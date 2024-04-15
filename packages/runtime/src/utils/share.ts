@@ -6,10 +6,13 @@ import {
   ShareArgs,
   ShareInfos,
   ShareScopeMap,
+  LoadShareExtraOptions,
+  UserOptions,
 } from '../type';
 import { warn, error } from './logger';
 import { satisfy } from './semver';
 import { SyncWaterfallHook } from './hooks';
+import { arrayOptions } from './tool';
 
 export function formatShare(shareArgs: ShareArgs, from: string): Shared {
   let get: Shared['get'];
@@ -41,21 +44,23 @@ export function formatShare(shareArgs: ShareArgs, from: string): Shared {
 }
 
 export function formatShareConfigs(
-  shareArgs: {
-    [pkgName: string]: ShareArgs;
-  },
+  shareArgs: UserOptions['shared'],
   from: string,
 ): ShareInfos {
   if (!shareArgs) {
     return {};
   }
   return Object.keys(shareArgs).reduce((res, pkgName) => {
-    res[pkgName] = formatShare(shareArgs[pkgName], from);
+    const arrayShareArgs = arrayOptions(shareArgs[pkgName]);
+    res[pkgName] = res[pkgName] || [];
+    arrayShareArgs.forEach((shareConfig) => {
+      res[pkgName].push(formatShare(shareConfig, from));
+    });
     return res;
   }, {} as ShareInfos);
 }
 
-function versionLt(a: string, b: string): boolean {
+export function versionLt(a: string, b: string): boolean {
   const transformInvalidVersion = (version: string) => {
     const isNumberVersion = !Number.isNaN(Number(version));
     if (isNumberVersion) {
@@ -75,20 +80,17 @@ function versionLt(a: string, b: string): boolean {
   }
 }
 
-const findVersion = (
-  shareScopeMap: ShareScopeMap,
-  scope: string,
-  pkgName: string,
+export const findVersion = (
+  shareVersionMap: ShareScopeMap[string][string],
   cb?: (prev: string, cur: string) => boolean,
 ): string => {
-  const versions = shareScopeMap[scope][pkgName];
   const callback =
     cb ||
     function (prev: string, cur: string): boolean {
       return versionLt(prev, cur);
     };
 
-  return Object.keys(versions).reduce((prev: number | string, cur) => {
+  return Object.keys(shareVersionMap).reduce((prev: number | string, cur) => {
     if (!prev) {
       return cur;
     }
@@ -105,7 +107,7 @@ const findVersion = (
   }, 0) as string;
 };
 
-const isLoaded = (shared: Shared) => {
+export const isLoaded = (shared: Shared) => {
   return Boolean(shared.loaded) || typeof shared.lib === 'function';
 };
 
@@ -119,7 +121,7 @@ function findSingletonVersionOrderByVersion(
     return !isLoaded(versions[prev]) && versionLt(prev, cur);
   };
 
-  return findVersion(shareScopeMap, scope, pkgName, callback);
+  return findVersion(shareScopeMap[scope][pkgName], callback);
 }
 
 function findSingletonVersionOrderByLoaded(
@@ -143,7 +145,7 @@ function findSingletonVersionOrderByLoaded(
     return versionLt(prev, cur);
   };
 
-  return findVersion(shareScopeMap, scope, pkgName, callback);
+  return findVersion(shareScopeMap[scope][pkgName], callback);
 }
 
 function getFindShareFunction(strategy: Shared['strategy']) {
@@ -156,7 +158,7 @@ function getFindShareFunction(strategy: Shared['strategy']) {
 export function getRegisteredShare(
   localShareScopeMap: ShareScopeMap,
   pkgName: string,
-  shareInfo: ShareInfos[keyof ShareInfos],
+  shareInfo: Shared,
   resolveShare: SyncWaterfallHook<{
     shareScopeMap: ShareScopeMap;
     scope: string;
@@ -239,4 +241,35 @@ export function getRegisteredShare(
 
 export function getGlobalShareScope(): GlobalShareScopeMap {
   return Global.__FEDERATION__.__SHARE__;
+}
+
+export function getTargetSharedOptions(options: {
+  pkgName: string;
+  extraOptions?: LoadShareExtraOptions;
+  shareInfos: ShareInfos;
+}) {
+  const { pkgName, extraOptions, shareInfos } = options;
+  const defaultResolver = (sharedOptions: ShareInfos[string]) => {
+    if (!sharedOptions) {
+      return undefined;
+    }
+    const shareVersionMap: ShareScopeMap[string][string] = {};
+    sharedOptions.forEach((shared) => {
+      shareVersionMap[shared.version] = shared;
+    });
+    const callback = function (prev: string, cur: string): boolean {
+      return !isLoaded(shareVersionMap[prev]) && versionLt(prev, cur);
+    };
+
+    const maxVersion = findVersion(shareVersionMap, callback);
+    return shareVersionMap[maxVersion];
+  };
+
+  const resolver = extraOptions?.resolver ?? defaultResolver;
+
+  return Object.assign(
+    {},
+    resolver(shareInfos[pkgName]),
+    extraOptions?.customShareInfo,
+  );
 }

@@ -1,11 +1,12 @@
 import { assert, describe, it } from 'vitest';
 import { init } from '../src/index';
-import { getGlobalShareScope } from '../src/utils/share';
 import {
   mergeShareInfo1,
   mergeShareInfo2,
   mergeShareInfo3,
   localMergeShareInfos,
+  arrayShared,
+  arraySharedInfos,
 } from './share';
 // import { assert } from '../src/utils/logger';
 import { FederationHost } from '../src/core';
@@ -27,6 +28,11 @@ describe('shared', () => {
     expect(FederationInstance.options.shared).toMatchObject(
       localMergeShareInfos,
     );
+  });
+
+  it('init array shared', () => {
+    const FederationInstance = init(arrayShared);
+    expect(FederationInstance.options.shared).toMatchObject(arraySharedInfos);
   });
 
   it('loadShare singleton', async () => {
@@ -741,9 +747,11 @@ describe('load share with customize consume info', () => {
     expect(sharedRes.from).toEqual('@shared-single/runtime-deps');
 
     const sharedWithCustomInfo = await FM1.loadShare('runtime-react', {
-      shareConfig: {
-        requiredVersion: '>17',
-        singleton: false,
+      customShareInfo: {
+        shareConfig: {
+          requiredVersion: '>17',
+          singleton: false,
+        },
       },
     });
     console.log(sharedWithCustomInfo);
@@ -834,5 +842,79 @@ describe('load share with different strategy', () => {
 
     Global.__FEDERATION__.__INSTANCES__ = [];
     setGlobalFederationConstructor(undefined, true);
+  });
+});
+
+describe('load share while shared has multiple versions', () => {
+  it('return loaded and has max version shared by default', async () => {
+    const federationConfig1: UserOptions = {
+      name: '@shared/multiple-versions',
+      remotes: [],
+      shared: {
+        'runtime-react': [
+          {
+            version: '16.0.0',
+            scope: 'default',
+            // pass lib means the shared has loaded
+            lib: () => {
+              return { from: '@shared/multiple-versions', version: '16.0.0' };
+            },
+          },
+          {
+            version: '17.0.0',
+            scope: 'default',
+            get: async () => () => {
+              return { from: '@shared/multiple-versions', version: '17.0.0' };
+            },
+          },
+        ],
+      },
+    };
+
+    const FM1 = new FederationHost(federationConfig1);
+    const shared = await FM1.loadShare<{ version: string }>('runtime-react');
+    assert(shared, "shared can't be null");
+    const sharedRes = shared();
+    assert(sharedRes, "sharedRes can't be null");
+    expect(sharedRes.version).toEqual('16.0.0');
+  });
+
+  it('return specify shared with resolver', async () => {
+    const federationConfig1: UserOptions = {
+      name: '@shared/multiple-versions',
+      remotes: [],
+      shared: {
+        'runtime-react': [
+          {
+            version: '17.0.0',
+            scope: 'default',
+            // pass lib means the shared has loaded
+            lib: () => {
+              return { from: '@shared/multiple-versions', version: '17.0.0' };
+            },
+          },
+          {
+            version: '16.0.0',
+            scope: 'default',
+            get: async () => () => {
+              return { from: '@shared/multiple-versions', version: '16.0.0' };
+            },
+          },
+        ],
+      },
+    };
+
+    const FM1 = new FederationHost(federationConfig1);
+    const shared = await FM1.loadShare<{ version: string }>('runtime-react', {
+      resolver: (sharedOptions) => {
+        return (
+          sharedOptions.find((i) => i.version === '16.0.0') ?? sharedOptions[0]
+        );
+      },
+    });
+    assert(shared, "shared can't be null");
+    const sharedRes = shared();
+    assert(sharedRes, "sharedRes can't be null");
+    expect(sharedRes.version).toEqual('16.0.0');
   });
 });
