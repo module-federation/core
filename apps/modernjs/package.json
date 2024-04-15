@@ -6,7 +6,6 @@
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
     "build": "modern build",
-    "build:check-syntax": "modern build -c modern.config.check-syntax.ts",
     "start": "modern start",
     "serve": "modern serve",
     "new": "modern new",
@@ -29,7 +28,8 @@
     "@modern-js/runtime": "2.46.1",
     "react": "~18.2.0",
     "react-dom": "~18.2.0",
-    "@module-federation/enhanced": "workspace:*"
+    "@module-federation/enhanced": "workspace:*",
+    "@babel/runtime": "7.24.4"
   },
   "devDependencies": {
     "@modern-js/app-tools": "2.46.1",

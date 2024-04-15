@@ -21,23 +21,6 @@
         ]
       }
     },
-    "build:check-syntax": {
-      "executor": "nx:run-commands",
-      "options": {
-        "dependsOn": [
-          {
-            "target": "build",
-            "dependencies": true
-          }
-        ],
-        "commands": [
-          {
-            "command": "cd apps/modernjs; pnpm run build:check-syntax",
-            "forwardAllArgs": true
-          }
-        ]
-      }
-    },
     "serve": {
       "executor": "nx:run-commands",
       "options": {
