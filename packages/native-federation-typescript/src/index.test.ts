@@ -75,6 +75,13 @@ describe('index', () => {
                 children: [
                   { name: 'archiveHandler.d.ts' },
                   { name: 'typeScriptCompiler.d.ts' },
+                  { 
+                    name: 'writeBundle',
+                    children: [
+                      { name: 'host.d.ts' },
+                      { name: 'remote.d.ts' }
+                    ]
+                  }
                 ],
               },
             ],
@@ -237,6 +244,13 @@ describe('index', () => {
                     children: [
                       { name: 'archiveHandler.d.ts' },
                       { name: 'typeScriptCompiler.d.ts' },
+                      { 
+                        name: 'writeBundle',
+                        children: [
+                          { name: 'host.d.ts' },
+                          { name: 'remote.d.ts' }
+                        ]
+                      }
                     ],
                   },
                 ],
