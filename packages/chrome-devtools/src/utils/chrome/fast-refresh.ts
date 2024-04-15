@@ -33,50 +33,53 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
         });
         Object.keys(shareInfo).forEach(async (share) => {
           // @ts-expect-error legacy runtime shareInfo[share] is shared , and latest i shard[]
-          const shared: Shared = Array.isArray(shareInfo[share])
-            ? shareInfo[share][0]
-            : shareInfo[share];
-          let get: () => any;
-          if (share === 'react') {
-            get = () =>
-              loadScript(getUnpkgUrl(share, shared.version) as string, {
-                attrs: { defer: true, async: false },
-              }).then(() => {
-                orderResolve();
-              });
-          }
-          if (share === 'react-dom') {
-            get = () =>
-              orderPromise.then(() =>
+          const sharedArr: Shared[] = Array.isArray(shareInfo[share])
+            ? shareInfo[share]
+            : [shareInfo[share]];
+
+          sharedArr.forEach((shared) => {
+            let get: () => any;
+            if (share === 'react') {
+              get = () =>
                 loadScript(getUnpkgUrl(share, shared.version) as string, {
                   attrs: { defer: true, async: false },
-                }),
-              );
-          }
-          // @ts-expect-error
-          if (enableFastRefresh && typeof get === 'function') {
-            if (share === 'react') {
-              shared.get = async () => {
-                if (!window.React) {
-                  await get();
-                  console.warn(
-                    '[Module Federation HMR]: You are using Module Federation Devtools to debug online host, it will cause your project load Dev mode React and ReactDOM. If not in this mode, please disable it in Module Federation Devtools',
-                  );
-                }
-                shared.lib = () => window.React;
-                return () => window.React;
-              };
+                }).then(() => {
+                  orderResolve();
+                });
             }
             if (share === 'react-dom') {
-              shared.get = async () => {
-                if (!window.ReactDOM) {
-                  await get();
-                }
-                shared.lib = () => window.ReactDOM;
-                return () => window.ReactDOM;
-              };
+              get = () =>
+                orderPromise.then(() =>
+                  loadScript(getUnpkgUrl(share, shared.version) as string, {
+                    attrs: { defer: true, async: false },
+                  }),
+                );
             }
-          }
+            // @ts-expect-error
+            if (enableFastRefresh && typeof get === 'function') {
+              if (share === 'react') {
+                shared.get = async () => {
+                  if (!window.React) {
+                    await get();
+                    console.warn(
+                      '[Module Federation HMR]: You are using Module Federation Devtools to debug online host, it will cause your project load Dev mode React and ReactDOM. If not in this mode, please disable it in Module Federation Devtools',
+                    );
+                  }
+                  shared.lib = () => window.React;
+                  return () => window.React;
+                };
+              }
+              if (share === 'react-dom') {
+                shared.get = async () => {
+                  if (!window.ReactDOM) {
+                    await get();
+                  }
+                  shared.lib = () => window.ReactDOM;
+                  return () => window.ReactDOM;
+                };
+              }
+            }
+          });
         });
 
         return {
