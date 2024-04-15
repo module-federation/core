@@ -40,7 +40,6 @@ const expectWarning = (regexp) => {
 };
 
 it('should load the component from container', () => {
-  debugger;
   return import('./App').then(({ default: App }) => {
     // FIXME: Federation runtime 打印的 warning 和原先不一致
     // expectWarning(

@@ -728,10 +728,10 @@ export class FederationHost {
       }
     };
     Object.keys(this.options.shared).forEach((shareName) => {
-      const shared = this.options.shared[shareName];
-      shared.forEach((s) => {
-        if (s.scope.includes(shareScopeName)) {
-          register(shareName, s);
+      const sharedArr = this.options.shared[shareName];
+      sharedArr.forEach((shared) => {
+        if (shared.scope.includes(shareScopeName)) {
+          register(shareName, shared);
         }
       });
     });
@@ -777,7 +777,7 @@ export class FederationHost {
       } else {
         formatShareOptions[shareKey].forEach((newUserSharedOptions) => {
           const isSameVersion = shared[shareKey].find(
-            (s) => s.version === newUserSharedOptions.version,
+            (sharedVal) => sharedVal.version === newUserSharedOptions.version,
           );
           if (!isSameVersion) {
             shared[shareKey].push(newUserSharedOptions);
@@ -804,21 +804,21 @@ export class FederationHost {
     // register shared in shareScopeMap
     const sharedKeys = Object.keys(formatShareOptions);
     sharedKeys.forEach((sharedKey) => {
-      const sharedVal = formatShareOptions[sharedKey];
-      sharedVal.forEach((s) => {
+      const sharedVals = formatShareOptions[sharedKey];
+      sharedVals.forEach((sharedVal) => {
         const registeredShared = getRegisteredShare(
           this.shareScopeMap,
           sharedKey,
-          s,
+          sharedVal,
           this.hooks.lifecycle.resolveShare,
         );
-        if (!registeredShared && s && s.lib) {
+        if (!registeredShared && sharedVal && sharedVal.lib) {
           this.setShared({
             pkgName: sharedKey,
-            lib: s.lib,
-            get: s.get,
+            lib: sharedVal.lib,
+            get: sharedVal.get,
             loaded: true,
-            shared: s,
+            shared: sharedVal,
             from: userOptions.name,
           });
         }
