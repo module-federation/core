@@ -165,12 +165,16 @@ new NextFederationPlugin({
   extraOptions: {
     debug: boolean, // `false` by default
     exposePages: boolean, // `false` by default
+    enableImageLoaderFix: boolean, // false by default
+    enableUrlLoaderFix: boolean, // false by default
   },
 });
 ```
 
 - `debug` – enables debug mode. It will print additional information about what is going on under the hood.
 - `exposePages` – exposes automatically all nextjs pages for you and theirs `./pages-map`.
+- `enableImageLoaderFix` – patches image urls so that they get right paths across apps.
+- `enableUrlLoaderFix` – patches url loader to ensure they get right paths across apps
 
 ## Demo
 
