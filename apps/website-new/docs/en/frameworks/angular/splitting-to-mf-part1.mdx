@@ -1,31 +1,24 @@
 ---
 title: "Splitting a Monolith"
 ---
-# Splitting an Angular App into Micro-Frontend Applications: A Step-by-Step Guide
+import {Steps} from '@theme'
 
+# Splitting an Angular App into Micro-Frontend Applications: A Step-by-Step Guide
 ## Introduction to Micro-Frontends
 
-In the dynamic landscape of modern application development, teams often find themselves managing large applications that grow in complexity and size. This can lead to the formation of smaller, specialized teams each focusing on different sections of the application. However, a challenge arises when each team needs to download, run, build, and test the entire application. To address this, the micro-frontend architecture offers an efficient and scalable solution.
+Micro-frontends offer a scalable solution for managing large applications by dividing them into smaller, independent pieces. This approach allows specialized teams to develop, test, and deploy sections of an application separately, improving efficiency and reducing complexity.
 
 ### What is a Micro-Frontend?
 
-Micro-frontends extend the principles of microservices to front-end development. In traditional microservices architecture, a large monolithic application is divided into smaller, independent services. Each service can be developed, tested, built, and delivered individually. Similarly, micro-frontends divide a large front-end application into smaller, manageable pieces. These pieces, or "micro-apps," can be developed, tested, and built independently, and then integrated into a larger application, often using routing.
+Micro-frontends apply microservices principles to front-end development, breaking down large applications into manageable parts. These parts, or micro-apps, can be independently developed and integrated, often through routing. For a deeper dive into micro-frontends, especially regarding module federation, we suggest our [article on module federation](https://test.com).
 
-For a more comprehensive understanding of how micro-frontends work, particularly in the context of module federation, we recommend reading our [separate article on module federation](https://test.com). This additional resource provides in-depth insights and foundational knowledge that can enhance your grasp of micro-frontend concepts and their practical applications in modern web development.
+#### Perspectives
 
-#### User and Developer Perspectives
+Users see a unified application, while developers enjoy flexibility in deployment and serving options, including module federation for integrating micro-apps.
 
-From a user's perspective, the experience is seamless—they interact with one unified application. For developers, micro-frontends offer flexibility in how applications are served. Options range from serving them individually to bundling them into a single application using advanced techniques like module federation.
+## Micro-Frontend Technology Landscape
 
-In our example, we will construct an application that imports and integrates these individual micro-apps, allowing each to be served, tested, and deployed independently.
-
-## Current State of Micro-Frontend Technology
-
-The micro-frontend approach permits the use of various frameworks and libraries in developing different sections of an application. This flexibility comes with its pros and cons. For instance, using different technologies across teams can make it challenging to shift developers between teams. However, tools like Single SPA facilitate the integration of diverse technologies into a cohesive application.
-
-Alternatively, one can opt for a single frontend framework like React, Vue, or Angular. Each framework offers unique ways to implement micro-frontends. For Angular, a tool like Nx provides features like dependency graphs and linked packages, along with strong support for Module Federation and micro-frontend development.
-
-Ultimately, the goal is to build, test, and deploy each micro-app independently while providing users with a unified application experience.
+Micro-frontends allow using different frameworks or libraries for various application parts, offering flexibility but also posing challenges, such as team mobility. Tools like Single SPA or framework-specific solutions like Nx for Angular help integrate these technologies into a cohesive application. The aim is to independently build, test, and deploy each micro-app while ensuring a seamless user experience.
 
 ## Tackling the Transition to Micro-Frontends
 
@@ -33,11 +26,9 @@ Ultimately, the goal is to build, test, and deploy each micro-app independently 
 
 Large applications can suffer from lengthy test and build times, and slow local serving. Transitioning to micro-frontends by splitting the application into smaller parts can significantly alleviate these issues.
 
-### Approaches to Implementing Micro-Frontends
-
 There are numerous methods for implementing micro-frontends, with various guides and resources available. Some focus on building micro-frontends from scratch, which is ideal for new projects expected to scale significantly.
 
-#### Refactoring an Existing Application
+## Refactoring an Existing Application
 
 This guide, however, concentrates on refactoring an existing application, potentially built using the Angular CLI, into shared libraries and individual apps. These components are then seamlessly integrated within the larger application, maintaining the unified user experience while enhancing development efficiency.
 
@@ -77,8 +68,8 @@ The goal is to refactor the services and models into libraries that can be share
 
 The current routing setup in the application utilizes lazy loading, enhancing performance and user experience. Here's an extract showcasing the routing strategy:
 
-```javascript
-// app-routing.module.ts
+```typescript title="app-routing.module.ts"
+
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { isLogged } from './shared/auth/is-logged.guard';
@@ -146,16 +137,12 @@ This command results in the following actions:
 The folder structure of the `models` library should be organized for clarity and easy access.
 
 #### Updating Imports
-
-1. **Change Import Paths**: Replace existing import paths with the new library path. For instance, change:
+**Change Import Paths**: Replace existing import paths with the new library path. For instance, change:
 
 ```javascript
+// from
 import { User } from 'src/app/models/user';
-```
-
-to:
-
-```javascript
+// to
 import { User } from '@@models';
 ```
 
@@ -163,7 +150,7 @@ Ensure that the path matches what is specified in `tsconfig.json`.
 
 #### Building the Library
 
-- **Resolving Errors**: Initially, you may encounter errors due to the library not being built. Resolve this by running:
+**Resolving Errors**: Initially, you may encounter errors due to the library not being built. Resolve this by running:
 
 ```bash
 ng build models
@@ -171,20 +158,21 @@ ng build models
 
 This command compiles the `models` library, allowing TypeScript to correctly reference `@@models`.
 
-#### Progressing Further in Micro-Frontend Migration
 
-##### Advancing Beyond Basic Migration
+#### Advancing Beyond Basic Migration
 
 After successfully migrating independent code into libraries, the next step involves tackling dependent code that can also be isolated. Continuing with our example, we'll focus on migrating the `auth` service, including its guards, into a separate library. This process mirrors the steps taken for the `models` library.
 #### Creating the Auth Library
-
-1. **Generate the Library**: Use Angular CLI to create the `auth` library with the command:
+<Steps>
+### Generate the Library
+Use Angular CLI to create the `auth` library with the command:
 
 ```bash
 ng generate library auth
 ```
 
-2. **Refactor the Library Content**: Remove the default content from the `lib` folder and transfer all contents of the `auth` folder into it. Update the `public-api.ts` file to reflect these changes.
+### Refactor the Library Content:
+Remove the default content from the `lib` folder and transfer all contents of the `auth` folder into it. Update the `public-api.ts` file to reflect these changes.
 
 The `public-api.ts` should look something like this:
 
@@ -197,15 +185,17 @@ export * from './lib/is-logged.guard';
 export * from './lib/is-not-logged.guard';
 ```
 
-3. **Build the Library**: Compile the `auth` library using Angular CLI:
+### Build the Library
+Compile the `auth` library using Angular CLI:
 
 ```bash
 ng build auth
 ```
 
-4. **Update Imports**: Change the application's import statements to use the new `auth` library.
-### Celebrating Milestones
+### Update Imports
+Change the application's import statements to use the new `auth` library.
 
+</Steps>
 Congratulations are in order! Parts of your application have been successfully migrated into libraries. This not only keeps the application running but potentially speeds it up, as Angular doesn't need to rebuild the entire application. You now have several libraries with isolated testing and building, suitable for larger applications where components, services, pipes, and other elements are shared.
 
 #### Advanced Library Organization
@@ -222,7 +212,10 @@ In our example, the `Login` feature module is selected for migration. Ensure tha
 
 #### Creating the Login Application
 
-1. **Generate the Application**: Use Angular CLI to create the `login` application:
+<Steps>
+
+### Generate the Application
+Use Angular CLI to create the `login` application:
 
 ```bash
 ng generate application login --style=scss --routing
@@ -230,13 +223,16 @@ ng generate application login --style=scss --routing
 
 The `--routing` flag is essential for navigation within the app.
 
-2. **Serve the Application**: Test the newly created application with:
+### Serve the Application
+Test the newly created application with:
 
 ```bash
 ng serve login
 ```
 
 If the main application is running, you may need to use a different port.
+
+</Steps>
 
 ### Refactoring the Feature Module
 
@@ -301,7 +297,3 @@ With these changes, you can serve the application as usual. The `Login` module, 
 
 - **Automating Builds**: To streamline the process, consider using tools like Lerna for automated build and dependency management. This can help especially when dealing with multiple libraries and applications.
 - **Version Management**: Currently, the setup does not utilize versioning for libraries, which could complicate the introduction of breaking changes. Implementing a versioning strategy could be beneficial for long-term maintenance.
-
-### Conclusion and Next Steps
-
-Thank you for following along! This guide aims to provide a clear pathway for migrating to a micro-frontend architecture. While further posts on topics like sharing styles or configuring ng-packagr secondary endpoints might be beneficial, feedback on specific areas of interest would be greatly appreciated. Your engagement and suggestions are crucial in shaping future content.

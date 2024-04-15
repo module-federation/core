@@ -25,7 +25,6 @@ Run the following command in your project's root directory:
 
 ```bash
 ng add @angular-architects/module-federation --project app-micro --type dynamic-host --port 4200
-
 ```
 
 This command configures your main project for Module Federation, updates Angular CLI configurations, creates a manifest file for loading remote entries, and reorganizes the bootstrap process.
@@ -50,7 +49,7 @@ To avoid conflicts, update the port for serving the secondary application. For e
 
 ```json
 {
-"login": "http://localhost:4201/remoteEntry.js"
+  "login": "http://localhost:4201/remoteEntry.js"
 }
 ```
 

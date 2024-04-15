@@ -1,6 +1,7 @@
 ---
 title: "Authentication with Okta"
 ---
+import {Steps} from '@theme';
 
 # Integrating Authentication with OpenID Connect in Module Federation
 
@@ -17,30 +18,34 @@ Module Federation enhances the management of shared code and state across micro 
 
 ### Create an Okta Application
 
-1. Register or Log In to Okta:
-+
+<Steps>
+### Register or Log In to Okta:
 - To register for a new account, execute `okta register` in your terminal.
 - If you already have an account, log in by running `okta login`.
 
-2. Create Your Application:
-+
+### Create Your Application:
 - Execute `okta apps create`.
 - When prompted, accept the default application name or provide a new one.
 - Select *Single-Page App (SPA)* and confirm by pressing Enter.
 - For *Redirect URI*, use `http://localhost:4200/login/callback` and set the Logout *Redirect URI* to `http://localhost:4200`.
+</Steps>
 
 ### Configure Application in Okta
 
-- The Okta CLI creates an OIDC SPA in your Okta Org, configures redirect URIs, grants access to the Everyone group, and adds `http://localhost:4200 `as a trusted origin.
-+
-NOTE: The *Okta Admin Console* can also be used for app creation. For Angular apps, refer to the Okta documentation on creating an Angular application.
+The Okta CLI creates an OIDC SPA in your Okta Org, configures redirect URIs, grants access to the Everyone group, and adds `http://localhost:4200` as a trusted origin.
+
+:::tip NOTE
+The *Okta Admin Console* can also be used for app creation. For Angular apps, refer to the Okta documentation on creating an Angular application.
+:::
 
 **Okta Application Configuration Example:**
 
 - *Issuer:* `https://dev-12345.okta.com/oauth2/default`
 - *Client ID:* `0oab12345CDEF`
-+
-NOTE: Ensure you note down the *Issuer* and *Client ID*; these are crucial for your application's configuration.
+
+:::tip NOTE
+Ensure you note down the *Issuer* and *Client ID*; these are crucial for your application's configuration.
+:::
 
 ### Install Required Libraries
 
@@ -165,68 +170,84 @@ Run the project using npm run start (or the appropriate command for your setup) 
 
 This section expands on incorporating Module Federation to share authenticated state across the main application and the micro-frontend. We'll explore how to set up a new Angular application, configure routing, and update components to include profile details.
 
-### Creating a New Angular Application
+<Steps>
+### Generate a New Angular Application
+Stop the current project execution and run the following command to create a new Angular application named `mfe-profile`:
 
-1. **Generate a New Angular Application:** Stop the current project execution and run the following command to create a new Angular application named `mfe-profile`:
-+
 ```bash
 ng generate application mfe-profile --routing --style css --inline-style --skip-tests
 ```
-+
+
 This command accomplishes several tasks:
 - Generates a new application with a module and component.
 - Adds a separate routing module.
 - Defines CSS styles to be inline within components.
 - Skips the creation of test files for the initial component.
 
-2. **Generate HomeComponent and ProfileModule:**Execute the following commands to create a `HomeComponent` and a `ProfileModule` within the `mfe-profile` application:
-+
+### Generate HomeComponent and ProfileModule
+
+Execute the following commands to create a `HomeComponent` and a `ProfileModule` within the `mfe-profile` application:
 ```bash
 ng generate component home --project mfe-profile
 ng generate module profile --project mfe-profile --module app --routing --route profile
 ```
-+
+
 These commands create:
 - A `HomeComponent` for the default route.
 - A `ProfileModule` with routing and a default `ProfileComponent`, added as a lazy-loaded route to the `AppModule`.
+</Steps>
 
 ### Updating the Application Code
+<Steps>
+### Configure Routing:
 
-1. **Configure Routing:** Update `projects/mfe-profile/src/app/app-routing.module.ts` to include a route for `HomeComponent` and a lazy-loaded route for `ProfileModule`:
-+
+Update `projects/mfe-profile/src/app/app-routing.module.ts` to include a route for `HomeComponent` and a lazy-loaded route for `ProfileModule`:
+
 ```typescript
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'profile', loadChildren: () => import('./profile/profile.module').then(m => m.ProfileModule) }
 ];
 ```
-+
-2. **Update AppComponent and HomeComponent Templates:**
+
+### Update AppComponent and HomeComponent Templates
+
 - For `app.component.html`, replace the content with a message of your choice and a `router-outlet` for navigation.
 - For `home.component.html`, provide a message guiding users to the Profile page with a router link to `/profile`.
 
+</Steps>
+
 ### Profile Component Configuration
+<Steps>
+ ### Implement Profile Logic
+Update `projects/mfe-profile/src/app/profile/profile.component.ts` to include properties for user profile information and authentication state, utilizing `OktaAuthStateService`.
 
-1. **Implement Profile Logic:** Update `projects/mfe-profile/src/app/profile/profile.component.ts` to include properties for user profile information and authentication state, utilizing `OktaAuthStateService`.
-
-2. **Update Profile Template:** Modify the template to display user profile details, such as name and email, and the last sign-in time.
+### Update Profile Template
+Modify the template to display user profile details, such as name and email, and the last sign-in time.
+</Steps>
 
 ### Integrating Module Federation
+<Steps>
+### Add Module Federation to `mfe-profile`
+Use the `@angular-architects/module-federation` schematic to prepare `mfe-profile` for Module Federation, specifying port 4202.
 
-1. **Add Module Federation to `mfe-profile`:** Use the `@angular-architects/module-federation` schematic to prepare `mfe-profile` for Module Federation, specifying port 4202.
-+
 ```bash
 ng add @angular-architects/module-federation --project mfe-profile --port 4202
 ```
 
-2. **Configure `mfe-profile` as a Remote:** Update `webpack.config.js` in `mfe-profile` to expose `ProfileModule` for the host application.
-+
-3. **Update Host Application Configuration:** Modify the shell application's `webpack.config.js` to include `mfe-profile` as a remote, enabling the host to access the Profile micro-frontend.
-+
-4. **Share Authenticated State:**
+### Configure `mfe-profile` as a Remote
+Update `webpack.config.js` in `mfe-profile` to expose `ProfileModule` for the host application.
+
+### Update Host Application Configuration
+Modify the shell application's `webpack.config.js` to include `mfe-profile` as a remote, enabling the host to access the Profile micro-frontend.
+
+### Share Authenticated State
 - Update `webpack.config.js` in the shell application to share Okta libraries as singletons.
 - Ensure `mfe-profile` also shares the Okta libraries to utilize the authenticated state.
-
+</Steps>
 ### Running the Integrated Application
 
-After configuring Module Federation and updating both the shell and micro-frontend applications, you can run the project using `npm run run:all`. This setup allows you to log in, view your profile, log out, and interact with other parts of the application seamlessly across the main and micro-frontend parts.
+After configuring Module Federation and updating both the shell and micro-frontend applications, you can run the project using `npm run run:all`.
+
+This setup allows you to log in, view your profile, log out, and interact with other parts of the application seamlessly across the main and micro-frontend parts.
+

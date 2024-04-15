@@ -11,6 +11,11 @@
   },
   {
     "type": "dir",
+    "name": "next",
+    "label": "Next.js"
+  },
+  {
+    "type": "dir",
     "name": "angular",
     "label": "Angular"
   }
