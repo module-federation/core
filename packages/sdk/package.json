@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/sdk",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "license": "MIT",
   "description": "A sdk for support module federation",
   "keywords": [
@@ -21,14 +21,14 @@
   "types": "./dist/index.cjs.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.cjs.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js",
-      "types": "./dist/index.cjs.d.ts"
+      "require": "./dist/index.cjs.js"
     },
     "./normalize-webpack-path": {
+      "types": "./dist/normalize-webpack-path.cjs.d.ts",
       "import": "./dist/normalize-webpack-path.esm.js",
-      "require": "./dist/normalize-webpack-path.cjs.js",
-      "types": "./dist/src/normalize-webpack-path.cjs.d.ts"
+      "require": "./dist/normalize-webpack-path.cjs.js"
     }
   },
   "typesVersions": {

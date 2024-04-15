@@ -1,121 +1,30 @@
-import React, { Suspense, lazy } from 'react';
-import TestRemoteHook from './test-remote-hook';
+import React, { lazy } from 'react';
 import { loadRemote } from '@module-federation/runtime';
-import LocalBtn from './components/ButtonOldAnt';
-import WebpackPng from './webpack.png';
-import WebpackSvg from './webpack.svg';
-
-function DynamicRemoteButton() {
-  // @ts-ignore ignore
-  const Comp = React.lazy(async () => {
-    //@ts-ignore
-    const Button = await loadRemote('dynamic-remote/ButtonOldAnt');
-    return Button;
-  });
-  return (
-    <React.Suspense fallback="Loading Button">
-      <Comp />
-    </React.Suspense>
-  );
-}
-
-const WebpackSvgRemote = lazy(() =>
-  import('remote1/WebpackSvg').then((m) => {
-    return m;
-  }),
-);
-
-const WebpackPngRemote = lazy(() => import('remote1/WebpackPng'));
+import { Link, Routes, Route, BrowserRouter } from 'react-router-dom';
+import Root from './Root';
+import Remote1 from './Remote1';
+import Remote2 from './Remote2';
 
 const App = () => (
-  <div>
+  <BrowserRouter>
     <h1>Runtime Demo</h1>
-    <h2>Host</h2>
-    <h3>check static remote</h3>
-    <table border={1} cellPadding={5}>
-      <thead>
-        <tr>
-          <td></td>
-          <td>Test case</td>
-          <td>Expected</td>
-          <td>Actual</td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>✅</td>
-          <td>Test hook from remote localhost:3006</td>
-          <td>
-            <div>
-              Page with custom remote hook. You must see text in red box below:
-              <div style={{ border: '1px solid red', padding: 5 }}>
-                Custom hook from localhost:3006 works!
-              </div>
-            </div>
-          </td>
-          <td>
-            <TestRemoteHook />
-          </td>
-        </tr>
-        <tr>
-          <td>✅</td>
-          <td>
-            Loading remote component with PNG image from localhost:3006
-            <br />
-            <blockquote>(check publicPath fix in image-loader)</blockquote>
-          </td>
-          <td>
-            <img className="home-webpack-png" src={WebpackPng} />
-          </td>
-          <td>
-            <Suspense fallback="loading WebpackPngRemote">
-              <WebpackPngRemote />
-            </Suspense>
-          </td>
-        </tr>
-        <tr>
-          <td>✅</td>
-          <td>
-            Loading remote component with SVG from localhost:3006
-            <br />
-            <blockquote>(check publicPath fix in url-loader)</blockquote>
-          </td>
-          <td>
-            <img className="home-webpack-svg" src={WebpackSvg} />
-          </td>
-          <td>
-            <Suspense fallback="loading WebpackSvgRemote">
-              <WebpackSvgRemote />
-            </Suspense>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h3>check dynamic remote</h3>
-    <table border={1} cellPadding={5}>
-      <thead>
-        <tr>
-          <td></td>
-          <td>Test case</td>
-          <td>Expected</td>
-          <td>Actual</td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>✅</td>
-          <td>Loading dynamic remote Button from localhost:3007</td>
-          <td>
-            <LocalBtn />
-          </td>
-          <td>
-            <DynamicRemoteButton />
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <ul>
+      <li>
+        <Link to={'/'}>Home</Link>
+      </li>
+      <li>
+        <Link to={'/remote1'}>remote1</Link>
+      </li>
+      <li>
+        <Link to={'/remote2'}>remote2</Link>
+      </li>
+    </ul>
+    <Routes>
+      <Route path="/" element={<Root />} />
+      <Route path="/remote1" element={<Remote1 />} />
+      <Route path="/remote2" element={<Remote2 />} />
+    </Routes>
+  </BrowserRouter>
 );
 
 export default App;

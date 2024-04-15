@@ -49,6 +49,6 @@
       "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
-  "tags": ["package"],
+  "tags": ["type:pkg"],
   "implicitDependencies": []
 }

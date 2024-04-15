@@ -13,6 +13,7 @@
 interface PluginDtsOptions {
   generateTypes?: boolean | DtsRemoteOptions;
   consumeTypes?: boolean | DtsHostOptions;
+  tsConfigPath?: string;
 }
 ```
 
@@ -102,6 +103,7 @@ interface DtsRemoteOptions {
 - 类型：`string`
 - 是否必填：否
 - 默认值：`path.join(process.cwd(),'./tsconfig.json')`
+> 优先级：dts.generateTypes.tsConfigPath > dts.tsConfigPath
 
 tsconfig 配置文件路径
 
@@ -206,3 +208,11 @@ interface DtsHostOptions {
 - 默认值：`'@mf-types'`
 
 对应 `remotes` 目录配置的 `typesFolder`
+
+### tsConfigPath
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`path.join(process.cwd(),'./tsconfig.json')`
+
+tsconfig 配置文件路径

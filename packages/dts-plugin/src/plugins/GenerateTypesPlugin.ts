@@ -51,6 +51,10 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
       extraOptions: dtsOptions.extraOptions || {},
     };
 
+    if (dtsOptions.tsConfigPath && !finalOptions.remote.tsConfigPath) {
+      finalOptions.remote.tsConfigPath = dtsOptions.tsConfigPath;
+    }
+
     validateOptions(finalOptions.remote);
     const isProd = !isDev();
     const getGenerateTypesFn = () => {

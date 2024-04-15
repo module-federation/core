@@ -823,11 +823,18 @@ export class FederationHost {
   }
 
   registerPlugins(plugins: UserOptions['plugins']) {
-    registerPlugins(plugins, [
+    const pluginRes = registerPlugins(plugins, [
       this.hooks,
       this.snapshotHandler.hooks,
       this.loaderHook,
     ]);
+    // Merge plugin
+    this.options.plugins = this.options.plugins.reduce((res, plugin) => {
+      if (res && !res.find((item) => item.name === plugin.name)) {
+        res.push(plugin);
+      }
+      return res;
+    }, pluginRes || []);
   }
 
   private setShared({
