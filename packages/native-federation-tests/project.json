@@ -44,6 +44,6 @@
       }
     }
   },
-  "tags": ["package"],
+  "tags": ["type:pkg"],
   "implicitDependencies": []
 }

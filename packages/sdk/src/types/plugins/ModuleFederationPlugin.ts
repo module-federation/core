@@ -154,6 +154,7 @@ export interface DtsRemoteOptions {
 export interface PluginDtsOptions {
   generateTypes?: boolean | DtsRemoteOptions;
   consumeTypes?: boolean | DtsHostOptions;
+  tsConfigPath?: string;
   extraOptions?: Record<string, any>;
   implementation?: string;
 }

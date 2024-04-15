@@ -1,6 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": "./",
     "jsx": "react-jsx",
     "allowJs": true,
     "esModuleInterop": true,
@@ -11,7 +12,10 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
   },
   "files": [],
   "references": [

@@ -8,19 +8,18 @@ Before reading this guide, please first read the [Setting Up Environment](./sett
 
 Use [Rsbuild](https://rsbuild.dev/) to create a producer and call the following command:
 
-```bash
-# For npm users
-npm create rsbuild@latest
 
-# For yarn users
-yarn create rsbuild
+import { PackageManagerTabs } from '@theme';
 
-# For pnpm users
-pnpm create rsbuild@latest
+<PackageManagerTabs
+  command={{
+    npm: 'npm create rsbuild@latest',
+    yarn: 'yarn create rsbuild',
+    pnpm: 'pnpm create rsbuild@latest',
+    bun: 'bun create rsbuild@latest',
+  }}
+/>
 
-# For bun users
-bun create rsbuild@latest
-```
 
 > Complete the project creation according to the prompts.
 
@@ -34,25 +33,49 @@ bun create rsbuild@latest
 
 Following the steps above for initializing the project, we created a `React` project named `federation_provider`. Execute the following commands in sequence:
 
-```bash
-# For npm users
+<PackageManagerTabs
+  command={{
+    npm: `
 cd federation_provider
 npm add @module-federation/enhanced
-
-# For yarn users
+    `,
+    yarn: `
 cd federation_provider
 yarn add @module-federation/enhanced
-
-# For pnpm users
+    `,
+    pnpm: `
 cd federation_provider
 pnpm add @module-federation/enhanced
-
-# For bun users
+    `,
+    bun: `
 cd federation_provider
 bun add @module-federation/enhanced
-```
+    `,
+  }}
+/>
 
 ### 3. Exporting Modules by the Producer
+
+> Change the entry file to asynchronous
+
+
+```tsx
+// Move src/index.tsx to a newly created src/bootstrap.tsx file
+// src/index.tsx
+import('./bootstrap');
+
+// src/bootstrap.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);
+```
 
 > Add a Button Component
 
@@ -98,19 +121,14 @@ export default defineConfig({
 
 ### 4. Starting the Producer
 
-```bash
-# For npm users
-npm run dev
-
-# For yarn users
-yarn run dev
-
-# For pnpm users
-pnpm run dev
-
-# For bun users
-bun run dev
-```
+<PackageManagerTabs
+  command={{
+    npm: `npm run dev`,
+    yarn: `yarn run dev`,
+    pnpm: `pnpm run dev`,
+    bun: `bun run dev`,
+  }}
+/>
 
 ```zsh
 ➜  federation_provider npm run dev
@@ -136,19 +154,15 @@ After the project starts, the `Manifest Link: http://localhost:3000/mf-manifest.
 
 Use [Rsbuild](https://rsbuild.dev/) to create a consumer and call the following command:
 
-```bash
-# For npm users
-npm create rsbuild@latest
+<PackageManagerTabs
+  command={{
+    npm: 'npm create rsbuild@latest',
+    yarn: 'yarn create rsbuild',
+    pnpm: 'pnpm create rsbuild@latest',
+    bun: 'bun create rsbuild@latest',
+  }}
+/>
 
-# For yarn users
-yarn create rsbuild
-
-# For pnpm users
-pnpm create rsbuild@latest
-
-# For bun users
-bun create rsbuild@latest
-```
 
 > Complete the project creation according to the prompts.
 
@@ -162,23 +176,27 @@ bun create rsbuild@latest
 
 Following the steps above for initializing the project, we created a `React` project named `federation_consumer`. Execute the following commands in sequence:
 
-```bash
-# For npm users
+<PackageManagerTabs
+  command={{
+    npm: `
 cd federation_consumer
 npm add @module-federation/enhanced
-
-# For yarn users
+    `,
+    yarn: `
 cd federation_consumer
 yarn add @module-federation/enhanced
-
-# For pnpm users
+    `,
+    pnpm: `
 cd federation_consumer
 pnpm add @module-federation/enhanced
-
-# For bun users
+    `,
+    bun: `
 cd federation_consumer
 bun add @module-federation/enhanced
-```
+    `,
+  }}
+/>
+
 
 ### 3. Consuming the Producer
 
@@ -206,8 +224,8 @@ root.render(
 
 ```json
 {
-  "Compiler options": {
-    "path":{
+  "compilerOptions": {
+    "paths":{
       "*": ["./@mf-types/*"]
     }
   }
@@ -257,7 +275,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
     <App />
