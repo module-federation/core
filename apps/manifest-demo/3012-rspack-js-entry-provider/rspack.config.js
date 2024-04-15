@@ -13,6 +13,9 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    config.watchOptions = {
+      ignored: ['**/node_modules/**', '**/@mf-types/**'],
+    };
     config.context = path.join(
       context.context.root,
       'apps/manifest-demo/3012-rspack-js-entry-provider',
