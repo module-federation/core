@@ -1,5 +1,12 @@
 # [1.1.0-canary.1](https://github.com/module-federation/universe/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.1.5
+
+### Patch Changes
+
+- ca271ab: feat: support config manifest
+- 1a9c6e7: feat: support config multiple versions shared
+
 ## 0.1.4
 
 ### Patch Changes

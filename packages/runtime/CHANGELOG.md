@@ -1,5 +1,16 @@
 # @module-federation/runtime
 
+## 0.1.5
+
+### Patch Changes
+
+- 876a4ff: feat: support config shared import:false in runtime
+- f26aa2d: chore: prevent plugins from losing information
+- 1a9c6e7: feat: support config multiple versions shared
+- Updated dependencies [ca271ab]
+- Updated dependencies [1a9c6e7]
+  - @module-federation/sdk@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes

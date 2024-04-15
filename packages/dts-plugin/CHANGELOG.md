@@ -1,5 +1,16 @@
 # @module-federation/dts-plugin
 
+## 0.1.5
+
+### Patch Changes
+
+- f9b8af7: feat: supports the use of @module-federation/enhanced/runtime and also has type hints
+- 71559fb: fix: output error in file
+- Updated dependencies [ca271ab]
+- Updated dependencies [1a9c6e7]
+  - @module-federation/sdk@0.1.5
+  - @module-federation/managers@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes
