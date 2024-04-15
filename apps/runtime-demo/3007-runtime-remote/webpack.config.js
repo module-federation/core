@@ -15,7 +15,7 @@ module.exports = composePlugins(
   withReact(),
   async (config, context) => {
     config.watchOptions = {
-      ignored: ['**/node_modules/**', '**/@mf-types/**','**/dist/**'],
+      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
     };
     config.plugins.push(
       new ModuleFederationPlugin({
@@ -56,6 +56,7 @@ module.exports = composePlugins(
         },
       }),
     );
+    config.devServer.host = '127.0.0.1';
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {
       if (p.constructor.name === 'ModuleFederationPlugin') {

@@ -12,7 +12,7 @@ init({
     {
       name: 'runtime_remote2',
       alias: 'dynamic-remote',
-      entry: 'http://localhost:3007/mf-manifest.json',
+      entry: 'http://127.0.0.1:3007/mf-manifest.json',
     },
   ],
 });
