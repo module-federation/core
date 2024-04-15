@@ -6,11 +6,6 @@
   },
   {
     "type": "dir",
-    "name": "start",
-    "label": "Getting Started"
-  },
-  {
-    "type": "dir",
     "name": "anti-patterns",
     "label": "Anti Patterns"
   },
