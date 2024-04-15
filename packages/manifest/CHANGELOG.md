@@ -1,5 +1,28 @@
 # @module-federation/manifest
 
+## 0.1.6
+
+### Patch Changes
+
+- 72c7b80: chore: fix release tag
+- Updated dependencies [72c7b80]
+  - @module-federation/dts-plugin@0.1.6
+  - @module-federation/managers@0.1.6
+  - @module-federation/sdk@0.1.6
+
+## 0.1.5
+
+### Patch Changes
+
+- ca271ab: feat: support config manifest
+- Updated dependencies [f9b8af7]
+- Updated dependencies [71559fb]
+- Updated dependencies [ca271ab]
+- Updated dependencies [1a9c6e7]
+  - @module-federation/dts-plugin@0.1.5
+  - @module-federation/sdk@0.1.5
+  - @module-federation/managers@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes

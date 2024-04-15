@@ -49,6 +49,7 @@ class DTSManager {
     });
     this.runtimePkgs = [
       '@module-federation/runtime',
+      '@module-federation/enhanced/runtime',
       '@module-federation/runtime-tools',
     ];
     this.loadedRemoteAPIAlias = [];
