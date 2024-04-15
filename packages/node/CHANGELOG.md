@@ -1,5 +1,30 @@
 # [2.1.0-canary.6](https://github.com/module-federation/universe/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.1.6
+
+### Patch Changes
+
+- 72c7b80: chore: fix release tag
+- Updated dependencies [72c7b80]
+  - @module-federation/runtime@0.1.6
+  - @module-federation/enhanced@0.1.6
+  - @module-federation/sdk@0.1.6
+  - @module-federation/utilities@3.0.11
+
+## 2.1.5
+
+### Patch Changes
+
+- Updated dependencies [876a4ff]
+- Updated dependencies [e0acf83]
+- Updated dependencies [ca271ab]
+- Updated dependencies [f26aa2d]
+- Updated dependencies [1a9c6e7]
+  - @module-federation/runtime@0.1.5
+  - @module-federation/enhanced@0.1.5
+  - @module-federation/sdk@0.1.5
+  - @module-federation/utilities@3.0.10
+
 ## 2.1.4
 
 ### Patch Changes

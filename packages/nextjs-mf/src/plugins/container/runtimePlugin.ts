@@ -34,9 +34,15 @@ export default function (): FederationRuntimePlugin {
       if (!globalThis.usedChunks) globalThis.usedChunks = new Set();
       if (shared) {
         Object.keys(shared || {}).forEach((sharedKey) => {
-          if (!shared[sharedKey].strategy) {
-            shareInfo[sharedKey].strategy = 'loaded-first';
-          }
+          const rawShared = shared[sharedKey];
+          const arrayShared = Array.isArray(rawShared)
+            ? rawShared
+            : [rawShared];
+          arrayShared.forEach((s) => {
+            if (!s.strategy) {
+              s.strategy = 'loaded-first';
+            }
+          });
         });
       }
 
@@ -172,7 +178,8 @@ export default function (): FederationRuntimePlugin {
         return args;
       }
       args.resolver = function () {
-        shareScopeMap[scope][pkgName][version] = host.options.shared[pkgName]; // replace local share scope manually with desired module
+        shareScopeMap[scope][pkgName][version] =
+          host.options.shared[pkgName][0]; // replace local share scope manually with desired module
         return shareScopeMap[scope][pkgName][version];
       };
       return args;

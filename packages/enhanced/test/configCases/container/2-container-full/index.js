@@ -1,6 +1,18 @@
 let warnings = [];
 let oldWarn;
 
+if (global.__FEDERATION__) {
+  global.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
+  //@ts-ignore
+  global.__FEDERATION__.__INSTANCES__.map((i) => {
+    i.moduleCache.clear();
+    if (global[i.name]) {
+      delete global[i.name];
+    }
+  });
+  global.__FEDERATION__.__INSTANCES__ = [];
+}
+
 beforeEach((done) => {
   oldWarn = console.warn;
   console.warn = (m) => warnings.push(m);

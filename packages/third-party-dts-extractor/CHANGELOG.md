@@ -1,5 +1,11 @@
 # @module-federation/third-party-dts-extractor
 
+## 0.1.6
+
+### Patch Changes
+
+- 72c7b80: chore: fix release tag
+
 ## 0.0.18
 
 ### Patch Changes
