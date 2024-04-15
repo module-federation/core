@@ -4,4 +4,6 @@ import { defineConfig } from 'cypress';
 export default defineConfig({
   e2e: nxE2EPreset(__filename, { cypressDir: 'cypress' }),
   defaultCommandTimeout: 20000,
+  chromeWebSecurity: false,
+  experimentalModifyObstructiveThirdPartyCode: true,
 });

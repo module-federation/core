@@ -38,13 +38,13 @@ jobs:
         run: npx nx format:check
 
       - name: Run Affected Build
-        run: npx nx affected -t build --parallel=10 --exclude='*,!tag:package'
+        run: npx nx run-many -t build --parallel=10 --exclude='*,!tag:type:pkg'
 
       - name: Run Affected Lint
-        run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:package'
+        run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:type:pkg'
 
       - name: Run Affected Test
-        run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
+        run: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
 
       - name: E2E Test for Next.js
         run: pnpm run app:next:dev & echo "done" && sleep 50 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=2 && lsof -ti tcp:3000,3001,3002 | xargs kill
@@ -59,10 +59,10 @@ jobs:
       #        run: pnpm run app:next:dev & echo "done" && sleep 15 && npx nx run-many --target=test:e2e --projects=3002-checkout && lsof -ti tcp:3000,3001,3002 | xargs kill
 
       - name: E2E Test for 3005-runtime-host
-        run: pnpm run app:runtime:dev & echo "done" && sleep 6 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1 && lsof -ti tcp:3005,3006,3007 | xargs kill
+        run: pnpm run app:runtime:dev & echo "done" && sleep 10 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1 && lsof -ti tcp:3005,3006,3007 | xargs kill
 
       - name: E2E Test for 3008-webpack-host
-        run: pnpm run app:manifest:dev & echo "done" && sleep 6 && npx nx run-many --target=e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
+        run: pnpm run app:manifest:dev & echo "done" && sleep 10 && npx nx run-many --target=e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
 
       - name: Build Next.js Apps in Production Mode
         run: pnpm app:next:build

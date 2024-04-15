@@ -143,6 +143,7 @@
     "@types/lodash.get": "4.4.9",
     "@types/node": "18.19.26",
     "@types/node-fetch": "2.6.11",
+    "@types/pidusage": "2.0.5",
     "@types/react": "18.2.62",
     "@types/react-dom": "18.2.19",
     "@types/react-router-dom": "5.3.3",
@@ -199,6 +200,7 @@
     "open": "^10.0.0",
     "openai": "3.3.0",
     "pdf-parse": "1.1.1",
+    "pidusage": "3.0.2",
     "postcss-calc": "9.0.1",
     "postcss-custom-properties": "13.3.5",
     "postcss-import": "15.1.0",
@@ -232,9 +234,7 @@
     "webpack": "^5.90.0",
     "webpack-virtual-modules": "0.6.1",
     "whatwg-fetch": "^3.6.2",
-    "yargs": "^17.7.2",
-    "pidusage": "3.0.2",
-    "@types/pidusage": "2.0.5"
+    "yargs": "^17.7.2"
   },
   "config": {
     "commitizen": {

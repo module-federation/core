@@ -97,7 +97,8 @@
         "cypressConfig": "apps/runtime-demo/3005-runtime-host/cypress.config.ts",
         "testingType": "e2e",
         "baseUrl": "http://localhost:3005",
-        "browser": "chrome"
+        "browser": "chrome",
+        "chromeWebSecurity": false
       },
       "configurations": {
         "development": {
