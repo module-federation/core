@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 0.1.6
+
+### Patch Changes
+
+- 72c7b80: chore: fix release tag
+- Updated dependencies [72c7b80]
+  - @module-federation/managers@0.1.6
+  - @module-federation/sdk@0.1.6
+  - @module-federation/third-party-dts-extractor@0.1.6
+
 ## 0.1.5
 
 ### Patch Changes

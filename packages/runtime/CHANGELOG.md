@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.1.6
+
+### Patch Changes
+
+- 72c7b80: chore: fix release tag
+- Updated dependencies [72c7b80]
+  - @module-federation/sdk@0.1.6
+
 ## 0.1.5
 
 ### Patch Changes
