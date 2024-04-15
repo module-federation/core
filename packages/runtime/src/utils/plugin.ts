@@ -28,4 +28,5 @@ export function registerPlugins(
       });
     });
   }
+  return plugins;
 }
