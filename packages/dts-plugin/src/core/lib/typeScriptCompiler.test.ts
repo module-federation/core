@@ -1,8 +1,8 @@
 import dirTree from 'directory-tree';
-import { mkdtempSync, rmSync } from 'fs';
+import { mkdtempSync, readFileSync, rmSync } from 'fs';
 import os from 'os';
-import { join, sep } from 'path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { join, sep, resolve } from 'path';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import {
@@ -53,9 +53,10 @@ describe('typeScriptCompiler', () => {
     expect(retrievedOriginalOutDir).toBe(expectedPath);
   });
 
-  describe('compileTs', () => {
+  const runCompileTsTest = () => {
     afterEach(() => {
       rmSync(tmpDir, { recursive: true, force: true });
+      vi.resetAllMocks();
     });
 
     it('empty mapToExpose', () => {
@@ -180,5 +181,60 @@ describe('typeScriptCompiler', () => {
 
       expect(directoryStructure).toMatchObject(expectedStructure);
     });
+
+    it('filled mapToExpose - tsCompiler.d.ts file content', () => {
+      const mapToExpose = {
+        tsCompiler: join(__dirname, './typeScriptCompiler.ts'),
+      };
+
+      const compile = () => compileTs(mapToExpose, tsConfig, remoteOptions);
+      expect(compile).not.toThrow();
+
+      const compiledTypesFile = resolve(
+        tsConfig.outDir,
+        '..',
+        'tsCompiler.d.ts',
+      );
+
+      const result = readFileSync(compiledTypesFile, 'utf8');
+
+      expect(result)
+        .toEqual(`export * from './compiledTypesFolder/lib/typeScriptCompiler.js';
+export { default } from './compiledTypesFolder/lib/typeScriptCompiler.js';`);
+    });
+  };
+
+  describe('compileTs (posix)', () => {
+    beforeEach(() => {
+      vi.mock('path', async (importOriginal) => {
+        const originalPath = await importOriginal<typeof import('path')>();
+        const platformPath = originalPath.posix;
+        return {
+          ...platformPath,
+          posix: originalPath.posix,
+          win32: originalPath.win32,
+          default: platformPath,
+        };
+      });
+    });
+
+    runCompileTsTest();
+  });
+
+  describe('compileTs (win32)', () => {
+    beforeEach(() => {
+      vi.mock('path', async (importOriginal) => {
+        const originalPath = await importOriginal<typeof import('path')>();
+        const platformPath = originalPath.win32;
+        return {
+          ...platformPath,
+          posix: originalPath.posix,
+          win32: originalPath.win32,
+          default: platformPath,
+        };
+      });
+    });
+
+    runCompileTsTest();
   });
 });
