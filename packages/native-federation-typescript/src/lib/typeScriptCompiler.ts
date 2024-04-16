@@ -84,16 +84,11 @@ const createHost = (
           `${sourceEntry}${DEFINITION_FILE_EXTENSION}`,
         );
         const mfeTypeEntryDirectory = dirname(mfeTypeEntry);
-        let relativePathToOutput = relative(mfeTypeEntryDirectory, filepath)
+        const relativePathToOutput = relative(mfeTypeEntryDirectory, filepath)
           .replace(DEFINITION_FILE_EXTENSION, '')
-          .replace(STARTS_WITH_SLASH, '');
-
-        // If we're on Windows, need to convert "\" to "/" in the import path since it
-        // was derived from platform-specific file system path.
-        if (sep === '\\') {
-          relativePathToOutput = relativePathToOutput.split(sep).join('/');
-        }
-
+          .replace(STARTS_WITH_SLASH, '')
+          .split(sep) // Windows platform-specific file system path fix
+          .join('/');
         originalWriteFile(
           mfeTypeEntry,
           `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`,
