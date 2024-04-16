@@ -11,7 +11,9 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
   }
   const { shareKey, shareInfo } = moduleToHandlerMapping[moduleId];
 
-  return federationInstance.loadShareSync(shareKey, shareInfo);
+  return federationInstance.loadShareSync(shareKey, {
+    customShareInfo: shareInfo,
+  });
 }
 
 export function installInitialConsumes(options: InstallInitialConsumesOptions) {

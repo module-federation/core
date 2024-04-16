@@ -72,7 +72,14 @@ class FederationRuntimePlugin {
     return Template.asString([
       `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
-      `${federationGlobal} = {...federation,...${federationGlobal}};`,
+      `var prevFederation = ${federationGlobal};`,
+      `${federationGlobal} = {}`,
+      `for(var key in federation){`,
+      Template.indent([`${federationGlobal}[key] = federation[key];`]),
+      '}',
+      `for(var key in prevFederation){`,
+      Template.indent([`${federationGlobal}[key] = prevFederation[key];`]),
+      '}',
       `if(!${federationGlobal}.instance){`,
       Template.indent([
         runtimePLuginNames.length

@@ -89,7 +89,8 @@ jobs:
       - name: Build and test Packages
         run: |
           git fetch origin main
-          npx nx run-many --target=build --exclude='*,!tag:package'
+          npx nx run-many --targets=build --projects=tag:type:pkg
+          ls -l packages/*/dist packages/*/package.json
 
       - name: Release
         uses: web-infra-dev/actions@v2
