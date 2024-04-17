@@ -47,7 +47,9 @@ export function formatShare(
     get,
     loaded: 'lib' in shareArgs ? true : undefined,
     version: shareArgs.version ?? '0',
-    scope: Array.isArray(shareArgs.scope) ? shareArgs.scope : ['default'],
+    scope: Array.isArray(shareArgs.scope)
+      ? shareArgs.scope
+      : [shareArgs.scope ?? 'default'],
     strategy: shareArgs.strategy || 'version-first',
   };
 }
