@@ -37,28 +37,34 @@ export function init(options: UserOptions): FederationHost {
   }
 }
 
-export function loadRemote(
+export function loadRemote<T>(
   ...args: Parameters<FederationHost['loadRemote']>
-): ReturnType<FederationHost['loadRemote']> {
+): Promise<T | null> {
   assert(FederationInstance, 'Please call init first');
+  const loadRemote: typeof FederationInstance.loadRemote<T> =
+    FederationInstance.loadRemote;
   // eslint-disable-next-line prefer-spread
-  return FederationInstance.loadRemote.apply(FederationInstance, args);
+  return loadRemote.apply(FederationInstance, args);
 }
 
-export function loadShare(
+export function loadShare<T>(
   ...args: Parameters<FederationHost['loadShare']>
-): ReturnType<FederationHost['loadShare']> {
+): Promise<false | (() => T | undefined)> {
   assert(FederationInstance, 'Please call init first');
   // eslint-disable-next-line prefer-spread
-  return FederationInstance.loadShare.apply(FederationInstance, args);
+  const loadShare: typeof FederationInstance.loadShare<T> =
+    FederationInstance.loadShare;
+  return loadShare.apply(FederationInstance, args);
 }
 
-export function loadShareSync(
+export function loadShareSync<T>(
   ...args: Parameters<FederationHost['loadShareSync']>
-): ReturnType<FederationHost['loadShareSync']> {
+): () => T | never {
   assert(FederationInstance, 'Please call init first');
+  const loadShareSync: typeof FederationInstance.loadShareSync<T> =
+    FederationInstance.loadShareSync;
   // eslint-disable-next-line prefer-spread
-  return FederationInstance.loadShareSync.apply(FederationInstance, args);
+  return loadShareSync.apply(FederationInstance, args);
 }
 
 export function preloadRemote(
