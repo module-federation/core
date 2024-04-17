@@ -145,7 +145,7 @@
     "@types/node-fetch": "2.6.11",
     "@types/pidusage": "2.0.5",
     "@types/react": "18.2.62",
-    "@types/react-dom": "18.2.19",
+    "@types/react-dom": "18.2.25",
     "@types/webpack-sources": "3.2.3",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
