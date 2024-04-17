@@ -858,6 +858,7 @@ export class FederationHost {
     ]);
     // Merge plugin
     this.options.plugins = this.options.plugins.reduce((res, plugin) => {
+      if (!plugin) return res;
       if (res && !res.find((item) => item.name === plugin.name)) {
         res.push(plugin);
       }
