@@ -24,7 +24,7 @@
     "docs": "typedoc",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
-    "build": "nx run-many --target=build --parallel=3 --exclude='*,!tag:package'",
+    "build": "nx run-many --target=build --parallel=3 --exclude='*,!tag:type:pkg'",
     "build:pkg": "nx run-many --targets=build --projects=tag:type:pkg",
     "lint-fix": "nx format:write --uncommitted",
     "trigger-release": "node -e 'import(\"open\").then(open => open.default(\"https://github.com/module-federation/universe/actions/workflows/trigger-release.yml\"))'",
@@ -43,7 +43,7 @@
     "commitlint": "commitlint --edit",
     "prepare": "husky install",
     "changeset": "changeset",
-    "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:package'"
+    "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:type:pkg'"
   },
   "dependencies": {
     "adm-zip": "0.5.10",
