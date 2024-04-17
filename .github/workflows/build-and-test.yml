@@ -41,7 +41,7 @@ jobs:
         run: npx nx affected -t build --parallel=10 --exclude='*,!tag:type:pkg'
 
       - name: Run Affected Lint
-        run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:package'
+        run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:type:pkg'
 
       - name: Run Affected Test
         run: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
