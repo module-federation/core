@@ -44,7 +44,7 @@ jobs:
         run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:type:pkg'
 
       - name: Run Affected Test
-        run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
+        run: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
 
       - name: E2E Test for Next.js
         run: pnpm run app:next:dev & echo "done" && npx wait-on tcp:3000 && npx wait-on tcp:3001 && npx wait-on tcp:3002 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=2 && lsof -ti tcp:3000,3001,3002 | xargs kill
