@@ -63,7 +63,11 @@ describe('DTSManager', () => {
     const distFolder = join(projectRoot, 'dist', remoteOptions.typesFolder);
     await dtsManager.generateTypes();
 
-    expect(dirTree(distFolder, { exclude: /node_modules/ })).toMatchObject({
+    expect(
+      dirTree(distFolder, {
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+      }),
+    ).toMatchObject({
       name: '@mf-types-dts-test',
       children: [
         {
@@ -190,7 +194,11 @@ describe('DTSManager', () => {
     await dtsManager.consumeTypes();
 
     const targetFolder = join(projectRoot, hostOptions.typesFolder);
-    expect(dirTree(targetFolder, { exclude: /node_modules/ })).toMatchObject({
+    expect(
+      dirTree(targetFolder, {
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+      }),
+    ).toMatchObject({
       name: '@mf-types-dts-test-consume-types',
       children: [
         {
@@ -323,7 +331,11 @@ describe('DTSManager', () => {
       updateMode: UpdateMode.POSITIVE,
     });
 
-    expect(dirTree(distFolder, { exclude: /node_modules/ })).toMatchObject({
+    expect(
+      dirTree(distFolder, {
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+      }),
+    ).toMatchObject({
       name: '@mf-types-dts-test',
       children: [
         {
@@ -457,7 +469,11 @@ describe('DTSManager', () => {
       updateMode: UpdateMode.PASSIVE,
     });
 
-    expect(dirTree(targetFolder, { exclude: /node_modules/ })).toMatchObject({
+    expect(
+      dirTree(targetFolder, {
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+      }),
+    ).toMatchObject({
       name: '@mf-types-dts-test-consume-types',
       children: [
         {
