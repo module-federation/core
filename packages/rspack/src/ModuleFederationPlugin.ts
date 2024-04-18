@@ -3,10 +3,12 @@ import {
   ModuleFederationPluginOptions,
   RspackPluginInstance,
 } from '@rspack/core';
-import { getIdentifier } from './utils';
-import { moduleFederationPlugin } from '@module-federation/sdk';
+import {
+  composeKeyWithSeparator,
+  moduleFederationPlugin,
+} from '@module-federation/sdk';
 import { StatsPlugin } from '@module-federation/manifest';
-import { ContainerManager } from '@module-federation/managers';
+import { ContainerManager, utils } from '@module-federation/managers';
 import { DtsPlugin } from '@module-federation/dts-plugin';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
@@ -30,9 +32,13 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
   private _patchBundlerConfig(compiler: Compiler): void {
     const { name } = this._options;
-    new compiler.webpack.DefinePlugin({
-      FEDERATION_BUILD_IDENTIFIER: JSON.stringify(getIdentifier(name!)),
-    }).apply(compiler);
+    if (name) {
+      new compiler.webpack.DefinePlugin({
+        FEDERATION_BUILD_IDENTIFIER: JSON.stringify(
+          composeKeyWithSeparator(name, utils.getBuildVersion()),
+        ),
+      }).apply(compiler);
+    }
   }
 
   private _checkSingleton(compiler: Compiler): void {

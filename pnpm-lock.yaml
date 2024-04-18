@@ -934,6 +934,24 @@ importers:
         specifier: ~5.0.4
         version: 5.0.4
 
+  apps/node-dynamic-remote:
+    dependencies:
+      '@module-federation/node':
+        specifier: workspace:*
+        version: link:../../packages/node
+      lodash:
+        specifier: 4.17.21
+        version: 4.17.21
+
+  apps/node-dynamic-remote-new-version:
+    dependencies:
+      '@module-federation/node':
+        specifier: workspace:*
+        version: link:../../packages/node
+      lodash:
+        specifier: 4.17.21
+        version: 4.17.21
+
   apps/node-host:
     dependencies:
       '@module-federation/enhanced':
@@ -26489,6 +26507,8 @@ packages:
       webpack: '*'
     peerDependenciesMeta:
       webpack:
+        optional: true
+      webpack-sources:
         optional: true
     dependencies:
       webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)

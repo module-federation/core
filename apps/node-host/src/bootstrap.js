@@ -4,8 +4,27 @@
  */
 
 import express from 'express';
+import os from 'os';
 import * as path from 'path';
 import node_local_remote from 'node_local_remote/test';
+import { registerRemotes, loadRemote } from '@module-federation/runtime';
+
+registerRemotes([
+  {
+    name: 'node_dynamic_remote',
+    entry: 'http://localhost:3006/remoteEntry.js',
+  },
+]);
+
+const getMemoryUsage = () => {
+  const formatSize = (bytes) => `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+
+  const memory = process.memoryUsage();
+  return `Time: ${new Date()}\nheap total: ${formatSize(
+    memory.heapTotal,
+  )} heapUsed: ${formatSize(memory.heapUsed)} rss: ${formatSize(memory.rss)}`;
+};
+
 const remoteMsg = import('node_remote/test').then((m) => {
   console.log('\x1b[32m%s\x1b[0m', m.default || m);
   return m.default || m;
@@ -23,6 +42,51 @@ app.get('/api', async (req, res) => {
       node_remote: await remoteMsg,
       node_local_remote,
     },
+  });
+});
+
+app.get('/dynamic-remote', async (req, res) => {
+  debugger;
+
+  const dynamicRemote = await loadRemote('node_dynamic_remote/test-with-axios');
+
+  res.send({
+    message: 'dynamic remote',
+    dynamicRemote: dynamicRemote(),
+  });
+});
+
+app.get('/upgrade-remote', async (req, res) => {
+  debugger;
+  registerRemotes(
+    [
+      {
+        name: 'node_dynamic_remote',
+        entry: 'http://localhost:3007/remoteEntry.js',
+      },
+    ],
+    { force: true },
+  );
+
+  res.send({
+    message: 'Upgrade success!',
+  });
+});
+
+app.get('/memory-cache', async (req, res) => {
+  const memoryUsage = getMemoryUsage();
+  console.log(memoryUsage);
+  res.send({
+    message: 'memory-cache',
+    memoryUsage: memoryUsage,
+  });
+});
+
+app.get('/federation-info', async (req, res) => {
+  console.log(global.__FEDERATION__);
+  console.log(global.__FEDERATION__.__INSTANCES__[0].moduleCache);
+  res.send({
+    message: 'federation info will be output in terminal !',
   });
 });
 
