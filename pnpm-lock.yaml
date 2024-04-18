@@ -444,9 +444,6 @@ importers:
       open:
         specifier: ^10.0.0
         version: 10.1.0
-      pidusage:
-        specifier: 3.0.2
-        version: 3.0.2
       postcss-calc:
         specifier: 9.0.1
         version: 9.0.1(postcss@8.4.38)
@@ -24291,8 +24288,6 @@ packages:
     peerDependenciesMeta:
       webpack:
         optional: true
-      webpack-sources:
-        optional: true
     dependencies:
       webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
       webpack-sources: 3.2.3
@@ -27271,13 +27266,6 @@ packages:
     resolution: {integrity: sha512-eG2dWTVw5bzqGRztnHExczNxt5VGsE6OwTeCG3fdUf9KBsZzO3R5OIIIzWR+iZA0NtZ+RDVdaoE2dK1cn6jH4g==}
     engines: {node: '>=0.10'}
     hasBin: true
-    dev: true
-
-  /pidusage@3.0.2:
-    resolution: {integrity: sha512-g0VU+y08pKw5M8EZ2rIGiEBaB8wrQMjYGFfW2QVIfyT8V+fq8YFLkvlz4bz5ljvFDJYNFCWT3PWqcRr2FKO81w==}
-    engines: {node: '>=10'}
-    dependencies:
-      safe-buffer: 5.2.1
     dev: true
 
   /pify@2.3.0:

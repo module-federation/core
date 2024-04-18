@@ -24,7 +24,7 @@
     "docs": "typedoc",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
-    "build": "nx run-many --target=build --parallel=3 --exclude='*,!tag:package'",
+    "build": "nx run-many --target=build --parallel=3 --exclude='*,!tag:type:pkg'",
     "build:pkg": "nx run-many --targets=build --projects=tag:type:pkg",
     "lint-fix": "nx format:write --uncommitted",
     "trigger-release": "node -e 'import(\"open\").then(open => open.default(\"https://github.com/module-federation/universe/actions/workflows/trigger-release.yml\"))'",
@@ -43,7 +43,7 @@
     "commitlint": "commitlint --edit",
     "prepare": "husky install",
     "changeset": "changeset",
-    "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:package'"
+    "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:type:pkg'"
   },
   "dependencies": {
     "adm-zip": "0.5.10",
@@ -143,6 +143,7 @@
     "@types/lodash.get": "4.4.9",
     "@types/node": "18.19.26",
     "@types/node-fetch": "2.6.11",
+    "@types/pidusage": "2.0.5",
     "@types/react": "18.2.62",
     "@types/react-dom": "18.2.19",
     "@types/webpack-sources": "3.2.3",
@@ -220,13 +221,12 @@
     "vitest": "1.2.2",
     "vitest-fetch-mock": "^0.2.2",
     "vue-tsc": "1.8.27",
+    "wait-on": "^7.2.0",
     "wast-loader": "^1.11.5",
     "webpack": "^5.90.0",
     "webpack-virtual-modules": "0.6.1",
     "whatwg-fetch": "^3.6.2",
-    "yargs": "^17.7.2",
-    "pidusage": "3.0.2",
-    "@types/pidusage": "2.0.5"
+    "yargs": "^17.7.2"
   },
   "config": {
     "commitizen": {
