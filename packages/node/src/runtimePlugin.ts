@@ -34,8 +34,6 @@
         return null;
       }
 
-      console.log('Resolved ENTRYURL:', entryUrl);
-
       const url = new URL(entryUrl);
       const fileToReplace = path.basename(url.pathname);
       url.pathname = url.pathname.replace(fileToReplace, chunkName);

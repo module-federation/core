@@ -8,8 +8,7 @@
       "executor": "@nx/next:build",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/3000-home",
-        "experimentalAppOnly": false
+        "outputPath": "apps/3000-home"
       },
       "configurations": {
         "development": {
