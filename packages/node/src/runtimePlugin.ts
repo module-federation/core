@@ -121,6 +121,14 @@
 
   function httpEvalStrategy(chunkName, remoteName, callback) {
     var url = resolveUrl(remoteName, chunkName);
+    if (!url) {
+      var emptyChunk = {
+        modules: {}, // No modules
+        ids: [], // No chunk IDs
+        runtime: null, // No runtime function
+      };
+      return callback(null, emptyChunk);
+    }
     fetch(url)
       .then(function (res) {
         return res.text();
@@ -147,6 +155,14 @@
     var vm = __non_webpack_require__('vm');
 
     var url = resolveUrl(remoteName, chunkName);
+    if (!url) {
+      var emptyChunk = {
+        modules: {}, // No modules
+        ids: [], // No chunk IDs
+        runtime: null, // No runtime function
+      };
+      return callback(null, emptyChunk);
+    }
     var protocol = url.protocol === 'https:' ? https : http;
     protocol.get(url.href, function (res) {
       var data = '';
@@ -249,7 +265,10 @@
         if (installedChunkData) {
           promises.push(installedChunkData[2]);
         } else {
-          if (__webpack_require__.federation.chunkMatcher(chunkId)) {
+          const matcher = __webpack_require__.federation.chunkMatcher
+            ? __webpack_require__.federation.chunkMatcher(chunkId)
+            : true;
+          if (matcher) {
             // check if real chunk for handler
             var promise = new Promise(function (resolve, reject) {
               installedChunkData = installedChunks[chunkId] = [resolve, reject];
