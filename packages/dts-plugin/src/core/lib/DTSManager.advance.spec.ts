@@ -91,7 +91,11 @@ describe('DTSManager advance usage', () => {
     await dtsManager.consumeTypes();
 
     const targetFolder = join(projectRoot, hostOptions.typesFolder);
-    expect(dirTree(targetFolder, { exclude: /node_modules/ })).toMatchObject({
+    expect(
+      dirTree(targetFolder, {
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+      }),
+    ).toMatchObject({
       name: '@mf-types-dts-test-consume-types-advance',
       children: [
         {

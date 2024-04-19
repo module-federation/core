@@ -35,7 +35,7 @@ jobs:
         run: pnpm install
 
       - name: Run Affected Build
-        run: npx nx build --parallel=10 --exclude='*,!tag:package'
+        run: npx nx build --parallel=10 --exclude='*,!tag:type:pkg'
 
       - name: Configuration xvfb
         shell: bash

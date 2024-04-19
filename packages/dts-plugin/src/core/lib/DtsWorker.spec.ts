@@ -68,9 +68,12 @@ describe('generateTypesInChildProcess', () => {
     };
     expect(checkProcess()).toEqual(true);
     await dtsWorker.controlledPromise;
-    expect(dirTree(distFolder, { exclude: /node_modules/ })).toMatchObject({
+    expect(
+      dirTree(distFolder, {
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+      }),
+    ).toMatchObject({
       name: '@mf-types-dts-test-child-process',
-
       children: [
         {
           children: [
