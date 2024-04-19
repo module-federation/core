@@ -754,5 +754,9 @@ export default {
         },
       ],
     },
+    async: {
+      description: 'Make entrypoints startup as async chunks',
+      type: 'boolean',
+    },
   },
 };

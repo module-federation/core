@@ -1,0 +1,56 @@
+{
+  "name": "@module-federation/modern-js",
+  "version": "0.1.6",
+  "files": [
+    "dist/",
+    "types.d.ts",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "modern build"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/esm/cli/index.js",
+      "require": "./dist/cjs/cli/index.js",
+      "types": "./dist/types/cli/index.d.ts"
+    },
+    "./runtime": {
+      "types": "./dist/types/runtime/index.d.ts",
+      "default": "./dist/esm/runtime/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types/cli/index.d.ts"
+      ],
+      "runtime": [
+        "./dist/types/runtime/index.d.ts"
+      ]
+    }
+  },
+  "main": "./dist/cjs/cli/index.js",
+  "types": "./dist/types/cli/index.d.ts",
+  "author": "hanric <hanric.zhang@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@swc/helpers": "0.5.3",
+    "@modern-js/utils": "^2.49.2",
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/node": "workspace:*",
+    "@modern-js/node-bundle-require": "^2.49.2"
+  },
+  "devDependencies": {
+    "@module-federation/manifest": "workspace:*",
+    "@modern-js/app-tools": "^2.49.2",
+    "@modern-js/core": "^2.49.2",
+    "@modern-js/runtime": "^2.49.2",
+    "@modern-js/module-tools": "^2.35.0",
+    "@modern-js/tsconfig": "^2.35.0"
+  }
+}
