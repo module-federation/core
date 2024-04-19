@@ -67,15 +67,12 @@ class AsyncEntryStartupPlugin {
     });
   }
 
-  getChunkByName(
-    compilation: Compilation,
-    dependOn: string[],
-  ): (string | number | undefined)[] {
+  getChunkByName(compilation: Compilation, dependOn: string[]): Chunk[] {
     const byname = [];
     for (const name of dependOn) {
       const chunk = compilation.namedChunks.get(name);
       if (chunk) {
-        byname.push(chunk.id || chunk.name);
+        byname.push(chunk);
       }
     }
     return byname;
@@ -120,15 +117,17 @@ class AsyncEntryStartupPlugin {
             compilation.chunkGraph.getTreeRuntimeRequirements(runtimeItem);
 
           const entryOptions = upperContext.chunk.getEntryOptions();
-          const chunkInitials = Array.from(
-            // upperContext.chunk.getAllInitialChunks()
+          const chunkInitialsSet = new Set(
             compilation.chunkGraph.getChunkEntryDependentChunksIterable(
               upperContext.chunk,
             ),
           );
 
-          chunkInitials.push(upperContext.chunk);
-
+          chunkInitialsSet.add(upperContext.chunk);
+          const dependOn = entryOptions?.dependOn || [];
+          const dependOnChunks = this.getChunkByName(compilation, dependOn);
+          dependOnChunks.map((c) => chunkInitialsSet.add(c));
+          const chunkInitials = Array.from(chunkInitialsSet);
           const initialChunks = chunkInitials.map((chunk: Chunk) => chunk.id);
           const hasRemoteModules = chunkInitials.some((chunk: Chunk) =>
             compilation.chunkGraph.getChunkModulesIterableBySourceType(
@@ -142,19 +141,6 @@ class AsyncEntryStartupPlugin {
               'consume-shared',
             ),
           );
-
-          const dependOn = entryOptions?.dependOn || [];
-          const dependOnIDs = this.getChunkByName(compilation, dependOn);
-
-          const chunkIds = Array.from(
-            compilation.chunkGraph.getChunkEntryDependentChunksIterable(
-              upperContext.chunk,
-            ),
-          ).map((chunk) => {
-            return chunk.id;
-          });
-
-          chunkIds.unshift(upperContext.chunk.id);
 
           remotes = this._getRemotes(
             compiler.webpack.RuntimeGlobals,
