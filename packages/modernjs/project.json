@@ -1,0 +1,61 @@
+{
+  "name": "modern-js-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/modernjs/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "dependsOn": [
+          {
+            "target": "build",
+            "dependencies": true
+          }
+        ],
+        "commands": [
+          {
+            "command": "cd packages/modernjs; pnpm run build",
+            "forwardAllArgs": true
+          },
+          {
+            "command": "cp packages/modernjs/*.md packages/modernjs/dist",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/modernjs/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/modernjs"]
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run modern-js-plugin:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run modern-js-plugin:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
+    }
+  },
+  "tags": ["type:pkg"],
+  "implicitDependencies": []
+}

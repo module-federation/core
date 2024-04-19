@@ -1,0 +1,44 @@
+{
+  "name": "@module-federation/modern-js",
+  "version": "0.1.6",
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "modern build"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ]
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "author": "hanric <hanric.zhang@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@swc/helpers": "0.5.3",
+    "@modern-js/utils": "2.49.0",
+    "@module-federation/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@modern-js/app-tools": "^2.49.0",
+    "@modern-js/core": "^2.49.0",
+    "@modern-js/runtime": "^2.49.0",
+    "@modern-js/module-tools": "^2.35.0",
+    "@modern-js/tsconfig": "^2.35.0"
+  }
+}
