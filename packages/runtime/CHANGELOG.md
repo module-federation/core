@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.1.7
+
+### Patch Changes
+
+- 648353b: Filter falsey runtime plugins from registerPlugins
+- 35ebb46: fix: support config string shareScope
+  - @module-federation/sdk@0.1.7
+
 ## 0.1.6
 
 ### Patch Changes

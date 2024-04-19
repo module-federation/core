@@ -10,7 +10,7 @@ Thank you for your interest in contributing to Module Federation! Before startin
 4. Set up the development environment. Refer to the "Setup Development Environment" section below for guidance.
 5. If you've fixed a bug or added code that should be tested, add some tests.
 6. Ensure all tests pass. See the "Testing" section below for more information.
-7. Run `nx format:write` and `nx affected -t lint --parallel=7 --exclude='*,!tag:package'` to check and fix the code style.
+7. Run `nx format:write` and `nx affected -t lint --parallel=7 --exclude='*,!tag:type:pkg'` to check and fix the code style.
 8. If you've changed Node.js packages, run `npm run commit` for semantic versioning and commit.
 9. Submit the Pull Request, ensuring all CI runs pass.
 10. Your Pull Request will be reviewed by the maintainers soon.
@@ -88,7 +88,7 @@ Replace `PROJECT-NAME` with the actual name of the project you want to test. The
 To run tests only for the projects affected by recent changes, use:
 
 ```sh
-npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
+npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
 ```
 
 This command ensures that only relevant tests are executed, saving time and resources.
