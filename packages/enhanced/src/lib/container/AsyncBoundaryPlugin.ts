@@ -67,15 +67,12 @@ class AsyncEntryStartupPlugin {
     });
   }
 
-  getChunkByName(
-    compilation: Compilation,
-    dependOn: string[],
-  ): (string | number | undefined)[] {
+  getChunkByName(compilation: Compilation, dependOn: string[]): Chunk[] {
     const byname = [];
     for (const name of dependOn) {
       const chunk = compilation.namedChunks.get(name);
       if (chunk) {
-        byname.push(chunk.id || chunk.name);
+        byname.push(chunk);
       }
     }
     return byname;
@@ -118,36 +115,46 @@ class AsyncEntryStartupPlugin {
 
           const requirements =
             compilation.chunkGraph.getTreeRuntimeRequirements(runtimeItem);
-          const hasRemoteModules =
-            compilation.chunkGraph.getChunkModulesIterableBySourceType(
-              upperContext.chunk,
-              'remote',
-            );
-          const consumeShares =
-            compilation.chunkGraph.getChunkModulesIterableBySourceType(
-              upperContext.chunk,
-              'consume-shared',
-            );
+
           const entryOptions = upperContext.chunk.getEntryOptions();
-          const initialChunks = Array.from(
-            upperContext.chunk.getAllInitialChunks(),
-          ).map((chunk: Chunk) => chunk.id);
+          const chunkInitialsSet = new Set(
+            compilation.chunkGraph.getChunkEntryDependentChunksIterable(
+              upperContext.chunk,
+            ),
+          );
+
+          chunkInitialsSet.add(upperContext.chunk);
           const dependOn = entryOptions?.dependOn || [];
-          const dependOnIDs = this.getChunkByName(compilation, dependOn);
-          const chunksToRef = [...dependOnIDs, ...initialChunks];
+          const dependOnChunks = this.getChunkByName(compilation, dependOn);
+          dependOnChunks.map((c) => chunkInitialsSet.add(c));
+          const chunkInitials = Array.from(chunkInitialsSet);
+          const initialChunks = chunkInitials.map((chunk: Chunk) => chunk.id);
+          const hasRemoteModules = chunkInitials.some((chunk: Chunk) =>
+            compilation.chunkGraph.getChunkModulesIterableBySourceType(
+              chunk,
+              'remote',
+            ),
+          );
+          const consumeShares = chunkInitials.some((chunk: Chunk) =>
+            compilation.chunkGraph.getChunkModulesIterableBySourceType(
+              chunk,
+              'consume-shared',
+            ),
+          );
 
           remotes = this._getRemotes(
             compiler.webpack.RuntimeGlobals,
             requirements,
-            Boolean(hasRemoteModules),
-            chunksToRef,
+            hasRemoteModules,
+            initialChunks,
             remotes,
           );
+
           shared = this._getShared(
             compiler.webpack.RuntimeGlobals,
             requirements,
-            Boolean(consumeShares),
-            chunksToRef,
+            consumeShares,
+            initialChunks,
             shared,
           );
         }
