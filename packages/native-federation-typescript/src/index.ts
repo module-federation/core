@@ -16,12 +16,12 @@ import hostWriteBundle from './lib/writeBundle/host';
 export const NativeFederationTypeScriptRemote = createUnplugin(
   (options: RemoteOptions) => {
     const remoteConfig = retrieveRemoteConfig(options);
-    const { remoteOptions, tsConfig } = remoteConfig
+    const { remoteOptions, tsConfig } = remoteConfig;
     return {
       name: 'native-federation-typescript/remote',
       async writeBundle() {
         try {
-          await remoteWriteBundle(remoteConfig)
+          await remoteWriteBundle(remoteConfig);
 
           console.log(ansiColors.green('Federated types created correctly'));
         } catch (error) {
@@ -34,9 +34,9 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
         return process.env.NODE_ENV === 'production'
           ? undefined
           : {
-            buildStart: (this as UnpluginOptions).writeBundle,
-            watchChange: (this as UnpluginOptions).writeBundle,
-          };
+              buildStart: (this as UnpluginOptions).writeBundle,
+              watchChange: (this as UnpluginOptions).writeBundle,
+            };
       },
       webpack(compiler) {
         compiler.options.devServer = mergeDeepRight(
@@ -80,9 +80,9 @@ export const NativeFederationTypeScriptHost = createUnplugin(
         return process.env.NODE_ENV === 'production'
           ? undefined
           : {
-            buildStart: (this as UnpluginOptions).writeBundle,
-            watchChange: (this as UnpluginOptions).writeBundle,
-          };
+              buildStart: (this as UnpluginOptions).writeBundle,
+              watchChange: (this as UnpluginOptions).writeBundle,
+            };
       },
     };
   },
