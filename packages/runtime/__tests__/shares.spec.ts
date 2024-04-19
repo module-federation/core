@@ -743,7 +743,8 @@ describe('with shareScope shared', () => {
     assert(shared, "shared can't be null");
     const sharedRes = shared();
     assert(sharedRes, "sharedRes can't be null");
-    expect(sharedRes.from).toEqual('@shared-single/runtime-deps');
+    // default strategy is version-first, so the priority @shared-single/runtime-deps2 > @shared-single/runtime-deps
+    expect(sharedRes.from).toEqual('@shared-single/runtime-deps2');
   });
 });
 
