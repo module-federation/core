@@ -24,7 +24,7 @@ function getFederationGlobal(
       template.indent([
         `initOptions: ${initOptionsStrWithoutShared},`,
         `chunkMatcher: function(chunkId) {return ${matcher}},`,
-        rootOutputDir ? `rootOutputDir: ${JSON.stringify(rootOutputDir)},` : '',
+        `rootOutputDir: ${JSON.stringify(rootOutputDir || '')},`,
         `initialConsumes: undefined,`,
         'bundlerRuntimeOptions: {}',
       ]),

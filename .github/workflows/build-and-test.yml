@@ -73,4 +73,4 @@ jobs:
         run: pnpm run app:manifest:dev & echo "done" && npx wait-on tcp:3009 && npx wait-on tcp:3012 && npx nx run-many --target=e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
 
       - name: E2E Node Federation
-        run: npx nx run-many --target=serve --projects=node-local-remote,node-remote --parallel=3 & echo "done" && npx wait-on tcp:3003 && npx wait-on tcp:3002 && npx nx run-many --target=serve --projects=node-host & echo "done" && npx wait-on tcp:3333 && npx nx run node-host-e2e:test:e2e
+        run: npx nx run-many --target=serve --projects=node-local-remote,node-remote --parallel=3 & echo "done" && sleep 10 && npx nx run-many --target=serve --projects=node-host & npx wait-on tcp:3333 && npx nx run node-host-e2e:test:e2e
