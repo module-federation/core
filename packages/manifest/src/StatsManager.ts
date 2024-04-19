@@ -32,6 +32,7 @@ import {
 } from '@module-federation/managers';
 import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
 import { ModuleHandler } from './ModuleHandler';
+import { StatsInfo } from './types';
 
 class StatsManager {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions = {};
@@ -115,7 +116,7 @@ class StatsManager {
       remoteEntry: {
         name: getRemoteEntryName(),
         path: '',
-        // same as the types supported by runtime, currently only global/var/script is supported
+        // same as the types supported by runtime, currently only global/var/script/cjs:webpack is supported
         type: 'global',
       },
       types: getTypesMetaInfo(this._options, compiler.context),
@@ -394,9 +395,10 @@ class StatsManager {
   async generateStats(
     compiler: Compiler,
     compilation: Compilation,
-    extraOptions?: {},
-  ): Promise<Stats> {
+    extraOptions: { disableEmit?: boolean } = {},
+  ): Promise<StatsInfo> {
     try {
+      const { disableEmit } = extraOptions;
       const existedStats = compilation.getAsset(this.fileName);
       if (existedStats) {
         return JSON.parse(existedStats.source.source().toString());
@@ -418,11 +420,19 @@ class StatsManager {
         stats = ret || stats;
       }
 
-      compilation.emitAsset(
-        this.fileName,
-        new compiler.webpack.sources.RawSource(JSON.stringify(stats, null, 2)),
-      );
-      return stats;
+      if (!disableEmit) {
+        compilation.emitAsset(
+          this.fileName,
+          new compiler.webpack.sources.RawSource(
+            JSON.stringify(stats, null, 2),
+          ),
+        );
+      }
+
+      return {
+        stats,
+        filename: this.fileName,
+      };
     } catch (err) {
       throw err;
     }

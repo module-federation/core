@@ -6,7 +6,12 @@ import {
   isManifestProvider,
 } from '@module-federation/sdk';
 import { Optional, Options, Remote } from '../../type';
-import { isRemoteInfoWithEntry, error } from '../../utils';
+import {
+  isRemoteInfoWithEntry,
+  error,
+  getRemoteEntryInfoFromSnapshot,
+  isBrowserEnv,
+} from '../../utils';
 import {
   getGlobalSnapshot,
   setGlobalSnapshotInfoByModuleInfo,
@@ -146,8 +151,11 @@ export class SnapshotHandler {
     // global snapshot includes manifest or module info includes manifest
     if (globalRemoteSnapshot) {
       if (isManifestProvider(globalRemoteSnapshot)) {
+        const remoteEntry = isBrowserEnv()
+          ? globalRemoteSnapshot.remoteEntry
+          : globalRemoteSnapshot.ssrRemoteEntry || '';
         const moduleSnapshot = await this.getManifestJson(
-          globalRemoteSnapshot.remoteEntry,
+          remoteEntry,
           moduleInfo,
           {},
         );
@@ -157,7 +165,7 @@ export class SnapshotHandler {
             ...moduleInfo,
             // The global remote may be overridden
             // Therefore, set the snapshot key to the global address of the actual request
-            entry: globalRemoteSnapshot.remoteEntry,
+            entry: remoteEntry,
           },
           moduleSnapshot,
         );

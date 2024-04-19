@@ -1,6 +1,58 @@
 import type { Stats, ModuleInfo } from '../../src/types';
 
 const manifest: { [key: string]: Stats } = {
+  ssrAppManifest: {
+    id: '@mf/ssr-manifest-provider',
+    name: '@mf/ssr-manifest-provider',
+    metaData: {
+      type: 'global',
+      pluginVersion: '0.0.1',
+      name: '@mf/ssr-manifest-provider',
+      buildInfo: {
+        buildVersion: '1.0.0.1517',
+        buildName: 'ssr-manifest-provider',
+      },
+      ssrRemoteEntry: {
+        name: 'federation-remote-entry.496985d3.js',
+        path: 'server',
+        type: 'cjs',
+      },
+      remoteEntry: {
+        name: 'federation-remote-entry.536985d3.js',
+        path: '',
+        type: 'global',
+      },
+      types: {
+        name: 'index.d.ts',
+        path: '',
+        api: '@mf-types.d.ts',
+        zip: '@mf-types.zip',
+      },
+      globalName: '__FEDERATION_@mf/ssr-manifest-provider:1.0.0.1517__',
+      publicPath: 'https://__CDN_PREFIX__/ssr-manifest-provider/1.0.0.1517/',
+    },
+    shared: [],
+    exposes: [
+      {
+        id: '@mf/ssr-manifest-provider:button',
+        name: 'button',
+        path: './button',
+        requires: [],
+        file: './src/button.tsx',
+        assets: {
+          js: {
+            sync: ['__FEDERATION_expose_button.js'],
+            async: ['426.js'],
+          },
+          css: {
+            sync: ['__FEDERATION_expose_button.css'],
+            async: [],
+          },
+        },
+      },
+    ],
+    remotes: [],
+  },
   prodAppManifest: {
     id: '@garfish/micro-app-sub2',
     name: '@garfish/micro-app-sub2',
@@ -1001,6 +1053,37 @@ const snapshot: { [key: string]: ModuleInfo } = {
     ],
     getPublicPath:
       "return 'https://xxx.com/__FEDERATION_micro-app-sub3/1.0.0.1513/'",
+  },
+  ssrProdAppSnapshotWithAllParams: {
+    version: '',
+    buildVersion: '1.0.0.1517',
+    globalName: '__FEDERATION_@mf/ssr-manifest-provider:1.0.0.1517__',
+    ssrRemoteEntry: 'server/federation-remote-entry.496985d3.js',
+    remoteEntry: 'federation-remote-entry.536985d3.js',
+    remoteEntryType: 'global',
+    ssrRemoteEntryType: 'cjs',
+    remoteTypes: 'index.d.ts',
+    remoteTypesAPI: '@mf-types.d.ts',
+    remoteTypesZip: '@mf-types.zip',
+    remotesInfo: {},
+    shared: [],
+    modules: [
+      {
+        moduleName: 'button',
+        modulePath: './button',
+        assets: {
+          js: {
+            sync: ['__FEDERATION_expose_button.js'],
+            async: ['426.js'],
+          },
+          css: {
+            sync: ['__FEDERATION_expose_button.css'],
+            async: [],
+          },
+        },
+      },
+    ],
+    publicPath: 'https://__CDN_PREFIX__/ssr-manifest-provider/1.0.0.1517/',
   },
   prodAppSnapshotWithAllParams: {
     version: '',

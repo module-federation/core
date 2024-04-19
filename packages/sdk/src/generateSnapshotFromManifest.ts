@@ -7,6 +7,7 @@ import {
   ManifestProvider,
 } from './types';
 import { MANIFEST_EXT } from './constant';
+import { isBrowserEnv } from './env';
 
 interface IOptions {
   remotes?: Record<string, string>;
@@ -126,6 +127,7 @@ export function generateSnapshotFromManifest(
     types: remoteTypes,
     buildInfo: { buildVersion },
     globalName,
+    ssrRemoteEntry,
   } = manifest.metaData;
   const { exposes } = manifest;
 
@@ -182,18 +184,39 @@ export function generateSnapshotFromManifest(
     };
   }
 
+  if (ssrRemoteEntry) {
+    const fullSSRRemoteEntry = simpleJoinRemoteEntry(
+      ssrRemoteEntry.path,
+      ssrRemoteEntry.name,
+    );
+    remoteSnapshot.ssrRemoteEntry = fullSSRRemoteEntry;
+    remoteSnapshot.ssrRemoteEntryType = 'cjs:webpack';
+  }
+
   return remoteSnapshot;
 }
 
 export function isManifestProvider(
   moduleInfo: ModuleInfo | ManifestProvider,
 ): moduleInfo is ManifestProvider {
-  if (
-    'remoteEntry' in moduleInfo &&
-    moduleInfo.remoteEntry.includes(MANIFEST_EXT)
-  ) {
-    return true;
+  if (isBrowserEnv()) {
+    if (
+      'remoteEntry' in moduleInfo &&
+      moduleInfo.remoteEntry.includes(MANIFEST_EXT)
+    ) {
+      return true;
+    } else {
+      return false;
+    }
   } else {
-    return false;
+    if (
+      'ssrRemoteEntry' in moduleInfo &&
+      moduleInfo.ssrRemoteEntry &&
+      moduleInfo.ssrRemoteEntry.includes(MANIFEST_EXT)
+    ) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

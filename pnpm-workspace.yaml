@@ -3,6 +3,7 @@ packages:
   - 'packages/*'
   - 'packages/enhance'
   - 'apps/runtime-demo/*'
+  - 'apps/modernjs-ssr/*'
   - 'apps/manifest-demo/*'
   - 'apps/*'
   - 'webpack'
