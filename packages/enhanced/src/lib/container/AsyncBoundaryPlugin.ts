@@ -67,15 +67,17 @@ class AsyncEntryStartupPlugin {
     });
   }
 
-  getChunkByName(compilation: Compilation, dependOn: string[]): Chunk[] {
-    const byname = [];
+  getChunkByName(
+    compilation: Compilation,
+    dependOn: string[],
+    byname: Set<Chunk>,
+  ) {
     for (const name of dependOn) {
       const chunk = compilation.namedChunks.get(name);
       if (chunk) {
-        byname.push(chunk);
+        byname.add(chunk);
       }
     }
-    return byname;
   }
 
   private _handleRenderStartup(compiler: Compiler, compilation: Compilation) {
@@ -125,22 +127,35 @@ class AsyncEntryStartupPlugin {
 
           chunkInitialsSet.add(upperContext.chunk);
           const dependOn = entryOptions?.dependOn || [];
-          const dependOnChunks = this.getChunkByName(compilation, dependOn);
-          dependOnChunks.map((c) => chunkInitialsSet.add(c));
-          const chunkInitials = Array.from(chunkInitialsSet);
-          const initialChunks = chunkInitials.map((chunk: Chunk) => chunk.id);
-          const hasRemoteModules = chunkInitials.some((chunk: Chunk) =>
-            compilation.chunkGraph.getChunkModulesIterableBySourceType(
-              chunk,
-              'remote',
-            ),
-          );
-          const consumeShares = chunkInitials.some((chunk: Chunk) =>
-            compilation.chunkGraph.getChunkModulesIterableBySourceType(
-              chunk,
-              'consume-shared',
-            ),
-          );
+          this.getChunkByName(compilation, dependOn, chunkInitialsSet);
+
+          const initialChunks = [];
+
+          let hasRemoteModules = false;
+          let consumeShares = false;
+
+          for (const chunk of chunkInitialsSet) {
+            initialChunks.push(chunk.id);
+            if (!hasRemoteModules) {
+              hasRemoteModules = Boolean(
+                compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                  chunk,
+                  'remote',
+                ),
+              );
+            }
+            if (!consumeShares) {
+              consumeShares = Boolean(
+                compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                  chunk,
+                  'consume-shared',
+                ),
+              );
+            }
+            if (hasRemoteModules && consumeShares) {
+              break;
+            }
+          }
 
           remotes = this._getRemotes(
             compiler.webpack.RuntimeGlobals,
