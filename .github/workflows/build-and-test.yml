@@ -48,7 +48,7 @@ jobs:
 
       - name: E2E Test for Next.js Dev
         run: |
-          pnpm run app:next:dev & echo "done" &&
+          pnpm run app:next:dev & sleep 1 &&
           pnpm exec wait-on tcp:3001 &&
           pnpm exec wait-on tcp:3002 &&
           pnpm exec wait-on tcp:3000 &&
