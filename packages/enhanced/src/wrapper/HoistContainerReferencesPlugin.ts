@@ -7,8 +7,10 @@ export default class HoistContainerReferencesPlugin
   implements WebpackPluginInstance
 {
   name: string;
+  private containerName?: string | undefined;
 
-  constructor() {
+  constructor(name?: string | undefined) {
+    this.containerName = name;
     this.name = PLUGIN_NAME;
   }
 
