@@ -27,11 +27,12 @@ const downloadErrorLogger =
   };
 
 export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
-  let retries = 0;
+  const retriesPerFile: Record<string, number> = {};
   return async ([destinationFolder, fileToDownload]: string[]) => {
+    retriesPerFile[fileToDownload] = 0;
     const destinationPath = join(hostOptions.mocksFolder, destinationFolder);
 
-    while (retries++ < hostOptions.maxRetries) {
+    while (retriesPerFile[fileToDownload]++ < hostOptions.maxRetries) {
       try {
         const response = await axios
           .get(fileToDownload, { responseType: 'arraybuffer' })
@@ -48,7 +49,7 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
             }`,
           ),
         );
-        if (retries >= hostOptions.maxRetries) {
+        if (retriesPerFile[fileToDownload] >= hostOptions.maxRetries) {
           throw error;
         }
       }
