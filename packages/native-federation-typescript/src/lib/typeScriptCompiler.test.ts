@@ -1,7 +1,7 @@
 import dirTree from 'directory-tree';
 import { mkdtempSync, readFileSync, rmSync } from 'fs';
 import os from 'os';
-import { join, resolve, sep } from 'path';
+import { join, resolve, sep } from 'path/posix'; // import "path/posix" since we vi.mock windows environment, but run tests on unix
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
