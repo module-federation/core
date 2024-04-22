@@ -28,8 +28,8 @@ export default defineConfig({
   icon: '/svg.svg',
   lang: 'en',
   logo: {
-    light: '/module-federation-logo.svg',
-    dark: '/module-federation-logo-white.svg',
+    light: '/module-federation-2.0.svg',
+    dark: '/module-federation-logo-white-2.0.svg',
   },
   markdown: {
     checkDeadLinks: true,

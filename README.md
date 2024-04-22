@@ -2,7 +2,9 @@
   <img alt="Module federation Banner"  width="260" src="https://github.com/module-federation/universe/assets/27547179/11234712-40fc-4696-a7fd-16e0c631005a">
 </p>
 
-# Module Federation
+# Module Federation 2.0
+
+Module Federation 2.0 is used to distinguish it from Module Federation (1.0) in Webpack. In Module Federation 2.0, the relationship between runtime and build tools is redesigned, and Manifest files are introduced. Compared with 1.0, Module Federation 2.0 introduces more major new features.
 
 ## 💡 What is Module Federation?
 
@@ -14,28 +16,18 @@
 
 [Learn more](https://module-federation.io/)
 
-## 🔥 What does universe offer?
+## 🔥 What new features does Module Federation 2.0 provide?
 
-The universe repository provides a set of tools to enhance module federation's capabilities. These include:
-
-- [Module Federation Runtime](https://module-federation.io/guide/basic/runtime.html)
-- [Rspack Module Federation](https://module-federation.io/guide/basic/rspack.html)
-- [Webpack Module Federation](https://module-federation.io/guide/basic/webpack.html)
-- [Next.js Module Federation](https://module-federation.io/guide/framework/nextjs.html)
+* 🎨 Module Federation Runtime
+* 🧩 Runtime Plugins System
+* 📝 Manifest
+* 🚀 Dynamic type prompt
+* 🛠️ Chrome Devtool
 
 ## 📚 Getting Started
 
 To get started with Module Federation, see the [Quick Start](https://module-federation.io/guide/start/quick-start.html).
 
-
-## 📦 Packages
-
-Some of the underlying dependencies of the past are listed here, and [enhanced](https://module-federation.io/) access is recommended for direct use.
-
-- [Node Module Federation](./packages/node)
-- [Storybook addon for Module Federation](./packages/storybook-addon)
-- [Native federation typescript](./packages/native-federation-typescript)
-- [Utilities](./packages/utilities)
 
 # 🧑‍💻 Community
 

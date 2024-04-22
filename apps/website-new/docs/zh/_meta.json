@@ -15,13 +15,17 @@
     "activeMatch": "/plugin/"
   },
   {
+    "text": "博客",
+    "link": "/blog/showcase",
+    "activeMatch": "/blog/"
+  },
+  {
     "text": "社区",
-    "link": "/community/showcaseå",
     "activeMatch": "/community/",
     "items": [
       {
         "text": "Showcase",
-        "link": "/community/showcase/"
+        "link": "/blog/showcase/"
       },
       {
         "text": "Module Federation Examples",
