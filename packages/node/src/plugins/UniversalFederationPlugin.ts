@@ -46,6 +46,15 @@ class UniversalFederationPlugin {
     this._options = options || ({} as NodeFederationOptions);
     this.context = context || ({} as NodeFederationContext);
     this.name = 'ModuleFederationPlugin';
+  }
+
+  private updateCompilerOptions(compiler: Compiler): void {
+    compiler.options.output.chunkFormat = 'commonjs';
+    if (compiler.options.output.enabledLibraryTypes === undefined) {
+      compiler.options.output.enabledLibraryTypes = ['commonjs-module'];
+    } else {
+      compiler.options.output.enabledLibraryTypes.push('commonjs-module');
+    }
 
     if (this._options.useRuntimePlugin) {
       this._options.runtimePlugins = this._options.runtimePlugins
@@ -53,6 +62,21 @@ class UniversalFederationPlugin {
             require.resolve('../runtimePlugin.js'),
           ])
         : [require.resolve('../runtimePlugin.js')];
+    }
+
+    const chunkFileName = compiler.options?.output?.chunkFilename;
+    const uniqueName =
+      compiler?.options?.output?.uniqueName || this._options.name;
+    if (
+      typeof chunkFileName === 'string' &&
+      uniqueName &&
+      !chunkFileName.includes(uniqueName)
+    ) {
+      const suffix = `-[chunkhash].js`;
+      compiler.options.output.chunkFilename = chunkFileName.replace(
+        '.js',
+        suffix,
+      );
     }
   }
 
@@ -73,12 +97,7 @@ class UniversalFederationPlugin {
       compiler.options.target === 'async-node'
     ) {
       if (useRuntimePlugin) {
-        compiler.options.output.chunkFormat = 'commonjs';
-        if (compiler.options.output.enabledLibraryTypes === undefined) {
-          compiler.options.output.enabledLibraryTypes = ['commonjs-module'];
-        } else {
-          compiler.options.output.enabledLibraryTypes.push('commonjs-module');
-        }
+        this.updateCompilerOptions(compiler);
 
         new ModuleFederationPlugin({
           ...options,
