@@ -13,6 +13,7 @@
 interface PluginDtsOptions {
   generateTypes?: boolean | DtsRemoteOptions;
   consumeTypes?: boolean | DtsHostOptions;
+  tsConfigPath?: string;
 }
 ```
 
@@ -32,6 +33,7 @@ interface DtsRemoteOptions {
   deleteTypesFolder?: boolean;
   additionalFilesToCompile?: string[];
   compilerInstance?: 'tsc' | 'vue-tsc';
+  compileInChildProcess?: boolean;
   generateAPITypes?: boolean;
   extractThirdParty?: boolean;
   extractRemoteTypes?: boolean;
@@ -46,7 +48,8 @@ interface DtsRemoteOptions {
   "generateAPITypes": true,
   "abortOnError": false,
   "extractThirdParty": true,
-  "extractRemoteTypes": true
+  "extractRemoteTypes": true,
+  "compileInChildProcess": true
 }
 ```
 
@@ -79,6 +82,14 @@ interface DtsRemoteOptions {
 
 是否生成 `Federation Runtime` 中 `loadRemote` 类型
 
+#### compileInChildProcess
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`undefined`
+
+是否在子进程中编译生成类型
+
 #### abortOnError
 
 - 类型：`boolean`
@@ -92,6 +103,7 @@ interface DtsRemoteOptions {
 - 类型：`string`
 - 是否必填：否
 - 默认值：`path.join(process.cwd(),'./tsconfig.json')`
+> 优先级：dts.generateTypes.tsConfigPath > dts.tsConfigPath
 
 tsconfig 配置文件路径
 
@@ -196,3 +208,11 @@ interface DtsHostOptions {
 - 默认值：`'@mf-types'`
 
 对应 `remotes` 目录配置的 `typesFolder`
+
+### tsConfigPath
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`path.join(process.cwd(),'./tsconfig.json')`
+
+tsconfig 配置文件路径

@@ -13,7 +13,7 @@
       "@module-federation/managers",
       "@module-federation/manifest",
       "@module-federation/dts-plugin",
-      "@module-federation/native-federation-typescript"
+      "@module-federation/third-party-dts-extractor"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],

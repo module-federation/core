@@ -1,5 +1,11 @@
 # [1.0.0-canary.1](https://github.com/module-federation/universe/compare/native-federation-tests-0.2.1...native-federation-tests-1.0.0-canary.1) (2023-11-06)
 
+## 0.4.1
+
+### Patch Changes
+
+- f926b6c: chore: revert prev implementation
+
 ## 0.4.0
 
 ### Minor Changes

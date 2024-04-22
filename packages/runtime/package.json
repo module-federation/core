@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime",
-  "version": "0.1.2",
+  "version": "0.1.8",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs",
   "module": "./dist/index.esm.js",
@@ -15,19 +15,19 @@
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.cjs.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js",
-      "types": "./dist/index.cjs.d.ts"
+      "require": "./dist/index.cjs.js"
     },
     "./helpers": {
+      "types": "./dist/helpers.cjs.d.ts",
       "import": "./dist/helpers.esm.js",
-      "require": "./dist/helpers.cjs.js",
-      "types": "./dist/helpers.cjs.d.ts"
+      "require": "./dist/helpers.cjs.js"
     },
     "./types": {
+      "types": "./dist/types.cjs.d.ts",
       "import": "./dist/types.esm.js",
-      "require": "./dist/types.cjs.js",
-      "types": "./dist/types.cjs.d.ts"
+      "require": "./dist/types.cjs.js"
     },
     "./*": "./*"
   },

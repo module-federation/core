@@ -10,6 +10,7 @@ export class StatsPlugin implements WebpackPluginInstance {
   private _statsManager: StatsManager = new StatsManager();
   private _manifestManager: ManifestManager = new ManifestManager();
   private _enable: boolean = true;
+  private _bundler: 'webpack' | 'rspack' = 'webpack';
 
   constructor(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -20,6 +21,7 @@ export class StatsPlugin implements WebpackPluginInstance {
   ) {
     try {
       this._options = options;
+      this._bundler = bundler;
       this._statsManager.init(this._options, { pluginVersion, bundler });
       this._manifestManager.init(this._options);
     } catch (err) {
@@ -57,6 +59,11 @@ export class StatsPlugin implements WebpackPluginInstance {
               stats,
               publicPath: this._statsManager.getPublicPath(compiler),
               compiler,
+              bundler: this._bundler,
+              additionalData:
+                typeof this._options.manifest === 'object'
+                  ? this._options.manifest.additionalData
+                  : undefined,
             });
           }
         },

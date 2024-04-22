@@ -1,17 +1,19 @@
 import * as runtime from '@module-federation/runtime';
-import type { RemoteEntryInitOptions } from '@module-federation/runtime/types';
+import type {
+  RemoteEntryInitOptions,
+  SharedConfig,
+} from '@module-federation/runtime/types';
 import { initializeSharing } from './initializeSharing';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
 
 // FIXME: ideal situation => import { GlobalShareScope,UserOptions } from '@module-federation/runtime/types'
 type ExcludeUndefined<T> = T extends undefined ? never : T;
+type Shared = InitOptions['shared'];
+
 type NonUndefined<T = Shared> = ExcludeUndefined<T>;
 
 type InitOptions = Parameters<typeof runtime.init>[0];
-type Shared = InitOptions['shared'];
-
-type SharedConfig = NonUndefined<NonUndefined[string]['shareConfig']>;
 
 type ModuleCache = runtime.FederationHost['moduleCache'];
 type InferModule<T> = T extends Map<string, infer U> ? U : never;

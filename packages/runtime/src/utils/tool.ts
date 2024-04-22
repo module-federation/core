@@ -73,3 +73,7 @@ export function isStaticResourcesEqual(url1: string, url2: string): boolean {
   // Check if the relative paths are identical
   return relativeUrl1 === relativeUrl2;
 }
+
+export function arrayOptions<T>(options: T | Array<T>): Array<T> {
+  return Array.isArray(options) ? options : [options];
+}

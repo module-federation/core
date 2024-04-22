@@ -1,5 +1,74 @@
 # @module-federation/rspack
 
+## 0.1.8
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.8
+- @module-federation/runtime-tools@0.1.8
+- @module-federation/managers@0.1.8
+- @module-federation/manifest@0.1.8
+- @module-federation/dts-plugin@0.1.8
+
+## 0.1.7
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.1.7
+- @module-federation/sdk@0.1.7
+- @module-federation/managers@0.1.7
+- @module-federation/manifest@0.1.7
+- @module-federation/dts-plugin@0.1.7
+
+## 0.1.6
+
+### Patch Changes
+
+- 72c7b80: chore: fix release tag
+- Updated dependencies [72c7b80]
+  - @module-federation/dts-plugin@0.1.6
+  - @module-federation/managers@0.1.6
+  - @module-federation/manifest@0.1.6
+  - @module-federation/runtime-tools@0.1.6
+  - @module-federation/sdk@0.1.6
+
+## 0.1.5
+
+### Patch Changes
+
+- Updated dependencies [f9b8af7]
+- Updated dependencies [71559fb]
+- Updated dependencies [ca271ab]
+- Updated dependencies [1a9c6e7]
+  - @module-federation/dts-plugin@0.1.5
+  - @module-federation/manifest@0.1.5
+  - @module-federation/sdk@0.1.5
+  - @module-federation/runtime-tools@0.1.5
+  - @module-federation/managers@0.1.5
+
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies [8f3a440]
+- Updated dependencies [2f697b9]
+  - @module-federation/dts-plugin@0.1.4
+  - @module-federation/sdk@0.1.4
+  - @module-federation/runtime-tools@0.1.4
+  - @module-federation/manifest@0.1.4
+  - @module-federation/managers@0.1.4
+
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [f926b6c]
+  - @module-federation/dts-plugin@0.1.3
+  - @module-federation/manifest@0.1.3
+  - @module-federation/runtime-tools@0.1.3
+  - @module-federation/sdk@0.1.3
+  - @module-federation/managers@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes

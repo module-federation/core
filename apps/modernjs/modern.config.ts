@@ -11,11 +11,24 @@ export default defineConfig({
   runtime: {
     router: true,
   },
+  security: {
+    checkSyntax: true,
+  },
+  source: {
+    // downgrade @module-federation related pkgs
+    include: [
+      // should set module-federation in outer repo
+      /universe\/packages/,
+    ],
+  },
   // source: {
   //   enableAsyncEntry: true,
   // },
   plugins: [appTools()],
   tools: {
+    babel(config) {
+      config.sourceType = 'unambiguous';
+    },
     webpack: (config, { webpack, appendPlugins }) => {
       if (config?.output) {
         config.output.publicPath = 'http://localhost:4001/';
@@ -24,6 +37,7 @@ export default defineConfig({
       appendPlugins([
         new AsyncBoundaryPlugin({
           excludeChunk: chunk => chunk.name === 'app1',
+          eager: module => /\.federation/.test(module?.request || ''),
         }),
         new ModuleFederationPlugin({
           name: 'app1',

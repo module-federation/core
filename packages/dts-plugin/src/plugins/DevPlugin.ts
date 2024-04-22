@@ -8,7 +8,7 @@ import {
 import { WEB_CLIENT_OPTIONS_IDENTIFIER, WebClientOptions } from '../server';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import path from 'path';
-import { isTSProject } from './utils';
+import { isTSProject, isDev } from './utils';
 
 enum PROCESS_EXIT_CODE {
   SUCCESS = 0,
@@ -22,10 +22,6 @@ function ensureTempDir(filePath: string): void {
   } catch (_err) {
     // noop
   }
-}
-
-function isDev(): boolean {
-  return process.env['NODE_ENV'] === 'development';
 }
 
 export class DevPlugin implements WebpackPluginInstance {
@@ -142,7 +138,10 @@ export class DevPlugin implements WebpackPluginInstance {
     const defaultConsumeTypes = { consumeAPITypes: true };
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
-        isTSProject(undefined, compiler.context),
+        isTSProject(
+          typeof dts === 'object' ? dts.tsConfigPath : undefined,
+          compiler.context,
+        ),
         {
           //  remote types dist(.dev-server) not be used currently, so no need to set extractThirdParty etc
           generateTypes: defaultGenerateTypes,
@@ -154,7 +153,7 @@ export class DevPlugin implements WebpackPluginInstance {
 
     const normalizedGenerateTypes =
       normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
-        normalizedDtsOptions === false,
+        Boolean(normalizedDtsOptions),
         defaultGenerateTypes,
         'mfOptions.dts.generateTypes',
       )(
@@ -206,9 +205,24 @@ export class DevPlugin implements WebpackPluginInstance {
             abortOnError: false,
             ...normalizedConsumeTypes,
           };
+
     const extraOptions = normalizedDtsOptions
       ? normalizedDtsOptions.extraOptions || {}
       : {};
+
+    if (!remote && !host && normalizedDev.disableLiveReload) {
+      return;
+    }
+
+    if (
+      remote &&
+      !remote?.tsConfigPath &&
+      typeof normalizedDtsOptions === 'object' &&
+      normalizedDtsOptions.tsConfigPath
+    ) {
+      remote.tsConfigPath = normalizedDtsOptions.tsConfigPath;
+    }
+
     this._devWorker = createDevWorker({
       name,
       remote: remote,

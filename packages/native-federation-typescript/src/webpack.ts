@@ -3,13 +3,14 @@ import { WebpackPluginInstance } from 'unplugin';
 import {
   NativeFederationTypeScriptHost as GeneralHost,
   NativeFederationTypeScriptRemote as GeneralRemote,
-  EnhancedRemoteOptions,
-  EnhancedHostOptions,
-} from './index';
+} from '.';
+
+import { HostOptions } from './interfaces/HostOptions';
+import { RemoteOptions } from './interfaces/RemoteOptions';
 
 export const NativeFederationTypeScriptRemote: (
-  options: EnhancedRemoteOptions,
+  options: RemoteOptions,
 ) => WebpackPluginInstance = GeneralRemote.webpack;
 export const NativeFederationTypeScriptHost: (
-  options: EnhancedHostOptions,
+  options: HostOptions,
 ) => WebpackPluginInstance = GeneralHost.webpack;

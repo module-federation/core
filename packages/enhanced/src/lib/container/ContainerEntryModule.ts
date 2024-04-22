@@ -189,6 +189,7 @@ class ContainerEntryModule extends Module {
       // @ts-ignore
       new EntryDependency(this._injectRuntimeEntry),
     );
+
     callback();
   }
 

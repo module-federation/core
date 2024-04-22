@@ -131,6 +131,7 @@ export function generateSnapshotFromManifest(
     shared: manifest?.shared.map((item) => ({
       assets: item.assets,
       sharedName: item.name,
+      version: item.version,
     })),
     modules: exposes?.map((expose) => ({
       moduleName: expose.name,

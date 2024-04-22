@@ -1,5 +1,59 @@
 # [1.0.0-canary.3](https://github.com/module-federation/universe/compare/webpack-bundler-runtime-1.0.0-canary.2...webpack-bundler-runtime-1.0.0-canary.3) (2023-11-23)
 
+## 0.1.8
+
+### Patch Changes
+
+- @module-federation/runtime@0.1.8
+- @module-federation/sdk@0.1.8
+
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies [648353b]
+- Updated dependencies [35ebb46]
+  - @module-federation/runtime@0.1.7
+  - @module-federation/sdk@0.1.7
+
+## 0.1.6
+
+### Patch Changes
+
+- 72c7b80: chore: fix release tag
+- Updated dependencies [72c7b80]
+  - @module-federation/runtime@0.1.6
+  - @module-federation/sdk@0.1.6
+
+## 0.1.5
+
+### Patch Changes
+
+- 1a9c6e7: feat: support config multiple versions shared
+- Updated dependencies [876a4ff]
+- Updated dependencies [ca271ab]
+- Updated dependencies [f26aa2d]
+- Updated dependencies [1a9c6e7]
+  - @module-federation/runtime@0.1.5
+  - @module-federation/sdk@0.1.5
+
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies [8f3a440]
+- Updated dependencies [2f697b9]
+  - @module-federation/sdk@0.1.4
+  - @module-federation/runtime@0.1.4
+
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [6b3b210]
+  - @module-federation/runtime@0.1.3
+  - @module-federation/sdk@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes

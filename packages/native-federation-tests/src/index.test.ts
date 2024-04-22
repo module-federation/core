@@ -2,7 +2,7 @@ import AdmZip from 'adm-zip';
 import axios from 'axios';
 import dirTree from 'directory-tree';
 import { rm } from 'fs/promises';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { UnpluginOptions } from 'unplugin';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -49,6 +49,93 @@ describe('index', () => {
       expect(dirTree(distFolder)).toMatchObject({
         name: '@mf-tests',
         children: [{ name: 'index.js' }],
+      });
+    });
+
+    it('correctly enrich webpack config', async () => {
+      const options = {
+        moduleFederationConfig: {
+          name: 'moduleFederationTypescript',
+          filename: 'remoteEntry.js',
+          exposes: {
+            './index': exposedIndex,
+          },
+          shared: {
+            react: { singleton: true, eager: true },
+            'react-dom': { singleton: true, eager: true },
+          },
+        },
+        deleteTestsFolder: false,
+        testsFolder: '@mf-tests',
+      };
+
+      const webpackCompiler = {
+        options: {
+          devServer: {
+            foo: {},
+          },
+        },
+      };
+
+      const unplugin = NativeFederationTestsRemote.rollup(
+        options,
+      ) as UnpluginOptions;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      await unplugin.webpack?.(webpackCompiler);
+
+      expect(webpackCompiler).toStrictEqual({
+        options: {
+          devServer: {
+            foo: {},
+            static: {
+              directory: resolve('./dist'),
+            },
+          },
+        },
+      });
+    });
+
+    it('correctly enrich rspack config', async () => {
+      const options = {
+        moduleFederationConfig: {
+          name: 'moduleFederationTypescript',
+          filename: 'remoteEntry.js',
+          exposes: {
+            './index': exposedIndex,
+          },
+          shared: {
+            react: { singleton: true, eager: true },
+            'react-dom': { singleton: true, eager: true },
+          },
+        },
+        deleteTestsFolder: false,
+        testsFolder: '@mf-tests',
+      };
+
+      const rspackCompiler = {
+        options: {
+          devServer: {
+            foo: {},
+          },
+        },
+      } as any;
+
+      const unplugin = NativeFederationTestsRemote.rollup(
+        options,
+      ) as UnpluginOptions;
+
+      unplugin.rspack?.(rspackCompiler);
+
+      expect(rspackCompiler).toStrictEqual({
+        options: {
+          devServer: {
+            foo: {},
+            static: {
+              directory: resolve('./dist'),
+            },
+          },
+        },
       });
     });
   });

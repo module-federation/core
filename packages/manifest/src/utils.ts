@@ -10,7 +10,7 @@ import {
   normalizeOptions,
   MetaDataTypes,
 } from '@module-federation/sdk';
-import { retrieveTypesAssetsInfo } from '@module-federation/native-federation-typescript/helpers';
+import { retrieveTypesAssetsInfo } from '@module-federation/dts-plugin/core';
 import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
 
 function getSharedModuleName(name: string): string {

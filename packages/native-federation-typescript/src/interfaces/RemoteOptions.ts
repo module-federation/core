@@ -1,8 +1,9 @@
-import { moduleFederationPlugin } from '@module-federation/sdk';
-
-export interface RemoteOptions extends moduleFederationPlugin.DtsRemoteOptions {
-  moduleFederationConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
-  context?: string;
-  implementation?: string;
-  hostRemoteTypesFolder?: string;
+export interface RemoteOptions {
+  moduleFederationConfig: any;
+  tsConfigPath?: string;
+  typesFolder?: string;
+  compiledTypesFolder?: string;
+  deleteTypesFolder?: boolean;
+  additionalFilesToCompile?: string[];
+  compilerInstance?: 'tsc' | 'vue-tsc';
 }

@@ -9,12 +9,21 @@ const path = require('path');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
+const packageJson = require('./package.json');
 
 module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    config.watchOptions = {
+      ignored: ['**/node_modules/**', '**/@mf-types/**'],
+    };
     // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
+    config.watchOptions = {
+      ignored: ['**/dist/**'],
+    };
+    config.devServer.host = '127.0.0.1';
+
     config.plugins.push(
       new ModuleFederationPlugin({
         name: 'runtime_remote1',
@@ -26,13 +35,32 @@ module.exports = composePlugins(
           './WebpackPng': './src/components/WebpackPng',
         },
         shared: {
-          lodash: {},
-          antd: {},
-          react: {},
-          'react/': {},
-          'react-dom': {},
-          'react-dom/': {},
+          lodash: {
+            singleton: true,
+            requiredVersion: '^4.0.0',
+          },
+          antd: {
+            singleton: true,
+            requiredVersion: '^4.0.0',
+          },
+          react: {
+            singleton: true,
+            requiredVersion: '^18.2.0',
+          },
+          'react/': {
+            singleton: true,
+            requiredVersion: '^18.2.0',
+          },
+          'react-dom': {
+            singleton: true,
+            requiredVersion: '^18.2.0',
+          },
+          'react-dom/': {
+            singleton: true,
+            requiredVersion: '^18.2.0',
+          },
         },
+        runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
       }),
     );
     // config.externals={
@@ -54,6 +82,7 @@ module.exports = composePlugins(
     // e.g. `config.plugins.push(new MyPlugin())`
     config.output = {
       ...config.output,
+      publicPath: 'http://localhost:3006/',
       scriptType: 'text/javascript',
     };
     config.optimization = {

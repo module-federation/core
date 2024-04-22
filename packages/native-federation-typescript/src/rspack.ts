@@ -1,7 +1,7 @@
 import {
   NativeFederationTypeScriptHost as GeneralHost,
   NativeFederationTypeScriptRemote as GeneralRemote,
-} from './index';
+} from '.';
 
 export const NativeFederationTypeScriptRemote = GeneralRemote.rspack;
 export const NativeFederationTypeScriptHost = GeneralHost.rspack;
