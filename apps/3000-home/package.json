@@ -27,6 +27,6 @@
   },
   "scripts": {
     "start": "next start",
-    "build": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
+    "build": "pnpm exec next telemetry disable && NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
   }
 }

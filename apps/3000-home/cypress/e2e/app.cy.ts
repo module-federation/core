@@ -3,6 +3,20 @@ import { getH1, getH3 } from '../support/app.po';
 describe('3000-home/', () => {
   beforeEach(() => cy.visit('/'));
 
+  describe('Warmup Next', () => {
+    it('warms pages concurrently', () => {
+      const urls = [
+        '/shop',
+        '/checkout',
+        '/checkout/test-title',
+        '/checkout/test-check-button',
+      ];
+      urls.forEach((url) => {
+        cy.request(url); // This makes a GET request, not a full page visit
+      });
+    });
+  });
+
   describe('Welcome message', () => {
     it('should display welcome message', () => {
       getH1().contains('This is SPA combined');
@@ -32,9 +46,6 @@ describe('3000-home/', () => {
 
   describe('Routing checks', () => {
     it('check that clicking back and forwards in client side routeing still renders the content correctly', () => {
-      cy.visit('/');
-      cy.visit('/shop');
-      cy.visit('/');
       cy.visit('/shop');
       cy.wait(3000);
       cy.url().should('include', '/shop');
