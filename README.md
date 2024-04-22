@@ -16,7 +16,7 @@ Module Federation 2.0 is used to distinguish it from Module Federation (1.0) in 
 
 [Learn more](https://module-federation.io/)
 
-## 🔥 What new features does Module Federation 2.0 provide?
+## ✨ What new features does Module Federation 2.0 provide?
 
 * 🎨 Module Federation Runtime
 * 🧩 Runtime Plugins System
