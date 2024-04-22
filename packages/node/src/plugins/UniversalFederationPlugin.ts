@@ -73,6 +73,13 @@ class UniversalFederationPlugin {
       compiler.options.target === 'async-node'
     ) {
       if (useRuntimePlugin) {
+        compiler.options.output.chunkFormat = 'commonjs';
+        if (compiler.options.output.enabledLibraryTypes === undefined) {
+          compiler.options.output.enabledLibraryTypes = ['commonjs-module'];
+        } else {
+          compiler.options.output.enabledLibraryTypes.push('commonjs-module');
+        }
+
         new ModuleFederationPlugin({
           ...options,
         }).apply(compiler);
@@ -80,6 +87,8 @@ class UniversalFederationPlugin {
         new NodeFederationPlugin(options, this.context).apply(compiler);
         new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
       }
+    } else {
+      new ModuleFederationPlugin(options).apply(compiler);
     }
   }
 }
