@@ -1,5 +1,4 @@
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import { ModuleFederationPlugin } from '@module-federation/enhanced';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
@@ -20,7 +19,7 @@ export default defineConfig({
     },
   },
   tools: {
-    webpack: (config: Record<string, any>, { appendPlugins }) => {
+    webpack: (config: Record<string, any>) => {
       if (process.env.E2ETEST) {
         config.entry.worker = './src/worker/index.ts';
       }
@@ -37,20 +36,6 @@ export default defineConfig({
         './src/utils/chrome/post-message-listener.ts';
       config.entry['post-message-start'] =
         './src/utils/chrome/post-message-start.ts';
-
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'app1',
-          exposes: {
-            './App': './src/App.tsx',
-          },
-          shared: {
-            react: { singleton: true },
-            'react-dom': { singleton: true },
-          },
-        }),
-      ]);
-
       return config;
     },
   },

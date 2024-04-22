@@ -6,4 +6,7 @@ module.exports = {
     tsconfigRootDir: __dirname,
     project: ['../tsconfig.json'],
   },
+  rules: {
+    '@typescript-eslint/no-parameter-properties': 'off',
+  },
 };

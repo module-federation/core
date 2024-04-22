@@ -1,4 +1,4 @@
-import { SetStateAction, ReactNode } from 'react';
+import { SetStateAction, ReactNode, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import {
   Checkbox,
@@ -10,7 +10,6 @@ import {
   Select,
   Switch,
   FormInstance,
-  Input,
 } from '@arco-design/web-react';
 import {
   IconDelete,
@@ -24,6 +23,7 @@ import {
   isObject,
   separateType,
   FormItemStatus,
+  RootComponentProps,
 } from '../../utils';
 import styles from './index.module.scss';
 
@@ -44,7 +44,7 @@ interface FormProps {
   enableHMR: string;
   onHMRChange: (on: boolean) => void;
 }
-const FormComponent = (props: FormProps) => {
+const FormComponent = (props: FormProps & RootComponentProps) => {
   const {
     form,
     condition,
@@ -53,6 +53,9 @@ const FormComponent = (props: FormProps) => {
     validateForm,
     enableHMR,
     onHMRChange,
+    versionList,
+    setVersionList,
+    getVersion,
   } = props;
   const { moduleInfo } = window.__FEDERATION__;
   let { producer } = separateType(moduleInfo);
@@ -77,6 +80,17 @@ const FormComponent = (props: FormProps) => {
       };
     }
   });
+
+  useEffect(() => {
+    producer.forEach((target) => {
+      const version = getVersion?.(target);
+      const list = [...(versionList || [])];
+      if (version) {
+        list.push(version);
+      }
+      setVersionList?.(list);
+    });
+  }, []);
 
   const getCheckStatus = (index: number) => {
     const formData = form.getFieldsValue();
@@ -147,15 +161,29 @@ const FormComponent = (props: FormProps) => {
     (arg0: { key: string; value: string; checked: boolean }): void;
   }) => {
     add(defaultDataItem);
+    setVersionList?.([...(versionList || []), []]);
     validateForm();
   };
 
   const onRemove = (remove: (index: number) => void, index: number) => {
+    if (Array.isArray(versionList)) {
+      versionList.splice(index, 1);
+      setVersionList?.(versionList);
+    }
     remove(index);
   };
 
   const hmrChange = (on: boolean) => {
     onHMRChange(on);
+  };
+
+  const onKeyChange = (key: string, index: number) => {
+    const version = getVersion?.(key);
+    if (version) {
+      const list = [...(versionList || [])];
+      list.splice(index, 1, version);
+      setVersionList?.(list);
+    }
   };
 
   return (
@@ -226,6 +254,7 @@ const FormComponent = (props: FormProps) => {
                       <Select
                         data-set-e2e={'e2eProxyKey'}
                         placeholder={'Module Name'}
+                        onChange={(key) => onKeyChange(key, index)}
                         allowClear
                         showSearch
                       >
@@ -248,11 +277,24 @@ const FormComponent = (props: FormProps) => {
                         },
                       ]}
                     >
-                      <Input
+                      {/* <Input
                         data-set-e2e={'e2eProxyValue'}
                         placeholder={'Custom Manifest URL'}
                         allowClear
-                      />
+                      /> */}
+                      <Select
+                        data-set-e2e={'e2eProxyValue'}
+                        placeholder={'Custom Manifest URL'}
+                        allowClear
+                        showSearch
+                        allowCreate
+                      >
+                        {(versionList || [])[index]?.map((version) => (
+                          <Option key={version} value={version}>
+                            {version}
+                          </Option>
+                        ))}
+                      </Select>
                     </FormItem>
                   </div>
 

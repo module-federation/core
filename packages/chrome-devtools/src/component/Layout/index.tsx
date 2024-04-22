@@ -21,6 +21,7 @@ import {
   removeStorage,
   setStorage,
   FormItemStatus,
+  RootComponentProps,
 } from '../../utils';
 import {
   defaultModuleData,
@@ -39,8 +40,16 @@ interface FormItemType {
   checked: boolean;
 }
 
-const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
-  const { moduleInfo } = props;
+const Layout = (
+  props: { moduleInfo: GlobalModuleInfo } & RootComponentProps,
+) => {
+  const {
+    moduleInfo,
+    handleSnapshot,
+    versionList,
+    setVersionList,
+    getVersion,
+  } = props;
   const { producer } = separateType(moduleInfo);
   const [condition, setCondition] = useState(statusInfo.processing);
   const [formStatus, setFormStatus] = useState<Array<FormItemStatus>>([]);
@@ -81,8 +90,9 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
           setSnapshot(window.__FEDERATION__.originModuleInfo);
           return;
         }
-        const { moduleInfo, status, overrides } =
-          await getModuleInfo(filterFormData);
+        const { moduleInfo, status, overrides } = handleSnapshot
+          ? await handleSnapshot(filterFormData)
+          : await getModuleInfo(filterFormData);
         const snapshotJson = JSON.stringify(moduleInfo);
         await setStorage(MODULE_DEVTOOL_IDENTIFIER, snapshotJson);
         await setStorage(BROWSER_ENV_KEY);
@@ -191,6 +201,9 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
           validateForm={() => validateForm(form)}
           enableHMR={enableHMR}
           onHMRChange={onHMRChange}
+          versionList={versionList}
+          setVersionList={setVersionList}
+          getVersion={getVersion}
         />
       </Form>
 

@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Layout, Empty } from '@arco-design/web-react';
 
+import './init';
 import ProxyLayout from './component/Layout';
-import { getGlobalModuleInfo } from './utils';
+import { getGlobalModuleInfo, RootComponentProps } from './utils';
 
 import '@arco-design/web-react/dist/css/arco.css';
 import styles from './App.module.scss';
 
 const { Content } = Layout;
 
-const App = () => {
-  const [module, setModule] = useState({});
+const App = (props: RootComponentProps) => {
+  const { versionList, setVersionList, getVersion, handleSnapshot } = props;
+  const [module, setModule] = useState(window.__FEDERATION__?.moduleInfo || {});
 
   useEffect(() => {
     getGlobalModuleInfo(setModule);
@@ -22,7 +24,13 @@ const App = () => {
         <Content className={styles.content}>
           {Object.keys(module).length > 0 ||
           process.env.NODE_ENV === 'development' ? (
-            <ProxyLayout moduleInfo={module} />
+            <ProxyLayout
+              moduleInfo={module}
+              versionList={versionList}
+              setVersionList={setVersionList}
+              getVersion={getVersion}
+              handleSnapshot={handleSnapshot}
+            />
           ) : (
             <Empty description={'No ModuleInfo Detected'} />
           )}
