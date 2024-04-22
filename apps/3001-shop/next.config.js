@@ -34,7 +34,7 @@ const nextConfig = {
         },
         shared: {
           'lodash/': {},
-          'antd/': {},
+          antd: {},
         },
         extraOptions: {
           exposePages: true,

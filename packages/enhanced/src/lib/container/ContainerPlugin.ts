@@ -91,7 +91,10 @@ class ContainerPlugin {
             if (typeof cacheGroup.chunks === 'function') {
               const prevChunks = cacheGroup.chunks;
               cacheGroup.chunks = (chunk) => {
-                if (chunk.name && chunk.name === name) {
+                if (
+                  chunk.name &&
+                  (chunk.name === name || chunk.name === name + '_partial')
+                ) {
                   return false;
                 }
                 return prevChunks(chunk);
@@ -101,7 +104,10 @@ class ContainerPlugin {
 
             if (cacheGroup.chunks === 'all') {
               cacheGroup.chunks = (chunk) => {
-                if (chunk.name && chunk.name === name) {
+                if (
+                  chunk.name &&
+                  (chunk.name === name || chunk.name === name + '_partial')
+                ) {
                   return false;
                 }
                 return true;
@@ -110,7 +116,10 @@ class ContainerPlugin {
             }
             if (cacheGroup.chunks === 'initial') {
               cacheGroup.chunks = (chunk) => {
-                if (chunk.name && chunk.name === name) {
+                if (
+                  chunk.name &&
+                  (chunk.name === name || chunk.name === name + '_partial')
+                ) {
                   return false;
                 }
                 return chunk.isOnlyInitial();
