@@ -68,13 +68,15 @@ class NodeFederationPlugin {
   }
 
   private preparePluginOptions(): ModuleFederationPluginOptions {
+    this._options.runtimePlugins = [
+      ...(this.useRuntimePlugin ? [require.resolve('../runtimePlugin')] : []),
+      ...(this._options.runtimePlugins || []),
+    ];
+
     return {
       ...this._options,
       remotes: this._options.remotes || {},
-      runtimePlugins: [
-        ...(this.useRuntimePlugin ? [require.resolve('../runtimePlugin')] : []),
-        ...(this._options.runtimePlugins || []),
-      ],
+      runtimePlugins: this._options.runtimePlugins,
       // enable dts in browser by default
       dts: this._options.dts ?? false,
     };

@@ -8,7 +8,7 @@ const { UniversalFederationPlugin } = require('@module-federation/node');
 module.exports = composePlugins(withNx(), (config) => {
   // config.output.publicPath = '/remotetest'; // this breaks because of import.meta
   // config.output.publicPath = 'auto';
-  config.target = 'node';
+  config.target = 'async-node';
   config.devtool = false;
   config.cache = false;
   if (config.mode === 'development') {

@@ -46,6 +46,14 @@ class UniversalFederationPlugin {
     this._options = options || ({} as NodeFederationOptions);
     this.context = context || ({} as NodeFederationContext);
     this.name = 'ModuleFederationPlugin';
+
+    if (this._options.useRuntimePlugin) {
+      this._options.runtimePlugins = this._options.runtimePlugins
+        ? this._options.runtimePlugins.concat([
+            require.resolve('../runtimePlugin.js'),
+          ])
+        : [require.resolve('../runtimePlugin.js')];
+    }
   }
 
   /**
@@ -53,7 +61,7 @@ class UniversalFederationPlugin {
    * @param {Compiler} compiler - The webpack compiler
    */
   apply(compiler: Compiler) {
-    const { isServer, debug, ...options } = this._options;
+    const { isServer, debug, useRuntimePlugin, ...options } = this._options;
     const { webpack } = compiler;
     if (!process.env['FEDERATION_WEBPACK_PATH']) {
       process.env['FEDERATION_WEBPACK_PATH'] = getWebpackPath(compiler);
@@ -64,20 +72,14 @@ class UniversalFederationPlugin {
       compiler.options.target === 'node' ||
       compiler.options.target === 'async-node'
     ) {
-      if (this._options.useRuntimePlugin) {
+      if (useRuntimePlugin) {
         new ModuleFederationPlugin({
           ...options,
-          runtimePlugins: [
-            require.resolve('../runtimePlugin'),
-            ...(options.runtimePlugins || []),
-          ],
         }).apply(compiler);
       } else {
         new NodeFederationPlugin(options, this.context).apply(compiler);
         new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
       }
-    } else {
-      new ModuleFederationPlugin(options).apply(compiler);
     }
   }
 }

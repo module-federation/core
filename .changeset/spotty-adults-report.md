@@ -1,5 +1,5 @@
 ---
-'@module-federation/node': patch
+'@module-federation/node': minor
 ---
 
 Node Runtime Plugin implementation and options
