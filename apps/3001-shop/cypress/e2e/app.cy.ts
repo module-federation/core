@@ -5,6 +5,20 @@ describe('3001-shop/', () => {
     cy.visit('/');
   });
 
+  describe('Warmup Next', () => {
+    it('warms pages concurrently', () => {
+      const urls = [
+        '/shop',
+        '/checkout',
+        '/checkout/test-title',
+        '/checkout/test-check-button',
+      ];
+      urls.forEach((url) => {
+        cy.request(url); // This makes a GET request, not a full page visit
+      });
+    });
+  });
+
   describe('Welcome message', () => {
     it('should display welcome message', () => {
       getH1().contains('This is SPA combined');
@@ -33,8 +47,7 @@ describe('3001-shop/', () => {
   });
 
   describe('Routing checks', () => {
-    xit('check that clicking back and forwards in client-side routing still renders the content correctly', () => {
-      cy.visit('/');
+    it('check that clicking back and forwards in client-side routing still renders the content correctly', () => {
       cy.visit('/shop');
       cy.url().should('include', '/shop');
       cy.wait(3000);

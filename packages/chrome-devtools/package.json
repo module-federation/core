@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.0.22",
+  "version": "0.0.24",
   "private": true,
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
@@ -41,7 +41,7 @@
     "dagre": "^0.8.5",
     "react": "~18.2.0",
     "react-dom": "~18.2.0",
-    "reactflow": "11.10.4"
+    "reactflow": "11.11.2"
   },
   "devDependencies": {
     "@modern-js-app/eslint-config": "2.46.1",
@@ -54,7 +54,7 @@
     "@types/jest": "~29.2.4",
     "@types/node": "~16.11.7",
     "@types/react": "~18.2.0",
-    "@types/react-dom": "~18.2.0",
+    "@types/react-dom": "~18.2.25",
     "lint-staged": "~13.1.0",
     "prettier": "~2.8.1",
     "rimraf": "~3.0.2",

@@ -1,5 +1,17 @@
 # [3.1.0](https://github.com/module-federation/universe/compare/utils-3.0.2...utils-3.1.0) (2023-10-26)
 
+## 3.0.13
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.8
+
+## 3.0.12
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.7
+
 ## 3.0.11
 
 ### Patch Changes
