@@ -61,6 +61,7 @@ const config = {
       isServer: true, // or false
       remotes: {},
       filename: 'remoteEntry.js',
+      useRuntimePlugin: true, // uses the module-federation/enhanced runtime plugins
       exposes: {
         './SharedComponent': './remoteServer/SharedComponent',
       },

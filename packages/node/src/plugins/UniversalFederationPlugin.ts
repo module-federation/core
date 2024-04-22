@@ -18,6 +18,7 @@ interface NodeFederationOptions extends ModuleFederationPluginOptions {
   isServer: boolean;
   promiseBaseURI?: string;
   debug?: boolean;
+  useRuntimePlugin?: boolean;
 }
 
 /**
@@ -63,8 +64,18 @@ class UniversalFederationPlugin {
       compiler.options.target === 'node' ||
       compiler.options.target === 'async-node'
     ) {
-      new NodeFederationPlugin(options, this.context).apply(compiler);
-      new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
+      if (this._options.useRuntimePlugin) {
+        new ModuleFederationPlugin({
+          ...options,
+          runtimePlugins: [
+            require.resolve('../runtimePlugin'),
+            ...(options.runtimePlugins || []),
+          ],
+        }).apply(compiler);
+      } else {
+        new NodeFederationPlugin(options, this.context).apply(compiler);
+        new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
+      }
     } else {
       new ModuleFederationPlugin(options).apply(compiler);
     }
