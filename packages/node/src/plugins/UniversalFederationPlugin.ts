@@ -63,14 +63,6 @@ class UniversalFederationPlugin {
       compiler.options.output.enabledLibraryTypes.push('commonjs-module');
     }
 
-    // if (this._options.useRuntimePlugin) {
-    //   this._options.runtimePlugins = this._options.runtimePlugins
-    //     ? this._options.runtimePlugins.concat([
-    //         require.resolve('../runtimePlugin.js'),
-    //       ])
-    //     : [require.resolve('../runtimePlugin.js')];
-    // }
-
     const chunkFileName = compiler.options?.output?.chunkFilename;
     const uniqueName =
       compiler?.options?.output?.uniqueName || this._options.name;
