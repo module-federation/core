@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@arco-design/web-react": "^2.59.1",
-    "@modern-js/runtime": "2.46.1",
+    "@modern-js/runtime": "2.49.0",
     "@module-federation/sdk": "workspace:*",
     "@types/dagre": "^0.7.52",
     "ahooks": "^3.7.10",
@@ -44,10 +44,10 @@
     "reactflow": "11.10.4"
   },
   "devDependencies": {
-    "@modern-js-app/eslint-config": "2.46.1",
-    "@modern-js/app-tools": "2.46.1",
-    "@modern-js/eslint-config": "2.46.1",
-    "@modern-js/tsconfig": "2.46.1",
+    "@modern-js-app/eslint-config": "2.49.0",
+    "@modern-js/app-tools": "2.49.0",
+    "@modern-js/eslint-config": "2.49.0",
+    "@modern-js/tsconfig": "2.49.0",
     "@module-federation/runtime": "workspace:*",
     "@playwright/test": "1.36.1",
     "@types/chrome": "^0.0.260",

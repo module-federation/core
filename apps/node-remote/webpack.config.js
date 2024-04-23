@@ -26,5 +26,6 @@ module.exports = composePlugins(withNx(), (config) => {
       },
     }),
   );
+  debugger;
   return config;
 });

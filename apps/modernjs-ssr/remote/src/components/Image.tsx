@@ -1,6 +1,5 @@
 import React from 'react';
 import Button from 'antd/lib/button';
-import mfSvg from '../assets/module-federation.svg';
 import stuff from './stuff.module.css';
 
 export default (): JSX.Element => (
@@ -21,7 +20,11 @@ export default (): JSX.Element => (
     >
       Click me to test i'm interactive!
     </button>
-    <img src={mfSvg} style={{ width: '100px' }} alt="serge" />
+    <img
+      src="https://module-federation.io/module-federation-logo.svg"
+      style={{ width: '100px' }}
+      alt="serge"
+    />
     <Button className={stuff['test-remote2']}>Button from remote</Button>
   </div>
 );

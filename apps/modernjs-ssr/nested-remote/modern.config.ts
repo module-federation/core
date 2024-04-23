@@ -3,10 +3,14 @@ import {
   ModuleFederationPlugin,
   AsyncBoundaryPlugin,
 } from '@module-federation/enhanced';
+import { StreamingTargetPlugin } from '@module-federation/node';
+
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
   dev: {
     port: 3007,
+    hmr: false,
+    liveReload: false,
   },
   runtime: {
     router: true,
@@ -14,44 +18,61 @@ export default defineConfig({
   security: {
     checkSyntax: true,
   },
-  source: {
-    // downgrade @module-federation related pkgs
-    include: [
-      // should set module-federation in outer repo
-      /universe\/packages/,
-    ],
+  output: {
+    disableTsChecker: true,
+    cssModuleLocalIdentName: 'nested-remote-[local]-[hash:base64:6]',
+  },
+  server: {
+    ssr: {
+      mode: 'stream',
+    },
+    port: 3007,
   },
   // source: {
   //   enableAsyncEntry: true,
   // },
   plugins: [appTools()],
   tools: {
-    babel(config) {
-      config.sourceType = 'unambiguous';
-    },
-    webpack: (config, { webpack, appendPlugins }) => {
+    webpack: (config, { isServer, appendPlugins }) => {
       if (config?.output) {
         config.output.publicPath = 'http://localhost:3007/';
       }
-
+      config.optimization!.runtimeChunk = false;
+      if (!isServer) {
+        // otherwise the federation entry will be loaded as async chunk
+        config.optimization!.splitChunks.chunks = 'async';
+      }
+      const mfConfig = {
+        name: 'nested_remote',
+        filename: 'remoteEntry.js',
+        exposes: {
+          './Content': './src/components/Content.tsx',
+        },
+        remotes: {
+          remote: 'remote@http://localhost:3006/mf-manifest.json',
+        },
+        shared: {
+          react: { singleton: true },
+          'react-dom': { singleton: true },
+        },
+        dts: false,
+        dev: false,
+      };
+      if (isServer) {
+        mfConfig.filename = 'bundles/remoteEntry.js';
+        mfConfig.remotes = {
+          remote: 'remote@http://localhost:3006/bundles/remoteEntry.js',
+        };
+      }
+      if (isServer) {
+        appendPlugins([new StreamingTargetPlugin(mfConfig)]);
+      }
       appendPlugins([
         new AsyncBoundaryPlugin({
           excludeChunk: (chunk) => chunk.name === 'nested_remote',
           eager: (module) => /\.federation/.test(module?.request || ''),
         }),
-        new ModuleFederationPlugin({
-          name: 'nested_remote',
-          exposes: {
-            './Content': './src/components/Content.tsx',
-          },
-          remotes: {
-            remote: 'remote@http://localhost:3006/mf-manifest.json',
-          },
-          shared: {
-            react: { singleton: true },
-            'react-dom': { singleton: true },
-          },
-        }),
+        new ModuleFederationPlugin(mfConfig),
       ]);
     },
   },
