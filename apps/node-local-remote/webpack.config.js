@@ -6,7 +6,7 @@ const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 // Nx plugins for webpack.
 module.exports = composePlugins(withNx(), (config) => {
   config.output.publicPath = 'auto';
-  config.target = 'node';
+  config.target = 'async-node';
   config.devtool = false;
   config.cache = false;
 
