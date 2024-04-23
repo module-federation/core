@@ -10,6 +10,7 @@ describe('3000-home/', () => {
         '/checkout',
         '/checkout/test-title',
         '/checkout/test-check-button',
+        '/api/test',
       ];
       urls.forEach((url) => {
         cy.request(url); // This makes a GET request, not a full page visit
