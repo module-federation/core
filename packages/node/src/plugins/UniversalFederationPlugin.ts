@@ -46,6 +46,13 @@ class UniversalFederationPlugin {
     this._options = options || ({} as NodeFederationOptions);
     this.context = context || ({} as NodeFederationContext);
     this.name = 'ModuleFederationPlugin';
+    if (this._options.useRuntimePlugin && this._options.isServer) {
+      this._options.runtimePlugins = this._options.runtimePlugins
+        ? this._options.runtimePlugins.concat([
+            require.resolve('../runtimePlugin.js'),
+          ])
+        : [require.resolve('../runtimePlugin.js')];
+    }
   }
 
   private updateCompilerOptions(compiler: Compiler): void {
@@ -56,13 +63,13 @@ class UniversalFederationPlugin {
       compiler.options.output.enabledLibraryTypes.push('commonjs-module');
     }
 
-    if (this._options.useRuntimePlugin) {
-      this._options.runtimePlugins = this._options.runtimePlugins
-        ? this._options.runtimePlugins.concat([
-            require.resolve('../runtimePlugin.js'),
-          ])
-        : [require.resolve('../runtimePlugin.js')];
-    }
+    // if (this._options.useRuntimePlugin) {
+    //   this._options.runtimePlugins = this._options.runtimePlugins
+    //     ? this._options.runtimePlugins.concat([
+    //         require.resolve('../runtimePlugin.js'),
+    //       ])
+    //     : [require.resolve('../runtimePlugin.js')];
+    // }
 
     const chunkFileName = compiler.options?.output?.chunkFilename;
     const uniqueName =

@@ -79,7 +79,9 @@ jobs:
       - name: E2E Node Federation
         run: |
           npx nx run-many --target=serve --configuration=development -p node-local-remote,node-remote &
-          sleep 20 &&
+          sleep 10 &&
           npx wait-on tcp:3002 &&
           npx wait-on tcp:3003 &&
-          npx nx run-many --target=serve --configuration=development -p node-host
+          npx nx run-many --target=serve --configuration=development -p node-host &
+          sleep 5 &&
+          npx nx run node-host-e2e:test:e2e
