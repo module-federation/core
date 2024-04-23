@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "2.1.8",
+  "version": "2.2.0",
   "type": "commonjs",
   "main": "./dist/src/index.js",
   "exports": {
@@ -10,6 +10,7 @@
       "require": "./dist/src/index.js"
     },
     "./package.json": "./package.json",
+    "./runtimePlugin": "./dist/src/runtimePlugin.js",
     "./utils": {
       "import": "./dist/src/utils/index.js",
       "require": "./dist/src/utils/index.js"
@@ -47,7 +48,6 @@
     "@module-federation/runtime": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^12||^13",
     "react": "^16||^17||^18",
     "react-dom": "^16||^17||^18",
     "webpack": "^5.40.0"

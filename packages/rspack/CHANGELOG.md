@@ -1,5 +1,16 @@
 # @module-federation/rspack
 
+## 0.1.9
+
+### Patch Changes
+
+- fcbae83: patch chunk split of partial container entry
+  - @module-federation/runtime-tools@0.1.9
+  - @module-federation/sdk@0.1.9
+  - @module-federation/managers@0.1.9
+  - @module-federation/manifest@0.1.9
+  - @module-federation/dts-plugin@0.1.9
+
 ## 0.1.8
 
 ### Patch Changes

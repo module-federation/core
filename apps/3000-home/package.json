@@ -35,6 +35,7 @@
     "@module-federation/utilities": "workspace:*"
   },
   "scripts": {
-    "start": "next start"
+    "start": "next start",
+    "build": "pnpm exec next telemetry disable && NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
   }
 }

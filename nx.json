@@ -10,6 +10,9 @@
       "runner": "nx-cloud",
       "options": {
         "cacheableOperations": [
+          "3000-home:build:production",
+          "3001-shop:build:production",
+          "3002-checkout:build:production",
           "build",
           "lint",
           "test",
