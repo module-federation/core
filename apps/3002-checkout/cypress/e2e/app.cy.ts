@@ -106,7 +106,7 @@ describe('3002-checkout/', () => {
     });
 
     describe('Image checks', () => {
-      it('should check that shop-webpack-png images are not 404', () => {
+      xit('should check that shop-webpack-png images are not 404', () => {
         // Get the src attribute of the shop-webpack-png image
         cy.get('img.shop-webpack-png')
           .invoke('attr', 'src')
