@@ -20,8 +20,8 @@
     "activeMatch": "/blog/"
   },
   {
-    "text": "Community",
-    "activeMatch": "/community/",
+    "text": "Ecosystem",
+    "activeMatch": "/ecosystem/",
     "items": [
       {
         "text": "Module Federation Examples",

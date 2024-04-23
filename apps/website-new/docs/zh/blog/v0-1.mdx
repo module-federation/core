@@ -4,7 +4,7 @@
 
 我们最近发布了 **[Module Federation 2.0](https://github.com/module-federation/universe)** **v0.1** 版本。
 
-`Module Federation 2.0` 不同于 `Webpack5` 内置的 `Module Federation` 它提供了除 `Module Federation` 有的：模块导出、模块加载、依赖共享，还提供了额外的动态类型提示、`Manifest`、`Federation Runtime`、`Runtime Plugin`，这些功能能让 `Module Federation` 更适合作为大型 `Web` 应用的微前端架构。
+`Module Federation 2.0` 不同于 `Webpack5` 内置的 `Module Federation` 它提供了除 `Module Federation` 有的：模块导出、模块加载、依赖共享，还提供了额外的动态类型提示、`Manifest`、`Federation Runtime`、`Runtime Plugin System`，这些功能能让 `Module Federation` 更适合作为大型 `Web` 应用的微前端架构。
 
 
 ### ✨ 特性
@@ -19,12 +19,12 @@
 
 - **Federation Runtime**：`Federation Runtime` 是一种独立的软件开发工具包（SDK），它解决了模块联合（Module Federation）在不同构建工具中的兼容性问题。在早期，`Module Federation` 的实现与 `Webpack 5` 紧密耦合，这使得其他构建工具难以支持，并且可维护性差。通过将 `Federation Runtime` 作为独立组件，新版的 `Webpack` 和 `Rspack` 以及其他构建工具都能够更容易地实现和维护 `Module Federation` 功能，提高了模块加载和依赖共享的灵活性和效率。
 
-- **Rspack**：Rspack 中的 `Module Federation` 基于 `Federation Runtime`，因此能够享受 `Module Federation Enhanced` 所有额外的能力，并且由于 `Module Federation` 分治的架构思想，你可以将你的大型项目通过 `Module Federation` 渐进式迁移至 `Rspack`。
+- **Rspack**：Rspack 中的 `Module Federation` 基于 `Federation Runtime`，因此能够享受 `Module Federation 2.0` 所有额外的能力，并且由于 `Module Federation` 分治的架构思想，你可以将你的大型项目通过 `Module Federation` 渐进式迁移至 `Rspack`。
 
 
 ### 💡 下一步
 
-目前 `Module Federation Enhanced` 仍在快速迭代中，并计划引入更多强大的新特性。
+目前 `Module Federation 2.0` 仍在快速迭代中，并计划引入更多强大的新特性。
 
 比如，我们正在开发 **Module Federation Chrome Devtool**，这是一个易用 `Module Federation` 调试和代理工具，它能够将线上项目的 `Module Federation` 模块直接代理到本地，并且能够实时热更新，它提供可视化的依赖图能够看到 `Module Federation` 依赖关系以及 `Shared` 设置情况。
 

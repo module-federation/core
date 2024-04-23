@@ -20,13 +20,9 @@
     "activeMatch": "/blog/"
   },
   {
-    "text": "社区",
+    "text": "生态",
     "activeMatch": "/community/",
     "items": [
-      {
-        "text": "Showcase",
-        "link": "/blog/showcase/"
-      },
       {
         "text": "Module Federation Examples",
         "link": "https://github.com/module-federation/module-federation-examples"

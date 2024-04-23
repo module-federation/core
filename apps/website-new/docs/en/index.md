@@ -2,7 +2,7 @@
 pageType: home
 
 hero:
-  name: Module Federation
+  name: Module Federation 2.0
   text: Microfrontend Architecture
   tagline: Decentralize Your Web Applications
   actions:
