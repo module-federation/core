@@ -24,6 +24,7 @@ module.exports = composePlugins(withNx(), (config) => {
       name: 'node_remote',
       library: { type: 'commonjs-module' },
       filename: 'remoteEntry.js',
+      useRuntimePlugin: false,
       exposes: {
         './test': './src/expose.js',
       },

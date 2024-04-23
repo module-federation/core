@@ -1,7 +1,7 @@
 //@ts-nocheck
 export default function () {
   return {
-    name: 'node-internal-plugin',
+    name: 'node-federation-plugin',
     beforeInit: function (args) {
       (() => {
         function resolveFile(rootOutputDir, chunkId) {
@@ -263,8 +263,8 @@ export default function () {
                 res,
               );
               // use normal global assignment
-              if (!usesInternalRef && !globalThis[chunkId]) {
-                globalThis[chunkId] = enhancedRemote;
+              if (!usesInternalRef && !globalThisVal[chunkId]) {
+                globalThisVal[chunkId] = enhancedRemote;
               }
               console.log('adding remote', chunkId);
               callback(enhancedRemote);
