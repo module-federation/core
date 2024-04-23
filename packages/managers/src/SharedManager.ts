@@ -19,14 +19,21 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
   get sharedPluginOptions(): SharePluginOptions {
     const normalizedShared = this.normalizedOptions;
     const shared = Object.keys(normalizedShared).reduce((sum, cur) => {
-      const { singleton, requiredVersion, version, eager, shareScope } =
-        normalizedShared[cur];
+      const {
+        singleton,
+        requiredVersion,
+        version,
+        eager,
+        shareScope,
+        import: sharedImport,
+      } = normalizedShared[cur];
       sum[cur] = {
         singleton,
         requiredVersion,
         version,
         eager,
         shareScope,
+        import: sharedImport,
       };
       return sum;
     }, {});
