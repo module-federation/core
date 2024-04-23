@@ -1,5 +1,18 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.1.9
+
+### Patch Changes
+
+- fcbae83: patch chunk split of "\_partial" container chunks
+- Updated dependencies [fcbae83]
+  - @module-federation/rspack@0.1.9
+  - @module-federation/runtime-tools@0.1.9
+  - @module-federation/sdk@0.1.9
+  - @module-federation/managers@0.1.9
+  - @module-federation/manifest@0.1.9
+  - @module-federation/dts-plugin@0.1.9
+
 ## 0.1.8
 
 ### Patch Changes

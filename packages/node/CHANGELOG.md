@@ -1,5 +1,20 @@
 # [2.1.0-canary.6](https://github.com/module-federation/universe/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.2.0
+
+### Minor Changes
+
+- f3b764a: Node Runtime Plugin implementation and options
+
+### Patch Changes
+
+- Updated dependencies [fcbae83]
+- Updated dependencies [5ef0150]
+  - @module-federation/enhanced@0.1.9
+  - @module-federation/runtime@0.1.9
+  - @module-federation/sdk@0.1.9
+  - @module-federation/utilities@3.0.14
+
 ## 2.1.8
 
 ### Patch Changes
