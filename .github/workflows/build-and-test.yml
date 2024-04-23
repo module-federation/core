@@ -77,4 +77,4 @@ jobs:
           lsof -ti tcp:3000,3001,3002 | xargs kill
 
       - name: E2E Node Federation
-        run: npx nx run-many --target=serve --projects=node-local-remote,node-remote --parallel=3 & echo "done" && sleep 1 && npx wait-on tcp:3002 tcp:3003 && npx nx run-many --target=serve --projects=node-host & npx wait-on tcp:3333 && npx nx run node-host-e2e:test:e2e
+        run: npx nx run-many --target=serve --projects=node-local-remote,node-remote --parallel=3 & echo "done" && sleep 1 && npx wait-on tcp:3002 && npx wait-on tcp:3003 && npx nx run-many --target=serve --projects=node-host & npx wait-on tcp:3333 && npx nx run node-host-e2e:test:e2e

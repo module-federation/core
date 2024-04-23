@@ -98,7 +98,6 @@ class UniversalFederationPlugin {
     ) {
       if (useRuntimePlugin) {
         this.updateCompilerOptions(compiler);
-
         new ModuleFederationPlugin({
           ...options,
         }).apply(compiler);
