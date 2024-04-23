@@ -1,5 +1,12 @@
 # @module-federation/runtime
 
+## 0.1.9
+
+### Patch Changes
+
+- 5ef0150: fix: preserve generic in loadRemote/loadShare/loadShareSync
+  - @module-federation/sdk@0.1.9
+
 ## 0.1.8
 
 ### Patch Changes
