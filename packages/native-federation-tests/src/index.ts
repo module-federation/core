@@ -55,7 +55,7 @@ export const NativeFederationTestsRemote = createUnplugin(
               watchChange: (this as UnpluginOptions).writeBundle,
             };
       },
-      webpack: (compiler) => {
+      webpack(compiler) {
         compiler.options.devServer = mergeDeepRight(
           compiler.options.devServer || {},
           {
@@ -65,7 +65,7 @@ export const NativeFederationTestsRemote = createUnplugin(
           },
         );
       },
-      rspack: (compiler) => {
+      rspack(compiler) {
         compiler.options.devServer = mergeDeepRight(
           compiler.options.devServer || {},
           {

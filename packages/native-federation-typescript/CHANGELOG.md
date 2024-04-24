@@ -1,5 +1,12 @@
 # [1.0.0-canary.1](https://github.com/module-federation/universe/compare/native-federation-typescript-0.2.6...native-federation-typescript-1.0.0-canary.1) (2023-11-06)
 
+## 0.4.2
+
+### Patch Changes
+
+- 671f64b: download retrieves count per file
+- bc5c2e0: chore: using piscina, which wraps worker threads, can help us achieving the same result with a more concise code.
+
 ## 0.4.1
 
 ### Patch Changes
