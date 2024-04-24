@@ -124,7 +124,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
           if (typeof cacheGroup.chunks === 'function') {
             const prevChunks = cacheGroup.chunks;
             cacheGroup.chunks = (chunk) => {
-              if (chunk.name && chunk.name === name) {
+              if (
+                chunk.name &&
+                (chunk.name === name || chunk.name === name + '_partial')
+              ) {
                 return false;
               }
               return prevChunks(chunk);
@@ -133,12 +136,18 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
           }
 
           if (cacheGroup.chunks === 'all') {
-            cacheGroup.chunks = new RegExp(`^(?!.*${name}).*$`, 'g');
+            cacheGroup.chunks = new RegExp(
+              `^(?!.*(${name}|${name}_partial)).*$`,
+              'g',
+            );
             break;
           }
           if (cacheGroup.chunks === 'initial') {
             cacheGroup.chunks = (chunk) => {
-              if (chunk.name && chunk.name === name) {
+              if (
+                chunk.name &&
+                (chunk.name === name || chunk.name === name + '_partial')
+              ) {
                 return false;
               }
               return chunk.isOnlyInitial();

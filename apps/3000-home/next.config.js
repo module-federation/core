@@ -42,7 +42,7 @@ const nextConfig = {
         },
         shared: {
           'lodash/': {},
-          'antd/': {},
+          antd: {},
         },
         extraOptions: {
           debug: false,

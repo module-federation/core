@@ -1,5 +1,5 @@
-import { assert, describe, test, it, vi } from 'vitest';
-import { init } from '../src/index';
+import { assert, describe, test, it, vi, expectTypeOf } from 'vitest';
+import { init, loadRemote, loadShare, loadShareSync } from '../src/index';
 import { getInfoWithoutType } from '../src/global';
 
 describe('global', () => {
@@ -42,6 +42,34 @@ describe('global', () => {
     expect(res3).toMatchObject({
       key: 'npm:@federation/app4',
       value: 4,
+    });
+  });
+
+  describe('global types (generic)', () => {
+    it('loadRemote', async () => {
+      const typedLoadRemote: typeof loadRemote<string> = loadRemote;
+      expectTypeOf(typedLoadRemote).returns.toMatchTypeOf<
+        Promise<string | null>
+      >();
+      expectTypeOf(typedLoadRemote).returns.not.toMatchTypeOf<Promise<null>>();
+    });
+
+    it('loadShare', async () => {
+      const typedLoadShare: typeof loadShare<string> = loadShare;
+      expectTypeOf(typedLoadShare).returns.toMatchTypeOf<
+        Promise<false | (() => string | undefined)>
+      >();
+      expectTypeOf(typedLoadShare).returns.not.toMatchTypeOf<
+        Promise<false | (() => undefined)>
+      >();
+    });
+
+    it('loadShareSync', async () => {
+      const typedLoadShareSync: typeof loadShareSync<string> = loadShareSync;
+      expectTypeOf(typedLoadShareSync).returns.toMatchTypeOf<
+        () => string | never
+      >();
+      expectTypeOf(typedLoadShareSync).returns.not.toMatchTypeOf<() => never>();
     });
   });
 });
