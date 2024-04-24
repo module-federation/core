@@ -520,11 +520,26 @@ export class FederationHost {
     moduleOptions: ModuleOptions;
     remoteMatchInfo: LoadRemoteMatch;
   }> {
-    const loadRemoteArgs = await this.hooks.lifecycle.beforeRequest.emit({
-      id,
-      options: this.options,
-      origin: this,
-    });
+    let loadRemoteArgs;
+
+    try {
+      loadRemoteArgs = await this.hooks.lifecycle.beforeRequest.emit({
+        id,
+        options: this.options,
+        origin: this,
+      });
+    } catch (error) {
+      loadRemoteArgs = await this.hooks.lifecycle.errorLoadRemote.emit({
+        id,
+        error,
+        from: 'runtime',
+        origin: this,
+      });
+
+      if (!loadRemoteArgs) {
+        throw error;
+      }
+    }
 
     const { id: idRes } = loadRemoteArgs;
 
