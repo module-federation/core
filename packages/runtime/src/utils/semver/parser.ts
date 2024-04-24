@@ -1,3 +1,5 @@
+// fork from https://github.com/originjs/vite-plugin-federation/blob/v1.1.12/packages/lib/src/utils/semver/index.ts
+
 import { isXVersion, parseRegex } from './utils';
 import {
   caret,

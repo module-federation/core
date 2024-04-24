@@ -1,3 +1,5 @@
+// fork from https://github.com/originjs/vite-plugin-federation/blob/v1.1.12/packages/lib/src/utils/semver/index.ts
+
 export interface CompareAtom {
   operator: string;
   version: string;

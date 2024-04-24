@@ -2,9 +2,9 @@
 pageType: home
 
 hero:
-  name: Module Federation 2.0
+  name: Module Federation
   text: 微前端架构
-  tagline: 分治你的 Web 应用程序
+  tagline: Module Federation 2.0 全新发布，
   actions:
     - theme: brand
       text: 介绍

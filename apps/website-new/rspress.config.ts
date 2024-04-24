@@ -23,13 +23,13 @@ const getNavbar = (lang: string) => {
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
-  title: 'Module federation 2.0',
-  description: 'Module federation 2.0',
+  title: 'Module federation',
+  description: 'Module federation',
   icon: '/svg.svg',
   lang: 'en',
   logo: {
-    light: '/module-federation-2.0.svg',
-    dark: '/module-federation-logo-white-2.0.svg',
+    light: '/module-federation.svg',
+    dark: '/module-federation-logo-white.svg',
   },
   markdown: {
     checkDeadLinks: true,
