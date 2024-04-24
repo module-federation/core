@@ -52,7 +52,7 @@
   "dependencies": {
     "@arco-design/web-react": "^2.59.1",
     "@modern-js/runtime": "2.46.1",
-    "@module-federation/sdk": "0.1.8",
+    "@module-federation/sdk": "workspace:*",
     "ahooks": "^3.7.10",
     "dagre": "^0.8.5",
     "react": "~18.2.0",
@@ -67,7 +67,7 @@
     "@modern-js/tsconfig": "2.46.1",
     "@modern-js/module-tools": "2.46.1",
     "@modern-js/builder-webpack-provider": "2.46.1",
-    "@module-federation/runtime": "0.1.8",
+    "@module-federation/runtime": "workspace:*",
     "@playwright/test": "1.36.1",
     "@types/chrome": "^0.0.260",
     "@types/jest": "~29.2.4",
