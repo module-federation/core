@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/modernjs",
   "private": true,
-  "version": "0.1.8",
+  "version": "0.1.13",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
@@ -28,7 +28,8 @@
     "@modern-js/runtime": "2.46.1",
     "react": "~18.2.0",
     "react-dom": "~18.2.0",
-    "@module-federation/enhanced": "workspace:*"
+    "@module-federation/enhanced": "workspace:*",
+    "@babel/runtime": "7.24.4"
   },
   "devDependencies": {
     "@modern-js/app-tools": "2.46.1",
@@ -39,7 +40,7 @@
     "@types/jest": "~29.5.0",
     "@types/node": "~16.11.7",
     "@types/react": "~18.2.0",
-    "@types/react-dom": "~18.2.0",
+    "@types/react-dom": "~18.2.25",
     "lint-staged": "~13.1.0",
     "prettier": "~2.8.1",
     "rimraf": "~3.0.2"

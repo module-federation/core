@@ -53,7 +53,7 @@ class FederationRuntimePlugin {
     );
 
     let runtimePluginTemplates = '';
-    const runtimePLuginNames: string[] = [];
+    const runtimePluginNames: string[] = [];
 
     if (Array.isArray(runtimePlugins)) {
       runtimePlugins.forEach((runtimePlugin, index) => {
@@ -65,21 +65,34 @@ class FederationRuntimePlugin {
         );
 
         runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
-        runtimePLuginNames.push(runtimePluginName);
+        runtimePluginNames.push(runtimePluginName);
       });
     }
 
     return Template.asString([
       `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
-      `${federationGlobal} = {...federation,...${federationGlobal}};`,
+      `var prevFederation = ${federationGlobal};`,
+      `${federationGlobal} = {}`,
+      `for(var key in federation){`,
+      Template.indent([`${federationGlobal}[key] = federation[key];`]),
+      '}',
+      `for(var key in prevFederation){`,
+      Template.indent([`${federationGlobal}[key] = prevFederation[key];`]),
+      '}',
       `if(!${federationGlobal}.instance){`,
       Template.indent([
-        runtimePLuginNames.length
+        runtimePluginNames.length
           ? Template.asString([
-              `${federationGlobal}.initOptions.plugins = ([`,
-              Template.indent(runtimePLuginNames.map((item) => `${item}(),`)),
-              '])',
+              `const pluginsToAdd = [`,
+              Template.indent(
+                runtimePluginNames.map(
+                  (item) => `${item} ? ${item}() : false,`,
+                ),
+              ),
+              `].filter(Boolean);`,
+              `${federationGlobal}.initOptions.plugins = ${federationGlobal}.initOptions.plugins ? `,
+              `${federationGlobal}.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;`,
             ])
           : '',
         `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,

@@ -1,5 +1,6 @@
 import type webpack from 'webpack';
 import { Stats } from '../stats';
+import { Manifest } from '../manifest';
 /**
  * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
  */
@@ -109,6 +110,7 @@ export type SharedItem = string;
 
 export interface AdditionalDataOptions {
   stats: Stats;
+  manifest?: Manifest;
   pluginOptions: ModuleFederationPluginOptions;
   compiler: webpack.Compiler;
   compilation: webpack.Compilation;
@@ -154,6 +156,7 @@ export interface DtsRemoteOptions {
 export interface PluginDtsOptions {
   generateTypes?: boolean | DtsRemoteOptions;
   consumeTypes?: boolean | DtsHostOptions;
+  tsConfigPath?: string;
   extraOptions?: Record<string, any>;
   implementation?: string;
 }

@@ -4,7 +4,7 @@ export default defineConfig({
   plugins: [moduleTools()],
   buildPreset: 'npm-component',
   buildConfig: {
-    input: ['src/App.tsx'],
+    input: ['src', '!src/index.tsx'],
     tsconfig: 'tsconfig.lib.json',
   },
 });

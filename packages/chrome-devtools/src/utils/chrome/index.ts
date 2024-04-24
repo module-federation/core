@@ -29,6 +29,10 @@ export function getCurrentTabId() {
 export function getInspectWindowTabId() {
   return new Promise((resolve, reject) => {
     if (chrome?.devtools?.inspectedWindow) {
+      // @ts-expect-error In dev mode, should resolve by hand
+      if (chrome.isDevMode) {
+        resolve(0);
+      }
       chrome.devtools.inspectedWindow.eval(
         'typeof window.__FEDERATION__ !== "undefined" || typeof window.__VMOK__ !== "undefined"',
         function (info, error) {
@@ -122,7 +126,7 @@ export const injectScript = async (
   ...args: any
 ) => {
   await getInspectWindowTabId();
-  chrome.scripting
+  return chrome.scripting
     .executeScript({
       target: {
         tabId: getCurrentTabId(),

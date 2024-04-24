@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime-tools",
-  "version": "0.1.3",
+  "version": "0.1.8",
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "main": "./dist/index.cjs",
   "module": "./dist/index.esm.js",
@@ -11,14 +11,17 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/index.cjs.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js"
     },
     "./runtime": {
+      "types": "./dist/runtime.cjs.d.ts",
       "import": "./dist/runtime.esm.js",
       "require": "./dist/runtime.cjs.js"
     },
     "./webpack-bundler-runtime": {
+      "types": "./dist/webpack-bundler-runtime.cjs.d.ts",
       "import": "./dist/webpack-bundler-runtime.esm.js",
       "require": "./dist/webpack-bundler-runtime.cjs.js"
     },

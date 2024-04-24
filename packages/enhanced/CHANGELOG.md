@@ -1,5 +1,77 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.1.8
+
+### Patch Changes
+
+- 56eb56a: add chunk matcher logic to federation runtime module
+- b120511: Improve Async Boundary Plugin on entry that use dependOn and improve chunk dep search
+  - @module-federation/rspack@0.1.8
+  - @module-federation/sdk@0.1.8
+  - @module-federation/runtime-tools@0.1.8
+  - @module-federation/managers@0.1.8
+  - @module-federation/manifest@0.1.8
+  - @module-federation/dts-plugin@0.1.8
+
+## 0.1.7
+
+### Patch Changes
+
+- 648353b: Check that runtime plugins are not undefined or tree shaken out before calling the factory functions
+  - @module-federation/runtime-tools@0.1.7
+  - @module-federation/rspack@0.1.7
+  - @module-federation/sdk@0.1.7
+  - @module-federation/managers@0.1.7
+  - @module-federation/manifest@0.1.7
+  - @module-federation/dts-plugin@0.1.7
+
+## 0.1.6
+
+### Patch Changes
+
+- 72c7b80: chore: fix release tag
+- Updated dependencies [72c7b80]
+  - @module-federation/dts-plugin@0.1.6
+  - @module-federation/managers@0.1.6
+  - @module-federation/manifest@0.1.6
+  - @module-federation/rspack@0.1.6
+  - @module-federation/runtime-tools@0.1.6
+  - @module-federation/sdk@0.1.6
+
+## 0.1.5
+
+### Patch Changes
+
+- 876a4ff: feat: support config shared import:false in runtime
+- e0acf83: chore: downgrade template code to es5
+- 1a9c6e7: feat: support config multiple versions shared
+- Updated dependencies [f9b8af7]
+- Updated dependencies [71559fb]
+- Updated dependencies [ca271ab]
+- Updated dependencies [1a9c6e7]
+  - @module-federation/dts-plugin@0.1.5
+  - @module-federation/manifest@0.1.5
+  - @module-federation/sdk@0.1.5
+  - @module-federation/runtime-tools@0.1.5
+  - @module-federation/rspack@0.1.5
+  - @module-federation/managers@0.1.5
+
+## 0.1.4
+
+### Patch Changes
+
+- 8f3a440: fix: detect whether the project is ts
+- 2f697b9: fix: fixed type declaration in pkg
+- 8f3a440: allow dts plugin to be disabled
+- Updated dependencies [8f3a440]
+- Updated dependencies [2f697b9]
+  - @module-federation/dts-plugin@0.1.4
+  - @module-federation/sdk@0.1.4
+  - @module-federation/runtime-tools@0.1.4
+  - @module-federation/manifest@0.1.4
+  - @module-federation/rspack@0.1.4
+  - @module-federation/managers@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
-  "name": "@nyqykk/tool",
-  "version": "0.0.4",
+  "name": "@module-federation/devtools",
+  "version": "0.0.25",
   "scripts": {
     "build:storybook": "storybook build",
     "storybook": "storybook dev -p 6006",
@@ -25,6 +25,11 @@
     "README.md"
   ],
   "exports": {
+    ".": {
+      "require": "./dist/lib/App.js",
+      "import": "./dist/es/App.js",
+      "types": "./dist/types/App.d.ts"
+    },
     "./App": {
       "require": "./dist/lib/App.js",
       "import": "./dist/es/App.js",

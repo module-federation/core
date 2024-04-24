@@ -1,5 +1,4 @@
 import { Handle, Position } from 'reactflow';
-import { Avatar } from '@arco-design/web-react';
 
 import styles from './index.module.scss';
 import 'reactflow/dist/style.css';

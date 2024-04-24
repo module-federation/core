@@ -20,6 +20,7 @@ import {
 import { defaultDataItem, proxyFormField } from '../../template/constant';
 import {
   validateCustom,
+  validateSemver,
   isObject,
   separateType,
   FormItemStatus,
@@ -82,8 +83,8 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
   });
 
   useEffect(() => {
-    producer.forEach((target) => {
-      const version = getVersion?.(target);
+    producer.forEach(async (target) => {
+      const version = await getVersion?.(target);
       const list = [...(versionList || [])];
       if (version) {
         list.push(version);
@@ -143,7 +144,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
       };
     }
 
-    if (validateCustom(value)) {
+    if (validateCustom(value) || validateSemver(value)) {
       statusSet[index].valueStatus = true;
       flushSync(() => setFormStatus(statusSet));
       return callback();
@@ -177,8 +178,8 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     onHMRChange(on);
   };
 
-  const onKeyChange = (key: string, index: number) => {
-    const version = getVersion?.(key);
+  const onKeyChange = async (key: string, index: number) => {
+    const version = await getVersion?.(key);
     if (version) {
       const list = [...(versionList || [])];
       list.splice(index, 1, version);
@@ -289,7 +290,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                         showSearch
                         allowCreate
                       >
-                        {(versionList || [])[index]?.map((version) => (
+                        {(versionList || [])?.[index]?.map((version) => (
                           <Option key={version} value={version}>
                             {version}
                           </Option>

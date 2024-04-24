@@ -645,6 +645,10 @@ export default {
           type: 'object',
           additionalProperties: true,
         },
+        tsConfigPath: {
+          description: 'The tsconfig path of the project.',
+          type: 'string',
+        },
         implementation: {
           description: 'The implementation of the DTS Manager.',
           type: 'string',

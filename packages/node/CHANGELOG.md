@@ -1,5 +1,65 @@
 # [2.1.0-canary.6](https://github.com/module-federation/universe/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.1.8
+
+### Patch Changes
+
+- Updated dependencies [56eb56a]
+- Updated dependencies [b120511]
+  - @module-federation/enhanced@0.1.8
+  - @module-federation/runtime@0.1.8
+  - @module-federation/sdk@0.1.8
+  - @module-federation/utilities@3.0.13
+
+## 2.1.7
+
+### Patch Changes
+
+- Updated dependencies [648353b]
+- Updated dependencies [648353b]
+- Updated dependencies [35ebb46]
+  - @module-federation/runtime@0.1.7
+  - @module-federation/enhanced@0.1.7
+  - @module-federation/sdk@0.1.7
+  - @module-federation/utilities@3.0.12
+
+## 2.1.6
+
+### Patch Changes
+
+- 72c7b80: chore: fix release tag
+- Updated dependencies [72c7b80]
+  - @module-federation/runtime@0.1.6
+  - @module-federation/enhanced@0.1.6
+  - @module-federation/sdk@0.1.6
+  - @module-federation/utilities@3.0.11
+
+## 2.1.5
+
+### Patch Changes
+
+- Updated dependencies [876a4ff]
+- Updated dependencies [e0acf83]
+- Updated dependencies [ca271ab]
+- Updated dependencies [f26aa2d]
+- Updated dependencies [1a9c6e7]
+  - @module-federation/runtime@0.1.5
+  - @module-federation/enhanced@0.1.5
+  - @module-federation/sdk@0.1.5
+  - @module-federation/utilities@3.0.10
+
+## 2.1.4
+
+### Patch Changes
+
+- Updated dependencies [8f3a440]
+- Updated dependencies [2f697b9]
+- Updated dependencies [8f3a440]
+  - @module-federation/enhanced@0.1.4
+  - @module-federation/sdk@0.1.4
+  - @module-federation/runtime@0.1.4
+  - @module-federation/utilities@3.0.9
+
 ## 2.1.3
 
 ### Patch Changes

@@ -1,5 +1,47 @@
 # @module-federation/runtime
 
+## 0.1.8
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.8
+
+## 0.1.7
+
+### Patch Changes
+
+- 648353b: Filter falsey runtime plugins from registerPlugins
+- 35ebb46: fix: support config string shareScope
+  - @module-federation/sdk@0.1.7
+
+## 0.1.6
+
+### Patch Changes
+
+- 72c7b80: chore: fix release tag
+- Updated dependencies [72c7b80]
+  - @module-federation/sdk@0.1.6
+
+## 0.1.5
+
+### Patch Changes
+
+- 876a4ff: feat: support config shared import:false in runtime
+- f26aa2d: chore: prevent plugins from losing information
+- 1a9c6e7: feat: support config multiple versions shared
+- Updated dependencies [ca271ab]
+- Updated dependencies [1a9c6e7]
+  - @module-federation/sdk@0.1.5
+
+## 0.1.4
+
+### Patch Changes
+
+- 2f697b9: fix: fixed type declaration in pkg
+- Updated dependencies [8f3a440]
+- Updated dependencies [2f697b9]
+  - @module-federation/sdk@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes

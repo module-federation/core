@@ -1,5 +1,4 @@
 import AdmZip from 'adm-zip';
-import ansiColors from 'ansi-colors';
 import axios from 'axios';
 import { resolve, join } from 'path';
 import typescript from 'typescript';
@@ -7,7 +6,8 @@ import typescript from 'typescript';
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { retrieveMfTypesPath } from './typeScriptCompiler';
-import { isDebugMode, replaceLocalhost } from './utils';
+import { replaceLocalhost } from './utils';
+import { fileLog } from '../../server';
 
 export const retrieveTypesZipPath = (
   mfTypesPath: string,
@@ -68,15 +68,13 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
         zip.extractAllTo(destinationPath, true);
         return [destinationFolder, destinationPath];
       } catch (error: any) {
-        if (isDebugMode()) {
-          console.error(
-            ansiColors.red(
-              `Error during types archive download: ${
-                error?.message || 'unknown error'
-              }`,
-            ),
-          );
-        }
+        fileLog(
+          `Error during types archive download: ${
+            error?.message || 'unknown error'
+          }`,
+          'downloadTypesArchive',
+          'error',
+        );
         if (retries >= hostOptions.maxRetries) {
           if (hostOptions.abortOnError !== false) {
             throw error;

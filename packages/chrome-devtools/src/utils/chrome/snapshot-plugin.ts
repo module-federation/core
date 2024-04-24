@@ -30,6 +30,9 @@ const chromeDevtoolsPlugin: () => FederationRuntimePlugin = function () {
           if (chromeDevtoolSnapshot) {
             runtimeHelpers.global.addGlobalSnapshot(chromeDevtoolSnapshot);
             nativeGlobal.__INIT_VMOK_CHROME_DEVTOOL_PLUGIN__ = true;
+            console.warn(
+              '[Module Federation Devtools]: You are using the chrome devtool to proxy online module',
+            );
           }
         }
       }

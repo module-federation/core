@@ -11,5 +11,5 @@ export interface RootComponentProps {
   handleSnapshot?: (...args: ParametersTypeOfRoot) => Promise<ReturnTypeOfRoot>;
   versionList?: Array<Array<string>>;
   setVersionList?: React.Dispatch<React.SetStateAction<Array<Array<string>>>>;
-  getVersion?: (moduleName: string) => Array<string>;
+  getVersion?: (moduleName: string) => Promise<Array<string>>;
 }
