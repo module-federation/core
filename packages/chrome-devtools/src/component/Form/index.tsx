@@ -278,11 +278,6 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                         },
                       ]}
                     >
-                      {/* <Input
-                        data-set-e2e={'e2eProxyValue'}
-                        placeholder={'Custom Manifest URL'}
-                        allowClear
-                      /> */}
                       <Select
                         data-set-e2e={'e2eProxyValue'}
                         placeholder={'Custom Manifest URL'}
