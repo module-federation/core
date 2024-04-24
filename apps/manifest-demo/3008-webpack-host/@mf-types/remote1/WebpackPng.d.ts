@@ -1,2 +1,0 @@
-export * from './compiled-types/apps/manifest-demo/3009-webpack-provider/src/components/WebpackPng';
-export { default } from './compiled-types/apps/manifest-demo/3009-webpack-provider/src/components/WebpackPng';
