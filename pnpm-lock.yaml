@@ -1435,6 +1435,10 @@ importers:
       vue-tsc:
         specifier: ^1.0.24
         version: 1.8.27(typescript@5.3.3)
+    devDependencies:
+      upath:
+        specifier: 2.0.1
+        version: 2.0.1
 
   packages/nextjs-mf:
     dependencies:
@@ -24400,8 +24404,6 @@ packages:
       webpack: '*'
     peerDependenciesMeta:
       webpack:
-        optional: true
-      webpack-sources:
         optional: true
     dependencies:
       webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
