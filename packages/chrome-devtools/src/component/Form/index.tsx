@@ -21,6 +21,7 @@ import { defaultDataItem, proxyFormField } from '../../template/constant';
 import {
   validateCustom,
   validateSemver,
+  validatePort,
   isObject,
   separateType,
   FormItemStatus,
@@ -144,7 +145,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
       };
     }
 
-    if (validateCustom(value) || validateSemver(value)) {
+    if (validateCustom(value) || validateSemver(value) || validatePort(value)) {
       statusSet[index].valueStatus = true;
       flushSync(() => setFormStatus(statusSet));
       return callback();

@@ -12,4 +12,5 @@ export interface RootComponentProps {
   versionList?: Array<Array<string>>;
   setVersionList?: React.Dispatch<React.SetStateAction<Array<Array<string>>>>;
   getVersion?: (moduleName: string) => Promise<Array<string>>;
+  handleProxyAdress?: (adress: string) => string;
 }

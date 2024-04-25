@@ -38,6 +38,8 @@ export const validateSemver = (schema: string) => {
   return reg.test(schema);
 };
 
+export const validatePort = (schema: string) => !isNaN(Number(schema));
+
 const splitModuleId = (target: string) => {
   const array = target.split(':');
   const { length } = array;
