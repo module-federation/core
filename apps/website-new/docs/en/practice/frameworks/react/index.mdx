@@ -59,6 +59,9 @@ create rsbuild@latest
 
 "Select framework":
 > React
+
+"Select language":
+> TypeScript
 ```
 
 ### Create App 2
@@ -71,6 +74,9 @@ create rsbuild@latest
 
 "Select framework":
 > React
+
+"Select language":
+> TypeScript
 ```
 
 ### Install
@@ -84,8 +90,6 @@ pnpm i
  ````
 
 </Steps>
-
-
 
 ### Use React in an existing project
 
@@ -113,17 +117,17 @@ Ensure that Webpack version 5 or above is installed by checking the installation
 In both applications, rename the `index.js` file to `bootstrap.js`. This change allows `bootstrap.js` to load asynchronously, which is essential for Module Federation to function correctly between the two applications.
 
 ```bash
-mv src/index.js src/bootstrap.js
+mv src/index.tsx src/bootstrap.tsx
 ```
 
-Update the contents of bootstrap.js to the following:
+Update the contents of bootstrap.tsx to the following:
 
-```javascript
+```typescript
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
     <App />
@@ -131,9 +135,9 @@ root.render(
 );
 ```
 
-Now, create a new `index.js` file in both applications with the following content to import `bootstrap.js`:
+Now, create a new `index.tsx` file in both applications with the following content to import `bootstrap.tsx`:
 
-```javascript
+```typescript
 import('./bootstrap');
 ```
 
@@ -141,15 +145,12 @@ import('./bootstrap');
 
 Now, create a component to expose from `MFE2`
 
-
 <Steps>
 ### 3.1 Create Button Component
 
-In `MFE2`, create a new file named `Button.js` in the src directory with the following content:
+In `MFE2`, create a new file named `Button.tsx` in the src directory with the following content:
 
-```javascript
-import React from 'react';
-
+```typescript
 const Button = () => (
   <button>MFE2 Button</button>
 );
@@ -157,29 +158,29 @@ const Button = () => (
 export default Button;
 ```
 
-### 3.2 Update App.js
+### 3.2 Update App.tsx
 
-Update `App.js` in `MFE2` to import and render the Button component:
+Update `App.tsx` in `MFE2` to import and render the Button component:
 
-```javascript
-import React from 'react';
+```typescript
+import './App.css';
 import Button from './Button';
 
-function App() {
+const App = () => {
   return (
-    <div>
+    <div className="content">
       <h1>MFE2</h1>
       <Button />
     </div>
   );
-}
+};
 
 export default App;
 ```
 
 ## Step 3.3: Configure Rsbuild in MFE2
 
-Create a `rsbuild.config.js` file in the root directory of `MFE2` with the following configuration:
+Create a `rsbuild.config.ts` file in the root directory of `MFE2` with the following configuration:
 
 ```ts title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
@@ -219,14 +220,12 @@ export default defineConfig({
 
 Consume the exposed module from `MFE2` in `MFE1`
 
-
-
 <Steps>
-### 4.1 Update App.js
+### 4.1 Update App.tsx
 
-Update `App.js` in `MFE1` to import and render the `MFE2` Button component:
+Update `App.tsx` in `MFE1` to import and render the `MFE2` Button component:
 
-```javascript
+```typescript
 import React from 'react';
 import Button from 'remote/Button'; // federated import
 
@@ -244,7 +243,7 @@ export default App;
 
 ### Step 4.2: Configure Rsbuild in MFE1
 
-Create a `rsbuild.config.js` file in the root directory of `MFE1` with the following configuration:
+Create a `rsbuild.config.ts` file in the root directory of `MFE1` with the following configuration:
 
 ```ts title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
