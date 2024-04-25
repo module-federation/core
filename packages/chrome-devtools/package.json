@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "private": true,
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",

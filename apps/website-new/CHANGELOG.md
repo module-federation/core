@@ -1,5 +1,11 @@
 # website-new
 
+## 1.0.3
+
+### Patch Changes
+
+- 60ac566: fix imports for node plugin in docs
+
 ## 1.0.2
 
 ### Patch Changes
