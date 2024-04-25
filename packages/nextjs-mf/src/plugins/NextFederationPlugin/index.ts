@@ -150,7 +150,7 @@ export class NextFederationPlugin {
     const defaultExpose = this._extraOptions.skipSharingNextInternals
       ? {}
       : {
-          './noop': `!${noop}`,
+          './noop': noop,
           './react': require.resolve('react'),
           './react-dom': require.resolve('react-dom'),
           './next/router': require.resolve('next/router'),
