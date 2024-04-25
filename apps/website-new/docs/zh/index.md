@@ -4,11 +4,11 @@ pageType: home
 hero:
   name: Module Federation
   text: 微前端架构
-  tagline: Module Federation 2.0 全新发布，
+  tagline: 新文档、运行时、devtool、类型提示等全新功能上线
   actions:
     - theme: brand
-      text: 介绍
-      link: /zh/guide/start/index.html
+      text: 🎉 发布公告
+      link: /zh/blog/announcement.html
     - theme: alt
       text: 快速开始
       link: /zh/guide/start/quick-start.html
