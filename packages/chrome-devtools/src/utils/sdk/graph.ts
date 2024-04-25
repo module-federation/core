@@ -167,12 +167,12 @@ export class DependencyGraph {
   }
 
   run(
-    targetGraph = this.graph,
+    targetGraph: any,
     target: string = this.initTarget,
     type: string,
     id: string = this.initTarget,
   ) {
-    if (!Object.keys(targetGraph)?.length) {
+    if (!targetGraph || !Object.keys(targetGraph)?.length) {
       return;
     }
     const name = splitModuleId(target);
