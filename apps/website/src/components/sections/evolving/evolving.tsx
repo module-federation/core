@@ -54,7 +54,7 @@ export default component$(() => {
       ),
       actionText: t('evolving.rfcs.action@@Take part now!'),
       actionHref:
-        'https://github.com/module-federation/universe/discussions/categories/rfc',
+        'https://github.com/module-federation/core/discussions/categories/rfc',
       target: '_blank' as ButtonPropsTarget,
       lineClass:
         'absolute w-24 bottom-[5%] md:bottom-[20%] left-full -translate-x-full',
