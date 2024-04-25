@@ -2,7 +2,7 @@
   <img alt="Module federation Banner"  width="260" src="https://github.com/module-federation/universe/assets/27547179/11234712-40fc-4696-a7fd-16e0c631005a">
 </p>
 
-# Module Federation 2.0
+# Module Federation
 
 `Module Federation 2.0` differs from the `Module Federation` built into `Webpack5` by providing not only the core features of module export, loading, and dependency sharing but also additional dynamic type hinting, `Manifest`, `Federation Runtime`, and `Runtime Plugin System`. These features make `Module Federation` more suitable for use as a micro-frontend architecture in large-scale `Web` applications.
 
@@ -31,7 +31,7 @@ To get started with Module Federation, see the [Quick Start](https://module-fede
 
 # 🧑‍💻 Community
 
-Come and chat with us on [Discussions](https://github.com/module-federation/universe/discussions)! The Module federation team and users are active there, and we're always looking for contributions.
+Come and chat with us on [Discussions](https://github.com/module-federation/universe/discussions) or [Discord](https://discord.gg/n69NnT3ACV)! The Module federation team and users are active there, and we're always looking for contributions.
 
 # 🤝 Contribution
 
