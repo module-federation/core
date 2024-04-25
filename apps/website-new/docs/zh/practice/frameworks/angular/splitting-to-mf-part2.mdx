@@ -1,0 +1,151 @@
+---
+title: "改造巨石应用"
+---
+
+# 使用模块联邦扩展 Angular 应用程序：一步步指南
+
+欢迎使用我们系列的第二部分，本系列讲述了如何利用模块联邦（MF）增强 Angular 应用程序。在本指南中，我们将深入探讨如何将 MF 无缝地整合到现有的普通 Angular 应用程序中。
+
+## 理解我们的工具：@angular-architects/module-federation
+
+值得注意的是，Angular CLI 默认并不支持加载自定义 Webpack 配置。为了解决这个问题，我们的方法涉及使用一个专门的自定义构建器更新 Angular CLI 构建器。这种修改允许扩展 Webpack 配置文件，对于集成像模块联邦这样的高级特性至关重要。
+
+当本指南专注于使用 `@angular-architects/module-federation` 库提供的自定义构建器时，你可以根据自己的专业能力用另一种构建器替换它。对于那些对如何实现 Angular CLI 构建器内自定义 Webpack 配置感兴趣的人，我们建议阅读 DigitalOcean 的文章 [如何使用 Angular CLI 构建器使用自定义 webpack 配置](https://www.digitalocean.com/community/tutorials/angular-custom-webpack-config)。这个资源提供了宝贵的见解和实际步骤，用于自定义你的 Angular 构建过程，超越标准配置。
+
+### 库功能
+
+- **更新构建配置**：它允许扩展 Webpack 配置文件。
+- **应用服务**：便于单独服务应用程序，不管是通过标准的浏览器交互还是作为微前端。
+
+## 设置主应用程序
+
+### 使用 Schematics 初始化
+
+在项目的根目录下运行以下命令：
+
+```bash
+ng add @angular-architects/module-federation --project app-micro --type dynamic-host --port 4200
+```
+这个命令为你的主项目配置模块联邦，更新 Angular CLI 配置，创建一个用于加载远程入口的清单文件，并重新组织启动引导过程。
+
+### 处理模式冲突
+
+一些 Angular 模式，比如 `@angular/pwa` 和 `@angular/material`，预期在 `main.ts` 中进行启动引导。如果你计划使用这些模式，临时切换启动引导过程：
+
+```bash
+ng g @angular-architects/module-federation:boot-async false --project [YOUR_MAIN_PROJECT]
+ng add [YOUR_LIBRARIES_OF_CHOICE] --project yourProject
+ng g @angular-architects/module-federation:boot-async true --project [YOUR_MAIN_PROJECT]
+```
+### 更新清单文件
+
+在实施模式变更后，修改清单文件（`mf.manifest.json`）和应用程序路由配置（`app-routing.module.ts`）是确保你的 Angular 应用程序正常运行的关键。
+
+`mf.manifest.json` 中的默认配置被设置为在端口 `4200` 上提供文件服务。然而，这个端口通常用于主应用程序。
+
+为了避免冲突，请更新用于服务次要应用程序的端口。例如，将端口更改为 `4201`。你的 `mf.manifest.json` 文件应该反映出这个更改，如下所示：
+
+```json
+{
+  "login": "http://localhost:4201/remoteEntry.js"
+}
+```
+
+通过更新这些配置，你为在不同端口上运行主应用程序和次要 Angular 应用程序建立了一个明确且功能性的结构，从而促进了它们的独立操作和集成。
+
+- **简化示例：** 在本指南中，为了简单起见，清单配置是静态定义在 JSON 文件中的。
+
+- **生产中的动态配置：** 对于真实应用程序，建议动态地提供清单配置。这可以通过以下方式实现：
+
+  - 使用生产版本替换静态 JSON 文件。
+  - 在服务器上设置一个端点，返回清单配置。
+
+:::details NOTE
+当选择动态服务时，更新 `main.ts` 文件以修改 `initFederation` 函数用来检索清单数据的 URL。请注意，在这种配置下，如果没有互联网连接，应用程序将无法加载。然而，在使用静态配置的情况下，你可以处理连接错误，特别是如果你的应用程序已经被缓存过了。
+:::
+
+4. **集成清单到路由**:
+
+   *修改清单文件：*
+
+   - 如前所述，如有必要，请在 `mf.manifest.json` 文件中调整端口。
+
+   *更新应用程序路由 (`app-routing.module.ts`)：*
+
+   - 移除现有的导入代码（例如 `import('@@login')`）。
+   - 替换为 `loadRemoteModule` 函数的调用（从 `@angular-architects/module-federation` 模块中导入）。
+   - 使用以下对象配置 `loadRemoteModule` 函数：
+
+
+```json
+{
+  "type": "manifest",
+  "remoteName": "login",
+  "exposedModule": "./Module",
+}
+```
+
+   - `type`: Denotes the remote configuration type (`'manifest'` in this case).
+   - `remoteName`: The module's name as declared in the manifest.
+   - `exposedModule`: Path of the module in the secondary app.
+
+   The final result should look similar to the following example:
+
+```typescript
+const routes: Routes = [
+  ...
+  {
+    path: '',
+    canMatch: [isNotLogged],
+    loadChildren: () =>
+      loadRemoteModule({ type: 'manifest', remoteName: 'login', exposedModule: './Module' }).then(
+        (m) => m.LoginModule,
+      ),
+  },
+  ...
+];
+```
+已经遵循这些步骤后，主应用程序现在已配置为远程加载其他应用程序。下一个阶段涉及设置次级应用程序，以确保它们可以以这种方式被加载。
+
+## 设置远程应用程序
+
+在配置次级应用程序时，类似于主应用程序，将更新几个项目组件。值得注意的是，这个过程不会创建清单文件，但会修改 `webpack.config.js` 文件，在其中添加比通常在主应用程序配置中找到的更多细节。
+
+```bash
+ng add @angular-architects/module-federation --project login --type remote --port 4201
+```
+
+:::tip
+我们要使用 `--type remote` 而不是 `--type dynamic-host`。
+:::
+### 理解 'exposes'
+
+- **"exposes" 的作用：** `webpack.config.js` 文件中的 `exposes` 属性扮演着关键角色。它包含一个对象配置，其中每个键值对类似于一个路由。这个属性决定了要暴露给加载器的模块。
+- **链接到 "exposedModule"：** 这与我们之前的步骤相关，在路由配置中使用了 `exposedModule` 属性，表明了要加载的特定模块路由。
+
+### Webpack 配置中的调整
+
+*识别配置不匹配：* 在当前设置中，路由配置尝试加载一个名为 `./Module` 的模块，但这在现有的 Webpack 配置中并未指定。
+
+为了纠正这个问题，修改 `webpack.config.js` 文件：
+
+- 移除现有的 `./Component` 键。
+- 添加一个新的 `./Module` 键，确保它指向加载应用程序模块的正确路径。例如：
+
+```javascript
+exposes: {
+  './Module': './projects/login/src/app/feature/login/login.module.ts',
+},
+```
+通过这次更新，次级应用程序已经被正确配置，以便暴露所需的模块，与主应用程序中设定的远程加载需求相匹配。
+
+## 测试和运行应用程序
+
+- **运行主应用程序**：`ng serve`
+- **运行次级应用程序**：`ng serve login`
+- 在启动了两个应用程序之后，刷新主应用程序以查看集成的实际操作。次级应用程序现在应该能够在主应用程序中正确加载。
+- 此外，通过在浏览器中导航到 `localhost:4201`，你可以观察到登录应用程序作为一个独立的实体在运行。
+
+## 构建配置的优化
+
+虽然我们目前使用了 `@angular-architects/module-federation/webpack` 包中的 `shareAll`，一个更加精细的方法是使用 `share` 函数共享仅必要的依赖。这种选择性的共享优化了应用程序的性能和资源利用率。

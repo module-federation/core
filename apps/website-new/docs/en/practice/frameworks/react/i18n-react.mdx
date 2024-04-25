@@ -4,9 +4,13 @@ title: "Internationalization (i18n)"
 
 # Implementing Internationalization (i18n) with Module Federation in React Micro-Frontends
 
+:::tip Demo Reference
+Check out the example project list here: [React i18n](https://github.com/module-federation/module-federation-examples/tree/master/i18next-nextjs-react)
+:::
+
 ## Overview
 
-In the realm of micro-frontends, ensuring each application remains as autonomous as possible is crucial. However, scenarios arise where inter-application communication is inevitable. A common requirement is synchronizing language preferences across micro-frontends, such as when a user changes the language setting in one application, and it cascades across all integrated micro-frontends. This documentation outlines a strategy for implementing internationalization using the `react-i18next` library within a micro-frontend architecture facilitated by Webpack's Module Federation.
+In the realm of micro-frontends, ensuring each application remains as autonomous as possible is crucial. However, scenarios arise where inter-application communication is inevitable. A common requirement is synchronizing language preferences across micro-frontends, such as when a user changes the language setting in one application, and it cascades across all integrated micro-frontends. This documentation outlines a strategy for implementing internationalization using the `react-i18next` library within a micro-frontend architecture facilitated by Module Federation.
 
 ## Scenario
 
@@ -14,9 +18,9 @@ Consider two applications: App A (the container application) and App B (the remo
 
 ## Architecture and Implementation
 
-### Extending Webpack Configuration
+### Extending Bundler Configuration
 
-To accommodate micro-frontend integration, we extend the existing Webpack and Create React App (CRA) configurations using the Module Federation plugin. This extension allows App B to expose various elements (e.g., components, themes, hooks) for consumption by App A or any other integrated applications without requiring codebase ejection.
+To accommodate micro-frontend integration, we extend the existing Webpack/Rspack/Rsbuild and Create React App (CRA) configurations using the Module Federation plugin. This extension allows App B to expose various elements (e.g., components, themes, hooks) for consumption by App A or any other integrated applications without requiring codebase ejection.
 
 ### Setting Up Internationalization
 
@@ -203,3 +207,4 @@ export default App;
 ```
 
 In this example, `LanguageSwitcher` will only render when App B is not embedded within App A, based on the `isRemote` state determined by the `useIsRemote` hook. This approach ensures that components like language switchers are only shown in appropriate contexts, enhancing the user experience and maintaining the independence of micro-frontend applications.
+

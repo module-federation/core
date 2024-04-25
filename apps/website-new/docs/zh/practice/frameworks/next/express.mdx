@@ -1,0 +1,80 @@
+import {Steps} from '@theme'
+
+# 使用 Express.js
+
+使用 Express 时，热服务器模块重载可能不会在 SSR 之后工作。
+
+这是因为 Express 有自己的路由栈，所以仅重载缓存并不足以让 Express 内部的路由重新加载。
+
+<Steps>
+
+### 在 Express 中添加全局回调
+
+对于 Express 和 Next.js 的热模块重载，需要设置一个全局回调来清除 Express 的路由缓存。
+
+这允许在不重启服务器的情况下识别路由更新。
+
+```javascript title="server/express.js"
+import express from 'express';
+import next from 'next';
+
+const dev = process.env.NODE_ENV !== 'production';
+const hostname = 'localhost';
+const port = 3000;
+const app = next({ dev, hostname, port });
+const handle = app.getRequestHandler();
+
+global.clearRoutes = () => {
+  server._router.stack = server._router.stack.filter((k) => !(k && k.route && k.route.path));
+};
+
+app.prepare().then(() => {
+  const server = express();
+
+  server.all('*', (req, res) => {
+    const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+    const { pathname, query } = parsedUrl;
+
+    handle(req, res, parsedUrl);
+  });
+
+  server.listen(port, () => {
+    console.log(`> Ready on http://${hostname}:${port}`);
+  });
+});
+```
+### 在重新验证期间触发回调
+
+在 `_document.js` 中添加一个全局回调，在重新验证期间清除 Express 路由缓存，允许在不重启服务器的情况下提供更新后的路由。
+
+```jsx title="pages/_document.js"
+class MyDocument extends Document {
+  static async getInitialProps(ctx) {
+    if (ctx?.pathname && !ctx?.pathname?.endsWith('_error')) {
+      await revalidate().then((shouldUpdate) => {
+        if (shouldUpdate) {
+          global.clearRoutes();
+        }
+      });
+    }
+
+    const initialProps = await Document.getInitialProps(ctx);
+    return initialProps;
+  }
+
+  render() {
+    return (
+      <Html>
+        <Head />
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
+}
+```
+
+</Steps>
+

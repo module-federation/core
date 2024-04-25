@@ -1,0 +1,89 @@
+# 导入组件
+
+远程模块可以通过多种方式导入。
+
+### 懒加载/异步加载
+
+#### 默认导出
+
+使用 `React.lazy` 和 `React.Suspense`
+
+:::danger Hydration Errors
+使用 `next/dynamic` 导入远程模块会导致 **hydration error（重新水合错误）**。
+:::
+
+```javascript
+import React, { lazy } from 'react';
+const SampleComponent = lazy(() => import('next2/sampleComponent'));
+
+const FormComponent = ()=>{
+  return (
+    <Suspense fallback="loading">
+      <SampleComponent/>
+    </Suspense>
+  )
+}
+
+export default FormComponent
+```
+
+#### Named exports
+Named Exports require a mocked `default` be returned to `React.lazy` which expects only default exports.
+
+```javascript
+import React, { lazy } from 'react';
+
+const SampleComponent = lazy(() => import('next2/sampleComponent').then((mod) => {
+  return { default: mod.NamedComponent };
+}));
+
+const FormComponent = () => {
+  return (
+    <Suspense fallback="loading">
+      <SampleComponent />
+    </Suspense>
+  );
+};
+
+export default FormComponent;
+```
+
+### Eager / Sync import
+
+Eager imports work as well, but it is reccomneded to use dynamic imports when possible to avoid large upfront network transfors or requests
+
+```javascript
+let SomeHook = require('next2/someHook');
+SomeHook = SomeHook.default || SomeHook;
+
+import SomeComponent, {NamedExportComponent} from 'next2/sampleComponent';
+```
+### Client side only
+
+In some cases, you may just want to load a remote module on the client.
+
+For example, if your remote does not provide a commonjs and browser build target.
+
+Node requires a remoteEntry in commonjs format, you cannot provide a browser designated remote to a Server.
+
+```jsx
+import {lazy, Suspense, useEffect, useState} from 'react';
+
+const RemoteModule = typeof window === 'undefined' ? ()=>{} : lazy(() => import('app3/sampleComponent'));
+
+const ClientOnly = ({Component}) => {
+  const [mounted, setMount] = useState(false);
+  useEffect(() => {
+    setMount(true);
+  }, []);
+  if (mounted) return null;
+  return (
+    <Suspense fallback="loading">
+      <Component />
+    </Suspense>
+  );
+};
+
+const App = ()=>{
+  return <ClientOnly Component={RemoteModule} />
+}

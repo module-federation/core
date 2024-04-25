@@ -2,19 +2,24 @@
 title: "Basic CRA with Rsbuild"
 ---
 
-## Setup Environment
+# Basic CRA with Rsbuild
 
-Before getting started, you will need to install [Node.js](https://nodejs.org/), and ensure that your Node.js version >= 16. **We recommend using the LTS version of Node.js 20.**
+:::tip Demo Reference
+在此处查看示例项目列表: [Rsbuild CRA](https://github.com/module-federation/module-federation-examples/tree/master/cra)
+:::
 
-You can check the currently used Node.js version with the following command:
+## 设置环境
+在开始之前，你需要安装 [Node.js](https://nodejs.org/)，并确保你的 Node.js 版本 >= 16。 **我们建议使用 Node.js 20 的 LTS 版本.**
+
+你可以使用以下命令检查当前使用的 Node.js 版本：
 
 ```bash
 node -v
 ```
 
-If you do not have Node.js installed in your current environment, or the installed version is too low, you can use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to install the required version.
+如果你当前环境没有安装Node.js，或者安装的版本太低，可以使用 [nvm](https://github.com/nvm-sh/nvm) 或 [fnm](https: //github.com/Schniz/fnm) 安装所需的版本。
 
-Here is an example of how to install the Node.js 20 LTS version via nvm:
+以下是如何通过 nvm 安装 Node.js 20 LTS 版本的示例：
 
 ```bash
 # Install the long-term support version of Node.js 20
@@ -26,12 +31,11 @@ nvm alias default 20
 # Switch to the newly installed Node.js 20
 nvm use 20
 ```
+## 第 1 步：设置 React 应用程序
 
-## Step 1: Setup React Applications
+### 创建 React 项目
 
-### Create React Project
-
-You can use `create-rsbuild` to create a project with Rsbuild + React. Just execute the following command:
+你可以使用“create-rsbuild”使用 Rsbuild + React 创建项目。只需执行以下命令：
 
 import { PackageManagerTabs } from '@theme';
 
@@ -59,6 +63,9 @@ create rsbuild@latest
 
 "Select framework":
 > React
+
+"Select language":
+> TypeScript
 ```
 
 ### Create App 2
@@ -71,6 +78,9 @@ create rsbuild@latest
 
 "Select framework":
 > React
+
+"Select language":
+> TypeScript
 ```
 
 ### Install
@@ -81,17 +91,16 @@ pnpm i
 ```bash
 cd mfe2
 pnpm i
- ````
+ ```
 
 </Steps>
 
+### 在现有项目中使用 React
 
+要编译React，你需要注册Rsbuild [React Plugin](https://rsbuild.dev/plugins/list/plugin-react)。该插件将自动添加 React 构建所需的配置。
 
-### Use React in an existing project
+例如，在`rsbuild.config.ts`中注册：
 
-To compile React, you need to register the Rsbuild [React Plugin](https://rsbuild.dev/plugins/list/plugin-react). The plugin will automatically add the necessary configuration for React builds.
-
-For example, register in `rsbuild.config.ts`:
 
 ```ts title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
@@ -103,27 +112,27 @@ export default defineConfig({
 ```
 
 :::tip
-For projects using Create React App, you can refer to the [CRA Migration Guide](https://rsbuild.dev/guide/migration/cra).
+对于使用Create React App的项目，可以参考【CRA迁移指南】(https://rsbuild.dev/guide/migration/cra) 。
 :::
 
-Ensure that Webpack version 5 or above is installed by checking the installation report provided by Yarn.
+通过检查 Yarn 提供的安装报告，确保 Webpack 版本 5 或更高版本已安装。
 
-## Step 2: Update Entry Files
+## 步骤2：更新条目文件
 
-In both applications, rename the `index.js` file to `bootstrap.js`. This change allows `bootstrap.js` to load asynchronously, which is essential for Module Federation to function correctly between the two applications.
+在这两个应用程序中，将“index.js”文件重命名为“bootstrap.js”。此更改允许异步加载“bootstrap.js”，这对于模块联邦在两个应用程序之间正确运行至关重要。
 
 ```bash
-mv src/index.js src/bootstrap.js
+mv src/index.tsx src/bootstrap.tsx
 ```
 
-Update the contents of bootstrap.js to the following:
+将 bootstrap.tsx 的内容更新为以下内容：
 
-```javascript
+```typescript
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
     <App />
@@ -131,25 +140,25 @@ root.render(
 );
 ```
 
-Now, create a new `index.js` file in both applications with the following content to import `bootstrap.js`:
+现在，在两个应用程序中创建一个新的“index.tsx”文件，其中包含以下内容以导入“bootstrap.tsx”：
 
-```javascript
+```typescript
 import('./bootstrap');
 ```
 
-## Step 3: Create and Expose
+## 步骤 3：创建并公开
 
-Now, create a component to expose from `MFE2`
+现在，创建一个从“MFE2”公开的组件
 
 
 <Steps>
-### 3.1 Create Button Component
 
-In `MFE2`, create a new file named `Button.js` in the src directory with the following content:
 
-```javascript
-import React from 'react';
+### 3.1 创建按钮组件
 
+在“MFE2”中，在 src 目录中创建一个名为“Button.tsx”的新文件，其中包含以下内容：
+
+```typescript
 const Button = () => (
   <button>MFE2 Button</button>
 );
@@ -157,29 +166,28 @@ const Button = () => (
 export default Button;
 ```
 
-### 3.2 Update App.js
+### 3.2 更新 App.tsx
 
-Update `App.js` in `MFE2` to import and render the Button component:
+更新 `MFE2` 中的 `App.tsx` 以导入并渲染 Button 组件：
 
-```javascript
-import React from 'react';
+```typescript
+import './App.css';
 import Button from './Button';
 
-function App() {
+const App = () => {
   return (
-    <div>
+    <div className="content">
       <h1>MFE2</h1>
       <Button />
     </div>
   );
-}
+};
 
 export default App;
 ```
+## 3.3：在MFE2中配置Rsbuild
 
-## Step 3.3: Configure Rsbuild in MFE2
-
-Create a `rsbuild.config.js` file in the root directory of `MFE2` with the following configuration:
+在`MFE2`根目录下创建`rsbuild.config.ts`文件，配置如下：
 
 ```ts title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
@@ -214,19 +222,16 @@ export default defineConfig({
 });
 ```
 </Steps>
+## 步骤 4：使用远程模块
 
-## Step 4: Consume Remote Module
-
-Consume the exposed module from `MFE2` in `MFE1`
-
-
+在“MFE1”中使用“MFE2”公开的模块
 
 <Steps>
-### 4.1 Update App.js
+### 4.1 更新 App.tsx
 
-Update `App.js` in `MFE1` to import and render the `MFE2` Button component:
+更新“MFE1”中的“App.tsx”以导入并渲染“MFE2”按钮组件：
 
-```javascript
+```typescript
 import React from 'react';
 import Button from 'remote/Button'; // federated import
 
@@ -242,9 +247,9 @@ function App() {
 export default App;
 ```
 
-### Step 4.2: Configure Rsbuild in MFE1
+### 4.2：在 MFE1 中配置 Rsbuild
 
-Create a `rsbuild.config.js` file in the root directory of `MFE1` with the following configuration:
+在“MFE1”根目录中创建“rsbuild.config.ts”文件，配置如下：
 
 ```ts title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
@@ -279,7 +284,6 @@ export default defineConfig({
 ```
 </Steps>
 
+此设置会在“MFE1”内启动模块联邦，并且在启动开发服务器后，可以通过“http://localhost:3001”进行访问。
 
-This setup initiates Module Federation within `MFE1`, and upon initiating the development server, it is accessible at `http://localhost:3001`.
-
-Similarly, the configuration activates Module Federation for `MFE2`, thereby exposing the `Button` component at `http://localhost:3002/remoteEntry.js`. With the development server operational, it becomes accessible at `http://localhost:3002`.
+类似地，配置激活“MFE2”的模块联邦，从而在“http://localhost:3002/remoteEntry.js”处公开“Button”组件。随着开发服务器的运行，可以通过“http://localhost:3002”进行访问。
