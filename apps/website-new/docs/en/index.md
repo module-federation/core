@@ -4,7 +4,7 @@ pageType: home
 hero:
   name: Module Federation
   text: Microfrontend Architecture
-  tagline: Make it easier to share code between java script applications and make team collaboration more efficient
+  tagline: Make it easier to share code between javascript applications and make team collaboration more efficient
   actions:
     - theme: brand
       text: 🎉 Announce
