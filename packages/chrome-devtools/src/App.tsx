@@ -11,7 +11,13 @@ import styles from './App.module.scss';
 const { Content } = Layout;
 
 const App = (props: RootComponentProps) => {
-  const { versionList, setVersionList, getVersion, handleSnapshot } = props;
+  const {
+    versionList,
+    setVersionList,
+    getVersion,
+    handleSnapshot,
+    handleProxyAddress,
+  } = props;
   const [module, setModule] = useState(window.__FEDERATION__?.moduleInfo || {});
 
   useEffect(() => {
@@ -30,6 +36,7 @@ const App = (props: RootComponentProps) => {
               setVersionList={setVersionList}
               getVersion={getVersion}
               handleSnapshot={handleSnapshot}
+              handleProxyAddress={handleProxyAddress}
             />
           ) : (
             <Empty description={'No ModuleInfo Detected'} />
