@@ -49,7 +49,7 @@ const Layout = (
     versionList,
     setVersionList,
     getVersion,
-    handleProxyAdress,
+    handleProxyAddress,
   } = props;
   const { producer } = separateType(moduleInfo);
   const [condition, setCondition] = useState(statusInfo.processing);
@@ -74,8 +74,8 @@ const Layout = (
             return memo;
           }
           const duplicate = JSON.parse(JSON.stringify(current));
-          if (handleProxyAdress) {
-            const value = handleProxyAdress(duplicate.value);
+          if (handleProxyAddress) {
+            const value = handleProxyAddress(duplicate.value);
             duplicate.value = value;
           }
           return [...memo, duplicate];
