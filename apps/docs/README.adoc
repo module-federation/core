@@ -11,7 +11,7 @@ Before you begin, make sure you have the following installed on your machine:
 - nx
 - yarn
 
-You also need a GitHub account and a fork of the https://github.com/module-federation/core[module-federation/universe] repository.
+You also need a GitHub account and a fork of the https://github.com/module-federation/core[module-federation/core] repository.
 
 ## Setting up your environment
 
@@ -22,7 +22,7 @@ Documentation website consists of 2 applications:
 
 To set up your environment, follow these steps:
 
-1. Clone your fork of the module-federation/universe repository to your local machine.
+1. Clone your fork of the module-federation/core repository to your local machine.
 2. Navigate to the `apps/docs` folder inside the cloned repository.
 3. Run `npm install` to install the dependencies.
 4. By default, serving\building will pull the changes from the `main` branch. To use it, run `nx run docs:serve`. Along with it there's a `local` configuration, that provides an ability to rely on the files within the filesystem. Can be used by running `nx run docs:serve:local`
@@ -44,7 +44,7 @@ To make changes to the documentation, follow these steps:
 
 ## Submitting pull requests
 
-Once you are happy with your changes, you can submit a pull request to the module-federation/universe repository. A pull request is a way of proposing your changes to be merged into the main branch of the repository.
+Once you are happy with your changes, you can submit a pull request to the module-federation/core repository. A pull request is a way of proposing your changes to be merged into the main branch of the repository.
 
 To submit a pull request, follow these steps:
 
@@ -54,7 +54,7 @@ To submit a pull request, follow these steps:
 4. Select your fork and branch as the source and the main branch as the destination.
 5. Fill in the title and description of your pull request and click on "Create pull request".
 
-Your pull request will be reviewed by the maintainers of the `module-federation/universe` repository as well as by a technical writer who will check your content for accuracy, clarity, and adherence to Google Developers Documentation Style Guide. The technical writer may suggest some changes or improvements to your content before merging it to the main branch. and they will provide feedback or approve it.
+Your pull request will be reviewed by the maintainers of the `module-federation/core` repository as well as by a technical writer who will check your content for accuracy, clarity, and adherence to Google Developers Documentation Style Guide. The technical writer may suggest some changes or improvements to your content before merging it to the main branch. and they will provide feedback or approve it.
 
 ## Conclusion
 
