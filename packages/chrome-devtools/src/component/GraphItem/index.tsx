@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Handle, Position } from 'reactflow';
 
 import styles from './index.module.scss';
@@ -6,25 +7,53 @@ import 'reactflow/dist/style.css';
 const GraphItem = (props: {
   data: { info?: string; color?: string; remote?: any };
 }) => {
-  let name;
-  let version;
+  const [shareds, setShareds] = useState([]);
+  const [exposes, setExposes] = useState([]);
 
+  let name: string;
+  let version: string;
   const { info = '', color, remote } = props.data;
   const infoArray = info.split(':');
   if (info.endsWith('.json') || info.endsWith('.js')) {
-    name = infoArray.shift();
+    name = infoArray.shift() as string;
     version = infoArray.join(':');
   } else {
     [name, version] = infoArray;
   }
 
   const isEntryType = version?.startsWith('http') || version?.startsWith('//');
-  const exposes =
-    remote?.modules?.map((item: { modulePath: string }) => item.modulePath) ||
-    [];
-  const shareds =
-    remote?.shared?.map((item: { sharedName: string }) => item.sharedName) ||
-    [];
+
+  useEffect(() => {
+    let exposes;
+    let shareds;
+    if (isEntryType) {
+      fetch(version)
+        .then((response) => response.json())
+        .then((json) => {
+          exposes =
+            json.exposes.map((expose: { path: string }) => expose.path) || [];
+          shareds =
+            json.shared.map(
+              (share: { name: string; version: string }) =>
+                `${share.name}:${share.version}`,
+            ) || [];
+          setExposes(exposes);
+          setShareds(shareds);
+        });
+    } else {
+      exposes =
+        remote?.modules?.map(
+          (item: { modulePath: string }) => item.modulePath,
+        ) || [];
+      shareds =
+        remote?.shared?.map(
+          (item: { sharedName: string; version: string }) =>
+            `${item.sharedName}:${item.version}`,
+        ) || [];
+      setExposes(exposes);
+      setShareds(shareds);
+    }
+  }, []);
 
   return (
     <div style={{ background: color }} className={styles.Wrapper}>
@@ -50,7 +79,7 @@ const GraphItem = (props: {
               </div>
             ) : null}
 
-            {exposes.length > 0 ? (
+            {shareds.length > 0 ? (
               <div className={styles['expose-container']}>
                 <span className={styles.type}>Shared</span>
                 <div>
