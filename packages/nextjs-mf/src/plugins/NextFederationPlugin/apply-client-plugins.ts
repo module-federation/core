@@ -37,7 +37,6 @@ export function applyClientPlugins(
   compiler.options.output.publicPath = 'auto';
   // Build will hang without this. Likely something in my plugin
   compiler.options.optimization.splitChunks = undefined;
-  compiler.options.output.importMetaName = 'containerRegistry';
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
   if (extraOptions.automaticPageStitching) {
