@@ -15,6 +15,11 @@
     "activeMatch": "/plugin/"
   },
   {
+    "text": "Showcase",
+    "link": "/showcase/index",
+    "activeMatch": "/showcase/"
+  },
+  {
     "text": "Blog",
     "link": "/blog/announcement",
     "activeMatch": "/blog/"

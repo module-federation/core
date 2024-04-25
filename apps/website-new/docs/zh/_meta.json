@@ -15,6 +15,11 @@
     "activeMatch": "/plugin/"
   },
   {
+    "text": "案例",
+    "link": "/showcase/index",
+    "activeMatch": "/showcase/"
+  },
+  {
     "text": "博客",
     "link": "/blog/announcement",
     "activeMatch": "/blog/"
