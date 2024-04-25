@@ -16,6 +16,7 @@ export function applyServerPlugins(
   compiler: Compiler,
   options: ModuleFederationPluginOptions,
 ): void {
+  compiler.options.output.importMetaName = 'containerRegistry';
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
   const chunkFileName = compiler.options?.output?.chunkFilename;
