@@ -4,7 +4,7 @@ pageType: home
 hero:
   name: Module Federation
   text: 微前端架构
-  tagline: 新文档、运行时、devtool、类型提示等全新功能上线
+  tagline: 新文档、runtime、devtool、类型提示等全新功能上线
   actions:
     - theme: brand
       text: 🎉 发布公告
