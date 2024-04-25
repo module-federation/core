@@ -52,7 +52,7 @@ function useFooterData() {
       items: [
         {
           title: 'GitHub',
-          link: 'https://github.com/module-federation/universe',
+          link: 'https://github.com/module-federation/core',
         },
         // {
         //   title: 'Discord',

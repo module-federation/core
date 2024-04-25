@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Module federation Banner"  width="260" src="https://github.com/module-federation/universe/assets/27547179/11234712-40fc-4696-a7fd-16e0c631005a">
+  <img alt="Module federation Banner"  width="260" src="https://github.com/module-federation/core/assets/27547179/11234712-40fc-4696-a7fd-16e0c631005a">
 </p>
 
 # Module Federation
@@ -39,13 +39,13 @@ Some of the underlying dependencies of the past are listed here, and [enhanced](
 
 # 🧑‍💻 Community
 
-Come and chat with us on [Discussions](https://github.com/module-federation/universe/discussions)! The Module federation team and users are active there, and we're always looking for contributions.
+Come and chat with us on [Discussions](https://github.com/module-federation/core/discussions)! The Module federation team and users are active there, and we're always looking for contributions.
 
 # 🤝 Contribution
 
 > New contributors welcome!
 
-Please read the [Contributing Guide](https://github.com/module-federation/universe/blob/main/CONTRIBUTING.md).
+Please read the [Contributing Guide](https://github.com/module-federation/core/blob/main/CONTRIBUTING.md).
 
 # Credits
 

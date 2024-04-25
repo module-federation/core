@@ -36,7 +36,7 @@
   ],
   "types": "src/index.d.ts",
   "description": "Module Federation helper for Node",
-  "repository": "https://github.com/module-federation/universe/tree/main/packages/node",
+  "repository": "https://github.com/module-federation/core/tree/main/packages/node",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "dependencies": {
