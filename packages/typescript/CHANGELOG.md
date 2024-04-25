@@ -1,13 +1,18 @@
 ## [3.1.1](https://github.com/module-federation/core/compare/typescript-3.1.0...typescript-3.1.1) (2023-11-24)
 
+## 3.1.2
+
+### Patch Changes
+
+- 3d4fb69: import path on Windows
 
 ### Bug Fixes
 
-* **deps:** update dependency antd to v4.24.15 ([de857c4](https://github.com/module-federation/core/commit/de857c45af92b3a2584cd3319263417a36f9977a))
-* **deps:** update dependency axios to v1.6.0 [security] ([71bd7be](https://github.com/module-federation/core/commit/71bd7becbc201d69b11f0975d5a56548facb3242))
-* **deps:** update dependency core-js to v3.33.3 ([6100431](https://github.com/module-federation/core/commit/6100431155a53c6e34092baf6c0e4d5dd578a53d))
-* **deps:** update dependency typedoc to v0.25.3 ([10477bf](https://github.com/module-federation/core/commit/10477bf1f16d695b792d97919e83a8920ee15c01))
-* **deps:** update dependency unplugin to v1.5.1 ([e2ea98b](https://github.com/module-federation/core/commit/e2ea98b1a8e67c53c79e41dab0398e8a75434362))
+- **deps:** update dependency antd to v4.24.15 ([de857c4](https://github.com/module-federation/core/commit/de857c45af92b3a2584cd3319263417a36f9977a))
+- **deps:** update dependency axios to v1.6.0 [security] ([71bd7be](https://github.com/module-federation/core/commit/71bd7becbc201d69b11f0975d5a56548facb3242))
+- **deps:** update dependency core-js to v3.33.3 ([6100431](https://github.com/module-federation/core/commit/6100431155a53c6e34092baf6c0e4d5dd578a53d))
+- **deps:** update dependency typedoc to v0.25.3 ([10477bf](https://github.com/module-federation/core/commit/10477bf1f16d695b792d97919e83a8920ee15c01))
+- **deps:** update dependency unplugin to v1.5.1 ([e2ea98b](https://github.com/module-federation/core/commit/e2ea98b1a8e67c53c79e41dab0398e8a75434362))
 
 # [3.1.0](https://github.com/module-federation/core/compare/typescript-3.0.1...typescript-3.1.0) (2023-11-13)
 
