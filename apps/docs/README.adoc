@@ -11,14 +11,14 @@ Before you begin, make sure you have the following installed on your machine:
 - nx
 - yarn
 
-You also need a GitHub account and a fork of the https://github.com/module-federation/universe[module-federation/universe] repository.
+You also need a GitHub account and a fork of the https://github.com/module-federation/core[module-federation/universe] repository.
 
 ## Setting up your environment
 
 Documentation website consists of 2 applications:
 
 - `docs-ui` holds the visual part of the documentation website. When serving\building the docs app, docs-ui will be prebuilt as its dependency.
-- `docs` is the one that is meant to contain all the actual documentation. 
+- `docs` is the one that is meant to contain all the actual documentation.
 
 To set up your environment, follow these steps:
 
@@ -50,7 +50,7 @@ To submit a pull request, follow these steps:
 
 1. Commit your changes to your local branch using `git commit -m "your message"`.
 2. Push your changes to your remote fork using `git push origin your-branch`.
-3. Go to https://github.com/module-federation/universe and click on "New pull request".
+3. Go to https://github.com/module-federation/core and click on "New pull request".
 4. Select your fork and branch as the source and the main branch as the destination.
 5. Fill in the title and description of your pull request and click on "Create pull request".
 
@@ -60,4 +60,4 @@ Your pull request will be reviewed by the maintainers of the `module-federation/
 
 That's it! You have successfully contributed to the Module Federation documentation! Thank you for your time and effort!
 
-If you have any questions or issues, feel free to reach out to us on https://github.com/module-federation/universe/discussions[GitHub Discussions]
+If you have any questions or issues, feel free to reach out to us on https://github.com/module-federation/core/discussions[GitHub Discussions]

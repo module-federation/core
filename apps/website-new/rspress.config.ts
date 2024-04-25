@@ -53,14 +53,14 @@ export default defineConfig({
     ],
     editLink: {
       docRepoBaseUrl:
-        'https://github.com/module-federation/universe/tree/main/apps/website-new/docs',
+        'https://github.com/module-federation/core/tree/main/apps/website-new/docs',
       text: 'Edit this page on GitHub',
     },
     socialLinks: [
       {
         icon: 'github',
         mode: 'link',
-        content: 'https://github.com/module-federation/universe',
+        content: 'https://github.com/module-federation/core',
       },
     ],
   },
