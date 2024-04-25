@@ -25,7 +25,7 @@ The runtime plugin can be applied at compile-time or runtime
 <Tabs>
   <Tab label="Rspack">
   ```typescript title="rspack.config.js"
-  const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
+  const {ModuleFederationPlugin} = require('@module-federation/enhanced/rspack');
 
   new ModuleFederationPlugin({
     // other options
@@ -37,7 +37,7 @@ The runtime plugin can be applied at compile-time or runtime
   </Tab>
   <Tab label="Webpack">
   ```typescript title="webpack.config.js"
-  const {ModuleFederationPlugin} = require('@module-federation/enhanced/rspack');
+  const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
 
   new ModuleFederationPlugin({
     // other options

@@ -1,3 +1,7 @@
+import { Badge } from '@theme';
+
+<div style={{float:"right"}}><Badge text="App Router Not Supported" type="danger" /></div>
+
 # Next.js
 
 This plugin enables Module Federation on Next.js
@@ -5,93 +9,11 @@ This plugin enables Module Federation on Next.js
 ## Supports
 
 - next ^14 || ^13 || ^12
-- SSR included!
+- Server-Side Rendering
+- Pages router
 
 I highly recommend referencing this application which takes advantage of the best capabilities:
 https://github.com/module-federation/module-federation-examples
-
-## This project supports federated SSR
-
-## Whats shared by default?
-
-Under the hood we share some next internals automatically
-You do not need to share these packages, sharing next internals yourself will cause errors.
-
-<details>
-<summary> See DEFAULT_SHARE_SCOPE:</summary>
-
-```ts
-export const DEFAULT_SHARE_SCOPE: SharedObject = {
-  'next/dynamic': {
-    eager: false,
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-  },
-  'next/head': {
-    eager: false,
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-  },
-  'next/link': {
-    eager: true,
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-  },
-  'next/router': {
-    requiredVersion: false,
-    singleton: true,
-    import: false,
-    eager: false,
-  },
-  'next/script': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-    eager: false,
-  },
-  react: {
-    singleton: true,
-    requiredVersion: false,
-    eager: false,
-    import: false,
-  },
-  'react-dom': {
-    singleton: true,
-    requiredVersion: false,
-    eager: false,
-    import: false,
-  },
-  'react/jsx-dev-runtime': {
-    singleton: true,
-    requiredVersion: false,
-    import: undefined,
-    eager: false,
-  },
-  'react/jsx-runtime': {
-    singleton: true,
-    requiredVersion: false,
-    eager: false,
-    import: false,
-  },
-  'styled-jsx': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-    eager: false,
-  },
-  'styled-jsx/style': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-    eager: false,
-  },
-};
-```
-
-</details>
 
 ## Requirement
 
@@ -314,13 +236,83 @@ class MyDocument extends Document {
 
 Hot reloading Express.js required additional steps: https://github.com/module-federation/universe/blob/main/packages/node/README.md
 
-## Contact
+## Whats shared by default?
 
-If you have any questions or need to report a bug
+Under the hood we share some next internals automatically
+You do not need to share these packages, sharing next internals yourself will cause errors.
 
-<a href="https://twitter.com/ScriptedAlchemy">
-  {' '}
-  Reach me on Twitter @ScriptedAlchemy
-</a>
+<details>
+<summary> Click to view `DEFAULT_SHARE_SCOPE`:</summary>
 
-Or join this discussion thread: https://github.com/module-federation/module-federation-examples/discussions/978
+```ts
+export const DEFAULT_SHARE_SCOPE: SharedObject = {
+  'next/dynamic': {
+    eager: false,
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+  },
+  'next/head': {
+    eager: false,
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+  },
+  'next/link': {
+    eager: true,
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+  },
+  'next/router': {
+    requiredVersion: false,
+    singleton: true,
+    import: false,
+    eager: false,
+  },
+  'next/script': {
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+    eager: false,
+  },
+  react: {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+    import: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+    import: false,
+  },
+  'react/jsx-dev-runtime': {
+    singleton: true,
+    requiredVersion: false,
+    import: undefined,
+    eager: false,
+  },
+  'react/jsx-runtime': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+    import: false,
+  },
+  'styled-jsx': {
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+    eager: false,
+  },
+  'styled-jsx/style': {
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+    eager: false,
+  },
+};
+```
+
+</details>
