@@ -15,9 +15,9 @@
     "activeMatch": "/plugin/"
   },
   {
-    "text": "Blog",
-    "link": "/blog/announcement",
-    "activeMatch": "/blog/"
+    "text": "Showcase",
+    "link": "/showcase/index",
+    "activeMatch": "/showcase/"
   },
   {
     "text": "Ecosystem",

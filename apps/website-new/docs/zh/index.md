@@ -4,7 +4,7 @@ pageType: home
 hero:
   name: Module Federation
   text: 微前端架构
-  tagline: 新文档、运行时、devtool、类型提示等全新功能上线
+  tagline: 让 JavaScript 应用间共享代码更加简单，团队协作更加高效
   actions:
     - theme: brand
       text: 🎉 发布公告
