@@ -20,11 +20,6 @@
     "activeMatch": "/showcase/"
   },
   {
-    "text": "Blog",
-    "link": "/blog/announcement",
-    "activeMatch": "/blog/"
-  },
-  {
     "text": "Ecosystem",
     "activeMatch": "/ecosystem/",
     "items": [

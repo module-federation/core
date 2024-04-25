@@ -20,11 +20,6 @@
     "activeMatch": "/showcase/"
   },
   {
-    "text": "博客",
-    "link": "/blog/announcement",
-    "activeMatch": "/blog/"
-  },
-  {
     "text": "生态",
     "activeMatch": "/community/",
     "items": [
