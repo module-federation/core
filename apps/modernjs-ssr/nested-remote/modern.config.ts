@@ -63,10 +63,9 @@ export default defineConfig({
         mfConfig.remotes = {
           remote: 'remote@http://localhost:3006/bundles/remoteEntry.js',
         };
-      }
-      if (isServer) {
         appendPlugins([new StreamingTargetPlugin(mfConfig)]);
       }
+
       appendPlugins([
         new AsyncBoundaryPlugin({
           excludeChunk: (chunk) => chunk.name === 'nested_remote',

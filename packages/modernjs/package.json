@@ -31,13 +31,13 @@
   "license": "MIT",
   "dependencies": {
     "@swc/helpers": "0.5.3",
-    "@modern-js/utils": "2.49.0",
+    "@modern-js/utils": "2.49.1",
     "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
-    "@modern-js/app-tools": "^2.49.0",
-    "@modern-js/core": "^2.49.0",
-    "@modern-js/runtime": "^2.49.0",
+    "@modern-js/app-tools": "^2.49.1",
+    "@modern-js/core": "^2.49.1",
+    "@modern-js/runtime": "^2.49.1",
     "@modern-js/module-tools": "^2.35.0",
     "@modern-js/tsconfig": "^2.35.0"
   }

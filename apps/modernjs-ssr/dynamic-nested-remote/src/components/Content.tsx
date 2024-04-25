@@ -1,7 +1,26 @@
 import React from 'react';
-import Comp from 'dynamic_remote/Image';
 import Button from 'antd/lib/button';
+import {
+  loadRemote,
+  registerRemotes,
+} from '@module-federation/enhanced/runtime';
 import stuff from './stuff.module.css';
+
+const isServer = typeof window === 'undefined';
+registerRemotes([
+  {
+    name: 'dynamic_remote',
+    entry: isServer
+      ? 'http://localhost:3008/bundles/bundles/remoteEntry.js'
+      : 'http://localhost:3008/remoteEntry.js',
+  },
+]);
+
+const Comp = React.lazy(() =>
+  loadRemote('dynamic_remote/Image').then((m) => {
+    return m;
+  }),
+);
 
 export default (): JSX.Element => (
   <div className="testlll">
