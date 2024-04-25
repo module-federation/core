@@ -48,11 +48,11 @@ body:
       label: Validations
       description: Before submitting the issue, please make sure you do the following
       options:
-        - label: Read the [docs](https://github.com/module-federation/universe).
+        - label: Read the [docs](https://github.com/module-federation/core).
           required: true
-        - label: Read the [common issues list](https://github.com/module-federation/universe/issues).
+        - label: Read the [common issues list](https://github.com/module-federation/core/issues).
           required: true
-        - label: Check that there isn't [already an issue](https://github.com/module-federation/universe/issues) that reports the same bug to avoid creating a duplicate.
+        - label: Check that there isn't [already an issue](https://github.com/module-federation/core/issues) that reports the same bug to avoid creating a duplicate.
           required: true
         - label: Make sure this is a Module federation issue and not a framework-specific issue.
           required: true

@@ -71,7 +71,7 @@ const config = {
 
 ## Roadmap
 
-For future plans and improvements, refer to the [Roadmap/RFC](https://github.com/module-federation/universe/discussions/1170).
+For future plans and improvements, refer to the [Roadmap/RFC](https://github.com/module-federation/core/discussions/1170).
 
 ## Contributing
 
@@ -85,4 +85,4 @@ License information to be provided by package maintainer.
 
 URLs:
 
-- Roadmap/RFC: https://github.com/module-federation/universe/discussions/1170
+- Roadmap/RFC: https://github.com/module-federation/core/discussions/1170

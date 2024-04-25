@@ -104,6 +104,8 @@ export default defineConfig({
   },
   tools: {
     rspack: (config, { appendPlugins }) => {
+      // You need to set a unique value that is not equal to other applications
+      config.output!.uniqueName = 'federation_provider';
       appendPlugins([
         new ModuleFederationPlugin({
           name: 'federation_provider',

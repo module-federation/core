@@ -20,14 +20,14 @@
     "activeMatch": "/plugin/"
   },
   {
-    "text": "Community",
-    "link": "/community/showcase",
-    "activeMatch": "/community/",
+    "text": "Showcase",
+    "link": "/showcase/index",
+    "activeMatch": "/showcase/"
+  },
+  {
+    "text": "Ecosystem",
+    "activeMatch": "/ecosystem/",
     "items": [
-      {
-        "text": "Showcase",
-        "link": "/community/showcase/"
-      },
       {
         "text": "Module Federation Examples",
         "link": "https://github.com/module-federation/module-federation-examples"

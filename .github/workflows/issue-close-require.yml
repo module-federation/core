@@ -12,7 +12,7 @@ jobs:
     permissions:
       issues: write
     runs-on: ubuntu-latest
-    if: github.repository == 'module-federation/universe'
+    if: github.repository == 'module-federation/core'
     steps:
       - name: need reproduction
         uses: actions-cool/issues-helper@v3

@@ -10,4 +10,4 @@ See [https://module-federation.io/guide/basic/runtime.html](https://module-feder
 
 ## License
 
-`@module-federation/runtime` is [MIT licensed](https://github.com/module-federation/universe/blob/main/packages/runtime/LICENSE).
+`@module-federation/runtime` is [MIT licensed](https://github.com/module-federation/core/blob/main/packages/runtime/LICENSE).
