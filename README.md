@@ -4,6 +4,18 @@
 
 # Module Federation
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/@module-federation/runtime?activeTab=readme">
+   <img src="https://img.shields.io/npm/v/@module-federation/runtime?style=flat-square&colorA=564341&colorB=EDED91" alt="npm version" />
+  </a>
+  <a href="https://npmcharts.com/compare/@module-federation/runtime?minimal=true">
+    <img src="https://img.shields.io/npm/dm/@module-federation/runtime.svg?style=flat-square&colorA=564341&colorB=EDED91" alt="downloads" />
+  </a>
+  <a href="https://github.com/web-infra-dev/rspack/blob/main/LICENSE">
+    <img src="https://img.shields.io/npm/l/@module-federation/runtime?style=flat-square&colorA=564341&colorB=EDED91" alt="license" />
+  </a>
+</p>
+
 `Module Federation 2.0` differs from the `Module Federation` built into `Webpack5` by providing not only the core features of module export, loading, and dependency sharing but also additional dynamic type hinting, `Manifest`, `Federation Runtime`, and `Runtime Plugin System`. These features make `Module Federation` more suitable for use as a micro-frontend architecture in large-scale `Web` applications.
 
 ## 💡 What is Module Federation?
@@ -14,7 +26,6 @@
 
 - Module Federation reuses common dependencies between modules as much as possible
 
-[Learn more](https://module-federation.io/)
 
 ## ✨ What new features does Module Federation 2.0 provide?
 
