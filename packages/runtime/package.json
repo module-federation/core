@@ -2,7 +2,7 @@
   "name": "@module-federation/runtime",
   "version": "0.1.9",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
   "types": "./dist/index.cjs.d.ts",
   "license": "MIT",
