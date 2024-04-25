@@ -177,7 +177,9 @@ export class NextFederationPlugin {
         ...defaultShared,
         ...this._options.shared,
       },
-      ...(isServer ? {} : { manifest: { filePath: '/static/chunks' } }),
+      ...(isServer
+        ? { manifest: { filePath: '' } }
+        : { manifest: { filePath: '/static/chunks' } }),
       // nextjs project needs to add config.watchOptions = ['**/node_modules/**', '**/@mf-types/**'] to prevent loop types update
       dts: this._options.dts ?? false,
     };
