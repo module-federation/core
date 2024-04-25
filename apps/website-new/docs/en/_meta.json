@@ -5,6 +5,11 @@
     "activeMatch": "/guide/"
   },
   {
+    "text": "Practice",
+    "link": "/practice/overview",
+    "activeMatch": "/practice/"
+  },
+  {
     "text": "Configuration",
     "link": "/configure/",
     "activeMatch": "/configure/"
@@ -13,11 +18,6 @@
     "text": "Plugins",
     "link": "/plugin/dev/index",
     "activeMatch": "/plugin/"
-  },
-  {
-    "text": "Practice",
-    "link": "/practice/overview",
-    "activeMatch": "/practice/"
   },
   {
     "text": "Community",
