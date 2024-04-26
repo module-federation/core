@@ -1,0 +1,210 @@
+---
+title: "Internationalization (i18n)"
+---
+
+# Implementing Internationalization (i18n) with Module Federation in React Micro-Frontends
+
+:::tip Demo Reference
+Check out the example project list here: [React i18n](https://github.com/module-federation/module-federation-examples/tree/master/i18next-nextjs-react)
+:::
+
+## Overview
+
+In the realm of micro-frontends, ensuring each application remains as autonomous as possible is crucial. However, scenarios arise where inter-application communication is inevitable. A common requirement is synchronizing language preferences across micro-frontends, such as when a user changes the language setting in one application, and it cascades across all integrated micro-frontends. This documentation outlines a strategy for implementing internationalization using the `react-i18next` library within a micro-frontend architecture facilitated by Module Federation.
+
+## Scenario
+
+Consider two applications: App A (the container application) and App B (the remote application). While App B functions independently as a standalone application, it is also designed to be embedded within App A at runtime. Our objective is to seamlessly synchronize language settings between App A and App B, ensuring both applications can manage and display their localized content.
+
+## Architecture and Implementation
+
+### Extending Bundler Configuration
+
+To accommodate micro-frontend integration, we extend the existing Webpack/Rspack/Rsbuild and Create React App (CRA) configurations using the Module Federation plugin. This extension allows App B to expose various elements (e.g., components, themes, hooks) for consumption by App A or any other integrated applications without requiring codebase ejection.
+
+### Setting Up Internationalization
+
+The `react-i18next` implementation forms the backbone of our translation functionality. Initially, an instance of `i18next` is configured and imported directly into the main application file (`App.js`). This instance leverages a context store to manage state, resources (translations), and plugins.
+
+#### Addressing Translation Override Challenges
+
+A direct implementation approach where each application initializes its `i18next` instance could lead to resource conflicts, particularly where translated terms are overridden. To avoid this, we establish separate `i18next` instances for App A and App B, ensuring each application maintains its translation terms independently.
+
+### Implementation Steps
+
+#### Configuring i18next Instances
+
+For both App A and App B, configure separate `i18next` instances as follows:
+
+```javascript
+// App A
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import enJSON from './translations/en';
+import uaJSON from './translations/ua';
+
+// Translation resources
+const resources = {
+  en: { translation: enJSON },
+  ua: { translation: uaJSON },
+};
+
+// Initialize i18next instance for App A
+const appAInstance = i18n.createInstance();
+appAInstance.use(initReactI18next).init({
+  resources,
+  lng: 'en', // default language
+  fallbackLng: 'en',
+  interpolation: { escapeValue: false },
+  react: { useSuspense: true },
+});
+
+export default appAInstance;
+
+// Repeat similar setup for App B with a separate instance
+```
+
+#### Integrating i18next Providers
+
+Wrap the application components in `I18nextProvider`, passing the respective `i18next` instances to ensure translation contexts are correctly applied.
+
+```javascript
+// App A Wrapper
+import { I18nextProvider } from 'react-i18next';
+import appAInstance from '../i18n';
+
+const AppAI18nWrapper = ({ children }) => (
+  <I18nextProvider i18n={appAInstance}>{children}</I18nextProvider>
+);
+
+export default AppAI18nWrapper;
+
+// Repeat similar setup for App B
+```
+
+#### Language Switching Logic
+
+For App B, write a custom hook to facilitate language switching, for example:
+
+```javascript
+import appBInstance from '../i18n';
+
+const useSwitchLanguage = () => {
+  return (languageId) => appBInstance.changeLanguage(languageId);
+};
+
+export default useSwitchLanguage;
+```
+
+Expose this hook via Module Federation to allow its consumption by App A or other integrated applications.
+
+```javascript
+// Module Federation exposes configuration
+exposes: {
+  './hooks/useSwitchAppBLanguage': './src/hooks/useSwitchLanguage',
+},
+```
+
+In App A, implement a hook that orchestrates language switching across all integrated micro-frontends:
+
+```javascript
+import useSwitchAppBLanguage from 'remoteAppB/hooks/useSwitchAppBLanguage';
+import appAInstance from '../i18n';
+
+const useSwitchLanguage = () => {
+  const switchAppBLanguageHook = useSwitchAppBLanguage();
+  //Application A
+  const switchAppALanguage = (languageCode) => appAInstance.changeLanguage(languageCode);
+  //Application B
+  const switchAppBLanguage = (languageCode) => switchAppBLanguageHook(languageCode);
+  //Both Applications
+  const switchAllLanguages = (languageCode) => {
+    switchAppALanguage(languageCode);
+    switchAppBLanguage(languageCode);
+  };
+
+  return { switchAppALanguage, switchAppBLanguage, switchAllLanguages };
+};
+
+export default useSwitchLanguage;
+```
+
+### Language Switching Interface
+
+Implement a user interface component, such as a button, to trigger language changes across all applications:
+
+```javascript
+import { useSwitchLanguage } from 'src/hooks/useSwitchLanguage';
+
+const LanguageSwitcher = () => {
+  const { switchAllLanguages } = useSwitchLanguage();
+  const handleLanguageSwitch = (lng) => () => switchAllLanguages(lng);
+
+  return <button onClick={handleLanguageSwitch("ua")}>Change language to Ukrainian</button>;
+};
+
+export default LanguageSwitcher;
+```
+
+#### Handling Integrated Environments
+
+To conditionally display language switcher components (e.g., hide the switcher in App B when embedded in App A), leverage a custom hook like `useIsRemote`.
+
+The `useIsRemote` hook is designed to determine if the current application (e.g., App B) is running in a standalone mode or is embedded within another application (e.g., App A). This distinction allows us to conditionally render components based on the application's context.
+
+Below we provided an example of a simplified implementation of the `useIsRemote` hook that checks for a specific condition to determine the application's environment. In the real application this condition could be based on URL parameters, DOM presence checks, or any other trigger that differentiates between being embedded and running standalone:
+
+```javascript
+import { useEffect, useState } from 'react';
+
+/**
+ * Determines if the current application is running as a remote (embedded)
+ * or as a standalone application.
+ *
+ * You should adapt the logic based on the specific criteria that apply to your application's
+ * architecture, such as checking for specific URL parameters or the presence
+ * of a particular DOM element that would only exist when embedded.
+ */
+const useIsRemote = () => {
+  const [isRemote, setIsRemote] = useState(false);
+
+  useEffect(() => {
+    // Check for a URL parameter that indicates embedding
+    const searchParams = new URLSearchParams(window.location.search);
+    setIsRemote(searchParams.has('embedded'));
+
+    // Alternatively, check for a global variable or a specific DOM element
+    // setIsRemote(window.parent !== window || document.getElementById('embed-flag') !== null);
+  }, []);
+
+  return isRemote;
+};
+
+export default useIsRemote;
+```
+
+#### Using the useIsRemote Hook
+
+With the useIsRemote hook implemented, you can now use it within your components to conditionally render elements based on whether the application is running standalone or is embedded. Here's an example of how it might be used to conditionally display a language switcher component in App B:
+
+```javascript
+import React from 'react';
+import useIsRemote from './hooks/useIsRemote';
+import LanguageSwitcher from './components/LanguageSwitcher';
+
+const App = () => {
+  const isRemote = useIsRemote();
+
+  return (
+    <div>
+      {/* Only display the LanguageSwitcher if not running as a remote */}
+      {!isRemote && <LanguageSwitcher />}
+    </div>
+  );
+};
+
+export default App;
+```
+
+In this example, `LanguageSwitcher` will only render when App B is not embedded within App A, based on the `isRemote` state determined by the `useIsRemote` hook. This approach ensures that components like language switchers are only shown in appropriate contexts, enhancing the user experience and maintaining the independence of micro-frontend applications.
+

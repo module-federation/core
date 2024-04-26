@@ -360,7 +360,7 @@ ctx?.res?.on('finish', () => {
 
 ## For Express.js
 
-Hot reloading Express.js required additional steps: https://github.com/module-federation/universe/blob/main/packages/node/README.md
+Hot reloading Express.js required additional steps: https://github.com/module-federation/core/blob/main/packages/node/README.md
 
 ## Contact
 

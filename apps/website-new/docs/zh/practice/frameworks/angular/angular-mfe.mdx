@@ -1,0 +1,328 @@
+---
+title: "Micro-frontends with Angular"
+---
+
+import {Steps, Tabs, Tab} from '@theme';
+
+# 使用 Angular 和 Webpack Module Federation 的微前端
+
+## 概览
+
+Module Federation 大大影响了微前端领域。当它与 Angular 结合使用时，为分布式前端架构提供了一个强大且可扩展的解决方案。本指南探讨了一个实际示例，详细介绍了如何在 Angular shell 和远程应用程序中配置 Webpack 的 `ModuleFederationPlugin`。
+
+### 前置要求
+
+在开始设置之前，请确保满足以下先决条件：
+
+- **Node.js 和 npm：** 确保已安装 Node.js 和 npm。
+- **Angular 和 Webpack 知识：** 需要对 Angular 和 Webpack 有基本的了解。
+- **Module Federation：** 假设对 Module Federation 已经熟悉。
+
+## 准备步骤
+
+<Steps>
+
+### 强制使用 Webpack 5
+
+Angular CLI 项目通常预配置了 Webpack，但为了确保完全支持 Module Federation，需要选择使用 Webpack 5。
+
+<Tabs>
+<Tab label="Yarn">
+  Open your `package.json` and add a `resolutions` key to force the use of Webpack 5:
+  ```json title="package.json"
+  {
+    "resolutions": {
+      "webpack": "^5.0.0"
+    }
+  }
+  ```
+</Tab>
+<Tab label="Npm">
+  `resolutions` 键并非 npm 原生支持。 <br/>
+  建议使用 Yarn 作为包管理器。 <br/>
+  或者，可以尝试使用 `npm-force-resolutions` 包，尽管它尚未在此配置中经过广泛的测试。
+</Tab>
+</Tabs>
+
+
+### 在 Angular CLI 中指定包管理器
+
+
+```json title="angular.json"
+{
+  "cli": {
+    "packageManager": "yarn"
+  }
+}
+```
+
+
+
+### 增加自定义 Webpack 配置
+
+有几个选择来公开 Webpack 配置，例如使用 `Ngx-build-plus` 或 `@angular-builders/custom-webpack`。
+
+在这个例子中，我们将使用后者。
+
+首先，安装包：
+
+```bash
+yarn add @angular-builders/custom-webpack -D
+# or
+npm i -D @angular-builders/custom-webpack
+```
+
+然后，更新 “angular.json” 文件以使用此自定义构建器来执行构建和服务命令：
+
+```json title="angular.json"
+{
+  "projects": {
+    "your-project-name": {
+      "architect": {
+        "build": {
+          "builder": "@angular-builders/custom-webpack:browser",
+          "options": {
+            "customWebpackConfig": {
+              "path": "webpack.config.ts"
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-builders/custom-webpack:dev-server"
+        }
+      }
+    }
+  }
+}
+```
+
+<div className={"rspress-directive tip"}>
+  自定义的 Webpack 配置将会与 Angular 的默认配置合并，这样只需要指定 Module Federation 所需的变更。
+</div>
+
+</Steps>
+
+## 设置消费者 Webpack 构建配置
+
+<Steps>
+
+### 设置 uniqueName
+
+Webpack 默认使用 package.json 中的名称。然而，为了避免冲突，尤其是在单仓库结构中，建议手动定义一个唯一的名称。
+
+```javascript title="webpack.config.ts"
+config.output.uniqueName = 'shell';
+```
+:::tip
+注意：如果你没有使用单体仓库（monorepo），并且在你的 package.json 文件中已经有了唯一的名称，你可以跳过这一步。
+:::
+
+### 优化 runtime chunk
+
+由于当前存在一个漏洞，将 runtimeChunk 优化设置为 false 是必要的；否则，模块联邦机制的设置将会失败。
+
+```javascript title="webpack.config.ts"
+config.optimization.runtimeChunk = false;
+```
+
+### 使用 Module Federation Plugin
+
+
+在你的 webpack.config.ts 文件中，将 ModuleFederationPlugin 添加到插件数组中：
+
+```typescript title="webpack.config.ts"
+import { CustomWebpackBrowserSchema, TargetOptions } from '@angular-builders/custom-webpack';
+import { Configuration, container } from 'webpack';
+
+export default (config: Configuration, options: CustomWebpackBrowserSchema, targetOptions: TargetOptions) => {
+  // ... existing configuration
+  config.plugins.push(
+    new container.ModuleFederationPlugin({
+      remotes: {
+        'mf1': 'mf1@http://localhost:4300/mf1.js'
+      },
+      shared: {
+        '@angular/animations': {singleton: true, strictVersion: true},
+        '@angular/core': {singleton: true, strictVersion: true},
+        // ... other shared modules
+      }
+    })
+  );
+
+  return config;
+};
+```
+
+在这里，在 remotes 对象中，我们将远程模块名称映射到它们各自的位置。键（本例中的 'mf1'）是用于在消费者消费者应用程序中导入模块的名称。值指定远程文件的位置，在这个例子中是 http://localhost:4300/mf1.js。
+
+</Steps>
+## 配置生产者模块/应用
+
+<Steps>
+
+### 设置 uniqueName 以及禁用 runtimeChunk
+
+类似于消费者，定义一个唯一的输出名称并禁用 runtimeChunk 优化：
+
+```typescript
+config.output.uniqueName = 'contact';
+config.optimization.runtimeChunk = false;
+```
+
+### 使用 Module Federation Plugin
+
+使用 `ModuleFederationPlugin`，配置如下:
+
+```typescript
+import { CustomWebpackBrowserSchema, TargetOptions } from '@angular-builders/custom-webpack';
+import { Configuration, container } from 'webpack';
+import * as path from 'path';
+
+export default (config: Configuration, options: CustomWebpackBrowserSchema, targetOptions: TargetOptions) => {
+  // ... existing configuration
+
+  config.plugins.push(
+    new container.ModuleFederationPlugin({
+      filename: "mf1.js",
+      name: "mf1",
+      exposes: {
+        './Contact': path.resolve(__dirname, './src/app/contact/contact.module.ts'),
+        './Clock': path.resolve(__dirname, './src/app/clock/index.ts'),
+      },
+      shared: {
+        '@angular/animations': {singleton: true, strictVersion: true},
+        // ... other shared modules
+      }
+    })
+  );
+
+  return config;
+};
+```
+
+在这里，filename 和 name 属性指定了 JavaScript 文件的名称以及模块容器在全局 window 对象中的命名空间。这些正是消费者消费者应用程序在加载远程模块时使用的确切值。
+
+### 提供模块
+
+`exposes` 对象指明了要被导出的模块。在这个例子中：
+* ./Contact 导出了一个带有子路由的 Angular NgModule。
+* ./Clock 导出了一个用于运行时渲染的 Angular 组件。
+
+</Steps>
+
+## Angular 路由
+
+#### 声明生产者模块类型
+
+在你使用远程模块之前，你需要通知 TypeScript 它们的存在，因为它们将在运行时动态加载。
+
+在你的路由模块旁边创建一个新的 TypeScript 定义文件 remote-modules.d.ts：
+
+```typescript
+declare module 'mf1/Contact';
+declare module 'mf1/Clock';
+```
+
+#### 在路由中懒加载远程模块
+
+就像你对本地懒加载模块的操作一样，你现在可以将远程模块导入到你的 Angular 路由配置中。
+
+请按以下方式修改你的路由配置：
+
+```typescript
+const routes: Routes = [
+  {
+    path: '',
+    loadChildren: () => HomeModule
+  },
+  {
+    path: 'contact',
+    loadChildren: () => import('mf1/Contact').then(m => m.ContactModule)
+  },
+  // ... other routes
+];
+```
+
+## Dynamic Component Creation of Remote Modules
+
+Creating components dynamically from remote modules offers a more advanced level of integration.
+This involves setting up a service and a directive to handle the dynamic rendering.
+
+### 远程模块加载服务
+
+此服务负责动态加载远程模块并解析组件工厂。
+
+```typescript
+@Injectable({
+  providedIn: 'root'
+})
+export class RemoteModuleLoader {
+  constructor(private _componentFactoryResolver: ComponentFactoryResolver) {}
+
+  async loadRemoteModule(name: string) {
+    const [scope, moduleName] = name.split('/');
+    const moduleFactory = await window[scope].get('./' + moduleName);
+    return moduleFactory();
+  }
+
+  getComponentFactory(component: Type<unknown>): ComponentFactory<unknown> {
+    return this._componentFactoryResolver.resolveComponentFactory(component);
+  }
+}
+```
+
+### 远程组件渲染器指令
+
+这个结构型指令使用从远程模块加载服务获取的组件工厂，在它自己的视图容器中动态创建组件。
+
+```typescript
+@Directive({
+  selector: '[remoteComponentRenderer]'
+})
+export class RemoteComponentRenderer implements OnInit {
+  @Input() set remoteComponentRenderer(componentName: string) { /* ... */ }
+  @Input() set remoteComponentRendererModule(moduleName: RemoteModule) { /* ... */ }
+
+  // ... other code
+
+  private async renderComponent() {
+    const module = await this.remoteModuleLoaderService.loadRemoteModule(this._moduleName);
+    const componentFactory = this.remoteModuleLoaderService.getComponentFactory(module[this._componentName]);
+    this.viewContainerRef.createComponent(componentFactory, undefined, this.injector);
+  }
+}
+```
+
+#### 视图使用方式
+
+在 Angular 视图中，可以使用如下指令：
+
+```html
+<ng-container *remoteComponentRenderer="'ClockComponent'; module:'mf1/Clock'"></ng-container>
+```
+
+## 共享依赖
+
+### 共享依赖的重要性
+
+在 Webpack 配置中的 `shared` 部分在定义消费者(shell)和远程模块共有的模块时起着关键作用。这样做可以显著减少打包大小，增强用户体验。
+
+### 处理版本不匹配
+
+由于消费者(shell)和远程应用程序之间主要版本的不匹配，Webpack 可能会在运行时抛出错误。对于共享的 `singletons` 来说，保持一致的版本同步非常重要。
+
+### 语义化版本控制和灵活性
+
+Webpack 在解析共享依赖时遵循语义化版本控制。建议在使用 `^` 或 `>=` 等操作符时允许一定版本的灵活性。这确保只加载必要的版本，最小化加载库的多个冲突版本的风险。
+
+## 总结
+
+本指南通过使用 Webpack 的 Module Federation 介绍了在 Angular 应用程序中动态集成远程模块。具体来说，你已经学到：
+
+- 如何设置 Yarn 作为你的包管理器。
+- 为你的 Angular 构建自定义 Webpack 配置。
+- 在消费者(shell)和微前端应用中利用模块联邦。
+- 在 Angular 路由中懒加载远程模块。
+- 动态创建来自远程模块的组件。
+
+对于生产就绪的设置，还需进行额外的步骤，这些将在未来的指南中介绍。如果你对这项技术有任何问题，欢迎通过我们的社交网络与我们联系。
