@@ -7,6 +7,7 @@
     "dist/",
     "README.md"
   ],
+  "type": "commonjs",
   "publishConfig": {
     "access": "public"
   },
