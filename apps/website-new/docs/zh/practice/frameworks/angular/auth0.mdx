@@ -1,0 +1,145 @@
+---
+title: "Authentication with Auth0"
+---
+
+# 认证：集成共享用户上下文
+
+本文档概述了在应用程序消费者体中使用 Auth0 和 Angular 跨微前端共享身份验证状态（例如当前用户上下文）的过程。
+
+## 概述
+
+在微前端架构中，通常会有跨应用程序的不同部分共享上下文信息（如当前用户的资料）的需求。本文档描述了如何使用 `@auth0/auth0-angular` 实现无缝的身份验证状态共享，这是一个方便与 Auth0（身份管理提供商）集成的软件包。
+
+## 前提条件
+
+在继续之前，请确保你已经拥有：
+
+- 对 Angular 和微前端概念的基本了解。
+- Auth0 账户以及在 [Auth0 的管理仪表板](https://manage.auth0.com/) 上注册的 Web 应用程序。
+- 已设置 Module Federation 的 Angular 应用程序。
+
+## 逐步指南
+
+### 第 1 步：安装 Auth0 包
+
+通过 npm 安装 `@auth0/auth0-angular`，以便在你的 Angular 应用程序中使用 Auth0 进行认证：
+
+```bash
+npm i @auth0/auth0-angular
+```
+
+### 第 2 步：注册应用程序
+
+1. 访问 [Auth0 的管理仪表板](https://manage.auth0.com/) 并注册你的单页面应用程序 (SPA)。
+2. 记下注册后提供的 `domain` 和 `clientId`。
+3. 将你的应用程序 URL（例如，`http://localhost:4200`）添加到允许的回调 URL 部分。
+
+### 第 3 步：导入 AuthModule
+
+从 `@auth0/auth0-angular` 导入 `AuthModule` 到消费者应用程序和微前端（一个或多个）的 AppModule 中。
+
+```typescript title="app.module.ts"
+
+import { AuthModule } from '@auth0/auth0-angular';
+
+@NgModule({
+  imports: [
+    AuthModule.forRoot({
+      domain: 'YOUR_AUTH0_DOMAIN',
+      clientId: 'YOUR_AUTH0_CLIENT_ID'
+    }),
+    // other imports...
+  ],
+  // other module properties...
+})
+export class AppModule { }
+```
+
+替换 `YOUR_AUTH0_DOMAIN` 和 `YOUR_AUTH0_CLIENT_ID` 为从你的 Auth0 应用程序设置中获取的实际值。
+
+### 第 4 步：实现登录功能
+
+在你的消费者应用程序中，使用 `AuthService` 来实现登录功能。
+
+```typescript title="projects/shell/src/app/home/home.component.ts"
+
+import { Component } from '@angular/core';
+import { AuthService } from '@auth0/auth0-angular';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss']
+})
+export class HomeComponent {
+  user$ = this.auth.user$;
+
+  constructor(private auth: AuthService) {}
+
+  login(): void {
+    this.auth.loginWithRedirect();
+  }
+}
+```
+
+### 第 5 步：显示用户信息
+
+在消费者应用程序的主页组件中，显示已登录用户的名称。
+
+```html title="projects/shell/src/app/home/home.component.html"
+<h1>Welcome!</h1>
+
+<p *ngIf="user$ | async as user">
+    User: {{user.name}}
+</p>
+
+<div>
+    <button (click)="login()" mat-flat-button color="primary">Login</button>
+</div>
+```
+
+#### 第 6 步：在微前端中使用 AuthService
+
+在你的微前端组件中，同样可以使用 `AuthService` 来访问当前用户的信息。
+
+```typescript title="address.component.ts"
+import { AuthService } from '@auth0/auth0-angular';
+import { FormBuilder } from '@angular/forms';
+import { take } from 'rxjs/operators';
+
+@Component({
+  // component metadata...
+})
+export class AddressComponent {
+  // component properties...
+  constructor(
+    private auth: AuthService,
+    private fb: FormBuilder) {
+    this.auth.user$.pipe(take(1)).subscribe(user => {
+      if (!user) return;
+      // Use user information to pre-fill form, etc.
+    });
+  }
+  // other component methods...
+}
+```
+### 第 7 步：为共享认证配置模块联邦
+
+确保 `@auth0/auth0-angular` 包在你的消费者应用程序和微前端之间共享，以维护单一的认证状态。
+
+```typescript
+// In webpack.config.js of both shell and micro frontends
+
+module.exports = {
+  // existing configuration...
+  shared: share({
+    "@auth0/auth0-angular": { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+    // other shared packages...
+  })
+};
+```
+这种配置确保了 `AuthService` 的单一实例在整个应用程序中被使用，便于实现共享的认证状态。
+
+## 结论
+
+遵循这些步骤，你可以在 Angular 应用程序的微前端之间实现无缝的认证状态共享。这种设置不仅简化了用户上下文的管理，而且通过在应用程序的模块化组件之间保持一致的认证状态，还增强了整体的用户体验。

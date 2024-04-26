@@ -1,0 +1,305 @@
+---
+title: "拆分巨石应用"
+---
+import {Steps} from '@theme'
+
+# 将Angular应用分割成微前端应用：一个分步指南
+
+## 微前端介绍
+
+微前端为管理大型应用程序提供了一种可扩展的解决方案，通过将它们分割成更小、更独立的部件。这种方法允许专门的团队分别开发、测试和部署应用程序的各个部分，提高了效率并减少了复杂性。
+
+### 什么是微前端？
+
+微前端将微服务原则应用于前端开发，将大型应用程序分解成可管理的部分。这些部件，或称为微应用，可以独立开发并通过路由集成。有关微前端的更深入信息，特别是涉及到模块联邦的部分，我们建议阅读我们的[模块联邦文章](https://test.com)。
+
+#### 视角
+
+用户看到一个统一的应用，而开发者则在部署和服务选项中享有灵活性，包括用于集成微服务的模块联邦。
+
+## 微前端技术概览
+
+微前端允许使用不同的框架或库来构建应用程序的不同部分，提供了灵活性但也带来了挑战，如团队流动性。像单页面SPA或特定框架的解决方案，如Angular的Nx，帮助将这些技术集成到一个连贯的应用中。目标是独立构建、测试和部署每个微应用，同时确保用户无缝体验。
+
+## 应对向微前端的转变
+
+### 大型应用程序的挑战
+
+大型应用程序可能会因为测试和构建耗时而遭受重负，以及本地服务速度缓慢。通过将应用程序分割成更小的部分转变为微前端，可以显著缓解这些问题。
+
+实施微前端有许多方法，有各种指导和资源可用。一些专注于从头构建微前端，这对于预期要大规模扩展的新项目来说是理想的。
+
+## 重构现有应用程序
+
+然而，本指南集中在重构现有应用程序，可能使用Angular CLI构建，将其分割成共享库和单个应用。然后这些组件在不破坏统一用户体验的同时，增强开发效率，无缝集成在更大的应用程序中。
+
+## 为微前端实现审核基础应用程序
+
+### 使用示例应用程序进行实验设置
+
+对于我们对微前端的探索，我们将使用一个示例应用程序。该应用程序虽然不大也不复杂，但包含几个服务，演示了它们如何可以与微前端架构中的每个微应用集成。
+
+#### 应用程序结构
+
+应用程序的结构反映了使用Angular CLI创建新项目时通常会得到的样子。主要元素包括：
+
+- **功能模块**：这些是应用程序内的特定功能或页面，如 'add-user'（添加用户）、'dashboard'（仪表板）、'login'（登录）和 'user-list'（用户列表）。
+- **模型**：定义应用程序内数据形态的数据结构。
+- **共享服务**：在应用程序的不同部分中使用的常见功能，如身份验证（`auth`）和用户管理（`users`）。
+
+目录结构如下：
+
+```bash
+- src
+  + features
+    - add-user
+    - dashboard
+    - login
+    - user-list
+  - models
+  + shared
+    - auth
+    - users
+```
+### 重构策略
+
+目标是将服务和模型重构为可以跨微应用共享的库。另一方面，功能模块将被转换为各自的应用程序。这种方法确保了模块化，并便于每个功能的独立开发和部署。
+
+#### 路由考虑
+
+应用程序中当前的路由设置使用懒加载，提高了性能和用户体验。下面是展示路由策略的一个摘录：
+
+```typescript title="app-routing.module.ts"
+
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { isLogged } from './shared/auth/is-logged.guard';
+import { isNotLogged } from './shared/auth/is-not-logged.guard';
+
+const routes: Routes = [
+  {
+    path: '',
+    canMatch: [isLogged],
+    loadChildren: () =>
+      import('./features/dashboard/dashboard.module').then((m) => m.DashboardModule),
+  },
+  {
+    path: '',
+    canMatch: [isNotLogged],
+    loadChildren: () => import('./features/login/login.module').then((m) => m.LoginModule),
+  },
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {}
+```
+
+This routing module demonstrates the use of guards (`isLogged` and `isNotLogged`) to manage access to different routes based on user authentication status, and dynamic imports for lazy loading of feature modules.
+
+### Starting with Simple Steps in Micro-Frontend Migration
+
+#### Approach to Migrating a Complex Application
+
+Migrating a complex application to a micro-frontend architecture can be challenging. To facilitate this process, clear steps and possibly additional tooling (for better dependency management) are essential.
+
+##### Initial Focus: Dependency-Free Files
+
+1. **Identify Independent Files**: Start by pinpointing files that do not have dependencies but are used across services and feature modules. For example, in our sample application, this applies to the `models` folder, which contains models used throughout the application but doesn't depend on any other files.
+
+2. **Create a New Library for these Files**: Use Angular CLI to generate a library that will house these independent files. The command for this is:
+
+```bash
+ng generate library models
+```
+这个命令会产生以下动作：
+    - 创建一个新的 `projects` 文件夹，包含 `models` 库。
+    - 安装 `ng-packagr` 作为依赖。
+    - 更新 `angular.json` 和 `tsconfig.json` 以包含新的库。
+
+#### 自定义库
+
+- **路径映射**：修改 `tsconfig.json` 中的路径映射以避免与npm模块发生潜在的冲突。建议的前缀是 `@@`，因为npm模块名称不能包含双感叹号。
+- **包命名**：如果你打算将库发布到注册表，请确保 `package.json` 中的名称适合注册表。否则，你可以选择一个方便的名称。
+
+#### 重构模型
+
+1. **移动模型**：将 `models` 文件夹的内容转移到新库中。生成的库将包含默认的组件、模块和服务，这些可以被移除。将用户模型文件放置在库的 `lib` 文件夹中。
+2. **更新公共API**：修改 `public-api.ts` 文件以从 `lib` 文件夹导出适当的内容。
+
+#### 管理文件移动
+
+- **使用Git进行文件传输**：使用 `git mv` 而不是操作系统功能来移动文件。这样可以确保Git更好地跟踪更改。
+
+#### 库文件夹结构
+
+`models` 库的文件夹结构应该组织得清晰易懂，便于访问。
+
+#### 更新导入
+
+**更改导入路径**：将现有的导入路径替换为新库的路径。例如，更改：
+
+```javascript
+// from
+import { User } from 'src/app/models/user';
+// to
+import { User } from '@@models';
+```
+
+确保路径与 `tsconfig.json` 文件中指定的相匹配。
+
+#### 构建库
+
+**解决错误**：最初，你可能会遇到由于库未构建而导致的错误。通过运行以下命令来解决这个问题：
+
+```bash
+ng build models
+```
+
+这个命令会编译 `models` 库，使 TypeScript 能够正确引用 `@@models`。
+
+#### 迁移至高级阶段
+
+成功将独立代码迁移到库中后，下一步涉及到处理也可以隔离的依赖代码。继续以我们的示例为例，我们将专注于将 `auth` 服务及其守卫迁移到一个独立的库中。这个过程与为 `models` 库采取的步骤相似。
+
+#### 创建认证库
+
+<Steps>
+
+### 生成库
+
+使用 Angular CLI 创建 `auth` 库，命令如下：
+
+```bash
+ng generate library auth
+```
+### 重构库内容：
+
+从 `lib` 文件夹中移除默认内容，并将 `auth` 文件夹中的所有内容转移到其中。更新 `public-api.ts` 文件以反映这些更改。
+
+`public-api.ts` 文件应该类似于如下结构：
+
+```javascript
+/*
+ * Public API Surface of auth
+ */
+export * from './lib/auth.service';
+export * from './lib/is-logged.guard';
+export * from './lib/is-not-logged.guard';
+```
+
+### 构建库
+
+使用Angular CLI编译`auth`库：
+
+```bash
+ng build auth
+```
+### 更新导入
+将应用程序的导入语句更改为使用新的 `auth` 库。
+
+</Steps>
+值得庆祝！你的应用程序的部分已经成功迁移到库中。这不仅保持了应用程序的运行，还有可能加快了速度，因为Angular不需要重建整个应用程序。你现在拥有了几个具有独立测试和构建功能的库，适用于更大应用程序中的组件、服务、管道和其他元素的共享。
+
+#### 高级库组织
+
+对于更复杂的应用程序，请考虑使用ng-packagr的次要入口点（Secondary Entrypoints）功能将常用的项（例如组件或服务）进行分组。这需要进行额外的配置调整。
+
+### 迁移第一个应用程序
+
+已经学会了如何打包库，我们现在转向将一个特性模块迁移到它自己的应用程序。
+
+#### 选择迁移的模块
+
+在我们的示例中，选择 `Login` 特性模块进行迁移。确保此模块使用的共享工件已经在它们各自的库中。像 `users` 服务这样的其他服务可以稍后迁移。
+
+#### 创建登录应用程序
+
+<Steps>
+
+### 生成应用程序
+
+使用Angular CLI创建 `login` 应用程序：
+
+```bash
+ng generate application login --style=scss --routing
+```
+--routing标志对于应用内的导航至关重要。
+
+### 启动应用程序
+
+使用以下命令测试新创建的应用程序：
+
+```bash
+ng serve login
+```
+
+如果主应用程序正在运行，你可能需要使用不同的端口。
+
+</Steps>
+### 重构特性模块
+
+1. **转移特性模块**：不要像处理库那样替换文件，而是在新应用程序的 `src` 中创建一个 `feature` 文件夹，并将 `login` 文件夹移入其中。
+
+2. **更新路由**：修改 `login` 应用程序的 `app-routing.module.ts`，以便在根路由上提供 `Login` 模块。
+
+3. **调整 AppComponent**：确保 `login` 应用的 `app.component.html` 包含一个 `<router-outlet></router-outlet>` 标签，以便路由能够正确工作。
+
+### 解决样式问题
+
+最初，新应用程序可能看起来没有样式。从主应用程序中复制 `styles.scss` 文件到新应用程序中以解决这个问题。未来的文章将深入探讨跨应用程序共享样式。
+
+### 结果
+
+如果操作正确，`login` 应用程序现在应该可以独立运行，有样式且功能完备，这标志着你朝着完全实现微前端架构迈出的重要一步。
+
+## 将登录应用集成到主应用程序中
+
+在将 `Login` 应用程序设置为独立实体后，下一步关键步骤是将其与主应用程序集成。这涉及构建 `Login` 应用为库，并使用主模块中现有的懒加载特性进行导入。
+
+### 更新 `angular.json`
+
+1. **修改项目配置**：在 `angular.json` 中，复制一个库配置，将其放在 `login` 配置下以更好地组织。将键重命名为 `login-lib` 并更新引用（如 `root`、`sourceRoot`）以指向 `login` 应用程序。
+   - 更新后的配置应调整以反映 `login` 应用程序的特定路径和设置。
+
+2. **创建 `ng-package.json`**：此文件对于指导 `ng-packagr` 如何打包应用程序至关重要。从另一个库中复制一个现有的 `ng-package.json` 文件，将其粘贴到 `Login` 应用程序的根文件夹中。将 `dest` 键更新为 `"../../dist/login-lib"` 以指明构建输出目录。
+
+### 建立公共API
+
+1. **创建 `public-api.ts`**：这个文件不同于典型的库设置，应该在 `src` 文件夹下创建。它应该只导出 `Login` 特征模块：
+
+```javascript
+// public-api.ts
+export { LoginModule } from './app/feature/login/login.module';
+```
+### 构建库
+
+1. **准备 `package.json`**：从另一个库复制一个 `package.json` 到 `Login` 应用的根目录，并确保更新项目名称。
+
+2. **构建命令**：执行 Angular CLI 构建命令：
+
+```bash
+ng build login-lib
+```
+
+这个过程会编译 Login 模块为库。
+
+### 导入库
+1. **更新 tsconfig.json**：在 tsconfig.json 中为 login-lib 添加一个新的路径映射，指向 "dist/login-lib"。这一步对 TypeScript 正确定位库至关重要。
+
+2. 修改应用程序路由：在 app-routing.module.ts 中，更新懒加载路径以使用新库：
+
+```javascript
+loadChildren: () => import('@@login').then((m) => m.LoginModule),
+```
+### 运行集成应用程序
+
+将这些更改应用之后，你可以像往常一样启动应用程序。现在作为一个单独项目的 `Login` 模块应该能够在主应用程序中无缝地工作。
+
+### 更多的机会和考虑
+
+- **自动化构建**：为了简化流程，考虑使用像 Lerna 这样的工具进行自动化构建和依赖项管理。这在处理多个库和应用程序时尤其有帮助。
+
+- **版本管理**：当前的设置没有使用库的版本控制，这可能会使得引入破坏性更改变得复杂。实施版本控制策略对长期维护来说可能是有益的。
