@@ -4,15 +4,16 @@
 
 Today, we are thrilled to announce the official launch of Module Federation 2.0! Module Federation 2.0 is a new version introduced by the [ByteDance Web Infra](https://github.com/web-infra-dev) team and [@Zack Jackson](https://github.com/ScriptedAlchemy). It resolves numerous issues from the previous Module Federation, building upon ByteDance's internal practices and the original community ecosystem.
 
-## Why Develop Module Federation 2.0?
+## Why Use Module Federation 2.0?
 
-Module Federation, as a pivotal feature introduced by Webpack 5 over three years ago, has been widely adopted as a module sharing solution. It is favored by large web projects for its efficiency and simplicity in large web application development and team collaboration. However, broader adoption has also surfaced new challenges:
+Module Federation, a major feature introduced by Webpack 5, has been out for over three years. As a module sharing solution, it has been widely adopted and is particularly favored by large web projects. It has made the development of large web applications and team collaboration more efficient and straightforward. However, with the broader adoption of Module Federation, new challenges have emerged. Module Federation 2.0 offers new solutions to some of these issues:
 
-- **Lack of Best Practices**: As an integral plugin of Webpack 5 without a dedicated site, Module Federation has lacked comprehensive best practices for various configurations and scenarios.
-- **Runtime and Build Tool Coupling**: Previously, Module Federation's Runtime was tightly coupled with the build tool, which made it impossible to load remote MF modules without the build tool. This necessitated a ground-up implementation of Module Federation in all build tools, leading to high maintenance costs and a lack of standardization.
-- **Type Safety**: Unlike traditional NPM packages, Module Federation's runtime loading characteristic lacks TypeScript type hints, presenting a disadvantage.
-- **Debugging Tools**: As a micro-frontend architecture pattern, Module Federation lacks tools for analysis and debugging to accommodate new development practices, increasing team collaboration costs.
-- **Deployment Platforms**: Module Federation primarily used remoteEntry.js for remote module loading and provisioning in the past. It lacked a universal protocol to integrate with deployment platforms for more controlled resource and version management.
+- **Best Practices**: Module Federation has launched a new independent documentation site [here](https://module-federation.io/), which includes best practices for Module Federation and configurations that can help you use Module Federation more effectively.
+- **Decoupling Runtime from Build Tools**: The new version of Module Federation decouples the Runtime from build tools, unifying the implementation standards for Module Federation across various build tools, and making the loading of Module Federation modules more flexible.
+- **Type Safety**: The new version of Module Federation's build plugin will automatically generate and load types for TypeScript projects, and in development mode, it will automatically synchronize types to ensure type safety.
+- **Debugging Tools**: The new version of Module Federation provides a `devtool` that makes debugging with Module Federation more convenient and efficient.
+- **Deployment Platforms**: The new version of Module Federation has added the `mf-manifest.json` file protocol, which makes it easier to integrate with deployment platforms, allowing for more controlled management of Module Federation version resources and versions.
+
 
 ## Introduction to Module Federation 2.0 Features
 
