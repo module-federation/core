@@ -27,7 +27,7 @@ export default function AnnouncementVideo(props: {
     }
     return {
       width: width - width * customWidthScale,
-      height: (width - width * customWidthScale) * 0.64,
+      height: (width - width * customWidthScale) * 0.5625,
     };
   }
 
