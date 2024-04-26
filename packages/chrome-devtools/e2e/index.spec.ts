@@ -91,6 +91,8 @@ test('test proxy', async ({ request }) => {
   await sleep(2000);
 
   await devtoolsPage.getByPlaceholder('Custom Manifest URL').fill(mockUrl);
+  const optionsEle = await devtoolsPage.$$('.arco-select-option');
+  optionsEle[0].click();
 
   await sleep(1000);
 
