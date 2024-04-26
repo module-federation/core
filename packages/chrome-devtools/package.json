@@ -1,6 +1,7 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.0.25",
+  "version": "0.0.26",
+  "private": true,
   "scripts": {
     "build:storybook": "storybook build",
     "storybook": "storybook dev -p 6006",

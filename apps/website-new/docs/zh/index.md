@@ -4,11 +4,11 @@ pageType: home
 hero:
   name: Module Federation
   text: 微前端架构
-  tagline: 分治你的 Web 应用程序
+  tagline: 让 JavaScript 应用间共享代码更加简单，团队协作更加高效
   actions:
     - theme: brand
-      text: 介绍
-      link: /zh/guide/start/index.html
+      text: 🎉 发布公告
+      link: /zh/blog/announcement.html
     - theme: alt
       text: 快速开始
       link: /zh/guide/start/quick-start.html

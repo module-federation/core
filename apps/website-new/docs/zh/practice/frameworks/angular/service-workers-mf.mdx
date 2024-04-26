@@ -1,0 +1,266 @@
+---
+title: "使用 Service Workers"
+---
+
+import {Steps} from '@theme'
+
+## 使用Angular和Module Federation的服务工作者
+
+集成Angular服务工作者可以解决使用Module Federation的Angular项目中的挑战，尤其是在动态加载来自远程容器的大型代码块时。服务工作者通过缓存联合代码并确保远程容器离线可访问，从而增强用户体验，提高应用程序性能，减少加载时间，并平滑路由过渡。
+
+## Angular服务工作者
+
+Angular中的服务工作者是一个在web应用程序后台运行的小型JavaScript脚本。它的主要职责是管理网络请求，比如加载网页或数据的请求。
+
+服务工作者在Angular应用程序中特别有用，这些应用程序通常是单页应用程序（SPAs）。自Angular版本5.0起，Angular应用程序就可以轻松地使用服务工作者。这有助于这些应用程序更快地加载，并更平滑地工作，无需复杂的代码即可处理网络请求和缓存。
+
+要了解更多关于Angular服务工作者及其工作原理，建议查阅官方Angular文档中的[服务工作者介绍](https://angular.io/guide/service-worker-intro)。
+
+## 优势
+
+### 性能和可靠性
+
+服务工作者缓存必要的资源，包括JavaScript模块和其他资产。这种缓存机制意味着一旦用户下载了这些资源，它们就会被本地存储，因此在后续访问时加载时间会显著加快。
+
+### 离线能力
+
+服务工作者使Angular应用程序即使在不稳定的网络条件下也能有效地运行。这对于Module Federation特别有利，确保应用程序保持功能性并提供一致的用户体验，无论网络的可靠性如何。
+
+### 简化应用程序更新
+
+服务工作者促进后台更新联合模块。它们帮助维护联合模块之间的版本一致性，确保应用程序在没有依赖冲突的情况下平稳运行。
+
+### 提升用户体验
+
+对于使用Module Federation的应用程序，服务工作者可以预获取所需的模块，减少在应用程序的不同部分之间导航时的加载时间。这带来了更平滑、更响应的用户体验。
+
+## 实施服务工作者
+
+本节提供了在Angular中设置服务工作者的简明指南。有关详细信息，请参考[官方Angular文档](https://angular.io/guide/service-worker-getting-started)。
+
+为了有效地将服务工作者集成到Angular应用程序中，第一步是将应用程序转变为渐进式Web应用程序（PWA）。PWA以其提供类似本地应用的功能而闻名，能够提升用户体验。要理解PWA的概念、它们的独特优势、对商业的影响以及开发方法，建议查阅web.dev上的[渐进式Web应用程序](https://web.dev/explore/progressive-web-apps)页面。
+
+## PWA设置
+
+在应用程序的根目录执行`ng add @angular/pwa`。此命令：
+
+1. **安装服务工作者包**：将`@angular/service-worker`添加到你的项目中。
+2. **生成服务工作者配置**：创建一个`ngsw-config.json`文件。
+3. **更新索引文件**：修改`index.html`以引用`manifest.webmanifest`。
+
+设置服务工作者后，配置缓存策略以优化应用程序的性能。
+
+### 缓存策略
+
+定义缓存策略以增强应用程序的性能。服务工作者即使在离线状态下也能处理导航和API URL请求。正确的策略取决于应用程序的设置。
+
+如果应用程序具有懒加载模块，请将它们包含在缓存策略中。以下是`ngsw-config.json`中的一个示例：
+
+```json
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "main-assets",
+      "installMode": "prefetch",
+      "updateMode": "lazy",
+      "resources": {
+        "files": [
+          "/favicon.ico",
+          "/index.html",
+          "/*.css",
+          "/main.js",
+          "/polyfills.js",
+          "/styles.css",
+          "/lazy-module-1.js",
+          "/lazy-module-2.js"
+        ]
+      }
+    },
+    {
+      "name": "additional-assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/assets/**",
+          "/*.(png|jpg|jpeg|svg|gif|webp|woff2|woff|ttf|otf)"
+        ]
+      }
+    }
+  ]
+}
+```
+### 动态加载和依赖管理
+
+在远程容器被动态加载的场景中，Webpack负责下载必要的依赖项。<br/>
+通过检查浏览器开发者工具中的网络（Network）标签，可以验证所有已下载的依赖项。<br/>
+此检验将展示加载过程中获取的所有文件，为可能需要缓存的内容提供清晰的视图。<br/>
+当远程容器动态加载时，Webpack将检索任何尚不存在的所需依赖项。
+
+![动态加载和依赖管理](https://angular.io/generated/images/guide/service-worker/sw-active.png)
+
+### 为远程容器调整策略
+
+为了避免新构建中文件名变更的问题，可以使用通配符模式来缓存来自远程URL的所有`*.js`文件。此方法在`ngsw-config.json`文件中实现。
+
+```json
+{
+  "name": "RemoteAssets",
+  "installMode": "lazy",
+  "updateMode": "prefetch",
+  "resources": {
+    "urls": [
+      "https://your-remote-container-url/*.js" // Using a wildcard to cache all JS files
+    ]
+  }
+}
+```
+理解配置参数
+
+- **名称 (Name)**：标识资产组，并与清单哈希 (manifestHash) 相关联以确定缓存位置。
+- **安装模式 (InstallMode)**：决定初始缓存行为（`prefetch` 为立即，`lazy` 为按需）。
+- **更新模式 (UpdateMode)**：在更新期间决定缓存行为（`prefetch` 为立即更新，`lazy` 为延迟缓存）。
+- **资源 (Resources)**：描述缓存的范围，包括 `文件 (files)` 和/或 `URL (urls)`。
+
+### 更新缓存的联合块
+
+#### 确保数据的新鲜度
+
+Angular 服务工作者包括 SwUpdate 服务和硬刷新方法等特点，用以保持数据当前。
+
+为了更深入地理解 Angular 服务工作者中使用的 SwUpdate 服务和硬刷新方法，建议咨询 [官方 Angular 文档](https://angular.io/guide/service-worker-communications)。这个资源提供了这些特定功能的详细细节和指导。
+
+*硬刷新实施示例 (Hard Refresh Implementation Example)*：
+
+```javascript
+function hardRefresh() {
+  navigator.serviceWorker.getRegistration().then(async (registration) => {
+    if (!registration) return;
+    await registration.unregister();
+    window.location.reload();
+  });
+}
+```
+这种实施确保应用程序为用户提供最新内容。
+
+执行硬刷新时，将执行以下操作：
+
+1. 注销服务工作者。
+2. 清除服务工作者缓存的所有文件。
+3. 重新加载网页。
+
+## 使用Workbox增强服务工作者管理
+
+Workbox是一套JavaScript库，增强了渐进式Web应用程序（PWA）的功能，超出了Angular服务工作者等特定框架工具的能力。它在Angular中的Module Federation等复杂设置中特别有用，为开发人员提供了提高应用程序性能和用户体验的方法。
+
+### Workbox的主要特点
+
+1. **Webpack集成定制化**：Workbox通过`workbox-webpack-plugin`与Webpack无缝集成，区别于其他工具的特性。这对于Module Federation项目至关重要，允许在Webpack配置内实现有效和精确的服务工作者管理。
+
+2. **不依赖框架**：Workbox适用于不同的JavaScript框架和库，为使用多个框架的项目或寻找广泛适用工具的开发人员提供多功能解决方案。
+
+3. **详细缓存控制**：它为开发人员提供了详细的缓存控制权，使他们能够创建自定义的服务工作者脚本来精细管理资源。
+### 安装和配置
+
+<Steps>
+### 安装Workbox
+
+首先，将Workbox添加到你的Angular项目中：
+
+```bash
+npm install workbox-webpack-plugin --save-dev
+```
+### 在Webpack中配置Workbox
+
+鉴于Module Federation严重依赖于Webpack，因此需要在Webpack配置中将Workbox作为一个插件进行配置。这一步对于确保服务工作者策略与Module Federation的分布式特性一致至关重要。
+
+*示例Webpack配置：*
+
+```javascript
+const { GenerateSW } = require('workbox-webpack-plugin');
+
+module.exports = {
+  // ... other webpack config relevant to Module Federation
+  plugins: [
+    new GenerateSW({
+      // Configurations specific to your Module Federation setup
+      // these options encourage the ServiceWorkers to get in there fast
+      // and not allow any straggling "old" SWs to hang around
+      clientsClaim: true,
+      skipWaiting: true,
+    })
+  ],
+};
+```
+### 定制缓存策略和公开Workbox服务工作者
+
+在Module Federation设置中，正确公开共享资源（如Workbox服务工作者）至关重要。以下是实现方法：
+
+1. *将Workbox定义为共享模块：* 在Webpack中的Module Federation插件配置中，将Workbox服务工作者声明为共享模块。这一步确保了服务工作者可以在所有联合模块中被访问。
+
+*示例Module Federation配置在webpack.config.js中：*
+
+```javascript
+const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
+
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      // Other Module Federation settings
+      shared: {
+        // Share Workbox configuration as a module
+        'workbox-webpack-plugin': {
+          singleton: true,
+          requiredVersion: 'your-workbox-version'
+        }
+      }
+    })
+  ],
+};
+```
+2. *动态导入Workbox服务工作者：* 使用动态导入特性在你的Angular应用程序中加载Workbox服务工作者。这通常可以在你应用程序的主入口文件中完成。
+
+*在main.ts中动态加载的示例：*
+
+```typescript
+import { Workbox } from 'workbox-window';
+
+if ('serviceWorker' in navigator) {
+  const wb = new Workbox('/service-worker.js');
+
+  wb.register();
+}
+```
+在这个示例中，使用了 `workbox-window` 来简化客户端应用程序中的服务工作者注册过程。请确保这个包已经安装并包含在你的项目依赖中。有关在Webpack中注册服务工作者的更多信息，我们建议阅读 [主题的官方文档](https://webpack.js.org/guides/progressive-web-application/#registering-our-service-worker)。
+
+### 定制Workbox策略
+
+Workbox提供了多种缓存和网络请求的策略。在服务工作者文件中配置这些策略，以满足你的应用程序的特定需求。
+
+*Example `service-worker.js`:*
+
+```javascript
+import { precacheAndRoute } from 'workbox-precaching';
+import { NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
+
+// Precaching for fast load of initial resources
+precacheAndRoute(self.__WB_MANIFEST);
+
+// Example runtime caching strategies
+self.addEventListener('fetch', event => {
+  if (event.request.url.includes('/api/')) {
+    // Network-first strategy for API requests
+    event.respondWith(new NetworkFirst().handle({ event }));
+  } else {
+    // Stale-while-revalidate for other resources
+    event.respondWith(new StaleWhileRevalidate().handle({ event }));
+  }
+});
+```
+
+在这个设置中，Workbox为API调用提供了一个网络优先策略，并对其他资源使用了边使用边验证策略，确保了高效地获取数据和缓存。
+
+</Steps>
+
