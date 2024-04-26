@@ -20,7 +20,7 @@ export const ZH_CN: Record<keyof typeof EN_US, string> = {
     '基于 Rust 和 TypeScript 的高度并行、增量编译架构，构建速度非常快，带给你极致的开发体验。',
   benchmarkDetail: '参见 Benchmark 详情',
   announcementVideo:
-    'https://lf3-static.bytednsdoc.com/obj/eden-cn/dhozeh7vhpebvog/module-federation/announcement-video.mp4',
+    'https://module-federation-assest.netlify.app/document/announcement/blog/announcement/announcement-video.mp4',
   announcementVideoPoster:
     'https://lf3-static.bytednsdoc.com/obj/eden-cn/dhozeh7vhpebvog/module-federation/announcement-video-poster.png',
 };
