@@ -28,6 +28,11 @@ summary {
   --rp-code-block-bg: #242424;
 }
 
+.badge-info span.rounded-full,
+.badge-info span.rounded-full {
+  color: #ccffcc;
+  background-color: rgba(0, 128, 0, 0.2);
+}
 button:focus,
 button:focus-visible {
   outline: none;

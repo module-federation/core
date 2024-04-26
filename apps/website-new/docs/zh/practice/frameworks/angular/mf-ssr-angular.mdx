@@ -1,0 +1,114 @@
+---
+title: "服务端渲染"
+---
+
+import {Steps} from '@theme'
+
+# Angular 模块联邦服务端渲染
+
+历史上，模块联邦主要限于客户端渲染（CSR），主要受益于单页应用（SPA）。然而，随着网络开发景观的不断发展，由于其众多优势，服务器端渲染（SSR）越来越受到青睐。
+
+## Nx 在模块联邦中的 SSR 推进（从版本 15.4 开始）
+
+随着 15.4 版本的发布，Nx 引入了支持 SSR 的模块联邦，这是一个重要的里程碑。这种在 Nx 工作空间中将模块联邦与 SSR 结合的方式，利用了两种技术的优势。
+
+为了全面理解 Nx 及其与模块联邦的集成，我们强烈推荐你查阅官方的 Nx 文档。它提供了深入的见解和实际指导，以有效地利用这些技术。你可以通过以下链接访问这个宝贵的资源：
+
+- [官方 Nx 文档关于模块联邦](https://nx.dev/recipes/module-federation)
+
+本指南专注于为 Angular 应用程序特别设置模块联邦与服务器端渲染。
+
+## 工作原理
+
+在传统的 SSR 应用程序中，服务器负责根据浏览器请求的路由来渲染应用程序。当将模块联邦与 SSR 结合时，这个概念就扩展了。如果一个路由指向一个远程模块，宿主服务器将路由处理委托给远程服务器，然后远程服务器渲染 HTML 并将其发送回浏览器。
+
+这种集成不仅充分利用了 SSR 的全部潜力，而且还保持了将构建划分为更小段的灵活性。它促进了应用程序内功能的独立部署，允许更新远程服务器而无需完全重新部署宿主服务器。
+
+## 逐步指南
+
+我们将从一个名为 'dashboard' 的宿主应用程序和一个名为 'login' 的远程应用程序开始。
+
+<Steps>
+
+### 创建 Nx 工作空间
+
+开始通过执行以下命令来创建一个新的 Nx 工作空间：
+
+```bash
+npx create-nx-workspace@latest myorganization
+```
+
+在这个过程，你将遇到有关工作空间类型和预设的提示。
+
+按照以下方式响应提示：
+
+```bash
+- Workspace type: "integrated"
+- Workspace content: "apps"
+- Enable distributed caching (CI speed enhancement): "No"
+```
+
+**Nx Cloud 选项 (可选)**
+
+在设置你的工作空间时，系统还会询问你是否要添加 Nx Cloud。本指南不涵盖 Nx Cloud，但其与模块联邦的集成有利于团队和 CI 之间共享缓存，加快构建时间。在 [Nx Cloud 官网](https://nx.app) 上了解有关 Nx Cloud 的更多信息。
+
+### 安装 Nx Angular Plugin
+
+在创建 workspace 后，导航到此：
+
+```bash
+cd myorganization
+```
+
+#### 安装官方 Nx Angular 插件
+
+```bash
+npm install @nx/angular
+```
+
+
+### 创建应用
+
+使用一个命令为你的模块联邦架构和SSR搭建框架：
+
+```bash
+npx nx g host dashboard --remotes=login --ssr
+```
+这个命令生成两个Angular Universal（SSR）应用程序，并为浏览器和服务器配置Webpack，启用模块联邦。
+
+### 提供应用程序
+
+1. 要提供'dashboard'（宿主）和'login'（远程）应用程序，运行：
+
+```bash
+npx nx serve-ssr dashboard
+```
+
+这为 'login' 应用构建了浏览器和服务器打包文件，并使用Node.js运行它。请注意，'login' 应用不带有文件观察者运行，因此其代码中的更改不会自动反映出来。
+
+</Steps>
+
+## 缓存和实时更新
+
+- Nx缓存了'login'应用程序的浏览器和服务器打包构建。在后续运行中，它使用此缓存而不是重新构建应用程序。
+- 对于'dashboard'应用程序，服务器构建包括文件监视器，从而实现代码的实时更新。
+
+## 验证设置
+
+1. 成功编译后，你将看到成功消息，指示服务器的监听地址，通常为 `http://localhost:4200`。
+2. 在浏览器中打开此地址并检查DevTools的Network选项卡。
+
+### 模块联邦在行动
+
+- 最初，Angular Universal将处理渲染，随后的导航将切换到客户端渲染（CSR）。
+- 导航至 http://localhost:4200/login 将展示登录页面的服务器呈现HTML，展示模块联邦解析和呈现远程服务器模块的能力。
+
+### 登录应用程序的实时更新
+
+如果你正在积极开发'login'应用程序并需要实时看到你更改的结果，你可以通过代码修改来启用服务器
+
+```bash
+npx nx serve-ssr dashboard --devRemotes=login
+```
+
+使用此命令，每当你进行更改时，服务器将重新构建'login'应用程序，从而实现迭代且高效的开发过程。

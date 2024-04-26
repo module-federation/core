@@ -5,6 +5,11 @@
     "activeMatch": "/guide/"
   },
   {
+    "text": "Practice",
+    "link": "/practice/overview",
+    "activeMatch": "/practice/"
+  },
+  {
     "text": "Configuration",
     "link": "/configure/",
     "activeMatch": "/configure/"

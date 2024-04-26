@@ -1,0 +1,19 @@
+# 动态远程模块
+
+```js
+import { loadRemote, init } from '@module-federation/runtime';
+// if i have remotes in my federation plugin, i can pass the name of the remote
+loadRemote('home/exposedModule')
+// if i want to load a custom remote not known at build time.
+init({
+  name: 'hostname',
+  remotes: [
+    {
+      name: 'home',
+      entry: 'http://somthing.com/remoteEntry.js'
+    }
+  ],
+  force: true // may be needed to sideload remotes after the fact.
+})
+loadRemote('home/exposedModule')
+```
