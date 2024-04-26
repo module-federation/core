@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useI18n } from '../i18n';
+import { useI18n } from '../../theme/i18n';
 import Player from 'xgplayer';
 import 'xgplayer/dist/index.min.css';
 
-export default function AnnouncementVideo() {
+export default function AnnouncementVideo(props: {
+  customWidthScale?: number;
+}) {
   const t = useI18n();
 
   useEffect(() => {
@@ -19,9 +21,13 @@ export default function AnnouncementVideo() {
   });
 
   function calculatescale(width: number) {
+    let customWidthScale = props.customWidthScale;
+    if (!props.customWidthScale) {
+      customWidthScale = 0.3;
+    }
     return {
-      width: width - width * 0.3,
-      height: (width - width * 0.3) * 0.64,
+      width: width - width * customWidthScale,
+      height: (width - width * customWidthScale) * 0.64,
     };
   }
 
@@ -42,7 +48,7 @@ export default function AnnouncementVideo() {
 
   return (
     <div
-      className="mx-auto pb-20"
+      className="mx-auto"
       style={{
         width: `${calculatescale(divWidth).width}px`,
         height: `${calculatescale(divWidth).height}px`,
