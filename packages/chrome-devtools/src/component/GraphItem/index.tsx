@@ -93,7 +93,7 @@ const GraphItem = (props: {
                 </div>
               </div>
             ) : null}
-            <div>
+            <div className={styles.message}>
               <span className={styles.type}>
                 {isEntryType ? 'Entry' : 'Version'}
               </span>
