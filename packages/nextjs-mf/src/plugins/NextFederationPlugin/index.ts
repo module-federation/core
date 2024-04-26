@@ -6,7 +6,6 @@
 'use strict';
 
 import type {
-  ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
 } from '@module-federation/utilities';
@@ -141,7 +140,7 @@ export class NextFederationPlugin {
   private getNormalFederationPluginOptions(
     compiler: Compiler,
     isServer: boolean,
-  ): ModuleFederationPluginOptions {
+  ): moduleFederationPlugin.ModuleFederationPluginOptions {
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
       : retrieveDefaultShared(isServer);
@@ -150,7 +149,7 @@ export class NextFederationPlugin {
     const defaultExpose = this._extraOptions.skipSharingNextInternals
       ? {}
       : {
-          './noop': `!${noop}`,
+          './noop': noop,
           './react': require.resolve('react'),
           './react-dom': require.resolve('react-dom'),
           './next/router': require.resolve('next/router'),
@@ -178,6 +177,9 @@ export class NextFederationPlugin {
         ...defaultShared,
         ...this._options.shared,
       },
+      ...(isServer
+        ? { manifest: { filePath: '' } }
+        : { manifest: { filePath: '/static/chunks' } }),
       // nextjs project needs to add config.watchOptions = ['**/node_modules/**', '**/@mf-types/**'] to prevent loop types update
       dts: this._options.dts ?? false,
     };

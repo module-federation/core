@@ -19,6 +19,7 @@ export default defineConfig({
     include: [
       // should set module-federation in outer repo
       /universe\/packages/,
+      /core\/packages/,
     ],
   },
   // source: {
