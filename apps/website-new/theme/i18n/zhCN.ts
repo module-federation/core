@@ -19,7 +19,8 @@ export const ZH_CN: Record<keyof typeof EN_US, string> = {
   benchmarkDesc:
     '基于 Rust 和 TypeScript 的高度并行、增量编译架构，构建速度非常快，带给你极致的开发体验。',
   benchmarkDetail: '参见 Benchmark 详情',
-  recruit: 'Rspack 团队正在招聘中，欢迎加入👏🏻',
   announcementVideo:
-    'https://lf3-static.bytednsdoc.com/obj/eden-cn/dhozeh7vhpebvog/module-federation/home-video.mp4',
+    'https://lf3-static.bytednsdoc.com/obj/eden-cn/dhozeh7vhpebvog/module-federation/announcement-video.mp4',
+  announcementVideoPoster:
+    'https://lf3-static.bytednsdoc.com/obj/eden-cn/dhozeh7vhpebvog/module-federation/announcement-video-poster.png',
 };

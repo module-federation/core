@@ -17,7 +17,8 @@ export const EN_US = {
   benchmarkDesc:
     'Combining TypeScript and Rust with a parallelized architecture to bring you the ultimate developer experience.',
   benchmarkDetail: 'See benchmark details',
-  recruit: 'Rspack team is recruiting, welcome to join👏🏻',
   announcementVideo:
-    'https://sf16-sg.tiktokcdn.com/obj/eden-sg/dhozeh7vhpebvog/module-federation/home-video.mp4',
+    'https://sf16-sg.tiktokcdn.com/obj/eden-sg/dhozeh7vhpebvog/module-federation/announcement-video.mp4',
+  announcementVideoPoster:
+    'https://sf16-sg.tiktokcdn.com/obj/eden-sg/dhozeh7vhpebvog/module-federation/announcement-video-poster.png',
 } as const;

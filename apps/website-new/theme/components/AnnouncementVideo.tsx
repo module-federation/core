@@ -13,6 +13,7 @@ export default function AnnouncementVideo() {
         url: t('announcementVideo'),
         height: '100%',
         width: '100%',
+        poster: t('announcementVideoPoster'),
       });
     }, 500);
   });
