@@ -19,5 +19,5 @@ export const EN_US = {
   benchmarkDetail: 'See benchmark details',
   recruit: 'Rspack team is recruiting, welcome to join👏🏻',
   announcementVideo:
-    'https://lf3-static.bytednsdoc.com/obj/eden-cn/dhozeh7vhpebvog/module-federation/home-video.mp4',
+    'https://sf16-sg.tiktokcdn.com/obj/eden-sg/dhozeh7vhpebvog/module-federation/home-video.mp4',
 } as const;

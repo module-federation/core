@@ -60,21 +60,21 @@ loadRemote("app2/util").then((md)=>{
 
 新版 Module Federation 推出了一项非常重磅的功能：动态模块类型提示能力！该功能解决了 Module Federation 从本地模块变成动态远程模块后的 TypeScript 项目类型失效问题，使用新版 Module Federation 插件会自动生成和消费远程类型，当项目都在本地启动时可以达到 npm link 一样的类型热更新体验。
 
-![](@public/blog/announcement/demo-type-hint.gif)
+![](https://module-federation-assest.netlify.app/document/announcement/blog/announcement/demo-type-hint.gif)
 
 ### Module Federation Devtool
 
 Module Federation Devtool 是专门为 Module Federation 开发的一款调试工具，通过这个调试工具可以清晰的看到 Module Federation 模块间的依赖关系以及 Expose、shared 设置情况，并且通过该 Devtool 还可以将线上页面中的 Module Federation 模块直接代理到线下，并保持热更新的开发体验！
 
 
-![](@public/blog/announcement/chrome-devtool-display.gif)
+![](https://module-federation-assest.netlify.app/document/announcement/blog/announcement/chrome-devtool-display.gif)
 
 ### Manifest 协议
 
 Manifest 文件是使用新版本 Module Federation 插件项目构建后所生成的文件，该文件中会存储 Module Federation 相关的基础信息，包括：remoteEntry、shared、exposes、remotes、type 信息，这些信息可以作为原信息分析 Module Federation 项目间的依赖关系，并且基于这份文件可以实现自己的物料平台并打通各个部署平台从而对 Module Federation 模块的版本和灰度有更好的控制，构建插件和运行时还可以直接消费该文件协议，基于这份文件协议可以提供更多进阶的功能，新版本的动态类型提示正是基于该文件协议实现。
 
 
-![](@public/blog/announcement/manifest-file.gif)
+![](https://module-federation-assest.netlify.app/document/announcement/blog/announcement/manifest-file.gif)
 
 ## 致谢
 
