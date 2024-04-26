@@ -18,4 +18,6 @@ export const EN_US = {
     'Combining TypeScript and Rust with a parallelized architecture to bring you the ultimate developer experience.',
   benchmarkDetail: 'See benchmark details',
   recruit: 'Rspack team is recruiting, welcome to join👏🏻',
+  announcementVideo:
+    'https://lf3-static.bytednsdoc.com/obj/eden-cn/dhozeh7vhpebvog/module-federation/home-video.mp4',
 } as const;
