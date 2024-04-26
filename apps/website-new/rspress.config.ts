@@ -28,7 +28,7 @@ export default defineConfig({
   icon: '/svg.svg',
   lang: 'en',
   logo: {
-    light: '/module-federation-logo.svg',
+    light: '/module-federation.svg',
     dark: '/module-federation-logo-white.svg',
   },
   markdown: {

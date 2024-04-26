@@ -9,15 +9,22 @@ Module Federation 是一种 JavaScript 应用分治的架构模式（类似于�
 - 降低应用程序的整体大小
 - 提高应用程序的性能
 
+### ✨ 什么是 Module Federation 2.0?
+
+`Module Federation 2.0` 不同于 `Webpack5` 内置的 `Module Federation` 它提供了除 `Module Federation` 有的：模块导出、模块加载、依赖共享，还提供了额外的动态类型提示、`Manifest`、`Federation Runtime`、`Runtime Plugin System`，这些功能能让 `Module Federation` 更适合作为大型 `Web` 应用的微前端架构。
+
 ### 🔥 特性
 
-Module Federation 具有以下特性：
+Module Federation 2.0 具有以下特性：
 
-- 代码共享：可以在多个应用程序之间共享代码、样式和资源。
-- 按需加载：仅在需要时加载代码，从而提高性能。
-- 动态更新：可以动态更新应用程序中的代码，无需重新部署整个应用程序。
-- 支持多种框架：支持 React、Vue、Angular 等多种框架。
-- 支持多种构建工具：[Webpack](../basic/webpack)、[Rspack](../basic/rspack)。
+- ⚡ 代码共享、依赖复用
+- 📝 Manifest
+- 🎨 [Module Federation 运行时](../basic/runtime.mdx)
+- 🧩 [运行时插件系统](../../plugin/dev/index.mdx)
+- 🚀 [动态类型提示](../basic/type-prompt.mdx)
+- 🛠️ [Chrome Devtool](../basic/chrome-devtool.mdx)
+- 🦀 [Rspack](../basic/rspack) and [Webpack](../basic/webpack) Support
+
 
 ### 🎯 定位
 

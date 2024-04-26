@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "overview",
+    "label": "概览"
+  },
+  {
+    "type": "dir",
+    "name": "frameworks",
+    "label": "框架"
+  },
+  {
+    "type": "file",
+    "name": "scenario",
+    "label": "场景化"
+  }
+]
