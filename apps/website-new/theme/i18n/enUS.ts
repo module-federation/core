@@ -20,5 +20,5 @@ export const EN_US = {
   announcementVideo:
     'https://module-federation-assest.netlify.app/document/announcement/blog/announcement/announcement-video.mp4',
   announcementVideoPoster:
-    'https://sf16-sg.tiktokcdn.com/obj/eden-sg/dhozeh7vhpebvog/module-federation/announcement-video-poster.png',
+    'https://module-federation-assest.netlify.app/document/announcement/blog/announcement/announcement-video-poster.png',
 } as const;
