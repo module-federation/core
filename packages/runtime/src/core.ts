@@ -135,7 +135,9 @@ export class FederationHost {
         {
           id: string;
           error: unknown;
+          options?: any;
           from: 'build' | 'runtime';
+          lifecycle: 'onLoad' | 'beforeRequest';
           origin: FederationHost;
         },
       ],
@@ -529,12 +531,18 @@ export class FederationHost {
         origin: this,
       });
     } catch (error) {
-      loadRemoteArgs = await this.hooks.lifecycle.errorLoadRemote.emit({
+      loadRemoteArgs = (await this.hooks.lifecycle.errorLoadRemote.emit({
         id,
-        error,
-        from: 'runtime',
+        options: this.options,
         origin: this,
-      });
+        from: 'runtime',
+        error,
+        lifecycle: 'beforeRequest',
+      })) as {
+        id: string;
+        options: Options;
+        origin: FederationHost;
+      };
 
       if (!loadRemoteArgs) {
         throw error;
@@ -643,6 +651,7 @@ export class FederationHost {
         id,
         error,
         from,
+        lifecycle: 'onLoad',
         origin: this,
       });
 
