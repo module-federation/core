@@ -1,5 +1,5 @@
 import ansiColors from 'ansi-colors';
-import { dirname, join, normalize, relative } from 'path';
+import { dirname, join, normalize, relative, sep } from 'path';
 import typescript from 'typescript';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
@@ -52,7 +52,10 @@ const createHost = (
   const host = typescript.createCompilerHost(tsConfig);
   const originalWriteFile = host.writeFile;
   const mapExposeToEntry = Object.fromEntries(
-    Object.entries(mapComponentsToExpose).map((entry) => entry.reverse()),
+    Object.entries(mapComponentsToExpose).map(([exposed, filename]) => [
+      normalize(filename),
+      exposed,
+    ]),
   );
   const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
 
@@ -74,7 +77,7 @@ const createHost = (
     );
 
     for (const sourceFile of sourceFiles || []) {
-      const sourceEntry = mapExposeToEntry[sourceFile.fileName];
+      const sourceEntry = mapExposeToEntry[normalize(sourceFile.fileName)];
       if (sourceEntry) {
         const mfeTypeEntry = join(
           mfTypePath,
@@ -83,7 +86,9 @@ const createHost = (
         const mfeTypeEntryDirectory = dirname(mfeTypeEntry);
         const relativePathToOutput = relative(mfeTypeEntryDirectory, filepath)
           .replace(DEFINITION_FILE_EXTENSION, '')
-          .replace(STARTS_WITH_SLASH, '');
+          .replace(STARTS_WITH_SLASH, '')
+          .split(sep) // Windows platform-specific file system path fix
+          .join('/');
         originalWriteFile(
           mfeTypeEntry,
           `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`,

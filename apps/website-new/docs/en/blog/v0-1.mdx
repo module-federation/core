@@ -1,0 +1,33 @@
+# v0.1 Release
+
+> April 3, 2024
+
+We have recently released the **v0.1** version of **[Module Federation Enhanced](https://github.com/module-federation/core)** (You can simply think of it as the early version of Module Federation 2.0.)!
+
+`Module Federation 2.0` differs from the `Module Federation` built into `Webpack5` by providing not only the core features of module export, loading, and dependency sharing but also additional dynamic type hinting, `Manifest`, `Federation Runtime`, and `Runtime Plugin System`. These features make `Module Federation` more suitable for use as a micro-frontend architecture in large-scale `Web` applications.
+
+### 🔥 Features
+
+`Module Federation` comes with the following features:
+
+- **New Documentation**: `Module Federation` has launched a [brand-new documentation](https://module-federation.io/), which can help you better understand and utilize `Module Federation`.
+
+- **Dynamic Type Hinting**: `Module Federation` uses dynamic runtime, which previously did not support `TypeScript` type hinting. This significantly impacted the stability and maintainability of projects. Therefore, `Module Federation` now supports out-of-the-box type exports and dynamic type loading capabilities, as well as hot type updating, providing an experience akin to loading local `NPM` modules.
+
+- **Manifest**: In the past, `Module Federation` primarily used `remoteEntry.js` as the entry point for `Module Federation` modules. Remote modules could not store more original information, such as type files, exposes, remotes, etc. We now support setting `remote` to `mf-manifest.json`, which enables more advanced capabilities: `type hinting`, `resource preloading`, `visualized dependency relationships`, `shared dependency analysis`, `integration with deployment platforms`, and `service discovery`.
+
+- **Federation Runtime**: `Federation Runtime` is an independent software development kit (SDK) that addresses compatibility issues with `Module Federation` across different build tools. In the early stages, the implementation of `Module Federation` was tightly coupled with `Webpack 5`, making it difficult for other build tools to support and leading to poor maintainability. By treating `Federation Runtime` as a separate component, the new versions of `Webpack` and `Rspack`, as well as other build tools, can more easily implement and maintain `Module Federation` features, enhancing the flexibility and efficiency of module loading and dependency sharing.
+
+- **Rspack**: The `Module Federation` in Rspack is based on `Federation Runtime`, thus enjoying all the additional capabilities of `Module Federation Enhance`. Moreover, due to the partitioned architecture concept of `Module Federation`, you can progressively migrate your large projects to `Rspack` through `Module Federation`.
+
+### 💡 Next Steps
+
+`Module Federation 2.0` is still in rapid iteration and plans to introduce more powerful new features.
+
+For example, we are developing the **Module Federation Chrome Devtool**, a user-friendly `Module Federation` debugging and proxy tool that can directly proxy online project `Module Federation` modules to local and enable real-time hot updates. It provides a visual dependency graph that allows you to see the `Module Federation` dependency relationships and `Shared` settings.
+
+At the same time, we will offer more framework-level capabilities, such as: `Modern.js SSR`, `React Server Component`, `Router`, `Web Component`, `cross-frame`.
+
+### 🙏 Acknowledgements
+
+The release of `Module Federation Enhanced` version `0.1` would not have been possible without the feedback and suggestions from the `Module Federation` community and the efforts of contributors to the [`Universe`](https://github.com/module-federation/core) repository.

@@ -13,7 +13,8 @@
       "@module-federation/managers",
       "@module-federation/manifest",
       "@module-federation/dts-plugin",
-      "@module-federation/third-party-dts-extractor"
+      "@module-federation/third-party-dts-extractor",
+      "@module-federation/devtools"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],

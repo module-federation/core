@@ -1,5 +1,14 @@
 # @module-federation/dts-plugin
 
+## 0.1.10
+
+### Patch Changes
+
+- 3d4fb69: import path on Windows
+  - @module-federation/sdk@0.1.10
+  - @module-federation/managers@0.1.10
+  - @module-federation/third-party-dts-extractor@0.1.10
+
 ## 0.1.9
 
 ### Patch Changes

@@ -2,10 +2,6 @@
   display: flex;
   justify-content: center;
 
-  & .checkBoxContainer {
-    flex: 0;
-  }
-
   & .checkBox {
     transform: scale(1.25);
   }

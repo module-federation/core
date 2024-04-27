@@ -1,4 +1,4 @@
-import { GlobalModuleInfo } from '@module-federation/sdk/.';
+import { GlobalModuleInfo } from '@module-federation/sdk';
 import { FormID } from '../../template/constant';
 import { definePropertyGlobalVal } from '../sdk';
 
@@ -29,10 +29,20 @@ export function getCurrentTabId() {
 export function getInspectWindowTabId() {
   return new Promise((resolve, reject) => {
     if (chrome?.devtools?.inspectedWindow) {
+      // @ts-expect-error In dev mode, should resolve by hand
+      if (chrome.isDevMode) {
+        resolve(0);
+      }
       chrome.devtools.inspectedWindow.eval(
         'typeof window.__FEDERATION__ !== "undefined" || typeof window.__VMOK__ !== "undefined"',
         function (info, error) {
-          const tabId = chrome.devtools.inspectedWindow.tabId;
+          const { tabId } = chrome.devtools.inspectedWindow;
+          getTabs().then((tabs) => {
+            const target = tabs.find(
+              (tab: chrome.tabs.Tab) => tab.id === tabId,
+            );
+            window.targetTab = target as chrome.tabs.Tab;
+          });
           console.log(
             'chrome.devtools.inspectedWindow.tabId',
             chrome.devtools.inspectedWindow.tabId,
@@ -116,7 +126,7 @@ export const injectScript = async (
   ...args: any
 ) => {
   await getInspectWindowTabId();
-  chrome.scripting
+  return chrome.scripting
     .executeScript({
       target: {
         tabId: getCurrentTabId(),
