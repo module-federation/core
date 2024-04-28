@@ -58,10 +58,12 @@ loadRemote("app2/util").then((md)=>{
 });
 ```
 
-### 统一 Module Federation 构建工具运行时
+### 解绑 Webpack，支持跨工具共享模块
 
 
-新版 Rspack 和 Webpack 的 Module Federation 插件采用了全新的 Runtime 架构。这意味着构建工具不必再与 Module Federation Runtime 的逻辑紧密绑定。得益于新 Runtime 的插件机制和预加载功能，开发者可以享受更加灵活和高效的模块加载控制。此外，其他构建工具也可以依据这一标准实现 Module Federation，这不仅降低了维护成本，还有助于保持运行时环境的一致性和标准化。
+新版 Module Federation 插件采用了全新的 Runtime 架构。这一变化使得构建工具不再需要与 Runtime 强绑定。开发者有望在项目中自由地引入由不同构建工具的产物，并灵活地组装它们进行运行。
+
+目前，已经有多个构建工具与之兼容，包括 Webpack、Rspack 。其他构建工具也可以依据这一标准实现 Module Federation，这将保持运行时的一致性和标准化。
 
 ### 类型提示
 
