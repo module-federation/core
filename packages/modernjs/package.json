@@ -13,20 +13,20 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/esm/cli/index.js",
+      "require": "./dist/cjs/cli/index.js",
+      "types": "./dist/types/cli/index.d.ts"
     }
   },
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.d.ts"
+        "./dist/types/cli/index.d.ts"
       ]
     }
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/cjs/cli/index.js",
+  "types": "./dist/types/cli/index.d.ts",
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
   "dependencies": {

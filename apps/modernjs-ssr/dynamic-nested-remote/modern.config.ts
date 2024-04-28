@@ -4,6 +4,7 @@ import {
   AsyncBoundaryPlugin,
 } from '@module-federation/enhanced';
 import { StreamingTargetPlugin } from '@module-federation/node';
+import { moduleFederationPlugin } from '@module-federation/modern-js';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
@@ -28,7 +29,7 @@ export default defineConfig({
   // source: {
   //   enableAsyncEntry: true,
   // },
-  plugins: [appTools()],
+  plugins: [appTools(), moduleFederationPlugin()],
   tools: {
     webpack: (config, { isServer, appendPlugins }) => {
       if (config?.output) {

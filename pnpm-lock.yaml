@@ -1002,6 +1002,9 @@ importers:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../../packages/enhanced
+      '@module-federation/modern-js':
+        specifier: workspace:*
+        version: link:../../../packages/modernjs
       '@module-federation/node':
         specifier: workspace:*
         version: link:../../../packages/node
@@ -1063,6 +1066,9 @@ importers:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../../packages/enhanced
+      '@module-federation/modern-js':
+        specifier: workspace:*
+        version: link:../../../packages/modernjs
       '@module-federation/node':
         specifier: workspace:*
         version: link:../../../packages/node

@@ -4,6 +4,7 @@ import {
   AsyncBoundaryPlugin,
 } from '@module-federation/enhanced';
 import { StreamingTargetPlugin } from '@module-federation/node';
+import { moduleFederationPlugin } from '@module-federation/modern-js';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
@@ -21,11 +22,12 @@ export default defineConfig({
   },
   output: {
     disableTsChecker: true,
+    disableCssExtract: true,
   },
   // source: {
   //   enableAsyncEntry: true,
   // },
-  plugins: [appTools()],
+  plugins: [appTools(), moduleFederationPlugin()],
   tools: {
     webpack: (config, { isServer, appendPlugins }) => {
       if (config?.output) {
@@ -51,18 +53,7 @@ export default defineConfig({
         appendPlugins([new StreamingTargetPlugin(mfConfig)]);
       }
 
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'dynamic_remote',
-          exposes: {
-            './Image': './src/components/Image.tsx',
-          },
-          shared: {
-            react: { singleton: true },
-            'react-dom': { singleton: true },
-          },
-        }),
-      ]);
+      appendPlugins([new ModuleFederationPlugin(mfConfig)]);
     },
   },
 });
