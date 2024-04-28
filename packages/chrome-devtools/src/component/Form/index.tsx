@@ -1,4 +1,4 @@
-import { SetStateAction, ReactNode } from 'react';
+import { SetStateAction, ReactNode, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import {
   Checkbox,
@@ -10,7 +10,6 @@ import {
   Select,
   Switch,
   FormInstance,
-  Input,
 } from '@arco-design/web-react';
 import {
   IconDelete,
@@ -21,9 +20,12 @@ import {
 import { defaultDataItem, proxyFormField } from '../../template/constant';
 import {
   validateCustom,
+  validateSemver,
+  validatePort,
   isObject,
   separateType,
   FormItemStatus,
+  RootComponentProps,
 } from '../../utils';
 import styles from './index.module.scss';
 
@@ -44,7 +46,7 @@ interface FormProps {
   enableHMR: string;
   onHMRChange: (on: boolean) => void;
 }
-const FormComponent = (props: FormProps) => {
+const FormComponent = (props: FormProps & RootComponentProps) => {
   const {
     form,
     condition,
@@ -53,6 +55,9 @@ const FormComponent = (props: FormProps) => {
     validateForm,
     enableHMR,
     onHMRChange,
+    versionList,
+    setVersionList,
+    getVersion,
   } = props;
   const { moduleInfo } = window.__FEDERATION__;
   let { producer } = separateType(moduleInfo);
@@ -77,6 +82,17 @@ const FormComponent = (props: FormProps) => {
       };
     }
   });
+
+  useEffect(() => {
+    producer.forEach(async (target) => {
+      const version = await getVersion?.(target);
+      const list = [...(versionList || [])];
+      if (version) {
+        list.push(version);
+      }
+      setVersionList?.(list);
+    });
+  }, []);
 
   const getCheckStatus = (index: number) => {
     const formData = form.getFieldsValue();
@@ -129,7 +145,7 @@ const FormComponent = (props: FormProps) => {
       };
     }
 
-    if (validateCustom(value)) {
+    if (validateCustom(value) || validateSemver(value) || validatePort(value)) {
       statusSet[index].valueStatus = true;
       flushSync(() => setFormStatus(statusSet));
       return callback();
@@ -147,15 +163,29 @@ const FormComponent = (props: FormProps) => {
     (arg0: { key: string; value: string; checked: boolean }): void;
   }) => {
     add(defaultDataItem);
+    setVersionList?.([...(versionList || []), []]);
     validateForm();
   };
 
   const onRemove = (remove: (index: number) => void, index: number) => {
+    if (Array.isArray(versionList)) {
+      versionList.splice(index, 1);
+      setVersionList?.(versionList);
+    }
     remove(index);
   };
 
   const hmrChange = (on: boolean) => {
     onHMRChange(on);
+  };
+
+  const onKeyChange = async (key: string, index: number) => {
+    const version = await getVersion?.(key);
+    if (version) {
+      const list = [...(versionList || [])];
+      list.splice(index, 1, version);
+      setVersionList?.(list);
+    }
   };
 
   return (
@@ -226,6 +256,7 @@ const FormComponent = (props: FormProps) => {
                       <Select
                         data-set-e2e={'e2eProxyKey'}
                         placeholder={'Module Name'}
+                        onChange={(key) => onKeyChange(key, index)}
                         allowClear
                         showSearch
                       >
@@ -248,11 +279,19 @@ const FormComponent = (props: FormProps) => {
                         },
                       ]}
                     >
-                      <Input
+                      <Select
                         data-set-e2e={'e2eProxyValue'}
                         placeholder={'Custom Manifest URL'}
                         allowClear
-                      />
+                        showSearch
+                        allowCreate
+                      >
+                        {(versionList || [])?.[index]?.map((version) => (
+                          <Option key={version} value={version}>
+                            {version}
+                          </Option>
+                        ))}
+                      </Select>
                     </FormItem>
                   </div>
 

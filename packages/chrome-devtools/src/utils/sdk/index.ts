@@ -1,3 +1,5 @@
+export * from './graph';
+
 export const setLocalStorage = (key: string, value: any) => {
   localStorage.setItem(key, value);
 };

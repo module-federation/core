@@ -1,12 +1,13 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "files": [
     "dist/",
     "README.md"
   ],
+  "type": "commonjs",
   "publishConfig": {
     "access": "public"
   },

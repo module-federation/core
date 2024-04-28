@@ -5,6 +5,11 @@
     "activeMatch": "/guide/"
   },
   {
+    "text": "实践",
+    "link": "/practice/overview",
+    "activeMatch": "/practice/"
+  },
+  {
     "text": "配置",
     "link": "/configure/",
     "activeMatch": "/configure/"
@@ -18,6 +23,11 @@
     "text": "案例",
     "link": "/showcase/index",
     "activeMatch": "/showcase/"
+  },
+  {
+    "text": "博客",
+    "link": "/blog/announcement",
+    "activeMatch": "/blog/"
   },
   {
     "text": "生态",

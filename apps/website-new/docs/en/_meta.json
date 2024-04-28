@@ -19,6 +19,11 @@
     ]
   },
   {
+    "text": "Practice",
+    "link": "/practice/overview",
+    "activeMatch": "/practice/"
+  },
+  {
     "text": "Configuration",
     "link": "/configure/",
     "activeMatch": "/configure/"
@@ -32,6 +37,11 @@
     "text": "Showcase",
     "link": "/showcase/index",
     "activeMatch": "/showcase/"
+  },
+  {
+    "text": "Blog",
+    "link": "/blog/announcement",
+    "activeMatch": "/blog/"
   },
   {
     "text": "Ecosystem",

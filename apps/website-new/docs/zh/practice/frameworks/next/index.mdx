@@ -1,0 +1,485 @@
+---
+title: "Basic Example"
+---
+
+# Next.js & Module Federation
+
+import {Steps, Tabs, Tab, Badge, SourceCode} from '@theme';
+
+
+<span className="badge-info">
+ <Badge text="Next 12" type="info" />
+ <Badge text="Next 13" type="info" />
+ <Badge text="Next 14" type="info" />
+ <Badge text="SSR (Pages Router)" type="info" />
+</span>
+<Badge text="App Router" type="danger" />
+#
+
+:::tip Demo Reference
+在此处查看示例项目列表: [Next.js SSR](https://github.com/module-federation/module-federation-examples/tree/master/nextjs-ssr)
+:::
+
+## 设置环境
+
+在开始之前，你需要安装 [Node.js](https://nodejs.org/)，并确保你的 Node.js 版本 >= 16。**我们推荐使用 Node.js 20 的 LTS 版本。**
+
+你可以使用以下命令检查当前使用的 Node.js 版本：
+
+```bash
+node -v
+```
+
+如果你当前环境中没有安装 Node.js，或者安装的版本太低，你可以使用 [nvm](https://github.com/nvm-sh/nvm) 或 [fnm](https://github.com/Schniz/fnm) 来安装所需的版本。
+
+以下是通过 nvm 安装 Node.js 20 LTS 版本的例子：
+
+```bash
+# Install the long-term support version of Node.js 20
+nvm install 20 --lts
+
+# Make the newly installed Node.js 20 as the default version
+nvm alias default 20
+
+# Switch to the newly installed Node.js 20
+nvm use 20
+```
+
+
+## 步骤 1: 设置 Next.js 应用
+
+### 创建 Next.js 项目
+
+你可以使用 `create-next-app` 创建 Next.js 项目。只需执行以下命令：
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npx create-next-app@latest',
+    yarn: 'yarn create next-app',
+    pnpm: 'pnpm create next-app',
+    bun: 'bunx create-next-app',
+  }}
+/>
+
+
+#
+
+
+<Steps>
+### 创建 App 1
+```bash
+npx create-next-app@latest
+
+"What is your project named?":
+> mfe1
+
+"Would you like to use App Router?":
+> No
+```
+
+### 创建 App 2
+
+```bash
+npx create-next-app@latest
+
+"What is your project named?":
+> mfe2
+
+"Would you like to use App Router?":
+> No
+```
+
+### 安装
+
+```bash
+cd mfe1
+pnpm add @module-federation/nextjs-mf webpack -D
+pnpm i
+```
+```bash
+cd mfe2
+pnpm add @module-federation/nextjs-mf webpack -D
+pnpm i
+```
+
+</Steps>
+
+
+### 现有项目
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm i @module-federation/nextjs-mf webpack -D',
+    yarn: 'yarn add @module-federation/nextjs-mf webpack -D',
+    pnpm: 'pnpm add @module-federation/nextjs-mf webpack -D',
+    bun: 'bun add @module-federation/nextjs-mf webpack -D',
+  }}
+/>
+
+
+```javascript title="next.config.mjs"
+import { NextFederationPlugin } from '@module-federation/nextjs-mf';
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  webpack(config,options ){
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: 'mfe1',
+        filename: 'static/chunks/remoteEntry.js',
+        remotes: {
+          mfe2: `http://localhost:3001/static/${options.isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+        },
+        shared: {},
+        extraOptions: {
+          exposePages: true,
+          enableImageLoaderFix: true,
+          enableUrlLoaderFix: true,
+        },
+      })
+    )
+    return config
+  }
+};
+
+export default nextConfig;
+```
+
+## 步骤 2: 覆盖 Webpack
+
+<Steps>
+
+### 设置本地 Webpack 环境
+
+“本地 Webpack”意味着你必须将 webpack 作为依赖项安装，接下来将不会使用其捆绑的 webpack 副本，该副本无法使用，因为它不会导出所有 Webpack 内部结构
+
+```bash title="shell"
+NEXT_PRIVATE_LOCAL_WEBPACK=true next dev
+# or
+NEXT_PRIVATE_LOCAL_WEBPACK=true next build
+```
+
+`.env` 也可以设置，但及时设置 `NEXT_PRIVATE_LOCAL_WEBPACK` 可能不可靠。
+
+```.env title=".env"
+NEXT_PRIVATE_LOCAL_WEBPACK=true
+```
+
+### 确保已经手动安装过 Webpack
+
+必须安装Webpack，否则构建会抛出`MODULE_NOT_FOUND`错误
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm i webpack -D',
+    yarn: 'yarn add webpack -D',
+    pnpm: 'pnpm add webpack -D',
+    bun: 'bun add webpack -D',
+  }}
+/>
+
+</Steps>
+
+## 步骤 3: 实现 SSR
+
+<Steps>
+
+### 增加服务生命周期
+
+为了确保 Next.js 创建服务器运行时，"_document" 必须实现 "getInitialProps " 或 "getServerSideProps"
+
+<div className="rspress-directive warning">
+
+如果没有服务器生命周期方法，接下来将尝试它认为是静态的“SSG”页面。
+
+如果没有服务器运行时，就没有服务器来呈现远程更新
+
+</div>
+
+```jsx title="_document.js"
+import Document, { Html, Head, Main, NextScript } from 'next/document';
+
+class MyDocument extends Document {
+  static async getInitialProps(ctx) {
+    const initialProps = await Document.getInitialProps(ctx);
+    return initialProps;
+  }
+
+  render() {
+    return (
+      <Html>
+        <Head />
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
+}
+```
+
+
+
+### 将重新验证添加到热重载节点
+
+为了处理远程模块中的更新，使用“revalidate”函数。这是因为 Webpack 使用块缓存并且不会获取已加载的块，并且热服务器不会自动识别更新。
+
+实施重新验证有两种主要方法：
+- 渲染阻塞
+- 重新验证时陈旧
+
+<Tabs>
+  <Tab label="Render Blocking">
+   建议大多数用例使用此实现，因为它可以确保服务器和客户端始终同步，从而有助于避免水合错误。通过在渲染之前阻止并检查更新，你可以保证你的应用程序始终是最新的，而不会对用户体验产生负面影响。
+
+    **怎么运行的：**
+
+    - **在渲染页面之前**，服务器检查是否有任何可用更新。
+    - **如果有可用更新**，它会在响应客户端请求之前继续进行热模块更换 (HMR)。
+    - **此方法确保**所有用户都能收到最新版本的应用程序，而不会遇到服务器呈现的内容和客户端呈现的内容之间不一致的情况。
+
+    **实施示例：**
+
+    ```jsx title="_document"
+
+    import { revalidate } from '@module-federation/nextjs-mf/utils';
+    import Document, { Html, Head, Main, NextScript } from 'next/document';
+
+    class MyDocument extends Document {
+      static async getInitialProps(ctx) {
+        if (ctx?.pathname && !ctx?.pathname?.endsWith('_error')) {
+          await revalidate().then((shouldUpdate) => {
+            if (shouldUpdate) {
+              console.log('Hot Module Replacement (HMR) activated', shouldUpdate);
+            }
+          });
+        }
+
+        const initialProps = await Document.getInitialProps(ctx);
+        return initialProps;
+      }
+
+      render() {
+        return (
+          <Html>
+            <Head />
+            <body>
+              <Main />
+              <NextScript />
+            </body>
+          </Html>
+        );
+      }
+    }
+    ```
+  </Tab>
+  <Tab label="Stale While Revalidate">
+   虽然由于可能出现水合错误而不推荐，但此方法涉及侦听响应对象上的“完成”事件，然后检查更新。这在更新应用频率较低或服务器和客户端之间的即时一致性不那么重要的特定场景中可能很有用。
+
+    **怎么运行的：**
+
+    - **响应客户端后**，服务器侦听响应对象上的“完成”事件。
+    - **一旦发送响应**，它就会检查更新。
+    - **如果发现更新**，它会记录这些更新或根据这些更新采取行动，尽管这些更新仅适用于后续请求。
+
+    **实施示例：**
+
+   ```jsx title="_document"
+    static async getInitialProps(ctx) {
+      const initialProps = await Document.getInitialProps(ctx);
+      ctx?.res?.on('finish', () => {
+        revalidate().then((shouldUpdate) => {
+          console.log('Response sent, checking for updates:', shouldUpdate);
+        });
+      });
+      return initialProps;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### 热更新
+
+热更新尝试在服务端渲染（SSR）期间“刷新”使用中的分块，以便将 `<script>` 标签发送到浏览器。
+
+```jsx title="_document"
+import Document, { Html, Head, Main, NextScript } from 'next/document';
+import {
+  revalidate,
+  FlushedChunks,
+  flushChunks,
+} from '@module-federation/nextjs-mf/utils';
+
+class MyDocument extends Document {
+  static async getInitialProps(ctx) {
+    if (ctx.pathname) {
+      if (!ctx.pathname.endsWith('_error')) {
+        await revalidate().then((shouldUpdate) => {
+          if (shouldUpdate) {
+            console.log('should HMR', shouldUpdate);
+          }
+        });
+      }
+    }
+
+    const initialProps = await Document.getInitialProps(ctx);
+
+    const chunks = await flushChunks();
+
+    return {
+      ...initialProps,
+      chunks,
+    };
+  }
+
+  render() {
+    return (
+      <Html>
+        <Head>
+          <FlushedChunks chunks={this.props.chunks} />
+        </Head>
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
+}
+```
+</Steps>
+
+## 步骤 4: 创建并导出
+
+现在，创建一个从“MFE2”公开的组件
+
+<Steps>
+
+### 创建按钮组件
+
+在“MFE2”中，在 src 目录中创建一个名为“Button.js”的新文件，其中包含以下内容：
+
+```javascript
+import React from 'react';
+
+const Button = () => (
+  <button>MFE2 Button</button>
+);
+
+export default Button;
+
+```
+
+### 配置 next MFE2
+
+更新构建配置以公开模块
+
+```javascript title="next.config.mjs"
+const nextConfig = {
+  reactStrictMode: true,
+  webpack(config, options) {
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: 'mfe2',
+        filename: 'static/chunks/remoteEntry.js',
+        exposes: {
+          "./Button": './component/Button.js',
+        },
+        shared: {},
+        extraOptions: {
+          exposePages: true,
+          enableImageLoaderFix: true,
+          enableUrlLoaderFix: true,
+        },
+      })
+    )
+    return config
+  }
+};
+```
+</Steps>
+
+## 步骤 5: 消费远程模块
+
+在 "MFE1" 中使用 "MFE2" 公开的模块
+
+<Steps>
+
+### 导入模块
+
+在“MFE1”的其中一页中导入“MFE2”
+
+```jsx title="index.js"
+import React from 'react';
+import Button from 'mfe2/Button'; // federated import
+
+const Index = () => {
+  return (
+    <div>
+      <h1>MFE1</h1>
+      <Button />
+    </div>
+  );
+}
+```
+
+### 将服务器生命周期方法添加到页面
+
+接下来还将尝试没有某些数据生命周期的“SSG”页面。
+
+确保将其添加到页面文件中。
+
+```javascript
+export const getServerSideProps = async () => {
+  return {
+    props: {}
+  }
+}
+// or
+Index.getInitialProps = async ()=> {
+  return {}
+}
+
+export default Index;
+```
+
+### 配置 Next in MFE1
+
+相应地更新“remotes”字段
+
+```javascript title="next.config.mjs"
+import { NextFederationPlugin } from '@module-federation/nextjs-mf';
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  webpack(config,options ){
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: 'mfe1',
+        filename: 'static/chunks/remoteEntry.js',
+        remotes: {
+          mfe2: `http://localhost:3001/static/${options.isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+        },
+        shared: {},
+        extraOptions: {
+          exposePages: true,
+          enableImageLoaderFix: true,
+          enableUrlLoaderFix: true,
+        },
+      })
+    )
+    return config
+  }
+};
+
+export default nextConfig;
+```
+</Steps>
+
+
+
