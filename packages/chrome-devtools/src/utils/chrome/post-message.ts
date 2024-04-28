@@ -1,7 +1,7 @@
+import helpers from '@module-federation/runtime/helpers';
 import type { FederationRuntimePlugin } from '@module-federation/runtime/types';
 
 import { definePropertyGlobalVal } from '../sdk';
-import helpers from '@module-federation/runtime/helpers';
 
 const getModuleInfo = (): FederationRuntimePlugin => {
   return {

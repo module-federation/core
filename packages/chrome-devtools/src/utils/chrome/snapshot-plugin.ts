@@ -23,13 +23,15 @@ const chromeDevtoolsPlugin: () => FederationRuntimePlugin = function () {
         );
         if (
           debugModuleInfoStr &&
-          !nativeGlobal.__INIT_VMOK_CHROME_DEVTOOL_PLUGIN__ &&
-          !options?.id?.endsWith(':local')
+          !nativeGlobal.__INIT_VMOK_CHROME_DEVTOOL_PLUGIN__
         ) {
           const chromeDevtoolSnapshot = JSON.parse(debugModuleInfoStr);
           if (chromeDevtoolSnapshot) {
             runtimeHelpers.global.addGlobalSnapshot(chromeDevtoolSnapshot);
             nativeGlobal.__INIT_VMOK_CHROME_DEVTOOL_PLUGIN__ = true;
+            console.warn(
+              '[Module Federation Devtools]: You are using the chrome devtool to proxy online module',
+            );
           }
         }
       }

@@ -12,7 +12,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "https://github.com/module-federation/universe/tree/main/packages/core",
+  "repository": "https://github.com/module-federation/core/tree/main/packages/core",
   "peerDependencies": {
     "webpack": "^5.40.0"
   }

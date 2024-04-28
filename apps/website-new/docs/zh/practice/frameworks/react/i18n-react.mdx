@@ -1,0 +1,205 @@
+---
+title: "国际化 (i18n)"
+---
+# 使用 Module Federation 在 React 微前端中实现国际化 (i18n)
+
+:::tip 示例参考
+在此查看示例项目列表：[React i18n](https://github.com/module-federation/module-federation-examples/tree/master/i18next-nextjs-react)
+:::
+
+## 概述
+
+在微前端领域，确保每个应用尽可能保持自治是至关重要的。然而，也会出现不可避免的应用程序间的通信场景。一个常见的需求是在微前端之间同步语言偏好，例如当用户在一个应用中更改语言设置时，该变更会级联至所有集成的微前端。本文档概述了在由 Module Federation 促进的微前端架构中使用 `react-i18next` 库实现国际化的策略。
+
+## 场景
+
+考虑有两个应用：应用 A（容器应用）和应用 B（远程应用）。尽管应用 B 作为一个独立的应用独立运行，但它也被设计为在运行时嵌入应用 A 中。我们的目标是在应用 A 和应用 B 之间无缝同步语言设置，确保两个应用都能管理和展示它们的本地化内容。
+
+## 架构和实现
+
+### 扩展捆绑器配置
+
+为了适应微前端集成，我们使用 Module Federation 插件扩展现有的 Webpack/Rspack/Rsbuild 和 Create React App (CRA) 配置。此扩展允许应用 B 暴露各种元素（例如组件、主题、钩子）供应用 A 或任何其他集成的应用使用，而不需要代码库驱逐。
+
+### 设置国际化
+
+`react-i18next` 实现构成了我们翻译功能的基础。最初，`i18next` 的一个实例被配置并直接导入到主应用程序文件（`App.js`）。该实例利用上下文存储来管理状态、资源（翻译）和插件。
+
+#### 解决翻译重写挑战
+
+直接实现方法，每个应用初始化其 `i18next` 实例可能导致资源冲突，特别是在重写翻译术语的情况下。为了避免这种情况，我们为应用 A 和应用 B 建立独立的 `i18next` 实例，确保每个应用独立维护其翻译术语。
+
+### 实施步骤
+
+#### 配置 i18next 实例
+
+对于应用 A 和应用 B，如下配置独立的 `i18next` 实例：
+
+```javascript
+// App A
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import enJSON from './translations/en';
+import uaJSON from './translations/ua';
+
+// Translation resources
+const resources = {
+  en: { translation: enJSON },
+  ua: { translation: uaJSON },
+};
+
+// Initialize i18next instance for App A
+const appAInstance = i18n.createInstance();
+appAInstance.use(initReactI18next).init({
+  resources,
+  lng: 'en', // default language
+  fallbackLng: 'en',
+  interpolation: { escapeValue: false },
+  react: { useSuspense: true },
+});
+
+export default appAInstance;
+
+// Repeat similar setup for App B with a separate instance
+```
+#### 集成 i18next 提供商
+
+将应用程序组件包装在“I18nextProvider”中，传递相应的“i18next”实例以确保正确应用翻译上下文。
+
+```javascript
+// App A Wrapper
+import { I18nextProvider } from 'react-i18next';
+import appAInstance from '../i18n';
+
+const AppAI18nWrapper = ({ children }) => (
+  <I18nextProvider i18n={appAInstance}>{children}</I18nextProvider>
+);
+
+export default AppAI18nWrapper;
+
+// Repeat similar setup for App B
+```
+#### 语言切换逻辑
+
+对于App B，编写一个自定义的hook，方便语言切换，例如：
+
+```javascript
+import appBInstance from '../i18n';
+
+const useSwitchLanguage = () => {
+  return (languageId) => appBInstance.changeLanguage(languageId);
+};
+
+export default useSwitchLanguage;
+```
+
+通过模块联邦公开此挂钩，以允许 App A 或其他集成应用程序使用它。
+
+```javascript
+// Module Federation exposes configuration
+exposes: {
+  './hooks/useSwitchAppBLanguage': './src/hooks/useSwitchLanguage',
+},
+```
+
+在 App A 中，实现一个钩子来协调所有集成微前端的语言切换：
+
+```javascript
+import useSwitchAppBLanguage from 'remoteAppB/hooks/useSwitchAppBLanguage';
+import appAInstance from '../i18n';
+
+const useSwitchLanguage = () => {
+  const switchAppBLanguageHook = useSwitchAppBLanguage();
+  //Application A
+  const switchAppALanguage = (languageCode) => appAInstance.changeLanguage(languageCode);
+  //Application B
+  const switchAppBLanguage = (languageCode) => switchAppBLanguageHook(languageCode);
+  //Both Applications
+  const switchAllLanguages = (languageCode) => {
+    switchAppALanguage(languageCode);
+    switchAppBLanguage(languageCode);
+  };
+
+  return { switchAppALanguage, switchAppBLanguage, switchAllLanguages };
+};
+
+export default useSwitchLanguage;
+```
+
+### Language Switching Interface
+
+Implement a user interface component, such as a button, to trigger language changes across all applications:
+
+```javascript
+import { useSwitchLanguage } from 'src/hooks/useSwitchLanguage';
+
+const LanguageSwitcher = () => {
+  const { switchAllLanguages } = useSwitchLanguage();
+  const handleLanguageSwitch = (lng) => () => switchAllLanguages(lng);
+
+  return <button onClick={handleLanguageSwitch("ua")}>Change language to Ukrainian</button>;
+};
+
+export default LanguageSwitcher;
+```
+#### 处理集成环境
+
+要有条件地显示语言切换器组件（例如，在嵌入应用程序 A 时隐藏应用程序 B 中的切换器），请利用“useIsRemote”等自定义挂钩。
+
+`useIsRemote` 钩子旨在确定当前应用程序（例如应用程序 B）是否以独立模式运行或嵌入到另一个应用程序（例如应用程序 A）中。这种区别使我们能够根据应用程序的上下文有条件地渲染组件。
+
+下面我们提供了“useIsRemote”挂钩的简化实现示例，该挂钩检查特定条件以确定应用程序的环境。在实际应用程序中，此条件可能基于 URL 参数、DOM 存在检查或区分嵌入和独立运行的任何其他触发器：
+
+```javascript
+import { useEffect, useState } from 'react';
+
+/**
+ * Determines if the current application is running as a remote (embedded)
+ * or as a standalone application.
+ *
+ * You should adapt the logic based on the specific criteria that apply to your application's
+ * architecture, such as checking for specific URL parameters or the presence
+ * of a particular DOM element that would only exist when embedded.
+ */
+const useIsRemote = () => {
+  const [isRemote, setIsRemote] = useState(false);
+
+  useEffect(() => {
+    // Check for a URL parameter that indicates embedding
+    const searchParams = new URLSearchParams(window.location.search);
+    setIsRemote(searchParams.has('embedded'));
+
+    // Alternatively, check for a global variable or a specific DOM element
+    // setIsRemote(window.parent !== window || document.getElementById('embed-flag') !== null);
+  }, []);
+
+  return isRemote;
+};
+
+export default useIsRemote;
+```
+
+#### 使用 useIsRemote 挂钩
+
+实现 useIsRemote 挂钩后，你现在可以在组件中使用它，根据应用程序是独立运行还是嵌入运行来有条件地渲染元素。以下是如何使用它在 App B 中有条件地显示语言切换器组件的示例：
+
+```javascript
+import React from 'react';
+import useIsRemote from './hooks/useIsRemote';
+import LanguageSwitcher from './components/LanguageSwitcher';
+
+const App = () => {
+  const isRemote = useIsRemote();
+
+  return (
+    <div>
+      {/* Only display the LanguageSwitcher if not running as a remote */}
+      {!isRemote && <LanguageSwitcher />}
+    </div>
+  );
+};
+
+export default App;
+```
+
+在此示例中，仅当应用程序 B 未嵌入应用程序 A 中时，基于由“useIsRemote”挂钩确定的“isRemote”状态，“LanguageSwitcher”才会呈现。这种方法确保语言切换器等组件仅在适当的上下文中显示，从而增强用户体验并保持微前端应用程序的独立性。

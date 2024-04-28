@@ -24,11 +24,12 @@ const getNavbar = (lang: string) => {
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
   title: 'Module federation',
-  description: 'Module federation',
+  description:
+    'Module Federation is a concept that allows developers to share code and resources across multiple JavaScript applications',
   icon: '/svg.svg',
   lang: 'en',
   logo: {
-    light: '/module-federation-logo.svg',
+    light: '/module-federation.svg',
     dark: '/module-federation-logo-white.svg',
   },
   markdown: {
@@ -53,14 +54,14 @@ export default defineConfig({
     ],
     editLink: {
       docRepoBaseUrl:
-        'https://github.com/module-federation/universe/tree/main/apps/website-new/docs',
+        'https://github.com/module-federation/core/tree/main/apps/website-new/docs',
       text: 'Edit this page on GitHub',
     },
     socialLinks: [
       {
         icon: 'github',
         mode: 'link',
-        content: 'https://github.com/module-federation/universe',
+        content: 'https://github.com/module-federation/core',
       },
     ],
   },
