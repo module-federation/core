@@ -16,7 +16,7 @@ const chromeDevtoolsPlugin: () => FederationRuntimePlugin = function () {
     beforeLoadRemoteSnapshot({ options }) {
       const { nativeGlobal } = runtimeHelpers.global;
 
-      if (options.inBrowser) {
+      if (!options || options.inBrowser) {
         const realLocalStorage = nativeGlobal.localStorage || localStorage;
         const debugModuleInfoStr = realLocalStorage.getItem(
           MODULE_DEVTOOL_IDENTIFIER,
