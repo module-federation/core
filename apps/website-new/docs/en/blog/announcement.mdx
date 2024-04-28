@@ -60,9 +60,11 @@ loadRemote("app2/util").then((md)=>{
   md.add(1,2,3);
 });
 ```
-### Unified Build Tool Runtime
+### Decoupling Webpack and Supporting Cross-Tool Sharing of Modules
 
-The new version of Rspack and the Webpack plugin adopts a completely new Runtime architecture. This means that build tools no longer need to be tightly bound to the logic of the Runtime. Thanks to the new Runtime's plugin mechanism and preloading capabilities, developers can enjoy more flexible and efficient control over module loading. Additionally, other build tools can also implement this standard, which not only reduces maintenance costs but also helps to maintain consistency and standardization of the runtime environment.
+The new version of the Module Federation plugin adopts a completely new Runtime architecture. This change means that the build tool is no longer tightly coupled with the Runtime. Developers can now freely introduce artifacts produced by different build tools into their projects and flexibly assemble them for operation.
+
+Currently, multiple build tools are compatible with it, including Webpack and Rspack. Other build tools can also implement Module Federation based on this standard, which will maintain consistency and standardization in the runtime.
 
 ### Type Hints
 
