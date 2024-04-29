@@ -8,7 +8,8 @@ import {
 import { WEB_CLIENT_OPTIONS_IDENTIFIER, WebClientOptions } from '../server';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import path from 'path';
-import { isTSProject, isDev } from './utils';
+import { isDev } from './utils';
+import { isTSProject } from '../core/lib/utils';
 
 enum PROCESS_EXIT_CODE {
   SUCCESS = 0,
@@ -138,10 +139,7 @@ export class DevPlugin implements WebpackPluginInstance {
     const defaultConsumeTypes = { consumeAPITypes: true };
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
-        isTSProject(
-          typeof dts === 'object' ? dts.tsConfigPath : undefined,
-          compiler.context,
-        ),
+        isTSProject(dts, compiler.context),
         {
           //  remote types dist(.dev-server) not be used currently, so no need to set extractThirdParty etc
           generateTypes: defaultGenerateTypes,
