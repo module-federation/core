@@ -46,6 +46,12 @@ export class SharedHandler {
       GlobalFederation: Federation;
       resolver: () => Shared | undefined;
     }>('resolveShare'),
+    // maybe will change, temporarily for internal use only
+    initContainerShareScopeMap: new AsyncWaterfallHook<{
+      shareScope: ShareScopeMap[string];
+      options: Options;
+      origin: FederationHost;
+    }>('initContainer'),
   });
 
   constructor() {
@@ -420,6 +426,19 @@ export class SharedHandler {
         2. The ${pkgName} share was not registered with the 'lib' attribute.\n
       `,
     );
+  }
+
+  initShareScopeMap(
+    origin: FederationHost,
+    scopeName: string,
+    shareScope: ShareScopeMap[string],
+  ): void {
+    this.shareScopeMap[scopeName] = shareScope;
+    this.hooks.lifecycle.initContainerShareScopeMap.emit({
+      shareScope,
+      options: origin.options,
+      origin: origin,
+    });
   }
 
   private setShared({
