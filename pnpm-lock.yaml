@@ -388,8 +388,8 @@ importers:
         specifier: 4.6.0
         version: 4.6.0(eslint@8.56.0)
       eslint-plugin-simple-import-sort:
-        specifier: 10.0.0
-        version: 10.0.0(eslint@8.56.0)
+        specifier: 12.1.0
+        version: 12.1.0(eslint@8.56.0)
       form-data:
         specifier: 4.0.0
         version: 4.0.0
@@ -9528,7 +9528,7 @@ packages:
       enquirer: 2.3.6
       less-loader: 11.1.0(less@4.2.0)(webpack@5.91.0)
       license-webpack-plugin: 4.0.2(webpack@5.91.0)
-      sass-loader: 12.6.0(webpack@5.91.0)
+      sass-loader: 12.6.0(sass@1.74.1)(webpack@5.91.0)
       stylus-loader: 7.1.3(stylus@0.63.0)(webpack@5.91.0)
       tsconfig-paths: 4.2.0
       webpack-sources: 3.2.3
@@ -14289,7 +14289,7 @@ packages:
     dependencies:
       '@babel/core': 7.24.4
       '@svgr/babel-preset': 8.1.0(@babel/core@7.24.4)
-      '@svgr/core': 8.1.0(typescript@5.0.4)
+      '@svgr/core': 8.1.0(typescript@5.3.3)
       '@svgr/hast-util-to-babel-ast': 8.0.0
       svg-parser: 2.0.4
     transitivePeerDependencies:
@@ -19259,7 +19259,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.2.0
       serialize-javascript: 6.0.2
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /copy-webpack-plugin@11.0.0(webpack@5.91.0):
@@ -19613,7 +19613,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.38)
       postcss-value-parser: 4.2.0
       semver: 7.6.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /css-minimizer-webpack-plugin@5.0.1(esbuild@0.17.19)(webpack@5.91.0):
@@ -21805,8 +21805,8 @@ packages:
       string.prototype.matchall: 4.0.11
     dev: true
 
-  /eslint-plugin-simple-import-sort@10.0.0(eslint@8.56.0):
-    resolution: {integrity: sha512-AeTvO9UCMSNzIHRkg8S6c3RPy5YEwKWSQPx3DYghLedo2ZQxowPFLGDN1AZ2evfg6r6mjBSZSLxLFsWSu3acsw==}
+  /eslint-plugin-simple-import-sort@12.1.0(eslint@8.56.0):
+    resolution: {integrity: sha512-Y2fqAfC11TcG/WP3TrI1Gi3p3nc8XJyEOJYHyEPEGI/UAgNx6akxxlX74p7SbAQdLcgASKhj8M0GKvH3vq/+ig==}
     peerDependencies:
       eslint: '>=5.0.0'
     dependencies:
@@ -26548,7 +26548,7 @@ packages:
     dependencies:
       klona: 2.0.6
       less: 4.1.3
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /less-loader@11.1.0(less@4.2.0)(webpack@5.91.0):
@@ -26626,7 +26626,7 @@ packages:
       webpack-sources:
         optional: true
     dependencies:
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
       webpack-sources: 3.2.3
     dev: true
 
@@ -27987,7 +27987,7 @@ packages:
       webpack: ^5.0.0
     dependencies:
       schema-utils: 4.2.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /mini-css-extract-plugin@2.7.6(webpack@5.91.0):
@@ -30328,7 +30328,7 @@ packages:
       klona: 2.0.6
       postcss: 8.4.38
       semver: 7.6.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /postcss-media-minmax@5.0.0(postcss@8.4.38):
@@ -33488,30 +33488,6 @@ packages:
       klona: 2.0.6
       neo-async: 2.6.2
       sass: 1.74.1
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
-    dev: true
-
-  /sass-loader@12.6.0(webpack@5.91.0):
-    resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}
-    engines: {node: '>= 12.13.0'}
-    peerDependencies:
-      fibers: '>= 3.1.0'
-      node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
-      sass: ^1.3.0
-      sass-embedded: '*'
-      webpack: ^5.0.0
-    peerDependenciesMeta:
-      fibers:
-        optional: true
-      node-sass:
-        optional: true
-      sass:
-        optional: true
-      sass-embedded:
-        optional: true
-    dependencies:
-      klona: 2.0.6
-      neo-async: 2.6.2
       webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
@@ -34152,7 +34128,7 @@ packages:
       abab: 2.0.6
       iconv-lite: 0.6.3
       source-map-js: 1.2.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /source-map-resolve@0.5.3:
@@ -34733,7 +34709,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /style-to-object@0.3.0:
@@ -34873,7 +34849,7 @@ packages:
       fast-glob: 3.3.2
       normalize-path: 3.0.0
       stylus: 0.59.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /stylus-loader@7.1.3(stylus@0.63.0)(webpack@5.91.0):
@@ -37620,7 +37596,7 @@ packages:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.2.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /webpack-dev-middleware@6.0.2(webpack@5.91.0):
@@ -37749,7 +37725,7 @@ packages:
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
       webpack-dev-middleware: 5.3.4(webpack@5.91.0)
       ws: 8.16.0
     transitivePeerDependencies:
@@ -37838,7 +37814,7 @@ packages:
     dependencies:
       html-webpack-plugin: 5.6.0(@rspack/core@0.5.8)(webpack@5.91.0)
       typed-assert: 1.0.9
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /webpack-virtual-modules@0.4.6:
