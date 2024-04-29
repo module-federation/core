@@ -6,3 +6,9 @@ from = "/*"
 to = "/"
 status = 200
 
+
+[[redirects]]
+from = "/docs/en/mf-docs/0.2/getting-started"
+to = "/guide/start/quick-start.html"
+status = 200
+
