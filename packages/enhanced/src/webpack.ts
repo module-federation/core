@@ -1,1 +1,2 @@
-export { default as ModuleFederationPlugin } from './wrapper/ModuleFederationPlugin';
+import { default as ModuleFederationPlugin } from './wrapper/ModuleFederationPlugin';
+export { ModuleFederationPlugin };
