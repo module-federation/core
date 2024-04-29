@@ -9,6 +9,7 @@ export function registerPlugins(
     | FederationHost['hooks']
     | FederationHost['snapshotHandler']['hooks']
     | FederationHost['sharedHandler']['hooks']
+    | FederationHost['remoteHandler']['hooks']
     | Module['host']['loaderHook']
   >,
 ) {
