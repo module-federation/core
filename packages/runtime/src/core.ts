@@ -135,7 +135,9 @@ export class FederationHost {
         {
           id: string;
           error: unknown;
+          options?: any;
           from: 'build' | 'runtime';
+          lifecycle: 'onLoad' | 'beforeRequest';
           origin: FederationHost;
         },
       ],
@@ -520,11 +522,32 @@ export class FederationHost {
     moduleOptions: ModuleOptions;
     remoteMatchInfo: LoadRemoteMatch;
   }> {
-    const loadRemoteArgs = await this.hooks.lifecycle.beforeRequest.emit({
-      id,
-      options: this.options,
-      origin: this,
-    });
+    let loadRemoteArgs;
+
+    try {
+      loadRemoteArgs = await this.hooks.lifecycle.beforeRequest.emit({
+        id,
+        options: this.options,
+        origin: this,
+      });
+    } catch (error) {
+      loadRemoteArgs = (await this.hooks.lifecycle.errorLoadRemote.emit({
+        id,
+        options: this.options,
+        origin: this,
+        from: 'runtime',
+        error,
+        lifecycle: 'beforeRequest',
+      })) as {
+        id: string;
+        options: Options;
+        origin: FederationHost;
+      };
+
+      if (!loadRemoteArgs) {
+        throw error;
+      }
+    }
 
     const { id: idRes } = loadRemoteArgs;
 
@@ -628,6 +651,7 @@ export class FederationHost {
         id,
         error,
         from,
+        lifecycle: 'onLoad',
         origin: this,
       });
 
