@@ -4,11 +4,14 @@ import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { DTSManager } from './DTSManager';
 import { retrieveTypesZipPath } from './archiveHandler';
+import fs from 'fs';
 import {
   retrieveMfAPITypesPath,
   retrieveMfTypesPath,
 } from './typeScriptCompiler';
+import { moduleFederationPlugin } from '@module-federation/sdk';
 import ansiColors from 'ansi-colors';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export function getDTSManagerConstructor(
   implementation?: string,
@@ -69,3 +72,28 @@ export function replaceLocalhost(url: string): string {
 export function isDebugMode() {
   return Boolean(process.env['FEDERATION_DEBUG']);
 }
+
+export const isTSProject = (
+  dtsOptions: moduleFederationPlugin.ModuleFederationPluginOptions['dts'],
+  context = process.cwd(),
+) => {
+  if (dtsOptions === false) {
+    return false;
+  }
+
+  try {
+    let filepath = '';
+    if (typeof dtsOptions === 'object' && dtsOptions.tsConfigPath) {
+      filepath = dtsOptions.tsConfigPath;
+    } else {
+      filepath = path.resolve(context, './tsconfig.json');
+    }
+
+    if (!path.isAbsolute(filepath)) {
+      filepath = path.resolve(context, filepath);
+    }
+    return fs.existsSync(filepath);
+  } catch (err) {
+    return false;
+  }
+};

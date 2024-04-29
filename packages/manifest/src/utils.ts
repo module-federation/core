@@ -10,7 +10,10 @@ import {
   normalizeOptions,
   MetaDataTypes,
 } from '@module-federation/sdk';
-import { retrieveTypesAssetsInfo } from '@module-federation/dts-plugin/core';
+import {
+  isTSProject,
+  retrieveTypesAssetsInfo,
+} from '@module-federation/dts-plugin/core';
 import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
 
 function getSharedModuleName(name: string): string {
@@ -259,7 +262,7 @@ export function getTypesMetaInfo(
   try {
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
-        true,
+        isTSProject(pluginOptions.dts, context),
         {
           generateTypes: defaultRemoteOptions,
           consumeTypes: {},

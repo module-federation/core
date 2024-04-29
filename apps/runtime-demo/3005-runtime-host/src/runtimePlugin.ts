@@ -8,8 +8,9 @@ export default function (): FederationRuntimePlugin {
 
       if (shared) {
         Object.keys(shared || {}).forEach((sharedKey) => {
-          if (!shared[sharedKey].strategy) {
-            shareInfo[sharedKey].strategy = 'loaded-first';
+          const sharedItem = shared[sharedKey];
+          if (!Array.isArray(sharedItem) && !sharedItem.strategy) {
+            sharedItem.strategy = 'loaded-first';
           }
         });
       }
