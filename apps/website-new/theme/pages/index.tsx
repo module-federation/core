@@ -3,10 +3,12 @@ import { Hero, HomeHero } from '../components/HomeHero';
 import { HomeFooter } from '../components/HomeFooter/index';
 import { Contributors } from '../components/Contributors';
 import { HomeFeature, Feature } from '../components/HomeFeature';
+import AnnouncementVideo from '../../src/components/AnnouncementVideo';
 
 export function HomeLayout() {
   const { page } = usePageData();
   const { frontmatter } = page;
+
   return (
     <div>
       {/* Landing Page */}
@@ -20,6 +22,11 @@ export function HomeLayout() {
       >
         <div className="pt-14 pb-12">
           <HomeHero hero={frontmatter.hero as Hero} />
+          <NoSSR>
+            <div className="pb-20">
+              <AnnouncementVideo />
+            </div>
+          </NoSSR>
           <HomeFeature features={frontmatter.features as Feature[]} />
         </div>
       </div>

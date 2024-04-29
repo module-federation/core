@@ -1,30 +1,38 @@
 # 发布公告
 
-> April 24, 2024
+> April 26, 2024
 
-今天我们很高兴跟大家宣布 Module Federation 2.0 正式发布了！Module Federation 2.0 是由 [ByteDance Web Infra](https://github.com/web-infra-dev) 团队和 [@Zack Jackson](https://github.com/ScriptedAlchemy) 推出的新版本，它解决了原有 Module Federation 存在的诸多问题，新版本基于 Bytedance 内实践和 Module Federation 原有社区生态实现 。
+今天，我们很高兴地宣布 Module Federation 2.0 正式发布了！这是一个由 [ByteDance Web Infra](https://github.com/web-infra-dev) 团队与 Module Federation 的作者 [@Zack Jackson](https://github.com/ScriptedAlchemy) 共同推出的新版本。Module Federation 2.0 解决了原有版本存在的诸多问题，新版本基于 Bytedance 内部实践以及 Module Federation 原有社区生态实现的。
 
-## 为什么要做 Module Federation 2.0？
 
-Module Federation 作为 Webpack 5 推出的重磅功能距离发布至今已经三年有余，Module Federation 作为一种模块共享方案已经在被广泛使用，它受到了大型 Web 项目的欢迎，它让开发大型 Web 应用和团队协同变更的更加高效和简单，但随着 Module Federation 被更加广泛的使用带来了较多新的问题：
+import AnnouncementVideo from '@components/AnnouncementVideo.tsx';
 
-- **缺乏最佳实践**：Module Federation 过去作为 Webpack 5 的一个内置插件，没有独立的站点导致缺乏针对 Module Federation 的最佳实践对于各个配置的解释和使用场景不够全面。
-- **Runtime 与构建工具耦合**：Module Federation 过去作为 Webpack 5 的一个内置插件， Runtime 和构建工具存在耦合，导致脱离构建工具无法加载 MF 的远程模块，所有构建工具都需要从零实现 Module Federation，维护成本高且标准无法统一。
-- **类型安全**：Module Federation 对比传统的 NPM 包，带来了另一个劣势就是由于 Module Federation 运行时加载的特性导致的不具备 TypeScript 类型提示。
-- **调试工具**：Module Federation 作为一种微前端的架构模式，缺乏分析和调试工具来完成新的满足新的开发方式，团队协作成本变高。
-- **部署平台**：Module Federation 在过去主要通过 remoteEntry.js 来进行远程模块的加载和提供，Module Federation 缺乏通用的协议来打通部署平台让资源和版本变得更加可控。
+<AnnouncementVideo customWidthScale={0.5} />
+
+
+## 你为什么要用 Module Federation 2.0？
+
+Module Federation 作为 Webpack 5 推出的重磅功能，自发布以来已经三年有余。作为一种模块共享方案，它已经被广泛使用，并受到了大型 Web 项目的欢迎。Module Federation 让开发大型 Web 应用和团队协同变得更加高效和简单。然而，随着 Module Federation 的使用日益广泛，也遇到了新的问题。为此，Module Federation 2.0 针对这些问题提出了全新的解决方案：
+
+- **增加最佳实践**：Module Federation 2.0 推出了新的独立文档站点，这里汇集了关于 Module Federation 的最佳实践。通过这些指导，你可以更高效地利用 Module Federation。
+- **Runtime 与构建工具解耦**：在 Module Federation 2.0 中，Runtime 与构建工具实现了解耦。这一变化统一了各构建工具对 Module Federation 的实现标准，并使得模块加载过程更加灵活。
+- **类型安全**：为了确保类型安全，Module Federation 2.0 的构建插件会为 TypeScript 项目自动生成并加载类型定义。在开发模式下，类型会自动同步，以保证代码的类型准确性。
+- **调试工具**：Module Federation 2.0 引入了 devtool 工具，旨在简化调试过程。这些工具让开发者能够更轻松、更高效地进行 Module Federation 的调试工作。
+- **部署平台**：Module Federation 2.0 新增了 mf-manifest.json 文件协议，这使得在部署平台上的版本资源和版本控制变得更加简单可行。
+
+
 
 ## Module Federation 2.0 特性介绍
 
 ### Module Federation 新文档站
 
-新文档中包含了 Module Federation 的适用场景和功能介绍，包括如何从零使用 Rspack 创建到使用 Module Federation 的介绍，对 Module Federation 插件的配置增加了更详细的说明和介绍！
+新文档详细介绍了 Module Federation 的适用场景和功能。它涵盖了从零开始使用 Rspack 创建项目，到运用 Module Federation 的全过程。同时，对 Module Federation 插件的配置进行了深入的阐述和说明。
 
 ![](@public/blog/announcement/module-federation-doc.png)
 
 ### Module Federation 模块加载更加灵活
 
-新版本 Module Federation 将内置在 Webpack 中的 Module Federation Runtime 能力抽离成了一个独立的 SDK，能够脱离构建工具动态注册远程模块、加载远程模块、注册 Shared，模块预加载并使用运行时插件，使其能够对于加载过程有更强的控制。
+Module Federation 的新版本带来了显著的变化。在这个版本中，原本嵌入在 Webpack 中的 Module Federation Runtime 能力被提取出来，形成了一个独立的 SDK。这个变化意味着，现在我们可以不依赖于任何构建工具，就能够动态地注册和加载远程模块，以及注册共享模块。此外，模块的预加载和运行时插件的使用也得到了增强，从而为模块的加载过程提供了更为强大的控制能力。
 
 ```ts
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
@@ -50,49 +58,52 @@ loadRemote("app2/util").then((md)=>{
 });
 ```
 
-### 统一 Module Federation 构建工具运行时
+### 解绑 Webpack，支持跨工具共享模块
 
 
-新版 Rspack 和 Webpack 的 Module Federation 插件基于新版 Runtime 实现，构建工具不需要直接耦合 Module Federation Runtime 相关逻辑，并且能够享受到新版 Runtime 提供的插件机制和预加载能力，其他的构建工具也可以基于该标准实现 Module Federation 能够降低维护成本并保持运行时的标准保持统一。
+新版 Module Federation 插件采用了全新的 Runtime 架构。这一变化使得构建工具不再需要与 Runtime 强绑定。开发者有望在项目中自由地引入由不同构建工具的产物，并灵活地组装它们进行运行。
 
+目前，已经有多个构建工具与之兼容，包括 Webpack、Rspack 。其他构建工具也可以依据这一标准实现 Module Federation，这将保持运行时的一致性和标准化。
 
 ### 类型提示
 
-新版 Module Federation 推出了一项非常重磅的功能：动态模块类型提示能力！该功能解决了 Module Federation 从本地模块变成动态远程模块后的 TypeScript 项目类型失效问题，使用新版 Module Federation 插件会自动生成和消费远程类型，当项目都在本地启动时可以达到 npm link 一样的类型热更新体验。
+Module Federation 插件的新版本引入了一项突破性的功能——动态模块类型提示！这一功能有效地解决了将本地模块转换为动态远程模块时，在 TypeScript 项目中遇到的类型丢失问题。现在，使用该插件不仅可以自动生成和使用远程类型，而且当所有项目都在本地运行时，还能实现类似于 npm link 的类型实时更新体验。
 
-![](@public/blog/announcement/demo-type-hint.gif)
+![](https://module-federation-assest.netlify.app/document/announcement/blog/announcement/demo-type-hint.gif)
 
 ### Module Federation Devtool
 
-Module Federation Devtool 是专门为 Module Federation 开发的一款调试工具，通过这个调试工具可以清晰的看到 Module Federation 模块间的依赖关系以及 Expose、shared 设置情况，并且通过该 Devtool 还可以将线上页面中的 Module Federation 模块直接代理到线下，并保持热更新的开发体验！
+Module Federation Devtool 是一款为 Module Federation 开发的调试工具。它能够清晰地展示模块间的依赖关系，以及 Expose 和 shared 的配置情况。此外，该工具还支持将线上页面中的 Module Federation 模块代理到本地开发环境，并且保持热更新功能，以提供流畅的开发体验。
 
 
-![](@public/blog/announcement/chrome-devtool-display.gif)
+![](https://module-federation-assest.netlify.app/document/announcement/blog/announcement/chrome-devtool-display.gif)
 
 ### Manifest 协议
 
-Manifest 文件是使用新版本 Module Federation 插件项目构建后所生成的文件，该文件中会存储 Module Federation 相关的基础信息，包括：remoteEntry、shared、exposes、remotes、type 信息，这些信息可以作为原信息分析 Module Federation 项目间的依赖关系，并且基于这份文件可以实现自己的物料平台并打通各个部署平台从而对 Module Federation 模块的版本和灰度有更好的控制，构建插件和运行时还可以直接消费该文件协议，基于这份文件协议可以提供更多进阶的功能，新版本的动态类型提示正是基于该文件协议实现。
+Module Federation 构建插件会生成一个关键的 Manifest 文件。这份文件包含了 Module Federation 的基本信息，例如 remoteEntry、shared、exposes、remotes 和 type。这些信息对于分析项目间的依赖关系至关重要，有助于我们构建和优化物料平台。通过这种方式，我们能够对不同部署平台的 Module Federation 模块版本进行精细的版本和灰度管理。此外，构建插件和运行时可以直接使用 Manifest 文件协议，以实现更为高级的功能。例如，动态类型提示功能就是在最新版本中，基于 Manifest 文件协议开发的。
 
 
-![](@public/blog/announcement/manifest-file.gif)
+![](https://module-federation-assest.netlify.app/document/announcement/blog/announcement/manifest-file.gif)
 
 ## 致谢
 
-新版 Module Federation 离不开社区内各个项目的启发和支持，在这里对这些项目表示致敬和感谢：
-- [Webpack Module Federation](https://webpack.js.org/concepts/module-federation/)，新版 Module Federation 对其进行了 fork 并在此基础上进行了重新设计和实现。
+新版 Module Federation 的发展离不开社区内众多项目的启发和支持。在此，我们向这些项目表示深深的敬意和感激：
+
+- [Webpack Module Federation](https://webpack.js.org/concepts/module-federation/)。新版 Module Federation 对其进行了 fork，并在此基础上重新设计和实施。
 - [Module Federation Universe](https://github.com/module-federation/core) 仓库，Universe 原有实现对是新版 Module Federation 的基础。
-- [Rspack](https://github.com/web-infra-dev/rspack) 项目，Rspack 团队基于 Module Federation Runtime 实现了 Module Federation，使得 Module Federation 2.0 能够完全兼容 Rspack 生态。
+- [Rspack](https://github.com/web-infra-dev/rspack) 项目。Rspack 团队基于 Module Federation Runtime 实现了 Module Federation，确保了 Module Federation 2.0 与 Rspack 生态的完全兼容。
+
 
 ## 未来计划
 
 ### 优化开发者体验
 
-尽管新版本我们提供了动态类型提示和 Chrome devtool，但目前 Chrome devtool 的能力仍然较弱，我们希望增强 Module Federation 的调试工具，例如：增加 shared 复用可视化。
+虽然新版本中引入了动态类型提示和 Chrome 开发者工具支持，但目前 Chrome 开发者工具的功能尚显不足。我们计划对 Module Federation 的调试工具进行增强，比如增加 shared 复用的可视化功能。
 
 ### 提供高性能方案
 
-Module Federation 作为一种微前端的架构方案，也同时拥有微前端架构带来的“请求瀑布问题”，因此 Module Federation 将会提供高性能的解决方案例如：SSR、Data prefetch 等方案。
+Module Federation，作为微前端架构的一种方案，同样面临微前端架构所特有的“请求瀑布问题”。为了解决这一问题，Module Federation 计划提供了一系列高性能的解决策略，包括服务器端渲染（SSR）和数据预获取（Data prefetch）等。
 
 ### 跟社区内的伙伴合作
 
-Module Federation 2.0 推出的新功能目前仅在 Webpack、Rspack 构建工具上提供了支持，Module Federation 提供了较多基础能力的 SDK，其他构建工具可以基于该能力进行上层封装。Module Federation 目前更多的是作为一个模块共享的解决方案，我们计划结合上层框架提供更多基于 Module Federation 微前端架构的最佳实践，用于满足大型 Web 应用的微前端架构开发诉求。
+Module Federation 2.0 的新功能，目前只有 Webpack 和 Rspack 这两款构建工具支持。Module Federation 提供了一套丰富的基础 SDK，便于其他构建工具在此基础上进行扩展封装。目前，Module Federation 主要用作模块共享的解决方案。我们的计划是，与上层框架结合，提供一系列基于 Module Federation 的微前端架构最佳实践。这将帮助开发者更好地满足大型 Web 应用在微前端架构开发上的需求。
