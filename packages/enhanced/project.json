@@ -5,21 +5,27 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "@nx/rollup:rollup",
       "outputs": ["{workspaceRoot}/packages/enhanced/dist"],
       "options": {
+        "parallel": false,
         "outputPath": "packages/enhanced/dist",
         "main": "packages/enhanced/src/index.ts",
+        "additionalEntryPoints": [
+          "packages/enhanced/src/*.ts",
+          "packages/enhanced/src/lib/**/*.ts",
+          "packages/enhanced/src/runtime/**/*.ts",
+          "packages/enhanced/src/schemas/**/*.ts",
+          "packages/enhanced/src/types/**/*.ts",
+          "packages/enhanced/src/wrapper/**/*.ts"
+        ],
         "tsConfig": "packages/enhanced/tsconfig.lib.json",
-        "assets": [
-          "packages/enhanced/*.md",
-          {
-            "glob": "src/**/*.d.ts",
-            "input": "packages/enhanced",
-            "ignore": [],
-            "output": ""
-          }
-        ]
+        "assets": [],
+        "project": "packages/enhanced/package.json",
+        "compiler": "swc",
+        "rollupConfig": "packages/enhanced/rollup.config.js",
+        "format": ["cjs", "esm"],
+        "external": ["@module-federation/*"]
       },
       "dependsOn": [
         {

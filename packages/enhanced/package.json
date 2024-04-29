@@ -1,13 +1,12 @@
 {
   "name": "@module-federation/enhanced",
   "version": "0.1.10",
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.cjs.d.ts",
   "files": [
     "dist/",
     "README.md"
   ],
-  "type": "commonjs",
   "publishConfig": {
     "access": "public"
   },
@@ -16,39 +15,39 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
-      "require": "./dist/src/index.js",
-      "import": "./dist/src/index.js"
+      "types": "./dist/index.cjs.d.ts",
+      "require": "./dist/index.cjs.js",
+      "import": "./dist/index.esm.js"
     },
     "./webpack": {
-      "types": "./dist/src/webpack.d.ts",
-      "require": "./dist/src/webpack.js",
-      "import": "./dist/src/webpack.js"
+      "types": "./dist/webpack.cjs.d.ts",
+      "require": "./dist/webpack.cjs.js",
+      "import": "./dist/webpack.esm.js"
     },
     "./rspack": {
-      "types": "./dist/src/rspack.d.ts",
-      "require": "./dist/src/rspack.js",
-      "import": "./dist/src/rspack.js"
+      "types": "./dist/rspack.cjs.d.ts",
+      "require": "./dist/rspack.cjs.js",
+      "import": "./dist/rspack.esm.js"
     },
     "./runtime": {
-      "types": "./dist/src/runtime.d.ts",
-      "require": "./dist/src/runtime.js",
-      "import": "./dist/src/runtime.js"
+      "types": "./dist/runtime.cjs.d.ts",
+      "require": "./dist/runtime.cjs.js",
+      "import": "./dist/runtime.esm.js"
     }
   },
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/src/index.d.ts"
+        "./dist/index.cjs.d.ts"
       ],
       "webpack": [
-        "./dist/src/webpack.d.ts"
+        "./dist/webpack.cjs.d.ts"
       ],
       "rspack": [
-        "./dist/src/rspack.d.ts"
+        "./dist/rspack.cjs.d.ts"
       ],
       "runtime": [
-        "./dist/src/runtime.d.ts"
+        "./dist/runtime.cjs.d.ts"
       ]
     }
   },
