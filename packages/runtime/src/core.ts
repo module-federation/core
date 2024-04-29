@@ -30,22 +30,18 @@ import {
   SyncHook,
   SyncWaterfallHook,
 } from './utils/hooks';
-import {
-  getGlobalShareScope,
-  formatShareConfigs,
-  getRegisteredShare,
-  getTargetSharedOptions,
-} from './utils/share';
+import { getGlobalShareScope } from './utils/share';
 import { formatPreloadArgs, preloadAssets } from './utils/preload';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
 import { snapshotPlugin } from './plugins/snapshot';
 import { isBrowserEnv } from './utils/env';
 import { getRemoteEntryUniqueKey, getRemoteInfo } from './utils/load';
-import { Global, Federation, globalLoading } from './global';
+import { globalLoading } from './global';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
+import { SharedHandler } from './shared';
 
-interface LoadRemoteMatch {
+export interface LoadRemoteMatch {
   id: string;
   pkgNameOrAlias: string;
   expose: string;
@@ -54,6 +50,100 @@ interface LoadRemoteMatch {
   origin: FederationHost;
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
+}
+
+export async function getRemoteModuleAndOptions(options: {
+  id: string;
+  origin: FederationHost;
+}): Promise<{
+  module: Module;
+  moduleOptions: ModuleOptions;
+  remoteMatchInfo: LoadRemoteMatch;
+}> {
+  const { id, origin } = options;
+  let loadRemoteArgs;
+
+  try {
+    loadRemoteArgs = await origin.hooks.lifecycle.beforeRequest.emit({
+      id,
+      options: origin.options,
+      origin: origin,
+    });
+  } catch (error) {
+    loadRemoteArgs = (await origin.hooks.lifecycle.errorLoadRemote.emit({
+      id,
+      options: origin.options,
+      origin: origin,
+      from: 'runtime',
+      error,
+      lifecycle: 'beforeRequest',
+    })) as {
+      id: string;
+      options: Options;
+      origin: FederationHost;
+    };
+
+    if (!loadRemoteArgs) {
+      throw error;
+    }
+  }
+
+  const { id: idRes } = loadRemoteArgs;
+
+  const remoteSplitInfo = matchRemoteWithNameAndExpose(
+    origin.options.remotes,
+    idRes,
+  );
+
+  assert(
+    remoteSplitInfo,
+    `
+      Unable to locate ${idRes} in ${
+        origin.options.name
+      }. Potential reasons for failure include:\n
+      1. ${idRes} was not included in the 'remotes' parameter of ${
+        origin.options.name || 'the host'
+      }.\n
+      2. ${idRes} could not be found in the 'remotes' of ${
+        origin.options.name
+      } with either 'name' or 'alias' attributes.
+      3. ${idRes} is not online, injected, or loaded.
+      4. ${idRes}  cannot be accessed on the expected.
+      5. The 'beforeRequest' hook was provided but did not return the correct 'remoteInfo' when attempting to load ${idRes}.
+    `,
+  );
+
+  const { remote: rawRemote } = remoteSplitInfo;
+  const remoteInfo = getRemoteInfo(rawRemote);
+  const matchInfo = await origin.sharedHandler.hooks.lifecycle.afterResolve.emit({
+    id: idRes,
+    ...remoteSplitInfo,
+    options: origin.options,
+    origin: origin,
+    remoteInfo,
+  });
+
+  const { remote, expose } = matchInfo;
+  assert(
+    remote && expose,
+    `The 'beforeRequest' hook was executed, but it failed to return the correct 'remote' and 'expose' values while loading ${idRes}.`,
+  );
+  let module: Module | undefined = origin.moduleCache.get(remote.name);
+
+  const moduleOptions: ModuleOptions = {
+    host: origin,
+    remoteInfo,
+  };
+
+  if (!module) {
+    module = new Module(moduleOptions);
+    origin.moduleCache.set(remote.name, module);
+  }
+  return {
+    module,
+    moduleOptions,
+    remoteMatchInfo: matchInfo,
+  };
 }
 
 export class FederationHost {
@@ -79,7 +169,6 @@ export class FederationHost {
       options: Options;
       origin: FederationHost;
     }>('beforeRequest'),
-    afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
     // maybe will change, temporarily for internal use only
     beforeInitContainer: new AsyncWaterfallHook<{
       shareScope: ShareScopeMap[string];
@@ -143,22 +232,6 @@ export class FederationHost {
       ],
       void | unknown
     >('errorLoadRemote'),
-    beforeLoadShare: new AsyncWaterfallHook<{
-      pkgName: string;
-      shareInfo?: Shared;
-      shared: Options['shared'];
-      origin: FederationHost;
-    }>('beforeLoadShare'),
-    // not used yet
-    loadShare: new AsyncHook<[FederationHost, string, ShareInfos]>(),
-    resolveShare: new SyncWaterfallHook<{
-      shareScopeMap: ShareScopeMap;
-      scope: string;
-      pkgName: string;
-      version: string;
-      GlobalFederation: Federation;
-      resolver: () => Shared | undefined;
-    }>('resolveShare'),
     beforePreloadRemote: new AsyncHook<{
       preloadOps: Array<PreloadRemoteArgs>;
       options: Options;
@@ -188,6 +261,7 @@ export class FederationHost {
   name: string;
   moduleCache: Map<string, Module> = new Map();
   snapshotHandler: SnapshotHandler;
+  sharedHandler: SharedHandler;
   shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
     // FIXME: may not be suitable , not open to the public yet
@@ -237,9 +311,10 @@ export class FederationHost {
 
     this.name = userOptions.name;
     this.options = defaultOptions;
-    this.shareScopeMap = {};
     this._setGlobalShareScopeMap();
     this.snapshotHandler = new SnapshotHandler(this);
+    this.sharedHandler = new SharedHandler();
+    this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,
       ...(userOptions.plugins || []),
@@ -271,132 +346,7 @@ export class FederationHost {
       resolver?: (sharedOptions: ShareInfos[string]) => Shared;
     },
   ): Promise<false | (() => T | undefined)> {
-    // This function performs the following steps:
-    // 1. Checks if the currently loaded share already exists, if not, it throws an error
-    // 2. Searches globally for a matching share, if found, it uses it directly
-    // 3. If not found, it retrieves it from the current share and stores the obtained share globally.
-
-    const shareInfo = getTargetSharedOptions({
-      pkgName,
-      extraOptions,
-      shareInfos: this.options.shared,
-    });
-
-    if (shareInfo?.scope) {
-      await Promise.all(
-        shareInfo.scope.map(async (shareScope) => {
-          await Promise.all(
-            this.initializeSharing(shareScope, shareInfo.strategy),
-          );
-          return;
-        }),
-      );
-    }
-    const loadShareRes = await this.hooks.lifecycle.beforeLoadShare.emit({
-      pkgName,
-      shareInfo,
-      shared: this.options.shared,
-      origin: this,
-    });
-
-    const { shareInfo: shareInfoRes } = loadShareRes;
-
-    // Assert that shareInfoRes exists, if not, throw an error
-    assert(
-      shareInfoRes,
-      `Cannot find ${pkgName} Share in the ${this.options.name}. Please ensure that the ${pkgName} Share parameters have been injected`,
-    );
-
-    // Retrieve from cache
-    const registeredShared = getRegisteredShare(
-      this.shareScopeMap,
-      pkgName,
-      shareInfoRes,
-      this.hooks.lifecycle.resolveShare,
-    );
-
-    const addUseIn = (shared: Shared): void => {
-      if (!shared.useIn) {
-        shared.useIn = [];
-      }
-      addUniqueItem(shared.useIn, this.options.name);
-    };
-
-    if (registeredShared && registeredShared.lib) {
-      addUseIn(registeredShared);
-      return registeredShared.lib as () => T;
-    } else if (
-      registeredShared &&
-      registeredShared.loading &&
-      !registeredShared.loaded
-    ) {
-      const factory = await registeredShared.loading;
-      registeredShared.loaded = true;
-      if (!registeredShared.lib) {
-        registeredShared.lib = factory;
-      }
-      addUseIn(registeredShared);
-      return factory;
-    } else if (registeredShared) {
-      const asyncLoadProcess = async () => {
-        const factory = await registeredShared.get();
-        shareInfoRes.lib = factory;
-        shareInfoRes.loaded = true;
-        addUseIn(shareInfoRes);
-        const gShared = getRegisteredShare(
-          this.shareScopeMap,
-          pkgName,
-          shareInfoRes,
-          this.hooks.lifecycle.resolveShare,
-        );
-        if (gShared) {
-          gShared.lib = factory;
-          gShared.loaded = true;
-        }
-        return factory as () => T;
-      };
-      const loading = asyncLoadProcess();
-      this.setShared({
-        pkgName,
-        loaded: false,
-        shared: registeredShared,
-        from: this.options.name,
-        lib: null,
-        loading,
-      });
-      return loading;
-    } else {
-      if (extraOptions?.customShareInfo) {
-        return false;
-      }
-      const asyncLoadProcess = async () => {
-        const factory = await shareInfoRes.get();
-        shareInfoRes.lib = factory;
-        shareInfoRes.loaded = true;
-        addUseIn(shareInfoRes);
-        const gShared = getRegisteredShare(
-          this.shareScopeMap,
-          pkgName,
-          shareInfoRes,
-          this.hooks.lifecycle.resolveShare,
-        );
-        if (gShared) {
-          gShared.lib = factory;
-          gShared.loaded = true;
-        }
-        return factory as () => T;
-      };
-      const loading = asyncLoadProcess();
-      this.setShared({
-        pkgName,
-        loaded: false,
-        shared: shareInfoRes,
-        from: this.options.name,
-        lib: null,
-        loading,
-      });
-      return loading;
-    }
+    return this.sharedHandler.loadShare(this, pkgName, extraOptions);
   }
 
   // The lib function will only be available if the shared set by eager or runtime init is set or the shared is successfully loaded.
@@ -410,97 +360,15 @@ export class FederationHost {
       resolver?: (sharedOptions: ShareInfos[string]) => Shared;
     },
   ): () => T | never {
-    const shareInfo = getTargetSharedOptions({
-      pkgName,
-      extraOptions,
-      shareInfos: this.options.shared,
-    });
+    return this.sharedHandler.loadShareSync(this, pkgName, extraOptions);
+  }
 
-    if (shareInfo?.scope) {
-      shareInfo.scope.forEach((shareScope) => {
-        this.initializeSharing(shareScope, shareInfo.strategy);
-      });
-    }
-    const registeredShared = getRegisteredShare(
-      this.shareScopeMap,
-      pkgName,
-      shareInfo,
-      this.hooks.lifecycle.resolveShare,
-    );
-
-    const addUseIn = (shared: Shared): void => {
-      if (!shared.useIn) {
-        shared.useIn = [];
-      }
-      addUniqueItem(shared.useIn, this.options.name);
-    };
-
-    if (registeredShared) {
-      if (typeof registeredShared.lib === 'function') {
-        addUseIn(registeredShared);
-        if (!registeredShared.loaded) {
-          registeredShared.loaded = true;
-          if (registeredShared.from === this.options.name) {
-            shareInfo.loaded = true;
-          }
-        }
-        return registeredShared.lib as () => T;
-      }
-      if (typeof registeredShared.get === 'function') {
-        const module = registeredShared.get();
-        if (!(module instanceof Promise)) {
-          addUseIn(registeredShared);
-          this.setShared({
-            pkgName,
-            loaded: true,
-            from: this.options.name,
-            lib: module,
-            shared: registeredShared,
-          });
-          return module;
-        }
-      }
-    }
-
-    if (shareInfo.lib) {
-      if (!shareInfo.loaded) {
-        shareInfo.loaded = true;
-      }
-      return shareInfo.lib as () => T;
-    }
-
-    if (shareInfo.get) {
-      const module = shareInfo.get();
-
-      if (module instanceof Promise) {
-        throw new Error(`
-        The loadShareSync function was unable to load ${pkgName}. The ${pkgName} could not be found in ${this.options.name}.
-        Possible reasons for failure: \n
-        1. The ${pkgName} share was registered with the 'get' attribute, but loadShare was not used beforehand.\n
-        2. The ${pkgName} share was not registered with the 'lib' attribute.\n
-      `);
-      }
-
-      shareInfo.lib = module;
-
-      this.setShared({
-        pkgName,
-        loaded: true,
-        from: this.options.name,
-        lib: shareInfo.lib,
-        shared: shareInfo,
-      });
-      return shareInfo.lib as () => T;
-    }
-
-    throw new Error(
-      `
-        The loadShareSync function was unable to load ${pkgName}. The ${pkgName} could not be found in ${this.options.name}.
-        Possible reasons for failure: \n
-        1. The ${pkgName} share was registered with the 'get' attribute, but loadShare was not used beforehand.\n
-        2. The ${pkgName} share was not registered with the 'lib' attribute.\n
-      `,
-    );
+  initializeSharing(
+    origin: FederationHost,
+    shareScopeName = DEFAULT_SCOPE,
+    strategy?: Shared['strategy'],
+  ): Array<Promise<void>> {
+    return this.sharedHandler.initializeSharing(this, shareScopeName, strategy);
   }
 
   initRawContainer(
@@ -515,96 +383,6 @@ export class FederationHost {
     this.moduleCache.set(name, module);
 
     return module;
-  }
-
-  private async _getRemoteModuleAndOptions(id: string): Promise<{
-    module: Module;
-    moduleOptions: ModuleOptions;
-    remoteMatchInfo: LoadRemoteMatch;
-  }> {
-    let loadRemoteArgs;
-
-    try {
-      loadRemoteArgs = await this.hooks.lifecycle.beforeRequest.emit({
-        id,
-        options: this.options,
-        origin: this,
-      });
-    } catch (error) {
-      loadRemoteArgs = (await this.hooks.lifecycle.errorLoadRemote.emit({
-        id,
-        options: this.options,
-        origin: this,
-        from: 'runtime',
-        error,
-        lifecycle: 'beforeRequest',
-      })) as {
-        id: string;
-        options: Options;
-        origin: FederationHost;
-      };
-
-      if (!loadRemoteArgs) {
-        throw error;
-      }
-    }
-
-    const { id: idRes } = loadRemoteArgs;
-
-    const remoteSplitInfo = matchRemoteWithNameAndExpose(
-      this.options.remotes,
-      idRes,
-    );
-
-    assert(
-      remoteSplitInfo,
-      `
-        Unable to locate ${idRes} in ${
-          this.options.name
-        }. Potential reasons for failure include:\n
-        1. ${idRes} was not included in the 'remotes' parameter of ${
-          this.options.name || 'the host'
-        }.\n
-        2. ${idRes} could not be found in the 'remotes' of ${
-          this.options.name
-        } with either 'name' or 'alias' attributes.
-        3. ${idRes} is not online, injected, or loaded.
-        4. ${idRes}  cannot be accessed on the expected.
-        5. The 'beforeRequest' hook was provided but did not return the correct 'remoteInfo' when attempting to load ${idRes}.
-      `,
-    );
-
-    const { remote: rawRemote } = remoteSplitInfo;
-    const remoteInfo = getRemoteInfo(rawRemote);
-    const matchInfo = await this.hooks.lifecycle.afterResolve.emit({
-      id: idRes,
-      ...remoteSplitInfo,
-      options: this.options,
-      origin: this,
-      remoteInfo,
-    });
-
-    const { remote, expose } = matchInfo;
-    assert(
-      remote && expose,
-      `The 'beforeRequest' hook was executed, but it failed to return the correct 'remote' and 'expose' values while loading ${idRes}.`,
-    );
-    let module: Module | undefined = this.moduleCache.get(remote.name);
-
-    const moduleOptions: ModuleOptions = {
-      host: this,
-      remoteInfo,
-    };
-
-    if (!module) {
-      module = new Module(moduleOptions);
-      this.moduleCache.set(remote.name, module);
-    }
-    return {
-      module,
-      moduleOptions,
-      remoteMatchInfo: matchInfo,
-    };
   }
 
   // eslint-disable-next-line max-lines-per-function
@@ -623,7 +401,10 @@ export class FederationHost {
       // id: alias(app1) + expose(button) = app1/button
       // id: alias(app1/utils) + expose(loadash/sort) = app1/utils/loadash/sort
       const { module, moduleOptions, remoteMatchInfo } =
-        await this._getRemoteModuleAndOptions(id);
+        await getRemoteModuleAndOptions({
+          id,
+          origin: this,
+        });
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
       const moduleOrFactory = (await module.get(expose, options)) as T;
 
@@ -699,77 +480,6 @@ export class FederationHost {
     );
   }
 
-  /**
-   * This function initializes the sharing sequence (executed only once per share scope).
-   * It accepts one argument, the name of the share scope.
-   * If the share scope does not exist, it creates one.
-   */
-  // eslint-disable-next-line @typescript-eslint/member-ordering
-  initializeSharing(
-    shareScopeName = DEFAULT_SCOPE,
-    strategy?: Shared['strategy'],
-  ): Array<Promise<void>> {
-    const shareScope = this.shareScopeMap;
-    const hostName = this.options.name;
-    // Creates a new share scope if necessary
-    if (!shareScope[shareScopeName]) {
-      shareScope[shareScopeName] = {};
-    }
-    // Executes all initialization snippets from all accessible modules
-    const scope = shareScope[shareScopeName];
-    const register = (name: string, shared: Shared) => {
-      const { version, eager } = shared;
-      scope[name] = scope[name] || {};
-      const versions = scope[name];
-      const activeVersion = versions[version];
-      const activeVersionEager = Boolean(
-        activeVersion &&
-          (activeVersion.eager || activeVersion.shareConfig?.eager),
-      );
-      if (
-        !activeVersion ||
-        (activeVersion.strategy !== 'loaded-first' &&
-          !activeVersion.loaded &&
-          (Boolean(!eager) !== !activeVersionEager
-            ? eager
-            : hostName > activeVersion.from))
-      ) {
-        versions[version] = shared;
-      }
-    };
-    const promises: Promise<any>[] = [];
-    const initFn = (mod: RemoteEntryExports) =>
-      mod && mod.init && mod.init(shareScope[shareScopeName]);
-
-    const initRemoteModule = async (key: string): Promise<void> => {
-      const { module } = await this._getRemoteModuleAndOptions(key);
-      if (module.getEntry) {
-        const entry = await module.getEntry();
-        if (!module.inited) {
-          initFn(entry);
-          module.inited = true;
-        }
-      }
-    };
-    Object.keys(this.options.shared).forEach((shareName) => {
-      const sharedArr = this.options.shared[shareName];
-      sharedArr.forEach((shared) => {
-        if (shared.scope.includes(shareScopeName)) {
-          register(shareName, shared);
-        }
-      });
-    });
-    if (strategy === 'version-first') {
-      this.options.remotes.forEach((remote) => {
-        if (remote.shareScope === shareScopeName) {
-          promises.push(initRemoteModule(remote.name));
-        }
-      });
-    }
-
-    return promises;
-  }
-
   initShareScopeMap(
     scopeName: string,
     shareScope: ShareScopeMap[string],
@@ -786,30 +496,10 @@ export class FederationHost {
     globalOptions: Options,
     userOptions: UserOptions,
   ): Options {
-    const formatShareOptions = formatShareConfigs(
-      userOptions.shared || {},
-      userOptions.name,
+    const { shared, shareInfos } = this.sharedHandler.formatShareConfigs(
+      globalOptions,
+      userOptions,
     );
-
-    const shared = {
-      ...globalOptions.shared,
-    };
-
-    Object.keys(formatShareOptions).forEach((shareKey) => {
-      if (!shared[shareKey]) {
-        shared[shareKey] = formatShareOptions[shareKey];
-      } else {
-        formatShareOptions[shareKey].forEach((newUserSharedOptions) => {
-          const isSameVersion = shared[shareKey].find(
-            (sharedVal) => sharedVal.version === newUserSharedOptions.version,
-          );
-          if (!isSameVersion) {
-            shared[shareKey].push(newUserSharedOptions);
-          }
-        });
-      }
-    });
-
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({
         origin: this,
@@ -825,29 +515,7 @@ export class FederationHost {
       return res;
     }, globalOptionsRes.remotes);
 
-    // register shared in shareScopeMap
-    const sharedKeys = Object.keys(formatShareOptions);
-    sharedKeys.forEach((sharedKey) => {
-      const sharedVals = formatShareOptions[sharedKey];
-      sharedVals.forEach((sharedVal) => {
-        const registeredShared = getRegisteredShare(
-          this.shareScopeMap,
-          sharedKey,
-          sharedVal,
-          this.hooks.lifecycle.resolveShare,
-        );
-        if (!registeredShared && sharedVal && sharedVal.lib) {
-          this.setShared({
-            pkgName: sharedKey,
-            lib: sharedVal.lib,
-            get: sharedVal.get,
-            loaded: true,
-            shared: sharedVal,
-            from: userOptions.name,
-          });
-        }
-      });
-    });
+    this.sharedHandler.registerShared(shareInfos, userOptions);
 
     const plugins = [...globalOptionsRes.plugins];
 
@@ -877,6 +545,7 @@ export class FederationHost {
   registerPlugins(plugins: UserOptions['plugins']) {
     const pluginRes = registerPlugins(plugins, [
       this.hooks,
+      this.sharedHandler.hooks,
       this.snapshotHandler.hooks,
       this.loaderHook,
     ]);
@@ -888,52 +557,6 @@ export class FederationHost {
       }
       return res;
     }, pluginRes || []);
-  }
-
-  private setShared({
-    pkgName,
-    shared,
-    from,
-    lib,
-    loading,
-    loaded,
-    get,
-  }: {
-    pkgName: string;
-    shared: Shared;
-    from: string;
-    lib: any;
-    loaded?: boolean;
-    loading?: Shared['loading'];
-    get?: Shared['get'];
-  }): void {
-    const { version, scope = 'default', ...shareInfo } = shared;
-    const scopes: string[] = Array.isArray(scope) ? scope : [scope];
-    scopes.forEach((sc) => {
-      if (!this.shareScopeMap[sc]) {
-        this.shareScopeMap[sc] = {};
-      }
-      if (!this.shareScopeMap[sc][pkgName]) {
-        this.shareScopeMap[sc][pkgName] = {};
-      }
-
-      if (this.shareScopeMap[sc][pkgName][version]) {
-        return;
-      }
-
-      this.shareScopeMap[sc][pkgName][version] = {
-        version,
-        scope: ['default'],
-        ...shareInfo,
-        lib,
-        loaded,
-        loading,
-      };
-
-      if (get) {
-        this.shareScopeMap[sc][pkgName][version].get = get;
-      }
-    });
   }
 
   private removeRemote(remote: Remote): void {

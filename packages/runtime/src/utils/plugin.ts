@@ -8,6 +8,7 @@ export function registerPlugins(
   hookInstances: Array<
     | FederationHost['hooks']
     | FederationHost['snapshotHandler']['hooks']
+    | FederationHost['sharedHandler']['hooks']
     | Module['host']['loaderHook']
   >,
 ) {

@@ -1,6 +1,7 @@
 import { FederationHost } from '../core';
 import { Module } from '../module';
 import { SnapshotHandler } from '../plugins/snapshot/SnapshotHandler';
+import { SharedHandler } from '../shared';
 
 type CoreLifeCycle = FederationHost['hooks']['lifecycle'];
 type CoreLifeCyclePartial = Partial<{
@@ -17,8 +18,14 @@ type ModuleLifeCycleCyclePartial = Partial<{
   [k in keyof ModuleLifeCycle]: Parameters<ModuleLifeCycle[k]['on']>[0];
 }>;
 
+type SharedLifeCycle = SharedHandler['hooks']['lifecycle'];
+type SharedLifeCycleCyclePartial = Partial<{
+  [k in keyof SharedLifeCycle]: Parameters<SharedLifeCycle[k]['on']>[0];
+}>;
+
 export type FederationRuntimePlugin = CoreLifeCyclePartial &
   SnapshotLifeCycleCyclePartial &
+  SharedLifeCycleCyclePartial &
   ModuleLifeCycleCyclePartial & {
     name: string;
     version?: string;
