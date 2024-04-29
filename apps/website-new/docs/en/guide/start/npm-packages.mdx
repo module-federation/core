@@ -68,7 +68,8 @@ The storybook plugin for Module Federation.
 
 ![](https://img.shields.io/npm/v/@module-federation/native-federation-typescript?style=flat-square&colorA=564341&colorB=EDED91)
 
-The type generation and loading plugin for Module Federation, **it is recommended to use @module-federation/enhanced to automatically handle type generation and loading**.
+The bundler-agnostic plugin for type generation and loading for Module Federation.
+It is recommended when you are using other bundlers than webpack and rspack or Module Federation < 2.0. Otherwise, **it is recommended to use @module-federation/enhanced to automatically handle type generation and loading**.
 
 - [npm](https://npmjs.com/package/@module-federation/native-federation-typescript)
 - [Source Code](https://github.com/module-federation/core/tree/main/packages/native-federation-typescript)
@@ -83,7 +84,7 @@ When using `mf-manifest.json`, @module-federation/enhanced will download consume
 
 ![](https://img.shields.io/npm/v/@module-federation/native-federation-tests?style=flat-square&colorA=564341&colorB=EDED91)
 
-The mocks generation and loading plugin for Module Federation for your tests, that works for both Jest and Vitest.
+The bundler-agnostic plugin for mocks generation and loading for Module Federation and your tests, that works for both Jest and Vitest.
 
 - [npm](https://npmjs.com/package/@module-federation/native-federation-tests)
 - [Source Code](https://github.com/module-federation/core/tree/main/packages/native-federation-tests)
