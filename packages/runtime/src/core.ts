@@ -306,9 +306,8 @@ export class FederationHost {
 
     this.name = userOptions.name;
     this.options = defaultOptions;
-    this._setGlobalShareScopeMap();
     this.snapshotHandler = new SnapshotHandler(this);
-    this.sharedHandler = new SharedHandler();
+    this.sharedHandler = new SharedHandler(this.options);
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,

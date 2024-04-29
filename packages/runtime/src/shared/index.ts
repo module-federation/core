@@ -22,6 +22,7 @@ import {
   formatShareConfigs,
   getRegisteredShare,
   getTargetSharedOptions,
+  getGlobalShareScope,
 } from '../utils/share';
 import { assert, addUniqueItem } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
@@ -54,8 +55,9 @@ export class SharedHandler {
     }>('initContainer'),
   });
 
-  constructor() {
+  constructor(hostOptions: Options) {
     this.shareScopeMap = {};
+    this._setGlobalShareScopeMap(hostOptions);
   }
 
   formatShareConfigs(globalOptions: Options, userOptions: UserOptions) {
@@ -485,5 +487,13 @@ export class SharedHandler {
         this.shareScopeMap[sc][pkgName][version].get = get;
       }
     });
+  }
+
+  private _setGlobalShareScopeMap(hostOptions: Options): void {
+    const globalShareScopeMap = getGlobalShareScope();
+    const identifier = hostOptions.id || hostOptions.name;
+    if (identifier && !globalShareScopeMap[identifier]) {
+      globalShareScopeMap[identifier] = this.shareScopeMap;
+    }
   }
 }
