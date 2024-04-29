@@ -622,8 +622,8 @@ importers:
         specifier: 3.3.0
         version: 3.3.0
       semver:
-        specifier: 6.3.1
-        version: 6.3.1
+        specifier: 7.6.0
+        version: 7.6.0
       styled-jsx:
         specifier: 5.1.2
         version: 5.1.2(@babel/core@7.24.4)(react@18.2.0)
@@ -707,8 +707,8 @@ importers:
         specifier: 3.3.0
         version: 3.3.0
       semver:
-        specifier: 6.3.1
-        version: 6.3.1
+        specifier: 7.6.0
+        version: 7.6.0
       styled-jsx:
         specifier: 5.1.2
         version: 5.1.2(@babel/core@7.24.4)(react@18.2.0)
@@ -795,8 +795,8 @@ importers:
         specifier: 3.3.0
         version: 3.3.0
       semver:
-        specifier: 6.3.1
-        version: 6.3.1
+        specifier: 7.6.0
+        version: 7.6.0
       styled-jsx:
         specifier: 5.1.2
         version: 5.1.2(@babel/core@7.24.4)(react@18.2.0)
@@ -26269,7 +26269,7 @@ packages:
       acorn: 8.11.3
       eslint-visitor-keys: 3.4.3
       espree: 9.6.1
-      semver: 7.5.3
+      semver: 7.6.0
     dev: true
 
   /jsonc-parser@3.2.0:
@@ -28681,7 +28681,7 @@ packages:
     dependencies:
       hosted-git-info: 7.0.1
       proc-log: 3.0.0
-      semver: 7.5.3
+      semver: 7.6.0
       validate-npm-package-name: 5.0.0
     dev: true
 
