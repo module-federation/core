@@ -115,13 +115,14 @@ export async function getRemoteModuleAndOptions(options: {
 
   const { remote: rawRemote } = remoteSplitInfo;
   const remoteInfo = getRemoteInfo(rawRemote);
-  const matchInfo = await origin.sharedHandler.hooks.lifecycle.afterResolve.emit({
-    id: idRes,
-    ...remoteSplitInfo,
-    options: origin.options,
-    origin: origin,
-    remoteInfo,
-  });
+  const matchInfo =
+    await origin.sharedHandler.hooks.lifecycle.afterResolve.emit({
+      id: idRes,
+      ...remoteSplitInfo,
+      options: origin.options,
+      origin: origin,
+      remoteInfo,
+    });
 
   const { remote, expose } = matchInfo;
   assert(
@@ -364,7 +365,6 @@ export class FederationHost {
   }
 
   initializeSharing(
-    origin: FederationHost,
     shareScopeName = DEFAULT_SCOPE,
     strategy?: Shared['strategy'],
   ): Array<Promise<void>> {
