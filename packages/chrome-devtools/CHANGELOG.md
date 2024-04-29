@@ -1,5 +1,13 @@
 # @module-federation/devtools
 
+## 0.1.11
+
+### Patch Changes
+
+- 99b23f7: fix(chrome-devtools): fix options undefined cause error
+- f8c6db7: chore(devtools): add modern lib to publish npm package
+  - @module-federation/sdk@0.1.11
+
 ## 0.0.26
 
 ### Patch Changes

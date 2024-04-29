@@ -1,5 +1,12 @@
 # @module-federation/runtime
 
+## 0.1.11
+
+### Patch Changes
+
+- 328cd99: package json main definition
+  - @module-federation/sdk@0.1.11
+
 ## 0.1.10
 
 ### Patch Changes

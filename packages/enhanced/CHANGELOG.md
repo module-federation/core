@@ -1,5 +1,18 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.1.11
+
+### Patch Changes
+
+- d45ee54: add type to package.json of commonjs
+- 3d2c63a: fix esm export formats and make webpack optional peer
+  - @module-federation/runtime-tools@0.1.11
+  - @module-federation/rspack@0.1.11
+  - @module-federation/sdk@0.1.11
+  - @module-federation/managers@0.1.11
+  - @module-federation/manifest@0.1.11
+  - @module-federation/dts-plugin@0.1.11
+
 ## 0.1.10
 
 ### Patch Changes
