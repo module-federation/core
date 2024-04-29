@@ -5,7 +5,7 @@ import {
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { ConsumeTypesPlugin } from './ConsumeTypesPlugin';
 import { GenerateTypesPlugin } from './GenerateTypesPlugin';
-import { isTSProject } from './utils';
+import { isTSProject } from '../core';
 
 class TypesPlugin implements WebpackPluginInstance {
   options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -26,12 +26,7 @@ class TypesPlugin implements WebpackPluginInstance {
     const defaultConsumeTypes = { abortOnError: false, consumeAPITypes: true };
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
-        isTSProject(
-          typeof options.dts === 'object'
-            ? options.dts.tsConfigPath
-            : undefined,
-          compiler.context,
-        ),
+        isTSProject(options.dts, compiler.context),
         {
           generateTypes: defaultGenerateTypes,
           consumeTypes: defaultConsumeTypes,

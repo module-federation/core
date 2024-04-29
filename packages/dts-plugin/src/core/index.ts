@@ -4,6 +4,7 @@ export {
   getDTSManagerConstructor,
   validateOptions,
   retrieveTypesAssetsInfo,
+  isTSProject,
 } from './lib/utils';
 export {
   retrieveOriginalOutDir,
