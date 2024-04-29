@@ -112,8 +112,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(@types/node@18.19.26)(typescript@5.3.3)
       '@commitlint/config-conventional':
-        specifier: 17.8.1
-        version: 17.8.1
+        specifier: 19.2.2
+        version: 19.2.2
       '@commitlint/config-nx-scopes':
         specifier: ^17.6.4
         version: 17.8.1(nx@17.2.8)
@@ -4028,11 +4028,12 @@ packages:
       - typescript
     dev: true
 
-  /@commitlint/config-conventional@17.8.1:
-    resolution: {integrity: sha512-NxCOHx1kgneig3VLauWJcDWS40DVjg7nKOpBEEK9E5fjJpQqLCilcnKkIIjdBH98kEO1q3NpE5NSrZ2kl/QGJg==}
-    engines: {node: '>=v14'}
+  /@commitlint/config-conventional@19.2.2:
+    resolution: {integrity: sha512-mLXjsxUVLYEGgzbxbxicGPggDuyWNkf25Ht23owXIH+zV2pv1eJuzLK3t1gDY5Gp6pxdE60jZnWUY5cvgL3ufw==}
+    engines: {node: '>=v18'}
     dependencies:
-      conventional-changelog-conventionalcommits: 6.1.0
+      '@commitlint/types': 19.0.3
+      conventional-changelog-conventionalcommits: 7.0.2
     dev: true
 
   /@commitlint/config-nx-scopes@17.8.1(nx@17.2.8):
@@ -9528,7 +9529,7 @@ packages:
       enquirer: 2.3.6
       less-loader: 11.1.0(less@4.2.0)(webpack@5.91.0)
       license-webpack-plugin: 4.0.2(webpack@5.91.0)
-      sass-loader: 12.6.0(webpack@5.91.0)
+      sass-loader: 12.6.0(sass@1.74.1)(webpack@5.91.0)
       stylus-loader: 7.1.3(stylus@0.63.0)(webpack@5.91.0)
       tsconfig-paths: 4.2.0
       webpack-sources: 3.2.3
@@ -14289,7 +14290,7 @@ packages:
     dependencies:
       '@babel/core': 7.24.4
       '@svgr/babel-preset': 8.1.0(@babel/core@7.24.4)
-      '@svgr/core': 8.1.0(typescript@5.0.4)
+      '@svgr/core': 8.1.0(typescript@5.3.3)
       '@svgr/hast-util-to-babel-ast': 8.0.0
       svg-parser: 2.0.4
     transitivePeerDependencies:
@@ -19033,13 +19034,6 @@ packages:
     engines: {node: '>=16'}
     dev: true
 
-  /conventional-changelog-conventionalcommits@6.1.0:
-    resolution: {integrity: sha512-3cS3GEtR78zTfMzk0AizXKKIdN4OvSh7ibNz6/DPbhWWQu7LqE/8+/GqSodV+sywUR2gpJAdP/1JFf4XtN7Zpw==}
-    engines: {node: '>=14'}
-    dependencies:
-      compare-func: 2.0.0
-    dev: true
-
   /conventional-changelog-conventionalcommits@7.0.2:
     resolution: {integrity: sha512-NKXYmMR/Hr1DevQegFB4MwfM5Vv0m4UIxKZTTYuD98lpTknaZlSRrDOG4X7wIXpGkfsYxZTghUN+Qq+T0YQI7w==}
     engines: {node: '>=16'}
@@ -19259,7 +19253,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.2.0
       serialize-javascript: 6.0.2
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /copy-webpack-plugin@11.0.0(webpack@5.91.0):
@@ -19613,7 +19607,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.38)
       postcss-value-parser: 4.2.0
       semver: 7.6.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /css-minimizer-webpack-plugin@5.0.1(esbuild@0.17.19)(webpack@5.91.0):
@@ -26548,7 +26542,7 @@ packages:
     dependencies:
       klona: 2.0.6
       less: 4.1.3
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /less-loader@11.1.0(less@4.2.0)(webpack@5.91.0):
@@ -26626,7 +26620,7 @@ packages:
       webpack-sources:
         optional: true
     dependencies:
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
       webpack-sources: 3.2.3
     dev: true
 
@@ -27987,7 +27981,7 @@ packages:
       webpack: ^5.0.0
     dependencies:
       schema-utils: 4.2.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /mini-css-extract-plugin@2.7.6(webpack@5.91.0):
@@ -30328,7 +30322,7 @@ packages:
       klona: 2.0.6
       postcss: 8.4.38
       semver: 7.6.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /postcss-media-minmax@5.0.0(postcss@8.4.38):
@@ -33488,30 +33482,6 @@ packages:
       klona: 2.0.6
       neo-async: 2.6.2
       sass: 1.74.1
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
-    dev: true
-
-  /sass-loader@12.6.0(webpack@5.91.0):
-    resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}
-    engines: {node: '>= 12.13.0'}
-    peerDependencies:
-      fibers: '>= 3.1.0'
-      node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
-      sass: ^1.3.0
-      sass-embedded: '*'
-      webpack: ^5.0.0
-    peerDependenciesMeta:
-      fibers:
-        optional: true
-      node-sass:
-        optional: true
-      sass:
-        optional: true
-      sass-embedded:
-        optional: true
-    dependencies:
-      klona: 2.0.6
-      neo-async: 2.6.2
       webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
@@ -34152,7 +34122,7 @@ packages:
       abab: 2.0.6
       iconv-lite: 0.6.3
       source-map-js: 1.2.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /source-map-resolve@0.5.3:
@@ -34733,7 +34703,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /style-to-object@0.3.0:
@@ -34873,7 +34843,7 @@ packages:
       fast-glob: 3.3.2
       normalize-path: 3.0.0
       stylus: 0.59.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /stylus-loader@7.1.3(stylus@0.63.0)(webpack@5.91.0):
@@ -37620,7 +37590,7 @@ packages:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.2.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /webpack-dev-middleware@6.0.2(webpack@5.91.0):
@@ -37749,7 +37719,7 @@ packages:
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
       webpack-dev-middleware: 5.3.4(webpack@5.91.0)
       ws: 8.16.0
     transitivePeerDependencies:
@@ -37838,7 +37808,7 @@ packages:
     dependencies:
       html-webpack-plugin: 5.6.0(@rspack/core@0.5.8)(webpack@5.91.0)
       typed-assert: 1.0.9
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: true
 
   /webpack-virtual-modules@0.4.6:
