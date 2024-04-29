@@ -48,7 +48,7 @@ jobs:
         run: pnpm install
 
       - name: Build and test Packages
-        run: npx nx run-many --target=build --exclude='*,!tag:type:pkg'
+        run: pnpm run build:pkg
 
       - name: Release
         uses: web-infra-dev/actions@v2
