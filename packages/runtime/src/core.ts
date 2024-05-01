@@ -1,4 +1,8 @@
-import type { ModuleInfo, GlobalModuleInfo } from '@module-federation/sdk';
+import type {
+  ModuleInfo,
+  GlobalModuleInfo,
+  CreateScriptHookReturn,
+} from '@module-federation/sdk';
 import {
   Options,
   PreloadAssets,
@@ -206,7 +210,7 @@ export class FederationHost {
           url: string;
         },
       ],
-      HTMLScriptElement | void
+      CreateScriptHookReturn
     >(),
     createLink: new SyncHook<
       [

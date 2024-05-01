@@ -21,16 +21,17 @@ export function isStaticResourcesEqual(url1: string, url2: string): boolean {
   // Check if the relative paths are identical
   return relativeUrl1 === relativeUrl2;
 }
+
+export type CreateScriptHookReturn =
+  | HTMLScriptElement
+  | { script?: HTMLScriptElement; timeout?: number }
+  | void;
+
 export function createScript(
   url: string,
   cb: (value: void | PromiseLike<void>) => void,
   attrs?: Record<string, any>,
-  createScriptHook?: (
-    url: string,
-  ) =>
-    | HTMLScriptElement
-    | { script?: HTMLScriptElement; timeout?: number }
-    | void,
+  createScriptHook?: (url: string) => CreateScriptHookReturn,
 ): { script: HTMLScriptElement; needAttach: boolean } {
   // Retrieve the existing script element by its src attribute
   let script: HTMLScriptElement | null = null;
@@ -56,7 +57,7 @@ export function createScript(
       const createScriptRes = createScriptHook(url);
       if (createScriptRes instanceof HTMLScriptElement) {
         script = createScriptRes;
-      } else {
+      } else if (createScriptRes) {
         if (createScriptRes?.script) script = createScriptRes.script;
         if (createScriptRes?.timeout) timeout = createScriptRes.timeout;
       }
@@ -187,12 +188,7 @@ export function loadScript(
   url: string,
   info: {
     attrs?: Record<string, any>;
-    createScriptHook?: (
-      url: string,
-    ) =>
-      | HTMLScriptElement
-      | { script?: HTMLScriptElement; timeout?: number }
-      | void;
+    createScriptHook?: (url: string) => CreateScriptHookReturn;
   },
 ) {
   const { attrs, createScriptHook } = info;
