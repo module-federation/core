@@ -55,11 +55,12 @@ export function createScript(
     script.src = url;
     if (createScriptHook) {
       const createScriptRes = createScriptHook(url);
+
       if (createScriptRes instanceof HTMLScriptElement) {
         script = createScriptRes;
-      } else if (createScriptRes) {
-        if (createScriptRes?.script) script = createScriptRes.script;
-        if (createScriptRes?.timeout) timeout = createScriptRes.timeout;
+      } else if (typeof createScriptRes === 'object') {
+        if (createScriptRes.script) script = createScriptRes.script;
+        if (createScriptRes.timeout) timeout = createScriptRes.timeout;
       }
     }
   }
