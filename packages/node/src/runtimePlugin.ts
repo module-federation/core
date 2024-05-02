@@ -21,15 +21,6 @@ export default function () {
           try {
             return new URL(chunkName, __webpack_require__.p);
           } catch (error) {
-            console.error(
-              'module-federation: failed to construct absolute chunk path of',
-              remoteName,
-              'for',
-              chunkName,
-              'for public path',
-              __webpack_require__.p,
-            );
-
             const entryUrl =
               returnFromCache(remoteName) ||
               returnFromGlobalInstances(remoteName);
@@ -181,15 +172,19 @@ export default function () {
               data += chunk.toString();
             });
             res.on('end', function () {
-              var chunk = {};
-              var urlDirname = url.pathname.split('/').slice(0, -1).join('/');
-              vm.runInThisContext(
-                '(function(exports, require, __dirname, __filename) {' +
-                  data +
-                  '\n})',
-                chunkName,
-              )(chunk, __non_webpack_require__, urlDirname, chunkName);
-              callback(null, chunk);
+              try {
+                var chunk = {};
+                var urlDirname = url.pathname.split('/').slice(0, -1).join('/');
+                vm.runInThisContext(
+                  '(function(exports, require, __dirname, __filename) {' +
+                    data +
+                    '\n})',
+                  chunkName,
+                )(chunk, __non_webpack_require__, urlDirname, chunkName);
+                callback(null, chunk);
+              } catch (e) {
+                callback(err, null);
+              }
             });
             res.on('error', function (err) {
               callback(err, null);
@@ -323,8 +318,8 @@ export default function () {
                       var chunkName = __webpack_require__.u(chunkId);
                       const loadingStrategy =
                         typeof process === 'undefined'
-                          ? 'http-vm'
-                          : 'http-eval';
+                          ? 'http-eval'
+                          : 'http-vm';
                       loadChunkStrategy(
                         loadingStrategy,
                         chunkName,
