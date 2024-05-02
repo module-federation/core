@@ -100,7 +100,7 @@ export function createScript(
     cb();
   };
 
-  // script.onerror = onScriptComplete.bind(null, script.onerror);
+  script.onerror = onScriptComplete.bind(null, script.onerror);
   script.onload = onScriptComplete.bind(null, script.onload);
 
   timeoutId = setTimeout(() => {
