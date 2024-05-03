@@ -11,7 +11,7 @@ export const EN_US = {
   compatibility: 'Compatibility',
   migration: 'Migration',
   cli: 'CLI',
-  friendLink: 'Friend Link',
+  friendLink: 'Ecosystem',
   community: 'Community',
   benchmarkTitle: 'Build Performance',
   benchmarkDesc:
