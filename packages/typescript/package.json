@@ -34,7 +34,8 @@
     "react-dom": "*"
   },
   "dependencies": {
-    "node-fetch": "2.7.0"
+    "node-fetch": "2.7.0",
+    "lodash.get": "^4.4.2"
   },
   "peerDependenciesMeta": {
     "react": {
