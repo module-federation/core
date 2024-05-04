@@ -32,6 +32,10 @@
       "import": "./dist/constant.esm.js",
       "require": "./dist/constant.cjs.js"
     },
+    "./container": {
+      "import": "./dist/container.esm.js",
+      "require": "./dist/container.cjs.js"
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -43,5 +47,8 @@
         "./dist/constant.cjs.d.ts"
       ]
     }
+  },
+  "devDependencies": {
+    "@module-federation/runtime": "workspace:*"
   }
 }
