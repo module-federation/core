@@ -36,8 +36,12 @@ import { defineConfig } from '@rsbuild/core';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 
 export default defineConfig({
-  output: {
+  // publicPath must be configured if using manifest
+  dev: {
     assetPrefix: 'http://localhost:2000/',
+  },
+  output: {
+    assetPrefix: 'https://cdn.domain.com/path/to/project/',
   },
   server: {
     port: 2000,
