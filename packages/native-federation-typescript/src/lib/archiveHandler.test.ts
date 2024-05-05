@@ -75,6 +75,29 @@ describe('archiveHandler', () => {
       });
     });
 
+    it('correctly extracts downloaded archive - skips same zip file', async () => {
+      const archivePath = join(tmpDir, destinationFolder);
+
+      const zip = new AdmZip();
+      await zip.addLocalFolderPromise(tmpDir, {});
+
+      axios.get = vi.fn().mockResolvedValue({ data: zip.toBuffer() });
+
+      const downloader = downloadTypesArchive(hostOptions);
+
+      await downloader([destinationFolder, fileToDownload]);
+      await downloader([destinationFolder,fileToDownload]);
+
+      expect(existsSync(archivePath)).toBeTruthy();
+      expect(axios.get).toHaveBeenCalledTimes(2);
+      expect(axios.get.mock.calls[0]).toStrictEqual([fileToDownload, {
+        responseType: 'arraybuffer',
+      }]);
+      expect(axios.get.mock.calls[1]).toStrictEqual([fileToDownload, {
+        responseType: 'arraybuffer',
+      }]);
+    });
+
     it('correctly handles exception', async () => {
       const message = 'Rejected value';
 

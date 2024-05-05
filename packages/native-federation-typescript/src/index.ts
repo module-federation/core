@@ -79,6 +79,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
 export const NativeFederationTypeScriptHost = createUnplugin(
   (options: HostOptions) => {
     const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(options);
+    const typesDownloader = downloadTypesArchive(hostOptions);
     return {
       name: 'native-federation-typescript/host',
       async writeBundle() {
@@ -93,7 +94,6 @@ export const NativeFederationTypeScriptHost = createUnplugin(
           );
         }
 
-        const typesDownloader = downloadTypesArchive(hostOptions);
         const downloadPromises =
           Object.entries(mapRemotesToDownload).map(typesDownloader);
 
