@@ -41,7 +41,9 @@ describe('archiveHandler', () => {
   });
 
   describe('downloadTypesArchive', () => {
-    const archivePath = join(tmpDir, 'testsHostFolder');
+    const destinationFolder = 'testsHostFolder';
+    const archivePath = join(tmpDir, destinationFolder);
+    const fileToDownload = 'https://foo.it';
     const hostOptions = {
       moduleFederationConfig: {},
       mocksFolder: archivePath,
@@ -66,10 +68,31 @@ describe('archiveHandler', () => {
       axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
       await downloadTypesArchive(hostOptions)([
-        'testsHostFolder',
-        'https://foo.it',
+        destinationFolder,
+        fileToDownload,
       ]);
       expect(existsSync(archivePath)).toBeTruthy();
+    });
+
+    it('correctly extracts downloaded archive - skips same zip file', async () => {
+      const zip = new AdmZip();
+      await zip.addLocalFolderPromise(tmpDir, {});
+
+      axios.get = vi.fn().mockResolvedValue({ data: zip.toBuffer() });
+
+      const downloader = downloadTypesArchive(hostOptions);
+
+      await downloader([destinationFolder, fileToDownload]);
+      await downloader([destinationFolder, fileToDownload]);
+
+      expect(existsSync(archivePath)).toBeTruthy();
+      expect(axios.get).toHaveBeenCalledTimes(2);
+      expect(axios.get.mock.calls[0]).toStrictEqual([fileToDownload, {
+        responseType: 'arraybuffer',
+      }]);
+      expect(axios.get.mock.calls[1]).toStrictEqual([fileToDownload, {
+        responseType: 'arraybuffer',
+      }]);
     });
   });
 });
