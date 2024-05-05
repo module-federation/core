@@ -8,7 +8,11 @@ import { retrieveHostConfig } from './configurations/hostPlugin';
 import { retrieveRemoteConfig } from './configurations/remotePlugin';
 import { HostOptions } from './interfaces/HostOptions';
 import { RemoteOptions } from './interfaces/RemoteOptions';
-import { createTestsArchive, deleteTestsFolder, downloadTypesArchive } from './lib/archiveHandler';
+import {
+  createTestsArchive,
+  deleteTestsFolder,
+  downloadTypesArchive,
+} from './lib/archiveHandler';
 
 export const NativeFederationTestsRemote = createUnplugin(
   (options: RemoteOptions) => {

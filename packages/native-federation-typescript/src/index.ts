@@ -7,7 +7,11 @@ import { retrieveHostConfig } from './configurations/hostPlugin';
 import { retrieveRemoteConfig } from './configurations/remotePlugin';
 import { HostOptions } from './interfaces/HostOptions';
 import { RemoteOptions } from './interfaces/RemoteOptions';
-import { createTypesArchive, deleteTypesFolder, downloadTypesArchive } from './lib/archiveHandler';
+import {
+  createTypesArchive,
+  deleteTypesFolder,
+  downloadTypesArchive,
+} from './lib/archiveHandler';
 import {
   compileTs,
   retrieveMfTypesPath,

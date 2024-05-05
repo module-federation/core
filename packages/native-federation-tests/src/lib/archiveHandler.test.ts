@@ -87,12 +87,18 @@ describe('archiveHandler', () => {
 
       expect(existsSync(archivePath)).toBeTruthy();
       expect(axios.get).toHaveBeenCalledTimes(2);
-      expect(axios.get.mock.calls[0]).toStrictEqual([fileToDownload, {
-        responseType: 'arraybuffer',
-      }]);
-      expect(axios.get.mock.calls[1]).toStrictEqual([fileToDownload, {
-        responseType: 'arraybuffer',
-      }]);
+      expect(axios.get.mock.calls[0]).toStrictEqual([
+        fileToDownload,
+        {
+          responseType: 'arraybuffer',
+        },
+      ]);
+      expect(axios.get.mock.calls[1]).toStrictEqual([
+        fileToDownload,
+        {
+          responseType: 'arraybuffer',
+        },
+      ]);
     });
   });
 });

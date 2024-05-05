@@ -38,18 +38,19 @@ const downloadErrorLogger =
     };
   };
 
-export const deleteTypesFolder = async (options: Required<HostOptions> | Required<RemoteOptions>, destinationPath: string) => {
+export const deleteTypesFolder = async (
+  options: Required<HostOptions> | Required<RemoteOptions>,
+  destinationPath: string,
+) => {
   if (options.deleteTypesFolder) {
     await rm(destinationPath, {
       recursive: true,
       force: true,
     }).catch((error) =>
-      console.error(
-        ansiColors.red(`Unable to remove types folder, ${error}`),
-      ),
+      console.error(ansiColors.red(`Unable to remove types folder, ${error}`)),
     );
   }
-}
+};
 
 export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
   const retriesPerFile: Record<string, number> = {};
@@ -69,7 +70,7 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
 
         const hash = createHash('sha256').update(responseBuffer).digest('hex');
 
-        if(hashPerFile[fileToDownload] !== hash) {
+        if (hashPerFile[fileToDownload] !== hash) {
           await deleteTypesFolder(hostOptions, destinationPath);
 
           const zip = new AdmZip(responseBuffer);

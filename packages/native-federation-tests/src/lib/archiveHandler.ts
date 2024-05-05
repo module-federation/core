@@ -28,18 +28,19 @@ const downloadErrorLogger =
     };
   };
 
-export const deleteTestsFolder = async (options: Required<HostOptions> | Required<RemoteOptions>, destinationPath: string) => {
+export const deleteTestsFolder = async (
+  options: Required<HostOptions> | Required<RemoteOptions>,
+  destinationPath: string,
+) => {
   if (options.deleteTestsFolder) {
     await rm(destinationPath, {
       recursive: true,
       force: true,
     }).catch((error) =>
-      console.error(
-        ansiColors.red(`Unable to remove types folder, ${error}`),
-      ),
+      console.error(ansiColors.red(`Unable to remove tests folder, ${error}`)),
     );
   }
-}
+};
 
 export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
   const retriesPerFile: Record<string, number> = {};
