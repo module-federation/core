@@ -2,7 +2,8 @@ import AdmZip from 'adm-zip';
 import ansiColors from 'ansi-colors';
 import axios from 'axios';
 import { createHash } from 'node:crypto';
-import { join } from 'path';
+import { rm } from 'node:fs/promises';
+import { join } from 'node:path';
 import typescript from 'typescript';
 
 import { HostOptions } from '../interfaces/HostOptions';
@@ -37,6 +38,19 @@ const downloadErrorLogger =
     };
   };
 
+export const deleteTypesFolder = async (options: Required<HostOptions> | Required<RemoteOptions>, destinationPath: string) => {
+  if (options.deleteTypesFolder) {
+    await rm(destinationPath, {
+      recursive: true,
+      force: true,
+    }).catch((error) =>
+      console.error(
+        ansiColors.red(`Unable to remove types folder, ${error}`),
+      ),
+    );
+  }
+}
+
 export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
   const retriesPerFile: Record<string, number> = {};
   const hashPerFile: Record<string, string> = {};
@@ -56,6 +70,8 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
         const hash = createHash('sha256').update(responseBuffer).digest('hex');
 
         if(hashPerFile[fileToDownload] !== hash) {
+          await deleteTypesFolder(hostOptions, destinationPath);
+
           const zip = new AdmZip(responseBuffer);
           zip.extractAllTo(destinationPath, true);
 
