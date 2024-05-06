@@ -48,6 +48,7 @@ export function HomeHero({ hero }: { hero: Hero }) {
             {hero.actions.map((action) => (
               <div key={action.link} className="p-1 flex-shrink-0">
                 <Button
+                  className="pl-2 pr-2"
                   type="a"
                   text={action.text}
                   href={normalizeHrefInRuntime(action.link)}

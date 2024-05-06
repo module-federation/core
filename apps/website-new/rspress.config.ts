@@ -63,6 +63,11 @@ export default defineConfig({
         mode: 'link',
         content: 'https://github.com/module-federation/core',
       },
+      {
+        icon: 'discord',
+        mode: 'link',
+        content: 'https://discord.gg/T8c6yAxkbv',
+      },
     ],
   },
   builderConfig: {
