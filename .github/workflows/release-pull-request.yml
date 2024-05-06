@@ -38,7 +38,7 @@ jobs:
         run: pnpm install --ignore-scripts
 
       - name: Create Release Pull Request
-        uses: web-infra-dev/actions@v2
+        uses: module-federation/actions@v2
         with:
           # this expects you to have a script called release which does a build for your packages and calls changeset publish
           version: ${{ github.event.inputs.version || 'latest' }}
