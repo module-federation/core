@@ -1,6 +1,5 @@
 import ansiColors from 'ansi-colors';
-import { rm } from 'fs/promises';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { mergeDeepRight } from 'rambda';
 import { UnpluginOptions, createUnplugin } from 'unplugin';
 
@@ -8,7 +7,11 @@ import { retrieveHostConfig } from './configurations/hostPlugin';
 import { retrieveRemoteConfig } from './configurations/remotePlugin';
 import { HostOptions } from './interfaces/HostOptions';
 import { RemoteOptions } from './interfaces/RemoteOptions';
-import { createTypesArchive, downloadTypesArchive } from './lib/archiveHandler';
+import {
+  createTypesArchive,
+  deleteTypesFolder,
+  downloadTypesArchive,
+} from './lib/archiveHandler';
 import {
   compileTs,
   retrieveMfTypesPath,
@@ -19,6 +22,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
   (options: RemoteOptions) => {
     const { remoteOptions, tsConfig, mapComponentsToExpose } =
       retrieveRemoteConfig(options);
+    const typesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
     return {
       name: 'native-federation-typescript/remote',
       async writeBundle() {
@@ -27,12 +31,8 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
 
           await createTypesArchive(tsConfig, remoteOptions);
 
-          if (remoteOptions.deleteTypesFolder) {
-            await rm(retrieveMfTypesPath(tsConfig, remoteOptions), {
-              recursive: true,
-              force: true,
-            });
-          }
+          await deleteTypesFolder(remoteOptions, typesPath);
+
           console.log(ansiColors.green('Federated types created correctly'));
         } catch (error) {
           console.error(
@@ -79,21 +79,10 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
 export const NativeFederationTypeScriptHost = createUnplugin(
   (options: HostOptions) => {
     const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(options);
+    const typesDownloader = downloadTypesArchive(hostOptions);
     return {
       name: 'native-federation-typescript/host',
       async writeBundle() {
-        if (hostOptions.deleteTypesFolder) {
-          await rm(hostOptions.typesFolder, {
-            recursive: true,
-            force: true,
-          }).catch((error) =>
-            console.error(
-              ansiColors.red(`Unable to remove types folder, ${error}`),
-            ),
-          );
-        }
-
-        const typesDownloader = downloadTypesArchive(hostOptions);
         const downloadPromises =
           Object.entries(mapRemotesToDownload).map(typesDownloader);
 
