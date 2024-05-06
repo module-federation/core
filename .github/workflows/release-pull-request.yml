@@ -45,6 +45,7 @@ jobs:
           versionNumber: 'auto'
           type: 'pull request'
           tools: 'changeset'
+          coreNpmName: '@module-federation/runtime'
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_SCOPED_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
