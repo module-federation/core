@@ -212,7 +212,7 @@
     "rimraf": "^3.0.2",
     "rollup-plugin-copy": "3.5.0",
     "stopword": "2.0.8",
-    "strip-ansi": "^6.0.0",
+    "strip-ansi": "^7.1.0",
     "swc-loader": "0.2.3",
     "tailwindcss": "3.4.1",
     "terser-webpack-plugin": "^5.3.10",
