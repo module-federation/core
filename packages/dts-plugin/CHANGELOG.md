@@ -1,5 +1,14 @@
 # @module-federation/dts-plugin
 
+## 0.1.12
+
+### Patch Changes
+
+- 2a18c65: fix(dts-plugin): avoid typescript generation exceptions in javascript projects
+  - @module-federation/sdk@0.1.12
+  - @module-federation/managers@0.1.12
+  - @module-federation/third-party-dts-extractor@0.1.12
+
 ## 0.1.11
 
 ### Patch Changes
