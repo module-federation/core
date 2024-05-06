@@ -1311,8 +1311,8 @@ importers:
         specifier: ^1.6.7
         version: 1.6.7
       chalk:
-        specifier: 3.0.0
-        version: 3.0.0
+        specifier: 5.3.0
+        version: 5.3.0
       fs-extra:
         specifier: 9.1.0
         version: 9.1.0
@@ -1413,8 +1413,8 @@ importers:
         specifier: workspace:*
         version: link:../sdk
       chalk:
-        specifier: 3.0.0
-        version: 3.0.0
+        specifier: 5.3.0
+        version: 5.3.0
       find-pkg:
         specifier: 2.0.0
         version: 2.0.0
@@ -18320,14 +18320,6 @@ packages:
       ansi-styles: 3.2.1
       escape-string-regexp: 1.0.5
       supports-color: 5.5.0
-
-  /chalk@3.0.0:
-    resolution: {integrity: sha512-4D3B6Wf41KOYRFdszmDqMCGq5VV/uMAB273JILmO+3jAlh8X4qDtdtgCR3fxtbLEMzSx22QdhnDcJvu2u1fVwg==}
-    engines: {node: '>=8'}
-    dependencies:
-      ansi-styles: 4.3.0
-      supports-color: 7.2.0
-    dev: false
 
   /chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
