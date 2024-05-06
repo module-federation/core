@@ -1186,8 +1186,8 @@ importers:
         specifier: ^0.16.0
         version: 0.16.0(react-dom@18.2.0)(react@18.2.0)
       xgplayer:
-        specifier: ^3.0.16
-        version: 3.0.16(core-js@3.34.0)
+        specifier: ^3.0.17
+        version: 3.0.17(core-js@3.34.0)
     devDependencies:
       '@types/node':
         specifier: ^16
@@ -38364,8 +38364,8 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /xgplayer-subtitles@3.0.16(core-js@3.34.0):
-    resolution: {integrity: sha512-gy9bZnWAMPVga36XgT4EGlh/cPQCvNNutLxggv2DGnNI0GC8RalLaFmI++ijcrruRFPt0d82791kNBj3pdNzRA==}
+  /xgplayer-subtitles@3.0.17(core-js@3.34.0):
+    resolution: {integrity: sha512-gNJ/Gwj6UNBUXiOPG9yiGwg0g7Zbn6SOPz1NOuQvsdU0r5Z2KDz8dco0dkAXdxVZ2oqKi440qNFSu9+mQW30Cg==}
     peerDependencies:
       core-js: '>=3.12.1'
     dependencies:
@@ -38373,8 +38373,8 @@ packages:
       eventemitter3: 4.0.7
     dev: false
 
-  /xgplayer@3.0.16(core-js@3.34.0):
-    resolution: {integrity: sha512-u8uh/bREtfUywUw700QD9TzjjCIKsVIldGyqI9ubA0aSf/zmGTbdZKMpUlMu86lnnAwhtDdansPZvbrIa0f5Wg==}
+  /xgplayer@3.0.17(core-js@3.34.0):
+    resolution: {integrity: sha512-kaWGDlTunYFBJw0wIXqhF6A7KcDIqZzRvkqPOlpLiRFmE1vfnXB0Q6CUu8/AY8R8McIPCqpVUippGYV/1SzHVQ==}
     peerDependencies:
       core-js: '>=3.12.1'
     dependencies:
@@ -38383,7 +38383,7 @@ packages:
       delegate: 3.2.0
       downloadjs: 1.4.7
       eventemitter3: 4.0.7
-      xgplayer-subtitles: 3.0.16(core-js@3.34.0)
+      xgplayer-subtitles: 3.0.17(core-js@3.34.0)
     dev: false
 
   /xml-name-validator@4.0.0:
