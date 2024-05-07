@@ -32,34 +32,37 @@ import { PackageManagerTabs } from '@theme';
 在 `Rspack` 中，你可以通过 `rspack.config.js` 配置文件中的 `plugins` 配置项来添加插件：
 
 ```ts title='rspack.config.js'
+import { defineConfig } from '@rsbuild/core';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
-module.exports = {
-  devServer: {
-    port: 2000,
+
+export default defineConfig({
+  // 使用 manifest 必须要配置 publicPath
+  dev: {
+    assetPrefix: 'http://localhost:2000/',
   },
   output: {
-    // 使用 manifest 必须要配置 publicPath
-    publicPath: 'http://localhost:2000/',
+    // 这将影响生产环境中使用的产物路径前缀
+    assetPrefix: 'https://cdn.domain.com/path/to/project/',
   },
-  plugins: [
-    new ModuleFederationPlugin({
-      name: 'rspack_provider',
-      filename: 'remoteEntry.js',
-      exposes: {
-        // 设置需要导出的模块，default 导出为 .
-        './button': './src/components/button',
-      },
-      shared: {
-        react: {
-          singleton: true,
-        },
-        'react-dom': {
-          singleton: true,
-        },
-      },
-    }),
-  ],
-};
+  server: {
+    port: 2000,
+  },
+  tools: {
+    rspack: (config, { appendPlugins }) => {
+      // 需要设置一个唯一值不能和其他应用相等
+      config.output!.uniqueName = 'federation_provider';
+      appendPlugins([
+        new ModuleFederationPlugin({
+          name: 'federation_provider',
+          exposes: {
+            './button': './src/button.tsx',
+          },
+          shared: ['react', 'react-dom'],
+        }),
+      ]);
+    },
+  },
+});
 ```
 
 ## 配置构建插件

@@ -2,16 +2,16 @@
   {
     "type": "file",
     "name": "overview",
-    "label": "overview"
+    "label": "Overview"
   },
   {
     "type": "dir",
     "name": "frameworks",
-    "label": "frameworks"
+    "label": "Frameworks"
   },
   {
     "type": "file",
     "name": "scenario",
-    "label": "scenario"
+    "label": "Scenarios"
   }
 ]

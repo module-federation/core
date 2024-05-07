@@ -1,5 +1,4 @@
 import ansiColors from 'ansi-colors';
-import { rm } from 'fs/promises';
 import { resolve } from 'path';
 import { mergeDeepRight, mergeRight } from 'rambda';
 import { build } from 'tsup';
@@ -9,8 +8,11 @@ import { retrieveHostConfig } from './configurations/hostPlugin';
 import { retrieveRemoteConfig } from './configurations/remotePlugin';
 import { HostOptions } from './interfaces/HostOptions';
 import { RemoteOptions } from './interfaces/RemoteOptions';
-import { createTestsArchive, downloadTypesArchive } from './lib/archiveHandler';
-import { cleanMocksFolder } from './lib/mocksClean';
+import {
+  createTestsArchive,
+  deleteTestsFolder,
+  downloadTypesArchive,
+} from './lib/archiveHandler';
 
 export const NativeFederationTestsRemote = createUnplugin(
   (options: RemoteOptions) => {
@@ -37,9 +39,8 @@ export const NativeFederationTestsRemote = createUnplugin(
 
           await createTestsArchive(remoteOptions, compiledFilesFolder);
 
-          if (remoteOptions.deleteTestsFolder) {
-            await rm(compiledFilesFolder, { recursive: true, force: true });
-          }
+          await deleteTestsFolder(remoteOptions, compiledFilesFolder);
+
           console.log(ansiColors.green('Federated mocks created correctly'));
         } catch (error) {
           console.error(
@@ -82,17 +83,10 @@ export const NativeFederationTestsRemote = createUnplugin(
 export const NativeFederationTestsHost = createUnplugin(
   (options: HostOptions) => {
     const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(options);
+    const typesDownloader = downloadTypesArchive(hostOptions);
     return {
       name: 'native-federation-tests/host',
       async writeBundle() {
-        if (hostOptions.deleteTestsFolder) {
-          await cleanMocksFolder(
-            hostOptions,
-            Object.keys(mapRemotesToDownload),
-          );
-        }
-
-        const typesDownloader = downloadTypesArchive(hostOptions);
         const downloadPromises =
           Object.entries(mapRemotesToDownload).map(typesDownloader);
 
