@@ -45,6 +45,10 @@ function useFooterData() {
           title: 'Rspress',
           link: 'https://rspress.dev/',
         },
+        {
+          title: 'Zephyr Cloud',
+          link: 'https://zephyr-cloud.io/',
+        },
       ],
     },
     {
@@ -85,7 +89,8 @@ export function HomeFooter() {
       </div>
       <div className="flex flex-center">
         <h2 className="font-normal text-sm text-gray-600 dark:text-light-600 py-4">
-          © 2024-present Module federation team. All Rights Reserved.
+          © {new Date().getFullYear()} Module Federation core team. All Rights
+          Reserved.
         </h2>
       </div>
     </div>

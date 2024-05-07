@@ -1,5 +1,5 @@
 import ansiColors from 'ansi-colors';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { mergeDeepRight } from 'rambda';
 import { UnpluginOptions, createUnplugin } from 'unplugin';
 
@@ -7,21 +7,31 @@ import { retrieveHostConfig } from './configurations/hostPlugin';
 import { retrieveRemoteConfig } from './configurations/remotePlugin';
 import { HostOptions } from './interfaces/HostOptions';
 import { RemoteOptions } from './interfaces/RemoteOptions';
-import { retrieveOriginalOutDir } from './lib/typeScriptCompiler';
-// @ts-expect-error function exported through module.exports
-import remoteWriteBundle from './lib/writeBundle/remote';
-// @ts-expect-error function exported through module.exports
-import hostWriteBundle from './lib/writeBundle/host';
+import {
+  createTypesArchive,
+  deleteTypesFolder,
+  downloadTypesArchive,
+} from './lib/archiveHandler';
+import {
+  compileTs,
+  retrieveMfTypesPath,
+  retrieveOriginalOutDir,
+} from './lib/typeScriptCompiler';
 
 export const NativeFederationTypeScriptRemote = createUnplugin(
   (options: RemoteOptions) => {
-    const remoteConfig = retrieveRemoteConfig(options);
-    const { remoteOptions, tsConfig } = remoteConfig;
+    const { remoteOptions, tsConfig, mapComponentsToExpose } =
+      retrieveRemoteConfig(options);
+    const typesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
     return {
       name: 'native-federation-typescript/remote',
       async writeBundle() {
         try {
-          await remoteWriteBundle(remoteConfig);
+          compileTs(mapComponentsToExpose, tsConfig, remoteOptions);
+
+          await createTypesArchive(tsConfig, remoteOptions);
+
+          await deleteTypesFolder(remoteOptions, typesPath);
 
           console.log(ansiColors.green('Federated types created correctly'));
         } catch (error) {
@@ -68,12 +78,15 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
 
 export const NativeFederationTypeScriptHost = createUnplugin(
   (options: HostOptions) => {
-    const hostConfig = retrieveHostConfig(options);
+    const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(options);
+    const typesDownloader = downloadTypesArchive(hostOptions);
     return {
       name: 'native-federation-typescript/host',
       async writeBundle() {
-        await hostWriteBundle(hostConfig);
+        const downloadPromises =
+          Object.entries(mapRemotesToDownload).map(typesDownloader);
 
+        await Promise.allSettled(downloadPromises);
         console.log(ansiColors.green('Federated types extraction completed'));
       },
       get vite() {

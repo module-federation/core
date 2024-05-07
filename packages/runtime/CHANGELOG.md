@@ -1,5 +1,12 @@
 # @module-federation/runtime
 
+## 0.1.12
+
+### Patch Changes
+
+- 371d1f1: Before Request throws to errorLoadRemote
+  - @module-federation/sdk@0.1.12
+
 ## 0.1.11
 
 ### Patch Changes

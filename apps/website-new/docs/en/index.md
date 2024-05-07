@@ -3,11 +3,11 @@ pageType: home
 
 hero:
   name: Module Federation
-  text: Microfrontend Architecture
+  text: Micro-Frontend Architecture
   tagline: Make it easier to share code between javascript applications and make team collaboration more efficient
   actions:
     - theme: brand
-      text: 🎉 Announce
+      text: 🎉 2.0 Announcement
       link: /blog/announcement.html
     - theme: alt
       text: Quick Start
