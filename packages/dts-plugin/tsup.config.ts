@@ -1,5 +1,5 @@
-import type { Options } from 'tsup';
 import { join } from 'path';
+import type { Options } from 'tsup';
 
 function generateConfigurations(
   options: Array<[string[] | Record<string, string>, Options]>,
@@ -11,7 +11,7 @@ function generateConfigurations(
       clean: true,
       dts: true,
       legacyOutput: true,
-      outDir: 'packages/dts-plugin/dist',
+      outDir: join('packages', 'dts-plugin', 'dist'),
       external: [join(__dirname, 'package.json')],
       ...config,
     };
@@ -21,11 +21,11 @@ function generateConfigurations(
 export const tsup: Options[] = generateConfigurations([
   [
     {
-      index: join(__dirname, 'src/index.ts'),
-      core: join(__dirname, 'src/core/index.ts'),
-      forkDevWorker: join(__dirname, 'src/dev-worker/forkDevWorker.ts'),
-      startBroker: join(__dirname, 'src/server/broker/startBroker.ts'),
-      forkGenerateDts: join(__dirname, 'src/core/lib/forkGenerateDts.ts'),
+      index: join(__dirname, 'src', 'index.ts'),
+      core: join(__dirname, 'src', 'core', 'index.ts'),
+      forkDevWorker: join(__dirname, 'src', 'dev-worker', 'forkDevWorker.ts'),
+      startBroker: join(__dirname, 'src', 'server', 'broker', 'startBroker.ts'),
+      forkGenerateDts: join(__dirname, 'src', 'core', 'lib', 'forkGenerateDts.ts'),
     },
     {
       format: ['cjs'],
@@ -33,7 +33,7 @@ export const tsup: Options[] = generateConfigurations([
   ],
   [
     {
-      'launch-web-client': join(__dirname, 'src/server/launchWebClient.ts'),
+      'launch-web-client': join(__dirname, 'src', 'server', 'launchWebClient.ts'),
     },
     {
       format: ['iife'],
