@@ -13,6 +13,7 @@ export function assignRemoteInfo(
     error(`The attribute remoteEntry of ${name} must not be undefined.`);
   }
   const { remoteEntry } = remoteSnapshot;
+
   const entryUrl = getResourceUrl(remoteSnapshot, remoteEntry);
 
   remoteInfo.type = remoteSnapshot.remoteEntryType;
@@ -31,14 +32,6 @@ export function snapshotPlugin(): FederationRuntimePlugin {
       if (!isRemoteInfoWithEntry(remote) || !isPureRemoteEntry(remote)) {
         const { remoteSnapshot, globalSnapshot } =
           await origin.snapshotHandler.loadRemoteSnapshotInfo(remote);
-
-        if (
-          'publicPath' in remoteSnapshot &&
-          'entry' in remote &&
-          remoteSnapshot.publicPath === 'auto'
-        ) {
-          remoteSnapshot.publicPath = new URL(remote.entry).origin + '/';
-        }
 
         assignRemoteInfo(remoteInfo, remoteSnapshot);
         // preloading assets

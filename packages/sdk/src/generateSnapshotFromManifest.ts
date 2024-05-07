@@ -59,6 +59,9 @@ export function generateSnapshotFromManifest(
 
   const getPublicPath = (): string => {
     if ('publicPath' in manifest.metaData) {
+      if (manifest.metaData.publicPath === 'auto' && version) {
+        return new URL(version).origin + '/';
+      }
       return manifest.metaData.publicPath;
     } else {
       return manifest.metaData.getPublicPath;
