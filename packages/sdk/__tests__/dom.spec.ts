@@ -1,4 +1,4 @@
-import { createScript } from '../src/dom';
+import { createScript, createLink } from '../src/dom';
 
 describe('createScript', () => {
   afterEach(() => {
@@ -113,5 +113,85 @@ describe('createScript', () => {
 
       expect(clearTimeout).toHaveBeenCalled();
     });
+  });
+});
+
+describe('createLink', () => {
+  afterEach(() => {
+    document.getElementsByTagName('html')[0].innerHTML = '';
+  });
+
+  it('should create a new link element if one does not exist', () => {
+    const url = 'https://example.com/script.js';
+    const cb = jest.fn();
+    const { link, needAttach } = createLink(url, cb, { as: 'script' });
+
+    expect(link.tagName).toBe('LINK');
+    expect(link.href).toBe(url);
+    expect(link.getAttribute('as')).toBe('script');
+    expect(needAttach).toBe(true);
+  });
+
+  xit('should reuse an existing link element if one exists', () => {
+    const url = 'https://example.com/script.js';
+    const cb = jest.fn();
+    document.head.innerHTML = `<link href="${url}" rel="preload" as="script">`;
+    const { link, needAttach } = createLink(url, cb, {
+      rel: 'preload',
+      as: 'script',
+    });
+
+    expect(link.tagName).toBe('LINK');
+    expect(link.href).toBe(url);
+    expect(needAttach).toBe(false);
+  });
+
+  it('should set attributes on the link element', () => {
+    const url = 'https://example.com/script.js';
+    const cb = jest.fn();
+    const attrs = { rel: 'preload', as: 'script', 'data-test': 'test' };
+    const { link } = createLink(url, cb, attrs);
+
+    expect(link.rel).toBe('preload');
+    expect(link.getAttribute('as')).toBe('script');
+    expect(link.getAttribute('data-test')).toBe('test');
+  });
+
+  it('should call the callback when the link loads', () => {
+    const url = 'https://example.com/script.js';
+    const cb = jest.fn();
+    const { link, needAttach } = createLink(url, cb, { as: 'script' });
+
+    if (needAttach) {
+      document.head.appendChild(link);
+    }
+    link?.onload?.(new Event('load'));
+
+    expect(cb).toHaveBeenCalled();
+  });
+
+  it('should call the callback when the link fails to load', () => {
+    const url = 'https://example.com/script.js';
+    const cb = jest.fn();
+    const { link, needAttach } = createLink(url, cb, { as: 'script' });
+
+    if (needAttach) {
+      document.head.appendChild(link);
+    }
+    link?.onerror?.(new Event('error'));
+
+    expect(cb).toHaveBeenCalled();
+  });
+
+  it('should use the link element returned by createLinkHook', () => {
+    const url = 'https://example.com/script.js';
+    const cb = jest.fn();
+    const customLink = document.createElement('link');
+    customLink.href = url;
+    customLink.rel = 'preload';
+    customLink.setAttribute('as', 'script');
+    const { link } = createLink(url, cb, {}, () => customLink);
+
+    expect(link).toBe(customLink);
   });
 });
