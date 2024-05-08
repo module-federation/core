@@ -60,7 +60,11 @@ export function generateSnapshotFromManifest(
   const getPublicPath = (): string => {
     if ('publicPath' in manifest.metaData) {
       if (manifest.metaData.publicPath === 'auto' && version) {
-        return new URL(version).origin + '/';
+        // use same implementation as publicPath auto runtime module implements
+        return version
+          .replace(/#.*$/, '')
+          .replace(/\?.*$/, '')
+          .replace(/\/[^\/]+$/, '/');
       }
       return manifest.metaData.publicPath;
     } else {
