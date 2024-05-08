@@ -51,7 +51,7 @@ jobs:
         run: pnpm run build:pkg
 
       - name: Release
-        uses: web-infra-dev/actions@v2
+        uses: module-federation/actions@v2
         with:
           version: 'next'
           type: 'release'
@@ -93,7 +93,7 @@ jobs:
           ls -l packages/*/dist packages/*/package.json
 
       - name: Release
-        uses: web-infra-dev/actions@v2
+        uses: module-federation/actions@v2
         with:
           version: ${{ github.event.inputs.version  || 'next' }}
           branch: ${{ github.event.inputs.branch }}

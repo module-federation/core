@@ -7,56 +7,56 @@
   {
     "type": "file",
     "name": "name",
-    "label": "name"
+    "label": "Name"
   },
   {
     "type": "file",
     "name": "filename",
-    "label": "filename"
+    "label": "Filename"
   },
   {
     "type": "file",
     "name": "remotes",
-    "label": "remotes"
+    "label": "Remotes"
   },
   {
     "type": "file",
     "name": "exposes",
-    "label": "exposes"
+    "label": "Exposes"
   },
   {
     "type": "file",
     "name": "shared",
-    "label": "shared"
+    "label": "Shared"
   },
   {
     "type": "file",
     "name": "runtimeplugins",
-    "label": "runtimePlugins"
+    "label": "Runtime Plugins"
   },
   {
     "type": "file",
     "name": "getpublicpath",
-    "label": "getPublicPath"
+    "label": "Get Public Path"
   },
   {
     "type": "file",
     "name": "implementation",
-    "label": "implementation"
+    "label": "Implementation"
   },
   {
     "type": "file",
     "name": "dts",
-    "label": "dts"
+    "label": "DTS"
   },
   {
     "type": "file",
     "name": "dev",
-    "label": "dev"
+    "label": "Dev"
   },
   {
     "type": "file",
     "name": "manifest",
-    "label": "manifest"
+    "label": "Manifest"
   }
 ]

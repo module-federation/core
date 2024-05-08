@@ -22,6 +22,6 @@ export default defineConfig({
   clean: true,
   minify: true,
   format: ['cjs', 'esm'],
-  outDir: 'packages/native-federation-typescript/dist',
+  outDir: join('packages', 'native-federation-typescript', 'dist'),
   external: [join(__dirname, 'package.json')],
 });
