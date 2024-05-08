@@ -1,12 +1,12 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "8.3.10",
+  "version": "8.3.13",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "type": "commonjs",
   "description": "Module Federation helper for NextJS",
-  "repository": "https://github.com/module-federation/universe/tree/main/packages/nextjs-mf",
+  "repository": "https://github.com/module-federation/core/tree/main/packages/nextjs-mf",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "contributors": [
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"

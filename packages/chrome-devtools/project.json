@@ -7,7 +7,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["npm run build --prefix packages/chrome-devtools"]
+        "commands": ["npm run build:lib --prefix packages/chrome-devtools"]
       }
     },
     "test": {

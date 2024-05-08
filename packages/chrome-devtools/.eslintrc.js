@@ -7,7 +7,4 @@ module.exports = {
   parserOptions: {
     project: true,
   },
-  rules: {
-    '@typescript-eslint/no-parameter-properties': 'off',
-  },
 };

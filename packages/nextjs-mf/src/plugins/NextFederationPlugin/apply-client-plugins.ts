@@ -33,8 +33,10 @@ export function applyClientPlugins(
 ): void {
   const { webpack } = compiler;
   const { remotes, name } = options;
-  //@ts-ignore
-  compiler.options.output.publicPath = 'auto';
+
+  if (compiler.options.output.publicPath === '/_next/') {
+    compiler.options.output.publicPath = 'auto';
+  }
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
   if (extraOptions.automaticPageStitching) {

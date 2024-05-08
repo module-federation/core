@@ -209,7 +209,7 @@ init({
       {
         version: '17.0.0',
         scope: 'default',
-        get: async ()=>() => ({ version: '17.0.0)' }),
+        get: async ()=>() => ({ version: '17.0.0' }),
         shareConfig: {
           singleton: true,
           requiredVersion: '^17.0.0',
@@ -219,7 +219,7 @@ init({
         version: '18.0.0',
         scope: 'default',
         // pass lib means the shared has loaded
-        lib: () => ({ version: '18.0.0)' }),
+        lib: () => ({ version: '18.0.0' }),
         shareConfig: {
           singleton: true,
           requiredVersion: '^18.0.0',
@@ -412,11 +412,11 @@ registerRemotes([
 
 `Federation Runtime` is one of the main features of the new version of `Module Federation`. It supports registering shared dependencies at runtime, dynamically registering and loading remote modules, and can expand the capabilities of `Module Federation` at runtime through `Plugin`. Build plugins are based on the basic implementation of Runtime.
 
-There are the following differences between `Federation Runtime` and `Builder Plugin`:
+There are the following differences between `Federation Runtime` and `Compiler Plugin`:
 
-| Federation Runtime                                                                                                           | Builder Plugin                                                                                 |
+| Federation Runtime                                                                                                           | Compiler Plugin                                                                                 |
 | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Can be used independently of build plugins, and can directly use pure runtime for module loading in projects like `webpack4` | Build plugins require webpack5, Rspack, Vite, or above                                         |
+| Can be used independently of build plugins, and can directly use pure runtime for module loading in projects like `webpack4` | Build plugins require Webpack5, Rspack, Vite, or above                                         |
 | Supports dynamic registration of modules                                                                                     | Does not support dynamic registration of modules                                               |
 | Does not support loading modules with `import` syntax                                                                        | Supports loading modules synchronously with `import` syntax                                    |
 | Supports `loadRemote` for loading modules                                                                                    | Supports `loadRemote` for loading modules                                                      |

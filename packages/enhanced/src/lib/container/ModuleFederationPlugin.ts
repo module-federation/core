@@ -28,7 +28,7 @@ const createSchemaValidation = require(
 ) as typeof import('webpack/lib/util/create-schema-validation');
 const validate = createSchemaValidation(
   // just use schema to validate
-  () => false,
+  () => true,
   () => schema,
   {
     name: 'Module Federation Plugin',

@@ -28,7 +28,7 @@ export function HomeHero({ hero }: { hero: Hero }) {
       }}
     >
       <div className="max-w-6xl m-auto flex flex-col md:flex-row">
-        <div className="m-auto flex flex-col order-2 md:order-1 justify-center text-center">
+        <div className="m-auto flex flex-col order-2 md:order-1 items-center justify-center text-center">
           <h1 className="text-3xl sm:text-6xl md:text-7xl font-bold pb-3 lg:pb-5 z-10">
             <span className={styles.clip}>{hero.name}</span>
           </h1>
@@ -48,6 +48,7 @@ export function HomeHero({ hero }: { hero: Hero }) {
             {hero.actions.map((action) => (
               <div key={action.link} className="p-1 flex-shrink-0">
                 <Button
+                  className="pl-2 pr-2"
                   type="a"
                   text={action.text}
                   href={normalizeHrefInRuntime(action.link)}

@@ -1,5 +1,37 @@
 # @module-federation/rspack
 
+## 0.1.12
+
+### Patch Changes
+
+- Updated dependencies [2a18c65]
+  - @module-federation/dts-plugin@0.1.12
+  - @module-federation/manifest@0.1.12
+  - @module-federation/runtime-tools@0.1.12
+  - @module-federation/sdk@0.1.12
+  - @module-federation/managers@0.1.12
+
+## 0.1.11
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.1.11
+- @module-federation/sdk@0.1.11
+- @module-federation/managers@0.1.11
+- @module-federation/manifest@0.1.11
+- @module-federation/dts-plugin@0.1.11
+
+## 0.1.10
+
+### Patch Changes
+
+- Updated dependencies [3d4fb69]
+  - @module-federation/dts-plugin@0.1.10
+  - @module-federation/manifest@0.1.10
+  - @module-federation/sdk@0.1.10
+  - @module-federation/runtime-tools@0.1.10
+  - @module-federation/managers@0.1.10
+
 ## 0.1.9
 
 ### Patch Changes

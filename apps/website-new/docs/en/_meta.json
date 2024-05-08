@@ -5,6 +5,11 @@
     "activeMatch": "/guide/"
   },
   {
+    "text": "Practice",
+    "link": "/practice/overview",
+    "activeMatch": "/practice/"
+  },
+  {
     "text": "Configuration",
     "link": "/configure/",
     "activeMatch": "/configure/"
@@ -15,14 +20,19 @@
     "activeMatch": "/plugin/"
   },
   {
-    "text": "Community",
-    "link": "/community/showcase",
-    "activeMatch": "/community/",
+    "text": "Showcase",
+    "link": "/showcase/index",
+    "activeMatch": "/showcase/"
+  },
+  {
+    "text": "Blog",
+    "link": "/blog/announcement",
+    "activeMatch": "/blog/"
+  },
+  {
+    "text": "Ecosystem",
+    "activeMatch": "/ecosystem/",
     "items": [
-      {
-        "text": "Showcase",
-        "link": "/community/showcase/"
-      },
       {
         "text": "Module Federation Examples",
         "link": "https://github.com/module-federation/module-federation-examples"
@@ -30,6 +40,10 @@
       {
         "text": "Practical Module Federation",
         "link": "https://module-federation.myshopify.com/products/practical-module-federation"
+      },
+      {
+        "text": "Zephyr Cloud",
+        "link": "https://zephyr-cloud.io/"
       }
     ]
   }

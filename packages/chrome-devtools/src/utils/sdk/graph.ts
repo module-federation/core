@@ -31,12 +31,14 @@ export interface EdgeType {
   };
 }
 
-const validateSemver = (schema: string) => {
+export const validateSemver = (schema: string) => {
   // https://regex101.com/r/vkijKf/1
   const reg =
     /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/gm;
   return reg.test(schema);
 };
+
+export const validatePort = (schema: string) => !isNaN(Number(schema));
 
 const splitModuleId = (target: string) => {
   const array = target.split(':');
@@ -167,12 +169,12 @@ export class DependencyGraph {
   }
 
   run(
-    targetGraph = this.graph,
+    targetGraph: any,
     target: string = this.initTarget,
     type: string,
     id: string = this.initTarget,
   ) {
-    if (!Object.keys(targetGraph)?.length) {
+    if (!targetGraph || !Object.keys(targetGraph)?.length) {
       return;
     }
     const name = splitModuleId(target);
@@ -180,8 +182,9 @@ export class DependencyGraph {
     let info = name;
 
     const remote = this.snapshot[target];
-    if (remote && 'version' in remote) {
-      info += `:${remote.version}`;
+    if (remote && ('version' in remote || 'remoteEntry' in remote)) {
+      // @ts-expect-error
+      info += `:${remote.version || remote.remoteEntry}`;
     }
 
     if (!this.identifyMap.has(targetWithoutType)) {

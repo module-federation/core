@@ -104,6 +104,8 @@ export default defineConfig({
   },
   tools: {
     rspack: (config, { appendPlugins }) => {
+      // You need to set a unique value that is not equal to other applications
+      config.output!.uniqueName = 'federation_provider';
       appendPlugins([
         new ModuleFederationPlugin({
           name: 'federation_provider',
@@ -199,26 +201,6 @@ bun add @module-federation/enhanced
 
 
 ### 3. Consuming the Producer
-
-> Change the entry to be asynchronous
-
-```tsx
-// Move src/index.tsx to a newly created src/bootstrap.tsx file
-// src/index.tsx
-import('./bootstrap');
-
-// src/bootstrap.tsx
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-);
-```
 
 > Declare the `Module Federation` type path in `tsconfig.json`
 

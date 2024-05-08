@@ -11,11 +11,14 @@ export const EN_US = {
   compatibility: 'Compatibility',
   migration: 'Migration',
   cli: 'CLI',
-  friendLink: 'Friend Link',
+  friendLink: 'Ecosystem',
   community: 'Community',
   benchmarkTitle: 'Build Performance',
   benchmarkDesc:
     'Combining TypeScript and Rust with a parallelized architecture to bring you the ultimate developer experience.',
   benchmarkDetail: 'See benchmark details',
-  recruit: 'Rspack team is recruiting, welcome to join👏🏻',
+  announcementVideo:
+    'https://module-federation-assest.netlify.app/document/announcement/blog/announcement/announcement-video.mp4',
+  announcementVideoPoster:
+    'https://module-federation-assest.netlify.app/document/announcement/blog/announcement/announcement-video-poster.png',
 } as const;

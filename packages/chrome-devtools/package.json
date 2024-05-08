@@ -1,12 +1,15 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.0.25",
-  "private": true,
+  "version": "0.1.12",
   "scripts": {
+    "build:storybook": "storybook build",
+    "storybook": "storybook dev -p 6006",
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
     "build": "modern build && node postpack.js",
     "build:debug": "DEBUG=true modern build && node postpack.js",
+    "build:lib": "rm -rf dist && modern-module build -c modern.lib.config.ts",
+    "release": "npm publish --tag canary",
     "test": "vitest run",
     "test:e2e": "E2ETEST=true pnpm build && playwright test",
     "test:e2e:ui": "E2ETEST=true pnpm build && playwright test --ui",
@@ -16,8 +19,22 @@
     "upgrade": "modern upgrade",
     "postinstall": "bash install-deps.bash"
   },
-  "engines": {
-    "node": ">=16.18.1"
+  "files": [
+    "dist/",
+    "install-deps.bash",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "require": "./dist/lib/App.js",
+      "import": "./dist/es/App.js",
+      "types": "./dist/types/App.d.ts"
+    },
+    "./App": {
+      "require": "./dist/lib/App.js",
+      "import": "./dist/es/App.js",
+      "types": "./dist/types/App.d.ts"
+    }
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,cjs}": [
@@ -29,36 +46,40 @@
     "dist/"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "types": "./dist/index.d.ts"
   },
   "dependencies": {
     "@arco-design/web-react": "^2.59.1",
     "@modern-js/runtime": "2.46.1",
     "@module-federation/sdk": "workspace:*",
-    "@types/dagre": "^0.7.52",
     "ahooks": "^3.7.10",
-    "axios": "^1.6.7",
     "dagre": "^0.8.5",
     "react": "~18.2.0",
     "react-dom": "~18.2.0",
-    "reactflow": "11.11.2"
+    "reactflow": "11.10.4"
   },
   "devDependencies": {
+    "@types/dagre": "^0.7.52",
     "@modern-js-app/eslint-config": "2.46.1",
     "@modern-js/app-tools": "2.46.1",
     "@modern-js/eslint-config": "2.46.1",
     "@modern-js/tsconfig": "2.46.1",
+    "@modern-js/module-tools": "2.46.1",
+    "@modern-js/builder-webpack-provider": "2.46.1",
     "@module-federation/runtime": "workspace:*",
     "@playwright/test": "1.36.1",
     "@types/chrome": "^0.0.260",
     "@types/jest": "~29.2.4",
     "@types/node": "~16.11.7",
     "@types/react": "~18.2.0",
-    "@types/react-dom": "~18.2.25",
+    "@types/react-dom": "~18.2.0",
     "lint-staged": "~13.1.0",
     "prettier": "~2.8.1",
     "rimraf": "~3.0.2",
     "typescript": "~5.0.4",
-    "vitest": "1.2.2"
+    "vitest": "1.2.2",
+    "@modern-js/storybook": "2.46.1",
+    "@storybook/addon-essentials": "^7"
   }
 }

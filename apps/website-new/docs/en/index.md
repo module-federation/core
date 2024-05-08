@@ -3,12 +3,12 @@ pageType: home
 
 hero:
   name: Module Federation
-  text: Microfrontend Architecture
-  tagline: Decentralize Your Web Applications
+  text: Micro-Frontend Architecture
+  tagline: Make it easier to share code between javascript applications and make team collaboration more efficient
   actions:
     - theme: brand
-      text: Introduction
-      link: /guide/start/index.html
+      text: 🎉 2.0 Announcement
+      link: /blog/announcement.html
     - theme: alt
       text: Quick Start
       link: /guide/start/quick-start.html

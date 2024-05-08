@@ -1,0 +1,30 @@
+{
+  "name": "3008-runtime-remote",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/runtime-demo/3008-runtime-remote/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run build",
+        "cwd": "apps/runtime-demo/3008-runtime-remote"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run dev",
+        "cwd": "apps/runtime-demo/3008-runtime-remote"
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run dev",
+        "cwd": "apps/runtime-demo/3008-runtime-remote"
+      }
+    }
+  },
+  "tags": []
+}

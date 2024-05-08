@@ -1,0 +1,119 @@
+# npm 包
+
+本文档展示了 Module Federation 团队维护的所有 npm 包信息。
+
+
+## @module-federation/enhanced
+
+![](https://img.shields.io/npm/v/@module-federation/enhanced?style=flat-square&colorA=564341&colorB=EDED91)
+
+Module Federation 核心包，作为 Webpack 构建插件、 Rspack 构建插件、Runtime 入口依赖。
+
+- [npm](https://npmjs.com/package/@module-federation/enhanced)
+- [源代码](https://github.com/module-federation/core/tree/main/packages/enhanced)
+- [Runtime 文档](/guide/basic/runtime)
+- [Rspack 构建插件](/guide/basic/rspack)
+- [Webpack 构建插件](/guide/basic/webpack)
+
+
+## @module-federation/runtime
+
+![](https://img.shields.io/npm/v/@module-federation/runtime?style=flat-square&colorA=564341&colorB=EDED91)
+
+Module Federation 的 Runtime 包，通常使用 @module-federation/enhanced 来使用 Runtime 能力，若不需要使用构建工具时可单独安装此包。
+
+- [npm](https://npmjs.com/package/@module-federation/runtime)
+- [源代码](https://github.com/module-federation/core/tree/main/packages/runtime)
+- [文档](/guide/basic/runtime)
+
+## @module-federation/rspack
+
+![](https://img.shields.io/npm/v/@module-federation/rspack?style=flat-square&colorA=564341&colorB=EDED91)
+
+Module Federation 的 Rspack 构建插件，通常使用 @module-federation/enhanced 来使用，否则无法单独使用 Runtime API。
+
+- [npm](https://npmjs.com/package/@module-federation/rspack)
+- [源代码](https://github.com/module-federation/core/tree/main/packages/rspack)
+- [文档](/guide/basic/rspack)
+
+## @module-federation/nextjs-mf
+
+![](https://img.shields.io/npm/v/@module-federation/nextjs-mf?style=flat-square&colorA=564341&colorB=EDED91)
+
+Module Federation 的 Next.js 构建插件。
+
+- [npm](https://npmjs.com/package/@module-federation/nextjs-mf)
+- [源代码](https://github.com/module-federation/core/tree/main/packages/nextjs-mf)
+- [文档](/guide/framework/nextjs)
+
+
+
+## @module-federation/node
+
+![](https://img.shields.io/npm/v/@module-federation/node?style=flat-square&colorA=564341&colorB=EDED91)
+
+Module Federation 的 Node 构建插件。
+
+- [npm](https://npmjs.com/package/@module-federation/node)
+- [源代码](https://github.com/module-federation/core/tree/main/packages/node)
+- [文档](https://github.com/module-federation/core/tree/main/packages/node)
+
+
+
+## @module-federation/storybook-addon
+
+![](https://img.shields.io/npm/v/@module-federation/storybook-addon?style=flat-square&colorA=564341&colorB=EDED91)
+
+Module Federation 的 storybook 插件。
+
+- [npm](https://npmjs.com/package/@module-federation/storybook-addon)
+- [源代码](https://github.com/module-federation/core/tree/main/packages/storybook-addon)
+- [文档](https://github.com/module-federation/core/tree/main/packages/storybook-addon)
+
+
+
+## @module-federation/native-federation-typescript
+
+![](https://img.shields.io/npm/v/@module-federation/native-federation-typescript?style=flat-square&colorA=564341&colorB=EDED91)
+
+与构建工具无关的插件，用于 Module Federation 的 TypeScript 类型生成和加载。
+
+当你使用除 webpack 和 rspack 或 Module Federation < 2.0 之外的其他捆绑程序时，建议使用此方法。否则，**建议使用 @module-federation/enhanced 自动处理类型生成和加载**。
+
+- [npm](https://npmjs.com/package/@module-federation/native-federation-typescript)
+- [源代码](https://github.com/module-federation/core/tree/main/packages/native-federation-typescript)
+- [文档](https://github.com/module-federation/core/tree/main/packages/native-federation-typescript)
+
+:::warning
+@module-federation/enhanced 在使用 `mf-manifest.json` 时将会下载消费 TypeScript 类型，并且保持热更新体验。通常推荐直接使用 @module-federation/enhanced 的自带的类型提示能力。
+
+:::
+
+## @module-federation/native-federation-tests
+
+![](https://img.shields.io/npm/v/@module-federation/native-federation-tests?style=flat-square&colorA=564341&colorB=EDED91)
+
+
+可用于 Module Federation 测试生成和加载，适用于 Jest 和 Vitest。
+
+- [npm](https://npmjs.com/package/@module-federation/native-federation-tests)
+- [源代码](https://github.com/module-federation/core/tree/main/packages/native-federation-tests)
+- [文档](https://github.com/module-federation/core/tree/main/packages/native-federation-tests)
+
+
+## @module-federation/utilities
+
+![](https://img.shields.io/npm/v/@module-federation/utilities?style=flat-square&colorA=564341&colorB=EDED91)
+
+Module Federation 的旧版 Runtime。
+
+- [npm](https://npmjs.com/package/@module-federation/utilities)
+- [源代码](https://github.com/module-federation/core/tree/main/packages/utilities)
+- [文档](https://github.com/module-federation/core/tree/main/packages/utilities)
+
+
+
+:::danger
+@module-federation/utilities 已经处于废弃状态，请使用 @module-federation/enhanced 的 runtime 导出代替。
+
+:::

@@ -1,5 +1,25 @@
 # @module-federation/runtime
 
+## 0.1.12
+
+### Patch Changes
+
+- 371d1f1: Before Request throws to errorLoadRemote
+  - @module-federation/sdk@0.1.12
+
+## 0.1.11
+
+### Patch Changes
+
+- 328cd99: package json main definition
+  - @module-federation/sdk@0.1.11
+
+## 0.1.10
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.10
+
 ## 0.1.9
 
 ### Patch Changes

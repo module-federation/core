@@ -5,6 +5,11 @@
     "activeMatch": "/guide/"
   },
   {
+    "text": "实践",
+    "link": "/practice/overview",
+    "activeMatch": "/practice/"
+  },
+  {
     "text": "配置",
     "link": "/configure/",
     "activeMatch": "/configure/"
@@ -15,14 +20,19 @@
     "activeMatch": "/plugin/"
   },
   {
-    "text": "社区",
-    "link": "/community/showcaseå",
+    "text": "案例",
+    "link": "/showcase/index",
+    "activeMatch": "/showcase/"
+  },
+  {
+    "text": "博客",
+    "link": "/blog/announcement",
+    "activeMatch": "/blog/"
+  },
+  {
+    "text": "生态",
     "activeMatch": "/community/",
     "items": [
-      {
-        "text": "Showcase",
-        "link": "/community/showcase/"
-      },
       {
         "text": "Module Federation Examples",
         "link": "https://github.com/module-federation/module-federation-examples"

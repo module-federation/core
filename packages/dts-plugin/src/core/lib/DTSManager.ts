@@ -61,7 +61,10 @@ class DTSManager {
     const exposePaths: Set<string> = new Set();
     const packageType = Object.keys(mapComponentsToExpose).reduce(
       (sum: string, exposeKey: string) => {
-        const exposePath = path.join(REMOTE_ALIAS_IDENTIFIER, exposeKey);
+        const exposePath = path
+          .join(REMOTE_ALIAS_IDENTIFIER, exposeKey)
+          .split(path.sep) // Windows platform-specific file system path fix
+          .join('/');
         exposePaths.add(`'${exposePath}'`);
         const curType = `T extends '${exposePath}' ? typeof import('${exposePath}') :`;
         sum = curType + sum;
