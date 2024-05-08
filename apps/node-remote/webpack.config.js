@@ -19,7 +19,7 @@ module.exports = composePlugins(withNx(), (config) => {
     new UniversalFederationPlugin({
       isServer: true,
       name: 'node_remote',
-      library: { type: 'commonjs-module' },
+      library: { type: 'commonjs-module', name: 'node_remote' },
       filename: 'remoteEntry.js',
       useRuntimePlugin: false,
       exposes: {
