@@ -7,3 +7,4 @@
 ./packages/utilities
 ./packages/typescript
 ./packages/native-*
+./apps
