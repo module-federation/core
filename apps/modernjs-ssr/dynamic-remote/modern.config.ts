@@ -18,11 +18,13 @@ export default defineConfig({
     router: true,
   },
   server: {
-    ssr: true,
+    ssr: {
+      mode: 'stream',
+    },
   },
   output: {
     disableTsChecker: true,
-    disableCssExtract: true,
+    // disableCssExtract: true,
   },
   // source: {
   //   enableAsyncEntry: true,

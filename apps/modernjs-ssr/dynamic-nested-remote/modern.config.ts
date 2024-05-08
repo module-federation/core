@@ -23,6 +23,7 @@ export default defineConfig({
   server: {
     ssr: {
       mode: 'stream',
+      // mode: 'string',
     },
     port: 3009,
   },
