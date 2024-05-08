@@ -7,7 +7,7 @@ module.exports = composePlugins(withNx(), async (config) => {
   // e.g. `config.plugins.push(new MyPlugin())`
   config.cache = false;
   config.devtool = false;
-  config.output.publicPath = '/testing';
+  config.output.publicPath = 'auto';
   await new Promise((r) => setTimeout(r, 400));
   config.module.rules.pop();
   config.plugins.push(
