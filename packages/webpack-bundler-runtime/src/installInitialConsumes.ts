@@ -17,7 +17,7 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
     });
   } catch (err) {
     console.error(
-      'loadShareSync fail! The function should not be called unless you set "eager:true". If you do not set, and encounter this issue, you can check whether enable async boundary.',
+      'loadShareSync failed! The function should not be called unless you set "eager:true". If you do not set it, and encounter this issue, you can check whether an async boundary is implemented.',
     );
     console.error('The original error message is as follows: ');
     throw err;
