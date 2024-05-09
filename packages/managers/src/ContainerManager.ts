@@ -41,7 +41,7 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
       if (typeof library.name === 'string') {
         return library.name;
       }
-      return undefined;
+      return name;
     }
 
     return name;

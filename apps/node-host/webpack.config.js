@@ -21,8 +21,8 @@ module.exports = composePlugins(withNx(), async (config) => {
         require.resolve('@module-federation/node/runtimePlugin'),
       ],
       remotes: {
-        // node_local_remote:
-        //   'commonjs ../../node-local-remote/dist/remoteEntry.js',
+        node_local_remote:
+          'commonjs ../../node-local-remote/dist/remoteEntry.js',
         // node_local_remote: '__webpack_require__.federation.instance.moduleCache.get("node_local_remote")',
         // node_remote:
         //   '__webpack_require__.federation.instance.moduleCache.get("node_remote")@http://localhost:3002/remoteEntry.js',
