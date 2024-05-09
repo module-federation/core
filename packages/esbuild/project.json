@@ -1,0 +1,87 @@
+{
+  "name": "esbuild",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/esbuild/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{workspaceRoot}/packages/esbuild/dist"],
+      "options": {
+        "parallel": false,
+        "outputPath": "packages/esbuild/dist",
+        "main": "packages/esbuild/src/index.ts",
+        "additionalEntryPoints": [
+          "packages/esbuild/src/types.ts",
+          "packages/esbuild/src/helpers.ts"
+        ],
+        "tsConfig": "packages/esbuild/tsconfig.lib.json",
+        "assets": [],
+        "project": "packages/esbuild/package.json",
+        "compiler": "swc",
+        "rollupConfig": "packages/esbuild/rollup.config.js",
+        "format": ["cjs", "esm"],
+        "external": ["@module-federation/*"],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/esbuild/**/*.ts",
+          "packages/esbuild/package.json"
+        ]
+      }
+    },
+    "build-debug": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "FEDERATION_DEBUG=true nx run esbuild:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run esbuild:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run esbuild:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "tesxt": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "vitest run -c packages/esbuild/vitest.config.ts",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}
