@@ -11,9 +11,17 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
   }
   const { shareKey, shareInfo } = moduleToHandlerMapping[moduleId];
 
-  return federationInstance.loadShareSync(shareKey, {
-    customShareInfo: shareInfo,
-  });
+  try {
+    return federationInstance.loadShareSync(shareKey, {
+      customShareInfo: shareInfo,
+    });
+  } catch (err) {
+    console.error(
+      'loadShareSync failed! The function should not be called unless you set "eager:true". If you do not set it, and encounter this issue, you can check whether an async boundary is implemented.',
+    );
+    console.error('The original error message is as follows: ');
+    throw err;
+  }
 }
 
 export function installInitialConsumes(options: InstallInitialConsumesOptions) {
