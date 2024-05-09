@@ -249,7 +249,7 @@ export default function () {
           }
 
           __webpack_require__.federation.runtime
-            .loadScriptNode(url, { attrs: {} })
+            .loadScriptNode(url, { attrs: { globalName: remoteName } })
             .then(function (res) {
               var federation = __webpack_require__.federation;
               var enhancedRemote = federation.instance.initRawContainer(
