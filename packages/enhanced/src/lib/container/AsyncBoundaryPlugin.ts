@@ -314,9 +314,7 @@ class AsyncEntryStartupPlugin {
 
         if (shouldInclude) {
           initialEntryModules.push(
-            `if(__webpack_require__.m[${JSON.stringify(entryModuleID)}]) {
-              __webpack_require__(${JSON.stringify(entryModuleID)});
-            }`,
+            `__webpack_require__(${JSON.stringify(entryModuleID)});`,
           );
         }
       }

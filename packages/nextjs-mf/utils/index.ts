@@ -1,15 +1,17 @@
+import * as deadUtils from '@module-federation/utilities';
+
 /**
  * Extracts the URL and global from the module federation utilities.
  * @module @module-federation/utilities/src/utils/pure
  */
 export { extractUrlAndGlobal } from '@module-federation/utilities';
-import { injectScript as injectLegacy } from '@module-federation/utilities';
+
 //@ts-ignore
 export const injectScript = (args) => {
-  console.error(
-    '@module-federation/utilities injectScript is deprecated, use module-federation/runtime {init,loadRemote}',
+  console.warn(
+    'injectScript is deprecated, use module-federation/runtime and loadRemote',
   );
-  return injectLegacy(args);
+  return deadUtils.injectScript(args);
 };
 
 /**
