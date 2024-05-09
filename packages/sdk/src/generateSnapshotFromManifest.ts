@@ -48,6 +48,13 @@ export const simpleJoinRemoteEntry = (rPath: string, rName: string): string => {
   return `${transformedPath}/${rName}`;
 };
 
+export function inferAutoPublicPath(url: string): string {
+  return url
+    .replace(/#.*$/, '')
+    .replace(/\?.*$/, '')
+    .replace(/\/[^\/]+$/, '/');
+}
+
 // Priority: overrides > remotes
 // eslint-disable-next-line max-lines-per-function
 export function generateSnapshotFromManifest(
@@ -61,10 +68,7 @@ export function generateSnapshotFromManifest(
     if ('publicPath' in manifest.metaData) {
       if (manifest.metaData.publicPath === 'auto' && version) {
         // use same implementation as publicPath auto runtime module implements
-        return version
-          .replace(/#.*$/, '')
-          .replace(/\?.*$/, '')
-          .replace(/\/[^\/]+$/, '/');
+        return inferAutoPublicPath(version);
       }
       return manifest.metaData.publicPath;
     } else {

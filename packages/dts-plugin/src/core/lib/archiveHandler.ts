@@ -6,7 +6,6 @@ import typescript from 'typescript';
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { retrieveMfTypesPath } from './typeScriptCompiler';
-import { replaceLocalhost } from './utils';
 import { fileLog } from '../../server';
 
 export const retrieveTypesZipPath = (
@@ -59,7 +58,7 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
 
     while (retries++ < hostOptions.maxRetries) {
       try {
-        const url = replaceLocalhost(fileToDownload);
+        const url = fileToDownload;
         const response = await axios
           .get(url, { responseType: 'arraybuffer' })
           .catch(downloadErrorLogger(destinationFolder, url));
