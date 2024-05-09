@@ -5,12 +5,12 @@
 
 import express from 'express';
 import * as path from 'path';
-import node_local_remote from 'node_local_remote/test';
+// import node_local_remote from 'node_local_remote/test';
 const remoteMsg = import('node_remote/test').then((m) => {
   console.log('\x1b[32m%s\x1b[0m', m.default || m);
   return m.default || m;
 });
-console.log('\x1b[32m%s\x1b[0m', node_local_remote);
+// console.log('\x1b[32m%s\x1b[0m', node_local_remote);
 
 const app = express();
 
@@ -21,7 +21,7 @@ app.get('/api', async (req, res) => {
     message: 'Welcome to node-host!',
     remotes: {
       node_remote: await remoteMsg,
-      node_local_remote,
+      // node_local_remote,
     },
   });
 });
