@@ -260,7 +260,6 @@ export default function () {
               const globalThisVal = new Function('return globalThis')();
               // use normal global assignment
               globalThisVal[chunkId] = enhancedRemote;
-              console.log('adding remote', chunkId);
               callback(enhancedRemote);
             })
             .catch(function (error) {
