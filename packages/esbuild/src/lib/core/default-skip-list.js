@@ -1,11 +1,4 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.isInSkipList =
-  exports.prepareSkipList =
-  exports.PREPARED_DEFAULT_SKIP_LIST =
-  exports.DEFAULT_SKIP_LIST =
-    void 0;
-exports.DEFAULT_SKIP_LIST = [
+export const DEFAULT_SKIP_LIST = [
   '@softarc/native-federation-runtime',
   '@softarc/native-federation',
   '@softarc/native-federation-core',
@@ -27,16 +20,18 @@ exports.DEFAULT_SKIP_LIST = [
   (pkg) => pkg.startsWith('@angular/') && !!pkg.match(/\/testing(\/|$)/),
   (pkg) => pkg.startsWith('@types/'),
 ];
-exports.PREPARED_DEFAULT_SKIP_LIST = prepareSkipList(exports.DEFAULT_SKIP_LIST);
-function prepareSkipList(skipList) {
+
+export const PREPARED_DEFAULT_SKIP_LIST = prepareSkipList(DEFAULT_SKIP_LIST);
+
+export function prepareSkipList(skipList) {
   return {
     strings: new Set(skipList.filter((e) => typeof e === 'string')),
     functions: skipList.filter((e) => typeof e === 'function'),
     regexps: skipList.filter((e) => typeof e === 'object'),
   };
 }
-exports.prepareSkipList = prepareSkipList;
-function isInSkipList(entry, skipList) {
+
+export function isInSkipList(entry, skipList) {
   if (skipList.strings.has(entry)) {
     return true;
   }
@@ -48,5 +43,3 @@ function isInSkipList(entry, skipList) {
   }
   return false;
 }
-exports.isInSkipList = isInSkipList;
-//# sourceMappingURL=default-skip-list.js.map

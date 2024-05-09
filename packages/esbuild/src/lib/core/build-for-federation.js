@@ -1,57 +1,51 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.buildForFederation = exports.defaultBuildParams = void 0;
-const tslib_1 = require('tslib');
-const write_import_map_1 = require('./write-import-map');
-const write_federation_info_1 = require('./write-federation-info');
-const bundle_shared_1 = require('./bundle-shared');
-const bundle_exposed_and_mappings_1 = require('./bundle-exposed-and-mappings');
-exports.defaultBuildParams = {
+import { writeImportMap } from './write-import-map';
+import { writeFederationInfo } from './write-federation-info';
+import { bundleShared } from './bundle-shared';
+import {
+  bundleExposedAndMappings,
+  describeExposed,
+  describeSharedMappings,
+} from './bundle-exposed-and-mappings';
+
+export const defaultBuildParams = {
   skipMappingsAndExposed: false,
 };
-function buildForFederation(
+
+export async function buildForFederation(
   config,
   fedOptions,
   externals,
-  buildParams = exports.defaultBuildParams,
+  buildParams = defaultBuildParams,
 ) {
-  return tslib_1.__awaiter(this, void 0, void 0, function* () {
-    let artefactInfo;
-    if (!buildParams.skipMappingsAndExposed) {
-      artefactInfo = yield (0,
-      bundle_exposed_and_mappings_1.bundleExposedAndMappings)(
-        config,
-        fedOptions,
-        externals,
-      );
-    }
-    const exposedInfo = !artefactInfo
-      ? (0, bundle_exposed_and_mappings_1.describeExposed)(config, fedOptions)
-      : artefactInfo.exposes;
-    const sharedPackageInfo = yield (0, bundle_shared_1.bundleShared)(
+  let artefactInfo;
+  if (!buildParams.skipMappingsAndExposed) {
+    artefactInfo = await bundleExposedAndMappings(
       config,
       fedOptions,
       externals,
     );
-    const sharedMappingInfo = !artefactInfo
-      ? (0, bundle_exposed_and_mappings_1.describeSharedMappings)(
-          config,
-          fedOptions,
-        )
-      : artefactInfo.mappings;
-    const sharedInfo = [...sharedPackageInfo, ...sharedMappingInfo];
-    const federationInfo = {
-      name: config.name,
-      shared: sharedInfo,
-      exposes: exposedInfo,
-    };
-    (0, write_federation_info_1.writeFederationInfo)(
-      federationInfo,
-      fedOptions,
-    );
-    (0, write_import_map_1.writeImportMap)(sharedInfo, fedOptions);
-    return federationInfo;
-  });
+  }
+
+  const exposedInfo = !artefactInfo
+    ? describeExposed(config, fedOptions)
+    : artefactInfo.exposes;
+
+  const sharedPackageInfo = await bundleShared(config, fedOptions, externals);
+
+  const sharedMappingInfo = !artefactInfo
+    ? describeSharedMappings(config, fedOptions)
+    : artefactInfo.mappings;
+
+  const sharedInfo = [...sharedPackageInfo, ...sharedMappingInfo];
+
+  const federationInfo = {
+    name: config.name,
+    shared: sharedInfo,
+    exposes: exposedInfo,
+  };
+
+  writeFederationInfo(federationInfo, fedOptions);
+  writeImportMap(sharedInfo, fedOptions);
+
+  return federationInfo;
 }
-exports.buildForFederation = buildForFederation;
-//# sourceMappingURL=build-for-federation.js.map
