@@ -257,11 +257,9 @@ export default function () {
                 url,
                 res,
               );
+              const globalThisVal = new Function('return globalThis')();
               // use normal global assignment
-              if (!usesInternalRef && !globalThisVal[chunkId]) {
-                globalThisVal[chunkId] = enhancedRemote;
-              }
-              console.log('adding remote', chunkId);
+              globalThisVal[chunkId] = enhancedRemote;
               callback(enhancedRemote);
             })
             .catch(function (error) {

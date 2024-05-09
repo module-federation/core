@@ -3,6 +3,7 @@
   "private": true,
   "dependencies": {
     "@module-federation/node": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
     "@module-federation/runtime": "workspace:*"
   }
 }
