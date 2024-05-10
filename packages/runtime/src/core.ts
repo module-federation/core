@@ -336,7 +336,7 @@ export class FederationHost {
         shareInfo: shared,
       });
 
-    const remotes = this.remoteHandler.formatRemote(
+    const remotes = this.remoteHandler.formatAndRegisterRemote(
       this,
       globalOptionsRes,
       userOptionsRes,

@@ -99,7 +99,7 @@ export class RemoteHandler {
     }>(),
   });
 
-  formatRemote(
+  formatAndRegisterRemote(
     origin: FederationHost,
     globalOptions: Options,
     userOptions: UserOptions,
