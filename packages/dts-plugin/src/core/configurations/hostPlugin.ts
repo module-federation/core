@@ -17,9 +17,6 @@ const defaultOptions = {
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {
   const remoteUrl = new URL(url);
 
-  if (remoteUrl.href.includes(MANIFEST_EXT)) {
-    return undefined;
-  }
   const pathnameWithoutEntry = remoteUrl.pathname
     .split('/')
     .slice(0, -1)
@@ -51,6 +48,7 @@ const retrieveRemoteInfo = (options: {
       : parsedInfo.name === remote
       ? remote
       : '';
+
   const zipUrl = url ? buildZipUrl(hostOptions, url) : '';
 
   return {

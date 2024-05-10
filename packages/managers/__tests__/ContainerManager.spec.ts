@@ -50,7 +50,9 @@ describe('ContainerManager', () => {
     const containerManager = new ContainerManager();
     containerManager.init(options);
 
-    expect(containerManager.globalEntryName).toEqual(undefined);
+    expect(containerManager.globalEntryName).toEqual(
+      '@module-federation/container-managers-test',
+    );
   });
 
   it('set expose name by default', () => {

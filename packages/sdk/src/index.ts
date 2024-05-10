@@ -5,6 +5,7 @@ export {
   generateSnapshotFromManifest,
   isManifestProvider,
   simpleJoinRemoteEntry,
+  inferAutoPublicPath,
 } from './generateSnapshotFromManifest';
 export * from './logger';
 export * from './env';

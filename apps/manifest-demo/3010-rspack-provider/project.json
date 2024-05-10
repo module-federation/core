@@ -31,6 +31,12 @@
         "buildTarget": "3010-rspack-provider:build",
         "port": 3010
       },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
       "configurations": {
         "development": {
           "buildTarget": "3010-rspack-provider:build:development",

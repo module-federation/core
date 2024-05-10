@@ -51,6 +51,12 @@
         "hmr": true,
         "port": 3009
       },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
       "configurations": {
         "development": {
           "buildTarget": "3009-webpack-provider:build:development"
