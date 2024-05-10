@@ -10,10 +10,10 @@
       "options": {
         "parallel": false,
         "outputPath": "packages/esbuild/dist",
-        "main": "packages/esbuild/src/index.ts",
+        "main": "packages/esbuild/src/index.js",
         "additionalEntryPoints": [
-          "packages/esbuild/src/types.ts",
-          "packages/esbuild/src/helpers.ts"
+          "packages/esbuild/src/adapters/esbuild.js",
+          "packages/esbuild/src/build.js"
         ],
         "tsConfig": "packages/esbuild/tsconfig.lib.json",
         "assets": [],
@@ -21,9 +21,14 @@
         "compiler": "swc",
         "rollupConfig": "packages/esbuild/rollup.config.js",
         "format": ["cjs", "esm"],
-        "external": ["@module-federation/*"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
+        "external": [
+          "@module-federation/*",
+          "pnpapi",
+          "esbuild",
+          "@rollup/*",
+          "rollup-plugin-node-externals",
+          "rollup"
+        ]
       },
       "dependsOn": [
         {

@@ -1,8 +1,8 @@
 export const DEFAULT_SKIP_LIST = [
-  '@softarc/native-federation-runtime',
-  '@softarc/native-federation',
-  '@softarc/native-federation-core',
-  '@softarc/native-federation-esbuild',
+  '@module-federation/native-federation-runtime',
+  '@module-federation/native-federation',
+  '@module-federation/native-federation-core',
+  '@module-federation/native-federation-esbuild',
   '@angular-architects/native-federation',
   '@angular-architects/native-federation-runtime',
   'es-module-shims',

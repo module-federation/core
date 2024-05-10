@@ -19,10 +19,15 @@
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js"
     },
-    "./helpers": {
-      "types": "./dist/helpers.cjs.d.ts",
-      "import": "./dist/helpers.esm.js",
-      "require": "./dist/helpers.cjs.js"
+    "./esbuild-adapter": {
+      "types": "./dist/esbuild.cjs.d.ts",
+      "import": "./dist/esbuild.esm.js",
+      "require": "./dist/esbuild.cjs.js"
+    },
+    "./build": {
+      "types": "./dist/build.cjs.d.ts",
+      "import": "./dist/build.esm.js",
+      "require": "./dist/build.cjs.js"
     },
     "./types": {
       "types": "./dist/types.cjs.d.ts",
@@ -45,6 +50,14 @@
     }
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "npmlog": "^7.0.1",
+    "json5": "^2.2.3",
+    "@rollup/plugin-commonjs": "^22.0.2",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-replace": "^4.0.0",
+    "rollup": "^2.79.0",
+    "rollup-plugin-node-externals": "^4.1.1",
+    "esbuild": "^0.15.5"
   }
 }

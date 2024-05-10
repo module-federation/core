@@ -1,1 +1,1 @@
-export * from '@softarc/native-federation-runtime';
+export * from '@module-federation/native-federation-runtime';
