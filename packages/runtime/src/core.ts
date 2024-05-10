@@ -121,8 +121,8 @@ export class FederationHost {
     this.name = userOptions.name;
     this.options = defaultOptions;
     this.snapshotHandler = new SnapshotHandler(this);
-    this.sharedHandler = new SharedHandler(this.options);
-    this.remoteHandler = new RemoteHandler();
+    this.sharedHandler = new SharedHandler(this);
+    this.remoteHandler = new RemoteHandler(this);
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,
@@ -147,7 +147,7 @@ export class FederationHost {
       resolver?: (sharedOptions: ShareInfos[string]) => Shared;
     },
   ): Promise<false | (() => T | undefined)> {
-    return this.sharedHandler.loadShare(this, pkgName, extraOptions);
+    return this.sharedHandler.loadShare(pkgName, extraOptions);
   }
 
   // The lib function will only be available if the shared set by eager or runtime init is set or the shared is successfully loaded.
@@ -161,14 +161,14 @@ export class FederationHost {
       resolver?: (sharedOptions: ShareInfos[string]) => Shared;
     },
   ): () => T | never {
-    return this.sharedHandler.loadShareSync(this, pkgName, extraOptions);
+    return this.sharedHandler.loadShareSync(pkgName, extraOptions);
   }
 
   initializeSharing(
     shareScopeName = DEFAULT_SCOPE,
     strategy?: Shared['strategy'],
   ): Array<Promise<void>> {
-    return this.sharedHandler.initializeSharing(this, shareScopeName, strategy);
+    return this.sharedHandler.initializeSharing(shareScopeName, strategy);
   }
 
   initRawContainer(
@@ -191,19 +191,19 @@ export class FederationHost {
     id: string,
     options?: { loadFactory?: boolean; from: 'build' | 'runtime' },
   ): Promise<T | null> {
-    return this.remoteHandler.loadRemote(this, id, options);
+    return this.remoteHandler.loadRemote(id, options);
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async preloadRemote(preloadOptions: Array<PreloadRemoteArgs>): Promise<void> {
-    return this.remoteHandler.preloadRemote(this, preloadOptions);
+    return this.remoteHandler.preloadRemote(preloadOptions);
   }
 
   initShareScopeMap(
     scopeName: string,
     shareScope: ShareScopeMap[string],
   ): void {
-    this.sharedHandler.initShareScopeMap(this, scopeName, shareScope);
+    this.sharedHandler.initShareScopeMap(scopeName, shareScope);
   }
 
   private formatOptions(
@@ -223,7 +223,6 @@ export class FederationHost {
       });
 
     const remotes = this.remoteHandler.formatAndRegisterRemote(
-      this,
       globalOptionsRes,
       userOptionsRes,
     );
@@ -274,6 +273,6 @@ export class FederationHost {
   }
 
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
-    return this.remoteHandler.registerRemotes(this, remotes, options);
+    return this.remoteHandler.registerRemotes(remotes, options);
   }
 }

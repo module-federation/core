@@ -43,6 +43,7 @@ export interface LoadRemoteMatch {
 }
 
 export class RemoteHandler {
+  host: FederationHost;
   hooks = new PluginSystem({
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
@@ -115,15 +116,15 @@ export class RemoteHandler {
     }>(),
   });
 
-  formatAndRegisterRemote(
-    origin: FederationHost,
-    globalOptions: Options,
-    userOptions: UserOptions,
-  ) {
+  constructor(host: FederationHost) {
+    this.host = host;
+  }
+
+  formatAndRegisterRemote(globalOptions: Options, userOptions: UserOptions) {
     const userRemotes = userOptions.remotes || [];
 
     return userRemotes.reduce((res, remote) => {
-      this.registerRemote(origin, remote, res, { force: false });
+      this.registerRemote(remote, res, { force: false });
       return res;
     }, globalOptions.remotes);
   }
@@ -131,10 +132,10 @@ export class RemoteHandler {
   // eslint-disable-next-line max-lines-per-function
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
-    origin: FederationHost,
     id: string,
     options?: { loadFactory?: boolean; from: 'build' | 'runtime' },
   ): Promise<T | null> {
+    const { host } = this;
     try {
       const { loadFactory = true } = options || { loadFactory: true };
       // 1. Validate the parameters of the retrieved module. There are two module request methods: pkgName + expose and alias + expose.
@@ -147,7 +148,6 @@ export class RemoteHandler {
       const { module, moduleOptions, remoteMatchInfo } =
         await this.getRemoteModuleAndOptions({
           id,
-          origin: origin,
         });
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
       const moduleOrFactory = (await module.get(expose, options)) as T;
@@ -161,7 +161,7 @@ export class RemoteHandler {
         remote,
         options: moduleOptions,
         moduleInstance: module,
-        origin: origin,
+        origin: host,
       });
 
       if (typeof moduleWrapper === 'function') {
@@ -177,7 +177,7 @@ export class RemoteHandler {
         error,
         from,
         lifecycle: 'onLoad',
-        origin: origin,
+        origin: host,
       });
 
       if (!failOver) {
@@ -189,18 +189,17 @@ export class RemoteHandler {
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  async preloadRemote(
-    origin: FederationHost,
-    preloadOptions: Array<PreloadRemoteArgs>,
-  ): Promise<void> {
+  async preloadRemote(preloadOptions: Array<PreloadRemoteArgs>): Promise<void> {
+    const { host } = this;
+
     await this.hooks.lifecycle.beforePreloadRemote.emit({
       preloadOptions,
-      options: origin.options,
-      origin: origin,
+      options: host.options,
+      origin: host,
     });
 
     const preloadOps: PreloadOptions = formatPreloadArgs(
-      origin.options.remotes,
+      host.options.remotes,
       preloadOptions,
     );
 
@@ -209,10 +208,10 @@ export class RemoteHandler {
         const { remote } = ops;
         const remoteInfo = getRemoteInfo(remote);
         const { globalSnapshot, remoteSnapshot } =
-          await origin.snapshotHandler.loadRemoteSnapshotInfo(remote);
+          await host.snapshotHandler.loadRemoteSnapshotInfo(remote);
 
         const assets = await this.hooks.lifecycle.generatePreloadAssets.emit({
-          origin: origin,
+          origin: host,
           preloadOptions: ops,
           remote,
           remoteInfo,
@@ -222,55 +221,48 @@ export class RemoteHandler {
         if (!assets) {
           return;
         }
-        preloadAssets(remoteInfo, origin, assets);
+        preloadAssets(remoteInfo, host, assets);
       }),
     );
   }
 
-  registerRemotes(
-    origin: FederationHost,
-    remotes: Remote[],
-    options?: { force?: boolean },
-  ): void {
+  registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
+    const { host } = this;
     remotes.forEach((remote) => {
-      this.registerRemote(origin, remote, origin.options.remotes, {
+      this.registerRemote(remote, host.options.remotes, {
         force: options?.force,
       });
     });
   }
 
-  async getRemoteModuleAndOptions(options: {
-    id: string;
-    origin: FederationHost;
-  }): Promise<{
+  async getRemoteModuleAndOptions(options: { id: string }): Promise<{
     module: Module;
     moduleOptions: ModuleOptions;
     remoteMatchInfo: LoadRemoteMatch;
   }> {
-    const { id, origin } = options;
+    const { host } = this;
+    const { id } = options;
     let loadRemoteArgs;
 
     try {
-      loadRemoteArgs =
-        await origin.remoteHandler.hooks.lifecycle.beforeRequest.emit({
-          id,
-          options: origin.options,
-          origin: origin,
-        });
+      loadRemoteArgs = await this.hooks.lifecycle.beforeRequest.emit({
+        id,
+        options: host.options,
+        origin: host,
+      });
     } catch (error) {
-      loadRemoteArgs =
-        (await origin.remoteHandler.hooks.lifecycle.errorLoadRemote.emit({
-          id,
-          options: origin.options,
-          origin: origin,
-          from: 'runtime',
-          error,
-          lifecycle: 'beforeRequest',
-        })) as {
-          id: string;
-          options: Options;
-          origin: FederationHost;
-        };
+      loadRemoteArgs = (await this.hooks.lifecycle.errorLoadRemote.emit({
+        id,
+        options: host.options,
+        origin: host,
+        from: 'runtime',
+        error,
+        lifecycle: 'beforeRequest',
+      })) as {
+        id: string;
+        options: Options;
+        origin: FederationHost;
+      };
 
       if (!loadRemoteArgs) {
         throw error;
@@ -280,7 +272,7 @@ export class RemoteHandler {
     const { id: idRes } = loadRemoteArgs;
 
     const remoteSplitInfo = matchRemoteWithNameAndExpose(
-      origin.options.remotes,
+      host.options.remotes,
       idRes,
     );
 
@@ -288,13 +280,13 @@ export class RemoteHandler {
       remoteSplitInfo,
       `
         Unable to locate ${idRes} in ${
-          origin.options.name
+          host.options.name
         }. Potential reasons for failure include:\n
         1. ${idRes} was not included in the 'remotes' parameter of ${
-          origin.options.name || 'the host'
+          host.options.name || 'the host'
         }.\n
         2. ${idRes} could not be found in the 'remotes' of ${
-          origin.options.name
+          host.options.name
         } with either 'name' or 'alias' attributes.
         3. ${idRes} is not online, injected, or loaded.
         4. ${idRes}  cannot be accessed on the expected.
@@ -305,11 +297,11 @@ export class RemoteHandler {
     const { remote: rawRemote } = remoteSplitInfo;
     const remoteInfo = getRemoteInfo(rawRemote);
     const matchInfo =
-      await origin.sharedHandler.hooks.lifecycle.afterResolve.emit({
+      await host.sharedHandler.hooks.lifecycle.afterResolve.emit({
         id: idRes,
         ...remoteSplitInfo,
-        options: origin.options,
-        origin: origin,
+        options: host.options,
+        origin: host,
         remoteInfo,
       });
 
@@ -318,16 +310,16 @@ export class RemoteHandler {
       remote && expose,
       `The 'beforeRequest' hook was executed, but it failed to return the correct 'remote' and 'expose' values while loading ${idRes}.`,
     );
-    let module: Module | undefined = origin.moduleCache.get(remote.name);
+    let module: Module | undefined = host.moduleCache.get(remote.name);
 
     const moduleOptions: ModuleOptions = {
-      host: origin,
+      host: host,
       remoteInfo,
     };
 
     if (!module) {
       module = new Module(moduleOptions);
-      origin.moduleCache.set(remote.name, module);
+      host.moduleCache.set(remote.name, module);
     }
     return {
       module,
@@ -337,11 +329,12 @@ export class RemoteHandler {
   }
 
   registerRemote(
-    origin: FederationHost,
     remote: Remote,
     targetRemotes: Remote[],
     options?: { force?: boolean },
   ): void {
+    const { host } = this;
+
     const normalizeRemote = () => {
       if (remote.alias) {
         // Validate if alias equals the prefix of remote.name and remote.alias, if so, throw an error
@@ -389,7 +382,7 @@ export class RemoteHandler {
       ];
       if (options?.force) {
         // remove registered remote
-        this.removeRemote(origin, registeredRemote);
+        this.removeRemote(registeredRemote);
         normalizeRemote();
         targetRemotes.push(remote);
       }
@@ -397,15 +390,16 @@ export class RemoteHandler {
     }
   }
 
-  private removeRemote(origin: FederationHost, remote: Remote): void {
+  private removeRemote(remote: Remote): void {
+    const { host } = this;
     const { name } = remote;
-    const remoteIndex = origin.options.remotes.findIndex(
+    const remoteIndex = host.options.remotes.findIndex(
       (item) => item.name === name,
     );
     if (remoteIndex !== -1) {
-      origin.options.remotes.splice(remoteIndex, 1);
+      host.options.remotes.splice(remoteIndex, 1);
     }
-    const loadedModule = origin.moduleCache.get(remote.name);
+    const loadedModule = host.moduleCache.get(remote.name);
     if (loadedModule) {
       const key = loadedModule.remoteInfo
         .entryGlobalName as keyof typeof globalThis;
@@ -418,7 +412,7 @@ export class RemoteHandler {
       if (globalLoading[remoteEntryUniqueKey]) {
         delete globalLoading[remoteEntryUniqueKey];
       }
-      origin.moduleCache.delete(remote.name);
+      host.moduleCache.delete(remote.name);
     }
   }
 }

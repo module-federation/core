@@ -25,6 +25,7 @@ import { DEFAULT_SCOPE } from '../constant';
 import { LoadRemoteMatch } from '../remote';
 
 export class SharedHandler {
+  host: FederationHost;
   shareScopeMap: ShareScopeMap;
   hooks = new PluginSystem({
     afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
@@ -52,9 +53,10 @@ export class SharedHandler {
     }>('initContainer'),
   });
 
-  constructor(hostOptions: Options) {
+  constructor(host: FederationHost) {
+    this.host = host;
     this.shareScopeMap = {};
-    this._setGlobalShareScopeMap(hostOptions);
+    this._setGlobalShareScopeMap(host.options);
   }
 
   formatShareConfigs(globalOptions: Options, userOptions: UserOptions) {
@@ -112,13 +114,13 @@ export class SharedHandler {
   }
 
   async loadShare<T>(
-    origin: FederationHost,
     pkgName: string,
     extraOptions?: {
       customShareInfo?: Partial<Shared>;
       resolver?: (sharedOptions: ShareInfos[string]) => Shared;
     },
   ): Promise<false | (() => T | undefined)> {
+    const { host } = this;
     // This function performs the following steps:
     // 1. Checks if the currently loaded share already exists, if not, it throws an error
     // 2. Searches globally for a matching share, if found, it uses it directly
@@ -127,14 +129,14 @@ export class SharedHandler {
     const shareInfo = getTargetSharedOptions({
       pkgName,
       extraOptions,
-      shareInfos: origin.options.shared,
+      shareInfos: host.options.shared,
     });
 
     if (shareInfo?.scope) {
       await Promise.all(
         shareInfo.scope.map(async (shareScope) => {
           await Promise.all(
-            this.initializeSharing(origin, shareScope, shareInfo.strategy),
+            this.initializeSharing(shareScope, shareInfo.strategy),
           );
           return;
         }),
@@ -143,8 +145,8 @@ export class SharedHandler {
     const loadShareRes = await this.hooks.lifecycle.beforeLoadShare.emit({
       pkgName,
       shareInfo,
-      shared: origin.options.shared,
-      origin: origin,
+      shared: host.options.shared,
+      origin: host,
     });
 
     const { shareInfo: shareInfoRes } = loadShareRes;
@@ -152,7 +154,7 @@ export class SharedHandler {
     // Assert that shareInfoRes exists, if not, throw an error
     assert(
       shareInfoRes,
-      `Cannot find ${pkgName} Share in the ${origin.options.name}. Please ensure that the ${pkgName} Share parameters have been injected`,
+      `Cannot find ${pkgName} Share in the ${host.options.name}. Please ensure that the ${pkgName} Share parameters have been injected`,
     );
 
     // Retrieve from cache
@@ -167,7 +169,7 @@ export class SharedHandler {
       if (!shared.useIn) {
         shared.useIn = [];
       }
-      addUniqueItem(shared.useIn, origin.options.name);
+      addUniqueItem(shared.useIn, host.options.name);
     };
 
     if (registeredShared && registeredShared.lib) {
@@ -208,7 +210,7 @@ export class SharedHandler {
         pkgName,
         loaded: false,
         shared: registeredShared,
-        from: origin.options.name,
+        from: host.options.name,
         lib: null,
         loading,
       });
@@ -239,7 +241,7 @@ export class SharedHandler {
         pkgName,
         loaded: false,
         shared: shareInfoRes,
-        from: origin.options.name,
+        from: host.options.name,
         lib: null,
         loading,
       });
@@ -254,12 +256,13 @@ export class SharedHandler {
    */
   // eslint-disable-next-line @typescript-eslint/member-ordering
   initializeSharing(
-    origin: FederationHost,
     shareScopeName = DEFAULT_SCOPE,
     strategy?: Shared['strategy'],
   ): Array<Promise<void>> {
+    const { host } = this;
+
     const shareScope = this.shareScopeMap;
-    const hostName = origin.options.name;
+    const hostName = host.options.name;
     // Creates a new share scope if necessary
     if (!shareScope[shareScopeName]) {
       shareScope[shareScopeName] = {};
@@ -291,9 +294,8 @@ export class SharedHandler {
       mod && mod.init && mod.init(shareScope[shareScopeName]);
 
     const initRemoteModule = async (key: string): Promise<void> => {
-      const { module } = await origin.remoteHandler.getRemoteModuleAndOptions({
+      const { module } = await host.remoteHandler.getRemoteModuleAndOptions({
         id: key,
-        origin,
       });
       if (module.getEntry) {
         const entry = await module.getEntry();
@@ -303,8 +305,8 @@ export class SharedHandler {
         }
       }
     };
-    Object.keys(origin.options.shared).forEach((shareName) => {
-      const sharedArr = origin.options.shared[shareName];
+    Object.keys(host.options.shared).forEach((shareName) => {
+      const sharedArr = host.options.shared[shareName];
       sharedArr.forEach((shared) => {
         if (shared.scope.includes(shareScopeName)) {
           register(shareName, shared);
@@ -312,7 +314,7 @@ export class SharedHandler {
       });
     });
     if (strategy === 'version-first') {
-      origin.options.remotes.forEach((remote) => {
+      host.options.remotes.forEach((remote) => {
         if (remote.shareScope === shareScopeName) {
           promises.push(initRemoteModule(remote.name));
         }
@@ -327,22 +329,22 @@ export class SharedHandler {
   // 2. If lib exists in local shared, it will be used directly
   // 3. If the local get returns something other than Promise, then it will be used directly
   loadShareSync<T>(
-    origin: FederationHost,
     pkgName: string,
     extraOptions?: {
       customShareInfo?: Partial<Shared>;
       resolver?: (sharedOptions: ShareInfos[string]) => Shared;
     },
   ): () => T | never {
+    const { host } = this;
     const shareInfo = getTargetSharedOptions({
       pkgName,
       extraOptions,
-      shareInfos: origin.options.shared,
+      shareInfos: host.options.shared,
     });
 
     if (shareInfo?.scope) {
       shareInfo.scope.forEach((shareScope) => {
-        this.initializeSharing(origin, shareScope, shareInfo.strategy);
+        this.initializeSharing(shareScope, shareInfo.strategy);
       });
     }
     const registeredShared = getRegisteredShare(
@@ -356,7 +358,7 @@ export class SharedHandler {
       if (!shared.useIn) {
         shared.useIn = [];
       }
-      addUniqueItem(shared.useIn, origin.options.name);
+      addUniqueItem(shared.useIn, host.options.name);
     };
 
     if (registeredShared) {
@@ -364,7 +366,7 @@ export class SharedHandler {
         addUseIn(registeredShared);
         if (!registeredShared.loaded) {
           registeredShared.loaded = true;
-          if (registeredShared.from === origin.options.name) {
+          if (registeredShared.from === host.options.name) {
             shareInfo.loaded = true;
           }
         }
@@ -377,7 +379,7 @@ export class SharedHandler {
           this.setShared({
             pkgName,
             loaded: true,
-            from: origin.options.name,
+            from: host.options.name,
             lib: module,
             shared: registeredShared,
           });
@@ -398,7 +400,7 @@ export class SharedHandler {
 
       if (module instanceof Promise) {
         throw new Error(`
-        The loadShareSync function was unable to load ${pkgName}. The ${pkgName} could not be found in ${origin.options.name}.
+        The loadShareSync function was unable to load ${pkgName}. The ${pkgName} could not be found in ${host.options.name}.
         Possible reasons for failure: \n
         1. The ${pkgName} share was registered with the 'get' attribute, but loadShare was not used beforehand.\n
         2. The ${pkgName} share was not registered with the 'lib' attribute.\n
@@ -410,7 +412,7 @@ export class SharedHandler {
       this.setShared({
         pkgName,
         loaded: true,
-        from: origin.options.name,
+        from: host.options.name,
         lib: shareInfo.lib,
         shared: shareInfo,
       });
@@ -419,7 +421,7 @@ export class SharedHandler {
 
     throw new Error(
       `
-        The loadShareSync function was unable to load ${pkgName}. The ${pkgName} could not be found in ${origin.options.name}.
+        The loadShareSync function was unable to load ${pkgName}. The ${pkgName} could not be found in ${host.options.name}.
         Possible reasons for failure: \n
         1. The ${pkgName} share was registered with the 'get' attribute, but loadShare was not used beforehand.\n
         2. The ${pkgName} share was not registered with the 'lib' attribute.\n
@@ -428,15 +430,15 @@ export class SharedHandler {
   }
 
   initShareScopeMap(
-    origin: FederationHost,
     scopeName: string,
     shareScope: ShareScopeMap[string],
   ): void {
+    const { host } = this;
     this.shareScopeMap[scopeName] = shareScope;
     this.hooks.lifecycle.initContainerShareScopeMap.emit({
       shareScope,
-      options: origin.options,
-      origin: origin,
+      options: host.options,
+      origin: host,
     });
   }
 
