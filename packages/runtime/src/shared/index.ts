@@ -7,11 +7,7 @@ import {
   RemoteEntryExports,
   UserOptions,
 } from '../type';
-import {
-  LoadRemoteMatch,
-  FederationHost,
-  getRemoteModuleAndOptions,
-} from '../core';
+import { FederationHost } from '../core';
 import {
   PluginSystem,
   AsyncHook,
@@ -26,6 +22,7 @@ import {
 } from '../utils/share';
 import { assert, addUniqueItem } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
+import { LoadRemoteMatch, getRemoteModuleAndOptions } from '../remote';
 
 export class SharedHandler {
   shareScopeMap: ShareScopeMap;

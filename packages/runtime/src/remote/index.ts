@@ -14,17 +14,130 @@ import {
   Remote,
   RemoteInfo,
 } from '../type';
-import { FederationHost, getRemoteModuleAndOptions } from '../core';
+import { FederationHost } from '../core';
 import {
   PluginSystem,
   AsyncHook,
   AsyncWaterfallHook,
   SyncHook,
 } from '../utils/hooks';
-import { assert, getRemoteInfo, getRemoteEntryUniqueKey } from '../utils';
+import {
+  assert,
+  getRemoteInfo,
+  getRemoteEntryUniqueKey,
+  matchRemoteWithNameAndExpose,
+} from '../utils';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
+
+export interface LoadRemoteMatch {
+  id: string;
+  pkgNameOrAlias: string;
+  expose: string;
+  remote: Remote;
+  options: Options;
+  origin: FederationHost;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
+}
+
+export async function getRemoteModuleAndOptions(options: {
+  id: string;
+  origin: FederationHost;
+}): Promise<{
+  module: Module;
+  moduleOptions: ModuleOptions;
+  remoteMatchInfo: LoadRemoteMatch;
+}> {
+  const { id, origin } = options;
+  let loadRemoteArgs;
+
+  try {
+    loadRemoteArgs =
+      await origin.remoteHandler.hooks.lifecycle.beforeRequest.emit({
+        id,
+        options: origin.options,
+        origin: origin,
+      });
+  } catch (error) {
+    loadRemoteArgs =
+      (await origin.remoteHandler.hooks.lifecycle.errorLoadRemote.emit({
+        id,
+        options: origin.options,
+        origin: origin,
+        from: 'runtime',
+        error,
+        lifecycle: 'beforeRequest',
+      })) as {
+        id: string;
+        options: Options;
+        origin: FederationHost;
+      };
+
+    if (!loadRemoteArgs) {
+      throw error;
+    }
+  }
+
+  const { id: idRes } = loadRemoteArgs;
+
+  const remoteSplitInfo = matchRemoteWithNameAndExpose(
+    origin.options.remotes,
+    idRes,
+  );
+
+  assert(
+    remoteSplitInfo,
+    `
+      Unable to locate ${idRes} in ${
+        origin.options.name
+      }. Potential reasons for failure include:\n
+      1. ${idRes} was not included in the 'remotes' parameter of ${
+        origin.options.name || 'the host'
+      }.\n
+      2. ${idRes} could not be found in the 'remotes' of ${
+        origin.options.name
+      } with either 'name' or 'alias' attributes.
+      3. ${idRes} is not online, injected, or loaded.
+      4. ${idRes}  cannot be accessed on the expected.
+      5. The 'beforeRequest' hook was provided but did not return the correct 'remoteInfo' when attempting to load ${idRes}.
+    `,
+  );
+
+  const { remote: rawRemote } = remoteSplitInfo;
+  const remoteInfo = getRemoteInfo(rawRemote);
+  const matchInfo =
+    await origin.sharedHandler.hooks.lifecycle.afterResolve.emit({
+      id: idRes,
+      ...remoteSplitInfo,
+      options: origin.options,
+      origin: origin,
+      remoteInfo,
+    });
+
+  const { remote, expose } = matchInfo;
+  assert(
+    remote && expose,
+    `The 'beforeRequest' hook was executed, but it failed to return the correct 'remote' and 'expose' values while loading ${idRes}.`,
+  );
+  let module: Module | undefined = origin.moduleCache.get(remote.name);
+
+  const moduleOptions: ModuleOptions = {
+    host: origin,
+    remoteInfo,
+  };
+
+  if (!module) {
+    module = new Module(moduleOptions);
+    origin.moduleCache.set(remote.name, module);
+  }
+  return {
+    module,
+    moduleOptions,
+    remoteMatchInfo: matchInfo,
+  };
+}
 
 export class RemoteHandler {
   hooks = new PluginSystem({
