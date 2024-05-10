@@ -22,7 +22,7 @@ import {
 } from '../utils/share';
 import { assert, addUniqueItem } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
-import { LoadRemoteMatch, getRemoteModuleAndOptions } from '../remote';
+import { LoadRemoteMatch } from '../remote';
 
 export class SharedHandler {
   shareScopeMap: ShareScopeMap;
@@ -291,7 +291,7 @@ export class SharedHandler {
       mod && mod.init && mod.init(shareScope[shareScopeName]);
 
     const initRemoteModule = async (key: string): Promise<void> => {
-      const { module } = await getRemoteModuleAndOptions({
+      const { module } = await origin.remoteHandler.getRemoteModuleAndOptions({
         id: key,
         origin,
       });
