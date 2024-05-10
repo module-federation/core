@@ -3,7 +3,7 @@ import type { RemoteWithEntry, RemoteWithVersion } from './common';
 
 export type RemoteEntryType = 'esm' | 'global';
 
-interface ResourceInfo {
+export interface ResourceInfo {
   path: string;
   name: string;
   type: RemoteEntryType;

@@ -22,6 +22,7 @@ import { getRegisteredShare } from '../utils/share';
 import {
   arrayOptions,
   getFMId,
+  getRemoteEntryFromSnapshot,
   isPureRemoteEntry,
   isRemoteInfoWithEntry,
 } from '../utils';
@@ -149,9 +150,7 @@ export function generatePreloadAssets(
 
       const remoteEntryUrl = getResourceUrl(
         moduleInfoSnapshot,
-        'remoteEntry' in moduleInfoSnapshot
-          ? moduleInfoSnapshot.remoteEntry
-          : '',
+        getRemoteEntryFromSnapshot(moduleInfoSnapshot),
       );
 
       if (remoteEntryUrl) {
