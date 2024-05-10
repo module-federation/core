@@ -46,14 +46,17 @@ export function snapshotPlugin(): FederationRuntimePlugin {
           },
         };
 
-        const assets = await origin.hooks.lifecycle.generatePreloadAssets.emit({
-          origin,
-          preloadOptions,
-          remoteInfo,
-          remote,
-          remoteSnapshot,
-          globalSnapshot,
-        });
+        const assets =
+          await origin.remoteHandler.hooks.lifecycle.generatePreloadAssets.emit(
+            {
+              origin,
+              preloadOptions,
+              remoteInfo,
+              remote,
+              remoteSnapshot,
+              globalSnapshot,
+            },
+          );
 
         if (assets) {
           preloadAssets(remoteInfo, origin, assets);
