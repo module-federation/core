@@ -1,5 +1,13 @@
 # @module-federation/managers
 
+## 0.1.13
+
+### Patch Changes
+
+- 2e52e51: If library.name is not set, fallback to plugin name
+- Updated dependencies [2e52e51]
+  - @module-federation/sdk@0.1.13
+
 ## 0.1.12
 
 ### Patch Changes

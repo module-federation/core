@@ -1,5 +1,18 @@
 # @module-federation/dts-plugin
 
+## 0.1.13
+
+### Patch Changes
+
+- 2e52e51: Build zip url for json ext as well
+- 677958c: fix: tsup configuration
+- Updated dependencies [2e52e51]
+- Updated dependencies [677958c]
+- Updated dependencies [2e52e51]
+  - @module-federation/managers@0.1.13
+  - @module-federation/third-party-dts-extractor@0.1.13
+  - @module-federation/sdk@0.1.13
+
 ## 0.1.12
 
 ### Patch Changes

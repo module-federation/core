@@ -1,5 +1,15 @@
 # [1.0.0-canary.1](https://github.com/module-federation/core/compare/native-federation-typescript-0.2.6...native-federation-typescript-1.0.0-canary.1) (2023-11-06)
 
+## 0.5.0
+
+### Minor Changes
+
+- 3d61613: perf(native-federation): extract archive only if needed
+
+### Patch Changes
+
+- 677958c: fix: tsup configuration
+
 ## 0.4.4
 
 ### Patch Changes
