@@ -115,6 +115,7 @@ export function generateSnapshotFromManifest(
     types: remoteTypes,
     buildInfo: { buildVersion },
     globalName,
+    ssrRemoteEntry,
   } = manifest.metaData;
   const { exposes } = manifest;
 
@@ -169,6 +170,16 @@ export function generateSnapshotFromManifest(
       ...basicRemoteSnapshot,
       getPublicPath: getPublicPath(),
     };
+  }
+
+  if (ssrRemoteEntry) {
+    const fullSSRRemoteEntry = simpleJoinRemoteEntry(
+      ssrRemoteEntry.path,
+      ssrRemoteEntry.name,
+    );
+    const ssrRemoteEntryType = ssrRemoteEntry.type;
+    remoteSnapshot.ssrRemoteEntry = fullSSRRemoteEntry;
+    remoteSnapshot.ssrRemoteEntryType = ssrRemoteEntryType;
   }
 
   return remoteSnapshot;
