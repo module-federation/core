@@ -1,6 +1,6 @@
 //@ts-nocheck
 
-import { initFederation } from '@module-federation/native-federation';
+import { initFederation } from '@module-federation/esbuild';
 
 (async () => {
   await initFederation({

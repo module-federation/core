@@ -1,0 +1,22 @@
+{
+  "name": "@module-federation/native-federation-runtime",
+  "version": "2.0.9",
+  "peerDependencies": {},
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "module": "lib/softarc-native-federation-runtime.mjs",
+  "typings": "index.d.ts",
+  "exports": {
+    "./package.json": {
+      "default": "./package.json"
+    },
+    ".": {
+      "types": "./index.d.ts",
+      "lib": "./lib/softarc-native-federation-runtime.mjs",
+      "esm": "./lib/softarc-native-federation-runtime.mjs",
+      "default": "./lib/softarc-native-federation-runtime.mjs"
+    }
+  },
+  "sideEffects": false
+}

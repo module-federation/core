@@ -3,7 +3,7 @@
 const {
   withNativeFederation,
   shareAll,
-} = require('@module-federation/native-federation/build');
+} = require('@module-federation/esbuild/build');
 
 module.exports = withNativeFederation({
   name: 'host',

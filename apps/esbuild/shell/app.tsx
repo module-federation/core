@@ -1,7 +1,7 @@
 //@ts-nocheck
 
 import React from 'react';
-import { loadRemoteModule } from '@module-federation/native-federation';
+const { loadRemoteModule } = require('@module-federation/esbuild');
 
 const RemoteComponent = React.lazy(() =>
   loadRemoteModule({

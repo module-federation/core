@@ -51,13 +51,15 @@
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
-    "npmlog": "^7.0.1",
+    "@module-federation/native-federation-runtime": "workspace:*",
     "json5": "^2.2.3",
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
     "rollup": "^2.79.0",
     "rollup-plugin-node-externals": "^4.1.1",
-    "esbuild": "^0.15.5"
+    "esbuild": "^0.18.12",
+    "npmlog": "^6.0.2",
+    "acorn": "^8.8.1"
   }
 }
