@@ -48,6 +48,7 @@ interface BasicProviderModuleInfoWithGetPublicPath
 
 export interface ManifestProvider {
   remoteEntry: string;
+  ssrRemoteEntry?: string;
   version?: string;
 }
 

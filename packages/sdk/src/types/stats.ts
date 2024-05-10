@@ -1,7 +1,7 @@
 import { MFModuleType } from '../constant';
 import type { RemoteWithEntry, RemoteWithVersion } from './common';
 
-export type RemoteEntryType = 'esm' | 'global';
+export type RemoteEntryType = 'esm' | 'global' | 'cjs';
 
 export interface ResourceInfo {
   path: string;

@@ -1,7 +1,7 @@
 import type {
   RemoteWithEntry,
   ModuleInfo,
-  ResourceInfo,
+  RemoteEntryType,
 } from '@module-federation/sdk';
 import { Remote, RemoteInfoOptionalVersion, UserOptions } from '../type';
 import { warn } from './logger';
@@ -83,20 +83,35 @@ export function arrayOptions<T>(options: T | Array<T>): Array<T> {
   return Array.isArray(options) ? options : [options];
 }
 
-export function getRemoteEntryInfoFromSnapshot(
-  snapshot: ModuleInfo,
-): Omit<ResourceInfo, 'path'> {
+export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
+  url: string;
+  type: RemoteEntryType;
+  globalName: string;
+} {
+  const defaultRemoteEntryInfo: {
+    url: string;
+    type: RemoteEntryType;
+    globalName: string;
+  } = {
+    url: '',
+    type: 'global',
+    globalName: '',
+  };
   if (isBrowserEnv()) {
     return 'remoteEntry' in snapshot
       ? {
-          name: snapshot.remoteEntry,
+          url: snapshot.remoteEntry,
           type: snapshot.remoteEntryType,
+          globalName: snapshot.globalName,
         }
-      : {
-          name: '',
-          type: 'global',
-        };
+      : defaultRemoteEntryInfo;
   }
-
-  return 'ssrRemoteEntry' in snapshot ? snapshot.ssrRemoteEntry || '' : '';
+  if ('ssrRemoteEntry' in snapshot) {
+    return {
+      url: snapshot.ssrRemoteEntry || defaultRemoteEntryInfo.url,
+      type: snapshot.ssrRemoteEntryType || defaultRemoteEntryInfo.type,
+      globalName: snapshot.globalName,
+    };
+  }
+  return defaultRemoteEntryInfo;
 }

@@ -3,9 +3,9 @@ import { ModuleInfo, getResourceUrl } from '@module-federation/sdk';
 import { FederationRuntimePlugin } from '../../type/plugin';
 import {
   error,
-  getRemoteEntryFromSnapshot,
   isPureRemoteEntry,
   isRemoteInfoWithEntry,
+  getRemoteEntryInfoFromSnapshot,
 } from '../../utils';
 import { PreloadOptions, RemoteInfo } from '../../type';
 import { preloadAssets } from '../../utils/preload';
@@ -14,17 +14,17 @@ export function assignRemoteInfo(
   remoteInfo: RemoteInfo,
   remoteSnapshot: ModuleInfo,
 ): void {
-  const remoteEntry = getRemoteEntryFromSnapshot(remoteSnapshot);
-  if (!remoteEntry) {
+  const remoteEntryInfo = getRemoteEntryInfoFromSnapshot(remoteSnapshot);
+  if (!remoteEntryInfo.url) {
     error(
       `The attribute remoteEntry of ${remoteInfo.name} must not be undefined.`,
     );
   }
 
-  const entryUrl = getResourceUrl(remoteSnapshot, remoteEntry);
+  const entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url);
 
-  remoteInfo.type = remoteSnapshot.remoteEntryType;
-  remoteInfo.entryGlobalName = remoteSnapshot.globalName;
+  remoteInfo.type = remoteEntryInfo.type;
+  remoteInfo.entryGlobalName = remoteEntryInfo.globalName;
   remoteInfo.entry = entryUrl;
   remoteInfo.version = remoteSnapshot.version;
   remoteInfo.buildVersion = remoteSnapshot.buildVersion;
