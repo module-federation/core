@@ -21,7 +21,6 @@ export async function bundleShared(config, fedOptions, externals) {
   const packageInfos = Object.keys(config.shared)
     .map((packageName) => getPackageInfo(packageName, folder))
     .filter((pi) => !!pi);
-
   const allEntryPoints = packageInfos.map((pi) => {
     const encName = pi.packageName.replace(/[^A-Za-z0-9]/g, '_');
     const encVersion = pi.version.replace(/[^A-Za-z0-9]/g, '_');
@@ -52,7 +51,7 @@ export async function bundleShared(config, fedOptions, externals) {
   }
 
   try {
-    await bundle({
+    const build = await bundle({
       entryPoints,
       tsConfigPath: fedOptions.tsConfig,
       external: externals,
@@ -61,13 +60,27 @@ export async function bundleShared(config, fedOptions, externals) {
       dev: fedOptions.dev,
       kind: 'shared-package',
       hash: false,
+      packageInfos: packageInfos,
+      name: config.name,
     });
-
     for (const fileName of exptedResults) {
       const outFileName = _path.basename(fileName);
       const cachedFile = _path.join(cachePath, outFileName);
+
+      const realoutFileName = 'mf_' + _path.basename(fileName);
+      const realcachedFile = _path.join(cachePath, realoutFileName);
+
       copyFileIfExists(cachedFile, fileName);
       copySrcMapIfExists(cachedFile, fileName);
+
+      copyFileIfExists(
+        realcachedFile,
+        fileName.replace(outFileName, realoutFileName),
+      );
+      copySrcMapIfExists(
+        realcachedFile,
+        fileName.replace(outFileName, realoutFileName),
+      );
     }
   } catch (e) {
     logger.error('Error bundling shared npm package ');
@@ -115,6 +128,7 @@ export async function bundleShared(config, fedOptions, externals) {
 }
 
 function copyFileIfExists(cachedFile, fullOutputPath) {
+  debugger;
   fs.mkdirSync(_path.dirname(fullOutputPath), { recursive: true });
   if (fs.existsSync(cachedFile)) {
     fs.copyFileSync(cachedFile, fullOutputPath);

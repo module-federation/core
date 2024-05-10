@@ -1,22 +1,38 @@
-'use strict';
-const esbuild = require('esbuild');
-const rollup = require('rollup').rollup;
-const pluginNodeResolve = require('@rollup/plugin-node-resolve');
-const rollupPluginNodeExternals =
-  require('rollup-plugin-node-externals').externals;
-const fs = require('fs');
-const path = require('path');
-const commonjs = require('@rollup/plugin-commonjs');
-const replace = require('@rollup/plugin-replace');
-module.exports.esBuildAdapter = createEsBuildAdapter({
-  plugins: [],
-});
-function createEsBuildAdapter(config) {
+import esbuild from 'esbuild';
+import { rollup } from 'rollup';
+import pluginNodeResolve from '@rollup/plugin-node-resolve';
+import { externals as rollupPluginNodeExternals } from 'rollup-plugin-node-externals';
+import fs from 'fs';
+import path from 'path';
+import commonjs from '@rollup/plugin-commonjs';
+import replace from '@rollup/plugin-replace';
+
+function createVirtualModuleShare(name, ref, exports) {
+  const code = `
+// find this FederationHost instance.
+// Each virtual module needs to know what FederationHost to connect to for loading modules
+const container = __FEDERATION__.__INSTANCES__.find(container=>{
+  return container.name === ${JSON.stringify(name)}
+})
+// Federation Runtime takes care of script injection
+const mfLsZJ92 = await container.loadShare(${JSON.stringify(ref)})
+
+${exports
+  .map((e) => {
+    if (e === 'default') return `export default mfLsZJ92.default`;
+    return `export const ${e} = mfLsZJ92[${JSON.stringify(e)}];`;
+  })
+  .join('\n')}
+`;
+  return code;
+}
+
+export function createEsBuildAdapter(config) {
   if (!config.compensateExports) {
     config.compensateExports = [new RegExp('/react/')];
   }
   return async (options) => {
-    const { entryPoints, external, outdir, hash } = options;
+    const { entryPoints, external, outdir, hash, packageInfos, name } = options;
     // TODO: Do we need to prepare packages anymore as esbuild has evolved?
     for (const entryPoint of entryPoints) {
       const isPkg = entryPoint.fileName.includes('node_modules');
@@ -49,23 +65,40 @@ function createEsBuildAdapter(config) {
       format: 'esm',
       target: ['esnext'],
       plugins: [...config.plugins],
+      metafile: true,
     });
+
     const result = await ctx.rebuild();
+    result.outputFiles = result.outputFiles.reduce((acc, file, index) => {
+      const sharedPack = packageInfos ? packageInfos[index] : null;
+      if (!sharedPack) {
+        acc.push(file);
+        return acc;
+      }
+      const fileName = path.basename(file.path);
+      const filePath = path.join(outdir, fileName);
+      const metafile = result.metafile;
+      const relative = path.relative(process.cwd(), file.path);
+      const metadata = result.metafile.outputs[relative];
+
+      const replc = filePath.replace(filePath, 'mf_' + fileName);
+      acc.push({ ...file, path: replc });
+      const vm = createVirtualModuleShare(
+        name,
+        packageInfos.packageName,
+        metadata.exports,
+      );
+      acc.push({ ...file, contents: vm });
+
+      return acc;
+    }, []);
+
     const writtenFiles = writeResult(result, outdir);
     ctx.dispose();
     return writtenFiles.map((fileName) => ({ fileName }));
-    // const normEntryPoint = entryPoint.replace(/\\/g, '/');
-    // if (
-    //   isPkg &&
-    //   config?.compensateExports?.find((regExp) => regExp.exec(normEntryPoint))
-    // ) {
-    //   logger.verbose('compensate exports for ' + tmpFolder);
-    //   compensateExports(tmpFolder, outfile);
-    // }
   };
 }
 
-exports.createEsBuildAdapter = createEsBuildAdapter;
 function writeResult(result, outdir) {
   const outputFiles = result.outputFiles || [];
   const writtenFiles = [];
@@ -77,25 +110,7 @@ function writeResult(result, outdir) {
   }
   return writtenFiles;
 }
-// TODO: Unused, to delete?
-// function compensateExports(entryPoint: string, outfile?: string): void {
-//   const inExports = collectExports(entryPoint);
-//   the outExports = outfile ? collectExports(outfile) : inExports;
-//
-//   if (!outExports.hasDefaultExport or outExports.hasFurtherExports) {
-//     return;
-//   }
-//   const defaultName = outExports.defaultExportName;
-//
-//   let exports = '/*Try to compensate missing exports*/\n\n';
-//   for (const exp of inExports.exports) {
-//     exports += `let ${exp}$module-federation = ${defaultName}.${exp};\n`;
-//     exports += `export { ${exp}$module-federation as ${exp} };\n`;
-//   }
-//
-//   the target = outfile ?? entryPoint;
-//   fs.appendFileSync(target, exports, 'utf-8');
-// }
+
 async function prepareNodePackage(
   entryPoint,
   external,
@@ -131,11 +146,13 @@ async function prepareNodePackage(
     exports: 'named',
   });
 }
+
 function inferePkgName(entryPoint) {
   return entryPoint
     .replace(/.*?node_modules/g, '')
     .replace(/[^A-Za-z0-9.]/g, '_');
 }
+
 function normalize(config) {
   const result = {};
   for (const key in config) {
@@ -149,6 +166,7 @@ function normalize(config) {
   }
   return result;
 }
+
 function replaceEntryPoint(entryPoint, fileReplacements) {
   entryPoint = entryPoint.replace(/\\/g, '/');
   for (const key in fileReplacements) {

@@ -3,7 +3,8 @@
   "version": "2.0.9",
   "peerDependencies": {},
   "dependencies": {
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "@module-federation/runtime": "workspace:*"
   },
   "module": "lib/softarc-native-federation-runtime.mjs",
   "typings": "index.d.ts",
