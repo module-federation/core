@@ -1,9 +1,13 @@
-// import { isInSkipList, PREPARED_DEFAULT_SKIP_LIST } from './default-skip-list';
-
 export function getExternals(config) {
   const shared = Object.keys(config.shared);
   const sharedMappings = config.sharedMappings.map((m) => m.key);
-  const externals = [...shared, ...sharedMappings];
+  const remotes = config.remotes;
+  const remoteKeys = Object.keys(remotes).reduce((acc, key) => {
+    if (!key) return acc;
+    acc.push(key);
+    acc.push(key + '/*');
+    return acc;
+  }, []);
+  const externals = [...shared, ...sharedMappings, ...remoteKeys];
   return externals;
-  // return externals.filter((p) => !isInSkipList(p, PREPARED_DEFAULT_SKIP_LIST));
 }

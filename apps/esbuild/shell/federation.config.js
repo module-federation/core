@@ -7,7 +7,9 @@ const {
 
 module.exports = withNativeFederation({
   name: 'host',
-
+  remotes: {
+    remoteA: 'http://someRemote/thing.js',
+  },
   shared: {
     ...shareAll({
       singleton: true,

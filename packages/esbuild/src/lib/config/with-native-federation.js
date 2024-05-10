@@ -10,6 +10,7 @@ export function withNativeFederation(config) {
   return {
     name: config.name ?? '',
     exposes: config.exposes ?? {},
+    remotes: config.remotes ?? {},
     shared: normalizeShared(config, skip),
     sharedMappings: normalizeSharedMappings(config, skip),
   };
