@@ -32,19 +32,6 @@ export default function (): FederationRuntimePlugin {
       const { userOptions, shareInfo } = args;
       const { shared } = userOptions;
       if (!globalThis.usedChunks) globalThis.usedChunks = new Set();
-      if (shared) {
-        Object.keys(shared || {}).forEach((sharedKey) => {
-          const rawShared = shared[sharedKey];
-          const arrayShared = Array.isArray(rawShared)
-            ? rawShared
-            : [rawShared];
-          arrayShared.forEach((s) => {
-            if (!s.strategy) {
-              s.strategy = 'loaded-first';
-            }
-          });
-        });
-      }
 
       if (
         typeof __webpack_runtime_id__ === 'string' &&
