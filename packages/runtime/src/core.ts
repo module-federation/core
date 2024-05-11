@@ -210,7 +210,7 @@ export class FederationHost {
     globalOptions: Options,
     userOptions: UserOptions,
   ): Options {
-    const { shared, shareInfos } = this.sharedHandler.formatShareConfigs(
+    const { shared } = this.sharedHandler.formatShareConfigs(
       globalOptions,
       userOptions,
     );
@@ -222,12 +222,15 @@ export class FederationHost {
         shareInfo: shared,
       });
 
+    const { shared: handledShared, shareInfos: handledShareInfos } =
+      this.sharedHandler.formatShareConfigs(globalOptions, userOptions);
+
     const remotes = this.remoteHandler.formatAndRegisterRemote(
       globalOptionsRes,
       userOptionsRes,
     );
 
-    this.sharedHandler.registerShared(shareInfos, userOptions);
+    this.sharedHandler.registerShared(handledShareInfos, userOptions);
 
     const plugins = [...globalOptionsRes.plugins];
 
@@ -244,7 +247,7 @@ export class FederationHost {
       ...userOptions,
       plugins,
       remotes,
-      shared,
+      shared: handledShared,
     };
 
     this.hooks.lifecycle.init.emit({
