@@ -15,7 +15,7 @@ const defaultOptions = {
 } satisfies Partial<HostOptions>;
 
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {
-  const remoteUrl = new URL(url);
+  const remoteUrl = new URL(url, 'file:');
 
   const pathnameWithoutEntry = remoteUrl.pathname
     .split('/')
@@ -23,7 +23,7 @@ const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {
     .join('/');
   remoteUrl.pathname = `${pathnameWithoutEntry}/${hostOptions.remoteTypesFolder}.zip`;
 
-  return remoteUrl.href;
+  return remoteUrl.protocol === 'file:' ? remoteUrl.pathname : remoteUrl.href;
 };
 
 const buildApiTypeUrl = (zipUrl?: string) => {
