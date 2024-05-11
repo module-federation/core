@@ -59,36 +59,13 @@ export class SharedHandler {
     this._setGlobalShareScopeMap(host.options);
   }
 
-  formatShareConfigs(globalOptions: Options, userOptions: UserOptions) {
-    const shareInfos = formatShareConfigs(
-      userOptions.shared || {},
-      userOptions.name,
+  // register shared in shareScopeMap
+  registerShared(globalOptions: Options, userOptions: UserOptions) {
+    const { shareInfos, shared } = formatShareConfigs(
+      globalOptions,
+      userOptions,
     );
 
-    const shared = {
-      ...globalOptions.shared,
-    };
-
-    Object.keys(shareInfos).forEach((shareKey) => {
-      if (!shared[shareKey]) {
-        shared[shareKey] = shareInfos[shareKey];
-      } else {
-        shareInfos[shareKey].forEach((newUserSharedOptions) => {
-          const isSameVersion = shared[shareKey].find(
-            (sharedVal) => sharedVal.version === newUserSharedOptions.version,
-          );
-          if (!isSameVersion) {
-            shared[shareKey].push(newUserSharedOptions);
-          }
-        });
-      }
-    });
-
-    return { shared, shareInfos };
-  }
-
-  // register shared in shareScopeMap
-  registerShared(shareInfos: ShareInfos, userOptions: UserOptions) {
     const sharedKeys = Object.keys(shareInfos);
     sharedKeys.forEach((sharedKey) => {
       const sharedVals = shareInfos[sharedKey];
@@ -111,6 +88,11 @@ export class SharedHandler {
         }
       });
     });
+
+    return {
+      shareInfos,
+      shared,
+    };
   }
 
   async loadShare<T>(
