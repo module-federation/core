@@ -15,6 +15,7 @@ import {
 import { getFileName, isDev } from './utils';
 import type { Compilation, Compiler } from 'webpack';
 import { PLUGIN_IDENTIFIER } from './constants';
+import { ManifestInfo } from './types';
 
 interface GenerateManifestOptions {
   compilation: Compilation;
@@ -41,7 +42,10 @@ class ManifestManager {
     return getFileName(this._options.manifest).manifestFileName;
   }
 
-  async generateManifest(options: GenerateManifestOptions): Promise<void> {
+  async generateManifest(
+    options: GenerateManifestOptions,
+    extraOptions: { disableEmit?: boolean } = {},
+  ): Promise<ManifestInfo> {
     const {
       compilation,
       publicPath,
@@ -50,6 +54,7 @@ class ManifestManager {
       bundler,
       additionalData,
     } = options;
+    const { disableEmit } = extraOptions;
     const manifest: Manifest = {
       ...stats,
     };
@@ -117,18 +122,25 @@ class ManifestManager {
       this._manifest = ret || this._manifest;
     }
 
-    compilation.emitAsset(
-      manifestFileName,
-      new compiler.webpack.sources.RawSource(
-        JSON.stringify(this._manifest, null, 2),
-      ),
-    );
+    if (!disableEmit) {
+      compilation.emitAsset(
+        manifestFileName,
+        new compiler.webpack.sources.RawSource(
+          JSON.stringify(this._manifest, null, 2),
+        ),
+      );
+    }
 
     if (isDev()) {
       console.log(
         chalk`{bold {greenBright [ ${PLUGIN_IDENTIFIER} ]} {greenBright Manifest Link:} {cyan ${publicPath}${manifestFileName}}}`,
       );
     }
+
+    return {
+      manifest: this._manifest,
+      filename: manifestFileName,
+    };
   }
 }
 

@@ -15,7 +15,7 @@
         ],
         "commands": [
           {
-            "command": "cd apps/modernjs-ssr/modernjs-ssr-nested-remote; pnpm run build",
+            "command": "cd apps/modernjs-ssr/nested-remote; pnpm run build",
             "forwardAllArgs": true
           }
         ]
@@ -32,7 +32,7 @@
         ],
         "commands": [
           {
-            "command": "cd apps/modernjs-ssr/modernjs-ssr-nested-remote; pnpm run dev",
+            "command": "cd apps/modernjs-ssr/nested-remote; pnpm run dev",
             "forwardAllArgs": false
           }
         ]
@@ -41,7 +41,7 @@
     "e2e": {
       "executor": "@nx/cypress:cypress",
       "options": {
-        "cypressConfig": "apps/modernjs-ssr/modernjs-ssr-nested-remote/cypress.config.ts",
+        "cypressConfig": "apps/modernjs-ssr/nested-remote/cypress.config.ts",
         "testingType": "e2e",
         "baseUrl": "http://localhost:4001",
         "browser": "chrome"

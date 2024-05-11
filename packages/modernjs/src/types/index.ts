@@ -1,7 +1,6 @@
 import { moduleFederationPlugin } from '@module-federation/sdk';
 
-export interface VmokType {
+export interface PluginOptions {
   config?: moduleFederationPlugin.ModuleFederationPluginOptions;
   configPath?: string;
-  ssrRuntime?: boolean;
 }

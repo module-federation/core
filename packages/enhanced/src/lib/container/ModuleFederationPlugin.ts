@@ -15,7 +15,6 @@ import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import schema from '../../schemas/container/ModuleFederationPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
-import HoistContainerReferencesPlugin from './HoistContainerReferencesPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -38,6 +37,7 @@ const validate = createSchemaValidation(
 
 class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
+  private _statsPlugin?: StatsPlugin;
   /**
    * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options options
    */
@@ -136,11 +136,16 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
 
     if (!disableManifest) {
       const pkg = require('../../../../package.json');
-      new StatsPlugin(options, {
+      this._statsPlugin = new StatsPlugin(options, {
         pluginVersion: pkg.version,
         bundler: 'webpack',
-      }).apply(compiler);
+      });
+      this._statsPlugin.apply(compiler);
     }
+  }
+
+  get statsResourceInfo() {
+    return this._statsPlugin?.resourceInfo;
   }
 }
 

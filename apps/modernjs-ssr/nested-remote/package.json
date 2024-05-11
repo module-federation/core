@@ -28,8 +28,7 @@
     "@modern-js/runtime": "2.49.1",
     "react": "~18.2.0",
     "react-dom": "~18.2.0",
-    "@module-federation/enhanced": "workspace:*",
-    "@module-federation/node": "workspace:*",
+    "@module-federation/modern-js": "workspace:*",
     "@babel/runtime": "7.24.4",
     "antd": "4.24.15"
   },

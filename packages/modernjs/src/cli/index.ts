@@ -1,17 +1,68 @@
 import path from 'path';
 import { fs } from '@modern-js/utils';
 import type { CliPlugin, AppTools } from '@modern-js/app-tools';
+import {
+  ModuleFederationPlugin,
+  AsyncBoundaryPlugin,
+} from '@module-federation/enhanced';
+import { StreamingTargetPlugin } from '@module-federation/node';
+import type { PluginOptions } from '../types';
+import { getMFConfig, patchMFConfig } from './utils';
+import { updateStatsAndManifest } from './manifest';
+import { MODERN_JS_SERVER_DIR } from '../constant';
 
-export const moduleFederationPlugin = (): CliPlugin<AppTools> => ({
+export const moduleFederationPlugin = (
+  userConfig: PluginOptions = {},
+): CliPlugin<AppTools> => ({
   name: '@modern-js/plugin-module-federation',
   setup: async ({ useConfigContext }) => {
+    const userModernJSConfig = useConfigContext();
+    const enableSSR = Boolean(userModernJSConfig?.server?.ssr);
+    const mfConfig = await getMFConfig(userConfig);
+    let outputDir = '';
+
+    let browserPlugin: ModuleFederationPlugin;
+    let nodePlugin: ModuleFederationPlugin;
     return {
       config: () => {
-        const userModernjsConfig = useConfigContext();
-        const enableSSR = Boolean(userModernjsConfig?.server?.ssr);
-
+        if (enableSSR) {
+          process.env['MF_DISABLE_EMIT_STATS'] = 'true';
+        }
         return {
           tools: {
+            webpack(config, { isServer }) {
+              patchMFConfig(mfConfig, isServer);
+              if (isServer) {
+                nodePlugin = new ModuleFederationPlugin(mfConfig);
+                config.plugins?.push(nodePlugin);
+                config.plugins?.push(new StreamingTargetPlugin(mfConfig));
+              } else {
+                outputDir =
+                  config.output?.path || path.resolve(process.cwd(), 'dist');
+                browserPlugin = new ModuleFederationPlugin(mfConfig);
+                config.plugins?.push(browserPlugin);
+              }
+
+              if (mfConfig.async) {
+                const asyncBoundaryPluginOptions = {
+                  eager: /.federation\/entry/,
+                  excludeChunk: (chunk) => chunk.name === mfConfig.name,
+                };
+                config.plugins?.push(
+                  new AsyncBoundaryPlugin(asyncBoundaryPluginOptions),
+                );
+              }
+
+              if (config.output?.publicPath === 'auto') {
+                // TODO: only in dev temp
+                const port =
+                  userModernJSConfig.dev?.port ||
+                  userModernJSConfig.server?.port ||
+                  8080;
+                const publicPath = `http://localhost:${port}/`;
+                config.output.publicPath = publicPath;
+              }
+            },
             devServer: {
               headers: {
                 'Access-Control-Allow-Origin': '*',
@@ -27,17 +78,16 @@ export const moduleFederationPlugin = (): CliPlugin<AppTools> => ({
                     return;
                   }
                   try {
-                    const SERVER_PREFIX = '/bundles';
-                    console.log(222, req.url);
+                    const SERVER_PREFIX = `/${MODERN_JS_SERVER_DIR}`;
                     if (
                       req.url?.startsWith(SERVER_PREFIX) ||
-                      req.url?.includes('remoteEntry.js')
+                      req.url?.includes('remoteEntry.js') ||
+                      req.url?.includes('.json')
                     ) {
                       const filepath = path.join(
                         process.cwd(),
                         `dist${req.url}`,
                       );
-                      console.log('filepath: ', filepath);
                       fs.statSync(filepath);
                       res.setHeader('Access-Control-Allow-Origin', '*');
                       res.setHeader(
@@ -62,8 +112,20 @@ export const moduleFederationPlugin = (): CliPlugin<AppTools> => ({
           },
         };
       },
+      afterBuild: () => {
+        if (enableSSR) {
+          updateStatsAndManifest(nodePlugin, browserPlugin, outputDir);
+        }
+      },
+      afterDev: () => {
+        if (enableSSR) {
+          updateStatsAndManifest(nodePlugin, browserPlugin, outputDir);
+        }
+      },
     };
   },
 });
 
 export default moduleFederationPlugin;
+
+export { createModuleFederationConfig } from '@module-federation/enhanced';
