@@ -180,19 +180,14 @@ class DTSManager {
       if (!manifestJson.metaData.types.zip) {
         throw new Error(`Can not get ${remoteInfo.name}'s types archive url!`);
       }
-      const addProtocol = (u: string): string => {
-        if (u.startsWith('//')) {
-          return `https:${u}`;
-        }
-        return u;
-      };
       const publicPath =
         'publicPath' in manifestJson.metaData
           ? manifestJson.metaData.publicPath
           : new Function(manifestJson.metaData.getPublicPath)();
 
       remoteInfo.zipUrl = new URL(
-        path.join(addProtocol(publicPath), manifestJson.metaData.types.zip),
+        path.join(publicPath, manifestJson.metaData.types.zip),
+        url,
       ).href;
       if (!manifestJson.metaData.types.api) {
         console.warn(`Can not get ${remoteInfo.name}'s api types url!`);
@@ -200,7 +195,8 @@ class DTSManager {
         return remoteInfo as Required<RemoteInfo>;
       }
       remoteInfo.apiTypeUrl = new URL(
-        path.join(addProtocol(publicPath), manifestJson.metaData.types.api),
+        path.join(publicPath, manifestJson.metaData.types.api),
+        url,
       ).href;
       return remoteInfo as Required<RemoteInfo>;
     } catch (_err) {
