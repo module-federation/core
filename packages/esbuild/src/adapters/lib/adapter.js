@@ -7,6 +7,7 @@ import path from 'path';
 import commonjs from '@rollup/plugin-commonjs';
 import replace from '@rollup/plugin-replace';
 export { getExports, resolve } from './collect-exports';
+export { moduleFederationPlugin } from './plugin';
 
 function createVirtualModuleShare(name, ref, exports) {
   const code = `

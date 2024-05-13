@@ -59,7 +59,7 @@ ${exports
   return code;
 }
 
-const buildContainerHost = (outputPath, config) => {
+export const buildContainerHost = (config) => {
   const { name, remotes = {}, shared = {}, exposes = {} } = config;
 
   const remoteConfigs = remotes
@@ -168,19 +168,8 @@ export async function bundleExposedAndMappings(config, fedOptions, externals) {
       {
         name: 'createContainer',
         setup(build) {
-          // build.onResolve({ filter: /.+/ }, args => {
-          //   return {
-          //     path: args.path,
-          //     namespace: 'file'
-          //   };
-          // });
-
           const filter = new RegExp(
             ['remoteEntry'].map((name) => `${name}$`).join('|'),
-          );
-
-          const sharedExternals = new RegExp(
-            externals.map((name) => `${name}$`).join('|'),
           );
 
           build.onResolve({ filter: filter }, async (args) => {
@@ -190,6 +179,68 @@ export async function bundleExposedAndMappings(config, fedOptions, externals) {
               pluginData: { kind: args.kind, resolveDir: args.resolveDir },
             };
           });
+
+          build.onLoad({ filter, namespace: 'container' }, async (args) => {
+            const code = [buildContainerHost(config)].join('\n');
+            return {
+              contents: code,
+              loader: 'js',
+              resolveDir: args.pluginData.resolveDir,
+            };
+          });
+        },
+      },
+      {
+        name: 'cjs-to-esm',
+        setup(build) {
+          const sharedExternals = new RegExp(
+            externals.map((name) => `${name}$`).join('|'),
+          );
+          build.onResolve({ filter: /.*/, namespace: 'esm-shares' }, (args) => {
+            const shouldExternalize = sharedExternals.test(args.path);
+            if (shouldExternalize) {
+              return {
+                path: args.path,
+                namespace: 'virtual-share-module',
+                pluginData: { kind: args.kind, resolveDir: args.resolveDir },
+              };
+            }
+            return {
+              path: args.path,
+              namespace: 'esm-shares',
+              pluginData: { kind: args.kind, resolveDir: args.resolveDir },
+            };
+          });
+
+          build.onLoad(
+            { filter: /.*/, namespace: 'esm-shares' },
+            async (args) => {
+              const { transform } = await eval("import('@chialab/cjs-to-esm')");
+
+              const resolver = await resolve(
+                args.pluginData.resolveDir,
+                args.path,
+              );
+
+              const fileContent = fs.readFileSync(resolver, 'utf-8');
+              const { code } = await transform(fileContent);
+
+              return {
+                contents: code,
+                loader: 'js',
+                resolveDir: path.dirname(resolver),
+                pluginData: { ...args.pluginData, path: resolver },
+              };
+            },
+          );
+        },
+      },
+      {
+        name: 'linkShared',
+        setup(build) {
+          const filter = new RegExp(
+            externals.map((name) => `${name}$`).join('|'),
+          );
 
           const realShares = new RegExp(
             ['federationShare'].map((name) => `^${name}`).join('|'),
@@ -203,8 +254,7 @@ export async function bundleExposedAndMappings(config, fedOptions, externals) {
             };
           });
 
-          // can be removed and externals will work normally
-          build.onResolve({ filter: sharedExternals }, (args) => {
+          build.onResolve({ filter: filter }, (args) => {
             if (args.namespace === 'esm-shares') return null;
 
             return {
@@ -212,126 +262,7 @@ export async function bundleExposedAndMappings(config, fedOptions, externals) {
               namespace: 'virtual-share-module',
               pluginData: { kind: args.kind, resolveDir: args.resolveDir },
             };
-            return null;
-            // return {path: args.path, namespace: 'esm-shares', pluginData: {kind: args.kind, resolveDir: args.resolveDir}}
           });
-
-          build.onResolve({ filter: /.*/, namespace: 'esm-shares' }, (args) => {
-            const shouldExternalize = sharedExternals.test(args.path);
-            if (shouldExternalize) {
-              // use build module factory
-              return {
-                path: args.path,
-                namespace: 'virtual-share-module',
-                pluginData: { kind: args.kind, resolveDir: args.resolveDir },
-              };
-              // use external and depend on import map to factorize
-              return { path: args.path, external: true };
-            }
-            return {
-              path: args.path,
-              namespace: 'esm-shares',
-              pluginData: { kind: args.kind, resolveDir: args.resolveDir },
-            };
-          });
-
-          //
-          // build.onResolve({ filter: sharedExternals }, async (args) => {
-          //   if(args.namespace === 'container') return undefined
-          //    if(args.kind === 'require-call') {
-          //      return {path: args.path, namespace: 'esm-shares', pluginData: {kind: args.kind, resolveDir: args.resolveDir}}
-          //    }
-          //   return {path: args.path, namespace: 'virtual-share-module', pluginData: {kind: args.kind, resolveDir: args.resolveDir}}
-          // });
-
-          // const resolvedRuntime = require.resolve("@module-federation/webpack-bundler-runtime", {paths: [path.join(__dirname, '..')]})
-          // build.onResolve({ filter: /@module-federation\/webpack-bundler-runtime/ }, args => {
-          //
-          //   return ({
-          //     path: resolvedRuntime.replace('cjs','esm'),
-          //   })
-          // })
-
-          build.onLoad({ filter, namespace: 'container' }, async (args) => {
-            const code = [
-              buildContainerHost(fedOptions.outputPath, config),
-            ].join('\n');
-            return {
-              contents: code,
-              loader: 'js',
-              resolveDir: args.pluginData.resolveDir,
-            };
-          });
-
-          // build.onLoad({ filter: jsAndMjsFilter, namespace:'file' }, async (args) => {
-          //
-          //
-          //   const options = build.initialOptions
-          //   const isEntryPoint = options.entryPoints.some(e=>args.path.includes(e))
-          //   const contents = await fs.promises.readFile(args.path, 'utf8');
-          //
-          //   if(!isEntryPoint) return { contents };
-          //   // const contents = await fs.promises.readFile(args.path, 'utf8');
-          //   // return {contents: contents}
-          //
-          //   const injectedContent = buildFederationHost(outputPath) + contents;
-          //
-          //   debugger;
-          //
-          //   return { contents: injectedContent };
-          // });
-        },
-      },
-      {
-        name: 'cjs-to-esm',
-        setup(build) {
-          const filter = new RegExp(
-            externals.map((name) => `${name}$`).join('|'),
-          );
-
-          //
-          // build.onResolve({ filter: filter, namespace: 'file' }, async (args) => {
-          //   return {path: args.path, namespace: 'esm-shares', pluginData: {kind: args.kind, resolveDir: args.resolveDir}}
-          // });
-
-          build.onLoad(
-            { filter: /.*/, namespace: 'esm-shares' },
-            async (args) => {
-              const { transform } = await eval("import('@chialab/cjs-to-esm')");
-
-              const resolver = await resolve(
-                args.pluginData.resolveDir,
-                args.path,
-              );
-
-              const fileContent = fs.readFileSync(resolver, 'utf-8');
-              const { code, map } = await transform(fileContent);
-
-              const o = {
-                contents: code,
-                loader: 'js',
-                resolveDir: path.dirname(resolver),
-                pluginData: { ...args.pluginData, path: resolver.path },
-              };
-              return o;
-            },
-          );
-        },
-      },
-      {
-        name: 'linkShared',
-        setup(build) {
-          const filter = new RegExp(
-            externals.map((name) => `${name}$`).join('|'),
-          );
-
-          // build.onResolve({ filter: filter, namespace: 'file' }, async (args) => {
-          //   return {path: args.path, namespace: 'cjs-to-esm', pluginData: {kind: args.kind, resolveDir: args.resolveDir}}
-          // });
-
-          // build.onResolve({ filter: filter}, async (args) => {
-          //   return {path: args.path, namespace: 'virtual-share-module', pluginData: {kind: args.kind, resolveDir: args.resolveDir}}
-          // });
 
           build.onLoad(
             { filter, namespace: 'virtual-share-module' },
@@ -349,62 +280,6 @@ export async function bundleExposedAndMappings(config, fedOptions, externals) {
               };
             },
           );
-
-          //           build.onLoad({filter, namespace: 'container'}, async(args)=>{
-          //
-          //             const resolver = await build.resolve(args.path, {kind: 'import-statement', resolveDir: args.pluginData.resolveDir});
-          //             debugger;
-          //             const fileContent = fs.readFileSync(resolver.path,'utf-8')
-          // debugger;
-          //             const exp =   await getExports(args.path)
-          //             console.log(exp)
-          //             const virtualShare = createVirtualModuleShare(args.path, config.name, exp);
-          //             return {contents: virtualShare, loader: 'js'}
-          //           })
-
-          // const resolvedRuntime = require.resolve("@module-federation/webpack-bundler-runtime", {paths: [path.join(__dirname, '..')]})
-          // build.onResolve({ filter: /@module-federation\/webpack-bundler-runtime/ }, args => {
-          //
-          //   return ({
-          //     path: resolvedRuntime.replace('cjs','esm'),
-          //   })
-          // })
-
-          //
-          //  build.onLoad({ filter, namespace:'container'}, async (args) => {
-          //
-          //    const code = [buildContainerHost(fedOptions.outputPath, config)].join('\n')
-          //
-          // return {contents: code, loader: 'js'}
-          //    // const { name, remotes, shared } = federationBuilder.config;
-          //    //
-          //    // const options = build.initialOptions
-          //    // const isEntryPoint =options.entryPoints.some(e=>args.path.includes( e))
-          //    //
-          //    // const contents = await fs.promises.readFile(args.path, 'utf8');
-          //    //
-          //    // const injectedContent = buildContainerHost(outputPath) + contents;
-          //    // // debugger
-          //    // return { contents: injectedContent};
-          //  });
-
-          // build.onLoad({ filter: jsAndMjsFilter, namespace:'file' }, async (args) => {
-          //
-          //
-          //   const options = build.initialOptions
-          //   const isEntryPoint = options.entryPoints.some(e=>args.path.includes(e))
-          //   const contents = await fs.promises.readFile(args.path, 'utf8');
-          //
-          //   if(!isEntryPoint) return { contents };
-          //   // const contents = await fs.promises.readFile(args.path, 'utf8');
-          //   // return {contents: contents}
-          //
-          //   const injectedContent = buildFederationHost(outputPath) + contents;
-          //
-          //   debugger;
-          //
-          //   return { contents: injectedContent };
-          // });
         },
       },
     ],
