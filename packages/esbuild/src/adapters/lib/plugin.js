@@ -2,7 +2,67 @@ import fs from 'fs';
 import { resolve, getExports } from './collect-exports.js';
 import path from 'path';
 import { federationBuilder } from '../../lib/core/federation-builder';
-import { buildContainerHost } from '../../lib/core/bundle-exposed-and-mappings';
+import { createContainerCode } from '../../lib/core/createContainerTemplate';
+
+export const buildContainerHost = (config) => {
+  const { name, remotes = {}, shared = {}, exposes = {} } = config;
+
+  const remoteConfigs = remotes
+    ? Object.entries(remotes).map(([remoteAlias, remote]) => ({
+        type: 'esm',
+        name: remoteAlias,
+        entry: remote.entry,
+        alias: remoteAlias,
+      }))
+    : [];
+
+  const shareConfig =
+    Object.entries(shared).reduce((acc, [pkg, config]) => {
+      const version = config.requiredVersion?.replace(/^[^0-9]/, '') || '';
+
+      // const referencedChunk = federationBuilder.federationInfo.shared.find((chunk)=>{
+      //  return chunk.packageName === pkg
+      // })
+
+      // const relPath = path.resolve(outputPath,'mf_' + referencedChunk.outFileName)
+
+      acc += `${JSON.stringify(pkg)}: {
+        "package": "${pkg}",
+        "version": "${version}",
+        "scope": "default",
+        "get": async () => import('federationShare/${pkg}'),
+        "shareConfig": {
+          "singleton": ${config.singleton},
+          "requiredVersion": "${config.requiredVersion}",
+          "eager": ${config.eager},
+          "strictVersion": ${config.strictVersion}
+        }
+      },\n`;
+
+      return acc;
+    }, '{') + '}';
+
+  const exposesConfig =
+    Object.entries(exposes).reduce((acc, [exposeName, exposePath]) => {
+      acc += `${JSON.stringify(
+        exposeName,
+      )}: async () => await import('${exposePath}'),\n`;
+      return acc;
+    }, '{') + '}';
+
+  const injectedContent = `
+    const createdContainer = await createContainer({
+      name: ${JSON.stringify(name)},
+      exposes: ${exposesConfig},
+      remotes: ${JSON.stringify(remoteConfigs)},
+      shared: ${shareConfig},
+    });
+
+    export const get = createdContainer.get
+    export const init = createdContainer.init
+  `;
+  return [createContainerCode, injectedContent].join('\n');
+};
 
 function createVirtualModuleShare(name, ref, exports) {
   const code = `
@@ -75,8 +135,8 @@ const buildFederationHost = () => {
   return injectedContent;
 };
 
-const injectTopPlugin = {
-  name: 'inject-top',
+const initializeHostPlugin = {
+  name: 'host-initialization',
   setup(build) {
     build.onResolve({ filter: new RegExp('federation-host') }, (args) => {
       return {
@@ -235,7 +295,7 @@ const linkSharedPlugin = {
 
 export const moduleFederationPlugin = (config) => {
   const plugins = [
-    injectTopPlugin,
+    initializeHostPlugin,
     createContainerPlugin(config),
     cjsToEsmPlugin,
     linkSharedPlugin,
