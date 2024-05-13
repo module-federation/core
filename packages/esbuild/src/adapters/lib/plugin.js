@@ -4,41 +4,34 @@ import path from 'path';
 import { federationBuilder } from '../../lib/core/federation-builder';
 import { createContainerCode } from '../../lib/core/createContainerTemplate';
 
-export const buildContainerHost = (config) => {
+// Builds the container host code based on the provided configuration
+const buildContainerHost = (config) => {
   const { name, remotes = {}, shared = {}, exposes = {} } = config;
 
-  const remoteConfigs = remotes
-    ? Object.entries(remotes).map(([remoteAlias, remote]) => ({
-        type: 'esm',
-        name: remoteAlias,
-        entry: remote.entry,
-        alias: remoteAlias,
-      }))
-    : [];
+  const remoteConfigs = Object.entries(remotes).map(
+    ([remoteAlias, remote]) => ({
+      type: 'esm',
+      name: remoteAlias,
+      entry: remote.entry,
+      alias: remoteAlias,
+    }),
+  );
 
-  const shareConfig =
+  const sharedConfig =
     Object.entries(shared).reduce((acc, [pkg, config]) => {
       const version = config.requiredVersion?.replace(/^[^0-9]/, '') || '';
-
-      // const referencedChunk = federationBuilder.federationInfo.shared.find((chunk)=>{
-      //  return chunk.packageName === pkg
-      // })
-
-      // const relPath = path.resolve(outputPath,'mf_' + referencedChunk.outFileName)
-
       acc += `${JSON.stringify(pkg)}: {
-        "package": "${pkg}",
-        "version": "${version}",
-        "scope": "default",
-        "get": async () => import('federationShare/${pkg}'),
-        "shareConfig": {
-          "singleton": ${config.singleton},
-          "requiredVersion": "${config.requiredVersion}",
-          "eager": ${config.eager},
-          "strictVersion": ${config.strictVersion}
-        }
-      },\n`;
-
+      "package": "${pkg}",
+      "version": "${version}",
+      "scope": "default",
+      "get": async () => import('federationShare/${pkg}'),
+      "shareConfig": {
+        "singleton": ${config.singleton},
+        "requiredVersion": "${config.requiredVersion}",
+        "eager": ${config.eager},
+        "strictVersion": ${config.strictVersion}
+      }
+    },\n`;
       return acc;
     }, '{') + '}';
 
@@ -55,7 +48,7 @@ export const buildContainerHost = (config) => {
       name: ${JSON.stringify(name)},
       exposes: ${exposesConfig},
       remotes: ${JSON.stringify(remoteConfigs)},
-      shared: ${shareConfig},
+      shared: ${sharedConfig},
     });
 
     export const get = createdContainer.get
@@ -64,31 +57,28 @@ export const buildContainerHost = (config) => {
   return [createContainerCode, injectedContent].join('\n');
 };
 
-function createVirtualModuleShare(name, ref, exports) {
-  const code = `
-// find this FederationHost instance.
-console.log(__FEDERATION__.__INSTANCES__[0],${JSON.stringify(
+// Creates a virtual module for sharing dependencies
+const createVirtualShareModule = (name, ref, exports) => `
+  console.log(__FEDERATION__.__INSTANCES__[0],${JSON.stringify(
     name,
   )}, ${JSON.stringify(ref)})
 
-// Each virtual module needs to know what FederationHost to connect to for loading modules
-const container = __FEDERATION__.__INSTANCES__.find(container=>{
-  return container.name === ${JSON.stringify(name)}
-}) || __FEDERATION__.__INSTANCES__[0]
+  const container = __FEDERATION__.__INSTANCES__.find(container => container.name === ${JSON.stringify(
+    name,
+  )}) || __FEDERATION__.__INSTANCES__[0]
 
-// Federation Runtime takes care of script injection
-const mfLsZJ92 = await container.loadShare(${JSON.stringify(ref)})
+  const mfLsZJ92 = await container.loadShare(${JSON.stringify(ref)})
 
-${exports
-  .map((e) => {
-    if (e === 'default') return `export default mfLsZJ92.default`;
-    return `export const ${e} = mfLsZJ92[${JSON.stringify(e)}];`;
-  })
-  .join('\n')}
+  ${exports
+    .map((e) =>
+      e === 'default'
+        ? `export default mfLsZJ92.default`
+        : `export const ${e} = mfLsZJ92[${JSON.stringify(e)}];`,
+    )
+    .join('\n')}
 `;
-  return code;
-}
 
+// Builds the federation host code
 const buildFederationHost = () => {
   const { name, remotes, shared } = federationBuilder.config;
 
@@ -103,114 +93,93 @@ const buildFederationHost = () => {
       )
     : '[]';
 
-  const shareConfig =
+  const sharedConfig =
     Object.entries(shared).reduce((acc, [pkg, config]) => {
       const version = config.requiredVersion?.replace(/^[^0-9]/, '') || '';
-
       acc += `${JSON.stringify(pkg)}: {
-        "package": "${pkg}",
-        "version": "${version}",
-        "scope": "default",
-        "get": async () => await import('federationShare/${pkg}'),
-        "shareConfig": {
-          "singleton": ${config.singleton},
-          "requiredVersion": "${config.requiredVersion}",
-          "eager": ${config.eager},
-          "strictVersion": ${config.strictVersion}
-        }
-      },\n`;
-
+      "package": "${pkg}",
+      "version": "${version}",
+      "scope": "default",
+      "get": async () => await import('federationShare/${pkg}'),
+      "shareConfig": {
+        "singleton": ${config.singleton},
+        "requiredVersion": "${config.requiredVersion}",
+        "eager": ${config.eager},
+        "strictVersion": ${config.strictVersion}
+      }
+    },\n`;
       return acc;
     }, '{') + '}';
 
-  const injectedContent = `
+  return `
     import { init as initFederationHost } from "@module-federation/runtime";
     initFederationHost({
       name: ${JSON.stringify(name)},
       remotes: ${remoteConfigs},
-      shared: ${shareConfig}
+      shared: ${sharedConfig}
      });
   `;
-
-  return injectedContent;
 };
 
+// Plugin to initialize the federation host
 const initializeHostPlugin = {
   name: 'host-initialization',
   setup(build) {
-    build.onResolve({ filter: new RegExp('federation-host') }, (args) => {
-      return {
-        path: args.path,
-        namespace: 'federation-host',
-        pluginData: { kind: args.kind, resolveDir: args.resolveDir },
-      };
-    });
+    build.onResolve({ filter: /federation-host/ }, (args) => ({
+      path: args.path,
+      namespace: 'federation-host',
+      pluginData: { kind: args.kind, resolveDir: args.resolveDir },
+    }));
 
     build.onLoad(
       { filter: /.*/, namespace: 'federation-host' },
-      async (args) => {
-        const injectedContent = buildFederationHost();
-
-        return {
-          contents: injectedContent,
-          resolveDir: args.pluginData.resolveDir,
-        };
-      },
+      async (args) => ({
+        contents: buildFederationHost(),
+        resolveDir: args.pluginData.resolveDir,
+      }),
     );
 
     build.onLoad(
       { filter: /.*\.(ts|js|mjs)$/, namespace: 'file' },
       async (args) => {
-        const options = build.initialOptions;
-        const isEntryPoint = options.entryPoints.some((e) =>
-          args.path.includes(e),
-        );
-
-        if (!isEntryPoint) return undefined;
+        if (
+          !build.initialOptions.entryPoints.some((e) => args.path.includes(e))
+        )
+          return;
         const contents = await fs.promises.readFile(args.path, 'utf8');
-
-        const injectedContent = buildFederationHost() + contents;
-
-        return { contents: injectedContent };
+        return { contents: buildFederationHost() + contents };
       },
     );
   },
 };
 
+// Plugin to create the container
 const createContainerPlugin = (config) => ({
   name: 'createContainer',
   setup(build) {
-    const externals = config.externals;
-    const { filename } = config.config;
+    const {
+      externals,
+      config: { filename },
+    } = config;
     const filter = new RegExp([filename].map((name) => `${name}$`).join('|'));
-
     const sharedExternals = new RegExp(
       externals.map((name) => `${name}$`).join('|'),
     );
 
-    build.onResolve({ filter: filter }, async (args) => {
-      return {
-        path: args.path,
-        namespace: 'container',
-        pluginData: { kind: args.kind, resolveDir: args.resolveDir },
-      };
-    });
+    build.onResolve({ filter }, async (args) => ({
+      path: args.path,
+      namespace: 'container',
+      pluginData: { kind: args.kind, resolveDir: args.resolveDir },
+    }));
 
-    const realShares = new RegExp(
-      ['federationShare'].map((name) => `^${name}`).join('|'),
-    );
-
-    build.onResolve({ filter: realShares }, async (args) => {
-      return {
-        path: args.path.replace('federationShare/', ''),
-        namespace: 'esm-shares',
-        pluginData: { kind: args.kind, resolveDir: args.resolveDir },
-      };
-    });
+    build.onResolve({ filter: /^federationShare/ }, async (args) => ({
+      path: args.path.replace('federationShare/', ''),
+      namespace: 'esm-shares',
+      pluginData: { kind: args.kind, resolveDir: args.resolveDir },
+    }));
 
     build.onResolve({ filter: sharedExternals }, (args) => {
       if (args.namespace === 'esm-shares') return null;
-
       return {
         path: args.path,
         namespace: 'virtual-share-module',
@@ -219,8 +188,7 @@ const createContainerPlugin = (config) => ({
     });
 
     build.onResolve({ filter: /.*/, namespace: 'esm-shares' }, (args) => {
-      const shouldExternalize = sharedExternals.test(args.path);
-      if (shouldExternalize) {
+      if (sharedExternals.test(args.path)) {
         return {
           path: args.path,
           namespace: 'virtual-share-module',
@@ -234,57 +202,51 @@ const createContainerPlugin = (config) => ({
       };
     });
 
-    build.onLoad({ filter, namespace: 'container' }, async (args) => {
-      const code = [buildContainerHost(federationBuilder.config)].join('\n');
-
-      return {
-        contents: code,
-        loader: 'js',
-        resolveDir: args.pluginData.resolveDir,
-      };
-    });
+    build.onLoad({ filter, namespace: 'container' }, async (args) => ({
+      contents: buildContainerHost(federationBuilder.config),
+      loader: 'js',
+      resolveDir: args.pluginData.resolveDir,
+    }));
   },
 });
 
+// Plugin to transform CommonJS modules to ESM
 const cjsToEsmPlugin = {
   name: 'cjs-to-esm',
   setup(build) {
     build.onLoad({ filter: /.*/, namespace: 'esm-shares' }, async (args) => {
       const { transform } = await eval("import('@chialab/cjs-to-esm')");
       const resolver = await resolve(args.pluginData.resolveDir, args.path);
-
       const fileContent = fs.readFileSync(resolver, 'utf-8');
       const { code } = await transform(fileContent);
-
-      const o = {
+      return {
         contents: code,
         loader: 'js',
         resolveDir: path.dirname(resolver),
         pluginData: { ...args.pluginData, path: resolver.path },
       };
-      return o;
     });
   },
 };
 
+// Plugin to link shared dependencies
 const linkSharedPlugin = {
   name: 'linkShared',
   setup(build) {
-    const externals = federationBuilder.externals;
-
-    const filter = new RegExp(externals.map((name) => `${name}$`).join('|'));
+    const filter = new RegExp(
+      federationBuilder.externals.map((name) => `${name}$`).join('|'),
+    );
 
     build.onLoad(
       { filter, namespace: 'virtual-share-module' },
       async (args) => {
         const exp = await getExports(args.path);
-        const virtualShare = createVirtualModuleShare(
-          federationBuilder.config.name,
-          args.path,
-          exp,
-        );
         return {
-          contents: virtualShare,
+          contents: createVirtualShareModule(
+            federationBuilder.config.name,
+            args.path,
+            exp,
+          ),
           loader: 'js',
           resolveDir: path.dirname(args.path),
         };
@@ -293,18 +255,15 @@ const linkSharedPlugin = {
   },
 };
 
-export const moduleFederationPlugin = (config) => {
-  const plugins = [
-    initializeHostPlugin,
-    createContainerPlugin(config),
-    cjsToEsmPlugin,
-    linkSharedPlugin,
-  ];
-
-  return {
-    name: 'module-federation',
-    setup(build) {
-      plugins.forEach((plugin) => plugin.setup(build));
-    },
-  };
-};
+// Main module federation plugin
+export const moduleFederationPlugin = (config) => ({
+  name: 'module-federation',
+  setup(build) {
+    [
+      initializeHostPlugin,
+      createContainerPlugin(config),
+      cjsToEsmPlugin,
+      linkSharedPlugin,
+    ].forEach((plugin) => plugin.setup(build));
+  },
+});
