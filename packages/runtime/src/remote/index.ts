@@ -483,7 +483,7 @@ export class RemoteHandler {
         }
         needDeleteKeys.forEach(
           ([insId, shareScope, shareName, shareVersion]) => {
-            delete globalShareScopeMap[insId][shareScope][shareName][
+            delete globalShareScopeMap[insId]?.[shareScope]?.[shareName]?.[
               shareVersion
             ];
           },

@@ -4,7 +4,6 @@
  */
 
 import express from 'express';
-import os from 'os';
 import * as path from 'path';
 import node_local_remote from 'node_local_remote/test';
 import { registerRemotes, loadRemote } from '@module-federation/runtime';
@@ -46,8 +45,6 @@ app.get('/api', async (req, res) => {
 });
 
 app.get('/dynamic-remote', async (req, res) => {
-  debugger;
-
   const dynamicRemote = await loadRemote('node_dynamic_remote/test-with-axios');
 
   res.send({
@@ -57,7 +54,6 @@ app.get('/dynamic-remote', async (req, res) => {
 });
 
 app.get('/upgrade-remote', async (req, res) => {
-  debugger;
   registerRemotes(
     [
       {
