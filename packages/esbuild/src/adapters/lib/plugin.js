@@ -58,7 +58,7 @@ const buildContainerHost = (config) => {
 };
 
 // Creates a virtual module for sharing dependencies
-const createVirtualShareModule = (name, ref, exports) => `
+export const createVirtualShareModule = (name, ref, exports) => `
   console.log(__FEDERATION__.__INSTANCES__[0],${JSON.stringify(
     name,
   )}, ${JSON.stringify(ref)})

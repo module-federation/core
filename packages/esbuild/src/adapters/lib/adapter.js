@@ -8,31 +8,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import replace from '@rollup/plugin-replace';
 export { getExports, resolve } from './collect-exports';
 export { moduleFederationPlugin } from './plugin';
-
-function createVirtualModuleShare(name, ref, exports) {
-  const code = `
-// find this FederationHost instance.
-console.log(__FEDERATION__.__INSTANCES__[0],${JSON.stringify(
-    name,
-  )}, ${JSON.stringify(ref)})
-
-// Each virtual module needs to know what FederationHost to connect to for loading modules
-const container = __FEDERATION__.__INSTANCES__.find(container=>{
-  return container.name === ${JSON.stringify(name)}
-}) || __FEDERATION__.__INSTANCES__[0]
-
-// Federation Runtime takes care of script injection
-const mfLsZJ92 = await container.loadShare(${JSON.stringify(ref)})
-
-${exports
-  .map((e) => {
-    if (e === 'default') return `export default mfLsZJ92.default`;
-    return `export const ${e} = mfLsZJ92[${JSON.stringify(e)}];`;
-  })
-  .join('\n')}
-`;
-  return code;
-}
+import { createVirtualShareModule } from './plugin';
 
 export function createEsBuildAdapter(config) {
   if (!config.compensateExports) {
@@ -98,14 +74,13 @@ export function createEsBuildAdapter(config) {
       }
       const fileName = path.basename(file.path);
       const filePath = path.join(outdir, fileName);
-      const metafile = result.metafile;
       const relative = path.relative(process.cwd(), file.path);
       const metadata = result.metafile.outputs[relative];
 
       const replc = filePath.replace(filePath, 'mf_' + fileName);
       acc.push({ ...file, path: replc });
 
-      const vm = createVirtualModuleShare(
+      const vm = createVirtualShareModule(
         name,
         sharedPack.packageName,
         metadata.exports,
