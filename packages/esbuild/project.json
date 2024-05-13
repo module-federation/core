@@ -16,18 +16,22 @@
           "packages/esbuild/src/build.js"
         ],
         "tsConfig": "packages/esbuild/tsconfig.lib.json",
-        "assets": [],
+        "assets": ["packages/esbuild/src/resolve"],
         "project": "packages/esbuild/package.json",
         "compiler": "swc",
         "rollupConfig": "packages/esbuild/rollup.config.js",
         "format": ["cjs", "esm"],
         "external": [
+          "@chialab/cjs-to-esm",
+          "enhanced-resolve",
+          "cjs-module-lexer",
           "@module-federation/*",
           "pnpapi",
           "esbuild",
           "@rollup/*",
           "rollup-plugin-node-externals",
-          "rollup"
+          "rollup",
+          "../../resolve/esm-resolver.mjs"
         ]
       },
       "dependsOn": [

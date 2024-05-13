@@ -1,13 +1,12 @@
 //@ts-nocheck
 
 import React from 'react';
-const { loadRemoteModule } = require('@module-federation/esbuild');
+import { loadRemote } from '@module-federation/runtime';
+// const { loadRemoteModule } = require('@module-federation/esbuild');
 
 const RemoteComponent = React.lazy(() =>
-  loadRemoteModule({
-    remoteName: 'mfe1',
-    exposedModule: './component',
-  }).then((c) => {
+  loadRemote('mfe1/component').then((c) => {
+    console.log('lazyh', c);
     return { default: c.App };
   }),
 );

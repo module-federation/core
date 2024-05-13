@@ -6,7 +6,7 @@
   "scripts": {
     "build:remote": "node build/build-mfe1.js",
     "build:host": "node build/build-shell.js",
-    "build": "npm run build:remote && npm run build:host",
+    "build": "rm -rf ./node_modules/.cache && npm run build:remote && npm run build:host",
     "watch": "concurrently \"npm run build:remote -- --watch\" \"npm run build:host -- --watch\"",
     "start:remote": "live-server dist/mfe1 --port=3001 --cors",
     "start:host": "live-server dist/shell --port=3000",
@@ -15,7 +15,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@chialab/cjs-to-esm": "^0.18.0",
+    "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@module-federation/esbuild": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
     "@types/node": "^18.7.13",
     "concurrently": "^5.3.0",
     "esbuild": "^0.15.5",

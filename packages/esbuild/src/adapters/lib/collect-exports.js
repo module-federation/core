@@ -1,6 +1,48 @@
-const tslib_1 = require('tslib');
-const fs = require('fs');
-const acorn = require('acorn');
+import acorn from 'acorn';
+import { promisify } from 'util';
+import enhancedResolve from 'enhanced-resolve';
+import * as moduleLexer from 'cjs-module-lexer';
+import fs from 'fs';
+import path from 'path';
+
+export const resolve = promisify(
+  enhancedResolve.create({
+    mainFields: ['browser', 'module', 'main'],
+  }),
+);
+
+let lexerInitialized = false;
+export async function getExports(modulePath) {
+  if (!lexerInitialized) {
+    await moduleLexer.init();
+    lexerInitialized = true;
+  }
+  try {
+    const exports = [];
+    const paths = [];
+    paths.push(await resolve(process.cwd(), modulePath));
+    while (paths.length > 0) {
+      const currentPath = paths.pop();
+      const results = moduleLexer.parse(
+        await fs.readFileSync(currentPath, 'utf8'),
+      );
+      exports.push(...results.exports);
+      for (const reexport of results.reexports) {
+        paths.push(await resolve(path.dirname(currentPath), reexport));
+      }
+    }
+    /**
+     * 追加default
+     */
+    if (!exports.includes('default')) {
+      exports.push('default');
+    }
+    return exports;
+  } catch (e) {
+    console.log(e);
+    return ['default'];
+  }
+}
 
 function collectExports(path) {
   const src = fs.readFileSync(path, 'utf8');
@@ -14,12 +56,11 @@ function collectExports(path) {
   let defaultExportName = '';
   const exports = new Set();
   traverse(parseTree, (node) => {
-    var _a, _b, _c, _d;
     if (
       node.type === 'AssignmentExpression' &&
-      (_b = (_a = node?.left)?.object)?.name === 'exports'
+      node?.left?.object?.name === 'exports'
     ) {
-      exports.add((_c = node.left.property)?.name);
+      exports.add(node.left.property?.name);
       return;
     }
     if (hasDefaultExport && hasFurtherExports) {
@@ -34,7 +75,7 @@ function collectExports(path) {
     }
     for (const s of node.specifiers) {
       if (isDefaultExport(s)) {
-        defaultExportName = (_d = s?.local)?.name;
+        defaultExportName = s?.local?.name;
         hasDefaultExport = true;
       } else {
         hasFurtherExports = true;
@@ -64,16 +105,10 @@ function traverse(node, visit) {
 }
 
 function isDefaultExport(exportSpecifier) {
-  var _a, _b;
   return (
-    (_a = exportSpecifier.exported)?.type === 'Identifier' &&
-    (_b = exportSpecifier.exported)?.name === 'default'
+    exportSpecifier.exported?.type === 'Identifier' &&
+    exportSpecifier.exported?.name === 'default'
   );
 }
 
-module.exports = {
-  collectExports,
-  traverse,
-  isDefaultExport,
-};
-//# sourceMappingURL=collect-exports.js.map
+export { collectExports, traverse, isDefaultExport };

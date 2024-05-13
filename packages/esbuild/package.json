@@ -50,6 +50,10 @@
     }
   },
   "dependencies": {
+    "enhanced-resolve": "^5.16.1",
+    "esm-cjs-lexer": "^0.10.0",
+    "cjs-module-lexer": "^1.3.1",
+    "@chialab/cjs-to-esm": "^0.18.0",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/native-federation-runtime": "workspace:*",
     "json5": "^2.2.3",

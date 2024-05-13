@@ -8,7 +8,7 @@ const {
 module.exports = withNativeFederation({
   name: 'host',
   remotes: {
-    remoteA: 'http://someRemote/thing.js',
+    mfe1: 'http://localhost:3001/remoteEntry.js',
   },
   shared: {
     ...shareAll({

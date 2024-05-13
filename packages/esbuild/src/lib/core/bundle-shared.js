@@ -128,7 +128,6 @@ export async function bundleShared(config, fedOptions, externals) {
 }
 
 function copyFileIfExists(cachedFile, fullOutputPath) {
-  debugger;
   fs.mkdirSync(_path.dirname(fullOutputPath), { recursive: true });
   if (fs.existsSync(cachedFile)) {
     fs.copyFileSync(cachedFile, fullOutputPath);

@@ -5,6 +5,10 @@ import { joinPaths, getDirectory } from './utils/path-utils';
 import { addRemote } from './model/remotes';
 import { appendImportMap } from './utils/add-import-map';
 
+__FEDERATION__.__INSTANCES__.find((instance) => {
+  instance.name === __HOST__;
+});
+
 export async function initFederation(remotesOrManifestUrl = {}) {
   const remotes =
     typeof remotesOrManifestUrl === 'string'

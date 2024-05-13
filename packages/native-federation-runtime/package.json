@@ -14,9 +14,9 @@
     },
     ".": {
       "types": "./index.d.ts",
-      "lib": "./lib/softarc-native-federation-runtime.mjs",
-      "esm": "./lib/softarc-native-federation-runtime.mjs",
-      "default": "./lib/softarc-native-federation-runtime.mjs"
+      "lib": "./libv2/softarc-native-federation-runtime.mjs",
+      "esm": "./libv2/softarc-native-federation-runtime.mjs",
+      "default": "./libv2/softarc-native-federation-runtime.mjs"
     }
   },
   "sideEffects": false
