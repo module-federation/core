@@ -22,15 +22,18 @@ export const getMFConfig = async (
 
 export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  isServer: boolean,
 ) => {
-  if (typeof mfConfig.async !== 'undefined') {
-    mfConfig.async = true;
+  mfConfig.runtimePlugins = mfConfig.runtimePlugins || [];
+  const runtimePluginPath = path.resolve(
+    __dirname,
+    './mfRuntimePlugins/shared-strategy.js',
+  );
+  if (!mfConfig.runtimePlugins.includes(runtimePluginPath)) {
+    mfConfig.runtimePlugins.push(
+      path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
+    );
   }
-  if (isServer) {
-    mfConfig.library = {
-      type: 'commonjs-module',
-      name: mfConfig.name,
-    };
+  if (typeof mfConfig.async === 'undefined') {
+    mfConfig.async = true;
   }
 };

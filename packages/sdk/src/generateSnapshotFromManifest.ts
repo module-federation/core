@@ -178,9 +178,8 @@ export function generateSnapshotFromManifest(
       ssrRemoteEntry.path,
       ssrRemoteEntry.name,
     );
-    const ssrRemoteEntryType = ssrRemoteEntry.type;
     remoteSnapshot.ssrRemoteEntry = fullSSRRemoteEntry;
-    remoteSnapshot.ssrRemoteEntryType = ssrRemoteEntryType;
+    remoteSnapshot.ssrRemoteEntryType = 'cjs:webpack';
   }
 
   return remoteSnapshot;

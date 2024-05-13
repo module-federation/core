@@ -1,1 +1,1 @@
-export const foo = () => {};
+export * from '@module-federation/enhanced/runtime';

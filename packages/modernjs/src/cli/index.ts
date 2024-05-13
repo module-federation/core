@@ -16,8 +16,12 @@ export const moduleFederationPlugin = (
 ): CliPlugin<AppTools> => ({
   name: '@modern-js/plugin-module-federation',
   setup: async ({ useConfigContext }) => {
-    const userModernJSConfig = useConfigContext();
-    const enableSSR = Boolean(userModernJSConfig?.server?.ssr);
+    const useConfig = useConfigContext();
+    const enableSSR = Boolean(useConfig?.server?.ssr);
+    const isStreamSSR =
+      typeof useConfig?.server?.ssr === 'object'
+        ? useConfig?.server?.ssr?.mode === 'stream'
+        : false;
     const mfConfig = await getMFConfig(userConfig);
     let outputDir = '';
 
@@ -31,9 +35,16 @@ export const moduleFederationPlugin = (
         return {
           tools: {
             webpack(config, { isServer }) {
-              patchMFConfig(mfConfig, isServer);
+              delete config.optimization?.runtimeChunk;
+              patchMFConfig(mfConfig);
               if (isServer) {
-                nodePlugin = new ModuleFederationPlugin(mfConfig);
+                nodePlugin = new ModuleFederationPlugin({
+                  library: {
+                    type: 'commonjs-module',
+                    name: mfConfig.name,
+                  },
+                  ...mfConfig,
+                });
                 config.plugins?.push(nodePlugin);
                 config.plugins?.push(new StreamingTargetPlugin(mfConfig));
               } else {
@@ -41,11 +52,25 @@ export const moduleFederationPlugin = (
                   config.output?.path || path.resolve(process.cwd(), 'dist');
                 browserPlugin = new ModuleFederationPlugin(mfConfig);
                 config.plugins?.push(browserPlugin);
+
+                if (
+                  enableSSR &&
+                  isStreamSSR &&
+                  typeof config.optimization?.splitChunks === 'object' &&
+                  config.optimization.splitChunks.cacheGroups
+                ) {
+                  config.optimization.splitChunks.chunks = 'async';
+                  console.warn(
+                    '[Modern.js Module Federation] splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"',
+                  );
+                }
               }
 
-              if (mfConfig.async) {
+              const enableAsyncEntry = useConfig.source?.enableAsyncEntry;
+              if (!enableAsyncEntry && mfConfig.async) {
                 const asyncBoundaryPluginOptions = {
-                  eager: /.federation\/entry/,
+                  eager: (module) =>
+                    module && /\.federation/.test(module?.request || ''),
                   excludeChunk: (chunk) => chunk.name === mfConfig.name,
                 };
                 config.plugins?.push(
@@ -56,9 +81,7 @@ export const moduleFederationPlugin = (
               if (config.output?.publicPath === 'auto') {
                 // TODO: only in dev temp
                 const port =
-                  userModernJSConfig.dev?.port ||
-                  userModernJSConfig.server?.port ||
-                  8080;
+                  useConfig.dev?.port || useConfig.server?.port || 8080;
                 const publicPath = `http://localhost:${port}/`;
                 config.output.publicPath = publicPath;
               }
@@ -109,6 +132,18 @@ export const moduleFederationPlugin = (
                 },
               ],
             },
+          },
+          source: {
+            alias: {
+              '@modern-js/runtime/mf': require.resolve(
+                '@module-federation/modern-js/runtime',
+              ),
+            },
+          },
+          dev: {
+            assetPrefix: useConfig?.dev?.assetPrefix
+              ? useConfig.dev.assetPrefix
+              : true,
           },
         };
       },

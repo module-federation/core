@@ -1,18 +1,13 @@
 import React from 'react';
 import Button from 'antd/lib/button';
-import {
-  loadRemote,
-  registerRemotes,
-} from '@module-federation/enhanced/runtime';
+import { loadRemote, registerRemotes } from '@modern-js/runtime/mf';
 import stuff from './stuff.module.css';
 
 const isServer = typeof window === 'undefined';
 registerRemotes([
   {
     name: 'dynamic_remote',
-    entry: isServer
-      ? 'http://localhost:3008/bundles/bundles/remoteEntry.js'
-      : 'http://localhost:3008/remoteEntry.js',
+    entry: 'http://localhost:3008/mf-manifest.json',
   },
 ]);
 

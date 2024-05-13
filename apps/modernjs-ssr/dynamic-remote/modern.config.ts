@@ -1,9 +1,4 @@
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import {
-  ModuleFederationPlugin,
-  AsyncBoundaryPlugin,
-} from '@module-federation/enhanced';
-import { StreamingTargetPlugin } from '@module-federation/node';
 import { moduleFederationPlugin } from '@module-federation/modern-js';
 
 // https://modernjs.dev/en/configure/app/usage
@@ -32,30 +27,29 @@ export default defineConfig({
   plugins: [appTools(), moduleFederationPlugin()],
   tools: {
     webpack: (config, { isServer, appendPlugins }) => {
-      if (config?.output) {
-        config.output.publicPath = 'http://localhost:3008/';
-      }
-      const mfConfig = {
-        name: 'dynamic_remote',
-        filename: 'remoteEntry.js',
-        exposes: {
-          './Image': './src/components/Image.tsx',
-        },
-        shared: {
-          react: { singleton: true },
-          'react-dom': { singleton: true },
-        },
-      };
-      if (isServer) {
-        mfConfig.filename = 'bundles/remoteEntry.js';
-        mfConfig.library = {
-          type: 'commonjs-module',
-        };
-        mfConfig.manifest = false;
-        appendPlugins([new StreamingTargetPlugin(mfConfig)]);
-      }
-
-      appendPlugins([new ModuleFederationPlugin(mfConfig)]);
+      // if (config?.output) {
+      //   config.output.publicPath = 'http://localhost:3008/';
+      // }
+      // const mfConfig = {
+      //   name: 'dynamic_remote',
+      //   filename: 'remoteEntry.js',
+      //   exposes: {
+      //     './Image': './src/components/Image.tsx',
+      //   },
+      //   shared: {
+      //     react: { singleton: true },
+      //     'react-dom': { singleton: true },
+      //   },
+      // };
+      // if (isServer) {
+      //   mfConfig.filename = 'bundles/remoteEntry.js';
+      //   mfConfig.library = {
+      //     type: 'commonjs-module',
+      //   };
+      //   mfConfig.manifest = false;
+      //   appendPlugins([new StreamingTargetPlugin(mfConfig)]);
+      // }
+      // appendPlugins([new ModuleFederationPlugin(mfConfig)]);
     },
   },
 });

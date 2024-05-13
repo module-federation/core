@@ -3,6 +3,7 @@
   "version": "0.1.6",
   "files": [
     "dist/",
+    "types.d.ts",
     "README.md"
   ],
   "publishConfig": {
@@ -16,12 +17,19 @@
       "import": "./dist/esm/cli/index.js",
       "require": "./dist/cjs/cli/index.js",
       "types": "./dist/types/cli/index.d.ts"
+    },
+    "./runtime": {
+      "types": "./dist/types/runtime/index.d.ts",
+      "default": "./dist/esm/runtime/index.js"
     }
   },
   "typesVersions": {
     "*": {
       ".": [
         "./dist/types/cli/index.d.ts"
+      ],
+      "runtime": [
+        "./dist/types/runtime/index.d.ts"
       ]
     }
   },

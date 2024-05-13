@@ -9,6 +9,11 @@ import { getFederationGlobalScope } from './runtime/utils';
 import type ExternalModule from 'webpack/lib/ExternalModule';
 import type FallbackModule from './FallbackModule';
 import type { RemotesOptions } from '@module-federation/webpack-bundler-runtime';
+import {
+  FEDERATION_SUPPORTED_TYPES_CJS,
+  FEDERATION_SUPPORTED_TYPES_CJS_MAP,
+  FEDERATION_SUPPORTED_TYPES,
+} from '@module-federation/webpack-bundler-runtime/constant';
 
 const extractUrlAndGlobal = require(
   normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
@@ -98,9 +103,20 @@ class RemoteRuntimeModule extends RuntimeModule {
               remoteModule &&
               // @ts-ignore
               chunkGraph.getModuleId(remoteModule);
+
+            const isCJS =
+              remoteModule.externalType ===
+              FEDERATION_SUPPORTED_TYPES_CJS_MAP[
+                FEDERATION_SUPPORTED_TYPES_CJS
+              ];
+            const externalType = isCJS
+              ? FEDERATION_SUPPORTED_TYPES_CJS
+              : remoteModule.externalType;
+            const canShowName =
+              FEDERATION_SUPPORTED_TYPES.includes(externalType);
             idToRemoteMap[id].push({
-              externalType: remoteModule.externalType,
-              name: remoteModule.externalType === 'script' ? remoteName : '',
+              externalType: externalType,
+              name: canShowName ? remoteName : '',
               externalModuleId,
             });
           });

@@ -116,7 +116,7 @@ class StatsManager {
       remoteEntry: {
         name: getRemoteEntryName(),
         path: '',
-        // same as the types supported by runtime, currently only global/var/script is supported
+        // same as the types supported by runtime, currently only global/var/script/cjs:webpack is supported
         type: 'global',
       },
       types: getTypesMetaInfo(this._options, compiler.context),

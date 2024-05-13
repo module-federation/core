@@ -19,15 +19,16 @@ export default defineConfig({
   //   enableAsyncEntry: true,
   // },
   plugins: [appTools(), moduleFederationPlugin()],
+  // plugins: [appTools(), ],
   server: {
     ssr: true,
   },
   tools: {
     webpack: (config, { isServer, appendPlugins }) => {
       config.optimization!.runtimeChunk = false;
-      // if (config?.output) {
-      //   config.output.publicPath = 'http://localhost:3006/';
-      // }
+      if (config?.output) {
+        config.output.publicPath = 'http://localhost:3006/';
+      }
 
       // const mfConfig = {
       //   name: 'remote',

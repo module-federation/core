@@ -999,15 +999,9 @@ importers:
       '@modern-js/runtime':
         specifier: 2.49.1
         version: 2.49.1(@types/react-dom@18.2.19)(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)(webpack@5.91.0)
-      '@module-federation/enhanced':
-        specifier: workspace:*
-        version: link:../../../packages/enhanced
       '@module-federation/modern-js':
         specifier: workspace:*
         version: link:../../../packages/modernjs
-      '@module-federation/node':
-        specifier: workspace:*
-        version: link:../../../packages/node
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.2.0)(react@18.2.0)
@@ -1063,15 +1057,9 @@ importers:
       '@modern-js/runtime':
         specifier: 2.49.1
         version: 2.49.1(@types/react-dom@18.2.19)(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)(webpack@5.91.0)
-      '@module-federation/enhanced':
-        specifier: workspace:*
-        version: link:../../../packages/enhanced
       '@module-federation/modern-js':
         specifier: workspace:*
         version: link:../../../packages/modernjs
-      '@module-federation/node':
-        specifier: workspace:*
-        version: link:../../../packages/node
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.2.0)(react@18.2.0)
