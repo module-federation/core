@@ -3,6 +3,7 @@ import {
   type GlobalModuleInfo,
   isBrowserEnv,
   warn,
+  composeKeyWithSeparator,
 } from '@module-federation/sdk';
 import { globalLoading } from '../global';
 import {
@@ -30,6 +31,7 @@ import {
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
+import { getGlobalShareScope } from '../utils/share';
 
 export interface LoadRemoteMatch {
   id: string;
@@ -401,8 +403,9 @@ export class RemoteHandler {
     }
     const loadedModule = host.moduleCache.get(remote.name);
     if (loadedModule) {
-      const key = loadedModule.remoteInfo
-        .entryGlobalName as keyof typeof globalThis;
+      const remoteInfo = loadedModule.remoteInfo;
+      const key = remoteInfo.entryGlobalName as keyof typeof globalThis;
+
       if (globalThis[key]) {
         delete globalThis[key];
       }
@@ -411,6 +414,81 @@ export class RemoteHandler {
       );
       if (globalLoading[remoteEntryUniqueKey]) {
         delete globalLoading[remoteEntryUniqueKey];
+      }
+      // delete un loaded shared and instance
+      let remoteInsId = remoteInfo.buildVersion
+        ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
+        : remoteInfo.name;
+      const remoteInsIndex = globalThis.__FEDERATION__.__INSTANCES__.findIndex(
+        (ins) => {
+          if (remoteInfo.buildVersion) {
+            return ins.options.id === remoteInsId;
+          } else {
+            return ins.name === remoteInsId;
+          }
+        },
+      );
+      if (remoteInsIndex !== -1) {
+        const remoteIns =
+          globalThis.__FEDERATION__.__INSTANCES__[remoteInsIndex];
+        remoteInsId = remoteIns.options.id || remoteInsId;
+        const globalShareScopeMap = getGlobalShareScope();
+
+        let isAllSharedNotUsed = true;
+        const needDeleteKeys: Array<[string, string, string, string]> = [];
+        Object.keys(globalShareScopeMap).forEach((instId) => {
+          Object.keys(globalShareScopeMap[instId]).forEach((shareScope) => {
+            Object.keys(globalShareScopeMap[instId][shareScope]).forEach(
+              (shareName) => {
+                Object.keys(
+                  globalShareScopeMap[instId][shareScope][shareName],
+                ).forEach((shareVersion) => {
+                  const shared =
+                    globalShareScopeMap[instId][shareScope][shareName][
+                      shareVersion
+                    ];
+                  if (shared.from === remoteInfo.name) {
+                    if (shared.loaded || shared.loading) {
+                      shared.useIn = shared.useIn.filter(
+                        (usedHostName) => usedHostName !== remoteInfo.name,
+                      );
+                      if (shared.useIn.length) {
+                        isAllSharedNotUsed = false;
+                      } else {
+                        needDeleteKeys.push([
+                          instId,
+                          shareScope,
+                          shareName,
+                          shareVersion,
+                        ]);
+                      }
+                    } else {
+                      needDeleteKeys.push([
+                        instId,
+                        shareScope,
+                        shareName,
+                        shareVersion,
+                      ]);
+                    }
+                  }
+                });
+              },
+            );
+          });
+        });
+
+        if (isAllSharedNotUsed) {
+          remoteIns.shareScopeMap = {};
+          delete globalShareScopeMap[remoteInsId];
+        }
+        needDeleteKeys.forEach(
+          ([insId, shareScope, shareName, shareVersion]) => {
+            delete globalShareScopeMap[insId][shareScope][shareName][
+              shareVersion
+            ];
+          },
+        );
+        globalThis.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
       }
       host.moduleCache.delete(remote.name);
     }
