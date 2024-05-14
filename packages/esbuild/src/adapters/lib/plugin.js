@@ -35,120 +35,77 @@ const buildContainerHost = (config) => {
       return acc;
     }, '{') + '}';
 
-  const exposesConfig =
-    Object.entries(exposes).reduce((acc, [exposeName, exposePath]) => {
-      acc += `${JSON.stringify(
-        exposeName,
-      )}: async () => await import('${exposePath}'),\n`;
-      return acc;
-    }, '{') + '}';
+  let exposesConfig = Object.entries(exposes)
+    .map(
+      ([exposeName, exposePath]) =>
+        `${JSON.stringify(
+          exposeName,
+        )}: async () => await import('${exposePath}')`,
+    )
+    .join(',\n');
+  exposesConfig = `{${exposesConfig}}`;
 
   const injectedContent = `
     export const moduleMap = '__MODULE_MAP__';
 
     function appendImportMap(importMap) {
-      document.head.appendChild(
-        Object.assign(document.createElement('script'), {
-          type: 'importmap-shim',
-          innerHTML: JSON.stringify(importMap),
-        }),
-      );
+      const script = document.createElement('script');
+      script.type = 'importmap-shim';
+      script.innerHTML = JSON.stringify(importMap);
+      document.head.appendChild(script);
     }
 
     export const createVirtualRemoteModule = (name, ref, exports) => {
-     const genExports = exports.map(function(e) {
-      if (e === 'default') {
-        return 'export default mfLsZJ92.default';
-      } else {
-        return 'export const ' + e + ' = mfLsZJ92[' + JSON.stringify(e) + '];';
-      }
-    }).join('');
+      const genExports = exports.map(e =>
+        e === 'default' ? 'export default mfLsZJ92.default' : \`export const \${e} = mfLsZJ92[\${JSON.stringify(e)}];\`
+      ).join('');
 
-    const loadRef = "const mfLsZJ92 = await container.loadRemote(" + JSON.stringify(ref) + ");"
+      const loadRef = \`const mfLsZJ92 = await container.loadRemote(\${JSON.stringify(ref)});\`;
 
       return \`
-      const container = __FEDERATION__.__INSTANCES__.find(container => container.name === name) || __FEDERATION__.__INSTANCES__[0];
-
-      \` + loadRef + genExports
+        const container = __FEDERATION__.__INSTANCES__.find(container => container.name === name) || __FEDERATION__.__INSTANCES__[0];
+        \${loadRef}
+        \${genExports}
+      \`;
     };
 
     function encodeInlineESM(code) {
-      // Encode the JavaScript code
       const encodedCode = encodeURIComponent(code);
-
-      // Create the inline ESM string
-      const inlineESM = 'data:text/javascript;charset=utf-8,' + encodedCode;
-
-      return inlineESM;
+      return \`data:text/javascript;charset=utf-8,\${encodedCode}\`;
     }
 
-
-  const runtimePlugin = function () {
-      return {
-        name: 'my-runtime-plugin',
-        beforeInit(args) {
-          console.log('beforeInit: ', args);
-          return args;
-        },
+    const runtimePlugin = () => ({
+        name: 'import-maps-plugin',
         async init(args) {
-          console.log('init: ', args);
-const map = {};
-          Object.keys(moduleMap).forEach((expose)=>{
-          // const encodedModule = createVirtualRemoteModule(args.origin.name, args.origin.name + expose.replace('.',''), moduleMap[expose].exports)
-          const importMap = importShim.getImportMap().imports
-          if(importMap[args.origin.name + expose.replace('.', '')]) return
-          const encodedModule = encodeInlineESM(createVirtualRemoteModule(args.origin.name, args.origin.name + expose.replace('.', ''), moduleMap[expose].exports))
-
-          map[args.origin.name + expose.replace('.', '')] = encodedModule
-
-
-          })
-
-         await importShim.addImportMap({
-              imports: map
-            });
-          const importMap = importShim.getImportMap();
-            console.log('final map', importMap);
-
-
-
-          return args
-        },
-        beforeRequest(args) {
-          console.log('beforeRequest: ', args);
-          return args;
-        },
-        afterResolve(args) {
-          console.log('afterResolve', args);
-          const remoteFromCache = args.origin.moduleCache.get(args.pkgNameOrAlias);
-          if(!remoteFromCache) {return args}
-          const remoteModuleMap = remoteFromCache.remoteEntryExports.moduleMap;
-          if(!remoteModuleMap[args.expose]) return args
-
-            const maps = remoteFromCache.remoteEntryExports.moduleMap[args.expose]
-            console.log(maps);
-            const encodedModule = encodeInlineESM(createVirtualRemoteModule(args.origin.name, args.id, maps.exports))
-            appendImportMap({
-              imports: {
-                [args.id]: encodedModule
-              }
+            const remotePrefetch = args.options.remotes.map(async (remote) => {
+                console.log('remote', remote);
+                if (remote.type === 'esm') {
+                    await import(remote.entry);
+                }
             });
 
-          return args;
-        },
-        onLoad(args) {
-          console.log('onLoad: ', args);
-          return args;
-        },
-        async loadShare(args) {
-          console.log('loadShare:', args);
-        },
-        async beforeLoadShare(args) {
-          console.log('beforeloadShare:', args);
-          return args;
-        },
-      };
-    };
+
+            await Promise.all(remotePrefetch);
+
+            const map = Object.keys(moduleMap).reduce((acc, expose) => {
+                const importMap = importShim.getImportMap().imports;
+                const key = args.origin.name + expose.replace('.', '');
+                if (!importMap[key]) {
+                    const encodedModule = encodeInlineESM(
+                        createVirtualRemoteModule(args.origin.name, key, moduleMap[expose].exports)
+                    );
+                    acc[key] = encodedModule;
+                }
+                return acc;
+            }, {});
+
+            await importShim.addImportMap({ imports: map });
+            console.log('final map', importShim.getImportMap());
+
+            return args;
+        }
+    });
+
     const createdContainer = await createContainer({
       name: ${JSON.stringify(name)},
       exposes: ${exposesConfig},
@@ -157,8 +114,8 @@ const map = {};
       plugins: [runtimePlugin()],
     });
 
-    export const get = createdContainer.get
-    export const init = createdContainer.init
+    export const get = createdContainer.get;
+    export const init = createdContainer.init;
   `;
   return [createContainerCode, injectedContent].join('\n');
 };
@@ -182,17 +139,7 @@ export const createVirtualShareModule = (name, ref, exports) => `
 `;
 
 export const createVirtualRemoteModule = (name, ref, exports) => `
-
-import {loadRemote} from '@module-federation/runtime'
-  const container = __FEDERATION__.__INSTANCES__.find(container => container.name === ${JSON.stringify(
-    name,
-  )}) || __FEDERATION__.__INSTANCES__[0]
-  const fullImport = ${JSON.stringify(ref)}
-  // await loadRemote(fullImport);
-
- console.log(import(${JSON.stringify('federationRemote/' + ref)}))
 export * from ${JSON.stringify('federationRemote/' + ref)}
-
 `;
 
 // Builds the federation host code
@@ -230,79 +177,59 @@ const buildFederationHost = () => {
   return `
     import { init as initFederationHost } from "@module-federation/runtime";
 
-    function appendImportMap(importMap) {
-      document.head.appendChild(
-        Object.assign(document.createElement('script'), {
-          type: 'importmap-shim',
-          innerHTML: JSON.stringify(importMap),
-        }),
-      );
-    }
-
     export const createVirtualRemoteModule = (name, ref, exports) => {
-     const genExports = exports.map(function(e) {
-      if (e === 'default') {
-        return 'export default mfLsZJ92.default';
-      } else {
-        return 'export const ' + e + ' = mfLsZJ92[' + JSON.stringify(e) + '];';
-      }
-    }).join('');
+      const genExports = exports.map(e =>
+        e === 'default'
+          ? 'export default mfLsZJ92.default;'
+          : \`export const \${e} = mfLsZJ92[\${JSON.stringify(e)}];\`
+      ).join('');
 
-    const loadRef = "const mfLsZJ92 = await container.loadRemote(" + JSON.stringify(ref) + ");"
+      const loadRef = \`const mfLsZJ92 = await container.loadRemote(\${JSON.stringify(ref)});\`;
 
       return \`
-      const container = __FEDERATION__.__INSTANCES__.find(container => container.name === name) || __FEDERATION__.__INSTANCES__[0];
-
-      \` + loadRef + genExports
+        const container = __FEDERATION__.__INSTANCES__.find(container => container.name === name) || __FEDERATION__.__INSTANCES__[0];
+        \${loadRef}
+        \${genExports}
+      \`;
     };
 
     function encodeInlineESM(code) {
-      // Encode the JavaScript code
-      const encodedCode = encodeURIComponent(code);
-
-      // Create the inline ESM string
-      const inlineESM = 'data:text/javascript;charset=utf-8,' + encodedCode;
-
-      return inlineESM;
+      return 'data:text/javascript;charset=utf-8,' + encodeURIComponent(code);
     }
 
-    const runtimePlugin = function () {
-      return {
-        name: 'my-runtime-plugin',
-        async init(args) {
-        console.log('init', args.options.remotes)
-        const remotePrefetch = args.options.remotes.map(async remote=>{
-           console.log('remote', remote);
-           if(remote.type === 'esm') {
-           await import(remote.entry)
-           }
+    const runtimePlugin = () => ({
+      name: 'import-maps-plugin',
+      async init(args) {
+        const remotePrefetch = args.options.remotes.map(async (remote) => {
+          console.log('remote', remote);
+          if (remote.type === 'esm') {
+            await import(remote.entry);
+          }
+        });
 
-        })
+        await Promise.all(remotePrefetch);
 
-        console.log(remotePrefetch);
+        if (typeof moduleMap !== 'undefined') {
+          const map = Object.keys(moduleMap).reduce((acc, expose) => {
+            const importMap = importShim.getImportMap().imports;
+            const key = args.origin.name + expose.replace('.', '');
+            if (!importMap[key]) {
+              const encodedModule = encodeInlineESM(
+                createVirtualRemoteModule(args.origin.name, key, moduleMap[expose].exports)
+              );
+              acc[key] = encodedModule;
+            }
+            return acc;
+          }, {});
 
-        await Promise.all(remotePrefetch)
-         console.log('after init');
-          return args;
-        },
-        beforeRequest(args) {
-          return args;
-        },
-        afterResolve(args) {
-         console.log('after resolve', args);
-          return args;
-        },
-        onLoad(args) {
-          console.log('onLoad: ', args);
-          return args;
-        },
-        async loadShare(args) {
-        },
-        async beforeLoadShare(args) {
-          return args;
-        },
-      };
-    };
+          await importShim.addImportMap({ imports: map });
+        }
+        console.log('final map', importShim.getImportMap());
+
+        return args;
+      }
+    });
+
     initFederationHost({
       name: ${JSON.stringify(name)},
       remotes: ${remoteConfigs},
