@@ -4,5 +4,6 @@
   "dependencies": {
     "@module-federation/node": "workspace:*",
     "lodash": "4.17.21"
-  }
+  },
+  "version": null
 }
