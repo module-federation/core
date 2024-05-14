@@ -8,6 +8,6 @@ export function getExternals(config) {
     acc.push(key + '/*');
     return acc;
   }, []);
-  const externals = [...shared, ...sharedMappings, ...remoteKeys];
+  const externals = [...shared, ...sharedMappings];
   return externals;
 }

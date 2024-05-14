@@ -5,11 +5,10 @@ const {
 
 module.exports = withNativeFederation({
   name: 'mfe1',
-
+  filename: 'remoteEntry.js',
   exposes: {
     './component': './mfe1/app',
   },
-
   shared: {
     ...shareAll({
       singleton: true,
@@ -18,8 +17,4 @@ module.exports = withNativeFederation({
       includeSecondaries: false,
     }),
   },
-
-  // skip: [
-  //   '@module-federation/native-federation'
-  // ]
 });

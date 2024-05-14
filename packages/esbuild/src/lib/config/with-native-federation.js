@@ -9,6 +9,7 @@ export function withNativeFederation(config) {
   const skip = prepareSkipList(config.skip ?? []);
   return {
     name: config.name ?? '',
+    filename: config.filename ?? 'remoteEntry',
     exposes: config.exposes ?? {},
     remotes: config.remotes ?? {},
     shared: normalizeShared(config, skip),

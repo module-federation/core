@@ -40,7 +40,6 @@ const createContainer = (federationOptions) => {
         }
       }
 
-      console.log(moduleMap);
       const get = (module, getScope) => {
         __webpack_require__.R = getScope;
         getScope = (
@@ -177,5 +176,6 @@ const createContainer = (federationOptions) => {
   const __webpack_exports__ = __webpack_require__("webpack/container/entry/createContainer");
   const __webpack_exports__get = __webpack_exports__.get;
   const __webpack_exports__init = __webpack_exports__.init;
+  const __webpack_exports__moduleMap = __webpack_exports__.moduleMap;
   return __webpack_exports__;
 }`;
