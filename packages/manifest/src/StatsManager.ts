@@ -84,7 +84,7 @@ class StatsManager {
 
       assert(remoteEntryNameChunk, 'Can not get remoteEntry chunk!');
       const files = Array.from(remoteEntryNameChunk.files).filter(
-        (f) => !f.includes(HOT_UPDATE_SUFFIX),
+        (f) => !f.includes(HOT_UPDATE_SUFFIX) && !f.endsWith('.css'),
       );
       assert(
         files.length === 1,
