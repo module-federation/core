@@ -1,5 +1,18 @@
 # [1.0.0-canary.3](https://github.com/module-federation/core/compare/webpack-bundler-runtime-1.0.0-canary.2...webpack-bundler-runtime-1.0.0-canary.3) (2023-11-23)
 
+## 0.1.13
+
+### Patch Changes
+
+- 2700ba1: chore(webpack-bundler-runtime): add more details tip for loadShareSync
+- Updated dependencies [d259a37]
+- Updated dependencies [08740a0]
+- Updated dependencies [0113b81]
+- Updated dependencies [d259a37]
+- Updated dependencies [2e52e51]
+  - @module-federation/runtime@0.1.13
+  - @module-federation/sdk@0.1.13
+
 ## 0.1.12
 
 ### Patch Changes

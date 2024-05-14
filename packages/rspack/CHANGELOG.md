@@ -1,5 +1,22 @@
 # @module-federation/rspack
 
+## 0.1.13
+
+### Patch Changes
+
+- 0113b81: chore: delete references to used shared to prevent memory leaks
+- Updated dependencies [2e52e51]
+- Updated dependencies [2e52e51]
+- Updated dependencies [9559769]
+- Updated dependencies [0113b81]
+- Updated dependencies [677958c]
+- Updated dependencies [2e52e51]
+  - @module-federation/dts-plugin@0.1.13
+  - @module-federation/managers@0.1.13
+  - @module-federation/manifest@0.1.13
+  - @module-federation/sdk@0.1.13
+  - @module-federation/runtime-tools@0.1.13
+
 ## 0.1.12
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.1.13
+
+### Patch Changes
+
+- 2e52e51: publicPath: auto support for json manifest remote
+
 ## 0.1.12
 
 ## 0.1.11
