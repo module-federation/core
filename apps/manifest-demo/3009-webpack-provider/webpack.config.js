@@ -16,7 +16,7 @@ module.exports = composePlugins(
       ignored: ['**/node_modules/**', '**/@mf-types/**'],
     };
     // publicPath must be specific url
-    config.output.publicPath = 'http://localhost:3009/';
+    config.output.publicPath = 'auto';
     config.plugins.push(
       new ModuleFederationPlugin({
         name: 'webpack_provider',

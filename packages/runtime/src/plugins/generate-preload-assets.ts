@@ -213,7 +213,7 @@ export function generatePreloadAssets(
         for (let index = 0; index < assetsLength; index++) {
           const assetsInfo = moduleAssetsInfo[index];
           const exposeFullPath = `${remoteInfo.name}/${assetsInfo.moduleName}`;
-          origin.hooks.lifecycle.handlePreloadModule.emit({
+          origin.remoteHandler.hooks.lifecycle.handlePreloadModule.emit({
             id:
               assetsInfo.moduleName === '.' ? remoteInfo.name : exposeFullPath,
             name: remoteInfo.name,
@@ -256,7 +256,7 @@ export function generatePreloadAssets(
         origin.shareScopeMap,
         snapshotShared.sharedName,
         shareInfo,
-        origin.hooks.lifecycle.resolveShare,
+        origin.sharedHandler.hooks.lifecycle.resolveShare,
       );
       // If the global share does not exist, or the lib function does not exist, it means that the shared has not been loaded yet and can be preloaded.
 

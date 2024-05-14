@@ -1,5 +1,20 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.2.4
+
+### Patch Changes
+
+- 890fff8: fix missing variable in runtime plugin when setting to global for script types
+- Updated dependencies [d259a37]
+- Updated dependencies [08740a0]
+- Updated dependencies [0113b81]
+- Updated dependencies [d259a37]
+- Updated dependencies [2e52e51]
+  - @module-federation/runtime@0.1.13
+  - @module-federation/enhanced@0.1.13
+  - @module-federation/sdk@0.1.13
+  - @module-federation/utilities@3.0.18
+
 ## 2.2.3
 
 ### Patch Changes
