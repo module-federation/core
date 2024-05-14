@@ -5,7 +5,8 @@
 /tmp
 /out-tsc
 /build
-/@mf-types
+**/@mf-types
+**/@mf-types/**
 /docs
 /.nx
 # dependencies

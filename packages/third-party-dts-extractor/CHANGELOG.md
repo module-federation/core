@@ -1,5 +1,11 @@
 # @module-federation/third-party-dts-extractor
 
+## 0.1.13
+
+### Patch Changes
+
+- 677958c: fix: tsup configuration
+
 ## 0.1.12
 
 ## 0.1.11

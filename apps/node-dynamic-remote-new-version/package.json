@@ -1,0 +1,9 @@
+{
+  "name": "node-dynamic-remote-new-version",
+  "private": true,
+  "dependencies": {
+    "@module-federation/node": "workspace:*",
+    "lodash": "4.17.21"
+  },
+  "version": null
+}

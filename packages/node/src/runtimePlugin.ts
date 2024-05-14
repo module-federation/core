@@ -249,7 +249,7 @@ export default function () {
           }
 
           __webpack_require__.federation.runtime
-            .loadScriptNode(url, { attrs: {} })
+            .loadScriptNode(url, { attrs: { globalName: remoteName } })
             .then(function (res) {
               var federation = __webpack_require__.federation;
               var enhancedRemote = federation.instance.initRawContainer(
@@ -257,11 +257,9 @@ export default function () {
                 url,
                 res,
               );
+              const globalThisVal = new Function('return globalThis')();
               // use normal global assignment
-              if (!usesInternalRef && !globalThisVal[chunkId]) {
-                globalThisVal[chunkId] = enhancedRemote;
-              }
-              console.log('adding remote', chunkId);
+              globalThisVal[chunkId] = enhancedRemote;
               callback(enhancedRemote);
             })
             .catch(function (error) {

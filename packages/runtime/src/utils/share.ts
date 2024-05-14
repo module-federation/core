@@ -8,6 +8,7 @@ import {
   ShareScopeMap,
   LoadShareExtraOptions,
   UserOptions,
+  Options,
 } from '../type';
 import { warn, error } from './logger';
 import { satisfy } from './semver';
@@ -55,13 +56,13 @@ export function formatShare(
 }
 
 export function formatShareConfigs(
-  shareArgs: UserOptions['shared'],
-  from: string,
-): ShareInfos {
-  if (!shareArgs) {
-    return {};
-  }
-  return Object.keys(shareArgs).reduce((res, pkgName) => {
+  globalOptions: Options,
+  userOptions: UserOptions,
+) {
+  const shareArgs = userOptions.shared || {};
+  const from = userOptions.name;
+
+  const shareInfos = Object.keys(shareArgs).reduce((res, pkgName) => {
     const arrayShareArgs = arrayOptions(shareArgs[pkgName]);
     res[pkgName] = res[pkgName] || [];
     arrayShareArgs.forEach((shareConfig) => {
@@ -69,6 +70,26 @@ export function formatShareConfigs(
     });
     return res;
   }, {} as ShareInfos);
+
+  const shared = {
+    ...globalOptions.shared,
+  };
+
+  Object.keys(shareInfos).forEach((shareKey) => {
+    if (!shared[shareKey]) {
+      shared[shareKey] = shareInfos[shareKey];
+    } else {
+      shareInfos[shareKey].forEach((newUserSharedOptions) => {
+        const isSameVersion = shared[shareKey].find(
+          (sharedVal) => sharedVal.version === newUserSharedOptions.version,
+        );
+        if (!isSameVersion) {
+          shared[shareKey].push(newUserSharedOptions);
+        }
+      });
+    }
+  });
+  return { shared, shareInfos };
 }
 
 export function versionLt(a: string, b: string): boolean {
