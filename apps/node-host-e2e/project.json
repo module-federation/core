@@ -17,7 +17,7 @@
         "parallel": true,
         "commands": [
           {
-            "command": "sleep 10 && nx run node-host-e2e:e2e && lsof -ti tcp:3002,3003,3333 | xargs kill",
+            "command": "sleep 10 && nx run node-host-e2e:e2e && lsof -ti tcp:3002,3003,3333,3006,3007 | xargs kill",
             "forwardAllArgs": true
           }
         ]
