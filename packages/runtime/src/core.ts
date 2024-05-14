@@ -28,6 +28,7 @@ import { DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 import { SharedHandler } from './shared';
 import { RemoteHandler } from './remote';
+import { formatShareConfigs } from './utils/share';
 
 export class FederationHost {
   options: Options;
@@ -210,10 +211,7 @@ export class FederationHost {
     globalOptions: Options,
     userOptions: UserOptions,
   ): Options {
-    const { shared, shareInfos } = this.sharedHandler.formatShareConfigs(
-      globalOptions,
-      userOptions,
-    );
+    const { shared } = formatShareConfigs(globalOptions, userOptions);
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({
         origin: this,
@@ -227,7 +225,10 @@ export class FederationHost {
       userOptionsRes,
     );
 
-    this.sharedHandler.registerShared(shareInfos, userOptions);
+    const { shared: handledShared } = this.sharedHandler.registerShared(
+      globalOptionsRes,
+      userOptionsRes,
+    );
 
     const plugins = [...globalOptionsRes.plugins];
 
@@ -244,7 +245,7 @@ export class FederationHost {
       ...userOptions,
       plugins,
       remotes,
-      shared,
+      shared: handledShared,
     };
 
     this.hooks.lifecycle.init.emit({
