@@ -141,7 +141,7 @@
     "@types/jest": "29.5.12",
     "@types/lodash.clonedeepwith": "^4.5.9",
     "@types/lodash.get": "4.4.9",
-    "@types/node": "18.19.26",
+    "@types/node": "20.12.12",
     "@types/node-fetch": "2.6.11",
     "@types/pidusage": "2.0.5",
     "@types/react": "18.2.62",
