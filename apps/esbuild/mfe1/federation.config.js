@@ -9,7 +9,6 @@ module.exports = withNativeFederation({
   exposes: {
     './component': './mfe1/app',
   },
-
   shared: {
     ...shareAll({
       singleton: true,
@@ -18,8 +17,4 @@ module.exports = withNativeFederation({
       includeSecondaries: false,
     }),
   },
-
-  // skip: [
-  //   '@module-federation/native-federation'
-  // ]
 });

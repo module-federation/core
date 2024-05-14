@@ -35,33 +35,93 @@ const buildContainerHost = (config) => {
       return acc;
     }, '{') + '}';
 
-  const exposesConfig =
-    Object.entries(exposes).reduce((acc, [exposeName, exposePath]) => {
-      acc += `${JSON.stringify(
-        exposeName,
-      )}: async () => await import('${exposePath}'),\n`;
-      return acc;
-    }, '{') + '}';
+  let exposesConfig = Object.entries(exposes)
+    .map(
+      ([exposeName, exposePath]) =>
+        `${JSON.stringify(
+          exposeName,
+        )}: async () => await import('${exposePath}')`,
+    )
+    .join(',\n');
+  exposesConfig = `{${exposesConfig}}`;
 
   const injectedContent = `
+    export const moduleMap = '__MODULE_MAP__';
+
+    function appendImportMap(importMap) {
+      const script = document.createElement('script');
+      script.type = 'importmap-shim';
+      script.innerHTML = JSON.stringify(importMap);
+      document.head.appendChild(script);
+    }
+
+    export const createVirtualRemoteModule = (name, ref, exports) => {
+      const genExports = exports.map(e =>
+        e === 'default' ? 'export default mfLsZJ92.default' : \`export const \${e} = mfLsZJ92[\${JSON.stringify(e)}];\`
+      ).join('');
+
+      const loadRef = \`const mfLsZJ92 = await container.loadRemote(\${JSON.stringify(ref)});\`;
+
+      return \`
+        const container = __FEDERATION__.__INSTANCES__.find(container => container.name === name) || __FEDERATION__.__INSTANCES__[0];
+        \${loadRef}
+        \${genExports}
+      \`;
+    };
+
+    function encodeInlineESM(code) {
+      const encodedCode = encodeURIComponent(code);
+      return \`data:text/javascript;charset=utf-8,\${encodedCode}\`;
+    }
+
+    const runtimePlugin = () => ({
+        name: 'import-maps-plugin',
+        async init(args) {
+            const remotePrefetch = args.options.remotes.map(async (remote) => {
+                console.log('remote', remote);
+                if (remote.type === 'esm') {
+                    await import(remote.entry);
+                }
+            });
+
+
+            await Promise.all(remotePrefetch);
+
+            const map = Object.keys(moduleMap).reduce((acc, expose) => {
+                const importMap = importShim.getImportMap().imports;
+                const key = args.origin.name + expose.replace('.', '');
+                if (!importMap[key]) {
+                    const encodedModule = encodeInlineESM(
+                        createVirtualRemoteModule(args.origin.name, key, moduleMap[expose].exports)
+                    );
+                    acc[key] = encodedModule;
+                }
+                return acc;
+            }, {});
+
+            await importShim.addImportMap({ imports: map });
+            console.log('final map', importShim.getImportMap());
+
+            return args;
+        }
+    });
+
     const createdContainer = await createContainer({
       name: ${JSON.stringify(name)},
       exposes: ${exposesConfig},
       remotes: ${JSON.stringify(remoteConfigs)},
       shared: ${sharedConfig},
+      plugins: [runtimePlugin()],
     });
 
-    export const get = createdContainer.get
-    export const init = createdContainer.init
+    export const get = createdContainer.get;
+    export const init = createdContainer.init;
   `;
   return [createContainerCode, injectedContent].join('\n');
 };
 
 // Creates a virtual module for sharing dependencies
 export const createVirtualShareModule = (name, ref, exports) => `
-  console.log(__FEDERATION__.__INSTANCES__[0],${JSON.stringify(
-    name,
-  )}, ${JSON.stringify(ref)})
 
   const container = __FEDERATION__.__INSTANCES__.find(container => container.name === ${JSON.stringify(
     name,
@@ -76,6 +136,10 @@ export const createVirtualShareModule = (name, ref, exports) => `
         : `export const ${e} = mfLsZJ92[${JSON.stringify(e)}];`,
     )
     .join('\n')}
+`;
+
+export const createVirtualRemoteModule = (name, ref, exports) => `
+export * from ${JSON.stringify('federationRemote/' + ref)}
 `;
 
 // Builds the federation host code
@@ -110,14 +174,68 @@ const buildFederationHost = () => {
     },\n`;
       return acc;
     }, '{') + '}';
-
   return `
     import { init as initFederationHost } from "@module-federation/runtime";
+
+    export const createVirtualRemoteModule = (name, ref, exports) => {
+      const genExports = exports.map(e =>
+        e === 'default'
+          ? 'export default mfLsZJ92.default;'
+          : \`export const \${e} = mfLsZJ92[\${JSON.stringify(e)}];\`
+      ).join('');
+
+      const loadRef = \`const mfLsZJ92 = await container.loadRemote(\${JSON.stringify(ref)});\`;
+
+      return \`
+        const container = __FEDERATION__.__INSTANCES__.find(container => container.name === name) || __FEDERATION__.__INSTANCES__[0];
+        \${loadRef}
+        \${genExports}
+      \`;
+    };
+
+    function encodeInlineESM(code) {
+      return 'data:text/javascript;charset=utf-8,' + encodeURIComponent(code);
+    }
+
+    const runtimePlugin = () => ({
+      name: 'import-maps-plugin',
+      async init(args) {
+        const remotePrefetch = args.options.remotes.map(async (remote) => {
+          console.log('remote', remote);
+          if (remote.type === 'esm') {
+            await import(remote.entry);
+          }
+        });
+
+        await Promise.all(remotePrefetch);
+
+        if (typeof moduleMap !== 'undefined') {
+          const map = Object.keys(moduleMap).reduce((acc, expose) => {
+            const importMap = importShim.getImportMap().imports;
+            const key = args.origin.name + expose.replace('.', '');
+            if (!importMap[key]) {
+              const encodedModule = encodeInlineESM(
+                createVirtualRemoteModule(args.origin.name, key, moduleMap[expose].exports)
+              );
+              acc[key] = encodedModule;
+            }
+            return acc;
+          }, {});
+
+          await importShim.addImportMap({ imports: map });
+        }
+        console.log('final map', importShim.getImportMap());
+
+        return args;
+      }
+    });
+
     initFederationHost({
       name: ${JSON.stringify(name)},
       remotes: ${remoteConfigs},
-      shared: ${sharedConfig}
-     });
+      shared: ${sharedConfig},
+      plugins: [runtimePlugin()],
+    });
   `;
 };
 
@@ -255,15 +373,116 @@ const linkSharedPlugin = {
   },
 };
 
+const linkRemotesPlugin = {
+  name: 'linkRemotes',
+  setup(build) {
+    // const filter = new RegExp(
+    //   federationBuilder.externals.map((name) => `${name}$`).join('|'),
+    // );
+
+    const ext = federationBuilder.externals;
+    const remotes = federationBuilder.config.remotes;
+    const filter = new RegExp(
+      Object.keys(remotes)
+        .reduce((acc, key) => {
+          if (!key) return acc;
+          acc.push(`^${key}`);
+          // acc.push(key + '/*');
+          return acc;
+        }, [])
+        .join('|'),
+    );
+
+    build.onResolve({ filter: filter }, async (args) => {
+      // const parent = await build.resolve(args.importer, {resolveDir: args.resolveDir, kind: args.kind})
+      return { path: args.path, namespace: 'remote-module' };
+    });
+
+    build.onResolve({ filter: /^federationRemote/ }, async (args) => {
+      // const parent = await build.resolve(args.importer, {resolveDir: args.resolveDir, kind: args.kind})
+      return {
+        path: args.path.replace('federationRemote/', ''),
+        external: true,
+        namespace: 'externals',
+      };
+    });
+
+    build.onLoad({ filter, namespace: 'remote-module' }, async (args) => {
+      return {
+        contents: createVirtualRemoteModule(
+          federationBuilder.config.name,
+          args.path,
+        ),
+        loader: 'js',
+        resolveDir: path.dirname(args.path),
+      };
+    });
+  },
+};
+
 // Main module federation plugin
 export const moduleFederationPlugin = (config) => ({
   name: 'module-federation',
   setup(build) {
+    build.initialOptions.metafile = true;
+
+    const pluginStack = [];
+    const remotes = Object.keys(federationBuilder.config.remotes).length;
+    const shared = Object.keys(federationBuilder.config.shared).length;
+    const exposes = Object.keys(federationBuilder.config.exposes).length;
+
+    if (remotes) {
+      pluginStack.push(linkRemotesPlugin);
+    }
+
+    if (shared) {
+      pluginStack.push(linkSharedPlugin);
+    }
+
     [
       initializeHostPlugin,
       createContainerPlugin(config),
       cjsToEsmPlugin,
-      linkSharedPlugin,
+      ...pluginStack,
     ].forEach((plugin) => plugin.setup(build));
+
+    build.onEnd(async (result) => {
+      if (exposes) {
+        const exposedConfig = federationBuilder.config.exposes;
+        const remoteFile = federationBuilder.config.filename;
+        const exposedEntries = {};
+        for (const [expose, value] of Object.entries(exposedConfig)) {
+          const output = Object.values(result.metafile.outputs).find((o) => {
+            if (!o.entryPoint) return false;
+            const found = o.entryPoint.startsWith(value.replace(/^\.\//, ''));
+            return found;
+          });
+          if (output) {
+            exposedEntries[expose] = {
+              entryPoint: output.entryPoint,
+              exports: output.exports,
+            };
+          }
+        }
+        for (const [outputPath, value] of Object.entries(
+          result.metafile.outputs,
+        )) {
+          if (!value.entryPoint) continue;
+
+          if (!value.entryPoint.startsWith('container:')) continue;
+
+          if (!value.entryPoint.endsWith(remoteFile)) continue;
+
+          const container = fs.readFileSync(outputPath, 'utf-8');
+
+          let withExports = container
+            .replace('"__MODULE_MAP__"', `${JSON.stringify(exposedEntries)}`)
+            .replace("'__MODULE_MAP__'", `${JSON.stringify(exposedEntries)}`);
+
+          fs.writeFileSync(outputPath, withExports, 'utf-8');
+        }
+      }
+      console.log(`build ended with ${result.errors.length} errors`);
+    });
   },
 });

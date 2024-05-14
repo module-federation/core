@@ -1,5 +1,7 @@
 //@ts-nocheck
 
 (async () => {
-  await import('./bootstrap');
+  setTimeout(() => {
+    import('./bootstrap');
+  }, 400);
 })();
