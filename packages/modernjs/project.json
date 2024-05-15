@@ -19,7 +19,7 @@
             "forwardAllArgs": true
           },
           {
-            "command": "cp packages/modernjs/*.md packages/modernjs/dist",
+            "command": "cp packages/modernjs/LICENSE packages/modernjs/dist",
             "forwardAllArgs": true
           }
         ]
