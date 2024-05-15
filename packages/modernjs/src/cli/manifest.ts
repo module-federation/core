@@ -1,9 +1,9 @@
 // TODO: Support Rspack
 import path from 'path';
-import { ModuleFederationPlugin } from '@module-federation/enhanced';
 import { Stats, Manifest } from '@module-federation/sdk';
 import { fs } from '@modern-js/utils';
 import { MODERN_JS_SERVER_DIR } from '../constant';
+import { BundlerPlugin } from '../types';
 
 function mergeStats(browserStats: Stats, nodeStats: Stats): Stats {
   const ssrRemoteEntry = nodeStats.metaData.remoteEntry;
@@ -25,8 +25,8 @@ function mergeManifest(
 }
 
 function mergeStatsAndManifest(
-  nodePlugin: ModuleFederationPlugin,
-  browserPlugin: ModuleFederationPlugin,
+  nodePlugin: BundlerPlugin,
+  browserPlugin: BundlerPlugin,
 ): {
   mergedStats: Stats;
   mergedStatsFilePath: string;
@@ -63,8 +63,8 @@ function mergeStatsAndManifest(
 }
 
 export function updateStatsAndManifest(
-  nodePlugin: ModuleFederationPlugin,
-  browserPlugin: ModuleFederationPlugin,
+  nodePlugin: BundlerPlugin,
+  browserPlugin: BundlerPlugin,
   outputDir: string,
 ) {
   const {

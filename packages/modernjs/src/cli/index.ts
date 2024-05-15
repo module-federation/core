@@ -6,7 +6,11 @@ import {
   AsyncBoundaryPlugin,
 } from '@module-federation/enhanced';
 import { StreamingTargetPlugin } from '@module-federation/node';
-import type { PluginOptions } from '../types';
+import type {
+  PluginOptions,
+  BundlerPluginImplementation,
+  BundlerPlugin,
+} from '../types';
 import {
   getMFConfig,
   getTargetEnvConfig,
@@ -26,10 +30,10 @@ export const moduleFederationPlugin = (
     const mfConfig = await getMFConfig(userConfig);
     let outputDir = '';
 
-    const WebpackPluginConstructor =
-      userConfig.webpackPluginImplementation || ModuleFederationPlugin;
-    let browserPlugin: ModuleFederationPlugin;
-    let nodePlugin: ModuleFederationPlugin;
+    const PluginConstructor: BundlerPluginImplementation =
+      userConfig.bundlerPluginImplementation || ModuleFederationPlugin;
+    let browserPlugin: BundlerPlugin;
+    let nodePlugin: BundlerPlugin;
     return {
       config: () => {
         if (enableSSR) {
@@ -40,13 +44,15 @@ export const moduleFederationPlugin = (
             webpack(config, { isServer }) {
               const envConfig = getTargetEnvConfig(mfConfig, isServer);
               if (isServer) {
-                nodePlugin = new WebpackPluginConstructor(envConfig);
+                nodePlugin = new PluginConstructor(envConfig);
+                // @ts-ignore
                 config.plugins?.push(nodePlugin);
                 config.plugins?.push(new StreamingTargetPlugin(envConfig));
               } else {
                 outputDir =
                   config.output?.path || path.resolve(process.cwd(), 'dist');
-                browserPlugin = new WebpackPluginConstructor(envConfig);
+                browserPlugin = new PluginConstructor(envConfig);
+                // @ts-ignore
                 config.plugins?.push(browserPlugin);
               }
 

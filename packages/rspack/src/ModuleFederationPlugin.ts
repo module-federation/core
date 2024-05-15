@@ -25,6 +25,7 @@ const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
 export class ModuleFederationPlugin implements RspackPluginInstance {
   readonly name = 'RspackModuleFederationPlugin';
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
+  private _statsPlugin?: StatsPlugin;
 
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this._options = options;
@@ -102,11 +103,12 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     });
 
     if (!disableManifest) {
-      new StatsPlugin(options, {
+      this._statsPlugin = new StatsPlugin(options, {
         pluginVersion: __VERSION__,
         bundler: 'rspack',
-        // @ts-ignore
-      }).apply(compiler);
+      });
+      // @ts-ignore
+      this._statsPlugin.apply(compiler);
     }
   }
 
@@ -183,5 +185,9 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     Object.keys(cacheGroups).forEach((cacheGroupKey) => {
       patchChunkSplit(cacheGroups[cacheGroupKey]);
     });
+  }
+
+  get statsResourceInfo() {
+    return this._statsPlugin?.resourceInfo;
   }
 }
