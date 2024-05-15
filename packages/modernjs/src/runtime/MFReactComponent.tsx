@@ -5,6 +5,7 @@ import {
   type FederationHost,
 } from '@module-federation/enhanced/runtime';
 
+type Comp = React.FC | { default: React.FC };
 interface IProps {
   id: string;
   loading?: React.ReactNode;
@@ -76,13 +77,18 @@ function MFReactComponent(props: IProps) {
   const { loading = 'loading...', id } = props;
 
   const Component = React.lazy(() =>
-    loadRemote(id).then((mod: any) => {
+    loadRemote<Comp>(id).then((mod) => {
       const links = collectLinks(id);
+      if (!mod) {
+        throw new Error('load remote failed');
+      }
+      const Com =
+        typeof mod === 'object' ? ('default' in mod ? mod.default : mod) : mod;
       return {
         default: () => (
           <div>
             {links}
-            <mod.default />
+            <Com />
           </div>
         ),
       };
@@ -96,4 +102,4 @@ function MFReactComponent(props: IProps) {
   );
 }
 
-export { MFReactComponent };
+export { MFReactComponent, collectLinks };
