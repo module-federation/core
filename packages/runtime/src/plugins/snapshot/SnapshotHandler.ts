@@ -227,7 +227,7 @@ export class SnapshotHandler {
     }
   }
 
-  private getGlobalRemoteInfo(moduleInfo: Remote): {
+  getGlobalRemoteInfo(moduleInfo: Remote): {
     hostGlobalSnapshot: ModuleInfo | undefined;
     globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
     remoteSnapshot: GlobalModuleInfo[string] | undefined;

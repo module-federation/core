@@ -1,9 +1,12 @@
 import React from 'react';
 import Button from 'antd/lib/button';
-import { loadRemote, registerRemotes } from '@modern-js/runtime/mf';
+import {
+  loadRemote,
+  registerRemotes,
+  MFReactComponent,
+} from '@modern-js/runtime/mf';
 import stuff from './stuff.module.css';
 
-const isServer = typeof window === 'undefined';
 registerRemotes([
   {
     name: 'dynamic_remote',
@@ -11,23 +14,23 @@ registerRemotes([
   },
 ]);
 
-const Comp = React.lazy(() =>
-  loadRemote('dynamic_remote/Image').then((m) => {
-    return {
-      default: () => (
-        <div>
-          <link
-            href="http://localhost:3008/static/css/async/__federation_expose_Image.css"
-            rel="stylesheet"
-            type="text/css"
-          />
-          <span>11</span>
-          <m.default />
-        </div>
-      ),
-    };
-  }),
-);
+// const Comp = React.lazy(() =>
+//   loadRemote('dynamic_remote/Image').then((m) => {
+//     return {
+//       default: () => (
+//         <div>
+//           <link
+//             href="http://localhost:3008/static/css/async/__federation_expose_Image.css"
+//             rel="stylesheet"
+//             type="text/css"
+//           />
+//           <span>11</span>
+//           <m.default />
+//         </div>
+//       ),
+//     };
+//   }),
+// );
 
 const LazyButton = React.lazy(() =>
   import('./Button').then((m) => {
@@ -57,9 +60,10 @@ export default (): JSX.Element => (
       Click me to test <strong>dynamic nested remote</strong> interactive!
     </Button>
 
-    <React.Suspense fallback="loading">
+    {/* <React.Suspense fallback="loading">
       <Comp />
-    </React.Suspense>
+    </React.Suspense> */}
+    <MFReactComponent id="dynamic_remote/Image" />
     <React.Suspense fallback="loading btn">
       <LazyButton />
     </React.Suspense>
