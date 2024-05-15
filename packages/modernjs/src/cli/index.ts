@@ -7,7 +7,12 @@ import {
 } from '@module-federation/enhanced';
 import { StreamingTargetPlugin } from '@module-federation/node';
 import type { PluginOptions } from '../types';
-import { getMFConfig, patchMFConfig } from './utils';
+import {
+  getMFConfig,
+  getTargetEnvConfig,
+  patchMFConfig,
+  patchWebpackConfig,
+} from './utils';
 import { updateStatsAndManifest } from './manifest';
 import { MODERN_JS_SERVER_DIR } from '../constant';
 
@@ -18,13 +23,11 @@ export const moduleFederationPlugin = (
   setup: async ({ useConfigContext }) => {
     const useConfig = useConfigContext();
     const enableSSR = Boolean(useConfig?.server?.ssr);
-    const isStreamSSR =
-      typeof useConfig?.server?.ssr === 'object'
-        ? useConfig?.server?.ssr?.mode === 'stream'
-        : false;
     const mfConfig = await getMFConfig(userConfig);
     let outputDir = '';
 
+    const WebpackPluginConstructor =
+      userConfig.webpackPluginImplementation || ModuleFederationPlugin;
     let browserPlugin: ModuleFederationPlugin;
     let nodePlugin: ModuleFederationPlugin;
     return {
@@ -35,36 +38,23 @@ export const moduleFederationPlugin = (
         return {
           tools: {
             webpack(config, { isServer }) {
-              delete config.optimization?.runtimeChunk;
-              patchMFConfig(mfConfig);
+              const envConfig = getTargetEnvConfig(mfConfig, isServer);
               if (isServer) {
-                nodePlugin = new ModuleFederationPlugin({
-                  library: {
-                    type: 'commonjs-module',
-                    name: mfConfig.name,
-                  },
-                  ...mfConfig,
-                });
+                nodePlugin = new WebpackPluginConstructor(envConfig);
                 config.plugins?.push(nodePlugin);
-                config.plugins?.push(new StreamingTargetPlugin(mfConfig));
+                config.plugins?.push(new StreamingTargetPlugin(envConfig));
               } else {
                 outputDir =
                   config.output?.path || path.resolve(process.cwd(), 'dist');
-                browserPlugin = new ModuleFederationPlugin(mfConfig);
+                browserPlugin = new WebpackPluginConstructor(envConfig);
                 config.plugins?.push(browserPlugin);
-
-                if (
-                  enableSSR &&
-                  isStreamSSR &&
-                  typeof config.optimization?.splitChunks === 'object' &&
-                  config.optimization.splitChunks.cacheGroups
-                ) {
-                  config.optimization.splitChunks.chunks = 'async';
-                  console.warn(
-                    '[Modern.js Module Federation] splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"',
-                  );
-                }
               }
+
+              patchWebpackConfig({
+                config,
+                isServer,
+                useConfig,
+              });
 
               const enableAsyncEntry = useConfig.source?.enableAsyncEntry;
               if (!enableAsyncEntry && mfConfig.async) {
@@ -76,14 +66,6 @@ export const moduleFederationPlugin = (
                 config.plugins?.push(
                   new AsyncBoundaryPlugin(asyncBoundaryPluginOptions),
                 );
-              }
-
-              if (config.output?.publicPath === 'auto') {
-                // TODO: only in dev temp
-                const port =
-                  useConfig.dev?.port || useConfig.server?.port || 8080;
-                const publicPath = `http://localhost:${port}/`;
-                config.output.publicPath = publicPath;
               }
             },
             devServer: {
@@ -104,7 +86,6 @@ export const moduleFederationPlugin = (
                     const SERVER_PREFIX = `/${MODERN_JS_SERVER_DIR}`;
                     if (
                       req.url?.startsWith(SERVER_PREFIX) ||
-                      req.url?.includes('remoteEntry.js') ||
                       req.url?.includes('.json')
                     ) {
                       const filepath = path.join(

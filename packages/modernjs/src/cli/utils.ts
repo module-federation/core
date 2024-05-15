@@ -1,3 +1,4 @@
+import type { webpack, UserConfig, AppTools } from '@modern-js/app-tools';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import path from 'path';
 import { bundle } from '@modern-js/node-bundle-require';
@@ -37,3 +38,56 @@ export const patchMFConfig = (
     mfConfig.async = true;
   }
 };
+
+export function getTargetEnvConfig(
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  isServer: boolean,
+) {
+  patchMFConfig(mfConfig);
+  if (isServer) {
+    return {
+      library: {
+        type: 'commonjs-module',
+        name: mfConfig.name,
+      },
+      ...mfConfig,
+    };
+  }
+
+  return mfConfig;
+}
+
+export function patchWebpackConfig(options: {
+  config: webpack.Configuration;
+  isServer: boolean;
+  useConfig: UserConfig<AppTools>;
+}) {
+  const { config, useConfig, isServer } = options;
+  const enableSSR = Boolean(useConfig?.server?.ssr);
+  const isStreamSSR =
+    typeof useConfig?.server?.ssr === 'object'
+      ? useConfig?.server?.ssr?.mode === 'stream'
+      : false;
+
+  delete config.optimization?.runtimeChunk;
+
+  if (
+    !isServer &&
+    enableSSR &&
+    isStreamSSR &&
+    typeof config.optimization?.splitChunks === 'object' &&
+    config.optimization.splitChunks.cacheGroups
+  ) {
+    config.optimization.splitChunks.chunks = 'async';
+    console.warn(
+      '[Modern.js Module Federation] splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"',
+    );
+  }
+
+  if (config.output?.publicPath === 'auto') {
+    // TODO: only in dev temp
+    const port = useConfig.dev?.port || useConfig.server?.port || 8080;
+    const publicPath = `http://localhost:${port}/`;
+    config.output.publicPath = publicPath;
+  }
+}
