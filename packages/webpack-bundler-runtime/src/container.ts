@@ -1,40 +1,11 @@
 import bundler_runtime_base from './index';
-import type { Options } from '@module-federation/runtime/types';
+import type { UserOptions } from '@module-federation/runtime/types';
 
-interface ExposesConfig {
-  /**
-   * Request to a module that should be exposed by this container.
-   */
-  import: ExposesItem | ExposesItems;
-  /**
-   * Custom chunk name for the exposed module.
-   */
-  name?: string;
-}
-
-type Exposes = (ExposesItem | ExposesObject)[] | ExposesObject;
-/**
- * Module that should be exposed by this container.
- */
-type ExposesItem = string;
-/**
- * Modules that should be exposed by this container.
- */
-type ExposesItems = ExposesItem[];
-
-interface ExposesObject {
-  /**
-   * Modules that should be exposed by this container.
-   */
-  [k: string]: ExposesConfig | ExposesItem | ExposesItems;
-}
-
-interface ExtendedOptions extends Options {
+interface ExtendedOptions extends UserOptions {
   exposes: { [key: string]: () => Promise<() => any> };
 }
 
-export const createContainer = async (federationOptions: ExtendedOptions) => {
-  // await instantiatePatch(federationOptions, true);
+export const createContainer = (federationOptions: ExtendedOptions) => {
   const { exposes, name, remotes = [], shared, plugins } = federationOptions;
 
   const __webpack_modules__ = {
@@ -268,4 +239,10 @@ export const createContainer = async (federationOptions: ExtendedOptions) => {
   const __webpack_exports__get = __webpack_exports__.get;
   const __webpack_exports__init = __webpack_exports__.init;
   return __webpack_exports__;
+};
+export const createContainerAsync = async (
+  federationOptions: ExtendedOptions,
+) => {
+  // todo: consider async startup options here, for "async boundary" provision.
+  return createContainer(federationOptions);
 };
