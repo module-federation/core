@@ -1,10 +1,21 @@
-import type { webpack, UserConfig, AppTools } from '@modern-js/app-tools';
+import type {
+  webpack,
+  UserConfig,
+  AppTools,
+  Rspack,
+} from '@modern-js/app-tools';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import path from 'path';
 import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
+
+export type ConfigType<T> = T extends 'webpack'
+  ? webpack.Configuration
+  : T extends 'rspack'
+  ? Rspack.Configuration
+  : never;
 
 export const getMFConfig = async (
   userConfig: PluginOptions,
@@ -57,8 +68,8 @@ export function getTargetEnvConfig(
   return mfConfig;
 }
 
-export function patchWebpackConfig(options: {
-  config: webpack.Configuration;
+export function patchWebpackConfig<T>(options: {
+  config: ConfigType<T>;
   isServer: boolean;
   useConfig: UserConfig<AppTools>;
 }) {
