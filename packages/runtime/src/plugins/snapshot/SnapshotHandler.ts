@@ -153,7 +153,9 @@ export class SnapshotHandler {
       if (isManifestProvider(globalRemoteSnapshot)) {
         const remoteEntry = isBrowserEnv()
           ? globalRemoteSnapshot.remoteEntry
-          : globalRemoteSnapshot.ssrRemoteEntry || '';
+          : globalRemoteSnapshot.ssrRemoteEntry ||
+            globalRemoteSnapshot.remoteEntry ||
+            '';
         const moduleSnapshot = await this.getManifestJson(
           remoteEntry,
           moduleInfo,
