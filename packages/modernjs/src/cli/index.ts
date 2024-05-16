@@ -51,6 +51,7 @@ export const moduleFederationPlugin = (
       config: () => {
         if (enableSSR) {
           process.env['MF_DISABLE_EMIT_STATS'] = 'true';
+          process.env['MF_SSR_PRJ'] = 'true';
         }
 
         const modifyBundlerConfig = <T extends 'webpack' | 'rspack'>(

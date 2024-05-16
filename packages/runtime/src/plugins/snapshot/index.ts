@@ -39,7 +39,7 @@ export function snapshotPlugin(): FederationRuntimePlugin {
       if (!isRemoteInfoWithEntry(remote) || !isPureRemoteEntry(remote)) {
         const { remoteSnapshot, globalSnapshot } =
           await origin.snapshotHandler.loadRemoteSnapshotInfo(remote);
-
+        debugger;
         assignRemoteInfo(remoteInfo, remoteSnapshot);
         // preloading assets
         const preloadOptions: PreloadOptions[0] = {
