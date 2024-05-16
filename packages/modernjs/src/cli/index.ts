@@ -88,12 +88,18 @@ export const moduleFederationPlugin = (
             webpack(config, { isServer }) {
               modifyBundlerConfig(config, isServer);
               const enableAsyncEntry = useConfig.source?.enableAsyncEntry;
-              if (!enableAsyncEntry && mfConfig.async) {
-                const asyncBoundaryPluginOptions = {
-                  eager: (module) =>
-                    module && /\.federation/.test(module?.request || ''),
-                  excludeChunk: (chunk) => chunk.name === mfConfig.name,
-                };
+              if (
+                mfConfig.async ||
+                (!enableAsyncEntry && mfConfig.async !== false)
+              ) {
+                const asyncBoundaryPluginOptions =
+                  typeof mfConfig.async === 'object'
+                    ? mfConfig.async
+                    : {
+                        eager: (module) =>
+                          module && /\.federation/.test(module?.request || ''),
+                        excludeChunk: (chunk) => chunk.name === mfConfig.name,
+                      };
                 config.plugins?.push(
                   new AsyncBoundaryPlugin(asyncBoundaryPluginOptions),
                 );
