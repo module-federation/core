@@ -671,6 +671,30 @@ export default {
         },
       },
     },
+    AsyncBoundaryOptions: {
+      description: 'Make entrypoints startup as async chunks',
+      type: 'object',
+      properties: {
+        eager: {
+          description: 'whether eager',
+          anyOf: [
+            {
+              instanceof: 'RegExp',
+              tsType: 'RegExp',
+              tsType: '((module: any) => boolean)',
+            },
+            {
+              type: 'boolean',
+            },
+          ],
+        },
+        excludeChunk: {
+          description: 'exclude chunk',
+          instanceof: 'Function',
+          tsType: '(chunk: any) => boolean',
+        },
+      },
+    },
   },
   title: 'ModuleFederationPluginOptions',
   type: 'object',
@@ -756,7 +780,14 @@ export default {
     },
     async: {
       description: 'Make entrypoints startup as async chunks',
-      type: 'boolean',
+      anyOf: [
+        {
+          $ref: '#/definitions/AsyncBoundaryOptions',
+        },
+        {
+          type: 'boolean',
+        },
+      ],
     },
   },
 };

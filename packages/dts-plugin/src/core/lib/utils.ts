@@ -11,7 +11,8 @@ import {
 } from './typeScriptCompiler';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import ansiColors from 'ansi-colors';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import cloneDeepWith from 'lodash.clonedeepwith';
+import { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 
 export function getDTSManagerConstructor(
   implementation?: string,
@@ -93,3 +94,13 @@ export const isTSProject = (
     return false;
   }
 };
+
+export function cloneDeepOptions(options: DTSManagerOptions) {
+  const excludeKeys = ['manifest', 'async'];
+  return cloneDeepWith(options, (_value, key) => {
+    // moduleFederationConfig.manifest may have un serialization options
+    if (typeof key === 'string' && excludeKeys.includes(key)) {
+      return false;
+    }
+  });
+}
