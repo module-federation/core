@@ -64,7 +64,9 @@ export function getTargetEnvConfig(
       ...mfConfig,
     };
   }
-
+  if (mfConfig.library?.type === 'commonjs-module') {
+    mfConfig.library.type = 'global';
+  }
   return mfConfig;
 }
 
