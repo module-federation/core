@@ -19,6 +19,7 @@ export interface NormalizedSharedConfig {
   strictVersion: boolean;
   requiredVersion: string;
   version?: string;
+  eager?: boolean;
   includeSecondaries?: boolean;
 }
 export interface NormalizedFederationConfig {
@@ -26,4 +27,5 @@ export interface NormalizedFederationConfig {
   exposes: Record<string, string>;
   shared: Record<string, NormalizedSharedConfig>;
   sharedMappings: Array<MappedPath>;
+  remotes?: Record<string, string>;
 }

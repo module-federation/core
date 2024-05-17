@@ -66,4 +66,3 @@ function normalizeSharedMappings(config, skip) {
   }
   return result;
 }
-//# sourceMappingURL=with-native-federation.js.map
