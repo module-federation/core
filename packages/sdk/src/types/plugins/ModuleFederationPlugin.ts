@@ -161,6 +161,11 @@ export interface PluginDtsOptions {
   implementation?: string;
 }
 
+export type AsyncBoundaryOptions = {
+  eager?: RegExp | ((module: any) => boolean);
+  excludeChunk?: (chunk: any) => boolean;
+};
+
 export interface ModuleFederationPluginOptions {
   /**
    * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
@@ -211,7 +216,7 @@ export interface ModuleFederationPluginOptions {
 
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
-  async?: boolean;
+  async?: boolean | AsyncBoundaryOptions;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

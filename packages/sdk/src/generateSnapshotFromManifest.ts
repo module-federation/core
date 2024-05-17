@@ -199,24 +199,12 @@ export function generateSnapshotFromManifest(
 export function isManifestProvider(
   moduleInfo: ModuleInfo | ManifestProvider,
 ): moduleInfo is ManifestProvider {
-  if (isBrowserEnv()) {
-    if (
-      'remoteEntry' in moduleInfo &&
-      moduleInfo.remoteEntry.includes(MANIFEST_EXT)
-    ) {
-      return true;
-    } else {
-      return false;
-    }
+  if (
+    'remoteEntry' in moduleInfo &&
+    moduleInfo.remoteEntry.includes(MANIFEST_EXT)
+  ) {
+    return true;
   } else {
-    if (
-      'ssrRemoteEntry' in moduleInfo &&
-      moduleInfo.ssrRemoteEntry &&
-      moduleInfo.ssrRemoteEntry.includes(MANIFEST_EXT)
-    ) {
-      return true;
-    } else {
-      return false;
-    }
+    return false;
   }
 }
