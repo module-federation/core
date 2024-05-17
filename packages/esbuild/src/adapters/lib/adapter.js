@@ -177,4 +177,3 @@ function replaceEntryPoint(entryPoint, fileReplacements) {
   }
   return entryPoint;
 }
-//# sourceMappingURL=adapter.js.map
