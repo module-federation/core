@@ -14,6 +14,7 @@ import {
 } from '@module-federation/sdk';
 import { Compilation, Compiler, StatsCompilation, StatsModule } from 'webpack';
 import {
+  isDev,
   getAssetsByChunk,
   findChunk,
   getAssetsByChunkIDs,
@@ -400,8 +401,11 @@ class StatsManager {
     try {
       const { disableEmit } = extraOptions;
       const existedStats = compilation.getAsset(this.fileName);
-      if (existedStats) {
-        return JSON.parse(existedStats.source.source().toString());
+      if (existedStats && !isDev()) {
+        return {
+          stats: JSON.parse(existedStats.source.source().toString()),
+          filename: this.fileName,
+        };
       }
       const { manifest: manifestOptions = {} } = this._options;
       let stats = await this._generateStats(compiler, compilation);

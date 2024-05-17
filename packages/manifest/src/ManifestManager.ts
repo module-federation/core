@@ -59,47 +59,44 @@ class ManifestManager {
       ...stats,
     };
 
-    manifest.exposes = Object.keys(stats.exposes).reduce((sum, cur) => {
-      const statsExpose = manifest.exposes[cur] as StatsExpose;
+    manifest.exposes = stats.exposes.reduce((sum, cur) => {
       const expose: ManifestExpose = {
-        id: statsExpose.id,
-        name: statsExpose.name,
-        assets: statsExpose.assets,
-        path: statsExpose.path,
+        id: cur.id,
+        name: cur.name,
+        assets: cur.assets,
+        path: cur.path,
       };
       sum.push(expose);
       return sum;
     }, [] as ManifestExpose[]);
-    manifest.shared = Object.keys(stats.shared).reduce((sum, cur) => {
-      const statsShared = manifest.shared[cur] as StatsShared;
+    manifest.shared = stats.shared.reduce((sum, cur) => {
       const shared: ManifestShared = {
-        id: statsShared.id,
-        name: statsShared.name,
-        version: statsShared.version,
-        singleton: statsShared.singleton,
-        requiredVersion: statsShared.requiredVersion,
-        hash: statsShared.hash,
-        assets: statsShared.assets,
+        id: cur.id,
+        name: cur.name,
+        version: cur.version,
+        singleton: cur.singleton,
+        requiredVersion: cur.requiredVersion,
+        hash: cur.hash,
+        assets: cur.assets,
       };
       sum.push(shared);
       return sum;
     }, [] as ManifestShared[]);
 
-    manifest.remotes = Object.keys(stats.remotes).reduce((sum, cur) => {
-      const statsRemote = manifest.remotes[cur] as StatsRemote;
+    manifest.remotes = stats.remotes.reduce((sum, cur) => {
       // @ts-ignore version/entry will be added as follow
       const remote: ManifestRemote = {
-        federationContainerName: statsRemote.federationContainerName,
-        moduleName: statsRemote.moduleName,
-        alias: statsRemote.alias,
+        federationContainerName: cur.federationContainerName,
+        moduleName: cur.moduleName,
+        alias: cur.alias,
       };
 
-      if ('entry' in statsRemote) {
+      if ('entry' in cur) {
         // @ts-ignore
-        remote.entry = statsRemote.entry;
-      } else if ('version' in statsRemote) {
+        remote.entry = cur.entry;
+      } else if ('version' in cur) {
         // @ts-ignore
-        remote.entry = statsRemote.version;
+        remote.entry = cur.version;
       }
 
       sum.push(remote);

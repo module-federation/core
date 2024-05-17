@@ -7,7 +7,6 @@ import {
   Manifest,
   inferAutoPublicPath,
 } from '@module-federation/sdk';
-import cloneDeepWith from 'lodash.clonedeepwith';
 
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
 import { createTypesArchive, downloadTypesArchive } from './archiveHandler';
@@ -27,6 +26,7 @@ import {
 } from '../constant';
 import axios from 'axios';
 import { fileLog } from '../../server';
+import { cloneDeepOptions } from './utils';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
 
@@ -44,12 +44,7 @@ class DTSManager {
   extraOptions: Record<string, any>;
 
   constructor(options: DTSManagerOptions) {
-    this.options = cloneDeepWith(options, (_value, key) => {
-      // moduleFederationConfig.manifest may have un serialization options
-      if (key === 'manifest') {
-        return false;
-      }
-    });
+    this.options = cloneDeepOptions(options);
     this.runtimePkgs = [
       '@module-federation/runtime',
       '@module-federation/enhanced/runtime',

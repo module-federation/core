@@ -7,6 +7,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
+        "parallel": false,
         "dependsOn": [
           {
             "target": "build",
@@ -14,14 +15,8 @@
           }
         ],
         "commands": [
-          {
-            "command": "cd packages/modernjs; pnpm run build",
-            "forwardAllArgs": true
-          },
-          {
-            "command": "cp packages/modernjs/*.md packages/modernjs/dist",
-            "forwardAllArgs": true
-          }
+          "cd packages/modernjs; pnpm run build",
+          "cp packages/modernjs/LICENSE packages/modernjs/dist"
         ]
       }
     },
