@@ -38,7 +38,7 @@
     "app:next:prod": "nx run-many --target=serve --configuration=production -p 3000-home,3001-shop,3002-checkout",
     "app:node:dev": "nx run-many --target=serve --parallel=10 --configuration=development -p node-host,node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote",
     "app:runtime:dev": "nx run-many --target=serve -p 3005-runtime-host,3006-runtime-remote,3007-runtime-remote",
-    "app:manifest:dev": "nx run-many --target=serve --parallel=10 -p 3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider",
+    "app:manifest:dev": "nx run-many --target=serve --parallel=100 -p 3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider",
     "app:ts:dev": "nx run-many --target=serve -p react_ts_host,react_ts_nested_remote,react_ts_remote",
     "commitlint": "commitlint --edit",
     "prepare": "husky install",
