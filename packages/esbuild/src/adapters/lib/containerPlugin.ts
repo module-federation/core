@@ -1,7 +1,7 @@
 import { OnResolveArgs, OnLoadArgs, PluginBuild } from 'esbuild';
 import { createContainerCode } from '../../lib/core/createContainerTemplate.js';
-
-const buildContainerHost = (config: any) => {
+//@ts-ignore
+const buildContainerHost = ({ config }) => {
   const { name, remotes = {}, shared = {}, exposes = {} } = config;
 
   const remoteConfigs = Object.entries(remotes).map(
@@ -75,7 +75,6 @@ const buildContainerHost = (config: any) => {
         name: 'import-maps-plugin',
         async init(args) {
             const remotePrefetch = args.options.remotes.map(async (remote) => {
-                console.log('remote', remote);
                 if (remote.type === 'esm') {
                     await import(remote.entry);
                 }
@@ -84,6 +83,7 @@ const buildContainerHost = (config: any) => {
 
             await Promise.all(remotePrefetch);
 
+console.log('module map',moduleMap);
             const map = Object.keys(moduleMap).reduce((acc, expose) => {
                 const importMap = importShim.getImportMap().imports;
                 const key = args.origin.name + expose.replace('.', '');
@@ -95,7 +95,6 @@ const buildContainerHost = (config: any) => {
                 }
                 return acc;
             }, {});
-
             await importShim.addImportMap({ imports: map });
             console.log('final map', importShim.getImportMap());
 

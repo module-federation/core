@@ -121,7 +121,7 @@ export const writeRemoteManifest = async (config, result) => {
   });
 
   const exposes = await Promise.all(
-    Object.entries(mfConfig.exposes).map(async ([expose, value]) => {
+    Object.entries(mfConfig.exposes).map(([expose, value]) => {
       const exposedFound = outputMapWithoutExt[value.replace('./', '')];
       const chunks = getChunks(exposedFound, outputMap);
 
