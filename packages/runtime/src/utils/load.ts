@@ -2,6 +2,7 @@ import {
   composeKeyWithSeparator,
   loadScript,
   loadScriptNode,
+  CreateScriptHookReturn,
 } from '@module-federation/sdk';
 import { assert } from '../utils/logger';
 import { getRemoteEntryExports, globalLoading } from '../global';
@@ -41,7 +42,7 @@ export async function loadEntryScript({
   name: string;
   globalName: string;
   entry: string;
-  createScriptHook?: (url: string) => HTMLScriptElement | void;
+  createScriptHook?: (url: string) => CreateScriptHookReturn;
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -116,7 +117,7 @@ export async function getRemoteEntry({
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | undefined;
-  createScriptHook?: (url: string) => HTMLScriptElement | void;
+  createScriptHook?: (url: string) => CreateScriptHookReturn;
 }): Promise<RemoteEntryExports | void> {
   const { entry, name, type, entryGlobalName } = remoteInfo;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);

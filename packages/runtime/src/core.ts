@@ -1,3 +1,4 @@
+import type { CreateScriptHookReturn } from '@module-federation/sdk';
 import {
   Options,
   PreloadRemoteArgs,
@@ -90,7 +91,7 @@ export class FederationHost {
           url: string;
         },
       ],
-      HTMLScriptElement | void
+      CreateScriptHookReturn
     >(),
     createLink: new SyncHook<
       [

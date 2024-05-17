@@ -492,7 +492,7 @@ interface PreloadAssets {
 - Type
 
 ```typescript
-function createScript(args: CreateScriptOptions): HTMLScriptElement | void;
+function createScript(args: CreateScriptOptions): HTMLScriptElement | {script?: HTMLScriptElement, timeout?: number } | void;
 
 type CreateScriptOptions = {
   url: string;
@@ -520,5 +520,26 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   };
 };
 ```
-import { resolve } from "path"
+
+- Example with script timeout
+
+```typescript
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'change-script-attribute',
+    createScript({ url }) {
+      if (url === testRemoteEntry) {
+        let script = document.createElement('script');
+        script.src = testRemoteEntry;
+        script.setAttribute('loader-hooks', 'isTrue');
+        script.setAttribute('crossorigin', 'anonymous');
+        return { script, timeout: 1000 }
+      }
+    },
+  };
+};
+```
 
