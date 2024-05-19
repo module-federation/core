@@ -28,8 +28,8 @@ export const moduleFederationPlugin = (
 ): CliPlugin<AppTools> => ({
   name: '@modern-js/plugin-module-federation',
   setup: async ({ useConfigContext, useAppContext }) => {
-    const useConfig = useConfigContext();
-    const enableSSR = Boolean(useConfig?.server?.ssr);
+    const modernjsConfig = useConfigContext();
+    const enableSSR = Boolean(modernjsConfig?.server?.ssr);
     const mfConfig = await getMFConfig(userConfig);
     let outputDir = '';
     const bundlerType =
@@ -74,9 +74,10 @@ export const moduleFederationPlugin = (
           }
 
           patchWebpackConfig({
-            config,
+            bundlerConfig: config,
             isServer,
-            useConfig,
+            modernjsConfig,
+            mfConfig: envConfig,
           });
         };
 
@@ -88,7 +89,7 @@ export const moduleFederationPlugin = (
             },
             webpack(config, { isServer }) {
               modifyBundlerConfig(config, isServer);
-              const enableAsyncEntry = useConfig.source?.enableAsyncEntry;
+              const enableAsyncEntry = modernjsConfig.source?.enableAsyncEntry;
               if (
                 mfConfig.async ||
                 (!enableAsyncEntry && mfConfig.async !== false)
@@ -160,8 +161,8 @@ export const moduleFederationPlugin = (
             },
           },
           dev: {
-            assetPrefix: useConfig?.dev?.assetPrefix
-              ? useConfig.dev.assetPrefix
+            assetPrefix: modernjsConfig?.dev?.assetPrefix
+              ? modernjsConfig.dev.assetPrefix
               : true,
           },
         };

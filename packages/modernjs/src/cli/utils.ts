@@ -77,36 +77,51 @@ export function getTargetEnvConfig(
 }
 
 export function patchWebpackConfig<T>(options: {
-  config: ConfigType<T>;
+  bundlerConfig: ConfigType<T>;
   isServer: boolean;
-  useConfig: UserConfig<AppTools>;
+  modernjsConfig: UserConfig<AppTools>;
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
 }) {
-  const { config, useConfig, isServer } = options;
-  const enableSSR = Boolean(useConfig?.server?.ssr);
+  const { bundlerConfig, modernjsConfig, isServer, mfConfig } = options;
   const isStreamSSR =
-    typeof useConfig?.server?.ssr === 'object'
-      ? useConfig?.server?.ssr?.mode === 'stream'
+    typeof modernjsConfig?.server?.ssr === 'object'
+      ? modernjsConfig?.server?.ssr?.mode === 'stream'
       : false;
 
-  delete config.optimization?.runtimeChunk;
+  delete bundlerConfig.optimization?.runtimeChunk;
 
   if (
     !isServer &&
-    enableSSR &&
     isStreamSSR &&
-    typeof config.optimization?.splitChunks === 'object' &&
-    config.optimization.splitChunks.cacheGroups
+    typeof bundlerConfig.optimization?.splitChunks === 'object' &&
+    bundlerConfig.optimization.splitChunks.cacheGroups
   ) {
-    config.optimization.splitChunks.chunks = 'async';
+    bundlerConfig.optimization.splitChunks.chunks = 'async';
     console.warn(
       '[Modern.js Module Federation] splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"',
     );
   }
 
-  if (config.output?.publicPath === 'auto') {
+  if (bundlerConfig.output?.publicPath === 'auto') {
     // TODO: only in dev temp
-    const port = useConfig.dev?.port || useConfig.server?.port || 8080;
+    const port =
+      modernjsConfig.dev?.port || modernjsConfig.server?.port || 8080;
     const publicPath = `http://localhost:${port}/`;
-    config.output.publicPath = publicPath;
+    bundlerConfig.output.publicPath = publicPath;
+  }
+
+  if (isServer && isStreamSSR) {
+    const { output } = bundlerConfig;
+    const uniqueName = mfConfig.name || output?.uniqueName;
+    const chunkFileName = output?.chunkFilename;
+    if (
+      output &&
+      typeof chunkFileName === 'string' &&
+      uniqueName &&
+      !chunkFileName.includes(uniqueName)
+    ) {
+      const suffix = `-[chunkhash].js`;
+      output.chunkFilename = chunkFileName.replace('.js', suffix);
+    }
   }
 }
