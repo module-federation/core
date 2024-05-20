@@ -133,8 +133,8 @@ importers:
         specifier: 4.2.0
         version: 4.2.0(@nx/devkit@17.2.8)
       '@node-rs/jieba':
-        specifier: 1.9.2
-        version: 1.9.2
+        specifier: 1.10.3
+        version: 1.10.3
       '@nx/cypress':
         specifier: 17.2.8
         version: 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.5.6)(@types/node@20.12.12)(cypress@13.7.2)(eslint@8.56.0)(js-yaml@4.1.0)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.2)
@@ -7161,13 +7161,13 @@ packages:
       - supports-color
     dev: true
 
-  /@napi-rs/wasm-runtime@0.1.2:
-    resolution: {integrity: sha512-8JuczewTFIZ/XIjHQ+YlQUydHvlKx2hkcxtuGwh+t/t5zWyZct6YG4+xjHcq8xyc/e7FmFwf42Zj2YgICwmlvA==}
+  /@napi-rs/wasm-runtime@0.2.4:
+    resolution: {integrity: sha512-9zESzOO5aDByvhIAsOy9TbpZ0Ur2AJbUI7UT73kcUTS2mxAMHOBaa1st/jAymNoCtvrit99kkzT1FZuXVcgfIQ==}
     requiresBuild: true
     dependencies:
       '@emnapi/core': 1.1.1
       '@emnapi/runtime': 1.1.1
-      '@tybys/wasm-util': 0.8.1
+      '@tybys/wasm-util': 0.9.0
     dev: true
     optional: true
 
@@ -7266,8 +7266,8 @@ packages:
       eslint-scope: 5.1.1
     dev: true
 
-  /@node-rs/jieba-android-arm-eabi@1.9.2:
-    resolution: {integrity: sha512-FbgUDCvek/KI4mJe5wqbbJi9kDE788YVvsA7DLTE0up+Tb/A7pNIJXq4Pg7zhsgHTVL7EfHHsyd89k+YoSU7Wg==}
+  /@node-rs/jieba-android-arm-eabi@1.10.3:
+    resolution: {integrity: sha512-fuqVtaYlUKZg3cqagYFxj1DSa7ZHKXLle4iGH2kbQWg7Kw6cf7aCYBHIUZuH5sliK10M/CWccZ+SGRUwcSGfbg==}
     engines: {node: '>= 10'}
     cpu: [arm]
     os: [android]
@@ -7275,8 +7275,8 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba-android-arm64@1.9.2:
-    resolution: {integrity: sha512-o6cZz5APAUVBCTG9tNK3XEcLunjGo7Oon1N8+1EHOHPlx4Twzhn1msBtQ+VCgboHUOI+QgZzlY/sTXGfh8IuIA==}
+  /@node-rs/jieba-android-arm64@1.10.3:
+    resolution: {integrity: sha512-iuZZZq5yD9lT+AgaXpFe19gtAsIecUODRLLaBFbavjgjLk5cumv38ytWjS36s/eqptwI15MQfysSYOlWtMEG5g==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [android]
@@ -7284,8 +7284,8 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba-darwin-arm64@1.9.2:
-    resolution: {integrity: sha512-68Pk5phmgn/k5w6nzZWYkDHwJ5wYagprVaSf/WgcPVucw9kAzVMZasGxXo2+Kqn2kMWhD7Dm2NT1TAromQq8Eg==}
+  /@node-rs/jieba-darwin-arm64@1.10.3:
+    resolution: {integrity: sha512-dwPhkav1tEARskwPz91UUXL2NXy4h0lJYTuJzpGgwXxm552zBM2JJ41kjah1364j+EOq5At3NQvf5r5rH89phQ==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
@@ -7293,8 +7293,8 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba-darwin-x64@1.9.2:
-    resolution: {integrity: sha512-TXms+q4l7/0a7T+O9t5fQ0m6Qi+4XKgtaRmg089iYbvSp4JfX+XIg+ZLJG+9uc25oWpOgpt+z4bsz9rrHnW/6Q==}
+  /@node-rs/jieba-darwin-x64@1.10.3:
+    resolution: {integrity: sha512-kjxvV6G1baQo/2I3mELv5qGv4Q0rhd5srwXhypSxMWZFtSpNwCDsLcIOR5bvMBci6QVFfZOs6WD6DKiWVz0SlA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
@@ -7302,8 +7302,8 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba-freebsd-x64@1.9.2:
-    resolution: {integrity: sha512-U4p8PSm+1onheBJUKlEyP4VRE42UrH+gXDYMJlWiJDqriAjZLvA+MdF5xiqeppH0dWc/tQu/ECLoj1WXkJKfvg==}
+  /@node-rs/jieba-freebsd-x64@1.10.3:
+    resolution: {integrity: sha512-QYTsn+zlWRil+MuBeLfTK5Md4GluOf2lHnFqjrOZW2oMgNOvxB3qoLV4TUf70S/E2XHeP6PUdjCKItX8C7GQPg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [freebsd]
@@ -7311,8 +7311,8 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba-linux-arm-gnueabihf@1.9.2:
-    resolution: {integrity: sha512-pelyUy0uFzR7dsnleN8A+4yiNRIRQYFDufbOapP9qkgpEOSvJaD6zYOi3HDm4GdXD5jD0UFNEYMCbi2+Ed2zIg==}
+  /@node-rs/jieba-linux-arm-gnueabihf@1.10.3:
+    resolution: {integrity: sha512-UFB43kDOvqmbRl99e3GPwaTuwJZaAvgLaMTvBkmxww4MpQH6G1k31RLzMW/S21uSQso2lj6W/Mm59gaJk2FiyA==}
     engines: {node: '>= 10'}
     cpu: [arm]
     os: [linux]
@@ -7320,8 +7320,8 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba-linux-arm64-gnu@1.9.2:
-    resolution: {integrity: sha512-qgrEyYbzXyqoIcl2iLXMvIv4PC1Z84O5TGCGKwGibblHAOpWIVQzkquDhty/aE9Ju1OSJiNZGtE9ISlJXB/PJA==}
+  /@node-rs/jieba-linux-arm64-gnu@1.10.3:
+    resolution: {integrity: sha512-bu++yWi10wZtnS5uLcwxzxKmHVT77NgQMK8JiQr1TWCl3Y1Th7CnEHQtxfVB489edDK8l644h1/4zSTe5fRnOQ==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
@@ -7329,8 +7329,8 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba-linux-arm64-musl@1.9.2:
-    resolution: {integrity: sha512-FMl9EYCJSKCfJb8rrk+9mmi44SwDyNCMLvxMzG/va59D0BRItmm4EP9Zd2QoKnGawV6Bw4BAXIrNhSg9gWedxg==}
+  /@node-rs/jieba-linux-arm64-musl@1.10.3:
+    resolution: {integrity: sha512-pJh+SzrK1HaKakhdFM+ew9vXwpZqMxy9u0U7J4GT+3GvOwnAZ+KjeaHebIfgOz7ZHvp/T4YBNf8oWW4zwj3AJw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
@@ -7338,8 +7338,8 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba-linux-x64-gnu@1.9.2:
-    resolution: {integrity: sha512-+7wcz5+3HzOH8+PbNwOPuelTo6ik5jgrz8SFbd+JL6sZLap2pjpKWol5nJyNYNv90yRq1A6p8TrhFXCtVZujFA==}
+  /@node-rs/jieba-linux-x64-gnu@1.10.3:
+    resolution: {integrity: sha512-GF5cfvu/0wXO2fVX/XV3WYH/xEGWzMBvfqLhGiA1OA1xHIufnA1T7uU3ZXkyoNi5Bzf6dmxnwtE4CJL0nvhwjQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -7347,8 +7347,8 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba-linux-x64-musl@1.9.2:
-    resolution: {integrity: sha512-ims1jOq99zTvcwcUXKuD+WT36KHHVNTq9Fm663YzMMBO+5sqLleQtQkZgbh0BHJI25jvW9IrBCvuS1ZwKZ6kOA==}
+  /@node-rs/jieba-linux-x64-musl@1.10.3:
+    resolution: {integrity: sha512-h45HMVU/hgzQ0saXNsK9fKlGdah1i1cXZULpB5vQRlRL2ZIaGp+ULtWTogS7vkoo2K8s2l4tqakWMg9eUjIJ2A==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -7356,18 +7356,18 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba-wasm32-wasi@1.9.2:
-    resolution: {integrity: sha512-h/lWDJCYlsH3VUNWBCO2exite7VDPgjpOmaQgTQ6aNI5x8rR3NEkyXfmy/yWIev63tdMr9nD3sXw38QQp4ddIA==}
+  /@node-rs/jieba-wasm32-wasi@1.10.3:
+    resolution: {integrity: sha512-vuoQ62vVoedNGcBmIi4UWdtNBOZG8B+vDYfjx3FD6rNg6g/RgwbVjYXbOVMOQwX06Ob9CfrutICXdUGHgoxzEQ==}
     engines: {node: '>=14.0.0'}
     cpu: [wasm32]
     requiresBuild: true
     dependencies:
-      '@napi-rs/wasm-runtime': 0.1.2
+      '@napi-rs/wasm-runtime': 0.2.4
     dev: true
     optional: true
 
-  /@node-rs/jieba-win32-arm64-msvc@1.9.2:
-    resolution: {integrity: sha512-a3BkMcvW9sedSA1XlYvGEQSNQQrK4kUMULKTXmqboLjFbwI9v6flpDCiJyw2pXYs+1WT6XjTHvEyVsoGCVMRlQ==}
+  /@node-rs/jieba-win32-arm64-msvc@1.10.3:
+    resolution: {integrity: sha512-B8t4dh56TZnMLBoYWDkopf1ed37Ru/iU1qiIeBkbZWXGmNBChNZUOd//eaPOFjx8m9Sfc8bkj3FBRWt/kTAhmw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
@@ -7375,8 +7375,8 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba-win32-ia32-msvc@1.9.2:
-    resolution: {integrity: sha512-k8xPkEOMJM3ic4UzvmvKELjPQsIFSo7mw1wx4tNrUN5mu5ANIhk1Fq0zXOcTbpIe7jHPsWaB5jYtBeeJ0h09iA==}
+  /@node-rs/jieba-win32-ia32-msvc@1.10.3:
+    resolution: {integrity: sha512-SKuPGZJ5T+X4jOn1S8LklOSZ6HC7UBiw0hwi2z9uqX6WgElquLjGi/xfZ2gPqffeR/5K/PUu7aqYUUPL1XonVQ==}
     engines: {node: '>= 10'}
     cpu: [ia32]
     os: [win32]
@@ -7384,8 +7384,8 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba-win32-x64-msvc@1.9.2:
-    resolution: {integrity: sha512-wIseuWUK+WdikhMFPLvr80D0I4wQJSdFsRIljiUhKwnNQESG20zIxSYE1qy7BNBd7s8fAn1BC6PGeg7S/2KliQ==}
+  /@node-rs/jieba-win32-x64-msvc@1.10.3:
+    resolution: {integrity: sha512-j9I4+a/tf2hsLu8Sr0NhcLBVNBBQctO2mzcjemMpRa1SlEeODyic9RIyP8Ljz3YTN6MYqKh1KA9iR1xvxjxYFg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -7393,24 +7393,24 @@ packages:
     dev: true
     optional: true
 
-  /@node-rs/jieba@1.9.2:
-    resolution: {integrity: sha512-H7/Pv9RBEgzcxVAM4yg6L4G10ZoiqVnNcUCs01yV9XIRwLmShUkdthkTqG8heyx2dAMRua+kofd28JtDWBHMfA==}
+  /@node-rs/jieba@1.10.3:
+    resolution: {integrity: sha512-SG0CWHmhIveH6upJURgymDKLertEPYbOc5NSFIpbZWW1W2MpqgumVteQO+5YBlkmpR6jMNDPWNQyQwkB6HoeNg==}
     engines: {node: '>= 10'}
     optionalDependencies:
-      '@node-rs/jieba-android-arm-eabi': 1.9.2
-      '@node-rs/jieba-android-arm64': 1.9.2
-      '@node-rs/jieba-darwin-arm64': 1.9.2
-      '@node-rs/jieba-darwin-x64': 1.9.2
-      '@node-rs/jieba-freebsd-x64': 1.9.2
-      '@node-rs/jieba-linux-arm-gnueabihf': 1.9.2
-      '@node-rs/jieba-linux-arm64-gnu': 1.9.2
-      '@node-rs/jieba-linux-arm64-musl': 1.9.2
-      '@node-rs/jieba-linux-x64-gnu': 1.9.2
-      '@node-rs/jieba-linux-x64-musl': 1.9.2
-      '@node-rs/jieba-wasm32-wasi': 1.9.2
-      '@node-rs/jieba-win32-arm64-msvc': 1.9.2
-      '@node-rs/jieba-win32-ia32-msvc': 1.9.2
-      '@node-rs/jieba-win32-x64-msvc': 1.9.2
+      '@node-rs/jieba-android-arm-eabi': 1.10.3
+      '@node-rs/jieba-android-arm64': 1.10.3
+      '@node-rs/jieba-darwin-arm64': 1.10.3
+      '@node-rs/jieba-darwin-x64': 1.10.3
+      '@node-rs/jieba-freebsd-x64': 1.10.3
+      '@node-rs/jieba-linux-arm-gnueabihf': 1.10.3
+      '@node-rs/jieba-linux-arm64-gnu': 1.10.3
+      '@node-rs/jieba-linux-arm64-musl': 1.10.3
+      '@node-rs/jieba-linux-x64-gnu': 1.10.3
+      '@node-rs/jieba-linux-x64-musl': 1.10.3
+      '@node-rs/jieba-wasm32-wasi': 1.10.3
+      '@node-rs/jieba-win32-arm64-msvc': 1.10.3
+      '@node-rs/jieba-win32-ia32-msvc': 1.10.3
+      '@node-rs/jieba-win32-x64-msvc': 1.10.3
     dev: true
 
   /@nodelib/fs.scandir@2.1.5:
@@ -9154,7 +9154,7 @@ packages:
       enquirer: 2.3.6
       less-loader: 11.1.0(less@4.2.0)(webpack@5.91.0)
       license-webpack-plugin: 4.0.2(webpack@5.91.0)
-      sass-loader: 12.6.0(webpack@5.91.0)
+      sass-loader: 12.6.0(sass@1.74.1)(webpack@5.91.0)
       stylus-loader: 7.1.3(stylus@0.63.0)(webpack@5.91.0)
       tsconfig-paths: 4.2.0
       webpack-sources: 3.2.3
@@ -13915,7 +13915,7 @@ packages:
     dependencies:
       '@babel/core': 7.24.4
       '@svgr/babel-preset': 8.1.0(@babel/core@7.24.4)
-      '@svgr/core': 8.1.0(typescript@5.0.4)
+      '@svgr/core': 8.1.0(typescript@5.3.3)
       '@svgr/hast-util-to-babel-ast': 8.0.0
       svg-parser: 2.0.4
     transitivePeerDependencies:
@@ -14250,8 +14250,8 @@ packages:
   /@tsconfig/node16@1.0.4:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
-  /@tybys/wasm-util@0.8.1:
-    resolution: {integrity: sha512-GSsTwyBl4pIzsxAY5wroZdyQKyhXk0d8PCRZtrSZ2WEB1cBdrp2EgGBwHOGCZtIIPun/DL3+AykCv+J6fyRH4Q==}
+  /@tybys/wasm-util@0.9.0:
+    resolution: {integrity: sha512-6+7nlbMVX/PVDCwaIQ8nTOPveOcFLSt8GcXdx8hD0bt39uWxYT88uXzqTd4fTvqta7oeUJqudepapKNt2DYJFw==}
     requiresBuild: true
     dependencies:
       tslib: 2.6.2
@@ -18871,7 +18871,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.2.0
       serialize-javascript: 6.0.2
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
     dev: true
 
   /copy-webpack-plugin@11.0.0(webpack@5.91.0):
@@ -19225,7 +19225,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.38)
       postcss-value-parser: 4.2.0
       semver: 7.6.0
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
     dev: true
 
   /css-minimizer-webpack-plugin@5.0.1(esbuild@0.17.19)(webpack@5.91.0):
@@ -26052,7 +26052,7 @@ packages:
     dependencies:
       klona: 2.0.6
       less: 4.1.3
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
     dev: true
 
   /less-loader@11.1.0(less@4.2.0)(webpack@5.91.0):
@@ -26130,7 +26130,7 @@ packages:
       webpack-sources:
         optional: true
     dependencies:
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
       webpack-sources: 3.2.3
     dev: true
 
@@ -27460,7 +27460,7 @@ packages:
       webpack: ^5.0.0
     dependencies:
       schema-utils: 4.2.0
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
     dev: true
 
   /mini-css-extract-plugin@2.7.6(webpack@5.91.0):
@@ -29717,7 +29717,7 @@ packages:
       klona: 2.0.6
       postcss: 8.4.38
       semver: 7.6.0
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
     dev: true
 
   /postcss-media-minmax@5.0.0(postcss@8.4.38):
@@ -32872,30 +32872,6 @@ packages:
       klona: 2.0.6
       neo-async: 2.6.2
       sass: 1.74.1
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
-    dev: true
-
-  /sass-loader@12.6.0(webpack@5.91.0):
-    resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}
-    engines: {node: '>= 12.13.0'}
-    peerDependencies:
-      fibers: '>= 3.1.0'
-      node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
-      sass: ^1.3.0
-      sass-embedded: '*'
-      webpack: ^5.0.0
-    peerDependenciesMeta:
-      fibers:
-        optional: true
-      node-sass:
-        optional: true
-      sass:
-        optional: true
-      sass-embedded:
-        optional: true
-    dependencies:
-      klona: 2.0.6
-      neo-async: 2.6.2
       webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
     dev: true
 
@@ -33536,7 +33512,7 @@ packages:
       abab: 2.0.6
       iconv-lite: 0.6.3
       source-map-js: 1.2.0
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
     dev: true
 
   /source-map-resolve@0.5.3:
@@ -34113,7 +34089,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
     dev: true
 
   /style-to-object@0.3.0:
@@ -34253,7 +34229,7 @@ packages:
       fast-glob: 3.3.2
       normalize-path: 3.0.0
       stylus: 0.59.0
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
     dev: true
 
   /stylus-loader@7.1.3(stylus@0.63.0)(webpack@5.91.0):
@@ -36815,7 +36791,7 @@ packages:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.2.0
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
     dev: true
 
   /webpack-dev-middleware@6.0.2(webpack@5.91.0):
@@ -36944,7 +36920,7 @@ packages:
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
       webpack-dev-middleware: 5.3.4(webpack@5.91.0)
       ws: 8.16.0
     transitivePeerDependencies:
@@ -37033,7 +37009,7 @@ packages:
     dependencies:
       html-webpack-plugin: 5.6.0(@rspack/core@0.5.8)(webpack@5.91.0)
       typed-assert: 1.0.9
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
     dev: true
 
   /webpack-virtual-modules@0.4.6:
