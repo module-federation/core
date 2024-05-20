@@ -76,7 +76,7 @@ export async function loadEntryScript({
         return entryExports;
       })
       .catch((e) => {
-        return e;
+        throw e;
       });
   }
 
@@ -100,7 +100,7 @@ export async function loadEntryScript({
       return entryExports;
     })
     .catch((e) => {
-      return e;
+      throw e;
     });
 }
 

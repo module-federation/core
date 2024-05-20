@@ -339,8 +339,6 @@ export class RemoteHandler {
     targetRemotes: Remote[],
     options?: { force?: boolean },
   ): void {
-    const { host } = this;
-
     const normalizeRemote = () => {
       if (remote.alias) {
         // Validate if alias equals the prefix of remote.name and remote.alias, if so, throw an error
