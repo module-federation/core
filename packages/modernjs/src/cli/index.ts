@@ -32,23 +32,25 @@ export const moduleFederationPlugin = (
     const enableSSR = Boolean(modernjsConfig?.server?.ssr);
     const mfConfig = await getMFConfig(userConfig);
     let outputDir = '';
-    const bundlerType =
-      useAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
-
-    const WebpackPluginConstructor =
-      userConfig.webpackPluginImplementation || WebpackModuleFederationPlugin;
-    const RspackPluginConstructor =
-      userConfig.rspackPluginImplementation || RspackModuleFederationPlugin;
-
-    const MFBundlerPlugin =
-      bundlerType === 'rspack'
-        ? RspackPluginConstructor
-        : WebpackPluginConstructor;
 
     let browserPlugin: BundlerPlugin;
     let nodePlugin: BundlerPlugin;
     return {
       config: () => {
+        const bundlerType =
+          useAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
+
+        const WebpackPluginConstructor =
+          userConfig.webpackPluginImplementation ||
+          WebpackModuleFederationPlugin;
+        const RspackPluginConstructor =
+          userConfig.rspackPluginImplementation || RspackModuleFederationPlugin;
+
+        const MFBundlerPlugin =
+          bundlerType === 'rspack'
+            ? RspackPluginConstructor
+            : WebpackPluginConstructor;
+
         if (enableSSR) {
           process.env['MF_DISABLE_EMIT_STATS'] = 'true';
           process.env['MF_SSR_PRJ'] = 'true';
