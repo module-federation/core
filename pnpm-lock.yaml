@@ -120,18 +120,12 @@ importers:
       '@commitlint/cz-commitlint':
         specifier: ^17.7.2
         version: 17.8.1(@swc/core@1.5.6)(commitizen@4.3.0)(inquirer@8.2.6)
-      '@dqbd/tiktoken':
-        specifier: 1.0.13
-        version: 1.0.13
       '@fontsource/roboto':
         specifier: 5.0.12
         version: 5.0.12
       '@fontsource/roboto-mono':
         specifier: 5.0.18
         version: 5.0.18
-      '@jscutlery/semver':
-        specifier: 4.2.0
-        version: 4.2.0(@nx/devkit@17.2.8)
       '@node-rs/jieba':
         specifier: 1.10.3
         version: 1.10.3
@@ -420,9 +414,6 @@ importers:
       js-yaml:
         specifier: 4.1.0
         version: 4.1.0
-      merge-stream:
-        specifier: 2.0.0
-        version: 2.0.0
       mime-types:
         specifier: 2.1.35
         version: 2.1.35
@@ -432,9 +423,6 @@ importers:
       node-fetch:
         specifier: ~3.3.0
         version: 3.3.2
-      node-html-markdown:
-        specifier: 1.3.0
-        version: 1.3.0
       nx:
         specifier: 17.2.8
         version: 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.5.6)
@@ -525,9 +513,6 @@ importers:
       wait-on:
         specifier: ^7.2.0
         version: 7.2.0
-      wast-loader:
-        specifier: ^1.11.5
-        version: 1.12.1
       webpack:
         specifier: ^5.90.0
         version: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
@@ -4343,10 +4328,6 @@ packages:
     engines: {node: '>=10.0.0'}
     dev: true
 
-  /@dqbd/tiktoken@1.0.13:
-    resolution: {integrity: sha512-941kjlHjfI97l6NuH/AwuXV4mHuVnRooDcHNSlzi98hz+4ug3wT4gJcWjSwSZHqeGAEn90lC9sFD+8a9d5Jvxg==}
-    dev: true
-
   /@emnapi/core@1.1.1:
     resolution: {integrity: sha512-eu4KjHfXg3I+UUR7vSuwZXpRo4c8h4Rtb5Lu2F7Z4JqJFl/eidquONEBiRs6viXKpWBC3BaJBy68xGJ2j56idw==}
     requiresBuild: true
@@ -5311,11 +5292,6 @@ packages:
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
     dev: true
 
-  /@hutson/parse-repository-url@5.0.0:
-    resolution: {integrity: sha512-e5+YUKENATs1JgYHMzTr2MW/NDcXGfYFAuOQU8gJgF/kEh4EqKgfGrfLI67bMD4tbhZVlkigz/9YYwWcbOFthg==}
-    engines: {node: '>=10.13.0'}
-    dev: true
-
   /@iarna/toml@2.2.5:
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
     dev: true
@@ -5788,31 +5764,6 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
-
-  /@jscutlery/semver@4.2.0(@nx/devkit@17.2.8):
-    resolution: {integrity: sha512-XaExVbzoIQ5D7k9JOfdqi4IJ2CRNPyiSQu730jbcNtl+D3Ra5qOsg3HVgRtp4BoiMFNLoPsQJMiB8LeAADMfwA==}
-    peerDependencies:
-      '@nx/devkit': ^17.0.0
-    dependencies:
-      '@nx/devkit': 17.2.8(nx@17.2.8)
-      chalk: 4.1.2
-      conventional-changelog: 5.1.0
-      conventional-changelog-angular: 7.0.0
-      conventional-changelog-atom: 4.0.0
-      conventional-changelog-codemirror: 4.0.0
-      conventional-changelog-conventionalcommits: 7.0.2
-      conventional-changelog-ember: 4.0.0
-      conventional-changelog-eslint: 5.0.0
-      conventional-changelog-express: 4.0.0
-      conventional-changelog-jquery: 5.0.0
-      conventional-changelog-jshint: 4.0.0
-      conventional-commits-parser: 5.0.0
-      conventional-recommended-bump: 9.0.0
-      detect-indent: 6.1.0
-      git-semver-tags: 7.0.1
-      inquirer: 8.2.6
-      rxjs: 7.8.1
-    dev: true
 
   /@juggle/resize-observer@3.4.0:
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
@@ -9154,7 +9105,7 @@ packages:
       enquirer: 2.3.6
       less-loader: 11.1.0(less@4.2.0)(webpack@5.91.0)
       license-webpack-plugin: 4.0.2(webpack@5.91.0)
-      sass-loader: 12.6.0(sass@1.74.1)(webpack@5.91.0)
+      sass-loader: 12.6.0(webpack@5.91.0)
       stylus-loader: 7.1.3(stylus@0.63.0)(webpack@5.91.0)
       tsconfig-paths: 4.2.0
       webpack-sources: 3.2.3
@@ -13915,7 +13866,7 @@ packages:
     dependencies:
       '@babel/core': 7.24.4
       '@svgr/babel-preset': 8.1.0(@babel/core@7.24.4)
-      '@svgr/core': 8.1.0(typescript@5.3.3)
+      '@svgr/core': 8.1.0(typescript@5.0.4)
       '@svgr/hast-util-to-babel-ast': 8.0.0
       svg-parser: 2.0.4
     transitivePeerDependencies:
@@ -16184,10 +16135,6 @@ packages:
     resolution: {integrity: sha512-Y9rRfJG5jcKOE0CLisYbojUjIrIEE7AGMzA/Sm4BslANhbS+cDMpgBdcPT91oJ7OuJ9hYJBx59RjbhxVnrF8Xg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
-
-  /add-stream@1.0.0:
-    resolution: {integrity: sha512-qQLMr+8o0WC4FZGQTcJiKBVC59JylcPSrTtk6usvmIDFUOCKegapy1VHQwRbFMOFyb/inzUVqHs+eMYKDM1YeQ==}
-    dev: true
 
   /address@1.2.2:
     resolution: {integrity: sha512-4B/qKCfeE/ODUaAUpSwfzazo5x29WD4r3vXiWsB7I2mSDAihwEqKO+g8GELZUQSSAo5e1XTYh3ZVfLyxBc12nA==}
@@ -18635,76 +18582,11 @@ packages:
       compare-func: 2.0.0
     dev: true
 
-  /conventional-changelog-atom@4.0.0:
-    resolution: {integrity: sha512-q2YtiN7rnT1TGwPTwjjBSIPIzDJCRE+XAUahWxnh+buKK99Kks4WLMHoexw38GXx9OUxAsrp44f9qXe5VEMYhw==}
-    engines: {node: '>=16'}
-    dev: true
-
-  /conventional-changelog-codemirror@4.0.0:
-    resolution: {integrity: sha512-hQSojc/5imn1GJK3A75m9hEZZhc3urojA5gMpnar4JHmgLnuM3CUIARPpEk86glEKr3c54Po3WV/vCaO/U8g3Q==}
-    engines: {node: '>=16'}
-    dev: true
-
   /conventional-changelog-conventionalcommits@6.1.0:
     resolution: {integrity: sha512-3cS3GEtR78zTfMzk0AizXKKIdN4OvSh7ibNz6/DPbhWWQu7LqE/8+/GqSodV+sywUR2gpJAdP/1JFf4XtN7Zpw==}
     engines: {node: '>=14'}
     dependencies:
       compare-func: 2.0.0
-    dev: true
-
-  /conventional-changelog-conventionalcommits@7.0.2:
-    resolution: {integrity: sha512-NKXYmMR/Hr1DevQegFB4MwfM5Vv0m4UIxKZTTYuD98lpTknaZlSRrDOG4X7wIXpGkfsYxZTghUN+Qq+T0YQI7w==}
-    engines: {node: '>=16'}
-    dependencies:
-      compare-func: 2.0.0
-    dev: true
-
-  /conventional-changelog-core@7.0.0:
-    resolution: {integrity: sha512-UYgaB1F/COt7VFjlYKVE/9tTzfU3VUq47r6iWf6lM5T7TlOxr0thI63ojQueRLIpVbrtHK4Ffw+yQGduw2Bhdg==}
-    engines: {node: '>=16'}
-    dependencies:
-      '@hutson/parse-repository-url': 5.0.0
-      add-stream: 1.0.0
-      conventional-changelog-writer: 7.0.1
-      conventional-commits-parser: 5.0.0
-      git-raw-commits: 4.0.0
-      git-semver-tags: 7.0.1
-      hosted-git-info: 7.0.1
-      normalize-package-data: 6.0.0
-      read-pkg: 8.1.0
-      read-pkg-up: 10.1.0
-    dev: true
-
-  /conventional-changelog-ember@4.0.0:
-    resolution: {integrity: sha512-D0IMhwcJUg1Y8FSry6XAplEJcljkHVlvAZddhhsdbL1rbsqRsMfGx/PIkPYq0ru5aDgn+OxhQ5N5yR7P9mfsvA==}
-    engines: {node: '>=16'}
-    dev: true
-
-  /conventional-changelog-eslint@5.0.0:
-    resolution: {integrity: sha512-6JtLWqAQIeJLn/OzUlYmzd9fKeNSWmQVim9kql+v4GrZwLx807kAJl3IJVc3jTYfVKWLxhC3BGUxYiuVEcVjgA==}
-    engines: {node: '>=16'}
-    dev: true
-
-  /conventional-changelog-express@4.0.0:
-    resolution: {integrity: sha512-yWyy5c7raP9v7aTvPAWzqrztACNO9+FEI1FSYh7UP7YT1AkWgv5UspUeB5v3Ibv4/o60zj2o9GF2tqKQ99lIsw==}
-    engines: {node: '>=16'}
-    dev: true
-
-  /conventional-changelog-jquery@5.0.0:
-    resolution: {integrity: sha512-slLjlXLRNa/icMI3+uGLQbtrgEny3RgITeCxevJB+p05ExiTgHACP5p3XiMKzjBn80n+Rzr83XMYfRInEtCPPw==}
-    engines: {node: '>=16'}
-    dev: true
-
-  /conventional-changelog-jshint@4.0.0:
-    resolution: {integrity: sha512-LyXq1bbl0yG0Ai1SbLxIk8ZxUOe3AjnlwE6sVRQmMgetBk+4gY9EO3d00zlEt8Y8gwsITytDnPORl8al7InTjg==}
-    engines: {node: '>=16'}
-    dependencies:
-      compare-func: 2.0.0
-    dev: true
-
-  /conventional-changelog-preset-loader@4.1.0:
-    resolution: {integrity: sha512-HozQjJicZTuRhCRTq4rZbefaiCzRM2pr6u2NL3XhrmQm4RMnDXfESU6JKu/pnKwx5xtdkYfNCsbhN5exhiKGJA==}
-    engines: {node: '>=16'}
     dev: true
 
   /conventional-changelog-writer@7.0.1:
@@ -18718,23 +18600,6 @@ packages:
       meow: 12.1.1
       semver: 7.6.0
       split2: 4.2.0
-    dev: true
-
-  /conventional-changelog@5.1.0:
-    resolution: {integrity: sha512-aWyE/P39wGYRPllcCEZDxTVEmhyLzTc9XA6z6rVfkuCD2UBnhV/sgSOKbQrEG5z9mEZJjnopjgQooTKxEg8mAg==}
-    engines: {node: '>=16'}
-    dependencies:
-      conventional-changelog-angular: 7.0.0
-      conventional-changelog-atom: 4.0.0
-      conventional-changelog-codemirror: 4.0.0
-      conventional-changelog-conventionalcommits: 7.0.2
-      conventional-changelog-core: 7.0.0
-      conventional-changelog-ember: 4.0.0
-      conventional-changelog-eslint: 5.0.0
-      conventional-changelog-express: 4.0.0
-      conventional-changelog-jquery: 5.0.0
-      conventional-changelog-jshint: 4.0.0
-      conventional-changelog-preset-loader: 4.1.0
     dev: true
 
   /conventional-commit-types@3.0.0:
@@ -18755,19 +18620,6 @@ packages:
       is-text-path: 2.0.0
       meow: 12.1.1
       split2: 4.2.0
-    dev: true
-
-  /conventional-recommended-bump@9.0.0:
-    resolution: {integrity: sha512-HR1yD0G5HgYAu6K0wJjLd7QGRK8MQDqqj6Tn1n/ja1dFwBCE6QmV+iSgQ5F7hkx7OUR/8bHpxJqYtXj2f/opPQ==}
-    engines: {node: '>=16'}
-    hasBin: true
-    dependencies:
-      conventional-changelog-preset-loader: 4.1.0
-      conventional-commits-filter: 4.0.0
-      conventional-commits-parser: 5.0.0
-      git-raw-commits: 4.0.0
-      git-semver-tags: 7.0.1
-      meow: 12.1.1
     dev: true
 
   /convert-hrtime@5.0.0:
@@ -18871,7 +18723,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.2.0
       serialize-javascript: 6.0.2
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
     dev: true
 
   /copy-webpack-plugin@11.0.0(webpack@5.91.0):
@@ -19225,7 +19077,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.38)
       postcss-value-parser: 4.2.0
       semver: 7.6.0
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
     dev: true
 
   /css-minimizer-webpack-plugin@5.0.1(esbuild@0.17.19)(webpack@5.91.0):
@@ -22969,15 +22821,6 @@ packages:
       split2: 4.2.0
     dev: true
 
-  /git-semver-tags@7.0.1:
-    resolution: {integrity: sha512-NY0ZHjJzyyNXHTDZmj+GG7PyuAKtMsyWSwh07CR2hOZFa+/yoTsXci/nF2obzL8UDhakFNkD9gNdt/Ed+cxh2Q==}
-    engines: {node: '>=16'}
-    hasBin: true
-    dependencies:
-      meow: 12.1.1
-      semver: 7.6.0
-    dev: true
-
   /github-slugger@1.5.0:
     resolution: {integrity: sha512-wIh+gKBI9Nshz2o46B0B3f5k/W+WI9ZAv6y5Dn5WJ5SK1t0TnDimB4WE5rmTD05ZAIn8HALCZVmCsvj0w0v0lw==}
     dev: true
@@ -26052,7 +25895,7 @@ packages:
     dependencies:
       klona: 2.0.6
       less: 4.1.3
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
     dev: true
 
   /less-loader@11.1.0(less@4.2.0)(webpack@5.91.0):
@@ -26127,10 +25970,8 @@ packages:
     peerDependenciesMeta:
       webpack:
         optional: true
-      webpack-sources:
-        optional: true
     dependencies:
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
       webpack-sources: 3.2.3
     dev: true
 
@@ -27460,7 +27301,7 @@ packages:
       webpack: ^5.0.0
     dependencies:
       schema-utils: 4.2.0
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
     dev: true
 
   /mini-css-extract-plugin@2.7.6(webpack@5.91.0):
@@ -27977,13 +27818,6 @@ packages:
   /node-gyp-build@4.8.0:
     resolution: {integrity: sha512-u6fs2AEUljNho3EYTJNBfImO5QTo/J/1Etd+NVdCj7qWKUSN/bSLkZwhDv7I+w/MSC6qJ4cknepkAYykDdK8og==}
     hasBin: true
-    dev: true
-
-  /node-html-markdown@1.3.0:
-    resolution: {integrity: sha512-OeFi3QwC/cPjvVKZ114tzzu+YoR+v9UXW5RwSXGUqGb0qCl0DvP406tzdL7SFn8pZrMyzXoisfG2zcuF9+zw4g==}
-    engines: {node: '>=10.0.0'}
-    dependencies:
-      node-html-parser: 6.1.13
     dev: true
 
   /node-html-parser@6.1.13:
@@ -28980,17 +28814,6 @@ packages:
       lines-and-columns: 1.2.4
     dev: true
 
-  /parse-json@7.1.1:
-    resolution: {integrity: sha512-SgOTCX/EZXtZxBE5eJ97P4yGM5n37BwRU+YMsH4vNzFqJV/oWFXXCmwFlgWUM4PrakybVOueJJ6pwHqSVhTFDw==}
-    engines: {node: '>=16'}
-    dependencies:
-      '@babel/code-frame': 7.24.2
-      error-ex: 1.3.2
-      json-parse-even-better-errors: 3.0.1
-      lines-and-columns: 2.0.4
-      type-fest: 3.13.1
-    dev: true
-
   /parse-json@8.1.0:
     resolution: {integrity: sha512-rum1bPifK5SSar35Z6EKZuYPJx85pkNaFrxBK3mwdfSJ1/WKbYrjoW/zTPSjRRamfmVX1ACBIdFAO0VRErW/EA==}
     engines: {node: '>=18'}
@@ -29717,7 +29540,7 @@ packages:
       klona: 2.0.6
       postcss: 8.4.38
       semver: 7.6.0
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
     dev: true
 
   /postcss-media-minmax@5.0.0(postcss@8.4.38):
@@ -31949,15 +31772,6 @@ packages:
     dependencies:
       pify: 2.3.0
 
-  /read-pkg-up@10.1.0:
-    resolution: {integrity: sha512-aNtBq4jR8NawpKJQldrQcSW9y/d+KWH4v24HWkHljOZ7H0av+YTGANBzRh9A5pw7v/bLVsLVPpOhJ7gHNVy8lA==}
-    engines: {node: '>=16'}
-    dependencies:
-      find-up: 6.3.0
-      read-pkg: 8.1.0
-      type-fest: 4.15.0
-    dev: true
-
   /read-pkg-up@11.0.0:
     resolution: {integrity: sha512-LOVbvF1Q0SZdjClSefZ0Nz5z8u+tIE7mV5NibzmE9VYmDe9CaBbAVtz1veOSZbofrdsilxuDAYnFenukZVp8/Q==}
     engines: {node: '>=18'}
@@ -31985,16 +31799,6 @@ packages:
       normalize-package-data: 2.5.0
       parse-json: 5.2.0
       type-fest: 0.6.0
-    dev: true
-
-  /read-pkg@8.1.0:
-    resolution: {integrity: sha512-PORM8AgzXeskHO/WEv312k9U03B8K9JSiWF/8N9sUuFjBa+9SF2u6K7VClzXwDXab51jCd8Nd36CNM+zR97ScQ==}
-    engines: {node: '>=16'}
-    dependencies:
-      '@types/normalize-package-data': 2.4.4
-      normalize-package-data: 6.0.0
-      parse-json: 7.1.1
-      type-fest: 4.15.0
     dev: true
 
   /read-pkg@9.0.1:
@@ -32872,6 +32676,30 @@ packages:
       klona: 2.0.6
       neo-async: 2.6.2
       sass: 1.74.1
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
+    dev: true
+
+  /sass-loader@12.6.0(webpack@5.91.0):
+    resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}
+    engines: {node: '>= 12.13.0'}
+    peerDependencies:
+      fibers: '>= 3.1.0'
+      node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
+      sass: ^1.3.0
+      sass-embedded: '*'
+      webpack: ^5.0.0
+    peerDependenciesMeta:
+      fibers:
+        optional: true
+      node-sass:
+        optional: true
+      sass:
+        optional: true
+      sass-embedded:
+        optional: true
+    dependencies:
+      klona: 2.0.6
+      neo-async: 2.6.2
       webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
     dev: true
 
@@ -33512,7 +33340,7 @@ packages:
       abab: 2.0.6
       iconv-lite: 0.6.3
       source-map-js: 1.2.0
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
     dev: true
 
   /source-map-resolve@0.5.3:
@@ -34089,7 +33917,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
     dev: true
 
   /style-to-object@0.3.0:
@@ -34229,7 +34057,7 @@ packages:
       fast-glob: 3.3.2
       normalize-path: 3.0.0
       stylus: 0.59.0
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
     dev: true
 
   /stylus-loader@7.1.3(stylus@0.63.0)(webpack@5.91.0):
@@ -35525,11 +35353,6 @@ packages:
     engines: {node: '>=12.20'}
     dev: true
 
-  /type-fest@3.13.1:
-    resolution: {integrity: sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==}
-    engines: {node: '>=14.16'}
-    dev: true
-
   /type-fest@4.15.0:
     resolution: {integrity: sha512-tB9lu0pQpX5KJq54g+oHOLumOx+pMep4RaM6liXh2PKmVRFF+/vAtUP0ZaJ0kOySfVNjF6doBWPHhBhISKdlIA==}
     engines: {node: '>=16'}
@@ -36663,10 +36486,6 @@ packages:
       xml-name-validator: 4.0.0
     dev: true
 
-  /wabt@1.0.0-nightly.20180421:
-    resolution: {integrity: sha512-bsu9zk672KACjoabONcAS94IS20prRm05IbiIUGfa8eBpRLjWZv8ugocdinV/ONh0mFMfXrVWkvF1/BNtwIfUw==}
-    dev: true
-
   /wait-on@7.2.0:
     resolution: {integrity: sha512-wCQcHkRazgjG5XoAq9jbTMLpNIjoSlZslrJ2+N9MxDsGEv1HnFoVjOCexL0ESva7Y9cu350j+DWADdk54s4AFQ==}
     engines: {node: '>=12.0.0'}
@@ -36685,12 +36504,6 @@ packages:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
     dependencies:
       makeerror: 1.0.12
-    dev: true
-
-  /wast-loader@1.12.1:
-    resolution: {integrity: sha512-2w1mPE83C8hgnkxN3imXdiXoXr+CdZ8b0lwHq1zhg6F8C1N9V1VWLog2PFU2n2x3A35Wc86hR+TwaAxdtlrvnA==}
-    dependencies:
-      wabt: 1.0.0-nightly.20180421
     dev: true
 
   /watchpack-chokidar2@2.0.1:
@@ -36791,7 +36604,7 @@ packages:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.2.0
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
     dev: true
 
   /webpack-dev-middleware@6.0.2(webpack@5.91.0):
@@ -36920,7 +36733,7 @@ packages:
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
       webpack-dev-middleware: 5.3.4(webpack@5.91.0)
       ws: 8.16.0
     transitivePeerDependencies:
@@ -37009,7 +36822,7 @@ packages:
     dependencies:
       html-webpack-plugin: 5.6.0(@rspack/core@0.5.8)(webpack@5.91.0)
       typed-assert: 1.0.9
-      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.20.2)
+      webpack: 5.91.0(@swc/core@1.5.6)(esbuild@0.18.20)
     dev: true
 
   /webpack-virtual-modules@0.4.6:
