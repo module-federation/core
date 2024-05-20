@@ -37,22 +37,31 @@ export const patchMFConfig = (
   isServer: boolean,
 ) => {
   const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
-  const runtimePluginPath = path.resolve(
+  const sharedStrategyRuntimePluginPath = path.resolve(
     __dirname,
     './mfRuntimePlugins/shared-strategy.js',
   );
-  if (!runtimePlugins.includes(runtimePluginPath)) {
-    runtimePlugins.push(
-      path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
-    );
+  if (!runtimePlugins.includes(sharedStrategyRuntimePluginPath)) {
+    runtimePlugins.push(sharedStrategyRuntimePluginPath);
   }
 
   if (isServer) {
-    const nodeHmrPluginPath = require.resolve(
-      '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
+    const isDev = process.env.NODE_ENV === 'development';
+    if (isDev) {
+      const nodeHmrPluginPath = require.resolve(
+        '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
+      );
+      if (!runtimePlugins.includes(nodeHmrPluginPath)) {
+        runtimePlugins.push(nodeHmrPluginPath);
+      }
+    }
+
+    const injectNodeFetchRuntimePluginPath = path.resolve(
+      __dirname,
+      './mfRuntimePlugins/inject-node-fetch.js',
     );
-    if (!runtimePlugins.includes(nodeHmrPluginPath)) {
-      runtimePlugins.push(nodeHmrPluginPath);
+    if (!runtimePlugins.includes(injectNodeFetchRuntimePluginPath)) {
+      runtimePlugins.push(injectNodeFetchRuntimePluginPath);
     }
   }
 

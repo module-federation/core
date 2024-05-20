@@ -50,7 +50,8 @@
     "@module-federation/sdk": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
-    "@modern-js/node-bundle-require": "^2.49.2"
+    "@modern-js/node-bundle-require": "^2.49.2",
+    "node-fetch": "~3.3.0"
   },
   "devDependencies": {
     "@module-federation/manifest": "workspace:*",
