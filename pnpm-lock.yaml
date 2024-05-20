@@ -214,8 +214,8 @@ importers:
         specifier: 7.6.17
         version: 7.6.17(@types/react-dom@18.2.25)(@types/react@18.2.62)(encoding@0.1.13)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/builder-webpack5':
-        specifier: 7.6.17
-        version: 7.6.17(@rspack/core@0.5.8)(@swc/helpers@0.5.3)(encoding@0.1.13)(esbuild@0.20.2)(typescript@5.3.3)
+        specifier: 8.1.1
+        version: 8.1.1(@rspack/core@0.5.8)(@swc/core@1.5.6)(encoding@0.1.13)(esbuild@0.20.2)(prettier@3.0.3)(typescript@5.3.3)
       '@storybook/core-common':
         specifier: 7.6.17
         version: 7.6.17(encoding@0.1.13)
@@ -12540,7 +12540,7 @@ packages:
       '@storybook/client-logger': 7.6.17
       '@storybook/components': 7.6.17(@types/react-dom@18.2.25)(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/core-events': 7.6.17
-      '@storybook/csf': 0.1.3
+      '@storybook/csf': 0.1.7
       '@storybook/docs-tools': 7.6.17(encoding@0.1.13)
       '@storybook/global': 5.0.0
       '@storybook/manager-api': 7.6.17(react-dom@18.2.0)(react@18.2.0)
@@ -12615,27 +12615,24 @@ packages:
       - supports-color
     dev: true
 
-  /@storybook/builder-webpack5@7.6.17(@rspack/core@0.5.8)(@swc/helpers@0.5.3)(encoding@0.1.13)(esbuild@0.20.2)(typescript@5.3.3):
-    resolution: {integrity: sha512-GMaBd8/RzivuAmWrYSt9Rga3j8WLcu5LCMYiPVs+XKXsKAC8lTkV0WRWh8Nk6wTmfzsRQ2acwFjSG5oE4ClZKA==}
+  /@storybook/builder-webpack5@8.1.1(@rspack/core@0.5.8)(@swc/core@1.5.6)(encoding@0.1.13)(esbuild@0.20.2)(prettier@3.0.3)(typescript@5.3.3):
+    resolution: {integrity: sha512-I66lr0FkodFe5c0QbEPpyyZC4zdyzZog5B2gAdoKhFZ1yIWc0cHHFKakV7r6dg+lDnCGLZFmYGfz8LDEC/bj6Q==}
     peerDependencies:
       typescript: '*'
     peerDependenciesMeta:
       typescript:
         optional: true
     dependencies:
-      '@babel/core': 7.24.4
-      '@storybook/channels': 7.6.17
-      '@storybook/client-logger': 7.6.17
-      '@storybook/core-common': 7.6.17(encoding@0.1.13)
-      '@storybook/core-events': 7.6.17
-      '@storybook/core-webpack': 7.6.17(encoding@0.1.13)
-      '@storybook/node-logger': 7.6.17
-      '@storybook/preview': 7.6.17
-      '@storybook/preview-api': 7.6.17
-      '@swc/core': 1.5.6(@swc/helpers@0.5.3)
+      '@storybook/channels': 8.1.1
+      '@storybook/client-logger': 8.1.1
+      '@storybook/core-common': 8.1.1(encoding@0.1.13)(prettier@3.0.3)
+      '@storybook/core-events': 8.1.1
+      '@storybook/core-webpack': 8.1.1(encoding@0.1.13)(prettier@3.0.3)
+      '@storybook/node-logger': 8.1.1
+      '@storybook/preview': 8.1.1
+      '@storybook/preview-api': 8.1.1
       '@types/node': 18.19.26
       '@types/semver': 7.5.8
-      babel-loader: 9.1.3(@babel/core@7.24.4)(webpack@5.91.0)
       browser-assert: 1.2.1
       case-sensitive-paths-webpack-plugin: 2.4.0
       cjs-module-lexer: 1.2.3
@@ -12651,7 +12648,6 @@ packages:
       process: 0.11.10
       semver: 7.6.0
       style-loader: 3.3.4(webpack@5.91.0)
-      swc-loader: 0.2.3(@swc/core@1.5.6)(webpack@5.91.0)
       terser-webpack-plugin: 5.3.10(@swc/core@1.5.6)(esbuild@0.20.2)(webpack@5.91.0)
       ts-dedent: 2.2.0
       typescript: 5.3.3
@@ -12664,9 +12660,10 @@ packages:
       webpack-virtual-modules: 0.5.0
     transitivePeerDependencies:
       - '@rspack/core'
-      - '@swc/helpers'
+      - '@swc/core'
       - encoding
       - esbuild
+      - prettier
       - supports-color
       - uglify-js
       - webpack-cli
@@ -12846,7 +12843,7 @@ packages:
       '@babel/core': 7.24.4
       '@babel/preset-env': 7.24.4(@babel/core@7.24.4)
       '@babel/types': 7.24.0
-      '@storybook/csf': 0.1.3
+      '@storybook/csf': 0.1.7
       '@storybook/csf-tools': 7.6.18
       '@storybook/node-logger': 7.6.18
       '@storybook/types': 7.6.18
@@ -12888,7 +12885,7 @@ packages:
       '@radix-ui/react-select': 1.2.2(@types/react-dom@18.2.25)(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-toolbar': 1.0.4(@types/react-dom@18.2.25)(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/client-logger': 7.6.17
-      '@storybook/csf': 0.1.3
+      '@storybook/csf': 0.1.7
       '@storybook/global': 5.0.0
       '@storybook/theming': 7.6.17(react-dom@18.2.0)(react@18.2.0)
       '@storybook/types': 7.6.17
@@ -13156,7 +13153,7 @@ packages:
       '@storybook/channels': 7.6.18
       '@storybook/core-common': 7.6.18(encoding@0.1.13)
       '@storybook/core-events': 7.6.18
-      '@storybook/csf': 0.1.3
+      '@storybook/csf': 0.1.7
       '@storybook/csf-tools': 7.6.18
       '@storybook/docs-mdx': 0.1.0
       '@storybook/global': 5.0.0
@@ -13257,16 +13254,17 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@storybook/core-webpack@7.6.17(encoding@0.1.13):
-    resolution: {integrity: sha512-PyGrFhRM8sTONGwwLWLqBQ1HO+LBnVZ+5TOQO7ejQfdV2FWyNOzjBXm2e5jL/C6XlqiEhmL5pyHEyDBaQJQ3KA==}
+  /@storybook/core-webpack@8.1.1(encoding@0.1.13)(prettier@3.0.3):
+    resolution: {integrity: sha512-zIlRDiVD/hqr58AIvwxGzY8qIV3w3BnrHk6/iKHs6FTsM7B7LP+J+1FEcKyjpeVT3ngJA3ExNFh5LSn60ABmzw==}
     dependencies:
-      '@storybook/core-common': 7.6.17(encoding@0.1.13)
-      '@storybook/node-logger': 7.6.17
-      '@storybook/types': 7.6.17
+      '@storybook/core-common': 8.1.1(encoding@0.1.13)(prettier@3.0.3)
+      '@storybook/node-logger': 8.1.1
+      '@storybook/types': 8.1.1
       '@types/node': 18.19.26
       ts-dedent: 2.2.0
     transitivePeerDependencies:
       - encoding
+      - prettier
       - supports-color
     dev: true
 
@@ -13286,7 +13284,7 @@ packages:
       '@babel/parser': 7.24.4
       '@babel/traverse': 7.24.1(supports-color@5.5.0)
       '@babel/types': 7.24.0
-      '@storybook/csf': 0.1.3
+      '@storybook/csf': 0.1.7
       '@storybook/types': 7.6.17
       fs-extra: 11.2.0
       recast: 0.23.6
@@ -13302,7 +13300,7 @@ packages:
       '@babel/parser': 7.24.4
       '@babel/traverse': 7.24.1(supports-color@5.5.0)
       '@babel/types': 7.24.0
-      '@storybook/csf': 0.1.3
+      '@storybook/csf': 0.1.7
       '@storybook/types': 7.6.18
       fs-extra: 11.2.0
       recast: 0.23.6
@@ -13331,12 +13329,6 @@ packages:
     resolution: {integrity: sha512-9OVvMVh3t9znYZwb0Svf/YQoxX2gVOeQTGe2bses2yj+a3+OJnCrUF3/hGv6Em7KujtOdL2LL+JnG49oMVGFgQ==}
     dependencies:
       lodash: 4.17.21
-    dev: true
-
-  /@storybook/csf@0.1.3:
-    resolution: {integrity: sha512-IPZvXXo4b3G+gpmgBSBqVM81jbp2ePOKsvhgJdhyZJtkYQCII7rg9KKLQhvBQM5sLaF1eU6r0iuwmyynC9d9SA==}
-    dependencies:
-      type-fest: 2.19.0
     dev: true
 
   /@storybook/csf@0.1.7:
@@ -13389,7 +13381,7 @@ packages:
       '@storybook/channels': 7.6.17
       '@storybook/client-logger': 7.6.17
       '@storybook/core-events': 7.6.17
-      '@storybook/csf': 0.1.3
+      '@storybook/csf': 0.1.7
       '@storybook/global': 5.0.0
       '@storybook/router': 7.6.17
       '@storybook/theming': 7.6.17(react-dom@18.2.0)(react@18.2.0)
@@ -13540,7 +13532,7 @@ packages:
       '@storybook/channels': 7.6.17
       '@storybook/client-logger': 7.6.17
       '@storybook/core-events': 7.6.17
-      '@storybook/csf': 0.1.3
+      '@storybook/csf': 0.1.7
       '@storybook/global': 5.0.0
       '@storybook/types': 7.6.17
       '@types/qs': 6.9.14
@@ -13559,7 +13551,7 @@ packages:
       '@storybook/channels': 7.6.18
       '@storybook/client-logger': 7.6.18
       '@storybook/core-events': 7.6.18
-      '@storybook/csf': 0.1.3
+      '@storybook/csf': 0.1.7
       '@storybook/global': 5.0.0
       '@storybook/types': 7.6.18
       '@types/qs': 6.9.14
@@ -13619,6 +13611,10 @@ packages:
 
   /@storybook/preview@7.6.17:
     resolution: {integrity: sha512-LvkMYK/y6alGjwRVNDIKL1lFlbyZ0H0c8iAbcQkiMoaFiujMQyVswMDKlWcj42Upfr/B1igydiruomc+eUt0mw==}
+    dev: true
+
+  /@storybook/preview@8.1.1:
+    resolution: {integrity: sha512-P8iBi9v/62AhTztbCYjVxH6idNO0h9uO583GHwi3uq2Io7F1gUSgwG/HYZ7PnclOsMnmG0FJvAwrvdRc6sWSNw==}
     dev: true
 
   /@storybook/react-docgen-typescript-plugin@1.0.6--canary.9.0c3f3b7.0(typescript@5.0.4)(webpack@5.91.0):
@@ -25817,7 +25813,7 @@ packages:
       acorn: 8.11.3
       eslint-visitor-keys: 3.4.3
       espree: 9.6.1
-      semver: 7.5.3
+      semver: 7.6.0
     dev: true
 
   /jsonc-parser@3.2.0:
