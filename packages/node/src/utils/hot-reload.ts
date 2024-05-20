@@ -127,6 +127,7 @@ export const checkFakeRemote = (remoteScope: any) => {
 export const createFetcher = (
   url: string,
   fetchModule: any,
+  name: string,
   cb: (hash: string) => void,
 ) => {
   return fetchModule(url)
@@ -156,7 +157,7 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
     const name = property;
     const container = remoteScope[property];
     const url = container.entry;
-    const fetcher = createFetcher(url, fetchModule, (hash) => {
+    const fetcher = createFetcher(url, fetchModule, name, (hash) => {
       if (hashmap[name]) {
         if (hashmap[name] !== hash) {
           hashmap[name] = hash;
