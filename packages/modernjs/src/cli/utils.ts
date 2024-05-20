@@ -4,7 +4,7 @@ import type {
   AppTools,
   Rspack,
 } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/sdk';
+import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
 import path from 'path';
 import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
@@ -141,7 +141,7 @@ export function patchWebpackConfig<T>(options: {
       uniqueName &&
       !chunkFileName.includes(uniqueName)
     ) {
-      const suffix = `-[chunkhash].js`;
+      const suffix = `${encodeName(uniqueName)}-[chunkhash].js`;
       output.chunkFilename = chunkFileName.replace('.js', suffix);
     }
   }
