@@ -1,11 +1,6 @@
 import path from 'path';
 import { fs } from '@modern-js/utils';
-import type {
-  CliPlugin,
-  AppTools,
-  webpack,
-  Rspack,
-} from '@modern-js/app-tools';
+import type { CliPlugin, AppTools } from '@modern-js/app-tools';
 import {
   ModuleFederationPlugin as WebpackModuleFederationPlugin,
   AsyncBoundaryPlugin,
@@ -17,19 +12,21 @@ import {
   ConfigType,
   getMFConfig,
   getTargetEnvConfig,
-  patchMFConfig,
   patchWebpackConfig,
 } from './utils';
 import { updateStatsAndManifest } from './manifest';
 import { MODERN_JS_SERVER_DIR } from '../constant';
+
+const SSR_PLUGIN_IDENTIFIER = 'mfPluginSSR';
+const isDev = process.env.NODE_ENV === 'development';
 
 export const moduleFederationPlugin = (
   userConfig: PluginOptions = {},
 ): CliPlugin<AppTools> => ({
   name: '@modern-js/plugin-module-federation',
   setup: async ({ useConfigContext, useAppContext }) => {
-    const useConfig = useConfigContext();
-    const enableSSR = Boolean(useConfig?.server?.ssr);
+    const modernjsConfig = useConfigContext();
+    const enableSSR = Boolean(modernjsConfig?.server?.ssr);
     const mfConfig = await getMFConfig(userConfig);
     let outputDir = '';
     const bundlerType =
@@ -74,9 +71,10 @@ export const moduleFederationPlugin = (
           }
 
           patchWebpackConfig({
-            config,
+            bundlerConfig: config,
             isServer,
-            useConfig,
+            modernjsConfig,
+            mfConfig: envConfig,
           });
         };
 
@@ -88,7 +86,7 @@ export const moduleFederationPlugin = (
             },
             webpack(config, { isServer }) {
               modifyBundlerConfig(config, isServer);
-              const enableAsyncEntry = useConfig.source?.enableAsyncEntry;
+              const enableAsyncEntry = modernjsConfig.source?.enableAsyncEntry;
               if (
                 mfConfig.async ||
                 (!enableAsyncEntry && mfConfig.async !== false)
@@ -160,10 +158,46 @@ export const moduleFederationPlugin = (
             },
           },
           dev: {
-            assetPrefix: useConfig?.dev?.assetPrefix
-              ? useConfig.dev.assetPrefix
+            assetPrefix: modernjsConfig?.dev?.assetPrefix
+              ? modernjsConfig.dev.assetPrefix
               : true,
           },
+        };
+      },
+      modifyEntryImports({ entrypoint, imports }: any) {
+        if (!enableSSR || !isDev) {
+          return {
+            entrypoint,
+            imports,
+          };
+        }
+        imports.push({
+          value: '@module-federation/modern-js/ssr-runtime',
+          specifiers: [{ imported: SSR_PLUGIN_IDENTIFIER }],
+        });
+
+        return {
+          entrypoint,
+          imports,
+        };
+      },
+
+      modifyEntryRuntimePlugins({ entrypoint, plugins }) {
+        if (!enableSSR || !isDev) {
+          return {
+            entrypoint,
+            plugins,
+          };
+        }
+
+        plugins.unshift({
+          name: SSR_PLUGIN_IDENTIFIER,
+          options: JSON.stringify({}),
+        });
+
+        return {
+          entrypoint,
+          plugins,
         };
       },
       afterBuild: () => {

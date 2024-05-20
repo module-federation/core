@@ -2,6 +2,7 @@ import { ModuleInfo, getResourceUrl } from '@module-federation/sdk';
 
 import { FederationRuntimePlugin } from '../../type/plugin';
 import {
+  isBrowserEnv,
   error,
   isPureRemoteEntry,
   isRemoteInfoWithEntry,
@@ -21,7 +22,11 @@ export function assignRemoteInfo(
     );
   }
 
-  const entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url);
+  let entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url);
+
+  if (!isBrowserEnv() && !entryUrl.startsWith('http')) {
+    entryUrl = `https:${entryUrl}`;
+  }
 
   remoteInfo.type = remoteEntryInfo.type;
   remoteInfo.entryGlobalName = remoteEntryInfo.globalName;

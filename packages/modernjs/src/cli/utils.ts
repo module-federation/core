@@ -34,79 +34,116 @@ export const getMFConfig = async (
 
 export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  isServer: boolean,
 ) => {
-  mfConfig.runtimePlugins = mfConfig.runtimePlugins || [];
+  const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
   const runtimePluginPath = path.resolve(
     __dirname,
     './mfRuntimePlugins/shared-strategy.js',
   );
-  if (!mfConfig.runtimePlugins.includes(runtimePluginPath)) {
-    mfConfig.runtimePlugins.push(
+  if (!runtimePlugins.includes(runtimePluginPath)) {
+    runtimePlugins.push(
       path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
     );
   }
+
+  if (isServer) {
+    const nodeHmrPluginPath = require.resolve(
+      '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
+    );
+    if (!runtimePlugins.includes(nodeHmrPluginPath)) {
+      runtimePlugins.push(nodeHmrPluginPath);
+    }
+  }
+
   if (typeof mfConfig.async === 'undefined') {
     mfConfig.async = true;
   }
+
+  return { ...mfConfig, runtimePlugins };
 };
 
 export function getTargetEnvConfig(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
 ) {
-  patchMFConfig(mfConfig);
+  const patchedMFConfig = patchMFConfig(mfConfig, isServer);
   if (isServer) {
     return {
       library: {
         type: 'commonjs-module',
         name: mfConfig.name,
       },
-      ...mfConfig,
+      ...patchedMFConfig,
     };
   }
-  if (mfConfig.library?.type === 'commonjs-module') {
+
+  if (patchedMFConfig.library?.type === 'commonjs-module') {
     return {
-      ...mfConfig,
+      ...patchedMFConfig,
       library: {
         ...mfConfig.library,
         type: 'global',
       },
     };
   }
-  return mfConfig;
+
+  return patchedMFConfig;
 }
 
 export function patchWebpackConfig<T>(options: {
-  config: ConfigType<T>;
+  bundlerConfig: ConfigType<T>;
   isServer: boolean;
-  useConfig: UserConfig<AppTools>;
+  modernjsConfig: UserConfig<AppTools>;
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
 }) {
-  const { config, useConfig, isServer } = options;
-  const enableSSR = Boolean(useConfig?.server?.ssr);
-  const isStreamSSR =
-    typeof useConfig?.server?.ssr === 'object'
-      ? useConfig?.server?.ssr?.mode === 'stream'
-      : false;
+  const { bundlerConfig, modernjsConfig, isServer, mfConfig } = options;
+  const enableSSR = Boolean(modernjsConfig.server?.ssr);
 
-  delete config.optimization?.runtimeChunk;
+  delete bundlerConfig.optimization?.runtimeChunk;
 
   if (
     !isServer &&
     enableSSR &&
-    isStreamSSR &&
-    typeof config.optimization?.splitChunks === 'object' &&
-    config.optimization.splitChunks.cacheGroups
+    typeof bundlerConfig.optimization?.splitChunks === 'object' &&
+    bundlerConfig.optimization.splitChunks.cacheGroups
   ) {
-    config.optimization.splitChunks.chunks = 'async';
+    bundlerConfig.optimization.splitChunks.chunks = 'async';
     console.warn(
       '[Modern.js Module Federation] splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"',
     );
   }
 
-  if (config.output?.publicPath === 'auto') {
+  if (bundlerConfig.output?.publicPath === 'auto') {
     // TODO: only in dev temp
-    const port = useConfig.dev?.port || useConfig.server?.port || 8080;
+    const port =
+      modernjsConfig.dev?.port || modernjsConfig.server?.port || 8080;
     const publicPath = `http://localhost:${port}/`;
-    config.output.publicPath = publicPath;
+    bundlerConfig.output.publicPath = publicPath;
+  }
+
+  if (isServer && enableSSR) {
+    const { output } = bundlerConfig;
+    const uniqueName = mfConfig.name || output?.uniqueName;
+    const chunkFileName = output?.chunkFilename;
+    if (
+      output &&
+      typeof chunkFileName === 'string' &&
+      uniqueName &&
+      !chunkFileName.includes(uniqueName)
+    ) {
+      const suffix = `-[chunkhash].js`;
+      output.chunkFilename = chunkFileName.replace('.js', suffix);
+    }
+  }
+  const isDev = process.env.NODE_ENV === 'development';
+  // modernjs project has the same entry for server/client, add polyfill:false to skip compile error in browser target
+  if (isDev && enableSSR && !isServer) {
+    bundlerConfig.resolve!.fallback = {
+      ...bundlerConfig.resolve!.fallback,
+      crypto: false,
+      stream: false,
+      vm: false,
+    };
   }
 }
