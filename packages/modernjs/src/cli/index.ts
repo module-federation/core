@@ -6,7 +6,10 @@ import {
   AsyncBoundaryPlugin,
 } from '@module-federation/enhanced';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
-import { StreamingTargetPlugin } from '@module-federation/node';
+import {
+  StreamingTargetPlugin,
+  EntryChunkTrackerPlugin,
+} from '@module-federation/node';
 import type { PluginOptions, BundlerPlugin } from '../types';
 import {
   ConfigType,
@@ -62,6 +65,10 @@ export const moduleFederationPlugin = (
             config.plugins?.push(nodePlugin);
             // @ts-ignore
             config.plugins?.push(new StreamingTargetPlugin(envConfig));
+            if (isDev) {
+              // @ts-ignore
+              config.plugins?.push(new EntryChunkTrackerPlugin());
+            }
           } else {
             outputDir =
               config.output?.path || path.resolve(process.cwd(), 'dist');
