@@ -8,5 +8,16 @@ describe('inferAutoPublicPath', () => {
     expect(inferAutoPublicPath('http://localhost:3009/remoteEntry.js')).toEqual(
       'http://localhost:3009/',
     );
+
+    expect(
+      inferAutoPublicPath(
+        'http://localhost:3009/_next/static/chunks/mf-stats.json',
+      ),
+    ).toEqual('http://localhost:3009/');
+    expect(
+      inferAutoPublicPath(
+        'http://localhost:3009/_next/static/chunks/remoteEntry.js',
+      ),
+    ).toEqual('http://localhost:3009/');
   });
 });

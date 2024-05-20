@@ -49,6 +49,14 @@ export const simpleJoinRemoteEntry = (rPath: string, rName: string): string => {
 };
 
 export function inferAutoPublicPath(url: string): string {
+  if (url.includes('/_next/')) {
+    return url
+      .split('_next/')[0]
+      .replace(/#.*$/, '')
+      .replace(/\?.*$/, '')
+      .replace(/\/[^\/]+$/, '/');
+  }
+
   return url
     .replace(/#.*$/, '')
     .replace(/\?.*$/, '')
