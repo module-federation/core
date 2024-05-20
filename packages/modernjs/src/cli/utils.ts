@@ -34,46 +34,61 @@ export const getMFConfig = async (
 
 export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  isServer: boolean,
 ) => {
-  mfConfig.runtimePlugins = mfConfig.runtimePlugins || [];
+  const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
   const runtimePluginPath = path.resolve(
     __dirname,
     './mfRuntimePlugins/shared-strategy.js',
   );
-  if (!mfConfig.runtimePlugins.includes(runtimePluginPath)) {
-    mfConfig.runtimePlugins.push(
+  if (!runtimePlugins.includes(runtimePluginPath)) {
+    runtimePlugins.push(
       path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
     );
   }
+
+  if (isServer) {
+    const nodeHmrPluginPath = require.resolve(
+      '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
+    );
+    if (!runtimePlugins.includes(nodeHmrPluginPath)) {
+      runtimePlugins.push(nodeHmrPluginPath);
+    }
+  }
+
   if (typeof mfConfig.async === 'undefined') {
     mfConfig.async = true;
   }
+
+  return { ...mfConfig, runtimePlugins };
 };
 
 export function getTargetEnvConfig(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
 ) {
-  patchMFConfig(mfConfig);
+  const patchedMFConfig = patchMFConfig(mfConfig, isServer);
   if (isServer) {
     return {
       library: {
         type: 'commonjs-module',
         name: mfConfig.name,
       },
-      ...mfConfig,
+      ...patchedMFConfig,
     };
   }
-  if (mfConfig.library?.type === 'commonjs-module') {
+
+  if (patchedMFConfig.library?.type === 'commonjs-module') {
     return {
-      ...mfConfig,
+      ...patchedMFConfig,
       library: {
         ...mfConfig.library,
         type: 'global',
       },
     };
   }
-  return mfConfig;
+
+  return patchedMFConfig;
 }
 
 export function patchWebpackConfig<T>(options: {
@@ -83,16 +98,13 @@ export function patchWebpackConfig<T>(options: {
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
 }) {
   const { bundlerConfig, modernjsConfig, isServer, mfConfig } = options;
-  const isStreamSSR =
-    typeof modernjsConfig?.server?.ssr === 'object'
-      ? modernjsConfig?.server?.ssr?.mode === 'stream'
-      : false;
+  const enableSSR = Boolean(modernjsConfig.server?.ssr);
 
   delete bundlerConfig.optimization?.runtimeChunk;
 
   if (
     !isServer &&
-    isStreamSSR &&
+    enableSSR &&
     typeof bundlerConfig.optimization?.splitChunks === 'object' &&
     bundlerConfig.optimization.splitChunks.cacheGroups
   ) {
@@ -110,7 +122,7 @@ export function patchWebpackConfig<T>(options: {
     bundlerConfig.output.publicPath = publicPath;
   }
 
-  if (isServer && isStreamSSR) {
+  if (isServer && enableSSR) {
     const { output } = bundlerConfig;
     const uniqueName = mfConfig.name || output?.uniqueName;
     const chunkFileName = output?.chunkFilename;
@@ -123,5 +135,15 @@ export function patchWebpackConfig<T>(options: {
       const suffix = `-[chunkhash].js`;
       output.chunkFilename = chunkFileName.replace('.js', suffix);
     }
+  }
+  const isDev = process.env.NODE_ENV === 'development';
+  // modernjs project has the same entry for server/client, add polyfill:false to skip compile error in browser target
+  if (isDev && enableSSR && !isServer) {
+    bundlerConfig.resolve!.fallback = {
+      ...bundlerConfig.resolve!.fallback,
+      crypto: false,
+      stream: false,
+      vm: false,
+    };
   }
 }

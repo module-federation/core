@@ -21,6 +21,10 @@
     "./runtime": {
       "types": "./dist/types/runtime/index.d.ts",
       "default": "./dist/esm/runtime/index.js"
+    },
+    "./ssr-runtime": {
+      "types": "./dist/types/ssr-runtime/index.d.ts",
+      "default": "./dist/esm/ssr-runtime/index.js"
     }
   },
   "typesVersions": {
@@ -30,6 +34,9 @@
       ],
       "runtime": [
         "./dist/types/runtime/index.d.ts"
+      ],
+      "ssr-runtime": [
+        "./dist/types/ssr-runtime/index.d.ts"
       ]
     }
   },

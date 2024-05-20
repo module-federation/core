@@ -1,11 +1,6 @@
 import path from 'path';
 import { fs } from '@modern-js/utils';
-import type {
-  CliPlugin,
-  AppTools,
-  webpack,
-  Rspack,
-} from '@modern-js/app-tools';
+import type { CliPlugin, AppTools } from '@modern-js/app-tools';
 import {
   ModuleFederationPlugin as WebpackModuleFederationPlugin,
   AsyncBoundaryPlugin,
@@ -17,11 +12,13 @@ import {
   ConfigType,
   getMFConfig,
   getTargetEnvConfig,
-  patchMFConfig,
   patchWebpackConfig,
 } from './utils';
 import { updateStatsAndManifest } from './manifest';
 import { MODERN_JS_SERVER_DIR } from '../constant';
+
+const SSR_PLUGIN_IDENTIFIER = 'mfPluginSSR';
+const isDev = process.env.NODE_ENV === 'development';
 
 export const moduleFederationPlugin = (
   userConfig: PluginOptions = {},
@@ -165,6 +162,42 @@ export const moduleFederationPlugin = (
               ? modernjsConfig.dev.assetPrefix
               : true,
           },
+        };
+      },
+      modifyEntryImports({ entrypoint, imports }: any) {
+        if (!enableSSR || !isDev) {
+          return {
+            entrypoint,
+            imports,
+          };
+        }
+        imports.push({
+          value: '@module-federation/modern-js/ssr-runtime',
+          specifiers: [{ imported: SSR_PLUGIN_IDENTIFIER }],
+        });
+
+        return {
+          entrypoint,
+          imports,
+        };
+      },
+
+      modifyEntryRuntimePlugins({ entrypoint, plugins }) {
+        if (!enableSSR || !isDev) {
+          return {
+            entrypoint,
+            plugins,
+          };
+        }
+
+        plugins.unshift({
+          name: SSR_PLUGIN_IDENTIFIER,
+          options: JSON.stringify({}),
+        });
+
+        return {
+          entrypoint,
+          plugins,
         };
       },
       afterBuild: () => {
