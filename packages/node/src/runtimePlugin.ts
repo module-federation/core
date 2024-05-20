@@ -183,7 +183,7 @@ export default function () {
                 )(chunk, __non_webpack_require__, urlDirname, chunkName);
                 callback(null, chunk);
               } catch (e) {
-                callback(err, null);
+                callback(e, null);
               }
             });
             res.on('error', function (err) {
