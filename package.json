@@ -118,7 +118,7 @@
     "@storybook/addon-essentials": "7.6.17",
     "@storybook/builder-webpack5": "7.6.17",
     "@storybook/core-common": "7.6.17",
-    "@storybook/core-server": "7.6.17",
+    "@storybook/core-server": "8.1.1",
     "@storybook/manager-webpack5": "6.5.16",
     "@storybook/node-logger": "7.6.17",
     "@storybook/react": "7.6.17",
