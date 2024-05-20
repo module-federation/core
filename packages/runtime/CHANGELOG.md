@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.1.14
+
+### Patch Changes
+
+- 103b2b8: Script timeout options for createScript hook
+- Updated dependencies [103b2b8]
+  - @module-federation/sdk@0.1.14
+
 ## 0.1.13
 
 ### Patch Changes
