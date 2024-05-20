@@ -89,7 +89,7 @@
     "@fontsource/roboto": "5.0.12",
     "@fontsource/roboto-mono": "5.0.18",
     "@jscutlery/semver": "4.2.0",
-    "@node-rs/jieba": "1.9.2",
+    "@node-rs/jieba": "1.10.3",
     "@nx/cypress": "17.2.8",
     "@nx/devkit": "17.2.8",
     "@nx/esbuild": "17.2.8",
