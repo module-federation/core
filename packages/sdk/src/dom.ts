@@ -1,5 +1,4 @@
 import { warn } from './utils';
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function safeWrapper<T extends (...args: Array<any>) => any>(
   callback: T,
@@ -23,15 +22,22 @@ export function isStaticResourcesEqual(url1: string, url2: string): boolean {
   return relativeUrl1 === relativeUrl2;
 }
 
+export type CreateScriptHookReturn =
+  | HTMLScriptElement
+  | { script?: HTMLScriptElement; timeout?: number }
+  | void;
+
 export function createScript(
   url: string,
   cb: (value: void | PromiseLike<void>) => void,
   attrs?: Record<string, any>,
-  createScriptHook?: (url: string) => HTMLScriptElement | void,
+  createScriptHook?: (url: string) => CreateScriptHookReturn,
 ): { script: HTMLScriptElement; needAttach: boolean } {
   // Retrieve the existing script element by its src attribute
   let script: HTMLScriptElement | null = null;
   let needAttach = true;
+  let timeout = 20000;
+  let timeoutId: NodeJS.Timeout;
   const scripts = document.getElementsByTagName('script');
   for (let i = 0; i < scripts.length; i++) {
     const s = scripts[i];
@@ -49,8 +55,12 @@ export function createScript(
     script.src = url;
     if (createScriptHook) {
       const createScriptRes = createScriptHook(url);
+
       if (createScriptRes instanceof HTMLScriptElement) {
         script = createScriptRes;
+      } else if (typeof createScriptRes === 'object') {
+        if (createScriptRes.script) script = createScriptRes.script;
+        if (createScriptRes.timeout) timeout = createScriptRes.timeout;
       }
     }
   }
@@ -72,6 +82,7 @@ export function createScript(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event: any,
   ): void => {
+    clearTimeout(timeoutId);
     // Prevent memory leaks in IE.
     if (script) {
       script.onerror = null;
@@ -91,6 +102,10 @@ export function createScript(
 
   script.onerror = onScriptComplete.bind(null, script.onerror);
   script.onload = onScriptComplete.bind(null, script.onload);
+
+  timeoutId = setTimeout(() => {
+    onScriptComplete(null, new Error(`Remote script "${url}" time-outed.`));
+  }, timeout);
 
   return { script, needAttach };
 }
@@ -174,7 +189,7 @@ export function loadScript(
   url: string,
   info: {
     attrs?: Record<string, any>;
-    createScriptHook?: (url: string) => HTMLScriptElement | void;
+    createScriptHook?: (url: string) => CreateScriptHookReturn;
   },
 ) {
   const { attrs, createScriptHook } = info;

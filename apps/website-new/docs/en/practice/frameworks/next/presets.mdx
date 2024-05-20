@@ -23,70 +23,80 @@ It's important to note that manually sharing these internals can lead to errors,
 ```ts
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/dynamic': {
-    eager: false,
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/head': {
-    eager: false,
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/link': {
-    eager: true,
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/router': {
     requiredVersion: false,
     singleton: true,
-    import: false,
-    eager: false,
+    import: undefined,
   },
-  'next/script': {
-    requiredVersion: false,
+  'next/image': {
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
-    eager: false,
+  },
+  'next/script': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
   },
   react: {
     singleton: true,
     requiredVersion: false,
-    eager: false,
+    import: false,
+  },
+  'react/': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: false,
     import: false,
   },
   'react-dom': {
     singleton: true,
     requiredVersion: false,
-    eager: false,
     import: false,
   },
   'react/jsx-dev-runtime': {
     singleton: true,
     requiredVersion: false,
-    import: undefined,
-    eager: false,
   },
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
-    eager: false,
-    import: false,
   },
   'styled-jsx': {
-    requiredVersion: false,
     singleton: true,
     import: undefined,
-    eager: false,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
   'styled-jsx/style': {
-    requiredVersion: false,
+    singleton: true,
+    import: false,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
+  },
+  'styled-jsx/css': {
     singleton: true,
     import: undefined,
-    eager: false,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
 };
 ```

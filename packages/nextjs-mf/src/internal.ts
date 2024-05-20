@@ -62,11 +62,11 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   },
   'react/jsx-dev-runtime': {
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
   },
   'react/jsx-runtime': {
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
   },
   'styled-jsx': {
     singleton: true,
