@@ -38,7 +38,7 @@ export const moduleFederationPlugin = (
     const WebpackPluginConstructor =
       userConfig.webpackPluginImplementation || WebpackModuleFederationPlugin;
     const RspackPluginConstructor =
-      userConfig.webpackPluginImplementation || RspackModuleFederationPlugin;
+      userConfig.rspackPluginImplementation || RspackModuleFederationPlugin;
 
     const MFBundlerPlugin =
       bundlerType === 'rspack'
