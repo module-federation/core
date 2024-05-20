@@ -1,5 +1,16 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.2.5
+
+### Patch Changes
+
+- 450c224: missing variable in runtime plugin error call
+- Updated dependencies [103b2b8]
+  - @module-federation/runtime@0.1.14
+  - @module-federation/sdk@0.1.14
+  - @module-federation/enhanced@0.1.14
+  - @module-federation/utilities@3.0.19
+
 ## 2.2.4
 
 ### Patch Changes
