@@ -1,39 +1,40 @@
-// fork from https://github.com/originjs/vite-plugin-federation/blob/v1.1.12/packages/lib/src/utils/semver/index.ts
-// those constants are based on https://www.rubydoc.info/gems/semantic_range/3.0.0/SemanticRange#BUILDIDENTIFIER-constant
-// Copyright (c)
-// vite-plugin-federation is licensed under Mulan PSL v2.
-// You can use this software according to the terms and conditions of the Mulan PSL v2.
-// You may obtain a copy of Mulan PSL v2 at:
-//      http://license.coscl.org.cn/MulanPSL2
-// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-// See the Mulan PSL v2 for more details.
+const numericId = '0|[1-9]\\d*';
+const numericIdLoose = '[0-9]+';
 
-const buildIdentifier = '[0-9A-Za-z-]+';
-const build = `(?:\\+(${buildIdentifier}(?:\\.${buildIdentifier})*))`;
-const numericIdentifier = '0|[1-9]\\d*';
-const numericIdentifierLoose = '[0-9]+';
-const nonNumericIdentifier = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
-const preReleaseIdentifierLoose = `(?:${numericIdentifierLoose}|${nonNumericIdentifier})`;
-const preReleaseLoose = `(?:-?(${preReleaseIdentifierLoose}(?:\\.${preReleaseIdentifierLoose})*))`;
-const preReleaseIdentifier = `(?:${numericIdentifier}|${nonNumericIdentifier})`;
-const preRelease = `(?:-(${preReleaseIdentifier}(?:\\.${preReleaseIdentifier})*))`;
-const xRangeIdentifier = `${numericIdentifier}|x|X|\\*`;
-const xRangePlain = `[v=\\s]*(${xRangeIdentifier})(?:\\.(${xRangeIdentifier})(?:\\.(${xRangeIdentifier})(?:${preRelease})?${build}?)?)?`;
-export const hyphenRange = `^\\s*(${xRangePlain})\\s+-\\s+(${xRangePlain})\\s*$`;
-const mainVersionLoose = `(${numericIdentifierLoose})\\.(${numericIdentifierLoose})\\.(${numericIdentifierLoose})`;
-const loosePlain = `[v=\\s]*${mainVersionLoose}${preReleaseLoose}?${build}?`;
-const gtlt = '((?:<|>)?=?)';
-export const comparatorTrim = `(\\s*)${gtlt}\\s*(${loosePlain}|${xRangePlain})`;
-const loneTilde = '(?:~>?)';
-export const tildeTrim = `(\\s*)${loneTilde}\\s+`;
-const loneCaret = '(?:\\^)';
-export const caretTrim = `(\\s*)${loneCaret}\\s+`;
+const nonNumericId = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
+
+const preReleaseId = `(?:${numericId}|${nonNumericId})`;
+const preReleaseIdLoose = `(?:${numericIdLoose}|${nonNumericId})`;
+
+const buildId = '[0-9A-Za-z-]+';
+const buildMetadata = `(?:\\+(${buildId}(?:\\.${buildId})*))`;
+
+const preReleaseMetadata = `(?:-(${preReleaseId}(?:\\.${preReleaseId})*))`;
+const preReleaseMetadataLoose = `(?:-?(${preReleaseIdLoose}(?:\\.${preReleaseIdLoose})*))`;
+
+const versionCore = `(${numericId})\\.(${numericId})\\.(${numericId})`;
+const versionCoreLoose = `(${numericIdLoose})\\.(${numericIdLoose})\\.(${numericIdLoose})`;
+
+const xRangeId = `${numericId}|x|X|\\*`;
+const xRangePattern = `[v=\\s]*(${xRangeId})(?:\\.(${xRangeId})(?:\\.(${xRangeId})(?:${preReleaseMetadata})?${buildMetadata}?)?)?`;
+
+const fullPattern = `v?${versionCore}${preReleaseMetadata}?${buildMetadata}?`;
+const loosePattern = `[v=\\s]*${versionCoreLoose}${preReleaseMetadataLoose}?${buildMetadata}?`;
+
+const comparatorOperator = '((?:<|>)?=?)';
+
+export const hyphenRange = `^\\s*(${xRangePattern})\\s+-\\s+(${xRangePattern})\\s*$`;
+export const comparator = `^${comparatorOperator}\\s*(${fullPattern})$|^$`;
+export const xRange = `^${comparatorOperator}\\s*${xRangePattern}$`;
+export const comparatorTrim = `(\\s*)${comparatorOperator}\\s*(${loosePattern}|${xRangePattern})`;
+
+const tildeOperator = '(?:~>?)';
+const caretOperator = '(?:\\^)';
+
+export const tilde = `^${tildeOperator}${xRangePattern}$`;
+export const caret = `^${caretOperator}${xRangePattern}$`;
+export const tildeTrim = `(\\s*)${tildeOperator}\\s+`;
+export const caretTrim = `(\\s*)${caretOperator}\\s+`;
 export const star = '(<|>)?=?\\s*\\*';
-export const caret = `^${loneCaret}${xRangePlain}$`;
-const mainVersion = `(${numericIdentifier})\\.(${numericIdentifier})\\.(${numericIdentifier})`;
-const fullPlain = `v?${mainVersion}${preRelease}?${build}?`;
-export const tilde = `^${loneTilde}${xRangePlain}$`;
-export const xRange = `^${gtlt}\\s*${xRangePlain}$`;
-export const comparator = `^${gtlt}\\s*(${fullPlain})$|^$`;
-// copy from semver package
-export const gte0 = '^\\s*>=\\s*0.0.0\\s*$';
+
+export const gte0 = '^\\s*>=\\s*0.0.0\\s*$'; // Indicates a greater than or equal comparison to version 0.0.0

@@ -1,13 +1,4 @@
-// fork from https://github.com/originjs/vite-plugin-federation/blob/v1.1.12/packages/lib/src/utils/semver/index.ts
-// Copyright (c)
-// vite-plugin-federation is licensed under Mulan PSL v2.
-// You can use this software according to the terms and conditions of the Mulan PSL v2.
-// You may obtain a copy of Mulan PSL v2 at:
-//      http://license.coscl.org.cn/MulanPSL2
-// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-// See the Mulan PSL v2 for more details.
-
-export interface CompareAtom {
+export interface VersionComponent {
   operator: string;
   version: string;
   major: string;
@@ -16,109 +7,108 @@ export interface CompareAtom {
   preRelease?: string[];
 }
 
-function compareAtom(
-  rangeAtom: string | number,
-  versionAtom: string | number,
+function compareComponent(
+  component1: string | number,
+  component2: string | number,
 ): number {
-  rangeAtom = Number(rangeAtom) || rangeAtom;
-  versionAtom = Number(versionAtom) || versionAtom;
+  const comp1 = Number(component1) || component1;
+  const comp2 = Number(component2) || component2;
 
-  if (rangeAtom > versionAtom) {
+  if (comp1 > comp2) {
     return 1;
   }
-
-  if (rangeAtom === versionAtom) {
+  if (comp1 === comp2) {
     return 0;
   }
-
   return -1;
 }
 
-function comparePreRelease(
-  rangeAtom: CompareAtom,
-  versionAtom: CompareAtom,
+function comparePreReleaseComponents(
+  component1: VersionComponent,
+  component2: VersionComponent,
 ): number {
-  const { preRelease: rangePreRelease } = rangeAtom;
-  const { preRelease: versionPreRelease } = versionAtom;
+  const { preRelease: preRelease1 } = component1;
+  const { preRelease: preRelease2 } = component2;
 
-  if (rangePreRelease === undefined && Boolean(versionPreRelease)) {
+  if (!preRelease1 && preRelease2) {
     return 1;
   }
-
-  if (Boolean(rangePreRelease) && versionPreRelease === undefined) {
+  if (preRelease1 && !preRelease2) {
     return -1;
   }
-
-  if (rangePreRelease === undefined && versionPreRelease === undefined) {
+  if (!preRelease1 && !preRelease2) {
     return 0;
   }
 
-  for (let i = 0, n = rangePreRelease!.length; i <= n; i++) {
-    const rangeElement = rangePreRelease![i];
-    const versionElement = versionPreRelease![i];
+  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  for (let i = 0; i <= preRelease1!.length; i++) {
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    const element1 = preRelease1![i];
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    const element2 = preRelease2![i];
 
-    if (rangeElement === versionElement) {
+    if (element1 === element2) {
       continue;
     }
-
-    if (rangeElement === undefined && versionElement === undefined) {
+    if (!element1 && !element2) {
       return 0;
     }
-
-    if (!rangeElement) {
+    if (!element1) {
       return 1;
     }
-
-    if (!versionElement) {
+    if (!element2) {
       return -1;
     }
-
-    return compareAtom(rangeElement, versionElement);
+    return compareComponent(element1, element2);
   }
 
   return 0;
 }
 
-function compareVersion(
-  rangeAtom: CompareAtom,
-  versionAtom: CompareAtom,
+function compareVersionComponents(
+  component1: VersionComponent,
+  component2: VersionComponent,
 ): number {
   return (
-    compareAtom(rangeAtom.major, versionAtom.major) ||
-    compareAtom(rangeAtom.minor, versionAtom.minor) ||
-    compareAtom(rangeAtom.patch, versionAtom.patch) ||
-    comparePreRelease(rangeAtom, versionAtom)
+    compareComponent(component1.major, component2.major) ||
+    compareComponent(component1.minor, component2.minor) ||
+    compareComponent(component1.patch, component2.patch) ||
+    comparePreReleaseComponents(component1, component2)
   );
 }
 
-function eq(rangeAtom: CompareAtom, versionAtom: CompareAtom): boolean {
-  return rangeAtom.version === versionAtom.version;
+function isEqual(
+  component1: VersionComponent,
+  component2: VersionComponent,
+): boolean {
+  return component1.version === component2.version;
 }
 
 export function compare(
-  rangeAtom: CompareAtom,
-  versionAtom: CompareAtom,
+  component1: VersionComponent,
+  component2: VersionComponent,
 ): boolean {
-  switch (rangeAtom.operator) {
+  switch (component1.operator) {
     case '':
     case '=':
-      return eq(rangeAtom, versionAtom);
+      return isEqual(component1, component2);
     case '>':
-      return compareVersion(rangeAtom, versionAtom) < 0;
+      return compareVersionComponents(component1, component2) < 0;
     case '>=':
       return (
-        eq(rangeAtom, versionAtom) || compareVersion(rangeAtom, versionAtom) < 0
+        isEqual(component1, component2) ||
+        compareVersionComponents(component1, component2) < 0
       );
     case '<':
-      return compareVersion(rangeAtom, versionAtom) > 0;
+      return compareVersionComponents(component1, component2) > 0;
     case '<=':
       return (
-        eq(rangeAtom, versionAtom) || compareVersion(rangeAtom, versionAtom) > 0
+        isEqual(component1, component2) ||
+        compareVersionComponents(component1, component2) > 0
       );
-    case undefined: {
-      // mean * or x -> all versions
+    case undefined:
+      // means * or x -> all versions
       return true;
-    }
     default:
       return false;
   }

@@ -20,7 +20,7 @@ import {
   parseGTE0,
 } from './parser';
 import { compare } from './compare';
-import type { CompareAtom } from './compare';
+import type { VersionComponent } from './compare';
 
 function parseComparatorString(range: string): string {
   return pipe(
@@ -72,11 +72,11 @@ export function satisfy(version: string, range: string): boolean {
   const parsedRange = parseRange(range);
   const parsedComparator = parsedRange
     .split(' ')
-    .map((rangeVersion) => parseComparatorString(rangeVersion))
+    .map((rangeVersion: string) => parseComparatorString(rangeVersion))
     .join(' ');
   const comparators = parsedComparator
     .split(/\s+/)
-    .map((comparator) => parseGTE0(comparator));
+    .map((comparator: string) => parseGTE0(comparator));
   const extractedVersion = extractComparator(version);
 
   if (!extractedVersion) {
@@ -92,7 +92,7 @@ export function satisfy(version: string, range: string): boolean {
     versionPatch,
     versionPreRelease,
   ] = extractedVersion;
-  const versionAtom: CompareAtom = {
+  const versionAtom: VersionComponent = {
     operator: versionOperator,
     version: combineVersion(
       versionMajor,
@@ -122,7 +122,7 @@ export function satisfy(version: string, range: string): boolean {
       rangePatch,
       rangePreRelease,
     ] = extractedComparator;
-    const rangeAtom: CompareAtom = {
+    const rangeAtom: VersionComponent = {
       operator: rangeOperator,
       version: combineVersion(
         rangeMajor,
