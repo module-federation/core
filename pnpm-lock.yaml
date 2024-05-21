@@ -1815,6 +1815,12 @@ importers:
       node-fetch:
         specifier: ~3.3.0
         version: 3.3.2
+      react:
+        specifier: '>=17'
+        version: 18.2.0
+      react-dom:
+        specifier: '>=17'
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@modern-js/app-tools':
         specifier: ^2.49.2
