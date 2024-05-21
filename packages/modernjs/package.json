@@ -61,7 +61,6 @@
     "@modern-js/tsconfig": "^2.35.0"
   },
   "peerDependencies": {
-    "@edenx/runtime": "^1.36.0",
     "react": ">=17",
     "react-dom": ">=17"
   }
