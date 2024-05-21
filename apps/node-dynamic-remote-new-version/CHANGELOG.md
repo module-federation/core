@@ -4,6 +4,12 @@
 
 ### Patch Changes
 
+- @module-federation/node@2.2.6
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [450c224]
   - @module-federation/node@2.2.5
 
