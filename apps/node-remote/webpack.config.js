@@ -22,7 +22,7 @@ module.exports = composePlugins(withNx(), (config) => {
         require.resolve('@module-federation/node/runtimePlugin'),
       ],
       name: 'node_remote',
-      library: { type: 'commonjs-module' },
+      library: { type: 'commonjs-module', name: 'node_remote' },
       filename: 'remoteEntry.js',
       exposes: {
         './test': './src/expose.js',

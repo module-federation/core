@@ -1,5 +1,38 @@
 # @module-federation/manifest
 
+## 0.1.15
+
+### Patch Changes
+
+- Updated dependencies [1227fd6]
+  - @module-federation/dts-plugin@0.1.15
+  - @module-federation/sdk@0.1.15
+  - @module-federation/managers@0.1.15
+
+## 0.1.14
+
+### Patch Changes
+
+- Updated dependencies [103b2b8]
+  - @module-federation/sdk@0.1.14
+  - @module-federation/dts-plugin@0.1.14
+  - @module-federation/managers@0.1.14
+
+## 0.1.13
+
+### Patch Changes
+
+- 9559769: fix: remoteEntry chunk may have css files which need to be exclude
+- 2e52e51: publicPath: auto support for json manifest remote
+- Updated dependencies [2e52e51]
+- Updated dependencies [2e52e51]
+- Updated dependencies [0113b81]
+- Updated dependencies [677958c]
+- Updated dependencies [2e52e51]
+  - @module-federation/dts-plugin@0.1.13
+  - @module-federation/managers@0.1.13
+  - @module-federation/sdk@0.1.13
+
 ## 0.1.12
 
 ### Patch Changes

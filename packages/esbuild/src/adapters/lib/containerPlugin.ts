@@ -1,4 +1,5 @@
 import { OnResolveArgs, OnLoadArgs, PluginBuild } from 'esbuild';
+//replace with createContainer from bundler runtime
 import { createContainerCode } from '../../lib/core/createContainerTemplate.js';
 //@ts-ignore
 const buildContainerHost = ({ config }) => {
@@ -113,6 +114,8 @@ console.log('module map',moduleMap);
     export const get = createdContainer.get;
     export const init = createdContainer.init;
   `;
+  //replace with createContainer from bundler runtime - import it in the string as a dep etc
+
   return [createContainerCode, injectedContent].join('\n');
 };
 

@@ -1,3 +1,4 @@
+import { PKGJsonManager } from './PKGJsonManager';
 import { LOCAL_BUILD_VERSION } from './constant';
 import {
   ContainerOptionsFormat,
@@ -62,7 +63,14 @@ export function parseOptions<T, R>(
 }
 
 export function getBuildVersion(): string {
-  return process.env['MF_BUILD_VERSION'] || LOCAL_BUILD_VERSION;
+  if (process.env['MF_BUILD_VERSION']) {
+    return process.env['MF_BUILD_VERSION'];
+  }
+  const pkg = new PKGJsonManager().readPKGJson();
+  if (pkg?.['version'] && typeof pkg['version'] === 'string') {
+    return pkg['version'];
+  }
+  return LOCAL_BUILD_VERSION;
 }
 
 export function getBuildName(): string | undefined {

@@ -27,6 +27,10 @@ import { PackageManagerTabs } from '@theme';
 
 In `Webpack`, you can add the plugin through the `plugins` configuration item in the `webpack.config.js` file:
 
+:::warning Public Path Auto & Manifest
+When using mf-manifest.json remotes `publicPath: 'auto'` support is experimental
+:::
+
 ```ts title='webpack.config.js'
 import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 module.exports = {
@@ -34,8 +38,7 @@ module.exports = {
     port: 2000,
   },
   output: {
-    // publicPath must be configured if using manifest
-    publicPath: 'http://localhost:2000/',
+    publicPath: 'http://localhost:2000/', // or auto
   },
   plugins: [
     new ModuleFederationPlugin({

@@ -491,8 +491,8 @@ interface PreloadAssets {
 
 - 类型
 
-```ts
-function createScript(args: CreateScriptOptions): HTMLScriptElement | void;
+```typescript
+function createScript(args: CreateScriptOptions): HTMLScriptElement | {script?: HTMLScriptElement, timeout?: number } | void;
 
 type CreateScriptOptions = {
   url: string;
@@ -501,7 +501,7 @@ type CreateScriptOptions = {
 
 - 示例
 
-```ts
+```typescript
 import { init } from '@module-federation/enhanced/runtime';
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -515,6 +515,28 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
         script.setAttribute('loader-hooks', 'isTrue');
         script.setAttribute('crossorigin', 'anonymous');
         return script;
+      }
+    },
+  };
+};
+```
+
+- 示例带有脚本超时
+
+```typescript
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'change-script-attribute',
+    createScript({ url }) {
+      if (url === testRemoteEntry) {
+        let script = document.createElement('script');
+        script.src = testRemoteEntry;
+        script.setAttribute('loader-hooks', 'isTrue');
+        script.setAttribute('crossorigin', 'anonymous');
+        return { script, timeout: 1000 }
       }
     },
   };
