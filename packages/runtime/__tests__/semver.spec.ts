@@ -163,8 +163,10 @@ describe('simple ranges', () => {
   test('>= Array', () => {
     const array = ['1.2.3', '1.2.4', '1.2.0', '1.2.9'];
     const map = array.sort((a, b) => {
+      // biome-ignore lint/style/useTemplate: <explanation>
       if (satisfy(a, '<=' + b)) {
         return 1;
+        // biome-ignore lint/style/noUselessElse: <explanation>
       } else {
         return -1;
       }
