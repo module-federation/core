@@ -267,6 +267,7 @@ class DTSManager {
     const remoteKeys: string[] = [];
 
     const importTypeStr = this.loadedRemoteAPIAlias
+      .sort()
       .map((alias, index) => {
         const remoteKey = `RemoteKeys_${index}`;
         const packageType = `PackageType_${index}`;
