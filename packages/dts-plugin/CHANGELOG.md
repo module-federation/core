@@ -1,5 +1,14 @@
 # @module-federation/dts-plugin
 
+## 0.1.15
+
+### Patch Changes
+
+- 1227fd6: fix: Avoid the generation type order being affected by the loading timing so that every type occurs
+  - @module-federation/sdk@0.1.15
+  - @module-federation/managers@0.1.15
+  - @module-federation/third-party-dts-extractor@0.1.15
+
 ## 0.1.14
 
 ### Patch Changes
