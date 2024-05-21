@@ -59,5 +59,10 @@
     "@modern-js/runtime": "^2.49.2",
     "@modern-js/module-tools": "^2.35.0",
     "@modern-js/tsconfig": "^2.35.0"
+  },
+  "peerDependencies": {
+    "@edenx/runtime": "^1.36.0",
+    "react": ">=17",
+    "react-dom": ">=17"
   }
 }
