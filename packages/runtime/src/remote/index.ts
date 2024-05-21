@@ -92,11 +92,15 @@ export class RemoteHandler {
       ],
       void | unknown
     >('errorLoadRemote'),
-    beforePreloadRemote: new AsyncHook<{
-      preloadOps: Array<PreloadRemoteArgs>;
-      options: Options;
-      origin: FederationHost;
-    }>(),
+    beforePreloadRemote: new AsyncHook<
+      [
+        {
+          preloadOps: Array<PreloadRemoteArgs>;
+          options: Options;
+          origin: FederationHost;
+        },
+      ]
+    >('beforePreloadRemote'),
     generatePreloadAssets: new AsyncHook<
       [
         {
@@ -195,7 +199,7 @@ export class RemoteHandler {
     const { host } = this;
 
     await this.hooks.lifecycle.beforePreloadRemote.emit({
-      preloadOptions,
+      preloadOps: preloadOptions,
       options: host.options,
       origin: host,
     });
