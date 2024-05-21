@@ -406,7 +406,10 @@ export class RemoteHandler {
       const remoteInfo = loadedModule.remoteInfo;
       const key = remoteInfo.entryGlobalName as keyof typeof globalThis;
 
-      if (globalThis[key]) {
+      if (
+        globalThis[key] &&
+        Object.getOwnPropertyDescriptor(globalThis, key)?.configurable
+      ) {
         delete globalThis[key];
       }
       const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
