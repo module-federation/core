@@ -4,7 +4,7 @@ import type {
   AppTools,
   Rspack,
 } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/sdk';
+import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
 import path from 'path';
 import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
@@ -37,22 +37,31 @@ export const patchMFConfig = (
   isServer: boolean,
 ) => {
   const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
-  const runtimePluginPath = path.resolve(
+  const sharedStrategyRuntimePluginPath = path.resolve(
     __dirname,
     './mfRuntimePlugins/shared-strategy.js',
   );
-  if (!runtimePlugins.includes(runtimePluginPath)) {
-    runtimePlugins.push(
-      path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
-    );
+  if (!runtimePlugins.includes(sharedStrategyRuntimePluginPath)) {
+    runtimePlugins.push(sharedStrategyRuntimePluginPath);
   }
 
   if (isServer) {
-    const nodeHmrPluginPath = require.resolve(
-      '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
+    const isDev = process.env.NODE_ENV === 'development';
+    if (isDev) {
+      const nodeHmrPluginPath = require.resolve(
+        '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
+      );
+      if (!runtimePlugins.includes(nodeHmrPluginPath)) {
+        runtimePlugins.push(nodeHmrPluginPath);
+      }
+    }
+
+    const injectNodeFetchRuntimePluginPath = path.resolve(
+      __dirname,
+      './mfRuntimePlugins/inject-node-fetch.js',
     );
-    if (!runtimePlugins.includes(nodeHmrPluginPath)) {
-      runtimePlugins.push(nodeHmrPluginPath);
+    if (!runtimePlugins.includes(injectNodeFetchRuntimePluginPath)) {
+      runtimePlugins.push(injectNodeFetchRuntimePluginPath);
     }
   }
 
@@ -132,7 +141,7 @@ export function patchWebpackConfig<T>(options: {
       uniqueName &&
       !chunkFileName.includes(uniqueName)
     ) {
-      const suffix = `-[chunkhash].js`;
+      const suffix = `${encodeName(uniqueName)}-[chunkhash].js`;
       output.chunkFilename = chunkFileName.replace('.js', suffix);
     }
   }
