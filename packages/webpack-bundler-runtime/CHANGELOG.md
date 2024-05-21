@@ -1,5 +1,14 @@
 # [1.0.0-canary.3](https://github.com/module-federation/core/compare/webpack-bundler-runtime-1.0.0-canary.2...webpack-bundler-runtime-1.0.0-canary.3) (2023-11-23)
 
+## 0.1.14
+
+### Patch Changes
+
+- 10e6f5a: createContainer factory function added. Allows container interfaced to be dynamically created
+- Updated dependencies [103b2b8]
+  - @module-federation/runtime@0.1.14
+  - @module-federation/sdk@0.1.14
+
 ## 0.1.13
 
 ### Patch Changes

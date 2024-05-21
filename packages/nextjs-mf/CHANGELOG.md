@@ -1,5 +1,19 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.3.15
+
+### Patch Changes
+
+- 210363d: Prevent react/jsx-runtime warnings from appearing
+- b3530d7: fix(nextjs-mf): delete duplicate code lines
+- Updated dependencies [450c224]
+- Updated dependencies [103b2b8]
+  - @module-federation/node@2.2.5
+  - @module-federation/runtime@0.1.14
+  - @module-federation/sdk@0.1.14
+  - @module-federation/enhanced@0.1.14
+  - @module-federation/utilities@3.0.19
+
 ## 8.3.14
 
 ### Patch Changes
