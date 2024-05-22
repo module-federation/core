@@ -1382,9 +1382,6 @@ importers:
       '@chialab/cjs-to-esm':
         specifier: ^0.18.0
         version: 0.18.0
-      '@module-federation/native-federation-runtime':
-        specifier: workspace:*
-        version: link:../native-federation-runtime
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -1458,15 +1455,6 @@ importers:
       find-pkg:
         specifier: 2.0.0
         version: 2.0.0
-
-  packages/native-federation-runtime:
-    dependencies:
-      '@module-federation/runtime':
-        specifier: workspace:*
-        version: link:../runtime
-      tslib:
-        specifier: ^2.3.0
-        version: 2.6.2
 
   packages/native-federation-tests:
     dependencies:
