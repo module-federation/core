@@ -10,11 +10,14 @@ export const mfPluginSSR = (): Plugin => ({
       if (typeof window !== 'undefined') {
         return next({ context });
       }
+      console.log('modernjs plugin start: ', Date.now());
       const nodeUtils = await import('@module-federation/node/utils');
       const shouldUpdate = await nodeUtils.revalidate();
       if (shouldUpdate) {
         console.log('should HMR', shouldUpdate);
+        await nodeUtils.flushChunks();
       }
+      console.log('modernjs plugin end: ', Date.now());
       return next({ context });
     },
   }),

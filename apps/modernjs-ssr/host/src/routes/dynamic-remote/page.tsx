@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  loadRemote,
-  registerRemotes,
-} from '@module-federation/enhanced/runtime';
+import { loadRemote, registerRemotes } from '@modern-js/runtime/mf';
 import { useNavigate } from '@modern-js/runtime/router';
 import './index.css';
 
@@ -30,9 +27,6 @@ const Index = (): JSX.Element => {
         onClick={() => alert('Client side Javascript works!')}
       >
         Click me to test host interactive!
-      </button>
-      <button style={{ marginBottom: '1rem' }} onClick={() => navi('/user')}>
-        Click to jump router!
       </button>
       <DynamicRemote />
     </div>

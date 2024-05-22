@@ -131,7 +131,8 @@ export const moduleFederationPlugin = (
                     const SERVER_PREFIX = `/${MODERN_JS_SERVER_DIR}`;
                     if (
                       req.url?.startsWith(SERVER_PREFIX) ||
-                      req.url?.includes('.json')
+                      (req.url?.includes('.json') &&
+                        !req.url?.includes('hot-update'))
                     ) {
                       const filepath = path.join(
                         process.cwd(),
