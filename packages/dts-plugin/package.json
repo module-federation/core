@@ -22,6 +22,10 @@
       "import": "./dist/core.js",
       "require": "./dist/core.js"
     },
+    "./server": {
+      "import": "./dist/server.js",
+      "require": "./dist/server.js"
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -31,6 +35,9 @@
       ],
       "core": [
         "./dist/core.d.ts"
+      ],
+      "server": [
+        "./dist/server.d.ts"
       ]
     }
   },

@@ -19,7 +19,6 @@ import { retrieveHostConfig } from '../configurations/hostPlugin';
 import { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 import { HostOptions, RemoteInfo } from '../interfaces/HostOptions';
 import {
-  UpdateMode,
   REMOTE_API_TYPES_FILE_NAME,
   REMOTE_ALIAS_IDENTIFIER,
   HOST_API_TYPES_FILE_NAME,
@@ -27,6 +26,7 @@ import {
 import axios from 'axios';
 import { fileLog } from '../../server';
 import { cloneDeepOptions } from './utils';
+import { UpdateMode } from '../../server/constant';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
 

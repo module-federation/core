@@ -51,6 +51,7 @@
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
     "@modern-js/node-bundle-require": "^2.49.2",
+    "@module-federation/dts-plugin": "workspace:*",
     "node-fetch": "~3.3.0"
   },
   "devDependencies": {

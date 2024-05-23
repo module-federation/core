@@ -669,6 +669,10 @@ export default {
           description: 'Disable hot types reload.',
           type: 'boolean',
         },
+        injectWebClient: {
+          description: 'whether inject websocket client.',
+          type: 'boolean',
+        },
       },
     },
     AsyncBoundaryOptions: {

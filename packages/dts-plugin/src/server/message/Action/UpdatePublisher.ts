@@ -1,4 +1,4 @@
-import { UpdateMode } from '../../../core/index';
+import { UpdateMode } from '../../constant';
 import { BaseContext } from '../../types';
 import { Action, ActionKind } from './Action';
 import { UpdateKind } from './Update';

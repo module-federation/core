@@ -1,24 +1,38 @@
 import type { Plugin } from '@modern-js/runtime';
 
-export const mfPluginSSR = (): Plugin => ({
+export const mfPluginSSR = ({ name }: { name?: string }): Plugin => ({
   name: '@module-federation/modern-js',
 
-  // eslint-disable-next-line max-lines-per-function
-  setup: () => ({
-    // eslint-disable-next-line max-lines-per-function
-    async init({ context }, next) {
-      if (typeof window !== 'undefined') {
+  setup: () => {
+    let mfDevServer;
+    return {
+      async init({ context }, next) {
+        if (typeof window !== 'undefined') {
+          return next({ context });
+        }
+        const devServer = await import('@module-federation/dts-plugin/server');
+        if (name) {
+          mfDevServer = new devServer.ModuleFederationDevServer({
+            name: `${name}-server`,
+            remotes: [],
+            updateCallback: async () => {},
+            remoteTypeTarPath: '',
+          });
+        }
+        const nodeUtils = await import('@module-federation/node/utils');
+        const shouldUpdate = await nodeUtils.revalidate();
+        if (shouldUpdate) {
+          console.log('should RELOAD', shouldUpdate);
+          await nodeUtils.flushChunks();
+          mfDevServer &&
+            mfDevServer.update({
+              updateKind: devServer.UpdateKind.RELOAD_PAGE,
+              updateMode: devServer.UpdateMode.POSITIVE,
+              clientName: name,
+            });
+        }
         return next({ context });
-      }
-      console.log('modernjs plugin start: ', Date.now());
-      const nodeUtils = await import('@module-federation/node/utils');
-      const shouldUpdate = await nodeUtils.revalidate();
-      if (shouldUpdate) {
-        console.log('should HMR', shouldUpdate);
-        await nodeUtils.flushChunks();
-      }
-      console.log('modernjs plugin end: ', Date.now());
-      return next({ context });
-    },
-  }),
+      },
+    };
+  },
 });

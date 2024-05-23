@@ -1,5 +1,5 @@
 import path from 'path';
-import { DTSManagerOptions, rpc } from '../core/index';
+import { type DTSManagerOptions, rpc } from '../core/index';
 import { cloneDeepOptions } from '../core/lib/utils';
 
 export interface DevWorkerOptions extends DTSManagerOptions {
@@ -18,7 +18,7 @@ export class DevWorker {
 
     this.removeUnSerializationOptions();
     this._rpcWorker = rpc.createRpcWorker(
-      path.resolve(__dirname, './forkDevWorker.js'),
+      path.resolve(__dirname, './fork-dev-worker.js'),
       {},
       undefined,
       false,

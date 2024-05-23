@@ -7,6 +7,7 @@ function generateConfigurations(
   return options.map((option) => {
     const [entry, config] = option;
     return {
+      tsconfig: join(__dirname, 'tsconfig.json'),
       entry,
       clean: true,
       dts: true,
@@ -23,9 +24,21 @@ export const tsup: Options[] = generateConfigurations([
     {
       index: join(__dirname, 'src', 'index.ts'),
       core: join(__dirname, 'src', 'core', 'index.ts'),
-      forkDevWorker: join(__dirname, 'src', 'dev-worker', 'forkDevWorker.ts'),
-      startBroker: join(__dirname, 'src', 'server', 'broker', 'startBroker.ts'),
-      forkGenerateDts: join(
+      server: join(__dirname, 'src', 'server', 'index.ts'),
+      'fork-dev-worker': join(
+        __dirname,
+        'src',
+        'dev-worker',
+        'forkDevWorker.ts',
+      ),
+      'start-broker': join(
+        __dirname,
+        'src',
+        'server',
+        'broker',
+        'startBroker.ts',
+      ),
+      'fork-generate-dts': join(
         __dirname,
         'src',
         'core',

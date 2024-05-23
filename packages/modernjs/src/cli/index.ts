@@ -159,6 +159,14 @@ export const moduleFederationPlugin = (
                 },
               ],
             },
+            bundlerChain(chain, { isServer }) {
+              if (isDev && !isServer) {
+                chain.externals({
+                  '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
+                  '@module-federation/dts-plugin/server': 'NOT_USED_IN_BROWSER',
+                });
+              }
+            },
           },
           source: {
             alias: {
@@ -202,7 +210,9 @@ export const moduleFederationPlugin = (
 
         plugins.unshift({
           name: SSR_PLUGIN_IDENTIFIER,
-          options: JSON.stringify({}),
+          options: JSON.stringify({
+            name: mfConfig.name,
+          }),
         });
 
         return {

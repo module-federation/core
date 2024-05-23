@@ -102,6 +102,7 @@ export class DevPlugin implements WebpackPluginInstance {
         {
           disableLiveReload: true,
           disableHotTypesReload: false,
+          injectWebClient: false,
         },
         'mfOptions.dev',
       )(dev);
@@ -112,7 +113,8 @@ export class DevPlugin implements WebpackPluginInstance {
 
     if (
       normalizedDev.disableHotTypesReload &&
-      normalizedDev.disableLiveReload
+      normalizedDev.disableLiveReload &&
+      !normalizedDev.injectWebClient
     ) {
       return;
     }
@@ -120,19 +122,25 @@ export class DevPlugin implements WebpackPluginInstance {
       throw new Error('name is required if you want to enable dev server!');
     }
 
-    if (!normalizedDev.disableLiveReload) {
+    if (normalizedDev.injectWebClient) {
       const TEMP_DIR = path.join(
         `${process.cwd()}/node_modules`,
         `.federation`,
       );
       const filepath = path.join(TEMP_DIR, `live-reload.js`);
 
-      DevPlugin.ensureLiveReloadEntry({ name }, filepath);
-      compiler.hooks.afterPlugins.tap('MFDevPlugin', () => {
-        new compiler.webpack.EntryPlugin(compiler.context, filepath, {
-          name,
-        }).apply(compiler);
-      });
+      if (typeof compiler.options.entry === 'object') {
+        DevPlugin.ensureLiveReloadEntry({ name }, filepath);
+        Object.keys(compiler.options.entry).forEach((entry) => {
+          const normalizedEntry = compiler.options.entry[entry];
+          if (
+            typeof normalizedEntry === 'object' &&
+            Array.isArray(normalizedEntry.import)
+          ) {
+            normalizedEntry.import.unshift(filepath);
+          }
+        });
+      }
     }
 
     const defaultGenerateTypes = { compileInChildProcess: true };

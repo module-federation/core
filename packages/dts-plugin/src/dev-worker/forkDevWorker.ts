@@ -1,6 +1,5 @@
 import {
   rpc,
-  UpdateMode,
   getDTSManagerConstructor,
   DTSManager,
   retrieveHostConfig,
@@ -19,6 +18,7 @@ import {
   fileLog,
   getIPV4,
   DEFAULT_TAR_NAME,
+  UpdateMode,
 } from '../server';
 
 import { DevWorkerOptions } from './DevWorker';

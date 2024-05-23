@@ -1,5 +1,5 @@
 import WebSocket from 'isomorphic-ws';
-import { UpdateMode } from '../core/index';
+import { UpdateMode } from './constant';
 import { Broker } from './broker/Broker';
 import { fib, getIdentifier, getIPV4, fileLog } from './utils';
 import { Message } from './message/Message';
@@ -39,6 +39,7 @@ export interface ServerUpdateOptions {
   updateKind: UpdateKind;
   updateMode: UpdateMode;
   updateSourcePaths?: string[];
+  clientName?: string;
 }
 
 export interface Remote {
@@ -99,12 +100,12 @@ export class ModuleFederationDevServer {
         'info',
       );
       this._isConnected = true;
-      const startGarfishModule = new AddPublisherAction({
+      const addPublisherAction = new AddPublisherAction({
         name: this._name,
         ip: this._ip,
         remoteTypeTarPath: this._remoteTypeTarPath,
       });
-      this._publishWebSocket?.send(JSON.stringify(startGarfishModule));
+      this._publishWebSocket?.send(JSON.stringify(addPublisherAction));
       this._connectSubscribers();
     });
     this._publishWebSocket.on('message', (message) => {
@@ -487,7 +488,7 @@ export class ModuleFederationDevServer {
     if (!this._publishWebSocket || !this._isConnected) {
       return;
     }
-    const { updateKind, updateMode, updateSourcePaths } = options;
+    const { updateKind, updateMode, updateSourcePaths, clientName } = options;
     fileLog(
       `update run, ${this._name} module update, updateKind: ${updateKind}, updateMode: ${updateMode}, updateSourcePaths: ${updateSourcePaths}`,
       MF_SERVER_IDENTIFIER,
@@ -495,7 +496,7 @@ export class ModuleFederationDevServer {
     );
     if (updateKind === UpdateKind.RELOAD_PAGE) {
       const notifyWebClient = new NotifyWebClientAction({
-        name: this._name,
+        name: clientName || this._name,
         updateMode,
       });
       this._publishWebSocket.send(JSON.stringify(notifyWebClient));

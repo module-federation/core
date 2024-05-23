@@ -69,7 +69,36 @@ export const patchMFConfig = (
     mfConfig.async = true;
   }
 
-  return { ...mfConfig, runtimePlugins };
+  if (!isServer) {
+    return {
+      ...mfConfig,
+      runtimePlugins,
+      dts:
+        mfConfig.dts === false
+          ? false
+          : {
+              generateTypes: false,
+              consumeTypes: false,
+              ...(typeof mfConfig.dts === 'object' ? mfConfig.dts : {}),
+            },
+      dev:
+        mfConfig.dev === false
+          ? false
+          : {
+              disableHotTypesReload: true,
+              disableLiveReload: false,
+              injectWebClient: true,
+              ...(typeof mfConfig.dev === 'object' ? mfConfig.dev : {}),
+            },
+    };
+  }
+
+  return {
+    ...mfConfig,
+    runtimePlugins,
+    dts: false,
+    dev: false,
+  };
 };
 
 export function getTargetEnvConfig(

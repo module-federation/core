@@ -18,7 +18,7 @@ export class DtsWorker {
 
     this.removeUnSerializationOptions();
     this.rpcWorker = createRpcWorker(
-      path.resolve(__dirname, './forkGenerateDts.js'),
+      path.resolve(__dirname, './fork-generate-dts.js'),
       {},
       undefined,
       true,
