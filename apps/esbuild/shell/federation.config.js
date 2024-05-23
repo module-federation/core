@@ -1,11 +1,11 @@
 // shell\federation.config.js
 
 const {
-  withNativeFederation,
+  withFederation,
   shareAll,
 } = require('@module-federation/esbuild/build');
 
-module.exports = withNativeFederation({
+module.exports = withFederation({
   name: 'host',
   filename: './shell/remoteEntry.js',
   remotes: {

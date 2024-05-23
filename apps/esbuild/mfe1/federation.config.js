@@ -1,9 +1,9 @@
 const {
-  withNativeFederation,
+  withFederation,
   shareAll,
 } = require('@module-federation/esbuild/build');
 
-module.exports = withNativeFederation({
+module.exports = withFederation({
   name: 'mfe1',
   filename: './mfe1/remoteEntry.js',
   exposes: {

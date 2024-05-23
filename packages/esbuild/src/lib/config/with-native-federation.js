@@ -5,7 +5,7 @@ import { findRootTsConfigJson } from './share-utils';
 import { isInSkipList } from '../core/default-skip-list';
 import { logger } from '../utils/logger';
 
-export function withNativeFederation(config) {
+export function withFederation(config) {
   const skip = prepareSkipList(config.skip ?? []);
   return {
     name: config.name ?? '',
