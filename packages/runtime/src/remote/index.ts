@@ -46,7 +46,7 @@ export interface LoadRemoteMatch {
 
 export class RemoteHandler {
   host: FederationHost;
-  idToModuleNameMap: Record<string, string>;
+  idToRemoteMap: Record<string, { name: string; expose: string }>;
 
   hooks = new PluginSystem({
     beforeRequest: new AsyncWaterfallHook<{
@@ -126,7 +126,7 @@ export class RemoteHandler {
 
   constructor(host: FederationHost) {
     this.host = host;
-    this.idToModuleNameMap = {};
+    this.idToRemoteMap = {};
   }
 
   formatAndRegisterRemote(globalOptions: Options, userOptions: UserOptions) {
@@ -173,7 +173,7 @@ export class RemoteHandler {
         origin: host,
       });
 
-      this.idToModuleNameMap[id] = remote.name;
+      this.idToRemoteMap[id] = { name: remote.name, expose };
       if (typeof moduleWrapper === 'function') {
         return moduleWrapper as T;
       }

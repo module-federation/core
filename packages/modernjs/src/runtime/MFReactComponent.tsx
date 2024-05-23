@@ -12,11 +12,11 @@ interface IProps {
 }
 
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
-  const moduleName = instance.remoteHandler.idToModuleNameMap[id];
-  if (!moduleName) {
+  const { name, expose } = instance.remoteHandler.idToRemoteMap[id];
+  if (!name) {
     return;
   }
-  const module = instance.moduleCache.get(moduleName);
+  const module = instance.moduleCache.get(name);
   if (!module) {
     return;
   }
@@ -26,6 +26,7 @@ function getLoadedRemoteInfos(instance: FederationHost, id: string) {
   return {
     ...module.remoteInfo,
     snapshot: remoteSnapshot,
+    expose,
   };
 }
 
@@ -52,23 +53,34 @@ function collectLinks(id: string) {
   if (!publicPath) {
     return links;
   }
+  const addProtocol = (url: string): string => {
+    if (url.startsWith('//')) {
+      return `https:${url}`;
+    }
+    return url;
+  };
   const modules = 'modules' in snapshot ? snapshot.modules : [];
   if (modules) {
-    modules.forEach((module) => {
-      [...module.assets.css.sync, ...module.assets.css.async].forEach(
-        (file, index) => {
-          // links.push(`${publicPath}${file}`)
-          links.push(
-            <link
-              key={index}
-              href={`${publicPath}${file}`}
-              rel="stylesheet"
-              type="text/css"
-            />,
-          );
-        },
-      );
-    });
+    const targetModule = modules.find(
+      (m) => m.modulePath === loadedRemoteInfo.expose,
+    );
+    if (!targetModule) {
+      return links;
+    }
+
+    [...targetModule.assets.css.sync, ...targetModule.assets.css.async].forEach(
+      (file, index) => {
+        // links.push(`${publicPath}${file}`)
+        links.push(
+          <link
+            key={index}
+            href={`${addProtocol(publicPath)}${file}`}
+            rel="stylesheet"
+            type="text/css"
+          />,
+        );
+      },
+    );
   }
   return links;
 }
