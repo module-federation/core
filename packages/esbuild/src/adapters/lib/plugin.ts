@@ -8,6 +8,7 @@ import { writeRemoteManifest } from './manifest.js';
 import { createContainerPlugin } from './containerPlugin';
 import { initializeHostPlugin } from './containerReference';
 import { linkRemotesPlugin } from './linkRemotesPlugin';
+import { BuildOptions, PluginBuild, Plugin } from 'esbuild';
 
 // Creates a virtual module for sharing dependencies
 export const createVirtualShareModule = (
@@ -90,13 +91,15 @@ const linkSharedPlugin = {
 // Main module federation plugin
 export const moduleFederationPlugin = (config: any) => ({
   name: 'module-federation',
-  setup(build: any) {
+  setup(build: PluginBuild) {
     build.initialOptions.metafile = true;
 
-    const pluginStack: any[] = [];
+    const pluginStack: Plugin[] = [];
     const remotes = Object.keys(federationBuilder.config.remotes || {}).length;
     const shared = Object.keys(federationBuilder.config.shared || {}).length;
     const exposes = Object.keys(federationBuilder.config.exposes || {}).length;
+    const entryPoints = build.initialOptions.entryPoints;
+    const filename = federationBuilder.config.filename || 'remoteEntry.js';
 
     if (remotes) {
       pluginStack.push(linkRemotesPlugin);
@@ -104,6 +107,21 @@ export const moduleFederationPlugin = (config: any) => ({
 
     if (shared) {
       pluginStack.push(linkSharedPlugin);
+    }
+
+    if (!entryPoints) {
+      build.initialOptions.entryPoints = [];
+    }
+
+    if (exposes) {
+      if (Array.isArray(entryPoints)) {
+        //@ts-ignore
+        entryPoints.push(filename);
+      } else if (entryPoints && typeof entryPoints === 'object') {
+        entryPoints[filename] = filename;
+      } else {
+        build.initialOptions.entryPoints = [filename];
+      }
     }
 
     [
@@ -116,7 +134,7 @@ export const moduleFederationPlugin = (config: any) => ({
     build.onEnd(async (result: any) => {
       if (!result.metafile) return;
       if (exposes) {
-        const exposedConfig = federationBuilder.config.exposes;
+        const exposedConfig = federationBuilder.config.exposes || {};
         const remoteFile = (federationBuilder.config as any).filename;
         const exposedEntries: Record<string, any> = {};
         const outputMapWithoutExt = Object.entries(
@@ -162,7 +180,6 @@ export const moduleFederationPlugin = (config: any) => ({
         }
       }
       await writeRemoteManifest(federationBuilder.config, result);
-
       console.log(`build ended with ${result.errors.length} errors`);
     });
   },

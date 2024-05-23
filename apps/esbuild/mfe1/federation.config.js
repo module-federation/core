@@ -5,7 +5,7 @@ const {
 
 module.exports = withNativeFederation({
   name: 'mfe1',
-  filename: 'remoteEntry.js',
+  filename: './mfe1/remoteEntry.js',
   exposes: {
     './component': './mfe1/app',
   },

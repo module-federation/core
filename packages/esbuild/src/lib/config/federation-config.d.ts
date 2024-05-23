@@ -24,8 +24,9 @@ export interface NormalizedSharedConfig {
 }
 export interface NormalizedFederationConfig {
   name: string;
-  exposes: Record<string, string>;
-  shared: Record<string, NormalizedSharedConfig>;
+  filename?: string;
+  exposes?: Record<string, string>;
+  shared?: Record<string, NormalizedSharedConfig>;
   sharedMappings: Array<MappedPath>;
   remotes?: Record<string, string>;
 }

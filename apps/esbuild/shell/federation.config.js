@@ -7,6 +7,7 @@ const {
 
 module.exports = withNativeFederation({
   name: 'host',
+  filename: './shell/remoteEntry.js',
   remotes: {
     mfe1: 'http://localhost:3001/remoteEntry.js',
   },

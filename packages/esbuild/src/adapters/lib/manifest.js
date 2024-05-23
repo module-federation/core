@@ -3,8 +3,12 @@ const path = require('path');
 import { resolve } from './collect-exports.js';
 
 export const writeRemoteManifest = async (config, result) => {
-  let packageJson;
+  if (result.errors && result.errors.length > 0) {
+    console.warn('Build errors detected, skipping writeRemoteManifest.');
+    return;
+  }
 
+  let packageJson;
   try {
     packageJson = await resolve(process.cwd(), '/package.json');
   } catch (e) {
@@ -31,6 +35,8 @@ export const writeRemoteManifest = async (config, result) => {
     },
     {},
   );
+
+  if (!outputMap[containerName]) return;
 
   const outputMapWithoutExt = Object.entries(result.metafile.outputs).reduce(
     (acc, [chunkKey, chunkValue]) => {
@@ -68,71 +74,71 @@ export const writeRemoteManifest = async (config, result) => {
     return assets;
   };
 
-  const shared = await Promise.all(
-    Object.entries(mfConfig.shared).map(async ([pkg, config]) => {
-      const meta = outputMap['esm-shares:' + pkg];
-      const chunks = getChunks(meta, outputMap);
-      let { version } = config;
+  const shared = mfConfig.shared
+    ? await Promise.all(
+        Object.entries(mfConfig.shared).map(async ([pkg, config]) => {
+          const meta = outputMap['esm-shares:' + pkg];
+          const chunks = getChunks(meta, outputMap);
+          let { version } = config;
 
-      if (!version) {
-        try {
-          const packageJsonPath = await resolve(
-            process.cwd(),
-            `${pkg}/package.json`,
-          );
-          version = JSON.parse(
-            fs.readFileSync(packageJsonPath, 'utf-8'),
-          ).version;
-        } catch (e) {
-          console.warn(
-            `Can't resolve ${pkg} version automatically, consider setting "version" manually`,
-          );
-        }
-      }
+          if (!version) {
+            try {
+              const packageJsonPath = await resolve(
+                process.cwd(),
+                `${pkg}/package.json`,
+              );
+              version = JSON.parse(
+                fs.readFileSync(packageJsonPath, 'utf-8'),
+              ).version;
+            } catch (e) {
+              console.warn(
+                `Can't resolve ${pkg} version automatically, consider setting "version" manually`,
+              );
+            }
+          }
 
-      return {
-        id: `${mfConfig.name}:${pkg}`,
-        name: pkg,
-        version: version || config.version,
-        singleton: config.singleton || false,
-        requiredVersion: config.requiredVersion || '*',
-        assets: chunks,
-      };
-    }),
-  );
+          return {
+            id: `${mfConfig.name}:${pkg}`,
+            name: pkg,
+            version: version || config.version,
+            singleton: config.singleton || false,
+            requiredVersion: config.requiredVersion || '*',
+            assets: chunks,
+          };
+        }),
+      )
+    : [];
 
-  const remotes = Object.entries(mfConfig.remotes).map(([alias, remote]) => {
-    if (remote.includes('@')) {
-      const [federationContainerName, entry] = remote.split('@');
-      return {
-        federationContainerName,
-        moduleName: '',
-        alias,
-        entry,
-      };
-    } else {
-      return {
-        federationContainerName: alias,
-        moduleName: '',
-        alias,
-        entry: remote,
-      };
-    }
-  });
+  const remotes = mfConfig.remotes
+    ? Object.entries(mfConfig.remotes).map(([alias, remote]) => {
+        const [federationContainerName, entry] = remote.includes('@')
+          ? remote.split('@')
+          : [alias, remote];
 
-  const exposes = await Promise.all(
-    Object.entries(mfConfig.exposes).map(([expose, value]) => {
-      const exposedFound = outputMapWithoutExt[value.replace('./', '')];
-      const chunks = getChunks(exposedFound, outputMap);
+        return {
+          federationContainerName,
+          moduleName: '',
+          alias,
+          entry,
+        };
+      })
+    : [];
 
-      return {
-        id: `${mfConfig.name}:${expose.replace(/^\.\//, '')}`,
-        name: expose.replace(/^\.\//, ''),
-        assets: chunks,
-        path: expose,
-      };
-    }),
-  );
+  const exposes = mfConfig.exposes
+    ? await Promise.all(
+        Object.entries(mfConfig.exposes).map(async ([expose, value]) => {
+          const exposedFound = outputMapWithoutExt[value.replace('./', '')];
+          const chunks = getChunks(exposedFound, outputMap);
+
+          return {
+            id: `${mfConfig.name}:${expose.replace(/^\.\//, '')}`,
+            name: expose.replace(/^\.\//, ''),
+            assets: chunks,
+            path: expose,
+          };
+        }),
+      )
+    : [];
 
   const types = {
     path: '',
@@ -153,7 +159,9 @@ export const writeRemoteManifest = async (config, result) => {
       },
       remoteEntry: {
         name: mfConfig.filename,
-        path: path.dirname(outputMap[containerName].chunk),
+        path: outputMap[containerName]
+          ? path.dirname(outputMap[containerName].chunk)
+          : '',
         type: 'esm',
       },
       types,

@@ -17,7 +17,7 @@ export const buildFederationHost = () => {
     : '[]';
 
   const sharedConfig =
-    Object.entries(shared).reduce((acc, [pkg, config]) => {
+    Object.entries(shared ?? {}).reduce((acc, [pkg, config]) => {
       const version = config.requiredVersion?.replace(/^[^0-9]/, '') || '';
       acc += `${JSON.stringify(pkg)}: {
       "package": "${pkg}",
