@@ -49,6 +49,9 @@ const cjsToEsmPlugin = {
       async (args: any) => {
         const { transform } = await eval("import('@chialab/cjs-to-esm')");
         const resolver = await resolve(args.pluginData.resolveDir, args.path);
+        if (typeof resolver !== 'string') {
+          throw new Error(`Unable to resolve path: ${args.path}`);
+        }
         const fileContent = fs.readFileSync(resolver, 'utf-8');
         const { code } = await transform(fileContent);
         return {
