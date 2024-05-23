@@ -113,17 +113,45 @@ export const initializeHostPlugin = {
       }),
     );
 
+    // Add custom loaders
+    const loaders = build.initialOptions.loader || {};
+
+    // Apply custom loaders
+    for (const [ext, loader] of Object.entries(loaders)) {
+      build.onLoad(
+        { filter: new RegExp(`\\${ext}$`), namespace: 'file' },
+        async (args: any) => {
+          const contents = await fs.promises.readFile(args.path, 'utf8');
+          return {
+            contents: buildFederationHost() + contents,
+            loader,
+          };
+        },
+      );
+    }
+
+    // Fallback loader for files not matched by custom loaders
+    const fallbackFilter = new RegExp(
+      Object.keys(loaders)
+        .map((ext) => `\\${ext}$`)
+        .join('|'),
+    );
+
     build.onLoad(
       { filter: /.*\.(ts|js|mjs)$/, namespace: 'file' },
+      //@ts-ignore
       async (args: any) => {
-        if (
-          !build.initialOptions.entryPoints.some((e: string) =>
-            args.path.includes(e),
-          )
-        )
-          return;
-        const contents = await fs.promises.readFile(args.path, 'utf8');
-        return { contents: buildFederationHost() + contents };
+        if (!fallbackFilter.test(args.path)) {
+          if (
+            !build.initialOptions.entryPoints.some((e: string) =>
+              args.path.includes(e),
+            )
+          ) {
+            return;
+          }
+          const contents = await fs.promises.readFile(args.path, 'utf8');
+          return { contents: buildFederationHost() + contents };
+        }
       },
     );
   },

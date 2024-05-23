@@ -37,6 +37,7 @@ async function buildProject(projectName, watch) {
     mainFields: ['es2020', 'browser', 'module', 'main'],
     conditions: ['es2020', 'es2015', 'module'],
     resolveExtensions: ['.ts', '.tsx', '.mjs', '.js'],
+    loader: { '.ts': 'ts' },
     tsconfig: tsConfig,
     splitting: true,
     plugins: [moduleFederationPlugin(federationBuilder)],
