@@ -1,21 +1,23 @@
 import fs from 'fs';
 import path from 'path';
 import { resolve } from './collect-exports.js';
+import {
+  BuildOptions,
+  PluginBuild,
+  Plugin,
+  OnResolveArgs,
+  OnLoadArgs,
+  BuildResult,
+  BuildContext,
+} from 'esbuild';
 //@ts-ignore
 import { version as pluginVersion } from '@module-federation/esbuild/package.json';
-
-interface BuildResult {
-  errors?: any[];
-  metafile: {
-    outputs: Record<string, OutputFile>;
-  };
-}
 
 interface OutputFile {
   entryPoint?: string;
   imports?: { path: string }[];
   exports?: string[];
-  kind: string;
+  kind?: string;
   chunk: string;
 }
 
@@ -102,15 +104,16 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
   let containerName: string = '';
 
   const outputMap: Record<string, OutputFile> = Object.entries(
-    result.metafile.outputs,
+    result.metafile?.outputs || {},
   ).reduce(
     (acc, [chunkKey, chunkValue]) => {
-      const { entryPoint } = chunkValue;
+      //@ts-ignore
+      const { entryPoint, kind = 'static-import' } = chunkValue;
       const key = entryPoint || chunkKey;
       if (key.startsWith('container:') && key.endsWith(mfConfig.filename)) {
         containerName = key;
       }
-      acc[key] = { ...chunkValue, chunk: chunkKey };
+      acc[key] = { ...chunkValue, kind, chunk: chunkKey };
       return acc;
     },
     {} as Record<string, OutputFile>,
@@ -119,7 +122,7 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
   if (!outputMap[containerName]) return;
 
   const outputMapWithoutExt: Record<string, OutputFile> = Object.entries(
-    result.metafile.outputs,
+    result.metafile?.outputs || {},
   ).reduce(
     (acc, [chunkKey, chunkValue]) => {
       const { entryPoint } = chunkValue;
