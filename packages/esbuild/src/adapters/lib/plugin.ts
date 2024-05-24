@@ -212,8 +212,11 @@ export const moduleFederationPlugin = (config: any) => ({
         }, {});
 
         for (const [expose, value] of Object.entries(exposedConfig)) {
-          //@ts-ignore
-          const exposedFound = outputMapWithoutExt[value.replace('./', '')];
+          const exposedFound =
+            //@ts-ignore
+            outputMapWithoutExt[value.replace('./', '')] ||
+            //@ts-ignore
+            outputMapWithoutExt[expose.replace('./', '')];
 
           if (exposedFound) {
             exposedEntries[expose] = {

@@ -1,6 +1,3 @@
-Here's an updated README.md that incorporates the plugin options and ensures they are met:
-
-
 # @module-federation/esbuild
 
 This package provides an esbuild plugin for Module Federation, enabling you to easily share code between independently built and deployed applications.
