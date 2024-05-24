@@ -19,6 +19,7 @@ export const DEFAULT_SKIP_LIST = [
   /^@nx\/angular/,
   (pkg) => pkg.startsWith('@angular/') && !!pkg.match(/\/testing(\/|$)/),
   (pkg) => pkg.startsWith('@types/'),
+  (pkg) => pkg.startsWith('@module-federation/'),
 ];
 
 export const PREPARED_DEFAULT_SKIP_LIST = prepareSkipList(DEFAULT_SKIP_LIST);
