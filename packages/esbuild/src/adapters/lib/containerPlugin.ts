@@ -170,9 +170,7 @@ export const createContainerPlugin = (config: any) => ({
             pluginData: { kind: args.kind, resolveDir: args.resolveDir },
           };
         }
-        const resolve = await build.resolve(args.path, {
-          resolveDir: args.resolveDir,
-        });
+
         return undefined;
         return {
           path: args.path,
