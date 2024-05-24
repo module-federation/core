@@ -1,14 +1,19 @@
 import fs from 'fs';
-//@ts-ignore
 import { resolve, getExports } from './collect-exports.js';
 import path from 'path';
 import { federationBuilder } from '../../lib/core/federation-builder';
-//@ts-ignore
 import { writeRemoteManifest } from './manifest.js';
 import { createContainerPlugin } from './containerPlugin';
 import { initializeHostPlugin } from './containerReference';
 import { linkRemotesPlugin } from './linkRemotesPlugin';
-import { BuildOptions, PluginBuild, Plugin, OnResolveArgs } from 'esbuild';
+import {
+  BuildOptions,
+  PluginBuild,
+  Plugin,
+  OnResolveArgs,
+  OnLoadArgs,
+} from 'esbuild';
+
 // Creates a virtual module for sharing dependencies
 export const createVirtualShareModule = (
   name: string,
@@ -37,29 +42,30 @@ export const createVirtualRemoteModule = (
 export * from ${JSON.stringify('federationRemote/' + ref)}
 `;
 
-// Plugin to initialize the federation host
-
 // Plugin to transform CommonJS modules to ESM
-const cjsToEsmPlugin = {
+const cjsToEsmPlugin: Plugin = {
   name: 'cjs-to-esm',
-  setup(build: any) {
+  setup(build: PluginBuild) {
     build.onLoad(
       { filter: /.*/, namespace: 'esm-shares' },
-      async (args: any) => {
-        const { transform } = await eval("import('@chialab/cjs-to-esm')");
+      async (args: OnLoadArgs) => {
+        const { transform } = await import('@chialab/cjs-to-esm');
         const resolver = await resolve(args.pluginData.resolveDir, args.path);
         if (typeof resolver !== 'string') {
           throw new Error(`Unable to resolve path: ${args.path}`);
         }
         const fileContent = fs.readFileSync(resolver, 'utf-8');
         try {
-          const { code } = await transform(fileContent);
-          return {
-            contents: code,
-            loader: 'js',
-            resolveDir: path.dirname(resolver),
-            pluginData: { ...args.pluginData, path: resolver },
-          };
+          const result = await transform(fileContent);
+          if (result) {
+            const { code } = result;
+            return {
+              contents: code,
+              loader: 'js',
+              resolveDir: path.dirname(resolver),
+              pluginData: { ...args.pluginData, path: resolver },
+            };
+          }
         } catch {
           return {
             contents: fileContent,
@@ -68,15 +74,17 @@ const cjsToEsmPlugin = {
             pluginData: { ...args.pluginData, path: resolver },
           };
         }
+
+        return undefined;
       },
     );
   },
 };
 
 // Plugin to link shared dependencies
-const linkSharedPlugin = {
+const linkSharedPlugin: Plugin = {
   name: 'linkShared',
-  setup(build: any) {
+  setup(build: PluginBuild) {
     const filter = new RegExp(
       Object.keys(federationBuilder.config.shared || {})
         .map((name: string) => `${name}$`)
@@ -110,7 +118,6 @@ const linkSharedPlugin = {
             pluginData: { kind: args.kind, resolveDir: args.resolveDir },
           };
         }
-        return undefined;
         return {
           path: args.path,
           namespace: 'file',
@@ -130,7 +137,7 @@ const linkSharedPlugin = {
 
     build.onLoad(
       { filter, namespace: 'virtual-share-module' },
-      async (args: any) => {
+      async (args: OnLoadArgs) => {
         const exp = await getExports(args.path);
         return {
           contents: createVirtualShareModule(
@@ -145,6 +152,56 @@ const linkSharedPlugin = {
     );
   },
 };
+
+async function processRemoteFileOutput(result: any, federationBuilder: any) {
+  if (!result.metafile) return;
+  if (federationBuilder.config.exposes) {
+    const exposedConfig = federationBuilder.config.exposes || {};
+    const remoteFile = (federationBuilder.config as any).filename;
+    const exposedEntries: Record<
+      string,
+      { entryPoint: string; exports: string[] }
+    > = {};
+    const outputMapWithoutExt = Object.entries(result.metafile.outputs).reduce(
+      (acc, [chunkKey, chunkValue]) => {
+        const { entryPoint } = chunkValue as { entryPoint: string };
+        const key = entryPoint || chunkKey;
+        const trimKey = key.substring(0, key.lastIndexOf('.')) || key;
+        if (typeof chunkValue === 'object' && chunkValue !== null) {
+          acc[trimKey] = { ...chunkValue, chunk: chunkKey };
+        }
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
+
+    for (const [expose, value] of Object.entries(exposedConfig)) {
+      const exposedFound =
+        outputMapWithoutExt[(value as string).replace('./', '')];
+
+      if (exposedFound) {
+        exposedEntries[expose] = {
+          entryPoint: exposedFound.entryPoint,
+          exports: exposedFound.exports || [],
+        };
+      }
+    }
+
+    const remoteFileOutput = result.outputFiles.find((file: { path: string }) =>
+      file.path.endsWith(remoteFile),
+    );
+
+    if (remoteFileOutput) {
+      const container = remoteFileOutput.text;
+      const withExports = container
+        .replace('"__MODULE_MAP__"', `${JSON.stringify(exposedEntries)}`)
+        .replace("'__MODULE_MAP__'", `${JSON.stringify(exposedEntries)}`);
+
+      remoteFileOutput.text = withExports;
+    }
+  }
+  await writeRemoteManifest(federationBuilder.config, result);
+}
 
 // Main module federation plugin
 export const moduleFederationPlugin = (config: any) => ({
@@ -173,10 +230,9 @@ export const moduleFederationPlugin = (config: any) => ({
 
     if (exposes) {
       if (Array.isArray(entryPoints)) {
-        //@ts-ignore
-        entryPoints.push(filename);
+        (entryPoints as string[]).push(filename);
       } else if (entryPoints && typeof entryPoints === 'object') {
-        entryPoints[filename] = filename;
+        (entryPoints as Record<string, string>)[filename] = filename;
       } else {
         build.initialOptions.entryPoints = [filename];
       }
@@ -190,54 +246,7 @@ export const moduleFederationPlugin = (config: any) => ({
     ].forEach((plugin) => plugin.setup(build));
 
     build.onEnd(async (result: any) => {
-      if (!result.metafile) return;
-      if (exposes) {
-        const exposedConfig = federationBuilder.config.exposes || {};
-        const remoteFile = (federationBuilder.config as any).filename;
-        const exposedEntries: Record<string, any> = {};
-        const outputMapWithoutExt = Object.entries(
-          result.metafile.outputs,
-        ).reduce((acc, [chunkKey, chunkValue]) => {
-          //@ts-ignore
-          const { entryPoint } = chunkValue;
-          const key = entryPoint || chunkKey;
-          const trimKey = key.substring(0, key.lastIndexOf('.')) || key;
-          //@ts-ignore
-          acc[trimKey] = { ...chunkValue, chunk: chunkKey };
-          return acc;
-        }, {});
-
-        for (const [expose, value] of Object.entries(exposedConfig)) {
-          //@ts-ignore
-          const exposedFound = outputMapWithoutExt[value.replace('./', '')];
-
-          if (exposedFound) {
-            exposedEntries[expose] = {
-              entryPoint: exposedFound.entryPoint,
-              exports: exposedFound.exports,
-            };
-          }
-        }
-
-        for (const [outputPath, value] of Object.entries(
-          result.metafile.outputs,
-        )) {
-          if (!(value as any).entryPoint) continue;
-
-          if (!(value as any).entryPoint.startsWith('container:')) continue;
-
-          if (!(value as any).entryPoint.endsWith(remoteFile)) continue;
-
-          const container = fs.readFileSync(outputPath, 'utf-8');
-
-          const withExports = container
-            .replace('"__MODULE_MAP__"', `${JSON.stringify(exposedEntries)}`)
-            .replace("'__MODULE_MAP__'", `${JSON.stringify(exposedEntries)}`);
-
-          fs.writeFileSync(outputPath, withExports, 'utf-8');
-        }
-      }
-      await writeRemoteManifest(federationBuilder.config, result);
+      await processRemoteFileOutput(result, federationBuilder);
       console.log(`build ended with ${result.errors.length} errors`);
     });
   },
