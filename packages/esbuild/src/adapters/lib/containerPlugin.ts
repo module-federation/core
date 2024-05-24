@@ -1,6 +1,7 @@
 import { OnResolveArgs, OnLoadArgs, PluginBuild } from 'esbuild';
 //replace with createContainer from bundler runtime
 import { createContainerCode } from '../../lib/core/createContainerTemplate.js';
+import { federationBuilder } from '../../lib/core/federation-builder';
 //@ts-ignore
 const buildContainerHost = ({ config }) => {
   const { name, remotes = {}, shared = {}, exposes = {} } = config;
@@ -128,8 +129,11 @@ export const createContainerPlugin = (config: any) => ({
     } = config;
 
     const filter = new RegExp([filename].map((name) => `${name}$`).join('|'));
+
     const sharedExternals = new RegExp(
-      externals.map((name: string) => `${name}$`).join('|'),
+      Object.keys(federationBuilder.config.shared || {})
+        .map((name: string) => `${name}$`)
+        .join('|'),
     );
 
     build.onResolve({ filter }, async (args: OnResolveArgs) => ({
@@ -158,7 +162,7 @@ export const createContainerPlugin = (config: any) => ({
 
     build.onResolve(
       { filter: /.*/, namespace: 'esm-shares' },
-      (args: OnResolveArgs) => {
+      async (args: OnResolveArgs) => {
         if (sharedExternals.test(args.path)) {
           return {
             path: args.path,
@@ -166,9 +170,13 @@ export const createContainerPlugin = (config: any) => ({
             pluginData: { kind: args.kind, resolveDir: args.resolveDir },
           };
         }
+        const resolve = await build.resolve(args.path, {
+          resolveDir: args.resolveDir,
+        });
+        return undefined;
         return {
           path: args.path,
-          namespace: 'esm-shares',
+          namespace: 'file',
           pluginData: { kind: args.kind, resolveDir: args.resolveDir },
         };
       },

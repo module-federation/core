@@ -768,6 +768,9 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
     devDependencies:
       '@chialab/cjs-to-esm':
         specifier: ^0.18.0
@@ -1382,6 +1385,9 @@ importers:
       '@chialab/cjs-to-esm':
         specifier: ^0.18.0
         version: 0.18.0
+      '@chialab/estransform':
+        specifier: ^0.18.1
+        version: 0.18.1
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -1403,6 +1409,9 @@ importers:
       enhanced-resolve:
         specifier: ^5.16.1
         version: 5.16.1
+      es-module-lexer:
+        specifier: ^1.5.3
+        version: 1.5.3
       esbuild:
         specifier: ^0.18.12
         version: 0.18.20
@@ -6169,7 +6178,7 @@ packages:
       '@rsbuild/plugin-node-polyfill': 0.3.4(@rsbuild/core@0.3.11)(@swc/helpers@0.5.3)
       '@rsbuild/shared': 0.3.4(@swc/helpers@0.5.3)
       '@swc/helpers': 0.5.3
-      es-module-lexer: 1.5.0
+      es-module-lexer: 1.5.3
       esbuild: 0.17.19
     transitivePeerDependencies:
       - '@parcel/css'
@@ -12786,7 +12795,7 @@ packages:
       cjs-module-lexer: 1.3.1
       constants-browserify: 1.0.0
       css-loader: 6.11.0(@rspack/core@0.5.8)(webpack@5.91.0)
-      es-module-lexer: 1.5.0
+      es-module-lexer: 1.5.3
       express: 4.19.2
       fork-ts-checker-webpack-plugin: 8.0.0(typescript@5.3.3)(webpack@5.91.0)
       fs-extra: 11.2.0
@@ -20998,8 +21007,8 @@ packages:
     resolution: {integrity: sha512-1HQ2M2sPtxwnvOvT1ZClHyQDiggdNjURWpY2we6aMKCQiUVxTmVs2UYPLIrD84sS+kMdUwfBSylbJPwNnBrnHQ==}
     dev: true
 
-  /es-module-lexer@1.5.0:
-    resolution: {integrity: sha512-pqrTKmwEIgafsYZAGw9kszYzmagcE/n4dbgwGWLEXg7J4QFJVQRBld8j3Q3GNez79jzxZshq0bcT962QHOghjw==}
+  /es-module-lexer@1.5.3:
+    resolution: {integrity: sha512-i1gCgmR9dCl6Vil6UKPI/trA69s08g/syhiDK9TG0Nf1RJjjFI+AzoWW7sPufzkgYAn861skuCwJa0pIIHYxvg==}
 
   /es-object-atoms@1.0.0:
     resolution: {integrity: sha512-MZ4iQ6JwHOBQjahnjwaC1ZtIBH+2ohjamzAO3oaHcXYup7qxjF2fixyH+Q71voWHeOkI2q/TnJao/KfXYIZWbw==}
@@ -33342,7 +33351,6 @@ packages:
     resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
     dependencies:
       tslib: 2.6.2
-    dev: true
 
   /sade@1.8.1:
     resolution: {integrity: sha512-xal3CZX1Xlo/k4ApwCFrHVACi9fBqJ7V+mwhBsuf/1IOKbBy098Fex+Wa/5QMubw09pSZ/u8EY8PWgevJsXp1A==}
@@ -37719,7 +37727,7 @@ packages:
       browserslist: 4.23.0
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.16.1
-      es-module-lexer: 1.5.0
+      es-module-lexer: 1.5.3
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1
@@ -37759,7 +37767,7 @@ packages:
       browserslist: 4.23.0
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.16.0
-      es-module-lexer: 1.5.0
+      es-module-lexer: 1.5.3
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1
@@ -37799,7 +37807,7 @@ packages:
       browserslist: 4.23.0
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.16.0
-      es-module-lexer: 1.5.0
+      es-module-lexer: 1.5.3
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1
@@ -37839,7 +37847,7 @@ packages:
       browserslist: 4.23.0
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.16.0
-      es-module-lexer: 1.5.0
+      es-module-lexer: 1.5.3
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1

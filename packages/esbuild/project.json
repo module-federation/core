@@ -25,6 +25,7 @@
           "@chialab/cjs-to-esm",
           "enhanced-resolve",
           "cjs-module-lexer",
+          "es-module-lexer",
           "@module-federation/*",
           "pnpapi",
           "esbuild",

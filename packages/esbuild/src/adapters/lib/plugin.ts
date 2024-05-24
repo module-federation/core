@@ -8,8 +8,7 @@ import { writeRemoteManifest } from './manifest.js';
 import { createContainerPlugin } from './containerPlugin';
 import { initializeHostPlugin } from './containerReference';
 import { linkRemotesPlugin } from './linkRemotesPlugin';
-import { BuildOptions, PluginBuild, Plugin } from 'esbuild';
-
+import { BuildOptions, PluginBuild, Plugin, OnResolveArgs } from 'esbuild';
 // Creates a virtual module for sharing dependencies
 export const createVirtualShareModule = (
   name: string,
@@ -53,13 +52,22 @@ const cjsToEsmPlugin = {
           throw new Error(`Unable to resolve path: ${args.path}`);
         }
         const fileContent = fs.readFileSync(resolver, 'utf-8');
-        const { code } = await transform(fileContent);
-        return {
-          contents: code,
-          loader: 'js',
-          resolveDir: path.dirname(resolver),
-          pluginData: { ...args.pluginData, path: resolver },
-        };
+        try {
+          const { code } = await transform(fileContent);
+          return {
+            contents: code,
+            loader: 'js',
+            resolveDir: path.dirname(resolver),
+            pluginData: { ...args.pluginData, path: resolver },
+          };
+        } catch {
+          return {
+            contents: fileContent,
+            loader: 'js',
+            resolveDir: path.dirname(resolver),
+            pluginData: { ...args.pluginData, path: resolver },
+          };
+        }
       },
     );
   },
@@ -70,7 +78,54 @@ const linkSharedPlugin = {
   name: 'linkShared',
   setup(build: any) {
     const filter = new RegExp(
-      federationBuilder.externals.map((name: string) => `${name}$`).join('|'),
+      Object.keys(federationBuilder.config.shared || {})
+        .map((name: string) => `${name}$`)
+        .join('|'),
+    );
+
+    build.onResolve({ filter }, (args: OnResolveArgs) => {
+      if (args.namespace === 'esm-shares') return null;
+      return {
+        path: args.path,
+        namespace: 'virtual-share-module',
+        pluginData: { kind: args.kind, resolveDir: args.resolveDir },
+      };
+    });
+
+    build.onResolve(
+      { filter: /.*/, namespace: 'esm-shares' },
+      (args: OnResolveArgs) => {
+        if (filter.test(args.path)) {
+          return {
+            path: args.path,
+            namespace: 'virtual-share-module',
+            pluginData: { kind: args.kind, resolveDir: args.resolveDir },
+          };
+        }
+
+        if (filter.test(args.importer)) {
+          return {
+            path: args.path,
+            namespace: 'esm-shares',
+            pluginData: { kind: args.kind, resolveDir: args.resolveDir },
+          };
+        }
+        return undefined;
+        return {
+          path: args.path,
+          namespace: 'file',
+          pluginData: { kind: args.kind, resolveDir: args.resolveDir },
+        };
+      },
+    );
+
+    build.onResolve(
+      { filter: /^federationShare/ },
+      async (args: OnResolveArgs) => ({
+        path: args.path.replace('federationShare/', ''),
+        namespace: 'esm-shares',
+        pluginData: { kind: args.kind, resolveDir: args.resolveDir },
+      }),
     );
 
     build.onLoad(
