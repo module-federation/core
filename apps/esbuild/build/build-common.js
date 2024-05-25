@@ -6,30 +6,15 @@ const fs = require('fs');
 const {
   moduleFederationPlugin,
 } = require('@module-federation/esbuild/esbuild-adapter');
-const { federationBuilder } = require('@module-federation/esbuild/build');
 
 async function buildProject(projectName, watch) {
   const tsConfig = 'tsconfig.json';
   const outputPath = path.join('dist', projectName);
 
-  await federationBuilder.init({
-    options: {
-      workspaceRoot: path.join(__dirname, '..'),
-      outputPath,
-      tsConfig,
-      federationConfig: path.join(projectName, 'federation.config.js'),
-      verbose: false,
-      watch,
-    },
-  });
-
   fs.rmSync(outputPath, { force: true, recursive: true });
-
-  const federationConfig = federationBuilder.config;
 
   await esbuild.build({
     entryPoints: [path.join(projectName, 'main.ts')],
-    external: federationBuilder.externals,
     outdir: outputPath,
     bundle: true,
     platform: 'browser',
@@ -40,7 +25,11 @@ async function buildProject(projectName, watch) {
     loader: { '.ts': 'ts' },
     tsconfig: tsConfig,
     splitting: true,
-    plugins: [moduleFederationPlugin(federationBuilder)],
+    plugins: [
+      moduleFederationPlugin(
+        require(path.join('../', projectName, 'federation.config.js')),
+      ),
+    ],
     watch,
   });
 

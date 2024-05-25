@@ -10,7 +10,7 @@ import {
   BuildResult,
   BuildContext,
 } from 'esbuild';
-//@ts-ignore
+//@ts-expect-error
 import { version as pluginVersion } from '@module-federation/esbuild/package.json';
 
 interface OutputFile {
@@ -95,7 +95,6 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
   } catch (e) {
     packageJson = { name: config.name };
   }
-  const mfConfig = config;
   const envType =
     process.env['NODE_ENV'] === 'development'
       ? 'local'
@@ -107,13 +106,12 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
     result.metafile?.outputs || {},
   ).reduce(
     (acc, [chunkKey, chunkValue]) => {
-      //@ts-ignore
-      const { entryPoint, kind = 'static-import' } = chunkValue;
+      const { entryPoint } = chunkValue;
       const key = entryPoint || chunkKey;
-      if (key.startsWith('container:') && key.endsWith(mfConfig.filename)) {
+      if (key.startsWith('container:') && key.endsWith(config.filename)) {
         containerName = key;
       }
-      acc[key] = { ...chunkValue, kind, chunk: chunkKey };
+      acc[key] = { ...chunkValue, chunk: chunkKey };
       return acc;
     },
     {} as Record<string, OutputFile>,
@@ -162,9 +160,9 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
     return assets;
   };
 
-  const shared: SharedConfig[] = mfConfig.shared
+  const shared: SharedConfig[] = config.shared
     ? await Promise.all(
-        Object.entries(mfConfig.shared).map(
+        Object.entries(config.shared).map(
           async ([pkg, config]: [string, any]) => {
             const meta = outputMap['esm-shares:' + pkg];
             const chunks = getChunks(meta, outputMap);
@@ -189,7 +187,7 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
             }
 
             return {
-              id: `${mfConfig.name}:${pkg}`,
+              id: `${config.name}:${pkg}`,
               name: pkg,
               version: version || config.version,
               singleton: config.singleton || false,
@@ -201,8 +199,8 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
       )
     : [];
 
-  const remotes: RemoteConfig[] = mfConfig.remotes
-    ? Object.entries(mfConfig.remotes).map(([alias, remote]: [string, any]) => {
+  const remotes: RemoteConfig[] = config.remotes
+    ? Object.entries(config.remotes).map(([alias, remote]: [string, any]) => {
         const [federationContainerName, entry] = remote.includes('@')
           ? remote.split('@')
           : [alias, remote];
@@ -216,15 +214,15 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
       })
     : [];
 
-  const exposes: ExposeConfig[] = mfConfig.exposes
+  const exposes: ExposeConfig[] = config.exposes
     ? await Promise.all(
-        Object.entries(mfConfig.exposes).map(
+        Object.entries(config.exposes).map(
           async ([expose, value]: [string, any]) => {
             const exposedFound = outputMapWithoutExt[value.replace('./', '')];
             const chunks = getChunks(exposedFound, outputMap);
 
             return {
-              id: `${mfConfig.name}:${expose.replace(/^\.\//, '')}`,
+              id: `${config.name}:${expose.replace(/^\.\//, '')}`,
               name: expose.replace(/^\.\//, ''),
               assets: chunks,
               path: expose,
@@ -242,10 +240,10 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
   };
 
   const manifest: Manifest = {
-    id: mfConfig.name,
-    name: mfConfig.name,
+    id: config.name,
+    name: config.name,
     metaData: {
-      name: mfConfig.name,
+      name: config.name,
       type: 'app',
       buildInfo: {
         buildVersion: envType,
@@ -255,14 +253,14 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
         ),
       },
       remoteEntry: {
-        name: mfConfig.filename,
+        name: config.filename,
         path: outputMap[containerName]
           ? path.dirname(outputMap[containerName].chunk)
           : '',
         type: 'esm',
       },
       types,
-      globalName: mfConfig.name,
+      globalName: config.name,
       pluginVersion,
       publicPath,
     },

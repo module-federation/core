@@ -2,7 +2,6 @@
 
 (async () => {
   setTimeout(async () => {
-    const { bootstrap } = await import('./bootstrap');
-    bootstrap();
+    import('./bootstrap');
   }, 400);
 })();

@@ -1,7 +1,6 @@
 import fs from 'fs';
 import { resolve, getExports } from './collect-exports.js';
 import path from 'path';
-import { federationBuilder } from '../../lib/core/federation-builder';
 import { writeRemoteManifest } from './manifest.js';
 import { createContainerPlugin } from './containerPlugin';
 import { initializeHostPlugin } from './containerReference';
@@ -13,6 +12,8 @@ import {
   OnResolveArgs,
   OnLoadArgs,
 } from 'esbuild';
+import { getExternals } from '../../lib/core/get-externals';
+import { NormalizedFederationConfig } from '../../lib/config/federation-config.js';
 
 // Creates a virtual module for sharing dependencies
 export const createVirtualShareModule = (
@@ -84,11 +85,11 @@ const cjsToEsmPlugin: Plugin = {
 };
 
 // Plugin to link shared dependencies
-const linkSharedPlugin: Plugin = {
+const linkSharedPlugin = (config: NormalizedFederationConfig): Plugin => ({
   name: 'linkShared',
   setup(build: PluginBuild) {
     const filter = new RegExp(
-      Object.keys(federationBuilder.config.shared || {})
+      Object.keys(config.shared || {})
         .map((name: string) => `${name}$`)
         .join('|'),
     );
@@ -138,38 +139,41 @@ const linkSharedPlugin: Plugin = {
       async (args: OnLoadArgs) => {
         const exp = await getExports(args.path);
         return {
-          contents: createVirtualShareModule(
-            federationBuilder.config.name,
-            args.path,
-            exp,
-          ),
+          contents: createVirtualShareModule(config.name, args.path, exp),
           loader: 'js',
           resolveDir: path.dirname(args.path),
         };
       },
     );
   },
-};
+});
 
 // Main module federation plugin
-export const moduleFederationPlugin = (config: any) => ({
+export const moduleFederationPlugin = (config: NormalizedFederationConfig) => ({
   name: 'module-federation',
   setup(build: PluginBuild) {
     build.initialOptions.metafile = true;
-
+    const externals = getExternals(config);
+    if (build.initialOptions.external) {
+      build.initialOptions.external = [
+        ...new Set([...build.initialOptions.external, ...externals]),
+      ];
+    } else {
+      build.initialOptions.external = externals;
+    }
     const pluginStack: Plugin[] = [];
-    const remotes = Object.keys(federationBuilder.config.remotes || {}).length;
-    const shared = Object.keys(federationBuilder.config.shared || {}).length;
-    const exposes = Object.keys(federationBuilder.config.exposes || {}).length;
+    const remotes = Object.keys(config.remotes || {}).length;
+    const shared = Object.keys(config.shared || {}).length;
+    const exposes = Object.keys(config.exposes || {}).length;
     const entryPoints = build.initialOptions.entryPoints;
-    const filename = federationBuilder.config.filename || 'remoteEntry.js';
+    const filename = config.filename || 'remoteEntry.js';
 
     if (remotes) {
-      pluginStack.push(linkRemotesPlugin);
+      pluginStack.push(linkRemotesPlugin(config));
     }
 
     if (shared) {
-      pluginStack.push(linkSharedPlugin);
+      pluginStack.push(linkSharedPlugin(config));
     }
 
     if (!entryPoints) {
@@ -187,7 +191,7 @@ export const moduleFederationPlugin = (config: any) => ({
     }
 
     [
-      initializeHostPlugin,
+      initializeHostPlugin(config),
       createContainerPlugin(config),
       cjsToEsmPlugin,
       ...pluginStack,
@@ -196,8 +200,8 @@ export const moduleFederationPlugin = (config: any) => ({
     build.onEnd(async (result: any) => {
       if (!result.metafile) return;
       if (exposes) {
-        const exposedConfig = federationBuilder.config.exposes || {};
-        const remoteFile = (federationBuilder.config as any).filename;
+        const exposedConfig = config.exposes || {};
+        const remoteFile = config.filename;
         const exposedEntries: Record<string, any> = {};
         const outputMapWithoutExt = Object.entries(
           result.metafile.outputs,
@@ -244,7 +248,7 @@ export const moduleFederationPlugin = (config: any) => ({
           fs.writeFileSync(outputPath, withExports, 'utf-8');
         }
       }
-      await writeRemoteManifest(federationBuilder.config, result);
+      await writeRemoteManifest(config, result);
       console.log(`build ended with ${result.errors.length} errors`);
     });
   },

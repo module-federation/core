@@ -1,9 +1,9 @@
-import { federationBuilder } from '../../lib/core/federation-builder';
 import fs from 'fs';
+import { NormalizedFederationConfig } from '../../lib/config/federation-config';
 
 // Builds the federation host code
-export const buildFederationHost = () => {
-  const { name, remotes, shared } = federationBuilder.config;
+export const buildFederationHost = (config: NormalizedFederationConfig) => {
+  const { name, remotes, shared } = config;
 
   const remoteConfigs = remotes
     ? JSON.stringify(
@@ -96,7 +96,7 @@ export const buildFederationHost = () => {
   `;
 };
 
-export const initializeHostPlugin = {
+export const initializeHostPlugin = (config: NormalizedFederationConfig) => ({
   name: 'host-initialization',
   setup(build: any) {
     build.onResolve({ filter: /federation-host/ }, (args: any) => ({
@@ -108,7 +108,7 @@ export const initializeHostPlugin = {
     build.onLoad(
       { filter: /.*/, namespace: 'federation-host' },
       async (args: any) => ({
-        contents: buildFederationHost(),
+        contents: buildFederationHost(config),
         resolveDir: args.pluginData.resolveDir,
       }),
     );
@@ -123,7 +123,7 @@ export const initializeHostPlugin = {
         async (args: any) => {
           const contents = await fs.promises.readFile(args.path, 'utf8');
           return {
-            contents: buildFederationHost() + contents,
+            contents: buildFederationHost(config) + contents,
             loader,
           };
         },
@@ -150,9 +150,9 @@ export const initializeHostPlugin = {
             return;
           }
           const contents = await fs.promises.readFile(args.path, 'utf8');
-          return { contents: buildFederationHost() + contents };
+          return { contents: 'import "federation-host"; \n ' + contents };
         }
       },
     );
   },
-};
+});

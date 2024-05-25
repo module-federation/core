@@ -1,9 +1,8 @@
 import { OnResolveArgs, OnLoadArgs, PluginBuild } from 'esbuild';
-//replace with createContainer from bundler runtime
 import { createContainerCode } from '../../lib/core/createContainerTemplate.js';
-import { federationBuilder } from '../../lib/core/federation-builder';
-//@ts-ignore
-const buildContainerHost = ({ config }) => {
+import { NormalizedFederationConfig } from '../../lib/config/federation-config.js';
+
+const buildContainerHost = (config: NormalizedFederationConfig) => {
   const { name, remotes = {}, shared = {}, exposes = {} } = config;
 
   const remoteConfigs = Object.entries(remotes).map(
@@ -120,18 +119,15 @@ console.log('module map',moduleMap);
   return [createContainerCode, injectedContent].join('\n');
 };
 
-export const createContainerPlugin = (config: any) => ({
+export const createContainerPlugin = (config: NormalizedFederationConfig) => ({
   name: 'createContainer',
   setup(build: PluginBuild) {
-    const {
-      externals,
-      config: { filename },
-    } = config;
+    const { filename } = config;
 
     const filter = new RegExp([filename].map((name) => `${name}$`).join('|'));
 
     const sharedExternals = new RegExp(
-      Object.keys(federationBuilder.config.shared || {})
+      Object.keys(config.shared || {})
         .map((name: string) => `${name}$`)
         .join('|'),
     );

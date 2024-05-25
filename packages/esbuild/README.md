@@ -17,45 +17,34 @@ To use the Module Federation plugin with esbuild, add it to your esbuild configu
 ```js
 const esbuild = require('esbuild');
 const path = require('path');
-const fs = require('fs');
 const { moduleFederationPlugin } = require('@module-federation/esbuild/esbuild-adapter');
-const { federationBuilder } = require('@module-federation/esbuild/build');
+const federationConfig = require('./federation.config.js');
 
-async function build() {
+async function buildApp() {
   const tsConfig = 'tsconfig.json';
   const outputPath = path.join('dist', 'host');
 
-  await federationBuilder.init({
-    options: {
-      workspaceRoot: path.join(__dirname, '..'),
-      outputPath,
-      tsConfig,
-      federationConfig: path.join('host', 'federation.config.js'),
-      verbose: false,
-      watch: false,
-    },
-  });
-
-  await esbuild.build({
-    entryPoints: [path.join('host', 'main.ts')],
-    external: federationBuilder.externals,
-    outdir: outputPath,
-    bundle: true,
-    platform: 'browser',
-    format: 'esm',
-    mainFields: ['es2020', 'browser', 'module', 'main'],
-    conditions: ['es2020', 'es2015', 'module'],
-    resolveExtensions: ['.ts', '.tsx', '.mjs', '.js'],
-    tsconfig: tsConfig,
-    splitting: true,
-    plugins: [moduleFederationPlugin(federationBuilder)],
-  });
+  try {
+    await esbuild.build({
+      entryPoints: [path.join('host', 'main.ts')],
+      outdir: outputPath,
+      bundle: true,
+      platform: 'browser',
+      format: 'esm',
+      mainFields: ['es2020', 'browser', 'module', 'main'],
+      conditions: ['es2020', 'es2015', 'module'],
+      resolveExtensions: ['.ts', '.tsx', '.mjs', '.js'],
+      tsconfig: tsConfig,
+      splitting: true,
+      plugins: [moduleFederationPlugin(federationConfig)],
+    });
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
 }
 
-build().catch((err) => {
-  console.error(err);
-  process.exit(1);
-}
+buildApp();
 
 // Example of federation.config.js
 
@@ -111,4 +100,5 @@ Creates an esbuild plugin for Module Federation.
   - `shared` (array, optional): An array of package names to be shared between the host and remote applications.
 
 Returns an esbuild plugin instance.
+
 
