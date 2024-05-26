@@ -5,29 +5,26 @@
 
 'use strict';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Dependency, Compilation } from 'webpack';
-import ContainerExposedDependency from './ContainerExposedDependency';
+import type { Compilation, Dependency } from 'webpack';
 import type {
+  InputFileSystem,
   LibIdentOptions,
   NeedBuildContext,
-  RequestShortener,
   ObjectDeserializerContext,
   ObjectSerializerContext,
-  WebpackOptions,
-  InputFileSystem,
+  RequestShortener,
   ResolverWithOptions,
+  WebpackOptions,
 } from 'webpack/lib/Module';
 import type WebpackError from 'webpack/lib/WebpackError';
-import { getFederationGlobalScope } from './runtime/utils';
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from '../Constants';
+import ContainerExposedDependency from './ContainerExposedDependency';
+import { getFederationGlobalScope } from './runtime/utils';
 
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
-const { sources: webpackSources } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { AsyncDependenciesBlock, Template, Module, RuntimeGlobals } = require(
+const { sources: webpackSources, AsyncDependenciesBlock, Template, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const StaticExportsDependency = require(
@@ -79,7 +76,6 @@ class ContainerEntryModule extends Module {
   static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
     const { read } = context;
     const obj = new ContainerEntryModule(read(), read(), read(), read());
-    //@ts-ignore
     obj.deserialize(context);
     return obj;
   }
@@ -119,7 +115,7 @@ class ContainerEntryModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  // @ts-ignore typeof webpack/lib !== typeof webpack/types
+  // @ts-expect-error typeof webpack/lib !== typeof webpack/types
   override needBuild(
     context: NeedBuildContext,
     callback: (
@@ -138,7 +134,7 @@ class ContainerEntryModule extends Module {
    * @param {function(WebpackError): void} callback callback function
    * @returns {void}
    */
-  // @ts-ignore typeof webpack/lib !== typeof webpack/types
+  // @ts-expect-error typeof webpack/lib !== typeof webpack/types
   override build(
     options: WebpackOptions,
     compilation: Compilation,
@@ -152,7 +148,6 @@ class ContainerEntryModule extends Module {
       topLevelDeclarations: new Set(['moduleMap', 'get', 'init']),
     };
     this.buildMeta.exportsType = 'namespace';
-    //@ts-ignore
     this.clearDependenciesAndBlocks();
 
     for (const [name, options] of this._exposes) {
@@ -170,15 +165,11 @@ class ContainerEntryModule extends Module {
           name,
           index: idx++,
         };
-        //@ts-ignore
         block.addDependency(dep);
       }
-      //@ts-ignore
       this.addBlock(block);
     }
-    //@ts-ignore
     this.addDependency(
-      //@ts-ignore
       new StaticExportsDependency(
         ['get', 'init'],
         false,
@@ -186,7 +177,7 @@ class ContainerEntryModule extends Module {
     );
 
     this.addDependency(
-      // @ts-ignore
+      // @ts-expect-error flaky type for EntryDependency
       new EntryDependency(this._injectRuntimeEntry),
     );
 
@@ -197,8 +188,7 @@ class ContainerEntryModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
-  //@ts-ignore
-  override codeGeneration({ moduleGraph, chunkGraph, runtimeTemplate }) {
+  override codeGeneration({ moduleGraph, chunkGraph, runtimeTemplate }: any) {
     const sources = new Map();
     const runtimeRequirements = new Set([
       RuntimeGlobals.definePropertyGetters,
@@ -232,7 +222,6 @@ class ContainerEntryModule extends Module {
         })}.then(${runtimeTemplate.returningFunction(
           runtimeTemplate.returningFunction(
             `(${modules
-              //@ts-ignore
               .map(({ module, request }) =>
                 runtimeTemplate.moduleRaw({
                   module,
@@ -259,7 +248,7 @@ class ContainerEntryModule extends Module {
     const initRuntimeModuleGetter = runtimeTemplate.moduleRaw({
       module: moduleGraph.getModule(initRuntimeDep),
       chunkGraph,
-      // @ts-expect-error
+      // @ts-expect-error flaky type definition for Dependency
       request: initRuntimeDep.userRequest,
       weak: false,
       runtimeRequirements,
