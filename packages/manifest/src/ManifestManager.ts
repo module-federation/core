@@ -1,16 +1,18 @@
+import path from 'path';
+import fs from 'fs';
 import chalk from 'chalk';
 import {
   Stats,
   Manifest,
-  ManifestFileName,
   ManifestExpose,
   StatsExpose,
   StatsShared,
   ManifestShared,
   ManifestRemote,
-  simpleJoinRemoteEntry,
   StatsRemote,
   moduleFederationPlugin,
+  encodeName,
+  MFPrefetchCommon,
 } from '@module-federation/sdk';
 import { getFileName, isDev } from './utils';
 import type { Compilation, Compiler } from 'webpack';
@@ -100,6 +102,20 @@ class ManifestManager {
       sum.push(remote);
       return sum;
     }, [] as ManifestRemote[]);
+
+    let prefetchInterface = false;
+    const prefetchFilePath = path.resolve(
+      compiler.options.context || process.cwd(),
+      `node_modules/.mf/${encodeName(stats.name)}/${MFPrefetchCommon.fileName}`,
+    );
+    const existPrefetch = fs.existsSync(prefetchFilePath);
+    if (existPrefetch) {
+      const content = fs.readFileSync(prefetchFilePath).toString();
+      if (content) {
+        prefetchInterface = true;
+      }
+    }
+    stats.metaData.prefetchInterface = prefetchInterface;
 
     this._manifest = manifest;
 

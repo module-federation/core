@@ -1,4 +1,5 @@
 import React, { Suspense, lazy } from 'react';
+import ReactComponent from 'modern-js-provider/react-component';
 import TestRemoteHook from './test-remote-hook';
 import { loadRemote } from '@module-federation/runtime';
 import LocalBtn from './components/ButtonOldAnt';
@@ -29,6 +30,7 @@ const WebpackPngRemote = lazy(() => import('remote1/WebpackPng'));
 
 const App = () => (
   <div>
+    <ReactComponent />
     <h2>Manifest Basic Usage</h2>
     <h3>check static remote</h3>
     <table border={1} cellPadding={5}>

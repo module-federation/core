@@ -32,3 +32,11 @@ export const MFModuleType = {
 };
 
 export const MODULE_DEVTOOL_IDENTIFIER = '__MF_DEVTOOLS_MODULE_INFO__';
+
+export const MFPrefetchCommon = {
+  identifier: 'MFDataPrefetch',
+  globalKey: '__PREFETCH__',
+  library: 'mf-data-prefetch',
+  exportsKey: '__PREFETCH_EXPORTS__',
+  fileName: 'prefetch.js',
+};

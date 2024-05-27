@@ -8,8 +8,10 @@ import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { type moduleFederationPlugin } from '@module-federation/sdk';
 import { StatsPlugin } from '@module-federation/manifest';
+import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { ContainerManager } from '@module-federation/managers';
 import { DtsPlugin } from '@module-federation/dts-plugin';
+
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
@@ -53,6 +55,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    */
   apply(compiler: Compiler): void {
     const { _options: options } = this;
+    new PrefetchPlugin(this._options).apply(compiler);
     // @ts-ignore
     new FederationRuntimePlugin(options).apply(compiler);
     const library = options.library || { type: 'var', name: options.name };

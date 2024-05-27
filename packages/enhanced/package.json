@@ -38,6 +38,11 @@
       "types": "./dist/src/runtime.d.ts",
       "require": "./dist/src/runtime.js",
       "import": "./dist/src/runtime.js"
+    },
+    "./prefetch": {
+      "types": "./dist/src/prefetch.d.ts",
+      "require": "./dist/src/prefetch.js",
+      "import": "./dist/src/prefetch.js"
     }
   },
   "typesVersions": {
@@ -53,6 +58,9 @@
       ],
       "runtime": [
         "./dist/src/runtime.d.ts"
+      ],
+      "prefetch": [
+        "./dist/src/prefetch.d.ts"
       ]
     }
   },
@@ -66,6 +74,7 @@
     "@module-federation/managers": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/rspack": "workspace:*",
+    "@module-federation/data-prefetch": "workspace:*",
     "upath": "2.0.1"
   }
 }
