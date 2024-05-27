@@ -109,11 +109,11 @@ export class PrefetchPlugin implements WebpackPluginInstance {
     }
     fs.writeFileSync(asyncEntryPath, this._reWriteExports);
 
-    const prefetchVmokEntry = path.resolve(
+    const prefetchEntry = path.resolve(
       compiler.options.context,
       `node_modules/${TEMP_DIR}/${encodedName}/${MFPrefetchCommon.fileName}`,
     );
-    fs.writeFileSync(prefetchVmokEntry, addTemplate(name as string));
-    this.options.runtimePlugins!.push(prefetchVmokEntry);
+    fs.writeFileSync(prefetchEntry, addTemplate(name as string));
+    this.options.runtimePlugins!.push(prefetchEntry);
   }
 }
