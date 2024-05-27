@@ -1,5 +1,6 @@
 ---
 '@module-federation/native-federation-typescript': patch
+'@module-federation/dts-plugin': patch
 ---
 
-rollback without piscina
+optional vue-tsc

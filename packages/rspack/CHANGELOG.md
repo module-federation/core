@@ -1,5 +1,55 @@
 # @module-federation/rspack
 
+## 0.1.15
+
+### Patch Changes
+
+- Updated dependencies [1227fd6]
+  - @module-federation/dts-plugin@0.1.15
+  - @module-federation/manifest@0.1.15
+  - @module-federation/sdk@0.1.15
+  - @module-federation/runtime-tools@0.1.15
+  - @module-federation/managers@0.1.15
+
+## 0.1.14
+
+### Patch Changes
+
+- Updated dependencies [103b2b8]
+  - @module-federation/sdk@0.1.14
+  - @module-federation/runtime-tools@0.1.14
+  - @module-federation/dts-plugin@0.1.14
+  - @module-federation/managers@0.1.14
+  - @module-federation/manifest@0.1.14
+
+## 0.1.13
+
+### Patch Changes
+
+- 0113b81: chore: delete references to used shared to prevent memory leaks
+- Updated dependencies [2e52e51]
+- Updated dependencies [2e52e51]
+- Updated dependencies [9559769]
+- Updated dependencies [0113b81]
+- Updated dependencies [677958c]
+- Updated dependencies [2e52e51]
+  - @module-federation/dts-plugin@0.1.13
+  - @module-federation/managers@0.1.13
+  - @module-federation/manifest@0.1.13
+  - @module-federation/sdk@0.1.13
+  - @module-federation/runtime-tools@0.1.13
+
+## 0.1.12
+
+### Patch Changes
+
+- Updated dependencies [2a18c65]
+  - @module-federation/dts-plugin@0.1.12
+  - @module-federation/manifest@0.1.12
+  - @module-federation/runtime-tools@0.1.12
+  - @module-federation/sdk@0.1.12
+  - @module-federation/managers@0.1.12
+
 ## 0.1.11
 
 ### Patch Changes

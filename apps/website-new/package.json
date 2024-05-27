@@ -15,6 +15,6 @@
     "xgplayer": "^3.0.16"
   },
   "devDependencies": {
-    "@types/node": "^16"
+    "@types/node": "^20"
   }
 }

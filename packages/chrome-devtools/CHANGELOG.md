@@ -1,5 +1,32 @@
 # @module-federation/devtools
 
+## 0.1.15
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.15
+
+## 0.1.14
+
+### Patch Changes
+
+- Updated dependencies [103b2b8]
+  - @module-federation/sdk@0.1.14
+
+## 0.1.13
+
+### Patch Changes
+
+- Updated dependencies [2e52e51]
+  - @module-federation/sdk@0.1.13
+
+## 0.1.12
+
+### Patch Changes
+
+- 2d761ae: fix: fix publish private error
+  - @module-federation/sdk@0.1.12
+
 ## 0.1.11
 
 ### Patch Changes

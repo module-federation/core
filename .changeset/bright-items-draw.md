@@ -2,4 +2,4 @@
 '@module-federation/runtime': patch
 ---
 
-Before Request throws to errorLoadRemote
+fix types for beforePreloadRemote args hook

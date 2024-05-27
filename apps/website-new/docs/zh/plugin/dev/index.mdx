@@ -271,11 +271,16 @@ type HandlePreloadModuleOptions = {
 
 `AsyncHook`
 
-如果加载联合模块失败，则调用，允许自定义错误处理。
+当联合模块加载失败时，此钩子将被触发，允许自定义错误处理策略。
+
+它被设计为在模块加载的各个生命周期阶段失败时触发。
+
+利用 `args.lifecycle` 来识别调用 `errorLoadRemote` 的具体生命周期阶段，从而实现适当的错误处理或回退机制。
+
 
 - 类型
 
-```ts
+```typescript
 async function errorLoadRemote(
   args: ErrorLoadRemoteOptions,
 ): Promise<void | unknown>;
@@ -283,14 +288,16 @@ async function errorLoadRemote(
 type ErrorLoadRemoteOptions = {
   id: string;
   error: unknown;
+  options?: any;
   from: 'build' | 'runtime';
+  lifecycle: 'onLoad' | 'beforeRequest';
   origin: FederationHost;
 };
 ```
 
 - 示例
 
-```ts
+```typescript
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -299,9 +306,13 @@ const fallbackPlugin: () => FederationRuntimePlugin = function () {
   return {
     name: 'fallback-plugin',
     errorLoadRemote(args) {
-      const fallback = 'fallback';
-      return fallback;
-    },
+      if(args.lifecycle === 'onLoad') {
+        const fallback = 'fallback';
+        return fallback;
+      } else if (args.lifecycle === 'beforeRequest') {
+        return args
+      }
+    }
   };
 };
 
@@ -311,17 +322,16 @@ init({
     {
       name: '@demo/app2',
       entry: 'http://localhost:3006/remoteEntry.js',
-      alias: 'app2',
-    },
+      alias: 'app2'
+    }
   ],
-  plugins: [fallbackPlugin()],
+  plugins: [fallbackPlugin()]
 });
 
 loadRemote('app2/un-existed-module').then((mod) => {
   expect(mod).toEqual('fallback');
 });
 ```
-
 ### beforeLoadShare
 
 `AsyncWaterfallHook`
@@ -481,8 +491,8 @@ interface PreloadAssets {
 
 - 类型
 
-```ts
-function createScript(args: CreateScriptOptions): HTMLScriptElement | void;
+```typescript
+function createScript(args: CreateScriptOptions): HTMLScriptElement | {script?: HTMLScriptElement, timeout?: number } | void;
 
 type CreateScriptOptions = {
   url: string;
@@ -491,7 +501,7 @@ type CreateScriptOptions = {
 
 - 示例
 
-```ts
+```typescript
 import { init } from '@module-federation/enhanced/runtime';
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -505,6 +515,28 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
         script.setAttribute('loader-hooks', 'isTrue');
         script.setAttribute('crossorigin', 'anonymous');
         return script;
+      }
+    },
+  };
+};
+```
+
+- 示例带有脚本超时
+
+```typescript
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'change-script-attribute',
+    createScript({ url }) {
+      if (url === testRemoteEntry) {
+        let script = document.createElement('script');
+        script.src = testRemoteEntry;
+        script.setAttribute('loader-hooks', 'isTrue');
+        script.setAttribute('crossorigin', 'anonymous');
+        return { script, timeout: 1000 }
       }
     },
   };

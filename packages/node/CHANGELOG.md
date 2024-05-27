@@ -1,5 +1,51 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.2.6
+
+### Patch Changes
+
+- @module-federation/enhanced@0.1.15
+- @module-federation/runtime@0.1.15
+- @module-federation/sdk@0.1.15
+- @module-federation/utilities@3.0.20
+
+## 2.2.5
+
+### Patch Changes
+
+- 450c224: missing variable in runtime plugin error call
+- Updated dependencies [103b2b8]
+  - @module-federation/runtime@0.1.14
+  - @module-federation/sdk@0.1.14
+  - @module-federation/enhanced@0.1.14
+  - @module-federation/utilities@3.0.19
+
+## 2.2.4
+
+### Patch Changes
+
+- 890fff8: fix missing variable in runtime plugin when setting to global for script types
+- Updated dependencies [d259a37]
+- Updated dependencies [08740a0]
+- Updated dependencies [0113b81]
+- Updated dependencies [d259a37]
+- Updated dependencies [2e52e51]
+  - @module-federation/runtime@0.1.13
+  - @module-federation/enhanced@0.1.13
+  - @module-federation/sdk@0.1.13
+  - @module-federation/utilities@3.0.18
+
+## 2.2.3
+
+### Patch Changes
+
+- 7d0a049: fix chunk load logic order of runtime plugin
+- Updated dependencies [371d1f1]
+  - @module-federation/runtime@0.1.12
+  - @module-federation/enhanced@0.1.12
+  - @module-federation/sdk@0.1.12
+  - @module-federation/utilities@3.0.17
+
 ## 2.2.2
 
 ### Patch Changes

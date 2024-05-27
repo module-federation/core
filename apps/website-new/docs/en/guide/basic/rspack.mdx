@@ -32,34 +32,37 @@ import { PackageManagerTabs } from '@theme';
 In `Rspack`, you can add the plugin through the `plugins` configuration item in the `rspack.config.js` file:
 
 ```ts title='rspack.config.js'
+import { defineConfig } from '@rsbuild/core';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
-module.exports = {
-  devServer: {
-    port: 2000,
+
+export default defineConfig({
+  // publicPath must be configured if using manifest
+  dev: {
+    assetPrefix: 'http://localhost:2000/',
   },
   output: {
-    // publicPath must be configured if using manifest
-    publicPath: 'http://localhost:2000/',
+    // This will affect the build output resource url prefix in production env
+    assetPrefix: 'https://cdn.domain.com/path/to/project/',
   },
-  plugins: [
-    new ModuleFederationPlugin({
-      name: 'rspack_provider',
-      filename: 'remoteEntry.js',
-      exposes: {
-        // Set the modules to be exported, default export as '.'
-        './button': './src/components/button',
-      },
-      shared: {
-        react: {
-          singleton: true,
-        },
-        'react-dom': {
-          singleton: true,
-        },
-      },
-    }),
-  ],
-};
+  server: {
+    port: 2000,
+  },
+  tools: {
+    rspack: (config, { appendPlugins }) => {
+      // You need to set a unique value that is not equal to other applications
+      config.output!.uniqueName = 'federation_provider';
+      appendPlugins([
+        new ModuleFederationPlugin({
+          name: 'federation_provider',
+          exposes: {
+            './button': './src/button.tsx',
+          },
+          shared: ['react', 'react-dom'],
+        }),
+      ]);
+    },
+  },
+});
 ```
 
 ## Configure the Build Plugin

@@ -6,12 +6,14 @@
 'use strict';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { type moduleFederationPlugin } from '@module-federation/sdk';
+import {
+  composeKeyWithSeparator,
+  type moduleFederationPlugin,
+} from '@module-federation/sdk';
 import { StatsPlugin } from '@module-federation/manifest';
+import { ContainerManager, utils } from '@module-federation/managers';
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
-import { ContainerManager } from '@module-federation/managers';
 import { DtsPlugin } from '@module-federation/dts-plugin';
-
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
@@ -48,6 +50,17 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     this._options = options;
   }
 
+  private _patchBundlerConfig(compiler: Compiler): void {
+    const { name } = this._options;
+    if (name) {
+      new compiler.webpack.DefinePlugin({
+        FEDERATION_BUILD_IDENTIFIER: JSON.stringify(
+          composeKeyWithSeparator(name, utils.getBuildVersion()),
+        ),
+      }).apply(compiler);
+    }
+  }
+
   /**
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance
@@ -76,7 +89,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       // @ts-ignore
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
-
+    this._patchBundlerConfig(compiler);
     if (!disableManifest && useContainerPlugin) {
       try {
         const containerManager = new ContainerManager();

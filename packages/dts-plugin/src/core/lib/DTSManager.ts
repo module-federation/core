@@ -2,7 +2,11 @@ import ansiColors from 'ansi-colors';
 import path from 'path';
 import { rm } from 'fs/promises';
 import fs from 'fs';
-import { MANIFEST_EXT, Manifest } from '@module-federation/sdk';
+import {
+  MANIFEST_EXT,
+  Manifest,
+  inferAutoPublicPath,
+} from '@module-federation/sdk';
 import cloneDeepWith from 'lodash.clonedeepwith';
 
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
@@ -22,7 +26,6 @@ import {
   HOST_API_TYPES_FILE_NAME,
 } from '../constant';
 import axios from 'axios';
-import { replaceLocalhost } from './utils';
 import { fileLog } from '../../server';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
@@ -171,7 +174,7 @@ class DTSManager {
       if (!remoteInfo.url.includes(MANIFEST_EXT)) {
         return remoteInfo as Required<RemoteInfo>;
       }
-      const url = replaceLocalhost(remoteInfo.url);
+      const url = remoteInfo.url;
       const res = await axios({
         method: 'get',
         url,
@@ -186,10 +189,14 @@ class DTSManager {
         }
         return u;
       };
-      const publicPath =
+
+      let publicPath =
         'publicPath' in manifestJson.metaData
           ? manifestJson.metaData.publicPath
           : new Function(manifestJson.metaData.getPublicPath)();
+      if (publicPath === 'auto') {
+        publicPath = inferAutoPublicPath(remoteInfo.url);
+      }
 
       remoteInfo.zipUrl = new URL(
         path.join(addProtocol(publicPath), manifestJson.metaData.types.zip),
@@ -233,7 +240,7 @@ class DTSManager {
       return;
     }
     try {
-      const url = replaceLocalhost(apiTypeUrl);
+      const url = apiTypeUrl;
       const res = await axios.get(url);
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(
@@ -260,6 +267,7 @@ class DTSManager {
     const remoteKeys: string[] = [];
 
     const importTypeStr = this.loadedRemoteAPIAlias
+      .sort()
       .map((alias, index) => {
         const remoteKey = `RemoteKeys_${index}`;
         const packageType = `PackageType_${index}`;
