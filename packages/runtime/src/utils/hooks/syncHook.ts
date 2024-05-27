@@ -27,7 +27,7 @@ export class SyncHook<T, K> {
     });
   }
 
-  emit(...data: ArgsType<T>): void | K | Promise<any> {
+  emit(...data: ArgsType<T>): void | K {
     let result;
     if (this.listeners.size > 0) {
       // eslint-disable-next-line prefer-spread

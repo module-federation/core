@@ -28,7 +28,7 @@ import { getRemoteInfo } from './utils/load';
 import { DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 import { SharedHandler } from './shared';
-import { RemoteHandler } from './remote';
+import { RegisterRemoteOptions, RemoteHandler } from './remote';
 import { formatShareConfigs } from './utils/share';
 
 export class FederationHost {
@@ -274,7 +274,7 @@ export class FederationHost {
     }, pluginRes || []);
   }
 
-  registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
+  registerRemotes(remotes: Remote[], options?: RegisterRemoteOptions): void {
     return this.remoteHandler.registerRemotes(remotes, options);
   }
 }

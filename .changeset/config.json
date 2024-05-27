@@ -14,7 +14,8 @@
       "@module-federation/manifest",
       "@module-federation/dts-plugin",
       "@module-federation/third-party-dts-extractor",
-      "@module-federation/devtools"
+      "@module-federation/devtools",
+      "@module-federation/flush-dynamic-remote-plugin"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],

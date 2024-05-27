@@ -1,0 +1,56 @@
+{
+  "name": "flush-dynamic-remote-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/flush-dynamic-remote-plugin/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/runtime-plugins/flush-dynamic-remote-plugin/dist",
+        "main": "packages/runtime-plugins/flush-dynamic-remote-plugin/src/index.ts",
+        "tsConfig": "packages/runtime-plugins/flush-dynamic-remote-plugin/tsconfig.lib.json",
+        "assets": [],
+        "external": ["@module-federation/*"],
+        "project": "packages/runtime-plugins/flush-dynamic-remote-plugin/package.json",
+        "rollupConfig": "packages/runtime-plugins/flush-dynamic-remote-plugin/rollup.config.js",
+        "compiler": "swc",
+        "format": ["cjs", "esm"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/flush-dynamic-remote-plugin/**/*.ts",
+          "packages/flush-dynamic-remote-plugin/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": [
+        "{workspaceRoot}/coverage/packages/runtime-plugins/flush-dynamic-remote-plugin"
+      ]
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run flush-dynamic-remote-plugin:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run flush-dynamic-remote-plugin:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}

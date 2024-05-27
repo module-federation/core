@@ -6,8 +6,7 @@ function importNodeModule<T>(name: string): Promise<T> {
   return importModule(name)
     .then((res: any) => res.default as T)
     .catch((error: any) => {
-      console.error(`Error importing module ${name}:`, error);
-      throw error;
+      return Promise.resolve(eval('require')(name));
     });
 }
 

@@ -1,6 +1,7 @@
 packages:
   - '!**/dist/**'
   - 'packages/*'
+  - 'packages/runtime-plugins/*'
   - 'packages/enhance'
   - 'apps/runtime-demo/*'
   - 'apps/manifest-demo/*'

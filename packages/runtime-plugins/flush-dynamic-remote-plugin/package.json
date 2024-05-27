@@ -1,0 +1,41 @@
+{
+  "name": "@module-federation/flush-dynamic-remote-plugin",
+  "version": "0.1.15",
+  "license": "MIT",
+  "description": "A sdk for support module federation",
+  "keywords": [
+    "Module Federation",
+    "runtime plugin",
+    "flush-dynamic-remote",
+    "node"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "zhanghang <hanric.zhang@gmail.com>",
+  "sideEffects": false,
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.cjs.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.cjs.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    }
+  },
+  "dependencies": {
+    "@module-federation/runtime": "workspace:*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ]
+    }
+  }
+}

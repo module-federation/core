@@ -44,9 +44,25 @@ export interface LoadRemoteMatch {
   remoteSnapshot?: ModuleInfo;
 }
 
+export type RegisterRemoteOptions = {
+  force?: boolean;
+};
+
 export class RemoteHandler {
   host: FederationHost;
   hooks = new PluginSystem({
+    beforeRegisterRemote: new SyncHook<
+      [
+        {
+          remote: Remote;
+          options?: RegisterRemoteOptions;
+        },
+      ],
+      {
+        remote: Remote;
+        options?: RegisterRemoteOptions;
+      }
+    >('beforeRegisterRemote'),
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
@@ -337,60 +353,67 @@ export class RemoteHandler {
   registerRemote(
     remote: Remote,
     targetRemotes: Remote[],
-    options?: { force?: boolean },
+    options?: RegisterRemoteOptions,
   ): void {
-    const { host } = this;
+    const { remote: remoteRes, options: optionsRes } =
+      this.hooks.lifecycle.beforeRegisterRemote.emit({
+        remote,
+        options,
+      }) || { remote, options };
 
     const normalizeRemote = () => {
-      if (remote.alias) {
+      if (remoteRes.alias) {
         // Validate if alias equals the prefix of remote.name and remote.alias, if so, throw an error
         // As multi-level path references cannot guarantee unique names, alias being a prefix of remote.name is not supported
         const findEqual = targetRemotes.find(
           (item) =>
-            remote.alias &&
-            (item.name.startsWith(remote.alias) ||
-              item.alias?.startsWith(remote.alias)),
+            remoteRes.alias &&
+            (item.name.startsWith(remoteRes.alias) ||
+              item.alias?.startsWith(remoteRes.alias)),
         );
         assert(
           !findEqual,
-          `The alias ${remote.alias} of remote ${
-            remote.name
+          `The alias ${remoteRes.alias} of remote ${
+            remoteRes.name
           } is not allowed to be the prefix of ${
             findEqual && findEqual.name
           } name or alias`,
         );
       }
       // Set the remote entry to a complete path
-      if ('entry' in remote) {
-        if (isBrowserEnv() && !remote.entry.startsWith('http')) {
-          remote.entry = new URL(remote.entry, window.location.origin).href;
+      if ('entry' in remoteRes) {
+        if (isBrowserEnv() && !remoteRes.entry.startsWith('http')) {
+          remoteRes.entry = new URL(
+            remoteRes.entry,
+            window.location.origin,
+          ).href;
         }
       }
-      if (!remote.shareScope) {
-        remote.shareScope = DEFAULT_SCOPE;
+      if (!remoteRes.shareScope) {
+        remoteRes.shareScope = DEFAULT_SCOPE;
       }
-      if (!remote.type) {
-        remote.type = DEFAULT_REMOTE_TYPE;
+      if (!remoteRes.type) {
+        remoteRes.type = DEFAULT_REMOTE_TYPE;
       }
     };
     const registeredRemote = targetRemotes.find(
-      (item) => item.name === remote.name,
+      (item) => item.name === remoteRes.name,
     );
     if (!registeredRemote) {
       normalizeRemote();
-      targetRemotes.push(remote);
+      targetRemotes.push(remoteRes);
     } else {
       const messages = [
-        `The remote "${remote.name}" is already registered.`,
-        options?.force
+        `The remote "${remoteRes.name}" is already registered.`,
+        optionsRes?.force
           ? 'Hope you have known that OVERRIDE it may have some unexpected errors'
           : 'If you want to merge the remote, you can set "force: true".',
       ];
-      if (options?.force) {
+      if (optionsRes?.force) {
         // remove registered remote
         this.removeRemote(registeredRemote);
         normalizeRemote();
-        targetRemotes.push(remote);
+        targetRemotes.push(remoteRes);
       }
       warn(messages.join(' '));
     }
