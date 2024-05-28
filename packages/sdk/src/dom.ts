@@ -140,6 +140,7 @@ export function createLink(
   if (!link) {
     link = document.createElement('link');
     link.setAttribute('href', url);
+    link.setAttribute('crossorigin', 'anonymous');
 
     if (createLinkHook) {
       const createLinkRes = createLinkHook(url);
