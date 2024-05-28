@@ -9,6 +9,7 @@ type Comp = React.FC | { default: React.FC };
 interface IProps {
   id: string;
   loading?: React.ReactNode;
+  fallback?: (err: Error) => React.FC | React.FC;
 }
 
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
@@ -86,25 +87,40 @@ function collectLinks(id: string) {
 }
 
 function MFReactComponent(props: IProps) {
-  const { loading = 'loading...', id } = props;
+  const { loading = 'loading...', id, fallback } = props;
 
   const Component = React.lazy(() =>
-    loadRemote<Comp>(id).then((mod) => {
-      const links = collectLinks(id);
-      if (!mod) {
-        throw new Error('load remote failed');
-      }
-      const Com =
-        typeof mod === 'object' ? ('default' in mod ? mod.default : mod) : mod;
-      return {
-        default: () => (
-          <div>
-            {links}
-            <Com />
-          </div>
-        ),
-      };
-    }),
+    loadRemote<Comp>(id)
+      .then((mod) => {
+        const links = collectLinks(id);
+        if (!mod) {
+          throw new Error('load remote failed');
+        }
+        const Com =
+          typeof mod === 'object'
+            ? 'default' in mod
+              ? mod.default
+              : mod
+            : mod;
+        return {
+          default: () => (
+            <div>
+              {links}
+              <Com />
+            </div>
+          ),
+        };
+      })
+      .catch((err) => {
+        if (!fallback) {
+          throw err;
+        }
+        const FallbackComponent =
+          typeof fallback === 'function' ? fallback(err) : fallback;
+        return {
+          default: () => <FallbackComponent />,
+        };
+      }),
   );
 
   return (
