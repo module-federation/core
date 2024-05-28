@@ -10,20 +10,22 @@ function flushDynamicRemotePlugin(
 ): FederationRuntimePlugin {
   return {
     name: 'flush-dynamic-remote-plugin',
-    beforeRegisterRemote({ remote, options }) {
+    beforeRegisterRemote(args) {
       try {
         const shouldFlush = flushDynamicRemote({
-          remote,
-          options,
+          remote: args.remote,
+          options: args.options,
           expiredTime: pluginOptions.expiredTime,
         });
-        return { remote, options: { ...options, force: shouldFlush } };
+        if (shouldFlush && !args.options?.force) {
+          args.options = {
+            force: true,
+          };
+        }
+        return args;
       } catch (err) {
         console.error(new Error(err as unknown as any));
-        return {
-          remote,
-          options,
-        };
+        return args;
       }
     },
   };

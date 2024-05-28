@@ -356,9 +356,12 @@ export class RemoteHandler {
     options?: RegisterRemoteOptions,
   ): void {
     const { remote: remoteRes, options: optionsRes } =
-      this.hooks.lifecycle.beforeRegisterRemote.emit({
+      (this.hooks.lifecycle.beforeRegisterRemote.emit({
         remote,
         options,
+      }) as {
+        remote: Remote;
+        options?: RegisterRemoteOptions;
       }) || { remote, options };
 
     const normalizeRemote = () => {
