@@ -173,7 +173,7 @@ export class NextFederationPlugin {
       ],
       //@ts-ignore
       exposes: {
-        ...(this._extraOptions.skipSharingNextInternals ? {} : defaultExpose),
+        ...defaultExpose,
         ...this._options.exposes,
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)

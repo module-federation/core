@@ -1,5 +1,30 @@
 # @module-federation/runtime
 
+## 0.1.15
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.15
+
+## 0.1.14
+
+### Patch Changes
+
+- 103b2b8: Script timeout options for createScript hook
+- Updated dependencies [103b2b8]
+  - @module-federation/sdk@0.1.14
+
+## 0.1.13
+
+### Patch Changes
+
+- d259a37: chore: extract sharedHandler
+- 08740a0: fix: should use userOptions.shared to apply hooks
+- 0113b81: chore: delete references to used shared to prevent memory leaks
+- d259a37: chore: extract remoteHandler
+- Updated dependencies [2e52e51]
+  - @module-federation/sdk@0.1.13
+
 ## 0.1.12
 
 ### Patch Changes

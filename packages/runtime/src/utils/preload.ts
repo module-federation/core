@@ -84,9 +84,21 @@ export function preloadAssets(
             const res = host.loaderHook.lifecycle.createScript.emit({
               url,
             });
+            if (!res) return;
+
+            if (typeof document === 'undefined') {
+              //todo: needs real fix
+              return res as HTMLScriptElement;
+            }
+
             if (res instanceof HTMLScriptElement) {
               return res;
             }
+
+            if ('script' in res || 'timeout' in res) {
+              return res;
+            }
+
             return;
           },
         });
@@ -98,9 +110,21 @@ export function preloadAssets(
             const res = host.loaderHook.lifecycle.createScript.emit({
               url,
             });
+            if (!res) return;
+
+            if (typeof document === 'undefined') {
+              //todo: needs real fix
+              return res as HTMLScriptElement;
+            }
+
             if (res instanceof HTMLScriptElement) {
               return res;
             }
+
+            if ('script' in res || 'timeout' in res) {
+              return res;
+            }
+
             return;
           },
         });
