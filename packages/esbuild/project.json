@@ -12,7 +12,7 @@
         "outputPath": "packages/esbuild/dist",
         "main": "packages/esbuild/src/index.js",
         "additionalEntryPoints": [
-          "packages/esbuild/src/adapters/esbuild.js",
+          "packages/esbuild/src/adapters/lib/plugin.ts",
           "packages/esbuild/src/build.js"
         ],
         "tsConfig": "packages/esbuild/tsconfig.lib.json",

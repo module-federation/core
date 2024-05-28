@@ -1,5 +1,6 @@
 import { SkipList } from '../core/default-skip-list';
 import { MappedPath } from '../utils/mapped-paths';
+
 export interface SharedConfig {
   singleton?: boolean;
   strictVersion?: boolean;
@@ -7,6 +8,7 @@ export interface SharedConfig {
   version?: string;
   includeSecondaries?: boolean;
 }
+
 export interface FederationConfig {
   name?: string;
   exposes?: Record<string, string>;
@@ -14,6 +16,7 @@ export interface FederationConfig {
   sharedMappings?: Array<string>;
   skip?: SkipList;
 }
+
 export interface NormalizedSharedConfig {
   singleton: boolean;
   strictVersion: boolean;
@@ -22,11 +25,11 @@ export interface NormalizedSharedConfig {
   eager?: boolean;
   includeSecondaries?: boolean;
 }
+
 export interface NormalizedFederationConfig {
   name: string;
   filename?: string;
   exposes?: Record<string, string>;
   shared?: Record<string, NormalizedSharedConfig>;
-  sharedMappings: Array<MappedPath>;
   remotes?: Record<string, string>;
 }

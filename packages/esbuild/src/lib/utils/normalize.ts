@@ -1,4 +1,4 @@
-export function normalize(path, trailingSlash) {
+export function normalize(path: string, trailingSlash?: boolean): string {
   let cand = path.replace(/\\/g, '/');
   if (typeof trailingSlash === 'undefined') {
     return cand;

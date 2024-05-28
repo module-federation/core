@@ -1,7 +1,12 @@
 import * as _path from 'path';
 import * as fs from 'fs';
 
-export async function loadFederationConfig(fedOptions) {
+interface FederationOptions {
+  workspaceRoot: string;
+  federationConfig: string;
+}
+
+export async function loadFederationConfig(fedOptions: FederationOptions): Promise<any> {
   const fullConfigPath = _path.join(
     fedOptions.workspaceRoot,
     fedOptions.federationConfig,

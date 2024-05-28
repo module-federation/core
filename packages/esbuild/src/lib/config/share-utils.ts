@@ -1,23 +1,40 @@
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 import process from 'process';
-import { getVersionMaps, findDepPackageJson } from '../utils/package-info';
 import { getConfigContext } from './configuration-context';
+import { SharedConfig } from './federation-config';
+import { getVersionMaps, findDepPackageJson } from '../utils/package-info';
 import { logger } from '../utils/logger';
 import {
   isInSkipList,
   prepareSkipList,
   DEFAULT_SKIP_LIST,
   PREPARED_DEFAULT_SKIP_LIST,
+  SkipListEntry,
 } from '../core/default-skip-list';
 
+type IncludeSecondariesOptions =
+  | {
+      skip: string | string[];
+    }
+  | boolean;
+
+type CustomSharedConfig = SharedConfig & {
+  includeSecondaries?: IncludeSecondariesOptions;
+};
+
+type ConfigObject = Record<string, CustomSharedConfig>;
+type Config = (string | ConfigObject)[] | ConfigObject;
+
+
 let inferVersion = false;
-export const DEFAULT_SECONARIES_SKIP_LIST = [
+
+export const DEFAULT_SECONARIES_SKIP_LIST: string[] = [
   '@angular/router/upgrade',
   '@angular/common/upgrade',
 ];
 
-export function findRootTsConfigJson() {
+export function findRootTsConfigJson(): string {
   const packageJson = findPackageJson(process.cwd());
   const projectRoot = path.dirname(packageJson);
   const tsConfigBaseJson = path.join(projectRoot, 'tsconfig.base.json');
@@ -30,7 +47,7 @@ export function findRootTsConfigJson() {
   throw new Error('Neither a tsconfig.json nor a tsconfig.base.json was found');
 }
 
-export function findPackageJson(folder) {
+export function findPackageJson(folder: string): string {
   while (
     !fs.existsSync(path.join(folder, 'package.json')) &&
     path.dirname(folder) !== folder
@@ -47,7 +64,7 @@ export function findPackageJson(folder) {
   );
 }
 
-export function lookupVersion(key, workspaceRoot) {
+export function lookupVersion(key: string, workspaceRoot: string): string {
   const versionMaps = getVersionMaps(workspaceRoot, workspaceRoot);
   for (const versionMap of versionMaps) {
     const version = lookupVersionInMap(key, versionMap);
@@ -60,7 +77,7 @@ export function lookupVersion(key, workspaceRoot) {
   );
 }
 
-export function lookupVersionInMap(key, versions) {
+export function lookupVersionInMap(key: string, versions: Record<string, string>): string | null {
   const parts = key.split('/');
   if (parts.length >= 2 && parts[0].startsWith('@')) {
     key = parts[0] + '/' + parts[1];
@@ -76,7 +93,12 @@ export function lookupVersionInMap(key, versions) {
   return versions[key];
 }
 
-export function _findSecondaries(libPath, excludes, shareObject, acc) {
+export function _findSecondaries(
+  libPath: string,
+  excludes: string[],
+  shareObject: Record<string, any>,
+  acc: Record<string, any>
+): void {
   const files = fs.readdirSync(libPath);
   const dirs = files
     .map((f) => path.join(libPath, f))
@@ -99,13 +121,22 @@ export function _findSecondaries(libPath, excludes, shareObject, acc) {
   }
 }
 
-export function findSecondaries(libPath, excludes, shareObject) {
-  const acc = {};
+export function findSecondaries(
+  libPath: string,
+  excludes: string[],
+  shareObject: Record<string, any>
+): Record<string, any> {
+  const acc: Record<string, any> = {};
   _findSecondaries(libPath, excludes, shareObject, acc);
   return acc;
 }
 
-export function getSecondaries(includeSecondaries, libPath, key, shareObject) {
+export function getSecondaries(
+  includeSecondaries: boolean | { skip?: string | string[] },
+  libPath: string,
+  key: string,
+  shareObject: Record<string, any>
+): Record<string, any> {
   let exclude = [...DEFAULT_SECONARIES_SKIP_LIST];
   if (typeof includeSecondaries === 'object') {
     if (Array.isArray(includeSecondaries.skip)) {
@@ -132,11 +163,11 @@ export function getSecondaries(includeSecondaries, libPath, key, shareObject) {
 }
 
 export function readConfiguredSecondaries(
-  parent,
-  libPath,
-  exclude,
-  shareObject,
-) {
+  parent: string,
+  libPath: string,
+  exclude: string[],
+  shareObject: Record<string, any>
+): Record<string, any> | null {
   const libPackageJson = path.join(libPath, 'package.json');
   if (!fs.existsSync(libPackageJson)) {
     return null;
@@ -153,7 +184,7 @@ export function readConfiguredSecondaries(
       !key.endsWith('*') &&
       (exports[key]['default'] || typeof exports[key] === 'string'),
   );
-  const result = {};
+  const result: Record<string, any> = {};
   for (const key of keys) {
     // const relPath = exports[key]['default'];
     const secondaryName = path.join(parent, key).replace(/\\/g, '/');
@@ -180,14 +211,12 @@ export function readConfiguredSecondaries(
   return result;
 }
 
-export function getDefaultEntry(exports, key) {
-  var _a;
-  let entry = '';
+export function getDefaultEntry(exports: { [key: string]: any }, key: string): string {
+  let entry;
   if (typeof exports[key] === 'string') {
     entry = exports[key];
   } else {
-    entry =
-      (_a = exports[key]) === null || _a === void 0 ? void 0 : _a['default'];
+    entry = exports[key]?.['default'];
     if (typeof entry === 'object') {
       entry = entry['default'];
     }
@@ -195,19 +224,15 @@ export function getDefaultEntry(exports, key) {
   return entry;
 }
 
+
 export function shareAll(
-  config = {},
-  skip = DEFAULT_SKIP_LIST,
-  projectPath = '',
-) {
-  // let workspacePath: string | undefined = undefined;
+  config: CustomSharedConfig,
+  skip: SkipListEntry[] = DEFAULT_SKIP_LIST,
+  projectPath: string = '',
+): Config {
   projectPath = inferProjectPath(projectPath);
-  // workspacePath = getConfigContext().workspaceRoot ?? '';
-  // if (!workspacePath) {
-  //   workspacePath = projectPath;
-  // }
   const versionMaps = getVersionMaps(projectPath, projectPath);
-  const share = {};
+  const share: ConfigObject = {};
   for (const versions of versionMaps) {
     const preparedSkipList = prepareSkipList(skip);
     for (const key in versions) {
@@ -229,8 +254,8 @@ export function shareAll(
   return module.exports.share(share, projectPath);
 }
 
-export function inferProjectPath(projectPath) {
-  if (!projectPath && getConfigContext().packageJson) {
+function inferProjectPath(projectPath: string): string {
+  if (!projectPath) {
     projectPath = path.dirname(getConfigContext().packageJson || '');
   }
   if (!projectPath && getConfigContext().workspaceRoot) {
@@ -241,17 +266,19 @@ export function inferProjectPath(projectPath) {
   }
   return projectPath;
 }
-
-export function setInferVersion(infer) {
+export function setInferVersion(infer: boolean): void {
   inferVersion = infer;
 }
 
-export function share(shareObjects, projectPath = '') {
+export function share(
+  shareObjects: Record<string, any>,
+  projectPath: string = ''
+): Record<string, any> {
   projectPath = inferProjectPath(projectPath);
   const packagePath = findPackageJson(projectPath);
   // const versions = readVersionMap(packagePath);
-  const result = {};
-  let includeSecondaries;
+  const result: Record<string, any> = {};
+  let includeSecondaries: boolean | { skip?: string | string[] };
   for (const key in shareObjects) {
     includeSecondaries = false;
     const shareObject = shareObjects[key];
@@ -292,7 +319,10 @@ export function share(shareObjects, projectPath = '') {
   return result;
 }
 
-export function addSecondaries(secondaries, result) {
+export function addSecondaries(
+  secondaries: Record<string, any>,
+  result: Record<string, any>
+): void {
   for (const key in secondaries) {
     result[key] = secondaries[key];
   }

@@ -1,7 +1,15 @@
 'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.reactReplacements = void 0;
-exports.reactReplacements = {
+
+interface Replacement {
+  file: string;
+}
+
+interface ReactReplacements {
+  dev: Record<string, Replacement>;
+  prod: Record<string, Replacement>;
+}
+
+export const reactReplacements: ReactReplacements = {
   dev: {
     'node_modules/react/index.js': {
       file: 'node_modules/react/cjs/react.development.js',

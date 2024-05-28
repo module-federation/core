@@ -17,7 +17,7 @@ To use the Module Federation plugin with esbuild, add it to your esbuild configu
 ```js
 const esbuild = require('esbuild');
 const path = require('path');
-const { moduleFederationPlugin } = require('@module-federation/esbuild/esbuild-adapter');
+const { moduleFederationPlugin } = require('@module-federation/esbuild/plugin');
 const federationConfig = require('./federation.config.js');
 
 async function buildApp() {

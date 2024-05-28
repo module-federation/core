@@ -19,10 +19,10 @@
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js"
     },
-    "./esbuild-adapter": {
+    "./plugin": {
       "types": "./dist/esbuild.cjs.d.ts",
-      "import": "./dist/esbuild.esm.js",
-      "require": "./dist/esbuild.cjs.js"
+      "import": "./dist/plugin.esm.js",
+      "require": "./dist/plugin.cjs.js"
     },
     "./build": {
       "types": "./dist/build.cjs.d.ts",

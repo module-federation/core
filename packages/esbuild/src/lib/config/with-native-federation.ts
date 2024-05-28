@@ -1,31 +1,46 @@
-import { prepareSkipList } from '../core/default-skip-list';
+import { prepareSkipList, isInSkipList, PreparedSkipList } from '../core/default-skip-list';
 import { shareAll } from './share-utils';
-import { getMappedPaths } from '../utils/mapped-paths';
+import { getMappedPaths, MappedPath } from '../utils/mapped-paths';
 import { findRootTsConfigJson } from './share-utils';
-import { isInSkipList } from '../core/default-skip-list';
 import { logger } from '../utils/logger';
 
-export function withFederation(config) {
-  const skip = prepareSkipList(config.skip ?? []);
+interface FederationConfig {
+  name?: string;
+  filename?: string;
+  exposes?: Record<string, string>;
+  remotes?: Record<string, string>;
+  shared?: Record<string, SharedConfig>;
+  skip?: string[];
+}
+
+interface SharedConfig {
+  requiredVersion?: string;
+  singleton?: boolean;
+  strictVersion?: boolean;
+  version?: string;
+  includeSecondaries?: boolean;
+}
+
+export function withFederation(config: FederationConfig) {
+  const skip: PreparedSkipList = prepareSkipList(config.skip ?? []);
   return {
     name: config.name ?? '',
     filename: config.filename ?? 'remoteEntry',
     exposes: config.exposes ?? {},
     remotes: config.remotes ?? {},
     shared: normalizeShared(config, skip),
-    sharedMappings: normalizeSharedMappings(config, skip),
   };
 }
 
-function normalizeShared(config, skip) {
-  let result = {};
+function normalizeShared(config: FederationConfig, skip: PreparedSkipList): Record<string, SharedConfig> {
+  let result: Record<string, SharedConfig> = {};
   const shared = config.shared;
   if (!shared) {
     result = shareAll({
       singleton: true,
       strictVersion: true,
       requiredVersion: 'auto',
-    });
+    }) as Record<string, SharedConfig>;
   } else {
     result = Object.keys(shared).reduce((acc, cur) => {
       return {
@@ -52,11 +67,10 @@ function normalizeShared(config, skip) {
   return result;
 }
 
-function normalizeSharedMappings(config, skip) {
+function normalizeSharedMappings(config: FederationConfig, skip: PreparedSkipList): MappedPath[] {
   const rootTsConfigPath = findRootTsConfigJson();
   const paths = getMappedPaths({
     rootTsConfigPath,
-    sharedMappings: config.sharedMappings,
   });
   const result = paths.filter(
     (p) => !isInSkipList(p.key, skip) && !p.key.includes('*'),

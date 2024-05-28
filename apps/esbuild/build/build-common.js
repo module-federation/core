@@ -3,9 +3,7 @@
 const esbuild = require('esbuild');
 const path = require('path');
 const fs = require('fs');
-const {
-  moduleFederationPlugin,
-} = require('@module-federation/esbuild/esbuild-adapter');
+const { moduleFederationPlugin } = require('@module-federation/esbuild/plugin');
 
 async function buildProject(projectName, watch) {
   const tsConfig = 'tsconfig.json';

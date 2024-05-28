@@ -3,21 +3,33 @@ import * as path from 'path';
 import { logger } from './logger';
 import { normalize } from './normalize';
 
-const packageCache = {};
+interface PackageJsonInfo {
+  content: any;
+  directory: string;
+}
 
-export function findPackageJsonFiles(project, workspace) {
+interface PackageInfo {
+  entryPoint: string;
+  packageName: string;
+  version: string;
+  esm: boolean;
+}
+
+const packageCache: Record<string, PackageJsonInfo[]> = {};
+
+export function findPackageJsonFiles(project: string, workspace: string): string[] {
   return expandFolders(project, workspace)
     .map((f) => path.join(f, 'package.json'))
     .filter((f) => fs.existsSync(f));
 }
 
-export function expandFolders(child, parent) {
-  const result = [];
+export function expandFolders(child: string, parent: string): string[] {
+  const result: string[] = [];
   parent = normalize(parent, true);
   child = normalize(child, true);
   if (!child.startsWith(parent)) {
     throw new Error(
-      `Workspace folder ${path} needs to be a parent of the project folder ${child}`,
+      `Workspace folder ${parent} needs to be a parent of the project folder ${child}`,
     );
   }
   let current = child;
@@ -33,7 +45,7 @@ export function expandFolders(child, parent) {
   return result;
 }
 
-export function getPackageInfo(packageName, workspaceRoot) {
+export function getPackageInfo(packageName: string, workspaceRoot: string): PackageInfo | null {
   workspaceRoot = normalize(workspaceRoot, true);
   const packageJsonInfos = getPackageJsonFiles(workspaceRoot, workspaceRoot);
   for (const info of packageJsonInfos) {
@@ -46,17 +58,17 @@ export function getPackageInfo(packageName, workspaceRoot) {
   return null;
 }
 
-function getVersionMapCacheKey(project, workspace) {
+function getVersionMapCacheKey(project: string, workspace: string): string {
   return `${project}**${workspace}`;
 }
 
-export function getVersionMaps(project, workspace) {
+export function getVersionMaps(project: string, workspace: string): Record<string, string>[] {
   return getPackageJsonFiles(project, workspace).map((json) => ({
     ...json.content['dependencies'],
   }));
 }
 
-export function getPackageJsonFiles(project, workspace) {
+export function getPackageJsonFiles(project: string, workspace: string): PackageJsonInfo[] {
   const cacheKey = getVersionMapCacheKey(project, workspace);
   let maps = packageCache[cacheKey];
   if (maps) {
@@ -65,7 +77,7 @@ export function getPackageJsonFiles(project, workspace) {
   maps = findPackageJsonFiles(project, workspace).map((f) => {
     const content = JSON.parse(fs.readFileSync(f, 'utf-8'));
     const directory = normalize(path.dirname(f), true);
-    const result = {
+    const result: PackageJsonInfo = {
       content,
       directory,
     };
@@ -75,7 +87,7 @@ export function getPackageJsonFiles(project, workspace) {
   return maps;
 }
 
-export function findDepPackageJson(packageName, projectRoot) {
+export function findDepPackageJson(packageName: string, projectRoot: string): string | null {
   const mainPkgName = getPkgFolder(packageName);
   let mainPkgPath = path.join(projectRoot, 'node_modules', mainPkgName);
   let mainPkgJsonPath = path.join(mainPkgPath, 'package.json');
@@ -97,7 +109,7 @@ export function findDepPackageJson(packageName, projectRoot) {
   return mainPkgJsonPath;
 }
 
-export function _getPackageInfo(packageName, directory) {
+export function _getPackageInfo(packageName: string, directory: string): PackageInfo | null {
   const mainPkgName = getPkgFolder(packageName);
   const mainPkgJsonPath = findDepPackageJson(packageName, directory);
   if (!mainPkgJsonPath) {
@@ -208,7 +220,7 @@ export function _getPackageInfo(packageName, directory) {
   }
   const secondaryPgkPath = path.join(mainPkgPath, relSecondaryPath);
   const secondaryPgkJsonPath = path.join(secondaryPgkPath, 'package.json');
-  let secondaryPgkJson = null;
+  let secondaryPgkJson: any = null;
   if (fs.existsSync(secondaryPgkJsonPath)) {
     secondaryPgkJson = readJson(secondaryPgkJsonPath);
   }
@@ -253,11 +265,11 @@ export function _getPackageInfo(packageName, directory) {
   return null;
 }
 
-function readJson(mainPkgJsonPath) {
+function readJson(mainPkgJsonPath: string): any {
   return JSON.parse(fs.readFileSync(mainPkgJsonPath, 'utf-8'));
 }
 
-function getPkgFolder(packageName) {
+function getPkgFolder(packageName: string): string {
   const parts = packageName.split('/');
   let folder = parts[0];
   if (folder.startsWith('@')) {
