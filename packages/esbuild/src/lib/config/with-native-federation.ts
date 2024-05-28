@@ -1,4 +1,8 @@
-import { prepareSkipList, isInSkipList, PreparedSkipList } from '../core/default-skip-list';
+import {
+  prepareSkipList,
+  isInSkipList,
+  PreparedSkipList,
+} from '../core/default-skip-list';
 import { shareAll } from './share-utils';
 import { getMappedPaths, MappedPath } from '../utils/mapped-paths';
 import { findRootTsConfigJson } from './share-utils';
@@ -32,7 +36,10 @@ export function withFederation(config: FederationConfig) {
   };
 }
 
-function normalizeShared(config: FederationConfig, skip: PreparedSkipList): Record<string, SharedConfig> {
+function normalizeShared(
+  config: FederationConfig,
+  skip: PreparedSkipList,
+): Record<string, SharedConfig> {
   let result: Record<string, SharedConfig> = {};
   const shared = config.shared;
   if (!shared) {
@@ -67,7 +74,10 @@ function normalizeShared(config: FederationConfig, skip: PreparedSkipList): Reco
   return result;
 }
 
-function normalizeSharedMappings(config: FederationConfig, skip: PreparedSkipList): MappedPath[] {
+function normalizeSharedMappings(
+  config: FederationConfig,
+  skip: PreparedSkipList,
+): MappedPath[] {
   const rootTsConfigPath = findRootTsConfigJson();
   const paths = getMappedPaths({
     rootTsConfigPath,

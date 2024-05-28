@@ -4,11 +4,36 @@ import npmlog from 'npmlog';
 
 const levels = npmlog.levels;
 
-npmlog.addLevel('error', levels.error, { fg: 'brightWhite', bg: 'red' }, ' ERR! ');
-npmlog.addLevel('warn', levels.info, { fg: 'brightWhite', bg: 'yellow' }, ' WARN ');
-npmlog.addLevel('info', levels.warn, { fg: 'brightWhite', bg: 'green' }, ' INFO ');
-npmlog.addLevel('notice', levels.notice, { fg: 'black', bg: 'brightYellow' }, ' NOTE ');
-npmlog.addLevel('verbose', levels.verbose, { fg: 'brightWhite', bg: 'brightBlue' }, ' VRB! ');
+npmlog.addLevel(
+  'error',
+  levels.error,
+  { fg: 'brightWhite', bg: 'red' },
+  ' ERR! ',
+);
+npmlog.addLevel(
+  'warn',
+  levels.info,
+  { fg: 'brightWhite', bg: 'yellow' },
+  ' WARN ',
+);
+npmlog.addLevel(
+  'info',
+  levels.warn,
+  { fg: 'brightWhite', bg: 'green' },
+  ' INFO ',
+);
+npmlog.addLevel(
+  'notice',
+  levels.notice,
+  { fg: 'black', bg: 'brightYellow' },
+  ' NOTE ',
+);
+npmlog.addLevel(
+  'verbose',
+  levels.verbose,
+  { fg: 'brightWhite', bg: 'brightBlue' },
+  ' VRB! ',
+);
 npmlog.addLevel('silly', levels.silly, { fg: 'black', bg: 'white' }, ' DBG! ');
 
 interface Logger {

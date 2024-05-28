@@ -26,7 +26,6 @@ type CustomSharedConfig = SharedConfig & {
 type ConfigObject = Record<string, CustomSharedConfig>;
 type Config = (string | ConfigObject)[] | ConfigObject;
 
-
 let inferVersion = false;
 
 export const DEFAULT_SECONARIES_SKIP_LIST: string[] = [
@@ -77,7 +76,10 @@ export function lookupVersion(key: string, workspaceRoot: string): string {
   );
 }
 
-export function lookupVersionInMap(key: string, versions: Record<string, string>): string | null {
+export function lookupVersionInMap(
+  key: string,
+  versions: Record<string, string>,
+): string | null {
   const parts = key.split('/');
   if (parts.length >= 2 && parts[0].startsWith('@')) {
     key = parts[0] + '/' + parts[1];
@@ -97,7 +99,7 @@ export function _findSecondaries(
   libPath: string,
   excludes: string[],
   shareObject: Record<string, any>,
-  acc: Record<string, any>
+  acc: Record<string, any>,
 ): void {
   const files = fs.readdirSync(libPath);
   const dirs = files
@@ -124,7 +126,7 @@ export function _findSecondaries(
 export function findSecondaries(
   libPath: string,
   excludes: string[],
-  shareObject: Record<string, any>
+  shareObject: Record<string, any>,
 ): Record<string, any> {
   const acc: Record<string, any> = {};
   _findSecondaries(libPath, excludes, shareObject, acc);
@@ -135,7 +137,7 @@ export function getSecondaries(
   includeSecondaries: boolean | { skip?: string | string[] },
   libPath: string,
   key: string,
-  shareObject: Record<string, any>
+  shareObject: Record<string, any>,
 ): Record<string, any> {
   let exclude = [...DEFAULT_SECONARIES_SKIP_LIST];
   if (typeof includeSecondaries === 'object') {
@@ -166,7 +168,7 @@ export function readConfiguredSecondaries(
   parent: string,
   libPath: string,
   exclude: string[],
-  shareObject: Record<string, any>
+  shareObject: Record<string, any>,
 ): Record<string, any> | null {
   const libPackageJson = path.join(libPath, 'package.json');
   if (!fs.existsSync(libPackageJson)) {
@@ -211,7 +213,10 @@ export function readConfiguredSecondaries(
   return result;
 }
 
-export function getDefaultEntry(exports: { [key: string]: any }, key: string): string {
+export function getDefaultEntry(
+  exports: { [key: string]: any },
+  key: string,
+): string {
   let entry;
   if (typeof exports[key] === 'string') {
     entry = exports[key];
@@ -223,7 +228,6 @@ export function getDefaultEntry(exports: { [key: string]: any }, key: string): s
   }
   return entry;
 }
-
 
 export function shareAll(
   config: CustomSharedConfig,
@@ -272,7 +276,7 @@ export function setInferVersion(infer: boolean): void {
 
 export function share(
   shareObjects: Record<string, any>,
-  projectPath: string = ''
+  projectPath: string = '',
 ): Record<string, any> {
   projectPath = inferProjectPath(projectPath);
   const packagePath = findPackageJson(projectPath);
@@ -321,7 +325,7 @@ export function share(
 
 export function addSecondaries(
   secondaries: Record<string, any>,
-  result: Record<string, any>
+  result: Record<string, any>,
 ): void {
   for (const key in secondaries) {
     result[key] = secondaries[key];

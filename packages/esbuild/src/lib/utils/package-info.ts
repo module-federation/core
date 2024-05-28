@@ -17,7 +17,10 @@ interface PackageInfo {
 
 const packageCache: Record<string, PackageJsonInfo[]> = {};
 
-export function findPackageJsonFiles(project: string, workspace: string): string[] {
+export function findPackageJsonFiles(
+  project: string,
+  workspace: string,
+): string[] {
   return expandFolders(project, workspace)
     .map((f) => path.join(f, 'package.json'))
     .filter((f) => fs.existsSync(f));
@@ -45,7 +48,10 @@ export function expandFolders(child: string, parent: string): string[] {
   return result;
 }
 
-export function getPackageInfo(packageName: string, workspaceRoot: string): PackageInfo | null {
+export function getPackageInfo(
+  packageName: string,
+  workspaceRoot: string,
+): PackageInfo | null {
   workspaceRoot = normalize(workspaceRoot, true);
   const packageJsonInfos = getPackageJsonFiles(workspaceRoot, workspaceRoot);
   for (const info of packageJsonInfos) {
@@ -62,13 +68,19 @@ function getVersionMapCacheKey(project: string, workspace: string): string {
   return `${project}**${workspace}`;
 }
 
-export function getVersionMaps(project: string, workspace: string): Record<string, string>[] {
+export function getVersionMaps(
+  project: string,
+  workspace: string,
+): Record<string, string>[] {
   return getPackageJsonFiles(project, workspace).map((json) => ({
     ...json.content['dependencies'],
   }));
 }
 
-export function getPackageJsonFiles(project: string, workspace: string): PackageJsonInfo[] {
+export function getPackageJsonFiles(
+  project: string,
+  workspace: string,
+): PackageJsonInfo[] {
   const cacheKey = getVersionMapCacheKey(project, workspace);
   let maps = packageCache[cacheKey];
   if (maps) {
@@ -87,7 +99,10 @@ export function getPackageJsonFiles(project: string, workspace: string): Package
   return maps;
 }
 
-export function findDepPackageJson(packageName: string, projectRoot: string): string | null {
+export function findDepPackageJson(
+  packageName: string,
+  projectRoot: string,
+): string | null {
   const mainPkgName = getPkgFolder(packageName);
   let mainPkgPath = path.join(projectRoot, 'node_modules', mainPkgName);
   let mainPkgJsonPath = path.join(mainPkgPath, 'package.json');
@@ -109,7 +124,10 @@ export function findDepPackageJson(packageName: string, projectRoot: string): st
   return mainPkgJsonPath;
 }
 
-export function _getPackageInfo(packageName: string, directory: string): PackageInfo | null {
+export function _getPackageInfo(
+  packageName: string,
+  directory: string,
+): PackageInfo | null {
   const mainPkgName = getPkgFolder(packageName);
   const mainPkgJsonPath = findDepPackageJson(packageName, directory);
   if (!mainPkgJsonPath) {

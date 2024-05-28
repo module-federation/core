@@ -26,22 +26,29 @@ export const DEFAULT_SKIP_LIST: SkipListEntry[] = [
   'express',
   /\/schematics(\/|$)/,
   /^@nx\/angular/,
-  (pkg: string) => pkg.startsWith('@angular/') && !!pkg.match(/\/testing(\/|$)/),
+  (pkg: string) =>
+    pkg.startsWith('@angular/') && !!pkg.match(/\/testing(\/|$)/),
   (pkg: string) => pkg.startsWith('@types/'),
   (pkg: string) => pkg.startsWith('@module-federation/'),
 ];
 
-export const PREPARED_DEFAULT_SKIP_LIST: PreparedSkipList = prepareSkipList(DEFAULT_SKIP_LIST);
+export const PREPARED_DEFAULT_SKIP_LIST: PreparedSkipList =
+  prepareSkipList(DEFAULT_SKIP_LIST);
 
 export function prepareSkipList(skipList: SkipListEntry[]): PreparedSkipList {
   return {
-    strings: new Set(skipList.filter((e): e is string => typeof e === 'string')),
+    strings: new Set(
+      skipList.filter((e): e is string => typeof e === 'string'),
+    ),
     functions: skipList.filter((e): e is SkipFn => typeof e === 'function'),
     regexps: skipList.filter((e): e is RegExp => e instanceof RegExp),
   };
 }
 
-export function isInSkipList(entry: string, skipList: PreparedSkipList): boolean {
+export function isInSkipList(
+  entry: string,
+  skipList: PreparedSkipList,
+): boolean {
   if (skipList.strings.has(entry)) {
     return true;
   }
@@ -53,5 +60,3 @@ export function isInSkipList(entry: string, skipList: PreparedSkipList): boolean
   }
   return false;
 }
-
-

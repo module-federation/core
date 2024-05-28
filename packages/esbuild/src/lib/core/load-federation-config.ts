@@ -6,7 +6,9 @@ interface FederationOptions {
   federationConfig: string;
 }
 
-export async function loadFederationConfig(fedOptions: FederationOptions): Promise<any> {
+export async function loadFederationConfig(
+  fedOptions: FederationOptions,
+): Promise<any> {
   const fullConfigPath = _path.join(
     fedOptions.workspaceRoot,
     fedOptions.federationConfig,

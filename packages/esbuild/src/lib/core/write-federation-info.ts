@@ -11,7 +11,10 @@ interface FedOptions {
   outputPath: string;
 }
 
-export function writeFederationInfo(federationInfo: FederationInfo, fedOptions: FedOptions): void {
+export function writeFederationInfo(
+  federationInfo: FederationInfo,
+  fedOptions: FedOptions,
+): void {
   const metaDataPath = _path.join(
     fedOptions.workspaceRoot,
     fedOptions.outputPath,

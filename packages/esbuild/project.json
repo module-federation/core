@@ -10,10 +10,10 @@
       "options": {
         "parallel": false,
         "outputPath": "packages/esbuild/dist",
-        "main": "packages/esbuild/src/index.js",
+        "main": "packages/esbuild/src/index.ts",
         "additionalEntryPoints": [
           "packages/esbuild/src/adapters/lib/plugin.ts",
-          "packages/esbuild/src/build.js"
+          "packages/esbuild/src/build.ts"
         ],
         "tsConfig": "packages/esbuild/tsconfig.lib.json",
         "assets": ["packages/esbuild/src/resolve"],
