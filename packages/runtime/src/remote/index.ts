@@ -443,44 +443,43 @@ export class RemoteHandler {
         let isAllSharedNotUsed = true;
         const needDeleteKeys: Array<[string, string, string, string]> = [];
         Object.keys(globalShareScopeMap).forEach((instId) => {
-          Object.keys(globalShareScopeMap[instId]).forEach((shareScope) => {
-            Object.keys(globalShareScopeMap[instId][shareScope]).forEach(
-              (shareName) => {
-                Object.keys(
-                  globalShareScopeMap[instId][shareScope][shareName],
-                ).forEach((shareVersion) => {
-                  const shared =
-                    globalShareScopeMap[instId][shareScope][shareName][
-                      shareVersion
-                    ];
-                  if (shared.from === remoteInfo.name) {
-                    if (shared.loaded || shared.loading) {
-                      shared.useIn = shared.useIn.filter(
-                        (usedHostName) => usedHostName !== remoteInfo.name,
-                      );
-                      if (shared.useIn.length) {
-                        isAllSharedNotUsed = false;
-                      } else {
-                        needDeleteKeys.push([
-                          instId,
-                          shareScope,
-                          shareName,
-                          shareVersion,
-                        ]);
+          const shareScopeMap = globalShareScopeMap[instId];
+          shareScopeMap &&
+            Object.keys(shareScopeMap).forEach((shareScope) => {
+              const shareScopeVal = shareScopeMap[shareScope];
+              shareScopeVal &&
+                Object.keys(shareScopeVal).forEach((shareName) => {
+                  const sharedPkgs = shareScopeVal[shareName];
+                  sharedPkgs &&
+                    Object.keys(sharedPkgs).forEach((shareVersion) => {
+                      const shared = sharedPkgs[shareVersion];
+                      if (shared.from === remoteInfo.name) {
+                        if (shared.loaded || shared.loading) {
+                          shared.useIn = shared.useIn.filter(
+                            (usedHostName) => usedHostName !== remoteInfo.name,
+                          );
+                          if (shared.useIn.length) {
+                            isAllSharedNotUsed = false;
+                          } else {
+                            needDeleteKeys.push([
+                              instId,
+                              shareScope,
+                              shareName,
+                              shareVersion,
+                            ]);
+                          }
+                        } else {
+                          needDeleteKeys.push([
+                            instId,
+                            shareScope,
+                            shareName,
+                            shareVersion,
+                          ]);
+                        }
                       }
-                    } else {
-                      needDeleteKeys.push([
-                        instId,
-                        shareScope,
-                        shareName,
-                        shareVersion,
-                      ]);
-                    }
-                  }
+                    });
                 });
-              },
-            );
-          });
+            });
         });
 
         if (isAllSharedNotUsed) {
