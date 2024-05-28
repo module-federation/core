@@ -84,7 +84,6 @@ const buildContainerHost = (config: NormalizedFederationConfig) => {
 
             await Promise.all(remotePrefetch);
 
-console.log('module map',moduleMap);
             const map = Object.keys(moduleMap).reduce((acc, expose) => {
                 const importMap = importShim.getImportMap().imports;
                 const key = args.origin.name + expose.replace('.', '');
@@ -97,7 +96,6 @@ console.log('module map',moduleMap);
                 return acc;
             }, {});
             await importShim.addImportMap({ imports: map });
-            console.log('final map', importShim.getImportMap());
 
             return args;
         }
