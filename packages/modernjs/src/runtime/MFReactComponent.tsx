@@ -9,7 +9,10 @@ type Comp = React.FC | { default: React.FC };
 interface IProps {
   id: string;
   loading?: React.ReactNode;
-  fallback?: (err: Error) => React.FC | React.FC;
+  fallback?:
+    | ((err: Error) => React.FC | React.ReactElement)
+    | React.FC
+    | React.ReactElement;
 }
 
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
@@ -115,10 +118,16 @@ function MFReactComponent(props: IProps) {
         if (!fallback) {
           throw err;
         }
-        const FallbackComponent =
+        const FallbackNode =
           typeof fallback === 'function' ? fallback(err) : fallback;
+        if (React.isValidElement(FallbackNode)) {
+          return {
+            default: () => FallbackNode,
+          };
+        }
+        const FallbackFunctionComponent = FallbackNode as React.FC;
         return {
-          default: () => <FallbackComponent />,
+          default: () => <FallbackFunctionComponent />,
         };
       }),
   );
