@@ -1,5 +1,14 @@
 # @module-federation/runtime
 
+## 0.1.16
+
+### Patch Changes
+
+- 103cd07: fix types for beforePreloadRemote args hook
+- 425fc9d: fix: only delete can be configurable descriptor
+- Updated dependencies [364f2bc]
+  - @module-federation/sdk@0.1.16
+
 ## 0.1.15
 
 ### Patch Changes
