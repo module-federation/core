@@ -57,12 +57,7 @@ function collectLinks(id: string) {
   if (!publicPath) {
     return links;
   }
-  const addProtocol = (url: string): string => {
-    if (url.startsWith('//')) {
-      return `https:${url}`;
-    }
-    return url;
-  };
+
   const modules = 'modules' in snapshot ? snapshot.modules : [];
   if (modules) {
     const targetModule = modules.find(
@@ -78,7 +73,7 @@ function collectLinks(id: string) {
         links.push(
           <link
             key={index}
-            href={`${addProtocol(publicPath)}${file}`}
+            href={`${publicPath}${file}`}
             rel="stylesheet"
             type="text/css"
           />,
