@@ -424,9 +424,7 @@ export class RemoteHandler {
           delete globalLoading[remoteEntryUniqueKey];
         }
 
-        if (host.snapshotHandler.manifestCache.has(remoteInfo.entry)) {
-          host.snapshotHandler.manifestCache.delete(remoteInfo.entry);
-        }
+        host.snapshotHandler.manifestCache.delete(remoteInfo.entry);
 
         // delete un loaded shared and instance
         let remoteInsId = remoteInfo.buildVersion
