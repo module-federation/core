@@ -8,6 +8,8 @@ import {
 type Comp = React.FC | { default: React.FC };
 interface IProps {
   id: string;
+  injectScript?: boolean;
+  injectLink?: boolean;
   loading?: React.ReactNode;
   fallback?:
     | ((err: Error) => React.FC | React.ReactElement)
@@ -34,19 +36,18 @@ function getLoadedRemoteInfos(instance: FederationHost, id: string) {
   };
 }
 
-function collectLinks(id: string) {
-  const links: React.ReactNode[] = [];
+function getTargetModuleInfo(id: string) {
   const instance = getInstance();
   if (!instance) {
-    return links;
+    return;
   }
   const loadedRemoteInfo = getLoadedRemoteInfos(instance, id);
   if (!loadedRemoteInfo) {
-    return links;
+    return;
   }
   const snapshot = loadedRemoteInfo.snapshot;
   if (!snapshot) {
-    return links;
+    return;
   }
   const publicPath =
     'publicPath' in snapshot
@@ -55,21 +56,44 @@ function collectLinks(id: string) {
       ? new Function(snapshot.getPublicPath)()
       : '';
   if (!publicPath) {
-    return links;
+    return;
+  }
+  const modules = 'modules' in snapshot ? snapshot.modules : [];
+  const targetModule = modules.find(
+    (m) => m.modulePath === loadedRemoteInfo.expose,
+  );
+  if (!targetModule) {
+    return;
   }
 
-  const modules = 'modules' in snapshot ? snapshot.modules : [];
-  if (modules) {
-    const targetModule = modules.find(
-      (m) => m.modulePath === loadedRemoteInfo.expose,
-    );
-    if (!targetModule) {
-      return links;
-    }
+  const remoteEntry = 'remoteEntry' in snapshot ? snapshot.remoteEntry : '';
+  if (!remoteEntry) {
+    return;
+  }
+  return {
+    module: targetModule,
+    publicPath,
+    remoteEntry,
+  };
+}
 
+function collectAssets(options: IProps) {
+  const { id, injectLink = true, injectScript = true } = options;
+  const links: React.ReactNode[] = [];
+  const scripts: React.ReactNode[] = [];
+  const instance = getInstance();
+  if (!instance || (!injectLink && !injectScript)) {
+    return [...scripts, ...links];
+  }
+
+  const moduleAndPublicPath = getTargetModuleInfo(id);
+  if (!moduleAndPublicPath) {
+    return [...scripts, ...links];
+  }
+  const { module: targetModule, publicPath, remoteEntry } = moduleAndPublicPath;
+  if (injectLink) {
     [...targetModule.assets.css.sync, ...targetModule.assets.css.async].forEach(
       (file, index) => {
-        // links.push(`${publicPath}${file}`)
         links.push(
           <link
             key={index}
@@ -81,7 +105,26 @@ function collectLinks(id: string) {
       },
     );
   }
-  return links;
+  if (injectScript) {
+    scripts.push(
+      <script
+        key={'remote-entry'}
+        src={`${publicPath}${remoteEntry}`}
+        crossOrigin="anonymous"
+      />,
+    );
+    [...targetModule.assets.js.sync].forEach((file, index) => {
+      scripts.push(
+        <script
+          key={index}
+          src={`${publicPath}${file}`}
+          crossOrigin="anonymous"
+        />,
+      );
+    });
+  }
+
+  return [...scripts, ...links];
 }
 
 function MFReactComponent(props: IProps) {
@@ -90,7 +133,7 @@ function MFReactComponent(props: IProps) {
   const Component = React.lazy(() =>
     loadRemote<Comp>(id)
       .then((mod) => {
-        const links = collectLinks(id);
+        const assets = collectAssets(props);
         if (!mod) {
           throw new Error('load remote failed');
         }
@@ -102,10 +145,10 @@ function MFReactComponent(props: IProps) {
             : mod;
         return {
           default: () => (
-            <div>
-              {links}
+            <>
+              {assets}
               <Com />
-            </div>
+            </>
           ),
         };
       })
@@ -134,4 +177,4 @@ function MFReactComponent(props: IProps) {
   );
 }
 
-export { MFReactComponent, collectLinks };
+export { MFReactComponent, collectAssets };
