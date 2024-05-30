@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/third-party-dts-extractor",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "files": [
     "dist/",
     "README.md"
