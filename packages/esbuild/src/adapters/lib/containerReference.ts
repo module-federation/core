@@ -36,7 +36,7 @@ export const buildFederationHost = (config: NormalizedFederationConfig) => {
   return `
     import { init as initFederationHost } from "@module-federation/runtime";
 
-    export const createVirtualRemoteModule = (name, ref, exports) => {
+    const createVirtualRemoteModule = (name, ref, exports) => {
       const genExports = exports.map(e =>
         e === 'default'
           ? 'export default mfLsZJ92.default;'
@@ -87,14 +87,14 @@ export const buildFederationHost = (config: NormalizedFederationConfig) => {
       }
     });
 
-     const host = initFederationHost({
+     const mfHoZJ92 = initFederationHost({
       name: ${JSON.stringify(name)},
       remotes: ${remoteConfigs},
       shared: ${sharedConfig},
       plugins: [runtimePlugin()],
     });
 
-    await Promise.all(host.initializeSharing('default', 'version-first'));
+    await Promise.all(mfHoZJ92.initializeSharing('default', 'version-first'));
 
 
   `;
