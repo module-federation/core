@@ -96,7 +96,7 @@ function collectAssets(options: IProps) {
       (file, index) => {
         links.push(
           <link
-            key={index}
+            key={`${file.split('.')[0]}_${index}`}
             href={`${publicPath}${file}`}
             rel="stylesheet"
             type="text/css"
@@ -108,7 +108,8 @@ function collectAssets(options: IProps) {
   if (injectScript) {
     scripts.push(
       <script
-        key={'remote-entry'}
+        async={true}
+        key={remoteEntry.split('.')[0]}
         src={`${publicPath}${remoteEntry}`}
         crossOrigin="anonymous"
       />,
@@ -116,7 +117,8 @@ function collectAssets(options: IProps) {
     [...targetModule.assets.js.sync].forEach((file, index) => {
       scripts.push(
         <script
-          key={index}
+          key={`${file.split('.')[0]}_${index}`}
+          async={true}
           src={`${publicPath}${file}`}
           crossOrigin="anonymous"
         />,
