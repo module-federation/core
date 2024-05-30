@@ -11,7 +11,7 @@
     "watch": "concurrently \"npm run build:remote -- --watch\" \"npm run build:host -- --watch\"",
     "start:remote": "live-server dist/mfe1 --port=3001 --cors",
     "start:host": "live-server dist/shell --port=3000",
-    "start": "concurrently \"npm run start:remote\" \"npm run start:host\""
+    "start": "pnpm run build && concurrently \"npm run start:remote\" \"npm run start:host\""
   },
   "author": "",
   "license": "ISC",

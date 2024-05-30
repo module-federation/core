@@ -18,7 +18,7 @@ async function buildProject(projectName, watch) {
     platform: 'browser',
     format: 'esm',
     mainFields: ['es2020', 'browser', 'module', 'main'],
-    conditions: ['es2020', 'es2015', 'module'],
+    conditions: ['es2022', 'es2015', 'module'],
     resolveExtensions: ['.ts', '.tsx', '.mjs', '.js'],
     loader: { '.ts': 'ts' },
     tsconfig: tsConfig,
