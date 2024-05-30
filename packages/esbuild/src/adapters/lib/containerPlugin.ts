@@ -75,6 +75,7 @@ const buildContainerHost = (config: NormalizedFederationConfig) => {
     const runtimePlugin = () => ({
         name: 'import-maps-plugin',
         async init(args) {
+
             const remotePrefetch = args.options.remotes.map(async (remote) => {
                 if (remote.type === 'esm') {
                     await import(remote.entry);

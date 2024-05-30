@@ -87,12 +87,16 @@ export const buildFederationHost = (config: NormalizedFederationConfig) => {
       }
     });
 
-     initFederationHost({
+     const host = initFederationHost({
       name: ${JSON.stringify(name)},
       remotes: ${remoteConfigs},
       shared: ${sharedConfig},
       plugins: [runtimePlugin()],
     });
+
+    await Promise.all(host.initializeSharing('default', 'version-first'));
+
+
   `;
 };
 
