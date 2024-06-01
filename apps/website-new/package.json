@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "framer-motion": "^10.0.0",
-    "rspress": "^1.0.0",
+    "rspress": "^1.22.0",
     "tailwindcss": "^3.2.7",
     "video-react": "^0.16.0",
     "xgplayer": "^3.0.16"
