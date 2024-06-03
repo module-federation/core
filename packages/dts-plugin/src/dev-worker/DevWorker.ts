@@ -22,7 +22,7 @@ export class DevWorker {
     });
     this.removeUnSerializationOptions();
     this._rpcWorker = rpc.createRpcWorker(
-      path.resolve(__dirname, './forkDevWorker.js'),
+      path.resolve(__dirname, './fork-dev-worker.js'),
       {},
       undefined,
       false,

@@ -21,6 +21,7 @@ import {
   AsyncHook,
   AsyncWaterfallHook,
   SyncHook,
+  SyncWaterfallHook,
 } from '../utils/hooks';
 import {
   assert,
@@ -47,6 +48,10 @@ export interface LoadRemoteMatch {
 export class RemoteHandler {
   host: FederationHost;
   hooks = new PluginSystem({
+    registerRemote: new SyncWaterfallHook<{
+      remote: Remote;
+      origin: FederationHost;
+    }>('registerRemote'),
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
@@ -379,6 +384,7 @@ export class RemoteHandler {
     if (!registeredRemote) {
       normalizeRemote();
       targetRemotes.push(remote);
+      this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
     } else {
       const messages = [
         `The remote "${remote.name}" is already registered.`,
@@ -391,6 +397,7 @@ export class RemoteHandler {
         this.removeRemote(registeredRemote);
         normalizeRemote();
         targetRemotes.push(remote);
+        this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
       }
       warn(messages.join(' '));
     }

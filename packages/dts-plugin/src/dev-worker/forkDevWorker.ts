@@ -79,10 +79,12 @@ async function updateCallback({
   updateMode,
   name,
   remoteTypeTarPath,
+  remoteInfo,
+  once,
 }: UpdateCallbackOptions): Promise<void> {
   const { disableHotTypesReload, disableLiveReload } = cacheOptions || {};
   fileLog(
-    `sync remote module ${name}, types to vmok ${cacheOptions?.name},typesManager.updateTypes run`,
+    `sync remote module ${name}, types to ${cacheOptions?.name},typesManager.updateTypes run`,
     'forkDevWorker',
     'info',
   );
@@ -98,6 +100,8 @@ async function updateCallback({
       updateMode,
       remoteName: name,
       remoteTarPath: remoteTypeTarPath,
+      remoteInfo,
+      once,
     });
   }
 }

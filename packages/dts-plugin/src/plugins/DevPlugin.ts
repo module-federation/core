@@ -5,7 +5,11 @@ import {
   moduleFederationPlugin,
   normalizeOptions,
 } from '@module-federation/sdk';
-import { WEB_CLIENT_OPTIONS_IDENTIFIER, WebClientOptions } from '../server';
+import {
+  WEB_CLIENT_OPTIONS_IDENTIFIER,
+  WebClientOptions,
+  getIPV4,
+} from '../server';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import path from 'path';
 import { isDev } from './utils';
@@ -95,7 +99,9 @@ export class DevPlugin implements WebpackPluginInstance {
     const {
       _options: { name, dev, dts },
     } = this;
-
+    new compiler.webpack.DefinePlugin({
+      FEDERATION_IPV4: JSON.stringify(getIPV4()),
+    }).apply(compiler);
     const normalizedDev =
       normalizeOptions<moduleFederationPlugin.PluginDevOptions>(
         true,

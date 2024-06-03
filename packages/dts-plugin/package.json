@@ -22,6 +22,16 @@
       "import": "./dist/core.js",
       "require": "./dist/core.js"
     },
+    "./create-websocket": {
+      "types": "./dist/create-websocket.d.ts",
+      "import": "./dist/esm/create-websocket.js",
+      "require": "./dist/create-websocket.js"
+    },
+    "./server-actions": {
+      "types": "./dist/server-actions.d.ts",
+      "import": "./dist/esm/server-actions.js",
+      "require": "./dist/server-actions.js"
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -31,6 +41,12 @@
       ],
       "core": [
         "./dist/core.d.ts"
+      ],
+      "create-websocket": [
+        "./dist/create-websocket.d.ts"
+      ],
+      "server-actions": [
+        "./dist/server-actions.d.ts"
       ]
     }
   },

@@ -7,6 +7,13 @@ const {
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
+const runtimePlugins = [path.join(__dirname, './runtimePlugin.ts')];
+if (process.env.NODE_ENV === 'development') {
+  runtimePlugins.push(
+    require.resolve('@module-federation/dynamic-remote-type-hints-plugin'),
+  );
+}
+
 module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   config.watchOptions = {
     ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
@@ -50,7 +57,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
           requiredVersion: '^18.2.0',
         },
       },
-      runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
+      runtimePlugins: runtimePlugins,
     }),
   );
   config.optimization.runtimeChunk = false;
