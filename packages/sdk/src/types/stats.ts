@@ -18,7 +18,8 @@ export type RemoteEntryType =
   | 'umd'
   | 'umd2'
   | 'jsonp'
-  | 'system';
+  | 'system'
+  | string;
 
 interface ResourceInfo {
   path: string;
