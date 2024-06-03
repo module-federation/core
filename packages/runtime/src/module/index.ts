@@ -63,7 +63,7 @@ class Module {
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  async get(expose: string, options?: { loadFactory?: boolean }) {
+  async get(id: string, expose: string, options?: { loadFactory?: boolean }) {
     const { loadFactory = true } = options || { loadFactory: true };
 
     // Get remoteEntry.js
@@ -126,6 +126,12 @@ class Module {
       return moduleFactory;
     }
     const exposeContent = await moduleFactory();
+
+    // This parameter is used for bridge debugging
+    Object.defineProperty(exposeContent, Symbol.for('mf_module_id'), {
+      value: id,
+      enumerable: false,
+    });
 
     return exposeContent;
   }
