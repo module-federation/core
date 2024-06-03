@@ -1,7 +1,24 @@
-import { MFModuleType } from '../constant';
 import type { RemoteWithEntry, RemoteWithVersion } from './common';
 
-export type RemoteEntryType = 'esm' | 'global';
+export type RemoteEntryType =
+  | 'var'
+  | 'module'
+  | 'assign'
+  | 'assign-properties'
+  | 'this'
+  | 'window'
+  | 'self'
+  | 'global'
+  | 'commonjs'
+  | 'commonjs2'
+  | 'commonjs-module'
+  | 'commonjs-static'
+  | 'amd'
+  | 'amd-require'
+  | 'umd'
+  | 'umd2'
+  | 'jsonp'
+  | 'system';
 
 interface ResourceInfo {
   path: string;
