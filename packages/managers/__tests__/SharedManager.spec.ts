@@ -55,6 +55,7 @@ describe('SharedManager', () => {
             'name',
             'version',
             'eager',
+            'import',
           ].includes(key),
       ),
     ).toEqual(true);

@@ -33,7 +33,7 @@ export default class ContainerEntryModuleFactory extends ModuleFactory {
     const dep = containerDependencies[0];
 
     callback(null, {
-      // @ts-ignore
+      // @ts-expect-error missing some deps
       module: new ContainerEntryModule(
         dep.name,
         dep.exposes,
