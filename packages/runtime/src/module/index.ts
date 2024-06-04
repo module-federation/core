@@ -122,18 +122,44 @@ class Module {
       `${getFMId(this.remoteInfo)} remote don't export ${expose}.`,
     );
 
-    if (!loadFactory) {
-      return moduleFactory;
-    }
-    const exposeContent = await moduleFactory();
+    const wrapModuleFactory = this.wraperFactory(moduleFactory, id);
 
-    // This parameter is used for bridge debugging
-    Object.defineProperty(exposeContent, Symbol.for('mf_module_id'), {
-      value: id,
-      enumerable: false,
-    });
+    if (!loadFactory) {
+      return wrapModuleFactory;
+    }
+    const exposeContent = await wrapModuleFactory();
 
     return exposeContent;
+  }
+
+  private wraperFactory(
+    moduleFactory: () => any | (() => Promise<any>),
+    id: string,
+  ) {
+    function defineModuleId(res: any, id: string) {
+      if (res && typeof res === 'object') {
+        Object.defineProperty(res, Symbol.for('mf_module_id'), {
+          value: id,
+          enumerable: false,
+        });
+      }
+    }
+
+    if (moduleFactory instanceof Promise) {
+      return async () => {
+        const res = await moduleFactory();
+        // This parameter is used for bridge debugging
+        defineModuleId(res, id);
+        return res;
+      };
+    } else {
+      return () => {
+        const res = moduleFactory();
+        // This parameter is used for bridge debugging
+        defineModuleId(res, id);
+        return res;
+      };
+    }
   }
 }
 
