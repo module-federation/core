@@ -1,5 +1,22 @@
 # @module-federation/dts-plugin
 
+## 0.1.18
+
+### Patch Changes
+
+- Updated dependencies [80af3f3]
+  - @module-federation/sdk@0.1.18
+  - @module-federation/managers@0.1.18
+  - @module-federation/third-party-dts-extractor@0.1.18
+
+## 0.1.17
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.17
+- @module-federation/managers@0.1.17
+- @module-federation/third-party-dts-extractor@0.1.17
+
 ## 0.1.16
 
 ### Patch Changes

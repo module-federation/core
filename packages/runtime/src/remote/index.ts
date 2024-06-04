@@ -156,7 +156,7 @@ export class RemoteHandler {
           id,
         });
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
-      const moduleOrFactory = (await module.get(expose, options)) as T;
+      const moduleOrFactory = (await module.get(idRes, expose, options)) as T;
 
       const moduleWrapper = await this.hooks.lifecycle.onLoad.emit({
         id: idRes,

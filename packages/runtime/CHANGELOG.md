@@ -1,5 +1,20 @@
 # @module-federation/runtime
 
+## 0.1.18
+
+### Patch Changes
+
+- 80af3f3: fix: add protocol in node automaticly
+- Updated dependencies [80af3f3]
+  - @module-federation/sdk@0.1.18
+
+## 0.1.17
+
+### Patch Changes
+
+- 26bff6e: feat: add mf_module_id to remote to add module debugging information
+  - @module-federation/sdk@0.1.17
+
 ## 0.1.16
 
 ### Patch Changes
