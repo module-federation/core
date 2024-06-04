@@ -1,5 +1,11 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.1.16
+
+### Patch Changes
+
+- 364f2bc: fix: Resolve the problem that static resource preload is not reused
+
 ## 0.1.15
 
 ## 0.1.14

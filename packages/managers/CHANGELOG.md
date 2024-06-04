@@ -1,5 +1,13 @@
 # @module-federation/managers
 
+## 0.1.16
+
+### Patch Changes
+
+- cce5404: chore: support normalize shared.import option
+- Updated dependencies [364f2bc]
+  - @module-federation/sdk@0.1.16
+
 ## 0.1.15
 
 ### Patch Changes
