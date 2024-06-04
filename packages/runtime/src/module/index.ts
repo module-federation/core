@@ -137,6 +137,12 @@ class Module {
     }
     const exposeContent = await wrapModuleFactory();
 
+    // This parameter is used for bridge debugging
+    Object.defineProperty(exposeContent, Symbol.for('mf_module_id'), {
+      value: id,
+      enumerable: false,
+    });
+
     return exposeContent;
   }
 }
