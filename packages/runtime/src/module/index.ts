@@ -122,7 +122,7 @@ class Module {
       `${getFMId(this.remoteInfo)} remote don't export ${expose}.`,
     );
 
-    const wrapModuleFactory = wraperFactory(moduleFactory, id);
+    const wrapModuleFactory = this.wraperFactory(moduleFactory, id);
 
     if (!loadFactory) {
       return wrapModuleFactory;
@@ -131,33 +131,33 @@ class Module {
 
     return exposeContent;
   }
-}
 
-function wraperFactory(
-  moduleFactory: () => any | (() => Promise<any>),
-  id: string,
-) {
-  function defineModuleId(res: any, id: string) {
-    Object.defineProperty(res, Symbol.for('mf_module_id'), {
-      value: id,
-      enumerable: false,
-    });
-  }
+  private wraperFactory(
+    moduleFactory: () => any | (() => Promise<any>),
+    id: string,
+  ) {
+    function defineModuleId(res: any, id: string) {
+      Object.defineProperty(res, Symbol.for('mf_module_id'), {
+        value: id,
+        enumerable: false,
+      });
+    }
 
-  if (moduleFactory instanceof Promise) {
-    return async () => {
-      let res = await moduleFactory();
-      // This parameter is used for bridge debugging
-      defineModuleId(res, id);
-      return res;
-    };
-  } else {
-    return () => {
-      const res = moduleFactory();
-      // This parameter is used for bridge debugging
-      defineModuleId(res, id);
-      return res;
-    };
+    if (moduleFactory instanceof Promise) {
+      return async () => {
+        let res = await moduleFactory();
+        // This parameter is used for bridge debugging
+        defineModuleId(res, id);
+        return res;
+      };
+    } else {
+      return () => {
+        const res = moduleFactory();
+        // This parameter is used for bridge debugging
+        defineModuleId(res, id);
+        return res;
+      };
+    }
   }
 }
 
