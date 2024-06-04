@@ -145,7 +145,7 @@ class Module {
 
     if (moduleFactory instanceof Promise) {
       return async () => {
-        let res = await moduleFactory();
+        const res = await moduleFactory();
         // This parameter is used for bridge debugging
         defineModuleId(res, id);
         return res;
