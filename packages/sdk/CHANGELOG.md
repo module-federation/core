@@ -1,5 +1,11 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.1.18
+
+### Patch Changes
+
+- 80af3f3: fix: get remoteEntry type from options
+
 ## 0.1.17
 
 ## 0.1.16
