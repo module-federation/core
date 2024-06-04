@@ -137,10 +137,12 @@ class Module {
     id: string,
   ) {
     function defineModuleId(res: any, id: string) {
-      Object.defineProperty(res, Symbol.for('mf_module_id'), {
-        value: id,
-        enumerable: false,
-      });
+      if (res && typeof res === 'object') {
+        Object.defineProperty(res, Symbol.for('mf_module_id'), {
+          value: id,
+          enumerable: false,
+        });
+      }
     }
 
     if (moduleFactory instanceof Promise) {
