@@ -1,5 +1,14 @@
 # @module-federation/manifest
 
+## 0.1.17
+
+### Patch Changes
+
+- 4f22c3e: fix: add requiredVersion to manifest.shared
+  - @module-federation/sdk@0.1.17
+  - @module-federation/managers@0.1.17
+  - @module-federation/dts-plugin@0.1.17
+
 ## 0.1.16
 
 ### Patch Changes

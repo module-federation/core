@@ -1,5 +1,18 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.1.17
+
+### Patch Changes
+
+- Updated dependencies [4f22c3e]
+- Updated dependencies [efadc07]
+  - @module-federation/manifest@0.1.17
+  - @module-federation/rspack@0.1.17
+  - @module-federation/runtime-tools@0.1.17
+  - @module-federation/sdk@0.1.17
+  - @module-federation/managers@0.1.17
+  - @module-federation/dts-plugin@0.1.17
+
 ## 0.1.16
 
 ### Patch Changes
