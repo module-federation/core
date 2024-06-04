@@ -143,7 +143,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
           if (cacheGroup.chunks === 'all') {
             cacheGroup.chunks = (chunk) => {
-              if (chunk.name && chunk.name === name) {
+              if (
+                chunk.name &&
+                (chunk.name === name || chunk.name === name + '_partial')
+              ) {
                 return false;
               }
               return true;
