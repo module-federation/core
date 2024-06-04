@@ -137,7 +137,11 @@ class Module {
     id: string,
   ) {
     function defineModuleId(res: any, id: string) {
-      if (res && typeof res === 'object') {
+      if (
+        res &&
+        typeof res === 'object' &&
+        !Object.getOwnPropertyDescriptor(res, Symbol.for('mf_module_id'))
+      ) {
         Object.defineProperty(res, Symbol.for('mf_module_id'), {
           value: id,
           enumerable: false,
