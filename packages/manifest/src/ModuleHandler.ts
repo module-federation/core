@@ -60,6 +60,9 @@ class ModuleHandler {
       sharedMap[pkgName] = {
         ...sharedManagerNormalizedOptions[pkgName],
         id: `${this._options.name}:${pkgName}`,
+        requiredVersion:
+          sharedManagerNormalizedOptions[pkgName]?.requiredVersion ||
+          `^${pkgVersion}`,
         name: pkgName,
         version: pkgVersion,
         assets: {
