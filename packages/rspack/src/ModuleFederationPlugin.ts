@@ -142,10 +142,12 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
           }
 
           if (cacheGroup.chunks === 'all') {
-            cacheGroup.chunks = new RegExp(
-              `^(?!.*(${name}|${name}_partial)).*$`,
-              'g',
-            );
+            cacheGroup.chunks = (chunk) => {
+              if (chunk.name && chunk.name === name) {
+                return false;
+              }
+              return true;
+            };
             break;
           }
           if (cacheGroup.chunks === 'initial') {
