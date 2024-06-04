@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.1.18
+
+### Patch Changes
+
+- 80af3f3: fix: add protocol in node automaticly
+- Updated dependencies [80af3f3]
+  - @module-federation/sdk@0.1.18
+
 ## 0.1.17
 
 ### Patch Changes
