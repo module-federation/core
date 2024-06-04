@@ -122,16 +122,20 @@ class Module {
       `${getFMId(this.remoteInfo)} remote don't export ${expose}.`,
     );
 
-    if (!loadFactory) {
-      return moduleFactory;
-    }
-    const exposeContent = await moduleFactory();
+    const wrapModuleFactory = async () => {
+      const res = await moduleFactory();
+      // This parameter is used for bridge debugging
+      Object.defineProperty(res, Symbol.for('mf_module_id'), {
+        value: id,
+        enumerable: false,
+      });
+      return res;
+    };
 
-    // This parameter is used for bridge debugging
-    Object.defineProperty(exposeContent, Symbol.for('mf_module_id'), {
-      value: id,
-      enumerable: false,
-    });
+    if (!loadFactory) {
+      return wrapModuleFactory;
+    }
+    const exposeContent = await wrapModuleFactory();
 
     return exposeContent;
   }
