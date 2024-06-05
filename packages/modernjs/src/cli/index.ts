@@ -163,7 +163,6 @@ export const moduleFederationPlugin = (
               if (isDev && !isServer) {
                 chain.externals({
                   '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
-                  '@module-federation/dts-plugin/server': 'NOT_USED_IN_BROWSER',
                 });
               }
             },

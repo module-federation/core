@@ -1785,9 +1785,6 @@ importers:
       '@modern-js/utils':
         specifier: ^2.49.2
         version: 2.49.3
-      '@module-federation/dts-plugin':
-        specifier: workspace:*
-        version: link:../dts-plugin
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../enhanced
