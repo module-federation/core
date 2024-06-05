@@ -50,6 +50,7 @@ export class SharedHandler {
       shareScope: ShareScopeMap[string];
       options: Options;
       origin: FederationHost;
+      hostShareScopeMap?: ShareScopeMap;
     }>('initContainer'),
   });
 
@@ -414,6 +415,7 @@ export class SharedHandler {
   initShareScopeMap(
     scopeName: string,
     shareScope: ShareScopeMap[string],
+    hostShareScopeMap?: ShareScopeMap,
   ): void {
     const { host } = this;
     this.shareScopeMap[scopeName] = shareScope;
@@ -421,6 +423,7 @@ export class SharedHandler {
       shareScope,
       options: host.options,
       origin: host,
+      hostShareScopeMap,
     });
   }
 

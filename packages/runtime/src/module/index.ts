@@ -84,8 +84,8 @@ class Module {
       };
 
       // Help to find host instance
-      Object.defineProperty(remoteEntryInitOptions, 'hostId', {
-        value: this.host.options.id || this.host.name,
+      Object.defineProperty(remoteEntryInitOptions, 'shareScopeMap', {
+        value: localShareScopeMap,
         // remoteEntryInitOptions will be traversed and assigned during container init, ,so this attribute is not allowed to be traversed
         enumerable: false,
       });
@@ -93,7 +93,7 @@ class Module {
       const initContainerOptions =
         await this.host.hooks.lifecycle.beforeInitContainer.emit({
           shareScope,
-          // @ts-ignore hostId will be set by Object.defineProperty
+          // @ts-ignore shareScopeMap will be set by Object.defineProperty
           remoteEntryInitOptions,
           initScope,
           remoteInfo: this.remoteInfo,
