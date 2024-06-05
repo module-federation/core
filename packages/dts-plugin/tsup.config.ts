@@ -44,19 +44,11 @@ export const tsup: Options[] = generateConfigurations([
         'lib',
         'forkGenerateDts.ts',
       ),
-      'create-websocket': join(
+      'dynamic-remote-type-hints-plugin': join(
         __dirname,
         'src',
-        'server',
-        'createWebsocket.ts',
-      ),
-      'server-actions': join(
-        __dirname,
-        'src',
-        'server',
-        'message',
-        'Action',
-        'index.ts',
+        'runtime-plugins',
+        'dynamic-remote-type-hints-plugin.ts',
       ),
     },
     {

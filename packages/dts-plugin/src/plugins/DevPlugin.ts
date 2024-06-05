@@ -108,6 +108,7 @@ export class DevPlugin implements WebpackPluginInstance {
         {
           disableLiveReload: true,
           disableHotTypesReload: false,
+          disableDynamicRemoteTypeHints: false,
         },
         'mfOptions.dev',
       )(dev);
@@ -118,12 +119,22 @@ export class DevPlugin implements WebpackPluginInstance {
 
     if (
       normalizedDev.disableHotTypesReload &&
-      normalizedDev.disableLiveReload
+      normalizedDev.disableLiveReload &&
+      normalizedDev.disableDynamicRemoteTypeHints
     ) {
       return;
     }
     if (!name) {
       throw new Error('name is required if you want to enable dev server!');
+    }
+
+    if (!normalizedDev.disableDynamicRemoteTypeHints) {
+      if (!this._options.runtimePlugins) {
+        this._options.runtimePlugins = [];
+      }
+      this._options.runtimePlugins.push(
+        path.resolve(__dirname, 'dynamic-remote-type-hints-plugin.js'),
+      );
     }
 
     if (!normalizedDev.disableLiveReload) {

@@ -22,15 +22,10 @@
       "import": "./dist/core.js",
       "require": "./dist/core.js"
     },
-    "./create-websocket": {
-      "types": "./dist/create-websocket.d.ts",
-      "import": "./dist/esm/create-websocket.js",
-      "require": "./dist/create-websocket.js"
-    },
-    "./server-actions": {
-      "types": "./dist/server-actions.d.ts",
-      "import": "./dist/esm/server-actions.js",
-      "require": "./dist/server-actions.js"
+    "./dynamic-remote-type-hints-plugin": {
+      "types": "./dist/dynamic-remote-type-hints-plugin.d.ts",
+      "import": "./dist/esm/dynamic-remote-type-hints-plugin.js",
+      "require": "./dist/dynamic-remote-type-hints-plugin.js"
     },
     "./*": "./*"
   },
@@ -42,11 +37,8 @@
       "core": [
         "./dist/core.d.ts"
       ],
-      "create-websocket": [
-        "./dist/create-websocket.d.ts"
-      ],
-      "server-actions": [
-        "./dist/server-actions.d.ts"
+      "dynamic-remote-type-hints-plugin": [
+        "./dist/dynamic-remote-type-hints-plugin.d.ts"
       ]
     }
   },
@@ -70,7 +62,8 @@
   "devDependencies": {
     "@types/ws": "8.5.10",
     "@types/koa": "2.11.2",
-    "@types/node-schedule": "2.1.7"
+    "@types/node-schedule": "2.1.7",
+    "@module-federation/runtime": "workspace:*"
   },
   "peerDependencies": {
     "typescript": "^4.9.0 || ^5.0.0",

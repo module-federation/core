@@ -1,10 +1,10 @@
 import type { FederationRuntimePlugin } from '@module-federation/runtime/types';
-import { createWebsocket } from '@module-federation/dts-plugin/create-websocket';
+import { createWebsocket } from '../server/createWebsocket';
 import {
   AddDynamicRemoteAction,
   FetchTypesAction,
-} from '@module-federation/dts-plugin/server-actions';
-import { getIp } from './utils';
+} from '../server/message/Action';
+import { getIpFromEntry } from '../dev-worker/utils';
 
 declare const FEDERATION_IPV4: string | undefined;
 const PLUGIN_NAME = 'dynamic-remote-type-hints-plugin';
@@ -33,7 +33,7 @@ function dynamicRemoteTypeHintsPlugin(): FederationRuntimePlugin {
         }
         const defaultIpV4 =
           typeof FEDERATION_IPV4 === 'string' ? FEDERATION_IPV4 : '127.0.0.1';
-        const remoteIp = getIp(remote.entry, defaultIpV4);
+        const remoteIp = getIpFromEntry(remote.entry, defaultIpV4);
         const remoteInfo = {
           name: remote.name,
           url: remote.entry,

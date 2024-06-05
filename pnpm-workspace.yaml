@@ -5,5 +5,4 @@ packages:
   - 'apps/runtime-demo/*'
   - 'apps/manifest-demo/*'
   - 'apps/*'
-  - 'packages/runtime-plugins/*'
   - 'webpack'
