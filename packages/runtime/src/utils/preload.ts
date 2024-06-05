@@ -1,4 +1,4 @@
-import { createLink } from '@module-federation/sdk';
+import { createLink, createScript } from '@module-federation/sdk';
 import {
   PreloadAssets,
   PreloadConfig,
@@ -69,6 +69,8 @@ export function preloadAssets(
   remoteInfo: RemoteInfo,
   host: FederationHost,
   assets: PreloadAssets,
+  // It is used to distinguish preload from load remote parallel loading
+  useLinkPreload: boolean = true,
 ): void {
   const { cssAssets, jsAssetsWithoutEntry, entryAssets } = assets;
 
@@ -131,52 +133,96 @@ export function preloadAssets(
       }
     });
 
-    const fragment = document.createDocumentFragment();
-    cssAssets.forEach((cssUrl) => {
-      const { link: cssEl, needAttach } = createLink(
-        cssUrl,
-        () => {},
-        {
-          rel: 'preload',
-          as: 'style',
-        },
-        (url: string) => {
-          const res = host.loaderHook.lifecycle.createLink.emit({
-            url,
-          });
-          if (res instanceof HTMLLinkElement) {
-            return res;
-          }
-          return;
-        },
-      );
+    if (useLinkPreload) {
+      cssAssets.forEach((cssUrl) => {
+        const { link: cssEl, needAttach } = createLink({
+          url: cssUrl,
+          cb: () => {},
+          attrs: {
+            rel: 'preload',
+            as: 'style',
+            crossorigin: 'anonymous',
+          },
+          createLinkHook: (url: string) => {
+            const res = host.loaderHook.lifecycle.createLink.emit({
+              url,
+            });
+            if (res instanceof HTMLLinkElement) {
+              return res;
+            }
+            return;
+          },
+        });
 
-      needAttach && fragment.appendChild(cssEl);
-    });
+        needAttach && document.head.appendChild(cssEl);
+      });
+    } else {
+      cssAssets.forEach((cssUrl) => {
+        const { link: cssEl, needAttach } = createLink({
+          url: cssUrl,
+          cb: () => {},
+          attrs: {
+            rel: 'stylesheet',
+            type: 'text/css',
+          },
+          createLinkHook: (url: string) => {
+            const res = host.loaderHook.lifecycle.createLink.emit({
+              url,
+            });
+            if (res instanceof HTMLLinkElement) {
+              return res;
+            }
+            return;
+          },
+        });
 
-    jsAssetsWithoutEntry.forEach((jsUrl) => {
-      const { link: linkEl, needAttach } = createLink(
-        jsUrl,
-        () => {
-          // noop
-        },
-        {
-          rel: 'preload',
-          as: 'script',
-        },
-        (url: string) => {
-          const res = host.loaderHook.lifecycle.createLink.emit({
-            url,
-          });
-          if (res instanceof HTMLLinkElement) {
-            return res;
-          }
-          return;
-        },
-      );
-      needAttach && document.head.appendChild(linkEl);
-    });
+        needAttach && document.head.appendChild(cssEl);
+      });
+    }
 
-    document.head.appendChild(fragment);
+    if (useLinkPreload) {
+      jsAssetsWithoutEntry.forEach((jsUrl) => {
+        const { link: linkEl, needAttach } = createLink({
+          url: jsUrl,
+          cb: () => {},
+          attrs: {
+            rel: 'preload',
+            as: 'script',
+            crossorigin: 'anonymous',
+          },
+          createLinkHook: (url: string) => {
+            const res = host.loaderHook.lifecycle.createLink.emit({
+              url,
+            });
+            if (res instanceof HTMLLinkElement) {
+              return res;
+            }
+            return;
+          },
+        });
+        needAttach && document.head.appendChild(linkEl);
+      });
+    } else {
+      jsAssetsWithoutEntry.forEach((jsUrl) => {
+        const { script: scriptEl, needAttach } = createScript({
+          url: jsUrl,
+          cb: () => {},
+          attrs: {
+            crossorigin: 'anonymous',
+            fetchpriority: 'high',
+          },
+          createScriptHook: (url: string) => {
+            const res = host.loaderHook.lifecycle.createScript.emit({
+              url,
+            });
+            if (res instanceof HTMLScriptElement) {
+              return res;
+            }
+            return;
+          },
+        });
+        needAttach && document.head.appendChild(scriptEl);
+      });
+    }
   }
 }
