@@ -67,7 +67,7 @@ export function snapshotPlugin(): FederationRuntimePlugin {
           );
 
         if (assets) {
-          preloadAssets(remoteInfo, origin, assets);
+          preloadAssets(remoteInfo, origin, assets, false);
         }
 
         return {

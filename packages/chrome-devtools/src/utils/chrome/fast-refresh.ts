@@ -11,8 +11,8 @@ import { __FEDERATION_DEVTOOLS__ } from '../../template';
 const fastRefreshPlugin = (): FederationRuntimePlugin => {
   return {
     name: 'mf-fast-refresh-plugin',
-    // @ts-expect-error
-    beforeInit({ origin, userOptions, options, shareInfo }) {
+    beforeInit({ userOptions, ...args }) {
+      const shareInfo = userOptions.shared;
       let enableFastRefresh: boolean;
       let devtoolsMessage;
 
@@ -26,7 +26,7 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
         }
       }
 
-      if (isObject(shareInfo)) {
+      if (shareInfo && isObject(shareInfo)) {
         let orderResolve: (value?: unknown) => void;
         const orderPromise = new Promise((resolve) => {
           orderResolve = resolve;
@@ -83,16 +83,13 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
         });
 
         return {
-          origin,
           userOptions,
-          options,
-          shareInfo,
+          ...args,
         };
       } else {
         return {
-          origin,
           userOptions,
-          options,
+          ...args,
         };
       }
     },
