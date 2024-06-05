@@ -19,6 +19,7 @@ interface SharedConfig {
   singleton?: boolean;
   requiredVersion?: string;
   eager?: boolean;
+  shareScope?: string;
 }
 ```
 
@@ -75,6 +76,14 @@ Setting `eager` to true will package the shared dependencies into the entry file
 Whether to immediately load the shared module.
 
 Under normal circumstances, you need to enable lazy entry, and then asynchronously load shared modules on demand. If you want to use shared but do not want to enable lazy entry, you can set `eager` to true.
+
+## shareScope
+
+- Type: `string`
+- Required: No
+- Default: `'default'`
+
+share scope name, default value is `'default'` .
 
 ## FAQ
 
