@@ -38,16 +38,22 @@ export const performReload = async (shouldReload: any) => {
     gs.entryChunkCache.clear();
   }
 
-  //@ts-ignore
-  __webpack_require__.federation.instance.moduleCache.clear();
   gs.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
   //@ts-ignore
   gs.__FEDERATION__.__INSTANCES__.map((i) => {
+    //@ts-ignore
+    i.moduleCache.forEach((mc) => {
+      if (mc.remoteInfo && mc.remoteInfo.entryGlobalName) {
+        delete gs[mc.remoteInfo.entryGlobalName];
+      }
+    });
     i.moduleCache.clear();
     if (gs[i.name]) {
       delete gs[i.name];
     }
   });
+  //@ts-ignore
+  __webpack_require__.federation.instance.moduleCache.clear();
   gs.__FEDERATION__.__INSTANCES__ = [];
 
   for (const entry of entries) {
