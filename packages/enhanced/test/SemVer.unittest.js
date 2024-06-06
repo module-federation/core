@@ -10,7 +10,7 @@ const {
   rangeToStringRuntimeCode,
   satisfy,
   satisfyRuntimeCode,
-} = require('./semver');
+} = require('../src/lib/utils/semver');
 
 describe('SemVer', () => {
   const createRuntimeFunction = (runtimeCodeFunction) => {
