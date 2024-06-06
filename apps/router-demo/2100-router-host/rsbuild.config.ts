@@ -16,11 +16,11 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 2100,
   },
   dev: {
     // It is necessary to configure assetPrefix, and in the production environment, you need to configure output.assetPrefix
-    assetPrefix: 'http://localhost:3000',
+    assetPrefix: 'http://localhost:2100',
     writeToDisk: true,
   },
   tools: {
