@@ -416,7 +416,7 @@ export class SharedHandler {
   initShareScopeMap(
     scopeName: string,
     shareScope: ShareScopeMap[string],
-    hostShareScopeMap?: ShareScopeMap,
+    extraOptions: { hostShareScopeMap?: ShareScopeMap } = {},
   ): void {
     const { host } = this;
     this.shareScopeMap[scopeName] = shareScope;
@@ -425,7 +425,7 @@ export class SharedHandler {
       options: host.options,
       origin: host,
       scopeName,
-      hostShareScopeMap,
+      hostShareScopeMap: extraOptions.hostShareScopeMap,
     });
   }
 

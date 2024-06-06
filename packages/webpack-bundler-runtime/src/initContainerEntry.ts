@@ -26,11 +26,9 @@ export function initContainerEntry(
     ...remoteEntryInitOptions,
   });
 
-  federationInstance.initShareScopeMap(
-    name,
-    shareScope,
-    remoteEntryInitOptions?.shareScopeMap,
-  );
+  federationInstance.initShareScopeMap(name, shareScope, {
+    shareScopeMap: remoteEntryInitOptions?.shareScopeMap,
+  });
 
   if (webpackRequire.federation.attachShareScopeMap) {
     webpackRequire.federation.attachShareScopeMap(webpackRequire);
