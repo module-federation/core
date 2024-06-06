@@ -1,5 +1,35 @@
 # @module-federation/manifest
 
+## 0.1.18
+
+### Patch Changes
+
+- 80af3f3: fix: get remoteEntry type from options
+- Updated dependencies [80af3f3]
+  - @module-federation/sdk@0.1.18
+  - @module-federation/dts-plugin@0.1.18
+  - @module-federation/managers@0.1.18
+
+## 0.1.17
+
+### Patch Changes
+
+- 4f22c3e: fix: add requiredVersion to manifest.shared
+  - @module-federation/sdk@0.1.17
+  - @module-federation/managers@0.1.17
+  - @module-federation/dts-plugin@0.1.17
+
+## 0.1.16
+
+### Patch Changes
+
+- Updated dependencies [cce5404]
+- Updated dependencies [ea34795]
+- Updated dependencies [364f2bc]
+  - @module-federation/managers@0.1.16
+  - @module-federation/dts-plugin@0.1.16
+  - @module-federation/sdk@0.1.16
+
 ## 0.1.15
 
 ### Patch Changes

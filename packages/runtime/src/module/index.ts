@@ -63,7 +63,7 @@ class Module {
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  async get(expose: string, options?: { loadFactory?: boolean }) {
+  async get(id: string, expose: string, options?: { loadFactory?: boolean }) {
     const { loadFactory = true } = options || { loadFactory: true };
 
     // Get remoteEntry.js
@@ -122,12 +122,48 @@ class Module {
       `${getFMId(this.remoteInfo)} remote don't export ${expose}.`,
     );
 
+    const wrapModuleFactory = this.wraperFactory(moduleFactory, id);
+
     if (!loadFactory) {
-      return moduleFactory;
+      return wrapModuleFactory;
     }
-    const exposeContent = await moduleFactory();
+    const exposeContent = await wrapModuleFactory();
 
     return exposeContent;
+  }
+
+  private wraperFactory(
+    moduleFactory: () => any | (() => Promise<any>),
+    id: string,
+  ) {
+    function defineModuleId(res: any, id: string) {
+      if (
+        res &&
+        typeof res === 'object' &&
+        !Object.getOwnPropertyDescriptor(res, Symbol.for('mf_module_id'))
+      ) {
+        Object.defineProperty(res, Symbol.for('mf_module_id'), {
+          value: id,
+          enumerable: false,
+        });
+      }
+    }
+
+    if (moduleFactory instanceof Promise) {
+      return async () => {
+        const res = await moduleFactory();
+        // This parameter is used for bridge debugging
+        defineModuleId(res, id);
+        return res;
+      };
+    } else {
+      return () => {
+        const res = moduleFactory();
+        // This parameter is used for bridge debugging
+        defineModuleId(res, id);
+        return res;
+      };
+    }
   }
 }
 

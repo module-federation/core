@@ -1,5 +1,4 @@
 import { ModuleInfo, getResourceUrl } from '@module-federation/sdk';
-
 import { FederationRuntimePlugin } from '../../type/plugin';
 import {
   isBrowserEnv,
@@ -71,7 +70,7 @@ export function snapshotPlugin(): FederationRuntimePlugin {
           );
 
         if (assets) {
-          preloadAssets(remoteInfo, origin, assets);
+          preloadAssets(remoteInfo, origin, assets, false);
         }
 
         return {

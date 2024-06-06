@@ -159,7 +159,7 @@ export class RemoteHandler {
           id,
         });
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
-      const moduleOrFactory = (await module.get(expose, options)) as T;
+      const moduleOrFactory = (await module.get(idRes, expose, options)) as T;
 
       const moduleWrapper = await this.hooks.lifecycle.onLoad.emit({
         id: idRes,
@@ -413,7 +413,10 @@ export class RemoteHandler {
         const remoteInfo = loadedModule.remoteInfo;
         const key = remoteInfo.entryGlobalName as keyof typeof globalThis;
 
-        if (globalThis[key]) {
+        if (
+          globalThis[key] &&
+          Object.getOwnPropertyDescriptor(globalThis, key)?.configurable
+        ) {
           delete globalThis[key];
         }
         const remoteEntryUniqueKey = getRemoteEntryUniqueKey(

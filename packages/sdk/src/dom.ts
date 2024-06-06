@@ -27,12 +27,13 @@ export type CreateScriptHookReturn =
   | { script?: HTMLScriptElement; timeout?: number }
   | void;
 
-export function createScript(
-  url: string,
-  cb: (value: void | PromiseLike<void>) => void,
-  attrs?: Record<string, any>,
-  createScriptHook?: (url: string) => CreateScriptHookReturn,
-): { script: HTMLScriptElement; needAttach: boolean } {
+export function createScript(info: {
+  url: string;
+  cb?: (value: void | PromiseLike<void>) => void;
+  attrs?: Record<string, any>;
+  needDeleteScript?: boolean;
+  createScriptHook?: (url: string) => CreateScriptHookReturn;
+}): { script: HTMLScriptElement; needAttach: boolean } {
   // Retrieve the existing script element by its src attribute
   let script: HTMLScriptElement | null = null;
   let needAttach = true;
@@ -42,7 +43,7 @@ export function createScript(
   for (let i = 0; i < scripts.length; i++) {
     const s = scripts[i];
     const scriptSrc = s.getAttribute('src');
-    if (scriptSrc && isStaticResourcesEqual(scriptSrc, url)) {
+    if (scriptSrc && isStaticResourcesEqual(scriptSrc, info.url)) {
       script = s;
       needAttach = false;
       break;
@@ -52,9 +53,9 @@ export function createScript(
   if (!script) {
     script = document.createElement('script');
     script.type = 'text/javascript';
-    script.src = url;
-    if (createScriptHook) {
-      const createScriptRes = createScriptHook(url);
+    script.src = info.url;
+    if (info.createScriptHook) {
+      const createScriptRes = info.createScriptHook(info.url);
 
       if (createScriptRes instanceof HTMLScriptElement) {
         script = createScriptRes;
@@ -65,6 +66,7 @@ export function createScript(
     }
   }
 
+  const attrs = info.attrs;
   if (attrs) {
     Object.keys(attrs).forEach((name) => {
       if (script) {
@@ -88,34 +90,39 @@ export function createScript(
       script.onerror = null;
       script.onload = null;
       safeWrapper(() => {
-        script?.parentNode && script.parentNode.removeChild(script);
+        if (info.needDeleteScript) {
+          script?.parentNode && script.parentNode.removeChild(script);
+        }
       });
       if (prev) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const res = (prev as any)(event);
-        cb();
+        info?.cb?.();
         return res;
       }
     }
-    cb();
+    info?.cb?.();
   };
 
   script.onerror = onScriptComplete.bind(null, script.onerror);
   script.onload = onScriptComplete.bind(null, script.onload);
 
   timeoutId = setTimeout(() => {
-    onScriptComplete(null, new Error(`Remote script "${url}" time-outed.`));
+    onScriptComplete(
+      null,
+      new Error(`Remote script "${info.url}" time-outed.`),
+    );
   }, timeout);
 
   return { script, needAttach };
 }
 
-export function createLink(
-  url: string,
-  cb: (value: void | PromiseLike<void>) => void,
-  attrs: Record<string, string> = {},
-  createLinkHook?: (url: string) => HTMLLinkElement | void,
-) {
+export function createLink(info: {
+  url: string;
+  cb: (value: void | PromiseLike<void>) => void;
+  attrs: Record<string, string>;
+  createLinkHook?: (url: string) => HTMLLinkElement | void;
+}) {
   // <link rel="preload" href="script.js" as="script">
 
   // Retrieve the existing script element by its src attribute
@@ -128,8 +135,8 @@ export function createLink(
     const linkRef = l.getAttribute('ref');
     if (
       linkHref &&
-      isStaticResourcesEqual(linkHref, url) &&
-      linkRef === attrs['ref']
+      isStaticResourcesEqual(linkHref, info.url) &&
+      linkRef === info.attrs['ref']
     ) {
       link = l;
       needAttach = false;
@@ -139,16 +146,17 @@ export function createLink(
 
   if (!link) {
     link = document.createElement('link');
-    link.setAttribute('href', url);
+    link.setAttribute('href', info.url);
 
-    if (createLinkHook) {
-      const createLinkRes = createLinkHook(url);
+    if (info.createLinkHook) {
+      const createLinkRes = info.createLinkHook(info.url);
       if (createLinkRes instanceof HTMLLinkElement) {
         link = createLinkRes;
       }
     }
   }
 
+  const attrs = info.attrs;
   if (attrs) {
     Object.keys(attrs).forEach((name) => {
       if (link) {
@@ -172,11 +180,11 @@ export function createLink(
       if (prev) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const res = (prev as any)(event);
-        cb();
+        info.cb();
         return res;
       }
     }
-    cb();
+    info.cb();
   };
 
   link.onerror = onLinkComplete.bind(null, link.onerror);
@@ -192,14 +200,19 @@ export function loadScript(
     createScriptHook?: (url: string) => CreateScriptHookReturn;
   },
 ) {
-  const { attrs, createScriptHook } = info;
+  const { attrs = {}, createScriptHook } = info;
   return new Promise<void>((resolve, _reject) => {
-    const { script, needAttach } = createScript(
+    const { script, needAttach } = createScript({
       url,
-      resolve,
-      attrs,
+      cb: resolve,
+      attrs: {
+        crossorigin: 'anonymous',
+        fetchpriority: 'high',
+        ...attrs,
+      },
       createScriptHook,
-    );
-    needAttach && document.getElementsByTagName('head')[0].appendChild(script);
+      needDeleteScript: true,
+    });
+    needAttach && document.head.appendChild(script);
   });
 }
