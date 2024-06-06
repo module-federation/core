@@ -5,7 +5,6 @@ import { moduleFederationPlugin } from '@module-federation/modern-js';
 export default defineConfig({
   dev: {
     port: 3008,
-    host: 'localhost',
   },
   runtime: {
     router: true,

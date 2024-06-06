@@ -1,10 +1,6 @@
 import React from 'react';
 import Button from 'antd/lib/button';
-import {
-  loadRemote,
-  registerRemotes,
-  MFReactComponent,
-} from '@modern-js/runtime/mf';
+import { registerRemotes, MFReactComponent } from '@modern-js/runtime/mf';
 import stuff from './stuff.module.css';
 
 registerRemotes([
@@ -14,43 +10,25 @@ registerRemotes([
   },
 ]);
 
-// const Comp = React.lazy(() =>
-//   loadRemote('dynamic_remote/Image').then((m) => {
-//     return {
-//       default: () => (
-//         <div>
-//           <link
-//             href="http://localhost:3008/static/css/async/__federation_expose_Image.css"
-//             rel="stylesheet"
-//             type="text/css"
-//           />
-//           <span>11</span>
-//           <m.default />
-//         </div>
-//       ),
-//     };
-//   }),
-// );
-
-const LazyButton = React.lazy(() =>
-  import('./Button').then((m) => {
+const LazyButton2 = React.lazy(() =>
+  import('./Button2').then((m) => {
     return new Promise((resolve) => {
-      setTimeout(() => resolve(m), 0);
+      setTimeout(() => resolve(m), 2000);
     });
   }),
 );
 
-const LazyButton2 = React.lazy(() =>
+const LazyButton1 = React.lazy(() =>
   import('./Button').then((m) => {
     return new Promise((resolve) => {
-      setTimeout(() => resolve(m), 0);
+      setTimeout(() => resolve(m), 1000);
     });
   }),
 );
 
 export default (): JSX.Element => (
   <div className="testlll">
-    <h2 onClick={() => alert('Client side Javascript works!')}>
+    <h2>
       <strong>dynamic nested remote</strong>
     </h2>
     <Button
@@ -60,14 +38,11 @@ export default (): JSX.Element => (
       Click me to test <strong>dynamic nested remote</strong> interactive!
     </Button>
 
-    {/* <React.Suspense fallback="loading">
-      <Comp />
-    </React.Suspense> */}
     <MFReactComponent id="dynamic_remote/Image" />
-    <React.Suspense fallback="loading btn">
-      <LazyButton />
+    <React.Suspense fallback="loading btn 1000ms">
+      <LazyButton1 />
     </React.Suspense>
-    <React.Suspense fallback="loading btn2">
+    <React.Suspense fallback="loading btn 2000ms">
       <LazyButton2 />
     </React.Suspense>
   </div>

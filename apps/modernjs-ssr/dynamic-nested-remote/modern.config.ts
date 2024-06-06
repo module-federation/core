@@ -5,8 +5,6 @@ import { moduleFederationPlugin } from '@module-federation/modern-js';
 export default defineConfig({
   dev: {
     port: 3009,
-    // hmr: false,
-    // liveReload: false,
   },
   runtime: {
     router: true,

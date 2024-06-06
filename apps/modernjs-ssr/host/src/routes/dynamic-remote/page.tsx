@@ -1,7 +1,5 @@
 import React from 'react';
 import { loadRemote, registerRemotes } from '@modern-js/runtime/mf';
-import { useNavigate } from '@modern-js/runtime/router';
-import './index.css';
 
 registerRemotes([
   {
@@ -9,7 +7,6 @@ registerRemotes([
     entry: 'http://localhost:3008/mf-manifest.json',
   },
 ]);
-
 const DynamicRemote = React.lazy(() =>
   loadRemote('dynamic_remote/Image').then((m) => {
     return m;
@@ -17,18 +14,36 @@ const DynamicRemote = React.lazy(() =>
 );
 
 const Index = (): JSX.Element => {
-  const navi = useNavigate();
-
   return (
-    <div className="container-box">
-      host page , router: dynamic-remote
-      <button
-        style={{ marginBottom: '1rem' }}
-        onClick={() => alert('Client side Javascript works!')}
-      >
-        Click me to test host interactive!
-      </button>
-      <DynamicRemote />
+    <div>
+      <h1>Dynamic Remote</h1>
+      <table border={1} cellPadding={5}>
+        <thead>
+          <tr>
+            <td></td>
+            <td>Desc</td>
+            <td>Host component</td>
+            <td>Remote component</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>✅</td>
+            <td>This component is from a dynamic remote(localhost:3008)</td>
+            <td>
+              <button
+                style={{ marginBottom: '1rem' }}
+                onClick={() => alert('Client side Javascript works!')}
+              >
+                Click me to test host interactive!
+              </button>
+            </td>
+            <td>
+              <DynamicRemote />
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 };

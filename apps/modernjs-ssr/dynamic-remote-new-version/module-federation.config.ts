@@ -1,10 +1,10 @@
 import { createModuleFederationConfig } from '@module-federation/modern-js';
 export default createModuleFederationConfig({
-  name: 'dynamic_nested_remote',
-  filename: 'remoteEntry.js',
+  name: 'dynamic_remote',
   exposes: {
-    './Content': './src/components/Content.tsx',
+    './thing': './src/test.ts',
   },
+  runtimePlugins: ['./runtimePlugin.ts'],
   shared: {
     react: { singleton: true },
     'react-dom': { singleton: true },

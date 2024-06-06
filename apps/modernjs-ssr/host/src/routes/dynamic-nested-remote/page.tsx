@@ -1,7 +1,5 @@
 import React from 'react';
 import { loadRemote, registerRemotes } from '@modern-js/runtime/mf';
-import { useNavigate } from '@modern-js/runtime/router';
-import './index.css';
 
 registerRemotes([
   {
@@ -17,18 +15,39 @@ const DynamicNestedRemote = React.lazy(() =>
 );
 
 const Index = (): JSX.Element => {
-  const navi = useNavigate();
-
   return (
-    <div className="container-box">
-      host page , router: dynamic-nested-remote
-      <button
-        style={{ marginBottom: '1rem' }}
-        onClick={() => alert('Client side Javascript works!')}
-      >
-        Click me to test host interactive!
-      </button>
-      <DynamicNestedRemote />
+    <div>
+      <h1>Dynamic Nested Remote</h1>
+      <table border={1} cellPadding={5}>
+        <thead>
+          <tr>
+            <td></td>
+            <td>Desc</td>
+            <td>Host component</td>
+            <td>Remote component</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>✅</td>
+            <td>
+              This component is from a dynamic remote(localhost:3009) which nest
+              a dynamic remote
+            </td>
+            <td>
+              <button
+                style={{ marginBottom: '1rem' }}
+                onClick={() => alert('Client side Javascript works!')}
+              >
+                Click me to test host interactive!
+              </button>
+            </td>
+            <td>
+              <DynamicNestedRemote />
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 };
