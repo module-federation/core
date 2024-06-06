@@ -1,0 +1,21 @@
+{
+  "name": "bridge-react",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/bridge/bridge-react/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run build --prefix packages/bridge/bridge-react"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run test --prefix packages/bridge/bridge-react"]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}

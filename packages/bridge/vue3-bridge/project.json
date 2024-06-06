@@ -1,0 +1,21 @@
+{
+  "name": "vue3-bridge",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/bridge/vue3-bridge/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run build --prefix packages/bridge/vue3-bridge"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run test --prefix packages/bridge/vue3-bridge"]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}

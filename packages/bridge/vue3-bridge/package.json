@@ -1,0 +1,31 @@
+{
+  "name": "@module-federation/bridge-vue3",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "peerDependencies": {
+    "vue": "=3",
+    "vue-router": "=3"
+  },
+  "dependencies": {
+    "@module-federation/bridge-shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "@vitejs/plugin-vue-jsx": "^4.0.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vite-plugin-dts": "^3.9.1",
+    "vue": "^3.4.21",
+    "vue-router": "4.3.2",
+    "vue-tsc": "^2.0.6"
+  }
+}
