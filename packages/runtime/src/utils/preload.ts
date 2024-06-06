@@ -174,6 +174,7 @@ export function preloadAssets(
             }
             return;
           },
+          needDeleteLink: false,
         });
 
         needAttach && document.head.appendChild(cssEl);
@@ -220,6 +221,7 @@ export function preloadAssets(
             }
             return;
           },
+          needDeleteScript: true,
         });
         needAttach && document.head.appendChild(scriptEl);
       });
