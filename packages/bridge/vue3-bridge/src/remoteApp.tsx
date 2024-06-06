@@ -17,19 +17,6 @@ export default defineComponent({
     const pathname = ref('');
     const route = useRoute();
 
-    watch(
-      () => route.path,
-      (newPath) => {
-        if (pathname.value !== '' && pathname.value !== newPath) {
-          LoggerInstance.log(`createRemoteComponent dispatchPopstateEnv >>>`, {
-            ...props,
-          });
-          dispatchPopstateEnv();
-        }
-        pathname.value = newPath;
-      },
-    );
-
     const renderComponent = () => {
       const providerReturn = props.providerInfo?.();
       providerInfoRef.value = providerReturn;
@@ -46,6 +33,24 @@ export default defineComponent({
       providerReturn.render(renderProps);
     };
 
+    const watchStopHandle = watch(
+      () => route.path,
+      (newPath) => {
+        if (newPath !== route.path) {
+          renderComponent();
+        }
+
+        // dispatchPopstateEnv
+        if (pathname.value !== '' && pathname.value !== newPath) {
+          LoggerInstance.log(`createRemoteComponent dispatchPopstateEnv >>>`, {
+            ...props,
+          });
+          dispatchPopstateEnv();
+        }
+        pathname.value = newPath;
+      },
+    );
+
     onMounted(() => {
       renderComponent();
     });
@@ -54,17 +59,9 @@ export default defineComponent({
       LoggerInstance.log(`createRemoteComponent LazyComponent destroy >>>`, {
         ...props,
       });
+      watchStopHandle();
       (providerInfoRef.value as any)?.destroy({ dom: rootRef.value });
     });
-
-    watch(
-      () => route.path,
-      (newPath) => {
-        if (newPath !== route.path) {
-          renderComponent();
-        }
-      },
-    );
 
     return () => <div ref={rootRef}></div>;
   },

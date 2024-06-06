@@ -14,7 +14,7 @@ function WraperRouter(
   LoggerInstance.log(`WraperRouter info >>>`, {
     ...routerContextProps,
     routerContextProps,
-    props,
+    WraperRouterProps: props,
   });
   if (!routerContextProps) return <ReactRouterDom.BrowserRouter {...props} />;
 
@@ -43,7 +43,7 @@ function WraperRouterProvider(
   LoggerInstance.log(`WraperRouterProvider info >>>`, {
     ...routerContextProps,
     routerContextProps,
-    props,
+    WraperRouterProviderProps: props,
     router,
   });
   if (!routerContextProps) return <ReactRouterDom.RouterProvider {...props} />;

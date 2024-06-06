@@ -34,6 +34,7 @@ const RemoteApp = ({
   ...resProps
 }: RemoteAppParams & ProviderParams) => {
   const rootRef = useRef(null);
+  const renderDom = useRef(null);
   const location = useLocation();
   const [pathname, setPathname] = useState(location.pathname);
   const providerInfoRef = useRef<any>(null);
@@ -59,6 +60,7 @@ const RemoteApp = ({
         memoryRoute,
         ...resProps,
       };
+      renderDom.current = rootRef.current;
       LoggerInstance.log(
         `createRemoteComponent LazyComponent render >>>`,
         renderProps,
@@ -72,10 +74,10 @@ const RemoteApp = ({
         if (providerInfoRef.current?.destroy) {
           LoggerInstance.log(
             `createRemoteComponent LazyComponent destroy >>>`,
-            { name, basename, dom: rootRef.current },
+            { name, basename, dom: renderDom.current },
           );
           providerInfoRef.current?.destroy({
-            dom: rootRef.current,
+            dom: renderDom.current,
           });
         }
       });
