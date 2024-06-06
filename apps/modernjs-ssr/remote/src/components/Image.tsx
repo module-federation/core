@@ -12,7 +12,7 @@ export default (): JSX.Element => (
     }}
   >
     <h2>
-      <strong>remote</strong>&nbsp;image vvvvvv
+      <strong>remote</strong>&nbsp;image
     </h2>
     <button
       style={{ marginBottom: '1rem' }}

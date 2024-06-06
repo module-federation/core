@@ -8,6 +8,8 @@ import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
 import path from 'path';
 import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
+import dns from 'dns';
+import { LOCALHOST } from '../constant';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
 
@@ -32,37 +34,48 @@ export const getMFConfig = async (
   return mfConfig;
 };
 
+const injectRuntimePlugins = (
+  runtimePlugin: string,
+  runtimePlugins: string[],
+): void => {
+  if (!runtimePlugins.includes(runtimePlugin)) {
+    runtimePlugins.push(runtimePlugin);
+  }
+};
+
 export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
 ) => {
+  const isDev = process.env.NODE_ENV === 'development';
   const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
-  const sharedStrategyRuntimePluginPath = path.resolve(
-    __dirname,
-    './mfRuntimePlugins/shared-strategy.js',
+
+  injectRuntimePlugins(
+    path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
+    runtimePlugins,
   );
-  if (!runtimePlugins.includes(sharedStrategyRuntimePluginPath)) {
-    runtimePlugins.push(sharedStrategyRuntimePluginPath);
+
+  if (isDev) {
+    injectRuntimePlugins(
+      path.resolve(__dirname, './mfRuntimePlugins/resolve-entry-ipv4.js'),
+      runtimePlugins,
+    );
   }
 
   if (isServer) {
-    const isDev = process.env.NODE_ENV === 'development';
     if (isDev) {
-      const nodeHmrPluginPath = require.resolve(
-        '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
+      injectRuntimePlugins(
+        require.resolve(
+          '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
+        ),
+        runtimePlugins,
       );
-      if (!runtimePlugins.includes(nodeHmrPluginPath)) {
-        runtimePlugins.push(nodeHmrPluginPath);
-      }
     }
 
-    const injectNodeFetchRuntimePluginPath = path.resolve(
-      __dirname,
-      './mfRuntimePlugins/inject-node-fetch.js',
+    injectRuntimePlugins(
+      path.resolve(__dirname, './mfRuntimePlugins/inject-node-fetch.js'),
+      runtimePlugins,
     );
-    if (!runtimePlugins.includes(injectNodeFetchRuntimePluginPath)) {
-      runtimePlugins.push(injectNodeFetchRuntimePluginPath);
-    }
   }
 
   if (typeof mfConfig.async === 'undefined') {
@@ -185,3 +198,12 @@ export function patchWebpackConfig<T>(options: {
     };
   }
 }
+
+export const lookupIpv4 = async (): Promise<string> => {
+  try {
+    const res = await dns.promises.lookup(LOCALHOST, { family: 4 });
+    return res.address;
+  } catch (err) {
+    return '127.0.0.1';
+  }
+};

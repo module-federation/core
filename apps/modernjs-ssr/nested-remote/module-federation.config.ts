@@ -1,6 +1,5 @@
 import { createModuleFederationConfig } from '@module-federation/modern-js';
 export default createModuleFederationConfig({
-  async: true,
   name: 'nested_remote',
   filename: 'remoteEntry.js',
   exposes: {

@@ -16,6 +16,7 @@ import {
   getMFConfig,
   getTargetEnvConfig,
   patchWebpackConfig,
+  lookupIpv4,
 } from './utils';
 import { updateStatsAndManifest } from './manifest';
 import { MODERN_JS_SERVER_DIR } from '../constant';
@@ -36,7 +37,7 @@ export const moduleFederationPlugin = (
     let browserPlugin: BundlerPlugin;
     let nodePlugin: BundlerPlugin;
     return {
-      config: () => {
+      config: async () => {
         const bundlerType =
           useAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
 
@@ -86,6 +87,8 @@ export const moduleFederationPlugin = (
             mfConfig: envConfig,
           });
         };
+
+        const ipv4 = await lookupIpv4();
 
         return {
           tools: {
@@ -172,6 +175,9 @@ export const moduleFederationPlugin = (
               '@modern-js/runtime/mf': require.resolve(
                 '@module-federation/modern-js/runtime',
               ),
+            },
+            define: {
+              FEDERATION_IPV4: JSON.stringify(ipv4),
             },
           },
           dev: {

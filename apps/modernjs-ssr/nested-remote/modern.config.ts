@@ -5,14 +5,9 @@ import { moduleFederationPlugin } from '@module-federation/modern-js';
 export default defineConfig({
   dev: {
     port: 3007,
-    // hmr: false,
-    // liveReload: false,
   },
   runtime: {
     router: true,
-  },
-  security: {
-    checkSyntax: true,
   },
   output: {
     disableTsChecker: true,

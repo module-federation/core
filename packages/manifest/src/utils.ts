@@ -153,6 +153,9 @@ export function getAssetsByChunk(chunk: Chunk): StatsAssets {
   ): void => {
     [...targetChunk.groupsIterable].forEach((chunkGroup) => {
       chunkGroup.getFiles().forEach((file) => {
+        if (file.includes('.hot-update.js')) {
+          return;
+        }
         if (file.endsWith('.css')) {
           assesSet.css[type].add(file);
         } else {

@@ -6,16 +6,18 @@ import {
 } from '@module-federation/enhanced/runtime';
 
 type Comp = React.FC | { default: React.FC };
-interface IProps {
-  id: string;
-  injectScript?: boolean;
-  injectLink?: boolean;
-  loading?: React.ReactNode;
-  fallback?:
-    | ((err: Error) => React.FC | React.ReactElement)
-    | React.FC
-    | React.ReactElement;
-}
+type IProps =
+  | {
+      id: string;
+      injectScript?: boolean;
+      injectLink?: boolean;
+      loading?: React.ReactNode;
+      fallback?:
+        | ((err: Error) => React.FC | React.ReactElement)
+        | React.FC
+        | React.ReactElement;
+    }
+  | string;
 
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
   const { name, expose } = instance.remoteHandler.idToRemoteMap[id];
@@ -78,7 +80,11 @@ function getTargetModuleInfo(id: string) {
 }
 
 function collectAssets(options: IProps) {
-  const { id, injectLink = true, injectScript = true } = options;
+  const {
+    id,
+    injectLink = true,
+    injectScript = true,
+  } = typeof options === 'string' ? { id: options } : options;
   const links: React.ReactNode[] = [];
   const scripts: React.ReactNode[] = [];
   const instance = getInstance();
@@ -130,7 +136,11 @@ function collectAssets(options: IProps) {
 }
 
 function MFReactComponent(props: IProps) {
-  const { loading = 'loading...', id, fallback } = props;
+  const {
+    loading = 'loading...',
+    id,
+    fallback = undefined,
+  } = typeof props === 'string' ? { id: props } : props;
 
   const Component = React.lazy(() =>
     loadRemote<Comp>(id)
