@@ -90,7 +90,8 @@ export function createScript(info: {
       script.onerror = null;
       script.onload = null;
       safeWrapper(() => {
-        if (info.needDeleteScript) {
+        const { needDeleteScript = true } = info;
+        if (needDeleteScript) {
           script?.parentNode && script.parentNode.removeChild(script);
         }
       });
@@ -121,6 +122,7 @@ export function createLink(info: {
   url: string;
   cb: (value: void | PromiseLike<void>) => void;
   attrs: Record<string, string>;
+  needDeleteLink?: boolean;
   createLinkHook?: (url: string) => HTMLLinkElement | void;
 }) {
   // <link rel="preload" href="script.js" as="script">
@@ -175,7 +177,10 @@ export function createLink(info: {
       link.onerror = null;
       link.onload = null;
       safeWrapper(() => {
-        link?.parentNode && link.parentNode.removeChild(link);
+        const { needDeleteLink = true } = info;
+        if (needDeleteLink) {
+          link?.parentNode && link.parentNode.removeChild(link);
+        }
       });
       if (prev) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
