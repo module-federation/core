@@ -1,12 +1,9 @@
-import { Compiler } from 'webpack';
+import type { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
-import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
+import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import {
-  ModuleFederationPlugin,
-  ModuleInfoRuntimePlugin,
-} from '@module-federation/enhanced';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 /**
  * This function applies server-specific plugins to the webpack compiler.
  *
@@ -34,18 +31,12 @@ export function applyServerPlugins(
       suffix,
     );
   }
-  new ModuleInfoRuntimePlugin().apply(compiler);
-  // Apply the DelegatesModulePlugin to the compiler
-  new DelegatesModulePlugin({
-    runtime: 'webpack-runtime',
-    remotes: options.remotes,
-    container: options.name,
-  }).apply(compiler);
-
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
     ModuleFederationPlugin: ModuleFederationPlugin,
   }).apply(compiler);
+
+  new HoistContainerReferencesPlugin(options.name).apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({
@@ -137,7 +128,6 @@ export function handleServerExternals(
       if (
         ctx.request &&
         (ctx.request.includes('@module-federation/utilities') ||
-          ctx.request.includes('internal-delegate-hoist') ||
           Object.keys(options.shared || {}).some((key) => {
             return (
               //@ts-ignore
@@ -166,10 +156,6 @@ export function handleServerExternals(
       // Otherwise, return (null) to treat the module as internalizable
       return;
     };
-    // compiler.options.externals.push(crittersRegex)
-    // compiler.options.externals.push(reactRegex)
-    // compiler.options.externals.push(reactDomRegex)
-    // compiler.options.externals.push(nextCompiledRegex)
   }
 }
 

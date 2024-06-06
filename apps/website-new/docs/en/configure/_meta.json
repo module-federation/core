@@ -1,0 +1,62 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Overview"
+  },
+  {
+    "type": "file",
+    "name": "name",
+    "label": "Name"
+  },
+  {
+    "type": "file",
+    "name": "filename",
+    "label": "Filename"
+  },
+  {
+    "type": "file",
+    "name": "remotes",
+    "label": "Remotes"
+  },
+  {
+    "type": "file",
+    "name": "exposes",
+    "label": "Exposes"
+  },
+  {
+    "type": "file",
+    "name": "shared",
+    "label": "Shared"
+  },
+  {
+    "type": "file",
+    "name": "runtimeplugins",
+    "label": "Runtime Plugins"
+  },
+  {
+    "type": "file",
+    "name": "getpublicpath",
+    "label": "Get Public Path"
+  },
+  {
+    "type": "file",
+    "name": "implementation",
+    "label": "Implementation"
+  },
+  {
+    "type": "file",
+    "name": "dts",
+    "label": "DTS"
+  },
+  {
+    "type": "file",
+    "name": "dev",
+    "label": "Dev"
+  },
+  {
+    "type": "file",
+    "name": "manifest",
+    "label": "Manifest"
+  }
+]

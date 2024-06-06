@@ -1,0 +1,271 @@
+---
+title: "Authentication with Okta"
+---
+
+import {Steps} from '@theme';
+
+# 在模块联邦中集成使用OpenID Connect的认证
+
+## 引言
+
+模块联邦增强了跨微前端的共享代码和状态的管理。本指南将指导你如何使用 Okta 将 OpenID Connect 添加到你的项目中。通过本文档结束时，你的应用程序将能够处理当前应用程序内部以及新集成的微前端的已认证状态。
+
+## 先决条件
+
+- 一个免费的 Okta 开发者账户。如果你还没有，可以使用 Okta CLI 注册。
+- 在你的机器上安装了 Okta CLI。
+
+## 设置 Okta 认证
+
+### 创建 Okta 应用程序
+
+<Steps>
+
+### 注册或登录 Okta：
+- 要注册新账户，请在终端中执行 `okta register`。
+- 如果你已经有账户，请通过运行 `okta login` 登录。
+
+### 创建你的应用程序：
+- 执行 `okta apps create`。
+- 当提示时，接受默认应用程序名称或提供一个新的。
+- 选择 *单页面应用程序 (SPA)* 并按Enter键确认。
+- 对于 *重定向URI*，使用 `http://localhost:4200/login/callback` 并将注销 *重定向URI* 设置为 `http://localhost:4200`。
+
+</Steps>
+
+### 在Okta中配置应用程序
+
+Okta CLI 在你的 Okta 组织中创建了一个 OIDC SPA，配置了重定向 URI，授予了 Everyone 组访问权限，并将 `http://localhost:4200` 添加为受信任的来源。
+
+:::tip NOTE
+*Okta 管理控制台* 也可用于应用程序创建。对于 Angular 应用程序，请参阅 Okta 文档，了解如何创建 Angular应用程序。
+:::
+
+**Okta 应用程序配置示例:**
+
+- *Issuer:* `https://dev-12345.okta.com/oauth2/default`
+- *Client ID:* `0oab12345CDEF`
+
+:::tip NOTE
+确保记下*发行者*和*客户端 ID*；这些对你的应用程序配置至关重要。
+:::
+
+### 安装需要的依赖
+
+将 Okta Angular 和 Okta Auth JS 库添加到你的项目中：
+
+```bash
+npm install @okta/okta-angular@5.2 @okta/okta-auth-js@6.4
+```
+
+### 在Angular模块中配置 Okta
+
+在你的 shell 项目中导入并配置 `OktaAuthModule` 和 `OktaAuth` 到 `AppModule`。请使用你的特定的 Okta 域名和客户端ID替换 `{yourOktaDomain}` 和 `{yourClientID}`。
+
+```typescript
+import { NgModule } from '@angular/core';
+import { OKTA_CONFIG, OktaAuthModule } from '@okta/okta-angular';
+import { OktaAuth } from '@okta/okta-auth-js';
+
+const oktaAuth = new OktaAuth({
+  issuer: 'https://{yourOktaDomain}/oauth2/default',
+  clientId: '{yourClientID}',
+  redirectUri: window.location.origin + '/login/callback',
+  scopes: ['openid', 'profile', 'email']
+});
+
+@NgModule({
+  imports: [
+    OktaAuthModule,
+    // other imports
+  ],
+  providers: [
+    { provide: OKTA_CONFIG, useValue: { oktaAuth } }
+  ],
+  // other module properties
+})
+```
+
+### 为认证配置路由
+
+更新 `app-routing.module.ts` 以包含登录回调路由。
+
+```typescript
+import { Routes } from '@angular/router';
+import { OktaCallbackComponent } from '@okta/okta-angular';
+
+const routes: Routes = [
+  { path: '', component: ProductsComponent },
+  { path: 'basket', loadChildren: () => import('mfeBasket/Module').then(m => m.BasketModule) },
+  { path: 'login/callback', component: OktaCallbackComponent }
+];
+```
+
+## 实现认证逻辑
+
+### 更新应用组件
+
+修改 `app.component.ts` 文件以包含使用 Okta 库进行登录和登出的逻辑，并相应地更新认证状态变量。
+
+```typescript
+import { Component, Inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { filter, map, shareReplay } from 'rxjs/operators';
+import { OKTA_AUTH, OktaAuthStateService } from '@okta/okta-angular';
+import { OktaAuth } from '@okta/okta-auth-js';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html'
+})
+export class AppComponent {
+  public isAuthenticated$: Observable<boolean>;
+  public name$: Observable<string>;
+
+  constructor(private oktaStateService: OktaAuthStateService, @Inject(OKTA_AUTH) private oktaAuth: OktaAuth) {
+    this.isAuthenticated$ = this.oktaStateService.authState$
+      .pipe(
+        filter(authState => !!authState),
+        map(authState => authState.isAuthenticated ?? false),
+        shareReplay()
+      );
+
+    this.name$ = this.oktaStateService.authState$
+      .pipe(
+        filter(authState => !!authState && !!authState.isAuthenticated),
+        map(authState => authState.idToken?.claims.name ?? '')
+      );
+  }
+
+  public async signIn(): Promise<void> {
+    await this.oktaAuth.signInWithRedirect();
+  }
+
+  public async signOut(): Promise<void> {
+    await this.oktaAuth.signOut();
+  }
+}
+```
+
+### 在用户界面中处理登录和登出
+
+在 `app.component.html` 中，为登录和登出按钮添加用户界面逻辑。
+
+```html
+<li>
+  <button *ngIf="(isAuthenticated$ | async) === false; else logout" (click)="signIn()">
+    Sign In
+  </button>
+
+  <ng-template #logout>
+    <button (click)="signOut()">
+      Sign Out
+    </button>
+  </ng-template>
+</li>
+```
+### 测试应用程序
+
+使用 npm run start（或你设置的适当命令）运行项目以测试认证功能。成功实施后，允许用户登录和注销，并在登录后可以访问个人信息。
+
+## 添加用户个人资料与模块联邦
+
+本节扩展了如何利用模块联邦，通过主应用程序和微前端共享验证状态。我们将探讨如何设置新的 Angular 应用程序，配置路由以及更新组件以包括个人资料细节。
+
+<Steps>
+
+### 生成一个新 Angular 应用程序
+
+停止当前项目执行，然后运行以下命令创建一个名为 `mfe-profile` 的新 Angular 应用程序：
+
+```bash
+ng generate application mfe-profile --routing --style css --inline-style --skip-tests
+```
+此命令完成多项任务：
+- 生成一个带有模块和组件的新应用。
+- 添加一个独立的路由模块。
+- 定义 CSS 样式，使其内联在组件中。
+- 跳过为初始组件创建测试文件。
+
+### 生成 HomeComponent 和 ProfileModule
+
+执行以下命令，在 `mfe-profile` 应用程序中创建一个 `HomeComponent` 和一个 `ProfileModule`：
+
+```bash
+ng generate component home --project mfe-profile
+ng generate module profile --project mfe-profile --module app --routing --route profile
+```
+
+这些命令创建了：
+- `HomeComponent` 作为默认路由的组件。
+- `ProfileModule` 带有路由，并包含一个作为懒加载路由添加到 `AppModule` 中的默认 `ProfileComponent`。
+
+</Steps>
+
+### 更新应用代码
+
+<Steps>
+
+### 配置路由
+
+更新 `projects/mfe-profile/src/app/app-routing.module.ts` 文件，包含 `HomeComponent` 的路由以及为 `ProfileModule` 的懒加载路由：
+
+```typescript
+const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'profile', loadChildren: () => import('./profile/profile.module').then(m => m.ProfileModule) }
+];
+```
+
+### 更新 AppComponent 和 HomeComponent 的模板
+
+- 对于 `app.component.html`，请将内容替换为你选择的消息以及一个用于导航的 `router-outlet`。
+- 对于 `home.component.html`，请提供一条信息引导用户使用路由器链接到 `/profile` 的个人资料页面。
+
+</Steps>
+
+### 个人资料组件配置
+
+<Steps>
+
+ ### 实现个人资料逻辑
+
+ 更新 `projects/mfe-profile/src/app/profile/profile.component.ts` 文件以包含用户个人资料信息和身份验证状态的属性，并利用 `OktaAuthStateService`。
+
+ ### 更新个人资料模板
+
+ 修改模板以显示用户个人资料的详细信息，例如姓名和电子邮件，以及最后一次登录时间。
+
+</Steps>
+
+### 集成模块联邦
+
+<Steps>
+
+### 在 `mfe-profile` 中添加模块联邦
+
+使用 `@angular-architects/module-federation` 架构来准备 `mfe-profile` 进行模块联邦，并指定端口 4202。
+
+```bash
+ng add @angular-architects/module-federation --project mfe-profile --port 4202
+```
+### 将 `mfe-profile` 配置为远程模块
+
+更新 `mfe-profile` 中的 `webpack.config.js` 以暴露 `ProfileModule` 供宿主应用程序使用。
+
+### 更新宿主应用程序配置
+
+修改外消费者应用程序的 `webpack.config.js` 以包含 `mfe-profile` 作为远程模块，使宿主能够访问个人资料微前端。
+
+### 共享认证状态
+
+- 更新外消费者应用程序中的 `webpack.config.js` 以共享 Okta 库作为单例。
+- 确保 `mfe-profile` 也共享 Okta 库以利用已认证的状态。
+
+### 运行集成应用程序
+
+配置完 Module Federation 并更新了外消费者和微前端应用程序之后，你可以使用 `npm run run:all` 运行项目。
+
+这个设置允许你登录、查看你的个人资料、注销，并在主前端和微前端部分流畅地与应用程序的其他部分交互。
+
+</Steps>

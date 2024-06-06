@@ -1,59 +1,53 @@
 const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 
 registerPluginTSTranspiler();
-const { withModuleFederation } = require('@nx/react/module-federation');
-const { FederatedTypesPlugin } = require('@module-federation/typescript');
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
+const { composePlugins, withNx } = require('@nx/webpack');
+const { withReact } = require('@nx/react');
+process.env.FEDERATION_DEBUG = true;
 
-const baseConfig = require('./module-federation.config');
-
-/**
- * @type {import('@nx/react/module-federation').ModuleFederationConfig}
- **/
-const defaultConfig = {
-  ...baseConfig,
-};
-
-module.exports = async (config, context) => {
-  const mf = await withModuleFederation(defaultConfig);
-
-  /** @type {import('webpack').Configuration} */
-  const parsedConfig = mf(config, context);
-
-  const remotes = baseConfig.remotes.reduce((remotes, remote) => {
-    const [name, url] = remote;
-    remotes[name] = url;
-    return remotes;
-  }, {});
-
-  parsedConfig.plugins.forEach((plugin) => {
-    if (plugin.constructor.name === 'ModuleFederationPlugin') {
-      //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-      plugin._options.library = undefined;
-    }
-  });
-
-  parsedConfig.plugins.push(
-    new FederatedTypesPlugin({
-      federationConfig: {
-        ...baseConfig,
-        filename: 'remoteEntry.js',
-        remotes,
+module.exports = composePlugins(
+  withNx(),
+  withReact(),
+  async (config, context) => {
+    // prevent cyclic updates
+    config.watchOptions = {
+      ignored: ['**/node_modules/**', '**/@mf-types/**'],
+    };
+    const baseConfig = {
+      name: 'react_ts_host',
+      filename: 'remoteEntry.js',
+      remotes: {
+        react_ts_nested_remote:
+          // 'react_ts_nested_remote@http://localhost:3005/remoteEntry.js',
+          'react_ts_nested_remote@http://localhost:3005/mf-manifest.json',
       },
-    }),
-  );
+    };
+    config.plugins.push(new ModuleFederationPlugin(baseConfig));
 
-  parsedConfig.infrastructureLogging = {
-    level: 'verbose',
-    colors: true,
-  };
+    config.optimization.runtimeChunk = false;
+    config.plugins.forEach((p) => {
+      if (p.constructor.name === 'ModuleFederationPlugin') {
+        //Temporary workaround - https://github.com/nrwl/nx/issues/16983
+        p._options.library = undefined;
+      }
+    });
 
-  //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-  parsedConfig.experiments = { outputModule: false };
+    //Temporary workaround - https://github.com/nrwl/nx/issues/16983
+    config.experiments = { outputModule: false };
 
-  parsedConfig.output = {
-    ...parsedConfig.output,
-    scriptType: 'text/javascript',
-  };
-
-  return parsedConfig;
-};
+    // Update the webpack config as needed here.
+    // e.g. `config.plugins.push(new MyPlugin())`
+    config.output = {
+      ...config.output,
+      scriptType: 'text/javascript',
+    };
+    config.optimization = {
+      runtimeChunk: false,
+      minimize: false,
+    };
+    return config;
+  },
+);

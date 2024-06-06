@@ -1,0 +1,230 @@
+import { Steps, Tab, Tabs, Badge, Aside } from '@theme';
+
+# Angular CLI 设置
+
+本指南介绍了如何将模块联邦（Module Federation）与 Angular CLI 集成。使用 `@angular-architects/module-federation` 插件来协助完成这一集成。
+
+## 前置要求
+
+- **Angular CLI**: 需要版本 10 或更高。
+- **插件安装**: 安装 `@angular-architects/module-federation` 插件。
+
+## 安装
+
+你需要在构建阶段配置 Angular CLI 以使用模块联邦。
+为了充分发挥模块联邦的潜力，需要一个自定义构建器。
+
+`@angular-architects/module-federation` 包提供了这个自定义构建器。
+使用 `ng add` 命令将它整合到你的项目中：
+
+  <Tabs>
+    <Tab label="Angular CLI">
+      ```bash
+      ng add @angular-architects/module-federation --project shell --port 4200 --type host
+      ng add @angular-architects/module-federation --project mfe1 --port 4201 --type remote
+      ```
+    </Tab>
+    <Tab label="Nx Cli">
+      对于 Nx 用户，流程略有不同。
+
+      ```bash
+      npm i @angular-architects/module-federation -D
+      ng g @angular-architects/module-federation:init --project shell --port 4200 --type host
+      ng g @angular-architects/module-federation:init --project mfe1 --port 4201 --type remote
+      ```
+
+    </Tab>
+  </Tabs>
+  <div className={"rspress-directive tip"}>
+    在版本 14.3 中引入的 `--type` 参数确保只生成必要的配置。
+  </div>
+
+## Shell （消费者）配置
+
+Shell（消费者）对于模块联邦（Module Federation）集成至关重要。
+本节配置了支持通过路由来懒加载 `FlightModule` 的 Shell。
+
+<Steps>
+  ### 路由配置
+
+  首先定义应用程序的路由，使用虚拟路径指定懒加载的 `FlightModule`：
+
+  ```javascript
+  export const APP_ROUTES: Routes = [
+    {
+      path: '',
+      component: HomeComponent,
+      pathMatch: 'full'
+    },
+    {
+      path: 'flights',
+      loadChildren: () => import('mfe1/Module').then(m => m.FlightsModule)
+    },
+  ];
+  ```
+
+在这个配置中，路径 `'mfe1/Module'` 是一个虚拟表示，表明它在 Shell 应用程序中并不实际存在。相反，它是对另一个独立项目中的模块的引用。
+
+### 类型提示
+
+为虚拟路径创建一个类型定义：
+
+```typescript
+// decl.d.ts
+declare module 'mfe1/Module';
+```
+
+这有助于 TypeScript 编译器理解虚拟路径。
+
+### Webpack 配置
+
+配置 Webpack 将所有前缀为 `mfe1` 的路径解析为一个远程项目。这是在 `webpack.config.js` 文件中完成的：
+
+```javascript
+const { shareAll, withModuleFederationPlugin } = require('@angular-architects/module-federation/webpack');
+
+module.exports = withModuleFederationPlugin({
+
+   remotes: {
+     "mfe1": "http://localhost:4201/remoteEntry.js",
+   },
+
+   shared: {
+     ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
+   },
+
+});
+```
+<details>
+
+  在开发中，直接硬编码远程入口的 URL 就足够了。然而，对于生产环境，需要采用动态方法。动态远程的概念在专门的文档页面“动态远程”中进一步探讨。
+
+  - `shared` 属性指定了 Shell 和微前端（们）之间要共享的 npm 包。使用 `shareAll` 辅助方法，可以共享 `package.json` 中列出的所有依赖。这虽然便于快速设置，但可能导致共享依赖过多，这可能会对优化造成影响。
+  - `singleton: true` 和 `strictVersion: true` 的组合设置指示，如果 Shell 和微前端（们）之间存在版本不匹配，Webpack 将抛出运行时错误。将 `strictVersion` 更改为 `false` 将改为运行时警告。
+  - `requiredVersion: 'auto'` 选项，由 `@angular-architects/module-federation` 插件提供，可以自动从 `package.json` 确定版本，有助于防止与版本相关的问题。
+
+</details>
+
+</Steps>
+
+## 配置生产者
+
+生产者，也称为模块联邦中的远程模块，其结构类似于标准的 Angular 应用。它在 `AppModule` 中有特定的路由，并且有一个用于航班相关任务的 `FlightsModule`。本节解释了如何将 `FlightsModule` 平滑地加载到 Shell（宿主）中。
+
+<Steps>
+
+### 路由定义
+
+在 `AppModule` 内部建立基本路由：
+
+```typescript
+export const APP_ROUTES: Routes = [
+     { path: '', component: HomeComponent, pathMatch: 'full'}
+ ];
+```
+
+这个简单的路由设置在应用程序被访问时导航到 `HomeComponent`。
+
+### 创建模块
+
+创建一个 `FlightsModule` 来处理与航班相关的操作：
+
+```typescript
+@NgModule({
+   imports: [
+     CommonModule,
+     RouterModule.forChild(FLIGHTS_ROUTES)
+   ],
+   declarations: [
+     FlightsSearchComponent
+   ]
+ })
+ export class FlightsModule { }
+```
+
+该模块包含一条路由，指向如下定义的 `FlightsSearchComponent`：
+
+```typescript
+export const FLIGHTS_ROUTES: Routes = [
+     {
+       path: 'flights-search',
+       component: FlightsSearchComponent
+     }
+ ];
+```
+
+### 配置生产者
+
+为了将 FlightsModule 加载到 Shell 中，通过 Remote 的 Webpack 配置来公开它：
+
+```javascript
+const { shareAll, withModuleFederationPlugin } = require('@angular-architects/module-federation/webpack');
+
+module.exports = withModuleFederationPlugin({
+   name: 'mfe1',
+   exposes: {
+     './Module': './projects/mfe1/src/app/flights/flights.module.ts',
+   },
+   shared: {
+     ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
+   },
+});
+```
+
+<details>
+在这种配置中：
+
+- `name` 属性将微前端标识为 `mfe1`。
+- `exposes` 属性意味着 `FlightsModule` 在公共名称 `Module` 下的暴露，允许 Shell 进行引用。
+- `shared` 属性列出了将与 Shell 共享的库，使用 `shareAll` 方法共享 `package.json` 中找到的所有依赖。`singleton: true` 和 `strictVersion: true` 属性确保使用共享库的单一版本，并且在版本不兼容的情况下触发运行时错误。
+
+</details>
+
+</Steps>
+
+## 启动应用
+
+设置好 Shell（宿主）和 Micro-frontend（远程），就可以启动项目测试效果。
+
+要启动 Shell 和 Micro-frontend，请使用以下命令：
+
+```bash
+ng serve shell -o
+ng serve mfe1 -o
+```
+
+在 Shell 中导航到 Flights 部分，以查看微前端被动态加载。
+
+:::tip
+该插件在 `ng-add` 和 `init` schematics 过程中安装了一个 npm 脚本 `run:all`，允许同时提供所有应用程序的服务：
+
+```bash
+npm run run:all
+# or
+npm run run:all shell mfe1
+```
+:::
+
+
+## 优化依赖共享
+
+使用 `shareAll` 的初始设置简单且实用，但可能导致创建过大的共享包。
+
+为了更有效地管理共享依赖项，请考虑从 `shareAll` 切换到使用 `share` 辅助函数。这样可以更细致地控制哪些依赖项被共享：
+
+```javascript
+// Replace shareAll with share:
+const { share, withModuleFederationPlugin } = require('@angular-architects/module-federation/webpack');
+
+module.exports = withModuleFederationPlugin({
+    // Specify the packages to share:
+    shared: share({
+        "@angular/core": { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+        "@angular/common": { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+        "@angular/common/http": { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+        "@angular/router": { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+    })
+});
+```
+
+在这种配置中，`share` 辅助函数允许显式共享选定的包，从而实现更优化的包共享，并有可能减少加载时间。

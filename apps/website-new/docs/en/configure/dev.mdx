@@ -1,0 +1,31 @@
+# dev
+
+- Type: `boolean | PluginDevOptions`
+- Required: No
+- Default value: `true`
+- Usage scenario: used to control `Module Federation` dev behavior
+
+The `PluginDevOptions` types are as follows:
+
+```ts
+interface PluginDevOptions {
+  disableLiveReload?: boolean;
+  disableHotTypesReload?: boolean;
+}
+```
+
+## disableHotTypesReload
+
+- Type: `boolean`
+- Required: No
+- Default value: `false`
+
+Whether to disable type hot reloading
+
+## disableLiveReload
+
+- Type: `boolean`
+- Required: No
+- Default value: `false`
+
+Whether to disable `liveReload`, after setting `true`, any updates from the producer will not trigger the consumer's **page** `liveReload`

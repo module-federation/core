@@ -1,0 +1,357 @@
+= SplitChunksPlugin & Sharing and Bundling Multiple Vendor Bundles Into One Vendor Bundle
+
+== Introduction
+
+The following guide is based on a project that used Webpack's ModuleFederationPlugin to share both component and vendor library modules between two web applications. The challenge was to share two-digit-number of different vendor modules, but bundle them into one common vendors chunk to reduce the network load of having dozens of different requests simultaneously. The solution was to bundle all different vendor bundles into one using `SplitChunksPlugin`, resulting in only one request from the host app to the remote app when the vendor library is needed.
+
+This guide will demonstrate how to use Webpack's `ModuleFederationPlugin`  to share modules between two simple web applications, and how to bundle supplementary vendor libraries' bundles into one bundle using Webpack's `SplitChunksPlugin`, so that they can be shared between the remote and host applications as one chunk and improve performance.
+
+== Project Structure
+
+The project consists of the host app (app1), which loads a shared function, a shared component, and a vendor bundle from the remote app (app2). This is a simple demonstration of the work of Webpack's ModuleFederationPlugin and SplitChunksPlugin.
+
+== Setup
+
+After creating two directories, one for the host and one for the remote app, navigate into the  `Remote_App` directory. Initialize an npm project and install Webpack to produce bundles of our code. 
+
+[source, bash]
+----
+npm init
+npm i webpack webpack-cli --save-dev
+----
+
+Create the `src` directory which will hold our shared modules. Create a new file called `bootstrap.js` and another directory - `sharedModules`. In the `sharedModules` directory, create our first shared function - `mySharedFunction.js`. Leave this file empty for now.
+
+Populate `bootstrap.js` with the following line:
+
+[source, javascript]
+----
+import('./sharedModules/mySharedFunction');
+----
+
+For the Module Federation to work, the best way to implement the sharing between code is through dynamic imports like in example above, although sharing through eager consumption of modules is also possible and static imports of shared modules are supported as well. This is because the shared components/vendors are loaded at runtime and it's best to have them asynchronously imported.
+
+Now, navigate back out of the source directory and create a `webpack.configuration.js` file which is the configuration file for using Webpack with our remote app:
+
+[source, javascript]
+----
+const path = require('path');
+module.exports = {
+ entry: './src/bootstrap.js',
+ output: {
+   filename: '[name].bundle.js',
+   path: path.resolve(__dirname, 'dist'),
+   clean: true
+ },
+ mode: 'development'
+};
+----
+
+The entry point would be our `bootstrap.js` file. This file would act as an entry point for the dynamic imports of all the shared modules you could have. Every bundle will be outputted to the `dist` directory.
+
+Repeat the same process for the host app. Initialize an npm project and install Webpack.
+
+[source, bash]
+----
+npm init
+npm i webpack webpack-cli --save-dev
+----
+
+Create a `bootstrap.js` file and an empty `mainLogic.js` file. This file will later on contain dynamic imports of the shared modules.
+
+[source, javascript]
+----
+import('./mainLogic');
+----
+
+You can copy-paste the configuration file for Webpack in this host app from the remote app. It contains almost the same configuration, except for the filename prop, it will be only called `bundle.js` as we will have only that one app-related bundle.
+
+[source, javascript]
+----
+filename: 'bundle.js'
+----
+
+== Hosting the Apps
+
+To host the apps, we use `webpack-dev-server`, a CLI-based tool for starting a static server for your assets. Besides installing `webpack-dev-server`, we also need the `HtmlWebpackPlugin` so we can render HTML files. Therefore, you need to navigate into both host and remote app directories and run the following commands:
+
+[source, bash]
+----
+npm i webpack-dev-server --save-dev
+npm i html-webpack-plugin --save-dev
+----
+
+Next, we need to extend both webpack configuration files, of the host app as well as the remote:
+
+[source, javascript]
+----
+devServer: {
+ static: path.join(__dirname,'dist'),
+ port: 3001
+},
+----
+
+After including this option in our Webpack configuration file of the host, the content from the `dist` directory will be rendered on port 3001. Let's create one HTML page now:
+
+[source, html]
+----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= htmlWebpackPlugin.options.title %> </title>
+</head>
+<body>
+    HOST APP
+</body>
+</html>
+----
+
+The `htmlWebpackPlugin.options.title` comes from the title property of the `HtmlWebpackPlugin` we define in the next step.
+
+At the top of the `webpack.configuration.js` file, we need an import for the plugin:
+
+[source, javascript]
+----
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+----
+
+We also create a plugins prop in the webpack configuration file containing our `HtmlWebpackPlugin` setup like the following:
+
+[source, javascript]
+----
+plugins: [
+    new HtmlWebpackPlugin({
+      title: 'Host app',
+      template: path.resolve(__dirname, './src/template.html')
+    })
+  ]
+----
+
+Now you can add this command to your npm scripts which will start the server. In the `package.json`, under scripts add `"start": "webpack serve --open"`. Now if you execute `npm start` in the terminal, the server should be started at port `localhost:3001`. Only a white background will be shown with the text "HOST APP" written on the screen.
+
+The same steps are replicated in the remote app. Firstly, install the required npm packages, then create a `template.html` and add the npm script for starting the server in the `package.json`.
+
+Update the `webpack.configuration.js` file of the remote app to look like the following:
+
+[source, javascript]
+----
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
+
+module.exports = {
+  entry: './src/bootstrap.js',
+  output: {
+    filename: '[name].bundle.js',
+    path: path.resolve(__dirname, 'dist'),
+    clean: true
+  },
+  mode: 'development',
+  devServer: {
+    static: path.join(__dirname,'dist'),
+    port: 3000
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: 'Remote app',
+      template: path.resolve(__dirname, './src/template.html')
+    })
+  ]
+}; 
+----
+
+== Using Module Federation & Adding Vendor Libraries
+
+Until this point, we only set up the starting code for both apps and hosted them on different ports. Now we need to truly utilize Webpack's module federation plugin, and the next thing that we would do is share two modules - an ordinary JS function that uses a feature from our first shared vendor library - Lodash, and a button styled with the D3 library (D3 is a JS library for manipulating documents based on data, but in our case, for the sake of simplicity we will use it to style the button only).
+
+Let's start with the remote. Firstly, install the Lodash and D3 libraries:
+
+[source, bash]
+----
+npm install lodash d3
+----
+
+The function which will be shared is called `myFunction()`. It will use the `sortedUniq()` method from Lodash to remove duplicates from an array of numbers:
+
+[source, javascript]
+----
+import _ from 'lodash';
+
+export const myFunction = () => {
+    let sampleArray = [1,1,2,2,2,3,4,5,5,6];
+    let sortedArray = _.sortedUniq(sampleArray);
+    console.log('My resulting array: ' + sortedArray);
+}
+----
+
+Next, create a button and use D3 to change the internal text color of it:
+
+[source, javascript]
+----
+import * as d3 from 'd3'; 
+// create button & fill with text and id param
+let d3Btn = document.createElement('button');
+d3Btn.setAttribute('id','btn-d3');
+d3Btn.appendChild(document.createTextNode('D3 Button'));
+// append to the body
+let container = document.getElementsByTagName('body');
+container[0].appendChild(d3Btn);
+// use d3
+// change color of text to orange
+d3.select('#btn-d3').style('color','orange'); 
+----
+
+Next step is to import the modules dynamically, so the `bootstrap.js` file would look like the following:
+
+[source, javascript]
+----
+import('./sharedModules/mySharedFunction');
+import('./sharedModules/mySharedButton');
+----
+
+To enable the usage of the `ModuleFederationPlugin` we need to register it in the configuration file. Import at the top of the file:
+
+[source, javascript]
+----
+const { ModuleFederationPlugin } = require('webpack').container;
+----
+
+In the plugins section of the configuration, we register the plugin:
+
+[source, javascript]
+----
+new ModuleFederationPlugin({
+      name: 'remoteApp_oneVendorsBundle',
+      library: {
+        type: 'var',
+        name: 'remoteApp_oneVendorsBundle'
+      },
+      filename: 'remoteEntry.js',
+      exposes: {
+        './mySharedFunction':'./src/sharedModules/mySharedFunction.js',
+        './mySharedButton':'./src/sharedModules/mySharedButton.js'
+      },
+      shared: [
+        'lodash', 'd3'
+      ]
+    })
+----
+
+We register a name for our application - it would be used by the host app to connect with the remote. We also register a script by the name of `remoteEntry.js`. This will be the script that enables the sharing of modules between our two apps and will be automatically generated when building our app. 
+
+We also need to have a shared section where we put the vendor libraries to be shared with the host app.
+
+The only thing we need to do in the host application is to add some code to configure the ModuleFederationPlugin to work with the remote app. First, we require the plugin:
+
+[source, javascript]
+----
+const { ModuleFederationPlugin } = require('webpack').container;
+----
+
+And in the plugins section we should have the following code:
+
+[source, javascript]
+----
+new ModuleFederationPlugin({
+      name: 'hostApp_oneVendorsBundle',
+      library: {
+        type: 'var',
+        name: 'hostApp_oneVendorsBundle'
+      },
+      remotes: {
+        remoteApp: 'remoteApp_oneVendorsBundle'
+      },
+      shared: [
+        'lodash', 'd3'
+      ]
+    })
+----
+
+Here we need to register the remote app in order to share modules. In our host app, we would reference the remote by the name `remoteApp`. 
+
+We also need the Lodash and D3 to be shared. The vendor bundles will be loaded together with the bundle for the shared function and button.
+
+Proceed to the `template.html` of the `Host_App`, and add the following `<script>` tag in the head of the `temlplate.html`:
+
+[source, html]
+----
+<script src='http://localhost:3000/remoteEntry.js'></script>
+----
+
+The shared `myFunction()` will be loaded with a click of a button, and we need a `<div>` which will act as a container for rendering the button, that's why we need this code in the `<body>`:
+
+[source, html]
+----
+<button id="btn-shared-modules-loader" 
+  style="display: block; margin-top: 10px;">Load shared modules</button>
+<div id='shared-btn-container' style="margin-top: 10px;"></div>  
+----
+
+By `document.getElementById()` we get the button from the `template.html` and we add an onClick event listener which dynamically loads the shared function and button bundle:
+
+[source, javascript]
+----
+let loadSharedModulesBtn = document.getElementById('btn-shared-modules-loader');
+loadSharedModulesBtn.addEventListener('click', async () => {
+    let sharedFunctionModule = await import('remoteApp/mySharedFunction');
+    sharedFunctionModule.myFunction();
+    let sharedButtonModule = await import('remoteApp/mySharedButton');
+    let sharedButton = document.createElement(sharedButtonModule.name);
+    let sharedButtonContainer = document.getElementById('shared-btn-container');
+    sharedButtonContainer.appendChild(sharedButton);
+})
+----
+
+It's now time to package our code for deployment. To do so, we'll need to incorporate an npm script in the `package.json` of both our applications. Please add the following line of code: `"build": "webpack --config webpack.config.js"`. Once added, you should then run the command `npm run build` within both applications. Upon execution, the `dist` directories in each app will showcase the array of bundles generated by Webpack.
+
+Upon launching both applications and pressing the 'Load shared modules' button in the host application, the D3 button will become visible. Additionally, the console log will present the filtered array from the shared function, and the vendor bundles will be accessed from the remote app. Note that it's essential to initiate the remote app prior to the host, or alternatively, reload the host if you started the applications in a different sequence.
+
+If you take a peek at the browser's developer tools and navigate to the network tab, you'll observe that the Lodash, D3, and shared module bundles are not loaded until the button is clicked. Post-click, all the bundles are loaded, and we receive a console message from `myFunction()` from the remote, along with the display of the shared button. Hovering over the bundle names will reveal their origin: they are fetched from the remote, specifically from `localhost:3000.`
+
+== Bundling Vendor Libraries
+
+Webpack's `SplitChunksPlugin` is traditionally employed to accomplish code splitting - the process of segmenting code into smaller, manageable bundles and regulating resource loading. However, in this scenario, we have deviated from the standard use and used this tool to aggregate all vendor code into a singular bundle.
+
+In this demonstration, we're dealing with a limited number of vendor bundles, but this strategy can be immensely advantageous and performance-enhancing when operating at a larger scale with numerous smaller vendor modules. This holds particularly true if the requirement arises to load all vendor bundles simultaneously.
+
+We need to add the `optimization` property to the `webpack.configuration.js` file of the remote app:
+
+[source, javascript]
+----
+optimization: {
+    splitChunks: {
+      cacheGroups: {
+        commons: {
+          test: /[\\/]node_modules[\\/](lodash|d3|delaunator|internmap|robust-predicates)/,
+          name: 'Vendors_Lodash_D3',
+          chunks: 'all'
+        }
+      }
+    }
+}
+----
+
+You might be curious about 'delaunator' and 'internmap'. These are modules incorporated during the D3 installation. If they're excluded from the regular expression (regex), they will independently generate separate vendor modules within the 'dist' directory, which diverges from our original intent. This situation can be bypassed by employing a more selective import of D3, avoiding the use of import * as d3 from d3.
+
+Upon executing `npm run build` within the remote application, a unified vendor bundle titled Vendors_Lodash_D3.bundle.js will be produced in the 'dist' directory.
+
+To culminate, if you launch both applications, the remote will independently load the entire `Vendors_Lodash_D3` bundle and refrain from loading any other vendor modules:
+
+//TODO: [!image]
+
+Upon selecting the 'load shared modules' button in the host application, it will not only load both the shared function and the shared D3 button bundles, but also exclusively load a single vendor bundle, specifically, the Vendors_Lodash_D3 bundle.
+
+//TODO: [!image]
+
+== Conclusion
+
+In this guide, we have shown how to bundle two vendor libraries' bundles into one bundle using Webpack's SplitChunksPlugin, so that they can be shared between the remote and host applications as one chunk and improve performance.
+
+This is a powerful feature of Webpack that can be used to optimize the performance of your applications by reducing the number of requests and the size of the bundles. It also allows for better code organization and separation of concerns by allowing you to share modules between different applications.
+
+== Additional Information on SplitChunksPlugin
+
+https://webpack.js.org/plugins/split-chunks-plugin/[Official Webpack 5 SplitChunksPlugin Documentation]
+https://indepth.dev/posts/1490/webpack-an-in-depth-introduction-to-splitchunksplugin[Webpack: An in-depth introduction to SplitChunksPlugin]

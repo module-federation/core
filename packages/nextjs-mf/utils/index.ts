@@ -1,14 +1,18 @@
+import * as deadUtils from '@module-federation/utilities';
+
 /**
  * Extracts the URL and global from the module federation utilities.
  * @module @module-federation/utilities/src/utils/pure
  */
-export { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
+export { extractUrlAndGlobal } from '@module-federation/utilities';
 
-/**
- * Injects a script from the module federation utilities.
- * @module @module-federation/utilities/src/utils/common
- */
-export { injectScript } from '@module-federation/utilities/src/utils/common';
+//@ts-ignore
+export const injectScript = (args) => {
+  console.warn(
+    'injectScript is deprecated, use module-federation/runtime and loadRemote',
+  );
+  return deadUtils.injectScript(args);
+};
 
 /**
  * Flushes chunks from the module federation node utilities.
@@ -33,13 +37,16 @@ export type { FlushedChunksProps } from './flushedChunks';
  * If the function is called on the server side, it imports the revalidate function from the module federation node utilities and returns the result of calling that function.
  * @returns {Promise<boolean>} A promise that resolves with a boolean.
  */
-export const revalidate = () => {
+export const revalidate = (
+  fetchModule: any = undefined,
+  force: boolean = false,
+) => {
   if (typeof window !== 'undefined') {
     console.error('revalidate should only be called server-side');
     return Promise.resolve(false);
   }
   // @ts-ignore
   return import('@module-federation/node/utils').then((utils) => {
-    return utils.revalidate();
+    return utils.revalidate(fetchModule, force);
   });
 };

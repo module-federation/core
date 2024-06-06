@@ -1,0 +1,54 @@
+{
+  "public": true,
+  "name": "@module-federation/webpack-bundler-runtime",
+  "version": "0.1.18",
+  "license": "MIT",
+  "description": "Module Federation Runtime for webpack",
+  "keywords": [
+    "Module Federation",
+    "bundler runtime"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "zhanghang <hanric.zhang@gmail.com>",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.cjs.d.ts",
+  "dependencies": {
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./constant": {
+      "import": "./dist/constant.esm.js",
+      "require": "./dist/constant.cjs.js"
+    },
+    "./container": {
+      "import": "./dist/container.esm.js",
+      "require": "./dist/container.cjs.js"
+    },
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ],
+      "constant": [
+        "./dist/constant.cjs.d.ts"
+      ]
+    }
+  },
+  "devDependencies": {
+    "@module-federation/runtime": "workspace:*"
+  }
+}

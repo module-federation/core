@@ -1,9 +1,9 @@
 {
   "name": "@module-federation/storybook-addon",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Storybook addon to consume remote module federated apps/components",
   "license": "MIT",
-  "repository": "https://github.com/module-federation/universe/tree/main/packages/storybook-addon",
+  "repository": "https://github.com/module-federation/core/tree/main/packages/storybook-addon",
   "publishConfig": {
     "access": "public"
   },
@@ -13,19 +13,42 @@
     "storybook",
     "addon"
   ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "author": "Fiodorov Andrei <hello@fyodorovandrei.com> (https://github.com/fyodorovandrei)",
+  "exports": {
+    ".": {
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js",
+      "types": "./dist/src/indexd.ts"
+    },
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ]
+    }
+  },
   "devDependencies": {
-    "@storybook/core-common": "7.4.6",
-    "@storybook/node-logger": "7.4.6",
-    "webpack": "5.88.2",
-    "webpack-virtual-modules": "0.6.0",
-    "@module-federation/utilities": "3.0.0"
+    "@storybook/core-common": "7.6.17",
+    "@storybook/node-logger": "7.6.17",
+    "webpack": "5.89.0",
+    "webpack-virtual-modules": "0.6.1",
+    "@module-federation/utilities": "workspace:*",
+    "@nx/react": "^17.1.3",
+    "@nx/webpack": "^17.1.3"
   },
   "peerDependencies": {
     "@storybook/core-common": "^6.5.16 || ^7.0.0",
     "@storybook/node-logger": "^6.5.16 || ^7.0.0",
     "webpack": "^5.75.0",
     "webpack-virtual-modules": "^0.5.0 || ^0.6.0",
-    "@module-federation/utilities": "3.0.0"
+    "@module-federation/utilities": "^3.0.23",
+    "@nx/react": "~16.0.0 || ~17.0.0 || ~17.2.0",
+    "@nx/webpack": "~16.0.0 || ~17.0.0 || ~17.2.0"
   }
 }

@@ -1,0 +1,46 @@
+[
+  {
+    "text": "指南",
+    "link": "/guide/start/",
+    "activeMatch": "/guide/"
+  },
+  {
+    "text": "实践",
+    "link": "/practice/overview",
+    "activeMatch": "/practice/"
+  },
+  {
+    "text": "配置",
+    "link": "/configure/",
+    "activeMatch": "/configure/"
+  },
+  {
+    "text": "插件",
+    "link": "/plugin/dev/index",
+    "activeMatch": "/plugin/"
+  },
+  {
+    "text": "案例",
+    "link": "/showcase/index",
+    "activeMatch": "/showcase/"
+  },
+  {
+    "text": "博客",
+    "link": "/blog/announcement",
+    "activeMatch": "/blog/"
+  },
+  {
+    "text": "生态",
+    "activeMatch": "/community/",
+    "items": [
+      {
+        "text": "Module Federation Examples",
+        "link": "https://github.com/module-federation/module-federation-examples"
+      },
+      {
+        "text": "Practical Module Federation",
+        "link": "https://module-federation.myshopify.com/products/practical-module-federation"
+      }
+    ]
+  }
+]

@@ -1,4 +1,8 @@
-import { Template, RuntimeGlobals, Chunk, ChunkGraph } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+const { RuntimeGlobals, Template } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+import type { Chunk, ChunkGraph } from 'webpack';
 
 /**
  * Generates the hot module replacement (HMR) code.
@@ -179,22 +183,9 @@ export function generateLoadingCode(
                       ),
                     )};`,
 
-                    `var requestedRemote = globalThis.__remote_scope__[${JSON.stringify(
-                      name,
-                    )}]`,
-
-                    "if(typeof requestedRemote === 'function'){",
-                    Template.indent(
-                      'requestedRemote = await requestedRemote()',
-                    ),
-                    '}',
-
                     `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
                     "const loadingStrategy = typeof process !== 'undefined' ?  'http-vm' : 'http-eval';",
-
-                    `loadChunkStrategy(loadingStrategy, chunkName,${JSON.stringify(
-                      name,
-                    )}, globalThis.__remote_scope__,installChunkCallback);`,
+                    `loadChunkStrategy(loadingStrategy, chunkName,${RuntimeGlobals.require}.federation.initOptions.name, ${RuntimeGlobals.require}.federation.initOptions.remotes, installChunkCallback);`,
                   ]),
                   '}',
                 ]),
@@ -282,52 +273,36 @@ export function generateLoadScript(runtimeTemplate: any): string {
   return Template.asString([
     '// load script equivalent for server side',
     `${RuntimeGlobals.loadScript} = ${runtimeTemplate.basicFunction(
-      'url,callback,chunkId',
+      'url, callback, chunkId',
       [
         Template.indent([
           `async function executeLoad(url, callback, name) {
             if (!name) {
               throw new Error('__webpack_require__.l name is required for ' + url);
             }
-            var remoteName = name;
-            if(name.includes('__remote_scope__')) {
-              remoteName = name.split('__remote_scope__.')[1]
+            const usesInternalRef = name.startsWith('__webpack_require__')
+            if (usesInternalRef) {
+              const regex = /__webpack_require__\\.federation\\.instance\\.moduleCache\\.get\\(([^)]+)\\)/;
+              const match = name.match(regex);
+              if (match) {
+                name = match[1].replace(/["']/g, '');
+              }
             }
-            if (typeof globalThis.__remote_scope__[remoteName] !== 'undefined') return callback(globalThis.__remote_scope__[remoteName]);
-            globalThis.__remote_scope__._config[remoteName] = url;
             try {
-              const scriptContent = await (globalThis.webpackChunkLoad || globalThis.fetch || require("node-fetch"))(url).then(res => res.text());
-              let remote;
-              if (typeof process !== 'undefined') {
-                const vm = require('vm');
-                const m = require('module');
-                const remoteCapsule = vm.runInThisContext(m.wrap(scriptContent), 'node-federation-loader-' + name + '.vm')
-                const exp = {};
-                remote = {exports:{}};
-                remoteCapsule(exp,require,remote,'node-federation-loader-' + name + '.vm',__dirname);
-                remote = remote.exports || remote;
-              } else {
-                remote = eval('let module = {};' + scriptContent + '\\nmodule.exports')
+              const federation = ${RuntimeGlobals.require}.federation;
+              const res = await ${RuntimeGlobals.require}.federation.runtime.loadScriptNode(url, { attrs: {} });
+              const enhancedRemote = federation.instance.initRawContainer(name, url, res);
+              // use normal global assignment
+              if(!usesInternalRef && !globalThis[name]) {
+                globalThis[name] = enhancedRemote
               }
-              globalThis.__remote_scope__[remoteName] = remote[remoteName] || remote;
-              globalThis.__remote_scope__._config[remoteName] = url;
-              callback(globalThis.__remote_scope__[remoteName])
-            } catch (e) {
-              e.target = {src: url};
-              globalThis.__remote_scope__[remoteName] = {
-                get: function() {
-                  return function() {
-                    return ()=>null
-                  }
-                },
-                init: function() {},
-                fake: true
-              }
-              console.log(e);
-              callback(e);
+              callback(enhancedRemote);
+            } catch (error) {
+              callback(error);
             }
+
           }`,
-          `executeLoad(url,callback,chunkId)`,
+          `executeLoad(url, callback, chunkId);`,
         ]),
       ],
     )}`,
@@ -348,7 +323,6 @@ export function generateInstallChunk(
       '}',
     ]),
     '}',
-    // 'console.log("install chunk", chunkIds, installedChunks);',
     'if(runtime) runtime(__webpack_require__);',
     'for(var i = 0; i < chunkIds.length; i++) {',
     Template.indent([

@@ -1,51 +1,55 @@
-# ModuleFederation
+<p align="center">
+  <img alt="Module federation Banner"  width="260" src="https://github.com/module-federation/core/assets/27547179/11234712-40fc-4696-a7fd-16e0c631005a">
+</p>
 
-# Documentation
+# Module Federation
 
-[module-federation/nextjs-mf](./packages/nextjs-mf)
+<p align="center">
+  <a href="https://www.npmjs.com/package/@module-federation/runtime?activeTab=readme">
+   <img src="https://img.shields.io/npm/v/@module-federation/runtime?style=flat-square&colorA=564341&colorB=EDED91" alt="npm version" />
+  </a>
+  <a href="https://npmcharts.com/compare/@module-federation/runtime?minimal=true">
+    <img src="https://img.shields.io/npm/dm/@module-federation/runtime.svg?style=flat-square&colorA=564341&colorB=EDED91" alt="downloads" />
+  </a>
+  <a href="https://github.com/web-infra-dev/rspack/blob/main/LICENSE">
+    <img src="https://img.shields.io/npm/l/@module-federation/runtime?style=flat-square&colorA=564341&colorB=EDED91" alt="license" />
+  </a>
+</p>
 
-[module-federation/node](./packages/node)
+You can consider the module federation capabilities provided by this repository as "module federation 2.0". "Module Federation 2.0" differs from the "Module Federation" built into Webpack 5 by offering not only the core features of module export, loading, and dependency sharing but also additional dynamic type hinting, a "Manifest", a "Federation Runtime", and a "Runtime Plugin System". These features make "Module Federation" more suitable for use as a micro-frontend architecture in large-scale web applications.
 
-[module-federation/utilities](./packages/utilities)
+## 💡 What is Module Federation?
 
-[module-federation/typescript](./packages/typescript)
+- Module Federation is a concept that allows developers to share code and resources across multiple JavaScript applications
 
-[module-federation/storybook-addon](./packages/storybook-addon)
+- Module Federation can be used to split monolithic applications into micro-front-end architectures
 
-[module-federation/native-federation-typescript](./packages/native-federation-typescript)
+- Module Federation reuses common dependencies between modules as much as possible
 
-[module-federation/native-federation-tests](./packages/native-federation-tests)
 
-## Generate an application
+## ✨ What new features does Module Federation provide?
 
-Run `nx g @nx/next:app my-app` to generate an application.
+* 🎨 Module Federation Runtime
+* 🧩 Runtime Plugins System
+* 📝 Manifest
+* 🚀 Dynamic type prompt
+* 🛠️ Chrome Devtool
 
-> You can use any of the plugins above to generate applications as well.
+## 📚 Getting Started
 
-When using Nx, you can create multiple applications and libraries in the same workspace.
+To get started with Module Federation, see the [Quick Start](https://module-federation.io/guide/start/quick-start.html).
 
-## Generate a library
 
-Run `nx g @nx/js:lib my-lib` to generate a library.
+# 🧑‍💻 Community
 
-> You can also use any of the plugins above to generate libraries as well.
+Come and chat with us on [Discussions](https://github.com/module-federation/universe/discussions) or [Discord](https://discord.gg/n69NnT3ACV)! The Module federation team and users are active there, and we're always looking for contributions.
 
-Libraries are shareable across libraries and applications. They can be imported from `@module-federation/mylib`.
+# 🤝 Contribution
 
-## Development server
+> New contributors welcome!
 
-Run `nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
+Please read the [Contributing Guide](https://github.com/module-federation/core/blob/main/CONTRIBUTING.md).
 
-## Build
+# 🙌 Code of Conduct
 
-Run `nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
-
-Run `nx affected:test` to execute the unit tests affected by a change.
-
-## Social links
-
-We are excited to announce the new [Discord community](https://discord.gg/T8c6yAxkbv) for Module Federation has been recently launched! This space will be used to discuss and share knowledge about the latest advancements in module federation and how to use it effectively. See you there!
+This repo has adopted the Code of Conduct. Please check [Code of Conduct](./CODE_OF_CONDUCT.md) for more details.

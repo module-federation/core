@@ -4,10 +4,7 @@
 */
 
 'use strict';
-
-import { RawSource } from 'webpack-sources';
-//@ts-ignore
-import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type {
   WebpackOptions,
   Compilation,
@@ -24,14 +21,23 @@ import type {
   Hash,
   InputFileSystem,
 } from 'webpack/lib/Module';
-//@ts-ignore
-import Module from 'webpack/lib/Module';
-import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from 'webpack/lib/ModuleTypeConstants';
-import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-//@ts-ignore
-import makeSerializable from 'webpack/lib/util/makeSerializable';
-import { rangeToString, stringifyHoley } from 'webpack/lib/util/semver';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
+import { normalizeConsumeShareOptions } from './utils';
+import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../Constants';
+
+const { rangeToString, stringifyHoley } = require(
+  normalizeWebpackPath('webpack/lib/util/semver'),
+) as typeof import('webpack/lib/util/semver');
+const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { sources: webpackSources } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const makeSerializable = require(
+  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+) as typeof import('webpack/lib/util/makeSerializable');
+
 export type ConsumeOptions = {
   /**
    * fallback request
@@ -160,6 +166,7 @@ class ConsumeSharedModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
+  // @ts-ignore
   override needBuild(
     context: NeedBuildContext,
     callback: (error?: WebpackError | null, needsRebuild?: boolean) => void,
@@ -175,6 +182,7 @@ class ConsumeSharedModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
+  // @ts-ignore
   override build(
     options: WebpackOptions,
     compilation: Compilation,
@@ -217,8 +225,10 @@ class ConsumeSharedModule extends Module {
    * @param {UpdateHashContext} context context
    * @returns {void}
    */
+  // @ts-ignore
   override updateHash(hash: Hash, context: UpdateHashContext): void {
     hash.update(JSON.stringify(this.options));
+    // @ts-ignore
     super.updateHash(hash, context);
   }
 
@@ -226,6 +236,7 @@ class ConsumeSharedModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
+  // @ts-ignore
   override codeGeneration({
     chunkGraph,
     moduleGraph,
@@ -246,6 +257,7 @@ class ConsumeSharedModule extends Module {
       if (eager) {
         const dep = this.dependencies[0];
         fallbackCode = runtimeTemplate.syncModuleFactory({
+          // @ts-ignore
           dependency: dep,
           chunkGraph,
           runtimeRequirements,
@@ -254,6 +266,7 @@ class ConsumeSharedModule extends Module {
       } else {
         const block = this.blocks[0];
         fallbackCode = runtimeTemplate.asyncModuleFactory({
+          // @ts-ignore
           block,
           chunkGraph,
           runtimeRequirements,
@@ -281,12 +294,23 @@ class ConsumeSharedModule extends Module {
       fn += 'Fallback';
       args.push(fallbackCode);
     }
-    const code = runtimeTemplate.returningFunction(`${fn}(${args.join(', ')})`);
+    // const code = runtimeTemplate.returningFunction(`${fn}(${args.join(', ')})`);
     const sources = new Map();
-    sources.set('consume-shared', new RawSource(code));
+    sources.set(
+      'consume-shared',
+      new webpackSources.RawSource(
+        fallbackCode ||
+          `()=>()=>{throw new Error("Can not get '${shareKey}'")}`,
+      ),
+    );
+
+    const data = new Map();
+    data.set('consume-shared', normalizeConsumeShareOptions(this.options));
+
     return {
       runtimeRequirements,
       sources,
+      data,
     };
   }
 

@@ -1,5 +1,8 @@
 import type { LoaderContext } from 'webpack';
-import { Template } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+const { Template } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 import path from 'path';
 
 /**
@@ -26,7 +29,7 @@ export async function fixImageLoader(
 
   const isServer = this._compiler?.options.name !== 'client';
   //@ts-ignore
-  const { publicPath } = this._compiler?.webpack.RuntimeGlobals;
+  const { publicPath } = this._compiler.webpack.RuntimeGlobals;
 
   const result = await this.importModule(
     `${this.resourcePath}.webpack[javascript/auto]!=!${remaining}`,
@@ -37,12 +40,24 @@ export async function fixImageLoader(
   const computedAssetPrefix = isServer
     ? `${Template.asString([
         'function getSSRImagePath(){',
+        //TODO: use auto public path plugin instead
+        `const pubpath = ${publicPath};`,
         Template.asString([
           'try {',
           Template.indent([
-            'const config = globalThis.__remote_scope__ &&',
-            'globalThis.__remote_scope__._config;',
-            `const remoteEntry = config[__webpack_runtime_id__] || ${publicPath}`,
+            "const globalThisVal = new Function('return globalThis')();",
+            'const name = __webpack_require__.federation.instance.name',
+            `const container = globalThisVal['__FEDERATION__']['__INSTANCES__'].find(
+              (instance) => {
+                if (!instance.moduleCache.has(name)) return;
+                const container = instance.moduleCache.get(name);
+                if (!container.remoteInfo) return;
+                return container.remoteInfo.entry;
+              },
+            );`,
+            'const cache = container.moduleCache',
+            'const remote = cache.get(name).remoteInfo',
+            `const remoteEntry = remote.entry;`,
             `if (remoteEntry) {`,
             Template.indent([
               `const splitted = remoteEntry.split('/_next')`,
@@ -65,13 +80,9 @@ export async function fixImageLoader(
         Template.indent([
           'try {',
           Template.indent([
-            `if(typeof document === 'undefined')`,
             Template.indent(
               `return ${publicPath} && ${publicPath}.indexOf('://') > 0 ? new URL(${publicPath}).origin : ''`,
             ),
-            `const path = (document.currentScript && document.currentScript.src) || new URL(${publicPath}).origin;`,
-            `const splitted = path.split('/_next')`,
-            `return splitted.length === 2 ? splitted[0] : '';`,
           ]),
           '} catch (e) {',
           Template.indent([

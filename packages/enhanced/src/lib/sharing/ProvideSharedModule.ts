@@ -2,14 +2,9 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
-
-import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
-import Module from 'webpack/lib/Module';
-import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
-import type Compilation from 'webpack/lib/Compilation';
-import WebpackError from 'webpack/lib/WebpackError';
-import { WEBPACK_MODULE_TYPE_PROVIDE } from 'webpack/lib/ModuleTypeConstants';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Compilation } from 'webpack';
+import type WebpackError from 'webpack/lib/WebpackError';
 import type {
   CodeGenerationContext,
   CodeGenerationResult,
@@ -20,9 +15,17 @@ import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/Module';
-import { InputFileSystem } from 'webpack/lib/util/fs';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
-import { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
+import { WEBPACK_MODULE_TYPE_PROVIDE } from '../Constants';
+import type { InputFileSystem } from 'webpack/lib/util/fs';
+import type { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
+
+const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const makeSerializable = require(
+  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+) as typeof import('webpack/lib/util/makeSerializable');
 
 const TYPES = new Set(['share-init']);
 
@@ -36,6 +39,9 @@ class ProvideSharedModule extends Module {
   private _version: string | false;
   private _request: string;
   private _eager: boolean;
+  private _requiredVersion: string | false;
+  private _strictVersion: boolean;
+  private _singleton: boolean;
 
   /**
    * @constructor
@@ -44,6 +50,9 @@ class ProvideSharedModule extends Module {
    * @param {string | false} version version
    * @param {string} request request to the provided module
    * @param {boolean} eager include the module in sync way
+   * @param {boolean} requiredVersion version requirement
+   * @param {boolean} strictVersion don't use shared version even if version isn't valid
+   * @param {boolean} singleton use single global version
    */
   constructor(
     shareScope: string,
@@ -51,6 +60,9 @@ class ProvideSharedModule extends Module {
     version: string | false,
     request: string,
     eager: boolean,
+    requiredVersion: string | false,
+    strictVersion: boolean,
+    singleton: boolean,
   ) {
     super(WEBPACK_MODULE_TYPE_PROVIDE);
     this._shareScope = shareScope;
@@ -58,6 +70,9 @@ class ProvideSharedModule extends Module {
     this._version = version;
     this._request = request;
     this._eager = eager;
+    this._requiredVersion = requiredVersion;
+    this._strictVersion = strictVersion;
+    this._singleton = singleton;
   }
 
   /**
@@ -92,6 +107,7 @@ class ProvideSharedModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
+  // @ts-ignore
   override needBuild(
     context: NeedBuildContext,
     callback: (error?: WebpackError | null, needsRebuild?: boolean) => void,
@@ -107,6 +123,7 @@ class ProvideSharedModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
+  // @ts-ignore
   override build(
     options: WebpackOptions,
     compilation: Compilation,
@@ -151,29 +168,31 @@ class ProvideSharedModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
+  // @ts-ignore
   override codeGeneration({
     runtimeTemplate,
     moduleGraph,
     chunkGraph,
   }: CodeGenerationContext): CodeGenerationResult {
     const runtimeRequirements = new Set([RuntimeGlobals.initializeSharing]);
+    const moduleGetter = this._eager
+      ? runtimeTemplate.syncModuleFactory({
+          //@ts-ignore
+          dependency: this.dependencies[0],
+          chunkGraph,
+          request: this._request,
+          runtimeRequirements,
+        })
+      : runtimeTemplate.asyncModuleFactory({
+          //@ts-ignore
+          block: this.blocks[0],
+          chunkGraph,
+          request: this._request,
+          runtimeRequirements,
+        });
     const code = `register(${JSON.stringify(this._name)}, ${JSON.stringify(
       this._version || '0',
-    )}, ${
-      this._eager
-        ? runtimeTemplate.syncModuleFactory({
-            dependency: this.dependencies[0],
-            chunkGraph,
-            request: this._request,
-            runtimeRequirements,
-          })
-        : runtimeTemplate.asyncModuleFactory({
-            block: this.blocks[0],
-            chunkGraph,
-            request: this._request,
-            runtimeRequirements,
-          })
-    }${this._eager ? ', 1' : ''});`;
+    )}, ${moduleGetter}${this._eager ? ', 1' : ''});`;
     const sources = new Map();
     const data = new Map();
     data.set('share-init', [
@@ -183,6 +202,19 @@ class ProvideSharedModule extends Module {
         init: code,
       },
     ]);
+    data.set('share-init-option', {
+      name: this._name,
+      version: JSON.stringify(this._version || '0'),
+      request: this._request,
+      getter: moduleGetter,
+      shareScope: [this._shareScope],
+      shareConfig: {
+        eager: this._eager,
+        requiredVersion: this._requiredVersion,
+        strictVersion: this._strictVersion,
+        singleton: this._singleton,
+      },
+    });
     return { sources, data, runtimeRequirements };
   }
 
@@ -196,6 +228,9 @@ class ProvideSharedModule extends Module {
     write(this._version);
     write(this._request);
     write(this._eager);
+    write(this._requiredVersion);
+    write(this._strictVersion);
+    write(this._singleton);
     super.serialize(context);
   }
 
@@ -205,7 +240,16 @@ class ProvideSharedModule extends Module {
    */
   static deserialize(context: ObjectDeserializerContext): ProvideSharedModule {
     const { read } = context;
-    const obj = new ProvideSharedModule(read(), read(), read(), read(), read());
+    const obj = new ProvideSharedModule(
+      read(),
+      read(),
+      read(),
+      read(),
+      read(),
+      read(),
+      read(),
+      read(),
+    );
     obj.deserialize(context);
     return obj;
   }

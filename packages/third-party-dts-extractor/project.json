@@ -1,0 +1,52 @@
+{
+  "name": "third-party-dts-extractor",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/third-party-dts-extractor/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/third-party-dts-extractor/dist"],
+      "options": {
+        "parallel": false,
+        "commands": [
+          "tsup --config packages/third-party-dts-extractor/tsup.config.ts",
+          "cp packages/third-party-dts-extractor/package.json packages/third-party-dts-extractor/dist",
+          "cp packages/third-party-dts-extractor/*.md packages/third-party-dts-extractor/dist"
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/third-party-dts-extractor/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/third-party-dts-extractor"]
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run third-party-dts-extractor:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run third-party-dts-extractor:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
+    }
+  },
+  "tags": ["type:pkg"],
+  "implicitDependencies": []
+}

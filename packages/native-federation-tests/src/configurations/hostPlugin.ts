@@ -4,7 +4,8 @@ const defaultOptions = {
   testsFolder: '@mf-tests',
   mocksFolder: './__mocks__',
   deleteTestsFolder: true,
-};
+  maxRetries: 3,
+} satisfies Partial<HostOptions>;
 
 const retrieveRemoteStringUrl = (remote: string) => {
   const splittedRemote = remote.split('@');

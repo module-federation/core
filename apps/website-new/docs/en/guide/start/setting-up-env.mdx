@@ -1,0 +1,52 @@
+# Setting Up the Environment
+
+Module Federation is a JavaScript application partitioning architecture pattern (similar to microservices on the server side) that allows you to share code and resources between multiple JavaScript applications (or micro frontends). This document is aimed at beginner users and will guide you through setting up the basic environment for Module Federation.
+
+## Prerequisites
+
+Before we begin, we require you to have the following prerequisites. For any unfamiliar terms encountered in the text, please refer to the [Glossary of Terms](../start/glossary):
+
+- You should understand the [basic concepts and applicable scenarios](../start/index) of Module Federation.
+- You need to have Node.js and npm installed on your machine, refer to the following [Initial Environment Setup](#initial-environment).
+- You should be proficient in the following essential web application development technologies:
+  - Proficient in [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML) and [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_Overview)
+  - Familiar with [Node.js](https://nodejs.org/en/about/)
+  - Proficient in using [npm](https://www.npmjs.com/package/npm)
+- You need to have an application that can load JavaScript modules.
+
+## Initial Environment Setup
+
+Before starting to use Module Federation, you need to install [Node.js](https://nodejs.org/) and ensure that the Node.js version is >= 16. **We recommend using the LTS version of Node.js 20**.
+
+You can check the current Node.js version in use with the following command:
+
+```bash
+node -v
+```
+
+If you do not have Node.js installed in your current environment, or if the installed version is too low, you can install the required version through [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm).
+
+Here is an example of installing the LTS version of Node.js 20 with nvm:
+
+```bash
+# Install the long-term support version of Node.js 20
+nvm install 20 --lts
+
+# Set the newly installed Node.js 20 as the default version
+nvm alias default 20
+
+# Switch to the newly installed Node.js 20
+nvm use 20
+```
+
+## Using Module Federation
+
+To use Module Federation, you need to follow these steps:
+
+- Identify shared modules: Determine which modules you want to share between applications.
+- Create a shared package/repository: Add these modules to a shared package or code repository.
+- Ensure access rights: Make sure each application can access the shared package or code repository.
+- Configure build plugins: Configure the [Webpack](../basic/webpack), [Rspack](../basic/rspack) configuration files for each application to use Module Federation.
+- Use shared modules: Use the shared modules in your applications as needed.
+
+For more information and advanced configuration options, please refer to the [Build Configuration](../../configure/index) documentation.

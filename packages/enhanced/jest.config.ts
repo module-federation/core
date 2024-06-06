@@ -1,11 +1,16 @@
 /* eslint-disable */
-import { readFileSync } from 'fs';
+import { readFileSync, rmdirSync, existsSync } from 'fs';
+import path from 'path';
 
 // Reading the SWC compilation config and remove the "exclude"
 // for the test files to be compiled by SWC
 const { exclude: _, ...swcJestConfig } = JSON.parse(
   readFileSync(`${__dirname}/.swcrc`, 'utf-8'),
 );
+
+if (existsSync(__dirname + '/test/js')) {
+  rmdirSync(__dirname + '/test/js', { recursive: true });
+}
 
 // disable .swcrc look-up by SWC core because we're passing in swcJestConfig ourselves.
 // If we do not disable this, SWC Core will read .swcrc and won't transform our test files due to "exclude"
@@ -26,4 +31,13 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/enhanced',
+  rootDir: __dirname,
+  testMatch: [
+    '<rootDir>/test/*.test.js',
+    '<rootDir>/test/*.basictest.js',
+    '<rootDir>/test/*.longtest.js',
+    '<rootDir>/test/*.unittest.js',
+  ],
+  testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
+  setupFilesAfterEnv: ['<rootDir>/test/setupTestFramework.js'],
 };

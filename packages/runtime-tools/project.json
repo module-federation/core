@@ -1,0 +1,78 @@
+{
+  "name": "runtime-tools",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/runtime-tools/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{workspaceRoot}/packages/runtime-tools/dist"],
+      "options": {
+        "parallel": false,
+        "outputPath": "packages/runtime-tools/dist",
+        "main": "packages/runtime-tools/src/index.ts",
+        "additionalEntryPoints": [
+          "packages/runtime-tools/src/runtime.ts",
+          "packages/runtime-tools/src/webpack-bundler-runtime.ts"
+        ],
+        "tsConfig": "packages/runtime-tools/tsconfig.lib.json",
+        "assets": [],
+        "project": "packages/runtime-tools/package.json",
+        "compiler": "swc",
+        "rollupConfig": "packages/runtime-tools/rollup.config.js",
+        "format": ["cjs", "esm"],
+        "external": ["@module-federation/*"],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/runtime-tools/**/*.ts",
+          "packages/runtime-tools/package.json"
+        ]
+      }
+    },
+    "release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run runtime:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run runtime:build",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run runtime:semantic-release",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/core"],
+      "options": {
+        "jestConfig": "packages/runtime-tools/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}

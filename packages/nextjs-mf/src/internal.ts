@@ -1,12 +1,4 @@
-import type {
-  ModuleFederationPluginOptions,
-  SharedConfig,
-  SharedObject,
-} from '@module-federation/utilities';
-import { createDelegatedModule } from '@module-federation/utilities';
-
-import { isRequiredVersion } from 'webpack/lib/sharing/utils';
-import { parseOptions } from 'webpack/lib/container/options';
+import type { SharedConfig, SharedObject } from '@module-federation/utilities';
 
 /**
  * @typedef SharedObject
@@ -19,94 +11,80 @@ import { parseOptions } from 'webpack/lib/container/options';
  */
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/dynamic': {
-    version: '1',
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/head': {
-    version: '1',
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/link': {
-    version: '1',
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/router': {
-    version: '1',
-    requiredVersion: undefined,
+    requiredVersion: false,
     singleton: true,
     import: undefined,
-  },
-  '@module-federation/utilities': {
-    eager: true,
-    requiredVersion: false,
   },
   'next/image': {
     requiredVersion: undefined,
     singleton: true,
-    version: '1',
     import: undefined,
   },
   'next/script': {
-    version: '1',
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   react: {
-    version: '0',
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react/': {
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react-dom/': {
-    version: '1',
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react-dom': {
-    version: '1',
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react/jsx-dev-runtime': {
-    version: '1',
     singleton: true,
-    requiredVersion: undefined,
-    import: undefined,
+    requiredVersion: false,
   },
   'react/jsx-runtime': {
-    version: '1',
     singleton: true,
-    requiredVersion: undefined,
-    // import: false,
+    requiredVersion: false,
   },
   'styled-jsx': {
-    requiredVersion: undefined,
     singleton: true,
     import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
   'styled-jsx/style': {
-    requiredVersion: false,
     singleton: true,
     import: false,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
   'styled-jsx/css': {
-    requiredVersion: false,
     singleton: true,
     import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
 };
 
@@ -141,15 +119,6 @@ const isInternalOrPromise = (value: string): boolean =>
   ['internal ', 'promise '].some((prefix) => value.startsWith(prefix));
 
 /**
- * Checks if the remote value is using the standard remote syntax.
- *
- * @param {string} value - The remote value to check.
- * @returns {boolean} - True if the value is using the standard remote syntax, false otherwise.
- */
-const isStandardRemoteSyntax = (value: string): boolean => {
-  return value.includes('@');
-};
-/**
  * Parses the remotes object and checks if they are using a custom promise template or not.
  * If it's a custom promise template, the remote syntax is parsed to get the module name and version number.
  * If the remote value is using the standard remote syntax, a delegated module is created.
@@ -168,26 +137,6 @@ export const parseRemotes = (
         return { ...acc, [key]: value };
       }
 
-      return { ...acc, [key]: value };
-
-      if (isStandardRemoteSyntax(value)) {
-        let resolvePath;
-        try {
-          resolvePath = require.resolve('./default-delegate.cjs');
-        } catch (e) {
-          resolvePath = require.resolve('./default-delegate');
-        }
-
-        // If the value is using the standard remote syntax, create a delegated module
-        return {
-          ...acc,
-          [key]: createDelegatedModule(resolvePath, {
-            remote: value,
-          }),
-        };
-      }
-
-      // If none of the above conditions are met, keep the original value
       return { ...acc, [key]: value };
     },
     {} as Record<string, string>,
@@ -219,68 +168,6 @@ export const getDelegates = (
       isInternalDelegate(value) ? { ...acc, [key]: value } : acc,
     {},
   );
-
-/**
- * Validates the shared item type and constructs a shared configuration object based on the item and key.
- * If the item is the same as the key or if the item does not require a specific version,
- * the function returns an object with the import property set to the item.
- * Otherwise, it returns an object with the import property set to the key and the requiredVersion property set to the item.
- *
- * @param {string} item - The shared item to be validated and used in the shared configuration object.
- * @param {string} key - The key associated with the shared item.
- * @returns {object} - The constructed shared configuration object.
- * @throws {Error} - Throws an error if the item type is not a string.
- */
-const getSharedConfig = (item: string, key: string) => {
-  if (typeof item !== 'string') {
-    throw new Error('Unexpected array in shared');
-  }
-
-  return item === key || !isRequiredVersion(item)
-    ? {
-        import: item,
-      }
-    : {
-        import: key,
-        requiredVersion: item,
-      };
-};
-
-/**
- * Parses the share options from the provided ModuleFederationPluginOptions object and constructs a new object containing all shared configurations.
- * This newly constructed object is then used as the value for the 'shared' property of the Module Federation Plugin Options.
- * The function uses the 'parseOptions' utility function from webpack to parse the 'shared' property of the provided options object.
- * The 'getSharedConfig' function is used as the 'config' argument for 'parseOptions' to construct the shared configuration object for each shared item.
- * The 'item' argument for 'parseOptions' is a function that simply returns the item as it is.
- * The function then reduces the parsed shared options into a new object with the shared configuration for each shared item.
- *
- * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions object to parse the share options from.
- * @returns {Record<string, SharedConfig>} - An object containing the shared configuration for each shared item.
- */
-const parseShareOptions = (options: ModuleFederationPluginOptions) => {
-  const sharedOptions: [string, SharedConfig][] = parseOptions(
-    options.shared,
-    getSharedConfig,
-    (item: any) => item,
-  );
-
-  return sharedOptions.reduce(
-    (acc, [key, options]) => {
-      acc[key] = {
-        import: options.import,
-        shareKey: options.shareKey || key,
-        shareScope: options.shareScope,
-        requiredVersion: options.requiredVersion,
-        strictVersion: options.strictVersion,
-        singleton: options.singleton,
-        packageName: options.packageName,
-        eager: options.eager,
-      };
-      return acc;
-    },
-    {} as Record<string, SharedConfig>,
-  );
-};
 
 /**
  * Takes an error object and formats it into a displayable string.

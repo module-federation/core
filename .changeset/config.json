@@ -1,0 +1,32 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    [
+      "@module-federation/runtime",
+      "@module-federation/enhanced",
+      "@module-federation/rspack",
+      "@module-federation/webpack-bundler-runtime",
+      "@module-federation/sdk",
+      "@module-federation/runtime-tools",
+      "@module-federation/managers",
+      "@module-federation/manifest",
+      "@module-federation/dts-plugin",
+      "@module-federation/third-party-dts-extractor",
+      "@module-federation/devtools"
+    ]
+  ],
+  "ignorePatterns": ["^alpha|^beta"],
+  "linked": [],
+  "access": "restricted",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "node-host",
+    "node-host-e2e",
+    "node-host-e2e",
+    "node-local-remote",
+    "node-remote"
+  ]
+}

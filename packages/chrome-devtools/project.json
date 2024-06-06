@@ -1,0 +1,33 @@
+{
+  "name": "chrome-devtools",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/chrome-devtools/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run build:lib --prefix packages/chrome-devtools"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run test --prefix packages/chrome-devtools"]
+      }
+    },
+    "e2e:devtools": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run test:e2e --prefix packages/chrome-devtools"]
+      }
+    },
+    "e2e:devtools:ui": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run test:e2e:ui --prefix packages/chrome-devtools"]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}

@@ -1,0 +1,10 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+./tmp
+./scripts
+./.git
+./packages/storybook-addon
+./packages/core
+./packages/utilities
+./packages/typescript
+./packages/native-*
+./apps

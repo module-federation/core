@@ -8,7 +8,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/core",
+        "outputPath": "packages/core/dist",
         "main": "packages/core/src/index.ts",
         "tsConfig": "packages/core/tsconfig.lib.json",
         "assets": ["packages/core/*.md"]
@@ -29,7 +29,7 @@
         "passWithNoTests": true
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -41,17 +41,10 @@
           {
             "command": "nx run core:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run core:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
-  "tags": ["package"]
+  "tags": ["type:pkg"]
 }

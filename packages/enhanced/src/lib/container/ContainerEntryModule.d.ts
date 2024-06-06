@@ -39,6 +39,7 @@ declare class ContainerEntryModule extends Module {
    * @param {string} name container entry name
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
    * @param {string} shareScope name of the share scope
+   * @param {string[]} runtimePlugins Runtime plugin file paths or package name.
    */
   constructor(
     name: string,
@@ -48,6 +49,7 @@ declare class ContainerEntryModule extends Module {
   _name: string;
   _exposes: [string, ExposeOptions][];
   _shareScope: string;
+  runtimePlugins: string[];
 }
 declare namespace ContainerEntryModule {
   export {

@@ -1,26 +1,80 @@
 name: Build affected packages
 
 on:
-  push:
-    branches: ['main']
   pull_request:
-    branches: ['main', 'next', 'canary']
+    branches: [main]
+
+  push:
+    branches: [main]
 
 jobs:
   main:
     runs-on: ubuntu-latest
-    # Cancel any previous runs in progress
-    concurrency:
-      group: ${{ github.head_ref || github.run_id }}
-      cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: nrwl/nx-set-shas@v3
-      - run: npm ci
 
-      - run: npx nx format:check
-      - run: npx nx affected -t lint --parallel=3 --exclude='*,!tag:package'
-      - run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
-      - run: npx nx affected -t build --parallel=3 --exclude='*,!tag:package'
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Check Code Format
+        run: npx nx format:check
+
+      - name: Run Affected Build
+        run: pnpm run build:pkg
+
+      - name: Run Affected Lint
+        run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:type:pkg'
+
+      - name: Run Affected Test
+        run: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg' --skip-cache
+
+      # - name: E2E Test for Next.js Dev
+      #   run: |
+      #     pnpm run app:next:dev &
+      #     sleep 1 &&
+      #     npx wait-on tcp:3001 &&
+      #     npx wait-on tcp:3002 &&
+      #     npx wait-on tcp:3000 &&
+      #     npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=2 &&
+      #     lsof -ti tcp:3000,3001,3002 | xargs kill
+
+      # - name: E2E Test for Next.js Prod
+      #   run: |
+      #     pnpm run --filter @module-federation/3002-checkout --filter @module-federation/3000-home --filter @module-federation/3001-shop build &&
+      #     pnpm run app:next:prod &
+      #     sleep 2 &&
+      #     npx wait-on tcp:3001 &&
+      #     npx wait-on tcp:3002 &&
+      #     npx wait-on tcp:3000 &&
+      #     npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 &&
+      #     lsof -ti tcp:3000,3001,3002 | xargs kill
+
+      - name: E2E Test for ModernJS
+        run: npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && lsof -ti tcp:4001 | xargs kill
+
+      - name: E2E Test for 3005-runtime-host
+        run: pnpm run app:runtime:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1 && lsof -ti tcp:3005,3006,3007 | xargs kill
+
+      - name: E2E Test for 3008-webpack-host
+        run: pnpm run app:manifest:dev & echo "done" && npx wait-on tcp:3009 && npx wait-on tcp:3012 && npx nx run-many --target=e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
+
+      - name: E2E Node Federation
+        run: npx nx run-many --target=serve --projects=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote --parallel=10 & echo "done" && sleep 25 && npx nx run-many --target=serve --projects=node-host & sleep 5 && npx wait-on tcp:3333 && npx nx run node-host-e2e:test:e2e

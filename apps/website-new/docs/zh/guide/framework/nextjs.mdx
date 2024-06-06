@@ -1,0 +1,259 @@
+# Next.js
+
+这个插件为 Next.js 启用 Module Federation
+
+## 支持
+
+- next ^14 || ^13 || ^12
+- 包含服务器端渲染（SSR）!
+
+强烈推荐参考这个应用，它充分利用了最佳功能：
+[module-federation 示例](https://github.com/module-federation/module-federation-examples)
+
+## 该项目支持联合服务器端渲染（SSR）
+
+## 默认共享内容
+
+在底层，默认自动共享一些 Next 内部的内容
+你不需要自己共享这些包，自行共享 Next 内部内容会引起错误。
+
+<details>
+<summary> 查看 DEFAULT_SHARE_SCOPE:</summary>
+
+```ts
+export const DEFAULT_SHARE_SCOPE: SharedObject = {
+  'next/dynamic': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  'next/head': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  'next/link': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  'next/router': {
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+  },
+  'next/image': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  'next/script': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  react: {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react/': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react/jsx-dev-runtime': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react/jsx-runtime': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'styled-jsx': {
+    singleton: true,
+    import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
+  },
+  'styled-jsx/style': {
+    singleton: true,
+    import: false,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
+  },
+  'styled-jsx/css': {
+    singleton: true,
+    import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
+  },
+};
+```
+
+</details>
+
+## 要求
+
+在这个插件中，设置了 `process.env.NEXT_PRIVATE_LOCAL_WEBPACK = 'true'`，但最好是在环境变量或命令行中设置。
+
+"本地 Webpack" 意味着你必须将 webpack 安装为依赖项，并且 next 不会使用其捆绑的 webpack 副本，因为需要访问所有 webpack 内部
+
+- 使用 `NEXT_PRIVATE_LOCAL_WEBPACK=true next dev` 或 `next build`
+- `npm install webpack`
+
+## 使用方法
+
+```js
+import React, { lazy } from 'react';
+const SampleComponent = lazy(() => import('next2/sampleComponent'));
+```
+
+为了避免水合错误，使用 `React.lazy` 而不是 `next/dynamic` 来懒加载联合组件。
+
+#### 在这里看到实现：[module-federation 示例](https://github.com/module-federation/module-federation-examples/tree/master/nextjs-v13/home/pages)
+
+在页面级别安装异步边界后，可以执行以下操作：
+
+```js
+const SomeHook = require('next2/someHook');
+import SomeComponent from 'next2/someComponent';
+```
+
+## 演示
+
+你可以在这里看到它的实际应用：[module-federation 示例](https://github.com/module-federation/module-federation-examples/tree/master/nextjs-ssr)
+
+## 选项
+
+这个插件的工作方式与 ModuleFederationPlugin 完全相同，按正常方式使用即可。
+请注意，我们已经自动为你共享了 react 和 next 相关的内容。
+
+NextFederationPlugin 还有一个可选参数 `extraOptions`，你可以用它来启用这个插件的额外功能：
+
+```js
+new NextFederationPlugin({
+  name: '',
+  filename: '',
+  remotes: {},
+  exposes: {},
+  shared: {},
+  extraOptions: {
+    debug: boolean, // `false` by default
+    exposePages: boolean, // `false` by default
+    enableImageLoaderFix: boolean, // `false` by default
+    enableUrlLoaderFix: boolean, // `false` by default
+    skipSharingNextInternals: boolean, // `false` by default
+  },
+});
+```
+
+- `debug` – 启用调试模式。它将打印关于底层发生情况的额外信息。
+- `exposePages` – 自动为你暴露所有的 Next.js 页面和它们的 `./pages-map`。
+- `enableImageLoaderFix` – 给所有由 `nextjs-image-loader` 打包的资产添加公共主机名。例如，如果你从 `http://example.com` 提供 remoteEntry，则所有打包资产将在运行时获取此主机名。这类似于 HTML 中的 Base URL，但用于联合模块。
+- `enableUrlLoaderFix` – 给所有由 `url-loader` 打包的资产添加公共主机名。
+- `skipSharingNextInternals` – 禁用共享 Next 内部。如果你想自己共享 Next 内部或在非 next 应用中使用此插件，则可以使用它。
+
+## 演示
+
+你可以在这里看到它的实际应用：[module-federation 演示](https://github.com/module-federation/module-federation-examples/pull/2147)
+
+## 实现插件
+
+1. 在你想要暴露模块的应用的 `next.config.js` 中使用 `NextFederationPlugin`。我们将这个应用称为 "next2"。
+
+```js
+// either from default
+const NextFederationPlugin = require('@module-federation/nextjs-mf');
+
+module.exports = {
+  webpack(config, options) {
+    const { isServer } = options;
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: 'next2',
+        remotes: {
+          next1: `next1@http://localhost:3001/_next/static/${
+            isServer ? 'ssr' : 'chunks'
+          }/remoteEntry.js`,
+        },
+        filename: 'static/chunks/remoteEntry.js',
+        exposes: {
+          './title': './components/exposedTitle.js',
+          './checkout': './pages/checkout',
+        },
+        shared: {
+          // whatever else
+        },
+      }),
+    );
+
+    return config;
+  },
+};
+```
+
+```js
+// next.config.js
+
+const NextFederationPlugin = require('@module-federation/nextjs-mf');
+
+module.exports = {
+  webpack(config, options) {
+    const { isServer } = options;
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: 'next1',
+        remotes: {
+          next2: `next2@http://localhost:3000/_next/static/${
+            isServer ? 'ssr' : 'chunks'
+          }/remoteEntry.js`,
+        },
+      }),
+    );
+
+    return config;
+  },
+};
+```
+
+4. 使用 react.lazy、低级 API 或从导入远程模
+
+```js
+import React, { lazy } from 'react';
+
+const SampleComponent = lazy(() =>
+  window.next2.get('./sampleComponent').then((factory) => {
+    return { default: factory() };
+  }),
+);
+
+// or
+
+const SampleComponent = lazy(() => import('next2/sampleComponent'));
+
+//or
+
+import Sample from 'next2/sampleComponent';
+```
+
+## RuntimePlugins
+
+要为 Module Federation 提供可扩展性和“中间件”，您可以参考 `@module-federation/enhanced/runtime`
+
+```js
+// next.config.js
+new NextFederationPlugin({
+  runtimePlugins: [require.resolve('./path/to/myRuntimePlugin.js')],
+});
+```

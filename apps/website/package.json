@@ -1,3 +1,4 @@
 {
-  "name": "website"
+  "name": "website",
+  "private": true
 }

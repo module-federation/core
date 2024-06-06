@@ -1,0 +1,80 @@
+# Chrome Devtool
+
+`微前端` 架构不同于传统单体应用的开发模式，其分开开发、部署、调试的特征使其需要一套新的调试工具来满足新的使用场景，诸如：在开发 `Module Federation` 时怎么验证模块在实际项目中的效果、 `Module Federation` 的依赖是否和宿主环境进行了复用、当前页面加载了哪些 `Module Federation` ， `Module Federation` 的依赖关系、`Module Federation` 间的数据流转是怎么样的。
+
+`Chrome Devtool` 提供了以下能力：
+
+- 支持 `Module Federation` 代理功能，将线上页面中的`Module Federation`代理到用户本地的`Module Federation`
+- 切换线上页面`Module Federation`版本，来进行快速的功能验证
+- 支持查看模块依赖信息
+- 支持筛选指定模块依赖信息
+
+::: tip 关于 Chrome Devtool 的限制：
+必须使用 `mf-manifest.json` 才可以使用 `Chrome devtool` 提供的可视化和代理能力
+
+:::
+
+## 使用场景
+
+开发环境以及生产环境
+
+- 已有模块需要代理，目前支持以下种场景：
+
+1. 支持本地服务端口号，例如 key: appA -> value: `http://localhost:3000/mf-manifest.json`，页面将直接加载 3000 端口的 `Module Federation` 内容
+2. 支持使用 `mf-manifest.json` 文件地址形式，例如：key: appA -> value: `https://xxx/static/mf-manifest.json`， 页面将直接加载指定地址的 `Module Federation` 内容
+
+- 希望看到远程依赖关系图
+
+![](@public/guide/chrome-devtools/features.png)
+
+## 如何安装
+
+1. 打开 [Module Federation 插件详情页](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom?hl=zh-CN&utm_source=ext_sidebar), 点击 `添加到 Chrome` 按钮
+
+![](@public/guide/chrome-devtools/chrome-store-add-devtool.png)
+
+## 如何使用
+
+插件提供了 Devtools 面板
+
+- F12 打开开发者工具，选择点击 `Module Federation` tab，进入代理页面，便可对依赖的模块进行代理调试
+  ![](@public/guide/chrome-devtools/open-devtools.png)
+
+## 整体交互
+
+如下图所示，代理页面上提供了 `add new proxy module`、`producer selector`、 `version or local port or custom entry` 等选项操作。
+
+- 通过选择 `producer selector` 选择出目标页面需要代理的一个模块;
+- 通过 `version or local port` 选择或者输入指定的地址（包括端口号和 `mf-manifest.json` 结尾的地址），进行代理操作;
+- 如果需要同时代理多个模块，点击 `add new proxy module` 区域，增加对应的代理模块。
+
+![](@public/guide/chrome-devtools/opereation-guide.png)
+
+## 如何将本地开发的模块代理到线上
+
+- 首先需要在本地启动生产者
+
+![](@public/guide/chrome-devtools/dev-to-proxy.png)
+
+- 然后将启动成功的 manifest 地址，输入到代理页面的版本选择输入框内
+- 之后调整本地的生产者代码，消费者页面将会自动 Reload
+
+![](@public/guide/chrome-devtools/proxy-to-local.png)
+
+## 常见问题
+
+### Devtools 内容太拥挤
+
+可以将 devtools 改成独立窗口打开
+
+![](@public/guide/chrome-devtools/split-window.png)
+
+### 配置何时生效
+
+- ✅ 符合验证规则
+- ✅ 配置规则被勾选
+- ✅ 配置填写正确，页面显示：代理配置已生效，获取远程模块成功，已自动刷新对应页面
+
+### 部分配置符合规则
+
+插件会筛选出**符合配置规则的模块**进行代理

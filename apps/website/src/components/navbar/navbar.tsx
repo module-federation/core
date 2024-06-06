@@ -26,6 +26,10 @@ export const locales = [
     name: 'Port',
     lang: 'pt-BR',
   },
+  {
+    name: '中文',
+    lang: 'zh-CN',
+  },
 ];
 
 export interface NavbarProps {
@@ -286,8 +290,8 @@ export default component$((props: NavbarProps) => {
                 class="border-blue-gray-900 w-1/2 px-4 py-1.5 pr-8 bg-mf-gray hover:bg-white focus:bg-mf-gray text-lg focus:border-ui-blue"
                 name="language"
                 id="language"
-                onChange$={async (event, el) => {
-                  await changeLocale$(event.target.value as any);
+                onChange$={async (event: any, el) => {
+                  await changeLocale$(event.target?.value as any);
                 }}
               >
                 {locales.map((locale) => {

@@ -1,4 +1,5 @@
-import { Compiler, RuntimeGlobals } from 'webpack';
+import type { Compiler } from 'webpack';
+
 import RemotePublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
 
 interface PluginOptions {}
@@ -11,6 +12,7 @@ class RemotePublicPathPlugin {
   }
 
   apply(compiler: Compiler) {
+    const { RuntimeGlobals } = compiler.webpack;
     compiler.hooks.thisCompilation.tap(
       'RemotePublicPathPlugin',
       (compilation) => {

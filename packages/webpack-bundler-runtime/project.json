@@ -1,0 +1,77 @@
+{
+  "name": "webpack-bundler-runtime",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/webpack-bundler-runtime/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "parallel": false,
+        "outputPath": "packages/webpack-bundler-runtime/dist",
+        "main": "packages/webpack-bundler-runtime/src/index.ts",
+        "tsConfig": "packages/webpack-bundler-runtime/tsconfig.lib.json",
+        "assets": [],
+        "project": "packages/webpack-bundler-runtime/package.json",
+        "compiler": "swc",
+        "format": ["cjs", "esm"],
+        "additionalEntryPoints": [
+          "packages/webpack-bundler-runtime/src/constant.ts",
+          "packages/webpack-bundler-runtime/src/container.ts"
+        ],
+        "external": ["@module-federation/*"],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true,
+        "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.js"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/webpack-bundler-runtime/**/*.ts",
+          "packages/webpack-bundler-runtime/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/webpack-bundler-runtime/jest.config.js",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run webpack-bundler-runtime:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run webpack-bundler-runtime:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}

@@ -1,0 +1,14 @@
+[build]
+publish = "apps/website-new/doc_build"
+
+[[redirects]]
+from = "/docs/en/mf-docs/0.2/getting-started"
+to = "https://module-federation.io/"
+status = 302
+
+[[redirects]]
+from = "/*"
+to = "/"
+status = 200
+
+

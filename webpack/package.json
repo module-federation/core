@@ -1,0 +1,19 @@
+{
+  "name": "@module-federation/webpack-type",
+  "version": "0.0.1",
+  "license": "MIT",
+  "types": "./types.d.ts",
+  "type": "commonjs",
+  "description": "Webpack type for Module federation",
+  "repository": "https://github.com/module-federation/core/tree/main/packages/nextjs-mf",
+  "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
+  "contributors": [
+    "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
+  ],
+  "exports": {
+    ".": "./types.d.ts"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

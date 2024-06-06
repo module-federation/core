@@ -1,0 +1,46 @@
+name: Devtools
+
+on:
+  pull_request:
+    branches: [main]
+
+  push:
+    branches: [main]
+
+env:
+  PLAYWRIGHT_BROWSERS_PATH: 0 # Places binaries to node_modules/@playwright/test
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run Affected Build
+        run: npx nx build --parallel=10 --exclude='*,!tag:type:pkg'
+
+      - name: Configuration xvfb
+        shell: bash
+        run: sudo apt-get update && sudo apt-get install xvfb
+
+      - name: E2E Chrome Devtools
+        run: |
+          pnpm run app:manifest:dev & echo "done" && sleep 50 && npx nx e2e:devtools chrome-devtools && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill

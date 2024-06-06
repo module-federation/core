@@ -1,0 +1,2 @@
+export const ENCODE_NAME_PREFIX = 'ENCODE_NAME_PREFIX';
+export const FEDERATION_SUPPORTED_TYPES = ['script'];

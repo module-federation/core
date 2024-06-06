@@ -1,0 +1,441 @@
+# Federation Runtime
+
+:::tip
+在阅读本章前，预设你已经了解：
+
+- Module Federation 的[特点和能力](../start/index)
+- Module Federation 的[名词解释](../start/glossary)
+- 了解如[何消费和导出模块](../start/quick-start)
+
+:::
+
+`Federation Runtime` 是新版本 `Module Federation` 的主要功能之一，它能够支持通过运行时 API 注册共享依赖、动态注册和加载远程模块，了解 Runtime 的设计原理可以参考：[Why Runtime](#why-runtime)。
+
+## 安装依赖
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/enhanced --save',
+    yarn: 'yarn add @module-federation/enhanced --save',
+    pnpm: 'pnpm add @module-federation/enhanced --save',
+    bun: 'bun add @module-federation/enhanced --save',
+  }}
+/>
+
+## API
+
+```javascript
+// 可以只使用运行时加载模块，而不依赖于构建插件
+// 当不使用构建插件时，共享的依赖项不能自动设置细节
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+
+init({
+    name: '@demo/app-main',
+    remotes: [
+        {
+            name: "@demo/app1",
+            // mf-manifest.json 是在 Module federation 新版构建工具中生成的文件类型，对比 remoteEntry 提供了更丰富的功能
+            // 预加载功能依赖于使用 mf-manifest.json 文件类型
+            entry: "http://localhost:3005/mf-manifest.json",
+            alias: "app1"
+        },
+        {
+            name: "@demo/app2",
+            entry: "http://localhost:3006/remoteEntry.js",
+            alias: "app2"
+        },
+    ],
+});
+
+// 使用别名加载
+loadRemote<{add: (...args: Array<number>)=> number }>("app2/util").then((md)=>{
+    md.add(1,2,3);
+});
+```
+
+### init
+
+- Type: `init(options: InitOptions): void`
+- 创建运行时实例，它可以通过重新调用动态注册远程，但只存在一个实例。
+- InitOptions:
+
+```ts
+type InitOptions {
+    //当前消费者的名称
+    name: string;
+    // 依赖的远程模块列表
+    // 使用 version 内容的时候需要配合 snapshot 使用，该内容还在施工中
+    remotes: Array<RemoteInfo>;
+    // 当前消费者需要共享的依赖项列表
+    // 当使用构建插件时，用户可以在构建插件中配置需要共享的依赖项，而构建插件会将需要共享的依赖项注入到运行时共享配置中
+    // Shared 在运行时传入时必须在版本实例引用中手动传入，因为它不能在运行时直接传入。
+    shared?: {
+      [pkgName: string]: ShareArgs | ShareArgs[];
+    };
+  };
+
+type ShareArgs =
+  | (SharedBaseArgs & { get: SharedGetter })
+  | (SharedBaseArgs & { lib: () => Module });
+
+type SharedBaseArgs = {
+  version: string;
+  shareConfig?: SharedConfig;
+  scope?: string | Array<string>;
+  deps?: Array<string>;
+  strategy?: 'version-first' | 'loaded-first';
+};
+
+type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
+
+type RemoteInfo = (RemotesWithEntry | RemotesWithVersion) & {
+   alias?: string;
+};
+
+interface RemotesWithVersion {
+   name: string;
+   version: string;
+}
+
+interface RemotesWithEntry {
+   name: string;
+   entry: string;
+}
+
+type ShareInfos = {
+   // 依赖的包名、依赖的基本信息和共享策略
+   [pkgName: string]: Share;
+};
+
+type Share = {
+   // 共享依赖的版本
+   version: string;
+   // 当前依赖再被哪些模块消费
+   useIn?: Array<string>;
+   // 共享依赖来自哪个模块?
+   from?: string;
+   // 获取共享依赖实例的工厂函数。当没有其他已经存在的依赖，将加载它自己的共享依赖项。
+   lib: () => Module;
+   // 共享策略，将使用什么策略来决定依赖项是否复用
+   shareConfig?: SharedConfig;
+   // 共享依赖项所在的作用域下，默认值为 default
+   scope?: string | Array<string>;
+};
+```
+
+### loadRemote
+
+- Type: `loadRemote(id: string)`
+- 用于加载初始化的远程模块，当与构建插件一起使用时，它可以通过原生的 `import("remote name/expose")`语法直接加载，并且构建插件会自动将其转换为`loadRemote("remote name/expose")`用法。
+
+- Example
+
+```javascript
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+
+init({
+  name: '@demo/main-app',
+  remotes: [
+    {
+      name: '@demo/app2',
+      alias: 'app2',
+      entry: 'http://localhost:3006/remoteEntry.js',
+    },
+  ],
+});
+
+// remoteName + expose
+loadRemote('@demo/app2/util').then((m) => m.add(1, 2, 3));
+
+// alias + expose
+loadRemote('app2/util').then((m) => m.add(1, 2, 3));
+```
+
+### loadShare
+
+- Type: `loadShare(pkgName: string, extraOptions?: { customShareInfo?: Partial<Shared>;resolver?: (sharedOptions: ShareInfos[string]) => Shared;})`
+- 获取 `share` 依赖项。当全局环境中存在与当前消费者匹配的“共享”依赖时，现有的和符合共享条件的依赖将首先被复用。否则，加载它自己的依赖项并将它们存储在全局缓存中。
+- 这个 `API` 通常不是由用户直接调用，而是由构建插件使用来转换它们自己的依赖项。
+
+- Example
+
+```js
+import { init, loadRemote, loadShare } from '@module-federation/enhanced/runtime';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+init({
+  name: '@demo/main-app',
+  remotes: [],
+  shared: {
+    react: {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+    'react-dom': {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => ReactDOM,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+  },
+});
+
+loadShare('react').then((reactFactory) => {
+  console.log(reactFactory());
+});
+```
+
+如果设置了多个版本 shared，默认会返回已加载且最高版本的 shared 。可以通过设置 `extraOptions.resolver` 来改变这个行为：
+
+```js
+import { init, loadRemote, loadShare } from '@module-federation/runtime';
+
+init({
+  name: '@demo/main-app',
+  remotes: [],
+  shared: {
+    react: [
+      {
+        version: '17.0.0',
+        scope: 'default',
+        get: async ()=>() => ({ version: '17.0.0)' }),
+        shareConfig: {
+          singleton: true,
+          requiredVersion: '^17.0.0',
+        },
+      },
+      {
+        version: '18.0.0',
+        scope: 'default',
+        // pass lib means the shared has loaded
+        lib: () => ({ version: '18.0.0)' }),
+        shareConfig: {
+          singleton: true,
+          requiredVersion: '^18.0.0',
+        },
+      },
+    ],
+  },
+});
+
+loadShare('react', {
+   resolver: (sharedOptions) => {
+      return (
+        sharedOptions.find((i) => i.version === '17.0.0') ?? sharedOptions[0]
+      );
+  },
+ }).then((reactFactory) => {
+  console.log(reactFactory()); // { version: '17.0.0' }
+});
+```
+
+### preloadRemote
+
+:::warning
+只有当 entry 是 manifest 文件协议时，preloadRemote 接口才有效
+:::
+
+- Type: `preloadRemote(preloadOptions: Array<PreloadRemoteArgs>)`
+- 用于预加载模块的远程资源，比如 `remote-entry.js` 和其他的 js chunk、css 文件，使用 preloadRemote API.
+
+- Type
+
+```typescript
+async function preloadRemote(preloadOptions: Array<PreloadRemoteArgs>) {}
+
+type depsPreloadArg = Omit<PreloadRemoteArgs, 'depsRemote'>;
+type PreloadRemoteArgs = {
+  // 预加载远程模块的名称和别名
+  nameOrAlias: string;
+  // 预加载远程模块的特定 expose
+  // 默认预加载所有 expose
+  // 当提供 exposes 时，只会预加载特定的 expose
+  exposes?: Array<string>; // Default request
+  // 默认为 sync，只加载 expose 中引用的同步 chunk
+  // 设置为 all 以加载同步和异步引用 chunk
+  resourceCategory?: 'all' | 'sync';
+  // 当没有配置任何值时，默认值为 true，加载当前模块的所有子模块依赖
+  // 在配置依赖项之后，只会加载所需的资源
+  depsRemote?: boolean | Array<depsPreloadArg>;
+  // 未配置时不过滤资源
+  // 配置后会过滤掉不需要的资源
+  filter?: (assetUrl: string) => boolean;
+};
+```
+
+- 细节
+
+通过 `preloadRemote`，模块资源可以在较早的阶段预加载，以避免瀑布式请求。`preloadRemote` 可以预加载以下内容:
+
+- `remote` 的 `remote entry`
+- `remote` 中的 `expose` 资源
+- `remote` 中的同步资源和异步资源
+- `remote` 中 `remote` 的依赖
+
+* Example
+
+```ts
+import { init, preloadRemote } from '@module-federation/enhanced/runtime';
+
+init({
+  name: '@demo/preload-remote',
+  remotes: [
+    {
+      name: '@demo/sub1',
+      entry: 'http://localhost:2001/vmok-manifest.json',
+    },
+    {
+      name: '@demo/sub2',
+      entry: 'http://localhost:2002/vmok-manifest.json',
+    },
+    {
+      name: '@demo/sub3',
+      entry: 'http://localhost:2003/vmok-manifest.json',
+    },
+  ],
+});
+
+// Preload @demo/sub1 模块
+// 过滤资源名称中包含 ignore 的资源信息
+// 只预加载子依赖的 @demo/sub1-button 模块
+preloadRemote([
+  {
+    nameOrAlias: '@demo/sub1',
+    filter(assetUrl) {
+      return assetUrl.indexOf('ignore') === -1;
+    },
+    depsRemote: [{ nameOrAlias: '@demo/sub1-button' }],
+  },
+]);
+
+// Preload @demo/sub2 模块
+// 预加载 @demo/sub2 下的所有 expose
+// 预加载 @demo/sub2 的同步和异步资源
+preloadRemote([
+  {
+    nameOrAlias: '@demo/sub2',
+    resourceCategory: 'all',
+  },
+]);
+
+// 预加载 @demo/sub3 模块的 add expose
+preloadRemote([
+  {
+    nameOrAlias: '@demo/sub3',
+    resourceCategory: 'all',
+    exposes: ['add'],
+  },
+]);
+```
+
+### registerRemotes
+
+- Type: `registerRemotes(remotes: Remote[], options?: { force?: boolean }): void`
+- 用于在初始化后注册远程模块.
+
+- Type
+
+```typescript
+function registerRemotes(remotes: Remote[], options?: { force?: boolean }) {}
+
+type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
+
+interface RemoteInfoCommon {
+  alias?: string;
+  shareScope?: string;
+  type?: RemoteEntryType;
+  entryGlobalName?: string;
+}
+
+interface RemoteWithEntry {
+  name: string;
+  entry: string;
+}
+
+interface RemoteWithVersion {
+  name: string;
+  version: string;
+}
+```
+
+- 细节
+  **info**: 设置 `force:true` 时请小心 !
+
+如果设置 `force: true`，它将合并远程（包括已加载的远程），并移除已加载的远程缓存，同时会使用 `console.warn` 来警告此操作可能存在风险。
+
+- Example
+
+```ts
+import { init, registerRemotes } from '@module-federation/enhanced/runtime';
+
+init({
+  name: '@demo/register-new-remotes',
+  remotes: [
+    {
+      name: '@demo/sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    },
+  ],
+});
+
+// 添加新的远程 @demo/sub2
+registerRemotes([
+  {
+    name: '@demo/sub2',
+    entry: 'http://localhost:2002/mf-manifest.json',
+  },
+]);
+
+// 覆盖以前的远程 @demo/sub1
+registerRemotes([
+  {
+    name: '@demo/sub1',
+    entry: 'http://localhost:2003/mf-manifest.json',
+  },
+]);
+```
+
+## FAQ
+
+### 构建插件和 Runtime 差异
+
+`Federation Runtime` 是新版本 `Module Federation` 的主要功能之一，它能够支持在运行时注册共享依赖、动态注册和加载远程模块，还可以通过 `Plugin` 来扩展 `Module Federation` 在运行时的能力，构建插件是基于 Runtime 的基础实现的。
+
+`Federation Runtime` 和 `Builder Plugin` 存在以下差异：
+
+| Federation Runtime                                                       | Builder Plugin                                               |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| 可脱离构建插件使用，在 `webpack4` 等项目中可直接使用纯运行时进行模块加载 | 构建插件需要是 webpack5、Rspack、Vite 以上                   |
+| 支持动态注册模块                                                         | 不支持动态注册模块                                           |
+| 不支持 `import` 语法加载模块                                             | 支持 `import` 同步语法加载模块                               |
+| 支持 `loadRemote` 加载模块                                               | 支持 `loadRemote` 加载模块                                   |
+| 设置 `shared` 必须提供具体版本和实例信息                                 | 设置 `shared` 只需要配置规则即可，无须提供具体版本及实例信息 |
+| `shared` 依赖只能供外部使用，无法使用外部 `shared` 依赖                  | `shared` 依赖按照特定规则双向共享                            |
+| 可以通过 `runtime` 的 `plugin` 机制影响加载流程                          | 可以通过 `runtimePlugin` 配置影响加载流程                    |
+| 纯运行时不支持远程类型提示                                               | 支持远程类型提示                                             |
+
+### Why Runtime
+
+`Runtime` 对于之前使用 `Webpack` 内置的 `Module Federation` 构建插件的用户而言可能是一个全新的概念，在之前 Webpack 中的 Module Federation 无论是导出模块、还是消费模块都是纯构建的行为，所有模块的加载过程都被构建工具给封装了起来，对比模块加载器 Systemjs、esmodule 对比带来以下两点收益：
+
+- 在现有项目中导出模块的成本非常低，无需安装过多额外的依赖和构建配置，只需要声明模块名称和导出的模块路径就可以完成模块导出
+- 消费远程模块的只需要声明远程模块的名称和地址就可以和 `NPM` 依赖一样 `import` 使用即可
+
+但是这种模式同时也对于项目的灵活性和构建插件的维护成本带来了以下影响：
+
+- 不同的构建工具 Webpack、Rspack、Vite 都需要针对 Module Federation 分别实现：Builder 构建工具和运行时，导致维护成本和功能一致性受到影响
+- 无法在 Webpack 4 等不支持 Module Federation 的构建插件中消费远程模块
+- 缺乏灵活性，无法动态增加模块、更改模块行为，增加更多框架上的能力
+
+因此在新版本 `Module Federation` 设计中，将 `Runtime` 单独抽离了出来，不同的构建工具基于 `Runtime` 去实现对于模块的导出的构建、共享模块的信息收集、远程模块引用的处理，其他具体的共享依赖复用、远程模块加载等行为全部内置到 Runtime 中。

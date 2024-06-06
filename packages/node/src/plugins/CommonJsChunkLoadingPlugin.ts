@@ -1,11 +1,11 @@
 import type { Chunk, Compiler, Compilation, ChunkGraph } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { ModuleFederationPluginOptions } from '../types';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
+const StartupChunkDependenciesPlugin = require(
+  normalizeWebpackPath('webpack/lib/runtime/StartupChunkDependenciesPlugin'),
+) as typeof import('webpack/lib/runtime/StartupChunkDependenciesPlugin');
 import ChunkLoadingRuntimeModule from './DynamicFilesystemChunkLoadingRuntimeModule';
 import AutoPublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
-//@ts-ignore
-import PublicPathRuntimeModule from 'webpack/lib/runtime/PublicPathRuntimeModule';
 
 interface DynamicFilesystemChunkLoadingOptions
   extends ModuleFederationPluginOptions {
@@ -27,6 +27,7 @@ class DynamicFilesystemChunkLoadingPlugin {
   }
 
   apply(compiler: Compiler) {
+    const { RuntimeGlobals } = compiler.webpack;
     const chunkLoadingValue = this._asyncChunkLoading
       ? 'async-node'
       : 'require';

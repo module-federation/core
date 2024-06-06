@@ -3,3 +3,8 @@
 /dist
 /coverage
 **/*.hbs
+*.md
+!README.md
+pnpm-lock.yaml
+**/dist/**
+apps/website-new/docs

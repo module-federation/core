@@ -2,13 +2,17 @@
   "name": "@module-federation/core",
   "version": "0.0.1",
   "type": "commonjs",
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "repository": "https://github.com/module-federation/universe/tree/main/packages/core",
+  "repository": "https://github.com/module-federation/core/tree/main/packages/core",
   "peerDependencies": {
     "webpack": "^5.40.0"
   }

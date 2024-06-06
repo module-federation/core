@@ -1,0 +1,106 @@
+# npm Packages
+
+This document showcases all npm package information maintained by the Module Federation team.
+
+## @module-federation/enhanced
+
+![](https://img.shields.io/npm/v/@module-federation/enhanced?style=flat-square&colorA=564341&colorB=EDED91)
+
+The core package of Module Federation, serving as a Webpack build plugin, Rspack build plugin, and Runtime entry dependency.
+
+- [npm](https://npmjs.com/package/@module-federation/enhanced)
+- [Source Code](https://github.com/module-federation/core/tree/main/packages/enhanced)
+- [Runtime Documentation](/guide/basic/runtime)
+- [Rspack Build Plugin](/guide/basic/rspack)
+- [Webpack Build Plugin](/guide/basic/webpack)
+
+## @module-federation/runtime
+
+![](https://img.shields.io/npm/v/@module-federation/runtime?style=flat-square&colorA=564341&colorB=EDED91)
+
+The Runtime package of Module Federation, typically used with @module-federation/enhanced to leverage Runtime capabilities, and can be installed separately if no build tool is required.
+
+- [npm](https://npmjs.com/package/@module-federation/runtime)
+- [Source Code](https://github.com/module-federation/core/tree/main/packages/runtime)
+- [Documentation](/guide/basic/runtime)
+
+## @module-federation/rspack
+
+![](https://img.shields.io/npm/v/@module-federation/rspack?style=flat-square&colorA=564341&colorB=EDED91)
+
+The Rspack build plugin for Module Federation, typically used with @module-federation/enhanced, and cannot be used independently without the Runtime API.
+
+- [npm](https://npmjs.com/package/@module-federation/rspack)
+- [Source Code](https://github.com/module-federation/core/tree/main/packages/rspack)
+- [Documentation](/guide/basic/rspack)
+
+## @module-federation/nextjs-mf
+
+![](https://img.shields.io/npm/v/@module-federation/nextjs-mf?style=flat-square&colorA=564341&colorB=EDED91)
+
+The Next.js build plugin for Module Federation.
+
+- [npm](https://npmjs.com/package/@module-federation/nextjs-mf)
+- [Source Code](https://github.com/module-federation/core/tree/main/packages/nextjs-mf)
+- [Documentation](/guide/framework/nextjs)
+
+## @module-federation/node
+
+![](https://img.shields.io/npm/v/@module-federation/node?style=flat-square&colorA=564341&colorB=EDED91)
+
+The Node build plugin for Module Federation.
+
+- [npm](https://npmjs.com/package/@module-federation/node)
+- [Source Code](https://github.com/module-federation/core/tree/main/packages/node)
+- [Documentation](https://github.com/module-federation/core/tree/main/packages/node)
+
+## @module-federation/storybook-addon
+
+![](https://img.shields.io/npm/v/@module-federation/storybook-addon?style=flat-square&colorA=564341&colorB=EDED91)
+
+The storybook plugin for Module Federation.
+
+- [npm](https://npmjs.com/package/@module-federation/storybook-addon)
+- [Source Code](https://github.com/module-federation/core/tree/main/packages/storybook-addon)
+- [Documentation](https://github.com/module-federation/core/tree/main/packages/storybook-addon)
+
+## @module-federation/native-federation-typescript
+
+![](https://img.shields.io/npm/v/@module-federation/native-federation-typescript?style=flat-square&colorA=564341&colorB=EDED91)
+
+The bundler-agnostic plugin for type generation and loading for Module Federation.
+It is recommended when you are using other bundlers than webpack and rspack or Module Federation < 2.0. Otherwise, **it is recommended to use @module-federation/enhanced to automatically handle type generation and loading**.
+
+- [npm](https://npmjs.com/package/@module-federation/native-federation-typescript)
+- [Source Code](https://github.com/module-federation/core/tree/main/packages/native-federation-typescript)
+- [Documentation](https://github.com/module-federation/core/tree/main/packages/native-federation-typescript)
+
+:::warning
+When using `mf-manifest.json`, @module-federation/enhanced will download consumed TypeScript types and maintain a hot update experience. It is generally recommended to use the built-in type hinting capabilities of @module-federation/enhanced directly.
+
+:::
+
+## @module-federation/native-federation-tests
+
+![](https://img.shields.io/npm/v/@module-federation/native-federation-tests?style=flat-square&colorA=564341&colorB=EDED91)
+
+The bundler-agnostic plugin for mocks generation and loading for Module Federation and your tests, that works for both Jest and Vitest.
+
+- [npm](https://npmjs.com/package/@module-federation/native-federation-tests)
+- [Source Code](https://github.com/module-federation/core/tree/main/packages/native-federation-tests)
+- [Documentation](https://github.com/module-federation/core/tree/main/packages/native-federation-tests)
+
+## @module-federation/utilities
+
+![](https://img.shields.io/npm/v/@module-federation/utilities?style=flat-square&colorA=564341&colorB=EDED91)
+
+The legacy Runtime for Module Federation.
+
+- [npm](https://npmjs.com/package/@module-federation/utilities)
+- [Source Code](https://github.com/module-federation/core/tree/main/packages/utilities)
+- [Documentation](https://github.com/module-federation/core/tree/main/packages/utilities)
+
+:::danger
+@module-federation/utilities is now deprecated. Please use the runtime exports of @module-federation/enhanced instead.
+
+:::

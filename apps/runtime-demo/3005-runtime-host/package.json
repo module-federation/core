@@ -1,0 +1,16 @@
+{
+  "name": "runtime-host",
+  "private": true,
+  "version": "0.0.0",
+  "devDependencies": {
+    "@module-federation/core": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/typescript": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
+    "react-refresh": "0.14.0"
+  },
+  "dependencies": {
+    "antd": "4.24.15"
+  }
+}

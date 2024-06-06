@@ -3,15 +3,30 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "antd": "4.24.14",
+    "antd": "4.24.15",
+    "buffer": "5.7.1",
+    "encoding": "0.1.13",
+    "eslint-scope": "7.2.2",
+    "events": "3.3.0",
+    "js-cookie": "3.0.5",
     "lodash": "4.17.21",
-    "next": "13.5.4",
+    "next": "14.1.2",
+    "node-fetch": "2.7.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "js-cookie": "3.0.5"
+    "schema-utils": "3.3.0",
+    "terser-webpack-plugin": "5.3.10",
+    "typescript": "5.3.3",
+    "upath": "2.0.1",
+    "url": "0.11.3",
+    "util": "0.12.5"
   },
   "devDependencies": {
-    "@module-federation/nextjs-mf": "7.0.8",
-    "@module-federation/utilities": "3.0.0"
+    "@module-federation/nextjs-mf": "workspace:*",
+    "@module-federation/utilities": "workspace:*"
+  },
+  "scripts": {
+    "start": "next start",
+    "build": "pnpm exec next telemetry disable && NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
   }
 }

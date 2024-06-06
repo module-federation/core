@@ -1,7 +1,9 @@
 import AdmZip from 'adm-zip';
 import ansiColors from 'ansi-colors';
 import axios from 'axios';
-import { join } from 'path';
+import { createHash } from 'node:crypto';
+import { rm } from 'node:fs/promises';
+import { join } from 'node:path';
 
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
@@ -9,7 +11,7 @@ import { RemoteOptions } from '../interfaces/RemoteOptions';
 const retrieveTestsZipPath = (remoteOptions: Required<RemoteOptions>) =>
   join(remoteOptions.distFolder, `${remoteOptions.testsFolder}.zip`);
 
-export const createTypesArchive = async (
+export const createTestsArchive = async (
   remoteOptions: Required<RemoteOptions>,
   compiledFilesFolder: string,
 ) => {
@@ -20,25 +22,66 @@ export const createTypesArchive = async (
 
 const downloadErrorLogger =
   (destinationFolder: string, fileToDownload: string) => (reason: Error) => {
-    reason.message = ansiColors.red(
-      `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}', skipping...`,
-    );
-    throw reason;
+    throw {
+      ...reason,
+      message: `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}'`,
+    };
   };
 
-export const downloadTypesArchive =
-  (hostOptions: Required<HostOptions>) =>
-  async ([destinationFolder, fileToDownload]: string[]) => {
-    try {
-      const response = await axios.get(fileToDownload, {
-        responseType: 'arraybuffer',
-      });
+export const deleteTestsFolder = async (
+  options: Required<HostOptions> | Required<RemoteOptions>,
+  destinationPath: string,
+) => {
+  if (options.deleteTestsFolder) {
+    await rm(destinationPath, {
+      recursive: true,
+      force: true,
+    }).catch((error) =>
+      console.error(ansiColors.red(`Unable to remove tests folder, ${error}`)),
+    );
+  }
+};
 
-      const destinationPath = join(hostOptions.mocksFolder, destinationFolder);
+export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
+  const retriesPerFile: Record<string, number> = {};
+  const hashPerFile: Record<string, string> = {};
 
-      const zip = new AdmZip(Buffer.from(response.data));
-      zip.extractAllTo(destinationPath, true);
-    } catch (error) {
-      downloadErrorLogger(destinationFolder, fileToDownload)(error as Error);
+  return async ([destinationFolder, fileToDownload]: string[]) => {
+    retriesPerFile[fileToDownload] = 0;
+    const destinationPath = join(hostOptions.mocksFolder, destinationFolder);
+
+    while (retriesPerFile[fileToDownload]++ < hostOptions.maxRetries) {
+      try {
+        const response = await axios
+          .get(fileToDownload, { responseType: 'arraybuffer' })
+          .catch(downloadErrorLogger(destinationFolder, fileToDownload));
+
+        const responseBuffer = Buffer.from(response.data);
+
+        const hash = createHash('sha256').update(responseBuffer).digest('hex');
+
+        if (hashPerFile[fileToDownload] !== hash) {
+          await deleteTestsFolder(hostOptions, destinationPath);
+
+          const zip = new AdmZip(responseBuffer);
+          zip.extractAllTo(destinationPath, true);
+
+          hashPerFile[fileToDownload] = hash;
+        }
+
+        break;
+      } catch (error: any) {
+        console.error(
+          ansiColors.red(
+            `Error during types archive download: ${
+              error?.message || 'unknown error'
+            }`,
+          ),
+        );
+        if (retriesPerFile[fileToDownload] >= hostOptions.maxRetries) {
+          throw error;
+        }
+      }
     }
   };
+};

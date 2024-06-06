@@ -4,7 +4,7 @@ import {
   RuntimeRemote,
   RuntimeRemotesMap,
   WebpackRemoteContainer,
-} from '../types/index';
+} from '../types';
 
 const pure = typeof process !== 'undefined' ? process.env['REMOTES'] || {} : {};
 export const remoteVars = pure as RemoteVars;

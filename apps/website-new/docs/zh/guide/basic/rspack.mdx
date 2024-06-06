@@ -1,0 +1,83 @@
+# Rspack Plugin
+
+:::info 注意
+需要 Rspack 0.5.0 及以上版本
+:::
+
+- 能够构建出满足 `Module Federation` 加载规范的模块
+- 能够使用别名消费 `Module Federation` 规范的模块
+- 能够设置模块的共享依赖配置，当加载模块的宿主环境已经存在对应依赖时将不会重复加载
+- 当模块具备远程类型时将会自动把远程模块的类型下载下来消费
+- 消费远程模块时将具备热更新能力
+
+## 快速开始
+
+### 安装
+
+你可以通过如下的命令安装插件：
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/enhanced --save',
+    yarn: 'yarn add @module-federation/enhanced --save',
+    pnpm: 'pnpm add @module-federation/enhanced --save',
+    bun: 'bun add @module-federation/enhanced --save',
+  }}
+/>
+
+### 注册插件
+
+在 `Rspack` 中，你可以通过 `rspack.config.js` 配置文件中的 `plugins` 配置项来添加插件：
+
+```ts title='rspack.config.js'
+import { defineConfig } from '@rsbuild/core';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+
+export default defineConfig({
+  // 使用 manifest 必须要配置 publicPath
+  dev: {
+    assetPrefix: 'http://localhost:2000/',
+  },
+  output: {
+    // 这将影响生产环境中使用的产物路径前缀
+    assetPrefix: 'https://cdn.domain.com/path/to/project/',
+  },
+  server: {
+    port: 2000,
+  },
+  tools: {
+    rspack: (config, { appendPlugins }) => {
+      // 需要设置一个唯一值不能和其他应用相等
+      config.output!.uniqueName = 'federation_provider';
+      appendPlugins([
+        new ModuleFederationPlugin({
+          name: 'federation_provider',
+          exposes: {
+            './button': './src/button.tsx',
+          },
+          shared: ['react', 'react-dom'],
+        }),
+      ]);
+    },
+  },
+});
+```
+
+## 配置构建插件
+
+- Type: `ModuleFederationPlugin(options: ModuleFederationOptions)`
+
+- Module federation 插件的配置结构如下所示：
+
+```ts
+type ModuleFederationOptions {
+    name: string;
+    filename?: string,
+    remotes?: Array<RemoteInfo>;
+    shared?: ShareInfos;
+};
+```
+
+你可以在 [Config 总览](../../configure/index) 页面找到所有配置项的详细说明。

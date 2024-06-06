@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "overview",
+    "label": "Overview"
+  },
+  {
+    "type": "dir",
+    "name": "frameworks",
+    "label": "Frameworks"
+  },
+  {
+    "type": "file",
+    "name": "scenario",
+    "label": "Scenarios"
+  }
+]

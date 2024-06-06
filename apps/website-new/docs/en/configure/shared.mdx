@@ -1,0 +1,133 @@
+# Shared
+
+The `shared` configuration is used to share common dependencies between consumers and producers, reducing the runtime download volume and thus improving performance. `shared` allows you to configure rules for reusing dependency versions. You can learn more about the scenarios where `shared` is applicable and how to use `shared` through the [FAQ](#faq).
+
+- Type: `PluginSharedOptions`
+- Required: No
+- Default: `undefined`
+
+The `PluginSharedOptions` type is as follows:
+
+```tsx
+type PluginSharedOptions = string[] | SharedObject;
+
+interface SharedObject {
+  [sharedName: string]: SharedConfig;
+}
+
+interface SharedConfig {
+  singleton?: boolean;
+  requiredVersion?: string;
+  eager?: boolean;
+  shareScope?: string;
+}
+```
+
+- Example
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/host',
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+  //...
+});
+```
+
+## Singleton
+
+- Type: `boolean`
+- Required: No
+- Default: `true`
+
+Whether to allow only one version of the shared module within the shared scope (singleton mode).
+
+- If set to true, singleton mode is enabled; if set to false, singleton mode is not enabled.
+- If singleton mode is enabled, the shared dependencies between the remote application components and the host application will only be loaded once, and a higher version will be loaded if the versions are inconsistent. A warning will be given for the party with the lower version.
+- If singleton mode is not enabled, and the shared dependencies between the remote application and the host application have different versions, each will load their own dependencies.
+
+## RequiredVersion
+
+- Type: `string`
+- Required: No
+- Default: `require('project/package.json')[devDeps | dep]['depName']`
+
+The required version, which can be a version range. The default value is the current application's dependency version.
+
+- When using shared dependencies, it will check whether the dependency version is greater than or equal to `requiredVersion`. If it is, it will be used normally. If it is less than `requiredVersion`, a warning will be given in the console, and the smallest version available in the shared dependencies will be used.
+- When one party sets `requiredVersion` and the other sets `singleton`, the dependency with `requiredVersion` will be loaded, and the `singleton` party will directly use the dependency with `requiredVersion`, regardless of the version.
+
+## Eager
+
+:::warning
+Setting `eager` to true will package the shared dependencies into the entry file, which may result in a large entry file size. Use with caution.
+:::
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+Whether to immediately load the shared module.
+
+Under normal circumstances, you need to enable lazy entry, and then asynchronously load shared modules on demand. If you want to use shared but do not want to enable lazy entry, you can set `eager` to true.
+
+## shareScope
+
+- Type: `string`
+- Required: No
+- Default: `'default'`
+
+share scope name, default value is `'default'` .
+
+## FAQ
+
+### When to use shared dependencies
+
+Consuming modules across projects often encounters issues such as **duplicate dependency loading** and **singleton restrictions**. These issues can be resolved by setting up `shared`.
+
+- (Consumer Consumption) The third-party packages used in the modules provided by the producer are widely used in the consumer, such as `lodash.get`
+- (Consumer Consumption) The third-party packages used in the modules provided by the producer have singleton requirements, such as `react`
+- (Consumer Consumption) The third-party packages used in the modules provided by the producer are used in the consumer, have a large dependency volume, and do not support tree shaking, such as `lodash` (not used on demand)
+- (Consumer Consumption) The third-party packages used in the modules provided by the producer are used in the consumer, have a large dependency volume, support tree shaking, but the exposed modules are all used, such as `antd`
+
+At this point, you can add the corresponding dependencies to the `shared` configuration.
+
+### How to use shared dependencies
+
+Depending on the use case, `Module Federation` supports two forms of shared dependency configuration: array and object. The former is suitable for most scenarios, while the latter is suitable for complex customization needs.
+
+**Array Format (General Scenario)**
+
+Simply add the corresponding dependencies to the `shared` configuration in the `Module Federation` build configuration, for example:
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/button',
+  shared: ['react', 'react-dom'],
+  //...
+});
+```
+
+**Object Format (Customized Configuration)**
+
+Add the shared dependencies in the `shared` configuration of the `Module Federation Plugin`, with the `key` being the dependency name and the `value` being the provided configuration.
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/button',
+  shared: {
+    react: {
+      singleton: true,
+      requiredVersion: '~18.2.0',
+      fixedDependencies: true,
+    },
+  },
+  //...
+});
+```

@@ -1,11 +1,11 @@
-import type Compiler from 'webpack/lib/Compiler';
+import type { Compiler } from 'webpack';
 import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
 } from '@module-federation/utilities';
-import DelegateModulesPlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
+import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 /**
  * Applies client-specific plugins.
  *
@@ -33,29 +33,16 @@ export function applyClientPlugins(
 ): void {
   const { webpack } = compiler;
   const { remotes, name } = options;
-  //@ts-ignore
-  compiler.options.output.publicPath = 'auto';
+
+  if (compiler.options.output.publicPath === '/_next/') {
+    compiler.options.output.publicPath = 'auto';
+  }
   // Build will hang without this. Likely something in my plugin
   compiler.options.optimization.splitChunks = undefined;
-
-  new DelegateModulesPlugin({
-    container: name,
-    runtime: 'webpack',
-    remotes,
-    debug: extraOptions.debug,
-    //@ts-ignore
-  }).apply(compiler);
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
   if (extraOptions.automaticPageStitching) {
     console.warn('[nextjs-mf]', 'automatic page stitching is disabled in v7');
-    // compiler.options.module.rules.push({
-    //   test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
-    //   loader: path.resolve(
-    //     __dirname,
-    //     '../../loaders/patchNextClientPageLoader'
-    //   ),
-    // });
   }
 
   // If a custom library is set, log an error message
@@ -77,6 +64,8 @@ export function applyClientPlugins(
     ],
     //@ts-ignore
   }).apply(compiler);
+
+  new HoistContainerReferencesPlugin(options.name).apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({

@@ -1,0 +1,46 @@
+# exposes
+
+- 类型：`PluginExposesOptions`
+- 是否必填：否
+- 默认值：`undefined`
+- 使用场景：决定 `Module Federation` 对外暴露的模块以及文件入口
+
+:::tip
+生产者特有参数，设置了 `exposes` 则可认为这是一个生产者
+
+:::
+
+配置之后，会将 expose 的模块单独抽离成一个 chunk ，如果有异步 chunk 会在抽取成单独 chunk（具体拆分行为根据 chunk 拆分规则而定）。
+
+`PluginExposesOptions` 类型如下：
+
+```tsx
+interface PluginExposesOptions {
+  [exposeKey: string]: string | ExposesConfig;
+}
+
+interface ExposesConfig {
+  // 文件入口
+  import: string;
+}
+```
+
+其中 `exposeKey` 与 [Package Entry Points](https://nodejs.org/api/packages.html#package-entry-points) 规范基本一致（除了不支持正则匹配）。
+
+举例：
+
+```jsx
+module.exports = {
+  plugins: [
+    new ModuleFederation({
+      name: 'provider',
+      exposes: {
+        // 注意： 不支持 "./"，为 . 导出是表示为 default 默认导出
+        '.': './src/index.tsx',
+        './add': './src/utils/add.ts',
+        './Button': './src/components/Button.tsx',
+      },
+    }),
+  ],
+};
+```

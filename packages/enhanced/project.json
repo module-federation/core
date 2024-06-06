@@ -5,20 +5,23 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/js:tsc",
+      "outputs": ["{workspaceRoot}/packages/enhanced/dist"],
       "options": {
-        "outputPath": "dist/packages/enhanced",
+        "outputPath": "packages/enhanced/dist",
         "main": "packages/enhanced/src/index.ts",
         "tsConfig": "packages/enhanced/tsconfig.lib.json",
-        "assets": ["packages/enhanced/*.md"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
+        "assets": [
+          "packages/enhanced/*.md",
+          {
+            "glob": "src/**/*.d.ts",
+            "input": "packages/enhanced",
+            "ignore": [],
+            "output": ""
+          }
+        ]
       },
       "dependsOn": [
-        {
-          "target": "build"
-        },
         {
           "target": "build",
           "dependencies": true
@@ -33,20 +36,18 @@
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "packages/enhanced/jest.config.ts",
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
+        "parallel": false,
+        "commands": [
+          {
+            "command": "node packages/enhanced/test/script.js",
+            "forwardAllArgs": false
+          }
+        ]
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -58,17 +59,10 @@
           {
             "command": "nx run enhanced:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run enhanced:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
-  "tags": ["package"]
+  "tags": ["type:pkg"]
 }

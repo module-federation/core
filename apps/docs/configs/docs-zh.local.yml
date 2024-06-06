@@ -12,11 +12,11 @@ urls:
 content:
   sources:
     - url: ./../../../
-      start_path: apps/docs/src/zh
+      start_path: apps/docs/src/zh_CN
       edit_url: '{web_url}/blob/{refname}/{path}'
 ui:
   bundle:
-    url: ./../../../dist/apps/docs-ui
+    url: ./../../../apps/docs-ui/dist
     snapshot: false
   # supplemental_files: ./../../../node_modules/antora-navigator-extension/data/
 output:

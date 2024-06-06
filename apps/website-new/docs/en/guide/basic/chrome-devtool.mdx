@@ -1,0 +1,81 @@
+# Chrome DevTools
+
+The `Microfrontend` architecture differs from the traditional monolithic application development model. Its characteristics of separate development, deployment, and debugging necessitate a new set of debugging tools to meet new usage scenarios, such as: how to verify the effect of modules in actual projects when developing `Module Federation`, whether the dependencies of `Module Federation` are reused with the host environment, which `Module Federation` modules are loaded on the current page, the dependency relationships of `Module Federation`, and how the data flow between `Module Federation` works.
+
+`Chrome DevTools` provides the following capabilities:
+
+- Support for `Module Federation` proxy functionality, which proxies the `Module Federation` on the online page to the user's local `Module Federation`.
+- Switch the version of `Module Federation` on the online page for rapid feature verification.
+- Support for viewing module dependency information.
+- Support for filtering specific module dependency information.
+
+::: tip About the limitations of Chrome DevTools:
+You must use `mf-manifest.json` to utilize the visualization and proxy capabilities provided by `Chrome DevTools`.
+
+:::
+
+## Use Cases
+
+Development and production environments:
+
+- Existing modules need to be proxied, currently supporting the following scenarios:
+
+1. Support for local server port numbers, for example, key: appA -> value: `http://localhost:3000/mf-manifest.json`, the page will directly load the `Module Federation` content from port 3000.
+2. Support for using the `mf-manifest.json` file address format, for example, key: appA -> value: `https://xxx/static/mf-manifest.json`, the page will directly load the `Module Federation` content from the specified address.
+
+- Want to see the remote dependency relationship graph.
+
+![](@public/guide/chrome-devtools/features.png)
+
+## How to Install
+
+1. Open the [Module Federation plugin detail page](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom), and click the `Add to Chrome` button.
+
+![](@public/guide/chrome-devtools/chrome-store-add-devtool.png)
+
+## How to Use
+
+The plugin provides a DevTools panel:
+
+- Press F12 to open the developer tools, select and click the `Module Federation` tab to enter the proxy page, where you can proxy and debug the dependent modules.
+  ![](@public/guide/chrome-devtools/open-devtools.png)
+
+## Overall Interaction
+
+As shown in the figure below, the proxy page provides options for operations such as `add new proxy module`, `producer selector`, `version or local port or custom entry`.
+
+- Select a module that needs to be proxied on the target page by choosing the `producer selector`.
+- Select or enter a specific address (including port number and address ending with `mf-manifest.json`) through `version or local port` to perform the proxy operation.
+- If you need to proxy multiple modules at the same time, click the `add new proxy module` area to add the corresponding proxy modules.
+
+![](@public/guide/chrome-devtools/opereation-guide.png)
+
+## How to Proxy Locally Developed Modules to Online
+
+- First, you need to start the producer locally.
+
+![](@public/guide/chrome-devtools/dev-to-proxy.png)
+
+- Then enter the successfully launched manifest address into the version selection input box on the proxy page.
+- After adjusting the local producer code, the consumer page will automatically Reload.
+
+![](@public/guide/chrome-devtools/proxy-to-local.png)
+
+## Common Issues
+
+### DevTools Content is Too Crowded
+
+You can open DevTools in a separate window.
+
+![](@public/guide/chrome-devtools/split-window.png)
+
+### When Does the Configuration Take Effect
+
+- ✅ Complies with validation rules.
+- ✅ Configuration rules are checked.
+- ✅ Configuration is filled in correctly, the page shows: Proxy configuration is effective, remote module retrieval is successful, the corresponding page has been automatically refreshed.
+
+
+### Partial Configuration Complies with Rules
+
+The plugin will filter out **modules that comply with the configuration rules** for proxying.

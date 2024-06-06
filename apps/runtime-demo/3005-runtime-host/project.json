@@ -1,0 +1,130 @@
+{
+  "name": "3005-runtime-host",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/runtime-demo/3005-runtime-host/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "babel",
+        "outputPath": "apps/runtime-demo/3005-runtime-host/dist",
+        "index": "apps/runtime-demo/3005-runtime-host/src/index.html",
+        "baseHref": "/",
+        "main": "apps/runtime-demo/3005-runtime-host/src/index.ts",
+        "tsConfig": "apps/runtime-demo/3005-runtime-host/tsconfig.app.json",
+        "styles": [],
+        "scripts": [],
+        "webpackConfig": "apps/runtime-demo/3005-runtime-host/webpack.config.js",
+        "babelUpwardRootMode": true
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "serve": {
+      "executor": "@nx/webpack:dev-server",
+      "defaultConfiguration": "production",
+      "options": {
+        "buildTarget": "3005-runtime-host:build",
+        "hmr": true,
+        "port": 3005,
+        "devRemotes": ["3006-runtime-remote"]
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "3005-runtime-host:build:development"
+        },
+        "production": {
+          "buildTarget": "3005-runtime-host:build:production",
+          "hmr": false
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/runtime-demo/host/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "3005-runtime-host:build",
+        "port": 3005
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "3005-runtime-host:build:development"
+        },
+        "production": {
+          "buildTarget": "3005-runtime-host:build:production"
+        }
+      }
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/runtime-demo/3005-runtime-host/cypress.config.ts",
+        "testingType": "e2e",
+        "baseUrl": "http://127.0.0.1:3005",
+        "browser": "chrome"
+      },
+      "configurations": {
+        "development": {
+          "runnerUi": true,
+          "browser": "electron",
+          "exit": false,
+          "watch": true
+        }
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
+          {
+            "command": "lsof -i :3005 || nx run 3005-runtime-host:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "sleep 4 && nx run 3005-runtime-host:e2e",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    }
+  },
+  "tags": [],
+  "implicitDependencies": ["typescript"]
+}

@@ -4,5 +4,6 @@
       "description": "A Federação de Módulos tem como objetivo resolver o compartilhamento de módulos em um sistema distribuído. Ela permite que você envie essas peças críticas compartilhadas como macro ou micro conforme desejar. Isso é feito retirando-as do pipeline de build e de seus aplicativos."
     },
     "title": "Federação de Módulos: otimize seus microfrontends"
-  }
+  },
+  "ValorSoftware": ""
 }

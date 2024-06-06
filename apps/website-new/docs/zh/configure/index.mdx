@@ -1,0 +1,30 @@
+# Config 总览
+
+当前页面列出了 `Module federation` 所有的配置项，请查看 「[Rspack Plugin](../guide/basic/rspack)」、「[Webpack Plugin](../guide/basic/webpack)」 了解使用方式。
+
+```ts
+type ModuleFederationOptions {
+    // module federation name
+    name: string;
+    // remoteEntry 名称
+    filename?: string,
+    // module federation remotes 远程模块别名和 entry 信息
+    remotes?: Array<RemoteInfo>;
+    // module federation expose 的模块信息
+    expose?: PluginExposesOptions;
+    // 共享依赖配置
+    shared?: ShareInfos;
+    // 动态 publicPath
+    getPublicPath?: string;
+    // 运行时插件
+    runtimePlugins?: Array<string>;
+    // runtime pkg 依赖
+    implementation?: string;
+    // manifest 配置
+    manifest?: boolean | PluginManifestOptions
+    // 控制页面热重载和类型热重载
+    dev?: boolean | PluginDevOptions;
+    // 控制类型生成
+    dts?: boolean | PluginDtsOptions;
+};
+```

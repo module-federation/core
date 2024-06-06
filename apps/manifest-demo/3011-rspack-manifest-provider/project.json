@@ -1,0 +1,53 @@
+{
+  "name": "3011-rspack-manifest-provider",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/manifest-demo/3011-rspack-manifest-provider/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "web",
+        "outputPath": "apps/manifest-demo/3011-rspack-manifest-provider/dist",
+        "indexHtml": "apps/manifest-demo/3011-rspack-manifest-provider/src/index.html",
+        "main": "apps/manifest-demo/3011-rspack-manifest-provider/src/index.jsx",
+        "tsConfig": "apps/manifest-demo/3011-rspack-manifest-provider/tsconfig.app.json",
+        "rspackConfig": "apps/manifest-demo/3011-rspack-manifest-provider/rspack.config.js"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "serve": {
+      "executor": "@nx/rspack:dev-server",
+      "defaultConfiguration": "production",
+      "options": {
+        "rspackConfig": "apps/manifest-demo/3011-rspack-manifest-provider/rspack.config.js",
+        "buildTarget": "3011-rspack-manifest-provider:build",
+        "port": 3011
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
+      "configurations": {
+        "development": {
+          "buildTarget": "3011-rspack-manifest-provider:build:development",
+          "port": 3011
+        },
+        "production": {
+          "buildTarget": "3011-rspack-manifest-provider:build:production",
+          "port": 3011
+        }
+      }
+    }
+  },
+  "tags": []
+}

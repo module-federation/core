@@ -5,15 +5,19 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "@nx/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/utilities",
+        "outputPath": "packages/utilities/dist",
         "main": "packages/utilities/src/index.ts",
         "tsConfig": "packages/utilities/tsconfig.lib.json",
-        "assets": ["packages/utilities/*.md"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
+        "assets": [],
+        "generateExportsField": true,
+        "project": "packages/utilities/package.json",
+        "additionalEntryPoints": ["packages/utilities/src/types/types.ts"],
+        "external": ["@module-federation/*"],
+        "compiler": "swc",
+        "format": ["cjs", "esm"]
       }
     },
     "lint": {
@@ -31,7 +35,7 @@
         "passWithNoTests": true
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -43,17 +47,22 @@
           {
             "command": "nx run utils:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run utils:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
-  "tags": ["package"]
+  "pre": [
+    {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "commands": [
+          {
+            "command": "rm -f dist"
+          }
+        ]
+      }
+    }
+  ],
+  "tags": ["type:pkg"]
 }

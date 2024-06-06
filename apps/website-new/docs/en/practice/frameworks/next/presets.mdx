@@ -1,0 +1,138 @@
+# Presets
+
+## Shared
+
+By default, certain Next.js internals are automatically shared to optimize your application.
+It's important to note that manually sharing these internals can lead to errors, as they are already handled for you.
+
+- `next/dynamic`
+- `next/head`
+- `next/link`
+- `next/router`
+- `next/script`
+- `react`
+- `react/`
+- `react-dom`
+- `react-dom/`
+- `styled-jsx`
+- `styled-jsx/style`
+
+<details>
+<summary> Click to Expand `DEFAULT_SHARE_SCOPE`:</summary>
+
+```ts
+export const DEFAULT_SHARE_SCOPE: SharedObject = {
+  'next/dynamic': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  'next/head': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  'next/link': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  'next/router': {
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+  },
+  'next/image': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  'next/script': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  react: {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react/': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react/jsx-dev-runtime': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react/jsx-runtime': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'styled-jsx': {
+    singleton: true,
+    import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
+  },
+  'styled-jsx/style': {
+    singleton: true,
+    import: false,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
+  },
+  'styled-jsx/css': {
+    singleton: true,
+    import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
+  },
+};
+```
+</details>
+
+## Expose Pages
+
+You can automatically expose all pages via the plugin
+
+```javascript
+new NextFederationPlugin({
+  name: 'remoteApp',
+  filename: '',
+  remotes: {},
+  exposes: {},
+  shared: {},
+  extraOptions: {
+    exposePages: true
+  },
+});
+```
+
+This will make pages available to import like:
+
+- `import Page from 'remoteApp/pages/index'`
+- `import Page from 'remoteApp/pages/shop/product'`
+
+## Build Options
+### Public Path
+
+Public Path is set to "auto"
+
+`config.output.publicPath: "auto"`
+
+### Target
+
+Webpack output target is set to `async-node` from `node`
+
+`config.target = "async-node"`

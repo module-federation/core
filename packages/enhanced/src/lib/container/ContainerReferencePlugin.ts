@@ -2,10 +2,13 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
+import type { Compiler } from 'webpack';
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
 
-import type Compiler from 'webpack/lib/Compiler';
-import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+// import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import FallbackDependency from './FallbackDependency';
 import FallbackItemDependency from './FallbackItemDependency';
 import FallbackModuleFactory from './FallbackModuleFactory';
@@ -13,21 +16,24 @@ import RemoteModule from './RemoteModule';
 import RemoteRuntimeModule from './RemoteRuntimeModule';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import { parseOptions } from './options';
-import ExternalsPlugin from 'webpack/lib/ExternalsPlugin';
-import type Compilation from 'webpack/lib/Compilation';
-import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
-import NormalModuleFactory from 'webpack/lib/NormalModuleFactory';
-import {
-  ExternalsType,
-  ContainerReferencePluginOptions,
-  RemotesConfig,
-} from '../../declarations/plugins/container/ContainerReferencePlugin';
+import { containerReferencePlugin } from '@module-federation/sdk';
+import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import schema from '../../schemas/container/ContainerReferencePlugin';
+import checkOptions from '../../schemas/container/ContainerReferencePlugin.check';
+import HoistContainerReferencesPlugin from './HoistContainerReferencesPlugin';
+
+const { ExternalsPlugin } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+
+const createSchemaValidation = require(
+  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
+) as typeof import('webpack/lib/util/create-schema-validation');
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require('webpack/schemas/plugins/container/ContainerReferencePlugin.check.js'),
-  () =>
-    require('webpack/schemas/plugins/container/ContainerReferencePlugin.json'),
+  checkOptions,
+  () => schema,
   {
     name: 'Container Reference Plugin',
     baseDataPath: 'options',
@@ -37,10 +43,12 @@ const validate = createSchemaValidation(
 const slashCode = '/'.charCodeAt(0);
 
 class ContainerReferencePlugin {
-  private _remoteType: ExternalsType;
-  private _remotes: [string, RemotesConfig][];
+  private _remoteType: containerReferencePlugin.ExternalsType;
+  private _remotes: [string, containerReferencePlugin.RemotesConfig][];
 
-  constructor(options: ContainerReferencePluginOptions) {
+  constructor(
+    options: containerReferencePlugin.ContainerReferencePluginOptions,
+  ) {
     validate(options);
 
     this._remoteType = options.remoteType;
@@ -66,7 +74,7 @@ class ContainerReferencePlugin {
    */
   apply(compiler: Compiler): void {
     const { _remotes: remotes, _remoteType: remoteType } = this;
-
+    new FederationRuntimePlugin().apply(compiler);
     /** @type {Record<string, string>} */
     const remoteExternals: Record<string, string> = {};
 
@@ -83,15 +91,11 @@ class ContainerReferencePlugin {
       }
     }
     const Externals = compiler.webpack.ExternalsPlugin || ExternalsPlugin;
-    //@ts-ignore
     new Externals(remoteType, remoteExternals).apply(compiler);
 
     compiler.hooks.compilation.tap(
       'ContainerReferencePlugin',
-      (
-        compilation: Compilation,
-        { normalModuleFactory }: { normalModuleFactory: NormalModuleFactory },
-      ) => {
+      (compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
           RemoteToExternalDependency,
           normalModuleFactory,
@@ -104,13 +108,14 @@ class ContainerReferencePlugin {
 
         compilation.dependencyFactories.set(
           FallbackDependency,
+          // @ts-ignore
           new FallbackModuleFactory(),
         );
 
         normalModuleFactory.hooks.factorize.tap(
           'ContainerReferencePlugin',
-          //@ts-ignore
-          (data: ResolveData): Module => {
+          // @ts-ignore
+          (data) => {
             if (!data.request.includes('!')) {
               for (const [key, config] of remotes) {
                 if (
@@ -139,13 +144,13 @@ class ContainerReferencePlugin {
         );
 
         compilation.hooks.runtimeRequirementInTree
-          .for(RuntimeGlobals.ensureChunkHandlers)
+          .for(compiler.webpack.RuntimeGlobals.ensureChunkHandlers)
           .tap('ContainerReferencePlugin', (chunk, set) => {
-            set.add(RuntimeGlobals.module);
-            set.add(RuntimeGlobals.moduleFactoriesAddOnly);
-            set.add(RuntimeGlobals.hasOwnProperty);
-            set.add(RuntimeGlobals.initializeSharing);
-            set.add(RuntimeGlobals.shareScopeMap);
+            set.add(compiler.webpack.RuntimeGlobals.module);
+            set.add(compiler.webpack.RuntimeGlobals.moduleFactoriesAddOnly);
+            set.add(compiler.webpack.RuntimeGlobals.hasOwnProperty);
+            set.add(compiler.webpack.RuntimeGlobals.initializeSharing);
+            set.add(compiler.webpack.RuntimeGlobals.shareScopeMap);
             compilation.addRuntimeModule(chunk, new RemoteRuntimeModule());
           });
       },

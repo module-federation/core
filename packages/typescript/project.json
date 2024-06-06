@@ -5,13 +5,14 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/js:tsc",
+      "outputs": ["{workspaceRoot}/packages/typescript/dist"],
       "options": {
-        "outputPath": "dist/packages/typescript",
+        "outputPath": "packages/typescript/dist",
         "main": "packages/typescript/src/index.ts",
         "tsConfig": "packages/typescript/tsconfig.lib.json",
         "assets": ["packages/typescript/*.md"],
+        "skipTypeCheck": true,
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
       },
@@ -43,7 +44,7 @@
         }
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -55,18 +56,11 @@
           {
             "command": "nx run typescript:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run typescript:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
-  "tags": ["package"],
+  "tags": ["type:pkg"],
   "implicitDependencies": ["utils"]
 }

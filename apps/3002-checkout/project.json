@@ -6,14 +6,13 @@
   "targets": {
     "build": {
       "executor": "@nx/next:build",
-      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/3002-checkout"
+        "outputPath": "apps/3002-checkout"
       },
       "configurations": {
         "development": {
-          "outputPath": "dist/apps/3002-checkout"
+          "outputPath": "apps/3002-checkout"
         },
         "production": {}
       },
@@ -43,7 +42,13 @@
           "dev": false,
           "port": 3002
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "export": {
       "executor": "@nx/next:export",
@@ -56,6 +61,35 @@
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/3002-checkout/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
+          {
+            "command": "lsof -i :3002 || nx run 3002-checkout:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "sleep 5 && nx run 3002-checkout:e2e",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/3002-checkout/cypress.config.ts",
+        "testingType": "e2e",
+        "baseUrl": "http://localhost:3002"
+      },
+      "configurations": {
+        "production": {
+          "baseUrl": "http://localhost:3002"
+        }
       }
     }
   },

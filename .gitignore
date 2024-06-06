@@ -5,9 +5,10 @@
 /tmp
 /out-tsc
 /build
-/@mf-types
+**/@mf-types
+**/@mf-types/**
 /docs
-
+/.nx
 # dependencies
 node_modules
 
@@ -45,3 +46,14 @@ Thumbs.db
 .next
 .netlify
 migrations.json
+
+# build contnt
+packages/**/dist
+apps/**/dist
+
+# test cases
+!packages/enhanced/test/configCases/**/**/node_modules
+packages/enhanced/test/js
+.ignored
+/.mf
+

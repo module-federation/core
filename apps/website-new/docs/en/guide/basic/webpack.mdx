@@ -1,0 +1,79 @@
+# Webpack Plugin
+
+- Can build modules that meet the `Module Federation` loading specifications.
+- Can consume modules that adhere to the `Module Federation` specifications using aliases.
+- Can configure shared dependencies for modules, so that when the host environment of the loaded module already has the corresponding dependency, it will not be loaded again.
+- When a module has remote types, it will automatically download and consume the types of the remote modules.
+- Consuming remote modules will have hot update capabilities.
+
+## Quick Start
+
+### Installation
+
+You can install the plugin with the following commands:
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/enhanced --save',
+    yarn: 'yarn add @module-federation/enhanced --save',
+    pnpm: 'pnpm add @module-federation/enhanced --save',
+    bun: 'bun add @module-federation/enhanced --save',
+  }}
+/>
+
+### Register the Plugin
+
+In `Webpack`, you can add the plugin through the `plugins` configuration item in the `webpack.config.js` file:
+
+:::warning Public Path Auto & Manifest
+When using mf-manifest.json remotes `publicPath: 'auto'` support is experimental
+:::
+
+```ts title='webpack.config.js'
+import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
+module.exports = {
+  devServer: {
+    port: 2000,
+  },
+  output: {
+    publicPath: 'http://localhost:2000/', // or auto
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'webpack_provider',
+      filename: 'remoteEntry.js',
+      exposes: {
+        // Set the modules to be exported, default export as '.'
+        './button': './src/components/button',
+      },
+      shared: {
+        react: {
+          singleton: true,
+        },
+        'react-dom': {
+          singleton: true,
+        },
+      },
+    }),
+  ],
+};
+```
+
+## Configure the Build Plugin
+
+- Type: `ModuleFederationPlugin(options: ModuleFederationOptions)`
+
+- The configuration structure for the Module Federation plugin is as follows:
+
+```ts
+type ModuleFederationOptions = {
+  name: string;
+  filename?: string;
+  remotes?: Array<RemoteInfo>;
+  shared?: ShareInfos;
+};
+```
+
+You can find detailed explanations of all configuration items on the [Configuration Overview](../../configure/index) page.

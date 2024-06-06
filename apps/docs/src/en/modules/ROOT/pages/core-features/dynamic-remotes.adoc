@@ -1,0 +1,186 @@
+= Using Dynamic Remotes
+
+This documentation page will discuss how to use dynamic remotes in Module Federation to deploy micro frontend applications across various environments.
+
+== Overview
+
+Dynamic remotes enable you to deploy the same micro frontend application in testing, staging, and production environments. They also support on-premise, cloud, and hybrid deployments simultaneously, and allow you to scale multiple teams working on different parts of the architecture. In this guide, we will cover four ways to use dynamic remotes:
+
+1. Environment variables
+2. Webpack plugin external-remotes-plugin
+3. Promise-based dynamic remotes
+4. Dynamic remote containers
+
+== Environment Variables
+
+Environment variables provide a straightforward way to use dynamic remotes by replacing localhost in your Webpack config with environment variables.
+
+=== Implementation
+
+[source, javascript]
+----
+module.exports = (env) => ({
+  // ...
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "Host",
+      remotes: {
+        RemoteA: `RemoteA@${env.A_URL}/remoteEntry.js`,
+        RemoteB: `RemoteB@${env.B_URL}/remoteEntry.js`,
+      },
+    }),
+  ],
+});
+----
+
+=== Advantages and Limitations
+
+This approach is simple but requires building a new version for each environment to update the URLs, which may not be ideal for enterprise use cases and multiple deployment models.
+
+== Webpack External Remotes Plugin
+
+The https://www.npmjs.com/package/external-remotes-plugin[external-remotes-plugin], developed by Zack Jackson, allows you to resolve URLs at runtime using templating. By defining window.appAUrl and window.appBUrl within your application before loading any code from remote applications, you gain the flexibility to define your URLs as needed.
+
+=== Implementation
+
+[source, javascript]
+----
+plugins: [
+  new ModuleFederationPlugin({
+    name: "Host",
+    remotes: {
+      RemoteA: "RemoteA@[window.appAUrl]/remoteEntry.js",
+      RemoteB: "RemoteB@[window.appBUrl]/remoteEntry.js",
+    },
+  }),
+  new ExternalTemplateRemotesPlugin(),
+],
+----
+
+=== Advantages and Limitations
+
+All you need to do is define `window.appAUrl` and window.appBUrl within your application before you load any code from the remote applications.
+
+Now you have the flexibility to define your URLs however you want. For example, you could maintain a map of the host URLs to remote URLs for each environment, use server-side rendering to allow the backend to define the URLs, create a custom configuration management service, and many other methods.
+
+This approach is fully dynamic and would solve the use cases, but there is still a slight limitation with this approach. We do not have complete control over the loading lifecycle.
+
+== Promise-Based Dynamic Remotes
+
+Module Federation allows you to define remote URLs as promises instead of URL strings. You can use any promise as long as it fits the get/init interface defined by Module Federation. This method offers more control over the loading process but may be difficult to debug or maintain due to the stringified code in the configuration file.
+
+=== Implementation
+
+==== Webpack Configuration
+
+[source, javascript]
+----
+// Webpack config:
+module.exports = {
+  // ...
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "Host",
+      remotes: {
+        RemoteA: `promise new Promise(${fetchRemoteA.toString()})`,
+      },
+    }),
+  ],
+};
+----
+
+==== Fetching Remote A Dynamically
+
+[source, javascript]
+----
+// Fetch Remote A dynamically:
+const fetchRemoteA = (resolve) => {
+const fetchRemoteA = (resolve, reject) => {
+  // We define a script tag to use the browser for fetching the remoteEntry.js file
+  const script = document.createElement("script");
+  script.src = window.appAUrl; // This could be defined anywhere
+  // When the script is loaded we need to resolve the promise back to Module Federation
+  script.onload = () => {
+    // The script is now loaded on window using the name defined within the remote
+    const module = {
+      get: (request) => window.RemoteA.get(request),
+      init: (arg) => {
+        try {
+          return window.RemoteA.init(arg);
+        } catch (e) {
+          console.log("Remote A has already been loaded");
+        }
+      },
+    };
+    resolve(module);
+  };
+  // Reject promise in case of network error
+  script.onerror = () => {
+    reject(new Error('Remote A init error'));
+  };
+  // Lastly we inject the script tag into the document's head to trigger the script load
+  document.head.appendChild(script);
+};
+----
+
+=== Advantages and Limitations
+
+In this approach, we create a new script tag and inject it into the DOM to fetch the remote JavaScript file. `window.appAUrl` contains the URL for the remote app. While this method provides control over the loading lifecycle, it is not the easiest to debug or maintain since it involves stringified code within the configuration file.
+
+== Dynamic Remote Containers
+
+Dynamic remote containers allow you to load remote applications programmatically without defining any URLs in your Webpack configuration. This enables developers to work on new remote applications that may not yet be defined in the host application or allow partners and customers to inject their remote modules into their deployment of your app.
+
+=== Implementation 
+
+1. Remove the remotes field from the ModuleFederationPlugin configuration:
++
+[source, javascript]
+----
+plugins: [
+  new ModuleFederationPlugin({
+    name: "Host",
+    remotes: {},
+  }),
+],
+----
+
+2. Before loading any remote apps, fetch the remote module using a dynamic script tag and manually initialize the remote container:
++
+[source, javascript]
+----
+(async () => {
+  // Initializes the shared scope. Fills it with known provided modules from this build and all remotes
+  await __webpack_init_sharing__("default");
+  const container = window.someContainer; // or get the container somewhere else
+  // Initialize the container, it may provide shared modules
+  await container.init(__webpack_share_scopes__.default);
+  const module = await container.get("./module");
+})();
+----
++
+Here, `container` refers to a remote app configured in the `remotes` field in the host app's Webpack configuration, and module refers to one of the items defined in the `exposes` field in the remote app's Webpack configuration.
++
+By injecting a script tag to fetch the remote container and storing it in `window.someContainer`, you can ensure the code resolves to the same `get/init` pattern used in earlier examples.
++
+To use one of the modules exposed by the remote app, call `container.get(moduleName)` as demonstrated in the example above.
+
+=== Advantages and Limitations
+
+Dynamic Remote Containers in Module Federation enhance deployment flexibility by supporting A/B testing through the dynamic loading of different versions of a shared module. This capability allows for updates and feature enhancements to be applied dynamically, improving user experiences without necessitating full application redeployments. The approach also includes fallback mechanisms to maintain application stability by handling redundant module loads with warnings and ignoring unnecessary shared modules.
+
+On the other hand, implementing Dynamic Remote Containers presents challenges. The complexity of setting up these containers requires a thorough understanding of Module Federation. Performance considerations are critical, as dynamically loading modules may add latency, requiring optimizations to ensure a responsive user experience. Additionally, managing dependencies across dynamically loaded modules is essential to avoid runtime errors and ensure seamless application functionality.
+
+== Summary and Recommendations
+
+Using dynamic remotes, you can deploy your micro frontend to fetch remote applications from any URL, allowing for deployment to multiple test environments, on-premises, or in the cloud. Developers can choose whether to use production versions of other remote applications or introduce new ones dynamically.
+
+The four methods discussed in this guide are:
+
+1. Environment Variables
+2. Webpack External Remotes Plugin
+3. Promise-Based Dynamic Remotes
+4. Dynamic Remote Containers
+
+Each method has its advantages and limitations. Choose the one that best suits your project's requirements and complexity.
+

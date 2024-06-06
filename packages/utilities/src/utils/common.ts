@@ -7,36 +7,8 @@ import type {
   Remotes,
   RuntimeRemote,
   WebpackRemoteContainer,
-  WebpackShareScopes,
 } from '../types';
 import { loadScript } from './pure';
-
-/**
- * Creates a module that can be shared across different builds.
- * @param {string} delegate - The delegate string.
- * @param {Object} params - The parameters for the module.
- * @returns {string} - The created module.
- * @throws Will throw an error if the params are an array or object.
- */
-export const createDelegatedModule = (
-  delegate: string,
-  params: { [key: string]: any },
-) => {
-  const queries: string[] = [];
-  const processParam = (key: string, value: any) => {
-    if (Array.isArray(value)) {
-      value.forEach((v, i) => processParam(`${key}[${i}]`, v));
-    } else if (typeof value === 'object' && value !== null) {
-      Object.entries(value).forEach(([k, v]) => processParam(`${key}.${k}`, v));
-    } else {
-      queries.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
-    }
-  };
-  Object.entries(params).forEach(([key, value]) => processParam(key, value));
-  return queries.length === 0
-    ? `internal ${delegate}`
-    : `internal ${delegate}?${queries.join('&')}`;
-};
 
 const createContainerSharingScope = (
   asyncContainer: AsyncContainer | undefined,

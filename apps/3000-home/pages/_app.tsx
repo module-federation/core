@@ -3,11 +3,9 @@ import { useState } from 'react';
 import App from 'next/app';
 import { Layout, version } from 'antd';
 import Router, { useRouter } from 'next/router';
-
-import SharedNav from '../components/SharedNav';
+const SharedNav = React.lazy(() => import('../components/SharedNav'));
 import HostAppMenu from '../components/menu';
 import 'antd/dist/antd.css';
-console.log(__webpack_share_scopes__);
 function MyApp(props) {
   const { Component, pageProps } = props;
   const { asPath } = useRouter();
@@ -26,7 +24,9 @@ function MyApp(props) {
     }
   };
   // handle first route hit.
-  React.useMemo(() => handleRouteChange(asPath), [asPath]);
+  React.useEffect(() => {
+    handleRouteChange(asPath);
+  }, [asPath]);
 
   //handle route change
   React.useEffect(() => {
@@ -39,7 +39,9 @@ function MyApp(props) {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <SharedNav />
+      <React.Suspense>
+        <SharedNav />
+      </React.Suspense>
       <Layout>
         <Layout.Sider width={200}>
           <MenuComponent />

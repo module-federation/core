@@ -1,0 +1,63 @@
+{
+  "name": "dts-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dts-plugin/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/dts-plugin/dist"],
+      "options": {
+        "parallel": false,
+        "commands": [
+          "tsup --config packages/dts-plugin/tsup.config.ts",
+          "cp packages/dts-plugin/package.json packages/dts-plugin/dist",
+          "cp packages/dts-plugin/*.md packages/dts-plugin/dist"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/dts-plugin"]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/dts-plugin/**/*.ts",
+          "packages/dts-plugin/package.json"
+        ]
+      }
+    },
+    "build-debug": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "FEDERATION_DEBUG=true nx run dts-plugin:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run dts-plugin:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run dts-plugin:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}

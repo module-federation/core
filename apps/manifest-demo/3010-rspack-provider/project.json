@@ -1,0 +1,74 @@
+{
+  "name": "3010-rspack-provider",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/manifest-demo/3010-rspack-provider/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "web",
+        "outputPath": "apps/manifest-demo/3010-rspack-provider/dist",
+        "indexHtml": "apps/manifest-demo/3010-rspack-provider/src/index.html",
+        "main": "apps/manifest-demo/3010-rspack-provider/src/index.ts",
+        "tsConfig": "apps/manifest-demo/3010-rspack-provider/tsconfig.app.json",
+        "rspackConfig": "apps/manifest-demo/3010-rspack-provider/rspack.config.js"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "serve": {
+      "executor": "@nx/rspack:dev-server",
+      "defaultConfiguration": "production",
+      "options": {
+        "rspackConfig": "apps/manifest-demo/3010-rspack-provider/rspack.config.js",
+        "buildTarget": "3010-rspack-provider:build",
+        "port": 3010
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
+      "configurations": {
+        "development": {
+          "buildTarget": "3010-rspack-provider:build:development",
+          "port": 3010
+        },
+        "production": {
+          "buildTarget": "3010-rspack-provider:build:production",
+          "port": 3010
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/node-remote/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/node-remote/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  },
+  "tags": []
+}

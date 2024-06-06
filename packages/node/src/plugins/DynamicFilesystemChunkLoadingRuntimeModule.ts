@@ -1,11 +1,18 @@
 /*
   MIT License http://www.opensource.org/licenses/mit-license.php
 */
-import type { Chunk, ChunkGraph, Compiler } from 'webpack';
-import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
-import { getUndoPath } from 'webpack/lib/util/identifier';
+import type { Chunk, Compiler } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+const { RuntimeGlobals, RuntimeModule } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { getUndoPath } = require(
+  normalizeWebpackPath('webpack/lib/util/identifier'),
+) as typeof import('webpack/lib/util/identifier');
 import { SyncWaterfallHook } from 'tapable';
-import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
+const compileBooleanMatcher = require(
+  normalizeWebpackPath('webpack/lib/util/compileBooleanMatcher'),
+) as typeof import('webpack/lib/util/compileBooleanMatcher');
 import {
   generateHmrCode,
   getInitialChunkIds,
@@ -39,20 +46,6 @@ interface ChunkLoadingContext {
   webpack: Compiler['webpack'];
 }
 
-//hook can be tapped with
-// class MyPlugin {
-//   apply(compiler: Compiler) {
-//     compiler.hooks.thisCompilation.tap('MyPlugin', (compilation: Compilation) => {
-//       compilation.hooks.runtimeModule.tap('MyPlugin', (module: RuntimeModule) => {
-//         if (module instanceof DynamicFilesystemChunkLoadingRuntimeModule) {
-//           module.hooks.strategyCase.tap('MyPlugin', (source: string) => {
-//             return source + '\ncase "my-strategy": return myStrategy(chunkId,rootOutputDir, remotes, callback);';
-//           });
-//         }
-//       });
-//     });
-//   }
-// }
 class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
   private runtimeRequirements: Set<string>;
   private options: DynamicFilesystemChunkLoadingRuntimeModuleOptions;
@@ -111,7 +104,7 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
     const { remotes = {}, name } = this.options;
     const { webpack } = this.chunkLoadingContext;
     const { chunkGraph, chunk, compilation } = this;
-
+    const { Template } = webpack;
     if (!chunkGraph || !chunk || !compilation) {
       console.warn('Missing required properties. Returning empty string.');
       return '';
@@ -134,7 +127,7 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
     );
     const rootOutputDir = getUndoPath(
       outputName,
-      compilation.outputOptions.path,
+      compilation.outputOptions.path || '',
       false,
     );
     const stateExpression = this.runtimeRequirements.has(
@@ -162,28 +155,8 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
       ]),
       '};',
     ]);
-    const remoteRegistry = Template.asString([
-      `var remotes = ${JSON.stringify(
-        Object.values(remotes).reduce(
-          (acc, remote) => {
-            const [global, url] = remote.split('@');
-            acc[global] = url;
-            return acc;
-          },
-          {} as Record<string, string>,
-        ),
-      )};`,
-      Template.asString([
-        'Object.keys(remotes).forEach(function(remote) {',
-        Template.indent(
-          'globalThis.__remote_scope__._config[remote] = remotes[remote];',
-        ),
-        '});',
-      ]),
-    ]);
 
     return Template.asString([
-      remoteRegistry,
       dynamicFilesystemChunkLoadingPluginCode,
       this.runtimeRequirements.has(RuntimeGlobals.baseURI)
         ? this._generateBaseUri(chunk, rootOutputDir)

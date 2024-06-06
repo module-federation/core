@@ -11,11 +11,10 @@
       "options": {
         "target": "node",
         "compiler": "tsc",
-        "outputPath": "dist/apps/node-host",
+        "outputPath": "apps/node-host/dist",
         "main": "apps/node-host/src/main.js",
         "tsConfig": "apps/node-host/tsconfig.app.json",
         "assets": ["apps/node-host/src/assets"],
-        "isolatedConfig": true,
         "webpackConfig": "apps/node-host/webpack.config.js"
       },
       "configurations": {

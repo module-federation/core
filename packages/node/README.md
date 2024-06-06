@@ -35,6 +35,51 @@ yarn add @module-federation/node
 ## 🚀 Usage
 
 There are two approaches to using the plugins exported from this package, dependent on your use case.
+### Use as Runtime Plugin
+
+`module-federation/enhanced` supports runtime plugins. 
+
+```js
+const { ModuleFederationPlugin } = require('@module-federation/enhanced');
+
+const options = {
+  target: 'async-node',
+  output: {
+    chunkFilename: '[id]-[chunkhash].js' // important to hash chunks
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'app1',
+      exposes: {},
+      remotes: {
+        app2: 'app2@http://'
+      },
+      runtimePlugins: [
+        require.resolve('@module-federation/node/runtimePlugin')
+      ],
+      remoteType: 'script',
+      library: { type: 'commonjs-module', name: 'app1' }
+    })
+  ]
+};
+
+```
+
+or you can enable it with some presets via UniversalFederation
+
+```js
+new UniversalFederationPlugin({
+    name: 'website2',
+    library: { type: 'commonjs-module' },
+    isServer: true, // or false
+    remotes: {},
+    filename: 'remoteEntry.js',
+    useRuntimePlugin: true, // uses the module-federation/enhanced runtime plugin api
+    exposes: {
+      './SharedComponent': './remoteServer/SharedComponent',
+    },
+  })
+```
 
 ### UniversalFederationPlugin
 
@@ -61,6 +106,7 @@ const config = {
       isServer: true, // or false
       remotes: {},
       filename: 'remoteEntry.js',
+      useRuntimePlugin: true, // uses the module-federation/enhanced runtime plugins
       exposes: {
         './SharedComponent': './remoteServer/SharedComponent',
       },
@@ -152,7 +198,7 @@ revalidate().then((shouldReload) => {
 });
 ```
 
-### Overrideing default http chunk fetch
+### Overriding default http chunk fetch
 
 ```js
 const chunkFetcher = globalThis.webpackChunkLoad || globalThis.fetch || fetchPolyfill;
@@ -165,8 +211,7 @@ chunkFetcher(url)
   });
 ```
 
-if you want to use your own custom fetch, or add fetch headers, either in the entrypoint of webpack or outside
-of webpack scope, like in express server- you can override the default chunk fetcher by setting the globalThis.webpackChunkLoad variable.
+If you want to use your own custom fetch, or add fetch headers, either in the entrypoint of webpack or outside of webpack scope, like in express server you can override the default chunk fetcher by setting the `globalThis.webpackChunkLoad` variable.
 
 ```js
 globalThis.webpackChunkLoad = async (url) => {

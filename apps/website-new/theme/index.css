@@ -1,0 +1,157 @@
+/* It seems tailwind have style `display: list-style` by default */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+summary {
+  display: block;
+}
+
+:root {
+  --rp-c-brand: #71bedb;
+  --rp-c-brand-dark: #71bedb;
+  --rp-c-brand-darker: #9589ea;
+  --rp-c-brand-light: #71bedb;
+  --rp-c-brand-lighter: #71bedb;
+  --rp-c-brand-tint: rgba(127, 163, 255, 0.16);
+  --rp-code-title-bg: rgba(250, 192, 61, 0.15);
+  --rp-code-block-bg: rgba(214, 188, 70, 0.05);
+  --rp-custom-block-info-bg: rgba(250, 192, 61, 0.05);
+  --rp-custom-block-info-border: rgba(61, 177, 250, 0.5);
+}
+
+:root {
+}
+
+.dark {
+  --rp-code-title-bg: rgba(128, 128, 128, 0.2);
+  --rp-code-block-bg: #242424;
+}
+
+.badge-info span.rounded-full,
+.badge-info span.rounded-full {
+  color: #ccffcc;
+  background-color: rgba(0, 128, 0, 0.2);
+}
+button:focus,
+button:focus-visible {
+  outline: none;
+}
+
+[disabled] {
+  cursor: not-allowed;
+}
+
+[role='tablist'] {
+  max-width: 100vw;
+  padding: 0 10px;
+}
+
+@media (min-width: 640px) {
+  .sm\:flex {
+    display: flex;
+  }
+
+  .sm\:max-w-xl {
+    max-width: 36rem;
+  }
+
+  .sm\:flex-row {
+    flex-direction: row;
+  }
+
+  .sm\:px-8 {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .sm\:pr-4 {
+    padding-right: 1rem;
+  }
+
+  .sm\:pt-0 {
+    padding-top: 0;
+  }
+
+  .sm\:text-4xl {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
+  .sm\:text-5xl {
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  .sm\:text-6xl {
+    font-size: 3.75rem;
+    line-height: 1;
+  }
+
+  .sm\:text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .sm\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .sm\:text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:order-1 {
+    order: 1;
+  }
+
+  .md\:order-2 {
+    order: 2;
+  }
+
+  .md\:m-0 {
+    margin: 0;
+  }
+
+  .md\:flex-row {
+    flex-direction: row;
+  }
+
+  .md\:px-16 {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+
+  .md\:pb-16 {
+    padding-bottom: 4rem;
+  }
+
+  .md\:text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .md\:text-6xl {
+    font-size: 3.75rem;
+    line-height: 1;
+  }
+
+  .md\:text-7xl {
+    font-size: 4.5rem;
+    line-height: 1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:flex {
+    display: flex;
+  }
+
+  .lg\:pb-5 {
+    padding-bottom: 1.25rem;
+  }
+}

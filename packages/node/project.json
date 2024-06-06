@@ -8,7 +8,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/node",
+        "outputPath": "packages/node/dist",
         "main": "packages/node/src/index.js",
         "tsConfig": "packages/node/tsconfig.lib.json",
         "updateBuildableProjectDepsInPackageJson": true,
@@ -26,7 +26,7 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/node/**/*.js"]
+        "lintFilePatterns": ["packages/node/**/*.js", "packages/node/**/*.ts"]
       }
     },
     "test": {
@@ -37,7 +37,7 @@
         "passWithNoTests": true
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -49,17 +49,10 @@
           {
             "command": "nx run node:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run node:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
-  "tags": ["package"]
+  "tags": ["type:pkg"]
 }

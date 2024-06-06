@@ -5,12 +5,8 @@ import './menu';
 
 const SharedNav = () => {
   const { asPath, push } = useRouter();
-  // is used here as a demo for tracking loading status of remote container
-  // const homeRemote = useMFRemote('home_app');
-  // const shopRemote = useMFRemote('shop');
-  // const checkoutRemote = useMFRemote('checkout');
-
   let activeMenu;
+
   if (asPath === '/' || asPath.startsWith('/home')) {
     activeMenu = '/';
   } else if (asPath.startsWith('/shop')) {
@@ -19,8 +15,36 @@ const SharedNav = () => {
     activeMenu = '/checkout';
   }
 
-  // const badgeColor = (remoteData) =>
-  //   remoteData.error ? 'red' : remoteData.loaded ? 'green' : 'yellow';
+  const menuItems = [
+    {
+      className: 'home-menu-link',
+      label: (
+        <>
+          Home <sup>3000</sup>
+        </>
+      ),
+      key: '/',
+      onMouseEnter: () => {},
+    },
+    {
+      className: 'shop-menu-link',
+      label: (
+        <>
+          Shop <sup>3001</sup>
+        </>
+      ),
+      key: '/shop',
+    },
+    {
+      className: 'checkout-menu-link',
+      label: (
+        <>
+          Checkout <sup>3002</sup>
+        </>
+      ),
+      key: '/checkout',
+    },
+  ];
 
   return (
     <Layout.Header>
@@ -32,40 +56,7 @@ const SharedNav = () => {
         onClick={({ key }) => {
           push(key);
         }}
-        items={[
-          {
-            label: (
-              <>
-                Home <sup>3000</sup>
-              </>
-            ),
-            key: '/',
-            onMouseEnter: () => {
-              // prefetch remote container on HOVER manually
-              // if you use `next/link` it prefetches remoteEntry automatically
-              // but here Antd.Menu does not use Link, so do it manually
-              // homeRemote.remote.getContainer();
-            },
-          },
-          {
-            label: (
-              <>
-                Shop <sup>3001</sup>
-              </>
-            ),
-            key: '/shop',
-            // onMouseEnter: () => shopRemote.remote.getContainer(),
-          },
-          {
-            label: (
-              <>
-                Checkout <sup>3002</sup>
-              </>
-            ),
-            key: '/checkout',
-            // onMouseEnter: () => checkoutRemote.remote.getContainer(),
-          },
-        ]}
+        items={menuItems}
       />
       <style jsx>
         {`

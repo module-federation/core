@@ -1,0 +1,44 @@
+# manifest
+
+- 类型：`boolean | PluginManifestOptions`
+- 默认值：`undefined`
+
+用于控制是否生成 manifest ，以及对应的生成配置。
+
+`PluginManifestOptions` 类型如下：
+
+```ts
+interface PluginManifestOptions {
+  filePath?: string;
+  disableAssetsAnalyze?: boolean;
+  fileName?: string;
+}
+```
+
+## filePath
+
+- 类型：`string`
+- 默认值：`undefined`
+
+manifest 存放路径
+
+## fileName
+
+- 类型：`string`
+- 默认值：`'mf-manifest.json'`
+
+manifest 文件名称
+
+## disableAssetsAnalyze
+
+:::warning
+不建议用户设置此配置，设置后，preload 功能将失效！
+:::
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`undefined`
+
+asset analyze 在复杂项目中会耗费较长时间，设置该选项后，会禁用 asset analyze，优化构建时间。
+如果项目是纯消费者，默认在 dev 中会设置为 true 。
+如果设置为 true ，那么 manifest 中将不会有 shared 、exposes 字段，且 remotes 中也不会有 assets 。
