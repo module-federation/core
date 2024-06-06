@@ -64,19 +64,19 @@ export function createScript(info: {
         if (createScriptRes.timeout) timeout = createScriptRes.timeout;
       }
     }
-  }
 
-  const attrs = info.attrs;
-  if (attrs) {
-    Object.keys(attrs).forEach((name) => {
-      if (script) {
-        if (name === 'async' || name === 'defer') {
-          script[name] = attrs[name];
-        } else {
-          script.setAttribute(name, attrs[name]);
+    const attrs = info.attrs;
+    if (attrs) {
+      Object.keys(attrs).forEach((name) => {
+        if (script) {
+          if (name === 'async' || name === 'defer') {
+            script[name] = attrs[name];
+          } else {
+            script.setAttribute(name, attrs[name]);
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   const onScriptComplete = (
