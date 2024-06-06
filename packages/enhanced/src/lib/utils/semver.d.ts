@@ -4,7 +4,7 @@ export function parseVersionRuntimeCode(runtimeTemplate: any): string;
 export function versionLtRuntimeCode(runtimeTemplate: any): string;
 export function rangeToStringRuntimeCode(runtimeTemplate: any): string;
 export function satisfyRuntimeCode(runtimeTemplate: any): string;
-export type RuntimeTemplate = import("../RuntimeTemplate");
+export type RuntimeTemplate = import('webpack/lib/RuntimeTemplate');
 export type SemVerRange = (string | number | undefined | [])[];
 /** @typedef {import("../RuntimeTemplate")} RuntimeTemplate */
 /** @typedef {(string|number|undefined|[])[]} SemVerRange */
