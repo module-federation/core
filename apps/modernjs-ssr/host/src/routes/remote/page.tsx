@@ -3,7 +3,7 @@ import Comp from 'remote/Image';
 import { registerRemotes, loadRemote } from '@modern-js/runtime/mf';
 
 const NewRemoteCom = React.lazy(() =>
-  loadRemote('dynamic_nested_remote/Content').then((m) => {
+  loadRemote('remote/Image').then((m) => {
     console.log('加载');
     return m;
   }),

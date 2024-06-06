@@ -3,10 +3,11 @@ import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtim
 const sharedStrategy: () => FederationRuntimePlugin = () => ({
   name: 'shared-strategy-plugin',
   beforeInit(args) {
-    const { shareInfo } = args;
-    if (shareInfo) {
-      Object.keys(shareInfo || {}).forEach((sharedKey) => {
-        const sharedConfigs = shareInfo[sharedKey];
+    const { userOptions } = args;
+    const shared = userOptions.shared;
+    if (shared) {
+      Object.keys(shared).forEach((sharedKey) => {
+        const sharedConfigs = shared[sharedKey];
         const arraySharedConfigs = Array.isArray(sharedConfigs)
           ? sharedConfigs
           : [sharedConfigs];

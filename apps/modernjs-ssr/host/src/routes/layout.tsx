@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, useNavigate } from '@modern-js/runtime/router';
-import { LiveReload } from '@modern-js/runtime/mf';
+// import { LiveReload } from '@modern-js/runtime/mf';
 import { Layout, Menu } from 'antd';
 
 const { Header, Content } = Layout;
@@ -24,7 +24,7 @@ const App: React.FC = () => {
 
   return (
     <Layout>
-      <LiveReload />
+      {/* <LiveReload /> */}
       <Header style={{ display: 'flex', alignItems: 'center' }}>
         <Menu
           theme="dark"

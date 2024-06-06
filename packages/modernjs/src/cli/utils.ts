@@ -31,6 +31,8 @@ export const getMFConfig = async (
   const preBundlePath = await bundle(mfConfigPath);
   const mfConfig = (await import(preBundlePath))
     .default as unknown as moduleFederationPlugin.ModuleFederationPluginOptions;
+
+  await replaceRemoteUrl(mfConfig);
   return mfConfig;
 };
 
@@ -40,6 +42,46 @@ const injectRuntimePlugins = (
 ): void => {
   if (!runtimePlugins.includes(runtimePlugin)) {
     runtimePlugins.push(runtimePlugin);
+  }
+};
+
+const replaceRemoteUrl = async (
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+): Promise<void> => {
+  if (!mfConfig.remotes) {
+    return;
+  }
+  const ipv4 = await lookupIpv4();
+  const handleRemoteObject = (
+    remoteObject: moduleFederationPlugin.RemotesObject,
+  ) => {
+    Object.keys(remoteObject).forEach((remoteKey) => {
+      const remote = remoteObject[remoteKey];
+      // no support array items yet
+      if (Array.isArray(remote)) {
+        return;
+      }
+      if (typeof remote === 'string' && remote.includes(LOCALHOST)) {
+        remoteObject[remoteKey] = remote.replace(LOCALHOST, ipv4);
+      }
+      if (
+        typeof remote === 'object' &&
+        !Array.isArray(remote.external) &&
+        remote.external.includes(LOCALHOST)
+      ) {
+        remote.external = remote.external.replace(LOCALHOST, ipv4);
+      }
+    });
+  };
+  if (Array.isArray(mfConfig.remotes)) {
+    mfConfig.remotes.forEach((remoteObject) => {
+      if (typeof remoteObject === 'string') {
+        return;
+      }
+      handleRemoteObject(remoteObject);
+    });
+  } else if (typeof mfConfig.remotes !== 'string') {
+    handleRemoteObject(mfConfig.remotes);
   }
 };
 

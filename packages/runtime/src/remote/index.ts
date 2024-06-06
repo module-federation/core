@@ -5,7 +5,7 @@ import {
   warn,
   composeKeyWithSeparator,
 } from '@module-federation/sdk';
-import { globalLoading } from '../global';
+import { getInfoWithoutType, globalLoading } from '../global';
 import {
   Options,
   UserOptions,
@@ -21,6 +21,7 @@ import {
   AsyncHook,
   AsyncWaterfallHook,
   SyncHook,
+  SyncWaterfallHook,
 } from '../utils/hooks';
 import {
   assert,
@@ -32,6 +33,7 @@ import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
 import { getGlobalShareScope } from '../utils/share';
+import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
 
 export interface LoadRemoteMatch {
   id: string;
@@ -49,6 +51,14 @@ export class RemoteHandler {
   idToRemoteMap: Record<string, { name: string; expose: string }>;
 
   hooks = new PluginSystem({
+    beforeRegisterRemote: new SyncWaterfallHook<{
+      remote: Remote;
+      origin: FederationHost;
+    }>('beforeRegisterRemote'),
+    registerRemote: new SyncWaterfallHook<{
+      remote: Remote;
+      origin: FederationHost;
+    }>('registerRemote'),
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
@@ -343,6 +353,7 @@ export class RemoteHandler {
     targetRemotes: Remote[],
     options?: { force?: boolean },
   ): void {
+    const { host } = this;
     const normalizeRemote = () => {
       if (remote.alias) {
         // Validate if alias equals the prefix of remote.name and remote.alias, if so, throw an error
@@ -375,12 +386,14 @@ export class RemoteHandler {
         remote.type = DEFAULT_REMOTE_TYPE;
       }
     };
+    this.hooks.lifecycle.beforeRegisterRemote.emit({ remote, origin: host });
     const registeredRemote = targetRemotes.find(
       (item) => item.name === remote.name,
     );
     if (!registeredRemote) {
       normalizeRemote();
       targetRemotes.push(remote);
+      this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
     } else {
       const messages = [
         `The remote "${remote.name}" is already registered.`,
@@ -393,6 +406,7 @@ export class RemoteHandler {
         this.removeRemote(registeredRemote);
         normalizeRemote();
         targetRemotes.push(remote);
+        this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
       }
       warn(messages.join(' '));
     }
@@ -413,11 +427,13 @@ export class RemoteHandler {
         const remoteInfo = loadedModule.remoteInfo;
         const key = remoteInfo.entryGlobalName as keyof typeof globalThis;
 
-        if (
-          globalThis[key] &&
-          Object.getOwnPropertyDescriptor(globalThis, key)?.configurable
-        ) {
-          delete globalThis[key];
+        if (globalThis[key]) {
+          if (Object.getOwnPropertyDescriptor(globalThis, key)?.configurable) {
+            delete globalThis[key];
+          } else {
+            // @ts-ignore
+            globalThis[key] = undefined;
+          }
         }
         const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
           loadedModule.remoteInfo,
@@ -429,7 +445,7 @@ export class RemoteHandler {
 
         host.snapshotHandler.manifestCache.delete(remoteInfo.entry);
 
-        // delete un loaded shared and instance
+        // delete unloaded shared and instance
         let remoteInsId = remoteInfo.buildVersion
           ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
           : remoteInfo.name;
@@ -507,6 +523,19 @@ export class RemoteHandler {
           );
           globalThis.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
         }
+
+        const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
+        if (hostGlobalSnapshot) {
+          const remoteKey =
+            hostGlobalSnapshot &&
+            'remotesInfo' in hostGlobalSnapshot &&
+            hostGlobalSnapshot.remotesInfo &&
+            getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
+          if (remoteKey) {
+            delete hostGlobalSnapshot.remotesInfo[remoteKey];
+          }
+        }
+
         host.moduleCache.delete(remote.name);
       }
     } catch (err) {

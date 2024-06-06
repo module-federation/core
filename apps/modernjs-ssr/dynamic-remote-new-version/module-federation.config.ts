@@ -2,9 +2,8 @@ import { createModuleFederationConfig } from '@module-federation/modern-js';
 export default createModuleFederationConfig({
   name: 'dynamic_remote',
   exposes: {
-    './thing': './src/test.ts',
+    './Image': './src/components/Image.tsx',
   },
-  runtimePlugins: ['./runtimePlugin.ts'],
   shared: {
     react: { singleton: true },
     'react-dom': { singleton: true },
