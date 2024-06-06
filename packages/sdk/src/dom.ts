@@ -156,15 +156,15 @@ export function createLink(info: {
         link = createLinkRes;
       }
     }
-  }
 
-  const attrs = info.attrs;
-  if (attrs) {
-    Object.keys(attrs).forEach((name) => {
-      if (link) {
-        link.setAttribute(name, attrs[name]);
-      }
-    });
+    const attrs = info.attrs;
+    if (attrs) {
+      Object.keys(attrs).forEach((name) => {
+        if (link) {
+          link.setAttribute(name, attrs[name]);
+        }
+      });
+    }
   }
 
   const onLinkComplete = (
