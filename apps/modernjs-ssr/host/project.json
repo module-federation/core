@@ -15,7 +15,7 @@
         ],
         "commands": [
           {
-            "command": "cd apps/modernjs-ssr/modernjs-ssr-host; pnpm run build",
+            "command": "cd apps/modernjs-ssr/host; pnpm run build",
             "forwardAllArgs": true
           }
         ]
@@ -32,7 +32,7 @@
         ],
         "commands": [
           {
-            "command": "cd apps/modernjs-ssr/modernjs-ssr-host; pnpm run dev",
+            "command": "cd apps/modernjs-ssr/host; pnpm run dev",
             "forwardAllArgs": false
           }
         ]
@@ -41,9 +41,9 @@
     "e2e": {
       "executor": "@nx/cypress:cypress",
       "options": {
-        "cypressConfig": "apps/modernjs-ssr/modernjs-ssr-host/cypress.config.ts",
+        "cypressConfig": "apps/modernjs-ssr/host/cypress.config.ts",
         "testingType": "e2e",
-        "baseUrl": "http://localhost:4001",
+        "baseUrl": "http://localhost:3005",
         "browser": "chrome"
       },
       "configurations": {
@@ -61,11 +61,7 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :8080 || nx run modernjs-ssr-host:serve & echo 'done'",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "sleep 20 && nx run modernjs-ssr-host:e2e",
+            "command": "nx run modernjs-ssr-host:e2e",
             "forwardAllArgs": true
           }
         ]

@@ -36,8 +36,13 @@ const Index = (): JSX.Element => {
             </td>
             <td>
               <button
+                id="nested-dynamic-remote-local-button"
                 style={{ marginBottom: '1rem' }}
-                onClick={() => alert('Client side Javascript works!')}
+                onClick={() =>
+                  alert(
+                    '[Nested Dynamic Remote Page] Client side Javascript works!',
+                  )
+                }
               >
                 Click me to test host interactive!
               </button>

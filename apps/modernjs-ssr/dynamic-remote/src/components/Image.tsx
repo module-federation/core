@@ -5,23 +5,27 @@ import stuff from './stuff.module.css';
 
 export default (): JSX.Element => (
   <div
+    id="dynamic-remote-components"
     style={{
       backgroundColor: '#18fa41',
       color: 'lightgrey',
       padding: '1rem',
-      width: '500px',
     }}
   >
     <h2>
       <strong>dynamic remote</strong>&nbsp;image
     </h2>
     <button
+      id="dynamic-remote-components-button"
       style={{ marginBottom: '1rem' }}
-      onClick={() => alert('Client side Javascript works!')}
+      onClick={() =>
+        alert('[dynamic-remote-components] Client side Javascript works!')
+      }
     >
       Click me to test i'm interactive!
     </button>
     <img
+      id="dynamic-remote-components-image"
       src="https://module-federation.io/module-federation-logo.svg"
       style={{ width: '100px' }}
       alt="serge"

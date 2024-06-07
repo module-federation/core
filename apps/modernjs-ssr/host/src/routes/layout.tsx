@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, useNavigate } from '@modern-js/runtime/router';
-// import { LiveReload } from '@modern-js/runtime/mf';
+import { LiveReload } from '@modern-js/runtime/mf';
 import { Layout, Menu } from 'antd';
 
 const { Header, Content } = Layout;
@@ -9,6 +9,7 @@ const App: React.FC = () => {
   const navi = useNavigate();
 
   const Navs = [
+    'home',
     'all',
     'remote',
     'nested-remote',
@@ -17,19 +18,24 @@ const App: React.FC = () => {
   ].map((i) => ({
     key: i,
     label: i,
+    icon: <span className={i}></span>,
     onClick: ({ key }) => {
-      navi(`/${key}`);
+      if (key === 'home') {
+        navi(`/`);
+      } else {
+        navi(`/${key}`);
+      }
     },
   }));
 
   return (
     <Layout>
-      {/* <LiveReload /> */}
+      <LiveReload />
       <Header style={{ display: 'flex', alignItems: 'center' }}>
         <Menu
           theme="dark"
           mode="horizontal"
-          defaultSelectedKeys={['2']}
+          defaultSelectedKeys={['home']}
           items={Navs}
           style={{ flex: 1, minWidth: 0 }}
         />

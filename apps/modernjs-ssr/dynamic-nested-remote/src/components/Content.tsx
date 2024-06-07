@@ -27,13 +27,25 @@ const LazyButton1 = React.lazy(() =>
 );
 
 export default (): JSX.Element => (
-  <div className="testlll">
+  <div
+    id="nested-dynamic-remote-components"
+    style={{
+      backgroundColor: '#e9541e',
+      color: 'lightgrey',
+      padding: '1rem',
+    }}
+  >
     <h2>
       <strong>dynamic nested remote</strong>
     </h2>
     <Button
+      id="nested-dynamic-remote-components-button"
       className={stuff['test-remote2']}
-      onClick={() => alert('Client side Javascript works!')}
+      onClick={() =>
+        alert(
+          '[nested-dynamic-remote-components] Client side Javascript works!',
+        )
+      }
     >
       Click me to test <strong>dynamic nested remote</strong> interactive!
     </Button>

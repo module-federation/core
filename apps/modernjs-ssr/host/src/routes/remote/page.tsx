@@ -44,8 +44,11 @@ const Index = (): JSX.Element => {
             <td>This component is from a remote(localhost:3006)</td>
             <td>
               <button
+                id="remote-local-button"
                 style={{ marginBottom: '1rem' }}
-                onClick={() => alert('Client side Javascript works!')}
+                onClick={() =>
+                  alert('[Remote Page] Client side Javascript works!')
+                }
               >
                 Click me to test host interactive!
               </button>
@@ -59,7 +62,11 @@ const Index = (): JSX.Element => {
             <td>✅</td>
             <td>click button to replace new remote </td>
             <td>
-              <button style={{ marginBottom: '1rem' }} onClick={replaceRemote}>
+              <button
+                id="remote-replace-button"
+                style={{ marginBottom: '1rem' }}
+                onClick={replaceRemote}
+              >
                 replace new remote
               </button>
             </td>

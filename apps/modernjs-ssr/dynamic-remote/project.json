@@ -15,7 +15,7 @@
         ],
         "commands": [
           {
-            "command": "cd apps/modernjs-ssr/modernjs-ssr-dynamic-remote; pnpm run build",
+            "command": "cd apps/modernjs-ssr/dynamic-remote; pnpm run build",
             "forwardAllArgs": true
           }
         ]
@@ -32,7 +32,7 @@
         ],
         "commands": [
           {
-            "command": "cd apps/modernjs-ssr/modernjs-ssr-dynamic-remote; pnpm run dev",
+            "command": "cd apps/modernjs-ssr/dynamic-remote; pnpm run dev",
             "forwardAllArgs": false
           }
         ]

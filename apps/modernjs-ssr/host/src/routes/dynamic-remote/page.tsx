@@ -54,8 +54,11 @@ const Index = (): JSX.Element => {
             <td>This component is from a dynamic remote(localhost:3008)</td>
             <td>
               <button
+                id="dynamic-remote-local-button"
                 style={{ marginBottom: '1rem' }}
-                onClick={() => alert('Client side Javascript works!')}
+                onClick={() =>
+                  alert('[Dynamic Remote Page] Client side Javascript works!')
+                }
               >
                 Click me to test host interactive!
               </button>
@@ -70,7 +73,11 @@ const Index = (): JSX.Element => {
             <td>✅</td>
             <td>click button to replace new remote </td>
             <td>
-              <button style={{ marginBottom: '1rem' }} onClick={replaceRemote}>
+              <button
+                id="dynamic-remote-replace-button"
+                style={{ marginBottom: '1rem' }}
+                onClick={replaceRemote}
+              >
                 replace new remote
               </button>
             </td>
