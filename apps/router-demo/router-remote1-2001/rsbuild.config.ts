@@ -2,6 +2,7 @@ import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import path from 'path';
+import { chunkName } from '../../../webpack/lib/RuntimeGlobals';
 
 export default defineConfig({
   source: {
@@ -26,8 +27,12 @@ export default defineConfig({
     writeToDisk: true,
   },
   tools: {
+    cssLoader: {
+      // esModule: false
+    },
     rspack: (config, { appendPlugins }) => {
       delete config.optimization?.splitChunks;
+      config.output!.uniqueName = 'router-remote1-2001';
       appendPlugins([
         new ModuleFederationPlugin({
           name: 'remote1',

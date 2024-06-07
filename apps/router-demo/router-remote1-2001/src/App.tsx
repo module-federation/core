@@ -7,6 +7,9 @@ import {
 import { Table } from 'antd';
 import { useShadowRoot, ShadowRoot } from './shadow';
 import { useEffect, useRef } from 'react';
+import style from './App.css';
+
+console.log('style', style);
 
 const dataSource = [
   {
@@ -40,8 +43,6 @@ const columns = [
     key: 'address',
   },
 ];
-
-// import "./App.css";
 
 function Home() {
   return (
@@ -86,6 +87,11 @@ const App = (info: any) => {
           <Route path="/detail" Component={Detail} />
         </Routes>
       </BrowserRouter>
+      {/* <style ref="text/css">
+        {
+          style
+        }
+      </style> */}
     </StyleProvider>
   );
 };

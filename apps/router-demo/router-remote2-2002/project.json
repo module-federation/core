@@ -1,14 +1,14 @@
 {
-  "name": "2003-router-remote3",
+  "name": "router-remote2-2002",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/router-demo/2003-router-remote3/src",
+  "sourceRoot": "packages/router-demo/router-remote2-2002/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "npm run build --prefix apps/router-demo/2003-router-remote3"
+          "npm run build --prefix apps/router-demo/router-remote2-2002"
         ]
       }
     },
@@ -16,7 +16,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "npm run test --prefix apps/router-demo/2003-router-remote3"
+          "npm run test --prefix apps/router-demo/router-remote2-2002"
         ]
       }
     },
@@ -24,7 +24,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "npm run dev --prefix apps/router-demo/2003-router-remote3"
+          "npm run dev --prefix apps/router-demo/router-remote2-2002"
         ]
       },
       "dependsOn": [
