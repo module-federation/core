@@ -1,5 +1,5 @@
 export { createRemoteComponent } from './create';
-export { createBridgeComponent } from './provider';
+export { createBridgeComponent, ShadowComponent } from './provider';
 export type {
   ProviderParams,
   RenderFnParams,

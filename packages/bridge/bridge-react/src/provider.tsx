@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterContext } from './context';
 import type {
@@ -44,3 +44,13 @@ export function createBridgeComponent<T>(Component: React.ComponentType<T>) {
     };
   };
 }
+
+export function ShadowRoot(info: { children: () => JSX.Element }) {
+  const [root, setRoot] = useState(null);
+  const domRef = useRef(null);
+  useLayoutEffect(() => {});
+
+  return <div ref={domRef}>{root && <info.children />}</div>;
+}
+
+function ShadowContent() {}
