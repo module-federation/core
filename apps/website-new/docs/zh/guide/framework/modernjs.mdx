@@ -1,0 +1,204 @@
+# Modern.js
+
+该插件为 Modern.js 提供 Module Federation 配套功能
+
+## 支持
+
+- modern.js ^2.52.0
+- 包含服务器端渲染（SSR）
+
+强烈推荐参考这个应用，它充分利用了最佳功能：
+[module-federation 示例](https://github.com/module-federation/core/tree/feat/modernjs-ssr/apps/modernjs-ssr)
+
+## 快速开始
+
+### 安装
+
+你可以通过如下的命令安装插件：
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/modern-js --save',
+    yarn: 'yarn add @module-federation/modern-js --save',
+    pnpm: 'pnpm add @module-federation/modern-js --save',
+    bun: 'bun add @module-federation/modern-js --save',
+  }}
+/>
+
+### 应用插件
+
+在 `modern.config.ts` 的 `plugins` 中应用此插件：
+
+```ts title="modern.config.ts"
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import { moduleFederationPlugin } from '@module-federation/modern-js';
+
+export default defineConfig({
+  dev: {
+    port: 3005,
+  },
+  runtime: {
+    router: true,
+  },
+  server: {
+    ssr: {
+      mode: 'stream',
+    },
+  },
+  plugins: [appTools(), moduleFederationPlugin()],
+});
+```
+
+随后创建 `module-federation.config.ts` 文件，并写入需要的配置：
+
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/modern-js';
+export default createModuleFederationConfig({
+  name: 'host',
+  remotes: {
+    remote: 'remote@http://localhost:3006/mf-manifest.json',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+```
+
+## 服务端渲染（SSR）
+
+:::info 注意
+为更好的性能体验，Module Federation X Modern.js SSR 仅支持 stream SSR 。
+:::
+
+在 SSR 场景与 CSR 场景中使用 Module Federation 没有任何区别，开发者保持按照原有的开发行为即可。
+
+但为了更好地开发体验，我们提供了相应的组件来帮助开发者更好的使用 Module Federation。
+
+### MFReactComponent
+
+import Collapse from '@components/Collapse'
+
+<Collapse>
+```ts
+declare function MFReactComponent(
+  props: MFReactComponentProps
+): React.ReactElement;
+
+type Id = string;
+type MFReactComponentProps =
+  | {
+      id: Id;
+      injectScript?: boolean;
+      injectLink?: boolean;
+      loading?: React.ReactNode;
+      fallback?:
+        | ((err: Error) => React.FC | React.ReactElement)
+        | React.FC
+        | React.ReactElement;
+    }
+  | Id;
+```
+</Collapse>
+
+该组件加载组件的同时，还会帮助注入相应的样式标签/脚本 ，此行为可以帮助避免流式渲染带来的 CSS 闪烁问题以及加速 PID （首屏可交互时间）。
+
+#### 示例
+
+```tsx
+import React, { FC, memo, useEffect } from 'react';
+import { registerRemotes, MFReactComponent } from '@modern-js/runtime/mf';
+
+const Product: FC = () => {
+  registerRemotes([
+    {
+      name: 'dynamic_remote',
+      entry: 'http://localhost:3008/mf-manifest.json',
+    },
+  ]);
+
+  const fallback = (err: Error) => {
+    if (err.message.includes('does not exist in container')) {
+      return <div>404</div>;
+    }
+    throw err;
+  };
+
+  return <>
+    <MFReactComponent id={rId} fallback={fallback} />
+  </>;
+};
+export default Product;
+```
+
+#### id
+
+- 类型：`string`
+- 是否必填：是
+- 默认值：`undefined`
+
+完整请求路径，设置后会调用 `loadRemote` 加载此模块。
+
+#### loading
+
+- 类型：`React.ReactNode`
+- 是否必填：否
+- 默认值：`undefined`
+
+设置模块载入状态。
+
+#### fallback
+
+- 类型：`((err: Error) => React.FC | React.ReactElement) | React.FC | React.ReactElement`
+- 是否必填：否
+- 默认值：`undefined`
+
+加载失败容错组件。
+
+#### injectLink
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`true`
+
+是否注入对应组件的样式。
+
+#### injectScript
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`true`
+
+是否注入对应组件的脚本。
+
+### LiveReload
+
+:::info 提示
+该组件在生产环境不会生效！
+:::
+
+<Collapse>
+```ts
+declare function LiveReload(): React.JSX.Element | null;
+```
+</Collapse>
+
+当远程组件更新时，会自动进行页面重载。
+
+#### 示例
+
+```tsx
+import { Outlet } from '@modern-js/runtime/router';
+import { LiveReload } from '@modern-js/runtime/mf';
+
+export default function Layout() {
+  return (
+    <div>
+      <LiveReload />
+      <Outlet />
+    </div>
+  );
+}
+```

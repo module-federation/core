@@ -1,5 +1,9 @@
 import React, { useState, Suspense } from 'react';
-import { loadRemote, registerRemotes } from '@modern-js/runtime/mf';
+import {
+  loadRemote,
+  registerRemotes,
+  MFReactComponent,
+} from '@modern-js/runtime/mf';
 
 registerRemotes([
   {
@@ -7,11 +11,6 @@ registerRemotes([
     entry: 'http://localhost:3008/mf-manifest.json',
   },
 ]);
-const DynamicRemote = React.lazy(() =>
-  loadRemote('dynamic_remote/Image').then((m) => {
-    return m;
-  }),
-);
 
 const NewRemoteCom = React.lazy(() =>
   loadRemote('dynamic_remote/Image').then((m) => {
@@ -64,7 +63,7 @@ const Index = (): JSX.Element => {
               </button>
             </td>
             <td>
-              <DynamicRemote />
+              <MFReactComponent id="dynamic_remote/Image" />
             </td>
           </tr>
 

@@ -6,9 +6,10 @@ import {
 } from '@module-federation/enhanced/runtime';
 
 type Comp = React.FC | { default: React.FC };
+type Id = string;
 type IProps =
   | {
-      id: string;
+      id: Id;
       injectScript?: boolean;
       injectLink?: boolean;
       loading?: React.ReactNode;
@@ -17,7 +18,7 @@ type IProps =
         | React.FC
         | React.ReactElement;
     }
-  | string;
+  | Id;
 
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
   const { name, expose } = instance.remoteHandler.idToRemoteMap[id];
