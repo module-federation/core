@@ -1,4 +1,7 @@
 import path from 'path';
+import http from 'http';
+import https from 'https';
+import axios, { type AxiosRequestConfig } from 'axios';
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
@@ -103,4 +106,10 @@ export function cloneDeepOptions(options: DTSManagerOptions) {
       return false;
     }
   });
+}
+
+export async function axiosGet(url: string, config?: AxiosRequestConfig) {
+  const httpAgent = new http.Agent({ family: 4 });
+  const httpsAgent = new https.Agent({ family: 4 });
+  return axios.get(url, { httpAgent, httpsAgent, ...config });
 }

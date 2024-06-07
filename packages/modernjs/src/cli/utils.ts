@@ -128,23 +128,23 @@ export const patchMFConfig = (
     return {
       ...mfConfig,
       runtimePlugins,
-      dts:
-        mfConfig.dts === false
-          ? false
-          : {
-              generateTypes: false,
-              consumeTypes: false,
-              ...(typeof mfConfig.dts === 'object' ? mfConfig.dts : {}),
-            },
-      dev:
-        mfConfig.dev === false
-          ? false
-          : {
-              disableHotTypesReload: true,
-              disableLiveReload: false,
-              injectWebClient: true,
-              ...(typeof mfConfig.dev === 'object' ? mfConfig.dev : {}),
-            },
+      // dts:
+      //   mfConfig.dts === false
+      //     ? false
+      //     : {
+      //         generateTypes: false,
+      //         consumeTypes: false,
+      //         ...(typeof mfConfig.dts === 'object' ? mfConfig.dts : {}),
+      //       },
+      // dev:
+      //   mfConfig.dev === false
+      //     ? false
+      //     : {
+      //         disableHotTypesReload: true,
+      //         disableLiveReload: false,
+      //         injectWebClient: true,
+      //         ...(typeof mfConfig.dev === 'object' ? mfConfig.dev : {}),
+      //       },
     };
   }
 
