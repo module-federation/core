@@ -1,51 +1,54 @@
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
-*/
+/**
+ * MIT License http://www.opensource.org/licenses/mit-license.php
+ * Author Tobias Koppers @sokra
+ */
 
 'use strict';
 
-/** @typedef {import("../RuntimeTemplate")} RuntimeTemplate */
-/** @typedef {(string|number|undefined|[])[]} SemVerRange */
+export type RuntimeTemplate = import('webpack/lib/RuntimeTemplate');
+export type SemVerRange = (string | number | undefined | [])[];
 
 /**
- * @param {string} str version string
+ * @param str version string
  * @returns {(string|number|undefined|[])[]} parsed version
  */
-const parseVersion = (str) => {
-  var splitAndConvert = function (str) {
-    return str.split('.').map(function (item) {
-      // eslint-disable-next-line eqeqeq
-      return +item == item ? +item : item;
+export function parseVersion(
+  str: string,
+): (string | number | undefined | [])[] {
+  const splitAndConvert = (str: string): (string | number)[] => {
+    return str.split('.').map((item) => {
+      return !isNaN(+item) ? +item : item;
     });
   };
-  var match = /^([^-+]+)?(?:-([^+]+))?(?:\+(.+))?$/.exec(str);
-  /** @type {(string|number|undefined|[])[]} */
-  var ver = match[1] ? splitAndConvert(match[1]) : [];
+
+  const match = /^([^-+]+)?(?:-([^+]+))?(?:\+(.+))?$/.exec(str);
+  if (!match) {
+    return [];
+  }
+
+  const ver: (string | number | undefined | [])[] = match[1]
+    ? splitAndConvert(match[1])
+    : [];
   if (match[2]) {
     ver.length++;
-    ver.push.apply(ver, splitAndConvert(match[2]));
+    ver.push(...splitAndConvert(match[2]));
   }
   if (match[3]) {
     ver.push([]);
-    ver.push.apply(ver, splitAndConvert(match[3]));
+    ver.push(...splitAndConvert(match[3]));
   }
   return ver;
-};
-exports.parseVersion = parseVersion;
-
+}
 /* eslint-disable eqeqeq */
 /**
- * @param {string} a version
- * @param {string} b version
+ * @param a version
+ * @param b version
  * @returns {boolean} true, iff a < b
  */
-const versionLt = (a, b) => {
-  // @ts-expect-error
-  a = parseVersion(a);
-  // @ts-expect-error
-  b = parseVersion(b);
-  var i = 0;
+export function versionLt(a: string, b: string): boolean {
+  const parsedA = parseVersion(a);
+  const parsedB = parseVersion(b);
+  let i = 0;
   for (;;) {
     // a       b  EOA     object  undefined  number  string
     // EOA        a == b  a < b   b < a      a < b   a < b
@@ -58,19 +61,21 @@ const versionLt = (a, b) => {
     // (1) compare them via "<"
 
     // Handles first row in table
-    if (i >= a.length) return i < b.length && (typeof b[i])[0] != 'u';
+    if (i >= parsedA.length)
+      return i < parsedB.length && (typeof parsedB[i])[0] != 'u';
 
-    var aValue = a[i];
-    var aType = (typeof aValue)[0];
+    const aValue = parsedA[i];
+    const aType = (typeof aValue)[0];
 
     // Handles first column in table
-    if (i >= b.length) return aType == 'u';
+    if (i >= parsedB.length) return aType == 'u';
 
-    var bValue = b[i];
-    var bType = (typeof bValue)[0];
+    const bValue = parsedB[i];
+    const bType = (typeof bValue)[0];
 
     if (aType == bType) {
       if (aType != 'o' && aType != 'u' && aValue != bValue) {
+        //@ts-ignore
         return aValue < bValue;
       }
       i++;
@@ -80,35 +85,38 @@ const versionLt = (a, b) => {
       return bType == 's' || aType == 'u';
     }
   }
-};
+}
 /* eslint-enable eqeqeq */
-exports.versionLt = versionLt;
 
 /**
- * @param {string} str range string
+ * @param str range string
  * @returns {SemVerRange} parsed range
  */
-exports.parseRange = (str) => {
-  const splitAndConvert = (str) => {
+export function parseRange(str: string): SemVerRange {
+  const splitAndConvert = (str: string) => {
     return str
       .split('.')
       .map((item) => (item !== 'NaN' && `${+item}` === item ? +item : item));
   };
+
   // see https://docs.npmjs.com/misc/semver#range-grammar for grammar
-  const parsePartial = (str) => {
+  const parsePartial = (str: string): (string | number)[] => {
     const match = /^([^-+]+)?(?:-([^+]+))?(?:\+(.+))?$/.exec(str);
-    /** @type {(string|number|undefined|[])[]} */
-    const ver = match[1] ? [0, ...splitAndConvert(match[1])] : [0];
+    if (!match) return [0];
+
+    const ver: (string | number)[] = match[1]
+      ? [0, ...splitAndConvert(match[1])]
+      : [0];
     if (match[2]) {
       ver.length++;
-      ver.push.apply(ver, splitAndConvert(match[2]));
+      ver.push(...splitAndConvert(match[2]));
     }
 
     // remove trailing any matchers
-    let last = ver[ver.length - 1];
+    let last: string | number | undefined = ver[ver.length - 1];
     while (
       ver.length &&
-      (last === undefined || /^[*xX]$/.test(/** @type {string} */ (last)))
+      (last === undefined || (typeof last === 'string' && /^[*xX]$/.test(last)))
     ) {
       ver.pop();
       last = ver[ver.length - 1];
@@ -116,7 +124,8 @@ exports.parseRange = (str) => {
 
     return ver;
   };
-  const toFixed = (range) => {
+
+  const toFixed = (range: SemVerRange) => {
     if (range.length === 1) {
       // Special case for "*" is "x.x.x" instead of "="
       return [0];
@@ -130,10 +139,15 @@ exports.parseRange = (str) => {
       return [range.length, ...range.slice(1)];
     }
   };
-  const negate = (range) => {
-    return [-range[0] - 1, ...range.slice(1)];
+
+  const negate = (range: SemVerRange) => {
+    if (typeof range[0] === 'number') {
+      return [-range[0] - 1, ...range.slice(1)];
+    }
+    return undefined;
   };
-  const parseSimple = (str) => {
+
+  const parseSimple = (str: string) => {
     // simple       ::= primitive | partial | tilde | caret
     // primitive    ::= ( '<' | '>' | '>=' | '<=' | '=' | '!' ) ( ' ' ) * partial
     // tilde        ::= '~' ( ' ' ) * partial
@@ -185,9 +199,10 @@ exports.parseRange = (str) => {
         throw new Error('Unexpected start value');
     }
   };
-  const combine = (items, fn) => {
+
+  const combine = (items: SemVerRange[], fn: number) => {
     if (items.length === 1) return items[0];
-    const arr = [];
+    const arr: SemVerRange[] = [];
     for (const item of items.slice().reverse()) {
       if (0 in item) {
         arr.push(item);
@@ -198,7 +213,8 @@ exports.parseRange = (str) => {
     // eslint-disable-next-line no-sparse-arrays
     return [, ...arr, ...items.slice(1).map(() => fn)];
   };
-  const parseRange = (str) => {
+
+  const parseRange = (str: string) => {
     // range      ::= hyphen | simple ( ' ' ( ' ' ) * simple ) * | ''
     // hyphen     ::= partial ( ' ' ) * ' - ' ( ' ' ) * partial
     const items = str.split(/\s+-\s+/);
@@ -215,19 +231,21 @@ exports.parseRange = (str) => {
     // eslint-disable-next-line no-sparse-arrays
     return [, toFixed(b), negate(b), 1, a, 2];
   };
-  const parseLogicalOr = (str) => {
+
+  const parseLogicalOr = (str: string) => {
     // range-set  ::= range ( logical-or range ) *
     // logical-or ::= ( ' ' ) * '||' ( ' ' ) *
     const items = str.split(/\s*\|\|\s*/).map(parseRange);
     return combine(items, 1);
   };
+
   return parseLogicalOr(str);
-};
+}
 
 /* eslint-disable eqeqeq */
-const rangeToString = (range) => {
-  var fixCount = range[0];
-  var str = '';
+export function rangeToString(range: SemVerRange): string {
+  const fixCount = range[0] as number;
+  let str = '';
   if (range.length === 1) {
     return '*';
   } else if (fixCount + 0.5) {
@@ -243,10 +261,10 @@ const rangeToString = (range) => {
         : fixCount > 0
         ? '='
         : '!=';
-    var needDot = 1;
-    for (var i = 1; i < range.length; i++) {
-      var item = range[i];
-      var t = (typeof item)[0];
+    let needDot = 1;
+    for (let i = 1; i < range.length; i++) {
+      const item = range[i];
+      const t = (typeof item)[0];
       needDot--;
       str +=
         t == 'u'
@@ -257,11 +275,9 @@ const rangeToString = (range) => {
     }
     return str;
   } else {
-    var stack = [];
-    // eslint-disable-next-line no-redeclare
-    for (var i = 1; i < range.length; i++) {
-      // eslint-disable-next-line no-redeclare
-      var item = range[i];
+    const stack: string[] = [];
+    for (let i = 1; i < range.length; i++) {
+      const item = range[i];
       stack.push(
         item === 0
           ? 'not(' + pop() + ')'
@@ -269,33 +285,30 @@ const rangeToString = (range) => {
           ? '(' + pop() + ' || ' + pop() + ')'
           : item === 2
           ? stack.pop() + ' ' + stack.pop()
-          : rangeToString(item),
+          : rangeToString(item as SemVerRange),
       );
     }
     return pop();
   }
   function pop() {
-    return stack.pop().replace(/^\((.+)\)$/, '$1');
+    return stack.pop()!.replace(/^\((.+)\)$/, '$1');
   }
-};
+}
 /* eslint-enable eqeqeq */
-exports.rangeToString = rangeToString;
 
 /* eslint-disable eqeqeq */
 /**
- * @param {SemVerRange} range version range
- * @param {string} version the version
+ * @param range version range
+ * @param version the version
  * @returns {boolean} if version satisfy the range
  */
-const satisfy = (range, version) => {
+export function satisfy(range: SemVerRange, version: string): boolean {
   if (0 in range) {
-    // @ts-expect-error
-    version = parseVersion(version);
-    var fixCount = /** @type {number} */ (range[0]);
-    // when negated is set it swill set for < instead of >=
-    var negated = fixCount < 0;
+    const parsedVersion = parseVersion(version);
+    let fixCount = range[0] as number;
+    const negated = fixCount < 0;
     if (negated) fixCount = -fixCount - 1;
-    for (var i = 0, j = 1, isEqual = true; ; j++, i++) {
+    for (let i = 0, j = 1, isEqual = true; ; j++, i++) {
       // cspell:word nequal nequ
 
       // when isEqual = true:
@@ -340,15 +353,15 @@ const satisfy = (range, version) => {
       // big-cmp: when negated => return false, else => next-nequ
       // small-cmp: when negated => next-nequ, else => return false
 
-      var rangeType = j < range.length ? (typeof range[j])[0] : '';
+      const rangeType = j < range.length ? (typeof range[j])[0] : '';
 
-      var versionValue;
-      var versionType;
+      let versionValue;
+      let versionType;
 
       // Handles first column in both tables (end of version or object)
       if (
-        i >= version.length ||
-        ((versionValue = version[i]),
+        i >= parsedVersion.length ||
+        ((versionValue = parsedVersion[i]),
         (versionType = (typeof versionValue)[0]) == 'o')
       ) {
         // Handles nequal
@@ -408,28 +421,25 @@ const satisfy = (range, version) => {
       }
     }
   }
-  /** @type {(boolean | number)[]} */
-  var stack = [];
-  var p = stack.pop.bind(stack);
-  // eslint-disable-next-line no-redeclare
-  for (var i = 1; i < range.length; i++) {
-    var item = /** @type {SemVerRange | 0 | 1 | 2} */ (range[i]);
+  const stack: (boolean | number)[] = [];
+  const p = stack.pop.bind(stack);
+  for (let i = 1; i < range.length; i++) {
+    const item = range[i] as SemVerRange | 0 | 1 | 2;
     stack.push(
       item == 1
-        ? p() | p()
+        ? p()! | p()!
         : item == 2
-        ? p() & p()
+        ? p()! & p()!
         : item
         ? satisfy(item, version)
-        : !p(),
+        : !p()!,
     );
   }
   return !!p();
-};
+}
 /* eslint-enable eqeqeq */
-exports.satisfy = satisfy;
 
-exports.stringifyHoley = (json) => {
+export function stringifyHoley(json: any): string {
   switch (typeof json) {
     case 'undefined':
       return '';
@@ -438,7 +448,7 @@ exports.stringifyHoley = (json) => {
         let str = '[';
         for (let i = 0; i < json.length; i++) {
           if (i !== 0) str += ',';
-          str += this.stringifyHoley(json[i]);
+          str += stringifyHoley(json[i]);
         }
         str += ']';
         return str;
@@ -448,11 +458,16 @@ exports.stringifyHoley = (json) => {
     default:
       return JSON.stringify(json);
   }
-};
+}
 
 //#region runtime code: parseVersion
-exports.parseVersionRuntimeCode = (runtimeTemplate) =>
-  `var parseVersion = ${runtimeTemplate.basicFunction('str', [
+/**
+ * Generates runtime code for parsing version strings.
+ * @param {any} runtimeTemplate - The runtime template object.
+ * @returns {string} The generated runtime code.
+ */
+export function parseVersionRuntimeCode(runtimeTemplate: any): string {
+  return `var parseVersion = ${runtimeTemplate.basicFunction('str', [
     '// see webpack/lib/util/semver.js for original code',
     `var p=${
       runtimeTemplate.supportsArrowFunction() ? 'p=>' : 'function(p)'
@@ -460,28 +475,41 @@ exports.parseVersionRuntimeCode = (runtimeTemplate) =>
       runtimeTemplate.supportsArrowFunction() ? 'p=>' : 'function(p)'
     }{return+p==p?+p:p}))},n=/^([^-+]+)?(?:-([^+]+))?(?:\\+(.+))?$/.exec(str),r=n[1]?p(n[1]):[];return n[2]&&(r.length++,r.push.apply(r,p(n[2]))),n[3]&&(r.push([]),r.push.apply(r,p(n[3]))),r;`,
   ])}`;
+}
 //#endregion
 
 //#region runtime code: versionLt
-exports.versionLtRuntimeCode = (runtimeTemplate) =>
+/**
+ * Generates runtime code for comparing versions.
+ * @param {any} runtimeTemplate - The runtime template object.
+ * @returns {string} The generated runtime code.
+ */
+exports.versionLtRuntimeCode = (runtimeTemplate: any): string =>
   `var versionLt = ${runtimeTemplate.basicFunction('a, b', [
     '// see webpack/lib/util/semver.js for original code',
     'a=parseVersion(a),b=parseVersion(b);for(var r=0;;){if(r>=a.length)return r<b.length&&"u"!=(typeof b[r])[0];var e=a[r],n=(typeof e)[0];if(r>=b.length)return"u"==n;var t=b[r],f=(typeof t)[0];if(n!=f)return"o"==n&&"n"==f||("s"==f||"u"==n);if("o"!=n&&"u"!=n&&e!=t)return e<t;r++}',
   ])}`;
-//#endregion
 
 //#region runtime code: rangeToString
-exports.rangeToStringRuntimeCode = (runtimeTemplate) =>
+/**
+ * Generates runtime code for converting range to string.
+ * @param {any} runtimeTemplate - The runtime template object.
+ * @returns {string} The generated runtime code.
+ */
+exports.rangeToStringRuntimeCode = (runtimeTemplate: any): string =>
   `var rangeToString = ${runtimeTemplate.basicFunction('range', [
     '// see webpack/lib/util/semver.js for original code',
     'var r=range[0],n="";if(1===range.length)return"*";if(r+.5){n+=0==r?">=":-1==r?"<":1==r?"^":2==r?"~":r>0?"=":"!=";for(var e=1,a=1;a<range.length;a++){e--,n+="u"==(typeof(t=range[a]))[0]?"-":(e>0?".":"")+(e=2,t)}return n}var g=[];for(a=1;a<range.length;a++){var t=range[a];g.push(0===t?"not("+o()+")":1===t?"("+o()+" || "+o()+")":2===t?g.pop()+" "+g.pop():rangeToString(t))}return o();function o(){return g.pop().replace(/^\\((.+)\\)$/,"$1")}',
   ])}`;
-//#endregion
 
 //#region runtime code: satisfy
-exports.satisfyRuntimeCode = (runtimeTemplate) =>
+/**
+ * Generates runtime code for checking if a version satisfies a range.
+ * @param {any} runtimeTemplate - The runtime template object.
+ * @returns {string} The generated runtime code.
+ */
+exports.satisfyRuntimeCode = (runtimeTemplate: any): string =>
   `var satisfy = ${runtimeTemplate.basicFunction('range, version', [
     '// see webpack/lib/util/semver.js for original code',
     'if(0 in range){version=parseVersion(version);var e=range[0],r=e<0;r&&(e=-e-1);for(var n=0,i=1,a=!0;;i++,n++){var f,s,g=i<range.length?(typeof range[i])[0]:"";if(n>=version.length||"o"==(s=(typeof(f=version[n]))[0]))return!a||("u"==g?i>e&&!r:""==g!=r);if("u"==s){if(!a||"u"!=g)return!1}else if(a)if(g==s)if(i<=e){if(f!=range[i])return!1}else{if(r?f>range[i]:f<range[i])return!1;f!=range[i]&&(a=!1)}else if("s"!=g&&"n"!=g){if(r||i<=e)return!1;a=!1,i--}else{if(i<=e||s<g!=r)return!1;a=!1}else"s"!=g&&"n"!=g&&(a=!1,i--)}}var t=[],o=t.pop.bind(t);for(n=1;n<range.length;n++){var u=range[n];t.push(1==u?o()|o():2==u?o()&o():u?satisfy(u,version):!o())}return!!o();',
   ])}`;
-//#endregion
