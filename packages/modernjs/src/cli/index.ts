@@ -156,7 +156,9 @@ export const moduleFederationPlugin = (
                       next();
                     }
                   } catch (err) {
-                    console.error(err);
+                    if (process.env.FEDERATION_DEBUG) {
+                      console.error(err);
+                    }
                     next();
                   }
                 },
