@@ -23,7 +23,7 @@ describe('typeScriptCompiler', () => {
     compiledTypesFolder: 'compiledTypesFolder',
     typesFolder: 'typesRemoteFolder',
     moduleFederationConfig: {},
-    tsConfigPath: './tsconfig.json',
+    tsConfigPath: './tsconfig.spec.json',
     deleteTypesFolder: false,
     compilerInstance: 'tsc',
     compileInChildProcess: false,
