@@ -64,19 +64,17 @@ export const moduleFederationPlugin = (
           const envConfig = getTargetEnvConfig(mfConfig, isServer);
           if (isServer) {
             nodePlugin = new MFBundlerPlugin(envConfig);
-            // @ts-ignore
             config.plugins?.push(nodePlugin);
-            // @ts-ignore
+            // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
             config.plugins?.push(new StreamingTargetPlugin(envConfig));
             if (isDev) {
-              // @ts-ignore
+              // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
               config.plugins?.push(new EntryChunkTrackerPlugin());
             }
           } else {
             outputDir =
               config.output?.path || path.resolve(process.cwd(), 'dist');
             browserPlugin = new MFBundlerPlugin(envConfig);
-            // @ts-ignore
             config.plugins?.push(browserPlugin);
           }
 
@@ -217,9 +215,7 @@ export const moduleFederationPlugin = (
 
         plugins.unshift({
           name: SSR_PLUGIN_IDENTIFIER,
-          options: JSON.stringify({
-            name: mfConfig.name,
-          }),
+          options: JSON.stringify({}),
         });
 
         return {

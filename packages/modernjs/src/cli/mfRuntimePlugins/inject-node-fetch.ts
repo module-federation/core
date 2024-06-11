@@ -5,7 +5,7 @@ const injectNodeFetchPlugin: () => FederationRuntimePlugin = () => ({
   name: 'inject-node-fetch-plugin',
   beforeInit(args) {
     if (!globalThis.fetch) {
-      // @ts-ignore
+      // @ts-expect-error inject node-fetch
       globalThis.fetch = nodeFetch;
     }
     return args;

@@ -1,6 +1,6 @@
 import type { Plugin } from '@modern-js/runtime';
 
-export const mfPluginSSR = ({ name }: { name?: string }): Plugin => ({
+export const mfPluginSSR = (): Plugin => ({
   name: '@module-federation/modern-js',
 
   setup: () => {
