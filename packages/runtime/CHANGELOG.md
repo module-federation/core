@@ -1,5 +1,16 @@
 # @module-federation/runtime
 
+## 0.1.19
+
+### Patch Changes
+
+- 031454d: fix: do not delete link tag if no preload
+- a2bfb9b: fix: In load remote, link preload is not used to preload resources, preventing resource reloading
+- Updated dependencies [031454d]
+- Updated dependencies [b0a31a7]
+- Updated dependencies [a2bfb9b]
+  - @module-federation/sdk@0.1.19
+
 ## 0.1.18
 
 ### Patch Changes
