@@ -33,7 +33,11 @@ export function createScriptNode(
     return;
   }
   const getFetch = async () => {
-    if (typeof fetch === 'undefined') {
+    //@ts-ignore
+    if (typeof globalThis['webpackChunkLoad'] !== 'undefined') {
+      //@ts-ignore
+      return globalThis['webpackChunkLoad'];
+    } else if (typeof fetch === 'undefined') {
       const fetchModule = await importNodeModule('node-fetch');
       //@ts-ignore
       return fetchModule?.default || fetchModule;

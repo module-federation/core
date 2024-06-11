@@ -131,7 +131,8 @@ export default function () {
             };
             return callback(null, emptyChunk);
           }
-          fetch(url)
+          const fetchFunction = globalThis.webpackChunkLoad || fetch;
+          fetchFunction(url)
             .then(function (res) {
               return res.text();
             })
@@ -150,48 +151,74 @@ export default function () {
               }
             });
         }
+        function httpVmStrategy(
+          chunkName: string,
+          remoteName: string,
+          callback: (err: Error | null, chunk: any) => void,
+        ): void {
+          const http = __non_webpack_require__('http');
+          const https = __non_webpack_require__('https');
+          const vm = __non_webpack_require__('vm');
 
-        function httpVmStrategy(chunkName, remoteName, callback) {
-          var http = __non_webpack_require__('http');
-          var https = __non_webpack_require__('https');
-          var vm = __non_webpack_require__('vm');
-
-          var url = resolveUrl(remoteName, chunkName);
+          const url = resolveUrl(remoteName, chunkName);
           if (!url) {
-            var emptyChunk = {
+            const emptyChunk = {
               modules: {}, // No modules
               ids: [], // No chunk IDs
               runtime: null, // No runtime function
             };
             return callback(null, emptyChunk);
           }
-          var protocol = url.protocol === 'https:' ? https : http;
-          protocol.get(url.href, function (res) {
-            var data = '';
-            res.on('data', function (chunk) {
+
+          const fetchMethod =
+            globalThis.webpackChunkLoad ||
+            (url.protocol === 'https:' ? https : http).get;
+
+          const handleResponse = (res: any) => {
+            let data = '';
+            res.on('data', (chunk: Buffer) => {
               data += chunk.toString();
             });
-            res.on('end', function () {
+            res.on('end', () => {
               try {
-                var chunk = {};
-                var urlDirname = url.pathname.split('/').slice(0, -1).join('/');
+                const chunk = {};
+                const urlDirname = url.pathname
+                  .split('/')
+                  .slice(0, -1)
+                  .join('/');
                 vm.runInThisContext(
-                  '(function(exports, require, __dirname, __filename) {' +
-                    data +
-                    '\n})',
-                  chunkName,
+                  `(function(exports, require, __dirname, __filename) {${data}\n})`,
+                  { filename: chunkName },
                 )(chunk, __non_webpack_require__, urlDirname, chunkName);
                 callback(null, chunk);
               } catch (e) {
                 callback(e, null);
               }
             });
-            res.on('error', function (err) {
+            res.on('error', (err: Error) => {
               callback(err, null);
             });
-          });
-        }
+          };
 
+          if (fetchMethod === globalThis.webpackChunkLoad) {
+            fetchMethod(url.href)
+              .then((res: Response) => res.text())
+              .then((data: string) => {
+                handleResponse({
+                  on: (event: string, handler: (data?: string) => void) => {
+                    if (event === 'data') {
+                      handler(data);
+                    } else if (event === 'end') {
+                      handler();
+                    }
+                  },
+                });
+              })
+              .catch((err: Error) => callback(err, null));
+          } else {
+            fetchMethod(url.href, handleResponse);
+          }
+        }
         function loadChunkStrategy(
           strategyType,
           chunkId,
