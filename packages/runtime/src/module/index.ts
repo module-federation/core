@@ -140,6 +140,7 @@ class Module {
       if (
         res &&
         typeof res === 'object' &&
+        Object.isExtensible(res) &&
         !Object.getOwnPropertyDescriptor(res, Symbol.for('mf_module_id'))
       ) {
         Object.defineProperty(res, Symbol.for('mf_module_id'), {
