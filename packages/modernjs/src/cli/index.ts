@@ -64,6 +64,7 @@ export const moduleFederationPlugin = (
           const envConfig = getTargetEnvConfig(mfConfig, isServer);
           if (isServer) {
             nodePlugin = new MFBundlerPlugin(envConfig);
+            // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
             config.plugins?.push(nodePlugin);
             // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
             config.plugins?.push(new StreamingTargetPlugin(envConfig));
@@ -75,6 +76,7 @@ export const moduleFederationPlugin = (
             outputDir =
               config.output?.path || path.resolve(process.cwd(), 'dist');
             browserPlugin = new MFBundlerPlugin(envConfig);
+            // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
             config.plugins?.push(browserPlugin);
           }
 
