@@ -1,5 +1,5 @@
 ---
-'@module-federation/enhanced': minor
+'@module-federation/enhanced': patch
 ---
 
 Add repository property to the enhanced package
