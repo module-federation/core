@@ -11,6 +11,7 @@ import {
   Stats,
   StatsAssets,
   moduleFederationPlugin,
+  RemoteEntryType,
 } from '@module-federation/sdk';
 import { Compilation, Compiler, StatsCompilation, StatsModule } from 'webpack';
 import {
@@ -116,7 +117,9 @@ class StatsManager {
         name: getRemoteEntryName(),
         path: '',
         // same as the types supported by runtime, currently only global/var/script is supported
-        type: 'global',
+        type:
+          (this._options?.library?.type as RemoteEntryType | undefined) ||
+          'global',
       },
       types: getTypesMetaInfo(this._options, compiler.context),
       globalName: globalName,

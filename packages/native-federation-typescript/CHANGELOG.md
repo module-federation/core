@@ -1,5 +1,11 @@
 # [1.0.0-canary.1](https://github.com/module-federation/core/compare/native-federation-typescript-0.2.6...native-federation-typescript-1.0.0-canary.1) (2023-11-06)
 
+## 0.5.1
+
+### Patch Changes
+
+- ea34795: optional vue-tsc
+
 ## 0.5.0
 
 ### Minor Changes

@@ -316,6 +316,8 @@ class AsyncEntryStartupPlugin {
           initialEntryModules.push(
             `if(__webpack_require__.m[${JSON.stringify(entryModuleID)}]) {
               __webpack_require__(${JSON.stringify(entryModuleID)});
+            } else {
+              console.warn('Federation Runtime Module not found. In the current runtime');
             }`,
           );
         }

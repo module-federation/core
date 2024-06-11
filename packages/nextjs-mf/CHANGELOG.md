@@ -1,5 +1,55 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.3.20
+
+### Patch Changes
+
+- Updated dependencies [031454d]
+- Updated dependencies [e1518e2]
+- Updated dependencies [b0a31a7]
+- Updated dependencies [a2bfb9b]
+  - @module-federation/runtime@0.1.19
+  - @module-federation/sdk@0.1.19
+  - @module-federation/enhanced@0.1.19
+  - @module-federation/node@2.2.10
+  - @module-federation/utilities@3.0.24
+
+## 8.3.19
+
+### Patch Changes
+
+- Updated dependencies [80af3f3]
+- Updated dependencies [80af3f3]
+  - @module-federation/runtime@0.1.18
+  - @module-federation/sdk@0.1.18
+  - @module-federation/node@2.2.9
+  - @module-federation/enhanced@0.1.18
+  - @module-federation/utilities@3.0.23
+
+## 8.3.18
+
+### Patch Changes
+
+- Updated dependencies [26bff6e]
+  - @module-federation/runtime@0.1.17
+  - @module-federation/enhanced@0.1.17
+  - @module-federation/node@2.2.8
+  - @module-federation/sdk@0.1.17
+  - @module-federation/utilities@3.0.22
+
+## 8.3.17
+
+### Patch Changes
+
+- Updated dependencies [103cd07]
+- Updated dependencies [425fc9d]
+- Updated dependencies [364f2bc]
+  - @module-federation/runtime@0.1.16
+  - @module-federation/sdk@0.1.16
+  - @module-federation/node@2.2.7
+  - @module-federation/enhanced@0.1.16
+  - @module-federation/utilities@3.0.21
+
 ## 8.3.16
 
 ### Patch Changes

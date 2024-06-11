@@ -1,5 +1,40 @@
 # @module-federation/runtime
 
+## 0.1.19
+
+### Patch Changes
+
+- 031454d: fix: do not delete link tag if no preload
+- a2bfb9b: fix: In load remote, link preload is not used to preload resources, preventing resource reloading
+- Updated dependencies [031454d]
+- Updated dependencies [b0a31a7]
+- Updated dependencies [a2bfb9b]
+  - @module-federation/sdk@0.1.19
+
+## 0.1.18
+
+### Patch Changes
+
+- 80af3f3: fix: add protocol in node automaticly
+- Updated dependencies [80af3f3]
+  - @module-federation/sdk@0.1.18
+
+## 0.1.17
+
+### Patch Changes
+
+- 26bff6e: feat: add mf_module_id to remote to add module debugging information
+  - @module-federation/sdk@0.1.17
+
+## 0.1.16
+
+### Patch Changes
+
+- 103cd07: fix types for beforePreloadRemote args hook
+- 425fc9d: fix: only delete can be configurable descriptor
+- Updated dependencies [364f2bc]
+  - @module-federation/sdk@0.1.16
+
 ## 0.1.15
 
 ### Patch Changes
