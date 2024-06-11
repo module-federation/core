@@ -16,6 +16,30 @@ import {
 } from '@module-federation/dts-plugin/core';
 import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
 
+function isHotFile(file: string) {
+  return file.includes(HOT_UPDATE_SUFFIX);
+}
+
+const collectAssets = (
+  assets: string[],
+  jsTargetSet: Set<string>,
+  cssTargetSet: Set<string>,
+) => {
+  assets.forEach((file) => {
+    if (file.endsWith('.css')) {
+      cssTargetSet.add(file);
+    } else {
+      if (isDev()) {
+        if (!isHotFile(file)) {
+          jsTargetSet.add(file);
+        }
+      } else {
+        jsTargetSet.add(file);
+      }
+    }
+  });
+};
+
 function getSharedModuleName(name: string): string {
   const [_type, _shared, _module, _shareScope, sharedInfo] = name.split(' ');
   return sharedInfo.split('@').slice(0, -1).join('@');
@@ -39,19 +63,7 @@ export function getAssetsByChunkIDs(
     chunkIDs.forEach((chunkID) => {
       const chunk = arrayChunks.find((item) => item.id === chunkID);
       if (chunk) {
-        [...chunk.files].forEach((asset) => {
-          if (asset.endsWith('.css')) {
-            assetMap[key].css.add(asset);
-          } else {
-            if (process.env['NODE_ENV'] === 'development') {
-              if (!asset.includes(HOT_UPDATE_SUFFIX)) {
-                assetMap[key].js.add(asset);
-              }
-            } else {
-              assetMap[key].js.add(asset);
-            }
-          }
-        });
+        collectAssets([...chunk.files], assetMap[key].js, assetMap[key].css);
       }
     });
   });
@@ -152,25 +164,21 @@ export function getAssetsByChunk(chunk: Chunk): StatsAssets {
     type: 'sync' | 'async',
   ): void => {
     [...targetChunk.groupsIterable].forEach((chunkGroup) => {
-      chunkGroup.getFiles().forEach((file) => {
-        if (file.endsWith('.css')) {
-          assesSet.css[type].add(file);
-        } else {
-          assesSet.js[type].add(file);
-        }
-      });
+      collectAssets(
+        chunkGroup.getFiles(),
+        assesSet.js[type],
+        assesSet.css[type],
+      );
     });
   };
   collectChunkFiles(chunk, 'sync');
 
   [...chunk.getAllAsyncChunks()].forEach((asyncChunk) => {
-    asyncChunk.files.forEach((file) => {
-      if (file.endsWith('.css')) {
-        assesSet.css.async.add(file);
-      } else {
-        assesSet.js.async.add(file);
-      }
-    });
+    collectAssets(
+      [...asyncChunk.files],
+      assesSet.js['async'],
+      assesSet.css['async'],
+    );
     collectChunkFiles(asyncChunk, 'async');
   });
 

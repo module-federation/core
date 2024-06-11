@@ -1,5 +1,20 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.1.19
+
+### Patch Changes
+
+- e1518e2: Wrap require of federation runtime module in conditional so that async boundary plugin doesnt crash runtimes who do not implement federation
+- Updated dependencies [031454d]
+- Updated dependencies [b0a31a7]
+- Updated dependencies [a2bfb9b]
+  - @module-federation/sdk@0.1.19
+  - @module-federation/runtime-tools@0.1.19
+  - @module-federation/dts-plugin@0.1.19
+  - @module-federation/managers@0.1.19
+  - @module-federation/manifest@0.1.19
+  - @module-federation/rspack@0.1.19
+
 ## 0.1.18
 
 ### Patch Changes
