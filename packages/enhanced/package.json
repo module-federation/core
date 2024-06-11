@@ -1,8 +1,9 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
+  "repository": "https://github.com/module-federation/core/tree/main/packages/enhanced",
   "files": [
     "dist/",
     "README.md"
