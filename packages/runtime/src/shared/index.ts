@@ -46,11 +46,13 @@ export class SharedHandler {
       resolver: () => Shared | undefined;
     }>('resolveShare'),
     // maybe will change, temporarily for internal use only
-    initContainerShareScopeMap: new AsyncWaterfallHook<{
+    initContainerShareScopeMap: new SyncWaterfallHook<{
       shareScope: ShareScopeMap[string];
       options: Options;
       origin: FederationHost;
-    }>('initContainer'),
+      scopeName: string;
+      hostShareScopeMap?: ShareScopeMap;
+    }>('initContainerShareScopeMap'),
   });
 
   constructor(host: FederationHost) {
@@ -414,6 +416,7 @@ export class SharedHandler {
   initShareScopeMap(
     scopeName: string,
     shareScope: ShareScopeMap[string],
+    extraOptions: { hostShareScopeMap?: ShareScopeMap } = {},
   ): void {
     const { host } = this;
     this.shareScopeMap[scopeName] = shareScope;
@@ -421,6 +424,8 @@ export class SharedHandler {
       shareScope,
       options: host.options,
       origin: host,
+      scopeName,
+      hostShareScopeMap: extraOptions.hostShareScopeMap,
     });
   }
 

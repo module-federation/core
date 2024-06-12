@@ -1,5 +1,14 @@
 ## [1.0.1-canary.1](https://github.com/module-federation/core/compare/runtime-1.0.0...runtime-1.0.1-canary.1) (2023-12-06)
 
+## 0.1.19
+
+### Patch Changes
+
+- Updated dependencies [031454d]
+- Updated dependencies [a2bfb9b]
+  - @module-federation/runtime@0.1.19
+  - @module-federation/webpack-bundler-runtime@0.1.19
+
 ## 0.1.18
 
 ### Patch Changes

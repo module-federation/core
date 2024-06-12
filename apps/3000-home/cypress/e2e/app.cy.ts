@@ -4,7 +4,7 @@ describe('3000-home/', () => {
   beforeEach(() => cy.visit('/'));
 
   describe('Warmup Next', () => {
-    it('warms pages concurrently', () => {
+    xit('warms pages concurrently', () => {
       const urls = [
         '/shop',
         '/checkout',

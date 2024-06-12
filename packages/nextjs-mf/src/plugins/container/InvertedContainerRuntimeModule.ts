@@ -31,6 +31,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       return '';
     }
 
+    if (this.chunk.runtime === 'webpack-api-runtime') {
+      return '';
+    }
     const { name } = this.options;
     const containerEntryModule = this.findEntryModuleOfContainer() as
       | Module

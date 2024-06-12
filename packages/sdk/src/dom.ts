@@ -64,19 +64,19 @@ export function createScript(info: {
         if (createScriptRes.timeout) timeout = createScriptRes.timeout;
       }
     }
-  }
 
-  const attrs = info.attrs;
-  if (attrs) {
-    Object.keys(attrs).forEach((name) => {
-      if (script) {
-        if (name === 'async' || name === 'defer') {
-          script[name] = attrs[name];
-        } else {
-          script.setAttribute(name, attrs[name]);
+    const attrs = info.attrs;
+    if (attrs) {
+      Object.keys(attrs).forEach((name) => {
+        if (script) {
+          if (name === 'async' || name === 'defer') {
+            script[name] = attrs[name];
+          } else {
+            script.setAttribute(name, attrs[name]);
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   const onScriptComplete = (
@@ -90,7 +90,8 @@ export function createScript(info: {
       script.onerror = null;
       script.onload = null;
       safeWrapper(() => {
-        if (info.needDeleteScript) {
+        const { needDeleteScript = true } = info;
+        if (needDeleteScript) {
           script?.parentNode && script.parentNode.removeChild(script);
         }
       });
@@ -121,6 +122,7 @@ export function createLink(info: {
   url: string;
   cb: (value: void | PromiseLike<void>) => void;
   attrs: Record<string, string>;
+  needDeleteLink?: boolean;
   createLinkHook?: (url: string) => HTMLLinkElement | void;
 }) {
   // <link rel="preload" href="script.js" as="script">
@@ -154,15 +156,15 @@ export function createLink(info: {
         link = createLinkRes;
       }
     }
-  }
 
-  const attrs = info.attrs;
-  if (attrs) {
-    Object.keys(attrs).forEach((name) => {
-      if (link) {
-        link.setAttribute(name, attrs[name]);
-      }
-    });
+    const attrs = info.attrs;
+    if (attrs) {
+      Object.keys(attrs).forEach((name) => {
+        if (link) {
+          link.setAttribute(name, attrs[name]);
+        }
+      });
+    }
   }
 
   const onLinkComplete = (
@@ -175,7 +177,10 @@ export function createLink(info: {
       link.onerror = null;
       link.onload = null;
       safeWrapper(() => {
-        link?.parentNode && link.parentNode.removeChild(link);
+        const { needDeleteLink = true } = info;
+        if (needDeleteLink) {
+          link?.parentNode && link.parentNode.removeChild(link);
+        }
       });
       if (prev) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
