@@ -63,6 +63,7 @@ function Detail() {
 }
 
 const App = (info: any) => {
+  console.log('info', info);
   const container = useShadowRoot();
   return (
     <StyleProvider
@@ -97,12 +98,12 @@ const App = (info: any) => {
   );
 };
 
-function WrapApp(info: any) {
-  return (
-    // <ReactShadow.div>
-    <App />
-    // </ReactShadow.div>
-  );
-}
+// function WrapApp(info: any) {
+//   return (
+//     // <ReactShadow.div>
+//     <App />
+//     // </ReactShadow.div>
+//   );
+// }
 
-export default WrapApp;
+export default App;

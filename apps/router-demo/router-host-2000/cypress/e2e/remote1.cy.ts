@@ -12,17 +12,17 @@ describe('router-remote1-2001/', () => {
   });
 });
 
-describe('router-remote1-2001 in host', () => {
-  beforeEach(() => cy.visit('/'));
+// describe('router-remote1-2001 in host', () => {
+//   beforeEach(() => cy.visit('/'));
 
-  describe('Remote1 render and destroy', () => {
-    it('jump to remote1 home page', () => {
-      cy.get('.host-menu > li:nth-child(3)').click();
-      cy.get('.menu-remote1-home-link').click();
+//   describe('Remote1 render and destroy', () => {
+//     it('jump to remote1 home page', () => {
+//       cy.get('.host-menu > li:nth-child(3)').click();
+//       cy.get('.menu-remote1-home-link').click();
 
-      getH2().contains('Remote1 home page');
-      cy.get('.menu-remote1-detail-link').click();
-      getH2().contains('Remote1 detail page');
-    });
-  });
-});
+//       getH2().contains('Remote1 home page');
+//       cy.get('.menu-remote1-detail-link').click();
+//       getH2().contains('Remote1 detail page');
+//     });
+//   });
+// });

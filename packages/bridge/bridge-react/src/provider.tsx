@@ -11,27 +11,31 @@ export function createBridgeComponent<T>(Component: React.ComponentType<T>) {
   return () => {
     const rootMap = new Map<any, ReactDOM.Root>();
 
-    const RawComponent = (info: T & ProviderParams) => {
-      const { name, memoryRoute, basename = '/' } = info;
+    const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
+      const { appInfo, propsInfo } = info;
+      const { name, memoryRoute, basename = '/' } = appInfo;
 
       return (
         <RouterContext.Provider value={{ name, basename, memoryRoute }}>
-          <Component {...info} />
+          <Component {...propsInfo} basename={basename} />
         </RouterContext.Provider>
       );
     };
 
     return {
-      render(info: RenderFnParams & T) {
+      render(info: RenderFnParams & any) {
         LoggerInstance.log(`createBridgeComponent render Info`, info);
         const root = ReactDOM.createRoot(info.dom);
         rootMap.set(info.dom, root);
+        const { name, basename, memoryRoute, ...propsInfo } = info;
         root.render(
           <RawComponent
-            name={info.name}
-            basename={info.basename}
-            memoryRoute={info.memoryRoute}
-            {...info}
+            propsInfo={propsInfo}
+            appInfo={{
+              name,
+              basename,
+              memoryRoute,
+            }}
           />,
         );
       },
