@@ -8,6 +8,7 @@
     "dist/",
     "README.md"
   ],
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
