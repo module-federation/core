@@ -47,7 +47,7 @@ function Navgation(Info: {
           children: [
             {
               label: (
-                <Link to="/remote1" className="remote1-home-link">
+                <Link to="/remote1" className="menu-remote1-home-link">
                   Home
                 </Link>
               ),
@@ -55,7 +55,7 @@ function Navgation(Info: {
             },
             {
               label: (
-                <Link to="/remote1/detail" className="remote1-detail-link">
+                <Link to="/remote1/detail" className="menu-remote1-detail-link">
                   Detail
                 </Link>
               ),

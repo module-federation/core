@@ -73,10 +73,14 @@ const App = (info: any) => {
       <BrowserRouter basename="/">
         <ul>
           <li>
-            <Link to="/">Home</Link>
+            <Link to="/" className="self-remote1-home-link">
+              Home
+            </Link>
           </li>
           <li>
-            <Link to="/detail">Detail</Link>
+            <Link to="/detail" className="self-remote1-detail-link">
+              Detail
+            </Link>
           </li>
         </ul>
         <Routes>

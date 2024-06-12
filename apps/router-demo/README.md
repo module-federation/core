@@ -15,3 +15,7 @@ open http://localhost:2100/
 
 * 该 Demo 主要演示了如何使用 mf bridge 库来加载带路由的模块
 * 如何在 Vue、React 间项目加载模块
+
+## 测试运行
+
+* nx e2e router-host-2000 --watch
