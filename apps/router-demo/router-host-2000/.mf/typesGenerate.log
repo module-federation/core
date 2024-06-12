@@ -1,87 +1,30 @@
-[2024-06-11T14:48:47.669] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[{"name":"federation_consumer","remote":{"context":"/Users/bytedance/github/core/apps/router-demo/router-host-2000","moduleFederationConfig":{"name":"federation_consumer","remotes":{"remote1":"remote1@http://localhost:2001/mf-manifest.json","remote2":"remote2@http://localhost:2002/mf-manifest.json","remote3":"remote3@http://localhost:2003/mf-manifest.json"},"shared":["react","react-dom","antd"],"runtimePlugins":["/Users/bytedance/github/core/apps/router-demo/router-host-2000/src/runtime-plugin/shared-strategy.ts"],"implementation":"/Users/bytedance/github/core/packages/runtime-tools/dist/index.cjs.js"},"hostRemoteTypesFolder":"@mf-types","compileInChildProcess":true,"typesFolder":".dev-server"},"host":{"context":"/Users/bytedance/github/core/apps/router-demo/router-host-2000","moduleFederationConfig":{"name":"federation_consumer","remotes":{"remote1":"remote1@http://localhost:2001/mf-manifest.json","remote2":"remote2@http://localhost:2002/mf-manifest.json","remote3":"remote3@http://localhost:2003/mf-manifest.json"},"shared":["react","react-dom","antd"],"runtimePlugins":["/Users/bytedance/github/core/apps/router-demo/router-host-2000/src/runtime-plugin/shared-strategy.ts"],"implementation":"/Users/bytedance/github/core/packages/runtime-tools/dist/index.cjs.js"},"typesFolder":"@mf-types","abortOnError":false,"consumeAPITypes":true},"extraOptions":{},"disableLiveReload":false,"disableHotTypesReload":false}]} 
-[2024-06-11T14:48:47.689] [INFO] forkDevWorker - federation_consumer module generateTypes done, localServerAddress:  http://10.94.55.204:61646
-[2024-06-11T14:48:47.691] [INFO] Module Federation Dev Server - Publisher:federation_consumer Trying to connect to ws://10.94.55.204:16322...
-[2024-06-11T14:48:47.698] [INFO] Module Federation Dev Server - Current pid: 24739, publisher:federation_consumer connected to ws://10.94.55.204:16322, starting service...
-[2024-06-11T14:48:47.700] [INFO] Module Federation Dev Server - remote module:remote1 trying to connect to  ws://10.94.55.204:16322...
-[2024-06-11T14:48:47.701] [INFO] Module Federation Dev Server - remote module:remote2 trying to connect to  ws://10.94.55.204:16322...
-[2024-06-11T14:48:47.701] [INFO] Module Federation Dev Server - remote module:remote3 trying to connect to  ws://10.94.55.204:16322...
-[2024-06-11T14:48:47.711] [INFO] Module Federation Dev Server - Current pid: 24739 remote module: remote1 connected to ws://10.94.55.204:16322, starting service...
-[2024-06-11T14:48:47.717] [INFO] Module Federation Dev Server - Current pid: 24739 remote module: remote2 connected to ws://10.94.55.204:16322, starting service...
-[2024-06-11T14:48:47.718] [INFO] Module Federation Dev Server - Current pid: 24739 remote module: remote3 connected to ws://10.94.55.204:16322, starting service...
-[2024-06-11T14:48:47.725] [INFO] Module Federation Dev Server - [_updateSubscriber] run, updateSourcePaths:remote1, current module:federation_consumer, update start...
-[2024-06-11T14:48:47.725] [INFO] forkDevWorker - sync remote module remote1, types to vmok federation_consumer,typesManager.updateTypes run
-[2024-06-11T14:48:47.725] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: PASSIVE, updateSourcePaths: undefined
-[2024-06-11T14:48:47.735] [INFO] Module Federation Dev Server - [_updateSubscriber] run, updateSourcePaths:remote3, current module:federation_consumer, update start...
-[2024-06-11T14:48:47.736] [INFO] forkDevWorker - sync remote module remote3, types to vmok federation_consumer,typesManager.updateTypes run
-[2024-06-11T14:48:47.736] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: PASSIVE, updateSourcePaths: undefined
-[2024-06-11T14:48:47.761] [INFO] Module Federation Dev Server - [_updateSubscriber] run, updateSourcePaths:remote3,federation_consumer, update publisher federation_consumer start...
-[2024-06-11T14:48:49.056] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:48:49.056] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:48:49.057] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:48:49.062] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:48:51.839] [ERROR] downloadTypesArchive - Error during types archive download: EEXIST: file already exists, mkdir '/Users/bytedance/github/core/apps/router-demo/router-host-2000/@mf-types/remote1/node_modules'
-[2024-06-11T14:48:51.857] [INFO] Module Federation Dev Server - [_updateSubscriber] run, updateSourcePaths:remote1,federation_consumer, update publisher federation_consumer start...
-[2024-06-11T14:48:52.350] [INFO] Module Federation Dev Server - [_updateSubscriber] run, updateSourcePaths:remote1, current module:federation_consumer, update start...
-[2024-06-11T14:48:52.350] [INFO] forkDevWorker - sync remote module remote1, types to vmok federation_consumer,typesManager.updateTypes run
-[2024-06-11T14:48:52.350] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: PASSIVE, updateSourcePaths: undefined
-[2024-06-11T14:48:52.367] [INFO] Module Federation Dev Server - [_updateSubscriber] run, updateSourcePaths:remote1,federation_consumer, update publisher federation_consumer start...
-[2024-06-11T14:48:55.784] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:48:55.784] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:48:55.784] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:48:55.789] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:48:56.529] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:48:56.529] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:48:56.530] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:48:56.534] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:49:31.195] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:49:31.196] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:49:31.198] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:49:31.195] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:49:39.747] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:49:39.747] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:49:39.747] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:49:39.750] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:00.963] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:51:00.963] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:00.966] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:00.963] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:51:09.239] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:51:09.243] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:09.238] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:51:09.239] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:14.656] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:51:14.656] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:51:14.656] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:14.660] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:15.717] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:51:15.717] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:51:15.720] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:15.718] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:30.232] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:51:30.235] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:30.232] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:51:30.232] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:56.593] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:56.595] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:56.592] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:51:56.592] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:51:57.305] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:51:57.307] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:57.305] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:51:57.305] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:52:11.496] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:52:11.496] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:52:11.496] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:52:11.498] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:52:21.283] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:52:21.284] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:52:21.286] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:52:21.284] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:52:54.574] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:52:54.575] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:52:54.577] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:52:54.575] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:53:28.550] [INFO] forkDevWorker - ChildProcess(24739), message: {"type":"mf_call","id":"503239f5-a3ba-4b35-ad1e-417639ae19d8","args":[null,"update"]} 
-[2024-06-11T14:53:28.551] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
-[2024-06-11T14:53:28.557] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
-[2024-06-11T14:53:28.551] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
+[2024-06-12T10:43:53.299] [INFO] forkDevWorker - ChildProcess(90241), message: {"type":"mf_call","id":"06d38c9d-6276-4c48-bfd7-a3ebddcd5688","args":[{"name":"federation_consumer","remote":{"context":"/Users/bytedance/github/core/apps/router-demo/router-host-2000","moduleFederationConfig":{"name":"federation_consumer","remotes":{"remote1":"remote1@http://localhost:2001/mf-manifest.json","remote2":"remote2@http://localhost:2002/mf-manifest.json","remote3":"remote3@http://localhost:2003/mf-manifest.json"},"shared":["react","react-dom","antd"],"runtimePlugins":["/Users/bytedance/github/core/apps/router-demo/router-host-2000/src/runtime-plugin/shared-strategy.ts"],"implementation":"/Users/bytedance/github/core/packages/runtime-tools/dist/index.cjs.js"},"hostRemoteTypesFolder":"@mf-types","compileInChildProcess":true,"typesFolder":".dev-server"},"host":{"context":"/Users/bytedance/github/core/apps/router-demo/router-host-2000","moduleFederationConfig":{"name":"federation_consumer","remotes":{"remote1":"remote1@http://localhost:2001/mf-manifest.json","remote2":"remote2@http://localhost:2002/mf-manifest.json","remote3":"remote3@http://localhost:2003/mf-manifest.json"},"shared":["react","react-dom","antd"],"runtimePlugins":["/Users/bytedance/github/core/apps/router-demo/router-host-2000/src/runtime-plugin/shared-strategy.ts"],"implementation":"/Users/bytedance/github/core/packages/runtime-tools/dist/index.cjs.js"},"typesFolder":"@mf-types","abortOnError":false,"consumeAPITypes":true},"extraOptions":{},"disableLiveReload":false,"disableHotTypesReload":false}]} 
+[2024-06-12T10:43:53.317] [INFO] Module Federation Dev Server - Publisher:federation_consumer Trying to connect to ws://10.94.55.204:16322...
+[2024-06-12T10:43:53.316] [INFO] forkDevWorker - federation_consumer module generateTypes done, localServerAddress:  http://10.94.55.204:54827
+[2024-06-12T10:43:53.335] [INFO] Module Federation Dev Server - Current pid: 90241, publisher:federation_consumer connected to ws://10.94.55.204:16322, starting service...
+[2024-06-12T10:43:53.337] [INFO] Module Federation Dev Server - remote module:remote1 trying to connect to  ws://10.94.55.204:16322...
+[2024-06-12T10:43:53.338] [INFO] Module Federation Dev Server - remote module:remote2 trying to connect to  ws://10.94.55.204:16322...
+[2024-06-12T10:43:53.338] [INFO] Module Federation Dev Server - remote module:remote3 trying to connect to  ws://10.94.55.204:16322...
+[2024-06-12T10:43:53.343] [INFO] Module Federation Dev Server - Current pid: 90241 remote module: remote1 connected to ws://10.94.55.204:16322, starting service...
+[2024-06-12T10:43:53.344] [INFO] Module Federation Dev Server - Current pid: 90241 remote module: remote2 connected to ws://10.94.55.204:16322, starting service...
+[2024-06-12T10:43:53.345] [INFO] Module Federation Dev Server - Current pid: 90241 remote module: remote3 connected to ws://10.94.55.204:16322, starting service...
+[2024-06-12T10:43:53.347] [INFO] Module Federation Dev Server - [_updateSubscriber] run, updateSourcePaths:remote1, current module:federation_consumer, update start...
+[2024-06-12T10:43:53.347] [INFO] forkDevWorker - sync remote module remote1, types to vmok federation_consumer,typesManager.updateTypes run
+[2024-06-12T10:43:53.347] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: PASSIVE, updateSourcePaths: undefined
+[2024-06-12T10:43:53.353] [INFO] Module Federation Dev Server - [_updateSubscriber] run, updateSourcePaths:remote3, current module:federation_consumer, update start...
+[2024-06-12T10:43:53.354] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: PASSIVE, updateSourcePaths: undefined
+[2024-06-12T10:43:53.354] [INFO] forkDevWorker - sync remote module remote3, types to vmok federation_consumer,typesManager.updateTypes run
+[2024-06-12T10:43:53.379] [INFO] Module Federation Dev Server - [_updateSubscriber] run, updateSourcePaths:remote1,federation_consumer, update publisher federation_consumer start...
+[2024-06-12T10:43:53.383] [INFO] Module Federation Dev Server - [_updateSubscriber] run, updateSourcePaths:remote3,federation_consumer, update publisher federation_consumer start...
+[2024-06-12T10:43:54.304] [INFO] forkDevWorker - ChildProcess(90241), message: {"type":"mf_call","id":"06d38c9d-6276-4c48-bfd7-a3ebddcd5688","args":[null,"update"]} 
+[2024-06-12T10:43:54.305] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
+[2024-06-12T10:43:54.307] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
+[2024-06-12T10:43:54.305] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
+[2024-06-12T10:44:32.070] [INFO] forkDevWorker - ChildProcess(90241), message: {"type":"mf_call","id":"06d38c9d-6276-4c48-bfd7-a3ebddcd5688","args":[null,"update"]} 
+[2024-06-12T10:44:32.071] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
+[2024-06-12T10:44:32.075] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
+[2024-06-12T10:44:32.071] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 
+[2024-06-12T10:45:32.723] [INFO] forkDevWorker - ChildProcess(90241), message: {"type":"mf_call","id":"06d38c9d-6276-4c48-bfd7-a3ebddcd5688","args":[null,"update"]} 
+[2024-06-12T10:45:32.723] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: RELOAD_PAGE, updateMode: POSITIVE, updateSourcePaths: undefined
+[2024-06-12T10:45:32.726] [INFO] Module Federation Dev Server - update run, federation_consumer module update, updateKind: UPDATE_TYPE, updateMode: POSITIVE, updateSourcePaths: undefined
+[2024-06-12T10:45:32.723] [INFO] forkDevWorker - remoteModule federation_consumer receive devWorker update, start typesManager.updateTypes 

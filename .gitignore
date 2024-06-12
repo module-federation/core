@@ -55,5 +55,6 @@ apps/**/dist
 !packages/enhanced/test/configCases/**/**/node_modules
 packages/enhanced/test/js
 .ignored
-/.mf/**
+**/.mf
+**/.mf/**
 

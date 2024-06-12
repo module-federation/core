@@ -4,7 +4,6 @@ import './App.css';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
-import { withErrorBoundary } from 'react-error-boundary';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 import { createRemoteComponent } from '@module-federation/bridge-react';
 
@@ -22,8 +21,8 @@ const Remote3App = createRemoteComponent(() =>
 
 const FallbackComp = <div>loading</div>;
 const FallbackErrorComp = (info: any) => {
-  console.log('error', info);
-  return <div>{info.error.message}</div>;
+  // console.log('error', info);
+  return <div>{info?.error?.message}</div>;
 };
 
 function Wraper3() {
