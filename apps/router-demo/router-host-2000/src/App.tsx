@@ -6,9 +6,17 @@ import Detail from './pages/Detail';
 import Home from './pages/Home';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 import { createRemoteComponent } from '@module-federation/bridge-react';
+import { ErrorBoundary, withErrorBoundary } from 'react-error-boundary';
 
-const Remote1App = createRemoteComponent(() =>
-  loadRemote('remote1/export-app'),
+const FallbackErrorComp = (info: any) => {
+  return <div>{info?.error?.message}</div>;
+};
+
+const Remote1App = withErrorBoundary(
+  createRemoteComponent(() => loadRemote('remote1/export-app')),
+  {
+    FallbackComponent: FallbackErrorComp,
+  },
 );
 
 const Remote2App = createRemoteComponent(
@@ -17,13 +25,9 @@ const Remote2App = createRemoteComponent(
 );
 const Remote3App = createRemoteComponent(() =>
   loadRemote('remote3/export-app'),
-);
+) as (info: any) => React.JSX.Element;
 
 const FallbackComp = <div>loading</div>;
-const FallbackErrorComp = (info: any) => {
-  // console.log('error', info);
-  return <div>{info?.error?.message}</div>;
-};
 
 function Wraper3() {
   return (
@@ -33,7 +37,7 @@ function Wraper3() {
           <h2>Remote1</h2>
           <Remote1App
             memoryRoute={{ entryPath: '/' }}
-            loading={FallbackComp}
+            fallback={FallbackComp}
             errorBoundary={FallbackErrorComp}
           />
         </div>
@@ -41,16 +45,14 @@ function Wraper3() {
           <h2>Remote2</h2>
           <Remote2App
             memoryRoute={{ entryPath: '/detail' }}
-            loading={FallbackComp}
-            errorBoundary={FallbackErrorComp}
+            fallback={FallbackComp}
           />
         </div>
         <div className="grow">
           <h2>Remote3</h2>
           <Remote3App
             memoryRoute={{ entryPath: '/detail' }}
-            loading={FallbackComp}
-            errorBoundary={FallbackErrorComp}
+            fallback={FallbackComp}
           />
         </div>
       </div>
@@ -70,30 +72,15 @@ const App = () => {
         <Route path="/detail" Component={Detail} />
         <Route
           path="/remote1/*"
-          Component={() => (
-            <Remote1App
-              loading={FallbackComp}
-              errorBoundary={FallbackErrorComp}
-            />
-          )}
+          Component={() => <Remote1App fallback={FallbackComp} />}
         />
         <Route
           path="/remote2/*"
-          Component={() => (
-            <Remote2App
-              loading={FallbackComp}
-              errorBoundary={FallbackErrorComp}
-            />
-          )}
+          Component={() => <Remote2App fallback={FallbackComp} />}
         />
         <Route
           path="/remote3/*"
-          Component={() => (
-            <Remote3App
-              loading={FallbackComp}
-              errorBoundary={FallbackErrorComp}
-            />
-          )}
+          Component={() => <Remote3App fallback={FallbackComp} />}
         />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
       </Routes>

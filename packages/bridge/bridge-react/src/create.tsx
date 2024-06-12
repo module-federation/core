@@ -1,7 +1,4 @@
 import React, {
-  Component,
-  FunctionComponent,
-  ReactElement,
   ReactNode,
   useContext,
   useEffect,
@@ -13,11 +10,6 @@ import { UNSAFE_RouteContext, useLocation } from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
-import {
-  ErrorBoundary,
-  ErrorBoundaryPropsWithComponent,
-  withErrorBoundary,
-} from 'react-error-boundary';
 
 declare const __APP_VERSION__: string;
 
@@ -123,8 +115,7 @@ export function createRemoteComponent<T, E extends keyof T>(
     props: {
       basename?: ProviderParams['basename'];
       memoryRoute?: ProviderParams['memoryRoute'];
-      errorBoundary: ErrorBoundaryPropsWithComponent['FallbackComponent'];
-      loading: ReactNode;
+      fallback: ReactNode;
     } & RawComponentType,
   ) => {
     const exportName = info?.export || 'default';
@@ -177,11 +168,9 @@ export function createRemoteComponent<T, E extends keyof T>(
 
     //@ts-ignore
     return (
-      <ErrorBoundary FallbackComponent={props.errorBoundary}>
-        <React.Suspense fallback={props.loading}>
-          <LazyComponent />
-        </React.Suspense>
-      </ErrorBoundary>
+      <React.Suspense fallback={props.fallback}>
+        <LazyComponent />
+      </React.Suspense>
     );
   };
 }
