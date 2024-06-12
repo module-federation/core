@@ -20,6 +20,7 @@ const HomeDiv = styled.div`
 function Home() {
   return (
     <HomeDiv>
+      <h2>Remote2 home page</h2>
       <div>hello sub home page</div>
       <div>React router v6 + React 18</div>
     </HomeDiv>
@@ -29,6 +30,7 @@ function Home() {
 function Detail() {
   return (
     <>
+      <h2>Remote2 detail page</h2>
       <div>hello sub2 detail page</div>
       <Image
         width={200}
@@ -43,10 +45,14 @@ function Layout() {
     <>
       <ul>
         <li>
-          <Link to="/">Home</Link>
+          <Link to="/" className="self-remote2-home-link">
+            Home
+          </Link>
         </li>
         <li>
-          <Link to="/detail">Detail</Link>
+          <Link to="/detail" className="self-remote2-detail-link">
+            Detail
+          </Link>
         </li>
       </ul>
       <Outlet />

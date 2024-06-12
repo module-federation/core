@@ -1,5 +1,8 @@
 <template>
-  <div class="content">About page</div>
+  <div class="content">
+    <h2>Remote3 detail page</h2>
+    About page
+  </div>
 </template>
 
 <style scoped>

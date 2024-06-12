@@ -79,6 +79,7 @@ function Navgation(Info: {
               label: (
                 <Link
                   to="/remote2"
+                  className="menu-remote2-home-link"
                   //  onClick={() => Info.setInitialEntrie("/")}
                 >
                   Home
@@ -90,6 +91,7 @@ function Navgation(Info: {
               label: (
                 <Link
                   to="/remote2/detail"
+                  className="menu-remote2-detail-link"
                   // onClick={() => Info.setInitialEntrie("/detail")}
                 >
                   Detail
@@ -128,11 +130,19 @@ function Navgation(Info: {
           label: 'Sub Router',
           children: [
             {
-              label: <Link to="/remote3">Home</Link>,
+              label: (
+                <Link to="/remote3" className="menu-remote3-home-link">
+                  Home
+                </Link>
+              ),
               key: 'remote3:setting:1',
             },
             {
-              label: <Link to="/remote3/detail">Detail</Link>,
+              label: (
+                <Link to="/remote3/detail" className="menu-remote3-detail-link">
+                  Detail
+                </Link>
+              ),
               key: 'remote3:setting:2',
             },
           ],

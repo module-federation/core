@@ -1,5 +1,6 @@
 <template>
   <div class="content">
+    <h2>Remote3 home page</h2>
     <p>Start building amazing things with Rsbuild.</p>
   </div>
 </template>
