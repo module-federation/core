@@ -25,7 +25,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@module-federation/bridge-shared": "workspace:*"
+    "@module-federation/bridge-shared": "workspace:*",
+    "react-error-boundary": "^4.0.13"
   },
   "peerDependencies": {
     "react": "=18",

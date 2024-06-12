@@ -83,6 +83,11 @@ const data: DataType[] = [
   },
 ];
 
-const Home: React.FC = () => <Table columns={columns} dataSource={data} />;
+const Home: React.FC = () => (
+  <>
+    <h2>Router host Home page</h2>
+    <Table columns={columns} dataSource={data} />
+  </>
+);
 
 export default Home;

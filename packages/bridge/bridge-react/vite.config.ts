@@ -11,7 +11,10 @@ export default defineConfig({
   plugins: [
     dts({
       rollupTypes: true,
-      bundledPackages: ['@module-federation/bridge-shared'],
+      bundledPackages: [
+        '@module-federation/bridge-shared',
+        'react-error-boundary',
+      ],
     }),
   ],
   build: {

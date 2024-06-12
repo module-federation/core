@@ -4,6 +4,17 @@ import React from 'react';
 
 const ShadowContext = React.createContext<Element>(document.head);
 
+function createShadowDomDiv(target: Element) {
+  const shadowRoot = target.attachShadow({ mode: 'open' });
+  const container = document.createElement('div');
+  container.id = 'container';
+  shadowRoot.appendChild(container);
+  return {
+    shadowRoot,
+    container,
+  };
+}
+
 export function ShadowRoot(info: { children: JSX.Element }) {
   const [root, setRoot] = useState(null);
   const domRef = useRef(null);

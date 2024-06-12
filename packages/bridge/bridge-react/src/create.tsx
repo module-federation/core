@@ -1,8 +1,23 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  Component,
+  FunctionComponent,
+  ReactElement,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { UNSAFE_RouteContext, useLocation } from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
+import {
+  ErrorBoundary,
+  ErrorBoundaryPropsWithComponent,
+  withErrorBoundary,
+} from 'react-error-boundary';
 
 declare const __APP_VERSION__: string;
 
@@ -43,6 +58,7 @@ const RemoteApp = ({
     if (pathname !== '' && pathname !== location.pathname) {
       LoggerInstance.log(`createRemoteComponent dispatchPopstateEnv >>>`, {
         name,
+        pathname: location.pathname,
       });
       dispatchPopstateEnv();
     }
@@ -107,7 +123,8 @@ export function createRemoteComponent<T, E extends keyof T>(
     props: {
       basename?: ProviderParams['basename'];
       memoryRoute?: ProviderParams['memoryRoute'];
-      fallback: React.ReactNode;
+      errorBoundary: ErrorBoundaryPropsWithComponent['FallbackComponent'];
+      loading: ReactNode;
     } & RawComponentType,
   ) => {
     const exportName = info?.export || 'default';
@@ -160,10 +177,11 @@ export function createRemoteComponent<T, E extends keyof T>(
 
     //@ts-ignore
     return (
-      <React.Suspense fallback={props.fallback}>
-        {/* @ts-ignore */}
-        <LazyComponent />
-      </React.Suspense>
+      <ErrorBoundary FallbackComponent={props.errorBoundary}>
+        <React.Suspense fallback={props.loading}>
+          <LazyComponent />
+        </React.Suspense>
+      </ErrorBoundary>
     );
   };
 }

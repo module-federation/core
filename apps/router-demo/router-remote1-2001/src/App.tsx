@@ -4,12 +4,9 @@ import {
   StyleProvider,
   legacyLogicalPropertiesTransformer,
 } from '@ant-design/cssinjs';
+import ReactShadow, { useShadowRoot } from 'react-shadow';
 import { Table } from 'antd';
-import { useShadowRoot, ShadowRoot } from './shadow';
-import { useEffect, useRef } from 'react';
-import style from './App.css';
-
-console.log('style', style);
+import styles from './App.module.css';
 
 const dataSource = [
   {
@@ -47,7 +44,7 @@ const columns = [
 function Home() {
   return (
     <div>
-      hello sub home page
+      <h2>Remote1 home page</h2>
       <Table dataSource={dataSource} columns={columns} />
     </div>
   );
@@ -56,7 +53,7 @@ function Home() {
 function Detail() {
   return (
     <>
-      <div>hello sub detail page</div>
+      <h2>Remote1 detail page</h2>
       <Image
         width={200}
         src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
@@ -96,4 +93,11 @@ const App = (info: any) => {
   );
 };
 
-export default App;
+function WrapApp(info: any) {
+  return (
+    // <ReactShadow.div>
+    <App />
+    // </ReactShadow.div>
+  );
+}
+export default WrapApp;

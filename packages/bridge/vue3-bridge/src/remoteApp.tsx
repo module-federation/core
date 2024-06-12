@@ -44,6 +44,7 @@ export default defineComponent({
         if (pathname.value !== '' && pathname.value !== newPath) {
           LoggerInstance.log(`createRemoteComponent dispatchPopstateEnv >>>`, {
             ...props,
+            pathname: route.path,
           });
           dispatchPopstateEnv();
         }

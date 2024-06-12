@@ -27,6 +27,39 @@
           "dependencies": true
         }
       ]
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/router-demo/router-host-2000/cypress.config.ts",
+        "testingType": "e2e",
+        "baseUrl": "http://127.0.0.1:2000",
+        "browser": "chrome"
+      },
+      "configurations": {
+        "development": {
+          "runnerUi": true,
+          "browser": "electron",
+          "exit": false,
+          "watch": true
+        }
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
+          {
+            "command": "lsof -i :3005 || nx run 3005-runtime-host:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "sleep 4 && nx run 3005-runtime-host:e2e",
+            "forwardAllArgs": true
+          }
+        ]
+      }
     }
   },
   "tags": ["type:app"]

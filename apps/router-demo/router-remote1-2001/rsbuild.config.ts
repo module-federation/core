@@ -1,8 +1,8 @@
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+import { createCacheGroups } from '@rsbuild/shared';
 import path from 'path';
-import { chunkName } from '../../../webpack/lib/RuntimeGlobals';
 
 export default defineConfig({
   source: {
@@ -27,9 +27,6 @@ export default defineConfig({
     writeToDisk: true,
   },
   tools: {
-    cssLoader: {
-      // esModule: false
-    },
     rspack: (config, { appendPlugins }) => {
       delete config.optimization?.splitChunks;
       config.output!.uniqueName = 'router-remote1-2001';
@@ -40,7 +37,20 @@ export default defineConfig({
             './button': './src/button.tsx',
             './export-app': './src/export-App.tsx',
           },
-          shared: ['react', 'react-dom'],
+          shared: {
+            react: {
+              singleton: true,
+            },
+            'react-dom': {
+              singleton: true,
+            },
+            'react-router-dom': {
+              singleton: true,
+            },
+            antd: {
+              singleton: true,
+            },
+          },
         }),
       ]);
     },

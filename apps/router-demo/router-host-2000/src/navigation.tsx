@@ -46,11 +46,19 @@ function Navgation(Info: {
           label: 'Sub Router',
           children: [
             {
-              label: <Link to="/remote1">Home</Link>,
+              label: (
+                <Link to="/remote1" className="remote1-home-link">
+                  Home
+                </Link>
+              ),
               key: 'remote1:setting:1',
             },
             {
-              label: <Link to="/remote1/detail">Detail</Link>,
+              label: (
+                <Link to="/remote1/detail" className="remote1-detail-link">
+                  Detail
+                </Link>
+              ),
               key: 'remote1:setting:2',
             },
           ],
@@ -90,24 +98,24 @@ function Navgation(Info: {
             },
           ],
         },
-        {
-          type: 'group',
-          label: 'change data',
-          children: [
-            {
-              key: 'setting:3',
-              label: (
-                <div onClick={() => Info.setAbc(123)}>Change data: 123</div>
-              ),
-            },
-            {
-              key: 'setting:4',
-              label: (
-                <div onClick={() => Info.setAbc(2345)}>Change data: 2345</div>
-              ),
-            },
-          ],
-        },
+        // {
+        //   type: 'group',
+        //   label: 'change data',
+        //   children: [
+        //     {
+        //       key: 'setting:3',
+        //       label: (
+        //         <div onClick={() => Info.setAbc(123)}>Change data: 123</div>
+        //       ),
+        //     },
+        //     {
+        //       key: 'setting:4',
+        //       label: (
+        //         <div onClick={() => Info.setAbc(2345)}>Change data: 2345</div>
+        //       ),
+        //     },
+        //   ],
+        // },
       ],
     },
     {
@@ -143,6 +151,7 @@ function Navgation(Info: {
   };
   return (
     <Menu
+      className="host-menu"
       onClick={onClick}
       selectedKeys={[current]}
       mode="horizontal"
