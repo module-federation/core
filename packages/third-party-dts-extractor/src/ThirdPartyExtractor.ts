@@ -74,7 +74,7 @@ class ThirdPartyExtractor {
     }
   }
 
-  collectPkgs(str: string) {
+  collectTypeImports(str: string): string[] {
     const { pattern } = this;
     let match;
     const imports: Set<string> = new Set();
@@ -82,8 +82,12 @@ class ThirdPartyExtractor {
     while ((match = pattern.exec(str)) !== null) {
       imports.add(match[2]);
     }
+    return [...imports];
+  }
 
-    [...imports].forEach((importPath) => {
+  collectPkgs(str: string) {
+    const imports = this.collectTypeImports(str);
+    imports.forEach((importPath) => {
       this.inferPkgDir(importPath);
     });
   }
