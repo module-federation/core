@@ -71,7 +71,8 @@ export function createScript(info: {
         if (script) {
           if (name === 'async' || name === 'defer') {
             script[name] = attrs[name];
-          } else {
+            // Attributes that do not exist are considered overridden
+          } else if (!script.getAttribute(name)) {
             script.setAttribute(name, attrs[name]);
           }
         }
@@ -160,7 +161,7 @@ export function createLink(info: {
     const attrs = info.attrs;
     if (attrs) {
       Object.keys(attrs).forEach((name) => {
-        if (link) {
+        if (link && !link.getAttribute(name)) {
           link.setAttribute(name, attrs[name]);
         }
       });

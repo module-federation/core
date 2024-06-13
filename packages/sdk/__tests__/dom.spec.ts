@@ -123,6 +123,32 @@ describe('createScript', () => {
 
       expect(clearTimeout).toHaveBeenCalled();
     });
+
+    it('should set section attributes on the script element', () => {
+      const url = 'https://example.com/script.js';
+      const cb = jest.fn();
+      const attrs = {
+        async: true,
+        'data-test': 'test',
+        crossOrigin: 'anonymous',
+      };
+      const { script } = createScript({
+        url,
+        cb,
+        attrs,
+        createScriptHook: (url) => {
+          const scriptEle = document.createElement('script');
+          scriptEle.src = url;
+          scriptEle.crossOrigin = 'use-credentials';
+          scriptEle.async = false;
+          return scriptEle;
+        },
+      });
+
+      expect(script.async).toBe(true);
+      expect(script.crossOrigin).toBe('use-credentials');
+      expect(script.getAttribute('data-test')).toBe('test');
+    });
   });
 });
 
@@ -171,6 +197,33 @@ describe('createLink', () => {
     const { link } = createLink({ url, cb, attrs });
 
     expect(link.rel).toBe('preload');
+    expect(link.getAttribute('as')).toBe('script');
+    expect(link.getAttribute('data-test')).toBe('test');
+  });
+
+  it('should set section attributes on the link element', () => {
+    const url = 'https://example.com/script.js';
+    const cb = jest.fn();
+    const attrs = {
+      rel: 'preload',
+      as: 'script',
+      'data-test': 'test',
+      crossOrigin: 'anonymous',
+    };
+    const { link } = createLink({
+      url,
+      cb,
+      attrs,
+      createLinkHook: (url) => {
+        const linkEle = document.createElement('link');
+        linkEle.href = url;
+        linkEle.crossOrigin = 'use-credentials';
+        return linkEle;
+      },
+    });
+
+    expect(link.rel).toBe('preload');
+    expect(link.crossOrigin).toBe('use-credentials');
     expect(link.getAttribute('as')).toBe('script');
     expect(link.getAttribute('data-test')).toBe('test');
   });
