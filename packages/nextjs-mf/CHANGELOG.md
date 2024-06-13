@@ -1,5 +1,20 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.3.21
+
+### Patch Changes
+
+- 0f4d9e2: Do not crash on share resolver if host is not next
+- Updated dependencies [766de80]
+- Updated dependencies [652c8a2]
+- Updated dependencies [d5ac542]
+- Updated dependencies [05c43f3]
+  - @module-federation/enhanced@0.1.20
+  - @module-federation/runtime@0.1.20
+  - @module-federation/node@2.2.11
+  - @module-federation/sdk@0.1.20
+  - @module-federation/utilities@3.0.25
+
 ## 8.3.20
 
 ### Patch Changes

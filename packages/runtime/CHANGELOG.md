@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.1.20
+
+### Patch Changes
+
+- 652c8a2: do not apply symbol if object not extensible
+- 05c43f3: feat: support pass shareScopeMap
+  - @module-federation/sdk@0.1.20
+
 ## 0.1.19
 
 ### Patch Changes
