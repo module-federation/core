@@ -24,7 +24,9 @@ const buildZipUrl = (hostOptions: Required<HostOptions>, remote: string) => {
     .join('/');
   remoteUrl.pathname = `${pathnameWithoutEntry}/${hostOptions.testsFolder}.zip`;
 
-  return remoteUrl.protocol === FILE_PROTOCOL ? remoteUrl.pathname : remoteUrl.href;
+  return remoteUrl.protocol === FILE_PROTOCOL
+    ? remoteUrl.pathname
+    : remoteUrl.href;
 };
 
 const resolveRemotes = (hostOptions: Required<HostOptions>) => {

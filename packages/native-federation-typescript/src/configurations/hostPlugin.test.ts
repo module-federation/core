@@ -91,7 +91,7 @@ describe('hostPlugin', () => {
       });
 
       expect(mapRemotesToDownload).toStrictEqual({
-        moduleFederationTypescript: "/subpatha/@mf-types.zip",
+        moduleFederationTypescript: '/subpatha/@mf-types.zip',
       });
     });
   });
