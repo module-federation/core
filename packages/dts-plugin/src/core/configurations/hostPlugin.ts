@@ -33,7 +33,7 @@ const buildApiTypeUrl = (zipUrl?: string) => {
   return zipUrl.replace('.zip', '.d.ts');
 };
 
-const retrieveRemoteInfo = (options: {
+export const retrieveRemoteInfo = (options: {
   hostOptions: Required<HostOptions>;
   remoteAlias: string;
   remote: string;

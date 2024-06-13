@@ -27,7 +27,7 @@ describe('archiveHandler', () => {
       compiledTypesFolder: 'compiledTypesFolder',
       typesFolder: 'typesRemoteFolder',
       moduleFederationConfig: {},
-      tsConfigPath: './tsconfig.json',
+      tsConfigPath: './tsconfig.spec.json',
       deleteTypesFolder: false,
     } as unknown as Required<RemoteOptions>;
 

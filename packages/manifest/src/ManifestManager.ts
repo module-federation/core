@@ -2,13 +2,11 @@ import chalk from 'chalk';
 import {
   Stats,
   Manifest,
-  ManifestFileName,
   ManifestExpose,
   StatsExpose,
   StatsShared,
   ManifestShared,
   ManifestRemote,
-  simpleJoinRemoteEntry,
   StatsRemote,
   moduleFederationPlugin,
 } from '@module-federation/sdk';

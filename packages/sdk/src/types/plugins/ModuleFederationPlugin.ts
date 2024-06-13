@@ -128,6 +128,7 @@ export interface PluginManifestOptions {
 export interface PluginDevOptions {
   disableLiveReload?: boolean;
   disableHotTypesReload?: boolean;
+  disableDynamicRemoteTypeHints?: boolean;
 }
 
 export interface DtsHostOptions {
