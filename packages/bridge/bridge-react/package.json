@@ -35,11 +35,13 @@
     "react-router-dom": ">=5"
   },
   "devDependencies": {
+    "@testing-library/react": "15.0.7",
     "@types/react": "18.2.79",
     "@types/react-dom": "18.2.25",
     "@vitejs/plugin-react": "^4.3.0",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
+    "jsdom": "^24.1.0",
     "react": "18.1.0",
     "react-dom": "18.1.0",
     "react-router-dom": "6.22.3",

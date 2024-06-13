@@ -13,7 +13,13 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["npm run test --prefix packages/bridge/bridge-react"]
+        "parallel": false,
+        "commands": [
+          {
+            "command": "vitest run -c packages/bridge/bridge-react/vitest.config.ts",
+            "forwardAllArgs": false
+          }
+        ]
       }
     }
   },
