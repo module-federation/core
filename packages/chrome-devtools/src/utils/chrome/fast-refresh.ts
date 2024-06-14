@@ -13,6 +13,7 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
     name: 'mf-fast-refresh-plugin',
     beforeInit({ userOptions, ...args }) {
       const shareInfo = userOptions.shared;
+      const twinsShareInfo = args.shareInfo;
       let enableFastRefresh: boolean;
       let devtoolsMessage;
 
@@ -36,8 +37,12 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
           const sharedArr: Shared[] = Array.isArray(shareInfo[share])
             ? shareInfo[share]
             : [shareInfo[share]];
+          // @ts-expect-error
+          const twinsSharedArr: Shared[] = Array.isArray(twinsShareInfo[share])
+            ? twinsShareInfo[share]
+            : [twinsShareInfo[share]];
 
-          sharedArr.forEach((shared) => {
+          sharedArr.forEach((shared, idx) => {
             let get: () => any;
             if (share === 'react') {
               get = () =>
@@ -78,6 +83,7 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
                   return () => window.ReactDOM;
                 };
               }
+              twinsSharedArr[idx].get = shared.get;
             }
           });
         });
