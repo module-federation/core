@@ -8,7 +8,6 @@ import {
   inferAutoPublicPath,
 } from '@module-federation/sdk';
 import cloneDeepWith from 'lodash.clonedeepwith';
-import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extractor';
 
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
 import { createTypesArchive, downloadTypesArchive } from './archiveHandler';
@@ -31,6 +30,7 @@ import {
 } from '../constant';
 import axios from 'axios';
 import { fileLog } from '../../server';
+import { collectTypeImports } from './utils';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
 
@@ -275,9 +275,7 @@ class DTSManager {
     );
     try {
       const existedFile = fs.readFileSync(apiTypeFileName, 'utf-8');
-      const existedImports = new ThirdPartyExtractor('').collectTypeImports(
-        existedFile,
-      );
+      const existedImports = collectTypeImports(existedFile);
       existedImports.forEach((existedImport) => {
         const alias = existedImport
           .split('./')

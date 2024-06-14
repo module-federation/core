@@ -1,9 +1,10 @@
 import ansiColors from 'ansi-colors';
 import { dirname, join, normalize, relative, resolve, sep } from 'path';
 import typescript from 'typescript';
-import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extractor';
+import { Extractor, IExtractorInvokeOptions } from '@microsoft/api-extractor';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
+import { retrieveExtractorConfig } from '../configurations/thirdPartyExtractor';
 
 const STARTS_WITH_SLASH = /^\//;
 
@@ -59,7 +60,7 @@ const createHost = (
   mapComponentsToExpose: Record<string, string>,
   tsConfig: typescript.CompilerOptions,
   remoteOptions: Required<RemoteOptions>,
-  cb: (dts: string) => void,
+  cb: (compiledTypeEntry: string, typeEntry: string, content: string) => void,
 ) => {
   const host = typescript.createCompilerHost(tsConfig);
   const originalWriteFile = host.writeFile;
@@ -106,10 +107,9 @@ const createHost = (
           `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`,
           writeOrderByteMark,
         );
+        cb(filepath, mfeTypeEntry, text);
       }
     }
-
-    cb(text);
   };
 
   return host;
@@ -140,15 +140,23 @@ export const compileTs = (
   tsConfig: typescript.CompilerOptions,
   remoteOptions: Required<RemoteOptions>,
 ) => {
-  const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
-  const thirdPartyExtractor = new ThirdPartyExtractor(
-    resolve(mfTypePath, 'node_modules'),
-    remoteOptions.context,
-  );
-
   const cb = remoteOptions.extractThirdParty
-    ? thirdPartyExtractor.collectPkgs.bind(thirdPartyExtractor)
-    : () => undefined;
+    ? (compiledTypeEntry: string, typeEntry: string, content: string) => {
+        const extractorConfig = retrieveExtractorConfig(
+          remoteOptions,
+          tsConfig,
+          compiledTypeEntry,
+        );
+        Extractor.invoke(extractorConfig, {
+          // 设置 localBuild 为 true 可以使构建更宽容，适合本地开发
+          localBuild: false,
+          showVerboseMessages: false,
+          showDiagnostics: false,
+          typescriptCompilerFolder: require.resolve('typescript'),
+          // ...rollupOptions as IExtractorInvokeOptions
+        });
+      }
+    : () => {};
 
   const tsHost = createHost(mapComponentsToExpose, tsConfig, remoteOptions, cb);
   const filesToCompile = [
@@ -165,8 +173,4 @@ export const compileTs = (
 
   const { diagnostics = [] } = tsProgram.emit();
   diagnostics.forEach(reportCompileDiagnostic);
-
-  if (remoteOptions.extractThirdParty) {
-    thirdPartyExtractor.copyDts();
-  }
 };

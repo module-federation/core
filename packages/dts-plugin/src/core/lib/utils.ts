@@ -93,3 +93,14 @@ export const isTSProject = (
     return false;
   }
 };
+
+export function collectTypeImports(str: string): string[] {
+  const pattern = /(from|import\()\s*['"]([^'"]+)['"]/g;
+  let match;
+  const imports: Set<string> = new Set();
+
+  while ((match = pattern.exec(str)) !== null) {
+    imports.add(match[2]);
+  }
+  return [...imports];
+}
