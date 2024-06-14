@@ -37,10 +37,14 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
           const sharedArr: Shared[] = Array.isArray(shareInfo[share])
             ? shareInfo[share]
             : [shareInfo[share]];
-          // @ts-expect-error
-          const twinsSharedArr: Shared[] = Array.isArray(twinsShareInfo[share])
-            ? twinsShareInfo[share]
-            : [twinsShareInfo[share]];
+
+          let twinsSharedArr: Shared[];
+          if (twinsShareInfo) {
+            // @ts-expect-error
+            twinsSharedArr = Array.isArray(twinsShareInfo[share])
+              ? twinsShareInfo[share]
+              : [twinsShareInfo[share]];
+          }
 
           sharedArr.forEach((shared, idx) => {
             let get: () => any;
@@ -83,7 +87,9 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
                   return () => window.ReactDOM;
                 };
               }
-              twinsSharedArr[idx].get = shared.get;
+              if (twinsShareInfo) {
+                twinsSharedArr[idx].get = shared.get;
+              }
             }
           });
         });
