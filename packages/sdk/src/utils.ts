@@ -28,9 +28,9 @@ const parseEntry = (
   // Check if the string starts with a type
   if (strSplit.length >= 2) {
     let [name, ...versionOrEntryArr] = strSplit;
-    if (str.startsWith(SEPARATOR)) {
+    if (str.startsWith(separator)) {
       versionOrEntryArr = [devVersionOrUrl || strSplit.slice(-1)[0]];
-      name = strSplit.slice(0, -1).join(SEPARATOR);
+      name = strSplit.slice(0, -1).join(separator);
     }
 
     let versionOrEntry = devVersionOrUrl || versionOrEntryArr.join(separator);
