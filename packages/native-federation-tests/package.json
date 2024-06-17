@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/native-federation-tests",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Bundler agnostic unplugin to share federated tests",
   "publishConfig": {
     "access": "public"
