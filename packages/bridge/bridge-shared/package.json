@@ -1,6 +1,7 @@
 {
   "name": "@module-federation/bridge-shared",
   "version": "0.0.0",
+  "author": "zhouxiao <codingzx@gmail.com>",
   "type": "module",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",

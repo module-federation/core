@@ -1,56 +1,82 @@
 import { assert, describe, it } from 'vitest';
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
-import { Link, Routes, Route } from 'react-router-dom';
-import { BrowserRouter } from '../src/router';
-import { JSDOM } from 'jsdom';
-import { prettyDOM } from '@testing-library/react';
+import {
+  Link,
+  Routes,
+  Route,
+  Outlet,
+  createBrowserRouter,
+} from 'react-router-dom';
+import { BrowserRouter, RouterProvider } from '../src/router';
+import { RouterContext } from '../src/context';
+import { getHtml, getWindowImpl } from './util';
 
 describe('react router proxy', () => {
   it('BrowserRouter not wraper context', async () => {
     let { container } = render(
-      <BrowserRouter basename="/" window={getWindowImpl('/', false)}>
-        <ul>
-          <li>
-            <Link to="/" className="self-remote1-home-link">
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link to="/detail" className="self-remote1-detail-link">
-              Detail
-            </Link>
-          </li>
-        </ul>
-        <Routes>
-          <Route path="/" Component={() => <div>home page</div>} />
-          <Route path="/detail" Component={() => <div>detail page</div>} />
-        </Routes>
-      </BrowserRouter>,
+      <RouterContext.Provider value={{ name: 'test', basename: '/test' }}>
+        <BrowserRouter basename="/" window={getWindowImpl('/test', false)}>
+          <ul>
+            <li>
+              <Link to="/">Home</Link>
+            </li>
+            <li>
+              <Link to="/detail">Detail</Link>
+            </li>
+          </ul>
+          <Routes>
+            <Route path="/" Component={() => <div>home page</div>} />
+            <Route path="/detail" Component={() => <div>detail page</div>} />
+          </Routes>
+        </BrowserRouter>
+      </RouterContext.Provider>,
     );
     expect(getHtml(container)).toMatch('home page');
   });
 
-  it('The host snapshot is automatically completed', async () => {
-    expect(1).toBe(2);
+  it('RouterProvider', async () => {
+    function Layout() {
+      return (
+        <>
+          <ul>
+            <li>
+              <Link to="/">Home</Link>
+            </li>
+            <li>
+              <Link to="/detail">Detail</Link>
+            </li>
+          </ul>
+          <Outlet />
+        </>
+      );
+    }
+    const router = createBrowserRouter(
+      [
+        {
+          path: '/',
+          element: <Layout />,
+          children: [
+            {
+              index: true,
+              element: <div>home page</div>,
+            },
+            {
+              path: '/detail',
+              element: <div>detail page</div>,
+            },
+          ],
+        },
+      ],
+      {
+        window: getWindowImpl('/test', false),
+      },
+    );
+    let { container } = render(
+      <RouterContext.Provider value={{ name: 'test', basename: '/test' }}>
+        <RouterProvider router={router} />
+      </RouterContext.Provider>,
+    );
+    expect(getHtml(container)).toMatch('home page');
   });
 });
-
-function getWindowImpl(initialUrl: string, isHash = false): Window {
-  // Need to use our own custom DOM in order to get a working history
-  const dom = new JSDOM(`<!DOCTYPE html>`, { url: 'http://localhost/' });
-  dom.window.history.replaceState(null, '', (isHash ? '#' : '') + initialUrl);
-  return dom.window as unknown as Window;
-}
-
-function getHtml(container: HTMLElement) {
-  return prettyDOM(container, undefined, {
-    highlight: false,
-  });
-}

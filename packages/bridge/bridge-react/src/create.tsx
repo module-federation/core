@@ -105,9 +105,9 @@ export function createRemoteComponent<T, E extends keyof T>(
   type ExportType = T[E] extends (...args: any) => any
     ? ReturnType<T[E]>
     : never;
-  type RawComponentType = 'rawComponent' extends keyof ExportType
-    ? ExportType['rawComponent'] extends (...args: any) => any
-      ? Parameters<ExportType['rawComponent']>[0]
+  type RawComponentType = '__BRIDGE_FN__' extends keyof ExportType
+    ? ExportType['__BRIDGE_FN__'] extends (...args: any) => any
+      ? Parameters<ExportType['__BRIDGE_FN__']>[0]
       : {}
     : {};
 

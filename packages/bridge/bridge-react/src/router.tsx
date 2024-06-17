@@ -11,6 +11,7 @@ function WraperRouter(
 ) {
   const { basename, ...propsRes } = props;
   const routerContextProps = useContext(RouterContext) || {};
+
   LoggerInstance.log(`WraperRouter info >>>`, {
     ...routerContextProps,
     routerContextProps,
@@ -67,7 +68,7 @@ function WraperRouterProvider(
   }
 }
 
+export * from 'react-router-dom/';
+
 export { WraperRouter as BrowserRouter };
 export { WraperRouterProvider as RouterProvider };
-
-export * from 'react-router-dom/';

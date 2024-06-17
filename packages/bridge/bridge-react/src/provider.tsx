@@ -7,7 +7,11 @@ import type {
 } from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
 
-export function createBridgeComponent<T>(Component: React.ComponentType<T>) {
+type ProviderFnParams<T> = {
+  rootComponent: React.ComponentType<T>;
+};
+
+export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
   return () => {
     const rootMap = new Map<any, ReactDOM.Root>();
 
@@ -17,7 +21,7 @@ export function createBridgeComponent<T>(Component: React.ComponentType<T>) {
 
       return (
         <RouterContext.Provider value={{ name, basename, memoryRoute }}>
-          <Component {...propsInfo} basename={basename} />
+          <bridgeInfo.rootComponent {...propsInfo} basename={basename} />
         </RouterContext.Provider>
       );
     };
@@ -44,7 +48,8 @@ export function createBridgeComponent<T>(Component: React.ComponentType<T>) {
         const root = rootMap.get(dom);
         root?.unmount();
       },
-      rawComponent: RawComponent,
+      rawComponent: bridgeInfo.rootComponent,
+      __BRIDGE_FN__: (_args: T) => {},
     };
   };
 }
