@@ -26,13 +26,6 @@ import { createBridgeComponent } from '@module-federation/bridge-react';
 
 function App() {
   return ( <BrowserRouter basename="/">
-    <ul>
-      <li>
-        <Link to="/" className="self-remote1-home-link">
-          Home
-        </Link>
-      </li>
-    </ul>
     <Routes>
       <Route path="/" Component={()=> <div>Home page</div>}>
       <Route path="/detail" Component={()=> <div>Detail page</div>}>
@@ -117,6 +110,11 @@ function App() {
       <li>
         <Link to="/">
           Home
+        </Link>
+      </li>
+      <li>
+        <Link to="/remote1">
+          Remote1
         </Link>
       </li>
     </ul>
