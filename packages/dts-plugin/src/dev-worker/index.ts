@@ -1,2 +1,2 @@
 export { createDevWorker } from './createDevWorker';
-export { DevWorker, DevWorkerOptions } from './DevWorker';
+export { DevWorker, type DevWorkerOptions } from './DevWorker';

@@ -1,5 +1,68 @@
 # @module-federation/rspack
 
+## 0.1.20
+
+### Patch Changes
+
+- Updated dependencies [685c607]
+- Updated dependencies [34f9498]
+- Updated dependencies [e8e0969]
+- Updated dependencies [349c381]
+  - @module-federation/dts-plugin@0.1.20
+  - @module-federation/sdk@0.1.20
+  - @module-federation/runtime-tools@0.1.20
+  - @module-federation/manifest@0.1.20
+  - @module-federation/managers@0.1.20
+
+## 0.1.19
+
+### Patch Changes
+
+- Updated dependencies [031454d]
+- Updated dependencies [b0a31a7]
+- Updated dependencies [a2bfb9b]
+  - @module-federation/sdk@0.1.19
+  - @module-federation/runtime-tools@0.1.19
+  - @module-federation/dts-plugin@0.1.19
+  - @module-federation/managers@0.1.19
+  - @module-federation/manifest@0.1.19
+
+## 0.1.18
+
+### Patch Changes
+
+- Updated dependencies [80af3f3]
+  - @module-federation/manifest@0.1.18
+  - @module-federation/sdk@0.1.18
+  - @module-federation/runtime-tools@0.1.18
+  - @module-federation/dts-plugin@0.1.18
+  - @module-federation/managers@0.1.18
+
+## 0.1.17
+
+### Patch Changes
+
+- efadc07: fix: rspack splitChunk.chunks should use function to prevent wrong behavior
+- Updated dependencies [4f22c3e]
+  - @module-federation/manifest@0.1.17
+  - @module-federation/runtime-tools@0.1.17
+  - @module-federation/sdk@0.1.17
+  - @module-federation/managers@0.1.17
+  - @module-federation/dts-plugin@0.1.17
+
+## 0.1.16
+
+### Patch Changes
+
+- Updated dependencies [cce5404]
+- Updated dependencies [ea34795]
+- Updated dependencies [364f2bc]
+  - @module-federation/managers@0.1.16
+  - @module-federation/dts-plugin@0.1.16
+  - @module-federation/sdk@0.1.16
+  - @module-federation/runtime-tools@0.1.16
+  - @module-federation/manifest@0.1.16
+
 ## 0.1.15
 
 ### Patch Changes

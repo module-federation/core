@@ -1,5 +1,76 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.1.20
+
+### Patch Changes
+
+- 766de80: Add repository property to the enhanced package
+- d5ac542: Add license property to the package.json of module-federation/enhanced
+- Updated dependencies [685c607]
+- Updated dependencies [34f9498]
+- Updated dependencies [e8e0969]
+- Updated dependencies [349c381]
+  - @module-federation/dts-plugin@0.1.20
+  - @module-federation/sdk@0.1.20
+  - @module-federation/runtime-tools@0.1.20
+  - @module-federation/manifest@0.1.20
+  - @module-federation/rspack@0.1.20
+  - @module-federation/managers@0.1.20
+
+## 0.1.19
+
+### Patch Changes
+
+- e1518e2: Wrap require of federation runtime module in conditional so that async boundary plugin doesnt crash runtimes who do not implement federation
+- Updated dependencies [031454d]
+- Updated dependencies [b0a31a7]
+- Updated dependencies [a2bfb9b]
+  - @module-federation/sdk@0.1.19
+  - @module-federation/runtime-tools@0.1.19
+  - @module-federation/dts-plugin@0.1.19
+  - @module-federation/managers@0.1.19
+  - @module-federation/manifest@0.1.19
+  - @module-federation/rspack@0.1.19
+
+## 0.1.18
+
+### Patch Changes
+
+- Updated dependencies [80af3f3]
+  - @module-federation/manifest@0.1.18
+  - @module-federation/sdk@0.1.18
+  - @module-federation/runtime-tools@0.1.18
+  - @module-federation/rspack@0.1.18
+  - @module-federation/dts-plugin@0.1.18
+  - @module-federation/managers@0.1.18
+
+## 0.1.17
+
+### Patch Changes
+
+- Updated dependencies [4f22c3e]
+- Updated dependencies [efadc07]
+  - @module-federation/manifest@0.1.17
+  - @module-federation/rspack@0.1.17
+  - @module-federation/runtime-tools@0.1.17
+  - @module-federation/sdk@0.1.17
+  - @module-federation/managers@0.1.17
+  - @module-federation/dts-plugin@0.1.17
+
+## 0.1.16
+
+### Patch Changes
+
+- Updated dependencies [cce5404]
+- Updated dependencies [ea34795]
+- Updated dependencies [364f2bc]
+  - @module-federation/managers@0.1.16
+  - @module-federation/dts-plugin@0.1.16
+  - @module-federation/sdk@0.1.16
+  - @module-federation/runtime-tools@0.1.16
+  - @module-federation/manifest@0.1.16
+  - @module-federation/rspack@0.1.16
+
 ## 0.1.15
 
 ### Patch Changes

@@ -18,7 +18,7 @@ describe('generateTypesInChildProcess', () => {
         'react-dom': { singleton: true, eager: true },
       },
     },
-    tsConfigPath: join(__dirname, '../../..', './tsconfig.json'),
+    tsConfigPath: join(__dirname, '../../..', './tsconfig.spec.json'),
     typesFolder: typesFolder,
     compiledTypesFolder: 'compiled-types',
     deleteTypesFolder: false,

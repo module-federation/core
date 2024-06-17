@@ -77,7 +77,7 @@ export async function loadEntryScript({
         return entryExports;
       })
       .catch((e) => {
-        return e;
+        throw e;
       });
   }
 
@@ -101,7 +101,7 @@ export async function loadEntryScript({
       return entryExports;
     })
     .catch((e) => {
-      return e;
+      throw e;
     });
 }
 
@@ -126,7 +126,7 @@ export async function getRemoteEntry({
   }
 
   if (!globalLoading[uniqueKey]) {
-    if (type === 'esm') {
+    if (['esm', 'module'].includes(type)) {
       globalLoading[uniqueKey] = loadEsmEntry({
         entry,
         remoteEntryExports,

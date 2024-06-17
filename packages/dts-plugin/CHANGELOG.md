@@ -1,5 +1,57 @@
 # @module-federation/dts-plugin
 
+## 0.1.20
+
+### Patch Changes
+
+- 685c607: feat: support dynamic remote type hints
+- 34f9498: dts-plugin can now support remotes using relative path references: 'app@/mf-manifest.json'
+- Updated dependencies [685c607]
+- Updated dependencies [e8e0969]
+- Updated dependencies [349c381]
+  - @module-federation/third-party-dts-extractor@0.1.20
+  - @module-federation/sdk@0.1.20
+  - @module-federation/managers@0.1.20
+
+## 0.1.19
+
+### Patch Changes
+
+- Updated dependencies [031454d]
+- Updated dependencies [b0a31a7]
+- Updated dependencies [a2bfb9b]
+  - @module-federation/sdk@0.1.19
+  - @module-federation/managers@0.1.19
+  - @module-federation/third-party-dts-extractor@0.1.19
+
+## 0.1.18
+
+### Patch Changes
+
+- Updated dependencies [80af3f3]
+  - @module-federation/sdk@0.1.18
+  - @module-federation/managers@0.1.18
+  - @module-federation/third-party-dts-extractor@0.1.18
+
+## 0.1.17
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.17
+- @module-federation/managers@0.1.17
+- @module-federation/third-party-dts-extractor@0.1.17
+
+## 0.1.16
+
+### Patch Changes
+
+- ea34795: optional vue-tsc
+- Updated dependencies [cce5404]
+- Updated dependencies [364f2bc]
+  - @module-federation/managers@0.1.16
+  - @module-federation/sdk@0.1.16
+  - @module-federation/third-party-dts-extractor@0.1.16
+
 ## 0.1.15
 
 ### Patch Changes
