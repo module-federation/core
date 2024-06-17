@@ -1,17 +1,20 @@
+import fs from 'fs';
 import path from 'path';
+import axios, { type AxiosRequestConfig } from 'axios';
+import http from 'http';
+import https from 'https';
+import { moduleFederationPlugin } from '@module-federation/sdk';
+import ansiColors from 'ansi-colors';
+
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { DTSManager } from './DTSManager';
 import { retrieveTypesZipPath } from './archiveHandler';
-import fs from 'fs';
 import {
   retrieveMfAPITypesPath,
   retrieveMfTypesPath,
 } from './typeScriptCompiler';
-import { moduleFederationPlugin } from '@module-federation/sdk';
-import ansiColors from 'ansi-colors';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 export function getDTSManagerConstructor(
   implementation?: string,
@@ -93,3 +96,9 @@ export const isTSProject = (
     return false;
   }
 };
+
+export async function axiosGet(url: string, config?: AxiosRequestConfig) {
+  const httpAgent = new http.Agent({ family: 4 });
+  const httpsAgent = new https.Agent({ family: 4 });
+  return axios.get(url, { httpAgent, httpsAgent, ...config });
+}

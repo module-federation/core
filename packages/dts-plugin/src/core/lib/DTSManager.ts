@@ -29,8 +29,8 @@ import {
   REMOTE_ALIAS_IDENTIFIER,
   HOST_API_TYPES_FILE_NAME,
 } from '../constant';
-import axios from 'axios';
 import { fileLog } from '../../server';
+import { axiosGet } from './utils';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
 
@@ -183,10 +183,7 @@ class DTSManager {
         return remoteInfo as Required<RemoteInfo>;
       }
       const url = remoteInfo.url;
-      const res = await axios({
-        method: 'get',
-        url,
-      });
+      const res = await axiosGet(url);
       const manifestJson = res.data as unknown as Manifest;
       if (!manifestJson.metaData.types.zip) {
         throw new Error(`Can not get ${remoteInfo.name}'s types archive url!`);
@@ -249,7 +246,7 @@ class DTSManager {
     }
     try {
       const url = apiTypeUrl;
-      const res = await axios.get(url);
+      const res = await axiosGet(url);
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(
         REMOTE_ALIAS_IDENTIFIER,
