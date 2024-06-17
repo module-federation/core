@@ -1,5 +1,18 @@
 # @module-federation/dts-plugin
 
+## 0.1.20
+
+### Patch Changes
+
+- 685c607: feat: support dynamic remote type hints
+- 34f9498: dts-plugin can now support remotes using relative path references: 'app@/mf-manifest.json'
+- Updated dependencies [685c607]
+- Updated dependencies [e8e0969]
+- Updated dependencies [349c381]
+  - @module-federation/third-party-dts-extractor@0.1.20
+  - @module-federation/sdk@0.1.20
+  - @module-federation/managers@0.1.20
+
 ## 0.1.19
 
 ### Patch Changes
