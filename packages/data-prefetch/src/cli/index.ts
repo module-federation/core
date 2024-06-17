@@ -63,7 +63,7 @@ export class PrefetchPlugin implements WebpackPluginInstance {
       if (typeof exposeValue === 'string') {
         exposePath = exposeValue;
       } else {
-        exposePath = exposeValue.import;
+        exposePath = exposeValue.import[0];
       }
       const targetPaths = fixPrefetchPath(exposePath);
       for (const pathItem of targetPaths) {

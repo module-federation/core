@@ -68,7 +68,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    */
   apply(compiler: Compiler): void {
     const { _options: options } = this;
-    new PrefetchPlugin(this._options).apply(compiler);
+    if (options.dataPrefetch) {
+      new PrefetchPlugin(this._options).apply(compiler);
+    }
     // @ts-ignore
     new FederationRuntimePlugin(options).apply(compiler);
     const library = options.library || { type: 'var', name: options.name };

@@ -107,6 +107,10 @@ export type Shared = (SharedItem | SharedObject)[] | SharedObject;
  * A module that should be shared in the share scope.
  */
 export type SharedItem = string;
+/**
+ * Enable Data Prefetch
+ */
+export type DataPrefetch = boolean;
 
 export interface AdditionalDataOptions {
   stats: Stats;
@@ -211,6 +215,7 @@ export interface ModuleFederationPluginOptions {
 
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
+  dataPrefetch?: DataPrefetch;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.
