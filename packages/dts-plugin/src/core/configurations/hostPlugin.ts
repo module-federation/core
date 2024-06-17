@@ -1,4 +1,9 @@
-import { MANIFEST_EXT, parseEntry } from '@module-federation/sdk';
+import {
+  MANIFEST_EXT,
+  parseEntry,
+  ENCODE_NAME_PREFIX,
+  decodeName,
+} from '@module-federation/sdk';
 import { utils } from '@module-federation/managers';
 import { HostOptions, RemoteInfo } from '../interfaces/HostOptions';
 import { validateOptions } from '../lib/utils';
@@ -39,14 +44,18 @@ export const retrieveRemoteInfo = (options: {
   remote: string;
 }): RemoteInfo => {
   const { hostOptions, remoteAlias, remote } = options;
+  let decodeRemote = remote;
+  if (remote.startsWith(ENCODE_NAME_PREFIX)) {
+    decodeRemote = decodeName(remote, ENCODE_NAME_PREFIX);
+  }
 
-  const parsedInfo = parseEntry(remote, undefined, '@');
+  const parsedInfo = parseEntry(decodeRemote, undefined, '@');
 
   const url =
     'entry' in parsedInfo
       ? parsedInfo.entry
-      : parsedInfo.name === remote
-      ? remote
+      : parsedInfo.name === decodeRemote
+      ? decodeRemote
       : '';
 
   const zipUrl = url ? buildZipUrl(hostOptions, url) : '';
