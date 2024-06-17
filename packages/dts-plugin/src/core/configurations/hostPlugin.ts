@@ -44,18 +44,18 @@ export const retrieveRemoteInfo = (options: {
   remote: string;
 }): RemoteInfo => {
   const { hostOptions, remoteAlias, remote } = options;
-  let decodeRemote = remote;
-  if (remote.startsWith(ENCODE_NAME_PREFIX)) {
-    decodeRemote = decodeName(remote, ENCODE_NAME_PREFIX);
+  let decodedRemote = remote;
+  if (decodedRemote.startsWith(ENCODE_NAME_PREFIX)) {
+    decodedRemote = decodeName(decodedRemote, ENCODE_NAME_PREFIX);
   }
 
-  const parsedInfo = parseEntry(decodeRemote, undefined, '@');
+  const parsedInfo = parseEntry(decodedRemote, undefined, '@');
 
   const url =
     'entry' in parsedInfo
       ? parsedInfo.entry
-      : parsedInfo.name === decodeRemote
-      ? decodeRemote
+      : parsedInfo.name === decodedRemote
+      ? decodedRemote
       : '';
 
   const zipUrl = url ? buildZipUrl(hostOptions, url) : '';
