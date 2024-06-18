@@ -30,7 +30,7 @@ import {
   HOST_API_TYPES_FILE_NAME,
 } from '../constant';
 import { fileLog } from '../../server';
-import { axiosGet } from './utils';
+import { axiosGet, isDebugMode } from './utils';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
 
@@ -157,11 +157,17 @@ class DTSManager {
         fs.writeFileSync(apiTypesPath, apiTypes);
       }
 
-      if (remoteOptions.deleteTypesFolder) {
-        await rm(retrieveMfTypesPath(tsConfig, remoteOptions), {
-          recursive: true,
-          force: true,
-        });
+      try {
+        if (remoteOptions.deleteTypesFolder) {
+          await rm(retrieveMfTypesPath(tsConfig, remoteOptions), {
+            recursive: true,
+            force: true,
+          });
+        }
+      } catch (err) {
+        if (isDebugMode()) {
+          console.error(err);
+        }
       }
       console.log(ansiColors.green('Federated types created correctly'));
     } catch (error) {
