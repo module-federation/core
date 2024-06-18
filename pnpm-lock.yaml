@@ -1385,9 +1385,15 @@ importers:
       '@chialab/cjs-to-esm':
         specifier: ^0.18.0
         version: 0.18.0
+      '@chialab/esbuild-plugin-commonjs':
+        specifier: ^0.18.0
+        version: 0.18.0
       '@chialab/estransform':
         specifier: ^0.18.1
         version: 0.18.1
+      '@hyrious/esbuild-plugin-commonjs':
+        specifier: ^0.2.4
+        version: 0.2.4(cjs-module-lexer@1.3.1)(esbuild@0.18.20)
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -1418,6 +1424,9 @@ importers:
       esm-cjs-lexer:
         specifier: ^0.10.0
         version: 0.10.0
+      find-package-json:
+        specifier: 1.2.0
+        version: 1.2.0
       json5:
         specifier: ^2.2.3
         version: 2.2.3
@@ -4490,11 +4499,32 @@ packages:
     dependencies:
       '@chialab/estransform': 0.18.1
 
+  /@chialab/esbuild-plugin-commonjs@0.18.0:
+    resolution: {integrity: sha512-qZjIsNr1dVEJk6NLyza3pJLHeY7Fz0xjmYteKXElCnlFSKR7vVg6d18AsxVpRnP5qNbvx3XlOvs9U8j97ZQ6bw==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@chialab/cjs-to-esm': 0.18.0
+      '@chialab/esbuild-rna': 0.18.2
+    dev: false
+
+  /@chialab/esbuild-rna@0.18.2:
+    resolution: {integrity: sha512-ckzskez7bxstVQ4c5cxbx0DRP2teldzrcSGQl2KPh1VJGdO2ZmRrb6vNkBBD5K3dx9tgTyvskWp4dV+Fbg07Ag==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@chialab/estransform': 0.18.1
+      '@chialab/node-resolve': 0.18.0
+    dev: false
+
   /@chialab/estransform@0.18.1:
     resolution: {integrity: sha512-W/WmjpQL2hndD0/XfR0FcPBAUj+aLNeoAVehOjV/Q9bSnioz0GVSAXXhzp59S33ZynxJBBfn8DNiMTVNJmk4Aw==}
     engines: {node: '>=18'}
     dependencies:
       '@parcel/source-map': 2.1.1
+
+  /@chialab/node-resolve@0.18.0:
+    resolution: {integrity: sha512-eV1m70Qn9pLY9xwFmZ2FlcOzwiaUywsJ7NB/ud8VB7DouvCQtIHkQ3Om7uPX0ojXGEG1LCyO96kZkvbNTxNu0Q==}
+    engines: {node: '>=18'}
+    dev: false
 
   /@colors/colors@1.5.0:
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
@@ -6049,6 +6079,20 @@ packages:
   /@humanwhocodes/object-schema@2.0.3:
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
     dev: true
+
+  /@hyrious/esbuild-plugin-commonjs@0.2.4(cjs-module-lexer@1.3.1)(esbuild@0.18.20):
+    resolution: {integrity: sha512-NKR8bsDbNP7EpM//cjoo8Bpihmc97gPpnwrggG+18iSGow6oaJpfmy3Bv+oBgPkPlxcGzC9SXh+6szoCoKFvCw==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      cjs-module-lexer: '*'
+      esbuild: '*'
+    peerDependenciesMeta:
+      cjs-module-lexer:
+        optional: true
+    dependencies:
+      cjs-module-lexer: 1.3.1
+      esbuild: 0.18.20
+    dev: false
 
   /@iarna/toml@2.2.5:
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
@@ -23234,6 +23278,10 @@ packages:
       findup-sync: 4.0.0
       merge: 2.1.1
     dev: true
+
+  /find-package-json@1.2.0:
+    resolution: {integrity: sha512-+SOGcLGYDJHtyqHd87ysBhmaeQ95oWspDKnMXBrnQ9Eq4OkLNqejgoaD8xVWu6GPa0B6roa6KinCMEMcVeqONw==}
+    dev: false
 
   /find-pkg@2.0.0:
     resolution: {integrity: sha512-WgZ+nKbELDa6N3i/9nrHeNznm+lY3z4YfhDDWgW+5P0pdmMj26bxaxU11ookgY3NyP9GC7HvZ9etp0jRFqGEeQ==}

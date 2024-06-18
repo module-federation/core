@@ -62,9 +62,12 @@
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
     "rollup": "^2.79.0",
+    "@chialab/esbuild-plugin-commonjs": "^0.18.0",
+    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "rollup-plugin-node-externals": "^4.1.1",
     "esbuild": "^0.18.12",
     "npmlog": "^6.0.2",
-    "acorn": "^8.8.1"
+    "acorn": "^8.8.1",
+    "find-package-json": "1.2.0"
   }
 }

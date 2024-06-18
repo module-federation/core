@@ -31,6 +31,8 @@
           "esbuild",
           "@rollup/*",
           "rollup-plugin-node-externals",
+          "@chialab/esbuild-plugin-commonjs",
+          "@hyrious/esbuild-plugin-commonjs",
           "rollup",
           "../../resolve/esm-resolver.mjs"
         ]

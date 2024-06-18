@@ -5,6 +5,7 @@ import { writeRemoteManifest } from './manifest.js';
 import { createContainerPlugin } from './containerPlugin';
 import { initializeHostPlugin } from './containerReference';
 import { linkRemotesPlugin } from './linkRemotesPlugin';
+import { commonjs } from './commonjs';
 import {
   BuildOptions,
   PluginBuild,
@@ -50,40 +51,32 @@ const cjsToEsmPlugin: Plugin = {
     build.onLoad(
       { filter: /.*/, namespace: 'esm-shares' },
       async (args: OnLoadArgs) => {
-        const { transform } = await new Function(
-          'return import("@chialab/cjs-to-esm")',
-        )();
-        const resolver = await resolve(args.pluginData.resolveDir, args.path);
-        if (typeof resolver !== 'string') {
-          throw new Error(`Unable to resolve path: ${args.path}`);
-        }
-        const fileContent = fs.readFileSync(resolver, 'utf-8');
-        try {
-          const result = await transform(fileContent);
-          if (result) {
-            const { code } = result;
-            return {
-              contents: code,
-              loader: 'js',
-              resolveDir: path.dirname(resolver),
-              pluginData: { ...args.pluginData, path: resolver },
-            };
-          }
-        } catch {
-          return {
-            contents: fileContent,
-            loader: 'js',
-            resolveDir: path.dirname(resolver),
-            pluginData: { ...args.pluginData, path: resolver },
-          };
-        }
+        let esbuild_shim: typeof import('esbuild') | undefined;
+        const require_esbuild = () =>
+          build.esbuild || (esbuild_shim ||= require('esbuild'));
 
-        return undefined;
+        const packageBuilder = await require_esbuild().build({
+          ...build.initialOptions,
+          external: build.initialOptions.external?.filter((e) => {
+            if (e.includes('*')) {
+              const prefix = e.split('*')[0];
+              return !args.path.startsWith(prefix);
+            }
+            return e !== args.path;
+          }),
+          entryPoints: [args.path],
+          plugins: [commonjs({ filter: /.*/ })],
+          write: false,
+        });
+        return {
+          contents: packageBuilder.outputFiles[0].text,
+          loader: 'js',
+          resolveDir: args.pluginData.resolveDir,
+        };
       },
     );
   },
 };
-
 // Plugin to link shared dependencies
 const linkSharedPlugin = (config: NormalizedFederationConfig): Plugin => ({
   name: 'linkShared',
