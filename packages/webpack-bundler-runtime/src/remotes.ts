@@ -1,8 +1,7 @@
 import { attachShareScopeMap } from './attachShareScopeMap';
 import type { RemoteEntryExports } from './types';
 import { RemotesOptions } from './types';
-import { decodeName } from '@module-federation/sdk';
-import { ENCODE_NAME_PREFIX } from './constant';
+import { decodeName, ENCODE_NAME_PREFIX } from '@module-federation/sdk';
 
 export function remotes(options: RemotesOptions) {
   const {
