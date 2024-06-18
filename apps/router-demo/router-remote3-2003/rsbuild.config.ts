@@ -27,7 +27,7 @@ export default defineConfig({
           exposes: {
             './export-app': './src/export-app.ts',
           },
-          shared: ['react', 'react-dom'],
+          shared: ['vue', 'vue-router'],
         }),
       ]);
     },

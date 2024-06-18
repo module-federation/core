@@ -43,9 +43,11 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           />,
         );
       },
-      destroy({ dom }: any) {
-        LoggerInstance.log(`createBridgeComponent destroy Info`, { dom });
-        const root = rootMap.get(dom);
+      destroy(info: { dom: HTMLElement }) {
+        LoggerInstance.log(`createBridgeComponent destroy Info`, {
+          dom: info.dom,
+        });
+        const root = rootMap.get(info.dom);
         root?.unmount();
       },
       rawComponent: bridgeInfo.rootComponent,

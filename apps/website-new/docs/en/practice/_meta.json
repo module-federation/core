@@ -5,13 +5,20 @@
     "label": "Overview"
   },
   {
+    "type": "file",
+    "name": "bridge",
+    "label": "Bridge"
+  },
+  {
     "type": "dir",
     "name": "frameworks",
-    "label": "Frameworks"
+    "label": "Frameworks",
+    "collapsed": true
   },
   {
     "type": "file",
     "name": "scenario",
-    "label": "Scenarios"
+    "label": "Scenarios",
+    "collapsed": true
   }
 ]

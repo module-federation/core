@@ -100,7 +100,9 @@ const RemoteApp = ({
 
 export function createRemoteComponent<T, E extends keyof T>(
   lazyComponent: () => Promise<T>,
-  info?: { export?: E },
+  info?: {
+    export?: E;
+  },
 ) {
   type ExportType = T[E] extends (...args: any) => any
     ? ReturnType<T[E]>

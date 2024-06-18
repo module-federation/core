@@ -5,5 +5,5 @@ export interface ProviderParams {
 }
 
 export interface RenderFnParams extends ProviderParams {
-  dom?: any;
+  dom: HTMLElement;
 }

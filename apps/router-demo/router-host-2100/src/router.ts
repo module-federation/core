@@ -6,11 +6,9 @@ import {
 import Home from '@/pages/Home.vue';
 import Detail from '@/pages/Detail.vue';
 import { loadRemote, init } from '@module-federation/enhanced/runtime';
-import * as aaa from '@module-federation/bridge-vue3';
+import * as bridge from '@module-federation/bridge-vue3';
 
-(loadRemote as any).test = true;
-
-const Remote2 = aaa.createRemoteComponent(() =>
+const Remote2 = bridge.createRemoteComponent(() =>
   loadRemote('remote1/export-app'),
 );
 
