@@ -1270,7 +1270,7 @@ importers:
         version: 9.1.0
       isomorphic-ws:
         specifier: 5.0.0
-        version: 5.0.0(ws@8.17.0)
+        version: 5.0.0(ws@8.17.1)
       koa:
         specifier: 2.11.0
         version: 2.11.0
@@ -1293,8 +1293,8 @@ importers:
         specifier: ^1.0.24
         version: 1.8.27(typescript@5.3.3)
       ws:
-        specifier: 8.17.0
-        version: 8.17.0
+        specifier: 8.17.1
+        version: 8.17.1
     devDependencies:
       '@module-federation/runtime':
         specifier: workspace:*
@@ -7277,7 +7277,7 @@ packages:
       minimatch: 3.1.2
       path-to-regexp: 6.2.1
       ts-node: 10.9.1(@swc/core@1.5.28)(@types/node@20.12.12)(typescript@5.3.3)
-      ws: 8.17.0
+      ws: 8.17.1
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@rsbuild/core'
@@ -7318,7 +7318,7 @@ packages:
       minimatch: 3.1.2
       path-to-regexp: 6.2.1
       ts-node: 10.9.1(@swc/core@1.5.28)(@types/node@20.12.12)(typescript@5.3.3)
-      ws: 8.17.0
+      ws: 8.17.1
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@rsbuild/core'
@@ -7359,7 +7359,7 @@ packages:
       minimatch: 3.1.2
       path-to-regexp: 6.2.1
       ts-node: 10.9.1(@swc/core@1.5.28)(@types/node@20.12.12)(typescript@5.3.3)
-      ws: 8.17.0
+      ws: 8.17.1
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@rsbuild/core'
@@ -13885,7 +13885,7 @@ packages:
       util: 0.12.5
       util-deprecate: 1.0.2
       watchpack: 2.4.1
-      ws: 8.17.0
+      ws: 8.17.1
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -13941,7 +13941,7 @@ packages:
       util: 0.12.5
       util-deprecate: 1.0.2
       watchpack: 2.4.1
-      ws: 8.17.0
+      ws: 8.17.1
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -25868,12 +25868,12 @@ packages:
       simple-get: 4.0.1
     dev: true
 
-  /isomorphic-ws@5.0.0(ws@8.17.0):
+  /isomorphic-ws@5.0.0(ws@8.17.1):
     resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}
     peerDependencies:
       ws: '*'
     dependencies:
-      ws: 8.17.0
+      ws: 8.17.1
     dev: false
 
   /isstream@0.1.2:
@@ -26572,7 +26572,7 @@ packages:
       whatwg-encoding: 2.0.0
       whatwg-mimetype: 3.0.0
       whatwg-url: 11.0.0
-      ws: 8.17.0
+      ws: 8.17.1
       xml-name-validator: 4.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -37903,7 +37903,7 @@ packages:
       spdy: 4.0.2
       webpack: 5.91.0(@swc/core@1.5.28)(esbuild@0.21.4)
       webpack-dev-middleware: 5.3.4(webpack@5.91.0)
-      ws: 8.17.0
+      ws: 8.17.1
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -37954,7 +37954,7 @@ packages:
       spdy: 4.0.2
       webpack: 5.91.0(@swc/core@1.5.28)(esbuild@0.18.20)
       webpack-dev-middleware: 5.3.4(webpack@5.91.0)
-      ws: 8.17.0
+      ws: 8.17.1
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -38530,8 +38530,8 @@ packages:
       async-limiter: 1.0.1
     dev: true
 
-  /ws@8.17.0:
-    resolution: {integrity: sha512-uJq6108EgZMAl20KagGkzCKfMEjxmKvZHG7Tlq0Z6nOky7YF7aq4mOx6xK8TJ/i1LeK4Qus7INktacctDgY8Ow==}
+  /ws@8.17.1:
+    resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
