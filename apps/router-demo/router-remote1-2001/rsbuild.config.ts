@@ -38,18 +38,18 @@ export default defineConfig({
             './export-app': './src/export-App.tsx',
           },
           shared: {
-            react: {
-              singleton: true,
-            },
-            'react-dom': {
-              singleton: true,
-            },
-            'react-router-dom': {
-              singleton: true,
-            },
-            antd: {
-              singleton: true,
-            },
+            // react: {
+            //   singleton: true,
+            // },
+            // 'react-dom': {
+            //   singleton: true,
+            // },
+            // 'react-router-dom': {
+            //   singleton: true,
+            // },
+            // antd: {
+            //   singleton: true,
+            // },
           },
         }),
       ]);

@@ -1,11 +1,13 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom/client';
+import { useLayoutEffect, useRef, useState } from 'react';
+import * as React from 'react';
+import ReactDOM from 'react-dom';
+import ReactDOMClient from 'react-dom/client';
 import { RouterContext } from './context';
 import type {
   ProviderParams,
   RenderFnParams,
 } from '@module-federation/bridge-shared';
-import { LoggerInstance } from './utils';
+import { LoggerInstance, atLeastReact18 } from './utils';
 
 type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
@@ -13,7 +15,7 @@ type ProviderFnParams<T> = {
 
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
   return () => {
-    const rootMap = new Map<any, ReactDOM.Root>();
+    const rootMap = new Map<any, ReactDOMClient.Root>();
 
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo } = info;
@@ -29,26 +31,45 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
     return {
       render(info: RenderFnParams & any) {
         LoggerInstance.log(`createBridgeComponent render Info`, info);
-        const root = ReactDOM.createRoot(info.dom);
-        rootMap.set(info.dom, root);
         const { name, basename, memoryRoute, ...propsInfo } = info;
-        root.render(
-          <RawComponent
-            propsInfo={propsInfo}
-            appInfo={{
-              name,
-              basename,
-              memoryRoute,
-            }}
-          />,
-        );
+
+        if (atLeastReact18(React)) {
+          const root = ReactDOMClient.createRoot(info.dom);
+          rootMap.set(info.dom, root);
+          root.render(
+            <RawComponent
+              propsInfo={propsInfo}
+              appInfo={{
+                name,
+                basename,
+                memoryRoute,
+              }}
+            />,
+          );
+        } else {
+          ReactDOM.render(
+            <RawComponent
+              propsInfo={propsInfo}
+              appInfo={{
+                name,
+                basename,
+                memoryRoute,
+              }}
+            />,
+            info.dom,
+          );
+        }
       },
       destroy(info: { dom: HTMLElement }) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
-        const root = rootMap.get(info.dom);
-        root?.unmount();
+        if (atLeastReact18(React)) {
+          const root = rootMap.get(info.dom);
+          root?.unmount();
+        } else {
+          ReactDOM.unmountComponentAtNode(info.dom);
+        }
       },
       rawComponent: bridgeInfo.rootComponent,
       __BRIDGE_FN__: (_args: T) => {},

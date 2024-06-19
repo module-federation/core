@@ -33,9 +33,9 @@
     "react-error-boundary": "^4.0.13"
   },
   "peerDependencies": {
-    "react": "=18",
-    "react-dom": "=18",
-    "react-router-dom": ">=5"
+    "react": ">=16.9.0",
+    "react-dom": ">=16.9.0",
+    "react-router-dom": ">=4"
   },
   "devDependencies": {
     "@testing-library/react": "15.0.7",
