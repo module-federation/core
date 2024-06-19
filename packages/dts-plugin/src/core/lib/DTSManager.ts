@@ -341,18 +341,6 @@ class DTSManager {
 
   async consumeArchiveTypes(options: HostOptions) {
     const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(options);
-    if (hostOptions.deleteTypesFolder) {
-      await rm(hostOptions.typesFolder, {
-        recursive: true,
-        force: true,
-      }).catch((error) =>
-        fileLog(
-          `Unable to remove types folder, ${error}`,
-          'consumeArchiveTypes',
-          'error',
-        ),
-      );
-    }
 
     const downloadPromises = Object.entries(mapRemotesToDownload).map(
       async (item) => {

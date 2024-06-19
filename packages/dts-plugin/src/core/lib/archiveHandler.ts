@@ -1,5 +1,6 @@
 import AdmZip from 'adm-zip';
 import { resolve, join } from 'path';
+import { rm } from 'fs/promises';
 import typescript from 'typescript';
 
 import { HostOptions } from '../interfaces/HostOptions';
@@ -62,6 +63,21 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
         const response = await axiosGet(url, {
           responseType: 'arraybuffer',
         }).catch(downloadErrorLogger(destinationFolder, url));
+
+        try {
+          if (hostOptions.deleteTypesFolder) {
+            await rm(destinationPath, {
+              recursive: true,
+              force: true,
+            });
+          }
+        } catch (error) {
+          fileLog(
+            `Unable to remove types folder, ${error}`,
+            'downloadTypesArchive',
+            'error',
+          );
+        }
 
         const zip = new AdmZip(Buffer.from(response.data));
         zip.extractAllTo(destinationPath, true);
