@@ -256,7 +256,10 @@ class StatsManager {
       const { name, manifest: manifestOptions = {} } = this._options;
 
       const metaData = this._getMetaData(compiler, compilation, extraOptions);
-
+      if (this._options.getPublicPath) {
+        // @ts-ignore set getPublicPath
+        metaData.getPublicPath = this._options.getPublicPath;
+      }
       const stats: Stats = {
         id: name!,
         name: name!,

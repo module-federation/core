@@ -204,7 +204,10 @@ class DTSManager {
       let publicPath =
         'publicPath' in manifestJson.metaData
           ? manifestJson.metaData.publicPath
-          : new Function(manifestJson.metaData.getPublicPath)();
+          : new Function(manifestJson.metaData.getPublicPath)()(
+              manifestJson.metaData,
+            );
+
       if (publicPath === 'auto') {
         publicPath = inferAutoPublicPath(remoteInfo.url);
       }

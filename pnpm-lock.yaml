@@ -1329,6 +1329,9 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
+      btoa:
+        specifier: ^1.2.1
+        version: 1.2.1
       typescript:
         specifier: ^4.9.0 || ^5.0.0
         version: 5.0.4
@@ -1345,6 +1348,9 @@ importers:
       '@module-federation/webpack-bundler-runtime':
         specifier: workspace:*
         version: link:../webpack-bundler-runtime
+      '@types/btoa':
+        specifier: ^1.2.5
+        version: 1.2.5
 
   packages/managers:
     dependencies:
@@ -15164,6 +15170,12 @@ packages:
       '@types/node': 20.12.12
     dev: true
 
+  /@types/btoa@1.2.5:
+    resolution: {integrity: sha512-BItINdjZRlcGdI2efwK4bwxY5vEAT0SnIVfMOZVT18wp4900F1Lurqk/9PNdF9hMP1zgFmWbjVEtAsQKVcbqxA==}
+    dependencies:
+      '@types/node': 20.12.12
+    dev: true
+
   /@types/cacheable-request@6.0.3:
     resolution: {integrity: sha512-IQ3EbTzGxIigb1I3qPZc1rWJnH0BmSKv5QYTalEwweFvyBDLSAe24zP0le/hyi7ecGfZVlIVAg4BZqb8WBwKqw==}
     dependencies:
@@ -18564,6 +18576,12 @@ packages:
     dependencies:
       node-int64: 0.4.0
     dev: true
+
+  /btoa@1.2.1:
+    resolution: {integrity: sha512-SB4/MIGlsiVkMcHmT+pSmIPoNDoHg+7cMzmt3Uxt628MTz2487DKSqK/fuhFBrkuqrYv5UCEnACpF4dTFNKc/g==}
+    engines: {node: '>= 0.4.0'}
+    hasBin: true
+    dev: false
 
   /buffer-builder@0.2.0:
     resolution: {integrity: sha512-7VPMEPuYznPSoR21NE1zvd2Xna6c/CloiZCfcMXR1Jny6PjX0N4Nsa38zcBFo/FMK+BlA+FLKbJCQ0i2yxp+Xg==}

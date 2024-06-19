@@ -182,8 +182,8 @@ const generateShareFilename = /* @__PURE__ */ (
 
 const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
   if ('getPublicPath' in module) {
-    const publicPath = new Function(module.getPublicPath)();
-    return `${publicPath}${sourceUrl}`;
+    const publicPath = new Function('return ' + module.getPublicPath)();
+    return `${publicPath(module)}${sourceUrl}`;
   } else if ('publicPath' in module) {
     return `${module.publicPath}${sourceUrl}`;
   } else {
