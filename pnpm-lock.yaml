@@ -8342,26 +8342,10 @@ packages:
       - nx
     dev: true
 
-  /@nrwl/devkit@17.3.2(nx@17.3.2):
-    resolution: {integrity: sha512-31wh7dDZPM1YUCfhhk/ioHnUeoPIlKYLFLW0fGdw76Ow2nmTqrmxha2m0CSIR1/9En9GpYut2IdUdNh9CctNlA==}
-    dependencies:
-      '@nx/devkit': 17.3.2(nx@17.3.2)
-    transitivePeerDependencies:
-      - nx
-    dev: true
-
   /@nrwl/devkit@19.2.3(nx@17.2.8):
     resolution: {integrity: sha512-OL6sc70gR/USasvbYzyYY44Hd5ZCde2UfiA5h8VeAYAJbq+JmtscpvjcnZ7OIsXyYEOxe1rypULElqu/8qpKzQ==}
     dependencies:
       '@nx/devkit': 19.2.3(nx@17.2.8)
-    transitivePeerDependencies:
-      - nx
-    dev: true
-
-  /@nrwl/devkit@19.2.3(nx@19.2.3):
-    resolution: {integrity: sha512-OL6sc70gR/USasvbYzyYY44Hd5ZCde2UfiA5h8VeAYAJbq+JmtscpvjcnZ7OIsXyYEOxe1rypULElqu/8qpKzQ==}
-    dependencies:
-      '@nx/devkit': 19.2.3(nx@19.2.3)
     transitivePeerDependencies:
       - nx
     dev: true
@@ -8999,7 +8983,7 @@ packages:
     peerDependencies:
       nx: '>= 16 <= 18'
     dependencies:
-      '@nrwl/devkit': 17.3.2(nx@17.3.2)
+      '@nrwl/devkit': 17.3.2(nx@17.2.8)
       ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.1
@@ -9032,7 +9016,7 @@ packages:
     peerDependencies:
       nx: '>= 17 <= 20'
     dependencies:
-      '@nrwl/devkit': 19.2.3(nx@19.2.3)
+      '@nrwl/devkit': 19.2.3(nx@17.2.8)
       ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.1
@@ -16364,7 +16348,7 @@ packages:
     dependencies:
       '@babel/core': 7.24.7
       '@svgr/babel-preset': 8.1.0(@babel/core@7.24.7)
-      '@svgr/core': 8.1.0(typescript@5.3.3)
+      '@svgr/core': 8.1.0(typescript@5.4.5)
       '@svgr/hast-util-to-babel-ast': 8.0.0
       svg-parser: 2.0.4
     transitivePeerDependencies:
@@ -41556,7 +41540,7 @@ packages:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.2.0
-      webpack: 5.92.0(@swc/core@1.5.28)(esbuild@0.21.4)
+      webpack: 5.92.0(@swc/core@1.5.28)(esbuild@0.18.20)
     dev: true
 
   /webpack-dev-middleware@6.0.2(webpack@5.92.0):
