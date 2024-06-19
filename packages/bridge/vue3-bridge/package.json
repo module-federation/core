@@ -2,7 +2,9 @@
   "name": "@module-federation/bridge-vue3",
   "author": "zhouxiao <codingzx@gmail.com>",
   "version": "0.0.1",
-  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
