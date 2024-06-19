@@ -23,7 +23,8 @@
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/manifest": "workspace:*",
     "@module-federation/managers": "workspace:*",
-    "@module-federation/dts-plugin": "workspace:*"
+    "@module-federation/dts-plugin": "workspace:*",
+    "@module-federation/data-prefetch": "workspace:*"
   },
   "devDependencies": {
     "@rspack/core": "0.5.0"

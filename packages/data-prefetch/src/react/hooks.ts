@@ -25,7 +25,9 @@ export const usePrefetch = <T>(
   if (isFirstMounted) {
     const startTiming = performance.now();
     logger.info(
-      `2. Start Get Prefetch Data: ${options.id} - ${options.functionId} - ${startTiming}`,
+      `2. Start Get Prefetch Data: ${options.id} - ${
+        options.functionId || 'default'
+      } - ${startTiming}`,
     );
   }
   const { id, functionId, deferId } = options;
@@ -56,7 +58,9 @@ export const usePrefetch = <T>(
   useEffect(() => {
     const useEffectTiming = performance.now();
     logger.info(
-      `3. Start Execute UseEffect: ${options.id} - ${options.functionId} - ${useEffectTiming}`,
+      `3. Start Execute UseEffect: ${options.id} - ${
+        options.functionId || 'default'
+      } - ${useEffectTiming}`,
     );
 
     return () => {

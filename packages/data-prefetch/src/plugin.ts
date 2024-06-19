@@ -147,7 +147,9 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
         await projectExports;
       }
       const exports = instance!.getExposeExports(id);
-      logger.info(`1. Start Prefetch: ${id} - ${performance.now()}`);
+      logger.info(
+        `1. PreloadRemote Start Prefetch: ${id} - ${performance.now()}`,
+      );
       const result = Object.keys(exports).map((k) => {
         const value = instance!.prefetch({
           id,

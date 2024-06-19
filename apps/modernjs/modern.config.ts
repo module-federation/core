@@ -52,6 +52,7 @@ export default defineConfig({
             react: { singleton: true },
             'react-dom': { singleton: true },
           },
+          dataPrefetch: true,
         }),
       ]);
     },

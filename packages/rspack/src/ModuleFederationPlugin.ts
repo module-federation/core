@@ -10,6 +10,7 @@ import {
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager, utils } from '@module-federation/managers';
 import { DtsPlugin } from '@module-federation/dts-plugin';
+import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
 type SplitChunks = Compiler['options']['optimization']['splitChunks'];
@@ -70,6 +71,8 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
     // @ts-ignore
     new DtsPlugin(options).apply(compiler);
+    // @ts-ignore
+    new PrefetchPlugin(options).apply(compiler);
 
     if (!disableManifest && options.exposes) {
       try {

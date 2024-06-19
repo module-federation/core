@@ -54,6 +54,18 @@ export class PrefetchPlugin implements WebpackPluginInstance {
     if (!compiler.options.context) {
       throw new Error('compiler.options.context is not defined');
     }
+
+    const { runtimePlugins } = this.options;
+    if (!Array.isArray(runtimePlugins)) {
+      this.options.runtimePlugins = [];
+    }
+    this.options.runtimePlugins!.push(
+      path.resolve(__dirname, '../esm/plugin.js'),
+    );
+    if (!this.options.dataPrefetch) {
+      return;
+    }
+
     const prefetchs: Array<string> = [];
     const exposeAlias = Object.keys(exposes);
     exposeAlias.forEach((alias) => {
@@ -78,14 +90,6 @@ export class PrefetchPlugin implements WebpackPluginInstance {
         }
       }
     });
-
-    const { runtimePlugins } = this.options;
-    if (!Array.isArray(runtimePlugins)) {
-      this.options.runtimePlugins = [];
-    }
-    this.options.runtimePlugins!.push(
-      path.resolve(__dirname, '../esm/plugin.js'),
-    );
 
     if (!this._reWriteExports) {
       return;
