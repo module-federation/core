@@ -1,5 +1,19 @@
 # @module-federation/dts-plugin
 
+## 0.1.21
+
+### Patch Changes
+
+- a50c459: fix: use ipv4 first while load local remote
+- 88900ad: fix: support decode encode remote name
+- 4cddb8a: fix: no delete exist types if fetch new types failed
+- 6ee10aa: fix: replace sourceEntry with index if the value is '.'
+- 1e93c5e: fix: use userOptions.typesFolder first
+- Updated dependencies [88900ad]
+  - @module-federation/sdk@0.1.21
+  - @module-federation/managers@0.1.21
+  - @module-federation/third-party-dts-extractor@0.1.21
+
 ## 0.1.20
 
 ### Patch Changes
