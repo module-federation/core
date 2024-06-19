@@ -82,7 +82,7 @@ module.exports = composePlugins(
     // e.g. `config.plugins.push(new MyPlugin())`
     config.output = {
       ...config.output,
-      publicPath: 'http://localhost:3006/',
+      publicPath: 'http://127.0.0.1:3006/',
       scriptType: 'text/javascript',
     };
     config.optimization = {

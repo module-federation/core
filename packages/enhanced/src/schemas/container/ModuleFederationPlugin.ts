@@ -669,6 +669,10 @@ export default {
           description: 'Disable hot types reload.',
           type: 'boolean',
         },
+        disableDynamicRemoteTypeHints: {
+          description: 'Disable dynamic remote types hints.',
+          type: 'boolean',
+        },
       },
     },
   },

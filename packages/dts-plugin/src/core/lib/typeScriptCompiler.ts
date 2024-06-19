@@ -89,7 +89,10 @@ const createHost = (
     );
 
     for (const sourceFile of sourceFiles || []) {
-      const sourceEntry = mapExposeToEntry[normalize(sourceFile.fileName)];
+      let sourceEntry = mapExposeToEntry[normalize(sourceFile.fileName)];
+      if (sourceEntry === '.') {
+        sourceEntry = 'index';
+      }
       if (sourceEntry) {
         const mfeTypeEntry = join(
           mfTypePath,

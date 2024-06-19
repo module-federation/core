@@ -9,6 +9,7 @@ function generateConfigurations(
     return {
       entry,
       clean: true,
+      tsconfig: join(__dirname, 'tsconfig.json'),
       dts: true,
       legacyOutput: true,
       outDir: join('packages', 'dts-plugin', 'dist'),
@@ -23,18 +24,35 @@ export const tsup: Options[] = generateConfigurations([
     {
       index: join(__dirname, 'src', 'index.ts'),
       core: join(__dirname, 'src', 'core', 'index.ts'),
-      forkDevWorker: join(__dirname, 'src', 'dev-worker', 'forkDevWorker.ts'),
-      startBroker: join(__dirname, 'src', 'server', 'broker', 'startBroker.ts'),
-      forkGenerateDts: join(
+      'fork-dev-worker': join(
+        __dirname,
+        'src',
+        'dev-worker',
+        'forkDevWorker.ts',
+      ),
+      'start-broker': join(
+        __dirname,
+        'src',
+        'server',
+        'broker',
+        'startBroker.ts',
+      ),
+      'fork-generate-dts': join(
         __dirname,
         'src',
         'core',
         'lib',
         'forkGenerateDts.ts',
       ),
+      'dynamic-remote-type-hints-plugin': join(
+        __dirname,
+        'src',
+        'runtime-plugins',
+        'dynamic-remote-type-hints-plugin.ts',
+      ),
     },
     {
-      format: ['cjs'],
+      format: ['cjs', 'esm'],
     },
   ],
   [
