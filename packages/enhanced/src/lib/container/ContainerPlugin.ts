@@ -160,7 +160,10 @@ class ContainerPlugin {
     if (!useModuleFederationPlugin) {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
-    const federationRuntimePluginInstance = new FederationRuntimePlugin();
+    //@ts-ignore
+    const federationRuntimePluginInstance = new FederationRuntimePlugin({
+      lazy: true,
+    });
     federationRuntimePluginInstance.apply(compiler);
 
     const { name, exposes, shareScope, filename, library, runtime } =

@@ -1,6 +1,7 @@
 const copy = require('rollup-plugin-copy');
 
 module.exports = (rollupConfig, projectOptions) => {
+  rollupConfig.output.dynamicImportInCjs = true;
   rollupConfig.plugins.push(
     copy({
       targets: [

@@ -38,11 +38,13 @@ const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
+  externalEntryFilePath?: string;
   bundlerRuntimePath: string;
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
+    this.externalEntryFilePath = '';
     this.bundlerRuntimePath = BundlerRuntimePath;
   }
 
@@ -70,7 +72,10 @@ class FederationRuntimePlugin {
     }
 
     return Template.asString([
-      `import federation from '${normalizedBundlerRuntimePath}';`,
+      //@ts-ignore
+      !this.options?.lazy
+        ? `import federation from '${normalizedBundlerRuntimePath}'; globalThis.runtime = federation;`
+        : 'const federation = globalThis.runtime',
       runtimePluginTemplates,
       `var prevFederation = ${federationGlobal};`,
       `${federationGlobal} = {}`,
@@ -127,6 +132,19 @@ class FederationRuntimePlugin {
     if (this.entryFilePath) {
       return this.entryFilePath;
     }
+    //@ts-ignore
+    if (this.options.lazy && this.externalEntryFilePath) {
+      return this.externalEntryFilePath;
+      //@ts-ignore
+    }
+    if (this.options.lazy) {
+      this.externalEntryFilePath = FederationRuntimePlugin.getFilePath(
+        this.options.name!,
+        this.options.runtimePlugins!,
+        this.bundlerRuntimePath,
+      );
+      return this.externalEntryFilePath;
+    }
 
     if (!this.options) {
       return '';
@@ -137,6 +155,7 @@ class FederationRuntimePlugin {
       this.options.runtimePlugins!,
       this.bundlerRuntimePath,
     );
+
     return this.entryFilePath;
   }
 

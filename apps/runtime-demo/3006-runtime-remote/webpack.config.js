@@ -22,6 +22,9 @@ module.exports = composePlugins(
     config.watchOptions = {
       ignored: ['**/dist/**'],
     };
+
+    config.externals['@module-federation/webpack-bundler-runtime'] =
+      'https://www.unpkg.com/@module-federation/webpack-bundler-runtime@0.1.20/dist/index.esm.js';
     config.devServer.host = '127.0.0.1';
 
     config.plugins.push(
