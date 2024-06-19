@@ -1,12 +1,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import * as ModuleFederationSDK from '@module-federation/sdk';
-import * as VmokSDK from '@vmok/sdk';
 import { usePrefetch } from '../src/react';
-import { VmokPrefetch } from '../src/prefetch';
-
-jest.mock('@vmok/sdk', () => ({
-  getPrefetchId: jest.fn((id) => id),
-}));
+import { MFDataPrefetch } from '../src/prefetch';
 
 const mockLoadScript = jest.spyOn(ModuleFederationSDK, 'loadScript');
 mockLoadScript.mockImplementation(() => Promise.resolve());
@@ -33,11 +28,11 @@ describe('usePrefetch', () => {
     }),
   );
 
-  let prefetch: VmokPrefetch; // An instance of `VmokPrefetch` class that is being tested
+  let prefetch: MFDataPrefetch;
 
   const options = {
-    // Options that will be passed to the `VmokPrefetch` constructor
-    name: '@vmok/test',
+    // Options that will be passed to the `MFDataPrefetch` constructor
+    name: '@mf/test',
     remoteSnapshot: {
       buildVersion: '1.0.0',
       globalName: 'TestGlobalName',
@@ -57,7 +52,7 @@ describe('usePrefetch', () => {
       __PREFETCH_EXPORTS__: {},
     };
     // @ts-ignore
-    prefetch = new VmokPrefetch(options); // Create a new instance of `VmokPrefetch` class before each test
+    prefetch = new MFDataPrefetch(options); // Create a new instance of `MFDataPrefetch` class before each test
 
     const exposeExport = {
       [functionId]: executePrefetch,

@@ -7,10 +7,6 @@ jest.mock('@module-federation/sdk', () => ({
   loadScript: jest.fn(() => Promise.resolve()),
 }));
 
-jest.mock('@vmok/sdk', () => ({
-  getPrefetchId: jest.fn((id) => id),
-}));
-
 describe('MF Data Prefetch', () => {
   let prefetch: MFDataPrefetch;
 
