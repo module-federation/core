@@ -21,7 +21,7 @@ type IProps =
   | Id;
 
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
-  const { name, expose } = instance.remoteHandler.idToRemoteMap[id];
+  const { name, expose } = instance.remoteHandler.idToRemoteMap[id] || {};
   if (!name) {
     return;
   }

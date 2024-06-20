@@ -148,6 +148,22 @@ export class RemoteHandler {
     }, globalOptions.remotes);
   }
 
+  setIdToRemoteMap(id: string, remoteMatchInfo: LoadRemoteMatch) {
+    const { remote, expose } = remoteMatchInfo;
+    const { name, alias } = remote;
+    this.idToRemoteMap[id] = { name: remote.name, expose };
+    if (alias && id.startsWith(name)) {
+      const idWithAlias = id.replace(name, alias);
+      this.idToRemoteMap[idWithAlias] = { name: remote.name, expose };
+      return;
+    }
+
+    if (alias && id.startsWith(alias)) {
+      const idWithName = id.replace(alias, name);
+      this.idToRemoteMap[idWithName] = { name: remote.name, expose };
+    }
+  }
+
   // eslint-disable-next-line max-lines-per-function
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
@@ -183,7 +199,7 @@ export class RemoteHandler {
         origin: host,
       });
 
-      this.idToRemoteMap[id] = { name: remote.name, expose };
+      this.setIdToRemoteMap(id, remoteMatchInfo);
       if (typeof moduleWrapper === 'function') {
         return moduleWrapper as T;
       }
