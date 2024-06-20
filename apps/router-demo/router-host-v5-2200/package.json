@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "FEDERATION_DEBUG=true rsbuild dev --open",
+    "dev": "FEDERATION_DEBUG=true rsbuild dev",
     "build": "rsbuild build",
     "preview": "rsbuild preview"
   },
