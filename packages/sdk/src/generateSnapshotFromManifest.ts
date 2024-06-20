@@ -190,7 +190,7 @@ export function generateSnapshotFromManifest(
       ssrRemoteEntry.name,
     );
     remoteSnapshot.ssrRemoteEntry = fullSSRRemoteEntry;
-    remoteSnapshot.ssrRemoteEntryType = 'cjs:webpack';
+    remoteSnapshot.ssrRemoteEntryType = 'commonjs-module';
   }
 
   return remoteSnapshot;

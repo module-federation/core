@@ -19,7 +19,6 @@ export type RemoteEntryType =
   | 'umd2'
   | 'jsonp'
   | 'system'
-  | 'cjs:webpack'
   | string;
 
 export interface ResourceInfo {
