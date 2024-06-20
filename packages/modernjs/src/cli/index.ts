@@ -112,6 +112,13 @@ export const moduleFederationPlugin = (
                   new AsyncBoundaryPlugin(asyncBoundaryPluginOptions),
                 );
               }
+              config.ignoreWarnings = config.ignoreWarnings || [];
+              config.ignoreWarnings.push((warning) => {
+                if (warning.message.includes('external script')) {
+                  return true;
+                }
+                return false;
+              });
             },
             devServer: {
               headers: {

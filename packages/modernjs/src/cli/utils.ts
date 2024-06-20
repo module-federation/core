@@ -33,6 +33,9 @@ export const getMFConfig = async (
     .default as unknown as moduleFederationPlugin.ModuleFederationPluginOptions;
 
   await replaceRemoteUrl(mfConfig);
+  if (mfConfig.remoteType === undefined) {
+    mfConfig.remoteType = 'script';
+  }
   return mfConfig;
 };
 

@@ -83,12 +83,12 @@ jobs:
         run: |
           pnpm run app:modern:dev &
           sleep 1 &&
-          npx wait-on tcp:3005 &&
-          npx wait-on tcp:3006 &&
-          npx wait-on tcp:3007 &&
-          npx wait-on tcp:3008 &&
-          npx wait-on tcp:3009 &&
-          npx wait-on tcp:3010 &&
-          npx wait-on tcp:3011 &&
+          npx wait-on http://127.0.0.1:3005/ &&
+          npx wait-on http://127.0.0.1:3006/ &&
+          npx wait-on http://127.0.0.1:3007/ &&
+          npx wait-on http://127.0.0.1:3008/ &&
+          npx wait-on http://127.0.0.1:3009/ &&
+          npx wait-on http://127.0.0.1:3010/ &&
+          npx wait-on http://127.0.0.1:3011/ &&
           npx nx run modernjs-ssr-host:e2e &&
           lsof -ti tcp:3005,3006,3007,3008,3009,3010,3011 | xargs kill
