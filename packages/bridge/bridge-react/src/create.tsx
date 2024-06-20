@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { UNSAFE_RouteContext, useLocation } from 'react-router-dom';
+import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
@@ -46,7 +46,7 @@ const RemoteApp = ({
   const renderDom = useRef(null);
   const providerInfoRef = useRef<any>(null);
   if (dispathPopstate) {
-    const location = useLocation();
+    const location = ReactRouterDOM.useLocation();
     const [pathname, setPathname] = useState(location.pathname);
 
     useEffect(() => {
@@ -125,15 +125,28 @@ export function createRemoteComponent<T, E extends keyof T>(
     } & RawComponentType,
   ) => {
     const exportName = info?.export || 'default';
-    const routerContextVal = useContext(UNSAFE_RouteContext);
     let basename = '/';
-    if (
-      routerContextVal &&
-      routerContextVal.matches &&
-      routerContextVal.matches[0] &&
-      routerContextVal.matches[0].pathnameBase
-    ) {
-      basename = routerContextVal.matches[0].pathnameBase;
+    let enableDispathPopstate = false;
+    let routerContextVal: any;
+    try {
+      ReactRouterDOM.useLocation();
+      enableDispathPopstate = true;
+    } catch {
+      enableDispathPopstate = false;
+    }
+
+    if (ReactRouterDOM.UNSAFE_RouteContext && enableDispathPopstate) {
+      routerContextVal = useContext(ReactRouterDOM.UNSAFE_RouteContext);
+      if (
+        routerContextVal &&
+        routerContextVal.matches &&
+        routerContextVal.matches[0] &&
+        routerContextVal.matches[0].pathnameBase
+      ) {
+        basename = routerContextVal.matches[0].pathnameBase;
+      }
+      enableDispathPopstate =
+        routerContextVal?.matches && routerContextVal?.matches.length > 0;
     }
 
     const LazyComponent = useMemo(() => {
@@ -162,10 +175,7 @@ export function createRemoteComponent<T, E extends keyof T>(
             default: () => (
               <RemoteApp
                 name={moduleName}
-                dispathPopstate={
-                  routerContextVal?.matches &&
-                  routerContextVal?.matches.length > 0
-                }
+                dispathPopstate={enableDispathPopstate}
                 {...info}
                 {...props}
                 providerInfo={exportFn}
