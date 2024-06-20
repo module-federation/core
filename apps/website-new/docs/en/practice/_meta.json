@@ -5,7 +5,7 @@
     "label": "Overview"
   },
   {
-    "type": "file",
+    "type": "dir",
     "name": "bridge",
     "label": "Bridge"
   },
