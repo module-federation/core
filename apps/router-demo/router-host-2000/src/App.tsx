@@ -91,18 +91,16 @@ function Wraper3() {
 const App = () => {
   const [initialEntrie, setInitialEntrie] = useState('/');
   const [abc, setAbc] = useState(5555);
-  return <Remote2App fallback={FallbackComp} />;
-  // return (
-  //   <BrowserRouter basename="/">
-  //     <Navigation setInitialEntrie={setInitialEntrie} setAbc={setAbc} />
-  //       <Route path="/" >
-  //         <Home />
-  //       </Route>
-  //       <Route
-  //         path="/remote2"
-  //       >
-  //         <Remote2App fallback={FallbackComp} />
-  //       </Route>
-  //   </BrowserRouter>);
+  return (
+    <BrowserRouter basename="/">
+      <Navigation setInitialEntrie={setInitialEntrie} setAbc={setAbc} />
+      <Route path="/">
+        <Home />
+      </Route>
+      <Route path="/remote2">
+        <Remote2App fallback={FallbackComp} />
+      </Route>
+    </BrowserRouter>
+  );
 };
 export default App;
