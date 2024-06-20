@@ -1,5 +1,4 @@
 import { Space, Table, Tag } from 'antd';
-import { useHistory } from 'react-router-dom';
 import type { TableProps } from 'antd';
 import type React from 'react';
 
@@ -85,7 +84,6 @@ const data: DataType[] = [
 ];
 
 const Home: React.FC = () => {
-  console.log(useHistory());
   return (
     <>
       <h2>Router host Home page</h2>

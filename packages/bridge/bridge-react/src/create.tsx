@@ -1,7 +1,14 @@
-import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
-import { LoggerInstance } from './utils';
+import { LoggerInstance, pathJoin } from './utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 
 declare const __APP_VERSION__: string;
@@ -128,44 +135,46 @@ export function createRemoteComponent<T, E extends keyof T>(
       enableDispathPopstate = false;
     }
 
-    // if (props.basename) {
-    //   basename = props.basename
-    // } else if (enableDispathPopstate) {
-    //   const routerV5Api = 'useRoute' + 'Match';
-    //   const routerV6Api = 'useMatches';
-    //   const routerV5History = 'use' + 'History';
-    //   const useHref = 'useHref';
+    if (props.basename) {
+      basename = props.basename;
+    } else if (enableDispathPopstate) {
+      const ReactRouterDOMAny: any = ReactRouterDOM;
+      // Avoid building tools checking references
+      const useRouteMatch = ReactRouterDOMAny['use' + 'RouteMatch']; //v5
+      const useHistory = ReactRouterDOMAny['use' + 'History']; //v5
+      const useHref = ReactRouterDOMAny['use' + 'Href'];
+      const UNSAFE_RouteContext = ReactRouterDOMAny['UNSAFE_' + 'RouteContext'];
 
-    //   const match = (ReactRouterDOM as any)[routerV5Api]?.();
-    //   const matchs = (ReactRouterDOM as any)[routerV6Api]?.();
-    //   const location = ReactRouterDOM.useLocation();
-
-    //   if ((ReactRouterDOM as any)[routerV5History] /* react-router@5 */) {
-    //     // there is no dynamic switching of the router version in the project
-    //     // so hooks can be used in conditional judgment
-    //     // eslint-disable-next-line react-hooks/rules-of-hooks
-    //     const history = (ReactRouterDOM as any)[routerV5History]?.();
-    //     // To be compatible to history@4.10.1 and @5.3.0 we cannot write like this `history.createHref(pathname)`
-    //     basename = history?.createHref?.({ pathname: '/' });
-    //   } else if (useHref /* react-router@6 */) {
-    //     // eslint-disable-next-line react-hooks/rules-of-hooks
-    //     basename = useHref?.('/');
-    //   }
-    // }
-
-    // if (ReactRouterDOM.UNSAFE_RouteContext && enableDispathPopstate) {
-    //   routerContextVal = eval('useContext(ReactRouterDOM.UNSAFE_RouteContext)');
-    //   if (
-    //     routerContextVal &&
-    //     routerContextVal.matches &&
-    //     routerContextVal.matches[0] &&
-    //     routerContextVal.matches[0].pathnameBase
-    //   ) {
-    //     basename = routerContextVal.matches[0].pathnameBase;
-    //   }
-    //   enableDispathPopstate =
-    //     routerContextVal?.matches && routerContextVal?.matches.length > 0;
-    // }
+      if (UNSAFE_RouteContext /* react-router@6 */) {
+        if (useHref) {
+          basename = useHref?.('/');
+        }
+        routerContextVal = useContext(UNSAFE_RouteContext);
+        if (
+          routerContextVal &&
+          routerContextVal.matches &&
+          routerContextVal.matches[0] &&
+          routerContextVal.matches[0].pathnameBase
+        ) {
+          basename = pathJoin(
+            basename,
+            routerContextVal.matches[0].pathnameBase || '/',
+          );
+        }
+      } /* react-router@5 */ else {
+        const match = useRouteMatch?.(); // v5
+        if (useHistory /* react-router@5 */) {
+          // there is no dynamic switching of the router version in the project
+          // so hooks can be used in conditional judgment
+          const history = useHistory?.();
+          // To be compatible to history@4.10.1 and @5.3.0 we cannot write like this `history.createHref(pathname)`
+          basename = history?.createHref?.({ pathname: '/' });
+        }
+        if (match /* react-router@5 */) {
+          basename = pathJoin(basename, match?.path || '/');
+        }
+      }
+    }
 
     const LazyComponent = useMemo(() => {
       //@ts-ignore

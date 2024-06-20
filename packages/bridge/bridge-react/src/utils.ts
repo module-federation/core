@@ -21,3 +21,21 @@ export function atLeastReact18(React: typeReact) {
     return false;
   }
 }
+
+export function pathJoin(...args: string[]) {
+  const res = args.reduce((res, path: string) => {
+    let nPath = path;
+    if (!nPath || typeof nPath !== 'string') {
+      return res;
+    }
+    if (nPath[0] !== '/') {
+      nPath = `/${nPath}`;
+    }
+    const lastIndex = nPath.length - 1;
+    if (nPath[lastIndex] === '/') {
+      nPath = nPath.substring(0, lastIndex);
+    }
+    return res + nPath;
+  }, '');
+  return res || '/';
+}
