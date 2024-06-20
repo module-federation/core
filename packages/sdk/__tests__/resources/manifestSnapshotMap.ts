@@ -15,7 +15,7 @@ const manifest: { [key: string]: Stats } = {
       ssrRemoteEntry: {
         name: 'federation-remote-entry.496985d3.js',
         path: 'server',
-        type: 'cjs',
+        type: 'commonjs-module',
       },
       remoteEntry: {
         name: 'federation-remote-entry.536985d3.js',
@@ -1061,7 +1061,7 @@ const snapshot: { [key: string]: ModuleInfo } = {
     ssrRemoteEntry: 'server/federation-remote-entry.496985d3.js',
     remoteEntry: 'federation-remote-entry.536985d3.js',
     remoteEntryType: 'global',
-    ssrRemoteEntryType: 'cjs',
+    ssrRemoteEntryType: 'commonjs-module',
     remoteTypes: 'index.d.ts',
     remoteTypesAPI: '@mf-types.d.ts',
     remoteTypesZip: '@mf-types.zip',
