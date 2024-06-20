@@ -22,7 +22,6 @@ describe('getTargetEnvConfig', async () => {
     const targetEnvConfig = getTargetEnvConfig(mfConfig, true);
 
     expect(targetEnvConfig).toStrictEqual({
-      async: true,
       dev: false,
       dts: false,
       filename: 'remoteEntry.js',
@@ -55,7 +54,6 @@ describe('getTargetEnvConfig', async () => {
     const targetEnvConfig = getTargetEnvConfig(mfConfig, false);
 
     expect(targetEnvConfig).toStrictEqual({
-      async: true,
       filename: 'remoteEntry.js',
       name: 'host',
       remotes: {

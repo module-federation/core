@@ -99,10 +99,7 @@ export const moduleFederationPlugin = (
             webpack(config, { isServer }) {
               modifyBundlerConfig(config, isServer);
               const enableAsyncEntry = modernjsConfig.source?.enableAsyncEntry;
-              if (
-                mfConfig.async ||
-                (!enableAsyncEntry && mfConfig.async !== false)
-              ) {
+              if (!enableAsyncEntry && mfConfig.async !== false) {
                 const asyncBoundaryPluginOptions =
                   typeof mfConfig.async === 'object'
                     ? mfConfig.async

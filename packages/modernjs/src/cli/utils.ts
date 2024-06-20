@@ -120,10 +120,6 @@ export const patchMFConfig = (
     );
   }
 
-  if (typeof mfConfig.async === 'undefined') {
-    mfConfig.async = true;
-  }
-
   if (!isServer) {
     return {
       ...mfConfig,
