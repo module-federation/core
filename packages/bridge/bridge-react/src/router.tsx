@@ -47,24 +47,25 @@ function WraperRouterProvider(
     WraperRouterProviderProps: props,
     router,
   });
-  if (!routerContextProps) return <ReactRouterDom.RouterProvider {...props} />;
+  const RouterProvider = (ReactRouterDom as any)['Router' + 'Provider'];
+  const createMemoryRouter = (ReactRouterDom as any)['create' + 'MemoryRouter'];
+  const createBrowserRouter = (ReactRouterDom as any)[
+    'create' + 'BrowserRouter'
+  ];
+  if (!routerContextProps) return <RouterProvider {...props} />;
+
   if (routerContextProps.memoryRoute) {
-    const MemeoryRouterInstance = ReactRouterDom.createMemoryRouter(routers, {
+    const MemeoryRouterInstance = createMemoryRouter(routers, {
       initialEntries: [routerContextProps?.memoryRoute.entryPath],
     });
-    return <ReactRouterDom.RouterProvider router={MemeoryRouterInstance} />;
+    return <RouterProvider router={MemeoryRouterInstance} />;
   } else {
-    const BrowserRouterInstance = ReactRouterDom.createBrowserRouter(routers, {
+    const BrowserRouterInstance = createBrowserRouter(routers, {
       basename: routerContextProps.basename,
       future: router.future,
       window: router.window,
     });
-    return (
-      <ReactRouterDom.RouterProvider
-        {...propsRes}
-        router={BrowserRouterInstance}
-      />
-    );
+    return <RouterProvider {...propsRes} router={BrowserRouterInstance} />;
   }
 }
 

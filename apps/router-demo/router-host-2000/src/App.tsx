@@ -88,28 +88,4 @@ const App = () => {
   );
 };
 
-// const App = () => {
-//   const [initialEntrie, setInitialEntrie] = useState('/');
-//   const [abc, setAbc] = useState(5555);
-//   return (
-//     <BrowserRouter basename="/test">
-//       <Navigation setInitialEntrie={setInitialEntrie} setAbc={setAbc} />
-//       <Route exact path="/">
-//         <Home />
-//       </Route>
-//       <Route path="/remote1">
-//         <Remote1App fallback={FallbackComp} />
-//       </Route>
-//       <Route path="/remote2">
-//         <Remote2App fallback={FallbackComp} />
-//       </Route>
-//       <Route path="/remote3">
-//         <Remote3App fallback={FallbackComp} />
-//       </Route>
-//       <Route path="/memory-router">
-//         <Wraper3 />
-//       </Route>
-//     </BrowserRouter>
-//   );
-// };
 export default App;
