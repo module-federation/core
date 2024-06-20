@@ -69,7 +69,7 @@ describe('/', () => {
         'have.attr',
         'src',
         'https://module-federation.io/module-federation-logo.svg',
-      ); // 替换xxxxxx为你期望的src的值
+      );
     });
 
     it('should inject link tag if use collectAssets', () => {
@@ -147,7 +147,7 @@ describe('/', () => {
         'have.attr',
         'src',
         'https://module-federation.io/module-federation-logo.svg',
-      ); // 替换xxxxxx为你期望的src的值
+      );
     });
 
     it('should inject link tag if use MFReactComponent', () => {
@@ -224,7 +224,7 @@ describe('/', () => {
         'have.attr',
         'src',
         'https://module-federation.io/module-federation-logo.svg',
-      ); // 替换xxxxxx为你期望的src的值
+      );
     });
 
     it('remote component should be interactive', () => {
@@ -279,7 +279,7 @@ describe('/', () => {
         'have.attr',
         'src',
         'https://module-federation.io/module-federation-logo.svg',
-      ); // 替换xxxxxx为你期望的src的值
+      );
     });
 
     it('dynamic remote component should be interactive', () => {

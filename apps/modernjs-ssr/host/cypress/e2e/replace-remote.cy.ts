@@ -27,7 +27,7 @@ describe('/', () => {
         'have.attr',
         'src',
         'https://module-federation.io/module-federation-logo.svg',
-      ); // 替换xxxxxx为你期望的src的值
+      );
 
       const stub = cy.stub();
       cy.on('window:alert', stub);
@@ -60,7 +60,7 @@ describe('/', () => {
         'have.attr',
         'src',
         'https://module-federation.io/module-federation-logo.svg',
-      ); // 替换xxxxxx为你期望的src的值
+      );
 
       const stub = cy.stub();
       cy.on('window:alert', stub);
