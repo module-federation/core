@@ -182,13 +182,20 @@ const generateShareFilename = /* @__PURE__ */ (
 
 const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
   if ('getPublicPath' in module) {
-    const publicPath = new Function('return ' + module.getPublicPath)();
-    return `${publicPath(module)}${sourceUrl}`;
+    let publicPath;
+
+    if (!module.getPublicPath.startsWith('function')) {
+      publicPath = new Function(module.getPublicPath)();
+    } else {
+      publicPath = new Function('return ' + module.getPublicPath)()(module);
+    }
+
+    return `${publicPath}${sourceUrl}`;
   } else if ('publicPath' in module) {
     return `${module.publicPath}${sourceUrl}`;
   } else {
     console.warn(
-      'Can not get resource url, if in debug mode, please ignore',
+      'Cannot get resource URL. If in debug mode, please ignore.',
       module,
       sourceUrl,
     );

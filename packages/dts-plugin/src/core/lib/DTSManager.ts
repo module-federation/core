@@ -201,12 +201,19 @@ class DTSManager {
         return u;
       };
 
-      let publicPath =
-        'publicPath' in manifestJson.metaData
-          ? manifestJson.metaData.publicPath
-          : new Function(manifestJson.metaData.getPublicPath)()(
-              manifestJson.metaData,
-            );
+      let publicPath;
+
+      if ('publicPath' in manifestJson.metaData) {
+        publicPath = manifestJson.metaData.publicPath;
+      } else {
+        const getPublicPath = new Function(manifestJson.metaData.getPublicPath);
+
+        if (manifestJson.metaData.getPublicPath.startsWith('function')) {
+          publicPath = getPublicPath()(manifestJson.metaData);
+        } else {
+          publicPath = getPublicPath();
+        }
+      }
 
       if (publicPath === 'auto') {
         publicPath = inferAutoPublicPath(remoteInfo.url);

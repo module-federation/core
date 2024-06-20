@@ -12,12 +12,14 @@ export class RemoteEntryPlugin implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler): void {
+    let code;
     if (!this._getPublicPath.startsWith('function')) {
-      throw new Error(
-        'getPublicPath: requires a string that starts with "function(path){return path}"',
-      );
+      code = `${
+        compiler.webpack.RuntimeGlobals.publicPath
+      } = new Function(${JSON.stringify(this._getPublicPath)})()`;
+    } else {
+      code = `(${this._getPublicPath})(${compiler.webpack.RuntimeGlobals.publicPath})`;
     }
-    const code = ` (${this._getPublicPath})(${compiler.webpack.RuntimeGlobals.publicPath})`;
     const base64Code = btoa(code);
     const dataUrl = `data:text/javascript;base64,${base64Code}`;
 
