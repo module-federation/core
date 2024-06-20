@@ -42,22 +42,26 @@ export class DtsWorker {
   }
 
   get controlledPromise(): ReturnType<DTSManager['generateTypes']> {
+    const ensureChildProcessExit = () => {
+      try {
+        const pid = this.rpcWorker.process?.pid;
+        process.kill(pid, 0);
+      } catch (error) {
+        if (isDebugMode()) {
+          console.error(error);
+        }
+      }
+    };
     return Promise.resolve(this._res)
       .then(() => {
-        const pid = this.rpcWorker.process?.pid;
         this.exit();
-        try {
-          process.kill(pid, 0);
-        } catch (error) {
-          if (isDebugMode()) {
-            console.error(error);
-          }
-        }
+        ensureChildProcessExit();
       })
       .catch((err) => {
         if (isDebugMode()) {
           console.error(err);
         }
+        ensureChildProcessExit();
       });
   }
 
