@@ -31,6 +31,7 @@ interface RemoteModule {
 interface RemoteAppParams {
   name: string;
   providerInfo: NonNullable<RemoteModule['provider']>;
+  dispathPopstate: boolean;
 }
 
 const RemoteApp = ({
@@ -38,24 +39,27 @@ const RemoteApp = ({
   memoryRoute,
   basename,
   providerInfo,
+  dispathPopstate,
   ...resProps
 }: RemoteAppParams & ProviderParams) => {
   const rootRef = useRef(null);
   const renderDom = useRef(null);
-  const location = useLocation();
-  const [pathname, setPathname] = useState(location.pathname);
   const providerInfoRef = useRef<any>(null);
+  if (dispathPopstate) {
+    const location = useLocation();
+    const [pathname, setPathname] = useState(location.pathname);
 
-  useEffect(() => {
-    if (pathname !== '' && pathname !== location.pathname) {
-      LoggerInstance.log(`createRemoteComponent dispatchPopstateEnv >>>`, {
-        name,
-        pathname: location.pathname,
-      });
-      dispatchPopstateEnv();
-    }
-    setPathname(location.pathname);
-  }, [location]);
+    useEffect(() => {
+      if (pathname !== '' && pathname !== location.pathname) {
+        LoggerInstance.log(`createRemoteComponent dispatchPopstateEnv >>>`, {
+          name,
+          pathname: location.pathname,
+        });
+        dispatchPopstateEnv();
+      }
+      setPathname(location.pathname);
+    }, [location]);
+  }
 
   useEffect(() => {
     const renderTimeout = setTimeout(() => {
@@ -124,6 +128,8 @@ export function createRemoteComponent<T, E extends keyof T>(
     const routerContextVal = useContext(UNSAFE_RouteContext);
     let basename = '/';
     if (
+      routerContextVal &&
+      routerContextVal.matches &&
       routerContextVal.matches[0] &&
       routerContextVal.matches[0].pathnameBase
     ) {
@@ -138,6 +144,7 @@ export function createRemoteComponent<T, E extends keyof T>(
           lazyComponent,
           exportName,
           props,
+          routerContextVal,
         });
         const m = (await lazyComponent()) as RemoteModule;
         // @ts-ignore
@@ -155,6 +162,10 @@ export function createRemoteComponent<T, E extends keyof T>(
             default: () => (
               <RemoteApp
                 name={moduleName}
+                dispathPopstate={
+                  routerContextVal?.matches &&
+                  routerContextVal?.matches.length > 0
+                }
                 {...info}
                 {...props}
                 providerInfo={exportFn}

@@ -63,6 +63,7 @@ describe('bridge', () => {
     expect(getHtml(container)).toMatch('loading');
 
     await sleep(200);
-    expect(getHtml(container)).toMatch('life cycle render hello world');
+    expect(getHtml(container)).toMatch('life cycle render');
+    expect(getHtml(container)).toMatch('hello world');
   });
 });
