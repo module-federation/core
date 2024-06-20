@@ -1,19 +1,19 @@
+import fs from 'fs';
 import path from 'path';
+import axios, { type AxiosRequestConfig } from 'axios';
 import http from 'http';
 import https from 'https';
-import axios, { type AxiosRequestConfig } from 'axios';
+import { moduleFederationPlugin } from '@module-federation/sdk';
+import ansiColors from 'ansi-colors';
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { DTSManager } from './DTSManager';
 import { retrieveTypesZipPath } from './archiveHandler';
-import fs from 'fs';
 import {
   retrieveMfAPITypesPath,
   retrieveMfTypesPath,
 } from './typeScriptCompiler';
-import { moduleFederationPlugin } from '@module-federation/sdk';
-import ansiColors from 'ansi-colors';
 import cloneDeepWith from 'lodash.clonedeepwith';
 import { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 

@@ -7,3 +7,6 @@ export * from './ExitSubscriber';
 export * from './ExitPublisher';
 export * from './NotifyWebClient';
 export * from './UpdatePublisher';
+export * from './FetchTypes';
+export * from './AddDynamicRemote';
+export { UpdateMode } from '../../../server/constant';

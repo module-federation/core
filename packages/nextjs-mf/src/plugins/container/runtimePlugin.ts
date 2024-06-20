@@ -177,6 +177,11 @@ export default function (): FederationRuntimePlugin {
       if (!host) {
         return args;
       }
+
+      if (!host.options.shared[pkgName]) {
+        return args;
+      }
+
       args.resolver = function () {
         shareScopeMap[scope][pkgName][version] =
           host.options.shared[pkgName][0]; // replace local share scope manually with desired module

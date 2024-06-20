@@ -70,6 +70,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    */
   apply(compiler: Compiler): void {
     const { _options: options } = this;
+    if (options.dts !== false) {
+      new DtsPlugin(options).apply(compiler);
+    }
     new FederationRuntimePlugin(options).apply(compiler);
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =
@@ -101,10 +104,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         console.warn(err);
         disableManifest = true;
       }
-    }
-
-    if (options.dts !== false) {
-      new DtsPlugin(options).apply(compiler);
     }
 
     if (

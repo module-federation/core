@@ -204,8 +204,9 @@ export class FederationHost {
   initShareScopeMap(
     scopeName: string,
     shareScope: ShareScopeMap[string],
+    extraOptions: { hostShareScopeMap?: ShareScopeMap } = {},
   ): void {
-    this.sharedHandler.initShareScopeMap(scopeName, shareScope);
+    this.sharedHandler.initShareScopeMap(scopeName, shareScope, extraOptions);
   }
 
   private formatOptions(

@@ -24,7 +24,6 @@ export const tsup: Options[] = generateConfigurations([
     {
       index: join(__dirname, 'src', 'index.ts'),
       core: join(__dirname, 'src', 'core', 'index.ts'),
-      server: join(__dirname, 'src', 'server', 'index.ts'),
       'fork-dev-worker': join(
         __dirname,
         'src',
@@ -45,9 +44,15 @@ export const tsup: Options[] = generateConfigurations([
         'lib',
         'forkGenerateDts.ts',
       ),
+      'dynamic-remote-type-hints-plugin': join(
+        __dirname,
+        'src',
+        'runtime-plugins',
+        'dynamic-remote-type-hints-plugin.ts',
+      ),
     },
     {
-      format: ['cjs'],
+      format: ['cjs', 'esm'],
     },
   ],
   [

@@ -25,6 +25,8 @@ import {
   AddWebClientActionPayload,
   AddPublisherActionPayload,
   UpdateKind,
+  FetchTypesPayload,
+  AddDynamicRemotePayload,
 } from '../message/Action';
 import {
   DEFAULT_WEB_SOCKET_PORT,
@@ -177,6 +179,14 @@ export class Broker {
         client,
       );
     }
+
+    if (kind === ActionKind.FETCH_TYPES) {
+      await this._fetchTypes(payload as FetchTypesPayload, client);
+    }
+
+    if (kind === ActionKind.ADD_DYNAMIC_REMOTE) {
+      this._addDynamicRemote(payload as AddDynamicRemotePayload);
+    }
   }
   private async _addPublisher(
     context: AddPublisherActionPayload,
@@ -194,7 +204,12 @@ export class Broker {
     }
 
     try {
-      const publisher = new Publisher({ name, ip, remoteTypeTarPath });
+      const publisher = new Publisher({
+        name,
+        ip,
+        remoteTypeTarPath,
+        ws: client,
+      });
       this._publisherMap.set(identifier, publisher);
       fileLog(
         `[${ActionKind.ADD_PUBLISHER}] ${identifier} Adding Publisher Succeed`,
@@ -263,12 +278,75 @@ export class Broker {
           updateKind,
           updateSourcePaths: updateSourcePaths || [],
         });
+
+        // update dynamic remote as well
+        this._publisherMap.forEach((p) => {
+          if (p.name === publisher.name) {
+            return;
+          }
+          const dynamicRemoteInfo = p.dynamicRemoteMap.get(identifier);
+          if (dynamicRemoteInfo) {
+            fileLog(
+              // eslint-disable-next-line max-len
+              `dynamicRemoteInfo: ${JSON.stringify(
+                dynamicRemoteInfo,
+              )}, identifier:${identifier} publish: ${p.name}`,
+              'Broker',
+              'info',
+            );
+            p.fetchRemoteTypes({
+              remoteInfo: dynamicRemoteInfo,
+              once: false,
+            });
+          }
+        });
       }
     } catch (err) {
       const msg = error(err, ActionKind.UPDATE_PUBLISHER, 'Broker');
       client.send(msg);
       client.close();
     }
+  }
+
+  private async _fetchTypes(context: FetchTypesPayload, _client: WebSocket) {
+    const { name, ip, remoteInfo } = context ?? {};
+    const identifier = getIdentifier({ name, ip });
+    try {
+      const publisher = this._publisherMap.get(identifier);
+      fileLog(
+        `[${ActionKind.FETCH_TYPES}] ${identifier} fetch types`,
+        'Broker',
+        'info',
+      );
+      if (publisher) {
+        publisher.fetchRemoteTypes({
+          remoteInfo,
+          once: true,
+        });
+      }
+    } catch (err) {
+      fileLog(
+        `[${ActionKind.FETCH_TYPES}] ${identifier} fetch types fail , error info: ${err}`,
+        'Broker',
+        'error',
+      );
+    }
+  }
+
+  private _addDynamicRemote(context: AddDynamicRemotePayload) {
+    const { name, ip, remoteInfo, remoteIp } = context ?? {};
+    const identifier = getIdentifier({ name, ip });
+    const publisher = this._publisherMap.get(identifier);
+    const remoteId = getIdentifier({ name: remoteInfo.name, ip: remoteIp });
+    fileLog(
+      `[${ActionKind.ADD_DYNAMIC_REMOTE}] identifier:${identifier},publisher: ${publisher.name}, remoteId:${remoteId}`,
+      'Broker',
+      'error',
+    );
+    if (!publisher || publisher.dynamicRemoteMap.has(remoteId)) {
+      return;
+    }
+    publisher.dynamicRemoteMap.set(remoteId, remoteInfo);
   }
   //  app1 consumes provider1,provider2. Dependencies at this time: publishers: [provider1, provider2], subscriberName: app1
   // provider1 is app1's remote

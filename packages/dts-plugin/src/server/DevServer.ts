@@ -13,9 +13,10 @@ import {
   UpdatePublisherAction,
   UpdateKind,
 } from './message/Action';
-import { APIKind, UpdateSubscriberAPI } from './message/API';
+import { APIKind, FetchTypesAPI, UpdateSubscriberAPI } from './message/API';
 import { createBroker } from './broker/createBroker';
 import { MF_SERVER_IDENTIFIER } from './constant';
+import { RemoteInfo } from '../core/interfaces/HostOptions';
 
 export interface UpdateCallbackOptions {
   name: string;
@@ -23,6 +24,8 @@ export interface UpdateCallbackOptions {
   updateMode: UpdateMode;
   remoteTypeTarPath: string;
   updateSourcePaths?: string[];
+  remoteInfo?: RemoteInfo;
+  once?: boolean;
 }
 
 export interface UpdateSubscriberOptions {
@@ -31,6 +34,7 @@ export interface UpdateSubscriberOptions {
   updateKind: UpdateKind;
   updateMode: UpdateMode;
   updateSourcePaths: string[];
+  remoteInfo?: RemoteInfo;
 }
 
 export type UpdateCallback = (options: UpdateCallbackOptions) => Promise<void>;
@@ -108,7 +112,7 @@ export class ModuleFederationDevServer {
       this._publishWebSocket?.send(JSON.stringify(addPublisherAction));
       this._connectSubscribers();
     });
-    this._publishWebSocket.on('message', (message) => {
+    this._publishWebSocket.on('message', async (message) => {
       try {
         const parsedMessage: Message = JSON.parse(
           message.toString(),
@@ -121,6 +125,29 @@ export class ModuleFederationDevServer {
               'warn',
             );
             this._exit();
+          }
+        }
+        if (parsedMessage.type === 'API') {
+          if (parsedMessage.kind === APIKind.FETCH_TYPES) {
+            const {
+              payload: { remoteInfo },
+            } = parsedMessage as FetchTypesAPI;
+
+            fileLog(
+              `${
+                this._name
+              } Receive broker FETCH_TYPES, payload as follows: ${JSON.stringify(
+                remoteInfo,
+                null,
+                2,
+              )}.`,
+              MF_SERVER_IDENTIFIER,
+              'info',
+            );
+
+            await this.fetchDynamicRemoteTypes({
+              remoteInfo,
+            });
           }
         }
       } catch (err) {
@@ -309,7 +336,14 @@ export class ModuleFederationDevServer {
       updateSourcePaths,
       name,
       remoteTypeTarPath,
+      remoteInfo,
     } = options;
+    fileLog(
+      // eslint-disable-next-line max-len
+      `[_updateSubscriber] run, options: ${JSON.stringify(options, null, 2)}`,
+      MF_SERVER_IDENTIFIER,
+      'warn',
+    );
     if (
       updateMode === UpdateMode.PASSIVE &&
       updateSourcePaths.includes(this._name)
@@ -344,6 +378,7 @@ export class ModuleFederationDevServer {
       updateKind,
       updateSourcePaths,
       remoteTypeTarPath,
+      remoteInfo,
     });
     const newUpdateSourcePaths = updateSourcePaths.concat(this._name);
     const updatePublisher = new UpdatePublisherAction({
@@ -502,6 +537,39 @@ export class ModuleFederationDevServer {
       this._publishWebSocket.send(JSON.stringify(notifyWebClient));
       return;
     }
+
+    const updatePublisher = new UpdatePublisherAction({
+      name: this._name,
+      ip: this._ip,
+      updateMode,
+      updateKind,
+      updateSourcePaths: [this._name],
+      remoteTypeTarPath: this._remoteTypeTarPath,
+    });
+    this._publishWebSocket.send(JSON.stringify(updatePublisher));
+  }
+
+  async fetchDynamicRemoteTypes(options: {
+    remoteInfo: RemoteInfo;
+    once?: boolean;
+  }) {
+    const { remoteInfo, once } = options;
+    const updateMode = UpdateMode.PASSIVE;
+    const updateKind = UpdateKind.UPDATE_TYPE;
+    fileLog(
+      `fetchDynamicRemoteTypes: remoteInfo: ${JSON.stringify(remoteInfo)}`,
+      MF_SERVER_IDENTIFIER,
+      'info',
+    );
+    await this._updateCallback({
+      name: this._name,
+      updateMode,
+      updateKind,
+      updateSourcePaths: [],
+      remoteTypeTarPath: '',
+      remoteInfo,
+      once,
+    });
 
     const updatePublisher = new UpdatePublisherAction({
       name: this._name,

@@ -22,22 +22,10 @@ import {
 } from '../server';
 
 import { DevWorkerOptions } from './DevWorker';
-
-const DEFAULT_LOCAL_IPS = ['localhost', '127.0.0.1'];
+import { getIpFromEntry } from './utils';
 
 interface Options extends DevWorkerOptions {
   name: string;
-}
-
-function getIpFromEntry(entry: string): string | void {
-  let ip;
-  entry.replace(/https?:\/\/([0-9|.]+|localhost):/, (str, matched) => {
-    ip = matched;
-    return str;
-  });
-  if (ip) {
-    return DEFAULT_LOCAL_IPS.includes(ip) ? getIPV4() : ip;
-  }
 }
 
 let typesManager: DTSManager,
@@ -60,7 +48,7 @@ function getLocalRemoteNames(
       const name = encodeNameIdentifier
         ? decodeName(remoteInfo.name, encodeNameIdentifier)
         : remoteInfo.name;
-      const ip = getIpFromEntry(remoteInfo.url);
+      const ip = getIpFromEntry(remoteInfo.url, getIPV4());
       if (!ip) {
         return sum;
       }
@@ -79,10 +67,12 @@ async function updateCallback({
   updateMode,
   name,
   remoteTypeTarPath,
+  remoteInfo,
+  once,
 }: UpdateCallbackOptions): Promise<void> {
   const { disableHotTypesReload, disableLiveReload } = cacheOptions || {};
   fileLog(
-    `sync remote module ${name}, types to vmok ${cacheOptions?.name},typesManager.updateTypes run`,
+    `sync remote module ${name}, types to ${cacheOptions?.name},typesManager.updateTypes run`,
     'forkDevWorker',
     'info',
   );
@@ -98,6 +88,8 @@ async function updateCallback({
       updateMode,
       remoteName: name,
       remoteTarPath: remoteTypeTarPath,
+      remoteInfo,
+      once,
     });
   }
 }

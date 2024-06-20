@@ -5,7 +5,11 @@ import {
   moduleFederationPlugin,
   normalizeOptions,
 } from '@module-federation/sdk';
-import { WEB_CLIENT_OPTIONS_IDENTIFIER, WebClientOptions } from '../server';
+import {
+  WEB_CLIENT_OPTIONS_IDENTIFIER,
+  WebClientOptions,
+  getIPV4,
+} from '../server';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import path from 'path';
 import { isDev } from './utils';
@@ -95,14 +99,16 @@ export class DevPlugin implements WebpackPluginInstance {
     const {
       _options: { name, dev, dts },
     } = this;
-
+    new compiler.webpack.DefinePlugin({
+      FEDERATION_IPV4: JSON.stringify(getIPV4()),
+    }).apply(compiler);
     const normalizedDev =
       normalizeOptions<moduleFederationPlugin.PluginDevOptions>(
         true,
         {
           disableLiveReload: true,
           disableHotTypesReload: false,
-          injectWebClient: false,
+          disableDynamicRemoteTypeHints: false,
         },
         'mfOptions.dev',
       )(dev);
@@ -114,7 +120,7 @@ export class DevPlugin implements WebpackPluginInstance {
     if (
       normalizedDev.disableHotTypesReload &&
       normalizedDev.disableLiveReload &&
-      !normalizedDev.injectWebClient
+      normalizedDev.disableDynamicRemoteTypeHints
     ) {
       return;
     }
@@ -122,7 +128,16 @@ export class DevPlugin implements WebpackPluginInstance {
       throw new Error('name is required if you want to enable dev server!');
     }
 
-    if (normalizedDev.injectWebClient) {
+    if (!normalizedDev.disableDynamicRemoteTypeHints) {
+      if (!this._options.runtimePlugins) {
+        this._options.runtimePlugins = [];
+      }
+      this._options.runtimePlugins.push(
+        path.resolve(__dirname, 'dynamic-remote-type-hints-plugin.js'),
+      );
+    }
+
+    if (!normalizedDev.disableLiveReload) {
       const TEMP_DIR = path.join(
         `${process.cwd()}/node_modules`,
         `.federation`,
@@ -207,7 +222,7 @@ export class DevPlugin implements WebpackPluginInstance {
                 : normalizedDtsOptions.implementation,
             context: compiler.context,
             moduleFederationConfig: this._options,
-            typesFolder: '@mf-types',
+            typesFolder: normalizedConsumeTypes.typesFolder || '@mf-types',
             abortOnError: false,
             ...normalizedConsumeTypes,
           };

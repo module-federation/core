@@ -44,28 +44,28 @@ jobs:
         run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:type:pkg'
 
       - name: Run Affected Test
-        run: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg' --skip-cache
+        run: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
-      # - name: E2E Test for Next.js Dev
-      #   run: |
-      #     pnpm run app:next:dev &
-      #     sleep 1 &&
-      #     npx wait-on tcp:3001 &&
-      #     npx wait-on tcp:3002 &&
-      #     npx wait-on tcp:3000 &&
-      #     npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=2 &&
-      #     lsof -ti tcp:3000,3001,3002 | xargs kill
+      - name: E2E Test for Next.js Dev
+        run: |
+          pnpm run app:next:dev > /dev/null 2>&1 &
+          sleep 1 &&
+          npx wait-on tcp:3001 &&
+          npx wait-on tcp:3002 &&
+          npx wait-on tcp:3000 &&
+          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=3 &&
+          lsof -ti tcp:3000,3001,3002 | xargs kill
 
-      # - name: E2E Test for Next.js Prod
-      #   run: |
-      #     pnpm run --filter @module-federation/3002-checkout --filter @module-federation/3000-home --filter @module-federation/3001-shop build &&
-      #     pnpm run app:next:prod &
-      #     sleep 2 &&
-      #     npx wait-on tcp:3001 &&
-      #     npx wait-on tcp:3002 &&
-      #     npx wait-on tcp:3000 &&
-      #     npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 &&
-      #     lsof -ti tcp:3000,3001,3002 | xargs kill
+      - name: E2E Test for Next.js Prod
+        run: |
+          pnpm run --filter @module-federation/3002-checkout --filter @module-federation/3000-home --filter @module-federation/3001-shop build &&
+          pnpm run app:next:prod &
+          sleep 2 &&
+          npx wait-on tcp:3001 &&
+          npx wait-on tcp:3002 &&
+          npx wait-on tcp:3000 &&
+          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 &&
+          lsof -ti tcp:3000,3001,3002 | xargs kill
 
       - name: E2E Test for ModernJS
         run: npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && lsof -ti tcp:4001 | xargs kill

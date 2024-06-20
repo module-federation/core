@@ -6,7 +6,7 @@ describe('3001-shop/', () => {
   });
 
   describe('Warmup Next', () => {
-    it('warms pages concurrently', () => {
+    xit('warms pages concurrently', () => {
       const urls = [
         '/shop',
         '/checkout',

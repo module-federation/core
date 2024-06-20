@@ -1,5 +1,43 @@
 # @module-federation/dts-plugin
 
+## 0.1.21
+
+### Patch Changes
+
+- a50c459: fix: use ipv4 first while load local remote
+- 88900ad: fix: support decode encode remote name
+- 4cddb8a: fix: no delete exist types if fetch new types failed
+- 6ee10aa: fix: replace sourceEntry with index if the value is '.'
+- 1e93c5e: fix: use userOptions.typesFolder first
+- Updated dependencies [88900ad]
+  - @module-federation/sdk@0.1.21
+  - @module-federation/managers@0.1.21
+  - @module-federation/third-party-dts-extractor@0.1.21
+
+## 0.1.20
+
+### Patch Changes
+
+- 685c607: feat: support dynamic remote type hints
+- 34f9498: dts-plugin can now support remotes using relative path references: 'app@/mf-manifest.json'
+- Updated dependencies [685c607]
+- Updated dependencies [e8e0969]
+- Updated dependencies [349c381]
+  - @module-federation/third-party-dts-extractor@0.1.20
+  - @module-federation/sdk@0.1.20
+  - @module-federation/managers@0.1.20
+
+## 0.1.19
+
+### Patch Changes
+
+- Updated dependencies [031454d]
+- Updated dependencies [b0a31a7]
+- Updated dependencies [a2bfb9b]
+  - @module-federation/sdk@0.1.19
+  - @module-federation/managers@0.1.19
+  - @module-federation/third-party-dts-extractor@0.1.19
+
 ## 0.1.18
 
 ### Patch Changes

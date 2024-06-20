@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dts-plugin",
-  "version": "0.1.18",
+  "version": "0.1.21",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -22,9 +22,10 @@
       "import": "./dist/core.js",
       "require": "./dist/core.js"
     },
-    "./server": {
-      "import": "./dist/server.js",
-      "require": "./dist/server.js"
+    "./dynamic-remote-type-hints-plugin": {
+      "types": "./dist/dynamic-remote-type-hints-plugin.d.ts",
+      "import": "./dist/esm/dynamic-remote-type-hints-plugin.js",
+      "require": "./dist/dynamic-remote-type-hints-plugin.js"
     },
     "./*": "./*"
   },
@@ -36,8 +37,8 @@
       "core": [
         "./dist/core.d.ts"
       ],
-      "server": [
-        "./dist/server.d.ts"
+      "dynamic-remote-type-hints-plugin": [
+        "./dist/dynamic-remote-type-hints-plugin.d.ts"
       ]
     }
   },
@@ -56,12 +57,13 @@
     "koa": "2.11.0",
     "log4js": "6.9.1",
     "node-schedule": "2.1.1",
-    "ws": "8.17.0"
+    "ws": "8.17.1"
   },
   "devDependencies": {
     "@types/ws": "8.5.10",
     "@types/koa": "2.11.2",
-    "@types/node-schedule": "2.1.7"
+    "@types/node-schedule": "2.1.7",
+    "@module-federation/runtime": "workspace:*"
   },
   "peerDependencies": {
     "typescript": "^4.9.0 || ^5.0.0",
