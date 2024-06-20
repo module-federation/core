@@ -1,5 +1,20 @@
 # @module-federation/rspack
 
+## 0.1.21
+
+### Patch Changes
+
+- Updated dependencies [a50c459]
+- Updated dependencies [88900ad]
+- Updated dependencies [4cddb8a]
+- Updated dependencies [6ee10aa]
+- Updated dependencies [1e93c5e]
+  - @module-federation/dts-plugin@0.1.21
+  - @module-federation/sdk@0.1.21
+  - @module-federation/manifest@0.1.21
+  - @module-federation/runtime-tools@0.1.21
+  - @module-federation/managers@0.1.21
+
 ## 0.1.20
 
 ### Patch Changes
