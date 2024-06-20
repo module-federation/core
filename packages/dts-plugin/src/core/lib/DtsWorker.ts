@@ -5,6 +5,7 @@ import { type RpcWorker, createRpcWorker } from '../rpc/index';
 import type { RpcMethod } from '../rpc/types';
 import type { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 import type { DTSManager } from './DTSManager';
+import { isDebugMode } from './utils';
 
 export type DtsWorkerOptions = DTSManagerOptions;
 
@@ -42,7 +43,15 @@ export class DtsWorker {
 
   get controlledPromise(): ReturnType<DTSManager['generateTypes']> {
     return Promise.resolve(this._res).then(() => {
+      const pid = this.rpcWorker.process?.pid;
       this.exit();
+      try {
+        process.kill(pid, 0);
+      } catch (error) {
+        if (isDebugMode()) {
+          console.error(error);
+        }
+      }
     });
   }
 
