@@ -51,6 +51,9 @@ const resolveEntryIpv4Plugin: () => FederationRuntimePlugin = () => ({
     if ('getPublicPath' in remoteSnapshot) {
       replaceObjectLocalhost('getPublicPath', remoteSnapshot);
     }
+    if ('matchedVersion:' in remoteSnapshot) {
+      replaceObjectLocalhost('matchedVersion:', remoteSnapshot);
+    }
     return args;
   },
 });
