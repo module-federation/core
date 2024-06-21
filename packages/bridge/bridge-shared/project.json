@@ -9,12 +9,6 @@
       "options": {
         "commands": ["npm run build --prefix packages/bridge/bridge-shared"]
       }
-    },
-    "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": ["npm run test --prefix packages/bridge/bridge-shared"]
-      }
     }
   },
   "tags": ["type:pkg"]

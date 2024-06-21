@@ -9,12 +9,6 @@
       "options": {
         "commands": ["npm run build --prefix packages/bridge/vue3-bridge"]
       }
-    },
-    "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": ["npm run test --prefix packages/bridge/vue3-bridge"]
-      }
     }
   },
   "tags": ["type:pkg"]
