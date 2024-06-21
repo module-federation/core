@@ -38,7 +38,7 @@ jobs:
         run: npx nx format:check
 
       - name: Run Affected Build
-        run: pnpm run build:pkg
+        run: nx run-many --targets=build --projects=tag:type:pkg  --skip-nx-cache
 
       - name: Run Affected Lint
         run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:type:pkg'
