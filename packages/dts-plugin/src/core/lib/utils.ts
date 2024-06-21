@@ -70,7 +70,10 @@ export function retrieveTypesAssetsInfo(options: RemoteOptions) {
 }
 
 export function isDebugMode() {
-  return Boolean(process.env['FEDERATION_DEBUG']);
+  return (
+    Boolean(process.env['FEDERATION_DEBUG']) ||
+    process.env['NODE_ENV'] === 'test'
+  );
 }
 
 export const isTSProject = (
