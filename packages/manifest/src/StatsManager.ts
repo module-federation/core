@@ -257,9 +257,13 @@ class StatsManager {
 
       const metaData = this._getMetaData(compiler, compilation, extraOptions);
       if (this._options.getPublicPath) {
+        if ('publicPath' in metaData) {
+          delete (metaData as { publicPath?: string }).publicPath;
+        }
         // @ts-ignore set getPublicPath
         metaData.getPublicPath = this._options.getPublicPath;
       }
+
       const stats: Stats = {
         id: name!,
         name: name!,
