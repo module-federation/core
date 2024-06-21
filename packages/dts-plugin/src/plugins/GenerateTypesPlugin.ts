@@ -11,6 +11,7 @@ import {
   generateTypesInChildProcess,
   retrieveTypesAssetsInfo,
 } from '../core/index';
+import path from 'path';
 
 export class GenerateTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -88,10 +89,25 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
               return;
             }
             await generateTypesFn(finalOptions);
-
+            const config = finalOptions.remote.moduleFederationConfig;
+            let zipPrefix = '';
+            if (
+              typeof config.manifest === 'object' &&
+              'filePath' in config.manifest
+            ) {
+              zipPrefix = config.manifest.filePath;
+            } else if (
+              typeof config.manifest === 'object' &&
+              'fileName' in config.manifest
+            ) {
+              zipPrefix = path.dirname(config.manifest.filePath);
+            } else if (config.filename) {
+              zipPrefix = path.dirname(config.filename);
+            }
+            console.log(finalOptions.remote.moduleFederationConfig);
             if (zipTypesPath) {
               compilation.emitAsset(
-                zipName,
+                path.join(zipPrefix, zipName),
                 new compiler.webpack.sources.RawSource(
                   fs.readFileSync(zipTypesPath),
                   false,
@@ -101,7 +117,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
 
             if (apiTypesPath) {
               compilation.emitAsset(
-                apiFileName,
+                path.join(zipPrefix, apiFileName),
                 new compiler.webpack.sources.RawSource(
                   fs.readFileSync(apiTypesPath),
                   false,
