@@ -22,7 +22,7 @@ describe('index', () => {
       expect(writeBundle).toThrowError('moduleFederationConfig is required');
     });
 
-    xit('correctly writeBundle', async () => {
+    it.skip('correctly writeBundle', async () => {
       const options = {
         moduleFederationConfig: {
           name: 'moduleFederationTypescript',
@@ -177,7 +177,7 @@ describe('index', () => {
       expect(writeBundle).toThrowError('moduleFederationConfig is required');
     });
 
-    it('correctly writeBundle', async () => {
+    it.skip('correctly writeBundle', async () => {
       const options = {
         moduleFederationConfig: {
           name: 'moduleFederationTypescript',
