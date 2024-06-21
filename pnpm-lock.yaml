@@ -47,6 +47,9 @@ importers:
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
+      react-router-dom:
+        specifier: 6.22.3
+        version: 6.22.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       regenerator-runtime:
         specifier: 0.14.1
         version: 0.14.1
