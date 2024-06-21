@@ -6,6 +6,15 @@ declare const FEDERATION_IPV4: string | undefined;
 const ipv4 =
   typeof FEDERATION_IPV4 !== 'undefined' ? FEDERATION_IPV4 : '127.0.0.1';
 
+function replaceObjectLocalhost(key: string, obj: Record<string, any>) {
+  if (!(key in obj)) {
+    return;
+  }
+  const remote = obj[key];
+  if (remote && typeof remote === 'string' && remote.includes(LOCALHOST)) {
+    obj[key] = replaceLocalhost(remote);
+  }
+}
 function replaceLocalhost(url: string): string {
   return url.replace(LOCALHOST, ipv4);
 }
@@ -15,37 +24,32 @@ const resolveEntryIpv4Plugin: () => FederationRuntimePlugin = () => ({
 
   beforeRegisterRemote(args) {
     const { remote } = args;
-    if ('entry' in remote && remote.entry.includes(LOCALHOST)) {
-      remote.entry = replaceLocalhost(remote.entry);
-    }
+    replaceObjectLocalhost('entry', remote);
     return args;
   },
-  // async fetch(manifestUrl) {
-  //   const ipv4ManifestUrl = manifestUrl.replace(LOCALHOST, ipv4);
-  //   return globalThis.fetch(ipv4ManifestUrl);
-  // },
   async afterResolve(args) {
     const { remoteInfo } = args;
-    if (remoteInfo.entry.includes(LOCALHOST)) {
-      remoteInfo.entry = replaceLocalhost(remoteInfo.entry);
+    replaceObjectLocalhost('entry', remoteInfo);
+    return args;
+  },
+  beforeLoadRemoteSnapshot(args) {
+    const { moduleInfo } = args;
+    if ('entry' in moduleInfo) {
+      replaceObjectLocalhost('entry', moduleInfo);
+      return args;
+    }
+    if ('version' in moduleInfo) {
+      replaceObjectLocalhost('version', moduleInfo);
     }
     return args;
   },
   loadRemoteSnapshot(args) {
     const { remoteSnapshot } = args;
-    if (
-      'publicPath' in remoteSnapshot &&
-      remoteSnapshot.publicPath.includes(LOCALHOST)
-    ) {
-      remoteSnapshot.publicPath = replaceLocalhost(remoteSnapshot.publicPath);
+    if ('publicPath' in remoteSnapshot) {
+      replaceObjectLocalhost('publicPath', remoteSnapshot);
     }
-    if (
-      'getPublicPath' in remoteSnapshot &&
-      remoteSnapshot.getPublicPath.includes(LOCALHOST)
-    ) {
-      remoteSnapshot.getPublicPath = replaceLocalhost(
-        remoteSnapshot.getPublicPath,
-      );
+    if ('getPublicPath' in remoteSnapshot) {
+      replaceObjectLocalhost('getPublicPath', remoteSnapshot);
     }
     return args;
   },
