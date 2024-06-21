@@ -9,25 +9,36 @@ import { createRemoteComponent } from '@module-federation/bridge-react';
 import { ErrorBoundary, withErrorBoundary } from 'react-error-boundary';
 
 const FallbackErrorComp = (info: any) => {
-  return <div>{info?.error?.message}</div>;
+  return (
+    <div>
+      {info?.error?.message}
+      <button onClick={() => info.resetErrorBoundary()}>
+        resetErrorBoundary
+      </button>
+    </div>
+  );
 };
 
-const Remote1App = withErrorBoundary(
-  createRemoteComponent(() => loadRemote('remote1/export-app')),
-  {
-    FallbackComponent: FallbackErrorComp,
-  },
-);
-
-const Remote2App = createRemoteComponent(
-  () => loadRemote('remote2/export-app'),
-  { export: 'provider' },
-);
-const Remote3App = createRemoteComponent(() =>
-  loadRemote('remote3/export-app'),
-) as (info: any) => React.JSX.Element;
-
 const FallbackComp = <div>loading</div>;
+
+const Remote1App = createRemoteComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  fallback: FallbackErrorComp,
+  loading: FallbackComp,
+});
+
+const Remote2App = createRemoteComponent({
+  loader: () => import('remote2/export-app'),
+  export: 'provider',
+  fallback: FallbackErrorComp,
+  loading: FallbackComp,
+});
+
+const Remote3App = createRemoteComponent({
+  loader: () => loadRemote('remote3/export-app'),
+  fallback: FallbackErrorComp,
+  loading: FallbackComp,
+}) as (info: any) => React.JSX.Element;
 
 function Wraper3() {
   return (
@@ -35,25 +46,15 @@ function Wraper3() {
       <div className="flex flex-row">
         <div className="grow">
           <h2>Remote1</h2>
-          <Remote1App
-            memoryRoute={{ entryPath: '/' }}
-            fallback={FallbackComp}
-            errorBoundary={FallbackErrorComp}
-          />
+          <Remote1App memoryRoute={{ entryPath: '/' }} />
         </div>
         <div className="grow">
           <h2>Remote2</h2>
-          <Remote2App
-            memoryRoute={{ entryPath: '/detail' }}
-            fallback={FallbackComp}
-          />
+          <Remote2App memoryRoute={{ entryPath: '/detail' }} />
         </div>
         <div className="grow">
           <h2>Remote3</h2>
-          <Remote3App
-            memoryRoute={{ entryPath: '/detail' }}
-            fallback={FallbackComp}
-          />
+          <Remote3App memoryRoute={{ entryPath: '/detail' }} />
         </div>
       </div>
     </>
@@ -70,18 +71,9 @@ const App = () => {
       <Routes>
         <Route path="/" Component={Home} />
         <Route path="/detail/*" Component={Detail} />
-        <Route
-          path="/remote1/*"
-          Component={() => <Remote1App fallback={FallbackComp} />}
-        />
-        <Route
-          path="/remote2/*"
-          Component={() => <Remote2App fallback={FallbackComp} />}
-        />
-        <Route
-          path="/remote3/*"
-          Component={() => <Remote3App fallback={FallbackComp} />}
-        />
+        <Route path="/remote1/*" Component={() => <Remote1App />} />
+        <Route path="/remote2/*" Component={() => <Remote2App />} />
+        <Route path="/remote3/*" Component={() => <Remote3App />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
       </Routes>
     </BrowserRouter>

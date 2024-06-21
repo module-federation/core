@@ -1,4 +1,5 @@
 import React, {
+  ComponentType,
   ReactNode,
   useContext,
   useEffect,
@@ -10,6 +11,10 @@ import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { LoggerInstance, pathJoin } from './utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
+import {
+  ErrorBoundary,
+  ErrorBoundaryPropsWithComponent,
+} from 'react-error-boundary';
 
 declare const __APP_VERSION__: string;
 
@@ -102,12 +107,12 @@ const RemoteApp = ({
 
 (RemoteApp as any)['__APP_VERSION__'] = __APP_VERSION__;
 
-export function createRemoteComponent<T, E extends keyof T>(
-  lazyComponent: () => Promise<T>,
-  info?: {
-    export?: E;
-  },
-) {
+export function createRemoteComponent<T, E extends keyof T>(info: {
+  loader: () => Promise<T>;
+  loading: React.ReactNode;
+  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
+  export?: E;
+}) {
   type ExportType = T[E] extends (...args: any) => any
     ? ReturnType<T[E]>
     : never;
@@ -121,7 +126,6 @@ export function createRemoteComponent<T, E extends keyof T>(
     props: {
       basename?: ProviderParams['basename'];
       memoryRoute?: ProviderParams['memoryRoute'];
-      fallback: ReactNode;
     } & RawComponentType,
   ) => {
     const exportName = info?.export || 'default';
@@ -181,46 +185,60 @@ export function createRemoteComponent<T, E extends keyof T>(
       return React.lazy(async () => {
         LoggerInstance.log(`createRemoteComponent LazyComponent create >>>`, {
           basename,
-          lazyComponent,
+          lazyComponent: info.loader,
           exportName,
           props,
           routerContextVal,
         });
-        const m = (await lazyComponent()) as RemoteModule;
-        // @ts-ignore
-        const moduleName = m && m[Symbol.for('mf_module_id')];
-        LoggerInstance.log(
-          `createRemoteComponent LazyComponent loadRemote info >>>`,
-          { basename, name: moduleName, module: m, exportName, props },
-        );
+        try {
+          const m = (await info.loader()) as RemoteModule;
+          // @ts-ignore
+          const moduleName = m && m[Symbol.for('mf_module_id')];
+          LoggerInstance.log(
+            `createRemoteComponent LazyComponent loadRemote info >>>`,
+            { basename, name: moduleName, module: m, exportName, props },
+          );
 
-        // @ts-ignore
-        const exportFn = m[exportName] as any;
+          // @ts-ignore
+          const exportFn = m[exportName] as any;
 
-        if (exportName in m && typeof exportFn === 'function') {
-          return {
-            default: () => (
-              <RemoteApp
-                name={moduleName}
-                dispathPopstate={enableDispathPopstate}
-                {...info}
-                {...props}
-                providerInfo={exportFn}
-                basename={basename}
-              />
-            ),
-          };
+          if (exportName in m && typeof exportFn === 'function') {
+            return {
+              default: () => (
+                <RemoteApp
+                  name={moduleName}
+                  dispathPopstate={enableDispathPopstate}
+                  {...info}
+                  {...props}
+                  providerInfo={exportFn}
+                  basename={basename}
+                />
+              ),
+            };
+          } else {
+            LoggerInstance.log(
+              `createRemoteComponent LazyComponent module not found >>>`,
+              { basename, name: moduleName, module: m, exportName, props },
+            );
+            throw Error(
+              `Make sure that ${moduleName} has the correct export when export is ${String(
+                exportName,
+              )}`,
+            );
+          }
+        } catch (error) {
+          throw error;
         }
-
-        throw Error('module not found');
       });
     }, [exportName, basename, props.memoryRoute]);
 
     //@ts-ignore
     return (
-      <React.Suspense fallback={props.fallback}>
-        <LazyComponent />
-      </React.Suspense>
+      <ErrorBoundary FallbackComponent={info.fallback}>
+        <React.Suspense fallback={info.loading}>
+          <LazyComponent />
+        </React.Suspense>
+      </ErrorBoundary>
     );
   };
 }
