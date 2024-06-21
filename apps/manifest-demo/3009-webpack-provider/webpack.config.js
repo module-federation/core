@@ -20,7 +20,7 @@ module.exports = composePlugins(
     config.plugins.push(
       new ModuleFederationPlugin({
         getPublicPath:
-          'function(path) {console.log("PUBLIC PATH", path); return path;}',
+          'function(path) {console.log("ORIGINAL PUBLIC PATH", __webpack_require__.p); return __webpack_require__.p;}',
         name: 'webpack_provider',
         filename: 'remoteEntry.js',
         exposes: {

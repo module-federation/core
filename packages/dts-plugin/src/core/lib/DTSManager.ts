@@ -209,7 +209,7 @@ class DTSManager {
         const getPublicPath = new Function(manifestJson.metaData.getPublicPath);
 
         if (manifestJson.metaData.getPublicPath.startsWith('function')) {
-          publicPath = getPublicPath()(manifestJson.metaData);
+          publicPath = getPublicPath()();
         } else {
           publicPath = getPublicPath();
         }

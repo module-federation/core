@@ -187,7 +187,7 @@ const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
     if (!module.getPublicPath.startsWith('function')) {
       publicPath = new Function(module.getPublicPath)();
     } else {
-      publicPath = new Function('return ' + module.getPublicPath)()(module);
+      publicPath = new Function('return ' + module.getPublicPath)()();
     }
 
     return `${publicPath}${sourceUrl}`;
