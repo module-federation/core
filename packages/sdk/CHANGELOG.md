@@ -1,5 +1,19 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.1.21
+
+### Patch Changes
+
+- 88900ad: fix: support decode encode remote name
+
+## 0.1.20
+
+### Patch Changes
+
+- 685c607: feat: support dynamic remote type hints
+- e8e0969: fix: The returned properties are used by default when create script and create link hook
+- 349c381: fix(sdk): use variable instead of constant
+
 ## 0.1.19
 
 ### Patch Changes

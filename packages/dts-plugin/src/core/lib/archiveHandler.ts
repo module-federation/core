@@ -1,12 +1,13 @@
 import AdmZip from 'adm-zip';
-import axios from 'axios';
 import { resolve, join } from 'path';
+import { rm } from 'fs/promises';
 import typescript from 'typescript';
 
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { retrieveMfTypesPath } from './typeScriptCompiler';
 import { fileLog } from '../../server';
+import { axiosGet } from './utils';
 
 export const retrieveTypesZipPath = (
   mfTypesPath: string,
@@ -59,9 +60,24 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
     while (retries++ < hostOptions.maxRetries) {
       try {
         const url = fileToDownload;
-        const response = await axios
-          .get(url, { responseType: 'arraybuffer' })
-          .catch(downloadErrorLogger(destinationFolder, url));
+        const response = await axiosGet(url, {
+          responseType: 'arraybuffer',
+        }).catch(downloadErrorLogger(destinationFolder, url));
+
+        try {
+          if (hostOptions.deleteTypesFolder) {
+            await rm(destinationPath, {
+              recursive: true,
+              force: true,
+            });
+          }
+        } catch (error) {
+          fileLog(
+            `Unable to remove types folder, ${error}`,
+            'downloadTypesArchive',
+            'error',
+          );
+        }
 
         const zip = new AdmZip(Buffer.from(response.data));
         zip.extractAllTo(destinationPath, true);

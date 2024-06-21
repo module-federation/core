@@ -1,5 +1,13 @@
 # @module-federation/third-party-dts-extractor
 
+## 0.1.21
+
+## 0.1.20
+
+### Patch Changes
+
+- 685c607: feat: support dynamic remote type hints
+
 ## 0.1.19
 
 ## 0.1.18

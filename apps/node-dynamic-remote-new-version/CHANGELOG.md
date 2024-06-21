@@ -4,6 +4,18 @@
 
 ### Patch Changes
 
+- @module-federation/node@2.2.12
+
+## null
+
+### Patch Changes
+
+- @module-federation/node@2.2.11
+
+## null
+
+### Patch Changes
+
 - @module-federation/node@2.2.10
 
 ## null

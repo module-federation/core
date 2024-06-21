@@ -14,6 +14,8 @@ export const enum ActionKind {
   EXIT_PUBLISHER = 'EXIT_PUBLISHER',
   ADD_WEB_CLIENT = 'ADD_WEB_CLIENT',
   NOTIFY_WEB_CLIENT = 'NOTIFY_WEB_CLIENT',
+  FETCH_TYPES = 'FETCH_TYPES',
+  ADD_DYNAMIC_REMOTE = 'ADD_DYNAMIC_REMOTE',
 }
 
 export class Action<T = unknown> extends Message {

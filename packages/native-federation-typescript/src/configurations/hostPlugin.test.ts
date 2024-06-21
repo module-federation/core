@@ -77,5 +77,22 @@ describe('hostPlugin', () => {
           'http://localhost:3000/subpatha/subpathb/@mf-types.zip',
       });
     });
+
+    it('correctly resolve remotes with relative reference in place of absolute url', () => {
+      const subpathModuleFederationConfig = {
+        ...moduleFederationConfig,
+        remotes: {
+          moduleFederationTypescript: '/subpatha/remoteEntry.js',
+        },
+      };
+
+      const { mapRemotesToDownload } = retrieveHostConfig({
+        moduleFederationConfig: subpathModuleFederationConfig,
+      });
+
+      expect(mapRemotesToDownload).toStrictEqual({
+        moduleFederationTypescript: '/subpatha/@mf-types.zip',
+      });
+    });
   });
 });
