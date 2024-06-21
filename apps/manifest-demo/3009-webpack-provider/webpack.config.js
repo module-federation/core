@@ -19,7 +19,7 @@ module.exports = composePlugins(
     config.output.publicPath = 'auto';
     config.plugins.push(
       new ModuleFederationPlugin({
-        getPublicPath: 'function(path) { return "http://localhost:3009"; }',
+        getPublicPath: 'function(path) { return "http://localhost:3009/"; }',
         name: 'webpack_provider',
         filename: 'remoteEntry.js',
         exposes: {
