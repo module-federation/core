@@ -81,6 +81,7 @@ jobs:
 
       - name: E2E Test for Modern.js Dev
         run: |
+          lsof -ti tcp:3005,3006,3007,3008,3009,3010,3011 | xargs kill &&
           pnpm run app:modern:dev &
           sleep 1 &&
           npx wait-on http://127.0.0.1:3005/ &&
