@@ -4,21 +4,21 @@ import {
   getInstance,
   type FederationHost,
 } from '@module-federation/enhanced/runtime';
+import {
+  ErrorBoundary,
+  ErrorBoundaryPropsWithComponent,
+} from 'react-error-boundary';
 
 type Comp = React.FC | { default: React.FC };
 type Id = string;
-type IProps =
-  | {
-      id: Id;
-      injectScript?: boolean;
-      injectLink?: boolean;
-      loading?: React.ReactNode;
-      fallback?:
-        | ((err: Error) => React.FC | React.ReactElement)
-        | React.FC
-        | React.ReactElement;
-    }
-  | Id;
+type IProps = {
+  id: Id;
+  loading: React.ReactNode;
+  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
+  injectScript?: boolean;
+  injectLink?: boolean;
+  remoteProps?: Record<string, any>;
+};
 
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
   const { name, expose } = instance.remoteHandler.idToRemoteMap[id] || {};
@@ -137,11 +137,7 @@ function collectAssets(options: IProps) {
 }
 
 function MFReactComponent(props: IProps) {
-  const {
-    loading = 'loading...',
-    id,
-    fallback = undefined,
-  } = typeof props === 'string' ? { id: props } : props;
+  const { loading = 'loading...', id, remoteProps = {}, fallback } = props;
 
   const Component = React.lazy(() =>
     loadRemote<Comp>(id)
@@ -160,7 +156,7 @@ function MFReactComponent(props: IProps) {
           default: () => (
             <>
               {assets}
-              <Com />
+              <Com {...remoteProps} />
             </>
           ),
         };
@@ -169,24 +165,25 @@ function MFReactComponent(props: IProps) {
         if (!fallback) {
           throw err;
         }
-        const FallbackNode =
-          typeof fallback === 'function' ? fallback(err) : fallback;
-        if (React.isValidElement(FallbackNode)) {
-          return {
-            default: () => FallbackNode,
-          };
-        }
-        const FallbackFunctionComponent = FallbackNode as React.FC;
+        const FallbackFunctionComponent = fallback;
+        const FallbackNode = (
+          <FallbackFunctionComponent
+            error={err}
+            resetErrorBoundary={() => {}}
+          />
+        );
         return {
-          default: () => <FallbackFunctionComponent />,
+          default: () => FallbackNode,
         };
       }),
   );
 
   return (
-    <React.Suspense fallback={loading}>
-      <Component />
-    </React.Suspense>
+    <ErrorBoundary FallbackComponent={fallback}>
+      <React.Suspense fallback={loading}>
+        <Component />
+      </React.Suspense>
+    </ErrorBoundary>
   );
 }
 

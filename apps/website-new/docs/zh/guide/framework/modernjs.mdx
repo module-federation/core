@@ -94,10 +94,9 @@ type MFReactComponentProps =
       injectScript?: boolean;
       injectLink?: boolean;
       loading?: React.ReactNode;
+      remoteProps?: Record<string, any>;
       fallback?:
         | ((err: Error) => React.FC | React.ReactElement)
-        | React.FC
-        | React.ReactElement;
     }
   | Id;
 ```
@@ -151,11 +150,13 @@ export default Product;
 
 #### fallback
 
-- 类型：`((err: Error) => React.FC | React.ReactElement) | React.FC | React.ReactElement`
+- 类型：`((err: Error) => React.FC | React.ReactElement)`
 - 是否必填：否
 - 默认值：`undefined`
 
-加载失败容错组件。
+当组件**加载**或**渲染**失败时，所渲染的容错组件。
+
+注意：当**渲染**失败的时候，该组件仅在客户端渲染此 容错组件。
 
 #### injectLink
 
@@ -172,6 +173,14 @@ export default Product;
 - 默认值：`true`
 
 是否注入对应组件的脚本。
+
+#### remoteProps
+
+- 类型：`Record<string, any>`
+- 是否必填：否
+- 默认值：`{}`
+
+传给远程
 
 ### LiveReload
 
