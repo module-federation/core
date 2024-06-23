@@ -41,7 +41,7 @@ export class DtsWorker {
       try {
         const pid = this.rpcWorker.process?.pid;
         const currentPid = process.pid;
-        if (currentPid !== pid) {
+        if (pid && currentPid !== pid) {
           process.kill(pid, 0);
         }
       } catch (error) {
