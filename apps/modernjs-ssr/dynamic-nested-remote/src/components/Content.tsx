@@ -2,6 +2,7 @@ import React from 'react';
 import Button from 'antd/lib/button';
 import { registerRemotes, MFReactComponent } from '@modern-js/runtime/mf';
 import stuff from './stuff.module.css';
+import { component$ } from '@builder.io/qwik';
 
 registerRemotes([
   {
@@ -50,7 +51,21 @@ export default (): JSX.Element => (
       Click me to test <strong>dynamic nested remote</strong> interactive!
     </Button>
 
-    <MFReactComponent id="dynamic_remote/Image" />
+    <MFReactComponent
+      id="wrong_id_dynamic_remote/Image"
+      loading={'loading...'}
+      fallback={({ error }) => {
+        console.log(error);
+        return (
+          <MFReactComponent
+            id="dynamic_remote/Image"
+            loading={'loading...'}
+            fallback={() => <div>fallback component$</div>}
+          />
+        );
+      }}
+    />
+
     <React.Suspense fallback="loading btn 1000ms">
       <LazyButton1 />
     </React.Suspense>

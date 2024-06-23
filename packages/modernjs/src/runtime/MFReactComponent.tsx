@@ -169,7 +169,9 @@ function MFReactComponent(props: IProps) {
         const FallbackNode = (
           <FallbackFunctionComponent
             error={err}
-            resetErrorBoundary={() => {}}
+            resetErrorBoundary={() => {
+              console.log('SSR mode not support "resetErrorBoundary" !');
+            }}
           />
         );
         return {

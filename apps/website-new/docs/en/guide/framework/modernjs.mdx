@@ -151,11 +151,13 @@ Set module loading status.
 
 #### fallback
 
-- Type:`((err: Error) => React.FC | React.ReactElement) | React.FC | React.ReactElement`
+- Type:`((err: Error) => React.ReactElement)`
 - Required: No
 - Default value: `undefined`
 
-Loading failure tolerant components.
+A fault-tolerant component that is rendered when the component fails to **load** or **render**.
+
+Note: This component only renders this fault-tolerant component on the client side when **rendering** fails.
 
 #### injectLink
 
