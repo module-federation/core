@@ -147,7 +147,10 @@ export function getSharedModules(
   return effectiveSharedModules;
 }
 
-export function getAssetsByChunk(chunk: Chunk): StatsAssets {
+export function getAssetsByChunk(
+  chunk: Chunk,
+  entryPointNames: Array<string>,
+): StatsAssets {
   const assesSet = {
     js: {
       sync: new Set() as Set<string>,
@@ -164,11 +167,13 @@ export function getAssetsByChunk(chunk: Chunk): StatsAssets {
     type: 'sync' | 'async',
   ): void => {
     [...targetChunk.groupsIterable].forEach((chunkGroup) => {
-      collectAssets(
-        chunkGroup.getFiles(),
-        assesSet.js[type],
-        assesSet.css[type],
-      );
+      if (!entryPointNames.includes(chunkGroup.name as string)) {
+        collectAssets(
+          chunkGroup.getFiles(),
+          assesSet.js[type],
+          assesSet.css[type],
+        );
+      }
     });
   };
   collectChunkFiles(chunk, 'sync');
