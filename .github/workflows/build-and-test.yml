@@ -47,7 +47,7 @@ jobs:
         run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:type:pkg'
 
       - name: Run Affected Test
-        run: npx nx affected -t test --parallel=1 --exclude='*,!tag:type:pkg' --skip-nx-cache
+        run: npx nx affected -t test --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
       # - name: E2E Test for Next.js Dev
       #   run: |

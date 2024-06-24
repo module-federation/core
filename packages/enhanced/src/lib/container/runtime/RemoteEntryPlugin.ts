@@ -20,7 +20,7 @@ export class RemoteEntryPlugin implements WebpackPluginInstance {
     } else {
       code = `(${this._getPublicPath})()`;
     }
-    const base64Code = btoa(code);
+    const base64Code = pBtoa(code);
     const dataUrl = `data:text/javascript;base64,${base64Code}`;
 
     compiler.hooks.afterPlugins.tap('VmokRemoteEntryPlugin', () => {
