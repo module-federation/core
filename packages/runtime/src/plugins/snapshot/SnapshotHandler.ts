@@ -302,6 +302,7 @@ export class SnapshotHandler {
         this.manifestCache.set(manifestUrl, manifestJson);
         return manifestJson;
       } catch (err) {
+        delete this.manifestLoading[manifestUrl];
         error(
           `Failed to get manifestJson for ${moduleInfo.name}. The manifest URL is ${manifestUrl}. Please ensure that the manifestUrl is accessible.
           \n Error message:

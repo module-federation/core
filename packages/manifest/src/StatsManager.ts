@@ -157,6 +157,9 @@ class StatsManager {
     const { chunks } = compilation;
     const { exposeFileNameImportMap } = this._containerManager;
     const assets: Record<string, StatsAssets> = {};
+    const entryPointNames = [...compilation.entrypoints.values()]
+      .map((e) => e.name)
+      .filter((v) => !!v) as Array<string>;
 
     chunks.forEach((chunk) => {
       if (
@@ -165,13 +168,15 @@ class StatsManager {
       ) {
         // TODO: support multiple import
         const exposeKey = exposeFileNameImportMap[chunk.name][0];
-        assets[getFileNameWithOutExt(exposeKey)] = getAssetsByChunk(chunk);
+        assets[getFileNameWithOutExt(exposeKey)] = getAssetsByChunk(
+          chunk,
+          entryPointNames,
+        );
       }
     });
 
     return assets;
   }
-
   private _getProvideSharedAssets(
     compilation: Compilation,
     stats: StatsCompilation,

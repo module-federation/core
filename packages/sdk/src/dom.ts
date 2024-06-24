@@ -64,7 +64,6 @@ export function createScript(info: {
         if (createScriptRes.timeout) timeout = createScriptRes.timeout;
       }
     }
-
     const attrs = info.attrs;
     if (attrs) {
       Object.keys(attrs).forEach((name) => {

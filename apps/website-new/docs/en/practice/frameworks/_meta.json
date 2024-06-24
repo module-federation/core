@@ -2,21 +2,25 @@
   {
     "type": "file",
     "name": "index",
-    "label": "Framework Overview"
+    "label": "Framework Overview",
+    "collapsed": true
   },
   {
     "type": "dir",
     "name": "react",
-    "label": "React"
+    "label": "React",
+    "collapsed": true
   },
   {
     "type": "dir",
     "name": "next",
-    "label": "Next.js"
+    "label": "Next.js",
+    "collapsed": true
   },
   {
     "type": "dir",
     "name": "angular",
-    "label": "Angular"
+    "label": "Angular",
+    "collapsed": true
   }
 ]

@@ -1,0 +1,39 @@
+{
+  "name": "router-remote1-2001",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/router-demo/router-remote1-2001/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npm run build --prefix apps/router-demo/router-remote1-2001"
+        ]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npm run test --prefix apps/router-demo/router-remote1-2001"
+        ]
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npm run dev --prefix apps/router-demo/router-remote1-2001"
+        ]
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    }
+  },
+  "tags": ["type:app"]
+}

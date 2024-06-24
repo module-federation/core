@@ -1,5 +1,16 @@
 # @module-federation/dts-plugin
 
+## 0.2.0
+
+### Patch Changes
+
+- 804cc3b: fix: check pid is undefined before kill it
+- 52bb94c: fix(dts-plugin): ensure kill fork child process when the task is finished
+- f7a6d3f: fix: download api types when types refresh
+  - @module-federation/sdk@0.2.0
+  - @module-federation/managers@0.2.0
+  - @module-federation/third-party-dts-extractor@0.2.0
+
 ## 0.1.21
 
 ### Patch Changes

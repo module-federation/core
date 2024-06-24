@@ -438,6 +438,16 @@ class DTSManager {
           (i) => i.name === remoteName,
         );
 
+        const consumeTypes = async (
+          requiredRemoteInfo: Required<RemoteInfo>,
+        ) => {
+          const [_alias, destinationPath] = await this.consumeTargetRemotes(
+            hostOptions,
+            requiredRemoteInfo,
+          );
+          await this.downloadAPITypes(requiredRemoteInfo, destinationPath);
+        };
+
         if (!loadedRemoteInfo) {
           const remoteInfo = Object.values(mapRemotesToDownload).find(
             (item) => {
@@ -450,20 +460,11 @@ class DTSManager {
                 await this.requestRemoteManifest(remoteInfo);
               this.remoteAliasMap[remoteInfo.alias] = requiredRemoteInfo;
             }
-            await this.consumeTargetRemotes(
-              hostOptions,
-              this.remoteAliasMap[remoteInfo.alias],
-            );
+            await consumeTypes(this.remoteAliasMap[remoteInfo.alias]);
           } else if (updatedRemoteInfo) {
             const consumeDynamicRemoteTypes = async () => {
-              const [_destinationFolder, destinationPath] =
-                await this.consumeTargetRemotes(
-                  hostOptions,
-                  this.updatedRemoteInfos[updatedRemoteInfo.name],
-                );
-              await this.downloadAPITypes(
+              await consumeTypes(
                 this.updatedRemoteInfos[updatedRemoteInfo.name],
-                destinationPath,
               );
               this.consumeAPITypes(hostOptions);
             };
@@ -492,7 +493,7 @@ class DTSManager {
             }
           }
         } else {
-          await this.consumeTargetRemotes(hostOptions, loadedRemoteInfo);
+          await consumeTypes(loadedRemoteInfo);
         }
       }
     } catch (err) {
