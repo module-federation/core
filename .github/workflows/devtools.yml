@@ -35,7 +35,7 @@ jobs:
         run: pnpm install
 
       - name: Run Affected Build
-        run: npx nx build --parallel=10 --exclude='*,!tag:type:pkg'
+        run: npx nx run-many --targets=build --projects=tag:type:pkg  --skip-nx-cache
 
       - name: Configuration xvfb
         shell: bash
