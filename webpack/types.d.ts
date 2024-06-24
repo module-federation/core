@@ -4,8 +4,6 @@
  * Run `yarn special-lint-fix` to update
  */
 
-import 'webpack';
-
 import { Buffer } from 'buffer';
 import {
   ArrayExpression,
