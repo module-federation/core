@@ -201,10 +201,20 @@ class DTSManager {
         return u;
       };
 
-      let publicPath =
-        'publicPath' in manifestJson.metaData
-          ? manifestJson.metaData.publicPath
-          : new Function(manifestJson.metaData.getPublicPath)();
+      let publicPath;
+
+      if ('publicPath' in manifestJson.metaData) {
+        publicPath = manifestJson.metaData.publicPath;
+      } else {
+        const getPublicPath = new Function(manifestJson.metaData.getPublicPath);
+
+        if (manifestJson.metaData.getPublicPath.startsWith('function')) {
+          publicPath = getPublicPath()();
+        } else {
+          publicPath = getPublicPath();
+        }
+      }
+
       if (publicPath === 'auto') {
         publicPath = inferAutoPublicPath(remoteInfo.url);
       }
@@ -444,6 +454,16 @@ class DTSManager {
           (i) => i.name === remoteName,
         );
 
+        const consumeTypes = async (
+          requiredRemoteInfo: Required<RemoteInfo>,
+        ) => {
+          const [_alias, destinationPath] = await this.consumeTargetRemotes(
+            hostOptions,
+            requiredRemoteInfo,
+          );
+          await this.downloadAPITypes(requiredRemoteInfo, destinationPath);
+        };
+
         if (!loadedRemoteInfo) {
           const remoteInfo = Object.values(mapRemotesToDownload).find(
             (item) => {
@@ -456,20 +476,11 @@ class DTSManager {
                 await this.requestRemoteManifest(remoteInfo);
               this.remoteAliasMap[remoteInfo.alias] = requiredRemoteInfo;
             }
-            await this.consumeTargetRemotes(
-              hostOptions,
-              this.remoteAliasMap[remoteInfo.alias],
-            );
+            await consumeTypes(this.remoteAliasMap[remoteInfo.alias]);
           } else if (updatedRemoteInfo) {
             const consumeDynamicRemoteTypes = async () => {
-              const [_destinationFolder, destinationPath] =
-                await this.consumeTargetRemotes(
-                  hostOptions,
-                  this.updatedRemoteInfos[updatedRemoteInfo.name],
-                );
-              await this.downloadAPITypes(
+              await consumeTypes(
                 this.updatedRemoteInfos[updatedRemoteInfo.name],
-                destinationPath,
               );
               this.consumeAPITypes(hostOptions);
             };
@@ -498,7 +509,7 @@ class DTSManager {
             }
           }
         } else {
-          await this.consumeTargetRemotes(hostOptions, loadedRemoteInfo);
+          await consumeTypes(loadedRemoteInfo);
         }
       }
     } catch (err) {

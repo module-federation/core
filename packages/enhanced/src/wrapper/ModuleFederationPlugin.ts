@@ -1,7 +1,9 @@
 import type { WebpackPluginInstance, Compiler } from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import path from 'node:path';
+import fs from 'node:fs';
+import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 
 const PLUGIN_NAME = 'ModuleFederationPlugin';
 
@@ -24,6 +26,19 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
       require('../lib/container/ModuleFederationPlugin')
         .default as typeof import('../lib/container/ModuleFederationPlugin').default;
     new CoreModuleFederationPlugin(this._options).apply(compiler);
+
+    // react bridge plugin
+    const nodeModulesPath = path.resolve(compiler.context, 'node_modules');
+    const reactPath = path.join(
+      nodeModulesPath,
+      '@module-federation/bridge-react',
+    );
+    // Check whether react exists
+    if (fs.existsSync(reactPath)) {
+      new ReactBridgePlugin({
+        moduleFederationOptions: this._options,
+      }).apply(compiler);
+    }
 
     // compiler.hooks.afterPlugins.tap('WrapperModuleFederationPlugin', () => {
     // })

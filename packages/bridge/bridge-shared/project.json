@@ -1,0 +1,15 @@
+{
+  "name": "bridge-shared",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/bridge/bridge-shared/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run build --prefix packages/bridge/bridge-shared"]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}
