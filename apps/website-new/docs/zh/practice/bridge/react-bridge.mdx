@@ -18,6 +18,12 @@ import { PackageManagerTabs } from '@theme';
 
 ### 示例
 
+
+:::danger
+使用 `@module-federation/bridge-react` 后不能将 `react-router-dom` 设置成 shared、否则构建工具将会提示异常。因为 `@module-federation/bridge-react` 通过代理 `react-router-dom` 实现对于路由的控制
+
+:::
+
 > Remote
 
 ```tsx

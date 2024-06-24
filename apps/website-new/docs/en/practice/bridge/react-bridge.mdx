@@ -16,6 +16,11 @@ import { PackageManagerTabs } from '@theme';
 
 ### Example
 
+:::danger
+After using @module-federation/bridge-react, you should not set react-router-dom as shared; otherwise, the build tool will raise an exception. This is because @module-federation/bridge-react controls routing by proxying react-router-dom.
+
+:::
+
 > Remote
 
 ```tsx
