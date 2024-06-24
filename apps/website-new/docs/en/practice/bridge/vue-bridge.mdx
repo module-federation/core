@@ -130,9 +130,9 @@ export default router;
 
 ```tsx
 function createRemoteComponent<T, E extends keyof T>(
-  // Function to load remote application, e.g., loadRemote('remote1/export-app') or import('remote1/export-app')
-  lazyComponent: () => Promise<T>,
-  options?: {
+  options: {
+    // Function to load remote application, e.g., loadRemote('remote1/export-app') or import('remote1/export-app')
+    loader: () => Promise<T>,
     // Default is 'default', used to specify module export
     export?: E;
   }
@@ -142,15 +142,15 @@ function createRemoteComponent<T, E extends keyof T>(
 }) => DefineComponent;
 ```
 
-* `lazyComponent`
-  * type: `() => Promise<Module>`
-  * Purpose: Used to load remote modules, e.g., `loadRemote('remote1/export-app')` or `import('remote1/export-app')`
 
 ```tsx
 const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'));
 ```
 
 * `options`
+  * `loader`
+    * type: `() => Promise<Module>`
+    * Purpose: Used to load remote modules, e.g., `loadRemote('remote1/export-app')` or `import('remote1/export-app')`
   * `export`
     * type: `string`
     * Purpose: Used to specify module export

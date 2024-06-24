@@ -5,10 +5,10 @@ import { useRoute } from 'vue-router';
 
 declare const __APP_VERSION__: string;
 
-export function createRemoteComponent(
-  lazyComponent: () => Promise<any>,
-  info?: { export: string },
-) {
+export function createRemoteComponent(info: {
+  loader: () => Promise<any>;
+  export?: string;
+}) {
   return defineAsyncComponent({
     __APP_VERSION__,
     //@ts-ignore
@@ -28,11 +28,10 @@ export function createRemoteComponent(
       const exportName = info?.export || 'default';
       LoggerInstance.log(`createRemoteComponent LazyComponent create >>>`, {
         basename,
-        lazyComponent,
-        exportName,
+        info,
       });
 
-      const module: any = await lazyComponent();
+      const module: any = await info.loader();
       const moduleName = module && module[Symbol.for('mf_module_id')];
       const exportFn = module[exportName];
 

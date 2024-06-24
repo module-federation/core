@@ -1,7 +1,6 @@
-# React Bridge（for React v16、v17、v18）
+# React Bridge
 
 `@module-federation/bridge-react` 提供了用于 React 应用的 `bridge` 工具函数，其提供的 `createBridgeComponent` 可用于导出应用级别模块，`createRemoteComponent` 用于加载应用级别模块。[Demo](https://github.com/module-federation/core/blob/6756c9142d0bf41262a26fe30e3c39d7957cfa58/apps/router-demo)
-
 
 
 ### 安装
@@ -106,29 +105,29 @@ const App = () => {
 
 ```tsx
 function createRemoteComponent<T, `E extends keyof T`>(
-  // 加载远程应用的函数，例如：loadRemote('remote1/export-app')、import('remote1/export-app')
-  lazyComponent: () => Promise<T>,
-  options?: {
+  options: {
+    // 加载远程应用的函数，例如：loadRemote('remote1/export-app')、import('remote1/export-app')
+    loader: () => Promise<T>,
     // 默认为 default，用于指定模块的 export
     export?: E;
+    loading: React.ReactNode;
+    fallback: ComponentType<{ error: any; }>;
   }
 ): (props: {
     basename?: ProviderParams['basename'];
     memoryRoute?: { entryPath: string };
-    fallback: ReactNode;
 } & RawComponentType) => React.JSX.Element;
 ```
 
-* `lazyComponent`
-  * type: `() => Promise<Module>`
-  * 作用: 用于加载远程模块的函数，例如：`loadRemote('remote1/export-app')`、`import('remote1/export-app')`
+* `options`
+  * `loader`
+    * type: `() => Promise<Module>`
+    * 作用: 用于加载远程模块的函数，例如：`loadRemote('remote1/export-app')`、`import('remote1/export-app')`
 
 ```tsx
 const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'));
 const Remote2App = createRemoteComponent(() => import('remote2/export-app'));
 ```
-
-* `options`
   * `export`
     * type: `string`
     * 作用: 可以指定模块的 export
@@ -139,11 +138,17 @@ export const provider = createBridgeComponent({
 });
 
 // host
-const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'), {
+const Remote1App = createRemoteComponent({
+  loader: () => loadRemote('remote1/export-app'),
   export: 'provider'
 });
 ```
-
+  * `loading`
+    * type: `React.ReactNode`
+    * 作用: 加载远程模块时显示的组件
+  * `fallback`
+    * type: `ComponentType<{ error: any; }>`
+    * 作用: 加载、渲染远程模块过程中展示的错误
 * ReturnType
   * type: `(props: PropsInfo)=> React.JSX.Element`
   * 作用: 用于渲染远程模块组件

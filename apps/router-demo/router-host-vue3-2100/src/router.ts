@@ -8,9 +8,9 @@ import Detail from '@/pages/Detail.vue';
 import { loadRemote, init } from '@module-federation/enhanced/runtime';
 import * as bridge from '@module-federation/bridge-vue3';
 
-const Remote2 = bridge.createRemoteComponent(() =>
-  loadRemote('remote1/export-app'),
-);
+const Remote2 = bridge.createRemoteComponent({
+  loader: () => loadRemote('remote1/export-app'),
+});
 
 const router = createRouter({
   history: createWebHistory(),

@@ -14,7 +14,6 @@ import { PackageManagerTabs } from '@theme';
   }}
 />
 
-
 ### 示例
 
 > Remote
@@ -99,9 +98,9 @@ export default router;
 
 ```tsx
 function createRemoteComponent<T, E extends keyof T>(
-  // 加载远程应用的函数，例如：loadRemote('remote1/export-app')、import('remote1/export-app')
-  lazyComponent: () => Promise<T>,
   options?: {
+    // 加载远程应用的函数，例如：loadRemote('remote1/export-app')、import('remote1/export-app')
+    loader: () => Promise<T>,
     // 默认为 default，用于指定模块的 export
     export?: E;
   }
@@ -111,16 +110,16 @@ function createRemoteComponent<T, E extends keyof T>(
 }) => DefineComponent;
 ```
 
-* `lazyComponent`
-  * type: `() => Promise<Module>`
-  * 作用: 用于加载远程模块的函数，例如：`loadRemote('remote1/export-app')`、`import('remote1/export-app')`
+* `options`
+  * `loader`
+    * type: `() => Promise<Module>`
+    * 作用: 用于加载远程模块的函数，例如：`loadRemote('remote1/export-app')`、`import('remote1/export-app')`
 
 ```tsx
 const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'));
 const Remote2App = createRemoteComponent(() => import('remote2/export-app'));
 ```
 
-* `options`
   * `export`
     * type: `string`
     * 作用: 可以指定模块的 export

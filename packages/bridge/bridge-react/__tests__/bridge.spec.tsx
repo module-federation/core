@@ -51,15 +51,17 @@ describe('bridge', () => {
     const BridgeComponent = createBridgeComponent({
       rootComponent: Component,
     });
-    const RemoteComponent = createRemoteComponent(async () => {
-      return {
-        default: BridgeComponent,
-      };
+    const RemoteComponent = createRemoteComponent({
+      loader: async () => {
+        return {
+          default: BridgeComponent,
+        };
+      },
+      fallback: () => <div></div>,
+      loading: <div>loading</div>,
     });
 
-    const { container } = render(
-      <RemoteComponent fallback={<div>loading</div>} msg={'hello world'} />,
-    );
+    const { container } = render(<RemoteComponent msg={'hello world'} />);
     expect(getHtml(container)).toMatch('loading');
 
     await sleep(200);
