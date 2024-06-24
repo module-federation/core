@@ -1,8 +1,10 @@
 packages:
   - '!**/dist/**'
   - 'packages/*'
+  - 'packages/bridge/*'
   - 'packages/enhance'
   - 'apps/runtime-demo/*'
+  - 'apps/router-demo/*'
   - 'apps/manifest-demo/*'
   - 'apps/*'
   - 'webpack'

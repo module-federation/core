@@ -20,6 +20,7 @@
   "types": "./dist/index.cjs.d.ts",
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
+    "@module-federation/bridge-react-webpack-plugin": "workspace:*",
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/manifest": "workspace:*",
     "@module-federation/managers": "workspace:*",

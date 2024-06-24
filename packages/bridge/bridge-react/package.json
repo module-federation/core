@@ -1,0 +1,55 @@
+{
+  "name": "@module-federation/bridge-react",
+  "version": "0.0.1",
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "zhouxiao <codingzx@gmail.com>",
+  "type": "module",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./router": {
+      "types": "./dist/router.d.ts",
+      "import": "./dist/router.es.js",
+      "require": "./dist/router.cjs.js"
+    },
+    "./*": "./*"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@loadable/component": "^5.16.4",
+    "@module-federation/bridge-shared": "workspace:*",
+    "react-error-boundary": "^4.0.13"
+  },
+  "peerDependencies": {
+    "react": ">=16.9.0",
+    "react-dom": ">=16.9.0",
+    "react-router-dom": ">=4"
+  },
+  "devDependencies": {
+    "@testing-library/react": "15.0.7",
+    "@types/react": "18.2.79",
+    "@types/react-dom": "18.2.25",
+    "@vitejs/plugin-react": "^4.3.0",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "@vitejs/plugin-vue-jsx": "^4.0.0",
+    "jsdom": "^24.1.0",
+    "react": "18.1.0",
+    "react-dom": "18.1.0",
+    "react-router-dom": "6.22.3",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vite-plugin-dts": "^3.9.1"
+  }
+}

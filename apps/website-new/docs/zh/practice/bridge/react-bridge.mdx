@@ -1,0 +1,219 @@
+# React Bridge
+
+`@module-federation/bridge-react` 提供了用于 React 应用的 `bridge` 工具函数，其提供的 `createBridgeComponent` 可用于导出应用级别模块，`createRemoteComponent` 用于加载应用级别模块。[Demo](https://github.com/module-federation/core/blob/6756c9142d0bf41262a26fe30e3c39d7957cfa58/apps/router-demo)
+
+
+### 安装
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/bridge-react@0.0.0-next-20240620060503',
+    yarn: 'yarn add @module-federation/bridge-react@0.0.0-next-20240620060503',
+    pnpm: 'pnpm add @module-federation/bridge-react@0.0.0-next-20240620060503',
+  }}
+/>
+
+
+### 示例
+
+
+:::danger
+使用 `@module-federation/bridge-react` 后不能将 `react-router-dom` 设置成 shared、否则构建工具将会提示异常。因为 `@module-federation/bridge-react` 通过代理 `react-router-dom` 实现对于路由的控制
+
+:::
+
+> Remote
+
+```tsx
+// ./src/export-app.tsx
+import App from './src/App.tsx';
+import { createBridgeComponent } from '@module-federation/bridge-react';
+
+export default createBridgeComponent({
+  rootComponent: App
+});
+```
+
+```ts
+// rsbuild.config.ts
+export default defineConfig({
+  tools: {
+    rspack: (config, { appendPlugins }) => {
+      appendPlugins([
+        new ModuleFederationPlugin({
+          name: 'remote1',
+          exposes: {
+            './export-app': './src/export-app.tsx',
+          },
+          shared: ['react', 'react-dom'],
+        }),
+      ]);
+    },
+  },
+});
+```
+
+> Host
+
+```ts
+//rsbuild.config.ts
+export default defineConfig({
+  tools: {
+    rspack: (config, { appendPlugins }) => {
+      config.output!.uniqueName = 'host';
+      appendPlugins([
+        new ModuleFederationPlugin({
+          name: 'host',
+          remotes: {
+            remote1: 'remote1@http://localhost:2001/mf-manifest.json',
+          },
+        }),
+      ]);
+    },
+  },
+});
+```
+
+```tsx
+// ./src/App.tsx
+import React from 'react';
+import { createRemoteComponent } from '@module-federation/bridge-react';
+
+const Remote1App = createRemoteComponent(() => loadRemote('remote2/export-app'));
+
+const App = () => {
+  return (<BrowserRouter basename="/">
+      <Routes>
+        <Route path="/" Component={Home} />
+        <Route
+          path="/remote1/*"
+          Component={() => <Remote1App fallback={<div>loading</div>} />}
+        />
+      </Routes>
+    </BrowserRouter>)
+};
+```
+
+### 方法
+
+#### createRemoteComponent
+
+```tsx
+function createRemoteComponent<T, `E extends keyof T`>(
+  options: {
+    // 加载远程应用的函数，例如：loadRemote('remote1/export-app')、import('remote1/export-app')
+    loader: () => Promise<T>,
+    // 默认为 default，用于指定模块的 export
+    export?: E;
+    loading: React.ReactNode;
+    fallback: ComponentType<{ error: any; }>;
+  }
+): (props: {
+    basename?: ProviderParams['basename'];
+    memoryRoute?: { entryPath: string };
+} & RawComponentType) => React.JSX.Element;
+```
+
+* `options`
+  * `loader`
+    * type: `() => Promise<Module>`
+    * 作用: 用于加载远程模块的函数，例如：`loadRemote('remote1/export-app')`、`import('remote1/export-app')`
+
+```tsx
+const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'));
+const Remote2App = createRemoteComponent(() => import('remote2/export-app'));
+```
+  * `export`
+    * type: `string`
+    * 作用: 可以指定模块的 export
+```tsx
+// remote
+export const provider = createBridgeComponent({
+  rootComponent: App
+});
+
+// host
+const Remote1App = createRemoteComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  export: 'provider'
+});
+```
+  * `loading`
+    * type: `React.ReactNode`
+    * 作用: 加载远程模块时显示的组件
+  * `fallback`
+    * type: `ComponentType<{ error: any; }>`
+    * 作用: 加载、渲染远程模块过程中展示的错误
+* ReturnType
+  * type: `(props: PropsInfo)=> React.JSX.Element`
+  * 作用: 用于渲染远程模块组件
+
+```tsx
+const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'));
+
+function App() {
+  return (<BrowserRouter basename="/">
+    <Routes>
+      <Route
+        path="/remote1/*"
+        Component={() => <Remote1App fallback={<div>loading</div>} />}
+      />
+    </Routes>
+  </BrowserRouter>)
+}
+```
+
+```tsx
+const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'));
+
+function App() {
+  return (<BrowserRouter basename="/">
+    <Routes>
+      <Route
+        path="/remote1/*"
+        {/* 通过 memoryRoute 来讲子应用路由控制为 memoryRouter，将不会直接将 url 展示在浏览器地址上  */}
+        Component={() => <Remote1App fallback={<div>loading</div>} memoryRoute={{ entryPath: '/detail' }}/>}
+      />
+    </Routes>
+  </BrowserRouter>)
+}
+```
+
+#### createBridgeComponent
+
+```tsx
+function createBridgeComponent<T>(bridgeInfo: {
+  rootComponent: React.ComponentType<T>;
+}): () => {
+  render(info: {
+    name?: string;
+    basename?: string;
+    memoryRoute?: {
+      entryPath: string;
+    };
+    dom?: HTMLElement;
+}): void;
+  destroy(info: { dom: HTMLElement}): void;
+}
+```
+
+* `bridgeInfo`
+  * type: `{ rootComponent: React.ComponentType<T>; }`
+  * 作用: 用于传递根组件
+* ReturnType
+  * type: `() => { render: (info: RenderFnParams) => void; destroy: (info: { dom: HTMLElement}) => void; }`
+
+```tsx
+// ./src/export-app.tsx
+import React from 'react';
+import App from './src/App.tsx';
+import { createRemoteComponent } from '@module-federation/bridge-react';
+
+export default createBridgeComponent({
+  rootComponent: App
+});
+```
+
+

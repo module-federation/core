@@ -1,0 +1,98 @@
+# Bridge 概览
+
+## 介绍
+
+`bridge` 是 `Module Federation` 提供的工具函数，用于帮助用户通过 `Module Federation` 来加载应用级别模块。它能自动提供 `provider` 函数所需的应用生命周期函数 `render` 和 `destroy`，并实现框架不同版本的兼容。此外，它还能让应用间的路由正常协同工作。
+
+:::tip
+在阅读本章前，预设你已经了解：
+
+- [何消费和导出模块](../../guide/start/quick-start.mdx)
+- [Module Federation Builder plugin](../../guide/basic/rspack.mdx)
+- [Module Federation Runtime 的特点和能力](../../guide/basic/runtime.mdx)
+
+:::
+
+## 工具包
+
+### @module-federation/bridge-react
+
+`@module-federation/bridge-react` 工具包是 MF 为 React v16、v17、v18 应用 提供的 `bridge` 工具函数包，其导出的 `createBridgeComponent` 可用于 react v18 应用的导出模块，`@module-federation/bridge-react` 的使用见 [Host demo](https://github.com/module-federation/core/blob/6756c9142d0bf41262a26fe30e3c39d7957cfa58/apps/router-demo/router-host-2000)、[Remote demo](https://github.com/module-federation/core/blob/6756c9142d0bf41262a26fe30e3c39d7957cfa58/apps/router-demo/router-remote2-2002)。
+
+### @module-federation/bridge-vue3
+
+`@module-federation/bridge-vue3` 工具包是 MF 为 Vue v3 应用 提供的 `bridge` 工具函数包，其导出的 `createBridgeComponent` 可用于 Vue v3 子应用的导出模块，`@module-federation/bridge-vue3` 的使用见 [Host demo](https://github.com/module-federation/core/blob/6756c9142d0bf41262a26fe30e3c39d7957cfa58/apps/router-demo/router-host-2100)、[Remote demo](https://github.com/module-federation/core/blob/6756c9142d0bf41262a26fe30e3c39d7957cfa58/apps/router-demo/router-remote3-2003)。
+
+
+## FAQ
+
+### Why Bridge?
+
+Bridge 主要用于解决两个问题：
+
+* 跨应用框架（React、Vue）加载和渲染
+* 支持加载带路由的模块（路由可以很好的协同工作）
+
+这两个问题都是「微前端框架」里重要的特性
+
+### 未提供对应框架的 bridge 如何解决？
+
+目前 `Module Federation` 提供了官方的 bridge 工具包，如果你需要其他框架的 bridge 工具包，可以通过 [issue](https://github.com/module-federation/core/issues) 给我们提供反馈，也可以参考现有的 [`Bridge`](https://github.com/module-federation/core/blob/34ba220bcee3d032e4083aae37f802d1ed20d61b/packages/bridge/bridge-react) 如何实现.
+
+`Bridge` 的实现非常简单，核心就是基于 `DOM` 渲染，下面是伪代码：
+
+> 导出模块
+
+```tsx
+export default function () {
+  const rootMap = new Map<any, ReactDOM.Root>();
+  return {
+    render(info: { dom: HTMLElement; basename?: string; memoryRoute?: { entryPath: string; } }) {
+      const root = ReactDOM.createRoot(info.dom);
+      rootMap.set(info.dom, root);
+      root.render(
+        <App />,
+      );
+    },
+    destroy(info: { dom: HTMLElement }) {
+      const root = rootMap.get(info.dom);
+      root?.unmount();
+    },
+  }
+}
+```
+
+> 加载模块
+
+```tsx
+const LazyComponent =  React.lazy(async () => {
+  const m = await loadRemote('remote1/export-app');
+  const providerInfo = m.default;
+  return {
+    default: () => {
+      const rootRef = useRef(null);
+      const providerInfoRef = useRef<any>(null);
+
+      useEffect(() => {
+        const providerReturn = providerInfo();
+        providerInfoRef.current = providerReturn;
+        providerReturn.render(renderProps);
+
+        return () => {
+          providerInfoRef.current?.destroy({
+            dom: renderDom.current,
+          });
+        };
+      }, []);
+      return <div ref={rootRef}></div>;
+    }
+  };
+});
+
+function Component () {
+  return (<React.Suspense fallback={<div>loading</div>}>
+  <LazyComponent />
+</React.Suspense>)
+}
+```
+

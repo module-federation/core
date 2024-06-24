@@ -1,0 +1,19 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Bridge 概览"
+  },
+  {
+    "type": "file",
+    "name": "react-bridge",
+    "label": "React bridge",
+    "collapsed": true
+  },
+  {
+    "type": "file",
+    "name": "vue-bridge",
+    "label": "Vue bridge",
+    "collapsed": true
+  }
+]
