@@ -20,15 +20,14 @@ if (swcJestConfig.swcrc === undefined) {
 
 module.exports = {
   clearMocks: true,
+  cache: false,
   testEnvironment: 'jsdom',
   coveragePathIgnorePatterns: ['__tests__', '/node_modules/'],
-  coverageProvider: 'v8',
-  coverageReporters: ['cobertura', 'clover', 'json', 'lcov', 'text'],
   globals: {
     __DEV__: true,
     __TEST__: true,
     __BROWSER__: false,
-    __VERSION__: '"unknow"',
+    __VERSION__: '"unknown"',
   },
   preset: 'ts-jest',
   transformIgnorePatterns: [
