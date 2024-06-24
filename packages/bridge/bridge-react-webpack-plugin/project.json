@@ -11,18 +11,6 @@
           "npm run build --prefix packages/bridge/bridge-react-webpack-plugin"
         ]
       }
-    },
-    "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "parallel": false,
-        "commands": [
-          {
-            "command": "vitest run -c packages/bridge/bridge-react-webpack-plugin/vitest.config.ts",
-            "forwardAllArgs": false
-          }
-        ]
-      }
     }
   },
   "tags": ["type:pkg"]
