@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.1.21",
+  "version": "0.2.0",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "repository": "https://github.com/module-federation/core/tree/main/packages/enhanced",
@@ -77,6 +77,7 @@
     "@module-federation/managers": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/rspack": "workspace:*",
+    "@module-federation/bridge-react-webpack-plugin": "workspace:*",
     "upath": "2.0.1",
     "btoa": "^1.2.1"
   }
