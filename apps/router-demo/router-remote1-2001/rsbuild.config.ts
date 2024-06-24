@@ -11,10 +11,10 @@ export default defineConfig({
       react: path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
       // 'react-router-dom': path.resolve(__dirname, 'node_modules/react-router-dom'),
-      'react-router-dom$': path.resolve(
-        __dirname,
-        'node_modules/@module-federation/bridge-react/dist/router.es.js',
-      ),
+      // 'react-router-dom$': path.resolve(
+      //   __dirname,
+      //   'node_modules/@module-federation/bridge-react/dist/router.es.js',
+      // ),
     },
   },
   server: {
@@ -38,12 +38,12 @@ export default defineConfig({
             './export-app': './src/export-App.tsx',
           },
           shared: {
-            // react: {
-            //   singleton: true,
-            // },
-            // 'react-dom': {
-            //   singleton: true,
-            // },
+            react: {
+              singleton: true,
+            },
+            'react-dom': {
+              singleton: true,
+            },
             // 'react-router-dom': {
             //   singleton: true,
             // },

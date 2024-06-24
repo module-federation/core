@@ -13,10 +13,10 @@ export default defineConfig({
       react: path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
       // 'react-router-dom': path.resolve(__dirname, 'node_modules/react-router-dom'),
-      'react-router-dom$': path.resolve(
-        __dirname,
-        'node_modules/@module-federation/bridge-react/dist/router.es.js',
-      ),
+      // 'react-router-dom$': path.resolve(
+      //   __dirname,
+      //   'node_modules/@module-federation/bridge-react/dist/router.es.js',
+      // ),
     },
   },
   server: {
@@ -33,11 +33,7 @@ export default defineConfig({
       delete config.optimization?.splitChunks;
       appendPlugins([
         new ModuleFederationPlugin({
-          name: '@com/aaa-remote2',
-          library: {
-            type: 'window',
-            name: 'remote2',
-          },
+          name: 'remote2',
           exposes: {
             './button': './src/button.tsx',
             './export-app': './src/export-App.tsx',
