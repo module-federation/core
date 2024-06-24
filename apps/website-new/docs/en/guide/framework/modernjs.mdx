@@ -81,13 +81,13 @@ There is no difference between using Module Federation in SSR scenarios and CSR 
 
 But for a better user experience, we provide supporting functions/components to help developers better use Module Federation.
 
-### createRemoteSSRComponent
+### createRemoteSSRReactComponent
 
 import Collapse from '@components/Collapse'
 
 <Collapse>
 ```ts
-declare function createRemoteSSRComponent(
+declare function createRemoteSSRReactComponent(
   props: CreateRemoteSSRComponentOptions
 ): (props: ComponentType) => React.JSX.Element;
 
@@ -114,12 +114,12 @@ This function will also help inject the corresponding style tag/script while loa
 
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
-import { registerRemotes, createRemoteSSRComponent } from '@modern-js/runtime/mf';
+import { registerRemotes, createRemoteSSRReactComponent } from '@modern-js/runtime/mf';
 // The remote declared in the build plug-in can be imported directly at the top level
 import RemoteComp from 'remote/Image';
 
 
-const RemoteSSRComponent = createRemoteSSRComponent({
+const RemoteSSRComponent = createRemoteSSRReactComponent({
   // The remote declared in the build plug-in can also be loaded using this function: loader: () => import('remote/Image'),
   loader: () => loadRemote('dynamic_remote/Image'),
   loading: <div>loading...</div>,
@@ -192,7 +192,7 @@ Whether to inject the script of the corresponding component.
 
 <Collapse>
 ```ts
-declare function createRemoteSSRComponent(
+declare function createRemoteSSRReactComponent(
   props: CollectSSRAssetsOptions
 ): React.ReactNode[];
 
