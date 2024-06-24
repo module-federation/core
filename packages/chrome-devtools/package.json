@@ -63,7 +63,7 @@
     "@types/dagre": "^0.7.52",
     "@modern-js-app/eslint-config": "2.46.1",
     "@modern-js/app-tools": "2.46.1",
-    "@modern-js/eslint-config": "2.50.0",
+    "@modern-js/eslint-config": "2.54.2",
     "@modern-js/tsconfig": "2.46.1",
     "@modern-js/module-tools": "2.46.1",
     "@modern-js/builder-webpack-provider": "2.46.1",
