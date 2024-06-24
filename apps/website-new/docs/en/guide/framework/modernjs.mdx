@@ -42,11 +42,7 @@ export default defineConfig({
   runtime: {
     router: true,
   },
-  server: {
-    ssr: {
-      mode: 'stream',
-    },
-  },
+  // moduleFederationPlugin is a plug-in for modern.js, which can make certain modifications to the build/runtime
   plugins: [appTools(), moduleFederationPlugin()],
 });
 ```
@@ -67,6 +63,14 @@ export default createModuleFederationConfig({
 });
 ```
 
+### Type support
+
+add `/// <reference types='@module-federation/modern-js/types' />` in `modern-app-env.d.ts` to get type support.
+
+```diff title='modern-app-env.d.ts'
++ /// <reference types='@module-federation/modern-js/types' />
+```
+
 ## Server-Side Rendering
 
 :::info
@@ -75,41 +79,57 @@ For a better performance experience, Module Federation X Modern.js SSR only supp
 
 There is no difference between using Module Federation in SSR scenarios and CSR scenarios. Developers can just keep following the original development behavior.
 
-But for a better development experience, we provide corresponding components to help developers better use Module Federation.
+But for a better user experience, we provide supporting functions/components to help developers better use Module Federation.
 
-### MFReactComponent
+### createRemoteSSRComponent
 
 import Collapse from '@components/Collapse'
 
 <Collapse>
 ```ts
-declare function MFReactComponent(
-  props: MFReactComponentProps
-): React.ReactElement;
+declare function createRemoteSSRComponent(
+  props: CreateRemoteSSRComponentOptions
+): (props: ComponentType) => React.JSX.Element;
 
-type Id = string;
-type MFReactComponentProps =
-  | {
-      id: Id;
-      injectScript?: boolean;
-      injectLink?: boolean;
-      loading?: React.ReactNode;
-      fallback?:
-        | ((err: Error) => React.FC | React.ReactElement)
-        | React.FC
-        | React.ReactElement;
-    }
-  | Id;
+type CreateRemoteSSRComponentOptions = {
+  loader: () => Promise<T>;
+  loading: React.ReactNode;
+  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
+  injectScript?: boolean;
+  injectLink?: boolean;
+  export?: E;
+};
+
+type ComponentType = T[E] extends (...args: any) => any
+  ? Parameters<T[E]>[0] extends undefined
+    ? Record<string, never>
+    : Parameters<T[E]>[0]
+  : Record<string, never>;
 ```
 </Collapse>
 
-While loading the component, this component will also help inject the corresponding link/script. This behavior can help avoid the CSS flickering problem caused by streaming rendering and accelerate the PID (first screen interactive time).
+This function will also help inject the corresponding style tag/script while loading the component. This behavior can help avoid the CSS flickering problem caused by streaming rendering and accelerate the PID (first screen interactive time).
 
 #### Example
 
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
-import { registerRemotes, MFReactComponent } from '@modern-js/runtime/mf';
+import { registerRemotes, createRemoteSSRComponent } from '@modern-js/runtime/mf';
+// The remote declared in the build plug-in can be imported directly at the top level
+import RemoteComp from 'remote/Image';
+
+
+const RemoteSSRComponent = createRemoteSSRComponent({
+  // The remote declared in the build plug-in can also be loaded using this function: loader: () => import('remote/Image'),
+  loader: () => loadRemote('dynamic_remote/Image'),
+  loading: <div>loading...</div>,
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
 
 const Product: FC = () => {
   registerRemotes([
@@ -127,24 +147,17 @@ const Product: FC = () => {
   };
 
   return <>
-    <MFReactComponent id={rId} fallback={fallback} />
+    <RemoteSSRComponent />
+    <RemoteComp />
   </>;
 };
 export default Product;
 ```
 
-#### id
-
-- Type:`string`
-- Required: Yes
-- Default value: `undefined`
-
-The complete request path. After setting, `loadRemote` will be called to load this module.
-
 #### loading
 
 - Type:`React.ReactNode`
-- Required: No
+- Required: Yes
 - Default value: `undefined`
 
 Set module loading status.
@@ -152,7 +165,7 @@ Set module loading status.
 #### fallback
 
 - Type:`((err: Error) => React.ReactElement)`
-- Required: No
+- Required: Yes
 - Default value: `undefined`
 
 A fault-tolerant component that is rendered when the component fails to **load** or **render**.
@@ -175,7 +188,56 @@ Whether to inject the style of the corresponding component.
 
 Whether to inject the script of the corresponding component.
 
-### LiveReload
+### collectSSRAssets
+
+<Collapse>
+```ts
+declare function createRemoteSSRComponent(
+  props: CollectSSRAssetsOptions
+): React.ReactNode[];
+
+type CollectSSRAssetsOptions = {
+  id: string;
+  injectScript?: boolean;
+  injectLink?: boolean;
+};
+```
+</Collapse>
+
+This function collects producer-related scripts and styles rendered on the server side and returns the script/link tag.
+
+#### Example
+
+```tsx
+import React from 'react';
+import { collectSSRAssets } from '@modern-js/runtime/mf';
+import Comp from 'remote/Image';
+
+export default (): JSX.Element => (
+  <div>
+    {collectSSRAssets({ id: 'remote/Image' })}
+    <Comp />
+  </div>
+);
+```
+
+#### injectLink
+
+- Type:`boolean`
+- Required: No
+- Default value: `true`
+
+Whether to inject the style of the corresponding component.
+
+#### injectScript
+
+- Type:`boolean`
+- Required: No
+- Default value: `true`
+
+Whether to inject the script of the corresponding component.
+
+### SSRLiveReload
 
 :::info
 This component will not take effect in the production environment!
@@ -183,7 +245,7 @@ This component will not take effect in the production environment!
 
 <Collapse>
 ```ts
-declare function LiveReload(): React.JSX.Element | null;
+declare function SSRLiveReload(): React.JSX.Element | null;
 ```
 </Collapse>
 
@@ -193,12 +255,12 @@ When remote components are updated, page reloads occur automatically.
 
 ```tsx
 import { Outlet } from '@modern-js/runtime/router';
-import { LiveReload } from '@modern-js/runtime/mf';
+import { SSRLiveReload } from '@modern-js/runtime/mf';
 
 export default function Layout() {
   return (
     <div>
-      <LiveReload />
+      <SSRLiveReload />
       <Outlet />
     </div>
   );

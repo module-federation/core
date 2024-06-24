@@ -72,7 +72,7 @@ describe('/', () => {
       );
     });
 
-    it('should inject link tag if use collectAssets', () => {
+    it('should inject link tag if use collectSSRAssets', () => {
       cy.get('#nested-remote-components')
         .find('link')
         .should('have.attr', 'href')

@@ -2,7 +2,7 @@ import React, { useState, Suspense } from 'react';
 import {
   loadRemote,
   registerRemotes,
-  MFReactComponent,
+  createRemoteSSRComponent,
 } from '@modern-js/runtime/mf';
 
 registerRemotes([
@@ -11,6 +11,17 @@ registerRemotes([
     entry: 'http://localhost:3008/mf-manifest.json',
   },
 ]);
+
+const RemoteSSRComponent = createRemoteSSRComponent({
+  loader: () => loadRemote('dynamic_remote/Image'),
+  loading: 'loading...',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
 
 const NewRemoteCom = React.lazy(() =>
   loadRemote('dynamic_remote/Image').then((m) => {
@@ -63,7 +74,7 @@ const Index = (): JSX.Element => {
               </button>
             </td>
             <td>
-              <MFReactComponent id="dynamic_remote/Image" />
+              <RemoteSSRComponent text={'host render'} />
             </td>
           </tr>
 

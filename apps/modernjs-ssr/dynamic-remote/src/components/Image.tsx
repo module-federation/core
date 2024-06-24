@@ -3,7 +3,7 @@ import Button from 'antd/lib/button';
 import mfSvg from '../assets/module-federation.svg';
 import stuff from './stuff.module.css';
 
-export default (): JSX.Element => (
+export default ({ text }: { text: string }): JSX.Element => (
   <div
     id="dynamic-remote-components"
     style={{
@@ -15,6 +15,7 @@ export default (): JSX.Element => (
     <h2>
       <strong>dynamic remote</strong>&nbsp;image
     </h2>
+    <p>{text}</p>
     <button
       id="dynamic-remote-components-button"
       style={{ marginBottom: '1rem' }}

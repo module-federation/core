@@ -6,9 +6,9 @@ import type {
 } from '@modern-js/app-tools';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
 import path from 'path';
+import os from 'os';
 import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
-import dns from 'dns';
 import { LOCALHOST } from '../constant';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
@@ -54,7 +54,7 @@ const replaceRemoteUrl = async (
   if (!mfConfig.remotes) {
     return;
   }
-  const ipv4 = await lookupIpv4();
+  const ipv4 = getIPV4();
   const handleRemoteObject = (
     remoteObject: moduleFederationPlugin.RemotesObject,
   ) => {
@@ -95,6 +95,35 @@ export const patchMFConfig = (
   const isDev = process.env.NODE_ENV === 'development';
   const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
 
+  const ModernJSRuntime = '@modern-js/runtime/mf';
+  if (mfConfig.dts !== false) {
+    if (typeof mfConfig.dts === 'boolean' || mfConfig.dts === undefined) {
+      mfConfig.dts = {
+        consumeTypes: {
+          runtimePkgs: [ModernJSRuntime],
+        },
+      };
+    } else if (
+      mfConfig.dts?.consumeTypes ||
+      mfConfig.dts?.consumeTypes === undefined
+    ) {
+      if (
+        typeof mfConfig.dts.consumeTypes === 'boolean' ||
+        mfConfig.dts?.consumeTypes === undefined
+      ) {
+        mfConfig.dts.consumeTypes = {
+          runtimePkgs: [ModernJSRuntime],
+        };
+      } else {
+        mfConfig.dts.consumeTypes.runtimePkgs =
+          mfConfig.dts.consumeTypes.runtimePkgs || [];
+        if (!mfConfig.dts.consumeTypes.runtimePkgs.includes(ModernJSRuntime)) {
+          mfConfig.dts.consumeTypes.runtimePkgs.push(ModernJSRuntime);
+        }
+      }
+    }
+  }
+
   injectRuntimePlugins(
     path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
     runtimePlugins,
@@ -127,23 +156,6 @@ export const patchMFConfig = (
     return {
       ...mfConfig,
       runtimePlugins,
-      // dts:
-      //   mfConfig.dts === false
-      //     ? false
-      //     : {
-      //         generateTypes: false,
-      //         consumeTypes: false,
-      //         ...(typeof mfConfig.dts === 'object' ? mfConfig.dts : {}),
-      //       },
-      // dev:
-      //   mfConfig.dev === false
-      //     ? false
-      //     : {
-      //         disableHotTypesReload: true,
-      //         disableLiveReload: false,
-      //         injectWebClient: true,
-      //         ...(typeof mfConfig.dev === 'object' ? mfConfig.dev : {}),
-      //       },
     };
   }
 
@@ -244,13 +256,33 @@ export function patchWebpackConfig<T>(options: {
   }
 }
 
-export const lookupIpv4 = async (): Promise<string> => {
+const localIpv4 = '127.0.0.1';
+
+const getIpv4Interfaces = (): os.NetworkInterfaceInfo[] => {
   try {
-    const res = await dns.promises.lookup(LOCALHOST, { family: 4 });
-    return res.address;
-  } catch (err) {
-    return '127.0.0.1';
+    const interfaces = os.networkInterfaces();
+    const ipv4Interfaces: os.NetworkInterfaceInfo[] = [];
+
+    Object.values(interfaces).forEach((detail) => {
+      detail?.forEach((detail) => {
+        // 'IPv4' is in Node <= 17, from 18 it's a number 4 or 6
+        const familyV4Value = typeof detail.family === 'string' ? 'IPv4' : 4;
+
+        if (detail.family === familyV4Value && detail.address !== localIpv4) {
+          ipv4Interfaces.push(detail);
+        }
+      });
+    });
+    return ipv4Interfaces;
+  } catch (_err) {
+    return [];
   }
+};
+
+export const getIPV4 = (): string => {
+  const ipv4Interfaces = getIpv4Interfaces();
+  const ipv4Interface = ipv4Interfaces[0] || { address: localIpv4 };
+  return ipv4Interface.address;
 };
 
 // lib-polyfill.js: include core-js，@babel/runtime，@swc/helpers，tslib.

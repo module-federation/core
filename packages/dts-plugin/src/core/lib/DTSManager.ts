@@ -308,7 +308,12 @@ class DTSManager {
       'Y',
     ].join(' :\n')} ;`;
 
-    const pkgsDeclareStr = this.runtimePkgs
+    const runtimePkgs: Set<string> = new Set();
+    [...this.runtimePkgs, ...hostOptions.runtimePkgs].forEach((pkg) => {
+      runtimePkgs.add(pkg);
+    });
+
+    const pkgsDeclareStr = [...runtimePkgs]
       .map((pkg) => {
         return `declare module "${pkg}" {
       ${remoteKeysStr}

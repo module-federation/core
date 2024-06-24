@@ -1,4 +1,4 @@
-export function LiveReload() {
+export function SSRLiveReload() {
   if (process.env.NODE_ENV !== 'development') {
     return null;
   }

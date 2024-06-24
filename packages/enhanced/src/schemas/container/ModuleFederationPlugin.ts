@@ -626,6 +626,15 @@ export default {
           type: 'number',
           minimum: 1,
         },
+        runtimePkgs: {
+          description: 'The extra runtime pkgs.',
+          type: 'array',
+          items: {
+            description: 'The extra runtime pkg.',
+            type: 'string',
+            minLength: 1,
+          },
+        },
       },
     },
     Dts: {

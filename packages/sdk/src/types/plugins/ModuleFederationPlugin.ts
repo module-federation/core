@@ -138,6 +138,7 @@ export interface DtsHostOptions {
   deleteTypesFolder?: boolean;
   maxRetries?: number;
   consumeAPITypes?: boolean;
+  runtimePkgs?: string[];
 }
 
 export interface DtsRemoteOptions {

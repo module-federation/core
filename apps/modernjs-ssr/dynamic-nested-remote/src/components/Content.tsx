@@ -1,8 +1,11 @@
 import React from 'react';
 import Button from 'antd/lib/button';
-import { registerRemotes, MFReactComponent } from '@modern-js/runtime/mf';
+import {
+  registerRemotes,
+  loadRemote,
+  createRemoteSSRComponent,
+} from '@modern-js/runtime/mf';
 import stuff from './stuff.module.css';
-import { component$ } from '@builder.io/qwik';
 
 registerRemotes([
   {
@@ -10,6 +13,17 @@ registerRemotes([
     entry: 'http://localhost:3008/mf-manifest.json',
   },
 ]);
+
+const RemoteSSRComponent = createRemoteSSRComponent({
+  loader: () => loadRemote('dynamic_remote/Image'),
+  loading: 'loading...',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
 
 const LazyButton2 = React.lazy(() =>
   import('./Button2').then((m) => {
@@ -51,20 +65,7 @@ export default (): JSX.Element => (
       Click me to test <strong>dynamic nested remote</strong> interactive!
     </Button>
 
-    <MFReactComponent
-      id="wrong_id_dynamic_remote/Image"
-      loading={'loading...'}
-      fallback={({ error }) => {
-        console.log(error);
-        return (
-          <MFReactComponent
-            id="dynamic_remote/Image"
-            loading={'loading...'}
-            fallback={() => <div>fallback component$</div>}
-          />
-        );
-      }}
-    />
+    <RemoteSSRComponent text={'xxxx'} />
 
     <React.Suspense fallback="loading btn 1000ms">
       <LazyButton1 />

@@ -1,3 +1,4 @@
-/// <reference types="react" />
-declare const _default: () => JSX.Element;
+declare const _default: ({ text }: {
+    text: string;
+}) => JSX.Element;
 export default _default;

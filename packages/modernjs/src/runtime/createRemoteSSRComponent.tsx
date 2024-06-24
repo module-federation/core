@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  loadRemote,
   getInstance,
   type FederationHost,
 } from '@module-federation/enhanced/runtime';
@@ -9,15 +8,10 @@ import {
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
 
-type Comp = React.FC | { default: React.FC };
-type Id = string;
 type IProps = {
-  id: Id;
-  loading: React.ReactNode;
-  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
+  id: string;
   injectScript?: boolean;
   injectLink?: boolean;
-  remoteProps?: Record<string, any>;
 };
 
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
@@ -80,7 +74,7 @@ function getTargetModuleInfo(id: string) {
   };
 }
 
-function collectAssets(options: IProps) {
+export function collectSSRAssets(options: IProps) {
   const {
     id,
     injectLink = true,
@@ -136,36 +130,59 @@ function collectAssets(options: IProps) {
   return [...scripts, ...links];
 }
 
-function MFReactComponent(props: IProps) {
-  const { loading = 'loading...', id, remoteProps = {}, fallback } = props;
+export function createRemoteSSRComponent<T, E extends keyof T>(info: {
+  loader: () => Promise<T>;
+  loading: React.ReactNode;
+  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
+  injectScript?: boolean;
+  injectLink?: boolean;
+  export?: E;
+}) {
+  type ComponentType = T[E] extends (...args: any) => any
+    ? Parameters<T[E]>[0] extends undefined
+      ? Record<string, never>
+      : Parameters<T[E]>[0]
+    : Record<string, never>;
 
-  const Component = React.lazy(() =>
-    loadRemote<Comp>(id)
-      .then((mod) => {
-        const assets = collectAssets(props);
-        if (!mod) {
+  return (props: ComponentType) => {
+    const exportName = info?.export || 'default';
+    const LazyComponent = React.lazy(async () => {
+      try {
+        const m = (await info.loader()) as Record<string, React.FC> &
+          Record<symbol, string>;
+        if (!m) {
           throw new Error('load remote failed');
         }
-        const Com =
-          typeof mod === 'object'
-            ? 'default' in mod
-              ? mod.default
-              : mod
-            : mod;
-        return {
-          default: () => (
-            <>
-              {assets}
-              <Com {...remoteProps} />
-            </>
-          ),
-        };
-      })
-      .catch((err) => {
-        if (!fallback) {
+        const moduleId = m && m[Symbol.for('mf_module_id')];
+
+        const assets = collectSSRAssets({
+          id: moduleId,
+          injectLink: info.injectLink,
+          injectScript: info.injectScript,
+        });
+
+        const Com = m[exportName] as React.FC;
+        if (exportName in m && typeof Com === 'function') {
+          return {
+            default: () => (
+              <>
+                {assets}
+                <Com {...props} />
+              </>
+            ),
+          };
+        } else {
+          throw Error(
+            `Make sure that ${moduleId} has the correct export when export is ${String(
+              exportName,
+            )}`,
+          );
+        }
+      } catch (err) {
+        if (!info.fallback) {
           throw err;
         }
-        const FallbackFunctionComponent = fallback;
+        const FallbackFunctionComponent = info.fallback;
         const FallbackNode = (
           <FallbackFunctionComponent
             error={err}
@@ -177,16 +194,15 @@ function MFReactComponent(props: IProps) {
         return {
           default: () => FallbackNode,
         };
-      }),
-  );
+      }
+    });
 
-  return (
-    <ErrorBoundary FallbackComponent={fallback}>
-      <React.Suspense fallback={loading}>
-        <Component />
-      </React.Suspense>
-    </ErrorBoundary>
-  );
+    return (
+      <ErrorBoundary FallbackComponent={info.fallback}>
+        <React.Suspense fallback={info.loading}>
+          <LazyComponent />
+        </React.Suspense>
+      </ErrorBoundary>
+    );
+  };
 }
-
-export { MFReactComponent, collectAssets };

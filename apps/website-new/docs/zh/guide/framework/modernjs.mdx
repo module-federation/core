@@ -42,11 +42,7 @@ export default defineConfig({
   runtime: {
     router: true,
   },
-  server: {
-    ssr: {
-      mode: 'stream',
-    },
-  },
+  // moduleFederationPlugin 是 modern.js 的插件，可以对构建/运行时做一定的修改
   plugins: [appTools(), moduleFederationPlugin()],
 });
 ```
@@ -67,6 +63,14 @@ export default createModuleFederationConfig({
 });
 ```
 
+### 引用类型
+
+在 `modern-app-env.d.ts` 文件增加 `/// <reference types='@module-federation/modern-js/types' />` 以获取类型支持。
+
+```diff title='modern-app-env.d.ts'
++ /// <reference types='@module-federation/modern-js/types' />
+```
+
 ## 服务端渲染（SSR）
 
 :::info 注意
@@ -75,40 +79,56 @@ export default createModuleFederationConfig({
 
 在 SSR 场景与 CSR 场景中使用 Module Federation 没有任何区别，开发者保持按照原有的开发行为即可。
 
-但为了更好地开发体验，我们提供了相应的组件来帮助开发者更好的使用 Module Federation。
+但为了更好地使用体验，我们提供了配套的函数/组件来帮助开发者更好的使用 Module Federation。
 
-### MFReactComponent
+### createRemoteSSRComponent
 
 import Collapse from '@components/Collapse'
 
 <Collapse>
 ```ts
-declare function MFReactComponent(
-  props: MFReactComponentProps
-): React.ReactElement;
+declare function createRemoteSSRComponent(
+  props: CreateRemoteSSRComponentOptions
+): (props: ComponentType) => React.JSX.Element;
 
-type Id = string;
-type MFReactComponentProps =
-  | {
-      id: Id;
-      injectScript?: boolean;
-      injectLink?: boolean;
-      loading?: React.ReactNode;
-      remoteProps?: Record<string, any>;
-      fallback?:
-        | ((err: Error) => React.FC | React.ReactElement)
-    }
-  | Id;
+type CreateRemoteSSRComponentOptions = {
+  loader: () => Promise<T>;
+  loading: React.ReactNode;
+  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
+  injectScript?: boolean;
+  injectLink?: boolean;
+  export?: E;
+};
+
+type ComponentType = T[E] extends (...args: any) => any
+  ? Parameters<T[E]>[0] extends undefined
+    ? Record<string, never>
+    : Parameters<T[E]>[0]
+  : Record<string, never>;
 ```
 </Collapse>
 
-该组件加载组件的同时，还会帮助注入相应的样式标签/脚本 ，此行为可以帮助避免流式渲染带来的 CSS 闪烁问题以及加速 PID （首屏可交互时间）。
+该函数在加载组件同时，还会帮助注入相应的样式标签/脚本 ，此行为可以帮助避免流式渲染带来的 CSS 闪烁问题以及加速 PID （首屏可交互时间）。
 
 #### 示例
 
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
-import { registerRemotes, MFReactComponent } from '@modern-js/runtime/mf';
+import { registerRemotes, createRemoteSSRComponent } from '@modern-js/runtime/mf';
+// 在构建插件声明过的 remote 可以直接在顶层 import
+import RemoteComp from 'remote/Image';
+
+const RemoteSSRComponent = createRemoteSSRComponent({
+  // 在构建插件声明过的 remote 也可以使用此函数加载：loader: () => import('remote/Image'),
+  loader: () => loadRemote('dynamic_remote/Image'),
+  loading: <div>loading...</div>,
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
 
 const Product: FC = () => {
   registerRemotes([
@@ -126,32 +146,25 @@ const Product: FC = () => {
   };
 
   return <>
-    <MFReactComponent id={rId} fallback={fallback} />
+    <RemoteSSRComponent />
+    <RemoteComp />
   </>;
 };
 export default Product;
 ```
 
-#### id
-
-- 类型：`string`
-- 是否必填：是
-- 默认值：`undefined`
-
-完整请求路径，设置后会调用 `loadRemote` 加载此模块。
-
 #### loading
 
 - 类型：`React.ReactNode`
-- 是否必填：否
+- 是否必填：是
 - 默认值：`undefined`
 
 设置模块载入状态。
 
 #### fallback
 
-- 类型：`(({error}: {error: Error}) => React.ReactElement)`
-- 是否必填：否
+- 类型：`(({ error }: { error: Error}) => React.ReactElement)`
+- 是否必填：是
 - 默认值：`undefined`
 
 当组件**加载**或**渲染**失败时，所渲染的容错组件。
@@ -174,15 +187,56 @@ export default Product;
 
 是否注入对应组件的脚本。
 
-#### remoteProps
+### collectSSRAssets
 
-- 类型：`Record<string, any>`
+<Collapse>
+```ts
+declare function createRemoteSSRComponent(
+  props: CollectSSRAssetsOptions
+): React.ReactNode[];
+
+type CollectSSRAssetsOptions = {
+  id: string;
+  injectScript?: boolean;
+  injectLink?: boolean;
+};
+```
+</Collapse>
+
+该函数会收集在服务端渲染的生产者相关的脚本和样式，并返回 script/link 标签。
+
+#### 示例
+
+```tsx
+import React from 'react';
+import { collectSSRAssets } from '@modern-js/runtime/mf';
+import Comp from 'remote/Image';
+
+export default (): JSX.Element => (
+  <div>
+    {collectSSRAssets({ id: 'remote/Image' })}
+    <Comp />
+  </div>
+);
+```
+
+#### injectLink
+
+- 类型：`boolean`
 - 是否必填：否
-- 默认值：`{}`
+- 默认值：`true`
 
-传给远程
+是否注入对应组件的样式。
 
-### LiveReload
+#### injectScript
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`true`
+
+是否注入对应组件的脚本。
+
+### SSRLiveReload
 
 :::info 提示
 该组件在生产环境不会生效！
@@ -190,7 +244,7 @@ export default Product;
 
 <Collapse>
 ```ts
-declare function LiveReload(): React.JSX.Element | null;
+declare function SSRLiveReload(): React.JSX.Element | null;
 ```
 </Collapse>
 
@@ -200,12 +254,12 @@ declare function LiveReload(): React.JSX.Element | null;
 
 ```tsx
 import { Outlet } from '@modern-js/runtime/router';
-import { LiveReload } from '@modern-js/runtime/mf';
+import { SSRLiveReload } from '@modern-js/runtime/mf';
 
 export default function Layout() {
   return (
     <div>
-      <LiveReload />
+      <SSRLiveReload />
       <Outlet />
     </div>
   );

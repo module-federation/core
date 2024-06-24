@@ -16,7 +16,7 @@ import {
   getMFConfig,
   getTargetEnvConfig,
   patchWebpackConfig,
-  lookupIpv4,
+  getIPV4,
 } from './utils';
 import { updateStatsAndManifest } from './manifest';
 import { MODERN_JS_SERVER_DIR } from '../constant';
@@ -88,7 +88,7 @@ export const moduleFederationPlugin = (
           });
         };
 
-        const ipv4 = await lookupIpv4();
+        const ipv4 = await getIPV4();
 
         return {
           tools: {

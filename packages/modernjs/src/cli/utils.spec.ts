@@ -72,6 +72,11 @@ describe('getTargetEnvConfig', async () => {
           singleton: true,
         },
       },
+      dts: {
+        consumeTypes: {
+          runtimePkgs: ['@modern-js/runtime/mf'],
+        },
+      },
     });
   });
 });
