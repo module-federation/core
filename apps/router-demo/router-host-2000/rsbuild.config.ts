@@ -29,7 +29,7 @@ export default defineConfig({
             remote3: 'remote3@http://localhost:2003/mf-manifest.json',
             remote_error: 'remote_error@http://localhost:2004/mf-manifest.json',
           },
-          shared: ['react', 'react-dom', 'antd', 'react-router-dom'],
+          shared: ['react', 'react-dom', 'antd'],
           runtimePlugins: [
             path.join(__dirname, './src/runtime-plugin/shared-strategy.ts'),
           ],

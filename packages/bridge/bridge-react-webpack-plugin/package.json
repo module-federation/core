@@ -5,14 +5,13 @@
     "access": "public"
   },
   "author": "zhouxiao <codingzx@gmail.com>",
-  "type": "module",
   "main": "./dist/index.cjs.js",
-  "module": "./dist/index.es.js",
-  "types": "./dist/index.d.ts",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.cjs.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.es.js",
+      "types": "./dist/index.cjs.d.ts",
+      "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js"
     },
     "./*": "./*"
