@@ -31,15 +31,6 @@ export default createBridgeComponent({
 ```ts
 // rsbuild.config.ts
 export default defineConfig({
-  source: {
-    alias: {
-      // Set react-router-dom to proxy's router for convenience
-      'react-router-dom$': path.resolve(
-        __dirname,
-        'node_modules/@module-federation/bridge-react/dist/router.es.js',
-      ),
-    },
-  },
   tools: {
     rspack: (config, { appendPlugins }) => {
       appendPlugins([

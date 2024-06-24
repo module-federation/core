@@ -33,15 +33,6 @@ export default createBridgeComponent({
 ```ts
 // rsbuild.config.ts
 export default defineConfig({
-  source: {
-    alias: {
-      // 设置 react-router-dom 到 proxy 的 router 中，方便
-      'react-router-dom$': path.resolve(
-        __dirname,
-        'node_modules/@module-federation/bridge-react/dist/router.es.js',
-      ),
-    },
-  },
   tools: {
     rspack: (config, { appendPlugins }) => {
       appendPlugins([
