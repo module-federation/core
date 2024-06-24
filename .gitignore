@@ -58,3 +58,5 @@ packages/enhanced/test/js
 **/.mf
 **/.mf/**
 
+/apps/manifest-demo/**/@mf-types/
+/apps/manifest-demo/3008-webpack-host/@mf-types/
