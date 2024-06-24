@@ -53,8 +53,6 @@ export class DtsWorker {
         if (isDebugMode()) {
           console.error(error);
         }
-        const pid = this.rpcWorker.process?.pid;
-        process.kill(pid, 'SIGKILL');
       }
     };
     return Promise.resolve(this._res)
