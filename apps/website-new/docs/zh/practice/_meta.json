@@ -6,8 +6,14 @@
   },
   {
     "type": "dir",
+    "name": "bridge",
+    "label": "Bridge"
+  },
+  {
+    "type": "dir",
     "name": "frameworks",
-    "label": "框架"
+    "label": "框架",
+    "collapsed": true
   },
   {
     "type": "file",

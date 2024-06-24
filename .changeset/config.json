@@ -14,7 +14,11 @@
       "@module-federation/manifest",
       "@module-federation/dts-plugin",
       "@module-federation/third-party-dts-extractor",
-      "@module-federation/devtools"
+      "@module-federation/devtools",
+      "@module-federation/bridge-react",
+      "@module-federation/bridge-vue3",
+      "@module-federation/bridge-shared",
+      "@module-federation/bridge-react-webpack-plugin"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],
