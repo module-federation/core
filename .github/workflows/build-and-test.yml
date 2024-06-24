@@ -37,11 +37,11 @@ jobs:
       - name: Check Code Format
         run: npx nx format:check
 
+      - name: Update NX Build Cache
+        run: npx nx run-many --targets=build --exclude='*,!tag:type:pkg'
+
       - name: Run Build for All
         run: npx nx run-many --targets=build --exclude='*,!tag:type:pkg' --skip-nx-cache
-
-      - name: Update NX Build Cache
-        run: npx nx affected --targets=build --exclude='*,!tag:type:pkg'
 
       - name: Run Affected Lint
         run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:type:pkg'
