@@ -9,10 +9,6 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       vue: path.resolve(__dirname, 'node_modules/vue'),
       'vue-router': path.resolve(__dirname, 'node_modules/vue-router'),
-      '@module-federation/enhanced': path.resolve(
-        __dirname,
-        'node_modules/@module-federation/enhanced',
-      ),
     },
   },
   server: {

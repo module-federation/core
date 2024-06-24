@@ -67,6 +67,7 @@ export default function () {
 ```tsx
 const LazyComponent =  React.lazy(async () => {
   const m = await loadRemote('remote1/export-app');
+  const providerInfo = m.default;
   return {
     default: () => {
       const rootRef = useRef(null);

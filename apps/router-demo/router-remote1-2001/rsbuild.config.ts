@@ -6,7 +6,7 @@ import path from 'path';
 
 export default defineConfig({
   source: {
-    // 避免 pnpm workspace 导致 npm 依赖的 devDependencies 生效
+    // Prevent pnpm workspace from causing dev dependencies on npm to take effect
     alias: {
       react: path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
