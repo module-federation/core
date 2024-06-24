@@ -167,7 +167,7 @@ export function getAssetsByChunk(
     type: 'sync' | 'async',
   ): void => {
     [...targetChunk.groupsIterable].forEach((chunkGroup) => {
-      if (!entryPointNames.includes(chunkGroup.name as string)) {
+      if (chunkGroup.name && !entryPointNames.includes(chunkGroup.name)) {
         collectAssets(
           chunkGroup.getFiles(),
           assesSet.js[type],
