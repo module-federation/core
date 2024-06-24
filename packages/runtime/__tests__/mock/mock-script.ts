@@ -78,6 +78,9 @@ function injector(current: Function, methodName: string) {
         if (!preload) {
           new Function(execScriptContent)();
         }
+        if (element && element.onload) {
+          element.onload.call(element);
+        }
         // eslint-disable-next-line prefer-rest-params
         oriArguments[index] = nEl;
       }
