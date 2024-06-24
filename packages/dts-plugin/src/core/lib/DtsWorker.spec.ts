@@ -66,6 +66,8 @@ describe('generateTypesInChildProcess', () => {
         if (rootPid === pid) {
           return true;
         }
+
+        console.log(stdout, stdout[1]);
         return Boolean(stdout[1].length);
       } catch (err) {
         console.error(err);
