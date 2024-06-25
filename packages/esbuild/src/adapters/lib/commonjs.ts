@@ -166,11 +166,13 @@ export function commonjs({
         try {
           if (parseCJS && willTransform) {
             // move sourcemap to the end of the transformed file
-            let sourcemapIndex = contents.lastIndexOf('//# sourceMappingURL=');
+            const sourcemapIndex = contents.lastIndexOf(
+              '//# sourceMappingURL=',
+            );
             let sourcemap: string | undefined;
             if (sourcemapIndex !== -1) {
               sourcemap = contents.slice(sourcemapIndex);
-              let sourcemapEnd = sourcemap.indexOf('\n');
+              const sourcemapEnd = sourcemap.indexOf('\n');
               if (
                 sourcemapEnd !== -1 &&
                 sourcemap.slice(sourcemapEnd + 1).trimStart().length > 0
@@ -202,7 +204,7 @@ export function commonjs({
                 exportDefault = '';
               }
             }
-            let reexports = cjsExports.reexports
+            const reexports = cjsExports.reexports
               .map((e) => `export * from ${JSON.stringify(e)};`)
               .join('');
             let transformed: string[];
@@ -282,8 +284,8 @@ export function commonjs({
           ({ warnings } = err as any);
         }
 
-        let lines = contents.split('\n');
-        let getOffset = cachedReduce(lines, (a, b) => a + 1 + b.length, 0);
+        const lines = contents.split('\n');
+        const getOffset = cachedReduce(lines, (a, b) => a + 1 + b.length, 0);
 
         if (
           warnings &&
@@ -291,7 +293,7 @@ export function commonjs({
             e.text.includes('"require" to "esm"'),
           )).length
         ) {
-          let edits: [start: number, end: number, replace: string][] = [];
+          const edits: [start: number, end: number, replace: string][] = [];
           let imports: string[] = [];
 
           for (const { location } of warnings) {
@@ -305,7 +307,7 @@ export function commonjs({
             const rightBrace =
               lineText.indexOf(')', leftBrace + 2 + path.length) + 1;
 
-            let name = makeName(path);
+            const name = makeName(path);
             let import_statement: string;
             if (use_default_export(path)) {
               import_statement = `import ${name} from ${JSON.stringify(path)};`;
@@ -315,7 +317,7 @@ export function commonjs({
               )};`;
             }
 
-            let offset = getOffset(line - 1);
+            const offset = getOffset(line - 1);
             edits.push([offset + column, offset + rightBrace, name]);
             imports.push(import_statement);
           }

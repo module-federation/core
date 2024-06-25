@@ -1,10 +1,10 @@
 // simplified from acorn (MIT license)
 
-function isNewLine(code: number) {
+function isNewLine(code: number): boolean {
   return code === 10 || code === 13 || code === 0x2028 || code === 0x2029;
 }
 
-function codePointToString(ch: number) {
+function codePointToString(ch: number): string {
   if (ch <= 0xffff) return String.fromCharCode(ch);
   ch -= 0x10000;
   return String.fromCharCode((ch >> 10) + 0xd800, (ch & 0x03ff) + 0xdc00);
@@ -24,9 +24,10 @@ export class Lexer {
 
     let out = '';
     let chunkStart = ++this.pos;
+    //eslint-disable-next-line no-constant-condition
     while (true) {
       if (this.pos >= this.input.length) return null;
-      let ch = this.input.charCodeAt(this.pos);
+      const ch = this.input.charCodeAt(this.pos);
       if (ch === quote) break;
       if (ch === 92) {
         out += this.input.slice(chunkStart, this.pos);
@@ -45,7 +46,7 @@ export class Lexer {
   }
 
   readEscapedChar(): string | null {
-    let ch = this.input.charCodeAt(++this.pos);
+    const ch = this.input.charCodeAt(++this.pos);
     let code: number | null;
     ++this.pos;
     switch (ch) {
@@ -74,16 +75,15 @@ export class Lexer {
         if (this.input.charCodeAt(this.pos) === 10) {
           ++this.pos;
         }
-      //@ts-ignore
+      // fall through
       case 10:
-        //@ts-ignore
         return '';
       case 56:
       case 57:
         return null;
       default:
         if (ch >= 48 && ch <= 55) {
-          let match = this.input
+          const match = this.input
             .slice(this.pos - 1, this.pos + 2)
             .match(/^[0-7]+/);
           if (match === null) return null;
@@ -94,8 +94,8 @@ export class Lexer {
             octal = parseInt(octalStr, 8);
           }
           this.pos += octalStr.length - 1;
-          ch = this.input.charCodeAt(this.pos);
-          if (octalStr !== '0' || ch === 56 || ch === 57) return null;
+          const nextCh = this.input.charCodeAt(this.pos);
+          if (octalStr !== '0' || nextCh === 56 || nextCh === 57) return null;
           return String.fromCharCode(octal);
         }
         if (isNewLine(ch)) return '';
@@ -103,11 +103,11 @@ export class Lexer {
     }
   }
 
-  readInt(radix: number, len: number) {
-    let start = this.pos;
+  readInt(radix: number, len: number): number | null {
+    const start = this.pos;
     let total = 0;
     for (let i = 0; i < len; ++i, ++this.pos) {
-      let code = this.input.charCodeAt(this.pos);
+      const code = this.input.charCodeAt(this.pos);
       let val: number;
       if (code >= 97) {
         val = code - 97 + 10;
@@ -126,12 +126,12 @@ export class Lexer {
     return total;
   }
 
-  readHexChar(len: number) {
+  readHexChar(len: number): number | null {
     return this.readInt(16, len);
   }
 
-  readCodePoint() {
-    let ch = this.input.charCodeAt(this.pos);
+  readCodePoint(): number | null {
+    const ch = this.input.charCodeAt(this.pos);
     let code: number | null;
     if (ch === 123) {
       ++this.pos;
