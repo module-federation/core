@@ -101,6 +101,7 @@ export const moduleFederationPlugin = (
               modifyBundlerConfig(config, false);
             },
             webpack(config, { isServer }) {
+              // @ts-ignore
               modifyBundlerConfig(config, isServer);
               const enableAsyncEntry = modernjsConfig.source?.enableAsyncEntry;
               if (!enableAsyncEntry && mfConfig.async !== false) {
