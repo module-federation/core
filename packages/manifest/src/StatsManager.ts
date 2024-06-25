@@ -128,6 +128,15 @@ class StatsManager {
       pluginVersion: this._pluginVersion,
     };
 
+    if (this._options.getPublicPath) {
+      if ('publicPath' in metaData) {
+        delete metaData.publicPath;
+      }
+      return {
+        ...metaData,
+        getPublicPath: this._options.getPublicPath,
+      };
+    }
     return {
       ...metaData,
       publicPath: this.getPublicPath(compiler),

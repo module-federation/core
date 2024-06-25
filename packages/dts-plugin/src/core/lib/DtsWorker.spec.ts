@@ -194,6 +194,9 @@ describe('generateTypesInChildProcess', () => {
         },
       ],
     });
+    await new Promise((res) => {
+      setTimeout(res, 1000);
+    });
     // the child process should be killed after generateTypes
     expect(checkProcess()).toEqual(false);
   });

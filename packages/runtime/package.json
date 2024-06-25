@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",

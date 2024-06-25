@@ -210,6 +210,10 @@ export interface ModuleFederationPluginOptions {
    */
   runtimePlugins?: string[];
   /**
+   * Custom public path function
+   */
+  getPublicPath?: string;
+  /**
    * Bundler runtime path
    */
   implementation?: string;
