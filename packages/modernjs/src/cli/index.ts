@@ -88,12 +88,16 @@ export const moduleFederationPlugin = (
           });
         };
 
-        const ipv4 = await getIPV4();
+        const ipv4 = getIPV4();
 
         return {
           tools: {
             rspack(config) {
-              // not support ssr yet
+              if (enableSSR) {
+                throw new Error(
+                  '@module-federation/modern-js not support ssr for rspack bundler yet!',
+                );
+              }
               modifyBundlerConfig(config, false);
             },
             webpack(config, { isServer }) {
