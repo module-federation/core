@@ -9,9 +9,7 @@ const { exclude: _, ...swcJestConfig } = JSON.parse(
 
 // disable .swcrc look-up by SWC core because we're passing in swcJestConfig ourselves.
 // If we do not disable this, SWC Core will read .swcrc and won't transform our test files due to "exclude"
-if (swcJestConfig.swcrc === undefined) {
-  swcJestConfig.swcrc = false;
-}
+swcJestConfig.swcrc ?= false;
 
 // Uncomment if using global setup/teardown files being transformed via swc
 // https://nx.dev/packages/jest/documents/overview#global-setup/teardown-with-nx-libraries
