@@ -170,7 +170,7 @@ export default function () {
 
           const fetchMethod =
             globalThis.webpackChunkLoad ||
-            (url.protocol === 'https:' ? https : http).get;
+            __non_webpack_require__(url.protocol === 'https:' ? 'https' : 'http').get;
 
           const handleResponse = (res: any) => {
             let data = '';
