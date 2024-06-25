@@ -118,7 +118,7 @@
     "@semantic-release/github": "^9.2.1",
     "@semantic-release/npm": "^11.0.0",
     "@storybook/addon-essentials": "7.6.17",
-    "@storybook/builder-webpack5": "7.6.17",
+    "@storybook/builder-webpack5": "8.1.10",
     "@storybook/core-common": "7.6.17",
     "@storybook/core-server": "8.1.1",
     "@storybook/manager-webpack5": "6.5.16",
