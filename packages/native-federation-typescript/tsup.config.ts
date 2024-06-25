@@ -8,6 +8,7 @@ const SUPPORTED_BUNDLERS = [
   'webpack',
   'rspack',
   'rolldown',
+  'farm'
 ];
 
 export default defineConfig({
