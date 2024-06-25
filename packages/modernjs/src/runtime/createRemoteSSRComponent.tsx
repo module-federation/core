@@ -130,7 +130,7 @@ export function collectSSRAssets(options: IProps) {
   return [...scripts, ...links];
 }
 
-export function createRemoteSSRReactComponent<T, E extends keyof T>(info: {
+export function createRemoteSSRComponent<T, E extends keyof T>(info: {
   loader: () => Promise<T>;
   loading: React.ReactNode;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];

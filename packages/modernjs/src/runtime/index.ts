@@ -1,6 +1,6 @@
 export * from '@module-federation/enhanced/runtime';
 export {
-  createRemoteSSRReactComponent,
+  createRemoteSSRComponent,
   collectSSRAssets,
-} from './createRemoteSSRReactComponent';
+} from './createRemoteSSRComponent';
 export { SSRLiveReload } from './SSRLiveReload';

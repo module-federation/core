@@ -3,7 +3,7 @@ import Button from 'antd/lib/button';
 import {
   registerRemotes,
   loadRemote,
-  createRemoteSSRReactComponent,
+  createRemoteSSRComponent,
 } from '@modern-js/runtime/mf';
 import stuff from './stuff.module.css';
 
@@ -14,7 +14,7 @@ registerRemotes([
   },
 ]);
 
-const RemoteSSRComponent = createRemoteSSRReactComponent({
+const RemoteSSRComponent = createRemoteSSRComponent({
   loader: () => loadRemote('dynamic_remote/Image'),
   loading: 'loading...',
   fallback: ({ error }) => {

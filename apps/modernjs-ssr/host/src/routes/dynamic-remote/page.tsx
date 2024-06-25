@@ -2,7 +2,7 @@ import React, { useState, Suspense } from 'react';
 import {
   loadRemote,
   registerRemotes,
-  createRemoteSSRReactComponent,
+  createRemoteSSRComponent,
 } from '@modern-js/runtime/mf';
 
 registerRemotes([
@@ -12,7 +12,7 @@ registerRemotes([
   },
 ]);
 
-const RemoteSSRComponent = createRemoteSSRReactComponent({
+const RemoteSSRComponent = createRemoteSSRComponent({
   loader: () => loadRemote('dynamic_remote/Image'),
   loading: 'loading...',
   fallback: ({ error }) => {

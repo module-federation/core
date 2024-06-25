@@ -1,9 +1,9 @@
-import { createRemoteSSRReactComponent } from '@modern-js/runtime/mf';
+import { createRemoteSSRComponent } from '@modern-js/runtime/mf';
 
 import Content from '../components/Content';
 import './index.css';
 
-const RemoteSSRComponent = createRemoteSSRReactComponent({
+const RemoteSSRComponent = createRemoteSSRComponent({
   loader: () => import('remote/Button'),
   loading: 'loading...',
   export: 'Button',
