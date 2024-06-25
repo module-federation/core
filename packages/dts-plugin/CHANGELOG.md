@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 0.2.1
+
+### Patch Changes
+
+- 88445e7: Support getPublicPath in compiler plugins
+- Updated dependencies [88445e7]
+  - @module-federation/sdk@0.2.1
+  - @module-federation/managers@0.2.1
+  - @module-federation/third-party-dts-extractor@0.2.1
+
 ## 0.2.0
 
 ### Patch Changes
