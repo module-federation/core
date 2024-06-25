@@ -8,6 +8,7 @@ interface APIContent<T = unknown> {
 export const enum APIKind {
   UPDATE_SUBSCRIBER = 'UPDATE_SUBSCRIBER',
   RELOAD_WEB_CLIENT = 'RELOAD_WEB_CLIENT',
+  FETCH_TYPES = 'FETCH_TYPES',
 }
 
 export class API<T = unknown> extends Message {

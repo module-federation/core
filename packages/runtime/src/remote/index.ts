@@ -1,10 +1,9 @@
 import {
-  type ModuleInfo,
-  type GlobalModuleInfo,
   isBrowserEnv,
   warn,
   composeKeyWithSeparator,
 } from '@module-federation/sdk';
+import type { ModuleInfo, GlobalModuleInfo } from '@module-federation/sdk';
 import { globalLoading } from '../global';
 import {
   Options,
@@ -21,6 +20,7 @@ import {
   AsyncHook,
   AsyncWaterfallHook,
   SyncHook,
+  SyncWaterfallHook,
 } from '../utils/hooks';
 import {
   assert,
@@ -47,6 +47,10 @@ export interface LoadRemoteMatch {
 export class RemoteHandler {
   host: FederationHost;
   hooks = new PluginSystem({
+    registerRemote: new SyncWaterfallHook<{
+      remote: Remote;
+      origin: FederationHost;
+    }>('registerRemote'),
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
@@ -156,7 +160,7 @@ export class RemoteHandler {
           id,
         });
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
-      const moduleOrFactory = (await module.get(expose, options)) as T;
+      const moduleOrFactory = (await module.get(idRes, expose, options)) as T;
 
       const moduleWrapper = await this.hooks.lifecycle.onLoad.emit({
         id: idRes,
@@ -379,6 +383,7 @@ export class RemoteHandler {
     if (!registeredRemote) {
       normalizeRemote();
       targetRemotes.push(remote);
+      this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
     } else {
       const messages = [
         `The remote "${remote.name}" is already registered.`,
@@ -391,6 +396,7 @@ export class RemoteHandler {
         this.removeRemote(registeredRemote);
         normalizeRemote();
         targetRemotes.push(remote);
+        this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
       }
       warn(messages.join(' '));
     }

@@ -63,7 +63,7 @@ class Module {
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  async get(expose: string, options?: { loadFactory?: boolean }) {
+  async get(id: string, expose: string, options?: { loadFactory?: boolean }) {
     const { loadFactory = true } = options || { loadFactory: true };
 
     // Get remoteEntry.js
@@ -84,8 +84,8 @@ class Module {
       };
 
       // Help to find host instance
-      Object.defineProperty(remoteEntryInitOptions, 'hostId', {
-        value: this.host.options.id || this.host.name,
+      Object.defineProperty(remoteEntryInitOptions, 'shareScopeMap', {
+        value: localShareScopeMap,
         // remoteEntryInitOptions will be traversed and assigned during container init, ,so this attribute is not allowed to be traversed
         enumerable: false,
       });
@@ -93,7 +93,7 @@ class Module {
       const initContainerOptions =
         await this.host.hooks.lifecycle.beforeInitContainer.emit({
           shareScope,
-          // @ts-ignore hostId will be set by Object.defineProperty
+          // @ts-ignore shareScopeMap will be set by Object.defineProperty
           remoteEntryInitOptions,
           initScope,
           remoteInfo: this.remoteInfo,
@@ -122,12 +122,49 @@ class Module {
       `${getFMId(this.remoteInfo)} remote don't export ${expose}.`,
     );
 
+    const wrapModuleFactory = this.wraperFactory(moduleFactory, id);
+
     if (!loadFactory) {
-      return moduleFactory;
+      return wrapModuleFactory;
     }
-    const exposeContent = await moduleFactory();
+    const exposeContent = await wrapModuleFactory();
 
     return exposeContent;
+  }
+
+  private wraperFactory(
+    moduleFactory: () => any | (() => Promise<any>),
+    id: string,
+  ) {
+    function defineModuleId(res: any, id: string) {
+      if (
+        res &&
+        typeof res === 'object' &&
+        Object.isExtensible(res) &&
+        !Object.getOwnPropertyDescriptor(res, Symbol.for('mf_module_id'))
+      ) {
+        Object.defineProperty(res, Symbol.for('mf_module_id'), {
+          value: id,
+          enumerable: false,
+        });
+      }
+    }
+
+    if (moduleFactory instanceof Promise) {
+      return async () => {
+        const res = await moduleFactory();
+        // This parameter is used for bridge debugging
+        defineModuleId(res, id);
+        return res;
+      };
+    } else {
+      return () => {
+        const res = moduleFactory();
+        // This parameter is used for bridge debugging
+        defineModuleId(res, id);
+        return res;
+      };
+    }
   }
 }
 

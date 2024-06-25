@@ -19,6 +19,7 @@ interface SharedConfig {
   singleton?: boolean;
   requiredVersion?: string;
   eager?: boolean;
+  shareScope?: string;
 }
 ```
 
@@ -75,6 +76,14 @@ new ModuleFederationPlugin({
 是否立即加载共享模块。
 
 正常情况下，需要开启异步入口，随后按需异步加载 shared 。 若想使用 shared ，但又不想开启异步入口，那么可以设置 `eager` 为 true 。
+
+## shareScope
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`'default'`
+
+共享依赖作用域，默认值为 `'default'` 。
 
 ## FAQ
 

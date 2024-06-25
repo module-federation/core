@@ -11,6 +11,7 @@ The `PluginDevOptions` types are as follows:
 interface PluginDevOptions {
   disableLiveReload?: boolean;
   disableHotTypesReload?: boolean;
+  disableDynamicRemoteTypeHints?: boolean;
 }
 ```
 
@@ -29,3 +30,11 @@ Whether to disable type hot reloading
 - Default value: `false`
 
 Whether to disable `liveReload`, after setting `true`, any updates from the producer will not trigger the consumer's **page** `liveReload`
+
+## disableDynamicRemoteTypeHints
+
+- Type: `boolean`
+- Required: No
+- Default value: `false`
+
+Whether to disable type hot reloading

@@ -1,5 +1,63 @@
 # @module-federation/runtime
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [88445e7]
+  - @module-federation/sdk@0.2.1
+
+## 0.2.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.2.0
+
+## 0.1.21
+
+### Patch Changes
+
+- Updated dependencies [88900ad]
+  - @module-federation/sdk@0.1.21
+
+## 0.1.20
+
+### Patch Changes
+
+- 652c8a2: do not apply symbol if object not extensible
+- 685c607: feat: support dynamic remote type hints
+- 05c43f3: feat: support pass shareScopeMap
+- Updated dependencies [685c607]
+- Updated dependencies [e8e0969]
+- Updated dependencies [349c381]
+  - @module-federation/sdk@0.1.20
+
+## 0.1.19
+
+### Patch Changes
+
+- 031454d: fix: do not delete link tag if no preload
+- a2bfb9b: fix: In load remote, link preload is not used to preload resources, preventing resource reloading
+- Updated dependencies [031454d]
+- Updated dependencies [b0a31a7]
+- Updated dependencies [a2bfb9b]
+  - @module-federation/sdk@0.1.19
+
+## 0.1.18
+
+### Patch Changes
+
+- 80af3f3: fix: add protocol in node automaticly
+- Updated dependencies [80af3f3]
+  - @module-federation/sdk@0.1.18
+
+## 0.1.17
+
+### Patch Changes
+
+- 26bff6e: feat: add mf_module_id to remote to add module debugging information
+  - @module-federation/sdk@0.1.17
+
 ## 0.1.16
 
 ### Patch Changes

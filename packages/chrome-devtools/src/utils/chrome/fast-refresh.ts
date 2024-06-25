@@ -11,8 +11,9 @@ import { __FEDERATION_DEVTOOLS__ } from '../../template';
 const fastRefreshPlugin = (): FederationRuntimePlugin => {
   return {
     name: 'mf-fast-refresh-plugin',
-    // @ts-expect-error
-    beforeInit({ origin, userOptions, options, shareInfo }) {
+    beforeInit({ userOptions, ...args }) {
+      const shareInfo = userOptions.shared;
+      const twinsShareInfo = args.shareInfo;
       let enableFastRefresh: boolean;
       let devtoolsMessage;
 
@@ -26,7 +27,7 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
         }
       }
 
-      if (isObject(shareInfo)) {
+      if (shareInfo && isObject(shareInfo)) {
         let orderResolve: (value?: unknown) => void;
         const orderPromise = new Promise((resolve) => {
           orderResolve = resolve;
@@ -37,7 +38,15 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
             ? shareInfo[share]
             : [shareInfo[share]];
 
-          sharedArr.forEach((shared) => {
+          let twinsSharedArr: Shared[];
+          if (twinsShareInfo) {
+            // @ts-expect-error
+            twinsSharedArr = Array.isArray(twinsShareInfo[share])
+              ? twinsShareInfo[share]
+              : [twinsShareInfo[share]];
+          }
+
+          sharedArr.forEach((shared, idx) => {
             let get: () => any;
             if (share === 'react') {
               get = () =>
@@ -78,21 +87,21 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
                   return () => window.ReactDOM;
                 };
               }
+              if (twinsShareInfo) {
+                twinsSharedArr[idx].get = shared.get;
+              }
             }
           });
         });
 
         return {
-          origin,
           userOptions,
-          options,
-          shareInfo,
+          ...args,
         };
       } else {
         return {
-          origin,
           userOptions,
-          options,
+          ...args,
         };
       }
     },

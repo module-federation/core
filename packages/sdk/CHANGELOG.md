@@ -1,5 +1,43 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.2.1
+
+### Patch Changes
+
+- 88445e7: Support getPublicPath in compiler plugins
+
+## 0.2.0
+
+## 0.1.21
+
+### Patch Changes
+
+- 88900ad: fix: support decode encode remote name
+
+## 0.1.20
+
+### Patch Changes
+
+- 685c607: feat: support dynamic remote type hints
+- e8e0969: fix: The returned properties are used by default when create script and create link hook
+- 349c381: fix(sdk): use variable instead of constant
+
+## 0.1.19
+
+### Patch Changes
+
+- 031454d: fix: do not delete link tag if no preload
+- b0a31a7: fix: don't modify loaded tag
+- a2bfb9b: fix: In load remote, link preload is not used to preload resources, preventing resource reloading
+
+## 0.1.18
+
+### Patch Changes
+
+- 80af3f3: fix: get remoteEntry type from options
+
+## 0.1.17
+
 ## 0.1.16
 
 ### Patch Changes
