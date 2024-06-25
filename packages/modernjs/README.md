@@ -4,7 +4,7 @@ This plugin provides Module Federation supporting functions for Modern.js
 
 ## Supports
 
-- modern.js ^2.52.0
+- modern.js ^2.54.2
 - Server-Side Rendering
 
 We highly recommend referencing this application which takes advantage of the best capabilities:

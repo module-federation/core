@@ -64,6 +64,12 @@ export class DtsWorker {
   }
 
   exit(): void {
-    this.rpcWorker?.terminate();
+    try {
+      this.rpcWorker?.terminate();
+    } catch (err) {
+      if (isDebugMode()) {
+        console.error(err);
+      }
+    }
   }
 }

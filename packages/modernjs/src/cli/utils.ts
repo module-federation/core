@@ -9,7 +9,7 @@ import path from 'path';
 import os from 'os';
 import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
-import { LOCALHOST } from '../constant';
+import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
 
@@ -88,13 +88,13 @@ const replaceRemoteUrl = async (
   }
 };
 
-export const patchMFConfig = (
+const patchDTSConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
 ) => {
-  const isDev = process.env.NODE_ENV === 'development';
-  const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
-
+  if (isServer) {
+    return;
+  }
   const ModernJSRuntime = '@modern-js/runtime/mf';
   if (mfConfig.dts !== false) {
     if (typeof mfConfig.dts === 'boolean' || mfConfig.dts === undefined) {
@@ -123,6 +123,16 @@ export const patchMFConfig = (
       }
     }
   }
+};
+
+export const patchMFConfig = (
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  isServer: boolean,
+) => {
+  const isDev = process.env.NODE_ENV === 'development';
+  const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
+
+  patchDTSConfig(mfConfig, isServer);
 
   injectRuntimePlugins(
     path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
@@ -218,7 +228,7 @@ export function patchWebpackConfig<T>(options: {
   ) {
     bundlerConfig.optimization.splitChunks.chunks = 'async';
     console.warn(
-      '[Modern.js Module Federation] splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"',
+      `${PLUGIN_IDENTIFIER} splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"`,
     );
   }
 

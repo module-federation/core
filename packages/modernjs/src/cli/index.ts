@@ -19,7 +19,7 @@ import {
   getIPV4,
 } from './utils';
 import { updateStatsAndManifest } from './manifest';
-import { MODERN_JS_SERVER_DIR } from '../constant';
+import { MODERN_JS_SERVER_DIR, PLUGIN_IDENTIFIER } from '../constant';
 
 const SSR_PLUGIN_IDENTIFIER = 'mfPluginSSR';
 const isDev = process.env.NODE_ENV === 'development';
@@ -95,7 +95,7 @@ export const moduleFederationPlugin = (
             rspack(config) {
               if (enableSSR) {
                 throw new Error(
-                  '@module-federation/modern-js not support ssr for rspack bundler yet!',
+                  `${PLUGIN_IDENTIFIER} not support ssr for rspack bundler yet!`,
                 );
               }
               modifyBundlerConfig(config, false);
