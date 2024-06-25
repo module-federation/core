@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "scripts": {
     "build:storybook": "storybook build",
     "storybook": "storybook dev -p 6006",
@@ -80,6 +80,6 @@
     "typescript": "~5.0.4",
     "vitest": "1.2.2",
     "@modern-js/storybook": "2.46.1",
-    "@storybook/addon-essentials": "^7"
+    "@storybook/addon-essentials": "^8"
   }
 }
