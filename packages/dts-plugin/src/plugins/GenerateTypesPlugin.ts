@@ -91,15 +91,15 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             await generateTypesFn(finalOptions);
             const config = finalOptions.remote.moduleFederationConfig;
             let zipPrefix = '';
-            const isManifestObject =  typeof config.manifest === 'object'
+            const isManifestObject = typeof config.manifest === 'object';
             if (isManifestObject && config.manifest.filePath) {
               zipPrefix = config.manifest.filePath;
             } else if (isManifestObject && config.manifest.fileName) {
-              zipPrefix = path.dirname(config.manifest.filePath);
+              zipPrefix = path.dirname(config.manifest.fileName);
             } else if (config.filename) {
               zipPrefix = path.dirname(config.filename);
             }
-            console.log(finalOptions.remote.moduleFederationConfig);
+
             if (zipTypesPath) {
               compilation.emitAsset(
                 path.join(zipPrefix, zipName),
