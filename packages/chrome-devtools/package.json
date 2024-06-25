@@ -80,6 +80,6 @@
     "typescript": "~5.0.4",
     "vitest": "1.2.2",
     "@modern-js/storybook": "2.46.1",
-    "@storybook/addon-essentials": "^7"
+    "@storybook/addon-essentials": "^8"
   }
 }
