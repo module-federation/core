@@ -196,6 +196,28 @@ export default {
 <br>
 </details>
 
+<details>
+<summary>Farm</summary><br>
+
+```ts
+// farm.config.ts
+import { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } from '@module-federation/native-federation-typescript/farm';
+
+const config: UserConfig = {
+  plugins: [
+    NativeFederationTypeScriptRemote({
+      /* options */
+    }),
+    NativeFederationTypeScriptHost({
+      /* options */
+    }),
+  ]
+}
+```
+
+<br>
+</details>
+
 ## TypeScript configuration
 
 To have the type definitions automatically found for imports, add paths to the `compilerOptions` in the `tsconfig.json`:

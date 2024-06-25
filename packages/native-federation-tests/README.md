@@ -200,6 +200,28 @@ export default {
 <br>
 </details>
 
+<details>
+<summary>Farm</summary><br>
+
+```ts
+// farm.config.ts
+import { NativeFederationTestsHost, NativeFederationTestsRemote } from '@module-federation/native-federation-tests/farm';
+
+const config: UserConfig = {
+  plugins: [
+    NativeFederationTestsRemote({
+      /* options */
+    }),
+    NativeFederationTestsHost({
+      /* options */
+    }),
+  ]
+}
+```
+
+<br>
+</details>
+
 ## Examples
 
 To use it in a `host` module, refer to [this example](https://github.com/module-federation/module-federation-examples/tree/master/native-federation-tests-typescript-plugins/host).  
