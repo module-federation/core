@@ -1,0 +1,22 @@
+{
+  "name": "host-vue3",
+  "private": true,
+  "version": "1.0.1",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/bridge-vue3": "workspace:*",
+    "vue": "^3.4.19",
+    "vue-router": "^4.3.2"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^0.6.15",
+    "@rsbuild/plugin-vue": "^0.6.15",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.2"
+  }
+}

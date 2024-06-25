@@ -45,7 +45,10 @@ export class DtsWorker {
     const ensureChildProcessExit = () => {
       try {
         const pid = this.rpcWorker.process?.pid;
-        process.kill(pid, 0);
+        const rootPid = process.pid;
+        if (pid && rootPid !== pid) {
+          process.kill(pid, 0);
+        }
       } catch (error) {
         if (isDebugMode()) {
           console.error(error);

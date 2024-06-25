@@ -22,7 +22,7 @@ module.exports = {
         './Button': './src/components/Button.tsx',
       },
       // ...
-      getPublicPath: `function(currentPath) {return "https:" + window.navigator.cdn_host + "/resource/app/"}`,
+      getPublicPath: `function() {return "https:" + window.navigator.cdn_host + "/resource/app/"}`,
     }),
   ],
 };
