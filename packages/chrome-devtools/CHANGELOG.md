@@ -1,5 +1,28 @@
 # @module-federation/devtools
 
+## 0.2.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.2.0
+
+## 0.1.21
+
+### Patch Changes
+
+- Updated dependencies [88900ad]
+  - @module-federation/sdk@0.1.21
+
+## 0.1.20
+
+### Patch Changes
+
+- 8671892: fix(chrome-devtools): fix sharedInfo conflict with userOptions.sharedInfo cause hmr fail
+- Updated dependencies [685c607]
+- Updated dependencies [e8e0969]
+- Updated dependencies [349c381]
+  - @module-federation/sdk@0.1.20
+
 ## 0.1.19
 
 ### Patch Changes

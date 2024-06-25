@@ -2,7 +2,7 @@ import { fork, ChildProcess } from 'child_process';
 import path from 'path';
 
 export function createBroker(): ChildProcess {
-  const startBrokerPath = path.resolve(__dirname, './startBroker.js');
+  const startBrokerPath = path.resolve(__dirname, './start-broker.js');
   const sub = fork(startBrokerPath, [], {
     detached: true,
     stdio: 'ignore',

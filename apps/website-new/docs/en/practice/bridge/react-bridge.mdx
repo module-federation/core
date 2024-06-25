@@ -1,0 +1,220 @@
+# React Bridge
+
+`@module-federation/bridge-react` provides `bridge` utility functions for React applications. The `createBridgeComponent` function can be used to export application-level modules, while `createRemoteComponent` is used to load application-level modules. [Demo](https://github.com/module-federation/core/core/tree/main/apps/router-demo)
+
+### Installation
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/bridge-react@latest',
+    yarn: 'yarn add @module-federation/bridge-react@latest',
+    pnpm: 'pnpm add @module-federation/bridge-react@latest',
+  }}
+/>
+
+### Example
+
+:::danger
+After using @module-federation/bridge-react, you should not set react-router-dom as shared; otherwise, the build tool will raise an exception. This is because @module-federation/bridge-react controls routing by proxying react-router-dom.
+
+:::
+
+> Remote
+
+```tsx
+// ./src/export-app.tsx
+import App from './src/App.tsx';
+import { createBridgeComponent } from '@module-federation/bridge-react';
+
+export default createBridgeComponent({
+  rootComponent: App
+});
+```
+
+```ts
+// rsbuild.config.ts
+export default defineConfig({
+  tools: {
+    rspack: (config, { appendPlugins }) => {
+      appendPlugins([
+        new ModuleFederationPlugin({
+          name: 'remote1',
+          exposes: {
+            './export-app': './src/export-app.tsx',
+          },
+          shared: ['react', 'react-dom'],
+        }),
+      ]);
+    },
+  },
+});
+```
+
+> Host
+
+```ts
+// rsbuild.config.ts
+export default defineConfig({
+  tools: {
+    rspack: (config, { appendPlugins }) => {
+      config.output!.uniqueName = 'host';
+      appendPlugins([
+        new ModuleFederationPlugin({
+          name: 'host',
+          remotes: {
+            remote1: 'remote1@http://localhost:2001/mf-manifest.json',
+          },
+        }),
+      ]);
+    },
+  },
+});
+```
+
+```tsx
+// ./src/App.tsx
+import React from 'react';
+import { createRemoteComponent } from '@module-federation/bridge-react';
+
+const Remote1App = createRemoteComponent(() => loadRemote('remote2/export-app'));
+
+const App = () => {
+  return (
+    <BrowserRouter basename="/">
+      <Routes>
+        <Route path="/" Component={Home} />
+        <Route
+          path="/remote1/*"
+          Component={() => <Remote1App fallback={<div>loading</div>} />}
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+```
+
+### Methods
+
+#### createRemoteComponent
+
+```tsx
+function createRemoteComponent<T, `E extends keyof T`>(
+  options: {
+    // Function to load the remote application, e.g., loadRemote('remote1/export-app'), import('remote1/export-app')
+    loader: () => Promise<T>,
+    // Default is 'default', used to specify the module's export
+    export?: E;
+    loading: React.ReactNode;
+    fallback: ComponentType<{ error: any; }>;
+  }
+): (props: {
+    basename?: ProviderParams['basename'];
+    memoryRoute?: { entryPath: string };
+} & RawComponentType) => React.JSX.Element;
+```
+
+* `options`
+  * `loader`
+    * type: `() => Promise<Module>`
+    * Purpose: Function to load the remote module, e.g., `loadRemote('remote1/export-app')`, `import('remote1/export-app')`
+
+```tsx
+const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'));
+const Remote2App = createRemoteComponent(() => import('remote2/export-app'));
+```
+  * `export`
+    * type: `string`
+    * Purpose: Can specify the module's export
+```tsx
+// remote
+export const provider = createBridgeComponent({
+  rootComponent: App
+});
+
+// host
+const Remote1App = createRemoteComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  export: 'provider'
+});
+```
+  * `loading`
+    * type: `React.ReactNode`
+    * Purpose: Component displayed while loading the remote module
+  * `fallback`
+    * type: `ComponentType<{ error: any; }>`
+    * Purpose: Component displayed during loading/rendering errors of the remote module
+* ReturnType
+  * type: `(props: PropsInfo) => React.JSX.Element`
+  * Purpose: Used to render the remote module component
+
+```tsx
+const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'));
+
+function App() {
+  return (
+    <BrowserRouter basename="/">
+      <Routes>
+        <Route
+          path="/remote1/*"
+          Component={() => <Remote1App fallback={<div>loading</div>} />}
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+
+```tsx
+const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'));
+
+function App() {
+  return (
+    <BrowserRouter basename="/">
+      <Routes>
+        <Route
+          path="/remote1/*"
+          {/* Use memoryRoute to control sub-application routing with memoryRouter, which will not display the URL in the browser address bar */}
+          Component={() => <Remote1App fallback={<div>loading</div>} memoryRoute={{ entryPath: '/detail' }} />}
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+
+#### createBridgeComponent
+
+```tsx
+function createBridgeComponent<T>(bridgeInfo: {
+  rootComponent: React.ComponentType<T>;
+}): () => {
+  render(info: {
+    name?: string;
+    basename?: string;
+    memoryRoute?: {
+      entryPath: string;
+    };
+    dom?: HTMLElement;
+}): void;
+  destroy(info: { dom: HTMLElement }): void;
+}
+```
+
+* `bridgeInfo`
+  * type: `{ rootComponent: React.ComponentType<T>; }`
+  * Purpose: Used to pass the root component
+* ReturnType
+  * type: `() => { render: (info: RenderFnParams) => void; destroy: (info: { dom: HTMLElement }) => void; }`
+
+```tsx
+// ./src/export-app.tsx
+import React from 'react';
+import App from './src/App.tsx';
+import { createRemoteComponent } from '@module-federation/bridge-react';
+
+export default createBridgeComponent({
+  rootComponent: App
+});
+```

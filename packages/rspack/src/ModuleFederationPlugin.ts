@@ -10,6 +10,9 @@ import {
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager, utils } from '@module-federation/managers';
 import { DtsPlugin } from '@module-federation/dts-plugin';
+import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
+import path from 'node:path';
+import fs from 'node:fs';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
 type SplitChunks = Compiler['options']['optimization']['splitChunks'];
@@ -106,6 +109,20 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
         pluginVersion: __VERSION__,
         bundler: 'rspack',
         // @ts-ignore
+      }).apply(compiler);
+    }
+
+    // react bridge plugin
+    const nodeModulesPath = path.resolve(compiler.context, 'node_modules');
+    const reactPath = path.join(
+      nodeModulesPath,
+      '@module-federation/bridge-react',
+    );
+
+    // Check whether react exists
+    if (fs.existsSync(reactPath)) {
+      new ReactBridgePlugin({
+        moduleFederationOptions: this._options,
       }).apply(compiler);
     }
   }

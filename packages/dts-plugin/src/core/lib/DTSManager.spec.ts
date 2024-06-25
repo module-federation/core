@@ -22,7 +22,7 @@ describe('DTSManager', () => {
         'react-dom': { singleton: true, eager: true },
       },
     },
-    tsConfigPath: join(__dirname, '../../..', './tsconfig.json'),
+    tsConfigPath: join(__dirname, '../../..', './tsconfig.spec.json'),
     typesFolder: typesFolder,
     compiledTypesFolder: 'compiled-types',
     deleteTypesFolder: false,
@@ -185,20 +185,8 @@ describe('DTSManager', () => {
     });
   });
 
-  it('correct consumeTypes', async () => {
-    const distFolder = join(projectRoot, 'dist', typesFolder);
-    const zip = new AdmZip();
-    await zip.addLocalFolderPromise(distFolder, {});
-    axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
-
-    await dtsManager.consumeTypes();
-
-    const targetFolder = join(projectRoot, hostOptions.typesFolder);
-    expect(
-      dirTree(targetFolder, {
-        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
-      }),
-    ).toMatchObject({
+  describe('consumeTypes', async () => {
+    const expectedStructure = {
       name: '@mf-types-dts-test-consume-types',
       children: [
         {
@@ -318,6 +306,31 @@ describe('DTSManager', () => {
           name: 'remotes',
         },
       ],
+    };
+    const targetFolder = join(projectRoot, hostOptions.typesFolder);
+    it('correct consumeTypes', async () => {
+      const distFolder = join(projectRoot, 'dist', typesFolder);
+      const zip = new AdmZip();
+      await zip.addLocalFolderPromise(distFolder, {});
+      axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
+
+      await dtsManager.consumeTypes();
+
+      expect(
+        dirTree(targetFolder, {
+          exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+        }),
+      ).toMatchObject(expectedStructure);
+    });
+
+    it('no delete exist remote types if fetch new remote types failed', async () => {
+      axios.get = vi.fn().mockRejectedValue(new Error('error'));
+      await dtsManager.consumeTypes();
+      expect(
+        dirTree(targetFolder, {
+          exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+        }),
+      ).toMatchObject(expectedStructure);
     });
   });
 

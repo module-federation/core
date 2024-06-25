@@ -1,0 +1,96 @@
+# Bridge 概览
+
+## Introduction
+
+The `MF bridge` is a utility function provided by `Module Federation` to help users load application-level modules through `Module Federation`. It automatically provides the necessary application lifecycle functions `render` and `destroy` required by the `provider` function and ensures compatibility with different framework versions. Additionally, it allows proper routing collaboration between applications.
+
+:::tip
+Before reading this chapter, it's assumed you are already familiar with:
+
+- [How to consume and export modules](../../guide/start/quick-start.mdx)
+- [Module Federation Builder plugin](../../guide/basic/rspack.mdx)
+- [Features and capabilities of the Module Federation Runtime](../../guide/basic/runtime.mdx)
+
+:::
+
+## Toolkits
+
+### @module-federation/bridge-react
+
+The `@module-federation/bridge-react` toolkit is a `bridge` utility function package provided by MF for React v18 applications. The exported `createBridgeComponent` can be used for exporting modules in React v18 applications. Usage examples of `@module-federation/bridge-react` can be found in the [Host demo](https://github.com/module-federation/core/core/tree/main/apps/router-demo/router-host-2000) and [Remote demo](https://github.com/module-federation/core/core/tree/main/apps/router-demo/router-remote2-2002).
+
+### @module-federation/bridge-vue3
+
+The `@module-federation/bridge-vue3` toolkit is a `bridge` utility function package provided by MF for Vue v3 applications. The exported `createBridgeComponent` can be used for exporting modules in Vue v3 sub-applications. Usage examples of `@module-federation/bridge-vue3` can be found in the [Host demo](https://github.com/module-federation/core/core/tree/main/apps/router-demo/router-host-2100) and [Remote demo](https://github.com/module-federation/core/core/tree/main/apps/router-demo/router-remote3-2003).
+
+
+## FAQ
+
+### Why Bridge?
+
+Bridge is mainly used to solve two problems:
+
+* Cross-application framework (React, Vue) loading and rendering
+* Support for loading modules with routes (routes can work together properly)
+
+These two problems are important features in the "micro-frontend framework".
+
+### How to solve it if the corresponding framework bridge is not provided?
+
+Currently, `Module Federation` provides official bridge toolkits. If you need bridge toolkits for other frameworks, you can provide feedback via [issue](https://github.com/module-federation/core/issues) or refer to the existing [`Bridge`](https://github.com/module-federation/core/blob/34ba220bcee3d032e4083aae37f802d1ed20d61b/packages/bridge/bridge-react) to implement it yourself.
+
+The implementation of `Bridge` is very simple. The core is based on `DOM` rendering. Here is the pseudocode:
+
+> Export module
+
+```tsx
+export default function () {
+  const rootMap = new Map<any, ReactDOM.Root>();
+  return {
+    render(info: { dom: HTMLElement; basename?: string; memoryRoute?: { entryPath: string; } }) {
+      const root = ReactDOM.createRoot(info.dom);
+      rootMap.set(info.dom, root);
+      root.render(<App />);
+    },
+    destroy(info: { dom: HTMLElement }) {
+      const root = rootMap.get(info.dom);
+      root?.unmount();
+    },
+  };
+}
+```
+
+> Load module
+
+```tsx
+const LazyComponent = React.lazy(async () => {
+  const m = await loadRemote('remote1/export-app');
+  return {
+    default: () => {
+      const rootRef = useRef(null);
+      const providerInfoRef = useRef<any>(null);
+
+      useEffect(() => {
+        const providerReturn = providerInfo();
+        providerInfoRef.current = providerReturn;
+        providerReturn.render(renderProps);
+
+        return () => {
+          providerInfoRef.current?.destroy({
+            dom: renderDom.current,
+          });
+        };
+      }, []);
+      return <div ref={rootRef}></div>;
+    },
+  };
+});
+
+function Component() {
+  return (
+    <React.Suspense fallback={<div>loading</div>}>
+      <LazyComponent />
+    </React.Suspense>
+  );
+}
+```
