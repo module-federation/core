@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/utilities",
-  "version": "3.0.27",
+  "version": "3.0.28",
   "type": "commonjs",
   "main": "./dist/index.cjs.js",
   "types": "./dist/index.cjs.d.ts",
