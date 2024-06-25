@@ -119,6 +119,11 @@ export class NextFederationPlugin {
 
   private applyConditionalPlugins(compiler: Compiler, isServer: boolean) {
     compiler.options.output.uniqueName = this._options.name;
+    compiler.options.output.environment = {
+      ...compiler.options.output.environment,
+      asyncFunction: true,
+    };
+
     applyPathFixes(compiler, this._extraOptions);
     if (this._extraOptions.debug) {
       compiler.options.devtool = false;
