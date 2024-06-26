@@ -18,6 +18,7 @@ import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -69,6 +70,15 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    */
   apply(compiler: Compiler): void {
     const { _options: options } = this;
+    // must before ModuleFederationPlugin
+    if (options.getPublicPath && options.name) {
+      new RemoteEntryPlugin(options.name, options.getPublicPath).apply(
+        compiler,
+      );
+    }
+    if (options.dts !== false) {
+      new DtsPlugin(options).apply(compiler);
+    }
     new FederationRuntimePlugin(options).apply(compiler);
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =
@@ -100,10 +110,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         console.warn(err);
         disableManifest = true;
       }
-    }
-
-    if (options.dts !== false) {
-      new DtsPlugin(options).apply(compiler);
     }
 
     if (

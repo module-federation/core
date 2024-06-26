@@ -56,6 +56,12 @@
 
 ![nested-remote](@public/guide/type-prompt/nested-remote.jpg)
 
+### 动态类型提示
+
+`Module Federation` 支持加载动态类型，并且通用支持热更新。
+
+![dynamic-remote-hot-types-reload](@public/guide/type-prompt/dynamic-remote-hot-types-reload-static.gif)
+
 ## 配置
 
 - [dts](../../configure/dts)：类型生成/加载
@@ -74,3 +80,8 @@ config.watchOptions = {
   ignored: ['**/node_modules/**', '**/@mf-types/**'],
 };
 ```
+
+2. 动态类型未能正常获取
+
+* 请确保 `Vmok` 版本大于等于 `1.9.0`。
+* 动态类型需要访问页面加载指定模块后才会获取，请确保已经加载了对应模块。

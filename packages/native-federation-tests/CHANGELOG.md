@@ -1,5 +1,17 @@
 # [1.0.0-canary.1](https://github.com/module-federation/core/compare/native-federation-tests-0.2.1...native-federation-tests-1.0.0-canary.1) (2023-11-06)
 
+## 0.6.0
+
+### Minor Changes
+
+- 8941ef4: feat: support for farm, drop support for node < 16
+
+## 0.5.1
+
+### Patch Changes
+
+- 3082718: ability to use relative paths
+
 ## 0.5.0
 
 ### Minor Changes

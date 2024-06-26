@@ -11,6 +11,7 @@
 interface PluginDevOptions {
   disableLiveReload?: boolean;
   disableHotTypesReload?: boolean;
+  disableDynamicRemoteTypeHints?: boolean;
 }
 ```
 
@@ -29,3 +30,11 @@ interface PluginDevOptions {
 - 默认值：`false`
 
 是否禁用 `liveReload`，设置 `true` 后，生产者的任何更新，都不会触发消费者的**页面** `liveReload`
+
+## disableDynamicRemoteTypeHints
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+是否禁用动态模块类型提示，设置 `true` 后，消费者不会获取到动态模块的类型。

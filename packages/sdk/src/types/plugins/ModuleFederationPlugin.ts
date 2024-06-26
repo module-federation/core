@@ -128,6 +128,7 @@ export interface PluginManifestOptions {
 export interface PluginDevOptions {
   disableLiveReload?: boolean;
   disableHotTypesReload?: boolean;
+  disableDynamicRemoteTypeHints?: boolean;
 }
 
 export interface DtsHostOptions {
@@ -202,6 +203,10 @@ export interface ModuleFederationPluginOptions {
    * Runtime plugin file paths or package name.
    */
   runtimePlugins?: string[];
+  /**
+   * Custom public path function
+   */
+  getPublicPath?: string;
   /**
    * Bundler runtime path
    */

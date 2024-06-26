@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "useDefineForClassFields": true,
+
+    /* Bundler mode */
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+
+    "declarationDir": "./dist/types",
+    "rootDir": "./src",
+    "module": "commonjs",
+    "target": "es5",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+    "skipLibCheck": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "lib": ["esnext", "dom"],
+    "jsx": "preserve",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/remoteApp.tsx",
+    "src/create.ts"
+  ],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

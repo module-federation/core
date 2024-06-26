@@ -1,5 +1,83 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [7d09ed8]
+  - @module-federation/dts-plugin@0.2.2
+  - @module-federation/manifest@0.2.2
+  - @module-federation/rspack@0.2.2
+  - @module-federation/sdk@0.2.2
+  - @module-federation/runtime-tools@0.2.2
+  - @module-federation/managers@0.2.2
+  - @module-federation/bridge-react-webpack-plugin@0.2.2
+
+## 0.2.1
+
+### Patch Changes
+
+- 88445e7: Support getPublicPath in compiler plugins
+- Updated dependencies [88445e7]
+- Updated dependencies [e494f1a]
+  - @module-federation/dts-plugin@0.2.1
+  - @module-federation/manifest@0.2.1
+  - @module-federation/sdk@0.2.1
+  - @module-federation/rspack@0.2.1
+  - @module-federation/bridge-react-webpack-plugin@0.2.1
+  - @module-federation/managers@0.2.1
+  - @module-federation/runtime-tools@0.2.1
+
+## 0.2.0
+
+### Patch Changes
+
+- Updated dependencies [804cc3b]
+- Updated dependencies [52bb94c]
+- Updated dependencies [d2ab821]
+- Updated dependencies [f7a6d3f]
+  - @module-federation/dts-plugin@0.2.0
+  - @module-federation/bridge-react-webpack-plugin@0.2.0
+  - @module-federation/manifest@0.2.0
+  - @module-federation/rspack@0.2.0
+  - @module-federation/sdk@0.2.0
+  - @module-federation/runtime-tools@0.2.0
+  - @module-federation/managers@0.2.0
+
+## 0.1.21
+
+### Patch Changes
+
+- 1e93c5e: chore(enhanced): add peer deps required by dts plugin
+- Updated dependencies [a50c459]
+- Updated dependencies [88900ad]
+- Updated dependencies [4cddb8a]
+- Updated dependencies [6ee10aa]
+- Updated dependencies [1e93c5e]
+  - @module-federation/dts-plugin@0.1.21
+  - @module-federation/sdk@0.1.21
+  - @module-federation/manifest@0.1.21
+  - @module-federation/rspack@0.1.21
+  - @module-federation/runtime-tools@0.1.21
+  - @module-federation/managers@0.1.21
+
+## 0.1.20
+
+### Patch Changes
+
+- 766de80: Add repository property to the enhanced package
+- d5ac542: Add license property to the package.json of module-federation/enhanced
+- Updated dependencies [685c607]
+- Updated dependencies [34f9498]
+- Updated dependencies [e8e0969]
+- Updated dependencies [349c381]
+  - @module-federation/dts-plugin@0.1.20
+  - @module-federation/sdk@0.1.20
+  - @module-federation/runtime-tools@0.1.20
+  - @module-federation/manifest@0.1.20
+  - @module-federation/rspack@0.1.20
+  - @module-federation/managers@0.1.20
+
 ## 0.1.19
 
 ### Patch Changes

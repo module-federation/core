@@ -1,5 +1,49 @@
 # [1.0.0-canary.3](https://github.com/module-federation/core/compare/webpack-bundler-runtime-1.0.0-canary.2...webpack-bundler-runtime-1.0.0-canary.3) (2023-11-23)
 
+## 0.2.2
+
+### Patch Changes
+
+- @module-federation/runtime@0.2.2
+- @module-federation/sdk@0.2.2
+
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [88445e7]
+  - @module-federation/sdk@0.2.1
+  - @module-federation/runtime@0.2.1
+
+## 0.2.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.2.0
+- @module-federation/sdk@0.2.0
+
+## 0.1.21
+
+### Patch Changes
+
+- 88900ad: fix: support decode encode remote name
+- Updated dependencies [88900ad]
+  - @module-federation/sdk@0.1.21
+  - @module-federation/runtime@0.1.21
+
+## 0.1.20
+
+### Patch Changes
+
+- 05c43f3: feat: support pass shareScopeMap
+- Updated dependencies [652c8a2]
+- Updated dependencies [685c607]
+- Updated dependencies [05c43f3]
+- Updated dependencies [e8e0969]
+- Updated dependencies [349c381]
+  - @module-federation/runtime@0.1.20
+  - @module-federation/sdk@0.1.20
+
 ## 0.1.19
 
 ### Patch Changes

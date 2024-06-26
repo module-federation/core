@@ -99,6 +99,12 @@
         "baseUrl": "http://127.0.0.1:3005",
         "browser": "chrome"
       },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
       "configurations": {
         "development": {
           "runnerUi": true,

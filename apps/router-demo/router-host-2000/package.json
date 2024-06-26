@@ -1,0 +1,24 @@
+{
+  "name": "host",
+  "private": true,
+  "version": "1.0.3",
+  "scripts": {
+    "dev": "FEDERATION_DEBUG=true rsbuild dev --open",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.3.6",
+    "@module-federation/bridge-react": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
+    "react-error-boundary": "^4.0.13"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^0.6.3",
+    "@rsbuild/plugin-react": "^0.6.3",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.5"
+  }
+}

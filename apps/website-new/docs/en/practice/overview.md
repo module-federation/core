@@ -4,9 +4,8 @@ title: "Overview"
 
 # Overview
 
-Module Federation, as a module sharing scheme, has its core objectives centered around solving the problems of code reuse, optimizing the build process, and enhancing runtime performance. However, these functionalities are often insufficient in the practice of project development. It typically needs to be integrated with various frameworks to understand how to use Module Federation under different frameworks and how to consolidate multiple functionalities from different frameworks. Additionally, the varying demand differences of different application scenarios must be considered, such as the differences between mid-back office applications and mobile application development scenarios.
+Module Federation, as a module sharing solution, aims to solve code reuse issues, optimize the build process, and enhance runtime performance. However, in practical project development, these functionalities alone are insufficient. It often needs to be combined with various frameworks to understand how to use Module Federation under different frameworks and how to integrate multiple functionalities from different frameworks. Additionally, it is necessary to consider the differing needs of various application scenarios, such as backend applications versus mobile application development scenarios.
+This "Practical Guide" aims to address the above issues by providing a series of best practices for using Module Federation. The main content includes two parts:
 
-This article, titled "Practical Aspects," aims to address the aforementioned issues and provide a collection of best practices regarding the use of Module Federation. The main content consists of two parts:
-
-* Frameworks: Introduces how Module Federation is used within different frameworks.
-* Scenario-based Applications: For common business development scenarios, this article provides best practice guidance on Module Federation and explores how to integrate multiple functionalities across different frameworks to form comprehensive solutions.
+1. Bridge: For common business development scenarios: how to load application-level modules (with routing) and how to load modules across different frontend frameworks.
+2. Framework: Introduces the usage of Module Federation in different frameworks.

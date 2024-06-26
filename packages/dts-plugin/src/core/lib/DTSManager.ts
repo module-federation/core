@@ -8,6 +8,7 @@ import {
   inferAutoPublicPath,
 } from '@module-federation/sdk';
 import cloneDeepWith from 'lodash.clonedeepwith';
+import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extractor';
 
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
 import { createTypesArchive, downloadTypesArchive } from './archiveHandler';
@@ -16,7 +17,10 @@ import {
   retrieveMfAPITypesPath,
   retrieveMfTypesPath,
 } from './typeScriptCompiler';
-import { retrieveHostConfig } from '../configurations/hostPlugin';
+import {
+  retrieveHostConfig,
+  retrieveRemoteInfo,
+} from '../configurations/hostPlugin';
 import { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 import { HostOptions, RemoteInfo } from '../interfaces/HostOptions';
 import {
@@ -25,8 +29,8 @@ import {
   REMOTE_ALIAS_IDENTIFIER,
   HOST_API_TYPES_FILE_NAME,
 } from '../constant';
-import axios from 'axios';
 import { fileLog } from '../../server';
+import { axiosGet, isDebugMode } from './utils';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
 
@@ -34,14 +38,17 @@ interface UpdateTypesOptions {
   updateMode: UpdateMode;
   remoteName?: string;
   remoteTarPath?: string;
+  remoteInfo?: RemoteInfo;
+  once?: boolean;
 }
 
 class DTSManager {
   options: DTSManagerOptions;
   runtimePkgs: string[];
   remoteAliasMap: Record<string, Required<RemoteInfo>>;
-  loadedRemoteAPIAlias: string[];
+  loadedRemoteAPIAlias: Set<string>;
   extraOptions: Record<string, any>;
+  updatedRemoteInfos: Record<string, Required<RemoteInfo>>;
 
   constructor(options: DTSManagerOptions) {
     this.options = cloneDeepWith(options, (_value, key) => {
@@ -55,9 +62,10 @@ class DTSManager {
       '@module-federation/enhanced/runtime',
       '@module-federation/runtime-tools',
     ];
-    this.loadedRemoteAPIAlias = [];
+    this.loadedRemoteAPIAlias = new Set();
     this.remoteAliasMap = {};
     this.extraOptions = options?.extraOptions || {};
+    this.updatedRemoteInfos = {};
   }
 
   generateAPITypes(mapComponentsToExpose: Record<string, string>) {
@@ -149,11 +157,17 @@ class DTSManager {
         fs.writeFileSync(apiTypesPath, apiTypes);
       }
 
-      if (remoteOptions.deleteTypesFolder) {
-        await rm(retrieveMfTypesPath(tsConfig, remoteOptions), {
-          recursive: true,
-          force: true,
-        });
+      try {
+        if (remoteOptions.deleteTypesFolder) {
+          await rm(retrieveMfTypesPath(tsConfig, remoteOptions), {
+            recursive: true,
+            force: true,
+          });
+        }
+      } catch (err) {
+        if (isDebugMode()) {
+          console.error(err);
+        }
       }
       console.log(ansiColors.green('Federated types created correctly'));
     } catch (error) {
@@ -175,10 +189,7 @@ class DTSManager {
         return remoteInfo as Required<RemoteInfo>;
       }
       const url = remoteInfo.url;
-      const res = await axios({
-        method: 'get',
-        url,
-      });
+      const res = await axiosGet(url);
       const manifestJson = res.data as unknown as Manifest;
       if (!manifestJson.metaData.types.zip) {
         throw new Error(`Can not get ${remoteInfo.name}'s types archive url!`);
@@ -190,10 +201,20 @@ class DTSManager {
         return u;
       };
 
-      let publicPath =
-        'publicPath' in manifestJson.metaData
-          ? manifestJson.metaData.publicPath
-          : new Function(manifestJson.metaData.getPublicPath)();
+      let publicPath;
+
+      if ('publicPath' in manifestJson.metaData) {
+        publicPath = manifestJson.metaData.publicPath;
+      } else {
+        const getPublicPath = new Function(manifestJson.metaData.getPublicPath);
+
+        if (manifestJson.metaData.getPublicPath.startsWith('function')) {
+          publicPath = getPublicPath()();
+        } else {
+          publicPath = getPublicPath();
+        }
+      }
+
       if (publicPath === 'auto') {
         publicPath = inferAutoPublicPath(remoteInfo.url);
       }
@@ -241,7 +262,7 @@ class DTSManager {
     }
     try {
       const url = apiTypeUrl;
-      const res = await axios.get(url);
+      const res = await axiosGet(url);
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(
         REMOTE_ALIAS_IDENTIFIER,
@@ -249,7 +270,7 @@ class DTSManager {
       );
       const filePath = path.join(destinationPath, REMOTE_API_TYPES_FILE_NAME);
       fs.writeFileSync(filePath, apiTypeFile);
-      this.loadedRemoteAPIAlias.push(remoteInfo.alias);
+      this.loadedRemoteAPIAlias.add(remoteInfo.alias);
     } catch (err) {
       fileLog(
         `Unable to download "${remoteInfo.name}" api types, ${err}`,
@@ -260,13 +281,34 @@ class DTSManager {
   }
 
   consumeAPITypes(hostOptions: Required<HostOptions>) {
-    if (!this.loadedRemoteAPIAlias.length) {
+    const apiTypeFileName = path.join(
+      hostOptions.context,
+      hostOptions.typesFolder,
+      HOST_API_TYPES_FILE_NAME,
+    );
+    try {
+      const existedFile = fs.readFileSync(apiTypeFileName, 'utf-8');
+      const existedImports = new ThirdPartyExtractor('').collectTypeImports(
+        existedFile,
+      );
+      existedImports.forEach((existedImport) => {
+        const alias = existedImport
+          .split('./')
+          .slice(1)
+          .join('./')
+          .replace('/apis.d.ts', '');
+        this.loadedRemoteAPIAlias.add(alias);
+      });
+    } catch (err) {
+      //noop
+    }
+    if (!this.loadedRemoteAPIAlias.size) {
       return;
     }
     const packageTypes: string[] = [];
     const remoteKeys: string[] = [];
 
-    const importTypeStr = this.loadedRemoteAPIAlias
+    const importTypeStr = [...this.loadedRemoteAPIAlias]
       .sort()
       .map((alias, index) => {
         const remoteKey = `RemoteKeys_${index}`;
@@ -309,18 +351,6 @@ class DTSManager {
 
   async consumeArchiveTypes(options: HostOptions) {
     const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(options);
-    if (hostOptions.deleteTypesFolder) {
-      await rm(hostOptions.typesFolder, {
-        recursive: true,
-        force: true,
-      }).catch((error) =>
-        fileLog(
-          `Unable to remove types folder, ${error}`,
-          'consumeArchiveTypes',
-          'error',
-        ),
-      );
-    }
 
     const downloadPromises = Object.entries(mapRemotesToDownload).map(
       async (item) => {
@@ -392,46 +422,98 @@ class DTSManager {
   }
 
   async updateTypes(options: UpdateTypesOptions): Promise<void> {
-    // can use remoteTarPath directly in the future
-    const { remoteName, updateMode } = options;
-    const hostName = this.options?.host?.moduleFederationConfig?.name;
-
-    if (updateMode === UpdateMode.POSITIVE && remoteName === hostName) {
-      if (!this.options.remote) {
-        return;
-      }
-      this.generateTypes();
-    } else {
-      const { remoteAliasMap } = this;
-      if (!this.options.host) {
-        return;
-      }
-      const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(
-        this.options.host,
+    try {
+      // can use remoteTarPath directly in the future
+      const {
+        remoteName,
+        updateMode,
+        remoteInfo: updatedRemoteInfo,
+        once,
+      } = options;
+      const hostName = this.options?.host?.moduleFederationConfig?.name;
+      fileLog(
+        `updateTypes options:, ${JSON.stringify(options, null, 2)}`,
+        'consumeTypes',
+        'info',
       );
-
-      const loadedRemoteInfo = Object.values(remoteAliasMap).find(
-        (i) => i.name === remoteName,
-      );
-
-      if (!loadedRemoteInfo) {
-        const remoteInfo = Object.values(mapRemotesToDownload).find((item) => {
-          return item.name === remoteName;
-        });
-        if (remoteInfo) {
-          if (!this.remoteAliasMap[remoteInfo.alias]) {
-            const requiredRemoteInfo =
-              await this.requestRemoteManifest(remoteInfo);
-            this.remoteAliasMap[remoteInfo.alias] = requiredRemoteInfo;
-          }
-          await this.consumeTargetRemotes(
-            hostOptions,
-            this.remoteAliasMap[remoteInfo.alias],
-          );
+      if (updateMode === UpdateMode.POSITIVE && remoteName === hostName) {
+        if (!this.options.remote) {
+          return;
         }
+        this.generateTypes();
       } else {
-        await this.consumeTargetRemotes(hostOptions, loadedRemoteInfo);
+        const { remoteAliasMap } = this;
+        if (!this.options.host) {
+          return;
+        }
+        const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(
+          this.options.host,
+        );
+
+        const loadedRemoteInfo = Object.values(remoteAliasMap).find(
+          (i) => i.name === remoteName,
+        );
+
+        const consumeTypes = async (
+          requiredRemoteInfo: Required<RemoteInfo>,
+        ) => {
+          const [_alias, destinationPath] = await this.consumeTargetRemotes(
+            hostOptions,
+            requiredRemoteInfo,
+          );
+          await this.downloadAPITypes(requiredRemoteInfo, destinationPath);
+        };
+
+        if (!loadedRemoteInfo) {
+          const remoteInfo = Object.values(mapRemotesToDownload).find(
+            (item) => {
+              return item.name === remoteName;
+            },
+          );
+          if (remoteInfo) {
+            if (!this.remoteAliasMap[remoteInfo.alias]) {
+              const requiredRemoteInfo =
+                await this.requestRemoteManifest(remoteInfo);
+              this.remoteAliasMap[remoteInfo.alias] = requiredRemoteInfo;
+            }
+            await consumeTypes(this.remoteAliasMap[remoteInfo.alias]);
+          } else if (updatedRemoteInfo) {
+            const consumeDynamicRemoteTypes = async () => {
+              await consumeTypes(
+                this.updatedRemoteInfos[updatedRemoteInfo.name],
+              );
+              this.consumeAPITypes(hostOptions);
+            };
+            if (!this.updatedRemoteInfos[updatedRemoteInfo.name]) {
+              const parsedRemoteInfo = retrieveRemoteInfo({
+                hostOptions: hostOptions,
+                remoteAlias: updatedRemoteInfo.alias || updatedRemoteInfo.name,
+                remote: updatedRemoteInfo.url,
+              });
+              fileLog(`start request manifest`, 'consumeTypes', 'info');
+              this.updatedRemoteInfos[updatedRemoteInfo.name] =
+                await this.requestRemoteManifest(parsedRemoteInfo);
+              fileLog(
+                `end request manifest, this.updatedRemoteInfos[updatedRemoteInfo.name]: ${JSON.stringify(
+                  this.updatedRemoteInfos[updatedRemoteInfo.name],
+                  null,
+                  2,
+                )}`,
+                'consumeTypes',
+                'info',
+              );
+              await consumeDynamicRemoteTypes();
+            }
+            if (!once && this.updatedRemoteInfos[updatedRemoteInfo.name]) {
+              await consumeDynamicRemoteTypes();
+            }
+          }
+        } else {
+          await consumeTypes(loadedRemoteInfo);
+        }
       }
+    } catch (err) {
+      fileLog(`updateTypes fail, ${err}`, 'updateTypes', 'error');
     }
   }
 }
