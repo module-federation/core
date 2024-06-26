@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dts-plugin",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
