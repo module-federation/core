@@ -83,7 +83,9 @@ export function createScriptNode(
           );
         } catch (e) {
           // console.error('Error running script:', e);
-          cb(new Error(`Script execution error: ${e}`));
+          cb(
+            e instanceof Error ? e : new Error(`Script execution error: ${e}`),
+          );
         }
       })
       .catch((err: Error) => {
