@@ -12,6 +12,7 @@ import { PluginOptions } from '../types';
 import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
+const isDev = process.env.NODE_ENV === 'development';
 
 export type ConfigType<T> = T extends 'webpack'
   ? webpack.Configuration
@@ -35,6 +36,9 @@ export const getMFConfig = async (
   await replaceRemoteUrl(mfConfig);
   if (mfConfig.remoteType === undefined) {
     mfConfig.remoteType = 'script';
+  }
+  if (!mfConfig.name) {
+    throw new Error(`${PLUGIN_IDENTIFIER} mfConfig.name can not be empty!`);
   }
   return mfConfig;
 };
@@ -129,7 +133,6 @@ export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
 ) => {
-  const isDev = process.env.NODE_ENV === 'development';
   const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
 
   patchDTSConfig(mfConfig, isServer);
@@ -216,6 +219,15 @@ export function patchWebpackConfig<T>(options: {
 
   delete bundlerConfig.optimization?.runtimeChunk;
 
+  if (bundlerConfig.output) {
+    if (!bundlerConfig.output?.chunkLoadingGlobal) {
+      bundlerConfig.output.chunkLoadingGlobal = `chunk_${mfConfig.name}`;
+    }
+    if (!bundlerConfig.output?.uniqueName) {
+      bundlerConfig.output.uniqueName = mfConfig.name;
+    }
+  }
+
   if (!isServer) {
     autoDeleteSplitChunkCacheGroups(mfConfig, bundlerConfig);
   }
@@ -232,7 +244,7 @@ export function patchWebpackConfig<T>(options: {
     );
   }
 
-  if (bundlerConfig.output?.publicPath === 'auto') {
+  if (isDev && bundlerConfig.output?.publicPath === 'auto') {
     // TODO: only in dev temp
     const port =
       modernjsConfig.dev?.port || modernjsConfig.server?.port || 8080;
@@ -254,7 +266,6 @@ export function patchWebpackConfig<T>(options: {
       output.chunkFilename = chunkFileName.replace('.js', suffix);
     }
   }
-  const isDev = process.env.NODE_ENV === 'development';
   // modernjs project has the same entry for server/client, add polyfill:false to skip compile error in browser target
   if (isDev && enableSSR && !isServer) {
     bundlerConfig.resolve!.fallback = {
@@ -263,6 +274,16 @@ export function patchWebpackConfig<T>(options: {
       stream: false,
       vm: false,
     };
+  }
+
+  if (
+    modernjsConfig.deploy?.microFrontend &&
+    Object.keys(mfConfig.exposes || {}).length
+  ) {
+    if (!bundlerConfig.optimization) {
+      bundlerConfig.optimization = {};
+    }
+    bundlerConfig.optimization.usedExports = false;
   }
 }
 

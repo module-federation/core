@@ -17,5 +17,12 @@ export default defineConfig({
   output: {
     disableTsChecker: true,
   },
+  tools: {
+    webpack: (config) => {
+      config.output!.uniqueName = 'modernjs-ssr-dynamic-remote-new-version';
+      config.output!.chunkLoadingGlobal =
+        'modernjs-ssr-dynamic-remote-new-version';
+    },
+  },
   plugins: [appTools(), moduleFederationPlugin()],
 });

@@ -1,10 +1,6 @@
 import { it, expect, describe } from 'vitest';
 import path from 'path';
-import {
-  getTargetEnvConfig,
-  patchWebpackConfig,
-  type ConfigType,
-} from './utils';
+import { getTargetEnvConfig, patchWebpackConfig } from './utils';
 
 const mfConfig = {
   name: 'host',
@@ -103,7 +99,9 @@ describe('patchWebpackConfig', async () => {
 
     expect(bundlerConfig).toStrictEqual({
       output: {
-        publicPath: 'http://localhost:8080/',
+        chunkLoadingGlobal: 'chunk_host',
+        publicPath: 'auto',
+        uniqueName: 'host',
       },
     });
   });
@@ -129,7 +127,9 @@ describe('patchWebpackConfig', async () => {
 
     expect(bundlerConfig).toStrictEqual({
       output: {
-        publicPath: 'http://localhost:8080/',
+        chunkLoadingGlobal: 'chunk_host',
+        publicPath: 'auto',
+        uniqueName: 'host',
       },
     });
   });
