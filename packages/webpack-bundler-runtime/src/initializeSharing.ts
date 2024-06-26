@@ -22,8 +22,10 @@ export function initializeSharing({
     typeof console !== 'undefined' && console.warn && console.warn(msg);
 
   var initExternal = (id: string | number) => {
-    var handleError = (err: any) =>
+    var handleError = (err: any) => {
       warn('Initialization of sharing external failed: ' + err);
+      debugger;
+    };
     try {
       var module = webpackRequire(id);
       if (!module) return;

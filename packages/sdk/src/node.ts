@@ -115,6 +115,7 @@ export function loadScriptNode(
             `__FEDERATION_${info?.attrs?.['name']}:custom__`;
           const entryExports = ((globalThis as any)[remoteEntryKey] =
             scriptContext);
+          debugger;
           resolve(entryExports);
         }
       },

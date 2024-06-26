@@ -1,13 +1,53 @@
-//@ts-nocheck
-export default function () {
+import type {
+  FederationRuntimePlugin,
+  FederationHost,
+} from '@module-federation/runtime';
+type WebpackRequire = {
+  (id: string): any;
+  u: (chunkId: string) => string;
+  p: string;
+  m: { [key: string]: any };
+  o: (obj: any, prop: string) => boolean;
+  C?: (chunk: any) => void;
+  l: (
+    url: string,
+    done: (res: any) => void,
+    key: string,
+    chunkId: string,
+  ) => void;
+  federation: {
+    runtime: {
+      loadScriptNode: (
+        url: string,
+        options: { attrs: { globalName: string } },
+      ) => Promise<any>;
+    };
+    instance: FederationHost;
+    chunkMatcher?: (chunkId: string) => boolean;
+    rootOutputDir?: string;
+    initOptions: {
+      name: string;
+      remotes: any;
+    };
+  };
+  f?: {
+    require?: (chunkId: string, promises: any[]) => void;
+    readFileVm?: (chunkId: string, promises: any[]) => void;
+  };
+};
+
+declare const __webpack_require__: WebpackRequire;
+declare const __non_webpack_require__: (id: string) => any;
+
+export default function (): FederationRuntimePlugin {
   return {
     name: 'node-federation-plugin',
-    beforeInit: function (args) {
+    beforeInit: function (args: any) {
       (() => {
-        function resolveFile(rootOutputDir, chunkId) {
-          var path = __non_webpack_require__('path');
+        function resolveFile(rootOutputDir: string, chunkId: string): string {
+          const path = __non_webpack_require__('path');
 
-          var filename = path.join(
+          const filename = path.join(
             __dirname,
             rootOutputDir + __webpack_require__.u(chunkId),
           );
@@ -15,8 +55,8 @@ export default function () {
           return filename;
         }
 
-        function resolveUrl(remoteName, chunkName) {
-          var path = __non_webpack_require__('path');
+        function resolveUrl(remoteName: string, chunkName: string): URL | null {
+          const path = __non_webpack_require__('path');
 
           try {
             return new URL(chunkName, __webpack_require__.p);
@@ -37,12 +77,12 @@ export default function () {
           }
         }
 
-        function returnFromCache(remoteName) {
+        function returnFromCache(remoteName: string): string | null {
           const globalThisVal = new Function('return globalThis')();
           const federationInstances =
             globalThisVal['__FEDERATION__']['__INSTANCES__'];
 
-          let entryUrl = null; // Initialize entryUrl to null
+          let entryUrl: string | null = null; // Initialize entryUrl to null
 
           // Using for...of for better readability and direct control
           for (const instance of federationInstances) {
@@ -56,12 +96,12 @@ export default function () {
           return entryUrl; // Return the found entry URL or null if not found
         }
 
-        function returnFromGlobalInstances(remoteName) {
+        function returnFromGlobalInstances(remoteName: string): string | null {
           const globalThisVal = new Function('return globalThis')();
           const federationInstances =
             globalThisVal['__FEDERATION__']['__INSTANCES__'];
 
-          let entryUrl = null; // Declare a variable to store the entry URL when found
+          let entryUrl: string | null = null; // Declare a variable to store the entry URL when found
 
           // Iterate over federation instances
           for (const instance of federationInstances) {
@@ -81,65 +121,77 @@ export default function () {
         }
 
         function fileSystemRunInContextStrategy(
-          chunkId,
-          rootOutputDir,
-          callback,
-        ) {
-          var fs = __non_webpack_require__('fs');
-          var path = __non_webpack_require__('path');
-          var vm = __non_webpack_require__('vm');
-          var filename = resolveFile(rootOutputDir, chunkId);
+          chunkId: string,
+          rootOutputDir: string,
+          callback: (err: Error | null, chunk: any) => void,
+        ): void {
+          const fs = __non_webpack_require__('fs');
+          const path = __non_webpack_require__('path');
+          const vm = __non_webpack_require__('vm');
+          const filename = resolveFile(rootOutputDir, chunkId);
 
           if (fs.existsSync(filename)) {
-            fs.readFile(filename, 'utf-8', function (err, content) {
-              if (err) {
-                callback(err, null);
-                return;
-              }
-              var chunk = {};
-              try {
-                vm.runInThisContext(
-                  '(function(exports, require, __dirname, __filename) {' +
-                    content +
-                    '\n})',
-                  filename,
-                )(
-                  chunk,
-                  __non_webpack_require__,
-                  path.dirname(filename),
-                  filename,
-                );
-                callback(null, chunk);
-              } catch (e) {
-                console.log("'runInThisContext threw'", e);
-                callback(e, null);
-              }
-            });
+            fs.readFile(
+              filename,
+              'utf-8',
+              function (err: Error, content: string) {
+                if (err) {
+                  callback(err, null);
+                  return;
+                }
+                const chunk: any = {};
+                try {
+                  vm.runInThisContext(
+                    '(function(exports, require, __dirname, __filename) {' +
+                      content +
+                      '\n})',
+                    filename,
+                  )(
+                    chunk,
+                    __non_webpack_require__,
+                    path.dirname(filename),
+                    filename,
+                  );
+                  callback(null, chunk);
+                } catch (e) {
+                  console.log("'runInThisContext threw'", e);
+                  callback(e as Error, null);
+                }
+              },
+            );
           } else {
-            var err = new Error('File ' + filename + ' does not exist');
+            const err = new Error('File ' + filename + ' does not exist');
             callback(err, null);
           }
         }
 
-        function httpEvalStrategy(chunkName, remoteName, callback) {
-          var url = resolveUrl(remoteName, chunkName);
+        function httpEvalStrategy(
+          chunkName: string,
+          remoteName: string,
+          callback: (err: Error | null, chunk: any) => void,
+        ): void {
+          const url = resolveUrl(remoteName, chunkName);
           if (!url) {
-            var emptyChunk = {
+            const emptyChunk = {
               modules: {}, // No modules
               ids: [], // No chunk IDs
               runtime: null, // No runtime function
             };
             return callback(null, emptyChunk);
           }
-          const fetchFunction = globalThis.webpackChunkLoad || fetch;
-          fetchFunction(url)
-            .then(function (res) {
+
+          args.origin.loaderHook.lifecycle.fetch
+            .emit(url.href, {})
+            .then(function (res: Response) {
               return res.text();
             })
-            .then(function (data) {
-              var chunk = {};
+            .then(function (data: string) {
+              const chunk: any = {};
               try {
-                var urlDirname = url.pathname.split('/').slice(0, -1).join('/');
+                const urlDirname = url.pathname
+                  .split('/')
+                  .slice(0, -1)
+                  .join('/');
                 eval(
                   '(function(exports, require, __dirname, __filename) {' +
                     data +
@@ -147,10 +199,11 @@ export default function () {
                 )(chunk, __non_webpack_require__, urlDirname, chunkName);
                 callback(null, chunk);
               } catch (e) {
-                callback(e, null);
+                callback(e as Error, null);
               }
             });
         }
+
         function httpVmStrategy(
           chunkName: string,
           remoteName: string,
@@ -168,18 +221,15 @@ export default function () {
             return callback(null, emptyChunk);
           }
 
-          const fetchMethod =
-            globalThis.webpackChunkLoad ||
-            __non_webpack_require__(url.protocol === 'https:' ? 'https' : 'http').get;
-
-          const handleResponse = (res: any) => {
-            let data = '';
-            res.on('data', (chunk: Buffer) => {
-              data += chunk.toString();
-            });
-            res.on('end', () => {
+          const fetchHook = args.origin.loaderHook.lifecycle.fetch.emit(
+            url.href,
+            {},
+          );
+          fetchHook
+            .then((res: Response) => res.text())
+            .then((data: string) => {
               try {
-                const chunk = {};
+                const chunk: any = {};
                 const urlDirname = url.pathname
                   .split('/')
                   .slice(0, -1)
@@ -190,40 +240,19 @@ export default function () {
                 )(chunk, __non_webpack_require__, urlDirname, chunkName);
                 callback(null, chunk);
               } catch (e) {
-                callback(e, null);
+                callback(e as Error, null);
               }
-            });
-            res.on('error', (err: Error) => {
-              callback(err, null);
-            });
-          };
-
-          if (fetchMethod === globalThis.webpackChunkLoad) {
-            fetchMethod(url.href)
-              .then((res: Response) => res.text())
-              .then((data: string) => {
-                handleResponse({
-                  on: (event: string, handler: (data?: string) => void) => {
-                    if (event === 'data') {
-                      handler(data);
-                    } else if (event === 'end') {
-                      handler();
-                    }
-                  },
-                });
-              })
-              .catch((err: Error) => callback(err, null));
-          } else {
-            fetchMethod(url.href, handleResponse);
-          }
+            })
+            .catch((err: Error) => callback(err, null));
         }
+
         function loadChunkStrategy(
-          strategyType,
-          chunkId,
-          rootOutputDir,
-          remotes,
-          callback,
-        ) {
+          strategyType: string,
+          chunkId: string,
+          rootOutputDir: string,
+          remotes: any,
+          callback: (err: Error | null, chunk: any) => void,
+        ): void {
           switch (strategyType) {
             case 'filesystem':
               return fileSystemRunInContextStrategy(
@@ -243,21 +272,21 @@ export default function () {
 
         // object to store loaded chunks
         // "0" means "already loaded", Promise means loading
-        var installedChunks = {};
+        const installedChunks: { [key: string]: any } = {};
 
-        var installChunk = __webpack_require__.C
+        const installChunk = __webpack_require__.C
           ? __webpack_require__.C
-          : (chunk) => {
-              var moreModules = chunk.modules,
+          : (chunk: any) => {
+              const moreModules = chunk.modules,
                 chunkIds = chunk.ids,
                 runtime = chunk.runtime;
-              for (var moduleId in moreModules) {
+              for (const moduleId in moreModules) {
                 if (__webpack_require__.o(moreModules, moduleId)) {
                   __webpack_require__.m[moduleId] = moreModules[moduleId];
                 }
               }
               if (runtime) runtime(__webpack_require__);
-              for (var i = 0; i < chunkIds.length; i++) {
+              for (let i = 0; i < chunkIds.length; i++) {
                 if (installedChunks[chunkIds[i]]) {
                   installedChunks[chunkIds[i]][0]();
                 }
@@ -266,35 +295,39 @@ export default function () {
             };
 
         // load script equivalent for server side
-        __webpack_require__.l = function (url, callback, chunkId) {
-          if (!chunkId) {
+        __webpack_require__.l = (
+          url: string,
+          done: (res: any) => void,
+          key: string,
+          chunkId: string,
+        ) => {
+          if (!key || chunkId) {
             throw new Error(
               '__webpack_require__.l name is required for ' + url,
             );
           }
-
           __webpack_require__.federation.runtime
-            .loadScriptNode(url, { attrs: { globalName: remoteName } })
-            .then(function (res) {
-              var federation = __webpack_require__.federation;
-              var enhancedRemote = federation.instance.initRawContainer(
-                chunkId,
+            .loadScriptNode(url, { attrs: { globalName: key } })
+            .then((res: any) => {
+              const federation = __webpack_require__.federation;
+              const enhancedRemote = federation.instance.initRawContainer(
+                key,
                 url,
                 res,
               );
               const globalThisVal = new Function('return globalThis')();
               // use normal global assignment
-              globalThisVal[chunkId] = enhancedRemote;
-              callback(enhancedRemote);
+              globalThisVal[key] = enhancedRemote;
+              done(enhancedRemote);
             })
-            .catch(function (error) {
-              callback(error);
+            .catch((error: Error) => {
+              done(error);
             });
         };
         // Dynamic filesystem chunk loading for javascript
         if (__webpack_require__.f) {
-          const handle = function (chunkId, promises) {
-            var installedChunkData = installedChunks[chunkId];
+          const handle = function (chunkId: string, promises: any[]) {
+            let installedChunkData = installedChunks[chunkId];
             if (installedChunkData !== 0) {
               // 0 means "already installed".
               if (installedChunkData) {
@@ -305,23 +338,26 @@ export default function () {
                   : true;
                 if (matcher) {
                   // check if real chunk for handler
-                  var promise = new Promise(function (resolve, reject) {
+                  const promise = new Promise(function (resolve, reject) {
                     installedChunkData = installedChunks[chunkId] = [
                       resolve,
                       reject,
                     ];
 
-                    function installChunkCallback(error, chunk) {
+                    function installChunkCallback(
+                      error: Error | null,
+                      chunk: any,
+                    ) {
                       if (error) return reject(error);
                       if (chunk) installChunk(chunk);
                       resolve(chunk);
                     }
 
-                    var fs =
+                    const fs =
                       typeof process !== 'undefined'
                         ? __non_webpack_require__('fs')
                         : false;
-                    var filename =
+                    const filename =
                       typeof process !== 'undefined'
                         ? resolveFile(
                             __webpack_require__.federation.rootOutputDir || '',
@@ -338,7 +374,7 @@ export default function () {
                         installChunkCallback,
                       );
                     } else {
-                      var chunkName = __webpack_require__.u(chunkId);
+                      const chunkName = __webpack_require__.u(chunkId);
                       const loadingStrategy =
                         typeof process === 'undefined'
                           ? 'http-eval'
