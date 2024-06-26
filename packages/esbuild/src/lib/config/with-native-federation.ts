@@ -71,6 +71,7 @@ function normalizeShared(
       }),
       {},
     );
+
   return result;
 }
 

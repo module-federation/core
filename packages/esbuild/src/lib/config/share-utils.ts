@@ -58,8 +58,7 @@ export function findPackageJson(folder: string): string {
     return filePath;
   }
   throw new Error(
-    'no package.json found. Searched the following folder and all parents: ' +
-      folder,
+    `No package.json found. Searched the following folder and all parents: ${folder}`,
   );
 }
 
@@ -82,17 +81,14 @@ export function lookupVersionInMap(
 ): string | null {
   const parts = key.split('/');
   if (parts.length >= 2 && parts[0].startsWith('@')) {
-    key = parts[0] + '/' + parts[1];
+    key = `${parts[0]}/${parts[1]}`;
   } else {
     key = parts[0];
   }
   if (key.toLowerCase() === '@angular-architects/module-federation-runtime') {
     key = '@angular-architects/module-federation';
   }
-  if (!versions[key]) {
-    return null;
-  }
-  return versions[key];
+  return versions[key] || null;
 }
 
 export function _findSecondaries(
@@ -118,7 +114,7 @@ export function _findSecondaries(
     if (isInSkipList(secondaryLibName, PREPARED_DEFAULT_SKIP_LIST)) {
       continue;
     }
-    acc[secondaryLibName] = Object.assign({}, shareObject);
+    acc[secondaryLibName] = { ...shareObject };
     _findSecondaries(s, excludes, shareObject, acc);
   }
 }
@@ -160,8 +156,7 @@ export function getSecondaries(
     return configured;
   }
   // Fallback: Search folders
-  const secondaries = findSecondaries(libPath, exclude, shareObject);
-  return secondaries;
+  return findSecondaries(libPath, exclude, shareObject);
 }
 
 export function readConfiguredSecondaries(
@@ -181,14 +176,13 @@ export function readConfiguredSecondaries(
   }
   const keys = Object.keys(exports).filter(
     (key) =>
-      key != '.' &&
-      key != './package.json' &&
+      key !== '.' &&
+      key !== './package.json' &&
       !key.endsWith('*') &&
       (exports[key]['default'] || typeof exports[key] === 'string'),
   );
   const result: Record<string, any> = {};
   for (const key of keys) {
-    // const relPath = exports[key]['default'];
     const secondaryName = path.join(parent, key).replace(/\\/g, '/');
     if (exclude.includes(secondaryName)) {
       continue;
@@ -198,17 +192,13 @@ export function readConfiguredSecondaries(
     }
     const entry = getDefaultEntry(exports, key);
     if (typeof entry !== 'string') {
-      console.log('No entry point found for ' + secondaryName);
+      console.log(`No entry point found for ${secondaryName}`);
       continue;
     }
-    if (
-      (entry === null || entry === void 0 ? void 0 : entry.endsWith('.css')) ||
-      (entry === null || entry === void 0 ? void 0 : entry.endsWith('.scss')) ||
-      (entry === null || entry === void 0 ? void 0 : entry.endsWith('.less'))
-    ) {
+    if (['.css', '.scss', '.less'].some((ext) => entry.endsWith(ext))) {
       continue;
     }
-    result[secondaryName] = Object.assign({}, shareObject);
+    result[secondaryName] = { ...shareObject };
   }
   return result;
 }
@@ -236,7 +226,7 @@ export function shareAll(
 ): Config {
   projectPath = inferProjectPath(projectPath);
   const versionMaps = getVersionMaps(projectPath, projectPath);
-  const share: ConfigObject = {};
+  const shareConfig: ConfigObject = {};
   for (const versions of versionMaps) {
     const preparedSkipList = prepareSkipList(skip);
     for (const key in versions) {
@@ -248,14 +238,12 @@ export function shareAll(
       const requiredVersion = inferVersion
         ? versions[key]
         : config.requiredVersion;
-      if (!share[key]) {
-        share[key] = Object.assign(Object.assign({}, config), {
-          requiredVersion,
-        });
+      if (!shareConfig[key]) {
+        shareConfig[key] = { ...config, requiredVersion };
       }
     }
   }
-  return module.exports.share(share, projectPath);
+  return share(share, projectPath);
 }
 
 function inferProjectPath(projectPath: string): string {
@@ -270,6 +258,7 @@ function inferProjectPath(projectPath: string): string {
   }
   return projectPath;
 }
+
 export function setInferVersion(infer: boolean): void {
   inferVersion = infer;
 }
@@ -280,7 +269,6 @@ export function share(
 ): Record<string, any> {
   projectPath = inferProjectPath(projectPath);
   const packagePath = findPackageJson(projectPath);
-  // const versions = readVersionMap(packagePath);
   const result: Record<string, any> = {};
   let includeSecondaries: boolean | { skip?: string | string[] };
   for (const key in shareObjects) {
@@ -305,7 +293,7 @@ export function share(
     if (includeSecondaries) {
       const libPackageJson = findDepPackageJson(key, path.dirname(packagePath));
       if (!libPackageJson) {
-        logger.error('Could not find folder containing dep ' + key);
+        logger.error(`Could not find folder containing dep ${key}`);
         continue;
       }
       const libPath = path.dirname(libPackageJson);
@@ -327,7 +315,5 @@ export function addSecondaries(
   secondaries: Record<string, any>,
   result: Record<string, any>,
 ): void {
-  for (const key in secondaries) {
-    result[key] = secondaries[key];
-  }
+  Object.assign(result, secondaries);
 }

@@ -124,12 +124,12 @@ export const createContainerPlugin = (config: NormalizedFederationConfig) => ({
     const { filename } = config;
 
     const filter = new RegExp([filename].map((name) => `${name}$`).join('|'));
+    const hasShared = Object.keys(config.shared || {}).length;
 
-    const sharedExternals = new RegExp(
-      Object.keys(config.shared || {})
-        .map((name: string) => `${name}$`)
-        .join('|'),
-    );
+    const shared = Object.keys(config.shared || {})
+      .map((name: string) => `${name}$`)
+      .join('|');
+    const sharedExternals = new RegExp(shared);
 
     build.onResolve({ filter }, async (args: OnResolveArgs) => ({
       path: args.path,
@@ -145,35 +145,31 @@ export const createContainerPlugin = (config: NormalizedFederationConfig) => ({
         pluginData: { kind: args.kind, resolveDir: args.resolveDir },
       }),
     );
-
-    build.onResolve({ filter: sharedExternals }, (args: OnResolveArgs) => {
-      if (args.namespace === 'esm-shares') return null;
-      return {
-        path: args.path,
-        namespace: 'virtual-share-module',
-        pluginData: { kind: args.kind, resolveDir: args.resolveDir },
-      };
-    });
-
-    build.onResolve(
-      { filter: /.*/, namespace: 'esm-shares' },
-      async (args: OnResolveArgs) => {
-        if (sharedExternals.test(args.path)) {
-          return {
-            path: args.path,
-            namespace: 'virtual-share-module',
-            pluginData: { kind: args.kind, resolveDir: args.resolveDir },
-          };
-        }
-
-        return undefined;
+    if (hasShared) {
+      build.onResolve({ filter: sharedExternals }, (args: OnResolveArgs) => {
+        if (args.namespace === 'esm-shares') return null;
         return {
           path: args.path,
-          namespace: 'file',
+          namespace: 'virtual-share-module',
           pluginData: { kind: args.kind, resolveDir: args.resolveDir },
         };
-      },
-    );
+      });
+
+      build.onResolve(
+        { filter: /.*/, namespace: 'esm-shares' },
+        async (args: OnResolveArgs) => {
+          if (sharedExternals.test(args.path)) {
+            return {
+              path: args.path,
+              namespace: 'virtual-share-module',
+              pluginData: { kind: args.kind, resolveDir: args.resolveDir },
+            };
+          }
+
+          return undefined;
+        },
+      );
+    }
 
     build.onLoad(
       { filter, namespace: 'container' },

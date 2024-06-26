@@ -57,6 +57,18 @@ module.exports = withFederation({
     './Component': './src/Component',
   },
   shared: {
+    react: {
+      singleton: true,
+      version: '^18.2.0',
+    },
+    'react-dom': {
+      singleton: true,
+      version: '^18.2.0',
+    },
+    rxjs: {
+      singleton: true,
+      version: '^7.8.1',
+    },
     ...shareAll({
       singleton: true,
       strictVersion: true,
