@@ -156,8 +156,6 @@ export default function () {
           remoteName: string,
           callback: (err: Error | null, chunk: any) => void,
         ): void {
-          const http = __non_webpack_require__('http');
-          const https = __non_webpack_require__('https');
           const vm = __non_webpack_require__('vm');
 
           const url = resolveUrl(remoteName, chunkName);
@@ -172,7 +170,7 @@ export default function () {
 
           const fetchMethod =
             globalThis.webpackChunkLoad ||
-            (url.protocol === 'https:' ? https : http).get;
+            __non_webpack_require__(url.protocol === 'https:' ? 'https' : 'http').get;
 
           const handleResponse = (res: any) => {
             let data = '';
