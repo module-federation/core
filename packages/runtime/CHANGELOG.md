@@ -1,5 +1,14 @@
 # @module-federation/runtime
 
+## 0.2.3
+
+### Patch Changes
+
+- 32f26af: fix fetch hook types on runtime plugin interfaces
+- Updated dependencies [32f26af]
+- Updated dependencies [32f26af]
+  - @module-federation/sdk@0.2.3
+
 ## 0.2.2
 
 ### Patch Changes
