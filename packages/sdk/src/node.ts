@@ -32,20 +32,49 @@ export function createScriptNode(
     cb(new Error(`Invalid URL: ${e}`));
     return;
   }
-  const getFetch = async () => {
-    //@ts-ignore
-    if (typeof globalThis['webpackChunkLoad'] !== 'undefined') {
-      //@ts-ignore
-      return globalThis['webpackChunkLoad'];
-    } else if (typeof fetch === 'undefined') {
-      const fetchModule = await importNodeModule('node-fetch');
-      //@ts-ignore
-      return fetchModule?.default || fetchModule;
-    } else {
-      return fetch;
-    }
+  const getFetch = (): Promise<typeof fetch> => {
+    return new Promise((resolve, reject) => {
+      // @ts-expect-error
+      if (typeof __webpack_require__ !== 'undefined') {
+        try {
+          if (
+            // @ts-expect-error
+            __webpack_require__.federation.instance.loaderHook.lifecycle.fetch
+              .emit
+          ) {
+            return resolve(function (
+              input: RequestInfo | URL,
+              init?: RequestInit,
+            ): Promise<Response> {
+              // @ts-expect-error
+              return __webpack_require__.federation.instance.loaderHook.lifecycle.fetch.emit(
+                input,
+                init || {},
+              );
+            });
+          }
+        } catch (e) {
+          console.warn(
+            'federation.instance.loaderHook.lifecycle.fetch failed:',
+            e,
+          );
+          // fall through
+        }
+      }
+
+      if (typeof fetch === 'undefined') {
+        importNodeModule<typeof import('node-fetch')>('node-fetch')
+          .then((fetchModule) => {
+            const nodeFetch = fetchModule.default || fetchModule;
+            resolve(nodeFetch as unknown as typeof fetch); // Ensure compatibility
+          })
+          .catch(reject);
+      } else {
+        resolve(fetch);
+      }
+    });
   };
-  console.log('fetching', urlObj.href);
+
   getFetch().then((f) => {
     f(urlObj.href)
       .then((res: Response) => res.text())
@@ -115,7 +144,6 @@ export function loadScriptNode(
             `__FEDERATION_${info?.attrs?.['name']}:custom__`;
           const entryExports = ((globalThis as any)[remoteEntryKey] =
             scriptContext);
-          debugger;
           resolve(entryExports);
         }
       },

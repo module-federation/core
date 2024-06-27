@@ -42,7 +42,8 @@ declare const __non_webpack_require__: (id: string) => any;
 export default function (): FederationRuntimePlugin {
   return {
     name: 'node-federation-plugin',
-    beforeInit: function (args: any) {
+    beforeInit(args) {
+      //patch webpack chunk loading handlers
       (() => {
         function resolveFile(rootOutputDir: string, chunkId: string): string {
           const path = __non_webpack_require__('path');
@@ -182,11 +183,17 @@ export default function (): FederationRuntimePlugin {
 
           args.origin.loaderHook.lifecycle.fetch
             .emit(url.href, {})
-            .then(function (res: Response) {
-              return res.text();
+            .then(function (res: Response | false | void | Promise<Response>) {
+              if (res instanceof Response) {
+                return res.text();
+              } else if (typeof res === 'string') {
+                return res;
+              } else {
+                throw new Error('Invalid response type:' + res);
+              }
             })
             .then(function (data: string) {
-              const chunk: any = {};
+              const chunk: Record<string, unknown> = {};
               try {
                 const urlDirname = url.pathname
                   .split('/')
@@ -201,9 +208,9 @@ export default function (): FederationRuntimePlugin {
               } catch (e) {
                 callback(e as Error, null);
               }
-            });
+            })
+            .catch((err: Error) => callback(err, null));
         }
-
         function httpVmStrategy(
           chunkName: string,
           remoteName: string,
@@ -227,7 +234,7 @@ export default function (): FederationRuntimePlugin {
           );
 
           fetchHook
-            .then((res: Response) => res.text())
+            .then((res: any) => res.text())
             .then((data: string) => {
               try {
                 const chunk: any = {};
