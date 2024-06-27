@@ -105,7 +105,7 @@ export class FederationHost {
     fetch: new AsyncHook<
       [string, RequestInit],
       Promise<Response> | void | false
-    >('fetch'),
+    >(),
   });
 
   constructor(userOptions: UserOptions) {
