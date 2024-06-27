@@ -42,7 +42,10 @@ const nextConfig = {
         },
         shared: {
           'lodash/': {},
-          antd: {},
+          antd: {
+            requiredVersion: '5.18.3',
+            version: '5.18.3',
+          },
         },
         extraOptions: {
           debug: false,

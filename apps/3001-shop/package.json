@@ -4,7 +4,8 @@
   "private": true,
   "dependencies": {
     "acorn": "7.4.1",
-    "antd": "4.24.15",
+    "antd": "5.18.3",
+    "@ant-design/cssinjs": "^1.21.0",
     "buffer": "5.7.1",
     "chrome-trace-event": "1.0.3",
     "encoding": "0.1.13",

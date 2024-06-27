@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { useState } from 'react';
 import App from 'next/app';
-import { Layout, version } from 'antd';
+import { Layout, version, ConfigProvider } from 'antd';
+import { StyleProvider } from '@ant-design/cssinjs';
+
 import Router, { useRouter } from 'next/router';
 const SharedNav = React.lazy(() => import('../components/SharedNav'));
 import HostAppMenu from '../components/menu';
-import 'antd/dist/antd.css';
 function MyApp(props) {
   const { Component, pageProps } = props;
   const { asPath } = useRouter();
@@ -36,28 +37,35 @@ function MyApp(props) {
       Router.events.off('routeChangeStart', handleRouteChange);
     };
   }, []);
-
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <React.Suspense>
-        <SharedNav />
-      </React.Suspense>
-      <Layout>
-        <Layout.Sider width={200}>
-          <MenuComponent />
-        </Layout.Sider>
-        <Layout>
-          <Layout.Content style={{ background: '#fff', padding: 20 }}>
-            <Component {...pageProps} />
-          </Layout.Content>
-          <Layout.Footer
-            style={{ background: '#fff', color: '#999', textAlign: 'center' }}
-          >
-            antd@{version}
-          </Layout.Footer>
+    <StyleProvider layer>
+      <ConfigProvider prefixCls="nxt" theme={{ hashed: false }}>
+        <Layout style={{ minHeight: '100vh' }} prefixCls={'dd'}>
+          <React.Suspense>
+            <SharedNav />
+          </React.Suspense>
+          <Layout>
+            <Layout.Sider width={200}>
+              <MenuComponent />
+            </Layout.Sider>
+            <Layout>
+              <Layout.Content style={{ background: '#fff', padding: 20 }}>
+                <Component {...pageProps} />
+              </Layout.Content>
+              <Layout.Footer
+                style={{
+                  background: '#fff',
+                  color: '#999',
+                  textAlign: 'center',
+                }}
+              >
+                antd@{version}
+              </Layout.Footer>
+            </Layout>
+          </Layout>
         </Layout>
-      </Layout>
-    </Layout>
+      </ConfigProvider>
+    </StyleProvider>
   );
 }
 
