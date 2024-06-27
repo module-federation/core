@@ -225,6 +225,7 @@ export default function (): FederationRuntimePlugin {
             url.href,
             {},
           );
+
           fetchHook
             .then((res: Response) => res.text())
             .then((data: string) => {
