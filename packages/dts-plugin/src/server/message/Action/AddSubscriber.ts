@@ -1,3 +1,4 @@
+import { RemoteInfo } from '../../../core/interfaces/HostOptions';
 import { BaseContext, Publisher } from '../../types';
 import { Action, ActionKind } from './Action';
 

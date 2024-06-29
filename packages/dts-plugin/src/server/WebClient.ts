@@ -6,6 +6,7 @@ import {
 import { Message } from './message/Message';
 import { AddWebClientAction } from './message/Action';
 import { APIKind, ReloadWebClientAPI } from './message/API';
+import { createWebsocket } from './createWebsocket';
 
 type WebClientEnv = 'prod' | 'dev';
 
@@ -31,9 +32,7 @@ export class WebClient {
       `${this.logPrefix}Trying to connect to {cyan ws://127.0.0.1:${DEFAULT_WEB_SOCKET_PORT}}...}`,
     );
 
-    this._webSocket = new WebSocket(
-      `ws://127.0.0.1:${DEFAULT_WEB_SOCKET_PORT}?WEB_SOCKET_CONNECT_MAGIC_ID=${WEB_SOCKET_CONNECT_MAGIC_ID}`,
-    );
+    this._webSocket = createWebsocket();
 
     this._webSocket.onopen = () => {
       console.log(

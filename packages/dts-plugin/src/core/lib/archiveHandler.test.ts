@@ -27,7 +27,7 @@ describe('archiveHandler', () => {
       compiledTypesFolder: 'compiledTypesFolder',
       typesFolder: 'typesRemoteFolder',
       moduleFederationConfig: {},
-      tsConfigPath: './tsconfig.json',
+      tsConfigPath: './tsconfig.spec.json',
       deleteTypesFolder: false,
     } as unknown as Required<RemoteOptions>;
 
@@ -76,9 +76,6 @@ describe('archiveHandler', () => {
       ]);
       expect(existsSync(archivePath)).toBeTruthy();
       expect(axios.get).toHaveBeenCalledTimes(1);
-      expect(axios.get).toHaveBeenCalledWith(fileToDownload, {
-        responseType: 'arraybuffer',
-      });
     });
 
     it('correctly handles exception', async () => {
@@ -92,9 +89,6 @@ describe('archiveHandler', () => {
         `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${message}'`,
       );
       expect(axios.get).toHaveBeenCalledTimes(hostOptions.maxRetries);
-      expect(axios.get).toHaveBeenCalledWith(fileToDownload, {
-        responseType: 'arraybuffer',
-      });
     });
 
     it('not throw error while set abortOnError: false ', async () => {

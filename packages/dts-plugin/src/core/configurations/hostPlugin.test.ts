@@ -118,5 +118,28 @@ describe('hostPlugin', () => {
         },
       });
     });
+
+    it('correctly resolve remotes with relative reference in place of absolute url', () => {
+      const subpathModuleFederationConfig = {
+        ...moduleFederationConfig,
+        remotes: {
+          moduleFederationTypescript: '/subpatha/mf-manifest.json',
+        },
+      };
+
+      const { mapRemotesToDownload } = retrieveHostConfig({
+        moduleFederationConfig: subpathModuleFederationConfig,
+      });
+
+      expect(mapRemotesToDownload).toStrictEqual({
+        moduleFederationTypescript: {
+          alias: 'moduleFederationTypescript',
+          apiTypeUrl: '/subpatha/@mf-types.d.ts',
+          name: '/subpatha/mf-manifest.json',
+          url: '/subpatha/mf-manifest.json',
+          zipUrl: '/subpatha/@mf-types.zip',
+        },
+      });
+    });
   });
 });

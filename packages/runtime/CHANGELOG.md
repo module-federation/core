@@ -1,5 +1,52 @@
 # @module-federation/runtime
 
+## 0.2.3
+
+### Patch Changes
+
+- 32f26af: fix fetch hook types on runtime plugin interfaces
+- Updated dependencies [32f26af]
+- Updated dependencies [32f26af]
+  - @module-federation/sdk@0.2.3
+
+## 0.2.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.2.2
+
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [88445e7]
+  - @module-federation/sdk@0.2.1
+
+## 0.2.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.2.0
+
+## 0.1.21
+
+### Patch Changes
+
+- Updated dependencies [88900ad]
+  - @module-federation/sdk@0.1.21
+
+## 0.1.20
+
+### Patch Changes
+
+- 652c8a2: do not apply symbol if object not extensible
+- 685c607: feat: support dynamic remote type hints
+- 05c43f3: feat: support pass shareScopeMap
+- Updated dependencies [685c607]
+- Updated dependencies [e8e0969]
+- Updated dependencies [349c381]
+  - @module-federation/sdk@0.1.20
+
 ## 0.1.19
 
 ### Patch Changes

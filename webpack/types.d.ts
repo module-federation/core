@@ -3671,6 +3671,11 @@ declare interface Environment {
   arrowFunction?: boolean;
 
   /**
+   * The environment supports async function and await ('async function () { await ... }').
+   */
+  asyncFunction?: boolean;
+
+  /**
    * The environment supports BigInt as literal (123n).
    */
   bigIntLiteral?: boolean;
@@ -3720,6 +3725,7 @@ declare interface Environment {
    */
   templateLiteral?: boolean;
 }
+
 declare class EnvironmentPlugin {
   constructor(...keys: any[]);
   keys: any[];
@@ -9201,6 +9207,11 @@ declare interface Output {
     | ((pathData: PathData, assetInfo?: AssetInfo) => string);
 
   /**
+   * Compress the data in the head tag of CSS files.
+   */
+  cssHeadDataCompression?: boolean;
+
+  /**
    * Similar to `output.devtoolModuleFilenameTemplate`, but used in the case of duplicate module identifiers.
    */
   devtoolFallbackModuleFilenameTemplate?: string | Function;
@@ -9400,6 +9411,7 @@ declare interface Output {
    */
   workerWasmLoading?: string | false;
 }
+
 declare interface OutputFileSystem {
   writeFile: (
     arg0: string,

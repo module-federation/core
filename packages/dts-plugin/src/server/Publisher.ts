@@ -1,11 +1,19 @@
 import WebSocket from 'ws';
-import { UpdateSubscriberAPI, UpdateSubscriberAPIPayload } from './message/API';
+import {
+  FetchTypesAPI,
+  FetchTypesAPIPayload,
+  UpdateSubscriberAPI,
+  UpdateSubscriberAPIPayload,
+} from './message/API';
 import { getIdentifier, fileLog } from './utils';
+import { FetchTypesPayload } from './message/Action';
+import { RemoteInfo } from '../core/interfaces/HostOptions';
 
 interface PublisherContext {
   name: string;
   ip: string;
   remoteTypeTarPath: string;
+  ws: WebSocket;
 }
 
 export class Publisher {
@@ -13,12 +21,16 @@ export class Publisher {
   private _name: string;
   private _remoteTypeTarPath: string;
   private _subscribers: Map<string, WebSocket>;
+  private _ws: WebSocket;
+  dynamicRemoteMap: Map<string, RemoteInfo>;
 
   constructor(ctx: PublisherContext) {
     this._name = ctx.name;
     this._ip = ctx.ip;
     this._remoteTypeTarPath = ctx.remoteTypeTarPath;
     this._subscribers = new Map();
+    this._ws = ctx.ws;
+    this.dynamicRemoteMap = new Map();
   }
 
   get identifier(): string {
@@ -89,6 +101,23 @@ export class Publisher {
     );
   }
 
+  fetchRemoteTypes(options: FetchTypesAPIPayload) {
+    fileLog(
+      `[fetchRemoteTypes] ${
+        this.name
+      } fetchRemoteTypes, options: ${JSON.stringify(options)}, ws: ${Boolean(
+        this._ws,
+      )}`,
+      'Publisher',
+      'info',
+    );
+    if (!this._ws) {
+      return;
+    }
+    const api = new FetchTypesAPI(options);
+    this._ws.send(JSON.stringify(api));
+  }
+
   notifySubscribers(options: UpdateSubscriberAPIPayload): void {
     const api = new UpdateSubscriberAPI(options);
     this.broadcast(api);
@@ -116,6 +145,7 @@ export class Publisher {
   }
 
   close(): void {
+    this._ws = undefined;
     this._subscribers.forEach((_subscriber, identifier) => {
       fileLog(
         `[BroadCast] close ${this.name} remove: ${identifier}`,

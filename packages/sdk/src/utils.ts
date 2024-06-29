@@ -27,8 +27,14 @@ const parseEntry = (
 
   // Check if the string starts with a type
   if (strSplit.length >= 2) {
-    const [name, ...versionOrEntryArr] = strSplit;
-    const versionOrEntry = devVersionOrUrl || versionOrEntryArr.join(separator);
+    let [name, ...versionOrEntryArr] = strSplit;
+    if (str.startsWith(separator)) {
+      versionOrEntryArr = [devVersionOrUrl || strSplit.slice(-1)[0]];
+      name = strSplit.slice(0, -1).join(separator);
+    }
+
+    let versionOrEntry = devVersionOrUrl || versionOrEntryArr.join(separator);
+
     if (isEntry(versionOrEntry)) {
       return {
         name,
@@ -176,13 +182,20 @@ const generateShareFilename = /* @__PURE__ */ (
 
 const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
   if ('getPublicPath' in module) {
-    const publicPath = new Function(module.getPublicPath)();
+    let publicPath;
+
+    if (!module.getPublicPath.startsWith('function')) {
+      publicPath = new Function(module.getPublicPath)();
+    } else {
+      publicPath = new Function('return ' + module.getPublicPath)()();
+    }
+
     return `${publicPath}${sourceUrl}`;
   } else if ('publicPath' in module) {
     return `${module.publicPath}${sourceUrl}`;
   } else {
     console.warn(
-      'Can not get resource url, if in debug mode, please ignore',
+      'Cannot get resource URL. If in debug mode, please ignore.',
       module,
       sourceUrl,
     );
