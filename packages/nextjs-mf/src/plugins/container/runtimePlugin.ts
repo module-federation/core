@@ -1,4 +1,5 @@
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
+
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
@@ -80,9 +81,6 @@ export default function (): FederationRuntimePlugin {
       //@ts-ignore
       remote.entry = `${remote?.entry}?t=${Date.now()}`;
       return args;
-    },
-    createScript({ url }) {
-      return;
     },
     afterResolve(args) {
       return args;
