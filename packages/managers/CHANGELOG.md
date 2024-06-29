@@ -1,5 +1,19 @@
 # @module-federation/managers
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [32f26af]
+- Updated dependencies [32f26af]
+  - @module-federation/sdk@0.2.3
+
+## 0.2.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.2.2
+
 ## 0.2.1
 
 ### Patch Changes

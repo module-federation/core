@@ -40,7 +40,7 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <StyleProvider layer>
-      <ConfigProvider prefixCls="nxt" theme={{ hashed: false }}>
+      <ConfigProvider theme={{ hashed: false }}>
         <Layout style={{ minHeight: '100vh' }}>
           <SharedNav />
           <Layout>

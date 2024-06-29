@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react-webpack-plugin",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "publishConfig": {
     "access": "public"
   },
