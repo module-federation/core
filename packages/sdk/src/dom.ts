@@ -206,40 +206,18 @@ export function loadScript(
   },
 ) {
   const { attrs = {}, createScriptHook } = info;
-
-  const createScriptWithAttrs = (attrs: Record<string, any>) => {
-    return new Promise<void>((resolve, reject) => {
-      const { script, needAttach } = createScript({
-        url,
-        cb: resolve,
-        attrs,
-        createScriptHook,
-        needDeleteScript: true,
-      });
-      needAttach && document.head.appendChild(script);
-      script.onerror = (event) => {
-        script.parentNode?.removeChild(script);
-        reject(event);
-      };
-    });
-  };
-
-  return createScriptWithAttrs(
-    Object.assign(
-      {
+  return new Promise<void>((resolve, _reject) => {
+    const { script, needAttach } = createScript({
+      url,
+      cb: resolve,
+      attrs: {
         crossorigin: 'anonymous',
         fetchpriority: 'high',
+        ...attrs,
       },
-      attrs,
-    ),
-  ).catch(() =>
-    createScriptWithAttrs(
-      Object.assign(
-        {
-          fetchpriority: 'high',
-        },
-        attrs,
-      ),
-    ),
-  );
+      createScriptHook,
+      needDeleteScript: true,
+    });
+    needAttach && document.head.appendChild(script);
+  });
 }

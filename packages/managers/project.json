@@ -34,8 +34,7 @@
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "packages/managers/jest.config.js",
-        "passWithNoTests": true,
-        "clearCache": true
+        "passWithNoTests": true
       },
       "configurations": {
         "ci": {
