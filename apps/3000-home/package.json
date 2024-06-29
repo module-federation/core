@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "antd": "4.24.15",
+    "antd": "5.18.3",
+    "@ant-design/cssinjs": "^1.21.0",
     "buffer": "5.7.1",
     "encoding": "0.1.13",
     "eslint-scope": "7.2.2",
