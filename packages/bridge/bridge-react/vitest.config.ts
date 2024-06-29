@@ -6,7 +6,7 @@ export default defineConfig({
     __DEV__: true,
     __TEST__: true,
     __BROWSER__: false,
-    __VERSION__: '"unknow"',
+    __VERSION__: '"unknown"',
     __APP_VERSION__: '"0.0.0"',
   },
   plugins: [nxViteTsPaths()],

@@ -11,7 +11,7 @@ module.exports = {
     __DEV__: true,
     __TEST__: true,
     __BROWSER__: false,
-    __VERSION__: '"unknow"',
+    __VERSION__: '"unknown"',
   },
   preset: 'ts-jest',
   transformIgnorePatterns: [
