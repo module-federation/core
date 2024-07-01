@@ -1,5 +1,7 @@
 import { defer } from '@modern-js/runtime/router';
+import React from 'react';
 
+console.log(React);
 const defaultVal = {
   data: {
     id: 1,

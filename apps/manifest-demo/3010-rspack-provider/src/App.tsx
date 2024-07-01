@@ -1,4 +1,6 @@
 import LocalButton from './Button';
+import { Await } from 'react-router-dom';
+console.log(Await);
 
 const App = () => (
   <div>

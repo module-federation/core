@@ -1,3 +1,5 @@
+import { ModuleInfo } from '@module-federation/sdk';
+
 import { getFMId, safeToString, assert } from '../utils';
 import { getRemoteEntry } from '../utils/load';
 import { FederationHost } from '../core';
@@ -63,7 +65,12 @@ class Module {
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  async get(id: string, expose: string, options?: { loadFactory?: boolean }) {
+  async get(
+    id: string,
+    expose: string,
+    options?: { loadFactory?: boolean },
+    remoteSnapshot?: ModuleInfo,
+  ) {
     const { loadFactory = true } = options || { loadFactory: true };
 
     // Get remoteEntry.js
@@ -108,6 +115,8 @@ class Module {
 
       await this.host.hooks.lifecycle.initContainer.emit({
         ...initContainerOptions,
+        id,
+        remoteSnapshot,
         remoteEntryExports,
       });
     }

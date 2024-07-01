@@ -27,11 +27,12 @@ interface Loading {
   >;
 }
 const loadingArray: Array<Loading> = [];
-
+const strategy = 'loaded-first';
+let sharedFlag = strategy;
 // eslint-disable-next-line max-lines-per-function
 export const prefetchPlugin = (): FederationRuntimePlugin => ({
   name: 'data-prefetch-runtime-plugin',
-  afterResolve(options) {
+  initContainer(options) {
     const { remoteSnapshot, remoteInfo, id, origin } = options;
     const snapshot = remoteSnapshot as ModuleInfo;
     const { name } = remoteInfo;
@@ -45,6 +46,11 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
     const signal = getSignalFromManifest(snapshot);
     if (!signal) {
       return options;
+    }
+    if (sharedFlag !== strategy) {
+      throw new Error(
+        `[Module Federation Data Prefetch]: If you want to use data prefetch, the shared strategy must be 'loaded-first'`,
+      );
     }
 
     const instance =
@@ -67,21 +73,23 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
       if (projectExports instanceof Promise) {
         await projectExports;
       }
-      const exports = instance!.getExposeExports(id);
-      logger.info(`1. Start Prefetch: ${id} - ${performance.now()}`);
-      const result = Object.keys(exports).map((k) => {
-        const value = instance!.prefetch({
-          id,
-          functionId: k,
-        });
-        const functionId = k;
+      return Promise.resolve().then(() => {
+        const exports = instance!.getExposeExports(id);
+        logger.info(`1. Start Prefetch: ${id} - ${performance.now()}`);
+        const result = Object.keys(exports).map((k) => {
+          const value = instance!.prefetch({
+            id,
+            functionId: k,
+          });
+          const functionId = k;
 
-        return {
-          value,
-          functionId,
-        };
+          return {
+            value,
+            functionId,
+          };
+        });
+        return result;
       });
-      return result;
     });
 
     loadingArray.push({
@@ -169,6 +177,12 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
       id,
       promise,
     });
+    return options;
+  },
+
+  beforeLoadShare(options) {
+    const shareInfo = options.shareInfo;
+    sharedFlag = shareInfo?.strategy || sharedFlag;
     return options;
   },
 });

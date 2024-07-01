@@ -38,5 +38,5 @@ export const MFPrefetchCommon = {
   globalKey: '__PREFETCH__',
   library: 'mf-data-prefetch',
   exportsKey: '__PREFETCH_EXPORTS__',
-  fileName: 'prefetch.js',
+  fileName: 'bootstrap.js',
 };

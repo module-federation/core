@@ -12,30 +12,6 @@ import { TEMP_DIR } from '../common/constant';
 import { fileExistsWithCaseSync, fixPrefetchPath } from '../common/node-utils';
 import { getPrefetchId } from '../common/runtime-utils';
 
-const addTemplate = (name: string) =>
-  `
-export default function () {
-  let hasInit = false;
-  return {
-    name: 'data-prefetch-init-plugin',
-    beforeInit(args) {
-      if (!hasInit) {
-        hasInit = true;
-        globalThis.__FEDERATION__ = globalThis.__FEDERATION__ || {};
-        globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] || {
-          entryLoading: {},
-          instance: new Map(),
-          __PREFETCH_EXPORTS__: {},
-        };
-        globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] || {};
-        globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}']['${name}'] = import('./bootstrap');
-      }
-      return args;
-    }
-  }
-}
-`;
-
 export class PrefetchPlugin implements WebpackPluginInstance {
   public options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _reWriteExports: string;
@@ -61,6 +37,9 @@ export class PrefetchPlugin implements WebpackPluginInstance {
     }
     this.options.runtimePlugins!.push(
       path.resolve(__dirname, '../esm/plugin.js'),
+    );
+    this.options.runtimePlugins!.push(
+      path.resolve(__dirname, '../esm/shared/index.js'),
     );
     if (!this.options.dataPrefetch) {
       return;
@@ -112,12 +91,8 @@ export class PrefetchPlugin implements WebpackPluginInstance {
       fs.mkdirSync(`${tempDirRealPath}/${encodedName}`);
     }
     fs.writeFileSync(asyncEntryPath, this._reWriteExports);
-
-    const prefetchEntry = path.resolve(
-      compiler.options.context,
-      `node_modules/${TEMP_DIR}/${encodedName}/${MFPrefetchCommon.fileName}`,
-    );
-    fs.writeFileSync(prefetchEntry, addTemplate(name as string));
-    this.options.runtimePlugins!.push(prefetchEntry);
+    new compiler.webpack.DefinePlugin({
+      FederationDataPrefetch: JSON.stringify(asyncEntryPath),
+    }).apply(compiler);
   }
 }
