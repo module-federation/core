@@ -231,30 +231,3 @@ Whether to inject the style of the corresponding component.
 
 Whether to inject the script of the corresponding component.
 
-### SSRLiveReload
-
-:::info
-This component will not take effect in the production environment!
-:::
-
-```ts
-declare function SSRLiveReload(): React.JSX.Element | null;
-```
-
-When remote components are updated, page reloads occur automatically.
-
-#### Example
-
-```tsx
-import { Outlet } from '@modern-js/runtime/router';
-import { SSRLiveReload } from '@modern-js/runtime/mf';
-
-export default function Layout() {
-  return (
-    <div>
-      <SSRLiveReload />
-      <Outlet />
-    </div>
-  );
-}
-```

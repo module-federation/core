@@ -236,32 +236,3 @@ export default (): JSX.Element => (
 
 是否注入对应组件的脚本。
 
-### SSRLiveReload
-
-:::info 提示
-该组件在生产环境不会生效！
-:::
-
-<Collapse>
-```ts
-declare function SSRLiveReload(): React.JSX.Element | null;
-```
-</Collapse>
-
-当远程组件更新时，会自动进行页面重载。
-
-#### 示例
-
-```tsx
-import { Outlet } from '@modern-js/runtime/router';
-import { SSRLiveReload } from '@modern-js/runtime/mf';
-
-export default function Layout() {
-  return (
-    <div>
-      <SSRLiveReload />
-      <Outlet />
-    </div>
-  );
-}
-```

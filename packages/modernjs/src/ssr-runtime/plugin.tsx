@@ -1,4 +1,6 @@
 import type { Plugin } from '@modern-js/runtime';
+import hoistNonReactStatics from 'hoist-non-react-statics';
+import { SSRLiveReload } from './SSRLiveReload';
 
 export const mfPluginSSR = (): Plugin => ({
   name: '@module-federation/modern-js',
@@ -18,6 +20,18 @@ export const mfPluginSSR = (): Plugin => ({
           globalThis.shouldUpdate = true;
         }
         return next({ context });
+      },
+      hoc({ App, config }, next) {
+        const AppWrapper = (props: any) => (
+          <>
+            <SSRLiveReload />
+            <App {...props} />
+          </>
+        );
+        return next({
+          App: hoistNonReactStatics(AppWrapper, App),
+          config,
+        });
       },
     };
   },
