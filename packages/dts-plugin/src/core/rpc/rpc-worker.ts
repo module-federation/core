@@ -65,10 +65,11 @@ function createRpcWorker<T extends RpcMethod>(
       return remoteMethod(...args);
     },
     terminate() {
-      childProcess?.send?.({
-        type: RpcGMCallTypes.EXIT,
-        id,
-      });
+      childProcess?.connected &&
+        childProcess?.send?.({
+          type: RpcGMCallTypes.EXIT,
+          id,
+        });
       childProcess = undefined;
       remoteMethod = undefined;
     },
