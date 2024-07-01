@@ -65,11 +65,27 @@ function createRpcWorker<T extends RpcMethod>(
       return remoteMethod(...args);
     },
     terminate() {
-      childProcess?.connected &&
-        childProcess?.send?.({
-          type: RpcGMCallTypes.EXIT,
-          id,
-        });
+      try {
+        if (childProcess.connected) {
+          childProcess.send(
+            {
+              type: RpcGMCallTypes.EXIT,
+              id,
+            },
+            (err) => {
+              if (err) {
+                console.error('Error sending message:', err);
+              }
+            },
+          );
+        }
+      } catch (error) {
+        if (error.code === 'EPIPE') {
+          console.error('Pipe closed before message could be sent:', error);
+        } else {
+          console.error('Unexpected error:', error);
+        }
+      }
       childProcess = undefined;
       remoteMethod = undefined;
     },
