@@ -60,17 +60,37 @@ export const moduleFederationPlugin = (
         const modifyBundlerConfig = <T extends 'webpack' | 'rspack'>(
           config: ConfigType<T>,
           isServer: boolean,
+          bundlerType: 'webpack' | 'rspack' = 'webpack',
         ) => {
           const envConfig = getTargetEnvConfig(mfConfig, isServer);
           if (isServer) {
             nodePlugin = new MFBundlerPlugin(envConfig);
             // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
             config.plugins?.push(nodePlugin);
-            // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
-            config.plugins?.push(new StreamingTargetPlugin(envConfig));
-            if (isDev) {
+            if (bundlerType === 'webpack') {
               // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
-              config.plugins?.push(new EntryChunkTrackerPlugin());
+              config.plugins?.push(new StreamingTargetPlugin(envConfig));
+              if (isDev) {
+                // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
+                config.plugins?.push(new EntryChunkTrackerPlugin());
+              }
+            } else {
+              if (config.output) {
+                config.output.chunkFormat = 'commonjs';
+                config.output.enabledLibraryTypes =
+                  config.output.enabledLibraryTypes || [];
+                config.output.enabledLibraryTypes.push('commonjs-module');
+                config.output.chunkLoading = 'async-node';
+                config.output.enabledChunkLoadingTypes = [];
+                config.output.environment = config.output.environment || {};
+                config.output.environment.dynamicImport = true;
+                config.output.library = {
+                  type: 'commonjs2',
+                };
+              }
+              envConfig.runtimePlugins.push(
+                require.resolve('@module-federation/node/runtimePlugin'),
+              );
             }
           } else {
             outputDir =
@@ -92,13 +112,13 @@ export const moduleFederationPlugin = (
 
         return {
           tools: {
-            rspack(config) {
-              if (enableSSR) {
-                throw new Error(
-                  `${PLUGIN_IDENTIFIER} not support ssr for rspack bundler yet!`,
-                );
-              }
-              modifyBundlerConfig(config, false);
+            rspack(config, { isServer }) {
+              // if (enableSSR) {
+              //   throw new Error(
+              //     `${PLUGIN_IDENTIFIER} not support ssr for rspack bundler yet!`,
+              //   );
+              // }
+              modifyBundlerConfig(config, isServer, 'rspack');
             },
             webpack(config, { isServer }) {
               // @ts-ignore

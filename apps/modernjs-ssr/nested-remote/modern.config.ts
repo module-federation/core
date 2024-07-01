@@ -12,11 +12,19 @@ export default defineConfig({
   output: {
     disableTsChecker: true,
   },
+  source: {
+    enableAsyncEntry: true,
+  },
   server: {
     ssr: {
       mode: 'stream',
     },
     port: 3007,
   },
-  plugins: [appTools(), moduleFederationPlugin()],
+  plugins: [
+    appTools({
+      // bundler:'experimental-rspack'
+    }),
+    moduleFederationPlugin(),
+  ],
 });

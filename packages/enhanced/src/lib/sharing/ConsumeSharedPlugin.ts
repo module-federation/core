@@ -137,6 +137,7 @@ class ConsumeSharedPlugin {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation, { normalModuleFactory }) => {
+        debugger;
         compilation.dependencyFactories.set(
           ConsumeSharedFallbackDependency,
           normalModuleFactory,
