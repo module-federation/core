@@ -110,7 +110,7 @@
     "@rollup/plugin-alias": "5.1.0",
     "@rollup/plugin-replace": "5.0.5",
     "@rspack/core": "^0.5.4",
-    "@rspack/dev-server": "^0.5.4",
+    "@rspack/dev-server": "^0.7.5",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
