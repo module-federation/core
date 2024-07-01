@@ -187,39 +187,6 @@ export default Product;
 
 是否注入对应组件的脚本。
 
-### collectSSRAssets
-
-<Collapse>
-```ts
-declare function createRemoteSSRComponent(
-  props: CollectSSRAssetsOptions
-): React.ReactNode[];
-
-type CollectSSRAssetsOptions = {
-  id: string;
-  injectScript?: boolean;
-  injectLink?: boolean;
-};
-```
-</Collapse>
-
-该函数会收集在服务端渲染的生产者相关的脚本和样式，并返回 script/link 标签。
-
-#### 示例
-
-```tsx
-import React from 'react';
-import { collectSSRAssets } from '@modern-js/runtime/mf';
-import Comp from 'remote/Image';
-
-export default (): JSX.Element => (
-  <div>
-    {collectSSRAssets({ id: 'remote/Image' })}
-    <Comp />
-  </div>
-);
-```
-
 #### injectLink
 
 - 类型：`boolean`

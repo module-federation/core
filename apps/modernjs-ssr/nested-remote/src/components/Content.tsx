@@ -1,5 +1,4 @@
 import React from 'react';
-import { collectSSRAssets } from '@modern-js/runtime/mf';
 import Comp from 'remote/Image';
 import Button from 'antd/lib/button';
 import stuff from './stuff.module.css';
@@ -25,7 +24,6 @@ export default (): JSX.Element => (
     >
       Click me to test <strong>nested remote</strong> interactive!
     </Button>
-    {collectSSRAssets({ id: 'remote/Image' })}
     <Comp />
   </div>
 );

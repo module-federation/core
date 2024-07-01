@@ -188,39 +188,6 @@ Whether to inject the style of the corresponding component.
 
 Whether to inject the script of the corresponding component.
 
-### collectSSRAssets
-
-<Collapse>
-```ts
-declare function createRemoteSSRComponent(
-  props: CollectSSRAssetsOptions
-): React.ReactNode[];
-
-type CollectSSRAssetsOptions = {
-  id: string;
-  injectScript?: boolean;
-  injectLink?: boolean;
-};
-```
-</Collapse>
-
-This function collects producer-related scripts and styles rendered on the server side and returns the script/link tag.
-
-#### Example
-
-```tsx
-import React from 'react';
-import { collectSSRAssets } from '@modern-js/runtime/mf';
-import Comp from 'remote/Image';
-
-export default (): JSX.Element => (
-  <div>
-    {collectSSRAssets({ id: 'remote/Image' })}
-    <Comp />
-  </div>
-);
-```
-
 #### injectLink
 
 - Type:`boolean`

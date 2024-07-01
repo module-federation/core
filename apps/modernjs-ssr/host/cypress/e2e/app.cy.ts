@@ -72,18 +72,18 @@ describe('/', () => {
       );
     });
 
-    it('should inject link tag if use collectSSRAssets', () => {
-      cy.get('#nested-remote-components')
-        .find('link')
-        .should('have.attr', 'href')
-        .then((hrefs) => {
-          const hrefArrs = Array.isArray(hrefs) ? hrefs : [hrefs];
-          const targetHref = hrefArrs.find((href) =>
-            href.includes('__federation_expose_Image.css'),
-          );
-          expect(targetHref).to.exist;
-        });
-    });
+    // it('should inject link tag if use collectSSRAssets', () => {
+    //   cy.get('#nested-remote-components')
+    //     .find('link')
+    //     .should('have.attr', 'href')
+    //     .then((hrefs) => {
+    //       const hrefArrs = Array.isArray(hrefs) ? hrefs : [hrefs];
+    //       const targetHref = hrefArrs.find((href) =>
+    //         href.includes('__federation_expose_Image.css'),
+    //       );
+    //       expect(targetHref).to.exist;
+    //     });
+    // });
 
     it('nested remote component should be interactive', () => {
       cy.wait(2000);
