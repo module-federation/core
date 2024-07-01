@@ -92,8 +92,6 @@ type CreateRemoteSSRComponentOptions = {
   loader: () => Promise<T>;
   loading: React.ReactNode;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
-  injectScript?: boolean;
-  injectLink?: boolean;
   export?: E;
 };
 
@@ -167,36 +165,3 @@ Set module loading status.
 A fault-tolerant component that is rendered when the component fails to **load** or **render**.
 
 Note: This component only renders this fault-tolerant component on the client side when **rendering** fails.
-
-#### injectLink
-
-- Type:`boolean`
-- Required: No
-- Default value: `true`
-
-Whether to inject the style of the corresponding component.
-
-#### injectScript
-
-- Type:`boolean`
-- Required: No
-- Default value: `true`
-
-Whether to inject the script of the corresponding component.
-
-#### injectLink
-
-- Type:`boolean`
-- Required: No
-- Default value: `true`
-
-Whether to inject the style of the corresponding component.
-
-#### injectScript
-
-- Type:`boolean`
-- Required: No
-- Default value: `true`
-
-Whether to inject the script of the corresponding component.
-

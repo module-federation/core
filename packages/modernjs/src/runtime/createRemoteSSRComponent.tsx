@@ -134,8 +134,6 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
   loader: () => Promise<T>;
   loading: React.ReactNode;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
-  injectScript?: boolean;
-  injectLink?: boolean;
   export?: E;
 }) {
   type ComponentType = T[E] extends (...args: any) => any
@@ -157,8 +155,6 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
 
         const assets = collectSSRAssets({
           id: moduleId,
-          injectLink: info.injectLink,
-          injectScript: info.injectScript,
         });
 
         const Com = m[exportName] as React.FC;

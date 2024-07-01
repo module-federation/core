@@ -95,8 +95,6 @@ type CreateRemoteSSRComponentOptions = {
   loader: () => Promise<T>;
   loading: React.ReactNode;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
-  injectScript?: boolean;
-  injectLink?: boolean;
   export?: E;
 };
 
@@ -170,36 +168,3 @@ export default Product;
 当组件**加载**或**渲染**失败时，所渲染的容错组件。
 
 注意：当**渲染**失败的时候，该组件仅在客户端渲染此 容错组件。
-
-#### injectLink
-
-- 类型：`boolean`
-- 是否必填：否
-- 默认值：`true`
-
-是否注入对应组件的样式。
-
-#### injectScript
-
-- 类型：`boolean`
-- 是否必填：否
-- 默认值：`true`
-
-是否注入对应组件的脚本。
-
-#### injectLink
-
-- 类型：`boolean`
-- 是否必填：否
-- 默认值：`true`
-
-是否注入对应组件的样式。
-
-#### injectScript
-
-- 类型：`boolean`
-- 是否必填：否
-- 默认值：`true`
-
-是否注入对应组件的脚本。
-
