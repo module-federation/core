@@ -23,7 +23,7 @@ export default defineConfig({
   },
   plugins: [
     appTools({
-      // bundler:'experimental-rspack'
+      bundler: 'experimental-rspack',
     }),
     moduleFederationPlugin(),
   ],

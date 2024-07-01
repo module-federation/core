@@ -75,19 +75,19 @@ export const moduleFederationPlugin = (
                 config.plugins?.push(new EntryChunkTrackerPlugin());
               }
             } else {
-              if (config.output) {
-                config.output.chunkFormat = 'commonjs';
-                config.output.enabledLibraryTypes =
-                  config.output.enabledLibraryTypes || [];
-                config.output.enabledLibraryTypes.push('commonjs-module');
-                config.output.chunkLoading = 'async-node';
-                config.output.enabledChunkLoadingTypes = [];
-                config.output.environment = config.output.environment || {};
-                config.output.environment.dynamicImport = true;
-                config.output.library = {
-                  type: 'commonjs2',
-                };
-              }
+              // if (config.output) {
+              //   config.output.chunkFormat = 'commonjs';
+              //   config.output.enabledLibraryTypes =
+              //     config.output.enabledLibraryTypes || [];
+              //   config.output.enabledLibraryTypes.push('commonjs-module');
+              //   config.output.chunkLoading = 'async-node';
+              //   config.output.enabledChunkLoadingTypes = [];
+              //   config.output.environment = config.output.environment || {};
+              //   config.output.environment.dynamicImport = true;
+              //   config.output.library = {
+              //     type: 'commonjs2',
+              //   };
+              // }
               envConfig.runtimePlugins.push(
                 require.resolve('@module-federation/node/runtimePlugin'),
               );
