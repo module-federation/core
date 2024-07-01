@@ -66,7 +66,10 @@ export async function loadEntryScript({
   name: string;
   globalName: string;
   entry: string;
-  createScriptHook?: (url: string) => CreateScriptHookReturn;
+  createScriptHook?: (
+    url: string,
+    attrs?: Record<string, any> | undefined,
+  ) => CreateScriptHookReturn;
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -141,7 +144,10 @@ export async function getRemoteEntry({
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | undefined;
-  createScriptHook?: (url: string) => CreateScriptHookReturn;
+  createScriptHook?: (
+    url: string,
+    attrs?: Record<string, any> | undefined,
+  ) => CreateScriptHookReturn;
 }): Promise<RemoteEntryExports | void> {
   const { entry, name, type, entryGlobalName } = remoteInfo;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);

@@ -1,0 +1,68 @@
+{
+  "name": "@module-federation/esbuild",
+  "version": "0.0.2",
+  "author": "Zack Jackson (@ScriptedAlchemy)",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.cjs.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.cjs.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./plugin": {
+      "types": "./dist/esbuild.cjs.d.ts",
+      "import": "./dist/plugin.esm.js",
+      "require": "./dist/plugin.cjs.js"
+    },
+    "./build": {
+      "types": "./dist/build.cjs.d.ts",
+      "import": "./dist/build.esm.js",
+      "require": "./dist/build.cjs.js"
+    },
+    "./types": {
+      "types": "./dist/types.cjs.d.ts",
+      "import": "./dist/types.esm.js",
+      "require": "./dist/types.cjs.js"
+    },
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ],
+      "helpers": [
+        "./dist/helpers.cjs.d.ts"
+      ],
+      "types": [
+        "./dist/types.cjs.d.ts"
+      ]
+    }
+  },
+  "dependencies": {
+    "enhanced-resolve": "^5.16.1",
+    "cjs-module-lexer": "^1.3.1",
+    "es-module-lexer": "^1.5.3",
+    "@module-federation/sdk": "workspace:*",
+    "json5": "^2.2.3",
+    "@rollup/plugin-commonjs": "^22.0.2",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-replace": "^4.0.0",
+    "rollup": "^2.79.0",
+    "@chialab/esbuild-plugin-commonjs": "^0.18.0",
+    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
+    "rollup-plugin-node-externals": "^4.1.1",
+    "esbuild": "^0.18.12",
+    "npmlog": "^6.0.2"
+  }
+}
