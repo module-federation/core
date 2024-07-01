@@ -32,6 +32,7 @@ export const MFModuleType = {
 };
 
 export const MODULE_DEVTOOL_IDENTIFIER = '__MF_DEVTOOLS_MODULE_INFO__';
+export const ENCODE_NAME_PREFIX = 'ENCODE_NAME_PREFIX';
 
 export const MFPrefetchCommon = {
   identifier: 'MFDataPrefetch',

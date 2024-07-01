@@ -496,6 +496,7 @@ function createScript(args: CreateScriptOptions): HTMLScriptElement | {script?: 
 
 type CreateScriptOptions = {
   url: string;
+  attrs?: Record<string, any>;
 };
 ```
 
@@ -508,11 +509,13 @@ import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtim
 const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   return {
     name: 'change-script-attribute',
-    createScript({ url }) {
+    createScript({ url, attrs }) {
       if (url === testRemoteEntry) {
         let script = document.createElement('script');
         script.src = testRemoteEntry;
-        script.setAttribute('loader-hooks', 'isTrue');
+        // can modify the attrs object
+        attrs['loader-hooks'] = 'isTrue';
+        // or add them to the script
         script.setAttribute('crossorigin', 'anonymous');
         return script;
       }

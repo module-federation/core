@@ -1,10 +1,9 @@
 import {
-  type ModuleInfo,
-  type GlobalModuleInfo,
   isBrowserEnv,
   warn,
   composeKeyWithSeparator,
 } from '@module-federation/sdk';
+import type { ModuleInfo, GlobalModuleInfo } from '@module-federation/sdk';
 import { globalLoading } from '../global';
 import {
   Options,

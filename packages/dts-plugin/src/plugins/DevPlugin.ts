@@ -216,7 +216,7 @@ export class DevPlugin implements WebpackPluginInstance {
                 : normalizedDtsOptions.implementation,
             context: compiler.context,
             moduleFederationConfig: this._options,
-            typesFolder: '@mf-types',
+            typesFolder: normalizedConsumeTypes.typesFolder || '@mf-types',
             abortOnError: false,
             ...normalizedConsumeTypes,
           };

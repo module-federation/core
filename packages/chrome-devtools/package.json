@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.1.20",
+  "version": "0.2.3",
   "scripts": {
     "build:storybook": "storybook build",
     "storybook": "storybook dev -p 6006",
@@ -63,13 +63,13 @@
     "@types/dagre": "^0.7.52",
     "@modern-js-app/eslint-config": "2.46.1",
     "@modern-js/app-tools": "2.46.1",
-    "@modern-js/eslint-config": "2.50.0",
+    "@modern-js/eslint-config": "2.54.2",
     "@modern-js/tsconfig": "2.46.1",
     "@modern-js/module-tools": "2.46.1",
     "@modern-js/builder-webpack-provider": "2.46.1",
     "@module-federation/runtime": "workspace:*",
     "@playwright/test": "1.36.1",
-    "@types/chrome": "^0.0.260",
+    "@types/chrome": "^0.0.268",
     "@types/jest": "~29.2.4",
     "@types/node": "~20.12.12",
     "@types/react": "~18.2.0",
@@ -80,6 +80,6 @@
     "typescript": "~5.0.4",
     "vitest": "1.2.2",
     "@modern-js/storybook": "2.46.1",
-    "@storybook/addon-essentials": "^7"
+    "@storybook/addon-essentials": "^8"
   }
 }

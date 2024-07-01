@@ -126,6 +126,15 @@ class StatsManager {
       pluginVersion: this._pluginVersion,
     };
 
+    if (this._options.getPublicPath) {
+      if ('publicPath' in metaData) {
+        delete metaData.publicPath;
+      }
+      return {
+        ...metaData,
+        getPublicPath: this._options.getPublicPath,
+      };
+    }
     return {
       ...metaData,
       publicPath: this.getPublicPath(compiler),
@@ -155,9 +164,9 @@ class StatsManager {
     const { chunks } = compilation;
     const { exposeFileNameImportMap } = this._containerManager;
     const assets: Record<string, StatsAssets> = {};
-    const entryPointNames = [...compilation.entrypoints.values()].map(
-      (e) => e.name as string,
-    );
+    const entryPointNames = [...compilation.entrypoints.values()]
+      .map((e) => e.name)
+      .filter((v) => !!v) as Array<string>;
 
     chunks.forEach((chunk) => {
       if (

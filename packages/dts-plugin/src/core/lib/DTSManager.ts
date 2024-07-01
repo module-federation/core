@@ -29,8 +29,8 @@ import {
   REMOTE_ALIAS_IDENTIFIER,
   HOST_API_TYPES_FILE_NAME,
 } from '../constant';
-import axios from 'axios';
 import { fileLog } from '../../server';
+import { axiosGet, isDebugMode } from './utils';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
 
@@ -157,11 +157,17 @@ class DTSManager {
         fs.writeFileSync(apiTypesPath, apiTypes);
       }
 
-      if (remoteOptions.deleteTypesFolder) {
-        await rm(retrieveMfTypesPath(tsConfig, remoteOptions), {
-          recursive: true,
-          force: true,
-        });
+      try {
+        if (remoteOptions.deleteTypesFolder) {
+          await rm(retrieveMfTypesPath(tsConfig, remoteOptions), {
+            recursive: true,
+            force: true,
+          });
+        }
+      } catch (err) {
+        if (isDebugMode()) {
+          console.error(err);
+        }
       }
       console.log(ansiColors.green('Federated types created correctly'));
     } catch (error) {
@@ -183,10 +189,7 @@ class DTSManager {
         return remoteInfo as Required<RemoteInfo>;
       }
       const url = remoteInfo.url;
-      const res = await axios({
-        method: 'get',
-        url,
-      });
+      const res = await axiosGet(url);
       const manifestJson = res.data as unknown as Manifest;
       if (!manifestJson.metaData.types.zip) {
         throw new Error(`Can not get ${remoteInfo.name}'s types archive url!`);
@@ -198,10 +201,20 @@ class DTSManager {
         return u;
       };
 
-      let publicPath =
-        'publicPath' in manifestJson.metaData
-          ? manifestJson.metaData.publicPath
-          : new Function(manifestJson.metaData.getPublicPath)();
+      let publicPath;
+
+      if ('publicPath' in manifestJson.metaData) {
+        publicPath = manifestJson.metaData.publicPath;
+      } else {
+        const getPublicPath = new Function(manifestJson.metaData.getPublicPath);
+
+        if (manifestJson.metaData.getPublicPath.startsWith('function')) {
+          publicPath = getPublicPath()();
+        } else {
+          publicPath = getPublicPath();
+        }
+      }
+
       if (publicPath === 'auto') {
         publicPath = inferAutoPublicPath(remoteInfo.url);
       }
@@ -249,7 +262,7 @@ class DTSManager {
     }
     try {
       const url = apiTypeUrl;
-      const res = await axios.get(url);
+      const res = await axiosGet(url);
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(
         REMOTE_ALIAS_IDENTIFIER,
@@ -338,18 +351,6 @@ class DTSManager {
 
   async consumeArchiveTypes(options: HostOptions) {
     const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(options);
-    if (hostOptions.deleteTypesFolder) {
-      await rm(hostOptions.typesFolder, {
-        recursive: true,
-        force: true,
-      }).catch((error) =>
-        fileLog(
-          `Unable to remove types folder, ${error}`,
-          'consumeArchiveTypes',
-          'error',
-        ),
-      );
-    }
 
     const downloadPromises = Object.entries(mapRemotesToDownload).map(
       async (item) => {
@@ -453,6 +454,16 @@ class DTSManager {
           (i) => i.name === remoteName,
         );
 
+        const consumeTypes = async (
+          requiredRemoteInfo: Required<RemoteInfo>,
+        ) => {
+          const [_alias, destinationPath] = await this.consumeTargetRemotes(
+            hostOptions,
+            requiredRemoteInfo,
+          );
+          await this.downloadAPITypes(requiredRemoteInfo, destinationPath);
+        };
+
         if (!loadedRemoteInfo) {
           const remoteInfo = Object.values(mapRemotesToDownload).find(
             (item) => {
@@ -465,20 +476,11 @@ class DTSManager {
                 await this.requestRemoteManifest(remoteInfo);
               this.remoteAliasMap[remoteInfo.alias] = requiredRemoteInfo;
             }
-            await this.consumeTargetRemotes(
-              hostOptions,
-              this.remoteAliasMap[remoteInfo.alias],
-            );
+            await consumeTypes(this.remoteAliasMap[remoteInfo.alias]);
           } else if (updatedRemoteInfo) {
             const consumeDynamicRemoteTypes = async () => {
-              const [_destinationFolder, destinationPath] =
-                await this.consumeTargetRemotes(
-                  hostOptions,
-                  this.updatedRemoteInfos[updatedRemoteInfo.name],
-                );
-              await this.downloadAPITypes(
+              await consumeTypes(
                 this.updatedRemoteInfos[updatedRemoteInfo.name],
-                destinationPath,
               );
               this.consumeAPITypes(hostOptions);
             };
@@ -507,7 +509,7 @@ class DTSManager {
             }
           }
         } else {
-          await this.consumeTargetRemotes(hostOptions, loadedRemoteInfo);
+          await consumeTypes(loadedRemoteInfo);
         }
       }
     } catch (err) {

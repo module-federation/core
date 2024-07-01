@@ -1,5 +1,59 @@
 # @module-federation/dts-plugin
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [32f26af]
+- Updated dependencies [32f26af]
+  - @module-federation/sdk@0.2.3
+  - @module-federation/managers@0.2.3
+  - @module-federation/third-party-dts-extractor@0.2.3
+
+## 0.2.2
+
+### Patch Changes
+
+- 7d09ed8: Emit DTS relative to remote entry location
+  - @module-federation/sdk@0.2.2
+  - @module-federation/managers@0.2.2
+  - @module-federation/third-party-dts-extractor@0.2.2
+
+## 0.2.1
+
+### Patch Changes
+
+- 88445e7: Support getPublicPath in compiler plugins
+- Updated dependencies [88445e7]
+  - @module-federation/sdk@0.2.1
+  - @module-federation/managers@0.2.1
+  - @module-federation/third-party-dts-extractor@0.2.1
+
+## 0.2.0
+
+### Patch Changes
+
+- 804cc3b: fix: check pid is undefined before kill it
+- 52bb94c: fix(dts-plugin): ensure kill fork child process when the task is finished
+- f7a6d3f: fix: download api types when types refresh
+  - @module-federation/sdk@0.2.0
+  - @module-federation/managers@0.2.0
+  - @module-federation/third-party-dts-extractor@0.2.0
+
+## 0.1.21
+
+### Patch Changes
+
+- a50c459: fix: use ipv4 first while load local remote
+- 88900ad: fix: support decode encode remote name
+- 4cddb8a: fix: no delete exist types if fetch new types failed
+- 6ee10aa: fix: replace sourceEntry with index if the value is '.'
+- 1e93c5e: fix: use userOptions.typesFolder first
+- Updated dependencies [88900ad]
+  - @module-federation/sdk@0.1.21
+  - @module-federation/managers@0.1.21
+  - @module-federation/third-party-dts-extractor@0.1.21
+
 ## 0.1.20
 
 ### Patch Changes

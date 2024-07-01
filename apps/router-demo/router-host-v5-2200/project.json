@@ -1,0 +1,72 @@
+{
+  "name": "router-host-v5-2200",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/router-demo/router-host-v5-2200/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npm run build --prefix apps/router-demo/router-host-v5-2200"
+        ]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npm run test --prefix apps/router-demo/router-host-v5-2200"
+        ]
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npm run dev --prefix apps/router-demo/router-host-v5-2200"
+        ]
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/router-demo/router-host-v5-2200/cypress.config.ts",
+        "testingType": "e2e",
+        "baseUrl": "http://127.0.0.1:2000",
+        "browser": "chrome"
+      },
+      "configurations": {
+        "development": {
+          "runnerUi": true,
+          "browser": "electron",
+          "exit": false,
+          "watch": true
+        }
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
+          {
+            "command": "lsof -i :3005 || nx run 3005-runtime-host:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "sleep 4 && nx run 3005-runtime-host:e2e",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    }
+  },
+  "tags": ["type:app"]
+}

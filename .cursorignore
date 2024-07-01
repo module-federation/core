@@ -8,3 +8,6 @@
 ./packages/typescript
 ./packages/native-*
 ./apps
+**/configCases
+apps/**
+*.snap

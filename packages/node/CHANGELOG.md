@@ -1,5 +1,61 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.3.0
+
+### Minor Changes
+
+- 32f26af: fetch hook supported in node runtime plugin
+
+### Patch Changes
+
+- 32f26af: allow fetch override on runtime plugin with globalThis.webpackChunkLoad
+- Updated dependencies [32f26af]
+- Updated dependencies [32f26af]
+- Updated dependencies [32f26af]
+  - @module-federation/sdk@0.2.3
+  - @module-federation/runtime@0.2.3
+  - @module-federation/enhanced@0.2.3
+  - @module-federation/utilities@3.0.30
+
+## 2.2.15
+
+### Patch Changes
+
+- @module-federation/enhanced@0.2.2
+- @module-federation/runtime@0.2.2
+- @module-federation/sdk@0.2.2
+- @module-federation/utilities@3.0.29
+
+## 2.2.14
+
+### Patch Changes
+
+- Updated dependencies [88445e7]
+  - @module-federation/enhanced@0.2.1
+  - @module-federation/sdk@0.2.1
+  - @module-federation/runtime@0.2.1
+  - @module-federation/utilities@3.0.28
+
+## 2.2.13
+
+### Patch Changes
+
+- @module-federation/enhanced@0.2.0
+- @module-federation/runtime@0.2.0
+- @module-federation/sdk@0.2.0
+- @module-federation/utilities@3.0.27
+
+## 2.2.12
+
+### Patch Changes
+
+- Updated dependencies [88900ad]
+- Updated dependencies [1e93c5e]
+  - @module-federation/sdk@0.1.21
+  - @module-federation/enhanced@0.1.21
+  - @module-federation/runtime@0.1.21
+  - @module-federation/utilities@3.0.26
+
 ## 2.2.11
 
 ### Patch Changes

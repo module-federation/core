@@ -1,7 +1,7 @@
 {
   "name": "3008-runtime-remote",
   "private": true,
-  "version": "1.0.9",
+  "version": "1.0.14",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",

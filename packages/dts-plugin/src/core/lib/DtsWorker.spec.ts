@@ -60,6 +60,12 @@ describe('generateTypesInChildProcess', () => {
           .toString()
           .split('\n');
         console.log('stdout: ', stdout);
+        const rootPid = process.pid;
+        console.log('rootPid: ', rootPid);
+        console.log('child process pid: ', pid);
+        if (rootPid === pid) {
+          return true;
+        }
         return Boolean(stdout[1].length);
       } catch (err) {
         console.error(err);
@@ -187,6 +193,9 @@ describe('generateTypesInChildProcess', () => {
           name: 'index.d.ts',
         },
       ],
+    });
+    await new Promise((res) => {
+      setTimeout(res, 1000);
     });
     // the child process should be killed after generateTypes
     expect(checkProcess()).toEqual(false);

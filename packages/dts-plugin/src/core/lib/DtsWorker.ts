@@ -5,6 +5,7 @@ import { type RpcWorker, createRpcWorker } from '../rpc/index';
 import type { RpcMethod } from '../rpc/types';
 import type { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 import type { DTSManager } from './DTSManager';
+import { isDebugMode } from './utils';
 
 export type DtsWorkerOptions = DTSManagerOptions;
 
@@ -41,9 +42,30 @@ export class DtsWorker {
   }
 
   get controlledPromise(): ReturnType<DTSManager['generateTypes']> {
-    return Promise.resolve(this._res).then(() => {
-      this.exit();
-    });
+    const ensureChildProcessExit = () => {
+      try {
+        const pid = this.rpcWorker.process?.pid;
+        const rootPid = process.pid;
+        if (pid && rootPid !== pid) {
+          process.kill(pid, 0);
+        }
+      } catch (error) {
+        if (isDebugMode()) {
+          console.error(error);
+        }
+      }
+    };
+    return Promise.resolve(this._res)
+      .then(() => {
+        this.exit();
+        ensureChildProcessExit();
+      })
+      .catch((err) => {
+        if (isDebugMode()) {
+          console.error(err);
+        }
+        ensureChildProcessExit();
+      });
   }
 
   exit(): void {
