@@ -7,5 +7,6 @@ packages:
   - 'apps/modernjs-ssr/*'
   - 'apps/router-demo/*'
   - 'apps/manifest-demo/*'
+  - 'apps/esbuild'
   - 'apps/*'
   - 'webpack'
