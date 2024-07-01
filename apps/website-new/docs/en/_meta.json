@@ -2,7 +2,21 @@
   {
     "text": "Guide",
     "link": "/guide/start/",
-    "activeMatch": "/guide/"
+    "activeMatch": "/guide/",
+    "items": [
+      {
+        "text": "Overview",
+        "link": "/guide/start/"
+      },
+      {
+        "text": "Frameworks",
+        "link": "/frameworks/index"
+      },
+      {
+        "text": "Practices & Concepts",
+        "link": "/practices/anti-patterns/index"
+      }
+    ]
   },
   {
     "text": "Practice",

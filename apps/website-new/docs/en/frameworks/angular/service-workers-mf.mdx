@@ -1,0 +1,276 @@
+---
+title: "Using Service Workers"
+---
+
+import {Steps} from '@theme'
+
+
+## Service Workers with Angular and Module Federation
+
+Integrating Angular service workers addresses challenges in Angular projects using Module Federation, especially when dynamically loading large code chunks from remote containers. Service workers enhance user experience by caching federated code and ensuring remote containers are accessible offline, thus improving application performance, reducing load times, and smoothing route transitions.
+
+## Angular Service Worker
+
+A service worker in Angular is a small JavaScript script that runs in the background of a web application. Its main job is to manage network requests, like those for loading web pages or data.
+
+Service workers are especially useful in Angular applications, which are often single-page applications (SPAs). Since Angular version 5.0, Angular apps have been able to easily use service workers. This helps these apps to load faster and work more smoothly, without needing complex code to handle network requests and caching.
+
+To learn more about Angular Service Workers and their inner workings, it's recommended to refer to the [official Angular documentation](https://angular.io/guide/service-worker-intro) on the topic.
+
+## The benefits
+
+### Performance and Reliability
+
+Service workers cache necessary resources, including JavaScript modules and other assets. This caching mechanism means that once a user has downloaded these resources, they are stored locally, leading to significantly faster load times on subsequent visits.
+
+### Offline Capabilities
+
+Service workers enable Angular applications to function effectively even in unstable network conditions. This is particularly advantageous for Module Federation, ensuring that the app remains functional and provides a consistent user experience, regardless of network reliability.
+
+### Streamlining Application Updates
+
+Service workers facilitate the background updating of federated modules. They help maintain version consistency across federated modules, ensuring that the application runs smoothly without any dependency conflicts.
+
+### Enhancing User Experience
+
+For applications using Module Federation, service workers can prefetch necessary modules, reducing the loading time when navigating between different parts of the application. This results in a smoother, more responsive user experience.
+
+## Implementing Service Workers
+
+This section provides a concise guide on setting up service workers in Angular. For comprehensive details, refer to [the official Angular documentation](https://angular.io/guide/service-worker-getting-started).
+
+To effectively integrate service workers into an Angular application, the initial step is to transform the application into a Progressive Web App (PWA). PWAs are known for their ability to enhance user experience by providing features similar to native apps. To understand the concept of PWAs, their unique benefits, impact on business, and development methodologies, it's recommended to consult the [Progressive Web Apps](https://web.dev/explore/progressive-web-apps) page on web.dev.
+
+## PWA Setup
+
+Execute `ng add @angular/pwa` in your app's root directory. This command:
+
+1. **Installs Service Worker Package**: `@angular/service-worker` is added to your project.
+2. **Generates Service Worker Configuration**: A `ngsw-config.json` file is created.
+3. **Updates Index File**: `index.html` is modified to reference `manifest.webmanifest`.
+
+With service workers set up, configure caching strategies to optimize your app's performance.
+
+### Caching Strategies
+
+Define caching strategies to enhance your app's performance. Service workers handle navigation and API URL requests, even offline. The right strategy depends on your app's setup.
+
+If your app has lazy-loaded modules, include them in your caching strategy. Here's an example in `ngsw-config.json`:
+
+```json
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "main-assets",
+      "installMode": "prefetch",
+      "updateMode": "lazy",
+      "resources": {
+        "files": [
+          "/favicon.ico",
+          "/index.html",
+          "/*.css",
+          "/main.js",
+          "/polyfills.js",
+          "/styles.css",
+          "/lazy-module-1.js",
+          "/lazy-module-2.js"
+        ]
+      }
+    },
+    {
+      "name": "additional-assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/assets/**",
+          "/*.(png|jpg|jpeg|svg|gif|webp|woff2|woff|ttf|otf)"
+        ]
+      }
+    }
+  ]
+}
+```
+
+### Dynamic Loading and Dependency Management
+
+In scenarios where remote containers are dynamically loaded, Webpack handles the downloading of necessary dependencies. <br/>
+Inspect the Network tab in your browser's developer tools to verify all downloaded dependencies. <br/>
+This inspection reveals all the files fetched during the loading process, providing a clear view of what might need caching. <br/>
+When the remote container is dynamically loaded, Webpack fetches any required dependencies that are not already present.
+
+![Dynamic Loading and Dependency Management](https://angular.io/generated/images/guide/service-worker/sw-active.png)
+
+### Adjusting Strategies for Remote Containers
+
+To avoid issues with file name changes in new builds, use a wildcard pattern to cache all `*.js` files from the remote's URL. This method is implemented in the `ngsw-config.json` file.
+
+```json
+{
+  "name": "RemoteAssets",
+  "installMode": "lazy",
+  "updateMode": "prefetch",
+  "resources": {
+    "urls": [
+      "https://your-remote-container-url/*.js" // Using a wildcard to cache all JS files
+    ]
+  }
+}
+```
+
+Understanding Configuration Parameters
+
+- **Name**: Identifies an asset group, linked with manifestHash for cache location.
+- **InstallMode**: Determines initial caching behavior (`prefetch` for immediate, `lazy` for on-demand).
+- **UpdateMode**: Dictates caching during updates (`prefetch` for immediate update, `lazy` for delayed caching).
+- **Resources**: Describes the cache scope, including `files` and/or `urls`.
+
+### Updating Cached Federated Chunks
+
+#### Ensuring Data Freshness
+
+Angular Service Workers include features like the SwUpdate Service and Hard Refresh methods to keep data current.
+
+To gain a deeper understanding of the SwUpdate Service and Hard Refresh methods used in Angular Service Workers, it's recommended to consult the [official Angular documentation](https://angular.io/guide/service-worker-communications). This resource provides comprehensive details and guidance on these specific features.
+
+*Hard Refresh Implementation Example*:
+
+```javascript
+function hardRefresh() {
+  navigator.serviceWorker.getRegistration().then(async (registration) => {
+    if (!registration) return;
+    await registration.unregister();
+    window.location.reload();
+  });
+}
+```
+This implementation ensures the application serves the most current content to users.
+
+When performing a Hard Refresh, the following actions are executed:
+
+1. Unregister the Service Worker.
+2. Clear all files cached by the Service Worker.
+3. Reload the webpage.
+
+
+## Workbox for Enhanced Service Worker Management
+
+Workbox is a suite of JavaScript libraries enhancing Progressive Web Apps beyond the capabilities of framework-specific tools like Angular's Service Worker. It's particularly useful in complex setups like Module Federation in Angular, offering developers ways to boost app performance and user experience.
+
+### Key Features of Workbox
+
+1. **Webpack Integration for Customization**: Workbox stands out for its adaptability, integrating seamlessly with Webpack via the `workbox-webpack-plugin`. This is crucial for Module Federation projects, allowing for efficient and precise service worker management within Webpack configurations.
+
+2. **Framework Agnostic**: Workbox works across different JavaScript frameworks and libraries, offering a versatile solution for multi-framework projects or for developers looking for a broadly applicable tool.
+
+3. **Detailed Caching Control**: It gives developers detailed control over caching strategies, enabling the creation of custom service worker scripts for nuanced resource management.
+
+
+
+### Installation and Configuration
+
+<Steps>
+### Installing Workbox
+
+Start by adding Workbox to your Angular project:
+
+```bash
+npm install workbox-webpack-plugin --save-dev
+```
+
+### Configuring Workbox in Webpack
+
+Given that Module Federation heavily relies on Webpack, configure Workbox as a plugin in your Webpack configuration. This step is crucial for ensuring that the service worker strategies align with the distributed nature of Module Federation.
+
+*Example Webpack Configuration:*
+
+```javascript
+const { GenerateSW } = require('workbox-webpack-plugin');
+
+module.exports = {
+  // ... other webpack config relevant to Module Federation
+  plugins: [
+    new GenerateSW({
+      // Configurations specific to your Module Federation setup
+      // these options encourage the ServiceWorkers to get in there fast
+      // and not allow any straggling "old" SWs to hang around
+      clientsClaim: true,
+      skipWaiting: true,
+    })
+  ],
+};
+```
+
+### Tailoring Caching Strategies and Exposing the Workbox Service Worker
+
+In a Module Federation setup, the correct exposure of shared resources like the Workbox service worker is crucial. Here's how to achieve this:
+
+1. *Define Workbox as a Shared Module:* In your Module Federation plugin configuration within Webpack, declare the Workbox service worker as a shared module. This step ensures that the service worker is accessible across all federated modules.
+
+*Example Module Federation Config in webpack.config.js:*
+
+```javascript
+const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
+
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      // Other Module Federation settings
+      shared: {
+        // Share Workbox configuration as a module
+        'workbox-webpack-plugin': {
+          singleton: true,
+          requiredVersion: 'your-workbox-version'
+        }
+      }
+    })
+  ],
+};
+```
+
+2. *Dynamically Import Workbox Service Worker:* Utilize dynamic import capabilities to load the Workbox service worker within your Angular application. This can typically be done in the main entry file of your application.
+
+*Example of Dynamically Loading in main.ts:*
+
+```typescript
+import { Workbox } from 'workbox-window';
+
+if ('serviceWorker' in navigator) {
+  const wb = new Workbox('/service-worker.js');
+
+  wb.register();
+}
+```
+
+In this example, `workbox-window` is used for simplifying the service worker registration process in a client-side application. Ensure that this package is installed and included in your project dependencies. For more information on registering Service Worker in Webpack we suggest reading [official documentation on the subject](https://webpack.js.org/guides/progressive-web-application/#registering-our-service-worker).
+
+### Customize Workbox Strategies
+
+Workbox offers a variety of strategies for caching and network requests. Configure these strategies in a service worker file to cater to your application's specific needs.
+
+*Example `service-worker.js`:*
+
+```javascript
+import { precacheAndRoute } from 'workbox-precaching';
+import { NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
+
+// Precaching for fast load of initial resources
+precacheAndRoute(self.__WB_MANIFEST);
+
+// Example runtime caching strategies
+self.addEventListener('fetch', event => {
+  if (event.request.url.includes('/api/')) {
+    // Network-first strategy for API requests
+    event.respondWith(new NetworkFirst().handle({ event }));
+  } else {
+    // Stale-while-revalidate for other resources
+    event.respondWith(new StaleWhileRevalidate().handle({ event }));
+  }
+});
+```
+
+In this setup, Workbox provides a network-first strategy for API calls and a stale-while-revalidate strategy for other resources, ensuring efficient data fetching and caching.
+</Steps>
+

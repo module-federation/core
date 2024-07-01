@@ -1,0 +1,133 @@
+import {Tabs, Tab} from '@theme'
+
+# Routing & Importing Pages
+
+Importing federated pages in Next.js required working within the constraints of how next builds.
+
+## Importing Remote Pages
+
+Next depends on static analysis to determine how to build or render a page.
+
+Because Module Federation is at runtime, next is unable to see what exports a remote page contains at build time.
+
+This requires you to re-export the page remotes page api / data lifecycle inside the host.
+
+#### Sample Remote App
+<Tabs>
+  <Tab label="remote/pages/index.js">
+    ```jsx
+    import React from 'react';
+    import Head from 'next/head';
+
+    const Shop = (props) => {
+      return (
+        <div>
+          <Head>
+            <title>Shop</title>
+          </Head>
+          <pre>{JSON.stringify(props)}</pre>
+        </div>
+      );
+    };
+    Shop.getInitialProps = async () => {
+      const fallback = {
+        name: 'Luke Skywalker',
+        height: '172',
+        mass: '77',
+        hair_color: 'blond'
+      };
+      return Promise.resolve(fallback);
+    };
+
+    export default Shop;
+
+    ```
+  </Tab>
+  <Tab label="remote/pages/other.js">
+    ```jsx
+    export const getServerSideProps = async () => {
+      // Fetch data from external API
+      const res = await fetch('https://api.github.com/repos/vercel/next.js')
+      const repo = await res.json()
+      // Pass data to the page via props
+      return { props: { repo } }
+    }
+
+    export default function Page({ repo }) {
+      return (
+        <main>
+          <p>{repo.stargazers_count}</p>
+        </main>
+      )
+    }
+    ```
+  </Tab>
+  <Tab label="remote/pages/_app.js">
+    ```jsx
+    import App  from 'next/app'
+
+    export default function MyApp({
+      Component,
+      pageProps,
+      example,
+    }) {
+      return (
+        <>
+          <Component {...pageProps} />
+        </>
+      )
+    }
+
+    MyApp.getInitialProps = async (context) => {
+      const ctx = await App.getInitialProps(context)
+
+      return { ...ctx }
+    }
+    ```
+  </Tab>
+</Tabs>
+#### Sample Host App
+<Tabs>
+  <Tab label="host/pages/index.js">
+    ```jsx
+    import Shop from 'remote/pages/index';
+    const Page = Shop;
+    Page.getInitialProps = Shop.getInitialProps;
+    export default Page;
+    ```
+  </Tab>
+  <Tab label="host/pages/other.js">
+    ```jsx
+    import * as OtherPage from 'remote/pages/other';
+    const Page = OtherPage.default;
+    export const getServerSideProps = OtherPage.getServerSideProps
+    export default Page;
+    ```
+  </Tab>
+  <Tab label="host/pages/_app.js">
+    ```jsx
+    import App  from 'next/app'
+
+    export default function MyApp({
+      Component,
+      pageProps,
+      example,
+    }) {
+      return (
+        <>
+          <Component {...pageProps} />
+        </>
+      )
+    }
+
+    MyApp.getInitialProps = async (context) => {
+      const ctx = await App.getInitialProps(context)
+
+      return { ...ctx }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+
+
