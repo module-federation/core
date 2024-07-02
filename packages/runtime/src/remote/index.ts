@@ -73,14 +73,16 @@ export class RemoteHandler {
       void
     >('onLoad'),
     handlePreloadModule: new SyncHook<
-      {
-        id: string;
-        name: string;
-        remote: Remote;
-        remoteSnapshot: ModuleInfo;
-        preloadConfig: PreloadRemoteArgs;
-        origin: FederationHost;
-      },
+      [
+        {
+          id: string;
+          name: string;
+          remote: Remote;
+          remoteSnapshot: ModuleInfo;
+          preloadConfig: PreloadRemoteArgs;
+          origin: FederationHost;
+        },
+      ],
       void
     >('handlePreloadModule'),
     errorLoadRemote: new AsyncHook<

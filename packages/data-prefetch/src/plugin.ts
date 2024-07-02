@@ -1,4 +1,8 @@
-import type { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import { Module } from '@module-federation/runtime';
+import type {
+  FederationRuntimePlugin,
+  RemoteInfo,
+} from '@module-federation/runtime/types';
 import { ModuleInfo, getResourceUrl } from '@module-federation/sdk';
 
 import { getSignalFromManifest } from './common/runtime-utils';
@@ -150,6 +154,22 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
     }
 
     const promise = instance.loadEntry(prefetchUrl).then(async () => {
+      let module = origin.moduleCache.get(remote.name);
+      const moduleOptions = {
+        host: origin,
+        remoteInfo: remote as RemoteInfo,
+      };
+      if (!module) {
+        module = new Module(moduleOptions);
+        origin.moduleCache.set(remote.name, module);
+      }
+      const idPart = id.split('/');
+      let expose = idPart[idPart.length - 1];
+      if (expose !== '.') {
+        expose = `./${expose}`;
+      }
+      await module.get(id, expose, {}, remoteSnapshot);
+
       const projectExports = instance!.getProjectExports();
       if (projectExports instanceof Promise) {
         await projectExports;
