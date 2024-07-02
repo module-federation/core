@@ -76,7 +76,7 @@ const ClientOnly = ({Component}) => {
   useEffect(() => {
     setMount(true);
   }, []);
-  if (mounted) return null;
+  if (!mounted) return null;
   return (
     <Suspense fallback="loading">
       <Component />
