@@ -21,7 +21,7 @@ export type RemoteEntryType =
   | 'system'
   | string;
 
-interface ResourceInfo {
+export interface ResourceInfo {
   path: string;
   name: string;
   type: RemoteEntryType;
@@ -44,6 +44,7 @@ export interface BasicStatsMetaData {
   globalName: string;
   buildInfo: StatsBuildInfo;
   remoteEntry: ResourceInfo;
+  ssrRemoteEntry?: ResourceInfo;
   prefetchInterface?: boolean;
   prefetchEntry?: ResourceInfo;
   types: MetaDataTypes;

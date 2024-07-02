@@ -21,6 +21,9 @@ interface BasicModuleInfo {
 export interface BasicProviderModuleInfo extends BasicModuleInfo {
   remoteEntry: string;
   remoteEntryType: RemoteEntryType;
+  // ssrRemoteEntry/ssrRemoteEntryType only appear while manifest has serveSideRemoteEntry field
+  ssrRemoteEntry?: string;
+  ssrRemoteEntryType?: RemoteEntryType;
   remoteManifest?: string;
   globalName: string;
   modules: Array<{
@@ -45,6 +48,7 @@ interface BasicProviderModuleInfoWithGetPublicPath
 
 export interface ManifestProvider {
   remoteEntry: string;
+  ssrRemoteEntry?: string;
   version?: string;
 }
 

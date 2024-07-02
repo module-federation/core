@@ -6,7 +6,12 @@ import {
   isManifestProvider,
 } from '@module-federation/sdk';
 import { Optional, Options, Remote } from '../../type';
-import { isRemoteInfoWithEntry, error } from '../../utils';
+import {
+  isRemoteInfoWithEntry,
+  error,
+  getRemoteEntryInfoFromSnapshot,
+  isBrowserEnv,
+} from '../../utils';
 import {
   getGlobalSnapshot,
   setGlobalSnapshotInfoByModuleInfo,
@@ -18,6 +23,47 @@ import {
 import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
 import { FederationHost } from '../../core';
 import { assert } from '../../utils/logger';
+
+export function getGlobalRemoteInfo(
+  moduleInfo: Remote,
+  origin: FederationHost,
+): {
+  hostGlobalSnapshot: ModuleInfo | undefined;
+  globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
+  remoteSnapshot: GlobalModuleInfo[string] | undefined;
+} {
+  const hostGlobalSnapshot = getGlobalSnapshotInfoByModuleInfo({
+    name: origin.options.name,
+    version: origin.options.version,
+  });
+
+  // get remote detail info from global
+  const globalRemoteInfo =
+    hostGlobalSnapshot &&
+    'remotesInfo' in hostGlobalSnapshot &&
+    hostGlobalSnapshot.remotesInfo &&
+    getInfoWithoutType(hostGlobalSnapshot.remotesInfo, moduleInfo.name).value;
+
+  if (globalRemoteInfo && globalRemoteInfo.matchedVersion) {
+    return {
+      hostGlobalSnapshot,
+      globalSnapshot: getGlobalSnapshot(),
+      remoteSnapshot: getGlobalSnapshotInfoByModuleInfo({
+        name: moduleInfo.name,
+        version: globalRemoteInfo.matchedVersion,
+      }),
+    };
+  }
+
+  return {
+    hostGlobalSnapshot: undefined,
+    globalSnapshot: getGlobalSnapshot(),
+    remoteSnapshot: getGlobalSnapshotInfoByModuleInfo({
+      name: moduleInfo.name,
+      version: 'version' in moduleInfo ? moduleInfo.version : undefined,
+    }),
+  };
+}
 
 export class SnapshotHandler {
   loadingHostSnapshot: Promise<GlobalModuleInfo | void> | null = null;
@@ -146,8 +192,13 @@ export class SnapshotHandler {
     // global snapshot includes manifest or module info includes manifest
     if (globalRemoteSnapshot) {
       if (isManifestProvider(globalRemoteSnapshot)) {
+        const remoteEntry = isBrowserEnv()
+          ? globalRemoteSnapshot.remoteEntry
+          : globalRemoteSnapshot.ssrRemoteEntry ||
+            globalRemoteSnapshot.remoteEntry ||
+            '';
         const moduleSnapshot = await this.getManifestJson(
-          globalRemoteSnapshot.remoteEntry,
+          remoteEntry,
           moduleInfo,
           {},
         );
@@ -157,7 +208,7 @@ export class SnapshotHandler {
             ...moduleInfo,
             // The global remote may be overridden
             // Therefore, set the snapshot key to the global address of the actual request
-            entry: globalRemoteSnapshot.remoteEntry,
+            entry: remoteEntry,
           },
           moduleSnapshot,
         );
@@ -219,42 +270,12 @@ export class SnapshotHandler {
     }
   }
 
-  private getGlobalRemoteInfo(moduleInfo: Remote): {
+  getGlobalRemoteInfo(moduleInfo: Remote): {
     hostGlobalSnapshot: ModuleInfo | undefined;
     globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
     remoteSnapshot: GlobalModuleInfo[string] | undefined;
   } {
-    const hostGlobalSnapshot = getGlobalSnapshotInfoByModuleInfo({
-      name: this.HostInstance.options.name,
-      version: this.HostInstance.options.version,
-    });
-
-    // get remote detail info from global
-    const globalRemoteInfo =
-      hostGlobalSnapshot &&
-      'remotesInfo' in hostGlobalSnapshot &&
-      hostGlobalSnapshot.remotesInfo &&
-      getInfoWithoutType(hostGlobalSnapshot.remotesInfo, moduleInfo.name).value;
-
-    if (globalRemoteInfo && globalRemoteInfo.matchedVersion) {
-      return {
-        hostGlobalSnapshot,
-        globalSnapshot: getGlobalSnapshot(),
-        remoteSnapshot: getGlobalSnapshotInfoByModuleInfo({
-          name: moduleInfo.name,
-          version: globalRemoteInfo.matchedVersion,
-        }),
-      };
-    }
-
-    return {
-      hostGlobalSnapshot: undefined,
-      globalSnapshot: getGlobalSnapshot(),
-      remoteSnapshot: getGlobalSnapshotInfoByModuleInfo({
-        name: moduleInfo.name,
-        version: 'version' in moduleInfo ? moduleInfo.version : undefined,
-      }),
-    };
+    return getGlobalRemoteInfo(moduleInfo, this.HostInstance);
   }
 
   private async getManifestJson(

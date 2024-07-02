@@ -1,4 +1,5 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { moduleFederationPlugin } from '@module-federation/sdk';
 import type {
   Compiler,
   Compilation,
@@ -27,11 +28,7 @@ type InferStartupRenderContext<T> = T extends SyncWaterfallHook<
 
 type StartupRenderContext = InferStartupRenderContext<RenderStartup>;
 
-export interface Options {
-  eager?: RegExp | ((module: Module) => boolean);
-  excludeChunk?: (chunk: Chunk) => boolean;
-}
-
+export type Options = moduleFederationPlugin.AsyncBoundaryOptions;
 class AsyncEntryStartupPlugin {
   private _options: Options;
   private _runtimeChunks = new Map<string | number, Chunk | undefined>();

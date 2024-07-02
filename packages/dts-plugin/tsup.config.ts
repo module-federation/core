@@ -7,9 +7,9 @@ function generateConfigurations(
   return options.map((option) => {
     const [entry, config] = option;
     return {
+      tsconfig: join(__dirname, 'tsconfig.json'),
       entry,
       clean: true,
-      tsconfig: join(__dirname, 'tsconfig.json'),
       dts: true,
       legacyOutput: true,
       outDir: join('packages', 'dts-plugin', 'dist'),

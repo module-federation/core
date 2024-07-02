@@ -5,7 +5,7 @@ import { rmSync, existsSync } from 'fs';
 import { join } from 'path';
 import { describe, expect, it, vi, afterAll } from 'vitest';
 import { DTSManager } from './DTSManager';
-import { UpdateMode } from '../constant';
+import { UpdateMode } from '../../server/constant';
 
 describe('DTSManager', () => {
   const projectRoot = join(__dirname, '..', '..', '..', '..', '..');

@@ -15,6 +15,7 @@ import {
 } from '@module-federation/sdk';
 import { Compilation, Compiler, StatsCompilation, StatsModule } from 'webpack';
 import {
+  isDev,
   getAssetsByChunk,
   findChunk,
   getAssetsByChunkIDs,
@@ -33,6 +34,7 @@ import {
 } from '@module-federation/managers';
 import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
 import { ModuleHandler } from './ModuleHandler';
+import { StatsInfo } from './types';
 
 class StatsManager {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions = {};
@@ -411,12 +413,16 @@ class StatsManager {
   async generateStats(
     compiler: Compiler,
     compilation: Compilation,
-    extraOptions?: {},
-  ): Promise<Stats> {
+    extraOptions: { disableEmit?: boolean } = {},
+  ): Promise<StatsInfo> {
     try {
+      const { disableEmit } = extraOptions;
       const existedStats = compilation.getAsset(this.fileName);
-      if (existedStats) {
-        return JSON.parse(existedStats.source.source().toString());
+      if (existedStats && !isDev()) {
+        return {
+          stats: JSON.parse(existedStats.source.source().toString()),
+          filename: this.fileName,
+        };
       }
       const { manifest: manifestOptions = {} } = this._options;
       let stats = await this._generateStats(compiler, compilation);
@@ -435,11 +441,19 @@ class StatsManager {
         stats = ret || stats;
       }
 
-      compilation.emitAsset(
-        this.fileName,
-        new compiler.webpack.sources.RawSource(JSON.stringify(stats, null, 2)),
-      );
-      return stats;
+      if (!disableEmit) {
+        compilation.emitAsset(
+          this.fileName,
+          new compiler.webpack.sources.RawSource(
+            JSON.stringify(stats, null, 2),
+          ),
+        );
+      }
+
+      return {
+        stats,
+        filename: this.fileName,
+      };
     } catch (err) {
       throw err;
     }

@@ -40,6 +40,7 @@ describe('hostPlugin', () => {
           context: process.cwd(),
           abortOnError: true,
           consumeAPITypes: false,
+          runtimePkgs: [],
         });
 
         expect(mapRemotesToDownload).toStrictEqual({
@@ -64,6 +65,7 @@ describe('hostPlugin', () => {
           context: process.cwd(),
           abortOnError: true,
           consumeAPITypes: false,
+          runtimePkgs: [],
         };
 
         const { hostOptions, mapRemotesToDownload } =
