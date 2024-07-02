@@ -44,15 +44,15 @@ function Wraper3() {
   return (
     <>
       <div className="flex flex-row">
-        <div className="grow">
+        <div className="basis-1/3">
           <h2>Remote1</h2>
           <Remote1App memoryRoute={{ entryPath: '/' }} />
         </div>
-        <div className="grow">
+        <div className="basis-1/3">
           <h2>Remote2</h2>
           <Remote2App memoryRoute={{ entryPath: '/detail' }} />
         </div>
-        <div className="grow">
+        <div className="basis-1/3">
           <h2>Remote3</h2>
           <Remote3App memoryRoute={{ entryPath: '/detail' }} />
         </div>
