@@ -21,7 +21,6 @@ export function defaultPreloadArgs(
     resourceCategory: 'sync',
     share: true,
     depsRemote: true,
-    prefetchInterface: false,
     ...preloadConfig,
   } as PreloadConfig;
 }

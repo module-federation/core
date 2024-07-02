@@ -12,7 +12,6 @@ export { FederationHost } from './core';
 export { registerGlobalPlugins } from './global';
 export { getRemoteEntry, getRemoteInfo } from './utils';
 export { loadScript, loadScriptNode } from '@module-federation/sdk';
-export { Module } from './module';
 
 export type { Federation } from './global';
 export type { FederationRuntimePlugin };
