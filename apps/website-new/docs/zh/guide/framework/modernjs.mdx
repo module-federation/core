@@ -65,10 +65,22 @@ export default createModuleFederationConfig({
 
 ### 引用类型
 
-在 `modern-app-env.d.ts` 文件增加 `/// <reference types='@module-federation/modern-js/types' />` 以获取类型支持。
+在 `modern-app-env.d.ts` 文件增加 `/// <reference types='@module-federation/modern-js/types' />` 以获取运行时 `@@modern-js/runtime/mf` 类型支持。
 
 ```diff title='modern-app-env.d.ts'
 + /// <reference types='@module-federation/modern-js/types' />
+```
+
+在 `tsconfig.json` 添加 `paths` 以获取生产者的类型：
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
+  }
+}
 ```
 
 ## 服务端渲染（SSR）
