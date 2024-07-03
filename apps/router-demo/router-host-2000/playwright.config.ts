@@ -25,6 +25,10 @@ export default defineConfig({
 
     // Collect trace when retrying the failed test.
     trace: 'on-first-retry',
+    viewport: {
+      width: 1024,
+      height: 512,
+    },
   },
 
   timeout: 300 * 1000,
