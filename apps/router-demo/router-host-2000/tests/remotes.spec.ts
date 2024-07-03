@@ -12,7 +12,7 @@ test('remote pages can be launched', async ({ page }) => {
     const contents = await insight.segment({
       homeLink: 'link to Home page',
       detailLink: query('link to Detail page', {
-        link: retrieveOneElement('link'),
+        link: retrieveOneElement('link to Detail page'),
       }),
       contentTypeString: query(
         'a line of string, indicates the page content type',
@@ -26,6 +26,7 @@ test('remote pages can be launched', async ({ page }) => {
     return contents;
   };
   const pages = [remote1, remote2, remote3];
+
   for (const pageUrl of pages) {
     console.log(`will launch ${pageUrl}`);
     await page.goto(pageUrl);
@@ -35,6 +36,7 @@ test('remote pages can be launched', async ({ page }) => {
 
     // click detail link
     const detailLink = contents.detailLink.link as any as TextElement;
+    expect(detailLink).toBeTruthy();
     await page.mouse.click(...detailLink.center);
     await new Promise((r) => setTimeout(r, 3000));
 

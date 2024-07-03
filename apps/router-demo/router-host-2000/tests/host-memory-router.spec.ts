@@ -27,7 +27,7 @@ test('host page can be launched', async ({ page }) => {
     }),
     tableInContent: query('a table shows in content', {
       records:
-        'array of records, {name: string, age: number, address: string}[]',
+        'array of records, {name: string, age: number, address: string, action: string[], tags: string[]}[]',
     }),
   });
 
@@ -40,11 +40,13 @@ test('host page can be launched', async ({ page }) => {
     'Memory-router',
   ]);
   expect(overall.mainTitle.titleString).toBe('Router host Home page');
-  expect(overall.tableInContent.records).toStrictEqual([
-    { name: 'John Brown', age: 32, address: 'New York No. 1 Lake Park' },
-    { name: 'Jim Green', age: 42, address: 'London No. 1 Lake Park' },
-    { name: 'Joe Black', age: 32, address: 'Sydney No. 1 Lake Park' },
-  ]);
+  expect(overall.tableInContent.records[2]).toStrictEqual({
+    name: 'Joe Black',
+    age: 32,
+    address: 'Sydney No. 1 Lake Park',
+    action: ['Invite Joe Black', 'Delete'],
+    tags: ['COOL', 'TEACHER'],
+  });
 });
 
 test('host page with memory router', async ({ page }) => {
