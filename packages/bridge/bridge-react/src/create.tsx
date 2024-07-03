@@ -1,4 +1,11 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { LoggerInstance, pathJoin } from './utils';
@@ -28,7 +35,7 @@ interface RemoteModule {
 interface RemoteAppParams {
   name: string;
   providerInfo: NonNullable<RemoteModule['provider']>;
-  dispathPopstate: boolean;
+  exportName: string | number | symbol;
 }
 
 const RemoteApp = ({
@@ -36,27 +43,11 @@ const RemoteApp = ({
   memoryRoute,
   basename,
   providerInfo,
-  dispathPopstate,
   ...resProps
 }: RemoteAppParams & ProviderParams) => {
   const rootRef = useRef(null);
   const renderDom = useRef(null);
   const providerInfoRef = useRef<any>(null);
-  if (dispathPopstate) {
-    const location = ReactRouterDOM.useLocation();
-    const [pathname, setPathname] = useState(location.pathname);
-
-    useEffect(() => {
-      if (pathname !== '' && pathname !== location.pathname) {
-        LoggerInstance.log(`createRemoteComponent dispatchPopstateEnv >>>`, {
-          name,
-          pathname: location.pathname,
-        });
-        dispatchPopstateEnv();
-      }
-      setPathname(location.pathname);
-    }, [location]);
-  }
 
   useEffect(() => {
     const renderTimeout = setTimeout(() => {
@@ -99,29 +90,14 @@ const RemoteApp = ({
 
 (RemoteApp as any)['__APP_VERSION__'] = __APP_VERSION__;
 
-export function createRemoteComponent<T, E extends keyof T>(info: {
-  loader: () => Promise<T>;
-  loading: React.ReactNode;
-  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
-  export?: E;
-}) {
-  type ExportType = T[E] extends (...args: any) => any
-    ? ReturnType<T[E]>
-    : never;
-  type RawComponentType = '__BRIDGE_FN__' extends keyof ExportType
-    ? ExportType['__BRIDGE_FN__'] extends (...args: any) => any
-      ? Parameters<ExportType['__BRIDGE_FN__']>[0]
-      : {}
-    : {};
+interface ExtraDataProps {
+  basename?: string;
+}
 
-  return (
-    props: {
-      basename?: ProviderParams['basename'];
-      memoryRoute?: ProviderParams['memoryRoute'];
-    } & RawComponentType,
-  ) => {
-    const exportName = info?.export || 'default';
-    let basename = '/';
+function withRouterData<P extends object>(
+  WrappedComponent: React.ComponentType<P & ExtraDataProps>,
+): React.FC<Omit<P, keyof ExtraDataProps>> {
+  return (props: any) => {
     let enableDispathPopstate = false;
     let routerContextVal: any;
     try {
@@ -130,10 +106,9 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
     } catch {
       enableDispathPopstate = false;
     }
+    let basename = '/';
 
-    if (props.basename) {
-      basename = props.basename;
-    } else if (enableDispathPopstate) {
+    if (!props.basename && enableDispathPopstate) {
       const ReactRouterDOMAny: any = ReactRouterDOM;
       // Avoid building tools checking references
       const useRouteMatch = ReactRouterDOMAny['use' + 'RouteMatch']; //v5
@@ -149,13 +124,12 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
         if (
           routerContextVal &&
           routerContextVal.matches &&
-          routerContextVal.matches[0] &&
-          routerContextVal.matches[0].pathnameBase
+          routerContextVal.matches.length > 0
         ) {
-          basename = pathJoin(
-            basename,
-            routerContextVal.matches[0].pathnameBase || '/',
-          );
+          const matchIndex = routerContextVal.matches.length - 1;
+          const pathnameBase =
+            routerContextVal.matches[matchIndex].pathnameBase;
+          basename = pathJoin(basename, pathnameBase || '/');
         }
       } /* react-router@5 */ else {
         const match = useRouteMatch?.(); // v5
@@ -171,64 +145,110 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
         }
       }
     }
+    if (enableDispathPopstate) {
+      const location = ReactRouterDOM.useLocation();
+      const [pathname, setPathname] = useState(location.pathname);
 
-    const LazyComponent = useMemo(() => {
-      //@ts-ignore
-      return React.lazy(async () => {
-        LoggerInstance.log(`createRemoteComponent LazyComponent create >>>`, {
-          basename,
-          lazyComponent: info.loader,
-          exportName,
-          props,
-          routerContextVal,
-        });
-        try {
-          const m = (await info.loader()) as RemoteModule;
-          // @ts-ignore
-          const moduleName = m && m[Symbol.for('mf_module_id')];
-          LoggerInstance.log(
-            `createRemoteComponent LazyComponent loadRemote info >>>`,
-            { basename, name: moduleName, module: m, exportName, props },
-          );
-
-          // @ts-ignore
-          const exportFn = m[exportName] as any;
-
-          if (exportName in m && typeof exportFn === 'function') {
-            return {
-              default: () => (
-                <RemoteApp
-                  name={moduleName}
-                  dispathPopstate={enableDispathPopstate}
-                  {...info}
-                  {...props}
-                  providerInfo={exportFn}
-                  basename={basename}
-                />
-              ),
-            };
-          } else {
-            LoggerInstance.log(
-              `createRemoteComponent LazyComponent module not found >>>`,
-              { basename, name: moduleName, module: m, exportName, props },
-            );
-            throw Error(
-              `Make sure that ${moduleName} has the correct export when export is ${String(
-                exportName,
-              )}`,
-            );
-          }
-        } catch (error) {
-          throw error;
+      useEffect(() => {
+        if (pathname !== '' && pathname !== location.pathname) {
+          LoggerInstance.log(`createRemoteComponent dispatchPopstateEnv >>>`, {
+            name: props.name,
+            pathname: location.pathname,
+          });
+          dispatchPopstateEnv();
         }
-      });
-    }, [exportName, basename, props.memoryRoute]);
+        setPathname(location.pathname);
+      }, [location]);
+    }
 
-    //@ts-ignore
+    // 将额外的数据通过 props 传递给被包裹的组件
+    return <WrappedComponent {...(props as P)} basename={basename} />;
+  };
+}
+
+export function createRemoteComponent<T, E extends keyof T>(info: {
+  loader: () => Promise<T>;
+  loading: React.ReactNode;
+  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
+  export?: E;
+}) {
+  type ExportType = T[E] extends (...args: any) => any
+    ? ReturnType<T[E]>
+    : never;
+  type RawComponentType = '__BRIDGE_FN__' extends keyof ExportType
+    ? ExportType['__BRIDGE_FN__'] extends (...args: any) => any
+      ? Parameters<ExportType['__BRIDGE_FN__']>[0]
+      : {}
+    : {};
+  const exportName = info?.export || 'default';
+
+  const LazyComponent = React.lazy(async () => {
+    LoggerInstance.log(`createRemoteComponent LazyComponent create >>>`, {
+      lazyComponent: info.loader,
+      exportName,
+    });
+    try {
+      const m = (await info.loader()) as RemoteModule;
+      // @ts-ignore
+      const moduleName = m && m[Symbol.for('mf_module_id')];
+      LoggerInstance.log(
+        `createRemoteComponent LazyComponent loadRemote info >>>`,
+        { name: moduleName, module: m, exportName },
+      );
+
+      // @ts-ignore
+      const exportFn = m[exportName] as any;
+
+      if (exportName in m && typeof exportFn === 'function') {
+        const RemoteAppComponent = withRouterData(
+          forwardRef<
+            HTMLDivElement,
+            {
+              basename?: ProviderParams['basename'];
+              memoryRoute?: ProviderParams['memoryRoute'];
+            }
+          >((props, ref) => {
+            return (
+              <RemoteApp
+                name={moduleName}
+                {...info}
+                providerInfo={exportFn}
+                exportName={info.export || 'default'}
+                {...props}
+              />
+            );
+          }),
+        );
+
+        return {
+          default: RemoteAppComponent,
+        };
+      } else {
+        LoggerInstance.log(
+          `createRemoteComponent LazyComponent module not found >>>`,
+          { name: moduleName, module: m, exportName },
+        );
+        throw Error(
+          `Make sure that ${moduleName} has the correct export when export is ${String(
+            exportName,
+          )}`,
+        );
+      }
+    } catch (error) {
+      throw error;
+    }
+  });
+
+  return (
+    props: {
+      basename?: ProviderParams['basename'];
+      memoryRoute?: ProviderParams['memoryRoute'];
+    } & RawComponentType,
+  ) => {
     return (
       <ErrorBoundary FallbackComponent={info.fallback}>
         <React.Suspense fallback={info.loading}>
-          <LazyComponent />
+          <LazyComponent {...props} />
         </React.Suspense>
       </ErrorBoundary>
     );
