@@ -2,6 +2,12 @@ import ansiColors from 'ansi-colors';
 import { dirname, join, normalize, relative, resolve, sep } from 'path';
 import typescript from 'typescript';
 import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extractor';
+import { proxyCreateProgram } from '@volar/typescript';
+import { PKGJsonManager } from '@module-federation/managers';
+import {
+  resolveVueCompilerOptions,
+  createVueLanguagePlugin,
+} from '@vue/language-core';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 
@@ -121,6 +127,31 @@ const createHost = (
 const createVueTscProgram = (
   programOptions: typescript.CreateProgramOptions,
 ) => {
+  const pkgJsonManager = new PKGJsonManager();
+  const pkg = pkgJsonManager.readPKGJson(require.resolve('vue-tsc'));
+  if (typeof pkg.version === 'string' && pkg.version.startsWith('2')) {
+    const createVueProgram = proxyCreateProgram(
+      // @ts-ignore typescript version mismatch
+      typescript,
+      typescript.createProgram,
+      (typescript, options) => {
+        const vueOptions = resolveVueCompilerOptions({});
+        const vueLanguagePlugin = createVueLanguagePlugin(
+          // @ts-ignore typescript version mismatch
+          typescript,
+          (id) => id,
+          () => '',
+          () => false,
+          options.options,
+          vueOptions,
+        );
+
+        return [vueLanguagePlugin];
+      },
+    );
+    // @ts-ignore typescript version mismatch
+    return createVueProgram(programOptions);
+  }
   const vueTypescript = require('vue-tsc');
   return vueTypescript.createProgram(programOptions);
 };

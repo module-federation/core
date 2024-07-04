@@ -57,6 +57,8 @@
     "koa": "2.11.0",
     "log4js": "6.9.1",
     "node-schedule": "2.1.1",
+    "@volar/typescript": "2.3.4",
+    "@vue/language-core": "2.0.24",
     "ws": "8.17.1"
   },
   "devDependencies": {
