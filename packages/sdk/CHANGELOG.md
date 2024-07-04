@@ -1,5 +1,20 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.2.3
+
+### Patch Changes
+
+- 32f26af: allow global fetch override for node
+- 32f26af: refactor node fetch functions to call fetch hook from runtime plugin
+
+## 0.2.2
+
+## 0.2.1
+
+### Patch Changes
+
+- 88445e7: Support getPublicPath in compiler plugins
+
 ## 0.2.0
 
 ## 0.1.21

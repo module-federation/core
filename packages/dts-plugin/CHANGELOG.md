@@ -1,5 +1,34 @@
 # @module-federation/dts-plugin
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [32f26af]
+- Updated dependencies [32f26af]
+  - @module-federation/sdk@0.2.3
+  - @module-federation/managers@0.2.3
+  - @module-federation/third-party-dts-extractor@0.2.3
+
+## 0.2.2
+
+### Patch Changes
+
+- 7d09ed8: Emit DTS relative to remote entry location
+  - @module-federation/sdk@0.2.2
+  - @module-federation/managers@0.2.2
+  - @module-federation/third-party-dts-extractor@0.2.2
+
+## 0.2.1
+
+### Patch Changes
+
+- 88445e7: Support getPublicPath in compiler plugins
+- Updated dependencies [88445e7]
+  - @module-federation/sdk@0.2.1
+  - @module-federation/managers@0.2.1
+  - @module-federation/third-party-dts-extractor@0.2.1
+
 ## 0.2.0
 
 ### Patch Changes

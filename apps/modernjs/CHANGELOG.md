@@ -1,5 +1,24 @@
 # @module-federation/modernjs
 
+## 0.1.30
+
+### Patch Changes
+
+- @module-federation/enhanced@0.2.3
+
+## 0.1.29
+
+### Patch Changes
+
+- @module-federation/enhanced@0.2.2
+
+## 0.1.28
+
+### Patch Changes
+
+- Updated dependencies [88445e7]
+  - @module-federation/enhanced@0.2.1
+
 ## 0.1.27
 
 ### Patch Changes

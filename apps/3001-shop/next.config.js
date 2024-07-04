@@ -34,7 +34,13 @@ const nextConfig = {
         },
         shared: {
           'lodash/': {},
-          antd: {},
+          antd: {
+            requiredVersion: '5.18.3',
+            version: '5.18.3',
+          },
+          '@ant-design/': {
+            singleton: true,
+          },
         },
         extraOptions: {
           exposePages: true,
