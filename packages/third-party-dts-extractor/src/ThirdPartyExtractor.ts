@@ -92,48 +92,61 @@ class ThirdPartyExtractor {
     });
   }
 
-  copyDts() {
+  async copyDts() {
     if (!Object.keys(this.pkgs).length) {
       return;
     }
-    fs.ensureDirSync(this.destDir);
-    const copyFiles = (srcDir: string, destDir: string) => {
+    const ensureDir = async (dir: string) => {
+      try {
+        await fs.mkdir(dir, { recursive: true });
+      } catch (err) {
+        if (err.code !== 'EEXIST') throw err;
+      }
+    };
+    const copyFiles = async (srcDir: string, destDir: string) => {
       if (srcDir.startsWith('.')) {
         return;
       }
-      fs.readdirSync(srcDir).forEach((file) => {
-        const fullPath = path.join(srcDir, file);
-        // exclude node_modules
-        if (['node_modules', 'bin'].includes(file)) {
-          return;
-        }
 
-        if (fs.lstatSync(fullPath).isDirectory()) {
-          // create target dir
-          const destFullPath = path.join(destDir, file);
-          try {
-            if (!fs.existsSync(destFullPath)) {
-              fs.mkdirSync(destFullPath);
+      const files = await fs.readdir(srcDir);
+
+      await Promise.all(
+        files.map(async (file) => {
+          const fullPath = path.join(srcDir, file);
+
+          // exclude node_modules and bin
+          if (['node_modules', 'bin'].includes(file)) {
+            return;
+          }
+
+          const stats = await fs.lstat(fullPath);
+
+          if (stats.isDirectory()) {
+            // create target dir
+            const destFullPath = path.join(destDir, file);
+            await ensureDir(destFullPath);
+            await copyFiles(fullPath, destFullPath);
+          } else {
+            if (
+              fullPath.endsWith('.d.ts') ||
+              fullPath.endsWith('package.json')
+            ) {
+              await fs.copyFile(fullPath, path.join(destDir, file));
             }
-          } catch (_err) {
-            // noop
           }
-          //copy child dir
-          copyFiles(fullPath, destFullPath);
-        } else {
-          // only copy .d.ts
-          if (fullPath.endsWith('.d.ts') || fullPath.endsWith('package.json')) {
-            fs.copyFileSync(fullPath, path.join(destDir, file));
-          }
-        }
-      });
+        }),
+      );
     };
-    Object.keys(this.pkgs).forEach((pkgName) => {
-      const pkgDir = this.pkgs[pkgName];
-      const destDir = path.resolve(this.destDir, pkgName);
-      fs.ensureDirSync(destDir);
-      copyFiles(pkgDir, destDir);
-    });
+
+    await ensureDir(this.destDir);
+    await Promise.all(
+      Object.keys(this.pkgs).map(async (pkgName) => {
+        const pkgDir = this.pkgs[pkgName];
+        const destDir = path.resolve(this.destDir, pkgName);
+        await ensureDir(destDir);
+        await copyFiles(pkgDir, destDir);
+      }),
+    );
   }
 }
 
