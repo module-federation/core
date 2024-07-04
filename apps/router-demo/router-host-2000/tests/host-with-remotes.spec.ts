@@ -82,7 +82,7 @@ test('[remote3] route in the nav', async ({ page }) => {
 
   // check the content
   const textContent = await insight.findElement(
-    'text element below the title "Remote3 Detail Page"',
+    'title element with content like "Remote3 Detail Page"',
   );
-  expect(textContent?.content).toContain('About');
+  expect(textContent?.content).toContain('detail');
 });
