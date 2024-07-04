@@ -29,20 +29,9 @@
       ]
     },
     "e2e": {
-      "executor": "@nx/cypress:cypress",
+      "executor": "nx:run-commands",
       "options": {
-        "cypressConfig": "apps/router-demo/router-host-2000/cypress.config.ts",
-        "testingType": "e2e",
-        "baseUrl": "http://127.0.0.1:2000",
-        "browser": "chrome"
-      },
-      "configurations": {
-        "development": {
-          "runnerUi": true,
-          "browser": "electron",
-          "exit": false,
-          "watch": true
-        }
+        "commands": ["npm run e2e --prefix apps/router-demo/router-host-2000"]
       }
     },
     "test:e2e": {

@@ -11,7 +11,8 @@
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/bridge-react": "workspace:*",
     "@emotion/react": "^11.11.4",
-    "@emotion/styled": "^11.11.5"
+    "@emotion/styled": "^11.11.5",
+    "antd": "^5.19.0"
   },
   "devDependencies": {
     "@rsbuild/core": "^0.6.3",
