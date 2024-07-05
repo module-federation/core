@@ -1,5 +1,5 @@
 ---
-'@module-federation/runtime': minor
+'@module-federation/runtime': patch
 ---
 
 adding support for loading systemjs based remotes
