@@ -23,9 +23,11 @@ export class PKGJsonManager {
       return pkg;
     } catch (_err) {
       try {
-        const pkg = finder.sync(ctx);
-        this._pkg = pkg;
-        return pkg;
+        const pkgPath = finder.sync(ctx);
+
+        const pkgJson = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        this._pkg = pkgJson;
+        return pkgJson;
       } catch (err) {
         console.error(err);
         return {};
