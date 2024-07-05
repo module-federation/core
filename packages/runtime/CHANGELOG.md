@@ -1,5 +1,18 @@
 # @module-federation/runtime
 
+## 0.3.0
+
+### Minor Changes
+
+- 60cd259: adding support for loading systemjs based remotes
+
+### Patch Changes
+
+- 09b792d: connect attrs to create script hook
+- Updated dependencies [09b792d]
+- Updated dependencies [09b792d]
+  - @module-federation/sdk@0.3.0
+
 ## 0.2.3
 
 ### Patch Changes

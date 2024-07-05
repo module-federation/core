@@ -1,5 +1,11 @@
 # 3008-runtime-remote
 
+## 1.0.15
+
+### Patch Changes
+
+- @module-federation/enhanced@0.3.0
+
 ## 1.0.14
 
 ### Patch Changes

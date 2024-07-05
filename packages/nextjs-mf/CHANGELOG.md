@@ -1,5 +1,19 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.3.27
+
+### Patch Changes
+
+- 09b792d: connect attrs to create script hook
+- Updated dependencies [60cd259]
+- Updated dependencies [09b792d]
+- Updated dependencies [09b792d]
+  - @module-federation/runtime@0.3.0
+  - @module-federation/sdk@0.3.0
+  - @module-federation/node@2.3.1
+  - @module-federation/enhanced@0.3.0
+  - @module-federation/utilities@3.0.31
+
 ## 8.3.26
 
 ### Patch Changes
