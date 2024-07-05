@@ -26,7 +26,6 @@ You can consider the module federation capabilities provided by this repository 
 
 - Module Federation reuses common dependencies between modules as much as possible
 
-
 ## ✨ What new features does Module Federation provide?
 
 * 🎨 Module Federation Runtime
@@ -39,17 +38,16 @@ You can consider the module federation capabilities provided by this repository 
 
 To get started with Module Federation, see the [Quick Start](https://module-federation.io/guide/start/quick-start.html).
 
-
-# 🧑‍💻 Community
+## 🧑‍💻 Community
 
 Come and chat with us on [Discussions](https://github.com/module-federation/universe/discussions) or [Discord](https://discord.gg/n69NnT3ACV)! The Module federation team and users are active there, and we're always looking for contributions.
 
-# 🤝 Contribution
+## 🤝 Contribution
 
 > New contributors welcome!
 
 Please read the [Contributing Guide](https://github.com/module-federation/core/blob/main/CONTRIBUTING.md).
 
-# 🙌 Code of Conduct
+## 🙌 Code of Conduct
 
 This repo has adopted the Code of Conduct. Please check [Code of Conduct](./CODE_OF_CONDUCT.md) for more details.
