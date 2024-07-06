@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.2.5
+
+### Patch Changes
+
+- 8cce571: fix(runtime): Fixed an issue where script failed to load properly when static resources were set to cross-domain response headers due to the default setting of script crossorigin to anonymous (this issue appeared in next.js)
+- Updated dependencies [8cce571]
+  - @module-federation/sdk@0.2.5
+
 ## 0.2.4
 
 ### Patch Changes
