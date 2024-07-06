@@ -3,12 +3,11 @@ import { ModuleFederationPluginOptions } from './types';
 import EmbeddedContainerPlugin from './EmbeddedContainerPlugin';
 import { AsyncBoundaryPlugin } from '@module-federation/enhanced';
 
-interface InvertedContainerOptions extends ModuleFederationPluginOptions {
+interface InvertedContainerOptions {
   container?: string;
   remotes: Record<string, string>;
   runtime: string;
   debug?: boolean;
-  chunkToEmbed: string;
 }
 
 class InvertedContainerPlugin {

@@ -70,12 +70,8 @@ export function applyClientPlugins(
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({
     runtime: 'webpack',
-    chunkToEmbed: 'host_inner_ctn',
     container: options.name,
     remotes: options.remotes as Record<string, string>,
-    shared: options.shared as any,
-    shareScope: 'default',
-    exposes: options.exposes as any,
     debug: extraOptions.debug,
     //@ts-ignore
   }).apply(compiler);
