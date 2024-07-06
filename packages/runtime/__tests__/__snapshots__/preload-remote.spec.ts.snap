@@ -21,9 +21,11 @@ exports[`preload-remote inBrowser > 1 preload with default config 1`] = `
   ],
   "scripts": [
     {
+      "crossorigin": "",
       "src": "http://localhost:1111/resources/preload/preload-resource/federation-remote-entry.js",
     },
     {
+      "crossorigin": "",
       "src": "http://localhost:1111/resources/preload/preload-resource/sub1-button/federation-remote-entry.js",
     },
   ],
@@ -76,9 +78,11 @@ exports[`preload-remote inBrowser > 2 preload with all config  1`] = `
   ],
   "scripts": [
     {
+      "crossorigin": "",
       "src": "http://localhost:1111/resources/preload/preload-resource/sub2/federation-remote-entry.js",
     },
     {
+      "crossorigin": "",
       "src": "http://localhost:1111/resources/preload/preload-resource/sub2-button/federation-remote-entry.js",
     },
   ],
@@ -96,6 +100,7 @@ exports[`preload-remote inBrowser > 3 preload with expose config  1`] = `
   ],
   "scripts": [
     {
+      "crossorigin": "",
       "src": "http://localhost:1111/resources/preload/preload-resource/sub3/federation-remote-entry.js",
     },
   ],
@@ -113,6 +118,7 @@ exports[`preload-remote inBrowser > 3 preload with expose config  2`] = `
   ],
   "scripts": [
     {
+      "crossorigin": "",
       "src": "http://localhost:1111/resources/preload/preload-resource/sub3/federation-remote-entry.js",
     },
   ],
