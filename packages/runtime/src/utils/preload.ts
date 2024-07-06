@@ -209,7 +209,6 @@ export function preloadAssets(
           url: jsUrl,
           cb: () => {},
           attrs: {
-            crossorigin: 'anonymous',
             fetchpriority: 'high',
           },
           createScriptHook: (url: string) => {
