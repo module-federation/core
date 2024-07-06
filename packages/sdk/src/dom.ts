@@ -217,7 +217,6 @@ export function loadScript(
       url,
       cb: resolve,
       attrs: {
-        crossorigin: 'anonymous',
         fetchpriority: 'high',
         ...attrs,
       },
