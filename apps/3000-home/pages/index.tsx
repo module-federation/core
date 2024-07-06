@@ -93,7 +93,7 @@ const Home = () => {
             <td>
               Load federated component from checkout with old antd version
             </td>
-            <td>[Button from antd@5.18.3]</td>
+            <td>[Button from antd@5.19.1]</td>
             <td>
               <Suspense fallback="loading ButtonOldAnt">
                 <ButtonOldAnt />
