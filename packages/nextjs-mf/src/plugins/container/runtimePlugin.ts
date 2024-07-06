@@ -3,6 +3,19 @@ import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
+    //@ts-ignore
+    createScript({ url, attrs }) {
+      if (typeof window !== 'undefined') {
+        const script = document.createElement('script');
+        script.src = url;
+        script.async = true;
+        //@ts-ignore
+        delete attrs.crossorigin;
+
+        return { script, timeout: 8000 };
+      }
+      return undefined;
+    },
     errorLoadRemote({ id, error, from, origin }) {
       console.error(id, 'offline');
       const pg = function () {

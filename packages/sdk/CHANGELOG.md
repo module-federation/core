@@ -1,5 +1,12 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.2.4
+
+### Patch Changes
+
+- 09b792d: allow createScript to change script attributes
+- 09b792d: connect attrs to create script hook
+
 ## 0.2.3
 
 ### Patch Changes
