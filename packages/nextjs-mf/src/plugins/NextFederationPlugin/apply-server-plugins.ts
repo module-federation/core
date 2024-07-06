@@ -93,11 +93,6 @@ export function handleServerExternals(
   compiler: Compiler,
   options: ModuleFederationPluginOptions,
 ): void {
-  // Use a regex to match the required external modules
-  // const crittersRegex = 'critters';
-  // const reactRegex = /^react$/;
-  // const reactDomRegex = /^react-dom$/;
-  // const nextCompiledRegex = /next\/dist\/compiled\/(?!server|client|shared).*/;
   if (
     Array.isArray(compiler.options.externals) &&
     compiler.options.externals[0]
@@ -126,7 +121,7 @@ export function handleServerExternals(
               (key.endsWith('/') ? req.includes(key) : req === key)
             );
           }) ||
-          ctx.request.includes('@module-federation/dashboard-plugin'))
+          ctx.request.includes('@module-federation/'))
       ) {
         // If the module should not be treated as external, return without calling the original externals function
         return;
@@ -170,6 +165,7 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     ...compiler.options.node,
     global: false,
   };
+  compiler.options.target = 'async-node';
   // no custom chunk rules
   compiler.options.optimization.splitChunks = undefined;
 
