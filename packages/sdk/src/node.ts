@@ -96,7 +96,8 @@ export function createScriptNode(
         `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
         {
           filename,
-          importModuleDynamically: vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER,
+          importModuleDynamically:
+            vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
         },
       );
 
