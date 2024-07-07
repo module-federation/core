@@ -43,8 +43,8 @@ function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
     throw new Error('import specifier is required');
   }
-  const importModule = new Function('name', `return import(name)`);
-  return importModule(name)
+
+  return import(/* webpackIgnore: true */ name)
     .then((res: any) => res.default as T)
     .catch((error: any) => {
       console.error(`Error importing module ${name}:`, error);

@@ -35,7 +35,7 @@
     "@module-federation/utilities": "workspace:*"
   },
   "scripts": {
-    "start": "next start",
-    "build": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
+    "start": "NODE_OPTIONS=\"--experimental-vm-modules\" next start",
+    "build": "NODE_OPTIONS=\"--experimental-vm-modules\" NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
   }
 }
