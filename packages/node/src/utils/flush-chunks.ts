@@ -116,9 +116,6 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     let stats = {};
 
     try {
-      await new Promise((r) => {
-        setTimeout(r, 100);
-      });
       stats = await fetch(statsFile).then((res) => res.json());
     } catch (e) {
       console.error('flush error', e);

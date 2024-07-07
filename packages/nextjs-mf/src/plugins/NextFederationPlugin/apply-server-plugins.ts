@@ -167,7 +167,7 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
   };
   compiler.options.target = 'async-node';
   // no custom chunk rules
-  compiler.options.optimization.splitChunks = undefined;
+  //compiler.options.optimization.splitChunks = undefined;
 
   // solves strange issues where next doesnt create a runtime chunk
   // might be related to if an api route exists or not

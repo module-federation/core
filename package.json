@@ -215,8 +215,8 @@
     "vue-tsc": "1.8.27",
     "wait-on": "^7.2.0",
     "webpack": "^5.90.0",
-    "webpack-virtual-modules": "0.6.1",
-    "whatwg-fetch": "^3.6.2",
+    "webpack-virtual-modules": "0.6.2",
+    "whatwg-fetch": "^3.6.20",
     "yargs": "^17.7.2"
   },
   "config": {
