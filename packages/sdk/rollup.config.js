@@ -6,6 +6,14 @@ module.exports = (rollupConfig, _projectOptions) => {
       targets: [{ src: 'packages/sdk/LICENSE', dest: 'packages/sdk/dist' }],
     }),
   );
+  rollupConfig.plugins.push({
+    name: 'custom-dynamic-import',
+    renderDynamicImport({ moduleId }) {
+      if (moduleId.endsWith('node.ts')) {
+        return { left: 'import(', right: ')' };
+      }
+    },
+  });
 
   return rollupConfig;
 };
