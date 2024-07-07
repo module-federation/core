@@ -49,15 +49,15 @@ jobs:
       - name: Run Affected Test
         run: npx nx affected -t test --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
-      # - name: E2E Test for Next.js Dev
-      #   run: |
-      #     pnpm run app:next:dev > /dev/null 2>&1 &
-      #     sleep 1 &&
-      #     npx wait-on tcp:3001 &&
-      #     npx wait-on tcp:3002 &&
-      #     npx wait-on tcp:3000 &&
-      #     npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=3 &&
-      #     lsof -ti tcp:3000,3001,3002 | xargs kill
+      - name: E2E Test for Next.js Dev
+        run: |
+          pnpm run app:next:dev > /dev/null 2>&1 &
+          sleep 1 &&
+          npx wait-on tcp:3001 &&
+          npx wait-on tcp:3002 &&
+          npx wait-on tcp:3000 &&
+          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=3 &&
+          lsof -ti tcp:3000,3001,3002 | xargs kill
 
       - name: E2E Test for Next.js Prod
         run: |

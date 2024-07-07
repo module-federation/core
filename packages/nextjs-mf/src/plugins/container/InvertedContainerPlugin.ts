@@ -29,7 +29,6 @@ class InvertedContainerPlugin {
         chunk.name === this.options.container + '_partial',
       // @ts-ignore
       eager: (module) => /\.federation/.test(module?.request || ''),
-      //@ts-ignore
     }).apply(compiler);
   }
 }
