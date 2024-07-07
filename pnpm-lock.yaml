@@ -929,8 +929,8 @@ importers:
         version: 18.2.0(react@18.2.0)
     devDependencies:
       '@modern-js-app/eslint-config':
-        specifier: 2.46.1
-        version: 2.46.1(@rsbuild/core@0.3.11)(@swc/helpers@0.5.11)(typescript@5.0.4)
+        specifier: 2.54.6
+        version: 2.54.6(@swc/helpers@0.5.11)(typescript@5.0.4)
       '@modern-js/app-tools':
         specifier: 2.46.1
         version: 2.46.1(@rsbuild/core@0.3.11)(@swc/core@1.6.13)(@types/express@4.17.21)(postcss@8.4.39)(react-dom@18.2.0)(react@18.2.0)(styled-components@6.1.11)(ts-node@10.9.2)(typescript@5.0.4)
@@ -1561,8 +1561,8 @@ importers:
         version: 11.10.4(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@modern-js-app/eslint-config':
-        specifier: 2.46.1
-        version: 2.46.1(@rsbuild/core@0.3.11)(@swc/helpers@0.5.3)(typescript@5.0.4)
+        specifier: 2.54.6
+        version: 2.54.6(@swc/helpers@0.5.3)(typescript@5.0.4)
       '@modern-js/app-tools':
         specifier: 2.46.1
         version: 2.46.1(@rsbuild/core@0.3.11)(@swc/core@1.6.13)(@types/express@4.17.21)(postcss@8.4.39)(react-dom@18.2.0)(react@18.2.0)(styled-components@6.1.11)(ts-node@10.9.2)(typescript@5.0.4)
@@ -7247,68 +7247,6 @@ packages:
     resolution: {integrity: sha512-9b8mPpKrfeGRuhFH5iO1iwCLeIIsV6+H1sRfxbkoGXIyQE2BTsPd9zqSqQJ+pv5sJ/hT5M1zvOFL02MnEezFug==}
     dev: true
 
-  /@modern-js-app/eslint-config@2.46.1(@rsbuild/core@0.3.11)(@swc/helpers@0.5.11)(typescript@5.0.4):
-    resolution: {integrity: sha512-TxU47cr1IGC/jCW85tlkIgwRdmogQtIZKm0CzY2gtjg9GHbpSZ/UZsQV4UKeaoYXH5dILLgMRGs8BFtQq8LUvw==}
-    peerDependencies:
-      typescript: ^4 || ^5
-    dependencies:
-      '@babel/core': 7.24.7
-      '@babel/eslint-parser': 7.24.7(@babel/core@7.24.7)(eslint@8.56.0)
-      '@babel/eslint-plugin': 7.24.7(@babel/eslint-parser@7.24.7)(eslint@8.56.0)
-      '@rsbuild/babel-preset': 0.3.4(@rsbuild/core@0.3.11)(@swc/helpers@0.5.11)
-      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.56.0)(typescript@5.0.4)
-      '@typescript-eslint/parser': 5.62.0(eslint@8.56.0)(typescript@5.0.4)
-      eslint: 8.56.0
-      eslint-config-prettier: 8.10.0(eslint@8.56.0)
-      eslint-plugin-eslint-comments: 3.2.0(eslint@8.56.0)
-      eslint-plugin-filenames: 1.3.2(eslint@8.56.0)
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@5.62.0)(eslint@8.56.0)
-      eslint-plugin-node: 11.1.0(eslint@8.56.0)
-      eslint-plugin-prettier: 4.2.1(eslint-config-prettier@8.10.0)(eslint@8.56.0)(prettier@2.8.8)
-      eslint-plugin-promise: 6.4.0(eslint@8.56.0)
-      eslint-plugin-react: 7.34.3(eslint@8.56.0)
-      eslint-plugin-react-hooks: 4.6.2(eslint@8.56.0)
-      prettier: 2.8.8
-      typescript: 5.0.4
-    transitivePeerDependencies:
-      - '@rsbuild/core'
-      - '@swc/helpers'
-      - eslint-import-resolver-typescript
-      - eslint-import-resolver-webpack
-      - supports-color
-    dev: true
-
-  /@modern-js-app/eslint-config@2.46.1(@rsbuild/core@0.3.11)(@swc/helpers@0.5.3)(typescript@5.0.4):
-    resolution: {integrity: sha512-TxU47cr1IGC/jCW85tlkIgwRdmogQtIZKm0CzY2gtjg9GHbpSZ/UZsQV4UKeaoYXH5dILLgMRGs8BFtQq8LUvw==}
-    peerDependencies:
-      typescript: ^4 || ^5
-    dependencies:
-      '@babel/core': 7.24.7
-      '@babel/eslint-parser': 7.24.7(@babel/core@7.24.7)(eslint@8.56.0)
-      '@babel/eslint-plugin': 7.24.7(@babel/eslint-parser@7.24.7)(eslint@8.56.0)
-      '@rsbuild/babel-preset': 0.3.4(@rsbuild/core@0.3.11)(@swc/helpers@0.5.3)
-      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.56.0)(typescript@5.0.4)
-      '@typescript-eslint/parser': 5.62.0(eslint@8.56.0)(typescript@5.0.4)
-      eslint: 8.56.0
-      eslint-config-prettier: 8.10.0(eslint@8.56.0)
-      eslint-plugin-eslint-comments: 3.2.0(eslint@8.56.0)
-      eslint-plugin-filenames: 1.3.2(eslint@8.56.0)
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@5.62.0)(eslint@8.56.0)
-      eslint-plugin-node: 11.1.0(eslint@8.56.0)
-      eslint-plugin-prettier: 4.2.1(eslint-config-prettier@8.10.0)(eslint@8.56.0)(prettier@2.8.8)
-      eslint-plugin-promise: 6.4.0(eslint@8.56.0)
-      eslint-plugin-react: 7.34.3(eslint@8.56.0)
-      eslint-plugin-react-hooks: 4.6.2(eslint@8.56.0)
-      prettier: 2.8.8
-      typescript: 5.0.4
-    transitivePeerDependencies:
-      - '@rsbuild/core'
-      - '@swc/helpers'
-      - eslint-import-resolver-typescript
-      - eslint-import-resolver-webpack
-      - supports-color
-    dev: true
-
   /@modern-js-app/eslint-config@2.54.6(@swc/helpers@0.5.11)(typescript@5.0.4):
     resolution: {integrity: sha512-2mA5jIo6pRDTBCNZsWp8pKr5Do4PH/kQieyBGAsm6OcOJoCf7rQ8bpHDYwkPdEOmBWIm8MsSlYTwQ0Vrk52gaA==}
     peerDependencies:
@@ -12833,30 +12771,6 @@ packages:
     requiresBuild: true
     optional: true
 
-  /@rsbuild/babel-preset@0.3.4(@rsbuild/core@0.3.11)(@swc/helpers@0.5.11):
-    resolution: {integrity: sha512-lGYVxjuf5SmWt10cBu/agYxpXNfFrvgcl7r9pnObWF9bRwsuaI1S+EuigjFeBUVPdNs4OMQy46sQaTpMfp4p0A==}
-    dependencies:
-      '@babel/core': 7.24.7
-      '@babel/plugin-proposal-decorators': 7.24.7(@babel/core@7.24.7)
-      '@babel/plugin-proposal-export-default-from': 7.24.7(@babel/core@7.24.7)
-      '@babel/plugin-proposal-partial-application': 7.24.7(@babel/core@7.24.7)
-      '@babel/plugin-proposal-pipeline-operator': 7.24.7(@babel/core@7.24.7)
-      '@babel/plugin-transform-runtime': 7.24.7(@babel/core@7.24.7)
-      '@babel/preset-env': 7.24.7(@babel/core@7.24.7)
-      '@babel/preset-typescript': 7.24.7(@babel/core@7.24.7)
-      '@babel/runtime': 7.24.5
-      '@babel/types': 7.24.7
-      '@rsbuild/plugin-babel': 0.3.4(@rsbuild/core@0.3.11)(@swc/helpers@0.5.11)
-      '@rsbuild/shared': 0.3.4(@swc/helpers@0.5.11)
-      '@types/babel__core': 7.20.5
-      babel-plugin-dynamic-import-node: 2.3.3
-      core-js: 3.32.2
-    transitivePeerDependencies:
-      - '@rsbuild/core'
-      - '@swc/helpers'
-      - supports-color
-    dev: true
-
   /@rsbuild/babel-preset@0.3.4(@rsbuild/core@0.3.11)(@swc/helpers@0.5.3):
     resolution: {integrity: sha512-lGYVxjuf5SmWt10cBu/agYxpXNfFrvgcl7r9pnObWF9bRwsuaI1S+EuigjFeBUVPdNs4OMQy46sQaTpMfp4p0A==}
     dependencies:
@@ -13035,22 +12949,6 @@ packages:
       serialize-javascript: 6.0.2
     transitivePeerDependencies:
       - '@swc/helpers'
-    dev: true
-
-  /@rsbuild/plugin-babel@0.3.4(@rsbuild/core@0.3.11)(@swc/helpers@0.5.11):
-    resolution: {integrity: sha512-N6frB1R9mK1K/leaA73eNF2Vo9hy4B1i4+CGFUCbP4msS0DGasAlZ1fUlNWvCi7a07Q9R2QbWc38RG1yRyKYBw==}
-    peerDependencies:
-      '@rsbuild/core': ^0.3.4
-    dependencies:
-      '@babel/core': 7.24.7
-      '@babel/preset-typescript': 7.24.7(@babel/core@7.24.7)
-      '@rsbuild/core': 0.3.11
-      '@rsbuild/shared': 0.3.4(@swc/helpers@0.5.11)
-      '@types/babel__core': 7.20.5
-      upath: 2.0.1
-    transitivePeerDependencies:
-      - '@swc/helpers'
-      - supports-color
     dev: true
 
   /@rsbuild/plugin-babel@0.3.4(@rsbuild/core@0.3.11)(@swc/helpers@0.5.3):
@@ -13372,17 +13270,6 @@ packages:
     resolution: {integrity: sha512-PjjrUe1mstoy7N7A6Xr1i5sAKSGPfNay/cEbRt3SBvdYPOsK87TLE6DS9WtViSp8QYHh97cgJ6z1ufuluElDDw==}
     dependencies:
       '@rspack/core': 0.5.3(@swc/helpers@0.5.3)
-      caniuse-lite: 1.0.30001640
-      lodash: 4.17.21
-      postcss: 8.4.39
-    transitivePeerDependencies:
-      - '@swc/helpers'
-    dev: true
-
-  /@rsbuild/shared@0.3.4(@swc/helpers@0.5.11):
-    resolution: {integrity: sha512-rvm+B2pGHsRSW3LiqPzOnyg/PQMNZsrX2QvuZLUovuF3DpvzKJoBsrj0ih1c0ymlIEitEcoBqiJbQUVQI3iDUQ==}
-    dependencies:
-      '@rspack/core': 0.5.0(@swc/helpers@0.5.11)
       caniuse-lite: 1.0.30001640
       lodash: 4.17.21
       postcss: 8.4.39
