@@ -133,10 +133,15 @@ export default function (): FederationRuntimePlugin {
               if (err) return callback(err, null);
               const chunk = {};
               try {
-                vm.runInThisContext(
+                const script = new vm.Script(
                   `(function(exports, require, __dirname, __filename) {${content}\n})`,
-                  filename,
-                )(
+                  {
+                    filename,
+                    importModuleDynamically:
+                      vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER,
+                  },
+                );
+                script.runInThisContext()(
                   chunk,
                   __non_webpack_require__,
                   path.dirname(filename),

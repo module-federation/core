@@ -94,7 +94,10 @@ export function createScriptNode(
 
       const script = new vm.Script(
         `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
-        filename,
+        {
+          filename,
+          importModuleDynamically: vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER,
+        },
       );
 
       script.runInThisContext()(
