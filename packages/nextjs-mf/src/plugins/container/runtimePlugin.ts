@@ -1,10 +1,14 @@
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import {
+  ModuleInfo,
+  ConsumerModuleInfoWithPublicPath,
+} from '@module-federation/sdk';
 
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
     //@ts-ignore
-    createScript({ url, attrs }) {
+    createScript({ url, attrs = {} }) {
       if (typeof window !== 'undefined') {
         const script = document.createElement('script');
         script.src = url;
@@ -174,7 +178,46 @@ export default function (): FederationRuntimePlugin {
 
       return args;
     },
+    loadRemoteSnapshot(args) {
+      const { from, remoteSnapshot, manifestUrl, manifestJson, options } = args;
 
+      // ensure type of moduleInfo
+      const hasPublicPath = (
+        moduleInfo: ModuleInfo,
+      ): moduleInfo is ConsumerModuleInfoWithPublicPath =>
+        // @ts-ignore
+        moduleInfo?.publicPath;
+
+      // ensure snapshot is loaded from manifest
+      if (
+        from !== 'manifest' ||
+        !manifestUrl ||
+        !manifestJson ||
+        !hasPublicPath(remoteSnapshot)
+      ) {
+        return args;
+      }
+
+      // re-assign publicPath based on remoteEntry location
+      if (options.inBrowser) {
+        remoteSnapshot.publicPath = remoteSnapshot.publicPath.substring(
+          0,
+          remoteSnapshot.publicPath.lastIndexOf('/_next/') + 7,
+        );
+      } else {
+        const serverPublicPath = manifestUrl.substring(
+          0,
+          manifestUrl.indexOf('mf-manifest.json'),
+        );
+
+        remoteSnapshot.publicPath = serverPublicPath;
+        if ('publicPath' in manifestJson.metaData) {
+          manifestJson.metaData.publicPath = serverPublicPath;
+        }
+      }
+
+      return args;
+    },
     resolveShare(args) {
       if (
         args.pkgName !== 'react' &&
