@@ -136,7 +136,7 @@
     "@types/download": "8.0.5",
     "@types/eslint": "~8.37.0",
     "@types/express": "4.17.21",
-    "@types/fs-extra": "9.0.6",
+    "@types/fs-extra": "9.0.13",
     "@types/jest": "29.5.12",
     "@types/lodash.clonedeepwith": "^4.5.9",
     "@types/lodash.get": "4.4.9",
