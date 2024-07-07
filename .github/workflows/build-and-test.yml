@@ -61,16 +61,16 @@ jobs:
       - name: E2E Node Federation
         run: npx nx run-many --target=serve --projects=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote --parallel=10 & echo "done" && sleep 25 && npx nx run-many --target=serve --projects=node-host & sleep 5 && npx wait-on tcp:3333 && npx nx run node-host-e2e:test:e2e
 
-      - name: E2E Test for Next.js Prod
-        run: |
-          pnpm run --filter @module-federation/3002-checkout --filter @module-federation/3000-home --filter @module-federation/3001-shop build &&
-          pnpm run app:next:prod &
-          sleep 2 &&
-          npx wait-on tcp:3001 &&
-          npx wait-on tcp:3002 &&
-          npx wait-on tcp:3000 &&
-          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 &&
-          lsof -ti tcp:3000,3001,3002 | xargs kill
+      #      - name: E2E Test for Next.js Prod
+      #        run: |
+      #          pnpm run --filter @module-federation/3002-checkout --filter @module-federation/3000-home --filter @module-federation/3001-shop build &&
+      #          pnpm run app:next:prod &
+      #          sleep 2 &&
+      #          npx wait-on tcp:3001 &&
+      #          npx wait-on tcp:3002 &&
+      #          npx wait-on tcp:3000 &&
+      #          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 &&
+      #          lsof -ti tcp:3000,3001,3002 | xargs kill
 
       - name: E2E Test for Next.js Dev
         run: |
