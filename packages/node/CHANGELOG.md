@@ -1,5 +1,11 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.3.3
+
+### Patch Changes
+
+- 54bcdd1: remove loggers from node runtime plugin
+
 ## 2.3.2
 
 ### Patch Changes
