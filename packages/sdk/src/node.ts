@@ -4,7 +4,7 @@ function importNodeModule<T>(name: string): Promise<T> {
   }
 
   return import(/* webpackIgnore: true */ name)
-    .then((res: any) => res.default as T)
+    .then((res: any) => res as T)
     .catch((error: any) => {
       console.error(`Error importing module ${name}:`, error);
       throw error;
