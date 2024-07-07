@@ -71,7 +71,7 @@ jobs:
           lsof -ti tcp:3000,3001,3002 | xargs kill
 
       - name: E2E Test for ModernJS
-        run: npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && lsof -ti tcp:4001 | xargs kill
+        run: npx kill-port --port 3000,3001,3002 && npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && lsof -ti tcp:4001 | xargs kill
 
       - name: E2E Test for 3005-runtime-host
         run: npx kill-port --port 3005,3006,3007 && pnpm run app:runtime:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1 && lsof -ti tcp:3005,3006,3007 | xargs kill
