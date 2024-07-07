@@ -860,8 +860,8 @@ importers:
         specifier: 0.5.11
         version: 0.5.11(react-refresh@0.14.0)(webpack@5.92.1)
       '@rspack/plugin-react-refresh':
-        specifier: 0.5.9
-        version: 0.5.9(react-refresh@0.14.0)
+        specifier: 0.7.5
+        version: 0.7.5(react-refresh@0.14.0)
       react-refresh:
         specifier: 0.14.0
         version: 0.14.0
@@ -882,8 +882,8 @@ importers:
         specifier: 0.5.11
         version: 0.5.11(react-refresh@0.14.0)(webpack@5.92.1)
       '@rspack/plugin-react-refresh':
-        specifier: 0.5.9
-        version: 0.5.9(react-refresh@0.14.0)
+        specifier: 0.7.5
+        version: 0.7.5(react-refresh@0.14.0)
       react-refresh:
         specifier: 0.14.0
         version: 0.14.0
@@ -904,8 +904,8 @@ importers:
         specifier: 0.5.11
         version: 0.5.11(react-refresh@0.14.0)(webpack@5.92.1)
       '@rspack/plugin-react-refresh':
-        specifier: 0.5.9
-        version: 0.5.9(react-refresh@0.14.0)
+        specifier: 0.7.5
+        version: 0.7.5(react-refresh@0.14.0)
       react-refresh:
         specifier: 0.14.0
         version: 0.14.0
@@ -1959,8 +1959,8 @@ importers:
         version: link:../sdk
     devDependencies:
       '@rspack/core':
-        specifier: 0.5.0
-        version: 0.5.0(@swc/helpers@0.5.11)
+        specifier: 0.7.5
+        version: 0.7.5(@swc/helpers@0.5.11)
 
   packages/runtime:
     dependencies:
@@ -14272,17 +14272,6 @@ packages:
       react-refresh: 0.14.2
     dev: true
 
-  /@rspack/plugin-react-refresh@0.5.9(react-refresh@0.14.0):
-    resolution: {integrity: sha512-jsXA/8v4OaNLKo14+jqXKzAOKXWJs06ld6rzW97K9m2Q8hLd88jHiElxAgFsIiaSybu7tOs3ZKhhG/sGs4JspQ==}
-    peerDependencies:
-      react-refresh: '>=0.10.0 <1.0.0'
-    peerDependenciesMeta:
-      react-refresh:
-        optional: true
-    dependencies:
-      react-refresh: 0.14.0
-    dev: true
-
   /@rspack/plugin-react-refresh@0.6.5(react-refresh@0.14.2):
     resolution: {integrity: sha512-H7V54qtdJvBQXSL209ep3cNoeDk8Ljid7+AGeJIXj5nu3ZIF4TYYDFeiyZtn7xCIgeyiYscuQZ0DKb/qXFYqog==}
     peerDependencies:
@@ -14304,6 +14293,17 @@ packages:
     dependencies:
       react-refresh: 0.14.2
     dev: false
+
+  /@rspack/plugin-react-refresh@0.7.5(react-refresh@0.14.0):
+    resolution: {integrity: sha512-ROI9lrmfIH+Z9lbBaP3YMhbD2R3rlm9SSzi/9WzzkQU6KK911S1D+sL2ByeJ7ipZafbHvMPWTmC2aQEvjhwQig==}
+    peerDependencies:
+      react-refresh: '>=0.10.0 <1.0.0'
+    peerDependenciesMeta:
+      react-refresh:
+        optional: true
+    dependencies:
+      react-refresh: 0.14.0
+    dev: true
 
   /@rspress/core@1.25.2(@swc/helpers@0.5.11)(webpack@5.92.1):
     resolution: {integrity: sha512-fh6a/uQvgJrNw62bbPbpgQExIPpM5tLHFeVHVncXltAMhmF2d0uP9jxxenGrEFU/syr4aCdQjfZIv00ioS+b1w==}
