@@ -1,4 +1,4 @@
 {
   "extends": ["config:base"],
-  "ignorePaths": ["**/demo/**","**test/**"]
+  "ignorePaths": ["**/demo/**","**test/**","**/configCases/**"]
 }
