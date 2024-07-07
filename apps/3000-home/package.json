@@ -27,7 +27,7 @@
     "@module-federation/utilities": "workspace:*"
   },
   "scripts": {
-    "start": "NODE_OPTIONS=\"--experimental-vm-modules\" next start ",
-    "build": "pnpm exec next telemetry disable && NODE_OPTIONS=\"--experimental-vm-modules\" NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
+    "start": "next start",
+    "build": "pnpm exec next telemetry disable && NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
   }
 }
