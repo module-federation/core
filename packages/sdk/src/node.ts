@@ -88,6 +88,7 @@ export function createScriptNode(
         importNodeModule<typeof import('path')>('path'),
         importNodeModule<typeof import('vm')>('vm'),
       ]);
+
       const scriptContext = { exports: {}, module: { exports: {} } };
       const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
       const filename = path.basename(urlObj.pathname);
