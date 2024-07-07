@@ -9,6 +9,6 @@
     "@rspack/plugin-react-refresh": "0.5.9"
   },
   "dependencies": {
-    "antd": "4.24.15"
+    "antd": "4.24.16"
   }
 }
