@@ -593,8 +593,8 @@ importers:
         specifier: 5.7.1
         version: 5.7.1
       chrome-trace-event:
-        specifier: 1.0.3
-        version: 1.0.3
+        specifier: 1.0.4
+        version: 1.0.4
       encoding:
         specifier: 0.1.13
         version: 0.1.13
@@ -681,8 +681,8 @@ importers:
         specifier: 5.7.1
         version: 5.7.1
       chrome-trace-event:
-        specifier: 1.0.3
-        version: 1.0.3
+        specifier: 1.0.4
+        version: 1.0.4
       encoding:
         specifier: 0.1.13
         version: 0.1.13
@@ -21593,8 +21593,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /chrome-trace-event@1.0.3:
-    resolution: {integrity: sha512-p3KULyQg4S7NIHixdwbGX+nFHkoBiA4YQmyWtjb8XngSKV124nJmRysgAeujbUVb15vh+RvFUfCPqU7rXk+hZg==}
+  /chrome-trace-event@1.0.4:
+    resolution: {integrity: sha512-rNjApaLzuwaOTjCiT8lSDdGN1APCiqkChLMJxJPWLunPAt5fy8xgU9/jNOchV84wfIxrA0lRQB7oCT8jrn/wrQ==}
     engines: {node: '>=6.0'}
 
   /ci-info@3.9.0:
@@ -43047,7 +43047,7 @@ packages:
       acorn: 6.4.2
       ajv: 6.12.6
       ajv-keywords: 3.5.2(ajv@6.12.6)
-      chrome-trace-event: 1.0.3
+      chrome-trace-event: 1.0.4
       enhanced-resolve: 4.5.0
       eslint-scope: 4.0.3
       json-parse-better-errors: 1.0.2
@@ -43085,7 +43085,7 @@ packages:
       acorn: 8.12.1
       acorn-import-assertions: 1.9.0(acorn@8.12.1)
       browserslist: 4.23.1
-      chrome-trace-event: 1.0.3
+      chrome-trace-event: 1.0.4
       enhanced-resolve: 5.17.0
       es-module-lexer: 0.9.3
       eslint-scope: 5.1.1
@@ -43125,7 +43125,7 @@ packages:
       acorn: 8.12.1
       acorn-import-assertions: 1.9.0(acorn@8.12.1)
       browserslist: 4.23.1
-      chrome-trace-event: 1.0.3
+      chrome-trace-event: 1.0.4
       enhanced-resolve: 5.17.0
       es-module-lexer: 1.5.4
       eslint-scope: 5.1.1
@@ -43165,7 +43165,7 @@ packages:
       acorn: 8.12.1
       acorn-import-attributes: 1.9.5(acorn@8.12.1)
       browserslist: 4.23.1
-      chrome-trace-event: 1.0.3
+      chrome-trace-event: 1.0.4
       enhanced-resolve: 5.17.0
       es-module-lexer: 1.5.4
       eslint-scope: 5.1.1
@@ -43205,7 +43205,7 @@ packages:
       acorn: 8.12.1
       acorn-import-attributes: 1.9.5(acorn@8.12.1)
       browserslist: 4.23.1
-      chrome-trace-event: 1.0.3
+      chrome-trace-event: 1.0.4
       enhanced-resolve: 5.17.0
       es-module-lexer: 1.5.4
       eslint-scope: 5.1.1
@@ -43245,7 +43245,7 @@ packages:
       acorn: 8.12.1
       acorn-import-attributes: 1.9.5(acorn@8.12.1)
       browserslist: 4.23.1
-      chrome-trace-event: 1.0.3
+      chrome-trace-event: 1.0.4
       enhanced-resolve: 5.17.0
       es-module-lexer: 1.5.4
       eslint-scope: 5.1.1
