@@ -584,8 +584,8 @@ importers:
         specifier: ^1.21.0
         version: 1.21.0(react-dom@18.2.0)(react@18.2.0)
       acorn:
-        specifier: 7.4.1
-        version: 7.4.1
+        specifier: 8.12.1
+        version: 8.12.1
       antd:
         specifier: 5.19.1
         version: 5.19.1(react-dom@18.2.0)(react@18.2.0)
@@ -672,8 +672,8 @@ importers:
         specifier: ^1.21.0
         version: 1.21.0(react-dom@18.2.0)(react@18.2.0)
       acorn:
-        specifier: 7.4.1
-        version: 7.4.1
+        specifier: 8.12.1
+        version: 8.12.1
       antd:
         specifier: 5.19.1
         version: 5.19.1(react-dom@18.2.0)(react@18.2.0)
@@ -20158,6 +20158,7 @@ packages:
     resolution: {integrity: sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+    dev: true
 
   /acorn@8.12.1:
     resolution: {integrity: sha512-tcpGyI9zbizT9JbV6oYE477V6mTlXvvi0T0G3SNIYE2apm/G5huBa1+K89VGeovbg+jycCrfhl3ADxErOuO6Jg==}
