@@ -32,6 +32,18 @@ jobs:
         id: check-ci
         run: node tools/scripts/ci-is-affected.mjs --appName=3000-home
 
+      - name: E2E Test for Next.js Prod
+        if: steps.check-ci.outcome == 'success'
+        run: |
+          pnpm run --filter @module-federation/3002-checkout --filter @module-federation/3000-home --filter @module-federation/3001-shop build &&
+          pnpm run app:next:prod &
+          sleep 2 &&
+          npx wait-on tcp:3001 &&
+          npx wait-on tcp:3002 &&
+          npx wait-on tcp:3000 &&
+          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=3 &&
+          lsof -ti tcp:3000,3001,3002 | xargs kill
+
       - name: E2E Test for Next.js Dev
         if: steps.check-ci.outcome == 'success'
         run: |

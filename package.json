@@ -47,7 +47,7 @@
     "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:type:pkg'"
   },
   "dependencies": {
-    "adm-zip": "0.5.10",
+    "adm-zip": "0.5.14",
     "ansi-colors": "4.1.3",
     "antd": "^5.19.0",
     "axios": "1.6.7",
