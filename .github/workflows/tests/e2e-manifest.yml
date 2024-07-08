@@ -30,8 +30,8 @@ jobs:
 
       - name: Run condition check script
         id: check-ci
-        run: node tools/scripts/ci-is-affected.mjs --appName=3008-webpack-host
+        run: node tools/scripts/ci-is-affected.mjs --appName=manifest-webpack-host
 
       - name: E2E Test for Manifest Demo
         if: steps.check-ci.outcome == 'success'
-        run: pnpm run app:manifest:dev & echo "done" && npx wait-on tcp:3009 && npx wait-on tcp:3012 && npx nx run-many --target=e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
+        run: pnpm run app:manifest:dev & echo "done" && npx wait-on tcp:3009 && npx wait-on tcp:3012 && npx nx run-many --target=e2e --projects=manifest-webpack-host --parallel=1 && lsof -ti tcp:3013,3009,3010,3011,3012 | xargs kill

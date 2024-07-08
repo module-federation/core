@@ -800,31 +800,6 @@ importers:
         specifier: ^4.8.2
         version: 4.9.5
 
-  apps/manifest-demo/3008-webpack-host:
-    dependencies:
-      antd:
-        specifier: 4.24.15
-        version: 4.24.15(react-dom@18.2.0)(react@18.2.0)
-    devDependencies:
-      '@module-federation/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@module-federation/enhanced':
-        specifier: workspace:*
-        version: link:../../../packages/enhanced
-      '@module-federation/runtime':
-        specifier: workspace:*
-        version: link:../../../packages/runtime
-      '@module-federation/typescript':
-        specifier: workspace:*
-        version: link:../../../packages/typescript
-      '@pmmmwh/react-refresh-webpack-plugin':
-        specifier: 0.5.15
-        version: 0.5.15(react-refresh@0.14.0)(webpack@5.92.1)
-      react-refresh:
-        specifier: 0.14.0
-        version: 0.14.0
-
   apps/manifest-demo/3009-webpack-provider:
     dependencies:
       antd:
@@ -906,6 +881,31 @@ importers:
       '@rspack/plugin-react-refresh':
         specifier: 0.5.9
         version: 0.5.9(react-refresh@0.14.0)
+      react-refresh:
+        specifier: 0.14.0
+        version: 0.14.0
+
+  apps/manifest-demo/webpack-host:
+    dependencies:
+      antd:
+        specifier: 4.24.15
+        version: 4.24.15(react-dom@18.2.0)(react@18.2.0)
+    devDependencies:
+      '@module-federation/core':
+        specifier: workspace:*
+        version: link:../../../packages/core
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../../../packages/enhanced
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../../../packages/runtime
+      '@module-federation/typescript':
+        specifier: workspace:*
+        version: link:../../../packages/typescript
+      '@pmmmwh/react-refresh-webpack-plugin':
+        specifier: 0.5.15
+        version: 0.5.15(react-refresh@0.14.0)(webpack@5.92.1)
       react-refresh:
         specifier: 0.14.0
         version: 0.14.0
@@ -2166,7 +2166,7 @@ packages:
       '@ant-design/colors': 7.1.0
       '@ant-design/icons-svg': 4.4.2
       '@babel/runtime': 7.24.5
-      classnames: 2.5.1
+      classnames: 2.5.0
       rc-util: 5.43.0(react-dom@17.0.2)(react@17.0.2)
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
@@ -20469,7 +20469,7 @@ packages:
       '@ant-design/react-slick': 1.0.2(react@18.2.0)
       '@babel/runtime': 7.24.5
       '@ctrl/tinycolor': 3.6.1
-      classnames: 2.5.0
+      classnames: 2.5.1
       copy-to-clipboard: 3.3.3
       lodash: 4.17.21
       moment: 2.30.1

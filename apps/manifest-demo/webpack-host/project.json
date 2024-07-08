@@ -1,7 +1,7 @@
 {
-  "name": "3008-webpack-host",
+  "name": "manifest-webpack-host",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/manifest-demo/3008-webpack-host/src",
+  "sourceRoot": "apps/manifest-demo/manifest-webpack-host/src",
   "projectType": "application",
   "targets": {
     "build": {
@@ -10,14 +10,14 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
-        "outputPath": "apps/manifest-demo/3008-webpack-host/dist",
-        "index": "apps/manifest-demo/3008-webpack-host/src/index.html",
+        "outputPath": "apps/manifest-demo/manifest-webpack-host/dist",
+        "index": "apps/manifest-demo/manifest-webpack-host/src/index.html",
         "baseHref": "/",
-        "main": "apps/manifest-demo/3008-webpack-host/src/index.ts",
-        "tsConfig": "apps/manifest-demo/3008-webpack-host/tsconfig.app.json",
+        "main": "apps/manifest-demo/manifest-webpack-host/src/index.ts",
+        "tsConfig": "apps/manifest-demo/manifest-webpack-host/tsconfig.app.json",
         "styles": [],
         "scripts": [],
-        "webpackConfig": "apps/manifest-demo/3008-webpack-host/webpack.config.js",
+        "webpackConfig": "apps/manifest-demo/manifest-webpack-host/webpack.config.js",
         "babelUpwardRootMode": true
       },
       "configurations": {
@@ -47,16 +47,16 @@
       "executor": "@nx/webpack:dev-server",
       "defaultConfiguration": "production",
       "options": {
-        "buildTarget": "3008-webpack-host:build",
+        "buildTarget": "manifest-webpack-host:build",
         "hmr": true,
-        "port": 3008
+        "port": 3013
       },
       "configurations": {
         "development": {
-          "buildTarget": "3008-webpack-host:build:development"
+          "buildTarget": "manifest-webpack-host:build:development"
         },
         "production": {
-          "buildTarget": "3008-webpack-host:build:production",
+          "buildTarget": "manifest-webpack-host:build:production",
           "hmr": false
         }
       },
@@ -78,24 +78,24 @@
       "executor": "@nx/web:file-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "3008-webpack-host:build",
-        "port": 3008
+        "buildTarget": "manifest-webpack-host:build",
+        "port": 3013
       },
       "configurations": {
         "development": {
-          "buildTarget": "3008-webpack-host:build:development"
+          "buildTarget": "manifest-webpack-host:build:development"
         },
         "production": {
-          "buildTarget": "3008-webpack-host:build:production"
+          "buildTarget": "manifest-webpack-host:build:production"
         }
       }
     },
     "e2e": {
       "executor": "@nx/cypress:cypress",
       "options": {
-        "cypressConfig": "apps/manifest-demo/3008-webpack-host/cypress.config.ts",
+        "cypressConfig": "apps/manifest-demo/manifest-webpack-host/cypress.config.ts",
         "testingType": "e2e",
-        "baseUrl": "http://localhost:3008",
+        "baseUrl": "http://localhost:3013",
         "browser": "chrome"
       },
       "configurations": {
@@ -113,11 +113,11 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :3008 || nx run 3008-webpack-host:serve",
+            "command": "lsof -i :3013 || nx run manifest-webpack-host:serve",
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 4 && nx run 3008-webpack-host:e2e",
+            "command": "sleep 4 && nx run manifest-webpack-host:e2e",
             "forwardAllArgs": true
           }
         ]

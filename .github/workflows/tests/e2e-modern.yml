@@ -34,4 +34,4 @@ jobs:
 
       - name: E2E Test for ModernJS
         if: steps.check-ci.outcome == 'success'
-        run: npx kill-port --port 3000,3001,3002 && npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && lsof -ti tcp:3000,3001,3002 | xargs kill
+        run: npx kill-port --port 4001 && npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && lsof -ti tcp:4001 | xargs kill
