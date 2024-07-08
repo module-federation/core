@@ -13,15 +13,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup cache
-        id: cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
       - name: Install Pnpm
         run: corepack enable
 
@@ -35,7 +26,10 @@ jobs:
         uses: nrwl/nx-set-shas@v3
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --filter "...[!packages/chrome-devtools]"
+
+      - name: Install Cypress
+        run: npx cypress install
 
       - name: Run Build for All
         run: npx nx run-many --targets=build --projects=tag:type:pkg
