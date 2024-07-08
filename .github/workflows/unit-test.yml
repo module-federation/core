@@ -1,15 +1,10 @@
-# .github/workflows/affected-test.yml
 name: Run Affected Unit Test
 
 on:
   workflow_call:
-    inputs:
-      branch:
-        required: true
-        type: string
 
 jobs:
-  affected-test:
+  unit-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository

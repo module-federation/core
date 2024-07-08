@@ -5,7 +5,7 @@ on:
   workflow_call:
 
 jobs:
-  e2e-node-federation:
+  e2e-node:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository

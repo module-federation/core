@@ -5,7 +5,7 @@ on:
   workflow_call:
 
 jobs:
-  e2e-runtime-host:
+  e2e-runtime:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
