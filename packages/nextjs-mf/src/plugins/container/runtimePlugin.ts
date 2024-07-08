@@ -181,19 +181,12 @@ export default function (): FederationRuntimePlugin {
     loadRemoteSnapshot(args) {
       const { from, remoteSnapshot, manifestUrl, manifestJson, options } = args;
 
-      // ensure type of moduleInfo
-      const hasPublicPath = (
-        moduleInfo: ModuleInfo,
-      ): moduleInfo is ConsumerModuleInfoWithPublicPath =>
-        // @ts-ignore
-        moduleInfo?.publicPath;
-
       // ensure snapshot is loaded from manifest
       if (
         from !== 'manifest' ||
         !manifestUrl ||
         !manifestJson ||
-        !hasPublicPath(remoteSnapshot)
+        !('publicPath' in remoteSnapshot)
       ) {
         return args;
       }
