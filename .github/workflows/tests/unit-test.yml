@@ -1,0 +1,36 @@
+# .github/workflows/affected-test.yml
+name: Run Affected Unit Test
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+
+jobs:
+  affected-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run Affected Test
+        run: npx nx affected -t test --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache

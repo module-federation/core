@@ -1,0 +1,37 @@
+# .github/workflows/e2e-node-federation.yml
+name: E2E Node Federation
+
+on:
+  workflow_call:
+
+jobs:
+  e2e-node-federation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run condition check script
+        id: check-ci
+        run: node tools/scripts/ci-is-affected.mjs --appName=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote
+
+      - name: E2E Node Federation
+        if: steps.check-ci.outcome == 'success'
+        run: npx nx run-many --target=serve --projects=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote --parallel=10 & echo "done" && sleep 25 && npx nx run-many --target=serve --projects=node-host & sleep 5 && npx wait-on tcp:3333 && npx nx run node-host-e2e:test:e2e

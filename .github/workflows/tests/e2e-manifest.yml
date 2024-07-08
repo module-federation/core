@@ -1,0 +1,37 @@
+# .github/workflows/e2e-webpack-host.yml
+name: E2E Test for Manifest
+
+on:
+  workflow_call:
+
+jobs:
+  e2e-webpack-host:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run condition check script
+        id: check-ci
+        run: node tools/scripts/ci-is-affected.mjs --appName=3008-webpack-host
+
+      - name: E2E Test for Manifest Demo
+        if: steps.check-ci.outcome == 'success'
+        run: pnpm run app:manifest:dev & echo "done" && npx wait-on tcp:3009 && npx wait-on tcp:3012 && npx nx run-many --target=e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill

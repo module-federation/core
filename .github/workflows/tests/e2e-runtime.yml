@@ -1,0 +1,37 @@
+# .github/workflows/e2e-runtime-host.yml
+name: E2E Test for Runtime
+
+on:
+  workflow_call:
+
+jobs:
+  e2e-runtime-host:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run condition check script
+        id: check-ci
+        run: node tools/scripts/ci-is-affected.mjs --appName=3005-runtime-host
+
+      - name: E2E Test for Runtime Demo
+        if: steps.check-ci.outcome == 'success'
+        run: npx kill-port --port 3005,3006,3007 && pnpm run app:runtime:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1 && lsof -ti tcp:3005,3006,3007 | xargs kill
