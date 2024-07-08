@@ -15,6 +15,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup cache
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
       - name: Install Pnpm
         run: corepack enable
 
@@ -35,9 +44,6 @@ jobs:
 
       - name: Check Code Format
         run: npx nx format:check
-
-      - name: Update NX Build Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
 
       - name: Run Build for All
         run: npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
