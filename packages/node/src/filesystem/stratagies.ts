@@ -122,6 +122,7 @@ export async function httpVmStrategy(
     // search all instances to see if any have the remote
     const container = globalThisVal['__FEDERATION__']['__INSTANCES__'].find(
       (instance: any) => {
+        if (!instance) return;
         if (!instance.moduleCache.has(remoteName)) return;
         const container = instance.moduleCache.get(remoteName);
         if (!container.remoteInfo) return;
