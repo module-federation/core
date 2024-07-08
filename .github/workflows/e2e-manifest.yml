@@ -25,8 +25,11 @@ jobs:
       - name: Set Nx SHA
         uses: nrwl/nx-set-shas@v3
 
+      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> $GITHUB_ENV
+
       - name: Install Dependencies
-        run: pnpm install --filter '!@module-federation/devtools'
+        run: pnpm install
 
       - name: Install Cypress
         run: npx cypress install

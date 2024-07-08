@@ -1,7 +1,7 @@
 {
   "name": "manifest-webpack-host",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/manifest-demo/manifest-webpack-host/src",
+  "sourceRoot": "apps/manifest-demo/webpack-host/src",
   "projectType": "application",
   "targets": {
     "build": {
@@ -10,14 +10,14 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
-        "outputPath": "apps/manifest-demo/manifest-webpack-host/dist",
-        "index": "apps/manifest-demo/manifest-webpack-host/src/index.html",
+        "outputPath": "apps/manifest-demo/webpack-host/dist",
+        "index": "apps/manifest-demo/webpack-host/src/index.html",
         "baseHref": "/",
-        "main": "apps/manifest-demo/manifest-webpack-host/src/index.ts",
-        "tsConfig": "apps/manifest-demo/manifest-webpack-host/tsconfig.app.json",
+        "main": "apps/manifest-demo/webpack-host/src/index.ts",
+        "tsConfig": "apps/manifest-demo/webpack-host/tsconfig.app.json",
         "styles": [],
         "scripts": [],
-        "webpackConfig": "apps/manifest-demo/manifest-webpack-host/webpack.config.js",
+        "webpackConfig": "apps/manifest-demo/webpack-host/webpack.config.js",
         "babelUpwardRootMode": true
       },
       "configurations": {
@@ -93,7 +93,7 @@
     "e2e": {
       "executor": "@nx/cypress:cypress",
       "options": {
-        "cypressConfig": "apps/manifest-demo/manifest-webpack-host/cypress.config.ts",
+        "cypressConfig": "apps/manifest-demo/webpack-host/cypress.config.ts",
         "testingType": "e2e",
         "baseUrl": "http://localhost:3013",
         "browser": "chrome"
