@@ -169,7 +169,6 @@ export default function (): FederationRuntimePlugin {
                 .emit(url.href, {})
                 .then((res) => {
                   if (!res || !(res instanceof Response)) {
-                    console.log('No response from hook, falling back to fetch');
                     return fetchFunction(url.href).then((response) =>
                       response.text(),
                     );
