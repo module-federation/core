@@ -4,7 +4,7 @@ function importNodeModule<T>(name: string): Promise<T> {
   }
   const importModule = new Function('name', `return import(name)`);
   return importModule(name)
-    .then((res: any) => (res.default || res) as T)
+    .then((res: any) => res as T)
     .catch((error: any) => {
       console.error(`Error importing module ${name}:`, error);
       throw error;
