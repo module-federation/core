@@ -50,8 +50,8 @@ function getTargetModuleInfo(id: string) {
     'publicPath' in snapshot
       ? snapshot.publicPath
       : 'getPublicPath' in snapshot
-      ? new Function(snapshot.getPublicPath)()
-      : '';
+        ? new Function(snapshot.getPublicPath)()
+        : '';
   if (!publicPath) {
     return;
   }

@@ -17,8 +17,8 @@ const isDev = process.env.NODE_ENV === 'development';
 export type ConfigType<T> = T extends 'webpack'
   ? webpack.Configuration
   : T extends 'rspack'
-  ? Rspack.Configuration
-  : never;
+    ? Rspack.Configuration
+    : never;
 
 export const getMFConfig = async (
   userConfig: PluginOptions,

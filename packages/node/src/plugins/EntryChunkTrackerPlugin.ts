@@ -19,11 +19,12 @@ type CompilationHooksJavascriptModulesPlugin = ReturnType<
 >;
 type RenderStartup = CompilationHooksJavascriptModulesPlugin['renderStartup'];
 
-type InferStartupRenderContext<T> = T extends SyncWaterfallHook<
-  [infer Source, infer Module, infer StartupRenderContext]
->
-  ? StartupRenderContext
-  : never;
+type InferStartupRenderContext<T> =
+  T extends SyncWaterfallHook<
+    [infer Source, infer Module, infer StartupRenderContext]
+  >
+    ? StartupRenderContext
+    : never;
 
 type StartupRenderContext = InferStartupRenderContext<RenderStartup>;
 

@@ -56,8 +56,8 @@ export const retrieveRemoteInfo = (options: {
     'entry' in parsedInfo
       ? parsedInfo.entry
       : parsedInfo.name === decodedRemote
-      ? decodedRemote
-      : '';
+        ? decodedRemote
+        : '';
 
   const zipUrl = url ? buildZipUrl(hostOptions, url) : '';
 
