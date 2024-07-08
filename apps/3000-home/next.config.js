@@ -43,8 +43,8 @@ const nextConfig = {
         shared: {
           'lodash/': {},
           antd: {
-            requiredVersion: '5.18.3',
-            version: '5.18.3',
+            requiredVersion: '5.19.1',
+            version: '5.19.1',
           },
           '@ant-design/': {
             singleton: true,

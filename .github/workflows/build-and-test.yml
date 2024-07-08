@@ -49,29 +49,8 @@ jobs:
       - name: Run Affected Test
         run: npx nx affected -t test --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
-      # - name: E2E Test for Next.js Dev
-      #   run: |
-      #     pnpm run app:next:dev > /dev/null 2>&1 &
-      #     sleep 1 &&
-      #     npx wait-on tcp:3001 &&
-      #     npx wait-on tcp:3002 &&
-      #     npx wait-on tcp:3000 &&
-      #     npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=3 &&
-      #     lsof -ti tcp:3000,3001,3002 | xargs kill
-
-      # - name: E2E Test for Next.js Prod
-      #   run: |
-      #     pnpm run --filter @module-federation/3002-checkout --filter @module-federation/3000-home --filter @module-federation/3001-shop build &&
-      #     pnpm run app:next:prod &
-      #     sleep 2 &&
-      #     npx wait-on tcp:3001 &&
-      #     npx wait-on tcp:3002 &&
-      #     npx wait-on tcp:3000 &&
-      #     npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 &&
-      #     lsof -ti tcp:3000,3001,3002 | xargs kill
-
       - name: E2E Test for ModernJS
-        run: npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && lsof -ti tcp:4001 | xargs kill
+        run: npx kill-port --port 3000,3001,3002 && npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && lsof -ti tcp:4001 | xargs kill
 
       - name: E2E Test for 3005-runtime-host
         run: npx kill-port --port 3005,3006,3007 && pnpm run app:runtime:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1 && lsof -ti tcp:3005,3006,3007 | xargs kill
@@ -96,3 +75,23 @@ jobs:
           npx wait-on http://127.0.0.1:3011/ &&
           npx nx run modernjs-ssr-host:e2e &&
           lsof -ti tcp:3005,3006,3007,3008,3009,3010,3011 | xargs kill
+      #      - name: E2E Test for Next.js Prod
+      #        run: |
+      #          pnpm run --filter @module-federation/3002-checkout --filter @module-federation/3000-home --filter @module-federation/3001-shop build &&
+      #          pnpm run app:next:prod &
+      #          sleep 2 &&
+      #          npx wait-on tcp:3001 &&
+      #          npx wait-on tcp:3002 &&
+      #          npx wait-on tcp:3000 &&
+      #          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 &&
+      #          lsof -ti tcp:3000,3001,3002 | xargs kill
+
+      - name: E2E Test for Next.js Dev
+        run: |
+          pnpm run app:next:dev > /dev/null 2>&1 &
+          sleep 1 &&
+          npx wait-on tcp:3001 &&
+          npx wait-on tcp:3002 &&
+          npx wait-on tcp:3000 &&
+          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 &&
+          lsof -ti tcp:3000,3001,3002 | xargs kill

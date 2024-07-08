@@ -5,7 +5,7 @@ export default defineConfig({
   e2e: nxE2EPreset(__filename, { cypressDir: 'cypress' }),
   defaultCommandTimeout: 10000,
   retries: {
-    runMode: 2,
-    openMode: 1,
+    runMode: 3,
+    openMode: 2,
   },
 });

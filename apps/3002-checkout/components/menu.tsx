@@ -1,4 +1,4 @@
-import type { ItemType } from 'antd/lib/menu/hooks/useItems';
+import type { ItemType } from 'antd/es/menu/interface';
 
 import { useRouter } from 'next/router';
 import { Menu } from 'antd';
