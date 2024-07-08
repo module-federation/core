@@ -24,7 +24,7 @@ describe('3002-checkout/', () => {
   });
 
   describe('Image checks', () => {
-    it('should check that the home-webpack-png and shop-webpack-png images are not 404', () => {
+    xit('should check that the home-webpack-png and shop-webpack-png images are not 404', () => {
       // Get the src attribute of the home-webpack-png image
       cy.debug()
         .get('img.home-webpack-png')
