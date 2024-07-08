@@ -9,9 +9,7 @@ export default defineConfig({
   runtime: {
     router: true,
   },
-  output: {
-    disableTsChecker: true,
-  },
+
   plugins: [appTools(), moduleFederationPlugin()],
   server: {
     ssr: {

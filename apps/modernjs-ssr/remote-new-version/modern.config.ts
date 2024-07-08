@@ -14,9 +14,7 @@ export default defineConfig({
       mode: 'stream',
     },
   },
-  output: {
-    disableTsChecker: true,
-  },
+
   tools: {
     webpack: (config) => {
       config.output!.uniqueName = 'modernjs-ssr-remote-new-version';

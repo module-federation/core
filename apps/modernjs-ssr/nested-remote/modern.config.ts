@@ -9,9 +9,7 @@ export default defineConfig({
   runtime: {
     router: true,
   },
-  output: {
-    disableTsChecker: true,
-  },
+
   server: {
     ssr: {
       mode: 'stream',

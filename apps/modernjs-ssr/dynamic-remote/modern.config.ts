@@ -14,9 +14,7 @@ export default defineConfig({
       mode: 'stream',
     },
   },
-  output: {
-    disableTsChecker: true,
-  },
+
   plugins: [appTools(), moduleFederationPlugin()],
   // plugins: [appTools()],
 });
