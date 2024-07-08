@@ -44,30 +44,30 @@ jobs:
 
   unit-test:
     needs: checkout-install
-    uses: ./.github/workflows/tests/unit-test.yml
+    uses: ./.github/workflows/unit-test.yml
     secrets: inherit
 
   e2e-modern:
     needs: checkout-install
-    uses: ./.github/workflows/tests/e2e-modern.yml
+    uses: ./.github/workflows/e2e-modern.yml
     secrets: inherit
 
   e2e-runtime:
     needs: checkout-install
-    uses: ./.github/workflows/tests/e2e-runtime.yml
+    uses: ./.github/workflows/e2e-runtime.yml
     secrets: inherit
 
   e2e-manifest:
     needs: checkout-install
-    uses: ./.github/workflows/tests/e2e-manifest.yml
+    uses: ./.github/workflows/e2e-manifest.yml
     secrets: inherit
 
   e2e-node:
     needs: checkout-install
-    uses: ./.github/workflows/tests/e2e-node.yml
+    uses: ./.github/workflows/e2e-node.yml
     secrets: inherit
 
   e2e-next:
     needs: checkout-install
-    uses: ./.github/workflows/tests/e2e-next.yml
+    uses: ./.github/workflows/e2e-next.yml
     secrets: inherit
