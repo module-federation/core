@@ -63,7 +63,10 @@
     "@types/ws": "8.5.10",
     "@types/koa": "2.11.2",
     "@types/node-schedule": "2.1.7",
-    "@module-federation/runtime": "workspace:*"
+    "@module-federation/runtime": "workspace:*",
+    "vue": "^3.4.29",
+    "@vue/tsconfig": "^0.5.1",
+    "vue-tsc": "^2.0.26"
   },
   "peerDependencies": {
     "typescript": "^4.9.0 || ^5.0.0",
