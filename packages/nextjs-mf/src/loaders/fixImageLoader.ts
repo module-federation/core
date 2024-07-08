@@ -56,6 +56,7 @@ export async function fixImageLoader(
                 return container.remoteInfo.entry;
               },
             );`,
+            'if(!container) return "";',
             'const cache = container.moduleCache',
             'const remote = cache.get(name).remoteInfo',
             `const remoteEntry = remote.entry;`,
