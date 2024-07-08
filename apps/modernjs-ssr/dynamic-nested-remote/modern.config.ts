@@ -4,7 +4,7 @@ import { moduleFederationPlugin } from '@module-federation/modern-js';
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
   dev: {
-    port: 3009,
+    port: 3054,
   },
   runtime: {
     router: true,
@@ -16,7 +16,7 @@ export default defineConfig({
     ssr: {
       mode: 'stream',
     },
-    port: 3009,
+    port: 3054,
   },
   plugins: [appTools(), moduleFederationPlugin()],
 });

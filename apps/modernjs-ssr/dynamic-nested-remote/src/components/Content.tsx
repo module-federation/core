@@ -10,7 +10,7 @@ import stuff from './stuff.module.css';
 registerRemotes([
   {
     name: 'dynamic_remote',
-    entry: 'http://localhost:3008/mf-manifest.json',
+    entry: 'http://localhost:3053/mf-manifest.json',
   },
 ]);
 

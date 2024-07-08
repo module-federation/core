@@ -1,6 +1,6 @@
 import { getH1, getH2 } from '../support/app.po';
 
-describe('3008-webpack-host/preload', () => {
+describe('3013-webpack-host/preload', () => {
   beforeEach(() => cy.visit('/preload'));
 
   describe('Welcome message', () => {

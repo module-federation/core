@@ -17,7 +17,7 @@ const Index = (): JSX.Element => {
       [
         {
           name: 'remote',
-          entry: 'http://localhost:3010/mf-manifest.json',
+          entry: 'http://localhost:3055/mf-manifest.json',
         },
       ],
       { force: true },
@@ -41,7 +41,7 @@ const Index = (): JSX.Element => {
         <tbody>
           <tr>
             <td>✅</td>
-            <td>This component is from a remote(localhost:3006)</td>
+            <td>This component is from a remote(localhost:3051)</td>
             <td>
               <button
                 id="remote-local-button"

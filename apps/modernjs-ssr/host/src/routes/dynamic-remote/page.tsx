@@ -8,7 +8,7 @@ import {
 registerRemotes([
   {
     name: 'dynamic_remote',
-    entry: 'http://localhost:3008/mf-manifest.json',
+    entry: 'http://localhost:3053/mf-manifest.json',
   },
 ]);
 
@@ -37,7 +37,7 @@ const Index = (): JSX.Element => {
       [
         {
           name: 'dynamic_remote',
-          entry: 'http://localhost:3011/mf-manifest.json',
+          entry: 'http://localhost:3056/mf-manifest.json',
         },
       ],
       { force: true },
@@ -61,7 +61,7 @@ const Index = (): JSX.Element => {
         <tbody>
           <tr>
             <td>✅</td>
-            <td>This component is from a dynamic remote(localhost:3008)</td>
+            <td>This component is from a dynamic remote(localhost:3053)</td>
             <td>
               <button
                 id="dynamic-remote-local-button"

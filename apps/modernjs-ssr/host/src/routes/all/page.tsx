@@ -4,11 +4,11 @@ import { loadRemote, registerRemotes } from '@modern-js/runtime/mf';
 registerRemotes([
   {
     name: 'dynamic_nested_remote',
-    entry: 'http://localhost:3009/mf-manifest.json',
+    entry: 'http://localhost:3054/mf-manifest.json',
   },
   {
     name: 'dynamic_remote',
-    entry: 'http://localhost:3008/mf-manifest.json',
+    entry: 'http://localhost:3053/mf-manifest.json',
   },
 ]);
 
@@ -61,7 +61,7 @@ const Index = (): JSX.Element => {
           {/* remote */}
           <tr>
             <td>✅</td>
-            <td>This component is from a remote(localhost:3006)</td>
+            <td>This component is from a remote(localhost:3051)</td>
             <td>
               <button
                 style={{ marginBottom: '1rem' }}
@@ -80,7 +80,7 @@ const Index = (): JSX.Element => {
           <tr>
             <td>✅</td>
             <td>
-              This component is from a remote(localhost:3007) which nest a
+              This component is from a remote(localhost:3052) which nest a
               static remote
             </td>
             <td>
@@ -100,7 +100,7 @@ const Index = (): JSX.Element => {
           {/* dynamic remote */}
           <tr>
             <td>✅</td>
-            <td>This component is from a dynamic remote(localhost:3008)</td>
+            <td>This component is from a dynamic remote(localhost:3053)</td>
             <td>
               <button
                 style={{ marginBottom: '1rem' }}
@@ -118,7 +118,7 @@ const Index = (): JSX.Element => {
           <tr>
             <td>✅</td>
             <td>
-              This component is from a dynamic remote(localhost:3009) which nest
+              This component is from a dynamic remote(localhost:3054) which nest
               a dynamic remote
             </td>
             <td>

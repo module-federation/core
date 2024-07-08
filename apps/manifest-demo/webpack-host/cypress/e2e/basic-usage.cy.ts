@@ -1,6 +1,6 @@
 import { getH1, getH2 } from '../support/app.po';
 
-describe('3008-webpack-host/basic', () => {
+describe('3013-webpack-host/basic', () => {
   beforeEach(() => cy.visit('/basic'));
 
   describe('Welcome message', () => {

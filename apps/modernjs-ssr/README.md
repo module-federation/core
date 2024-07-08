@@ -2,10 +2,10 @@
 
 # Running Demo
 
-- host: [localhost:3005](http://localhost:3005/)
-- remote: [localhost:3006](http://localhost:3006/)
-- nested-remote: [localhost:3007](http://localhost:3007/)
-- dynamic-remote: [localhost:3008](http://localhost:3008/)
-- dynamic-nested-remote: [localhost:3009](http://localhost:3009/)
-- remote-new-version: [localhost:3010](http://localhost:3010/)
-- dynamic-remote-new-version: [localhost:3011](http://localhost:3011/)
+- host: [localhost:3050](http://localhost:3050/)
+- remote: [localhost:3051](http://localhost:3051/)
+- nested-remote: [localhost:3052](http://localhost:3052/)
+- dynamic-remote: [localhost:3053](http://localhost:3053/)
+- dynamic-nested-remote: [localhost:3054](http://localhost:3054/)
+- remote-new-version: [localhost:3055](http://localhost:3055/)
+- dynamic-remote-new-version: [localhost:3056](http://localhost:3056/)
