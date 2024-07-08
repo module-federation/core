@@ -4,22 +4,16 @@ projects:
     pathFilters:
       - '**/src/**/*.{ts,tsx}'
       - '**/src/**/*.{js,jsx}'
-    experiments:
-      anthropic: true
   - name: 'core'
     path: 'packages/core'
     pathFilters:
       - '**/src/**/*.{ts,tsx}'
       - '**/src/**/*.{js,jsx}'
-    experiments:
-      anthropic: true
   - name: 'dts-plugin'
     path: 'packages/dts-plugin'
     pathFilters:
       - '**/src/**/*.{ts,tsx}'
       - '**/src/**/*.{js,jsx}'
-    experiments:
-      anthropic: true
   - name: 'enhanced'
     path: 'packages/enhanced'
     pathFilters:
@@ -30,61 +24,45 @@ projects:
     pathFilters:
       - '**/src/**/*.{ts,tsx}'
       - '**/src/**/*.{js,jsx}'
-    experiments:
-      anthropic: true
   - name: 'esbuild'
     path: 'packages/esbuild'
     pathFilters:
       - '**/src/**/*.{ts,tsx}'
       - '**/src/**/*.{js,jsx}'
-    experiments:
-      anthropic: true
   - name: 'managers'
     path: 'packages/managers'
     pathFilters:
       - '**/src/**/*.{ts,tsx}'
       - '**/src/**/*.{js,jsx}'
-    experiments:
-      anthropic: true
   - name: 'manifest'
     path: 'packages/manifest'
     pathFilters:
       - '**/src/**/*.{ts,tsx}'
       - '**/src/**/*.{js,jsx}'
-    experiments:
-      anthropic: true
   - name: 'node'
     path: 'packages/node'
     pathFilters:
       - '**/src/**/*.{ts,tsx}'
       - '**/src/**/*.{js,jsx}'
-    experiments:
-      anthropic: true
   - name: 'nextjs-mf'
     path: 'packages/nextjs-mf'
     pathFilters:
       - '**/src/**/*.{ts,tsx}'
       - '**/src/**/*.{js,jsx}'
-    experiments:
-      anthropic: true
   - name: 'rspack'
     path: 'packages/rspack'
     pathFilters:
       - '**/src/**/*.{ts,tsx}'
       - '**/src/**/*.{js,jsx}'
-    experiments:
-      anthropic: true
   - name: 'runtime'
     path: 'packages/runtime'
     pathFilters:
       - '**/src/**/*.{ts,tsx}'
       - '**/src/**/*.{js,jsx}'
-    experiments:
-      anthropic: true
   - name: 'sdk'
     path: 'packages/sdk'
     pathFilters:
       - '**/src/**/*.{ts,tsx}'
       - '**/src/**/*.{js,jsx}'
-    experiments:
-      anthropic: true
+experiments:
+  anthropic: true

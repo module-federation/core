@@ -57,6 +57,6 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     runtimeChunk: false,
     minimize: false,
   };
-  config.output.publicPath = 'http://localhost:3008/';
+  config.output.publicPath = 'http://localhost:3013/';
   return config;
 });

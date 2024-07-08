@@ -1,0 +1,46 @@
+# .github/workflows/e2e-modernjs.yml
+name: E2E Test for ModernJS
+
+on:
+  workflow_call:
+
+jobs:
+  e2e-modern:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> $GITHUB_ENV
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Run Build for All
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
+      - name: Run condition check script
+        id: check-ci
+        run: node tools/scripts/ci-is-affected.mjs --appName=modernjs
+
+      - name: E2E Test for ModernJS
+        if: steps.check-ci.outcome == 'success'
+        run: npx kill-port --port 4001 && npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && lsof -ti tcp:4001 | xargs kill
