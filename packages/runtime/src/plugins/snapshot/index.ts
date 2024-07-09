@@ -6,8 +6,7 @@ import {
   isPureRemoteEntry,
   isRemoteInfoWithEntry,
 } from '../../utils';
-import { PreloadOptions, RemoteInfo } from '../../type';
-import { preloadAssets } from '../../utils/preload';
+import { RemoteInfo } from '../../type';
 
 export function assignRemoteInfo(
   remoteInfo: RemoteInfo,
@@ -35,24 +34,13 @@ export function snapshotPlugin(): FederationRuntimePlugin {
   return {
     name: 'snapshot-plugin',
     async afterResolve(args) {
-      const { remote, pkgNameOrAlias, expose, origin, remoteInfo } = args;
+      const { remote, origin, remoteInfo } = args;
 
       if (!isRemoteInfoWithEntry(remote) || !isPureRemoteEntry(remote)) {
-        const { remoteSnapshot, globalSnapshot } =
+        const { remoteSnapshot } =
           await origin.snapshotHandler.loadRemoteSnapshotInfo(remote);
 
         assignRemoteInfo(remoteInfo, remoteSnapshot);
-        // preloading assets
-        const preloadOptions: PreloadOptions[0] = {
-          remote,
-          preloadConfig: {
-            nameOrAlias: pkgNameOrAlias,
-            exposes: [expose],
-            resourceCategory: 'sync',
-            share: false,
-            depsRemote: false,
-          },
-        };
 
         return {
           ...args,

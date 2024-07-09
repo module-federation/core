@@ -10,6 +10,7 @@ export interface PreloadRemoteArgs {
   depsRemote?: boolean | Array<depsPreloadArg>;
   filter?: (assetUrl: string) => boolean;
   prefetchInterface?: boolean;
+  useLinkPreload?: boolean;
 }
 
 export type PreloadConfig = PreloadRemoteArgs;

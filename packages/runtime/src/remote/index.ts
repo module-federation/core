@@ -231,7 +231,12 @@ export class RemoteHandler {
         if (!assets) {
           return;
         }
-        preloadAssets(remoteInfo, host, assets);
+        preloadAssets(
+          remoteInfo,
+          host,
+          assets,
+          Boolean(ops.preloadConfig.useLinkPreload),
+        );
       }),
     );
   }
