@@ -103,6 +103,16 @@ class Module {
           origin: this.host,
         });
 
+      if (typeof remoteEntryExports?.init === 'undefined') {
+        console.error(
+          'The remote entry interface does not contain "init"',
+          '\n',
+          'Ensure the name of this remote is not reserved or in use. Check if anything already exists on window[nameOfRemote]',
+          '\n',
+          'Ensure that window[nameOfRemote] is returning a {get,init} object.',
+        );
+      }
+
       await remoteEntryExports.init(
         initContainerOptions.shareScope,
         initContainerOptions.initScope,
