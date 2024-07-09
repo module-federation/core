@@ -17,7 +17,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       name: 'runtime_host',
       remotes: {
         // remote2: 'runtime_remote2@http://localhost:3007/remoteEntry.js',
-        remote1: 'runtime_remote1@http://127.0.0.1:3006/mf-manifest.json',
+        remote1: 'promise new Promise(()=>{ console.log("thing@http")})',
       },
       // library: { type: 'var', name: 'runtime_remote' },
       filename: 'remoteEntry.js',
