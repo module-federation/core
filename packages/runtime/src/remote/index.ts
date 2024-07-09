@@ -125,6 +125,8 @@ export class RemoteHandler {
       origin: FederationHost;
     }>(),
   });
+  /** cache for remote module */
+  loadRemoteCache: Map<string, Promise<unknown>> = new Map();
 
   constructor(host: FederationHost) {
     this.host = host;
@@ -141,7 +143,7 @@ export class RemoteHandler {
 
   // eslint-disable-next-line max-lines-per-function
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  async loadRemote<T>(
+  private async _loadRemote<T>(
     id: string,
     options?: { loadFactory?: boolean; from: 'build' | 'runtime' },
   ): Promise<T | null> {
@@ -196,6 +198,17 @@ export class RemoteHandler {
 
       return failOver as T;
     }
+  }
+
+  async loadRemote<T>(
+    id: string,
+    options?: { loadFactory?: boolean; from: 'build' | 'runtime' },
+  ): Promise<T | null> {
+    const cacheKey = `${id}_${JSON.stringify(options || {})}`;
+    if (!this.loadRemoteCache.has(cacheKey)) {
+      this.loadRemoteCache.set(cacheKey, this._loadRemote(id, options));
+    }
+    return this.loadRemoteCache.get(cacheKey) as Promise<T | null>;
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
@@ -405,6 +418,11 @@ export class RemoteHandler {
   private removeRemote(remote: Remote): void {
     const { host } = this;
     const { name } = remote;
+    for (const [key] of this.loadRemoteCache) {
+      if (key.startsWith(`${name}_`)) {
+        this.loadRemoteCache.delete(key);
+      }
+    }
     const remoteIndex = host.options.remotes.findIndex(
       (item) => item.name === name,
     );
