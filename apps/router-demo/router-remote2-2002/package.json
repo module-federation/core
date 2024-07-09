@@ -14,8 +14,8 @@
     "@module-federation/enhanced": "workspace:*"
   },
   "devDependencies": {
-    "@rsbuild/core": "^0.6.15",
-    "@rsbuild/plugin-react": "^0.6.15",
+    "@rsbuild/core": "1.0.0-alpha.6",
+    "@rsbuild/plugin-react": "1.0.0-alpha.6",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
     "typescript": "^5.4.5"

@@ -19,15 +19,15 @@
   "module": "./dist/index.esm.js",
   "types": "./dist/index.cjs.d.ts",
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
     "@module-federation/bridge-react-webpack-plugin": "workspace:*",
-    "@module-federation/runtime-tools": "workspace:*",
-    "@module-federation/manifest": "workspace:*",
+    "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/managers": "workspace:*",
-    "@module-federation/dts-plugin": "workspace:*"
+    "@module-federation/manifest": "workspace:*",
+    "@module-federation/runtime-tools": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
-    "@rspack/core": "0.5.0"
+    "@rspack/core": "0.7.5"
   },
   "exports": {
     ".": {

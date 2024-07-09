@@ -18,8 +18,8 @@
   },
   "devDependencies": {
     "@ant-design/cssinjs": "^1.20.0",
-    "@rsbuild/core": "^0.6.15",
-    "@rsbuild/plugin-react": "^0.6.15",
+    "@rsbuild/core": "1.0.0-alpha.6",
+    "@rsbuild/plugin-react": "1.0.0-alpha.6",
     "@rsbuild/shared": "^0.7.10",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
