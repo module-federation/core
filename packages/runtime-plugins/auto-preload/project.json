@@ -1,0 +1,60 @@
+{
+  "name": "auto-preload",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/runtime-plugins/auto-preload/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/runtime-plugins/auto-preload/dist"],
+      "options": {
+        "parallel": false,
+        "commands": [
+          "tsup --config packages/runtime-plugins/auto-preload/tsup.config.ts",
+          "cp packages/runtime-plugins/auto-preload/package.json packages/runtime-plugins/auto-preload/dist",
+          "cp packages/runtime-plugins/auto-preload/*.md packages/runtime-plugins/auto-preload/dist"
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/runtime-plugins/auto-preload/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "vitest run -u -c packages/runtime-plugins/auto-preload/vitest.config.ts",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run auto-preload:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run auto-preload:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
+    }
+  },
+  "tags": ["type:pkg"],
+  "implicitDependencies": []
+}

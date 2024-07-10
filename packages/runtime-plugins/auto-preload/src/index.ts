@@ -1,8 +1,11 @@
-import { FederationRuntimePlugin } from '../type/plugin';
-import { isPureRemoteEntry, isRemoteInfoWithEntry } from '../utils';
-import { PreloadConfig, PreloadOptions } from '../type';
-import { preloadAssets } from '../utils/preload';
-import { getGlobalSnapshot } from '../global';
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type {
+  PreloadOptions,
+  PreloadConfig,
+} from '@module-federation/runtime/types';
+import helpers from '@module-federation/runtime/helpers';
+
+const tool = helpers.tool;
 
 function autoPreloadPlugin(
   preloadConfig?: PreloadConfig,
@@ -10,14 +13,14 @@ function autoPreloadPlugin(
   return {
     name: 'auto-preload-plugin',
     async afterResolve(args) {
-      const { remote, origin, remoteInfo, expose, pkgNameOrAlias } = args;
+      const { remote, origin, expose, pkgNameOrAlias } = args;
 
-      if (!isRemoteInfoWithEntry(remote) || !isPureRemoteEntry(remote)) {
+      if (
+        !tool.isRemoteInfoWithEntry(remote) ||
+        !tool.isPureRemoteEntry(remote)
+      ) {
         return args;
       }
-      const { remoteSnapshot, globalSnapshot } =
-        await origin.snapshotHandler.loadRemoteSnapshotInfo(remote);
-
       // preloading assets
       const preloadOptions: PreloadOptions[0] = {
         remote: remote,

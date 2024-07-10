@@ -198,6 +198,32 @@ export class RemoteHandler {
     }
   }
 
+  async preloadAssets(preloadOps: PreloadOptions[0]): Promise<void> {
+    const { host } = this;
+    const { remote } = preloadOps;
+    const remoteInfo = getRemoteInfo(remote);
+    const { globalSnapshot, remoteSnapshot } =
+      await host.snapshotHandler.loadRemoteSnapshotInfo(remote);
+
+    const assets = await this.hooks.lifecycle.generatePreloadAssets.emit({
+      origin: host,
+      preloadOptions: preloadOps,
+      remote,
+      remoteInfo,
+      globalSnapshot,
+      remoteSnapshot,
+    });
+    if (!assets) {
+      return;
+    }
+    preloadAssets(
+      remoteInfo,
+      host,
+      assets,
+      Boolean(preloadOps.preloadConfig.useLinkPreload),
+    );
+  }
+
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async preloadRemote(preloadOptions: Array<PreloadRemoteArgs>): Promise<void> {
     const { host } = this;
@@ -215,28 +241,7 @@ export class RemoteHandler {
 
     await Promise.all(
       preloadOps.map(async (ops) => {
-        const { remote } = ops;
-        const remoteInfo = getRemoteInfo(remote);
-        const { globalSnapshot, remoteSnapshot } =
-          await host.snapshotHandler.loadRemoteSnapshotInfo(remote);
-
-        const assets = await this.hooks.lifecycle.generatePreloadAssets.emit({
-          origin: host,
-          preloadOptions: ops,
-          remote,
-          remoteInfo,
-          globalSnapshot,
-          remoteSnapshot,
-        });
-        if (!assets) {
-          return;
-        }
-        preloadAssets(
-          remoteInfo,
-          host,
-          assets,
-          Boolean(ops.preloadConfig.useLinkPreload),
-        );
+        await this.preloadAssets(ops);
       }),
     );
   }

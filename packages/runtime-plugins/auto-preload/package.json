@@ -1,0 +1,32 @@
+{
+  "name": "@module-federation/runtime-auto-preload-plugin",
+  "version": "0.2.5",
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ]
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "author": "hanric <hanric.zhang@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@module-federation/runtime": "workspace:*"
+  }
+}
