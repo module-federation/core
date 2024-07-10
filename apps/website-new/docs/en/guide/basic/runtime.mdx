@@ -271,6 +271,8 @@ type PreloadRemoteArgs = {
   // No filtering by default
   // After configuration, unnecessary resources are filtered out
   filter?: (assetUrl: string) => boolean;
+  // Whether use link to preload the resources , default value is true
+  useLinkPreload?: boolean;
 };
 ```
 

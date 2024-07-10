@@ -1,10 +1,10 @@
 import { PackageManagerTabs, Tabs, Tab } from '@theme';
 
-# Auto Preload Plugin
+# 自动预加载资源
 
 当加载远程模块时，会自动预加载相应的远程模块资源。
 
-## Usage
+## 安装
 
 该运行时插件由 `@module-federation/auto-preload` 提供
 
@@ -18,7 +18,7 @@ import { PackageManagerTabs, Tabs, Tab } from '@theme';
 />
 
 
-### 配置
+### 使用
 
 此插件可在**运行时阶段**或**构建插件**中应用。你可以根据你的场景灵活选择。
 
@@ -65,3 +65,31 @@ import { PackageManagerTabs, Tabs, Tab } from '@theme';
     ```
   </Tab>
 </Tabs>
+
+## 参数
+
+- 类型: `Partial<PreloadConfig>`
+- 默认值: `undefined`
+- 描述: 控制预加载资源行为
+
+该配置与 [preloadRemote](../../guide/basic/runtime#preloadremote) 一致。
+
+使用示例：
+```typescript title="app.tsx"
+import { init } from '@module-federation/runtime';
+import autoPreloadPlugin from '@module-federation/auto-preload';
+init({
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: '@demo/app2',
+      entry: 'http: //localhost:3006/mf-manifest.json',
+      alias: 'app2',
+    },
+  ],
+  plugins: [autoPreloadPlugin({
+    // 默认值会通过 script 来预加载 js 文件，可通过 useLinkPreload: true 来修改此行为
+    useLinkPreload: false
+  })],
+});
+```

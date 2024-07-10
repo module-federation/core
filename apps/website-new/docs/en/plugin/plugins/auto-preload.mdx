@@ -4,7 +4,7 @@ import { PackageManagerTabs, Tabs, Tab } from '@theme';
 
 Helps auto preload assets when load remote.
 
-## Usage
+## Install
 
 This Runtime Plugin is Provided by the `@module-federation/auto-preload` package
 
@@ -18,9 +18,10 @@ This Runtime Plugin is Provided by the `@module-federation/auto-preload` package
 />
 
 
-### Configuration
+### Usage
 
 The runtime plugin can be applied at compile-time or runtime
+
 <Tabs>
   <Tab label="Rspack">
   ```typescript title="rspack.config.js"
@@ -64,3 +65,33 @@ The runtime plugin can be applied at compile-time or runtime
     ```
   </Tab>
 </Tabs>
+
+
+## Params
+
+- Type: `Partial<PreloadConfig>`
+- Default value: `undefined`
+- Description: Control the preload behavior
+
+The configuration is the same as [preloadRemote](../../guide/basic/runtime#preloadremote) .
+
+Example:
+
+```typescript title="app.tsx"
+import { init } from '@module-federation/runtime';
+import autoPreloadPlugin from '@module-federation/auto-preload';
+init({
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: '@demo/app2',
+      entry: 'http: //localhost:3006/mf-manifest.json',
+      alias: 'app2',
+    },
+  ],
+  plugins: [autoPreloadPlugin({
+    // 默认值会通过 script 来预加载 js 文件，可通过 useLinkPreload: true 来修改此行为
+    useLinkPreload: false
+  })],
+});
+```

@@ -3,7 +3,7 @@ import type { PreloadConfig } from '@module-federation/runtime/types';
 import { autoPreload } from './plugin';
 
 function autoPreloadPlugin(
-  preloadConfig?: PreloadConfig,
+  preloadConfig?: Partial<PreloadConfig>,
 ): FederationRuntimePlugin {
   return {
     name: 'auto-preload-plugin',
