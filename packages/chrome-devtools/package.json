@@ -79,7 +79,7 @@
     "rimraf": "~3.0.2",
     "typescript": "~5.0.4",
     "vitest": "1.2.2",
-    "@modern-js/storybook": "2.46.1",
+    "@modern-js/storybook": "2.54.6",
     "@storybook/addon-essentials": "^8"
   }
 }
