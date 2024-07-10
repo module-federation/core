@@ -1,8 +1,7 @@
 import { describe, it, assert } from 'vitest';
 import { init } from '@module-federation/runtime';
 import helpers from '@module-federation/runtime/helpers';
-import autoPreloadPlugin from '../src';
-import { mockStaticServer } from './mock/utils';
+import { autoPreload } from '../src/plugin';
 
 interface LinkInfo {
   type: string;
@@ -44,7 +43,7 @@ function getPreloadElInfos(): {
 }
 
 // eslint-disable-next-line max-lines-per-function
-describe('basic usage', () => {
+describe('basic usage', async () => {
   const mockSnapshot = {
     '@federation/host': {
       buildVersion: 'custom',
@@ -53,12 +52,6 @@ describe('basic usage', () => {
       remotesInfo: {
         '@federation/sub1': {
           matchedVersion: '1.0.2',
-        },
-        '@federation/sub2': {
-          matchedVersion: '1.0.3',
-        },
-        '@federation/sub3': {
-          matchedVersion: '1.0.3',
         },
       },
     },
@@ -81,155 +74,7 @@ describe('basic usage', () => {
       ],
       publicPath: 'http://localhost:1111/resources/preload/preload-resource/',
       remoteEntry: 'federation-remote-entry.js',
-      remotesInfo: {
-        '@federation/sub1-button': {
-          matchedVersion: '1.0.3',
-        },
-        '@federation/sub1-add': {
-          matchedVersion: '1.0.3',
-        },
-      },
-    },
-    '@federation/sub1-button:1.0.3': {
-      buildVersion: 'custom',
-      modules: [
-        {
-          moduleName: 'button',
-          assets: {
-            css: {
-              sync: [],
-              async: [],
-            },
-            js: {
-              sync: ['sub1-button/button.sync.js'],
-              async: ['sub1-button/button.async.js'],
-            },
-          },
-        },
-      ],
-      publicPath: 'http://localhost:1111/resources/preload/preload-resource/',
-      remoteEntry: 'sub1-button/federation-remote-entry.js',
-    },
-    '@federation/sub1-add:1.0.3': {
-      buildVersion: 'custom',
-      modules: [
-        {
-          moduleName: 'add',
-          assets: {
-            css: {
-              sync: [],
-              async: [],
-            },
-            js: {
-              sync: ['sub1-add/add.sync.js'],
-              async: ['sub1-add/add.async.js'],
-            },
-          },
-        },
-      ],
-      publicPath: 'http://localhost:1111/resources/preload/preload-resource/',
-      remoteEntry: 'sub1-add/federation-remote-entry.js',
-    },
-    '@federation/sub2:1.0.3': {
-      buildVersion: 'custom',
-      modules: [
-        {
-          moduleName: 'button',
-          assets: {
-            css: {
-              sync: ['sub2/button.sync.css'],
-              async: ['sub2/button.async.css'],
-            },
-            js: {
-              sync: ['sub2/button.sync.js'],
-              async: ['sub2/button.async.js'],
-            },
-          },
-        },
-      ],
-      publicPath: 'http://localhost:1111/resources/preload/preload-resource/',
-      remoteEntry: 'sub2/federation-remote-entry.js',
-      remotesInfo: {
-        '@federation/sub2-button': {
-          matchedVersion: '1.0.3',
-        },
-        '@federation/sub2-add': {
-          matchedVersion: '1.0.3',
-        },
-      },
-    },
-    '@federation/sub2-button:1.0.3': {
-      buildVersion: 'custom',
-      modules: [
-        {
-          moduleName: 'button',
-          assets: {
-            css: {
-              sync: [],
-              async: [],
-            },
-            js: {
-              sync: ['sub2-button/button.sync.js'],
-              async: ['sub2-button/button.async.js'],
-            },
-          },
-        },
-      ],
-      publicPath: 'http://localhost:1111/resources/preload/preload-resource/',
-      remoteEntry: 'sub2-button/federation-remote-entry.js',
-    },
-    '@federation/sub2-add:1.0.3': {
-      buildVersion: 'custom',
-      modules: [
-        {
-          moduleName: 'add',
-          assets: {
-            css: {
-              sync: [],
-              async: [],
-            },
-            js: {
-              sync: ['sub2-add/add.sync.js'],
-              async: ['sub2-add/add.async.js'],
-            },
-          },
-        },
-      ],
-      publicPath: 'http://localhost:1111/resources/preload/preload-resource/',
-      remoteEntry: 'sub2-button/federation-remote-entry.js',
-    },
-    '@federation/sub3:1.0.3': {
-      buildVersion: 'custom',
-      modules: [
-        {
-          moduleName: 'button',
-          assets: {
-            css: {
-              sync: [],
-              async: [],
-            },
-            js: {
-              sync: ['sub3/button.sync.js'],
-              async: [],
-            },
-          },
-        },
-        {
-          moduleName: 'add',
-          assets: {
-            css: {
-              sync: [],
-              async: [],
-            },
-            js: {
-              sync: ['sub3/add.sync.js'],
-              async: [],
-            },
-          },
-        },
-      ],
-      publicPath: 'http://localhost:1111/resources/preload/preload-resource/',
-      remoteEntry: 'sub3/federation-remote-entry.js',
+      globalName: '__FEDERATION_@federation/sub1:custom__',
     },
   };
   beforeEach(() => {
@@ -253,13 +98,38 @@ describe('basic usage', () => {
         version: '1.0.3',
       },
     ],
-    plugins: [autoPreloadPlugin()],
+    plugins: [
+      {
+        name: 'auto-preload-plugin',
+        async afterResolve(args) {
+          // test will await to validate if preload work, but the real plugin will not await.
+          await autoPreload(args, { useLinkPreload: true });
+          return args;
+        },
+      },
+    ],
   });
 
   it('auto preload assets when calling load remote', async () => {
     const reset = helpers.global.addGlobalSnapshot(mockSnapshot);
-    await FMInstance.loadRemote('@federation/sub1/say');
+    await FMInstance.loadRemote('@federation/sub1/button');
     reset();
-    expect(getPreloadElInfos()).toEqual({});
+    expect(getPreloadElInfos().links).toMatchObject([
+      {
+        href: 'http://localhost:1111/resources/preload/preload-resource/button.sync.css',
+        rel: 'preload',
+        type: 'style',
+      },
+      {
+        href: 'http://localhost:1111/resources/preload/preload-resource/ignore.sync.css',
+        rel: 'preload',
+        type: 'style',
+      },
+      {
+        href: 'http://localhost:1111/resources/preload/preload-resource/button.sync.js',
+        rel: 'preload',
+        type: 'script',
+      },
+    ]);
   });
 });

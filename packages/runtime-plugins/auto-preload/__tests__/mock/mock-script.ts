@@ -45,11 +45,7 @@ function injector(current: Function, methodName: string) {
         (matchKey) => element?.src?.indexOf(matchKey) > -1,
       );
       const matchInfo = matchInfoKey && responseMatchInfo[matchInfoKey];
-      if (
-        matchInfo &&
-        element.tagName === 'SCRIPT' &&
-        !element.src.includes('preload-resource')
-      ) {
+      if (matchInfo && element.tagName === 'SCRIPT') {
         element.setAttribute('innerHTML', matchInfoKey);
         const nEl = document.createElement('script');
         const attrs = element.attributes;
@@ -71,7 +67,6 @@ function injector(current: Function, methodName: string) {
           }
         }
         const filePath = element.src.replace(matchInfo.baseUrl, '');
-
         const execScriptContent = fs.readFileSync(
           path.resolve(matchInfo.baseDir, filePath),
           'utf-8',
@@ -84,6 +79,9 @@ function injector(current: Function, methodName: string) {
         // vitest 无法让 jsdom 和当前环境处于同一个执行环境
         if (!preload) {
           new Function(execScriptContent)();
+        }
+        if (element && element.onload) {
+          element.onload.call(element);
         }
         // eslint-disable-next-line prefer-rest-params
         oriArguments[index] = nEl;

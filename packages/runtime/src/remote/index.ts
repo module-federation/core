@@ -220,7 +220,7 @@ export class RemoteHandler {
       remoteInfo,
       host,
       assets,
-      Boolean(preloadOps.preloadConfig.useLinkPreload),
+      preloadOps.preloadConfig.useLinkPreload,
     );
   }
 

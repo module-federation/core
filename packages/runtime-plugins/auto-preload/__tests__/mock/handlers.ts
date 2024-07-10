@@ -6,6 +6,7 @@ export const handlers = [
   rest.get(
     'http://localhost:1111/resources/:category/:app/:file',
     (req, res, ctx) => {
+      console.log(1111, req);
       const category = req.params.category;
       const app = req.params.app;
       const file = req.params.file;

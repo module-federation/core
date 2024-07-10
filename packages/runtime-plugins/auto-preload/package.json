@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/runtime-auto-preload-plugin",
+  "name": "@module-federation/auto-preload",
   "version": "0.2.5",
   "files": [
     "dist/",

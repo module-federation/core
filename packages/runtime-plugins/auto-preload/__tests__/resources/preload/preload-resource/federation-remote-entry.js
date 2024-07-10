@@ -6,7 +6,7 @@ var version = 'custom';
 globalThis[`__FEDERATION_${`${pkgName}:${version}`}__`] = {
   get(scope) {
     const moduleMap = {
-      './say'() {
+      './button'() {
         return () => 'hello app2';
       },
     };

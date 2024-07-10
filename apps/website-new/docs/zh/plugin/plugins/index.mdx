@@ -2,12 +2,12 @@ import { PackageManagerTabs, Tabs, Tab } from '@theme';
 
 # Node Plugin
 
-Module Federation on the server-side enables many possibilities for backend architecture as well as enables server side rendering of apps.
 
+服务器端的模块联邦为后端架构提供了多种可能性，并支持应用程序的服务器端渲染。
 
-## Usage
+## 使用
 
-This Runtime Plugin is Provided by the `@module-federation/node` package
+该运行时插件由 `@module-federation/node` 提供
 
 <PackageManagerTabs
   command={{
@@ -19,9 +19,10 @@ This Runtime Plugin is Provided by the `@module-federation/node` package
 />
 
 
-### Configuration
+### 配置
 
-The runtime plugin can be applied at compile-time or runtime
+此插件可在**运行时阶段**或**构建插件**中应用。你可以根据你的场景灵活选择。
+
 <Tabs>
   <Tab label="Rspack">
   ```typescript title="rspack.config.js"

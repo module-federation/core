@@ -10,6 +10,7 @@ export default defineConfig({
   },
   plugins: [nxViteTsPaths()],
   test: {
+    cache: { dir: path.resolve(__dirname, 'node_modules/.vite/auto-preload') },
     environment: 'jsdom',
     include: [path.resolve(__dirname, '__tests__/*.spec.ts')],
     globals: true,
