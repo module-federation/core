@@ -1,5 +1,11 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.2.6
+
+### Patch Changes
+
+- 91bf689: pass dynamic import callback to vm
+
 ## 0.2.5
 
 ### Patch Changes
