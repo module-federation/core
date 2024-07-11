@@ -164,6 +164,22 @@ export class RemoteHandler {
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
       const moduleOrFactory = (await module.get(idRes, expose, options)) as T;
 
+      // update loadRemote cache for name or alias
+      const { name, alias } = remote;
+      const nameCacheKey = `${name}${expose === '.' ? '' : `/${expose}`}_${JSON.stringify(options || {})}`;
+      const aliasCacheKey = `${alias}${expose === '.' ? '' : `/${expose}`}_${JSON.stringify(options || {})}`;
+      const idCacheKey = `${id}_${JSON.stringify(options || {})}`;
+      if (this.loadRemoteCache.has(idCacheKey)) {
+        this.loadRemoteCache.set(
+          nameCacheKey,
+          this.loadRemoteCache.get(idCacheKey)!,
+        );
+        this.loadRemoteCache.set(
+          aliasCacheKey,
+          this.loadRemoteCache.get(idCacheKey)!,
+        );
+      }
+
       const moduleWrapper = await this.hooks.lifecycle.onLoad.emit({
         id: idRes,
         pkgNameOrAlias,
