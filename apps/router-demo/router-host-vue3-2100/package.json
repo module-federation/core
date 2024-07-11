@@ -8,14 +8,14 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
-    "@module-federation/enhanced": "workspace:*",
     "@module-federation/bridge-vue3": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
     "vue": "^3.4.19",
     "vue-router": "^4.3.2"
   },
   "devDependencies": {
-    "@rsbuild/core": "^0.6.15",
-    "@rsbuild/plugin-vue": "^0.6.15",
+    "@rsbuild/core": "1.0.0-alpha.6",
+    "@rsbuild/plugin-vue": "1.0.0-alpha.6",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.2"
   }

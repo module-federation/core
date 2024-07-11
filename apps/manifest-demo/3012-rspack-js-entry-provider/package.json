@@ -5,11 +5,11 @@
   "devDependencies": {
     "@module-federation/enhanced": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
-    "react-refresh": "0.14.0",
-    "@rspack/plugin-react-refresh": "0.5.9"
+    "@rspack/plugin-react-refresh": "0.7.5",
+    "react-refresh": "0.14.0"
   },
   "dependencies": {
-    "lodash": "4.17.21",
-    "antd": "4.24.15"
+    "antd": "4.24.15",
+    "lodash": "4.17.21"
   }
 }
