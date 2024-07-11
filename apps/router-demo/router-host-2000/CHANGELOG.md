@@ -1,5 +1,13 @@
 # host
 
+## 1.0.7
+
+### Patch Changes
+
+- Updated dependencies [4488064]
+  - @module-federation/enhanced@0.2.6
+  - @module-federation/bridge-react@0.2.6
+
 ## 1.0.6
 
 ### Patch Changes
