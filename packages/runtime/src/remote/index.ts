@@ -435,11 +435,12 @@ export class RemoteHandler {
     const { host } = this;
     const { name, alias } = remote;
     for (const [key] of this.loadRemoteCache) {
+      const id = key.split('_')[0];
       if (
-        key.startsWith(`${name}/`) ||
-        (alias && key.startsWith(`${alias}/`)) ||
-        key === name ||
-        (alias && key === alias)
+        id.startsWith(`${name}/`) ||
+        (alias && id.startsWith(`${alias}/`)) ||
+        id === name ||
+        (alias && id === alias)
       ) {
         this.loadRemoteCache.delete(key);
       }
