@@ -22,6 +22,7 @@ export function defaultPreloadArgs(
     share: true,
     depsRemote: true,
     prefetchInterface: false,
+    useLinkPreload: true,
     ...preloadConfig,
   } as PreloadConfig;
 }

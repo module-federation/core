@@ -19,6 +19,7 @@ import {
   Global,
 } from './global';
 import { getRegisteredShare, getGlobalShareScope } from './utils/share';
+import { isRemoteInfoWithEntry, isPureRemoteEntry } from './utils/tool';
 
 interface IShareUtils {
   getRegisteredShare: typeof getRegisteredShare;
@@ -71,9 +72,19 @@ const GlobalUtils: IGlobalUtils = {
   setPreloaded,
 };
 
+interface IToolUtils {
+  isRemoteInfoWithEntry: typeof isRemoteInfoWithEntry;
+  isPureRemoteEntry: typeof isPureRemoteEntry;
+}
+const ToolUtils: IToolUtils = {
+  isRemoteInfoWithEntry,
+  isPureRemoteEntry,
+};
+
 export default {
   global: GlobalUtils,
   share: ShareUtils,
+  tool: ToolUtils,
 };
 
 export type { IGlobalUtils, IShareUtils };

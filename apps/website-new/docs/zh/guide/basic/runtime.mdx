@@ -271,6 +271,8 @@ type PreloadRemoteArgs = {
   // 未配置时不过滤资源
   // 配置后会过滤掉不需要的资源
   filter?: (assetUrl: string) => boolean;
+  // 是否以 link 标签预加载资源，默认为 true
+  useLinkPreload?: boolean;
 };
 ```
 

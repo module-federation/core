@@ -3,5 +3,10 @@
     "type": "dir",
     "name": "dev",
     "label": "插件开发"
+  },
+  {
+    "type": "dir",
+    "name": "plugins",
+    "label": "Plugins"
   }
 ]
