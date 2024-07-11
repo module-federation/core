@@ -417,9 +417,14 @@ export class RemoteHandler {
 
   private removeRemote(remote: Remote): void {
     const { host } = this;
-    const { name } = remote;
+    const { name, alias } = remote;
     for (const [key] of this.loadRemoteCache) {
-      if (key.startsWith(`${name}_`)) {
+      if (
+        key.startsWith(`${name}/`) ||
+        (alias && key.startsWith(`${alias}/`)) ||
+        key === name ||
+        (alias && key === alias)
+      ) {
         this.loadRemoteCache.delete(key);
       }
     }
