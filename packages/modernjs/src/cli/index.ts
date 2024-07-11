@@ -1,6 +1,11 @@
 import path from 'path';
 import { fs } from '@modern-js/utils';
-import type { CliPlugin, AppTools } from '@modern-js/app-tools';
+import type {
+  CliPlugin,
+  AppTools,
+  AppToolsUserConfig,
+  Bundler,
+} from '@modern-js/app-tools';
 import {
   ModuleFederationPlugin as WebpackModuleFederationPlugin,
   AsyncBoundaryPlugin,
@@ -10,6 +15,7 @@ import {
   StreamingTargetPlugin,
   EntryChunkTrackerPlugin,
 } from '@module-federation/node';
+import type { BundlerConfig } from '../interfaces/bundler';
 import type { PluginOptions, BundlerPlugin } from '../types';
 import {
   ConfigType,
@@ -57,26 +63,22 @@ export const moduleFederationPlugin = (
           process.env['MF_SSR_PRJ'] = 'true';
         }
 
-        const modifyBundlerConfig = <T extends 'webpack' | 'rspack'>(
-          config: ConfigType<T>,
+        const modifyBundlerConfig = <T extends Bundler>(
+          config: BundlerConfig<T>,
           isServer: boolean,
         ) => {
           const envConfig = getTargetEnvConfig(mfConfig, isServer);
           if (isServer) {
             nodePlugin = new MFBundlerPlugin(envConfig);
-            // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
             config.plugins?.push(nodePlugin);
-            // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
             config.plugins?.push(new StreamingTargetPlugin(envConfig));
             if (isDev) {
-              // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
               config.plugins?.push(new EntryChunkTrackerPlugin());
             }
           } else {
             outputDir =
               config.output?.path || path.resolve(process.cwd(), 'dist');
             browserPlugin = new MFBundlerPlugin(envConfig);
-            // @ts-expect-error the compiler version can not be equal, so it usually throw type errors
             config.plugins?.push(browserPlugin);
           }
 

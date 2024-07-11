@@ -3,6 +3,7 @@ import type {
   UserConfig,
   AppTools,
   Rspack,
+  Bundler,
 } from '@modern-js/app-tools';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
 import path from 'path';
@@ -10,6 +11,7 @@ import os from 'os';
 import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
 import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
+import { BundlerConfig } from '../interfaces/bundler';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
 const isDev = process.env.NODE_ENV === 'development';
@@ -208,8 +210,8 @@ export function getTargetEnvConfig(
   return patchedMFConfig;
 }
 
-export function patchWebpackConfig<T>(options: {
-  bundlerConfig: ConfigType<T>;
+export function patchWebpackConfig<T extends Bundler>(options: {
+  bundlerConfig: BundlerConfig<T>;
   isServer: boolean;
   modernjsConfig: UserConfig<AppTools>;
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -348,9 +350,9 @@ const SHARED_SPLIT_CHUNK_MAP = {
   axios: SPLIT_CHUNK_MAP.AXIOS,
 };
 
-function autoDeleteSplitChunkCacheGroups<T extends 'webpack' | 'rspack'>(
+function autoDeleteSplitChunkCacheGroups<T extends Bundler>(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  bundlerConfig: ConfigType<T>,
+  bundlerConfig: BundlerConfig<T>,
 ) {
   if (!mfConfig.shared) {
     return;
