@@ -1,5 +1,26 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.4.0
+
+### Minor Changes
+
+- 54bcdd1: enable chunk splitting for next
+
+### Patch Changes
+
+- 91bf689: prevent error throw in image loaders when module cache doesnt exist
+- 54bcdd1: clean up old plugin params
+- 54bcdd1: Move to node runtime plugin implementation
+- Updated dependencies [54bcdd1]
+- Updated dependencies [4488064]
+- Updated dependencies [91bf689]
+- Updated dependencies [91bf689]
+  - @module-federation/node@2.4.0
+  - @module-federation/enhanced@0.2.6
+  - @module-federation/sdk@0.2.6
+  - @module-federation/runtime@0.2.6
+  - @module-federation/utilities@3.0.33
+
 ## 8.3.28
 
 ### Patch Changes
