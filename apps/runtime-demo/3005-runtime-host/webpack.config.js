@@ -17,28 +17,28 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       name: 'runtime_host',
       remotes: {
         // remote2: 'runtime_remote2@http://localhost:3007/remoteEntry.js',
-        // remote1: 'runtime_remote1@http://127.0.0.1:3006/mf-manifest.json',
-        remote1: `promise new Promise((resolve)=>{
-          const raw = 'runtime_remote1@http://127.0.0.1:3006/remoteEntry.js'
-          const [_, remoteUrlWithVersion] = raw.split('@')
-          const script = document.createElement('script')
-          script.src = remoteUrlWithVersion
-          script.onload = () => {
-            const proxy = {
-              get: (request) => window.runtime_remote1.get(request),
-              init: (arg) => {
-                try {
-                  return window.runtime_remote1.init(arg)
-                } catch(e) {
-                  console.log('runtime_remote1 container already initialized')
-                }
-              }
-            }
-            resolve(proxy)
-          }
-          document.head.appendChild(script);
+        remote1: 'runtime_remote1@http://127.0.0.1:3006/mf-manifest.json',
+        // remote1: `promise new Promise((resolve)=>{
+        //   const raw = 'runtime_remote1@http://127.0.0.1:3006/remoteEntry.js'
+        //   const [_, remoteUrlWithVersion] = raw.split('@')
+        //   const script = document.createElement('script')
+        //   script.src = remoteUrlWithVersion
+        //   script.onload = () => {
+        //     const proxy = {
+        //       get: (request) => window.runtime_remote1.get(request),
+        //       init: (arg) => {
+        //         try {
+        //           return window.runtime_remote1.init(arg)
+        //         } catch(e) {
+        //           console.log('runtime_remote1 container already initialized')
+        //         }
+        //       }
+        //     }
+        //     resolve(proxy)
+        //   }
+        //   document.head.appendChild(script);
 
-        })`,
+        // })`,
       },
       // library: { type: 'var', name: 'runtime_remote' },
       filename: 'remoteEntry.js',
