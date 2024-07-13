@@ -210,6 +210,7 @@ export function preloadAssets(
           cb: () => {},
           attrs: {
             fetchpriority: 'high',
+            type: remoteInfo?.type === 'module' ? 'module' : 'text/javascript',
           },
           createScriptHook: (url: string) => {
             const res = host.loaderHook.lifecycle.createScript.emit({
