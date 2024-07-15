@@ -5,10 +5,16 @@ import type { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@mo
 export interface PluginOptions {
   config?: moduleFederationPlugin.ModuleFederationPluginOptions;
   configPath?: string;
-  webpackPluginImplementation?: typeof WebpackModuleFederationPlugin;
-  rspackPluginImplementation?: typeof RspackModuleFederationPlugin;
 }
 
+export interface InternalModernPluginOptions {
+  csrConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
+  ssrConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
+  distOutputDir: string;
+  originPluginOptions: PluginOptions;
+  browserPlugin?: BundlerPlugin;
+  nodePlugin?: BundlerPlugin;
+}
 export type BundlerPlugin =
   | WebpackModuleFederationPlugin
   | RspackModuleFederationPlugin;

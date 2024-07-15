@@ -35,13 +35,6 @@ export const getMFConfig = async (
   const mfConfig = (await import(preBundlePath))
     .default as unknown as moduleFederationPlugin.ModuleFederationPluginOptions;
 
-  await replaceRemoteUrl(mfConfig);
-  if (mfConfig.remoteType === undefined) {
-    mfConfig.remoteType = 'script';
-  }
-  if (!mfConfig.name) {
-    throw new Error(`${PLUGIN_IDENTIFIER} mfConfig.name can not be empty!`);
-  }
   return mfConfig;
 };
 
@@ -54,9 +47,9 @@ const injectRuntimePlugins = (
   }
 };
 
-const replaceRemoteUrl = async (
+const replaceRemoteUrl = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-): Promise<void> => {
+) => {
   if (!mfConfig.remotes) {
     return;
   }
@@ -135,6 +128,13 @@ export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
 ) => {
+  replaceRemoteUrl(mfConfig);
+  if (mfConfig.remoteType === undefined) {
+    mfConfig.remoteType = 'script';
+  }
+  if (!mfConfig.name) {
+    throw new Error(`${PLUGIN_IDENTIFIER} mfConfig.name can not be empty!`);
+  }
   const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
 
   patchDTSConfig(mfConfig, isServer);
@@ -165,52 +165,38 @@ export const patchMFConfig = (
       path.resolve(__dirname, './mfRuntimePlugins/inject-node-fetch.js'),
       runtimePlugins,
     );
-  }
 
-  if (!isServer) {
-    return {
-      ...mfConfig,
-      runtimePlugins,
-    };
-  }
-
-  return {
-    ...mfConfig,
-    runtimePlugins,
-    dts: false,
-    dev: false,
-  };
-};
-
-export function getTargetEnvConfig(
-  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  isServer: boolean,
-) {
-  const patchedMFConfig = patchMFConfig(mfConfig, isServer);
-  if (isServer) {
-    return {
-      library: {
+    if (!mfConfig.library) {
+      mfConfig.library = {
         type: 'commonjs-module',
         name: mfConfig.name,
-      },
-      ...patchedMFConfig,
-    };
+      };
+    } else {
+      if (!mfConfig.library.type) {
+        mfConfig.library.type = 'commonjs-module';
+      }
+      if (!mfConfig.library.name) {
+        mfConfig.library.name = mfConfig.name;
+      }
+    }
   }
 
-  if (patchedMFConfig.library?.type === 'commonjs-module') {
-    return {
-      ...patchedMFConfig,
-      library: {
-        ...mfConfig.library,
-        type: 'global',
-      },
-    };
+  mfConfig.runtimePlugins = runtimePlugins;
+
+  if (!isServer) {
+    if (mfConfig.library?.type === 'commonjs-module') {
+      mfConfig.library.type = 'global';
+    }
+    return mfConfig;
   }
 
-  return patchedMFConfig;
-}
+  mfConfig.dts = false;
+  mfConfig.dev = false;
 
-export function patchWebpackConfig<T extends Bundler>(options: {
+  return mfConfig;
+};
+
+export function patchBundlerConfig<T extends Bundler>(options: {
   bundlerConfig: BundlerConfig<T>;
   isServer: boolean;
   modernjsConfig: UserConfig<AppTools>;

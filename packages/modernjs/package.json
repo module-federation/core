@@ -25,6 +25,16 @@
     "./ssr-runtime": {
       "types": "./dist/types/ssr-runtime/index.d.ts",
       "default": "./dist/esm/ssr-runtime/index.js"
+    },
+    "./config-plugin": {
+      "import": "./dist/esm/cli/configPlugin.js",
+      "require": "./dist/cjs/cli/configPlugin.js",
+      "types": "./dist/types/cli/configPlugin.d.ts"
+    },
+    "./ssr-plugin": {
+      "import": "./dist/esm/cli/ssrPlugin.js",
+      "require": "./dist/cjs/cli/ssrPlugin.js",
+      "types": "./dist/types/cli/ssrPlugin.d.ts"
     }
   },
   "typesVersions": {
@@ -35,8 +45,11 @@
       "runtime": [
         "./dist/types/runtime/index.d.ts"
       ],
-      "ssr-runtime": [
-        "./dist/types/ssr-runtime/index.d.ts"
+      "config-plugin": [
+        "./dist/types/cli/configPlugin.d.ts"
+      ],
+      "ssr-plugin": [
+        "./dist/types/cli/ssrPlugin.d.ts"
       ]
     }
   },
