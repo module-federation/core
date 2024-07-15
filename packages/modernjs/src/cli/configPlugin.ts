@@ -88,8 +88,10 @@ export const moduleFederationConfigPlugin = (
 
     const modernjsConfig = useConfigContext();
     const mfConfig = await getMFConfig(userConfig.originPluginOptions);
-    const csrConfig = JSON.parse(JSON.stringify(mfConfig));
-    const ssrConfig = JSON.parse(JSON.stringify(mfConfig));
+    const csrConfig =
+      userConfig.csrConfig || JSON.parse(JSON.stringify(mfConfig));
+    const ssrConfig =
+      userConfig.ssrConfig || JSON.parse(JSON.stringify(mfConfig));
     userConfig.ssrConfig = ssrConfig;
     userConfig.csrConfig = csrConfig;
 
