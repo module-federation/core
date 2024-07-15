@@ -1,6 +1,6 @@
 # React Bridge
 
-`@module-federation/bridge-react` 提供了用于 React 应用的 `bridge` 工具函数，其提供的 `createBridgeComponent` 可用于导出应用级别模块，`createRemoteComponent` 用于加载应用级别模块。[Demo](https://github.com/module-federation/core/core/tree/main/apps/router-demo)
+`@module-federation/bridge-react` 提供了用于 React 应用的 `bridge` 工具函数，其提供的 `createBridgeComponent` 可用于导出应用级别模块，`createRemoteComponent` 用于加载应用级别模块。[Demo](https://github.com/module-federation/core/tree/main/apps/router-demo)
 
 
 ### 安装
@@ -173,7 +173,7 @@ function App() {
     <Routes>
       <Route
         path="/remote1/*"
-        {/* 通过 memoryRoute 来讲子应用路由控制为 memoryRouter，将不会直接将 url 展示在浏览器地址上  */}
+        {/* 通过 memoryRoute 来将子应用路由控制为 memoryRouter，将不会直接将 url 展示在浏览器地址上  */}
         Component={() => <Remote1App fallback={<div>loading</div>} memoryRoute={{ entryPath: '/detail' }}/>}
       />
     </Routes>
