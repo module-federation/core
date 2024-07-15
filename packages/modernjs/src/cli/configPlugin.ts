@@ -5,10 +5,6 @@ import type {
   UserConfig,
   Bundler,
 } from '@modern-js/app-tools';
-import {
-  StreamingTargetPlugin,
-  EntryChunkTrackerPlugin,
-} from '@module-federation/node';
 import type { BundlerConfig } from '../interfaces/bundler';
 import type { InternalModernPluginOptions } from '../types';
 import {
@@ -18,7 +14,6 @@ import {
   patchMFConfig,
 } from './utils';
 import { moduleFederationPlugin } from '@module-federation/sdk';
-import { isDev } from './constant';
 
 export function setEnv(enableSSR: boolean) {
   if (enableSSR) {
@@ -99,17 +94,6 @@ export const moduleFederationConfigPlugin = (
       config: async () => {
         const bundlerType =
           useAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
-
-        // const WebpackPluginConstructor =
-        //   userConfig.webpackPluginImplementation ||
-        //   WebpackModuleFederationPlugin;
-        // const RspackPluginConstructor =
-        //   userConfig.rspackPluginImplementation || RspackModuleFederationPlugin;
-
-        // const MFBundlerPlugin =
-        //   bundlerType === 'rspack'
-        //     ? RspackPluginConstructor
-        //     : WebpackPluginConstructor;
         const ipv4 = getIPV4();
 
         return {
@@ -120,20 +104,10 @@ export const moduleFederationConfigPlugin = (
                 mfConfig: isServer ? ssrConfig : csrConfig,
                 config,
                 isServer,
-                // MFBundlerPlugin,
                 modernjsConfig,
               });
               userConfig.distOutputDir =
                 config.output?.path || path.resolve(process.cwd(), 'dist');
-              // if(res.browserPlugin){
-              //   userConfig.browserPlugin = res.browserPlugin;
-              // }
-              // if(res.nodePlugin){
-              //   userConfig.nodePlugin = res.nodePlugin;
-              // }
-              // if(res.distOutputDir){
-              //   userConfig.distOutputDir = res.distOutputDir
-              // }
             },
             webpack(config, { isServer }) {
               modifyBundlerConfig({

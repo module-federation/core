@@ -61,9 +61,9 @@ export const moduleFederationSSRPlugin = (
                   userConfig.nodePlugin = new ModuleFederationPlugin(
                     userConfig.ssrConfig,
                   );
+                  // @ts-ignore
+                  config.plugins?.push(userConfig.nodePlugin);
                 }
-                // @ts-ignore
-                config.plugins?.push(userConfig.nodePlugin);
                 config.plugins?.push(
                   new StreamingTargetPlugin(userConfig.nodePlugin),
                 );
