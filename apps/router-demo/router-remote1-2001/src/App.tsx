@@ -1,5 +1,6 @@
 import { Image } from 'antd';
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+// @ts-ignore
+import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
 import {
   StyleProvider,
   legacyLogicalPropertiesTransformer,
@@ -84,10 +85,18 @@ const App = (info: any) => {
             </Link>
           </li>
         </ul>
-        <Routes>
-          <Route path="/" Component={Home} />
-          <Route path="/detail" Component={Detail} />
-        </Routes>
+
+        <Switch>
+          <Route path="/home">
+            <Home />
+          </Route>
+          <Route path="/detail">
+            <Detail />
+          </Route>
+          <Route path="/">
+            <Home />
+          </Route>
+        </Switch>
       </BrowserRouter>
       {/* <style ref="text/css">
         {

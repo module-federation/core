@@ -22,6 +22,8 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         router: path.resolve(__dirname, 'src/router.tsx'),
+        'router-v5': path.resolve(__dirname, 'src/router-v5.tsx'),
+        'router-v6': path.resolve(__dirname, 'src/router-v6.tsx'),
       },
       formats: ['cjs', 'es'],
       fileName: (format, entryName) => `${entryName}.${format}.js`,
@@ -31,7 +33,8 @@ export default defineConfig({
         ...perDepsKeys,
         '@remix-run/router',
         'react-router',
-        // 'react-router-dom/',
+        'react-router-dom/',
+        'react-router-dom/index.js',
         'react-router-dom/dist/index.js',
       ],
     },

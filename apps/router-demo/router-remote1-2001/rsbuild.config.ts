@@ -10,11 +10,11 @@ export default defineConfig({
     alias: {
       react: path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
-      // 'react-router-dom': path.resolve(__dirname, 'node_modules/react-router-dom'),
-      // 'react-router-dom$': path.resolve(
-      //   __dirname,
-      //   'node_modules/@module-federation/bridge-react/dist/router.es.js',
-      // ),
+      // set `react-router-dom/` to reference react-router-dom v5 which shoule be find in node_modules/react-router-dom, otherwise it will cause app.tsx fail to work which in react-router-dom v5 mode.
+      'react-router-dom/$': path.resolve(
+        __dirname,
+        'node_modules/react-router-dom',
+      ),
     },
   },
   server: {

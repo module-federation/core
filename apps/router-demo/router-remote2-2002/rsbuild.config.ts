@@ -1,4 +1,6 @@
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+// import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
+
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import path from 'path';
@@ -12,11 +14,6 @@ export default defineConfig({
     alias: {
       react: path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
-      // 'react-router-dom': path.resolve(__dirname, 'node_modules/react-router-dom'),
-      // 'react-router-dom$': path.resolve(
-      //   __dirname,
-      //   'node_modules/@module-federation/bridge-react/dist/router.es.js',
-      // ),
     },
   },
   server: {
@@ -28,7 +25,7 @@ export default defineConfig({
     assetPrefix: 'http://localhost:2002',
   },
   tools: {
-    rspack: (config, { appendPlugins }) => {
+    webpack: (config, { appendPlugins }) => {
       config.output!.uniqueName = 'remote2';
       delete config.optimization?.splitChunks;
       appendPlugins([
