@@ -145,7 +145,6 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
     : IKey;
 
   return (props: ComponentType) => {
-    const { key, ...rest } = props;
     const exportName = info?.export || 'default';
     const LazyComponent = React.lazy(async () => {
       try {
@@ -166,7 +165,7 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
             default: () => (
               <>
                 {assets}
-                <Com {...rest} />
+                <Com {...props} />
               </>
             ),
           };
