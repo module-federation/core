@@ -28,10 +28,18 @@ export function modifyBundlerConfig<T extends Bundler>(options: {
   config: BundlerConfig<T>;
   isServer: boolean;
   modernjsConfig: UserConfig<AppTools>;
+  remoteIpStrategy?: 'ipv4' | 'inherit';
 }) {
-  const { mfConfig, config, isServer, modernjsConfig, bundlerType } = options;
+  const {
+    mfConfig,
+    config,
+    isServer,
+    modernjsConfig,
+    bundlerType,
+    remoteIpStrategy = 'ipv4',
+  } = options;
 
-  patchMFConfig(mfConfig, isServer);
+  patchMFConfig(mfConfig, isServer, remoteIpStrategy);
 
   // let browserPlugin: BundlerPlugin | undefined = undefined;
   // let nodePlugin: BundlerPlugin | undefined= undefined;
@@ -105,6 +113,7 @@ export const moduleFederationConfigPlugin = (
                 config,
                 isServer,
                 modernjsConfig,
+                remoteIpStrategy: userConfig.remoteIpStrategy,
               });
               userConfig.distOutputDir =
                 config.output?.path || path.resolve(process.cwd(), 'dist');
@@ -116,6 +125,7 @@ export const moduleFederationConfigPlugin = (
                 config,
                 isServer,
                 modernjsConfig,
+                remoteIpStrategy: userConfig.remoteIpStrategy,
               });
 
               userConfig.distOutputDir =

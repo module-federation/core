@@ -49,7 +49,11 @@ const injectRuntimePlugins = (
 
 const replaceRemoteUrl = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  remoteIpStrategy?: 'ipv4' | 'inherit',
 ) => {
+  if (remoteIpStrategy && remoteIpStrategy === 'inherit') {
+    return;
+  }
   if (!mfConfig.remotes) {
     return;
   }
@@ -127,8 +131,9 @@ const patchDTSConfig = (
 export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
+  remoteIpStrategy?: 'ipv4' | 'inherit',
 ) => {
-  replaceRemoteUrl(mfConfig);
+  replaceRemoteUrl(mfConfig, remoteIpStrategy);
   if (mfConfig.remoteType === undefined) {
     mfConfig.remoteType = 'script';
   }

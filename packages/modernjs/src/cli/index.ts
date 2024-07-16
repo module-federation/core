@@ -19,6 +19,7 @@ export const moduleFederationPlugin = (
     nodePlugin: undefined,
     distOutputDir: '',
     originPluginOptions: userConfig,
+    remoteIpStrategy: userConfig?.remoteIpStrategy,
   };
   return {
     name: '@modern-js/plugin-module-federation',
