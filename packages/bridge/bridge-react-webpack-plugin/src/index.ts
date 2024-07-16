@@ -45,8 +45,8 @@ class ReactBridgeAliasChangerPlugin {
         // Update the webpack configuration
         compiler.options.resolve = {
           // allow this config to be override
-          alias: updatedAlias,
           ...originalResolve,
+          alias: updatedAlias,
         };
       }
     });
