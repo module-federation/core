@@ -14,6 +14,8 @@ type IProps = {
   injectLink?: boolean;
 };
 
+type IKey = { key?: React.Key | null };
+
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
   const { name, expose } = instance.remoteHandler.idToRemoteMap[id] || {};
   if (!name) {
@@ -138,11 +140,12 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
 }) {
   type ComponentType = T[E] extends (...args: any) => any
     ? Parameters<T[E]>[0] extends undefined
-      ? Record<string, never>
-      : Parameters<T[E]>[0]
-    : Record<string, never>;
+      ? IKey
+      : Parameters<T[E]>[0] & IKey
+    : IKey;
 
   return (props: ComponentType) => {
+    const { key, ...rest } = props;
     const exportName = info?.export || 'default';
     const LazyComponent = React.lazy(async () => {
       try {
@@ -163,7 +166,7 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
             default: () => (
               <>
                 {assets}
-                <Com {...props} />
+                <Com {...rest} />
               </>
             ),
           };
