@@ -3,7 +3,7 @@ import {
   warn,
   composeKeyWithSeparator,
 } from '@module-federation/sdk';
-import { getInfoWithoutType, globalLoading } from '../global';
+import { Global, getInfoWithoutType, globalLoading } from '../global';
 import type { ModuleInfo, GlobalModuleInfo } from '@module-federation/sdk';
 import {
   Options,
@@ -548,6 +548,11 @@ export class RemoteHandler {
             getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
           if (remoteKey) {
             delete hostGlobalSnapshot.remotesInfo[remoteKey];
+            if (
+              Boolean(Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey])
+            ) {
+              delete Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey];
+            }
           }
         }
 
