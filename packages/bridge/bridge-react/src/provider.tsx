@@ -11,6 +11,7 @@ import { LoggerInstance, atLeastReact18 } from './utils';
 
 type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
+  render?: (App: React.ReactElement, id?: HTMLElement | string) => ReactDOMClient.Root;
 };
 
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
@@ -18,12 +19,12 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
     const rootMap = new Map<any, ReactDOMClient.Root>();
 
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
-      const { appInfo, propsInfo } = info;
+      const { appInfo, propsInfo, ...restProps } = info;
       const { name, memoryRoute, basename = '/' } = appInfo;
 
       return (
         <RouterContext.Provider value={{ name, basename, memoryRoute }}>
-          <bridgeInfo.rootComponent {...propsInfo} basename={basename} />
+          <bridgeInfo.rootComponent {...propsInfo} basename={basename} {...restProps} />
         </RouterContext.Provider>
       );
     };
@@ -32,22 +33,38 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
       render(info: RenderFnParams & any) {
         LoggerInstance.log(`createBridgeComponent render Info`, info);
         const { name, basename, memoryRoute, ...propsInfo } = info;
-
         if (atLeastReact18(React)) {
-          const root = ReactDOMClient.createRoot(info.dom);
+          // if render is provided by user
+          let root = null;
+          if (bridgeInfo?.render) {
+            root = bridgeInfo?.render(
+              <RawComponent
+                propsInfo={propsInfo}
+                appInfo={{
+                  name,
+                  basename,
+                  memoryRoute,
+                }}
+              />,
+              info.dom
+            );
+          } else {
+            root = ReactDOMClient.createRoot(info.dom);
+            root.render(
+              <RawComponent
+                propsInfo={propsInfo}
+                appInfo={{
+                  name,
+                  basename,
+                  memoryRoute,
+                }}
+              />,
+            );
+          }
           rootMap.set(info.dom, root);
-          root.render(
-            <RawComponent
-              propsInfo={propsInfo}
-              appInfo={{
-                name,
-                basename,
-                memoryRoute,
-              }}
-            />,
-          );
         } else {
-          ReactDOM.render(
+          const renderFunc = bridgeInfo?.render || ReactDOM.render;
+          renderFunc(
             <RawComponent
               propsInfo={propsInfo}
               appInfo={{
