@@ -59,8 +59,6 @@
     "lodash.get": "4.4.2",
     "next": "14.1.2",
     "rambda": "7.5.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
     "react-router-dom": "6.22.3",
     "regenerator-runtime": "0.14.1",
     "sharp": "^0.33.2",

@@ -45,19 +45,19 @@ module.exports = composePlugins(
           },
           react: {
             singleton: true,
-            requiredVersion: '^18.2.0',
+            requiredVersion: '^18.3.0',
           },
           'react/': {
             singleton: true,
-            requiredVersion: '^18.2.0',
+            requiredVersion: '^18.3.0',
           },
           'react-dom': {
             singleton: true,
-            requiredVersion: '^18.2.0',
+            requiredVersion: '^18.3.0',
           },
           'react-dom/': {
             singleton: true,
-            requiredVersion: '^18.2.0',
+            requiredVersion: '^18.3.0',
           },
         },
         runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
