@@ -56,7 +56,7 @@ cd myorganization
 +
 [source, bash]
 ----
-npm install @nrwl/angular
+npm install @nx/angular
 ----
 
 === Generating the Applications
