@@ -93,7 +93,7 @@ const Index = (): JSX.Element => {
             </td>
             <td>
               <Suspense fallback={<div>Loading...</div>}>
-                {showComponent && <NewRemoteCom />}
+                {showComponent && <NewRemoteCom text="" />}
               </Suspense>
             </td>
           </tr>

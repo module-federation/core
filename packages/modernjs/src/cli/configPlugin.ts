@@ -41,24 +41,6 @@ export function modifyBundlerConfig<T extends Bundler>(options: {
 
   patchMFConfig(mfConfig, isServer, remoteIpStrategy);
 
-  // let browserPlugin: BundlerPlugin | undefined = undefined;
-  // let nodePlugin: BundlerPlugin | undefined= undefined;
-  // let distOutputDir = '';
-  // const envConfig = getTargetEnvConfig(mfConfig, isServer);
-  // if (isServer) {
-  //   // nodePlugin = new MFBundlerPlugin(envConfig);
-  //   // config.plugins?.push(nodePlugin);
-  //   config.plugins?.push(new StreamingTargetPlugin(mfConfig));
-  //   if (isDev) {
-  //     config.plugins?.push(new EntryChunkTrackerPlugin());
-  //   }
-  // } else {
-  //   // distOutputDir =
-  //   //   config.output?.path || path.resolve(process.cwd(), 'dist');
-  //   // browserPlugin = new MFBundlerPlugin(envConfig);
-  //   // config.plugins?.push(browserPlugin);
-  // }
-
   patchBundlerConfig({
     bundlerConfig: config,
     isServer,
@@ -75,10 +57,6 @@ export function modifyBundlerConfig<T extends Bundler>(options: {
       return false;
     });
   }
-
-  // return {
-  //   distOutputDir
-  // }
 }
 
 export const moduleFederationConfigPlugin = (

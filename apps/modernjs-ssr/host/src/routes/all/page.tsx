@@ -26,7 +26,7 @@ const DynamicRemote = React.lazy(() =>
 
 const Remote = React.lazy(() => {
   return import('remote/Image').then((r) => {
-    return new Promise((resolve) => {
+    return new Promise<typeof import('remote/Image')>((resolve) => {
       setTimeout(() => {
         resolve(r);
       }, 2000);
@@ -36,7 +36,7 @@ const Remote = React.lazy(() => {
 
 const NestedRemote = React.lazy(() => {
   return import('nested_remote/Content').then((r) => {
-    return new Promise((resolve) => {
+    return new Promise<typeof import('nested_remote/Content')>((resolve) => {
       setTimeout(() => {
         resolve(r);
       }, 1000);
@@ -71,7 +71,7 @@ const Index = (): JSX.Element => {
               </button>
             </td>
             <td>
-              <Suspense loading={'loading remote for 2000ms'}>
+              <Suspense fallback={'loading remote for 2000ms'}>
                 <Remote />
               </Suspense>
             </td>
@@ -92,7 +92,7 @@ const Index = (): JSX.Element => {
               </button>
             </td>
             <td>
-              <Suspense loading={'loading nested remote for 1000ms'}>
+              <Suspense fallback={'loading nested remote for 1000ms'}>
                 <NestedRemote />
               </Suspense>
             </td>
@@ -110,7 +110,7 @@ const Index = (): JSX.Element => {
               </button>
             </td>
             <td>
-              <DynamicRemote />
+              <DynamicRemote text="" />
             </td>
           </tr>
 
