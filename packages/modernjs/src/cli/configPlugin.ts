@@ -87,8 +87,6 @@ export const moduleFederationConfigPlugin = (
   name: '@modern-js/plugin-module-federation-config',
   post: ['@modern-js/plugin-module-federation'],
   setup: async ({ useConfigContext, useAppContext }) => {
-    console.log('config plugin');
-
     const modernjsConfig = useConfigContext();
     const mfConfig = await getMFConfig(userConfig.originPluginOptions);
     const csrConfig =

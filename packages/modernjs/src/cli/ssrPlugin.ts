@@ -25,7 +25,6 @@ export const moduleFederationSSRPlugin = (
     '@modern-js/plugin-module-federation',
   ],
   setup: async ({ useConfigContext }) => {
-    console.log('ssr plugin');
     const modernjsConfig = useConfigContext();
     const enableSSR = Boolean(modernjsConfig?.server?.ssr);
     if (!enableSSR) {

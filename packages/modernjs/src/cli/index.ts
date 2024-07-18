@@ -24,8 +24,6 @@ export const moduleFederationPlugin = (
   return {
     name: '@modern-js/plugin-module-federation',
     setup: async ({ useConfigContext }) => {
-      console.log('main plugin');
-
       const modernjsConfig = useConfigContext();
       return {
         config: async () => {
