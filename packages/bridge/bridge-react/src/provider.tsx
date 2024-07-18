@@ -9,15 +9,15 @@ import type {
 } from '@module-federation/bridge-shared';
 import { LoggerInstance, atLeastReact18 } from './utils';
 
+type RootType = HTMLElement | ReactDOMClient.Root;
 type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
-  render?: (App: React.ReactElement, id?: HTMLElement | string) => ReactDOMClient.Root;
+  render?: (App: React.ReactElement, id?: HTMLElement | string) => RootType | Promise<RootType>;
 };
 
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
   return () => {
-    const rootMap = new Map<any, ReactDOMClient.Root>();
-
+    const rootMap = new Map<any, RootType>();
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
       const { name, memoryRoute, basename = '/' } = appInfo;
@@ -30,14 +30,13 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
     };
 
     return {
-      render(info: RenderFnParams & any) {
+      async render(info: RenderFnParams & any) {
         LoggerInstance.log(`createBridgeComponent render Info`, info);
         const { name, basename, memoryRoute, ...propsInfo } = info;
         if (atLeastReact18(React)) {
-          // if render is provided by user
-          let root = null;
+          // render is provided by user
           if (bridgeInfo?.render) {
-            root = bridgeInfo?.render(
+            Promise.resolve(bridgeInfo?.render(
               <RawComponent
                 propsInfo={propsInfo}
                 appInfo={{
@@ -47,9 +46,9 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
                 }}
               />,
               info.dom
-            );
+            )).then((root: RootType) => rootMap.set(info.dom, root));
           } else {
-            root = ReactDOMClient.createRoot(info.dom);
+            const root: RootType = ReactDOMClient.createRoot(info.dom);
             root.render(
               <RawComponent
                 propsInfo={propsInfo}
@@ -60,8 +59,8 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
                 }}
               />,
             );
+            rootMap.set(info.dom, root);
           }
-          rootMap.set(info.dom, root);
         } else {
           const renderFunc = bridgeInfo?.render || ReactDOM.render;
           renderFunc(
@@ -77,13 +76,13 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           );
         }
       },
-      destroy(info: { dom: HTMLElement }) {
+      async destroy(info: { dom: HTMLElement }) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
         if (atLeastReact18(React)) {
           const root = rootMap.get(info.dom);
-          root?.unmount();
+          (root as ReactDOMClient.Root)?.unmount();
         } else {
           ReactDOM.unmountComponentAtNode(info.dom);
         }
@@ -101,5 +100,3 @@ export function ShadowRoot(info: { children: () => JSX.Element }) {
 
   return <div ref={domRef}>{root && <info.children />}</div>;
 }
-
-// function ShadowContent() {}
