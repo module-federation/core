@@ -71,11 +71,11 @@
   "devDependencies": {
     "@types/hoist-non-react-statics": "3.3.2",
     "@module-federation/manifest": "workspace:*",
-    "@modern-js/app-tools": "^2.55.0",
-    "@modern-js/core": "^2.55.0",
-    "@modern-js/runtime": "^2.55.0",
-    "@modern-js/module-tools": "^2.55.0",
-    "@modern-js/tsconfig": "^2.55.0"
+    "@modern-js/app-tools": "^2.56.0",
+    "@modern-js/core": "^2.56.0",
+    "@modern-js/runtime": "^2.56.0",
+    "@modern-js/module-tools": "^2.56.0",
+    "@modern-js/tsconfig": "^2.56.0"
   },
   "peerDependencies": {
     "react": ">=17",
