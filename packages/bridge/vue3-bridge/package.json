@@ -6,7 +6,7 @@
     "access": "public"
   },
   "type": "module",
-  "main": "./dist/index.umd.js",
+  "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
   "scripts": {
