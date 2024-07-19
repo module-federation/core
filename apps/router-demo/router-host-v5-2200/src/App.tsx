@@ -1,24 +1,35 @@
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { BrowserRouter, Route } from 'react-router-dom';
 import './App.css';
 import Navigation from './navigation';
 import Home from './pages/Home';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 import { createRemoteComponent } from '@module-federation/bridge-react';
-import { withErrorBoundary } from 'react-error-boundary';
 
 const FallbackErrorComp = (info: any) => {
   return <div>{info?.error?.message}</div>;
 };
 
-const Remote1App = withErrorBoundary(
-  createRemoteComponent(() => loadRemote('remote1/export-app')),
-  {
-    FallbackComponent: FallbackErrorComp,
-  },
-);
-
 const FallbackComp = <div>loading</div>;
+
+const Remote1App = createRemoteComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  fallback: FallbackErrorComp,
+  loading: FallbackComp,
+});
+
+const Remote2App = createRemoteComponent({
+  loader: () => import('remote2/export-app'),
+  export: 'provider',
+  fallback: FallbackErrorComp,
+  loading: FallbackComp,
+});
+
+const Remote3App = createRemoteComponent({
+  loader: () => loadRemote('remote3/export-app'),
+  fallback: FallbackErrorComp,
+  loading: FallbackComp,
+}) as (info: any) => React.JSX.Element;
 
 const App = () => {
   const [initialEntrie, setInitialEntrie] = useState('/');
@@ -29,9 +40,22 @@ const App = () => {
       <Route exact path="/">
         <Home />
       </Route>
-      <Route path="/remote1">
-        <Remote1App fallback={FallbackComp} />
-      </Route>
+      <Route
+        path="/remote1"
+        render={() => (
+          <Suspense fallback={FallbackComp} >
+            <Remote1App />
+          </Suspense>
+        )}
+      />
+      <Route
+        path="/remote3"
+        render={() => (
+          <Suspense fallback={FallbackComp} >
+            <Remote3App />
+          </Suspense>
+        )}
+      />
     </BrowserRouter>
   );
 };
