@@ -5,4 +5,4 @@
 '@module-federation/sdk': patch
 ---
 
-chore: use tsc cmd to compile ts
+fix(dts-plugin): support compile vue@3 dts

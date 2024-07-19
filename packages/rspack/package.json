@@ -45,7 +45,7 @@
   },
   "peerDependencies": {
     "typescript": "^4.9.0 || ^5.0.0",
-    "vue-tsc": "^1.0.24 || ^2.0.0"
+    "vue-tsc": ">=1.0.24"
   },
   "peerDependenciesMeta": {
     "typescript": {
