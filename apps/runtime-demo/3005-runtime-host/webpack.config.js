@@ -45,6 +45,9 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       exposes: {
         './Button': './src/Button.tsx',
       },
+      dts: {
+        tsConfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
+      },
       shared: {
         lodash: {
           singleton: true,
