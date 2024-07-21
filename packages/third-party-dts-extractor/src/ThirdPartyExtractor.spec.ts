@@ -47,8 +47,8 @@ describe('ThirdPartyExtractor', () => {
     ).toEqual(true);
   });
 
-  it('copyDts to dest dir', () => {
-    thirdPartyExtractor.copyDts();
+  it('copyDts to dest dir', async () => {
+    await thirdPartyExtractor.copyDts();
     expect(fs.existsSync(join(destDir, 'tsup'))).toEqual(true);
     expect(fs.existsSync(join(destDir, '@types/react'))).toEqual(true);
   });
