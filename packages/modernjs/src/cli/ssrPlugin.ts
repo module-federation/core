@@ -49,9 +49,9 @@ export const moduleFederationSSRPlugin = (
           tools: {
             rspack(config, { isServer }) {
               if (isServer) {
-                throw new Error(
-                  `${PLUGIN_IDENTIFIER} Not support rspack ssr mode yet !`,
-                );
+                // throw new Error(
+                //   `${PLUGIN_IDENTIFIER} Not support rspack ssr mode yet !`,
+                // );
               }
             },
             webpack(config, { isServer }) {
@@ -63,9 +63,9 @@ export const moduleFederationSSRPlugin = (
                   // @ts-ignore
                   config.plugins?.push(userConfig.nodePlugin);
                 }
-                config.plugins?.push(
-                  new StreamingTargetPlugin(userConfig.nodePlugin),
-                );
+                // config.plugins?.push(
+                //   new StreamingTargetPlugin(userConfig.nodePlugin),
+                // );
                 if (isDev) {
                   config.plugins?.push(new EntryChunkTrackerPlugin());
                 }
