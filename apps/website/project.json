@@ -18,14 +18,14 @@
       }
     },
     "build.client": {
-      "executor": "@nrwl/vite:build",
+      "executor": "@nx/vite:build",
       "options": {
         "outputPath": "dist/apps/website",
         "configFile": "apps/website/vite.config.ts"
       }
     },
     "build.ssr": {
-      "executor": "@nrwl/vite:build",
+      "executor": "@nx/vite:build",
       "defaultConfiguration": "preview",
       "options": {
         "outputPath": "dist/apps/website"
@@ -41,14 +41,14 @@
       }
     },
     "preview": {
-      "executor": "@nrwl/vite:preview-server",
+      "executor": "@nx/vite:preview-server",
       "options": {
         "buildTarget": "website:build",
         "port": 4300
       }
     },
     "test": {
-      "executor": "@nrwl/vite:test",
+      "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/apps/website"],
       "options": {
         "passWithNoTests": true,
@@ -56,7 +56,7 @@
       }
     },
     "serve": {
-      "executor": "@nrwl/vite:dev-server",
+      "executor": "@nx/vite:dev-server",
       "options": {
         "buildTarget": "website:build.client",
         "mode": "ssr",

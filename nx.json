@@ -2,9 +2,6 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "npmScope": "module-federation",
   "defaultProject": "3000-home",
-  "affected": {
-    "defaultBase": "main"
-  },
   "tasksRunnerOptions": {
     "default": {
       "runner": "nx-cloud",
@@ -44,6 +41,15 @@
     },
     "e2e": {
       "inputs": ["default", "^production"]
+    },
+    "@nx/webpack:webpack": {
+      "inputs": [
+        "production",
+        "^production",
+        {
+          "env": "NX_MF_DEV_SERVER_STATIC_REMOTES"
+        }
+      ]
     }
   },
   "namedInputs": {
@@ -99,5 +105,7 @@
       "linter": "eslint",
       "unitTestRunner": "none"
     }
-  }
+  },
+  "useInferencePlugins": false,
+  "defaultBase": "main"
 }

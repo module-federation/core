@@ -12,13 +12,13 @@ In standard scenarios, TailwindCSS efficiently generates only the CSS classes us
 
 === The Complication with Module Federation
 
-Problems arise when integrating TailwindCSS into Module Federation setups. Imagine multiple applications ("remotes") sharing components and each generating its own TailwindCSS classes. These applications can inadvertently interfere with each other due to the global nature of CSS. 
+Problems arise when integrating TailwindCSS into Module Federation setups. Imagine multiple applications ("remotes") sharing components and each generating its own TailwindCSS classes. These applications can inadvertently interfere with each other due to the global nature of CSS.
 
 === Illustrative Example
 
 Consider two applications, `app1` and `app2`, each using TailwindCSS:
 
-==== Application #1 
+==== Application #1
 
 `app1`'s code:
 
@@ -54,7 +54,7 @@ The display behavior of the `div` element within App 1 varies according to the s
 2. **Medium Screens (640px to 767px)**: As the screen size expands to 640 pixels or more, the `div` becomes hidden.
 3. **Large Screens (768px and above)**: Once the screen size reaches 768 pixels, the `div` becomes visible again.
 
-==== Application #2 
+==== Application #2
 
 `app2`'s code:
 
@@ -128,7 +128,7 @@ The fundamental issue stems from the separate generation and integration of mult
 
 - **Consolidating TailwindCSS Classes into One File**: The proposed solution is to amalgamate all TailwindCSS classes into a single file and include it just once in the project.
 
-- **Practicality and Limitations**: 
+- **Practicality and Limitations**:
   - **File Size Concerns**: This method, while seemingly straightforward, leads to the creation of an excessively large CSS file, potentially spanning several hundred megabytes. Such a file size is generally impractical and not feasible for most web applications.
   - **Compatibility Issues with TailwindCSS Version 3**: It's important to note that TailwindCSS has discontinued support for this kind of functionality starting from version 3. This change further complicates the implementation of this solution, making it less viable for projects using the latest versions of TailwindCSS.
 
@@ -234,7 +234,7 @@ This method involves utilizing `twin.macro`, a library that enables the use of T
 ==== Personal Experience and Decision Rationale:
 
 - **Chosen Solution in Practice**: This strategy was selected when encountering a similar problem, primarily due to its ability to preserve an excellent developer experience.
-- **Developer Experience Priority**: The choice to use `twin.macro` was driven by the need to maintain a smooth and efficient workflow for developers, a critical aspect for the success of the project. 
+- **Developer Experience Priority**: The choice to use `twin.macro` was driven by the need to maintain a smooth and efficient workflow for developers, a critical aspect for the success of the project.
 
 By balancing the technical solution with the developer experience, this approach offers a practical way to handle class name conflicts in a module federation environment, despite the trade-off in runtime performance.
 
@@ -259,7 +259,7 @@ npm install tailwindcss postcss autoprefixer
 +
 [source, bash]
 ----
-npx nx generate @nrwl/angular:setup-tailwind [remoteName]
+npx nx generate @nx/angular:setup-tailwind [remoteName]
 ----
 +
 Replace `[remoteName]` with your application's name. This step configures `tailwind.config.js` and updates the global stylesheet with Tailwind imports.

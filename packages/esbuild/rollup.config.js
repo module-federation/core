@@ -10,8 +10,7 @@ module.exports = (rollupConfig, projectOptions) => {
   //   helpers: 'packages/runtime/src/helpers.ts',
   // };
 
-  const project = projectOptions.project;
-  const pkg = require(project);
+  const pkg = require('./package.json');
 
   if (rollupConfig.output.format === 'esm' && FEDERATION_DEBUG) {
     rollupConfig.output.format = 'iife';
