@@ -164,6 +164,9 @@ export const compileTs = async (
     try {
       await execPromise(cmd);
     } catch (err) {
+      if (isDebugMode()) {
+        console.log(JSON.stringify(tsConfig, null, 2));
+      }
       throw new Error(`compile TS failed, the original command is '${cmd}'`);
     }
 
