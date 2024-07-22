@@ -1,5 +1,14 @@
 # @module-federation/dts-plugin
 
+## 0.2.8
+
+### Patch Changes
+
+- f3d13c2: fix(dts-plugin): ensure dts file path if it has deep path
+  - @module-federation/sdk@0.2.8
+  - @module-federation/managers@0.2.8
+  - @module-federation/third-party-dts-extractor@0.2.8
+
 ## 0.2.7
 
 ### Patch Changes
