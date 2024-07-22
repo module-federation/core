@@ -3,6 +3,8 @@ import { defineConfig } from 'vite';
 
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 
+process.env.FEDERATION_DEBUG = 'true';
+
 export default defineConfig({
   cacheDir: '../../node_modules/.vite/dts-plugin',
 
