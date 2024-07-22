@@ -206,6 +206,9 @@ export const compileTs = async (
 
     await rm(tempTsConfigJsonPath);
   } catch (err) {
+    if (isDebugMode()) {
+      console.log('tsconfig: ', JSON.stringify(tsConfig, null, 2));
+    }
     throw err;
   }
 };
