@@ -75,6 +75,7 @@ describe('DTSManager advance usage', () => {
     } catch (err) {
       console.log('generateTypes failed');
       console.error(err);
+      console.log(err.stack);
     }
 
     const apiFile = `${distFolder}.d.ts`;
