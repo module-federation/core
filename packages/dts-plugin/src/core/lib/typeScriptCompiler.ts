@@ -204,21 +204,20 @@ export const compileTs = async (
       cb,
       mapExposeToEntry,
     });
-
+    console.log('processTypesFile: done');
     if (remoteOptions.extractThirdParty) {
       await thirdPartyExtractor.copyDts();
+      console.log('thirdPartyExtractor.copyDts: done');
     }
 
     await rm(tempTsConfigJsonPath);
   } catch (err) {
-    if (isDebugMode()) {
-      console.log('tsconfig: ', JSON.stringify(tsConfig, null, 2));
-      console.log('tempTsConfigJsonPath: ', tempTsConfigJsonPath);
-      console.log(
-        'tempTsConfigJson: ',
-        readFileSync(tempTsConfigJsonPath, 'utf-8'),
-      );
-    }
+    console.log('tsconfig: ', JSON.stringify(tsConfig, null, 2));
+    console.log('tempTsConfigJsonPath: ', tempTsConfigJsonPath);
+    console.log(
+      'tempTsConfigJson: ',
+      readFileSync(tempTsConfigJsonPath, 'utf-8'),
+    );
     throw err;
   }
 };
