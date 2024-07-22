@@ -18,7 +18,7 @@ const Index = (): JSX.Element => {
           <tr>
             <td>✅</td>
             <td>
-              This component is from a remote(localhost:3007) which nest a
+              This component is from a remote(localhost:3052) which nest a
               static remote
             </td>
             <td>

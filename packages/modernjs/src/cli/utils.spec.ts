@@ -1,6 +1,6 @@
 import { it, expect, describe } from 'vitest';
 import path from 'path';
-import { getTargetEnvConfig, patchWebpackConfig } from './utils';
+import { patchMFConfig, patchBundlerConfig, getIPV4 } from './utils';
 
 const mfConfig = {
   name: 'host',
@@ -13,11 +13,13 @@ const mfConfig = {
     'react-dom': { singleton: true, eager: true },
   },
 };
-describe('getTargetEnvConfig', async () => {
-  it('getTargetEnvConfig: server', async () => {
-    const targetEnvConfig = getTargetEnvConfig(mfConfig, true);
+describe('patchMFConfig', async () => {
+  it('patchMFConfig: server', async () => {
+    const patchedConfig = JSON.parse(JSON.stringify(mfConfig));
+    patchMFConfig(patchedConfig, true);
+    const ipv4 = getIPV4();
 
-    expect(targetEnvConfig).toStrictEqual({
+    expect(patchedConfig).toStrictEqual({
       dev: false,
       dts: false,
       filename: 'remoteEntry.js',
@@ -27,8 +29,9 @@ describe('getTargetEnvConfig', async () => {
       },
       name: 'host',
       remotes: {
-        remote: 'http://localhost:3000/remoteEntry.js',
+        remote: `http://${ipv4}:3000/remoteEntry.js`,
       },
+      remoteType: 'script',
       runtimePlugins: [
         path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
         path.resolve(__dirname, './mfRuntimePlugins/inject-node-fetch.js'),
@@ -46,15 +49,18 @@ describe('getTargetEnvConfig', async () => {
     });
   });
 
-  it('getTargetEnvConfig: client', async () => {
-    const targetEnvConfig = getTargetEnvConfig(mfConfig, false);
+  it('patchMFConfig: client', async () => {
+    const patchedConfig = JSON.parse(JSON.stringify(mfConfig));
+    patchMFConfig(patchedConfig, false);
+    const ipv4 = getIPV4();
 
-    expect(targetEnvConfig).toStrictEqual({
+    expect(patchedConfig).toStrictEqual({
       filename: 'remoteEntry.js',
       name: 'host',
       remotes: {
-        remote: 'http://localhost:3000/remoteEntry.js',
+        remote: `http://${ipv4}:3000/remoteEntry.js`,
       },
+      remoteType: 'script',
       runtimePlugins: [
         path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
       ],
@@ -77,14 +83,14 @@ describe('getTargetEnvConfig', async () => {
   });
 });
 
-describe('patchWebpackConfig', async () => {
-  it('patchWebpackConfig: server', async () => {
+describe('patchBundlerConfig', async () => {
+  it('patchBundlerConfig: server', async () => {
     const bundlerConfig = {
       output: {
         publicPath: 'auto',
       },
     };
-    patchWebpackConfig<'webpack'>({
+    patchBundlerConfig<'webpack'>({
       bundlerConfig,
       isServer: true,
       modernjsConfig: {
@@ -106,13 +112,13 @@ describe('patchWebpackConfig', async () => {
     });
   });
 
-  it('patchWebpackConfig: client', async () => {
+  it('patchBundlerConfig: client', async () => {
     const bundlerConfig = {
       output: {
         publicPath: 'auto',
       },
     };
-    patchWebpackConfig<'webpack'>({
+    patchBundlerConfig<'webpack'>({
       bundlerConfig,
       isServer: false,
       modernjsConfig: {

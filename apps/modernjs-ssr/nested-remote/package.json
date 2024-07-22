@@ -25,7 +25,7 @@
     "dist/"
   ],
   "dependencies": {
-    "@modern-js/runtime": "2.54.2",
+    "@modern-js/runtime": "0.0.0-next-20240718100102",
     "react": "~18.2.0",
     "react-dom": "~18.2.0",
     "@module-federation/modern-js": "workspace:*",
@@ -34,10 +34,10 @@
     "antd": "4.24.15"
   },
   "devDependencies": {
-    "@modern-js/app-tools": "2.54.2",
-    "@modern-js/eslint-config": "2.54.2",
-    "@modern-js/tsconfig": "2.54.2",
-    "@modern-js-app/eslint-config": "2.54.2",
+    "@modern-js/app-tools": "0.0.0-next-20240718100102",
+    "@modern-js/eslint-config": "0.0.0-next-20240718100102",
+    "@modern-js/tsconfig": "0.0.0-next-20240718100102",
+    "@modern-js-app/eslint-config": "0.0.0-next-20240718100102",
     "typescript": "~5.0.4",
     "@types/jest": "~29.5.0",
     "@types/node": "~16.11.7",

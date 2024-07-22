@@ -10,7 +10,7 @@ import stuff from './stuff.module.css';
 registerRemotes([
   {
     name: 'dynamic_remote',
-    entry: 'http://localhost:3008/mf-manifest.json',
+    entry: 'http://localhost:3053/mf-manifest.json',
   },
 ]);
 
@@ -27,7 +27,7 @@ const RemoteSSRComponent = createRemoteSSRComponent({
 
 const LazyButton2 = React.lazy(() =>
   import('./Button2').then((m) => {
-    return new Promise((resolve) => {
+    return new Promise<typeof import('./Button2')>((resolve) => {
       setTimeout(() => resolve(m), 2000);
     });
   }),
@@ -35,7 +35,7 @@ const LazyButton2 = React.lazy(() =>
 
 const LazyButton1 = React.lazy(() =>
   import('./Button').then((m) => {
-    return new Promise((resolve) => {
+    return new Promise<typeof import('./Button')>((resolve) => {
       setTimeout(() => resolve(m), 1000);
     });
   }),

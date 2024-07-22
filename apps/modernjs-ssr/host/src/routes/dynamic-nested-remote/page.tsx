@@ -4,7 +4,7 @@ import { loadRemote, registerRemotes } from '@modern-js/runtime/mf';
 registerRemotes([
   {
     name: 'dynamic_nested_remote',
-    entry: 'http://localhost:3009/mf-manifest.json',
+    entry: 'http://localhost:3054/mf-manifest.json',
   },
 ]);
 
@@ -31,7 +31,7 @@ const Index = (): JSX.Element => {
           <tr>
             <td>✅</td>
             <td>
-              This component is from a dynamic remote(localhost:3009) which nest
+              This component is from a dynamic remote(localhost:3054) which nest
               a dynamic remote
             </td>
             <td>

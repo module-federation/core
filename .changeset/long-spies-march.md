@@ -1,12 +1,13 @@
 ---
-'@module-federation/webpack-bundler-runtime': patch
-'@module-federation/devtools': patch
-'@module-federation/enhanced': patch
-'@module-federation/manifest': patch
-'@module-federation/modern-js': patch
-'@module-federation/runtime': patch
-'@module-federation/modernjs': patch
-'@module-federation/sdk': patch
+'@module-federation/devtools': minor
+'@module-federation/dts-plugin': minor
+'@module-federation/enhanced': minor
+'@module-federation/manifest': minor
+'@module-federation/modern-js': minor
+'@module-federation/runtime': minor
+'@module-federation/rspack': minor
+'@module-federation/node': minor
+'@module-federation/sdk': minor
 ---
 
-feat: add MFComponent
+feat: support modern.js ssr [#2348](https://github.com/module-federation/core/issues/2348)

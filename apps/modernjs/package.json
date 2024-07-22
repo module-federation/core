@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/modernjs",
   "private": true,
-  "version": "0.1.30",
+  "version": "0.1.33",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
@@ -25,17 +25,17 @@
     "dist/"
   ],
   "dependencies": {
-    "@modern-js/runtime": "2.52.0",
+    "@modern-js/runtime": "0.0.0-next-20240718100102",
     "react": "~18.2.0",
     "react-dom": "~18.2.0",
     "@module-federation/enhanced": "workspace:*",
     "@babel/runtime": "7.24.5"
   },
   "devDependencies": {
-    "@modern-js/app-tools": "2.46.1",
-    "@modern-js/eslint-config": "2.54.2",
-    "@modern-js/tsconfig": "2.46.1",
-    "@modern-js-app/eslint-config": "2.46.1",
+    "@modern-js/app-tools": "0.0.0-next-20240718100102",
+    "@modern-js/eslint-config": "0.0.0-next-20240718100102",
+    "@modern-js/tsconfig": "0.0.0-next-20240718100102",
+    "@modern-js-app/eslint-config": "0.0.0-next-20240718100102",
     "typescript": "~5.0.4",
     "@types/jest": "~29.5.0",
     "@types/node": "~20.12.12",

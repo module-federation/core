@@ -4,14 +4,12 @@ import { moduleFederationPlugin } from '@module-federation/modern-js';
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
   dev: {
-    port: 3006,
+    port: 3051,
   },
   runtime: {
     router: true,
   },
-  output: {
-    disableTsChecker: true,
-  },
+
   plugins: [appTools(), moduleFederationPlugin()],
   server: {
     ssr: {

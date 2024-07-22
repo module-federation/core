@@ -2,7 +2,7 @@ import type { Plugin } from '@modern-js/runtime';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import { SSRLiveReload } from './SSRLiveReload';
 
-export const mfPluginSSR = (): Plugin => ({
+export const mfSSRPlugin = (): Plugin => ({
   name: '@module-federation/modern-js',
 
   setup: () => {

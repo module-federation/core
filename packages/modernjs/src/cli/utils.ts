@@ -3,6 +3,7 @@ import type {
   UserConfig,
   AppTools,
   Rspack,
+  Bundler,
 } from '@modern-js/app-tools';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
 import path from 'path';
@@ -10,6 +11,7 @@ import os from 'os';
 import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
 import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
+import { BundlerConfig } from '../interfaces/bundler';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
 const isDev = process.env.NODE_ENV === 'development';
@@ -17,8 +19,8 @@ const isDev = process.env.NODE_ENV === 'development';
 export type ConfigType<T> = T extends 'webpack'
   ? webpack.Configuration
   : T extends 'rspack'
-  ? Rspack.Configuration
-  : never;
+    ? Rspack.Configuration
+    : never;
 
 export const getMFConfig = async (
   userConfig: PluginOptions,
@@ -33,13 +35,6 @@ export const getMFConfig = async (
   const mfConfig = (await import(preBundlePath))
     .default as unknown as moduleFederationPlugin.ModuleFederationPluginOptions;
 
-  await replaceRemoteUrl(mfConfig);
-  if (mfConfig.remoteType === undefined) {
-    mfConfig.remoteType = 'script';
-  }
-  if (!mfConfig.name) {
-    throw new Error(`${PLUGIN_IDENTIFIER} mfConfig.name can not be empty!`);
-  }
   return mfConfig;
 };
 
@@ -52,9 +47,13 @@ const injectRuntimePlugins = (
   }
 };
 
-const replaceRemoteUrl = async (
+const replaceRemoteUrl = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-): Promise<void> => {
+  remoteIpStrategy?: 'ipv4' | 'inherit',
+) => {
+  if (remoteIpStrategy && remoteIpStrategy === 'inherit') {
+    return;
+  }
   if (!mfConfig.remotes) {
     return;
   }
@@ -132,7 +131,15 @@ const patchDTSConfig = (
 export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
+  remoteIpStrategy?: 'ipv4' | 'inherit',
 ) => {
+  replaceRemoteUrl(mfConfig, remoteIpStrategy);
+  if (mfConfig.remoteType === undefined) {
+    mfConfig.remoteType = 'script';
+  }
+  if (!mfConfig.name) {
+    throw new Error(`${PLUGIN_IDENTIFIER} mfConfig.name can not be empty!`);
+  }
   const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
 
   patchDTSConfig(mfConfig, isServer);
@@ -163,53 +170,39 @@ export const patchMFConfig = (
       path.resolve(__dirname, './mfRuntimePlugins/inject-node-fetch.js'),
       runtimePlugins,
     );
-  }
 
-  if (!isServer) {
-    return {
-      ...mfConfig,
-      runtimePlugins,
-    };
-  }
-
-  return {
-    ...mfConfig,
-    runtimePlugins,
-    dts: false,
-    dev: false,
-  };
-};
-
-export function getTargetEnvConfig(
-  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  isServer: boolean,
-) {
-  const patchedMFConfig = patchMFConfig(mfConfig, isServer);
-  if (isServer) {
-    return {
-      library: {
+    if (!mfConfig.library) {
+      mfConfig.library = {
         type: 'commonjs-module',
         name: mfConfig.name,
-      },
-      ...patchedMFConfig,
-    };
+      };
+    } else {
+      if (!mfConfig.library.type) {
+        mfConfig.library.type = 'commonjs-module';
+      }
+      if (!mfConfig.library.name) {
+        mfConfig.library.name = mfConfig.name;
+      }
+    }
   }
 
-  if (patchedMFConfig.library?.type === 'commonjs-module') {
-    return {
-      ...patchedMFConfig,
-      library: {
-        ...mfConfig.library,
-        type: 'global',
-      },
-    };
+  mfConfig.runtimePlugins = runtimePlugins;
+
+  if (!isServer) {
+    if (mfConfig.library?.type === 'commonjs-module') {
+      mfConfig.library.type = 'global';
+    }
+    return mfConfig;
   }
 
-  return patchedMFConfig;
-}
+  mfConfig.dts = false;
+  mfConfig.dev = false;
 
-export function patchWebpackConfig<T>(options: {
-  bundlerConfig: ConfigType<T>;
+  return mfConfig;
+};
+
+export function patchBundlerConfig<T extends Bundler>(options: {
+  bundlerConfig: BundlerConfig<T>;
   isServer: boolean;
   modernjsConfig: UserConfig<AppTools>;
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -348,9 +341,9 @@ const SHARED_SPLIT_CHUNK_MAP = {
   axios: SPLIT_CHUNK_MAP.AXIOS,
 };
 
-function autoDeleteSplitChunkCacheGroups<T extends 'webpack' | 'rspack'>(
+function autoDeleteSplitChunkCacheGroups<T extends Bundler>(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  bundlerConfig: ConfigType<T>,
+  bundlerConfig: BundlerConfig<T>,
 ) {
   if (!mfConfig.shared) {
     return;

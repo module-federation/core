@@ -32,7 +32,10 @@ export function createScript(info: {
   cb?: (value: void | PromiseLike<void>) => void;
   attrs?: Record<string, any>;
   needDeleteScript?: boolean;
-  createScriptHook?: (url: string) => CreateScriptHookReturn;
+  createScriptHook?: (
+    url: string,
+    attrs?: Record<string, any> | undefined,
+  ) => CreateScriptHookReturn;
 }): { script: HTMLScriptElement; needAttach: boolean } {
   // Retrieve the existing script element by its src attribute
   let script: HTMLScriptElement | null = null;
@@ -55,7 +58,7 @@ export function createScript(info: {
     script.type = 'text/javascript';
     script.src = info.url;
     if (info.createScriptHook) {
-      const createScriptRes = info.createScriptHook(info.url);
+      const createScriptRes = info.createScriptHook(info.url, info.attrs);
 
       if (createScriptRes instanceof HTMLScriptElement) {
         script = createScriptRes;
@@ -202,7 +205,10 @@ export function loadScript(
   url: string,
   info: {
     attrs?: Record<string, any>;
-    createScriptHook?: (url: string) => CreateScriptHookReturn;
+    createScriptHook?: (
+      url: string,
+      attrs?: Record<string, any> | undefined,
+    ) => CreateScriptHookReturn;
   },
 ) {
   const { attrs = {}, createScriptHook } = info;
@@ -211,7 +217,6 @@ export function loadScript(
       url,
       cb: resolve,
       attrs: {
-        crossorigin: 'anonymous',
         fetchpriority: 'high',
         ...attrs,
       },

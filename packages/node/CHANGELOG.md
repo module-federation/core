@@ -1,5 +1,43 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.4.0
+
+### Minor Changes
+
+- 91bf689: dynamic import callback handler passed to vm. may require NODE_OPTIONS="--experimental-vm-modules"
+
+### Patch Changes
+
+- 54bcdd1: remove loggers from node runtime plugin
+- Updated dependencies [4488064]
+- Updated dependencies [91bf689]
+  - @module-federation/enhanced@0.2.6
+  - @module-federation/sdk@0.2.6
+  - @module-federation/runtime@0.2.6
+  - @module-federation/utilities@3.0.33
+
+## 2.3.2
+
+### Patch Changes
+
+- Updated dependencies [8cce571]
+  - @module-federation/runtime@0.2.5
+  - @module-federation/sdk@0.2.5
+  - @module-federation/enhanced@0.2.5
+  - @module-federation/utilities@3.0.32
+
+## 2.3.1
+
+### Patch Changes
+
+- Updated dependencies [60cd259]
+- Updated dependencies [09b792d]
+- Updated dependencies [09b792d]
+  - @module-federation/runtime@0.2.4
+  - @module-federation/sdk@0.2.4
+  - @module-federation/enhanced@0.2.4
+  - @module-federation/utilities@3.0.31
+
 ## 2.3.0
 
 ### Minor Changes

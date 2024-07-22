@@ -61,7 +61,7 @@
       "options": {
         "buildTarget": "node-dynamic-remote:build",
         "hmr": true,
-        "port": 3006
+        "port": 3026
       },
       "configurations": {
         "development": {

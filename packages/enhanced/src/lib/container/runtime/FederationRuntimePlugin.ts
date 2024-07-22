@@ -1,4 +1,4 @@
-import type { Compiler, sources } from 'webpack';
+import type { Compiler } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import {
@@ -12,7 +12,6 @@ import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import HoistContainerReferencesPlugin from '../HoistContainerReferencesPlugin';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),

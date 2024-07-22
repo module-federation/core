@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.2.3",
+  "version": "0.2.6",
   "scripts": {
     "build:storybook": "storybook build",
     "storybook": "storybook dev -p 6006",
@@ -61,9 +61,9 @@
   },
   "devDependencies": {
     "@types/dagre": "^0.7.52",
-    "@modern-js-app/eslint-config": "2.46.1",
+    "@modern-js-app/eslint-config": "2.54.6",
     "@modern-js/app-tools": "2.46.1",
-    "@modern-js/eslint-config": "2.54.2",
+    "@modern-js/eslint-config": "2.54.6",
     "@modern-js/tsconfig": "2.46.1",
     "@modern-js/module-tools": "2.46.1",
     "@modern-js/builder-webpack-provider": "2.46.1",

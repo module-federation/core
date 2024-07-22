@@ -89,6 +89,7 @@ export class FederationHost {
       [
         {
           url: string;
+          attrs?: Record<string, any>;
         },
       ],
       CreateScriptHookReturn

@@ -5,10 +5,18 @@ import type { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@mo
 export interface PluginOptions {
   config?: moduleFederationPlugin.ModuleFederationPluginOptions;
   configPath?: string;
-  webpackPluginImplementation?: typeof WebpackModuleFederationPlugin;
-  rspackPluginImplementation?: typeof RspackModuleFederationPlugin;
+  remoteIpStrategy?: 'ipv4' | 'inherit';
 }
 
+export interface InternalModernPluginOptions {
+  csrConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
+  ssrConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
+  distOutputDir: string;
+  originPluginOptions: PluginOptions;
+  browserPlugin?: BundlerPlugin;
+  nodePlugin?: BundlerPlugin;
+  remoteIpStrategy?: 'ipv4' | 'inherit';
+}
 export type BundlerPlugin =
   | WebpackModuleFederationPlugin
   | RspackModuleFederationPlugin;

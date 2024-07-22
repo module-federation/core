@@ -18,7 +18,7 @@ const App: React.FC = () => {
     key: i,
     label: i,
     icon: <span className={i}></span>,
-    onClick: ({ key }) => {
+    onClick: ({ key }: { key: string }) => {
       if (key === 'home') {
         navi(`/`);
       } else {

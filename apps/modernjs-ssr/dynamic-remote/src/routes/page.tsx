@@ -5,7 +5,7 @@ import Image from '../components/Image';
 const Index = () => (
   <div className="container-box">
     <React.Suspense>
-      <Image />
+      <Image text="" />
     </React.Suspense>
   </div>
 );

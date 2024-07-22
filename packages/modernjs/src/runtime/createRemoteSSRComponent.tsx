@@ -14,6 +14,8 @@ type IProps = {
   injectLink?: boolean;
 };
 
+type ReactKey = { key?: React.Key | null };
+
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
   const { name, expose } = instance.remoteHandler.idToRemoteMap[id] || {};
   if (!name) {
@@ -50,8 +52,8 @@ function getTargetModuleInfo(id: string) {
     'publicPath' in snapshot
       ? snapshot.publicPath
       : 'getPublicPath' in snapshot
-      ? new Function(snapshot.getPublicPath)()
-      : '';
+        ? new Function(snapshot.getPublicPath)()
+        : '';
   if (!publicPath) {
     return;
   }
@@ -138,9 +140,9 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
 }) {
   type ComponentType = T[E] extends (...args: any) => any
     ? Parameters<T[E]>[0] extends undefined
-      ? Record<string, never>
-      : Parameters<T[E]>[0]
-    : Record<string, never>;
+      ? ReactKey
+      : Parameters<T[E]>[0] & ReactKey
+    : ReactKey;
 
   return (props: ComponentType) => {
     const exportName = info?.export || 'default';
