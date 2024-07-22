@@ -5,7 +5,7 @@ import { readFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { describe, expect, it, vi, afterAll } from 'vitest';
 import { DTSManager } from './DTSManager';
-const TEST_DIT_DIR = 'dist-test';
+const TEST_DIT_DIR = 'dist-test-new';
 
 describe('DTSManager advance usage', () => {
   const projectRoot = join(__dirname, '../../..');

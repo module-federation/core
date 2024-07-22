@@ -6,7 +6,7 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noFallthroughCasesInSwitch": true,
-    "outDir": "dist-test"
+    "outDir": "dist-test-new"
   },
   "files": [],
   "include": [],

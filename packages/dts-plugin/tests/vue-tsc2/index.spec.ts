@@ -3,7 +3,7 @@ import { join } from 'path';
 import { describe, expect, it } from 'vitest';
 import { generateTypes, type RemoteOptions } from '../../src/core';
 
-const TEST_DIT_DIR = 'dist-test';
+const TEST_DIT_DIR = 'dist-test-new';
 
 describe('DTSManager', () => {
   const typesFolder = '@mf-types-dts-vue-test';

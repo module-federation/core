@@ -7,7 +7,7 @@ import { describe, expect, it, vi, afterAll } from 'vitest';
 import { DTSManager } from './DTSManager';
 import { UpdateMode } from '../constant';
 
-const TEST_DIT_DIR = 'dist-test';
+const TEST_DIT_DIR = 'dist-test-new';
 
 describe('DTSManager', () => {
   const projectRoot = join(__dirname, '../../..');

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { join } from 'path';
 import dirTree from 'directory-tree';
 import { execSync } from 'child_process';
-const TEST_DIT_DIR = 'dist-test';
+const TEST_DIT_DIR = 'dist-test-new';
 
 describe('generateTypesInChildProcess', () => {
   const projectRoot = join(__dirname, '../../..');

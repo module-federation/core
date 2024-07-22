@@ -3,6 +3,6 @@
   "compilerOptions": {
     "noEmit": false,
     "composite": true,
-    "outDir": "dist-test"
+    "outDir": "dist-test-new"
   }
 }
