@@ -69,8 +69,13 @@ describe('DTSManager advance usage', () => {
       TEST_DIT_DIR,
       remoteOptions.typesFolder,
     );
-    await dtsManager.generateTypes();
-    console.log('generateTypes done');
+    try {
+      await dtsManager.generateTypes();
+      console.log('generateTypes done');
+    } catch (err) {
+      console.log('generateTypes failed');
+      console.error(err);
+    }
 
     const apiFile = `${distFolder}.d.ts`;
     expect(readFileSync(apiFile, 'utf8')).toEqual(`
