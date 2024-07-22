@@ -140,7 +140,7 @@ class DTSManager {
         return;
       }
 
-      this.extractRemoteTypes({
+      await this.extractRemoteTypes({
         remoteOptions,
         tsConfig,
         mapComponentsToExpose,

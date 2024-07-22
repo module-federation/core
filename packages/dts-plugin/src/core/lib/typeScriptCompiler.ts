@@ -129,6 +129,7 @@ const processTypesFile = async (options: {
         .replace(STARTS_WITH_SLASH, '')
         .split(sep) // Windows platform-specific file system path fix
         .join('/');
+      ensureDirSync(mfeTypeEntryDirectory);
       await writeFile(
         mfeTypeEntry,
         `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`,
