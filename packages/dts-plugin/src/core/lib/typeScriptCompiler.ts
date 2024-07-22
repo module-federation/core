@@ -213,11 +213,6 @@ export const compileTs = async (
   } catch (err) {
     if (isDebugMode()) {
       console.log('tsconfig: ', JSON.stringify(tsConfig, null, 2));
-      console.log('tempTsConfigJsonPath: ', tempTsConfigJsonPath);
-      console.log(
-        'tempTsConfigJson: ',
-        readFileSync(tempTsConfigJsonPath, 'utf-8'),
-      );
     }
     throw err;
   }
