@@ -3,6 +3,7 @@ import { fs } from '@modern-js/utils';
 import type { CliPlugin, AppTools } from '@modern-js/app-tools';
 import type { InternalModernPluginOptions } from '../types';
 import { ModuleFederationPlugin } from '@module-federation/enhanced';
+import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import {
   StreamingTargetPlugin,
   EntryChunkTrackerPlugin,
@@ -52,6 +53,18 @@ export const moduleFederationSSRPlugin = (
                 // throw new Error(
                 //   `${PLUGIN_IDENTIFIER} Not support rspack ssr mode yet !`,
                 // );
+                if (!userConfig.nodePlugin) {
+                  userConfig.nodePlugin = new RspackModuleFederationPlugin(
+                    userConfig.ssrConfig,
+                  );
+                  // @ts-ignore
+                  config.plugins?.push(userConfig.nodePlugin);
+                }
+              } else {
+                userConfig.distOutputDir =
+                  userConfig.distOutputDir ||
+                  config.output?.path ||
+                  path.resolve(process.cwd(), 'dist');
               }
             },
             webpack(config, { isServer }) {

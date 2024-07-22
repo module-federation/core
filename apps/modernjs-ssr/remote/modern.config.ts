@@ -10,7 +10,12 @@ export default defineConfig({
     router: true,
   },
 
-  plugins: [appTools(), moduleFederationPlugin()],
+  plugins: [
+    appTools({
+      bundler: 'experimental-rspack',
+    }),
+    moduleFederationPlugin(),
+  ],
   server: {
     ssr: {
       mode: 'stream',
