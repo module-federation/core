@@ -48,6 +48,14 @@ const App = () => {
           </Suspense>
         )}
       />
+       <Route
+        path="/remote2"
+        render={() => (
+          <Suspense fallback={FallbackComp} >
+            <Remote2App />
+          </Suspense>
+        )}
+      />
       <Route
         path="/remote3"
         render={() => (

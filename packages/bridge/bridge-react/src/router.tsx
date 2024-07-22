@@ -53,10 +53,8 @@ function WraperRouterProvider(
   const createBrowserRouter = (ReactRouterDom as any)[
     'create' + 'BrowserRouter'
   ];
-  console.log('=======resolve to v5!!');
+ 
   if (!routerContextProps) return <RouterProvider {...props} />;
-
-  console.log('=======resolve to v6!!');
 
   if (routerContextProps.memoryRoute) {
     const MemeoryRouterInstance = createMemoryRouter(routers, {
@@ -64,11 +62,6 @@ function WraperRouterProvider(
     });
     return <RouterProvider router={MemeoryRouterInstance} />;
   } else {
-    console.log('=======createBrowserRouter routers', routers);
-    console.log(
-      '=======createBrowserRouter routerContextProps.basename',
-      routerContextProps.basename,
-    );
     const BrowserRouterInstance = createBrowserRouter(routers, {
       basename: routerContextProps.basename,
       future: router.future,
