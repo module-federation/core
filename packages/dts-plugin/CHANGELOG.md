@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 0.2.7
+
+### Patch Changes
+
+- b00ef13: fix(dts-plugin): support compile vue@3 dts
+- Updated dependencies [b00ef13]
+  - @module-federation/third-party-dts-extractor@0.2.7
+  - @module-federation/sdk@0.2.7
+  - @module-federation/managers@0.2.7
+
 ## 0.2.6
 
 ### Patch Changes
