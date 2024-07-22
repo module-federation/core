@@ -168,9 +168,12 @@ class DTSManager {
         if (isDebugMode()) {
           console.error(err);
         }
+        console.error(err);
       }
       console.log(ansiColors.green('Federated types created correctly'));
     } catch (error) {
+      console.error(error);
+
       if (this.options.remote?.abortOnError === false) {
         console.error(
           ansiColors.red(`Unable to compile federated types, ${error}`),

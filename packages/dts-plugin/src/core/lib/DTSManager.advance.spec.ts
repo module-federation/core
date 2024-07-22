@@ -39,7 +39,7 @@ describe('DTSManager advance usage', () => {
       name: 'moduleFederationTypescript',
       filename: 'remoteEntry.js',
       remotes: {
-        remotes: 'remote@https://bar.it',
+        remotes: 'remote@https://bar333.it',
       },
       shared: {
         react: { singleton: true, eager: true },

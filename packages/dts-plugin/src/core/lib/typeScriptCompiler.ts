@@ -98,50 +98,55 @@ const processTypesFile = async (options: {
   cb: (dts: string) => void;
   mapExposeToEntry: Record<string, string>;
 }) => {
-  const { outDir, filePath, rootDir, cb, mapExposeToEntry, mfTypePath } =
-    options;
-  if (!existsSync(filePath)) {
-    return;
-  }
-  const stats = await stat(filePath);
-
-  if (stats.isDirectory()) {
-    const files = await readdir(filePath);
-    await Promise.all(
-      files.map((file) =>
-        processTypesFile({
-          ...options,
-          filePath: join(filePath, file),
-        }),
-      ),
-    );
-  } else if (filePath.endsWith('.d.ts')) {
-    const exposeKey = getExposeKey({
-      filePath,
-      rootDir,
-      outDir,
-      mapExposeToEntry,
-    });
-    if (exposeKey) {
-      const sourceEntry = exposeKey === '.' ? 'index' : exposeKey;
-      const mfeTypeEntry = join(
-        mfTypePath,
-        `${sourceEntry}${DEFINITION_FILE_EXTENSION}`,
-      );
-      const mfeTypeEntryDirectory = dirname(mfeTypeEntry);
-      const relativePathToOutput = relative(mfeTypeEntryDirectory, filePath)
-        .replace(DEFINITION_FILE_EXTENSION, '')
-        .replace(STARTS_WITH_SLASH, '')
-        .split(sep) // Windows platform-specific file system path fix
-        .join('/');
-      ensureDirSync(mfeTypeEntryDirectory);
-      await writeFile(
-        mfeTypeEntry,
-        `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`,
-      );
+  try {
+    const { outDir, filePath, rootDir, cb, mapExposeToEntry, mfTypePath } =
+      options;
+    if (!existsSync(filePath)) {
+      return;
     }
-    const content = await readFile(filePath, 'utf8');
-    cb(content);
+    const stats = await stat(filePath);
+
+    if (stats.isDirectory()) {
+      const files = await readdir(filePath);
+      await Promise.all(
+        files.map((file) =>
+          processTypesFile({
+            ...options,
+            filePath: join(filePath, file),
+          }),
+        ),
+      );
+    } else if (filePath.endsWith('.d.ts')) {
+      const exposeKey = getExposeKey({
+        filePath,
+        rootDir,
+        outDir,
+        mapExposeToEntry,
+      });
+      if (exposeKey) {
+        const sourceEntry = exposeKey === '.' ? 'index' : exposeKey;
+        const mfeTypeEntry = join(
+          mfTypePath,
+          `${sourceEntry}${DEFINITION_FILE_EXTENSION}`,
+        );
+        const mfeTypeEntryDirectory = dirname(mfeTypeEntry);
+        const relativePathToOutput = relative(mfeTypeEntryDirectory, filePath)
+          .replace(DEFINITION_FILE_EXTENSION, '')
+          .replace(STARTS_WITH_SLASH, '')
+          .split(sep) // Windows platform-specific file system path fix
+          .join('/');
+        ensureDirSync(mfeTypeEntryDirectory);
+        await writeFile(
+          mfeTypeEntry,
+          `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`,
+        );
+      }
+      const content = await readFile(filePath, 'utf8');
+      cb(content);
+    }
+  } catch (err) {
+    console.log('processTypesFile failed: ', options);
+    console.error(err);
   }
 };
 
