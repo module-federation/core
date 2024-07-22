@@ -1,5 +1,12 @@
 # host-vue3
 
+## 1.0.9
+
+### Patch Changes
+
+- @module-federation/enhanced@0.2.8
+- @module-federation/bridge-vue3@0.2.8
+
 ## 1.0.8
 
 ### Patch Changes
