@@ -1,7 +1,7 @@
 {
   "name": "modernjs-ssr-dynamic-remote",
   "private": true,
-  "version": "0.1.11",
+  "version": "0.1.12",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",

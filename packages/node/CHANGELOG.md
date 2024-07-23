@@ -1,5 +1,19 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.5.0
+
+### Minor Changes
+
+- fa37cc4: feat: support modern.js ssr [#2348](https://github.com/module-federation/core/issues/2348)
+
+### Patch Changes
+
+- Updated dependencies [fa37cc4]
+  - @module-federation/enhanced@0.3.0
+  - @module-federation/runtime@0.3.0
+  - @module-federation/sdk@0.3.0
+  - @module-federation/utilities@3.0.36
+
 ## 2.4.2
 
 ### Patch Changes

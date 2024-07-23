@@ -1,5 +1,23 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.3.0
+
+### Minor Changes
+
+- fa37cc4: feat: support modern.js ssr [#2348](https://github.com/module-federation/core/issues/2348)
+
+### Patch Changes
+
+- Updated dependencies [7c4d99b]
+- Updated dependencies [fa37cc4]
+  - @module-federation/dts-plugin@0.3.0
+  - @module-federation/manifest@0.3.0
+  - @module-federation/rspack@0.3.0
+  - @module-federation/sdk@0.3.0
+  - @module-federation/runtime-tools@0.3.0
+  - @module-federation/bridge-react-webpack-plugin@0.3.0
+  - @module-federation/managers@0.3.0
+
 ## 0.2.8
 
 ### Patch Changes

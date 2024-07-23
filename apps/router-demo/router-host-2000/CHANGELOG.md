@@ -1,5 +1,13 @@
 # host
 
+## 1.0.10
+
+### Patch Changes
+
+- Updated dependencies [fa37cc4]
+  - @module-federation/enhanced@0.3.0
+  - @module-federation/bridge-react@0.3.0
+
 ## 1.0.9
 
 ### Patch Changes

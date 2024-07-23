@@ -1,5 +1,19 @@
 # @module-federation/dts-plugin
 
+## 0.3.0
+
+### Minor Changes
+
+- fa37cc4: feat: support modern.js ssr [#2348](https://github.com/module-federation/core/issues/2348)
+
+### Patch Changes
+
+- 7c4d99b: fix(dts-plugin): temp tsconfig path should extends original tsconfig
+- Updated dependencies [fa37cc4]
+  - @module-federation/sdk@0.3.0
+  - @module-federation/managers@0.3.0
+  - @module-federation/third-party-dts-extractor@0.3.0
+
 ## 0.2.8
 
 ### Patch Changes
