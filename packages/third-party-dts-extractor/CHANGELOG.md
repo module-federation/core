@@ -1,5 +1,7 @@
 # @module-federation/third-party-dts-extractor
 
+## 0.3.0
+
 ## 0.2.8
 
 ## 0.2.7
