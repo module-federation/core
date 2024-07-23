@@ -9,11 +9,15 @@ export default defineConfig({
   plugins: [nxViteTsPaths()],
 
   test: {
+    // cache: false,
     cache: {
       dir: '../../node_modules/.vitest',
     },
     environment: 'node',
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    include: [
+      'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
+      'tests/**/*.spec.ts',
+    ],
     reporters: ['default'],
     testTimeout: 60000,
   },

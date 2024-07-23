@@ -1,5 +1,32 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.2.8
+
+### Patch Changes
+
+- Updated dependencies [f3d13c2]
+  - @module-federation/dts-plugin@0.2.8
+  - @module-federation/manifest@0.2.8
+  - @module-federation/rspack@0.2.8
+  - @module-federation/sdk@0.2.8
+  - @module-federation/runtime-tools@0.2.8
+  - @module-federation/managers@0.2.8
+  - @module-federation/bridge-react-webpack-plugin@0.2.8
+
+## 0.2.7
+
+### Patch Changes
+
+- b00ef13: fix(dts-plugin): support compile vue@3 dts
+- Updated dependencies [b00ef13]
+  - @module-federation/dts-plugin@0.2.7
+  - @module-federation/sdk@0.2.7
+  - @module-federation/manifest@0.2.7
+  - @module-federation/rspack@0.2.7
+  - @module-federation/bridge-react-webpack-plugin@0.2.7
+  - @module-federation/managers@0.2.7
+  - @module-federation/runtime-tools@0.2.7
+
 ## 0.2.6
 
 ### Patch Changes

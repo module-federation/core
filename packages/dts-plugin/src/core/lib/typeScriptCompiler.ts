@@ -1,53 +1,52 @@
-import ansiColors from 'ansi-colors';
-import { dirname, join, normalize, relative, resolve, sep } from 'path';
-import typescript from 'typescript';
+import { ensureDirSync, writeFileSync, existsSync } from 'fs-extra';
+import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
+import { randomUUID } from 'crypto';
+import {
+  dirname,
+  join,
+  normalize,
+  relative,
+  resolve,
+  sep,
+  extname,
+  isAbsolute,
+} from 'path';
 import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extractor';
+import { exec } from 'child_process';
+import util from 'util';
+import { TEMP_DIR } from '@module-federation/sdk';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
+import { TsConfigJson } from '../interfaces/TsConfigJson';
+import { isDebugMode } from './utils';
 
 const STARTS_WITH_SLASH = /^\//;
 
 const DEFINITION_FILE_EXTENSION = '.d.ts';
 
-const reportCompileDiagnostic = (diagnostic: typescript.Diagnostic): void => {
-  const { line } = diagnostic.file!.getLineAndCharacterOfPosition(
-    diagnostic.start!,
-  );
-
-  console.error(
-    ansiColors.red(
-      `TS Error ${diagnostic.code}':' ${typescript.flattenDiagnosticMessageText(
-        diagnostic.messageText,
-        typescript.sys.newLine,
-      )}`,
-    ),
-  );
-  console.error(
-    ansiColors.red(
-      `         at ${diagnostic.file!.fileName}:${
-        line + 1
-      } typescript.sys.newLine`,
-    ),
-  );
-};
-
 export const retrieveMfTypesPath = (
-  tsConfig: typescript.CompilerOptions,
-  remoteOptions: Required<RemoteOptions>,
-) => normalize(tsConfig.outDir!.replace(remoteOptions.compiledTypesFolder, ''));
-
-export const retrieveOriginalOutDir = (
-  tsConfig: typescript.CompilerOptions,
+  tsConfig: TsConfigJson,
   remoteOptions: Required<RemoteOptions>,
 ) =>
   normalize(
-    tsConfig
+    tsConfig.compilerOptions.outDir!.replace(
+      remoteOptions.compiledTypesFolder,
+      '',
+    ),
+  );
+
+export const retrieveOriginalOutDir = (
+  tsConfig: TsConfigJson,
+  remoteOptions: Required<RemoteOptions>,
+) =>
+  normalize(
+    tsConfig.compilerOptions
       .outDir!.replace(remoteOptions.compiledTypesFolder, '')
       .replace(remoteOptions.typesFolder, ''),
   );
 
 export const retrieveMfAPITypesPath = (
-  tsConfig: typescript.CompilerOptions,
+  tsConfig: TsConfigJson,
   remoteOptions: Required<RemoteOptions>,
 ) =>
   join(
@@ -55,121 +54,161 @@ export const retrieveMfAPITypesPath = (
     `${remoteOptions.typesFolder}.d.ts`,
   );
 
-const createHost = (
-  mapComponentsToExpose: Record<string, string>,
-  tsConfig: typescript.CompilerOptions,
-  remoteOptions: Required<RemoteOptions>,
-  cb: (dts: string) => void,
-) => {
-  const host = typescript.createCompilerHost(tsConfig);
-  const originalWriteFile = host.writeFile;
-  const mapExposeToEntry = Object.fromEntries(
-    Object.entries(mapComponentsToExpose).map(([exposed, filename]) => [
-      normalize(filename),
-      exposed,
-    ]),
+function writeTempTsConfig(tsConfig: TsConfigJson, context: string) {
+  const tempTsConfigJsonPath = resolve(
+    context,
+    'node_modules',
+    TEMP_DIR,
+    `tsconfig.${randomUUID()}.json`,
   );
-  const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
+  ensureDirSync(dirname(tempTsConfigJsonPath));
+  writeFileSync(tempTsConfigJsonPath, JSON.stringify(tsConfig, null, 2));
+  return tempTsConfigJsonPath;
+}
 
-  host.writeFile = (
-    filepath,
-    text,
-    writeOrderByteMark,
-    onError,
-    sourceFiles,
-    data,
-  ) => {
-    originalWriteFile(
-      filepath,
-      text,
-      writeOrderByteMark,
-      onError,
-      sourceFiles,
-      data,
+const removeExt = (f: string): string => {
+  const ext = extname(f);
+  const regexPattern = new RegExp(`\\${ext}$`);
+  return f.replace(regexPattern, '');
+};
+
+function getExposeKey(options: {
+  filePath: string;
+  rootDir: string;
+  outDir: string;
+  mapExposeToEntry: Record<string, string>;
+}) {
+  const { filePath, rootDir, outDir, mapExposeToEntry } = options;
+  const relativeFilePath = removeExt(
+    relative(outDir, filePath.replace(new RegExp(`\\.d.ts$`), '')),
+  );
+  return mapExposeToEntry[relativeFilePath];
+}
+
+const processTypesFile = async (options: {
+  outDir: string;
+  filePath: string;
+  rootDir: string;
+  mfTypePath: string;
+  cb: (dts: string) => void;
+  mapExposeToEntry: Record<string, string>;
+}) => {
+  const { outDir, filePath, rootDir, cb, mapExposeToEntry, mfTypePath } =
+    options;
+  if (!existsSync(filePath)) {
+    return;
+  }
+  const stats = await stat(filePath);
+
+  if (stats.isDirectory()) {
+    const files = await readdir(filePath);
+    await Promise.all(
+      files.map((file) =>
+        processTypesFile({
+          ...options,
+          filePath: join(filePath, file),
+        }),
+      ),
     );
-
-    for (const sourceFile of sourceFiles || []) {
-      let sourceEntry = mapExposeToEntry[normalize(sourceFile.fileName)];
-      if (sourceEntry === '.') {
-        sourceEntry = 'index';
-      }
-      if (sourceEntry) {
-        const mfeTypeEntry = join(
-          mfTypePath,
-          `${sourceEntry}${DEFINITION_FILE_EXTENSION}`,
-        );
-        const mfeTypeEntryDirectory = dirname(mfeTypeEntry);
-        const relativePathToOutput = relative(mfeTypeEntryDirectory, filepath)
-          .replace(DEFINITION_FILE_EXTENSION, '')
-          .replace(STARTS_WITH_SLASH, '')
-          .split(sep) // Windows platform-specific file system path fix
-          .join('/');
-        originalWriteFile(
-          mfeTypeEntry,
-          `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`,
-          writeOrderByteMark,
-        );
-      }
+  } else if (filePath.endsWith('.d.ts')) {
+    const exposeKey = getExposeKey({
+      filePath,
+      rootDir,
+      outDir,
+      mapExposeToEntry,
+    });
+    if (exposeKey) {
+      const sourceEntry = exposeKey === '.' ? 'index' : exposeKey;
+      const mfeTypeEntry = join(
+        mfTypePath,
+        `${sourceEntry}${DEFINITION_FILE_EXTENSION}`,
+      );
+      const mfeTypeEntryDirectory = dirname(mfeTypeEntry);
+      const relativePathToOutput = relative(mfeTypeEntryDirectory, filePath)
+        .replace(DEFINITION_FILE_EXTENSION, '')
+        .replace(STARTS_WITH_SLASH, '')
+        .split(sep) // Windows platform-specific file system path fix
+        .join('/');
+      ensureDirSync(mfeTypeEntryDirectory);
+      await writeFile(
+        mfeTypeEntry,
+        `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`,
+      );
     }
-
-    cb(text);
-  };
-
-  return host;
-};
-
-const createVueTscProgram = (
-  programOptions: typescript.CreateProgramOptions,
-) => {
-  const vueTypescript = require('vue-tsc');
-  return vueTypescript.createProgram(programOptions);
-};
-
-const createProgram = (
-  remoteOptions: Required<RemoteOptions>,
-  programOptions: typescript.CreateProgramOptions,
-) => {
-  switch (remoteOptions.compilerInstance) {
-    case 'vue-tsc':
-      return createVueTscProgram(programOptions);
-    case 'tsc':
-    default:
-      return typescript.createProgram(programOptions);
+    const content = await readFile(filePath, 'utf8');
+    cb(content);
   }
 };
 
-export const compileTs = (
+export const compileTs = async (
   mapComponentsToExpose: Record<string, string>,
-  tsConfig: typescript.CompilerOptions,
+  tsConfig: TsConfigJson,
   remoteOptions: Required<RemoteOptions>,
 ) => {
-  const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
-  const thirdPartyExtractor = new ThirdPartyExtractor(
-    resolve(mfTypePath, 'node_modules'),
+  if (!Object.keys(mapComponentsToExpose).length) {
+    return;
+  }
+  const { compilerOptions } = tsConfig;
+  const tempTsConfigJsonPath = writeTempTsConfig(
+    tsConfig,
     remoteOptions.context,
   );
+  try {
+    const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
+    const thirdPartyExtractor = new ThirdPartyExtractor(
+      resolve(mfTypePath, 'node_modules'),
+      remoteOptions.context,
+    );
+    const execPromise = util.promisify(exec);
+    const cmd = `npx ${remoteOptions.compilerInstance} --project ${tempTsConfigJsonPath}`;
+    try {
+      await execPromise(cmd);
+    } catch (err) {
+      throw new Error(`compile TS failed, the original command is '${cmd}'`);
+    }
 
-  const cb = remoteOptions.extractThirdParty
-    ? thirdPartyExtractor.collectPkgs.bind(thirdPartyExtractor)
-    : () => undefined;
+    const mapExposeToEntry = Object.fromEntries(
+      Object.entries(mapComponentsToExpose).map(([exposed, filename]) => {
+        const normalizedFileName = normalize(filename);
+        let relativeFileName = '';
+        if (isAbsolute(normalizedFileName)) {
+          relativeFileName = relative(
+            tsConfig.compilerOptions.rootDir,
+            normalizedFileName,
+          );
+        } else {
+          relativeFileName = relative(
+            tsConfig.compilerOptions.rootDir,
+            resolve(remoteOptions.context, normalizedFileName),
+          );
+        }
 
-  const tsHost = createHost(mapComponentsToExpose, tsConfig, remoteOptions, cb);
-  const filesToCompile = [
-    ...Object.values(mapComponentsToExpose),
-    ...remoteOptions.additionalFilesToCompile,
-  ];
+        return [removeExt(relativeFileName), exposed];
+      }),
+    );
 
-  const programOptions: typescript.CreateProgramOptions = {
-    rootNames: filesToCompile,
-    host: tsHost,
-    options: tsConfig,
-  };
-  const tsProgram = createProgram(remoteOptions, programOptions);
+    const cb = remoteOptions.extractThirdParty
+      ? thirdPartyExtractor.collectPkgs.bind(thirdPartyExtractor)
+      : () => undefined;
 
-  const { diagnostics = [] } = tsProgram.emit();
-  diagnostics.forEach(reportCompileDiagnostic);
+    await processTypesFile({
+      outDir: compilerOptions.outDir,
+      filePath: compilerOptions.outDir,
+      rootDir: compilerOptions.rootDir,
+      mfTypePath,
+      cb,
+      mapExposeToEntry,
+    });
 
-  if (remoteOptions.extractThirdParty) {
-    thirdPartyExtractor.copyDts();
+    if (remoteOptions.extractThirdParty) {
+      await thirdPartyExtractor.copyDts();
+    }
+
+    await rm(tempTsConfigJsonPath);
+  } catch (err) {
+    if (isDebugMode()) {
+      console.log('tsconfig: ', JSON.stringify(tsConfig, null, 2));
+    }
+    throw err;
   }
 };
