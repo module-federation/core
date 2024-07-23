@@ -5,7 +5,7 @@ import { retrieveRemoteConfig } from './remotePlugin';
 
 describe('hostPlugin', () => {
   const moduleFederationConfig = {
-    name: 'moduleFederationHost',
+    name: 'remotePluginTestHost',
     filename: 'remoteEntry.js',
     exposes: {
       './button': './src/components/button',
@@ -35,6 +35,7 @@ describe('hostPlugin', () => {
           });
 
         expect(tsConfig).toStrictEqual({
+          extends: tsConfigPath,
           compileOnSave: false,
           compilerOptions: {
             target: 'es2017',
@@ -98,6 +99,7 @@ describe('hostPlugin', () => {
 
         expect(tsConfig).toStrictEqual({
           compileOnSave: false,
+          extends: tsConfigPath,
           compilerOptions: {
             module: 'esnext',
             resolveJsonModule: true,

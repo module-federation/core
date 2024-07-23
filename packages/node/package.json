@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "2.4.2",
+  "version": "2.5.1",
   "type": "commonjs",
   "main": "./dist/src/index.js",
   "exports": {
@@ -11,6 +11,7 @@
     },
     "./package.json": "./package.json",
     "./runtimePlugin": "./dist/src/runtimePlugin.js",
+    "./record-dynamic-remote-entry-hash-plugin": "./dist/src/recordDynamicRemoteEntryHashPlugin.js",
     "./utils": {
       "import": "./dist/src/utils/index.js",
       "require": "./dist/src/utils/index.js"
@@ -18,6 +19,22 @@
     "./src/plugins/RemotePublicPathPlugin.js": "./dist/src/plugins/RemotePublicPathPlugin.js",
     "./src/plugins/NodeFederationPlugin.js": "./dist/src/plugins/NodeFederationPlugin.js",
     "./src/": "./dist/src/"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/src/index.d.ts"
+      ],
+      "runtimePlugin": [
+        "./dist/src/runtimePlugin.d.ts"
+      ],
+      "utils": [
+        "./dist/src/utils/index.d.ts"
+      ],
+      "record-dynamic-remote-entry-hash-plugin": [
+        "./dist/src/record-dynamic-remote-entry-hash-plugin.d.ts"
+      ]
+    }
   },
   "files": [
     "dist/",
