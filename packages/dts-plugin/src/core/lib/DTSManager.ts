@@ -134,13 +134,13 @@ class DTSManager {
         return;
       }
 
-      this.extractRemoteTypes({
+      await this.extractRemoteTypes({
         remoteOptions,
         tsConfig,
         mapComponentsToExpose,
       });
 
-      compileTs(mapComponentsToExpose, tsConfig, remoteOptions);
+      await compileTs(mapComponentsToExpose, tsConfig, remoteOptions);
 
       await createTypesArchive(tsConfig, remoteOptions);
 
@@ -439,7 +439,7 @@ class DTSManager {
         if (!this.options.remote) {
           return;
         }
-        this.generateTypes();
+        await this.generateTypes();
       } else {
         const { remoteAliasMap } = this;
         if (!this.options.host) {

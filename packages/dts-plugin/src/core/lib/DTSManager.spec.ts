@@ -2,13 +2,15 @@ import AdmZip from 'adm-zip';
 import axios from 'axios';
 import dirTree from 'directory-tree';
 import { rmSync, existsSync } from 'fs';
-import { join } from 'path';
+import { basename, join } from 'path';
 import { describe, expect, it, vi, afterAll } from 'vitest';
 import { DTSManager } from './DTSManager';
 import { UpdateMode } from '../../server/constant';
 
+const TEST_DIT_DIR = 'dist-test';
+
 describe('DTSManager', () => {
-  const projectRoot = join(__dirname, '..', '..', '..', '..', '..');
+  const projectRoot = join(__dirname, '../../..');
   const typesFolder = '@mf-types-dts-test';
   const remoteOptions = {
     moduleFederationConfig: {
@@ -22,12 +24,12 @@ describe('DTSManager', () => {
         'react-dom': { singleton: true, eager: true },
       },
     },
-    tsConfigPath: join(__dirname, '../../..', './tsconfig.spec.json'),
+    tsConfigPath: join(projectRoot, './tsconfig.spec.json'),
     typesFolder: typesFolder,
     compiledTypesFolder: 'compiled-types',
     deleteTypesFolder: false,
     additionalFilesToCompile: [],
-    context: process.cwd(),
+    context: projectRoot,
   };
 
   const hostOptions = {
@@ -42,7 +44,8 @@ describe('DTSManager', () => {
         'react-dom': { singleton: true, eager: true },
       },
     },
-    typesFolder: 'dist/@mf-types-dts-test-consume-types',
+    typesFolder: `${TEST_DIT_DIR}/@mf-types-dts-test-consume-types`,
+    context: projectRoot,
   };
 
   const dtsManager = new DTSManager({
@@ -52,7 +55,7 @@ describe('DTSManager', () => {
 
   afterAll(() => {
     [
-      join(projectRoot, 'dist', remoteOptions.typesFolder),
+      join(projectRoot, TEST_DIT_DIR, remoteOptions.typesFolder),
       join(projectRoot, hostOptions.typesFolder),
     ].forEach((tmpDir) => {
       rmSync(tmpDir, { recursive: true });
@@ -60,7 +63,11 @@ describe('DTSManager', () => {
   });
 
   it('generate types', async () => {
-    const distFolder = join(projectRoot, 'dist', remoteOptions.typesFolder);
+    const distFolder = join(
+      projectRoot,
+      TEST_DIT_DIR,
+      remoteOptions.typesFolder,
+    );
     await dtsManager.generateTypes();
 
     expect(
@@ -107,6 +114,9 @@ describe('DTSManager', () => {
                                 },
                                 {
                                   name: 'RemoteOptions.d.ts',
+                                },
+                                {
+                                  name: 'TsConfigJson.d.ts',
                                 },
                               ],
                               name: 'interfaces',
@@ -229,6 +239,9 @@ describe('DTSManager', () => {
                                     {
                                       name: 'RemoteOptions.d.ts',
                                     },
+                                    {
+                                      name: 'TsConfigJson.d.ts',
+                                    },
                                   ],
                                   name: 'interfaces',
                                 },
@@ -309,11 +322,10 @@ describe('DTSManager', () => {
     };
     const targetFolder = join(projectRoot, hostOptions.typesFolder);
     it('correct consumeTypes', async () => {
-      const distFolder = join(projectRoot, 'dist', typesFolder);
+      const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
       const zip = new AdmZip();
       await zip.addLocalFolderPromise(distFolder, {});
       axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
-
       await dtsManager.consumeTypes();
 
       expect(
@@ -335,7 +347,11 @@ describe('DTSManager', () => {
   });
 
   it('update self while updateMode is POSITIVE', async () => {
-    const distFolder = join(projectRoot, 'dist', remoteOptions.typesFolder);
+    const distFolder = join(
+      projectRoot,
+      TEST_DIT_DIR,
+      remoteOptions.typesFolder,
+    );
     rmSync(distFolder, { recursive: true });
     expect(existsSync(distFolder)).toEqual(false);
     await dtsManager.updateTypes({
@@ -343,7 +359,6 @@ describe('DTSManager', () => {
       remoteTarPath: '',
       updateMode: UpdateMode.POSITIVE,
     });
-
     expect(
       dirTree(distFolder, {
         exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
@@ -388,6 +403,9 @@ describe('DTSManager', () => {
                                 },
                                 {
                                   name: 'RemoteOptions.d.ts',
+                                },
+                                {
+                                  name: 'TsConfigJson.d.ts',
                                 },
                               ],
                               name: 'interfaces',
@@ -471,7 +489,7 @@ describe('DTSManager', () => {
     rmSync(targetFolder, { recursive: true });
     expect(existsSync(targetFolder)).toEqual(false);
 
-    const distFolder = join(projectRoot, 'dist', typesFolder);
+    const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
     const zip = new AdmZip();
     await zip.addLocalFolderPromise(distFolder, {});
     axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
@@ -528,6 +546,9 @@ describe('DTSManager', () => {
                                     },
                                     {
                                       name: 'RemoteOptions.d.ts',
+                                    },
+                                    {
+                                      name: 'TsConfigJson.d.ts',
                                     },
                                   ],
                                   name: 'interfaces',

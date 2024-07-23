@@ -37,13 +37,15 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         //     resolve(proxy)
         //   }
         //   document.head.appendChild(script);
-
         // })`,
       },
       // library: { type: 'var', name: 'runtime_remote' },
       filename: 'remoteEntry.js',
       exposes: {
         './Button': './src/Button.tsx',
+      },
+      dts: {
+        tsConfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
       },
       shared: {
         lodash: {

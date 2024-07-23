@@ -4,6 +4,7 @@ import { type DevWorker, createDevWorker } from '../dev-worker';
 import {
   moduleFederationPlugin,
   normalizeOptions,
+  TEMP_DIR as BasicTempDir,
 } from '@module-federation/sdk';
 import {
   WEB_CLIENT_OPTIONS_IDENTIFIER,
@@ -138,10 +139,7 @@ export class DevPlugin implements WebpackPluginInstance {
     }
 
     if (!normalizedDev.disableLiveReload) {
-      const TEMP_DIR = path.join(
-        `${process.cwd()}/node_modules`,
-        `.federation`,
-      );
+      const TEMP_DIR = path.join(`${process.cwd()}/node_modules`, BasicTempDir);
       const filepath = path.join(TEMP_DIR, `live-reload.js`);
 
       if (typeof compiler.options.entry === 'object') {
