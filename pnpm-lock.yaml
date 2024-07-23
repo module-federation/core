@@ -1700,7 +1700,7 @@ importers:
         specifier: ^3.4.29
         version: 3.4.30(typescript@5.3.3)
       vue-tsc:
-        specifier: ^2.0.26
+        specifier: ^2.0.24
         version: 2.0.26(typescript@5.3.3)
 
   packages/enhanced:
@@ -16618,9 +16618,9 @@ packages:
     resolution: {integrity: sha512-FwTm11DP7KxQKT2mWLvwe80O5KpikgMSlqnw9CQhBaIHSYEypdJU9ZotbNsXsHdML3xcqg+S9ae3bpovC7KlwQ==}
     dependencies:
       '@rspack/core': 0.7.5(@swc/helpers@0.5.3)
-      caniuse-lite: 1.0.30001642
+      caniuse-lite: 1.0.30001636
       html-webpack-plugin: /html-rspack-plugin@5.7.2(@rspack/core@0.7.5)
-      postcss: 8.4.39
+      postcss: 8.4.38
     optionalDependencies:
       fsevents: 2.3.3
     transitivePeerDependencies:

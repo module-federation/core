@@ -76,6 +76,12 @@ describe('DTSManager advance usage', () => {
       console.log('generateTypes failed');
       console.error(err);
       console.log(err.stack);
+      console.log(
+        'node_modules/.federation structure: ',
+        dirTree(join(projectRoot, 'node_modules/.federation'), {
+          exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+        }),
+      );
     }
 
     const apiFile = `${distFolder}.d.ts`;
