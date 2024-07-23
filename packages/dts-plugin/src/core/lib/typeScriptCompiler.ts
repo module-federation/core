@@ -1,4 +1,9 @@
-import { ensureDirSync, writeFileSync, existsSync } from 'fs-extra';
+import {
+  ensureDirSync,
+  writeFileSync,
+  existsSync,
+  readFileSync,
+} from 'fs-extra';
 import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
 import { randomUUID } from 'crypto';
 import {
@@ -213,6 +218,11 @@ export const compileTs = async (
   } catch (err) {
     if (isDebugMode()) {
       console.log('tsconfig: ', JSON.stringify(tsConfig, null, 2));
+      console.log('tsconfig path: ', tempTsConfigJsonPath);
+      console.log(
+        'tsconfig path content: ',
+        readFileSync(tempTsConfigJsonPath),
+      );
     }
     throw err;
   }
