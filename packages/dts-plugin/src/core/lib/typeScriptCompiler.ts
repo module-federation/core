@@ -1,9 +1,5 @@
-import {
-  ensureDirSync,
-  writeFileSync,
-  existsSync,
-  readFileSync,
-} from 'fs-extra';
+import { ensureDirSync, writeFileSync, existsSync } from 'fs-extra';
+import crypto from 'crypto';
 import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
 import { randomUUID } from 'crypto';
 import {
@@ -64,11 +60,15 @@ function writeTempTsConfig(
   context: string,
   name: string,
 ) {
+  const createHash = (contents: string) => {
+    return crypto.createHash('md5').update(contents).digest('hex');
+  };
+  const hash = createHash(`${JSON.stringify(tsConfig)}${name}`);
   const tempTsConfigJsonPath = resolve(
     context,
     'node_modules',
     TEMP_DIR,
-    `tsconfig.${name}.${randomUUID()}.json`,
+    `tsconfig.${hash}.json`,
   );
   ensureDirSync(dirname(tempTsConfigJsonPath));
   writeFileSync(tempTsConfigJsonPath, JSON.stringify(tsConfig, null, 2));
@@ -218,11 +218,6 @@ export const compileTs = async (
   } catch (err) {
     if (isDebugMode()) {
       console.log('tsconfig: ', JSON.stringify(tsConfig, null, 2));
-      console.log('tsconfig path: ', tempTsConfigJsonPath);
-      console.log(
-        'tsconfig path content: ',
-        readFileSync(tempTsConfigJsonPath),
-      );
     }
     throw err;
   }
