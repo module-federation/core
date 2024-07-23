@@ -1,4 +1,5 @@
 import { ensureDirSync, writeFileSync, existsSync } from 'fs-extra';
+import crypto from 'crypto';
 import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
 import { randomUUID } from 'crypto';
 import {
@@ -54,12 +55,20 @@ export const retrieveMfAPITypesPath = (
     `${remoteOptions.typesFolder}.d.ts`,
   );
 
-function writeTempTsConfig(tsConfig: TsConfigJson, context: string) {
+function writeTempTsConfig(
+  tsConfig: TsConfigJson,
+  context: string,
+  name: string,
+) {
+  const createHash = (contents: string) => {
+    return crypto.createHash('md5').update(contents).digest('hex');
+  };
+  const hash = createHash(`${JSON.stringify(tsConfig)}${name}`);
   const tempTsConfigJsonPath = resolve(
     context,
     'node_modules',
     TEMP_DIR,
-    `tsconfig.${randomUUID()}.json`,
+    `tsconfig.${hash}.json`,
   );
   ensureDirSync(dirname(tempTsConfigJsonPath));
   writeFileSync(tempTsConfigJsonPath, JSON.stringify(tsConfig, null, 2));
@@ -152,6 +161,7 @@ export const compileTs = async (
   const tempTsConfigJsonPath = writeTempTsConfig(
     tsConfig,
     remoteOptions.context,
+    remoteOptions.moduleFederationConfig.name || 'mf',
   );
   try {
     const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);

@@ -2,8 +2,8 @@ import AdmZip from 'adm-zip';
 import axios from 'axios';
 import dirTree from 'directory-tree';
 import { rmSync, existsSync } from 'fs';
-import { basename, join } from 'path';
-import { describe, expect, it, vi, afterAll } from 'vitest';
+import { join } from 'path';
+import { describe, expect, it, vi } from 'vitest';
 import { DTSManager } from './DTSManager';
 import { UpdateMode } from '../../server/constant';
 
@@ -14,7 +14,7 @@ describe('DTSManager', () => {
   const typesFolder = '@mf-types-dts-test';
   const remoteOptions = {
     moduleFederationConfig: {
-      name: 'moduleFederationTypescript',
+      name: 'dtsManagerSpecRemote',
       filename: 'remoteEntry.js',
       exposes: {
         './index': join(__dirname, '..', './index.ts'),
@@ -34,7 +34,7 @@ describe('DTSManager', () => {
 
   const hostOptions = {
     moduleFederationConfig: {
-      name: 'moduleFederationTypescript',
+      name: 'dtsManagerSpecHost',
       filename: 'remoteEntry.js',
       remotes: {
         remotes: 'remote@https://foo.it',
@@ -51,15 +51,6 @@ describe('DTSManager', () => {
   const dtsManager = new DTSManager({
     remote: remoteOptions,
     host: hostOptions,
-  });
-
-  afterAll(() => {
-    [
-      join(projectRoot, TEST_DIT_DIR, remoteOptions.typesFolder),
-      join(projectRoot, hostOptions.typesFolder),
-    ].forEach((tmpDir) => {
-      rmSync(tmpDir, { recursive: true });
-    });
   });
 
   it('generate types', async () => {
@@ -355,13 +346,13 @@ describe('DTSManager', () => {
     rmSync(distFolder, { recursive: true });
     expect(existsSync(distFolder)).toEqual(false);
     await dtsManager.updateTypes({
-      remoteName: remoteOptions.moduleFederationConfig.name,
+      remoteName: hostOptions.moduleFederationConfig.name,
       remoteTarPath: '',
       updateMode: UpdateMode.POSITIVE,
     });
     expect(
       dirTree(distFolder, {
-        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/, ,],
       }),
     ).toMatchObject({
       name: '@mf-types-dts-test',
