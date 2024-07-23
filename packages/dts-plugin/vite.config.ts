@@ -9,6 +9,7 @@ export default defineConfig({
   plugins: [nxViteTsPaths()],
 
   test: {
+    // cache: false,
     cache: {
       dir: '../../node_modules/.vitest',
     },

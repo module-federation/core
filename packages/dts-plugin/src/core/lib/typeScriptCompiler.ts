@@ -1,4 +1,9 @@
-import { ensureDirSync, writeFileSync, existsSync } from 'fs-extra';
+import {
+  ensureDirSync,
+  writeFileSync,
+  existsSync,
+  readFileSync,
+} from 'fs-extra';
 import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
 import { randomUUID } from 'crypto';
 import {
@@ -129,6 +134,7 @@ const processTypesFile = async (options: {
         .replace(STARTS_WITH_SLASH, '')
         .split(sep) // Windows platform-specific file system path fix
         .join('/');
+      ensureDirSync(mfeTypeEntryDirectory);
       await writeFile(
         mfeTypeEntry,
         `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`,
@@ -205,6 +211,9 @@ export const compileTs = async (
 
     await rm(tempTsConfigJsonPath);
   } catch (err) {
+    if (isDebugMode()) {
+      console.log('tsconfig: ', JSON.stringify(tsConfig, null, 2));
+    }
     throw err;
   }
 };
