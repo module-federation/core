@@ -34,7 +34,13 @@ describe('DTSManager', () => {
 
     expect(
       dirTree(distFolder, {
-        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
+        exclude: [
+          /node_modules/,
+          /dev-worker/,
+          /plugins/,
+          /server/,
+          /tsconfig/,
+        ],
       }),
     ).toMatchObject({
       children: [
