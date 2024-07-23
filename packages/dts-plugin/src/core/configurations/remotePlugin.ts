@@ -105,6 +105,8 @@ const readTsConfig = (
     ...defaultCompilerOptions,
   };
 
+  delete rawTsConfigJson.compilerOptions?.paths;
+
   const filesToCompile = [
     ...Object.values(mapComponentsToExpose),
     ...additionalFilesToCompile,
@@ -115,10 +117,7 @@ const readTsConfig = (
   rawTsConfigJson.exclude = [];
   'references' in rawTsConfigJson && delete rawTsConfigJson.references;
 
-  const extendsPath = rawTsConfigJson.extends;
-  if (extendsPath && extendsPath.startsWith('.')) {
-    rawTsConfigJson.extends = resolve(context, extendsPath);
-  }
+  rawTsConfigJson.extends = resolvedTsConfigPath;
   return rawTsConfigJson;
 };
 

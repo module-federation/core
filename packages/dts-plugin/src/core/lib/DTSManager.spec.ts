@@ -72,13 +72,7 @@ describe('DTSManager', () => {
 
     expect(
       dirTree(distFolder, {
-        exclude: [
-          /node_modules/,
-          /dev-worker/,
-          /plugins/,
-          /server/,
-          /tsconfig/,
-        ],
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
       }),
     ).toMatchObject({
       name: '@mf-types-dts-test',
@@ -336,13 +330,7 @@ describe('DTSManager', () => {
 
       expect(
         dirTree(targetFolder, {
-          exclude: [
-            /node_modules/,
-            /dev-worker/,
-            /plugins/,
-            /server/,
-            /tsconfig/,
-          ],
+          exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
         }),
       ).toMatchObject(expectedStructure);
     });
@@ -352,13 +340,7 @@ describe('DTSManager', () => {
       await dtsManager.consumeTypes();
       expect(
         dirTree(targetFolder, {
-          exclude: [
-            /node_modules/,
-            /dev-worker/,
-            /plugins/,
-            /server/,
-            /tsconfig/,
-          ],
+          exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
         }),
       ).toMatchObject(expectedStructure);
     });
@@ -379,13 +361,7 @@ describe('DTSManager', () => {
     });
     expect(
       dirTree(distFolder, {
-        exclude: [
-          /node_modules/,
-          /dev-worker/,
-          /plugins/,
-          /server/,
-          /tsconfig/,
-        ],
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/, ,],
       }),
     ).toMatchObject({
       name: '@mf-types-dts-test',
@@ -526,13 +502,7 @@ describe('DTSManager', () => {
 
     expect(
       dirTree(targetFolder, {
-        exclude: [
-          /node_modules/,
-          /dev-worker/,
-          /plugins/,
-          /server/,
-          /tsconfig/,
-        ],
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
       }),
     ).toMatchObject({
       name: '@mf-types-dts-test-consume-types',

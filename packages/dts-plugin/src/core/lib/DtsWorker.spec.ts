@@ -82,13 +82,7 @@ describe('generateTypesInChildProcess', () => {
     await dtsWorker.controlledPromise;
     expect(
       dirTree(distFolder, {
-        exclude: [
-          /node_modules/,
-          /dev-worker/,
-          /plugins/,
-          /server/,
-          /tsconfig/,
-        ],
+        exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
       }),
     ).toMatchObject({
       name: '@mf-types-dts-test-child-process',

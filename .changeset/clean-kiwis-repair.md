@@ -2,4 +2,4 @@
 '@module-federation/dts-plugin': patch
 ---
 
-fix(dts-plugin): output temp tsconfig to current project root
+fix(dts-plugin): temp tsconfig path should extends original tsconfig

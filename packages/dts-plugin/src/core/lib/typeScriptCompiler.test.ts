@@ -111,13 +111,7 @@ describe('typeScriptCompiler', () => {
       const directoryStructure = dirTree(
         join(tsConfig.compilerOptions.outDir, '..'),
         {
-          exclude: [
-            /node_modules/,
-            /dev-worker/,
-            /plugins/,
-            /server/,
-            /tsconfig/,
-          ],
+          exclude: [/node_modules/, /dev-worker/, /plugins/, /server/],
         },
       );
       const expectedStructure = {
