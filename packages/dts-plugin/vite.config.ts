@@ -1,5 +1,6 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
+import path from 'path';
 
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 
@@ -20,5 +21,6 @@ export default defineConfig({
     ],
     reporters: ['default'],
     testTimeout: 60000,
+    setupFiles: [path.resolve(__dirname, './tests/setup.ts')],
   },
 });
