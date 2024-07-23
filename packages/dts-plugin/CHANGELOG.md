@@ -1,5 +1,14 @@
 # @module-federation/dts-plugin
 
+## 0.3.1
+
+### Patch Changes
+
+- 0a9adaf: chore: remove useless log
+  - @module-federation/sdk@0.3.1
+  - @module-federation/managers@0.3.1
+  - @module-federation/third-party-dts-extractor@0.3.1
+
 ## 0.3.0
 
 ### Minor Changes
