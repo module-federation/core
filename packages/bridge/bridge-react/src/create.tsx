@@ -6,11 +6,9 @@ import {
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
 import RemoteApp from './remote';
-
 export interface RenderFnParams extends ProviderParams {
   dom?: any;
 }
-
 interface RemoteModule {
   provider: () => {
     render: (
@@ -53,12 +51,13 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
             basename?: ProviderParams['basename'];
             memoryRoute?: ProviderParams['memoryRoute'];
           }
-        >((props, _ref) => {
+        >((props, ref) => {
           return (
             <RemoteApp
               name={moduleName}
               providerInfo={exportFn}
               exportName={info.export || 'default'}
+              ref={ref}
               {...props}
             />
           );
@@ -100,19 +99,17 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
     : {};
 
   const LazyComponent = createLazyRemoteComponent(info);
-
-  return (
-    props: {
-      basename?: ProviderParams['basename'];
-      memoryRoute?: ProviderParams['memoryRoute'];
-    } & RawComponentType,
-  ) => {
+  
+  return forwardRef(function (props: {
+    basename?: ProviderParams['basename'];
+    memoryRoute?: ProviderParams['memoryRoute'];
+  } & RawComponentType, ref) {
     return (
       <ErrorBoundary FallbackComponent={info.fallback}>
         <React.Suspense fallback={info.loading}>
-          <LazyComponent {...props} />
+          <LazyComponent {...props} ref={ref} />
         </React.Suspense>
       </ErrorBoundary>
     );
-  };
+  });
 }

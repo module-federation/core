@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useRef, useMemo, useState, useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
 import Navigation from './navigation';
@@ -6,7 +6,6 @@ import Detail from './pages/Detail';
 import Home from './pages/Home';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 import { createRemoteComponent } from '@module-federation/bridge-react';
-import { ErrorBoundary, withErrorBoundary } from 'react-error-boundary';
 
 const FallbackErrorComp = (info: any) => {
   return (
@@ -38,7 +37,7 @@ const Remote3App = createRemoteComponent({
   loader: () => loadRemote('remote3/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
-}) as (info: any) => React.JSX.Element;
+});
 
 function Wraper3() {
   return (
@@ -62,16 +61,22 @@ function Wraper3() {
 }
 
 const App = () => {
+  const ref = useRef<HTMLElement>(null);
   const [initialEntrie, setInitialEntrie] = useState('/');
   const [abc, setAbc] = useState(5555);
-
+  useEffect(() => {
+    setTimeout(() => {
+      ref.current.style.backgroundColor = 'salmon';
+    }, 2000)
+  }, [])
+  
   return (
     <BrowserRouter basename="/">
       <Navigation setInitialEntrie={setInitialEntrie} setAbc={setAbc} />
       <Routes>
         <Route path="/" Component={Home} />
         <Route path="/detail/*" Component={Detail} />
-        <Route path="/remote1/*" Component={() => <Remote1App />} />
+        <Route path="/remote1/*" Component={() => <Remote1App ref={ref} />} />
         <Route path="/remote2/*" Component={() => <Remote2App />} />
         <Route path="/remote3/*" Component={() => <Remote3App />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />

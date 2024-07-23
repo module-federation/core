@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState, forwardRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { LoggerInstance, pathJoin } from '../utils';
@@ -27,67 +27,74 @@ interface RemoteAppParams {
   exportName: string | number | symbol;
 }
 
-const RemoteApp = ({
-  name,
-  memoryRoute,
-  basename,
-  providerInfo,
-  ...resProps
-}: RemoteAppParams & ProviderParams) => {
-  const rootRef = useRef(null);
-  const renderDom = useRef(null);
-  const providerInfoRef = useRef<any>(null);
+const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderParams, ref) {
+  const RemoteApp = () => {
+    const {
+      name,
+      memoryRoute,
+      basename,
+      providerInfo,
+      ...resProps
+    } = props;
 
-  useEffect(() => {
-    const renderTimeout = setTimeout(() => {
-      const providerReturn = providerInfo();
-      providerInfoRef.current = providerReturn;
-      const renderProps = {
-        name,
-        dom: rootRef.current,
-        basename,
-        memoryRoute,
-        ...resProps,
-      };
-      renderDom.current = rootRef.current;
-      LoggerInstance.log(
-        `createRemoteComponent LazyComponent render >>>`,
-        renderProps,
-      );
-      providerReturn.render(renderProps);
-    });
-
-    return () => {
-      clearTimeout(renderTimeout);
-      setTimeout(() => {
-        if (providerInfoRef.current?.destroy) {
-          LoggerInstance.log(
-            `createRemoteComponent LazyComponent destroy >>>`,
-            { name, basename, dom: renderDom.current },
-          );
-          providerInfoRef.current?.destroy({
-            dom: renderDom.current,
-          });
-        }
+    const rootRef: React.MutableRefObject<HTMLElement | null> = ref && 'current' in ref ? ref as React.MutableRefObject<HTMLElement | null> : useRef(null);
+    const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
+    const providerInfoRef = useRef<any>(null);
+    
+    useEffect(() => {
+      const renderTimeout = setTimeout(() => {
+        const providerReturn = providerInfo();
+        providerInfoRef.current = providerReturn;
+        const renderProps = {
+          name,
+          dom: rootRef.current,
+          basename,
+          memoryRoute,
+          ...resProps,
+        };
+        
+        renderDom.current = rootRef.current;
+        LoggerInstance.log(
+          `createRemoteComponent LazyComponent render >>>`,
+          renderProps,
+        );
+        providerReturn.render(renderProps);
       });
-    };
-  }, []);
+  
+      return () => {
+        clearTimeout(renderTimeout);
+        setTimeout(() => {
+          if (providerInfoRef.current?.destroy) {
+            LoggerInstance.log(
+              `createRemoteComponent LazyComponent destroy >>>`,
+              { name, basename, dom: renderDom.current },
+            );
+            providerInfoRef.current?.destroy({
+              dom: renderDom.current,
+            });
+          }
+        });
+      };
+    }, []);
+  
+    //@ts-ignore
+    return <div ref={rootRef}></div>;
+  }
 
-  //@ts-ignore
-  return <div ref={rootRef}></div>;
-};
-
-(RemoteApp as any)['__APP_VERSION__'] = __APP_VERSION__;
+  (RemoteApp as any)['__APP_VERSION__'] = __APP_VERSION__;
+  return <RemoteApp />
+});
 
 interface ExtraDataProps {
   basename?: string;
 }
 
-export function withRouterData<P extends Parameters<typeof RemoteApp>[0]>(
+export function withRouterData<P extends Parameters<typeof RemoteAppWrapper>[0]>(
   WrappedComponent: React.ComponentType<P & ExtraDataProps>,
 ): React.FC<Omit<P, keyof ExtraDataProps>> {
-  return (props: any) => {
-    let enableDispathPopstate = false;
+  
+  const Component = forwardRef(function (props: any, ref) {
+    let enableDispathPopstate = false
     let routerContextVal: any;
     try {
       ReactRouterDOM.useLocation();
@@ -158,8 +165,12 @@ export function withRouterData<P extends Parameters<typeof RemoteApp>[0]>(
       }, [location]);
     }
 
-    return <WrappedComponent {...(props as P)} basename={basename} />;
-  };
+    return <WrappedComponent {...(props as P)} basename={basename} ref={ref} />;
+  });
+
+  return forwardRef(function (props, ref) {
+    return <Component {...props} ref={ref} />
+  }) as any;
 }
 
-export default withRouterData(RemoteApp);
+export default withRouterData(RemoteAppWrapper);
