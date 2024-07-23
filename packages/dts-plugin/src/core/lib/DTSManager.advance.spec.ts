@@ -55,14 +55,6 @@ describe('DTSManager advance usage', () => {
     host: hostOptions,
   });
 
-  afterAll(() => {
-    [
-      join(projectRoot, TEST_DIT_DIR, remoteOptions.typesFolder),
-      join(projectRoot, hostOptions.typesFolder),
-    ].forEach((tmpDir) => {
-      rmSync(tmpDir, { recursive: true });
-    });
-  });
   it('generate types with api declaration file', async () => {
     const distFolder = join(
       projectRoot,

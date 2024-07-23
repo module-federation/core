@@ -125,26 +125,6 @@ describe('typeScriptCompiler', () => {
                       {
                         children: [
                           {
-                            name: 'hostPlugin.d.ts',
-                          },
-                          {
-                            name: 'remotePlugin.d.ts',
-                          },
-                        ],
-                        name: 'configurations',
-                      },
-                      {
-                        name: 'constant.d.ts',
-                      },
-                      {
-                        children: [
-                          {
-                            name: 'DTSManagerOptions.d.ts',
-                          },
-                          {
-                            name: 'HostOptions.d.ts',
-                          },
-                          {
                             name: 'RemoteOptions.d.ts',
                           },
                           {
@@ -156,16 +136,7 @@ describe('typeScriptCompiler', () => {
                       {
                         children: [
                           {
-                            name: 'DTSManager.d.ts',
-                          },
-                          {
-                            name: 'archiveHandler.d.ts',
-                          },
-                          {
                             name: 'typeScriptCompiler.d.ts',
-                          },
-                          {
-                            name: 'utils.d.ts',
                           },
                         ],
                         name: 'lib',
