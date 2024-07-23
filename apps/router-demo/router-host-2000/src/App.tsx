@@ -1,11 +1,11 @@
 import { useRef, useMemo, useState, useEffect } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import './App.css';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { loadRemote } from '@module-federation/enhanced/runtime';
+import { createRemoteComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
-import { loadRemote } from '@module-federation/enhanced/runtime';
-import { createRemoteComponent } from '@module-federation/bridge-react';
+import './App.css';
 
 const FallbackErrorComp = (info: any) => {
   return (
@@ -61,17 +61,24 @@ function Wraper3() {
 }
 
 const App = () => {
+  const location = useLocation();
   const ref = useRef<HTMLElement>(null);
   const [initialEntrie, setInitialEntrie] = useState('/');
   const [abc, setAbc] = useState(5555);
   useEffect(() => {
-    setTimeout(() => {
-      ref.current.style.backgroundColor = 'salmon';
+    const refTimeout = setTimeout(() => {
+      if (ref && ref.current) {
+        ref.current.style.backgroundColor = 'salmon';
+      }
     }, 2000)
-  }, [])
-  
+    return () => {
+      if (!location.pathname.includes('remote1')) {
+        clearTimeout(refTimeout);
+      }
+    }
+  }, [location.pathname])
   return (
-    <BrowserRouter basename="/">
+    <div>
       <Navigation setInitialEntrie={setInitialEntrie} setAbc={setAbc} />
       <Routes>
         <Route path="/" Component={Home} />
@@ -81,7 +88,7 @@ const App = () => {
         <Route path="/remote3/*" Component={() => <Remote3App />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
       </Routes>
-    </BrowserRouter>
+    </div>
   );
 };
 

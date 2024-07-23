@@ -77,8 +77,6 @@ const router = createBrowserRouter([
   },
 ]);
 
-console.log('=====router', router);
-
 const App = (info?: { basename?: string; initialEntries?: Array<string> }) => {
   return (
     <>
@@ -86,29 +84,4 @@ const App = (info?: { basename?: string; initialEntries?: Array<string> }) => {
     </>
   );
 };
-
-const App2 = ({ basename }: any) => {
-  return (
-    <BrowserRouter basename={basename}>
-      <ul>
-        <li>
-          <Link to="/" className="self-remote1-home-link">
-            Home
-          </Link>
-        </li>
-        <li>
-          <Link to="/detail" className="self-remote1-detail-link">
-            Detail
-          </Link>
-        </li>
-      </ul>
-      <Routes>
-        <Route path="/" Component={Home} />
-        <Route path="/home" Component={Home} />
-        <Route path="/detail" Component={Detail} />
-      </Routes>
-    </BrowserRouter>
-  );
-};
-
 export default App;

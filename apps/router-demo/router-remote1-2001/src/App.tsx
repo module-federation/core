@@ -64,7 +64,6 @@ function Detail() {
 }
 
 const App = (info: any) => {
-  console.log('info', info);
   const container = useShadowRoot();
   return (
     <StyleProvider
