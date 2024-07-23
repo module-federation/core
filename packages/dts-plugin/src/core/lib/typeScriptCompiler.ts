@@ -1,7 +1,6 @@
 import { ensureDirSync, writeFileSync, existsSync } from 'fs-extra';
 import crypto from 'crypto';
 import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
-import { randomUUID } from 'crypto';
 import {
   dirname,
   join,
@@ -19,7 +18,6 @@ import { TEMP_DIR } from '@module-federation/sdk';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { TsConfigJson } from '../interfaces/TsConfigJson';
-import { isDebugMode } from './utils';
 
 const STARTS_WITH_SLASH = /^\//;
 
@@ -216,9 +214,6 @@ export const compileTs = async (
 
     await rm(tempTsConfigJsonPath);
   } catch (err) {
-    if (isDebugMode()) {
-      console.log('tsconfig: ', JSON.stringify(tsConfig, null, 2));
-    }
     throw err;
   }
 };
