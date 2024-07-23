@@ -5,7 +5,7 @@ import { retrieveRemoteConfig } from './remotePlugin';
 
 describe('hostPlugin', () => {
   const moduleFederationConfig = {
-    name: 'moduleFederationHost',
+    name: 'remotePluginTestHost',
     filename: 'remoteEntry.js',
     exposes: {
       './button': './src/components/button',

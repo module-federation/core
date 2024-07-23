@@ -54,12 +54,16 @@ export const retrieveMfAPITypesPath = (
     `${remoteOptions.typesFolder}.d.ts`,
   );
 
-function writeTempTsConfig(tsConfig: TsConfigJson, context: string) {
+function writeTempTsConfig(
+  tsConfig: TsConfigJson,
+  context: string,
+  name: string,
+) {
   const tempTsConfigJsonPath = resolve(
     context,
     'node_modules',
     TEMP_DIR,
-    `tsconfig.${randomUUID()}.json`,
+    `tsconfig.${name}.${randomUUID()}.json`,
   );
   ensureDirSync(dirname(tempTsConfigJsonPath));
   writeFileSync(tempTsConfigJsonPath, JSON.stringify(tsConfig, null, 2));
@@ -152,6 +156,7 @@ export const compileTs = async (
   const tempTsConfigJsonPath = writeTempTsConfig(
     tsConfig,
     remoteOptions.context,
+    remoteOptions.moduleFederationConfig.name || 'mf',
   );
   try {
     const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
