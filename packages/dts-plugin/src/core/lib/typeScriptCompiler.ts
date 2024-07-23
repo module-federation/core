@@ -223,6 +223,9 @@ export const compileTs = async (
       'tempTsConfigJson: ',
       readFileSync(tempTsConfigJsonPath, 'utf-8'),
     );
+    if (isDebugMode()) {
+      console.log('tsconfig: ', JSON.stringify(tsConfig, null, 2));
+    }
     throw err;
   }
 };
