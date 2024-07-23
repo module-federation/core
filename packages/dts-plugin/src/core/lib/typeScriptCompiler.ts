@@ -57,9 +57,7 @@ export const retrieveMfAPITypesPath = (
 function writeTempTsConfig(tsConfig: TsConfigJson, context: string) {
   const tempTsConfigJsonPath = resolve(
     context,
-    'node_modules',
-    TEMP_DIR,
-    `tsconfig.${randomUUID()}.json`,
+    `tsconfig.mf.${randomUUID()}.json`,
   );
   ensureDirSync(dirname(tempTsConfigJsonPath));
   writeFileSync(tempTsConfigJsonPath, JSON.stringify(tsConfig, null, 2));
