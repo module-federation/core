@@ -59,9 +59,14 @@ const createShareMap = () => {
     // Reduce the keys of the default property to create the share map
     // @ts-ignore
     return Object.keys(__webpack_share_scopes__.default).reduce((acc, key) => {
-      // Get the loaded modules for the current key
       // @ts-ignore
-      const loadedModules = Object.values(__webpack_share_scopes__.default[key])
+      const shareMap = __webpack_share_scopes__.default[key];
+      // shareScope may equal undefined or null if it has unexpected value
+      if (!shareMap || typeof shareMap !== 'object') {
+        return acc;
+      }
+      // Get the loaded modules for the current key
+      const loadedModules = Object.values(shareMap)
         // Filter out the modules that are not loaded
         // @ts-ignore
         .filter((sharedModule) => sharedModule.loaded)

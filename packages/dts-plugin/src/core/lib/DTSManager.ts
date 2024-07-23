@@ -7,7 +7,6 @@ import {
   Manifest,
   inferAutoPublicPath,
 } from '@module-federation/sdk';
-import cloneDeepWith from 'lodash.clonedeepwith';
 import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extractor';
 
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
@@ -24,13 +23,13 @@ import {
 import { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 import { HostOptions, RemoteInfo } from '../interfaces/HostOptions';
 import {
-  UpdateMode,
   REMOTE_API_TYPES_FILE_NAME,
   REMOTE_ALIAS_IDENTIFIER,
   HOST_API_TYPES_FILE_NAME,
 } from '../constant';
 import { fileLog } from '../../server';
-import { axiosGet, isDebugMode } from './utils';
+import { axiosGet, cloneDeepOptions, isDebugMode } from './utils';
+import { UpdateMode } from '../../server/constant';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
 
@@ -51,12 +50,7 @@ class DTSManager {
   updatedRemoteInfos: Record<string, Required<RemoteInfo>>;
 
   constructor(options: DTSManagerOptions) {
-    this.options = cloneDeepWith(options, (_value, key) => {
-      // moduleFederationConfig.manifest may have un serialization options
-      if (key === 'manifest') {
-        return false;
-      }
-    });
+    this.options = cloneDeepOptions(options);
     this.runtimePkgs = [
       '@module-federation/runtime',
       '@module-federation/enhanced/runtime',
@@ -324,7 +318,12 @@ class DTSManager {
       'Y',
     ].join(' :\n')} ;`;
 
-    const pkgsDeclareStr = this.runtimePkgs
+    const runtimePkgs: Set<string> = new Set();
+    [...this.runtimePkgs, ...hostOptions.runtimePkgs].forEach((pkg) => {
+      runtimePkgs.add(pkg);
+    });
+
+    const pkgsDeclareStr = [...runtimePkgs]
       .map((pkg) => {
         return `declare module "${pkg}" {
       ${remoteKeysStr}

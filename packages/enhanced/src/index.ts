@@ -1,3 +1,4 @@
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 export { default as ModuleFederationPlugin } from './wrapper/ModuleFederationPlugin';
 export { default as ContainerReferencePlugin } from './wrapper/ContainerReferencePlugin';
 export { default as SharePlugin } from './wrapper/SharePlugin';
@@ -21,4 +22,10 @@ export const container = {
   get ContainerEntryModule() {
     return require('./lib/container/ContainerEntryModule').default;
   },
+};
+
+export const createModuleFederationConfig = (
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
+): moduleFederationPlugin.ModuleFederationPluginOptions => {
+  return options;
 };

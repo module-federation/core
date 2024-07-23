@@ -1,5 +1,5 @@
 import dirTree from 'directory-tree';
-import { mkdtempSync, rmSync } from 'fs';
+import { rmSync } from 'fs';
 import { readJSONSync, ensureDirSync } from 'fs-extra';
 import os from 'os';
 import { join, resolve, sep } from 'path';
@@ -103,7 +103,6 @@ describe('typeScriptCompiler', () => {
       const mapToExpose = {
         tsCompiler: filepath,
       };
-
       await compileTs(
         mapToExpose,
         { ...tsConfig, files: [filepath] },
@@ -138,9 +137,6 @@ describe('typeScriptCompiler', () => {
                         name: 'constant.d.ts',
                       },
                       {
-                        name: 'index.d.ts',
-                      },
-                      {
                         children: [
                           {
                             name: 'DTSManagerOptions.d.ts',
@@ -163,19 +159,7 @@ describe('typeScriptCompiler', () => {
                             name: 'DTSManager.d.ts',
                           },
                           {
-                            name: 'DtsWorker.d.ts',
-                          },
-                          {
                             name: 'archiveHandler.d.ts',
-                          },
-                          {
-                            name: 'consumeTypes.d.ts',
-                          },
-                          {
-                            name: 'generateTypes.d.ts',
-                          },
-                          {
-                            name: 'generateTypesInChildProcess.d.ts',
                           },
                           {
                             name: 'typeScriptCompiler.d.ts',
@@ -185,29 +169,6 @@ describe('typeScriptCompiler', () => {
                           },
                         ],
                         name: 'lib',
-                      },
-                      {
-                        children: [
-                          {
-                            name: 'expose-rpc.d.ts',
-                          },
-                          {
-                            name: 'index.d.ts',
-                          },
-                          {
-                            name: 'rpc-error.d.ts',
-                          },
-                          {
-                            name: 'rpc-worker.d.ts',
-                          },
-                          {
-                            name: 'types.d.ts',
-                          },
-                          {
-                            name: 'wrap-rpc.d.ts',
-                          },
-                        ],
-                        name: 'rpc',
                       },
                     ],
                     name: 'core',

@@ -1,4 +1,4 @@
-import { UpdateMode } from '../../../core/index';
+import { UpdateMode } from '../../constant';
 import { UpdateKind } from '../../message/Action';
 import { API, APIKind } from './API';
 
