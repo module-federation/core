@@ -22,7 +22,7 @@ export const moduleFederationSSRPlugin = (
     '@modern-js/plugin-module-federation-config',
     '@modern-js/plugin-module-federation',
   ],
-  setup: async ({ useConfigContext }) => {
+  setup: async ({ useConfigContext, useAppContext }) => {
     const modernjsConfig = useConfigContext();
     const enableSSR = Boolean(modernjsConfig?.server?.ssr);
     if (!enableSSR) {
@@ -43,7 +43,16 @@ export const moduleFederationSSRPlugin = (
         return { entrypoint, plugins };
       },
       config: async () => {
+        const bundlerType =
+          useAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
+
         return {
+          source: {
+            enableAsyncEntry:
+              bundlerType === 'rspack'
+                ? modernjsConfig.source?.enableAsyncEntry ?? true
+                : modernjsConfig.source?.enableAsyncEntry,
+          },
           tools: {
             rspack(config, { isServer }) {
               if (isServer) {
@@ -126,6 +135,9 @@ export const moduleFederationSSRPlugin = (
               ],
             },
             bundlerChain(chain, { isServer }) {
+              if (isServer) {
+                chain.target('async-node');
+              }
               if (isDev && !isServer) {
                 chain.externals({
                   '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
