@@ -205,17 +205,9 @@ export const patchMFConfig = (
   return mfConfig;
 };
 
-export function patchBundlerConfig<T extends Bundler>(options: {
-  bundlerConfig: BundlerConfig<T>;
-  isServer: boolean;
-  modernjsConfig: UserConfig<AppTools>;
-  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
-}) {
-  const { bundlerConfig, modernjsConfig, isServer, mfConfig } = options;
-  const enableSSR = Boolean(modernjsConfig.server?.ssr);
-
-  delete bundlerConfig.optimization?.runtimeChunk;
-
+export function patchIgnoreWarning<T extends Bundler>(
+  bundlerConfig: BundlerConfig<T>,
+) {
   bundlerConfig.ignoreWarnings = bundlerConfig.ignoreWarnings || [];
   const ignoredMsgs = [
     'external script',
@@ -228,6 +220,19 @@ export function patchBundlerConfig<T extends Bundler>(options: {
     }
     return false;
   });
+}
+export function patchBundlerConfig<T extends Bundler>(options: {
+  bundlerConfig: BundlerConfig<T>;
+  isServer: boolean;
+  modernjsConfig: UserConfig<AppTools>;
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
+}) {
+  const { bundlerConfig, modernjsConfig, isServer, mfConfig } = options;
+  const enableSSR = Boolean(modernjsConfig.server?.ssr);
+
+  delete bundlerConfig.optimization?.runtimeChunk;
+
+  patchIgnoreWarning(bundlerConfig);
 
   bundlerConfig.watchOptions = bundlerConfig.watchOptions || {};
   if (!Array.isArray(bundlerConfig.watchOptions.ignored)) {

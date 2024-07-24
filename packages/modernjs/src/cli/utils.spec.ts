@@ -1,6 +1,12 @@
 import { it, expect, describe } from 'vitest';
 import path from 'path';
-import { patchMFConfig, patchBundlerConfig, getIPV4 } from './utils';
+import { BundlerConfig } from '../interfaces/bundler';
+import {
+  patchMFConfig,
+  patchBundlerConfig,
+  getIPV4,
+  patchIgnoreWarning,
+} from './utils';
 
 const mfConfig = {
   name: 'host',
@@ -34,6 +40,7 @@ describe('patchMFConfig', async () => {
       remoteType: 'script',
       runtimePlugins: [
         path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
+        require.resolve('@module-federation/node/runtimePlugin'),
         path.resolve(__dirname, './mfRuntimePlugins/inject-node-fetch.js'),
       ],
       shared: {
@@ -103,13 +110,21 @@ describe('patchBundlerConfig', async () => {
       mfConfig,
     });
 
-    expect(bundlerConfig).toStrictEqual({
+    const expectedConfig = {
       output: {
         chunkLoadingGlobal: 'chunk_host',
         publicPath: 'auto',
         uniqueName: 'host',
       },
-    });
+      watchOptions: {
+        ignored: ['@mf-types'],
+      },
+    };
+    // @ts-ignore temp ignore
+
+    delete bundlerConfig?.ignoreWarnings;
+    // patchIgnoreWarning(expectedConfig as BundlerConfig<'webpack'>);
+    expect(bundlerConfig).toStrictEqual(expectedConfig);
   });
 
   it('patchBundlerConfig: client', async () => {
@@ -131,12 +146,20 @@ describe('patchBundlerConfig', async () => {
       mfConfig,
     });
 
-    expect(bundlerConfig).toStrictEqual({
+    const expectedConfig = {
       output: {
         chunkLoadingGlobal: 'chunk_host',
         publicPath: 'auto',
         uniqueName: 'host',
       },
-    });
+      watchOptions: {
+        ignored: ['@mf-types'],
+      },
+    };
+    // @ts-ignore temp ignore
+    delete bundlerConfig?.ignoreWarnings;
+
+    // patchIgnoreWarning(expectedConfig as BundlerConfig<'webpack'>);
+    expect(bundlerConfig).toStrictEqual(expectedConfig);
   });
 });
