@@ -1208,9 +1208,6 @@ importers:
       '@module-federation/modern-js':
         specifier: workspace:*
         version: link:../../../packages/modernjs
-      '@module-federation/node':
-        specifier: workspace:*
-        version: link:../../../packages/node
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.2.0)(react@18.2.0)
@@ -11684,57 +11681,11 @@ packages:
       react-helmet: 6.1.0(react@18.2.0)
       react-is: 18.2.0
       react-side-effect: 2.1.2(react@18.2.0)
-      styled-components: 5.3.11(@babel/core@7.24.9)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)
-    transitivePeerDependencies:
-      - '@types/react'
-      - '@types/react-dom'
-      - supports-color
-    dev: false
-
-  /@modern-js/runtime@2.54.2(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)(webpack@5.92.1):
-    resolution: {integrity: sha512-EbMt/wbgx8JzBQJrs113X7JHQWsxCIsOsJjKT4MiGWlbArxVQ3qUPK/R7DkiDj62fSYWCGRDhrhrZBHgTgOdCw==}
-    engines: {node: '>=14.17.6'}
-    peerDependencies:
-      react: '>=17'
-      react-dom: '>=17'
-    dependencies:
-      '@babel/core': 7.24.7
-      '@babel/types': 7.24.7
-      '@loadable/babel-plugin': 5.15.3(@babel/core@7.24.7)
-      '@loadable/component': 5.15.3(react@18.2.0)
-      '@loadable/server': 5.15.3(@loadable/component@5.15.3)(react@18.2.0)
-      '@loadable/webpack-plugin': 5.15.2(webpack@5.92.1)
-      '@modern-js-reduck/plugin-auto-actions': 1.1.11(@modern-js-reduck/store@1.1.11)
-      '@modern-js-reduck/plugin-devtools': 1.1.11(@modern-js-reduck/store@1.1.11)
-      '@modern-js-reduck/plugin-effects': 1.1.11(@modern-js-reduck/store@1.1.11)
-      '@modern-js-reduck/plugin-immutable': 1.1.11(@modern-js-reduck/store@1.1.11)
-      '@modern-js-reduck/react': 1.1.11(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@modern-js-reduck/store': 1.1.11
-      '@modern-js/plugin': 2.54.2
-      '@modern-js/plugin-data-loader': 2.54.2(react-dom@18.2.0)(react@18.2.0)
-      '@modern-js/runtime-utils': 2.54.2(react-dom@18.2.0)(react@18.2.0)
-      '@modern-js/types': 2.54.2
-      '@modern-js/utils': 2.54.2
-      '@swc/helpers': 0.5.3
-      '@types/loadable__component': 5.13.9
-      '@types/react-helmet': 6.1.11
-      '@types/styled-components': 5.1.34
-      cookie: 0.5.0
-      es-module-lexer: 1.5.4
-      esbuild: 0.17.19
-      hoist-non-react-statics: 3.3.2
-      invariant: 2.2.4
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-helmet: 6.1.0(react@18.2.0)
-      react-is: 18.2.0
-      react-side-effect: 2.1.2(react@18.2.0)
       styled-components: 5.3.11(@babel/core@7.24.7)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
       - '@types/react-dom'
       - supports-color
-      - webpack
     dev: false
 
   /@modern-js/server-core@2.46.1:

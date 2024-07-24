@@ -6,7 +6,7 @@ import { retrieveTypesArchiveDestinationPath } from '../lib/archiveHandler';
 
 describe('hostPlugin', () => {
   const moduleFederationConfig = {
-    name: 'moduleFederationHost',
+    name: 'hostPluginTestHost',
     filename: 'remoteEntry.js',
     remotes: {
       moduleFederationTypescript: 'http://localhost:3000/remoteEntry.js',

@@ -1,5 +1,22 @@
 # @module-federation/devtools
 
+## 0.3.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.1
+
+## 0.3.0
+
+### Minor Changes
+
+- fa37cc4: feat: support modern.js ssr [#2348](https://github.com/module-federation/core/issues/2348)
+
+### Patch Changes
+
+- Updated dependencies [fa37cc4]
+  - @module-federation/sdk@0.3.0
+
 ## 0.2.8
 
 ### Patch Changes

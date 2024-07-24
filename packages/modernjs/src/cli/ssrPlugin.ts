@@ -4,10 +4,7 @@ import type { CliPlugin, AppTools } from '@modern-js/app-tools';
 import type { InternalModernPluginOptions } from '../types';
 import { ModuleFederationPlugin } from '@module-federation/enhanced';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
-import {
-  StreamingTargetPlugin,
-  EntryChunkTrackerPlugin,
-} from '@module-federation/node';
+import { EntryChunkTrackerPlugin } from '@module-federation/node';
 import { updateStatsAndManifest } from './manifest';
 import { MODERN_JS_SERVER_DIR, PLUGIN_IDENTIFIER } from '../constant';
 import { isDev } from './constant';
