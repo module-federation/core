@@ -66,3 +66,8 @@ jobs:
     needs: checkout-install
     uses: ./.github/workflows/e2e-next.yml
     secrets: inherit
+
+  e2e-modern-ssr:
+    needs: checkout-install
+    uses: ./.github/workflows/e2e-modern-ssr.yml
+    secrets: inherit

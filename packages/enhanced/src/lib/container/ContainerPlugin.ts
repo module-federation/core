@@ -12,7 +12,6 @@ import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
 import schema from '../../schemas/container/ContainerPlugin';
-import HoistContainerReferencesPlugin from './HoistContainerReferencesPlugin';
 
 type ExcludeUndefined<T> = T extends undefined ? never : T;
 type NonUndefined<T> = ExcludeUndefined<T>;

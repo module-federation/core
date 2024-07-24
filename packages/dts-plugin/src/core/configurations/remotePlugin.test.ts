@@ -5,7 +5,7 @@ import { retrieveRemoteConfig } from './remotePlugin';
 
 describe('hostPlugin', () => {
   const moduleFederationConfig = {
-    name: 'moduleFederationHost',
+    name: 'remotePluginTestHost',
     filename: 'remoteEntry.js',
     exposes: {
       './button': './src/components/button',
@@ -35,22 +35,29 @@ describe('hostPlugin', () => {
           });
 
         expect(tsConfig).toStrictEqual({
-          target: 4,
-          module: 99,
-          lib: ['lib.esnext.d.ts'],
-          moduleResolution: 2,
-          esModuleInterop: true,
-          strict: true,
-          strictNullChecks: true,
-          resolveJsonModule: true,
-          configFilePath: undefined,
-          emitDeclarationOnly: true,
-          noEmit: false,
-          declaration: true,
-          outDir: resolve(
-            remoteOptions.context,
-            'dist/@mf-types/compiled-types',
-          ),
+          extends: tsConfigPath,
+          compileOnSave: false,
+          compilerOptions: {
+            target: 'es2017',
+            module: 'esnext',
+            lib: ['esnext'],
+            moduleResolution: 'node',
+            esModuleInterop: true,
+            strict: true,
+            strictNullChecks: true,
+            resolveJsonModule: true,
+            emitDeclarationOnly: true,
+            noEmit: false,
+            declaration: true,
+            outDir: resolve(
+              remoteOptions.context,
+              'dist/@mf-types/compiled-types',
+            ),
+            rootDir: resolve(__dirname),
+          },
+          files: ['./src/components/button', './src/components/anotherButton'],
+          include: [],
+          exclude: [],
         });
 
         expect(mapComponentsToExpose).toStrictEqual({
@@ -91,22 +98,29 @@ describe('hostPlugin', () => {
           });
 
         expect(tsConfig).toStrictEqual({
-          module: 99,
-          resolveJsonModule: true,
-          strict: true,
-          strictNullChecks: true,
-          target: 4,
-          lib: ['lib.esnext.d.ts'],
-          moduleResolution: 2,
-          esModuleInterop: true,
-          configFilePath: undefined,
-          emitDeclarationOnly: true,
-          noEmit: false,
-          declaration: true,
-          outDir: resolve(
-            remoteOptions.context,
-            'dist/typesFolder/compiledTypesFolder',
-          ),
+          compileOnSave: false,
+          extends: tsConfigPath,
+          compilerOptions: {
+            module: 'esnext',
+            resolveJsonModule: true,
+            strict: true,
+            strictNullChecks: true,
+            target: 'es2017',
+            lib: ['esnext'],
+            moduleResolution: 'node',
+            esModuleInterop: true,
+            emitDeclarationOnly: true,
+            noEmit: false,
+            declaration: true,
+            outDir: resolve(
+              remoteOptions.context,
+              'dist/typesFolder/compiledTypesFolder',
+            ),
+            rootDir: resolve(__dirname),
+          },
+          exclude: [],
+          include: [],
+          files: ['./src/components/button', './src/components/anotherButton'],
         });
 
         expect(mapComponentsToExpose).toStrictEqual({

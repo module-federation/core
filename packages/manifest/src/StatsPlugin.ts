@@ -3,6 +3,7 @@ import { moduleFederationPlugin } from '@module-federation/sdk';
 import { ManifestManager } from './ManifestManager';
 import { StatsManager } from './StatsManager';
 import { PLUGIN_IDENTIFIER } from './constants';
+import { StatsInfo, ManifestInfo, ResourceInfo } from './types';
 
 export class StatsPlugin implements WebpackPluginInstance {
   readonly name = 'StatsPlugin';
@@ -11,6 +12,9 @@ export class StatsPlugin implements WebpackPluginInstance {
   private _manifestManager: ManifestManager = new ManifestManager();
   private _enable: boolean = true;
   private _bundler: 'webpack' | 'rspack' = 'webpack';
+  statsInfo?: StatsInfo;
+  manifestInfo?: ManifestInfo;
+  disableEmit?: boolean;
 
   constructor(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -22,6 +26,7 @@ export class StatsPlugin implements WebpackPluginInstance {
     try {
       this._options = options;
       this._bundler = bundler;
+      this.disableEmit = Boolean(process.env['MF_DISABLE_EMIT_STATS']);
       this._statsManager.init(this._options, { pluginVersion, bundler });
       this._manifestManager.init(this._options);
     } catch (err) {
@@ -50,24 +55,39 @@ export class StatsPlugin implements WebpackPluginInstance {
         },
         async () => {
           if (this._options.manifest !== false) {
-            const stats = await this._statsManager.generateStats(
+            this.statsInfo = await this._statsManager.generateStats(
               compiler,
               compilation,
+              {
+                disableEmit: this.disableEmit,
+              },
             );
-            this._manifestManager.generateManifest({
-              compilation,
-              stats,
-              publicPath: this._statsManager.getPublicPath(compiler),
-              compiler,
-              bundler: this._bundler,
-              additionalData:
-                typeof this._options.manifest === 'object'
-                  ? this._options.manifest.additionalData
-                  : undefined,
-            });
+            this.manifestInfo = await this._manifestManager.generateManifest(
+              {
+                compilation,
+                stats: this.statsInfo.stats,
+                publicPath: this._statsManager.getPublicPath(compiler),
+                compiler,
+                bundler: this._bundler,
+                additionalData:
+                  typeof this._options.manifest === 'object'
+                    ? this._options.manifest.additionalData
+                    : undefined,
+              },
+              {
+                disableEmit: this.disableEmit,
+              },
+            );
           }
         },
       );
     });
+  }
+
+  get resourceInfo(): Partial<ResourceInfo> {
+    return {
+      stats: this.statsInfo,
+      manifest: this.manifestInfo,
+    };
   }
 }

@@ -1,5 +1,63 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [0a9adaf]
+  - @module-federation/dts-plugin@0.3.1
+  - @module-federation/manifest@0.3.1
+  - @module-federation/rspack@0.3.1
+  - @module-federation/sdk@0.3.1
+  - @module-federation/runtime-tools@0.3.1
+  - @module-federation/managers@0.3.1
+  - @module-federation/bridge-react-webpack-plugin@0.3.1
+
+## 0.3.0
+
+### Minor Changes
+
+- fa37cc4: feat: support modern.js ssr [#2348](https://github.com/module-federation/core/issues/2348)
+
+### Patch Changes
+
+- Updated dependencies [7c4d99b]
+- Updated dependencies [fa37cc4]
+  - @module-federation/dts-plugin@0.3.0
+  - @module-federation/manifest@0.3.0
+  - @module-federation/rspack@0.3.0
+  - @module-federation/sdk@0.3.0
+  - @module-federation/runtime-tools@0.3.0
+  - @module-federation/bridge-react-webpack-plugin@0.3.0
+  - @module-federation/managers@0.3.0
+
+## 0.2.8
+
+### Patch Changes
+
+- Updated dependencies [f3d13c2]
+  - @module-federation/dts-plugin@0.2.8
+  - @module-federation/manifest@0.2.8
+  - @module-federation/rspack@0.2.8
+  - @module-federation/sdk@0.2.8
+  - @module-federation/runtime-tools@0.2.8
+  - @module-federation/managers@0.2.8
+  - @module-federation/bridge-react-webpack-plugin@0.2.8
+
+## 0.2.7
+
+### Patch Changes
+
+- b00ef13: fix(dts-plugin): support compile vue@3 dts
+- Updated dependencies [b00ef13]
+  - @module-federation/dts-plugin@0.2.7
+  - @module-federation/sdk@0.2.7
+  - @module-federation/manifest@0.2.7
+  - @module-federation/rspack@0.2.7
+  - @module-federation/bridge-react-webpack-plugin@0.2.7
+  - @module-federation/managers@0.2.7
+  - @module-federation/runtime-tools@0.2.7
+
 ## 0.2.6
 
 ### Patch Changes

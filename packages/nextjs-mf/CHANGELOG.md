@@ -1,5 +1,48 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.4.4
+
+### Patch Changes
+
+- @module-federation/enhanced@0.3.1
+- @module-federation/node@2.5.1
+- @module-federation/runtime@0.3.1
+- @module-federation/sdk@0.3.1
+- @module-federation/utilities@3.0.37
+
+## 8.4.3
+
+### Patch Changes
+
+- Updated dependencies [fa37cc4]
+  - @module-federation/enhanced@0.3.0
+  - @module-federation/runtime@0.3.0
+  - @module-federation/node@2.5.0
+  - @module-federation/sdk@0.3.0
+  - @module-federation/utilities@3.0.36
+
+## 8.4.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.2.8
+- @module-federation/node@2.4.2
+- @module-federation/runtime@0.2.8
+- @module-federation/sdk@0.2.8
+- @module-federation/utilities@3.0.35
+
+## 8.4.1
+
+### Patch Changes
+
+- 6e85e36: disable chunk splitting on next server
+- Updated dependencies [b00ef13]
+  - @module-federation/enhanced@0.2.7
+  - @module-federation/sdk@0.2.7
+  - @module-federation/node@2.4.1
+  - @module-federation/runtime@0.2.7
+  - @module-federation/utilities@3.0.34
+
 ## 8.4.0
 
 ### Minor Changes

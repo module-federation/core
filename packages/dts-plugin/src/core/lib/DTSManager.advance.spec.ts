@@ -5,13 +5,14 @@ import { readFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { describe, expect, it, vi, afterAll } from 'vitest';
 import { DTSManager } from './DTSManager';
+const TEST_DIT_DIR = 'dist-test';
 
 describe('DTSManager advance usage', () => {
-  const projectRoot = join(__dirname, '..', '..', '..', '..', '..');
+  const projectRoot = join(__dirname, '../../..');
   const typesFolder = '@mf-types-dts-test-advance';
   const remoteOptions = {
     moduleFederationConfig: {
-      name: 'moduleFederationTypescript',
+      name: 'dtsManagerAdvanceSpecRemote',
       filename: 'remoteEntry.js',
       exposes: {
         './index': join(__dirname, '..', './index.ts'),
@@ -21,20 +22,21 @@ describe('DTSManager advance usage', () => {
         'react-dom': { singleton: true, eager: true },
       },
     },
-    tsConfigPath: join(__dirname, '../../..', './tsconfig.spec.json'),
+    tsConfigPath: join(projectRoot, './tsconfig.spec.json'),
     typesFolder: typesFolder,
     compiledTypesFolder: 'compiled-types',
     deleteTypesFolder: false,
     additionalFilesToCompile: [],
-    context: process.cwd(),
+    context: projectRoot,
     generateAPITypes: true,
     extractRemoteTypes: true,
     extractThirdParty: true,
   };
 
   const hostOptions = {
+    context: projectRoot,
     moduleFederationConfig: {
-      name: 'moduleFederationTypescript',
+      name: 'dtsManagerAdvanceSpecHost',
       filename: 'remoteEntry.js',
       remotes: {
         remotes: 'remote@https://bar.it',
@@ -44,7 +46,7 @@ describe('DTSManager advance usage', () => {
         'react-dom': { singleton: true, eager: true },
       },
     },
-    typesFolder: 'dist/@mf-types-dts-test-consume-types-advance',
+    typesFolder: `${TEST_DIT_DIR}/@mf-types-dts-test-consume-types-advance`,
     consumeAPITypes: true,
   };
 
@@ -53,17 +55,20 @@ describe('DTSManager advance usage', () => {
     host: hostOptions,
   });
 
-  afterAll(() => {
-    [
-      join(projectRoot, 'dist', remoteOptions.typesFolder),
-      join(projectRoot, hostOptions.typesFolder),
-    ].forEach((tmpDir) => {
-      rmSync(tmpDir, { recursive: true });
-    });
-  });
   it('generate types with api declaration file', async () => {
-    const distFolder = join(projectRoot, 'dist', remoteOptions.typesFolder);
-    await dtsManager.generateTypes();
+    const distFolder = join(
+      projectRoot,
+      TEST_DIT_DIR,
+      remoteOptions.typesFolder,
+    );
+    try {
+      await dtsManager.generateTypes();
+      console.log('generateTypes done');
+    } catch (err) {
+      console.log('generateTypes failed');
+      console.error(err);
+      console.log(err.stack);
+    }
 
     const apiFile = `${distFolder}.d.ts`;
     expect(readFileSync(apiFile, 'utf8')).toEqual(`
@@ -72,11 +77,15 @@ describe('DTSManager advance usage', () => {
   });
 
   it('correct consumeTypes', async () => {
-    const distFolder = join(projectRoot, 'dist', typesFolder);
+    const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
     const zip = new AdmZip();
     await zip.addLocalFolderPromise(distFolder, {});
 
-    const apiDistFolder = join(projectRoot, 'dist', remoteOptions.typesFolder);
+    const apiDistFolder = join(
+      projectRoot,
+      TEST_DIT_DIR,
+      remoteOptions.typesFolder,
+    );
     const apiFile = `${apiDistFolder}.d.ts`;
     // const prevAxiosGet = axios.get;
     axios.get = (url) => {
@@ -143,6 +152,9 @@ describe('DTSManager advance usage', () => {
                                     },
                                     {
                                       name: 'RemoteOptions.d.ts',
+                                    },
+                                    {
+                                      name: 'TsConfigJson.d.ts',
                                     },
                                   ],
                                   name: 'interfaces',
