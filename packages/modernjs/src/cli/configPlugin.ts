@@ -115,6 +115,7 @@ export const moduleFederationConfigPlugin = (
             },
             define: {
               FEDERATION_IPV4: JSON.stringify(ipv4),
+              REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
             },
           },
           dev: {

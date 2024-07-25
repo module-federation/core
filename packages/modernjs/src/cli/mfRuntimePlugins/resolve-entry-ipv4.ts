@@ -2,11 +2,18 @@ import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtim
 import { LOCALHOST } from '../../constant';
 
 declare const FEDERATION_IPV4: string | undefined;
+declare const REMOTE_IP_STRATEGY: 'ipv4' | 'inherit' | undefined;
 
 const ipv4 =
   typeof FEDERATION_IPV4 !== 'undefined' ? FEDERATION_IPV4 : '127.0.0.1';
 
+const remoteIpStrategy =
+  typeof REMOTE_IP_STRATEGY !== 'undefined' ? REMOTE_IP_STRATEGY : '127.0.0.1';
+
 function replaceObjectLocalhost(key: string, obj: Record<string, any>) {
+  if (remoteIpStrategy !== 'ipv4') {
+    return;
+  }
   if (!(key in obj)) {
     return;
   }
