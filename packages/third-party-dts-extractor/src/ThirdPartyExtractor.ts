@@ -42,12 +42,14 @@ class ThirdPartyExtractor {
     }
 
     try {
-      const pkgJsonPath = findPkg.sync(
-        require.resolve(importPath, { paths: [this.context] }),
-      ) as string;
-      if (isNodeUtils(pkgJsonPath, importPath)) {
+      const importEntry = require.resolve(importPath, {
+        paths: [this.context],
+      });
+      if (isNodeUtils(importEntry, importPath)) {
         return;
       }
+      const pkgJsonPath = findPkg.sync(importEntry) as string;
+
       const dir = path.dirname(pkgJsonPath);
       const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')) as Record<
         string,
