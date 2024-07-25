@@ -70,8 +70,12 @@ export const moduleFederationConfigPlugin = (
         const ipv4 = getIPV4();
         const enableSSR = Boolean(modernjsConfig?.server?.ssr);
 
-        if (!enableSSR && userConfig.remoteIpStrategy === undefined) {
-          userConfig.remoteIpStrategy = 'inherit';
+        if (userConfig.remoteIpStrategy === undefined) {
+          if (!enableSSR) {
+            userConfig.remoteIpStrategy = 'inherit';
+          } else {
+            userConfig.remoteIpStrategy = 'ipv4';
+          }
         }
 
         return {
