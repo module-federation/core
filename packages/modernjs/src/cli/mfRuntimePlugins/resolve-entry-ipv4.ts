@@ -8,7 +8,7 @@ const ipv4 =
   typeof FEDERATION_IPV4 !== 'undefined' ? FEDERATION_IPV4 : '127.0.0.1';
 
 const remoteIpStrategy =
-  typeof REMOTE_IP_STRATEGY !== 'undefined' ? REMOTE_IP_STRATEGY : '127.0.0.1';
+  typeof REMOTE_IP_STRATEGY !== 'undefined' ? REMOTE_IP_STRATEGY : 'inherit';
 
 function replaceObjectLocalhost(key: string, obj: Record<string, any>) {
   if (remoteIpStrategy !== 'ipv4') {
