@@ -6,6 +6,7 @@ import { getTypedName } from './utils';
 
 const ignoredPkgs = ['typescript'];
 
+// require.resolve('path')==='path'
 const isNodeUtils = (pkgJsonPath: string, importPath: string) => {
   return pkgJsonPath === importPath;
 };
