@@ -68,7 +68,7 @@ const App = () => {
   useEffect(() => {
     const refTimeout = setTimeout(() => {
       if (ref && ref.current) {
-        ref.current.style.backgroundColor = 'salmon';
+        ref.current.style.borderRadius = '20px';
       }
     }, 2000)
     return () => {
@@ -83,8 +83,8 @@ const App = () => {
       <Routes>
         <Route path="/" Component={Home} />
         <Route path="/detail/*" Component={Detail} />
-        <Route path="/remote1/*" Component={() => <Remote1App msg={'hello remote1'} ref={ref} />} />
-        <Route path="/remote2/*" Component={() => <Remote2App msg={'hello remote2'} />} />
+        <Route path="/remote1/*" Component={() => <Remote1App className="remote1" msg={'hello remote1'} ref={ref} />} />
+        <Route path="/remote2/*" Component={() => <Remote2App style={{ background: '#d4e8fa' }} msg={'hello remote2'} />} />
         <Route path="/remote3/*" Component={() => <Remote3App />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
       </Routes>

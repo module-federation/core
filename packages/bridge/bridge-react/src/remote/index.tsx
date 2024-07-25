@@ -34,13 +34,15 @@ const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderP
       memoryRoute,
       basename,
       providerInfo,
+      className,
+      style,
       ...resProps
     } = props;
 
     const rootRef: React.MutableRefObject<HTMLElement | null> = ref && 'current' in ref ? ref as React.MutableRefObject<HTMLElement | null> : useRef(null);
     const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
     const providerInfoRef = useRef<any>(null);
-    
+
     useEffect(() => {
       const renderTimeout = setTimeout(() => {
         const providerReturn = providerInfo();
@@ -78,7 +80,7 @@ const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderP
     }, []);
   
     //@ts-ignore
-    return <div ref={rootRef}></div>;
+    return <div className={className} style={style} ref={rootRef}></div>;
   }
 
   (RemoteApp as any)['__APP_VERSION__'] = __APP_VERSION__;
