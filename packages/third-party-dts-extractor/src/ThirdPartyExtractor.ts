@@ -6,6 +6,10 @@ import { getTypedName } from './utils';
 
 const ignoredPkgs = ['typescript'];
 
+// require.resolve('path')==='path'
+const isNodeUtils = (pkgJsonPath: string, importPath: string) => {
+  return pkgJsonPath === importPath;
+};
 class ThirdPartyExtractor {
   pkgs: Record<string, string>;
   pattern: RegExp;
@@ -41,6 +45,9 @@ class ThirdPartyExtractor {
       const pkgJsonPath = findPkg.sync(
         require.resolve(importPath, { paths: [this.context] }),
       ) as string;
+      if (isNodeUtils(pkgJsonPath, importPath)) {
+        return;
+      }
       const dir = path.dirname(pkgJsonPath);
       const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')) as Record<
         string,
