@@ -5,7 +5,6 @@ import { LoggerInstance, pathJoin } from '../utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 
 declare const __APP_VERSION__: string;
-
 export interface RenderFnParams extends ProviderParams {
   dom?: any;
 }
@@ -34,8 +33,6 @@ const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderP
       memoryRoute,
       basename,
       providerInfo,
-      className,
-      style,
       ...resProps
     } = props;
 
@@ -80,7 +77,7 @@ const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderP
     }, []);
   
     //@ts-ignore
-    return <div className={className} style={style} ref={rootRef}></div>;
+    return <div className={props?.className} style={props?.style} ref={rootRef}></div>;
   }
 
   (RemoteApp as any)['__APP_VERSION__'] = __APP_VERSION__;

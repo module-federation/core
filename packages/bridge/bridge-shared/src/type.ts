@@ -1,10 +1,11 @@
-import { CSSProperties } from 'react';
-export interface ProviderParams {
+import React from 'react';
+export interface ProviderParams extends React.HTMLAttributes<HTMLDivElement> {
   name?: string;
   basename?: string;
   memoryRoute?: { entryPath: string };
-  style?: CSSProperties;
-  className?: string | string[];
+  props?: {
+    [key: string]: any;
+  }
 }
 
 export interface RenderFnParams extends ProviderParams {

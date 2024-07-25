@@ -7,6 +7,7 @@ import {
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
 import RemoteApp from './remote';
+
 export interface RenderFnParams extends ProviderParams {
   dom?: any;
 }
@@ -84,18 +85,12 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
   });
 }
 
-type RemoteProps = {
-  basename?: ProviderParams['basename'];
-  memoryRoute?: ProviderParams['memoryRoute'];
-  [key: string]: any;
-};
-
 export function createRemoteComponent<T, E extends keyof T>(info: {
   loader: () => Promise<T>;
   loading: React.ReactNode;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
   export?: E;
-}): ForwardRefExoticComponent< PropsWithoutRef<RemoteProps> & RefAttributes<HTMLElement | HTMLDivElement>> {
+}): ForwardRefExoticComponent<PropsWithoutRef<ProviderParams> & RefAttributes<HTMLElement | HTMLDivElement>> {
   // type ExportType = T[E] extends (...args: any) => any
   //   ? ReturnType<T[E]>
   //   : never;
