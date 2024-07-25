@@ -14,9 +14,7 @@ export interface RenderFnParams extends ProviderParams {
 interface RemoteModule {
   provider: () => {
     render: (
-      info: ProviderParams & {
-        dom: any;
-      },
+      info: RenderFnParams,
     ) => void;
     destroy: (info: { dom: any }) => void;
   };

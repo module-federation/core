@@ -76,16 +76,16 @@ export default defineConfig({
 // ./src/router.ts
 import * as bridge from '@module-federation/bridge-vue3';
 
-const Remote2 = bridge.createRemoteComponent(() =>
-  loadRemote('remote1/export-app'),
-);
+const Remote1 = bridge.createRemoteComponent({
+  loader: () => loadRemote('remote1/export-app'),
+});
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     // 在这里定义你的路由
     { path: '/', component: Home },
-    { path: '/remote1/:pathMatch(.*)*', component: Remote2 },
+    { path: '/remote1/:pathMatch(.*)*', component: Remote1 },
     // 其他路由
   ],
 });
@@ -116,8 +116,8 @@ function createRemoteComponent<T, E extends keyof T>(
     * 作用: 用于加载远程模块的函数，例如：`loadRemote('remote1/export-app')`、`import('remote1/export-app')`
 
 ```tsx
-const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'));
-const Remote2App = createRemoteComponent(() => import('remote2/export-app'));
+const Remote1App = createRemoteComponent({ loader: () => loadRemote('remote1/export-app') });
+const Remote2App = createRemoteComponent({ loader: () => import('remote2/export-app') });
 ```
 
   * `export`
@@ -130,9 +130,10 @@ export const provider = createBridgeComponent({
 });
 
 // host
-const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'), {
-  export: 'provider'
+const Remote1App = createRemoteComponent({
+  loader: () => loadRemote('remote1/export-app'),
 });
+
 ```
 
 * ReturnType
@@ -142,16 +143,16 @@ const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'),
 ```tsx
 import * as bridge from '@module-federation/bridge-vue3';
 
-const Remote2 = bridge.createRemoteComponent(() =>
-  loadRemote('remote1/export-app'),
-);
+const remote1 = bridge.createRemoteComponent({
+  loader: () => loadRemote('remote1/export-app'),
+});
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     // 在这里定义你的路由
     { path: '/', component: Home },
-    { path: '/remote1/:pathMatch(.*)*', component: Remote2 },
+    { path: '/remote1/:pathMatch(.*)*', component: Remote1 },
     // 其他路由
   ],
 });
