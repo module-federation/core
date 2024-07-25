@@ -35,7 +35,6 @@ export function modifyBundlerConfig<T extends Bundler>(options: {
     config,
     isServer,
     modernjsConfig,
-    bundlerType,
     remoteIpStrategy = 'ipv4',
   } = options;
 
@@ -69,6 +68,11 @@ export const moduleFederationConfigPlugin = (
         const bundlerType =
           useAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
         const ipv4 = getIPV4();
+        const enableSSR = Boolean(modernjsConfig?.server?.ssr);
+
+        if (!enableSSR && userConfig.remoteIpStrategy === undefined) {
+          userConfig.remoteIpStrategy = 'inherit';
+        }
 
         return {
           tools: {
