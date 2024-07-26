@@ -24,6 +24,7 @@ interface RemoteAppParams {
   name: string;
   providerInfo: NonNullable<RemoteModule['provider']>;
   exportName: string | number | symbol;
+  dom?: string;
 }
 
 const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderParams, ref) {
@@ -33,25 +34,38 @@ const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderP
       memoryRoute,
       basename,
       providerInfo,
+      dom,
+      className,
+      style,
       ...resProps
     } = props;
 
     const rootRef: React.MutableRefObject<HTMLElement | null> = ref && 'current' in ref ? ref as React.MutableRefObject<HTMLElement | null> : useRef(null);
     const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
     const providerInfoRef = useRef<any>(null);
-
+    
     useEffect(() => {
       const renderTimeout = setTimeout(() => {
         const providerReturn = providerInfo();
         providerInfoRef.current = providerReturn;
+        
+        let domElement = null;
+        if (dom) {
+          domElement = document.getElementById(dom.replace('#', ''));
+          // TODO: if domElement is null, throw Error.
+          rootRef.current = domElement;
+        } else {
+          domElement = rootRef.current;
+        }
+
         const renderProps = {
           name,
-          dom: rootRef.current,
+          // dom: rootRef.current,
+          dom: domElement,
           basename,
           memoryRoute,
           ...resProps,
         };
-        
         renderDom.current = rootRef.current;
         LoggerInstance.log(
           `createRemoteComponent LazyComponent render >>>`,
@@ -75,9 +89,8 @@ const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderP
         });
       };
     }, []);
-  
-    //@ts-ignore
-    return <div className={props?.className} style={props?.style} ref={rootRef}></div>;
+
+    return dom ? null : <div className={props?.className} style={props?.style} ref={rootRef}></div>;
   }
 
   (RemoteApp as any)['__APP_VERSION__'] = __APP_VERSION__;

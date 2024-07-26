@@ -25,6 +25,7 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
   loading: React.ReactNode;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
   export?: E;
+  dom?: string;
 }) {
   const exportName = info?.export || 'default';
   return React.lazy(async () => {
@@ -88,6 +89,7 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
   loading: React.ReactNode;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
   export?: E;
+  dom?: string;
 }): ForwardRefExoticComponent<PropsWithoutRef<ProviderParams> & RefAttributes<HTMLElement | HTMLDivElement>> {
   // type ExportType = T[E] extends (...args: any) => any
   //   ? ReturnType<T[E]>
@@ -98,12 +100,12 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
   //     : {}
   //   : {};
 
-  return forwardRef(function (props, ref) {
+  return forwardRef(function (props, ref) {    
     const LazyComponent = createLazyRemoteComponent(info);
     return (
       <ErrorBoundary FallbackComponent={info.fallback}>
         <React.Suspense fallback={info.loading}>
-          <LazyComponent {...props} ref={ref} />
+          <LazyComponent {...props} dom={info?.dom} ref={ref} />
         </React.Suspense>
       </ErrorBoundary>
     );

@@ -1,12 +1,12 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, Suspense } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 import { createRemoteComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
-import './App.css';
 import styles from './index.module.less';
+import './App.css';
 
 const FallbackErrorComp = (info: any) => {
   return (
@@ -25,6 +25,7 @@ const Remote1App = createRemoteComponent({
   loader: () => loadRemote('remote1/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
+  dom: '#root-remote1'
 });
 
 const Remote2App = createRemoteComponent({
@@ -80,7 +81,9 @@ const App = () => {
   }, [location.pathname])
   return (
     <div>
+      <div id="root-remote1"></div>
       <Navigation />
+      <Remote1App memoryRoute={{ entryPath: '/' }} />
       <Routes>
         <Route path="/" Component={Home} />
         <Route path="/detail/*" Component={Detail} />
