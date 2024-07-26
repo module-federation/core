@@ -1,5 +1,13 @@
 # host-v5
 
+## 1.0.12
+
+### Patch Changes
+
+- Updated dependencies [85ae159]
+  - @module-federation/enhanced@0.3.2
+  - @module-federation/bridge-react@0.3.2
+
 ## 1.0.11
 
 ### Patch Changes
