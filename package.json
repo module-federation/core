@@ -110,7 +110,7 @@
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
     "@rollup/plugin-alias": "5.1.0",
     "@rollup/plugin-replace": "5.0.7",
-    "@rspack/core": "^0.5.9",
+    "@rspack/core": "^0.7.5",
     "@rspack/dev-server": "^0.5.9",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^6.0.3",

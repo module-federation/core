@@ -27,7 +27,7 @@
     "@module-federation/dts-plugin": "workspace:*"
   },
   "devDependencies": {
-    "@rspack/core": "0.5.0"
+    "@rspack/core": "0.7.5"
   },
   "exports": {
     ".": {
