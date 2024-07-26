@@ -225,39 +225,44 @@ export function patchBundlerConfig<T extends Bundler>(options: {
   bundlerConfig: BundlerConfig<T>;
   isServer: boolean;
   modernjsConfig: UserConfig<AppTools>;
+  bundlerType: Bundler;
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
 }) {
-  const { bundlerConfig, modernjsConfig, isServer, mfConfig } = options;
+  const { bundlerConfig, modernjsConfig, isServer, mfConfig, bundlerType } =
+    options;
   const enableSSR = Boolean(modernjsConfig.server?.ssr);
 
   delete bundlerConfig.optimization?.runtimeChunk;
 
   patchIgnoreWarning(bundlerConfig);
 
-  bundlerConfig.watchOptions = bundlerConfig.watchOptions || {};
-  if (!Array.isArray(bundlerConfig.watchOptions.ignored)) {
-    if (bundlerConfig.watchOptions.ignored) {
-      bundlerConfig.watchOptions.ignored = [
-        bundlerConfig.watchOptions.ignored as string,
-      ];
+  if (bundlerType === 'webpack') {
+    bundlerConfig.watchOptions = bundlerConfig.watchOptions || {};
+    if (!Array.isArray(bundlerConfig.watchOptions.ignored)) {
+      if (bundlerConfig.watchOptions.ignored) {
+        bundlerConfig.watchOptions.ignored = [
+          bundlerConfig.watchOptions.ignored as string,
+        ];
+      } else {
+        bundlerConfig.watchOptions.ignored = [];
+      }
+    }
+    if (mfConfig.dts !== false) {
+      if (
+        typeof mfConfig.dts === 'object' &&
+        typeof mfConfig.dts.consumeTypes === 'object' &&
+        mfConfig.dts.consumeTypes.remoteTypesFolder
+      ) {
+        bundlerConfig.watchOptions.ignored.push(
+          `**/${mfConfig.dts.consumeTypes.remoteTypesFolder}/**`,
+        );
+      } else {
+        bundlerConfig.watchOptions.ignored.push('**/@mf-types/**');
+      }
     } else {
-      bundlerConfig.watchOptions.ignored = [];
+      bundlerConfig.watchOptions.ignored.push('**/@mf-types/**');
     }
   }
-  if (mfConfig.dts !== false) {
-    if (
-      typeof mfConfig.dts === 'object' &&
-      typeof mfConfig.dts.consumeTypes === 'object' &&
-      mfConfig.dts.consumeTypes.remoteTypesFolder
-    ) {
-      bundlerConfig.watchOptions.ignored.push(
-        mfConfig.dts.consumeTypes.remoteTypesFolder,
-      );
-    } else {
-      bundlerConfig.watchOptions.ignored.push('@mf-types');
-    }
-  }
-
   if (bundlerConfig.output) {
     if (!bundlerConfig.output?.chunkLoadingGlobal) {
       bundlerConfig.output.chunkLoadingGlobal = `chunk_${mfConfig.name}`;

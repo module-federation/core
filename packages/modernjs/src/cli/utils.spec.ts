@@ -98,6 +98,7 @@ describe('patchBundlerConfig', async () => {
       },
     };
     patchBundlerConfig<'webpack'>({
+      bundlerType: 'webpack',
       bundlerConfig,
       isServer: true,
       modernjsConfig: {
@@ -134,6 +135,7 @@ describe('patchBundlerConfig', async () => {
       },
     };
     patchBundlerConfig<'webpack'>({
+      bundlerType: 'webpack',
       bundlerConfig,
       isServer: false,
       modernjsConfig: {

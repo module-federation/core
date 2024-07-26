@@ -36,11 +36,13 @@ export function modifyBundlerConfig<T extends Bundler>(options: {
     isServer,
     modernjsConfig,
     remoteIpStrategy = 'ipv4',
+    bundlerType,
   } = options;
 
   patchMFConfig(mfConfig, isServer, remoteIpStrategy);
 
   patchBundlerConfig({
+    bundlerType,
     bundlerConfig: config,
     isServer,
     modernjsConfig,

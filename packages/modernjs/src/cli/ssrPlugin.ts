@@ -4,7 +4,7 @@ import type { CliPlugin, AppTools } from '@modern-js/app-tools';
 import type { InternalModernPluginOptions } from '../types';
 import { ModuleFederationPlugin } from '@module-federation/enhanced';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
-import { EntryChunkTrackerPlugin } from '@module-federation/node';
+import { UniverseEntryChunkTrackerPlugin } from '@module-federation/node';
 import { updateStatsAndManifest } from './manifest';
 import { MODERN_JS_SERVER_DIR, PLUGIN_IDENTIFIER } from '../constant';
 import { isDev } from './constant';
@@ -82,12 +82,6 @@ export const moduleFederationSSRPlugin = (
                   // @ts-ignore
                   config.plugins?.push(userConfig.nodePlugin);
                 }
-                // config.plugins?.push(
-                //   new StreamingTargetPlugin(userConfig.nodePlugin),
-                // );
-                if (isDev) {
-                  config.plugins?.push(new EntryChunkTrackerPlugin());
-                }
               } else {
                 userConfig.distOutputDir =
                   userConfig.distOutputDir ||
@@ -137,6 +131,11 @@ export const moduleFederationSSRPlugin = (
             bundlerChain(chain, { isServer }) {
               if (isServer) {
                 chain.target('async-node');
+                if (isDev) {
+                  chain
+                    .plugin('UniverseEntryChunkTrackerPlugin')
+                    .use(UniverseEntryChunkTrackerPlugin);
+                }
               }
               if (isDev && !isServer) {
                 chain.externals({

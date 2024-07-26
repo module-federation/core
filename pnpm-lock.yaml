@@ -2397,6 +2397,9 @@ importers:
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../utilities
+      btoa:
+        specifier: 1.2.1
+        version: 1.2.1
       encoding:
         specifier: ^0.1.13
         version: 0.1.13
