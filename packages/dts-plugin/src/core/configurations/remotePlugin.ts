@@ -104,8 +104,9 @@ const readTsConfig = (
     ...defaultCompilerOptions,
   };
 
-  delete rawTsConfigJson.compilerOptions?.paths;
-  delete rawTsConfigJson.compilerOptions?.baseUrl;
+  const { paths, baseUrl, ...restCompilerOptions } =
+    rawTsConfigJson.compilerOptions || {};
+  rawTsConfigJson.compilerOptions = restCompilerOptions;
 
   const filesToCompile = [];
   filesToCompile.push(...Object.values(mapComponentsToExpose));
