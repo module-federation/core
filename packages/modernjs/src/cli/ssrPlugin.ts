@@ -3,10 +3,8 @@ import { fs } from '@modern-js/utils';
 import type { CliPlugin, AppTools } from '@modern-js/app-tools';
 import type { InternalModernPluginOptions } from '../types';
 import { ModuleFederationPlugin } from '@module-federation/enhanced';
-import {
-  StreamingTargetPlugin,
-  EntryChunkTrackerPlugin,
-} from '@module-federation/node';
+import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { EntryChunkTrackerPlugin } from '@module-federation/node';
 import { updateStatsAndManifest } from './manifest';
 import { MODERN_JS_SERVER_DIR, PLUGIN_IDENTIFIER } from '../constant';
 import { isDev } from './constant';
@@ -24,7 +22,7 @@ export const moduleFederationSSRPlugin = (
     '@modern-js/plugin-module-federation-config',
     '@modern-js/plugin-module-federation',
   ],
-  setup: async ({ useConfigContext }) => {
+  setup: async ({ useConfigContext, useAppContext }) => {
     const modernjsConfig = useConfigContext();
     const enableSSR = Boolean(modernjsConfig?.server?.ssr);
     if (!enableSSR) {
@@ -45,13 +43,34 @@ export const moduleFederationSSRPlugin = (
         return { entrypoint, plugins };
       },
       config: async () => {
+        const bundlerType =
+          useAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
+
         return {
+          source: {
+            enableAsyncEntry:
+              bundlerType === 'rspack'
+                ? modernjsConfig.source?.enableAsyncEntry ?? true
+                : modernjsConfig.source?.enableAsyncEntry,
+          },
           tools: {
             rspack(config, { isServer }) {
               if (isServer) {
-                throw new Error(
-                  `${PLUGIN_IDENTIFIER} Not support rspack ssr mode yet !`,
-                );
+                // throw new Error(
+                //   `${PLUGIN_IDENTIFIER} Not support rspack ssr mode yet !`,
+                // );
+                if (!userConfig.nodePlugin) {
+                  userConfig.nodePlugin = new RspackModuleFederationPlugin(
+                    userConfig.ssrConfig,
+                  );
+                  // @ts-ignore
+                  config.plugins?.push(userConfig.nodePlugin);
+                }
+              } else {
+                userConfig.distOutputDir =
+                  userConfig.distOutputDir ||
+                  config.output?.path ||
+                  path.resolve(process.cwd(), 'dist');
               }
             },
             webpack(config, { isServer }) {
@@ -63,9 +82,9 @@ export const moduleFederationSSRPlugin = (
                   // @ts-ignore
                   config.plugins?.push(userConfig.nodePlugin);
                 }
-                config.plugins?.push(
-                  new StreamingTargetPlugin(userConfig.nodePlugin),
-                );
+                // config.plugins?.push(
+                //   new StreamingTargetPlugin(userConfig.nodePlugin),
+                // );
                 if (isDev) {
                   config.plugins?.push(new EntryChunkTrackerPlugin());
                 }
@@ -116,6 +135,9 @@ export const moduleFederationSSRPlugin = (
               ],
             },
             bundlerChain(chain, { isServer }) {
+              if (isServer) {
+                chain.target('async-node');
+              }
               if (isDev && !isServer) {
                 chain.externals({
                   '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',

@@ -157,6 +157,10 @@ export const patchMFConfig = (
   }
 
   if (isServer) {
+    injectRuntimePlugins(
+      require.resolve('@module-federation/node/runtimePlugin'),
+      runtimePlugins,
+    );
     if (isDev) {
       injectRuntimePlugins(
         require.resolve(
@@ -201,6 +205,22 @@ export const patchMFConfig = (
   return mfConfig;
 };
 
+export function patchIgnoreWarning<T extends Bundler>(
+  bundlerConfig: BundlerConfig<T>,
+) {
+  bundlerConfig.ignoreWarnings = bundlerConfig.ignoreWarnings || [];
+  const ignoredMsgs = [
+    'external script',
+    'process.env.WS_NO_BUFFER_UTIL',
+    `Can't resolve 'utf-8-validate`,
+  ];
+  bundlerConfig.ignoreWarnings.push((warning) => {
+    if (ignoredMsgs.some((msg) => warning.message.includes(msg))) {
+      return true;
+    }
+    return false;
+  });
+}
 export function patchBundlerConfig<T extends Bundler>(options: {
   bundlerConfig: BundlerConfig<T>;
   isServer: boolean;
@@ -211,6 +231,32 @@ export function patchBundlerConfig<T extends Bundler>(options: {
   const enableSSR = Boolean(modernjsConfig.server?.ssr);
 
   delete bundlerConfig.optimization?.runtimeChunk;
+
+  patchIgnoreWarning(bundlerConfig);
+
+  bundlerConfig.watchOptions = bundlerConfig.watchOptions || {};
+  if (!Array.isArray(bundlerConfig.watchOptions.ignored)) {
+    if (bundlerConfig.watchOptions.ignored) {
+      bundlerConfig.watchOptions.ignored = [
+        bundlerConfig.watchOptions.ignored as string,
+      ];
+    } else {
+      bundlerConfig.watchOptions.ignored = [];
+    }
+  }
+  if (mfConfig.dts !== false) {
+    if (
+      typeof mfConfig.dts === 'object' &&
+      typeof mfConfig.dts.consumeTypes === 'object' &&
+      mfConfig.dts.consumeTypes.remoteTypesFolder
+    ) {
+      bundlerConfig.watchOptions.ignored.push(
+        mfConfig.dts.consumeTypes.remoteTypesFolder,
+      );
+    } else {
+      bundlerConfig.watchOptions.ignored.push('@mf-types');
+    }
+  }
 
   if (bundlerConfig.output) {
     if (!bundlerConfig.output?.chunkLoadingGlobal) {
