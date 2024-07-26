@@ -107,11 +107,12 @@ const readTsConfig = (
   delete rawTsConfigJson.compilerOptions?.paths;
   delete rawTsConfigJson.compilerOptions?.baseUrl;
 
-  const filesToCompile = [
-    ...Object.values(mapComponentsToExpose),
+  const filesToCompile = [];
+  filesToCompile.push(...Object.values(mapComponentsToExpose));
+  filesToCompile.push(
     ...configContent.fileNames.filter((filename) => filename.endsWith('.d.ts')),
-    ...additionalFilesToCompile,
-  ];
+  );
+  filesToCompile.push(...additionalFilesToCompile);
 
   rawTsConfigJson.include = [];
   rawTsConfigJson.files = filesToCompile;
