@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "files": [
     "dist/",
     "types.d.ts",

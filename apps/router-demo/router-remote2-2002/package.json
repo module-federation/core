@@ -1,7 +1,7 @@
 {
   "name": "remote2",
   "private": true,
-  "version": "1.0.12",
+  "version": "1.0.13",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",

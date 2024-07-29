@@ -1,5 +1,7 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.3.3
+
 ## 0.3.2
 
 ## 0.3.1
