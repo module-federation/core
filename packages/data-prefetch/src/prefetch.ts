@@ -106,7 +106,8 @@ export class MFDataPrefetch {
       globalThis.__FEDERATION__.__PREFETCH__.__PREFETCH_EXPORTS__?.[name];
     const resolve = exportsPromise.then(
       (exports: Record<string, Record<string, any>> = {}) => {
-        // 根据函数名后缀匹配 prefetch，以便后续拓展其他能力，不应直接将所有函数都识别为 prefetch 函数
+        // Match prefetch based on the function name suffix so that other capabilities can be expanded later.
+        // Not all functions should be directly identified as prefetch functions
         const memory: Record<string, Record<string, any>> = {};
         Object.keys(exports).forEach((key) => {
           memory[key] = {};

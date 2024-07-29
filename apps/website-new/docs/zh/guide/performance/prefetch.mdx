@@ -1,0 +1,286 @@
+# Data Prefetch
+
+## 什么是 Data Prefetch
+Data Prefetch 可以将远程模块接口请求提前到 js、css 加载时并行发出，提升首屏速度。
+
+- 消费者常规加载流程：
+
+Host HTML(消费者 HTMl) -> Host main.js(消费者入口 js) -> Host fetch(消费者鉴权等前置动作) -> Provider main.js(生产者入口 js) -> Provider fetch(生产者发送请求)
+![](@public/guide/performance/data-prefetch/common.jpg)
+- 使用 Prefetch 后的加载流程
+![](@public/guide/performance/data-prefetch/prefetch.jpg)
+
+可以看到生产者的请求被提前到跟部分 js 并行了，**目前在最没有前置操作的简单场景中测试首屏可以提升40～100ms，次屏理论上可以完全做到直出**，在前置流程长的情况下可以大大提升模块整体的渲染速度
+
+## 使用方法
+1. 给`生产者`和`消费者`安装 `@module-federation/enhanced` 包
+
+import { Tab, Tabs } from '@theme';
+
+<Tabs values={[{ label: "npm" },{ label: "yarn" },{ label: "pnpm" }]}>
+<Tab>
+```bash
+npm install @module-federation/enhanced
+```
+</Tab>
+<Tab>
+```bash
+yarn add @module-federation/enhanced
+```
+</Tab>
+<Tab>
+```bash
+pnpm add @module-federation/enhanced
+```
+</Tab>
+</Tabs>
+
+2. 给生产者的 expose 模块目录同级增加 `.prefetch.ts(js)` 文件，假如有如下 `exposes`
+``` ts title=rsbuild(webpack).config.ts
+new ModuleFederationPlugin({
+  exposes: {
+    '.': './src/index.tsx',
+    './Button': './src/Button.tsx',
+  },
+  // ...
+})
+```
+此时生产者项目有 `.` 和 `./Button` 两个 `exposes`，
+那么我们可以在 `src` 下新建 `index.prefetch.ts` 和 `Button.prefetch.ts` 两个 prefetch 文件，拿 `Button` 举例
+
+**注意 export 的函数必须以 default 导出或 Prefetch 结尾才会被识别成 Prefetch 函数（不区分大小写）**
+``` ts title=Button.prefetch.ts
+// 这里通过使用 react-router-dom 提供的 defer API 举例，是否要使用这个 API 可以根据需求决定，参考问题解答「为什么要使用 defer、Suspense、Await 组件」
+// 用户可以通过 npm install react-router-dom 来安装这个包
+import { defer } from 'react-router-dom';
+
+const defaultVal = {
+  data: {
+    id: 1,
+    title: 'A Prefetch Title',
+  }
+};
+
+// 注意 export 的函数必须以 default 导出或 Prefetch 结尾才会被识别成 Prefetch 函数（不区分大小写）
+export default (params = defaultVal) => defer({
+  userInfo: new Promise(resolve => {
+    setTimeout(() => {
+      resolve(params);
+    }, 2000);
+  })
+})
+```
+
+在 `Button` 中使用
+```tsx title=Button.tsx
+import { Suspense } from 'react';
+import { usePrefetch } from '@module-federation/enhanced/prefetch';
+import { Await } from 'react-router-dom';
+
+interface UserInfo {
+  id: number;
+  title: string;
+};
+const reFetchParams = {
+  data: {
+    id: 2,
+    title: 'Another Prefetch Title',
+  }
+}
+export default function Button () {
+  const [prefetchResult, reFetchUserInfo] = usePrefetch<UserInfo>({
+    // 对应生产者 ModuleFederationPlugin 中的 (name + expose)，例如 `@mf/app2/Button` 用于消费 `Button.prefetch.ts`
+    id: '@mf/app2/Button',
+    // 可选参数，使用 defer 后必填
+    deferId: 'userInfo',
+    // default 导出默认可以不传 functionId，此处为举例说明，如果非 default 导出则需要填函数名,
+    // functionId: 'default',
+  });
+
+  return (
+    <>
+      <button onClick={() => reFetchUserInfo(reFetchParams)}>重新发送带参数的请求</button>
+      <Suspense fallback={<p>Loading...</p>}>
+        <Await
+          resolve={prefetchResult}
+          children={userInfo => (
+            <div>
+              <div>{userInfo.data.id}</div>
+              <div>{userInfo.data.title}</div>
+            </div>
+          )}
+        ></Await>
+      </Suspense>
+    </>
+  )
+};
+```
+这样就完成了接口预请求，在 `Button` 被消费者使用后会提前将接口请求发送出去（加载 js 资源时就会发出，正常项目需要等到组件渲染时），
+在上面的例子中 `Button` 首先会渲染 `loading...`， 然后在 2s 后展示数据
+点击`重新发送带参数的请求`可以重新触发请求并且添加参数，用于更新组件
+
+## 查看优化效果
+在浏览器控制台中打开日志模式查看输出（最好使用浏览器缓存模式模拟用户场景，否则数据可能不准确）
+默认优化效果是数据3减去数据1（模拟用户在 `useEffect` 中发送请求），如果你的请求不是在 `useEffect` 中发送，那么可以在接口执行处手动调用 `performance.now()` 来减去数据1
+``` ts
+localStorage.setItem('FEDERATION_DEBUG', 1)
+```
+![](@public/guide/performance/data-prefetch/log.jpg)
+
+## API
+### usePrefetch
+#### 功能
+- 用于获取预请求数据结果以及控制重新发起请求
+
+#### 类型
+``` ts
+type Options: <T>{
+  id: string; // 必填，对应生产者 vmok.config.ts 中的 (name + expose)，例如 `@vmok-e2e/edenx-demo-app2/Button` 用于消费 `Button.prefetch.ts`。
+  functionId?: string; // 可选（默认是 default），用于获取 .prefetch.ts 文件中 export 的函数名称，函数需要以 Prefetch 结尾(不区分大小写)
+  deferId?: string; // 可选（使用 defer 后必填），使用 defer 后函数返回值为对象(对象中可以有多个 key 对应多个请求)，deferId 为对象中的某个 key，用于获取具体请求
+  cacheStrategy?: () => boolean; // 可选，一般不用手动管理，由框架管理，用于控制是否更新请求结果缓存，目前在组件卸载后或手动执行 reFetch 函数会刷新缓存
+} => [
+  Promise<T>,
+  reFetch: (refetchParams?: refetchParams) => void, // 用于重新发起请求，常用于组件内部状态更新后接口需要重新请求获取数据的场景，调用此函数会重新发起请求并更新请求结果缓存
+];
+
+type refetchParams: any; // 用于组件内重新发起请求携带参数
+```
+
+#### 使用方法
+``` ts
+import { Suspense } from 'react';
+import { usePrefetch } from '@vmok/prefetch/react';
+import { Await } from '@edenx/runtime/router';
+
+export const Button = () => {
+  const [userInfoPrefetch, reFetchUserInfo] = usePrefetch<UserInfo>({
+    // 对应生产者 vmok.config.ts 中的 (name + expose)，例如 `@vmok-e2e/edenx-demo-app2/Button` 用于消费 `Button.prefetch.ts`
+    id: '@vmok-e2e/edenx-demo-app2/Button',
+    // 可选参数，使用 defer 后必填
+    deferId: 'userInfo'
+    // default 导出默认可以不传 functionId，此处为举例说明，如果非 default 导出则需要填函数名,
+    // functionId: 'default',
+  });
+
+  return (
+    <>
+      <button onClick={() => reFetchUserInfo(reFetchParams)}>重新发送带参数的请求</button>
+      <Suspense fallback={<p>Loading...</p>}>
+        <Await
+          resolve={prefetchResult}
+          children={userInfo => (
+            <div>
+              <div>{userInfo.data.id}</div>
+              <div>{userInfo.data.title}</div>
+            </div>
+          )}
+        ></Await>
+      </Suspense>
+    <>
+  )
+}
+```
+
+### preloadRemote
+#### 功能
+用户如果在消费者项目中手动调用 [preloadRemote](/guide/basic/runtime.html#preloadremote) API 并且设置参数 `prefetchInterface` 为 `true`，那么会认为消费者不仅希望提前加载生产者的静态资源，同时希望将接口请求也提前发出，这可以让项目获得更快的渲染速度,
+这在**首屏有前置请求**场景或者**希望次屏直出**这些场景中尤其有效
+#### 使用方法
+``` ts
+import { preloadRemote } from '@vmok/kit/runtime';
+
+preloadRemote([
+  {
+    nameOrAlias: '@vmok-e2e/edenx-demo-app2',
+    // 开启接口预请求
+    prefetchInterface: true,
+  },
+]);
+```
+
+#### 注意
+注意这可能会导致数据缓存问题，即生产者会优先使用预请求的接口结果（用户可能通过交互操作已经修改了服务端的数据），这种情况下会导致渲染使用到过时的数据，请按照项目情况合理使用
+
+## 问题解答
+
+### 1. 和 React Router v6 的 [Data Loader](https://reactrouter.com/en/main/route/loader) 有区别吗
+React Router 的 Data Loader 只能给单体项目使用，即跨项目无法复用，同时 Data Loader 是按路由绑定的，而非按模块(expose)绑定的，Data Prefetch 更加适合远程加载的场景
+
+### 2. 为什么要使用 defer、Suspense、Await 组件？[参考链接](https://reactrouter.com/en/main/guides/deferred)
+defer 和 Await 组件是 React Router v6 提供的用于数据加载和渲染 loading 时使用的 API 和组件，二者通常配合 React 的 Suspense
+来完成：渲染 loading -> 渲染内容 的过程。可以看到 defer 返回的是一个对象，在执行 Prefetch 函数时这个对象中所有 key 对应的请求(也就是 value)
+会一次性全部发送出去，而 defer 会追踪这些 Promise 的状态，配合 Suspense 和 Await 完成渲染，同时这些请求不会阻塞组件的渲染(在组件渲染完成前会展示 loading...)
+
+### 3. 能不能不使用 defer、Suspense 和 Await 这一套？
+可以，但是如果 export 的函数中有阻塞函数执行操作的话(例如有 await 或返回是 Promise)，会让组件等待函数执行完成后再渲染，即使组件内容早已加载出来，但组件仍然可能会等待接口完成再渲染，例如
+``` ts
+export default (params) => (
+  new Promise(resolve => {
+    setTimeout(() => {
+      resolve(params);
+    }, 2000);
+  })
+)
+```
+
+### 4. 为什么不默认全部 defer？
+让开发者场景更加可控，在某些场景下开发者更希望用户一次性看到完整的页面，而非渲染 loading，这可以让开发者更好的权衡场景，[参考](https://reactrouter.com/en/main/guides/deferred#why-not-defer-everything-by-default)
+
+### 5. Prefetch 能不能携带参数？
+首次请求由于请求时间和 js 资源加载属于并行，所以不支持从组件内部传递参数，可以手动设置默认值。而 usePrefetch 会返回 reFetch 函数，此函数用于在组件内部重新发送请求更新数据，此时可以携带参数
+
+### 6. 业务想最小成本改造如何操作？
+1. 将需要 prefetch 的接口放到 .prefetch.ts 中
+2. prefetch 函数用 `defer` 包裹返回一个对象(也可以直接返回一个对象，如果返回一个值的话会和组件 js 的加载互相 await 阻塞)
+3. 业务组件中一般是在 `useEffect` 中发请求:
+``` ts Button.tsx
+import { useState } from 'react';
+import { usePrefetch } from '@vmok/prefetch/react';
+
+export const Button = () => {
+  const [state, setState] = useState(defaultVal);
+  const [userInfoPrefetch, reFetchUserInfo] = usePrefetch<UserInfo>({
+    // 对应生产者 vmok.config.ts 中的 (name + expose)，例如 `@vmok-e2e/edenx-demo-app2/Button` 用于消费 `Button.prefetch.ts`
+    id: '@vmok-e2e/edenx-demo-app2/Button',
+    // 可选参数，使用 defer 后必填
+    deferId: 'userInfo',
+    // default 导出默认可以不传 functionId，此处为举例说明，如果非 default 导出则需要填函数名,
+    // functionId: 'default',
+  });
+
+  useEffect(() => {
+    // 常规场景一般在这里发请求
+    userInfoPrefetch
+      .then(data => (
+        // 更新数据
+        setState(data)
+      ));
+  }, []);
+
+  return (
+    <>{state.defaultVal}<>
+  )
+}
+```
+
+### 7. 为什么我定义了 Prefetch 函数但是不生效？
+注意 export 的函数必须以 default 导出或 Prefetch 结尾才会被识别成 Prefetch 函数（不区分大小写）
+
+### 8. 模块在次屏可以优化性能吗
+可以，并且效果比较明显，由于 Data Prefetch 是针对所有 expose 模块的，所以次屏模块也可以优化性能
+``` ts
+// 消费者中
+import { preloadRemote } from '@vmok/kit/runtime';
+
+preloadRemote([
+  {
+    nameOrAlias: '@vmok-e2e/edenx-demo-app2',
+    // 开启接口预请求
+    prefetchInterface: true,
+  },
+]);
+```
+
+### 9. Vue 或其他框架想用怎么办
+我们提供了通用的 Web API，只是未在 Vue 等其他框架中提供类似 `usePrefetch` 这种 hook（后续会支持），可以联系我们针对非 React 框架先在业务中使用起来

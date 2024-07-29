@@ -13,5 +13,10 @@
     "type": "dir",
     "name": "framework",
     "label": "框架"
+  },
+  {
+    "type": "dir",
+    "name": "performance",
+    "label": "性能优化"
   }
 ]
