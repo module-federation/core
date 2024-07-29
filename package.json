@@ -90,7 +90,7 @@
     "@commitlint/cz-commitlint": "^17.7.2",
     "@fontsource/roboto": "5.0.13",
     "@fontsource/roboto-mono": "5.0.18",
-    "@nx/cypress": "17.2.8",
+    "@nx/cypress": "19.5.3",
     "@nx/devkit": "17.2.8",
     "@nx/esbuild": "17.2.8",
     "@nx/eslint-plugin": "19.4.1",
