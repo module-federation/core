@@ -98,6 +98,7 @@ describe('patchBundlerConfig', async () => {
       },
     };
     patchBundlerConfig<'webpack'>({
+      bundlerType: 'webpack',
       bundlerConfig,
       isServer: true,
       modernjsConfig: {
@@ -117,7 +118,7 @@ describe('patchBundlerConfig', async () => {
         uniqueName: 'host',
       },
       watchOptions: {
-        ignored: ['@mf-types'],
+        ignored: ['**/@mf-types/**'],
       },
     };
     // @ts-ignore temp ignore
@@ -134,6 +135,7 @@ describe('patchBundlerConfig', async () => {
       },
     };
     patchBundlerConfig<'webpack'>({
+      bundlerType: 'webpack',
       bundlerConfig,
       isServer: false,
       modernjsConfig: {
@@ -153,7 +155,7 @@ describe('patchBundlerConfig', async () => {
         uniqueName: 'host',
       },
       watchOptions: {
-        ignored: ['@mf-types'],
+        ignored: ['**/@mf-types/**'],
       },
     };
     // @ts-ignore temp ignore
