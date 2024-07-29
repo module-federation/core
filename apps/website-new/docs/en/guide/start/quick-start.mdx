@@ -88,25 +88,27 @@ export default function Button() {
 
 > Export the Button component through Module Federation
 
-```typescript
-// rsbuild.config.ts
+```typescript title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 
 export default defineConfig({
+  plugins: [pluginReact()],
   server: {
     port: 3000,
   },
   dev: {
     // It is necessary to configure assetPrefix, and in the production environment, you need to configure output.assetPrefix
-    assetPrefix: 'http://localhost:3000',
+    assetPrefix: true,
   },
   tools: {
-    rspack: (config, { appendPlugins }) => {
-      // You need to set a unique value that is not equal to other applications
-      config.output!.uniqueName = 'federation_provider';
-      appendPlugins([
+    rspack: {
+      output: {
+        // You need to set a unique value that is not equal to other applications
+        uniqueName: 'federation_provider'
+      },
+      plugins: [
         new ModuleFederationPlugin({
           name: 'federation_provider',
           exposes: {
@@ -114,10 +116,9 @@ export default defineConfig({
           },
           shared: ['react', 'react-dom'],
         }),
-      ]);
+      ],
     },
   },
-  plugins: [pluginReact()],
 });
 ```
 
@@ -217,19 +218,19 @@ bun add @module-federation/enhanced
 
 > Add Module Federation plugin to consume remote modules
 
-```typescript
-// rsbuild.config.ts
+```typescript title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 
 export default defineConfig({
+  plugins: [pluginReact()],
   server: {
     port: 2000,
   },
   tools: {
-    rspack: (config, { appendPlugins }) => {
-      appendPlugins([
+    rspack: {
+      plugins: [
         new ModuleFederationPlugin({
           name: 'federation_consumer',
           remotes: {
@@ -238,10 +239,9 @@ export default defineConfig({
           },
           shared: ['react', 'react-dom'],
         }),
-      ]);
+      ],
     },
   },
-  plugins: [pluginReact()],
 });
 ```
 
