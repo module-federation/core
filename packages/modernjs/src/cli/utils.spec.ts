@@ -118,7 +118,7 @@ describe('patchBundlerConfig', async () => {
         uniqueName: 'host',
       },
       watchOptions: {
-        ignored: ['@mf-types'],
+        ignored: ['**/@mf-types/**'],
       },
     };
     // @ts-ignore temp ignore
@@ -155,7 +155,7 @@ describe('patchBundlerConfig', async () => {
         uniqueName: 'host',
       },
       watchOptions: {
-        ignored: ['@mf-types'],
+        ignored: ['**/@mf-types/**'],
       },
     };
     // @ts-ignore temp ignore
