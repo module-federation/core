@@ -1,4 +1,8 @@
-import type { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import { Module } from '@module-federation/runtime';
+import type {
+  FederationRuntimePlugin,
+  RemoteInfo,
+} from '@module-federation/runtime/types';
 import { ModuleInfo, getResourceUrl } from '@module-federation/sdk';
 
 import { getSignalFromManifest } from './common/runtime-utils';
@@ -14,6 +18,7 @@ interface PreloadRemoteArgs {
   share?: boolean;
   depsRemote?: boolean | Array<depsPreloadArg>;
   filter?: (assetUrl: string) => boolean;
+  prefetchInterface?: boolean;
 }
 
 interface Loading {
@@ -114,6 +119,84 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
         instance!.memorize(id + functionId, value);
       });
     }
+    return options;
+  },
+
+  handlePreloadModule(options) {
+    const { remoteSnapshot, name, id, preloadConfig, origin, remote } = options;
+    const snapshot = remoteSnapshot as ModuleInfo;
+
+    const signal = getSignalFromManifest(snapshot);
+    if (!signal) {
+      return options;
+    }
+
+    const prefetchOptions = {
+      name,
+      origin,
+      remote,
+      remoteSnapshot: snapshot,
+    };
+    const instance =
+      MFDataPrefetch.getInstance(name) || new MFDataPrefetch(prefetchOptions);
+
+    let prefetchUrl;
+    // @ts-expect-error
+    if (snapshot.prefetchEntry) {
+      // @ts-expect-error
+      prefetchUrl = getResourceUrl(snapshot, snapshot.prefetchEntry);
+    }
+
+    if (!preloadConfig.prefetchInterface) {
+      // @ts-ignore
+      instance.loadEntry(prefetchUrl);
+      return options;
+    }
+
+    const promise = instance.loadEntry(prefetchUrl).then(async () => {
+      let module = origin.moduleCache.get(remote.name);
+      const moduleOptions = {
+        host: origin,
+        remoteInfo: remote as RemoteInfo,
+      };
+      if (!module) {
+        module = new Module(moduleOptions);
+        origin.moduleCache.set(remote.name, module);
+      }
+      const idPart = id.split('/');
+      let expose = idPart[idPart.length - 1];
+      if (expose !== '.') {
+        expose = `./${expose}`;
+      }
+      await module.get(id, expose, {}, remoteSnapshot);
+
+      const projectExports = instance!.getProjectExports();
+      if (projectExports instanceof Promise) {
+        await projectExports;
+      }
+      const exports = instance!.getExposeExports(id);
+      logger.info(
+        `1. PreloadRemote Start Prefetch: ${id} - ${performance.now()}`,
+      );
+      const result = Object.keys(exports).map((k) => {
+        const value = instance!.prefetch({
+          id,
+          functionId: k,
+        });
+        const functionId = k;
+
+        return {
+          value,
+          functionId,
+        };
+      });
+      return result;
+    });
+
+    loadingArray.push({
+      id,
+      promise,
+    });
     return options;
   },
 
