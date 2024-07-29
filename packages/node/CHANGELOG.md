@@ -1,5 +1,15 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.5.3
+
+### Patch Changes
+
+- 85c6a12: fix: support rspack ssr live reload
+  - @module-federation/runtime@0.3.3
+  - @module-federation/enhanced@0.3.3
+  - @module-federation/sdk@0.3.3
+  - @module-federation/utilities@3.0.39
+
 ## 2.5.2
 
 ### Patch Changes
