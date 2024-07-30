@@ -9,7 +9,7 @@ function isBrowserEnv(): boolean {
 
 function isNodeEnv(): boolean {
   return (
-    typeof process !== 'undefined' && process?.versions?.node !== 'undefined'
+    typeof process !== 'undefined' && process?.versions?.node !== undefined
   );
 }
 
