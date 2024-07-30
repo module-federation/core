@@ -3,6 +3,7 @@ import {
   composeKeyWithSeparator,
   loadScript,
   loadScriptNode,
+  loadScriptReactNative,
   isNodeEnv,
   isReactNativeEnv,
 } from '@module-federation/sdk';
@@ -84,7 +85,7 @@ export async function loadEntryScript({
     loadScriptCallback = loadScriptNode;
     attrs = { name, globalName };
   } else if (isReactNativeEnv()) {
-    loadScriptCallback = loadScriptNode;
+    loadScriptCallback = loadScriptReactNative;
     attrs = { name, globalName };
   } else {
     loadScriptCallback = loadScript;
