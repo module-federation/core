@@ -1,5 +1,75 @@
 # @module-federation/dts-plugin
 
+## 0.3.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.3
+- @module-federation/managers@0.3.3
+- @module-federation/third-party-dts-extractor@0.3.3
+
+## 0.3.2
+
+### Patch Changes
+
+- 0de1c83: fix: do not collect node internal utils
+- 85ae159: feat: support rspack ssr
+- Updated dependencies [0de1c83]
+  - @module-federation/third-party-dts-extractor@0.3.2
+  - @module-federation/sdk@0.3.2
+  - @module-federation/managers@0.3.2
+
+## 0.3.1
+
+### Patch Changes
+
+- 0a9adaf: chore: remove useless log
+  - @module-federation/sdk@0.3.1
+  - @module-federation/managers@0.3.1
+  - @module-federation/third-party-dts-extractor@0.3.1
+
+## 0.3.0
+
+### Minor Changes
+
+- fa37cc4: feat: support modern.js ssr [#2348](https://github.com/module-federation/core/issues/2348)
+
+### Patch Changes
+
+- 7c4d99b: fix(dts-plugin): temp tsconfig path should extends original tsconfig
+- Updated dependencies [fa37cc4]
+  - @module-federation/sdk@0.3.0
+  - @module-federation/managers@0.3.0
+  - @module-federation/third-party-dts-extractor@0.3.0
+
+## 0.2.8
+
+### Patch Changes
+
+- f3d13c2: fix(dts-plugin): ensure dts file path if it has deep path
+  - @module-federation/sdk@0.2.8
+  - @module-federation/managers@0.2.8
+  - @module-federation/third-party-dts-extractor@0.2.8
+
+## 0.2.7
+
+### Patch Changes
+
+- b00ef13: fix(dts-plugin): support compile vue@3 dts
+- Updated dependencies [b00ef13]
+  - @module-federation/third-party-dts-extractor@0.2.7
+  - @module-federation/sdk@0.2.7
+  - @module-federation/managers@0.2.7
+
+## 0.2.6
+
+### Patch Changes
+
+- Updated dependencies [91bf689]
+  - @module-federation/sdk@0.2.6
+  - @module-federation/managers@0.2.6
+  - @module-federation/third-party-dts-extractor@0.2.6
+
 ## 0.2.5
 
 ### Patch Changes

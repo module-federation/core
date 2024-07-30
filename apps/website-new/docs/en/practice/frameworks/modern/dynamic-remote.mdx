@@ -1,0 +1,198 @@
+---
+title: "Dynamic load provider"
+---
+
+# Dynamic load provider
+
+
+Modern.js provides [Data Loader](https://modernjs.dev/en/guides/basic-features/data/data-fetch.html#data-loader-recommended) to help For data management, `Data Loader` is only executed on the server side and will not be executed repeatedly on the client side.
+
+This chapter will introduce how to use `Data Loader` to obtain producer information and load it dynamically.
+
+## Create provider
+
+Create a new provider for dynamic load.
+
+### 1. Create configuration file
+
+Create a `module-federation.config.ts` file in the project root directory and write the following content:
+
+```ts title='module-federation.config.ts'
+import { createModuleFederationConfig } from '@module-federation/modern-js';
+
+export default createModuleFederationConfig({
+  name: 'dynamic_provider',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './Image': './src/components/Image.tsx',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+```
+
+### 2. Apply plugin
+
+Apply `@module-federation/modern-js` in `modern.config.ts`:
+
+```ts title='modern.config.ts'
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import { moduleFederationPlugin } from '@module-federation/modern-js';
+
+// https://modernjs.dev/en/configure/app/usage
+export default defineConfig({
+  runtime: {
+    router: true,
+  },
+  server: {
+    ssr: {
+      mode: 'stream',
+    },
+    port: 3008,
+  },
+  plugins: [appTools(), moduleFederationPlugin()],
+});
+```
+
+### 3. Create need to be exposed component
+
+Create the file `src/components/Image.tsx` with the following content:
+
+```tsx title='Image.tsx'
+import React from 'react';
+import styles from './Image.module.css';
+
+export default (): JSX.Element => (
+  <div
+    id="remote-components"
+    style={{
+      backgroundColor: '#c0e91e',
+      color: 'lightgrey',
+      padding: '1rem',
+    }}
+  >
+    <h2>
+      <strong>dynamic remote</strong>&nbsp;image
+    </h2>
+    <button
+      id="dynamic-remote-components-button"
+      style={{ marginBottom: '1rem' }}
+      onClick={() => alert('[remote-components] Client side Javascript works!')}
+    >
+      Click me to test i'm interactive!
+    </button>
+    <img
+      id="dynamic-remote-components-image"
+      src="https://module-federation.io/module-federation-logo.svg"
+      style={{ width: '100px' }}
+      alt="serge"
+    />
+    <button className={styles['button']}>Button from dynamic remote</button>
+  </div>
+);
+```
+
+And create the corresponding style file, the content is as follows:
+
+```css title='Image.module.css'
+.button {
+  background: red;
+}
+```
+
+## Create loader
+
+Create a `.data` file with the same name in the corresponding routing file. Taking the root directory `src/routes/page.tsx` as an example, create `src/routes/page.data.ts`:
+
+```ts title='page.data.ts'
+import { LoaderFunctionArgs } from '@modern-js/runtime/router';
+
+export type DataLoaderRes = {
+    providerList: Array<{
+        name: string,
+        entry: string,
+        id: string;
+    }>
+}
+
+const fetchProviderList = async () => {
+    const res = await new Promise(resolve => {
+        setTimeout(() => {
+            resolve([
+                {
+                    name: 'dynamic_provider',
+                    entry: 'http://localhost:3008/mf-manifest.json',
+                    id: 'dynamic_provider/Image'
+                }
+            ])
+        }, 1000);
+    });
+
+    return res as DataLoaderRes['providerList']
+}
+
+export const loader = async ({ request }: LoaderFunctionArgs): Promise<DataLoaderRes> => {
+    console.log('request params', request);
+    const providerList = await fetchProviderList();
+    return {
+        providerList
+    }
+};
+```
+
+## Load dynamic provider
+
+Consume loader data and dynamically load the corresponding producer:
+
+```tsx
+import { createRemoteSSRComponent, loadRemote, registerRemotes } from '@modern-js/runtime/mf';
+// Use import type to get data loader types
+import type { DataLoaderRes } from './page.data';
+import { useLoaderData } from '@modern-js/runtime/router';
+
+import './index.css';
+
+const RemoteSSRComponent = createRemoteSSRComponent({
+  loader: () => import('remote/Image'),
+  loading: 'loading...',
+  export: 'default',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+
+const Index = () => {
+  // get data loader response
+  const dataLoader = useLoaderData() as DataLoaderRes;
+  // register dynamic remotes before loading them
+  registerRemotes(dataLoader.providerList);
+
+  const DynamicRemoteSSRComponents = dataLoader.providerList.map(item => {
+    const { id } = item;
+    const Com = createRemoteSSRComponent({
+      loader: () => loadRemote(id),
+      loading: 'loading...',
+      fallback: ({ error }) => {
+        if (error instanceof Error && error.message.includes('not exist')) {
+          return <div>fallback - not existed id</div>;
+        }
+        return <div>fallback</div>;
+      },
+    });
+    return <Com />
+  })
+  return (
+    <div className="container-box">
+      <RemoteSSRComponent />
+      {DynamicRemoteSSRComponents}
+    </div>
+  );
+}
+
+export default Index;
+```

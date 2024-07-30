@@ -1,5 +1,83 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.5.3
+
+### Patch Changes
+
+- 85c6a12: fix: support rspack ssr live reload
+  - @module-federation/runtime@0.3.3
+  - @module-federation/enhanced@0.3.3
+  - @module-federation/sdk@0.3.3
+  - @module-federation/utilities@3.0.39
+
+## 2.5.2
+
+### Patch Changes
+
+- Updated dependencies [85ae159]
+  - @module-federation/enhanced@0.3.2
+  - @module-federation/runtime@0.3.2
+  - @module-federation/sdk@0.3.2
+  - @module-federation/utilities@3.0.38
+
+## 2.5.1
+
+### Patch Changes
+
+- @module-federation/enhanced@0.3.1
+- @module-federation/runtime@0.3.1
+- @module-federation/sdk@0.3.1
+- @module-federation/utilities@3.0.37
+
+## 2.5.0
+
+### Minor Changes
+
+- fa37cc4: feat: support modern.js ssr [#2348](https://github.com/module-federation/core/issues/2348)
+
+### Patch Changes
+
+- Updated dependencies [fa37cc4]
+  - @module-federation/enhanced@0.3.0
+  - @module-federation/runtime@0.3.0
+  - @module-federation/sdk@0.3.0
+  - @module-federation/utilities@3.0.36
+
+## 2.4.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.2.8
+- @module-federation/runtime@0.2.8
+- @module-federation/sdk@0.2.8
+- @module-federation/utilities@3.0.35
+
+## 2.4.1
+
+### Patch Changes
+
+- Updated dependencies [b00ef13]
+  - @module-federation/enhanced@0.2.7
+  - @module-federation/sdk@0.2.7
+  - @module-federation/runtime@0.2.7
+  - @module-federation/utilities@3.0.34
+
+## 2.4.0
+
+### Minor Changes
+
+- 91bf689: dynamic import callback handler passed to vm. may require NODE_OPTIONS="--experimental-vm-modules"
+
+### Patch Changes
+
+- 54bcdd1: remove loggers from node runtime plugin
+- Updated dependencies [4488064]
+- Updated dependencies [91bf689]
+  - @module-federation/enhanced@0.2.6
+  - @module-federation/sdk@0.2.6
+  - @module-federation/runtime@0.2.6
+  - @module-federation/utilities@3.0.33
+
 ## 2.3.2
 
 ### Patch Changes

@@ -1,7 +1,11 @@
 import { getAllKnownRemotes } from './flush-chunks';
-
-const hashmap = {} as Record<string, string>;
 import crypto from 'crypto';
+
+declare global {
+  var mfHashMap: Record<string, string> | undefined;
+}
+
+const hashmap = globalThis.mfHashMap || ({} as Record<string, string>);
 
 const requireCacheRegex =
   /(remote|server|hot-reload|react-loadable-manifest|runtime|styled-jsx)/;
@@ -10,7 +14,6 @@ export const performReload = async (shouldReload: any) => {
   if (!shouldReload) {
     return false;
   }
-  const remotesFromAPI = getAllKnownRemotes();
 
   let req: NodeRequire;
   //@ts-ignore
@@ -35,16 +38,22 @@ export const performReload = async (shouldReload: any) => {
     gs.entryChunkCache.clear();
   }
 
-  //@ts-ignore
-  __webpack_require__.federation.instance.moduleCache.clear();
   gs.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
   //@ts-ignore
   gs.__FEDERATION__.__INSTANCES__.map((i) => {
+    //@ts-ignore
+    i.moduleCache.forEach((mc) => {
+      if (mc.remoteInfo && mc.remoteInfo.entryGlobalName) {
+        delete gs[mc.remoteInfo.entryGlobalName];
+      }
+    });
     i.moduleCache.clear();
     if (gs[i.name]) {
       delete gs[i.name];
     }
   });
+  //@ts-ignore
+  __webpack_require__.federation.instance.moduleCache.clear();
   gs.__FEDERATION__.__INSTANCES__ = [];
 
   for (const entry of entries) {
@@ -121,6 +130,32 @@ export const checkFakeRemote = (remoteScope: any) => {
   return false;
 };
 
+export const createFetcher = (
+  url: string,
+  fetchModule: any,
+  name: string,
+  cb: (hash: string) => void,
+) => {
+  return fetchModule(url)
+    .then((re: Response) => {
+      if (!re.ok) {
+        throw new Error(
+          `Error loading remote: status: ${
+            re.status
+          }, content-type: ${re.headers.get('content-type')}`,
+        );
+      }
+      return re.text();
+    })
+    .then((contents: string): void | boolean => {
+      const hash = crypto.createHash('md5').update(contents).digest('hex');
+      cb(hash);
+    })
+    .catch((e: Error) => {
+      console.error('Remote', name, url, 'Failed to load or is not online', e);
+    });
+};
+
 export const fetchRemote = (remoteScope: any, fetchModule: any) => {
   const fetches = [];
   let needReload = false;
@@ -128,39 +163,17 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
     const name = property;
     const container = remoteScope[property];
     const url = container.entry;
-    const fetcher = fetchModule(url)
-      .then((re: Response) => {
-        if (!re.ok) {
-          throw new Error(
-            `Error loading remote: status: ${
-              re.status
-            }, content-type: ${re.headers.get('content-type')}`,
-          );
-        }
-        return re.text();
-      })
-      .then((contents: string): void | boolean => {
-        const hash = crypto.createHash('md5').update(contents).digest('hex');
-        if (hashmap[name]) {
-          if (hashmap[name] !== hash) {
-            hashmap[name] = hash;
-            needReload = true;
-            console.log(name, 'hash is different - must hot reload server');
-            return true;
-          }
-        } else {
+    const fetcher = createFetcher(url, fetchModule, name, (hash) => {
+      if (hashmap[name]) {
+        if (hashmap[name] !== hash) {
           hashmap[name] = hash;
+          needReload = true;
+          console.log(name, 'hash is different - must hot reload server');
         }
-      })
-      .catch((e: Error) => {
-        console.error(
-          'Remote',
-          name,
-          url,
-          'Failed to load or is not online',
-          e,
-        );
-      });
+      } else {
+        hashmap[name] = hash;
+      }
+    });
 
     fetches.push(fetcher);
   }

@@ -1,5 +1,91 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.4.6
+
+### Patch Changes
+
+- Updated dependencies [85c6a12]
+  - @module-federation/node@2.5.3
+  - @module-federation/runtime@0.3.3
+  - @module-federation/enhanced@0.3.3
+  - @module-federation/sdk@0.3.3
+  - @module-federation/utilities@3.0.39
+
+## 8.4.5
+
+### Patch Changes
+
+- Updated dependencies [85ae159]
+  - @module-federation/enhanced@0.3.2
+  - @module-federation/node@2.5.2
+  - @module-federation/runtime@0.3.2
+  - @module-federation/sdk@0.3.2
+  - @module-federation/utilities@3.0.38
+
+## 8.4.4
+
+### Patch Changes
+
+- @module-federation/enhanced@0.3.1
+- @module-federation/node@2.5.1
+- @module-federation/runtime@0.3.1
+- @module-federation/sdk@0.3.1
+- @module-federation/utilities@3.0.37
+
+## 8.4.3
+
+### Patch Changes
+
+- Updated dependencies [fa37cc4]
+  - @module-federation/enhanced@0.3.0
+  - @module-federation/runtime@0.3.0
+  - @module-federation/node@2.5.0
+  - @module-federation/sdk@0.3.0
+  - @module-federation/utilities@3.0.36
+
+## 8.4.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.2.8
+- @module-federation/node@2.4.2
+- @module-federation/runtime@0.2.8
+- @module-federation/sdk@0.2.8
+- @module-federation/utilities@3.0.35
+
+## 8.4.1
+
+### Patch Changes
+
+- 6e85e36: disable chunk splitting on next server
+- Updated dependencies [b00ef13]
+  - @module-federation/enhanced@0.2.7
+  - @module-federation/sdk@0.2.7
+  - @module-federation/node@2.4.1
+  - @module-federation/runtime@0.2.7
+  - @module-federation/utilities@3.0.34
+
+## 8.4.0
+
+### Minor Changes
+
+- 54bcdd1: enable chunk splitting for next
+
+### Patch Changes
+
+- 91bf689: prevent error throw in image loaders when module cache doesnt exist
+- 54bcdd1: clean up old plugin params
+- 54bcdd1: Move to node runtime plugin implementation
+- Updated dependencies [54bcdd1]
+- Updated dependencies [4488064]
+- Updated dependencies [91bf689]
+- Updated dependencies [91bf689]
+  - @module-federation/node@2.4.0
+  - @module-federation/enhanced@0.2.6
+  - @module-federation/sdk@0.2.6
+  - @module-federation/runtime@0.2.6
+  - @module-federation/utilities@3.0.33
+
 ## 8.3.28
 
 ### Patch Changes

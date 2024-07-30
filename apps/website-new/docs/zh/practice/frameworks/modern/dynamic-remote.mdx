@@ -1,0 +1,195 @@
+---
+title: "动态加载生产者"
+---
+
+# 动态加载生产者
+
+Modern.js 提供了 [Data Loader](https://modernjs.dev/guides/basic-features/data/data-fetch.html#data-loader%E6%8E%A8%E8%8D%90) 来帮助进行数据管理，`Data Loader` 仅在服务端执行，不会在客户端重复执行。
+
+本章节将介绍如何利用 `Data Loader` 获取生产者信息并动态加载。
+
+## 创建生产者
+
+创建一个新的生产者，用于动态加载。
+
+### 1. 创建配置文件
+
+在项目根目录创建 `module-federation.config.ts` 文件，并写入下列内容：
+
+```ts title='module-federation.config.ts'
+import { createModuleFederationConfig } from '@module-federation/modern-js';
+
+export default createModuleFederationConfig({
+  name: 'dynamic_provider',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './Image': './src/components/Image.tsx',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+```
+
+### 2. 应用插件
+
+在 `modern.config.ts` 应用 `@module-federation/modern-js`：
+
+```ts title='modern.config.ts'
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import { moduleFederationPlugin } from '@module-federation/modern-js';
+
+// https://modernjs.dev/en/configure/app/usage
+export default defineConfig({
+  runtime: {
+    router: true,
+  },
+  server: {
+    ssr: {
+      mode: 'stream',
+    },
+    port: 3008,
+  },
+  plugins: [appTools(), moduleFederationPlugin()],
+});
+```
+
+### 3. 创建导出组件
+
+创建文件 `src/components/Image.tsx` ，内容如下：
+
+```tsx title='Image.tsx'
+import React from 'react';
+import styles from './Image.module.css';
+
+export default (): JSX.Element => (
+  <div
+    id="remote-components"
+    style={{
+      backgroundColor: '#c0e91e',
+      color: 'lightgrey',
+      padding: '1rem',
+    }}
+  >
+    <h2>
+      <strong>dynamic remote</strong>&nbsp;image
+    </h2>
+    <button
+      id="dynamic-remote-components-button"
+      style={{ marginBottom: '1rem' }}
+      onClick={() => alert('[remote-components] Client side Javascript works!')}
+    >
+      Click me to test i'm interactive!
+    </button>
+    <img
+      id="dynamic-remote-components-image"
+      src="https://module-federation.io/module-federation-logo.svg"
+      style={{ width: '100px' }}
+      alt="serge"
+    />
+    <button className={styles['button']}>Button from dynamic remote</button>
+  </div>
+);
+```
+并创建对应的样式文件，内容如下：
+```css title='Image.module.css'
+.button {
+  background: red;
+}
+```
+
+## 创建 loader
+
+在对应的路由文件创建同名的 `.data` 文件，以根目录 `src/routes/page.tsx` 为例，创建 `src/routes/page.data.ts`：
+
+```ts title='page.data.ts'
+import { LoaderFunctionArgs } from '@modern-js/runtime/router';
+
+export type DataLoaderRes = {
+    providerList: Array<{
+        name: string,
+        entry: string,
+        id: string;
+    }>
+}
+
+const fetchProviderList = async () => {
+    const res = await new Promise(resolve => {
+        setTimeout(() => {
+            resolve([
+                {
+                    name: 'dynamic_provider',
+                    entry: 'http://localhost:3008/mf-manifest.json',
+                    id: 'dynamic_provider/Image'
+                }
+            ])
+        }, 1000);
+    });
+
+    return res as DataLoaderRes['providerList']
+}
+
+export const loader = async ({ request }: LoaderFunctionArgs): Promise<DataLoaderRes> => {
+    console.log('request params', request);
+    const providerList = await fetchProviderList();
+    return {
+        providerList
+    }
+};
+```
+
+## 加载动态生产者
+
+消费 loader 数据，并动态加载对应的生产者：
+
+```tsx
+import { createRemoteSSRComponent, loadRemote, registerRemotes } from '@modern-js/runtime/mf';
+// 使用 import type ，仅获取类型
+import type { DataLoaderRes } from './page.data';
+import { useLoaderData } from '@modern-js/runtime/router';
+
+import './index.css';
+
+const RemoteSSRComponent = createRemoteSSRComponent({
+  loader: () => import('remote/Image'),
+  loading: 'loading...',
+  export: 'default',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+
+const Index = () => {
+  // 获取 data loader 数据
+  const dataLoader = useLoaderData() as DataLoaderRes;
+  // 注册生产者信息
+  registerRemotes(dataLoader.providerList);
+
+  const DynamicRemoteSSRComponents = dataLoader.providerList.map(item => {
+    const { id } = item;
+    const Com = createRemoteSSRComponent({
+      loader: () => loadRemote(id),
+      loading: 'loading...',
+      fallback: ({ error }) => {
+        if (error instanceof Error && error.message.includes('not exist')) {
+          return <div>fallback - not existed id</div>;
+        }
+        return <div>fallback</div>;
+      },
+    });
+    return <Com />
+  })
+  return (
+    <div className="container-box">
+      <RemoteSSRComponent />
+      {DynamicRemoteSSRComponents}
+    </div>
+  );
+}
+
+export default Index;
+```

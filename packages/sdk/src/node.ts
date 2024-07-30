@@ -4,7 +4,7 @@ function importNodeModule<T>(name: string): Promise<T> {
   }
   const importModule = new Function('name', `return import(name)`);
   return importModule(name)
-    .then((res: any) => res.default as T)
+    .then((res: any) => res as T)
     .catch((error: any) => {
       console.error(`Error importing module ${name}:`, error);
       throw error;
@@ -88,13 +88,18 @@ export function createScriptNode(
         importNodeModule<typeof import('path')>('path'),
         importNodeModule<typeof import('vm')>('vm'),
       ]);
+
       const scriptContext = { exports: {}, module: { exports: {} } };
       const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
       const filename = path.basename(urlObj.pathname);
 
       const script = new vm.Script(
         `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
-        filename,
+        {
+          filename,
+          importModuleDynamically:
+            vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
+        },
       );
 
       script.runInThisContext()(
@@ -120,7 +125,7 @@ export function createScriptNode(
         exportedInterface as keyof typeof scriptContext.module.exports,
       );
     } catch (e) {
-      cb(new Error(`Script execution error: ${e}`));
+      cb(e instanceof Error ? e : new Error(`Script execution error: ${e}`));
     }
   };
 

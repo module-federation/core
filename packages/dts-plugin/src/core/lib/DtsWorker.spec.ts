@@ -2,13 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { join } from 'path';
 import dirTree from 'directory-tree';
 import { execSync } from 'child_process';
+const TEST_DIT_DIR = 'dist-test';
 
 describe('generateTypesInChildProcess', () => {
-  const projectRoot = join(__dirname, '..', '..', '..', '..', '..');
+  const projectRoot = join(__dirname, '../../..');
   const typesFolder = '@mf-types-dts-test-child-process';
   const remoteOptions = {
     moduleFederationConfig: {
-      name: 'moduleFederationTypescript',
+      name: 'dtsWorkerSpecRemote',
       filename: 'remoteEntry.js',
       exposes: {
         './index': join(__dirname, '..', './index.ts'),
@@ -18,17 +19,18 @@ describe('generateTypesInChildProcess', () => {
         'react-dom': { singleton: true, eager: true },
       },
     },
-    tsConfigPath: join(__dirname, '../../..', './tsconfig.spec.json'),
+    tsConfigPath: join(projectRoot, './tsconfig.spec.json'),
     typesFolder: typesFolder,
     compiledTypesFolder: 'compiled-types',
     deleteTypesFolder: false,
     additionalFilesToCompile: [],
-    context: process.cwd(),
+    context: projectRoot,
   };
 
   const hostOptions = {
+    context: projectRoot,
     moduleFederationConfig: {
-      name: 'moduleFederationTypescript',
+      name: 'dtsWorkerSpecHost',
       filename: 'remoteEntry.js',
       remotes: {
         remotes: 'remote@https://foo.it',
@@ -38,7 +40,7 @@ describe('generateTypesInChildProcess', () => {
         'react-dom': { singleton: true, eager: true },
       },
     },
-    typesFolder: 'dist/@mf-types-dts-test-child-process-consume-types',
+    typesFolder: `${TEST_DIT_DIR}/@mf-types-dts-test-child-process-consume-types`,
   };
 
   it('generateTypesInChildProcess', async () => {
@@ -49,7 +51,11 @@ describe('generateTypesInChildProcess', () => {
       host: hostOptions,
       remote: remoteOptions,
     });
-    const distFolder = join(projectRoot, 'dist', remoteOptions.typesFolder);
+    const distFolder = join(
+      projectRoot,
+      TEST_DIT_DIR,
+      remoteOptions.typesFolder,
+    );
     const pid = dtsWorker.rpcWorker.process?.pid;
     if (!pid) {
       throw new Error('pid must be existed!');
@@ -118,6 +124,9 @@ describe('generateTypesInChildProcess', () => {
                                 },
                                 {
                                   name: 'RemoteOptions.d.ts',
+                                },
+                                {
+                                  name: 'TsConfigJson.d.ts',
                                 },
                               ],
                               name: 'interfaces',

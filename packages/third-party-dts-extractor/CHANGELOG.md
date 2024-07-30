@@ -1,5 +1,27 @@
 # @module-federation/third-party-dts-extractor
 
+## 0.3.3
+
+## 0.3.2
+
+### Patch Changes
+
+- 0de1c83: fix: do not collect node internal utils
+
+## 0.3.1
+
+## 0.3.0
+
+## 0.2.8
+
+## 0.2.7
+
+### Patch Changes
+
+- b00ef13: fix(dts-plugin): support compile vue@3 dts
+
+## 0.2.6
+
 ## 0.2.5
 
 ## 0.2.4

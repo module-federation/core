@@ -1,5 +1,58 @@
 # remote2
 
+## 1.0.13
+
+### Patch Changes
+
+- @module-federation/enhanced@0.3.3
+- @module-federation/bridge-react@0.3.3
+
+## 1.0.12
+
+### Patch Changes
+
+- Updated dependencies [85ae159]
+  - @module-federation/enhanced@0.3.2
+  - @module-federation/bridge-react@0.3.2
+
+## 1.0.11
+
+### Patch Changes
+
+- @module-federation/enhanced@0.3.1
+- @module-federation/bridge-react@0.3.1
+
+## 1.0.10
+
+### Patch Changes
+
+- Updated dependencies [fa37cc4]
+  - @module-federation/enhanced@0.3.0
+  - @module-federation/bridge-react@0.3.0
+
+## 1.0.9
+
+### Patch Changes
+
+- @module-federation/enhanced@0.2.8
+- @module-federation/bridge-react@0.2.8
+
+## 1.0.8
+
+### Patch Changes
+
+- Updated dependencies [b00ef13]
+  - @module-federation/enhanced@0.2.7
+  - @module-federation/bridge-react@0.2.7
+
+## 1.0.7
+
+### Patch Changes
+
+- Updated dependencies [4488064]
+  - @module-federation/enhanced@0.2.6
+  - @module-federation/bridge-react@0.2.6
+
 ## 1.0.6
 
 ### Patch Changes

@@ -1,5 +1,31 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.3.3
+
+## 0.3.2
+
+## 0.3.1
+
+## 0.3.0
+
+### Minor Changes
+
+- fa37cc4: feat: support modern.js ssr [#2348](https://github.com/module-federation/core/issues/2348)
+
+## 0.2.8
+
+## 0.2.7
+
+### Patch Changes
+
+- b00ef13: fix(dts-plugin): support compile vue@3 dts
+
+## 0.2.6
+
+### Patch Changes
+
+- 91bf689: pass dynamic import callback to vm
+
 ## 0.2.5
 
 ### Patch Changes

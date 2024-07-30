@@ -1,5 +1,94 @@
 # @module-federation/rspack
 
+## 0.3.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.3
+- @module-federation/runtime-tools@0.3.3
+- @module-federation/managers@0.3.3
+- @module-federation/manifest@0.3.3
+- @module-federation/dts-plugin@0.3.3
+- @module-federation/bridge-react-webpack-plugin@0.3.3
+
+## 0.3.2
+
+### Patch Changes
+
+- Updated dependencies [0de1c83]
+- Updated dependencies [85ae159]
+  - @module-federation/dts-plugin@0.3.2
+  - @module-federation/manifest@0.3.2
+  - @module-federation/sdk@0.3.2
+  - @module-federation/runtime-tools@0.3.2
+  - @module-federation/managers@0.3.2
+  - @module-federation/bridge-react-webpack-plugin@0.3.2
+
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [0a9adaf]
+  - @module-federation/dts-plugin@0.3.1
+  - @module-federation/manifest@0.3.1
+  - @module-federation/sdk@0.3.1
+  - @module-federation/runtime-tools@0.3.1
+  - @module-federation/managers@0.3.1
+  - @module-federation/bridge-react-webpack-plugin@0.3.1
+
+## 0.3.0
+
+### Minor Changes
+
+- fa37cc4: feat: support modern.js ssr [#2348](https://github.com/module-federation/core/issues/2348)
+
+### Patch Changes
+
+- Updated dependencies [7c4d99b]
+- Updated dependencies [fa37cc4]
+  - @module-federation/dts-plugin@0.3.0
+  - @module-federation/manifest@0.3.0
+  - @module-federation/sdk@0.3.0
+  - @module-federation/runtime-tools@0.3.0
+  - @module-federation/bridge-react-webpack-plugin@0.3.0
+  - @module-federation/managers@0.3.0
+
+## 0.2.8
+
+### Patch Changes
+
+- Updated dependencies [f3d13c2]
+  - @module-federation/dts-plugin@0.2.8
+  - @module-federation/manifest@0.2.8
+  - @module-federation/sdk@0.2.8
+  - @module-federation/runtime-tools@0.2.8
+  - @module-federation/managers@0.2.8
+  - @module-federation/bridge-react-webpack-plugin@0.2.8
+
+## 0.2.7
+
+### Patch Changes
+
+- Updated dependencies [b00ef13]
+  - @module-federation/dts-plugin@0.2.7
+  - @module-federation/sdk@0.2.7
+  - @module-federation/manifest@0.2.7
+  - @module-federation/bridge-react-webpack-plugin@0.2.7
+  - @module-federation/managers@0.2.7
+  - @module-federation/runtime-tools@0.2.7
+
+## 0.2.6
+
+### Patch Changes
+
+- Updated dependencies [91bf689]
+  - @module-federation/sdk@0.2.6
+  - @module-federation/bridge-react-webpack-plugin@0.2.6
+  - @module-federation/dts-plugin@0.2.6
+  - @module-federation/managers@0.2.6
+  - @module-federation/manifest@0.2.6
+  - @module-federation/runtime-tools@0.2.6
+
 ## 0.2.5
 
 ### Patch Changes
