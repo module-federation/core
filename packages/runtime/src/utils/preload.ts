@@ -82,7 +82,7 @@ export function preloadAssets(
         getRemoteEntry({
           remoteInfo: moduleInfo,
           remoteEntryExports: module.remoteEntryExports,
-          createScriptHook: (url: string, attrs: any) => {
+          createScriptHook: (url, attrs) => {
             const res = host.loaderHook.lifecycle.createScript.emit({
               url,
               attrs,
@@ -109,7 +109,7 @@ export function preloadAssets(
         getRemoteEntry({
           remoteInfo: moduleInfo,
           remoteEntryExports: undefined,
-          createScriptHook: (url: string, attrs: any) => {
+          createScriptHook: (url, attrs) => {
             const res = host.loaderHook.lifecycle.createScript.emit({
               url,
               attrs,
@@ -214,7 +214,7 @@ export function preloadAssets(
             fetchpriority: 'high',
             type: remoteInfo?.type === 'module' ? 'module' : 'text/javascript',
           },
-          createScriptHook: (url: string, attrs: any) => {
+          createScriptHook: (url, attrs) => {
             const res = host.loaderHook.lifecycle.createScript.emit({
               url,
               attrs,

@@ -1,3 +1,5 @@
+import { CreateScriptHook } from './types';
+
 type WebpackRequire = {
   l: (
     url: string,
@@ -13,10 +15,7 @@ export function createScriptReactNative(
   url: string,
   cb: (error?: Error) => void,
   attrs?: Record<string, any>,
-  createScriptHook?: (
-    url: string,
-    attrs?: Record<string, any> | undefined,
-  ) => { url: string } | void,
+  createScriptHook?: CreateScriptHook,
 ) {
   if (createScriptHook) {
     const hookResult = createScriptHook(url, attrs);
@@ -43,7 +42,7 @@ export async function loadScriptReactNative(
   url: string,
   info: {
     attrs?: Record<string, any>;
-    createScriptHook?: (url: string) => void;
+    createScriptHook?: CreateScriptHook;
   },
 ) {
   return new Promise<void>((resolve, reject) => {

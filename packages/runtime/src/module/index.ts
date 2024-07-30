@@ -32,7 +32,7 @@ class Module {
     const remoteEntryExports = await getRemoteEntry({
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
-      createScriptHook: (url: string, attrs: any) => {
+      createScriptHook: (url, attrs) => {
         const res = this.host.loaderHook.lifecycle.createScript.emit({
           url,
           attrs,

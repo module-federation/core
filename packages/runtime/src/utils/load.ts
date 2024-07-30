@@ -1,8 +1,8 @@
 import {
+  CreateScriptHook,
   composeKeyWithSeparator,
   loadScript,
   loadScriptNode,
-  CreateScriptHookReturn,
   isNodeEnv,
   isReactNativeEnv,
 } from '@module-federation/sdk';
@@ -68,10 +68,7 @@ export async function loadEntryScript({
   name: string;
   globalName: string;
   entry: string;
-  createScriptHook?: (
-    url: string,
-    attrs?: Record<string, any> | undefined,
-  ) => CreateScriptHookReturn;
+  createScriptHook?: CreateScriptHook;
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -130,10 +127,7 @@ export async function getRemoteEntry({
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | undefined;
-  createScriptHook?: (
-    url: string,
-    attrs?: Record<string, any> | undefined,
-  ) => CreateScriptHookReturn;
+  createScriptHook?: CreateScriptHook;
 }): Promise<RemoteEntryExports | void> {
   const { entry, name, type, entryGlobalName } = remoteInfo;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);

@@ -1,3 +1,5 @@
+import { CreateScriptHook } from './types';
+
 function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
     throw new Error('import specifier is required');
@@ -42,7 +44,7 @@ export function createScriptNode(
   url: string,
   cb: (error?: Error, scriptContext?: any) => void,
   attrs?: Record<string, any>,
-  createScriptHook?: (url: string) => any | void,
+  createScriptHook?: CreateScriptHook,
 ) {
   if (createScriptHook) {
     const hookResult = createScriptHook(url);
@@ -140,7 +142,7 @@ export function loadScriptNode(
   url: string,
   info: {
     attrs?: Record<string, any>;
-    createScriptHook?: (url: string) => void;
+    createScriptHook?: CreateScriptHook;
   },
 ) {
   return new Promise<void>((resolve, reject) => {
