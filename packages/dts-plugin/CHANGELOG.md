@@ -1,5 +1,24 @@
 # @module-federation/dts-plugin
 
+## 0.3.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.3
+- @module-federation/managers@0.3.3
+- @module-federation/third-party-dts-extractor@0.3.3
+
+## 0.3.2
+
+### Patch Changes
+
+- 0de1c83: fix: do not collect node internal utils
+- 85ae159: feat: support rspack ssr
+- Updated dependencies [0de1c83]
+  - @module-federation/third-party-dts-extractor@0.3.2
+  - @module-federation/sdk@0.3.2
+  - @module-federation/managers@0.3.2
+
 ## 0.3.1
 
 ### Patch Changes

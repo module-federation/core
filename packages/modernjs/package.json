@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "files": [
     "dist/",
     "types.d.ts",
@@ -71,11 +71,11 @@
   "devDependencies": {
     "@types/hoist-non-react-statics": "3.3.2",
     "@module-federation/manifest": "workspace:*",
-    "@modern-js/app-tools": "2.56.1",
-    "@modern-js/core": "2.56.1",
-    "@modern-js/runtime": "2.56.1",
-    "@modern-js/module-tools": "2.56.1",
-    "@modern-js/tsconfig": "2.56.1"
+    "@modern-js/app-tools": "2.56.2",
+    "@modern-js/core": "2.56.2",
+    "@modern-js/runtime": "2.56.2",
+    "@modern-js/module-tools": "2.56.2",
+    "@modern-js/tsconfig": "2.56.2"
   },
   "peerDependencies": {
     "react": ">=17",

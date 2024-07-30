@@ -1,4 +1,3 @@
-// TODO: Support Rspack
 import path from 'path';
 import { Stats, Manifest } from '@module-federation/sdk';
 import { fs } from '@modern-js/utils';
