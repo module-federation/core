@@ -38,7 +38,7 @@ export function createScriptReactNative(
   );
 }
 
-export async function loadScriptReactNative(
+export function loadScriptReactNative(
   url: string,
   info: {
     attrs?: Record<string, any>;
