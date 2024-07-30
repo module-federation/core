@@ -1,5 +1,20 @@
 # remote3
 
+## 1.0.13
+
+### Patch Changes
+
+- @module-federation/enhanced@0.3.3
+- @module-federation/bridge-vue3@0.3.3
+
+## 1.0.12
+
+### Patch Changes
+
+- Updated dependencies [85ae159]
+  - @module-federation/enhanced@0.3.2
+  - @module-federation/bridge-vue3@0.3.2
+
 ## 1.0.11
 
 ### Patch Changes

@@ -203,7 +203,12 @@ export class DependencyGraph {
 
     graphChilden.forEach((dep) => {
       this.addEdge(id + dep, id, id + dep);
-      this.run(targetGraph[targetWithoutType], dep, type, id + dep);
+      this.run(
+        targetGraph[targetWithoutType] || targetGraph[target],
+        dep,
+        type,
+        id + dep,
+      );
     });
   }
 
