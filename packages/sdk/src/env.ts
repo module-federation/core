@@ -7,6 +7,18 @@ function isBrowserEnv(): boolean {
   return typeof window !== 'undefined';
 }
 
+function isNodeEnv(): boolean {
+  return (
+    typeof process !== 'undefined' && process?.versions?.node !== 'undefined'
+  );
+}
+
+function isReactNativeEnv(): boolean {
+  return (
+    typeof navigator !== 'undefined' && navigator?.product === 'ReactNative'
+  );
+}
+
 function isDebugMode(): boolean {
   if (
     typeof process !== 'undefined' &&
@@ -22,4 +34,10 @@ const getProcessEnv = function (): Record<string, string | undefined> {
   return typeof process !== 'undefined' && process.env ? process.env : {};
 };
 
-export { isBrowserEnv, isDebugMode, getProcessEnv };
+export {
+  isBrowserEnv,
+  isNodeEnv,
+  isReactNativeEnv,
+  isDebugMode,
+  getProcessEnv,
+};
