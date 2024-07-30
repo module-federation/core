@@ -12,6 +12,24 @@ export async function sleep(time: number) {
 export function createContainer() {
   const container = document.createElement('div');
   container.setAttribute('id', 'container');
+  container.setAttribute('data-testid', 'container');
+
+  container.setAttribute('background', 'rgb(255, 112, 127)');
+
+  document.body.appendChild(container);
+
+  return {
+    clean: () => {
+      document.body.removeChild(container);
+    },
+    container,
+  };
+}
+
+export function createCustomContainer() {
+  const container = document.createElement('div');
+  container.setAttribute('id', 'container-custom');
+  container.setAttribute('data-testid', 'container-custom');
   document.body.appendChild(container);
 
   return {

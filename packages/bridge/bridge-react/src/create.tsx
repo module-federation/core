@@ -1,5 +1,9 @@
 import React, { forwardRef } from 'react';
-import type { ForwardRefExoticComponent, PropsWithoutRef, RefAttributes } from 'react';
+import type {
+  ForwardRefExoticComponent,
+  PropsWithoutRef,
+  RefAttributes,
+} from 'react';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
 import {
@@ -11,11 +15,10 @@ import RemoteApp from './remote';
 export interface RenderFnParams extends ProviderParams {
   dom?: any;
 }
+
 interface RemoteModule {
   provider: () => {
-    render: (
-      info: RenderFnParams,
-    ) => void;
+    render: (info: RenderFnParams) => void;
     destroy: (info: { dom: any }) => void;
   };
 }
@@ -90,7 +93,9 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
   export?: E;
   dom?: string;
-}): ForwardRefExoticComponent<PropsWithoutRef<ProviderParams> & RefAttributes<HTMLElement | HTMLDivElement>> {
+}): ForwardRefExoticComponent<
+  PropsWithoutRef<ProviderParams> & RefAttributes<HTMLElement | HTMLDivElement>
+> {
   // type ExportType = T[E] extends (...args: any) => any
   //   ? ReturnType<T[E]>
   //   : never;
@@ -100,7 +105,7 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
   //     : {}
   //   : {};
 
-  return forwardRef(function (props, ref) {    
+  return forwardRef(function (props, ref) {
     const LazyComponent = createLazyRemoteComponent(info);
     return (
       <ErrorBoundary FallbackComponent={info.fallback}>

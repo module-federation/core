@@ -12,7 +12,10 @@ import { LoggerInstance, atLeastReact18 } from './utils';
 type RootType = HTMLElement | ReactDOMClient.Root;
 type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
-  render?: (App: React.ReactElement, id?: HTMLElement | string) => RootType | Promise<RootType>;
+  render?: (
+    App: React.ReactElement,
+    id?: HTMLElement | string,
+  ) => RootType | Promise<RootType>;
 };
 
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
@@ -24,7 +27,11 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
 
       return (
         <RouterContext.Provider value={{ name, basename, memoryRoute }}>
-          <bridgeInfo.rootComponent {...propsInfo} basename={basename} {...restProps} />
+          <bridgeInfo.rootComponent
+            {...propsInfo}
+            basename={basename}
+            {...restProps}
+          />
         </RouterContext.Provider>
       );
     };
@@ -34,19 +41,20 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         LoggerInstance.log(`createBridgeComponent render Info`, info);
         const { name, basename, memoryRoute, ...propsInfo } = info;
         if (atLeastReact18(React)) {
-          // render is provided by user
           if (bridgeInfo?.render) {
-            Promise.resolve(bridgeInfo?.render(
-              <RawComponent
-                propsInfo={propsInfo}
-                appInfo={{
-                  name,
-                  basename,
-                  memoryRoute,
-                }}
-              />,
-              info.dom
-            )).then((root: RootType) => rootMap.set(info.dom, root));
+            Promise.resolve(
+              bridgeInfo?.render(
+                <RawComponent
+                  propsInfo={propsInfo}
+                  appInfo={{
+                    name,
+                    basename,
+                    memoryRoute,
+                  }}
+                />,
+                info.dom,
+              ),
+            ).then((root: RootType) => rootMap.set(info.dom, root));
           } else {
             const root: RootType = ReactDOMClient.createRoot(info.dom);
             root.render(

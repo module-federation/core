@@ -1,4 +1,10 @@
-import React, { useContext, useEffect, useRef, useState, forwardRef } from 'react';
+import React, {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  forwardRef,
+} from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { LoggerInstance, pathJoin } from '../utils';
@@ -24,10 +30,12 @@ interface RemoteAppParams {
   name: string;
   providerInfo: NonNullable<RemoteModule['provider']>;
   exportName: string | number | symbol;
-  dom?: string;
 }
 
-const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderParams, ref) {
+const RemoteAppWrapper = forwardRef(function (
+  props: RemoteAppParams & RenderFnParams,
+  ref,
+) {
   const RemoteApp = () => {
     const {
       name,
@@ -40,19 +48,24 @@ const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderP
       ...resProps
     } = props;
 
-    const rootRef: React.MutableRefObject<HTMLElement | null> = ref && 'current' in ref ? ref as React.MutableRefObject<HTMLElement | null> : useRef(null);
+    const rootRef: React.MutableRefObject<HTMLElement | null> =
+      ref && 'current' in ref
+        ? (ref as React.MutableRefObject<HTMLElement | null>)
+        : useRef(null);
     const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
     const providerInfoRef = useRef<any>(null);
-    
+
     useEffect(() => {
       const renderTimeout = setTimeout(() => {
         const providerReturn = providerInfo();
         providerInfoRef.current = providerReturn;
-        
+
         let domElement = null;
         if (dom) {
-          domElement = document.getElementById(dom.replace('#', ''));
-          // TODO: if domElement is null, throw Error.
+          domElement = document.querySelector(dom);
+          if (!domElement || !(domElement instanceof HTMLElement)) {
+            throw new Error(`Invalid dom: ${dom}`);
+          }
           rootRef.current = domElement;
         } else {
           domElement = rootRef.current;
@@ -60,7 +73,6 @@ const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderP
 
         const renderProps = {
           name,
-          // dom: rootRef.current,
           dom: domElement,
           basename,
           memoryRoute,
@@ -73,7 +85,7 @@ const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderP
         );
         providerReturn.render(renderProps);
       });
-  
+
       return () => {
         clearTimeout(renderTimeout);
         setTimeout(() => {
@@ -90,23 +102,30 @@ const RemoteAppWrapper = forwardRef(function (props: RemoteAppParams & ProviderP
       };
     }, []);
 
-    return dom ? null : <div className={props?.className} style={props?.style} ref={rootRef}></div>;
-  }
+    return dom ? null : (
+      <div
+        className={props?.className}
+        style={props?.style}
+        ref={rootRef}
+      ></div>
+    );
+  };
 
   (RemoteApp as any)['__APP_VERSION__'] = __APP_VERSION__;
-  return <RemoteApp />
+  return <RemoteApp />;
 });
 
 interface ExtraDataProps {
   basename?: string;
 }
 
-export function withRouterData<P extends Parameters<typeof RemoteAppWrapper>[0]>(
+export function withRouterData<
+  P extends Parameters<typeof RemoteAppWrapper>[0],
+>(
   WrappedComponent: React.ComponentType<P & ExtraDataProps>,
 ): React.FC<Omit<P, keyof ExtraDataProps>> {
-  
   const Component = forwardRef(function (props: any, ref) {
-    let enableDispathPopstate = false
+    let enableDispathPopstate = false;
     let routerContextVal: any;
     try {
       ReactRouterDOM.useLocation();
@@ -181,7 +200,7 @@ export function withRouterData<P extends Parameters<typeof RemoteAppWrapper>[0]>
   });
 
   return forwardRef(function (props, ref) {
-    return <Component {...props} ref={ref} />
+    return <Component {...props} ref={ref} />;
   }) as any;
 }
 
