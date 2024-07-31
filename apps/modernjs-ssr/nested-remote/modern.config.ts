@@ -5,16 +5,22 @@ import { moduleFederationPlugin } from '@module-federation/modern-js';
 export default defineConfig({
   dev: {
     port: 3052,
+    // FIXME: it should be removed , related issue: https://github.com/web-infra-dev/modern.js/issues/5999
+    host: '0.0.0.0',
   },
   runtime: {
     router: true,
   },
-
   server: {
     ssr: {
       mode: 'stream',
     },
     port: 3052,
   },
-  plugins: [appTools(), moduleFederationPlugin()],
+  plugins: [
+    appTools({
+      bundler: 'experimental-rspack',
+    }),
+    moduleFederationPlugin(),
+  ],
 });

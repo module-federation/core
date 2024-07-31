@@ -35,28 +35,19 @@ export function modifyBundlerConfig<T extends Bundler>(options: {
     config,
     isServer,
     modernjsConfig,
-    bundlerType,
     remoteIpStrategy = 'ipv4',
+    bundlerType,
   } = options;
 
   patchMFConfig(mfConfig, isServer, remoteIpStrategy);
 
   patchBundlerConfig({
+    bundlerType,
     bundlerConfig: config,
     isServer,
     modernjsConfig,
     mfConfig,
   });
-
-  if (bundlerType === 'webpack') {
-    config.ignoreWarnings = config.ignoreWarnings || [];
-    config.ignoreWarnings.push((warning) => {
-      if (warning.message.includes('external script')) {
-        return true;
-      }
-      return false;
-    });
-  }
 }
 
 export const moduleFederationConfigPlugin = (
@@ -79,6 +70,15 @@ export const moduleFederationConfigPlugin = (
         const bundlerType =
           useAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
         const ipv4 = getIPV4();
+        const enableSSR = Boolean(modernjsConfig?.server?.ssr);
+
+        if (userConfig.remoteIpStrategy === undefined) {
+          if (!enableSSR) {
+            userConfig.remoteIpStrategy = 'inherit';
+          } else {
+            userConfig.remoteIpStrategy = 'ipv4';
+          }
+        }
 
         return {
           tools: {
@@ -125,6 +125,7 @@ export const moduleFederationConfigPlugin = (
             },
             define: {
               FEDERATION_IPV4: JSON.stringify(ipv4),
+              REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
             },
           },
           dev: {

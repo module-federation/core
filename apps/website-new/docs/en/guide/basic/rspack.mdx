@@ -1,7 +1,7 @@
 # Rspack Plugin
 
 :::info Note
-Requires Rspack version 0.5.0 or above
+Requires Rspack version 0.5.0 or above.
 :::
 
 - Capable of building modules that meet the `Module Federation` loading specifications.
@@ -29,15 +29,17 @@ import { PackageManagerTabs } from '@theme';
 
 ### Register the Plugin
 
-In `Rspack`, you can add the plugin through the `plugins` configuration item in the `rspack.config.js` file:
+#### Rsbuild
 
-```ts title='rspack.config.js'
+In [Rsbuild](https://rsbuild.dev/), you can add the plugin in the `rsbuild.config.ts` file:
+
+```ts title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 
 export default defineConfig({
-  // publicPath must be configured if using manifest
   dev: {
+    // assetPrefix must be configured if using manifest
     assetPrefix: 'http://localhost:2000/',
   },
   output: {
@@ -48,10 +50,12 @@ export default defineConfig({
     port: 2000,
   },
   tools: {
-    rspack: (config, { appendPlugins }) => {
-      // You need to set a unique value that is not equal to other applications
-      config.output!.uniqueName = 'federation_provider';
-      appendPlugins([
+    rspack: {
+      output: {
+        // You need to set a unique value that is not equal to other applications
+        uniqueName: 'federation_provider',
+      },
+      plugins: [
         new ModuleFederationPlugin({
           name: 'federation_provider',
           exposes: {
@@ -59,10 +63,39 @@ export default defineConfig({
           },
           shared: ['react', 'react-dom'],
         }),
-      ]);
-    },
+      ],
+    }
   },
 });
+```
+
+#### Rspack
+
+In [Rspack](https://rspack.dev/), you can add the plugin in the `rspack.config.js` file:
+
+```ts title="rspack.config.js"
+const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
+
+module.exports = {
+  devServer: {
+    port: 2000,
+  },
+  output: {
+    // You need to set a unique value that is not equal to other applications
+    uniqueName: 'federation_provider',
+    // publicPath must be configured if using manifest
+    publicPath: 'http://localhost:2000/',
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'federation_provider',
+      exposes: {
+        './button': './src/button.tsx',
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
+};
 ```
 
 ## Configure the Build Plugin

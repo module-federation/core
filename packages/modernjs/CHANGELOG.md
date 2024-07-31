@@ -1,5 +1,24 @@
 # @module-federation/modern-js
 
+## 0.3.3
+
+### Patch Changes
+
+- Updated dependencies [85c6a12]
+  - @module-federation/node@2.5.3
+  - @module-federation/enhanced@0.3.3
+  - @module-federation/sdk@0.3.3
+
+## 0.3.2
+
+### Patch Changes
+
+- 85ae159: feat: support rspack ssr
+- Updated dependencies [85ae159]
+  - @module-federation/enhanced@0.3.2
+  - @module-federation/node@2.5.2
+  - @module-federation/sdk@0.3.2
+
 ## 0.3.1
 
 ### Patch Changes
