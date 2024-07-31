@@ -4,13 +4,6 @@ title: "快速开始"
 
 # Modern.js
 
-:::tip
-
-* 示例 Demo [Modern.js SSR](https://github.com/module-federation/module-federation-examples/tree/master/modernjs-ssr)
-
-:::
-
-
 ## 环境准备
 
 ### Node.js
@@ -251,40 +244,3 @@ const Index = () => (
 
 export default Index;
 ```
-
-## CSS 闪烁问题
-
-启动项目访问 `http://localhost:3007/`，发现SSR 正常工作，页面可以正常渲染，但是会有样式闪烁的问题。
-
-这是因为生产者的样式文件无法注入到对应的 html 中。
-
-此问题可以通过使用 `@module-federation/modern-js` 提供的 [createremotessrcomponent](../../../guide/framework/modernjs#createremotessrcomponent) 解决。
-
-修改消费者引用生产者处的代码（`src/routes/page.tsx`）：
-
-```tsx title='page.tsx'
-import { createRemoteSSRComponent } from '@modern-js/runtime/mf'
-import './index.css';
-
-const RemoteSSRComponent = createRemoteSSRComponent({
-  loader: () => import('remote/Image'),
-  loading: 'loading...',
-  export: 'default',
-  fallback: ({ error }) => {
-    if (error instanceof Error && error.message.includes('not exist')) {
-      return <div>fallback - not existed id</div>;
-    }
-    return <div>fallback</div>;
-  },
-});
-
-const Index = () => (
-  <div className="container-box">
-    <RemoteSSRComponent />
-  </div>
-);
-
-export default Index;
-```
-
-修改后重新访问页面，可以观测返回的 html 中会自动注入生产者的样式文件，从而解决 CSS 闪烁问题。

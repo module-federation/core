@@ -1,1 +1,15 @@
-["index","dynamic-remote"]
+[
+  "index",
+  {
+    "type": "dir",
+    "name": "ssr",
+    "label": "Server-Side Rendering",
+    "collapsed": true
+  },
+  {
+    "type": "dir",
+    "name": "csr",
+    "label": "Client-Side Rendering",
+    "collapsed": true
+  }
+]

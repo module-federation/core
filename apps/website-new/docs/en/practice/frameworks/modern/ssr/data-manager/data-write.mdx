@@ -1,0 +1,64 @@
+---
+title: "Data Writing"
+---
+
+# Data Writing
+
+:::info
+For complete usage, please refer to [**Data Write**](https://modernjs.dev/en/guides/basic-features/data/data-write.html)
+:::
+
+This chapter will demonstrate how to update the data returned by the Data Loader and pass the new data to the server.
+
+## Quick Start
+
+### 1. Add action function
+Modify `page.data.ts` and add the `action` function as follows:
+
+```ts title='page.data.ts'
+import type { ActionFunction } from '@modern-js/runtime/router';
+
+export const action: ActionFunction = async ({ request }) => {
+  try {
+    const data = await request.json();
+    const { msg } = data;
+    storage.set(key, msg);
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};
+```
+
+### Trigger action function
+
+Modify `page.ts`, obtain the corresponding `submit` function through `useFetcher`, execute and trigger Data Action, the example is as follows:
+
+```tsx title='page.tsx'
+import { useLoaderData, Link,useFetcher } from '@modern-js/runtime/router';
+import type { ProfileData } from './page.data';
+
+const Index = (): JSX.Element => {
+  const data = (useLoaderData() as ProfileData) || {
+    message: '404',
+  };
+  const { submit } = useFetcher();
+  const editMsg = () => {
+    const newData = {
+      msg: 'Modern.js'
+    }
+    return submit(newData, {
+      method: 'post',
+      encType: 'application/json',
+    })
+  }
+  return (
+    <div className="container-box">
+      <button onClick={editMsg}>click to update data</button>
+      provider {data.message}
+    </div>
+  );
+};
+export default Index;
+```

@@ -9,21 +9,8 @@
     "start": "FEDERATION_DEBUG=true modern start",
     "serve": "modern serve",
     "new": "modern new",
-    "lint": "modern lint",
     "upgrade": "modern upgrade"
   },
-  "engines": {
-    "node": ">=16.18.1"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,mjs,cjs}": [
-      "node --max_old_space_size=8192 ./node_modules/eslint/bin/eslint.js --fix --color --cache --quiet"
-    ]
-  },
-  "eslintIgnore": [
-    "node_modules/",
-    "dist/"
-  ],
   "dependencies": {
     "@babel/runtime": "7.24.4",
     "@modern-js/runtime": "2.60.6",

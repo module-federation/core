@@ -8,7 +8,8 @@ import type { moduleFederationPlugin as MFPluginOptions } from '@module-federati
 import type { PluginOptions, InternalModernPluginOptions } from '../types';
 import { moduleFederationConfigPlugin } from './configPlugin';
 import { moduleFederationSSRPlugin } from './ssrPlugin';
-import { WebpackPluginInstance } from '@rspack/core';
+import { moduleFederationRoutesPlugin } from './routes/plugin';
+import { WebpackPluginType } from '../types/modern';
 
 export const moduleFederationPlugin = (
   userConfig: PluginOptions = {},
@@ -20,8 +21,9 @@ export const moduleFederationPlugin = (
     nodePlugin: undefined,
     distOutputDir: '',
     originPluginOptions: userConfig,
-    remoteIpStrategy: userConfig?.remoteIpStrategy,
+    remoteIpStrategy: undefined,
   };
+
   return {
     name: '@modern-js/plugin-module-federation',
     setup: async ({ useConfigContext }) => {
@@ -48,7 +50,7 @@ export const moduleFederationPlugin = (
                   internalModernPluginOptions.browserPlugin =
                     new WebpackModuleFederationPlugin(browserPluginOptions);
                   config.plugins?.push(
-                    internalModernPluginOptions.browserPlugin as WebpackPluginInstance,
+                    internalModernPluginOptions.browserPlugin as WebpackPluginType,
                   );
                 }
                 const enableAsyncEntry =
@@ -79,6 +81,10 @@ export const moduleFederationPlugin = (
       moduleFederationSSRPlugin(
         internalModernPluginOptions as Required<InternalModernPluginOptions>,
       ),
+      moduleFederationRoutesPlugin({
+        userConfig,
+        internalOptions: internalModernPluginOptions,
+      }),
     ],
   };
 };

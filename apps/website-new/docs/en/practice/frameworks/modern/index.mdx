@@ -4,13 +4,6 @@ title: "Quick Start"
 
 # Modern.js
 
-:::tip
-
-* Example Demo [Modern.js SSR](https://github.com/module-federation/module-federation-examples/tree/master/modernjs-ssr)
-
-:::
-
-
 ## Environment
 
 ### Node.js
@@ -250,38 +243,3 @@ const Index = () => (
 
 export default Index;
 ```
-
-## CSS flickering issue
-
-Start the project and visit `http://localhost:3007/` and find that SSR is working normally and the page can be rendered normally, but there will be a problem of style flickering.
-
-This is because the producer's style files cannot be injected into the corresponding html.
-
-This issue can be solved by using the [createremotessrcomponent](../../../guide/framework/modernjs#createremotessrcomponent) provided by `@module-federation/modern-js`.
-
-```tsx title='page.tsx'
-import { createRemoteSSRComponent } from '@modern-js/runtime/mf'
-import './index.css';
-
-const RemoteSSRComponent = createRemoteSSRComponent({
-  loader: () => import('remote/Image'),
-  loading: 'loading...',
-  export: 'default',
-  fallback: ({ error }) => {
-    if (error instanceof Error && error.message.includes('not exist')) {
-      return <div>fallback - not existed id</div>;
-    }
-    return <div>fallback</div>;
-  },
-});
-
-const Index = () => (
-  <div className="container-box">
-    <RemoteSSRComponent />
-  </div>
-);
-
-export default Index;
-```
-
-After modifying the page and revisiting it, you can observe that the returned html will be automatically injected with the producer's style file, thereby solving the CSS flickering problem.

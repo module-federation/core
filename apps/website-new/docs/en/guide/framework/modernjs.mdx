@@ -71,6 +71,52 @@ add `/// <reference types='@module-federation/modern-js/types' />` in `modern-ap
 + /// <reference types='@module-federation/modern-js/types' />
 ```
 
+And then add `paths` to `tsconfig.json` to get type support:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
+  }
+}
+```
+
+## Configuration
+
+### config
+
+- Type: `moduleFederationPlugin.ModuleFederationPluginOptions`
+- Rquired: No
+- Default Value: `undefined`
+
+`@module-federation/modern-js` will auto read `module-federation.config.ts` config file. If `config` is configured, this configuration file will be used first.
+
+### configPath
+
+- Type: `string`
+- Required: No
+- Default Value: `path.resolve(process.cwd(), 'module-federation.config.ts');`
+
+Specify the configuration file path, which must be an absolute path.
+
+### exportRoutes
+
+- Type: `boolean`
+- Required: No
+- Default Value: `undefined`
+
+Setting `true` will automatically export the current project route.
+
+### importRoutes
+
+- Type: `boolean`
+- Required: No
+- Default Value: `undefined`
+
+After setting `true`, follow [this document](../../practice/frameworks/modern/ssr/route-component#how-to-enable-this-ability) to consume the routes exported by the producer.
+
 ## Server-Side Rendering
 
 :::info
@@ -169,3 +215,35 @@ Set module loading status.
 A fault-tolerant component that is rendered when the component fails to **load** or **render**.
 
 Note: This component only renders this fault-tolerant component on the client side when **rendering** fails.
+
+## Route Component
+
+### withMFRouteId
+
+<Collapse>
+```ts
+declare function withMFRouteId(id: string): string;
+```
+</Collapse>
+
+When you need to obtain the Data Loader data of the specified route level, you need to wrap the original `routeId` with this function.
+
+Examples are as follows:
+
+```ts
+import { useRouteLoaderData } from '@modern-js/runtime/router';
+import { withMFRouteId } from '@modern-js/runtime/mf';
+
+
+export function UserLayout() {
+// Get the data returned by `loader` in routes/user/layout.data.ts
+  // Note: If the project is a routing component, you need to call withMFRouteId to get the actual routeId after processing
+  const data = useRouteLoaderData(withMFRouteId('user/layout'));
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <h2>{data.age}</h2>
+    </div>
+  );
+}
+```

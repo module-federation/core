@@ -1,0 +1,1 @@
+export { generateRoutes } from './generateRoutes';

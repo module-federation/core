@@ -1,0 +1,11 @@
+[
+  "dynamic-remote",
+  "route-component",
+  {
+    "type": "dir",
+    "name": "data-manager",
+    "label": "Data Manager",
+    "collapsed": true
+  },
+  "faq"
+]

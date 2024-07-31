@@ -1,0 +1,33 @@
+---
+title: "概览"
+---
+
+# 介绍
+
+此章节会介绍常见的数据请求方式及其弊端，并简述 Modern.js 是如何解决存在的问题。同时展示 Module Federation 如何使用此功能。
+
+## 存在的问题
+
+在过去，SSR 模式下，生产者组件无法直接在 Server 端获取数据，只能通过消费者透传或者使用 `Await/Suspense` 异步加载数据。
+
+该解决方法会加载对应的页面 js 资源，然后发起网络请求，该过程是一个串行过程，这意味着如果有多层组件，那么首屏性能会较差。
+
+![serial-request](@public/practice/modernjs/serial-request.jpeg)
+
+## Modern.js 解决方案
+
+在 Modern.js 中，框架会对路由进行分片，并获取对应路由的静态资源和数据，随后会对静态资源和数据进行并行加载。
+
+![parallel-request](@public/practice/modernjs/parallel-request.jpeg)
+
+## 在 Module Federation 中使用
+
+根据调用场景有不同的使用方式。
+
+### 消费者
+
+如果是仅在消费页面使用 Data Loader，那么按照 Modern.js 官网中的[数据获取](https://modernjs.dev/guides/basic-features/data/data-fetch.html)和[数据写入](https://modernjs.dev/guides/basic-features/data/data-write.html)使用即可。
+
+### 生产者
+
+因为 Data Loader 需要和路由绑定，所以常规的生产者是无法使用此功能，需要该生产者为[路由组件](../route-component)。
