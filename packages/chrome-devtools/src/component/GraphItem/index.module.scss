@@ -16,7 +16,6 @@
     padding: 0;
 
     .group {
-      // margin-top: -2px;
       display: flex;
       align-items: center;
       margin-bottom: 3px;
@@ -55,6 +54,8 @@
         margin-right: 5px;
         margin-bottom: 5px;
         font-weight: 300;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
     }
 
