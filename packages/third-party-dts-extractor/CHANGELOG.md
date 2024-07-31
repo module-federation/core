@@ -1,5 +1,19 @@
 # @module-federation/third-party-dts-extractor
 
+## 0.3.3
+
+## 0.3.2
+
+### Patch Changes
+
+- 0de1c83: fix: do not collect node internal utils
+
+## 0.3.1
+
+## 0.3.0
+
+## 0.2.8
+
 ## 0.2.7
 
 ### Patch Changes

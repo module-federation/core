@@ -1,0 +1,94 @@
+{
+  "name": "@module-federation/modern-js",
+  "version": "0.3.3",
+  "files": [
+    "dist/",
+    "types.d.ts",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "modern build"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/esm/cli/index.js",
+      "require": "./dist/cjs/cli/index.js",
+      "types": "./dist/types/cli/index.d.ts"
+    },
+    "./runtime": {
+      "types": "./dist/types/runtime/index.d.ts",
+      "default": "./dist/esm/runtime/index.js"
+    },
+    "./ssr-runtime": {
+      "types": "./dist/types/ssr-runtime/index.d.ts",
+      "default": "./dist/esm/ssr-runtime/index.js"
+    },
+    "./config-plugin": {
+      "import": "./dist/esm/cli/configPlugin.js",
+      "require": "./dist/cjs/cli/configPlugin.js",
+      "types": "./dist/types/cli/configPlugin.d.ts"
+    },
+    "./ssr-plugin": {
+      "import": "./dist/esm/cli/ssrPlugin.js",
+      "require": "./dist/cjs/cli/ssrPlugin.js",
+      "types": "./dist/types/cli/ssrPlugin.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types/cli/index.d.ts"
+      ],
+      "runtime": [
+        "./dist/types/runtime/index.d.ts"
+      ],
+      "config-plugin": [
+        "./dist/types/cli/configPlugin.d.ts"
+      ],
+      "ssr-plugin": [
+        "./dist/types/cli/ssrPlugin.d.ts"
+      ]
+    }
+  },
+  "main": "./dist/cjs/cli/index.js",
+  "types": "./dist/types/cli/index.d.ts",
+  "author": "hanric <hanric.zhang@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@swc/helpers": "0.5.3",
+    "@modern-js/utils": "2.54.2",
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/node": "workspace:*",
+    "@modern-js/node-bundle-require": "2.54.2",
+    "node-fetch": "~3.3.0",
+    "react-error-boundary": "4.0.13",
+    "hoist-non-react-statics": "3.3.2"
+  },
+  "devDependencies": {
+    "@types/hoist-non-react-statics": "3.3.2",
+    "@module-federation/manifest": "workspace:*",
+    "@modern-js/app-tools": "2.56.2",
+    "@modern-js/core": "2.56.2",
+    "@modern-js/runtime": "2.56.2",
+    "@modern-js/module-tools": "2.56.2",
+    "@modern-js/tsconfig": "2.56.2"
+  },
+  "peerDependencies": {
+    "react": ">=17",
+    "react-dom": ">=17",
+    "typescript": "^4.9.0 || ^5.0.0",
+    "vue-tsc": "^1.0.24"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    },
+    "vue-tsc": {
+      "optional": true
+    }
+  }
+}

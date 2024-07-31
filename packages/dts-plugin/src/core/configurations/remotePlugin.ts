@@ -80,7 +80,6 @@ const readTsConfig = (
     typescript.sys,
     dirname(resolvedTsConfigPath),
   );
-
   const rootDir = getEffectiveRootDir(configContent);
 
   const outDir = resolve(
@@ -105,8 +104,13 @@ const readTsConfig = (
     ...defaultCompilerOptions,
   };
 
+  const { paths, baseUrl, ...restCompilerOptions } =
+    rawTsConfigJson.compilerOptions || {};
+  rawTsConfigJson.compilerOptions = restCompilerOptions;
+
   const filesToCompile = [
     ...Object.values(mapComponentsToExpose),
+    ...configContent.fileNames.filter((filename) => filename.endsWith('.d.ts')),
     ...additionalFilesToCompile,
   ];
 
@@ -115,10 +119,7 @@ const readTsConfig = (
   rawTsConfigJson.exclude = [];
   'references' in rawTsConfigJson && delete rawTsConfigJson.references;
 
-  const extendsPath = rawTsConfigJson.extends;
-  if (extendsPath && extendsPath.startsWith('.')) {
-    rawTsConfigJson.extends = resolve(context, extendsPath);
-  }
+  rawTsConfigJson.extends = resolvedTsConfigPath;
   return rawTsConfigJson;
 };
 

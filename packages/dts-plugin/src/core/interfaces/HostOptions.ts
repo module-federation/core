@@ -4,6 +4,7 @@ export interface HostOptions extends moduleFederationPlugin.DtsHostOptions {
   moduleFederationConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
   context?: string;
   implementation?: string;
+  runtimePkgs?: string[];
 }
 
 export interface RemoteInfo {

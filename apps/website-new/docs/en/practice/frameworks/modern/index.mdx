@@ -1,0 +1,287 @@
+---
+title: "Quick Start"
+---
+
+# Modern.js
+
+:::tip
+
+* Example Demo [Modern.js SSR](https://github.com/module-federation/module-federation-examples/tree/master/modernjs-ssr)
+
+:::
+
+
+## Environment
+
+### Node.js
+
+Before getting started, you will need to install [Node.js](https://nodejs.org/), and ensure that your Node.js version is higher than 16.2.0. **We recommend using the LTS version of Node.js 18.**
+
+You can check the currently used Node.js version with the following command:
+
+```bash
+node -v
+```
+
+If you do not have Node.js installed in your current environment, or the installed version is lower than 16.2.0, you can use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to install the required version.
+
+Here is an example of how to install the Node.js 18 LTS version via nvm:
+
+```bash
+# Install the long-term support version of Node.js 18
+nvm install 18 --lts
+
+# Make the newly installed Node.js 18 as the default version
+nvm alias default 18
+
+# Switch to the newly installed Node.js 18
+nvm use 18
+```
+
+:::tip nvm and fnm
+Both nvm and fnm are Node.js version management tools. Relatively speaking, nvm is more mature and stable, while fnm is implemented using Rust, which provides better performance than nvm.
+:::
+
+### pnpm
+
+It is recommended to use [pnpm](https://pnpm.io/installation) to manage dependencies:
+
+```bash
+npm install -g pnpm@8
+```
+
+:::note
+Modern.js also supports dependency management with `yarn` and `npm`.
+:::
+
+
+## 创建项目
+
+`@modern-js/create` provides an interactive Q & A interface to initialize the project based on the results, with initialization performed according to the default settings:
+
+### Create consumer
+
+```bash
+npx @modern-js/create@latest modern-consumer
+```
+
+### Create provider
+
+```bash
+npx @modern-js/create@latest modern-provider
+```
+
+### Install plugins
+
+Module Federation provides a matching plugin `@module-federation/modern-js` for Modern.js.
+
+```bash
+pnpm add @module-federation/modern-js
+```
+
+## Set Module Federation Configure
+
+### Provider
+
+#### 1. Create configuration file
+
+Create a `module-federation.config.ts` file in the project root directory and write the following content:
+
+```ts title='module-federation.config.ts'
+import { createModuleFederationConfig } from '@module-federation/modern-js';
+
+export default createModuleFederationConfig({
+  name: 'provider',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './Image': './src/components/Image.tsx',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+```
+
+#### 2. Apply plugin
+
+Apply `@module-federation/modern-js` in `modern.config.ts` :
+
+```ts title='modern.config.ts'
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import { moduleFederationPlugin } from '@module-federation/modern-js';
+
+// https://modernjs.dev/en/configure/app/usage
+export default defineConfig({
+  runtime: {
+    router: true,
+  },
+  server: {
+    ssr: {
+      mode: 'stream',
+    },
+    port: 3006,
+  },
+  plugins: [appTools(), moduleFederationPlugin()],
+});
+```
+
+#### 3. Create need to be exposed component
+
+Create the file `src/components/Image.tsx` with the following content:
+
+```tsx title='Image.tsx'
+import React from 'react';
+import styles from './Image.module.css';
+
+export default (): JSX.Element => (
+  <div
+    id="remote-components"
+    style={{
+      backgroundColor: '#1ee9c1',
+      color: 'lightgrey',
+      padding: '1rem',
+    }}
+  >
+    <h2>
+      <strong>remote</strong>&nbsp;image
+    </h2>
+    <button
+      id="remote-components-button"
+      style={{ marginBottom: '1rem' }}
+      onClick={() => alert('[remote-components] Client side Javascript works!')}
+    >
+      Click me to test i'm interactive!
+    </button>
+    <img
+      id="remote-components-image"
+      src="https://module-federation.io/module-federation-logo.svg"
+      style={{ width: '100px' }}
+      alt="serge"
+    />
+    <button className={styles['button']}>Button from remote</button>
+  </div>
+);
+```
+
+And create the corresponding style file, the content is as follows:
+
+```css title='Image.module.css'
+.button {
+  background: red;
+}
+```
+
+### Consumer
+
+#### 1. Create configuration file
+
+Create a `module-federation.config.ts` file in the project root directory and write the following content:
+
+```ts title='module-federation.config.ts'
+import { createModuleFederationConfig } from '@module-federation/modern-js';
+
+export default createModuleFederationConfig({
+  name: 'consumer',
+  remotes: {
+    remote: 'provider@http://localhost:3006/mf-manifest.json',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+```
+
+#### 2. Apply plugin
+
+Apply `@module-federation/modern-js` in `modern.config.ts`:
+
+```ts title='modern.config.ts'
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import { moduleFederationPlugin } from '@module-federation/modern-js';
+
+// https://modernjs.dev/en/configure/app/usage
+export default defineConfig({
+  runtime: {
+    router: true,
+  },
+  server: {
+    ssr: {
+      mode: 'stream',
+    },
+    port: 3007,
+  },
+  plugins: [appTools(), moduleFederationPlugin()],
+});
+```
+#### 3. Type hint
+
+Add `/// <reference types='@module-federation/modern-js/types' />` to the `modern-app-env.d.ts` file to get the runtime `@modern-js/runtime/mf` type support.
+
+```diff title='modern-app-env.d.ts'
++ /// <reference types='@module-federation/modern-js/types' />
+```
+
+Add `paths` in `tsconfig.json` to get the producer's type:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
+  }
+}
+```
+#### 4. Consume provider
+
+Modify the entry page (`src/routes/page.tsx`) and reference the components provided by the producer. The content is as follows:
+
+```tsx title='page.tsx'
+import ProviderImage from 'remote/Image';
+import './index.css';
+
+const Index = () => (
+  <div className="container-box">
+    <ProviderImage />
+  </div>
+);
+
+export default Index;
+```
+
+## CSS flickering issue
+
+Start the project and visit `http://localhost:3007/` and find that SSR is working normally and the page can be rendered normally, but there will be a problem of style flickering.
+
+This is because the producer's style files cannot be injected into the corresponding html.
+
+This issue can be solved by using the [createremotessrcomponent](../../../guide/framework/modernjs#createremotessrcomponent) provided by `@module-federation/modern-js`.
+
+```tsx title='page.tsx'
+import { createRemoteSSRComponent } from '@modern-js/runtime/mf'
+import './index.css';
+
+const RemoteSSRComponent = createRemoteSSRComponent({
+  loader: () => import('remote/Image'),
+  loading: 'loading...',
+  export: 'default',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+
+const Index = () => (
+  <div className="container-box">
+    <RemoteSSRComponent />
+  </div>
+);
+
+export default Index;
+```
+
+After modifying the page and revisiting it, you can observe that the returned html will be automatically injected with the producer's style file, thereby solving the CSS flickering problem.
