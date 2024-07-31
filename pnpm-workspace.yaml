@@ -5,6 +5,7 @@ packages:
   - 'packages/enhance'
   - 'apps/runtime-demo/*'
   - 'apps/modernjs-ssr/*'
+  - 'apps/modernjs-ssr-data-loader/*'
   - 'apps/router-demo/*'
   - 'apps/manifest-demo/*'
   - 'apps/esbuild'

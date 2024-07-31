@@ -1,4 +1,4 @@
-import type { CliPlugin, AppTools } from '@modern-js/app-tools';
+import type { CliPlugin, AppTools,webpack } from '@modern-js/app-tools';
 import {
   ModuleFederationPlugin as WebpackModuleFederationPlugin,
   AsyncBoundaryPlugin,
@@ -8,7 +8,7 @@ import type { moduleFederationPlugin as MFPluginOptions } from '@module-federati
 import type { PluginOptions, InternalModernPluginOptions } from '../types';
 import { moduleFederationConfigPlugin } from './configPlugin';
 import { moduleFederationSSRPlugin } from './ssrPlugin';
-import { WebpackPluginInstance } from '@rspack/core';
+import { moduleFederationDataLoaderPlugin } from './dataLoader/plugin';
 
 export const moduleFederationPlugin = (
   userConfig: PluginOptions = {},
@@ -22,6 +22,7 @@ export const moduleFederationPlugin = (
     originPluginOptions: userConfig,
     remoteIpStrategy: userConfig?.remoteIpStrategy,
   };
+
   return {
     name: '@modern-js/plugin-module-federation',
     setup: async ({ useConfigContext }) => {
@@ -48,7 +49,7 @@ export const moduleFederationPlugin = (
                   internalModernPluginOptions.browserPlugin =
                     new WebpackModuleFederationPlugin(browserPluginOptions);
                   config.plugins?.push(
-                    internalModernPluginOptions.browserPlugin as WebpackPluginInstance,
+                    internalModernPluginOptions.browserPlugin as webpack.WebpackPluginInstance,
                   );
                 }
                 const enableAsyncEntry =
@@ -78,6 +79,15 @@ export const moduleFederationPlugin = (
       moduleFederationConfigPlugin(internalModernPluginOptions),
       moduleFederationSSRPlugin(
         internalModernPluginOptions as Required<InternalModernPluginOptions>,
+      ),
+      moduleFederationDataLoaderPlugin(
+        Boolean(userConfig.dataLoader),
+        internalModernPluginOptions,
+        {
+          ...(typeof userConfig.dataLoader === 'boolean'
+            ? {}
+            : userConfig.dataLoader),
+        },
       ),
     ],
   };
