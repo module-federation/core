@@ -6,6 +6,9 @@ export interface PluginOptions {
   config?: moduleFederationPlugin.ModuleFederationPluginOptions;
   configPath?: string;
   remoteIpStrategy?: 'ipv4' | 'inherit';
+  dataLoader?:
+    | false
+    | Pick<DataLoaderOptions, 'baseName' | 'partialSSRRemotes'>;
 }
 
 export interface InternalModernPluginOptions {
@@ -20,3 +23,16 @@ export interface InternalModernPluginOptions {
 export type BundlerPlugin =
   | WebpackModuleFederationPlugin
   | RspackModuleFederationPlugin;
+
+export type DataLoaderOptions = {
+  baseName: string;
+  partialSSRRemotes?: string[];
+  fetchSSRByRouteIds?: (
+    partialSSRRemotes: string[],
+    mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  ) => Promise<string[] | undefined>;
+  patchMFConfig?: (
+    mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+    baseName: string,
+  ) => void;
+};

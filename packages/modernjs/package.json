@@ -26,6 +26,10 @@
       "types": "./dist/types/ssr-runtime/index.d.ts",
       "default": "./dist/esm/ssr-runtime/index.js"
     },
+    "./data-loader": {
+      "types": "./dist/types/runtime/dataLoader/index.d.ts",
+      "default": "./dist/esm/runtime/dataLoader.js"
+    },
     "./config-plugin": {
       "import": "./dist/esm/cli/configPlugin.js",
       "require": "./dist/cjs/cli/configPlugin.js",
@@ -71,11 +75,11 @@
   "devDependencies": {
     "@types/hoist-non-react-statics": "3.3.2",
     "@module-federation/manifest": "workspace:*",
-    "@modern-js/app-tools": "2.56.2",
-    "@modern-js/core": "2.56.2",
-    "@modern-js/runtime": "2.56.2",
-    "@modern-js/module-tools": "2.56.2",
-    "@modern-js/tsconfig": "2.56.2"
+    "@modern-js/app-tools": "0.0.0-next-20240730094311",
+    "@modern-js/core": "0.0.0-next-20240730094311",
+    "@modern-js/runtime": "0.0.0-next-20240730094311",
+    "@modern-js/module-tools": "0.0.0-next-20240730094311",
+    "@modern-js/tsconfig": "0.0.0-next-20240730094311"
   },
   "peerDependencies": {
     "react": ">=17",

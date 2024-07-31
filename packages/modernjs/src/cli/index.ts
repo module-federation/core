@@ -8,6 +8,7 @@ import type { moduleFederationPlugin as MFPluginOptions } from '@module-federati
 import type { PluginOptions, InternalModernPluginOptions } from '../types';
 import { moduleFederationConfigPlugin } from './configPlugin';
 import { moduleFederationSSRPlugin } from './ssrPlugin';
+import { moduleFederationDataLoaderPlugin } from './dataLoaderPlugin';
 
 export const moduleFederationPlugin = (
   userConfig: PluginOptions = {},
@@ -21,6 +22,7 @@ export const moduleFederationPlugin = (
     originPluginOptions: userConfig,
     remoteIpStrategy: userConfig?.remoteIpStrategy,
   };
+
   return {
     name: '@modern-js/plugin-module-federation',
     setup: async ({ useConfigContext }) => {
@@ -77,6 +79,14 @@ export const moduleFederationPlugin = (
       moduleFederationConfigPlugin(internalModernPluginOptions),
       moduleFederationSSRPlugin(
         internalModernPluginOptions as Required<InternalModernPluginOptions>,
+      ),
+      moduleFederationDataLoaderPlugin(
+        Boolean(userConfig.dataLoader),
+        internalModernPluginOptions,
+        {
+          baseName: '',
+          ...userConfig.dataLoader,
+        },
       ),
     ],
   };
