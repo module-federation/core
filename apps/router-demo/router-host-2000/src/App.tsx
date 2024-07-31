@@ -25,7 +25,7 @@ const Remote1App = createRemoteComponent({
   loader: () => loadRemote('remote1/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
-  dom: '#root-remote1'
+  dom: '#root-remote1',
 });
 
 const Remote2App = createRemoteComponent({
@@ -72,23 +72,40 @@ const App = () => {
       if (ref && ref.current) {
         ref.current.style.borderRadius = '20px';
       }
-    }, 2000)
+    }, 2000);
     return () => {
       if (!location.pathname.includes('remote1')) {
         clearTimeout(refTimeout);
       }
-    }
-  }, [location.pathname])
+    };
+  }, [location.pathname]);
   return (
     <div>
       <div id="root-remote1"></div>
       <Navigation />
-      <Remote1App memoryRoute={{ entryPath: '/' }} />
+      {/* <Remote1App memoryRoute={{ entryPath: '/' }} /> */}
       <Routes>
         <Route path="/" Component={Home} />
         <Route path="/detail/*" Component={Detail} />
-        <Route path="/remote1/*" Component={() => <Remote1App className={styles.remote1} props={{ msg: 'hello remote1' }} ref={ref} />} />
-        <Route path="/remote2/*" Component={() => <Remote2App style={{ background: 'black' }} props={{ msg: 'hello remote2' }} />} />
+        <Route
+          path="/remote1/*"
+          Component={() => (
+            <Remote1App
+              className={styles.remote1}
+              props={{ msg: 'hello remote1' }}
+              ref={ref}
+            />
+          )}
+        />
+        <Route
+          path="/remote2/*"
+          Component={() => (
+            <Remote2App
+              style={{ background: 'black' }}
+              props={{ msg: 'hello remote2' }}
+            />
+          )}
+        />
         <Route path="/remote3/*" Component={() => <Remote3App />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
       </Routes>
