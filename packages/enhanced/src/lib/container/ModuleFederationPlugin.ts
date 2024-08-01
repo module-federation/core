@@ -29,6 +29,11 @@ const isValidExternalsType = require(
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
+
+const StartupChunkDependenciesPlugin = require(
+  normalizeWebpackPath('webpack/lib/runtime/MfStartupChunkDependenciesPlugin'),
+) as typeof import('webpack/lib/runtime/MfStartupChunkDependenciesPlugin');
+
 const validate = createSchemaValidation(
   // just use schema to validate
   () => true,
@@ -77,6 +82,11 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         compiler,
       );
     }
+
+    new StartupChunkDependenciesPlugin({
+      asyncChunkLoading: true,
+    }).apply(compiler);
+
     if (options.dts !== false) {
       new DtsPlugin(options).apply(compiler);
     }

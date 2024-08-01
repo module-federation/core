@@ -17,6 +17,11 @@
     "Kyle Tsang (https://github.com/kyletsang)",
     "Matteo Pietro Dazzi (https://github.com/ilteoood)"
   ],
+  "pnpm": {
+    "overrides": {
+      "webpack": "git+https://github.com/ScriptedAlchemy/webpack.git#mf-chunk-startup"
+    }
+  },
   "license": "MIT",
   "scripts": {
     "nx": "nx",
