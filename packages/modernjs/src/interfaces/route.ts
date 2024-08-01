@@ -8,6 +8,6 @@ export type Route = {
 };
 export type MFModernRouteJson = {
   baseName: string;
-  routes: Array<Route>;
+  routes: Record<string, Route[]>;
   prefix: string;
 };

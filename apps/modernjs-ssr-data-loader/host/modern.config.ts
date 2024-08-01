@@ -15,6 +15,7 @@ export default defineConfig({
     ssr: {
       mode: 'stream',
     },
+    ssrByRouteIds: ['remote@layout', 'remote@page', 'remote@a/page'],
     port: 3062,
   },
   plugins: [
@@ -24,6 +25,7 @@ export default defineConfig({
     moduleFederationPlugin({
       dataLoader: {
         baseName: 'federationHost',
+        // partialSSRRemotes:['remote']
       },
     }),
   ],

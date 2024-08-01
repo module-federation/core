@@ -6,7 +6,7 @@ export default createModuleFederationConfig({
     './Content': './src/components/Content.tsx',
   },
   remotes: {
-    remote: 'remote@http://localhost:3061/mf-manifest.json',
+    remote: 'remote@http://127.0.0.1:3061/mf-manifest.json',
   },
   shared: {
     react: { singleton: true },

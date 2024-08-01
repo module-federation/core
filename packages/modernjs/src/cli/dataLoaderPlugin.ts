@@ -1,5 +1,5 @@
 import path from 'path';
-import { fs, ROUTE_SPEC_FILE } from '@modern-js/utils';
+import { fs, NESTED_ROUTE_SPEC_FILE } from '@modern-js/utils';
 import type { CliPlugin, AppTools } from '@modern-js/app-tools';
 import type { DataLoaderOptions, InternalModernPluginOptions } from '../types';
 import { transformName2Prefix } from '../runtime/utils';
@@ -18,22 +18,22 @@ function writeMFModernRouteJson({
   routeJsonPath: string;
   baseName: string;
 }) {
-  const keys = ['path', 'children', 'id', 'type', 'isRoot'];
+  const excludeKeys = ['_component'];
   const routeJson = fs.readFileSync(routeJsonPath, 'utf-8');
-  const mfModernRouteJson: MFModernRouteJson = JSON.parse(
-    routeJson,
-    (key, value) => {
-      if (keys.includes(key)) {
-        return value;
-      }
-      if (!key) {
-        return value;
-      }
+  const routeJsonContent = JSON.parse(routeJson, (key, value) => {
+    if (excludeKeys.includes(key)) {
       return undefined;
-    },
-  );
-  mfModernRouteJson.baseName = baseName;
-  mfModernRouteJson.prefix = transformName2Prefix(name);
+    }
+    if (!key) {
+      return value;
+    }
+    return value;
+  });
+  const mfModernRouteJson: MFModernRouteJson = {
+    routes: routeJsonContent,
+    baseName,
+    prefix: transformName2Prefix(name),
+  };
   const distDir = path.dirname(routeJsonPath);
   const filePath = path.join(distDir, MF_MODERN_ROUTE_JSON);
   fs.writeFileSync(filePath, JSON.stringify(mfModernRouteJson, null, 2));
@@ -120,7 +120,7 @@ async function _fetchSSRByRouteIds(
       const [_name, url] = entry.split('@');
       const mfModernRouteJsonUrl = url.replace(
         new URL(url.startsWith('//') ? `http:${url}` : url).pathname,
-        MF_MODERN_ROUTE_JSON,
+        `/${MF_MODERN_ROUTE_JSON}`,
       );
       return mfModernRouteJsonUrl;
     },
@@ -141,10 +141,12 @@ async function _fetchSSRByRouteIds(
           });
         }
       };
-      routeJson.routes.forEach((r) => collectIds(r));
+      Object.values(routeJson.routes).forEach((routeArr) => {
+        routeArr.forEach((r) => collectIds(r));
+      });
     }),
   );
-
+  console.log(111, [...remoteProviderRouteIds]);
   return [...remoteProviderRouteIds];
 }
 
@@ -186,26 +188,34 @@ export const moduleFederationDataLoaderPlugin = (
         return { entrypoint, plugins };
       },
       config: async () => {
+        console.log('dataloader plugin config');
+
         const fetchFn = fetchSSRByRouteIds || _fetchSSRByRouteIds;
         const ssrByRouteIds = await fetchFn(
           partialSSRRemotes,
           internalOptions.csrConfig!,
         );
+        console.log('ssrByRouteIds: ', ssrByRouteIds);
         const patchMFConfigFn = patchMFConfig || _pathMfConfig;
         return {
           server: {
             ssrByRouteIds: ssrByRouteIds,
           },
           tools: {
+            rspack(_config, { isServer }) {
+              if (isServer) {
+                patchMFConfigFn(internalOptions.ssrConfig!, baseName);
+              } else {
+                patchMFConfigFn(internalOptions.csrConfig!, baseName);
+              }
+              console.log('dataloader plugin rspack');
+            },
             bundlerChain(chain, { isServer }) {
               if (!isServer) {
                 routeJsonPath = path.join(
                   chain.output.get('path'),
-                  ROUTE_SPEC_FILE,
+                  NESTED_ROUTE_SPEC_FILE,
                 );
-                patchMFConfigFn(internalOptions.csrConfig!, baseName);
-              } else {
-                patchMFConfigFn(internalOptions.ssrConfig!, baseName);
               }
             },
             devServer: {
