@@ -55,13 +55,13 @@ export function createScript(info: {
 
       if (createScriptRes instanceof HTMLScriptElement) {
         script = createScriptRes;
-      } else if (
-        typeof createScriptRes === 'object' &&
-        'script' in createScriptRes &&
-        'timeout' in createScriptRes
-      ) {
-        if (createScriptRes.script) script = createScriptRes.script;
-        if (createScriptRes.timeout) timeout = createScriptRes.timeout;
+      } else if (typeof createScriptRes === 'object') {
+        if ('script' in createScriptRes && createScriptRes.script) {
+          script = createScriptRes.script;
+        }
+        if ('timeout' in createScriptRes && createScriptRes.timeout) {
+          timeout = createScriptRes.timeout;
+        }
       }
     }
     const attrs = info.attrs;
