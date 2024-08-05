@@ -1,4 +1,4 @@
-import { loadScriptNode } from '@module-federation/sdk';
+import { CreateScriptHookNode, loadScriptNode } from '@module-federation/sdk';
 import { FederationRuntimePlugin } from '../../type/plugin';
 import { getRemoteEntryExports } from '../../global';
 import { RemoteEntryExports } from '../../type';
@@ -8,10 +8,12 @@ export async function loadEntryScript({
   name,
   globalName,
   entry,
+  createScriptHook,
 }: {
   name: string;
   globalName: string;
   entry: string;
+  createScriptHook: CreateScriptHookNode;
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -24,6 +26,7 @@ export async function loadEntryScript({
 
   return loadScriptNode(entry, {
     attrs: { name, globalName },
+    createScriptHook,
   })
     .then(() => {
       const { remoteEntryKey, entryExports } = getRemoteEntryExports(
@@ -52,13 +55,25 @@ export function nodePlugin(): FederationRuntimePlugin {
   return {
     name: 'node-plugin',
     async loadEntry(args) {
-      const { remoteInfo } = args;
+      const { origin, remoteInfo } = args;
       const { entry, entryGlobalName, name } = remoteInfo;
 
       return loadEntryScript({
         entry,
         globalName: entryGlobalName,
         name,
+        createScriptHook: (url, attrs) => {
+          const hook = origin.loaderHook.lifecycle.createScript;
+          const res = hook.emit({ url, attrs });
+
+          if (!res) return;
+
+          if ('url' in res) {
+            return res;
+          }
+
+          return;
+        },
       });
     },
   };

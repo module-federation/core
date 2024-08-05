@@ -1,3 +1,4 @@
+import { CreateScriptHookDom } from './types';
 import { warn } from './utils';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function safeWrapper<T extends (...args: Array<any>) => any>(
@@ -22,20 +23,12 @@ export function isStaticResourcesEqual(url1: string, url2: string): boolean {
   return relativeUrl1 === relativeUrl2;
 }
 
-export type CreateScriptHookReturn =
-  | HTMLScriptElement
-  | { script?: HTMLScriptElement; timeout?: number }
-  | void;
-
 export function createScript(info: {
   url: string;
   cb?: (value: void | PromiseLike<void>) => void;
   attrs?: Record<string, any>;
   needDeleteScript?: boolean;
-  createScriptHook?: (
-    url: string,
-    attrs?: Record<string, any> | undefined,
-  ) => CreateScriptHookReturn;
+  createScriptHook?: CreateScriptHookDom;
 }): { script: HTMLScriptElement; needAttach: boolean } {
   // Retrieve the existing script element by its src attribute
   let script: HTMLScriptElement | null = null;
@@ -63,8 +56,12 @@ export function createScript(info: {
       if (createScriptRes instanceof HTMLScriptElement) {
         script = createScriptRes;
       } else if (typeof createScriptRes === 'object') {
-        if (createScriptRes.script) script = createScriptRes.script;
-        if (createScriptRes.timeout) timeout = createScriptRes.timeout;
+        if ('script' in createScriptRes && createScriptRes.script) {
+          script = createScriptRes.script;
+        }
+        if ('timeout' in createScriptRes && createScriptRes.timeout) {
+          timeout = createScriptRes.timeout;
+        }
       }
     }
     const attrs = info.attrs;
@@ -205,10 +202,7 @@ export function loadScript(
   url: string,
   info: {
     attrs?: Record<string, any>;
-    createScriptHook?: (
-      url: string,
-      attrs?: Record<string, any> | undefined,
-    ) => CreateScriptHookReturn;
+    createScriptHook?: CreateScriptHookDom;
   },
 ) {
   const { attrs = {}, createScriptHook } = info;

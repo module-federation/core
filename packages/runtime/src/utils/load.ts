@@ -24,11 +24,13 @@ export async function getRemoteEntry({
   }
 
   if (!globalLoading[uniqueKey]) {
-    const loadEntryHookRes = origin.loaderHook.lifecycle.loadEntry.emit({
-      origin,
-      remoteInfo,
-      remoteEntryExports,
-    });
+    const loadEntryHookRes = origin.loaderHook.lifecycle.loadEntry
+      .emit({
+        origin,
+        remoteInfo,
+        remoteEntryExports,
+      })
+      .then((res) => res || undefined);
     globalLoading[uniqueKey] = loadEntryHookRes;
   }
 

@@ -1,4 +1,4 @@
-import { loadScript } from '@module-federation/sdk';
+import { CreateScriptHookDom, loadScript } from '@module-federation/sdk';
 import { FederationRuntimePlugin } from '../../type/plugin';
 import { assert } from '../../utils';
 import { RemoteEntryExports } from '../../type';
@@ -56,10 +56,12 @@ async function loadEntryScript({
   name,
   globalName,
   entry,
+  createScriptHook,
 }: {
   name: string;
   globalName: string;
   entry: string;
+  createScriptHook: CreateScriptHookDom;
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -70,7 +72,7 @@ async function loadEntryScript({
     return remoteEntryExports;
   }
 
-  return loadScript(entry, { attrs: {} })
+  return loadScript(entry, { attrs: {}, createScriptHook })
     .then(() => {
       const { remoteEntryKey, entryExports } = getRemoteEntryExports(
         name,
@@ -98,7 +100,7 @@ export function domPlugin(): FederationRuntimePlugin {
   return {
     name: 'dom-plugin',
     async loadEntry(args) {
-      const { remoteInfo, remoteEntryExports } = args;
+      const { origin, remoteInfo, remoteEntryExports } = args;
       const { entry, entryGlobalName, name, type } = remoteInfo;
 
       if (['esm', 'module'].includes(type)) {
@@ -116,6 +118,22 @@ export function domPlugin(): FederationRuntimePlugin {
         entry,
         globalName: entryGlobalName,
         name,
+        createScriptHook: (url, attrs) => {
+          const hook = origin.loaderHook.lifecycle.createScript;
+          const res = hook.emit({ url, attrs });
+
+          if (!res) return;
+
+          if (res instanceof HTMLScriptElement) {
+            return res;
+          }
+
+          if ('script' in res || 'timeout' in res) {
+            return res;
+          }
+
+          return;
+        },
       });
     },
   };

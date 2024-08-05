@@ -1,3 +1,4 @@
+import { CreateScriptHookReturn } from '@module-federation/sdk';
 import {
   Options,
   PreloadRemoteArgs,
@@ -93,10 +94,7 @@ export class FederationHost {
           attrs?: Record<string, any>;
         },
       ],
-      | HTMLScriptElement
-      | { script?: HTMLScriptElement; timeout?: number }
-      | { url: string }
-      | void
+      CreateScriptHookReturn
     >(),
     createLink: new SyncHook<
       [
@@ -114,7 +112,7 @@ export class FederationHost {
           remoteEntryExports?: RemoteEntryExports;
         },
       ],
-      RemoteEntryExports
+      Promise<RemoteEntryExports> | void
     >(),
     // only work for manifest , so not open to the public yet
     fetch: new AsyncHook<
