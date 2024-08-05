@@ -42,6 +42,7 @@ function writeMFModernRouteJson({
 function addExpose(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   baseName: string,
+  pkgName: string,
 ) {
   const mfMetaExposeFilePath = path.join(
     process.cwd(),
@@ -56,14 +57,14 @@ function addExpose(
   const routeMetaKey = `./${MF_ROUTE_META_KEY}`;
   if (!mfConfig.exposes) {
     mfConfig.exposes = {
-      [routesExposeKey]: './node_modules/.modern-js/main/routes.js',
+      [routesExposeKey]: `./node_modules/.${pkgName}/main/routes.js`,
       [routeMetaKey]: mfMetaExposeFilePath,
     };
   } else {
     if (!Array.isArray(mfConfig.exposes)) {
       if (!mfConfig.exposes[routesExposeKey]) {
         mfConfig.exposes[routesExposeKey] =
-          './node_modules/.modern-js/main/routes.js';
+          `./node_modules/.${pkgName}/main/routes.js`;
       }
       if (!mfConfig.exposes[routeMetaKey]) {
         mfConfig.exposes[routeMetaKey] = mfMetaExposeFilePath;
@@ -73,16 +74,18 @@ function addExpose(
 }
 function addShared(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  pkgName: string,
 ) {
+  const alias = `@${pkgName}/runtime/router`;
   if (!mfConfig.shared) {
     mfConfig.shared = {
-      '@modern-js/runtime/router': { singleton: true },
+      [alias]: { singleton: true },
     };
   } else {
     if (!Array.isArray(mfConfig.shared)) {
-      mfConfig.shared['@modern-js/runtime/router'] = { singleton: true };
+      mfConfig.shared[alias] = { singleton: true };
     } else {
-      mfConfig.shared.push('@modern-js/runtime/router');
+      mfConfig.shared.push(alias);
     }
   }
 }
@@ -90,9 +93,10 @@ function addShared(
 function _pathMfConfig(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   baseName: string,
+  pkgName: string,
 ) {
-  addShared(mfConfig);
-  addExpose(mfConfig, baseName);
+  addShared(mfConfig, pkgName);
+  addExpose(mfConfig, baseName, pkgName);
 }
 
 async function _fetchSSRByRouteIds(
@@ -167,6 +171,7 @@ export const moduleFederationDataLoaderPlugin = (
       partialSSRRemotes = [],
       fetchSSRByRouteIds,
       patchMFConfig,
+      pkgName = 'modern-js',
     } = userConfig;
 
     if (!baseName) {
@@ -204,9 +209,9 @@ export const moduleFederationDataLoaderPlugin = (
           tools: {
             rspack(_config, { isServer }) {
               if (isServer) {
-                patchMFConfigFn(internalOptions.ssrConfig!, baseName);
+                patchMFConfigFn(internalOptions.ssrConfig!, baseName, pkgName);
               } else {
-                patchMFConfigFn(internalOptions.csrConfig!, baseName);
+                patchMFConfigFn(internalOptions.csrConfig!, baseName, pkgName);
               }
               console.log('dataloader plugin rspack');
             },

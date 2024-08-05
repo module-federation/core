@@ -27,6 +27,7 @@ export type BundlerPlugin =
 export type DataLoaderOptions = {
   baseName: string;
   partialSSRRemotes?: string[];
+  pkgName?: string;
   fetchSSRByRouteIds?: (
     partialSSRRemotes: string[],
     mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -34,5 +35,6 @@ export type DataLoaderOptions = {
   patchMFConfig?: (
     mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
     baseName: string,
+    pkgName: string,
   ) => void;
 };
