@@ -32,29 +32,6 @@ class Module {
     const remoteEntryExports = await getRemoteEntry({
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
-      createScriptHook: (url: string, attrs: any) => {
-        const res = this.host.loaderHook.lifecycle.createScript.emit({
-          url,
-          attrs,
-        });
-
-        if (!res) return;
-
-        if (typeof document === 'undefined') {
-          //todo: needs real fix
-          return res as HTMLScriptElement;
-        }
-
-        if (res instanceof HTMLScriptElement) {
-          return res;
-        }
-
-        if ('script' in res || 'timeout' in res) {
-          return res;
-        }
-
-        return;
-      },
     });
     assert(
       remoteEntryExports,

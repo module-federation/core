@@ -42,12 +42,17 @@ export function createScriptNode(
   url: string,
   cb: (error?: Error, scriptContext?: any) => void,
   attrs?: Record<string, any>,
-  createScriptHook?: (url: string) => any | void,
 ) {
+  //@ts-ignore
+  const loaderHooks = __webpack_require__.federation.instance.loaderHook;
+  const createScriptHook = loaderHooks.lifecycle.createScript;
   if (createScriptHook) {
-    const hookResult = createScriptHook(url);
-    if (hookResult && typeof hookResult === 'object' && 'url' in hookResult) {
-      url = hookResult.url;
+    const createScriptRes = createScriptHook.emit(url);
+
+    if (createScriptRes) {
+      if (typeof createScriptRes === 'object' && 'url' in createScriptRes) {
+        url = createScriptRes.url;
+      }
     }
   }
 
@@ -140,7 +145,6 @@ export function loadScriptNode(
   url: string,
   info: {
     attrs?: Record<string, any>;
-    createScriptHook?: (url: string) => void;
   },
 ) {
   return new Promise<void>((resolve, reject) => {
@@ -159,7 +163,6 @@ export function loadScriptNode(
         }
       },
       info.attrs,
-      info.createScriptHook,
     );
   });
 }
