@@ -68,9 +68,9 @@ const App = () => {
   useEffect(() => {
     const refTimeout = setTimeout(() => {
       if (ref && ref.current) {
-        ref.current.style.borderRadius = '20px';
+        ref.current.style.border = '2px solid';
       }
-    }, 2000);
+    }, 1000);
     return () => {
       if (!location.pathname.includes('remote1')) {
         clearTimeout(refTimeout);
@@ -96,7 +96,7 @@ const App = () => {
         />
         <Route
           path="/remote2/*"
-          Component={() => <Remote2App style={{ background: 'black' }} />}
+          Component={() => <Remote2App style={{ padding: '20px' }} />}
         />
         <Route path="/remote3/*" Component={() => <Remote3App />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
