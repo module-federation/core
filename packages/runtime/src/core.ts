@@ -102,6 +102,7 @@ export class FederationHost {
       ],
       HTMLLinkElement | void
     >(),
+    loadEntry: new AsyncHook(),
     // only work for manifest , so not open to the public yet
     fetch: new AsyncHook<
       [string, RequestInit],
