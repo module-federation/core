@@ -1963,8 +1963,8 @@ importers:
         specifier: ~18.2.0
         version: 18.2.0(react@18.2.0)
       reactflow:
-        specifier: 11.10.4
-        version: 11.10.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 11.11.4
+        version: 11.11.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@modern-js-app/eslint-config':
         specifier: 2.54.6
@@ -6414,7 +6414,7 @@ packages:
       '@babel/helper-module-imports': 7.24.7
       '@babel/helper-plugin-utils': 7.24.7
       '@babel/plugin-syntax-jsx': 7.24.7(@babel/core@7.24.9)
-      '@babel/types': 7.24.9
+      '@babel/types': 7.24.7
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -16344,13 +16344,13 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@reactflow/background@11.3.9(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-byj/G9pEC8tN0wT/ptcl/LkEP/BBfa33/SvBkqE4XwyofckqF87lKp573qGlisfnsijwAbpDlf81PuFL41So4Q==}
+  /@reactflow/background@11.3.14(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-Gewd7blEVT5Lh6jqrvOgd4G6Qk17eGKQfsDXgyRSqM+CTwDqRldG2LsWN4sNeno6sbqVIC2fZ+rAUBFA9ZEUDA==}
     peerDependencies:
       react: '>=17'
       react-dom: '>=17'
     dependencies:
-      '@reactflow/core': 11.10.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
+      '@reactflow/core': 11.11.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
       classcat: 5.0.5
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -16360,13 +16360,13 @@ packages:
       - immer
     dev: false
 
-  /@reactflow/controls@11.2.9(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-e8nWplbYfOn83KN1BrxTXS17+enLyFnjZPbyDgHSRLtI5ZGPKF/8iRXV+VXb2LFVzlu4Wh3la/pkxtfP/0aguA==}
+  /@reactflow/controls@11.2.14(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-MiJp5VldFD7FrqaBNIrQ85dxChrG6ivuZ+dcFhPQUwOK3HfYgX2RHdBua+gx+40p5Vw5It3dVNp/my4Z3jF0dw==}
     peerDependencies:
       react: '>=17'
       react-dom: '>=17'
     dependencies:
-      '@reactflow/core': 11.10.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
+      '@reactflow/core': 11.11.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
       classcat: 5.0.5
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -16376,8 +16376,8 @@ packages:
       - immer
     dev: false
 
-  /@reactflow/core@11.10.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-j3i9b2fsTX/sBbOm+RmNzYEFWbNx4jGWGuGooh2r1jQaE2eV+TLJgiG/VNOp0q5mBl9f6g1IXs3Gm86S9JfcGw==}
+  /@reactflow/core@11.11.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-H4vODklsjAq3AMq6Np4LE12i1I4Ta9PrDHuBR9GmL8uzTt2l2jh4CiQbEMpvMDcp7xi4be0hgXj+Ysodde/i7Q==}
     peerDependencies:
       react: '>=17'
       react-dom: '>=17'
@@ -16398,13 +16398,13 @@ packages:
       - immer
     dev: false
 
-  /@reactflow/minimap@11.7.9(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-le95jyTtt3TEtJ1qa7tZ5hyM4S7gaEQkW43cixcMOZLu33VAdc2aCpJg/fXcRrrf7moN2Mbl9WIMNXUKsp5ILA==}
+  /@reactflow/minimap@11.7.14(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-mpwLKKrEAofgFJdkhwR5UQ1JYWlcAAL/ZU/bctBkuNTT1yqV+y0buoNVImsRehVYhJwffSWeSHaBR5/GJjlCSQ==}
     peerDependencies:
       react: '>=17'
       react-dom: '>=17'
     dependencies:
-      '@reactflow/core': 11.10.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
+      '@reactflow/core': 11.11.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
       '@types/d3-selection': 3.0.10
       '@types/d3-zoom': 3.0.8
       classcat: 5.0.5
@@ -16418,13 +16418,13 @@ packages:
       - immer
     dev: false
 
-  /@reactflow/node-resizer@2.2.9(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-HfickMm0hPDIHt9qH997nLdgLt0kayQyslKE0RS/GZvZ4UMQJlx/NRRyj5y47Qyg0NnC66KYOQWDM9LLzRTnUg==}
+  /@reactflow/node-resizer@2.2.14(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-fwqnks83jUlYr6OHcdFEedumWKChTHRGw/kbCxj0oqBd+ekfs+SIp4ddyNU0pdx96JIm5iNFS0oNrmEiJbbSaA==}
     peerDependencies:
       react: '>=17'
       react-dom: '>=17'
     dependencies:
-      '@reactflow/core': 11.10.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
+      '@reactflow/core': 11.11.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
       classcat: 5.0.5
       d3-drag: 3.0.0
       d3-selection: 3.0.0
@@ -16436,13 +16436,13 @@ packages:
       - immer
     dev: false
 
-  /@reactflow/node-toolbar@1.3.9(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-VmgxKmToax4sX1biZ9LXA7cj/TBJ+E5cklLGwquCCVVxh+lxpZGTBF3a5FJGVHiUNBBtFsC8ldcSZIK4cAlQww==}
+  /@reactflow/node-toolbar@1.3.14(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-rbynXQnH/xFNu4P9H+hVqlEUafDCkEoCy0Dg9mG22Sg+rY/0ck6KkrAQrYrTgXusd+cEJOMK0uOOFCK2/5rSGQ==}
     peerDependencies:
       react: '>=17'
       react-dom: '>=17'
     dependencies:
-      '@reactflow/core': 11.10.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
+      '@reactflow/core': 11.11.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
       classcat: 5.0.5
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -42663,18 +42663,18 @@ packages:
       loose-envify: 1.4.0
     dev: false
 
-  /reactflow@11.10.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-0CApYhtYicXEDg/x2kvUHiUk26Qur8lAtTtiSlptNKuyEuGti6P1y5cS32YGaUoDMoCqkm/m+jcKkfMOvSCVRA==}
+  /reactflow@11.11.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-70FOtJkUWH3BAOsN+LU9lCrKoKbtOPnz2uq0CV2PLdNSwxTXOhCbsZr50GmZ+Rtw3jx8Uv7/vBFtCGixLfd4Og==}
     peerDependencies:
       react: '>=17'
       react-dom: '>=17'
     dependencies:
-      '@reactflow/background': 11.3.9(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
-      '@reactflow/controls': 11.2.9(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
-      '@reactflow/core': 11.10.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
-      '@reactflow/minimap': 11.7.9(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
-      '@reactflow/node-resizer': 2.2.9(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
-      '@reactflow/node-toolbar': 1.3.9(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
+      '@reactflow/background': 11.3.14(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
+      '@reactflow/controls': 11.2.14(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
+      '@reactflow/core': 11.11.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
+      '@reactflow/minimap': 11.7.14(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
+      '@reactflow/node-resizer': 2.2.14(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
+      '@reactflow/node-toolbar': 1.3.14(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     transitivePeerDependencies:
@@ -46176,7 +46176,7 @@ packages:
       jest-worker: 27.5.1
       schema-utils: 3.3.0
       serialize-javascript: 6.0.2
-      terser: 5.31.0
+      terser: 5.31.3
       webpack: 5.93.0(@swc/core@1.6.13)(esbuild@0.23.0)
 
   /terser-webpack-plugin@5.3.9(@swc/core@1.6.13)(esbuild@0.17.19)(webpack@5.93.0):
@@ -46251,16 +46251,6 @@ packages:
       commander: 2.20.3
       source-map-support: 0.5.21
     dev: true
-
-  /terser@5.31.0:
-    resolution: {integrity: sha512-Q1JFAoUKE5IMfI4Z/lkE/E6+SwgzO+x4tq4v1AyBLRj8VSYvRO6A/rQrPg1yud4g0En9EKI1TvFRF2tQFcoUkg==}
-    engines: {node: '>=10'}
-    hasBin: true
-    dependencies:
-      '@jridgewell/source-map': 0.3.6
-      acorn: 8.12.1
-      commander: 2.20.3
-      source-map-support: 0.5.21
 
   /terser@5.31.3:
     resolution: {integrity: sha512-pAfYn3NIZLyZpa83ZKigvj6Rn9c/vd5KfYGX7cN1mnzqgDcxWvrU5ZtAfIKhEXz9nRecw4z3LXkjaq96/qZqAA==}
