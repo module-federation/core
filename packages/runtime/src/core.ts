@@ -109,11 +109,12 @@ export class FederationHost {
     loadEntry: new AsyncHook<
       [
         {
+          origin: FederationHost;
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports;
         },
       ],
-      Promise<RemoteEntryExports>
+      RemoteEntryExports
     >(),
     // only work for manifest , so not open to the public yet
     fetch: new AsyncHook<

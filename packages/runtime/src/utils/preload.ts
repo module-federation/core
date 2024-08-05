@@ -80,11 +80,13 @@ export function preloadAssets(
       const module = host.moduleCache.get(remoteInfo.name);
       if (module) {
         getRemoteEntry({
+          origin: host,
           remoteInfo: moduleInfo,
           remoteEntryExports: module.remoteEntryExports,
         });
       } else {
         getRemoteEntry({
+          origin: host,
           remoteInfo: moduleInfo,
           remoteEntryExports: undefined,
         });

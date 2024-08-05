@@ -30,6 +30,7 @@ class Module {
 
     // Get remoteEntry.js
     const remoteEntryExports = await getRemoteEntry({
+      origin: this.host,
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
     });
