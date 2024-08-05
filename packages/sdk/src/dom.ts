@@ -22,11 +22,20 @@ export function isStaticResourcesEqual(url1: string, url2: string): boolean {
   return relativeUrl1 === relativeUrl2;
 }
 
+export type CreateScriptHookReturn =
+  | HTMLScriptElement
+  | { script?: HTMLScriptElement; timeout?: number }
+  | void;
+
 export function createScript(info: {
   url: string;
   cb?: (value: void | PromiseLike<void>) => void;
   attrs?: Record<string, any>;
   needDeleteScript?: boolean;
+  createScriptHook?: (
+    url: string,
+    attrs?: Record<string, any> | undefined,
+  ) => CreateScriptHookReturn;
 }): { script: HTMLScriptElement; needAttach: boolean } {
   // Retrieve the existing script element by its src attribute
   let script: HTMLScriptElement | null = null;
@@ -48,12 +57,8 @@ export function createScript(info: {
     script = document.createElement('script');
     script.type = 'text/javascript';
     script.src = info.url;
-
-    //@ts-ignore
-    const loaderHooks = __webpack_require__.federation.instance.loaderHook;
-    const createScriptHook = loaderHooks.lifecycle.createScript;
-    if (createScriptHook) {
-      const createScriptRes = createScriptHook.emit(info.url, info.attrs);
+    if (info.createScriptHook) {
+      const createScriptRes = info.createScriptHook(info.url, info.attrs);
 
       if (createScriptRes instanceof HTMLScriptElement) {
         script = createScriptRes;
@@ -200,9 +205,13 @@ export function loadScript(
   url: string,
   info: {
     attrs?: Record<string, any>;
+    createScriptHook?: (
+      url: string,
+      attrs?: Record<string, any> | undefined,
+    ) => CreateScriptHookReturn;
   },
 ) {
-  const { attrs = {} } = info;
+  const { attrs = {}, createScriptHook } = info;
   return new Promise<void>((resolve, _reject) => {
     const { script, needAttach } = createScript({
       url,
@@ -211,6 +220,7 @@ export function loadScript(
         fetchpriority: 'high',
         ...attrs,
       },
+      createScriptHook,
       needDeleteScript: true,
     });
     needAttach && document.head.appendChild(script);
