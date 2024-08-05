@@ -1,9 +1,4 @@
 import React, { forwardRef } from 'react';
-import type {
-  ForwardRefExoticComponent,
-  PropsWithoutRef,
-  RefAttributes,
-} from 'react';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
 import {
@@ -28,7 +23,6 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
   loading: React.ReactNode;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
   export?: E;
-  dom?: string;
 }) {
   const exportName = info?.export || 'default';
   return React.lazy(async () => {
@@ -92,25 +86,23 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
   loading: React.ReactNode;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
   export?: E;
-  dom?: string;
-}): ForwardRefExoticComponent<
-  PropsWithoutRef<ProviderParams> & RefAttributes<HTMLElement | HTMLDivElement>
-> {
-  // type ExportType = T[E] extends (...args: any) => any
-  //   ? ReturnType<T[E]>
-  //   : never;
-  // type RawComponentType = '__BRIDGE_FN__' extends keyof ExportType
-  //   ? ExportType['__BRIDGE_FN__'] extends (...args: any) => any
-  //     ? Parameters<ExportType['__BRIDGE_FN__']>[0]
-  //     : {}
-  //   : {};
+}) {
+  type ExportType = T[E] extends (...args: any) => any
+    ? ReturnType<T[E]>
+    : never;
 
-  return forwardRef(function (props, ref) {
+  type RawComponentType = '__BRIDGE_FN__' extends keyof ExportType
+    ? ExportType['__BRIDGE_FN__'] extends (...args: any) => any
+      ? Parameters<ExportType['__BRIDGE_FN__']>[0]
+      : {}
+    : {};
+
+  return forwardRef((props: ProviderParams & RawComponentType, ref) => {
     const LazyComponent = createLazyRemoteComponent(info);
     return (
       <ErrorBoundary FallbackComponent={info.fallback}>
         <React.Suspense fallback={info.loading}>
-          <LazyComponent {...props} dom={info?.dom} ref={ref} />
+          <LazyComponent {...props} ref={ref} />
         </React.Suspense>
       </ErrorBoundary>
     );

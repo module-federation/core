@@ -101,6 +101,9 @@ const App = () => {
 #### createRemoteComponent
 
 ```tsx
+import { createRemoteComponent } from '@module-federation/bridge-react';
+import type { ProviderParams } from '@module-federation/bridge-react';
+
 function createRemoteComponent<T, `E extends keyof T`>(
   options: {
     // 加载远程应用的函数，例如：loadRemote('remote1/export-app')、import('remote1/export-app')

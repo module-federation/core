@@ -24,7 +24,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
       const { name, memoryRoute, basename = '/' } = appInfo;
-
       return (
         <RouterContext.Provider value={{ name, basename, memoryRoute }}>
           <bridgeInfo.rootComponent
@@ -39,32 +38,32 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
     return {
       async render(info: RenderFnParams & any) {
         LoggerInstance.log(`createBridgeComponent render Info`, info);
-        const { name, basename, memoryRoute, ...propsInfo } = info;
+        const { name, dom, basename, memoryRoute, ...propsInfo } = info;
         if (atLeastReact18(React)) {
           if (bridgeInfo?.render) {
             Promise.resolve(
               bridgeInfo?.render(
                 <RawComponent
-                  propsInfo={propsInfo}
                   appInfo={{
                     name,
                     basename,
                     memoryRoute,
                   }}
+                  propsInfo={propsInfo}
                 />,
-                info.dom,
+                dom,
               ),
             ).then((root: RootType) => rootMap.set(info.dom, root));
           } else {
             const root: RootType = ReactDOMClient.createRoot(info.dom);
             root.render(
               <RawComponent
-                propsInfo={propsInfo}
                 appInfo={{
                   name,
                   basename,
                   memoryRoute,
                 }}
+                propsInfo={propsInfo}
               />,
             );
             rootMap.set(info.dom, root);
@@ -73,12 +72,12 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           const renderFunc = bridgeInfo?.render || ReactDOM.render;
           renderFunc(
             <RawComponent
-              propsInfo={propsInfo}
               appInfo={{
                 name,
                 basename,
                 memoryRoute,
               }}
+              propsInfo={propsInfo}
             />,
             info.dom,
           );
@@ -91,6 +90,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         if (atLeastReact18(React)) {
           const root = rootMap.get(info.dom);
           (root as ReactDOMClient.Root)?.unmount();
+          rootMap.delete(info.dom);
         } else {
           ReactDOM.unmountComponentAtNode(info.dom);
         }

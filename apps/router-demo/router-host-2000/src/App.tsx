@@ -1,4 +1,4 @@
-import { useRef, useEffect, Suspense } from 'react';
+import { useRef, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 import { createRemoteComponent } from '@module-federation/bridge-react';
@@ -25,11 +25,9 @@ const Remote1App = createRemoteComponent({
   loader: () => loadRemote('remote1/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
-  dom: '#root-remote1',
 });
 
 const Remote2App = createRemoteComponent({
-  // @ts-ignore
   loader: () => import('remote2/export-app'),
   export: 'provider',
   fallback: FallbackErrorComp,
@@ -48,7 +46,7 @@ function Wraper3() {
       <div className="flex flex-row">
         <div className="grow">
           <h2>Remote1</h2>
-          <Remote1App memoryRoute={{ entryPath: '/' }} />
+          <Remote1App name="Ming" age={12} memoryRoute={{ entryPath: '/' }} />
         </div>
         <div className="grow">
           <h2>Remote2</h2>
@@ -81,9 +79,7 @@ const App = () => {
   }, [location.pathname]);
   return (
     <div>
-      <div id="root-remote1"></div>
       <Navigation />
-      {/* <Remote1App memoryRoute={{ entryPath: '/' }} /> */}
       <Routes>
         <Route path="/" Component={Home} />
         <Route path="/detail/*" Component={Detail} />
@@ -92,19 +88,15 @@ const App = () => {
           Component={() => (
             <Remote1App
               className={styles.remote1}
-              props={{ msg: 'hello remote1' }}
+              name="Ming"
+              age={12}
               ref={ref}
             />
           )}
         />
         <Route
           path="/remote2/*"
-          Component={() => (
-            <Remote2App
-              style={{ background: 'black' }}
-              props={{ msg: 'hello remote2' }}
-            />
-          )}
+          Component={() => <Remote2App style={{ background: 'black' }} />}
         />
         <Route path="/remote3/*" Component={() => <Remote3App />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />

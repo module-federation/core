@@ -42,7 +42,6 @@ const RemoteAppWrapper = forwardRef(function (
       memoryRoute,
       basename,
       providerInfo,
-      dom,
       className,
       style,
       ...resProps
@@ -60,20 +59,9 @@ const RemoteAppWrapper = forwardRef(function (
         const providerReturn = providerInfo();
         providerInfoRef.current = providerReturn;
 
-        let domElement = null;
-        if (dom) {
-          domElement = document.querySelector(dom);
-          if (!domElement || !(domElement instanceof HTMLElement)) {
-            throw new Error(`Invalid dom: ${dom}`);
-          }
-          rootRef.current = domElement;
-        } else {
-          domElement = rootRef.current;
-        }
-
         const renderProps = {
           name,
-          dom: domElement,
+          dom: rootRef.current,
           basename,
           memoryRoute,
           ...resProps,
@@ -102,7 +90,7 @@ const RemoteAppWrapper = forwardRef(function (
       };
     }, []);
 
-    return dom ? null : (
+    return (
       <div
         className={props?.className}
         style={props?.style}

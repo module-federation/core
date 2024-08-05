@@ -43,11 +43,11 @@ class ReactBridgeAliasChangerPlugin {
         const updatedAlias = {
           // allow this config to be override
           [this.alias]: targetFilePath,
-          ...originalAlias, 
+          ...originalAlias,
         };
 
         // Update the webpack configuration
-        compiler.options.resolve = {  
+        compiler.options.resolve = {
           ...originalResolve,
           alias: updatedAlias,
         };

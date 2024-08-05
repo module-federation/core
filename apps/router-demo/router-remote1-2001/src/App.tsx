@@ -63,7 +63,7 @@ function Detail() {
   );
 }
 
-const App = (info: any) => {
+const App = (info: { name: string; age: number }) => {
   const container = useShadowRoot();
   return (
     <StyleProvider
@@ -75,7 +75,8 @@ const App = (info: any) => {
         <ul>
           <li>
             <Link to="/" className="self-remote1-home-link">
-              Home
+              Home name: {info.name}
+              age: {info.age}
             </Link>
           </li>
           <li>

@@ -19,6 +19,7 @@ const Remote1App = createRemoteComponent({
 });
 
 const Remote2App = createRemoteComponent({
+  // @ts-ignore
   loader: () => import('remote2/export-app'),
   export: 'provider',
   fallback: FallbackErrorComp,
@@ -43,15 +44,15 @@ const App = () => {
       <Route
         path="/remote1"
         render={() => (
-          <Suspense fallback={FallbackComp} >
+          <Suspense fallback={FallbackComp}>
             <Remote1App />
           </Suspense>
         )}
       />
-       <Route
+      <Route
         path="/remote2"
         render={() => (
-          <Suspense fallback={FallbackComp} >
+          <Suspense fallback={FallbackComp}>
             <Remote2App />
           </Suspense>
         )}
@@ -59,7 +60,7 @@ const App = () => {
       <Route
         path="/remote3"
         render={() => (
-          <Suspense fallback={FallbackComp} >
+          <Suspense fallback={FallbackComp}>
             <Remote3App />
           </Suspense>
         )}
