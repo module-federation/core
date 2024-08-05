@@ -170,16 +170,6 @@ export function preloadAssets(
             fetchpriority: 'high',
             type: remoteInfo?.type === 'module' ? 'module' : 'text/javascript',
           },
-          createScriptHook: (url: string, attrs: any) => {
-            const res = host.loaderHook.lifecycle.createScript.emit({
-              url,
-              attrs,
-            });
-            if (res instanceof HTMLScriptElement) {
-              return res;
-            }
-            return;
-          },
           needDeleteScript: true,
         });
         needAttach && document.head.appendChild(scriptEl);
