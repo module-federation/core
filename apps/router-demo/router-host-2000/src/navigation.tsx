@@ -6,10 +6,7 @@ import {
 import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
 import { useState } from 'react';
-import {
-  Link,  
-  useLocation,
-} from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 function Navgation() {
   const location = useLocation();
