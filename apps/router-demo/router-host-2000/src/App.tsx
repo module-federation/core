@@ -76,7 +76,9 @@ const App = () => {
   useEffect(() => {
     const refTimeout = setTimeout(() => {
       if (ref && ref.current) {
-        ref.current.style.border = '2px solid';
+        const div = document.createElement('h4');
+        div.append('Some text');
+        ref.current.append(div);
       }
     }, 1000);
     return () => {
@@ -85,6 +87,7 @@ const App = () => {
       }
     };
   }, [location.pathname]);
+
   return (
     <div>
       <Navigation />

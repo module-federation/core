@@ -43,14 +43,12 @@ const columns = [
 ];
 
 function Home({ name, age }: { name: string; age: number }) {
-  console.log('home', name, age);
-
   return (
     <div>
       <h2>Remote1 home page</h2>
-      <h4>
+      <h3>
         name: {name}, age: {age}
-      </h4>
+      </h3>
       <Table dataSource={dataSource} columns={columns} />
     </div>
   );
