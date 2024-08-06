@@ -1,5 +1,14 @@
 # @module-federation/modern-js
 
+## 0.3.4
+
+### Patch Changes
+
+- 951d705: chore: upgrade modernjs@2.57.0
+  - @module-federation/node@2.5.4
+  - @module-federation/enhanced@0.3.4
+  - @module-federation/sdk@0.3.4
+
 ## 0.3.3
 
 ### Patch Changes
