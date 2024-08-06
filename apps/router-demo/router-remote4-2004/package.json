@@ -1,23 +1,26 @@
 {
-  "name": "host",
+  "name": "remote4",
   "private": true,
   "version": "1.0.15",
   "scripts": {
-    "dev": "FEDERATION_DEBUG=true rsbuild dev --open",
+    "dev": "rsbuild dev",
     "build": "rsbuild build",
     "preview": "rsbuild preview"
   },
   "dependencies": {
-    "@ant-design/icons": "^5.3.6",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
     "@module-federation/bridge-react": "workspace:*",
-    "@module-federation/enhanced": "workspace:*"
+    "@module-federation/enhanced": "workspace:*",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.24.1"
   },
   "devDependencies": {
     "@rsbuild/core": "^0.6.15",
     "@rsbuild/plugin-react": "^0.6.15",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
-    "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5"
   }
 }

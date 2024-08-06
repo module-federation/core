@@ -2,7 +2,6 @@ import { useRef, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 import { createRemoteComponent } from '@module-federation/bridge-react';
-import { withErrorBoundary } from 'react-error-boundary';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
@@ -12,6 +11,7 @@ import './App.css';
 const FallbackErrorComp = (info: any) => {
   return (
     <div>
+      <p>Something went wrong</p>
       {info?.error?.message}
       <button onClick={() => info.resetErrorBoundary()}>
         resetErrorBoundary
@@ -28,13 +28,6 @@ const Remote1App = createRemoteComponent({
   loading: FallbackComp,
 });
 
-const ComponentWithErrorBoundary = withErrorBoundary(Remote1App, {
-  fallback: <div>Something went wrong</div>,
-  onError(error, info) {
-    console.log('Caught an error!', error, info);
-  },
-});
-
 const Remote2App = createRemoteComponent({
   loader: () => import('remote2/export-app'),
   export: 'provider',
@@ -44,6 +37,12 @@ const Remote2App = createRemoteComponent({
 
 const Remote3App = createRemoteComponent({
   loader: () => loadRemote('remote3/export-app'),
+  fallback: FallbackErrorComp,
+  loading: FallbackComp,
+});
+
+const RemoteErrorApp = createRemoteComponent({
+  loader: () => loadRemote('remote_error/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
@@ -62,7 +61,8 @@ function Wraper3() {
         </div>
         <div className="grow">
           <h2>Remote3</h2>
-          <Remote3App memoryRoute={{ entryPath: '/detail' }} />
+          <RemoteErrorApp />
+          {/* <Remote3App memoryRoute={{ entryPath: '/detail' }} /> */}
         </div>
       </div>
     </>
@@ -97,7 +97,7 @@ const App = () => {
         <Route
           path="/remote1/*"
           Component={() => (
-            <ComponentWithErrorBoundary
+            <Remote1App
               className={styles.remote1}
               name={'Ming'}
               age={12}
@@ -111,6 +111,7 @@ const App = () => {
         />
         <Route path="/remote3/*" Component={() => <Remote3App />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
+        <Route path="/remote-error/*" Component={() => <RemoteErrorApp />} />
       </Routes>
     </div>
   );

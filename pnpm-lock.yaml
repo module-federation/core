@@ -1496,9 +1496,6 @@ importers:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../../packages/enhanced
-      react-error-boundary:
-        specifier: ^4.0.13
-        version: 4.0.13(react@18.3.1)
     devDependencies:
       '@rsbuild/core':
         specifier: ^0.6.15
@@ -1712,6 +1709,46 @@ importers:
       vue-tsc:
         specifier: ^2.0.26
         version: 2.0.29(typescript@5.5.2)
+
+  apps/router-demo/router-remote4-2004:
+    dependencies:
+      '@emotion/react':
+        specifier: ^11.11.4
+        version: 11.13.0(@types/react@18.2.79)(react@18.3.1)
+      '@emotion/styled':
+        specifier: ^11.11.5
+        version: 11.13.0(@emotion/react@11.13.0)(@types/react@18.2.79)(react@18.3.1)
+      '@module-federation/bridge-react':
+        specifier: workspace:*
+        version: link:../../../packages/bridge/bridge-react
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../../../packages/enhanced
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+      react-router-dom:
+        specifier: 6.24.1
+        version: 6.24.1(react-dom@18.3.1)(react@18.3.1)
+    devDependencies:
+      '@rsbuild/core':
+        specifier: ^0.6.15
+        version: 0.6.15
+      '@rsbuild/plugin-react':
+        specifier: ^0.6.15
+        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.11)
+      '@types/react':
+        specifier: ^18.2.79
+        version: 18.2.79
+      '@types/react-dom':
+        specifier: ^18.2.25
+        version: 18.2.25
+      typescript:
+        specifier: ^5.4.5
+        version: 5.5.2
 
   apps/runtime-demo/3005-runtime-host:
     dependencies:
@@ -9753,7 +9790,7 @@ packages:
     resolution: {integrity: sha512-3j+/+eTtlZ5/LBqW0cztuXc/QYGb36eY5Xb5kz8AUaqyRX7mjArvRazhbs96jwrFkt0Lsj3b1ffOgZjl3XFcGg==}
     dependencies:
       '@swc/helpers': 0.5.3
-      caniuse-lite: 1.0.30001643
+      caniuse-lite: 1.0.30001649
       lodash: 4.17.21
       rslog: 1.2.2
     dev: false

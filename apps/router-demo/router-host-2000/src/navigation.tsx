@@ -123,6 +123,11 @@ function Navgation() {
       key: '/memory-router',
       icon: <GroupOutlined />,
     },
+    {
+      label: <Link to="/remote-error">Error-router</Link>,
+      key: '/remote-error',
+      icon: <GroupOutlined />,
+    },
   ];
 
   const onClick: MenuProps['onClick'] = (e) => {
