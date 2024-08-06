@@ -14,6 +14,7 @@ describe('router-host-2000/memory-router', () => {
   beforeEach(() => {
     cy.visit('/');
     cy.get('.host-menu > li:nth-child(6)').click();
+    wait2s();
   });
 
   describe('memory-router', () => {
