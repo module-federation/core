@@ -33,6 +33,30 @@ export async function loadEsmEntry({
   });
 }
 
+export async function loadSystemJsEntry({
+  entry,
+  remoteEntryExports,
+}: {
+  entry: string;
+  remoteEntryExports: RemoteEntryExports | undefined;
+}): Promise<RemoteEntryExports> {
+  return new Promise<RemoteEntryExports>((resolve, reject) => {
+    try {
+      if (!remoteEntryExports) {
+        // eslint-disable-next-line no-eval
+        new Function(
+          'callbacks',
+          `System.import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
+        )([resolve, reject]);
+      } else {
+        resolve(remoteEntryExports);
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
 export async function loadEntryScript({
   name,
   globalName,
@@ -134,6 +158,11 @@ export async function getRemoteEntry({
   if (!globalLoading[uniqueKey]) {
     if (['esm', 'module'].includes(type)) {
       globalLoading[uniqueKey] = loadEsmEntry({
+        entry,
+        remoteEntryExports,
+      });
+    } else if (type === 'system') {
+      globalLoading[uniqueKey] = loadSystemJsEntry({
         entry,
         remoteEntryExports,
       });

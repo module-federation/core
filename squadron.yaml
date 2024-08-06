@@ -1,0 +1,68 @@
+projects:
+  - name: 'bridge'
+    path: 'packages/bridge'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+  - name: 'core'
+    path: 'packages/core'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+  - name: 'dts-plugin'
+    path: 'packages/dts-plugin'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+  - name: 'enhanced'
+    path: 'packages/enhanced'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+  - name: 'enhanced-rspack'
+    path: 'packages/enhanced-rspack'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+  - name: 'esbuild'
+    path: 'packages/esbuild'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+  - name: 'managers'
+    path: 'packages/managers'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+  - name: 'manifest'
+    path: 'packages/manifest'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+  - name: 'node'
+    path: 'packages/node'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+  - name: 'nextjs-mf'
+    path: 'packages/nextjs-mf'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+  - name: 'rspack'
+    path: 'packages/rspack'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+  - name: 'runtime'
+    path: 'packages/runtime'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+  - name: 'sdk'
+    path: 'packages/sdk'
+    pathFilters:
+      - '**/src/**/*.{ts,tsx}'
+      - '**/src/**/*.{js,jsx}'
+experiments:
+  anthropic: true

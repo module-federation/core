@@ -1,6 +1,11 @@
-import type { RemoteWithEntry } from '@module-federation/sdk';
+import type {
+  RemoteWithEntry,
+  ModuleInfo,
+  RemoteEntryType,
+} from '@module-federation/sdk';
 import { Remote, RemoteInfoOptionalVersion, UserOptions } from '../type';
 import { warn } from './logger';
+import { isBrowserEnv } from './env';
 
 export function addUniqueItem(arr: Array<string>, item: string): Array<string> {
   if (arr.findIndex((name) => name === item) === -1) {
@@ -76,4 +81,37 @@ export function isStaticResourcesEqual(url1: string, url2: string): boolean {
 
 export function arrayOptions<T>(options: T | Array<T>): Array<T> {
   return Array.isArray(options) ? options : [options];
+}
+
+export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
+  url: string;
+  type: RemoteEntryType;
+  globalName: string;
+} {
+  const defaultRemoteEntryInfo: {
+    url: string;
+    type: RemoteEntryType;
+    globalName: string;
+  } = {
+    url: '',
+    type: 'global',
+    globalName: '',
+  };
+  if (isBrowserEnv()) {
+    return 'remoteEntry' in snapshot
+      ? {
+          url: snapshot.remoteEntry,
+          type: snapshot.remoteEntryType,
+          globalName: snapshot.globalName,
+        }
+      : defaultRemoteEntryInfo;
+  }
+  if ('ssrRemoteEntry' in snapshot) {
+    return {
+      url: snapshot.ssrRemoteEntry || defaultRemoteEntryInfo.url,
+      type: snapshot.ssrRemoteEntryType || defaultRemoteEntryInfo.type,
+      globalName: snapshot.globalName,
+    };
+  }
+  return defaultRemoteEntryInfo;
 }

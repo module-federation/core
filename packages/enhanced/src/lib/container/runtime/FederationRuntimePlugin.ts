@@ -13,13 +13,16 @@ import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
+
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
+
 const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
+
 const BundlerRuntimePath = require.resolve(
   '@module-federation/webpack-bundler-runtime',
   {
@@ -29,11 +32,14 @@ const BundlerRuntimePath = require.resolve(
 const RuntimePath = require.resolve('@module-federation/runtime', {
   paths: [RuntimeToolsPath],
 });
+
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
+
 class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
   bundlerRuntimePath: string;
+
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
@@ -49,8 +55,10 @@ class FederationRuntimePlugin {
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
       bundlerRuntimePath || BundlerRuntimePath,
     );
+
     let runtimePluginTemplates = '';
     const runtimePluginNames: string[] = [];
+
     if (Array.isArray(runtimePlugins)) {
       runtimePlugins.forEach((runtimePlugin, index) => {
         const runtimePluginName = `plugin_${index}`;
@@ -59,6 +67,7 @@ class FederationRuntimePlugin {
             ? runtimePlugin
             : path.join(process.cwd(), runtimePlugin),
         );
+
         runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
         runtimePluginNames.push(runtimePluginName);
       });
@@ -128,6 +137,7 @@ class FederationRuntimePlugin {
       '}',
     ]);
   }
+
   static getFilePath(
     compiler: Compiler,
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -147,9 +157,11 @@ class FederationRuntimePlugin {
     if (this.entryFilePath) {
       return this.entryFilePath;
     }
+
     if (!this.options) {
       return '';
     }
+
     this.entryFilePath = FederationRuntimePlugin.getFilePath(
       compiler,
       this.options,
@@ -176,6 +188,7 @@ class FederationRuntimePlugin {
       );
     }
   }
+
   prependEntry(compiler: Compiler) {
     this.ensureFile(compiler);
     const entryFilePath = this.getFilePath(compiler);
@@ -195,6 +208,7 @@ class FederationRuntimePlugin {
       },
     });
   }
+
   injectRuntime(compiler: Compiler) {
     if (!this.options || !this.options.name) {
       return;
@@ -206,6 +220,7 @@ class FederationRuntimePlugin {
     const federationGlobal = getFederationGlobalScope(
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
+
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation, { normalModuleFactory }) => {
@@ -232,6 +247,7 @@ class FederationRuntimePlugin {
       },
     );
   }
+
   setRuntimeAlias(compiler: Compiler) {
     let runtimePath = RuntimePath;
     if (this.options?.implementation) {
@@ -242,9 +258,11 @@ class FederationRuntimePlugin {
     if (Array.isArray(compiler.options.resolve.alias)) {
       return;
     }
+
     compiler.options.resolve.alias = {
       ...compiler.options.resolve.alias,
     };
+
     if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
       compiler.options.resolve.alias['@module-federation/runtime$'] =
         runtimePath;
@@ -254,6 +272,7 @@ class FederationRuntimePlugin {
         this.options?.implementation || RuntimeToolsPath;
     }
   }
+
   apply(compiler: Compiler) {
     const useModuleFederationPlugin = compiler.options.plugins.find((p) => {
       if (typeof p !== 'object' || !p) {
@@ -261,20 +280,25 @@ class FederationRuntimePlugin {
       }
       return p['name'] === 'ModuleFederationPlugin';
     });
+
     if (useModuleFederationPlugin && !this.options) {
       // @ts-ignore
       this.options = useModuleFederationPlugin._options;
     }
+
     const useContainerPlugin = compiler.options.plugins.find((p) => {
       if (typeof p !== 'object' || !p) {
         return false;
       }
+
       return p['name'] === 'ContainerPlugin';
     });
+
     if (useContainerPlugin && !this.options) {
       // @ts-ignore
       this.options = useContainerPlugin._options;
     }
+
     if (!useContainerPlugin && !useModuleFederationPlugin) {
       this.options = {
         remotes: {},
@@ -286,6 +310,7 @@ class FederationRuntimePlugin {
       this.options.name =
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
+
     if (this.options?.implementation) {
       this.bundlerRuntimePath = require.resolve(
         '@module-federation/webpack-bundler-runtime',
@@ -294,9 +319,11 @@ class FederationRuntimePlugin {
         },
       );
     }
+
     this.prependEntry(compiler);
     this.injectRuntime(compiler);
     this.setRuntimeAlias(compiler);
   }
 }
+
 export default FederationRuntimePlugin;

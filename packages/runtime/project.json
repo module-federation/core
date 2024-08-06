@@ -76,7 +76,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "vitest run -c packages/runtime/vitest.config.ts",
+            "command": "vitest run -u -c packages/runtime/vitest.config.ts",
             "forwardAllArgs": false
           }
         ]

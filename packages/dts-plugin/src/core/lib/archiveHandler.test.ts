@@ -1,6 +1,7 @@
 import AdmZip from 'adm-zip';
 import axios from 'axios';
 import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'fs';
+import { readJSONSync } from 'fs-extra';
 import os from 'os';
 import { join } from 'path';
 import { afterAll, describe, expect, it, vi } from 'vitest';
@@ -11,15 +12,20 @@ import { HostOptions } from '../interfaces/HostOptions';
 
 describe('archiveHandler', () => {
   const tmpDir = mkdtempSync(join(os.tmpdir(), 'archive-handler'));
+  const basicConfig = readJSONSync(
+    join(__dirname, '../../..', './tsconfig.spec.json'),
+  );
   const tsConfig = {
-    outDir: join(tmpDir, 'typesRemoteFolder', 'compiledTypesFolder'),
+    ...basicConfig,
   };
 
-  mkdirSync(tsConfig.outDir, { recursive: true });
+  tsConfig.compilerOptions.outDir = join(
+    tmpDir,
+    'typesRemoteFolder',
+    'compiledTypesFolder',
+  );
 
-  afterAll(() => {
-    rmSync(tmpDir, { recursive: true });
-  });
+  mkdirSync(tsConfig.compilerOptions.outDir, { recursive: true });
 
   describe('createTypesArchive', () => {
     const remoteOptions = {
@@ -42,7 +48,16 @@ describe('archiveHandler', () => {
 
     it('throws for unexisting outDir', async () => {
       expect(
-        createTypesArchive({ ...tsConfig, outDir: '/foo' }, remoteOptions),
+        createTypesArchive(
+          {
+            ...tsConfig,
+            compilerOptions: {
+              ...tsConfig.compilerOptions,
+              outDir: '/foo',
+            },
+          },
+          remoteOptions,
+        ),
       ).rejects.toThrowError();
     });
   });
@@ -58,6 +73,7 @@ describe('archiveHandler', () => {
       context: process.cwd(),
       abortOnError: true,
       consumeAPITypes: false,
+      runtimePkgs: [],
     };
 
     const destinationFolder = 'typesHostFolder';
@@ -103,6 +119,7 @@ describe('archiveHandler', () => {
         context: process.cwd(),
         abortOnError: false,
         consumeAPITypes: false,
+        runtimePkgs: [],
       };
       axios.get = vi.fn().mockRejectedValue(new Error(message));
       const res = await downloadTypesArchive(hostOptions)([

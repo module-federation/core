@@ -31,7 +31,7 @@ const afterHandler = (request: Request) => {
 };
 
 test.beforeEach(async ({ context: browserContext, extensionId }) => {
-  const openUrl = 'http://localhost:3008/basic';
+  const openUrl = 'http://localhost:3013/basic';
   targetPage = await browserContext.newPage();
   targetPage.on('request', beforeHandler);
   await targetPage.goto(openUrl);

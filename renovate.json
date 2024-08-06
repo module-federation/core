@@ -1,5 +1,4 @@
 {
-  "extends": ["config:base"],
-  "ignorePaths": ["**/demo/**"],
-  "schedule": ["before 8am on Friday"]
+  "extends": ["config:recommended"],
+  "ignorePaths": ["**/demo/**", "**test/**", "**/configCases/**"]
 }

@@ -6,7 +6,7 @@ import { retrieveTypesArchiveDestinationPath } from '../lib/archiveHandler';
 
 describe('hostPlugin', () => {
   const moduleFederationConfig = {
-    name: 'moduleFederationHost',
+    name: 'hostPluginTestHost',
     filename: 'remoteEntry.js',
     remotes: {
       moduleFederationTypescript: 'http://localhost:3000/remoteEntry.js',
@@ -40,6 +40,7 @@ describe('hostPlugin', () => {
           context: process.cwd(),
           abortOnError: true,
           consumeAPITypes: false,
+          runtimePkgs: [],
         });
 
         expect(mapRemotesToDownload).toStrictEqual({
@@ -64,6 +65,7 @@ describe('hostPlugin', () => {
           context: process.cwd(),
           abortOnError: true,
           consumeAPITypes: false,
+          runtimePkgs: [],
         };
 
         const { hostOptions, mapRemotesToDownload } =

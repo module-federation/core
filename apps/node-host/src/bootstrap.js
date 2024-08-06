@@ -11,7 +11,7 @@ import { registerRemotes, loadRemote } from '@module-federation/runtime';
 registerRemotes([
   {
     name: 'node_dynamic_remote',
-    entry: 'http://localhost:3006/remoteEntry.js',
+    entry: 'http://localhost:3026/remoteEntry.js',
   },
 ]);
 
@@ -58,7 +58,7 @@ app.get('/upgrade-remote', async (req, res) => {
     [
       {
         name: 'node_dynamic_remote',
-        entry: 'http://localhost:3007/remoteEntry.js',
+        entry: 'http://localhost:3027/remoteEntry.js',
       },
     ],
     { force: true },

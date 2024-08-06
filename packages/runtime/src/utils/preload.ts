@@ -82,9 +82,10 @@ export function preloadAssets(
         getRemoteEntry({
           remoteInfo: moduleInfo,
           remoteEntryExports: module.remoteEntryExports,
-          createScriptHook: (url: string) => {
+          createScriptHook: (url: string, attrs: any) => {
             const res = host.loaderHook.lifecycle.createScript.emit({
               url,
+              attrs,
             });
             if (!res) return;
 
@@ -108,9 +109,10 @@ export function preloadAssets(
         getRemoteEntry({
           remoteInfo: moduleInfo,
           remoteEntryExports: undefined,
-          createScriptHook: (url: string) => {
+          createScriptHook: (url: string, attrs: any) => {
             const res = host.loaderHook.lifecycle.createScript.emit({
               url,
+              attrs,
             });
             if (!res) return;
 
@@ -209,12 +211,13 @@ export function preloadAssets(
           url: jsUrl,
           cb: () => {},
           attrs: {
-            crossorigin: 'anonymous',
             fetchpriority: 'high',
+            type: remoteInfo?.type === 'module' ? 'module' : 'text/javascript',
           },
-          createScriptHook: (url: string) => {
+          createScriptHook: (url: string, attrs: any) => {
             const res = host.loaderHook.lifecycle.createScript.emit({
               url,
+              attrs,
             });
             if (res instanceof HTMLScriptElement) {
               return res;

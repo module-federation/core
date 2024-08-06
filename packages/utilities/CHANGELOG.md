@@ -1,5 +1,81 @@
 # [3.1.0](https://github.com/module-federation/core/compare/utils-3.0.2...utils-3.1.0) (2023-10-26)
 
+## 3.1.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.5
+
+## 3.1.0
+
+### Minor Changes
+
+- bb1e471: Expose esm from the package json
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.4
+
+## 3.0.39
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.3
+
+## 3.0.38
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.2
+
+## 3.0.37
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.1
+
+## 3.0.36
+
+### Patch Changes
+
+- Updated dependencies [fa37cc4]
+  - @module-federation/sdk@0.3.0
+
+## 3.0.35
+
+### Patch Changes
+
+- @module-federation/sdk@0.2.8
+
+## 3.0.34
+
+### Patch Changes
+
+- Updated dependencies [b00ef13]
+  - @module-federation/sdk@0.2.7
+
+## 3.0.33
+
+### Patch Changes
+
+- Updated dependencies [91bf689]
+  - @module-federation/sdk@0.2.6
+
+## 3.0.32
+
+### Patch Changes
+
+- Updated dependencies [8cce571]
+  - @module-federation/sdk@0.2.5
+
+## 3.0.31
+
+### Patch Changes
+
+- Updated dependencies [09b792d]
+- Updated dependencies [09b792d]
+  - @module-federation/sdk@0.2.4
+
 ## 3.0.30
 
 ### Patch Changes

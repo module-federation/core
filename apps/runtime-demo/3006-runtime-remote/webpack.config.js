@@ -11,6 +11,7 @@ const {
 } = require('@module-federation/enhanced/webpack');
 const packageJson = require('./package.json');
 
+process.env.FEDERATION_DEBUG = true;
 module.exports = composePlugins(
   withNx(),
   withReact(),
@@ -59,6 +60,9 @@ module.exports = composePlugins(
             singleton: true,
             requiredVersion: '^18.2.0',
           },
+        },
+        dts: {
+          tsConfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
         },
         runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
       }),

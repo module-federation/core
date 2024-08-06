@@ -62,9 +62,11 @@ function getPathFromFederation() {
     var found = {};
     // Iterate over all federation instances to collect module cache entries
     (federationManager.__INSTANCES__ || []).forEach((instance) => {
+    if(instance){
       instance.moduleCache.forEach((value, key) => {
         found[key] = value;
       });
+      }
     });
     return found;
   };

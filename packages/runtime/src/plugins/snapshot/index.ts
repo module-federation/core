@@ -1,10 +1,11 @@
 import { ModuleInfo, getResourceUrl } from '@module-federation/sdk';
 import { FederationRuntimePlugin } from '../../type/plugin';
 import {
-  error,
   isBrowserEnv,
+  error,
   isPureRemoteEntry,
   isRemoteInfoWithEntry,
+  getRemoteEntryInfoFromSnapshot,
 } from '../../utils';
 import { PreloadOptions, RemoteInfo } from '../../type';
 import { preloadAssets } from '../../utils/preload';
@@ -13,19 +14,21 @@ export function assignRemoteInfo(
   remoteInfo: RemoteInfo,
   remoteSnapshot: ModuleInfo,
 ): void {
-  if (!('remoteEntry' in remoteSnapshot) || !remoteSnapshot.remoteEntry) {
-    error(`The attribute remoteEntry of ${name} must not be undefined.`);
+  const remoteEntryInfo = getRemoteEntryInfoFromSnapshot(remoteSnapshot);
+  if (!remoteEntryInfo.url) {
+    error(
+      `The attribute remoteEntry of ${remoteInfo.name} must not be undefined.`,
+    );
   }
-  const { remoteEntry } = remoteSnapshot;
 
-  let entryUrl = getResourceUrl(remoteSnapshot, remoteEntry);
+  let entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url);
 
   if (!isBrowserEnv() && !entryUrl.startsWith('http')) {
     entryUrl = `https:${entryUrl}`;
   }
 
-  remoteInfo.type = remoteSnapshot.remoteEntryType;
-  remoteInfo.entryGlobalName = remoteSnapshot.globalName;
+  remoteInfo.type = remoteEntryInfo.type;
+  remoteInfo.entryGlobalName = remoteEntryInfo.globalName;
   remoteInfo.entry = entryUrl;
   remoteInfo.version = remoteSnapshot.version;
   remoteInfo.buildVersion = remoteSnapshot.buildVersion;

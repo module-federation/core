@@ -1,5 +1,77 @@
 # @module-federation/modernjs
 
+## 0.1.41
+
+### Patch Changes
+
+- Updated dependencies [59db2fd]
+  - @module-federation/enhanced@0.3.5
+
+## 0.1.40
+
+### Patch Changes
+
+- @module-federation/enhanced@0.3.4
+
+## 0.1.39
+
+### Patch Changes
+
+- 85c6a12: fix: support rspack ssr live reload
+  - @module-federation/enhanced@0.3.3
+
+## 0.1.38
+
+### Patch Changes
+
+- Updated dependencies [85ae159]
+  - @module-federation/enhanced@0.3.2
+
+## 0.1.37
+
+### Patch Changes
+
+- @module-federation/enhanced@0.3.1
+
+## 0.1.36
+
+### Patch Changes
+
+- Updated dependencies [fa37cc4]
+  - @module-federation/enhanced@0.3.0
+
+## 0.1.35
+
+### Patch Changes
+
+- @module-federation/enhanced@0.2.8
+
+## 0.1.34
+
+### Patch Changes
+
+- Updated dependencies [b00ef13]
+  - @module-federation/enhanced@0.2.7
+
+## 0.1.33
+
+### Patch Changes
+
+- Updated dependencies [4488064]
+  - @module-federation/enhanced@0.2.6
+
+## 0.1.32
+
+### Patch Changes
+
+- @module-federation/enhanced@0.2.5
+
+## 0.1.31
+
+### Patch Changes
+
+- @module-federation/enhanced@0.2.4
+
 ## 0.1.30
 
 ### Patch Changes

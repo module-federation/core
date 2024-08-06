@@ -20,7 +20,6 @@ export {
   HOST_API_TYPES_FILE_NAME,
   REMOTE_ALIAS_IDENTIFIER,
   REMOTE_API_TYPES_FILE_NAME,
-  UpdateMode,
 } from './constant';
 
 export type { DTSManagerOptions } from './interfaces/DTSManagerOptions';

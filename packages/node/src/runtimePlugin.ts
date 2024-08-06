@@ -133,10 +133,16 @@ export default function (): FederationRuntimePlugin {
               if (err) return callback(err, null);
               const chunk = {};
               try {
-                vm.runInThisContext(
+                const script = new vm.Script(
                   `(function(exports, require, __dirname, __filename) {${content}\n})`,
-                  filename,
-                )(
+                  {
+                    filename,
+                    importModuleDynamically:
+                      vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ??
+                      importNodeModule,
+                  },
+                );
+                script.runInThisContext()(
                   chunk,
                   __non_webpack_require__,
                   path.dirname(filename),
@@ -169,7 +175,6 @@ export default function (): FederationRuntimePlugin {
                 .emit(url.href, {})
                 .then((res) => {
                   if (!res || !(res instanceof Response)) {
-                    console.log('No response from hook, falling back to fetch');
                     return fetchFunction(url.href).then((response) =>
                       response.text(),
                     );

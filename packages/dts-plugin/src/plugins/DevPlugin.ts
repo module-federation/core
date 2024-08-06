@@ -4,6 +4,7 @@ import { type DevWorker, createDevWorker } from '../dev-worker';
 import {
   moduleFederationPlugin,
   normalizeOptions,
+  TEMP_DIR as BasicTempDir,
 } from '@module-federation/sdk';
 import {
   WEB_CLIENT_OPTIONS_IDENTIFIER,
@@ -138,18 +139,21 @@ export class DevPlugin implements WebpackPluginInstance {
     }
 
     if (!normalizedDev.disableLiveReload) {
-      const TEMP_DIR = path.join(
-        `${process.cwd()}/node_modules`,
-        `.federation`,
-      );
+      const TEMP_DIR = path.join(`${process.cwd()}/node_modules`, BasicTempDir);
       const filepath = path.join(TEMP_DIR, `live-reload.js`);
 
-      DevPlugin.ensureLiveReloadEntry({ name }, filepath);
-      compiler.hooks.afterPlugins.tap('MFDevPlugin', () => {
-        new compiler.webpack.EntryPlugin(compiler.context, filepath, {
-          name,
-        }).apply(compiler);
-      });
+      if (typeof compiler.options.entry === 'object') {
+        DevPlugin.ensureLiveReloadEntry({ name }, filepath);
+        Object.keys(compiler.options.entry).forEach((entry) => {
+          const normalizedEntry = compiler.options.entry[entry];
+          if (
+            typeof normalizedEntry === 'object' &&
+            Array.isArray(normalizedEntry.import)
+          ) {
+            normalizedEntry.import.unshift(filepath);
+          }
+        });
+      }
     }
 
     const defaultGenerateTypes = { compileInChildProcess: true };

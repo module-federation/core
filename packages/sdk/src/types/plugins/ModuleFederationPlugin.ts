@@ -142,6 +142,7 @@ export interface DtsHostOptions {
   deleteTypesFolder?: boolean;
   maxRetries?: number;
   consumeAPITypes?: boolean;
+  runtimePkgs?: string[];
 }
 
 export interface DtsRemoteOptions {
@@ -165,6 +166,11 @@ export interface PluginDtsOptions {
   extraOptions?: Record<string, any>;
   implementation?: string;
 }
+
+export type AsyncBoundaryOptions = {
+  eager?: RegExp | ((module: any) => boolean);
+  excludeChunk?: (chunk: any) => boolean;
+};
 
 export interface ModuleFederationPluginOptions {
   /**
@@ -220,6 +226,7 @@ export interface ModuleFederationPluginOptions {
 
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
+  async?: boolean | AsyncBoundaryOptions;
   dataPrefetch?: DataPrefetch;
 }
 /**

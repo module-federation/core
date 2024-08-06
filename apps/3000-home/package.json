@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "antd": "5.18.3",
+    "antd": "5.19.1",
     "@ant-design/cssinjs": "^1.21.0",
     "buffer": "5.7.1",
     "encoding": "0.1.13",

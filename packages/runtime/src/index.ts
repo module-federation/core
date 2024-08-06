@@ -92,5 +92,9 @@ export function registerPlugins(
   return FederationInstance.registerPlugins.apply(FederationInstance, args);
 }
 
+export function getInstance() {
+  return FederationInstance;
+}
+
 // Inject for debug
 setGlobalFederationConstructor(FederationHost);

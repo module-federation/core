@@ -1,5 +1,86 @@
 # @module-federation/runtime
 
+## 0.3.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.5
+
+## 0.3.4
+
+### Patch Changes
+
+- 67ea678: checking for remote entry type when loading assets
+- d26d7e6: Ensured createScript runtime hook always receives `attrs`
+  - @module-federation/sdk@0.3.4
+
+## 0.3.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.3
+
+## 0.3.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.2
+
+## 0.3.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.1
+
+## 0.3.0
+
+### Minor Changes
+
+- fa37cc4: feat: support modern.js ssr [#2348](https://github.com/module-federation/core/issues/2348)
+
+### Patch Changes
+
+- Updated dependencies [fa37cc4]
+  - @module-federation/sdk@0.3.0
+
+## 0.2.8
+
+### Patch Changes
+
+- @module-federation/sdk@0.2.8
+
+## 0.2.7
+
+### Patch Changes
+
+- Updated dependencies [b00ef13]
+  - @module-federation/sdk@0.2.7
+
+## 0.2.6
+
+### Patch Changes
+
+- Updated dependencies [91bf689]
+  - @module-federation/sdk@0.2.6
+
+## 0.2.5
+
+### Patch Changes
+
+- 8cce571: fix(runtime): Fixed an issue where script failed to load properly when static resources were set to cross-domain response headers due to the default setting of script crossorigin to anonymous (this issue appeared in next.js)
+- Updated dependencies [8cce571]
+  - @module-federation/sdk@0.2.5
+
+## 0.2.4
+
+### Patch Changes
+
+- 60cd259: adding support for loading systemjs based remotes
+- 09b792d: connect attrs to create script hook
+- Updated dependencies [09b792d]
+- Updated dependencies [09b792d]
+  - @module-federation/sdk@0.2.4
+
 ## 0.2.3
 
 ### Patch Changes

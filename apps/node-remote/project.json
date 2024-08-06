@@ -61,7 +61,7 @@
       "options": {
         "buildTarget": "node-remote:build",
         "hmr": false,
-        "port": 3002
+        "port": 3022
       },
       "configurations": {
         "development": {

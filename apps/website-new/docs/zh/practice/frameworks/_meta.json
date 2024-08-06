@@ -12,6 +12,12 @@
   },
   {
     "type": "dir",
+    "name": "modern",
+    "label": "Modern.js",
+    "collapsed": true
+  },
+  {
+    "type": "dir",
     "name": "next",
     "label": "Next.js",
     "collapsed": true
