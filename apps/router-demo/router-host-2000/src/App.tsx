@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 import { createRemoteComponent } from '@module-federation/bridge-react';
+import { withErrorBoundary } from 'react-error-boundary';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
@@ -27,6 +28,13 @@ const Remote1App = createRemoteComponent({
   loading: FallbackComp,
 });
 
+const ComponentWithErrorBoundary = withErrorBoundary(Remote1App, {
+  fallback: <div>Something went wrong</div>,
+  onError(error, info) {
+    console.log('Caught an error!', error, info);
+  },
+});
+
 const Remote2App = createRemoteComponent({
   loader: () => import('remote2/export-app'),
   export: 'provider',
@@ -46,7 +54,7 @@ function Wraper3() {
       <div className="flex flex-row">
         <div className="grow">
           <h2>Remote1</h2>
-          <Remote1App name="Ming" age={12} memoryRoute={{ entryPath: '/' }} />
+          <Remote1App name={'Ming'} age={12} memoryRoute={{ entryPath: '/' }} />
         </div>
         <div className="grow">
           <h2>Remote2</h2>
@@ -86,9 +94,9 @@ const App = () => {
         <Route
           path="/remote1/*"
           Component={() => (
-            <Remote1App
+            <ComponentWithErrorBoundary
               className={styles.remote1}
-              name="Ming"
+              name={'Ming'}
               age={12}
               ref={ref}
             />
