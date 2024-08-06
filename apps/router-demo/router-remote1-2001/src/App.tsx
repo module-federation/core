@@ -42,10 +42,15 @@ const columns = [
   },
 ];
 
-function Home() {
+function Home({ name, age }: { name: string; age: number }) {
+  console.log('home', name, age);
+
   return (
     <div>
       <h2>Remote1 home page</h2>
+      <h4>
+        name: {name}, age: {age}
+      </h4>
       <Table dataSource={dataSource} columns={columns} />
     </div>
   );
@@ -75,8 +80,7 @@ const App = (info: { name: string; age: number }) => {
         <ul>
           <li>
             <Link to="/" className="self-remote1-home-link">
-              Home name: {info.name}
-              age: {info.age}
+              Home
             </Link>
           </li>
           <li>
@@ -88,13 +92,13 @@ const App = (info: { name: string; age: number }) => {
 
         <Switch>
           <Route path="/home">
-            <Home />
+            <Home {...info} />
           </Route>
           <Route path="/detail">
             <Detail />
           </Route>
           <Route path="/">
-            <Home />
+            <Home {...info} />
           </Route>
         </Switch>
       </BrowserRouter>

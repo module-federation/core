@@ -1,5 +1,5 @@
 export interface ProviderParams {
-  name?: string;
+  moduleName?: string;
   basename?: string;
   memoryRoute?: { entryPath: string };
   style?: React.CSSProperties;

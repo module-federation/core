@@ -52,7 +52,8 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
         >((props, ref) => {
           return (
             <RemoteApp
-              name={moduleName}
+              // change `name` key to `moduleName` to avoid same property `name` key passed by user's props which may cause unexpected issues.
+              moduleName={moduleName}
               providerInfo={exportFn}
               exportName={info.export || 'default'}
               ref={ref}

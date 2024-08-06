@@ -27,7 +27,7 @@ interface RemoteModule {
 }
 
 interface RemoteAppParams {
-  name: string;
+  moduleName: string;
   providerInfo: NonNullable<RemoteModule['provider']>;
   exportName: string | number | symbol;
 }
@@ -37,8 +37,9 @@ const RemoteAppWrapper = forwardRef(function (
   ref,
 ) {
   const RemoteApp = () => {
+    LoggerInstance.log(`RemoteAppWrapper RemoteApp props >>>`, { props });
     const {
-      name,
+      moduleName,
       memoryRoute,
       basename,
       providerInfo,
@@ -60,7 +61,7 @@ const RemoteAppWrapper = forwardRef(function (
         providerInfoRef.current = providerReturn;
 
         const renderProps = {
-          name,
+          moduleName,
           dom: rootRef.current,
           basename,
           memoryRoute,
@@ -80,7 +81,7 @@ const RemoteAppWrapper = forwardRef(function (
           if (providerInfoRef.current?.destroy) {
             LoggerInstance.log(
               `createRemoteComponent LazyComponent destroy >>>`,
-              { name, basename, dom: renderDom.current },
+              { moduleName, basename, dom: renderDom.current },
             );
             providerInfoRef.current?.destroy({
               dom: renderDom.current,

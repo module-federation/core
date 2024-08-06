@@ -23,9 +23,9 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
     const rootMap = new Map<any, RootType>();
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
-      const { name, memoryRoute, basename = '/' } = appInfo;
+      const { moduleName, memoryRoute, basename = '/' } = appInfo;
       return (
-        <RouterContext.Provider value={{ name, basename, memoryRoute }}>
+        <RouterContext.Provider value={{ moduleName, basename, memoryRoute }}>
           <bridgeInfo.rootComponent
             {...propsInfo}
             basename={basename}
@@ -38,14 +38,14 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
     return {
       async render(info: RenderFnParams & any) {
         LoggerInstance.log(`createBridgeComponent render Info`, info);
-        const { name, dom, basename, memoryRoute, ...propsInfo } = info;
+        const { moduleName, dom, basename, memoryRoute, ...propsInfo } = info;
         if (atLeastReact18(React)) {
           if (bridgeInfo?.render) {
             Promise.resolve(
               bridgeInfo?.render(
                 <RawComponent
                   appInfo={{
-                    name,
+                    moduleName,
                     basename,
                     memoryRoute,
                   }}
@@ -59,7 +59,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
             root.render(
               <RawComponent
                 appInfo={{
-                  name,
+                  moduleName,
                   basename,
                   memoryRoute,
                 }}
@@ -73,7 +73,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           renderFunc(
             <RawComponent
               appInfo={{
-                name,
+                moduleName,
                 basename,
                 memoryRoute,
               }}
