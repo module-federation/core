@@ -23,6 +23,9 @@ module.exports = composePlugins(
     config.watchOptions = {
       ignored: ['**/dist/**'],
     };
+    if (!config.devServer) {
+      config.devServer = {};
+    }
     config.devServer.host = '127.0.0.1';
 
     config.plugins.push(
