@@ -1,9 +1,6 @@
-import {
-  init,
-  registerGlobalPlugins,
-} from '@module-federation/enhanced/runtime';
+import { registerGlobalPlugins } from '@module-federation/enhanced/runtime';
 import customPlugin from './runtimePlugin';
 
 registerGlobalPlugins([customPlugin()]);
 
-import('./bootstrap');
+require('./bootstrap');
