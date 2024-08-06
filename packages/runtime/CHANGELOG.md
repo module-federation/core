@@ -1,5 +1,11 @@
 # @module-federation/runtime
 
+## 0.3.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.5
+
 ## 0.3.4
 
 ### Patch Changes

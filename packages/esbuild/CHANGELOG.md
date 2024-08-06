@@ -1,5 +1,11 @@
 # @module-federation/esbuild
 
+## 0.0.13
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.5
+
 ## 0.0.12
 
 ### Patch Changes
