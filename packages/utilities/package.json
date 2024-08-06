@@ -1,8 +1,8 @@
 {
   "name": "@module-federation/utilities",
   "version": "3.0.39",
-  "type": "commonjs",
   "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
   "types": "./dist/index.cjs.d.ts",
   "license": "MIT",
   "publishConfig": {
@@ -36,7 +36,11 @@
     }
   },
   "exports": {
-    ".": "./dist/index.cjs.js",
+    ".": {
+      "types": "./dist/index.cjs.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    },
     "./package.json": "./package.json"
   },
   "typesVersions": {

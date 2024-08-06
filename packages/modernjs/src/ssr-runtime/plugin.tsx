@@ -21,17 +21,14 @@ export const mfSSRPlugin = (): Plugin => ({
         }
         return next({ context });
       },
-      hoc({ App, config }, next) {
+      wrapRoot(App) {
         const AppWrapper = (props: any) => (
           <>
             <SSRLiveReload />
             <App {...props} />
           </>
         );
-        return next({
-          App: hoistNonReactStatics(AppWrapper, App),
-          config,
-        });
+        return hoistNonReactStatics(AppWrapper, App);
       },
     };
   },
