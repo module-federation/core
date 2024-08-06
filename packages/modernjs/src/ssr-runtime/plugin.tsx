@@ -1,15 +1,16 @@
 import type { Plugin } from '@modern-js/runtime';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import { SSRLiveReload } from './SSRLiveReload';
-
+console.log('mfSSRPlugin trigger');
 export const mfSSRPlugin = (): Plugin => ({
   name: '@module-federation/modern-js',
 
   setup: () => {
     return {
-      async init({ context }, next) {
+      async beforeRender() {
+        console.log(111, 'beforeRender');
         if (typeof window !== 'undefined') {
-          return next({ context });
+          return;
         }
         globalThis.shouldUpdate = false;
         const nodeUtils = await import('@module-federation/node/utils');
@@ -19,7 +20,7 @@ export const mfSSRPlugin = (): Plugin => ({
           await nodeUtils.flushChunks();
           globalThis.shouldUpdate = true;
         }
-        return next({ context });
+        return;
       },
       hoc({ App, config }, next) {
         const AppWrapper = (props: any) => (

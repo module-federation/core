@@ -64,7 +64,7 @@ export const ssrDataLoaderPlugin = (): Plugin => {
     post: ['@modern-js/plugin-router'],
     setup: () => {
       return {
-        async init({ context }, next) {
+        async beforeRender({ context }) {
           console.log('init');
 
           if (typeof window === 'undefined') {
@@ -73,7 +73,6 @@ export const ssrDataLoaderPlugin = (): Plugin => {
             console.log(location.pathname);
           }
           await loadRoutes();
-          return next({ context });
         },
         modifyRoutes: (routes: RouteObject[]) => {
           console.log('modifyRoutes');
