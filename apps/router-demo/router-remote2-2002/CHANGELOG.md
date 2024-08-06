@@ -1,5 +1,13 @@
 # remote2
 
+## 1.0.15
+
+### Patch Changes
+
+- Updated dependencies [59db2fd]
+  - @module-federation/enhanced@0.3.5
+  - @module-federation/bridge-react@0.3.5
+
 ## 1.0.14
 
 ### Patch Changes

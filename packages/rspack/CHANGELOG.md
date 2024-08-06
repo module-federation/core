@@ -1,5 +1,16 @@
 # @module-federation/rspack
 
+## 0.3.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.5
+- @module-federation/runtime-tools@0.3.5
+- @module-federation/managers@0.3.5
+- @module-federation/manifest@0.3.5
+- @module-federation/dts-plugin@0.3.5
+- @module-federation/bridge-react-webpack-plugin@0.3.5
+
 ## 0.3.4
 
 ### Patch Changes
