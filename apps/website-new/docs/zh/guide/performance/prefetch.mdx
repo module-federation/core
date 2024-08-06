@@ -1,5 +1,9 @@
 # Data Prefetch
 
+:::warning
+该功能暂不支持 Rspack 项目使用
+:::
+
 ## 什么是 Data Prefetch
 Data Prefetch 可以将远程模块接口请求提前到 js、css 加载时并行发出，提升首屏速度。
 
@@ -114,6 +118,13 @@ export default function Button () {
     </>
   )
 };
+```
+3. 生产者的 ModuleFederationPlugin 配置处设置 `dataPrefetch`: true
+```ts
+  new ModuleFederationPlugin({
+    // ...
+    dataPrefetch: true
+  }),
 ```
 这样就完成了接口预请求，在 `Button` 被消费者使用后会提前将接口请求发送出去（加载 js 资源时就会发出，正常项目需要等到组件渲染时），
 在上面的例子中 `Button` 首先会渲染 `loading...`， 然后在 2s 后展示数据

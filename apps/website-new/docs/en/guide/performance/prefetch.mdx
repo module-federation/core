@@ -1,5 +1,9 @@
 # Data Prefetch
 
+:::warning
+This function is not currently supported in Rspack projects.
+:::
+
 ## What is Data Prefetch
 Data Prefetch can prefetch remote module API requests in parallel with the loading of js and css, improving the speed of the first screen.
 
@@ -117,6 +121,14 @@ export default function Button() {
     </>
   )
 };
+```
+
+3. Set `dataPrefetch`: true in the producer's ModuleFederationPlugin configuration
+```ts
+  new ModuleFederationPlugin({
+    // ...
+    dataPrefetch: true
+  }),
 ```
 
 With this setup, interface prefetching is completed. After the consumer uses `Button`, the interface request will be sent out early (when loading js resources, instead of waiting for the component to render).
