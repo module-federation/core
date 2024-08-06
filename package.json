@@ -81,7 +81,7 @@
     "@babel/plugin-transform-react-jsx": "7.24.7",
     "@babel/preset-react": "^7.24.7",
     "@builder.io/partytown": "0.10.2",
-    "@builder.io/qwik": "1.6.0",
+    "@builder.io/qwik": "1.7.3",
     "@builder.io/qwik-city": "1.6.0",
     "@changesets/cli": "^2.27.7",
     "@commitlint/cli": "^19.3.0",
