@@ -5,4 +5,4 @@
 '@module-federation/bridge-vue3': patch
 ---
 
-feat(@module-federation/bridge): optimize @module-federation/bridge package
+feat(@module-federation/bridge): enhance Bridge capabilities and fix some issues
