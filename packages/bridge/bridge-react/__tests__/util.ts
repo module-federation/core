@@ -12,7 +12,6 @@ export async function sleep(time: number) {
 export function createContainer() {
   const container = document.createElement('div');
   container.setAttribute('id', 'container');
-  container.setAttribute('data-testid', 'container');
   document.body.appendChild(container);
 
   return {

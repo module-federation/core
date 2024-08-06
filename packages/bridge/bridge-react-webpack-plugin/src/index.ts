@@ -41,7 +41,7 @@ class ReactBridgeAliasChangerPlugin {
 
         // Update alias
         const updatedAlias = {
-          // allow `alias` can be overrided
+          // allow `alias` can be override
           [this.alias]: targetFilePath,
           ...originalAlias,
         };
