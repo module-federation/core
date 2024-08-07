@@ -1,4 +1,4 @@
-import { getH2, getH3, wait2s } from '../support/app.po';
+import { getH2, getP, getPre } from '../support/app.po';
 
 describe('router-host-2000/', () => {
   beforeEach(() => cy.visit('/'));
@@ -14,10 +14,10 @@ describe('router-host-2000/memory-router', () => {
   beforeEach(() => {
     cy.visit('/');
     cy.get('.host-menu > li:nth-child(6)').click();
-    wait2s();
   });
 
   describe('memory-router', () => {
+    Cypress.on('uncaught:exception', () => false);
     it('remote1', () => {
       getH2().contains('Remote1 home page');
       cy.get('.self-remote1-detail-link').click();
@@ -29,9 +29,13 @@ describe('router-host-2000/memory-router', () => {
       getH2().contains('Remote2 home page');
     });
     it('remote3', () => {
-      getH2().contains('Remote3 detail page');
-      cy.get('.self-remote3-home-link').click();
       getH2().contains('Remote3 home page');
+      cy.get('.self-remote3-detail-link').click();
+      getH2().contains('Remote3 detail page');
+    });
+    it('jump to remote error page', () => {
+      getP().contains('Something went wrong');
+      getPre().contains('This is a deliberately thrown error');
     });
   });
 });
