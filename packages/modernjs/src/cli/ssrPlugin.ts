@@ -4,6 +4,7 @@ import type { CliPlugin, AppTools } from '@modern-js/app-tools';
 import type { InternalModernPluginOptions } from '../types';
 import { ModuleFederationPlugin } from '@module-federation/enhanced';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 import { updateStatsAndManifest } from './manifest';
 import { isDev } from './constant';
 
@@ -129,9 +130,6 @@ export const moduleFederationSSRPlugin = (
             bundlerChain(chain, { isServer }) {
               if (isServer) {
                 chain.target('async-node');
-                const {
-                  UniverseEntryChunkTrackerPlugin,
-                } = require('@module-federation/node');
                 if (isDev) {
                   chain
                     .plugin('UniverseEntryChunkTrackerPlugin')
