@@ -57,7 +57,7 @@ importers:
         specifier: 0.14.1
         version: 0.14.1
       sharp:
-        specifier: ^0.33.2
+        specifier: ^0.33.4
         version: 0.33.4
       tapable:
         specifier: 2.2.1
