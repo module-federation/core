@@ -47,7 +47,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           fallback,
           ...propsInfo
         } = info;
-        const rootComponent = (
+        const rootComponentWithErrorBoundary = (
           // set ErrorBoundary for RawComponent rendering error, usually caused by user app rendering error
           <ErrorBoundary FallbackComponent={fallback}>
             <RawComponent
@@ -64,18 +64,18 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         if (atLeastReact18(React)) {
           if (bridgeInfo?.render) {
             // in case bridgeInfo?.render is an async function, resolve this to promise
-            Promise.resolve(bridgeInfo?.render(rootComponent, dom)).then(
-              (root: RootType) => rootMap.set(info.dom, root),
-            );
+            Promise.resolve(
+              bridgeInfo?.render(rootComponentWithErrorBoundary, dom),
+            ).then((root: RootType) => rootMap.set(info.dom, root));
           } else {
             const root: RootType = ReactDOMClient.createRoot(info.dom);
-            root.render(rootComponent);
+            root.render(rootComponentWithErrorBoundary);
             rootMap.set(info.dom, root);
           }
         } else {
           // react 17 render
           const renderFn = bridgeInfo?.render || ReactDOM.render;
-          renderFn?.(rootComponent, info.dom);
+          renderFn?.(rootComponentWithErrorBoundary, info.dom);
         }
       },
       async destroy(info: { dom: HTMLElement }) {
