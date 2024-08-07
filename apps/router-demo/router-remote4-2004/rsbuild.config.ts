@@ -1,5 +1,4 @@
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
-// import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import path from 'path';
@@ -24,13 +23,12 @@ export default defineConfig({
   },
   tools: {
     rspack: (config, { appendPlugins }) => {
-      config.output!.uniqueName = 'remote2';
+      config.output!.uniqueName = 'remote4';
       delete config.optimization?.splitChunks;
       appendPlugins([
         new ModuleFederationPlugin({
-          name: 'remote2',
+          name: 'remote4',
           exposes: {
-            './button': './src/button.tsx',
             './export-app': './src/export-App.tsx',
           },
           shared: ['react', 'react-dom'],

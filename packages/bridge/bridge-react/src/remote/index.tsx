@@ -9,10 +9,12 @@ import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { LoggerInstance, pathJoin } from '../utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
+import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
 
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {
   dom?: any;
+  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
 }
 
 interface RemoteModule {
@@ -30,6 +32,7 @@ interface RemoteAppParams {
   moduleName: string;
   providerInfo: NonNullable<RemoteModule['provider']>;
   exportName: string | number | symbol;
+  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
 }
 
 const RemoteAppWrapper = forwardRef(function (
@@ -45,6 +48,7 @@ const RemoteAppWrapper = forwardRef(function (
       providerInfo,
       className,
       style,
+      fallback,
       ...resProps
     } = props;
 
@@ -65,6 +69,7 @@ const RemoteAppWrapper = forwardRef(function (
           dom: rootRef.current,
           basename,
           memoryRoute,
+          fallback,
           ...resProps,
         };
         renderDom.current = rootRef.current;

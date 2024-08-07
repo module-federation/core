@@ -30,6 +30,7 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
       lazyComponent: info.loader,
       exportName,
     });
+
     try {
       const m = (await info.loader()) as RemoteModule;
       // @ts-ignore
@@ -40,8 +41,7 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
       );
 
       // @ts-ignore
-      const exportFn = m[exportName] as any;
-
+      const exportFn = m[exportName];
       if (exportName in m && typeof exportFn === 'function') {
         const RemoteAppComponent = forwardRef<
           HTMLDivElement,
@@ -52,10 +52,11 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
         >((props, ref) => {
           return (
             <RemoteApp
-              // change `name` key to `moduleName` to avoid same property `name` key passed by user's props which may cause unexpected issues.
+              // change `name` key to `moduleName` to avoid same property `name` passed by user's props which may cause unexpected issues.
               moduleName={moduleName}
               providerInfo={exportFn}
               exportName={info.export || 'default'}
+              fallback={info.fallback}
               ref={ref}
               {...props}
             />
@@ -101,6 +102,7 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
   return forwardRef((props: ProviderParams & RawComponentType, ref) => {
     const LazyComponent = createLazyRemoteComponent(info);
     return (
+      // set ErrorBoundary for LazyComponent rendering error, usually caused by inner bridge logic render process
       <ErrorBoundary FallbackComponent={info.fallback}>
         <React.Suspense fallback={info.loading}>
           <LazyComponent {...props} ref={ref} />

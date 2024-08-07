@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, ForwardRefExoticComponent } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 import { createRemoteComponent } from '@module-federation/bridge-react';
@@ -11,16 +11,16 @@ import './App.css';
 const FallbackErrorComp = (info: any) => {
   return (
     <div>
-      <p>Something went wrong</p>
-      {info?.error?.message}
+      <p>Something went wrong:</p>
+      <pre style={{ color: 'red' }}>{info?.error.message}</pre>
       <button onClick={() => info.resetErrorBoundary()}>
-        resetErrorBoundary
+        resetErrorBoundary(try again)
       </button>
     </div>
   );
 };
 
-const FallbackComp = <div>loading</div>;
+const FallbackComp = <div>loading...</div>;
 
 const Remote1App = createRemoteComponent({
   loader: () => loadRemote('remote1/export-app'),
@@ -45,7 +45,7 @@ const RemoteErrorApp = createRemoteComponent({
   loader: () => loadRemote('remote_error/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
-});
+}) as ForwardRefExoticComponent<unknown>;
 
 function Wraper3() {
   return (
@@ -61,8 +61,11 @@ function Wraper3() {
         </div>
         <div className="grow">
           <h2>Remote3</h2>
+          <Remote3App />
+        </div>
+        <div className="grow">
+          <h2>Remote Error </h2>
           <RemoteErrorApp />
-          {/* <Remote3App memoryRoute={{ entryPath: '/detail' }} /> */}
         </div>
       </div>
     </>

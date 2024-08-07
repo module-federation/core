@@ -6,7 +6,7 @@ import * as ReactRouterDom from 'react-router-dom/index.js';
 import { RouterContext } from './context';
 import { LoggerInstance } from './utils';
 
-function WraperRouter(
+function WrapperRouter(
   props:
     | Parameters<typeof ReactRouterDom.BrowserRouter>[0]
     | Parameters<typeof ReactRouterDom.MemoryRouter>[0],
@@ -14,10 +14,10 @@ function WraperRouter(
   const { basename, ...propsRes } = props;
   const routerContextProps = useContext(RouterContext) || {};
 
-  LoggerInstance.log(`WraperRouter info >>>`, {
+  LoggerInstance.log(`WrapperRouter info >>>`, {
     ...routerContextProps,
     routerContextProps,
-    WraperRouterProps: props,
+    WrapperRouterProps: props,
   });
   // if (!routerContextProps) return <ReactRouterDom.BrowserRouter {...props} />;
 
@@ -37,16 +37,16 @@ function WraperRouter(
   );
 }
 
-function WraperRouterProvider(
+function WrapperRouterProvider(
   props: Parameters<typeof ReactRouterDom.RouterProvider>[0],
 ) {
   const { router, ...propsRes } = props;
   const routerContextProps = useContext(RouterContext) || {};
   const routers = router.routes;
-  LoggerInstance.log(`WraperRouterProvider info >>>`, {
+  LoggerInstance.log(`WrapperRouterProvider info >>>`, {
     ...routerContextProps,
     routerContextProps,
-    WraperRouterProviderProps: props,
+    WrapperRouterProviderProps: props,
     router,
   });
   const RouterProvider = (ReactRouterDom as any)['Router' + 'Provider'];
@@ -74,5 +74,5 @@ function WraperRouterProvider(
 // @ts-ignore
 // export * from 'react-router-dom/index.js';
 
-export { WraperRouter as BrowserRouter };
-export { WraperRouterProvider as RouterProvider };
+export { WrapperRouter as BrowserRouter };
+export { WrapperRouterProvider as RouterProvider };
