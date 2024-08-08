@@ -103,8 +103,8 @@ importers:
         specifier: 0.10.2
         version: 0.10.2
       '@builder.io/qwik':
-        specifier: 1.6.0
-        version: 1.6.0(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)(undici@5.28.4)
+        specifier: 1.7.3
+        version: 1.7.3(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)
       '@builder.io/qwik-city':
         specifier: 1.6.0
         version: 1.6.0(@types/node@20.12.12)(less@4.2.0)(rollup@2.79.1)(stylus@0.63.0)
@@ -446,7 +446,7 @@ importers:
         version: 2.3.0(@nx/devkit@17.2.8)(@nx/eslint@19.5.3)(@nx/js@17.2.8)(@nx/vite@17.2.8)
       qwik-speak:
         specifier: 0.23.0
-        version: 0.23.0(@builder.io/qwik@1.6.0)
+        version: 0.23.0(@builder.io/qwik@1.7.3)
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -2115,8 +2115,8 @@ importers:
         specifier: 5.0.0
         version: 5.0.0(ws@8.17.1)
       koa:
-        specifier: 2.11.0
-        version: 2.11.0
+        specifier: 2.15.3
+        version: 2.15.3
       lodash.clonedeepwith:
         specifier: 4.5.0
         version: 4.5.0
@@ -2140,8 +2140,8 @@ importers:
         specifier: workspace:*
         version: link:../runtime
       '@types/koa':
-        specifier: 2.11.2
-        version: 2.11.2
+        specifier: 2.15.0
+        version: 2.15.0
       '@types/node-schedule':
         specifier: 2.1.7
         version: 2.1.7
@@ -4955,15 +4955,12 @@ packages:
       - terser
     dev: true
 
-  /@builder.io/qwik@1.6.0(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)(undici@5.28.4):
-    resolution: {integrity: sha512-IaVLxK+hK2qzi1hMTl2M48f5I49OE//UQeNQo6Kil+Mu+/Ov2N5oMTwq8UFKpk9ZnurKQmWRc5CKwtM04js9tg==}
+  /@builder.io/qwik@1.7.3(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0):
+    resolution: {integrity: sha512-lVRT4j9redY4X+iOy26U2vhychJgX24aaleu3IuBlEwD8MjCU5k46ApHq+cGqI24/kbqjirPH3SIxtVSByEG/A==}
     engines: {node: '>=16.8.0 <18.0.0 || >=18.11'}
     hasBin: true
-    peerDependencies:
-      undici: '*'
     dependencies:
       csstype: 3.1.3
-      undici: 5.28.4
       vite: 5.2.11(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)
     transitivePeerDependencies:
       - '@types/node'
@@ -19407,6 +19404,10 @@ packages:
       '@types/node': 20.12.12
     dev: true
 
+  /@types/content-disposition@0.5.8:
+    resolution: {integrity: sha512-QVSSvno3dE0MgO76pJhmv4Qyi/j0Yk9pBp0Y7TJ2Tlj+KCgJWY6qX7nnxCOLkZ3VYRSIk1WTxCvwUSdx6CCLdg==}
+    dev: true
+
   /@types/conventional-commits-parser@5.0.0:
     resolution: {integrity: sha512-loB369iXNmAZglwWATL+WRe+CRMmmBPtpolYzIebFaX4YA3x+BEfLqhUAV9WanycKI3TG1IMr5bMJDajDKLlUQ==}
     dependencies:
@@ -19866,15 +19867,17 @@ packages:
   /@types/koa-compose@3.2.8:
     resolution: {integrity: sha512-4Olc63RY+MKvxMwVknCUDhRQX1pFQoBZ/lXcRLP69PQkEpze/0cr8LNqJQe5NFb/b19DWi2a5bTi2VAlQzhJuA==}
     dependencies:
-      '@types/koa': 2.11.2
+      '@types/koa': 2.15.0
     dev: true
 
-  /@types/koa@2.11.2:
-    resolution: {integrity: sha512-2UPelagNNW6bnc1I5kIzluCaheXRA9S+NyOdXEFFj9Az7jc15ek5V03kb8OTbb3tdZ5i2BIJObe86PhHvpMolg==}
+  /@types/koa@2.15.0:
+    resolution: {integrity: sha512-7QFsywoE5URbuVnG3loe03QXuGajrnotr3gQkXcEBShORai23MePfFYdhz90FEtBBpkyIYQbVD+evKtloCgX3g==}
     dependencies:
       '@types/accepts': 1.3.7
+      '@types/content-disposition': 0.5.8
       '@types/cookies': 0.9.0
       '@types/http-assert': 1.5.5
+      '@types/http-errors': 2.0.4
       '@types/keygrip': 1.0.6
       '@types/koa-compose': 3.2.8
       '@types/node': 20.12.12
@@ -24364,21 +24367,12 @@ packages:
     resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
     engines: {node: '>= 0.6'}
 
-  /cookies@0.8.0:
-    resolution: {integrity: sha512-8aPsApQfebXnuI+537McwYsDtjVxGm8gTIzQI3FDW6t5t/DAhERxtnbEPN/8RX+uZthoz4eCOgloXaE5cYyNow==}
-    engines: {node: '>= 0.8'}
-    dependencies:
-      depd: 2.0.0
-      keygrip: 1.1.0
-    dev: false
-
   /cookies@0.9.1:
     resolution: {integrity: sha512-TG2hpqe4ELx54QER/S3HQ9SRVnQnGBtKUz5bLQWtYAQ+o6GpgMs6sYUvaiJjVxb+UXwhRhAEP3m7LbsIZ77Hmw==}
     engines: {node: '>= 0.8'}
     dependencies:
       depd: 2.0.0
       keygrip: 1.1.0
-    dev: true
 
   /copy-anything@2.0.6:
     resolution: {integrity: sha512-1j20GZTsvKNkc4BY3NpMOM8tt///wY3FpIzozTOFO2ffuZcV61nojHXVKIy3WM+7ADCy5FVhdZYHYDdgTU0yJw==}
@@ -25439,17 +25433,6 @@ packages:
     dependencies:
       ms: 2.0.0
 
-  /debug@3.1.0:
-    resolution: {integrity: sha512-OX8XqP7/1a9cqkxYw2yXss15f26NKWBpDXQd0/uK/KPqdQhxbPa994hnzjcE2VqQpDslf55723cKPUOGSmMY3g==}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-    dependencies:
-      ms: 2.0.0
-    dev: false
-
   /debug@3.2.7(supports-color@8.1.1):
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
     peerDependencies:
@@ -26220,10 +26203,6 @@ packages:
     resolution: {integrity: sha512-7dFHNmqeFSEt2ZBsCriorKnn3Z2pj+fd9kmI6QoWw4//DL+icEBfc0U7qJCisqrTsKTjw4fNFy2pW9OqStD84g==}
     dependencies:
       is-arrayish: 0.2.1
-
-  /error-inject@1.0.0:
-    resolution: {integrity: sha512-JM8N6PytDbmIYm1IhPWlo8vr3NtfjhDY/1MhD/a5b/aad/USE8a0+NsqE9d5n+GVGmuNkPQWm4bFQWv18d8tMg==}
-    dev: false
 
   /error-stack-parser@2.1.4:
     resolution: {integrity: sha512-Sk5V6wVazPhq5MhpO+AUxJn5x7XSXGl1R93Vn7i+zS15KDVxQijejNCrz8340/2bgLBjR9GtEG8ZVKONDjcqGQ==}
@@ -31922,46 +31901,39 @@ packages:
     engines: {node: '>= 8'}
     dev: true
 
-  /koa-compose@3.2.1:
-    resolution: {integrity: sha512-8gen2cvKHIZ35eDEik5WOo8zbVp9t4cP8p4hW4uE55waxolLRexKKrqfCpwhGVppnB40jWeF8bZeTVg99eZgPw==}
-    dependencies:
-      any-promise: 1.3.0
-    dev: false
-
   /koa-compose@4.1.0:
     resolution: {integrity: sha512-8ODW8TrDuMYvXRwra/Kh7/rJo9BtOfPc6qO8eAfC80CnCvSjSl0bkRM24X6/XBBEyj0v1nRUQ1LyOy3dbqOWXw==}
     dev: false
 
-  /koa-convert@1.2.0:
-    resolution: {integrity: sha512-K9XqjmEDStGX09v3oxR7t5uPRy0jqJdvodHa6wxWTHrTfDq0WUNnYTOOUZN6g8OM8oZQXprQASbiIXG2Ez8ehA==}
-    engines: {node: '>= 4'}
+  /koa-convert@2.0.0:
+    resolution: {integrity: sha512-asOvN6bFlSnxewce2e/DK3p4tltyfC4VM7ZwuTuepI7dEQVcvpyFuBcEARu1+Hxg8DIwytce2n7jrZtRlPrARA==}
+    engines: {node: '>= 10'}
     dependencies:
       co: 4.6.0
-      koa-compose: 3.2.1
+      koa-compose: 4.1.0
     dev: false
 
-  /koa@2.11.0:
-    resolution: {integrity: sha512-EpR9dElBTDlaDgyhDMiLkXrPwp6ZqgAIBvhhmxQ9XN4TFgW+gEz6tkcsNI6BnUbUftrKDjVFj4lW2/J2aNBMMA==}
+  /koa@2.15.3:
+    resolution: {integrity: sha512-j/8tY9j5t+GVMLeioLaxweJiKUayFhlGqNTzf2ZGwL0ZCQijd2RLHK0SLW5Tsko8YyyqCZC2cojIb0/s62qTAg==}
     engines: {node: ^4.8.4 || ^6.10.1 || ^7.10.1 || >= 8.1.4}
     dependencies:
       accepts: 1.3.8
       cache-content-type: 1.0.1
       content-disposition: 0.5.4
       content-type: 1.0.5
-      cookies: 0.8.0
-      debug: 3.1.0
+      cookies: 0.9.1
+      debug: 4.3.5(supports-color@8.1.1)
       delegates: 1.0.0
-      depd: 1.1.2
+      depd: 2.0.0
       destroy: 1.2.0
       encodeurl: 1.0.2
-      error-inject: 1.0.0
       escape-html: 1.0.3
       fresh: 0.5.2
       http-assert: 1.5.0
       http-errors: 1.8.1
       is-generator-function: 1.0.10
       koa-compose: 4.1.0
-      koa-convert: 1.2.0
+      koa-convert: 2.0.0
       on-finished: 2.4.1
       only: 0.0.2
       parseurl: 1.3.3
@@ -37710,14 +37682,14 @@ packages:
       '@nx/vite': 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.6.13)(@types/node@20.12.12)(nx@17.2.8)(typescript@5.5.2)(verdaccio@5.29.2)(vite@5.2.11)(vitest@1.2.2)
     dev: true
 
-  /qwik-speak@0.23.0(@builder.io/qwik@1.6.0):
+  /qwik-speak@0.23.0(@builder.io/qwik@1.7.3):
     resolution: {integrity: sha512-7bxNbXpDzWhqQ0H3nKCWnTdeo4tpjVFoc1XpzO9W1izo6GgvNIjyvK4u/qCF1d9yzyuMJCfibA7CSzhoxSbkaQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     peerDependencies:
       '@builder.io/qwik': '>=1.5.5'
     dependencies:
-      '@builder.io/qwik': 1.6.0(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)(undici@5.28.4)
+      '@builder.io/qwik': 1.7.3(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)
     dev: true
 
   /rambda@7.5.0:
