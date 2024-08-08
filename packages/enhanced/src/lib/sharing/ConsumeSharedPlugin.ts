@@ -45,6 +45,9 @@ const WebpackError = require(
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
+const { join, dirname } = require(
+  normalizeWebpackPath('webpack/lib/util/fs'),
+) as typeof import('webpack/lib/util/fs');
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
@@ -233,43 +236,73 @@ class ConsumeSharedPlugin {
                 packageName = match[0];
               }
 
-              getDescriptionFile(
-                compilation.inputFileSystem,
-                context,
-                ['package.json'],
-                (err, result) => {
-                  if (err) {
-                    requiredVersionWarning(
-                      `Unable to read description file: ${err}`,
-                    );
-                    return resolve(undefined);
-                  }
-                  //@ts-ignore
-                  const { data, path: descriptionPath } = result;
-                  if (!data) {
+              const getDescriptionFileCallback: Parameters<
+                typeof getDescriptionFile
+              >[3] = (err, result) => {
+                if (err) {
+                  requiredVersionWarning(
+                    `Unable to read description file: ${err}`,
+                  );
+                  return resolve(undefined);
+                }
+                //@ts-ignore
+                const { data, path: descriptionPath } = result;
+                const currentDirectory = dirname(
+                  compilation.inputFileSystem,
+                  descriptionPath,
+                );
+                const parentDirectory = dirname(
+                  compilation.inputFileSystem,
+                  currentDirectory,
+                );
+                if (!data) {
+                  if (currentDirectory === parentDirectory) {
                     requiredVersionWarning(
                       `Unable to find description file in ${context}.`,
                     );
                     return resolve(undefined);
                   }
-                  //@ts-ignore
-                  if (data.name === packageName) {
-                    // Package self-referencing
-                    return resolve(undefined);
-                  }
-                  const requiredVersion = getRequiredVersionFromDescriptionFile(
-                    data,
-                    packageName,
+
+                  return getDescriptionFile(
+                    compilation.inputFileSystem,
+                    parentDirectory,
+                    ['package.json'],
+                    getDescriptionFileCallback,
                   );
-                  if (typeof requiredVersion !== 'string') {
+                }
+                //@ts-ignore
+                if (data.name === packageName) {
+                  // Package self-referencing
+                  return resolve(undefined);
+                }
+                const requiredVersion = getRequiredVersionFromDescriptionFile(
+                  data,
+                  packageName,
+                );
+                if (typeof requiredVersion !== 'string') {
+                  if (currentDirectory === parentDirectory) {
                     requiredVersionWarning(
                       `Unable to find required version for "${packageName}" in description file (${descriptionPath}). It need to be in dependencies, devDependencies or peerDependencies.`,
                     );
                     return resolve(undefined);
                   }
-                  // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
-                  resolve(requiredVersion);
-                },
+
+                  return getDescriptionFile(
+                    compilation.inputFileSystem,
+                    parentDirectory,
+                    ['package.json'],
+                    getDescriptionFileCallback,
+                  );
+                }
+                // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+                resolve(requiredVersion);
+              };
+
+              getDescriptionFile(
+                compilation.inputFileSystem,
+                context,
+                ['package.json'],
+                getDescriptionFileCallback,
               );
             }),
           ]).then(([importResolved, requiredVersion]) => {
