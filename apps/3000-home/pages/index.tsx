@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import Head from 'next/head';
-import CheckoutTitle from 'checkout/CheckoutTitle';
 import ButtonOldAnt from 'checkout/ButtonOldAnt';
+import CheckoutTitle from 'checkout/CheckoutTitle';
 // const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
 // const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
 const WebpackSvgRemote = lazy(() =>
@@ -93,7 +93,7 @@ const Home = () => {
             <td>
               Load federated component from checkout with old antd version
             </td>
-            <td>[Button from antd@5.18.3]</td>
+            <td>[Button from antd@5.19.1]</td>
             <td>
               <Suspense fallback="loading ButtonOldAnt">
                 <ButtonOldAnt />
