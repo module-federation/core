@@ -16,6 +16,9 @@ export const getScope = (id: string): string => {
 export const getPrefetchId = (id: string): string =>
   encodeName(`${id}/${MFPrefetchCommon.identifier}`);
 
+export const compatGetPrefetchId = (id: string): string =>
+  encodeName(`${id}/VmokPrefetch`);
+
 export const getSignalFromManifest = (remoteSnapshot: ModuleInfo): boolean => {
   if (!remoteSnapshot) {
     return false;

@@ -10,7 +10,7 @@ import {
 } from '@module-federation/sdk';
 import { Remote } from '@module-federation/runtime/types';
 
-import { getPrefetchId } from './common/runtime-utils';
+import { getPrefetchId, compatGetPrefetchId } from './common/runtime-utils';
 
 declare module '@module-federation/runtime' {
   export interface Federation {
@@ -137,7 +137,9 @@ export class MFDataPrefetch {
 
   getExposeExports(id: string): PrefetchExports {
     const prefetchId = getPrefetchId(id);
-    const prefetchExports = this._exports[prefetchId] as PrefetchExports;
+    const compatId = compatGetPrefetchId(id);
+    const prefetchExports =
+      this._exports[prefetchId] || (this._exports[compatId] as PrefetchExports);
     return prefetchExports || {};
   }
 
@@ -145,13 +147,15 @@ export class MFDataPrefetch {
     const { id, functionId = 'default', refetchParams } = prefetchOptions;
     let prefetchResult;
     const prefetchId = getPrefetchId(id);
+    const compatId = compatGetPrefetchId(id);
     const memorizeId = id + functionId;
     const memory = this.prefetchMemory.get(memorizeId);
     if (!this.checkOutdate(prefetchOptions) && memory) {
       return memory;
     }
 
-    const prefetchExports = this._exports[prefetchId] as PrefetchExports;
+    const prefetchExports =
+      this._exports[prefetchId] || (this._exports[compatId] as PrefetchExports);
     if (!prefetchExports) {
       return;
     }
