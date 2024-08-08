@@ -17,18 +17,23 @@ export function applyServerPlugins(
   options: ModuleFederationPluginOptions,
 ): void {
   const chunkFileName = compiler.options?.output?.chunkFilename;
+  const filename = compiler.options?.output?.filename || '';
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
+  const suffix = `-[chunkhash].js`;
 
   if (
     typeof chunkFileName === 'string' &&
     uniqueName &&
     !chunkFileName.includes(uniqueName)
   ) {
-    const suffix = `-[chunkhash].js`;
     compiler.options.output.chunkFilename = chunkFileName.replace(
       '.js',
       suffix,
     );
+  }
+
+  if (typeof filename === 'string' && !filename.includes(suffix)) {
+    compiler.options.output.filename = filename.replace('.js', suffix);
   }
 
   new HoistContainerReferencesPlugin(options.name).apply(compiler);
