@@ -11,7 +11,7 @@ export default function () {
       return args;
     },
     resolveShare(args) {
-      console.log(args);
+      // console.log(args);
       return args;
     },
   };

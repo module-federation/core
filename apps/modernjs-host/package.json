@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/modernjs",
+  "name": "@module-federation/modernjs-host",
   "private": true,
   "version": "0.1.41",
   "scripts": {

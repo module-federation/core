@@ -79,7 +79,7 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
       }
       return Promise.resolve().then(() => {
         const exports = instance!.getExposeExports(id);
-        logger.info(`1. Start Prefetch: ${id} - ${performance.now()}`);
+        console.log(`1. Start Prefetch: ${id} - ${performance.now()}`);
         const result = Object.keys(exports).map((k) => {
           const value = instance!.prefetch({
             id,
@@ -175,7 +175,7 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
         await projectExports;
       }
       const exports = instance!.getExposeExports(id);
-      logger.info(
+      console.log(
         `1. PreloadRemote Start Prefetch: ${id} - ${performance.now()}`,
       );
       const result = Object.keys(exports).map((k) => {

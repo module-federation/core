@@ -24,7 +24,7 @@ export const usePrefetch = <T>(
   const isFirstMounted = useFirstMounted();
   if (isFirstMounted) {
     const startTiming = performance.now();
-    logger.info(
+    console.log(
       `2. Start Get Prefetch Data: ${options.id} - ${
         options.functionId || 'default'
       } - ${startTiming}`,
@@ -57,7 +57,7 @@ export const usePrefetch = <T>(
 
   useEffect(() => {
     const useEffectTiming = performance.now();
-    logger.info(
+    console.log(
       `3. Start Execute UseEffect: ${options.id} - ${
         options.functionId || 'default'
       } - ${useEffectTiming}`,
