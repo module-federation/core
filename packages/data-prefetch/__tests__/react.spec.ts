@@ -57,8 +57,9 @@ describe('usePrefetch', () => {
     const exposeExport = {
       [functionId]: executePrefetch,
     };
+    const exposeId = `${options.name}/button/${ModuleFederationSDK.MFPrefetchCommon.identifier}`;
     const projectExport = {
-      [options.name]: exposeExport,
+      [ModuleFederationSDK.encodeName(exposeId)]: exposeExport,
     };
     globalThis.__FEDERATION__.__PREFETCH__.__PREFETCH_EXPORTS__[options.name] =
       Promise.resolve(projectExport);
@@ -76,7 +77,7 @@ describe('usePrefetch', () => {
 
   it('should prefetch data on first mount', async () => {
     const { result } = renderHook(() =>
-      usePrefetch({ id: options.name, functionId }),
+      usePrefetch({ id: `${options.name}/button`, functionId }),
     );
     await result.current[0];
     expect(executePrefetch).toHaveBeenCalled();
@@ -86,14 +87,14 @@ describe('usePrefetch', () => {
 
   it('should refetch data when refreshExecutor is called', async () => {
     const { result } = renderHook(() =>
-      usePrefetch({ id: options.name, functionId }),
+      usePrefetch({ id: `${options.name}/button`, functionId }),
     );
 
     await result.current[0];
     expect(executePrefetch).toHaveBeenCalled();
     executePrefetch.mockClear();
     const { result: newCallResult } = renderHook(() =>
-      usePrefetch({ id: options.name, functionId }),
+      usePrefetch({ id: `${options.name}/button`, functionId }),
     );
     await newCallResult.current[0];
     expect(executePrefetch).not.toHaveBeenCalled();

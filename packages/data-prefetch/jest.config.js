@@ -21,7 +21,7 @@ module.exports = {
     '/node_modules/(?!((@byted/garfish-)|(byted-tea-sdk))).+\\.js$',
   ],
   transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest'],
+    '^.+\\.(t|j)sx?$': ['@swc/jest', { swcrc: false }],
   },
   rootDir: __dirname,
   testMatch: ['<rootDir>__tests__/**/**.spec.[jt]s?(x)'],

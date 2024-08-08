@@ -9,7 +9,7 @@ interface BabelPluginOptions {
   hook_id: string;
   import_pkg: string;
   attribute: string;
-  mf_name: string;
+  name: string;
   exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'];
 }
 
@@ -18,7 +18,7 @@ export default (babel: { types: any }, options: BabelPluginOptions) => {
   const t = babel.types;
   let shouldHandle = false;
   let scope = '';
-  const { mf_name: name, exposes } = options;
+  const { name, exposes } = options;
   if (!exposes) {
     return {};
   }

@@ -41,6 +41,14 @@ export class PrefetchPlugin implements WebpackPluginInstance {
     this.options.runtimePlugins!.push(
       path.resolve(__dirname, '../esm/shared/index.js'),
     );
+    const encodedName = encodeName(name as string);
+    const asyncEntryPath = path.resolve(
+      compiler.options.context,
+      `node_modules/${TEMP_DIR}/${encodedName}/bootstrap.js`,
+    );
+    if (fs.existsSync(asyncEntryPath)) {
+      fs.unlinkSync(asyncEntryPath);
+    }
     if (!this.options.dataPrefetch) {
       return;
     }
@@ -73,12 +81,6 @@ export class PrefetchPlugin implements WebpackPluginInstance {
     if (!this._reWriteExports) {
       return;
     }
-
-    const encodedName = encodeName(name as string);
-    const asyncEntryPath = path.resolve(
-      compiler.options.context,
-      `node_modules/${TEMP_DIR}/${encodedName}/bootstrap.js`,
-    );
     const tempDirRealPath = path.resolve(
       compiler.options.context,
       'node_modules',

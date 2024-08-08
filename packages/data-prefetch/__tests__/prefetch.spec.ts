@@ -1,11 +1,19 @@
 // Import the necessary modules and functions
 import { MFDataPrefetch } from '../src/prefetch';
-import { loadScript } from '@module-federation/sdk';
+import {
+  loadScript,
+  MFPrefetchCommon,
+  encodeName,
+} from '@module-federation/sdk';
 
 // Mock loadScript function from SDK
-jest.mock('@module-federation/sdk', () => ({
-  loadScript: jest.fn(() => Promise.resolve()),
-}));
+jest.mock('@module-federation/sdk', () => {
+  const originalModule = jest.requireActual('@module-federation/sdk');
+  return {
+    ...originalModule,
+    loadScript: jest.fn(() => Promise.resolve()),
+  };
+});
 
 describe('MF Data Prefetch', () => {
   let prefetch: MFDataPrefetch;
@@ -17,6 +25,7 @@ describe('MF Data Prefetch', () => {
       globalName: 'TestGlobalName',
     },
   };
+  const exposeId = `${options.name}/button/${MFPrefetchCommon.identifier}`;
 
   beforeEach(() => {
     globalThis.__FEDERATION__.__PREFETCH__ = {
@@ -53,20 +62,22 @@ describe('MF Data Prefetch', () => {
       nyPrefetch: () => {},
     };
     const projectExport = {
-      [options.name]: exposeExport,
+      [encodeName(exposeId)]: exposeExport,
     };
     globalThis.__FEDERATION__.__PREFETCH__.__PREFETCH_EXPORTS__[options.name] =
       Promise.resolve(projectExport);
 
     await prefetch.getProjectExports();
-    expect(prefetch.getExposeExports(options.name)).toEqual(exposeExport);
+    expect(prefetch.getExposeExports(`${options.name}/button`)).toEqual(
+      exposeExport,
+    );
   });
   // Prefetching with memory and executing prefetch function
   it('executes prefetch using prefetch function with and without memory', async () => {
     const id = options.name;
     const functionId = 'nyPrefetch';
     const refetchParams = 'testParams';
-    const prefetchOptions = { id, functionId, refetchParams };
+    const prefetchOptions = { id: `${id}/button`, functionId, refetchParams };
 
     // Creating a mock prefetch function
     const executePrefetch = jest.fn(() => 'Expected Result');
@@ -75,7 +86,7 @@ describe('MF Data Prefetch', () => {
     // Mock Project Exports
     globalThis.__FEDERATION__.__PREFETCH__.__PREFETCH_EXPORTS__[id] =
       Promise.resolve({
-        [id]: prefetchExports,
+        [encodeName(exposeId)]: prefetchExports,
       });
 
     await prefetch.getProjectExports();
