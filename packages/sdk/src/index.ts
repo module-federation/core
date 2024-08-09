@@ -11,4 +11,5 @@ export * from './logger';
 export * from './env';
 export * from './dom';
 export * from './node';
+export * from './react-native';
 export * from './normalizeOptions';

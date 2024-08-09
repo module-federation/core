@@ -1,8 +1,11 @@
 import {
+  CreateScriptHook,
   composeKeyWithSeparator,
   loadScript,
   loadScriptNode,
-  CreateScriptHookReturn,
+  loadScriptReactNative,
+  isNodeEnv,
+  isReactNativeEnv,
 } from '@module-federation/sdk';
 import { assert } from '../utils/logger';
 import { getRemoteEntryExports, globalLoading } from '../global';
@@ -66,10 +69,7 @@ export async function loadEntryScript({
   name: string;
   globalName: string;
   entry: string;
-  createScriptHook?: (
-    url: string,
-    attrs?: Record<string, any> | undefined,
-  ) => CreateScriptHookReturn;
+  createScriptHook?: CreateScriptHook;
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -80,35 +80,19 @@ export async function loadEntryScript({
     return remoteEntryExports;
   }
 
-  if (typeof document === 'undefined') {
-    return loadScriptNode(entry, {
-      attrs: { name, globalName },
-      createScriptHook,
-    })
-      .then(() => {
-        const { remoteEntryKey, entryExports } = getRemoteEntryExports(
-          name,
-          globalName,
-        );
-
-        assert(
-          entryExports,
-          `
-        Unable to use the ${name}'s '${entry}' URL with ${remoteEntryKey}'s globalName to get remoteEntry exports.
-        Possible reasons could be:\n
-        1. '${entry}' is not the correct URL, or the remoteEntry resource or name is incorrect.\n
-        2. ${remoteEntryKey} cannot be used to get remoteEntry exports in the window object.
-      `,
-        );
-
-        return entryExports;
-      })
-      .catch((e) => {
-        throw e;
-      });
+  let loadScriptCallback, attrs;
+  if (isNodeEnv()) {
+    loadScriptCallback = loadScriptNode;
+    attrs = { name, globalName };
+  } else if (isReactNativeEnv()) {
+    loadScriptCallback = loadScriptReactNative;
+    attrs = { name, globalName };
+  } else {
+    loadScriptCallback = loadScript;
+    attrs = {};
   }
 
-  return loadScript(entry, { attrs: {}, createScriptHook })
+  return loadScriptCallback(entry, { attrs, createScriptHook })
     .then(() => {
       const { remoteEntryKey, entryExports } = getRemoteEntryExports(
         name,
@@ -144,10 +128,7 @@ export async function getRemoteEntry({
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | undefined;
-  createScriptHook?: (
-    url: string,
-    attrs?: Record<string, any> | undefined,
-  ) => CreateScriptHookReturn;
+  createScriptHook?: CreateScriptHook;
 }): Promise<RemoteEntryExports | void> {
   const { entry, name, type, entryGlobalName } = remoteInfo;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
