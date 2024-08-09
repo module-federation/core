@@ -51,6 +51,64 @@ function Navgation(Info: {
         },
       ],
     },
+    {
+      label: 'Remote2',
+      key: '/remote2',
+      icon: <SettingOutlined />,
+      children: [
+        {
+          type: 'group',
+          label: 'Sub Router',
+          children: [
+            {
+              label: (
+                <Link to="/remote2" className="menu-remote1-home-link">
+                  Home
+                </Link>
+              ),
+              key: 'remote2:setting:1',
+            },
+            {
+              label: (
+                <Link to="/remote2/detail" className="menu-remote1-detail-link">
+                  Detail
+                </Link>
+              ),
+              key: 'remote2:setting:2',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      label: 'Remote3',
+      key: '/remote3',
+      icon: <SettingOutlined />,
+      children: [
+        {
+          type: 'group',
+          label: 'Sub Router',
+          children: [
+            {
+              label: (
+                <Link to="/remote3" className="menu-remote1-home-link">
+                  Home
+                </Link>
+              ),
+              key: 'remote3:setting:1',
+            },
+            {
+              label: (
+                <Link to="/remote3/detail" className="menu-remote1-detail-link">
+                  Detail
+                </Link>
+              ),
+              key: 'remote3:setting:2',
+            },
+          ],
+        },
+      ],
+    },
   ];
 
   const onClick: MenuProps['onClick'] = (e) => {

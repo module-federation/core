@@ -1,6 +1,8 @@
 import React, { useContext } from 'react';
 // The upper alias react-router-dom$ into this file avoids the loop
-import * as ReactRouterDom from 'react-router-dom/';
+// @ts-ignore
+import * as ReactRouterDom from 'react-router-dom/index.js';
+
 import { RouterContext } from './context';
 import { LoggerInstance } from './utils';
 
@@ -17,6 +19,7 @@ function WrapperRouter(
     routerContextProps,
     WrapperRouterProps: props,
   });
+  // if (!routerContextProps) return <ReactRouterDom.BrowserRouter {...props} />;
 
   if (routerContextProps?.memoryRoute) {
     return (
@@ -51,7 +54,6 @@ function WrapperRouterProvider(
   const createBrowserRouter = (ReactRouterDom as any)[
     'create' + 'BrowserRouter'
   ];
-
   // if (!routerContextProps) return <RouterProvider {...props} />;
 
   if (routerContextProps.memoryRoute) {
@@ -69,7 +71,8 @@ function WrapperRouterProvider(
   }
 }
 
-export * from 'react-router-dom/';
+// @ts-ignore
+// export * from 'react-router-dom/index.js';
 
 export { WrapperRouter as BrowserRouter };
 export { WrapperRouterProvider as RouterProvider };

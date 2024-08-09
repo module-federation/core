@@ -1,4 +1,5 @@
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+// import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import path from 'path';
@@ -12,16 +13,10 @@ export default defineConfig({
     alias: {
       react: path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
-      // 'react-router-dom': path.resolve(__dirname, 'node_modules/react-router-dom'),
-      // 'react-router-dom$': path.resolve(
-      //   __dirname,
-      //   'node_modules/@module-federation/bridge-react/dist/router.es.js',
-      // ),
     },
   },
   server: {
     port: 2002,
-    host: 'localhost',
   },
   dev: {
     // It is necessary to configure assetPrefix, and in the production environment, you need to configure output.assetPrefix

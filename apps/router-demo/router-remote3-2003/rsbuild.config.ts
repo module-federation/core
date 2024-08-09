@@ -11,7 +11,6 @@ export default defineConfig({
   },
   server: {
     port: 2003,
-    host: 'localhost',
   },
   dev: {
     // It is necessary to configure assetPrefix, and in the production environment, you need to configure output.assetPrefix

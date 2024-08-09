@@ -84,5 +84,4 @@ const App = (info?: { basename?: string; initialEntries?: Array<string> }) => {
     </>
   );
 };
-
 export default App;

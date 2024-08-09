@@ -20,6 +20,16 @@
       "import": "./dist/router.es.js",
       "require": "./dist/router.cjs.js"
     },
+    "./router-v5": {
+      "types": "./dist/router-v5.d.ts",
+      "import": "./dist/router-v5.es.js",
+      "require": "./dist/router-v5.cjs.js"
+    },
+    "./router-v6": {
+      "types": "./dist/router-v6.d.ts",
+      "import": "./dist/router-v6.es.js",
+      "require": "./dist/router-v6.cjs.js"
+    },
     "./*": "./*"
   },
   "scripts": {
