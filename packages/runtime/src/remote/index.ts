@@ -13,6 +13,7 @@ import {
   PreloadRemoteArgs,
   Remote,
   RemoteInfo,
+  RemoteEntryExports,
 } from '../type';
 import { FederationHost } from '../core';
 import {
@@ -131,6 +132,16 @@ export class RemoteHandler {
       options: Options;
       origin: FederationHost;
     }>(),
+    getRemoteEntry: new AsyncHook<
+      [
+        {
+          origin: FederationHost;
+          remoteInfo: RemoteInfo;
+          remoteEntryExports?: RemoteEntryExports;
+        },
+      ],
+      Promise<RemoteEntryExports>
+    >(),
   });
 
   constructor(host: FederationHost) {

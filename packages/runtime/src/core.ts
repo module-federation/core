@@ -104,16 +104,6 @@ export class FederationHost {
       ],
       HTMLLinkElement | void
     >(),
-    loadEntry: new AsyncHook<
-      [
-        {
-          origin: FederationHost;
-          remoteInfo: RemoteInfo;
-          remoteEntryExports?: RemoteEntryExports;
-        },
-      ],
-      Promise<RemoteEntryExports> | void
-    >(),
     // only work for manifest , so not open to the public yet
     fetch: new AsyncHook<
       [string, RequestInit],
