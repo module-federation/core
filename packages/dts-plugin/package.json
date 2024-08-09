@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dts-plugin",
-  "version": "0.3.3",
+  "version": "0.3.5",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -54,14 +54,14 @@
     "chalk": "3.0.0",
     "fs-extra": "9.1.0",
     "isomorphic-ws": "5.0.0",
-    "koa": "2.11.0",
+    "koa": "2.15.3",
     "log4js": "6.9.1",
     "node-schedule": "2.1.1",
     "ws": "8.17.1"
   },
   "devDependencies": {
     "@types/ws": "8.5.10",
-    "@types/koa": "2.11.2",
+    "@types/koa": "2.15.0",
     "@types/node-schedule": "2.1.7",
     "@module-federation/runtime": "workspace:*",
     "vue": "^3.4.29",

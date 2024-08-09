@@ -1,6 +1,7 @@
 import type { WebpackPluginInstance, Compiler } from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type IModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
+import type { ResourceInfo } from '@module-federation/manifest';
 
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import path from 'node:path';
@@ -45,7 +46,7 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
     }
   }
 
-  get statsResourceInfo() {
+  get statsResourceInfo(): Partial<ResourceInfo> | undefined {
     return this._mfPlugin?.statsResourceInfo;
   }
 }
