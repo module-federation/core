@@ -141,7 +141,7 @@ export class FederationHost {
   }
 
   private envPlugin() {
-    if (typeof document === 'undefined') {
+    if (!isBrowserEnv()) {
       return nodePlugin();
     }
     return domPlugin();
