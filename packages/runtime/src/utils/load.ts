@@ -26,7 +26,7 @@ export async function getRemoteEntry({
   if (!globalLoading[uniqueKey]) {
     const loadEntryHookRes = origin.remoteHandler.hooks.lifecycle.loadEntry
       .emit({
-        origin,
+        createScriptHook: origin.loaderHook.lifecycle.createScript,
         remoteInfo,
         remoteEntryExports,
       })

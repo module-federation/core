@@ -55,7 +55,7 @@ export function nodePlugin(): FederationRuntimePlugin {
   return {
     name: 'node-plugin',
     async loadEntry(args) {
-      const { origin, remoteInfo } = args;
+      const { createScriptHook, remoteInfo } = args;
       const { entry, entryGlobalName, name } = remoteInfo;
 
       return loadEntryScript({
@@ -63,8 +63,7 @@ export function nodePlugin(): FederationRuntimePlugin {
         globalName: entryGlobalName,
         name,
         createScriptHook: (url, attrs) => {
-          const hook = origin.loaderHook.lifecycle.createScript;
-          const res = hook.emit({ url, attrs });
+          const res = createScriptHook.emit({ url, attrs });
 
           if (!res) return;
 

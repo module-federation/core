@@ -100,7 +100,7 @@ export function domPlugin(): FederationRuntimePlugin {
   return {
     name: 'dom-plugin',
     async loadEntry(args) {
-      const { origin, remoteInfo, remoteEntryExports } = args;
+      const { createScriptHook, remoteInfo, remoteEntryExports } = args;
       const { entry, entryGlobalName, name, type } = remoteInfo;
 
       if (['esm', 'module'].includes(type)) {
@@ -119,8 +119,7 @@ export function domPlugin(): FederationRuntimePlugin {
         globalName: entryGlobalName,
         name,
         createScriptHook: (url, attrs) => {
-          const hook = origin.loaderHook.lifecycle.createScript;
-          const res = hook.emit({ url, attrs });
+          const res = createScriptHook.emit({ url, attrs });
 
           if (!res) return;
 
