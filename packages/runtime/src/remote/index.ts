@@ -132,7 +132,7 @@ export class RemoteHandler {
       options: Options;
       origin: FederationHost;
     }>(),
-    getRemoteEntry: new AsyncHook<
+    loadEntry: new AsyncHook<
       [
         {
           origin: FederationHost;

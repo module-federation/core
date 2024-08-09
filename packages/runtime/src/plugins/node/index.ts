@@ -54,7 +54,7 @@ export async function loadEntryScript({
 export function nodePlugin(): FederationRuntimePlugin {
   return {
     name: 'node-plugin',
-    async getRemoteEntry(args) {
+    async loadEntry(args) {
       const { origin, remoteInfo } = args;
       const { entry, entryGlobalName, name } = remoteInfo;
 
