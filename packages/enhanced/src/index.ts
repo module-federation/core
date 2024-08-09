@@ -10,12 +10,6 @@ export { default as FederationRuntimePlugin } from './wrapper/FederationRuntimeP
 export { default as AsyncBoundaryPlugin } from './wrapper/AsyncBoundaryPlugin';
 export { default as HoistContainerReferencesPlugin } from './wrapper/HoistContainerReferencesPlugin';
 
-export {
-  isRequiredVersion,
-  normalizeVersion,
-  getDescriptionFile,
-  getRequiredVersionFromDescriptionFile,
-} from './lib/sharing/utils';
 export { parseOptions } from './lib/container/options';
 
 export const container = {
