@@ -1,5 +1,6 @@
 import type { Compiler } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { MFPrefetchCommon, encodeName } from '@module-federation/sdk';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import {
   getFederationGlobalScope,
@@ -44,9 +45,13 @@ class FederationRuntimePlugin {
     this.entryFilePath = '';
     this.bundlerRuntimePath = BundlerRuntimePath;
   }
-
-  static getTemplate(runtimePlugins: string[], bundlerRuntimePath?: string) {
+  static getTemplate(
+    compiler: Compiler,
+    options: moduleFederationPlugin.ModuleFederationPluginOptions,
+    bundlerRuntimePath?: string,
+  ) {
     // internal runtime plugin
+    const runtimePlugins = options.runtimePlugins;
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
       bundlerRuntimePath || BundlerRuntimePath,
     );
@@ -67,7 +72,14 @@ class FederationRuntimePlugin {
         runtimePluginNames.push(runtimePluginName);
       });
     }
-
+    if (!compiler.options.context) {
+      throw new Error('compiler.options.context is not defined');
+    }
+    const encodedName = encodeName(options.name as string);
+    const prefetchEntry = path.resolve(
+      compiler.options.context,
+      `node_modules/.mf/${encodedName}/bootstrap.js`,
+    );
     return Template.asString([
       `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
@@ -104,25 +116,44 @@ class FederationRuntimePlugin {
         Template.indent([`${federationGlobal}.installInitialConsumes()`]),
         '}',
       ]),
+      fs.existsSync(prefetchEntry)
+        ? Template.indent([
+            'function injectPrefetch() {',
+            `globalThis.__FEDERATION__ = globalThis.__FEDERATION__ || {};`,
+            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] || {`,
+            `entryLoading: {},`,
+            `instance: new Map(),`,
+            `__PREFETCH_EXPORTS__: {},`,
+            `};`,
+            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] || {};`,
+            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}']['${options.name}'] = import('${prefetchEntry}');`,
+            '}',
+            `${federationGlobal}.prefetch = injectPrefetch`,
+          ])
+        : '',
+      `if(!globalThis.isRemote && ${federationGlobal}.prefetch){`,
+      `${federationGlobal}.prefetch()`,
+      '}',
       '}',
     ]);
   }
 
   static getFilePath(
-    containerName: string,
-    runtimePlugins: string[],
+    compiler: Compiler,
+    options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
   ) {
+    const containerName = options.name;
     const hash = createHash(
       `${containerName} ${FederationRuntimePlugin.getTemplate(
-        runtimePlugins,
+        compiler,
+        options,
         bundlerRuntimePath,
       )}`,
     );
     return path.join(TEMP_DIR, `entry.${hash}.js`);
   }
-
-  getFilePath() {
+  getFilePath(compiler: Compiler) {
     if (this.entryFilePath) {
       return this.entryFilePath;
     }
@@ -132,18 +163,17 @@ class FederationRuntimePlugin {
     }
 
     this.entryFilePath = FederationRuntimePlugin.getFilePath(
-      this.options.name!,
-      this.options.runtimePlugins!,
+      compiler,
+      this.options,
       this.bundlerRuntimePath,
     );
     return this.entryFilePath;
   }
-
-  ensureFile() {
+  ensureFile(compiler: Compiler) {
     if (!this.options) {
       return;
     }
-    const filePath = this.getFilePath();
+    const filePath = this.getFilePath(compiler);
     try {
       fs.readFileSync(filePath);
     } catch (err) {
@@ -151,7 +181,8 @@ class FederationRuntimePlugin {
       fs.writeFileSync(
         filePath,
         FederationRuntimePlugin.getTemplate(
-          this.options.runtimePlugins!,
+          compiler,
+          this.options,
           this.bundlerRuntimePath,
         ),
       );
@@ -159,9 +190,8 @@ class FederationRuntimePlugin {
   }
 
   prependEntry(compiler: Compiler) {
-    this.ensureFile();
-    const entryFilePath = this.getFilePath();
-
+    this.ensureFile(compiler);
+    const entryFilePath = this.getFilePath(compiler);
     modifyEntry({
       compiler,
       prependEntry: (entry) => {

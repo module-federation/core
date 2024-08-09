@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { Helmet } from '@modern-js/runtime/head';
+import Component from '../components/react-component';
 import './index.css';
 
 const Index = () => (
@@ -87,6 +88,7 @@ const Index = () => (
         </a>
       </div>
     </main>
+    <Component />
   </div>
 );
 

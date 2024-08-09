@@ -3,7 +3,7 @@ describe('modernjs/', () => {
 
   describe('Welcome message', () => {
     it('should display welcome message', () => {
-      cy.get('.title').contains('Welcome');
+      cy.get('.container-box').contains('Resend request with parameters');
     });
   });
 });

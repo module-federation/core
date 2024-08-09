@@ -1,0 +1,1 @@
+@module-federation/data-prefetch

@@ -11,6 +11,7 @@ import {
   composeKeyWithSeparator,
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
+import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import schema from '../../schemas/container/ModuleFederationPlugin';
@@ -80,6 +81,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     if (options.dts !== false) {
       new DtsPlugin(options).apply(compiler);
     }
+    new PrefetchPlugin(options).apply(compiler);
     new FederationRuntimePlugin(options).apply(compiler);
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =

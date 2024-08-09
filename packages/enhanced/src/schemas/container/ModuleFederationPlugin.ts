@@ -704,6 +704,10 @@ export default {
         },
       },
     },
+    DataPrefetch: {
+      description: 'Used to enable data prefetch.',
+      type: 'boolean',
+    },
   },
   title: 'ModuleFederationPluginOptions',
   type: 'object',
@@ -797,6 +801,9 @@ export default {
           type: 'boolean',
         },
       ],
+    },
+    dataPrefetch: {
+      $ref: '#/definitions/DataPrefetch',
     },
   },
 };

@@ -80,14 +80,16 @@ export class RemoteHandler {
       void
     >('onLoad'),
     handlePreloadModule: new SyncHook<
-      {
-        id: string;
-        name: string;
-        remote: Remote;
-        remoteSnapshot: ModuleInfo;
-        preloadConfig: PreloadRemoteArgs;
-        origin: FederationHost;
-      },
+      [
+        {
+          id: string;
+          name: string;
+          remote: Remote;
+          remoteSnapshot: ModuleInfo;
+          preloadConfig: PreloadRemoteArgs;
+          origin: FederationHost;
+        },
+      ],
       void
     >('handlePreloadModule'),
     errorLoadRemote: new AsyncHook<
@@ -183,8 +185,19 @@ export class RemoteHandler {
         await this.getRemoteModuleAndOptions({
           id,
         });
-      const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
-      const moduleOrFactory = (await module.get(idRes, expose, options)) as T;
+      const {
+        pkgNameOrAlias,
+        remote,
+        expose,
+        id: idRes,
+        remoteSnapshot,
+      } = remoteMatchInfo;
+      const moduleOrFactory = (await module.get(
+        idRes,
+        expose,
+        options,
+        remoteSnapshot,
+      )) as T;
 
       const moduleWrapper = await this.hooks.lifecycle.onLoad.emit({
         id: idRes,
