@@ -150,7 +150,6 @@ export function preloadAssets(
             const res = host.loaderHook.lifecycle.createLink.emit({
               url,
               attrs,
-              useLinkPreload,
             });
             if (res instanceof HTMLLinkElement) {
               return res;
@@ -175,7 +174,6 @@ export function preloadAssets(
             const res = host.loaderHook.lifecycle.createLink.emit({
               url,
               attrs,
-              useLinkPreload,
             });
             if (res instanceof HTMLLinkElement) {
               return res;
@@ -204,7 +202,6 @@ export function preloadAssets(
             const res = host.loaderHook.lifecycle.createLink.emit({
               url,
               attrs,
-              useLinkPreload,
             });
             if (res instanceof HTMLLinkElement) {
               return res;

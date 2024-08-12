@@ -3,4 +3,4 @@
 '@module-federation/sdk': patch
 ---
 
-fix: add attrs and useLinkPreload options to createLink hook
+fix: add attrs option to createLink hook
