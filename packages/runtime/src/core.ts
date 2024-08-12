@@ -90,6 +90,7 @@ export class FederationHost {
         {
           url: string;
           attrs?: Record<string, any>;
+          useLinkPreload?: boolean;
         },
       ],
       CreateScriptHookReturn
@@ -98,6 +99,8 @@ export class FederationHost {
       [
         {
           url: string;
+          attrs?: Record<string, any>;
+          useLinkPreload?: boolean;
         },
       ],
       HTMLLinkElement | void

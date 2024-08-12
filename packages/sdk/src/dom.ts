@@ -127,7 +127,10 @@ export function createLink(info: {
   cb: (value: void | PromiseLike<void>) => void;
   attrs: Record<string, string>;
   needDeleteLink?: boolean;
-  createLinkHook?: (url: string) => HTMLLinkElement | void;
+  createLinkHook?: (
+    url: string,
+    attrs?: Record<string, any>,
+  ) => HTMLLinkElement | void;
 }) {
   // <link rel="preload" href="script.js" as="script">
 
@@ -155,14 +158,15 @@ export function createLink(info: {
     link.setAttribute('href', info.url);
 
     let createLinkRes: void | HTMLLinkElement = undefined;
+    const attrs = info.attrs;
+
     if (info.createLinkHook) {
-      createLinkRes = info.createLinkHook(info.url);
+      createLinkRes = info.createLinkHook(info.url, attrs);
       if (createLinkRes instanceof HTMLLinkElement) {
         link = createLinkRes;
       }
     }
 
-    const attrs = info.attrs;
     if (attrs && !createLinkRes) {
       Object.keys(attrs).forEach((name) => {
         if (link && !link.getAttribute(name)) {
@@ -209,7 +213,7 @@ export function loadScript(
     attrs?: Record<string, any>;
     createScriptHook?: (
       url: string,
-      attrs?: Record<string, any> | undefined,
+      attrs?: Record<string, any>,
     ) => CreateScriptHookReturn;
   },
 ) {
