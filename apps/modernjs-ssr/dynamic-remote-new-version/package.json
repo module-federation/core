@@ -35,7 +35,7 @@
   "devDependencies": {
     "@modern-js/app-tools": "2.57.0",
     "@modern-js/eslint-config": "2.57.0",
-    "@modern-js/tsconfig": "2.57.0",
+    "@modern-js/tsconfig": "2.58.0",
     "@modern-js-app/eslint-config": "2.57.0",
     "typescript": "~5.0.4",
     "@types/jest": "~29.5.0",
