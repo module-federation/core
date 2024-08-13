@@ -131,7 +131,7 @@
     "@swc/helpers": "0.5.12",
     "@swc/jest": "0.2.36",
     "@tailwindcss/forms": "0.5.7",
-    "@testing-library/react": "15.0.7",
+    "@testing-library/react": "16.0.0",
     "@types/adm-zip": "0.5.5",
     "@types/chrome": "^0.0.268",
     "@types/download": "8.0.5",
