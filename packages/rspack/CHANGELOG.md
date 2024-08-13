@@ -1,5 +1,18 @@
 # @module-federation/rspack
 
+## 0.4.0
+
+### Patch Changes
+
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/sdk@0.4.0
+  - @module-federation/dts-plugin@0.4.0
+  - @module-federation/runtime-tools@0.4.0
+  - @module-federation/bridge-react-webpack-plugin@0.4.0
+  - @module-federation/managers@0.4.0
+  - @module-federation/manifest@0.4.0
+
 ## 0.3.5
 
 ### Patch Changes

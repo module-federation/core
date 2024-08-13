@@ -1,5 +1,13 @@
 # [3.1.0](https://github.com/module-federation/core/compare/utils-3.0.2...utils-3.1.0) (2023-10-26)
 
+## 3.1.2
+
+### Patch Changes
+
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/sdk@0.4.0
+
 ## 3.1.1
 
 ### Patch Changes
