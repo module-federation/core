@@ -145,9 +145,10 @@ describe('createScript', () => {
         },
       });
 
-      expect(script.async).toBe(true);
+      // if user return element by createScriptHook, it will not add default attrs
+      expect(script.async).toBe(false);
       expect(script.crossOrigin).toBe('use-credentials');
-      expect(script.getAttribute('data-test')).toBe('test');
+      expect(script.getAttribute('data-test')).toBe(null);
     });
   });
 });
@@ -222,10 +223,11 @@ describe('createLink', () => {
       },
     });
 
-    expect(link.rel).toBe('preload');
+    // if user return element by createScriptHook, it will not add default attrs
+    expect(link.rel).toBe('');
     expect(link.crossOrigin).toBe('use-credentials');
-    expect(link.getAttribute('as')).toBe('script');
-    expect(link.getAttribute('data-test')).toBe('test');
+    expect(link.getAttribute('as')).toBe(null);
+    expect(link.getAttribute('data-test')).toBe(null);
   });
 
   it('should call the callback when the link loads', () => {
