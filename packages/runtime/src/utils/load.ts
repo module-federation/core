@@ -3,8 +3,66 @@ import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { globalLoading } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
 import { FederationHost } from '../core';
-import { loadEntryNode } from '../plugins/node';
-import { loadEntryDom } from '../plugins/dom';
+import { loadEntryNode } from '../plugins/node/loadEntry';
+import { loadEntryDom } from '../plugins/dom/loadEntry';
+
+function loadEntryNodeFallback({
+  remoteInfo,
+  createScriptHook,
+}: {
+  remoteInfo: RemoteInfo;
+  createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
+}) {
+  return loadEntryNode({
+    entry: remoteInfo.entry,
+    entryGlobalName: remoteInfo.entryGlobalName,
+    name: remoteInfo.name,
+    createScriptHook: (url, attrs) => {
+      const res = createScriptHook.emit({ url, attrs });
+
+      if (!res) return;
+
+      if ('url' in res) {
+        return res;
+      }
+
+      return;
+    },
+  });
+}
+
+function loadEntryDomFallback({
+  remoteInfo,
+  remoteEntryExports,
+  createScriptHook,
+}: {
+  remoteInfo: RemoteInfo;
+  remoteEntryExports?: RemoteEntryExports;
+  createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
+}) {
+  return loadEntryDom({
+    entry: remoteInfo.entry,
+    entryGlobalName: remoteInfo.entryGlobalName,
+    name: remoteInfo.name,
+    type: remoteInfo.type,
+    remoteEntryExports,
+    createScriptHook: (url, attrs) => {
+      const res = createScriptHook.emit({ url, attrs });
+
+      if (!res) return;
+
+      if (res instanceof HTMLScriptElement) {
+        return res;
+      }
+
+      if ('script' in res || 'timeout' in res) {
+        return res;
+      }
+
+      return;
+    },
+  });
+}
 
 export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
   const { entry, name } = remoteInfo;
@@ -32,6 +90,7 @@ export async function getRemoteEntry({
         remoteInfo,
         remoteEntryExports,
       });
+
     if (loadEntryHookRes) {
       globalLoading[uniqueKey] = loadEntryHookRes.then(
         (res) => res || undefined,
@@ -39,44 +98,15 @@ export async function getRemoteEntry({
     } else {
       const createScriptHook = origin.loaderHook.lifecycle.createScript;
       if (!isBrowserEnv()) {
-        globalLoading[uniqueKey] = loadEntryNode({
-          entry: remoteInfo.entry,
-          entryGlobalName: remoteInfo.entryGlobalName,
-          name: remoteInfo.name,
-          createScriptHook: (url, attrs) => {
-            const res = createScriptHook.emit({ url, attrs });
-
-            if (!res) return;
-
-            if ('url' in res) {
-              return res;
-            }
-
-            return;
-          },
+        globalLoading[uniqueKey] = loadEntryNodeFallback({
+          remoteInfo,
+          createScriptHook,
         });
       } else {
-        globalLoading[uniqueKey] = loadEntryDom({
-          entry: remoteInfo.entry,
-          entryGlobalName: remoteInfo.entryGlobalName,
-          name: remoteInfo.name,
-          type: remoteInfo.type,
+        globalLoading[uniqueKey] = loadEntryDomFallback({
+          remoteInfo,
           remoteEntryExports,
-          createScriptHook: (url, attrs) => {
-            const res = createScriptHook.emit({ url, attrs });
-
-            if (!res) return;
-
-            if (res instanceof HTMLScriptElement) {
-              return res;
-            }
-
-            if ('script' in res || 'timeout' in res) {
-              return res;
-            }
-
-            return;
-          },
+          createScriptHook,
         });
       }
     }
