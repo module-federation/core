@@ -1,5 +1,25 @@
 # @module-federation/esbuild
 
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/sdk@0.4.0
+
+## 0.0.13
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.5
+
+## 0.0.12
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.4
+
 ## 0.0.11
 
 ### Patch Changes
