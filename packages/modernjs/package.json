@@ -58,7 +58,7 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@swc/helpers": "0.5.3",
+    "@swc/helpers": "0.5.12",
     "@modern-js/utils": "2.54.2",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
