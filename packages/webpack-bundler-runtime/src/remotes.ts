@@ -1,7 +1,8 @@
 import { attachShareScopeMap } from './attachShareScopeMap';
 import type { RemoteEntryExports } from './types';
 import { RemotesOptions } from './types';
-import { decodeName, ENCODE_NAME_PREFIX } from '@module-federation/sdk';
+import { ENCODE_NAME_PREFIX, FEDERATION_SUPPORTED_TYPES } from './constant';
+import { decodeName } from '@module-federation/sdk';
 
 export function remotes(options: RemotesOptions) {
   const {
@@ -115,7 +116,7 @@ export function remotes(options: RemotesOptions) {
 
       const useRuntimeLoad =
         remoteInfos.length === 1 &&
-        ['script'].includes(remoteInfos[0].externalType) &&
+        FEDERATION_SUPPORTED_TYPES.includes(remoteInfos[0].externalType) &&
         remoteInfos[0].name;
 
       if (useRuntimeLoad) {

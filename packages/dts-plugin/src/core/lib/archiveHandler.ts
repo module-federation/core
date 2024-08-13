@@ -8,6 +8,7 @@ import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { retrieveMfTypesPath } from './typeScriptCompiler';
 import { fileLog } from '../../server';
 import { axiosGet } from './utils';
+import { TsConfigJson } from '../interfaces/TsConfigJson';
 
 export const retrieveTypesZipPath = (
   mfTypesPath: string,
@@ -19,7 +20,7 @@ export const retrieveTypesZipPath = (
   );
 
 export const createTypesArchive = async (
-  tsConfig: typescript.CompilerOptions,
+  tsConfig: TsConfigJson,
   remoteOptions: Required<RemoteOptions>,
 ) => {
   const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);

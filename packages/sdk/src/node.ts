@@ -125,7 +125,7 @@ export function createScriptNode(
         exportedInterface as keyof typeof scriptContext.module.exports,
       );
     } catch (e) {
-      cb(new Error(`Script execution error: ${e}`));
+      cb(e instanceof Error ? e : new Error(`Script execution error: ${e}`));
     }
   };
 

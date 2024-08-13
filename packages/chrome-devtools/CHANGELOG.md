@@ -1,5 +1,68 @@
 # @module-federation/devtools
 
+## 0.4.0
+
+### Patch Changes
+
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/sdk@0.4.0
+
+## 0.3.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.5
+
+## 0.3.4
+
+### Patch Changes
+
+- 2a1df29: fix(chrome-devtools): fix dependency graph lose node
+  - @module-federation/sdk@0.3.4
+
+## 0.3.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.3
+
+## 0.3.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.2
+
+## 0.3.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.1
+
+## 0.3.0
+
+### Minor Changes
+
+- fa37cc4: feat: support modern.js ssr [#2348](https://github.com/module-federation/core/issues/2348)
+
+### Patch Changes
+
+- Updated dependencies [fa37cc4]
+  - @module-federation/sdk@0.3.0
+
+## 0.2.8
+
+### Patch Changes
+
+- @module-federation/sdk@0.2.8
+
+## 0.2.7
+
+### Patch Changes
+
+- Updated dependencies [b00ef13]
+  - @module-federation/sdk@0.2.7
+
 ## 0.2.6
 
 ### Patch Changes

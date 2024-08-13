@@ -5,6 +5,7 @@ import typescript from 'typescript';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { validateOptions } from '../lib/utils';
+import { TsConfigJson } from '../interfaces/TsConfigJson';
 
 const defaultOptions = {
   tsConfigPath: './tsconfig.json',
@@ -23,12 +24,44 @@ const defaultOptions = {
   extractThirdParty: false,
 } satisfies Partial<RemoteOptions>;
 
-const readTsConfig = ({
-  tsConfigPath,
-  typesFolder,
-  compiledTypesFolder,
-  context,
-}: Required<RemoteOptions>): typescript.CompilerOptions => {
+function getEffectiveRootDir(
+  parsedCommandLine: typescript.ParsedCommandLine,
+): string {
+  const compilerOptions = parsedCommandLine.options;
+
+  if (compilerOptions.rootDir) {
+    return compilerOptions.rootDir;
+  }
+
+  // if no set rootDir , infer the commonRoot
+  const files = parsedCommandLine.fileNames;
+  if (files.length > 0) {
+    const commonRoot = files
+      .map((file) => dirname(file))
+      .reduce((commonPath, fileDir) => {
+        while (!fileDir.startsWith(commonPath)) {
+          commonPath = dirname(commonPath);
+        }
+        return commonPath;
+      }, files[0]);
+    return commonRoot;
+  }
+
+  throw new Error(
+    'Can not get effective rootDir, please set compilerOptions.rootDir !',
+  );
+}
+
+const readTsConfig = (
+  {
+    tsConfigPath,
+    typesFolder,
+    compiledTypesFolder,
+    context,
+    additionalFilesToCompile,
+  }: Required<RemoteOptions>,
+  mapComponentsToExpose: Record<string, string>,
+): TsConfigJson => {
   const resolvedTsConfigPath = resolve(context, tsConfigPath);
 
   const readResult = typescript.readConfigFile(
@@ -40,11 +73,15 @@ const readTsConfig = ({
     throw new Error(readResult.error.messageText.toString());
   }
 
+  const rawTsConfigJson: TsConfigJson = readResult.config;
+
   const configContent = typescript.parseJsonConfigFileContent(
-    readResult.config,
+    rawTsConfigJson,
     typescript.sys,
     dirname(resolvedTsConfigPath),
   );
+  const rootDir = getEffectiveRootDir(configContent);
+
   const outDir = resolve(
     context,
     configContent.options.outDir || 'dist',
@@ -52,13 +89,38 @@ const readTsConfig = ({
     compiledTypesFolder,
   );
 
-  return {
-    ...configContent.options,
+  const defaultCompilerOptions: typescript.CompilerOptions = {
+    rootDir,
     emitDeclarationOnly: true,
     noEmit: false,
     declaration: true,
     outDir,
   };
+
+  rawTsConfigJson.compilerOptions = rawTsConfigJson.compilerOptions || {};
+
+  rawTsConfigJson.compilerOptions = {
+    ...rawTsConfigJson.compilerOptions,
+    ...defaultCompilerOptions,
+  };
+
+  const { paths, baseUrl, ...restCompilerOptions } =
+    rawTsConfigJson.compilerOptions || {};
+  rawTsConfigJson.compilerOptions = restCompilerOptions;
+
+  const filesToCompile = [
+    ...Object.values(mapComponentsToExpose),
+    ...configContent.fileNames.filter((filename) => filename.endsWith('.d.ts')),
+    ...additionalFilesToCompile,
+  ];
+
+  rawTsConfigJson.include = [];
+  rawTsConfigJson.files = filesToCompile;
+  rawTsConfigJson.exclude = [];
+  'references' in rawTsConfigJson && delete rawTsConfigJson.references;
+
+  rawTsConfigJson.extends = resolvedTsConfigPath;
+  return rawTsConfigJson;
 };
 
 const TS_EXTENSIONS = ['ts', 'tsx', 'vue', 'svelte'];
@@ -115,7 +177,7 @@ export const retrieveRemoteConfig = (options: RemoteOptions) => {
     ...options,
   };
   const mapComponentsToExpose = resolveExposes(remoteOptions);
-  const tsConfig = readTsConfig(remoteOptions);
+  const tsConfig = readTsConfig(remoteOptions, mapComponentsToExpose);
 
   return {
     tsConfig,

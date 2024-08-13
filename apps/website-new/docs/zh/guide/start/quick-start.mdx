@@ -85,25 +85,27 @@ export default function Button() {
 
 > 通过 Module Federation 导出 Button 组件
 
-```typescript
-//rsbuild.config.ts
+```typescript title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 
 export default defineConfig({
+  plugins: [pluginReact()],
   server: {
     port: 3000,
   },
   dev: {
     // 必须要配置 assetPrefix，在生产环境需要配置 output.assetPrefix
-    assetPrefix: 'http://localhost:3000',
+    assetPrefix: true,
   },
   tools: {
-    rspack: (config, { appendPlugins }) => {
-      // 需要设置一个唯一值不能和其他应用相等
-      config.output!.uniqueName = 'federation_provider';
-      appendPlugins([
+    rspack: {
+      output: {
+      // 需要设置一个唯一值，不能和其他应用相等
+        uniqueName: 'federation_provider'
+      },
+      plugins: [
         new ModuleFederationPlugin({
           name: 'federation_provider',
           exposes: {
@@ -111,10 +113,9 @@ export default defineConfig({
           },
           shared: ['react', 'react-dom'],
         }),
-      ]);
+      ],
     },
   },
-  plugins: [pluginReact()],
 });
 ```
 
@@ -199,19 +200,19 @@ bun add @module-federation/enhanced
 
 > 增加 Module Federation 插件消费远程模块
 
-```typescript
-// rsbuild.config.ts
+```typescript title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 
 export default defineConfig({
+  plugins: [pluginReact()],
   server: {
     port: 2000,
   },
   tools: {
-    rspack: (config, { appendPlugins }) => {
-      appendPlugins([
+    rspack: {
+      plugins: [
         new ModuleFederationPlugin({
           name: 'federation_consumer',
           remotes: {
@@ -220,10 +221,9 @@ export default defineConfig({
           },
           shared: ['react', 'react-dom'],
         }),
-      ]);
+      ],
     },
   },
-  plugins: [pluginReact()],
 });
 ```
 

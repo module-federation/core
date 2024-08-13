@@ -1,5 +1,5 @@
 import { IncomingMessage, createServer } from 'http';
-import { UpdateMode } from '../../core/index';
+import { UpdateMode } from '../constant';
 import WebSocket from 'isomorphic-ws';
 import schedule from 'node-schedule';
 import { parse } from 'url';

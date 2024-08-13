@@ -412,9 +412,9 @@ registerRemotes([
 
 `Federation Runtime` is one of the main features of the new version of `Module Federation`. It supports registering shared dependencies at runtime, dynamically registering and loading remote modules, and can expand the capabilities of `Module Federation` at runtime through `Plugin`. Build plugins are based on the basic implementation of Runtime.
 
-There are the following differences between `Federation Runtime` and `Compiler Plugin`:
+There are the following differences between `Federation Runtime` and `Build Plugin`:
 
-| Federation Runtime                                                                                                           | Compiler Plugin                                                                                 |
+| Federation Runtime                                                                                                           | Build Plugin                                                                                 |
 | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | Can be used independently of build plugins, and can directly use pure runtime for module loading in projects like `webpack4` | Build plugins require Webpack5, Rspack, Vite, or above                                         |
 | Supports dynamic registration of modules                                                                                     | Does not support dynamic registration of modules                                               |
@@ -435,8 +435,8 @@ Compared to module loaders like Systemjs and esmodule, this brings the following
 
 However, this model also brings the following impacts on the flexibility of the project and the maintenance cost of the build plugin:
 
-- Different build tools such as Webpack, Rspack, and Vite all need to implement Module Federation separately: Builder build tools and runtime, which affects maintenance costs and feature consistency.
+- Different build tools such as Webpack, Rspack, and Vite all need to implement `Module Federation`'s build tools and runtime separately, which impacts maintenance costs and feature consistency.
 - Unable to consume remote modules in build plugins that do not support Module Federation, such as Webpack 4.
 - Lack of flexibility, unable to dynamically add modules, change module behavior, and add more framework capabilities.
 
-Therefore, in the new version of `Module Federation` design, `Runtime` has been separated, and different build tools implement the export build of modules, collection of shared module information, and handling of remote module references based on `Runtime`. Other specific behaviors such as shared dependency reuse and remote module loading are all built into Runtime.
+Therefore, in the new version of `Module Federation` design, `Runtime` has been separated, and different build tools implement the export build of modules, collection of shared module information, and handling of remote module references based on `Runtime`. Other specific behaviors such as shared dependency reuse and remote module loading are all built into `Runtime`.

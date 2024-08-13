@@ -144,4 +144,12 @@ describe('generateSnapshotFromManifest', () => {
     );
     expect(remoteSnapshot).toEqual(snapshot.prodAppSnapshotWithAllParams);
   });
+
+  it('return snapshot with ssrRemoteEntry when manifest has ssrRemoteEntry field', () => {
+    const remoteSnapshot = generateSnapshotFromManifest(
+      manifest.ssrAppManifest,
+      {},
+    );
+    expect(remoteSnapshot).toEqual(snapshot.ssrProdAppSnapshotWithAllParams);
+  });
 });

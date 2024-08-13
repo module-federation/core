@@ -17,6 +17,7 @@ const defaultOptions = {
   context: process.cwd(),
   abortOnError: true,
   consumeAPITypes: false,
+  runtimePkgs: [],
 } satisfies Partial<HostOptions>;
 
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {
@@ -55,8 +56,8 @@ export const retrieveRemoteInfo = (options: {
     'entry' in parsedInfo
       ? parsedInfo.entry
       : parsedInfo.name === decodedRemote
-      ? decodedRemote
-      : '';
+        ? decodedRemote
+        : '';
 
   const zipUrl = url ? buildZipUrl(hostOptions, url) : '';
 

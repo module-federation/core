@@ -60,3 +60,8 @@ packages/enhanced/test/js
 
 /apps/manifest-demo/**/@mf-types/
 /apps/manifest-demo/webpack-host/@mf-types/
+/apps/manifest-demo/3008-webpack-host/@mf-types/
+
+# dts test cases
+**/dist-test
+**/dist-test/**
