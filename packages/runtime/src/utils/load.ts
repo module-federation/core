@@ -84,17 +84,15 @@ export async function getRemoteEntry({
   }
 
   if (!globalLoading[uniqueKey]) {
-    const loadEntryHookRes =
-      origin.remoteHandler.hooks.lifecycle.loadEntry.emit({
-        createScriptHook: origin.loaderHook.lifecycle.createScript,
-        remoteInfo,
-        remoteEntryExports,
-      });
-
-    if (loadEntryHookRes) {
-      globalLoading[uniqueKey] = loadEntryHookRes.then(
-        (res) => res || undefined,
-      );
+    const loadEntryHook = origin.remoteHandler.hooks.lifecycle.loadEntry;
+    if (loadEntryHook.listeners.size) {
+      globalLoading[uniqueKey] = loadEntryHook
+        .emit({
+          createScriptHook: origin.loaderHook.lifecycle.createScript,
+          remoteInfo,
+          remoteEntryExports,
+        })
+        .then((res) => res || undefined);
     } else {
       const createScriptHook = origin.loaderHook.lifecycle.createScript;
       if (!isBrowserEnv()) {
