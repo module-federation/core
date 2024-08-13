@@ -96,6 +96,37 @@ async function loadEntryScript({
     });
 }
 
+export async function loadEntryDom({
+  entry,
+  entryGlobalName,
+  remoteEntryExports,
+  name,
+  type,
+  createScriptHook,
+}: {
+  entry: string;
+  entryGlobalName: string;
+  remoteEntryExports: RemoteEntryExports | undefined;
+  name: string;
+  type: string;
+  createScriptHook: CreateScriptHookDom;
+}) {
+  switch (type) {
+    case 'esm':
+    case 'module':
+      return loadEsmEntry({ entry, remoteEntryExports });
+    case 'system':
+      return loadSystemJsEntry({ entry, remoteEntryExports });
+    default:
+      return loadEntryScript({
+        entry,
+        globalName: entryGlobalName,
+        name,
+        createScriptHook,
+      });
+  }
+}
+
 export function domPlugin(): FederationRuntimePlugin {
   return {
     name: 'dom-plugin',
@@ -103,21 +134,12 @@ export function domPlugin(): FederationRuntimePlugin {
       const { createScriptHook, remoteInfo, remoteEntryExports } = args;
       const { entry, entryGlobalName, name, type } = remoteInfo;
 
-      if (['esm', 'module'].includes(type)) {
-        return loadEsmEntry({
-          entry,
-          remoteEntryExports,
-        });
-      } else if (type === 'system') {
-        return loadSystemJsEntry({
-          entry,
-          remoteEntryExports,
-        });
-      }
-      return loadEntryScript({
+      return loadEntryDom({
         entry,
-        globalName: entryGlobalName,
+        entryGlobalName,
         name,
+        type,
+        remoteEntryExports,
         createScriptHook: (url, attrs) => {
           const res = createScriptHook.emit({ url, attrs });
 

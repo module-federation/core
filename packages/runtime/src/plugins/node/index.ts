@@ -4,7 +4,7 @@ import { getRemoteEntryExports } from '../../global';
 import { RemoteEntryExports } from '../../type';
 import { assert } from '../../utils';
 
-export async function loadEntryScript({
+async function loadEntryScript({
   name,
   globalName,
   entry,
@@ -51,6 +51,25 @@ export async function loadEntryScript({
     });
 }
 
+export async function loadEntryNode({
+  entry,
+  entryGlobalName,
+  name,
+  createScriptHook,
+}: {
+  entry: string;
+  entryGlobalName: string;
+  name: string;
+  createScriptHook: CreateScriptHookNode;
+}) {
+  return loadEntryScript({
+    entry,
+    globalName: entryGlobalName,
+    name,
+    createScriptHook,
+  });
+}
+
 export function nodePlugin(): FederationRuntimePlugin {
   return {
     name: 'node-plugin',
@@ -58,9 +77,9 @@ export function nodePlugin(): FederationRuntimePlugin {
       const { createScriptHook, remoteInfo } = args;
       const { entry, entryGlobalName, name } = remoteInfo;
 
-      return loadEntryScript({
+      return loadEntryNode({
         entry,
-        globalName: entryGlobalName,
+        entryGlobalName,
         name,
         createScriptHook: (url, attrs) => {
           const res = createScriptHook.emit({ url, attrs });

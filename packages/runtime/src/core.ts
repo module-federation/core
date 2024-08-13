@@ -117,11 +117,7 @@ export class FederationHost {
     const defaultOptions: Options = {
       id: getBuilderId(),
       name: userOptions.name,
-      plugins: [
-        this.envPlugin(),
-        snapshotPlugin(),
-        generatePreloadAssetsPlugin(),
-      ],
+      plugins: [snapshotPlugin(), generatePreloadAssetsPlugin()],
       remotes: [],
       shared: {},
       inBrowser: isBrowserEnv(),
@@ -138,13 +134,6 @@ export class FederationHost {
       ...(userOptions.plugins || []),
     ]);
     this.options = this.formatOptions(defaultOptions, userOptions);
-  }
-
-  private envPlugin() {
-    if (!isBrowserEnv()) {
-      return nodePlugin();
-    }
-    return domPlugin();
   }
 
   initOptions(userOptions: UserOptions): Options {
