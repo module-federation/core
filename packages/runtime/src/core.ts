@@ -1,4 +1,4 @@
-import { CreateScriptHookReturn } from '@module-federation/sdk';
+import type { CreateScriptHookReturn } from '@module-federation/sdk';
 import {
   Options,
   PreloadRemoteArgs,
@@ -22,8 +22,6 @@ import {
   SyncWaterfallHook,
 } from './utils/hooks';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
-import { domPlugin } from './plugins/dom';
-import { nodePlugin } from './plugins/node';
 import { snapshotPlugin } from './plugins/snapshot';
 import { isBrowserEnv } from './utils/env';
 import { getRemoteInfo } from './utils/load';
