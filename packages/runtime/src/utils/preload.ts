@@ -10,7 +10,7 @@ import {
 } from '../type';
 import { matchRemote } from './manifest';
 import { assert } from './logger';
-import { safeToString } from './tool';
+import { safeToString } from '@module-federation/sdk';
 import { FederationHost } from '../core';
 import { getRemoteEntry } from './load';
 

@@ -1,4 +1,5 @@
-import { getFMId, safeToString, assert } from '../utils';
+import { getFMId, assert } from '../utils';
+import { safeToString } from '@module-federation/sdk';
 import { getRemoteEntry } from '../utils/load';
 import { FederationHost } from '../core';
 import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';

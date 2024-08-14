@@ -12,6 +12,7 @@ import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
+import CustomRuntimePlugin from './CustomRuntimePlugin';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -69,16 +70,16 @@ class FederationRuntimePlugin {
     }
 
     return Template.asString([
-      `import federation from '${normalizedBundlerRuntimePath}';`,
+      // `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
-      `var prevFederation = ${federationGlobal};`,
-      `${federationGlobal} = {}`,
-      `for(var key in federation){`,
-      Template.indent([`${federationGlobal}[key] = federation[key];`]),
-      '}',
-      `for(var key in prevFederation){`,
-      Template.indent([`${federationGlobal}[key] = prevFederation[key];`]),
-      '}',
+      // `var prevFederation = ${federationGlobal};`,
+      // `${federationGlobal} = {}`,
+      // `for(var key in federation){`,
+      // Template.indent([`${federationGlobal}[key] = federation[key];`]),
+      // '}',
+      // `for(var key in prevFederation){`,
+      // Template.indent([`${federationGlobal}[key] = prevFederation[key];`]),
+      // '}',
       `if(!${federationGlobal}.instance){`,
       Template.indent([
         runtimePluginNames.length
@@ -293,6 +294,7 @@ class FederationRuntimePlugin {
     this.prependEntry(compiler);
     this.injectRuntime(compiler);
     this.setRuntimeAlias(compiler);
+    new CustomRuntimePlugin(this.entryFilePath).apply(compiler);
   }
 }
 

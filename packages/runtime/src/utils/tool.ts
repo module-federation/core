@@ -6,7 +6,6 @@ import type {
 import { Remote, RemoteInfoOptionalVersion, UserOptions } from '../type';
 import { warn } from './logger';
 import { isBrowserEnv } from './env';
-
 export function addUniqueItem(arr: Array<string>, item: string): Array<string> {
   if (arr.findIndex((name) => name === item) === -1) {
     arr.push(item);
@@ -47,15 +46,6 @@ export async function safeWrapper<T extends (...args: Array<any>) => any>(
   } catch (e) {
     !disableWarn && warn(e);
     return;
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function safeToString(info: any): string {
-  try {
-    return JSON.stringify(info, null, 2);
-  } catch (e) {
-    return '';
   }
 }
 

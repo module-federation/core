@@ -12,7 +12,7 @@
         "main": "packages/sdk/src/index.ts",
         "tsConfig": "packages/sdk/tsconfig.lib.json",
         "assets": [],
-        "external": ["@module-federation/*"],
+        "external": ["@module-federation/*", "@swc"],
         "project": "packages/sdk/package.json",
         "additionalEntryPoints": ["packages/sdk/src/normalize-webpack-path.ts"],
         "rollupConfig": "packages/sdk/rollup.config.js",

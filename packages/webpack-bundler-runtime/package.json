@@ -36,6 +36,7 @@
       "import": "./dist/container.esm.js",
       "require": "./dist/container.cjs.js"
     },
+    "./vendor": "./dist/vendored.js",
     "./*": "./*"
   },
   "typesVersions": {
@@ -49,6 +50,8 @@
     }
   },
   "devDependencies": {
-    "@module-federation/runtime": "workspace:*"
+    "@module-federation/runtime": "workspace:*",
+    "@rollup/plugin-swc": "^0.3.1",
+    "rollup-plugin-cleanup": "^3.2.1"
   }
 }
