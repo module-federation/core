@@ -1,4 +1,4 @@
-import { CreateScriptHookDom } from './types';
+import { CreateScriptHookDom, CreateScriptHookReturnDom } from './types';
 import { warn } from './utils';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function safeWrapper<T extends (...args: Array<any>) => any>(
@@ -50,7 +50,7 @@ export function createScript(info: {
     script = document.createElement('script');
     script.type = 'text/javascript';
     script.src = info.url;
-    let createScriptRes: CreateScriptHookReturn = undefined;
+    let createScriptRes: CreateScriptHookReturnDom = undefined;
     if (info.createScriptHook) {
       createScriptRes = info.createScriptHook(info.url, info.attrs);
 
