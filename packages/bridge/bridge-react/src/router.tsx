@@ -52,8 +52,6 @@ function WrapperRouterProvider(
     'create' + 'BrowserRouter'
   ];
 
-  // if (!routerContextProps) return <RouterProvider {...props} />;
-
   if (routerContextProps.memoryRoute) {
     const MemeoryRouterInstance = createMemoryRouter(routers, {
       initialEntries: [routerContextProps?.memoryRoute.entryPath],

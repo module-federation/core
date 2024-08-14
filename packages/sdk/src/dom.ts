@@ -57,8 +57,9 @@ export function createScript(info: {
     script = document.createElement('script');
     script.type = 'text/javascript';
     script.src = info.url;
+    let createScriptRes: CreateScriptHookReturn = undefined;
     if (info.createScriptHook) {
-      const createScriptRes = info.createScriptHook(info.url, info.attrs);
+      createScriptRes = info.createScriptHook(info.url, info.attrs);
 
       if (createScriptRes instanceof HTMLScriptElement) {
         script = createScriptRes;
@@ -68,7 +69,7 @@ export function createScript(info: {
       }
     }
     const attrs = info.attrs;
-    if (attrs) {
+    if (attrs && !createScriptRes) {
       Object.keys(attrs).forEach((name) => {
         if (script) {
           if (name === 'async' || name === 'defer') {
@@ -126,7 +127,10 @@ export function createLink(info: {
   cb: (value: void | PromiseLike<void>) => void;
   attrs: Record<string, string>;
   needDeleteLink?: boolean;
-  createLinkHook?: (url: string) => HTMLLinkElement | void;
+  createLinkHook?: (
+    url: string,
+    attrs?: Record<string, any>,
+  ) => HTMLLinkElement | void;
 }) {
   // <link rel="preload" href="script.js" as="script">
 
@@ -153,15 +157,17 @@ export function createLink(info: {
     link = document.createElement('link');
     link.setAttribute('href', info.url);
 
+    let createLinkRes: void | HTMLLinkElement = undefined;
+    const attrs = info.attrs;
+
     if (info.createLinkHook) {
-      const createLinkRes = info.createLinkHook(info.url);
+      createLinkRes = info.createLinkHook(info.url, attrs);
       if (createLinkRes instanceof HTMLLinkElement) {
         link = createLinkRes;
       }
     }
 
-    const attrs = info.attrs;
-    if (attrs) {
+    if (attrs && !createLinkRes) {
       Object.keys(attrs).forEach((name) => {
         if (link && !link.getAttribute(name)) {
           link.setAttribute(name, attrs[name]);
@@ -207,7 +213,7 @@ export function loadScript(
     attrs?: Record<string, any>;
     createScriptHook?: (
       url: string,
-      attrs?: Record<string, any> | undefined,
+      attrs?: Record<string, any>,
     ) => CreateScriptHookReturn;
   },
 ) {
