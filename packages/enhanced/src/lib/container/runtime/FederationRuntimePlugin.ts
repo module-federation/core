@@ -86,7 +86,8 @@ class FederationRuntimePlugin {
               `const pluginsToAdd = [`,
               Template.indent(
                 runtimePluginNames.map(
-                  (item) => `${item} ? ${item}() : false,`,
+                  (item) =>
+                    `typeof ${item} === 'function' ? ${item}() : typeof ${item} === 'object' && 'default' in ${item} : false,`,
                 ),
               ),
               `].filter(Boolean);`,
