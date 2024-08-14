@@ -5,3 +5,4 @@ export const getH4 = () => cy.get('h4');
 export const getP = () => cy.get('p');
 export const getPre = () => cy.get('pre');
 export const wait2s = () => cy.wait(2000);
+export const wait5s = () => cy.wait(5000);

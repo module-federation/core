@@ -33,9 +33,5 @@ describe('router-host-2000/memory-router', () => {
       cy.get('.self-remote3-detail-link').click();
       getH2().contains('Remote3 detail page');
     });
-    it('jump to remote error page', () => {
-      getP().contains('Something went wrong');
-      getPre().contains('This is a deliberately thrown error');
-    });
   });
 });

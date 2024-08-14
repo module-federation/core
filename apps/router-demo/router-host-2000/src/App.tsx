@@ -1,6 +1,10 @@
 import { useRef, useEffect, ForwardRefExoticComponent } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { loadRemote } from '@module-federation/enhanced/runtime';
+import {
+  init,
+  loadRemote,
+  RetryPlugin,
+} from '@module-federation/enhanced/runtime';
 import { createRemoteComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
@@ -8,9 +12,22 @@ import Home from './pages/Home';
 import styles from './index.module.less';
 import './App.css';
 
+// init to register the RetryPlugin
+init({
+  name: 'federation_consumer',
+  remotes: [],
+  plugins: [
+    RetryPlugin({
+      // fallbackUrl is optional
+      fallbackUrl: 'http://localhost:2001/mf-manifest.json',
+    }),
+  ],
+});
+
 const FallbackErrorComp = (info: any) => {
   return (
     <div>
+      <h2>This is ErrorBoundary Component</h2>
       <p>Something went wrong:</p>
       <pre style={{ color: 'red' }}>{info?.error.message}</pre>
       <button onClick={() => info.resetErrorBoundary()}>
@@ -20,7 +37,7 @@ const FallbackErrorComp = (info: any) => {
   );
 };
 
-const FallbackComp = <div>loading...</div>;
+const FallbackComp = <div data-test-id="loading">loading...</div>;
 
 const Remote1App = createRemoteComponent({
   loader: () => loadRemote('remote1/export-app'),
@@ -41,8 +58,14 @@ const Remote3App = createRemoteComponent({
   loading: FallbackComp,
 });
 
-const RemoteErrorApp = createRemoteComponent({
-  loader: () => loadRemote('remote_error/export-app'),
+const RemoteRenderErrorApp = createRemoteComponent({
+  loader: () => loadRemote('remote-render-error/export-app'),
+  fallback: FallbackErrorComp,
+  loading: FallbackComp,
+}) as ForwardRefExoticComponent<unknown>;
+
+const RemoteResourceErrorApp = createRemoteComponent({
+  loader: () => loadRemote('remote-resource-error/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 }) as ForwardRefExoticComponent<unknown>;
@@ -62,10 +85,6 @@ function Wraper3() {
         <div className="grow">
           <h2>Remote3</h2>
           <Remote3App />
-        </div>
-        <div className="grow">
-          <h2>Remote Error </h2>
-          <RemoteErrorApp />
         </div>
       </div>
     </>
@@ -114,7 +133,14 @@ const App = () => {
         />
         <Route path="/remote3/*" Component={() => <Remote3App />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
-        <Route path="/remote-error/*" Component={() => <RemoteErrorApp />} />
+        <Route
+          path="/remote-render-error/*"
+          Component={() => <RemoteRenderErrorApp />}
+        />
+        <Route
+          path="/remote-resource-error/*"
+          Component={() => <RemoteResourceErrorApp />}
+        />
       </Routes>
     </div>
   );

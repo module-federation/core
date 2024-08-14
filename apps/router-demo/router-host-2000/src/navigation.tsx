@@ -124,8 +124,13 @@ function Navgation() {
       icon: <GroupOutlined />,
     },
     {
-      label: <Link to="/remote-error">Error-router</Link>,
-      key: '/remote-error',
+      label: <Link to="/remote-render-error">render-error</Link>,
+      key: '/remote-render-error',
+      icon: <GroupOutlined />,
+    },
+    {
+      label: <Link to="/remote-resource-error">resource-error</Link>,
+      key: '/remote-resource-error',
       icon: <GroupOutlined />,
     },
   ];
