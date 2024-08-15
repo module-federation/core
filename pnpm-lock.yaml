@@ -21,8 +21,8 @@ importers:
         specifier: 5.19.1
         version: 5.19.1(react-dom@18.2.0)(react@18.2.0)
       axios:
-        specifier: 1.6.7
-        version: 1.6.7
+        specifier: 1.7.4
+        version: 1.7.4
       core-js:
         specifier: 3.34.0
         version: 3.34.0
@@ -106,8 +106,8 @@ importers:
         specifier: 0.10.2
         version: 0.10.2
       '@builder.io/qwik':
-        specifier: 1.6.0
-        version: 1.6.0(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)(undici@5.28.4)
+        specifier: 1.7.3
+        version: 1.7.3(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)
       '@builder.io/qwik-city':
         specifier: 1.6.0
         version: 1.6.0(@types/node@20.12.12)(less@4.2.0)(rollup@2.79.1)(stylus@0.63.0)
@@ -194,7 +194,7 @@ importers:
         version: 5.0.7(rollup@2.79.1)
       '@rspack/core':
         specifier: ^0.5.9
-        version: 0.5.9(@swc/helpers@0.5.11)
+        version: 0.5.9(@swc/helpers@0.5.12)
       '@rspack/dev-server':
         specifier: ^0.5.9
         version: 0.5.9(@rspack/core@0.5.9)(@types/express@4.17.21)(webpack@5.99.1)
@@ -245,10 +245,10 @@ importers:
         version: 0.4.0(@swc/core@1.6.13)
       '@swc/core':
         specifier: 1.6.13
-        version: 1.6.13(@swc/helpers@0.5.11)
+        version: 1.6.13(@swc/helpers@0.5.12)
       '@swc/helpers':
-        specifier: 0.5.11
-        version: 0.5.11
+        specifier: 0.5.12
+        version: 0.5.12
       '@swc/jest':
         specifier: 0.2.36
         version: 0.2.36(@swc/core@1.6.13)
@@ -367,8 +367,8 @@ importers:
         specifier: 6.9.0
         version: 6.9.0(eslint@8.56.0)
       eslint-plugin-prettier:
-        specifier: 5.1.3
-        version: 5.1.3(@types/eslint@8.37.0)(eslint-config-prettier@9.1.0)(eslint@8.56.0)(prettier@3.3.2)
+        specifier: 5.2.1
+        version: 5.2.1(@types/eslint@8.37.0)(eslint-config-prettier@9.1.0)(eslint@8.56.0)(prettier@3.3.2)
       eslint-plugin-qwik:
         specifier: 1.6.0
         version: 1.6.0(eslint@8.56.0)
@@ -449,7 +449,7 @@ importers:
         version: 2.3.0(@nx/devkit@17.2.8)(@nx/eslint@19.2.3)(@nx/js@17.2.8)(@nx/vite@17.2.8)
       qwik-speak:
         specifier: 0.23.0
-        version: 0.23.0(@builder.io/qwik@1.6.0)
+        version: 0.23.0(@builder.io/qwik@1.7.3)
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -1508,7 +1508,7 @@ importers:
         version: 0.6.15
       '@rsbuild/plugin-react':
         specifier: ^0.6.15
-        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.11)
+        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.12)
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
@@ -1557,7 +1557,7 @@ importers:
         version: 0.6.15
       '@rsbuild/plugin-react':
         specifier: ^0.6.15
-        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.11)
+        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.12)
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
@@ -1591,7 +1591,7 @@ importers:
         version: 0.6.15
       '@rsbuild/plugin-vue':
         specifier: ^0.6.15
-        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/core@1.6.13)(@swc/helpers@0.5.11)(esbuild@0.23.0)(vue@3.4.30)
+        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/core@1.6.13)(@swc/helpers@0.5.12)(esbuild@0.23.0)(vue@3.4.30)
       tailwindcss:
         specifier: ^3.4.3
         version: 3.4.4(ts-node@10.9.1)
@@ -1631,10 +1631,10 @@ importers:
         version: 0.6.15
       '@rsbuild/plugin-react':
         specifier: ^0.6.15
-        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.11)
+        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.12)
       '@rsbuild/shared':
         specifier: ^0.7.10
-        version: 0.7.10(@swc/helpers@0.5.11)
+        version: 0.7.10(@swc/helpers@0.5.12)
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
@@ -1665,7 +1665,7 @@ importers:
         version: 0.6.15
       '@rsbuild/plugin-react':
         specifier: ^0.6.15
-        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.11)
+        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.12)
       '@types/react':
         specifier: ^18.2.79
         version: 18.2.79
@@ -1696,7 +1696,7 @@ importers:
         version: 0.6.15
       '@rsbuild/plugin-vue':
         specifier: ^0.6.15
-        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/core@1.6.13)(@swc/helpers@0.5.11)(esbuild@0.23.0)(vue@3.4.30)
+        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/core@1.6.13)(@swc/helpers@0.5.12)(esbuild@0.23.0)(vue@3.4.30)
       tailwindcss:
         specifier: ^3.4.3
         version: 3.4.4(ts-node@10.9.1)
@@ -1793,7 +1793,7 @@ importers:
         version: 0.6.15
       '@rsbuild/plugin-react':
         specifier: ^0.6.15
-        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.11)
+        version: 0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.12)
 
   apps/website: {}
 
@@ -1804,7 +1804,7 @@ importers:
         version: 10.18.0(react-dom@18.2.0)(react@18.2.0)
       rspress:
         specifier: ^1.22.0
-        version: 1.23.1(@swc/helpers@0.5.11)(webpack@5.99.1)
+        version: 1.23.1(@swc/helpers@0.5.12)(webpack@5.99.1)
       tailwindcss:
         specifier: ^3.2.7
         version: 3.4.1(ts-node@10.9.1)
@@ -2057,8 +2057,8 @@ importers:
         specifier: ^4.1.3
         version: 4.1.3
       axios:
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.7.4
+        version: 1.7.4
       chalk:
         specifier: 3.0.0
         version: 3.0.0
@@ -2069,8 +2069,8 @@ importers:
         specifier: 5.0.0
         version: 5.0.0(ws@8.17.1)
       koa:
-        specifier: 2.11.0
-        version: 2.11.0
+        specifier: 2.15.3
+        version: 2.15.3
       lodash.clonedeepwith:
         specifier: 4.5.0
         version: 4.5.0
@@ -2094,8 +2094,8 @@ importers:
         specifier: workspace:*
         version: link:../runtime
       '@types/koa':
-        specifier: 2.11.2
-        version: 2.11.2
+        specifier: 2.15.0
+        version: 2.15.0
       '@types/node-schedule':
         specifier: 2.1.7
         version: 2.1.7
@@ -2255,8 +2255,8 @@ importers:
         specifier: workspace:*
         version: link:../sdk
       '@swc/helpers':
-        specifier: 0.5.3
-        version: 0.5.3
+        specifier: 0.5.12
+        version: 0.5.12
       hoist-non-react-statics:
         specifier: 3.3.2
         version: 3.3.2
@@ -2448,7 +2448,7 @@ importers:
     devDependencies:
       '@rspack/core':
         specifier: 0.5.0
-        version: 0.5.0(@swc/helpers@0.5.11)
+        version: 0.5.0(@swc/helpers@0.5.12)
 
   packages/runtime:
     dependencies:
@@ -3270,7 +3270,7 @@ packages:
     dependencies:
       '@babel/compat-data': 7.24.7
       '@babel/helper-validator-option': 7.24.7
-      browserslist: 4.23.1
+      browserslist: 4.23.0
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -7572,15 +7572,12 @@ packages:
       - terser
     dev: true
 
-  /@builder.io/qwik@1.6.0(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)(undici@5.28.4):
-    resolution: {integrity: sha512-IaVLxK+hK2qzi1hMTl2M48f5I49OE//UQeNQo6Kil+Mu+/Ov2N5oMTwq8UFKpk9ZnurKQmWRc5CKwtM04js9tg==}
+  /@builder.io/qwik@1.7.3(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0):
+    resolution: {integrity: sha512-lVRT4j9redY4X+iOy26U2vhychJgX24aaleu3IuBlEwD8MjCU5k46ApHq+cGqI24/kbqjirPH3SIxtVSByEG/A==}
     engines: {node: '>=16.8.0 <18.0.0 || >=18.11'}
     hasBin: true
-    peerDependencies:
-      undici: '*'
     dependencies:
       csstype: 3.1.3
-      undici: 5.28.4
       vite: 5.2.11(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)
     transitivePeerDependencies:
       - '@types/node'
@@ -11083,7 +11080,7 @@ packages:
     dependencies:
       '@modern-js/utils': 2.54.2
       '@swc/helpers': 0.5.1
-      axios: 1.7.2
+      axios: 1.7.4
       tar: 6.2.1
     transitivePeerDependencies:
       - debug
@@ -11293,7 +11290,7 @@ packages:
       '@modern-js/plugin-i18n': 2.46.1
       '@modern-js/utils': 2.46.1
       '@swc/helpers': 0.5.3
-      axios: 1.7.2
+      axios: 1.7.4
       resolve-from: 5.0.0
     transitivePeerDependencies:
       - debug
@@ -11308,7 +11305,7 @@ packages:
       '@modern-js/plugin-i18n': 2.57.0
       '@modern-js/utils': 2.57.0
       '@swc/helpers': 0.5.3
-      axios: 1.7.2
+      axios: 1.7.4
       resolve-from: 5.0.0
     transitivePeerDependencies:
       - debug
@@ -11789,7 +11786,7 @@ packages:
       '@modern-js/types': 2.46.1
       '@modern-js/utils': 2.46.1
       '@swc/helpers': 0.5.3
-      axios: 1.7.2
+      axios: 1.7.4
       connect-history-api-fallback: 2.0.0
       http-compression: 1.0.6
       minimatch: 3.1.2
@@ -11830,7 +11827,7 @@ packages:
       '@modern-js/types': 2.57.0
       '@modern-js/utils': 2.57.0
       '@swc/helpers': 0.5.3
-      axios: 1.7.2
+      axios: 1.7.4
       connect-history-api-fallback: 2.0.0
       http-compression: 1.0.6
       minimatch: 3.1.2
@@ -14287,7 +14284,7 @@ packages:
       '@nx/eslint': 17.3.2(@swc-node/register@1.6.8)(@swc/core@1.6.13)(@types/node@20.12.12)(js-yaml@4.1.0)(nx@17.2.8)(verdaccio@5.29.2)
       '@nx/js': 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.6.13)(@types/node@20.12.12)(nx@17.2.8)(typescript@5.5.2)(verdaccio@5.29.2)
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.5.2)
-      '@rspack/core': 0.5.9(@swc/helpers@0.5.11)
+      '@rspack/core': 0.5.9(@swc/helpers@0.5.12)
       ajv: 8.12.0
       ajv-keywords: 5.1.0(ajv@8.12.0)
       enquirer: 2.3.6
@@ -14355,7 +14352,7 @@ packages:
       '@nx/devkit': 17.2.8(nx@17.2.8)
       '@nx/js': 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.6.13)(@types/node@20.12.12)(nx@17.2.8)(typescript@5.5.2)(verdaccio@5.29.2)
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.5.2)
-      '@swc/helpers': 0.5.11
+      '@swc/helpers': 0.5.12
       enquirer: 2.3.6
       tsconfig-paths: 4.2.0
       vite: 5.2.11(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)
@@ -16549,7 +16546,7 @@ packages:
         optional: true
     dependencies:
       '@rollup/pluginutils': 5.1.0(rollup@2.79.1)
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       rollup: 2.79.1
       smob: 1.5.0
     dev: true
@@ -16980,13 +16977,13 @@ packages:
       - webpack-cli
     dev: true
 
-  /@rsbuild/plugin-less@0.7.3(@rsbuild/core@0.7.3)(@swc/helpers@0.5.11):
+  /@rsbuild/plugin-less@0.7.3(@rsbuild/core@0.7.3)(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-wJl52er6lops3z7+Rl+1Su782ONqaJgV+Wmo+wDSCuuIoaUct4LgJi4bwK7doo/WLuMyYcOF6vvt2fLYLZeL2g==}
     peerDependencies:
       '@rsbuild/core': ^0.7.3
     dependencies:
       '@rsbuild/core': 0.7.3
-      '@rsbuild/shared': 0.7.3(@swc/helpers@0.5.11)
+      '@rsbuild/shared': 0.7.3(@swc/helpers@0.5.12)
     transitivePeerDependencies:
       - '@swc/helpers'
     dev: false
@@ -17087,26 +17084,26 @@ packages:
       - '@swc/helpers'
     dev: true
 
-  /@rsbuild/plugin-react@0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.11):
+  /@rsbuild/plugin-react@0.6.15(@rsbuild/core@0.6.15)(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-ZLFF5qYgQPKbJ5IL85XayadryxnHoaLUUjd2ewf/d/TRUh2NiWyZGaNzRytbmhaxI0WW8RUkZdy5aX3xyiZbTA==}
     peerDependencies:
       '@rsbuild/core': ^0.6.15
     dependencies:
       '@rsbuild/core': 0.6.15
-      '@rsbuild/shared': 0.6.15(@swc/helpers@0.5.11)
+      '@rsbuild/shared': 0.6.15(@swc/helpers@0.5.12)
       '@rspack/plugin-react-refresh': 0.6.5(react-refresh@0.14.2)
       react-refresh: 0.14.2
     transitivePeerDependencies:
       - '@swc/helpers'
     dev: true
 
-  /@rsbuild/plugin-react@0.7.3(@rsbuild/core@0.7.3)(@swc/helpers@0.5.11):
+  /@rsbuild/plugin-react@0.7.3(@rsbuild/core@0.7.3)(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-v1eVRyyw8T0EXW19bGbc6IJMD0+jRiEpvSdVkivRFVvVW5wqNnEajBoFMvfhoHw7VywVkH1CFhjSFX6omAe+fw==}
     peerDependencies:
       '@rsbuild/core': ^0.7.3
     dependencies:
       '@rsbuild/core': 0.7.3
-      '@rsbuild/shared': 0.7.3(@swc/helpers@0.5.11)
+      '@rsbuild/shared': 0.7.3(@swc/helpers@0.5.12)
       '@rspack/plugin-react-refresh': 0.7.1(react-refresh@0.14.2)
       react-refresh: 0.14.2
     transitivePeerDependencies:
@@ -17145,13 +17142,13 @@ packages:
       terser: 5.31.3
     dev: true
 
-  /@rsbuild/plugin-sass@0.7.3(@rsbuild/core@0.7.3)(@swc/helpers@0.5.11):
+  /@rsbuild/plugin-sass@0.7.3(@rsbuild/core@0.7.3)(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-fVPmUbM8uO+n/lRWhgcms+ptw4GAWd8wPxChgnnUia+LUVfNtISXzbicJrtQQO8NgyXz9pZ92OYTJ3ojZP4xjA==}
     peerDependencies:
       '@rsbuild/core': ^0.7.3
     dependencies:
       '@rsbuild/core': 0.7.3
-      '@rsbuild/shared': 0.7.3(@swc/helpers@0.5.11)
+      '@rsbuild/shared': 0.7.3(@swc/helpers@0.5.12)
       postcss: 8.4.39
       sass-embedded: 1.77.5
     transitivePeerDependencies:
@@ -17351,13 +17348,13 @@ packages:
       '@rsbuild/core': 1.0.1-beta.3
     dev: true
 
-  /@rsbuild/plugin-vue@0.6.15(@rsbuild/core@0.6.15)(@swc/core@1.6.13)(@swc/helpers@0.5.11)(esbuild@0.23.0)(vue@3.4.30):
+  /@rsbuild/plugin-vue@0.6.15(@rsbuild/core@0.6.15)(@swc/core@1.6.13)(@swc/helpers@0.5.12)(esbuild@0.23.0)(vue@3.4.30):
     resolution: {integrity: sha512-VBi1bZKbUsZTSHSdx8UBuHBYUdnX8qKsfOHtSeINVWMSAWZSaMaB2MPy6Vf9VVdJCjp5qCHwQNeaDT/q5dAvUw==}
     peerDependencies:
       '@rsbuild/core': ^0.6.15
     dependencies:
       '@rsbuild/core': 0.6.15
-      '@rsbuild/shared': 0.6.15(@swc/helpers@0.5.11)
+      '@rsbuild/shared': 0.6.15(@swc/helpers@0.5.12)
       vue-loader: 17.4.2(vue@3.4.30)(webpack@5.99.1)
       webpack: github.com/ScriptedAlchemy/webpack/df61a5c271f36ad32c8c575ff843424e4906378a(@swc/core@1.6.13)(esbuild@0.23.0)
     transitivePeerDependencies:
@@ -17403,10 +17400,10 @@ packages:
       - '@swc/helpers'
     dev: true
 
-  /@rsbuild/shared@0.6.15(@swc/helpers@0.5.11):
+  /@rsbuild/shared@0.6.15(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-siBYUQL3qVINLDkIBaxx4caNb+zZ+Jb8WtN2RgRT5buLW+PU5fXUs5vGwjFz6B6wCxO/vLr78X/FjaCmxMv8HA==}
     dependencies:
-      '@rspack/core': 0.6.5(@swc/helpers@0.5.11)
+      '@rspack/core': 0.6.5(@swc/helpers@0.5.12)
       caniuse-lite: 1.0.30001636
       postcss: 8.4.39
     optionalDependencies:
@@ -17427,10 +17424,10 @@ packages:
       - '@swc/helpers'
     dev: true
 
-  /@rsbuild/shared@0.7.10(@swc/helpers@0.5.11):
+  /@rsbuild/shared@0.7.10(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-FwTm11DP7KxQKT2mWLvwe80O5KpikgMSlqnw9CQhBaIHSYEypdJU9ZotbNsXsHdML3xcqg+S9ae3bpovC7KlwQ==}
     dependencies:
-      '@rspack/core': 0.7.5(@swc/helpers@0.5.11)
+      '@rspack/core': 0.7.5(@swc/helpers@0.5.12)
       caniuse-lite: 1.0.30001636
       html-webpack-plugin: /html-rspack-plugin@5.7.2(@rspack/core@0.7.5)
       postcss: 8.4.38
@@ -17453,10 +17450,10 @@ packages:
       - '@swc/helpers'
     dev: true
 
-  /@rsbuild/shared@0.7.3(@swc/helpers@0.5.11):
+  /@rsbuild/shared@0.7.3(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-TBD0rlZOayK0clLwmcTMMXXEIR6R8rNHmSLglPd3lZaBBim8yhDgudR5gNUFvO5zOefaV1SBj/Mr1uQqSyHzOg==}
     dependencies:
-      '@rspack/core': 0.7.1(@swc/helpers@0.5.11)
+      '@rspack/core': 0.7.1(@swc/helpers@0.5.12)
       caniuse-lite: 1.0.30001629
       html-webpack-plugin: /html-rspack-plugin@5.7.2(@rspack/core@0.7.1)
       postcss: 8.4.39
@@ -18033,7 +18030,7 @@ packages:
       '@rspack/binding-win32-x64-msvc': 1.0.0-alpha.5
     dev: true
 
-  /@rspack/core@0.5.0(@swc/helpers@0.5.11):
+  /@rspack/core@0.5.0(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-/Bpujdtx28qYir7AK9VVSbY35GBFEcZ1NTJZBx/WIzZGZWLCxhlVYfjH8cj44y4RvXa0Y26tnj/q7VJ4U3sHug==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
@@ -18044,7 +18041,7 @@ packages:
     dependencies:
       '@module-federation/runtime-tools': 0.0.8
       '@rspack/binding': 0.5.0
-      '@swc/helpers': 0.5.11
+      '@swc/helpers': 0.5.12
       browserslist: 4.23.0
       enhanced-resolve: 5.12.0
       graceful-fs: 4.2.10
@@ -18070,7 +18067,7 @@ packages:
       '@module-federation/runtime-tools': 0.0.8
       '@rspack/binding': 0.5.0
       '@swc/helpers': 0.5.3
-      browserslist: 4.23.1
+      browserslist: 4.23.0
       enhanced-resolve: 5.12.0
       graceful-fs: 4.2.10
       json-parse-even-better-errors: 3.0.1
@@ -18083,7 +18080,7 @@ packages:
       zod-validation-error: 1.3.1(zod@3.22.4)
     dev: true
 
-  /@rspack/core@0.5.9(@swc/helpers@0.5.11):
+  /@rspack/core@0.5.9(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-SNz6PS+LD5AFUnX75m5F1GULHPyoDx8v6A6zf5FQSF4CwZ+lGz47Fa2gRTTcQNXp3Fp+7v5m1q8TrSukV3yHwA==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
@@ -18094,7 +18091,7 @@ packages:
     dependencies:
       '@module-federation/runtime-tools': 0.0.8
       '@rspack/binding': 0.5.9
-      '@swc/helpers': 0.5.11
+      '@swc/helpers': 0.5.12
       browserslist: 4.23.0
       enhanced-resolve: 5.12.0
       events: 3.3.0
@@ -18108,7 +18105,7 @@ packages:
       zod-validation-error: 1.3.1(zod@3.22.4)
     dev: true
 
-  /@rspack/core@0.6.5(@swc/helpers@0.5.11):
+  /@rspack/core@0.6.5(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-jm0YKUZQCetccdufBfpkfSHE7BOlirrn0UmXv9C+69g8ikl9Jf4Jfr31meDWX5Z3vwZlpdryA7fUH2cblUXoBw==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
@@ -18119,7 +18116,7 @@ packages:
     dependencies:
       '@module-federation/runtime-tools': 0.1.6
       '@rspack/binding': 0.6.5
-      '@swc/helpers': 0.5.11
+      '@swc/helpers': 0.5.12
       caniuse-lite: 1.0.30001636
       enhanced-resolve: 5.12.0
       tapable: 2.2.1
@@ -18144,7 +18141,7 @@ packages:
       webpack-sources: 3.2.3
     dev: true
 
-  /@rspack/core@0.7.1(@swc/helpers@0.5.11):
+  /@rspack/core@0.7.1(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-ZOVRucpC5FDT00FD5ynEZb7siXVyHnxzoJNhcv67OqtTcaO8e7iQiOE8fHMJM4Z2Ix0zGKQn5/FV9G6MZoH+4w==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
@@ -18155,7 +18152,7 @@ packages:
     dependencies:
       '@module-federation/runtime-tools': 0.1.6
       '@rspack/binding': 0.7.1
-      '@swc/helpers': 0.5.11
+      '@swc/helpers': 0.5.12
       caniuse-lite: 1.0.30001636
       tapable: 2.2.1
       webpack-sources: 3.2.3
@@ -18178,7 +18175,7 @@ packages:
       webpack-sources: 3.2.3
     dev: false
 
-  /@rspack/core@0.7.5(@swc/helpers@0.5.11):
+  /@rspack/core@0.7.5(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-zVTe4WCyc3qsLPattosiDYZFeOzaJ32/BYukPP2I1VJtCVFa+PxGVRPVZhSoN6fXw5oy48yHg9W9v1T8CaEFhw==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
@@ -18189,7 +18186,7 @@ packages:
     dependencies:
       '@module-federation/runtime-tools': 0.1.6
       '@rspack/binding': 0.7.5
-      '@swc/helpers': 0.5.11
+      '@swc/helpers': 0.5.12
       caniuse-lite: 1.0.30001636
       tapable: 2.2.1
       webpack-sources: 3.2.3
@@ -18207,7 +18204,7 @@ packages:
       '@module-federation/runtime-tools': 0.1.6
       '@rspack/binding': 0.7.5
       '@swc/helpers': 0.5.3
-      caniuse-lite: 1.0.30001642
+      caniuse-lite: 1.0.30001636
       tapable: 2.2.1
       webpack-sources: 3.2.3
     dev: true
@@ -18233,7 +18230,7 @@ packages:
     peerDependencies:
       '@rspack/core': '*'
     dependencies:
-      '@rspack/core': 0.5.9(@swc/helpers@0.5.11)
+      '@rspack/core': 0.5.9(@swc/helpers@0.5.12)
       chokidar: 3.5.3
       connect-history-api-fallback: 2.0.0
       express: 4.18.1
@@ -18325,7 +18322,7 @@ packages:
       react-refresh: 0.14.2
     dev: true
 
-  /@rspress/core@1.23.1(@swc/helpers@0.5.11)(webpack@5.99.1):
+  /@rspress/core@1.23.1(@swc/helpers@0.5.12)(webpack@5.99.1):
     resolution: {integrity: sha512-DE19wmuI0oJ9SCOFQVU7fcJHpXPyhBCK754sbXsVYlBB7PY1HAoFbmUqFBQHmrkq5yUNIDL8o7QZ3De3LgRE2A==}
     engines: {node: '>=14.17.6'}
     dependencies:
@@ -18335,9 +18332,9 @@ packages:
       '@mdx-js/react': 2.3.0(react@18.2.0)
       '@modern-js/utils': 2.51.0
       '@rsbuild/core': 0.7.3
-      '@rsbuild/plugin-less': 0.7.3(@rsbuild/core@0.7.3)(@swc/helpers@0.5.11)
-      '@rsbuild/plugin-react': 0.7.3(@rsbuild/core@0.7.3)(@swc/helpers@0.5.11)
-      '@rsbuild/plugin-sass': 0.7.3(@rsbuild/core@0.7.3)(@swc/helpers@0.5.11)
+      '@rsbuild/plugin-less': 0.7.3(@rsbuild/core@0.7.3)(@swc/helpers@0.5.12)
+      '@rsbuild/plugin-react': 0.7.3(@rsbuild/core@0.7.3)(@swc/helpers@0.5.12)
+      '@rsbuild/plugin-sass': 0.7.3(@rsbuild/core@0.7.3)(@swc/helpers@0.5.12)
       '@rspress/mdx-rs': 0.5.7
       '@rspress/plugin-auto-nav-sidebar': 1.23.1
       '@rspress/plugin-container-syntax': 1.23.1
@@ -21262,7 +21259,7 @@ packages:
       '@swc/core': '>= 1.3'
       '@swc/types': '>= 0.1'
     dependencies:
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       '@swc/types': 0.1.9
     dev: true
 
@@ -21274,7 +21271,7 @@ packages:
     dependencies:
       '@swc-node/core': 1.13.0(@swc/core@1.6.13)(@swc/types@0.1.9)
       '@swc-node/sourcemap-support': 0.3.0
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       colorette: 2.0.20
       debug: 4.3.4(supports-color@8.1.1)
       pirates: 4.0.6
@@ -21304,7 +21301,7 @@ packages:
         optional: true
     dependencies:
       '@mole-inc/bin-wrapper': 8.0.1
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       '@swc/counter': 0.1.3
       commander: 8.3.0
       fast-glob: 3.3.2
@@ -21395,7 +21392,7 @@ packages:
     requiresBuild: true
     optional: true
 
-  /@swc/core@1.6.13(@swc/helpers@0.5.11):
+  /@swc/core@1.6.13(@swc/helpers@0.5.12):
     resolution: {integrity: sha512-eailUYex6fkfaQTev4Oa3mwn0/e3mQU4H8y1WPuImYQESOQDtVrowwUGDSc19evpBbHpKtwM+hw8nLlhIsF+Tw==}
     engines: {node: '>=10'}
     requiresBuild: true
@@ -21406,7 +21403,7 @@ packages:
         optional: true
     dependencies:
       '@swc/counter': 0.1.3
-      '@swc/helpers': 0.5.11
+      '@swc/helpers': 0.5.12
       '@swc/types': 0.1.9
     optionalDependencies:
       '@swc/core-darwin-arm64': 1.6.13
@@ -21432,6 +21429,12 @@ packages:
     resolution: {integrity: sha512-YNlnKRWF2sVojTpIyzwou9XoTNbzbzONwRhOoniEioF1AtaitTvVZblaQRrAzChWQ1bLYyYSWzM18y4WwgzJ+A==}
     dependencies:
       tslib: 2.6.3
+    dev: true
+
+  /@swc/helpers@0.5.12:
+    resolution: {integrity: sha512-KMZNXiGibsW9kvZAO1Pam2JPTDBm+KSHMMHWdsyI/1DbIZjT2A6Gy3hblVXUMEDvUAKq+e0vL0X0o54owWji7g==}
+    dependencies:
+      tslib: 2.6.3
 
   /@swc/helpers@0.5.2:
     resolution: {integrity: sha512-E4KcWTpoLHqwPHLxidpOqQbcrZVgi0rsmmZXUle1jXmJfuIf/UWpczUJ7MZZ5tlxytgJXyp0w4PGkkeLiuIdZw==}
@@ -21450,7 +21453,7 @@ packages:
       '@swc/core': '*'
     dependencies:
       '@jest/create-cache-key-function': 29.7.0
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       '@swc/counter': 0.1.3
       jsonc-parser: 3.2.1
     dev: true
@@ -21660,6 +21663,10 @@ packages:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
     dependencies:
       '@types/node': 20.12.12
+    dev: true
+
+  /@types/content-disposition@0.5.8:
+    resolution: {integrity: sha512-QVSSvno3dE0MgO76pJhmv4Qyi/j0Yk9pBp0Y7TJ2Tlj+KCgJWY6qX7nnxCOLkZ3VYRSIk1WTxCvwUSdx6CCLdg==}
     dev: true
 
   /@types/conventional-commits-parser@5.0.0:
@@ -22121,15 +22128,17 @@ packages:
   /@types/koa-compose@3.2.8:
     resolution: {integrity: sha512-4Olc63RY+MKvxMwVknCUDhRQX1pFQoBZ/lXcRLP69PQkEpze/0cr8LNqJQe5NFb/b19DWi2a5bTi2VAlQzhJuA==}
     dependencies:
-      '@types/koa': 2.11.2
+      '@types/koa': 2.15.0
     dev: true
 
-  /@types/koa@2.11.2:
-    resolution: {integrity: sha512-2UPelagNNW6bnc1I5kIzluCaheXRA9S+NyOdXEFFj9Az7jc15ek5V03kb8OTbb3tdZ5i2BIJObe86PhHvpMolg==}
+  /@types/koa@2.15.0:
+    resolution: {integrity: sha512-7QFsywoE5URbuVnG3loe03QXuGajrnotr3gQkXcEBShORai23MePfFYdhz90FEtBBpkyIYQbVD+evKtloCgX3g==}
     dependencies:
       '@types/accepts': 1.3.7
+      '@types/content-disposition': 0.5.8
       '@types/cookies': 0.9.0
       '@types/http-assert': 1.5.5
+      '@types/http-errors': 2.0.4
       '@types/keygrip': 1.0.6
       '@types/koa-compose': 3.2.8
       '@types/node': 20.12.12
@@ -24636,8 +24645,8 @@ packages:
       - debug
     dev: true
 
-  /axios@1.6.7:
-    resolution: {integrity: sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==}
+  /axios@1.7.2:
+    resolution: {integrity: sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==}
     dependencies:
       follow-redirects: 1.15.6
       form-data: 4.0.0
@@ -24646,8 +24655,8 @@ packages:
       - debug
     dev: false
 
-  /axios@1.7.2:
-    resolution: {integrity: sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==}
+  /axios@1.7.4:
+    resolution: {integrity: sha512-DukmaFRnY6AzAALSH4J2M3k6PkaC+MfaAGdEERRWcC9q3/TWQwLpHR8ZRLKTdQ3aBDL64EdluRDjJqKw+BPZEw==}
     dependencies:
       follow-redirects: 1.15.6
       form-data: 4.0.0
@@ -25479,7 +25488,6 @@ packages:
       electron-to-chromium: 1.4.728
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.23.0)
-    dev: true
 
   /browserslist@4.23.1:
     resolution: {integrity: sha512-TUfofFo/KsK/bWZ9TWQ5O26tsWW4Uhmt8IYklbnUa70udB6P2wA7w7o4PY4muaEPBQaAX+CEnmmIA41NVHtPVw==}
@@ -26583,21 +26591,12 @@ packages:
     resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
     engines: {node: '>= 0.6'}
 
-  /cookies@0.8.0:
-    resolution: {integrity: sha512-8aPsApQfebXnuI+537McwYsDtjVxGm8gTIzQI3FDW6t5t/DAhERxtnbEPN/8RX+uZthoz4eCOgloXaE5cYyNow==}
-    engines: {node: '>= 0.8'}
-    dependencies:
-      depd: 2.0.0
-      keygrip: 1.1.0
-    dev: false
-
   /cookies@0.9.1:
     resolution: {integrity: sha512-TG2hpqe4ELx54QER/S3HQ9SRVnQnGBtKUz5bLQWtYAQ+o6GpgMs6sYUvaiJjVxb+UXwhRhAEP3m7LbsIZ77Hmw==}
     engines: {node: '>= 0.8'}
     dependencies:
       depd: 2.0.0
       keygrip: 1.1.0
-    dev: true
 
   /copy-anything@2.0.6:
     resolution: {integrity: sha512-1j20GZTsvKNkc4BY3NpMOM8tt///wY3FpIzozTOFO2ffuZcV61nojHXVKIy3WM+7ADCy5FVhdZYHYDdgTU0yJw==}
@@ -26975,7 +26974,7 @@ packages:
       webpack:
         optional: true
     dependencies:
-      '@rspack/core': 0.5.9(@swc/helpers@0.5.11)
+      '@rspack/core': 0.5.9(@swc/helpers@0.5.12)
       icss-utils: 5.1.0(postcss@8.4.39)
       postcss: 8.4.39
       postcss-modules-extract-imports: 3.1.0(postcss@8.4.39)
@@ -27648,17 +27647,6 @@ packages:
     dependencies:
       ms: 2.0.0
 
-  /debug@3.1.0:
-    resolution: {integrity: sha512-OX8XqP7/1a9cqkxYw2yXss15f26NKWBpDXQd0/uK/KPqdQhxbPa994hnzjcE2VqQpDslf55723cKPUOGSmMY3g==}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-    dependencies:
-      ms: 2.0.0
-    dev: false
-
   /debug@3.2.7(supports-color@8.1.1):
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
     peerDependencies:
@@ -28261,7 +28249,6 @@ packages:
 
   /electron-to-chromium@1.4.728:
     resolution: {integrity: sha512-Ud1v7hJJYIqehlUJGqR6PF1Ek8l80zWwxA6nGxigBsGJ9f9M2fciHyrIiNMerSHSH3p+0/Ia7jIlnDkt41h5cw==}
-    dev: true
 
   /electron-to-chromium@1.4.825:
     resolution: {integrity: sha512-OCcF+LwdgFGcsYPYC5keEEFC2XT0gBhrYbeGzHCx7i9qRFbzO/AqTmc/C/1xNhJj+JA7rzlN7mpBuStshh96Cg==}
@@ -28404,10 +28391,6 @@ packages:
     resolution: {integrity: sha512-7dFHNmqeFSEt2ZBsCriorKnn3Z2pj+fd9kmI6QoWw4//DL+icEBfc0U7qJCisqrTsKTjw4fNFy2pW9OqStD84g==}
     dependencies:
       is-arrayish: 0.2.1
-
-  /error-inject@1.0.0:
-    resolution: {integrity: sha512-JM8N6PytDbmIYm1IhPWlo8vr3NtfjhDY/1MhD/a5b/aad/USE8a0+NsqE9d5n+GVGmuNkPQWm4bFQWv18d8tMg==}
-    dev: false
 
   /error-stack-parser@2.1.4:
     resolution: {integrity: sha512-Sk5V6wVazPhq5MhpO+AUxJn5x7XSXGl1R93Vn7i+zS15KDVxQijejNCrz8340/2bgLBjR9GtEG8ZVKONDjcqGQ==}
@@ -29342,8 +29325,8 @@ packages:
       prettier-linter-helpers: 1.0.0
     dev: true
 
-  /eslint-plugin-prettier@5.1.3(@types/eslint@8.37.0)(eslint-config-prettier@9.1.0)(eslint@8.56.0)(prettier@3.3.2):
-    resolution: {integrity: sha512-C9GCVAs4Eq7ZC/XFQHITLiHJxQngdtraXaM+LoUFoFp/lHNl2Zn8f3WQbe9HvTBBQ9YnKFB0/2Ajdqwo5D1EAw==}
+  /eslint-plugin-prettier@5.2.1(@types/eslint@8.37.0)(eslint-config-prettier@9.1.0)(eslint@8.56.0)(prettier@3.3.2):
+    resolution: {integrity: sha512-gH3iR3g4JfF+yYPaJYkN7jEl9QbweL/YfkoRlNnuIEHEz1vHVlCmWOS+eGGiRuzHQXdJFCOTxRgvju9b8VUmrw==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
       '@types/eslint': '>=8.0.0'
@@ -29361,7 +29344,7 @@ packages:
       eslint-config-prettier: 9.1.0(eslint@8.56.0)
       prettier: 3.3.2
       prettier-linter-helpers: 1.0.0
-      synckit: 0.8.8
+      synckit: 0.9.1
     dev: true
 
   /eslint-plugin-promise@6.1.1(eslint@8.56.0):
@@ -31905,7 +31888,7 @@ packages:
       '@rspack/core':
         optional: true
     dependencies:
-      '@rspack/core': 0.7.5(@swc/helpers@0.5.11)
+      '@rspack/core': 0.7.5(@swc/helpers@0.5.12)
     dev: true
 
   /html-tags@3.3.1:
@@ -31957,7 +31940,7 @@ packages:
       webpack:
         optional: true
     dependencies:
-      '@rspack/core': 0.5.9(@swc/helpers@0.5.11)
+      '@rspack/core': 0.5.9(@swc/helpers@0.5.12)
       '@types/html-minifier-terser': 6.1.0
       html-minifier-terser: 6.1.0
       lodash: 4.17.21
@@ -34090,46 +34073,39 @@ packages:
     engines: {node: '>= 8'}
     dev: true
 
-  /koa-compose@3.2.1:
-    resolution: {integrity: sha512-8gen2cvKHIZ35eDEik5WOo8zbVp9t4cP8p4hW4uE55waxolLRexKKrqfCpwhGVppnB40jWeF8bZeTVg99eZgPw==}
-    dependencies:
-      any-promise: 1.3.0
-    dev: false
-
   /koa-compose@4.1.0:
     resolution: {integrity: sha512-8ODW8TrDuMYvXRwra/Kh7/rJo9BtOfPc6qO8eAfC80CnCvSjSl0bkRM24X6/XBBEyj0v1nRUQ1LyOy3dbqOWXw==}
     dev: false
 
-  /koa-convert@1.2.0:
-    resolution: {integrity: sha512-K9XqjmEDStGX09v3oxR7t5uPRy0jqJdvodHa6wxWTHrTfDq0WUNnYTOOUZN6g8OM8oZQXprQASbiIXG2Ez8ehA==}
-    engines: {node: '>= 4'}
+  /koa-convert@2.0.0:
+    resolution: {integrity: sha512-asOvN6bFlSnxewce2e/DK3p4tltyfC4VM7ZwuTuepI7dEQVcvpyFuBcEARu1+Hxg8DIwytce2n7jrZtRlPrARA==}
+    engines: {node: '>= 10'}
     dependencies:
       co: 4.6.0
-      koa-compose: 3.2.1
+      koa-compose: 4.1.0
     dev: false
 
-  /koa@2.11.0:
-    resolution: {integrity: sha512-EpR9dElBTDlaDgyhDMiLkXrPwp6ZqgAIBvhhmxQ9XN4TFgW+gEz6tkcsNI6BnUbUftrKDjVFj4lW2/J2aNBMMA==}
+  /koa@2.15.3:
+    resolution: {integrity: sha512-j/8tY9j5t+GVMLeioLaxweJiKUayFhlGqNTzf2ZGwL0ZCQijd2RLHK0SLW5Tsko8YyyqCZC2cojIb0/s62qTAg==}
     engines: {node: ^4.8.4 || ^6.10.1 || ^7.10.1 || >= 8.1.4}
     dependencies:
       accepts: 1.3.8
       cache-content-type: 1.0.1
       content-disposition: 0.5.4
       content-type: 1.0.5
-      cookies: 0.8.0
-      debug: 3.1.0
+      cookies: 0.9.1
+      debug: 4.3.4(supports-color@8.1.1)
       delegates: 1.0.0
-      depd: 1.1.2
+      depd: 2.0.0
       destroy: 1.2.0
       encodeurl: 1.0.2
-      error-inject: 1.0.0
       escape-html: 1.0.3
       fresh: 0.5.2
       http-assert: 1.5.0
       http-errors: 1.8.1
       is-generator-function: 1.0.10
       koa-compose: 4.1.0
-      koa-convert: 1.2.0
+      koa-convert: 2.0.0
       on-finished: 2.4.1
       only: 0.0.2
       parseurl: 1.3.3
@@ -36805,11 +36781,11 @@ packages:
     dependencies:
       '@nrwl/tao': 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.6.13)
       '@swc-node/register': 1.6.8(@swc/core@1.6.13)(@swc/types@0.1.9)(typescript@5.5.2)
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.6
-      axios: 1.7.2
+      axios: 1.7.4
       chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
@@ -36869,11 +36845,11 @@ packages:
     dependencies:
       '@nrwl/tao': 17.3.2(@swc-node/register@1.6.8)(@swc/core@1.6.13)
       '@swc-node/register': 1.6.8(@swc/core@1.6.13)(@swc/types@0.1.9)(typescript@5.5.2)
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.6
-      axios: 1.7.2
+      axios: 1.7.4
       chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
@@ -36933,11 +36909,11 @@ packages:
     dependencies:
       '@nrwl/tao': 19.2.3(@swc-node/register@1.6.8)(@swc/core@1.6.13)
       '@swc-node/register': 1.6.8(@swc/core@1.6.13)(@swc/types@0.1.9)(typescript@5.5.2)
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.7
-      axios: 1.7.2
+      axios: 1.7.4
       chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
@@ -36997,11 +36973,11 @@ packages:
     dependencies:
       '@nrwl/tao': 19.4.1(@swc-node/register@1.6.8)(@swc/core@1.6.13)
       '@swc-node/register': 1.6.8(@swc/core@1.6.13)(@swc/types@0.1.9)(typescript@5.5.2)
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.7
-      axios: 1.7.2
+      axios: 1.7.4
       chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
@@ -39752,14 +39728,14 @@ packages:
       '@nx/vite': 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.6.13)(@types/node@20.12.12)(nx@17.2.8)(typescript@5.5.2)(verdaccio@5.29.2)(vite@5.2.11)(vitest@1.2.2)
     dev: true
 
-  /qwik-speak@0.23.0(@builder.io/qwik@1.6.0):
+  /qwik-speak@0.23.0(@builder.io/qwik@1.7.3):
     resolution: {integrity: sha512-7bxNbXpDzWhqQ0H3nKCWnTdeo4tpjVFoc1XpzO9W1izo6GgvNIjyvK4u/qCF1d9yzyuMJCfibA7CSzhoxSbkaQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     peerDependencies:
       '@builder.io/qwik': '>=1.5.5'
     dependencies:
-      '@builder.io/qwik': 1.6.0(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)(undici@5.28.4)
+      '@builder.io/qwik': 1.7.3(@types/node@20.12.12)(less@4.2.0)(stylus@0.63.0)
     dev: true
 
   /rambda@7.5.0:
@@ -42741,7 +42717,7 @@ packages:
       '@rspack/core':
         optional: true
     dependencies:
-      '@rspack/core': 0.5.9(@swc/helpers@0.5.11)
+      '@rspack/core': 0.5.9(@swc/helpers@0.5.12)
       tapable: 2.2.1
       webpack-sources: 2.3.1
     dev: true
@@ -42763,11 +42739,11 @@ packages:
       fs-extra: 11.2.0
     dev: false
 
-  /rspress@1.23.1(@swc/helpers@0.5.11)(webpack@5.99.1):
+  /rspress@1.23.1(@swc/helpers@0.5.12)(webpack@5.99.1):
     resolution: {integrity: sha512-msXuWbLsmp1a8BaHE2n9C9v1aPPnZ9BH0U9H8Qu0Ozwfi++Qc3H49qEn7MsU9km5s7JW6r4TOlHxc3WD+pQUbw==}
     dependencies:
       '@rsbuild/core': 0.7.3
-      '@rspress/core': 1.23.1(@swc/helpers@0.5.11)(webpack@5.99.1)
+      '@rspress/core': 1.23.1(@swc/helpers@0.5.12)(webpack@5.99.1)
       '@rspress/shared': 1.23.1
       cac: 6.7.14
       chalk: 5.3.0
@@ -44850,7 +44826,7 @@ packages:
       '@swc/core': ^1.2.147
       webpack: git+https://github.com/ScriptedAlchemy/webpack.git#mf-chunk-startup
     dependencies:
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       '@swc/counter': 0.1.3
       webpack: github.com/ScriptedAlchemy/webpack/df61a5c271f36ad32c8c575ff843424e4906378a(@swc/core@1.6.13)(esbuild@0.23.0)
     dev: true
@@ -44874,8 +44850,8 @@ packages:
     resolution: {integrity: sha512-AsS729u2RHUfEra9xJrE39peJcc2stq2+poBXX8bcM08Y6g9j/i/PUzwNQqkaJde7Ntg1TO7bSREbR5sdosQ+g==}
     dev: true
 
-  /synckit@0.8.8:
-    resolution: {integrity: sha512-HwOKAP7Wc5aRGYdKH+dw0PRRpbO841v2DENBtjnR5HFWoiNByAl7vrx3p0G/rCyYXQsrxqtX48TImFtPcIHSpQ==}
+  /synckit@0.9.1:
+    resolution: {integrity: sha512-7gr8p9TQP6RAHusBOSLs46F4564ZrjV8xFmw5zCmgmhGUcw2hxsShhJ6CEiHQMgPDwAQ1fWHPM0ypc4RMAig4A==}
     engines: {node: ^14.18.0 || >=16.0.0}
     dependencies:
       '@pkgr/core': 0.1.1
@@ -45099,7 +45075,7 @@ packages:
         optional: true
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       esbuild: 0.17.19
       jest-worker: 27.5.1
       schema-utils: 3.3.0
@@ -45125,7 +45101,7 @@ packages:
         optional: true
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       esbuild: 0.18.20
       jest-worker: 27.5.1
       schema-utils: 3.3.0
@@ -45150,7 +45126,7 @@ packages:
         optional: true
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       esbuild: 0.23.0
       jest-worker: 27.5.1
       schema-utils: 3.3.0
@@ -45175,7 +45151,7 @@ packages:
         optional: true
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       esbuild: 0.17.19
       jest-worker: 27.5.1
       schema-utils: 3.3.0
@@ -45201,7 +45177,7 @@ packages:
         optional: true
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       esbuild: 0.18.20
       jest-worker: 27.5.1
       schema-utils: 3.3.0
@@ -45621,7 +45597,7 @@ packages:
         optional: true
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
@@ -45653,7 +45629,7 @@ packages:
         optional: true
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
@@ -45685,7 +45661,7 @@ packages:
         optional: true
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
@@ -45717,7 +45693,7 @@ packages:
         optional: true
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
@@ -45816,7 +45792,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       bundle-require: 4.0.2(esbuild@0.18.20)
       cac: 6.7.14
       chokidar: 3.6.0
@@ -45857,7 +45833,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@swc/core': 1.6.13(@swc/helpers@0.5.11)
+      '@swc/core': 1.6.13(@swc/helpers@0.5.12)
       bundle-require: 4.0.2(esbuild@0.21.4)
       cac: 6.7.14
       chokidar: 3.6.0
@@ -46458,7 +46434,6 @@ packages:
       browserslist: 4.23.0
       escalade: 3.1.2
       picocolors: 1.0.1
-    dev: true
 
   /update-browserslist-db@1.1.0(browserslist@4.23.1):
     resolution: {integrity: sha512-EdRAaAyk2cUE1wOf2DkEhzxqOQvFOoRJFNS6NeyJ01Gp2beMRpBAINjM2iDXE3KCuKhwnvHIQCJm6ThL2Z+HzQ==}
@@ -47321,7 +47296,7 @@ packages:
     resolution: {integrity: sha512-wCQcHkRazgjG5XoAq9jbTMLpNIjoSlZslrJ2+N9MxDsGEv1HnFoVjOCexL0ESva7Y9cu350j+DWADdk54s4AFQ==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      axios: 1.7.2
+      axios: 1.7.4
       joi: 17.12.3
       lodash: 4.17.21
       minimist: 1.2.8
@@ -48145,6 +48120,7 @@ packages:
     version: 5.99.1
     engines: {node: '>=10.13.0'}
     hasBin: true
+    prepare: true
     requiresBuild: true
     peerDependencies:
       webpack-cli: '*'
@@ -48189,6 +48165,7 @@ packages:
     version: 5.99.1
     engines: {node: '>=10.13.0'}
     hasBin: true
+    prepare: true
     requiresBuild: true
     peerDependencies:
       webpack-cli: '*'
@@ -48232,6 +48209,7 @@ packages:
     version: 5.99.1
     engines: {node: '>=10.13.0'}
     hasBin: true
+    prepare: true
     requiresBuild: true
     peerDependencies:
       webpack-cli: '*'

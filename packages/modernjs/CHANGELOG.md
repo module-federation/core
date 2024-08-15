@@ -1,5 +1,17 @@
 # @module-federation/modern-js
 
+## 0.4.0
+
+### Patch Changes
+
+- 88dec4e: fix(modern-js-plugin): require node plugin on demand
+- Updated dependencies [a335707]
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/enhanced@0.4.0
+  - @module-federation/sdk@0.4.0
+  - @module-federation/node@2.5.6
+
 ## 0.3.5
 
 ### Patch Changes
