@@ -29,7 +29,7 @@ class CustomRuntimePlugin {
     compiler.hooks.make.tapAsync(
       'CustomRuntimePlugin',
       (compilation: Compilation, callback: (err?: Error) => void) => {
-        if (this.bundledCode) callback();
+        if (this.bundledCode) return callback();
         const runtimeModulePath = require
           .resolve('@module-federation/webpack-bundler-runtime/vendor')
           .replace('cjs', 'esm');

@@ -11,10 +11,6 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   config.watchOptions = {
     ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
   };
-  config.output.environment = {
-    arrowFunction: false,
-    const: false,
-  };
   // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
   config.plugins.push(
     new ModuleFederationPlugin({

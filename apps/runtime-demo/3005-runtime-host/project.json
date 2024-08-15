@@ -18,8 +18,7 @@
         "styles": [],
         "scripts": [],
         "webpackConfig": "apps/runtime-demo/3005-runtime-host/webpack.config.js",
-        "babelUpwardRootMode": true,
-        "babelConfig": "apps/runtime-demo/3005-runtime-host/.babelrc"
+        "babelUpwardRootMode": true
       },
       "configurations": {
         "development": {
