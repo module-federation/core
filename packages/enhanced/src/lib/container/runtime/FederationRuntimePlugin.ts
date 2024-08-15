@@ -29,7 +29,7 @@ const BundlerRuntimePath = require.resolve(
     paths: [RuntimeToolsPath],
   },
 );
-const RuntimePath = require.resolve('@module-federation/runtime', {
+const RuntimePath = require.resolve('@module-federation/runtime/embedded', {
   paths: [RuntimeToolsPath],
 });
 
@@ -95,6 +95,7 @@ class FederationRuntimePlugin {
               `${federationGlobal}.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;`,
             ])
           : '',
+        `console.log(${federationGlobal});`,
         `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
         `if(${federationGlobal}.attachShareScopeMap){`,
         Template.indent([
@@ -192,13 +193,21 @@ class FederationRuntimePlugin {
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
 
+    console.log('injecting runtime');
+
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation, { normalModuleFactory }) => {
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           this.constructor.name,
           (chunk, runtimeRequirements) => {
-            if (runtimeRequirements.has(federationGlobal)) {
+            if (!chunk.hasRuntime()) return;
+            if (runtimeRequirements.has(federationGlobal)) return;
+            if (
+              !runtimeRequirements.has(RuntimeGlobals.initializeSharing) &&
+              !runtimeRequirements.has(RuntimeGlobals.currentRemoteGetScope) &&
+              !runtimeRequirements.has(RuntimeGlobals.shareScopeMap)
+            ) {
               return;
             }
             runtimeRequirements.add(RuntimeGlobals.interceptModuleExecution);
@@ -215,6 +224,19 @@ class FederationRuntimePlugin {
             );
           },
         );
+        // compilation.hooks.runtimeRequirementInTree
+        //   .for(federationGlobal)
+        //   .tap(this.constructor.name, chunk => {
+        //     compilation.addRuntimeModule(
+        //       chunk,
+        //       new FederationRuntimeModule(
+        //         compilation.chunkGraph.getChunkRuntimeRequirements(chunk),
+        //         name,
+        //         initOptionsWithoutShared,
+        //       ),
+        //     );
+        //     return true;
+        //   });
       },
     );
   }
@@ -229,11 +251,18 @@ class FederationRuntimePlugin {
     if (Array.isArray(compiler.options.resolve.alias)) {
       return;
     }
+    // if (Array.isArray(compiler.options.externals)) {
+    //   compiler.options.externals.push({"@module-federation/runtime": "internal __webpack_require__.federation.runtime"});
+    // } else {
+    //   compiler.options.externals = [
+    //     {"@module-federation/runtime": "internal __webpack_require__.federation.runtime"},
+    //     ...(compiler.options?.externals ? [compiler.options.externals] : []),
+    //   ];
+    // }
 
     compiler.options.resolve.alias = {
       ...compiler.options.resolve.alias,
     };
-
     if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
       compiler.options.resolve.alias['@module-federation/runtime$'] =
         runtimePath;
@@ -290,11 +319,10 @@ class FederationRuntimePlugin {
         },
       );
     }
-
+    new CustomRuntimePlugin(this.entryFilePath).apply(compiler);
     this.prependEntry(compiler);
     this.injectRuntime(compiler);
     this.setRuntimeAlias(compiler);
-    new CustomRuntimePlugin(this.entryFilePath).apply(compiler);
   }
 }
 

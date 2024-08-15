@@ -13,6 +13,7 @@ class CustomRuntimeModule extends RuntimeModule {
 
   constructor(private readonly entryPath: string) {
     super('CustomRuntimeModule');
+    this.entryPath = entryPath;
   }
 
   override identifier() {
@@ -20,15 +21,9 @@ class CustomRuntimeModule extends RuntimeModule {
   }
 
   override generate(): string {
-    // module.exports = federation;
-    const runtimeModule = fs.readFileSync(
-      require.resolve('@module-federation/webpack-bundler-runtime/vendor'),
-      'utf-8',
-    );
-
+    const runtimeModule = this.entryPath;
     return Template.asString([
-      '// Generated CustomRuntimeModule code',
-      runtimeModule.replace('module.exports = federation;', ''),
+      runtimeModule,
       `var prevFederation = ${federationGlobal}`,
       `${federationGlobal} = {}`,
       `for(var key in federation){`,

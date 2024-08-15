@@ -8,6 +8,7 @@ module.exports = (rollupConfig, projectOptions) => {
     index: 'packages/runtime/src/index.ts',
     types: 'packages/runtime/src/types.ts',
     helpers: 'packages/runtime/src/helpers.ts',
+    embedded: 'packages/runtime/src/embedded.ts',
   };
 
   const project = projectOptions.project;

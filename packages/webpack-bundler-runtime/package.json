@@ -36,7 +36,7 @@
       "import": "./dist/container.esm.js",
       "require": "./dist/container.cjs.js"
     },
-    "./vendor": "./dist/vendored.js",
+    "./vendor": "./dist/vendored.ts",
     "./*": "./*"
   },
   "typesVersions": {

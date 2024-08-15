@@ -83,7 +83,7 @@ module.exports = (rollupConfig, projectOptions) => {
         'utf-8',
       );
       content = content.replace(/\/\*[\s\S]*?\*\//g, '');
-      fs.writeFileSync(projectOptions.outputPath + '/vendored.js', content);
+      fs.writeFileSync(projectOptions.outputPath + '/vendored.ts', content);
     },
   });
 

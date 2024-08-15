@@ -29,6 +29,11 @@
       "import": "./dist/types.esm.js",
       "require": "./dist/types.cjs.js"
     },
+    "./embedded": {
+      "types": "./dist/embedded.cjs.d.ts",
+      "import": "./dist/embedded.esm.js",
+      "require": "./dist/embedded.cjs.js"
+    },
     "./*": "./*"
   },
   "typesVersions": {

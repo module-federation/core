@@ -5,6 +5,15 @@
       {
         "runtime": "automatic"
       }
+    ],
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "chrome": "58",
+          "ie": "11"
+        }
+      }
     ]
   ],
   "plugins": []
