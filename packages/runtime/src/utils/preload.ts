@@ -80,57 +80,15 @@ export function preloadAssets(
       const module = host.moduleCache.get(remoteInfo.name);
       if (module) {
         getRemoteEntry({
+          origin: host,
           remoteInfo: moduleInfo,
           remoteEntryExports: module.remoteEntryExports,
-          createScriptHook: (url: string, attrs: any) => {
-            const res = host.loaderHook.lifecycle.createScript.emit({
-              url,
-              attrs,
-            });
-            if (!res) return;
-
-            if (typeof document === 'undefined') {
-              //todo: needs real fix
-              return res as HTMLScriptElement;
-            }
-
-            if (res instanceof HTMLScriptElement) {
-              return res;
-            }
-
-            if ('script' in res || 'timeout' in res) {
-              return res;
-            }
-
-            return;
-          },
         });
       } else {
         getRemoteEntry({
+          origin: host,
           remoteInfo: moduleInfo,
           remoteEntryExports: undefined,
-          createScriptHook: (url: string, attrs: any) => {
-            const res = host.loaderHook.lifecycle.createScript.emit({
-              url,
-              attrs,
-            });
-            if (!res) return;
-
-            if (typeof document === 'undefined') {
-              //todo: needs real fix
-              return res as HTMLScriptElement;
-            }
-
-            if (res instanceof HTMLScriptElement) {
-              return res;
-            }
-
-            if ('script' in res || 'timeout' in res) {
-              return res;
-            }
-
-            return;
-          },
         });
       }
     });
