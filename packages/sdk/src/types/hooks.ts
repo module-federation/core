@@ -12,6 +12,16 @@ export type CreateScriptHookReturn =
   | CreateScriptHookReturnReactNative
   | CreateScriptHookReturnDom;
 
+export type CreateScriptHookNode = (
+  url: string,
+  attrs?: Record<string, any> | undefined,
+) => CreateScriptHookReturnNode;
+
+export type CreateScriptHookDom = (
+  url: string,
+  attrs?: Record<string, any> | undefined,
+) => CreateScriptHookReturnDom;
+
 export type CreateScriptHook = (
   url: string,
   attrs?: Record<string, any> | undefined,

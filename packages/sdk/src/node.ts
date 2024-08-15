@@ -1,4 +1,4 @@
-import { CreateScriptHook } from './types';
+import { CreateScriptHookNode } from './types';
 
 function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
@@ -44,7 +44,7 @@ export function createScriptNode(
   url: string,
   cb: (error?: Error, scriptContext?: any) => void,
   attrs?: Record<string, any>,
-  createScriptHook?: CreateScriptHook,
+  createScriptHook?: CreateScriptHookNode,
 ) {
   if (createScriptHook) {
     const hookResult = createScriptHook(url);
@@ -142,7 +142,7 @@ export function loadScriptNode(
   url: string,
   info: {
     attrs?: Record<string, any>;
-    createScriptHook?: CreateScriptHook;
+    createScriptHook?: CreateScriptHookNode;
   },
 ) {
   return new Promise<void>((resolve, reject) => {
