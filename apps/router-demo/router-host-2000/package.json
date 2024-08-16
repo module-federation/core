@@ -10,7 +10,8 @@
   "dependencies": {
     "@ant-design/icons": "^5.3.6",
     "@module-federation/bridge-react": "workspace:*",
-    "@module-federation/enhanced": "workspace:*"
+    "@module-federation/enhanced": "workspace:*",
+    "react-router-dom": "6.24.1"
   },
   "devDependencies": {
     "@rsbuild/core": "^0.6.15",
