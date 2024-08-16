@@ -95,7 +95,7 @@ class FederationRuntimePlugin {
               `${federationGlobal}.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;`,
             ])
           : '',
-        `console.log(${federationGlobal});`,
+        `console.log('must set instance', __webpack_require__.federation);`,
         `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
         `if(${federationGlobal}.attachShareScopeMap){`,
         Template.indent([

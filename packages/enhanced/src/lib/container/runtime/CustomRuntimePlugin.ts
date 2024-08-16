@@ -1,12 +1,12 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type webpack from 'webpack';
 import CustomRuntimeModule from './CustomRuntimeModule';
+import fs from 'fs';
 
 const { RuntimeModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 import type { Compilation } from 'webpack';
-import fs from 'fs';
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
@@ -17,7 +17,9 @@ const WebpackError = require(
 
 class CustomRuntimePlugin {
   private entryPath: string;
+  private entryModule: string | number | undefined;
   private bundledCode: string | null = null;
+  private inFlight: boolean = false;
 
   constructor(path: string) {
     this.entryPath = path;
@@ -30,6 +32,7 @@ class CustomRuntimePlugin {
       'CustomRuntimePlugin',
       (compilation: Compilation, callback: (err?: Error) => void) => {
         if (this.bundledCode) return callback();
+
         const runtimeModulePath = require
           .resolve('@module-federation/webpack-bundler-runtime/vendor')
           .replace('cjs', 'esm');
@@ -38,7 +41,6 @@ class CustomRuntimePlugin {
           runtimeModulePath,
           'utf-8',
         );
-
         const runtimeModuleDataURI = `data:text/javascript;base64,${Buffer.from(runtimeModuleContent).toString('base64')}`;
 
         const childCompiler = compiler.createChildCompiler(
@@ -46,7 +48,7 @@ class CustomRuntimePlugin {
           'CustomRuntimePluginCompiler',
           0,
           {
-            filename: 'custom-runtime-bundle.js',
+            filename: '[name].js',
             library: {
               type: 'var',
               name: 'federation',
@@ -59,14 +61,18 @@ class CustomRuntimePlugin {
               runtimeModulePath,
               {
                 name: 'custom-runtime-bundle',
+                runtime: 'other',
               },
             ),
             new compiler.webpack.library.EnableLibraryPlugin('var'),
           ],
         );
+
         childCompiler.options.devtool = undefined;
+        childCompiler.options.optimization.moduleIds = 'deterministic';
 
         console.log('create child compiler for', runtimeModulePath);
+
         childCompiler.runAsChild(
           (
             err?: Error | null,
@@ -78,11 +84,28 @@ class CustomRuntimePlugin {
               return callback(childCompilation.errors[0]);
             }
 
-            this.bundledCode = (
-              childCompilation?.assets[
-                'custom-runtime-bundle.js'
-              ].source() as string
-            ).replace(/#\s*sourceMappingURL=\S+?\.map/g, '');
+            const injectChunk =
+              childCompilation?.assets['custom-runtime-bundle.js'];
+            const entry = childCompilation?.entrypoints.get(
+              'custom-runtime-bundle',
+            );
+            const entryChunk = entry?.getEntrypointChunk();
+
+            if (entryChunk) {
+              const entryModule =
+                childCompilation?.chunkGraph.getChunkEntryModulesIterable(
+                  entryChunk,
+                );
+              if (entryModule) {
+                const modu = Array.from(entryModule)[0];
+                this.entryModule =
+                  childCompilation?.chunkGraph.getModuleId(modu);
+              }
+            }
+
+            this.bundledCode = childCompilation?.assets[
+              'custom-runtime-bundle.js'
+            ].source() as string;
             callback();
           },
         );
@@ -103,7 +126,10 @@ class CustomRuntimePlugin {
               set.has(`${RuntimeGlobals.require}.federation`)
             ) {
               set.add('embeddedFederationRuntime');
-              const runtimeModule = new CustomRuntimeModule(this.bundledCode);
+              const runtimeModule = new CustomRuntimeModule(
+                this.bundledCode,
+                this.entryModule,
+              );
               compilation.addRuntimeModule(chunk, runtimeModule);
             }
           },

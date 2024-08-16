@@ -7,10 +7,10 @@
   },
   "packageManager": "pnpm@8.11.0",
   "private": true,
-  "description": "Module Federation helper for NextJS",
+  "description": "Module Federation v2",
   "main": "src/index.js",
   "types": "src/index.d.ts",
-  "repository": "https://github.com/module-federation/nextjs-mf",
+  "repository": "https://github.com/module-federation/core",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "contributors": [
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)",
