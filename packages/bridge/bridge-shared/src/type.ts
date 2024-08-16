@@ -1,7 +1,9 @@
 export interface ProviderParams {
-  name?: string;
+  moduleName?: string;
   basename?: string;
   memoryRoute?: { entryPath: string };
+  style?: React.CSSProperties;
+  className?: string;
 }
 
 export interface RenderFnParams extends ProviderParams {

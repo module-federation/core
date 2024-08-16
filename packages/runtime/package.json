@@ -29,6 +29,11 @@
       "import": "./dist/types.esm.js",
       "require": "./dist/types.cjs.js"
     },
+    "./retry-plugin": {
+      "types": "./dist/retry-plugin.cjs.d.ts",
+      "import": "./dist/retry-plugin.esm.js",
+      "require": "./dist/retry-plugin.cjs.js"
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -41,6 +46,9 @@
       ],
       "types": [
         "./dist/types.cjs.d.ts"
+      ],
+      "retry-plugin": [
+        "./dist/retry-plugin.cjs.d.ts"
       ]
     }
   },

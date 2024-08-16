@@ -10,8 +10,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.3.6",
     "@module-federation/bridge-react": "workspace:*",
-    "@module-federation/enhanced": "workspace:*",
-    "react-error-boundary": "^4.0.13"
+    "@module-federation/enhanced": "workspace:*"
   },
   "devDependencies": {
     "@rsbuild/core": "^0.6.15",
