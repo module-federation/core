@@ -1,5 +1,17 @@
 # @module-federation/runtime
 
+## 0.5.0
+
+### Minor Changes
+
+- 8378a77: feat(runtime): add loadEntry hook
+
+### Patch Changes
+
+- 5c7ac8a: provide error message when remote entry init fails
+- Updated dependencies [8378a77]
+  - @module-federation/sdk@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes
