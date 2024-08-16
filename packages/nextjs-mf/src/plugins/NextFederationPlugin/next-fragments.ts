@@ -62,7 +62,7 @@ export const applyPathFixes = (compiler: Compiler, options: any) => {
           oneOfRule.exclude = [
             oneOfRule.exclude,
             /universe\/packages/,
-            /core\/packages/,
+            // /core\/packages/,
           ].filter((i) => i);
         }
       });

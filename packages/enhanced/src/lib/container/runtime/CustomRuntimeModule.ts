@@ -10,15 +10,14 @@ const { RuntimeModule, Template, RuntimeGlobals } = require(
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class CustomRuntimeModule extends RuntimeModule {
-  private bundledCode: string | null = null;
   private entryModuleId: string | number | undefined;
 
   constructor(
-    private readonly entryPath: string,
+    private readonly bundledCode: string | null,
     entryModuleId: string | number | undefined,
   ) {
     super('CustomRuntimeModule', RuntimeModule.STAGE_BASIC);
-    this.entryPath = entryPath;
+    this.bundledCode = bundledCode;
     this.entryModuleId = entryModuleId;
   }
 
@@ -26,39 +25,32 @@ class CustomRuntimeModule extends RuntimeModule {
     return 'webpack/runtime/embed/federation';
   }
 
-  override generate(): string {
-    const { code: transformedCode } = transformSync(
-      this.entryPath.replace('var federation;', 'var federation = '),
-      {
-        jsc: {
-          parser: {
-            syntax: 'ecmascript',
-            jsx: false,
+  override generate(): string | null {
+    if (!this.bundledCode) return null;
+    const { code: transformedCode } = transformSync(this.bundledCode, {
+      jsc: {
+        parser: {
+          syntax: 'ecmascript',
+          jsx: false,
+        },
+        target: 'es2022',
+        minify: {
+          compress: {
+            unused: false,
+            dead_code: false,
           },
-          target: 'es2022',
-          minify: {
-            compress: {
-              unused: true,
-              dead_code: true,
-              drop_debugger: true,
-            },
-            mangle: false,
-            format: {
-              // strip comments that webpack wraps it in,
-              // they interfere with the parent comment prefixing and seem hard coded into webpack
-              comments: false,
-            },
+          mangle: false,
+          format: {
+            // strip comments that webpack wraps it in,
+            // they interfere with the parent comment prefixing and seem hard coded into webpack
+            comments: false,
           },
         },
       },
-    );
+    });
 
     return Template.asString([
       transformedCode,
-      `for (var mod in federation) {
-        ${Template.indent(`${RuntimeGlobals.moduleFactories}[mod] = federation[mod];`)}
-      }`,
-      `federation = ${RuntimeGlobals.require}(${JSON.stringify(this.entryModuleId)});`,
       `federation = ${RuntimeGlobals.compatGetDefaultExport}(federation)();`,
       `var prevFederation = ${federationGlobal}`,
       `${federationGlobal} = {}`,

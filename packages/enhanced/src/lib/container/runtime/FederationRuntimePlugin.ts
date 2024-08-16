@@ -193,8 +193,6 @@ class FederationRuntimePlugin {
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
 
-    console.log('injecting runtime');
-
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation, { normalModuleFactory }) => {
