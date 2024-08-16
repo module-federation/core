@@ -1,0 +1,137 @@
+# Error Catalog
+
+This section is a collection of common issues related to the implementation of `Module Federation` in general.
+The main goal is to provide additional context and solution paths for beginners not familiar with the fundamental ways of how `Module Federation` is working at its core.
+
+## Unable to use `module-name`'s URL with `module-name`_provider's globalName to get remoteEntry exports
+#### Error Message
+:::danger Browser Error Message
+Uncaught (in promise)
+Error: [ Federation Runtime ]:
+  Unable to use `module-name`'s URL with `module-name`_provider's globalName to get remoteEntry exports.
+  Possible reasons could be:
+
+   `origin`/modules/`module-name`/static/js/`module-name`_provider.js' is not the correct URL, or the remoteEntry resource is incorrect.
+
+   `module-name`_provider' cannot be used to get remoteEntry exports in the window object.
+:::
+
+#### Solution
+1. Create a shared-strategy in all hosts and remotes
+
+```ts title="shared-strategy.ts"
+``import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const sharedStrategy: () => FederationRuntimePlugin = () => ({
+  name: 'shared-strategy-plugin',
+  beforeInit(args) {
+    const { userOptions } = args;
+    const shared = userOptions.shared;
+    if (shared) {
+      Object.keys(shared).forEach((sharedKey) => {
+        const sharedConfigs = shared[sharedKey];
+        const arraySharedConfigs = Array.isArray(sharedConfigs)
+          ? sharedConfigs
+          : [sharedConfigs];
+        arraySharedConfigs.forEach((s) => {
+          s.strategy = 'loaded-first';
+        });
+      });
+    }
+    return args;
+  },
+});
+export default sharedStrategy;
+```
+
+2. Add the shared-strategy to your config
+```ts title="modern.config.js"
+{
+    ...
+    new ModuleFederationPlugin({
+        ...,
+        runtimePlugins: ['path/to/shared-strategy.ts'],
+      })
+  }
+```
+
+3. Optional: If you are running `module-federation` in a Docker environment, make sure to adapt the following fields in your configs of all `hosts` and `remotes`:
+```ts title="modern.config.js"
+{
+    rspack: (config, {appendPlugins}) => {
+        ...
+        config.publicPath = "auto";
+        config.output.uniqueName = "module-name";
+        delete config.optimization?.splitChunks;
+      },
+      appendPlugins([
+        new ModuleFederationPlugin({
+            ...,
+            runtime: false,
+        })
+      ])
+  }
+```
+
+## Resolve error: Cant't resolve `module-namespace`/`module-component` in `implementation-path`
+#### Error Message
+:::danger Browser Error Message
+Resolve error: Cant't resolve `module-namespace`/`module-component` in `implementation-path`
+
+var Component = /*#__PURE__*/ lazy(function() {}
+  return import("`module-namespace`/`module-component`)});
+:::
+
+#### Solution
+When checking your browser network traffic you might see that no `mf-manifest.json` file is being loaded. This is because the `module-namespace` is not being resolved correctly.
+Make sure the path to the actual exposed `module_provider.js` file in your remote is resolving with status code 200.
+
+
+## Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+#### Error Message
+:::danger Browser Error Message
+Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+
+You might have mismatching versions of React and the renderer (such as React DOM)
+
+You might be breaking the Rules of Hooks
+
+You might have more than one copy of React in the same app
+:::
+
+:::danger Browser Error Message
+Uncaught TypeError: Cannot read properties on null (reading `useState`)
+:::
+
+#### Solution
+This error occurs when you work a lot with `shared-dependencies`. After loading modules it is not clear which version of each shared-dependency should be used. To resolve this, switch to the shared notation of the option field `shared`
+The object notation allows for more control of the shared-dependencies.
+
+For us, the option `singleton` is mandatory to consolidate all versions of shared-dependencies to the lowest matching version.
+
+In addition, the option `eager` encapsulates all shared-dependencies into a dedicated output entry. This can be helpful to solve possible race-condition artifacts in the runtime. The drawback which this option is a slightly increased network traffic because of the additional output entry.
+
+```ts title="modern.config.js"
+{
+    ...
+    new ModuleFederationPlugin({
+            ...,
+         // Default basic configuration
+         // shared: [
+         //   'react',
+         //   'react-dom',
+         //   'my-custom-module'
+         // ]
+
+         // Configuration with more specificity
+            shared: {
+                react: { singleton: true, eager: true },
+                'react-dom': { singleton: true, eager: true },
+                'my-custom-module': { singleton: true, eager: true },
+                ...
+            },
+        })
+      ])
+  }
+```
+
