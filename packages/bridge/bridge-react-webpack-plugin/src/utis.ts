@@ -76,7 +76,7 @@ export const getBridgeRouterAlias = (
         // if react-router-dom/dist/index.js cannot be resolved, set the alias to origin reactRouterDomPath
         bridgeRouterAlias = {
           ...bridgeRouterAlias,
-          'react-router-dom/index.js': reactRouterDomPath,
+          'react-router-dom/dist/index.js': reactRouterDomPath,
         };
       }
     } else {
