@@ -1,0 +1,42 @@
+import React, { useContext } from 'react';
+// The upper alias react-router-dom$ into this file avoids the loop
+import * as ReactRouterDom from 'react-router-dom/dist/index.js';
+
+import { RouterContext } from './context';
+import { LoggerInstance } from './utils';
+
+function WraperRouterProvider(
+  props: Parameters<typeof ReactRouterDom.RouterProvider>[0],
+) {
+  const { router, ...propsRes } = props;
+  const routerContextProps = useContext(RouterContext) || {};
+  const routers = router.routes;
+  LoggerInstance.log(`WraperRouterProvider info >>>`, {
+    ...routerContextProps,
+    routerContextProps,
+    WraperRouterProviderProps: props,
+    router,
+  });
+  const RouterProvider = (ReactRouterDom as any)['Router' + 'Provider'];
+  const createMemoryRouter = (ReactRouterDom as any)['create' + 'MemoryRouter'];
+  const createBrowserRouter = (ReactRouterDom as any)[
+    'create' + 'BrowserRouter'
+  ];
+
+  if (routerContextProps.memoryRoute) {
+    const MemeoryRouterInstance = createMemoryRouter(routers, {
+      initialEntries: [routerContextProps?.memoryRoute.entryPath],
+    });
+    return <RouterProvider router={MemeoryRouterInstance} />;
+  } else {
+    const BrowserRouterInstance = createBrowserRouter(routers, {
+      basename: routerContextProps.basename,
+      future: router.future,
+      window: router.window,
+    });
+    return <RouterProvider {...propsRes} router={BrowserRouterInstance} />;
+  }
+}
+
+export * from 'react-router-dom/dist/index.js';
+export { WraperRouterProvider as RouterProvider };
