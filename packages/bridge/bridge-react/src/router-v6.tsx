@@ -5,6 +5,36 @@ import * as ReactRouterDom from 'react-router-dom/dist/index.js';
 import { RouterContext } from './context';
 import { LoggerInstance } from './utils';
 
+function WraperRouter(
+  props:
+    | Parameters<typeof ReactRouterDom.BrowserRouter>[0]
+    | Parameters<typeof ReactRouterDom.MemoryRouter>[0],
+) {
+  const { basename, ...propsRes } = props;
+  const routerContextProps = useContext(RouterContext) || {};
+
+  LoggerInstance.log(`WraperRouter info >>>`, {
+    ...routerContextProps,
+    routerContextProps,
+    WraperRouterProps: props,
+  });
+
+  if (routerContextProps?.memoryRoute) {
+    return (
+      <ReactRouterDom.MemoryRouter
+        {...props}
+        initialEntries={[routerContextProps?.memoryRoute.entryPath]}
+      />
+    );
+  }
+  return (
+    <ReactRouterDom.BrowserRouter
+      {...propsRes}
+      basename={routerContextProps?.basename || basename}
+    />
+  );
+}
+
 function WraperRouterProvider(
   props: Parameters<typeof ReactRouterDom.RouterProvider>[0],
 ) {
@@ -39,4 +69,5 @@ function WraperRouterProvider(
 }
 
 export * from 'react-router-dom/dist/index.js';
+export { WraperRouter as BrowserRouter };
 export { WraperRouterProvider as RouterProvider };

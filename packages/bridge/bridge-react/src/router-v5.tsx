@@ -36,4 +36,7 @@ function WraperRouter(
   );
 }
 
+// @ts-ignore
+export * from 'react-router-dom/';
+
 export { WraperRouter as BrowserRouter };

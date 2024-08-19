@@ -37,31 +37,31 @@ export default defineConfig({
         'react-router-dom/index.js',
         'react-router-dom/dist/index.js',
       ],
-      // plugins: [
-      //   {
-      //     name: 'modify-output-plugin',
-      //     generateBundle(options, bundle) {
-      //       for (const fileName in bundle) {
-      //         const chunk = bundle[fileName];
-      //         if (fileName.includes('router-v6') && chunk.type === 'chunk') {
-      //           chunk.code = chunk.code.replace(
-      //             // Match 'react-router-dom/' followed by single quotes, double quotes, or backticks, replacing only 'react-router-dom/' to react-router-v6 dist file structure
-      //             /react-router-dom\/(?=[\'\"\`])/g,
-      //             'react-router-dom/dist/index.js',
-      //           );
-      //         }
+      plugins: [
+        {
+          name: 'modify-output-plugin',
+          generateBundle(options, bundle) {
+            for (const fileName in bundle) {
+              const chunk = bundle[fileName];
+              // if (fileName.includes('router-v6') && chunk.type === 'chunk') {
+              //   chunk.code = chunk.code.replace(
+              //     // Match 'react-router-dom/' followed by single quotes, double quotes, or backticks, replacing only 'react-router-dom/' to react-router-v6 dist file structure
+              //     /react-router-dom\/(?=[\'\"\`])/g,
+              //     'react-router-dom/dist/index.js',
+              //   );
+              // }
 
-      //         if (fileName.includes('router-v5') && chunk.type === 'chunk') {
-      //           chunk.code = chunk.code.replace(
-      //             // Match 'react-router-dom/' followed by single quotes, double quotes, or backticks, replacing only 'react-router-dom/' to react-router-v5 dist file structure
-      //             /react-router-dom\/(?=[\'\"\`])/g,
-      //             'react-router-dom/index.js',
-      //           );
-      //         }
-      //       }
-      //     },
-      //   },
-      // ],
+              if (fileName.includes('router-v5') && chunk.type === 'chunk') {
+                chunk.code = chunk.code.replace(
+                  // Match 'react-router-dom/' followed by single quotes, double quotes, or backticks, replacing only 'react-router-dom/' to react-router-v5 dist file structure
+                  /react-router-dom\/(?=[\'\"\`])/g,
+                  'react-router-dom/index.js',
+                );
+              }
+            }
+          },
+        },
+      ],
     },
     minify: false,
   },
