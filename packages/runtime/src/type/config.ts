@@ -59,7 +59,7 @@ type SharedBaseArgs = {
   deps?: Array<string>;
   strategy?: 'version-first' | 'loaded-first';
   loaded?: boolean;
-};
+} & SharedConfig;
 
 export type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
 
