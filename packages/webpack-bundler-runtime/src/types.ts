@@ -1,11 +1,11 @@
-import type * as runtime from '@module-federation/runtime';
+import * as runtime from '@module-federation/runtime';
 import type {
   RemoteEntryInitOptions,
   SharedConfig,
 } from '@module-federation/runtime/types';
-import type { initializeSharing } from './initializeSharing';
-import type { attachShareScopeMap } from './attachShareScopeMap';
-import type { initContainerEntry } from './initContainerEntry';
+import { initializeSharing } from './initializeSharing';
+import { attachShareScopeMap } from './attachShareScopeMap';
+import { initContainerEntry } from './initContainerEntry';
 
 // FIXME: ideal situation => import { GlobalShareScope,UserOptions } from '@module-federation/runtime/types'
 type ExcludeUndefined<T> = T extends undefined ? never : T;
