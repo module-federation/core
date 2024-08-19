@@ -1,7 +1,7 @@
-import type { Compiler } from 'webpack';
+import type { Compiler, Chunk } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';
-import type { ModuleFederationCompilerPluginOptions } from '../ModuleFederationPlugin';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 import {
   getFederationGlobalScope,
   normalizeRuntimeInitOptionsWithOutShared,
@@ -50,11 +50,11 @@ const EmbeddedRuntimePath = require.resolve(
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class FederationRuntimePlugin {
-  options?: ModuleFederationCompilerPluginOptions;
+  options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
   bundlerRuntimePath: string;
 
-  constructor(options?: ModuleFederationCompilerPluginOptions) {
+  constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
     this.bundlerRuntimePath = options?.embedRuntime
@@ -224,14 +224,28 @@ class FederationRuntimePlugin {
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
 
+    const onceForChunkSet = new WeakSet();
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation, { normalModuleFactory }) => {
+        const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
+          if (onceForChunkSet.has(chunk)) {
+            onceForChunkSet.add(chunk);
+            compilation.addRuntimeModule(
+              chunk,
+              new FederationRuntimeModule(
+                runtimeRequirements,
+                name,
+                initOptionsWithoutShared,
+              ),
+            );
+          }
+        };
+
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           this.constructor.name,
           (chunk, runtimeRequirements) => {
             if (!chunk.hasRuntime()) return;
-            if (runtimeRequirements.has(federationGlobal)) return;
             if (
               !runtimeRequirements.has(RuntimeGlobals.initializeSharing) &&
               !runtimeRequirements.has(RuntimeGlobals.currentRemoteGetScope) &&
@@ -243,16 +257,21 @@ class FederationRuntimePlugin {
             runtimeRequirements.add(RuntimeGlobals.moduleCache);
             runtimeRequirements.add(RuntimeGlobals.compatGetDefaultExport);
             runtimeRequirements.add(federationGlobal);
-            compilation.addRuntimeModule(
-              chunk,
-              new FederationRuntimeModule(
-                runtimeRequirements,
-                name,
-                initOptionsWithoutShared,
-              ),
-            );
           },
         );
+
+        compilation.hooks.runtimeRequirementInTree
+          .for(RuntimeGlobals.initializeSharing)
+          .tap(this.constructor.name, handler);
+        compilation.hooks.runtimeRequirementInTree
+          .for(RuntimeGlobals.currentRemoteGetScope)
+          .tap(this.constructor.name, handler);
+        compilation.hooks.runtimeRequirementInTree
+          .for(RuntimeGlobals.shareScopeMap)
+          .tap(this.constructor.name, handler);
+        compilation.hooks.runtimeRequirementInTree
+          .for(federationGlobal)
+          .tap(this.constructor.name, handler);
       },
     );
   }

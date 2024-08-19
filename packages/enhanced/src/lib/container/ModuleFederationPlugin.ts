@@ -45,18 +45,13 @@ const validate = createSchemaValidation(
   },
 );
 
-export interface ModuleFederationCompilerPluginOptions
-  extends moduleFederationPlugin.ModuleFederationPluginOptions {
-  embedRuntime?: boolean;
-}
-
 class ModuleFederationPlugin implements WebpackPluginInstance {
-  private _options: ModuleFederationCompilerPluginOptions;
+  private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _statsPlugin?: StatsPlugin;
   /**
    * @param {ModuleFederationCompilerPluginOptions} options options
    */
-  constructor(options: ModuleFederationCompilerPluginOptions) {
+  constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
     validate(options);
     this._options = options;
   }
