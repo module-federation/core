@@ -99,17 +99,6 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
       : {}
     : {};
 
-  // return forwardRef((props: ProviderParams & RawComponentType, ref) => {
-  //   const LazyComponent = createLazyRemoteComponent(info);
-  //   return (
-  //     // set ErrorBoundary for LazyComponent rendering error, usually caused by inner bridge logic render process
-  //     <ErrorBoundary FallbackComponent={info.fallback}>
-  //       <React.Suspense fallback={info.loading}>
-  //         <LazyComponent {...props} ref={ref} />
-  //       </React.Suspense>
-  //     </ErrorBoundary>
-  //   );
-  // });
   return forwardRef<HTMLDivElement, ProviderParams & RawComponentType>(
     (props, ref) => {
       const LazyComponent = createLazyRemoteComponent(info);

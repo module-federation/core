@@ -37,6 +37,8 @@ function WraperRouter(
 }
 
 // @ts-ignore
+// cause export directly from react-router-dom/index.js will caused build falied.
+// it will be replace by react-router-dom/index.js in building phase
 export * from 'react-router-dom/';
 
 export { WraperRouter as BrowserRouter };
