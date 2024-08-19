@@ -51,7 +51,7 @@ class CustomRuntimeModule extends RuntimeModule {
 
     return Template.asString([
       transformedCode,
-      `federation = ${RuntimeGlobals.compatGetDefaultExport}(federation)();`,
+      `var federation = ${RuntimeGlobals.compatGetDefaultExport}(federation)();`,
       `var prevFederation = ${federationGlobal}`,
       `${federationGlobal} = {}`,
       `for (var key in federation) {`,

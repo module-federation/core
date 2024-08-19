@@ -5,7 +5,7 @@
 export { extractUrlAndGlobal } from '@module-federation/utilities';
 import { injectScript as injectLegacy } from '@module-federation/utilities';
 //@ts-ignore
-export const injectScript = (args) => {
+export const injectScript = function (args: any): any {
   console.error(
     '@module-federation/utilities injectScript is deprecated, use module-federation/runtime {init,loadRemote}',
   );
@@ -35,16 +35,16 @@ export type { FlushedChunksProps } from './flushedChunks';
  * If the function is called on the server side, it imports the revalidate function from the module federation node utilities and returns the result of calling that function.
  * @returns {Promise<boolean>} A promise that resolves with a boolean.
  */
-export const revalidate = (
+export const revalidate = function (
   fetchModule: any = undefined,
   force: boolean = false,
-) => {
+): Promise<boolean> {
   if (typeof window !== 'undefined') {
     console.error('revalidate should only be called server-side');
     return Promise.resolve(false);
   }
   // @ts-ignore
-  return import('@module-federation/node/utils').then((utils) => {
+  return import('@module-federation/node/utils').then(function (utils) {
     return utils.revalidate(fetchModule, force);
   });
 };

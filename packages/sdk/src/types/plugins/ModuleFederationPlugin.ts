@@ -222,7 +222,6 @@ export interface ModuleFederationPluginOptions {
 
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
-  async?: boolean | AsyncBoundaryOptions;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

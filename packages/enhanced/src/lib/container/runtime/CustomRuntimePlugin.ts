@@ -1,25 +1,39 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type webpack from 'webpack';
 import CustomRuntimeModule from './CustomRuntimeModule';
-import fs from 'fs';
+const { RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+import type { Compiler, Compilation, Chunk } from 'webpack';
 
-const { RuntimeModule, Template, RuntimeGlobals, WebpackOptionsApply } =
-  require(normalizeWebpackPath('webpack')) as typeof import('webpack');
-import type { Compilation } from 'webpack';
+const onceForCompilationMap = new WeakMap();
 
 class RuntimeModuleChunkPlugin {
-  apply(compiler: webpack.Compiler): void {
+  apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'ModuleChunkFormatPlugin',
       (compilation: Compilation) => {
+        compilation.hooks.optimizeModuleIds.tap(
+          'ModuleChunkFormatPlugin',
+          (modules) => {
+            for (const module of modules) {
+              if (typeof module.id === 'string') {
+                module.id = `(embed)${module.id}`;
+              } else {
+                module.id = `1000${module.id}`;
+              }
+            }
+          },
+        );
+
         const hooks =
           compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
             compilation,
           );
+
         hooks.renderChunk.tap(
           'ModuleChunkFormatPlugin',
           (modules, renderContext) => {
-            const { chunk, chunkGraph, runtimeTemplate } = renderContext;
+            const { chunk, chunkGraph } = renderContext;
 
             const source = new compiler.webpack.sources.ConcatSource();
             source.add('var federation = ');
@@ -28,8 +42,6 @@ class RuntimeModuleChunkPlugin {
             const entries = Array.from(
               chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunk),
             );
-            const loadedChunks = new Set();
-            let index = 0;
             for (let i = 0; i < entries.length; i++) {
               const [module, entrypoint] = entries[i];
               const final = i + 1 === entries.length;
@@ -38,7 +50,7 @@ class RuntimeModuleChunkPlugin {
               if (final) {
                 source.add('for (var mod in federation) {\n');
                 source.add(
-                  `\t${RuntimeGlobals.moduleFactories}[mod] = federation[mod];\n`,
+                  `${RuntimeGlobals.moduleFactories}[mod] = federation[mod];\n`,
                 );
                 source.add('}\n');
                 source.add('federation = ');
@@ -47,7 +59,6 @@ class RuntimeModuleChunkPlugin {
                 `${RuntimeGlobals.require}(${JSON.stringify(moduleId)});\n`,
               );
             }
-            const str = source.source();
             return source;
           },
         );
@@ -57,30 +68,22 @@ class RuntimeModuleChunkPlugin {
 }
 
 class CustomRuntimePlugin {
-  private entryPath: string;
-  private entryModule: string | number | undefined;
-  private bundledCode: string | null = null;
-  private inFlight: boolean = false;
+  private entryModule?: string | number;
+  private bundlerRuntimePath: string;
 
   constructor(path: string) {
-    this.entryPath = path;
-    console.log('CUSTOM PLUGNI');
+    this.bundlerRuntimePath = path.replace('cjs', 'esm');
   }
 
-  apply(compiler: webpack.Compiler): void {
+  apply(compiler: Compiler): void {
     compiler.hooks.make.tapAsync(
       'CustomRuntimePlugin',
       (compilation: Compilation, callback: (err?: Error) => void) => {
-        if (this.bundledCode || this.inFlight) return callback();
+        if (onceForCompilationMap.has(compilation)) return callback();
+        onceForCompilationMap.set(compilation, null);
 
-        const runtimeModulePath = require
-          .resolve('@module-federation/webpack-bundler-runtime/vendor')
-          .replace('cjs', 'esm');
-
-        const childCompiler = compiler.createChildCompiler(
-          compiler.createCompilation(),
+        const childCompiler = compilation.createChildCompiler(
           'CustomRuntimePluginCompiler',
-          0,
           {
             filename: '[name].js',
             library: {
@@ -92,7 +95,7 @@ class CustomRuntimePlugin {
           [
             new compiler.webpack.EntryPlugin(
               compiler.context,
-              runtimeModulePath,
+              this.bundlerRuntimePath,
               {
                 name: 'custom-runtime-bundle',
                 runtime: 'other',
@@ -103,47 +106,77 @@ class CustomRuntimePlugin {
           ],
         );
 
-        this.inFlight = true;
-
+        childCompiler.context = compiler.context;
         childCompiler.options.devtool = undefined;
-        childCompiler.options.optimization.moduleIds = 'deterministic';
         childCompiler.options.optimization.splitChunks = false;
         childCompiler.options.optimization.removeAvailableModules = true;
+        console.log('Creating child compiler for', this.bundlerRuntimePath);
 
-        console.log('create child compiler for', runtimeModulePath);
+        childCompiler.hooks.thisCompilation.tap(
+          this.constructor.name,
+          /**
+           * @param {Compilation} childCompilation
+           */
+          (childCompilation) => {
+            childCompilation.hooks.processAssets.tap(
+              this.constructor.name,
+              () => {
+                const source =
+                  childCompilation.assets['custom-runtime-bundle.js'] &&
+                  (childCompilation.assets[
+                    'custom-runtime-bundle.js'
+                  ].source() as string);
 
+                const entry = childCompilation.entrypoints.get(
+                  'custom-runtime-bundle',
+                );
+                const entryChunk = entry?.getEntrypointChunk();
+
+                if (entryChunk) {
+                  const entryModule = Array.from(
+                    childCompilation.chunkGraph.getChunkEntryModulesIterable(
+                      entryChunk,
+                    ),
+                  )[0];
+                  this.entryModule =
+                    childCompilation.chunkGraph.getModuleId(entryModule);
+                }
+
+                onceForCompilationMap.set(compilation, source);
+                console.log('got compilation asset');
+                // Remove all chunk assets
+                childCompilation.chunks.forEach((chunk) => {
+                  chunk.files.forEach((file) => {
+                    childCompilation.deleteAsset(file);
+                  });
+                });
+              },
+            );
+          },
+        );
         childCompiler.runAsChild(
           (
             err?: Error | null,
-            entries?: webpack.Chunk[],
-            childCompilation?: webpack.Compilation,
+            entries?: Chunk[],
+            childCompilation?: Compilation,
           ) => {
-            if (err) return callback(err);
-            if (childCompilation && childCompilation.errors.length > 0) {
+            if (err) {
+              return callback(err);
+            }
+
+            if (!childCompilation) {
+              console.warn(
+                'Embed Federation Runtime: Child compilation is undefined',
+              );
+              return callback();
+            }
+
+            if (childCompilation.errors.length) {
               return callback(childCompilation.errors[0]);
             }
 
-            const entry = childCompilation?.entrypoints.get(
-              'custom-runtime-bundle',
-            );
-            const entryChunk = entry?.getEntrypointChunk();
+            console.log('Code built successfully');
 
-            if (entryChunk) {
-              const entryModule =
-                childCompilation?.chunkGraph.getChunkEntryModulesIterable(
-                  entryChunk,
-                );
-              if (entryModule) {
-                const modu = Array.from(entryModule)[0];
-                this.entryModule =
-                  childCompilation?.chunkGraph.getModuleId(modu);
-              }
-            }
-            console.log('code built');
-            this.bundledCode =
-              (childCompilation?.assets[
-                'custom-runtime-bundle.js'
-              ]?.source() as string) || null;
             callback();
           },
         );
@@ -152,23 +185,26 @@ class CustomRuntimePlugin {
 
     compiler.hooks.thisCompilation.tap(
       'CustomRuntimePlugin',
-      (compilation: webpack.Compilation) => {
+      (compilation: Compilation) => {
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'CustomRuntimePlugin',
-          (chunk: webpack.Chunk, set: Set<string>) => {
-            if (set.has('embeddedFederationRuntime')) return;
-            if (!set.has(`${RuntimeGlobals.require}.federation`)) return;
+          (chunk: Chunk, runtimeRequirements: Set<string>) => {
+            if (runtimeRequirements.has('embeddedFederationRuntime')) return;
             if (
-              this.bundledCode &&
-              set.has(`${RuntimeGlobals.require}.federation`)
-            ) {
-              set.add('embeddedFederationRuntime');
-              const runtimeModule = new CustomRuntimeModule(
-                this.bundledCode,
-                this.entryModule,
-              );
-              compilation.addRuntimeModule(chunk, runtimeModule);
-            }
+              !runtimeRequirements.has(`${RuntimeGlobals.require}.federation`)
+            )
+              return;
+            const bundledCode = onceForCompilationMap.get(compilation);
+            if (!bundledCode) return;
+
+            runtimeRequirements.add('embeddedFederationRuntime');
+            const runtimeModule = new CustomRuntimeModule(
+              bundledCode,
+              this.entryModule,
+            );
+
+            compilation.addRuntimeModule(chunk, runtimeModule);
+            console.log(`Custom runtime module added to chunk: ${chunk.name}`);
           },
         );
       },

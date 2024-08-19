@@ -31,10 +31,10 @@ export function applyServerPlugins(
       suffix,
     );
   }
-
-  if (typeof filename === 'string' && !filename.includes(suffix)) {
-    compiler.options.output.filename = filename.replace('.js', suffix);
-  }
+  //
+  // if (typeof filename === 'string' && !filename.includes(suffix)) {
+  //   compiler.options.output.filename = filename.replace('.js', suffix);
+  // }
 
   new HoistContainerReferencesPlugin(options.name).apply(compiler);
 

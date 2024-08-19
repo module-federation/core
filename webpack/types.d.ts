@@ -2234,14 +2234,15 @@ declare class Compiler {
   root: Compiler;
   outputPath: string;
   watching?: Watching;
-  outputFileSystem: OutputFileSystem;
-  intermediateFileSystem: IntermediateFileSystem;
-  inputFileSystem: InputFileSystem;
-  watchFileSystem: WatchFileSystem;
+  outputFileSystem: null | OutputFileSystem;
+  intermediateFileSystem: null | IntermediateFileSystem;
+  inputFileSystem: null | InputFileSystem;
+  watchFileSystem: null | WatchFileSystem;
   recordsInputPath: null | string;
   recordsOutputPath: null | string;
-  records: object;
+  records: Record<string, any>;
   managedPaths: Set<string | RegExp>;
+  unmanagedPaths: Set<string | RegExp>;
   immutablePaths: Set<string | RegExp>;
   modifiedFiles?: ReadonlySet<string>;
   removedFiles?: ReadonlySet<string>;
@@ -2252,7 +2253,8 @@ declare class Compiler {
   >;
   fsStartTime?: number;
   resolverFactory: ResolverFactory;
-  infrastructureLogger: any;
+  infrastructureLogger?: (arg0: string, arg1: LogTypeEnum, arg2: any[]) => void;
+  platform: Readonly<PlatformTargetProperties>;
   options: WebpackOptionsNormalized;
   context: string;
   requestShortener: RequestShortener;
@@ -2260,8 +2262,8 @@ declare class Compiler {
   moduleMemCaches?: Map<
     Module,
     {
-      buildInfo: object;
-      references: WeakMap<Dependency, Module>;
+      buildInfo: BuildInfo;
+      references?: WeakMap<Dependency, Module>;
       memCache: WeakTupleMap<any, any>;
     }
   >;
@@ -2271,19 +2273,22 @@ declare class Compiler {
   watchMode: boolean;
   getCache(name: string): CacheFacade;
   getInfrastructureLogger(name: string | (() => string)): WebpackLogger;
-  watch(watchOptions: WatchOptions, handler: CallbackFunction<Stats>): Watching;
-  run(callback: CallbackFunction<Stats>): void;
+  watch(watchOptions: WatchOptions, handler: RunCallback<Stats>): Watching;
+  run(callback: RunCallback<Stats>): void;
   runAsChild(
     callback: (
-      err?: null | Error,
+      err: null | Error,
       entries?: Chunk[],
       compilation?: Compilation,
     ) => any,
   ): void;
   purgeInputFileSystem(): void;
-  emitAssets(compilation: Compilation, callback: CallbackFunction<void>): void;
-  emitRecords(callback: CallbackFunction<void>): void;
-  readRecords(callback: CallbackFunction<void>): void;
+  emitAssets(
+    compilation: Compilation,
+    callback: CallbackFunction_2<void>,
+  ): void;
+  emitRecords(callback: CallbackFunction_2<void>): void;
+  readRecords(callback: CallbackFunction_2<void>): void;
   createChildCompiler(
     compilation: Compilation,
     compilerName: string,
@@ -2292,7 +2297,7 @@ declare class Compiler {
     plugins?: WebpackPluginInstance[],
   ): Compiler;
   isChild(): boolean;
-  createCompilation(params?: any): Compilation;
+  createCompilation(params: CompilationParams): Compilation;
   newCompilation(params: CompilationParams): Compilation;
   createNormalModuleFactory(): NormalModuleFactory;
   createContextModuleFactory(): ContextModuleFactory;
@@ -2300,9 +2305,10 @@ declare class Compiler {
     normalModuleFactory: NormalModuleFactory;
     contextModuleFactory: ContextModuleFactory;
   };
-  compile(callback: CallbackFunction<Compilation>): void;
-  close(callback: CallbackFunction<void>): void;
+  compile(callback: RunCallback<Compilation>): void;
+  close(callback: RunCallback<void>): void;
 }
+
 declare class ConcatSource extends Source {
   constructor(...args: (string | Source)[]);
   getChildren(): Source[];
@@ -8589,7 +8595,7 @@ declare interface NormalModuleLoaderContext<OptionsType> {
   utils: {
     absolutify: (context: string, request: string) => string;
     contextify: (context: string, request: string) => string;
-    createHash: (algorithm?: string) => Hash;
+    createHash: (algorithm?: string | typeof Hash) => Hash;
   };
   rootContext: string;
   fs: InputFileSystem;
@@ -8600,6 +8606,7 @@ declare interface NormalModuleLoaderContext<OptionsType> {
   _compilation?: Compilation;
   _compiler?: Compiler;
 }
+
 declare class NormalModuleReplacementPlugin {
   /**
    * Create an instance of the plugin
@@ -14113,6 +14120,7 @@ declare namespace exports {
     ResolveOptionsWebpackOptions as ResolveOptions,
     RuleSetCondition,
     RuleSetConditionAbsolute,
+    MatchObject,
     RuleSetRule,
     RuleSetUse,
     RuleSetUseItem,

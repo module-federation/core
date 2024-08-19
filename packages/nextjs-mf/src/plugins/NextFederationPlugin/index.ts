@@ -60,13 +60,13 @@ export class NextFederationPlugin {
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
     new CopyFederationPlugin(isServer).apply(compiler);
-    this.applyConditionalPlugins(compiler, isServer);
     const normalFederationPluginOptions = this.getNormalFederationPluginOptions(
       compiler,
       isServer,
     );
-    // ContainerPlugin will get NextFederationPlugin._options, so NextFederationPlugin._options should be the same as normalFederationPluginOptions
     this._options = normalFederationPluginOptions;
+    this.applyConditionalPlugins(compiler, isServer);
+
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
 
     const runtimeESMPath = require.resolve(
@@ -130,7 +130,7 @@ export class NextFederationPlugin {
       asyncFunction: true,
     };
 
-    applyPathFixes(compiler, this._extraOptions);
+    applyPathFixes(compiler, this._options, this._extraOptions);
     if (this._extraOptions.debug) {
       compiler.options.devtool = false;
     }
@@ -173,9 +173,10 @@ export class NextFederationPlugin {
         ...(isServer
           ? [require.resolve('@module-federation/node/runtimePlugin')]
           : []),
+        //disable loaders on internal plugins
         require.resolve(path.join(__dirname, '../container/runtimePlugin')),
         ...(this._options.runtimePlugins || []),
-      ],
+      ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
       exposes: {
         ...defaultExpose,
@@ -196,6 +197,7 @@ export class NextFederationPlugin {
         : { manifest: { filePath: '/static/chunks' } }),
       // nextjs project needs to add config.watchOptions = ['**/node_modules/**', '**/@mf-types/**'] to prevent loop types update
       dts: this._options.dts ?? false,
+      embedRuntime: true,
     };
   }
 
@@ -206,7 +208,7 @@ export class NextFederationPlugin {
     } catch (e) {
       noop = require.resolve('../../federation-noop.cjs');
     }
-    return noop;
+    return '!' + noop;
   }
 }
 

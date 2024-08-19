@@ -1,33 +1,34 @@
+//@ts-nocheck
 import {
   nativeGlobal,
-  resetFederationGlobalInfo,
-  getGlobalFederationInstance,
-  setGlobalFederationInstance,
-  getGlobalFederationConstructor,
-  setGlobalFederationConstructor,
-  getInfoWithoutType,
-  getGlobalSnapshot,
-  getTargetSnapshotInfoByModuleInfo,
-  getGlobalSnapshotInfoByModuleInfo,
-  setGlobalSnapshotInfoByModuleInfo,
-  addGlobalSnapshot,
-  getRemoteEntryExports,
-  registerGlobalPlugins,
-  getGlobalHostPlugins,
-  getPreloaded,
-  setPreloaded,
-  Global,
+  // resetFederationGlobalInfo,
+  // getGlobalFederationInstance,
+  // setGlobalFederationInstance,
+  // getGlobalFederationConstructor,
+  // setGlobalFederationConstructor,
+  // getInfoWithoutType,
+  // getGlobalSnapshot,
+  // getTargetSnapshotInfoByModuleInfo,
+  // getGlobalSnapshotInfoByModuleInfo,
+  // setGlobalSnapshotInfoByModuleInfo,
+  // addGlobalSnapshot,
+  // getRemoteEntryExports,
+  // registerGlobalPlugins,
+  // getGlobalHostPlugins,
+  // getPreloaded,
+  // setPreloaded,
+  // Global,
 } from './global';
-import { getRegisteredShare, getGlobalShareScope } from './utils/share';
+// import { getRegisteredShare, getGlobalShareScope } from './utils/share';
 
-interface IShareUtils {
-  getRegisteredShare: typeof getRegisteredShare;
-  getGlobalShareScope: typeof getGlobalShareScope;
-}
-const ShareUtils: IShareUtils = {
-  getRegisteredShare,
-  getGlobalShareScope,
-};
+// interface IShareUtils {
+//   getRegisteredShare: typeof getRegisteredShare;
+//   getGlobalShareScope: typeof getGlobalShareScope;
+// }
+// const ShareUtils: IShareUtils = {
+//   getRegisteredShare,
+//   getGlobalShareScope,
+// };
 
 interface IGlobalUtils {
   Global: typeof Global;

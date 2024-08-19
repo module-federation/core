@@ -67,9 +67,6 @@ export function createScriptNode(
     if (typeof __webpack_require__ !== 'undefined') {
       try {
         //@ts-ignore
-        console.log(__webpack_require__.federation);
-        debugger;
-        //@ts-ignore
         const loaderHooks = __webpack_require__.federation.instance.loaderHook;
         if (loaderHooks.lifecycle.fetch) {
           return lazyLoaderHookFetch;

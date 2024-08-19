@@ -23,13 +23,13 @@ class InvertedContainerPlugin {
       container: this.options.container,
     }).apply(compiler);
 
-    new AsyncBoundaryPlugin({
-      excludeChunk: (chunk) =>
-        chunk.name === this.options.container ||
-        chunk.name === this.options.container + '_partial',
-      // @ts-ignore
-      eager: (module) => /\.federation/.test(module?.request || ''),
-    }).apply(compiler);
+    // new AsyncBoundaryPlugin({
+    //   excludeChunk: (chunk) =>
+    //     chunk.name === this.options.container ||
+    //     chunk.name === this.options.container + '_partial',
+    //   // @ts-ignore
+    //   eager: (module) => /\.federation/.test(module?.request || ''),
+    // }).apply(compiler);
   }
 }
 

@@ -19,6 +19,7 @@ import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
+import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -44,13 +45,18 @@ const validate = createSchemaValidation(
   },
 );
 
+export interface ModuleFederationCompilerPluginOptions
+  extends moduleFederationPlugin.ModuleFederationPluginOptions {
+  embedRuntime?: boolean;
+}
+
 class ModuleFederationPlugin implements WebpackPluginInstance {
-  private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
+  private _options: ModuleFederationCompilerPluginOptions;
   private _statsPlugin?: StatsPlugin;
   /**
-   * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options options
+   * @param {ModuleFederationCompilerPluginOptions} options options
    */
-  constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
+  constructor(options: ModuleFederationCompilerPluginOptions) {
     validate(options);
     this._options = options;
   }
@@ -90,13 +96,15 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     if (options.dts !== false) {
       new DtsPlugin(options).apply(compiler);
     }
-    new FederationRuntimePlugin(options).apply(compiler);
+    if (options.embedRuntime) {
+      new FederationRuntimePlugin(options).apply(compiler);
+    }
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =
       options.remoteType ||
       (options.library && isValidExternalsType(options.library.type)
-        ? options.library.type
-        : 'script');
+        ? (options.library.type as ExternalsType)
+        : ('script' as ExternalsType));
 
     const useContainerPlugin =
       options.exposes &&
@@ -148,7 +156,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           : Object.keys(options.remotes).length > 0)
       ) {
         new ContainerReferencePlugin({
-          // @ts-expect-error this should not be a string
           remoteType,
           shareScope: options.shareScope,
           remotes: options.remotes,

@@ -1,6 +1,7 @@
 import type { Compiler } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';
+import type { ModuleFederationCompilerPluginOptions } from '../ModuleFederationPlugin';
 import {
   getFederationGlobalScope,
   normalizeRuntimeInitOptionsWithOutShared,
@@ -11,7 +12,6 @@ import {
 import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
-import type { moduleFederationPlugin } from '@module-federation/sdk';
 import CustomRuntimePlugin from './CustomRuntimePlugin';
 
 const { RuntimeGlobals, Template } = require(
@@ -29,24 +29,44 @@ const BundlerRuntimePath = require.resolve(
     paths: [RuntimeToolsPath],
   },
 );
-const RuntimePath = require.resolve('@module-federation/runtime/embedded', {
+
+const VendoredBundlerRuntimePath = require.resolve(
+  '@module-federation/webpack-bundler-runtime/vendor',
+  {
+    paths: [RuntimeToolsPath],
+  },
+);
+
+const RuntimePath = require.resolve('@module-federation/runtime', {
   paths: [RuntimeToolsPath],
 });
+const EmbeddedRuntimePath = require.resolve(
+  '@module-federation/runtime/embedded',
+  {
+    paths: [RuntimeToolsPath],
+  },
+);
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class FederationRuntimePlugin {
-  options?: moduleFederationPlugin.ModuleFederationPluginOptions;
+  options?: ModuleFederationCompilerPluginOptions;
   entryFilePath: string;
   bundlerRuntimePath: string;
 
-  constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
+  constructor(options?: ModuleFederationCompilerPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
-    this.bundlerRuntimePath = BundlerRuntimePath;
+    this.bundlerRuntimePath = options?.embedRuntime
+      ? VendoredBundlerRuntimePath
+      : BundlerRuntimePath;
   }
 
-  static getTemplate(runtimePlugins: string[], bundlerRuntimePath?: string) {
+  static getTemplate(
+    runtimePlugins: string[],
+    bundlerRuntimePath?: string,
+    embedRuntime: boolean = false,
+  ) {
     // internal runtime plugin
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
       bundlerRuntimePath || BundlerRuntimePath,
@@ -69,17 +89,25 @@ class FederationRuntimePlugin {
       });
     }
 
+    const embedRuntimeLines = embedRuntime
+      ? '//using embedded runtime module, will not inject runtime in entry'
+      : Template.asString([
+          `var prevFederation = ${federationGlobal};`,
+          `${federationGlobal} = {}`,
+          `for(var key in federation){`,
+          Template.indent([`${federationGlobal}[key] = federation[key];`]),
+          '}',
+          `for(var key in prevFederation){`,
+          Template.indent([`${federationGlobal}[key] = prevFederation[key];`]),
+          '}',
+        ]);
+
     return Template.asString([
-      // `import federation from '${normalizedBundlerRuntimePath}';`,
+      embedRuntime
+        ? ''
+        : `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
-      // `var prevFederation = ${federationGlobal};`,
-      // `${federationGlobal} = {}`,
-      // `for(var key in federation){`,
-      // Template.indent([`${federationGlobal}[key] = federation[key];`]),
-      // '}',
-      // `for(var key in prevFederation){`,
-      // Template.indent([`${federationGlobal}[key] = prevFederation[key];`]),
-      // '}',
+      embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
       Template.indent([
         runtimePluginNames.length
@@ -95,7 +123,6 @@ class FederationRuntimePlugin {
               `${federationGlobal}.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;`,
             ])
           : '',
-        `console.log('must set instance', __webpack_require__.federation);`,
         `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
         `if(${federationGlobal}.attachShareScopeMap){`,
         Template.indent([
@@ -114,11 +141,13 @@ class FederationRuntimePlugin {
     containerName: string,
     runtimePlugins: string[],
     bundlerRuntimePath?: string,
+    embedRuntime: boolean = false,
   ) {
     const hash = createHash(
       `${containerName} ${FederationRuntimePlugin.getTemplate(
         runtimePlugins,
         bundlerRuntimePath,
+        embedRuntime,
       )}`,
     );
     return path.join(TEMP_DIR, `entry.${hash}.js`);
@@ -137,6 +166,7 @@ class FederationRuntimePlugin {
       this.options.name!,
       this.options.runtimePlugins!,
       this.bundlerRuntimePath,
+      this.options.embedRuntime,
     );
     return this.entryFilePath;
   }
@@ -155,6 +185,7 @@ class FederationRuntimePlugin {
         FederationRuntimePlugin.getTemplate(
           this.options.runtimePlugins!,
           this.bundlerRuntimePath,
+          this.options.embedRuntime,
         ),
       );
     }
@@ -222,49 +253,43 @@ class FederationRuntimePlugin {
             );
           },
         );
-        // compilation.hooks.runtimeRequirementInTree
-        //   .for(federationGlobal)
-        //   .tap(this.constructor.name, chunk => {
-        //     compilation.addRuntimeModule(
-        //       chunk,
-        //       new FederationRuntimeModule(
-        //         compilation.chunkGraph.getChunkRuntimeRequirements(chunk),
-        //         name,
-        //         initOptionsWithoutShared,
-        //       ),
-        //     );
-        //     return true;
-        //   });
       },
     );
   }
 
   setRuntimeAlias(compiler: Compiler) {
-    let runtimePath = RuntimePath;
+    let runtimePath = this.options?.embedRuntime
+      ? EmbeddedRuntimePath
+      : RuntimePath;
     if (this.options?.implementation) {
-      runtimePath = require.resolve('@module-federation/runtime', {
-        paths: [this.options.implementation],
-      });
+      runtimePath = require.resolve(
+        `@module-federation/runtime${this.options?.embedRuntime ? '/embedded' : ''}`,
+        {
+          paths: [this.options.implementation],
+        },
+      );
     }
     if (Array.isArray(compiler.options.resolve.alias)) {
       return;
     }
-    // if (Array.isArray(compiler.options.externals)) {
-    //   compiler.options.externals.push({"@module-federation/runtime": "internal __webpack_require__.federation.runtime"});
-    // } else {
-    //   compiler.options.externals = [
-    //     {"@module-federation/runtime": "internal __webpack_require__.federation.runtime"},
-    //     ...(compiler.options?.externals ? [compiler.options.externals] : []),
-    //   ];
-    // }
 
     compiler.options.resolve.alias = {
       ...compiler.options.resolve.alias,
     };
-    if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
-      compiler.options.resolve.alias['@module-federation/runtime$'] =
-        runtimePath;
+
+    if (this.options?.embedRuntime) {
+      // should use normal module replacement instead
+      if (!compiler.options.resolve.alias['@module-federation/runtime']) {
+        compiler.options.resolve.alias['@module-federation/runtime'] =
+          runtimePath;
+      }
+    } else {
+      if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
+        compiler.options.resolve.alias['@module-federation/runtime$'] =
+          runtimePath;
+      }
     }
+
     if (!compiler.options.resolve.alias['@module-federation/runtime-tools$']) {
       compiler.options.resolve.alias['@module-federation/runtime-tools$'] =
         this.options?.implementation || RuntimeToolsPath;
@@ -310,14 +335,16 @@ class FederationRuntimePlugin {
     }
 
     if (this.options?.implementation) {
-      this.bundlerRuntimePath = require.resolve(
-        '@module-federation/webpack-bundler-runtime',
-        {
-          paths: [this.options.implementation],
-        },
-      );
+      const runtimePath = this.options.embedRuntime
+        ? '@module-federation/webpack-bundler-runtime/vendor'
+        : '@module-federation/webpack-bundler-runtime';
+      this.bundlerRuntimePath = require.resolve(runtimePath, {
+        paths: [this.options.implementation],
+      });
     }
-    new CustomRuntimePlugin(this.entryFilePath).apply(compiler);
+    if (this.options?.embedRuntime) {
+      new CustomRuntimePlugin(this.bundlerRuntimePath).apply(compiler);
+    }
     this.prependEntry(compiler);
     this.injectRuntime(compiler);
     this.setRuntimeAlias(compiler);
