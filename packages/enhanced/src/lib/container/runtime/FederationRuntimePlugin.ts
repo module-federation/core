@@ -229,7 +229,7 @@ class FederationRuntimePlugin {
       this.constructor.name,
       (compilation, { normalModuleFactory }) => {
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
-          if (onceForChunkSet.has(chunk)) {
+          if (!onceForChunkSet.has(chunk)) {
             onceForChunkSet.add(chunk);
             compilation.addRuntimeModule(
               chunk,
@@ -242,24 +242,8 @@ class FederationRuntimePlugin {
           }
         };
 
-        compilation.hooks.additionalTreeRuntimeRequirements.tap(
-          this.constructor.name,
-          (chunk, runtimeRequirements) => {
-            if (!chunk.hasRuntime()) return;
-            if (
-              !runtimeRequirements.has(RuntimeGlobals.initializeSharing) &&
-              !runtimeRequirements.has(RuntimeGlobals.currentRemoteGetScope) &&
-              !runtimeRequirements.has(RuntimeGlobals.shareScopeMap)
-            ) {
-              return;
-            }
-            runtimeRequirements.add(RuntimeGlobals.interceptModuleExecution);
-            runtimeRequirements.add(RuntimeGlobals.moduleCache);
-            runtimeRequirements.add(RuntimeGlobals.compatGetDefaultExport);
-            runtimeRequirements.add(federationGlobal);
-          },
-        );
-
+        // if federation runtime requirements exist
+        // attach runtime module to the chunk
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.initializeSharing)
           .tap(this.constructor.name, handler);
