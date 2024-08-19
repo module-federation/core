@@ -297,7 +297,7 @@ class FederationRuntimePlugin {
     };
 
     if (this.options?.embedRuntime) {
-      // should use normal module replacement instead
+      // should use normal module replacement instead?
       if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
         compiler.options.resolve.alias['@module-federation/runtime$'] =
           runtimePath;
