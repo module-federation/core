@@ -1,5 +1,11 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.5.0
+
+### Patch Changes
+
+- 8378a77: feat(runtime): add loadEntry hook
+
 ## 0.4.0
 
 ### Patch Changes
