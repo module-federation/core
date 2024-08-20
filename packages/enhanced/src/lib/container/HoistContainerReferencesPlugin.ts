@@ -3,6 +3,7 @@ import type {
   Compilation,
   Chunk,
   WebpackPluginInstance,
+  ExternalModule,
 } from 'webpack';
 import ContainerEntryModule from './ContainerEntryModule';
 
@@ -13,8 +14,8 @@ import ContainerEntryModule from './ContainerEntryModule';
 export class HoistContainerReferences implements WebpackPluginInstance {
   private containerName?: string | undefined;
 
-  constructor(name?: string | undefined) {
-    this.containerName = name;
+  constructor(name: any) {
+    this.containerName = name || 'no known chunk name';
   }
 
   apply(compiler: Compiler): void {
@@ -24,10 +25,11 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         compilation.hooks.afterOptimizeChunks.tap(
           'HoistContainerReferences',
           (chunks: Iterable<Chunk>) => {
+            const runtimeChunks = this.getRuntimeChunks(compilation);
             for (const chunk of chunks) {
-              if (this.chunkContainsContainerEntryModule(chunk, compilation)) {
-                this.hoistModulesInChunk(chunk, compilation);
-              }
+              // if (this.chunkContainsContainerEntryModule(chunk, compilation)) {
+              this.hoistModulesInChunk(chunk, compilation, runtimeChunks);
+              // }
             }
           },
         );
@@ -38,6 +40,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   private chunkContainsContainerEntryModule(
     chunk: Chunk,
     compilation: Compilation,
+    runtimeChunks: Set<Chunk>,
   ): boolean {
     for (const module of compilation.chunkGraph.getChunkModulesIterable(
       chunk,
@@ -49,32 +52,48 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     return false;
   }
 
-  private hoistModulesInChunk(chunk: Chunk, compilation: Compilation): void {
-    const chunkGraph = compilation.chunkGraph;
-    const runtimeChunks = this.getRuntimeChunks(chunk, compilation);
+  private hoistModulesInChunk(
+    chunk: Chunk,
+    compilation: Compilation,
+    runtimeChunks: Set<Chunk>,
+  ): void {
+    const { chunkGraph, moduleGraph } = compilation;
+    const remoteModules = chunkGraph.getChunkModulesIterableBySourceType(
+      chunk,
+      'remote',
+    );
+    if (remoteModules) {
+      for (const module of remoteModules) {
+        const external = module.dependencies[0];
+        const externalModule = moduleGraph.getModule(external);
 
-    for (const module of chunkGraph.getChunkModulesIterable(chunk)) {
-      if (
-        !chunk.hasRuntime() &&
-        (!this.containerName ||
-          (chunk.name !== this.containerName &&
-            chunk.name !== this.containerName + '_partial'))
-      ) {
-        chunkGraph.disconnectChunkAndModule(chunk, module);
+        if (chunk.hasRuntime() || !externalModule) {
+          continue;
+        }
+
+        for (const runtimeChunk of runtimeChunks) {
+          if (chunkGraph.isModuleInChunk(externalModule, runtimeChunk))
+            continue;
+          chunkGraph.connectChunkAndModule(runtimeChunk, externalModule);
+        }
       }
-
-      for (const runtimeChunk of runtimeChunks) {
-        if (chunkGraph.isModuleInChunk(module, runtimeChunk)) continue;
-        chunkGraph.connectChunkAndModule(runtimeChunk, module);
+    }
+    if (chunk.name === this.containerName) {
+      for (const module of chunkGraph.getChunkRootModules(chunk)) {
+        chunkGraph.disconnectChunkAndModule(chunk, module);
+        for (const runtimeChunk of runtimeChunks) {
+          // if (chunkGraph.isModuleInChunk(module, runtimeChunk)) continue;
+          chunkGraph.connectChunkAndModule(runtimeChunk, module);
+        }
       }
     }
   }
 
-  private getRuntimeChunks(chunk: Chunk, compilation: Compilation): Chunk[] {
-    const runtimeChunks = [];
+  private getRuntimeChunks(compilation: Compilation): Set<Chunk> {
+    const runtimeChunks = new Set<Chunk>();
     for (const c of compilation.chunks) {
-      if (c.hasRuntime() && c !== chunk) {
-        runtimeChunks.push(c);
+      if (c.hasRuntime()) {
+        runtimeChunks.add(c);
       }
     }
     return runtimeChunks;

@@ -35,17 +35,16 @@ export function applyServerPlugins(
   // if (typeof filename === 'string' && !filename.includes(suffix)) {
   //   compiler.options.output.filename = filename.replace('.js', suffix);
   // }
-
-  new HoistContainerReferencesPlugin(options.name).apply(compiler);
+  new HoistContainerReferencesPlugin(options.name + '_partial').apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
-  new InvertedContainerPlugin({
-    runtime: 'webpack-runtime',
-    container: options.name,
-    remotes: options.remotes as Record<string, string>,
-    debug: false,
-    //@ts-ignore
-  }).apply(compiler);
+  // new InvertedContainerPlugin({
+  //   runtime: 'webpack-runtime',
+  //   container: options.name,
+  //   remotes: options.remotes as Record<string, string>,
+  //   debug: false,
+  //   //@ts-ignore
+  // }).apply(compiler);
 }
 
 /**

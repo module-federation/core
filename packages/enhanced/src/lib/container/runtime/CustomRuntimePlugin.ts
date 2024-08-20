@@ -4,8 +4,10 @@ const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 import type { Compiler, Compilation, Chunk } from 'webpack';
+import { getFederationGlobalScope } from './utils';
 
 const onceForCompilationMap = new WeakMap();
+const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class RuntimeModuleChunkPlugin {
   apply(compiler: Compiler): void {
@@ -16,10 +18,14 @@ class RuntimeModuleChunkPlugin {
           'ModuleChunkFormatPlugin',
           (modules) => {
             for (const module of modules) {
-              if (typeof module.id === 'string') {
-                module.id = `(embed)${module.id}`;
+              const moduleId = compilation.chunkGraph.getModuleId(module);
+              if (typeof moduleId === 'string') {
+                compilation.chunkGraph.setModuleId(
+                  module,
+                  `(embed)${moduleId}`,
+                );
               } else {
-                module.id = `1000${module.id}`;
+                compilation.chunkGraph.setModuleId(module, `1000${moduleId}`);
               }
             }
           },
@@ -83,7 +89,7 @@ class CustomRuntimePlugin {
         onceForCompilationMap.set(compilation, null);
 
         const childCompiler = compilation.createChildCompiler(
-          'CustomRuntimePluginCompiler',
+          'EmbedFederationRuntimeCompiler',
           {
             filename: '[name].js',
             library: {
@@ -186,27 +192,28 @@ class CustomRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       'CustomRuntimePlugin',
       (compilation: Compilation) => {
-        compilation.hooks.additionalTreeRuntimeRequirements.tap(
-          'CustomRuntimePlugin',
-          (chunk: Chunk, runtimeRequirements: Set<string>) => {
-            if (runtimeRequirements.has('embeddedFederationRuntime')) return;
-            if (
-              !runtimeRequirements.has(`${RuntimeGlobals.require}.federation`)
-            )
-              return;
-            const bundledCode = onceForCompilationMap.get(compilation);
-            if (!bundledCode) return;
+        const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
+          if (runtimeRequirements.has('embeddedFederationRuntime')) return;
+          if (
+            !runtimeRequirements.has(`${RuntimeGlobals.require}.federation`)
+          ) {
+            return;
+          }
+          const bundledCode = onceForCompilationMap.get(compilation);
+          if (!bundledCode) return;
 
-            runtimeRequirements.add('embeddedFederationRuntime');
-            const runtimeModule = new CustomRuntimeModule(
-              bundledCode,
-              this.entryModule,
-            );
+          runtimeRequirements.add('embeddedFederationRuntime');
+          const runtimeModule = new CustomRuntimeModule(
+            bundledCode,
+            this.entryModule,
+          );
 
-            compilation.addRuntimeModule(chunk, runtimeModule);
-            console.log(`Custom runtime module added to chunk: ${chunk.name}`);
-          },
-        );
+          compilation.addRuntimeModule(chunk, runtimeModule);
+          console.log(`Custom runtime module added to chunk: ${chunk.name}`);
+        };
+        compilation.hooks.runtimeRequirementInTree
+          .for(federationGlobal)
+          .tap('CustomRuntimePlugin', handler);
       },
     );
   }

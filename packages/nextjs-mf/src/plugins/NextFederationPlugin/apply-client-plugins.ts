@@ -62,9 +62,8 @@ export function applyClientPlugins(
     ],
     //@ts-ignore
   }).apply(compiler);
-
-  new HoistContainerReferencesPlugin(options.name).apply(compiler);
-  // // Add a new commonjs chunk loading plugin to the compiler
+  new HoistContainerReferencesPlugin(options.name + '_partial').apply(compiler);
+  // Add a new commonjs chunk loading plugin to the compiler
   // new InvertedContainerPlugin({
   //   runtime: 'webpack',
   //   container: options.name,

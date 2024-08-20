@@ -224,22 +224,20 @@ class FederationRuntimePlugin {
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
 
-    const onceForChunkSet = new WeakSet();
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation, { normalModuleFactory }) => {
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
-          if (!onceForChunkSet.has(chunk)) {
-            onceForChunkSet.add(chunk);
-            compilation.addRuntimeModule(
-              chunk,
-              new FederationRuntimeModule(
-                runtimeRequirements,
-                name,
-                initOptionsWithoutShared,
-              ),
-            );
-          }
+          if (runtimeRequirements.has(federationGlobal)) return;
+          runtimeRequirements.add(federationGlobal);
+          compilation.addRuntimeModule(
+            chunk,
+            new FederationRuntimeModule(
+              runtimeRequirements,
+              name,
+              initOptionsWithoutShared,
+            ),
+          );
         };
 
         // if federation runtime requirements exist
