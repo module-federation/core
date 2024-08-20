@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
+import { getBridgeRouterAlias } from './utis';
 
 class ReactBridgeAliasChangerPlugin {
   alias: string;
@@ -12,6 +13,7 @@ class ReactBridgeAliasChangerPlugin {
     this.moduleFederationOptions = info.moduleFederationOptions;
     this.alias = 'react-router-dom$';
     this.targetFile = '@module-federation/bridge-react/dist/router.es.js';
+
     if (this.moduleFederationOptions.shared) {
       if (Array.isArray(this.moduleFederationOptions.shared)) {
         if (this.moduleFederationOptions.shared.includes('react-router-dom')) {
@@ -42,7 +44,8 @@ class ReactBridgeAliasChangerPlugin {
         // Update alias
         const updatedAlias = {
           // allow `alias` can be override
-          [this.alias]: targetFilePath,
+          // [this.alias]: targetFilePath,
+          ...getBridgeRouterAlias(originalAlias['react-router-dom']),
           ...originalAlias,
         };
 
