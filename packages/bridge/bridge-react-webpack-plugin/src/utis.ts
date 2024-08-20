@@ -50,9 +50,8 @@ export const getBridgeRouterAlias = (
 
     if (majorVersion === 5) {
       bridgeRouterAlias = {
-        'react-router-dom$': require.resolve(
+        'react-router-dom$':
           '@module-federation/bridge-react/dist/router-v5.es.js',
-        ),
       };
       try {
         require.resolve('react-router-dom/index.js');
@@ -65,9 +64,8 @@ export const getBridgeRouterAlias = (
       }
     } else if (majorVersion === 6) {
       bridgeRouterAlias = {
-        'react-router-dom$': require.resolve(
+        'react-router-dom$':
           '@module-federation/bridge-react/dist/router-v6.es.js',
-        ),
       };
 
       try {
@@ -83,5 +81,9 @@ export const getBridgeRouterAlias = (
       console.warn('react-router-dom version is not supported');
     }
   }
+  console.log(
+    '<<<<<<<<<<<<< bridgeRouterAlias >>>>>>>>>>>>>',
+    bridgeRouterAlias,
+  );
   return bridgeRouterAlias;
 };
