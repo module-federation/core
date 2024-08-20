@@ -1,5 +1,13 @@
 # @module-federation/bridge-react-webpack-plugin
 
+## 0.5.0
+
+### Patch Changes
+
+- 49d6135: feat(@module-federation/bridge): enhance Bridge capabilities and fix some issues
+- Updated dependencies [8378a77]
+  - @module-federation/sdk@0.5.0
+
 ## 0.4.0
 
 ### Patch Changes
