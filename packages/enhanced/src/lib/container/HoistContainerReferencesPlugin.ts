@@ -4,6 +4,7 @@ import type {
   Chunk,
   WebpackPluginInstance,
   ExternalModule,
+  Module,
 } from 'webpack';
 import ContainerEntryModule from './ContainerEntryModule';
 
@@ -14,22 +15,19 @@ import ContainerEntryModule from './ContainerEntryModule';
 export class HoistContainerReferences implements WebpackPluginInstance {
   private containerName?: string | undefined;
 
-  constructor(name?: string | undefined) {
-    this.containerName = name;
+  constructor(name: any) {
+    this.containerName = name || 'no known chunk name';
   }
 
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'HoistContainerReferences',
       (compilation: Compilation) => {
-        compilation.hooks.afterOptimizeChunks.tap(
+        compilation.hooks.afterChunks.tap(
           'HoistContainerReferences',
           (chunks: Iterable<Chunk>) => {
-            for (const chunk of chunks) {
-              if (this.chunkContainsContainerEntryModule(chunk, compilation)) {
-                this.hoistModulesInChunk(chunk, compilation);
-              }
-            }
+            const runtimeChunks = this.getRuntimeChunks(compilation);
+            this.hoistModulesInChunk(chunks, compilation, runtimeChunks);
           },
         );
       },
@@ -39,6 +37,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   private chunkContainsContainerEntryModule(
     chunk: Chunk,
     compilation: Compilation,
+    runtimeChunks: Set<Chunk>,
   ): boolean {
     for (const module of compilation.chunkGraph.getChunkModulesIterable(
       chunk,
@@ -50,32 +49,44 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     return false;
   }
 
-  private hoistModulesInChunk(chunk: Chunk, compilation: Compilation): void {
-    const chunkGraph = compilation.chunkGraph;
-    const runtimeChunks = this.getRuntimeChunks(chunk, compilation);
+  private hoistModulesInChunk(
+    chunks: Iterable<Chunk>,
+    compilation: Compilation,
+    runtimeChunks: Set<Chunk>,
+  ): void {
+    const { chunkGraph, moduleGraph } = compilation;
+    const modulesToRemote = new Set<Module>();
+    for (const chunk of chunks) {
+      if (chunk.hasRuntime() && this.containerName) {
+        const partial = compilation.namedChunks.get(this.containerName);
 
-    for (const module of chunkGraph.getChunkModulesIterable(chunk)) {
-      if (
-        !chunk.hasRuntime() &&
-        (!this.containerName ||
-          (chunk.name !== this.containerName &&
-            chunk.name !== this.containerName + '_partial'))
-      ) {
-        chunkGraph.disconnectChunkAndModule(chunk, module);
+        if (partial && chunkGraph.getNumberOfEntryModules(chunk) === 0) {
+          for (const mod of compilation.chunkGraph.getChunkModulesIterable(
+            partial,
+          )) {
+            if (!chunkGraph.isModuleInChunk(mod, chunk)) {
+              chunk.addModule(mod);
+              modulesToRemote.add(mod);
+            }
+            partial.removeModule(mod);
+          }
+        }
       }
-
-      for (const runtimeChunk of runtimeChunks) {
-        if (chunkGraph.isModuleInChunk(module, runtimeChunk)) continue;
-        chunkGraph.connectChunkAndModule(runtimeChunk, module);
+    }
+    for (const module of modulesToRemote) {
+      const modulechunks = chunkGraph.getModuleChunks(module);
+      for (const chunk of modulechunks) {
+        if (chunk.hasRuntime()) continue;
+        chunk.removeModule(module);
       }
     }
   }
 
-  private getRuntimeChunks(chunk: Chunk, compilation: Compilation): Chunk[] {
-    const runtimeChunks = [];
+  private getRuntimeChunks(compilation: Compilation): Set<Chunk> {
+    const runtimeChunks = new Set<Chunk>();
     for (const c of compilation.chunks) {
-      if (c.hasRuntime() && c !== chunk) {
-        runtimeChunks.push(c);
+      if (c.hasRuntime()) {
+        runtimeChunks.add(c);
       }
     }
     return runtimeChunks;

@@ -155,7 +155,6 @@ class StartupChunkDependenciesPlugin {
               `${RuntimeGlobals.require}(${JSON.stringify(
                 chunkGraph.getModuleId(federationRuntimeModule),
               )});\n
-							//test
 							`,
               generateEntryStartup(
                 chunkGraph,

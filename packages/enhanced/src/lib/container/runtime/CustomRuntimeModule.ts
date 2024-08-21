@@ -51,7 +51,7 @@ class CustomRuntimeModule extends RuntimeModule {
 
     return Template.asString([
       transformedCode,
-      `var federation = ${RuntimeGlobals.compatGetDefaultExport}(federation)();`,
+      `var federation = federation.default || federation;`,
       `var prevFederation = ${federationGlobal}`,
       `${federationGlobal} = {}`,
       `for (var key in federation) {`,
@@ -60,7 +60,8 @@ class CustomRuntimeModule extends RuntimeModule {
       `for (var key in prevFederation) {`,
       Template.indent(`${federationGlobal}[key] = prevFederation[key];`),
       `}`,
-      'federation = undefined;',
+      'debugger;',
+      // 'federation = undefined;',
     ]);
   }
 }

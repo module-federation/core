@@ -62,7 +62,7 @@ class RuntimeModuleChunkPlugin {
                 source.add('federation = ');
               }
               source.add(
-                `${RuntimeGlobals.require}(${JSON.stringify(moduleId)});\n`,
+                `${RuntimeGlobals.require}(${typeof moduleId === 'number' ? moduleId : JSON.stringify(moduleId)});\n`,
               );
             }
             return source;
