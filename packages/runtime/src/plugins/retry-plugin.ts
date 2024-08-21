@@ -5,14 +5,14 @@ interface FetchWithRetryOptions {
   url: string;
   options?: RequestInit;
   retryTimes?: number;
-  fallbackUrl?: string;
+  fallback?: () => string;
 }
 
 async function fetchWithRetry({
   url, // fetch url
   options = {}, // fetch options
   retryTimes = defaultRetries, // retry times
-  fallbackUrl = '', // fallback url
+  fallback, // fallback url
 }: FetchWithRetryOptions) {
   try {
     const response = await fetch(url, options);
@@ -34,14 +34,13 @@ async function fetchWithRetry({
   } catch (error) {
     if (retryTimes <= 0) {
       console.log(
-        `>>>>>>>>> retry failed after ${defaultRetries} times for url: ${url}, now will try fallbackUrl url: ${fallbackUrl} <<<<<<<<<`,
+        `>>>>>>>>> retry failed after ${defaultRetries} times for url: ${url}, now will try fallbackUrl url <<<<<<<<<`,
       );
-      if (fallbackUrl && fallbackUrl !== url) {
+      if (fallback && typeof fallback === 'function') {
         return fetchWithRetry({
-          url: fallbackUrl,
+          url: fallback(),
           options,
           retryTimes: 1,
-          fallbackUrl,
         });
       }
       throw new Error(
@@ -56,7 +55,7 @@ async function fetchWithRetry({
       url,
       options,
       retryTimes: retryTimes - 1,
-      fallbackUrl,
+      fallback,
     });
   }
 }
@@ -73,7 +72,7 @@ const RetryPlugin: (
         ...params?.options,
       },
       retryTimes: params?.retryTimes,
-      fallbackUrl: params?.fallbackUrl,
+      fallback: params?.fallback,
     });
   },
 });

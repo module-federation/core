@@ -18,8 +18,8 @@ init({
   remotes: [],
   plugins: [
     RetryPlugin({
-      // fallbackUrl is optional
-      fallbackUrl: 'http://localhost:2001/mf-manifest.json',
+      // fallback is optional
+      fallback: () => 'http://localhost:2001/mf-manifest.json',
     }),
   ],
 });
