@@ -65,7 +65,6 @@ module.exports = composePlugins(
         dts: {
           tsConfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
         },
-        runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
       }),
     );
     // config.externals={
