@@ -7,6 +7,7 @@ import {
   ManifestProvider,
 } from './types';
 import { MANIFEST_EXT } from './constant';
+import { isBrowserEnv } from './env';
 
 interface IOptions {
   remotes?: Record<string, string>;
@@ -126,6 +127,7 @@ export function generateSnapshotFromManifest(
     types: remoteTypes,
     buildInfo: { buildVersion },
     globalName,
+    ssrRemoteEntry,
   } = manifest.metaData;
   const { exposes } = manifest;
 
@@ -180,6 +182,15 @@ export function generateSnapshotFromManifest(
       ...basicRemoteSnapshot,
       getPublicPath: getPublicPath(),
     };
+  }
+
+  if (ssrRemoteEntry) {
+    const fullSSRRemoteEntry = simpleJoinRemoteEntry(
+      ssrRemoteEntry.path,
+      ssrRemoteEntry.name,
+    );
+    remoteSnapshot.ssrRemoteEntry = fullSSRRemoteEntry;
+    remoteSnapshot.ssrRemoteEntryType = 'commonjs-module';
   }
 
   return remoteSnapshot;

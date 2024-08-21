@@ -9,7 +9,7 @@ describe('generateTypesInChildProcess', () => {
   const typesFolder = '@mf-types-dts-test-child-process';
   const remoteOptions = {
     moduleFederationConfig: {
-      name: 'moduleFederationTypescript',
+      name: 'dtsWorkerSpecRemote',
       filename: 'remoteEntry.js',
       exposes: {
         './index': join(__dirname, '..', './index.ts'),
@@ -30,7 +30,7 @@ describe('generateTypesInChildProcess', () => {
   const hostOptions = {
     context: projectRoot,
     moduleFederationConfig: {
-      name: 'moduleFederationTypescript',
+      name: 'dtsWorkerSpecHost',
       filename: 'remoteEntry.js',
       remotes: {
         remotes: 'remote@https://foo.it',

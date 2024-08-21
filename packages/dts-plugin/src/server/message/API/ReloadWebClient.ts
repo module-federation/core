@@ -1,4 +1,4 @@
-import { UpdateMode } from '../../../core/index';
+import { UpdateMode } from '../../constant';
 import { API, APIKind } from './API';
 
 export interface ReloadWebClientAPIPayload {

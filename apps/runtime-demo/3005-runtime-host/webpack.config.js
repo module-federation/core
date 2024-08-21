@@ -37,7 +37,6 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         //     resolve(proxy)
         //   }
         //   document.head.appendChild(script);
-        //
         // })`,
       },
       // library: { type: 'var', name: 'runtime_remote' },

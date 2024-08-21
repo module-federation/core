@@ -86,7 +86,7 @@ const data: DataType[] = [
 const Home: React.FC = () => {
   return (
     <>
-      <h2>Router host Home page</h2>
+      <h2>Router host Home page with React-React-Dom V5</h2>
       <Table columns={columns} dataSource={data} />
     </>
   );

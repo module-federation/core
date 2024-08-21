@@ -1,0 +1,57 @@
+name: E2E Test for ModernJS SSR
+
+on:
+  workflow_call:
+
+jobs:
+  e2e-modern:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> $GITHUB_ENV
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Run Build for All
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
+      - name: Run condition check script
+        id: check-ci
+        run: node tools/scripts/ci-is-affected.mjs --appName=modernjs
+
+      - name: E2E Test for Modern.js SSR
+        if: steps.check-ci.outcome == 'success'
+        run: |
+          lsof -ti tcp:3050,3051,3052,3053,3054,3055,3056 | xargs -r kill &&
+          pnpm run app:modern:dev &
+          sleep 1 &&
+          npx wait-on http://127.0.0.1:3050/ &&
+          npx wait-on http://127.0.0.1:3051/ &&
+          npx wait-on http://127.0.0.1:3052/ &&
+          npx wait-on http://127.0.0.1:3053/ &&
+          npx wait-on http://127.0.0.1:3054/ &&
+          npx wait-on http://127.0.0.1:3055/ &&
+          npx wait-on http://127.0.0.1:3056/ &&
+          npx nx run modernjs-ssr-host:e2e &&
+          lsof -ti tcp:3050,3051,3052,3053,3054,3055,3056 | xargs kill

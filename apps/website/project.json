@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/website/src",
+  "tags": [],
   "implicitDependencies": ["docs"],
   "targets": {
     "build": {
@@ -45,7 +46,8 @@
       "options": {
         "buildTarget": "website:build",
         "port": 4300
-      }
+      },
+      "dependsOn": ["build"]
     },
     "test": {
       "executor": "@nx/vite:test",
@@ -101,6 +103,5 @@
       "configurations": {},
       "dependsOn": ["docs:build-docs"]
     }
-  },
-  "tags": []
+  }
 }

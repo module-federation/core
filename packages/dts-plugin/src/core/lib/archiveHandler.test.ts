@@ -73,6 +73,7 @@ describe('archiveHandler', () => {
       context: process.cwd(),
       abortOnError: true,
       consumeAPITypes: false,
+      runtimePkgs: [],
     };
 
     const destinationFolder = 'typesHostFolder';
@@ -118,6 +119,7 @@ describe('archiveHandler', () => {
         context: process.cwd(),
         abortOnError: false,
         consumeAPITypes: false,
+        runtimePkgs: [],
       };
       axios.get = vi.fn().mockRejectedValue(new Error(message));
       const res = await downloadTypesArchive(hostOptions)([

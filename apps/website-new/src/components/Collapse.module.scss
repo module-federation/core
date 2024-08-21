@@ -1,0 +1,30 @@
+.arrow-right {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 10px solid;
+  border-left-color: var(--rp-c-text-1);
+}
+.arrow-down {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 10px solid;
+  border-top-color: var(--rp-c-text-1);
+}
+
+.details {
+  cursor: unset !important;
+  &:hover {
+    background-color: transparent !important;
+  }
+}
+
+.summary {
+  padding: 2px 0;
+  cursor: pointer;
+}

@@ -626,6 +626,15 @@ export default {
           type: 'number',
           minimum: 1,
         },
+        runtimePkgs: {
+          description: 'The extra runtime pkgs.',
+          type: 'array',
+          items: {
+            description: 'The extra runtime pkg.',
+            type: 'string',
+            minLength: 1,
+          },
+        },
       },
     },
     Dts: {
@@ -669,9 +678,29 @@ export default {
           description: 'Disable hot types reload.',
           type: 'boolean',
         },
-        disableDynamicRemoteTypeHints: {
-          description: 'Disable dynamic remote types hints.',
-          type: 'boolean',
+      },
+    },
+    AsyncBoundaryOptions: {
+      description: 'Make entrypoints startup as async chunks',
+      type: 'object',
+      properties: {
+        eager: {
+          description: 'whether eager',
+          anyOf: [
+            {
+              instanceof: 'RegExp',
+              tsType: 'RegExp',
+              tsType: '((module: any) => boolean)',
+            },
+            {
+              type: 'boolean',
+            },
+          ],
+        },
+        excludeChunk: {
+          description: 'exclude chunk',
+          instanceof: 'Function',
+          tsType: '(chunk: any) => boolean',
         },
       },
     },
@@ -752,6 +781,17 @@ export default {
       anyOf: [
         {
           $ref: '#/definitions/Dev',
+        },
+        {
+          type: 'boolean',
+        },
+      ],
+    },
+    async: {
+      description: 'Make entrypoints startup as async chunks',
+      anyOf: [
+        {
+          $ref: '#/definitions/AsyncBoundaryOptions',
         },
         {
           type: 'boolean',

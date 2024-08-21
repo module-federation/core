@@ -2,7 +2,9 @@
 
 ## 介绍
 
-`bridge` 是 `Module Federation` 提供的工具函数，用于帮助用户通过 `Module Federation` 来加载应用级别模块。它能自动提供 `provider` 函数所需的应用生命周期函数 `render` 和 `destroy`，并实现框架不同版本的兼容。此外，它还能让应用间的路由正常协同工作。
+`Bridge` 是 `Module Federation` 提供的工具函数，用于加载应用级别模块。
+所谓 “应用级别模块”，即 能像应用一样运行的模块，具备应用的框架渲染能力及路由能力。
+通过 `Bridge` 你可以在不同框架中渲染你的应用，并能保证应用间路由能协同工作。这对于微前端应用将非常有帮助。
 
 :::tip
 在阅读本章前，预设你已经了解：
@@ -17,12 +19,35 @@
 
 ### @module-federation/bridge-react
 
-`@module-federation/bridge-react` 工具包是 MF 为 React v16、v17、v18 应用 提供的 `bridge` 工具函数包，其导出的 `createBridgeComponent` 可用于 react v18 应用的导出模块，`@module-federation/bridge-react` 的使用见 [Host demo](https://github.com/module-federation/core/tree/main/apps/router-demo/router-host-2000)、[Remote demo](https://github.com/module-federation/core/tree/main/apps/router-demo/router-remote2-2002)。
+`@module-federation/bridge-react` 适用于 React 框架类型，目前我们支持 React v16、v17、v18 版本。
+
+在此工具包中我们提供 两个 API:
+
+- createBridgeComponent
+
+> 用于创建 React 应用类型模块导出，如果你的应用是 React 类型 且希望作为应用类型模块被另一个 MF 应用加载，那么你应该使用它为你的应用创造符合规范的导出。
+
+
+- createRemoteComponent
+
+> 用于在 React 应用中加载应用类型模块，所加载的模块必须被 `createBridgeComponent` 所包裹，`createRemoteComponent` 将自动在你的应用中创建渲染上下文以保证模块能正常工作。
+
+`@module-federation/bridge-react` 的使用见 [Host demo](https://github.com/module-federation/core/tree/main/apps/router-demo/router-host-2000)、[Remote demo](https://github.com/module-federation/core/tree/main/apps/router-demo/router-remote2-2002)。
+
 
 ### @module-federation/bridge-vue3
 
-`@module-federation/bridge-vue3` 工具包是 MF 为 Vue v3 应用 提供的 `bridge` 工具函数包，其导出的 `createBridgeComponent` 可用于 Vue v3 子应用的导出模块，`@module-federation/bridge-vue3` 的使用见 [Host demo](https://github.com/module-federation/core/tree/main/apps/router-demo/router-host-2100)、[Remote demo](https://github.com/module-federation/core/tree/main/apps/router-demo/router-remote3-2003)。
+`@module-federation/bridge-vue3` 适用于 Vue 框架类型，目前我们支持 Vue v3 版本。
 
+在此工具包中我们提供 两个 API:
+
+- createBridgeComponent
+
+> 用于创建 Vue 应用类型模块导出，如果你的应用是 Vue v3 类型 且希望作为应用类型模块被另一个 MF 应用加载，那么你应该使用它为你的应用创造符合规范的导出。
+
+- createRemoteComponent
+
+> 用于在 Vue 应用中加载应用类型模块，所加载的模块必须被 `createBridgeComponent` 所包裹，`createRemoteComponent` 将自动在你的应用中创建渲染上下文以保证模块能正常工作。
 
 ## FAQ
 

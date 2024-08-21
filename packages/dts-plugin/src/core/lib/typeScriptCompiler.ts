@@ -1,6 +1,6 @@
 import { ensureDirSync, writeFileSync, existsSync } from 'fs-extra';
+import crypto from 'crypto';
 import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
-import { randomUUID } from 'crypto';
 import {
   dirname,
   join,
@@ -18,7 +18,6 @@ import { TEMP_DIR } from '@module-federation/sdk';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { TsConfigJson } from '../interfaces/TsConfigJson';
-import { isDebugMode } from './utils';
 
 const STARTS_WITH_SLASH = /^\//;
 
@@ -54,12 +53,20 @@ export const retrieveMfAPITypesPath = (
     `${remoteOptions.typesFolder}.d.ts`,
   );
 
-function writeTempTsConfig(tsConfig: TsConfigJson, context: string) {
+function writeTempTsConfig(
+  tsConfig: TsConfigJson,
+  context: string,
+  name: string,
+) {
+  const createHash = (contents: string) => {
+    return crypto.createHash('md5').update(contents).digest('hex');
+  };
+  const hash = createHash(`${JSON.stringify(tsConfig)}${name}`);
   const tempTsConfigJsonPath = resolve(
     context,
     'node_modules',
     TEMP_DIR,
-    `tsconfig.${randomUUID()}.json`,
+    `tsconfig.${hash}.json`,
   );
   ensureDirSync(dirname(tempTsConfigJsonPath));
   writeFileSync(tempTsConfigJsonPath, JSON.stringify(tsConfig, null, 2));
@@ -129,6 +136,7 @@ const processTypesFile = async (options: {
         .replace(STARTS_WITH_SLASH, '')
         .split(sep) // Windows platform-specific file system path fix
         .join('/');
+      ensureDirSync(mfeTypeEntryDirectory);
       await writeFile(
         mfeTypeEntry,
         `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`,
@@ -151,6 +159,7 @@ export const compileTs = async (
   const tempTsConfigJsonPath = writeTempTsConfig(
     tsConfig,
     remoteOptions.context,
+    remoteOptions.moduleFederationConfig.name || 'mf',
   );
   try {
     const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
