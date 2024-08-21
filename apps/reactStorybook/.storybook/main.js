@@ -12,6 +12,7 @@ module.exports = {
         nxModuleFederationConfig: { ...nxModuleFederationConfig },
       },
     },
+    '@chromatic-com/storybook',
   ],
 
   framework: {
@@ -19,13 +20,11 @@ module.exports = {
     options: {},
   },
 
-  docs: {
-    autodocs: true
-  },
+  docs: {},
 
   typescript: {
-    reactDocgen: 'react-docgen-typescript'
-  }
+    reactDocgen: 'react-docgen-typescript',
+  },
 };
 
 // To customize your webpack configuration you can use the webpackFinal field.
