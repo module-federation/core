@@ -60,8 +60,7 @@ class CustomRuntimeModule extends RuntimeModule {
       `for (var key in prevFederation) {`,
       Template.indent(`${federationGlobal}[key] = prevFederation[key];`),
       `}`,
-      'debugger;',
-      // 'federation = undefined;',
+      'federation = undefined;',
     ]);
   }
 }

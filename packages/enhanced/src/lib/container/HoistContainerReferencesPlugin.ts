@@ -3,19 +3,14 @@ import type {
   Compilation,
   Chunk,
   WebpackPluginInstance,
-  ExternalModule,
   Module,
 } from 'webpack';
 import ContainerEntryModule from './ContainerEntryModule';
 
-/**
- * This class is used to hoist container references in the code.
- * @constructor
- */
 export class HoistContainerReferences implements WebpackPluginInstance {
-  private containerName?: string | undefined;
+  private readonly containerName: string;
 
-  constructor(name: any) {
+  constructor(name?: string) {
     this.containerName = name || 'no known chunk name';
   }
 
@@ -23,70 +18,63 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     compiler.hooks.thisCompilation.tap(
       'HoistContainerReferences',
       (compilation: Compilation) => {
-        compilation.hooks.afterChunks.tap(
-          'HoistContainerReferences',
-          (chunks: Iterable<Chunk>) => {
-            const runtimeChunks = this.getRuntimeChunks(compilation);
-            this.hoistModulesInChunk(chunks, compilation, runtimeChunks);
-          },
-        );
+        compilation.hooks.afterChunks.tap('HoistContainerReferences', () => {
+          const runtimeChunks = this.getRuntimeChunks(compilation);
+          this.hoistModulesInChunks(compilation, runtimeChunks);
+        });
       },
     );
   }
 
-  private chunkContainsContainerEntryModule(
-    chunk: Chunk,
-    compilation: Compilation,
-    runtimeChunks: Set<Chunk>,
-  ): boolean {
-    for (const module of compilation.chunkGraph.getChunkModulesIterable(
-      chunk,
-    )) {
-      if (module instanceof ContainerEntryModule) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private hoistModulesInChunk(
-    chunks: Iterable<Chunk>,
+  private hoistModulesInChunks(
     compilation: Compilation,
     runtimeChunks: Set<Chunk>,
   ): void {
-    const { chunkGraph, moduleGraph } = compilation;
-    const modulesToRemote = new Set<Module>();
-    for (const chunk of chunks) {
-      if (chunk.hasRuntime() && this.containerName) {
-        const partial = compilation.namedChunks.get(this.containerName);
+    const { chunkGraph } = compilation;
+    const partialChunk = this.containerName
+      ? compilation.namedChunks.get(this.containerName)
+      : undefined;
 
-        if (partial && chunkGraph.getNumberOfEntryModules(chunk) === 0) {
-          for (const mod of compilation.chunkGraph.getChunkModulesIterable(
-            partial,
-          )) {
-            if (!chunkGraph.isModuleInChunk(mod, chunk)) {
-              chunk.addModule(mod);
-              modulesToRemote.add(mod);
-            }
-            partial.removeModule(mod);
+    if (!partialChunk) return;
+
+    const modulesToHoist = new Set<Module>();
+
+    for (const chunk of runtimeChunks) {
+      if (chunkGraph.getNumberOfEntryModules(chunk) === 0) {
+        for (const module of chunkGraph.getChunkModulesIterable(partialChunk)) {
+          if (!chunkGraph.isModuleInChunk(module, chunk)) {
+            chunkGraph.connectChunkAndModule(chunk, module);
+            modulesToHoist.add(module);
           }
+        }
+        for (const module of modulesToHoist) {
+          chunkGraph.disconnectChunkAndModule(partialChunk, module);
         }
       }
     }
-    for (const module of modulesToRemote) {
-      const modulechunks = chunkGraph.getModuleChunks(module);
-      for (const chunk of modulechunks) {
-        if (chunk.hasRuntime()) continue;
-        chunk.removeModule(module);
+
+    this.cleanUpChunks(chunkGraph, modulesToHoist);
+  }
+
+  private cleanUpChunks(
+    chunkGraph: Compilation['chunkGraph'],
+    modules: Set<Module>,
+  ): void {
+    for (const module of modules) {
+      for (const chunk of chunkGraph.getModuleChunks(module)) {
+        if (!chunk.hasRuntime()) {
+          chunkGraph.disconnectChunkAndModule(chunk, module);
+        }
       }
     }
+    modules.clear();
   }
 
   private getRuntimeChunks(compilation: Compilation): Set<Chunk> {
     const runtimeChunks = new Set<Chunk>();
-    for (const c of compilation.chunks) {
-      if (c.hasRuntime()) {
-        runtimeChunks.add(c);
+    for (const chunk of compilation.chunks) {
+      if (chunk.hasRuntime()) {
+        runtimeChunks.add(chunk);
       }
     }
     return runtimeChunks;
