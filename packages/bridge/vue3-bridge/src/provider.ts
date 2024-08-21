@@ -29,7 +29,7 @@ export function createBridgeComponent(bridgeInfo: any) {
         });
 
         LoggerInstance.log(`createBridgeComponent render router info>>>`, {
-          name: info.name,
+          name: info.moduleName,
           router,
         });
         // memory route Initializes the route

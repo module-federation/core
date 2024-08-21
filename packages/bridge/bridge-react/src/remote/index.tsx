@@ -52,10 +52,11 @@ const RemoteAppWrapper = forwardRef(function (
       ...resProps
     } = props;
 
-    const rootRef: React.MutableRefObject<HTMLElement | null> =
+    const rootRef: React.MutableRefObject<HTMLDivElement | null> =
       ref && 'current' in ref
-        ? (ref as React.MutableRefObject<HTMLElement | null>)
+        ? (ref as React.MutableRefObject<HTMLDivElement | null>)
         : useRef(null);
+
     const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
     const providerInfoRef = useRef<any>(null);
 
