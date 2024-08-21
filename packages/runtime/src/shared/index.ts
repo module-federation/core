@@ -297,7 +297,7 @@ export class SharedHandler {
         }
       });
     });
-    if (strategy === 'version-first') {
+    if ((strategy ?? host.options.sharedStrategy) === 'version-first') {
       host.options.remotes.forEach((remote) => {
         if (remote.shareScope === shareScopeName) {
           promises.push(initRemoteModule(remote.name));

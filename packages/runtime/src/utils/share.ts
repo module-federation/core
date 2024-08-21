@@ -9,6 +9,7 @@ import {
   LoadShareExtraOptions,
   UserOptions,
   Options,
+  ShareStrategy,
 } from '../type';
 import { warn, error } from './logger';
 import { satisfy } from './semver';
@@ -19,6 +20,7 @@ export function formatShare(
   shareArgs: ShareArgs,
   from: string,
   name: string,
+  sharedStrategy?: ShareStrategy,
 ): Shared {
   let get: Shared['get'];
   if ('get' in shareArgs) {
@@ -51,7 +53,7 @@ export function formatShare(
     scope: Array.isArray(shareArgs.scope)
       ? shareArgs.scope
       : [shareArgs.scope ?? 'default'],
-    strategy: shareArgs.strategy || 'version-first',
+    strategy: (shareArgs.strategy ?? sharedStrategy) || 'version-first',
   };
 }
 
@@ -66,7 +68,9 @@ export function formatShareConfigs(
     const arrayShareArgs = arrayOptions(shareArgs[pkgName]);
     res[pkgName] = res[pkgName] || [];
     arrayShareArgs.forEach((shareConfig) => {
-      res[pkgName].push(formatShare(shareConfig, from, pkgName));
+      res[pkgName].push(
+        formatShare(shareConfig, from, pkgName, userOptions.sharedStrategy),
+      );
     });
     return res;
   }, {} as ShareInfos);

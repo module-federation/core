@@ -67,7 +67,7 @@ export type ShareArgs =
   | (SharedBaseArgs & { get: SharedGetter })
   | (SharedBaseArgs & { lib: () => Module })
   | SharedBaseArgs;
-
+export type ShareStrategy = 'version-first' | 'loaded-first';
 export type Shared = {
   version: string;
   get: SharedGetter;
@@ -81,7 +81,7 @@ export type Shared = {
   loading?: null | Promise<any>;
   // compatibility with previous shared
   eager?: boolean;
-  strategy: 'version-first' | 'loaded-first';
+  strategy: ShareStrategy;
 };
 
 export type ShareScopeMap = {
@@ -108,6 +108,7 @@ export interface Options {
   shared: ShareInfos;
   plugins: Array<FederationRuntimePlugin>;
   inBrowser: boolean;
+  sharedStrategy?: ShareStrategy;
 }
 
 export type UserOptions = Omit<

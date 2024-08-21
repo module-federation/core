@@ -71,6 +71,7 @@ export function normalizeRuntimeInitOptionsWithOutShared(
   const initOptionsWithoutShared = {
     name: options.name!,
     remotes: remoteOptions,
+    sharedStrategy: options.shareStrategy,
   };
 
   return initOptionsWithoutShared;

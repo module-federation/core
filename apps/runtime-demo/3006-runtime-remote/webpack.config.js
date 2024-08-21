@@ -35,6 +35,7 @@ module.exports = composePlugins(
           './WebpackSvg': './src/components/WebpackSvg',
           './WebpackPng': './src/components/WebpackPng',
         },
+        shareStrategy: 'loaded-first',
         shared: {
           lodash: {
             singleton: true,
