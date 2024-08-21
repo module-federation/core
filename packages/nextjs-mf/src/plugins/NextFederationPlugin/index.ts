@@ -208,7 +208,7 @@ export class NextFederationPlugin {
     } catch (e) {
       noop = require.resolve('../../federation-noop.cjs');
     }
-    return '!' + noop;
+    return noop;
   }
 }
 

@@ -36,7 +36,7 @@ export function applyServerPlugins(
   //   compiler.options.output.filename = filename.replace('.js', suffix);
   // }
 
-  new HoistContainerReferencesPlugin(options.name).apply(compiler);
+  new HoistContainerReferencesPlugin(options.name + '_partial').apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({

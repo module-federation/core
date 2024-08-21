@@ -20,7 +20,6 @@ import { containerReferencePlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import schema from '../../schemas/container/ContainerReferencePlugin';
 import checkOptions from '../../schemas/container/ContainerReferencePlugin.check';
-import HoistContainerReferencesPlugin from './HoistContainerReferencesPlugin';
 
 const { ExternalsPlugin } = require(
   normalizeWebpackPath('webpack'),

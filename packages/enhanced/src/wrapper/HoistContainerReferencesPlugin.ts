@@ -20,6 +20,6 @@ export default class HoistContainerReferencesPlugin
     const CoreHoistContainerReferencesPlugin =
       require('../lib/container/HoistContainerReferencesPlugin')
         .default as typeof import('../lib/container/HoistContainerReferencesPlugin').default;
-    new CoreHoistContainerReferencesPlugin().apply(compiler);
+    new CoreHoistContainerReferencesPlugin(this.containerName).apply(compiler);
   }
 }

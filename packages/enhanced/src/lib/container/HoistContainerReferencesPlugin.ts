@@ -3,6 +3,7 @@ import type {
   Compilation,
   Chunk,
   WebpackPluginInstance,
+  ExternalModule,
 } from 'webpack';
 import ContainerEntryModule from './ContainerEntryModule';
 

@@ -30,10 +30,8 @@ const isValidExternalsType = require(
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
-
-const StartupChunkDependenciesPlugin = require(
-  normalizeWebpackPath('webpack/lib/runtime/MfStartupChunkDependenciesPlugin'),
-) as typeof import('webpack/lib/runtime/MfStartupChunkDependenciesPlugin');
+//@ts-ignore
+import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 
 const validate = createSchemaValidation(
   // just use schema to validate
@@ -83,17 +81,16 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         compiler,
       );
     }
-
+    //@ts-ignore
     new StartupChunkDependenciesPlugin({
       asyncChunkLoading: true,
+      //@ts-ignore
     }).apply(compiler);
 
     if (options.dts !== false) {
       new DtsPlugin(options).apply(compiler);
     }
-    if (options.embedRuntime) {
-      new FederationRuntimePlugin(options).apply(compiler);
-    }
+    new FederationRuntimePlugin(options).apply(compiler);
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =
       options.remoteType ||
