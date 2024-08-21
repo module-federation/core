@@ -1,5 +1,5 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { container, Compiler, RuleSetRule } from 'webpack';
+import type { Compiler, RuleSetRule } from 'webpack';
 import type {
   ModuleFederationPluginOptions,
   SharedObject,
@@ -14,12 +14,6 @@ import {
   findLoaderForResource,
 } from '../../loaders/helpers';
 import path from 'path';
-const RuleSetCompiler = require(
-  normalizeWebpackPath('webpack/lib/rules/RuleSetCompiler'),
-) as typeof import('webpack/lib/rules/RuleSetCompiler');
-const { getScheme } = require(
-  normalizeWebpackPath('webpack/lib/util/URLAbsoluteSpecifier'),
-) as typeof import('webpack/lib/util/URLAbsoluteSpecifier');
 
 /**
  * Set up default shared values based on the environment.
@@ -50,16 +44,11 @@ export const applyPathFixes = (
   pluginOptions: ModuleFederationPluginOptions,
   options: any,
 ) => {
-  const mfp = compiler.options.plugins.find((p) => {
-    if (!p) return false;
-    return p.name === 'ModuleFederationPlugin';
-  });
-
   const runtimeModulePath = require
     .resolve('@module-federation/webpack-bundler-runtime/vendor')
     .replace('cjs', 'esm')
     .replace('.js', '.cjs');
-  //@ts-ignore
+  //@ts-expect-error
   const match = findLoaderForResource(compiler.options.module.rules, {
     path: path.join(compiler.context, '/something/thing.js'),
     issuerLayer: undefined,

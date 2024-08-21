@@ -4,7 +4,7 @@
  */
 export { extractUrlAndGlobal } from '@module-federation/utilities';
 import { injectScript as injectLegacy } from '@module-federation/utilities';
-//@ts-ignore
+
 export const injectScript = function (args: any): any {
   console.error(
     '@module-federation/utilities injectScript is deprecated, use module-federation/runtime {init,loadRemote}',
@@ -16,7 +16,6 @@ export const injectScript = function (args: any): any {
  * Flushes chunks from the module federation node utilities.
  * @module @module-federation/node/utils
  */
-// @ts-ignore
 export { flushChunks } from '@module-federation/node/utils';
 
 /**
@@ -43,7 +42,6 @@ export const revalidate = function (
     console.error('revalidate should only be called server-side');
     return Promise.resolve(false);
   }
-  // @ts-ignore
   return import('@module-federation/node/utils').then(function (utils) {
     return utils.revalidate(fetchModule, force);
   });

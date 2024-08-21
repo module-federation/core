@@ -5,7 +5,6 @@ import type {
   WebpackPluginInstance,
   Module,
 } from 'webpack';
-import ContainerEntryModule from './ContainerEntryModule';
 
 export class HoistContainerReferences implements WebpackPluginInstance {
   private readonly containerName: string;

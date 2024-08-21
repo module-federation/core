@@ -4,7 +4,6 @@ import {
   NextFederationPluginExtraOptions,
 } from '@module-federation/utilities';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
-import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 /**
  * Applies client-specific plugins.
@@ -64,12 +63,4 @@ export function applyClientPlugins(
   }).apply(compiler);
 
   new HoistContainerReferencesPlugin(options.name + '_partial').apply(compiler);
-  // // Add a new commonjs chunk loading plugin to the compiler
-  // new InvertedContainerPlugin({
-  //   runtime: 'webpack',
-  //   container: options.name,
-  //   remotes: options.remotes as Record<string, string>,
-  //   debug: extraOptions.debug,
-  //   //@ts-ignore
-  // }).apply(compiler);
 }

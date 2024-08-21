@@ -2,8 +2,7 @@ import type { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 import path from 'path';
-import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
+
 /**
  * This function applies server-specific plugins to the webpack compiler.
  *
@@ -17,7 +16,6 @@ export function applyServerPlugins(
   options: ModuleFederationPluginOptions,
 ): void {
   const chunkFileName = compiler.options?.output?.chunkFilename;
-  const filename = compiler.options?.output?.filename || '';
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
   const suffix = `-[chunkhash].js`;
 
@@ -31,21 +29,8 @@ export function applyServerPlugins(
       suffix,
     );
   }
-  //
-  // if (typeof filename === 'string' && !filename.includes(suffix)) {
-  //   compiler.options.output.filename = filename.replace('.js', suffix);
-  // }
 
-  new HoistContainerReferencesPlugin(options.name + '_partial').apply(compiler);
-
-  // Add a new commonjs chunk loading plugin to the compiler
-  new InvertedContainerPlugin({
-    runtime: 'webpack-runtime',
-    container: options.name,
-    remotes: options.remotes as Record<string, string>,
-    debug: false,
-    //@ts-ignore
-  }).apply(compiler);
+  new HoistContainerReferencesPlugin(`${options.name}_partial`).apply(compiler);
 }
 
 /**
@@ -107,7 +92,7 @@ export function handleServerExternals(
 
     // Replace the original externals function with a new asynchronous function
     compiler.options.externals[0] = async function (ctx: any, callback: any) {
-      //@ts-ignore
+      // @ts-ignore
       const fromNext = await originalExternals(ctx, callback);
       // If the result is null, return without further processing
       if (!fromNext) {
@@ -121,7 +106,7 @@ export function handleServerExternals(
         (ctx.request.includes('@module-federation/utilities') ||
           Object.keys(options.shared || {}).some((key) => {
             return (
-              //@ts-ignore
+              // @ts-ignore
               options.shared?.[key]?.import !== false &&
               (key.endsWith('/') ? req.includes(key) : req === key)
             );
