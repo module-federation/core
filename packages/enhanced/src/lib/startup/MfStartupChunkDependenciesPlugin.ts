@@ -1,9 +1,8 @@
 'use strict';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { generateEntryStartup } from './StartupHelpers';
-
 const { RuntimeGlobals } = require(normalizeWebpackPath('webpack'));
-
+import type { Compiler, Chunk } from 'webpack';
 const StartupChunkDependenciesRuntimeModule = require(
   normalizeWebpackPath(
     'webpack/lib/runtime/StartupChunkDependenciesRuntimeModule',
@@ -12,41 +11,28 @@ const StartupChunkDependenciesRuntimeModule = require(
 const StartupEntrypointRuntimeModule = require(
   normalizeWebpackPath('webpack/lib/runtime/StartupEntrypointRuntimeModule'),
 );
-const { ConcatSource } = require('webpack-sources');
+const ConcatenatedModule = require(
+  normalizeWebpackPath('webpack/lib/optimize/ConcatenatedModule'),
+);
+import type { ChunkLoadingType } from 'webpack/declarations/WebpackOptions';
 
-/** @typedef {import("webpack/declarations/WebpackOptions").ChunkLoadingType} ChunkLoadingType */
-/** @typedef {import("webpack/lib/Chunk")} Chunk */
-/** @typedef {import("webpack/lib/Compiler")} Compiler */
-/** @typedef {import("webpanextjsck/lib/optimize/ConcatenatedModule")} ConcatenatedModule */
-
-/**
- * @typedef {object} Options
- * @property {ChunkLoadingType} chunkLoading
- * @property {boolean=} asyncChunkLoading
- */
+interface Options {
+  chunkLoading: ChunkLoadingType;
+  asyncChunkLoading?: boolean;
+}
 
 class StartupChunkDependenciesPlugin {
-  /**
-   * @param {Options} options options
-   */
-  constructor(options) {
-    this.asyncChunkLoading = options.asyncChunkLoading || true;
+  asyncChunkLoading: boolean;
+
+  constructor(options: Options) {
+    this.asyncChunkLoading = options.asyncChunkLoading ?? true;
   }
 
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler) {
+  apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'MfStartupChunkDependenciesPlugin',
       (compilation) => {
-        /**
-         * @param {Chunk} chunk chunk to check
-         * @returns {boolean} true, when the plugin is enabled for the chunk
-         */
-        const isEnabledForChunk = (chunk) => {
+        const isEnabledForChunk = (chunk: Chunk): boolean => {
           const chunkGraph = compilation.chunkGraph;
           const entryModules = Array.from(
             chunkGraph.getChunkEntryModulesIterable(chunk),
@@ -76,6 +62,7 @@ class StartupChunkDependenciesPlugin {
             set.add(RuntimeGlobals.startup);
             set.add(RuntimeGlobals.ensureChunk);
             set.add(RuntimeGlobals.ensureChunkIncludeEntries);
+            // starts up runtime chunks
             compilation.addRuntimeModule(
               chunk,
               new StartupChunkDependenciesRuntimeModule(
@@ -90,19 +77,23 @@ class StartupChunkDependenciesPlugin {
           'MfStartupChunkDependenciesPlugin',
           (chunk, set) => {
             if (chunk.hasRuntime()) return;
+            if (compilation.chunkGraph.getNumberOfEntryModules(chunk) <= 0)
+              return;
             set.add(RuntimeGlobals.startup);
             set.add('federation-entry-startup');
             set.add(RuntimeGlobals.startupEntrypoint);
           },
         );
 
-        compilation.hooks.runtimeRequirementInTree
+        compilation.hooks.runtimeRequirementInChunk
           .for(RuntimeGlobals.startupEntrypoint)
           .tap('MfStartupChunkDependenciesPlugin', (chunk, set) => {
             if (!isEnabledForChunk(chunk)) return;
+            debugger;
             set.add(RuntimeGlobals.require);
             set.add(RuntimeGlobals.ensureChunk);
             set.add(RuntimeGlobals.ensureChunkIncludeEntries);
+            // starts up entrypoints
             compilation.addRuntimeModule(
               chunk,
               new StartupEntrypointRuntimeModule(this.asyncChunkLoading),
@@ -123,7 +114,7 @@ class StartupChunkDependenciesPlugin {
               return startupSource;
             }
 
-            let federationRuntimeModule = null;
+            let federationRuntimeModule: any = null;
             for (const module of chunkGraph.getChunkEntryModulesIterable(
               chunk,
             )) {
@@ -133,9 +124,8 @@ class StartupChunkDependenciesPlugin {
               }
 
               if (module && 'modules' in module) {
-                for (const concatModule of /** @type {ConcatenatedModule} */ (
-                  module
-                ).modules) {
+                for (const concatModule of (module as typeof ConcatenatedModule)
+                  .modules) {
                   if (
                     concatModule.context &&
                     concatModule.context.endsWith('.federation')
@@ -151,12 +141,12 @@ class StartupChunkDependenciesPlugin {
               return startupSource;
             }
 
-            return new ConcatSource(
+            return new compiler.webpack.sources.ConcatSource(
               `${RuntimeGlobals.require}(${JSON.stringify(
                 chunkGraph.getModuleId(federationRuntimeModule),
-              )});\n
-							`,
+              )});\n`,
               generateEntryStartup(
+                //@ts-ignore
                 chunkGraph,
                 runtimeTemplate,
                 Array.from(

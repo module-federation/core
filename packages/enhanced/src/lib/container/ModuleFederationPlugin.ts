@@ -30,7 +30,6 @@ const isValidExternalsType = require(
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
-//@ts-ignore
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 
 const validate = createSchemaValidation(
