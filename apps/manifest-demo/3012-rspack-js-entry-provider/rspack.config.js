@@ -1,5 +1,5 @@
-const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-registerPluginTSTranspiler();
+// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+// registerPluginTSTranspiler();
 
 const { composePlugins, withNx, withReact } = require('@nx/rspack');
 
