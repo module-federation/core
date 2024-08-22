@@ -20,7 +20,7 @@ export function formatShare(
   shareArgs: ShareArgs,
   from: string,
   name: string,
-  sharedStrategy?: ShareStrategy,
+  shareStrategy?: ShareStrategy,
 ): Shared {
   let get: Shared['get'];
   if ('get' in shareArgs) {
@@ -53,7 +53,7 @@ export function formatShare(
     scope: Array.isArray(shareArgs.scope)
       ? shareArgs.scope
       : [shareArgs.scope ?? 'default'],
-    strategy: (shareArgs.strategy ?? sharedStrategy) || 'version-first',
+    strategy: (shareArgs.strategy ?? shareStrategy) || 'version-first',
   };
 }
 
@@ -69,7 +69,7 @@ export function formatShareConfigs(
     res[pkgName] = res[pkgName] || [];
     arrayShareArgs.forEach((shareConfig) => {
       res[pkgName].push(
-        formatShare(shareConfig, from, pkgName, userOptions.sharedStrategy),
+        formatShare(shareConfig, from, pkgName, userOptions.shareStrategy),
       );
     });
     return res;

@@ -81,6 +81,9 @@ export type Shared = {
   loading?: null | Promise<any>;
   // compatibility with previous shared
   eager?: boolean;
+  /**
+   * @deprecated set in initOptions.shareStrategy instead
+   */
   strategy: ShareStrategy;
 };
 
@@ -108,7 +111,7 @@ export interface Options {
   shared: ShareInfos;
   plugins: Array<FederationRuntimePlugin>;
   inBrowser: boolean;
-  sharedStrategy?: ShareStrategy;
+  shareStrategy?: ShareStrategy;
 }
 
 export type UserOptions = Omit<
