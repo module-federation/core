@@ -1,13 +1,20 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  forwardRef,
+} from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { LoggerInstance, pathJoin } from '../utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
+import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
 
 declare const __APP_VERSION__: string;
-
 export interface RenderFnParams extends ProviderParams {
   dom?: any;
+  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
 }
 
 interface RemoteModule {
@@ -22,71 +29,97 @@ interface RemoteModule {
 }
 
 interface RemoteAppParams {
-  name: string;
+  moduleName: string;
   providerInfo: NonNullable<RemoteModule['provider']>;
   exportName: string | number | symbol;
+  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
 }
 
-const RemoteApp = ({
-  name,
-  memoryRoute,
-  basename,
-  providerInfo,
-  ...resProps
-}: RemoteAppParams & ProviderParams) => {
-  const rootRef = useRef(null);
-  const renderDom = useRef(null);
-  const providerInfoRef = useRef<any>(null);
+const RemoteAppWrapper = forwardRef(function (
+  props: RemoteAppParams & RenderFnParams,
+  ref,
+) {
+  const RemoteApp = () => {
+    LoggerInstance.log(`RemoteAppWrapper RemoteApp props >>>`, { props });
+    const {
+      moduleName,
+      memoryRoute,
+      basename,
+      providerInfo,
+      className,
+      style,
+      fallback,
+      ...resProps
+    } = props;
 
-  useEffect(() => {
-    const renderTimeout = setTimeout(() => {
-      const providerReturn = providerInfo();
-      providerInfoRef.current = providerReturn;
-      const renderProps = {
-        name,
-        dom: rootRef.current,
-        basename,
-        memoryRoute,
-        ...resProps,
-      };
-      renderDom.current = rootRef.current;
-      LoggerInstance.log(
-        `createRemoteComponent LazyComponent render >>>`,
-        renderProps,
-      );
-      providerReturn.render(renderProps);
-    });
+    const rootRef: React.MutableRefObject<HTMLDivElement | null> =
+      ref && 'current' in ref
+        ? (ref as React.MutableRefObject<HTMLDivElement | null>)
+        : useRef(null);
 
-    return () => {
-      clearTimeout(renderTimeout);
-      setTimeout(() => {
-        if (providerInfoRef.current?.destroy) {
-          LoggerInstance.log(
-            `createRemoteComponent LazyComponent destroy >>>`,
-            { name, basename, dom: renderDom.current },
-          );
-          providerInfoRef.current?.destroy({
-            dom: renderDom.current,
-          });
-        }
+    const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
+    const providerInfoRef = useRef<any>(null);
+
+    useEffect(() => {
+      const renderTimeout = setTimeout(() => {
+        const providerReturn = providerInfo();
+        providerInfoRef.current = providerReturn;
+
+        const renderProps = {
+          moduleName,
+          dom: rootRef.current,
+          basename,
+          memoryRoute,
+          fallback,
+          ...resProps,
+        };
+        renderDom.current = rootRef.current;
+        LoggerInstance.log(
+          `createRemoteComponent LazyComponent render >>>`,
+          renderProps,
+        );
+        providerReturn.render(renderProps);
       });
-    };
-  }, []);
 
-  //@ts-ignore
-  return <div ref={rootRef}></div>;
-};
+      return () => {
+        clearTimeout(renderTimeout);
+        setTimeout(() => {
+          if (providerInfoRef.current?.destroy) {
+            LoggerInstance.log(
+              `createRemoteComponent LazyComponent destroy >>>`,
+              { moduleName, basename, dom: renderDom.current },
+            );
+            providerInfoRef.current?.destroy({
+              dom: renderDom.current,
+            });
+          }
+        });
+      };
+    }, []);
 
-(RemoteApp as any)['__APP_VERSION__'] = __APP_VERSION__;
+    return (
+      <div
+        className={props?.className}
+        style={props?.style}
+        ref={rootRef}
+      ></div>
+    );
+  };
+
+  (RemoteApp as any)['__APP_VERSION__'] = __APP_VERSION__;
+  return <RemoteApp />;
+});
 
 interface ExtraDataProps {
   basename?: string;
 }
 
-export function withRouterData<P extends Parameters<typeof RemoteApp>[0]>(
+export function withRouterData<
+  P extends Parameters<typeof RemoteAppWrapper>[0],
+>(
   WrappedComponent: React.ComponentType<P & ExtraDataProps>,
 ): React.FC<Omit<P, keyof ExtraDataProps>> {
-  return (props: any) => {
+  const Component = forwardRef(function (props: any, ref) {
     let enableDispathPopstate = false;
     let routerContextVal: any;
     try {
@@ -158,8 +191,12 @@ export function withRouterData<P extends Parameters<typeof RemoteApp>[0]>(
       }, [location]);
     }
 
-    return <WrappedComponent {...(props as P)} basename={basename} />;
-  };
+    return <WrappedComponent {...(props as P)} basename={basename} ref={ref} />;
+  });
+
+  return forwardRef(function (props, ref) {
+    return <Component {...props} ref={ref} />;
+  }) as any;
 }
 
-export default withRouterData(RemoteApp);
+export default withRouterData(RemoteAppWrapper);

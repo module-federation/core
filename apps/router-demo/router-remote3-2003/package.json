@@ -1,7 +1,7 @@
 {
   "name": "remote3",
   "private": true,
-  "version": "1.0.16",
+  "version": "1.0.18",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
@@ -17,6 +17,8 @@
     "@rsbuild/core": "^0.6.15",
     "@rsbuild/plugin-vue": "^0.6.15",
     "tailwindcss": "^3.4.3",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "vue-tsc": "^2.0.26",
+    "@vue/tsconfig": "^0.5.1"
   }
 }

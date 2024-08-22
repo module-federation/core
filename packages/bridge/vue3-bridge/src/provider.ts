@@ -4,11 +4,11 @@ import { RenderFnParams } from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
 
 declare const __APP_VERSION__: string;
-interface Provider {
+type Provider = {
   __APP_VERSION__: string;
   render(info: RenderFnParams): void;
   destroy(info: { dom: HTMLElement }): void;
-}
+};
 
 export function createBridgeComponent(bridgeInfo: any) {
   let provider: Provider;
@@ -36,7 +36,7 @@ export function createBridgeComponent(bridgeInfo: any) {
           });
 
           LoggerInstance.log(`createBridgeComponent render router info>>>`, {
-            name: info.name,
+            name: info.moduleName,
             router,
           });
           // memory route Initializes the route

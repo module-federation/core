@@ -1,5 +1,19 @@
 # @module-federation/bridge-vue3
 
+## 0.5.1
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.5.1
+
+## 0.5.0
+
+### Patch Changes
+
+- 49d6135: feat(@module-federation/bridge): enhance Bridge capabilities and fix some issues
+- Updated dependencies [49d6135]
+  - @module-federation/bridge-shared@0.5.0
+
 ## 0.4.0
 
 ### Patch Changes

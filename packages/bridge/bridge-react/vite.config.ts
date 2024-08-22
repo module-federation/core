@@ -22,6 +22,8 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         router: path.resolve(__dirname, 'src/router.tsx'),
+        'router-v5': path.resolve(__dirname, 'src/router-v5.tsx'),
+        'router-v6': path.resolve(__dirname, 'src/router-v6.tsx'),
       },
       formats: ['cjs', 'es'],
       fileName: (format, entryName) => `${entryName}.${format}.js`,
@@ -32,6 +34,33 @@ export default defineConfig({
         '@remix-run/router',
         'react-router',
         'react-router-dom/',
+        'react-router-dom/index.js',
+        'react-router-dom/dist/index.js',
+      ],
+      plugins: [
+        {
+          name: 'modify-output-plugin',
+          generateBundle(options, bundle) {
+            for (const fileName in bundle) {
+              const chunk = bundle[fileName];
+              // if (fileName.includes('router-v6') && chunk.type === 'chunk') {
+              //   chunk.code = chunk.code.replace(
+              //     // Match 'react-router-dom/' followed by single quotes, double quotes, or backticks, replacing only 'react-router-dom/' to react-router-v6 dist file structure
+              //     /react-router-dom\/(?=[\'\"\`])/g,
+              //     'react-router-dom/dist/index.js',
+              //   );
+              // }
+
+              if (fileName.includes('router-v5') && chunk.type === 'chunk') {
+                chunk.code = chunk.code.replace(
+                  // Match 'react-router-dom/' followed by single quotes, double quotes, or backticks, replacing only 'react-router-dom/' to react-router-v5 dist file structure
+                  /react-router-dom\/(?=[\'\"\`])/g,
+                  'react-router-dom/index.js',
+                );
+              }
+            }
+          },
+        },
       ],
     },
     minify: false,

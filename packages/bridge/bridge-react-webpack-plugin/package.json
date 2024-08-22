@@ -1,17 +1,17 @@
 {
   "name": "@module-federation/bridge-react-webpack-plugin",
-  "version": "0.4.0",
+  "version": "0.5.1",
   "publishConfig": {
     "access": "public"
   },
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "module": "./dist/index.es.js",
   "types": "./dist/index.cjs.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.cjs.d.ts",
-      "import": "./dist/index.esm.js",
+      "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
     },
     "./*": "./*"
@@ -22,7 +22,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "semver": "7.6.3",
+    "@types/semver": "7.5.8"
   },
   "devDependencies": {
     "typescript": "^5.2.2",

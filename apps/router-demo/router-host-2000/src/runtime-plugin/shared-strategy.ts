@@ -20,4 +20,5 @@ const sharedStrategy: () => FederationRuntimePlugin = () => ({
     return args;
   },
 });
+
 export default sharedStrategy;

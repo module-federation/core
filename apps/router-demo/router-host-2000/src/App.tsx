@@ -1,25 +1,43 @@
-import { useMemo, useState } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import './App.css';
+import { useRef, useEffect, ForwardRefExoticComponent } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import {
+  init,
+  loadRemote,
+  RetryPlugin,
+} from '@module-federation/enhanced/runtime';
+import { createRemoteComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
-import { loadRemote } from '@module-federation/enhanced/runtime';
-import { createRemoteComponent } from '@module-federation/bridge-react';
-import { ErrorBoundary, withErrorBoundary } from 'react-error-boundary';
+import styles from './index.module.less';
+import './App.css';
+
+// init to register the RetryPlugin
+init({
+  name: 'federation_consumer',
+  remotes: [],
+  plugins: [
+    RetryPlugin({
+      // fallbackUrl is optional
+      fallbackUrl: 'http://localhost:2001/mf-manifest.json',
+    }),
+  ],
+});
 
 const FallbackErrorComp = (info: any) => {
   return (
     <div>
-      {info?.error?.message}
+      <h2>This is ErrorBoundary Component</h2>
+      <p>Something went wrong:</p>
+      <pre style={{ color: 'red' }}>{info?.error.message}</pre>
       <button onClick={() => info.resetErrorBoundary()}>
-        resetErrorBoundary
+        resetErrorBoundary(try again)
       </button>
     </div>
   );
 };
 
-const FallbackComp = <div>loading</div>;
+const FallbackComp = <div data-test-id="loading">loading...</div>;
 
 const Remote1App = createRemoteComponent({
   loader: () => loadRemote('remote1/export-app'),
@@ -38,7 +56,19 @@ const Remote3App = createRemoteComponent({
   loader: () => loadRemote('remote3/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
-}) as (info: any) => React.JSX.Element;
+});
+
+const RemoteRenderErrorApp = createRemoteComponent({
+  loader: () => loadRemote('remote-render-error/export-app'),
+  fallback: FallbackErrorComp,
+  loading: FallbackComp,
+}) as ForwardRefExoticComponent<unknown>;
+
+const RemoteResourceErrorApp = createRemoteComponent({
+  loader: () => loadRemote('remote-resource-error/export-app'),
+  fallback: FallbackErrorComp,
+  loading: FallbackComp,
+}) as ForwardRefExoticComponent<unknown>;
 
 function Wraper3() {
   return (
@@ -46,7 +76,7 @@ function Wraper3() {
       <div className="flex flex-row">
         <div className="grow">
           <h2>Remote1</h2>
-          <Remote1App memoryRoute={{ entryPath: '/' }} />
+          <Remote1App name={'Ming'} age={12} memoryRoute={{ entryPath: '/' }} />
         </div>
         <div className="grow">
           <h2>Remote2</h2>
@@ -54,7 +84,7 @@ function Wraper3() {
         </div>
         <div className="grow">
           <h2>Remote3</h2>
-          <Remote3App memoryRoute={{ entryPath: '/detail' }} />
+          <Remote3App />
         </div>
       </div>
     </>
@@ -62,21 +92,57 @@ function Wraper3() {
 }
 
 const App = () => {
-  const [initialEntrie, setInitialEntrie] = useState('/');
-  const [abc, setAbc] = useState(5555);
+  const location = useLocation();
+  const ref = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const refTimeout = setTimeout(() => {
+      if (ref && ref.current) {
+        const div = document.createElement('h4');
+        div.append('Some text');
+        ref.current.append(div);
+      }
+    }, 1000);
+    return () => {
+      if (!location.pathname.includes('remote1')) {
+        clearTimeout(refTimeout);
+      }
+    };
+  }, [location.pathname]);
 
   return (
-    <BrowserRouter basename="/">
-      <Navigation setInitialEntrie={setInitialEntrie} setAbc={setAbc} />
+    <div>
+      <Navigation />
       <Routes>
         <Route path="/" Component={Home} />
         <Route path="/detail/*" Component={Detail} />
-        <Route path="/remote1/*" Component={() => <Remote1App />} />
-        <Route path="/remote2/*" Component={() => <Remote2App />} />
+        <Route
+          path="/remote1/*"
+          Component={() => (
+            <Remote1App
+              className={styles.remote1}
+              name={'Ming'}
+              age={12}
+              ref={ref}
+            />
+          )}
+        />
+        <Route
+          path="/remote2/*"
+          Component={() => <Remote2App style={{ padding: '20px' }} />}
+        />
         <Route path="/remote3/*" Component={() => <Remote3App />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
+        <Route
+          path="/remote-render-error/*"
+          Component={() => <RemoteRenderErrorApp />}
+        />
+        <Route
+          path="/remote-resource-error/*"
+          Component={() => <RemoteResourceErrorApp />}
+        />
       </Routes>
-    </BrowserRouter>
+    </div>
   );
 };
 

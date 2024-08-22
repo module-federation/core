@@ -4,24 +4,11 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Menu, Timeline } from 'antd';
-import type React from 'react';
+import { Menu } from 'antd';
 import { useState } from 'react';
-import {
-  BrowserRouter,
-  Link,
-  Route,
-  Router,
-  RouterProvider,
-  Routes,
-  createBrowserRouter,
-  useLocation,
-} from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
-function Navgation(Info: {
-  setInitialEntrie: (value: React.SetStateAction<string>) => void;
-  setAbc: (value: React.SetStateAction<number>) => void;
-}) {
+function Navgation() {
   const location = useLocation();
   const [current, setCurrent] = useState('/' + location.pathname.split('/')[1]);
 
@@ -100,24 +87,6 @@ function Navgation(Info: {
             },
           ],
         },
-        // {
-        //   type: 'group',
-        //   label: 'change data',
-        //   children: [
-        //     {
-        //       key: 'setting:3',
-        //       label: (
-        //         <div onClick={() => Info.setAbc(123)}>Change data: 123</div>
-        //       ),
-        //     },
-        //     {
-        //       key: 'setting:4',
-        //       label: (
-        //         <div onClick={() => Info.setAbc(2345)}>Change data: 2345</div>
-        //       ),
-        //     },
-        //   ],
-        // },
       ],
     },
     {
@@ -152,6 +121,16 @@ function Navgation(Info: {
     {
       label: <Link to="/memory-router">Memory-router</Link>,
       key: '/memory-router',
+      icon: <GroupOutlined />,
+    },
+    {
+      label: <Link to="/remote-render-error">render-error</Link>,
+      key: '/remote-render-error',
+      icon: <GroupOutlined />,
+    },
+    {
+      label: <Link to="/remote-resource-error">resource-error</Link>,
+      key: '/remote-resource-error',
       icon: <GroupOutlined />,
     },
   ];
