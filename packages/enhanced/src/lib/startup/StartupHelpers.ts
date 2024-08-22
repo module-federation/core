@@ -4,11 +4,12 @@
 */
 
 'use strict';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type Chunk from 'webpack/lib/Chunk';
 import type ChunkGraph from 'webpack/lib/ChunkGraph';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { EntryModuleWithChunkGroup } from 'webpack/lib/ChunkGraph';
-import type { RuntimeTemplate } from 'webpack/lib/Generator';
+import type RuntimeTemplate from 'webpack/lib/RuntimeTemplate';
+import type Entrypoint from 'webpack/lib/Entrypoint';
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -31,7 +32,7 @@ export const generateEntryStartup = (
   passive: boolean,
 ): string => {
   /** @type {string[]} */
-  const runtime = [
+  const runtime: string[] = [
     `var __webpack_exec__ = ${runtimeTemplate.basicFunction(
       'moduleId',
       `console.log("require", moduleId); \n return ${RuntimeGlobals.require}(${RuntimeGlobals.entryModuleId} = moduleId)`,
@@ -42,12 +43,12 @@ export const generateEntryStartup = (
     chunkGraph.getChunkRuntimeRequirements(chunk);
   const federation = chunkRuntimeRequirements.has(federationStartup);
   passive = !federation;
-  const runModule = (id: string | number) => {
+  const runModule = (id: string) => {
     return `__webpack_exec__(${JSON.stringify(id)})`;
   };
   const outputCombination = (
     chunks: Set<Chunk>,
-    moduleIds: (string | number)[],
+    moduleIds: string[],
     final?: boolean,
   ) => {
     if (chunks.size === 0 && !federation) {
@@ -88,21 +89,13 @@ export const generateEntryStartup = (
   };
 
   let currentChunks: Set<Chunk> | undefined = undefined;
-  let currentModuleIds: (string | number)[] | undefined = undefined;
+  let currentModuleIds: string[] | undefined = undefined;
 
   for (const [module, entrypoint] of entries) {
     if (!entrypoint) continue;
-    const runtimeChunk =
-      /** @type {Entrypoint} */
-      entrypoint.getRuntimeChunk();
-    //@ts-ignore
-    const moduleId = chunkGraph.getModuleId(module);
-    const chunks = getAllChunks(
-      /** @type {Entrypoint} */ entrypoint,
-      chunk,
-      //@ts-ignore
-      runtimeChunk,
-    );
+    const runtimeChunk = entrypoint.getRuntimeChunk() as Entrypoint.Chunk;
+    const moduleId = chunkGraph.getModuleId(module) as string;
+    const chunks = getAllChunks(entrypoint as Entrypoint, chunk, runtimeChunk);
     if (
       currentChunks &&
       currentChunks.size === chunks.size &&

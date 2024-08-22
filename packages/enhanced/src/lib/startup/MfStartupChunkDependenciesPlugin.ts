@@ -2,7 +2,8 @@
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { generateEntryStartup } from './StartupHelpers';
-import type { Compiler, Chunk } from 'webpack';
+import type Compiler from 'webpack/lib/Compiler';
+import type Chunk from 'webpack/lib/Chunk';
 import ContainerEntryModule from '../container/ContainerEntryModule';
 import type { ChunkLoadingType } from 'webpack/declarations/WebpackOptions';
 
@@ -38,7 +39,8 @@ class StartupChunkDependenciesPlugin {
         const { chunkGraph } = compilation;
 
         const isEnabledForChunk = (chunk: Chunk): boolean => {
-          const [entryModule] = chunkGraph.getChunkEntryModulesIterable(chunk);
+          const [entryModule] =
+            chunkGraph.getChunkEntryModulesIterable(chunk) || [];
           return !(entryModule instanceof ContainerEntryModule);
         };
 
@@ -106,6 +108,7 @@ class StartupChunkDependenciesPlugin {
 
         renderStartup.tap(
           'MfStartupChunkDependenciesPlugin',
+          //@ts-ignore
           (startupSource, lastInlinedModule, renderContext) => {
             const { chunk, chunkGraph, runtimeTemplate } = renderContext;
 
@@ -150,11 +153,11 @@ class StartupChunkDependenciesPlugin {
 
             return new compiler.webpack.sources.ConcatSource(
               `${RuntimeGlobals.require}(${JSON.stringify(federationModuleId)});\n`,
-              //@ts-ignore
               generateEntryStartup(
-                //@ts-ignore
                 chunkGraph,
+                //@ts-ignore
                 runtimeTemplate,
+                //@ts-ignore
                 entryModules,
                 chunk,
                 false,

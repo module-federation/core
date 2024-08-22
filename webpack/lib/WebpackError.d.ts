@@ -1,67 +1,43 @@
 export = WebpackError;
 /** @typedef {import("./Chunk")} Chunk */
-/** @typedef {import("./Dependency").SyntheticDependencyLocation} SyntheticDependencyLocation */
-/** @typedef {import("./Dependency").RealDependencyLocation} RealDependencyLocation */
+/** @typedef {import("./Dependency").DependencyLocation} DependencyLocation */
 /** @typedef {import("./Module")} Module */
 /** @typedef {import("./serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("./serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 declare class WebpackError extends Error {
-  /**
-   * Creates an instance of WebpackError.
-   */
-  constructor(message?: string);
   /** @type {string | undefined} */
-  details?: string;
+  details: string | undefined;
   /** @type {Module | undefined | null} */
-  module?: null | Module;
-  /** @type {SyntheticDependencyLocation | RealDependencyLocation | undefined} */
-  loc?: SyntheticDependencyLocation | RealDependencyLocation;
+  module: Module | undefined | null;
+  /** @type {DependencyLocation | undefined} */
+  loc: DependencyLocation | undefined;
   /** @type {boolean | undefined} */
-  hideStack?: boolean;
+  hideStack: boolean | undefined;
   /** @type {Chunk | undefined} */
-  chunk?: Chunk;
+  chunk: Chunk | undefined;
   /** @type {string | undefined} */
-  file?: string;
+  file: string | undefined;
   /**
    * @param {ObjectSerializerContext} context context
    */
-  serialize(__0: ObjectSerializerContext): void;
+  serialize({ write }: ObjectSerializerContext): void;
   /**
    * @param {ObjectDeserializerContext} context context
    */
-  deserialize(__0: ObjectDeserializerContext): void;
-
-  /**
-   * Create .stack property on a target object
-   */
-  static captureStackTrace(
-    targetObject: object,
-    constructorOpt?: Function,
-  ): void;
-
-  /**
-   * Optional override for formatting stack traces
-   */
-  static prepareStackTrace?: (
-    err: Error,
-    stackTraces: NodeJS.CallSite[],
-  ) => any;
-  static stackTraceLimit: number;
+  deserialize({ read }: ObjectDeserializerContext): void;
+  stack: string;
 }
 declare namespace WebpackError {
   export {
     Chunk,
-    SyntheticDependencyLocation,
-    RealDependencyLocation,
+    DependencyLocation,
     Module,
     ObjectDeserializerContext,
     ObjectSerializerContext,
   };
 }
 type Module = import('./Module');
-type SyntheticDependencyLocation =
-  import('./Dependency').SyntheticDependencyLocation;
-type RealDependencyLocation = import('./Dependency').RealDependencyLocation;
+type DependencyLocation = import('./Dependency').DependencyLocation;
 type Chunk = import('./Chunk');
 type ObjectSerializerContext =
   import('./serialization/ObjectMiddleware').ObjectSerializerContext;

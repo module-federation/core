@@ -1,75 +1,140 @@
 export = Dependency;
 declare class Dependency {
-  constructor();
+  /** @type {Module | undefined} */
+  _parentModule: Module | undefined;
+  /** @type {DependenciesBlock | undefined} */
+  _parentDependenciesBlock: DependenciesBlock | undefined;
+  /** @type {number} */
+  _parentDependenciesBlockIndex: number;
+  /** @type {boolean} */
   weak: boolean;
+  /** @type {boolean} */
   optional: boolean;
+  _locSL: number;
+  _locSC: number;
+  _locEL: number;
+  _locEC: number;
+  _locI: any;
+  _locN: any;
+  _loc:
+    | DependencyLocation
+    | (SyntheticDependencyLocation & RealDependencyLocation);
+  /**
+   * @returns {string} a display name for the type of dependency
+   */
   get type(): string;
+  /**
+   * @returns {string} a dependency category, typical categories are "commonjs", "amd", "esm"
+   */
   get category(): string;
-  loc: DependencyLocation;
+  set loc(arg: DependencyLocation);
+  /**
+   * @returns {DependencyLocation} location
+   */
+  get loc(): DependencyLocation;
+  /**
+   * @param {number} startLine start line
+   * @param {number} startColumn start column
+   * @param {number} endLine end line
+   * @param {number} endColumn end column
+   */
   setLoc(
     startLine: number,
     startColumn: number,
     endLine: number,
     endColumn: number,
   ): void;
-  getContext(): undefined | string;
-  getResourceIdentifier(): null | string;
+  /**
+   * @returns {string | undefined} a request context
+   */
+  getContext(): string | undefined;
+  /**
+   * @returns {string | null} an identifier to merge equal requests
+   */
+  getResourceIdentifier(): string | null;
+  /**
+   * @returns {boolean | TRANSITIVE} true, when changes to the referenced module could affect the referencing module; TRANSITIVE, when changes to the referenced module could affect referencing modules of the referencing module
+   */
   couldAffectReferencingModule(): boolean | typeof TRANSITIVE;
-
   /**
    * Returns the referenced module and export
+   * @deprecated
+   * @param {ModuleGraph} moduleGraph module graph
+   * @returns {never} throws error
    */
   getReference(moduleGraph: ModuleGraph): never;
-
   /**
    * Returns list of exports referenced by this dependency
+   * @param {ModuleGraph} moduleGraph module graph
+   * @param {RuntimeSpec} runtime the runtime for which the module is analysed
+   * @returns {(string[] | ReferencedExport)[]} referenced exports
    */
   getReferencedExports(
     moduleGraph: ModuleGraph,
     runtime: RuntimeSpec,
   ): (string[] | ReferencedExport)[];
+  /**
+   * @param {ModuleGraph} moduleGraph module graph
+   * @returns {null | false | function(ModuleGraphConnection, RuntimeSpec): ConnectionState} function to determine if the connection is active
+   */
   getCondition(
     moduleGraph: ModuleGraph,
   ):
-    | null
     | false
     | ((arg0: ModuleGraphConnection, arg1: RuntimeSpec) => ConnectionState);
-
   /**
    * Returns the exported names
+   * @param {ModuleGraph} moduleGraph module graph
+   * @returns {ExportsSpec | undefined} export names
    */
-  getExports(moduleGraph: ModuleGraph): undefined | ExportsSpec;
-
+  getExports(moduleGraph: ModuleGraph): ExportsSpec | undefined;
   /**
    * Returns warnings
+   * @param {ModuleGraph} moduleGraph module graph
+   * @returns {WebpackError[] | null | undefined} warnings
    */
-  getWarnings(moduleGraph: ModuleGraph): undefined | null | WebpackError[];
-
+  getWarnings(moduleGraph: ModuleGraph): WebpackError[] | null | undefined;
   /**
    * Returns errors
+   * @param {ModuleGraph} moduleGraph module graph
+   * @returns {WebpackError[] | null | undefined} errors
    */
-  getErrors(moduleGraph: ModuleGraph): undefined | null | WebpackError[];
-
+  getErrors(moduleGraph: ModuleGraph): WebpackError[] | null | undefined;
   /**
    * Update the hash
+   * @param {Hash} hash hash to be updated
+   * @param {UpdateHashContext} context context
+   * @returns {void}
    */
-  updateHash(hash: Hash, context: UpdateHashContextDependency): void;
-
+  updateHash(hash: Hash, context: UpdateHashContext): void;
   /**
    * implement this method to allow the occurrence order plugin to count correctly
+   * @returns {number} count how often the id is used in this dependency
    */
   getNumberOfIdOccurrences(): number;
+  /**
+   * @param {ModuleGraph} moduleGraph the module graph
+   * @returns {ConnectionState} how this dependency connects the module to referencing modules
+   */
   getModuleEvaluationSideEffectsState(
     moduleGraph: ModuleGraph,
   ): ConnectionState;
-  createIgnoredModule(context: string): null | Module;
-  serialize(__0: ObjectSerializerContext): void;
-  deserialize(__0: ObjectDeserializerContext): void;
-  module: any;
+  /**
+   * @param {string} context context directory
+   * @returns {Module | null} a module
+   */
+  createIgnoredModule(context: string): Module | null;
+  /**
+   * @param {ObjectSerializerContext} context context
+   */
+  serialize({ write }: ObjectSerializerContext): void;
+  /**
+   * @param {ObjectDeserializerContext} context context
+   */
+  deserialize({ read }: ObjectDeserializerContext): void;
+  set module(arg: any);
+  get module(): any;
   get disconnect(): any;
-  static NO_EXPORTS_REFERENCED: string[][];
-  static EXPORTS_OBJECT_REFERENCED: string[][];
-  static TRANSITIVE: typeof TRANSITIVE;
 }
 declare namespace Dependency {
   export {
@@ -184,11 +249,10 @@ type ReferencedExport = {
    * name of the referenced export
    */
   name: string[];
-
   /**
    * when false, referenced export can not be mangled, defaults to true
    */
-  canMangle?: boolean;
+  canMangle?: boolean | undefined;
 };
 type ModuleGraphConnection = import('./ModuleGraphConnection');
 type ConnectionState = import('./ModuleGraphConnection').ConnectionState;
@@ -196,42 +260,35 @@ type ExportsSpec = {
   /**
    * exported names, true for unknown exports or null for no exports
    */
-  exports: null | true | (string | ExportSpec)[];
-
+  exports: (string | ExportSpec)[] | true | null;
   /**
    * when exports = true, list of unaffected exports
    */
-  excludeExports?: Set<string>;
-
+  excludeExports?: Set<string> | undefined;
   /**
    * list of maybe prior exposed, but now hidden exports
    */
-  hideExports?: Set<string>;
-
+  hideExports?: Set<string> | undefined;
   /**
    * when reexported: from which module
    */
-  from?: ModuleGraphConnection;
-
+  from?: ModuleGraphConnection | undefined;
   /**
    * when reexported: with which priority
    */
-  priority?: number;
-
+  priority?: number | undefined;
   /**
    * can the export be renamed (defaults to true)
    */
-  canMangle?: boolean;
-
+  canMangle?: boolean | undefined;
   /**
    * are the exports terminal bindings that should be checked for export star conflicts
    */
-  terminalBinding?: boolean;
-
+  terminalBinding?: boolean | undefined;
   /**
    * module on which the result depends on
    */
-  dependencies?: Module[];
+  dependencies?: Module[] | undefined;
 };
 type WebpackError = import('./WebpackError');
 type Hash = import('./util/Hash');
