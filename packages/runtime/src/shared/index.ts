@@ -21,7 +21,7 @@ import {
   getTargetSharedOptions,
   getGlobalShareScope,
 } from '../utils/share';
-import { assert, addUniqueItem, warn } from '../utils';
+import { assert, addUniqueItem } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
 import { LoadRemoteMatch } from '../remote';
 
@@ -303,11 +303,6 @@ export class SharedHandler {
       host.options.shareStrategy === 'version-first' ||
       strategy === 'version-first'
     ) {
-      if (strategy) {
-        warn(
-          `"shared.strategy is deprecated, please set in initOptions.shareStrategy instead!"`,
-        );
-      }
       host.options.remotes.forEach((remote) => {
         if (remote.shareScope === shareScopeName) {
           promises.push(initRemoteModule(remote.name));
