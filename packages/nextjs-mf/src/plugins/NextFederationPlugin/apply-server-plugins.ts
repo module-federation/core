@@ -4,12 +4,10 @@ import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 import path from 'path';
 
 /**
- * This function applies server-specific plugins to the webpack compiler.
+ * Applies server-specific plugins to the webpack compiler.
  *
  * @param {Compiler} compiler - The Webpack compiler instance.
  * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
- *
- * @returns {void}
  */
 export function applyServerPlugins(
   compiler: Compiler,
@@ -34,22 +32,14 @@ export function applyServerPlugins(
 }
 
 /**
- * This function configures server-specific library and filename options.
+ * Configures server-specific library and filename options.
  *
  * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
- *
- * @returns {void}
- *
- * @remarks
- * This function configures the library and filename options for server builds. The library option is
- * set to the commonjs-module format for chunks and the container, which allows them to be streamed over
- * to hosts with the NodeFederationPlugin. The filename option is set to the basename of the current
- * filename.
  */
 export function configureServerLibraryAndFilename(
   options: ModuleFederationPluginOptions,
 ): void {
-  // Configure the library option with type "commonjs-module" and the name from the options
+  // Set the library option to "commonjs-module" format with the name from the options
   options.library = {
     type: 'commonjs-module',
     name: options.name,
@@ -60,24 +50,10 @@ export function configureServerLibraryAndFilename(
 }
 
 /**
- * This function patches Next.js' default externals function to make sure shared modules are bundled and not treated as external.
+ * Patches Next.js' default externals function to ensure shared modules are bundled and not treated as external.
  *
  * @param {Compiler} compiler - The Webpack compiler instance.
  * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
- *
- * @returns {void}
- *
- * @remarks
- * In server builds, all node modules are treated as external, which prevents them from being shared
- * via module federation. To work around this limitation, we mark shared modules as internalizable
- * modules that webpack puts into chunks that can be streamed to other runtimes as needed.
- *
- * This function replaces Next.js' default externals function with a new asynchronous function that
- * checks whether a module should be treated as external. If the module should not be treated as
- * external, the function returns without calling the original externals function. Otherwise, the
- * function calls the original externals function and retrieves the result. If the result is null,
- * the function returns without further processing. If the module is from Next.js or React, the
- * function returns the original result. Otherwise, the function returns null.
  */
 export function handleServerExternals(
   compiler: Compiler,
@@ -119,8 +95,7 @@ export function handleServerExternals(
 
       if (
         req.startsWith('next') ||
-        // make sure we dont screw up package names that start with react
-        // like react-carousel or react-spring
+        // Ensure package names starting with "react" are not affected
         req.startsWith('react/') ||
         req.startsWith('react-dom/') ||
         req === 'react' ||
@@ -136,31 +111,21 @@ export function handleServerExternals(
 }
 
 /**
- * This function configures server-specific compiler options.
+ * Configures server-specific compiler options.
  *
  * @param {Compiler} compiler - The Webpack compiler instance.
- *
- * @returns {void}
- *
- * @remarks
- * This function configures the compiler options for server builds. It turns off the compiler target on node
- * builds because it adds its own chunk loading runtime module with NodeFederationPlugin and StreamingTargetPlugin.
- * It also disables split chunks to prevent conflicts from occurring in the graph.
- *
  */
 export function configureServerCompilerOptions(compiler: Compiler): void {
-  // Turn off the compiler target on node builds because we add our own chunk loading runtime module
-  // with NodeFederationPlugin and StreamingTargetPlugin
+  // Disable the global option in node builds and set the target to "async-node"
   compiler.options.node = {
     ...compiler.options.node,
     global: false,
   };
   compiler.options.target = 'async-node';
-  // no custom chunk rules
+  // Disable custom chunk rules
   compiler.options.optimization.splitChunks = undefined;
 
-  // solves strange issues where next doesnt create a runtime chunk
-  // might be related to if an api route exists or not
+  // Ensure a runtime chunk is created
   compiler.options.optimization.runtimeChunk = {
     name: 'webpack-runtime',
   };

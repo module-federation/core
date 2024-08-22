@@ -193,6 +193,7 @@ class CustomRuntimePlugin {
       'CustomRuntimePlugin',
       (compilation: Compilation) => {
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
+          if (!runtimeRequirements.has(RuntimeGlobals.moduleFactories)) return;
           if (runtimeRequirements.has('embeddedFederationRuntime')) return;
           if (!runtimeRequirements.has(federationGlobal)) {
             return;
