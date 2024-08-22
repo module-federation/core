@@ -152,6 +152,7 @@ class StartupChunkDependenciesPlugin {
               `${RuntimeGlobals.require}(${JSON.stringify(federationModuleId)});\n`,
               //@ts-ignore
               generateEntryStartup(
+                //@ts-ignore
                 chunkGraph,
                 runtimeTemplate,
                 entryModules,
