@@ -52,8 +52,7 @@ export const generateEntryStartup = (
     )}`,
   ];
 
-  const chunkRuntimeRequirements =
-    chunkGraph.getChunkRuntimeRequirements(chunk);
+  const chunkRuntimeRequirements = chunkGraph.getTreeRuntimeRequirements(chunk);
   const federation = chunkRuntimeRequirements.has(federationStartup);
   passive = !federation;
   const runModule = (id) => {

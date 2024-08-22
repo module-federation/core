@@ -192,7 +192,16 @@ class CustomRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       'CustomRuntimePlugin',
       (compilation: Compilation) => {
+        //TODO: support macros - curerntly i depend on module factory to compile the chunk, there is no module factory in macro
+
+        // compilation.hooks.executeModule.tap('CustomRuntimePlugin', (module, context) => {
+        //   console.log('executemoduel')
+        //   const { chunk } = context;
+        //   // debugger;
+        // });
+
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
+          //TODO: support macros - curerntly i depend on module factory to compile the chunk, there is no module factory in macro
           if (chunk.id === 'build time chunk') {
             return;
           }
