@@ -98,7 +98,7 @@ export class SnapshotHandler {
       options: Options;
       moduleInfo: Remote;
       remoteSnapshot: ModuleInfo;
-    }>('loadRemoteSnapshot'),
+    }>('afterLoadSnapshot'),
   });
   loaderHook: FederationHost['loaderHook'];
   manifestLoading: Record<string, Promise<ModuleInfo>> =
@@ -270,6 +270,13 @@ export class SnapshotHandler {
         `);
       }
     }
+
+    await this.hooks.lifecycle.afterLoadSnapshot.emit({
+      options,
+      moduleInfo,
+      remoteSnapshot: mSnapshot,
+    });
+
     return {
       remoteSnapshot: mSnapshot,
       globalSnapshot: gSnapshot,

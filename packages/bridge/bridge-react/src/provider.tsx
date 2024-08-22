@@ -13,7 +13,16 @@ type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
 };
 
+interface Provider<T> {
+  render(info: any): void;
+  destroy(info: { dom: HTMLElement }): void;
+  rawComponent: React.ComponentType;
+  __BRIDGE_FN__: (_args: T) => void;
+}
+
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
+  let provider: Provider<T>;
+
   return () => {
     const rootMap = new Map<any, ReactDOMClient.Root>();
 
@@ -28,52 +37,55 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
       );
     };
 
-    return {
-      render(info: RenderFnParams & any) {
-        LoggerInstance.log(`createBridgeComponent render Info`, info);
-        const { name, basename, memoryRoute, ...propsInfo } = info;
+    if (!provider) {
+      provider = {
+        render(info: RenderFnParams & any) {
+          LoggerInstance.log(`createBridgeComponent render Info`, info);
+          const { name, basename, memoryRoute, ...propsInfo } = info;
 
-        if (atLeastReact18(React)) {
-          const root = ReactDOMClient.createRoot(info.dom);
-          rootMap.set(info.dom, root);
-          root.render(
-            <RawComponent
-              propsInfo={propsInfo}
-              appInfo={{
-                name,
-                basename,
-                memoryRoute,
-              }}
-            />,
-          );
-        } else {
-          ReactDOM.render(
-            <RawComponent
-              propsInfo={propsInfo}
-              appInfo={{
-                name,
-                basename,
-                memoryRoute,
-              }}
-            />,
-            info.dom,
-          );
-        }
-      },
-      destroy(info: { dom: HTMLElement }) {
-        LoggerInstance.log(`createBridgeComponent destroy Info`, {
-          dom: info.dom,
-        });
-        if (atLeastReact18(React)) {
-          const root = rootMap.get(info.dom);
-          root?.unmount();
-        } else {
-          ReactDOM.unmountComponentAtNode(info.dom);
-        }
-      },
-      rawComponent: bridgeInfo.rootComponent,
-      __BRIDGE_FN__: (_args: T) => {},
-    };
+          if (atLeastReact18(React)) {
+            const root = ReactDOMClient.createRoot(info.dom);
+            rootMap.set(info.dom, root);
+            root.render(
+              <RawComponent
+                propsInfo={propsInfo}
+                appInfo={{
+                  name,
+                  basename,
+                  memoryRoute,
+                }}
+              />,
+            );
+          } else {
+            ReactDOM.render(
+              <RawComponent
+                propsInfo={propsInfo}
+                appInfo={{
+                  name,
+                  basename,
+                  memoryRoute,
+                }}
+              />,
+              info.dom,
+            );
+          }
+        },
+        destroy(info: { dom: HTMLElement }) {
+          LoggerInstance.log(`createBridgeComponent destroy Info`, {
+            dom: info.dom,
+          });
+          if (atLeastReact18(React)) {
+            const root = rootMap.get(info.dom);
+            root?.unmount();
+          } else {
+            ReactDOM.unmountComponentAtNode(info.dom);
+          }
+        },
+        rawComponent: bridgeInfo.rootComponent,
+        __BRIDGE_FN__: (_args: T) => {},
+      };
+    }
+    return provider;
   };
 }
 
