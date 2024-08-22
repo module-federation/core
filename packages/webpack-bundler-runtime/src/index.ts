@@ -24,5 +24,4 @@ const federation: Federation = {
   attachShareScopeMap,
   bundlerRuntimeOptions: {},
 };
-
 export default federation;

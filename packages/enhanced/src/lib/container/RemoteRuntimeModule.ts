@@ -3,7 +3,7 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Compilation, Chunk } from 'webpack';
+import type { Compilation } from 'webpack';
 import RemoteModule from './RemoteModule';
 import { getFederationGlobalScope } from './runtime/utils';
 import type ExternalModule from 'webpack/lib/ExternalModule';
