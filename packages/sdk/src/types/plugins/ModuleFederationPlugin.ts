@@ -222,7 +222,7 @@ export interface ModuleFederationPluginOptions {
 
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
-  async?: boolean;
+  async?: boolean | AsyncBoundaryOptions;
   embedRuntime?: boolean;
 }
 /**

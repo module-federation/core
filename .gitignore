@@ -48,8 +48,12 @@ migrations.json
 # build contnt
 packages/**/dist
 apps/**/dist
+
+packages/**/@mf-types
+apps/**/@mf-types
 **/@mf-types
-**/**/@mf-types
+@mf-types
+
 
 # test cases
 !packages/enhanced/test/configCases/**/**/node_modules

@@ -47,7 +47,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _statsPlugin?: StatsPlugin;
   /**
-   * @param {ModuleFederationCompilerPluginOptions} options options
+   * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options options
    */
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
     validate(options);
@@ -81,11 +81,13 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         compiler,
       );
     }
-    //@ts-ignore
-    new StartupChunkDependenciesPlugin({
-      asyncChunkLoading: true,
+    if (options.embedRuntime) {
       //@ts-ignore
-    }).apply(compiler);
+      new StartupChunkDependenciesPlugin({
+        asyncChunkLoading: true,
+        //@ts-ignore
+      }).apply(compiler);
+    }
 
     if (options.dts !== false) {
       new DtsPlugin(options).apply(compiler);

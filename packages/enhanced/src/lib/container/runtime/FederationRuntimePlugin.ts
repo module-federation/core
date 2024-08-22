@@ -57,7 +57,11 @@ class FederationRuntimePlugin {
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
-    this.bundlerRuntimePath = options?.embedRuntime
+    this.bundlerRuntimePath = this.getBundlerRuntimePath();
+  }
+
+  getBundlerRuntimePath() {
+    return this.options?.embedRuntime
       ? VendoredBundlerRuntimePath
       : BundlerRuntimePath;
   }
@@ -230,6 +234,10 @@ class FederationRuntimePlugin {
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (runtimeRequirements.has(federationGlobal)) return;
           runtimeRequirements.add(federationGlobal);
+          runtimeRequirements.add(RuntimeGlobals.interceptModuleExecution);
+          runtimeRequirements.add(RuntimeGlobals.moduleCache);
+          runtimeRequirements.add(RuntimeGlobals.compatGetDefaultExport);
+
           compilation.addRuntimeModule(
             chunk,
             new FederationRuntimeModule(
@@ -278,17 +286,9 @@ class FederationRuntimePlugin {
       ...compiler.options.resolve.alias,
     };
 
-    if (this.options?.embedRuntime) {
-      // should use normal module replacement instead?
-      if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
-        compiler.options.resolve.alias['@module-federation/runtime$'] =
-          runtimePath;
-      }
-    } else {
-      if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
-        compiler.options.resolve.alias['@module-federation/runtime$'] =
-          runtimePath;
-      }
+    if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
+      compiler.options.resolve.alias['@module-federation/runtime$'] =
+        runtimePath;
     }
 
     if (!compiler.options.resolve.alias['@module-federation/runtime-tools$']) {
@@ -330,7 +330,7 @@ class FederationRuntimePlugin {
       };
     }
     if (this.options && !this.options?.name) {
-      // the instance may get the same one if the name is the same https://github.com/module-federation/core/blob/main/packages/runtime/src/index.ts#L18
+      //! the instance may get the same one if the name is the same https://github.com/module-federation/core/blob/main/packages/runtime/src/index.ts#L18
       this.options.name =
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }

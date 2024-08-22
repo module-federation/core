@@ -24,6 +24,7 @@ import type {
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import checkOptions from '../../schemas/sharing/ProviderSharedPlugin.check';
 import schema from '../../schemas/sharing/ProviderSharedPlugin';
+
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
