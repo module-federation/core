@@ -61,25 +61,8 @@ export default function (): FederationRuntimePlugin {
 
       return mod;
     },
-    beforeInit: function (args: any) {
-      const userOptions = args.userOptions;
-      const shareInfo = args.shareInfo;
-      const shared = userOptions.shared;
+    beforeInit(args) {
       if (!globalThis.usedChunks) globalThis.usedChunks = new Set();
-      if (shared) {
-        Object.keys(shared || {}).forEach(function (sharedKey) {
-          const rawShared = shared[sharedKey];
-          const arrayShared = Array.isArray(rawShared)
-            ? rawShared
-            : [rawShared];
-          arrayShared.forEach(function (s) {
-            if (!s.strategy) {
-              s.strategy = 'loaded-first';
-            }
-          });
-        });
-      }
-
       if (
         typeof __webpack_runtime_id__ === 'string' &&
         !__webpack_runtime_id__.startsWith('webpack')

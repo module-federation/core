@@ -6,6 +6,7 @@ import {
   Shared,
   RemoteEntryExports,
   UserOptions,
+  ShareStrategy,
 } from '../type';
 import { FederationHost } from '../core';
 import {
@@ -241,7 +242,7 @@ export class SharedHandler {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   initializeSharing(
     shareScopeName = DEFAULT_SCOPE,
-    strategy?: Shared['strategy'],
+    strategy?: ShareStrategy,
   ): Array<Promise<void>> {
     const { host } = this;
 
@@ -297,7 +298,11 @@ export class SharedHandler {
         }
       });
     });
-    if (strategy === 'version-first') {
+    // TODO: strategy==='version-first' need to be removed in the future
+    if (
+      host.options.shareStrategy === 'version-first' ||
+      strategy === 'version-first'
+    ) {
       host.options.remotes.forEach((remote) => {
         if (remote.shareScope === shareScopeName) {
           promises.push(initRemoteModule(remote.name));

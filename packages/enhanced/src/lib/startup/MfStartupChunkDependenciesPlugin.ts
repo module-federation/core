@@ -15,7 +15,7 @@ const ConcatenatedModule = require(
   normalizeWebpackPath('webpack/lib/optimize/ConcatenatedModule'),
 );
 import type { ChunkLoadingType } from 'webpack/declarations/WebpackOptions';
-
+import ContainerEntryModule from '../container/ContainerEntryModule';
 interface Options {
   chunkLoading: ChunkLoadingType;
   asyncChunkLoading?: boolean;
@@ -34,13 +34,10 @@ class StartupChunkDependenciesPlugin {
       (compilation) => {
         const isEnabledForChunk = (chunk: Chunk): boolean => {
           const chunkGraph = compilation.chunkGraph;
-          const entryModules = Array.from(
+          const entryModule = Array.from(
             chunkGraph.getChunkEntryModulesIterable(chunk),
-          );
-          return !entryModules.some(
-            (entryModule) =>
-              entryModule.constructor.name === 'ContainerEntryModule',
-          );
+          )[0];
+          return !(entryModule instanceof ContainerEntryModule);
         };
 
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
@@ -89,7 +86,6 @@ class StartupChunkDependenciesPlugin {
           .for(RuntimeGlobals.startupEntrypoint)
           .tap('MfStartupChunkDependenciesPlugin', (chunk, set) => {
             if (!isEnabledForChunk(chunk)) return;
-            debugger;
             set.add(RuntimeGlobals.require);
             set.add(RuntimeGlobals.ensureChunk);
             set.add(RuntimeGlobals.ensureChunkIncludeEntries);
@@ -136,7 +132,7 @@ class StartupChunkDependenciesPlugin {
                 }
               }
             }
-
+            debugger;
             if (!federationRuntimeModule) {
               return startupSource;
             }
