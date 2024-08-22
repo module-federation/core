@@ -7,7 +7,7 @@ import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { parseOptions } from './options';
-import type { optimize, Compiler, Compilation } from 'webpack';
+import type { optimize, Compiler, Compilation, WebpackError } from 'webpack';
 import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
@@ -236,7 +236,6 @@ class ContainerPlugin {
         );
 
         compilation.dependencyFactories.set(
-          //@ts-ignore
           ContainerExposedDependency,
           normalModuleFactory,
         );

@@ -8,7 +8,11 @@ import {
   getWebpackPath,
   normalizeWebpackPath,
 } from '@module-federation/sdk/normalize-webpack-path';
-import type { Compiler, Compilation } from 'webpack';
+import type {
+  Compiler,
+  Compilation,
+  WebpackError as WebpackErrorType,
+} from 'webpack';
 import { parseOptions } from '../container/options';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import ProvideSharedDependency from './ProvideSharedDependency';
@@ -20,7 +24,6 @@ import type {
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import checkOptions from '../../schemas/sharing/ProviderSharedPlugin.check';
 import schema from '../../schemas/sharing/ProviderSharedPlugin';
-
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
@@ -243,7 +246,7 @@ class ProvideSharedPlugin {
                   {
                     name: undefined,
                   },
-                  (err: WebpackError | null | undefined) => {
+                  (err?: WebpackErrorType | null | undefined) => {
                     if (err) return reject(err);
                     resolve();
                   },
@@ -263,9 +266,8 @@ class ProvideSharedPlugin {
         );
 
         compilation.dependencyFactories.set(
-          //@ts-ignore
           ProvideSharedDependency,
-          // @ts-ignore
+          //@ts-ignore
           new ProvideSharedModuleFactory(),
         );
       },

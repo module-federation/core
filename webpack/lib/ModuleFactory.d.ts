@@ -23,19 +23,10 @@ export = ModuleFactory;
  * @property {string} context
  * @property {Dependency[]} dependencies
  */
-declare class ModuleFactory {
-  /**
-   * @abstract
-   * @param {ModuleFactoryCreateData} data data object
-   * @param {function((Error | null)=, ModuleFactoryResult=): void} callback callback
-   * @returns {void}
-   */
+declare abstract class ModuleFactory {
   create(
     data: ModuleFactoryCreateData,
-    callback: (
-      arg0: (Error | null) | undefined,
-      arg1: ModuleFactoryResult | undefined,
-    ) => void,
+    callback: (arg0?: null | Error, arg1?: ModuleFactoryResult) => void,
   ): void;
 }
 declare namespace ModuleFactory {
@@ -50,7 +41,7 @@ declare namespace ModuleFactory {
 }
 type ModuleFactoryCreateData = {
   contextInfo: ModuleFactoryCreateDataContextInfo;
-  resolveOptions?: ResolveOptions | undefined;
+  resolveOptions?: ResolveOptions;
   context: string;
   dependencies: Dependency[];
 };
@@ -58,20 +49,21 @@ type ModuleFactoryResult = {
   /**
    * the created module or unset if no module was created
    */
-  module?: Module | undefined;
-  fileDependencies?: Set<string> | undefined;
-  contextDependencies?: Set<string> | undefined;
-  missingDependencies?: Set<string> | undefined;
+  module?: Module;
+  fileDependencies?: Set<string>;
+  contextDependencies?: Set<string>;
+  missingDependencies?: Set<string>;
+
   /**
    * allow to use the unsafe cache
    */
-  cacheable?: boolean | undefined;
+  cacheable?: boolean;
 };
 type ResolveOptions = import('../declarations/WebpackOptions').ResolveOptions;
 type Dependency = import('./Dependency');
 type Module = import('./Module');
 type ModuleFactoryCreateDataContextInfo = {
   issuer: string;
-  issuerLayer?: (string | null) | undefined;
+  issuerLayer?: null | string;
   compiler: string;
 };
