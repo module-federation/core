@@ -41,8 +41,6 @@ class CustomRuntimeModule extends RuntimeModule {
           },
           mangle: false,
           format: {
-            // strip comments that webpack wraps it in,
-            // they interfere with the parent comment prefixing and seem hard coded into webpack
             comments: false,
           },
         },
