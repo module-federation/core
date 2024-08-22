@@ -133,7 +133,8 @@ export type RemoteEntryInitOptions = {
   shareScopeMap: ShareScopeMap;
 };
 
-export type InitScope = Array<Record<string, never>>;
+export type InitTokens = Record<string, Record<string, any>>;
+export type InitScope = InitTokens[];
 
 export type RemoteEntryExports = {
   get: (id: string) => () => Promise<Module>;

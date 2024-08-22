@@ -10,9 +10,12 @@ export function initializeSharing({
   initScope,
 }: InitializeSharingOptions): Promise<boolean> | boolean | void {
   if (!initScope) initScope = [];
+  const mfInstance = webpackRequire.federation.instance!;
+
   // handling circular init calls
   var initToken = initTokens[shareScopeName];
-  if (!initToken) initToken = initTokens[shareScopeName] = {};
+  if (!initToken)
+    initToken = initTokens[shareScopeName] = { from: mfInstance.name };
   if (initScope.indexOf(initToken) >= 0) return;
   initScope.push(initToken);
 
@@ -42,8 +45,11 @@ export function initializeSharing({
       handleError(err);
     }
   };
-  const promises =
-    webpackRequire.federation.instance!.initializeSharing(shareScopeName);
+  const promises = mfInstance.initializeSharing(
+    shareScopeName,
+    mfInstance.options.shareStrategy,
+    initScope,
+  );
   attachShareScopeMap(webpackRequire);
 
   const bundlerRuntimeRemotesOptions =

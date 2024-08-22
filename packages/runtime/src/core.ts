@@ -11,6 +11,7 @@ import {
   ShareScopeMap,
   InitScope,
   RemoteEntryInitOptions,
+  InitTokens,
 } from './type';
 import { getBuilderId, registerPlugins } from './utils';
 import { Module } from './module';
@@ -171,8 +172,13 @@ export class FederationHost {
   initializeSharing(
     shareScopeName = DEFAULT_SCOPE,
     strategy?: Shared['strategy'],
+    initScope?: InitScope,
   ): Array<Promise<void>> {
-    return this.sharedHandler.initializeSharing(shareScopeName, strategy);
+    return this.sharedHandler.initializeSharing(
+      shareScopeName,
+      strategy,
+      initScope,
+    );
   }
 
   initRawContainer(
