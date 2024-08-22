@@ -1,5 +1,4 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type webpack from 'webpack';
 import { getFederationGlobalScope } from './utils';
 import { transformSync } from '@swc/core';
 

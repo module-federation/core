@@ -1,8 +1,12 @@
 'use strict';
+
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { generateEntryStartup } from './StartupHelpers';
-const { RuntimeGlobals } = require(normalizeWebpackPath('webpack'));
 import type { Compiler, Chunk } from 'webpack';
+import ContainerEntryModule from '../container/ContainerEntryModule';
+import type { ChunkLoadingType } from 'webpack/declarations/WebpackOptions';
+
+const { RuntimeGlobals } = require(normalizeWebpackPath('webpack'));
 const StartupChunkDependenciesRuntimeModule = require(
   normalizeWebpackPath(
     'webpack/lib/runtime/StartupChunkDependenciesRuntimeModule',
@@ -14,8 +18,7 @@ const StartupEntrypointRuntimeModule = require(
 const ConcatenatedModule = require(
   normalizeWebpackPath('webpack/lib/optimize/ConcatenatedModule'),
 );
-import type { ChunkLoadingType } from 'webpack/declarations/WebpackOptions';
-import ContainerEntryModule from '../container/ContainerEntryModule';
+
 interface Options {
   chunkLoading: ChunkLoadingType;
   asyncChunkLoading?: boolean;
@@ -32,34 +35,30 @@ class StartupChunkDependenciesPlugin {
     compiler.hooks.thisCompilation.tap(
       'MfStartupChunkDependenciesPlugin',
       (compilation) => {
+        const { chunkGraph } = compilation;
+
         const isEnabledForChunk = (chunk: Chunk): boolean => {
-          const chunkGraph = compilation.chunkGraph;
-          const entryModule = Array.from(
-            chunkGraph.getChunkEntryModulesIterable(chunk),
-          )[0];
+          const [entryModule] = chunkGraph.getChunkEntryModulesIterable(chunk);
           return !(entryModule instanceof ContainerEntryModule);
         };
 
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'MfStartupChunkDependenciesPlugin',
           (chunk, set) => {
-            if (!chunk.hasRuntime()) return;
-            if (!isEnabledForChunk(chunk)) return;
+            if (!chunk.hasRuntime() || !isEnabledForChunk(chunk)) return;
 
-            const hasRemoteScope = set.has(
+            const runtimeRequirements = [
               RuntimeGlobals.currentRemoteGetScope,
-            );
-            const hasSharingInit = set.has(RuntimeGlobals.initializeSharing);
-            const hasShareMap = set.has(RuntimeGlobals.shareScopeMap);
+              RuntimeGlobals.initializeSharing,
+              RuntimeGlobals.shareScopeMap,
+            ];
 
-            if (!hasRemoteScope && !hasSharingInit && !hasShareMap) {
-              return;
-            }
+            if (!runtimeRequirements.some((req) => set.has(req))) return;
 
             set.add(RuntimeGlobals.startup);
             set.add(RuntimeGlobals.ensureChunk);
             set.add(RuntimeGlobals.ensureChunkIncludeEntries);
-            // starts up runtime chunks
+
             compilation.addRuntimeModule(
               chunk,
               new StartupChunkDependenciesRuntimeModule(
@@ -73,9 +72,12 @@ class StartupChunkDependenciesPlugin {
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'MfStartupChunkDependenciesPlugin',
           (chunk, set) => {
-            if (chunk.hasRuntime()) return;
-            if (compilation.chunkGraph.getNumberOfEntryModules(chunk) <= 0)
+            if (
+              chunk.hasRuntime() ||
+              chunkGraph.getNumberOfEntryModules(chunk) <= 0
+            )
               return;
+
             set.add(RuntimeGlobals.startup);
             set.add('federation-entry-startup');
             set.add(RuntimeGlobals.startupEntrypoint);
@@ -86,22 +88,23 @@ class StartupChunkDependenciesPlugin {
           .for(RuntimeGlobals.startupEntrypoint)
           .tap('MfStartupChunkDependenciesPlugin', (chunk, set) => {
             if (!isEnabledForChunk(chunk)) return;
+
             set.add(RuntimeGlobals.require);
             set.add(RuntimeGlobals.ensureChunk);
             set.add(RuntimeGlobals.ensureChunkIncludeEntries);
-            // starts up entrypoints
+
             compilation.addRuntimeModule(
               chunk,
               new StartupEntrypointRuntimeModule(this.asyncChunkLoading),
             );
           });
 
-        const hooks =
+        const { renderStartup } =
           compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
             compilation,
           );
 
-        hooks.renderStartup.tap(
+        renderStartup.tap(
           'MfStartupChunkDependenciesPlugin',
           (startupSource, lastInlinedModule, renderContext) => {
             const { chunk, chunkGraph, runtimeTemplate } = renderContext;
@@ -111,10 +114,14 @@ class StartupChunkDependenciesPlugin {
             }
 
             let federationRuntimeModule: any = null;
+
+            const isFederationModule = (module: any) =>
+              module.context?.endsWith('.federation');
+
             for (const module of chunkGraph.getChunkEntryModulesIterable(
               chunk,
             )) {
-              if (module.context && module.context.endsWith('.federation')) {
+              if (isFederationModule(module)) {
                 federationRuntimeModule = module;
                 break;
               }
@@ -122,34 +129,34 @@ class StartupChunkDependenciesPlugin {
               if (module && 'modules' in module) {
                 for (const concatModule of (module as typeof ConcatenatedModule)
                   .modules) {
-                  if (
-                    concatModule.context &&
-                    concatModule.context.endsWith('.federation')
-                  ) {
+                  if (isFederationModule(concatModule)) {
                     federationRuntimeModule = module;
                     break;
                   }
                 }
               }
             }
-            debugger;
+
             if (!federationRuntimeModule) {
               return startupSource;
             }
 
+            const federationModuleId = chunkGraph.getModuleId(
+              federationRuntimeModule,
+            );
+            const entryModules = Array.from(
+              chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunk),
+            );
+
             return new compiler.webpack.sources.ConcatSource(
-              `${RuntimeGlobals.require}(${JSON.stringify(
-                chunkGraph.getModuleId(federationRuntimeModule),
-              )});\n`,
+              `${RuntimeGlobals.require}(${JSON.stringify(federationModuleId)});\n`,
+              //@ts-ignore
               generateEntryStartup(
-                //@ts-ignore
                 chunkGraph,
                 runtimeTemplate,
-                Array.from(
-                  chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunk),
-                ),
+                entryModules,
                 chunk,
-                false, // passive set to false for active startup
+                false,
               ),
             );
           },

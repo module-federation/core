@@ -181,7 +181,7 @@ class ContainerEntryModule extends Module {
     );
 
     this.addDependency(
-      // @ts-expect-error flaky type for EntryDependency
+      //@ts-ignore
       new EntryDependency(this._injectRuntimeEntry),
     );
 
