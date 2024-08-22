@@ -193,6 +193,9 @@ class CustomRuntimePlugin {
       'CustomRuntimePlugin',
       (compilation: Compilation) => {
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
+          if (chunk.id === 'build time chunk') {
+            return;
+          }
           if (runtimeRequirements.has('embeddedFederationRuntime')) return;
           if (!runtimeRequirements.has(federationGlobal)) {
             return;

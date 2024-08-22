@@ -26,6 +26,8 @@ class CustomRuntimeModule extends RuntimeModule {
   }
 
   override generate(): string | null {
+    if (this.chunk?.id === 'build time chunk') {
+    }
     if (!this.bundledCode) return null;
     const { code: transformedCode } = transformSync(this.bundledCode, {
       jsc: {
