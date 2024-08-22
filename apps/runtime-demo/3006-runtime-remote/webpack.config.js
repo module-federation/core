@@ -35,6 +35,7 @@ module.exports = composePlugins(
           './WebpackSvg': './src/components/WebpackSvg',
           './WebpackPng': './src/components/WebpackPng',
         },
+        shareStrategy: 'loaded-first',
         shared: {
           lodash: {
             singleton: true,
@@ -64,7 +65,6 @@ module.exports = composePlugins(
         dts: {
           tsConfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
         },
-        runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
       }),
     );
     // config.externals={

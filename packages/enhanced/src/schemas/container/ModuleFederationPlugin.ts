@@ -410,6 +410,10 @@ export default {
         ],
       },
     },
+    ShareStrategy: {
+      description: "Load shared strategy(defaults to 'version-first').",
+      enum: ['version-first', 'loaded-first'],
+    },
     Shared: {
       description:
         'Modules that should be shared in the share scope. When provided, property names are used to match requested modules in this compilation.',
@@ -462,6 +466,9 @@ export default {
             "Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.",
           type: 'string',
           minLength: 1,
+        },
+        shareStrategy: {
+          $ref: '#/definitions/ShareStrategy',
         },
         requiredVersion: {
           description: 'Version requirement from module in share scope.',
@@ -761,6 +768,9 @@ export default {
         "Share scope name used for all shared modules (defaults to 'default').",
       type: 'string',
       minLength: 1,
+    },
+    shareStrategy: {
+      $ref: '#/definitions/ShareStrategy',
     },
     shared: {
       $ref: '#/definitions/Shared',
