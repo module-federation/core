@@ -1,4 +1,4 @@
-import type { Compiler } from 'webpack';
+import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import {
@@ -244,25 +244,29 @@ class FederationRuntimePlugin {
   }
 
   apply(compiler: Compiler) {
-    const useModuleFederationPlugin = compiler.options.plugins.find((p) => {
-      if (typeof p !== 'object' || !p) {
-        return false;
-      }
-      return p['name'] === 'ModuleFederationPlugin';
-    });
+    const useModuleFederationPlugin = compiler.options.plugins.find(
+      (p: WebpackPluginInstance) => {
+        if (typeof p !== 'object' || !p) {
+          return false;
+        }
+        return p['name'] === 'ModuleFederationPlugin';
+      },
+    );
 
     if (useModuleFederationPlugin && !this.options) {
       // @ts-ignore
       this.options = useModuleFederationPlugin._options;
     }
 
-    const useContainerPlugin = compiler.options.plugins.find((p) => {
-      if (typeof p !== 'object' || !p) {
-        return false;
-      }
+    const useContainerPlugin = compiler.options.plugins.find(
+      (p: WebpackPluginInstance) => {
+        if (typeof p !== 'object' || !p) {
+          return false;
+        }
 
-      return p['name'] === 'ContainerPlugin';
-    });
+        return p['name'] === 'ContainerPlugin';
+      },
+    );
 
     if (useContainerPlugin && !this.options) {
       // @ts-ignore
