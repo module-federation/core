@@ -4,7 +4,8 @@ declare class ConcatenatedModule extends Module {
    * @param {Module} rootModule the root module of the concatenation
    * @param {Set<Module>} modules all modules in the concatenation (including the root module)
    * @param {RuntimeSpec} runtime the runtime
-   * @param {Object=} associatedObjectForCache object for caching
+   * @param {Compilation} compilation the compilation
+   * @param {object=} associatedObjectForCache object for caching
    * @param {string | HashConstructor=} hashFunction hash function to use
    * @returns {ConcatenatedModule} the module
    */
@@ -12,40 +13,53 @@ declare class ConcatenatedModule extends Module {
     rootModule: Module,
     modules: Set<Module>,
     runtime: RuntimeSpec,
-    associatedObjectForCache?: any | undefined,
+    compilation: Compilation,
+    associatedObjectForCache?: object | undefined,
     hashFunction?: (string | HashConstructor) | undefined,
   ): ConcatenatedModule;
   /**
+   * @param {Compilation} compilation the compilation
+   * @returns {ConcatenateModuleHooks} the attached hooks
+   */
+  static getCompilationHooks(compilation: Compilation): ConcatenateModuleHooks;
+  /**
    * @param {Module} rootModule the root module of the concatenation
    * @param {Set<Module>} modules all modules in the concatenation (including the root module)
-   * @param {Object=} associatedObjectForCache object for caching
+   * @param {object=} associatedObjectForCache object for caching
    * @param {string | HashConstructor=} hashFunction hash function to use
    * @returns {string} the identifier
    */
   static _createIdentifier(
     rootModule: Module,
     modules: Set<Module>,
-    associatedObjectForCache?: any | undefined,
+    associatedObjectForCache?: object | undefined,
     hashFunction?: (string | HashConstructor) | undefined,
   ): string;
-  static deserialize(context: any): import('./ConcatenatedModule');
   /**
-   * @param {Object} options options
+   * @param {ObjectDeserializerContext} context context
+   * @returns {ConcatenatedModule} ConcatenatedModule
+   */
+  static deserialize(context: ObjectDeserializerContext): ConcatenatedModule;
+  /**
+   * @param {object} options options
    * @param {string} options.identifier the identifier of the module
    * @param {Module=} options.rootModule the root module of the concatenation
    * @param {RuntimeSpec} options.runtime the selected runtime
    * @param {Set<Module>=} options.modules all concatenated modules
+   * @param {Compilation} options.compilation the compilation
    */
   constructor({
     identifier,
     rootModule,
     modules,
     runtime,
+    compilation,
   }: {
     identifier: string;
     rootModule?: Module | undefined;
     runtime: RuntimeSpec;
     modules?: Set<Module> | undefined;
+    compilation: Compilation;
   });
   /** @type {string} */
   _identifier: string;
@@ -54,6 +68,8 @@ declare class ConcatenatedModule extends Module {
   /** @type {Set<Module>} */
   _modules: Set<Module>;
   _runtime: import('../util/runtime').RuntimeSpec;
+  /** @type {Compilation | undefined} */
+  compilation: Compilation | undefined;
   get modules(): Module[];
   /**
    * @private
@@ -93,11 +109,18 @@ declare class ConcatenatedModule extends Module {
     moduleGraph: ModuleGraph,
     runtime: RuntimeSpec,
   ): [ModuleInfoOrReference[], Map<Module, ModuleInfo>];
+  /**
+   * @param {string} oldName old name
+   * @param {UsedNames} usedNamed1 used named 1
+   * @param {UsedNames} usedNamed2 used named 2
+   * @param {string} extraInfo extra info
+   * @returns {string} found new name
+   */
   findNewName(
-    oldName: any,
-    usedNamed1: any,
-    usedNamed2: any,
-    extraInfo: any,
+    oldName: string,
+    usedNamed1: UsedNames,
+    usedNamed2: UsedNames,
+    extraInfo: string,
   ): string;
   /**
    * @param {Hash} hash the hash used to track dependencies
@@ -108,7 +131,9 @@ declare class ConcatenatedModule extends Module {
 }
 declare namespace ConcatenatedModule {
   export {
+    Reference,
     Scope,
+    Variable,
     Source,
     WebpackOptions,
     ChunkGraph,
@@ -119,22 +144,31 @@ declare namespace ConcatenatedModule {
     DependencyTemplateContext,
     DependencyTemplates,
     ExportInfo,
-    InitFragment,
+    BuildInfo,
+    BuildMeta,
     CodeGenerationContext,
     CodeGenerationResult,
     LibIdentOptions,
+    ReadOnlyRuntimeRequirements,
+    SourceTypes,
     ModuleGraph,
     ModuleGraphConnection,
     ConnectionState,
+    ModuleParseError,
     RequestShortener,
     ResolverWithOptions,
     RuntimeTemplate,
     WebpackError,
     ChunkRenderContext,
+    Program,
+    Range,
+    ObjectDeserializerContext,
     Hash,
     HashConstructor,
     InputFileSystem,
     RuntimeSpec,
+    InitFragment,
+    Comparator,
     ReexportInfo,
     Binding,
     RawBinding,
@@ -144,45 +178,55 @@ declare namespace ConcatenatedModule {
     ConcatenatedModuleInfo,
     ExternalModuleInfo,
     ReferenceToModuleInfo,
+    UsedNames,
     ConcatenationEntry,
+    ConcatenateModuleHooks,
   };
 }
 import Module = require('../Module');
-type ModuleInfo = ConcatenatedModuleInfo | ExternalModuleInfo;
-type DependencyTemplates = import('../DependencyTemplates');
-type RuntimeTemplate = import('../RuntimeTemplate');
-type ModuleGraph = import('../ModuleGraph');
-type ChunkGraph = import('../ChunkGraph');
-type RuntimeSpec = import('../util/runtime').RuntimeSpec;
-type CodeGenerationResults = import('../CodeGenerationResults');
-type ModuleInfoOrReference =
-  | ConcatenatedModuleInfo
-  | ExternalModuleInfo
-  | ReferenceToModuleInfo;
-type Hash = import('../util/Hash');
-type UpdateHashContext = import('../Dependency').UpdateHashContext;
-type HashConstructor = typeof import('../util/Hash');
+type Reference = import('eslint-scope').Reference;
 type Scope = import('eslint-scope').Scope;
-type Source = any;
+type Variable = import('eslint-scope').Variable;
+type Source = import('webpack-sources').Source;
 type WebpackOptions =
   import('../../declarations/WebpackOptions').WebpackOptionsNormalized;
+type ChunkGraph = import('../ChunkGraph');
+type CodeGenerationResults = import('../CodeGenerationResults');
 type Compilation = import('../Compilation');
 type Dependency = import('../Dependency');
+type UpdateHashContext = import('../Dependency').UpdateHashContext;
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
+type DependencyTemplates = import('../DependencyTemplates');
 type ExportInfo = import('../ExportsInfo').ExportInfo;
-type InitFragment<T> = import('../InitFragment')<T>;
+type BuildInfo = import('../Module').BuildInfo;
+type BuildMeta = import('../Module').BuildMeta;
 type CodeGenerationContext = import('../Module').CodeGenerationContext;
 type CodeGenerationResult = import('../Module').CodeGenerationResult;
 type LibIdentOptions = import('../Module').LibIdentOptions;
+type ReadOnlyRuntimeRequirements =
+  import('../Module').ReadOnlyRuntimeRequirements;
+type SourceTypes = import('../Module').SourceTypes;
+type ModuleGraph = import('../ModuleGraph');
 type ModuleGraphConnection = import('../ModuleGraphConnection');
 type ConnectionState = import('../ModuleGraphConnection').ConnectionState;
+type ModuleParseError = import('../ModuleParseError');
 type RequestShortener = import('../RequestShortener');
 type ResolverWithOptions = import('../ResolverFactory').ResolverWithOptions;
+type RuntimeTemplate = import('../RuntimeTemplate');
 type WebpackError = import('../WebpackError');
 type ChunkRenderContext =
   import('../javascript/JavascriptModulesPlugin').ChunkRenderContext;
+type Program = import('../javascript/JavascriptParser').Program;
+type Range = import('../javascript/JavascriptParser').Range;
+type ObjectDeserializerContext =
+  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
+type Hash = import('../util/Hash');
+type HashConstructor = typeof import('../util/Hash');
 type InputFileSystem = import('../util/fs').InputFileSystem;
+type RuntimeSpec = import('../util/runtime').RuntimeSpec;
+type InitFragment<T> = import('../InitFragment')<T>;
+type Comparator<T> = import('../util/comparators').Comparator<T>;
 type ReexportInfo = {
   module: Module;
   export: string[];
@@ -202,49 +246,60 @@ type SymbolBinding = {
   ids: string[];
   exportName: string[];
 };
+type ModuleInfo = ConcatenatedModuleInfo | ExternalModuleInfo;
+type ModuleInfoOrReference =
+  | ConcatenatedModuleInfo
+  | ExternalModuleInfo
+  | ReferenceToModuleInfo;
 type ConcatenatedModuleInfo = {
   type: 'concatenated';
   module: Module;
   index: number;
-  ast: any;
-  internalSource: any;
+  ast: Program | undefined;
+  internalSource: Source | undefined;
   source: ReplaceSource;
   chunkInitFragments?: InitFragment<ChunkRenderContext>[] | undefined;
-  runtimeRequirements: Iterable<string>;
-  globalScope: Scope;
-  moduleScope: Scope;
+  runtimeRequirements: ReadOnlyRuntimeRequirements | undefined;
+  globalScope: Scope | undefined;
+  moduleScope: Scope | undefined;
   internalNames: Map<string, string>;
-  exportMap: Map<string, string>;
-  rawExportMap: Map<string, string>;
+  exportMap: Map<string, string> | undefined;
+  rawExportMap: Map<string, string> | undefined;
   namespaceExportSymbol?: string | undefined;
-  namespaceObjectName: string;
+  namespaceObjectName: string | undefined;
   interopNamespaceObjectUsed: boolean;
-  interopNamespaceObjectName: string;
+  interopNamespaceObjectName: string | undefined;
   interopNamespaceObject2Used: boolean;
-  interopNamespaceObject2Name: string;
+  interopNamespaceObject2Name: string | undefined;
   interopDefaultAccessUsed: boolean;
-  interopDefaultAccessName: string;
+  interopDefaultAccessName: string | undefined;
 };
 type ExternalModuleInfo = {
   type: 'external';
   module: Module;
   runtimeCondition: RuntimeSpec | boolean;
   index: number;
-  name: string;
+  name: string | undefined;
   interopNamespaceObjectUsed: boolean;
-  interopNamespaceObjectName: string;
+  interopNamespaceObjectName: string | undefined;
   interopNamespaceObject2Used: boolean;
-  interopNamespaceObject2Name: string;
+  interopNamespaceObject2Name: string | undefined;
   interopDefaultAccessUsed: boolean;
-  interopDefaultAccessName: string;
+  interopDefaultAccessName: string | undefined;
 };
 type ReferenceToModuleInfo = {
   type: 'reference';
   runtimeCondition: RuntimeSpec | boolean;
   target: ConcatenatedModuleInfo | ExternalModuleInfo;
 };
+type UsedNames = Set<string>;
 type ConcatenationEntry = {
   type: 'concatenated' | 'external';
   module: Module;
   runtimeCondition: RuntimeSpec | boolean;
 };
+type ConcatenateModuleHooks = {
+  exportsDefinitions: SyncBailHook<[Record<string, string>], boolean>;
+};
+import { ReplaceSource } from 'webpack-sources';
+import { SyncBailHook } from 'tapable';
