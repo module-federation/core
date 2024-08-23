@@ -68,7 +68,7 @@ class StartupChunkDependenciesPlugin {
           },
         );
 
-        compilation.hooks.additionalChunkRuntimeRequirements.tap(
+        compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'MfStartupChunkDependenciesPlugin',
           (chunk, set) => {
             if (chunk.hasRuntime()) return;

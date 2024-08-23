@@ -3,59 +3,40 @@ import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
-    createScript: function (args: {
-      url: string;
-      attrs?: Record<string, any>;
-    }) {
-      // Updated type
-      const url = args.url;
-      const attrs = args.attrs;
+    //@ts-ignore
+    createScript({ url, attrs }) {
       if (typeof window !== 'undefined') {
         const script = document.createElement('script');
         script.src = url;
         script.async = true;
-        delete attrs?.['crossorigin'];
+        //@ts-ignore
+        delete attrs.crossorigin;
 
-        return { script: script, timeout: 8000 };
+        return { script, timeout: 8000 };
       }
       return undefined;
     },
-    errorLoadRemote: function (args: {
-      id: string;
-      error: any;
-      from: string;
-      origin: any;
-    }) {
-      const id = args.id;
-      const error = args.error;
-      const from = args.from;
+    errorLoadRemote({ id, error, from, origin }) {
       console.error(id, 'offline');
       const pg = function () {
         console.error(id, 'offline', error);
         return null;
       };
 
-      (pg as any).getInitialProps = function (ctx: any) {
-        // Type assertion to add getInitialProps
+      pg.getInitialProps = function (ctx: any) {
         return {};
       };
       let mod;
       if (from === 'build') {
-        mod = function () {
-          return {
-            __esModule: true,
-            default: pg,
-            getServerSideProps: function () {
-              return { props: {} };
-            },
-          };
-        };
+        mod = () => ({
+          __esModule: true,
+          default: pg,
+          getServerSideProps: () => ({ props: {} }),
+        });
       } else {
         mod = {
           default: pg,
-          getServerSideProps: function () {
-            return { props: {} };
-          },
+          getServerSideProps: () => ({ props: {} }),
         };
       }
 
@@ -70,8 +51,8 @@ export default function (): FederationRuntimePlugin {
         return args;
       }
 
-      const moduleCache = args.origin.moduleCache;
-      const name = args.origin.name;
+      // if (__webpack_runtime_id__ && !__webpack_runtime_id__.startsWith('webpack')) return args;
+      const { moduleCache, name } = args.origin;
       const gs = new Function('return globalThis')();
       const attachedRemote = gs[name];
       if (attachedRemote) {
@@ -80,30 +61,29 @@ export default function (): FederationRuntimePlugin {
 
       return args;
     },
-    init: function (args: any) {
+    init(args) {
       return args;
     },
-    beforeRequest: function (args: any) {
-      const options = args.options;
-      const id = args.id;
+    beforeRequest: (args) => {
+      const { options, id } = args;
       const remoteName = id.split('/').shift();
-      const remote = options.remotes.find(function (remote: any) {
-        return remote.name === remoteName;
-      });
+      const remote = options.remotes.find(
+        (remote) => remote.name === remoteName,
+      );
       if (!remote) return args;
-      if (remote && remote.entry && remote.entry.includes('?t=')) {
+      //@ts-ignore
+      if (remote?.entry?.includes('?t=')) {
         return args;
       }
-      remote.entry = remote.entry + '?t=' + Date.now();
+      //@ts-ignore
+      remote.entry = `${remote?.entry}?t=${Date.now()}`;
       return args;
     },
-    afterResolve: function (args: any) {
+    afterResolve(args) {
       return args;
     },
-    onLoad: function (args: any) {
-      const exposeModuleFactory = args.exposeModuleFactory;
-      const exposeModule = args.exposeModule;
-      const id = args.id;
+    onLoad(args) {
+      const { exposeModuleFactory, exposeModule, id } = args;
       const moduleOrFactory = exposeModuleFactory || exposeModule;
       if (!moduleOrFactory) return args; // Ensure moduleOrFactory is defined
 
@@ -116,29 +96,27 @@ export default function (): FederationRuntimePlugin {
         }
 
         const handler: ProxyHandler<any> = {
-          get: function (target, prop, receiver) {
+          get(target, prop, receiver) {
             // Check if accessing a static property of the function itself
             if (
               target === exposedModuleExports &&
               typeof exposedModuleExports[prop] === 'function'
             ) {
-              return function (this: unknown) {
+              return function (this: unknown, ...args: any[]) {
                 globalThis.usedChunks.add(id);
-                // eslint-disable-next-line prefer-rest-params
-                return exposedModuleExports[prop].apply(this, arguments);
+                return exposedModuleExports[prop].apply(this, args);
               };
             }
 
             const originalMethod = target[prop];
             if (typeof originalMethod === 'function') {
-              const proxiedFunction = function (this: unknown) {
+              const proxiedFunction = function (this: unknown, ...args: any[]) {
                 globalThis.usedChunks.add(id);
-                // eslint-disable-next-line prefer-rest-params
-                return originalMethod.apply(this, arguments);
+                return originalMethod.apply(this, args);
               };
 
               // Copy all enumerable properties from the original method to the proxied function
-              Object.keys(originalMethod).forEach(function (prop) {
+              Object.keys(originalMethod).forEach((prop) => {
                 Object.defineProperty(proxiedFunction, prop, {
                   value: originalMethod[prop],
                   writable: true,
@@ -161,7 +139,7 @@ export default function (): FederationRuntimePlugin {
 
           // Proxy static properties specifically
           const staticProps = Object.getOwnPropertyNames(exposedModuleExports);
-          staticProps.forEach(function (prop) {
+          staticProps.forEach((prop) => {
             if (typeof exposedModuleExports[prop] === 'function') {
               exposedModuleExports[prop] = new Proxy(
                 exposedModuleExports[prop],
@@ -169,9 +147,7 @@ export default function (): FederationRuntimePlugin {
               );
             }
           });
-          return function () {
-            return exposedModuleExports;
-          };
+          return () => exposedModuleExports;
         } else {
           // For objects, just wrap the exported object itself
           exposedModuleExports = new Proxy(exposedModuleExports, handler);
@@ -183,7 +159,7 @@ export default function (): FederationRuntimePlugin {
       return args;
     },
 
-    resolveShare: function (args: any) {
+    resolveShare(args) {
       if (
         args.pkgName !== 'react' &&
         args.pkgName !== 'react-dom' &&
@@ -191,11 +167,7 @@ export default function (): FederationRuntimePlugin {
       ) {
         return args;
       }
-      const shareScopeMap = args.shareScopeMap;
-      const scope = args.scope;
-      const pkgName = args.pkgName;
-      const version = args.version;
-      const GlobalFederation = args.GlobalFederation;
+      const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
       const host = GlobalFederation['__INSTANCES__'][0];
       if (!host) {
         return args;
@@ -204,11 +176,7 @@ export default function (): FederationRuntimePlugin {
       if (!host.options.shared[pkgName]) {
         return args;
       }
-      // if not next host then bail
-      if (!host.options.shared['next/router']) {
-        return args;
-      }
-      //handle react host next remote, disable resolving when not next host
+
       args.resolver = function () {
         shareScopeMap[scope][pkgName][version] =
           host.options.shared[pkgName][0]; // replace local share scope manually with desired module
@@ -216,7 +184,7 @@ export default function (): FederationRuntimePlugin {
       };
       return args;
     },
-    beforeLoadShare: async function (args: any) {
+    async beforeLoadShare(args) {
       return args;
     },
   };
