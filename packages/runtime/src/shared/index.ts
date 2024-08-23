@@ -9,6 +9,7 @@ import {
   ShareStrategy,
   InitScope,
   InitTokens,
+  CallFrom,
 } from '../type';
 import { FederationHost } from '../core';
 import {
@@ -124,7 +125,9 @@ export class SharedHandler {
       await Promise.all(
         shareInfo.scope.map(async (shareScope) => {
           await Promise.all(
-            this.initializeSharing(shareScope, shareInfo.strategy),
+            this.initializeSharing(shareScope, {
+              strategy: shareInfo.strategy,
+            }),
           );
           return;
         }),
@@ -245,22 +248,26 @@ export class SharedHandler {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   initializeSharing(
     shareScopeName = DEFAULT_SCOPE,
-    strategy?: ShareStrategy,
-    initScope?: InitScope,
-    // paramInitTokens?:InitTokens
+    extraOptions?: {
+      initScope?: InitScope;
+      from?: CallFrom;
+      strategy?: ShareStrategy;
+    },
   ): Array<Promise<void>> {
     const { host } = this;
+    const from = extraOptions?.from;
+    const strategy = extraOptions?.strategy;
+    let initScope = extraOptions?.initScope;
     const promises: Promise<any>[] = [];
-    // if(paramInitTokens && this.initTokens!==paramInitTokens){
-    //   this.initTokens = paramInitTokens
-    // }
-    const { initTokens } = this;
-    if (!initScope) initScope = [];
-    let initToken = initTokens[shareScopeName];
-    if (!initToken)
-      initToken = initTokens[shareScopeName] = { from: this.host.name };
-    if (initScope.indexOf(initToken) >= 0) return promises;
-    initScope.push(initToken);
+    if (from !== 'build') {
+      const { initTokens } = this;
+      if (!initScope) initScope = [];
+      let initToken = initTokens[shareScopeName];
+      if (!initToken)
+        initToken = initTokens[shareScopeName] = { from: this.host.name };
+      if (initScope.indexOf(initToken) >= 0) return promises;
+      initScope.push(initToken);
+    }
 
     const shareScope = this.shareScopeMap;
     const hostName = host.options.name;
@@ -348,7 +355,7 @@ export class SharedHandler {
 
     if (shareInfo?.scope) {
       shareInfo.scope.forEach((shareScope) => {
-        this.initializeSharing(shareScope, shareInfo.strategy);
+        this.initializeSharing(shareScope, { strategy: shareInfo.strategy });
       });
     }
     const registeredShared = getRegisteredShare(

@@ -45,11 +45,11 @@ export function initializeSharing({
       handleError(err);
     }
   };
-  const promises = mfInstance.initializeSharing(
-    shareScopeName,
-    mfInstance.options.shareStrategy,
+  const promises = mfInstance.initializeSharing(shareScopeName, {
+    strategy: mfInstance.options.shareStrategy,
     initScope,
-  );
+    from: 'build',
+  });
   attachShareScopeMap(webpackRequire);
 
   const bundlerRuntimeRemotesOptions =

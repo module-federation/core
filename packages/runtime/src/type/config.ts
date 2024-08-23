@@ -135,7 +135,7 @@ export type RemoteEntryInitOptions = {
 
 export type InitTokens = Record<string, Record<string, any>>;
 export type InitScope = InitTokens[];
-
+export type CallFrom = 'build' | 'runtime';
 export type RemoteEntryExports = {
   get: (id: string) => () => Promise<Module>;
   init: (
