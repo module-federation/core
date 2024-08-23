@@ -68,7 +68,7 @@ class StartupChunkDependenciesPlugin {
           },
         );
 
-        compilation.hooks.additionalTreeRuntimeRequirements.tap(
+        compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'MfStartupChunkDependenciesPlugin',
           (chunk, set) => {
             if (chunk.hasRuntime()) return;
@@ -84,7 +84,7 @@ class StartupChunkDependenciesPlugin {
         compilation.hooks.runtimeRequirementInChunk
           .for(RuntimeGlobals.startupEntrypoint)
           .tap('MfStartupChunkDependenciesPlugin', (chunk, set) => {
-            if (!isEnabledForChunk(chunk)) return;
+            // if (!isEnabledForChunk(chunk)) return;
 
             set.add(RuntimeGlobals.require);
             set.add(RuntimeGlobals.ensureChunk);

@@ -39,8 +39,12 @@ export const generateEntryStartup = (
     )}`,
   ];
 
-  const chunkRuntimeRequirements = chunkGraph.getTreeRuntimeRequirements(chunk);
-  const federation = chunkRuntimeRequirements.has(federationStartup);
+  const treeRuntimeRequirements = chunkGraph.getTreeRuntimeRequirements(chunk);
+  const chunkRuntimeRequirements =
+    chunkGraph.getChunkRuntimeRequirements(chunk);
+  const federation =
+    chunkRuntimeRequirements.has(federationStartup) ||
+    treeRuntimeRequirements.has(federationStartup);
   passive = !federation;
   const runModule = (id: string) => {
     return `__webpack_exec__(${JSON.stringify(id)})`;
