@@ -21,7 +21,11 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler) {
-    if (!compiler.options.plugins.find((p) => p && p.name === PLUGIN_NAME)) {
+    if (
+      !compiler.options.plugins.find(
+        (p: WebpackPluginInstance) => p && p['name'] === PLUGIN_NAME,
+      )
+    ) {
       compiler.options.plugins.push(this);
     }
     process.env['FEDERATION_WEBPACK_PATH'] =

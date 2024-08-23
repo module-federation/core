@@ -3,11 +3,12 @@ import CustomRuntimeModule from './CustomRuntimeModule';
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-import type { Compiler, Compilation, Chunk } from 'webpack';
+import type { Compiler, Compilation, Chunk, Module, ChunkGraph } from 'webpack';
 import { getFederationGlobalScope } from './utils';
 
 const onceForCompilationMap = new WeakMap();
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
+import { ConcatSource } from 'webpack-sources';
 
 class RuntimeModuleChunkPlugin {
   apply(compiler: Compiler): void {
@@ -16,7 +17,7 @@ class RuntimeModuleChunkPlugin {
       (compilation: Compilation) => {
         compilation.hooks.optimizeModuleIds.tap(
           'ModuleChunkFormatPlugin',
-          (modules) => {
+          (modules: Iterable<Module>) => {
             for (const module of modules) {
               const moduleId = compilation.chunkGraph.getModuleId(module);
               if (typeof moduleId === 'string') {
@@ -38,10 +39,13 @@ class RuntimeModuleChunkPlugin {
 
         hooks.renderChunk.tap(
           'ModuleChunkFormatPlugin',
-          (modules, renderContext) => {
+          (
+            modules: any,
+            renderContext: { chunk: Chunk; chunkGraph: ChunkGraph },
+          ) => {
             const { chunk, chunkGraph } = renderContext;
 
-            const source = new compiler.webpack.sources.ConcatSource();
+            const source = new ConcatSource();
             source.add('var federation = ');
             source.add(modules);
             source.add('\n');

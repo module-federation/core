@@ -2,23 +2,24 @@
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { generateEntryStartup } from './StartupHelpers';
-import type Compiler from 'webpack/lib/Compiler';
-import type Chunk from 'webpack/lib/Chunk';
+import type { Compiler, Chunk } from 'webpack';
 import ContainerEntryModule from '../container/ContainerEntryModule';
-import type { ChunkLoadingType } from 'webpack/declarations/WebpackOptions';
+import { ChunkLoadingType } from 'webpack/declarations/WebpackOptions';
 
-const { RuntimeGlobals } = require(normalizeWebpackPath('webpack'));
+const { RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 const StartupChunkDependenciesRuntimeModule = require(
   normalizeWebpackPath(
     'webpack/lib/runtime/StartupChunkDependenciesRuntimeModule',
   ),
-);
+) as typeof import('webpack/lib/runtime/StartupChunkDependenciesRuntimeModule');
 const StartupEntrypointRuntimeModule = require(
   normalizeWebpackPath('webpack/lib/runtime/StartupEntrypointRuntimeModule'),
-);
+) as typeof import('webpack/lib/runtime/StartupEntrypointRuntimeModule');
 const ConcatenatedModule = require(
   normalizeWebpackPath('webpack/lib/optimize/ConcatenatedModule'),
-);
+) as typeof import('webpack/lib/optimize/ConcatenatedModule');
 
 interface Options {
   chunkLoading: ChunkLoadingType;
@@ -36,18 +37,17 @@ class StartupChunkDependenciesPlugin {
     compiler.hooks.thisCompilation.tap(
       'MfStartupChunkDependenciesPlugin',
       (compilation) => {
-        const { chunkGraph } = compilation;
-
         const isEnabledForChunk = (chunk: Chunk): boolean => {
           const [entryModule] =
-            chunkGraph.getChunkEntryModulesIterable(chunk) || [];
+            compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
           return !(entryModule instanceof ContainerEntryModule);
         };
 
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'MfStartupChunkDependenciesPlugin',
           (chunk, set) => {
-            if (!chunk.hasRuntime() || !isEnabledForChunk(chunk)) return;
+            if (!chunk.hasRuntime()) return;
+            if (!isEnabledForChunk(chunk)) return;
 
             const runtimeRequirements = [
               RuntimeGlobals.currentRemoteGetScope,
@@ -63,10 +63,7 @@ class StartupChunkDependenciesPlugin {
 
             compilation.addRuntimeModule(
               chunk,
-              new StartupChunkDependenciesRuntimeModule(
-                this.asyncChunkLoading,
-                true,
-              ),
+              new StartupChunkDependenciesRuntimeModule(this.asyncChunkLoading),
             );
           },
         );
@@ -74,10 +71,8 @@ class StartupChunkDependenciesPlugin {
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'MfStartupChunkDependenciesPlugin',
           (chunk, set) => {
-            if (
-              chunk.hasRuntime() ||
-              chunkGraph.getNumberOfEntryModules(chunk) <= 0
-            )
+            if (chunk.hasRuntime()) return;
+            if (compilation.chunkGraph.getNumberOfEntryModules(chunk) <= 0)
               return;
 
             set.add(RuntimeGlobals.startup);
@@ -129,9 +124,10 @@ class StartupChunkDependenciesPlugin {
                 break;
               }
 
-              if (module && 'modules' in module) {
-                for (const concatModule of (module as typeof ConcatenatedModule)
-                  .modules) {
+              if (module && '_modules' in module) {
+                for (const concatModule of (
+                  module as InstanceType<typeof ConcatenatedModule>
+                )._modules) {
                   if (isFederationModule(concatModule)) {
                     federationRuntimeModule = module;
                     break;

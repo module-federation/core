@@ -1,4 +1,9 @@
-import type { Compiler, Chunk } from 'webpack';
+import type {
+  Compiler,
+  Chunk,
+  Compilation,
+  WebpackPluginInstance,
+} from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
@@ -13,6 +18,7 @@ import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
 import CustomRuntimePlugin from './CustomRuntimePlugin';
+import ContainerEntryModule from '../ContainerEntryModule';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -230,7 +236,12 @@ class FederationRuntimePlugin {
 
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
-      (compilation, { normalModuleFactory }) => {
+      (compilation: Compilation, { normalModuleFactory }) => {
+        const isEnabledForChunk = (chunk: Chunk): boolean => {
+          const [entryModule] =
+            compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
+          return entryModule instanceof ContainerEntryModule;
+        };
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (runtimeRequirements.has(federationGlobal)) return;
           runtimeRequirements.add(federationGlobal);
@@ -247,6 +258,22 @@ class FederationRuntimePlugin {
             ),
           );
         };
+
+        compilation.hooks.additionalTreeRuntimeRequirements.tap(
+          this.constructor.name,
+          (chunk: Chunk, runtimeRequirements: Set<string>) => {
+            if (!chunk.hasRuntime()) return;
+            if (runtimeRequirements.has(RuntimeGlobals.initializeSharing))
+              return;
+            if (runtimeRequirements.has(RuntimeGlobals.currentRemoteGetScope))
+              return;
+            if (runtimeRequirements.has(RuntimeGlobals.shareScopeMap)) return;
+            if (runtimeRequirements.has(federationGlobal)) return;
+            if (isEnabledForChunk(chunk)) {
+              handler(chunk, runtimeRequirements);
+            }
+          },
+        );
 
         // if federation runtime requirements exist
         // attach runtime module to the chunk
@@ -298,25 +325,29 @@ class FederationRuntimePlugin {
   }
 
   apply(compiler: Compiler) {
-    const useModuleFederationPlugin = compiler.options.plugins.find((p) => {
-      if (typeof p !== 'object' || !p) {
-        return false;
-      }
-      return p['name'] === 'ModuleFederationPlugin';
-    });
+    const useModuleFederationPlugin = compiler.options.plugins.find(
+      (p: WebpackPluginInstance) => {
+        if (typeof p !== 'object' || !p) {
+          return false;
+        }
+        return p['name'] === 'ModuleFederationPlugin';
+      },
+    );
 
     if (useModuleFederationPlugin && !this.options) {
       // @ts-ignore
       this.options = useModuleFederationPlugin._options;
     }
 
-    const useContainerPlugin = compiler.options.plugins.find((p) => {
-      if (typeof p !== 'object' || !p) {
-        return false;
-      }
+    const useContainerPlugin = compiler.options.plugins.find(
+      (p: WebpackPluginInstance) => {
+        if (typeof p !== 'object' || !p) {
+          return false;
+        }
 
-      return p['name'] === 'ContainerPlugin';
-    });
+        return p['name'] === 'ContainerPlugin';
+      },
+    );
 
     if (useContainerPlugin && !this.options) {
       // @ts-ignore

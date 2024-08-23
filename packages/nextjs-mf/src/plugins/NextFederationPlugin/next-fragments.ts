@@ -48,7 +48,6 @@ export const applyPathFixes = (
     .resolve('@module-federation/webpack-bundler-runtime/vendor')
     .replace('cjs', 'esm')
     .replace('.js', '.cjs');
-  //@ts-expect-error
   const match = findLoaderForResource(compiler.options.module.rules, {
     path: path.join(compiler.context, '/something/thing.js'),
     issuerLayer: undefined,
@@ -78,7 +77,7 @@ export const applyPathFixes = (
   //   debugger;
   // });
 
-  compiler.options.module.rules.forEach((rule) => {
+  compiler.options.module.rules.forEach((rule: RuleSetRule) => {
     // next-image-loader fix which adds remote's hostname to the assets url
     if (options.enableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
       injectRuleLoader(rule, {
@@ -142,9 +141,11 @@ export const applyPathFixes = (
       include: undefined,
     };
 
-    const oneOfRule = compiler.options.module.rules.find((rule) => {
-      return rule && typeof rule === 'object' && 'oneOf' in rule;
-    }) as RuleSetRule;
+    const oneOfRule = compiler.options.module.rules.find(
+      (rule: RuleSetRule) => {
+        return rule && typeof rule === 'object' && 'oneOf' in rule;
+      },
+    ) as RuleSetRule;
 
     if (!oneOfRule) {
       compiler.options.module.rules.unshift({

@@ -2212,6 +2212,9 @@ importers:
       '@types/btoa':
         specifier: ^1.2.5
         version: 1.2.5
+      '@types/enhanced-resolve':
+        specifier: ^5.0.0
+        version: 5.0.0
 
   packages/esbuild:
     dependencies:
@@ -2620,7 +2623,11 @@ importers:
         specifier: ^3.2.1
         version: 3.2.1(rollup@2.79.1)
 
-  webpack: {}
+  webpack:
+    dependencies:
+      enhanced-resolve:
+        specifier: ^5.17.1
+        version: 5.17.1
 
 packages:
 
@@ -19173,6 +19180,13 @@ packages:
 
   /@types/emscripten@1.39.13:
     resolution: {integrity: sha512-cFq+fO/isvhvmuP/+Sl4K4jtU6E23DoivtbO4r50e3odaxAiVdbfSYRDdJ4gCdxx+3aRjhphS5ZMwIH4hFy/Cw==}
+    dev: true
+
+  /@types/enhanced-resolve@5.0.0:
+    resolution: {integrity: sha512-jrgQjVFFHk7lK+Dyv8Lb5agHaCzL9OQdT9aciA61fxs6KI89u5yfEM7qubHq8DdN3UnTcho+S3Lzyr5mfdLUGg==}
+    deprecated: This is a stub types definition. enhanced-resolve provides its own type definitions, so you do not need this installed.
+    dependencies:
+      enhanced-resolve: 5.17.1
     dev: true
 
   /@types/escodegen@0.0.6:

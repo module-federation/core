@@ -6,8 +6,6 @@ export type ContainerOptionsFormat<T> =
   | (string | Record<string, string | string[] | T>)[]
   | Record<string, string | string[] | T>;
 
-/** @template T @typedef {(string | Record<string, string | string[] | T>)[] | Record<string, string | string[] | T>} ContainerOptionsFormat */
-
 /**
  * @template T
  * @template N
@@ -64,17 +62,17 @@ const process = <T, N>(
  * @param {function(T, string) : R} normalizeOptions normalize a complex item
  * @returns {[string, R][]} parsed options
  */
-const parseOptions = <T, R>(
+export function parseOptions<T, R>(
   options: ContainerOptionsFormat<T>,
   normalizeSimple: (item: string | string[], name: string) => R,
   normalizeOptions: (item: T, name: string) => R,
-): [string, R][] => {
+): [string, R][] {
   const items: [string, R][] = [];
   process(options, normalizeSimple, normalizeOptions, (key, value) => {
     items.push([key, value]);
   });
   return items;
-};
+}
 
 /**
  * @template T
@@ -82,10 +80,10 @@ const parseOptions = <T, R>(
  * @param {ContainerOptionsFormat<T>} options options passed by the user
  * @returns {Record<string, string | string[] | T>} options to spread or pass
  */
-const scope = <T>(
+export function scope<T>(
   scope: string,
   options: ContainerOptionsFormat<T>,
-): Record<string, string | string[] | T> => {
+): Record<string, string | string[] | T> {
   const obj: Record<string, string | string[] | T> = {};
   process(
     options,
@@ -98,6 +96,4 @@ const scope = <T>(
     },
   );
   return obj;
-};
-
-export { parseOptions, scope };
+}

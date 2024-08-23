@@ -56,7 +56,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   private _patchBundlerConfig(compiler: Compiler): void {
     const { name } = this._options;
     const MFPluginNum = compiler.options.plugins.filter(
-      (p) => p && p.name === 'ModuleFederationPlugin',
+      (p: WebpackPluginInstance) => p && p['name'] === 'ModuleFederationPlugin',
     ).length;
     if (name && MFPluginNum < 2) {
       new compiler.webpack.DefinePlugin({

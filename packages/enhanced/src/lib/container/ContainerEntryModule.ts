@@ -53,17 +53,13 @@ export type ExposeOptions = {
 
 class ContainerEntryModule extends Module {
   private _name: string;
-  private _exposes: [string, ExposeOptions][];
+  private _exposes: Array<[string, ExposeOptions]>;
   private _shareScope: string;
   private _injectRuntimeEntry: string;
-  /**
-   * @param {string} name container entry name
-   * @param {[string, ExposeOptions][]} exposes list of exposed modules
-   * @param {string} shareScope name of the share scope
-   */
+
   constructor(
     name: string,
-    exposes: [string, ExposeOptions][],
+    exposes: Array<[string, ExposeOptions]>,
     shareScope: string,
     injectRuntimeEntry: string,
   ) {
@@ -73,10 +69,7 @@ class ContainerEntryModule extends Module {
     this._shareScope = shareScope;
     this._injectRuntimeEntry = injectRuntimeEntry;
   }
-  /**
-   * @param {ObjectDeserializerContext} context context
-   * @returns {ContainerEntryModule} deserialized container entry module
-   */
+
   static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
     const { read } = context;
     const obj = new ContainerEntryModule(read(), read(), read(), read());
@@ -119,7 +112,6 @@ class ContainerEntryModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  // @ts-expect-error typeof webpack/lib !== typeof webpack/types
   override needBuild(
     context: NeedBuildContext,
     callback: (
@@ -130,15 +122,7 @@ class ContainerEntryModule extends Module {
     const baseContext = context as NeedBuildContext;
     callback(null, !this.buildMeta);
   }
-  /**
-   * @param {WebpackOptions} options webpack options
-   * @param {Compilation} compilation the compilation
-   * @param {ResolverWithOptions} resolver the resolver
-   * @param {InputFileSystem} fs the file system
-   * @param {function(WebpackError): void} callback callback function
-   * @returns {void}
-   */
-  // @ts-expect-error typeof webpack/lib !== typeof webpack/types
+
   override build(
     options: WebpackOptions,
     compilation: Compilation,

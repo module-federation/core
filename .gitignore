@@ -51,7 +51,9 @@ apps/**/dist
 
 packages/**/@mf-types
 apps/**/@mf-types
-**/@mf-types
+**/@mf-types/**
+**/**/@mf-types
+**/**/**/@mf-types
 @mf-types
 
 
@@ -65,5 +67,7 @@ packages/enhanced/test/js
 # dts test cases
 **/dist-test
 **/dist-test/**
+/apps/modernjs-ssr/dynamic-nested-remote/@mf-types/
+/apps/runtime-demo/3005-runtime-host/@mf-types/
 /apps/modernjs-ssr/dynamic-nested-remote/@mf-types/
 /apps/runtime-demo/3005-runtime-host/@mf-types/
