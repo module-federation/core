@@ -2,6 +2,7 @@ import type { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 import path from 'path';
+import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 
 /**
  * Applies server-specific plugins to the webpack compiler.
@@ -29,6 +30,13 @@ export function applyServerPlugins(
   }
 
   new HoistContainerReferencesPlugin(`${options.name}_partial`).apply(compiler);
+  new InvertedContainerPlugin({
+    runtime: 'webpack-runtime',
+    container: options.name,
+    remotes: options.remotes as Record<string, string>,
+    debug: false,
+    //@ts-ignore
+  }).apply(compiler);
 }
 
 /**

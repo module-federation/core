@@ -75,7 +75,6 @@ class StartupChunkDependenciesPlugin {
             if (compilation.chunkGraph.getNumberOfEntryModules(chunk) <= 0)
               return;
 
-            set.add(RuntimeGlobals.startup);
             set.add('federation-entry-startup');
             set.add(RuntimeGlobals.startupEntrypoint);
           },
