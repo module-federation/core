@@ -269,9 +269,7 @@ class FederationRuntimePlugin {
               return;
             if (runtimeRequirements.has(RuntimeGlobals.shareScopeMap)) return;
             if (runtimeRequirements.has(federationGlobal)) return;
-            if (isEnabledForChunk(chunk)) {
-              handler(chunk, runtimeRequirements);
-            }
+            handler(chunk, runtimeRequirements);
           },
         );
 
