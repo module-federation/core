@@ -15,6 +15,7 @@ export function applyServerPlugins(
   options: ModuleFederationPluginOptions,
 ): void {
   const chunkFileName = compiler.options?.output?.chunkFilename;
+  const filename = compiler.options?.output?.filename || '';
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
   const suffix = `-[chunkhash].js`;
 
@@ -28,7 +29,9 @@ export function applyServerPlugins(
       suffix,
     );
   }
-
+  // if (typeof filename === 'string' && !filename.includes(suffix)) {
+  //   compiler.options.output.filename = filename.replace('.js', suffix);
+  // }
   new HoistContainerReferencesPlugin(`${options.name}_partial`).apply(compiler);
   new InvertedContainerPlugin({
     runtime: 'webpack-runtime',

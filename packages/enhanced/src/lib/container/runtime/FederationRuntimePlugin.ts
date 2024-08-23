@@ -373,7 +373,9 @@ class FederationRuntimePlugin {
       });
     }
     if (this.options?.embedRuntime) {
-      new CustomRuntimePlugin(this.bundlerRuntimePath).apply(compiler);
+      new CustomRuntimePlugin(this.bundlerRuntimePath, TEMP_DIR).apply(
+        compiler,
+      );
     }
     this.prependEntry(compiler);
     this.injectRuntime(compiler);

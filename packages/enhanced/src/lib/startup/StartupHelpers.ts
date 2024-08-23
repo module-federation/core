@@ -10,6 +10,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import type { EntryModuleWithChunkGroup } from 'webpack/lib/ChunkGraph';
 import type RuntimeTemplate from 'webpack/lib/RuntimeTemplate';
 import type Entrypoint from 'webpack/lib/Entrypoint';
+
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -37,6 +38,7 @@ export const generateEntryStartup = (
       'moduleId',
       `console.log("require", moduleId); \n return ${RuntimeGlobals.require}(${RuntimeGlobals.entryModuleId} = moduleId)`,
     )}`,
+    'var promises = [];',
   ];
 
   const treeRuntimeRequirements = chunkGraph.getTreeRuntimeRequirements(chunk);
@@ -63,18 +65,27 @@ export const generateEntryStartup = (
         moduleIds.map(runModule).join(', '),
       );
       if (federation) {
-        const chunksWithEntry = [
-          ...Array.from(chunks, (c: Chunk) => c.id),
-          chunk.id,
-        ];
+        const chunkIds = Array.from(chunks, (c: Chunk) => c.id);
+        const wrappedInit = (body: string) =>
+          Template.asString([
+            'Promise.all([',
+            Template.indent([
+              `${RuntimeGlobals.ensureChunkHandlers}.consumes,`,
+              `${RuntimeGlobals.ensureChunkHandlers}.remotes,`,
+            ]),
+            `].reduce(${runtimeTemplate.returningFunction(`handler('${chunk.id}', p), p`, 'p, handler')}, promises)`,
+            `).then(${runtimeTemplate.returningFunction(body)});`,
+          ]);
 
-        runtime.push(
-          `${final && !passive ? EXPORT_PREFIX : ''}${
+        const wrap = wrappedInit(
+          `${
             passive
               ? RuntimeGlobals.onChunksLoaded
               : RuntimeGlobals.startupEntrypoint
-          }(0, ${JSON.stringify(chunksWithEntry)}, ${fn});`,
+          }(0, ${JSON.stringify(chunkIds)}, ${fn})`,
         );
+
+        runtime.push(`${final && !passive ? EXPORT_PREFIX : ''}${wrap}`);
       } else {
         const chunkIds = Array.from(chunks, (c: Chunk) => c.id);
         runtime.push(

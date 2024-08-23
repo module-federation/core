@@ -5,6 +5,8 @@ const { RuntimeGlobals } = require(
 ) as typeof import('webpack');
 import type { Compiler, Compilation, Chunk, Module, ChunkGraph } from 'webpack';
 import { getFederationGlobalScope } from './utils';
+import fs from 'fs';
+import path from 'path';
 
 const onceForCompilationMap = new WeakMap();
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
@@ -80,17 +82,31 @@ class RuntimeModuleChunkPlugin {
 class CustomRuntimePlugin {
   private entryModule?: string | number;
   private bundlerRuntimePath: string;
+  private tempDir: string;
 
-  constructor(path: string) {
+  constructor(path: string, tempDir: string) {
     this.bundlerRuntimePath = path.replace('cjs', 'esm');
+    this.tempDir = tempDir;
   }
 
   apply(compiler: Compiler): void {
     compiler.hooks.make.tapAsync(
       'CustomRuntimePlugin',
       (compilation: Compilation, callback: (err?: Error) => void) => {
-        if (onceForCompilationMap.has(compilation)) return callback();
-        onceForCompilationMap.set(compilation, null);
+        const target = compilation.options.target || 'default';
+        const outputPath = path.join(
+          this.tempDir,
+          `${target}-custom-runtime-bundle.js`,
+        );
+
+        if (fs.existsSync(outputPath)) {
+          const source = fs.readFileSync(outputPath, 'utf-8');
+          onceForCompilationMap.set(compiler, source);
+          return callback();
+        }
+
+        if (onceForCompilationMap.has(compiler)) return callback();
+        onceForCompilationMap.set(compiler, null);
 
         const childCompiler = compilation.createChildCompiler(
           'EmbedFederationRuntimeCompiler',
@@ -124,9 +140,6 @@ class CustomRuntimePlugin {
 
         childCompiler.hooks.thisCompilation.tap(
           this.constructor.name,
-          /**
-           * @param {Compilation} childCompilation
-           */
           (childCompilation) => {
             childCompilation.hooks.processAssets.tap(
               this.constructor.name,
@@ -152,7 +165,8 @@ class CustomRuntimePlugin {
                     childCompilation.chunkGraph.getModuleId(entryModule);
                 }
 
-                onceForCompilationMap.set(compilation, source);
+                onceForCompilationMap.set(compiler, source);
+                fs.writeFileSync(outputPath, source);
                 console.log('got compilation asset');
                 // Remove all chunk assets
                 childCompilation.chunks.forEach((chunk) => {
@@ -196,16 +210,7 @@ class CustomRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       'CustomRuntimePlugin',
       (compilation: Compilation) => {
-        //TODO: support macros - curerntly i depend on module factory to compile the chunk, there is no module factory in macro
-
-        // compilation.hooks.executeModule.tap('CustomRuntimePlugin', (module, context) => {
-        //   console.log('executemoduel')
-        //   const { chunk } = context;
-        //   // debugger;
-        // });
-
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
-          //TODO: support macros - curerntly i depend on module factory to compile the chunk, there is no module factory in macro
           if (chunk.id === 'build time chunk') {
             return;
           }
@@ -213,7 +218,7 @@ class CustomRuntimePlugin {
           if (!runtimeRequirements.has(federationGlobal)) {
             return;
           }
-          const bundledCode = onceForCompilationMap.get(compilation);
+          const bundledCode = onceForCompilationMap.get(compiler);
           if (!bundledCode) return;
           runtimeRequirements.add('embeddedFederationRuntime');
           const runtimeModule = new CustomRuntimeModule(
