@@ -47,7 +47,7 @@ export const generateEntryStartup = (
   const federation =
     chunkRuntimeRequirements.has(federationStartup) ||
     treeRuntimeRequirements.has(federationStartup);
-  passive = !federation;
+
   const runModule = (id: string) => {
     return `__webpack_exec__(${JSON.stringify(id)})`;
   };

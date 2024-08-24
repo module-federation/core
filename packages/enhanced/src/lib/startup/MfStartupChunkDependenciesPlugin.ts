@@ -38,6 +38,7 @@ class StartupChunkDependenciesPlugin {
       'MfStartupChunkDependenciesPlugin',
       (compilation) => {
         const isEnabledForChunk = (chunk: Chunk): boolean => {
+          if (chunk.id === 'build time chunk') return false;
           const [entryModule] =
             compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
           return !(entryModule instanceof ContainerEntryModule);
@@ -47,16 +48,12 @@ class StartupChunkDependenciesPlugin {
           'StartupChunkDependenciesPlugin',
           (chunk, set, { chunkGraph }) => {
             if (!isEnabledForChunk(chunk)) return;
-            if (chunkGraph.hasChunkEntryDependentChunks(chunk)) {
-              set.add(RuntimeGlobals.startup);
+            const hasEntryChunks =
+              chunkGraph.hasChunkEntryDependentChunks(chunk);
+            if (chunk.hasRuntime()) {
+              set.add(RuntimeGlobals.startupEntrypoint);
               set.add(RuntimeGlobals.ensureChunk);
               set.add(RuntimeGlobals.ensureChunkIncludeEntries);
-              compilation.addRuntimeModule(
-                chunk,
-                new StartupChunkDependenciesRuntimeModule(
-                  this.asyncChunkLoading,
-                ),
-              );
             }
           },
         );
@@ -91,33 +88,21 @@ class StartupChunkDependenciesPlugin {
           'MfStartupChunkDependenciesPlugin',
           (chunk, set) => {
             if (chunk.id === 'build time chunk') return;
-            const hasNoEntryModule =
-              compilation.chunkGraph.getNumberOfEntryModules(chunk) === 0;
-
-            if (chunk.hasRuntime() && !hasNoEntryModule) {
-              set.add('federation-entry-startup');
-              set.add(RuntimeGlobals.startupEntrypoint);
-              return;
-            }
-            if (chunk.hasRuntime()) return;
-            if (compilation.chunkGraph.getNumberOfEntryModules(chunk) <= 0)
-              return;
-            if (chunk.id === 'build time chunk') return;
+            if (!chunk.hasEntryModule()) return;
+            const hasNoContainer = isEnabledForChunk(chunk);
+            if (!hasNoContainer) return;
 
             set.add('federation-entry-startup');
-            set.add(RuntimeGlobals.startupEntrypoint);
           },
         );
 
-        compilation.hooks.runtimeRequirementInChunk
+        compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.startupEntrypoint)
-          .tap('MfStartupChunkDependenciesPlugin', (chunk, set) => {
-            // if (!isEnabledForChunk(chunk)) return;
-
+          .tap('StartupChunkDependenciesPlugin', (chunk, set) => {
+            if (!isEnabledForChunk(chunk)) return;
             set.add(RuntimeGlobals.require);
             set.add(RuntimeGlobals.ensureChunk);
             set.add(RuntimeGlobals.ensureChunkIncludeEntries);
-
             compilation.addRuntimeModule(
               chunk,
               new StartupEntrypointRuntimeModule(this.asyncChunkLoading),
