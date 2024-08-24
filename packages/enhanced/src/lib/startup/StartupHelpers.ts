@@ -34,10 +34,12 @@ export const generateEntryStartup = (
 ): string => {
   /** @type {string[]} */
   const runtime: string[] = [
-    `var __webpack_exec__ = ${runtimeTemplate.basicFunction(
+    `var __webpack_exec__ = ${runtimeTemplate.returningFunction(
+      `${RuntimeGlobals.require}(${RuntimeGlobals.entryModuleId} = moduleId)`,
       'moduleId',
-      `console.log("require", moduleId); \n return ${RuntimeGlobals.require}(${RuntimeGlobals.entryModuleId} = moduleId)`,
     )}`,
+    '',
+    '\n',
     'var promises = [];',
   ];
 
