@@ -107,7 +107,6 @@ class ContainerReferencePlugin {
 
         compilation.dependencyFactories.set(
           FallbackDependency,
-          // @ts-ignore
           new FallbackModuleFactory(),
         );
 

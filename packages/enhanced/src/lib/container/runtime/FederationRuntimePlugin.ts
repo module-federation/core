@@ -348,7 +348,6 @@ class FederationRuntimePlugin {
     );
 
     if (useContainerPlugin && !this.options) {
-      // @ts-ignore
       this.options = useContainerPlugin._options;
     }
 

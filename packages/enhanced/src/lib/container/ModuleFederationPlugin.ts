@@ -81,10 +81,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       );
     }
     if (options.embedRuntime) {
-      //@ts-ignore
       new StartupChunkDependenciesPlugin({
         asyncChunkLoading: true,
-        //@ts-ignore
       }).apply(compiler);
     }
 

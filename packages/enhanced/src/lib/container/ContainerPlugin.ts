@@ -200,7 +200,6 @@ class ContainerPlugin {
         dep.loc = { name };
         compilation.addEntry(
           compilation.options.context || '',
-          //@ts-ignore
           dep,
           {
             name,
@@ -224,7 +223,6 @@ class ContainerPlugin {
         const addEntryToSingleRuntimeChunk = () => {
           compilation.addEntry(
             compilation.options.context || '',
-            //@ts-ignore
             dep,
             {
               name: name ? name + '_partial' : undefined, // give unique name name
@@ -245,7 +243,6 @@ class ContainerPlugin {
       (compilation: Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
           ContainerEntryDependency,
-          //@ts-ignore
           new ContainerEntryModuleFactory(),
         );
 

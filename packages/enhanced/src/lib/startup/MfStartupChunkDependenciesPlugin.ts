@@ -9,11 +9,7 @@ import { ChunkLoadingType } from 'webpack/declarations/WebpackOptions';
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const StartupChunkDependenciesRuntimeModule = require(
-  normalizeWebpackPath(
-    'webpack/lib/runtime/StartupChunkDependenciesRuntimeModule',
-  ),
-) as typeof import('webpack/lib/runtime/StartupChunkDependenciesRuntimeModule');
+
 const StartupEntrypointRuntimeModule = require(
   normalizeWebpackPath('webpack/lib/runtime/StartupEntrypointRuntimeModule'),
 ) as typeof import('webpack/lib/runtime/StartupEntrypointRuntimeModule');
@@ -22,7 +18,6 @@ const ConcatenatedModule = require(
 ) as typeof import('webpack/lib/optimize/ConcatenatedModule');
 
 interface Options {
-  chunkLoading: ChunkLoadingType;
   asyncChunkLoading?: boolean;
 }
 
@@ -164,7 +159,6 @@ class StartupChunkDependenciesPlugin {
               `${RuntimeGlobals.require}(${JSON.stringify(federationModuleId)});\n`,
               generateEntryStartup(
                 chunkGraph,
-                //@ts-ignore
                 runtimeTemplate,
                 //@ts-ignore
                 entryModules,
