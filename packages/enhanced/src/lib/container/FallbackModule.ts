@@ -92,7 +92,6 @@ class FallbackModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  // @ts-expect-error incompatible context types
   override needBuild(
     context: NeedBuildContext,
     callback: (error: WebpackError | null, result?: boolean) => void,
@@ -108,7 +107,6 @@ class FallbackModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
-  // @ts-expect-error incompatible option types
   override build(
     options: WebpackOptions,
     compilation: Compilation,
@@ -147,7 +145,6 @@ class FallbackModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
-  // @ts-expect-error incompatible CodeGenerationContext
   override codeGeneration({
     runtimeTemplate,
     moduleGraph,

@@ -7,7 +7,13 @@ import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { parseOptions } from './options';
-import type { optimize, Compiler, Compilation } from 'webpack';
+import type {
+  optimize,
+  Compiler,
+  Compilation,
+  WebpackError,
+  WebpackPluginInstance,
+} from 'webpack';
 import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
@@ -148,13 +154,15 @@ class ContainerPlugin {
   }
 
   apply(compiler: Compiler): void {
-    const useModuleFederationPlugin = compiler.options.plugins.find((p) => {
-      if (typeof p !== 'object' || !p) {
-        return false;
-      }
+    const useModuleFederationPlugin = compiler.options.plugins.find(
+      (p: WebpackPluginInstance) => {
+        if (typeof p !== 'object' || !p) {
+          return false;
+        }
 
-      return p['name'] === 'ModuleFederationPlugin';
-    });
+        return p['name'] === 'ModuleFederationPlugin';
+      },
+    );
 
     if (!useModuleFederationPlugin) {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
