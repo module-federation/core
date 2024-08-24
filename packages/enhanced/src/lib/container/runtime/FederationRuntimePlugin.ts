@@ -1,8 +1,8 @@
 import type {
   Compiler,
-  Chunk,
-  Compilation,
   WebpackPluginInstance,
+  Compilation,
+  Chunk,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';

@@ -164,10 +164,7 @@ class ContainerEntryModule extends Module {
       ) as unknown as Dependency,
     );
 
-    this.addDependency(
-      //@ts-ignore
-      new EntryDependency(this._injectRuntimeEntry),
-    );
+    this.addDependency(new EntryDependency(this._injectRuntimeEntry));
 
     callback();
   }
