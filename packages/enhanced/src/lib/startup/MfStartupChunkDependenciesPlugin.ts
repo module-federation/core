@@ -44,36 +44,65 @@ class StartupChunkDependenciesPlugin {
         };
 
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
-          'MfStartupChunkDependenciesPlugin',
-          (chunk, set) => {
-            if (!chunk.hasRuntime()) return;
+          'StartupChunkDependenciesPlugin',
+          (chunk, set, { chunkGraph }) => {
             if (!isEnabledForChunk(chunk)) return;
-
-            const runtimeRequirements = [
-              RuntimeGlobals.currentRemoteGetScope,
-              RuntimeGlobals.initializeSharing,
-              RuntimeGlobals.shareScopeMap,
-            ];
-
-            if (!runtimeRequirements.some((req) => set.has(req))) return;
-
-            set.add(RuntimeGlobals.startup);
-            set.add(RuntimeGlobals.ensureChunk);
-            set.add(RuntimeGlobals.ensureChunkIncludeEntries);
-
-            compilation.addRuntimeModule(
-              chunk,
-              new StartupChunkDependenciesRuntimeModule(this.asyncChunkLoading),
-            );
+            if (chunkGraph.hasChunkEntryDependentChunks(chunk)) {
+              set.add(RuntimeGlobals.startup);
+              set.add(RuntimeGlobals.ensureChunk);
+              set.add(RuntimeGlobals.ensureChunkIncludeEntries);
+              compilation.addRuntimeModule(
+                chunk,
+                new StartupChunkDependenciesRuntimeModule(
+                  this.asyncChunkLoading,
+                ),
+              );
+            }
           },
         );
+
+        // compilation.hooks.additionalTreeRuntimeRequirements.tap(
+        //   'MfStartupChunkDependenciesPlugin',
+        //   (chunk, set) => {
+        //     if (chunk.id === 'build time chunk') return;
+        //     if (chunk.hasRuntime()) return;
+        //     if (!isEnabledForChunk(chunk)) return;
+        //
+        //     const runtimeRequirements = [
+        //       RuntimeGlobals.currentRemoteGetScope,
+        //       RuntimeGlobals.initializeSharing,
+        //       RuntimeGlobals.shareScopeMap,
+        //     ];
+        //
+        //     if (!runtimeRequirements.some((req) => set.has(req))) return;
+        //
+        //     set.add(RuntimeGlobals.startup);
+        //     set.add(RuntimeGlobals.ensureChunk);
+        //     set.add(RuntimeGlobals.ensureChunkIncludeEntries);
+        //     console.log('adding runtime requirement to TREE', chunk.id);
+        //     compilation.addRuntimeModule(
+        //       chunk,
+        //       new StartupChunkDependenciesRuntimeModule(this.asyncChunkLoading),
+        //     );
+        //   },
+        // );
 
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'MfStartupChunkDependenciesPlugin',
           (chunk, set) => {
+            if (chunk.id === 'build time chunk') return;
+            const hasNoEntryModule =
+              compilation.chunkGraph.getNumberOfEntryModules(chunk) === 0;
+
+            if (chunk.hasRuntime() && !hasNoEntryModule) {
+              set.add('federation-entry-startup');
+              set.add(RuntimeGlobals.startupEntrypoint);
+              return;
+            }
             if (chunk.hasRuntime()) return;
             if (compilation.chunkGraph.getNumberOfEntryModules(chunk) <= 0)
               return;
+            if (chunk.id === 'build time chunk') return;
 
             set.add('federation-entry-startup');
             set.add(RuntimeGlobals.startupEntrypoint);
