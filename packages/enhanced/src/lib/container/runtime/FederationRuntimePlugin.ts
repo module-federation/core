@@ -113,9 +113,7 @@ class FederationRuntimePlugin {
         ]);
 
     return Template.asString([
-      embedRuntime
-        ? ''
-        : `import federation from '${normalizedBundlerRuntimePath}';`,
+      `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
       embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
@@ -125,7 +123,7 @@ class FederationRuntimePlugin {
               `const pluginsToAdd = [`,
               Template.indent(
                 runtimePluginNames.map(
-                  (item) => `${item} ? ${item}() : false,`,
+                  (item) => `${item} ? (${item}.default || ${item})() : false,`,
                 ),
               ),
               `].filter(Boolean);`,
@@ -363,6 +361,8 @@ class FederationRuntimePlugin {
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
 
+    this.bundlerRuntimePath = this.getBundlerRuntimePath();
+
     if (this.options?.implementation) {
       const runtimePath = this.options.embedRuntime
         ? '@module-federation/webpack-bundler-runtime/vendor'
@@ -371,7 +371,12 @@ class FederationRuntimePlugin {
         paths: [this.options.implementation],
       });
     }
+
     if (this.options?.embedRuntime) {
+      this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
+        '.cjs.js',
+        '.esm.js',
+      );
       new CustomRuntimePlugin(this.bundlerRuntimePath, TEMP_DIR).apply(
         compiler,
       );

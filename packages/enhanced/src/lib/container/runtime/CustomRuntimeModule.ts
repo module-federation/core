@@ -1,23 +1,25 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { getFederationGlobalScope } from './utils';
-import { transformSync } from '@swc/core';
 
-const { RuntimeModule, Template, RuntimeGlobals } = require(
+const { RuntimeModule, NormalModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
+const ConcatenatedModule = require(
+  normalizeWebpackPath('webpack/lib/optimize/ConcatenatedModule'),
+) as typeof import('webpack/lib/optimize/ConcatenatedModule');
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class CustomRuntimeModule extends RuntimeModule {
-  private entryModuleId: string | number | undefined;
+  private bundlerRuntimePath: string;
 
   constructor(
     private readonly bundledCode: string | null,
-    entryModuleId: string | number | undefined,
+    bundlerRuntimePath: string,
   ) {
     super('CustomRuntimeModule', RuntimeModule.STAGE_BASIC);
     this.bundledCode = bundledCode;
-    this.entryModuleId = entryModuleId;
+    this.bundlerRuntimePath = bundlerRuntimePath;
   }
 
   override identifier() {
@@ -25,32 +27,27 @@ class CustomRuntimeModule extends RuntimeModule {
   }
 
   override generate(): string | null {
-    if (!this.bundledCode) return null;
-    const { code: transformedCode } = transformSync(this.bundledCode, {
-      jsc: {
-        parser: {
-          syntax: 'ecmascript',
-          jsx: false,
-        },
-        target: 'es2022',
-        minify: {
-          compress: {
-            unused: false,
-            dead_code: false,
-          },
-          mangle: false,
-          format: {
-            comments: false,
-          },
-        },
-      },
+    const { compilation, chunk, chunkGraph, bundlerRuntimePath } = this;
+    if (!chunk || !chunkGraph || !compilation) {
+      return null;
+    }
+
+    const found = this.findModule(chunk, bundlerRuntimePath);
+    if (!found) return null;
+
+    const initRuntimeModuleGetter = compilation.runtimeTemplate.moduleRaw({
+      module: found,
+      chunkGraph,
+      request: this.bundlerRuntimePath,
+      weak: false,
+      runtimeRequirements: new Set(),
     });
 
     return Template.asString([
-      transformedCode,
-      `var federation = federation.default || federation;`,
-      `var prevFederation = ${federationGlobal}`,
-      `${federationGlobal} = {}`,
+      `var federation = ${initRuntimeModuleGetter};`,
+      `federation = federation.default || federation;`,
+      `var prevFederation = ${federationGlobal};`,
+      `${federationGlobal} = {};`,
       `for (var key in federation) {`,
       Template.indent(`${federationGlobal}[key] = federation[key];`),
       `}`,
@@ -59,6 +56,23 @@ class CustomRuntimeModule extends RuntimeModule {
       `}`,
       'federation = undefined;',
     ]);
+  }
+
+  private findModule(chunk: any, bundlerRuntimePath: string) {
+    for (const mod of chunk.modulesIterable) {
+      if (mod instanceof NormalModule && mod.resource === bundlerRuntimePath) {
+        return mod;
+      }
+
+      if (mod instanceof ConcatenatedModule) {
+        for (const m of mod.modules) {
+          if (m instanceof NormalModule && m.resource === bundlerRuntimePath) {
+            return mod;
+          }
+        }
+      }
+    }
+    return null;
   }
 }
 

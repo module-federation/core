@@ -134,7 +134,7 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
   };
   compiler.options.target = 'async-node';
   // Disable custom chunk rules
-  compiler.options.optimization.splitChunks = undefined;
+  // compiler.options.optimization.splitChunks = undefined;
 
   // Ensure a runtime chunk is created
   compiler.options.optimization.runtimeChunk = {

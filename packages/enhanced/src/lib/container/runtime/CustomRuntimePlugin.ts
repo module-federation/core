@@ -7,6 +7,9 @@ import type { Compiler, Compilation, Chunk, Module, ChunkGraph } from 'webpack';
 import { getFederationGlobalScope } from './utils';
 import fs from 'fs';
 import path from 'path';
+const EntryDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
+) as typeof import('webpack/lib/dependencies/EntryDependency');
 
 const onceForCompilationMap = new WeakMap();
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
@@ -85,7 +88,7 @@ class CustomRuntimePlugin {
   private tempDir: string;
 
   constructor(path: string, tempDir: string) {
-    this.bundlerRuntimePath = path.replace('cjs', 'esm');
+    this.bundlerRuntimePath = path;
     this.tempDir = tempDir;
   }
 
@@ -93,6 +96,7 @@ class CustomRuntimePlugin {
     compiler.hooks.make.tapAsync(
       'CustomRuntimePlugin',
       (compilation: Compilation, callback: (err?: Error) => void) => {
+        return callback();
         const target = compilation.options.target || 'default';
         const outputPath = path.join(
           this.tempDir,
@@ -210,6 +214,10 @@ class CustomRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       'CustomRuntimePlugin',
       (compilation: Compilation) => {
+        // this.addDependency(new EntryDependency(this._injectRuntimeEntry));
+
+        // const dep = new EntryDependency(this.bundlerRuntimePath);
+        // const bundlerRuntime = compilation.moduleGraph.getResolvedModule(dep);
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (chunk.id === 'build time chunk') {
             return;
@@ -218,12 +226,14 @@ class CustomRuntimePlugin {
           if (!runtimeRequirements.has(federationGlobal)) {
             return;
           }
-          const bundledCode = onceForCompilationMap.get(compiler);
-          if (!bundledCode) return;
+
+          // const bundledCode = onceForCompilationMap.get(compiler);
+          // if (!bundledCode) return;
           runtimeRequirements.add('embeddedFederationRuntime');
           const runtimeModule = new CustomRuntimeModule(
-            bundledCode,
-            this.entryModule,
+            '',
+            //@ts-ignore
+            this.bundlerRuntimePath,
           );
 
           compilation.addRuntimeModule(chunk, runtimeModule);
