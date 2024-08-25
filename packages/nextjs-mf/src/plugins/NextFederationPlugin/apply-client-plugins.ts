@@ -63,7 +63,7 @@ export function applyClientPlugins(
     //@ts-ignore
   }).apply(compiler);
 
-  new HoistContainerReferencesPlugin(options.name + '_partial').apply(compiler);
+  // new HoistContainerReferencesPlugin(options.name + '_partial').apply(compiler);
 
   new InvertedContainerPlugin({
     runtime: 'webpack',

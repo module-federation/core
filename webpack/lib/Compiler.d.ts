@@ -35,7 +35,7 @@ declare class Compiler {
     afterResolvers: SyncHook<[Compiler]>;
     entryOption: SyncBailHook<[string, EntryNormalized], boolean>;
   }>;
-  webpack: typeof exports;
+  webpack: typeof import('../types');
   name?: string;
   parentCompilation?: Compilation;
   root: Compiler;

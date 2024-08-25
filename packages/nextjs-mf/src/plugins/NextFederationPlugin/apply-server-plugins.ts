@@ -32,7 +32,7 @@ export function applyServerPlugins(
   // if (typeof filename === 'string' && !filename.includes(suffix)) {
   //   compiler.options.output.filename = filename.replace('.js', suffix);
   // }
-  new HoistContainerReferencesPlugin(`${options.name}_partial`).apply(compiler);
+  // new HoistContainerReferencesPlugin(`${options.name}_partial`).apply(compiler);
   new InvertedContainerPlugin({
     runtime: 'webpack-runtime',
     container: options.name,

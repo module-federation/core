@@ -1,5 +1,6 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { getFederationGlobalScope } from './utils';
+import type { Chunk, Module } from 'webpack';
 
 const { RuntimeModule, NormalModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
@@ -13,12 +14,8 @@ const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 class CustomRuntimeModule extends RuntimeModule {
   private bundlerRuntimePath: string;
 
-  constructor(
-    private readonly bundledCode: string | null,
-    bundlerRuntimePath: string,
-  ) {
-    super('CustomRuntimeModule', RuntimeModule.STAGE_BASIC);
-    this.bundledCode = bundledCode;
+  constructor(bundlerRuntimePath: string) {
+    super('CustomRuntimeModule', RuntimeModule.STAGE_ATTACH);
     this.bundlerRuntimePath = bundlerRuntimePath;
   }
 
@@ -43,9 +40,25 @@ class CustomRuntimeModule extends RuntimeModule {
       runtimeRequirements: new Set(),
     });
 
+    const exportExpr = compilation.runtimeTemplate.exportFromImport({
+      moduleGraph: compilation.moduleGraph,
+      module: found,
+      request: this.bundlerRuntimePath,
+      exportName: ['default'],
+      originModule: found,
+      asiSafe: true,
+      isCall: false,
+      callContext: false,
+      defaultInterop: true,
+      importVar: 'federation',
+      initFragments: [],
+      runtime: chunk.runtime,
+      runtimeRequirements: new Set(),
+    });
+
     return Template.asString([
       `var federation = ${initRuntimeModuleGetter};`,
-      `federation = federation.default || federation;`,
+      `federation = ${exportExpr}`,
       `var prevFederation = ${federationGlobal};`,
       `${federationGlobal} = {};`,
       `for (var key in federation) {`,
@@ -58,8 +71,12 @@ class CustomRuntimeModule extends RuntimeModule {
     ]);
   }
 
-  private findModule(chunk: any, bundlerRuntimePath: string) {
-    for (const mod of chunk.modulesIterable) {
+  private findModule(chunk: Chunk, bundlerRuntimePath: string): Module | null {
+    const { chunkGraph, compilation } = this;
+    if (!chunk || !chunkGraph || !compilation) {
+      return null;
+    }
+    for (const mod of chunkGraph.getChunkModulesIterable(chunk)) {
       if (mod instanceof NormalModule && mod.resource === bundlerRuntimePath) {
         return mod;
       }

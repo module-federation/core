@@ -4,29 +4,87 @@ import type {
   Chunk,
   WebpackPluginInstance,
   Module,
+  ExternalModule,
 } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+
+const { NormalModule } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const ConcatenatedModule = require(
+  normalizeWebpackPath('webpack/lib/optimize/ConcatenatedModule'),
+) as typeof import('webpack/lib/optimize/ConcatenatedModule');
+
+const PLUGIN_NAME = 'HoistContainerReferences';
 
 export class HoistContainerReferences implements WebpackPluginInstance {
   private readonly containerName: string;
+  private readonly bundlerRuntimePath?: string;
 
-  constructor(name?: string) {
+  constructor(name?: string, bundlerRuntimePath?: string) {
     this.containerName = name || 'no known chunk name';
+    this.bundlerRuntimePath = bundlerRuntimePath;
   }
 
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
-      'HoistContainerReferences',
+      PLUGIN_NAME,
       (compilation: Compilation) => {
-        compilation.hooks.afterOptimizeChunks.tap(
-          'HoistContainerReferences',
-          () => {
+        const logger = compilation.getLogger(PLUGIN_NAME);
+        const { chunkGraph, moduleGraph } = compilation;
+        compilation.hooks.optimizeChunks.tap(
+          {
+            name: PLUGIN_NAME,
+            stage: 11, // advanced + 1
+          },
+          (chunks: Iterable<Chunk>) => {
             const runtimeChunks = this.getRuntimeChunks(compilation);
-            this.hoistModulesInChunks(compilation, runtimeChunks);
+            this.hoistModulesInChunks(
+              compilation,
+              runtimeChunks,
+              chunks,
+              logger,
+            );
+          },
+        );
+
+        compilation.hooks.optimizeDependencies.tap(
+          PLUGIN_NAME,
+          (modules: Iterable<Module>) => {
+            if (this.bundlerRuntimePath) {
+              let runtime;
+              compiler.webpack.util.runtime.mergeRuntimeOwned;
+              for (const [name, { options }] of compilation.entries) {
+                runtime = compiler.webpack.util.runtime.mergeRuntimeOwned(
+                  runtime,
+                  compiler.webpack.util.runtime.getEntryRuntime(
+                    compilation,
+                    name,
+                    options,
+                  ),
+                );
+              }
+              for (const module of modules) {
+                if (
+                  module instanceof NormalModule &&
+                  module.resource === this.bundlerRuntimePath
+                ) {
+                  const exportsInfo = moduleGraph.getExportsInfo(module);
+                  exportsInfo.setUsedInUnknownWay(runtime);
+                  // moduleGraph.addExtraReason(module, this.explanation);
+                  if (module.factoryMeta === undefined) {
+                    module.factoryMeta = {};
+                  }
+                  module.factoryMeta.sideEffectFree = false;
+                }
+              }
+            }
           },
         );
       },
     );
   }
+
   private getAllReferencedModules(compilation: Compilation, module: Module) {
     const collectedModules = new Set<Module>([module]);
     const collectOutgoingConnections = (module: Module) => {
@@ -47,50 +105,88 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     return collectedModules;
   }
 
-  private hoistModulesInChunks(
+  private findModule(
     compilation: Compilation,
-    runtimeChunks: Set<Chunk>,
-  ): void {
+    chunk: Chunk,
+    bundlerRuntimePath: string,
+  ): Module | null {
     const { chunkGraph } = compilation;
-    const partialChunk = this.containerName
-      ? compilation.namedChunks.get(this.containerName)
-      : undefined;
+    for (const mod of chunkGraph.getChunkModulesIterable(chunk)) {
+      if (mod instanceof NormalModule && mod.resource === bundlerRuntimePath) {
+        return mod;
+      }
 
-    if (!partialChunk) return;
-
-    const modulesToHoist = new Set<Module>();
-    const runtimeModule = compilation.moduleGraph.getModule(
-      partialChunk.entryModule.dependencies[1],
-    );
-    const getEntryReferences = this.getAllReferencedModules(
-      compilation,
-      partialChunk.entryModule,
-    );
-
-    if (runtimeModule) {
-      const allReferencedModules = this.getAllReferencedModules(
-        compilation,
-        runtimeModule,
-      );
-
-      for (const chunk of runtimeChunks) {
-        for (const module of allReferencedModules) {
-          if (!chunkGraph.isModuleInChunk(module, chunk)) {
-            compilation.chunkGraph.connectChunkAndModule(chunk, module);
+      if (mod instanceof ConcatenatedModule) {
+        for (const m of mod.modules) {
+          if (m instanceof NormalModule && m.resource === bundlerRuntimePath) {
+            return mod;
           }
         }
       }
+    }
+    return null;
+  }
 
-      for (const module of compilation.chunkGraph.getChunkModulesIterable(
-        partialChunk,
-      )) {
-        if (module instanceof compilation.compiler.webpack.ExternalModule) {
-          allReferencedModules.add(module);
+  private hoistModulesInChunks(
+    compilation: Compilation,
+    runtimeChunks: Set<Chunk>,
+    chunks: Iterable<Chunk>,
+    logger: ReturnType<Compilation['getLogger']>,
+  ): void {
+    const { chunkGraph, moduleGraph } = compilation;
+    const partialChunk = this.containerName
+      ? compilation.namedChunks.get(this.containerName)
+      : undefined;
+    let runtimeModule;
+    if (!partialChunk) {
+      for (const chunk of chunks) {
+        if (
+          chunkGraph.getNumberOfEntryModules(chunk) > 0 &&
+          this.bundlerRuntimePath
+        ) {
+          runtimeModule = this.findModule(
+            compilation,
+            chunk,
+            this.bundlerRuntimePath,
+          );
+
+          if (runtimeModule) break;
         }
       }
-
-      this.cleanUpChunks(compilation, allReferencedModules);
+    } else {
+      runtimeModule = moduleGraph.getModule(
+        partialChunk.entryModule.dependencies[1],
+      );
     }
+
+    if (!runtimeModule) {
+      logger.error('unable to find runtime module');
+      return;
+    }
+
+    const allReferencedModules = this.getAllReferencedModules(
+      compilation,
+      runtimeModule,
+    );
+
+    // if is single runtime chunk, copy the remoteEntry into the runtime chunk to allow for embed container
+    if (partialChunk) {
+      for (const module of chunkGraph.getChunkModulesIterable(partialChunk)) {
+        allReferencedModules.add(module);
+      }
+    }
+
+    for (const chunk of runtimeChunks) {
+      for (const module of allReferencedModules) {
+        if (!chunkGraph.isModuleInChunk(module, chunk)) {
+          chunkGraph.connectChunkAndModule(chunk, module);
+        }
+      }
+    }
+
+    // Set used exports for the runtime module
+
+    this.cleanUpChunks(compilation, allReferencedModules);
   }
 
   private cleanUpChunks(compilation: Compilation, modules: Set<Module>): void {

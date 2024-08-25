@@ -4,7 +4,6 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import { generateEntryStartup } from './StartupHelpers';
 import type { Compiler, Chunk } from 'webpack';
 import ContainerEntryModule from '../container/ContainerEntryModule';
-import { ChunkLoadingType } from 'webpack/declarations/WebpackOptions';
 
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
@@ -35,7 +34,9 @@ class StartupChunkDependenciesPlugin {
         const isEnabledForChunk = (chunk: Chunk): boolean => {
           if (chunk.id === 'build time chunk') return false;
           const [entryModule] =
-            compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
+            compilation.chunkGraph.getChunkEntryModulesWithChunkGroupIterable(
+              chunk,
+            ) || [];
           return !(entryModule instanceof ContainerEntryModule);
         };
 
@@ -53,37 +54,11 @@ class StartupChunkDependenciesPlugin {
           },
         );
 
-        // compilation.hooks.additionalTreeRuntimeRequirements.tap(
-        //   'MfStartupChunkDependenciesPlugin',
-        //   (chunk, set) => {
-        //     if (chunk.id === 'build time chunk') return;
-        //     if (chunk.hasRuntime()) return;
-        //     if (!isEnabledForChunk(chunk)) return;
-        //
-        //     const runtimeRequirements = [
-        //       RuntimeGlobals.currentRemoteGetScope,
-        //       RuntimeGlobals.initializeSharing,
-        //       RuntimeGlobals.shareScopeMap,
-        //     ];
-        //
-        //     if (!runtimeRequirements.some((req) => set.has(req))) return;
-        //
-        //     set.add(RuntimeGlobals.startup);
-        //     set.add(RuntimeGlobals.ensureChunk);
-        //     set.add(RuntimeGlobals.ensureChunkIncludeEntries);
-        //     console.log('adding runtime requirement to TREE', chunk.id);
-        //     compilation.addRuntimeModule(
-        //       chunk,
-        //       new StartupChunkDependenciesRuntimeModule(this.asyncChunkLoading),
-        //     );
-        //   },
-        // );
-
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'MfStartupChunkDependenciesPlugin',
-          (chunk, set) => {
+          (chunk, set, { chunkGraph }) => {
             if (chunk.id === 'build time chunk') return;
-            if (!chunk.hasEntryModule()) return;
+            if (chunkGraph.getNumberOfEntryModules(chunk) === 0) return;
             const hasNoContainer = isEnabledForChunk(chunk);
             if (!hasNoContainer) return;
 
@@ -93,16 +68,19 @@ class StartupChunkDependenciesPlugin {
 
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.startupEntrypoint)
-          .tap('StartupChunkDependenciesPlugin', (chunk, set) => {
-            if (!isEnabledForChunk(chunk)) return;
-            set.add(RuntimeGlobals.require);
-            set.add(RuntimeGlobals.ensureChunk);
-            set.add(RuntimeGlobals.ensureChunkIncludeEntries);
-            compilation.addRuntimeModule(
-              chunk,
-              new StartupEntrypointRuntimeModule(this.asyncChunkLoading),
-            );
-          });
+          .tap(
+            'StartupChunkDependenciesPlugin',
+            (chunk, set, { chunkGraph }) => {
+              if (!isEnabledForChunk(chunk)) return;
+              set.add(RuntimeGlobals.require);
+              set.add(RuntimeGlobals.ensureChunk);
+              set.add(RuntimeGlobals.ensureChunkIncludeEntries);
+              compilation.addRuntimeModule(
+                chunk,
+                new StartupEntrypointRuntimeModule(this.asyncChunkLoading),
+              );
+            },
+          );
 
         const { renderStartup } =
           compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
@@ -111,7 +89,6 @@ class StartupChunkDependenciesPlugin {
 
         renderStartup.tap(
           'MfStartupChunkDependenciesPlugin',
-          //@ts-ignore
           (startupSource, lastInlinedModule, renderContext) => {
             const { chunk, chunkGraph, runtimeTemplate } = renderContext;
 
@@ -160,7 +137,6 @@ class StartupChunkDependenciesPlugin {
               generateEntryStartup(
                 chunkGraph,
                 runtimeTemplate,
-                //@ts-ignore
                 entryModules,
                 chunk,
                 false,
