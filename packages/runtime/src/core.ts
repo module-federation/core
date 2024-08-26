@@ -11,6 +11,8 @@ import {
   ShareScopeMap,
   InitScope,
   RemoteEntryInitOptions,
+  InitTokens,
+  CallFrom,
 } from './type';
 import { getBuilderId, registerPlugins } from './utils';
 import { Module } from './module';
@@ -170,9 +172,13 @@ export class FederationHost {
 
   initializeSharing(
     shareScopeName = DEFAULT_SCOPE,
-    strategy?: Shared['strategy'],
+    extraOptions?: {
+      initScope?: InitScope;
+      from?: CallFrom;
+      strategy?: Shared['strategy'];
+    },
   ): Array<Promise<void>> {
-    return this.sharedHandler.initializeSharing(shareScopeName, strategy);
+    return this.sharedHandler.initializeSharing(shareScopeName, extraOptions);
   }
 
   initRawContainer(
@@ -193,7 +199,7 @@ export class FederationHost {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
     id: string,
-    options?: { loadFactory?: boolean; from: 'build' | 'runtime' },
+    options?: { loadFactory?: boolean; from: CallFrom },
   ): Promise<T | null> {
     return this.remoteHandler.loadRemote(id, options);
   }
