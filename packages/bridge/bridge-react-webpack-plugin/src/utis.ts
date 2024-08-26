@@ -2,6 +2,34 @@ import fs from 'node:fs';
 import path from 'node:path';
 import semver from 'semver';
 
+const checkVersion = (version: string) => {
+  // Extract the version number starting from the first digit
+  const versionMatch = version.match(/\d.*/);
+  if (!versionMatch) return 0;
+
+  const cleanVersion = versionMatch[0];
+
+  if (semver.gte(cleanVersion, '5.0.0') && semver.lt(cleanVersion, '6.0.0')) {
+    return 5;
+  } else if (semver.gte(cleanVersion, '6.0.0')) {
+    return 6;
+  }
+
+  return 0;
+};
+
+const findPackageJson = (startPath: string): string | null => {
+  let currentPath = startPath;
+  while (currentPath !== path.parse(currentPath).root) {
+    const packageJsonPath = path.join(currentPath, 'package.json');
+    if (fs.existsSync(packageJsonPath)) {
+      return packageJsonPath;
+    }
+    currentPath = path.dirname(currentPath);
+  }
+  return null;
+};
+
 export const getBridgeRouterAlias = (
   originalAlias: string,
 ): Record<string, string> => {
@@ -28,25 +56,22 @@ export const getBridgeRouterAlias = (
     let majorVersion = 0;
     let reactRouterDomPath = '';
 
-    // if react-router-dom version is set, use the version in package.json
-    if (reactRouterDomVersion) {
-      majorVersion = semver.major(
-        semver.coerce(reactRouterDomVersion || '0.0.0') ?? '0.0.0',
-      );
+    if (originalAlias) {
+      reactRouterDomPath = originalAlias;
+    } else if (reactRouterDomVersion) {
+      majorVersion = checkVersion(reactRouterDomVersion);
       reactRouterDomPath = require.resolve('react-router-dom');
     } else {
-      // if react-router-dom version is not set, reslove react-router-dom to get the version
       reactRouterDomPath = require.resolve('react-router-dom');
-      const packageJsonPath = path.resolve(
-        reactRouterDomPath,
-        '../../package.json',
-      );
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-      majorVersion = parseInt(packageJson.version.split('.')[0]);
     }
 
-    // if react-router-dom path has set alias by user, use the originalAlias
-    reactRouterDomPath = originalAlias || reactRouterDomPath;
+    const packageJsonPath = findPackageJson(reactRouterDomPath);
+    if (packageJsonPath) {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+      majorVersion = checkVersion(packageJson.version);
+    } else {
+      console.warn('Unable to find package.json for react-router-dom');
+    }
 
     if (majorVersion === 5) {
       bridgeRouterAlias = {
