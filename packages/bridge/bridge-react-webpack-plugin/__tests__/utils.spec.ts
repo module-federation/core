@@ -22,7 +22,7 @@ const resolveRouterV6_PkgPath = path.resolve(
   '../__tests__/mockRouterDir/router-v6/react-router-dom/package.json',
 );
 
-describe('checkVersion', () => {
+describe('test checkVersion: should return the correct major version for react-router-dom', () => {
   it('should return 5', () => {
     expect(checkVersion('5.0.0')).toBe(5);
   });
@@ -44,14 +44,14 @@ describe('checkVersion', () => {
   });
 });
 
-describe('findPackageJson', () => {
+describe('test findPackageJson: should return the correct package.json path for react-router-dom v5 and v6', () => {
   it('should return the package.json path', () => {
     expect(findPackageJson(resolveRouterV5)).toBe(resolveRouterV5_PkgPath);
     expect(findPackageJson(resolveRouterV6)).toBe(resolveRouterV6_PkgPath);
   });
 });
 
-describe('getBridgeRouterAlias', () => {
+describe('test getBridgeRouterAlias: should return the correct alias for react-router-dom v5 and v6', () => {
   it('should return the correct alias for router v5', () => {
     const res = getBridgeRouterAlias(resolveRouterV5);
     expect(res).toEqual({
