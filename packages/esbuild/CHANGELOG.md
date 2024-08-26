@@ -1,5 +1,12 @@
 # @module-federation/esbuild
 
+## 0.0.17
+
+### Patch Changes
+
+- Updated dependencies [b90fa7d]
+  - @module-federation/sdk@0.5.2
+
 ## 0.0.16
 
 ### Patch Changes

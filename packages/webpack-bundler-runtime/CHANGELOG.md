@@ -1,5 +1,15 @@
 # [1.0.0-canary.3](https://github.com/module-federation/core/compare/webpack-bundler-runtime-1.0.0-canary.2...webpack-bundler-runtime-1.0.0-canary.3) (2023-11-23)
 
+## 0.5.2
+
+### Patch Changes
+
+- 24ba96e: fix: handle circular init shared
+- Updated dependencies [24ba96e]
+- Updated dependencies [b90fa7d]
+  - @module-federation/runtime@0.5.2
+  - @module-federation/sdk@0.5.2
+
 ## 0.5.1
 
 ### Patch Changes

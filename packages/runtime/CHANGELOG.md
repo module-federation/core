@@ -1,5 +1,14 @@
 # @module-federation/runtime
 
+## 0.5.2
+
+### Patch Changes
+
+- 24ba96e: fix: handle circular init shared
+- b90fa7d: feat: add shareStrategy option
+- Updated dependencies [b90fa7d]
+  - @module-federation/sdk@0.5.2
+
 ## 0.5.1
 
 ### Patch Changes
