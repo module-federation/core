@@ -41,8 +41,14 @@ declare class Module extends DependenciesBlock {
   presentationalDependencies: Dependency[] | undefined;
   /** @type {Dependency[] | undefined} */
   codeGenerationDependencies: Dependency[] | undefined;
-  set id(arg: string | number);
-  get id(): string | number;
+  /**
+   * @param {ModuleId} value value
+   */
+  set id(value: ChunkGraph.ModuleId);
+  /**
+   * @returns {ModuleId | null} module id
+   */
+  get id(): ChunkGraph.ModuleId;
   /**
    * @returns {string} the hash of the module
    */
@@ -51,15 +57,39 @@ declare class Module extends DependenciesBlock {
    * @returns {string} the shortened hash of the module
    */
   get renderedHash(): string;
-  set profile(arg: import('./ModuleProfile'));
+  set profile(value: import('./ModuleProfile'));
   get profile(): import('./ModuleProfile');
-  set index(arg: number);
+  /**
+   * @param {number} value the pre order index
+   */
+  set index(value: number);
+  /**
+   * @returns {number | null} the pre order index
+   */
   get index(): number;
-  set index2(arg: number);
+  /**
+   * @param {number} value the post order index
+   */
+  set index2(value: number);
+  /**
+   * @returns {number | null} the post order index
+   */
   get index2(): number;
-  set depth(arg: number);
+  /**
+   * @param {number} value the depth
+   */
+  set depth(value: number);
+  /**
+   * @returns {number | null} the depth
+   */
   get depth(): number;
-  set issuer(arg: Module);
+  /**
+   * @param {Module | null} value issuer
+   */
+  set issuer(value: Module);
+  /**
+   * @returns {Module | null | undefined} issuer
+   */
   get issuer(): Module;
   get usedExports(): boolean | import('./util/SortableSet')<string>;
   /**
@@ -264,9 +294,9 @@ declare class Module extends DependenciesBlock {
   ): void;
   /**
    * @abstract
-   * @returns {Set<string>} types available (do not mutate)
+   * @returns {SourceTypes} types available (do not mutate)
    */
-  getSourceTypes(): Set<string>;
+  getSourceTypes(): SourceTypes;
   /**
    * @abstract
    * @deprecated Use codeGeneration() instead
@@ -279,7 +309,7 @@ declare class Module extends DependenciesBlock {
     dependencyTemplates: DependencyTemplates,
     runtimeTemplate: RuntimeTemplate,
     type?: string | undefined,
-  ): any;
+  ): Source;
   /**
    * @abstract
    * @param {string=} type the source type for which the size should be estimated
@@ -330,9 +360,9 @@ declare class Module extends DependenciesBlock {
   /**
    * Module should be unsafe cached. Get data that's needed for that.
    * This data will be passed to restoreFromUnsafeCache later.
-   * @returns {object} cached data
+   * @returns {UnsafeCacheData} cached data
    */
-  getUnsafeCacheData(): object;
+  getUnsafeCacheData(): UnsafeCacheData;
   /**
    * restore unsafe cache data
    * @param {object} unsafeCacheData data from getUnsafeCacheData
@@ -366,7 +396,7 @@ declare class Module extends DependenciesBlock {
   get isUsed(): any;
   get errors(): any;
   get warnings(): any;
-  set used(arg: any);
+  set used(value: any);
   get used(): any;
 }
 declare namespace Module {
@@ -375,15 +405,19 @@ declare namespace Module {
     ResolveOptions,
     WebpackOptions,
     Chunk,
+    ModuleId,
     ChunkGroup,
     CodeGenerationResults,
     Compilation,
+    AssetInfo,
+    ValueCacheVersion,
     ConcatenationScope,
     Dependency,
     UpdateHashContext,
     DependencyTemplates,
     UsageStateType,
     FileSystemInfo,
+    Snapshot,
     ConnectionState,
     ModuleTypes,
     NormalModuleFactory,
@@ -401,60 +435,73 @@ declare namespace Module {
     SourceContext,
     CodeGenerationContext,
     ConcatenationBailoutReasonContext,
+    RuntimeRequirements,
+    ReadOnlyRuntimeRequirements,
     CodeGenerationResult,
     LibIdentOptions,
     KnownBuildMeta,
+    KnownBuildInfo,
     NeedBuildContext,
     BuildMeta,
     BuildInfo,
     FactoryMeta,
+    SourceTypes,
+    UnsafeCacheData,
     OptimizationBailoutFunction,
   };
 }
 import DependenciesBlock = require('./DependenciesBlock');
-type ModuleTypes = import('./ModuleTypeConstants').ModuleTypes;
-type ResolveOptions = import('../declarations/WebpackOptions').ResolveOptions;
-type FactoryMeta = {
-  sideEffectFree?: boolean | undefined;
-};
-type WebpackError = import('./WebpackError');
-type BuildMeta = KnownBuildMeta & Record<string, any>;
-type BuildInfo = Record<string, any>;
-type Dependency = import('./Dependency');
-type OptimizationBailoutFunction = (
-  requestShortener: RequestShortener,
-) => string;
-type Chunk = import('./Chunk');
-import ModuleGraph = require('./ModuleGraph');
 import ChunkGraph = require('./ChunkGraph');
-type ChunkGroup = import('./ChunkGroup');
-type RuntimeSpec = import('./util/runtime').RuntimeSpec;
-type NeedBuildContext = {
-  compilation: Compilation;
-  fileSystemInfo: FileSystemInfo;
-  valueCacheVersions: Map<string, string | Set<string>>;
-};
-type Hash = import('./util/Hash');
-type UpdateHashContext = import('./Dependency').UpdateHashContext;
-type RequestShortener = import('./RequestShortener');
+import ModuleGraph = require('./ModuleGraph');
+type Source = import('webpack-sources').Source;
+type ResolveOptions = import('../declarations/WebpackOptions').ResolveOptions;
 type WebpackOptions =
   import('../declarations/WebpackOptions').WebpackOptionsNormalized;
+type Chunk = import('./Chunk');
+type ModuleId = import('./ChunkGraph').ModuleId;
+type ChunkGroup = import('./ChunkGroup');
+type CodeGenerationResults = import('./CodeGenerationResults');
 type Compilation = import('./Compilation');
-type ResolverWithOptions = import('./ResolverFactory').ResolverWithOptions;
-type InputFileSystem = import('./util/fs').InputFileSystem;
+type AssetInfo = import('./Compilation').AssetInfo;
+type ValueCacheVersion = import('./Compilation').ValueCacheVersion;
+type ConcatenationScope = import('./ConcatenationScope');
+type Dependency = import('./Dependency');
+type UpdateHashContext = import('./Dependency').UpdateHashContext;
 type DependencyTemplates = import('./DependencyTemplates');
+type UsageStateType = import('./ExportsInfo').UsageStateType;
+type FileSystemInfo = import('./FileSystemInfo');
+type Snapshot = import('./FileSystemInfo').Snapshot;
+type ConnectionState = import('./ModuleGraphConnection').ConnectionState;
+type ModuleTypes = import('./ModuleTypeConstants').ModuleTypes;
+type NormalModuleFactory = import('./NormalModuleFactory');
+type RequestShortener = import('./RequestShortener');
+type ResolverWithOptions = import('./ResolverFactory').ResolverWithOptions;
 type RuntimeTemplate = import('./RuntimeTemplate');
-type LibIdentOptions = {
+type WebpackError = import('./WebpackError');
+type ObjectDeserializerContext =
+  import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
+type ObjectSerializerContext =
+  import('./serialization/ObjectMiddleware').ObjectSerializerContext;
+type Hash = import('./util/Hash');
+/**
+ * <T>
+ */
+type LazySet<T> = import('./util/LazySet')<T>;
+/**
+ * <T>
+ */
+type SortableSet<T> = import('./util/SortableSet')<T>;
+type InputFileSystem = import('./util/fs').InputFileSystem;
+type RuntimeSpec = import('./util/runtime').RuntimeSpec;
+type SourceContext = {
   /**
-   * absolute context path to which lib ident is relative to
+   * the dependency templates
    */
-  context: string;
+  dependencyTemplates: DependencyTemplates;
   /**
-   * object for caching
+   * the runtime template
    */
-  associatedObjectForCache?: any | undefined;
-};
-type ConcatenationBailoutReasonContext = {
+  runtimeTemplate: RuntimeTemplate;
   /**
    * the module graph
    */
@@ -463,8 +510,15 @@ type ConcatenationBailoutReasonContext = {
    * the chunk graph
    */
   chunkGraph: ChunkGraph;
+  /**
+   * the runtimes code should be generated for
+   */
+  runtime: RuntimeSpec;
+  /**
+   * the type of source that should be generated
+   */
+  type?: string | undefined;
 };
-type ConnectionState = import('./ModuleGraphConnection').ConnectionState;
 type CodeGenerationContext = {
   /**
    * the dependency templates
@@ -493,7 +547,7 @@ type CodeGenerationContext = {
   /**
    * code generation results of other modules (need to have a codeGenerationDependency to use that)
    */
-  codeGenerationResults: CodeGenerationResults;
+  codeGenerationResults: CodeGenerationResults | undefined;
   /**
    * the compilation
    */
@@ -503,6 +557,18 @@ type CodeGenerationContext = {
    */
   sourceTypes?: ReadonlySet<string> | undefined;
 };
+type ConcatenationBailoutReasonContext = {
+  /**
+   * the module graph
+   */
+  moduleGraph: ModuleGraph;
+  /**
+   * the chunk graph
+   */
+  chunkGraph: ChunkGraph;
+};
+type RuntimeRequirements = Set<string>;
+type ReadOnlyRuntimeRequirements = ReadonlySet<string>;
 type CodeGenerationResult = {
   /**
    * the resulting sources for all source types
@@ -515,55 +581,21 @@ type CodeGenerationResult = {
   /**
    * the runtime requirements
    */
-  runtimeRequirements: ReadonlySet<string>;
+  runtimeRequirements: ReadOnlyRuntimeRequirements | null;
   /**
    * a hash of the code generation result (will be automatically calculated from sources and runtimeRequirements if not provided)
    */
   hash?: string | undefined;
 };
-type NormalModuleFactory = import('./NormalModuleFactory');
-type Source = any;
-/**
- * <T>
- */
-type LazySet<T> = import('./util/LazySet')<T>;
-type CodeGenerationResults = import('./CodeGenerationResults');
-type ConcatenationScope = import('./ConcatenationScope');
-type UsageStateType = import('./ExportsInfo').UsageStateType;
-type FileSystemInfo = import('./FileSystemInfo');
-type ObjectDeserializerContext =
-  import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
-type ObjectSerializerContext =
-  import('./serialization/ObjectMiddleware').ObjectSerializerContext;
-/**
- * <T>
- */
-type SortableSet<T> = import('./util/SortableSet')<T>;
-type SourceContext = {
+type LibIdentOptions = {
   /**
-   * the dependency templates
+   * absolute context path to which lib ident is relative to
    */
-  dependencyTemplates: DependencyTemplates;
+  context: string;
   /**
-   * the runtime template
+   * object for caching
    */
-  runtimeTemplate: RuntimeTemplate;
-  /**
-   * the module graph
-   */
-  moduleGraph: ModuleGraph;
-  /**
-   * the chunk graph
-   */
-  chunkGraph: ChunkGraph;
-  /**
-   * the runtimes code should be generated for
-   */
-  runtime: RuntimeSpec;
-  /**
-   * the type of source that should be generated
-   */
-  type?: string | undefined;
+  associatedObjectForCache?: object | undefined;
 };
 type KnownBuildMeta = {
   moduleArgument?: string | undefined;
@@ -576,3 +608,34 @@ type KnownBuildMeta = {
   async?: boolean | undefined;
   sideEffectFree?: boolean | undefined;
 };
+type KnownBuildInfo = {
+  cacheable?: boolean | undefined;
+  parsed?: boolean | undefined;
+  fileDependencies?: LazySet<string> | undefined;
+  contextDependencies?: LazySet<string> | undefined;
+  missingDependencies?: LazySet<string> | undefined;
+  buildDependencies?: LazySet<string> | undefined;
+  valueDependencies?: Map<string, ValueCacheVersion> | undefined;
+  hash?: TODO | undefined;
+  assets?: Record<string, Source> | undefined;
+  assetsInfo?: Map<string, AssetInfo | undefined> | undefined;
+  snapshot?: (Snapshot | null) | undefined;
+};
+type NeedBuildContext = {
+  compilation: Compilation;
+  fileSystemInfo: FileSystemInfo;
+  valueCacheVersions: Map<string, string | Set<string>>;
+};
+type BuildMeta = KnownBuildMeta & Record<string, any>;
+type BuildInfo = KnownBuildInfo & Record<string, any>;
+type FactoryMeta = {
+  sideEffectFree?: boolean | undefined;
+};
+type SourceTypes = Set<string>;
+type UnsafeCacheData = {
+  factoryMeta: FactoryMeta | undefined;
+  resolveOptions: ResolveOptions | undefined;
+};
+type OptimizationBailoutFunction = (
+  requestShortener: RequestShortener,
+) => string;
