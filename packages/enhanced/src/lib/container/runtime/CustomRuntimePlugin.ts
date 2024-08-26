@@ -82,6 +82,8 @@ class RuntimeModuleChunkPlugin {
   }
 }
 
+const useChildCompiler = false;
+
 class CustomRuntimePlugin {
   private entryModule?: string | number;
   private bundlerRuntimePath: string;
@@ -93,131 +95,129 @@ class CustomRuntimePlugin {
   }
 
   apply(compiler: Compiler): void {
-    compiler.hooks.make.tapAsync(
-      'CustomRuntimePlugin',
-      (compilation: Compilation, callback: (err?: Error) => void) => {
-        return callback();
-        const target = compilation.options.target || 'default';
-        const outputPath = path.join(
-          this.tempDir,
-          `${target}-custom-runtime-bundle.js`,
-        );
+    //preserving child compiler code for now
+    if (useChildCompiler) {
+      compiler.hooks.make.tapAsync(
+        'CustomRuntimePlugin',
+        (compilation: Compilation, callback: (err?: Error) => void) => {
+          const target = compilation.options.target || 'default';
+          const outputPath = path.join(
+            this.tempDir,
+            `${target}-custom-runtime-bundle.js`,
+          );
 
-        if (fs.existsSync(outputPath)) {
-          const source = fs.readFileSync(outputPath, 'utf-8');
-          onceForCompilationMap.set(compiler, source);
-          return callback();
-        }
+          if (fs.existsSync(outputPath)) {
+            const source = fs.readFileSync(outputPath, 'utf-8');
+            onceForCompilationMap.set(compiler, source);
+            return callback();
+          }
 
-        if (onceForCompilationMap.has(compiler)) return callback();
-        onceForCompilationMap.set(compiler, null);
+          if (onceForCompilationMap.has(compiler)) return callback();
+          onceForCompilationMap.set(compiler, null);
 
-        const childCompiler = compilation.createChildCompiler(
-          'EmbedFederationRuntimeCompiler',
-          {
-            filename: '[name].js',
-            library: {
-              type: 'var',
-              name: 'federation',
-              export: 'default',
+          const childCompiler = compilation.createChildCompiler(
+            'EmbedFederationRuntimeCompiler',
+            {
+              filename: '[name].js',
+              library: {
+                type: 'var',
+                name: 'federation',
+                export: 'default',
+              },
             },
-          },
-          [
-            new compiler.webpack.EntryPlugin(
-              compiler.context,
-              this.bundlerRuntimePath,
-              {
-                name: 'custom-runtime-bundle',
-                runtime: 'other',
-              },
-            ),
-            new compiler.webpack.library.EnableLibraryPlugin('var'),
-            new RuntimeModuleChunkPlugin(),
-          ],
-        );
+            [
+              new compiler.webpack.EntryPlugin(
+                compiler.context,
+                this.bundlerRuntimePath,
+                {
+                  name: 'custom-runtime-bundle',
+                  runtime: 'other',
+                },
+              ),
+              new compiler.webpack.library.EnableLibraryPlugin('var'),
+              new RuntimeModuleChunkPlugin(),
+            ],
+          );
 
-        childCompiler.context = compiler.context;
-        childCompiler.options.devtool = undefined;
-        childCompiler.options.optimization.splitChunks = false;
-        childCompiler.options.optimization.removeAvailableModules = true;
-        console.log('Creating child compiler for', this.bundlerRuntimePath);
+          childCompiler.context = compiler.context;
+          childCompiler.options.devtool = undefined;
+          childCompiler.options.optimization.splitChunks = false;
+          childCompiler.options.optimization.removeAvailableModules = true;
+          console.log('Creating child compiler for', this.bundlerRuntimePath);
 
-        childCompiler.hooks.thisCompilation.tap(
-          this.constructor.name,
-          (childCompilation) => {
-            childCompilation.hooks.processAssets.tap(
-              this.constructor.name,
-              () => {
-                const source =
-                  childCompilation.assets['custom-runtime-bundle.js'] &&
-                  (childCompilation.assets[
-                    'custom-runtime-bundle.js'
-                  ].source() as string);
+          childCompiler.hooks.thisCompilation.tap(
+            this.constructor.name,
+            (childCompilation) => {
+              childCompilation.hooks.processAssets.tap(
+                this.constructor.name,
+                () => {
+                  const source =
+                    childCompilation.assets['custom-runtime-bundle.js'] &&
+                    (childCompilation.assets[
+                      'custom-runtime-bundle.js'
+                    ].source() as string);
 
-                const entry = childCompilation.entrypoints.get(
-                  'custom-runtime-bundle',
-                );
-                const entryChunk = entry?.getEntrypointChunk();
+                  const entry = childCompilation.entrypoints.get(
+                    'custom-runtime-bundle',
+                  );
+                  const entryChunk = entry?.getEntrypointChunk();
 
-                if (entryChunk) {
-                  const entryModule = Array.from(
-                    childCompilation.chunkGraph.getChunkEntryModulesIterable(
-                      entryChunk,
-                    ),
-                  )[0];
-                  this.entryModule =
-                    childCompilation.chunkGraph.getModuleId(entryModule);
-                }
+                  if (entryChunk) {
+                    const entryModule = Array.from(
+                      childCompilation.chunkGraph.getChunkEntryModulesIterable(
+                        entryChunk,
+                      ),
+                    )[0];
+                    this.entryModule =
+                      childCompilation.chunkGraph.getModuleId(entryModule);
+                  }
 
-                onceForCompilationMap.set(compiler, source);
-                fs.writeFileSync(outputPath, source);
-                console.log('got compilation asset');
-                // Remove all chunk assets
-                childCompilation.chunks.forEach((chunk) => {
-                  chunk.files.forEach((file) => {
-                    childCompilation.deleteAsset(file);
+                  onceForCompilationMap.set(compiler, source);
+                  fs.writeFileSync(outputPath, source);
+                  console.log('got compilation asset');
+                  // Remove all chunk assets
+                  childCompilation.chunks.forEach((chunk) => {
+                    chunk.files.forEach((file) => {
+                      childCompilation.deleteAsset(file);
+                    });
                   });
-                });
-              },
-            );
-          },
-        );
-        childCompiler.runAsChild(
-          (
-            err?: Error | null,
-            entries?: Chunk[],
-            childCompilation?: Compilation,
-          ) => {
-            if (err) {
-              return callback(err);
-            }
-
-            if (!childCompilation) {
-              console.warn(
-                'Embed Federation Runtime: Child compilation is undefined',
+                },
               );
-              return callback();
-            }
+            },
+          );
+          childCompiler.runAsChild(
+            (
+              err?: Error | null,
+              entries?: Chunk[],
+              childCompilation?: Compilation,
+            ) => {
+              if (err) {
+                return callback(err);
+              }
 
-            if (childCompilation.errors.length) {
-              return callback(childCompilation.errors[0]);
-            }
+              if (!childCompilation) {
+                console.warn(
+                  'Embed Federation Runtime: Child compilation is undefined',
+                );
+                return callback();
+              }
 
-            console.log('Code built successfully');
+              if (childCompilation.errors.length) {
+                return callback(childCompilation.errors[0]);
+              }
 
-            callback();
-          },
-        );
-      },
-    );
+              console.log('Code built successfully');
+
+              callback();
+            },
+          );
+        },
+      );
+    }
 
     compiler.hooks.thisCompilation.tap(
       'CustomRuntimePlugin',
       (compilation: Compilation) => {
-        // this.addDependency(new EntryDependency(this._injectRuntimeEntry));
-
-        // const dep = new EntryDependency(this.bundlerRuntimePath);
-        // const bundlerRuntime = compilation.moduleGraph.getResolvedModule(dep);
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (chunk.id === 'build time chunk') {
             return;
@@ -227,12 +227,8 @@ class CustomRuntimePlugin {
             return;
           }
 
-          // const bundledCode = onceForCompilationMap.get(compiler);
-          // if (!bundledCode) return;
           runtimeRequirements.add('embeddedFederationRuntime');
           const runtimeModule = new CustomRuntimeModule(
-            '',
-            //@ts-ignore
             this.bundlerRuntimePath,
           );
 

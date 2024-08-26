@@ -1,8 +1,74 @@
-import type { Compiler } from 'webpack';
+import type {
+  WebpackOptionsNormalized,
+  Compiler,
+  Compilation,
+  Dependency,
+  EntryOptions,
+  EntryNormalized,
+} from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
-import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
+
+type EntryStaticNormalized = Awaited<
+  ReturnType<Extract<WebpackOptionsNormalized['entry'], () => any>>
+>;
+
+interface ModifyEntryOptions {
+  compiler: Compiler;
+  prependEntry?: (entry: EntryStaticNormalized) => void;
+  staticEntry?: EntryStaticNormalized;
+}
+export function modifyEntry(options: ModifyEntryOptions): void {
+  const { compiler, staticEntry, prependEntry } = options;
+  const operator = (
+    oriEntry: EntryStaticNormalized,
+    newEntry: EntryStaticNormalized,
+  ): EntryStaticNormalized => Object.assign(oriEntry, newEntry);
+
+  if (typeof compiler.options.entry === 'function') {
+    const prevEntryFn = compiler.options.entry;
+    compiler.options.entry = async () => {
+      let res = await prevEntryFn();
+      if (staticEntry) {
+        res = operator(res, staticEntry);
+      }
+      if (prependEntry) {
+        prependEntry(res);
+      }
+      return res;
+    };
+  } else {
+    if (staticEntry) {
+      compiler.options.entry = operator(compiler.options.entry, staticEntry);
+    }
+    if (prependEntry) {
+      prependEntry(compiler.options.entry);
+    }
+  }
+}
+
+class RemoveRuntimeFromApi {
+  apply(compiler: Compiler) {
+    compiler.hooks.entryOption.tap('RemoveRuntimeFromApi', (context, entry) => {
+      if (typeof entry === 'object' && entry !== null) {
+        for (const [name, entryDescription] of Object.entries(entry)) {
+          if (
+            name.startsWith('pages/api/') &&
+            (entryDescription as any).import
+          ) {
+            (entryDescription as any).import = (
+              entryDescription as any
+            ).import.filter((dep: string) => {
+              return !dep.includes('.federation/entry');
+            });
+          }
+        }
+      }
+      return true; // Ensure the function returns a boolean
+    });
+  }
+}
 
 /**
  * Applies server-specific plugins to the webpack compiler.
@@ -29,6 +95,8 @@ export function applyServerPlugins(
       suffix,
     );
   }
+
+  // new RemoveRuntimeFromApi().apply(compiler);
   // if (typeof filename === 'string' && !filename.includes(suffix)) {
   //   compiler.options.output.filename = filename.replace('.js', suffix);
   // }

@@ -44,10 +44,6 @@ export const applyPathFixes = (
   pluginOptions: ModuleFederationPluginOptions,
   options: any,
 ) => {
-  const runtimeModulePath = require
-    .resolve('@module-federation/webpack-bundler-runtime/vendor')
-    .replace('cjs', 'esm')
-    .replace('.js', '.cjs');
   const match = findLoaderForResource(compiler.options.module.rules, {
     path: path.join(compiler.context, '/something/thing.js'),
     issuerLayer: undefined,

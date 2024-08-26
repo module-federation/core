@@ -384,7 +384,7 @@ class FederationRuntimePlugin {
         compiler,
       );
       new HoistContainerReferences(
-        this.options.name + '_partial',
+        this.options.name ? this.options.name + '_partial' : undefined,
         this.bundlerRuntimePath,
       ).apply(compiler);
     }

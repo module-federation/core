@@ -33,19 +33,15 @@ class StartupChunkDependenciesPlugin {
       (compilation) => {
         const isEnabledForChunk = (chunk: Chunk): boolean => {
           if (chunk.id === 'build time chunk') return false;
-          const [entryModule] =
-            compilation.chunkGraph.getChunkEntryModulesWithChunkGroupIterable(
-              chunk,
-            ) || [];
-          return !(entryModule instanceof ContainerEntryModule);
+          const [finalEntry] =
+            compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
+          return !(finalEntry instanceof ContainerEntryModule);
         };
 
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'StartupChunkDependenciesPlugin',
           (chunk, set, { chunkGraph }) => {
             if (!isEnabledForChunk(chunk)) return;
-            const hasEntryChunks =
-              chunkGraph.hasChunkEntryDependentChunks(chunk);
             if (chunk.hasRuntime()) {
               set.add(RuntimeGlobals.startupEntrypoint);
               set.add(RuntimeGlobals.ensureChunk);

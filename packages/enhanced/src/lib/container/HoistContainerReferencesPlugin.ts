@@ -4,9 +4,10 @@ import type {
   Chunk,
   WebpackPluginInstance,
   Module,
-  ExternalModule,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { RuntimeSpec } from 'webpack/lib/util/runtime';
+import type ExportsInfo from 'webpack/lib/ExportsInfo';
 
 const { NormalModule } = require(
   normalizeWebpackPath('webpack'),
@@ -20,10 +21,13 @@ const PLUGIN_NAME = 'HoistContainerReferences';
 export class HoistContainerReferences implements WebpackPluginInstance {
   private readonly containerName: string;
   private readonly bundlerRuntimePath?: string;
+  private readonly explanation: string;
 
   constructor(name?: string, bundlerRuntimePath?: string) {
     this.containerName = name || 'no known chunk name';
     this.bundlerRuntimePath = bundlerRuntimePath;
+    this.explanation =
+      'Bundler runtime path module is required for proper functioning';
   }
 
   apply(compiler: Compiler): void {
@@ -52,8 +56,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
           PLUGIN_NAME,
           (modules: Iterable<Module>) => {
             if (this.bundlerRuntimePath) {
-              let runtime;
-              compiler.webpack.util.runtime.mergeRuntimeOwned;
+              let runtime: RuntimeSpec | undefined;
               for (const [name, { options }] of compilation.entries) {
                 runtime = compiler.webpack.util.runtime.mergeRuntimeOwned(
                   runtime,
@@ -69,9 +72,10 @@ export class HoistContainerReferences implements WebpackPluginInstance {
                   module instanceof NormalModule &&
                   module.resource === this.bundlerRuntimePath
                 ) {
-                  const exportsInfo = moduleGraph.getExportsInfo(module);
+                  const exportsInfo: ExportsInfo =
+                    moduleGraph.getExportsInfo(module);
                   exportsInfo.setUsedInUnknownWay(runtime);
-                  // moduleGraph.addExtraReason(module, this.explanation);
+                  moduleGraph.addExtraReason(module, this.explanation);
                   if (module.factoryMeta === undefined) {
                     module.factoryMeta = {};
                   }
@@ -201,6 +205,9 @@ export class HoistContainerReferences implements WebpackPluginInstance {
           ) {
             chunkGraph.disconnectChunk(chunk);
             compilation.chunks.delete(chunk);
+            if (chunk.name) {
+              compilation.namedChunks.delete(chunk.name);
+            }
           }
         }
       }
