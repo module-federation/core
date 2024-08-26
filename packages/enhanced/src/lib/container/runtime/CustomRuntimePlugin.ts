@@ -214,10 +214,6 @@ class CustomRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       'CustomRuntimePlugin',
       (compilation: Compilation) => {
-        // this.addDependency(new EntryDependency(this._injectRuntimeEntry));
-
-        // const dep = new EntryDependency(this.bundlerRuntimePath);
-        // const bundlerRuntime = compilation.moduleGraph.getResolvedModule(dep);
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (chunk.id === 'build time chunk') {
             return;
@@ -227,12 +223,8 @@ class CustomRuntimePlugin {
             return;
           }
 
-          // const bundledCode = onceForCompilationMap.get(compiler);
-          // if (!bundledCode) return;
           runtimeRequirements.add('embeddedFederationRuntime');
           const runtimeModule = new CustomRuntimeModule(
-            '',
-            //@ts-ignore
             this.bundlerRuntimePath,
           );
 

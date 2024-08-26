@@ -20,10 +20,13 @@ const PLUGIN_NAME = 'HoistContainerReferences';
 export class HoistContainerReferences implements WebpackPluginInstance {
   private readonly containerName: string;
   private readonly bundlerRuntimePath?: string;
+  private readonly explanation: string;
 
   constructor(name?: string, bundlerRuntimePath?: string) {
     this.containerName = name || 'no known chunk name';
     this.bundlerRuntimePath = bundlerRuntimePath;
+    this.explanation =
+      'Bundler runtime path module is required for proper functioning';
   }
 
   apply(compiler: Compiler): void {
@@ -71,7 +74,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
                 ) {
                   const exportsInfo = moduleGraph.getExportsInfo(module);
                   exportsInfo.setUsedInUnknownWay(runtime);
-                  // moduleGraph.addExtraReason(module, this.explanation);
+                  moduleGraph.addExtraReason(module, this.explanation);
                   if (module.factoryMeta === undefined) {
                     module.factoryMeta = {};
                   }
