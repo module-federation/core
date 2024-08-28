@@ -13,7 +13,6 @@ import {
 } from '@module-federation/sdk';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
-import schema from '../../schemas/container/ModuleFederationPlugin';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
@@ -27,21 +26,6 @@ const isValidExternalsType = require(
   ),
 ) as typeof import('webpack/schemas/plugins/container/ExternalsType.check.js');
 
-const createSchemaValidation = require(
-  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
-) as typeof import('webpack/lib/util/create-schema-validation');
-import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
-
-const validate = createSchemaValidation(
-  // just use schema to validate
-  () => true,
-  () => schema,
-  {
-    name: 'Module Federation Plugin',
-    baseDataPath: 'options',
-  },
-);
-
 class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _statsPlugin?: StatsPlugin;
@@ -49,7 +33,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options options
    */
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
-    validate(options);
     this._options = options;
   }
 

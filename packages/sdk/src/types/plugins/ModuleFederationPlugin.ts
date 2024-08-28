@@ -227,6 +227,7 @@ export interface ModuleFederationPluginOptions {
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
   async?: boolean | AsyncBoundaryOptions;
+  virtualRuntimeEntry?: boolean;
   embedRuntime?: boolean;
 }
 /**

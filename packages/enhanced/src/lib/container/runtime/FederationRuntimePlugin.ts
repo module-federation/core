@@ -20,6 +20,7 @@ import { TEMP_DIR } from '../constant';
 import CustomRuntimePlugin from './CustomRuntimePlugin';
 import ContainerEntryModule from '../ContainerEntryModule';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
+import pBtoa from 'btoa';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -173,12 +174,21 @@ class FederationRuntimePlugin {
       return '';
     }
 
-    this.entryFilePath = FederationRuntimePlugin.getFilePath(
-      this.options.name!,
-      this.options.runtimePlugins!,
-      this.bundlerRuntimePath,
-      this.options.embedRuntime,
-    );
+    if (!this.options?.virtualRuntimeEntry) {
+      this.entryFilePath = FederationRuntimePlugin.getFilePath(
+        this.options.name!,
+        this.options.runtimePlugins!,
+        this.bundlerRuntimePath,
+        this.options.embedRuntime,
+      );
+    } else {
+      this.entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
+        FederationRuntimePlugin.getTemplate(
+          this.options.runtimePlugins!,
+          this.bundlerRuntimePath,
+        ),
+      )}`;
+    }
     return this.entryFilePath;
   }
 
@@ -203,7 +213,9 @@ class FederationRuntimePlugin {
   }
 
   prependEntry(compiler: Compiler) {
-    this.ensureFile();
+    if (!this.options?.virtualRuntimeEntry) {
+      this.ensureFile();
+    }
     const entryFilePath = this.getFilePath();
 
     modifyEntry({
