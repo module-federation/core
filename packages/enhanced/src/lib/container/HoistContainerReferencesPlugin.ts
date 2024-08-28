@@ -36,9 +36,12 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       (compilation: Compilation) => {
         const logger = compilation.getLogger(PLUGIN_NAME);
         const { chunkGraph, moduleGraph } = compilation;
+
+        // Hook into the optimizeChunks phase
         compilation.hooks.optimizeChunks.tap(
           {
             name: PLUGIN_NAME,
+            // advanced stage is where SplitChunksPlugin runs.
             stage: 11, // advanced + 1
           },
           (chunks: Iterable<Chunk>) => {
@@ -52,6 +55,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
           },
         );
 
+        // Hook into the optimizeDependencies phase
         compilation.hooks.optimizeDependencies.tap(
           PLUGIN_NAME,
           (modules: Iterable<Module>) => {
@@ -89,6 +93,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     );
   }
 
+  // Helper method to collect all referenced modules recursively
   private getAllReferencedModules(compilation: Compilation, module: Module) {
     const collectedModules = new Set<Module>([module]);
     const collectOutgoingConnections = (module: Module) => {
@@ -109,6 +114,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     return collectedModules;
   }
 
+  // Helper method to find a specific module in a chunk
   private findModule(
     compilation: Compilation,
     chunk: Chunk,
@@ -131,6 +137,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     return null;
   }
 
+  // Method to hoist modules in chunks
   private hoistModulesInChunks(
     compilation: Compilation,
     runtimeChunks: Set<Chunk>,
@@ -173,7 +180,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       runtimeModule,
     );
 
-    // if is single runtime chunk, copy the remoteEntry into the runtime chunk to allow for embed container
+    // If single runtime chunk, copy the remoteEntry into the runtime chunk to allow for embed container
     if (partialChunk) {
       for (const module of chunkGraph.getChunkModulesIterable(partialChunk)) {
         allReferencedModules.add(module);
@@ -189,10 +196,10 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     }
 
     // Set used exports for the runtime module
-
     this.cleanUpChunks(compilation, allReferencedModules);
   }
 
+  // Method to clean up chunks by disconnecting unused modules
   private cleanUpChunks(compilation: Compilation, modules: Set<Module>): void {
     const { chunkGraph } = compilation;
     for (const module of modules) {
@@ -215,6 +222,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     modules.clear();
   }
 
+  // Helper method to get runtime chunks from the compilation
   private getRuntimeChunks(compilation: Compilation): Set<Chunk> {
     const runtimeChunks = new Set<Chunk>();
     const entries = compilation.entrypoints;
