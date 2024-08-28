@@ -19,6 +19,7 @@ import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
 import { ExternalsType } from 'webpack/declarations/WebpackOptions';
+import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
