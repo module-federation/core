@@ -27,16 +27,19 @@ class StartupChunkDependenciesPlugin {
     this.asyncChunkLoading = options.asyncChunkLoading ?? true;
   }
 
+  private isEnabledForChunk(chunk: Chunk, compilation: any): boolean {
+    if (chunk.id === 'build time chunk') return false;
+    const [finalEntry] =
+      compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
+    return !(finalEntry instanceof ContainerEntryModule);
+  }
+
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'MfStartupChunkDependenciesPlugin',
       (compilation) => {
-        const isEnabledForChunk = (chunk: Chunk): boolean => {
-          if (chunk.id === 'build time chunk') return false;
-          const [finalEntry] =
-            compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
-          return !(finalEntry instanceof ContainerEntryModule);
-        };
+        const isEnabledForChunk = (chunk: Chunk) =>
+          this.isEnabledForChunk(chunk, compilation);
 
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'StartupChunkDependenciesPlugin',
@@ -53,11 +56,8 @@ class StartupChunkDependenciesPlugin {
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'MfStartupChunkDependenciesPlugin',
           (chunk, set, { chunkGraph }) => {
-            if (chunk.id === 'build time chunk') return;
+            if (!isEnabledForChunk(chunk)) return;
             if (chunkGraph.getNumberOfEntryModules(chunk) === 0) return;
-            const hasNoContainer = isEnabledForChunk(chunk);
-            if (!hasNoContainer) return;
-
             set.add('federation-entry-startup');
           },
         );

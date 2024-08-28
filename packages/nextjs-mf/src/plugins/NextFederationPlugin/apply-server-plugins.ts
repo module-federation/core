@@ -1,10 +1,7 @@
 import type {
   WebpackOptionsNormalized,
   Compiler,
-  Compilation,
-  Dependency,
-  EntryOptions,
-  EntryNormalized,
+  ExternalItemFunctionData,
 } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import path from 'path';
@@ -48,28 +45,6 @@ export function modifyEntry(options: ModifyEntryOptions): void {
   }
 }
 
-class RemoveRuntimeFromApi {
-  apply(compiler: Compiler) {
-    compiler.hooks.entryOption.tap('RemoveRuntimeFromApi', (context, entry) => {
-      if (typeof entry === 'object' && entry !== null) {
-        for (const [name, entryDescription] of Object.entries(entry)) {
-          if (
-            name.startsWith('pages/api/') &&
-            (entryDescription as any).import
-          ) {
-            (entryDescription as any).import = (
-              entryDescription as any
-            ).import.filter((dep: string) => {
-              return !dep.includes('.federation/entry');
-            });
-          }
-        }
-      }
-      return true; // Ensure the function returns a boolean
-    });
-  }
-}
-
 /**
  * Applies server-specific plugins to the webpack compiler.
  *
@@ -81,7 +56,6 @@ export function applyServerPlugins(
   options: ModuleFederationPluginOptions,
 ): void {
   const chunkFileName = compiler.options?.output?.chunkFilename;
-  const filename = compiler.options?.output?.filename || '';
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
   const suffix = `-[chunkhash].js`;
 
@@ -96,17 +70,11 @@ export function applyServerPlugins(
     );
   }
 
-  // new RemoveRuntimeFromApi().apply(compiler);
-  // if (typeof filename === 'string' && !filename.includes(suffix)) {
-  //   compiler.options.output.filename = filename.replace('.js', suffix);
-  // }
-  // new HoistContainerReferencesPlugin(`${options.name}_partial`).apply(compiler);
   new InvertedContainerPlugin({
     runtime: 'webpack-runtime',
     container: options.name,
     remotes: options.remotes as Record<string, string>,
     debug: false,
-    //@ts-ignore
   }).apply(compiler);
 }
 
@@ -140,41 +108,42 @@ export function handleServerExternals(
 ): void {
   if (
     Array.isArray(compiler.options.externals) &&
-    compiler.options.externals[0]
+    typeof compiler.options.externals[0] === 'function'
   ) {
-    // Retrieve the original externals function
-    const originalExternals = compiler.options.externals[0];
+    const originalExternals = compiler.options.externals[0] as (
+      data: ExternalItemFunctionData,
+      callback: any,
+    ) => undefined | string;
 
-    // Replace the original externals function with a new asynchronous function
-    compiler.options.externals[0] = async function (ctx: any, callback: any) {
-      // @ts-ignore
+    compiler.options.externals[0] = async function (
+      ctx: ExternalItemFunctionData,
+      callback: any,
+    ) {
       const fromNext = await originalExternals(ctx, callback);
-      // If the result is null, return without further processing
       if (!fromNext) {
         return;
       }
-      // If the module is from Next.js or React, return the original result
       const req = fromNext.split(' ')[1];
-      // Check if the module should not be treated as external
       if (
         ctx.request &&
         (ctx.request.includes('@module-federation/utilities') ||
           Object.keys(options.shared || {}).some((key) => {
+            const sharedOptions = options.shared as Record<
+              string,
+              { import: boolean }
+            >;
             return (
-              // @ts-ignore
-              options.shared?.[key]?.import !== false &&
+              sharedOptions[key]?.import !== false &&
               (key.endsWith('/') ? req.includes(key) : req === key)
             );
           }) ||
           ctx.request.includes('@module-federation/'))
       ) {
-        // If the module should not be treated as external, return without calling the original externals function
         return;
       }
 
       if (
         req.startsWith('next') ||
-        // Ensure package names starting with "react" are not affected
         req.startsWith('react/') ||
         req.startsWith('react-dom/') ||
         req === 'react' ||
@@ -183,7 +152,6 @@ export function handleServerExternals(
       ) {
         return fromNext;
       }
-      // Otherwise, return (null) to treat the module as internalizable
       return;
     };
   }
