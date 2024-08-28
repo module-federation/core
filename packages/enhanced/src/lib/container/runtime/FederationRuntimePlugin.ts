@@ -19,6 +19,7 @@ import path from 'path';
 import { TEMP_DIR } from '../constant';
 import CustomRuntimePlugin from './CustomRuntimePlugin';
 import ContainerEntryModule from '../ContainerEntryModule';
+import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import pBtoa from 'btoa';
 
 const { RuntimeGlobals, Template } = require(
@@ -100,25 +101,25 @@ class FederationRuntimePlugin {
       });
     }
 
-    const embedRuntimeLines = embedRuntime
-      ? '//using embedded runtime module, will not inject runtime in entry'
-      : Template.asString([
-          `var prevFederation = ${federationGlobal};`,
-          `${federationGlobal} = {}`,
-          `for(var key in federation){`,
-          Template.indent([`${federationGlobal}[key] = federation[key];`]),
-          '}',
-          `for(var key in prevFederation){`,
-          Template.indent([`${federationGlobal}[key] = prevFederation[key];`]),
-          '}',
-        ]);
+    const embedRuntimeLines = Template.asString([
+      `if(!${federationGlobal}.runtime){`,
+      Template.indent([
+        `var prevFederation = ${federationGlobal};`,
+        `${federationGlobal} = {}`,
+        `for(var key in federation){`,
+        Template.indent([`${federationGlobal}[key] = federation[key];`]),
+        '}',
+        `for(var key in prevFederation){`,
+        Template.indent([`${federationGlobal}[key] = prevFederation[key];`]),
+        '}',
+      ]),
+      '}',
+    ]);
 
     return Template.asString([
-      embedRuntime
-        ? ''
-        : `import federation from '${normalizedBundlerRuntimePath}';`,
+      `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
-      embedRuntimeLines,
+      embedRuntime ? '' : embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
       Template.indent([
         runtimePluginNames.length
@@ -375,6 +376,8 @@ class FederationRuntimePlugin {
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
 
+    this.bundlerRuntimePath = this.getBundlerRuntimePath();
+
     if (this.options?.implementation) {
       const runtimePath = this.options.embedRuntime
         ? '@module-federation/webpack-bundler-runtime/vendor'
@@ -383,10 +386,19 @@ class FederationRuntimePlugin {
         paths: [this.options.implementation],
       });
     }
+
     if (this.options?.embedRuntime) {
+      this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
+        '.cjs.js',
+        '.esm.js',
+      );
       new CustomRuntimePlugin(this.bundlerRuntimePath, TEMP_DIR).apply(
         compiler,
       );
+      new HoistContainerReferences(
+        this.options.name ? this.options.name + '_partial' : undefined,
+        this.bundlerRuntimePath,
+      ).apply(compiler);
     }
     this.prependEntry(compiler);
     this.injectRuntime(compiler);

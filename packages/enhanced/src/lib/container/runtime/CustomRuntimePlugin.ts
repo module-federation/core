@@ -7,6 +7,9 @@ import type { Compiler, Compilation, Chunk, Module, ChunkGraph } from 'webpack';
 import { getFederationGlobalScope } from './utils';
 import fs from 'fs';
 import path from 'path';
+const EntryDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
+) as typeof import('webpack/lib/dependencies/EntryDependency');
 
 const onceForCompilationMap = new WeakMap();
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
@@ -79,133 +82,138 @@ class RuntimeModuleChunkPlugin {
   }
 }
 
+const useChildCompiler = false;
+
 class CustomRuntimePlugin {
   private entryModule?: string | number;
   private bundlerRuntimePath: string;
   private tempDir: string;
 
   constructor(path: string, tempDir: string) {
-    this.bundlerRuntimePath = path.replace('cjs', 'esm');
+    this.bundlerRuntimePath = path;
     this.tempDir = tempDir;
   }
 
   apply(compiler: Compiler): void {
-    compiler.hooks.make.tapAsync(
-      'CustomRuntimePlugin',
-      (compilation: Compilation, callback: (err?: Error) => void) => {
-        const target = compilation.options.target || 'default';
-        const outputPath = path.join(
-          this.tempDir,
-          `${target}-custom-runtime-bundle.js`,
-        );
+    //preserving child compiler code for now
+    if (useChildCompiler) {
+      compiler.hooks.make.tapAsync(
+        'CustomRuntimePlugin',
+        (compilation: Compilation, callback: (err?: Error) => void) => {
+          const target = compilation.options.target || 'default';
+          const outputPath = path.join(
+            this.tempDir,
+            `${target}-custom-runtime-bundle.js`,
+          );
 
-        if (fs.existsSync(outputPath)) {
-          const source = fs.readFileSync(outputPath, 'utf-8');
-          onceForCompilationMap.set(compiler, source);
-          return callback();
-        }
+          if (fs.existsSync(outputPath)) {
+            const source = fs.readFileSync(outputPath, 'utf-8');
+            onceForCompilationMap.set(compiler, source);
+            return callback();
+          }
 
-        if (onceForCompilationMap.has(compiler)) return callback();
-        onceForCompilationMap.set(compiler, null);
+          if (onceForCompilationMap.has(compiler)) return callback();
+          onceForCompilationMap.set(compiler, null);
 
-        const childCompiler = compilation.createChildCompiler(
-          'EmbedFederationRuntimeCompiler',
-          {
-            filename: '[name].js',
-            library: {
-              type: 'var',
-              name: 'federation',
-              export: 'default',
+          const childCompiler = compilation.createChildCompiler(
+            'EmbedFederationRuntimeCompiler',
+            {
+              filename: '[name].js',
+              library: {
+                type: 'var',
+                name: 'federation',
+                export: 'default',
+              },
             },
-          },
-          [
-            new compiler.webpack.EntryPlugin(
-              compiler.context,
-              this.bundlerRuntimePath,
-              {
-                name: 'custom-runtime-bundle',
-                runtime: 'other',
-              },
-            ),
-            new compiler.webpack.library.EnableLibraryPlugin('var'),
-            new RuntimeModuleChunkPlugin(),
-          ],
-        );
+            [
+              new compiler.webpack.EntryPlugin(
+                compiler.context,
+                this.bundlerRuntimePath,
+                {
+                  name: 'custom-runtime-bundle',
+                  runtime: 'other',
+                },
+              ),
+              new compiler.webpack.library.EnableLibraryPlugin('var'),
+              new RuntimeModuleChunkPlugin(),
+            ],
+          );
 
-        childCompiler.context = compiler.context;
-        childCompiler.options.devtool = undefined;
-        childCompiler.options.optimization.splitChunks = false;
-        childCompiler.options.optimization.removeAvailableModules = true;
-        console.log('Creating child compiler for', this.bundlerRuntimePath);
+          childCompiler.context = compiler.context;
+          childCompiler.options.devtool = undefined;
+          childCompiler.options.optimization.splitChunks = false;
+          childCompiler.options.optimization.removeAvailableModules = true;
+          console.log('Creating child compiler for', this.bundlerRuntimePath);
 
-        childCompiler.hooks.thisCompilation.tap(
-          this.constructor.name,
-          (childCompilation) => {
-            childCompilation.hooks.processAssets.tap(
-              this.constructor.name,
-              () => {
-                const source =
-                  childCompilation.assets['custom-runtime-bundle.js'] &&
-                  (childCompilation.assets[
-                    'custom-runtime-bundle.js'
-                  ].source() as string);
+          childCompiler.hooks.thisCompilation.tap(
+            this.constructor.name,
+            (childCompilation) => {
+              childCompilation.hooks.processAssets.tap(
+                this.constructor.name,
+                () => {
+                  const source =
+                    childCompilation.assets['custom-runtime-bundle.js'] &&
+                    (childCompilation.assets[
+                      'custom-runtime-bundle.js'
+                    ].source() as string);
 
-                const entry = childCompilation.entrypoints.get(
-                  'custom-runtime-bundle',
-                );
-                const entryChunk = entry?.getEntrypointChunk();
+                  const entry = childCompilation.entrypoints.get(
+                    'custom-runtime-bundle',
+                  );
+                  const entryChunk = entry?.getEntrypointChunk();
 
-                if (entryChunk) {
-                  const entryModule = Array.from(
-                    childCompilation.chunkGraph.getChunkEntryModulesIterable(
-                      entryChunk,
-                    ),
-                  )[0];
-                  this.entryModule =
-                    childCompilation.chunkGraph.getModuleId(entryModule);
-                }
+                  if (entryChunk) {
+                    const entryModule = Array.from(
+                      childCompilation.chunkGraph.getChunkEntryModulesIterable(
+                        entryChunk,
+                      ),
+                    )[0];
+                    this.entryModule =
+                      childCompilation.chunkGraph.getModuleId(entryModule);
+                  }
 
-                onceForCompilationMap.set(compiler, source);
-                fs.writeFileSync(outputPath, source);
-                console.log('got compilation asset');
-                // Remove all chunk assets
-                childCompilation.chunks.forEach((chunk) => {
-                  chunk.files.forEach((file) => {
-                    childCompilation.deleteAsset(file);
+                  onceForCompilationMap.set(compiler, source);
+                  fs.writeFileSync(outputPath, source);
+                  console.log('got compilation asset');
+                  // Remove all chunk assets
+                  childCompilation.chunks.forEach((chunk) => {
+                    chunk.files.forEach((file) => {
+                      childCompilation.deleteAsset(file);
+                    });
                   });
-                });
-              },
-            );
-          },
-        );
-        childCompiler.runAsChild(
-          (
-            err?: Error | null,
-            entries?: Chunk[],
-            childCompilation?: Compilation,
-          ) => {
-            if (err) {
-              return callback(err);
-            }
-
-            if (!childCompilation) {
-              console.warn(
-                'Embed Federation Runtime: Child compilation is undefined',
+                },
               );
-              return callback();
-            }
+            },
+          );
+          childCompiler.runAsChild(
+            (
+              err?: Error | null,
+              entries?: Chunk[],
+              childCompilation?: Compilation,
+            ) => {
+              if (err) {
+                return callback(err);
+              }
 
-            if (childCompilation.errors.length) {
-              return callback(childCompilation.errors[0]);
-            }
+              if (!childCompilation) {
+                console.warn(
+                  'Embed Federation Runtime: Child compilation is undefined',
+                );
+                return callback();
+              }
 
-            console.log('Code built successfully');
+              if (childCompilation.errors.length) {
+                return callback(childCompilation.errors[0]);
+              }
 
-            callback();
-          },
-        );
-      },
-    );
+              console.log('Code built successfully');
+
+              callback();
+            },
+          );
+        },
+      );
+    }
 
     compiler.hooks.thisCompilation.tap(
       'CustomRuntimePlugin',
@@ -218,12 +226,10 @@ class CustomRuntimePlugin {
           if (!runtimeRequirements.has(federationGlobal)) {
             return;
           }
-          const bundledCode = onceForCompilationMap.get(compiler);
-          if (!bundledCode) return;
+
           runtimeRequirements.add('embeddedFederationRuntime');
           const runtimeModule = new CustomRuntimeModule(
-            bundledCode,
-            this.entryModule,
+            this.bundlerRuntimePath,
           );
 
           compilation.addRuntimeModule(chunk, runtimeModule);

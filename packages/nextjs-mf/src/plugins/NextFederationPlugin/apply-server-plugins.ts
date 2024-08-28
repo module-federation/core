@@ -1,8 +1,53 @@
-import type { Compiler } from 'webpack';
+import type {
+  WebpackOptionsNormalized,
+  Compiler,
+  ExternalItemFunctionData,
+} from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
-import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
+
+type EntryStaticNormalized = Awaited<
+  ReturnType<Extract<WebpackOptionsNormalized['entry'], () => any>>
+>;
+
+interface ModifyEntryOptions {
+  compiler: Compiler;
+  prependEntry?: (entry: EntryStaticNormalized) => void;
+  staticEntry?: EntryStaticNormalized;
+}
+
+// Modifies the Webpack entry configuration
+export function modifyEntry(options: ModifyEntryOptions): void {
+  const { compiler, staticEntry, prependEntry } = options;
+  const operator = (
+    oriEntry: EntryStaticNormalized,
+    newEntry: EntryStaticNormalized,
+  ): EntryStaticNormalized => Object.assign(oriEntry, newEntry);
+
+  // If the entry is a function, wrap it to modify the result
+  if (typeof compiler.options.entry === 'function') {
+    const prevEntryFn = compiler.options.entry;
+    compiler.options.entry = async () => {
+      let res = await prevEntryFn();
+      if (staticEntry) {
+        res = operator(res, staticEntry);
+      }
+      if (prependEntry) {
+        prependEntry(res);
+      }
+      return res;
+    };
+  } else {
+    // If the entry is an object, directly modify it
+    if (staticEntry) {
+      compiler.options.entry = operator(compiler.options.entry, staticEntry);
+    }
+    if (prependEntry) {
+      prependEntry(compiler.options.entry);
+    }
+  }
+}
 
 /**
  * Applies server-specific plugins to the webpack compiler.
@@ -15,10 +60,10 @@ export function applyServerPlugins(
   options: ModuleFederationPluginOptions,
 ): void {
   const chunkFileName = compiler.options?.output?.chunkFilename;
-  const filename = compiler.options?.output?.filename || '';
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
   const suffix = `-[chunkhash].js`;
 
+  // Modify chunk filename to include a unique suffix if not already present
   if (
     typeof chunkFileName === 'string' &&
     uniqueName &&
@@ -29,16 +74,13 @@ export function applyServerPlugins(
       suffix,
     );
   }
-  // if (typeof filename === 'string' && !filename.includes(suffix)) {
-  //   compiler.options.output.filename = filename.replace('.js', suffix);
-  // }
-  new HoistContainerReferencesPlugin(`${options.name}_partial`).apply(compiler);
+
+  // Apply the InvertedContainerPlugin to the compiler
   new InvertedContainerPlugin({
     runtime: 'webpack-runtime',
     container: options.name,
     remotes: options.remotes as Record<string, string>,
     debug: false,
-    //@ts-ignore
   }).apply(compiler);
 }
 
@@ -72,41 +114,42 @@ export function handleServerExternals(
 ): void {
   if (
     Array.isArray(compiler.options.externals) &&
-    compiler.options.externals[0]
+    typeof compiler.options.externals[0] === 'function'
   ) {
-    // Retrieve the original externals function
-    const originalExternals = compiler.options.externals[0];
+    const originalExternals = compiler.options.externals[0] as (
+      data: ExternalItemFunctionData,
+      callback: any,
+    ) => undefined | string;
 
-    // Replace the original externals function with a new asynchronous function
-    compiler.options.externals[0] = async function (ctx: any, callback: any) {
-      // @ts-ignore
+    compiler.options.externals[0] = async function (
+      ctx: ExternalItemFunctionData,
+      callback: any,
+    ) {
       const fromNext = await originalExternals(ctx, callback);
-      // If the result is null, return without further processing
       if (!fromNext) {
         return;
       }
-      // If the module is from Next.js or React, return the original result
       const req = fromNext.split(' ')[1];
-      // Check if the module should not be treated as external
       if (
         ctx.request &&
         (ctx.request.includes('@module-federation/utilities') ||
           Object.keys(options.shared || {}).some((key) => {
+            const sharedOptions = options.shared as Record<
+              string,
+              { import: boolean }
+            >;
             return (
-              // @ts-ignore
-              options.shared?.[key]?.import !== false &&
+              sharedOptions[key]?.import !== false &&
               (key.endsWith('/') ? req.includes(key) : req === key)
             );
           }) ||
           ctx.request.includes('@module-federation/'))
       ) {
-        // If the module should not be treated as external, return without calling the original externals function
         return;
       }
 
       if (
         req.startsWith('next') ||
-        // Ensure package names starting with "react" are not affected
         req.startsWith('react/') ||
         req.startsWith('react-dom/') ||
         req === 'react' ||
@@ -115,7 +158,6 @@ export function handleServerExternals(
       ) {
         return fromNext;
       }
-      // Otherwise, return (null) to treat the module as internalizable
       return;
     };
   }
@@ -133,8 +175,6 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     global: false,
   };
   compiler.options.target = 'async-node';
-  // Disable custom chunk rules
-  compiler.options.optimization.splitChunks = undefined;
 
   // Ensure a runtime chunk is created
   compiler.options.optimization.runtimeChunk = {

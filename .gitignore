@@ -51,7 +51,7 @@ apps/**/dist
 
 packages/**/@mf-types
 apps/**/@mf-types
-**/@mf-types/**
+**/@mf-types
 **/**/@mf-types
 **/**/**/@mf-types
 @mf-types
@@ -71,3 +71,6 @@ packages/enhanced/test/js
 /apps/runtime-demo/3005-runtime-host/@mf-types/
 /apps/modernjs-ssr/dynamic-nested-remote/@mf-types/
 /apps/runtime-demo/3005-runtime-host/@mf-types/
+
+# Cypress downloads
+**/cypress/downloads
