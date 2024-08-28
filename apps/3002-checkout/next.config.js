@@ -50,13 +50,6 @@ const nextConfig = {
         },
       }),
     );
-    config.plugins.push({
-      name: 'xxx',
-      apply(compiler) {
-        compiler.options.devtool = false;
-        compiler.options.optimization.minimize = false;
-      },
-    });
     return config;
   },
 };

@@ -62,10 +62,8 @@ const nextConfig = {
       name: 'xxx',
       apply(compiler) {
         compiler.options.devtool = false;
-        // compiler.options.optimization.minimize = false;
       },
     });
-    // config.optimization.minimize = false
     return config;
   },
 };
