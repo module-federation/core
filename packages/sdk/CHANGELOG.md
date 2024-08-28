@@ -1,5 +1,17 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.6.0
+
+### Minor Changes
+
+- 1d9bb77: Add support for using Virtual Runtime Entrypoints instead of writing a temporary file to disk
+
+## 0.5.2
+
+### Patch Changes
+
+- b90fa7d: feat: add shareStrategy option
+
 ## 0.5.1
 
 ## 0.5.0
