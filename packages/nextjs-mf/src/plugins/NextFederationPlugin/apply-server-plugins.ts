@@ -16,6 +16,8 @@ interface ModifyEntryOptions {
   prependEntry?: (entry: EntryStaticNormalized) => void;
   staticEntry?: EntryStaticNormalized;
 }
+
+// Modifies the Webpack entry configuration
 export function modifyEntry(options: ModifyEntryOptions): void {
   const { compiler, staticEntry, prependEntry } = options;
   const operator = (
@@ -23,6 +25,7 @@ export function modifyEntry(options: ModifyEntryOptions): void {
     newEntry: EntryStaticNormalized,
   ): EntryStaticNormalized => Object.assign(oriEntry, newEntry);
 
+  // If the entry is a function, wrap it to modify the result
   if (typeof compiler.options.entry === 'function') {
     const prevEntryFn = compiler.options.entry;
     compiler.options.entry = async () => {
@@ -36,6 +39,7 @@ export function modifyEntry(options: ModifyEntryOptions): void {
       return res;
     };
   } else {
+    // If the entry is an object, directly modify it
     if (staticEntry) {
       compiler.options.entry = operator(compiler.options.entry, staticEntry);
     }
@@ -59,6 +63,7 @@ export function applyServerPlugins(
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
   const suffix = `-[chunkhash].js`;
 
+  // Modify chunk filename to include a unique suffix if not already present
   if (
     typeof chunkFileName === 'string' &&
     uniqueName &&
@@ -70,6 +75,7 @@ export function applyServerPlugins(
     );
   }
 
+  // Apply the InvertedContainerPlugin to the compiler
   new InvertedContainerPlugin({
     runtime: 'webpack-runtime',
     container: options.name,
@@ -169,8 +175,6 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     global: false,
   };
   compiler.options.target = 'async-node';
-  // Disable custom chunk rules
-  // compiler.options.optimization.splitChunks = undefined;
 
   // Ensure a runtime chunk is created
   compiler.options.optimization.runtimeChunk = {
