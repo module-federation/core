@@ -1,12 +1,8 @@
 import type { Compiler } from 'webpack';
-import {
-  ModuleFederationPluginOptions,
-  NextFederationPluginExtraOptions,
-} from '@module-federation/utilities';
+import { NextFederationPluginExtraOptions } from '@module-federation/utilities';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
-
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 /**
  * Applies client-specific plugins.
  *
@@ -28,7 +24,7 @@ import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
  */
 export function applyClientPlugins(
   compiler: Compiler,
-  options: ModuleFederationPluginOptions,
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
   extraOptions: NextFederationPluginExtraOptions,
 ): void {
   const { remotes, name } = options;
