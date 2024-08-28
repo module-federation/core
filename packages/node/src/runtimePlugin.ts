@@ -214,7 +214,7 @@ export default function (): FederationRuntimePlugin {
           const url = resolveUrl(rootOutputDir, chunkId);
           if (!url)
             return callback(null, { modules: {}, ids: [], runtime: null });
-
+          debugger;
           fetchAndRun(url, chunkId, callback);
         };
 
@@ -266,7 +266,6 @@ export default function (): FederationRuntimePlugin {
                 const matcher = __webpack_require__.federation.chunkMatcher
                   ? __webpack_require__.federation.chunkMatcher(chunkId)
                   : true;
-
                 if (matcher) {
                   const promise = new Promise((resolve, reject) => {
                     installedChunkData = installedChunks[chunkId] = [

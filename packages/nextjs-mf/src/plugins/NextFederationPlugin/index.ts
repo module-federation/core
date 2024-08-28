@@ -168,7 +168,10 @@ export class NextFederationPlugin {
         };
     return {
       ...this._options,
-      runtime: false,
+      //@ts-ignore
+      runtime: isServer
+        ? [false, 'webpack-runtime', 'webpack-api-runtime']
+        : false,
       remoteType: 'script',
       runtimePlugins: [
         ...(isServer

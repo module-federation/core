@@ -57,6 +57,7 @@ export const webpack = async (
 
   if (moduleFederationConfig) {
     logger.info(`=> [MF] Push Module Federation plugin`);
+    //@ts-ignore
     plugins.push(new ModuleFederationPlugin(moduleFederationConfig));
   }
 

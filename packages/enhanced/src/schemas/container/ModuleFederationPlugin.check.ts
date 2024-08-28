@@ -484,7 +484,17 @@ const schema51 = {
       $ref: '#/definitions/Remotes',
     },
     runtime: {
-      $ref: '#/definitions/EntryRuntime',
+      anyOf: [
+        {
+          $ref: '#/definitions/EntryRuntime',
+        },
+        {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/EntryRuntime',
+          },
+        },
+      ],
     },
     runtimePlugins: runtimePlugin,
     shareScope: {
@@ -524,7 +534,7 @@ const schema69 = {
 const schema78 = {
   anyOf: [
     {
-      enum: [false],
+      enum: [false, undefined],
     },
     {
       type: 'string',

@@ -14,7 +14,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   private options: InvertedContainerRuntimeModuleOptions;
 
   constructor(options: InvertedContainerRuntimeModuleOptions) {
-    super('inverted container startup', RuntimeModule.STAGE_TRIGGER);
+    super('inverted container startup', RuntimeModule.STAGE_ATTACH);
     this.options = options;
   }
 
@@ -32,17 +32,15 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     }
 
     if (this.chunk.runtime === 'webpack-api-runtime') {
-      return '';
+      return `__webpack_require__.federation.initOptions.name = __webpack_require__.federation.initOptions.name + ${JSON.stringify(this.chunk.runtime)}`;
     }
     const { name } = this.options;
     const containerEntryModule = this.findEntryModuleOfContainer() as
       | Module
       | undefined;
-
     const containerModuleId = containerEntryModule
       ? this.compilation.chunkGraph.getModuleId(containerEntryModule)
       : false;
-
     if (!containerModuleId) {
       return '';
     }

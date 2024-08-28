@@ -51,6 +51,8 @@ export default function (): FederationRuntimePlugin {
         return args;
       }
 
+      console.log('before init', __webpack_runtime_id__);
+
       // if (__webpack_runtime_id__ && !__webpack_runtime_id__.startsWith('webpack')) return args;
       const { moduleCache, name } = args.origin;
       const gs = new Function('return globalThis')();
@@ -169,11 +171,9 @@ export default function (): FederationRuntimePlugin {
       }
       const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
       const host = GlobalFederation['__INSTANCES__'][0];
-      if (!host) {
-        return args;
-      }
+      console.log('all', pkgName);
 
-      if (!host.options.shared[pkgName]) {
+      if (!host) {
         return args;
       }
 

@@ -86,7 +86,7 @@ export interface ContainerPluginOptions {
   /**
    * The name of the runtime chunk. If set a runtime chunk with this name is created or an existing entrypoint is used as runtime.
    */
-  runtime?: EntryRuntime;
+  runtime?: EntryRuntime | EntryRuntime[];
   /**
    * The name of the share scope which is shared with the host (defaults to 'default').
    */

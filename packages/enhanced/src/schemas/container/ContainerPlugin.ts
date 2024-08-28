@@ -52,7 +52,7 @@ export default {
         'The name of the runtime chunk. If set a runtime chunk with this name is created or an existing entrypoint is used as runtime.',
       anyOf: [
         {
-          enum: [false],
+          enum: [false, undefined],
         },
         {
           type: 'string',
@@ -328,7 +328,17 @@ export default {
       minLength: 1,
     },
     runtime: {
-      $ref: '#/definitions/EntryRuntime',
+      anyOf: [
+        {
+          $ref: '#/definitions/EntryRuntime',
+        },
+        {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/EntryRuntime',
+          },
+        },
+      ],
     },
     runtimePlugins: runtimePlugin,
     shareScope: {

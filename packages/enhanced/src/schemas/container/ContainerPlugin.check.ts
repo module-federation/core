@@ -54,7 +54,7 @@ const schema21 = {
     EntryRuntime: {
       anyOf: [
         {
-          enum: [false],
+          enum: [false, undefined],
         },
         {
           type: 'string',
@@ -110,22 +110,6 @@ const schema21 = {
       type: 'array',
       items: {
         $ref: '#/definitions/ExposesItem',
-      },
-    },
-    ExposesObject: {
-      type: 'object',
-      additionalProperties: {
-        anyOf: [
-          {
-            $ref: '#/definitions/ExposesConfig',
-          },
-          {
-            $ref: '#/definitions/ExposesItem',
-          },
-          {
-            $ref: '#/definitions/ExposesItems',
-          },
-        ],
       },
     },
     LibraryCustomUmdCommentObject: {
@@ -286,7 +270,17 @@ const schema21 = {
       minLength: 1,
     },
     runtime: {
-      $ref: '#/definitions/EntryRuntime',
+      anyOf: [
+        {
+          $ref: '#/definitions/EntryRuntime',
+        },
+        {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/EntryRuntime',
+          },
+        },
+      ],
     },
     runtimePlugins: runtimePlugin,
     shareScope: {
@@ -2128,13 +2122,71 @@ function validate19(
                       valid2 = valid2 || _valid0;
                     }
                     if (!valid2) {
-                      const err3 = {
+                      const _errs13 = errors;
+                      if (errors === _errs13) {
+                        if (Array.isArray(data4)) {
+                          var valid3 = true;
+                          const len0 = data4.length;
+                          for (let i0 = 0; i0 < len0; i0++) {
+                            let data5 = data4[i0];
+                            const _errs15 = errors;
+                            if (errors === _errs15) {
+                              if (typeof data5 === 'string') {
+                                if (data5.length < 1) {
+                                  const err3 = {
+                                    params: {},
+                                  };
+                                  if (vErrors === null) {
+                                    vErrors = [err3];
+                                  } else {
+                                    vErrors.push(err3);
+                                  }
+                                  errors++;
+                                }
+                              } else {
+                                const err4 = {
+                                  params: {
+                                    type: 'string',
+                                  },
+                                };
+                                if (vErrors === null) {
+                                  vErrors = [err4];
+                                } else {
+                                  vErrors.push(err4);
+                                }
+                                errors++;
+                              }
+                            }
+                            var valid3 = _errs15 === errors;
+                            if (!valid3) {
+                              break;
+                            }
+                          }
+                        } else {
+                          const err5 = {
+                            params: {
+                              type: 'array',
+                            },
+                          };
+                          if (vErrors === null) {
+                            vErrors = [err5];
+                          } else {
+                            vErrors.push(err5);
+                          }
+                          errors++;
+                        }
+                      }
+                      var _valid0 = _errs13 === errors;
+                      valid2 = valid2 || _valid0;
+                    }
+                    if (!valid2) {
+                      const err6 = {
                         params: {},
                       };
                       if (vErrors === null) {
-                        vErrors = [err3];
+                        vErrors = [err6];
                       } else {
-                        vErrors.push(err3);
+                        vErrors.push(err6);
                       }
                       errors++;
                       validate19.errors = vErrors;

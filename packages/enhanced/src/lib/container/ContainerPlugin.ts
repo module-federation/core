@@ -43,6 +43,7 @@ const PLUGIN_NAME = 'ContainerPlugin';
 class ContainerPlugin {
   _options: containerPlugin.ContainerPluginOptions;
   name: string;
+
   /**
    * @param {containerPlugin.ContainerPluginOptions} options options
    */
@@ -188,6 +189,13 @@ class ContainerPlugin {
         compilation: Compilation,
         callback: (error?: WebpackError | null | undefined) => void,
       ) => {
+        let entryOptions;
+        if (typeof compilation.options.entry === 'function') {
+          entryOptions = compilation.options.entry();
+        } else {
+          entryOptions = compilation.options.entry;
+        }
+
         const dep = new ContainerEntryDependency(
           name,
           //@ts-ignore
@@ -198,34 +206,47 @@ class ContainerPlugin {
         const hasSingleRuntimeChunk =
           compilation.options?.optimization?.runtimeChunk;
         dep.loc = { name };
-        compilation.addEntry(
-          compilation.options.context || '',
-          dep,
-          {
-            name,
-            filename,
-            runtime: hasSingleRuntimeChunk ? false : runtime,
-            library,
-          },
-          (error: WebpackError | null | undefined) => {
-            if (error) return callback(error);
-            if (hasSingleRuntimeChunk) {
-              // Add to single runtime chunk as well.
-              // Allows for singleton runtime graph with all needed runtime modules for federation
-              addEntryToSingleRuntimeChunk();
-            } else {
-              callback();
-            }
-          },
-        );
+        //@ts-ignore
+        const addEntryToSingleRuntimeChunk = ({
+          runtime,
+          layer,
+        }): Promise<void> => {
+          let cName: string | undefined;
+          if (runtime === false) {
+            cName = name;
+          } else if (runtime === undefined) {
+            cName = name + '_partial';
+          } else if (runtime) {
+            cName = runtime + '_partial';
+          } else {
+            cName = undefined;
+          }
 
-        // Function to add entry for undefined runtime
-        const addEntryToSingleRuntimeChunk = () => {
+          return new Promise<void>((resolve, reject) => {
+            compilation.addEntry(
+              compilation.options.context || '',
+              dep,
+              {
+                name: cName ? cName : undefined,
+                runtime: runtime,
+                library,
+                layer: layer,
+              },
+              (error: WebpackError | null | undefined) => {
+                if (error) return reject(error);
+                resolve();
+              },
+            );
+          });
+        };
+
+        const addEntryToSingleRuntimeChunkNorm = () => {
           compilation.addEntry(
             compilation.options.context || '',
+            //@ts-ignore
             dep,
             {
-              name: name ? name + '_partial' : undefined, // give unique name name
+              name: name ? name + '_partial' : undefined,
               runtime: undefined,
               library,
             },
@@ -235,6 +256,51 @@ class ContainerPlugin {
             },
           );
         };
+
+        if (!Array.isArray(runtime)) {
+          compilation.addEntry(
+            compilation.options.context || '',
+            dep,
+            {
+              name,
+              filename,
+              runtime: hasSingleRuntimeChunk ? false : runtime,
+              library,
+            },
+            (error: WebpackError | null | undefined) => {
+              if (error) return callback(error);
+              if (hasSingleRuntimeChunk) {
+                addEntryToSingleRuntimeChunkNorm();
+              }
+              callback();
+            },
+          );
+        } else {
+          compilation.addEntry(
+            compilation.options.context || '',
+            dep,
+            {
+              name,
+              filename,
+              //@ts-ignore
+              runtime: false,
+              library,
+            },
+            async (error: WebpackError | null | undefined) => {
+              const entries = new Set(
+                Object.entries(await entryOptions).map(([key, entry]) => ({
+                  runtime: entry.runtime,
+                  layer: entry.layer,
+                })),
+              );
+              if (error) return callback(error);
+              for (const rt of entries) {
+                await addEntryToSingleRuntimeChunk(rt);
+              }
+              callback();
+            },
+          );
+        }
       },
     );
 
