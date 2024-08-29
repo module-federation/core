@@ -51,7 +51,7 @@ apps/**/dist
 
 **/@mf-types
 **/@mf-types/**
-**/cypress
+**/cypress/downloads
 
 # test cases
 !packages/enhanced/test/configCases/**/**/node_modules
