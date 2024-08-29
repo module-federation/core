@@ -378,6 +378,7 @@ class FederationRuntimePlugin {
         ...this.options,
       };
     }
+
     if (this.options && !this.options?.name) {
       //! the instance may get the same one if the name is the same https://github.com/module-federation/core/blob/main/packages/runtime/src/index.ts#L18
       this.options.name =
