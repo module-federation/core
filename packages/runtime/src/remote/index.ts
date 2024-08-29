@@ -2,9 +2,10 @@ import {
   isBrowserEnv,
   warn,
   composeKeyWithSeparator,
+  ModuleInfo,
+  GlobalModuleInfo,
 } from '@module-federation/sdk';
 import { Global, getInfoWithoutType, globalLoading } from '../global';
-import type { ModuleInfo, GlobalModuleInfo } from '@module-federation/sdk';
 import {
   Options,
   UserOptions,
@@ -561,6 +562,7 @@ export class RemoteHandler {
           if (remoteKey) {
             delete hostGlobalSnapshot.remotesInfo[remoteKey];
             if (
+              //eslint-disable-next-line no-extra-boolean-cast
               Boolean(Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey])
             ) {
               delete Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey];

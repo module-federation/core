@@ -9,11 +9,3 @@ export function getBuilderId(): string {
       FEDERATION_BUILD_IDENTIFIER
     : '';
 }
-
-export function isDebugMode(): boolean {
-  return typeof FEDERATION_DEBUG !== 'undefined' && Boolean(FEDERATION_DEBUG);
-}
-
-export function isBrowserEnv(): boolean {
-  return typeof window !== 'undefined';
-}

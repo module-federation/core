@@ -1,4 +1,4 @@
-import { createLink, createScript } from '@module-federation/sdk';
+import { createLink, createScript, safeToString } from '@module-federation/sdk';
 import {
   PreloadAssets,
   PreloadConfig,
@@ -10,7 +10,6 @@ import {
 } from '../type';
 import { matchRemote } from './manifest';
 import { assert } from './logger';
-import { safeToString } from './tool';
 import { FederationHost } from '../core';
 import { getRemoteEntry } from './load';
 
