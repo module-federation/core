@@ -1,5 +1,5 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import CustomRuntimeModule from './CustomRuntimeModule';
+import EmbedFederationRuntimeModule from './EmbedFederationRuntimeModule';
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -11,7 +11,7 @@ const EntryDependency = require(
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
-class CustomRuntimePlugin {
+class EmbedFederationRuntimePlugin {
   private bundlerRuntimePath: string;
 
   constructor(path: string) {
@@ -20,7 +20,7 @@ class CustomRuntimePlugin {
 
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
-      'CustomRuntimePlugin',
+      'EmbedFederationRuntimePlugin',
       (compilation: Compilation) => {
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (chunk.id === 'build time chunk') {
@@ -32,7 +32,7 @@ class CustomRuntimePlugin {
           }
 
           runtimeRequirements.add('embeddedFederationRuntime');
-          const runtimeModule = new CustomRuntimeModule(
+          const runtimeModule = new EmbedFederationRuntimeModule(
             this.bundlerRuntimePath,
           );
 
@@ -41,10 +41,10 @@ class CustomRuntimePlugin {
         };
         compilation.hooks.runtimeRequirementInTree
           .for(federationGlobal)
-          .tap('CustomRuntimePlugin', handler);
+          .tap('EmbedFederationRuntimePlugin', handler);
       },
     );
   }
 }
 
-export default CustomRuntimePlugin;
+export default EmbedFederationRuntimePlugin;

@@ -11,11 +11,11 @@ const ConcatenatedModule = require(
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
-class CustomRuntimeModule extends RuntimeModule {
+class EmbedFederationRuntimeModule extends RuntimeModule {
   private bundlerRuntimePath: string;
 
   constructor(bundlerRuntimePath: string) {
-    super('CustomRuntimeModule', RuntimeModule.STAGE_ATTACH);
+    super('EmbedFederationRuntimeModule', RuntimeModule.STAGE_ATTACH);
     this.bundlerRuntimePath = bundlerRuntimePath;
   }
 
@@ -93,4 +93,4 @@ class CustomRuntimeModule extends RuntimeModule {
   }
 }
 
-export default CustomRuntimeModule;
+export default EmbedFederationRuntimeModule;
