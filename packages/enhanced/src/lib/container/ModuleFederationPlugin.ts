@@ -31,7 +31,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _statsPlugin?: StatsPlugin;
   /**
-   * @param {ModuleFederationCompilerPluginOptions} options options
+   * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options options
    */
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this._options = options;
