@@ -73,9 +73,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     if (options.dts !== false) {
       new DtsPlugin(options).apply(compiler);
     }
-    if (options.embedRuntime) {
-      new FederationRuntimePlugin(options).apply(compiler);
-    }
+
+    new FederationRuntimePlugin(options).apply(compiler);
+
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =
       options.remoteType ||
