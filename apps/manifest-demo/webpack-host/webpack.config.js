@@ -56,9 +56,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     scriptType: 'text/javascript',
   };
   config.optimization = {
-    runtimeChunk: {
-      name: (entrypoint) => `runtime~${entrypoint.name}`,
-    },
+    runtimeChunk: 'single',
     minimize: false,
     moduleIds: 'named',
     chunkIds: 'named',
