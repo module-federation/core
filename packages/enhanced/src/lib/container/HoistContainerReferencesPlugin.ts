@@ -17,7 +17,10 @@ const ConcatenatedModule = require(
 ) as typeof import('webpack/lib/optimize/ConcatenatedModule');
 
 const PLUGIN_NAME = 'HoistContainerReferences';
-
+/**
+ * This class is used to hoist container references in the code.
+ * @constructor
+ */
 export class HoistContainerReferences implements WebpackPluginInstance {
   private readonly containerName: string;
   private readonly bundlerRuntimePath?: string;

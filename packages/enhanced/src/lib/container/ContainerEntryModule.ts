@@ -56,7 +56,11 @@ class ContainerEntryModule extends Module {
   private _exposes: [string, ExposeOptions][];
   private _shareScope: string;
   private _injectRuntimeEntry: string;
-
+  /**
+   * @param {string} name container entry name
+   * @param {[string, ExposeOptions][]} exposes list of exposed modules
+   * @param {string} shareScope name of the share scope
+   */
   constructor(
     name: string,
     exposes: [string, ExposeOptions][],

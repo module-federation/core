@@ -328,7 +328,6 @@ class FederationRuntimePlugin {
       compiler.options.resolve.alias['@module-federation/runtime$'] =
         runtimePath;
     }
-
     if (!compiler.options.resolve.alias['@module-federation/runtime-tools$']) {
       compiler.options.resolve.alias['@module-federation/runtime-tools$'] =
         this.options?.implementation || RuntimeToolsPath;

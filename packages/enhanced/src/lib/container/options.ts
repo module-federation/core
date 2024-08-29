@@ -6,6 +6,8 @@ export type ContainerOptionsFormat<T> =
   | (string | Record<string, string | string[] | T>)[]
   | Record<string, string | string[] | T>;
 
+/** @template T @typedef {(string | Record<string, string | string[] | T>)[] | Record<string, string | string[] | T>} ContainerOptionsFormat */
+
 /**
  * @template T
  * @template N
