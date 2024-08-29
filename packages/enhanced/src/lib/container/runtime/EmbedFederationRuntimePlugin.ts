@@ -37,7 +37,6 @@ class EmbedFederationRuntimePlugin {
           );
 
           compilation.addRuntimeModule(chunk, runtimeModule);
-          console.log(`Custom runtime module added to chunk: ${chunk.name}`);
         };
         compilation.hooks.runtimeRequirementInTree
           .for(federationGlobal)
