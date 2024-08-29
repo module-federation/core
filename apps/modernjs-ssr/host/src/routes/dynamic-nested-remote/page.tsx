@@ -1,4 +1,3 @@
-//@ts-nocheck
 import React from 'react';
 import { loadRemote, registerRemotes } from '@modern-js/runtime/mf';
 
