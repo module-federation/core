@@ -1,5 +1,23 @@
 # @module-federation/bridge-vue3
 
+## 0.6.0
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.0
+
+## 0.5.2
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.5.2
+
+## 0.5.1
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.5.1
+
 ## 0.5.0
 
 ### Patch Changes

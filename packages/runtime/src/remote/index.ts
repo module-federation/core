@@ -15,6 +15,7 @@ import {
   Remote,
   RemoteInfo,
   RemoteEntryExports,
+  CallFrom,
 } from '../type';
 import { FederationHost } from '../core';
 import {
@@ -98,7 +99,7 @@ export class RemoteHandler {
           id: string;
           error: unknown;
           options?: any;
-          from: 'build' | 'runtime';
+          from: CallFrom;
           lifecycle: 'onLoad' | 'beforeRequest';
           origin: FederationHost;
         },
@@ -179,7 +180,7 @@ export class RemoteHandler {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
     id: string,
-    options?: { loadFactory?: boolean; from: 'build' | 'runtime' },
+    options?: { loadFactory?: boolean; from: CallFrom },
   ): Promise<T | null> {
     const { host } = this;
     try {

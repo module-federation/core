@@ -1502,6 +1502,9 @@ importers:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../../packages/enhanced
+      react-router-dom:
+        specifier: ^6.24.1
+        version: 6.24.1(react-dom@18.3.1)(react@18.3.1)
     devDependencies:
       '@rsbuild/core':
         specifier: ^0.6.15
@@ -1928,6 +1931,12 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../sdk
+      '@types/semver':
+        specifier: 7.5.8
+        version: 7.5.8
+      semver:
+        specifier: 7.6.3
+        version: 7.6.3
     devDependencies:
       typescript:
         specifier: ^5.2.2
@@ -2617,7 +2626,11 @@ importers:
         specifier: ^3.2.1
         version: 3.2.1(rollup@2.79.1)
 
-  webpack: {}
+  webpack:
+    dependencies:
+      enhanced-resolve:
+        specifier: ^5.17.1
+        version: 5.17.1
 
 packages:
 
@@ -19547,7 +19560,6 @@ packages:
 
   /@types/semver@7.5.8:
     resolution: {integrity: sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==}
-    dev: true
 
   /@types/send@0.17.4:
     resolution: {integrity: sha512-x2EM6TJOybec7c52BX0ZspPodMsQUd5L6PRwOunVyVUhXiBSKf3AezDL8Dgvgt5o0UfKNfuA0eMLr2wLT4AiBA==}

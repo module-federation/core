@@ -13,35 +13,19 @@ import {
 } from '@module-federation/sdk';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
-import schema from '../../schemas/container/ModuleFederationPlugin';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
 import { ExternalsType } from 'webpack/declarations/WebpackOptions';
+import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
     'webpack/schemas/plugins/container/ExternalsType.check.js',
   ),
 ) as typeof import('webpack/schemas/plugins/container/ExternalsType.check.js');
-
-const createSchemaValidation = require(
-  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
-) as typeof import('webpack/lib/util/create-schema-validation');
-//@ts-ignore
-import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
-
-const validate = createSchemaValidation(
-  // just use schema to validate
-  () => true,
-  () => schema,
-  {
-    name: 'Module Federation Plugin',
-    baseDataPath: 'options',
-  },
-);
 
 class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -50,14 +34,13 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    * @param {ModuleFederationCompilerPluginOptions} options options
    */
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
-    validate(options);
     this._options = options;
   }
 
   private _patchBundlerConfig(compiler: Compiler): void {
     const { name } = this._options;
     const MFPluginNum = compiler.options.plugins.filter(
-      (p) => p && p.name === 'ModuleFederationPlugin',
+      (p: WebpackPluginInstance) => p && p['name'] === 'ModuleFederationPlugin',
     ).length;
     if (name && MFPluginNum < 2) {
       new compiler.webpack.DefinePlugin({

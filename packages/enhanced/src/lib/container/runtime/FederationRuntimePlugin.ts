@@ -1,4 +1,4 @@
-import type { Compiler, Chunk } from 'webpack';
+import type { Compiler, Chunk, WebpackPluginInstance } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
@@ -13,6 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
 import CustomRuntimePlugin from './CustomRuntimePlugin';
+import pBtoa from 'btoa';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -115,7 +116,7 @@ class FederationRuntimePlugin {
               `const pluginsToAdd = [`,
               Template.indent(
                 runtimePluginNames.map(
-                  (item) => `${item} ? ${item}() : false,`,
+                  (item) => `${item} ? (${item}.default || ${item})() : false,`,
                 ),
               ),
               `].filter(Boolean);`,
@@ -162,12 +163,21 @@ class FederationRuntimePlugin {
       return '';
     }
 
-    this.entryFilePath = FederationRuntimePlugin.getFilePath(
-      this.options.name!,
-      this.options.runtimePlugins!,
-      this.bundlerRuntimePath,
-      this.options.embedRuntime,
-    );
+    if (!this.options?.virtualRuntimeEntry) {
+      this.entryFilePath = FederationRuntimePlugin.getFilePath(
+        this.options.name!,
+        this.options.runtimePlugins!,
+        this.bundlerRuntimePath,
+        this.options.embedRuntime,
+      );
+    } else {
+      this.entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
+        FederationRuntimePlugin.getTemplate(
+          this.options.runtimePlugins!,
+          this.bundlerRuntimePath,
+        ),
+      )}`;
+    }
     return this.entryFilePath;
   }
 
@@ -192,7 +202,9 @@ class FederationRuntimePlugin {
   }
 
   prependEntry(compiler: Compiler) {
-    this.ensureFile();
+    if (!this.options?.virtualRuntimeEntry) {
+      this.ensureFile();
+    }
     const entryFilePath = this.getFilePath();
 
     modifyEntry({
@@ -298,25 +310,29 @@ class FederationRuntimePlugin {
   }
 
   apply(compiler: Compiler) {
-    const useModuleFederationPlugin = compiler.options.plugins.find((p) => {
-      if (typeof p !== 'object' || !p) {
-        return false;
-      }
-      return p['name'] === 'ModuleFederationPlugin';
-    });
+    const useModuleFederationPlugin = compiler.options.plugins.find(
+      (p: WebpackPluginInstance) => {
+        if (typeof p !== 'object' || !p) {
+          return false;
+        }
+        return p['name'] === 'ModuleFederationPlugin';
+      },
+    );
 
     if (useModuleFederationPlugin && !this.options) {
       // @ts-ignore
       this.options = useModuleFederationPlugin._options;
     }
 
-    const useContainerPlugin = compiler.options.plugins.find((p) => {
-      if (typeof p !== 'object' || !p) {
-        return false;
-      }
+    const useContainerPlugin = compiler.options.plugins.find(
+      (p: WebpackPluginInstance) => {
+        if (typeof p !== 'object' || !p) {
+          return false;
+        }
 
-      return p['name'] === 'ContainerPlugin';
-    });
+        return p['name'] === 'ContainerPlugin';
+      },
+    );
 
     if (useContainerPlugin && !this.options) {
       // @ts-ignore

@@ -202,6 +202,10 @@ export interface ModuleFederationPluginOptions {
    */
   shareScope?: string;
   /**
+   * load shared strategy(defaults to 'version-first').
+   */
+  shareStrategy?: SharedStrategy;
+  /**
    * Modules that should be shared in the share scope. When provided, property names are used to match requested modules in this compilation.
    */
   shared?: Shared;
@@ -222,8 +226,9 @@ export interface ModuleFederationPluginOptions {
 
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
-  async?: boolean;
+  async?: boolean | AsyncBoundaryOptions;
   embedRuntime?: boolean;
+  virtualRuntimeEntry?: boolean;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.
@@ -345,6 +350,8 @@ export interface SharedObject {
    */
   [k: string]: SharedConfig | SharedItem;
 }
+
+export type SharedStrategy = 'version-first' | 'loaded-first';
 /**
  * Advanced configuration for modules that should be shared in the share scope.
  */
@@ -373,6 +380,10 @@ export interface SharedConfig {
    * Share scope name.
    */
   shareScope?: string;
+  /**
+   * load shared strategy(defaults to 'version-first').
+   */
+  shareStrategy?: SharedStrategy;
   /**
    * Allow only a single version of the shared module in share scope (disabled by default).
    */

@@ -51,6 +51,7 @@ module.exports = composePlugins(
             requiredVersion: '^18.2.0',
           },
         },
+        shareStrategy: 'loaded-first',
         dev: {
           disableLiveReload: true,
         },
