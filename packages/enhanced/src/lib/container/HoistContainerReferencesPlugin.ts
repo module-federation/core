@@ -120,7 +120,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
               continue;
             }
           }
-          if (connection?.module && !collectedModules.has(connection.module)) {
+          if (connection.module && !collectedModules.has(connection.module)) {
             collectedModules.add(connection.module);
             stack.push(connection.module);
           }
