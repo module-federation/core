@@ -1,11 +1,11 @@
-import type {
+import {
   RemoteWithEntry,
   ModuleInfo,
   RemoteEntryType,
+  isBrowserEnv,
 } from '@module-federation/sdk';
-import { Remote, RemoteInfoOptionalVersion, UserOptions } from '../type';
+import { Remote, RemoteInfoOptionalVersion } from '../type';
 import { warn } from './logger';
-import { isBrowserEnv } from './env';
 
 export function addUniqueItem(arr: Array<string>, item: string): Array<string> {
   if (arr.findIndex((name) => name === item) === -1) {

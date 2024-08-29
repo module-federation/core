@@ -1,5 +1,3 @@
-export { isBrowserEnv, isDebugMode } from '@module-federation/sdk';
-
 export function isDevelopmentMode(): boolean {
   return true;
 }
