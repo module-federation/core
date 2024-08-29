@@ -8,6 +8,7 @@ import type {
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { RuntimeSpec } from 'webpack/lib/util/runtime';
 import type ExportsInfo from 'webpack/lib/ExportsInfo';
+import ContainerEntryModule from './ContainerEntryModule';
 
 const { NormalModule } = require(
   normalizeWebpackPath('webpack'),
@@ -168,9 +169,13 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         }
       }
     } else {
-      runtimeModule = moduleGraph.getModule(
-        partialChunk.entryModule.dependencies[1],
-      );
+      const entryModules =
+        chunkGraph.getChunkEntryModulesIterable(partialChunk);
+      runtimeModule = entryModules
+        ? Array.from(entryModules).find(
+            (module) => module instanceof ContainerEntryModule,
+          )
+        : undefined;
     }
 
     if (!runtimeModule) {
