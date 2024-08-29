@@ -324,10 +324,19 @@ class FederationRuntimePlugin {
       ...compiler.options.resolve.alias,
     };
 
-    if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
-      compiler.options.resolve.alias['@module-federation/runtime$'] =
-        runtimePath;
+    if (this.options?.embedRuntime) {
+      // should use normal module replacement instead?
+      if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
+        compiler.options.resolve.alias['@module-federation/runtime$'] =
+          runtimePath;
+      }
+    } else {
+      if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
+        compiler.options.resolve.alias['@module-federation/runtime$'] =
+          runtimePath;
+      }
     }
+
     if (!compiler.options.resolve.alias['@module-federation/runtime-tools$']) {
       compiler.options.resolve.alias['@module-federation/runtime-tools$'] =
         this.options?.implementation || RuntimeToolsPath;

@@ -31,7 +31,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _statsPlugin?: StatsPlugin;
   /**
-   * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options options
+   * @param {ModuleFederationCompilerPluginOptions} options options
    */
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this._options = options;
@@ -73,7 +73,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     if (options.dts !== false) {
       new DtsPlugin(options).apply(compiler);
     }
-    new FederationRuntimePlugin(options).apply(compiler);
+    if (options.embedRuntime) {
+      new FederationRuntimePlugin(options).apply(compiler);
+    }
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =
       options.remoteType ||
