@@ -1,4 +1,5 @@
 import type { CreateScriptHookReturn } from '@module-federation/sdk';
+import { isBrowserEnv } from '@module-federation/sdk';
 import {
   Options,
   PreloadRemoteArgs,
@@ -25,7 +26,6 @@ import {
 } from './utils/hooks';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
 import { snapshotPlugin } from './plugins/snapshot';
-import { isBrowserEnv } from './utils/env';
 import { getRemoteInfo } from './utils/load';
 import { DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
