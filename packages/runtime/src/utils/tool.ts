@@ -50,15 +50,6 @@ export async function safeWrapper<T extends (...args: Array<any>) => any>(
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function safeToString(info: any): string {
-  try {
-    return JSON.stringify(info, null, 2);
-  } catch (e) {
-    return '';
-  }
-}
-
 export function isObject(val: any): boolean {
   return val && typeof val === 'object';
 }
