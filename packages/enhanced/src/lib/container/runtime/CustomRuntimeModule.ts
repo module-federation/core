@@ -23,44 +23,6 @@ class CustomRuntimeModule extends RuntimeModule {
     return 'webpack/runtime/embed/federation';
   }
 
-  // if use child compiler to embed entry
-  // override generate(): string | null {
-  //   if (!this.bundledCode) return null;
-  //   const { code: transformedCode } = transformSync(this.bundledCode, {
-  //     jsc: {
-  //       parser: {
-  //         syntax: 'ecmascript',
-  //         jsx: false,
-  //       },
-  //       target: 'es2022',
-  //       minify: {
-  //         compress: {
-  //           unused: false,
-  //           dead_code: false,
-  //         },
-  //         mangle: false,
-  //         format: {
-  //           comments: false,
-  //         },
-  //       },
-  //     },
-  //   });
-  //
-  //   return Template.asString([
-  //     transformedCode,
-  //     `var federation = federation.default || federation;`,
-  //     `var prevFederation = ${federationGlobal}`,
-  //     `${federationGlobal} = {}`,
-  //     `for (var key in federation) {`,
-  //     Template.indent(`${federationGlobal}[key] = federation[key];`),
-  //     `}`,
-  //     `for (var key in prevFederation) {`,
-  //     Template.indent(`${federationGlobal}[key] = prevFederation[key];`),
-  //     `}`,
-  //     'federation = undefined;',
-  //   ]);
-  // }
-
   override generate(): string | null {
     const { compilation, chunk, chunkGraph, bundlerRuntimePath } = this;
     if (!chunk || !chunkGraph || !compilation) {
