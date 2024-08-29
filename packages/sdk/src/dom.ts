@@ -29,132 +29,94 @@ export function createScript(info: {
   attrs?: Record<string, any>;
   needDeleteScript?: boolean;
   createScriptHook?: CreateScriptHookDom;
-  maxRetries?: number; // 新增：最大重试次数
-  retryDelay?: number; // 新增：重试延迟（毫秒）
-}): Promise<{ script: HTMLScriptElement; needAttach: boolean }> {
-  const maxRetries = info.maxRetries || 3; // 默认重试3次
-  const retryDelay = info.retryDelay || 1000; // 默认延迟1秒
+}): { script: HTMLScriptElement; needAttach: boolean } {
+  // Retrieve the existing script element by its src attribute
+  let script: HTMLScriptElement | null = null;
+  let needAttach = true;
+  let timeout = 20000;
+  let timeoutId: NodeJS.Timeout;
+  const scripts = document.getElementsByTagName('script');
+  for (let i = 0; i < scripts.length; i++) {
+    const s = scripts[i];
+    const scriptSrc = s.getAttribute('src');
+    if (scriptSrc && isStaticResourcesEqual(scriptSrc, info.url)) {
+      script = s;
+      needAttach = false;
+      break;
+    }
+  }
 
-  console.log('------ createScript url maxRetries', info.url, maxRetries);
-  return new Promise((resolve, reject) => {
-    const attemptLoad = (retryCount: number) => {
-      // Retrieve the existing script element by its src attribute
-      let script: HTMLScriptElement | null = null;
-      let needAttach = true;
-      let timeout = 20000;
-      let timeoutId: NodeJS.Timeout;
-      const scripts = document.getElementsByTagName('script');
+  if (!script) {
+    script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = info.url;
+    let createScriptRes: CreateScriptHookReturnDom = undefined;
+    if (info.createScriptHook) {
+      createScriptRes = info.createScriptHook(info.url, info.attrs);
 
-      for (let i = 0; i < scripts.length; i++) {
-        const s = scripts[i];
-        const scriptSrc = s.getAttribute('src');
-        if (scriptSrc && isStaticResourcesEqual(scriptSrc, info.url)) {
-          script = s;
-          needAttach = false;
-          break;
+      if (createScriptRes instanceof HTMLScriptElement) {
+        script = createScriptRes;
+      } else if (typeof createScriptRes === 'object') {
+        if ('script' in createScriptRes && createScriptRes.script) {
+          script = createScriptRes.script;
+        }
+        if ('timeout' in createScriptRes && createScriptRes.timeout) {
+          timeout = createScriptRes.timeout;
         }
       }
-
-      if (!script) {
-        script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = info.url;
-        let createScriptRes: CreateScriptHookReturnDom = undefined;
-        if (info.createScriptHook) {
-          createScriptRes = info.createScriptHook(info.url, info.attrs);
-
-          if (createScriptRes instanceof HTMLScriptElement) {
-            script = createScriptRes;
-          } else if (typeof createScriptRes === 'object') {
-            if ('script' in createScriptRes && createScriptRes.script) {
-              script = createScriptRes.script;
-            }
-            if ('timeout' in createScriptRes && createScriptRes.timeout) {
-              timeout = createScriptRes.timeout;
-            }
-          }
-        }
-        const attrs = info.attrs;
-        if (attrs && !createScriptRes) {
-          Object.keys(attrs).forEach((name) => {
-            if (script) {
-              if (name === 'async' || name === 'defer') {
-                script[name] = attrs[name];
-                // Attributes that do not exist are considered overridden
-              } else if (!script.getAttribute(name)) {
-                script.setAttribute(name, attrs[name]);
-              }
-            }
-          });
-        }
-      }
-
-      const onScriptComplete = (
-        prev: OnErrorEventHandler | GlobalEventHandlers['onload'] | null,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        event: any,
-      ): void => {
-        clearTimeout(timeoutId);
-        // Prevent memory leaks in IE.
+    }
+    const attrs = info.attrs;
+    if (attrs && !createScriptRes) {
+      Object.keys(attrs).forEach((name) => {
         if (script) {
-          console.log('------ onScriptComplete script', script);
-
-          script.onerror = null;
-          script.onload = null;
-          safeWrapper(() => {
-            const { needDeleteScript = true } = info;
-            if (needDeleteScript) {
-              script?.parentNode && script.parentNode.removeChild(script);
-            }
-          });
-          if (prev) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const res = (prev as any)(event);
-            info?.cb?.();
-            return res;
+          if (name === 'async' || name === 'defer') {
+            script[name] = attrs[name];
+            // Attributes that do not exist are considered overridden
+          } else if (!script.getAttribute(name)) {
+            script.setAttribute(name, attrs[name]);
           }
         }
-        info?.cb?.();
-      };
+      });
+    }
+  }
 
-      script.onerror = (event) => {
-        console.log('------ onScriptComplete script onError ', retryCount);
-        if (retryCount < maxRetries) {
-          console.warn(
-            `Script load failed, retrying (${retryCount + 1}/${maxRetries}): ${info.url}`,
-          );
-          setTimeout(() => attemptLoad(retryCount + 1), retryDelay);
-        } else {
-          onScriptComplete(script.onerror, event);
-          reject(
-            new Error(
-              `Failed to load script after ${maxRetries} attempts: ${info.url}`,
-            ),
-          );
+  const onScriptComplete = (
+    prev: OnErrorEventHandler | GlobalEventHandlers['onload'] | null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    event: any,
+  ): void => {
+    clearTimeout(timeoutId);
+    // Prevent memory leaks in IE.
+    if (script) {
+      script.onerror = null;
+      script.onload = null;
+      safeWrapper(() => {
+        const { needDeleteScript = true } = info;
+        if (needDeleteScript) {
+          script?.parentNode && script.parentNode.removeChild(script);
         }
-      };
+      });
+      if (prev) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const res = (prev as any)(event);
+        info?.cb?.();
+        return res;
+      }
+    }
+    info?.cb?.();
+  };
 
-      script.onload = (event) => {
-        console.log('------ onScriptComplete script onload ', info.url);
-        onScriptComplete(script.onload, event);
-        resolve({ script, needAttach });
-      };
+  script.onerror = onScriptComplete.bind(null, script.onerror);
+  script.onload = onScriptComplete.bind(null, script.onload);
 
-      timeoutId = setTimeout(() => {
-        onScriptComplete(
-          null,
-          new Error(`Remote script "${info.url}" time-outed.`),
-        );
-      }, timeout);
+  timeoutId = setTimeout(() => {
+    onScriptComplete(
+      null,
+      new Error(`Remote script "${info.url}" time-outed.`),
+    );
+  }, timeout);
 
-      return { script, needAttach };
-    };
-
-    attemptLoad(0);
-  });
-
-  // script.onerror = onScriptComplete.bind(null, script.onerror);
-  // script.onload = onScriptComplete.bind(null, script.onload);
+  return { script, needAttach };
 }
 
 export function createLink(info: {
@@ -247,14 +209,11 @@ export function loadScript(
   info: {
     attrs?: Record<string, any>;
     createScriptHook?: CreateScriptHookDom;
-    maxRetries?: number;
-    retryDelay?: number;
   },
 ) {
-  const { attrs = {}, createScriptHook, maxRetries, retryDelay } = info;
-
-  return new Promise<void>((resolve, reject) => {
-    createScript({
+  const { attrs = {}, createScriptHook } = info;
+  return new Promise<void>((resolve, _reject) => {
+    const { script, needAttach } = createScript({
       url,
       cb: resolve,
       attrs: {
@@ -263,14 +222,7 @@ export function loadScript(
       },
       createScriptHook,
       needDeleteScript: true,
-      maxRetries,
-      retryDelay,
-    })
-      .then(({ script, needAttach }) => {
-        if (needAttach) {
-          document.head.appendChild(script);
-        }
-      })
-      .catch(reject);
+    });
+    needAttach && document.head.appendChild(script);
   });
 }
