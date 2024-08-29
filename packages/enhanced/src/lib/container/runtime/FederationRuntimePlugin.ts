@@ -391,9 +391,7 @@ class FederationRuntimePlugin {
         '.cjs.js',
         '.esm.js',
       );
-      new CustomRuntimePlugin(this.bundlerRuntimePath, TEMP_DIR).apply(
-        compiler,
-      );
+      new CustomRuntimePlugin(this.bundlerRuntimePath).apply(compiler);
       new HoistContainerReferences(
         this.options.name ? this.options.name + '_partial' : undefined,
         this.bundlerRuntimePath,
