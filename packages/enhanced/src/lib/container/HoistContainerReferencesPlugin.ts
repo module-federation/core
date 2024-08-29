@@ -176,6 +176,11 @@ export class HoistContainerReferences implements WebpackPluginInstance {
             (module) => module instanceof ContainerEntryModule,
           )
         : undefined;
+      if (runtimeModule && runtimeModule.dependencies.length > 1) {
+        runtimeModule = moduleGraph.getModule(runtimeModule.dependencies[1]);
+      } else {
+        runtimeModule = undefined;
+      }
     }
 
     if (!runtimeModule) {
