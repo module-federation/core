@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
-import { Compiler } from 'webpack';
+import { Compiler, WebpackPluginInstance } from 'webpack';
 import { startServer, stopServer } from '../lib/server';
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
 import {
@@ -40,7 +40,8 @@ export class FederatedTypesPlugin {
 
     if (
       !compiler.options.plugins.some(
-        (p) => SUPPORTED_PLUGINS.indexOf(p?.constructor.name ?? '') !== -1,
+        (p: WebpackPluginInstance) =>
+          SUPPORTED_PLUGINS.indexOf(p?.constructor.name ?? '') !== -1,
       )
     ) {
       this.logger.error(

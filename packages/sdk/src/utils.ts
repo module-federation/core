@@ -218,6 +218,14 @@ const warn = (msg: Parameters<typeof console.warn>[0]): void => {
   console.warn(`${LOG_CATEGORY}: ${msg}`);
 };
 
+function safeToString(info: any): string {
+  try {
+    return JSON.stringify(info, null, 2);
+  } catch (e) {
+    return '';
+  }
+}
+
 export {
   parseEntry,
   logger,
@@ -230,4 +238,5 @@ export {
   assert,
   error,
   warn,
+  safeToString,
 };

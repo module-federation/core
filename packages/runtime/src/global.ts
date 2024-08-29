@@ -6,8 +6,12 @@ import {
   Optional,
 } from './type';
 import { getFMId } from './utils/tool';
-import { GlobalModuleInfo, ModuleInfo } from '@module-federation/sdk';
-import { getBuilderId, isDebugMode } from './utils/env';
+import {
+  GlobalModuleInfo,
+  ModuleInfo,
+  isDebugMode,
+} from '@module-federation/sdk';
+import { getBuilderId } from './utils/env';
 import { warn } from './utils/logger';
 import { FederationRuntimePlugin } from './type/plugin';
 

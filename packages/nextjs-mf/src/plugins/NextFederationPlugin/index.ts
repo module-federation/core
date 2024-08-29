@@ -9,7 +9,7 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
 } from '@module-federation/utilities';
-import type { Compiler } from 'webpack';
+import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
@@ -88,7 +88,8 @@ export class NextFederationPlugin {
 
   private validateOptions(compiler: Compiler): boolean {
     const manifestPlugin = compiler.options.plugins.find(
-      (p) => p?.constructor.name === 'BuildManifestPlugin',
+      (p: WebpackPluginInstance) =>
+        p?.constructor.name === 'BuildManifestPlugin',
     );
 
     if (manifestPlugin) {
@@ -196,6 +197,7 @@ export class NextFederationPlugin {
         : { manifest: { filePath: '/static/chunks' } }),
       // nextjs project needs to add config.watchOptions = ['**/node_modules/**', '**/@mf-types/**'] to prevent loop types update
       dts: this._options.dts ?? false,
+      shareStrategy: this._options.shareStrategy ?? 'loaded-first',
     };
   }
 

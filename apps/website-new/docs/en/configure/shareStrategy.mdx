@@ -1,0 +1,11 @@
+# shareStrategy
+
+- Type: `'version-first' | 'loaded-first'`
+- Required: No
+- Default: `'version-first'`
+
+Control the loading strategy of shared dependencies:
+
+- `'version-first'`: Version priority, ensuring that the highest version of shared dependencies is used. After setting, all *remotes* entry files will be automatically loaded and **register** the corresponding shared dependencies to ensure that all shared dependency versions can be obtained. This strategy is recommended when there are strict version requirements.
+
+- `'loaded-first'`: Prioritize reuse, greatly reducing redundant dependency requests. After setting, the *remotes* entry file will not be automatically loaded (it will only be loaded when needed), and the loaded shared dependencies will be reused first. This strategy is recommended when there are no strict requirements on the version and performance is required.
