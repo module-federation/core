@@ -33,6 +33,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         'react-dom': {},
         'react-dom/': {},
       },
+      embedRuntime: true,
       runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
     }),
   );
@@ -46,6 +47,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   if (config.devServer) {
     config.devServer.client.overlay = false;
   }
+  config.entry = './src/index.tsx';
   //Temporary workaround - https://github.com/nrwl/nx/issues/16983
   config.experiments = { outputModule: false };
 
@@ -54,8 +56,12 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     scriptType: 'text/javascript',
   };
   config.optimization = {
-    runtimeChunk: false,
+    runtimeChunk: {
+      name: (entrypoint) => `runtime~${entrypoint.name}`,
+    },
     minimize: false,
+    moduleIds: 'named',
+    chunkIds: 'named',
   };
   config.output.publicPath = 'http://localhost:3013/';
   return config;
