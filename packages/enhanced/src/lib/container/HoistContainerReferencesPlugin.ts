@@ -203,6 +203,8 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     );
 
     // If single runtime chunk, copy the remoteEntry into the runtime chunk to allow for embed container
+    // this will not work well if there multiple runtime chunks from entrypoints (like next)
+    // need better solution to multi runtime chunk hoisting
     if (partialChunk) {
       for (const module of chunkGraph.getChunkModulesIterable(partialChunk)) {
         allReferencedModules.add(module);
