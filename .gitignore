@@ -50,6 +50,7 @@ packages/**/dist
 apps/**/dist
 
 **/@mf-types
+**/@mf-types/**
 
 # test cases
 !packages/enhanced/test/configCases/**/**/node_modules
