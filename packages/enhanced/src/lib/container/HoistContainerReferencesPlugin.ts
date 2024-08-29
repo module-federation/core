@@ -10,7 +10,7 @@ import type { RuntimeSpec } from 'webpack/lib/util/runtime';
 import type ExportsInfo from 'webpack/lib/ExportsInfo';
 import ContainerEntryModule from './ContainerEntryModule';
 
-const { NormalModule } = require(
+const { NormalModule, AsyncDependenciesBlock } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const ConcatenatedModule = require(
@@ -98,12 +98,24 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   }
 
   // Helper method to collect all referenced modules recursively
-  private getAllReferencedModules(compilation: Compilation, module: Module) {
+  private getAllReferencedModules(
+    compilation: Compilation,
+    module: Module,
+    type?: 'all' | 'initial',
+  ): Set<Module> {
     const collectedModules = new Set<Module>([module]);
     const collectOutgoingConnections = (module: Module) => {
       const mgm = compilation.moduleGraph._getModuleGraphModule(module);
       if (mgm && mgm.outgoingConnections) {
         for (const connection of mgm.outgoingConnections) {
+          if (type === 'initial') {
+            const parentBlock = compilation.moduleGraph.getParentBlock(
+              connection.dependency,
+            );
+            if (parentBlock instanceof AsyncDependenciesBlock) {
+              continue;
+            }
+          }
           if (connection?.module && !collectedModules.has(connection.module)) {
             collectedModules.add(connection.module);
             collectOutgoingConnections(connection.module);
@@ -176,11 +188,11 @@ export class HoistContainerReferences implements WebpackPluginInstance {
             (module) => module instanceof ContainerEntryModule,
           )
         : undefined;
-      if (runtimeModule && runtimeModule.dependencies.length > 1) {
-        runtimeModule = moduleGraph.getModule(runtimeModule.dependencies[1]);
-      } else {
-        runtimeModule = undefined;
-      }
+      // if (runtimeModule && runtimeModule.dependencies.length > 1) {
+      //   runtimeModule = moduleGraph.getModule(runtimeModule.dependencies[1]);
+      // } else {
+      //   runtimeModule = undefined;
+      // }
     }
 
     if (!runtimeModule) {
@@ -191,6 +203,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     const allReferencedModules = this.getAllReferencedModules(
       compilation,
       runtimeModule,
+      'initial',
     );
 
     // If single runtime chunk, copy the remoteEntry into the runtime chunk to allow for embed container
