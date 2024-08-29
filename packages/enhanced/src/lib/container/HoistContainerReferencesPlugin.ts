@@ -104,8 +104,12 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     type?: 'all' | 'initial',
   ): Set<Module> {
     const collectedModules = new Set<Module>([module]);
-    const collectOutgoingConnections = (module: Module) => {
-      const mgm = compilation.moduleGraph._getModuleGraphModule(module);
+    const stack = [module];
+
+    while (stack.length > 0) {
+      const currentModule = stack.pop();
+      if (!currentModule) continue;
+      const mgm = compilation.moduleGraph._getModuleGraphModule(currentModule);
       if (mgm && mgm.outgoingConnections) {
         for (const connection of mgm.outgoingConnections) {
           if (type === 'initial') {
@@ -118,15 +122,12 @@ export class HoistContainerReferences implements WebpackPluginInstance {
           }
           if (connection?.module && !collectedModules.has(connection.module)) {
             collectedModules.add(connection.module);
-            collectOutgoingConnections(connection.module);
+            stack.push(connection.module);
           }
         }
       }
-    };
-
-    if (module) {
-      collectOutgoingConnections(module);
     }
+
     return collectedModules;
   }
 
