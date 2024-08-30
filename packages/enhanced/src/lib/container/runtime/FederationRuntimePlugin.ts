@@ -402,9 +402,11 @@ class FederationRuntimePlugin {
         '.esm.js',
       );
       new EmbedFederationRuntimePlugin(this.bundlerRuntimePath).apply(compiler);
+
       new HoistContainerReferences(
         this.options.name ? this.options.name + '_partial' : undefined,
-        this.bundlerRuntimePath,
+        // hoist all modules of federation entry
+        this.getFilePath(),
       ).apply(compiler);
     }
     this.prependEntry(compiler);

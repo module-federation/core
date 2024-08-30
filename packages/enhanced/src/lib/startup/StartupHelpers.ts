@@ -52,7 +52,11 @@ export const generateEntryStartup = (
 
   const hasRemotes =
     chunkRuntimeRequirements.has(RuntimeGlobals.currentRemoteGetScope) ||
-    treeRuntimeRequirements.has(RuntimeGlobals.currentRemoteGetScope);
+    // check if tree has req
+    treeRuntimeRequirements.has(RuntimeGlobals.currentRemoteGetScope) ||
+    // check if chunk contains remote module types
+    // currentRemoteGetScope is not reliable requirement for host check
+    !!chunkGraph.getChunkModulesIterableBySourceType(chunk, 'remote');
 
   const hasConsumes =
     chunkRuntimeRequirements.has(RuntimeGlobals.initializeSharing) ||
