@@ -65,7 +65,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         `return innerRemote;`,
       ]),
       `};`,
-      `${RuntimeGlobals.require}.federation.attachRemote = attachRemote;`,
       `attachRemote();`,
     ]);
   }
