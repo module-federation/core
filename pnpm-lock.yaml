@@ -574,6 +574,9 @@ importers:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
         version: link:../../packages/nextjs-mf
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../../packages/utilities
@@ -45071,7 +45074,7 @@ packages:
       esbuild: 0.20.2
       less: 4.2.0
       postcss: 8.4.40
-      rollup: 4.21.0
+      rollup: 4.19.0
       stylus: 0.63.0
     optionalDependencies:
       fsevents: 2.3.3
