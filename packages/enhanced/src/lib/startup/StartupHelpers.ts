@@ -50,6 +50,16 @@ export const generateEntryStartup = (
     chunkRuntimeRequirements.has(federationStartup) ||
     treeRuntimeRequirements.has(federationStartup);
 
+  const hasRemotes =
+    chunkRuntimeRequirements.has(RuntimeGlobals.currentRemoteGetScope) ||
+    treeRuntimeRequirements.has(RuntimeGlobals.currentRemoteGetScope);
+
+  const hasConsumes =
+    chunkRuntimeRequirements.has(RuntimeGlobals.initializeSharing) ||
+    treeRuntimeRequirements.has(RuntimeGlobals.initializeSharing) ||
+    chunkRuntimeRequirements.has(RuntimeGlobals.shareScopeMap) ||
+    treeRuntimeRequirements.has(RuntimeGlobals.shareScopeMap);
+
   const runModule = (id: string) => {
     return `__webpack_exec__(${JSON.stringify(id)})`;
   };
@@ -68,12 +78,17 @@ export const generateEntryStartup = (
       );
       if (federation) {
         const chunkIds = Array.from(chunks, (c: Chunk) => c.id);
+
         const wrappedInit = (body: string) =>
           Template.asString([
             'Promise.all([',
             Template.indent([
-              `${RuntimeGlobals.ensureChunkHandlers}.consumes,`,
-              `${RuntimeGlobals.ensureChunkHandlers}.remotes,`,
+              hasConsumes
+                ? `${RuntimeGlobals.ensureChunkHandlers}.consumes,`
+                : '',
+              hasRemotes
+                ? `${RuntimeGlobals.ensureChunkHandlers}.remotes,`
+                : '',
             ]),
             `].reduce(${runtimeTemplate.returningFunction(`handler('${chunk.id}', p), p`, 'p, handler')}, promises)`,
             `).then(${runtimeTemplate.returningFunction(body)});`,
