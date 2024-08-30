@@ -101,6 +101,9 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   config.optimization = {
     runtimeChunk: false,
     minimize: false,
+    splitChunks: {
+      chunks: 'all',
+    },
   };
   // const mf = await withModuleFederation(defaultConfig);
   return config;
