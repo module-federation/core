@@ -2,9 +2,8 @@ name: Build Affected Packages
 
 on:
   pull_request:
-    branches: ['*']
-  push:
     branches: [main]
+  push:
 
 jobs:
   checkout-install:
