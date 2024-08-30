@@ -63,11 +63,6 @@ const RemoteAppWrapper = forwardRef(function (
     const providerInfoRef = useRef<any>(null);
 
     useEffect(() => {
-      (async () => {
-        await hook.lifecycle.afterBridgeRender.emit({});
-      })();
-    }, []);
-    useEffect(() => {
       const renderTimeout = setTimeout(() => {
         const providerReturn = providerInfo();
         providerInfoRef.current = providerReturn;
@@ -85,26 +80,33 @@ const RemoteAppWrapper = forwardRef(function (
           `createRemoteComponent LazyComponent render >>>`,
           renderProps,
         );
+        hook.lifecycle.bridgeRender.emit({
+          ...renderProps,
+        });
         providerReturn.render(renderProps);
       });
 
       return () => {
-        (async () => {
-          await hook.lifecycle.beforeBridgeDestroy.emit({});
-          clearTimeout(renderTimeout);
-          setTimeout(async () => {
-            if (providerInfoRef.current?.destroy) {
-              LoggerInstance.log(
-                `createRemoteComponent LazyComponent destroy >>>`,
-                { moduleName, basename, dom: renderDom.current },
-              );
-              providerInfoRef.current?.destroy({
-                dom: renderDom.current,
-              });
-              await hook.lifecycle.afterBridgeDestroy.emit({});
-            }
-          });
-        })();
+        clearTimeout(renderTimeout);
+        setTimeout(() => {
+          if (providerInfoRef.current?.destroy) {
+            LoggerInstance.log(
+              `createRemoteComponent LazyComponent destroy >>>`,
+              { moduleName, basename, dom: renderDom.current },
+            );
+            hook.lifecycle.bridgeDestroy.emit({
+              moduleName,
+              dom: renderDom.current,
+              basename,
+              memoryRoute,
+              fallback,
+              ...resProps,
+            });
+            providerInfoRef.current?.destroy({
+              dom: renderDom.current,
+            });
+          }
+        });
       };
     }, []);
 

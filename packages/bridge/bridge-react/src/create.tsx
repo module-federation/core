@@ -36,7 +36,6 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
 
     try {
       const m = (await info.loader()) as RemoteModule;
-      await hook.lifecycle.beforeBridgeRender.emit({});
       // @ts-ignore
       const moduleName = m && m[Symbol.for('mf_module_id')];
       LoggerInstance.log(

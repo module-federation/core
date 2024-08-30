@@ -22,10 +22,8 @@ type ProviderFnParams<T> = {
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
-  beforeRender?: (params: RenderFnParams) => void;
-  afterRender?: (params: RenderFnParams) => void;
-  beforeDestroy?: (params: DestroyParams) => void;
-  afterDestroy?: (params: DestroyParams) => void;
+  renderLifecycle?: (params: RenderFnParams) => void;
+  destroyLifecycle?: (params: DestroyParams) => void;
 };
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
   return () => {
@@ -69,7 +67,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           </ErrorBoundary>
         );
 
-        bridgeInfo?.beforeRender?.(info);
+        bridgeInfo?.renderLifecycle?.(info);
         if (atLeastReact18(React)) {
           if (bridgeInfo?.render) {
             // in case bridgeInfo?.render is an async function, resolve this to promise
@@ -86,10 +84,8 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           const renderFn = bridgeInfo?.render || ReactDOM.render;
           renderFn?.(rootComponentWithErrorBoundary, info.dom);
         }
-        bridgeInfo?.afterRender?.(info);
       },
       async destroy(info: DestroyParams) {
-        bridgeInfo?.beforeDestroy?.(info);
         LoggerInstance.log(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
@@ -100,7 +96,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         } else {
           ReactDOM.unmountComponentAtNode(info.dom);
         }
-        bridgeInfo?.afterDestroy?.(info);
+        bridgeInfo?.destroyLifecycle?.(info);
       },
       rawComponent: bridgeInfo.rootComponent,
       __BRIDGE_FN__: (_args: T) => {},
