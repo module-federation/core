@@ -18,7 +18,7 @@ import type { moduleFederationPlugin } from '@module-federation/sdk';
  * - ChunkCorrelationPlugin: Collects metadata on chunks to enable proper module loading across different runtimes.
  * - InvertedContainerPlugin: Adds custom runtime modules to the container runtime to allow a host to expose its
  *   own remote interface at startup.
- *
+
  * If automatic page stitching is enabled, a warning is logged indicating that it is disabled in v7.
  * If a custom library is specified in the options, an error is logged. The options.library property is
  * also set to `{ type: 'window', name: options.name }`.
