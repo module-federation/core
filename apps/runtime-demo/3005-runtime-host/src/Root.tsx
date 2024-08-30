@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import TestRemoteHook from './test-remote-hook';
+// import TestRemoteHook from './test-remote-hook';
 import LocalBtn from './components/ButtonOldAnt';
 import WebpackPng from './webpack.png';
 import WebpackSvg from './webpack.svg';
@@ -31,9 +31,7 @@ const Root = () => (
               </div>
             </div>
           </td>
-          <td>
-            <TestRemoteHook />
-          </td>
+          <td>{/* <TestRemoteHook /> */}</td>
         </tr>
         <tr>
           <td>✅</td>
