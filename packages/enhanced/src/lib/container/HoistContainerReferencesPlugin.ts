@@ -4,6 +4,7 @@ import type {
   Chunk,
   WebpackPluginInstance,
   Module,
+  NormalModule as NormalModuleType,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { RuntimeSpec } from 'webpack/lib/util/runtime';
@@ -80,15 +81,31 @@ export class HoistContainerReferences implements WebpackPluginInstance {
                   module instanceof NormalModule &&
                   module.resource === this.bundlerRuntimePath
                 ) {
-                  const exportsInfo: ExportsInfo =
-                    moduleGraph.getExportsInfo(module);
-                  /// ensure modules exports are not tree shaken since i copy this into others who do not actually use it
-                  exportsInfo.setUsedInUnknownWay(runtime);
-                  moduleGraph.addExtraReason(module, this.explanation);
-                  if (module.factoryMeta === undefined) {
-                    module.factoryMeta = {};
+                  const bundlerRuntimeDep = moduleGraph.getModule(
+                    module.dependencies[0],
+                  ) as NormalModuleType;
+                  if (
+                    bundlerRuntimeDep &&
+                    !bundlerRuntimeDep?.resource.includes(
+                      'webpack-bundler-runtime',
+                    )
+                  ) {
+                    throw new Error(
+                      `dep is not bundler runtime: ${bundlerRuntimeDep?.resource}`,
+                    );
                   }
-                  module.factoryMeta.sideEffectFree = false;
+                  const exportsInfo: ExportsInfo =
+                    moduleGraph.getExportsInfo(bundlerRuntimeDep);
+                  //Since i dont use the import federation var, tree shake will eliminate it.
+                  exportsInfo.setUsedInUnknownWay(runtime);
+                  moduleGraph.addExtraReason(
+                    bundlerRuntimeDep,
+                    this.explanation,
+                  );
+                  if (bundlerRuntimeDep.factoryMeta === undefined) {
+                    bundlerRuntimeDep.factoryMeta = {};
+                  }
+                  bundlerRuntimeDep.factoryMeta.sideEffectFree = false;
                 }
               }
             }
