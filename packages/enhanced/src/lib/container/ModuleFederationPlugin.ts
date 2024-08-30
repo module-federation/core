@@ -19,6 +19,7 @@ import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
+import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -53,7 +54,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   private _patchBundlerConfig(compiler: Compiler): void {
     const { name } = this._options;
     const MFPluginNum = compiler.options.plugins.filter(
-      (p) => p && p.name === 'ModuleFederationPlugin',
+      (p: WebpackPluginInstance) => p && p['name'] === 'ModuleFederationPlugin',
     ).length;
     if (name && MFPluginNum < 2) {
       new compiler.webpack.DefinePlugin({
@@ -85,8 +86,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     const remoteType =
       options.remoteType ||
       (options.library && isValidExternalsType(options.library.type)
-        ? options.library.type
-        : 'script');
+        ? (options.library.type as ExternalsType)
+        : ('script' as ExternalsType));
 
     const useContainerPlugin =
       options.exposes &&
@@ -138,7 +139,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           : Object.keys(options.remotes).length > 0)
       ) {
         new ContainerReferencePlugin({
-          // @ts-expect-error this should not be a string
           remoteType,
           shareScope: options.shareScope,
           remotes: options.remotes,

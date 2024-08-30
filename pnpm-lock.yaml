@@ -2616,7 +2616,11 @@ importers:
         specifier: workspace:*
         version: link:../sdk
 
-  webpack: {}
+  webpack:
+    dependencies:
+      enhanced-resolve:
+        specifier: ^5.17.1
+        version: 5.17.1
 
 packages:
 

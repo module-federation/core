@@ -5,7 +5,11 @@
   "types": "./types.d.ts",
   "type": "commonjs",
   "description": "Webpack type for Module federation",
-  "repository": "https://github.com/module-federation/core/tree/main/packages/nextjs-mf",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core.git",
+    "directory": "packages/runtime"
+  },
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "contributors": [
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
@@ -15,5 +19,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "enhanced-resolve": "^5.17.1"
   }
 }
