@@ -43,6 +43,7 @@ const PLUGIN_NAME = 'ContainerPlugin';
 class ContainerPlugin {
   _options: containerPlugin.ContainerPluginOptions;
   name: string;
+
   /**
    * @param {containerPlugin.ContainerPluginOptions} options options
    */
