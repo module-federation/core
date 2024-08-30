@@ -64,7 +64,6 @@ class StatsManager {
   get fileName(): string {
     return getFileName(this._options.manifest).statsFileName;
   }
-
   private _getMetaData(
     compiler: Compiler,
     compilation: Compilation,
