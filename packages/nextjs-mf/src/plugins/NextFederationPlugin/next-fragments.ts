@@ -1,9 +1,6 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { container, Compiler, RuleSetRule } from 'webpack';
-import type {
-  ModuleFederationPluginOptions,
-  SharedObject,
-} from '@module-federation/utilities';
+import type { Compiler, RuleSetRule } from 'webpack';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
+import type { SharedObject } from '@module-federation/utilities';
 import {
   DEFAULT_SHARE_SCOPE,
   DEFAULT_SHARE_SCOPE_BROWSER,
@@ -14,12 +11,6 @@ import {
   findLoaderForResource,
 } from '../../loaders/helpers';
 import path from 'path';
-const RuleSetCompiler = require(
-  normalizeWebpackPath('webpack/lib/rules/RuleSetCompiler'),
-) as typeof import('webpack/lib/rules/RuleSetCompiler');
-const { getScheme } = require(
-  normalizeWebpackPath('webpack/lib/util/URLAbsoluteSpecifier'),
-) as typeof import('webpack/lib/util/URLAbsoluteSpecifier');
 
 /**
  * Set up default shared values based on the environment.
@@ -36,30 +27,11 @@ export const retrieveDefaultShared = (isServer: boolean): SharedObject => {
   return DEFAULT_SHARE_SCOPE_BROWSER;
 };
 
-/**
- * Apply path fixes.
- *
- * This function applies fixes to the path for certain loaders. It checks if the fix is enabled in the options
- * and if the loader is present in the rule. If both conditions are met, it injects the fix loader.
- *
- * @param {Compiler} compiler - The Webpack compiler instance.
- * @param {any} options - The ModuleFederationPluginOptions instance.
- */
 export const applyPathFixes = (
   compiler: Compiler,
-  pluginOptions: ModuleFederationPluginOptions,
+  pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
   options: any,
 ) => {
-  const mfp = compiler.options.plugins.find((p) => {
-    if (!p) return false;
-    return p.name === 'ModuleFederationPlugin';
-  });
-
-  const runtimeModulePath = require
-    .resolve('@module-federation/webpack-bundler-runtime/vendor')
-    .replace('cjs', 'esm')
-    .replace('.js', '.cjs');
-  //@ts-ignore
   const match = findLoaderForResource(compiler.options.module.rules, {
     path: path.join(compiler.context, '/something/thing.js'),
     issuerLayer: undefined,
@@ -89,7 +61,7 @@ export const applyPathFixes = (
   //   debugger;
   // });
 
-  compiler.options.module.rules.forEach((rule) => {
+  compiler.options.module.rules.forEach((rule: RuleSetRule) => {
     // next-image-loader fix which adds remote's hostname to the assets url
     if (options.enableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
       injectRuleLoader(rule, {
@@ -153,9 +125,11 @@ export const applyPathFixes = (
       include: undefined,
     };
 
-    const oneOfRule = compiler.options.module.rules.find((rule) => {
-      return rule && typeof rule === 'object' && 'oneOf' in rule;
-    }) as RuleSetRule;
+    const oneOfRule = compiler.options.module.rules.find(
+      (rule: RuleSetRule) => {
+        return rule && typeof rule === 'object' && 'oneOf' in rule;
+      },
+    ) as RuleSetRule;
 
     if (!oneOfRule) {
       compiler.options.module.rules.unshift({

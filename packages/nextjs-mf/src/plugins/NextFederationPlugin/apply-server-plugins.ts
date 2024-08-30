@@ -1,26 +1,69 @@
-import type { Compiler } from 'webpack';
-import { ModuleFederationPluginOptions } from '@module-federation/utilities';
-import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
+import type {
+  WebpackOptionsNormalized,
+  Compiler,
+  ExternalItemFunctionData,
+} from 'webpack';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
+
+type EntryStaticNormalized = Awaited<
+  ReturnType<Extract<WebpackOptionsNormalized['entry'], () => any>>
+>;
+
+interface ModifyEntryOptions {
+  compiler: Compiler;
+  prependEntry?: (entry: EntryStaticNormalized) => void;
+  staticEntry?: EntryStaticNormalized;
+}
+
+// Modifies the Webpack entry configuration
+export function modifyEntry(options: ModifyEntryOptions): void {
+  const { compiler, staticEntry, prependEntry } = options;
+  const operator = (
+    oriEntry: EntryStaticNormalized,
+    newEntry: EntryStaticNormalized,
+  ): EntryStaticNormalized => Object.assign(oriEntry, newEntry);
+
+  // If the entry is a function, wrap it to modify the result
+  if (typeof compiler.options.entry === 'function') {
+    const prevEntryFn = compiler.options.entry;
+    compiler.options.entry = async () => {
+      let res = await prevEntryFn();
+      if (staticEntry) {
+        res = operator(res, staticEntry);
+      }
+      if (prependEntry) {
+        prependEntry(res);
+      }
+      return res;
+    };
+  } else {
+    // If the entry is an object, directly modify it
+    if (staticEntry) {
+      compiler.options.entry = operator(compiler.options.entry, staticEntry);
+    }
+    if (prependEntry) {
+      prependEntry(compiler.options.entry);
+    }
+  }
+}
+
 /**
- * This function applies server-specific plugins to the webpack compiler.
+ * Applies server-specific plugins to the webpack compiler.
  *
  * @param {Compiler} compiler - The Webpack compiler instance.
- * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
- *
- * @returns {void}
+ * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
  */
 export function applyServerPlugins(
   compiler: Compiler,
-  options: ModuleFederationPluginOptions,
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ): void {
   const chunkFileName = compiler.options?.output?.chunkFilename;
-  const filename = compiler.options?.output?.filename || '';
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
   const suffix = `-[chunkhash].js`;
 
+  // Modify chunk filename to include a unique suffix if not already present
   if (
     typeof chunkFileName === 'string' &&
     uniqueName &&
@@ -31,39 +74,25 @@ export function applyServerPlugins(
       suffix,
     );
   }
-  //
-  // if (typeof filename === 'string' && !filename.includes(suffix)) {
-  //   compiler.options.output.filename = filename.replace('.js', suffix);
-  // }
-  new HoistContainerReferencesPlugin(options.name + '_partial').apply(compiler);
 
-  // Add a new commonjs chunk loading plugin to the compiler
-  // new InvertedContainerPlugin({
-  //   runtime: 'webpack-runtime',
-  //   container: options.name,
-  //   remotes: options.remotes as Record<string, string>,
-  //   debug: false,
-  //   //@ts-ignore
-  // }).apply(compiler);
+  // Apply the InvertedContainerPlugin to the compiler
+  new InvertedContainerPlugin({
+    runtime: 'webpack-runtime',
+    container: options.name,
+    remotes: options.remotes as Record<string, string>,
+    debug: false,
+  }).apply(compiler);
 }
 
 /**
- * This function configures server-specific library and filename options.
+ * Configures server-specific library and filename options.
  *
  * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
- *
- * @returns {void}
- *
- * @remarks
- * This function configures the library and filename options for server builds. The library option is
- * set to the commonjs-module format for chunks and the container, which allows them to be streamed over
- * to hosts with the NodeFederationPlugin. The filename option is set to the basename of the current
- * filename.
  */
 export function configureServerLibraryAndFilename(
-  options: ModuleFederationPluginOptions,
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ): void {
-  // Configure the library option with type "commonjs-module" and the name from the options
+  // Set the library option to "commonjs-module" format with the name from the options
   options.library = {
     type: 'commonjs-module',
     name: options.name,
@@ -74,67 +103,53 @@ export function configureServerLibraryAndFilename(
 }
 
 /**
- * This function patches Next.js' default externals function to make sure shared modules are bundled and not treated as external.
+ * Patches Next.js' default externals function to ensure shared modules are bundled and not treated as external.
  *
  * @param {Compiler} compiler - The Webpack compiler instance.
  * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
- *
- * @returns {void}
- *
- * @remarks
- * In server builds, all node modules are treated as external, which prevents them from being shared
- * via module federation. To work around this limitation, we mark shared modules as internalizable
- * modules that webpack puts into chunks that can be streamed to other runtimes as needed.
- *
- * This function replaces Next.js' default externals function with a new asynchronous function that
- * checks whether a module should be treated as external. If the module should not be treated as
- * external, the function returns without calling the original externals function. Otherwise, the
- * function calls the original externals function and retrieves the result. If the result is null,
- * the function returns without further processing. If the module is from Next.js or React, the
- * function returns the original result. Otherwise, the function returns null.
  */
 export function handleServerExternals(
   compiler: Compiler,
-  options: ModuleFederationPluginOptions,
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ): void {
   if (
     Array.isArray(compiler.options.externals) &&
-    compiler.options.externals[0]
+    typeof compiler.options.externals[0] === 'function'
   ) {
-    // Retrieve the original externals function
-    const originalExternals = compiler.options.externals[0];
+    const originalExternals = compiler.options.externals[0] as (
+      data: ExternalItemFunctionData,
+      callback: any,
+    ) => undefined | string;
 
-    // Replace the original externals function with a new asynchronous function
-    compiler.options.externals[0] = async function (ctx: any, callback: any) {
-      //@ts-ignore
+    compiler.options.externals[0] = async function (
+      ctx: ExternalItemFunctionData,
+      callback: any,
+    ) {
       const fromNext = await originalExternals(ctx, callback);
-      // If the result is null, return without further processing
       if (!fromNext) {
         return;
       }
-      // If the module is from Next.js or React, return the original result
       const req = fromNext.split(' ')[1];
-      // Check if the module should not be treated as external
       if (
         ctx.request &&
         (ctx.request.includes('@module-federation/utilities') ||
           Object.keys(options.shared || {}).some((key) => {
+            const sharedOptions = options.shared as Record<
+              string,
+              { import: boolean }
+            >;
             return (
-              //@ts-ignore
-              options.shared?.[key]?.import !== false &&
+              sharedOptions[key]?.import !== false &&
               (key.endsWith('/') ? req.includes(key) : req === key)
             );
           }) ||
           ctx.request.includes('@module-federation/'))
       ) {
-        // If the module should not be treated as external, return without calling the original externals function
         return;
       }
 
       if (
         req.startsWith('next') ||
-        // make sure we dont screw up package names that start with react
-        // like react-carousel or react-spring
         req.startsWith('react/') ||
         req.startsWith('react-dom/') ||
         req === 'react' ||
@@ -143,38 +158,25 @@ export function handleServerExternals(
       ) {
         return fromNext;
       }
-      // Otherwise, return (null) to treat the module as internalizable
       return;
     };
   }
 }
 
 /**
- * This function configures server-specific compiler options.
+ * Configures server-specific compiler options.
  *
  * @param {Compiler} compiler - The Webpack compiler instance.
- *
- * @returns {void}
- *
- * @remarks
- * This function configures the compiler options for server builds. It turns off the compiler target on node
- * builds because it adds its own chunk loading runtime module with NodeFederationPlugin and StreamingTargetPlugin.
- * It also disables split chunks to prevent conflicts from occurring in the graph.
- *
  */
 export function configureServerCompilerOptions(compiler: Compiler): void {
-  // Turn off the compiler target on node builds because we add our own chunk loading runtime module
-  // with NodeFederationPlugin and StreamingTargetPlugin
+  // Disable the global option in node builds and set the target to "async-node"
   compiler.options.node = {
     ...compiler.options.node,
     global: false,
   };
   compiler.options.target = 'async-node';
-  // no custom chunk rules
-  compiler.options.optimization.splitChunks = undefined;
 
-  // solves strange issues where next doesnt create a runtime chunk
-  // might be related to if an api route exists or not
+  // Ensure a runtime chunk is created
   compiler.options.optimization.runtimeChunk = {
     name: 'webpack-runtime',
   };

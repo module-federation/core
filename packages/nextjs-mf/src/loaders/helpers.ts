@@ -1,22 +1,15 @@
-import type { RuleSetRuleUnion, Loader } from '@module-federation/utilities';
 import type {
-  RuleSetCondition,
   RuleSetRule,
+  RuleSetCondition,
   RuleSetConditionAbsolute,
+  RuleSetUseItem,
 } from 'webpack';
 
-/**
- * This function injects a loader into the current module rule.
- * Note: This function mutates the `rule` argument.
- *
- * @param {RuleSetRuleUnion} rule - The current module rule.
- * @param {Loader} [loader={}] - The loader to be injected.
- */
-export function injectRuleLoader(rule: RuleSetRuleUnion, loader: Loader = {}) {
+export function injectRuleLoader(rule: any, loader: RuleSetUseItem = {}) {
   if (rule !== '...') {
     const _rule = rule as {
       loader?: string;
-      use?: (Loader | string)[];
+      use?: (RuleSetUseItem | string)[];
       options?: any;
     };
     if (_rule.loader) {
@@ -32,15 +25,16 @@ export function injectRuleLoader(rule: RuleSetRuleUnion, loader: Loader = {}) {
 /**
  * This function checks if the current module rule has a loader with the provided name.
  *
- * @param {RuleSetRuleUnion} rule - The current module rule.
+ * @param {RuleSetRule} rule - The current module rule.
  * @param {string} loaderName - The name of the loader to check.
  * @returns {boolean} Returns true if the current module rule has a loader with the provided name, otherwise false.
  */
-export function hasLoader(rule: RuleSetRuleUnion, loaderName: string) {
+export function hasLoader(rule: RuleSetRule, loaderName: string) {
+  //@ts-ignore
   if (rule !== '...') {
     const _rule = rule as {
       loader?: string;
-      use?: (Loader | string)[];
+      use?: (RuleSetUseItem | string)[];
       options?: any;
     };
     if (_rule.loader === loaderName) {
@@ -48,7 +42,6 @@ export function hasLoader(rule: RuleSetRuleUnion, loaderName: string) {
     } else if (_rule.use && Array.isArray(_rule.use)) {
       for (let i = 0; i < _rule.use.length; i++) {
         const loader = _rule.use[i];
-        // check exact name, eg "url-loader" or its path "node_modules/url-loader/dist/cjs.js"
         if (
           typeof loader !== 'string' &&
           typeof loader !== 'function' &&

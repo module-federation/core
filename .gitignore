@@ -48,7 +48,10 @@ migrations.json
 # build contnt
 packages/**/dist
 apps/**/dist
+
 **/@mf-types
+**/@mf-types/**
+**/cypress/downloads
 
 # test cases
 !packages/enhanced/test/configCases/**/**/node_modules

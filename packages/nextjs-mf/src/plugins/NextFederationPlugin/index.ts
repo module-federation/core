@@ -20,6 +20,7 @@ import {
   validatePluginOptions,
 } from './validate-options';
 import {
+  modifyEntry,
   applyServerPlugins,
   configureServerCompilerOptions,
   configureServerLibraryAndFilename,
@@ -68,7 +69,20 @@ export class NextFederationPlugin {
     this.applyConditionalPlugins(compiler, isServer);
 
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
-
+    modifyEntry({
+      compiler,
+      prependEntry: (entry) => {
+        Object.keys(entry).forEach((entryName) => {
+          const entryItem = entry[entryName];
+          if (!entryName.startsWith('pages/api')) return;
+          if (!entryItem.import) return;
+          // unpatch entry of webpack api runtime
+          entryItem.import = entryItem.import.filter((i) => {
+            return !i.includes('.federation/entry');
+          });
+        });
+      },
+    });
     const runtimeESMPath = require.resolve(
       '@module-federation/runtime/dist/index.esm.js',
     );
@@ -81,7 +95,8 @@ export class NextFederationPlugin {
     compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
       compiler.options.resolve.alias = {
         ...compiler.options.resolve.alias,
-        '@module-federation/runtime$': runtimeESMPath,
+        //useing embedded runtime
+        // '@module-federation/runtime$': runtimeESMPath,
       };
     });
   }

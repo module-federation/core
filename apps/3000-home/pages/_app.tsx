@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { useState } from 'react';
+import { init } from '@module-federation/runtime';
+console.log('logging init', typeof init);
 import App from 'next/app';
 import { Layout, version, ConfigProvider } from 'antd';
 import { StyleProvider } from '@ant-design/cssinjs';
-import { init } from '@module-federation/runtime';
-console.log('round runtime', init);
+
 import Router, { useRouter } from 'next/router';
 const SharedNav = React.lazy(() => import('../components/SharedNav'));
 import HostAppMenu from '../components/menu';

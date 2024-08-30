@@ -1,10 +1,17 @@
+// This stores the previous child compilation based solution
+// it is not currently used
+
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import CustomRuntimeModule from './CustomRuntimeModule';
-const { RuntimeGlobals } = require(
+import type { Compiler, Compilation, Chunk, Module, ChunkGraph } from 'webpack';
+import { getFederationGlobalScope } from './utils';
+import fs from 'fs';
+import path from 'path';
+import { ConcatSource } from 'webpack-sources';
+import { transformSync } from '@swc/core';
+
+const { RuntimeModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-import type { Compiler, Compilation, Chunk } from 'webpack';
-import { getFederationGlobalScope } from './utils';
 
 const onceForCompilationMap = new WeakMap();
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
@@ -16,7 +23,7 @@ class RuntimeModuleChunkPlugin {
       (compilation: Compilation) => {
         compilation.hooks.optimizeModuleIds.tap(
           'ModuleChunkFormatPlugin',
-          (modules) => {
+          (modules: Iterable<Module>) => {
             for (const module of modules) {
               const moduleId = compilation.chunkGraph.getModuleId(module);
               if (typeof moduleId === 'string') {
@@ -38,10 +45,13 @@ class RuntimeModuleChunkPlugin {
 
         hooks.renderChunk.tap(
           'ModuleChunkFormatPlugin',
-          (modules, renderContext) => {
+          (
+            modules: any,
+            renderContext: { chunk: Chunk; chunkGraph: ChunkGraph },
+          ) => {
             const { chunk, chunkGraph } = renderContext;
 
-            const source = new compiler.webpack.sources.ConcatSource();
+            const source = new ConcatSource();
             source.add('var federation = ');
             source.add(modules);
             source.add('\n');
@@ -62,7 +72,7 @@ class RuntimeModuleChunkPlugin {
                 source.add('federation = ');
               }
               source.add(
-                `${RuntimeGlobals.require}(${JSON.stringify(moduleId)});\n`,
+                `${RuntimeGlobals.require}(${typeof moduleId === 'number' ? moduleId : JSON.stringify(moduleId)});\n`,
               );
             }
             return source;
@@ -76,9 +86,11 @@ class RuntimeModuleChunkPlugin {
 class CustomRuntimePlugin {
   private entryModule?: string | number;
   private bundlerRuntimePath: string;
+  private tempDir: string;
 
-  constructor(path: string) {
+  constructor(path: string, tempDir: string) {
     this.bundlerRuntimePath = path.replace('cjs', 'esm');
+    this.tempDir = tempDir;
   }
 
   apply(compiler: Compiler): void {
@@ -87,6 +99,20 @@ class CustomRuntimePlugin {
       (compilation: Compilation, callback: (err?: Error) => void) => {
         if (onceForCompilationMap.has(compilation)) return callback();
         onceForCompilationMap.set(compilation, null);
+        const target = compilation.options.target || 'default';
+        const outputPath = path.join(
+          this.tempDir,
+          `${target}-custom-runtime-bundle.js`,
+        );
+
+        if (fs.existsSync(outputPath)) {
+          const source = fs.readFileSync(outputPath, 'utf-8');
+          onceForCompilationMap.set(compiler, source);
+          return callback();
+        }
+
+        if (onceForCompilationMap.has(compiler)) return callback();
+        onceForCompilationMap.set(compiler, null);
 
         const childCompiler = compilation.createChildCompiler(
           'EmbedFederationRuntimeCompiler',
@@ -120,9 +146,6 @@ class CustomRuntimePlugin {
 
         childCompiler.hooks.thisCompilation.tap(
           this.constructor.name,
-          /**
-           * @param {Compilation} childCompilation
-           */
           (childCompilation) => {
             childCompilation.hooks.processAssets.tap(
               this.constructor.name,
@@ -149,8 +172,9 @@ class CustomRuntimePlugin {
                 }
 
                 onceForCompilationMap.set(compilation, source);
+                onceForCompilationMap.set(compiler, source);
+                fs.writeFileSync(outputPath, source);
                 console.log('got compilation asset');
-                // Remove all chunk assets
                 childCompilation.chunks.forEach((chunk) => {
                   chunk.files.forEach((file) => {
                     childCompilation.deleteAsset(file);
@@ -193,15 +217,15 @@ class CustomRuntimePlugin {
       'CustomRuntimePlugin',
       (compilation: Compilation) => {
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
+          if (chunk.id === 'build time chunk') {
+            return;
+          }
           if (runtimeRequirements.has('embeddedFederationRuntime')) return;
-          if (
-            !runtimeRequirements.has(`${RuntimeGlobals.require}.federation`)
-          ) {
+          if (!runtimeRequirements.has(federationGlobal)) {
             return;
           }
           const bundledCode = onceForCompilationMap.get(compilation);
           if (!bundledCode) return;
-
           runtimeRequirements.add('embeddedFederationRuntime');
           const runtimeModule = new CustomRuntimeModule(
             bundledCode,
@@ -219,4 +243,68 @@ class CustomRuntimePlugin {
   }
 }
 
-export default CustomRuntimePlugin;
+class CustomRuntimeModule extends RuntimeModule {
+  private bundledCode: string | null = null;
+  private entryModuleId: string | number | undefined;
+
+  constructor(
+    private readonly entryPath: string,
+    entryModuleId: string | number | undefined,
+  ) {
+    super('CustomRuntimeModule', RuntimeModule.STAGE_BASIC);
+    this.entryPath = entryPath;
+    this.entryModuleId = entryModuleId;
+  }
+
+  override identifier() {
+    return 'webpack/runtime/embed/federation';
+  }
+
+  override generate(): string {
+    const runtimeModule = this.entryPath;
+    const { code: transformedCode } = transformSync(
+      this.entryPath.replace('var federation;', 'var federation = '),
+      {
+        jsc: {
+          parser: {
+            syntax: 'ecmascript',
+            jsx: false,
+          },
+          target: 'es2022',
+          minify: {
+            compress: {
+              unused: true,
+              dead_code: true,
+              drop_debugger: true,
+            },
+            mangle: false,
+            format: {
+              comments: false,
+            },
+          },
+        },
+      },
+    );
+
+    return Template.asString([
+      runtimeModule,
+      transformedCode,
+      `for (var mod in federation) {
+      ${Template.indent(`${RuntimeGlobals.moduleFactories}[mod] = federation[mod];`)}
+    }`,
+      `federation = ${RuntimeGlobals.require}(${JSON.stringify(this.entryModuleId)});`,
+      `federation = ${RuntimeGlobals.compatGetDefaultExport}(federation)();`,
+      `var prevFederation = ${federationGlobal}`,
+      `${federationGlobal} = {}`,
+      `for (var key in federation) {`,
+      Template.indent(`${federationGlobal}[key] = federation[key];`),
+      `}`,
+      `for (var key in prevFederation) {`,
+      Template.indent(`${federationGlobal}[key] = prevFederation[key];`),
+      `}`,
+      'federation = undefined;',
+    ]);
+  }
+}
+
+export { CustomRuntimePlugin, CustomRuntimeModule, RuntimeModuleChunkPlugin };

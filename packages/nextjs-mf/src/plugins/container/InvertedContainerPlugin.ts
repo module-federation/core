@@ -1,7 +1,5 @@
 import type { Compiler } from 'webpack';
-import { ModuleFederationPluginOptions } from './types';
 import EmbeddedContainerPlugin from './EmbeddedContainerPlugin';
-import { AsyncBoundaryPlugin } from '@module-federation/enhanced';
 
 interface InvertedContainerOptions {
   container?: string;
@@ -22,14 +20,6 @@ class InvertedContainerPlugin {
       runtime: this.options.runtime,
       container: this.options.container,
     }).apply(compiler);
-
-    // new AsyncBoundaryPlugin({
-    //   excludeChunk: (chunk) =>
-    //     chunk.name === this.options.container ||
-    //     chunk.name === this.options.container + '_partial',
-    //   // @ts-ignore
-    //   eager: (module) => /\.federation/.test(module?.request || ''),
-    // }).apply(compiler);
   }
 }
 
