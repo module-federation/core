@@ -46,7 +46,7 @@ jobs:
         run: |
           pnpm run --filter @module-federation/3002-checkout --filter @module-federation/3000-home --filter @module-federation/3001-shop build &&
           pnpm run app:next:prod &
-          sleep 2 &&
+          sleep 4 &&
           npx wait-on tcp:3001 &&
           npx wait-on tcp:3002 &&
           npx wait-on tcp:3000 &&
