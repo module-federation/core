@@ -2,6 +2,7 @@ name: Build Affected Packages
 
 on:
   pull_request:
+    branches: [main]
   push:
 
 jobs:
