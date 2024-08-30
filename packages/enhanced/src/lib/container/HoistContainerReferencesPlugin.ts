@@ -8,8 +8,9 @@ import type {
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { RuntimeSpec } from 'webpack/lib/util/runtime';
 import type ExportsInfo from 'webpack/lib/ExportsInfo';
+import ContainerEntryModule from './ContainerEntryModule';
 
-const { NormalModule } = require(
+const { NormalModule, AsyncDependenciesBlock } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const ConcatenatedModule = require(
@@ -97,23 +98,36 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   }
 
   // Helper method to collect all referenced modules recursively
-  private getAllReferencedModules(compilation: Compilation, module: Module) {
+  private getAllReferencedModules(
+    compilation: Compilation,
+    module: Module,
+    type?: 'all' | 'initial',
+  ): Set<Module> {
     const collectedModules = new Set<Module>([module]);
-    const collectOutgoingConnections = (module: Module) => {
-      const mgm = compilation.moduleGraph._getModuleGraphModule(module);
+    const stack = [module];
+
+    while (stack.length > 0) {
+      const currentModule = stack.pop();
+      if (!currentModule) continue;
+      const mgm = compilation.moduleGraph._getModuleGraphModule(currentModule);
       if (mgm && mgm.outgoingConnections) {
         for (const connection of mgm.outgoingConnections) {
-          if (connection?.module && !collectedModules.has(connection.module)) {
+          if (type === 'initial') {
+            const parentBlock = compilation.moduleGraph.getParentBlock(
+              connection.dependency,
+            );
+            if (parentBlock instanceof AsyncDependenciesBlock) {
+              continue;
+            }
+          }
+          if (connection.module && !collectedModules.has(connection.module)) {
             collectedModules.add(connection.module);
-            collectOutgoingConnections(connection.module);
+            stack.push(connection.module);
           }
         }
       }
-    };
-
-    if (module) {
-      collectOutgoingConnections(module);
     }
+
     return collectedModules;
   }
 
@@ -168,9 +182,13 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         }
       }
     } else {
-      runtimeModule = moduleGraph.getModule(
-        partialChunk.entryModule.dependencies[1],
-      );
+      const entryModules =
+        chunkGraph.getChunkEntryModulesIterable(partialChunk);
+      runtimeModule = entryModules
+        ? Array.from(entryModules).find(
+            (module) => module instanceof ContainerEntryModule,
+          )
+        : undefined;
     }
 
     if (!runtimeModule) {
@@ -181,9 +199,12 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     const allReferencedModules = this.getAllReferencedModules(
       compilation,
       runtimeModule,
+      'initial',
     );
 
     // If single runtime chunk, copy the remoteEntry into the runtime chunk to allow for embed container
+    // this will not work well if there multiple runtime chunks from entrypoints (like next)
+    // need better solution to multi runtime chunk hoisting
     if (partialChunk) {
       for (const module of chunkGraph.getChunkModulesIterable(partialChunk)) {
         allReferencedModules.add(module);

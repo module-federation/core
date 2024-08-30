@@ -55,6 +55,7 @@
   "devDependencies": {
     "@module-federation/runtime": "workspace:*",
     "@rollup/plugin-swc": "^0.3.1",
-    "rollup-plugin-cleanup": "^3.2.1"
+    "rollup-plugin-cleanup": "^3.2.1",
+    "rollup": "4.21.0"
   }
 }
