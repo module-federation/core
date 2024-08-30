@@ -1,7 +1,9 @@
 import { defineAsyncComponent, h } from 'vue';
+import { useRoute } from 'vue-router';
+
 import RemoteApp from './remoteApp.jsx';
 import { LoggerInstance } from './utils.js';
-import { useRoute } from 'vue-router';
+import hook from './lifecycle';
 
 declare const __APP_VERSION__: string;
 
@@ -32,6 +34,7 @@ export function createRemoteComponent(info: {
       });
 
       const module: any = await info.loader();
+      await hook.lifecycle.beforeBridgeRender.emit({});
       const moduleName = module && module[Symbol.for('mf_module_id')];
       const exportFn = module[exportName];
 

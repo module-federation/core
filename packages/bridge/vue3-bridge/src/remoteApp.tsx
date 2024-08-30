@@ -1,7 +1,9 @@
 import { ref, onMounted, onBeforeUnmount, watch, defineComponent } from 'vue';
-import { useRoute } from 'vue-router';
-import { LoggerInstance } from './utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
+import { useRoute } from 'vue-router';
+
+import { LoggerInstance } from './utils';
+import hook from './lifecycle';
 
 export default defineComponent({
   name: 'RemoteApp',
@@ -52,16 +54,19 @@ export default defineComponent({
       },
     );
 
-    onMounted(() => {
+    onMounted(async () => {
       renderComponent();
+      await hook.lifecycle.afterBridgeRender.emit({});
     });
 
-    onBeforeUnmount(() => {
+    onBeforeUnmount(async () => {
+      await hook.lifecycle.beforeBridgeDestroy.emit({});
       LoggerInstance.log(`createRemoteComponent LazyComponent destroy >>>`, {
         ...props,
       });
       watchStopHandle();
       (providerInfoRef.value as any)?.destroy({ dom: rootRef.value });
+      await hook.lifecycle.afterBridgeDestroy.emit({});
     });
 
     return () => <div ref={rootRef}></div>;

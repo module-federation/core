@@ -28,7 +28,8 @@
   },
   "peerDependencies": {
     "vue": "=3",
-    "vue-router": "=3"
+    "vue-router": "=3",
+    "@module-federation/runtime": "workspace:*"
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*"

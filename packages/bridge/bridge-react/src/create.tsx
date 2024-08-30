@@ -1,11 +1,14 @@
 import React, { forwardRef } from 'react';
-import type { ProviderParams } from '@module-federation/bridge-shared';
-import { LoggerInstance } from './utils';
 import {
   ErrorBoundary,
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
+
+import hook from './lifecycle';
+import { LoggerInstance } from './utils';
 import RemoteApp from './remote';
+
+import type { ProviderParams } from '@module-federation/bridge-shared';
 
 export interface RenderFnParams extends ProviderParams {
   dom?: any;
@@ -33,6 +36,7 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
 
     try {
       const m = (await info.loader()) as RemoteModule;
+      await hook.lifecycle.beforeBridgeRender.emit({});
       // @ts-ignore
       const moduleName = m && m[Symbol.for('mf_module_id')];
       LoggerInstance.log(

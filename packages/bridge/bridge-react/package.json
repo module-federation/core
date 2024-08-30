@@ -45,7 +45,8 @@
   "peerDependencies": {
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0",
-    "react-router-dom": ">=4"
+    "react-router-dom": ">=4",
+    "@module-federation/runtime": "workspace:*"
   },
   "devDependencies": {
     "@testing-library/react": "15.0.7",

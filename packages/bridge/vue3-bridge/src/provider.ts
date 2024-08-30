@@ -4,59 +4,54 @@ import { RenderFnParams } from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
 
 declare const __APP_VERSION__: string;
-type Provider = {
-  __APP_VERSION__: string;
-  render(info: RenderFnParams): void;
-  destroy(info: { dom: HTMLElement }): void;
-};
 
 export function createBridgeComponent(bridgeInfo: any) {
-  let provider: Provider;
   const rootMap = new Map();
   return () => {
-    if (!provider) {
-      provider = {
-        __APP_VERSION__,
-        render(info: RenderFnParams) {
-          LoggerInstance.log(`createBridgeComponent render Info`, info);
-          const app = Vue.createApp(bridgeInfo.rootComponent);
-          rootMap.set(info.dom, app);
-          const appOptions = bridgeInfo.appOptions({
-            basename: info.basename,
-            memoryRoute: info.memoryRoute,
-          });
+    return {
+      __APP_VERSION__,
+      render(info: RenderFnParams) {
+        bridgeInfo?.beforeRender?.(info);
+        LoggerInstance.log(`createBridgeComponent render Info`, info);
+        const app = Vue.createApp(bridgeInfo.rootComponent);
+        rootMap.set(info.dom, app);
+        const appOptions = bridgeInfo.appOptions({
+          basename: info.basename,
+          memoryRoute: info.memoryRoute,
+        });
 
-          const history = info.memoryRoute
-            ? VueRouter.createMemoryHistory(info.basename)
-            : VueRouter.createWebHistory(info.basename);
-          const router = VueRouter.createRouter({
-            ...appOptions.router.options,
-            history,
-            routes: appOptions.router.getRoutes(),
-          });
+        const history = info.memoryRoute
+          ? VueRouter.createMemoryHistory(info.basename)
+          : VueRouter.createWebHistory(info.basename);
+        const router = VueRouter.createRouter({
+          ...appOptions.router.options,
+          history,
+          routes: appOptions.router.getRoutes(),
+        });
 
-          LoggerInstance.log(`createBridgeComponent render router info>>>`, {
-            name: info.moduleName,
-            router,
-          });
-          // memory route Initializes the route
-          if (info.memoryRoute) {
-            router.push(info.memoryRoute.entryPath).then(() => {
-              app.use(router);
-              app.mount(info.dom);
-            });
-          } else {
+        LoggerInstance.log(`createBridgeComponent render router info>>>`, {
+          name: info.moduleName,
+          router,
+        });
+        // memory route Initializes the route
+        if (info.memoryRoute) {
+          router.push(info.memoryRoute.entryPath).then(() => {
             app.use(router);
             app.mount(info.dom);
-          }
-        },
-        destroy(info: { dom: HTMLElement }) {
-          LoggerInstance.log(`createBridgeComponent destroy Info`, info);
-          const root = rootMap.get(info?.dom);
-          root?.unmount();
-        },
-      };
-    }
-    return provider;
+          });
+        } else {
+          app.use(router);
+          app.mount(info.dom);
+        }
+        bridgeInfo?.afterRender?.(info);
+      },
+      destroy(info: { dom: HTMLElement }) {
+        bridgeInfo?.beforeDestroy?.(info);
+        LoggerInstance.log(`createBridgeComponent destroy Info`, info);
+        const root = rootMap.get(info?.dom);
+        root?.unmount();
+        bridgeInfo?.afterDestroy?.(info);
+      },
+    };
   };
 }

@@ -2,10 +2,15 @@ import { FederationHost } from '../core';
 import { UserOptions } from '../type';
 import { Module } from '../module';
 import { getGlobalHostPlugins } from '../global';
+import { PluginSystem } from './hooks';
 
-export function registerPlugins(
+export function registerPlugins<
+  Y extends Record<string, any>,
+  T extends PluginSystem<Y>,
+>(
   plugins: UserOptions['plugins'],
   hookInstances: Array<
+    | T
     | FederationHost['hooks']
     | FederationHost['snapshotHandler']['hooks']
     | FederationHost['sharedHandler']['hooks']

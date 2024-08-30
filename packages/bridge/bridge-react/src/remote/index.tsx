@@ -7,9 +7,11 @@ import React, {
 } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
-import { LoggerInstance, pathJoin } from '../utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
+
+import hook from '../lifecycle';
+import { LoggerInstance, pathJoin } from '../utils';
 
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {
@@ -61,6 +63,11 @@ const RemoteAppWrapper = forwardRef(function (
     const providerInfoRef = useRef<any>(null);
 
     useEffect(() => {
+      (async () => {
+        await hook.lifecycle.afterBridgeRender.emit({});
+      })();
+    }, []);
+    useEffect(() => {
       const renderTimeout = setTimeout(() => {
         const providerReturn = providerInfo();
         providerInfoRef.current = providerReturn;
@@ -82,18 +89,22 @@ const RemoteAppWrapper = forwardRef(function (
       });
 
       return () => {
-        clearTimeout(renderTimeout);
-        setTimeout(() => {
-          if (providerInfoRef.current?.destroy) {
-            LoggerInstance.log(
-              `createRemoteComponent LazyComponent destroy >>>`,
-              { moduleName, basename, dom: renderDom.current },
-            );
-            providerInfoRef.current?.destroy({
-              dom: renderDom.current,
-            });
-          }
-        });
+        (async () => {
+          await hook.lifecycle.beforeBridgeDestroy.emit({});
+          clearTimeout(renderTimeout);
+          setTimeout(async () => {
+            if (providerInfoRef.current?.destroy) {
+              LoggerInstance.log(
+                `createRemoteComponent LazyComponent destroy >>>`,
+                { moduleName, basename, dom: renderDom.current },
+              );
+              providerInfoRef.current?.destroy({
+                dom: renderDom.current,
+              });
+              await hook.lifecycle.afterBridgeDestroy.emit({});
+            }
+          });
+        })();
       };
     }, []);
 
