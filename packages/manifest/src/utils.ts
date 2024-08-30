@@ -49,7 +49,7 @@ export function getAssetsByChunkIDs(
   compilation: Compilation,
   chunkIDMap: Record<string, Set<string | number>>,
 ): Record<string, { js: string[]; css: string[] }> {
-  const arrayChunks = Array.from(compilation.chunks);
+  const arrayChunks = Array.from(compilation.chunks) as Chunk[];
   const assetMap: Record<string, { css: Set<string>; js: Set<string> }> = {};
 
   Object.keys(chunkIDMap).forEach((key) => {
