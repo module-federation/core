@@ -95,7 +95,8 @@ export class NextFederationPlugin {
     compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
       compiler.options.resolve.alias = {
         ...compiler.options.resolve.alias,
-        '@module-federation/runtime$': runtimeESMPath,
+        //useing embedded runtime
+        // '@module-federation/runtime$': runtimeESMPath,
       };
     });
   }
