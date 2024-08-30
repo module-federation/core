@@ -82,6 +82,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
                 ) {
                   const exportsInfo: ExportsInfo =
                     moduleGraph.getExportsInfo(module);
+                  /// ensure modules exports are not tree shaken since i copy this into others who do not actually use it
                   exportsInfo.setUsedInUnknownWay(runtime);
                   moduleGraph.addExtraReason(module, this.explanation);
                   if (module.factoryMeta === undefined) {
@@ -138,20 +139,23 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     bundlerRuntimePath: string,
   ): Module | null {
     const { chunkGraph } = compilation;
-    for (const mod of chunkGraph.getChunkModulesIterable(chunk)) {
+    let module: Module | null = null;
+    for (const mod of chunkGraph.getChunkEntryModulesIterable(chunk)) {
       if (mod instanceof NormalModule && mod.resource === bundlerRuntimePath) {
-        return mod;
+        module = mod;
+        break;
       }
 
       if (mod instanceof ConcatenatedModule) {
         for (const m of mod.modules) {
           if (m instanceof NormalModule && m.resource === bundlerRuntimePath) {
-            return mod;
+            module = mod;
+            break;
           }
         }
       }
     }
-    return null;
+    return module;
   }
 
   // Method to hoist modules in chunks
@@ -162,6 +166,8 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     logger: ReturnType<Compilation['getLogger']>,
   ): void {
     const { chunkGraph, moduleGraph } = compilation;
+    // when runtimeChunk: single is set - ContainerPlugin will create a "partial" chunk we can use to
+    // move modules into the runtime chunk
     const partialChunk = this.containerName
       ? compilation.namedChunks.get(this.containerName)
       : undefined;
@@ -192,7 +198,10 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     }
 
     if (!runtimeModule) {
-      logger.error('unable to find runtime module');
+      logger.error(
+        '[Federation HoistContainerReferences] unable to find runtime module:',
+        this.bundlerRuntimePath,
+      );
       return;
     }
 
