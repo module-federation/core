@@ -37,23 +37,9 @@ const BundlerRuntimePath = require.resolve(
     paths: [RuntimeToolsPath],
   },
 );
-
-const VendoredBundlerRuntimePath = require.resolve(
-  '@module-federation/webpack-bundler-runtime/vendor',
-  {
-    paths: [RuntimeToolsPath],
-  },
-);
-
 const RuntimePath = require.resolve('@module-federation/runtime', {
   paths: [RuntimeToolsPath],
 });
-const EmbeddedRuntimePath = require.resolve(
-  '@module-federation/runtime/embedded',
-  {
-    paths: [RuntimeToolsPath],
-  },
-);
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
@@ -65,13 +51,7 @@ class FederationRuntimePlugin {
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
-    this.bundlerRuntimePath = this.getBundlerRuntimePath();
-  }
-
-  getBundlerRuntimePath() {
-    return this.options?.embedRuntime
-      ? VendoredBundlerRuntimePath
-      : BundlerRuntimePath;
+    this.bundlerRuntimePath = BundlerRuntimePath;
   }
 
   static getTemplate(
@@ -305,16 +285,11 @@ class FederationRuntimePlugin {
   }
 
   setRuntimeAlias(compiler: Compiler) {
-    let runtimePath = this.options?.embedRuntime
-      ? EmbeddedRuntimePath
-      : RuntimePath;
+    let runtimePath = RuntimePath;
     if (this.options?.implementation) {
-      runtimePath = require.resolve(
-        `@module-federation/runtime${this.options?.embedRuntime ? '/embedded' : ''}`,
-        {
-          paths: [this.options.implementation],
-        },
-      );
+      runtimePath = require.resolve('@module-federation/runtime', {
+        paths: [this.options.implementation],
+      });
     }
     if (Array.isArray(compiler.options.resolve.alias)) {
       return;
@@ -324,19 +299,10 @@ class FederationRuntimePlugin {
       ...compiler.options.resolve.alias,
     };
 
-    if (this.options?.embedRuntime) {
-      // should use normal module replacement instead?
-      if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
-        compiler.options.resolve.alias['@module-federation/runtime$'] =
-          runtimePath;
-      }
-    } else {
-      if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
-        compiler.options.resolve.alias['@module-federation/runtime$'] =
-          runtimePath;
-      }
+    if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
+      compiler.options.resolve.alias['@module-federation/runtime$'] =
+        runtimePath;
     }
-
     if (!compiler.options.resolve.alias['@module-federation/runtime-tools$']) {
       compiler.options.resolve.alias['@module-federation/runtime-tools$'] =
         this.options?.implementation || RuntimeToolsPath;
@@ -385,15 +351,13 @@ class FederationRuntimePlugin {
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
 
-    this.bundlerRuntimePath = this.getBundlerRuntimePath();
-
     if (this.options?.implementation) {
-      const runtimePath = this.options.embedRuntime
-        ? '@module-federation/webpack-bundler-runtime/vendor'
-        : '@module-federation/webpack-bundler-runtime';
-      this.bundlerRuntimePath = require.resolve(runtimePath, {
-        paths: [this.options.implementation],
-      });
+      this.bundlerRuntimePath = require.resolve(
+        '@module-federation/webpack-bundler-runtime',
+        {
+          paths: [this.options.implementation],
+        },
+      );
     }
 
     if (this.options?.embedRuntime) {
