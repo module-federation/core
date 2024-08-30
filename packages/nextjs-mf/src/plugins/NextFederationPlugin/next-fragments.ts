@@ -1,9 +1,6 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, RuleSetRule } from 'webpack';
-import type {
-  ModuleFederationPluginOptions,
-  SharedObject,
-} from '@module-federation/utilities';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
+import type { SharedObject } from '@module-federation/utilities';
 import {
   DEFAULT_SHARE_SCOPE,
   DEFAULT_SHARE_SCOPE_BROWSER,
@@ -30,18 +27,9 @@ export const retrieveDefaultShared = (isServer: boolean): SharedObject => {
   return DEFAULT_SHARE_SCOPE_BROWSER;
 };
 
-/**
- * Apply path fixes.
- *
- * This function applies fixes to the path for certain loaders. It checks if the fix is enabled in the options
- * and if the loader is present in the rule. If both conditions are met, it injects the fix loader.
- *
- * @param {Compiler} compiler - The Webpack compiler instance.
- * @param {any} options - The ModuleFederationPluginOptions instance.
- */
 export const applyPathFixes = (
   compiler: Compiler,
-  pluginOptions: ModuleFederationPluginOptions,
+  pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
   options: any,
 ) => {
   const match = findLoaderForResource(compiler.options.module.rules, {

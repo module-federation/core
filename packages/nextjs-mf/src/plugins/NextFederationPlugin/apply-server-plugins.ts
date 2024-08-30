@@ -3,7 +3,7 @@ import type {
   Compiler,
   ExternalItemFunctionData,
 } from 'webpack';
-import { ModuleFederationPluginOptions } from '@module-federation/utilities';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 
@@ -53,11 +53,11 @@ export function modifyEntry(options: ModifyEntryOptions): void {
  * Applies server-specific plugins to the webpack compiler.
  *
  * @param {Compiler} compiler - The Webpack compiler instance.
- * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
+ * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
  */
 export function applyServerPlugins(
   compiler: Compiler,
-  options: ModuleFederationPluginOptions,
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ): void {
   const chunkFileName = compiler.options?.output?.chunkFilename;
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
@@ -90,7 +90,7 @@ export function applyServerPlugins(
  * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
  */
 export function configureServerLibraryAndFilename(
-  options: ModuleFederationPluginOptions,
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ): void {
   // Set the library option to "commonjs-module" format with the name from the options
   options.library = {
@@ -110,7 +110,7 @@ export function configureServerLibraryAndFilename(
  */
 export function handleServerExternals(
   compiler: Compiler,
-  options: ModuleFederationPluginOptions,
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ): void {
   if (
     Array.isArray(compiler.options.externals) &&
