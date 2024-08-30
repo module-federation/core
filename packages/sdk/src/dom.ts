@@ -99,11 +99,12 @@ export function createScript(info: {
       if (prev) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         // const res = (prev as any)(event);
+        // console.log('---------OnErrorEventHandler resolved ----------', prev);
         // info?.cb?.();
         // return res;
 
         const res = await (prev as any)(event); // 等待 prev 解析
-        console.log('---------OnErrorEventHandler resolved ----------');
+        console.log('---------OnErrorEventHandler resolved ----------', prev);
         info?.cb?.(); // 在 prev 解析后调用 cb
         return res;
       }

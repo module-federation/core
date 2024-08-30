@@ -83,6 +83,48 @@ export const createScript = (url: string, options: Record<string, any>) => {
   return script;
 };
 
+async function loadScript(url: string, maxRetries = 3, retryDelay = 1000) {
+  let retries = 0;
+
+  function attemptLoad() {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = url;
+
+      // 当脚本成功加载时，调用 resolve
+      script.onload = () => {
+        console.log('Script loaded successfully.');
+        resolve(script);
+      };
+
+      // 当脚本加载失败时
+      script.onerror = () => {
+        if (retries < maxRetries) {
+          retries++;
+          console.warn(
+            `Failed to load script. Retrying... (${retries}/${maxRetries})`,
+          );
+
+          // 延迟后重新尝试加载
+          setTimeout(() => {
+            resolve(attemptLoad()); // 返回新的 Promise 来处理下一个重试
+          }, retryDelay);
+        } else {
+          console.error('Failed to load script after maximum retries.');
+          // reject(new Error('Failed to load script after maximum retries.'));
+          resolve('Failed to load script after maximum retries.');
+        }
+      };
+
+      // 加载脚本
+      document.head.appendChild(script);
+      console.log('---appendChild script');
+    });
+  }
+
+  return attemptLoad(); // 开始首次加载脚本
+}
+
 async function loadScriptWithRetry(
   script: any,
   maxRetries = 3,
@@ -110,15 +152,17 @@ async function loadScriptWithRetry(
         console.error(
           'Failed to load script after maximum retries. will resolve',
         );
-        resolve({});
+        resolve(script);
+        console.log('-------test');
       }
     });
   }
 
+  loadScript().then((result) => {
+    console.log('-------test2');
+  });
   // 初次加载脚本
-  await loadScript();
-  console.log('---loadScriptWithRetry end');
-  return;
+  // return await loadScript();
 }
 
 function scriptWithRetry({
@@ -131,79 +175,19 @@ function scriptWithRetry({
   const script = createScript(url, attrs);
 
   script.onerror = async (event) => {
-    // 改为 async
-    console.log(
-      '------ onScriptComplete script onError ------',
-      url,
-      retryTimes,
-      maxRetries,
-    );
+    console.log('------ onScriptComplete script onError ------event', event);
 
-    // if (retryTimes < maxRetries) { // 修改条件
     console.warn(
       `Script load failed, retrying (${retryTimes + 1}/${maxRetries}): ${url}`,
     );
     // await new Promise((resolve) => setTimeout(resolve, 8000)); // 等待 1 秒
-    // return scriptWithRetry({ // 递归调用
-    //   url,
-    //   attrs,
-    //   retryTimes: retryTimes + 1,
-    //   fallback,
-    // });
-    await loadScriptWithRetry(script, 3, 1000);
-    // await new Promise((resolve) => setTimeout(resolve, 8000));
 
-    // } else {
-    //   console.warn(`Script load failed, times is out`);
-    //   throw new Error(`Failed to load script after ${maxRetries} attempts: ${url}`); // 抛出错误
-    // }
+    await loadScript(url, 3, 2000);
+    // await loadScriptWithRetry(script, 3, 1000);
+    return;
   };
   return script;
 }
-
-// function scriptWithRetry({
-//   url, // fetch url
-//   attrs = {}, // fetch options
-//   retryTimes = 0, // retry times
-//   fallback, // fallback url
-// }: ScriptWithRetryOptions) {
-//   console.log('------ scriptWithRetry ', url, retryTimes);
-//   const script = createScript(url, attrs);
-
-//   script.onerror = (event) => {
-//     return new Promise((resolve, reject) => {
-//       console.log('------ onScriptComplete script onError ------', url, retryTimes, maxRetries);
-
-//       if (retryTimes <= maxRetries) {
-//         console.warn(
-//           `Script load failed, retrying (${retryTimes + 1}/${maxRetries}): ${url}`,
-//         );
-//         setTimeout(() => scriptWithRetry({
-//           url,
-//           attrs,
-//           retryTimes: retryTimes + 1,
-//           fallback,
-//         }));
-//       } else {
-//         console.warn(
-//           `Script load failed, times is out`,
-//         );
-
-//         // onScriptComplete(script.onerror, event);
-//         // throw new Error(
-//         //   `Failed to load script after ${maxRetries} attempts: ${url}`,
-//         // );
-//         // reject(
-//         //   new Error(
-//         //     `Failed to load script after ${maxRetries} attempts: ${url}`,
-//         //   ),
-//         // );
-//         // resolve({});
-//       }
-//     })
-//   }
-//   return script;
-// }
 
 const RetryPlugin: (
   params?: Omit<FetchWithRetryOptions, 'url'>,
