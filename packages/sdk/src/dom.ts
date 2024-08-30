@@ -80,11 +80,11 @@ export function createScript(info: {
     }
   }
 
-  const onScriptComplete = (
+  const onScriptComplete = async (
     prev: OnErrorEventHandler | GlobalEventHandlers['onload'] | null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event: any,
-  ): void => {
+  ): Promise<void> => {
     clearTimeout(timeoutId);
     // Prevent memory leaks in IE.
     if (script) {
@@ -98,8 +98,13 @@ export function createScript(info: {
       });
       if (prev) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const res = (prev as any)(event);
-        info?.cb?.();
+        // const res = (prev as any)(event);
+        // info?.cb?.();
+        // return res;
+
+        const res = await (prev as any)(event); // 等待 prev 解析
+        console.log('---------OnErrorEventHandler resolved ----------');
+        info?.cb?.(); // 在 prev 解析后调用 cb
         return res;
       }
     }
@@ -211,6 +216,7 @@ export function loadScript(
     createScriptHook?: CreateScriptHookDom;
   },
 ) {
+  console.log('-----------loadScript----------', url);
   const { attrs = {}, createScriptHook } = info;
   return new Promise<void>((resolve, _reject) => {
     const { script, needAttach } = createScript({
