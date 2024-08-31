@@ -407,6 +407,7 @@ class FederationRuntimePlugin {
         this.options.name ? this.options.name + '_partial' : undefined,
         // hoist all modules of federation entry
         this.getFilePath(),
+        this.bundlerRuntimePath,
       ).apply(compiler);
     }
     this.prependEntry(compiler);
