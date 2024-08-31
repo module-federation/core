@@ -7,6 +7,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import type { Module, ChunkGraph, Compilation, Chunk } from 'webpack';
 import ConsumeSharedModule from './ConsumeSharedModule';
 import { getFederationGlobalScope } from '../container/runtime/utils';
+import ContainerEntryModule from '../container/ContainerEntryModule';
 
 const { Template, RuntimeGlobals, RuntimeModule } = require(
   normalizeWebpackPath('webpack'),
@@ -92,15 +93,21 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         moduleIdToSourceMapping.set(id, sharedInfoAndHandlerStr);
       }
     };
-    // const chunkReferences = this._runtimeRequirements.has(
-    //   'federation-entry-startup',
-    // )
-    //   ? this.chunk?.getAllReferencedChunks()
-    //   : this.chunk?.getAllAsyncChunks();
-    //
-    // const allChunks = chunkReferences || [];
-    const allChunks = [...(this.chunk?.getAllReferencedChunks() || [])];
-    for (const chunk of allChunks) {
+    let chunkReferences;
+    if (this.chunkGraph && this.chunk) {
+      const entryMods = Array.from(
+        this.chunkGraph.getChunkEntryModulesIterable(this.chunk),
+      );
+      const isRemoteEntry = entryMods.some(
+        (m) => m instanceof ContainerEntryModule,
+      );
+      if (isRemoteEntry) {
+        chunkReferences = this.chunk?.getAllAsyncChunks();
+      } else {
+        chunkReferences = this.chunk.getAllReferencedChunks();
+      }
+    }
+    for (const chunk of chunkReferences || []) {
       const modules = chunkGraph.getChunkModulesIterableBySourceType(
         chunk,
         'consume-shared',
