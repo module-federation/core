@@ -409,6 +409,19 @@ class FederationRuntimePlugin {
         this.getFilePath(),
         this.bundlerRuntimePath,
       ).apply(compiler);
+
+      new compiler.webpack.NormalModuleReplacementPlugin(
+        /@module-federation\/runtime/,
+        (resolveData) => {
+          if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
+            resolveData.request = RuntimePath.replace('cjs', 'esm');
+
+            if (resolveData.createData) {
+              resolveData.createData.request = resolveData.request;
+            }
+          }
+        },
+      ).apply(compiler);
     }
     this.prependEntry(compiler);
     this.injectRuntime(compiler);
