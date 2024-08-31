@@ -119,7 +119,7 @@ class FederationRuntimePlugin {
     return Template.asString([
       `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
-      embedRuntime ? '' : embedRuntimeLines,
+      embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
       Template.indent([
         runtimePluginNames.length
