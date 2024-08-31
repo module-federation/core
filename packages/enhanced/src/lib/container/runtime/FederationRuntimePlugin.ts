@@ -325,6 +325,7 @@ class FederationRuntimePlugin {
     };
 
     if (this.options?.embedRuntime) {
+      runtimePath = runtimePath.replace('.cjs', '.esm');
       // should use normal module replacement instead?
       if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
         compiler.options.resolve.alias['@module-federation/runtime$'] =
@@ -389,7 +390,7 @@ class FederationRuntimePlugin {
 
     if (this.options?.implementation) {
       const runtimePath = this.options.embedRuntime
-        ? '@module-federation/webpack-bundler-runtime'
+        ? '@module-federation/webpack-bundler-runtime/vendor'
         : '@module-federation/webpack-bundler-runtime';
       this.bundlerRuntimePath = require.resolve(runtimePath, {
         paths: [this.options.implementation],
