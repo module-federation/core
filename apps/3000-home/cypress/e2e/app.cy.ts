@@ -23,9 +23,8 @@ describe('3000-home/', () => {
       getH1().contains('This is SPA combined');
     });
     it('Api endpoint works', () => {
-      const urls = ['/api/test'];
-      urls.forEach((url) => {
-        cy.request(url); // This makes a GET request, not a full page visit
+      cy.request('/api/test').then((response) => {
+        expect(response.headers['content-type']).to.include('application/json');
       });
     });
   });
