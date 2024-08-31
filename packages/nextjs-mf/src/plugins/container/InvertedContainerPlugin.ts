@@ -22,6 +22,5 @@ class InvertedContainerPlugin {
     }).apply(compiler);
   }
 }
-//
 
 export default InvertedContainerPlugin;
