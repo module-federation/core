@@ -389,7 +389,7 @@ class FederationRuntimePlugin {
 
     if (this.options?.implementation) {
       const runtimePath = this.options.embedRuntime
-        ? '@module-federation/webpack-bundler-runtime/vendor'
+        ? '@module-federation/webpack-bundler-runtime'
         : '@module-federation/webpack-bundler-runtime';
       this.bundlerRuntimePath = require.resolve(runtimePath, {
         paths: [this.options.implementation],
