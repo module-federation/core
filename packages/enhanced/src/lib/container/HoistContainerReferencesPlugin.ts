@@ -25,12 +25,18 @@ const PLUGIN_NAME = 'HoistContainerReferences';
  */
 export class HoistContainerReferences implements WebpackPluginInstance {
   private readonly containerName: string;
-  private readonly bundlerRuntimePath?: string;
+  private readonly entryFilePath?: string;
+  private readonly bundlerRuntimeDep?: string;
   private readonly explanation: string;
 
-  constructor(name?: string, bundlerRuntimePath?: string) {
+  constructor(
+    name?: string,
+    entryFilePath?: string,
+    bundlerRuntimeDep?: string,
+  ) {
     this.containerName = name || 'no known chunk name';
-    this.bundlerRuntimePath = bundlerRuntimePath;
+    this.entryFilePath = entryFilePath;
+    this.bundlerRuntimeDep = bundlerRuntimeDep;
     this.explanation =
       'Bundler runtime path module is required for proper functioning';
   }
@@ -64,7 +70,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         compilation.hooks.optimizeDependencies.tap(
           PLUGIN_NAME,
           (modules: Iterable<Module>) => {
-            if (this.bundlerRuntimePath) {
+            if (this.entryFilePath) {
               let runtime: RuntimeSpec | undefined;
               for (const [name, { options }] of compilation.entries) {
                 runtime = compiler.webpack.util.runtime.mergeRuntimeOwned(
@@ -79,33 +85,17 @@ export class HoistContainerReferences implements WebpackPluginInstance {
               for (const module of modules) {
                 if (
                   module instanceof NormalModule &&
-                  module.resource === this.bundlerRuntimePath
+                  module.resource === this.bundlerRuntimeDep
                 ) {
-                  const bundlerRuntimeDep = moduleGraph.getModule(
-                    module.dependencies[0],
-                  ) as NormalModuleType;
-                  if (
-                    bundlerRuntimeDep &&
-                    !bundlerRuntimeDep?.resource.includes(
-                      'webpack-bundler-runtime',
-                    )
-                  ) {
-                    throw new Error(
-                      `dep is not bundler runtime: ${bundlerRuntimeDep?.resource}`,
-                    );
-                  }
                   const exportsInfo: ExportsInfo =
-                    moduleGraph.getExportsInfo(bundlerRuntimeDep);
+                    moduleGraph.getExportsInfo(module);
                   //Since i dont use the import federation var, tree shake will eliminate it.
                   exportsInfo.setUsedInUnknownWay(runtime);
-                  moduleGraph.addExtraReason(
-                    bundlerRuntimeDep,
-                    this.explanation,
-                  );
-                  if (bundlerRuntimeDep.factoryMeta === undefined) {
-                    bundlerRuntimeDep.factoryMeta = {};
+                  moduleGraph.addExtraReason(module, this.explanation);
+                  if (module.factoryMeta === undefined) {
+                    module.factoryMeta = {};
                   }
-                  bundlerRuntimeDep.factoryMeta.sideEffectFree = false;
+                  module.factoryMeta.sideEffectFree = false;
                 }
               }
             }
@@ -153,19 +143,19 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   private findModule(
     compilation: Compilation,
     chunk: Chunk,
-    bundlerRuntimePath: string,
+    entryFilePath: string,
   ): Module | null {
     const { chunkGraph } = compilation;
     let module: Module | null = null;
     for (const mod of chunkGraph.getChunkEntryModulesIterable(chunk)) {
-      if (mod instanceof NormalModule && mod.resource === bundlerRuntimePath) {
+      if (mod instanceof NormalModule && mod.resource === entryFilePath) {
         module = mod;
         break;
       }
 
       if (mod instanceof ConcatenatedModule) {
         for (const m of mod.modules) {
-          if (m instanceof NormalModule && m.resource === bundlerRuntimePath) {
+          if (m instanceof NormalModule && m.resource === entryFilePath) {
             module = mod;
             break;
           }
@@ -193,12 +183,12 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       for (const chunk of chunks) {
         if (
           chunkGraph.getNumberOfEntryModules(chunk) > 0 &&
-          this.bundlerRuntimePath
+          this.entryFilePath
         ) {
           runtimeModule = this.findModule(
             compilation,
             chunk,
-            this.bundlerRuntimePath,
+            this.entryFilePath,
           );
 
           if (runtimeModule) break;
@@ -217,7 +207,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     if (!runtimeModule) {
       logger.error(
         '[Federation HoistContainerReferences] unable to find runtime module:',
-        this.bundlerRuntimePath,
+        this.entryFilePath,
       );
       return;
     }
