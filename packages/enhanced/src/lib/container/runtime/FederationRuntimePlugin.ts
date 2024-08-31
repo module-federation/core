@@ -39,7 +39,7 @@ const BundlerRuntimePath = require.resolve(
 );
 
 const VendoredBundlerRuntimePath = require.resolve(
-  '@module-federation/webpack-bundler-runtime/vendor',
+  '@module-federation/webpack-bundler-runtime',
   {
     paths: [RuntimeToolsPath],
   },
