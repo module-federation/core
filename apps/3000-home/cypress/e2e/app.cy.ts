@@ -22,7 +22,10 @@ describe('3000-home/', () => {
     it('should display welcome message', () => {
       getH1().contains('This is SPA combined');
     });
-    it('Api endpoint works', () => {
+  });
+
+  describe('API endpoint should return json', () => {
+    it('Query Endpoint', () => {
       cy.request('/api/test').then((response) => {
         expect(response.headers['content-type']).to.include('application/json');
       });
