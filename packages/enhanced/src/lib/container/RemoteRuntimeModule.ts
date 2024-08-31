@@ -10,6 +10,7 @@ import type ExternalModule from 'webpack/lib/ExternalModule';
 import type FallbackModule from './FallbackModule';
 import type { RemotesOptions } from '@module-federation/webpack-bundler-runtime';
 import { FEDERATION_SUPPORTED_TYPES } from '@module-federation/webpack-bundler-runtime/constant';
+import ContainerEntryModule from './ContainerEntryModule';
 
 const extractUrlAndGlobal = require(
   normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
@@ -44,12 +45,22 @@ class RemoteRuntimeModule extends RuntimeModule {
     //     chunkReferences = this.chunk.getAllAsyncChunks();
     //   }
     // }
+    let chunkReferences;
+    if (this.chunkGraph && this.chunk) {
+      const entryMods = Array.from(
+        this.chunkGraph.getChunkEntryModulesIterable(this.chunk),
+      );
+      const isRemoteEntry = entryMods.some(
+        (m) => m instanceof ContainerEntryModule,
+      );
+      chunkReferences = isRemoteEntry
+        ? this.chunk.getAllAsyncChunks()
+        : this.chunk.getAllReferencedChunks();
+    } else {
+      chunkReferences = this.chunk?.getAllReferencedChunks() || [];
+    }
 
-    const allChunks = [
-      ...Array.from(this.chunk?.getAllReferencedChunks() || []),
-    ];
-
-    for (const chunk of allChunks) {
+    for (const chunk of chunkReferences) {
       const modules = chunkGraph?.getChunkModulesIterableBySourceType(
         chunk,
         'remote',

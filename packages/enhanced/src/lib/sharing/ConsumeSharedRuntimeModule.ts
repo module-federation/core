@@ -101,13 +101,13 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
       const isRemoteEntry = entryMods.some(
         (m) => m instanceof ContainerEntryModule,
       );
-      if (isRemoteEntry) {
-        chunkReferences = this.chunk?.getAllAsyncChunks();
-      } else {
-        chunkReferences = this.chunk.getAllReferencedChunks();
-      }
+      chunkReferences = isRemoteEntry
+        ? this.chunk.getAllAsyncChunks()
+        : this.chunk.getAllReferencedChunks();
+    } else {
+      chunkReferences = this.chunk?.getAllReferencedChunks() || [];
     }
-    for (const chunk of chunkReferences || []) {
+    for (const chunk of chunkReferences) {
       const modules = chunkGraph.getChunkModulesIterableBySourceType(
         chunk,
         'consume-shared',
@@ -123,7 +123,7 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         (chunkToModuleMapping[chunk.id.toString()] = []),
       );
     }
-    for (const chunk of [...(this.chunk?.getAllInitialChunks() || [])]) {
+    for (const chunk of this.chunk?.getAllInitialChunks() || []) {
       const modules = chunkGraph.getChunkModulesIterableBySourceType(
         chunk,
         'consume-shared',
