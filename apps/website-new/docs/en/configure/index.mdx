@@ -26,5 +26,7 @@ type ModuleFederationOptions = {
   dev?: boolean | PluginDevOptions;
   // control types
   dts?: boolean | PluginDtsOptions;
+  // Use a virtual runtime entrypoint instead of writing a temporary file to disk
+  virtualRuntimeEntry?: boolean;
 };
 ```

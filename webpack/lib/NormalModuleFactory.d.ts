@@ -1,12 +1,12 @@
 export = NormalModuleFactory;
 declare class NormalModuleFactory extends ModuleFactory {
   /**
-   * @param {Object} param params
+   * @param {object} param params
    * @param {string=} param.context context
    * @param {InputFileSystem} param.fs file system
    * @param {ResolverFactory} param.resolverFactory resolverFactory
    * @param {ModuleOptions} param.options options
-   * @param {Object=} param.associatedObjectForCache an object to which the cache will be attached
+   * @param {object=} param.associatedObjectForCache an object to which the cache will be attached
    * @param {boolean=} param.layers enable layers
    */
   constructor({
@@ -21,7 +21,7 @@ declare class NormalModuleFactory extends ModuleFactory {
     fs: InputFileSystem;
     resolverFactory: ResolverFactory;
     options: ModuleOptions;
-    associatedObjectForCache?: any | undefined;
+    associatedObjectForCache?: object | undefined;
     layers?: boolean | undefined;
   });
   hooks: Readonly<{
@@ -35,53 +35,32 @@ declare class NormalModuleFactory extends ModuleFactory {
     resolveInScheme: HookMap<
       AsyncSeriesBailHook<[ResourceDataWithData, ResolveData], true | void>
     >;
-    /** @type {AsyncSeriesBailHook<[ResolveData], Module>} */
-    factorize: AsyncSeriesBailHook<[ResolveData], Module>;
+    /** @type {AsyncSeriesBailHook<[ResolveData], Module | undefined>} */
+    factorize: AsyncSeriesBailHook<[ResolveData], Module | undefined>;
     /** @type {AsyncSeriesBailHook<[ResolveData], false | void>} */
     beforeResolve: AsyncSeriesBailHook<[ResolveData], false | void>;
     /** @type {AsyncSeriesBailHook<[ResolveData], false | void>} */
     afterResolve: AsyncSeriesBailHook<[ResolveData], false | void>;
     /** @type {AsyncSeriesBailHook<[ResolveData["createData"], ResolveData], Module | void>} */
     createModule: AsyncSeriesBailHook<
-      [
-        Partial<
-          NormalModule.NormalModuleCreateData & {
-            settings: ModuleSettings;
-          }
-        >,
-        ResolveData,
-      ],
-      void | Module,
-      import('tapable').UnsetAdditionalOptions
+      [ResolveData['createData'], ResolveData],
+      Module | void
     >;
     /** @type {SyncWaterfallHook<[Module, ResolveData["createData"], ResolveData], Module>} */
     module: SyncWaterfallHook<
-      [
-        Module,
-        Partial<
-          NormalModule.NormalModuleCreateData & {
-            settings: ModuleSettings;
-          }
-        >,
-        ResolveData,
-      ],
+      [Module, ResolveData['createData'], ResolveData],
       Module
     >;
-    createParser: HookMap<
-      SyncBailHook<any, any, import('tapable').UnsetAdditionalOptions>
-    >;
-    parser: HookMap<
-      SyncHook<any, void, import('tapable').UnsetAdditionalOptions>
-    >;
-    createGenerator: HookMap<
-      SyncBailHook<any, any, import('tapable').UnsetAdditionalOptions>
-    >;
-    generator: HookMap<
-      SyncHook<any, void, import('tapable').UnsetAdditionalOptions>
-    >;
-    createModuleClass: HookMap<
-      SyncBailHook<any, any, import('tapable').UnsetAdditionalOptions>
-    >;
+    /** @type {HookMap<SyncBailHook<[ParserOptions], Parser>>} */
+    createParser: HookMap<SyncBailHook<[ParserOptions], Parser>>;
+    /** @type {HookMap<SyncBailHook<[TODO, ParserOptions], void>>} */
+    parser: HookMap<SyncBailHook<[TODO, ParserOptions], void>>;
+    /** @type {HookMap<SyncBailHook<[GeneratorOptions], Generator>>} */
+    createGenerator: HookMap<SyncBailHook<[GeneratorOptions], Generator>>;
+    /** @type {HookMap<SyncBailHook<[TODO, GeneratorOptions], void>>} */
+    generator: HookMap<SyncBailHook<[TODO, GeneratorOptions], void>>;
+    /** @type {HookMap<SyncBailHook<[TODO, ResolveData], Module>>} */
+    createModuleClass: HookMap<SyncBailHook<[TODO, ResolveData], Module>>;
   }>;
   resolverFactory: import('./ResolverFactory');
   ruleSet: RuleSetCompiler.RuleSet;
@@ -89,57 +68,97 @@ declare class NormalModuleFactory extends ModuleFactory {
   fs: import('./util/fs').InputFileSystem;
   _globalParserOptions: import('../declarations/WebpackOptions').ParserOptionsByModuleType;
   _globalGeneratorOptions: import('../declarations/WebpackOptions').GeneratorOptionsByModuleType;
-  /** @type {Map<string, WeakMap<Object, TODO>>} */
-  parserCache: Map<string, WeakMap<any, TODO>>;
-  /** @type {Map<string, WeakMap<Object, Generator>>} */
-  generatorCache: Map<string, WeakMap<any, Generator>>;
+  /** @type {Map<string, WeakMap<object, Parser>>} */
+  parserCache: Map<string, WeakMap<object, Parser>>;
+  /** @type {Map<string, WeakMap<object, Generator>>} */
+  generatorCache: Map<string, WeakMap<object, Generator>>;
   /** @type {Set<Module>} */
   _restoredUnsafeCacheEntries: Set<Module>;
-  _parseResourceWithoutFragment: (str: any) => any;
+  _parseResourceWithoutFragment: import('./util/identifier').BindCacheResultFn<
+    import('./util/identifier').ParsedResourceWithoutFragment
+  >;
   cleanupForCache(): void;
+  /**
+   * @param {ModuleFactoryCreateDataContextInfo} contextInfo context info
+   * @param {string} context context
+   * @param {string} unresolvedResource unresolved resource
+   * @param {ResolverWithOptions} resolver resolver
+   * @param {ResolveContext} resolveContext resolver context
+   * @param {(err: null | Error, res?: string | false, req?: ResolveRequest) => void} callback callback
+   */
   resolveResource(
-    contextInfo: any,
-    context: any,
-    unresolvedResource: any,
-    resolver: any,
-    resolveContext: any,
-    callback: any,
+    contextInfo: ModuleFactoryCreateDataContextInfo,
+    context: string,
+    unresolvedResource: string,
+    resolver: ResolverWithOptions,
+    resolveContext: ResolveContext,
+    callback: (
+      err: null | Error,
+      res?: string | false,
+      req?: ResolveRequest,
+    ) => void,
   ): void;
-  _resolveResourceErrorHints(
-    error: any,
-    contextInfo: any,
-    context: any,
-    unresolvedResource: any,
-    resolver: any,
-    resolveContext: any,
-    callback: any,
-  ): void;
+  /**
+   * @param {Error} error error
+   * @param {ModuleFactoryCreateDataContextInfo} contextInfo context info
+   * @param {string} context context
+   * @param {string} unresolvedResource unresolved resource
+   * @param {ResolverWithOptions} resolver resolver
+   * @param {ResolveContext} resolveContext resolver context
+   * @param {Callback<string[]>} callback callback
+   * @private
+   */
+  private _resolveResourceErrorHints;
+  /**
+   * @param {ModuleFactoryCreateDataContextInfo} contextInfo context info
+   * @param {string} context context
+   * @param {LoaderItem[]} array array
+   * @param {ResolverWithOptions} resolver resolver
+   * @param {ResolveContext} resolveContext resolve context
+   * @param {Callback<LoaderItem[]>} callback callback
+   * @returns {void} result
+   */
   resolveRequestArray(
-    contextInfo: any,
-    context: any,
-    array: any,
-    resolver: any,
-    resolveContext: any,
-    callback: any,
-  ): any;
-  getParser(type: any, parserOptions?: {}): TODO;
+    contextInfo: ModuleFactoryCreateDataContextInfo,
+    context: string,
+    array: LoaderItem[],
+    resolver: ResolverWithOptions,
+    resolveContext: ResolveContext,
+    callback: Callback<LoaderItem[]>,
+  ): void;
   /**
    * @param {string} type type
-   * @param {{[k: string]: any}} parserOptions parser options
+   * @param {ParserOptions} parserOptions parser options
    * @returns {Parser} parser
    */
-  createParser(
-    type: string,
-    parserOptions?: {
-      [k: string]: any;
-    },
-  ): Parser;
-  getGenerator(type: any, generatorOptions?: {}): import('./Generator');
-  createGenerator(type: any, generatorOptions?: {}): any;
+  getParser(type: string, parserOptions?: ParserOptions): Parser;
+  /**
+   * @param {string} type type
+   * @param {ParserOptions} parserOptions parser options
+   * @returns {Parser} parser
+   */
+  createParser(type: string, parserOptions?: ParserOptions): Parser;
+  /**
+   * @param {string} type type of generator
+   * @param {GeneratorOptions} generatorOptions generator options
+   * @returns {Generator} generator
+   */
+  getGenerator(type: string, generatorOptions?: GeneratorOptions): Generator;
+  /**
+   * @param {string} type type of generator
+   * @param {GeneratorOptions} generatorOptions generator options
+   * @returns {Generator} generator
+   */
+  createGenerator(type: string, generatorOptions?: GeneratorOptions): Generator;
+  /**
+   * @param {Parameters<ResolverFactory["get"]>[0]} type type of resolver
+   * @param {Parameters<ResolverFactory["get"]>[1]=} resolveOptions options
+   * @returns {ReturnType<ResolverFactory["get"]>} the resolver
+   */
   getResolver(
-    type: any,
-    resolveOptions: any,
-  ): import('./ResolverFactory').ResolverWithOptions;
+    type: Parameters<ResolverFactory['get']>[0],
+    resolveOptions?: Parameters<ResolverFactory['get']>[1] | undefined,
+  ): ReturnType<ResolverFactory['get']>;
 }
 declare namespace NormalModuleFactory {
   export {
@@ -147,10 +166,17 @@ declare namespace NormalModuleFactory {
     RuleSetRule,
     Generator,
     ModuleFactoryCreateData,
+    ModuleFactoryCreateDataContextInfo,
     ModuleFactoryResult,
+    GeneratorOptions,
+    LoaderItem,
     NormalModuleCreateData,
+    ParserOptions,
     Parser,
     ResolverFactory,
+    ResolveContext,
+    ResolveRequest,
+    ResolverWithOptions,
     ModuleDependency,
     InputFileSystem,
     ModuleSettings,
@@ -159,10 +185,45 @@ declare namespace NormalModuleFactory {
     ResourceData,
     ResourceDataWithData,
     ParsedLoaderRequest,
+    Callback,
   };
 }
 import ModuleFactory = require('./ModuleFactory');
 import { AsyncSeriesBailHook } from 'tapable';
+import Module = require('./Module');
+import { HookMap } from 'tapable';
+import { SyncWaterfallHook } from 'tapable';
+import { SyncBailHook } from 'tapable';
+import RuleSetCompiler = require('./rules/RuleSetCompiler');
+type ModuleOptions =
+  import('../declarations/WebpackOptions').ModuleOptionsNormalized;
+type RuleSetRule = import('../declarations/WebpackOptions').RuleSetRule;
+type Generator = import('./Generator');
+type ModuleFactoryCreateData =
+  import('./ModuleFactory').ModuleFactoryCreateData;
+type ModuleFactoryCreateDataContextInfo =
+  import('./ModuleFactory').ModuleFactoryCreateDataContextInfo;
+type ModuleFactoryResult = import('./ModuleFactory').ModuleFactoryResult;
+type GeneratorOptions = import('./NormalModule').GeneratorOptions;
+type LoaderItem = import('./NormalModule').LoaderItem;
+type NormalModuleCreateData = import('./NormalModule').NormalModuleCreateData;
+type ParserOptions = import('./NormalModule').ParserOptions;
+type Parser = import('./Parser');
+type ResolverFactory = import('./ResolverFactory');
+type ResolveContext = import('./ResolverFactory').ResolveContext;
+type ResolveRequest = import('./ResolverFactory').ResolveRequest;
+type ResolverWithOptions = import('./ResolverFactory').ResolverWithOptions;
+type ModuleDependency = import('./dependencies/ModuleDependency');
+type InputFileSystem = import('./util/fs').InputFileSystem;
+type ModuleSettings = Pick<
+  RuleSetRule,
+  'type' | 'sideEffects' | 'parser' | 'generator' | 'resolve' | 'layer'
+>;
+type CreateData = Partial<
+  NormalModuleCreateData & {
+    settings: ModuleSettings;
+  }
+>;
 type ResolveData = {
   contextInfo: ModuleFactoryCreateData['contextInfo'];
   resolveOptions: ModuleFactoryCreateData['resolveOptions'];
@@ -180,43 +241,15 @@ type ResolveData = {
    */
   cacheable: boolean;
 };
-import Module = require('./Module');
-import { HookMap } from 'tapable';
-type ResourceDataWithData = ResourceData & {
-  data: Record<string, any>;
-};
-import NormalModule = require('./NormalModule');
-type ModuleSettings = Pick<
-  RuleSetRule,
-  'type' | 'sideEffects' | 'parser' | 'generator' | 'resolve' | 'layer'
->;
-import { SyncWaterfallHook } from 'tapable';
-import { SyncBailHook } from 'tapable';
-import { SyncHook } from 'tapable';
-import RuleSetCompiler = require('./rules/RuleSetCompiler');
-type Generator = import('./Generator');
-type Parser = import('./Parser');
-type InputFileSystem = import('./util/fs').InputFileSystem;
-type ResolverFactory = import('./ResolverFactory');
-type ModuleOptions =
-  import('../declarations/WebpackOptions').ModuleOptionsNormalized;
-type RuleSetRule = import('../declarations/WebpackOptions').RuleSetRule;
-type ModuleFactoryCreateData =
-  import('./ModuleFactory').ModuleFactoryCreateData;
-type ModuleFactoryResult = import('./ModuleFactory').ModuleFactoryResult;
-type NormalModuleCreateData = import('./NormalModule').NormalModuleCreateData;
-type ModuleDependency = import('./dependencies/ModuleDependency');
-type CreateData = Partial<
-  NormalModuleCreateData & {
-    settings: ModuleSettings;
-  }
->;
 type ResourceData = {
   resource: string;
-  path: string;
-  query: string;
-  fragment: string;
+  path?: string | undefined;
+  query?: string | undefined;
+  fragment?: string | undefined;
   context?: string | undefined;
+};
+type ResourceDataWithData = ResourceData & {
+  data: Record<string, any>;
 };
 type ParsedLoaderRequest = {
   /**
@@ -228,4 +261,8 @@ type ParsedLoaderRequest = {
    */
   options: string | undefined;
 };
+type Callback<T> = (
+  err?: (Error | null) | undefined,
+  stats?: T | undefined,
+) => void;
 import LazySet = require('./util/LazySet');
