@@ -1,11 +1,10 @@
-# .github/workflows/e2e-next-dev.yml
-name: E2E Test for Next.js Dev
+name: E2E Test for Next.js Prod
 
 on:
   workflow_call:
 
 jobs:
-  e2e-next:
+  e2e-next-prod:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -47,17 +46,6 @@ jobs:
           pnpm run --filter @module-federation/3002-checkout --filter @module-federation/3000-home --filter @module-federation/3001-shop build &&
           pnpm run app:next:prod &
           sleep 4 &&
-          npx wait-on tcp:3001 &&
-          npx wait-on tcp:3002 &&
-          npx wait-on tcp:3000 &&
-          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 &&
-          lsof -ti tcp:3000,3001,3002 | xargs kill
-
-      - name: E2E Test for Next.js Dev
-        if: steps.check-ci.outcome == 'success'
-        run: |
-          pnpm run app:next:dev > /dev/null 2>&1 &
-          sleep 1 &&
           npx wait-on tcp:3001 &&
           npx wait-on tcp:3002 &&
           npx wait-on tcp:3000 &&
