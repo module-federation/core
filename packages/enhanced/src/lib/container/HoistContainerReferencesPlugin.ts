@@ -87,15 +87,22 @@ export class HoistContainerReferences implements WebpackPluginInstance {
                   module instanceof NormalModule &&
                   module.resource === this.bundlerRuntimeDep
                 ) {
-                  const exportsInfo: ExportsInfo =
-                    moduleGraph.getExportsInfo(module);
-                  //Since i dont use the import federation var, tree shake will eliminate it.
-                  exportsInfo.setUsedInUnknownWay(runtime);
-                  moduleGraph.addExtraReason(module, this.explanation);
-                  if (module.factoryMeta === undefined) {
-                    module.factoryMeta = {};
+                  const allRefs = this.getAllReferencedModules(
+                    compilation,
+                    module,
+                    'initial',
+                  );
+                  for (const module of allRefs) {
+                    const exportsInfo: ExportsInfo =
+                      moduleGraph.getExportsInfo(module);
+                    //Since i dont use the import federation var, tree shake will eliminate it.
+                    exportsInfo.setUsedInUnknownWay(runtime);
+                    moduleGraph.addExtraReason(module, this.explanation);
+                    if (module.factoryMeta === undefined) {
+                      module.factoryMeta = {};
+                    }
+                    module.factoryMeta.sideEffectFree = false;
                   }
-                  module.factoryMeta.sideEffectFree = false;
                 }
               }
             }
