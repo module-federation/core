@@ -19,6 +19,7 @@ const ConcatenatedModule = require(
 ) as typeof import('webpack/lib/optimize/ConcatenatedModule');
 
 const PLUGIN_NAME = 'HoistContainerReferences';
+
 /**
  * This class is used to hoist container references in the code.
  * @constructor
@@ -67,7 +68,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         );
 
         // Hook into the optimizeDependencies phase
-        compilation.hooks.optimizeDependencies.tap(
+        compilation.hooks.afterOptimizeDependencies.tap(
           PLUGIN_NAME,
           (modules: Iterable<Module>) => {
             if (this.entryFilePath) {
@@ -95,7 +96,9 @@ export class HoistContainerReferences implements WebpackPluginInstance {
                   for (const module of allRefs) {
                     const exportsInfo: ExportsInfo =
                       moduleGraph.getExportsInfo(module);
-                    //Since i dont use the import federation var, tree shake will eliminate it.
+                    // Since i dont use the import federation var, tree shake will eliminate it.
+                    // also because currently the runtime is copied into all runtime chunks
+                    // some might not have the runtime import in the tree to begin with
                     exportsInfo.setUsedInUnknownWay(runtime);
                     moduleGraph.addExtraReason(module, this.explanation);
                     if (module.factoryMeta === undefined) {
