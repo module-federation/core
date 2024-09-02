@@ -4,7 +4,6 @@ import {
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
 
-import hook from './lifecycle';
 import { LoggerInstance } from './utils';
 import RemoteApp from './remote';
 

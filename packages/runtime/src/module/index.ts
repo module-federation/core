@@ -1,4 +1,4 @@
-import { getFMId, safeToString, assert } from '../utils';
+import { getFMId, safeToString, assert, processModuleAlias } from '../utils';
 import { getRemoteEntry } from '../utils/load';
 import { FederationHost } from '../core';
 import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
@@ -113,7 +113,9 @@ class Module {
       `${getFMId(this.remoteInfo)} remote don't export ${expose}.`,
     );
 
-    const wrapModuleFactory = this.wraperFactory(moduleFactory, id);
+    // keep symbol for module name always one format
+    const symbolName = processModuleAlias(this.remoteInfo.name, expose);
+    const wrapModuleFactory = this.wraperFactory(moduleFactory, symbolName);
 
     if (!loadFactory) {
       return wrapModuleFactory;

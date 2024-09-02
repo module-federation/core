@@ -115,3 +115,19 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
   }
   return defaultRemoteEntryInfo;
 }
+
+export const processModuleAlias = (name: string, subPath: string) => {
+  // @host/ ./button -> @host/button
+  let moduleName;
+  if (name.endsWith('/')) {
+    moduleName = name.slice(0, -1);
+  } else {
+    moduleName = name;
+  }
+
+  if (subPath.startsWith('.')) {
+    subPath = subPath.slice(1);
+  }
+  moduleName = moduleName + subPath;
+  return moduleName;
+};
