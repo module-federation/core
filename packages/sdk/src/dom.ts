@@ -98,8 +98,8 @@ export function createScript(info: {
       });
       if (prev) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const res = await (prev as any)(event); // 等待 prev 解析
-        info?.cb?.(); // 在 prev 解析后调用 cb
+        const res = await (prev as any)(event);
+        info?.cb?.();
         return res;
       }
     }

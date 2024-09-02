@@ -1,5 +1,5 @@
 import type { ReqiuredUrl, FetchWithRetryOptions } from './types';
-import { defaultRetries } from './constant';
+import { defaultRetries, defaultRetryDelay } from './constant';
 
 async function fetchWithRetry({
   url, // fetch url
@@ -42,7 +42,7 @@ async function fetchWithRetry({
     }
 
     // If there are remaining times, delay 1 second and try again
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, defaultRetryDelay));
     console.log(`Trying again. Number of retries available：${retryTimes - 1}`);
     return await fetchWithRetry({
       url,

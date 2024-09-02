@@ -1,5 +1,5 @@
 import { ScriptWithRetryOptions, CreateScriptFunc, ReqiuredUrl } from './types';
-import { defaultRetries } from './constant';
+import { defaultRetries, defaultRetryDelay } from './constant';
 
 export const defaultCreateScript = (
   url: string,
@@ -38,7 +38,7 @@ async function loadScript(
   url: string,
   attrs: Record<string, any>,
   maxRetries = defaultRetries,
-  retryDelay = 1000,
+  retryDelay = defaultRetryDelay,
   customCreateScript: CreateScriptFunc | undefined,
 ) {
   let retries = 0;
@@ -48,7 +48,6 @@ async function loadScript(
       const script = getScript(url, attrs, customCreateScript);
       // when the script is successfully loaded, call resolve
       script.onload = () => {
-        console.log('Script loaded successfully.');
         resolve(script);
       };
 
@@ -92,7 +91,13 @@ function scriptWithRetry({
     console.warn(
       `Script load failed, retrying (${retryTimes + 1}/${defaultRetries}): ${url}`,
     );
-    return await loadScript(url, attrs, retryTimes, 1000, customCreateScript);
+    return await loadScript(
+      url,
+      attrs,
+      retryTimes,
+      defaultRetryDelay,
+      customCreateScript,
+    );
   };
   return script;
 }
