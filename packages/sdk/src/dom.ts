@@ -211,7 +211,6 @@ export function loadScript(
     createScriptHook?: CreateScriptHookDom;
   },
 ) {
-  console.log('-----------loadScript----------', url);
   const { attrs = {}, createScriptHook } = info;
   return new Promise<void>((resolve, _reject) => {
     const { script, needAttach } = createScript({
