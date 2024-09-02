@@ -68,8 +68,12 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         );
 
         // Hook into the optimizeDependencies phase
-        compilation.hooks.afterOptimizeDependencies.tap(
-          PLUGIN_NAME,
+        compilation.hooks.optimizeDependencies.tap(
+          {
+            name: PLUGIN_NAME,
+            // basic optimization stage - it runs first
+            stage: -10,
+          },
           (modules: Iterable<Module>) => {
             if (this.entryFilePath) {
               let runtime: RuntimeSpec | undefined;
