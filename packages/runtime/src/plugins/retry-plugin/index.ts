@@ -1,61 +1,49 @@
 import { FederationRuntimePlugin } from '../../type/plugin';
 import type { CreateScriptHookReturn } from '@module-federation/sdk';
 import { fetchWithRetry } from './fetch-retry';
-import type { FetchWithRetryOptions } from './fetch-retry';
 import { scriptWithRetry } from './script-retry';
+import type { RetryPluginParams } from './types';
 
-const RetryPlugin: (
-  params?: Omit<FetchWithRetryOptions, 'url'>,
-) => FederationRuntimePlugin = (params) => ({
+const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
+  fetch: fetchOption,
+  script: scriptOption,
+}) => ({
   name: 'retry-plugin',
   async fetch(url: string, options: RequestInit) {
-    return fetchWithRetry({
-      url,
-      options: {
-        ...options,
-        ...params?.options,
-      },
-      retryTimes: params?.retryTimes,
-      fallback: params?.fallback,
-    });
-  },
-  createScript({ url, attrs }) {
-    console.log('>>>>>>>>>> createScript <<<<<<<<<<<', url, attrs);
-    // 对指定资源进行 retry
-    if (url.endsWith('src_App_tsx.js')) {
-      return scriptWithRetry({
-        url: `${url}-fake`,
-        attrs,
-        retryTimes: params?.retryTimes,
-        customCreateScript: (url, attrs) => {
-          let script = document.createElement('script');
-          script.src = url;
-          script.setAttribute('loader-hooks', 'isTrue');
-          script.setAttribute('crossorigin', 'anonymous');
-          return script;
+    // 如果配置了 fetch 重试规则
+    if (fetchOption) {
+      return fetchWithRetry({
+        url: fetchOption?.url || url,
+        options: {
+          ...options,
+          ...fetchOption?.options,
         },
+        retryTimes: fetchOption?.retryTimes,
+        fallback: fetchOption?.fallback,
       });
     }
-    return null as unknown as HTMLScriptElement; // Ensure null is assignable
+    // 未配置 fecth 重试规则，则直接请求
+    return fetch(url, options);
+  },
 
-    // 对所有资源进行 retry
-    // return scriptWithRetry({
-    //   url: `${url}-fake`,
-    //   attrs,
-    //   retryTimes: params?.retryTimes,
-    //   customCreateScript: (url, attrs) => {
-    //     if (url.endsWith('src_App_tsx.js')) {
-    //       let script = document.createElement('script');
-    //       script.src = url;
-    //       script.setAttribute('loader-hooks', 'isTrue');
-    //       script.setAttribute('crossorigin', 'anonymous');
-    //       return script;
-    //     }
-    //     return null as unknown as HTMLScriptElement; // Ensure null is assignable
-    //     // return null as unknown as CreateScriptHookReturn; // Ensure null is assignable
-    //   }
-    // });
+  createScript({ url, attrs }) {
+    const scriptAttrs = scriptOption?.attrs
+      ? { ...attrs, ...scriptOption.attrs }
+      : attrs;
+    if (scriptOption) {
+      return scriptWithRetry({
+        url: scriptOption?.url || url,
+        attrs: scriptAttrs,
+        retryTimes: scriptOption?.retryTimes,
+        customCreateScript: scriptOption?.customCreateScript
+          ? scriptOption.customCreateScript
+          : undefined,
+      });
+    }
+
+    return {};
   },
 });
 
 export default RetryPlugin;
+export type { RetryPluginParams } from './types';

@@ -1,17 +1,12 @@
-const defaultRetries = 3;
-export interface FetchWithRetryOptions {
-  url: string;
-  options?: RequestInit;
-  retryTimes?: number;
-  fallback?: () => string;
-}
+import type { ReqiuredUrl, FetchWithRetryOptions } from './types';
+import { defaultRetries } from './constant';
 
 async function fetchWithRetry({
   url, // fetch url
   options = {}, // fetch options
   retryTimes = defaultRetries, // retry times
   fallback, // fallback url
-}: FetchWithRetryOptions) {
+}: ReqiuredUrl<FetchWithRetryOptions>) {
   try {
     const response = await fetch(url, options);
 

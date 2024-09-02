@@ -1,15 +1,5 @@
-const maxRetries = 3;
-
-type CreateScriptFunc = (
-  url: string,
-  attrs: Record<string, any>,
-) => HTMLScriptElement;
-interface ScriptWithRetryOptions {
-  url: string;
-  attrs?: Record<string, string>;
-  retryTimes?: number;
-  customCreateScript?: CreateScriptFunc;
-}
+import { ScriptWithRetryOptions, CreateScriptFunc, ReqiuredUrl } from './types';
+import { defaultRetries } from './constant';
 
 export const defaultCreateScript = (
   url: string,
@@ -47,7 +37,7 @@ const getScript = (
 async function loadScript(
   url: string,
   attrs: Record<string, any>,
-  maxRetries = 3,
+  maxRetries = defaultRetries,
   retryDelay = 1000,
   customCreateScript: CreateScriptFunc | undefined,
 ) {
@@ -55,7 +45,6 @@ async function loadScript(
 
   function attemptLoad() {
     return new Promise((resolve, reject) => {
-      // const script = createScript(url, attrs)
       const script = getScript(url, attrs, customCreateScript);
       // when the script is successfully loaded, call resolve
       script.onload = () => {
@@ -80,7 +69,6 @@ async function loadScript(
             'Failed to load script after maximum retries. the url is:',
             url,
           );
-          // reject(new Error('Failed to load script after maximum retries.'));
           resolve('Failed to load script after maximum retries.');
         }
       };
@@ -96,13 +84,13 @@ async function loadScript(
 function scriptWithRetry({
   url, // fetch url
   attrs = {}, // fetch options
-  retryTimes = 3, // retry times
+  retryTimes = defaultRetries, // retry times
   customCreateScript, // user script create function
-}: ScriptWithRetryOptions) {
+}: ReqiuredUrl<ScriptWithRetryOptions>) {
   const script = getScript(url, attrs, customCreateScript);
   script.onerror = async (event) => {
     console.warn(
-      `Script load failed, retrying (${retryTimes + 1}/${maxRetries}): ${url}`,
+      `Script load failed, retrying (${retryTimes + 1}/${defaultRetries}): ${url}`,
     );
     return await loadScript(url, attrs, retryTimes, 1000, customCreateScript);
   };
