@@ -37,14 +37,6 @@ const BundlerRuntimePath = require.resolve(
     paths: [RuntimeToolsPath],
   },
 );
-
-const VendoredBundlerRuntimePath = require.resolve(
-  '@module-federation/webpack-bundler-runtime/vendor',
-  {
-    paths: [RuntimeToolsPath],
-  },
-);
-
 const RuntimePath = require.resolve('@module-federation/runtime', {
   paths: [RuntimeToolsPath],
 });
@@ -65,13 +57,7 @@ class FederationRuntimePlugin {
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
-    this.bundlerRuntimePath = this.getBundlerRuntimePath();
-  }
-
-  getBundlerRuntimePath() {
-    return this.options?.embedRuntime
-      ? VendoredBundlerRuntimePath
-      : BundlerRuntimePath;
+    this.bundlerRuntimePath = BundlerRuntimePath;
   }
 
   static getTemplate(
@@ -119,7 +105,7 @@ class FederationRuntimePlugin {
     return Template.asString([
       `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
-      embedRuntime ? '' : embedRuntimeLines,
+      embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
       Template.indent([
         runtimePluginNames.length
@@ -324,19 +310,10 @@ class FederationRuntimePlugin {
       ...compiler.options.resolve.alias,
     };
 
-    if (this.options?.embedRuntime) {
-      // should use normal module replacement instead?
-      if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
-        compiler.options.resolve.alias['@module-federation/runtime$'] =
-          runtimePath;
-      }
-    } else {
-      if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
-        compiler.options.resolve.alias['@module-federation/runtime$'] =
-          runtimePath;
-      }
+    if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
+      compiler.options.resolve.alias['@module-federation/runtime$'] =
+        runtimePath;
     }
-
     if (!compiler.options.resolve.alias['@module-federation/runtime-tools$']) {
       compiler.options.resolve.alias['@module-federation/runtime-tools$'] =
         this.options?.implementation || RuntimeToolsPath;
@@ -378,24 +355,20 @@ class FederationRuntimePlugin {
         ...this.options,
       };
     }
-
     if (this.options && !this.options?.name) {
       //! the instance may get the same one if the name is the same https://github.com/module-federation/core/blob/main/packages/runtime/src/index.ts#L18
       this.options.name =
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
 
-    this.bundlerRuntimePath = this.getBundlerRuntimePath();
-
     if (this.options?.implementation) {
-      const runtimePath = this.options.embedRuntime
-        ? '@module-federation/webpack-bundler-runtime/vendor'
-        : '@module-federation/webpack-bundler-runtime';
-      this.bundlerRuntimePath = require.resolve(runtimePath, {
-        paths: [this.options.implementation],
-      });
+      this.bundlerRuntimePath = require.resolve(
+        '@module-federation/webpack-bundler-runtime',
+        {
+          paths: [this.options.implementation],
+        },
+      );
     }
-
     if (this.options?.embedRuntime) {
       this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
         '.cjs.js',
@@ -408,6 +381,19 @@ class FederationRuntimePlugin {
         // hoist all modules of federation entry
         this.getFilePath(),
         this.bundlerRuntimePath,
+      ).apply(compiler);
+
+      new compiler.webpack.NormalModuleReplacementPlugin(
+        /@module-federation\/runtime/,
+        (resolveData) => {
+          if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
+            resolveData.request = RuntimePath.replace('cjs', 'esm');
+
+            if (resolveData.createData) {
+              resolveData.createData.request = resolveData.request;
+            }
+          }
+        },
       ).apply(compiler);
     }
     this.prependEntry(compiler);
