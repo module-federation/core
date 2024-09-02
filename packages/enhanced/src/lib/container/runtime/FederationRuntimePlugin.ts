@@ -233,11 +233,6 @@ class FederationRuntimePlugin {
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
 
-    compiler.hooks.entryOption.tap(this.constructor.name, (options, entry) => {
-      debugger;
-      return true;
-    });
-
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation: Compilation, { normalModuleFactory }) => {
