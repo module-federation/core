@@ -5,6 +5,7 @@ async function fetchWithRetry({
   url, // fetch url
   options = {}, // fetch options
   retryTimes = defaultRetries, // retry times
+  retryDelay = defaultRetryDelay, // retry delay
   fallback, // fallback url
 }: ReqiuredUrl<FetchWithRetryOptions>) {
   try {
@@ -34,23 +35,31 @@ async function fetchWithRetry({
           url: fallback(),
           options,
           retryTimes: 0,
+          retryDelay: 0,
         });
       }
 
-      if (error instanceof Error && error.message.includes('Json parse error'))
+      if (
+        error instanceof Error &&
+        error.message.includes('Json parse error')
+      ) {
         throw error;
+      }
+
       throw new Error(
         'The request failed three times and has now been abandoned',
       );
     }
 
     // If there are remaining times, delay 1 second and try again
-    // await new Promise((resolve) => setTimeout(resolve, defaultRetryDelay));
+    retryDelay > 0 &&
+      (await new Promise((resolve) => setTimeout(resolve, retryDelay)));
     console.log(`Trying again. Number of retries available：${retryTimes - 1}`);
     return await fetchWithRetry({
       url,
       options,
       retryTimes: retryTimes - 1,
+      retryDelay,
       fallback,
     });
   }

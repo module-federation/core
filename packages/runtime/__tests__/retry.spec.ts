@@ -147,6 +147,7 @@ describe('fetchWithRetry', () => {
     mockGlobalFetch(mockData);
     const response = await fetchWithRetry({
       url: 'https://example.com',
+      retryDelay: 0,
     });
     expect(await response.json()).toEqual(mockData); // 确保解析响应
   });
@@ -157,6 +158,7 @@ describe('fetchWithRetry', () => {
 
     const response = await fetchWithRetry({
       url: 'https://example.com',
+      retryDelay: 0,
     });
 
     expect(fetch).toHaveBeenCalledTimes(1);
@@ -169,6 +171,7 @@ describe('fetchWithRetry', () => {
     const responsePromise = fetchWithRetry({
       url: 'https://example.com',
       retryTimes,
+      retryDelay: 0,
     });
     vi.advanceTimersByTime(2000 * retryTimes);
 
@@ -184,6 +187,7 @@ describe('fetchWithRetry', () => {
     const responsePromise = fetchWithRetry({
       url: 'https://example.com',
       retryTimes,
+      retryDelay: 0,
       fallback: () => 'https://fallback.com',
     });
     vi.advanceTimersByTime(2000 * retryTimes);
@@ -210,6 +214,7 @@ describe('fetchWithRetry', () => {
       fetchWithRetry({
         url: 'https://example.com',
         retryTimes: 0,
+        retryDelay: 0,
       }),
     ).rejects.toThrow('Json parse error');
   });

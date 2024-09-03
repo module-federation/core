@@ -61,7 +61,7 @@ async function loadScript(
 
           // reload after a delay
           setTimeout(() => {
-            resolve(attemptLoad()); // recursively call attemptLoad
+            resolve(attemptLoad());
           }, retryDelay);
         } else {
           console.error(
@@ -77,7 +77,7 @@ async function loadScript(
     });
   }
 
-  return attemptLoad(); // begin the first attempt to load the script
+  return attemptLoad();
 }
 
 function scriptWithRetry({

@@ -2,6 +2,7 @@ export interface FetchWithRetryOptions {
   url?: string;
   options?: RequestInit;
   retryTimes?: number;
+  retryDelay?: number;
   fallback?: () => string;
 }
 
