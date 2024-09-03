@@ -10,8 +10,11 @@ function DynamicRemoteButton() {
   const Comp = React.lazy(async () => {
     //@ts-ignore
     const Button = await loadRemote('dynamic-remote/ButtonOldAnt');
+    console.log('BUTTON');
+    console.log(Button);
     return Button;
   });
+  console.log('loadManifestProvider');
   return (
     <React.Suspense fallback="Loading Button">
       <Comp />
