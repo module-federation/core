@@ -5,6 +5,7 @@
  */
 import Compilation from './lib/Compilation';
 import Stats from './lib/Stats';
+import NormalModuleReplacementPlugin from './lib/NormalModuleReplacementPlugin';
 import MultiCompiler from './lib/MultiCompiler';
 import Parser from './lib/Parser';
 import ModuleDependency from './lib/dependencies/ModuleDependency';
@@ -3176,24 +3177,6 @@ declare interface NormalModuleLoaderContext<OptionsType> {
   _module?: NormalModule;
   _compilation?: Compilation;
   _compiler?: Compiler;
-}
-
-declare class NormalModuleReplacementPlugin {
-  /**
-   * Create an instance of the plugin
-   */
-  constructor(
-    resourceRegExp: RegExp,
-    newResource: string | ((arg0: ResolveData) => void),
-  );
-
-  resourceRegExp: RegExp;
-  newResource: string | ((arg0: ResolveData) => void);
-
-  /**
-   * Apply the plugin
-   */
-  apply(compiler: Compiler): void;
 }
 
 declare class NullDependency extends Dependency {
