@@ -11,10 +11,10 @@ export function createBridgeComponent(bridgeInfo: any) {
     return {
       __APP_VERSION__,
       render(info: RenderFnParams) {
-        bridgeInfo?.beforeRender?.(info);
         LoggerInstance.log(`createBridgeComponent render Info`, info);
         const app = Vue.createApp(bridgeInfo.rootComponent);
         rootMap.set(info.dom, app);
+        bridgeInfo?.renderLifecycle?.(info);
         const appOptions = bridgeInfo.appOptions({
           basename: info.basename,
           memoryRoute: info.memoryRoute,
@@ -43,14 +43,12 @@ export function createBridgeComponent(bridgeInfo: any) {
           app.use(router);
           app.mount(info.dom);
         }
-        bridgeInfo?.afterRender?.(info);
       },
       destroy(info: { dom: HTMLElement }) {
-        bridgeInfo?.beforeDestroy?.(info);
         LoggerInstance.log(`createBridgeComponent destroy Info`, info);
         const root = rootMap.get(info?.dom);
+        bridgeInfo?.destroyLifecycle?.(info);
         root?.unmount();
-        bridgeInfo?.afterDestroy?.(info);
       },
     };
   };
