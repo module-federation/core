@@ -8,7 +8,11 @@ import {
   getWebpackPath,
   normalizeWebpackPath,
 } from '@module-federation/sdk/normalize-webpack-path';
-import type { Compiler, Compilation } from 'webpack';
+import type {
+  Compiler,
+  Compilation,
+  WebpackError as WebpackErrorType,
+} from 'webpack';
 import { parseOptions } from '../container/options';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import ProvideSharedDependency from './ProvideSharedDependency';
@@ -243,7 +247,7 @@ class ProvideSharedPlugin {
                   {
                     name: undefined,
                   },
-                  (err: WebpackError | null | undefined) => {
+                  (err?: WebpackErrorType | null | undefined) => {
                     if (err) return reject(err);
                     resolve();
                   },
@@ -263,7 +267,6 @@ class ProvideSharedPlugin {
         );
 
         compilation.dependencyFactories.set(
-          //@ts-ignore
           ProvideSharedDependency,
           // @ts-ignore
           new ProvideSharedModuleFactory(),
