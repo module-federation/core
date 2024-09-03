@@ -30,17 +30,13 @@ vi.spyOn(document.head, 'appendChild').mockImplementation(() => {
 describe('scriptWithRetry', () => {
   it('should create and append script element successfully', async () => {
     const url = 'https://example.com/some-script.js';
-
-    // 调用 scriptWithRetry 函数
     const script = scriptWithRetry({
       url,
       retryTimes: 3,
     });
-
-    // 模拟脚本加载成功
+    // mock the script load
     mockScriptElement.onload();
 
-    // 验证
     expect(document.createElement).toHaveBeenCalledWith('script');
     expect(script.src).toEqual(url);
     expect(mockScriptElement.onload).toHaveBeenCalled();
@@ -51,7 +47,6 @@ describe('scriptWithRetry', () => {
     const url = 'https://example.com/some-script.js';
     const retryTimes = 2;
 
-    // 模拟脚本加载失败并重试
     const script = scriptWithRetry({
       url,
       retryTimes,
@@ -64,10 +59,9 @@ describe('scriptWithRetry', () => {
     mockScriptElement.onerror();
     vi.advanceTimersByTime(2000 * retryTimes);
 
-    // 模拟第三次加载成功
     mockScriptElement.onload();
 
-    // 每调用一次 appendChild 即表示进入了一次 retry 的逻辑，所以这里可以使用 appendChild 的 calledTimes 来验证重试次数
+    // each call to appendChild represents one retry, so we can use the calledTimes of appendChild to verify the number of retries
     expect(document.head.appendChild).toHaveBeenCalledTimes(retryTimes);
   });
 
@@ -80,27 +74,18 @@ describe('scriptWithRetry', () => {
       retryTimes,
     });
 
-    // 所有重试都失败
+    // all retries fail
     for (let i = 0; i < retryTimes; i++) {
       mockScriptElement.onerror();
       vi.advanceTimersByTime(2000 * retryTimes);
     }
 
-    // 验证
     expect(document.head.appendChild).toHaveBeenCalledTimes(retryTimes);
   });
 });
 
-// Reset mocks before each test
-beforeEach(() => {
-  vi.clearAllMocks();
-  vi.useFakeTimers();
-});
-
 const mockGlobalFetch = (mockData) => {
-  // const mockData = { success: true };
   const mockFetch = vi.fn().mockResolvedValueOnce(mockResponse(200, mockData));
-  // 替换全局 fetch 为 mockFetch
   global.fetch = mockFetch;
   return mockFetch;
 };
@@ -117,7 +102,6 @@ const mockResponse = (status: number, body: any) => {
 };
 
 const mockErrorFetch = () => {
-  const mockError = new Error('Network error');
   const mockData = { success: false };
   const data = {
     ok: false,
@@ -136,12 +120,6 @@ const mockErrorFetch = () => {
 
 // Test cases
 describe('fetchWithRetry', () => {
-  test('async test', async () => {
-    const asyncMock = vi.fn().mockResolvedValueOnce('first call');
-
-    await asyncMock(); // 'first call'
-  });
-
   it('mockFetch should resolve correctly', async () => {
     const mockData = { success: true };
     mockGlobalFetch(mockData);
@@ -177,7 +155,7 @@ describe('fetchWithRetry', () => {
 
     await expect(responsePromise).rejects.toThrow(
       'The request failed three times and has now been abandoned',
-    ); // 断言抛出特定错误
+    );
     expect(fetch).toHaveBeenCalledTimes(4); // 首次 fetch + retryTimes 次 fetch
   });
 
@@ -194,7 +172,7 @@ describe('fetchWithRetry', () => {
 
     await expect(responsePromise).rejects.toThrow(
       'The request failed three times and has now been abandoned',
-    ); // 断言抛出特定错误
+    );
     expect(fetch).toHaveBeenCalledTimes(5); // 首次 fetch + retryTimes 次 fetch
     expect(fetch).toHaveBeenLastCalledWith('https://fallback.com', {});
   });
@@ -208,7 +186,6 @@ describe('fetchWithRetry', () => {
         return this;
       },
     });
-    // 替换全局 fetch 为 mockFetch
     global.fetch = mockFetch;
     await expect(
       fetchWithRetry({
