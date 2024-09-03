@@ -14,6 +14,10 @@ The following items are exported:
 - AsyncBoundaryPlugin
 - HoistContainerReferencesPlugin
 
+## Documentation
+
+See [https://module-federation.io/guide/basic/webpack.html](https://module-federation.io/guide/basic/webpack.html) for details.
+
 ## ModuleFederationPlugin
 
 ### Configuration

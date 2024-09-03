@@ -23,6 +23,9 @@ module.exports = composePlugins(
     config.watchOptions = {
       ignored: ['**/dist/**'],
     };
+    if (!config.devServer) {
+      config.devServer = {};
+    }
     config.devServer.host = '127.0.0.1';
 
     config.plugins.push(
@@ -35,6 +38,7 @@ module.exports = composePlugins(
           './WebpackSvg': './src/components/WebpackSvg',
           './WebpackPng': './src/components/WebpackPng',
         },
+        shareStrategy: 'loaded-first',
         shared: {
           lodash: {
             singleton: true,
@@ -64,7 +68,6 @@ module.exports = composePlugins(
         dts: {
           tsConfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
         },
-        runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
       }),
     );
     // config.externals={

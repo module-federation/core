@@ -13,31 +13,18 @@ import {
 } from '@module-federation/sdk';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
-import schema from '../../schemas/container/ModuleFederationPlugin';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
+import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
     'webpack/schemas/plugins/container/ExternalsType.check.js',
   ),
 ) as typeof import('webpack/schemas/plugins/container/ExternalsType.check.js');
-
-const createSchemaValidation = require(
-  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
-) as typeof import('webpack/lib/util/create-schema-validation');
-const validate = createSchemaValidation(
-  // just use schema to validate
-  () => true,
-  () => schema,
-  {
-    name: 'Module Federation Plugin',
-    baseDataPath: 'options',
-  },
-);
 
 class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -46,14 +33,13 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options options
    */
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
-    validate(options);
     this._options = options;
   }
 
   private _patchBundlerConfig(compiler: Compiler): void {
     const { name } = this._options;
     const MFPluginNum = compiler.options.plugins.filter(
-      (p) => p && p.name === 'ModuleFederationPlugin',
+      (p: WebpackPluginInstance) => p && p['name'] === 'ModuleFederationPlugin',
     ).length;
     if (name && MFPluginNum < 2) {
       new compiler.webpack.DefinePlugin({
@@ -85,8 +71,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     const remoteType =
       options.remoteType ||
       (options.library && isValidExternalsType(options.library.type)
-        ? options.library.type
-        : 'script');
+        ? (options.library.type as ExternalsType)
+        : ('script' as ExternalsType));
 
     const useContainerPlugin =
       options.exposes &&
@@ -138,7 +124,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           : Object.keys(options.remotes).length > 0)
       ) {
         new ContainerReferencePlugin({
-          // @ts-expect-error this should not be a string
           remoteType,
           shareScope: options.shareScope,
           remotes: options.remotes,

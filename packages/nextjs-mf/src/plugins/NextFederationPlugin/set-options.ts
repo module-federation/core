@@ -1,9 +1,8 @@
 import {
-  ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
 } from '@module-federation/utilities';
-
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 /**
  * This function sets the main and extra options for NextFederationPlugin. It splits the options object into
  * the main options and extra options, and sets default values for any options that are not defined.
@@ -20,7 +19,7 @@ import {
  * - debug: false
  */
 export function setOptions(options: NextFederationPluginOptions): {
-  mainOptions: ModuleFederationPluginOptions;
+  mainOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
   extraOptions: NextFederationPluginExtraOptions;
 } {
   const { extraOptions, ...mainOpts } = options;

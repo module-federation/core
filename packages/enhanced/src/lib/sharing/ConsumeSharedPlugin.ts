@@ -8,7 +8,7 @@ import {
   getWebpackPath,
   normalizeWebpackPath,
 } from '@module-federation/sdk/normalize-webpack-path';
-import type { Compiler } from 'webpack';
+import type { Compiler, Compilation } from 'webpack';
 import { parseOptions } from '../container/options';
 import { ConsumeOptions } from './ConsumeSharedModule';
 import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
@@ -18,7 +18,10 @@ import {
   getDescriptionFile,
   getRequiredVersionFromDescriptionFile,
 } from './utils';
-import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
+import type {
+  ResolveOptionsWithDependencyType,
+  ResolverWithOptions,
+} from 'webpack/lib/ResolverFactory';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import ConsumeSharedModule from './ConsumeSharedModule';
 import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
@@ -136,7 +139,7 @@ class ConsumeSharedPlugin {
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
-      (compilation, { normalModuleFactory }) => {
+      (compilation: Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
           ConsumeSharedFallbackDependency,
           normalModuleFactory,
@@ -152,11 +155,9 @@ class ConsumeSharedPlugin {
             prefixedConsumes = prefixed;
           },
         );
-
-        const resolver = compilation.resolverFactory.get(
+        const resolver: ResolverWithOptions = compilation.resolverFactory.get(
           'normal',
-          //@ts-ignore
-          RESOLVE_OPTIONS,
+          RESOLVE_OPTIONS as ResolveOptionsWithDependencyType,
         );
 
         const createConsumeSharedModule = (
