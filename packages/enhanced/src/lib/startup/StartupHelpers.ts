@@ -67,6 +67,7 @@ export const generateEntryStartup = (
   const runModule = (id: string) => {
     return `__webpack_exec__(${JSON.stringify(id)})`;
   };
+
   const outputCombination = (
     chunks: Set<Chunk>,
     moduleIds: string[],
@@ -87,12 +88,10 @@ export const generateEntryStartup = (
           Template.asString([
             'Promise.all([',
             Template.indent([
-              hasConsumes
-                ? `${RuntimeGlobals.ensureChunkHandlers}.consumes,`
-                : '',
-              hasRemotes
-                ? `${RuntimeGlobals.ensureChunkHandlers}.remotes,`
-                : '',
+              // may have other chunks who depend on federation, so best to just fallback
+              // instead of try to figure out if consumes or remotes exists during build
+              `${RuntimeGlobals.ensureChunkHandlers}.consumes || Promise.resolve,`,
+              `${RuntimeGlobals.ensureChunkHandlers}.remotes || Promise.resolve,`,
             ]),
             `].reduce(${runtimeTemplate.returningFunction(`handler('${chunk.id}', p), p`, 'p, handler')}, promises)`,
             `).then(${runtimeTemplate.returningFunction(body)});`,
