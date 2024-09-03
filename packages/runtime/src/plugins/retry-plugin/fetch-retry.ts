@@ -27,22 +27,25 @@ async function fetchWithRetry({
   } catch (error) {
     if (retryTimes <= 0) {
       console.log(
-        `>>>>>>>>> retry failed after ${defaultRetries} times for url: ${url}, now will try fallbackUrl url <<<<<<<<<`,
+        `>>>>>>>>> retry failed after ${retryTimes} times for url: ${url}, now will try fallbackUrl url <<<<<<<<<`,
       );
       if (fallback && typeof fallback === 'function') {
         return fetchWithRetry({
           url: fallback(),
           options,
-          retryTimes: 1,
+          retryTimes: 0,
         });
       }
+
+      if (error instanceof Error && error.message.includes('Json parse error'))
+        throw error;
       throw new Error(
         'The request failed three times and has now been abandoned',
       );
     }
 
     // If there are remaining times, delay 1 second and try again
-    await new Promise((resolve) => setTimeout(resolve, defaultRetryDelay));
+    // await new Promise((resolve) => setTimeout(resolve, defaultRetryDelay));
     console.log(`Trying again. Number of retries available：${retryTimes - 1}`);
     return await fetchWithRetry({
       url,
