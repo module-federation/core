@@ -77,6 +77,9 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     }),
   );
   config.optimization.runtimeChunk = false;
+  if (!config.devServer) {
+    config.devServer = {};
+  }
   config.devServer.host = '127.0.0.1';
   config.plugins.forEach((p) => {
     if (p.constructor.name === 'ModuleFederationPlugin') {

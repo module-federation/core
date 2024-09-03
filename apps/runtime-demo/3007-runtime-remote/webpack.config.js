@@ -57,6 +57,9 @@ module.exports = composePlugins(
         },
       }),
     );
+    if (!config.devServer) {
+      config.devServer = {};
+    }
     config.devServer.host = '127.0.0.1';
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {

@@ -9,21 +9,39 @@
       "options": {
         "command": "npm run build",
         "cwd": "apps/runtime-demo/3008-runtime-remote"
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "serve": {
       "executor": "nx:run-commands",
       "options": {
         "command": "npm run dev",
         "cwd": "apps/runtime-demo/3008-runtime-remote"
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "dev": {
       "executor": "nx:run-commands",
       "options": {
         "command": "npm run dev",
         "cwd": "apps/runtime-demo/3008-runtime-remote"
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     }
   },
   "tags": []

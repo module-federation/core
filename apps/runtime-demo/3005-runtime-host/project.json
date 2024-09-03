@@ -131,6 +131,5 @@
       }
     }
   },
-  "tags": [],
-  "implicitDependencies": ["typescript"]
+  "tags": []
 }
