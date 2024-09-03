@@ -10,6 +10,7 @@ export interface ScriptWithRetryOptions {
   url?: string;
   attrs?: Record<string, string>;
   retryTimes?: number;
+  retryDelay?: number;
   customCreateScript?: CreateScriptFunc;
 }
 

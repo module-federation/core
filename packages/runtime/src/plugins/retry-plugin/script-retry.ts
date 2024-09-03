@@ -60,9 +60,10 @@ async function loadScript(
           );
 
           // reload after a delay
-          setTimeout(() => {
-            resolve(attemptLoad());
-          }, retryDelay);
+          retryDelay > 0 &&
+            setTimeout(() => {
+              resolve(attemptLoad());
+            }, retryDelay);
         } else {
           console.error(
             'Failed to load script after maximum retries. the url is:',
@@ -84,6 +85,7 @@ function scriptWithRetry({
   url, // fetch url
   attrs = {}, // fetch options
   retryTimes = defaultRetries, // retry times
+  retryDelay = defaultRetryDelay, // retry delay
   customCreateScript, // user script create function
 }: ReqiuredUrl<ScriptWithRetryOptions>) {
   const script = getScript(url, attrs, customCreateScript);
@@ -95,7 +97,7 @@ function scriptWithRetry({
       url,
       attrs,
       retryTimes,
-      defaultRetryDelay,
+      retryDelay,
       customCreateScript,
     );
   };

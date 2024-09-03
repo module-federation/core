@@ -10,7 +10,7 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
 }) => ({
   name: 'retry-plugin',
   async fetch(url: string, options: RequestInit) {
-    // 如果配置了 fetch 重试规则
+    // if fetch retry rule is configured
     if (fetchOption) {
       if (fetchOption.url) {
         if (url === fetchOption?.url) {
@@ -69,4 +69,8 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
 });
 
 export default RetryPlugin;
-export type { RetryPluginParams } from './types';
+export type {
+  RetryPluginParams,
+  FetchWithRetryOptions,
+  ScriptWithRetryOptions,
+} from './types';

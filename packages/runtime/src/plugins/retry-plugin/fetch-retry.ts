@@ -46,7 +46,6 @@ async function fetchWithRetry({
         throw error;
       }
 
-      // console.log('The request failed three times and has now been abandoned');
       throw new Error(
         'The request failed three times and has now been abandoned',
       );
