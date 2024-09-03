@@ -42,6 +42,9 @@ jobs:
       - name: Run Affected Test
         run: npx nx affected -t test --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
+      - name: Warm Nx build cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
   e2e-modern:
     needs: checkout-install
     uses: ./.github/workflows/e2e-modern.yml
