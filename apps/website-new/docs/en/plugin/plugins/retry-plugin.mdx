@@ -1,0 +1,175 @@
+import { PackageManagerTabs, Tabs, Tab } from '@theme';
+
+# RetryPlugin
+
+## Introduction
+
+Resource retry plugin is used to retry resources when they fail to load, thereby increasing the success rate of resource loading. In Module Federation, we provide the retry plugin `RetryPlugin` to increase the retry mechanism, which can improve the stability of the application.
+
+## Installation
+
+This `RetryPlugin` is Provided by the `@module-federation/enhanced` package
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/enhanced --save',
+    yarn: 'yarn add @module-federation/enhanced --save',
+    pnpm: 'pnpm add @module-federation/enhanced --save',
+    bun: 'bun add @module-federation/enhanced --save',
+  }}
+/>
+
+## Usage
+
+`RetryPlugin` is a runtime plugin, we can register the plugin at runtime and configure retry parameters and retry logic, etc.:
+
+
+```ts
+import {
+  init,
+  loadRemote,
+  RetryPlugin,
+} from '@module-federation/enhanced/runtime';
+
+init({
+  name: 'federation_consumer',
+  remotes: [],
+  plugins: [
+    RetryPlugin({
+      fetch: {
+        // the retry resource url
+        url: 'http://localhost:2008/not-exist-mf-manifest.json',
+        // after all retried failed, set a fallback function to guarantee a fallback resource
+        fallback: () => 'http://localhost:2001/mf-manifest.json',
+      },
+      script: {
+        // the retry resource url
+        url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
+        // if you need to custom create script element, pass `customCreateScript` and plugin will use customCreateScript to create script element
+        customCreateScript: (url: string, attrs: Record<string, string>) => {
+          let script = document.createElement('script');
+          script.src = `http://localhost:2011/static/js/async/src_App_tsx.js`;
+          script.setAttribute('loader-hoos', 'isTrue');
+          script.setAttribute('crossorigin', 'anonymous');
+          return script;
+        },
+      },
+    }),
+  ],
+});
+
+const App = () => {
+  return (
+    <div>
+      <h1>Consumer</h1>
+      <RemoteApp />
+    </div>
+  )
+}
+```
+
+the resource that needs to be retried is divided into two types: the `fetch` type and the `script` type, and we control the retry logic of these two resource types through the `fetch` parameter and the `script` parameter, respectively.
+
+## Type
+
+```ts
+const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin;
+
+type RetryPluginParams = {
+  fetch?: FetchWithRetryOptions; // fetch retry options
+  script?: ScriptWithRetryOptions; // script retry options
+};
+
+type FetchWithRetryOptions = {
+  url?: string;
+  options?: RequestInit;
+  retryTimes?: number;
+  retryDelay?: number;
+  fallback?: () => string;
+}
+
+type ScriptWithRetryOptions = {
+  url?: string;
+  attrs?: Record<string, string>;
+  retryTimes?: number;
+  customCreateScript?: CreateScriptFunc;
+}
+
+```
+
+
+## RetryPluginParams type description
+
+`RetryPluginParams` is the parameter type used to configure `RetryPlugin`, which contains retry options for two types of resources: `fetch` and `script`.
+
+### Properties
+
+- **fetch**: `FetchWithRetryOptions` (optional)
+  - Used to configure the retry options for fetch type resources.
+
+- **script**: `ScriptWithRetryOptions` (optional)
+  - Used to configure the retry options for script type resources.
+
+
+## FetchWithRetryOptions type description
+
+`FetchWithRetryOptions` is the type used to configure the retry options for fetch type resources.
+
+### 属性
+### Properties
+
+- **url**: 
+  - `string`
+  - Optional. When not set, all failed resources will default to retry logic.
+  - The URL of the resource to be retried.
+
+- **options**: 
+  - `RequestInit`
+  - Optional.
+  - The request options for the fetch request.
+
+- **retryTimes**: 
+  - `number`
+  - Optional. 
+  - The number of retry attempts. Defaults to 3.
+
+- **retryDelay**: 
+  - `number`
+  - Optional. 
+  - The delay between retry attempts in milliseconds. Defaults to 1000.
+
+- **fallback**: 
+  - `() => string`
+  - Optional. A function that returns a Promise that resolves to a Response object. This function is called when all retry attempts have failed.
+ 
+
+### ScriptWithRetryOptions Type Description
+
+`ScriptWithRetryOptions` is the type used to configure the retry options for script type resources.
+
+### Properties
+
+- **url**: 
+  - `string`
+  - Optional. When not set, all failed resources will default to retry logic.
+  - The URL of the resource to be retried.
+
+- **attrs**: 
+  - `Record<string, string>`
+  - Optional
+  - The attributes to be passed to the script element.
+
+- **retryTimes**: 
+  - `number`
+  - Optional
+  - The number of retry attempts. Defaults to 3.
+
+- **retryDelay**: 
+  - `number`
+  - Optional
+  - The delay between retry attempts in milliseconds. Defaults to 1000.
+
+- **customCreateScript**:
+  - `CreateScriptFunc`
+  - Optional.
+  - A custom function to create the script element.

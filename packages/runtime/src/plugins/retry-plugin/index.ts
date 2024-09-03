@@ -33,7 +33,7 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
         });
       }
     }
-    // 未配置 fecth 重试规则，则直接请求
+    // return default fetch
     return fetch(url, options);
   },
 

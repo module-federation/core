@@ -156,7 +156,7 @@ describe('fetchWithRetry', () => {
     await expect(responsePromise).rejects.toThrow(
       'The request failed three times and has now been abandoned',
     );
-    expect(fetch).toHaveBeenCalledTimes(4); // 首次 fetch + retryTimes 次 fetch
+    expect(fetch).toHaveBeenCalledTimes(4); //first fetch + retryTimes fetch
   });
 
   it('should fall back to the fallback URL after retries fail', async () => {
@@ -173,7 +173,7 @@ describe('fetchWithRetry', () => {
     await expect(responsePromise).rejects.toThrow(
       'The request failed three times and has now been abandoned',
     );
-    expect(fetch).toHaveBeenCalledTimes(5); // 首次 fetch + retryTimes 次 fetch
+    expect(fetch).toHaveBeenCalledTimes(5); //first fetch + retryTimes fetch
     expect(fetch).toHaveBeenLastCalledWith('https://fallback.com', {});
   });
 
