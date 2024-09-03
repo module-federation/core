@@ -43,6 +43,7 @@ const PLUGIN_NAME = 'ContainerPlugin';
 class ContainerPlugin {
   _options: containerPlugin.ContainerPluginOptions;
   name: string;
+
   /**
    * @param {containerPlugin.ContainerPluginOptions} options options
    */
@@ -182,69 +183,71 @@ class ContainerPlugin {
       compiler.options.output.enabledLibraryTypes.push(library.type);
     }
 
-    compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
-      const dep = new ContainerEntryDependency(
-        name,
-        //@ts-ignore
-        exposes,
-        shareScope,
-        federationRuntimePluginInstance.entryFilePath,
-      );
-      const hasSingleRuntimeChunk =
-        compilation.options?.optimization?.runtimeChunk;
-      dep.loc = { name };
-      compilation.addEntry(
-        compilation.options.context || '',
-        //@ts-ignore
-        dep,
-        {
+    compiler.hooks.make.tapAsync(
+      PLUGIN_NAME,
+      (
+        compilation: Compilation,
+        callback: (error?: WebpackError | null | undefined) => void,
+      ) => {
+        const dep = new ContainerEntryDependency(
           name,
-          filename,
-          runtime: hasSingleRuntimeChunk ? false : runtime,
-          library,
-        },
-        (error: WebpackError | null | undefined) => {
-          if (error) return callback(error);
-          if (hasSingleRuntimeChunk) {
-            // Add to single runtime chunk as well.
-            // Allows for singleton runtime graph with all needed runtime modules for federation
-            addEntryToSingleRuntimeChunk();
-          } else {
-            callback();
-          }
-        },
-      );
-
-      // Function to add entry for undefined runtime
-      const addEntryToSingleRuntimeChunk = () => {
+          //@ts-ignore
+          exposes,
+          shareScope,
+          federationRuntimePluginInstance.entryFilePath,
+        );
+        const hasSingleRuntimeChunk =
+          compilation.options?.optimization?.runtimeChunk;
+        dep.loc = { name };
         compilation.addEntry(
           compilation.options.context || '',
-          //@ts-ignore
           dep,
           {
-            name: name ? name + '_partial' : undefined, // give unique name name
-            runtime: undefined,
+            name,
+            filename,
+            runtime: hasSingleRuntimeChunk ? false : runtime,
             library,
           },
           (error: WebpackError | null | undefined) => {
             if (error) return callback(error);
-            callback();
+            if (hasSingleRuntimeChunk) {
+              // Add to single runtime chunk as well.
+              // Allows for singleton runtime graph with all needed runtime modules for federation
+              addEntryToSingleRuntimeChunk();
+            } else {
+              callback();
+            }
           },
         );
-      };
-    });
+
+        // Function to add entry for undefined runtime
+        const addEntryToSingleRuntimeChunk = () => {
+          compilation.addEntry(
+            compilation.options.context || '',
+            dep,
+            {
+              name: name ? name + '_partial' : undefined, // give unique name name
+              runtime: undefined,
+              library,
+            },
+            (error: WebpackError | null | undefined) => {
+              if (error) return callback(error);
+              callback();
+            },
+          );
+        };
+      },
+    );
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
           ContainerEntryDependency,
-          //@ts-ignore
           new ContainerEntryModuleFactory(),
         );
 
         compilation.dependencyFactories.set(
-          //@ts-ignore
           ContainerExposedDependency,
           normalModuleFactory,
         );

@@ -2,9 +2,10 @@ import {
   isBrowserEnv,
   warn,
   composeKeyWithSeparator,
+  ModuleInfo,
+  GlobalModuleInfo,
 } from '@module-federation/sdk';
 import { Global, getInfoWithoutType, globalLoading } from '../global';
-import type { ModuleInfo, GlobalModuleInfo } from '@module-federation/sdk';
 import {
   Options,
   UserOptions,
@@ -14,6 +15,7 @@ import {
   Remote,
   RemoteInfo,
   RemoteEntryExports,
+  CallFrom,
 } from '../type';
 import { FederationHost } from '../core';
 import {
@@ -97,7 +99,7 @@ export class RemoteHandler {
           id: string;
           error: unknown;
           options?: any;
-          from: 'build' | 'runtime';
+          from: CallFrom;
           lifecycle: 'onLoad' | 'beforeRequest';
           origin: FederationHost;
         },
@@ -178,7 +180,7 @@ export class RemoteHandler {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
     id: string,
-    options?: { loadFactory?: boolean; from: 'build' | 'runtime' },
+    options?: { loadFactory?: boolean; from: CallFrom },
   ): Promise<T | null> {
     const { host } = this;
     try {
@@ -560,6 +562,7 @@ export class RemoteHandler {
           if (remoteKey) {
             delete hostGlobalSnapshot.remotesInfo[remoteKey];
             if (
+              //eslint-disable-next-line no-extra-boolean-cast
               Boolean(Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey])
             ) {
               delete Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey];

@@ -7,6 +7,9 @@ import {
   RemoteEntryExports,
   UserOptions,
   ShareStrategy,
+  InitScope,
+  InitTokens,
+  CallFrom,
 } from '../type';
 import { FederationHost } from '../core';
 import {
@@ -55,10 +58,11 @@ export class SharedHandler {
       hostShareScopeMap?: ShareScopeMap;
     }>('initContainerShareScopeMap'),
   });
-
+  initTokens: InitTokens;
   constructor(host: FederationHost) {
     this.host = host;
     this.shareScopeMap = {};
+    this.initTokens = {};
     this._setGlobalShareScopeMap(host.options);
   }
 
@@ -121,7 +125,9 @@ export class SharedHandler {
       await Promise.all(
         shareInfo.scope.map(async (shareScope) => {
           await Promise.all(
-            this.initializeSharing(shareScope, shareInfo.strategy),
+            this.initializeSharing(shareScope, {
+              strategy: shareInfo.strategy,
+            }),
           );
           return;
         }),
@@ -242,9 +248,26 @@ export class SharedHandler {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   initializeSharing(
     shareScopeName = DEFAULT_SCOPE,
-    strategy?: ShareStrategy,
+    extraOptions?: {
+      initScope?: InitScope;
+      from?: CallFrom;
+      strategy?: ShareStrategy;
+    },
   ): Array<Promise<void>> {
     const { host } = this;
+    const from = extraOptions?.from;
+    const strategy = extraOptions?.strategy;
+    let initScope = extraOptions?.initScope;
+    const promises: Promise<any>[] = [];
+    if (from !== 'build') {
+      const { initTokens } = this;
+      if (!initScope) initScope = [];
+      let initToken = initTokens[shareScopeName];
+      if (!initToken)
+        initToken = initTokens[shareScopeName] = { from: this.host.name };
+      if (initScope.indexOf(initToken) >= 0) return promises;
+      initScope.push(initToken);
+    }
 
     const shareScope = this.shareScopeMap;
     const hostName = host.options.name;
@@ -274,9 +297,8 @@ export class SharedHandler {
         versions[version] = shared;
       }
     };
-    const promises: Promise<any>[] = [];
     const initFn = (mod: RemoteEntryExports) =>
-      mod && mod.init && mod.init(shareScope[shareScopeName]);
+      mod && mod.init && mod.init(shareScope[shareScopeName], initScope);
 
     const initRemoteModule = async (key: string): Promise<void> => {
       const { module } = await host.remoteHandler.getRemoteModuleAndOptions({
@@ -285,7 +307,7 @@ export class SharedHandler {
       if (module.getEntry) {
         const entry = await module.getEntry();
         if (!module.inited) {
-          initFn(entry);
+          await initFn(entry);
           module.inited = true;
         }
       }
@@ -333,7 +355,7 @@ export class SharedHandler {
 
     if (shareInfo?.scope) {
       shareInfo.scope.forEach((shareScope) => {
-        this.initializeSharing(shareScope, shareInfo.strategy);
+        this.initializeSharing(shareScope, { strategy: shareInfo.strategy });
       });
     }
     const registeredShared = getRegisteredShare(
