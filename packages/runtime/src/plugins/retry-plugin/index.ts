@@ -12,15 +12,26 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
   async fetch(url: string, options: RequestInit) {
     // 如果配置了 fetch 重试规则
     if (fetchOption) {
-      return fetchWithRetry({
-        url: fetchOption?.url || url,
-        options: {
-          ...options,
-          ...fetchOption?.options,
-        },
-        retryTimes: fetchOption?.retryTimes,
-        fallback: fetchOption?.fallback,
-      });
+      if (fetchOption.url) {
+        if (url === fetchOption?.url) {
+          return fetchWithRetry({
+            url,
+            options,
+            retryTimes: fetchOption?.retryTimes,
+            fallback: fetchOption?.fallback,
+          });
+        }
+      } else {
+        return fetchWithRetry({
+          url,
+          options: {
+            ...options,
+            ...fetchOption?.options,
+          },
+          retryTimes: fetchOption?.retryTimes,
+          fallback: fetchOption?.fallback,
+        });
+      }
     }
     // 未配置 fecth 重试规则，则直接请求
     return fetch(url, options);
@@ -31,16 +42,28 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
       ? { ...attrs, ...scriptOption.attrs }
       : attrs;
     if (scriptOption) {
-      return scriptWithRetry({
-        url: scriptOption?.url || url,
-        attrs: scriptAttrs,
-        retryTimes: scriptOption?.retryTimes,
-        customCreateScript: scriptOption?.customCreateScript
-          ? scriptOption.customCreateScript
-          : undefined,
-      });
+      if (scriptOption?.url) {
+        if (url === scriptOption?.url) {
+          return scriptWithRetry({
+            url: scriptOption?.url as string,
+            attrs: scriptAttrs,
+            retryTimes: scriptOption?.retryTimes,
+            customCreateScript: scriptOption?.customCreateScript
+              ? scriptOption.customCreateScript
+              : undefined,
+          });
+        }
+      } else {
+        return scriptWithRetry({
+          url,
+          attrs: scriptAttrs,
+          retryTimes: scriptOption?.retryTimes,
+          customCreateScript: scriptOption?.customCreateScript
+            ? scriptOption.customCreateScript
+            : undefined,
+        });
+      }
     }
-
     return {};
   },
 });

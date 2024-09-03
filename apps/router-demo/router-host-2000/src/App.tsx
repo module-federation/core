@@ -23,6 +23,7 @@ init({
         fallback: () => 'http://localhost:2001/mf-manifest.json',
       },
       script: {
+        // url: 'http://localhost:2008/not-exist-mf-manifest.json',
         url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
         customCreateScript: (url: string, attrs: Record<string, string>) => {
           let script = document.createElement('script');

@@ -46,22 +46,27 @@ async function fetchWithRetry({
         throw error;
       }
 
+      // console.log('The request failed three times and has now been abandoned');
       throw new Error(
         'The request failed three times and has now been abandoned',
       );
-    }
+    } else {
+      // If there are remaining times, delay 1 second and try again
+      retryDelay > 0 &&
+        (await new Promise((resolve) => setTimeout(resolve, retryDelay)));
 
-    // If there are remaining times, delay 1 second and try again
-    retryDelay > 0 &&
-      (await new Promise((resolve) => setTimeout(resolve, retryDelay)));
-    console.log(`Trying again. Number of retries available：${retryTimes - 1}`);
-    return await fetchWithRetry({
-      url,
-      options,
-      retryTimes: retryTimes - 1,
-      retryDelay,
-      fallback,
-    });
+      console.log(
+        `Trying again. Number of retries available：${retryTimes - 1}`,
+      );
+      return await fetchWithRetry({
+        url,
+        options,
+        retryTimes: retryTimes - 1,
+        retryDelay,
+        fallback,
+      });
+    }
+    return fetch(url, options);
   }
 }
 
