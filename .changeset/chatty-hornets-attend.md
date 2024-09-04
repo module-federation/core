@@ -3,4 +3,4 @@
 '@module-federation/enhanced': minor
 ---
 
-enable chunk hoisting when runtime is embedded
+use hoist plugin when experiments.runtime === 'hoisted'
