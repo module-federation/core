@@ -3,14 +3,6 @@
  * @module @module-federation/utilities/src/utils/pure
  */
 export { extractUrlAndGlobal } from '@module-federation/utilities';
-import { injectScript as injectLegacy } from '@module-federation/utilities';
-
-export const injectScript = function (args: any): any {
-  console.error(
-    '@module-federation/utilities injectScript is deprecated, use module-federation/runtime {init,loadRemote}',
-  );
-  return injectLegacy(args);
-};
 
 /**
  * Flushes chunks from the module federation node utilities.
@@ -41,8 +33,9 @@ export const revalidate = function (
   if (typeof window !== 'undefined') {
     console.error('revalidate should only be called server-side');
     return Promise.resolve(false);
+  } else {
+    return import('@module-federation/node/utils').then(function (utils) {
+      return utils.revalidate(fetchModule, force);
+    });
   }
-  return import('@module-federation/node/utils').then(function (utils) {
-    return utils.revalidate(fetchModule, force);
-  });
 };
