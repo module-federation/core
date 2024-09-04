@@ -19,7 +19,60 @@ import { PackageManagerTabs, Tabs, Tab } from '@theme';
 
 ## 使用方法
 
-`RetryPlugin` 为运行时插件，我们可以在运行时进行插件注册，并配置重试参数和重试逻辑等：
+`RetryPlugin` 为运行时插件，我们可以通过构建插件的 `runtimePlugin` 注册此插件或在运行时进行插件注册，并配置重试参数和重试逻辑等：
+
+- 构建插件中注册：
+```diff
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+import path from 'path';
+
+export default defineConfig({
+  tools: {
+    rspack: (config, { appendPlugins }) => {
+      appendPlugins([
+        new ModuleFederationPlugin({
+          ...,
++         runtimePlugins: [
++            path.join(__dirname, './src/runtime-plugin/retry.ts'),
++         ],
+        }),
+      ]);
+    },
+  },
+  plugins: [pluginReact()],
+});
+
+```
+
+
+```ts
+// ./src/runtime-plugin/retry.ts
+import { RetryPlugin } from '@module-federation/enhanced/runtime';
+const retryPlugin = () => RetryPlugin({
+    fetch: {
+        url: 'http://localhost:2008/not-exist-mf-manifest.json',
+        fallback: () => 'http://localhost:2001/mf-manifest.json',
+    },
+    script: {
+        // url: 'http://localhost:2008/not-exist-mf-manifest.json',
+        url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
+        customCreateScript: (url: string, attrs: Record<string, string>) => {
+            let script = document.createElement('script');
+            script.src = `http://localhost:2011/static/js/async/src_App_tsx.js`;
+            script.setAttribute('loader-hoos', 'isTrue');
+            script.setAttribute('crossorigin', 'anonymous');
+            return script;
+        },
+    }
+})
+export default retryPlugin;
+```
+
+
+
+- 运行时注册：
 
 ```ts
 import {
@@ -54,15 +107,6 @@ init({
     }),
   ],
 });
-
-const App = () => {
-  return (
-    <div>
-      <h1>Consumer</h1>
-      <RemoteApp />
-    </div>
-  )
-}
 ```
 
 需要重试的资源分为两种类型：fetch 类型和 script 类型，这两种资源类型我们分别通过 `fetch` 参数和 `script` 参数进行重试逻辑控制。

@@ -28,7 +28,7 @@ async function fetchWithRetry({
   } catch (error) {
     if (retryTimes <= 0) {
       console.log(
-        `>>>>>>>>> retry failed after ${retryTimes} times for url: ${url}, now will try fallbackUrl url <<<<<<<<<`,
+        `>>>>>>>>> 【Module Federation Plugin】: retry failed after ${retryTimes} times for url: ${url}, now will try fallbackUrl url <<<<<<<<<`,
       );
       if (fallback && typeof fallback === 'function') {
         return fetchWithRetry({
@@ -47,7 +47,7 @@ async function fetchWithRetry({
       }
 
       throw new Error(
-        'The request failed three times and has now been abandoned',
+        '【Module Federation Plugin】: The request failed three times and has now been abandoned',
       );
     } else {
       // If there are remaining times, delay 1 second and try again
@@ -55,7 +55,7 @@ async function fetchWithRetry({
         (await new Promise((resolve) => setTimeout(resolve, retryDelay)));
 
       console.log(
-        `Trying again. Number of retries available：${retryTimes - 1}`,
+        `【Module Federation Plugin】: Trying again. Number of retries available：${retryTimes - 1}`,
       );
       return await fetchWithRetry({
         url,

@@ -1,5 +1,5 @@
 import { ScriptWithRetryOptions, CreateScriptFunc, ReqiuredUrl } from './types';
-import { defaultRetries, defaultRetryDelay } from './constant';
+import { defaultRetries, defaultRetryDelay, loadStatus } from './constant';
 
 export const defaultCreateScript = (
   url: string,
@@ -40,23 +40,29 @@ async function loadScript(
   maxRetries = defaultRetries,
   retryDelay = defaultRetryDelay,
   customCreateScript: CreateScriptFunc | undefined,
-) {
+): Promise<{
+  status: 'success' | 'error';
+  event?: Event;
+}> {
   let retries = 0;
 
   function attemptLoad() {
     return new Promise((resolve, reject) => {
       const script = getScript(url, attrs, customCreateScript);
       // when the script is successfully loaded, call resolve
-      script.onload = () => {
-        resolve(script);
+      script.onload = (event) => {
+        resolve({
+          status: loadStatus.success,
+          event,
+        });
       };
 
       // when script fails to load, retry after a delay
-      script.onerror = () => {
+      script.onerror = (event) => {
         if (retries < maxRetries) {
           retries++;
           console.warn(
-            `Failed to load script. Retrying... (${retries}/${maxRetries})`,
+            `【Module Federation Plugin】: Failed to load script. Retrying... (${retries}/${maxRetries})`,
           );
 
           // reload after a delay
@@ -66,10 +72,13 @@ async function loadScript(
             }, retryDelay);
         } else {
           console.error(
-            'Failed to load script after maximum retries. the url is:',
+            '【Module Federation Plugin】: Failed to load script after maximum retries. the url is:',
             url,
           );
-          resolve('Failed to load script after maximum retries.');
+          resolve({
+            status: loadStatus.error,
+            event,
+          });
         }
       };
 
@@ -78,6 +87,7 @@ async function loadScript(
     });
   }
 
+  // @ts-ignore
   return attemptLoad();
 }
 
@@ -89,17 +99,34 @@ function scriptWithRetry({
   customCreateScript, // user script create function
 }: ReqiuredUrl<ScriptWithRetryOptions>) {
   const script = getScript(url, attrs, customCreateScript);
+  const originOnerror = script.onerror;
+  const originOnLoad = script.onload;
   script.onerror = async (event) => {
     console.warn(
-      `Script load failed, retrying (${retryTimes + 1}/${defaultRetries}): ${url}`,
+      `【Module Federation Plugin】: Script load failed, retrying (${retryTimes + 1}/${defaultRetries}): ${url}`,
     );
-    return await loadScript(
+
+    const scriptLoader = await loadScript(
       url,
       attrs,
       retryTimes,
       retryDelay,
       customCreateScript,
     );
+
+    if (scriptLoader.status === loadStatus.success) {
+      // call origin onload
+      console.log(`【Module Federation Plugin】: success to load script`);
+      originOnLoad?.call(script, scriptLoader?.event as Event);
+      return;
+    } else {
+      console.error(
+        `【Module Federation Plugin】: Failed to load script after maximum retries: ${url}`,
+      );
+      // call origin onerror
+      originOnerror?.call(script, scriptLoader?.event as Event);
+    }
+    return;
   };
   return script;
 }

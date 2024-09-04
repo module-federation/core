@@ -117,6 +117,10 @@ const mockErrorFetch = () => {
   global.fetch = mockFetch;
   return mockFetch;
 };
+// Reset global.fetch after each test
+afterEach(() => {
+  global.fetch = fetch;
+});
 
 // Test cases
 describe('fetchWithRetry', () => {
