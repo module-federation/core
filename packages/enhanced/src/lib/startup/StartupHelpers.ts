@@ -258,7 +258,7 @@ export const generateESMEntryStartup = (
         if (!federation) {
           startupSource.add(
             `${
-              final ? `var ${RuntimeGlobals.exports} = ` : ''
+              final ? EXPORT_PREFIX : ''
             }__webpack_exec__(${JSON.stringify(moduleId)});\n`,
           );
         }
