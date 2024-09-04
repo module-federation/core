@@ -93,10 +93,17 @@ const describeCases = (config) => {
                     (p) => p.name === 'ModuleFederationPlugin',
                   );
                   if (mfp) {
-                    if (config.federation.embedRuntime) {
-                      if ('embedRuntime' in mfp._options) {
+                    if (!mfp._options.experiments) {
+                      mfp._options.experiments = {};
+                    }
+                    if (config.federation?.federationRuntime) {
+                      // dont override if explicitly set
+                      if ('federationRuntime' in mfp._options.experiments) {
                       } else {
-                        Object.assign(mfp._options, config.federation);
+                        Object.assign(
+                          mfp._options.experiments,
+                          config.federation,
+                        );
                       }
                     }
                   }

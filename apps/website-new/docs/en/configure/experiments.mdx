@@ -1,0 +1,32 @@
+# Experiments
+
+The `experiments` configuration is used to enable experimental capabilities in the plugin.
+
+- Example
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/host',
+  experiments: {
+    runtime: 'hoisted'
+  },
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+  //...
+});
+```
+
+## runtime
+
+- Type: `enum`
+- Required: No
+- Default: `true`
+- Options: `hoisted`
+
+### Hoisted Runtime

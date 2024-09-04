@@ -229,7 +229,7 @@ export interface ModuleFederationPluginOptions {
   async?: boolean | AsyncBoundaryOptions;
   virtualRuntimeEntry?: boolean;
   experiments?: {
-    runtime: 'hoisted';
+    federationRuntime?: false | 'hoisted';
   };
 }
 /**

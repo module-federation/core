@@ -63,7 +63,8 @@ class FederationRuntimePlugin {
   static getTemplate(
     runtimePlugins: string[],
     bundlerRuntimePath?: string,
-    experiments: { runtime: 'hoisted' } = { runtime: 'hoisted' },
+    // keep so that the hash changes if experiemts change
+    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
   ) {
     // internal runtime plugin
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
@@ -139,7 +140,7 @@ class FederationRuntimePlugin {
     containerName: string,
     runtimePlugins: string[],
     bundlerRuntimePath?: string,
-    experiments: { runtime: 'hoisted' } = { runtime: 'hoisted' },
+    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
   ) {
     const hash = createHash(
       `${containerName} ${FederationRuntimePlugin.getTemplate(
@@ -172,6 +173,7 @@ class FederationRuntimePlugin {
         FederationRuntimePlugin.getTemplate(
           this.options.runtimePlugins!,
           this.bundlerRuntimePath,
+          this.options.experiments,
         ),
       )}`;
     }
@@ -292,12 +294,12 @@ class FederationRuntimePlugin {
 
   setRuntimeAlias(compiler: Compiler) {
     let runtimePath =
-      this.options?.experiments?.runtime === 'hoisted'
+      this.options?.experiments?.federationRuntime === 'hoisted'
         ? EmbeddedRuntimePath
         : RuntimePath;
     if (this.options?.implementation) {
       runtimePath = require.resolve(
-        `@module-federation/runtime${this.options?.experiments?.runtime === 'hoisted' ? '/embedded' : ''}`,
+        `@module-federation/runtime${this.options?.experiments?.federationRuntime === 'hoisted' ? '/embedded' : ''}`,
         {
           paths: [this.options.implementation],
         },
@@ -370,7 +372,7 @@ class FederationRuntimePlugin {
         },
       );
     }
-    if (this.options?.experiments?.runtime === 'hoisted') {
+    if (this.options?.experiments?.federationRuntime === 'hoisted') {
       this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
         '.cjs.js',
         '.esm.js',
