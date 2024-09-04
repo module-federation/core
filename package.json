@@ -102,7 +102,7 @@
     "@nx/node": "19.6.4",
     "@nx/react": "19.6.4",
     "@nx/rollup": "19.6.4",
-    "@nx/rspack": "19.6.0",
+    "@nx/rspack": "19.7.0",
     "@nx/storybook": "19.6.4",
     "@nx/vite": "19.6.4",
     "@nx/web": "19.6.4",
