@@ -39,7 +39,7 @@ module.exports = [
         name: 'container',
         library: { type: 'commonjs-module' },
         filename: 'container.js',
-        experiments: { runtime: 'hoisted' },
+        // experiments: { federationRuntime: 'hoisted' },
         remotes: {
           containerA: '../0-container-full/container.js',
           containerB: './container.js',
@@ -62,7 +62,7 @@ module.exports = [
         name: 'container',
         library: { type: 'module' },
         filename: 'module/container.mjs',
-        experiments: { runtime: 'hoisted' },
+        // experiments: { federationRuntime: 'hoisted' },
         remotes: {
           containerA: '../../0-container-full/module/container.mjs',
           containerB: './container.mjs',
