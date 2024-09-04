@@ -30,6 +30,8 @@ const EXPORT_PREFIX = `var ${RuntimeGlobals.exports} = `;
 
 export const federationStartup = 'federation-entry-startup';
 
+// Abstracted from esm chunk format plugin in webpack, i only need the startup portion
+// https://github.com/webpack/webpack/blob/c802a98f58e26dbfd727ee757ebad7c38b3c77aa/lib/esm/ModuleChunkFormatPlugin.js#L138
 export const generateEntryStartup = (
   compilation: Compilation,
   chunkGraph: ChunkGraph,
