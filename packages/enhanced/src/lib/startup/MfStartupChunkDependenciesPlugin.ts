@@ -1,7 +1,11 @@
 'use strict';
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { generateEntryStartup } from './StartupHelpers';
+import {
+  federationStartup,
+  generateEntryStartup,
+  generateESMEntryStartup,
+} from './StartupHelpers';
 import type { Compiler, Chunk } from 'webpack';
 import ContainerEntryModule from '../container/ContainerEntryModule';
 
@@ -58,7 +62,7 @@ class StartupChunkDependenciesPlugin {
           (chunk, set, { chunkGraph }) => {
             if (!isEnabledForChunk(chunk)) return;
             if (chunkGraph.getNumberOfEntryModules(chunk) === 0) return;
-            set.add('federation-entry-startup');
+            set.add(federationStartup);
           },
         );
 
@@ -96,7 +100,6 @@ class StartupChunkDependenciesPlugin {
 
             const isFederationModule = (module: any) =>
               module.context?.endsWith('.federation');
-
             for (const module of chunkGraph.getChunkEntryModulesIterable(
               chunk,
             )) {
@@ -121,6 +124,19 @@ class StartupChunkDependenciesPlugin {
               return startupSource;
             }
 
+            const treeRuntimeRequirements =
+              chunkGraph.getTreeRuntimeRequirements(chunk);
+            const chunkRuntimeRequirements =
+              chunkGraph.getChunkRuntimeRequirements(chunk);
+
+            const federation =
+              chunkRuntimeRequirements.has(federationStartup) ||
+              treeRuntimeRequirements.has(federationStartup);
+
+            if (!federation) {
+              return startupSource;
+            }
+
             const federationModuleId = chunkGraph.getModuleId(
               federationRuntimeModule,
             );
@@ -128,9 +144,14 @@ class StartupChunkDependenciesPlugin {
               chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunk),
             );
 
+            const entryGeneration = runtimeTemplate.outputOptions.module
+              ? generateESMEntryStartup
+              : generateEntryStartup;
+
             return new compiler.webpack.sources.ConcatSource(
               `${RuntimeGlobals.require}(${JSON.stringify(federationModuleId)});\n`,
-              generateEntryStartup(
+              entryGeneration(
+                compilation,
                 chunkGraph,
                 runtimeTemplate,
                 entryModules,

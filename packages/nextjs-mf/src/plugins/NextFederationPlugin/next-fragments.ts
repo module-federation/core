@@ -1,6 +1,8 @@
 import type { Compiler, RuleSetRule } from 'webpack';
-import type { moduleFederationPlugin } from '@module-federation/sdk';
-import type { SharedObject } from '@module-federation/utilities';
+import type {
+  moduleFederationPlugin,
+  sharePlugin,
+} from '@module-federation/sdk';
 import {
   DEFAULT_SHARE_SCOPE,
   DEFAULT_SHARE_SCOPE_BROWSER,
@@ -17,7 +19,9 @@ import path from 'path';
  * @param {boolean} isServer - Boolean indicating if the code is running on the server.
  * @returns {SharedObject} The default share scope based on the environment.
  */
-export const retrieveDefaultShared = (isServer: boolean): SharedObject => {
+export const retrieveDefaultShared = (
+  isServer: boolean,
+): sharePlugin.SharedObject => {
   // If the code is running on the server, treat some Next.js internals as import false to make them external
   // This is because they will be provided by the server environment and not by the remote container
   if (isServer) {

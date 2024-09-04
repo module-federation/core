@@ -6,6 +6,7 @@ import { initializeSharing } from './initializeSharing';
 import { installInitialConsumes } from './installInitialConsumes';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
+
 export * from './types';
 
 const federation: Federation = {
@@ -23,5 +24,4 @@ const federation: Federation = {
   attachShareScopeMap,
   bundlerRuntimeOptions: {},
 };
-
 export default federation;

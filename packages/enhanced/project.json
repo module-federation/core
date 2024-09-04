@@ -43,6 +43,10 @@
           {
             "command": "node packages/enhanced/test/script.js",
             "forwardAllArgs": false
+          },
+          {
+            "command": "sleep 5 && node packages/enhanced/test/script-experiments.js",
+            "forwardAllArgs": false
           }
         ]
       }
