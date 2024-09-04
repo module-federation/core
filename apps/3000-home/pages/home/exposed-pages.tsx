@@ -1,28 +1,19 @@
 import { useState, useEffect } from 'react';
-import { injectScript } from '@module-federation/nextjs-mf/utils';
-
+import { loadRemote } from '@module-federation/runtime';
 export default function ExposedPages() {
   const [pageMap, setPageMap] = useState('');
   const [pageMapV2, setPageMapV2] = useState('');
 
   useEffect(() => {
-    injectScript({
-      global: 'home_app',
-      url: 'http://localhost:3000/_next/static/chunks/remoteEntry.js',
-    })
-      .then((container) => container.get('./pages-map'))
-      .then((data) => {
-        setPageMap(data);
-      });
+    loadRemote('home_app/pages-map').then((data) => {
+      //@ts-ignore
+      setPageMap(data);
+    });
 
-    injectScript({
-      global: 'home_app',
-      url: 'http://localhost:3000/_next/static/chunks/remoteEntry.js',
-    })
-      .then((container) => container.get('./pages-map-v2'))
-      .then((data) => {
-        setPageMapV2(data);
-      });
+    loadRemote('home_app/pages-map-v2').then((data) => {
+      //@ts-ignore
+      setPageMapV2(data);
+    });
   }, []);
 
   return (

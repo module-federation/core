@@ -189,7 +189,6 @@ export class NextFederationPlugin {
         ...(isServer
           ? [require.resolve('@module-federation/node/runtimePlugin')]
           : []),
-        //disable loaders on internal plugins
         require.resolve(path.join(__dirname, '../container/runtimePlugin')),
         ...(this._options.runtimePlugins || []),
       ].map((plugin) => plugin + '?runtimePlugin'),
@@ -214,7 +213,9 @@ export class NextFederationPlugin {
       // nextjs project needs to add config.watchOptions = ['**/node_modules/**', '**/@mf-types/**'] to prevent loop types update
       dts: this._options.dts ?? false,
       shareStrategy: this._options.shareStrategy ?? 'loaded-first',
-      embedRuntime: true,
+      experiments: {
+        runtime: 'hoisted',
+      },
     };
   }
 

@@ -8,6 +8,7 @@ module.exports = {
       exposes: {
         './Button': './Button',
       },
+      embedRuntime: false,
       shared: {
         react: {
           eager: true,

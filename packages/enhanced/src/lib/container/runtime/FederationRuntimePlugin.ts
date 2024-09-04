@@ -63,7 +63,7 @@ class FederationRuntimePlugin {
   static getTemplate(
     runtimePlugins: string[],
     bundlerRuntimePath?: string,
-    embedRuntime: boolean = false,
+    experiments: { runtime: 'hoisted' } = { runtime: 'hoisted' },
   ) {
     // internal runtime plugin
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
@@ -139,13 +139,13 @@ class FederationRuntimePlugin {
     containerName: string,
     runtimePlugins: string[],
     bundlerRuntimePath?: string,
-    embedRuntime: boolean = false,
+    experiments: { runtime: 'hoisted' } = { runtime: 'hoisted' },
   ) {
     const hash = createHash(
       `${containerName} ${FederationRuntimePlugin.getTemplate(
         runtimePlugins,
         bundlerRuntimePath,
-        embedRuntime,
+        experiments,
       )}`,
     );
     return path.join(TEMP_DIR, `entry.${hash}.js`);
@@ -165,7 +165,7 @@ class FederationRuntimePlugin {
         this.options.name!,
         this.options.runtimePlugins!,
         this.bundlerRuntimePath,
-        this.options.embedRuntime,
+        this.options.experiments,
       );
     } else {
       this.entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
@@ -192,7 +192,7 @@ class FederationRuntimePlugin {
         FederationRuntimePlugin.getTemplate(
           this.options.runtimePlugins!,
           this.bundlerRuntimePath,
-          this.options.embedRuntime,
+          this.options.experiments,
         ),
       );
     }
@@ -291,12 +291,13 @@ class FederationRuntimePlugin {
   }
 
   setRuntimeAlias(compiler: Compiler) {
-    let runtimePath = this.options?.embedRuntime
-      ? EmbeddedRuntimePath
-      : RuntimePath;
+    let runtimePath =
+      this.options?.experiments?.runtime === 'hoisted'
+        ? EmbeddedRuntimePath
+        : RuntimePath;
     if (this.options?.implementation) {
       runtimePath = require.resolve(
-        `@module-federation/runtime${this.options?.embedRuntime ? '/embedded' : ''}`,
+        `@module-federation/runtime${this.options?.experiments?.runtime === 'hoisted' ? '/embedded' : ''}`,
         {
           paths: [this.options.implementation],
         },
@@ -369,7 +370,7 @@ class FederationRuntimePlugin {
         },
       );
     }
-    if (this.options?.embedRuntime) {
+    if (this.options?.experiments?.runtime === 'hoisted') {
       this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
         '.cjs.js',
         '.esm.js',

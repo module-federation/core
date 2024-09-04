@@ -88,6 +88,20 @@ const describeCases = (config) => {
               );
               optionsArr = [].concat(options);
               optionsArr.forEach((options, idx) => {
+                if (config.federation) {
+                  const mfp = options.plugins.find(
+                    (p) => p.name === 'ModuleFederationPlugin',
+                  );
+                  if (mfp) {
+                    if (config.federation.embedRuntime) {
+                      if ('embedRuntime' in mfp._options) {
+                      } else {
+                        Object.assign(mfp._options, config.federation);
+                      }
+                    }
+                  }
+                }
+
                 if (!options.context) options.context = testDirectory;
                 if (!options.mode) options.mode = 'production';
                 if (!options.optimization) options.optimization = {};
