@@ -8,7 +8,6 @@ beforeEach(() => {
   vi.useFakeTimers();
 });
 
-// Mock document.createElement to return a mock script element
 const mockScriptElement = {
   onload: vi.fn(),
   onerror: vi.fn(),
@@ -22,9 +21,7 @@ vi.spyOn(document, 'createElement').mockImplementation(() => {
   return mockScriptElement as unknown as HTMLScriptElement;
 });
 
-vi.spyOn(document.head, 'appendChild').mockImplementation(() => {
-  // 这个模拟方法可以不用执行任何内容
-});
+vi.spyOn(document.head, 'appendChild').mockImplementation(() => {});
 
 // Test Cases
 describe('scriptWithRetry', () => {
@@ -117,12 +114,11 @@ const mockErrorFetch = () => {
   global.fetch = mockFetch;
   return mockFetch;
 };
-// Reset global.fetch after each test
+
 afterEach(() => {
   global.fetch = fetch;
 });
 
-// Test cases
 describe('fetchWithRetry', () => {
   it('mockFetch should resolve correctly', async () => {
     const mockData = { success: true };
@@ -131,7 +127,7 @@ describe('fetchWithRetry', () => {
       url: 'https://example.com',
       retryDelay: 0,
     });
-    expect(await response.json()).toEqual(mockData); // 确保解析响应
+    expect(await response.json()).toEqual(mockData);
   });
 
   it('should succeed on the first try', async () => {
