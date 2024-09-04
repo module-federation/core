@@ -64,7 +64,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         compiler,
       );
     }
-    if (options.embedRuntime) {
+    if (options.experiments?.runtime === 'hoisted') {
       new StartupChunkDependenciesPlugin({
         asyncChunkLoading: true,
       }).apply(compiler);
