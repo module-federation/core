@@ -15,3 +15,4 @@ registerPlugin<typeof pluginSystem.lifecycle, typeof pluginSystem>(
 );
 
 export default pluginSystem;
+export type BridgeRuntimePlugin = typeof pluginSystem;
