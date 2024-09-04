@@ -229,7 +229,7 @@ export interface ModuleFederationPluginOptions {
   async?: boolean | AsyncBoundaryOptions;
   virtualRuntimeEntry?: boolean;
   experiments?: {
-    runtime: RuntimeOptions;
+    federationRuntime?: false | 'hoisted';
   };
 }
 /**
@@ -399,5 +399,3 @@ export interface SharedConfig {
    */
   version?: false | string;
 }
-
-export type RuntimeOptions = 'hoisted';
