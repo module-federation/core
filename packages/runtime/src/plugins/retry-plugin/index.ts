@@ -10,24 +10,27 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
 }) => ({
   name: 'retry-plugin',
   async fetch(url: string, options: RequestInit) {
+    const _options = {
+      ...options,
+      ...fetchOption?.options,
+    };
     // if fetch retry rule is configured
     if (fetchOption) {
+      // when fetch retry rule is configured, only retry for specified url
       if (fetchOption.url) {
         if (url === fetchOption?.url) {
           return fetchWithRetry({
-            url,
-            options,
+            url: fetchOption.url,
+            options: _options,
             retryTimes: fetchOption?.retryTimes,
             fallback: fetchOption?.fallback,
           });
         }
       } else {
+        // or when fetch retry rule is configured, retry for all urls
         return fetchWithRetry({
           url,
-          options: {
-            ...options,
-            ...fetchOption?.options,
-          },
+          options: _options,
           retryTimes: fetchOption?.retryTimes,
           fallback: fetchOption?.fallback,
         });
@@ -42,6 +45,7 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
       ? { ...attrs, ...scriptOption.attrs }
       : attrs;
     if (scriptOption) {
+      // when script retry rule is configured, only retry for specified url
       if (scriptOption?.url) {
         if (url === scriptOption?.url) {
           return scriptWithRetry({
@@ -54,6 +58,7 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
           });
         }
       } else {
+        // or when script retry rule is configured, retry for all urls
         return scriptWithRetry({
           url,
           attrs: scriptAttrs,
