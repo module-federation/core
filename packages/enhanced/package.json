@@ -69,7 +69,7 @@
   "devDependencies": {
     "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@types/btoa": "^1.2.5",
-    "@types/enhanced-resolve": "^5.0.0"
+    "enhanced-resolve": "^5.0.0"
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
