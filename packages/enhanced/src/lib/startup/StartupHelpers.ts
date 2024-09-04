@@ -4,8 +4,7 @@
 */
 
 'use strict';
-import type Chunk from 'webpack/lib/Chunk';
-import type ChunkGraph from 'webpack/lib/ChunkGraph';
+import type { Compilation, Chunk, ChunkGraph } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { EntryModuleWithChunkGroup } from 'webpack/lib/ChunkGraph';
 import type RuntimeTemplate from 'webpack/lib/RuntimeTemplate';
@@ -20,12 +19,19 @@ const { isSubset } = require(
 const { getAllChunks } = require(
   normalizeWebpackPath('webpack/lib/javascript/ChunkHelpers'),
 ) as typeof import('webpack/lib/javascript/ChunkHelpers');
+const HotUpdateChunk = require(
+  normalizeWebpackPath('webpack/lib/HotUpdateChunk'),
+) as typeof import('webpack/lib/HotUpdateChunk');
+const { getUndoPath } = require(
+  normalizeWebpackPath('webpack/lib/util/identifier'),
+) as typeof import('webpack/lib/util/identifier');
 
 const EXPORT_PREFIX = `var ${RuntimeGlobals.exports} = `;
 
 export const federationStartup = 'federation-entry-startup';
 
 export const generateEntryStartup = (
+  compilation: Compilation,
   chunkGraph: ChunkGraph,
   runtimeTemplate: RuntimeTemplate,
   entries: EntryModuleWithChunkGroup[],
@@ -129,7 +135,7 @@ export const generateEntryStartup = (
     if (!entrypoint) continue;
     const runtimeChunk = entrypoint.getRuntimeChunk() as Entrypoint.Chunk;
     const moduleId = chunkGraph.getModuleId(module) as string;
-    const chunks = getAllChunks(entrypoint as Entrypoint, chunk, runtimeChunk);
+    const chunks = getAllChunks(entrypoint, chunk, runtimeChunk);
     if (
       currentChunks &&
       currentChunks.size === chunks.size &&
@@ -151,4 +157,138 @@ export const generateEntryStartup = (
   }
   runtime.push('');
   return Template.asString(runtime);
+};
+
+export const generateESMEntryStartup = (
+  compilation: Compilation,
+  chunkGraph: ChunkGraph,
+  runtimeTemplate: RuntimeTemplate,
+  entries: EntryModuleWithChunkGroup[],
+  chunk: Chunk,
+  passive: boolean,
+): string => {
+  const { chunkHasJs, getCompilationHooks, getChunkFilenameTemplate } =
+    compilation.compiler.webpack.JavascriptModulesPlugin;
+  const { ConcatSource } = compilation.compiler.webpack.sources;
+  const wrappedInit = (body: string) =>
+    Template.asString([
+      'Promise.all([',
+      Template.indent([
+        // may have other chunks who depend on federation, so best to just fallback
+        // instead of try to figure out if consumes or remotes exists during build
+        `${RuntimeGlobals.ensureChunkHandlers}.consumes || Promise.resolve,`,
+        `${RuntimeGlobals.ensureChunkHandlers}.remotes || Promise.resolve,`,
+      ]),
+      `].reduce(${runtimeTemplate.returningFunction(`handler('${chunk.id}', p), p`, 'p, handler')}, promises)`,
+      `).then(${runtimeTemplate.returningFunction(body)});`,
+    ]);
+  const hotUpdateChunk = chunk instanceof HotUpdateChunk ? chunk : null;
+  if (hotUpdateChunk) {
+    throw new Error('HMR is not implemented for module chunk format yet');
+  } else {
+    if (entries.length > 0) {
+      const runtimeChunk = entries[0]?.[1]?.getRuntimeChunk?.();
+      if (!runtimeChunk) {
+        throw new Error('Runtime chunk is undefined');
+      }
+      const currentOutputName = compilation
+        .getPath(getChunkFilenameTemplate(chunk, compilation.outputOptions), {
+          chunk,
+          contentHashType: 'javascript',
+        })
+        .replace(/^\/+/g, '')
+        .split('/');
+
+      /**
+       * @param {Chunk} chunk the chunk
+       * @returns {string} the relative path
+       */
+      const getRelativePath = (chunk: Chunk): string => {
+        const baseOutputName = currentOutputName.slice();
+        const chunkOutputName = compilation
+          .getPath(getChunkFilenameTemplate(chunk, compilation.outputOptions), {
+            chunk,
+            contentHashType: 'javascript',
+          })
+          .replace(/^\/+/g, '')
+          .split('/');
+
+        // remove common parts except filename
+        while (
+          baseOutputName.length > 1 &&
+          chunkOutputName.length > 1 &&
+          baseOutputName[0] === chunkOutputName[0]
+        ) {
+          baseOutputName.shift();
+          chunkOutputName.shift();
+        }
+        const last = chunkOutputName.join('/');
+        // create final path
+        return getUndoPath(baseOutputName.join('/'), last, true) + last;
+      };
+
+      const entrySource = new ConcatSource();
+      const source = ''; // Define the source variable
+      entrySource.add(source);
+      entrySource.add(';\n\n// load runtime\n');
+      entrySource.add(
+        `import ${RuntimeGlobals.require} from ${JSON.stringify(
+          getRelativePath(runtimeChunk),
+        )};\n`,
+      );
+
+      const startupSource = new ConcatSource();
+      startupSource.add(
+        `var __webpack_exec__ = ${runtimeTemplate.returningFunction(
+          `${RuntimeGlobals.require}(${RuntimeGlobals.entryModuleId} = moduleId)`,
+          'moduleId',
+        )}\n`,
+      );
+
+      const loadedChunks = new Set<Chunk>();
+      let index = 0;
+      for (let i = 0; i < entries.length; i++) {
+        const [module, entrypoint] = entries[i];
+        if (!entrypoint) continue;
+        const final = i + 1 === entries.length;
+        const moduleId = chunkGraph.getModuleId(module) as string;
+        const chunks = getAllChunks(entrypoint, runtimeChunk, undefined);
+        for (const chunk of chunks) {
+          if (loadedChunks.has(chunk) || !chunkHasJs(chunk, chunkGraph))
+            continue;
+          loadedChunks.add(chunk);
+          startupSource.add(
+            `import * as __webpack_chunk_${index}__ from ${JSON.stringify(
+              getRelativePath(chunk),
+            )};\n`,
+          );
+          startupSource.add(
+            `${RuntimeGlobals.externalInstallChunk}(__webpack_chunk_${index}__);\n`,
+          );
+          index++;
+        }
+        // generateEntryStartup handles calling require and execution of the entry module.
+        // startupSource.add(
+        //  `${
+        //     final ? `var ${RuntimeGlobals.exports} = ` : ""
+        //   }__webpack_exec__(${JSON.stringify(moduleId)});\n`
+        // );
+      }
+      startupSource.add('\n');
+      // call original entry startup, which will template out the startup code now that the chunk installs are done
+      startupSource.add(
+        generateEntryStartup(
+          compilation,
+          chunkGraph,
+          runtimeTemplate,
+          entries,
+          chunk,
+          passive,
+        ),
+      );
+
+      return startupSource.source();
+    }
+  }
+  return '';
 };

@@ -1,7 +1,10 @@
 'use strict';
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { generateEntryStartup } from './StartupHelpers';
+import {
+  generateEntryStartup,
+  generateESMEntryStartup,
+} from './StartupHelpers';
 import type { Compiler, Chunk } from 'webpack';
 import ContainerEntryModule from '../container/ContainerEntryModule';
 
@@ -96,7 +99,6 @@ class StartupChunkDependenciesPlugin {
 
             const isFederationModule = (module: any) =>
               module.context?.endsWith('.federation');
-
             for (const module of chunkGraph.getChunkEntryModulesIterable(
               chunk,
             )) {
@@ -127,10 +129,16 @@ class StartupChunkDependenciesPlugin {
             const entryModules = Array.from(
               chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunk),
             );
+            runtimeTemplate.outputOptions.module;
 
+            const entryGeneration = runtimeTemplate.outputOptions.module
+              ? generateESMEntryStartup
+              : generateEntryStartup;
+            debugger;
             return new compiler.webpack.sources.ConcatSource(
               `${RuntimeGlobals.require}(${JSON.stringify(federationModuleId)});\n`,
-              generateEntryStartup(
+              entryGeneration(
+                compilation,
                 chunkGraph,
                 runtimeTemplate,
                 entryModules,
