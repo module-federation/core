@@ -1,22 +1,15 @@
 import React, { Suspense, lazy } from 'react';
+import { loadRemote } from '@module-federation/runtime';
 
-export const WebpackSvgRemote = function () {
-  const WebpackSvgRemote = lazy(() => import('remote1/WebpackSvg'));
-  return (
-    <Suspense fallback="loading WebpackSvgRemote">
-      <WebpackSvgRemote />
-    </Suspense>
-  );
-};
+export const WebpackSvgRemote = React.lazy(async () => {
+  const WebpackSvgRemote = await loadRemote('remote1/WebpackSvg');
+  return WebpackSvgRemote;
+});
 
-export const WebpackPngRemote = function () {
-  const WebpackPngRemote = lazy(() => import('remote1/WebpackPng'));
-  return (
-    <Suspense fallback="loading WebpackPngRemote">
-      <WebpackPngRemote />
-    </Suspense>
-  );
-};
+export const WebpackPngRemote = React.lazy(async () => {
+  const WebpackPngRemote = await loadRemote('remote1/WebpackPng');
+  return WebpackPngRemote;
+});
 
 function Remote1() {
   return (
