@@ -1,5 +1,5 @@
 ---
-'@module-federation/nextjs-mf': major
+'@module-federation/nextjs-mf': minor
 ---
 
 Remove module-federation/utilities package exports
