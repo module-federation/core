@@ -96,8 +96,8 @@ export const generateEntryStartup = (
             Template.indent([
               // may have other chunks who depend on federation, so best to just fallback
               // instead of try to figure out if consumes or remotes exists during build
-              `${RuntimeGlobals.ensureChunkHandlers}.consumes || Promise.resolve,`,
-              `${RuntimeGlobals.ensureChunkHandlers}.remotes || Promise.resolve,`,
+              `${RuntimeGlobals.ensureChunkHandlers}.consumes || function(chunkId, promises) {},`,
+              `${RuntimeGlobals.ensureChunkHandlers}.remotes || function(chunkId, promises) {},`,
             ]),
             `].reduce(${runtimeTemplate.returningFunction(`handler('${chunk.id}', p), p`, 'p, handler')}, promises)`,
             `).then(${runtimeTemplate.returningFunction(body)});`,
@@ -170,22 +170,17 @@ export const generateESMEntryStartup = (
   const { chunkHasJs, getCompilationHooks, getChunkFilenameTemplate } =
     compilation.compiler.webpack.JavascriptModulesPlugin;
   const { ConcatSource } = compilation.compiler.webpack.sources;
-  const wrappedInit = (body: string) =>
-    Template.asString([
-      'Promise.all([',
-      Template.indent([
-        // may have other chunks who depend on federation, so best to just fallback
-        // instead of try to figure out if consumes or remotes exists during build
-        `${RuntimeGlobals.ensureChunkHandlers}.consumes || Promise.resolve,`,
-        `${RuntimeGlobals.ensureChunkHandlers}.remotes || Promise.resolve,`,
-      ]),
-      `].reduce(${runtimeTemplate.returningFunction(`handler('${chunk.id}', p), p`, 'p, handler')}, promises)`,
-      `).then(${runtimeTemplate.returningFunction(body)});`,
-    ]);
   const hotUpdateChunk = chunk instanceof HotUpdateChunk ? chunk : null;
   if (hotUpdateChunk) {
     throw new Error('HMR is not implemented for module chunk format yet');
   } else {
+    const treeRuntimeRequirements =
+      chunkGraph.getTreeRuntimeRequirements(chunk);
+    const chunkRuntimeRequirements =
+      chunkGraph.getChunkRuntimeRequirements(chunk);
+    const federation =
+      chunkRuntimeRequirements.has(federationStartup) ||
+      treeRuntimeRequirements.has(federationStartup);
     if (entries.length > 0) {
       const runtimeChunk = entries[0]?.[1]?.getRuntimeChunk?.();
       if (!runtimeChunk) {
@@ -227,16 +222,6 @@ export const generateESMEntryStartup = (
         return getUndoPath(baseOutputName.join('/'), last, true) + last;
       };
 
-      const entrySource = new ConcatSource();
-      const source = ''; // Define the source variable
-      entrySource.add(source);
-      entrySource.add(';\n\n// load runtime\n');
-      entrySource.add(
-        `import ${RuntimeGlobals.require} from ${JSON.stringify(
-          getRelativePath(runtimeChunk),
-        )};\n`,
-      );
-
       const startupSource = new ConcatSource();
       startupSource.add(
         `var __webpack_exec__ = ${runtimeTemplate.returningFunction(
@@ -268,24 +253,29 @@ export const generateESMEntryStartup = (
           index++;
         }
         // generateEntryStartup handles calling require and execution of the entry module.
-        // startupSource.add(
-        //  `${
-        //     final ? `var ${RuntimeGlobals.exports} = ` : ""
-        //   }__webpack_exec__(${JSON.stringify(moduleId)});\n`
-        // );
+        if (!federation) {
+          startupSource.add(
+            `${
+              final ? `var ${RuntimeGlobals.exports} = ` : ''
+            }__webpack_exec__(${JSON.stringify(moduleId)});\n`,
+          );
+        }
       }
-      startupSource.add('\n');
-      // call original entry startup, which will template out the startup code now that the chunk installs are done
-      startupSource.add(
-        generateEntryStartup(
-          compilation,
-          chunkGraph,
-          runtimeTemplate,
-          entries,
-          chunk,
-          passive,
-        ),
-      );
+
+      if (federation) {
+        startupSource.add('\n');
+        // call original entry startup, which will template out the startup code now that the chunk installs are done
+        startupSource.add(
+          generateEntryStartup(
+            compilation,
+            chunkGraph,
+            runtimeTemplate,
+            entries,
+            chunk,
+            passive,
+          ),
+        );
+      }
 
       return startupSource.source();
     }

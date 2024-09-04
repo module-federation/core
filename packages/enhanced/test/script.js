@@ -11,4 +11,16 @@ const args = [
   'packages/enhanced/jest.config.ts',
 ];
 
+const embedArgs = [
+  '--expose-gc',
+  '--max-old-space-size=4096',
+  '--experimental-vm-modules',
+  '--trace-deprecation',
+  jestPath,
+  '--logHeapUsage',
+  '--config',
+  'packages/enhanced/jest.embed.ts',
+];
+
 spawnSync('node', args, { stdio: 'inherit' });
+spawnSync('node', embedArgs, { stdio: 'inherit' });

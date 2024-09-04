@@ -2,6 +2,7 @@
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import {
+  federationStartup,
   generateEntryStartup,
   generateESMEntryStartup,
 } from './StartupHelpers';
@@ -123,18 +124,30 @@ class StartupChunkDependenciesPlugin {
               return startupSource;
             }
 
+            const treeRuntimeRequirements =
+              chunkGraph.getTreeRuntimeRequirements(chunk);
+            const chunkRuntimeRequirements =
+              chunkGraph.getChunkRuntimeRequirements(chunk);
+
+            const federation =
+              chunkRuntimeRequirements.has(federationStartup) ||
+              treeRuntimeRequirements.has(federationStartup);
+
+            if (!federation) {
+              return startupSource;
+            }
+
             const federationModuleId = chunkGraph.getModuleId(
               federationRuntimeModule,
             );
             const entryModules = Array.from(
               chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunk),
             );
-            runtimeTemplate.outputOptions.module;
 
             const entryGeneration = runtimeTemplate.outputOptions.module
               ? generateESMEntryStartup
               : generateEntryStartup;
-            debugger;
+
             return new compiler.webpack.sources.ConcatSource(
               `${RuntimeGlobals.require}(${JSON.stringify(federationModuleId)});\n`,
               entryGeneration(
