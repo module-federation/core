@@ -62,7 +62,7 @@ class StartupChunkDependenciesPlugin {
           (chunk, set, { chunkGraph }) => {
             if (!isEnabledForChunk(chunk)) return;
             if (chunkGraph.getNumberOfEntryModules(chunk) === 0) return;
-            set.add('federation-entry-startup');
+            set.add(federationStartup);
           },
         );
 
