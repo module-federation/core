@@ -8,7 +8,7 @@ const args = [
   jestPath,
   '--logHeapUsage',
   '--config',
-  'packages/enhanced/jest.config.ts',
+  'packages/enhanced/jest.embed.ts',
 ];
 
 spawnSync('node', args, { stdio: 'inherit' });

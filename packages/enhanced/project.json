@@ -38,10 +38,14 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "parallel": false,
+        "parallel": true,
         "commands": [
           {
             "command": "node packages/enhanced/test/script.js",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "node packages/enhanced/test/script-experiments.js",
             "forwardAllArgs": false
           }
         ]
