@@ -23,6 +23,10 @@ module.exports = composePlugins(
     // @nx/rspack not sync the latest rspack changes currently, so just override rules
     config.module.rules = [
       {
+        test: /\.module\.css$/,
+        type: 'css/module',
+      },
+      {
         test: /\.tsx$/,
         use: {
           loader: 'builtin:swc-loader',
@@ -44,6 +48,9 @@ module.exports = composePlugins(
         type: 'javascript/auto',
       },
     ];
+    config.experiments = {
+      css: true,
+    };
     config.resolve = {
       extensions: ['*', '.js', '.jsx', '.tsx', '.ts'],
       tsConfig: path.resolve(__dirname, 'tsconfig.app.json'),
