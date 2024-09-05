@@ -50,6 +50,7 @@
     }
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "@swc/helpers": "^0.5.0"
   }
 }
