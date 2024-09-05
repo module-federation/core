@@ -316,9 +316,9 @@ class FederationRuntimePlugin {
       implementation ||
       RuntimeToolsPath;
 
-// Set up aliases for the federation runtime and tools
-// This ensures that the correct versions are used throughout the project
-compiler.options.resolve.alias = alias;
+    // Set up aliases for the federation runtime and tools
+    // This ensures that the correct versions are used throughout the project
+    compiler.options.resolve.alias = alias;
   }
 
   apply(compiler: Compiler) {
