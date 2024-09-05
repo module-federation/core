@@ -1,0 +1,208 @@
+import { PackageManagerTabs, Tabs, Tab } from '@theme';
+
+# 资源重试插件
+
+资源重试插件用于在资源加载失败时进行重试，以增加资源加载的成功率。在 Module Federation 中我们提供重试插件 `RetryPlugin` 来增加资源重试机制，这对于远程应用的加载来说可提高应用的稳定性。
+
+## 安装
+
+资源重试插件是由`@module-federation/retry-plugin` 包提供的，我们先来安装它
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/retry-plugin --save',
+    yarn: 'yarn add @module-federation/retry-plugin --save',
+    pnpm: 'pnpm add @module-federation/retry-plugin --save',
+    bun: 'bun add @module-federation/retry-plugin --save',
+  }}
+/>
+
+## 使用方法
+
+`RetryPlugin` 为运行时插件，我们可以通过构建插件的 `runtimePlugin` 注册此插件或在运行时进行插件注册，并配置重试参数和重试逻辑等：
+
+:::note 
+注意：构建插件中注册 和 运行时注册两种方式选择任意一种即可，不要重复注册
+
+:::
+
+
+### 方式一：构建插件中注册
+```diff
+import { ModuleFederationPlugin } from '@module-federation/retry-plugin/rspack';
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+import path from 'path';
+
+export default defineConfig({
+  tools: {
+    rspack: (config, { appendPlugins }) => {
+      appendPlugins([
+        new ModuleFederationPlugin({
+          ...,
++         runtimePlugins: [
++            path.join(__dirname, './src/runtime-plugin/retry.ts'),
++         ],
+        }),
+      ]);
+    },
+  },
+  plugins: [pluginReact()],
+});
+
+```
+
+
+```ts
+// ./src/runtime-plugin/retry.ts
+import { RetryPlugin } from '@module-federation/retry-plugin';
+const retryPlugin = () => RetryPlugin({
+    fetch: {
+        url: 'http://localhost:2008/not-exist-mf-manifest.json',
+        fallback: () => 'http://localhost:2001/mf-manifest.json',
+    },
+    script: {
+        // url: 'http://localhost:2008/not-exist-mf-manifest.json',
+        url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
+        customCreateScript: (url: string, attrs: Record<string, string>) => {
+            let script = document.createElement('script');
+            script.src = `http://localhost:2011/static/js/async/src_App_tsx.js`;
+            script.setAttribute('loader-hoos', 'isTrue');
+            script.setAttribute('crossorigin', 'anonymous');
+            return script;
+        },
+    }
+})
+export default retryPlugin;
+```
+
+
+### 方式二：运行时注册
+
+```ts
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import { RetryPlugin } from '@module-federation/retry-plugin';
+
+init({
+  name: 'federation_consumer',
+  remotes: [],
+  plugins: [
+    RetryPlugin({
+      fetch: {
+        // the retry resource url
+        url: 'http://localhost:2008/not-exist-mf-manifest.json',
+        // after all retried failed, set a fallback function to guarantee a fallback resource
+        fallback: () => 'http://localhost:2001/mf-manifest.json',
+      },
+      script: {
+        // the retry resource url
+        url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
+        // if you need to custom create script element, pass `customCreateScript` and plugin will use customCreateScript to create script element
+        customCreateScript: (url: string, attrs: Record<string, string>) => {
+          let script = document.createElement('script');
+          script.src = `http://localhost:2011/static/js/async/src_App_tsx.js`;
+          script.setAttribute('loader-hoos', 'isTrue');
+          script.setAttribute('crossorigin', 'anonymous');
+          return script;
+        },
+      },
+    }),
+  ],
+});
+```
+
+需要重试的资源分为两种类型：fetch 类型和 script 类型，这两种资源类型我们分别通过 `fetch` 参数和 `script` 参数进行重试逻辑控制。
+
+## Type
+
+```ts
+const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin;
+
+type RetryPluginParams = {
+  fetch?: FetchWithRetryOptions; // fetch retry options
+  script?: ScriptWithRetryOptions; // script retry options
+};
+
+type FetchWithRetryOptions = {
+  url?: string;
+  options?: RequestInit;
+  retryTimes?: number;
+  retryDelay?: number;
+  fallback?: () => string;
+}
+
+type ScriptWithRetryOptions = {
+  url?: string;
+  attrs?: Record<string, string>;
+  retryTimes?: number;
+  customCreateScript?: CreateScriptFunc;
+}
+
+```
+
+
+## RetryPluginParams 类型说明
+
+`RetryPluginParams` 是用于配置 `RetryPlugin` 的参数类型，包含了两种资源类型的重试选项：`fetch` 和 `script`。
+
+### 属性
+
+- **fetch**: `FetchWithRetryOptions`（可选）
+  - 用于配置 fetch 类型资源的重试选项。
+
+- **script**: `ScriptWithRetryOptions`（可选）
+  - 用于配置 script 类型资源的重试选项。
+
+### FetchWithRetryOptions 类型说明
+
+- **url**: 
+  - `string`
+  - 可选。当不设置时对于所有加载失败的 URL 会默认进入重试逻辑
+  - 需要重试的资源的 URL。
+
+- **options**: 
+  - `RequestInit`
+  - 可选
+  - 传递给 fetch 请求的选项。
+
+- **retryTimes**:
+  - `number`
+  - 可选
+  - 重试的次数，默认为 3。
+
+- **retryDelay**: 
+  - `number`
+  - 可选
+  - 每次重试之间的延迟时间（毫秒）。
+
+- **fallback**: 
+  - `() => string`
+  - 可选
+  - 所有重试失败后，返回一个备用资源的 URL。
+
+### ScriptWithRetryOptions 类型说明
+
+- **url**:
+  - `string`
+  - 可选。当不设置时对于所有加载失败的 URL 会默认进入重试逻辑
+  - 需要重试的脚本资源的 URL。
+
+- **attrs**: 
+  - `Record<string, string>`
+  - 可选
+  - 传递给脚本元素的属性。
+
+- **retryTimes**: 
+  - `number`
+  - 可选
+  - 重试的次数，默认为 3。
+
+- **retryDelay**: 
+  - `number`
+  - 可选
+  - 每次重试之间的延迟时间（毫秒）。
+  
+- **customCreateScript**:
+  - `CreateScriptFunc`
+  - 可选
+  - 自定义创建脚本元素的函数，插件将使用此函数创建脚本元素。
