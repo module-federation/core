@@ -82,9 +82,8 @@ export async function fixImageLoader(
         Template.indent([
           'try {',
           Template.indent([
-            Template.indent(
-              `return ${publicPath} && ${publicPath}.indexOf('://') > 0 ? new URL(${publicPath}).origin : ''`,
-            ),
+            `const splitted = ${publicPath} ? ${publicPath}.split('/_next') : '';`,
+            `return splitted.length === 2 ? splitted[0] : '';`,
           ]),
           '} catch (e) {',
           Template.indent([
