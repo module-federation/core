@@ -23,8 +23,8 @@ module.exports = composePlugins(
     // @nx/rspack not sync the latest rspack changes currently, so just override rules
     config.module.rules = [
       {
-        test: /\.module\.css$/,
-        type: 'css/module',
+        test: /\.css$/,
+        type: 'css/auto',
       },
       {
         test: /\.tsx$/,
