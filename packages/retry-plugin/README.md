@@ -1,13 +1,54 @@
-# @module-federation/runtime
+# @module-federation/retry-plugin
 
-- Can be combined with the build plug-in to share basic dependencies according to policies to reduce the number of module downloads and improve the loading speed of modules.
-- Only consume part of the export of the remote module and will not fully download the remote module
-- The runtime calling process can be extended through the module-runtime plug-in mechanism
+> A plugin for retrying failed module requests.
+
+## Usage
+
+```js
+// ./src/runtime-plugin/retry.ts
+import { RetryPlugin } from '@module-federation/retry-plugin';
+const retryPlugin = () => RetryPlugin({
+    fetch: {
+        url: 'http://localhost:2008/not-exist-mf-manifest.json',
+        fallback: () => 'http://localhost:2001/mf-manifest.json',
+    },
+    script: {
+        // url: 'http://localhost:2008/not-exist-mf-manifest.json',
+        url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
+        customCreateScript: (url: string, attrs: Record<string, string>) => {
+            let script = document.createElement('script');
+            script.src = `http://localhost:2011/static/js/async/src_App_tsx.js`;
+            script.setAttribute('loader-hoos', 'isTrue');
+            script.setAttribute('crossorigin', 'anonymous');
+            return script;
+        },
+    }
+})
+
+export default defineConfig({
+  tools: {
+    rspack: (config, { appendPlugins }) => {
+      appendPlugins([
+        new ModuleFederationPlugin({
+          ...,
++         runtimePlugins: [
++            path.join(__dirname, './src/runtime-plugin/retry.ts'),
++         ],
+        }),
+      ]);
+    },
+  },
+  plugins: [pluginReact()],
+});
+
+```
+
+
 
 ## Documentation
 
-See [https://module-federation.io/guide/basic/runtime.html](https://module-federation.io/guide/basic/runtime.html) for details.
+See [https://module-federation.io/plugin/plugins/retry-plugin.html](https://module-federation.io/plugin/plugins/retry-plugin.html) for details.
 
 ## License
 
-`@module-federation/runtime` is [MIT licensed](https://github.com/module-federation/core/blob/main/packages/runtime/LICENSE).
+`@module-federation/retry-plugin` is [MIT licensed](https://github.com/module-federation/core/blob/main/packages/retry-plugin/LICENSE).
