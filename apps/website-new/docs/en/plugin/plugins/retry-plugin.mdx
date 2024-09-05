@@ -23,7 +23,14 @@ This `RetryPlugin` is Provided by the `@module-federation/retry-plugin` package
  
 `RetryPlugin` is a runtime plugin, we can register this plugin through the `runtimePlugin` of the build plugin or register it at runtime and configure retry parameters and retry logic, etc.:
 
-### Register in the build plugin:
+
+:::note 
+Note: Choose either of the two ways to register the build plugin and do not register it repeatedly
+
+:::
+
+
+### Method1: Register in the build plugin
 
 ```ts
 // ./src/runtime-plugin/retry.ts
@@ -48,7 +55,7 @@ const retryPlugin = () => RetryPlugin({
 export default retryPlugin;
 ```
 
-- register it at runtime:
+### Method2: Register it at runtime
 
 ```ts
 import {

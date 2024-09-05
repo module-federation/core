@@ -21,7 +21,13 @@ import { PackageManagerTabs, Tabs, Tab } from '@theme';
 
 `RetryPlugin` 为运行时插件，我们可以通过构建插件的 `runtimePlugin` 注册此插件或在运行时进行插件注册，并配置重试参数和重试逻辑等：
 
-- 构建插件中注册：
+:::note 
+注意：构建插件中注册 和 运行时注册两种方式选择任意一种即可，不要重复注册
+
+:::
+
+
+### 方式一：构建插件中注册
 ```diff
 import { ModuleFederationPlugin } from '@module-federation/retry-plugin/rspack';
 import { defineConfig } from '@rsbuild/core';
@@ -71,8 +77,7 @@ export default retryPlugin;
 ```
 
 
-
-- 运行时注册：
+### 方式二：运行时注册
 
 ```ts
 import {
