@@ -12,7 +12,7 @@
         "target": "web",
         "outputPath": "apps/manifest-demo/3012-rspack-js-entry-provider/dist",
         "indexHtml": "apps/manifest-demo/3012-rspack-js-entry-provider/src/index.html",
-        "main": "apps/manifest-demo/3012-rspack-js-entry-provider/src/index.jsx",
+        "main": "apps/manifest-demo/3012-rspack-js-entry-provider/src/index.js",
         "tsConfig": "apps/manifest-demo/3012-rspack-js-entry-provider/tsconfig.app.json",
         "rspackConfig": "apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js"
       },
