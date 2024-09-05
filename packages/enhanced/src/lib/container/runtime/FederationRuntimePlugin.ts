@@ -313,6 +313,10 @@ class FederationRuntimePlugin {
       ...compiler.options.resolve.alias,
     };
 
+    if (this.options?.experiments?.federationRuntime === 'hoisted') {
+      runtimePath = runtimePath.replace('.cjs', '.esm');
+    }
+
     if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
       compiler.options.resolve.alias['@module-federation/runtime$'] =
         runtimePath;
