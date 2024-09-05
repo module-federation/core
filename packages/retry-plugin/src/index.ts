@@ -1,5 +1,4 @@
-import { FederationRuntimePlugin } from '../../type/plugin';
-import type { CreateScriptHookReturn } from '@module-federation/sdk';
+import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 import { fetchWithRetry } from './fetch-retry';
 import { scriptWithRetry } from './script-retry';
 import type { RetryPluginParams } from './types';

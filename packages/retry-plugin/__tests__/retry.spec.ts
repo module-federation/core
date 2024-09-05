@@ -1,5 +1,5 @@
-import { scriptWithRetry } from '../src/plugins/retry-plugin/script-retry';
-import { fetchWithRetry } from '../src/plugins/retry-plugin/fetch-retry';
+import { scriptWithRetry } from '../src/script-retry';
+import { fetchWithRetry } from '../src/fetch-retry';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock the DOM environment

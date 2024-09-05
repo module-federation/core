@@ -8,7 +8,6 @@ module.exports = (rollupConfig, projectOptions) => {
     index: 'packages/runtime/src/index.ts',
     types: 'packages/runtime/src/types.ts',
     helpers: 'packages/runtime/src/helpers.ts',
-    'retry-plugin': 'packages/runtime/src/plugins/retry-plugin/index.ts',
   };
 
   const project = projectOptions.project;

@@ -1,10 +1,7 @@
 import { useRef, useEffect, ForwardRefExoticComponent } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import {
-  init,
-  loadRemote,
-  RetryPlugin,
-} from '@module-federation/enhanced/runtime';
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import RetryPlugin from '@module-federation/retry-plugin';
 import { createRemoteComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
@@ -12,7 +9,6 @@ import Home from './pages/Home';
 import styles from './index.module.less';
 import './App.css';
 
-// init to register the RetryPlugin
 init({
   name: 'federation_consumer',
   remotes: [],
@@ -23,7 +19,6 @@ init({
         fallback: () => 'http://localhost:2001/mf-manifest.json',
       },
       script: {
-        // url: 'http://localhost:2008/not-exist-mf-manifest.json',
         url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
         customCreateScript: (url: string, attrs: Record<string, string>) => {
           let script = document.createElement('script');
