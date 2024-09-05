@@ -10,7 +10,6 @@ export const defaultCreateScript = (
   Object.keys(attrs).forEach((key) => {
     if (key === 'async' || key === 'defer') {
       script[key] = attrs[key];
-      // Attributes that do not exist are considered overridden
     } else if (!script.getAttribute(key)) {
       script.setAttribute(key, attrs[key]);
     }
@@ -62,7 +61,7 @@ async function loadScript(
         if (retries < maxRetries) {
           retries++;
           console.warn(
-            `【Module Federation Plugin】: Failed to load script. Retrying... (${retries}/${maxRetries})`,
+            `【Module Federation RetryPlugin】: Failed to load script. Retrying... (${retries}/${maxRetries})`,
           );
 
           // reload after a delay
@@ -72,7 +71,7 @@ async function loadScript(
             }, retryDelay);
         } else {
           console.error(
-            '【Module Federation Plugin】: Failed to load script after maximum retries. the url is:',
+            '【Module Federation RetryPlugin】: Failed to load script after maximum retries. the url is:',
             url,
           );
           resolve({
@@ -103,7 +102,7 @@ function scriptWithRetry({
   const originOnLoad = script.onload;
   script.onerror = async (event) => {
     console.warn(
-      `【Module Federation Plugin】: Script load failed, retrying (${retryTimes + 1}/${defaultRetries}): ${url}`,
+      `【Module Federation RetryPlugin】: Script load failed, retrying (${retryTimes + 1}/${defaultRetries}): ${url}`,
     );
 
     const scriptLoader = await loadScript(
@@ -115,15 +114,9 @@ function scriptWithRetry({
     );
 
     if (scriptLoader.status === loadStatus.success) {
-      // call origin onload
-      console.log(`【Module Federation Plugin】: success to load script`);
       originOnLoad?.call(script, scriptLoader?.event as Event);
       return;
     } else {
-      console.error(
-        `【Module Federation Plugin】: Failed to load script after maximum retries: ${url}`,
-      );
-      // call origin onerror
       originOnerror?.call(script, scriptLoader?.event as Event);
     }
     return;

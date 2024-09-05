@@ -23,7 +23,6 @@ vi.spyOn(document, 'createElement').mockImplementation(() => {
 
 vi.spyOn(document.head, 'appendChild').mockImplementation(() => {});
 
-// Test Cases
 describe('scriptWithRetry', () => {
   it('should create and append script element successfully', async () => {
     const url = 'https://example.com/some-script.js';
@@ -31,9 +30,8 @@ describe('scriptWithRetry', () => {
       url,
       retryTimes: 3,
     });
-    // mock the script load
-    mockScriptElement.onload();
 
+    mockScriptElement.onload();
     expect(document.createElement).toHaveBeenCalledWith('script');
     expect(script.src).toEqual(url);
     expect(mockScriptElement.onload).toHaveBeenCalled();
