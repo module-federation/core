@@ -2437,6 +2437,9 @@ importers:
       '@module-federation/webpack-bundler-runtime':
         specifier: workspace:*
         version: link:../webpack-bundler-runtime
+      '@swc/helpers':
+        specifier: ^0.5.0
+        version: 0.5.12
       fast-glob:
         specifier: ^3.2.11
         version: 3.3.2

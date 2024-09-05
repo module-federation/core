@@ -44,7 +44,8 @@
     "@module-federation/sdk": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
-    "@module-federation/webpack-bundler-runtime": "workspace:*"
+    "@module-federation/webpack-bundler-runtime": "workspace:*",
+    "@swc/helpers": "^0.5.0"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",
