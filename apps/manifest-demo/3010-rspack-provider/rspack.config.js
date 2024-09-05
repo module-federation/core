@@ -20,6 +20,12 @@ module.exports = composePlugins(
       context.context.root,
       'apps/manifest-demo/3010-rspack-provider',
     );
+    config.module.parser = {
+      'css/auto': {
+        namedExports: false,
+      },
+    };
+
     // @nx/rspack not sync the latest rspack changes currently, so just override rules
     config.module.rules = [
       {
