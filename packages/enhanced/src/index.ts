@@ -11,7 +11,7 @@ export { default as AsyncBoundaryPlugin } from './wrapper/AsyncBoundaryPlugin';
 export { default as HoistContainerReferencesPlugin } from './wrapper/HoistContainerReferencesPlugin';
 
 export { parseOptions } from './lib/container/options';
-
+//
 export const container = {
   get ContainerEntryModule() {
     return require('./lib/container/ContainerEntryModule').default;
