@@ -72,7 +72,7 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
   },
 });
 
-export default RetryPlugin;
+export { RetryPlugin };
 export type {
   RetryPluginParams,
   FetchWithRetryOptions,

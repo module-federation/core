@@ -1,4 +1,4 @@
-import RetryPlugin from '@module-federation/retry-plugin';
+import { RetryPlugin } from '@module-federation/retry-plugin';
 
 const retryPlugin = () =>
   RetryPlugin({
