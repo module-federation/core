@@ -1,6 +1,6 @@
 ---
 '@module-federation/nextjs-mf': minor
-'@module-federation/enhanced': minor
+'@module-federation/enhanced': patch
 ---
 
-use hoist plugin when experiments.runtime === 'hoisted'
+add hoisted runtime flag: experiments.federationRuntime === 'hoisted' | false

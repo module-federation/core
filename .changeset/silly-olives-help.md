@@ -2,4 +2,4 @@
 '@module-federation/node': patch
 ---
 
-remove experiment flag from node plugin
+remove old experiment flag from node plugin

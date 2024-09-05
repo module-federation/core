@@ -1,5 +1,5 @@
 ---
-'@module-federation/enhanced': minor
+'@module-federation/enhanced': patch
 ---
 
-Embedded runtime and async entry startup
+experiment: Async Entry Startup when runtime is hoisted
