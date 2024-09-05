@@ -293,38 +293,30 @@ class FederationRuntimePlugin {
   }
 
   setRuntimeAlias(compiler: Compiler) {
-    let runtimePath =
-      this.options?.experiments?.federationRuntime === 'hoisted'
-        ? EmbeddedRuntimePath
-        : RuntimePath;
-    if (this.options?.implementation) {
+    const { experiments, implementation } = this.options || {};
+    const isHoisted = experiments?.federationRuntime === 'hoisted';
+    let runtimePath = isHoisted ? EmbeddedRuntimePath : RuntimePath;
+
+    if (implementation) {
       runtimePath = require.resolve(
-        `@module-federation/runtime${this.options?.experiments?.federationRuntime === 'hoisted' ? '/embedded' : ''}`,
-        {
-          paths: [this.options.implementation],
-        },
+        `@module-federation/runtime${isHoisted ? '/embedded' : ''}`,
+        { paths: [implementation] },
       );
     }
-    if (Array.isArray(compiler.options.resolve.alias)) {
-      return;
-    }
 
-    compiler.options.resolve.alias = {
-      ...compiler.options.resolve.alias,
-    };
-
-    if (this.options?.experiments?.federationRuntime === 'hoisted') {
+    if (isHoisted) {
       runtimePath = runtimePath.replace('.cjs', '.esm');
     }
 
-    if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
-      compiler.options.resolve.alias['@module-federation/runtime$'] =
-        runtimePath;
-    }
-    if (!compiler.options.resolve.alias['@module-federation/runtime-tools$']) {
-      compiler.options.resolve.alias['@module-federation/runtime-tools$'] =
-        this.options?.implementation || RuntimeToolsPath;
-    }
+    const alias = compiler.options.resolve.alias || {};
+    alias['@module-federation/runtime$'] =
+      alias['@module-federation/runtime$'] || runtimePath;
+    alias['@module-federation/runtime-tools$'] =
+      alias['@module-federation/runtime-tools$'] ||
+      implementation ||
+      RuntimeToolsPath;
+
+    compiler.options.resolve.alias = alias;
   }
 
   apply(compiler: Compiler) {
