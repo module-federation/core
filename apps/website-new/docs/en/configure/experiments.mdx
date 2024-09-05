@@ -22,7 +22,7 @@ new ModuleFederationPlugin({
 });
 ```
 
-## runtime
+## federationRuntime
 
 - Type: `enum`
 - Required: No
@@ -36,6 +36,7 @@ When Runtime is `hoisted` the following happens:
 This is useful configurations that need:
 - runtimeChunk: single
 - no `import()` in the user code
+- the runtime packages of module federation are moved into the runtime chunks and out of the entrypoint.
 
 
 1) Optimizations
