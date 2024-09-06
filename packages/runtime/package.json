@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/runtime",
+  "name": "@empjs/module-federation-runtime",
   "version": "0.6.1",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs.js",
