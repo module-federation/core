@@ -1,5 +1,19 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.5.11
+
+### Patch Changes
+
+- 2855583: remove old experiment flag from node plugin
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/enhanced@0.6.1
+  - @module-federation/runtime@0.6.1
+  - @module-federation/sdk@0.6.1
+  - @module-federation/utilities@3.1.7
+
 ## 2.5.10
 
 ### Patch Changes

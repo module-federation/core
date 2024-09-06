@@ -1,5 +1,14 @@
 # remote4
 
+## 1.0.20
+
+### Patch Changes
+
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+  - @module-federation/enhanced@0.6.1
+  - @module-federation/bridge-react@0.6.1
+
 ## 1.0.19
 
 ### Patch Changes

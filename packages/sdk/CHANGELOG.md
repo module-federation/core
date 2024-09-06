@@ -1,5 +1,12 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.6.1
+
+### Patch Changes
+
+- 2855583: externalize swc helpers and add them as a dependency
+- 813680f: Remove duplicated util functions and reference central ones in sdk
+
 ## 0.6.0
 
 ### Minor Changes
