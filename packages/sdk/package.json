@@ -40,8 +40,5 @@
         "./dist/normalize-webpack-path.cjs.d.ts"
       ]
     }
-  },
-  "dependencies": {
-    "@swc/helpers": "^0.5.0"
   }
 }

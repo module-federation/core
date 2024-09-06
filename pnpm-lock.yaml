@@ -2437,9 +2437,6 @@ importers:
       '@module-federation/webpack-bundler-runtime':
         specifier: workspace:*
         version: link:../webpack-bundler-runtime
-      '@swc/helpers':
-        specifier: ^0.5.0
-        version: 0.5.12
       fast-glob:
         specifier: ^3.2.11
         version: 3.3.2
@@ -2534,9 +2531,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@swc/helpers':
-        specifier: ^0.5.0
-        version: 0.5.12
 
   packages/runtime-tools:
     dependencies:
@@ -2547,11 +2541,7 @@ importers:
         specifier: workspace:*
         version: link:../webpack-bundler-runtime
 
-  packages/sdk:
-    dependencies:
-      '@swc/helpers':
-        specifier: ^0.5.0
-        version: 0.5.12
+  packages/sdk: {}
 
   packages/storybook-addon:
     dependencies:
@@ -2641,9 +2631,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@swc/helpers':
-        specifier: ^0.5.0
-        version: 0.5.12
 
   webpack:
     dependencies:

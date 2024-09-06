@@ -20,9 +20,6 @@
           "packages/webpack-bundler-runtime/src/constant.ts",
           "packages/webpack-bundler-runtime/src/container.ts"
         ],
-        "external": ["@module-federation/*", "@swc"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true,
         "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.js"
       },
       "dependsOn": [
