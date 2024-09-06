@@ -21,8 +21,7 @@
   "types": "./dist/index.cjs.d.ts",
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
-    "@module-federation/sdk": "workspace:*",
-    "@swc/helpers": "^0.5.0"
+    "@module-federation/sdk": "workspace:*"
   },
   "exports": {
     ".": {
