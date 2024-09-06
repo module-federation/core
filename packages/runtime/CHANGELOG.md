@@ -1,5 +1,15 @@
 # @module-federation/runtime
 
+## 0.6.1
+
+### Patch Changes
+
+- 2855583: externalize swc helpers and add them as a dependency
+- 813680f: Remove duplicated util functions and reference central ones in sdk
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/sdk@0.6.1
+
 ## 0.6.0
 
 ### Patch Changes

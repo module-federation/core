@@ -1,5 +1,21 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.6.1
+
+### Patch Changes
+
+- 2855583: add hoisted runtime flag: experiments.federationRuntime === 'hoisted' | false
+- 2855583: experiment: Async Entry Startup when runtime is hoisted
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/sdk@0.6.1
+  - @module-federation/runtime-tools@0.6.1
+  - @module-federation/dts-plugin@0.6.1
+  - @module-federation/bridge-react-webpack-plugin@0.6.1
+  - @module-federation/managers@0.6.1
+  - @module-federation/manifest@0.6.1
+  - @module-federation/rspack@0.6.1
+
 ## 0.6.0
 
 ### Minor Changes
