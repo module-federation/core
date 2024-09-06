@@ -19,6 +19,7 @@ import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
 import { ExternalsType } from 'webpack/declarations/WebpackOptions';
+import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -63,10 +64,18 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         compiler,
       );
     }
+    if (options.experiments?.federationRuntime === 'hoisted') {
+      new StartupChunkDependenciesPlugin({
+        asyncChunkLoading: true,
+      }).apply(compiler);
+    }
+
     if (options.dts !== false) {
       new DtsPlugin(options).apply(compiler);
     }
+
     new FederationRuntimePlugin(options).apply(compiler);
+
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =
       options.remoteType ||

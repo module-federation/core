@@ -228,6 +228,9 @@ export interface ModuleFederationPluginOptions {
   dts?: boolean | PluginDtsOptions;
   async?: boolean | AsyncBoundaryOptions;
   virtualRuntimeEntry?: boolean;
+  experiments?: {
+    federationRuntime?: false | 'hoisted';
+  };
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

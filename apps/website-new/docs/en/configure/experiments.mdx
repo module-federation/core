@@ -1,0 +1,65 @@
+# Experiments
+
+The `experiments` configuration is used to enable experimental capabilities in the plugin.
+
+- Example
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/host',
+  experiments: {
+    federationRuntime: 'hoisted'
+  },
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+  //...
+});
+```
+
+## federationRuntime
+
+- Type: `enum`
+- Required: No
+- Default: `false`
+- Options: `false | "hoisted"`
+
+### `Hoisted` Runtime
+
+When Runtime is `hoisted` the following happens:
+
+This is useful configurations that need:
+- runtimeChunk: single
+- no `import()` in the user code
+- the runtime packages of module federation are moved into the runtime chunks and out of the entrypoint.
+
+
+1) Optimizations
+
+The `module-federation/runtime` is patched onto entrypoints. This causes multiple copies to exist in some builds.
+It also causes some "eager consumption" errors when chunk splitting is configured in certain ways.
+
+This resolves a common issue with runtimeChunk: single
+
+2) Async startup
+
+:::warning
+This mode allows for async startup. When exporting a UMD library, it can return a promise resolving to the export.
+If you manually require() an entrypoint in Node, it sets module.exports to Promise.resolve(exports).
+:::
+
+Entrypoint startup will switch to "active" initialization and use async dependency startup.
+
+You will no longer need a mandatory `import('./bootsrtap')` dynamic import in order for consumers / hosts to function.
+There should be no "eager consumption" errors possible, as the initialization of the files themselves behave as async chunks.
+
+3) Eager Runtime Access
+
+Instead of federation runtime initilizing in the entrypoint code, it is initialized in a RuntimeModule, within the webpack runtime.
+This allows module federation to be avaliable ahead of time, thus enabling "Async Startup" capabilities etc.
+
