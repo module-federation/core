@@ -18,24 +18,11 @@ export type { FederationRuntimePlugin };
 
 let FederationInstance: FederationHost | null = null;
 export function init(options: UserOptions): FederationHost {
-  if (!options || typeof options !== 'object') {
-    throw new Error('Invalid options provided to init function');
-  }
-
-  if (FederationInstance) {
-    return FederationInstance;
-  }
-
-  if (!options.name) {
-    throw new Error('Name is required in options');
-  }
-
+  // Ensure that init is executed only once
+  if (FederationInstance) return FederationInstance;
+  // Retrieve the same instance with the same name
   const instance = getGlobalFederationInstance(options.name, options.version);
-  if (instance) {
-    return instance;
-  }
-
-  // Continue with initialization...
+  if (!instance) {
     // Retrieve debug constructor
     const FederationConstructor =
       getGlobalFederationConstructor() || FederationHost;
