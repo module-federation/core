@@ -267,7 +267,6 @@ describe('hooks', () => {
     expect(res()).toBe('hello app2');
   });
 
-
   it('loaderEntry hooks', async () => {
     const data = {
       id: '@loader-hooks/app2',
@@ -312,17 +311,17 @@ describe('hooks', () => {
         },
       };
     };
-    const loadEntryPlugin = function ():FederationRuntimePlugin {
+    const loadEntryPlugin = function (): FederationRuntimePlugin {
       return {
         name: 'load-entry-plugin',
-        loadEntry({remoteInfo}) {
+        loadEntry({ remoteInfo }) {
           if (remoteInfo.name === '@loaderEntry-hooks/app3') {
             return {
               init() {},
               get(path) {
-                return () => path
-              }
-            }
+                return () => path;
+              },
+            };
           }
         },
       } as any;
