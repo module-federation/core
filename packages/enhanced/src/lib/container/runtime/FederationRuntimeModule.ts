@@ -14,12 +14,12 @@ const { RuntimeModule, RuntimeGlobals, Template } = require(
 ) as typeof import('webpack');
 
 class FederationRuntimeModule extends RuntimeModule {
-  runtimeRequirements: Set<string>;
+  runtimeRequirements: ReadonlySet<string>;
   containerName: string;
   initOptionsWithoutShared: NormalizedRuntimeInitOptionsWithOutShared;
 
   constructor(
-    runtimeRequirements: Set<string>,
+    runtimeRequirements: ReadonlySet<string>,
     containerName: string,
     initOptionsWithoutShared: NormalizedRuntimeInitOptionsWithOutShared,
   ) {

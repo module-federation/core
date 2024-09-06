@@ -3,4 +3,4 @@
 '@module-federation/sdk': patch
 ---
 
-Remove duplicated util functions and referecne central ones
+Remove duplicated util functions and reference central ones in sdk

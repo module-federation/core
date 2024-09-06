@@ -1,4 +1,10 @@
-import type { Compiler, Compilation, Chunk, NormalModule } from 'webpack';
+import type {
+  Compiler,
+  Compilation,
+  Chunk,
+  NormalModule,
+  Module,
+} from 'webpack';
 
 class DelegateModulesPlugin {
   options: { debug: boolean; [key: string]: any };
@@ -62,14 +68,13 @@ class DelegateModulesPlugin {
       }
     }
   }
-
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'DelegateModulesPlugin',
       (compilation: Compilation) => {
         compilation.hooks.finishModules.tapAsync(
           'DelegateModulesPlugin',
-          (modules, callback) => {
+          (modules: Iterable<Module>, callback: () => void) => {
             const { remotes } = this.options;
             const knownDelegates = new Set(
               remotes
@@ -103,7 +108,7 @@ class DelegateModulesPlugin {
 
         compilation.hooks.optimizeChunks.tap(
           'DelegateModulesPlugin',
-          (chunks) => {
+          (chunks: Iterable<Chunk>) => {
             const { runtime, container } = this.options;
             const runtimeChunk = this.getChunkByName(chunks, runtime);
             if (!runtimeChunk || !runtimeChunk.hasRuntime()) {

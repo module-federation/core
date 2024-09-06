@@ -32,12 +32,8 @@ export default {
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/enhanced',
   rootDir: __dirname,
-  testMatch: [
-    '<rootDir>/test/*.test.js',
-    '<rootDir>/test/*.basictest.js',
-    '<rootDir>/test/*.longtest.js',
-    '<rootDir>/test/*.unittest.js',
-  ],
+  testMatch: ['<rootDir>/test/*.embedruntime.js'],
+
   testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
   setupFilesAfterEnv: ['<rootDir>/test/setupTestFramework.js'],
 };

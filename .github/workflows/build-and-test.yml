@@ -2,7 +2,7 @@ name: Build Affected Packages
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, '**']
   push:
     branches: [main]
 
@@ -42,6 +42,9 @@ jobs:
       - name: Run Affected Test
         run: npx nx affected -t test --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
+      - name: Warm Nx Cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
   e2e-modern:
     needs: checkout-install
     uses: ./.github/workflows/e2e-modern.yml
@@ -62,9 +65,14 @@ jobs:
     uses: ./.github/workflows/e2e-node.yml
     secrets: inherit
 
-  e2e-next:
+  e2e-next-dev:
     needs: checkout-install
-    uses: ./.github/workflows/e2e-next.yml
+    uses: ./.github/workflows/e2e-next-dev.yml
+    secrets: inherit
+
+  e2e-next-prod:
+    needs: checkout-install
+    uses: ./.github/workflows/e2e-next-prod.yml
     secrets: inherit
 
   e2e-modern-ssr:

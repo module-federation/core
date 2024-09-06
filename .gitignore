@@ -5,8 +5,6 @@
 /tmp
 /out-tsc
 /build
-**/@mf-types
-**/@mf-types/**
 /docs
 /.nx
 # dependencies
@@ -51,16 +49,16 @@ migrations.json
 packages/**/dist
 apps/**/dist
 
+**/@mf-types
+**/@mf-types/**
+**/cypress/downloads
+
 # test cases
 !packages/enhanced/test/configCases/**/**/node_modules
 packages/enhanced/test/js
 .ignored
 **/.mf
 **/.mf/**
-
-/apps/manifest-demo/**/@mf-types/
-/apps/manifest-demo/webpack-host/@mf-types/
-/apps/manifest-demo/3008-webpack-host/@mf-types/
 
 # dts test cases
 **/dist-test
