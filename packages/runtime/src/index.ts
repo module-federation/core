@@ -18,6 +18,8 @@ export type { FederationRuntimePlugin };
 
 let FederationInstance: FederationHost | null = null;
 export function init(options: UserOptions): FederationHost {
+  // Ensure that init is executed only once
+  if (FederationInstance) return FederationInstance;
   // Retrieve the same instance with the same name
   const instance = getGlobalFederationInstance(options.name, options.version);
   if (!instance) {
