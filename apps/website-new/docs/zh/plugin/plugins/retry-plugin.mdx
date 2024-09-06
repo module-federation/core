@@ -29,10 +29,8 @@ import { PackageManagerTabs, Tabs, Tab } from '@theme';
 
 ### 方式一：构建插件中注册
 ```diff
-import { ModuleFederationPlugin } from '@module-federation/retry-plugin/rspack';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { defineConfig } from '@rsbuild/core';
-import { pluginReact } from '@rsbuild/plugin-react';
-import path from 'path';
 
 export default defineConfig({
   tools: {
@@ -47,7 +45,6 @@ export default defineConfig({
       ]);
     },
   },
-  plugins: [pluginReact()],
 });
 
 ```

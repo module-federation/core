@@ -32,6 +32,27 @@ Note: Choose either of the two ways to register the build plugin and do not regi
 
 ### Method1: Register in the build plugin
 
+```diff
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { defineConfig } from '@rsbuild/core';
+
+export default defineConfig({
+  tools: {
+    rspack: (config, { appendPlugins }) => {
+      appendPlugins([
+        new ModuleFederationPlugin({
+          ...,
++         runtimePlugins: [
++            path.join(__dirname, './src/runtime-plugin/retry.ts'),
++         ],
+        }),
+      ]);
+    },
+  },
+});
+
+```
+
 ```ts
 // ./src/runtime-plugin/retry.ts
 import { RetryPlugin } from '@module-federation/retry-plugin';
@@ -59,8 +80,6 @@ export default retryPlugin;
 
 ```ts
 import {
-  init,
-  loadRemote,
   RetryPlugin,
 } from '@module-federation/retry-plugin';
 
