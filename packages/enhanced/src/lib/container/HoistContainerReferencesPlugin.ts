@@ -4,6 +4,7 @@ import type {
   Chunk,
   WebpackPluginInstance,
   Module,
+  Dependency,
   NormalModule as NormalModuleType,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
@@ -11,6 +12,7 @@ import type { RuntimeSpec } from 'webpack/lib/util/runtime';
 import type ExportsInfo from 'webpack/lib/ExportsInfo';
 import ContainerEntryModule from './ContainerEntryModule';
 import { moduleFederationPlugin } from '@module-federation/sdk';
+import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 
 const { NormalModule, AsyncDependenciesBlock } = require(
   normalizeWebpackPath('webpack'),
@@ -52,7 +54,14 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       (compilation: Compilation) => {
         const logger = compilation.getLogger(PLUGIN_NAME);
         const { chunkGraph, moduleGraph } = compilation;
-
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        const containerEntryDependencies = new Set<Dependency>();
+        hooks.getContainerEntryModules.tap(
+          'HoistContainerReferences',
+          (dep: Dependency) => {
+            containerEntryDependencies.add(dep);
+          },
+        );
         // Hook into the optimizeChunks phase
         compilation.hooks.optimizeChunks.tap(
           {
@@ -67,6 +76,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
               runtimeChunks,
               chunks,
               logger,
+              containerEntryDependencies,
             );
           },
         );
@@ -155,10 +165,59 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     runtimeChunks: Set<Chunk>,
     chunks: Iterable<Chunk>,
     logger: ReturnType<Compilation['getLogger']>,
+    containerEntryDependencies: Set<Dependency>,
   ): void {
     const { chunkGraph, moduleGraph } = compilation;
     // when runtimeChunk: single is set - ContainerPlugin will create a "partial" chunk we can use to
     // move modules into the runtime chunk
+    for (const dep of containerEntryDependencies) {
+      const containerEntryModule = moduleGraph.getModule(dep);
+      if (!containerEntryModule) continue;
+      const allReferencedModules = getAllReferencedModules(
+        compilation,
+        containerEntryModule,
+        'initial',
+      );
+      const containerRuntimes =
+        chunkGraph.getModuleRuntimes(containerEntryModule);
+      const runtimes = new Set<string>();
+
+      // const moduleChunks = chunkGraph.getModuleChunks(containerEntryModule);
+
+      // for(const chunk of moduleChunks) {
+      //   const entryOptions = chunk.getEntryOptions();
+      // }
+
+      for (const runtimeSpec of containerRuntimes) {
+        compilation.compiler.webpack.util.runtime.forEachRuntime(
+          runtimeSpec,
+          (runtimeKey) => {
+            if (runtimeKey) {
+              runtimes.add(runtimeKey);
+            }
+          },
+        );
+      }
+
+      for (const runtime of runtimes) {
+        const runtimeChunk = compilation.namedChunks.get(runtime);
+        if (!runtimeChunk) continue;
+
+        for (const module of allReferencedModules) {
+          if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
+            chunkGraph.connectChunkAndModule(runtimeChunk, module);
+          }
+        }
+      }
+
+      this.cleanUpChunks(compilation, allReferencedModules);
+      // debugger
+    }
+    //@ts-ignore
+    if (!process.env.none) {
+      return;
+    }
+
     const partialChunk = this.containerName
       ? compilation.namedChunks.get(this.containerName)
       : undefined;
@@ -179,8 +238,9 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         }
       }
     } else {
-      const entryModules =
-        chunkGraph.getChunkEntryModulesIterable(partialChunk);
+      const entryModules = partialChunk
+        ? chunkGraph.getChunkEntryModulesIterable(partialChunk)
+        : undefined;
       runtimeModule = entryModules
         ? Array.from(entryModules).find(
             (module) => module instanceof ContainerEntryModule,

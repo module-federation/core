@@ -96,7 +96,7 @@ class ContainerEntryModule extends Module {
   override identifier(): string {
     return `container entry (${this._shareScope}) ${JSON.stringify(
       this._exposes,
-    )}`;
+    )} ${this._injectRuntimeEntry}`;
   }
   /**
    * @param {RequestShortener} requestShortener the request shortener

@@ -16,6 +16,7 @@ import type {
 } from 'webpack';
 import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
 import schema from '../../schemas/container/ContainerPlugin';
 
@@ -168,6 +169,7 @@ class ContainerPlugin {
     if (!useModuleFederationPlugin) {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
+
     const federationRuntimePluginInstance = new FederationRuntimePlugin();
     federationRuntimePluginInstance.apply(compiler);
 
@@ -196,6 +198,8 @@ class ContainerPlugin {
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
         );
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        hooks.getContainerEntryModules.call(dep);
         const hasSingleRuntimeChunk =
           compilation.options?.optimization?.runtimeChunk;
         dep.loc = { name };
@@ -210,32 +214,41 @@ class ContainerPlugin {
           },
           (error: WebpackError | null | undefined) => {
             if (error) return callback(error);
-            if (hasSingleRuntimeChunk) {
-              // Add to single runtime chunk as well.
-              // Allows for singleton runtime graph with all needed runtime modules for federation
-              addEntryToSingleRuntimeChunk();
-            } else {
-              callback();
-            }
+            callback();
           },
         );
+      },
+    );
 
-        // Function to add entry for undefined runtime
-        const addEntryToSingleRuntimeChunk = () => {
-          compilation.addEntry(
-            compilation.options.context || '',
-            dep,
-            {
-              name: name ? name + '_partial' : undefined, // give unique name name
-              runtime: undefined,
-              library,
-            },
-            (error: WebpackError | null | undefined) => {
-              if (error) return callback(error);
-              callback();
-            },
-          );
-        };
+    compiler.hooks.make.tapAsync(
+      PLUGIN_NAME,
+      (compilation: Compilation, callback) => {
+        if (!compilation.options?.optimization?.runtimeChunk) {
+          return callback();
+        }
+        const dep = new ContainerEntryDependency(
+          name + '_partial',
+          //@ts-ignore
+          exposes,
+          shareScope,
+          federationRuntimePluginInstance.entryFilePath,
+        );
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        hooks.getContainerEntryModules.call(dep);
+        dep.loc = { name };
+        compilation.addEntry(
+          compilation.options.context || '',
+          dep,
+          {
+            name: name ? name + '_partial' : undefined, // give unique name name
+            runtime: undefined,
+            library,
+          },
+          (error: WebpackError | null | undefined) => {
+            if (error) return callback(error);
+            callback();
+          },
+        );
       },
     );
 
