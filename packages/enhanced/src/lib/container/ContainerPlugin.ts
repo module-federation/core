@@ -16,6 +16,7 @@ import type {
 } from 'webpack';
 import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
 import schema from '../../schemas/container/ContainerPlugin';
 
@@ -171,6 +172,9 @@ class ContainerPlugin {
     const federationRuntimePluginInstance = new FederationRuntimePlugin();
     federationRuntimePluginInstance.apply(compiler);
 
+    const federationModulesPluginInstance = new FederationModulesPlugin();
+    federationModulesPluginInstance.apply(compiler);
+
     const { name, exposes, shareScope, filename, library, runtime } =
       this._options;
 
@@ -196,6 +200,8 @@ class ContainerPlugin {
           shareScope,
           federationRuntimePluginInstance.embeddedEntryFilePath,
         );
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        hooks.getContainerEntryModules.call(dep);
         const hasSingleRuntimeChunk =
           compilation.options?.optimization?.runtimeChunk;
         dep.loc = { name };
@@ -229,6 +235,8 @@ class ContainerPlugin {
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
         );
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        hooks.getContainerEntryModules.call(dep);
         dep.loc = { name };
         compilation.addEntry(
           compilation.options.context || '',

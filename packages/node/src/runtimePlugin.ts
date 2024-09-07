@@ -261,7 +261,6 @@ export default function (): FederationRuntimePlugin {
             const req = __webpack_require__;
             //@ts-ignore
             const runtimeName = req.j;
-            console.log(typeof req);
             if (!chunkId.includes('vendor')) {
               // debugger
             }

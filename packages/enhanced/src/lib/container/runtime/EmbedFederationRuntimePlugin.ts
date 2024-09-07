@@ -1,11 +1,18 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import EmbedFederationRuntimeModule from './EmbedFederationRuntimeModule';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-
+import FederationModulesPlugin from './FederationModulesPlugin';
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-import type { Compiler, Compilation, Chunk, Module, ChunkGraph } from 'webpack';
+import type {
+  Compiler,
+  Compilation,
+  Dependency,
+  Chunk,
+  Module,
+  ChunkGraph,
+} from 'webpack';
 import { getFederationGlobalScope } from './utils';
 
 const EntryDependency = require(
@@ -36,6 +43,16 @@ class EmbedFederationRuntimePlugin {
         compiler.hooks.thisCompilation.tap(
           'EmbedFederationRuntimePlugin',
           (compilation: Compilation) => {
+            const hooks =
+              FederationModulesPlugin.getCompilationHooks(compilation);
+            const containerEntryDependencies = new Set<Dependency>();
+            hooks.getContainerEntryModules.tap(
+              'EmbedFederationRuntimeModule',
+              (dependency: Dependency) => {
+                containerEntryDependencies.add(dependency);
+              },
+            );
+
             const handler = (
               chunk: Chunk,
               runtimeRequirements: Set<string>,
@@ -50,8 +67,7 @@ class EmbedFederationRuntimePlugin {
 
               runtimeRequirements.add('embeddedFederationRuntime');
               const runtimeModule = new EmbedFederationRuntimeModule(
-                this.bundlerRuntimePath,
-                this.embeddedBundlerRuntimePath,
+                containerEntryDependencies,
                 this.experiments,
               );
 

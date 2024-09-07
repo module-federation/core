@@ -1,10 +1,15 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { getFederationGlobalScope } from './utils';
-import type { Chunk, Module } from 'webpack';
+import type {
+  Chunk,
+  Module,
+  Dependency,
+  NormalModule as NormalModuleType,
+} from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { getAllReferencedModules } from '../HoistContainerReferencesPlugin';
 import ContainerEntryModule from '../ContainerEntryModule';
-
+import FederationModulesPlugin from './FederationModulesPlugin';
 const { RuntimeModule, NormalModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -15,18 +20,15 @@ const ConcatenatedModule = require(
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class EmbedFederationRuntimeModule extends RuntimeModule {
-  private bundlerRuntimePath: string;
-  private embeddedBundlerRuntimePath: string;
   private experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
+  private containerEntryDependencies: Set<Dependency>;
 
   constructor(
-    bundlerRuntimePath: string,
-    embeddedBundlerRuntimePath: string,
+    containerEntryDependencies: Set<Dependency>,
     experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
   ) {
     super('EmbedFederationRuntimeModule', RuntimeModule.STAGE_ATTACH);
-    this.bundlerRuntimePath = bundlerRuntimePath;
-    this.embeddedBundlerRuntimePath = embeddedBundlerRuntimePath;
+    this.containerEntryDependencies = containerEntryDependencies;
     this.experiments = experiments;
   }
 
@@ -35,28 +37,40 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
   }
 
   override generate(): string | null {
-    const {
-      compilation,
-      chunk,
-      chunkGraph,
-      bundlerRuntimePath,
-      embeddedBundlerRuntimePath,
-    } = this;
+    const { compilation, chunk, chunkGraph } = this;
     if (!chunk || !chunkGraph || !compilation) {
       return null;
     }
-    const found =
-      this.findModule(chunk, bundlerRuntimePath) ||
-      this.findModule(chunk, embeddedBundlerRuntimePath);
-    const chunkName = chunk.name;
+
+    let found: NormalModuleType | null | undefined;
+    for (const dep of this.containerEntryDependencies) {
+      const mod = compilation.moduleGraph.getModule(dep);
+      if (mod && chunkGraph.isModuleInChunk(mod, chunk)) {
+        const federationEntry = compilation.moduleGraph.getModule(
+          mod.dependencies[1],
+        );
+        if (federationEntry) {
+          found = compilation.moduleGraph.getModule(
+            federationEntry.dependencies[0],
+          ) as NormalModuleType;
+          break;
+        }
+      }
+    }
+
     if (!found) {
       return null;
     }
 
     const moduleReferences = new Set();
-    const isRemoteChunk = Array.from(
-      chunkGraph.getChunkEntryModulesIterable(chunk),
-    ).some((mod) => mod instanceof ContainerEntryModule);
+    let isRemoteChunk = false;
+    for (const mod of chunkGraph.getChunkEntryModulesIterable(chunk)) {
+      if (mod instanceof ContainerEntryModule) {
+        isRemoteChunk = true;
+        break;
+      }
+    }
+
     const allRefs = getAllReferencedModules(compilation, found, 'initial');
     for (const refMod of allRefs) {
       moduleReferences.add(chunkGraph.getModuleId(refMod));
@@ -65,7 +79,7 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
     const initRuntimeModuleGetter = compilation.runtimeTemplate.moduleRaw({
       module: found,
       chunkGraph,
-      request: this.bundlerRuntimePath,
+      request: found.resource,
       weak: false,
       runtimeRequirements: new Set(),
     });
@@ -73,7 +87,7 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
     const exportExpr = compilation.runtimeTemplate.exportFromImport({
       moduleGraph: compilation.moduleGraph,
       module: found,
-      request: this.bundlerRuntimePath,
+      request: found.resource,
       exportName: ['default'],
       originModule: found,
       asiSafe: true,
@@ -94,13 +108,13 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
           'var factoryKeys = Object.keys(globalThis.federationRuntimeModuleFactories || {});',
           'for(var i = 0; i < factoryKeys.length; i++) {',
           Template.indent([
-            `${RuntimeGlobals.moduleFactories}['share' + factoryKeys[i]] = globalThis.federationRuntimeModuleFactories[factoryKeys[i]];`,
+            `${RuntimeGlobals.moduleFactories}[factoryKeys[i]] = globalThis.federationRuntimeModuleFactories[factoryKeys[i]];`,
           ]),
           '}',
         ]);
         federationRuntimeGetter = Template.asString([
           'if(factoryKeys[0]) {',
-          `var federation = __webpack_require__('share' + factoryKeys[0]).default;`,
+          `var federation = __webpack_require__(factoryKeys[0]).default;`,
           'console.log("federation", federation);',
           '} else { throw new Error("shared federation runtime factories missing")}',
         ]);

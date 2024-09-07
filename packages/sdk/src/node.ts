@@ -98,9 +98,9 @@ export function createScriptNode(
       //@ts-ignore
       const fs = __non_webpack_require__('fs');
       fs.writeFileSync(dir + '/' + filename, data);
-      //@ts-ignore
       const scriptContext = {
         exports: false,
+        //@ts-ignore
         module: { exports: __non_webpack_require__('./' + filename) },
       };
 
