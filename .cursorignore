@@ -1,13 +1,66 @@
-# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
-./tmp
-./scripts
-./.git
-./packages/storybook-addon
-./packages/core
-./packages/utilities
-./packages/typescript
-./packages/native-*
-./apps
-**/configCases
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+/dist
+/tmp
+/out-tsc
+/build
+/docs
+/.nx
+# dependencies
+node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Next.js
+.next
+.netlify
+migrations.json
+
+# build contnt
+packages/**/dist
 apps/**
-*.snap
+
+**/@mf-types
+**/@mf-types/**
+**/cypress/downloads
+
+# test cases
+!packages/enhanced/test/configCases/**/**/node_modules
+packages/enhanced/test/js
+.ignored
+**/.mf
+**/.mf/**
+
+# dts test cases
+**/dist-test
+**/dist-test/**
+**/cypress/downloads

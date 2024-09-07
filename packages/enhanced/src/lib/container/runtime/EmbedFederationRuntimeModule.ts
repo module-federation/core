@@ -9,7 +9,7 @@ import type {
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { getAllReferencedModules } from '../HoistContainerReferencesPlugin';
 import ContainerEntryModule from '../ContainerEntryModule';
-import FederationModulesPlugin from './FederationModulesPlugin';
+
 const { RuntimeModule, NormalModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -50,6 +50,7 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
           mod.dependencies[1],
         );
         if (federationEntry) {
+          //get bundler runtime .federation/entry
           found = compilation.moduleGraph.getModule(
             federationEntry.dependencies[0],
           ) as NormalModuleType;
@@ -64,12 +65,6 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
 
     const moduleReferences = new Set();
     let isRemoteChunk = false;
-    for (const mod of chunkGraph.getChunkEntryModulesIterable(chunk)) {
-      if (mod instanceof ContainerEntryModule) {
-        isRemoteChunk = true;
-        break;
-      }
-    }
 
     const allRefs = getAllReferencedModules(compilation, found, 'initial');
     for (const refMod of allRefs) {
@@ -103,20 +98,27 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
     let runtimeFactories = '';
     let federationRuntimeGetter = '';
     if (this.experiments?.federationRuntime === 'use-host') {
+      for (const mod of chunkGraph.getChunkEntryModulesIterable(chunk)) {
+        if (mod instanceof ContainerEntryModule) {
+          isRemoteChunk = true;
+          break;
+        }
+      }
+
       if (isRemoteChunk) {
         runtimeFactories = Template.asString([
           'var factoryKeys = Object.keys(globalThis.federationRuntimeModuleFactories || {});',
           'for(var i = 0; i < factoryKeys.length; i++) {',
           Template.indent([
-            `${RuntimeGlobals.moduleFactories}[factoryKeys[i]] = globalThis.federationRuntimeModuleFactories[factoryKeys[i]];`,
+            `var factory = globalThis.federationRuntimeModuleFactories[factoryKeys[i]];`,
+            `${RuntimeGlobals.moduleFactories}[factoryKeys[i]] = factory;`,
           ]),
           '}',
         ]);
+
         federationRuntimeGetter = Template.asString([
-          'if(factoryKeys[0]) {',
+          'if(!factoryKeys[0]) { throw new Error("shared federation runtime factories missing")}',
           `var federation = __webpack_require__(factoryKeys[0]).default;`,
-          'console.log("federation", federation);',
-          '} else { throw new Error("shared federation runtime factories missing")}',
         ]);
       } else {
         runtimeFactories = Template.asString([
@@ -170,46 +172,6 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       `}`,
       'federation = undefined;',
     ]);
-  }
-
-  private findModule(chunk: Chunk, runtimePath: string): Module | null {
-    const { chunkGraph, compilation } = this;
-    if (!chunk || !chunkGraph || !compilation) {
-      return null;
-    }
-
-    const isTargetModule = (mod: Module) => {
-      if (mod instanceof NormalModule) {
-        const isRuntimeModule =
-          mod.resourceResolveData?.['descriptionFileData']?.name ===
-          '@module-federation/runtime';
-        const isEmbedded = mod.resource.includes('/dist/embedded');
-        return isRuntimeModule && isEmbedded;
-      }
-      return false;
-    };
-
-    for (const mod of chunkGraph.getChunkModulesIterable(chunk)) {
-      if (
-        mod instanceof NormalModule &&
-        (isTargetModule(mod) || mod.resource === runtimePath)
-      ) {
-        console.log(mod.resource, chunk.name);
-        return mod;
-      }
-
-      if (mod instanceof ConcatenatedModule) {
-        for (const m of mod.modules) {
-          if (
-            m instanceof NormalModule &&
-            (isTargetModule(m) || m.resource === runtimePath)
-          ) {
-            return mod;
-          }
-        }
-      }
-    }
-    return null;
   }
 }
 

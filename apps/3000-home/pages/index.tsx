@@ -10,8 +10,10 @@ const WebpackSvgRemote = lazy(() =>
   }),
 );
 const WebpackPngRemote = lazy(() => import('shop/WebpackPng'));
+console.log('TEST');
 
 const Home = () => {
+  console.log('TEST');
   return (
     <>
       <Head>

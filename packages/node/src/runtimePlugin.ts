@@ -208,7 +208,12 @@ export default function (): FederationRuntimePlugin {
           callback: (err: Error | null, chunk: any) => void,
         ): void => {
           if (strategy === 'filesystem') {
-            return loadFromFs(resolveFile(rootOutputDir, chunkId), callback);
+            const res = resolveFile(rootOutputDir, chunkId);
+
+            if (!chunkId.includes('vendor')) {
+              debugger;
+            }
+            return loadFromFs(res, callback);
           }
 
           const url = resolveUrl(rootOutputDir, chunkId);
@@ -258,12 +263,6 @@ export default function (): FederationRuntimePlugin {
 
         if (__webpack_require__.f) {
           const handle = (chunkId: string, promises: any[]): void => {
-            const req = __webpack_require__;
-            //@ts-ignore
-            const runtimeName = req.j;
-            if (!chunkId.includes('vendor')) {
-              // debugger
-            }
             let installedChunkData = installedChunks[chunkId];
             if (installedChunkData !== 0) {
               if (installedChunkData) {
