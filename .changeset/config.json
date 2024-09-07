@@ -19,7 +19,8 @@
       "@module-federation/bridge-vue3",
       "@module-federation/bridge-shared",
       "@module-federation/bridge-react-webpack-plugin",
-      "@module-federation/modern-js"
+      "@module-federation/modern-js",
+      "@module-federation/retry-plugin"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],

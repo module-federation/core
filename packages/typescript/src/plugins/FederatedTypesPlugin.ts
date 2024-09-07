@@ -109,7 +109,6 @@ export class FederatedTypesPlugin {
       compiler.hooks.watchRun.tap(PLUGIN_NAME, () => {
         isServe = true;
       });
-
       compiler.hooks.beforeCompile.tapAsync(
         PLUGIN_NAME,
         async (params: unknown, callback: InnerCallback<Error, void>) => {

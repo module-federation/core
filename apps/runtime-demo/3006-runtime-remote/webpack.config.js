@@ -93,7 +93,7 @@ module.exports = composePlugins(
       scriptType: 'text/javascript',
     };
     config.optimization = {
-      ...config.optimization,
+      // ...config.optimization,
       runtimeChunk: false,
       minimize: false,
     };

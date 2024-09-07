@@ -34,6 +34,7 @@
     }
   },
   "devDependencies": {
+    "@module-federation/utilities": "workspace:*",
     "@storybook/core-common": "7.6.20",
     "@storybook/node-logger": "7.6.20",
     "webpack": "5.93.0",
@@ -41,7 +42,7 @@
     "@module-federation/utilities": "workspace:*"
   },
   "peerDependencies": {
-    "@module-federation/utilities": "^3.1.6",
+    "@module-federation/utilities": "^3.1.7",
     "@nx/react": "~16.0.0 || ~17.0.0 || ~17.2.0",
     "@nx/webpack": "~16.0.0 || ~17.0.0 || ~17.2.0",
     "@storybook/core-common": "^6.5.16 || ^7.0.0",

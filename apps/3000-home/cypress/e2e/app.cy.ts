@@ -22,10 +22,12 @@ describe('3000-home/', () => {
     it('should display welcome message', () => {
       getH1().contains('This is SPA combined');
     });
-    it('Api endpoint works', () => {
-      const urls = ['/api/test'];
-      urls.forEach((url) => {
-        cy.request(url); // This makes a GET request, not a full page visit
+  });
+
+  describe('API endpoint should return json', () => {
+    it('Query Endpoint', () => {
+      cy.request('/api/test').then((response) => {
+        expect(response.headers['content-type']).to.include('application/json');
       });
     });
   });
