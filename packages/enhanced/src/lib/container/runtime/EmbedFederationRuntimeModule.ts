@@ -1,6 +1,9 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { getFederationGlobalScope } from './utils';
 import type { Chunk, Module } from 'webpack';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
+import { getAllReferencedModules } from '../HoistContainerReferencesPlugin';
+import ContainerEntryModule from '../ContainerEntryModule';
 
 const { RuntimeModule, NormalModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
@@ -13,10 +16,18 @@ const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class EmbedFederationRuntimeModule extends RuntimeModule {
   private bundlerRuntimePath: string;
+  private embeddedBundlerRuntimePath: string;
+  private experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
 
-  constructor(bundlerRuntimePath: string) {
+  constructor(
+    bundlerRuntimePath: string,
+    embeddedBundlerRuntimePath: string,
+    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
+  ) {
     super('EmbedFederationRuntimeModule', RuntimeModule.STAGE_ATTACH);
     this.bundlerRuntimePath = bundlerRuntimePath;
+    this.embeddedBundlerRuntimePath = embeddedBundlerRuntimePath;
+    this.experiments = experiments;
   }
 
   override identifier() {
@@ -24,13 +35,32 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
   }
 
   override generate(): string | null {
-    const { compilation, chunk, chunkGraph, bundlerRuntimePath } = this;
+    const {
+      compilation,
+      chunk,
+      chunkGraph,
+      bundlerRuntimePath,
+      embeddedBundlerRuntimePath,
+    } = this;
     if (!chunk || !chunkGraph || !compilation) {
       return null;
     }
+    const found =
+      this.findModule(chunk, bundlerRuntimePath) ||
+      this.findModule(chunk, embeddedBundlerRuntimePath);
+    const chunkName = chunk.name;
+    if (!found) {
+      return null;
+    }
 
-    const found = this.findModule(chunk, bundlerRuntimePath);
-    if (!found) return null;
+    const moduleReferences = new Set();
+    const isRemoteChunk = Array.from(
+      chunkGraph.getChunkEntryModulesIterable(chunk),
+    ).some((mod) => mod instanceof ContainerEntryModule);
+    const allRefs = getAllReferencedModules(compilation, found, 'initial');
+    for (const refMod of allRefs) {
+      moduleReferences.add(chunkGraph.getModuleId(refMod));
+    }
 
     const initRuntimeModuleGetter = compilation.runtimeTemplate.moduleRaw({
       module: found,
@@ -56,9 +86,66 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       runtimeRequirements: new Set(),
     });
 
+    let runtimeFactories = '';
+    let federationRuntimeGetter = '';
+    if (this.experiments?.federationRuntime === 'use-host') {
+      if (isRemoteChunk) {
+        runtimeFactories = Template.asString([
+          'var factoryKeys = Object.keys(globalThis.federationRuntimeModuleFactories || {});',
+          'for(var i = 0; i < factoryKeys.length; i++) {',
+          Template.indent([
+            `${RuntimeGlobals.moduleFactories}['share' + factoryKeys[i]] = globalThis.federationRuntimeModuleFactories[factoryKeys[i]];`,
+          ]),
+          '}',
+        ]);
+        federationRuntimeGetter = Template.asString([
+          'if(factoryKeys[0]) {',
+          `var federation = __webpack_require__('share' + factoryKeys[0]).default;`,
+          'console.log("federation", federation);',
+          '} else { throw new Error("shared federation runtime factories missing")}',
+        ]);
+      } else {
+        runtimeFactories = Template.asString([
+          'var runtimeFactoriesArray = ' +
+            JSON.stringify(Array.from(moduleReferences)) +
+            ';',
+          'var runtimeFactories = runtimeFactoriesArray.reduce((acc, id) => {',
+          Template.indent([
+            'acc[id] = ' + RuntimeGlobals.moduleFactories + '[id];',
+            'return acc;',
+          ]),
+          '}, {});',
+          'globalThis.federationRuntimeModuleFactories = runtimeFactories;',
+        ]);
+        federationRuntimeGetter = Template.asString([
+          `var federation = ${initRuntimeModuleGetter};`,
+          `federation = ${exportExpr}`,
+        ]);
+      }
+    } else {
+      runtimeFactories = Template.asString([
+        'var runtimeFactoriesArray = ' +
+          JSON.stringify(Array.from(moduleReferences)) +
+          ';',
+        'var runtimeFactories = runtimeFactoriesArray.reduce((acc, id) => {',
+        Template.indent(
+          'acc[id] = ' + RuntimeGlobals.moduleFactories + '[id];',
+        ),
+        Template.indent('return acc;'),
+        '}, {});',
+        'globalThis.federationRuntimeModuleFactories = runtimeFactories;',
+      ]);
+      federationRuntimeGetter = Template.asString([
+        `var federation = ${initRuntimeModuleGetter};`,
+        `federation = ${exportExpr}`,
+      ]);
+    }
+
     return Template.asString([
-      `var federation = ${initRuntimeModuleGetter};`,
-      `federation = ${exportExpr}`,
+      runtimeFactories,
+      '\n',
+      federationRuntimeGetter,
+      '\n',
       `var prevFederation = ${federationGlobal};`,
       `${federationGlobal} = {};`,
       `for (var key in federation) {`,
@@ -71,19 +158,38 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
     ]);
   }
 
-  private findModule(chunk: Chunk, bundlerRuntimePath: string): Module | null {
+  private findModule(chunk: Chunk, runtimePath: string): Module | null {
     const { chunkGraph, compilation } = this;
     if (!chunk || !chunkGraph || !compilation) {
       return null;
     }
+
+    const isTargetModule = (mod: Module) => {
+      if (mod instanceof NormalModule) {
+        const isRuntimeModule =
+          mod.resourceResolveData?.['descriptionFileData']?.name ===
+          '@module-federation/runtime';
+        const isEmbedded = mod.resource.includes('/dist/embedded');
+        return isRuntimeModule && isEmbedded;
+      }
+      return false;
+    };
+
     for (const mod of chunkGraph.getChunkModulesIterable(chunk)) {
-      if (mod instanceof NormalModule && mod.resource === bundlerRuntimePath) {
+      if (
+        mod instanceof NormalModule &&
+        (isTargetModule(mod) || mod.resource === runtimePath)
+      ) {
+        console.log(mod.resource, chunk.name);
         return mod;
       }
 
       if (mod instanceof ConcatenatedModule) {
         for (const m of mod.modules) {
-          if (m instanceof NormalModule && m.resource === bundlerRuntimePath) {
+          if (
+            m instanceof NormalModule &&
+            (isTargetModule(m) || m.resource === runtimePath)
+          ) {
             return mod;
           }
         }

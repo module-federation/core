@@ -31,7 +31,6 @@ export default class ContainerEntryModuleFactory extends ModuleFactory {
     const containerDependencies =
       dependencies as unknown as ContainerEntryDependency[];
     const dep = containerDependencies[0];
-
     callback(null, {
       module: new ContainerEntryModule(
         dep.name,

@@ -10,6 +10,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import type { RuntimeSpec } from 'webpack/lib/util/runtime';
 import type ExportsInfo from 'webpack/lib/ExportsInfo';
 import ContainerEntryModule from './ContainerEntryModule';
+import ContainerEntryDependency from './ContainerEntryDependency';
 
 const { NormalModule, AsyncDependenciesBlock } = require(
   normalizeWebpackPath('webpack'),
@@ -77,7 +78,10 @@ export class HoistContainerReferences implements WebpackPluginInstance {
           (modules: Iterable<Module>) => {
             if (this.entryFilePath) {
               let runtime: RuntimeSpec | undefined;
-              for (const [name, { options }] of compilation.entries) {
+              for (const [
+                name,
+                { options, dependencies },
+              ] of compilation.entries) {
                 runtime = compiler.webpack.util.runtime.mergeRuntimeOwned(
                   runtime,
                   compiler.webpack.util.runtime.getEntryRuntime(
@@ -92,7 +96,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
                   module instanceof NormalModule &&
                   module.resource === this.bundlerRuntimeDep
                 ) {
-                  const allRefs = this.getAllReferencedModules(
+                  const allRefs = getAllReferencedModules(
                     compilation,
                     module,
                     'initial',
@@ -117,40 +121,6 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         );
       },
     );
-  }
-
-  // Helper method to collect all referenced modules recursively
-  private getAllReferencedModules(
-    compilation: Compilation,
-    module: Module,
-    type?: 'all' | 'initial',
-  ): Set<Module> {
-    const collectedModules = new Set<Module>([module]);
-    const stack = [module];
-
-    while (stack.length > 0) {
-      const currentModule = stack.pop();
-      if (!currentModule) continue;
-      const mgm = compilation.moduleGraph._getModuleGraphModule(currentModule);
-      if (mgm && mgm.outgoingConnections) {
-        for (const connection of mgm.outgoingConnections) {
-          if (type === 'initial') {
-            const parentBlock = compilation.moduleGraph.getParentBlock(
-              connection.dependency,
-            );
-            if (parentBlock instanceof AsyncDependenciesBlock) {
-              continue;
-            }
-          }
-          if (connection.module && !collectedModules.has(connection.module)) {
-            collectedModules.add(connection.module);
-            stack.push(connection.module);
-          }
-        }
-      }
-    }
-
-    return collectedModules;
   }
 
   // Helper method to find a specific module in a chunk
@@ -225,8 +195,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       );
       return;
     }
-
-    const allReferencedModules = this.getAllReferencedModules(
+    const allReferencedModules = getAllReferencedModules(
       compilation,
       runtimeModule,
       'initial',
@@ -242,6 +211,15 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     }
 
     for (const chunk of runtimeChunks) {
+      const isRemoteEntry = Array.from(
+        chunkGraph.getChunkEntryModulesIterable(chunk),
+      ).some((mod) => {
+        return mod instanceof ContainerEntryModule;
+      });
+      if (isRemoteEntry) {
+        continue;
+      }
+
       for (const module of allReferencedModules) {
         if (!chunkGraph.isModuleInChunk(module, chunk)) {
           chunkGraph.connectChunkAndModule(chunk, module);
@@ -289,6 +267,40 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     }
     return runtimeChunks;
   }
+}
+
+// Helper method to collect all referenced modules recursively
+export function getAllReferencedModules(
+  compilation: Compilation,
+  module: Module,
+  type?: 'all' | 'initial',
+): Set<Module> {
+  const collectedModules = new Set<Module>([module]);
+  const stack = [module];
+
+  while (stack.length > 0) {
+    const currentModule = stack.pop();
+    if (!currentModule) continue;
+    const mgm = compilation.moduleGraph._getModuleGraphModule(currentModule);
+    if (mgm && mgm.outgoingConnections) {
+      for (const connection of mgm.outgoingConnections) {
+        if (type === 'initial') {
+          const parentBlock = compilation.moduleGraph.getParentBlock(
+            connection.dependency,
+          );
+          if (parentBlock instanceof AsyncDependenciesBlock) {
+            continue;
+          }
+        }
+        if (connection.module && !collectedModules.has(connection.module)) {
+          collectedModules.add(connection.module);
+          stack.push(connection.module);
+        }
+      }
+    }
+  }
+
+  return collectedModules;
 }
 
 export default HoistContainerReferences;

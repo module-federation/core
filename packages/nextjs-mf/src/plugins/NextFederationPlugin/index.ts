@@ -168,6 +168,7 @@ export class NextFederationPlugin {
     compiler: Compiler,
     isServer: boolean,
   ): moduleFederationPlugin.ModuleFederationPluginOptions {
+    compiler.options.devtool = false;
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
       : retrieveDefaultShared(isServer);
@@ -214,7 +215,8 @@ export class NextFederationPlugin {
       dts: this._options.dts ?? false,
       shareStrategy: this._options.shareStrategy ?? 'loaded-first',
       experiments: {
-        federationRuntime: 'hoisted',
+        federationRuntime: 'use-host',
+        ...(this._options.experiments || {}),
       },
     };
   }

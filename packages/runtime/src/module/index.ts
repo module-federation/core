@@ -35,6 +35,7 @@ class Module {
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
     });
+
     assert(
       remoteEntryExports,
       `remoteEntryExports is undefined \n ${safeToString(this.remoteInfo)}`,

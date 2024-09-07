@@ -219,7 +219,7 @@ export class RemoteHandler {
       return moduleOrFactory;
     } catch (error) {
       const { from = 'runtime' } = options || { from: 'runtime' };
-
+      throw error;
       const failOver = await this.hooks.lifecycle.errorLoadRemote.emit({
         id,
         error,

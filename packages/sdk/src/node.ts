@@ -91,27 +91,36 @@ export function createScriptNode(
         importNodeModule<typeof import('vm')>('vm'),
       ]);
 
-      const scriptContext = { exports: {}, module: { exports: {} } };
+      // const scriptContext = { exports: {}, module: { exports: {} } };
       const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
-      const filename = path.basename(urlObj.pathname);
+      const filename = Date.now() + path.basename(urlObj.pathname);
+      const dir = __dirname;
+      //@ts-ignore
+      const fs = __non_webpack_require__('fs');
+      fs.writeFileSync(dir + '/' + filename, data);
+      //@ts-ignore
+      const scriptContext = {
+        exports: false,
+        module: { exports: __non_webpack_require__('./' + filename) },
+      };
 
-      const script = new vm.Script(
-        `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
-        {
-          filename,
-          importModuleDynamically:
-            vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
-        },
-      );
-
-      script.runInThisContext()(
-        scriptContext.exports,
-        scriptContext.module,
-        eval('require'),
-        urlDirname,
-        filename,
-      );
-
+      // const script = new vm.Script(
+      //   `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
+      //   {
+      //     filename,
+      //     importModuleDynamically:
+      //       vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
+      //   },
+      // );
+      //
+      // script.runInThisContext()(
+      //   scriptContext.exports,
+      //   scriptContext.module,
+      //   eval('require'),
+      //   urlDirname,
+      //   filename,
+      // );
+      //
       const exportedInterface: Record<string, any> =
         scriptContext.module.exports || scriptContext.exports;
 
@@ -121,9 +130,9 @@ export function createScriptNode(
         cb(undefined, container as keyof typeof scriptContext.module.exports);
         return;
       }
-
       cb(
         undefined,
+        //@ts-ignore
         exportedInterface as keyof typeof scriptContext.module.exports,
       );
     } catch (e) {

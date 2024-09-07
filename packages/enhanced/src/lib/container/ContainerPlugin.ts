@@ -194,7 +194,7 @@ class ContainerPlugin {
           //@ts-ignore
           exposes,
           shareScope,
-          federationRuntimePluginInstance.entryFilePath,
+          federationRuntimePluginInstance.embeddedEntryFilePath,
         );
         const hasSingleRuntimeChunk =
           compilation.options?.optimization?.runtimeChunk;
@@ -210,32 +210,39 @@ class ContainerPlugin {
           },
           (error: WebpackError | null | undefined) => {
             if (error) return callback(error);
-            if (hasSingleRuntimeChunk) {
-              // Add to single runtime chunk as well.
-              // Allows for singleton runtime graph with all needed runtime modules for federation
-              addEntryToSingleRuntimeChunk();
-            } else {
-              callback();
-            }
+            callback();
           },
         );
+      },
+    );
 
-        // Function to add entry for undefined runtime
-        const addEntryToSingleRuntimeChunk = () => {
-          compilation.addEntry(
-            compilation.options.context || '',
-            dep,
-            {
-              name: name ? name + '_partial' : undefined, // give unique name name
-              runtime: undefined,
-              library,
-            },
-            (error: WebpackError | null | undefined) => {
-              if (error) return callback(error);
-              callback();
-            },
-          );
-        };
+    compiler.hooks.make.tapAsync(
+      PLUGIN_NAME,
+      (compilation: Compilation, callback) => {
+        if (!compilation.options?.optimization?.runtimeChunk) {
+          return callback();
+        }
+        const dep = new ContainerEntryDependency(
+          name + '_partial',
+          //@ts-ignore
+          exposes,
+          shareScope,
+          federationRuntimePluginInstance.entryFilePath,
+        );
+        dep.loc = { name };
+        compilation.addEntry(
+          compilation.options.context || '',
+          dep,
+          {
+            name: name ? name + '_partial' : undefined, // give unique name name
+            runtime: undefined,
+            library,
+          },
+          (error: WebpackError | null | undefined) => {
+            if (error) return callback(error);
+            callback();
+          },
+        );
       },
     );
 

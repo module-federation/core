@@ -258,6 +258,13 @@ export default function (): FederationRuntimePlugin {
 
         if (__webpack_require__.f) {
           const handle = (chunkId: string, promises: any[]): void => {
+            const req = __webpack_require__;
+            //@ts-ignore
+            const runtimeName = req.j;
+            console.log(typeof req);
+            if (!chunkId.includes('vendor')) {
+              // debugger
+            }
             let installedChunkData = installedChunks[chunkId];
             if (installedChunkData !== 0) {
               if (installedChunkData) {

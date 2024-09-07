@@ -44,6 +44,9 @@
       "helpers": [
         "./dist/helpers.cjs.d.ts"
       ],
+      "embedded": [
+        "./dist/embedded.cjs.d.ts"
+      ],
       "types": [
         "./dist/types.cjs.d.ts"
       ]
