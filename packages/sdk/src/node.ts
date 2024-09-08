@@ -5,11 +5,14 @@ async function importNodeModule<T>(name: string): Promise<T> {
     throw new Error('import specifier is required');
   }
   try {
-    let testModule = "vm"
+    let testModule = 'vm';
     // Test whether dynamicImport is available. It is available in vite/rollup esm environment and will be compiled in webpack non-esm environment.
-    await import(testModule)
-    return import(name)
+    await import(testModule);
+    return import(name);
   } catch (e) {
+    console.log(
+      `[@module-federation/sdk][log]: Use new Function to dynamically import "${name}"`,
+    );
   }
   const importModule = new Function('name', `return import(name)`);
   return importModule(name)
@@ -140,16 +143,16 @@ export function createScriptNode(
 
   getFetch()
     .then(async (f) => {
-      if (attrs?.['type'] === "esm" || attrs?.['type'] === "module") {
+      if (attrs?.['type'] === 'esm' || attrs?.['type'] === 'module') {
         return loadModule(urlObj.href, {
           fetch: f,
           vm: await importNodeModule<typeof import('vm')>('vm'),
-        }).then(async module => {
+        }).then(async (module) => {
           await module.evaluate();
           cb(undefined, module.namespace);
-        })
+        });
       }
-      handleScriptFetch(f, urlObj)
+      handleScriptFetch(f, urlObj);
     })
     .catch((err) => {
       cb(err);
@@ -184,23 +187,29 @@ export function loadScriptNode(
   });
 }
 
-async function loadModule(url: string, options: {
-  vm: any,
-  fetch: any
-}, parentContext?: any) {
-  const {fetch, vm} = options
-  const context = parentContext || vm.createContext({
-    ...global,
-    Event,
-    URL,
-    URLSearchParams,
-    TextDecoder,
-    TextEncoder,
-    console,
-    require,
-    __dirname,
-    __filename,
-  });
+async function loadModule(
+  url: string,
+  options: {
+    vm: any;
+    fetch: any;
+  },
+  parentContext?: any,
+) {
+  const { fetch, vm } = options;
+  const context =
+    parentContext ||
+    vm.createContext({
+      ...global,
+      Event,
+      URL,
+      URLSearchParams,
+      TextDecoder,
+      TextEncoder,
+      console,
+      require,
+      __dirname,
+      __filename,
+    });
   const response = await fetch(url);
   const code = await response.text();
 
@@ -219,6 +228,5 @@ async function loadModule(url: string, options: {
     return module;
   });
 
-  return module
+  return module;
 }
-
