@@ -150,6 +150,8 @@ export function createScriptNode(
         }).then(async (module) => {
           await module.evaluate();
           cb(undefined, module.namespace);
+        }).catch(e => {
+          cb(e instanceof Error ? e : new Error(`Script execution error: ${e}`));
         });
       }
       handleScriptFetch(f, urlObj);
