@@ -190,7 +190,7 @@ export function generateSnapshotFromManifest(
       ssrRemoteEntry.name,
     );
     remoteSnapshot.ssrRemoteEntry = fullSSRRemoteEntry;
-    remoteSnapshot.ssrRemoteEntryType = 'commonjs-module';
+    remoteSnapshot.ssrRemoteEntryType = ssrRemoteEntry.type || 'commonjs-module';
   }
 
   return remoteSnapshot;

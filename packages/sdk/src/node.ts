@@ -1,8 +1,15 @@
 import { CreateScriptHookNode } from './types';
 
-function importNodeModule<T>(name: string): Promise<T> {
+async function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
     throw new Error('import specifier is required');
+  }
+  try {
+    let testModule = "vm"
+    // Test whether dynamicImport is available. It is available in vite/rollup esm environment and will be compiled in webpack non-esm environment.
+    await import(testModule)
+    return import(name)
+  } catch (e) {
   }
   const importModule = new Function('name', `return import(name)`);
   return importModule(name)
@@ -132,7 +139,18 @@ export function createScriptNode(
   };
 
   getFetch()
-    .then((f) => handleScriptFetch(f, urlObj))
+    .then(async (f) => {
+      if (attrs?.['type'] === "esm" || attrs?.['type'] === "module") {
+        return loadModule(urlObj.href, {
+          fetch: f,
+          vm: await importNodeModule<typeof import('vm')>('vm'),
+        }).then(async module => {
+          await module.evaluate();
+          cb(undefined, module.namespace);
+        })
+      }
+      handleScriptFetch(f, urlObj)
+    })
     .catch((err) => {
       cb(err);
     });
@@ -165,3 +183,42 @@ export function loadScriptNode(
     );
   });
 }
+
+async function loadModule(url: string, options: {
+  vm: any,
+  fetch: any
+}, parentContext?: any) {
+  const {fetch, vm} = options
+  const context = parentContext || vm.createContext({
+    ...global,
+    Event,
+    URL,
+    URLSearchParams,
+    TextDecoder,
+    TextEncoder,
+    console,
+    require,
+    __dirname,
+    __filename,
+  });
+  const response = await fetch(url);
+  const code = await response.text();
+
+  const module: any = new vm.SourceTextModule(code, {
+    context,
+    // @ts-ignore
+    importModuleDynamically: async (specifier, script) => {
+      const resolvedUrl = new URL(specifier, url).href;
+      return loadModule(resolvedUrl, options, context);
+    },
+  });
+
+  await module.link(async (specifier: string) => {
+    const resolvedUrl = new URL(specifier, url).href;
+    const module = await loadModule(resolvedUrl, options, context);
+    return module;
+  });
+
+  return module
+}
+
