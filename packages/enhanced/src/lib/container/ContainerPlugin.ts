@@ -200,8 +200,7 @@ class ContainerPlugin {
         );
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         hooks.getContainerEntryModules.call(dep);
-        const hasSingleRuntimeChunk =
-          compilation.options?.optimization?.runtimeChunk;
+        const hasSingleRuntimeChunk = true;
         dep.loc = { name };
         compilation.addEntry(
           compilation.options.context || '',
@@ -220,12 +219,61 @@ class ContainerPlugin {
       },
     );
 
+    compiler.hooks.finishMake.tapAsync(
+      PLUGIN_NAME,
+      async (compilation, callback) => {
+        const createdRuntimes = new Set();
+        for (const entry of compilation.entries.values()) {
+          if (entry.options.runtime) {
+            if (createdRuntimes.has(entry.options.runtime)) {
+              continue;
+            }
+            if (compilation.entries.get(name + '_' + entry.options.runtime))
+              continue;
+
+            createdRuntimes.add(entry.options.runtime);
+
+            const dep = new ContainerEntryDependency(
+              name + '_' + entry.options.runtime,
+              //@ts-ignore
+              exposes,
+              shareScope,
+              federationRuntimePluginInstance.entryFilePath,
+            );
+            const hooks =
+              FederationModulesPlugin.getCompilationHooks(compilation);
+            hooks.getContainerEntryModules.call(dep);
+            dep.loc = { name };
+
+            await new Promise((resolve, reject) => {
+              compilation.addEntry(
+                compilation.options.context || '',
+                dep,
+                {
+                  ...entry.options,
+                  name: name + '_' + entry.options.runtime, // give unique name name
+                  runtime: entry.options.runtime,
+                  library,
+                },
+                (error: WebpackError | null | undefined) => {
+                  if (error) return reject(error);
+                  resolve(undefined);
+                },
+              );
+            });
+          }
+        }
+        callback();
+      },
+    );
+
     compiler.hooks.make.tapAsync(
       PLUGIN_NAME,
       (compilation: Compilation, callback) => {
         if (!compilation.options?.optimization?.runtimeChunk) {
           return callback();
         }
+
         const dep = new ContainerEntryDependency(
           name + '_partial',
           //@ts-ignore
@@ -236,6 +284,7 @@ class ContainerPlugin {
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         hooks.getContainerEntryModules.call(dep);
         dep.loc = { name };
+
         compilation.addEntry(
           compilation.options.context || '',
           dep,

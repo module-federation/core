@@ -20,6 +20,7 @@ import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
 import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
+import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -65,6 +66,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       );
     }
     if (options.experiments?.federationRuntime) {
+      new FederationModulesPlugin().apply(compiler);
       new StartupChunkDependenciesPlugin({
         asyncChunkLoading: true,
       }).apply(compiler);

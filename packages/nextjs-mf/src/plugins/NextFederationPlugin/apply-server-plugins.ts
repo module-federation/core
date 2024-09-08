@@ -176,8 +176,8 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
   };
   compiler.options.target = 'async-node';
 
-  // Ensure a runtime chunk is created
-  compiler.options.optimization.runtimeChunk = {
-    name: 'webpack-runtime',
-  };
+  // // Ensure a runtime chunk is created
+  // compiler.options.optimization.runtimeChunk = {
+  //   name: 'webpack-runtime',
+  // };
 }

@@ -375,6 +375,7 @@ class FederationRuntimePlugin {
         '.cjs.js',
         '.esm.js',
       );
+
       new EmbedFederationRuntimePlugin(this.bundlerRuntimePath).apply(compiler);
 
       new HoistContainerReferences(

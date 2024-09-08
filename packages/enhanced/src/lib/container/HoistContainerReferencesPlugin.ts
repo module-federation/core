@@ -187,7 +187,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       // for(const chunk of moduleChunks) {
       //   const entryOptions = chunk.getEntryOptions();
       // }
-
+      // debugger;
       for (const runtimeSpec of containerRuntimes) {
         compilation.compiler.webpack.util.runtime.forEachRuntime(
           runtimeSpec,
