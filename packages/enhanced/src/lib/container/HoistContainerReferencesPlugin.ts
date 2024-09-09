@@ -10,6 +10,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import type { RuntimeSpec } from 'webpack/lib/util/runtime';
 import type ExportsInfo from 'webpack/lib/ExportsInfo';
 import ContainerEntryModule from './ContainerEntryModule';
+import { moduleFederationPlugin } from '@module-federation/sdk';
 
 const { NormalModule, AsyncDependenciesBlock } = require(
   normalizeWebpackPath('webpack'),
@@ -29,15 +30,18 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   private readonly entryFilePath?: string;
   private readonly bundlerRuntimeDep?: string;
   private readonly explanation: string;
+  private readonly experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
 
   constructor(
     name?: string,
     entryFilePath?: string,
     bundlerRuntimeDep?: string,
+    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
   ) {
     this.containerName = name || 'no known chunk name';
     this.entryFilePath = entryFilePath;
     this.bundlerRuntimeDep = bundlerRuntimeDep;
+    this.experiments = experiments;
     this.explanation =
       'Bundler runtime path module is required for proper functioning';
   }
