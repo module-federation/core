@@ -50,9 +50,6 @@ class ContainerPlugin {
   _options: containerPlugin.ContainerPluginOptions;
   name: string;
 
-  /**
-   * @param {containerPlugin.ContainerPluginOptions} options options
-   */
   constructor(options: containerPlugin.ContainerPluginOptions) {
     validate(options);
     this.name = PLUGIN_NAME;
@@ -79,6 +76,7 @@ class ContainerPlugin {
         }),
       ),
       runtimePlugins: options.runtimePlugins,
+      experiments: options.experiments,
     };
   }
 
@@ -202,6 +200,7 @@ class ContainerPlugin {
           exposes,
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
+          this._options.experiments,
         );
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         // hooks.getContainerEntryModules.call(dep);
@@ -245,6 +244,7 @@ class ContainerPlugin {
               exposes,
               shareScope,
               federationRuntimePluginInstance.entryFilePath,
+              this._options.experiments, // Add this line
             );
 
             dep.loc = { name };
@@ -286,6 +286,7 @@ class ContainerPlugin {
           exposes,
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
+          this._options.experiments, // Add this line
         );
         // hooks.getContainerEntryModules.call(dep);
         dep.loc = { name };
