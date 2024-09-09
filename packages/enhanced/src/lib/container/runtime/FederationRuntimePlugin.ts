@@ -225,7 +225,7 @@ class FederationRuntimePlugin {
     //if using runtime experiment, use the new include method else patch entry
     if (this.options?.experiments?.federationRuntime) {
       compiler.hooks.thisCompilation.tap(
-        'MyPlugin',
+        this.constructor.name,
         (compilation: Compilation, { normalModuleFactory }) => {
           const federationRuntimeDependency = this.getDependency();
           const logger = compilation.getLogger('FederationRuntimePlugin');
