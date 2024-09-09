@@ -222,6 +222,7 @@ class ContainerPlugin {
     compiler.hooks.finishMake.tapAsync(
       PLUGIN_NAME,
       async (compilation, callback) => {
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const createdRuntimes = new Set();
         for (const entry of compilation.entries.values()) {
           if (entry.options.runtime) {
@@ -240,10 +241,9 @@ class ContainerPlugin {
               shareScope,
               federationRuntimePluginInstance.entryFilePath,
             );
-            const hooks =
-              FederationModulesPlugin.getCompilationHooks(compilation);
-            hooks.getContainerEntryModules.call(dep);
+
             dep.loc = { name };
+            hooks.getContainerEntryModules.call(dep);
 
             await new Promise((resolve, reject) => {
               compilation.addEntry(
@@ -273,6 +273,7 @@ class ContainerPlugin {
         if (!compilation.options?.optimization?.runtimeChunk) {
           return callback();
         }
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
 
         const dep = new ContainerEntryDependency(
           name + '_partial',
@@ -281,7 +282,6 @@ class ContainerPlugin {
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
         );
-        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         hooks.getContainerEntryModules.call(dep);
         dep.loc = { name };
 

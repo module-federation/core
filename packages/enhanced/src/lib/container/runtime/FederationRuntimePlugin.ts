@@ -18,9 +18,14 @@ import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
 import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
-import ContainerEntryModule from '../ContainerEntryModule';
+import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import pBtoa from 'btoa';
+import ContainerEntryDependency from '../ContainerEntryDependency';
+
+const EntryDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
+) as typeof import('webpack/lib/dependencies/EntryDependency');
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -205,22 +210,33 @@ class FederationRuntimePlugin {
       this.ensureFile();
     }
     const entryFilePath = this.getFilePath();
+    const federationRuntime = new EntryDependency(entryFilePath);
+    compiler.hooks.finishMake.tap(this.constructor.name, (compilation) => {
+      for (const entry of compilation.entries.values()) {
+        const [initialEntry] = entry.dependencies;
+        if (initialEntry instanceof ContainerEntryDependency) {
+          continue;
+        }
+        if (initialEntry === federationRuntime) continue;
 
-    modifyEntry({
-      compiler,
-      prependEntry: (entry) => {
-        Object.keys(entry).forEach((entryName) => {
-          const entryItem = entry[entryName];
-          if (!entryItem.import) {
-            // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
-            entryItem.import = ['./src'];
-          }
-          if (!entryItem.import.includes(entryFilePath)) {
-            entryItem.import.unshift(entryFilePath);
-          }
-        });
-      },
+        entry.dependencies.unshift(federationRuntime);
+      }
     });
+    // modifyEntry({
+    //   compiler,
+    //   prependEntry: (entry) => {
+    //     Object.keys(entry).forEach((entryName) => {
+    //       const entryItem = entry[entryName];
+    //       if (!entryItem.import) {
+    //         // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
+    //         entryItem.import = ['./src'];
+    //       }
+    //       if (!entryItem.import.includes(entryFilePath)) {
+    //         entryItem.import.unshift(entryFilePath);
+    //       }
+    //     });
+    //   }
+    // });
   }
 
   injectRuntime(compiler: Compiler) {
@@ -238,11 +254,6 @@ class FederationRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation: Compilation, { normalModuleFactory }) => {
-        const isEnabledForChunk = (chunk: Chunk): boolean => {
-          const [entryModule] =
-            compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
-          return entryModule instanceof ContainerEntryModule;
-        };
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (runtimeRequirements.has(federationGlobal)) return;
           runtimeRequirements.add(federationGlobal);
