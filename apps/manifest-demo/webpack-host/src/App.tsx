@@ -1,4 +1,5 @@
 import React, { Suspense, lazy } from 'react';
+// @ts-ignore
 import ReactComponent from 'modern-js-provider/react-component';
 import TestRemoteHook from './test-remote-hook';
 import { loadRemote } from '@module-federation/runtime';
