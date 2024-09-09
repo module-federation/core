@@ -1,5 +1,16 @@
 # host
 
+## 1.0.21
+
+### Patch Changes
+
+- Updated dependencies [433fe07]
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+  - @module-federation/retry-plugin@0.6.1
+  - @module-federation/enhanced@0.6.1
+  - @module-federation/bridge-react@0.6.1
+
 ## 1.0.20
 
 ### Patch Changes
