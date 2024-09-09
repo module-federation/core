@@ -196,7 +196,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       // for(const chunk of moduleChunks) {
       //   const entryOptions = chunk.getEntryOptions();
       // }
-      // debugger;
+
       for (const runtimeSpec of containerRuntimes) {
         compilation.compiler.webpack.util.runtime.forEachRuntime(
           runtimeSpec,
@@ -220,76 +220,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       }
 
       this.cleanUpChunks(compilation, allReferencedModules);
-      // debugger
     }
-    //@ts-ignore
-    if (!process.env.none) {
-      return;
-    }
-
-    const partialChunk = this.containerName
-      ? compilation.namedChunks.get(this.containerName)
-      : undefined;
-    let runtimeModule;
-    if (!partialChunk) {
-      for (const chunk of chunks) {
-        if (
-          chunkGraph.getNumberOfEntryModules(chunk) > 0 &&
-          this.entryFilePath
-        ) {
-          runtimeModule = this.findModule(
-            compilation,
-            chunk,
-            this.entryFilePath,
-          );
-
-          if (runtimeModule) break;
-        }
-      }
-    } else {
-      const entryModules = partialChunk
-        ? chunkGraph.getChunkEntryModulesIterable(partialChunk)
-        : undefined;
-      runtimeModule = entryModules
-        ? Array.from(entryModules).find(
-            (module) => module instanceof ContainerEntryModule,
-          )
-        : undefined;
-    }
-
-    if (!runtimeModule) {
-      logger.error(
-        '[Federation HoistContainerReferences] unable to find runtime module:',
-        this.entryFilePath,
-      );
-      return;
-    }
-
-    const allReferencedModules = getAllReferencedModules(
-      compilation,
-      runtimeModule,
-      'initial',
-    );
-
-    // If single runtime chunk, copy the remoteEntry into the runtime chunk to allow for embed container
-    // this will not work well if there multiple runtime chunks from entrypoints (like next)
-    // need better solution to multi runtime chunk hoisting
-    if (partialChunk) {
-      for (const module of chunkGraph.getChunkModulesIterable(partialChunk)) {
-        allReferencedModules.add(module);
-      }
-    }
-
-    for (const chunk of runtimeChunks) {
-      for (const module of allReferencedModules) {
-        if (!chunkGraph.isModuleInChunk(module, chunk)) {
-          chunkGraph.connectChunkAndModule(chunk, module);
-        }
-      }
-    }
-
-    // Set used exports for the runtime module
-    this.cleanUpChunks(compilation, allReferencedModules);
   }
 
   // Method to clean up chunks by disconnecting unused modules
