@@ -19,6 +19,11 @@ import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
 import schema from '../../schemas/container/ContainerPlugin';
+import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
+
+const ModuleDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
+) as typeof import('webpack/lib/dependencies/ModuleDependency');
 
 type ExcludeUndefined<T> = T extends undefined ? never : T;
 type NonUndefined<T> = ExcludeUndefined<T>;
@@ -199,7 +204,7 @@ class ContainerPlugin {
           federationRuntimePluginInstance.entryFilePath,
         );
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        hooks.getContainerEntryModules.call(dep);
+        // hooks.getContainerEntryModules.call(dep);
         const hasSingleRuntimeChunk = true;
         dep.loc = { name };
         compilation.addEntry(
@@ -243,7 +248,7 @@ class ContainerPlugin {
             );
 
             dep.loc = { name };
-            hooks.getContainerEntryModules.call(dep);
+            // hooks.getContainerEntryModules.call(dep);
 
             await new Promise((resolve, reject) => {
               compilation.addEntry(
@@ -282,7 +287,7 @@ class ContainerPlugin {
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
         );
-        hooks.getContainerEntryModules.call(dep);
+        // hooks.getContainerEntryModules.call(dep);
         dep.loc = { name };
 
         compilation.addEntry(
@@ -301,6 +306,7 @@ class ContainerPlugin {
       },
     );
 
+    // add the container entry module
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
@@ -312,6 +318,41 @@ class ContainerPlugin {
         compilation.dependencyFactories.set(
           ContainerExposedDependency,
           normalModuleFactory,
+        );
+      },
+    );
+
+    // add include of federation runtime
+    compiler.hooks.thisCompilation.tap(
+      PLUGIN_NAME,
+      (compilation: Compilation, { normalModuleFactory }) => {
+        const federationRuntimeDependency =
+          federationRuntimePluginInstance.getDependency();
+
+        const logger = compilation.getLogger('ContainerPlugin');
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        compilation.dependencyFactories.set(
+          FederationRuntimeDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyTemplates.set(
+          FederationRuntimeDependency,
+          new ModuleDependency.Template(),
+        );
+
+        compilation.addInclude(
+          compiler.context,
+          federationRuntimeDependency,
+          { name: undefined },
+          (err, module) => {
+            if (err) {
+              return logger.error(
+                'Error adding federation runtime module:',
+                err,
+              );
+            }
+            hooks.getContainerEntryModules.call(federationRuntimeDependency);
+          },
         );
       },
     );

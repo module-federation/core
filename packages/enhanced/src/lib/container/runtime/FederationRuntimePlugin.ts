@@ -22,10 +22,11 @@ import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import pBtoa from 'btoa';
 import ContainerEntryDependency from '../ContainerEntryDependency';
+import FederationRuntimeDependency from './FederationRuntimeDependency';
 
-const EntryDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
-) as typeof import('webpack/lib/dependencies/EntryDependency');
+const ModuleDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
+) as typeof import('webpack/lib/dependencies/ModuleDependency');
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -54,24 +55,26 @@ const EmbeddedRuntimePath = require.resolve(
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
+const onceForCompler = new WeakSet();
+
 class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
   bundlerRuntimePath: string;
+  federationRuntimeDependency?: FederationRuntimeDependency; // Add this line
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
     this.bundlerRuntimePath = BundlerRuntimePath;
+    this.federationRuntimeDependency = undefined; // Initialize as undefined
   }
 
   static getTemplate(
     runtimePlugins: string[],
     bundlerRuntimePath?: string,
-    // keep so that the hash changes if experiemts change
     experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
   ) {
-    // internal runtime plugin
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
       bundlerRuntimePath || BundlerRuntimePath,
     );
@@ -205,38 +208,49 @@ class FederationRuntimePlugin {
     }
   }
 
+  getDependency() {
+    if (this.federationRuntimeDependency)
+      return this.federationRuntimeDependency;
+    this.federationRuntimeDependency = new FederationRuntimeDependency(
+      this.getFilePath(),
+    );
+    return this.federationRuntimeDependency;
+  }
+
   prependEntry(compiler: Compiler) {
     if (!this.options?.virtualRuntimeEntry) {
       this.ensureFile();
     }
-    const entryFilePath = this.getFilePath();
-    const federationRuntime = new EntryDependency(entryFilePath);
-    compiler.hooks.finishMake.tap(this.constructor.name, (compilation) => {
-      for (const entry of compilation.entries.values()) {
-        const [initialEntry] = entry.dependencies;
-        if (initialEntry instanceof ContainerEntryDependency) {
-          continue;
-        }
-        if (initialEntry === federationRuntime) continue;
 
-        entry.dependencies.unshift(federationRuntime);
-      }
-    });
-    // modifyEntry({
-    //   compiler,
-    //   prependEntry: (entry) => {
-    //     Object.keys(entry).forEach((entryName) => {
-    //       const entryItem = entry[entryName];
-    //       if (!entryItem.import) {
-    //         // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
-    //         entryItem.import = ['./src'];
-    //       }
-    //       if (!entryItem.import.includes(entryFilePath)) {
-    //         entryItem.import.unshift(entryFilePath);
-    //       }
-    //     });
-    //   }
-    // });
+    compiler.hooks.thisCompilation.tap(
+      'MyPlugin',
+      (compilation: Compilation, { normalModuleFactory }) => {
+        const federationRuntimeDependency = this.getDependency();
+        const logger = compilation.getLogger('FederationRuntimePlugin');
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        compilation.dependencyFactories.set(
+          FederationRuntimeDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyTemplates.set(
+          FederationRuntimeDependency,
+          new ModuleDependency.Template(),
+        );
+
+        compilation.addInclude(
+          compiler.context,
+          federationRuntimeDependency,
+          { name: undefined },
+          (err, module) => {
+            if (err) {
+              logger.error('Error adding federation runtime module:', err);
+              return;
+            }
+            hooks.getContainerEntryModules.call(federationRuntimeDependency);
+          },
+        );
+      },
+    );
   }
 
   injectRuntime(compiler: Compiler) {
@@ -327,8 +341,6 @@ class FederationRuntimePlugin {
       implementation ||
       RuntimeToolsPath;
 
-    // Set up aliases for the federation runtime and tools
-    // This ensures that the correct versions are used throughout the project
     compiler.options.resolve.alias = alias;
   }
 
@@ -368,7 +380,6 @@ class FederationRuntimePlugin {
       };
     }
     if (this.options && !this.options?.name) {
-      //! the instance may get the same one if the name is the same https://github.com/module-federation/core/blob/main/packages/runtime/src/index.ts#L18
       this.options.name =
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
@@ -391,7 +402,6 @@ class FederationRuntimePlugin {
 
       new HoistContainerReferences(
         this.options.name ? this.options.name + '_partial' : undefined,
-        // hoist all modules of federation entry
         this.getFilePath(),
         this.bundlerRuntimePath,
         this.options.experiments,
@@ -410,9 +420,13 @@ class FederationRuntimePlugin {
         },
       ).apply(compiler);
     }
-    this.prependEntry(compiler);
-    this.injectRuntime(compiler);
-    this.setRuntimeAlias(compiler);
+    // dont run multiple times on every apply()
+    if (!onceForCompler.has(compiler)) {
+      this.prependEntry(compiler);
+      this.injectRuntime(compiler);
+      this.setRuntimeAlias(compiler);
+      onceForCompler.add(compiler);
+    }
   }
 }
 

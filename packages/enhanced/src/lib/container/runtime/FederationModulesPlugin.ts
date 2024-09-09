@@ -6,6 +6,7 @@ const Compilation = require(
 ) as typeof import('webpack/lib/Compilation');
 import { SyncHook } from 'tapable';
 import ContainerEntryDependency from '../ContainerEntryDependency';
+import FederationRuntimeDependency from './FederationRuntimeDependency';
 
 /** @type {WeakMap<Compilation, CompilationHooks>} */
 const compilationHooksMap = new WeakMap<CompilationType, CompilationHooks>();
@@ -15,7 +16,10 @@ const PLUGIN_NAME = 'FederationModulesPlugin';
 /** @typedef {{ header: string[], beforeStartup: string[], startup: string[], afterStartup: string[], allowInlineStartup: boolean }} Bootstrap */
 
 type CompilationHooks = {
-  getContainerEntryModules: SyncHook<[ContainerEntryDependency], void>;
+  getContainerEntryModules: SyncHook<
+    [ContainerEntryDependency | FederationRuntimeDependency],
+    void
+  >;
   getEntrypointRuntime: SyncHook<[string], void>;
 };
 

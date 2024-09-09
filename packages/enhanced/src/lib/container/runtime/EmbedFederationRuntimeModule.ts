@@ -2,6 +2,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import { getFederationGlobalScope } from './utils';
 import type { Chunk, Module, NormalModule as NormalModuleType } from 'webpack';
 import ContainerEntryDependency from '../ContainerEntryDependency';
+import type FederationRuntimeDependency from './FederationRuntimeDependency';
 
 const { RuntimeModule, NormalModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
@@ -14,13 +15,17 @@ const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class EmbedFederationRuntimeModule extends RuntimeModule {
   private bundlerRuntimePath: string;
-  private containerEntrySet: Set<ContainerEntryDependency>;
+  private containerEntrySet: Set<
+    ContainerEntryDependency | FederationRuntimeDependency
+  >;
 
   constructor(
     bundlerRuntimePath: string,
-    containerEntrySet: Set<ContainerEntryDependency>,
+    containerEntrySet: Set<
+      ContainerEntryDependency | FederationRuntimeDependency
+    >,
   ) {
-    super('EmbedFederationRuntimeModule', RuntimeModule.STAGE_ATTACH);
+    super('embed federation', RuntimeModule.STAGE_ATTACH);
     this.bundlerRuntimePath = bundlerRuntimePath;
     this.containerEntrySet = containerEntrySet;
   }
@@ -34,26 +39,23 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
     if (!chunk || !chunkGraph || !compilation) {
       return null;
     }
+
     let found;
+
     if (chunk.name) {
       for (const dep of this.containerEntrySet) {
         const mod = compilation.moduleGraph.getModule(dep);
         if (mod && compilation.chunkGraph.isModuleInChunk(mod, chunk)) {
-          found = mod;
+          found = mod as NormalModuleType;
           break;
         }
       }
     }
 
-    // debugger;
     // const found = this.findModule(chunk, bundlerRuntimePath);
     if (!found) {
       return null;
     }
-
-    found = compilation.moduleGraph.getModule(
-      found.dependencies[1],
-    ) as NormalModuleType;
 
     const initRuntimeModuleGetter = compilation.runtimeTemplate.moduleRaw({
       module: found,
@@ -62,7 +64,7 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       weak: false,
       runtimeRequirements: new Set(),
     });
-
+    debugger;
     const exportExpr = compilation.runtimeTemplate.exportFromImport({
       moduleGraph: compilation.moduleGraph,
       module: found,

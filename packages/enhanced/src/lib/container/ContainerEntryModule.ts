@@ -178,7 +178,7 @@ class ContainerEntryModule extends Module {
       ) as unknown as Dependency,
     );
 
-    this.addDependency(new EntryDependency(this._injectRuntimeEntry));
+    // this.addDependency(new EntryDependency(this._injectRuntimeEntry));
 
     callback();
   }
@@ -243,15 +243,15 @@ class ContainerEntryModule extends Module {
       );
     }
 
-    const initRuntimeDep = this.dependencies[1];
-    const initRuntimeModuleGetter = runtimeTemplate.moduleRaw({
-      module: moduleGraph.getModule(initRuntimeDep),
-      chunkGraph,
-      // @ts-expect-error flaky type definition for Dependency
-      request: initRuntimeDep.userRequest,
-      weak: false,
-      runtimeRequirements,
-    });
+    // const initRuntimeDep = this.dependencies[1];
+    // const initRuntimeModuleGetter = runtimeTemplate.moduleRaw({
+    //   module: moduleGraph.getModule(initRuntimeDep),
+    //   chunkGraph,
+    //   // @ts-expect-error flaky type definition for Dependency
+    //   request: initRuntimeDep.userRequest,
+    //   weak: false,
+    //   runtimeRequirements,
+    // });
     const federationGlobal = getFederationGlobalScope(
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
@@ -293,7 +293,7 @@ class ContainerEntryModule extends Module {
           '})',
         ],
       )};`,
-      `${initRuntimeModuleGetter}`,
+      // `${initRuntimeModuleGetter}`,
       '',
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,

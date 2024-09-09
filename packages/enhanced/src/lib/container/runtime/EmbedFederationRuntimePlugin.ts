@@ -9,6 +9,7 @@ const { RuntimeGlobals } = require(
 import type { Compiler, Compilation, Chunk, Module, ChunkGraph } from 'webpack';
 import { getFederationGlobalScope } from './utils';
 import ContainerEntryDependency from '../ContainerEntryDependency';
+import FederationRuntimeDependency from './FederationRuntimeDependency';
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class EmbedFederationRuntimePlugin {
@@ -23,11 +24,19 @@ class EmbedFederationRuntimePlugin {
       'EmbedFederationRuntimePlugin',
       (compilation: Compilation) => {
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        const containerEntrySet: Set<ContainerEntryDependency> = new Set();
+        const containerEntrySet: Set<
+          ContainerEntryDependency | FederationRuntimeDependency
+        > = new Set();
         hooks.getContainerEntryModules.tap(
           'EmbedFederationRuntimePlugin',
-          (dependency: ContainerEntryDependency) => {
-            containerEntrySet.add(dependency);
+          (
+            dependency: FederationRuntimeDependency | ContainerEntryDependency,
+          ) => {
+            if (dependency instanceof ContainerEntryDependency) {
+              containerEntrySet.add(dependency);
+            } else if (dependency instanceof FederationRuntimeDependency) {
+              containerEntrySet.add(dependency);
+            }
           },
         );
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
