@@ -55,7 +55,6 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
     if (exist) {
       return options;
     }
-    // @ts-ignore
     const promise = instance.loadEntry(prefetchUrl).then(async () => {
       const projectExports = instance!.getProjectExports();
       if (projectExports instanceof Promise) {
@@ -87,6 +86,78 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
     return options;
   },
 
+  afterResolve(options) {
+    const { remoteSnapshot, remoteInfo, id, origin } = options;
+    const snapshot = remoteSnapshot as ModuleInfo;
+    const { name } = remoteInfo;
+
+    const prefetchOptions = {
+      name,
+      remote: remoteInfo,
+      origin,
+      remoteSnapshot: snapshot,
+    };
+    const signal = getSignalFromManifest(snapshot);
+    if (!signal) {
+      return options;
+    }
+
+    const inited = loadingArray.some((info) => info.id === id);
+    if (!inited) {
+      return options;
+    }
+
+    if (sharedFlag !== strategy) {
+      throw new Error(
+        `[Module Federation Data Prefetch]: If you want to use data prefetch, the shared strategy must be 'loaded-first'`,
+      );
+    }
+
+    const instance =
+      MFDataPrefetch.getInstance(name) || new MFDataPrefetch(prefetchOptions);
+
+    let prefetchUrl;
+    // @ts-expect-error
+    if (snapshot.prefetchEntry) {
+      // @ts-expect-error
+      prefetchUrl = getResourceUrl(snapshot, snapshot.prefetchEntry as string);
+    }
+
+    const index = loadingArray.findIndex((loading) => loading.id === id);
+    // clear cache
+    if (index !== -1) {
+      loadingArray.splice(index, 1);
+    }
+    const promise = instance.loadEntry(prefetchUrl).then(async () => {
+      const projectExports = instance!.getProjectExports();
+      if (projectExports instanceof Promise) {
+        await projectExports;
+      }
+      return Promise.resolve().then(() => {
+        const exports = instance!.getExposeExports(id);
+        logger.info(`1. Start Prefetch: ${id} - ${performance.now()}`);
+        const result = Object.keys(exports).map((k) => {
+          const value = instance!.prefetch({
+            id,
+            functionId: k,
+          });
+          const functionId = k;
+
+          return {
+            value,
+            functionId,
+          };
+        });
+        return result;
+      });
+    });
+
+    loadingArray.push({
+      id,
+      promise,
+    });
+    return options;
+  },
   async onLoad(options) {
     const { remote, id } = options;
     const { name } = remote;
