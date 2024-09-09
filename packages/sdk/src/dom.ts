@@ -1,3 +1,4 @@
+import { CreateScriptHookDom, CreateScriptHookReturnDom } from './types';
 import { warn } from './utils';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function safeWrapper<T extends (...args: Array<any>) => any>(
@@ -22,20 +23,12 @@ export function isStaticResourcesEqual(url1: string, url2: string): boolean {
   return relativeUrl1 === relativeUrl2;
 }
 
-export type CreateScriptHookReturn =
-  | HTMLScriptElement
-  | { script?: HTMLScriptElement; timeout?: number }
-  | void;
-
 export function createScript(info: {
   url: string;
   cb?: (value: void | PromiseLike<void>) => void;
   attrs?: Record<string, any>;
   needDeleteScript?: boolean;
-  createScriptHook?: (
-    url: string,
-    attrs?: Record<string, any> | undefined,
-  ) => CreateScriptHookReturn;
+  createScriptHook?: CreateScriptHookDom;
 }): { script: HTMLScriptElement; needAttach: boolean } {
   // Retrieve the existing script element by its src attribute
   let script: HTMLScriptElement | null = null;
@@ -57,18 +50,23 @@ export function createScript(info: {
     script = document.createElement('script');
     script.type = 'text/javascript';
     script.src = info.url;
+    let createScriptRes: CreateScriptHookReturnDom = undefined;
     if (info.createScriptHook) {
-      const createScriptRes = info.createScriptHook(info.url, info.attrs);
+      createScriptRes = info.createScriptHook(info.url, info.attrs);
 
       if (createScriptRes instanceof HTMLScriptElement) {
         script = createScriptRes;
       } else if (typeof createScriptRes === 'object') {
-        if (createScriptRes.script) script = createScriptRes.script;
-        if (createScriptRes.timeout) timeout = createScriptRes.timeout;
+        if ('script' in createScriptRes && createScriptRes.script) {
+          script = createScriptRes.script;
+        }
+        if ('timeout' in createScriptRes && createScriptRes.timeout) {
+          timeout = createScriptRes.timeout;
+        }
       }
     }
     const attrs = info.attrs;
-    if (attrs) {
+    if (attrs && !createScriptRes) {
       Object.keys(attrs).forEach((name) => {
         if (script) {
           if (name === 'async' || name === 'defer') {
@@ -82,11 +80,11 @@ export function createScript(info: {
     }
   }
 
-  const onScriptComplete = (
+  const onScriptComplete = async (
     prev: OnErrorEventHandler | GlobalEventHandlers['onload'] | null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event: any,
-  ): void => {
+  ): Promise<void> => {
     clearTimeout(timeoutId);
     // Prevent memory leaks in IE.
     if (script) {
@@ -98,11 +96,15 @@ export function createScript(info: {
           script?.parentNode && script.parentNode.removeChild(script);
         }
       });
-      if (prev) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const res = (prev as any)(event);
+      if (prev && typeof prev === 'function') {
+        const result = (prev as any)(event);
+        if (result instanceof Promise) {
+          const res = await result;
+          info?.cb?.();
+          return res;
+        }
         info?.cb?.();
-        return res;
+        return result;
       }
     }
     info?.cb?.();
@@ -126,7 +128,10 @@ export function createLink(info: {
   cb: (value: void | PromiseLike<void>) => void;
   attrs: Record<string, string>;
   needDeleteLink?: boolean;
-  createLinkHook?: (url: string) => HTMLLinkElement | void;
+  createLinkHook?: (
+    url: string,
+    attrs?: Record<string, any>,
+  ) => HTMLLinkElement | void;
 }) {
   // <link rel="preload" href="script.js" as="script">
 
@@ -153,15 +158,17 @@ export function createLink(info: {
     link = document.createElement('link');
     link.setAttribute('href', info.url);
 
+    let createLinkRes: void | HTMLLinkElement = undefined;
+    const attrs = info.attrs;
+
     if (info.createLinkHook) {
-      const createLinkRes = info.createLinkHook(info.url);
+      createLinkRes = info.createLinkHook(info.url, attrs);
       if (createLinkRes instanceof HTMLLinkElement) {
         link = createLinkRes;
       }
     }
 
-    const attrs = info.attrs;
-    if (attrs) {
+    if (attrs && !createLinkRes) {
       Object.keys(attrs).forEach((name) => {
         if (link && !link.getAttribute(name)) {
           link.setAttribute(name, attrs[name]);
@@ -205,10 +212,7 @@ export function loadScript(
   url: string,
   info: {
     attrs?: Record<string, any>;
-    createScriptHook?: (
-      url: string,
-      attrs?: Record<string, any> | undefined,
-    ) => CreateScriptHookReturn;
+    createScriptHook?: CreateScriptHookDom;
   },
 ) {
   const { attrs = {}, createScriptHook } = info;

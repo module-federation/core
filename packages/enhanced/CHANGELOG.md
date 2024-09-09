@@ -1,5 +1,95 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.6.1
+
+### Patch Changes
+
+- 2855583: add hoisted runtime flag: experiments.federationRuntime === 'hoisted' | false
+- 2855583: experiment: Async Entry Startup when runtime is hoisted
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/sdk@0.6.1
+  - @module-federation/runtime-tools@0.6.1
+  - @module-federation/dts-plugin@0.6.1
+  - @module-federation/bridge-react-webpack-plugin@0.6.1
+  - @module-federation/managers@0.6.1
+  - @module-federation/manifest@0.6.1
+  - @module-federation/rspack@0.6.1
+
+## 0.6.0
+
+### Minor Changes
+
+- 1d9bb77: Add support for using Virtual Runtime Entrypoints instead of writing a temporary file to disk
+
+### Patch Changes
+
+- f245bb3: chore(enhanced): remove useless schemas
+- Updated dependencies [1d9bb77]
+  - @module-federation/sdk@0.6.0
+  - @module-federation/bridge-react-webpack-plugin@0.6.0
+  - @module-federation/dts-plugin@0.6.0
+  - @module-federation/managers@0.6.0
+  - @module-federation/manifest@0.6.0
+  - @module-federation/rspack@0.6.0
+  - @module-federation/runtime-tools@0.6.0
+
+## 0.5.2
+
+### Patch Changes
+
+- b90fa7d: feat: add shareStrategy option
+- Updated dependencies [b90fa7d]
+  - @module-federation/sdk@0.5.2
+  - @module-federation/runtime-tools@0.5.2
+  - @module-federation/dts-plugin@0.5.2
+  - @module-federation/bridge-react-webpack-plugin@0.5.2
+  - @module-federation/managers@0.5.2
+  - @module-federation/manifest@0.5.2
+  - @module-federation/rspack@0.5.2
+
+## 0.5.1
+
+### Patch Changes
+
+- Updated dependencies [472e2cc]
+  - @module-federation/bridge-react-webpack-plugin@0.5.1
+  - @module-federation/rspack@0.5.1
+  - @module-federation/sdk@0.5.1
+  - @module-federation/runtime-tools@0.5.1
+  - @module-federation/managers@0.5.1
+  - @module-federation/manifest@0.5.1
+  - @module-federation/dts-plugin@0.5.1
+
+## 0.5.0
+
+### Patch Changes
+
+- Updated dependencies [49d6135]
+- Updated dependencies [8378a77]
+  - @module-federation/bridge-react-webpack-plugin@0.5.0
+  - @module-federation/sdk@0.5.0
+  - @module-federation/rspack@0.5.0
+  - @module-federation/dts-plugin@0.5.0
+  - @module-federation/runtime-tools@0.5.0
+  - @module-federation/managers@0.5.0
+  - @module-federation/manifest@0.5.0
+
+## 0.4.0
+
+### Patch Changes
+
+- a335707: fix(enhanced): remove useless but has side effect export
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/sdk@0.4.0
+  - @module-federation/dts-plugin@0.4.0
+  - @module-federation/runtime-tools@0.4.0
+  - @module-federation/bridge-react-webpack-plugin@0.4.0
+  - @module-federation/managers@0.4.0
+  - @module-federation/manifest@0.4.0
+  - @module-federation/rspack@0.4.0
+
 ## 0.3.5
 
 ### Patch Changes

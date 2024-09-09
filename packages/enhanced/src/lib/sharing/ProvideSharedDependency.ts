@@ -12,10 +12,10 @@ const { Dependency } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
-import {
+import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
-} from '../../declarations/plugins/container/Dependency';
+} from 'webpack/lib/Dependency';
 
 class ProvideSharedDependency extends Dependency {
   shareScope: string;

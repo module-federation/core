@@ -1,5 +1,74 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.5.11
+
+### Patch Changes
+
+- 2855583: remove old experiment flag from node plugin
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/enhanced@0.6.1
+  - @module-federation/runtime@0.6.1
+  - @module-federation/sdk@0.6.1
+  - @module-federation/utilities@3.1.7
+
+## 2.5.10
+
+### Patch Changes
+
+- Updated dependencies [f245bb3]
+- Updated dependencies [1d9bb77]
+  - @module-federation/enhanced@0.6.0
+  - @module-federation/sdk@0.6.0
+  - @module-federation/runtime@0.6.0
+  - @module-federation/utilities@3.1.6
+
+## 2.5.9
+
+### Patch Changes
+
+- Updated dependencies [24ba96e]
+- Updated dependencies [b90fa7d]
+  - @module-federation/runtime@0.5.2
+  - @module-federation/enhanced@0.5.2
+  - @module-federation/sdk@0.5.2
+  - @module-federation/utilities@3.1.5
+
+## 2.5.8
+
+### Patch Changes
+
+- @module-federation/enhanced@0.5.1
+- @module-federation/runtime@0.5.1
+- @module-federation/sdk@0.5.1
+- @module-federation/utilities@3.1.4
+
+## 2.5.7
+
+### Patch Changes
+
+- Updated dependencies [8378a77]
+- Updated dependencies [5c7ac8a]
+  - @module-federation/runtime@0.5.0
+  - @module-federation/sdk@0.5.0
+  - @module-federation/enhanced@0.5.0
+  - @module-federation/utilities@3.1.3
+
+## 2.5.6
+
+### Patch Changes
+
+- Updated dependencies [a335707]
+- Updated dependencies [f2f02c9]
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/enhanced@0.4.0
+  - @module-federation/runtime@0.4.0
+  - @module-federation/sdk@0.4.0
+  - @module-federation/utilities@3.1.2
+
 ## 2.5.5
 
 ### Patch Changes

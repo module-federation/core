@@ -119,7 +119,6 @@ class ContainerEntryModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  // @ts-expect-error typeof webpack/lib !== typeof webpack/types
   override needBuild(
     context: NeedBuildContext,
     callback: (
@@ -138,7 +137,6 @@ class ContainerEntryModule extends Module {
    * @param {function(WebpackError): void} callback callback function
    * @returns {void}
    */
-  // @ts-expect-error typeof webpack/lib !== typeof webpack/types
   override build(
     options: WebpackOptions,
     compilation: Compilation,
@@ -180,10 +178,7 @@ class ContainerEntryModule extends Module {
       ) as unknown as Dependency,
     );
 
-    this.addDependency(
-      // @ts-expect-error flaky type for EntryDependency
-      new EntryDependency(this._injectRuntimeEntry),
-    );
+    this.addDependency(new EntryDependency(this._injectRuntimeEntry));
 
     callback();
   }

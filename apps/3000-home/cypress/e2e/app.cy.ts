@@ -13,7 +13,7 @@ describe('3000-home/', () => {
         '/api/test',
       ];
       urls.forEach((url) => {
-        cy.request(url); // This makes a GET request, not a full page visit
+        cy.request(url);
       });
     });
   });
@@ -21,6 +21,14 @@ describe('3000-home/', () => {
   describe('Welcome message', () => {
     it('should display welcome message', () => {
       getH1().contains('This is SPA combined');
+    });
+  });
+
+  describe('API endpoint should return json', () => {
+    it('Query Endpoint', () => {
+      cy.request('/api/test').then((response) => {
+        expect(response.headers['content-type']).to.include('application/json');
+      });
     });
   });
 

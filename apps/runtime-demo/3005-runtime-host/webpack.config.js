@@ -15,6 +15,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   config.plugins.push(
     new ModuleFederationPlugin({
       name: 'runtime_host',
+      experiments: { federationRuntime: 'hoisted' },
       remotes: {
         // remote2: 'runtime_remote2@http://localhost:3007/remoteEntry.js',
         remote1: 'runtime_remote1@http://127.0.0.1:3006/mf-manifest.json',
@@ -47,6 +48,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       dts: {
         tsConfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
       },
+      shareStrategy: 'loaded-first',
       shared: {
         lodash: {
           singleton: true,
@@ -73,10 +75,12 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
           requiredVersion: '^18.2.0',
         },
       },
-      runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
     }),
   );
   config.optimization.runtimeChunk = false;
+  if (!config.devServer) {
+    config.devServer = {};
+  }
   config.devServer.host = '127.0.0.1';
   config.plugins.forEach((p) => {
     if (p.constructor.name === 'ModuleFederationPlugin') {

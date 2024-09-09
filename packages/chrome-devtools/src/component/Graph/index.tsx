@@ -20,7 +20,7 @@ import styles from './index.module.scss';
 import 'reactflow/dist/style.css';
 
 const nodeWidth = 400;
-const nodeHeight = 300;
+const nodeHeight = 600;
 const nodeTypes = { graphItem: GraphItem };
 
 const Graph = (props: { snapshot: GlobalModuleInfo }) => {

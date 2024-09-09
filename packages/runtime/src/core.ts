@@ -1,3 +1,4 @@
+import { isBrowserEnv } from '@module-federation/sdk';
 import type {
   CreateScriptHookReturn,
   ModuleInfo,
@@ -14,6 +15,8 @@ import {
   ShareScopeMap,
   InitScope,
   RemoteEntryInitOptions,
+  InitTokens,
+  CallFrom,
 } from './type';
 import { getBuilderId, registerPlugins } from './utils';
 import { Module } from './module';
@@ -26,7 +29,6 @@ import {
 } from './utils/hooks';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
 import { snapshotPlugin } from './plugins/snapshot';
-import { isBrowserEnv } from './utils/env';
 import { getRemoteInfo } from './utils/load';
 import { DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
@@ -103,6 +105,7 @@ export class FederationHost {
       [
         {
           url: string;
+          attrs?: Record<string, any>;
         },
       ],
       HTMLLinkElement | void
@@ -174,9 +177,13 @@ export class FederationHost {
 
   initializeSharing(
     shareScopeName = DEFAULT_SCOPE,
-    strategy?: Shared['strategy'],
+    extraOptions?: {
+      initScope?: InitScope;
+      from?: CallFrom;
+      strategy?: Shared['strategy'];
+    },
   ): Array<Promise<void>> {
-    return this.sharedHandler.initializeSharing(shareScopeName, strategy);
+    return this.sharedHandler.initializeSharing(shareScopeName, extraOptions);
   }
 
   initRawContainer(
@@ -197,7 +204,7 @@ export class FederationHost {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
     id: string,
-    options?: { loadFactory?: boolean; from: 'build' | 'runtime' },
+    options?: { loadFactory?: boolean; from: CallFrom },
   ): Promise<T | null> {
     return this.remoteHandler.loadRemote(id, options);
   }

@@ -1,5 +1,88 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.5.0
+
+### Minor Changes
+
+- 2855583: add hoisted runtime flag: experiments.federationRuntime === 'hoisted' | false
+- 2855583: Remove module-federation/utilities package exports
+  Should use module-federation/runtime instead
+
+### Patch Changes
+
+- df76031: Make CSR and SSR image loading consistent
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/enhanced@0.6.1
+  - @module-federation/webpack-bundler-runtime@0.6.1
+  - @module-federation/runtime@0.6.1
+  - @module-federation/sdk@0.6.1
+  - @module-federation/node@2.5.11
+  - @module-federation/utilities@3.1.7
+
+## 8.4.13
+
+### Patch Changes
+
+- Updated dependencies [f245bb3]
+- Updated dependencies [1d9bb77]
+  - @module-federation/enhanced@0.6.0
+  - @module-federation/sdk@0.6.0
+  - @module-federation/node@2.5.10
+  - @module-federation/runtime@0.6.0
+  - @module-federation/utilities@3.1.6
+
+## 8.4.12
+
+### Patch Changes
+
+- Updated dependencies [24ba96e]
+- Updated dependencies [b90fa7d]
+  - @module-federation/runtime@0.5.2
+  - @module-federation/enhanced@0.5.2
+  - @module-federation/sdk@0.5.2
+  - @module-federation/node@2.5.9
+  - @module-federation/utilities@3.1.5
+
+## 8.4.11
+
+### Patch Changes
+
+- @module-federation/enhanced@0.5.1
+- @module-federation/node@2.5.8
+- @module-federation/runtime@0.5.1
+- @module-federation/sdk@0.5.1
+- @module-federation/utilities@3.1.4
+
+## 8.4.10
+
+### Patch Changes
+
+- Updated dependencies [8378a77]
+- Updated dependencies [5c7ac8a]
+  - @module-federation/runtime@0.5.0
+  - @module-federation/sdk@0.5.0
+  - @module-federation/enhanced@0.5.0
+  - @module-federation/node@2.5.7
+  - @module-federation/utilities@3.1.3
+
+## 8.4.9
+
+### Patch Changes
+
+- Updated dependencies [a335707]
+- Updated dependencies [f2f02c9]
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/enhanced@0.4.0
+  - @module-federation/runtime@0.4.0
+  - @module-federation/sdk@0.4.0
+  - @module-federation/node@2.5.6
+  - @module-federation/utilities@3.1.2
+
 ## 8.4.8
 
 ### Patch Changes

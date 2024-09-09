@@ -1,5 +1,48 @@
 # [3.1.0](https://github.com/module-federation/core/compare/utils-3.0.2...utils-3.1.0) (2023-10-26)
 
+## 3.1.7
+
+### Patch Changes
+
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/sdk@0.6.1
+
+## 3.1.6
+
+### Patch Changes
+
+- Updated dependencies [1d9bb77]
+  - @module-federation/sdk@0.6.0
+
+## 3.1.5
+
+### Patch Changes
+
+- Updated dependencies [b90fa7d]
+  - @module-federation/sdk@0.5.2
+
+## 3.1.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.5.1
+
+## 3.1.3
+
+### Patch Changes
+
+- Updated dependencies [8378a77]
+  - @module-federation/sdk@0.5.0
+
+## 3.1.2
+
+### Patch Changes
+
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/sdk@0.4.0
+
 ## 3.1.1
 
 ### Patch Changes

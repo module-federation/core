@@ -6,4 +6,4 @@ import customPlugin from './runtimePlugin';
 
 registerGlobalPlugins([customPlugin()]);
 
-import('./bootstrap');
+require('./bootstrap');

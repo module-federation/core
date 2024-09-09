@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.3.5",
+  "version": "0.6.1",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "repository": "https://github.com/module-federation/core/tree/main/packages/enhanced",
@@ -76,7 +76,8 @@
   },
   "devDependencies": {
     "@module-federation/webpack-bundler-runtime": "workspace:*",
-    "@types/btoa": "^1.2.5"
+    "@types/btoa": "^1.2.5",
+    "enhanced-resolve": "^5.0.0"
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",

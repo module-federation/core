@@ -413,7 +413,6 @@ class FederationStatsPlugin {
     );
 
     if (!federationPlugins || federationPlugins.length === 0) {
-      console.error('No ModuleFederationPlugin(s) found.');
       return;
     }
 

@@ -1,3 +1,5 @@
+import type { Module } from 'webpack';
+
 declare class WebpackError extends Error {
   /**
    * Creates an instance of WebpackError.
@@ -17,7 +19,6 @@ declare class WebpackError extends Error {
    */
   static captureStackTrace(
     targetObject: object,
-    // eslint-disable-next-line @typescript-eslint/ban-types
     constructorOpt?: Function,
   ): void;
 

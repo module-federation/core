@@ -91,7 +91,6 @@ class RemoteModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  // @ts-ignore
   override needBuild(
     context: NeedBuildContext,
     callback: (err: WebpackError | null, needsRebuild?: boolean) => void,

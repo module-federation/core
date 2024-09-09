@@ -1,6 +1,15 @@
-import type { Compiler } from 'webpack';
+import type {
+  Compiler,
+  WebpackPluginInstance,
+  Compilation,
+  Chunk,
+} from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { MFPrefetchCommon, encodeName } from '@module-federation/sdk';
+import {
+  MFPrefetchCommon,
+  encodeName,
+  moduleFederationPlugin,
+} from '@module-federation/sdk';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import {
   getFederationGlobalScope,
@@ -12,7 +21,10 @@ import {
 import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
-import type { moduleFederationPlugin } from '@module-federation/sdk';
+import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
+import ContainerEntryModule from '../ContainerEntryModule';
+import HoistContainerReferences from '../HoistContainerReferencesPlugin';
+import pBtoa from 'btoa';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -32,6 +44,12 @@ const BundlerRuntimePath = require.resolve(
 const RuntimePath = require.resolve('@module-federation/runtime', {
   paths: [RuntimeToolsPath],
 });
+const EmbeddedRuntimePath = require.resolve(
+  '@module-federation/runtime/embedded',
+  {
+    paths: [RuntimeToolsPath],
+  },
+);
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
@@ -45,10 +63,13 @@ class FederationRuntimePlugin {
     this.entryFilePath = '';
     this.bundlerRuntimePath = BundlerRuntimePath;
   }
+
   static getTemplate(
     compiler: Compiler,
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
+    // keep so that the hash changes if experiemts change
+    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
   ) {
     // internal runtime plugin
     const runtimePlugins = options.runtimePlugins;
@@ -80,17 +101,25 @@ class FederationRuntimePlugin {
       compiler.options.context,
       `node_modules/.mf/${encodedName}/bootstrap.js`,
     );
+    const embedRuntimeLines = Template.asString([
+      `if(!${federationGlobal}.runtime){`,
+      Template.indent([
+        `var prevFederation = ${federationGlobal};`,
+        `${federationGlobal} = {}`,
+        `for(var key in federation){`,
+        Template.indent([`${federationGlobal}[key] = federation[key];`]),
+        '}',
+        `for(var key in prevFederation){`,
+        Template.indent([`${federationGlobal}[key] = prevFederation[key];`]),
+        '}',
+      ]),
+      '}',
+    ]);
+
     return Template.asString([
       `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
-      `var prevFederation = ${federationGlobal};`,
-      `${federationGlobal} = {}`,
-      `for(var key in federation){`,
-      Template.indent([`${federationGlobal}[key] = federation[key];`]),
-      '}',
-      `for(var key in prevFederation){`,
-      Template.indent([`${federationGlobal}[key] = prevFederation[key];`]),
-      '}',
+      embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
       Template.indent([
         runtimePluginNames.length
@@ -98,7 +127,7 @@ class FederationRuntimePlugin {
               `const pluginsToAdd = [`,
               Template.indent(
                 runtimePluginNames.map(
-                  (item) => `${item} ? ${item}() : false,`,
+                  (item) => `${item} ? (${item}.default || ${item})() : false,`,
                 ),
               ),
               `].filter(Boolean);`,
@@ -142,6 +171,7 @@ class FederationRuntimePlugin {
     compiler: Compiler,
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
+    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
   ) {
     const containerName = options.name;
     const hash = createHash(
@@ -149,6 +179,7 @@ class FederationRuntimePlugin {
         compiler,
         options,
         bundlerRuntimePath,
+        experiments,
       )}`,
     );
     return path.join(TEMP_DIR, `entry.${hash}.js`);
@@ -162,11 +193,24 @@ class FederationRuntimePlugin {
       return '';
     }
 
-    this.entryFilePath = FederationRuntimePlugin.getFilePath(
-      compiler,
-      this.options,
-      this.bundlerRuntimePath,
-    );
+    if (!this.options?.virtualRuntimeEntry) {
+      this.entryFilePath = FederationRuntimePlugin.getFilePath(
+        compiler,
+        this.options,
+        this.bundlerRuntimePath,
+        this.options.experiments,
+      );
+    } else {
+      this.entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
+        FederationRuntimePlugin.getTemplate(
+          compiler,
+          this.options,
+          this.bundlerRuntimePath,
+          this.options.experiments,
+        ),
+      )}`;
+    }
+
     return this.entryFilePath;
   }
   ensureFile(compiler: Compiler) {
@@ -184,14 +228,18 @@ class FederationRuntimePlugin {
           compiler,
           this.options,
           this.bundlerRuntimePath,
+          this.options.experiments,
         ),
       );
     }
   }
 
   prependEntry(compiler: Compiler) {
-    this.ensureFile(compiler);
+    if (!this.options?.virtualRuntimeEntry) {
+      this.ensureFile(compiler);
+    }
     const entryFilePath = this.getFilePath(compiler);
+
     modifyEntry({
       compiler,
       prependEntry: (entry) => {
@@ -223,79 +271,116 @@ class FederationRuntimePlugin {
 
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
-      (compilation, { normalModuleFactory }) => {
+      (compilation: Compilation, { normalModuleFactory }) => {
+        const isEnabledForChunk = (chunk: Chunk): boolean => {
+          const [entryModule] =
+            compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
+          return entryModule instanceof ContainerEntryModule;
+        };
+        const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
+          if (runtimeRequirements.has(federationGlobal)) return;
+          runtimeRequirements.add(federationGlobal);
+          runtimeRequirements.add(RuntimeGlobals.interceptModuleExecution);
+          runtimeRequirements.add(RuntimeGlobals.moduleCache);
+          runtimeRequirements.add(RuntimeGlobals.compatGetDefaultExport);
+
+          compilation.addRuntimeModule(
+            chunk,
+            new FederationRuntimeModule(
+              runtimeRequirements,
+              name,
+              initOptionsWithoutShared,
+            ),
+          );
+        };
+
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           this.constructor.name,
-          (chunk, runtimeRequirements) => {
-            if (runtimeRequirements.has(federationGlobal)) {
+          (chunk: Chunk, runtimeRequirements: Set<string>) => {
+            if (!chunk.hasRuntime()) return;
+            if (runtimeRequirements.has(RuntimeGlobals.initializeSharing))
               return;
-            }
-            runtimeRequirements.add(RuntimeGlobals.interceptModuleExecution);
-            runtimeRequirements.add(RuntimeGlobals.moduleCache);
-            runtimeRequirements.add(RuntimeGlobals.compatGetDefaultExport);
-            runtimeRequirements.add(federationGlobal);
-            compilation.addRuntimeModule(
-              chunk,
-              new FederationRuntimeModule(
-                runtimeRequirements,
-                name,
-                initOptionsWithoutShared,
-              ),
-            );
+            if (runtimeRequirements.has(RuntimeGlobals.currentRemoteGetScope))
+              return;
+            if (runtimeRequirements.has(RuntimeGlobals.shareScopeMap)) return;
+            if (runtimeRequirements.has(federationGlobal)) return;
+            handler(chunk, runtimeRequirements);
           },
         );
+
+        // if federation runtime requirements exist
+        // attach runtime module to the chunk
+        compilation.hooks.runtimeRequirementInTree
+          .for(RuntimeGlobals.initializeSharing)
+          .tap(this.constructor.name, handler);
+        compilation.hooks.runtimeRequirementInTree
+          .for(RuntimeGlobals.currentRemoteGetScope)
+          .tap(this.constructor.name, handler);
+        compilation.hooks.runtimeRequirementInTree
+          .for(RuntimeGlobals.shareScopeMap)
+          .tap(this.constructor.name, handler);
+        compilation.hooks.runtimeRequirementInTree
+          .for(federationGlobal)
+          .tap(this.constructor.name, handler);
       },
     );
   }
 
   setRuntimeAlias(compiler: Compiler) {
-    let runtimePath = RuntimePath;
-    if (this.options?.implementation) {
-      runtimePath = require.resolve('@module-federation/runtime', {
-        paths: [this.options.implementation],
-      });
-    }
-    if (Array.isArray(compiler.options.resolve.alias)) {
-      return;
+    const { experiments, implementation } = this.options || {};
+    const isHoisted = experiments?.federationRuntime === 'hoisted';
+    let runtimePath = isHoisted ? EmbeddedRuntimePath : RuntimePath;
+
+    if (implementation) {
+      runtimePath = require.resolve(
+        `@module-federation/runtime${isHoisted ? '/embedded' : ''}`,
+        { paths: [implementation] },
+      );
     }
 
-    compiler.options.resolve.alias = {
-      ...compiler.options.resolve.alias,
-    };
+    if (isHoisted) {
+      runtimePath = runtimePath.replace('.cjs', '.esm');
+    }
 
-    if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
-      compiler.options.resolve.alias['@module-federation/runtime$'] =
-        runtimePath;
-    }
-    if (!compiler.options.resolve.alias['@module-federation/runtime-tools$']) {
-      compiler.options.resolve.alias['@module-federation/runtime-tools$'] =
-        this.options?.implementation || RuntimeToolsPath;
-    }
+    const alias = compiler.options.resolve.alias || {};
+    alias['@module-federation/runtime$'] =
+      alias['@module-federation/runtime$'] || runtimePath;
+    alias['@module-federation/runtime-tools$'] =
+      alias['@module-federation/runtime-tools$'] ||
+      implementation ||
+      RuntimeToolsPath;
+
+    // Set up aliases for the federation runtime and tools
+    // This ensures that the correct versions are used throughout the project
+    compiler.options.resolve.alias = alias;
   }
 
   apply(compiler: Compiler) {
-    const useModuleFederationPlugin = compiler.options.plugins.find((p) => {
-      if (typeof p !== 'object' || !p) {
-        return false;
-      }
-      return p['name'] === 'ModuleFederationPlugin';
-    });
+    const useModuleFederationPlugin = compiler.options.plugins.find(
+      (p: WebpackPluginInstance) => {
+        if (typeof p !== 'object' || !p) {
+          return false;
+        }
+        return p['name'] === 'ModuleFederationPlugin';
+      },
+    );
 
     if (useModuleFederationPlugin && !this.options) {
       // @ts-ignore
       this.options = useModuleFederationPlugin._options;
     }
 
-    const useContainerPlugin = compiler.options.plugins.find((p) => {
-      if (typeof p !== 'object' || !p) {
-        return false;
-      }
+    const useContainerPlugin = compiler.options.plugins.find(
+      (p: WebpackPluginInstance) => {
+        if (typeof p !== 'object' || !p) {
+          return false;
+        }
 
-      return p['name'] === 'ContainerPlugin';
-    });
+        return p['name'] === 'ContainerPlugin';
+      },
+    );
 
     if (useContainerPlugin && !this.options) {
-      // @ts-ignore
       this.options = useContainerPlugin._options;
     }
 
@@ -306,7 +391,7 @@ class FederationRuntimePlugin {
       };
     }
     if (this.options && !this.options?.name) {
-      // the instance may get the same one if the name is the same https://github.com/module-federation/core/blob/main/packages/runtime/src/index.ts#L18
+      //! the instance may get the same one if the name is the same https://github.com/module-federation/core/blob/main/packages/runtime/src/index.ts#L18
       this.options.name =
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
@@ -319,7 +404,33 @@ class FederationRuntimePlugin {
         },
       );
     }
+    if (this.options?.experiments?.federationRuntime === 'hoisted') {
+      this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
+        '.cjs.js',
+        '.esm.js',
+      );
+      new EmbedFederationRuntimePlugin(this.bundlerRuntimePath).apply(compiler);
 
+      new HoistContainerReferences(
+        this.options.name ? this.options.name + '_partial' : undefined,
+        // hoist all modules of federation entry
+        this.getFilePath(compiler),
+        this.bundlerRuntimePath,
+      ).apply(compiler);
+
+      new compiler.webpack.NormalModuleReplacementPlugin(
+        /@module-federation\/runtime/,
+        (resolveData) => {
+          if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
+            resolveData.request = RuntimePath.replace('cjs', 'esm');
+
+            if (resolveData.createData) {
+              resolveData.createData.request = resolveData.request;
+            }
+          }
+        },
+      ).apply(compiler);
+    }
     this.prependEntry(compiler);
     this.injectRuntime(compiler);
     this.setRuntimeAlias(compiler);

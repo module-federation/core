@@ -173,25 +173,7 @@ new NextFederationPlugin({
 
 ## Utilities
 
-Ive added a util for dynamic chunk loading, in the event you need to load remote containers dynamically.
-
-**InjectScript**
-
-```js
-import { injectScript } from '@module-federation/nextjs-mf/utils';
-// if i have remotes in my federation plugin, i can pass the name of the remote
-injectScript('home').then((remoteContainer) => {
-  remoteContainer.get('./exposedModule');
-});
-// if i want to load a custom remote not known at build time.
-
-injectScript({
-  global: 'home',
-  url: 'http://somthing.com/remoteEntry.js',
-}).then((remoteContainer) => {
-  remoteContainer.get('./exposedModule');
-});
-```
+`loadRemote` has been removed - you can take advantage of the new runtime apis: https://module-federation.io/guide/basic/runtime.html#loadremote
 
 **revalidate**
 

@@ -1,5 +1,50 @@
 # @module-federation/bridge-react-webpack-plugin
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/sdk@0.6.1
+
+## 0.6.0
+
+### Patch Changes
+
+- Updated dependencies [1d9bb77]
+  - @module-federation/sdk@0.6.0
+
+## 0.5.2
+
+### Patch Changes
+
+- Updated dependencies [b90fa7d]
+  - @module-federation/sdk@0.5.2
+
+## 0.5.1
+
+### Patch Changes
+
+- 472e2cc: feat: enchance react-bridge react-router-dom alias according to origin react-router-dom version
+  - @module-federation/sdk@0.5.1
+
+## 0.5.0
+
+### Patch Changes
+
+- 49d6135: feat(@module-federation/bridge): enhance Bridge capabilities and fix some issues
+- Updated dependencies [8378a77]
+  - @module-federation/sdk@0.5.0
+
+## 0.4.0
+
+### Patch Changes
+
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/sdk@0.4.0
+
 ## 0.3.5
 
 ### Patch Changes

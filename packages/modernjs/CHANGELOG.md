@@ -1,5 +1,66 @@
 # @module-federation/modern-js
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/enhanced@0.6.1
+  - @module-federation/sdk@0.6.1
+  - @module-federation/node@2.5.11
+
+## 0.6.0
+
+### Patch Changes
+
+- Updated dependencies [f245bb3]
+- Updated dependencies [1d9bb77]
+  - @module-federation/enhanced@0.6.0
+  - @module-federation/sdk@0.6.0
+  - @module-federation/node@2.5.10
+
+## 0.5.2
+
+### Patch Changes
+
+- Updated dependencies [b90fa7d]
+  - @module-federation/enhanced@0.5.2
+  - @module-federation/sdk@0.5.2
+  - @module-federation/node@2.5.9
+
+## 0.5.1
+
+### Patch Changes
+
+- @module-federation/enhanced@0.5.1
+- @module-federation/node@2.5.8
+- @module-federation/sdk@0.5.1
+
+## 0.5.0
+
+### Patch Changes
+
+- Updated dependencies [8378a77]
+  - @module-federation/sdk@0.5.0
+  - @module-federation/enhanced@0.5.0
+  - @module-federation/node@2.5.7
+
+## 0.4.0
+
+### Patch Changes
+
+- 88dec4e: fix(modern-js-plugin): require node plugin on demand
+- Updated dependencies [a335707]
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/enhanced@0.4.0
+  - @module-federation/sdk@0.4.0
+  - @module-federation/node@2.5.6
+
 ## 0.3.5
 
 ### Patch Changes

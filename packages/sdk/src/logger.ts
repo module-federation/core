@@ -1,13 +1,6 @@
 import { BROWSER_LOG_KEY, BROWSER_LOG_VALUE } from './constant';
 import { isBrowserEnv, isDebugMode } from './env';
-
-function safeToString(info: any): string {
-  try {
-    return JSON.stringify(info, null, 2);
-  } catch (e) {
-    return '';
-  }
-}
+import { safeToString } from './utils';
 
 const DEBUG_LOG = '[ FEDERATION DEBUG ]';
 

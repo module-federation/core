@@ -1,7 +1,10 @@
-import { ModuleInfo, getResourceUrl } from '@module-federation/sdk';
+import {
+  ModuleInfo,
+  getResourceUrl,
+  isBrowserEnv,
+} from '@module-federation/sdk';
 import { FederationRuntimePlugin } from '../../type/plugin';
 import {
-  isBrowserEnv,
   error,
   isPureRemoteEntry,
   isRemoteInfoWithEntry,

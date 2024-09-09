@@ -82,17 +82,9 @@ export class MFDataPrefetch {
       const remoteInfo = getRemoteInfo(remote as Remote);
       const module = origin!.moduleCache.get(remoteInfo.name);
       return getRemoteEntry({
+        origin: origin!,
         remoteInfo,
         remoteEntryExports: module ? module.remoteEntryExports : undefined,
-        createScriptHook: (url: string) => {
-          const res = origin!.loaderHook.lifecycle.createScript.emit({
-            url,
-          });
-          if (res instanceof HTMLScriptElement) {
-            return res;
-          }
-          return;
-        },
       });
     }
   }

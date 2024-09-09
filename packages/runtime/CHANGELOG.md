@@ -1,5 +1,62 @@
 # @module-federation/runtime
 
+## 0.6.1
+
+### Patch Changes
+
+- 2855583: externalize swc helpers and add them as a dependency
+- 813680f: Remove duplicated util functions and reference central ones in sdk
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/sdk@0.6.1
+
+## 0.6.0
+
+### Patch Changes
+
+- Updated dependencies [1d9bb77]
+  - @module-federation/sdk@0.6.0
+
+## 0.5.2
+
+### Patch Changes
+
+- 24ba96e: fix: handle circular init shared
+- b90fa7d: feat: add shareStrategy option
+- Updated dependencies [b90fa7d]
+  - @module-federation/sdk@0.5.2
+
+## 0.5.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.5.1
+
+## 0.5.0
+
+### Minor Changes
+
+- 8378a77: feat(runtime): add loadEntry hook
+
+### Patch Changes
+
+- 5c7ac8a: provide error message when remote entry init fails
+- Updated dependencies [8378a77]
+  - @module-federation/sdk@0.5.0
+
+## 0.4.0
+
+### Minor Changes
+
+- f2f02c9: provide users to mark shared module as loaded
+
+### Patch Changes
+
+- a6e2bed: fix: add attrs option to createLink hook
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/sdk@0.4.0
+
 ## 0.3.5
 
 ### Patch Changes
