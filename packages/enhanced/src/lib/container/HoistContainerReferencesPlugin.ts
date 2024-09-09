@@ -13,6 +13,8 @@ import type ExportsInfo from 'webpack/lib/ExportsInfo';
 import ContainerEntryModule from './ContainerEntryModule';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
+import ContainerEntryDependency from './ContainerEntryDependency';
+import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
 
 const { NormalModule, AsyncDependenciesBlock } = require(
   normalizeWebpackPath('webpack'),
@@ -56,9 +58,15 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         const { chunkGraph, moduleGraph } = compilation;
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const containerEntryDependencies = new Set<Dependency>();
-        hooks.getContainerEntryModules.tap(
+        hooks.addContainerEntryModule.tap(
           'HoistContainerReferences',
-          (dep: Dependency) => {
+          (dep: ContainerEntryDependency) => {
+            containerEntryDependencies.add(dep);
+          },
+        );
+        hooks.addFederationRuntimeModule.tap(
+          'HoistContainerReferences',
+          (dep: FederationRuntimeDependency) => {
             containerEntryDependencies.add(dep);
           },
         );

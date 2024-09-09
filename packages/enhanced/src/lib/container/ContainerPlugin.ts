@@ -194,6 +194,9 @@ class ContainerPlugin {
         compilation: Compilation,
         callback: (error?: WebpackError | null | undefined) => void,
       ) => {
+        const hasSingleRuntimeChunk =
+          compilation.options?.optimization?.runtimeChunk;
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const dep = new ContainerEntryDependency(
           name,
           //@ts-ignore
@@ -202,9 +205,6 @@ class ContainerPlugin {
           federationRuntimePluginInstance.entryFilePath,
           this._options.experiments,
         );
-        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        // hooks.getContainerEntryModules.call(dep);
-        const hasSingleRuntimeChunk = true;
         dep.loc = { name };
         compilation.addEntry(
           compilation.options.context || '',
@@ -217,6 +217,7 @@ class ContainerPlugin {
           },
           (error: WebpackError | null | undefined) => {
             if (error) return callback(error);
+            hooks.addContainerEntryModule.call(dep);
             callback();
           },
         );
@@ -248,7 +249,6 @@ class ContainerPlugin {
             );
 
             dep.loc = { name };
-            // hooks.getContainerEntryModules.call(dep);
 
             await new Promise((resolve, reject) => {
               compilation.addEntry(
@@ -262,6 +262,7 @@ class ContainerPlugin {
                 },
                 (error: WebpackError | null | undefined) => {
                   if (error) return reject(error);
+                  hooks.addContainerEntryModule.call(dep);
                   resolve(undefined);
                 },
               );
@@ -288,7 +289,6 @@ class ContainerPlugin {
           federationRuntimePluginInstance.entryFilePath,
           this._options.experiments, // Add this line
         );
-        // hooks.getContainerEntryModules.call(dep);
         dep.loc = { name };
 
         compilation.addEntry(
@@ -301,6 +301,7 @@ class ContainerPlugin {
           },
           (error: WebpackError | null | undefined) => {
             if (error) return callback(error);
+            hooks.addContainerEntryModule.call(dep);
             callback();
           },
         );
@@ -352,7 +353,7 @@ class ContainerPlugin {
                 err,
               );
             }
-            hooks.getContainerEntryModules.call(federationRuntimeDependency);
+            hooks.addFederationRuntimeModule.call(federationRuntimeDependency);
           },
         );
       },

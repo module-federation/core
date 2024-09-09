@@ -246,7 +246,7 @@ class FederationRuntimePlugin {
               logger.error('Error adding federation runtime module:', err);
               return;
             }
-            hooks.getContainerEntryModules.call(federationRuntimeDependency);
+            hooks.addFederationRuntimeModule.call(federationRuntimeDependency);
           },
         );
       },

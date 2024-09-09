@@ -102,11 +102,12 @@ export const generateEntryStartup = (
               `${RuntimeGlobals.ensureChunkHandlers}.remotes || function(chunkId, promises) {},`,
             ]),
             `].reduce(${runtimeTemplate.returningFunction(`handler('${chunk.id}', p), p`, 'p, handler')}, promises)`,
-            `).then(${runtimeTemplate.returningFunction(body)});`,
+            `).then(${runtimeTemplate.basicFunction('', body)});`,
           ]);
 
         const wrap = wrappedInit(
-          `${
+          `if(!${RuntimeGlobals.startupEntrypoint}) debugger;
+          return ${
             passive
               ? RuntimeGlobals.onChunksLoaded
               : RuntimeGlobals.startupEntrypoint

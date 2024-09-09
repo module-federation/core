@@ -27,19 +27,18 @@ class EmbedFederationRuntimePlugin {
         const containerEntrySet: Set<
           ContainerEntryDependency | FederationRuntimeDependency
         > = new Set();
-        hooks.getContainerEntryModules.tap(
+
+        hooks.addFederationRuntimeModule.tap(
           'EmbedFederationRuntimePlugin',
-          (
-            dependency: FederationRuntimeDependency | ContainerEntryDependency,
-          ) => {
-            if (dependency instanceof ContainerEntryDependency) {
-              containerEntrySet.add(dependency);
-            } else if (dependency instanceof FederationRuntimeDependency) {
-              containerEntrySet.add(dependency);
-            }
+          (dependency: FederationRuntimeDependency) => {
+            containerEntrySet.add(dependency);
           },
         );
-        const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
+
+        const handleRuntimeRequirements = (
+          chunk: Chunk,
+          runtimeRequirements: Set<string>,
+        ) => {
           if (chunk.id === 'build time chunk') {
             return;
           }
@@ -56,9 +55,10 @@ class EmbedFederationRuntimePlugin {
 
           compilation.addRuntimeModule(chunk, runtimeModule);
         };
+
         compilation.hooks.runtimeRequirementInTree
           .for(federationGlobal)
-          .tap('EmbedFederationRuntimePlugin', handler);
+          .tap('EmbedFederationRuntimePlugin', handleRuntimeRequirements);
       },
     );
   }

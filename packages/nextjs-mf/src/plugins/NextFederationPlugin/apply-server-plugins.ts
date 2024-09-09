@@ -75,13 +75,7 @@ export function applyServerPlugins(
     );
   }
 
-  // Apply the InvertedContainerPlugin to the compiler
-  new InvertedContainerPlugin({
-    runtime: 'webpack-runtime',
-    container: options.name,
-    remotes: options.remotes as Record<string, string>,
-    debug: false,
-  }).apply(compiler);
+  new InvertedContainerPlugin().apply(compiler);
 }
 
 /**

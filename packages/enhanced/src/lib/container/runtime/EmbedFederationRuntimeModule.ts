@@ -64,7 +64,6 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       weak: false,
       runtimeRequirements: new Set(),
     });
-    debugger;
     const exportExpr = compilation.runtimeTemplate.exportFromImport({
       moduleGraph: compilation.moduleGraph,
       module: found,

@@ -49,6 +49,7 @@ class StartupChunkDependenciesPlugin {
           'StartupChunkDependenciesPlugin',
           (chunk, set, { chunkGraph }) => {
             if (!isEnabledForChunk(chunk)) return;
+
             if (chunk.hasRuntime()) {
               set.add(RuntimeGlobals.startupEntrypoint);
               set.add(RuntimeGlobals.ensureChunk);

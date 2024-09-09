@@ -16,11 +16,9 @@ const PLUGIN_NAME = 'FederationModulesPlugin';
 /** @typedef {{ header: string[], beforeStartup: string[], startup: string[], afterStartup: string[], allowInlineStartup: boolean }} Bootstrap */
 
 type CompilationHooks = {
-  getContainerEntryModules: SyncHook<
-    [ContainerEntryDependency | FederationRuntimeDependency],
-    void
-  >;
+  addContainerEntryModule: SyncHook<[ContainerEntryDependency], void>;
   getEntrypointRuntime: SyncHook<[string], void>;
+  addFederationRuntimeModule: SyncHook<[FederationRuntimeDependency], void>;
 };
 
 class FederationModulesPlugin {
@@ -37,8 +35,9 @@ class FederationModulesPlugin {
     let hooks = compilationHooksMap.get(compilation);
     if (hooks === undefined) {
       hooks = {
-        getContainerEntryModules: new SyncHook(['dependency']),
+        addContainerEntryModule: new SyncHook(['dependency']),
         getEntrypointRuntime: new SyncHook(['entrypoint']),
+        addFederationRuntimeModule: new SyncHook(['module']), // Initialize new hook
       };
       compilationHooksMap.set(compilation, hooks);
     }
