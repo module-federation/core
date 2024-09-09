@@ -80,8 +80,8 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
     });
 
     return Template.asString([
-      `var federation = ${initRuntimeModuleGetter};`,
-      'console.log(__webpack_require__.federation)',
+      `${initRuntimeModuleGetter}`,
+      // 'console.log(__webpack_require__.federation)',
       // `federation = ${exportExpr}`,
       // `var prevFederation = ${federationGlobal};`,
       // `${federationGlobal} = {};`,
@@ -93,27 +93,6 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       // `}`,
       // 'federation = undefined;'
     ]);
-  }
-
-  private findModule(chunk: Chunk, bundlerRuntimePath: string): Module | null {
-    const { chunkGraph, compilation } = this;
-    if (!chunk || !chunkGraph || !compilation) {
-      return null;
-    }
-    for (const mod of chunkGraph.getChunkModulesIterable(chunk)) {
-      if (mod instanceof NormalModule && mod.resource === bundlerRuntimePath) {
-        return mod;
-      }
-
-      if (mod instanceof ConcatenatedModule) {
-        for (const m of mod.modules) {
-          if (m instanceof NormalModule && m.resource === bundlerRuntimePath) {
-            return mod;
-          }
-        }
-      }
-    }
-    return null;
   }
 }
 
