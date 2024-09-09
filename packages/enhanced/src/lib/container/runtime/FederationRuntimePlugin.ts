@@ -222,35 +222,58 @@ class FederationRuntimePlugin {
       this.ensureFile();
     }
 
-    compiler.hooks.thisCompilation.tap(
-      'MyPlugin',
-      (compilation: Compilation, { normalModuleFactory }) => {
-        const federationRuntimeDependency = this.getDependency();
-        const logger = compilation.getLogger('FederationRuntimePlugin');
-        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        compilation.dependencyFactories.set(
-          FederationRuntimeDependency,
-          normalModuleFactory,
-        );
-        compilation.dependencyTemplates.set(
-          FederationRuntimeDependency,
-          new ModuleDependency.Template(),
-        );
+    //if using runtime experiment, use the new include method else patch entry
+    if (this.options?.experiments?.federationRuntime) {
+      compiler.hooks.thisCompilation.tap(
+        'MyPlugin',
+        (compilation: Compilation, { normalModuleFactory }) => {
+          const federationRuntimeDependency = this.getDependency();
+          const logger = compilation.getLogger('FederationRuntimePlugin');
+          const hooks =
+            FederationModulesPlugin.getCompilationHooks(compilation);
+          compilation.dependencyFactories.set(
+            FederationRuntimeDependency,
+            normalModuleFactory,
+          );
+          compilation.dependencyTemplates.set(
+            FederationRuntimeDependency,
+            new ModuleDependency.Template(),
+          );
 
-        compilation.addInclude(
-          compiler.context,
-          federationRuntimeDependency,
-          { name: undefined },
-          (err, module) => {
-            if (err) {
-              logger.error('Error adding federation runtime module:', err);
-              return;
+          compilation.addInclude(
+            compiler.context,
+            federationRuntimeDependency,
+            { name: undefined },
+            (err, module) => {
+              if (err) {
+                logger.error('Error adding federation runtime module:', err);
+                return;
+              }
+              hooks.addFederationRuntimeModule.call(
+                federationRuntimeDependency,
+              );
+            },
+          );
+        },
+      );
+    } else {
+      const entryFilePath = this.getFilePath();
+      modifyEntry({
+        compiler,
+        prependEntry: (entry) => {
+          Object.keys(entry).forEach((entryName) => {
+            const entryItem = entry[entryName];
+            if (!entryItem.import) {
+              // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
+              entryItem.import = ['./src'];
             }
-            hooks.addFederationRuntimeModule.call(federationRuntimeDependency);
-          },
-        );
-      },
-    );
+            if (!entryItem.import.includes(entryFilePath)) {
+              entryItem.import.unshift(entryFilePath);
+            }
+          });
+        },
+      });
+    }
   }
 
   injectRuntime(compiler: Compiler) {
@@ -341,6 +364,8 @@ class FederationRuntimePlugin {
       implementation ||
       RuntimeToolsPath;
 
+    // Set up aliases for the federation runtime and tools
+    // This ensures that the correct versions are used throughout the project
     compiler.options.resolve.alias = alias;
   }
 
@@ -380,6 +405,7 @@ class FederationRuntimePlugin {
       };
     }
     if (this.options && !this.options?.name) {
+      //! the instance may get the same one if the name is the same https://github.com/module-federation/core/blob/main/packages/runtime/src/index.ts#L18
       this.options.name =
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
@@ -402,6 +428,7 @@ class FederationRuntimePlugin {
 
       new HoistContainerReferences(
         this.options.name ? this.options.name + '_partial' : undefined,
+        // hoist all modules of federation entry
         this.getFilePath(),
         this.bundlerRuntimePath,
         this.options.experiments,

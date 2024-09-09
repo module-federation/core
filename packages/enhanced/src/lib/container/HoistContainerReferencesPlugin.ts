@@ -70,6 +70,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
             containerEntryDependencies.add(dep);
           },
         );
+
         // Hook into the optimizeChunks phase
         compilation.hooks.optimizeChunks.tap(
           {
