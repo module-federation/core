@@ -45,7 +45,7 @@ function Layout() {
     <>
       <ul>
         <li>
-          <Link to="/" className="self-remote2-home-link">
+          <Link to="/home" className="self-remote2-home-link">
             Home
           </Link>
         </li>
@@ -67,6 +67,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
+        path: '/home',
         element: <Home />,
       },
       {

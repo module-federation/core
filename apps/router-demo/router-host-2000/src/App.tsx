@@ -2,7 +2,10 @@ import { useRef, useEffect, ForwardRefExoticComponent } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
-import { createRemoteComponent } from '@module-federation/bridge-react';
+import {
+  createRemoteComponent,
+  useBridgeRouteChange,
+} from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
@@ -108,6 +111,16 @@ function Wraper3() {
 const App = () => {
   const location = useLocation();
   const ref = useRef<HTMLElement>(null);
+
+  useBridgeRouteChange(({ from, to }: { from: string; to: string }) => {
+    console.log(
+      `【useBridgeRouteChange】: detech router changed from:`,
+      from,
+      'to:',
+      to,
+    );
+    // do your thing
+  });
 
   useEffect(() => {
     const refTimeout = setTimeout(() => {
