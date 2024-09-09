@@ -92,7 +92,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
                   module instanceof NormalModule &&
                   module.resource === this.bundlerRuntimeDep
                 ) {
-                  const allRefs = this.getAllReferencedModules(
+                  const allRefs = getAllReferencedModules(
                     compilation,
                     module,
                     'initial',
@@ -117,40 +117,6 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         );
       },
     );
-  }
-
-  // Helper method to collect all referenced modules recursively
-  private getAllReferencedModules(
-    compilation: Compilation,
-    module: Module,
-    type?: 'all' | 'initial',
-  ): Set<Module> {
-    const collectedModules = new Set<Module>([module]);
-    const stack = [module];
-
-    while (stack.length > 0) {
-      const currentModule = stack.pop();
-      if (!currentModule) continue;
-      const mgm = compilation.moduleGraph._getModuleGraphModule(currentModule);
-      if (mgm && mgm.outgoingConnections) {
-        for (const connection of mgm.outgoingConnections) {
-          if (type === 'initial') {
-            const parentBlock = compilation.moduleGraph.getParentBlock(
-              connection.dependency,
-            );
-            if (parentBlock instanceof AsyncDependenciesBlock) {
-              continue;
-            }
-          }
-          if (connection.module && !collectedModules.has(connection.module)) {
-            collectedModules.add(connection.module);
-            stack.push(connection.module);
-          }
-        }
-      }
-    }
-
-    return collectedModules;
   }
 
   // Helper method to find a specific module in a chunk
@@ -226,7 +192,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       return;
     }
 
-    const allReferencedModules = this.getAllReferencedModules(
+    const allReferencedModules = getAllReferencedModules(
       compilation,
       runtimeModule,
       'initial',
@@ -289,6 +255,40 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     }
     return runtimeChunks;
   }
+}
+
+// Helper method to collect all referenced modules recursively
+export function getAllReferencedModules(
+  compilation: Compilation,
+  module: Module,
+  type?: 'all' | 'initial',
+): Set<Module> {
+  const collectedModules = new Set<Module>([module]);
+  const stack = [module];
+
+  while (stack.length > 0) {
+    const currentModule = stack.pop();
+    if (!currentModule) continue;
+    const mgm = compilation.moduleGraph._getModuleGraphModule(currentModule);
+    if (mgm && mgm.outgoingConnections) {
+      for (const connection of mgm.outgoingConnections) {
+        if (type === 'initial') {
+          const parentBlock = compilation.moduleGraph.getParentBlock(
+            connection.dependency,
+          );
+          if (parentBlock instanceof AsyncDependenciesBlock) {
+            continue;
+          }
+        }
+        if (connection.module && !collectedModules.has(connection.module)) {
+          collectedModules.add(connection.module);
+          stack.push(connection.module);
+        }
+      }
+    }
+  }
+
+  return collectedModules;
 }
 
 export default HoistContainerReferences;
