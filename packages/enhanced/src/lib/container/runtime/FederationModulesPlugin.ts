@@ -8,8 +8,8 @@ import { SyncHook } from 'tapable';
 import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
 
-/** @type {WeakMap<Compilation, CompilationHooks>} */
-const compilationHooksMap = new WeakMap<CompilationType, CompilationHooks>();
+/** @type {WeakMap<import("webpack").Compilation, CompilationHooks>} */
+const compilationHooksMap = new WeakMap<import("webpack").Compilation, CompilationHooks>();
 
 const PLUGIN_NAME = 'FederationModulesPlugin';
 
