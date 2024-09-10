@@ -1,18 +1,8 @@
 import { CreateScriptHookNode } from './types';
 
-async function importNodeModule<T>(name: string): Promise<T> {
+function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
     throw new Error('import specifier is required');
-  }
-  try {
-    let testModule = 'vm';
-    // Test whether dynamicImport is available. It is available in vite/rollup esm environment and will be compiled in webpack non-esm environment.
-    await import(testModule);
-    return import(name);
-  } catch (e) {
-    console.log(
-      `[@module-federation/sdk][log]: Use new Function to dynamically import "${name}"`,
-    );
   }
   const importModule = new Function('name', `return import(name)`);
   return importModule(name)
