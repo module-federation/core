@@ -19,13 +19,10 @@ export type RetryPluginParams = {
   script?: ScriptWithRetryOptions; // script retry options
 };
 
-export type ReqiuredUrl<T extends { url?: string }> = Required<Pick<T, 'url'>> &
-  Omit<T, 'url'>;
-
 export type CreateScriptFunc = (
   url: string,
   attrs: Record<string, any>,
 ) => HTMLScriptElement;
 
-export type ReqiuredUrl<T extends { url?: string }> = Required<Pick<T, 'url'>> &
+export type RequiredUrl<T extends { url?: string }> = Required<Pick<T, 'url'>> &
   Omit<T, 'url'>;
