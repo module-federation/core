@@ -416,6 +416,7 @@ class FederationRuntimePlugin {
         // hoist all modules of federation entry
         this.getFilePath(compiler),
         this.bundlerRuntimePath,
+        this.options.experiments,
       ).apply(compiler);
 
       new compiler.webpack.NormalModuleReplacementPlugin(
