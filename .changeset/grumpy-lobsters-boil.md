@@ -2,4 +2,4 @@
 '@module-federation/modern-js': patch
 ---
 
-fix(modernjs): update rsbuild cacheGroupKeys
+fix(modernjs): correct splitChunks.cacheGroups key which need to be removed
