@@ -35,14 +35,14 @@ jobs:
         run: pnpm install
 
       - name: Run Affected Build
-        run: npx nx run-many --targets=build --projects=tag:type:pkg  --skip-nx-cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
 
       - name: Configuration xvfb
         shell: bash
         run: sudo apt-get update && sudo apt-get install xvfb
 
       - name: E2E Chrome Devtools
-        run: pnpm run app:manifest:dev & echo "done" && sleep 10 && npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && sleep 10 && npx nx e2e:devtools chrome-devtools
+        run: pnpm run app:manifest:dev & echo "done" && sleep 10 && npx wait-on tcp:3009 && npx wait-on tcp:3010 && npx wait-on tcp:3011 && npx wait-on tcp:3012 && npx wait-on tcp:3013 && sleep 10 && npx nx e2e:devtools chrome-devtools --verbose
 
       - name: kill port
         run: lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
