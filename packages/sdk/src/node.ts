@@ -147,12 +147,18 @@ export function createScriptNode(
         return loadModule(urlObj.href, {
           fetch: f,
           vm: await importNodeModule<typeof import('vm')>('vm'),
-        }).then(async (module) => {
-          await module.evaluate();
-          cb(undefined, module.namespace);
-        }).catch(e => {
-          cb(e instanceof Error ? e : new Error(`Script execution error: ${e}`));
-        });
+        })
+          .then(async (module) => {
+            await module.evaluate();
+            cb(undefined, module.namespace);
+          })
+          .catch((e) => {
+            cb(
+              e instanceof Error
+                ? e
+                : new Error(`Script execution error: ${e}`),
+            );
+          });
       }
       handleScriptFetch(f, urlObj);
     })
