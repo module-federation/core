@@ -96,6 +96,7 @@ module.exports = composePlugins(
       // ...config.optimization,
       runtimeChunk: false,
       minimize: false,
+      moduleIds: 'named',
     };
     // const mf = await withModuleFederation(defaultConfig);
     return config;
