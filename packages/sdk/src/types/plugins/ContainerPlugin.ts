@@ -97,7 +97,7 @@ export interface ContainerPluginOptions {
   runtimePlugins?: string[];
 
   experiments?: {
-    federationRuntime?: false | 'hoisted';
+    federationRuntime?: false | 'hoisted' | 'use-host';
   };
 }
 /**
