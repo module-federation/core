@@ -42,7 +42,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install xvfb
 
       - name: E2E Chrome Devtools
-        run: pnpm run app:manifest:dev & echo "done" && sleep 10 && npx wait-on tcp:3009 && npx wait-on tcp:3010 && npx wait-on tcp:3011 && npx wait-on tcp:3012 && npx wait-on tcp:3013 && sleep 10 && npx nx e2e:devtools chrome-devtools
+        run: pnpm run app:manifest:dev & echo "done" && sleep 10 && npx wait-on tcp:3009 && npx wait-on tcp:3010 && npx wait-on tcp:3011 && npx wait-on tcp:3012 && npx wait-on tcp:3013 && sleep 40 && npx nx e2e:devtools chrome-devtools
 
       - name: kill port
         run: lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill

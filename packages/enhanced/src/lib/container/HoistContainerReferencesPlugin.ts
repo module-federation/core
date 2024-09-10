@@ -15,8 +15,10 @@ import { moduleFederationPlugin } from '@module-federation/sdk';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
+import RemoteToExternalDependency from './RemoteToExternalDependency';
+import RemoteModule from './RemoteModule';
 
-const { NormalModule, AsyncDependenciesBlock } = require(
+const { NormalModule, AsyncDependenciesBlock, ExternalModule } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const ConcatenatedModule = require(
@@ -91,81 +93,55 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         );
 
         // Hook into the optimizeDependencies phase
-        compilation.hooks.optimizeDependencies.tap(
-          {
-            name: PLUGIN_NAME,
-            // basic optimization stage - it runs first
-            stage: -10,
-          },
-          (modules: Iterable<Module>) => {
-            if (this.entryFilePath) {
-              let runtime: RuntimeSpec | undefined;
-              for (const [name, { options }] of compilation.entries) {
-                runtime = compiler.webpack.util.runtime.mergeRuntimeOwned(
-                  runtime,
-                  compiler.webpack.util.runtime.getEntryRuntime(
-                    compilation,
-                    name,
-                    options,
-                  ),
-                );
-              }
-              for (const module of modules) {
-                if (
-                  module instanceof NormalModule &&
-                  module.resource === this.bundlerRuntimeDep
-                ) {
-                  const allRefs = getAllReferencedModules(
-                    compilation,
-                    module,
-                    'initial',
-                  );
-                  for (const module of allRefs) {
-                    const exportsInfo: ExportsInfo =
-                      moduleGraph.getExportsInfo(module);
-                    // Since i dont use the import federation var, tree shake will eliminate it.
-                    // also because currently the runtime is copied into all runtime chunks
-                    // some might not have the runtime import in the tree to begin with
-                    exportsInfo.setUsedInUnknownWay(runtime);
-                    moduleGraph.addExtraReason(module, this.explanation);
-                    if (module.factoryMeta === undefined) {
-                      module.factoryMeta = {};
-                    }
-                    module.factoryMeta.sideEffectFree = false;
-                  }
-                }
-              }
-            }
-          },
-        );
+        // compilation.hooks.optimizeDependencies.tap(
+        //   {
+        //     name: PLUGIN_NAME,
+        //     // basic optimization stage - it runs first
+        //     stage: -10,
+        //   },
+        //   (modules: Iterable<Module>) => {
+        //     if (this.entryFilePath) {
+        //       let runtime: RuntimeSpec | undefined;
+        //       for (const [name, { options }] of compilation.entries) {
+        //         runtime = compiler.webpack.util.runtime.mergeRuntimeOwned(
+        //           runtime,
+        //           compiler.webpack.util.runtime.getEntryRuntime(
+        //             compilation,
+        //             name,
+        //             options,
+        //           ),
+        //         );
+        //       }
+        //       for (const module of modules) {
+        //         if (
+        //           module instanceof NormalModule &&
+        //           module.resource === this.bundlerRuntimeDep
+        //         ) {
+        //           const allRefs = getAllReferencedModules(
+        //             compilation,
+        //             module,
+        //             'initial',
+        //           );
+        //           for (const module of allRefs) {
+        //             const exportsInfo: ExportsInfo =
+        //               moduleGraph.getExportsInfo(module);
+        //             // Since i dont use the import federation var, tree shake will eliminate it.
+        //             // also because currently the runtime is copied into all runtime chunks
+        //             // some might not have the runtime import in the tree to begin with
+        //             exportsInfo.setUsedInUnknownWay(runtime);
+        //             moduleGraph.addExtraReason(module, this.explanation);
+        //             if (module.factoryMeta === undefined) {
+        //               module.factoryMeta = {};
+        //             }
+        //             module.factoryMeta.sideEffectFree = false;
+        //           }
+        //         }
+        //       }
+        //     }
+        //   },
+        // );
       },
     );
-  }
-
-  // Helper method to find a specific module in a chunk
-  private findModule(
-    compilation: Compilation,
-    chunk: Chunk,
-    entryFilePath: string,
-  ): Module | null {
-    const { chunkGraph } = compilation;
-    let module: Module | null = null;
-    for (const mod of chunkGraph.getChunkEntryModulesIterable(chunk)) {
-      if (mod instanceof NormalModule && mod.resource === entryFilePath) {
-        module = mod;
-        break;
-      }
-
-      if (mod instanceof ConcatenatedModule) {
-        for (const m of mod.modules) {
-          if (m instanceof NormalModule && m.resource === entryFilePath) {
-            module = mod;
-            break;
-          }
-        }
-      }
-    }
-    return module;
   }
 
   // Method to hoist modules in chunks
@@ -187,6 +163,18 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         containerEntryModule,
         'initial',
       );
+
+      const allRemoteReferences = getAllReferencedModules(
+        compilation,
+        containerEntryModule,
+        'external',
+      );
+
+      for (const remote of allRemoteReferences) {
+        allReferencedModules.add(remote);
+      }
+      // allRemoteReferences.clear();
+
       const containerRuntimes =
         chunkGraph.getModuleRuntimes(containerEntryModule);
       const runtimes = new Set<string>();
@@ -265,30 +253,49 @@ export class HoistContainerReferences implements WebpackPluginInstance {
 export function getAllReferencedModules(
   compilation: Compilation,
   module: Module,
-  type?: 'all' | 'initial',
+  type?: 'all' | 'initial' | 'external',
 ): Set<Module> {
   const collectedModules = new Set<Module>([module]);
+  const visitedModules = new WeakSet<Module>([module]);
   const stack = [module];
 
   while (stack.length > 0) {
     const currentModule = stack.pop();
     if (!currentModule) continue;
+
     const mgm = compilation.moduleGraph._getModuleGraphModule(currentModule);
-    if (mgm && mgm.outgoingConnections) {
-      for (const connection of mgm.outgoingConnections) {
-        if (type === 'initial') {
-          const parentBlock = compilation.moduleGraph.getParentBlock(
-            connection.dependency,
-          );
-          if (parentBlock instanceof AsyncDependenciesBlock) {
-            continue;
-          }
-        }
-        if (connection.module && !collectedModules.has(connection.module)) {
-          collectedModules.add(connection.module);
-          stack.push(connection.module);
+    if (!mgm?.outgoingConnections) continue;
+    for (const connection of mgm.outgoingConnections) {
+      const connectedModule = connection.module;
+
+      // Skip if module has already been visited
+      if (!connectedModule || visitedModules.has(connectedModule)) {
+        continue;
+      }
+
+      // Handle 'initial' type (skipping async blocks)
+      if (type === 'initial') {
+        const parentBlock = compilation.moduleGraph.getParentBlock(
+          connection.dependency,
+        );
+        if (parentBlock instanceof AsyncDependenciesBlock) {
+          continue;
         }
       }
+
+      // Handle 'external' type (collecting only external modules)
+      if (type === 'external') {
+        if (connection.module instanceof ExternalModule) {
+          collectedModules.add(connectedModule);
+        }
+      } else {
+        // Handle 'all' or unspecified types
+        collectedModules.add(connectedModule);
+      }
+
+      // Add connected module to the stack and mark it as visited
+      visitedModules.add(connectedModule);
+      stack.push(connectedModule);
     }
   }
 
