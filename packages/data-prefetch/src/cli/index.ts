@@ -6,11 +6,22 @@ import {
   moduleFederationPlugin,
   MFPrefetchCommon,
 } from '@module-federation/sdk';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 
 import { TEMP_DIR } from '../common/constant';
 import { fileExistsWithCaseSync, fixPrefetchPath } from '../common/node-utils';
 import { getPrefetchId } from '../common/runtime-utils';
+
+const { RuntimeGlobals, Template } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+
+export function getFederationGlobalScope(
+  runtimeGlobals: typeof RuntimeGlobals,
+): string {
+  return `${runtimeGlobals.require || '__webpack_require__'}.federation`;
+}
 
 export class PrefetchPlugin implements WebpackPluginInstance {
   public options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -96,5 +107,61 @@ export class PrefetchPlugin implements WebpackPluginInstance {
     new compiler.webpack.DefinePlugin({
       FederationDataPrefetch: JSON.stringify(asyncEntryPath),
     }).apply(compiler);
+  }
+
+  static addRuntime(
+    compiler: Compiler,
+    options: {
+      name: string;
+    },
+  ) {
+    const encodedName = encodeName(options.name as string);
+    if (!compiler.options.context) {
+      throw new Error('compiler.options.context is not defined');
+    }
+    const prefetchEntry = path.resolve(
+      compiler.options.context,
+      `node_modules/.mf/${encodedName}/bootstrap.js`,
+    );
+    const federationGlobal = getFederationGlobalScope(
+      RuntimeGlobals || ({} as typeof RuntimeGlobals),
+    );
+
+    return Template.asString([
+      fs.existsSync(prefetchEntry)
+        ? Template.indent([
+            'function injectPrefetch() {',
+            `globalThis.__FEDERATION__ = globalThis.__FEDERATION__ || {};`,
+            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] || {`,
+            `entryLoading: {},`,
+            `instance: new Map(),`,
+            `__PREFETCH_EXPORTS__: {},`,
+            `};`,
+            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] || {};`,
+            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}']['${options.name}'] = import('${prefetchEntry}');`,
+            '}',
+            `${federationGlobal}.prefetch = injectPrefetch`,
+          ])
+        : '',
+      Template.indent([
+        `if(!globalThis.isMFRemote && ${federationGlobal}.prefetch){`,
+        `${federationGlobal}.prefetch()`,
+        '}',
+      ]),
+    ]);
+  }
+
+  static setRemoteIdentifier() {
+    const federationGlobal = getFederationGlobalScope(
+      RuntimeGlobals || ({} as typeof RuntimeGlobals),
+    );
+    return Template.indent([`${federationGlobal}.isMFRemote = true;`]);
+  }
+
+  static removeRemoteIdentifier() {
+    const federationGlobal = getFederationGlobalScope(
+      RuntimeGlobals || ({} as typeof RuntimeGlobals),
+    );
+    return Template.indent([`${federationGlobal}.isMFRemote = false;`]);
   }
 }

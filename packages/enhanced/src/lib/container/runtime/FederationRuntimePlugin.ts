@@ -5,11 +5,8 @@ import type {
   Chunk,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import {
-  MFPrefetchCommon,
-  encodeName,
-  moduleFederationPlugin,
-} from '@module-federation/sdk';
+import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
+import { moduleFederationPlugin } from '@module-federation/sdk';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import {
   getFederationGlobalScope,
@@ -93,14 +90,6 @@ class FederationRuntimePlugin {
         runtimePluginNames.push(runtimePluginName);
       });
     }
-    if (!compiler.options.context) {
-      throw new Error('compiler.options.context is not defined');
-    }
-    const encodedName = encodeName(options.name as string);
-    const prefetchEntry = path.resolve(
-      compiler.options.context,
-      `node_modules/.mf/${encodedName}/bootstrap.js`,
-    );
     const embedRuntimeLines = Template.asString([
       `if(!${federationGlobal}.runtime){`,
       Template.indent([
@@ -145,24 +134,9 @@ class FederationRuntimePlugin {
         Template.indent([`${federationGlobal}.installInitialConsumes()`]),
         '}',
       ]),
-      fs.existsSync(prefetchEntry)
-        ? Template.indent([
-            'function injectPrefetch() {',
-            `globalThis.__FEDERATION__ = globalThis.__FEDERATION__ || {};`,
-            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] || {`,
-            `entryLoading: {},`,
-            `instance: new Map(),`,
-            `__PREFETCH_EXPORTS__: {},`,
-            `};`,
-            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] || {};`,
-            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}']['${options.name}'] = import('${prefetchEntry}');`,
-            '}',
-            `${federationGlobal}.prefetch = injectPrefetch`,
-          ])
-        : '',
-      `if(!globalThis.isRemote && ${federationGlobal}.prefetch){`,
-      `${federationGlobal}.prefetch()`,
-      '}',
+      PrefetchPlugin.addRuntime(compiler, {
+        name: options.name!,
+      }),
       '}',
     ]);
   }
@@ -210,7 +184,6 @@ class FederationRuntimePlugin {
         ),
       )}`;
     }
-
     return this.entryFilePath;
   }
   ensureFile(compiler: Compiler) {

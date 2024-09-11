@@ -1,3 +1,4 @@
+// no used now
 import path from 'path';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
