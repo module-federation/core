@@ -1,5 +1,12 @@
 # @module-federation/runtime
 
+## 0.6.2
+
+### Patch Changes
+
+- 9f98292: fix(runtime): set loading if registeredShared not set
+  - @module-federation/sdk@0.6.2
+
 ## 0.6.1
 
 ### Patch Changes
