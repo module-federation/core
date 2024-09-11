@@ -336,7 +336,7 @@ describe('hooks', () => {
         },
         {
           name: '@loaderEntry-hooks/app3',
-          entry: 'http://mockxxx.com/loadEntryTest',
+          entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
         },
       ],
       plugins: [fetchPlugin(), loadEntryPlugin()],
