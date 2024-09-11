@@ -1,5 +1,15 @@
 # @module-federation/modern-js
 
+## 0.6.2
+
+### Patch Changes
+
+- 541494d: fix(modernjs): correct splitChunks.cacheGroups key which need to be removed
+- 2394e38: fix(modernjs): auto set enableAsyncEntry when bundler is rspack
+  - @module-federation/node@2.5.12
+  - @module-federation/enhanced@0.6.2
+  - @module-federation/sdk@0.6.2
+
 ## 0.6.1
 
 ### Patch Changes
