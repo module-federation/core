@@ -315,7 +315,7 @@ describe('hooks', () => {
       return {
         name: 'load-entry-plugin',
         loadEntry({ remoteInfo }) {
-          if (remoteInfo.name === '@loaderEntry-hooks/app3') {
+          if (remoteInfo.name === '@loader-hooks/app3') {
             return {
               init() {},
               get(path) {
@@ -335,7 +335,7 @@ describe('hooks', () => {
           entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
         },
         {
-          name: '@loaderEntry-hooks/app3',
+          name: '@loader-hooks/app3',
           entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
         },
       ],
@@ -348,7 +348,7 @@ describe('hooks', () => {
     assert(res);
     expect(res()).toBe('hello app2');
     const loadEntryTestRes = await INSTANCE.loadRemote<() => string>(
-      '@loaderEntry-hooks/app3/testtest',
+      '@loader-hooks/app3/testtest',
     );
     assert(loadEntryTestRes);
     expect(loadEntryTestRes()).toBe('testtest');
