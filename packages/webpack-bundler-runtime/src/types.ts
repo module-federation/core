@@ -143,4 +143,5 @@ export interface Federation {
   };
   attachShareScopeMap?: typeof attachShareScopeMap;
   hasAttachShareScopeMap?: boolean;
+  prefetch: () => void;
 }
