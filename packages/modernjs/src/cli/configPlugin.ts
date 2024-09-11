@@ -127,6 +127,10 @@ export const moduleFederationConfigPlugin = (
               FEDERATION_IPV4: JSON.stringify(ipv4),
               REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
             },
+            enableAsyncEntry:
+              bundlerType === 'rspack'
+                ? modernjsConfig.source?.enableAsyncEntry ?? true
+                : modernjsConfig.source?.enableAsyncEntry,
           },
           dev: {
             assetPrefix: modernjsConfig?.dev?.assetPrefix
