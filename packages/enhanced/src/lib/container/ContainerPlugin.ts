@@ -323,6 +323,26 @@ class ContainerPlugin {
             hooks.addFederationRuntimeModule.call(federationRuntimeDependency);
           },
         );
+
+        if (this._options?.experiments?.federationRuntime === 'use-host') {
+          const externalRuntimeDependency =
+            federationRuntimePluginInstance.getMinimalDependency();
+          compilation.addInclude(
+            compiler.context,
+            externalRuntimeDependency,
+            { name: undefined },
+            (err, module) => {
+              if (err) {
+                return logger.error(
+                  'Error adding federation runtime module:',
+                  err,
+                );
+              }
+
+              hooks.addFederationRuntimeModule.call(externalRuntimeDependency);
+            },
+          );
+        }
       },
     );
   }

@@ -214,7 +214,7 @@ export class NextFederationPlugin {
       dts: this._options.dts ?? false,
       shareStrategy: this._options.shareStrategy ?? 'loaded-first',
       experiments: {
-        federationRuntime: 'hoisted',
+        federationRuntime: 'use-host',
       },
     };
   }

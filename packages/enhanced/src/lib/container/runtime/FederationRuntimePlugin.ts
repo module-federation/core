@@ -43,6 +43,13 @@ const BundlerRuntimePath = require.resolve(
     paths: [RuntimeToolsPath],
   },
 );
+
+const EmbeddedBundlerRuntimePath = require.resolve(
+  '@module-federation/webpack-bundler-runtime/embedded',
+  {
+    paths: [RuntimeToolsPath],
+  },
+);
 const RuntimePath = require.resolve('@module-federation/runtime', {
   paths: [RuntimeToolsPath],
 });
@@ -61,22 +68,30 @@ class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
   bundlerRuntimePath: string;
-  federationRuntimeDependency?: FederationRuntimeDependency; // Add this line
+  embeddedBundlerRuntimePath: string;
+  embeddedEntryFilePath: string;
+  federationRuntimeDependency?: FederationRuntimeDependency;
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
     this.bundlerRuntimePath = BundlerRuntimePath;
-    this.federationRuntimeDependency = undefined; // Initialize as undefined
+    this.federationRuntimeDependency = undefined;
+    this.embeddedBundlerRuntimePath = EmbeddedRuntimePath;
+    this.embeddedEntryFilePath = '';
   }
 
   static getTemplate(
     runtimePlugins: string[],
     bundlerRuntimePath?: string,
+    embeddedBundlerRuntimePath?: string,
     experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
+    useMinimalRuntime: boolean = false,
   ) {
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
-      bundlerRuntimePath || BundlerRuntimePath,
+      useMinimalRuntime
+        ? embeddedBundlerRuntimePath || EmbeddedBundlerRuntimePath
+        : bundlerRuntimePath || BundlerRuntimePath,
     );
 
     let runtimePluginTemplates = '';
@@ -148,51 +163,66 @@ class FederationRuntimePlugin {
     containerName: string,
     runtimePlugins: string[],
     bundlerRuntimePath?: string,
+    embeddedBundlerRuntimePath?: string,
     experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
+    useMinimalRuntime: boolean = false,
   ) {
     const hash = createHash(
       `${containerName} ${FederationRuntimePlugin.getTemplate(
         runtimePlugins,
         bundlerRuntimePath,
+        embeddedBundlerRuntimePath,
         experiments,
+        useMinimalRuntime,
       )}`,
     );
     return path.join(TEMP_DIR, `entry.${hash}.js`);
   }
-
-  getFilePath() {
-    if (this.entryFilePath) {
-      return this.entryFilePath;
-    }
-
+  getFilePath(useMinimalRuntime: boolean = false) {
     if (!this.options) {
       return '';
     }
 
-    if (!this.options?.virtualRuntimeEntry) {
-      this.entryFilePath = FederationRuntimePlugin.getFilePath(
-        this.options.name!,
-        this.options.runtimePlugins!,
-        this.bundlerRuntimePath,
-        this.options.experiments,
-      );
-    } else {
-      this.entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
-        FederationRuntimePlugin.getTemplate(
+    const cachedFilePath = useMinimalRuntime
+      ? this.embeddedEntryFilePath
+      : this.entryFilePath;
+    if (cachedFilePath) {
+      return cachedFilePath;
+    }
+
+    const filePath = this.options.virtualRuntimeEntry
+      ? `data:text/javascript;charset=utf-8;base64,${pBtoa(
+          FederationRuntimePlugin.getTemplate(
+            this.options.runtimePlugins!,
+            this.bundlerRuntimePath,
+            this.embeddedBundlerRuntimePath,
+            this.options.experiments,
+            useMinimalRuntime,
+          ),
+        )}`
+      : FederationRuntimePlugin.getFilePath(
+          this.options.name!,
           this.options.runtimePlugins!,
           this.bundlerRuntimePath,
+          this.embeddedBundlerRuntimePath,
           this.options.experiments,
-        ),
-      )}`;
+          useMinimalRuntime,
+        );
+
+    if (useMinimalRuntime) {
+      this.embeddedEntryFilePath = filePath;
+    } else {
+      this.entryFilePath = filePath;
     }
-    return this.entryFilePath;
+
+    return filePath;
   }
 
-  ensureFile() {
+  ensureFile(useMinimalRuntime: boolean = false) {
     if (!this.options) {
       return;
     }
-    const filePath = this.getFilePath();
+    const filePath = this.getFilePath(useMinimalRuntime);
     try {
       fs.readFileSync(filePath);
     } catch (err) {
@@ -202,7 +232,9 @@ class FederationRuntimePlugin {
         FederationRuntimePlugin.getTemplate(
           this.options.runtimePlugins!,
           this.bundlerRuntimePath,
+          this.embeddedBundlerRuntimePath,
           this.options.experiments,
+          useMinimalRuntime,
         ),
       );
     }
@@ -217,6 +249,15 @@ class FederationRuntimePlugin {
     return this.federationRuntimeDependency;
   }
 
+  getMinimalDependency() {
+    if (this.federationRuntimeDependency)
+      return this.federationRuntimeDependency;
+    this.federationRuntimeDependency = new FederationRuntimeDependency(
+      this.getFilePath(true),
+    );
+    return this.federationRuntimeDependency;
+  }
+
   prependEntry(compiler: Compiler) {
     if (!this.options?.virtualRuntimeEntry) {
       this.ensureFile();
@@ -224,6 +265,9 @@ class FederationRuntimePlugin {
 
     //if using runtime experiment, use the new include method else patch entry
     if (this.options?.experiments?.federationRuntime) {
+      if (this.options.experiments.federationRuntime === 'use-host') {
+        this.ensureFile(true);
+      }
       compiler.hooks.thisCompilation.tap(
         this.constructor.name,
         (compilation: Compilation, { normalModuleFactory }) => {
@@ -342,17 +386,19 @@ class FederationRuntimePlugin {
 
   setRuntimeAlias(compiler: Compiler) {
     const { experiments, implementation } = this.options || {};
-    const isHoisted = experiments?.federationRuntime === 'hoisted';
-    let runtimePath = isHoisted ? EmbeddedRuntimePath : RuntimePath;
+    const useExperimentalRuntime = experiments?.federationRuntime;
+    let runtimePath = useExperimentalRuntime
+      ? EmbeddedRuntimePath
+      : RuntimePath;
 
     if (implementation) {
       runtimePath = require.resolve(
-        `@module-federation/runtime${isHoisted ? '/embedded' : ''}`,
+        `@module-federation/runtime${useExperimentalRuntime ? '/embedded' : ''}`,
         { paths: [implementation] },
       );
     }
 
-    if (isHoisted) {
+    if (useExperimentalRuntime) {
       runtimePath = runtimePath.replace('.cjs', '.esm');
     }
 
@@ -417,9 +463,21 @@ class FederationRuntimePlugin {
           paths: [this.options.implementation],
         },
       );
+
+      this.embeddedBundlerRuntimePath = require.resolve(
+        '@module-federation/webpack-bundler-runtime/embedded',
+        {
+          paths: [this.options.implementation],
+        },
+      );
     }
-    if (this.options?.experiments?.federationRuntime === 'hoisted') {
+    if (this.options?.experiments?.federationRuntime) {
       this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
+        '.cjs.js',
+        '.esm.js',
+      );
+
+      this.embeddedBundlerRuntimePath = this.embeddedBundlerRuntimePath.replace(
         '.cjs.js',
         '.esm.js',
       );
