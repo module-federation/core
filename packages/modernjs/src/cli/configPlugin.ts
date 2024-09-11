@@ -54,6 +54,7 @@ export const moduleFederationConfigPlugin = (
   userConfig: InternalModernPluginOptions,
 ): CliPlugin<AppTools> => ({
   name: '@modern-js/plugin-module-federation-config',
+  pre: ['@modern-js/plugin-initialize'],
   post: ['@modern-js/plugin-module-federation'],
   setup: async ({ useConfigContext, useAppContext }) => {
     const modernjsConfig = useConfigContext();
