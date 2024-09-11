@@ -1,5 +1,11 @@
 # @module-federation/retry-plugin
 
+## 0.6.2
+
+### Patch Changes
+
+- 59758b7: Use correct paths for export
+
 ## 0.6.1
 
 ### Patch Changes
