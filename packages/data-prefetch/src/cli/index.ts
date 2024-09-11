@@ -144,7 +144,7 @@ export class PrefetchPlugin implements WebpackPluginInstance {
           ])
         : '',
       Template.indent([
-        `if(!globalThis.isMFRemote && ${federationGlobal}.prefetch){`,
+        `if(!${federationGlobal}.isMFRemote && ${federationGlobal}.prefetch){`,
         `${federationGlobal}.prefetch()`,
         '}',
       ]),
