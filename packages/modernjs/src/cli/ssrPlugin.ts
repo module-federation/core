@@ -42,16 +42,7 @@ export const moduleFederationSSRPlugin = (
         return { entrypoint, plugins };
       },
       config: async () => {
-        const bundlerType =
-          useAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
-
         return {
-          source: {
-            enableAsyncEntry:
-              bundlerType === 'rspack'
-                ? modernjsConfig.source?.enableAsyncEntry ?? true
-                : modernjsConfig.source?.enableAsyncEntry,
-          },
           tools: {
             rspack(config, { isServer }) {
               if (isServer) {

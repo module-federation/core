@@ -1,4 +1,4 @@
-import { ScriptWithRetryOptions, CreateScriptFunc, ReqiuredUrl } from './types';
+import { ScriptWithRetryOptions, CreateScriptFunc, RequiredUrl } from './types';
 import { defaultRetries, defaultRetryDelay, loadStatus } from './constant';
 
 export const defaultCreateScript = (
@@ -96,7 +96,7 @@ function scriptWithRetry({
   retryTimes = defaultRetries, // retry times
   retryDelay = defaultRetryDelay, // retry delay
   customCreateScript, // user script create function
-}: ReqiuredUrl<ScriptWithRetryOptions>) {
+}: RequiredUrl<ScriptWithRetryOptions>) {
   const script = getScript(url, attrs, customCreateScript);
   const originOnerror = script.onerror;
   const originOnLoad = script.onload;

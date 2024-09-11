@@ -370,8 +370,8 @@ export const getIPV4 = (): string => {
 // lib-axios.js: include axios.
 
 const SPLIT_CHUNK_MAP = {
-  REACT: 'lib-react',
-  ROUTER: 'lib-router',
+  REACT: 'react',
+  ROUTER: 'router',
   LODASH: 'lib-lodash',
   ANTD: 'lib-antd',
   ARCO: 'lib-arco',
