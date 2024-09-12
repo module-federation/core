@@ -1,5 +1,14 @@
 # @module-federation/modern-js
 
+## 0.6.3
+
+### Patch Changes
+
+- 81201b8: fix(modernjs): mfConfigPlugin should run after @modern-js/plugin-initialize
+  - @module-federation/enhanced@0.6.3
+  - @module-federation/sdk@0.6.3
+  - @module-federation/node@2.5.13
+
 ## 0.6.2
 
 ### Patch Changes
