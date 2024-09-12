@@ -31,7 +31,9 @@ class EmbedFederationRuntimePlugin {
         hooks.addFederationRuntimeModule.tap(
           'EmbedFederationRuntimePlugin',
           (dependency: FederationRuntimeDependency) => {
-            containerEntrySet.add(dependency);
+            if (!dependency.minimal) {
+              containerEntrySet.add(dependency);
+            }
           },
         );
 

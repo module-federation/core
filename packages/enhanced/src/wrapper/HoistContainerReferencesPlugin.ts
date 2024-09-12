@@ -1,5 +1,6 @@
 import type { WebpackPluginInstance, Compiler } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { moduleFederationPlugin } from '@module-federation/sdk';
 
 const PLUGIN_NAME = 'HoistContainerReferencesPlugin';
 
@@ -7,21 +8,12 @@ export default class HoistContainerReferencesPlugin
   implements WebpackPluginInstance
 {
   name: string;
-  private containerName: string;
-  private entryFilePath?: string;
-  private bundlerRuntimeDep?: string;
-  private explanation: string;
+  private readonly experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
 
   constructor(
-    name?: string,
-    entryFilePath?: string,
-    bundlerRuntimeDep?: string,
+    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
   ) {
-    this.containerName = name || 'no known chunk name';
-    this.entryFilePath = entryFilePath;
-    this.bundlerRuntimeDep = bundlerRuntimeDep;
-    this.explanation =
-      'Bundler runtime path module is required for proper functioning';
+    this.experiments = experiments;
     this.name = PLUGIN_NAME;
   }
 
@@ -31,10 +23,6 @@ export default class HoistContainerReferencesPlugin
     const CoreHoistContainerReferencesPlugin =
       require('../lib/container/HoistContainerReferencesPlugin')
         .default as typeof import('../lib/container/HoistContainerReferencesPlugin').default;
-    new CoreHoistContainerReferencesPlugin(
-      this.containerName,
-      this.entryFilePath,
-      this.bundlerRuntimeDep,
-    ).apply(compiler);
+    new CoreHoistContainerReferencesPlugin(this.experiments).apply(compiler);
   }
 }
