@@ -36,6 +36,7 @@ export default defineConfig({
         config.output.uniqueName = 'modern-js-app1';
       }
 
+      config.module!.unknownContextCritical = false;
       appendPlugins([
         new AsyncBoundaryPlugin({
           excludeChunk: chunk => chunk.name === 'app1',
