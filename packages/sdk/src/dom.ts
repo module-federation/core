@@ -49,7 +49,7 @@ export function createScript(info: {
   if (!script) {
     const attrs = info.attrs;
     script = document.createElement('script');
-    script.type = attrs?.["type"] || 'text/javascript';
+    script.type = attrs?.["type"] === "module" ? "module" : 'text/javascript';
     script.src = info.url;
     let createScriptRes: CreateScriptHookReturnDom = undefined;
     if (info.createScriptHook) {
