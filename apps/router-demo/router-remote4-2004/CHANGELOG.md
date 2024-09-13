@@ -1,5 +1,19 @@
 # remote4
 
+## 1.0.22
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.3
+- @module-federation/bridge-react@0.6.3
+
+## 1.0.21
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.2
+- @module-federation/bridge-react@0.6.2
+
 ## 1.0.20
 
 ### Patch Changes
