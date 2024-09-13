@@ -483,21 +483,24 @@ export class SharedHandler {
         this.shareScopeMap[sc][pkgName] = {};
       }
 
-      if (this.shareScopeMap[sc][pkgName][version]) {
+      if (!this.shareScopeMap[sc][pkgName][version]) {
+        this.shareScopeMap[sc][pkgName][version] = {
+          version,
+          scope: ['default'],
+          ...shareInfo,
+          lib,
+          loaded,
+          loading,
+        };
+        if (get) {
+          this.shareScopeMap[sc][pkgName][version].get = get;
+        }
         return;
       }
 
-      this.shareScopeMap[sc][pkgName][version] = {
-        version,
-        scope: ['default'],
-        ...shareInfo,
-        lib,
-        loaded,
-        loading,
-      };
-
-      if (get) {
-        this.shareScopeMap[sc][pkgName][version].get = get;
+      const registeredShared = this.shareScopeMap[sc][pkgName][version];
+      if (loading && !registeredShared.loading) {
+        registeredShared.loading = loading;
       }
     });
   }
