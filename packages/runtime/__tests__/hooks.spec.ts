@@ -351,6 +351,6 @@ describe('hooks', () => {
       '@loader-hooks/app3/testtest',
     );
     assert(loadEntryTestRes);
-    expect(loadEntryTestRes()).toBe('testtest');
+    expect(loadEntryTestRes).toBe('./testtest');
   });
 });
