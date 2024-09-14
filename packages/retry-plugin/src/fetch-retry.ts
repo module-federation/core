@@ -1,4 +1,4 @@
-import type { ReqiuredUrl, FetchWithRetryOptions } from './types';
+import type { RequiredUrl, FetchWithRetryOptions } from './types';
 import { defaultRetries, defaultRetryDelay } from './constant';
 
 async function fetchWithRetry({
@@ -7,7 +7,7 @@ async function fetchWithRetry({
   retryTimes = defaultRetries, // retry times
   retryDelay = defaultRetryDelay, // retry delay
   fallback, // fallback url
-}: ReqiuredUrl<FetchWithRetryOptions>) {
+}: RequiredUrl<FetchWithRetryOptions>) {
   try {
     const response = await fetch(url, options);
 
