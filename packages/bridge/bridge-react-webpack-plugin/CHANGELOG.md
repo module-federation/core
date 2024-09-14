@@ -1,5 +1,12 @@
 # @module-federation/bridge-react-webpack-plugin
 
+## 0.6.4
+
+### Patch Changes
+
+- d90295b: chore: adjust bridge router alias strategy to alias to router-v6 when not found react-router-dom in package.json
+  - @module-federation/sdk@0.6.4
+
 ## 0.6.3
 
 ### Patch Changes
