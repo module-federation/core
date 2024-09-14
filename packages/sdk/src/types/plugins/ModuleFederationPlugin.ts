@@ -82,6 +82,7 @@ export type ExternalsType =
   | 'promise'
   | 'import'
   | 'script'
+  | 'module-import'
   | 'node-commonjs';
 /**
  * Container locations and request scopes from which modules should be resolved and loaded at runtime. When provided, property name is used as request scope, otherwise request scope is automatically inferred from container location.
@@ -228,6 +229,9 @@ export interface ModuleFederationPluginOptions {
   dts?: boolean | PluginDtsOptions;
   async?: boolean | AsyncBoundaryOptions;
   virtualRuntimeEntry?: boolean;
+  experiments?: {
+    federationRuntime?: false | 'hoisted';
+  };
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

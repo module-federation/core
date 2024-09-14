@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { loadRemote } from '@module-federation/runtime';
 
-import { injectScript } from '@module-federation/nextjs-mf/utils';
-
 export default function ExposedPages() {
   const [pageMap, setPageMap] = useState('');
   const [pageMapV2, setPageMapV2] = useState('');

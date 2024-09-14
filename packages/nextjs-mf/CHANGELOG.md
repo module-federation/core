@@ -1,5 +1,62 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.5.3
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.4
+- @module-federation/node@2.5.14
+- @module-federation/runtime@0.6.4
+- @module-federation/webpack-bundler-runtime@0.6.4
+- @module-federation/sdk@0.6.4
+- @module-federation/utilities@3.1.10
+
+## 8.5.2
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.3
+- @module-federation/enhanced@0.6.3
+- @module-federation/webpack-bundler-runtime@0.6.3
+- @module-federation/sdk@0.6.3
+- @module-federation/node@2.5.13
+- @module-federation/utilities@3.1.9
+
+## 8.5.1
+
+### Patch Changes
+
+- Updated dependencies [9f98292]
+  - @module-federation/runtime@0.6.2
+  - @module-federation/node@2.5.12
+  - @module-federation/webpack-bundler-runtime@0.6.2
+  - @module-federation/enhanced@0.6.2
+  - @module-federation/sdk@0.6.2
+  - @module-federation/utilities@3.1.8
+
+## 8.5.0
+
+### Minor Changes
+
+- 2855583: add hoisted runtime flag: experiments.federationRuntime === 'hoisted' | false
+- 2855583: Remove module-federation/utilities package exports
+  Should use module-federation/runtime instead
+
+### Patch Changes
+
+- df76031: Make CSR and SSR image loading consistent
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/enhanced@0.6.1
+  - @module-federation/webpack-bundler-runtime@0.6.1
+  - @module-federation/runtime@0.6.1
+  - @module-federation/sdk@0.6.1
+  - @module-federation/node@2.5.11
+  - @module-federation/utilities@3.1.7
+
 ## 8.4.13
 
 ### Patch Changes

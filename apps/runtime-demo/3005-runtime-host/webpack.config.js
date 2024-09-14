@@ -11,10 +11,12 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   config.watchOptions = {
     ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
   };
+
   // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
   config.plugins.push(
     new ModuleFederationPlugin({
       name: 'runtime_host',
+      experiments: { federationRuntime: 'hoisted' },
       remotes: {
         // remote2: 'runtime_remote2@http://localhost:3007/remoteEntry.js',
         remote1: 'runtime_remote1@http://127.0.0.1:3006/mf-manifest.json',
@@ -76,7 +78,6 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       },
     }),
   );
-  config.optimization.runtimeChunk = false;
   if (!config.devServer) {
     config.devServer = {};
   }
@@ -100,6 +101,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   config.optimization = {
     runtimeChunk: false,
     minimize: false,
+    moduleIds: 'named',
   };
   // const mf = await withModuleFederation(defaultConfig);
   return config;

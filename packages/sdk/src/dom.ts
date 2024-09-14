@@ -80,11 +80,11 @@ export function createScript(info: {
     }
   }
 
-  const onScriptComplete = (
+  const onScriptComplete = async (
     prev: OnErrorEventHandler | GlobalEventHandlers['onload'] | null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event: any,
-  ): void => {
+  ): Promise<void> => {
     clearTimeout(timeoutId);
     // Prevent memory leaks in IE.
     if (script) {
@@ -96,11 +96,15 @@ export function createScript(info: {
           script?.parentNode && script.parentNode.removeChild(script);
         }
       });
-      if (prev) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const res = (prev as any)(event);
+      if (prev && typeof prev === 'function') {
+        const result = (prev as any)(event);
+        if (result instanceof Promise) {
+          const res = await result;
+          info?.cb?.();
+          return res;
+        }
         info?.cb?.();
-        return res;
+        return result;
       }
     }
     info?.cb?.();

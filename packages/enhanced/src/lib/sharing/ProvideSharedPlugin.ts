@@ -268,7 +268,7 @@ class ProvideSharedPlugin {
 
         compilation.dependencyFactories.set(
           ProvideSharedDependency,
-          // @ts-ignore
+          //@ts-ignore
           new ProvideSharedModuleFactory(),
         );
       },

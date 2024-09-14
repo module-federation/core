@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime",
-  "version": "0.6.0",
+  "version": "0.6.4",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
@@ -29,10 +29,10 @@
       "import": "./dist/types.esm.js",
       "require": "./dist/types.cjs.js"
     },
-    "./retry-plugin": {
-      "types": "./dist/retry-plugin.cjs.d.ts",
-      "import": "./dist/retry-plugin.esm.js",
-      "require": "./dist/retry-plugin.cjs.js"
+    "./embedded": {
+      "types": "./dist/embedded.cjs.d.ts",
+      "import": "./dist/embedded.esm.js",
+      "require": "./dist/embedded.cjs.js"
     },
     "./*": "./*"
   },
@@ -46,9 +46,6 @@
       ],
       "types": [
         "./dist/types.cjs.d.ts"
-      ],
-      "retry-plugin": [
-        "./dist/retry-plugin.cjs.d.ts"
       ]
     }
   },

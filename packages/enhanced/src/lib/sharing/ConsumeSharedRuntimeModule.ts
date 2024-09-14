@@ -92,6 +92,13 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         moduleIdToSourceMapping.set(id, sharedInfoAndHandlerStr);
       }
     };
+    // const chunkReferences = this._runtimeRequirements.has(
+    //   'federation-entry-startup',
+    // )
+    //   ? this.chunk?.getAllReferencedChunks()
+    //   : this.chunk?.getAllAsyncChunks();
+    //
+    // const allChunks = chunkReferences || [];
     const allChunks = [...(this.chunk?.getAllReferencedChunks() || [])];
     for (const chunk of allChunks) {
       const modules = chunkGraph.getChunkModulesIterableBySourceType(
