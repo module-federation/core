@@ -10,7 +10,7 @@ const pluginSystem = new pluginHelper.PluginSystem({
 });
 
 registerPlugin<typeof pluginSystem.lifecycle, typeof pluginSystem>(
-  host.options.plugins,
+  host?.options?.plugins,
   [pluginSystem],
 );
 
