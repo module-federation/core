@@ -5,7 +5,9 @@
 
 import { ExposeOptions } from './ContainerEntryModule';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { containerPlugin } from 'packages/sdk/dist/src';
+
+import type { containerPlugin } from '@module-federation/sdk';
+
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 );
