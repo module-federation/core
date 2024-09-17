@@ -21,23 +21,6 @@ class RuntimeModuleChunkPlugin {
     compiler.hooks.thisCompilation.tap(
       'ModuleChunkFormatPlugin',
       (compilation: Compilation) => {
-        compilation.hooks.optimizeModuleIds.tap(
-          'ModuleChunkFormatPlugin',
-          (modules: Iterable<Module>) => {
-            for (const module of modules) {
-              const moduleId = compilation.chunkGraph.getModuleId(module);
-              if (typeof moduleId === 'string') {
-                compilation.chunkGraph.setModuleId(
-                  module,
-                  `(embed)${moduleId}`,
-                );
-              } else {
-                compilation.chunkGraph.setModuleId(module, `1000${moduleId}`);
-              }
-            }
-          },
-        );
-
         const hooks =
           compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
             compilation,

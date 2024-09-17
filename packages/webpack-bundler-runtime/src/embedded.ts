@@ -8,7 +8,14 @@ import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
 
 export * from './types';
-
+//@ts-ignore
+// const federationInstance = new globalThis.sharedRuntime.FederationManager();
+// const runtime = {
+//   //@ts-ignore
+//   ...globalThis.sharedRuntime,
+//   ...federationInstance.getMethods(),
+// };
+// debugger;
 const federation: Federation = {
   runtime,
   instance: undefined,

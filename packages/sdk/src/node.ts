@@ -1,4 +1,4 @@
-import { CreateScriptHookNode } from './types';
+import { CreateScriptHookNode, FetchHook } from './types';
 
 function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
@@ -22,12 +22,10 @@ const loadNodeFetch = async (): Promise<typeof fetch> => {
 const lazyLoaderHookFetch = async (
   input: RequestInfo | URL,
   init?: RequestInit,
+  loaderHook?: any,
 ): Promise<Response> => {
-  // @ts-ignore
-  const loaderHooks = __webpack_require__.federation.instance.loaderHook;
-
   const hook = (url: RequestInfo | URL, init: RequestInit) => {
-    return loaderHooks.lifecycle.fetch.emit(url, init);
+    return loaderHook.lifecycle.fetch.emit(url, init);
   };
 
   const res = await hook(input, init || {});
@@ -44,10 +42,13 @@ export function createScriptNode(
   url: string,
   cb: (error?: Error, scriptContext?: any) => void,
   attrs?: Record<string, any>,
-  createScriptHook?: CreateScriptHookNode,
+  loaderHook?: {
+    createScriptHook?: CreateScriptHookNode;
+    fetch?: FetchHook;
+  },
 ) {
-  if (createScriptHook) {
-    const hookResult = createScriptHook(url);
+  if (loaderHook?.createScriptHook) {
+    const hookResult = loaderHook.createScriptHook(url);
     if (hookResult && typeof hookResult === 'object' && 'url' in hookResult) {
       url = hookResult.url;
     }
@@ -63,20 +64,9 @@ export function createScriptNode(
   }
 
   const getFetch = async (): Promise<typeof fetch> => {
-    //@ts-ignore
-    if (typeof __webpack_require__ !== 'undefined') {
-      try {
-        //@ts-ignore
-        const loaderHooks = __webpack_require__.federation.instance.loaderHook;
-        if (loaderHooks.lifecycle.fetch) {
-          return lazyLoaderHookFetch;
-        }
-      } catch (e) {
-        console.warn(
-          'federation.instance.loaderHook.lifecycle.fetch failed:',
-          e,
-        );
-      }
+    if (loaderHook?.fetch) {
+      return (input: RequestInfo | URL, init?: RequestInit) =>
+        lazyLoaderHookFetch(input, init, loaderHook);
     }
 
     return typeof fetch === 'undefined' ? loadNodeFetch() : fetch;
@@ -86,34 +76,47 @@ export function createScriptNode(
     try {
       const res = await f(urlObj.href);
       const data = await res.text();
-      const [path, vm] = await Promise.all([
+      const [path, vm, fs] = await Promise.all([
         importNodeModule<typeof import('path')>('path'),
         importNodeModule<typeof import('vm')>('vm'),
+        importNodeModule<typeof import('fs')>('fs'),
       ]);
 
       const scriptContext = { exports: {}, module: { exports: {} } };
       const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
-      const filename = path.basename(urlObj.pathname);
+      let filename = path.basename(urlObj.pathname);
 
-      const script = new vm.Script(
-        `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
-        {
-          filename,
-          importModuleDynamically:
-            vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
-        },
+      if (attrs && attrs['globalName']) {
+        filename = attrs['globalName'] + '_' + filename;
+      }
+      const dir = __dirname;
+      // if(!fs.existsSync(path.join(dir, '../../../', filename))) {
+      fs.writeFileSync(path.join(dir, '../../../', filename), data);
+      // }
+
+      // const script = new vm.Script(
+      //   `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
+      //   {
+      //     filename,
+      //     importModuleDynamically:
+      //       vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
+      //   },
+      // );
+      //
+      // script.runInThisContext()(
+      //   scriptContext.exports,
+      //   scriptContext.module,
+      //   //@ts-ignore
+      //   typeof __non_webpack_require__ === 'undefined' ? eval('require') : __non_webpack_require__,
+      //   urlDirname,
+      //   filename,
+      // );
+      //@ts-ignore
+      const exportedInterface = __non_webpack_require__(
+        path.join(dir, '../../../', filename),
       );
-
-      script.runInThisContext()(
-        scriptContext.exports,
-        scriptContext.module,
-        eval('require'),
-        urlDirname,
-        filename,
-      );
-
-      const exportedInterface: Record<string, any> =
-        scriptContext.module.exports || scriptContext.exports;
+      // const exportedInterface: Record<string, any> =
+      //   scriptContext.module.exports || scriptContext.exports;
 
       if (attrs && exportedInterface && attrs['globalName']) {
         const container =
@@ -142,7 +145,9 @@ export function loadScriptNode(
   url: string,
   info: {
     attrs?: Record<string, any>;
-    createScriptHook?: CreateScriptHookNode;
+    loaderHook?: {
+      createScriptHook?: CreateScriptHookNode;
+    };
   },
 ) {
   return new Promise<void>((resolve, reject) => {
@@ -161,7 +166,7 @@ export function loadScriptNode(
         }
       },
       info.attrs,
-      info.createScriptHook,
+      info.loaderHook,
     );
   });
 }

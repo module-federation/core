@@ -26,6 +26,8 @@ class InvertedContainerPlugin {
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'EmbeddedContainerPlugin',
           (chunk, set) => {
+            if (!chunk.hasRuntime()) return;
+
             compilation.addRuntimeModule(
               chunk,
               new InvertedContainerRuntimeModule({

@@ -39,6 +39,7 @@ function MyApp(props) {
       Router.events.off('routeChangeStart', handleRouteChange);
     };
   }, []);
+  console.log('app render');
   return (
     <StyleProvider layer>
       <ConfigProvider theme={{ hashed: false }}>

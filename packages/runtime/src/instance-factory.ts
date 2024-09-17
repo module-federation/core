@@ -1,10 +1,16 @@
 const {
-  FederationHost,
+  FederationManager,
   registerGlobalPlugins,
   getRemoteEntry,
   getRemoteInfo,
   loadScript,
   loadScriptNode,
+  //@ts-ignore
+} = __webpack_require__.federation.runtime;
+
+const federationManager = new FederationManager();
+
+export const {
   init,
   loadRemote,
   loadShare,
@@ -13,24 +19,13 @@ const {
   registerRemotes,
   registerPlugins,
   getInstance,
-  FederationManager,
-  //@ts-ignore
-} = __webpack_require__.federation.runtime as typeof import('./index');
+} = federationManager;
 
 export {
-  FederationHost,
+  FederationManager,
   registerGlobalPlugins,
   getRemoteEntry,
   getRemoteInfo,
   loadScript,
   loadScriptNode,
-  init,
-  loadRemote,
-  loadShare,
-  loadShareSync,
-  preloadRemote,
-  registerRemotes,
-  registerPlugins,
-  getInstance,
-  FederationManager,
 };

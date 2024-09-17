@@ -1,8 +1,10 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { moduleFederationPlugin } from '@module-federation/sdk';
 import { getFederationGlobalScope } from './utils';
 import type { Chunk, Module, NormalModule as NormalModuleType } from 'webpack';
 import ContainerEntryDependency from '../ContainerEntryDependency';
 import type FederationRuntimeDependency from './FederationRuntimeDependency';
+import { getAllReferencedModules } from '../HoistContainerReferencesPlugin';
 
 const { RuntimeModule, NormalModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
@@ -14,19 +16,23 @@ const ConcatenatedModule = require(
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class EmbedFederationRuntimeModule extends RuntimeModule {
-  private bundlerRuntimePath: string;
+  private experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
   private containerEntrySet: Set<
     ContainerEntryDependency | FederationRuntimeDependency
   >;
 
   constructor(
-    bundlerRuntimePath: string,
+    experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
     containerEntrySet: Set<
       ContainerEntryDependency | FederationRuntimeDependency
     >,
+    isHost: boolean,
   ) {
-    super('embed federation', RuntimeModule.STAGE_ATTACH);
-    this.bundlerRuntimePath = bundlerRuntimePath;
+    super(
+      'embed federation',
+      isHost ? RuntimeModule.STAGE_ATTACH : RuntimeModule.STAGE_TRIGGER,
+    );
+    this.experiments = experiments;
     this.containerEntrySet = containerEntrySet;
   }
 
@@ -35,53 +41,68 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
   }
 
   override generate(): string | null {
-    const { compilation, chunk, chunkGraph, bundlerRuntimePath } = this;
+    const { compilation, chunk, chunkGraph, experiments } = this;
     if (!chunk || !chunkGraph || !compilation) {
       return null;
     }
 
     let found;
-
-    if (chunk.name) {
-      for (const dep of this.containerEntrySet) {
-        const mod = compilation.moduleGraph.getModule(dep);
-        if (mod && compilation.chunkGraph.isModuleInChunk(mod, chunk)) {
+    let minimal;
+    for (const dep of this.containerEntrySet) {
+      const mod = compilation.moduleGraph.getModule(dep);
+      if (mod && compilation.chunkGraph.isModuleInChunk(mod, chunk)) {
+        //@ts-ignore
+        if (dep.minimal) {
+          minimal = mod as NormalModuleType;
+        } else {
           found = mod as NormalModuleType;
-          break;
         }
       }
     }
 
-    // const found = this.findModule(chunk, bundlerRuntimePath);
-    if (!found) {
+    if (!found && !minimal) {
       return null;
     }
 
-    const initRuntimeModuleGetter = compilation.runtimeTemplate.moduleRaw({
-      module: found,
-      chunkGraph,
-      request: found.request,
-      weak: false,
-      runtimeRequirements: new Set(),
-    });
-    const exportExpr = compilation.runtimeTemplate.exportFromImport({
-      moduleGraph: compilation.moduleGraph,
-      module: found,
-      request: found.request,
-      exportName: ['default'],
-      originModule: found,
-      asiSafe: true,
-      isCall: false,
-      callContext: false,
-      defaultInterop: true,
-      importVar: 'federation',
-      initFragments: [],
-      runtime: chunk.runtime,
-      runtimeRequirements: new Set(),
-    });
+    let initRuntimeModuleGetter = '';
+
+    if (found) {
+      initRuntimeModuleGetter = Template.asString([
+        compilation.runtimeTemplate.moduleRaw({
+          module: found,
+          chunkGraph,
+          request: found.request,
+          weak: false,
+          runtimeRequirements: new Set(),
+        }),
+        'const runtime = __webpack_require__.federation.runtime;',
+        'if(!runtime) console.error("shared runtime is not available");',
+        `globalThis.sharedRuntime = {
+          FederationManager: runtime.FederationManager,
+          FederationHost: runtime.FederationHost,
+          loadScript: runtime.loadScript,
+          loadScriptNode: runtime.loadScriptNode,
+          FederationHost: runtime.FederationHost,
+          registerGlobalPlugins: runtime.registerGlobalPlugins,
+          getRemoteInfo: runtime.getRemoteInfo,
+          getRemoteEntry: runtime.getRemoteEntry,
+        }`,
+      ]);
+    } else if (minimal) {
+      initRuntimeModuleGetter = Template.asString([
+        '__webpack_require__.federation.runtime = globalThis.sharedRuntime;',
+        compilation.runtimeTemplate.moduleRaw({
+          module: minimal,
+          chunkGraph,
+          request: minimal.request,
+          weak: false,
+          runtimeRequirements: new Set(),
+        }),
+      ]);
+    }
 
     return Template.asString([
-      `${initRuntimeModuleGetter}`,
+      initRuntimeModuleGetter,
       // 'console.log(__webpack_require__.federation)',
       // `federation = ${exportExpr}`,
       // `var prevFederation = ${federationGlobal};`,
