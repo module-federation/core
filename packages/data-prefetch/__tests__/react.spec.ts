@@ -1,3 +1,4 @@
+import { FederationHost, init } from '@module-federation/runtime';
 import { renderHook, act } from '@testing-library/react-hooks';
 import * as ModuleFederationSDK from '@module-federation/sdk';
 import { usePrefetch } from '../src/react';
@@ -45,6 +46,14 @@ describe('usePrefetch', () => {
     Promise.resolve(params ? params : testData),
   );
 
+  new FederationHost({
+    name: options.name,
+    remotes: [],
+  });
+  init({
+    name: options.name,
+    remotes: [],
+  });
   beforeEach(() => {
     globalThis.__FEDERATION__.__PREFETCH__ = {
       entryLoading: {},

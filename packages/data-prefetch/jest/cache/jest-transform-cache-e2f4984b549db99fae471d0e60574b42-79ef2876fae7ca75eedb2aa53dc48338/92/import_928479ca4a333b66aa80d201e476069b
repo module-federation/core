@@ -1,0 +1,7 @@
+451166318bdeb61955342fb355cbe56d
+module.exports = function import_(filepath) {
+  return import(filepath);
+};
+0 && 0;
+
+//# sourceMappingURL=import.cjs.map
