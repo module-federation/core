@@ -158,7 +158,7 @@ async function loadEntryNode({
   }
 
   return loadScriptNode(entry, {
-    attrs: { name, globalName, type: type },
+    attrs: { name, globalName, type },
     createScriptHook: (url, attrs) => {
       const res = createScriptHook.emit({ url, attrs });
 
