@@ -2,7 +2,7 @@ import { MFDataPrefetch, type prefetchOptions } from '../prefetch';
 import { getScope } from '../common/runtime-utils';
 
 export function prefetch(options: prefetchOptions): Promise<any> {
-  const { id, functionId } = options;
+  const { id, functionId = 'default' } = options;
   const mfScope = getScope();
 
   const prefetchInstance =
