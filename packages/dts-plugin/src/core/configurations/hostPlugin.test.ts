@@ -41,6 +41,7 @@ describe('hostPlugin', () => {
           abortOnError: true,
           consumeAPITypes: false,
           runtimePkgs: [],
+          remoteBasePath: 'file:',
         });
 
         expect(mapRemotesToDownload).toStrictEqual({
@@ -66,6 +67,7 @@ describe('hostPlugin', () => {
           abortOnError: true,
           consumeAPITypes: false,
           runtimePkgs: [],
+          remoteBasePath: 'file:',
         };
 
         const { hostOptions, mapRemotesToDownload } =
@@ -140,6 +142,55 @@ describe('hostPlugin', () => {
           name: '/subpatha/mf-manifest.json',
           url: '/subpatha/mf-manifest.json',
           zipUrl: '/subpatha/@mf-types.zip',
+        },
+      });
+    });
+
+    it('uses the provided remote base path for relative remote urls', () => {
+      const subpathModuleFederationConfig = {
+        ...moduleFederationConfig,
+        remotes: {
+          moduleFederationTypescript: '/subpatha/mf-manifest.json',
+        },
+      };
+
+      const { mapRemotesToDownload } = retrieveHostConfig({
+        moduleFederationConfig: subpathModuleFederationConfig,
+        remoteBasePath: 'http://localhost:3000',
+      });
+
+      expect(mapRemotesToDownload).toStrictEqual({
+        moduleFederationTypescript: {
+          alias: 'moduleFederationTypescript',
+          apiTypeUrl: 'http://localhost:3000/subpatha/@mf-types.d.ts',
+          name: '/subpatha/mf-manifest.json',
+          url: 'http://localhost:3000/subpatha/mf-manifest.json',
+          zipUrl: 'http://localhost:3000/subpatha/@mf-types.zip',
+        },
+      });
+    });
+
+    it('ignores the provided remote base path for absolute remote urls', () => {
+      const subpathModuleFederationConfig = {
+        ...moduleFederationConfig,
+        remotes: {
+          moduleFederationTypescript:
+            'http://localhost:3333/subpatha/mf-manifest.json',
+        },
+      };
+
+      const { mapRemotesToDownload } = retrieveHostConfig({
+        moduleFederationConfig: subpathModuleFederationConfig,
+        remoteBasePath: 'http://localhost:3000',
+      });
+
+      expect(mapRemotesToDownload).toStrictEqual({
+        moduleFederationTypescript: {
+          alias: 'moduleFederationTypescript',
+          apiTypeUrl: 'http://localhost:3333/subpatha/@mf-types.d.ts',
+          name: 'http://localhost:3333/subpatha/mf-manifest.json',
+          url: 'http://localhost:3333/subpatha/mf-manifest.json',
+          zipUrl: 'http://localhost:3333/subpatha/@mf-types.zip',
         },
       });
     });

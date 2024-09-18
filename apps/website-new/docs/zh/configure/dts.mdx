@@ -148,6 +148,7 @@ interface DtsHostOptions {
   deleteTypesFolder?: boolean;
   maxRetries?: number;
   consumeAPITypes?: boolean;
+  remoteBasePath?: string;
 }
 ```
 
@@ -208,6 +209,15 @@ interface DtsHostOptions {
 - 默认值：`'@mf-types'`
 
 对应 `remotes` 目录配置的 `typesFolder`
+
+#### remoteBasePath
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`''`
+
+在定位类型时，用作相对远程 URL 的默认基础路径
+
 
 ### tsConfigPath
 

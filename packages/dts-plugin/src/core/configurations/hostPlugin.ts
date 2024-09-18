@@ -8,6 +8,8 @@ import { utils } from '@module-federation/managers';
 import { HostOptions, RemoteInfo } from '../interfaces/HostOptions';
 import { validateOptions } from '../lib/utils';
 
+const fileBase = 'file:';
+
 const defaultOptions = {
   typesFolder: '@mf-types',
   remoteTypesFolder: '@mf-types',
@@ -18,18 +20,31 @@ const defaultOptions = {
   abortOnError: true,
   consumeAPITypes: false,
   runtimePkgs: [],
+  remoteBasePath: fileBase,
 } satisfies Partial<HostOptions>;
 
+const resolveRelativeUrl = (
+  hostOptions: Required<HostOptions>,
+  entryUrl: string,
+  relativeFile?: string,
+) => {
+  let remoteUrl = new URL(entryUrl, hostOptions.remoteBasePath);
+  if (relativeFile) {
+    const pathnameWithoutEntry = remoteUrl.pathname
+      .split('/')
+      .slice(0, -1)
+      .join('/');
+    remoteUrl.pathname = `${pathnameWithoutEntry}/${relativeFile}`;
+  }
+  return remoteUrl.protocol === fileBase ? remoteUrl.pathname : remoteUrl.href;
+};
+
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {
-  const remoteUrl = new URL(url, 'file:');
-
-  const pathnameWithoutEntry = remoteUrl.pathname
-    .split('/')
-    .slice(0, -1)
-    .join('/');
-  remoteUrl.pathname = `${pathnameWithoutEntry}/${hostOptions.remoteTypesFolder}.zip`;
-
-  return remoteUrl.protocol === 'file:' ? remoteUrl.pathname : remoteUrl.href;
+  return resolveRelativeUrl(
+    hostOptions,
+    url,
+    `${hostOptions.remoteTypesFolder}.zip`,
+  );
 };
 
 const buildApiTypeUrl = (zipUrl?: string) => {
@@ -63,7 +78,7 @@ export const retrieveRemoteInfo = (options: {
 
   return {
     name: parsedInfo.name || remoteAlias,
-    url: url,
+    url: resolveRelativeUrl(hostOptions, url),
     zipUrl,
     apiTypeUrl: buildApiTypeUrl(zipUrl),
     alias: remoteAlias,
