@@ -9,8 +9,7 @@ import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
-
-import hook from '../lifecycle';
+import bridgeHook from '../lifecycle';
 import { LoggerInstance, pathJoin } from '../utils';
 
 declare const __APP_VERSION__: string;
@@ -80,7 +79,7 @@ const RemoteAppWrapper = forwardRef(function (
           `createRemoteComponent LazyComponent render >>>`,
           renderProps,
         );
-        hook.lifecycle.bridgeRender.emit({
+        bridgeHook.lifecycle.beforeBridgeRender.emit({
           ...renderProps,
         });
         providerReturn.render(renderProps);
@@ -94,7 +93,7 @@ const RemoteAppWrapper = forwardRef(function (
               `createRemoteComponent LazyComponent destroy >>>`,
               { moduleName, basename, dom: renderDom.current },
             );
-            hook.lifecycle.bridgeDestroy.emit({
+            bridgeHook.lifecycle.beforeBridgeDestroy.emit({
               moduleName,
               dom: renderDom.current,
               basename,

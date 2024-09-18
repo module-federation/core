@@ -32,7 +32,7 @@ export default defineComponent({
         `createRemoteComponent LazyComponent render >>>`,
         renderProps,
       );
-      hook.lifecycle.bridgeRender.emit({
+      hook.lifecycle.beforeBridgeRender.emit({
         ...renderProps,
       });
       providerReturn.render(renderProps);
@@ -66,7 +66,7 @@ export default defineComponent({
         ...props,
       });
       watchStopHandle();
-      hook.lifecycle.bridgeDestroy.emit({
+      hook.lifecycle.beforeBridgeDestroy.emit({
         name: props.moduleName,
         dom: rootRef.value,
         basename: props.basename,
