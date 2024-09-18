@@ -3,7 +3,7 @@ import { getScope } from '../common/runtime-utils';
 
 export function prefetch(options: prefetchOptions): Promise<any> {
   const { id, functionId } = options;
-  const mfScope = getScope(id);
+  const mfScope = getScope();
 
   const prefetchInstance =
     MFDataPrefetch.getInstance(mfScope) ||

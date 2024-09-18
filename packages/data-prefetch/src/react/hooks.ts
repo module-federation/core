@@ -35,7 +35,7 @@ export const usePrefetch = <T>(
     id,
     functionId,
   };
-  const mfScope = getScope(id);
+  const mfScope = getScope();
 
   let state;
   const prefetchResult = prefetch(options);

@@ -1,16 +1,12 @@
+import { getInstance } from '@module-federation/runtime';
 import {
   encodeName,
   ModuleInfo,
   MFPrefetchCommon,
 } from '@module-federation/sdk';
 
-export const getScope = (id: string): string => {
-  const idArray = id.split('/');
-  if (idArray.length >= 2) {
-    idArray.pop();
-  }
-  const name = idArray.join('/');
-  return name;
+export const getScope = (): string => {
+  return getInstance()!.options.name;
 };
 
 export const getPrefetchId = (id: string): string =>
