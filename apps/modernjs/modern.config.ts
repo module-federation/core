@@ -32,7 +32,8 @@ export default defineConfig({
     },
     webpack: (config, { webpack, appendPlugins }) => {
       if (config?.output) {
-        config.output.publicPath = 'http://localhost:4001/';
+        config.output.publicPath = 'http://127.0.0.1:4001/';
+        config.output.uniqueName = 'modern-js-app1';
       }
 
       appendPlugins([
@@ -44,12 +45,14 @@ export default defineConfig({
           name: 'app1',
           exposes: {
             './thing': './src/test.ts',
+            './react-component': './src/components/react-component.tsx',
           },
           runtimePlugins: ['./runtimePlugin.ts'],
           shared: {
             react: { singleton: true },
             'react-dom': { singleton: true },
           },
+          dataPrefetch: true,
         }),
       ]);
     },
