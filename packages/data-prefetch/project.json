@@ -1,0 +1,21 @@
+{
+  "name": "module-federation/data-prefetch",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/data-prefetch/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run build --prefix packages/data-prefetch"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run test --prefix packages/data-prefetch"]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}
