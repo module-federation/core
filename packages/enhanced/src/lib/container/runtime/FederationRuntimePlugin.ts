@@ -216,11 +216,11 @@ class FederationRuntimePlugin {
     }
   }
 
-  getDependency() {
+  getDependency(compiler: Compiler) {
     if (this.federationRuntimeDependency)
       return this.federationRuntimeDependency;
     this.federationRuntimeDependency = new FederationRuntimeDependency(
-      this.getFilePath(),
+      this.getFilePath(compiler),
     );
     return this.federationRuntimeDependency;
   }
@@ -235,7 +235,7 @@ class FederationRuntimePlugin {
       compiler.hooks.thisCompilation.tap(
         this.constructor.name,
         (compilation: Compilation, { normalModuleFactory }) => {
-          const federationRuntimeDependency = this.getDependency();
+          const federationRuntimeDependency = this.getDependency(compiler);
           const logger = compilation.getLogger('FederationRuntimePlugin');
           const hooks =
             FederationModulesPlugin.getCompilationHooks(compilation);
