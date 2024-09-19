@@ -86,11 +86,12 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
           registerGlobalPlugins: runtime.registerGlobalPlugins,
           getRemoteInfo: runtime.getRemoteInfo,
           getRemoteEntry: runtime.getRemoteEntry,
+          isHost: true
         }`,
       ]);
     } else if (minimal) {
       initRuntimeModuleGetter = Template.asString([
-        '__webpack_require__.federation.runtime = globalThis.sharedRuntime;',
+        '__webpack_require__.federation.sharedRuntime = globalThis.sharedRuntime;',
         compilation.runtimeTemplate.moduleRaw({
           module: minimal,
           chunkGraph,

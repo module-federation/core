@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { init } from '@module-federation/runtime';
-console.log('logging init', typeof init);
+// import { init } from '@module-federation/runtime';
+// console.log('logging init', typeof init);
 import App from 'next/app';
 import { Layout, version, ConfigProvider } from 'antd';
 import { StyleProvider } from '@ant-design/cssinjs';

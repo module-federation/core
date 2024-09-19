@@ -129,20 +129,46 @@ class FederationRuntimePlugin {
       ]),
     ]);
 
+    if (useMinimalRuntime) {
+      return Template.asString([
+        `import federation from '${normalizedBundlerRuntimePath}';`,
+        runtimePluginTemplates,
+        embedRuntimeLines,
+        `if(!${federationGlobal}.instance){`,
+        Template.indent([
+          runtimePluginNames.length
+            ? Template.asString([
+                `const pluginsToAdd = [`,
+                Template.indent(
+                  runtimePluginNames.map(
+                    (item) =>
+                      `${item} ? (${item}.default || ${item})() : false,`,
+                  ),
+                ),
+                `].filter(Boolean);`,
+                `${federationGlobal}.initOptions.plugins = ${federationGlobal}.initOptions.plugins ? `,
+                `${federationGlobal}.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;`,
+              ])
+            : '',
+        ]),
+        `${federationGlobal}.instance = federation.runtime.init(${federationGlobal}.initOptions);`,
+        `if(${federationGlobal}.attachShareScopeMap){`,
+        Template.indent([
+          `${federationGlobal}.attachShareScopeMap(${RuntimeGlobals.require})`,
+        ]),
+        '}',
+        `if(${federationGlobal}.installInitialConsumes){`,
+        Template.indent([`${federationGlobal}.installInitialConsumes()`]),
+        '}',
+        `}`,
+      ]);
+    }
+
     return Template.asString([
       `import federation from '${normalizedBundlerRuntimePath}';`,
-      useMinimalRuntime
-        ? Template.asString([
-            'const federationInstance = new federation.runtime.FederationManager(',
-            'typeof FEDERATION_BUILD_IDENTIFIER === "undefined" ? undefined : FEDERATION_BUILD_IDENTIFIER',
-            ');',
-            'Object.assign(__webpack_require__.federation.runtime, federationInstance.getMethods());',
-          ])
-        : '',
       runtimePluginTemplates,
       embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
-      'debugger;',
       Template.indent([
         runtimePluginNames.length
           ? Template.asString([

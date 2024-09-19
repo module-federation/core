@@ -56,7 +56,6 @@ export default function (): FederationRuntimePlugin {
   return {
     name: 'node-federation-plugin',
     beforeInit(args) {
-      debugger;
       // Patch webpack chunk loading handlers
       (() => {
         const resolveFile = (
