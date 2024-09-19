@@ -2,9 +2,9 @@
   // webpackBootstrap
   /******/ 'use strict';
   /******/ var __webpack_modules__ = {
-    /***/ './node_modules/.federation/entry.22329a48720b92bd6a5767aead73eb49.js':
+    /***/ './node_modules/.federation/entry.c3b5d475ec76c5ad56b4c1194bd9a453.js':
       /*!****************************************************************************!*\
-  !*** ./node_modules/.federation/entry.22329a48720b92bd6a5767aead73eb49.js ***!
+  !*** ./node_modules/.federation/entry.c3b5d475ec76c5ad56b4c1194bd9a453.js ***!
   \****************************************************************************/
       /***/ (
         __unused_webpack_module,
@@ -25,7 +25,6 @@
             /*! ../../packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.js?runtimePlugin */ '../../packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.js?runtimePlugin',
           );
 
-        delete __webpack_require__.federation.runtime;
         var prevFederation = __webpack_require__.federation;
         __webpack_require__.federation = {};
         for (var key in _Users_bytedance_dev_universe_packages_webpack_bundler_runtime_dist_embedded_esm_js__WEBPACK_IMPORTED_MODULE_0__[
@@ -1150,14 +1149,35 @@
             /*! ./constant.esm.js */ '../../packages/webpack-bundler-runtime/dist/constant.esm.js',
           );
 
+        // Access the shared runtime from Webpack's federation plugin
         //@ts-ignore
         var sharedRuntime = __webpack_require__.federation.sharedRuntime;
+        // Create a new instance of FederationManager, handling the build identifier
+        //@ts-ignore
         var federationInstance = new sharedRuntime.FederationManager(
           false ? 0 : 'checkout:1.0.0',
         );
+        // Bind methods of federationInstance to ensure correct `this` context
+        // Without using destructuring or arrow functions
+        var boundInit = federationInstance.init.bind(federationInstance);
+        var boundGetInstance =
+          federationInstance.getInstance.bind(federationInstance);
+        var boundLoadRemote =
+          federationInstance.loadRemote.bind(federationInstance);
+        var boundLoadShare =
+          federationInstance.loadShare.bind(federationInstance);
+        var boundLoadShareSync =
+          federationInstance.loadShareSync.bind(federationInstance);
+        var boundPreloadRemote =
+          federationInstance.preloadRemote.bind(federationInstance);
+        var boundRegisterRemotes =
+          federationInstance.registerRemotes.bind(federationInstance);
+        var boundRegisterPlugins =
+          federationInstance.registerPlugins.bind(federationInstance);
+        // Assemble the federation object with bound methods
         var federation = {
           runtime: {
-            //general exports safe to share
+            // General exports safe to share
             FederationHost: sharedRuntime.FederationHost,
             registerGlobalPlugins: sharedRuntime.registerGlobalPlugins,
             getRemoteEntry: sharedRuntime.getRemoteEntry,
@@ -1165,15 +1185,15 @@
             loadScript: sharedRuntime.loadScript,
             loadScriptNode: sharedRuntime.loadScriptNode,
             FederationManager: sharedRuntime.FederationManager,
-            // runtime instance specific
-            init: federationInstance.init,
-            getInstance: federationInstance.getInstance,
-            loadRemote: federationInstance.loadRemote,
-            loadShare: federationInstance.loadShare,
-            loadShareSync: federationInstance.loadShareSync,
-            preloadRemote: federationInstance.preloadRemote,
-            registerRemotes: federationInstance.registerRemotes,
-            registerPlugins: federationInstance.registerPlugins,
+            // Runtime instance-specific methods with correct `this` binding
+            init: boundInit,
+            getInstance: boundGetInstance,
+            loadRemote: boundLoadRemote,
+            loadShare: boundLoadShare,
+            loadShareSync: boundLoadShareSync,
+            preloadRemote: boundPreloadRemote,
+            registerRemotes: boundRegisterRemotes,
+            registerPlugins: boundRegisterPlugins,
           },
           instance: undefined,
           initOptions: undefined,
@@ -2613,9 +2633,7 @@
                       callback,
                     );
                   }
-                  debugger;
                   const url = resolveUrl(rootOutputDir, chunkId);
-                  console.log('resolve url', url);
                   if (!url)
                     return callback(null, {
                       modules: {},
@@ -5526,7 +5544,7 @@
     /******/ __webpack_require__.federation.sharedRuntime =
       globalThis.sharedRuntime;
     /******/ __webpack_require__(
-      /*! ../../node_modules/.pnpm/next@14.1.2_@babel+core@7.24.9_react-dom@18.2.0_react@18.2.0/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[6].oneOf[0].use[0]!./node_modules/.federation/entry.22329a48720b92bd6a5767aead73eb49.js */ './node_modules/.federation/entry.22329a48720b92bd6a5767aead73eb49.js',
+      /*! ../../node_modules/.pnpm/next@14.1.2_@babel+core@7.24.9_react-dom@18.2.0_react@18.2.0/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[6].oneOf[0].use[0]!./node_modules/.federation/entry.c3b5d475ec76c5ad56b4c1194bd9a453.js */ './node_modules/.federation/entry.c3b5d475ec76c5ad56b4c1194bd9a453.js',
     );
     /******/
   })();

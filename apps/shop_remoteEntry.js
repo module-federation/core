@@ -2,9 +2,9 @@
   // webpackBootstrap
   /******/ 'use strict';
   /******/ var __webpack_modules__ = {
-    /***/ './node_modules/.federation/entry.2cdb20401118d930aed4715206add248.js':
+    /***/ './node_modules/.federation/entry.4f65ff976d8c02b3fa85e8b22bbfe43f.js':
       /*!****************************************************************************!*\
-  !*** ./node_modules/.federation/entry.2cdb20401118d930aed4715206add248.js ***!
+  !*** ./node_modules/.federation/entry.4f65ff976d8c02b3fa85e8b22bbfe43f.js ***!
   \****************************************************************************/
       /***/ (
         __unused_webpack_module,
@@ -25,7 +25,6 @@
             /*! ../../packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.js?runtimePlugin */ '../../packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.js?runtimePlugin',
           );
 
-        delete __webpack_require__.federation.runtime;
         var prevFederation = __webpack_require__.federation;
         __webpack_require__.federation = {};
         for (var key in _Users_bytedance_dev_universe_packages_webpack_bundler_runtime_dist_embedded_esm_js__WEBPACK_IMPORTED_MODULE_0__[
@@ -73,9 +72,9 @@
                 )
               : pluginsToAdd;
           __webpack_require__.federation.instance =
-            __webpack_require__.federation.runtime.init(
-              __webpack_require__.federation.initOptions,
-            );
+            _Users_bytedance_dev_universe_packages_webpack_bundler_runtime_dist_embedded_esm_js__WEBPACK_IMPORTED_MODULE_0__[
+              'default'
+            ].runtime.init(__webpack_require__.federation.initOptions);
           if (__webpack_require__.federation.attachShareScopeMap) {
             __webpack_require__.federation.attachShareScopeMap(
               __webpack_require__,
@@ -85,64 +84,6 @@
             __webpack_require__.federation.installInitialConsumes();
           }
         }
-
-        /***/
-      },
-
-    /***/ '../../packages/runtime/dist/embedded.esm.js':
-      /*!***************************************************!*\
-  !*** ../../packages/runtime/dist/embedded.esm.js ***!
-  \***************************************************/
-      /***/ (
-        __unused_webpack_module,
-        __webpack_exports__,
-        __webpack_require__,
-      ) => {
-        __webpack_require__.r(__webpack_exports__);
-        /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-          /* harmony export */ FederationHost: () =>
-            /* binding */ FederationHost,
-          /* harmony export */ FederationManager: () =>
-            /* binding */ FederationManager,
-          /* harmony export */ getInstance: () => /* binding */ getInstance,
-          /* harmony export */ getRemoteEntry: () =>
-            /* binding */ getRemoteEntry,
-          /* harmony export */ getRemoteInfo: () => /* binding */ getRemoteInfo,
-          /* harmony export */ init: () => /* binding */ init,
-          /* harmony export */ loadRemote: () => /* binding */ loadRemote,
-          /* harmony export */ loadScript: () => /* binding */ loadScript,
-          /* harmony export */ loadScriptNode: () =>
-            /* binding */ loadScriptNode,
-          /* harmony export */ loadShare: () => /* binding */ loadShare,
-          /* harmony export */ loadShareSync: () => /* binding */ loadShareSync,
-          /* harmony export */ preloadRemote: () => /* binding */ preloadRemote,
-          /* harmony export */ registerGlobalPlugins: () =>
-            /* binding */ registerGlobalPlugins,
-          /* harmony export */ registerPlugins: () =>
-            /* binding */ registerPlugins,
-          /* harmony export */ registerRemotes: () =>
-            /* binding */ registerRemotes,
-          /* harmony export */
-        });
-        const {
-          FederationHost,
-          registerGlobalPlugins,
-          getRemoteEntry,
-          getRemoteInfo,
-          loadScript,
-          loadScriptNode,
-          init,
-          loadRemote,
-          loadShare,
-          loadShareSync,
-          preloadRemote,
-          registerRemotes,
-          registerPlugins,
-          getInstance,
-          FederationManager,
-        } =
-          __webpack_require__.federation.sharedRuntime ||
-          __webpack_require__.federation.runtime;
 
         /***/
       },
@@ -1199,64 +1140,75 @@
           /* harmony export */ default: () => /* binding */ federation,
           /* harmony export */
         });
-        /* harmony import */ var _module_federation_runtime_embedded__WEBPACK_IMPORTED_MODULE_0__ =
-          __webpack_require__(
-            /*! @module-federation/runtime/embedded */ '../../packages/runtime/dist/embedded.esm.js',
-          );
-        /* harmony import */ var _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_1__ =
+        /* harmony import */ var _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_0__ =
           __webpack_require__(
             /*! ./initContainerEntry.esm.js */ '../../packages/webpack-bundler-runtime/dist/initContainerEntry.esm.js',
           );
-        /* harmony import */ var _constant_esm_js__WEBPACK_IMPORTED_MODULE_2__ =
+        /* harmony import */ var _constant_esm_js__WEBPACK_IMPORTED_MODULE_1__ =
           __webpack_require__(
             /*! ./constant.esm.js */ '../../packages/webpack-bundler-runtime/dist/constant.esm.js',
           );
 
-        var federationInstance =
-          new _module_federation_runtime_embedded__WEBPACK_IMPORTED_MODULE_0__.FederationManager(
-            false ? 0 : 'shop:1.0.0',
-          );
+        // Access the shared runtime from Webpack's federation plugin
+        //@ts-ignore
+        var sharedRuntime = __webpack_require__.federation.sharedRuntime;
+        // Create a new instance of FederationManager, handling the build identifier
+        //@ts-ignore
+        var federationInstance = new sharedRuntime.FederationManager(
+          false ? 0 : 'shop:1.0.0',
+        );
+        // Bind methods of federationInstance to ensure correct `this` context
+        // Without using destructuring or arrow functions
+        var boundInit = federationInstance.init.bind(federationInstance);
+        var boundGetInstance =
+          federationInstance.getInstance.bind(federationInstance);
+        var boundLoadRemote =
+          federationInstance.loadRemote.bind(federationInstance);
+        var boundLoadShare =
+          federationInstance.loadShare.bind(federationInstance);
+        var boundLoadShareSync =
+          federationInstance.loadShareSync.bind(federationInstance);
+        var boundPreloadRemote =
+          federationInstance.preloadRemote.bind(federationInstance);
+        var boundRegisterRemotes =
+          federationInstance.registerRemotes.bind(federationInstance);
+        var boundRegisterPlugins =
+          federationInstance.registerPlugins.bind(federationInstance);
+        // Assemble the federation object with bound methods
         var federation = {
           runtime: {
-            //general exports safe to share
-            FederationHost:
-              _module_federation_runtime_embedded__WEBPACK_IMPORTED_MODULE_0__.FederationHost,
-            registerGlobalPlugins:
-              _module_federation_runtime_embedded__WEBPACK_IMPORTED_MODULE_0__.registerGlobalPlugins,
-            getRemoteEntry:
-              _module_federation_runtime_embedded__WEBPACK_IMPORTED_MODULE_0__.getRemoteEntry,
-            getRemoteInfo:
-              _module_federation_runtime_embedded__WEBPACK_IMPORTED_MODULE_0__.getRemoteInfo,
-            loadScript:
-              _module_federation_runtime_embedded__WEBPACK_IMPORTED_MODULE_0__.loadScript,
-            loadScriptNode:
-              _module_federation_runtime_embedded__WEBPACK_IMPORTED_MODULE_0__.loadScriptNode,
-            FederationManager:
-              _module_federation_runtime_embedded__WEBPACK_IMPORTED_MODULE_0__.FederationManager,
-            // runtime instance specific
-            init: federationInstance.init,
-            getInstance: federationInstance.getInstance,
-            loadRemote: federationInstance.loadRemote,
-            loadShare: federationInstance.loadShare,
-            loadShareSync: federationInstance.loadShareSync,
-            preloadRemote: federationInstance.preloadRemote,
-            registerRemotes: federationInstance.registerRemotes,
-            registerPlugins: federationInstance.registerPlugins,
+            // General exports safe to share
+            FederationHost: sharedRuntime.FederationHost,
+            registerGlobalPlugins: sharedRuntime.registerGlobalPlugins,
+            getRemoteEntry: sharedRuntime.getRemoteEntry,
+            getRemoteInfo: sharedRuntime.getRemoteInfo,
+            loadScript: sharedRuntime.loadScript,
+            loadScriptNode: sharedRuntime.loadScriptNode,
+            FederationManager: sharedRuntime.FederationManager,
+            // Runtime instance-specific methods with correct `this` binding
+            init: boundInit,
+            getInstance: boundGetInstance,
+            loadRemote: boundLoadRemote,
+            loadShare: boundLoadShare,
+            loadShareSync: boundLoadShareSync,
+            preloadRemote: boundPreloadRemote,
+            registerRemotes: boundRegisterRemotes,
+            registerPlugins: boundRegisterPlugins,
           },
           instance: undefined,
           initOptions: undefined,
           bundlerRuntime: {
-            remotes: _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_1__.r,
-            consumes: _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_1__.c,
-            I: _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_1__.i,
+            remotes: _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_0__.r,
+            consumes: _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_0__.c,
+            I: _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_0__.i,
             S: {},
             installInitialConsumes:
-              _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_1__.a,
+              _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_0__.a,
             initContainerEntry:
-              _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_1__.b,
+              _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_0__.b,
           },
           attachShareScopeMap:
-            _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_1__.d,
+            _initContainerEntry_esm_js__WEBPACK_IMPORTED_MODULE_0__.d,
           bundlerRuntimeOptions: {},
         };
 
@@ -2651,9 +2603,7 @@
                       callback,
                     );
                   }
-                  debugger;
                   const url = resolveUrl(rootOutputDir, chunkId);
-                  console.log('resolve url', url);
                   if (!url)
                     return callback(null, {
                       modules: {},
@@ -3012,7 +2962,7 @@
             'd7178b6112bfee2a',
           __federation_expose_pages__home__test_remote_hook: 'aca32fd48f6f2ff9',
           __federation_expose_pages__home__test_shared_nav: 'c0ab4fd973111365',
-          __federation_expose_pages__shop__exposed_pages: '50c29b7cb66cc4df',
+          __federation_expose_pages__shop__exposed_pages: 'a46c0acdb20de1f3',
           __federation_expose_pages__shop__index: 'c469819e963daeb7',
           __federation_expose_pages__shop__test_webpack_png: '0a0a036ae810887a',
           __federation_expose_pages__shop__test_webpack_svg: '18af714e6868e459',
@@ -5342,7 +5292,7 @@
     /******/ __webpack_require__.federation.sharedRuntime =
       globalThis.sharedRuntime;
     /******/ __webpack_require__(
-      /*! ../../node_modules/.pnpm/next@14.1.2_@babel+core@7.24.9_react-dom@18.2.0_react@18.2.0/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[6].oneOf[0].use[0]!./node_modules/.federation/entry.2cdb20401118d930aed4715206add248.js */ './node_modules/.federation/entry.2cdb20401118d930aed4715206add248.js',
+      /*! ../../node_modules/.pnpm/next@14.1.2_@babel+core@7.24.9_react-dom@18.2.0_react@18.2.0/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[6].oneOf[0].use[0]!./node_modules/.federation/entry.4f65ff976d8c02b3fa85e8b22bbfe43f.js */ './node_modules/.federation/entry.4f65ff976d8c02b3fa85e8b22bbfe43f.js',
     );
     /******/
   })();

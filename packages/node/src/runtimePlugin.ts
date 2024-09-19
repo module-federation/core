@@ -211,9 +211,7 @@ export default function (): FederationRuntimePlugin {
             return loadFromFs(resolveFile(rootOutputDir, chunkId), callback);
           }
 
-          debugger;
           const url = resolveUrl(rootOutputDir, chunkId);
-          console.log('resolve url', url);
           if (!url)
             return callback(null, { modules: {}, ids: [], runtime: null });
 

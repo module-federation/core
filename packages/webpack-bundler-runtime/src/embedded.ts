@@ -7,19 +7,41 @@ import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
 
 export * from './types';
+
+// Access the shared runtime from Webpack's federation plugin
 //@ts-ignore
 const sharedRuntime = __webpack_require__.federation.sharedRuntime;
 
+// Create a new instance of FederationManager, handling the build identifier
+//@ts-ignore
 const federationInstance = new sharedRuntime.FederationManager(
   //@ts-ignore
   typeof FEDERATION_BUILD_IDENTIFIER === 'undefined'
     ? undefined
-    : FEDERATION_BUILD_IDENTIFIER,
+    : //@ts-ignore
+      FEDERATION_BUILD_IDENTIFIER,
 );
 
+// Bind methods of federationInstance to ensure correct `this` context
+// Without using destructuring or arrow functions
+const boundInit = federationInstance.init.bind(federationInstance);
+const boundGetInstance =
+  federationInstance.getInstance.bind(federationInstance);
+const boundLoadRemote = federationInstance.loadRemote.bind(federationInstance);
+const boundLoadShare = federationInstance.loadShare.bind(federationInstance);
+const boundLoadShareSync =
+  federationInstance.loadShareSync.bind(federationInstance);
+const boundPreloadRemote =
+  federationInstance.preloadRemote.bind(federationInstance);
+const boundRegisterRemotes =
+  federationInstance.registerRemotes.bind(federationInstance);
+const boundRegisterPlugins =
+  federationInstance.registerPlugins.bind(federationInstance);
+
+// Assemble the federation object with bound methods
 const federation: Federation = {
   runtime: {
-    //general exports safe to share
+    // General exports safe to share
     FederationHost: sharedRuntime.FederationHost,
     registerGlobalPlugins: sharedRuntime.registerGlobalPlugins,
     getRemoteEntry: sharedRuntime.getRemoteEntry,
@@ -27,27 +49,28 @@ const federation: Federation = {
     loadScript: sharedRuntime.loadScript,
     loadScriptNode: sharedRuntime.loadScriptNode,
     FederationManager: sharedRuntime.FederationManager,
-    // runtime instance specific
-    init: federationInstance.init,
-    getInstance: federationInstance.getInstance,
-    loadRemote: federationInstance.loadRemote,
-    loadShare: federationInstance.loadShare,
-    loadShareSync: federationInstance.loadShareSync,
-    preloadRemote: federationInstance.preloadRemote,
-    registerRemotes: federationInstance.registerRemotes,
-    registerPlugins: federationInstance.registerPlugins,
+    // Runtime instance-specific methods with correct `this` binding
+    init: boundInit,
+    getInstance: boundGetInstance,
+    loadRemote: boundLoadRemote,
+    loadShare: boundLoadShare,
+    loadShareSync: boundLoadShareSync,
+    preloadRemote: boundPreloadRemote,
+    registerRemotes: boundRegisterRemotes,
+    registerPlugins: boundRegisterPlugins,
   },
   instance: undefined,
   initOptions: undefined,
   bundlerRuntime: {
-    remotes,
-    consumes,
+    remotes: remotes,
+    consumes: consumes,
     I: initializeSharing,
     S: {},
-    installInitialConsumes,
-    initContainerEntry,
+    installInitialConsumes: installInitialConsumes,
+    initContainerEntry: initContainerEntry,
   },
-  attachShareScopeMap,
+  attachShareScopeMap: attachShareScopeMap,
   bundlerRuntimeOptions: {},
 };
+
 export default federation;
