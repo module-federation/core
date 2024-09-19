@@ -1,5 +1,11 @@
 # modernjs-ssr-host
 
+## 0.1.26
+
+### Patch Changes
+
+- @module-federation/modern-js@1.0.17
+
 ## 0.1.25
 
 ### Patch Changes
