@@ -1,5 +1,14 @@
 # @module-federation/dts-plugin
 
+## 0.6.6
+
+### Patch Changes
+
+- 35aead4: fix(dts-plugin): zipName should add prefix if remoteEntry has it
+  - @module-federation/sdk@0.6.6
+  - @module-federation/managers@0.6.6
+  - @module-federation/third-party-dts-extractor@0.6.6
+
 ## 0.6.5
 
 ### Patch Changes
