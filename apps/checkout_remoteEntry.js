@@ -4480,6 +4480,16 @@
     /******/
   })();
   /******/
+  /******/ /* webpack/runtime/embed/federation */
+  /******/ (() => {
+    /******/ __webpack_require__.federation.sharedRuntime =
+      globalThis.sharedRuntime;
+    /******/ __webpack_require__(
+      /*! ../../node_modules/.pnpm/next@14.1.2_@babel+core@7.24.9_react-dom@18.2.0_react@18.2.0/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[6].oneOf[0].use[0]!./node_modules/.federation/entry.c3b5d475ec76c5ad56b4c1194bd9a453.js */ './node_modules/.federation/entry.c3b5d475ec76c5ad56b4c1194bd9a453.js',
+    );
+    /******/
+  })();
+  /******/
   /******/ /* webpack/runtime/consumes */
   /******/ (() => {
     /******/ var installedModules = {};
@@ -5536,16 +5546,6 @@
     /******/ // no HMR
     /******/
     /******/ // no HMR manifest
-    /******/
-  })();
-  /******/
-  /******/ /* webpack/runtime/embed/federation */
-  /******/ (() => {
-    /******/ __webpack_require__.federation.sharedRuntime =
-      globalThis.sharedRuntime;
-    /******/ __webpack_require__(
-      /*! ../../node_modules/.pnpm/next@14.1.2_@babel+core@7.24.9_react-dom@18.2.0_react@18.2.0/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[6].oneOf[0].use[0]!./node_modules/.federation/entry.c3b5d475ec76c5ad56b4c1194bd9a453.js */ './node_modules/.federation/entry.c3b5d475ec76c5ad56b4c1194bd9a453.js',
-    );
     /******/
   })();
   /******/

@@ -120,23 +120,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       compiler.options.output.enabledLibraryTypes?.push(library.type);
     }
 
-    compiler.hooks.thisCompilation.tap(
-      'EmbedFederationRuntimePlugin',
-      (compilation: Compilation) => {
-        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        const containerEntrySet: Set<FederationRuntimeDependency> = new Set();
-
-        hooks.addFederationRuntimeModule.tap(
-          'EmbedFederationRuntimePlugin',
-          (dependency: FederationRuntimeDependency) => {
-            if (!dependency.minimal) {
-              containerEntrySet.add(dependency);
-            }
-          },
-        );
-      },
-    );
-
     compiler.hooks.afterPlugins.tap('ModuleFederationPlugin', () => {
       if (useContainerPlugin) {
         new ContainerPlugin({

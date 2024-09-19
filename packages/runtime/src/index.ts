@@ -51,10 +51,9 @@ class FederationManager {
         options.name === 'checkout' &&
         existingInstance.name !== 'checkout'
       ) {
-        debugger;
-        getGlobalFederationInstance(options.name, options.version, bid);
+        console.error('wrong instance');
       }
-      debugger;
+
       if (existingInstance) {
         this.instance = existingInstance;
         this.instance.initOptions(options);
@@ -62,9 +61,6 @@ class FederationManager {
         const FederationConstructor =
           getGlobalFederationConstructor() || FederationHost;
         this.instance = new FederationConstructor(options, this._bundlerId);
-        if (options.name === 'checkout' && this.instance.name !== 'checkout') {
-          debugger;
-        }
         setGlobalFederationInstance(this.instance);
       }
     } else {

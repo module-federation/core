@@ -28,10 +28,7 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
     >,
     isHost: boolean,
   ) {
-    super(
-      'embed federation',
-      isHost ? RuntimeModule.STAGE_ATTACH : RuntimeModule.STAGE_TRIGGER,
-    );
+    super('embed federation', RuntimeModule.STAGE_ATTACH - 1);
     this.experiments = experiments;
     this.containerEntrySet = containerEntrySet;
   }

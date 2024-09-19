@@ -65,7 +65,6 @@ export const applyPathFixes = (
   //     issuerLayer: ''
   //   });
   //   console.log(result);
-  //   debugger;
   // });
 
   (compiler.options.module.rules as RuleSetRule[]).forEach((rule) => {
