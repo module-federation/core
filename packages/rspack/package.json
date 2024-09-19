@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rspack",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "license": "MIT",
   "keywords": [
     "Module Federation",

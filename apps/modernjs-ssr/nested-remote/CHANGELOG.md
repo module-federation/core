@@ -1,5 +1,11 @@
 # modernjs-ssr-nested-remote
 
+## 0.1.24
+
+### Patch Changes
+
+- @module-federation/modern-js@0.6.4
+
 ## 0.1.23
 
 ### Patch Changes

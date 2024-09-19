@@ -5,8 +5,9 @@ import type {
   Chunk,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
+import { moduleFederationPlugin } from '@module-federation/sdk';
 import FederationRuntimeModule from './FederationRuntimeModule';
-import type { moduleFederationPlugin } from '@module-federation/sdk';
 import {
   getFederationGlobalScope,
   normalizeRuntimeInitOptionsWithOutShared,
@@ -61,12 +62,14 @@ class FederationRuntimePlugin {
   }
 
   static getTemplate(
-    runtimePlugins: string[],
+    compiler: Compiler,
+    options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
     // keep so that the hash changes if experiemts change
     experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
   ) {
     // internal runtime plugin
+    const runtimePlugins = options.runtimePlugins;
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
       bundlerRuntimePath || BundlerRuntimePath,
     );
@@ -87,7 +90,6 @@ class FederationRuntimePlugin {
         runtimePluginNames.push(runtimePluginName);
       });
     }
-
     const embedRuntimeLines = Template.asString([
       `if(!${federationGlobal}.runtime){`,
       Template.indent([
@@ -132,27 +134,31 @@ class FederationRuntimePlugin {
         Template.indent([`${federationGlobal}.installInitialConsumes()`]),
         '}',
       ]),
+      PrefetchPlugin.addRuntime(compiler, {
+        name: options.name!,
+      }),
       '}',
     ]);
   }
 
   static getFilePath(
-    containerName: string,
-    runtimePlugins: string[],
+    compiler: Compiler,
+    options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
     experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
   ) {
+    const containerName = options.name;
     const hash = createHash(
       `${containerName} ${FederationRuntimePlugin.getTemplate(
-        runtimePlugins,
+        compiler,
+        options,
         bundlerRuntimePath,
         experiments,
       )}`,
     );
     return path.join(TEMP_DIR, `entry.${hash}.js`);
   }
-
-  getFilePath() {
+  getFilePath(compiler: Compiler) {
     if (this.entryFilePath) {
       return this.entryFilePath;
     }
@@ -163,15 +169,16 @@ class FederationRuntimePlugin {
 
     if (!this.options?.virtualRuntimeEntry) {
       this.entryFilePath = FederationRuntimePlugin.getFilePath(
-        this.options.name!,
-        this.options.runtimePlugins!,
+        compiler,
+        this.options,
         this.bundlerRuntimePath,
         this.options.experiments,
       );
     } else {
       this.entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
         FederationRuntimePlugin.getTemplate(
-          this.options.runtimePlugins!,
+          compiler,
+          this.options,
           this.bundlerRuntimePath,
           this.options.experiments,
         ),
@@ -179,12 +186,11 @@ class FederationRuntimePlugin {
     }
     return this.entryFilePath;
   }
-
-  ensureFile() {
+  ensureFile(compiler: Compiler) {
     if (!this.options) {
       return;
     }
-    const filePath = this.getFilePath();
+    const filePath = this.getFilePath(compiler);
     try {
       fs.readFileSync(filePath);
     } catch (err) {
@@ -192,7 +198,8 @@ class FederationRuntimePlugin {
       fs.writeFileSync(
         filePath,
         FederationRuntimePlugin.getTemplate(
-          this.options.runtimePlugins!,
+          compiler,
+          this.options,
           this.bundlerRuntimePath,
           this.options.experiments,
         ),
@@ -202,9 +209,9 @@ class FederationRuntimePlugin {
 
   prependEntry(compiler: Compiler) {
     if (!this.options?.virtualRuntimeEntry) {
-      this.ensureFile();
+      this.ensureFile(compiler);
     }
-    const entryFilePath = this.getFilePath();
+    const entryFilePath = this.getFilePath(compiler);
 
     modifyEntry({
       compiler,
@@ -380,7 +387,7 @@ class FederationRuntimePlugin {
       new HoistContainerReferences(
         this.options.name ? this.options.name + '_partial' : undefined,
         // hoist all modules of federation entry
-        this.getFilePath(),
+        this.getFilePath(compiler),
         this.bundlerRuntimePath,
         this.options.experiments,
       ).apply(compiler);

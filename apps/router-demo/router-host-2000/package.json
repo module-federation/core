@@ -1,7 +1,7 @@
 {
   "name": "host",
   "private": true,
-  "version": "1.0.23",
+  "version": "1.0.24",
   "scripts": {
     "dev": "FEDERATION_DEBUG=true rsbuild dev --open",
     "build": "rsbuild build",
