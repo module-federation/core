@@ -108,6 +108,10 @@ export type Shared = (SharedItem | SharedObject)[] | SharedObject;
  * A module that should be shared in the share scope.
  */
 export type SharedItem = string;
+/**
+ * Enable Data Prefetch
+ */
+export type DataPrefetch = boolean;
 
 export interface AdditionalDataOptions {
   stats: Stats;
@@ -228,6 +232,7 @@ export interface ModuleFederationPluginOptions {
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
   async?: boolean | AsyncBoundaryOptions;
+  dataPrefetch?: DataPrefetch;
   virtualRuntimeEntry?: boolean;
   experiments?: {
     federationRuntime?: false | 'hoisted';
