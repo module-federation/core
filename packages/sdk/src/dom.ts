@@ -49,7 +49,6 @@ export function createScript(info: {
   if (!script) {
     script = document.createElement('script');
     script.type = 'text/javascript';
-    script.src = info.url;
     let createScriptRes: CreateScriptHookReturnDom = undefined;
     if (info.createScriptHook) {
       createScriptRes = info.createScriptHook(info.url, info.attrs);
@@ -64,6 +63,9 @@ export function createScript(info: {
           timeout = createScriptRes.timeout;
         }
       }
+    }
+    if (!script.src) {
+      script.src = info.url;
     }
     const attrs = info.attrs;
     if (attrs && !createScriptRes) {
