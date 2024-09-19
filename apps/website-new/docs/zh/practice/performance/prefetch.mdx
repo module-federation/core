@@ -5,16 +5,21 @@
 :::
 
 ## 什么是 Data Prefetch
-Data Prefetch 可以将远程模块接口请求提前到 js、css 加载时并行发出，提升首屏速度。
+Data Prefetch 可以将远程模块接口请求提前到 `remoteEntry` 加载完成后立即发出，无需等到组件渲染，提升首屏速度。
+
+## 适用场景
+项目首屏前置流程较长（例如需要鉴权等操作）或次屏希望数据直出的场景
 
 - 消费者常规加载流程：
 
-Host HTML(消费者 HTML) -> Host main.js(消费者入口 js) -> Host fetch(消费者鉴权等前置动作) -> Provider main.js(生产者入口 js) -> Provider fetch(生产者发送请求)
+`Host HTML`(消费者 HTML) -> `Host main.js`(消费者入口 js) -> `Host fetch`(消费者鉴权等前置动作) -> `Provider main.js`(生产者入口 js) -> `Provider fetch`(生产者发送请求)
 ![](@public/guide/performance/data-prefetch/common.jpg)
 - 使用 Prefetch 后的加载流程
 ![](@public/guide/performance/data-prefetch/prefetch.jpg)
+- 在前置流程中提前调用 `loadRemote` 的加载流程（loadRemote 会将有 prefetch 需求的生产者接口请求同步发送）
+![](@public/guide/performance/data-prefetch/advanced-prefetch.jpg)
 
-可以看到生产者的请求被提前到跟部分 js 并行了，**目前在最没有前置操作的简单场景中测试首屏可以有几十至上百毫秒的提升，次屏理论上可以完全做到直出**，在前置流程长的情况下可以大大提升模块整体的渲染速度
+可以看到生产者的请求被提前到跟部分 js 并行了，**目前对于首屏的优化效果取决于项目加载流程，次屏理论上可以通过提前调用 `loadRemote` 做到直出**，在前置流程长的情况下可以大大提升模块整体的渲染速度
 
 ## 使用方法
 1. 给`生产者`和`消费者`安装 `@module-federation/enhanced` 包
@@ -93,8 +98,8 @@ const reFetchParams = {
 }
 export default function Button () {
   const [prefetchResult, reFetchUserInfo] = usePrefetch<UserInfo>({
-    // 对应生产者 ModuleFederationPlugin 中的 (name + expose)，例如 `@mf/app2/Button` 用于消费 `Button.prefetch.ts`
-    id: '@mf/app2/Button',
+    // 对应生产者 ModuleFederationPlugin 中的 (name + expose)，例如 `app2/Button` 用于消费 `Button.prefetch.ts`
+    id: 'app2/Button',
     // 可选参数，使用 defer 后必填
     deferId: 'userInfo',
     // default 导出默认可以不传 functionId，此处为举例说明，如果非 default 导出则需要填函数名,
@@ -119,7 +124,7 @@ export default function Button () {
   )
 };
 ```
-3. 生产者的 ModuleFederationPlugin 配置处设置 `dataPrefetch`: true
+3. 生产者的 ModuleFederationPlugin 配置处设置 `dataPrefetch: true`
 ```ts
   new ModuleFederationPlugin({
     // ...
@@ -146,7 +151,7 @@ localStorage.setItem('FEDERATION_DEBUG', 1)
 #### 类型
 ``` ts
 type Options: <T>{
-  id: string; // 必填，对应生产者 MF 配置中的 (name + expose)，例如 `@mf/app2/Button` 用于消费 `Button.prefetch.ts`。
+  id: string; // 必填，对应生产者 MF 配置中的 (name + expose)，例如 `app2/Button` 用于消费 `Button.prefetch.ts`。
   functionId?: string; // 可选（默认是 default），用于获取 .prefetch.ts 文件中 export 的函数名称，函数需要以 Prefetch 结尾(不区分大小写)
   deferId?: string; // 可选（使用 defer 后必填），使用 defer 后函数返回值为对象(对象中可以有多个 key 对应多个请求)，deferId 为对象中的某个 key，用于获取具体请求
   cacheStrategy?: () => boolean; // 可选，一般不用手动管理，由框架管理，用于控制是否更新请求结果缓存，目前在组件卸载后或手动执行 reFetch 函数会刷新缓存
@@ -166,8 +171,8 @@ import { Await } from 'react-router-dom';
 
 export const Button = () => {
   const [userInfoPrefetch, reFetchUserInfo] = usePrefetch<UserInfo>({
-    // 对应生产者 MF 配置中的 (name + expose)，例如 `@mf/app2/Button` 用于消费 `Button.prefetch.ts`
-    id: '@mf/app2/Button',
+    // 对应生产者 MF 配置中的 (name + expose)，例如 `app2/Button` 用于消费 `Button.prefetch.ts`
+    id: 'app2/Button',
     // 可选参数，使用 defer 后必填
     deferId: 'userInfo'
     // default 导出默认可以不传 functionId，此处为举例说明，如果非 default 导出则需要填函数名,
@@ -201,7 +206,7 @@ export const Button = () => {
 ``` ts
 import { loadRemote } from '@module-federation/enhanced/runtime';
 
-loadRemote('@mf/app2/Button');
+loadRemote('app2/Button');
 ```
 
 #### 注意
@@ -246,8 +251,8 @@ import { usePrefetch } from '@module-federation/enhanced/prefetch';
 export const Button = () => {
   const [state, setState] = useState(defaultVal);
   const [userInfoPrefetch, reFetchUserInfo] = usePrefetch<UserInfo>({
-    // 对应生产者 MF 配置中的 (name + expose)，例如 `@mf/app2/Button` 用于消费 `Button.prefetch.ts`
-    id: '@mf/app2/Button',
+    // 对应生产者 MF 配置中的 (name + expose)，例如 `app2/Button` 用于消费 `Button.prefetch.ts`
+    id: 'app2/Button',
     // 可选参数，使用 defer 后必填
     deferId: 'userInfo',
     // default 导出默认可以不传 functionId，此处为举例说明，如果非 default 导出则需要填函数名,
@@ -277,7 +282,7 @@ export const Button = () => {
 ``` ts
 import { loadRemote } from '@module-federation/enhanced/runtime';
 
-loadRemote('@mf/app2/Button');
+loadRemote('app2/Button');
 ```
 
 ### 9. Vue 或其他框架想用怎么办

@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/modernjs",
   "private": true,
-  "version": "0.1.50",
+  "version": "0.1.51",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",

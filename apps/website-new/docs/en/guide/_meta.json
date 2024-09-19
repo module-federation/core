@@ -13,10 +13,5 @@
     "type": "dir",
     "name": "framework",
     "label": "Frameworks"
-  },
-  {
-    "type": "dir",
-    "name": "performance",
-    "label": "Performance"
   }
 ]
