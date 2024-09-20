@@ -224,9 +224,20 @@ class ContainerPlugin {
       },
     );
 
+    // this will still be copied into child compiler, so it needs a check to avoid running hook on child
+    // we have to use finishMake in order to check the entries created and see if there are multiple runtime chunks
     compiler.hooks.finishMake.tapAsync(
       PLUGIN_NAME,
       async (compilation, callback) => {
+        // its a child compiler
+        if (
+          compilation.compiler.parentCompilation &&
+          compilation.compiler.parentCompilation !== compilation
+        ) {
+          // dont include dependencies on child compilations
+          return callback();
+        }
+
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const createdRuntimes = new Set();
         for (const entry of compilation.entries.values()) {
@@ -234,8 +245,6 @@ class ContainerPlugin {
             if (createdRuntimes.has(entry.options.runtime)) {
               continue;
             }
-            if (compilation.entries.get(name + '_' + entry.options.runtime))
-              continue;
 
             createdRuntimes.add(entry.options.runtime);
           }
