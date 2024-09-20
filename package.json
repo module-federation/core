@@ -54,7 +54,7 @@
     "axios": "1.7.4",
     "core-js": "3.34.0",
     "encoding": "^0.1.13",
-    "express": "4.19.2",
+    "express": "4.20.0",
     "fast-glob": "3.3.2",
     "kill-port": "^2.0.1",
     "lodash.get": "4.4.2",
