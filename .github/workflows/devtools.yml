@@ -50,6 +50,7 @@ jobs:
             pnpm run app:manifest:dev & echo "done" && \
             npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 && \
             sleep 20 && \
+            npx kill-port 3010 &&
             npx nx e2e:devtools chrome-devtools
 
       - name: kill port
