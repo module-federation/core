@@ -96,34 +96,6 @@ class StartupChunkDependenciesPlugin {
               return startupSource;
             }
 
-            // let federationRuntimeModule: any = null;
-            //
-            // const isFederationModule = (module: any) =>
-            //   module.context?.endsWith('.federation');
-            // for (const module of chunkGraph.getChunkEntryModulesIterable(
-            //   chunk,
-            // )) {
-            //   if (isFederationModule(module)) {
-            //     federationRuntimeModule = module;
-            //     break;
-            //   }
-            //
-            //   if (module && '_modules' in module) {
-            //     for (const concatModule of (
-            //       module as InstanceType<typeof ConcatenatedModule>
-            //     )._modules) {
-            //       if (isFederationModule(concatModule)) {
-            //         federationRuntimeModule = module;
-            //         break;
-            //       }
-            //     }
-            //   }
-            // }
-            //
-            // if (!federationRuntimeModule) {
-            //   return startupSource;
-            // }
-
             const treeRuntimeRequirements =
               chunkGraph.getTreeRuntimeRequirements(chunk);
             const chunkRuntimeRequirements =
