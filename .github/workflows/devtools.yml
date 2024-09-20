@@ -42,7 +42,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install xvfb
 
       - name: E2E Chrome Devtools
-        run: pnpm run app:manifest:dev & echo "done" && sleep 10 && npx wait-on tcp:3009 && npx wait-on tcp:3010 && npx wait-on tcp:3011 && npx wait-on tcp:3012 && npx wait-on tcp:3013 && npx nx chrome-devtools & sleep 15 && npx nx e2e:devtools
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3 # Initial attempt + 2 retries
+          command: |
+            pnpm run app:manifest:dev & echo "done" && \
+            npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 && \
+            sleep 20 && \
+            npx nx e2e:devtools chrome-devtools
 
       - name: kill port
         run: lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
