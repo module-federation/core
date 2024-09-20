@@ -111,7 +111,7 @@ describe('Module export sync tests', async () => {
         (prop) => typeof indexModule[prop] === 'function' && !isPrivate(prop),
       )
       .sort();
-
+    debugger;
     // Compare the method names
     expect(embeddedMethods).toEqual(indexMethods);
   });

@@ -69,50 +69,6 @@ export const getInstance: typeof IndexModule.getInstance = (...args) => {
   return getRuntime().getInstance(...args);
 };
 
-export interface FederationHostInterface {
-  options: IndexModule.FederationHost['options'];
-  hooks: IndexModule.FederationHost['hooks'];
-  version: IndexModule.FederationHost['version'];
-  name: IndexModule.FederationHost['name'];
-  moduleCache: IndexModule.FederationHost['moduleCache'];
-  snapshotHandler: IndexModule.FederationHost['snapshotHandler'];
-  sharedHandler: IndexModule.FederationHost['sharedHandler'];
-  remoteHandler: IndexModule.FederationHost['remoteHandler'];
-  shareScopeMap: IndexModule.FederationHost['shareScopeMap'];
-  loaderHook: IndexModule.FederationHost['loaderHook'];
-
-  initOptions(
-    ...args: Parameters<IndexModule.FederationHost['initOptions']>
-  ): ReturnType<IndexModule.FederationHost['initOptions']>;
-  loadShare<T>(
-    ...args: Parameters<IndexModule.FederationHost['loadShare']>
-  ): ReturnType<IndexModule.FederationHost['loadShare']>;
-  loadShareSync<T>(
-    ...args: Parameters<IndexModule.FederationHost['loadShareSync']>
-  ): ReturnType<IndexModule.FederationHost['loadShareSync']>;
-  initializeSharing(
-    ...args: Parameters<IndexModule.FederationHost['initializeSharing']>
-  ): ReturnType<IndexModule.FederationHost['initializeSharing']>;
-  initRawContainer(
-    ...args: Parameters<IndexModule.FederationHost['initRawContainer']>
-  ): ReturnType<IndexModule.FederationHost['initRawContainer']>;
-  loadRemote<T>(
-    ...args: Parameters<IndexModule.FederationHost['loadRemote']>
-  ): ReturnType<IndexModule.FederationHost['loadRemote']>;
-  preloadRemote(
-    ...args: Parameters<IndexModule.FederationHost['preloadRemote']>
-  ): ReturnType<IndexModule.FederationHost['preloadRemote']>;
-  initShareScopeMap(
-    ...args: Parameters<IndexModule.FederationHost['initShareScopeMap']>
-  ): ReturnType<IndexModule.FederationHost['initShareScopeMap']>;
-  registerPlugins(
-    ...args: Parameters<IndexModule.FederationHost['registerPlugins']>
-  ): ReturnType<IndexModule.FederationHost['registerPlugins']>;
-  registerRemotes(
-    ...args: Parameters<IndexModule.FederationHost['registerRemotes']>
-  ): ReturnType<IndexModule.FederationHost['registerRemotes']>;
-}
-
 export class FederationHost implements IndexModule.FederationHost {
   private _instance: IndexModule.FederationHost | null = null;
   private _args: ConstructorParameters<typeof IndexModule.FederationHost>;
@@ -234,6 +190,7 @@ export class FederationHost implements IndexModule.FederationHost {
   formatOptions(
     ...args: Parameters<IndexModule.FederationHost['formatOptions']>
   ) {
+    //@ts-ignore
     return this._getInstance().formatOptions(...args);
   }
 }
@@ -306,5 +263,12 @@ export class Module implements ModuleInterface {
 
   async get(...args: Parameters<IndexModule.Module['get']>) {
     return this._getInstance().get(...args);
+  }
+
+  private wraperFactory(
+    ...args: Parameters<IndexModule.Module['wraperFactory']>
+  ) {
+    //@ts-ignore
+    return this._getInstance().wraperFactory(...args);
   }
 }
