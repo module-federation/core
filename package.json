@@ -45,7 +45,8 @@
     "commitlint": "commitlint --edit",
     "prepare": "husky install",
     "changeset": "changeset",
-    "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:type:pkg'"
+    "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:type:pkg'",
+    "changegen": "./changeset-gen.js --path ./packages/enhanced"
   },
   "dependencies": {
     "adm-zip": "0.5.14",
@@ -59,6 +60,7 @@
     "kill-port": "^2.0.1",
     "lodash.get": "4.4.2",
     "next": "14.1.2",
+    "openai": "^4.63.0",
     "rambda": "7.5.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
