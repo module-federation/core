@@ -7,7 +7,6 @@ const { OpenAI } = require('openai');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const glob = require('glob');
-
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -47,7 +46,9 @@ ${fileContent}`;
 
   return response.choices[0].message.content
     .trim()
-    .replace(/^```(?:\w+)?|```$/g, '');
+    .replace(/^\`/, '')
+    .replace(/\`$/, '')
+    .trim();
 }
 
 async function processFile(filePath) {
@@ -65,18 +66,19 @@ async function main() {
   if (argv.path) {
     await processFile(argv.path);
   } else if (argv.pattern) {
-    glob(argv.pattern, async (err, files) => {
-      if (err) {
-        console.error('Error finding files:', err.message);
-        process.exit(1);
-      }
+    console.log('pattern', argv.pattern);
+    try {
+      const files = await glob.glob(argv.pattern);
 
       for (const filePath of files) {
         await processFile(filePath);
       }
-    });
+    } catch (err) {
+      console.error('Error finding files:', err.message);
+      process.exit(1);
+    }
   }
-  execSync('nx format:write');
+  // execSync('nx format:write');
 }
 
 main();
