@@ -34,7 +34,12 @@ const argv = yargs(hideBin(process.argv))
   .alias('help', 'h').argv;
 
 async function lintFileContent(fileContent) {
-  const prompt = `Perform safe cleanup and linting on the following file content. Return only the updated file content with no other response text:
+  const prompt = `Perform safe cleanup and linting on the following file content.
+RULES:
+-Should preserve uses of normalizeWebpackPath
+-Should preserve uses of ts-ignore
+-Remove unused code
+-Return only the updated file content with no other response text:
 
 ${fileContent}`;
 
@@ -44,11 +49,16 @@ ${fileContent}`;
     max_tokens: 4096,
   });
 
-  return response.choices[0].message.content
-    .trim()
-    .replace(/^\`/, '')
-    .replace(/\`$/, '')
-    .trim();
+  let res = response.choices[0].message.content.trim().split('\n');
+  if (res[0].startsWith('`')) {
+    res[0] = undefined;
+  }
+
+  if (res[res.length - 1].startsWith('`')) {
+    res[res.length - 1] = undefined;
+  }
+
+  return res.filter((r) => r).join('\n');
 }
 
 async function processFile(filePath) {
@@ -78,7 +88,7 @@ async function main() {
       process.exit(1);
     }
   }
-  // execSync('nx format:write');
+  execSync('nx format:write');
 }
 
 main();
