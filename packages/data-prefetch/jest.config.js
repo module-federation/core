@@ -25,5 +25,5 @@ module.exports = {
   },
   rootDir: __dirname,
   testMatch: ['<rootDir>__tests__/**/**.spec.[jt]s?(x)'],
-  testPathIgnorePatterns: ['/node_modules/', '/dev/'],
+  testPathIgnorePatterns: ['/node_modules/'],
 };

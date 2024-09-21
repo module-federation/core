@@ -9,6 +9,17 @@ const args = [
   '--logHeapUsage',
   '--config',
   'packages/enhanced/jest.config.ts',
+  '--silent',
 ];
 
-spawnSync('node', args, { stdio: 'inherit' });
+const result = spawnSync('node', args, { stdio: 'inherit' });
+if (result.status !== 0) {
+  if (result.stderr) {
+    console.log('################');
+    console.error(result.stderr);
+  } else {
+    console.log('################');
+    console.log(result.stdout);
+  }
+  process.exit(result.status);
+}

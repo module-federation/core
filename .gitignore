@@ -62,5 +62,7 @@ packages/enhanced/test/js
 
 # dts test cases
 **/dist-test
+**/cache
+**/cache/**
 **/dist-test/**
 **/cypress/downloads
