@@ -42,19 +42,11 @@
         "commands": [
           {
             "command": "node packages/enhanced/test/script.js",
-            "forwardAllArgs": true
-          }
-        ]
-      }
-    },
-    "test:experiments": {
-      "executor": "nx:run-commands",
-      "options": {
-        "parallel": false,
-        "commands": [
+            "forwardAllArgs": false
+          },
           {
-            "command": "node packages/enhanced/test/script-experiments.js",
-            "forwardAllArgs": true
+            "command": "sleep 5 && node packages/enhanced/test/script-experiments.js",
+            "forwardAllArgs": false
           }
         ]
       }

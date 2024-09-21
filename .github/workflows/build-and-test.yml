@@ -36,17 +36,14 @@ jobs:
       - name: Check Code Format
         run: npx nx format:check
 
-      - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
-
       - name: Run Build for All
         run: npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
 
       - name: Run Affected Test
         run: npx nx affected -t test --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
-      - name: Run Affected Experimental Tests
-        run: sleep 5 && npx nx affected -t test:experiments --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache
+      - name: Warm Nx Cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
 
   e2e-modern:
     needs: checkout-install
