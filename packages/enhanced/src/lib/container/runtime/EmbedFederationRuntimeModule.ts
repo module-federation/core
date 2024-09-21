@@ -52,7 +52,6 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       }
     }
 
-    // const found = this.findModule(chunk, bundlerRuntimePath);
     if (!found) {
       return null;
     }
@@ -80,20 +79,7 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       runtimeRequirements: new Set(),
     });
 
-    return Template.asString([
-      `${initRuntimeModuleGetter}`,
-      // 'console.log(__webpack_require__.federation)',
-      // `federation = ${exportExpr}`,
-      // `var prevFederation = ${federationGlobal};`,
-      // `${federationGlobal} = {};`,
-      // `for (var key in federation) {`,
-      // Template.indent(`${federationGlobal}[key] = federation[key];`),
-      // `}`,
-      // `for (var key in prevFederation) {`,
-      // Template.indent(`${federationGlobal}[key] = prevFederation[key];`),
-      // `}`,
-      // 'federation = undefined;'
-    ]);
+    return Template.asString([`${initRuntimeModuleGetter}`]);
   }
 }
 
