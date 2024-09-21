@@ -26,9 +26,6 @@ module.exports = composePlugins(
           './WebpackSvg': './src/components/WebpackSvg',
           './WebpackPng': './src/components/WebpackPng',
         },
-        experiments: {
-          federationRuntime: 'hoisted',
-        },
         shared: {
           lodash: {},
           antd: {},
@@ -58,7 +55,6 @@ module.exports = composePlugins(
     config.optimization = {
       ...config.optimization,
       runtimeChunk: false,
-      minimize: false,
     };
     return config;
   },
