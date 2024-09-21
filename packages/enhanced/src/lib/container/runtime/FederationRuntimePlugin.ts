@@ -122,7 +122,7 @@ class FederationRuntimePlugin {
       Template.indent([
         runtimePluginNames.length
           ? Template.asString([
-              `const pluginsToAdd = [`,
+              `var pluginsToAdd = [`,
               Template.indent(
                 runtimePluginNames.map(
                   (item) => `${item} ? (${item}.default || ${item})() : false,`,
