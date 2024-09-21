@@ -13,7 +13,6 @@ import {
   findLoaderForResource,
 } from '../../loaders/helpers';
 import path from 'path';
-
 /**
  * Set up default shared values based on the environment.
  * @param {boolean} isServer - Boolean indicating if the code is running on the server.
@@ -30,7 +29,6 @@ export const retrieveDefaultShared = (
   // If the code is running on the client/browser, always bundle Next.js internals
   return DEFAULT_SHARE_SCOPE_BROWSER;
 };
-
 export const applyPathFixes = (
   compiler: Compiler,
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -60,10 +58,8 @@ export const applyPathFixes = (
 
   if (match) {
     let matchCopy: RuleSetRule;
-
     if (match.use) {
       matchCopy = { ...match };
-
       if (Array.isArray(match.use)) {
         matchCopy.use = match.use.filter((loader: any) => {
           return (

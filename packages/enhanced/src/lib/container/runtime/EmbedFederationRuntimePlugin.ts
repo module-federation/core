@@ -1,15 +1,15 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import EmbedFederationRuntimeModule from './EmbedFederationRuntimeModule';
 import FederationModulesPlugin from './FederationModulesPlugin';
-import type { Dependency } from 'webpack';
+import type { Compiler, Compilation, Chunk } from 'webpack';
+import { getFederationGlobalScope } from './utils';
+import ContainerEntryDependency from '../ContainerEntryDependency';
+import FederationRuntimeDependency from './FederationRuntimeDependency';
 
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-import type { Compiler, Compilation, Chunk, Module, ChunkGraph } from 'webpack';
-import { getFederationGlobalScope } from './utils';
-import ContainerEntryDependency from '../ContainerEntryDependency';
-import FederationRuntimeDependency from './FederationRuntimeDependency';
+
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class EmbedFederationRuntimePlugin {
@@ -46,13 +46,11 @@ class EmbedFederationRuntimePlugin {
           if (!runtimeRequirements.has(federationGlobal)) {
             return;
           }
-
           runtimeRequirements.add('embeddedFederationRuntime');
           const runtimeModule = new EmbedFederationRuntimeModule(
             this.bundlerRuntimePath,
             containerEntrySet,
           );
-
           compilation.addRuntimeModule(chunk, runtimeModule);
         };
 
@@ -63,5 +61,4 @@ class EmbedFederationRuntimePlugin {
     );
   }
 }
-
 export default EmbedFederationRuntimePlugin;
