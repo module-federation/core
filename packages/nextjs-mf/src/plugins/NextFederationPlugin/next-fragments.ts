@@ -42,29 +42,6 @@ export const applyPathFixes = (
     layer: undefined,
   });
 
-  // Get ruleset from normalModuleFactory
-  // compiler.hooks.normalModuleFactory.tap('NextFederationPlugin', (nmf) => {
-  //   const ruleSet = nmf.ruleSet;
-  //   return;
-  //   console.log(runtimeModulePath);
-  //   const result = ruleSet.exec({
-  //     resource: runtimeModulePath,
-  //     realResource: runtimeModulePath,
-  //     resourceQuery: undefined,
-  //     resourceFragment: undefined,
-  //     scheme: getScheme(runtimeModulePath),
-  //     assertions: undefined,
-  //     mimetype: 'text/javascript',
-  //     dependency: 'commonjs',
-  //     descriptionData: undefined,
-  //     issuer: undefined,
-  //     compiler: compiler.name,
-  //     issuerLayer: ''
-  //   });
-  //   console.log(result);
-  //   debugger;
-  // });
-
   compiler.options.module.rules.forEach((rule: RuleSetRule) => {
     // next-image-loader fix which adds remote's hostname to the assets url
     if (options.enableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
@@ -80,6 +57,7 @@ export const applyPathFixes = (
       });
     }
   });
+
   if (match) {
     let matchCopy: RuleSetRule;
 
@@ -95,17 +73,12 @@ export const applyPathFixes = (
           );
         });
       } else if (typeof match.use === 'string') {
-        if (match.use.includes('react')) {
-          matchCopy.use = '';
-        } else {
-          matchCopy.use = match.use;
-        }
+        matchCopy.use = match.use.includes('react') ? '' : match.use;
       } else if (typeof match.use === 'object' && match.use !== null) {
-        if (match.use.loader && match.use.loader.includes('react')) {
-          matchCopy.use = {};
-        } else {
-          matchCopy.use = match.use;
-        }
+        matchCopy.use =
+          match.use.loader && match.use.loader.includes('react')
+            ? {}
+            : match.use;
       }
     } else {
       matchCopy = { ...match };

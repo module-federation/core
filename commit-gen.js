@@ -20,6 +20,13 @@ const argv = yargs(hideBin(process.argv))
     description: 'Path to the file or directory',
     demandOption: true,
   })
+  .option('staged', {
+    alias: 's',
+    type: 'boolean',
+    description:
+      'Use staged changes instead of comparing against the base branch',
+    default: false,
+  })
   .help()
   .alias('help', 'h').argv;
 
@@ -69,7 +76,13 @@ function getAllowedScopes() {
 
 async function generateCommitMessage(patch, packageName) {
   const allowedScopes = getAllowedScopes().join(', ');
-  const prompt = `Generate a conventional commit message for the following git patch. Focus on the main purpose of the changes and their impact:
+  const prompt = `Generate a conventional commit message for the following git patch.
+RULES:
+Never author BREAKING CHANGE messages, they are not allowed.
+Body's lines must not be longer than 100 characters [body-max-line-length]
+Provide no explanation
+
+Focus on a statement of work of the changes:
 
 ${patch}
 
@@ -84,28 +97,43 @@ Please format the commit message as follows:
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4o',
-    messages: [{ role: 'user', content: prompt }],
-    max_tokens: 800,
+    messages: [
+      { role: 'system', content: 'never author BREAKING CHANGE commits' },
+      { role: 'user', content: prompt },
+    ],
+    max_tokens: 200,
   });
 
   return response.choices[0].message.content
     .trim()
     .replace('```markdown', '')
     .replace('```', '')
+    .replace(/^```(?:\w+)?|```$/g, '')
+    .trim()
+    .replace(/^\`/, '')
+    .replace(/\`$/, '')
     .trim();
 }
 
-function getGitDiffPatch(filePath) {
+function getGitDiffPatch(filePath, useStaged) {
   try {
     const sanitizedFilePath = sanitizeInput(filePath);
-    const baseBranch = execSync(
-      'git symbolic-ref refs/remotes/origin/HEAD | sed "s@^refs/remotes/origin/@@g" || echo main',
-    )
-      .toString()
-      .trim();
-    const patch = execSync(
-      `git diff ${baseBranch} -- "${sanitizedFilePath}"`,
-    ).toString();
+    let patch;
+    if (useStaged) {
+      patch = execSync(`git diff --cached -- "${sanitizedFilePath}"`, {
+        shell: '/bin/bash',
+      }).toString();
+    } else {
+      const baseBranch = execSync(
+        'git symbolic-ref refs/remotes/origin/HEAD | sed "s@^refs/remotes/origin/@@g" || echo main',
+        { shell: '/bin/bash' },
+      )
+        .toString()
+        .trim();
+      patch = execSync(`git diff ${baseBranch} -- "${sanitizedFilePath}"`, {
+        shell: '/bin/bash',
+      }).toString();
+    }
     return patch;
   } catch (error) {
     console.error('Error getting git diff:', error.message);
@@ -154,7 +182,7 @@ async function main() {
 
   const packageName = getPackageName(filePath);
 
-  const patch = getGitDiffPatch(filePath);
+  const patch = getGitDiffPatch(filePath, argv.staged);
 
   if (!patch) {
     console.log('No changes detected.');
@@ -164,7 +192,6 @@ async function main() {
     const commitMessage = await generateCommitMessage(patch, packageName);
     console.log('Generated Commit Message:');
     console.log(commitMessage);
-    execSync(`git commit -m ${JSON.stringify(commitMessage)}`);
   } catch (error) {
     console.error('Error generating commit message:', error.message);
     process.exit(1);

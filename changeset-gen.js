@@ -84,6 +84,7 @@ Only return the changeset, nothing else.`;
     .replace('```markdown', '')
     .replace('```', '')
     .replace(/<!--[\s\S]*?-->\n?/g, '')
+    .replace(/<\/?[^>]+(>|$)/g, '') // Remove all HTML tags
     .trim();
 }
 
