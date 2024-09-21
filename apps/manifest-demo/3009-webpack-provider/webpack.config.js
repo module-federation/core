@@ -26,6 +26,9 @@ module.exports = composePlugins(
           './WebpackSvg': './src/components/WebpackSvg',
           './WebpackPng': './src/components/WebpackPng',
         },
+        experiments: {
+          federationRuntime: 'hoisted',
+        },
         shared: {
           lodash: {},
           antd: {},
