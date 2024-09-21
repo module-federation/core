@@ -173,17 +173,10 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       for (const remote of allRemoteReferences) {
         allReferencedModules.add(remote);
       }
-      // allRemoteReferences.clear();
 
       const containerRuntimes =
         chunkGraph.getModuleRuntimes(containerEntryModule);
       const runtimes = new Set<string>();
-
-      // const moduleChunks = chunkGraph.getModuleChunks(containerEntryModule);
-
-      // for(const chunk of moduleChunks) {
-      //   const entryOptions = chunk.getEntryOptions();
-      // }
 
       for (const runtimeSpec of containerRuntimes) {
         compilation.compiler.webpack.util.runtime.forEachRuntime(

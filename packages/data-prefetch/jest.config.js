@@ -24,6 +24,6 @@ module.exports = {
     '^.+\\.(t|j)sx?$': ['@swc/jest', { swcrc: false }],
   },
   rootDir: __dirname,
-  testMatch: ['<rootDir>__tests__/**/**.spec.[jt]s?(x)'],
-  testPathIgnorePatterns: ['/node_modules/', '/dev/'],
+  testMatch: ['<rootDir>/__tests__/**/*.spec.[jt]s?(x)'],
+  testPathIgnorePatterns: ['/node_modules/'],
 };
