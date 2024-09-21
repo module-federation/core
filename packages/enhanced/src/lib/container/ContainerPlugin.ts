@@ -245,7 +245,6 @@ class ContainerPlugin {
             if (createdRuntimes.has(entry.options.runtime)) {
               continue;
             }
-
             createdRuntimes.add(entry.options.runtime);
           }
         }
@@ -269,9 +268,7 @@ class ContainerPlugin {
           compilation.addInclude(
             compilation.options.context || '',
             dep,
-            {
-              name: undefined,
-            },
+            { name: undefined },
             (error: WebpackError | null | undefined) => {
               if (error) return callback(error);
               hooks.addContainerEntryModule.call(dep);
@@ -305,7 +302,7 @@ class ContainerPlugin {
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
         const federationRuntimeDependency =
-          federationRuntimePluginInstance.getDependency(compiler); // Pass compiler here
+          federationRuntimePluginInstance.getDependency(compiler);
 
         const logger = compilation.getLogger('ContainerPlugin');
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
