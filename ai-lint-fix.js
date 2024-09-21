@@ -38,7 +38,7 @@ async function lintFileContent(fileContent) {
 RULES:
 -Should preserve uses of normalizeWebpackPath
 -Should preserve uses of ts-ignore
--Remove unused code
+-Removed commented out code
 -Return only the updated file content with no other response text:
 
 ${fileContent}`;
@@ -67,9 +67,33 @@ async function processFile(filePath) {
     const lintedContent = await lintFileContent(fileContent);
     fs.writeFileSync(filePath, lintedContent, 'utf8');
     console.log(`File has been linted and updated successfully: ${filePath}`);
+    const tsConfigPath = findTsConfig(filePath);
+    try {
+      const tscOutput = execSync(`tsc --noEmit --project ${tsConfigPath}`, {
+        stdio: 'pipe',
+      }).toString();
+      console.log(`TypeScript check passed for ${filePath}:\n${tscOutput}`);
+    } catch (error) {
+      console.error(
+        `TypeScript check failed for ${filePath}:\n${error.stdout.toString()}`,
+      );
+    }
   } catch (error) {
     console.error(`Error performing linting on ${filePath}:`, error.message);
+    process.exit(1);
   }
+}
+
+function findTsConfig(filePath) {
+  let dir = path.dirname(filePath);
+  while (dir !== path.resolve(dir, '..')) {
+    const tsConfigPath = path.join(dir, 'tsconfig.json');
+    if (fs.existsSync(tsConfigPath)) {
+      return tsConfigPath;
+    }
+    dir = path.resolve(dir, '..');
+  }
+  throw new Error('tsconfig.json not found');
 }
 
 async function main() {
