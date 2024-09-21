@@ -29,7 +29,6 @@ export default {
   transform: {
     '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
   },
-  cacheDirectory: '/tmp/embedcache',
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/enhanced',
   rootDir: __dirname,

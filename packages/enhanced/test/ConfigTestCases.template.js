@@ -358,7 +358,7 @@ const describeCases = (config) => {
                 const oneMonthInMs = 30 * 24 * 60 * 60 * 1000;
 
                 if (
-                  // currentDate.getTime() - startDate.getTime() >= oneMonthInMs &&
+                  currentDate.getTime() - startDate.getTime() >= oneMonthInMs &&
                   checkArrayExpectation(
                     testDirectory,
                     jsonStats,

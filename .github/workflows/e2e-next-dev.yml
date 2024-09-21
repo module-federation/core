@@ -43,7 +43,7 @@ jobs:
       - name: E2E Test for Next.js Dev
         if: steps.check-ci.outcome == 'success'
         run: |
-          pnpm run app:next:dev > /dev/null 2>&1 &
+          pnpm run app:next:dev &
           sleep 1 &&
           npx wait-on tcp:3001 &&
           npx wait-on tcp:3002 &&

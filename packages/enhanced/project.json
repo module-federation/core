@@ -42,7 +42,7 @@
         "commands": [
           {
             "command": "node packages/enhanced/test/script.js",
-            "forwardAllArgs": false
+            "forwardAllArgs": true
           }
         ]
       }
@@ -66,6 +66,10 @@
         "commands": [
           {
             "command": "nx run enhanced:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run enhanced:test:experiments",
             "forwardAllArgs": false
           },
           {

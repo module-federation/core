@@ -9,6 +9,7 @@ const args = [
   '--logHeapUsage',
   '--config',
   'packages/enhanced/jest.embed.ts',
+  '--clearCache',
 ];
 
 const result = spawnSync('node', args, { stdio: 'inherit' });
