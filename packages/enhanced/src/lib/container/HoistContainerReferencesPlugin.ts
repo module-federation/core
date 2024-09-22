@@ -29,7 +29,6 @@ const PLUGIN_NAME = 'HoistContainerReferences';
 
 /**
  * This class is used to hoist container references in the code.
- * @constructor
  */
 export class HoistContainerReferences implements WebpackPluginInstance {
   private readonly containerName: string;
@@ -91,55 +90,6 @@ export class HoistContainerReferences implements WebpackPluginInstance {
             );
           },
         );
-
-        // Hook into the optimizeDependencies phase
-        // compilation.hooks.optimizeDependencies.tap(
-        //   {
-        //     name: PLUGIN_NAME,
-        //     // basic optimization stage - it runs first
-        //     stage: -10,
-        //   },
-        //   (modules: Iterable<Module>) => {
-        //     if (this.entryFilePath) {
-        //       let runtime: RuntimeSpec | undefined;
-        //       for (const [name, { options }] of compilation.entries) {
-        //         runtime = compiler.webpack.util.runtime.mergeRuntimeOwned(
-        //           runtime,
-        //           compiler.webpack.util.runtime.getEntryRuntime(
-        //             compilation,
-        //             name,
-        //             options,
-        //           ),
-        //         );
-        //       }
-        //       for (const module of modules) {
-        //         if (
-        //           module instanceof NormalModule &&
-        //           module.resource === this.bundlerRuntimeDep
-        //         ) {
-        //           const allRefs = getAllReferencedModules(
-        //             compilation,
-        //             module,
-        //             'initial',
-        //           );
-        //           for (const module of allRefs) {
-        //             const exportsInfo: ExportsInfo =
-        //               moduleGraph.getExportsInfo(module);
-        //             // Since i dont use the import federation var, tree shake will eliminate it.
-        //             // also because currently the runtime is copied into all runtime chunks
-        //             // some might not have the runtime import in the tree to begin with
-        //             exportsInfo.setUsedInUnknownWay(runtime);
-        //             moduleGraph.addExtraReason(module, this.explanation);
-        //             if (module.factoryMeta === undefined) {
-        //               module.factoryMeta = {};
-        //             }
-        //             module.factoryMeta.sideEffectFree = false;
-        //           }
-        //         }
-        //       }
-        //     }
-        //   },
-        // );
       },
     );
   }

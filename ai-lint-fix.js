@@ -7,7 +7,6 @@ const { OpenAI } = require('openai');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const glob = require('glob');
-
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -35,7 +34,12 @@ const argv = yargs(hideBin(process.argv))
   .alias('help', 'h').argv;
 
 async function lintFileContent(fileContent) {
-  const prompt = `Perform safe cleanup and linting on the following file content. Return only the updated file content with no other response text:
+  const prompt = `Perform safe cleanup and linting on the following file content.
+RULES:
+-Should preserve uses of normalizeWebpackPath
+-Should preserve uses of ts-ignore
+-Removed commented out code
+-Return only the updated file content with no other response text:
 
 ${fileContent}`;
 
@@ -45,9 +49,16 @@ ${fileContent}`;
     max_tokens: 4096,
   });
 
-  return response.choices[0].message.content
-    .trim()
-    .replace(/^```(?:\w+)?|```$/g, '');
+  let res = response.choices[0].message.content.trim().split('\n');
+  if (res[0].startsWith('`')) {
+    res[0] = undefined;
+  }
+
+  if (res[res.length - 1].startsWith('`')) {
+    res[res.length - 1] = undefined;
+  }
+
+  return res.filter((r) => r).join('\n');
 }
 
 async function processFile(filePath) {
@@ -56,25 +67,50 @@ async function processFile(filePath) {
     const lintedContent = await lintFileContent(fileContent);
     fs.writeFileSync(filePath, lintedContent, 'utf8');
     console.log(`File has been linted and updated successfully: ${filePath}`);
+    const tsConfigPath = findTsConfig(filePath);
+    try {
+      const tscOutput = execSync(`tsc --noEmit --project ${tsConfigPath}`, {
+        stdio: 'pipe',
+      }).toString();
+      console.log(`TypeScript check passed for ${filePath}:\n${tscOutput}`);
+    } catch (error) {
+      console.error(
+        `TypeScript check failed for ${filePath}:\n${error.stdout.toString()}`,
+      );
+    }
   } catch (error) {
     console.error(`Error performing linting on ${filePath}:`, error.message);
+    process.exit(1);
   }
+}
+
+function findTsConfig(filePath) {
+  let dir = path.dirname(filePath);
+  while (dir !== path.resolve(dir, '..')) {
+    const tsConfigPath = path.join(dir, 'tsconfig.json');
+    if (fs.existsSync(tsConfigPath)) {
+      return tsConfigPath;
+    }
+    dir = path.resolve(dir, '..');
+  }
+  throw new Error('tsconfig.json not found');
 }
 
 async function main() {
   if (argv.path) {
     await processFile(argv.path);
   } else if (argv.pattern) {
-    glob(argv.pattern, async (err, files) => {
-      if (err) {
-        console.error('Error finding files:', err.message);
-        process.exit(1);
-      }
+    console.log('pattern', argv.pattern);
+    try {
+      const files = await glob.glob(argv.pattern);
 
       for (const filePath of files) {
         await processFile(filePath);
       }
-    });
+    } catch (err) {
+      console.error('Error finding files:', err.message);
+      process.exit(1);
+    }
   }
   execSync('nx format:write');
 }
