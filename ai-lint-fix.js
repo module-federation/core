@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { OpenAI } = require('openai');
@@ -69,7 +69,7 @@ async function processFile(filePath) {
     console.log(`File has been linted and updated successfully: ${filePath}`);
     const tsConfigPath = findTsConfig(filePath);
     try {
-      const tscOutput = execSync(`tsc --noEmit --project ${tsConfigPath}`, {
+      const tscOutput = execFileSync('tsc', ['--noEmit', '--project', tsConfigPath], {
         stdio: 'pipe',
       }).toString();
       console.log(`TypeScript check passed for ${filePath}:\n${tscOutput}`);
