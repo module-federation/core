@@ -14,11 +14,11 @@
 
 ```bash
 # Root directory
-pnpm i 
+pnpm i
 
-nx build modern-js-plugin 
+nx build modern-js-plugin
 
-pnpm run app:modern:dev  
+pnpm run app:modern:dev
 
 open http://localhost:3050/
 ```

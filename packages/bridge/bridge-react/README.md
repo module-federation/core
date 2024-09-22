@@ -4,9 +4,8 @@ React bridge is used to load the routing module in mf, so that the routing modul
 
 > When to use
 
-* Load the route module
-* Load across the front end framework
-
+- Load the route module
+- Load across the front end framework
 
 ## How to use
 
@@ -130,5 +129,3 @@ root.render(
     <App />
 );
 ```
-
-
