@@ -1,0 +1,35 @@
+name: Enhanced Experimental Tests
+
+on:
+  pull_request:
+    branches: [main, '**']
+  push:
+    branches: [main]
+
+jobs:
+  enhanced-experimental-tests:
+    runs-on: ubuntu-latest
+    needs: checkout-install
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Warm Nx Cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
+      - name: Run Affected Experimental Tests
+        run: npx nx affected -t test:experiments --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache

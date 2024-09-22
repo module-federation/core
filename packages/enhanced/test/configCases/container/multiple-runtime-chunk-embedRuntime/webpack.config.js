@@ -23,6 +23,7 @@ const commonMF = {
     './ComponentC': './ComponentC',
   },
   shared: ['react'],
+  experiments: { federationRuntime: 'hoisted' },
 };
 
 /** @type {import("../../../../").Configuration[]} */
@@ -62,7 +63,6 @@ module.exports = [
         name: 'container',
         library: { type: 'module' },
         filename: 'module/container.mjs',
-        // experiments: { federationRuntime: 'hoisted' },
         remotes: {
           containerA: '../../0-container-full/module/container.mjs',
           containerB: './container.mjs',

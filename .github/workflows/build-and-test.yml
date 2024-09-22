@@ -45,9 +45,6 @@ jobs:
       - name: Run Affected Test
         run: npx nx affected -t test --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
-      - name: Run Affected Experimental Tests
-        run: sleep 5 && npx nx affected -t test:experiments --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache
-
   e2e-modern:
     needs: checkout-install
     uses: ./.github/workflows/e2e-modern.yml
@@ -86,4 +83,9 @@ jobs:
   e2e-router:
     needs: checkout-install
     uses: ./.github/workflows/e2e-router.yml
+    secrets: inherit
+
+  enhanced-experimental-tests:
+    needs: checkout-install
+    uses: ./.github/workflows/enhanced-experimental-tests.yml
     secrets: inherit
