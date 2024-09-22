@@ -52,46 +52,55 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler): void {
-    compiler.hooks.thisCompilation.tap(
-      PLUGIN_NAME,
-      (compilation: Compilation) => {
-        const logger = compilation.getLogger(PLUGIN_NAME);
-        const { chunkGraph, moduleGraph } = compilation;
-        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        const containerEntryDependencies = new Set<Dependency>();
-        hooks.addContainerEntryModule.tap(
-          'HoistContainerReferences',
-          (dep: ContainerEntryDependency) => {
-            containerEntryDependencies.add(dep);
-          },
-        );
-        hooks.addFederationRuntimeModule.tap(
-          'HoistContainerReferences',
-          (dep: FederationRuntimeDependency) => {
-            containerEntryDependencies.add(dep);
-          },
-        );
+    if (
+      compiler.hooks.afterPlugins.taps.find((tap) => tap.name === PLUGIN_NAME)
+    ) {
+      console.log('already tapped for this hook');
+      return;
+    }
+    compiler.hooks.afterPlugins.tap(PLUGIN_NAME, (compiler) => {
+      compiler.hooks.thisCompilation.tap(
+        PLUGIN_NAME,
+        (compilation: Compilation) => {
+          const logger = compilation.getLogger(PLUGIN_NAME);
+          const { chunkGraph, moduleGraph } = compilation;
+          const hooks =
+            FederationModulesPlugin.getCompilationHooks(compilation);
+          const containerEntryDependencies = new Set<Dependency>();
+          hooks.addContainerEntryModule.tap(
+            'HoistContainerReferences',
+            (dep: ContainerEntryDependency) => {
+              containerEntryDependencies.add(dep);
+            },
+          );
+          hooks.addFederationRuntimeModule.tap(
+            'HoistContainerReferences',
+            (dep: FederationRuntimeDependency) => {
+              containerEntryDependencies.add(dep);
+            },
+          );
 
-        // Hook into the optimizeChunks phase
-        compilation.hooks.optimizeChunks.tap(
-          {
-            name: PLUGIN_NAME,
-            // advanced stage is where SplitChunksPlugin runs.
-            stage: 11, // advanced + 1
-          },
-          (chunks: Iterable<Chunk>) => {
-            const runtimeChunks = this.getRuntimeChunks(compilation);
-            this.hoistModulesInChunks(
-              compilation,
-              runtimeChunks,
-              chunks,
-              logger,
-              containerEntryDependencies,
-            );
-          },
-        );
-      },
-    );
+          // Hook into the optimizeChunks phase
+          compilation.hooks.optimizeChunks.tap(
+            {
+              name: PLUGIN_NAME,
+              // advanced stage is where SplitChunksPlugin runs.
+              stage: 11, // advanced + 1
+            },
+            (chunks: Iterable<Chunk>) => {
+              const runtimeChunks = this.getRuntimeChunks(compilation);
+              this.hoistModulesInChunks(
+                compilation,
+                runtimeChunks,
+                chunks,
+                logger,
+                containerEntryDependencies,
+              );
+            },
+          );
+        },
+      );
+    });
   }
 
   // Method to hoist modules in chunks
@@ -103,6 +112,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     containerEntryDependencies: Set<Dependency>,
   ): void {
     const { chunkGraph, moduleGraph } = compilation;
+    const moduleToDelete = new Set<Module>();
     // when runtimeChunk: single is set - ContainerPlugin will create a "partial" chunk we can use to
     // move modules into the runtime chunk
     for (const dep of containerEntryDependencies) {
@@ -144,32 +154,35 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         if (!runtimeChunk) continue;
 
         for (const module of allReferencedModules) {
+          moduleToDelete.add(module);
           for (const chunk of chunkGraph.getModuleChunks(module)) {
+            if (chunk.hasRuntime()) {
+              continue;
+            }
             chunkGraph.disconnectChunkAndModule(chunk, module);
           }
-          chunkGraph.connectChunkAndModule(runtimeChunk, module);
+          if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
+            chunkGraph.connectChunkAndModule(runtimeChunk, module);
+          }
         }
       }
-
-      this.cleanUpChunks(compilation, allReferencedModules);
     }
+    this.cleanUpChunks(compilation, moduleToDelete);
   }
 
   // Method to clean up chunks by disconnecting unused modules
   private cleanUpChunks(compilation: Compilation, modules: Set<Module>): void {
     const { chunkGraph } = compilation;
-    for (const module of modules) {
-      for (const chunk of chunkGraph.getModuleChunks(module)) {
-        if (!chunk.hasRuntime()) {
-          if (
-            chunkGraph.getNumberOfChunkModules(chunk) === 0 &&
-            chunkGraph.getNumberOfEntryModules(chunk) === 0
-          ) {
-            chunkGraph.disconnectChunk(chunk);
-            compilation.chunks.delete(chunk);
-            if (chunk.name) {
-              compilation.namedChunks.delete(chunk.name);
-            }
+    for (const chunk of compilation.chunks) {
+      if (!chunk.hasRuntime()) {
+        if (
+          chunkGraph.getNumberOfChunkModules(chunk) === 0 &&
+          chunkGraph.getNumberOfEntryModules(chunk) === 0
+        ) {
+          chunkGraph.disconnectChunk(chunk);
+          compilation.chunks.delete(chunk);
+          if (chunk.name) {
+            compilation.namedChunks.delete(chunk.name);
           }
         }
       }
