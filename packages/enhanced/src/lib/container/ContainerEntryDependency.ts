@@ -20,7 +20,7 @@ class ContainerEntryDependency extends Dependency {
   public exposes: [string, ExposeOptions][];
   public shareScope: string;
   public injectRuntimeEntry: string;
-/** Additional experimental options for container plugin customization */
+  /** Additional experimental options for container plugin customization */
   public experiments: containerPlugin.ContainerPluginOptions['experiments'];
 
   /**
