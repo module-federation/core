@@ -1,5 +1,23 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.5.16
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.6
+- @module-federation/runtime@0.6.6
+- @module-federation/sdk@0.6.6
+- @module-federation/utilities@3.1.12
+
+## 2.5.15
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.5
+- @module-federation/runtime@0.6.5
+- @module-federation/sdk@0.6.5
+- @module-federation/utilities@3.1.11
+
 ## 2.5.14
 
 ### Patch Changes

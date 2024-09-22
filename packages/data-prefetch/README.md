@@ -1,1 +1,3 @@
-Module Federation Data Prefetch(https://module-federation.io/zh/guide/performance/prefetch.html)
+# @module-federation/data-prefetch
+
+See [documentation](https://module-federation.io/zh/guide/performance/prefetch.html) for more details .

@@ -277,26 +277,26 @@ new NextFederationPlugin({
 
 Ive added a util for dynamic chunk loading, in the event you need to load remote containers dynamically.
 
-
 ```js
 import { loadRemote, init } from '@module-federation/runtime';
 // if i have remotes in my federation plugin, i can pass the name of the remote
-loadRemote('home/exposedModule')
+loadRemote('home/exposedModule');
 // if i want to load a custom remote not known at build time.
 init({
   name: 'hostname',
   remotes: [
     {
       name: 'home',
-      entry: 'http://somthing.com/remoteEntry.js'
-    }
+      entry: 'http://somthing.com/remoteEntry.js',
+    },
   ],
-  force: true // may be needed to sideload remotes after the fact. 
-})
-loadRemote('home/exposedModule')
+  force: true, // may be needed to sideload remotes after the fact.
+});
+loadRemote('home/exposedModule');
 ```
 
 **revalidate**
+
 ### Hot Reloading with `revalidate` in Production Environments
 
 In production environments, ensuring that your server can dynamically reload and update without requiring a full restart is crucial for maintaining uptime and providing the latest features to your users without disruption. The `revalidate` utility from `@module-federation/nextjs-mf/utils` facilitates this by enabling hot reloading of the node server (not the client). This section outlines two implementations for integrating `revalidate` into your Next.js application to leverage hot reloading capabilities.
