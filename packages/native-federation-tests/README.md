@@ -215,8 +215,8 @@ const config: UserConfig = {
     NativeFederationTestsHost({
       /* options */
     }),
-  ]
-}
+  ],
+};
 ```
 
 <br>
