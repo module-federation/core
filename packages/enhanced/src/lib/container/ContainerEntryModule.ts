@@ -16,6 +16,7 @@ import type {
   ResolverWithOptions,
   WebpackOptions,
 } from 'webpack/lib/Module';
+import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import type WebpackError from 'webpack/lib/WebpackError';
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from '../Constants';
 import ContainerExposedDependency from './ContainerExposedDependency';
@@ -293,7 +294,9 @@ class ContainerEntryModule extends Module {
           '})',
         ],
       )};`,
+      PrefetchPlugin.setRemoteIdentifier(),
       `${initRuntimeModuleGetter}`,
+      PrefetchPlugin.removeRemoteIdentifier(),
       '',
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,

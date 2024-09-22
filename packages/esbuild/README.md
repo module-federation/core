@@ -77,7 +77,6 @@ module.exports = withFederation({
     }),
   },
 });
-
 ```
 
 The `moduleFederationPlugin` accepts a configuration object with the following properties:
@@ -110,7 +109,5 @@ Creates an esbuild plugin for Module Federation.
   - `remotes` (object, optional): An object specifying the remote applications and their entry points.
   - `exposes` (object, optional): An object specifying the modules to be exposed by the host application.
   - `shared` (array, optional): An array of package names to be shared between the host and remote applications.
-  
+
 Returns an esbuild plugin instance.
-
-
