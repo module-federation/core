@@ -52,49 +52,46 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler): void {
-    compiler.hooks.afterPlugins.tap(PLUGIN_NAME, (compiler) => {
-      compiler.hooks.thisCompilation.tap(
-        PLUGIN_NAME,
-        (compilation: Compilation) => {
-          const logger = compilation.getLogger(PLUGIN_NAME);
-          const { chunkGraph, moduleGraph } = compilation;
-          const hooks =
-            FederationModulesPlugin.getCompilationHooks(compilation);
-          const containerEntryDependencies = new Set<Dependency>();
-          hooks.addContainerEntryModule.tap(
-            'HoistContainerReferences',
-            (dep: ContainerEntryDependency) => {
-              containerEntryDependencies.add(dep);
-            },
-          );
-          hooks.addFederationRuntimeModule.tap(
-            'HoistContainerReferences',
-            (dep: FederationRuntimeDependency) => {
-              containerEntryDependencies.add(dep);
-            },
-          );
+    compiler.hooks.thisCompilation.tap(
+      PLUGIN_NAME,
+      (compilation: Compilation) => {
+        const logger = compilation.getLogger(PLUGIN_NAME);
+        const { chunkGraph, moduleGraph } = compilation;
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        const containerEntryDependencies = new Set<Dependency>();
+        hooks.addContainerEntryModule.tap(
+          'HoistContainerReferences',
+          (dep: ContainerEntryDependency) => {
+            containerEntryDependencies.add(dep);
+          },
+        );
+        hooks.addFederationRuntimeModule.tap(
+          'HoistContainerReferences',
+          (dep: FederationRuntimeDependency) => {
+            containerEntryDependencies.add(dep);
+          },
+        );
 
-          // Hook into the optimizeChunks phase
-          compilation.hooks.optimizeChunks.tap(
-            {
-              name: PLUGIN_NAME,
-              // advanced stage is where SplitChunksPlugin runs.
-              stage: 11, // advanced + 1
-            },
-            (chunks: Iterable<Chunk>) => {
-              const runtimeChunks = this.getRuntimeChunks(compilation);
-              this.hoistModulesInChunks(
-                compilation,
-                runtimeChunks,
-                chunks,
-                logger,
-                containerEntryDependencies,
-              );
-            },
-          );
-        },
-      );
-    });
+        // Hook into the optimizeChunks phase
+        compilation.hooks.optimizeChunks.tap(
+          {
+            name: PLUGIN_NAME,
+            // advanced stage is where SplitChunksPlugin runs.
+            stage: 11, // advanced + 1
+          },
+          (chunks: Iterable<Chunk>) => {
+            const runtimeChunks = this.getRuntimeChunks(compilation);
+            this.hoistModulesInChunks(
+              compilation,
+              runtimeChunks,
+              chunks,
+              logger,
+              containerEntryDependencies,
+            );
+          },
+        );
+      },
+    );
   }
 
   // Method to hoist modules in chunks

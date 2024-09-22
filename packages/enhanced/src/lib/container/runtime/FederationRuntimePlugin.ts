@@ -235,10 +235,6 @@ class FederationRuntimePlugin {
       compiler.hooks.thisCompilation.tap(
         this.constructor.name,
         (compilation: Compilation, { normalModuleFactory }) => {
-          const federationRuntimeDependency = this.getDependency(compiler);
-          const logger = compilation.getLogger('FederationRuntimePlugin');
-          const hooks =
-            FederationModulesPlugin.getCompilationHooks(compilation);
           compilation.dependencyFactories.set(
             FederationRuntimeDependency,
             normalModuleFactory,
@@ -247,19 +243,27 @@ class FederationRuntimePlugin {
             FederationRuntimeDependency,
             new ModuleDependency.Template(),
           );
-
+        },
+      );
+      compiler.hooks.make.tapAsync(
+        this.constructor.name,
+        (compilation: Compilation, callback) => {
+          const federationRuntimeDependency = this.getDependency(compiler);
+          const logger = compilation.getLogger('FederationRuntimePlugin');
+          const hooks =
+            FederationModulesPlugin.getCompilationHooks(compilation);
           compilation.addInclude(
             compiler.context,
             federationRuntimeDependency,
             { name: undefined },
             (err, module) => {
               if (err) {
-                logger.error('Error adding federation runtime module:', err);
-                return;
+                return callback(err);
               }
               hooks.addFederationRuntimeModule.call(
                 federationRuntimeDependency,
               );
+              callback();
             },
           );
         },
@@ -466,12 +470,12 @@ class FederationRuntimePlugin {
       ).apply(compiler);
     }
     // dont run multiple times on every apply()
-    if (!onceForCompler.has(compiler)) {
-      this.prependEntry(compiler);
-      this.injectRuntime(compiler);
-      this.setRuntimeAlias(compiler);
-      onceForCompler.add(compiler);
-    }
+    // if (!onceForCompler.has(compiler)) {
+    this.prependEntry(compiler);
+    this.injectRuntime(compiler);
+    this.setRuntimeAlias(compiler);
+    onceForCompler.add(compiler);
+    // }
   }
 }
 
