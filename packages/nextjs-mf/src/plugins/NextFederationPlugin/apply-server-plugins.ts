@@ -169,7 +169,8 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     global: false,
   };
   // Set the compiler target to 'async-node' for server-side rendering compatibility
-  compiler.options.target = 'async-node';
+// Set the target to 'async-node' for server-side builds
+compiler.options.target = 'async-node';
 
   // Runtime chunk creation is currently disabled
   // Uncomment if separate runtime chunk is needed for specific use cases
