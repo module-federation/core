@@ -52,12 +52,6 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler): void {
-    if (
-      compiler.hooks.afterPlugins.taps.find((tap) => tap.name === PLUGIN_NAME)
-    ) {
-      console.log('already tapped for this hook');
-      return;
-    }
     compiler.hooks.afterPlugins.tap(PLUGIN_NAME, (compiler) => {
       compiler.hooks.thisCompilation.tap(
         PLUGIN_NAME,

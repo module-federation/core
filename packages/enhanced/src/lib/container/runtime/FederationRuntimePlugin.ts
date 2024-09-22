@@ -426,6 +426,16 @@ class FederationRuntimePlugin {
         },
       );
     }
+
+    if (
+      compiler.hooks.thisCompilation.taps.find(
+        (tap) => tap.name === this.constructor.name,
+      )
+    ) {
+      console.log('plugin already applied');
+      return;
+    }
+
     if (this.options?.experiments?.federationRuntime === 'hoisted') {
       this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
         '.cjs.js',
