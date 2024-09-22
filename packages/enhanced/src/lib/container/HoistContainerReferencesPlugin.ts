@@ -144,9 +144,10 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         if (!runtimeChunk) continue;
 
         for (const module of allReferencedModules) {
-          if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
-            chunkGraph.connectChunkAndModule(runtimeChunk, module);
+          for (const chunk of chunkGraph.getModuleChunks(module)) {
+            chunkGraph.disconnectChunkAndModule(chunk, module);
           }
+          chunkGraph.connectChunkAndModule(runtimeChunk, module);
         }
       }
 
@@ -160,7 +161,6 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     for (const module of modules) {
       for (const chunk of chunkGraph.getModuleChunks(module)) {
         if (!chunk.hasRuntime()) {
-          chunkGraph.disconnectChunkAndModule(chunk, module);
           if (
             chunkGraph.getNumberOfChunkModules(chunk) === 0 &&
             chunkGraph.getNumberOfEntryModules(chunk) === 0

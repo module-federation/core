@@ -40,7 +40,7 @@ jobs:
         run: npx nx run-many --targets=build --projects=tag:type:pkg
 
       - name: Run Build for All
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache --parallel=6
 
       - name: Run Affected Test
         run: npx nx affected -t test --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache
