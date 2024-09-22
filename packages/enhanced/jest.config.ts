@@ -11,7 +11,6 @@ const { exclude: _, ...swcJestConfig } = JSON.parse(
 
 rimraf.sync(__dirname + '/test/js');
 
-
 // disable .swcrc look-up by SWC core because we're passing in swcJestConfig ourselves.
 // If we do not disable this, SWC Core will read .swcrc and won't transform our test files due to "exclude"
 if (swcJestConfig.swcrc === undefined) {
