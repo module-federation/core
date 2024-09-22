@@ -69,9 +69,13 @@ async function processFile(filePath) {
     console.log(`File has been linted and updated successfully: ${filePath}`);
     const tsConfigPath = findTsConfig(filePath);
     try {
-      const tscOutput = execFileSync('tsc', ['--noEmit', '--project', tsConfigPath], {
-        stdio: 'pipe',
-      }).toString();
+      const tscOutput = execFileSync(
+        'tsc',
+        ['--noEmit', '--project', tsConfigPath],
+        {
+          stdio: 'pipe',
+        },
+      ).toString();
       console.log(`TypeScript check passed for ${filePath}:\n${tscOutput}`);
     } catch (error) {
       console.error(
