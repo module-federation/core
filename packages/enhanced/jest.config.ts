@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { readFileSync, rmdirSync, existsSync } from 'fs';
 import path from 'path';
+import os from 'os';
 const rimraf = require('rimraf');
 
 // Reading the SWC compilation config and remove the "exclude"
@@ -25,6 +26,7 @@ if (swcJestConfig.swcrc === undefined) {
 export default {
   displayName: 'enhanced',
   preset: '../../jest.preset.js',
+  cacheDirectory: path.join(os.tmpdir(), 'enhanced'),
   transform: {
     '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
   },
