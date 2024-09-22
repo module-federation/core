@@ -7,9 +7,10 @@ const args = [
   '--trace-deprecation',
   jestPath,
   '--logHeapUsage',
+  '--clearCache',
   '--config',
   'packages/enhanced/jest.config.ts',
-  '--silent',
+  '--silent'
 ];
 
 const result = spawnSync('node', args, { stdio: 'inherit' });
