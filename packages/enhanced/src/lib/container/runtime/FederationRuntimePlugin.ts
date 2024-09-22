@@ -431,15 +431,6 @@ class FederationRuntimePlugin {
       );
     }
 
-    if (
-      compiler.hooks.thisCompilation.taps.find(
-        (tap) => tap.name === this.constructor.name,
-      )
-    ) {
-      console.log('plugin already applied');
-      return;
-    }
-
     if (this.options?.experiments?.federationRuntime === 'hoisted') {
       this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
         '.cjs.js',
@@ -470,12 +461,12 @@ class FederationRuntimePlugin {
       ).apply(compiler);
     }
     // dont run multiple times on every apply()
-    // if (!onceForCompler.has(compiler)) {
-    this.prependEntry(compiler);
-    this.injectRuntime(compiler);
-    this.setRuntimeAlias(compiler);
-    onceForCompler.add(compiler);
-    // }
+    if (!onceForCompler.has(compiler)) {
+      this.prependEntry(compiler);
+      this.injectRuntime(compiler);
+      this.setRuntimeAlias(compiler);
+      onceForCompler.add(compiler);
+    }
   }
 }
 

@@ -272,3 +272,91 @@ export class Module implements ModuleInterface {
     return this._getInstance().wraperFactory(...args);
   }
 }
+
+//maybe use proxy?
+//export class Module implements ModuleInterface {
+//   private _instance: IndexModule.Module | null = null;
+//   private _args: ConstructorParameters<typeof IndexModule.Module>;
+//   constructor(...args: ConstructorParameters<typeof IndexModule.Module>) {
+//     this._args = args;
+//     return new Proxy(this, {
+//       get(target, prop) {
+//         if (prop in target) {
+//           return target[prop as keyof Module];
+//         }
+//         const instance = target._getInstance();
+//         const value = instance[prop as keyof IndexModule.Module];
+//         return typeof value === 'function' ? value.bind(instance) : value;
+//       },
+//       set(target, prop, value) {
+//         const instance = target._getInstance();
+//         instance[prop as keyof IndexModule.Module] = value;
+//         return true;
+//       },
+//     });
+//   }
+//   private _getInstance(): IndexModule.Module {
+//     if (!this._instance) {
+//       const RealModule = getRuntime().Module;
+//       this._instance = new RealModule(...this._args);
+//     }
+//     return this._instance;
+//   }
+//   // Keep only the methods that have custom logic
+//   private wraperFactory(...args: Parameters<IndexModule.Module['wraperFactory']>) {
+//     return this._getInstance().wraperFactory(...args);
+//   }
+// }
+//export class FederationHost implements IndexModule.FederationHost {
+//   private _instance: IndexModule.FederationHost | null = null;
+//   private _args: ConstructorParameters<typeof IndexModule.FederationHost>;
+//   constructor(...args: ConstructorParameters<typeof IndexModule.FederationHost>) {
+//     this._args = args;
+//     return new Proxy(this, {
+//       get(target, prop) {
+//         if (prop in target) {
+//           return target[prop as keyof FederationHost];
+//         }
+//         const instance = target._getInstance();
+//         const value = instance[prop as keyof IndexModule.FederationHost];
+//         return typeof value === 'function' ? value.bind(instance) : value;
+//       },
+//       set(target, prop, value) {
+//         const instance = target._getInstance();
+//         instance[prop as keyof IndexModule.FederationHost] = value;
+//         return true;
+//       },
+//     });
+//   }
+//   private _getInstance(): IndexModule.FederationHost {
+//     if (!this._instance) {
+//       const RealFederationHost = getRuntime().FederationHost;
+//       this._instance = new RealFederationHost(...this._args);
+//     }
+//     return this._instance;
+//   }
+//   // Keep only the methods that have custom logic
+//   formatOptions(...args: Parameters<IndexModule.FederationHost['formatOptions']>) {
+//     return this._getInstance().formatOptions(...args);
+//   }
+// }
+//function createRuntimeFunction<T extends keyof typeof IndexModule>(
+//   name: T
+// ): typeof IndexModule[T] {
+//   return (...args: any[]) => {
+//     return getRuntime()[name](...args);
+//   };
+// }
+// export const registerGlobalPlugins = createRuntimeFunction('registerGlobalPlugins');
+// export const getRemoteEntry = createRuntimeFunction('getRemoteEntry');
+// export const getRemoteInfo = createRuntimeFunction('getRemoteInfo');
+// export const loadScript = createRuntimeFunction('loadScript');
+// export const loadScriptNode = createRuntimeFunction('loadScriptNode');
+// export const init = createRuntimeFunction('init');
+// export const loadRemote = createRuntimeFunction('loadRemote');
+// export const loadShare = createRuntimeFunction('loadShare');
+// export const loadShareSync = createRuntimeFunction('loadShareSync');
+// export const preloadRemote = createRuntimeFunction('preloadRemote');
+// export const registerRemotes = createRuntimeFunction('registerRemotes');
+// export const registerPlugins = createRuntimeFunction('registerPlugins');
+// export const getInstance = createRuntimeFunction('getInstance');
