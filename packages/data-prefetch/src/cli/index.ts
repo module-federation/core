@@ -9,7 +9,7 @@ import {
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 
-import { TEMP_DIR } from '../common/constant';
+import { SHARED_STRATEGY, TEMP_DIR } from '../common/constant';
 import { fileExistsWithCaseSync, fixPrefetchPath } from '../common/node-utils';
 import { getPrefetchId } from '../common/runtime-utils';
 
@@ -48,12 +48,14 @@ export class PrefetchPlugin implements WebpackPluginInstance {
     }
 
     const runtimePath = path.resolve(__dirname, '../esm/plugin.js');
-    const sharedPath = path.resolve(__dirname, '../esm/shared/index.js');
     if (!this.options.runtimePlugins?.includes(runtimePath)) {
       this.options.runtimePlugins!.push(runtimePath);
     }
-    if (!this.options.runtimePlugins?.includes(sharedPath)) {
-      this.options.runtimePlugins!.push(sharedPath);
+    if (
+      !this.options.shareStrategy ||
+      this.options.shareStrategy !== SHARED_STRATEGY
+    ) {
+      this.options.shareStrategy = SHARED_STRATEGY;
     }
 
     const encodedName = encodeName(name as string);

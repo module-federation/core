@@ -16,7 +16,6 @@ export const tsup: Options = {
     'src/cli/babel.ts',
     'src/universal/index.ts',
     'src/plugin.ts',
-    'src/shared/index.ts',
   ],
   sourcemap: sourceMap,
   clean: true,

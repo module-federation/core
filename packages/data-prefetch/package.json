@@ -38,11 +38,6 @@
       "import": "./dist/esm/universal/index.js",
       "require": "./dist/universal/index.js",
       "types": "./dist/universal/index.d.ts"
-    },
-    "./shared": {
-      "import": "./dist/esm/shared/index.js",
-      "require": "./dist/shared/index.js",
-      "types": "./dist/shared/index.d.ts"
     }
   },
   "typesVersions": {
@@ -58,9 +53,6 @@
       ],
       "universal": [
         "./dist/universal/index.d.ts"
-      ],
-      "shared": [
-        "./dist/shared/index.d.ts"
       ]
     }
   },

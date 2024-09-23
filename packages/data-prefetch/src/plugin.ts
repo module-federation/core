@@ -2,6 +2,7 @@ import type { FederationRuntimePlugin } from '@module-federation/runtime/types';
 import { ModuleInfo, getResourceUrl } from '@module-federation/sdk';
 
 import { getSignalFromManifest } from './common/runtime-utils';
+import { SHARED_STRATEGY } from './common/constant';
 import { MFDataPrefetch } from './prefetch';
 import logger from './logger';
 
@@ -15,8 +16,7 @@ interface Loading {
   >;
 }
 const loadingArray: Array<Loading> = [];
-const strategy = 'loaded-first';
-let sharedFlag = strategy;
+let sharedFlag = SHARED_STRATEGY;
 // eslint-disable-next-line max-lines-per-function
 export const prefetchPlugin = (): FederationRuntimePlugin => ({
   name: 'data-prefetch-runtime-plugin',
@@ -35,7 +35,7 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
     if (!signal) {
       return options;
     }
-    if (sharedFlag !== strategy) {
+    if (sharedFlag !== SHARED_STRATEGY) {
       throw new Error(
         `[Module Federation Data Prefetch]: If you want to use data prefetch, the shared strategy must be 'loaded-first'`,
       );
@@ -109,7 +109,7 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
       return options;
     }
 
-    if (sharedFlag !== strategy) {
+    if (sharedFlag !== SHARED_STRATEGY) {
       throw new Error(
         `[Module Federation Data Prefetch]: If you want to use data prefetch, the shared strategy must be 'loaded-first'`,
       );
@@ -183,7 +183,8 @@ export const prefetchPlugin = (): FederationRuntimePlugin => ({
 
   beforeLoadShare(options) {
     const shareInfo = options.shareInfo;
-    sharedFlag = shareInfo?.strategy || sharedFlag;
+    sharedFlag =
+      options.origin.options.shareStrategy || shareInfo?.strategy || sharedFlag;
     return options;
   },
 });
