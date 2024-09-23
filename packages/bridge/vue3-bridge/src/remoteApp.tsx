@@ -1,8 +1,7 @@
 import { ref, onMounted, onBeforeUnmount, watch, defineComponent } from 'vue';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { useRoute } from 'vue-router';
-
-import hook from './lifecycle';
+import { registerBridgeLifeCycle } from './lifecycle';
 import { LoggerInstance } from './utils';
 
 export default defineComponent({
@@ -18,6 +17,7 @@ export default defineComponent({
     const providerInfoRef = ref(null);
     const pathname = ref('');
     const route = useRoute();
+    const bridgeHook = registerBridgeLifeCycle();
 
     const renderComponent = () => {
       const providerReturn = props.providerInfo?.();
@@ -32,9 +32,12 @@ export default defineComponent({
         `createRemoteComponent LazyComponent render >>>`,
         renderProps,
       );
-      hook.lifecycle.beforeBridgeRender.emit({
-        ...renderProps,
-      });
+
+      if (bridgeHook && bridgeHook?.lifecycle?.beforeBridgeRender) {
+        bridgeHook?.lifecycle?.beforeBridgeRender.emit({
+          ...renderProps,
+        });
+      }
       providerReturn.render(renderProps);
     };
 
@@ -66,12 +69,15 @@ export default defineComponent({
         ...props,
       });
       watchStopHandle();
-      hook.lifecycle.beforeBridgeDestroy.emit({
-        name: props.moduleName,
-        dom: rootRef.value,
-        basename: props.basename,
-        memoryRoute: props.memoryRoute,
-      });
+      if (bridgeHook && bridgeHook?.lifecycle?.beforeBridgeRender) {
+        bridgeHook?.lifecycle?.beforeBridgeDestroy.emit({
+          name: props.moduleName,
+          dom: rootRef.value,
+          basename: props.basename,
+          memoryRoute: props.memoryRoute,
+        });
+      }
+
       (providerInfoRef.value as any)?.destroy({ dom: rootRef.value });
     });
 

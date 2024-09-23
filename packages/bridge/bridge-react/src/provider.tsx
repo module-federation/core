@@ -76,7 +76,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           typeof bridgeInfo?.hooks.beforeBridgeRender === 'function'
         ) {
           bridgeInfo.hooks.beforeBridgeRender(info);
-          // bridgeInfo?.beforeBridgeRender?.(info);
         }
 
         // call render function

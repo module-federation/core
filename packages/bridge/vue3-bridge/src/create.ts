@@ -1,6 +1,5 @@
 import { defineAsyncComponent, h } from 'vue';
 import { useRoute } from 'vue-router';
-
 import RemoteApp from './remoteApp.jsx';
 import { LoggerInstance } from './utils.js';
 
