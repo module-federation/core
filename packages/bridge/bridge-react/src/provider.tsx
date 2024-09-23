@@ -7,7 +7,6 @@ import type {
   RenderFnParams,
 } from '@module-federation/bridge-shared';
 import { ErrorBoundary } from 'react-error-boundary';
-
 import { RouterContext } from './context';
 import { LoggerInstance, atLeastReact18 } from './utils';
 

@@ -4,4 +4,3 @@ export type {
   ProviderParams,
   RenderFnParams,
 } from '@module-federation/bridge-shared';
-export type { BridgeRuntimePlugin } from './lifecycle';

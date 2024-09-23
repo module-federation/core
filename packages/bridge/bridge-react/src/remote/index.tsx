@@ -9,7 +9,7 @@ import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
-import bridgeHook from '../lifecycle';
+import { registerBridgeLifeCycle } from '../lifecycle';
 import { LoggerInstance, pathJoin } from '../utils';
 
 declare const __APP_VERSION__: string;
@@ -40,6 +40,7 @@ const RemoteAppWrapper = forwardRef(function (
   props: RemoteAppParams & RenderFnParams,
   ref,
 ) {
+  const bridgeHook = registerBridgeLifeCycle();
   const RemoteApp = () => {
     LoggerInstance.log(`RemoteAppWrapper RemoteApp props >>>`, { props });
     const {
@@ -79,9 +80,13 @@ const RemoteAppWrapper = forwardRef(function (
           `createRemoteComponent LazyComponent render >>>`,
           renderProps,
         );
-        bridgeHook.lifecycle.beforeBridgeRender.emit({
-          ...renderProps,
-        });
+
+        if (bridgeHook && bridgeHook?.lifecycle?.beforeBridgeRender) {
+          bridgeHook?.lifecycle?.beforeBridgeRender.emit({
+            ...renderProps,
+          });
+        }
+
         providerReturn.render(renderProps);
       });
 
@@ -93,14 +98,16 @@ const RemoteAppWrapper = forwardRef(function (
               `createRemoteComponent LazyComponent destroy >>>`,
               { moduleName, basename, dom: renderDom.current },
             );
-            bridgeHook.lifecycle.beforeBridgeDestroy.emit({
-              moduleName,
-              dom: renderDom.current,
-              basename,
-              memoryRoute,
-              fallback,
-              ...resProps,
-            });
+            if (bridgeHook && bridgeHook?.lifecycle?.beforeBridgeDestroy) {
+              bridgeHook?.lifecycle?.beforeBridgeDestroy.emit({
+                moduleName,
+                dom: renderDom.current,
+                basename,
+                memoryRoute,
+                fallback,
+                ...resProps,
+              });
+            }
             providerInfoRef.current?.destroy({
               dom: renderDom.current,
             });
