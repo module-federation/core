@@ -15,52 +15,55 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.cjs.d.ts"
     },
     "./react": {
-      "import": "./dist/esm/react/index.js",
-      "require": "./dist/react/index.js",
-      "types": "./dist/react/index.d.ts"
+      "import": "./dist/react.esm.js",
+      "require": "./dist/react.cjs.js",
+      "types": "./dist/react.cjs.d.ts"
     },
     "./cli": {
-      "import": "./dist/esm/cli/index.js",
-      "require": "./dist/cli/index.js",
-      "types": "./dist/cli/index.d.ts"
+      "import": "./dist/cli.esm.js",
+      "require": "./dist/cli.cjs.js",
+      "types": "./dist/cli.cjs.d.ts"
     },
     "./babel-plugin": {
-      "import": "./dist/esm/cli/babel.js",
-      "require": "./dist/cli/babel.js",
-      "types": "./dist/cli/babel.d.ts"
+      "import": "./dist/babel.esm.js",
+      "require": "./dist/babel.cjs.js",
+      "types": "./dist/babel.cjs.d.ts"
     },
     "./universal": {
-      "import": "./dist/esm/universal/index.js",
-      "require": "./dist/universal/index.js",
-      "types": "./dist/universal/index.d.ts"
+      "import": "./dist/universal.esm.js",
+      "require": "./dist/universal.cjs.js",
+      "types": "./dist/universal.cjs.d.ts"
     },
     "./shared": {
-      "import": "./dist/esm/shared/index.js",
-      "require": "./dist/shared/index.js",
-      "types": "./dist/shared/index.d.ts"
+      "import": "./dist/shared.esm.js",
+      "require": "./dist/shared.cjs.js",
+      "types": "./dist/shared/.cjs.d.ts"
     }
   },
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.d.ts"
+        "./dist/index.cjs.d.ts"
       ],
       "react": [
-        "./dist/react/index.d.ts"
+        "./dist/react.cjs.d.ts"
       ],
       "cli": [
-        "./dist/cli/index.d.ts"
+        "./dist/cli.cjs.d.ts"
       ],
       "universal": [
-        "./dist/universal/index.d.ts"
+        "./dist/universal.cjs.d.ts"
       ],
       "shared": [
-        "./dist/shared/index.d.ts"
+        "./dist/shared.cjs.d.ts"
+      ],
+      "babel-plugin": [
+        "./dist/babel.cjs.d.ts"
       ]
     }
   },

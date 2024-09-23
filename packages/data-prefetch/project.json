@@ -13,14 +13,6 @@
         "tsConfig": "packages/data-prefetch/tsconfig.lib.json",
         "assets": [],
         "project": "packages/data-prefetch/package.json",
-        "additionalEntryPoints": [
-          "packages/data-prefetch/src/react/index.ts",
-          "packages/data-prefetch/src/cli/index.ts",
-          "packages/data-prefetch/src/cli/babel.ts",
-          "packages/data-prefetch/src/universal/index.ts",
-          "packages/data-prefetch/src/plugin.ts",
-          "packages/data-prefetch/src/shared/index.ts"
-        ],
         "rollupConfig": "packages/data-prefetch/rollup.config.js",
         "compiler": "swc",
         "format": ["cjs", "esm"]
