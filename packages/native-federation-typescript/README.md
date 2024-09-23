@@ -211,8 +211,8 @@ const config: UserConfig = {
     NativeFederationTypeScriptHost({
       /* options */
     }),
-  ]
-}
+  ],
+};
 ```
 
 <br>

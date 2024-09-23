@@ -2,9 +2,9 @@
 
 This example demos manifest
 
-- `manifest-webpack-host` consumes remote  and generate manifest.
-- `3009-webpack-provider` exposes a blue button component  and generate manifest.
-- `3010-rspack-provider` exposes a red button component  and generate manifest.
+- `manifest-webpack-host` consumes remote and generate manifest.
+- `3009-webpack-provider` exposes a blue button component and generate manifest.
+- `3010-rspack-provider` exposes a red button component and generate manifest.
 - `3011-rspack-manifest-provider`: expose component and generate manifest.
 - `3012-rspack-js-entry-provider`: expose component and not generate manifest.
 
