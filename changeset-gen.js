@@ -20,6 +20,12 @@ const argv = yargs(hideBin(process.argv))
     description: 'Path to the file or directory',
     demandOption: true,
   })
+  .option('staged', {
+    alias: 's',
+    type: 'boolean',
+    description: 'Run only against the staged files',
+    default: false,
+  })
   .help()
   .alias('help', 'h').argv;
 
@@ -96,9 +102,10 @@ function getGitDiffPatch(filePath) {
     )
       .toString()
       .trim();
-    const patch = execSync(
-      `git diff ${baseBranch} -- "${sanitizedFilePath}"`,
-    ).toString();
+    const diffCommand = argv.staged
+      ? `git diff --cached -- "${sanitizedFilePath}"`
+      : `git diff ${baseBranch} -- "${sanitizedFilePath}"`;
+    const patch = execSync(diffCommand).toString();
     return patch;
   } catch (error) {
     console.error('Error getting git diff:', error.message);

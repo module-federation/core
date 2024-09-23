@@ -33,8 +33,12 @@ class StartupChunkDependenciesPlugin {
 
   private isEnabledForChunk(chunk: Chunk, compilation: any): boolean {
     if (chunk.id === 'build time chunk') return false;
+
     const [finalEntry] =
-      compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
+      Array.from(
+        compilation.chunkGraph.getChunkEntryModulesIterable(chunk),
+      ).reverse() || [];
+
     return !(finalEntry instanceof ContainerEntryModule);
   }
 
