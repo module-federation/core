@@ -61,6 +61,10 @@
             "forwardAllArgs": false
           },
           {
+            "command": "nx run enhanced:test:experiments",
+            "forwardAllArgs": false
+          },
+          {
             "command": "nx run enhanced:build",
             "forwardAllArgs": false
           }

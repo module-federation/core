@@ -94,15 +94,16 @@ type RemoteKeys = RemoteKeys_0 | RemoteKeys_1;
 type PackageType<T, R = any> = T extends RemoteKeys_0
   ? PackageType_0<T>
   : T extends RemoteKeys_1
-  ? PackageType_1<T>
-  : R;
+    ? PackageType_1<T>
+    : R;
 type GetType<T, Y extends keyof T> = T[Y];
 type GetProvderComponentType<
   T extends RemoteKeys,
   Y extends keyof PackageType<T>,
-> = GetType<PackageType<T>, Y> extends (...args: Array<any>) => any
-  ? ReturnType<GetType<PackageType<T>, Y>>
-  : any;
+> =
+  GetType<PackageType<T>, Y> extends (...args: Array<any>) => any
+    ? ReturnType<GetType<PackageType<T>, Y>>
+    : any;
 
 type GetObjectVal<
   T extends Record<string, any>,
