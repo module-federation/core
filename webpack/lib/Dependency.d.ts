@@ -27,7 +27,7 @@ declare class Dependency {
    * @returns {string} a dependency category, typical categories are "commonjs", "amd", "esm"
    */
   get category(): string;
-  set loc(arg: DependencyLocation);
+  set loc(loc: DependencyLocation);
   /**
    * @returns {DependencyLocation} location
    */
@@ -75,13 +75,9 @@ declare class Dependency {
   ): (string[] | ReferencedExport)[];
   /**
    * @param {ModuleGraph} moduleGraph module graph
-   * @returns {null | false | function(ModuleGraphConnection, RuntimeSpec): ConnectionState} function to determine if the connection is active
+   * @returns {null | false | GetConditionFn} function to determine if the connection is active
    */
-  getCondition(
-    moduleGraph: ModuleGraph,
-  ):
-    | false
-    | ((arg0: ModuleGraphConnection, arg1: RuntimeSpec) => ConnectionState);
+  getCondition(moduleGraph: ModuleGraph): null | false | GetConditionFn;
   /**
    * Returns the exported names
    * @param {ModuleGraph} moduleGraph module graph
@@ -132,7 +128,7 @@ declare class Dependency {
    * @param {ObjectDeserializerContext} context context
    */
   deserialize({ read }: ObjectDeserializerContext): void;
-  set module(arg: any);
+  set module(value: any);
   get module(): any;
   get disconnect(): any;
 }
@@ -163,20 +159,9 @@ declare namespace Dependency {
     ExportSpec,
     ExportsSpec,
     ReferencedExport,
+    GetConditionFn,
   };
 }
-type Module = import('./Module');
-type DependenciesBlock = import('./DependenciesBlock');
-type DependencyLocation = SyntheticDependencyLocation | RealDependencyLocation;
-type SyntheticDependencyLocation = {
-  name: string;
-  index?: number | undefined;
-};
-type RealDependencyLocation = {
-  start: SourcePosition;
-  end?: SourcePosition | undefined;
-  index?: number | undefined;
-};
 /** @typedef {import("webpack-sources").Source} Source */
 /** @typedef {import("./ChunkGraph")} ChunkGraph */
 /** @typedef {import("./DependenciesBlock")} DependenciesBlock */
@@ -192,30 +177,30 @@ type RealDependencyLocation = {
 /** @typedef {import("./util/Hash")} Hash */
 /** @typedef {import("./util/runtime").RuntimeSpec} RuntimeSpec */
 /**
- * @typedef {Object} UpdateHashContext
+ * @typedef {object} UpdateHashContext
  * @property {ChunkGraph} chunkGraph
  * @property {RuntimeSpec} runtime
  * @property {RuntimeTemplate=} runtimeTemplate
  */
 /**
- * @typedef {Object} SourcePosition
+ * @typedef {object} SourcePosition
  * @property {number} line
  * @property {number=} column
  */
 /**
- * @typedef {Object} RealDependencyLocation
+ * @typedef {object} RealDependencyLocation
  * @property {SourcePosition} start
  * @property {SourcePosition=} end
  * @property {number=} index
  */
 /**
- * @typedef {Object} SyntheticDependencyLocation
+ * @typedef {object} SyntheticDependencyLocation
  * @property {string} name
  * @property {number=} index
  */
-/** @typedef {SyntheticDependencyLocation|RealDependencyLocation} DependencyLocation */
+/** @typedef {SyntheticDependencyLocation | RealDependencyLocation} DependencyLocation */
 /**
- * @typedef {Object} ExportSpec
+ * @typedef {object} ExportSpec
  * @property {string} name the name of the export
  * @property {boolean=} canMangle can the export be renamed (defaults to true)
  * @property {boolean=} terminalBinding is the export a terminal binding that should be checked for export star conflicts
@@ -226,10 +211,10 @@ type RealDependencyLocation = {
  * @property {boolean=} hidden export is not visible, because another export blends over it
  */
 /**
- * @typedef {Object} ExportsSpec
+ * @typedef {object} ExportsSpec
  * @property {(string | ExportSpec)[] | true | null} exports exported names, true for unknown exports or null for no exports
  * @property {Set<string>=} excludeExports when exports = true, list of unaffected exports
- * @property {Set<string>=} hideExports list of maybe prior exposed, but now hidden exports
+ * @property {(Set<string> | null)=} hideExports list of maybe prior exposed, but now hidden exports
  * @property {ModuleGraphConnection=} from when reexported: from which module
  * @property {number=} priority when reexported: with which priority
  * @property {boolean=} canMangle can the export be renamed (defaults to true)
@@ -237,80 +222,49 @@ type RealDependencyLocation = {
  * @property {Module[]=} dependencies module on which the result depends on
  */
 /**
- * @typedef {Object} ReferencedExport
+ * @typedef {object} ReferencedExport
  * @property {string[]} name name of the referenced export
  * @property {boolean=} canMangle when false, referenced export can not be mangled, defaults to true
  */
+/** @typedef {function(ModuleGraphConnection, RuntimeSpec): ConnectionState} GetConditionFn */
 declare const TRANSITIVE: unique symbol;
+declare var NO_EXPORTS_REFERENCED: string[][];
+declare var EXPORTS_OBJECT_REFERENCED: string[][];
+type Source = import('webpack-sources').Source;
+type ChunkGraph = import('./ChunkGraph');
+type DependenciesBlock = import('./DependenciesBlock');
+type DependencyTemplates = import('./DependencyTemplates');
+type Module = import('./Module');
 type ModuleGraph = import('./ModuleGraph');
-type RuntimeSpec = import('./util/runtime').RuntimeSpec;
-type ReferencedExport = {
-  /**
-   * name of the referenced export
-   */
-  name: string[];
-  /**
-   * when false, referenced export can not be mangled, defaults to true
-   */
-  canMangle?: boolean | undefined;
-};
 type ModuleGraphConnection = import('./ModuleGraphConnection');
 type ConnectionState = import('./ModuleGraphConnection').ConnectionState;
-type ExportsSpec = {
-  /**
-   * exported names, true for unknown exports or null for no exports
-   */
-  exports: (string | ExportSpec)[] | true | null;
-  /**
-   * when exports = true, list of unaffected exports
-   */
-  excludeExports?: Set<string> | undefined;
-  /**
-   * list of maybe prior exposed, but now hidden exports
-   */
-  hideExports?: Set<string> | undefined;
-  /**
-   * when reexported: from which module
-   */
-  from?: ModuleGraphConnection | undefined;
-  /**
-   * when reexported: with which priority
-   */
-  priority?: number | undefined;
-  /**
-   * can the export be renamed (defaults to true)
-   */
-  canMangle?: boolean | undefined;
-  /**
-   * are the exports terminal bindings that should be checked for export star conflicts
-   */
-  terminalBinding?: boolean | undefined;
-  /**
-   * module on which the result depends on
-   */
-  dependencies?: Module[] | undefined;
-};
+type RuntimeTemplate = import('./RuntimeTemplate');
 type WebpackError = import('./WebpackError');
+type ObjectDeserializerContext =
+  import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
+type ObjectSerializerContext =
+  import('./serialization/ObjectMiddleware').ObjectSerializerContext;
 type Hash = import('./util/Hash');
+type RuntimeSpec = import('./util/runtime').RuntimeSpec;
 type UpdateHashContext = {
   chunkGraph: ChunkGraph;
   runtime: RuntimeSpec;
   runtimeTemplate?: RuntimeTemplate | undefined;
 };
-type ObjectSerializerContext =
-  import('./serialization/ObjectMiddleware').ObjectSerializerContext;
-type ObjectDeserializerContext =
-  import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
-declare var NO_EXPORTS_REFERENCED: string[][];
-declare var EXPORTS_OBJECT_REFERENCED: string[][];
-type Source = any;
-type ChunkGraph = import('./ChunkGraph');
-type DependencyTemplates = import('./DependencyTemplates');
-type RuntimeTemplate = import('./RuntimeTemplate');
 type SourcePosition = {
   line: number;
   column?: number | undefined;
 };
+type RealDependencyLocation = {
+  start: SourcePosition;
+  end?: SourcePosition | undefined;
+  index?: number | undefined;
+};
+type SyntheticDependencyLocation = {
+  name: string;
+  index?: number | undefined;
+};
+type DependencyLocation = SyntheticDependencyLocation | RealDependencyLocation;
 type ExportSpec = {
   /**
    * the name of the export
@@ -345,3 +299,51 @@ type ExportSpec = {
    */
   hidden?: boolean | undefined;
 };
+type ExportsSpec = {
+  /**
+   * exported names, true for unknown exports or null for no exports
+   */
+  exports: (string | ExportSpec)[] | true | null;
+  /**
+   * when exports = true, list of unaffected exports
+   */
+  excludeExports?: Set<string> | undefined;
+  /**
+   * list of maybe prior exposed, but now hidden exports
+   */
+  hideExports?: (Set<string> | null) | undefined;
+  /**
+   * when reexported: from which module
+   */
+  from?: ModuleGraphConnection | undefined;
+  /**
+   * when reexported: with which priority
+   */
+  priority?: number | undefined;
+  /**
+   * can the export be renamed (defaults to true)
+   */
+  canMangle?: boolean | undefined;
+  /**
+   * are the exports terminal bindings that should be checked for export star conflicts
+   */
+  terminalBinding?: boolean | undefined;
+  /**
+   * module on which the result depends on
+   */
+  dependencies?: Module[] | undefined;
+};
+type ReferencedExport = {
+  /**
+   * name of the referenced export
+   */
+  name: string[];
+  /**
+   * when false, referenced export can not be mangled, defaults to true
+   */
+  canMangle?: boolean | undefined;
+};
+type GetConditionFn = (
+  arg0: ModuleGraphConnection,
+  arg1: RuntimeSpec,
+) => ConnectionState;
