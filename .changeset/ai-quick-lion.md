@@ -1,5 +1,5 @@
 ---
-"@module-federation/sdk": minor
+"@module-federation/sdk": patch
 ---
 
 Added experimental option for federation runtime in ContainerPluginOptions.
