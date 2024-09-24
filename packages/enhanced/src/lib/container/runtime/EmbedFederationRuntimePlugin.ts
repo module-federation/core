@@ -13,12 +13,6 @@ const { RuntimeGlobals } = require(
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class EmbedFederationRuntimePlugin {
-  private bundlerRuntimePath: string;
-
-  constructor(path: string) {
-    this.bundlerRuntimePath = path;
-  }
-
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'EmbedFederationRuntimePlugin',
@@ -48,7 +42,6 @@ class EmbedFederationRuntimePlugin {
           }
           runtimeRequirements.add('embeddedFederationRuntime');
           const runtimeModule = new EmbedFederationRuntimeModule(
-            this.bundlerRuntimePath,
             containerEntrySet,
           );
           compilation.addRuntimeModule(chunk, runtimeModule);

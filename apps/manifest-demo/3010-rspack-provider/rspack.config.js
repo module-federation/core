@@ -46,7 +46,7 @@ module.exports = composePlugins(
     ];
     config.resolve = {
       extensions: ['*', '.js', '.jsx', '.tsx', '.ts'],
-      tsConfig: path.resolve(__dirname, 'tsconfig.app.json'),
+      tsConfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
     };
     // publicPath must be specific url
     config.output.publicPath = 'http://localhost:3010/';

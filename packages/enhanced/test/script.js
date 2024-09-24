@@ -9,7 +9,6 @@ const args = [
   '--logHeapUsage',
   '--config',
   'packages/enhanced/jest.config.ts',
-  '--silent',
 ];
 
 const result = spawnSync('node', args, { stdio: 'inherit' });
