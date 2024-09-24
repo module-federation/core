@@ -37,16 +37,6 @@ export default defineConfig({
       }
 
       appendPlugins([
-        {
-          apply(compiler) {
-            compiler.options.devtool = false;
-            compiler.options.devServer = {
-              devMiddleware: {
-                writeToDisk: true,
-              },
-            };
-          },
-        },
         new ModuleFederationPlugin({
           name: 'app1',
           exposes: {
