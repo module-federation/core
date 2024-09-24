@@ -1,10 +1,13 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { NormalModule as NormalModuleType } from 'webpack';
 import ContainerEntryDependency from '../ContainerEntryDependency';
+
+import type { NormalModule as NormalModuleType } from 'webpack';
 import type FederationRuntimeDependency from './FederationRuntimeDependency';
+
 const { RuntimeModule, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
+
 class EmbedFederationRuntimeModule extends RuntimeModule {
   private bundlerRuntimePath: string;
   private containerEntrySet: Set<
