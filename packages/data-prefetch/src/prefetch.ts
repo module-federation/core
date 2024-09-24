@@ -94,8 +94,12 @@ export class MFDataPrefetch {
       return this._exports;
     }
     const { name } = this._options;
+    const exportsPromiseFn =
+      globalThis.__FEDERATION__.__PREFETCH__.__PREFETCH_EXPORTS__?.[name];
     const exportsPromise =
-      globalThis.__FEDERATION__.__PREFETCH__.__PREFETCH_EXPORTS__?.[name]?.();
+      typeof exportsPromiseFn === 'function'
+        ? exportsPromiseFn()
+        : Promise.resolve({});
     const resolve = exportsPromise.then(
       (exports: Record<string, Record<string, any>> = {}) => {
         // Match prefetch based on the function name suffix so that other capabilities can be expanded later.
