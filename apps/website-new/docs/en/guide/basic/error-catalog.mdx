@@ -107,3 +107,21 @@ In addition, the option `eager` encapsulates all shared-dependencies into a dedi
   }
 ```
 
+## Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'call')
+
+#### Error Message
+:::danger Browser Error Message
+Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'call')
+    at __webpack_require__ (builder-runtime.js:32:21)
+    ...
+:::
+
+:::danger Browser Error Message (Specific to rspack)
+undefined factory webpack/container/remote/`remote-name`/`name-of-exposed-file`
+:::
+
+#### Solution
+This error occurs when a remote (oftentimes a library-like share module) contains unwanted circular dependencies between the `shared dependencies` of the remote and other consumers or the host application. If the environment is using the module Federation config `shared: { "package-name": { eager: true } }`, the rspack / webpack builder-runtime will break with this error.
+
+To resolve this, you need to remove the `eager: true` option from the shared configuration of all connected remotes and the host application. This will prevent the shared dependencies from being loaded eagerly and will allow the remote to be loaded correctly.
+Since eager consumption wraps all dependencies inside the entryFile of the remote, rspack / webpack cannot detect the specific handlers for each dependency resulting in a `undefined`.
