@@ -1,0 +1,287 @@
+# Data Prefetch
+
+:::warning
+This feature is not currently supported by Rspack producer projects
+:::
+
+## What is Data Prefetch
+Data Prefetch can advance the remote module interface request to be sent immediately after `remoteEntry` is loaded, without waiting for component rendering, thus improving the first screen speed.
+
+## Applicable scenarios
+The pre-process of the first screen of the project is long (for example, authentication and other operations are required) or the scenario where the data is expected to be directly output on the second screen
+
+- Conventional loading process of hosts:
+
+`Host HTML`(hosts HTML) -> `Host main.js`(hosts entry js) -> `Host fetch`(hosts authentication and other pre-actions) -> `Provider main.js`(producer entry js) -> `Provider fetch`(producer sends request)
+![](@public/guide/performance/data-prefetch/common.jpg)
+- Loading process after using Prefetch
+![](@public/guide/performance/data-prefetch/prefetch.jpg)
+- Call `loadRemote` in advance in the pre-process (loadRemote will send the producer interface request with prefetch requirements synchronously)
+![](@public/guide/performance/data-prefetch/advanced-prefetch.jpg)
+
+You can see that the producer's request is advanced to the root part js in parallel. **Currently, the optimization effect of the first screen depends on the project loading process. Theoretically, the second screen can be directly output by calling `loadRemote` in advance**, which can greatly improve the overall rendering speed of the module when the front process is long
+
+## Usage
+1. Install the `@module-federation/enhanced` package for `producer` and `hosts`
+
+import { Tab, Tabs } from '@theme';
+
+<Tabs values={[{ label: "npm" },{ label: "yarn" },{ label: "pnpm" }]}>
+<Tab>
+```bash
+npm install @module-federation/enhanced
+```
+</Tab>
+<Tab>
+```bash
+yarn add @module-federation/enhanced
+```
+</Tab>
+<Tab>
+```bash
+pnpm add @module-federation/enhanced
+```
+</Tab>
+</Tabs>
+
+2. Add a `.prefetch.ts(js)` file to the producer's expose module directory. If there is the following `exposes`
+``` ts title=rsbuild(webpack).config.ts
+new ModuleFederationPlugin({
+  exposes: {
+    '.': './src/index.tsx',
+    './Button': './src/Button.tsx',
+  },
+  // ...
+})
+```
+At this time, the producer project has two `exposes`, `.` and `./Button`,
+then we can create two prefetch files, `index.prefetch.ts` and `Button.prefetch.ts`, under `src`, taking `Button` as an example
+
+**Note that the exported function must be exported as default or Prefetch It will be recognized as a Prefetch function only when it ends with default export or Prefetch (case insensitive)**
+``` ts title=Button.prefetch.ts
+// Here, the defer API provided by react-router-dom is used as an example. Whether to use this API can be determined according to needs. Refer to the question "Why use defer, Suspense, and Await components"
+// Users can install this package through npm install react-router-dom
+import { defer } from 'react-router-dom';
+
+const defaultVal = {
+  data: {
+    id: 1,
+    title: 'A Prefetch Title',
+  }
+};
+
+// Note that the exported function must end with default export or Prefetch to be recognized as a Prefetch function (case insensitive)
+export default (params = defaultVal) => defer({
+  userInfo: new Promise(resolve => {
+    setTimeout(() => {
+      resolve(params);
+    }, 2000);
+  })
+})
+```
+
+Use in `Button`
+```tsx title=Button.tsx
+import { Suspense } from 'react';
+import { usePrefetch } from '@module-federation/enhanced/prefetch';
+import { Await } from 'react-router-dom';
+
+interface UserInfo {
+  id: number;
+  title: string;
+};
+const reFetchParams = {
+  data: {
+    id: 2,
+    title: 'Another Prefetch Title',
+  }
+}
+export default function Button () {
+  const [prefetchResult, reFetchUserInfo] = usePrefetch<UserInfo>({
+    // Corresponds to (name + expose) in producer ModuleFederationPlugin, for example, `app2/Button` is used for consumption `Button.prefetch.ts`
+    id: 'app2/Button',
+    // Optional parameter, required after using defer
+    deferId: 'userInfo',
+    // default export does not need to pass functionId by default, here is an example, if it is not default export, you need to fill in the function name,
+    // functionId: 'default',
+  });
+
+  return (
+    <>
+      <button onClick={() => reFetchUserInfo(reFetchParams)}>Resend request with parameters</button>
+      <Suspense fallback={<p>Loading...</p>}>
+        <Await
+          resolve={prefetchResult}
+          children={userInfo => (
+            <div>
+              <div>{userInfo.data.id}</div>
+              <div>{userInfo.data.title}</div>
+            </div>
+          )}
+        ></Await>
+      </Suspense>
+    </>
+  )
+};
+```
+
+3. Set `dataPrefetch: true` in the producer's ModuleFederationPlugin configuration
+```ts
+new ModuleFederationPlugin({
+  // ...
+  dataPrefetch: true
+}),
+```
+This completes the interface pre-request. After `Button` is used by the hosts, the interface request will be sent out in advance (it will be sent when the js resource is loaded, and the normal project needs to wait until the component is rendered).
+In the above example, `Button` will first render `loading...`, and then display the data after 2s
+Click `Resend request with parameters` to re-trigger the request and add parameters to update the component
+
+## View the optimization effect
+Open the log mode in the browser console to view the output (it is best to use the browser cache mode to simulate the user scenario, otherwise the data may be inaccurate)
+The default optimization effect is data 3 minus data 1 (simulating the user sending a request in `useEffect`). If your request is not sent in `useEffect`, you can manually call `performance.now()` at the interface execution. to subtract data 1
+``` ts
+localStorage.setItem('FEDERATION_DEBUG', 1)
+```
+![](@public/guide/performance/data-prefetch/log.jpg)
+
+## API
+### usePrefetch
+#### Function
+- Used to obtain pre-request data results and control re-initiated requests
+
+#### Type
+``` ts
+type Options: <T>{
+  id: string; // Required, corresponding to (name + expose) in the producer MF configuration, for example, `app2/Button` is used to consume `Button.prefetch.ts`.
+  functionId?: string; // Optional (default is default), used to get the name of the function exported in the .prefetch.ts file, the function needs to end with Prefetch (case insensitive)
+  deferId?: string; // Optional (required after using defer), after using defer, the function return value is an object (there can be multiple keys in the object corresponding to multiple requests), deferId is a key in the object, used to get the specific request
+  cacheStrategy?: () => boolean; // Optional, generally not manually managed, managed by the framework, used to control whether to update the request result cache, currently after the component is uninstalled or the reFetch function is manually executed, the cache will be refreshed
+} => [
+  Promise<T>,
+  reFetch: (refetchParams?: refetchParams) => void, // Used to re-initiate a request, often used in scenarios where the interface needs to re-request data after the internal state of the component is updated. Calling this function will re-initiate a request and update the request result cache
+];
+
+type refetchParams: any; // Used to re-initiate requests with parameters in components
+```
+
+#### Usage
+``` ts
+import { Suspense } from 'react';
+import { usePrefetch } from '@module-federation/enhanced/prefetch';
+import { Await } from 'react-router-dom';
+
+export const Button = () => {
+  const [userInfoPrefetch, reFetchUserInfo] = usePrefetch<UserInfo>({
+    // Corresponds to (name + expose) in the producer MF configuration, for example, `app2/Button` is used to consume `Button.prefetch.ts`
+    id: 'app2/Button',
+    // Optional parameter, required after using defer
+    deferId: 'userInfo'
+    // default export does not need to pass functionId by default, here is an example, if it is not default export, you need to fill in the function name,
+    // functionId: 'default',
+  });
+
+return (
+  <>
+    <button onClick={() => reFetchUserInfo(reFetchParams)}>Resend request with parameters</button>
+    <Suspense fallback={<p>Loading...</p>}>
+      <Await
+        resolve={prefetchResult}
+        children={userInfo => (
+          <div>
+            <div>{userInfo.data.id}</div>
+            <div>{userInfo.data.title}</div>
+          </div>
+      )}
+    ></Await>
+    </Suspense>
+  <>
+ )
+}
+```
+
+### loadRemote
+#### Function
+If the user manually calls [loadRemote](/zh/guide/basic/runtime.html#loadremote) in the hosts project API, then it will be considered that the hosts not only wants to load the producer's static resources, but also wants to send the interface request in advance, which can make the project render faster. This is especially effective in the scenario where **the first screen has a pre-request** or **you want the second screen to be directly displayed**. It is suitable for the scenario where the second screen module is loaded in advance on the current page.
+#### How to use
+``` ts
+import { loadRemote } from '@module-federation/enhanced/runtime';
+
+loadRemote('app2/Button');
+```
+
+#### Note
+Note that this may cause data caching problems, that is, the producer will give priority to the pre-requested interface results (the user may have modified the server data through interactive operations). In this case, outdated data will be used for rendering. Please use it reasonably according to the project situation.
+
+## Questions and Answers
+
+### 1. Is there any difference with [Data Loader](https://reactrouter.com/en/main/route/loader) of React Router v6?
+React Router's Data Loader can only be used for single projects, that is, it cannot be reused across projects. At the same time, Data Loader is bound by route, not by module (expose). Data Prefetch is more suitable for remote loading scenarios.
+
+### 2. Why use defer, Suspense, and Await components? [Reference link](https://reactrouter.com/en/main/guides/deferred)
+Defer and Await components are APIs and components provided by React Router v6 for data loading and rendering loading. The two are usually used with React's Suspense to complete the process of rendering loading -> rendering content. You can see that defer returns an object. When the Prefetch function is executed, all requests corresponding to the keys in this object (that is, value) will be sent out at once, and defer will track the status of these Promises, cooperate with Suspense and Await to complete the rendering, and these requests will not block the rendering of the component (loading... will be displayed before the component rendering is completed)
+
+### 3. Can I not use defer, Suspense and Await?
+
+Yes, but if there is a blocking function execution operation in the export function (for example, there is await or the return is a Promise), the component will wait for the function to complete before rendering. Even if the component content has been loaded, the component may still wait for the interface to complete before rendering, for example
+``` ts
+export default (params) => (
+  new Promise(resolve => {
+    setTimeout(() => {
+      resolve(params);
+    }, 2000);
+  })
+)
+```
+### 4. Why not defer everything by default?
+Make the developer scenario more controllable. In some scenarios, developers prefer users to see the entire page at once, rather than rendering loading. This allows developers to better weigh the scenarios. [Reference](https://reactrouter.com/en/main/guides/deferred#why-not-defer-everything-by-default)
+
+### 5. Can Prefetch carry parameters?
+For the first request, since the request time and js resource loading are parallel, it does not support passing parameters from within the component. You can manually set the default value. And usePrefetch will return the reFetch function, which is used to resend the request to update data within the component. At this time, it can carry parameters
+
+### 6. How to operate the business to minimize cost transformation?
+1. Put the interface that needs to be prefetched in .prefetch.ts
+2. The prefetch function is wrapped with `defer` to return an object (you can also return an object directly. If you return a value, it will be blocked by the component js loading await)
+3. Business components generally send requests in `useEffect`:
+``` ts Button.tsx
+import { useState } from 'react';
+import { usePrefetch } from '@module-federation/enhanced/prefetch';
+
+export const Button = () => {
+  const [state, setState] = useState(defaultVal);
+  const [userInfoPrefetch, reFetchUserInfo] = usePrefetch<UserInfo>({
+    // Corresponds to (name + expose) in the producer MF configuration, for example, `app2/Button` is used to consume `Button.prefetch.ts`
+    id: 'app2/Button',
+    // Optional parameter, required after using defer
+    deferId: 'userInfo',
+    // default export does not need to pass functionId by default, here is an example, if it is not default export, you need to fill in the function name,
+    // functionId: 'default',
+  });
+
+useEffect(() => {
+  // General scenario usually sends a request here
+  userInfoPrefetch
+    .then(data => (
+      // Update data
+      setState(data)
+    ));
+  }, []);
+
+  return (
+    <>{state.defaultVal}<>
+  )
+}
+```
+
+### 7. Why does the Prefetch function I defined not work?
+Note that the exported function must end with default export or Prefetch to be recognized as a Prefetch function (case insensitive)
+
+### 8. Can the module optimize performance in the secondary screen?
+Yes, and the effect is quite obvious. Since Data Prefetch is for all expose modules, the secondary screen module can also optimize performance
+``` ts
+import { loadRemote } from '@module-federation/enhanced/runtime';
+
+loadRemote('app2/Button');
+```
+
+### 9. What to do if you want to use Vue or other frameworks?
+We provide a general Web API, but we do not provide a hook like `usePrefetch` in other frameworks such as Vue. We will support it later.

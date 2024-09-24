@@ -22,14 +22,13 @@ containerManager.init(options);
 options.exposes = containerManager.containerPluginExposesOptions;
 ```
 
-2. use StatsPlugin in webpack.config.js 
+2. use StatsPlugin in webpack.config.js
 
 ```js
 import { StatsPlugin } from '@module-federation/manifest';
 
 new StatsPlugin(mfOptions, {
-    pluginVersion: pkg.version,
-    bundler: 'webpack',
-  }).apply(compiler);
-
+  pluginVersion: pkg.version,
+  bundler: 'webpack',
+}).apply(compiler);
 ```

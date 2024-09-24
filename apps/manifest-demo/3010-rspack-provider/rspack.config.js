@@ -75,6 +75,7 @@ module.exports = composePlugins(
           'react-dom': {},
           'react-dom/': {},
         },
+        dataPrefetch: true,
       }),
     );
     (config.devServer = {

@@ -11,6 +11,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   config.watchOptions = {
     ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
   };
+
   // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
   config.plugins.push(
     new ModuleFederationPlugin({
@@ -77,7 +78,6 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       },
     }),
   );
-  config.optimization.runtimeChunk = false;
   if (!config.devServer) {
     config.devServer = {};
   }
@@ -101,6 +101,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   config.optimization = {
     runtimeChunk: false,
     minimize: false,
+    moduleIds: 'named',
   };
   // const mf = await withModuleFederation(defaultConfig);
   return config;

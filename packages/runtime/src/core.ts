@@ -1,5 +1,8 @@
-import type { CreateScriptHookReturn } from '@module-federation/sdk';
 import { isBrowserEnv } from '@module-federation/sdk';
+import type {
+  CreateScriptHookReturn,
+  ModuleInfo,
+} from '@module-federation/sdk';
 import {
   Options,
   PreloadRemoteArgs,
@@ -67,6 +70,8 @@ export class FederationHost {
       remoteInfo: RemoteInfo;
       remoteEntryExports: RemoteEntryExports;
       origin: FederationHost;
+      id: string;
+      remoteSnapshot?: ModuleInfo;
     }>('initContainer'),
   });
   version: string = __VERSION__;
@@ -217,10 +222,7 @@ export class FederationHost {
     this.sharedHandler.initShareScopeMap(scopeName, shareScope, extraOptions);
   }
 
-  private formatOptions(
-    globalOptions: Options,
-    userOptions: UserOptions,
-  ): Options {
+  formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
     const { shared } = formatShareConfigs(globalOptions, userOptions);
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({

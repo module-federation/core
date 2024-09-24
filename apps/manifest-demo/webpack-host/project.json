@@ -1,6 +1,6 @@
 {
   "name": "manifest-webpack-host",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/manifest-demo/webpack-host/src",
   "projectType": "application",
   "targets": {

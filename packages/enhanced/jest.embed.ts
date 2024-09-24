@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { readFileSync, rmdirSync, existsSync } from 'fs';
 import path from 'path';
+import os from 'os';
 
 // Reading the SWC compilation config and remove the "exclude"
 // for the test files to be compiled by SWC
@@ -24,8 +25,9 @@ if (swcJestConfig.swcrc === undefined) {
 // swcJestConfig.module.noInterop = false;
 
 export default {
-  displayName: 'enhanced',
+  displayName: 'enhanced-experiments',
   preset: '../../jest.preset.js',
+  cacheDirectory: path.join(os.tmpdir(), 'embed'),
   transform: {
     '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
   },

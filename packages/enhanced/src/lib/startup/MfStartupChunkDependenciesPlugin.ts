@@ -33,8 +33,12 @@ class StartupChunkDependenciesPlugin {
 
   private isEnabledForChunk(chunk: Chunk, compilation: any): boolean {
     if (chunk.id === 'build time chunk') return false;
+
     const [finalEntry] =
-      compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
+      Array.from(
+        compilation.chunkGraph.getChunkEntryModulesIterable(chunk),
+      ).reverse() || [];
+
     return !(finalEntry instanceof ContainerEntryModule);
   }
 
@@ -96,34 +100,6 @@ class StartupChunkDependenciesPlugin {
               return startupSource;
             }
 
-            let federationRuntimeModule: any = null;
-
-            const isFederationModule = (module: any) =>
-              module.context?.endsWith('.federation');
-            for (const module of chunkGraph.getChunkEntryModulesIterable(
-              chunk,
-            )) {
-              if (isFederationModule(module)) {
-                federationRuntimeModule = module;
-                break;
-              }
-
-              if (module && '_modules' in module) {
-                for (const concatModule of (
-                  module as InstanceType<typeof ConcatenatedModule>
-                )._modules) {
-                  if (isFederationModule(concatModule)) {
-                    federationRuntimeModule = module;
-                    break;
-                  }
-                }
-              }
-            }
-
-            if (!federationRuntimeModule) {
-              return startupSource;
-            }
-
             const treeRuntimeRequirements =
               chunkGraph.getTreeRuntimeRequirements(chunk);
             const chunkRuntimeRequirements =
@@ -137,9 +113,6 @@ class StartupChunkDependenciesPlugin {
               return startupSource;
             }
 
-            const federationModuleId = chunkGraph.getModuleId(
-              federationRuntimeModule,
-            );
             const entryModules = Array.from(
               chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunk),
             );
@@ -149,7 +122,6 @@ class StartupChunkDependenciesPlugin {
               : generateEntryStartup;
 
             return new compiler.webpack.sources.ConcatSource(
-              `${RuntimeGlobals.require}(${JSON.stringify(federationModuleId)});\n`,
               entryGeneration(
                 compilation,
                 chunkGraph,
