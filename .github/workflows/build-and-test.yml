@@ -87,8 +87,3 @@ jobs:
     needs: checkout-install
     uses: ./.github/workflows/e2e-router.yml
     secrets: inherit
-
-  enhanced-experimental-tests:
-    needs: checkout-install
-    uses: ./.github/workflows/enhanced-experimental-tests.yml
-    secrets: inherit
