@@ -16,8 +16,14 @@ import type {
 } from 'webpack';
 import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
 import schema from '../../schemas/container/ContainerPlugin';
+import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
+
+const ModuleDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
+) as typeof import('webpack/lib/dependencies/ModuleDependency');
 
 type ExcludeUndefined<T> = T extends undefined ? never : T;
 type NonUndefined<T> = ExcludeUndefined<T>;
@@ -44,9 +50,6 @@ class ContainerPlugin {
   _options: containerPlugin.ContainerPluginOptions;
   name: string;
 
-  /**
-   * @param {containerPlugin.ContainerPluginOptions} options options
-   */
   constructor(options: containerPlugin.ContainerPluginOptions) {
     validate(options);
     this.name = PLUGIN_NAME;
@@ -73,6 +76,7 @@ class ContainerPlugin {
         }),
       ),
       runtimePlugins: options.runtimePlugins,
+      experiments: options.experiments,
     };
   }
 
@@ -168,6 +172,7 @@ class ContainerPlugin {
     if (!useModuleFederationPlugin) {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
+
     const federationRuntimePluginInstance = new FederationRuntimePlugin();
     federationRuntimePluginInstance.apply(compiler);
 
@@ -189,15 +194,17 @@ class ContainerPlugin {
         compilation: Compilation,
         callback: (error?: WebpackError | null | undefined) => void,
       ) => {
+        const hasSingleRuntimeChunk =
+          compilation.options?.optimization?.runtimeChunk;
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const dep = new ContainerEntryDependency(
           name,
           //@ts-ignore
           exposes,
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
+          this._options.experiments,
         );
-        const hasSingleRuntimeChunk =
-          compilation.options?.optimization?.runtimeChunk;
         dep.loc = { name };
         compilation.addEntry(
           compilation.options.context || '',
@@ -210,35 +217,71 @@ class ContainerPlugin {
           },
           (error: WebpackError | null | undefined) => {
             if (error) return callback(error);
-            if (hasSingleRuntimeChunk) {
-              // Add to single runtime chunk as well.
-              // Allows for singleton runtime graph with all needed runtime modules for federation
-              addEntryToSingleRuntimeChunk();
-            } else {
-              callback();
-            }
+            hooks.addContainerEntryModule.call(dep);
+            callback();
           },
         );
-
-        // Function to add entry for undefined runtime
-        const addEntryToSingleRuntimeChunk = () => {
-          compilation.addEntry(
-            compilation.options.context || '',
-            dep,
-            {
-              name: name ? name + '_partial' : undefined, // give unique name name
-              runtime: undefined,
-              library,
-            },
-            (error: WebpackError | null | undefined) => {
-              if (error) return callback(error);
-              callback();
-            },
-          );
-        };
       },
     );
 
+    // this will still be copied into child compiler, so it needs a check to avoid running hook on child
+    // we have to use finishMake in order to check the entries created and see if there are multiple runtime chunks
+    compiler.hooks.finishMake.tapAsync(
+      PLUGIN_NAME,
+      async (compilation, callback) => {
+        // its a child compiler
+        if (
+          compilation.compiler.parentCompilation &&
+          compilation.compiler.parentCompilation !== compilation
+        ) {
+          // dont include dependencies on child compilations
+          return callback();
+        }
+
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        const createdRuntimes = new Set();
+        for (const entry of compilation.entries.values()) {
+          if (entry.options.runtime) {
+            if (createdRuntimes.has(entry.options.runtime)) {
+              continue;
+            }
+            createdRuntimes.add(entry.options.runtime);
+          }
+        }
+
+        // if it has multiple runtime chunks - make another with no name or runtime assigned
+        if (
+          createdRuntimes.size !== 0 ||
+          compilation.options?.optimization?.runtimeChunk
+        ) {
+          const dep = new ContainerEntryDependency(
+            name,
+            //@ts-ignore
+            exposes,
+            shareScope,
+            federationRuntimePluginInstance.entryFilePath,
+            this._options.experiments,
+          );
+
+          dep.loc = { name };
+
+          compilation.addInclude(
+            compilation.options.context || '',
+            dep,
+            { name: undefined },
+            (error: WebpackError | null | undefined) => {
+              if (error) return callback(error);
+              hooks.addContainerEntryModule.call(dep);
+              callback();
+            },
+          );
+        } else {
+          callback();
+        }
+      },
+    );
+
+    // add the container entry module
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
@@ -250,6 +293,41 @@ class ContainerPlugin {
         compilation.dependencyFactories.set(
           ContainerExposedDependency,
           normalModuleFactory,
+        );
+      },
+    );
+
+    // add include of federation runtime
+    compiler.hooks.thisCompilation.tap(
+      PLUGIN_NAME,
+      (compilation: Compilation, { normalModuleFactory }) => {
+        const federationRuntimeDependency =
+          federationRuntimePluginInstance.getDependency(compiler);
+
+        const logger = compilation.getLogger('ContainerPlugin');
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        compilation.dependencyFactories.set(
+          FederationRuntimeDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyTemplates.set(
+          FederationRuntimeDependency,
+          new ModuleDependency.Template(),
+        );
+
+        compilation.addInclude(
+          compiler.context,
+          federationRuntimeDependency,
+          { name: undefined },
+          (err, module) => {
+            if (err) {
+              return logger.error(
+                'Error adding federation runtime module:',
+                err,
+              );
+            }
+            hooks.addFederationRuntimeModule.call(federationRuntimeDependency);
+          },
         );
       },
     );

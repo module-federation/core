@@ -66,3 +66,4 @@ packages/enhanced/test/js
 **/cache/**
 **/dist-test/**
 **/cypress/downloads
+/packages/data-prefetch/jest/cache/

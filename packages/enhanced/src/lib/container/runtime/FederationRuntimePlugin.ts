@@ -19,9 +19,15 @@ import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
 import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
-import ContainerEntryModule from '../ContainerEntryModule';
+import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import pBtoa from 'btoa';
+import ContainerEntryDependency from '../ContainerEntryDependency';
+import FederationRuntimeDependency from './FederationRuntimeDependency';
+
+const ModuleDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
+) as typeof import('webpack/lib/dependencies/ModuleDependency');
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -50,22 +56,25 @@ const EmbeddedRuntimePath = require.resolve(
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
+const onceForCompler = new WeakSet();
+
 class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
   bundlerRuntimePath: string;
+  federationRuntimeDependency?: FederationRuntimeDependency; // Add this line
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
     this.bundlerRuntimePath = BundlerRuntimePath;
+    this.federationRuntimeDependency = undefined; // Initialize as undefined
   }
 
   static getTemplate(
     compiler: Compiler,
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
-    // keep so that the hash changes if experiemts change
     experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
   ) {
     // internal runtime plugin
@@ -113,7 +122,7 @@ class FederationRuntimePlugin {
       Template.indent([
         runtimePluginNames.length
           ? Template.asString([
-              `const pluginsToAdd = [`,
+              `var pluginsToAdd = [`,
               Template.indent(
                 runtimePluginNames.map(
                   (item) => `${item} ? (${item}.default || ${item})() : false,`,
@@ -207,27 +216,76 @@ class FederationRuntimePlugin {
     }
   }
 
+  getDependency(compiler: Compiler) {
+    if (this.federationRuntimeDependency)
+      return this.federationRuntimeDependency;
+    this.federationRuntimeDependency = new FederationRuntimeDependency(
+      this.getFilePath(compiler),
+    );
+    return this.federationRuntimeDependency;
+  }
+
   prependEntry(compiler: Compiler) {
     if (!this.options?.virtualRuntimeEntry) {
       this.ensureFile(compiler);
     }
-    const entryFilePath = this.getFilePath(compiler);
 
-    modifyEntry({
-      compiler,
-      prependEntry: (entry) => {
-        Object.keys(entry).forEach((entryName) => {
-          const entryItem = entry[entryName];
-          if (!entryItem.import) {
-            // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
-            entryItem.import = ['./src'];
-          }
-          if (!entryItem.import.includes(entryFilePath)) {
-            entryItem.import.unshift(entryFilePath);
-          }
-        });
-      },
-    });
+    //if using runtime experiment, use the new include method else patch entry
+    if (this.options?.experiments?.federationRuntime) {
+      compiler.hooks.thisCompilation.tap(
+        this.constructor.name,
+        (compilation: Compilation, { normalModuleFactory }) => {
+          compilation.dependencyFactories.set(
+            FederationRuntimeDependency,
+            normalModuleFactory,
+          );
+          compilation.dependencyTemplates.set(
+            FederationRuntimeDependency,
+            new ModuleDependency.Template(),
+          );
+        },
+      );
+      compiler.hooks.make.tapAsync(
+        this.constructor.name,
+        (compilation: Compilation, callback) => {
+          const federationRuntimeDependency = this.getDependency(compiler);
+          const logger = compilation.getLogger('FederationRuntimePlugin');
+          const hooks =
+            FederationModulesPlugin.getCompilationHooks(compilation);
+          compilation.addInclude(
+            compiler.context,
+            federationRuntimeDependency,
+            { name: undefined },
+            (err, module) => {
+              if (err) {
+                return callback(err);
+              }
+              hooks.addFederationRuntimeModule.call(
+                federationRuntimeDependency,
+              );
+              callback();
+            },
+          );
+        },
+      );
+    } else {
+      const entryFilePath = this.getFilePath(compiler);
+      modifyEntry({
+        compiler,
+        prependEntry: (entry) => {
+          Object.keys(entry).forEach((entryName) => {
+            const entryItem = entry[entryName];
+            if (!entryItem.import) {
+              // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
+              entryItem.import = ['./src'];
+            }
+            if (!entryItem.import.includes(entryFilePath)) {
+              entryItem.import.unshift(entryFilePath);
+            }
+          });
+        },
+      });
+    }
   }
 
   injectRuntime(compiler: Compiler) {
@@ -245,11 +303,6 @@ class FederationRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation: Compilation, { normalModuleFactory }) => {
-        const isEnabledForChunk = (chunk: Chunk): boolean => {
-          const [entryModule] =
-            compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
-          return entryModule instanceof ContainerEntryModule;
-        };
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (runtimeRequirements.has(federationGlobal)) return;
           runtimeRequirements.add(federationGlobal);
@@ -377,11 +430,13 @@ class FederationRuntimePlugin {
         },
       );
     }
+
     if (this.options?.experiments?.federationRuntime === 'hoisted') {
       this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
         '.cjs.js',
         '.esm.js',
       );
+
       new EmbedFederationRuntimePlugin(this.bundlerRuntimePath).apply(compiler);
 
       new HoistContainerReferences(
@@ -405,9 +460,13 @@ class FederationRuntimePlugin {
         },
       ).apply(compiler);
     }
-    this.prependEntry(compiler);
-    this.injectRuntime(compiler);
-    this.setRuntimeAlias(compiler);
+    // dont run multiple times on every apply()
+    if (!onceForCompler.has(compiler)) {
+      this.prependEntry(compiler);
+      this.injectRuntime(compiler);
+      this.setRuntimeAlias(compiler);
+      onceForCompler.add(compiler);
+    }
   }
 }
 
