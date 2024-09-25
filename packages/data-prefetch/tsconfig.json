@@ -22,6 +22,6 @@
       "@src/*": ["./src/*"]
     }
   },
-  "include": ["src", "../../global.d.ts", "__tests__/**/*", "tsup.config.ts"],
+  "include": ["src", "../../global.d.ts", "__tests__/**/*"],
   "exclude": ["node_modules/**/*", "../node_modules"]
 }
