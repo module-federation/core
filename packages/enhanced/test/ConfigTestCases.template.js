@@ -352,13 +352,8 @@ const describeCases = (config) => {
                 ) {
                   return;
                 }
-                const startDate = new Date('2024-09-20'); // Set the start date to today (or another specific date)
-                const currentDate = new Date();
-
-                const oneMonthInMs = 30 * 24 * 60 * 60 * 1000;
 
                 if (
-                  currentDate.getTime() - startDate.getTime() >= oneMonthInMs &&
                   checkArrayExpectation(
                     testDirectory,
                     jsonStats,
