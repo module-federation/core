@@ -55,6 +55,7 @@ class FederationModulesPlugin {
     compiler.hooks.compilation.tap(
       PLUGIN_NAME,
       (compilation: CompilationType, { normalModuleFactory }) => {
+        //@ts-ignore
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
       },
     );

@@ -42,7 +42,7 @@
         "commands": [
           {
             "command": "node packages/enhanced/test/script.js",
-            "forwardAllArgs": true
+            "forwardAllArgs": false
           }
         ]
       }
@@ -54,7 +54,7 @@
         "commands": [
           {
             "command": "node packages/enhanced/test/script-experiments.js",
-            "forwardAllArgs": true
+            "forwardAllArgs": false
           }
         ]
       }

@@ -9,18 +9,15 @@ const { RuntimeModule, Template } = require(
 ) as typeof import('webpack');
 
 class EmbedFederationRuntimeModule extends RuntimeModule {
-  private bundlerRuntimePath: string;
   private containerEntrySet: Set<
     ContainerEntryDependency | FederationRuntimeDependency
   >;
   constructor(
-    bundlerRuntimePath: string,
     containerEntrySet: Set<
       ContainerEntryDependency | FederationRuntimeDependency
     >,
   ) {
     super('embed federation', RuntimeModule.STAGE_ATTACH);
-    this.bundlerRuntimePath = bundlerRuntimePath;
     this.containerEntrySet = containerEntrySet;
   }
   override identifier() {
