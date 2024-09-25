@@ -293,6 +293,15 @@ const schema21 = {
       type: 'string',
       minLength: 1,
     },
+    experiments: {
+      type: 'object',
+      properties: {
+        federationRuntime: {
+          anyOf: [{ type: 'boolean' }, { enum: ['hoisted'] }],
+        },
+      },
+      additionalProperties: false,
+    },
   },
   required: ['name', 'exposes'],
 };
@@ -1949,7 +1958,8 @@ function validate19(
               key0 === 'name' ||
               key0 === 'runtime' ||
               key0 === 'runtimePlugins' ||
-              key0 === 'shareScope'
+              key0 === 'shareScope' ||
+              key0 === 'experiments'
             )
           ) {
             validate19.errors = [
@@ -2233,6 +2243,87 @@ function validate19(
                         var valid0 = _errs18 === errors;
                       } else {
                         var valid0 = true;
+                      }
+                      if (valid0) {
+                        if (data.experiments !== undefined) {
+                          let data8 = data.experiments;
+                          const _errs20 = errors;
+                          if (errors === _errs20) {
+                            if (
+                              typeof data8 === 'object' &&
+                              !Array.isArray(data8)
+                            ) {
+                              let missing1;
+                              if (
+                                data8.federationRuntime === undefined &&
+                                (missing1 = 'federationRuntime')
+                              ) {
+                                validate19.errors = [
+                                  {
+                                    params: {
+                                      missingProperty: missing1,
+                                    },
+                                  },
+                                ];
+                                return false;
+                              } else {
+                                const _errs21 = errors;
+                                for (const key1 in data8) {
+                                  if (!(key1 === 'federationRuntime')) {
+                                    validate19.errors = [
+                                      {
+                                        params: {
+                                          additionalProperty: key1,
+                                        },
+                                      },
+                                    ];
+                                    return false;
+                                    break;
+                                  }
+                                }
+                                if (_errs21 === errors) {
+                                  if (data8.federationRuntime !== undefined) {
+                                    let data9 = data8.federationRuntime;
+                                    const _errs22 = errors;
+                                    if (errors === _errs22) {
+                                      if (
+                                        typeof data9 === 'boolean' ||
+                                        (typeof data9 === 'string' &&
+                                          data9 === 'hoisted')
+                                      ) {
+                                        // Valid
+                                      } else {
+                                        validate19.errors = [
+                                          {
+                                            params: {
+                                              type: 'boolean or "hoisted"',
+                                            },
+                                          },
+                                        ];
+                                        return false;
+                                      }
+                                    }
+                                    var valid0 = _errs22 === errors;
+                                  } else {
+                                    var valid0 = true;
+                                  }
+                                }
+                              }
+                            } else {
+                              validate19.errors = [
+                                {
+                                  params: {
+                                    type: 'object',
+                                  },
+                                },
+                              ];
+                              return false;
+                            }
+                          }
+                          var valid0 = _errs20 === errors;
+                        } else {
+                          var valid0 = true;
+                        }
                       }
                     }
                   }
