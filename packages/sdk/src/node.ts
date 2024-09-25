@@ -204,7 +204,7 @@ async function loadModule(
       TextDecoder,
       TextEncoder,
       console,
-      require,
+      require: eval('require'),
       __dirname,
       __filename,
     });
