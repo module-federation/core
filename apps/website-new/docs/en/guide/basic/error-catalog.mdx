@@ -116,24 +116,24 @@ Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'c
     ...
 :::
 
-:::danger Browser Error Message (Specific to rspack)
-undefined factory webpack/container/remote/`remote-name`/`name-of-exposed-file`
+:::danger Browser Error Message (Specific to Rspack)
+Undefined factory webpack/container/remote/`remote-name`/`name-of-exposed-file`
 :::
-
 
 #### Solution 1
 
-Example scenario: you have a npm package with `eager` remote imports in it (like `import Button from 'myRemote/button'`), and you share this npm package with `eager:true`. 
-Example scenario: youre sharing a mix of package with `eager:true` and `eager:false` and the `eager:true` packages import the `eager: false` shared packages
+**Example scenario**: You have an npm package with `eager` remote imports (such as `import Button from 'myRemote/button'`) and share this npm package with `eager: true`.  
+**Example scenario**: You're sharing a mix of packages, some with `eager: true` and others with `eager: false`, and the `eager: true` packages import the `eager: false` shared packages.
 
-This error occurs when a remote (oftentimes a library-like share module) contains unwanted circular dependencies between the `shared dependencies` of the remote and other consumers or the host application. If the environment is using the module Federation config `shared: { "package-name": { eager: true } }`, the rspack / webpack builder-runtime will break with this error.
+This error occurs when a remote (often a library-like shared module) contains unwanted circular dependencies between the `shared dependencies` of the remote and other consumers or the host application. If the environment is using the Module Federation config `shared: { "package-name": { eager: true } }`, the Rspack/Webpack builder runtime will break with this error.
 
-To resolve this, you need to remove the `eager: true` option from the shared configuration of all connected remotes and the host application. This will prevent the shared dependencies from being loaded eagerly and will allow the remote to be loaded correctly.
-Since eager consumption wraps all dependencies inside the entryFile of the remote, rspack / webpack cannot detect the specific handlers for each dependency resulting in a `undefined`.
+To resolve this, remove the `eager: true` option from the shared configuration of all connected remotes and the host application. This will prevent the shared dependencies from being eagerly loaded and will allow the remote to be loaded correctly.
+
+Since eager consumption wraps all dependencies inside the entry file of the remote, Rspack/Webpack cannot detect the specific handlers for each dependency, resulting in `undefined`.
 
 #### Solution 2
-You are missing an "async bounary" in your application. Ensure you have a dynamic import at the top of the application.
-Foe example, if you have `index.js` which is your entrypoint, copy and past the contents of `index.js` into a file called `bootstrap.js`, then in `index.js` replace its code with `import('./bootstrap.js')
 
-Alternatively you can try the hoisted runtime experiment with removes the need for a async boundary in user code. https://module-federation.io/configure/experiments.html#federationruntime
+You are missing an "async boundary" in your application. Ensure that you have a dynamic import at the top of the application.  
+For example, if your entry point is `index.js`, copy the contents of `index.js` into a new file called `bootstrap.js`. Then, in `index.js`, replace the code with `import('./bootstrap.js')`.
 
+Alternatively, you can try the hoisted runtime experiment, which removes the need for an async boundary in user code. Learn more here: [Hoisted Runtime Experiment](https://module-federation.io/configure/experiments.html#federationruntime).
