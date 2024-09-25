@@ -5,25 +5,15 @@ import type {
   WebpackPluginInstance,
   Module,
   Dependency,
-  NormalModule as NormalModuleType,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { RuntimeSpec } from 'webpack/lib/util/runtime';
-import type ExportsInfo from 'webpack/lib/ExportsInfo';
-import ContainerEntryModule from './ContainerEntryModule';
-import { moduleFederationPlugin } from '@module-federation/sdk';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
-import RemoteToExternalDependency from './RemoteToExternalDependency';
-import RemoteModule from './RemoteModule';
 
-const { NormalModule, AsyncDependenciesBlock, ExternalModule } = require(
+const { AsyncDependenciesBlock, ExternalModule } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const ConcatenatedModule = require(
-  normalizeWebpackPath('webpack/lib/optimize/ConcatenatedModule'),
-) as typeof import('webpack/lib/optimize/ConcatenatedModule');
 
 const PLUGIN_NAME = 'HoistContainerReferences';
 
@@ -31,32 +21,11 @@ const PLUGIN_NAME = 'HoistContainerReferences';
  * This class is used to hoist container references in the code.
  */
 export class HoistContainerReferences implements WebpackPluginInstance {
-  private readonly containerName: string;
-  private readonly entryFilePath?: string;
-  private readonly bundlerRuntimeDep?: string;
-  private readonly explanation: string;
-  private readonly experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
-
-  constructor(
-    name?: string,
-    entryFilePath?: string,
-    bundlerRuntimeDep?: string,
-    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
-  ) {
-    this.containerName = name || 'no known chunk name';
-    this.entryFilePath = entryFilePath;
-    this.bundlerRuntimeDep = bundlerRuntimeDep;
-    this.experiments = experiments;
-    this.explanation =
-      'Bundler runtime path module is required for proper functioning';
-  }
-
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation) => {
         const logger = compilation.getLogger(PLUGIN_NAME);
-        const { chunkGraph, moduleGraph } = compilation;
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const containerEntryDependencies = new Set<Dependency>();
         hooks.addContainerEntryModule.tap(

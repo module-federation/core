@@ -141,7 +141,6 @@ class ContainerEntryModule extends Module {
       arg1: boolean | undefined,
     ) => void,
   ): void {
-    const baseContext = context as NeedBuildContext;
     callback(null, !this.buildMeta);
   }
   /**

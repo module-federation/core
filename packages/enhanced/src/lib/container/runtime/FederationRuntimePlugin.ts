@@ -22,7 +22,6 @@ import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
 import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import pBtoa from 'btoa';
-import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
 
 const ModuleDependency = require(
@@ -249,7 +248,6 @@ class FederationRuntimePlugin {
         this.constructor.name,
         (compilation: Compilation, callback) => {
           const federationRuntimeDependency = this.getDependency(compiler);
-          const logger = compilation.getLogger('FederationRuntimePlugin');
           const hooks =
             FederationModulesPlugin.getCompilationHooks(compilation);
           compilation.addInclude(
@@ -302,7 +300,7 @@ class FederationRuntimePlugin {
 
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
-      (compilation: Compilation, { normalModuleFactory }) => {
+      (compilation: Compilation) => {
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (runtimeRequirements.has(federationGlobal)) return;
           runtimeRequirements.add(federationGlobal);
@@ -437,15 +435,9 @@ class FederationRuntimePlugin {
         '.esm.js',
       );
 
-      new EmbedFederationRuntimePlugin(this.bundlerRuntimePath).apply(compiler);
+      new EmbedFederationRuntimePlugin().apply(compiler);
 
-      new HoistContainerReferences(
-        this.options.name ? this.options.name + '_partial' : undefined,
-        // hoist all modules of federation entry
-        this.getFilePath(compiler),
-        this.bundlerRuntimePath,
-        this.options.experiments,
-      ).apply(compiler);
+      new HoistContainerReferences().apply(compiler);
 
       new compiler.webpack.NormalModuleReplacementPlugin(
         /@module-federation\/runtime/,
