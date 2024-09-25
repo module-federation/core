@@ -2,6 +2,7 @@
 import { readFileSync, rmdirSync, existsSync } from 'fs';
 import path from 'path';
 import os from 'os';
+const rimraf = require('rimraf');
 
 // Reading the SWC compilation config and remove the "exclude"
 // for the test files to be compiled by SWC
@@ -9,9 +10,7 @@ const { exclude: _, ...swcJestConfig } = JSON.parse(
   readFileSync(`${__dirname}/.swcrc`, 'utf-8'),
 );
 
-if (existsSync(__dirname + '/test/js')) {
-  rmdirSync(__dirname + '/test/js', { recursive: true });
-}
+rimraf.sync(__dirname + '/test/js');
 
 // disable .swcrc look-up by SWC core because we're passing in swcJestConfig ourselves.
 // If we do not disable this, SWC Core will read .swcrc and won't transform our test files due to "exclude"
@@ -25,16 +24,17 @@ if (swcJestConfig.swcrc === undefined) {
 // swcJestConfig.module.noInterop = false;
 
 export default {
-  displayName: 'enhanced-experiments',
+  displayName: 'enhanced',
   preset: '../../jest.preset.js',
-  cacheDirectory: path.join(os.tmpdir(), 'embed'),
+  cacheDirectory: path.join(os.tmpdir(), 'enhanced'),
   transform: {
     '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/enhanced',
   rootDir: __dirname,
-  testMatch: ['<rootDir>/test/*.embedruntime.js'],
+  testMatch: ['<rootDir>/test/*.basictest.js'],
+
   testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
   setupFilesAfterEnv: ['<rootDir>/test/setupTestFramework.js'],
 };
