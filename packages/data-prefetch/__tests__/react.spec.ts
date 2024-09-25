@@ -71,7 +71,7 @@ describe('usePrefetch', () => {
       [ModuleFederationSDK.encodeName(exposeId)]: exposeExport,
     };
     globalThis.__FEDERATION__.__PREFETCH__.__PREFETCH_EXPORTS__[options.name] =
-      Promise.resolve(projectExport);
+      () => Promise.resolve(projectExport);
   });
 
   afterEach(() => {
