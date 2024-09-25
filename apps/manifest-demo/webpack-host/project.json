@@ -124,6 +124,5 @@
       }
     }
   },
-  "tags": [],
-  "implicitDependencies": ["typescript"]
+  "tags": []
 }
