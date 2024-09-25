@@ -1,25 +1,41 @@
-import type { Compiler } from 'webpack';
-import EmbeddedContainerPlugin from './EmbeddedContainerPlugin';
-
-interface InvertedContainerOptions {
-  container?: string;
-  remotes: Record<string, string>;
-  runtime: string;
-  debug?: boolean;
-}
+import type { Compilation, Compiler, Chunk } from 'webpack';
+import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
+import {
+  FederationModulesPlugin,
+  dependencies,
+} from '@module-federation/enhanced';
 
 class InvertedContainerPlugin {
-  private options: InvertedContainerOptions;
-
-  constructor(options: InvertedContainerOptions) {
-    this.options = options;
-  }
+  constructor() {}
 
   public apply(compiler: Compiler): void {
-    new EmbeddedContainerPlugin({
-      runtime: this.options.runtime,
-      container: this.options.container,
-    }).apply(compiler);
+    compiler.hooks.thisCompilation.tap(
+      'EmbeddedContainerPlugin',
+      (compilation: Compilation) => {
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        const containers = new Set();
+        hooks.addContainerEntryModule.tap(
+          'EmbeddedContainerPlugin',
+          (dependency) => {
+            if (dependency instanceof dependencies.ContainerEntryDependency) {
+              containers.add(dependency);
+            }
+          },
+        );
+        // Adding the runtime module
+        compilation.hooks.additionalTreeRuntimeRequirements.tap(
+          'EmbeddedContainerPlugin',
+          (chunk, set) => {
+            compilation.addRuntimeModule(
+              chunk,
+              new InvertedContainerRuntimeModule({
+                containers,
+              }),
+            );
+          },
+        );
+      },
+    );
   }
 }
 

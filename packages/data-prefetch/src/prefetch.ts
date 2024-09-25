@@ -17,7 +17,7 @@ declare module '@module-federation/runtime' {
     __PREFETCH__: {
       entryLoading: Record<string, undefined | Promise<void>>;
       instance: Map<string, MFDataPrefetch>;
-      __PREFETCH_EXPORTS__: Record<string, Promise<Record<string, any>>>;
+      __PREFETCH_EXPORTS__: Record<string, () => Promise<Record<string, any>>>;
     };
   }
 }
@@ -94,8 +94,12 @@ export class MFDataPrefetch {
       return this._exports;
     }
     const { name } = this._options;
-    const exportsPromise =
+    const exportsPromiseFn =
       globalThis.__FEDERATION__.__PREFETCH__.__PREFETCH_EXPORTS__?.[name];
+    const exportsPromise =
+      typeof exportsPromiseFn === 'function'
+        ? exportsPromiseFn()
+        : Promise.resolve({});
     const resolve = exportsPromise.then(
       (exports: Record<string, Record<string, any>> = {}) => {
         // Match prefetch based on the function name suffix so that other capabilities can be expanded later.

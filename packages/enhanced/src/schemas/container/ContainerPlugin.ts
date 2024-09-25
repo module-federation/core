@@ -337,6 +337,15 @@ export default {
       type: 'string',
       minLength: 1,
     },
+    experiments: {
+      type: 'object',
+      properties: {
+        federationRuntime: {
+          anyOf: [{ type: 'boolean' }, { enum: ['hoisted'] }],
+        },
+      },
+      additionalProperties: false,
+    },
   },
   required: ['name', 'exposes'],
 };

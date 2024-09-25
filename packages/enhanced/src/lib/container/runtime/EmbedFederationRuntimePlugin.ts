@@ -1,28 +1,38 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import EmbedFederationRuntimeModule from './EmbedFederationRuntimeModule';
+import FederationModulesPlugin from './FederationModulesPlugin';
+import type { Compiler, Compilation, Chunk } from 'webpack';
+import { getFederationGlobalScope } from './utils';
+import ContainerEntryDependency from '../ContainerEntryDependency';
+import FederationRuntimeDependency from './FederationRuntimeDependency';
+
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-import type { Compiler, Compilation, Chunk, Module, ChunkGraph } from 'webpack';
-import { getFederationGlobalScope } from './utils';
-const EntryDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
-) as typeof import('webpack/lib/dependencies/EntryDependency');
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class EmbedFederationRuntimePlugin {
-  private bundlerRuntimePath: string;
-
-  constructor(path: string) {
-    this.bundlerRuntimePath = path;
-  }
-
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'EmbedFederationRuntimePlugin',
       (compilation: Compilation) => {
-        const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        const containerEntrySet: Set<
+          ContainerEntryDependency | FederationRuntimeDependency
+        > = new Set();
+
+        hooks.addFederationRuntimeModule.tap(
+          'EmbedFederationRuntimePlugin',
+          (dependency: FederationRuntimeDependency) => {
+            containerEntrySet.add(dependency);
+          },
+        );
+
+        const handleRuntimeRequirements = (
+          chunk: Chunk,
+          runtimeRequirements: Set<string>,
+        ) => {
           if (chunk.id === 'build time chunk') {
             return;
           }
@@ -30,20 +40,18 @@ class EmbedFederationRuntimePlugin {
           if (!runtimeRequirements.has(federationGlobal)) {
             return;
           }
-
           runtimeRequirements.add('embeddedFederationRuntime');
           const runtimeModule = new EmbedFederationRuntimeModule(
-            this.bundlerRuntimePath,
+            containerEntrySet,
           );
-
           compilation.addRuntimeModule(chunk, runtimeModule);
         };
+
         compilation.hooks.runtimeRequirementInTree
           .for(federationGlobal)
-          .tap('EmbedFederationRuntimePlugin', handler);
+          .tap('EmbedFederationRuntimePlugin', handleRuntimeRequirements);
       },
     );
   }
 }
-
 export default EmbedFederationRuntimePlugin;
