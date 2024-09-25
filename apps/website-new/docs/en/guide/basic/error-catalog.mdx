@@ -120,8 +120,20 @@ Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'c
 undefined factory webpack/container/remote/`remote-name`/`name-of-exposed-file`
 :::
 
-#### Solution
+
+#### Solution 1
+
+Example scenario: you have a npm package with `eager` remote imports in it (like `import Button from 'myRemote/button'`), and you share this npm package with `eager:true`. 
+Example scenario: youre sharing a mix of package with `eager:true` and `eager:false` and the `eager:true` packages import the `eager: false` shared packages
+
 This error occurs when a remote (oftentimes a library-like share module) contains unwanted circular dependencies between the `shared dependencies` of the remote and other consumers or the host application. If the environment is using the module Federation config `shared: { "package-name": { eager: true } }`, the rspack / webpack builder-runtime will break with this error.
 
 To resolve this, you need to remove the `eager: true` option from the shared configuration of all connected remotes and the host application. This will prevent the shared dependencies from being loaded eagerly and will allow the remote to be loaded correctly.
 Since eager consumption wraps all dependencies inside the entryFile of the remote, rspack / webpack cannot detect the specific handlers for each dependency resulting in a `undefined`.
+
+#### Solution 2
+You are missing an "async bounary" in your application. Ensure you have a dynamic import at the top of the application.
+Foe example, if you have `index.js` which is your entrypoint, copy and past the contents of `index.js` into a file called `bootstrap.js`, then in `index.js` replace its code with `import('./bootstrap.js')
+
+Alternatively you can try the hoisted runtime experiment with removes the need for a async boundary in user code. https://module-federation.io/configure/experiments.html#federationruntime
+
