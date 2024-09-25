@@ -6,6 +6,8 @@
 import { ExposeOptions } from './ContainerEntryModule';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
+import type { containerPlugin } from '@module-federation/sdk';
+
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 );
@@ -18,24 +20,29 @@ class ContainerEntryDependency extends Dependency {
   public exposes: [string, ExposeOptions][];
   public shareScope: string;
   public injectRuntimeEntry: string;
+  /** Additional experimental options for container plugin customization */
+  public experiments: containerPlugin.ContainerPluginOptions['experiments'];
 
   /**
    * @param {string} name entry name
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
    * @param {string} shareScope name of the share scope
    * @param {string[]} injectRuntimeEntry the path of injectRuntime file.
+   * @param {containerPlugin.ContainerPluginOptions['experiments']} experiments additional experiments options
    */
   constructor(
     name: string,
     exposes: [string, ExposeOptions][],
     shareScope: string,
     injectRuntimeEntry: string,
+    experiments: containerPlugin.ContainerPluginOptions['experiments'],
   ) {
     super();
     this.name = name;
     this.exposes = exposes;
     this.shareScope = shareScope;
     this.injectRuntimeEntry = injectRuntimeEntry;
+    this.experiments = experiments;
   }
 
   /**

@@ -55,7 +55,6 @@ module.exports = composePlugins(
     config.optimization = {
       ...config.optimization,
       runtimeChunk: false,
-      minimize: false,
     };
     return config;
   },

@@ -135,14 +135,16 @@ export class PrefetchPlugin implements WebpackPluginInstance {
       fs.existsSync(prefetchEntry)
         ? Template.indent([
             'function injectPrefetch() {',
-            `globalThis.__FEDERATION__ = globalThis.__FEDERATION__ || {};`,
-            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] || {`,
-            `entryLoading: {},`,
-            `instance: new Map(),`,
-            `__PREFETCH_EXPORTS__: {},`,
-            `};`,
-            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] || {};`,
-            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}']['${options.name}'] = import('${prefetchEntry}');`,
+            Template.indent([
+              `globalThis.__FEDERATION__ = globalThis.__FEDERATION__ || {};`,
+              `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] || {`,
+              `entryLoading: {},`,
+              `instance: new Map(),`,
+              `__PREFETCH_EXPORTS__: {},`,
+              `};`,
+              `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] || {};`,
+              `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}']['${options.name}'] = function(){ return import('${prefetchEntry}');}`,
+            ]),
             '}',
             `${federationGlobal}.prefetch = injectPrefetch`,
           ])
