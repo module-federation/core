@@ -16,9 +16,6 @@ const { RuntimeGlobals } = require(
 const StartupEntrypointRuntimeModule = require(
   normalizeWebpackPath('webpack/lib/runtime/StartupEntrypointRuntimeModule'),
 ) as typeof import('webpack/lib/runtime/StartupEntrypointRuntimeModule');
-const ConcatenatedModule = require(
-  normalizeWebpackPath('webpack/lib/optimize/ConcatenatedModule'),
-) as typeof import('webpack/lib/optimize/ConcatenatedModule');
 
 interface Options {
   asyncChunkLoading?: boolean;

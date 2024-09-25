@@ -11,7 +11,4 @@ const args = [
   'packages/enhanced/jest.embed.ts',
 ];
 
-const result = spawnSync('node', args, { stdio: 'inherit' });
-if (result.status !== 0) {
-  process.exit(result.status);
-}
+spawnSync('node', args, { stdio: 'inherit' });
