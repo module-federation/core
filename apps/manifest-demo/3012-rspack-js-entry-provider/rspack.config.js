@@ -67,10 +67,22 @@ module.exports = composePlugins(
           './Component': './src/App.jsx',
         },
         shared: {
-          react: {},
-          'react/': {},
-          'react-dom': {},
-          'react-dom/': {},
+          'react/': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          react: {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          'react-dom': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          'react-dom/': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
         },
         manifest: false,
       }),
@@ -96,6 +108,7 @@ module.exports = composePlugins(
         ...config.optimization,
         runtimeChunk: false,
         minimize: false,
+        splitChunks: false,
       });
     config.output.clean = true;
 

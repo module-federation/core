@@ -70,10 +70,22 @@ module.exports = composePlugins(
         shared: {
           lodash: {},
           antd: {},
-          react: {},
-          'react/': {},
-          'react-dom': {},
-          'react-dom/': {},
+          'react/': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          react: {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          'react-dom': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          'react-dom/': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
         },
         dataPrefetch: true,
       }),
@@ -99,6 +111,7 @@ module.exports = composePlugins(
         ...config.optimization,
         runtimeChunk: false,
         minimize: false,
+        splitChunks: false,
       });
     config.output.clean = true;
 

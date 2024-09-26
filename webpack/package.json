@@ -21,6 +21,7 @@
     "access": "public"
   },
   "dependencies": {
-    "enhanced-resolve": "^5.17.1"
+    "enhanced-resolve": "^5.17.1",
+    "tapable": "^2.1.1"
   }
 }

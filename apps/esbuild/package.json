@@ -17,9 +17,9 @@
   "license": "ISC",
   "devDependencies": {
     "@chialab/cjs-to-esm": "^0.18.0",
-    "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@module-federation/esbuild": "workspace:*",
     "@module-federation/runtime": "workspace:*",
+    "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@types/node": "^18.7.13",
     "concurrently": "^8.2.2",
     "esbuild": "^0.15.5",
@@ -28,8 +28,8 @@
     "typescript": "^4.8.2"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "rxjs": "^7.8.1"
   }
 }

@@ -17,6 +17,12 @@
     "Kyle Tsang (https://github.com/kyletsang)",
     "Matteo Pietro Dazzi (https://github.com/ilteoood)"
   ],
+  "pnpm": {
+    "overrides": {
+      "react": "18.3.1",
+      "react-dom": "18.3.1"
+    }
+  },
   "license": "MIT",
   "scripts": {
     "nx": "nx",
