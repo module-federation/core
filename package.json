@@ -47,7 +47,7 @@
     "prepare": "husky install",
     "changeset": "changeset",
     "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:type:pkg'",
-    "changegen": "./changeset-gen.js --path ./packages/node --staged && ./changeset-gen.js --path ./packages/nextjs-mf --staged && ./changeset-gen.js --path ./packages/data-prefetch --staged",
+    "changegen": "./changeset-gen.js --path ./packages/enhanced --staged && ./changeset-gen.js --path ./packages/runtime --staged && ./changeset-gen.js --path ./packages/data-prefetch --staged",
     "commitgen:staged": "./commit-gen.js --path ./packages --staged",
     "commitgen:main": "./commit-gen.js --path ./packages"
   },
