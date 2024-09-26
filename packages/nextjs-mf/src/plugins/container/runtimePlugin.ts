@@ -29,6 +29,8 @@ export default function (): FederationRuntimePlugin {
       var id = args.id;
       var error = args.error;
       var from = args.from;
+      //@ts-ignore
+      globalThis.moduleGraphDirty = true;
       console.error(id, 'offline');
       var pg = function () {
         console.error(id, 'offline', error);
@@ -72,7 +74,8 @@ export default function (): FederationRuntimePlugin {
 
       var moduleCache = args.origin.moduleCache;
       var name = args.origin.name;
-      var gs = new Function('return globalThis')();
+      var gs = globalThis;
+      //@ts-ignore
       var attachedRemote = gs[name];
       if (attachedRemote) {
         moduleCache.set(name, attachedRemote);

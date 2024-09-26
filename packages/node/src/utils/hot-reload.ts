@@ -3,9 +3,11 @@ import crypto from 'crypto';
 import helpers from '@module-federation/runtime/helpers';
 declare global {
   var mfHashMap: Record<string, string> | undefined;
+  var moduleGraphDirty: boolean;
 }
 
 const hashmap = globalThis.mfHashMap || ({} as Record<string, string>);
+globalThis.moduleGraphDirty = false;
 
 const requireCacheRegex =
   /(remote|server|hot-reload|react-loadable-manifest|runtime|styled-jsx)/;
@@ -186,6 +188,9 @@ export const revalidate = async (
   fetchModule: any = getFetchModule() || (() => {}),
   force: boolean = false,
 ) => {
+  if (globalThis.moduleGraphDirty) {
+    force = true;
+  }
   const remotesFromAPI = getAllKnownRemotes();
   //@ts-ignore
   return new Promise((res) => {
