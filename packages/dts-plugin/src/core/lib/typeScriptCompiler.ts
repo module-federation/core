@@ -86,8 +86,9 @@ function getExposeKey(options: {
   mapExposeToEntry: Record<string, string>;
 }) {
   const { filePath, rootDir, outDir, mapExposeToEntry } = options;
-  const relativeFilePath = removeExt(
-    relative(outDir, filePath.replace(new RegExp(`\\.d.ts$`), '')),
+  const relativeFilePath = relative(
+    outDir,
+    filePath.replace(new RegExp(`\\.d.ts$`), ''),
   );
   return mapExposeToEntry[relativeFilePath];
 }
