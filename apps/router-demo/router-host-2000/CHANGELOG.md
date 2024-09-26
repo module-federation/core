@@ -1,5 +1,57 @@
 # host
 
+## 1.0.26
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.6
+- @module-federation/bridge-react@0.6.6
+- @module-federation/retry-plugin@0.6.6
+
+## 1.0.25
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.5
+- @module-federation/bridge-react@0.6.5
+- @module-federation/retry-plugin@0.6.5
+
+## 1.0.24
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.4
+- @module-federation/bridge-react@0.6.4
+- @module-federation/retry-plugin@0.6.4
+
+## 1.0.23
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.3
+- @module-federation/bridge-react@0.6.3
+- @module-federation/retry-plugin@0.6.3
+
+## 1.0.22
+
+### Patch Changes
+
+- Updated dependencies [59758b7]
+  - @module-federation/retry-plugin@0.6.2
+  - @module-federation/enhanced@0.6.2
+  - @module-federation/bridge-react@0.6.2
+
+## 1.0.21
+
+### Patch Changes
+
+- Updated dependencies [433fe07]
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+  - @module-federation/retry-plugin@0.6.1
+  - @module-federation/enhanced@0.6.1
+  - @module-federation/bridge-react@0.6.1
+
 ## 1.0.20
 
 ### Patch Changes

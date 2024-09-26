@@ -1,0 +1,63 @@
+{
+  "name": "data-prefetch",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/data-prefetch/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/data-prefetch/dist",
+        "main": "packages/data-prefetch/src/index.ts",
+        "tsConfig": "packages/data-prefetch/tsconfig.lib.json",
+        "assets": [],
+        "project": "packages/data-prefetch/package.json",
+        "rollupConfig": "packages/data-prefetch/rollup.config.js",
+        "compiler": "swc",
+        "format": ["cjs", "esm"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/data-prefetch/jest.config.js",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/data-prefetch/**/*.ts",
+          "packages/data-prefetch/package.json"
+        ]
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run data-prefetch:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run data-prefetch:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}

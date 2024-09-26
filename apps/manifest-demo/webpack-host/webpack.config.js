@@ -20,6 +20,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
           'rspack_manifest_provider@http://localhost:3011/mf-manifest.json',
         'js-entry-provider':
           'rspack_js_entry_provider@http://localhost:3012/remoteEntry.js',
+        'modern-js-provider': 'app1@http://127.0.0.1:4001/mf-manifest.json',
       },
       filename: 'remoteEntry.js',
       exposes: {
@@ -33,6 +34,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         'react-dom': {},
         'react-dom/': {},
       },
+      experiments: { federationRuntime: 'hoisted' },
       runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
     }),
   );
@@ -46,6 +48,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   if (config.devServer) {
     config.devServer.client.overlay = false;
   }
+  config.entry = './src/index.tsx';
   //Temporary workaround - https://github.com/nrwl/nx/issues/16983
   config.experiments = { outputModule: false };
 
@@ -54,8 +57,11 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     scriptType: 'text/javascript',
   };
   config.optimization = {
-    runtimeChunk: false,
+    ...config.optimization,
+    runtimeChunk: 'single',
     minimize: false,
+    moduleIds: 'named',
+    chunkIds: 'named',
   };
   config.output.publicPath = 'http://localhost:3013/';
   return config;

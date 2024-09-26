@@ -32,24 +32,27 @@ export default defineConfig({
     },
     webpack: (config, { webpack, appendPlugins }) => {
       if (config?.output) {
-        config.output.publicPath = 'http://localhost:4001/';
+        config.output.publicPath = 'http://127.0.0.1:4001/';
+        config.output.uniqueName = 'modern-js-app1';
       }
 
       appendPlugins([
-        new AsyncBoundaryPlugin({
-          excludeChunk: chunk => chunk.name === 'app1',
-          eager: module => /\.federation/.test(module?.request || ''),
-        }),
         new ModuleFederationPlugin({
           name: 'app1',
           exposes: {
             './thing': './src/test.ts',
+            './react-component': './src/components/react-component.tsx',
           },
           runtimePlugins: ['./runtimePlugin.ts'],
+          filename: 'remoteEntry.js',
           shared: {
             react: { singleton: true },
             'react-dom': { singleton: true },
           },
+          experiments: {
+            federationRuntime: 'hoisted',
+          },
+          dataPrefetch: true,
         }),
       ]);
     },

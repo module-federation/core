@@ -47,6 +47,18 @@
         ]
       }
     },
+    "test:experiments": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "node packages/enhanced/test/script-experiments.js",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
     "pre-release": {
       "executor": "nx:run-commands",
       "options": {
@@ -54,6 +66,10 @@
         "commands": [
           {
             "command": "nx run enhanced:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run enhanced:test:experiments",
             "forwardAllArgs": false
           },
           {

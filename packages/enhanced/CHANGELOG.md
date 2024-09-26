@@ -1,5 +1,86 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.6.6
+
+### Patch Changes
+
+- Updated dependencies [35aead4]
+  - @module-federation/dts-plugin@0.6.6
+  - @module-federation/manifest@0.6.6
+  - @module-federation/rspack@0.6.6
+  - @module-federation/sdk@0.6.6
+  - @module-federation/runtime-tools@0.6.6
+  - @module-federation/managers@0.6.6
+  - @module-federation/bridge-react-webpack-plugin@0.6.6
+  - @module-federation/data-prefetch@0.6.6
+
+## 0.6.5
+
+### Patch Changes
+
+- Updated dependencies [3070e26]
+  - @module-federation/data-prefetch@1.0.16
+  - @module-federation/rspack@0.6.5
+  - @module-federation/sdk@0.6.5
+  - @module-federation/runtime-tools@0.6.5
+  - @module-federation/managers@0.6.5
+  - @module-federation/manifest@0.6.5
+  - @module-federation/dts-plugin@0.6.5
+  - @module-federation/bridge-react-webpack-plugin@0.6.5
+
+## 0.6.4
+
+### Patch Changes
+
+- Updated dependencies [d90295b]
+  - @module-federation/bridge-react-webpack-plugin@0.6.4
+  - @module-federation/rspack@0.6.4
+  - @module-federation/sdk@0.6.4
+  - @module-federation/runtime-tools@0.6.4
+  - @module-federation/managers@0.6.4
+  - @module-federation/manifest@0.6.4
+  - @module-federation/dts-plugin@0.6.4
+
+## 0.6.3
+
+### Patch Changes
+
+- @module-federation/rspack@0.6.3
+- @module-federation/sdk@0.6.3
+- @module-federation/runtime-tools@0.6.3
+- @module-federation/managers@0.6.3
+- @module-federation/manifest@0.6.3
+- @module-federation/dts-plugin@0.6.3
+- @module-federation/bridge-react-webpack-plugin@0.6.3
+
+## 0.6.2
+
+### Patch Changes
+
+- @module-federation/dts-plugin@0.6.2
+- @module-federation/runtime-tools@0.6.2
+- @module-federation/rspack@0.6.2
+- @module-federation/sdk@0.6.2
+- @module-federation/managers@0.6.2
+- @module-federation/manifest@0.6.2
+- @module-federation/bridge-react-webpack-plugin@0.6.2
+
+## 0.6.1
+
+### Patch Changes
+
+- 2855583: add hoisted runtime flag: experiments.federationRuntime === 'hoisted' | false
+- 2855583: experiment: Async Entry Startup when runtime is hoisted
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/sdk@0.6.1
+  - @module-federation/runtime-tools@0.6.1
+  - @module-federation/dts-plugin@0.6.1
+  - @module-federation/bridge-react-webpack-plugin@0.6.1
+  - @module-federation/managers@0.6.1
+  - @module-federation/manifest@0.6.1
+  - @module-federation/rspack@0.6.1
+
 ## 0.6.0
 
 ### Minor Changes

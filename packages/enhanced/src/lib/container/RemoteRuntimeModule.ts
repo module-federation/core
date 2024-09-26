@@ -3,13 +3,12 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Compilation, Chunk } from 'webpack';
+import type { Compilation } from 'webpack';
 import RemoteModule from './RemoteModule';
 import { getFederationGlobalScope } from './runtime/utils';
 import type ExternalModule from 'webpack/lib/ExternalModule';
 import type FallbackModule from './FallbackModule';
 import type { RemotesOptions } from '@module-federation/webpack-bundler-runtime';
-import { FEDERATION_SUPPORTED_TYPES } from '@module-federation/webpack-bundler-runtime/constant';
 
 const extractUrlAndGlobal = require(
   normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
@@ -33,6 +32,17 @@ class RemoteRuntimeModule extends RuntimeModule {
     const chunkToRemotesMapping: Record<string, any> = {};
     const idToExternalAndNameMapping: Record<string | number, any> = {};
     const idToRemoteMap: RemotesOptions['idToRemoteMap'] = {};
+    // let chunkReferences: Set<Chunk> = new Set();
+
+    // if (this.chunk && chunkGraph) {
+    //   const requirements = chunkGraph.getTreeRuntimeRequirements(this.chunk);
+    //   if (requirements.has('federation-entry-startup')) {
+    //     chunkReferences = this.chunk.getAllReferencedChunks();
+    //   } else {
+    //     // remote entry doesnt need federation startup, can have async chunk map only
+    //     chunkReferences = this.chunk.getAllAsyncChunks();
+    //   }
+    // }
 
     const allChunks = [
       ...Array.from(this.chunk?.getAllReferencedChunks() || []),

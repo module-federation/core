@@ -1,35 +1,41 @@
-import type { Compiler } from 'webpack';
-import { ModuleFederationPluginOptions } from './types';
-import EmbeddedContainerPlugin from './EmbeddedContainerPlugin';
-import { AsyncBoundaryPlugin } from '@module-federation/enhanced';
-
-interface InvertedContainerOptions {
-  container?: string;
-  remotes: Record<string, string>;
-  runtime: string;
-  debug?: boolean;
-}
+import type { Compilation, Compiler, Chunk } from 'webpack';
+import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
+import {
+  FederationModulesPlugin,
+  dependencies,
+} from '@module-federation/enhanced';
 
 class InvertedContainerPlugin {
-  private options: InvertedContainerOptions;
-
-  constructor(options: InvertedContainerOptions) {
-    this.options = options;
-  }
+  constructor() {}
 
   public apply(compiler: Compiler): void {
-    new EmbeddedContainerPlugin({
-      runtime: this.options.runtime,
-      container: this.options.container,
-    }).apply(compiler);
-
-    new AsyncBoundaryPlugin({
-      excludeChunk: (chunk) =>
-        chunk.name === this.options.container ||
-        chunk.name === this.options.container + '_partial',
-      // @ts-ignore
-      eager: (module) => /\.federation/.test(module?.request || ''),
-    }).apply(compiler);
+    compiler.hooks.thisCompilation.tap(
+      'EmbeddedContainerPlugin',
+      (compilation: Compilation) => {
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        const containers = new Set();
+        hooks.addContainerEntryModule.tap(
+          'EmbeddedContainerPlugin',
+          (dependency) => {
+            if (dependency instanceof dependencies.ContainerEntryDependency) {
+              containers.add(dependency);
+            }
+          },
+        );
+        // Adding the runtime module
+        compilation.hooks.additionalTreeRuntimeRequirements.tap(
+          'EmbeddedContainerPlugin',
+          (chunk, set) => {
+            compilation.addRuntimeModule(
+              chunk,
+              new InvertedContainerRuntimeModule({
+                containers,
+              }),
+            );
+          },
+        );
+      },
+    );
   }
 }
 

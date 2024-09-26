@@ -1,4 +1,4 @@
-import type { SharedConfig, SharedObject } from '@module-federation/utilities';
+import type { sharePlugin } from '@module-federation/sdk';
 
 /**
  * @typedef SharedObject
@@ -9,7 +9,7 @@ import type { SharedConfig, SharedObject } from '@module-federation/utilities';
  * @property {boolean} key.eager - Whether the shared object should be eagerly loaded.
  * @property {boolean} key.import - Whether the shared object should be imported or not.
  */
-export const DEFAULT_SHARE_SCOPE: SharedObject = {
+export const DEFAULT_SHARE_SCOPE: sharePlugin.SharedObject = {
   'next/dynamic': {
     requiredVersion: undefined,
     singleton: true,
@@ -98,16 +98,15 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
  * @returns {SharedObject} - The modified share scope for the browser environment.
  */
 
-export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
-  DEFAULT_SHARE_SCOPE,
-).reduce((acc, item) => {
-  const [key, value] = item as [string, SharedConfig];
+export const DEFAULT_SHARE_SCOPE_BROWSER: sharePlugin.SharedObject =
+  Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc, item) => {
+    const [key, value] = item as [string, sharePlugin.SharedConfig];
 
-  // Set eager and import to undefined for all entries, except for the ones specified above
-  acc[key] = { ...value, import: undefined };
+    // Set eager and import to undefined for all entries, except for the ones specified above
+    acc[key] = { ...value, import: undefined };
 
-  return acc;
-}, {} as SharedObject);
+    return acc;
+  }, {} as sharePlugin.SharedObject);
 
 /**
  * Checks if the remote value is an internal or promise delegate module reference.

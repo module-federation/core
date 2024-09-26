@@ -1,5 +1,51 @@
 # [1.0.0-canary.3](https://github.com/module-federation/core/compare/webpack-bundler-runtime-1.0.0-canary.2...webpack-bundler-runtime-1.0.0-canary.3) (2023-11-23)
 
+## 0.6.6
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.6
+- @module-federation/sdk@0.6.6
+
+## 0.6.5
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.5
+- @module-federation/sdk@0.6.5
+
+## 0.6.4
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.4
+- @module-federation/sdk@0.6.4
+
+## 0.6.3
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.3
+- @module-federation/sdk@0.6.3
+
+## 0.6.2
+
+### Patch Changes
+
+- Updated dependencies [9f98292]
+  - @module-federation/runtime@0.6.2
+  - @module-federation/sdk@0.6.2
+
+## 0.6.1
+
+### Patch Changes
+
+- 2855583: externalize swc helpers and add them as a dependency
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/runtime@0.6.1
+  - @module-federation/sdk@0.6.1
+
 ## 0.6.0
 
 ### Patch Changes

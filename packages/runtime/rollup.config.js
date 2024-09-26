@@ -8,7 +8,7 @@ module.exports = (rollupConfig, projectOptions) => {
     index: 'packages/runtime/src/index.ts',
     types: 'packages/runtime/src/types.ts',
     helpers: 'packages/runtime/src/helpers.ts',
-    'retry-plugin': 'packages/runtime/src/plugins/retry-plugin.ts',
+    embedded: 'packages/runtime/src/embedded.ts',
   };
 
   const project = projectOptions.project;
@@ -21,6 +21,16 @@ module.exports = (rollupConfig, projectOptions) => {
     delete rollupConfig.input.type;
     delete rollupConfig.input.helpers;
   }
+
+  rollupConfig.external = [/@module-federation/];
+  rollupConfig.output = {
+    ...rollupConfig.output,
+    manualChunks: (id) => {
+      if (id.includes('@swc/helpers')) {
+        return 'polyfills';
+      }
+    },
+  };
 
   rollupConfig.plugins.push(
     replace({
