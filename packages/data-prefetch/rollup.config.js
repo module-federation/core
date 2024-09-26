@@ -20,6 +20,6 @@ module.exports = (rollupConfig, _projectOptions) => {
     plugin: 'packages/data-prefetch/src/plugin.ts',
     shared: 'packages/data-prefetch/src/shared/index.ts',
   };
-  rollupConfig.external = [/@module-federation/];
+  // rollupConfig.external = [/@module-federation/];
   return rollupConfig;
 };
