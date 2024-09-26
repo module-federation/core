@@ -1,6 +1,6 @@
 import { getAllKnownRemotes } from './flush-chunks';
 import crypto from 'crypto';
-
+import helpers from '@module-federation/runtime/helpers';
 declare global {
   var mfHashMap: Record<string, string> | undefined;
 }
@@ -25,7 +25,7 @@ export const performReload = async (shouldReload: any) => {
   }
 
   const gs = new Function('return globalThis')();
-  const entries = Array.from(gs.entryChunkCache || []);
+  const entries = gs.entryChunkCache || [];
 
   if (!gs.entryChunkCache) {
     Object.keys(req.cache).forEach((key) => {
@@ -54,7 +54,7 @@ export const performReload = async (shouldReload: any) => {
   });
   //@ts-ignore
   __webpack_require__.federation.instance.moduleCache.clear();
-  gs.__FEDERATION__.__INSTANCES__ = [];
+  helpers.global.resetFederationGlobalInfo();
 
   for (const entry of entries) {
     //@ts-ignore
