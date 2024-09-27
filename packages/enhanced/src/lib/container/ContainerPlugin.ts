@@ -210,23 +210,6 @@ class ContainerPlugin {
         dep.loc = { name };
 
         await new Promise((resolve, reject) => {
-          compilation.addInclude(
-            compiler.context,
-            federationRuntimeDependency,
-            { name: undefined },
-            (err, module) => {
-              if (err) {
-                return reject(err);
-              }
-              hooks.addFederationRuntimeModule.call(
-                federationRuntimeDependency,
-              );
-              resolve(undefined);
-            },
-          );
-        }).catch(callback);
-
-        await new Promise((resolve, reject) => {
           compilation.addEntry(
             compilation.options.context || '',
             dep,
@@ -244,38 +227,56 @@ class ContainerPlugin {
           );
         }).catch(callback);
 
+        await new Promise((resolve, reject) => {
+          compilation.addInclude(
+            compiler.context,
+            federationRuntimeDependency,
+            { name: undefined },
+            (err, module) => {
+              if (err) {
+                return reject(err);
+              }
+              hooks.addFederationRuntimeModule.call(
+                federationRuntimeDependency,
+              );
+              resolve(undefined);
+            },
+          );
+        }).catch(callback);
+
         callback();
       },
     );
 
     // this will still be copied into child compiler, so it needs a check to avoid running hook on child
     // we have to use finishMake in order to check the entries created and see if there are multiple runtime chunks
-    compiler.hooks.finishMake.tapAsync(PLUGIN_NAME, (compilation, callback) => {
-      // its a child compiler
-      if (
-        compilation.compiler.parentCompilation &&
-        compilation.compiler.parentCompilation !== compilation
-      ) {
-        // dont include dependencies on child compilations
-        return callback();
-      }
-
-      const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-      const createdRuntimes = new Set();
-      for (const entry of compilation.entries.values()) {
-        if (entry.options.runtime) {
-          if (createdRuntimes.has(entry.options.runtime)) {
-            continue;
-          }
-          createdRuntimes.add(entry.options.runtime);
+    compiler.hooks.finishMake.tapAsync(
+      PLUGIN_NAME,
+      (compilation: Compilation, callback) => {
+        if (
+          compilation.compiler.parentCompilation &&
+          compilation.compiler.parentCompilation !== compilation
+        ) {
+          return callback();
         }
-      }
 
-      // if it has multiple runtime chunks - make another with no name or runtime assigned
-      if (
-        createdRuntimes.size !== 0 ||
-        compilation.options?.optimization?.runtimeChunk
-      ) {
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        const createdRuntimes = new Set<string>();
+
+        for (const entry of compilation.entries.values()) {
+          const runtime = entry.options.runtime;
+          if (runtime) {
+            createdRuntimes.add(runtime);
+          }
+        }
+
+        if (
+          createdRuntimes.size === 0 &&
+          !compilation.options?.optimization?.runtimeChunk
+        ) {
+          return callback();
+        }
+
         const dep = new ContainerEntryDependency(
           name,
           //@ts-ignore
@@ -297,10 +298,8 @@ class ContainerPlugin {
             callback();
           },
         );
-      } else {
-        callback();
-      }
-    });
+      },
+    );
 
     // add the container entry module
     compiler.hooks.thisCompilation.tap(
