@@ -316,7 +316,6 @@ class ContainerPlugin {
       const federationRuntimeDependency =
         federationRuntimePluginInstance.getDependency(compiler);
 
-      const logger = compilation.getLogger('ContainerPlugin');
       const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
       compilation.addInclude(
         compiler.context,
