@@ -41,8 +41,8 @@
         "parallel": false,
         "commands": [
           {
-            "command": "node packages/enhanced/test/script.js",
-            "forwardAllArgs": true
+            "command": "node --expose-gc --max-old-space-size=4096 --experimental-vm-modules --trace-deprecation ./node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.config.ts --silent",
+            "forwardAllArgs": false
           }
         ]
       }
@@ -53,8 +53,8 @@
         "parallel": false,
         "commands": [
           {
-            "command": "node packages/enhanced/test/script-experiments.js",
-            "forwardAllArgs": true
+            "command": "node --expose-gc --max-old-space-size=4096 --experimental-vm-modules --trace-deprecation ./node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.embed.ts --silent",
+            "forwardAllArgs": false
           }
         ]
       }
