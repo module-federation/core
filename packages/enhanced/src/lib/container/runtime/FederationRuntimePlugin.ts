@@ -218,6 +218,9 @@ class FederationRuntimePlugin {
   getDependency(compiler: Compiler) {
     if (this.federationRuntimeDependency)
       return this.federationRuntimeDependency;
+
+    this.ensureFile(compiler);
+
     this.federationRuntimeDependency = new FederationRuntimeDependency(
       this.getFilePath(compiler),
     );

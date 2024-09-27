@@ -38,7 +38,8 @@ async function lintFileContent(fileContent) {
 RULES:
 -Should preserve uses of normalizeWebpackPath
 -Should preserve uses of ts-ignore
--Removed commented out code
+-Should improve the source code while ensuing its logic is preserved and functionality is not altered
+-Update existing comments for accuracy
 -Return only the updated file content with no other response text:
 
 ${fileContent}`;
@@ -46,7 +47,7 @@ ${fileContent}`;
   const response = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [{ role: 'user', content: prompt }],
-    max_tokens: 4096,
+    max_completion_tokens: 4096,
   });
 
   let res = response.choices[0].message.content.trim().split('\n');
