@@ -197,7 +197,6 @@ class ContainerPlugin {
         const hasSingleRuntimeChunk =
           compilation.options?.optimization?.runtimeChunk;
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-
         const dep = new ContainerEntryDependency(
           name,
           //@ts-ignore
@@ -207,7 +206,6 @@ class ContainerPlugin {
           this._options.experiments,
         );
         dep.loc = { name };
-
         compilation.addEntry(
           compilation.options.context || '',
           dep,
@@ -283,6 +281,7 @@ class ContainerPlugin {
       },
     );
 
+    // add the container entry module
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
@@ -313,17 +312,19 @@ class ContainerPlugin {
       },
     );
 
-    compiler.hooks.make.tapAsync(PLUGIN_NAME, async (compilation, callback) => {
-      const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+    compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
       const federationRuntimeDependency =
         federationRuntimePluginInstance.getDependency(compiler);
+
+      const logger = compilation.getLogger('ContainerPlugin');
+      const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
       compilation.addInclude(
         compiler.context,
         federationRuntimeDependency,
         { name: undefined },
         (err, module) => {
           if (err) {
-            callback(err);
+            return callback(err);
           }
           hooks.addFederationRuntimeModule.call(federationRuntimeDependency);
           callback();
