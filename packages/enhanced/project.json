@@ -41,7 +41,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "node --expose-gc --max-old-space-size=4096 --experimental-vm-modules --trace-deprecation ./node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.config.ts",
+            "command": "node --expose-gc --max-old-space-size=4096 --experimental-vm-modules --trace-deprecation ./node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.config.ts --silent",
             "forwardAllArgs": false
           }
         ]
@@ -53,7 +53,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "node --expose-gc --max-old-space-size=4096 --experimental-vm-modules --trace-deprecation ./node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.embed.ts",
+            "command": "node --expose-gc --max-old-space-size=4096 --experimental-vm-modules --trace-deprecation ./node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.embed.ts --silent",
             "forwardAllArgs": false
           }
         ]
