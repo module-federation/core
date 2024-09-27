@@ -301,11 +301,6 @@ class ContainerPlugin {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
-        const federationRuntimeDependency =
-          federationRuntimePluginInstance.getDependency(compiler);
-
-        const logger = compilation.getLogger('ContainerPlugin');
-        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         compilation.dependencyFactories.set(
           FederationRuntimeDependency,
           normalModuleFactory,
@@ -314,23 +309,26 @@ class ContainerPlugin {
           FederationRuntimeDependency,
           new ModuleDependency.Template(),
         );
-
-        compilation.addInclude(
-          compiler.context,
-          federationRuntimeDependency,
-          { name: undefined },
-          (err, module) => {
-            if (err) {
-              return logger.error(
-                'Error adding federation runtime module:',
-                err,
-              );
-            }
-            hooks.addFederationRuntimeModule.call(federationRuntimeDependency);
-          },
-        );
       },
     );
+
+    compiler.hooks.make.tapAsync(PLUGIN_NAME, async (compilation, callback) => {
+      const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+      const federationRuntimeDependency =
+        federationRuntimePluginInstance.getDependency(compiler);
+      compilation.addInclude(
+        compiler.context,
+        federationRuntimeDependency,
+        { name: undefined },
+        (err, module) => {
+          if (err) {
+            callback(err);
+          }
+          hooks.addFederationRuntimeModule.call(federationRuntimeDependency);
+          callback();
+        },
+      );
+    });
   }
 }
 
