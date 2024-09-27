@@ -188,30 +188,6 @@ class ContainerPlugin {
       compiler.options.output.enabledLibraryTypes.push(library.type);
     }
 
-    compiler.hooks.thisCompilation.tap(
-      PLUGIN_NAME,
-      (compilation: Compilation, { normalModuleFactory }) => {
-        compilation.dependencyFactories.set(
-          ContainerEntryDependency,
-          new ContainerEntryModuleFactory(),
-        );
-
-        compilation.dependencyFactories.set(
-          ContainerExposedDependency,
-          normalModuleFactory,
-        );
-
-        compilation.dependencyFactories.set(
-          FederationRuntimeDependency,
-          normalModuleFactory,
-        );
-        compilation.dependencyTemplates.set(
-          FederationRuntimeDependency,
-          new ModuleDependency.Template(),
-        );
-      },
-    );
-
     compiler.hooks.make.tapAsync(
       PLUGIN_NAME,
       (
@@ -266,49 +242,29 @@ class ContainerPlugin {
       },
     );
 
-    compiler.hooks.finishMake.tapAsync(PLUGIN_NAME, (compilation, callback) => {
-      if (
-        compilation.compiler.parentCompilation &&
-        compilation.compiler.parentCompilation !== compilation
-      ) {
-        // Don't include dependencies on child compilations
-        return callback();
-      }
-
-      const createdRuntimes = new Set();
-      for (const entry of compilation.entries.values()) {
-        if (entry.options.runtime) {
-          if (createdRuntimes.has(entry.options.runtime)) {
-            continue;
-          }
-          createdRuntimes.add(entry.options.runtime);
-        }
-      }
-
-      // If there are multiple runtime chunks, addInclude in finishMake
-      if (
-        createdRuntimes.size !== 0 ||
-        compilation.options?.optimization?.runtimeChunk
-      ) {
-        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        const federationRuntimeDependency =
-          federationRuntimePluginInstance.getDependency(compiler);
-        compilation.addInclude(
-          compiler.context,
-          federationRuntimeDependency,
-          { name: undefined },
-          (err, module) => {
-            if (err) {
-              return callback(err);
-            }
-            hooks.addFederationRuntimeModule.call(federationRuntimeDependency);
-            callback();
-          },
+    compiler.hooks.thisCompilation.tap(
+      PLUGIN_NAME,
+      (compilation: Compilation, { normalModuleFactory }) => {
+        compilation.dependencyFactories.set(
+          ContainerEntryDependency,
+          new ContainerEntryModuleFactory(),
         );
-      } else {
-        callback();
-      }
-    });
+
+        compilation.dependencyFactories.set(
+          ContainerExposedDependency,
+          normalModuleFactory,
+        );
+
+        compilation.dependencyFactories.set(
+          FederationRuntimeDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyTemplates.set(
+          FederationRuntimeDependency,
+          new ModuleDependency.Template(),
+        );
+      },
+    );
   }
 }
 
