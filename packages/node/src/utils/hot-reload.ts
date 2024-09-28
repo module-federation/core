@@ -1,7 +1,6 @@
 import { getAllKnownRemotes } from './flush-chunks';
 import crypto from 'crypto';
 import helpers from '@module-federation/runtime/helpers';
-import callsites from 'callsites';
 import path from 'path';
 
 declare global {
@@ -16,9 +15,11 @@ const getRequire = (): NodeRequire => {
     : require;
 };
 
-const find = function (moduleName: string): string | undefined {
+const find = async function (moduleName: string): Promise<string | undefined> {
   if (moduleName[0] === '.') {
-    const stack = callsites();
+    // @ts-ignore
+    const callsites = (await import('callsites')).default;
+    const stack = callsites.default();
     for (const frame of stack) {
       const filename = frame.getFileName();
       if (filename && filename !== module.filename) {
@@ -38,9 +39,9 @@ const find = function (moduleName: string): string | undefined {
  * Removes a module from the cache. We need this to re-load our http_request !
  * see: https://stackoverflow.com/a/14801711/1148249
  */
-const decache = function (moduleName: string) {
+const decache = async function (moduleName: string) {
   //@ts-ignore
-  moduleName = find(moduleName);
+  moduleName = await find(moduleName);
 
   if (!moduleName) {
     return;
