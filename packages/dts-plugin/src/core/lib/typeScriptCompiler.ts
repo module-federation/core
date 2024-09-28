@@ -180,7 +180,6 @@ export const compileTs = async (
       throw new Error(`compile TS failed, the original command is '${cmd}'`);
     }
 
-    debugger;
     const mapExposeToEntry = Object.fromEntries(
       Object.entries(mapComponentsToExpose).map(([exposed, filename]) => {
         const normalizedFileName = normalize(filename);
