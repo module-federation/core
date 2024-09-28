@@ -1,8 +1,7 @@
 import { getAllKnownRemotes } from './flush-chunks';
 import crypto from 'crypto';
 import helpers from '@module-federation/runtime/helpers';
-//@ts-ignore
-import callsite from 'callsite';
+import callsites from 'callsites';
 import path from 'path';
 
 declare global {
@@ -19,10 +18,10 @@ const getRequire = (): NodeRequire => {
 
 const find = function (moduleName: string): string | undefined {
   if (moduleName[0] === '.') {
-    const stack = callsite();
+    const stack = callsites();
     for (const frame of stack) {
       const filename = frame.getFileName();
-      if (filename !== module.filename) {
+      if (filename && filename !== module.filename) {
         moduleName = path.resolve(path.dirname(filename), moduleName);
         break;
       }
