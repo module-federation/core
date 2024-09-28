@@ -5,19 +5,15 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
-      "outputs": ["{workspaceRoot}/packages/node/dist"],
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "parallel": false,
         "outputPath": "packages/node/dist",
-        "main": "packages/node/src/index.ts",
+        "main": "packages/node/src/index.js",
         "tsConfig": "packages/node/tsconfig.lib.json",
-        "assets": [],
-        "external": ["@module-federation/*"],
-        "project": "packages/node/package.json",
-        "compiler": "swc",
-        "rollupConfig": "packages/node/rollup.config.js",
-        "format": ["esm", "cjs"]
+        "updateBuildableProjectDepsInPackageJson": true,
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "assets": ["packages/node/*.md"]
       },
       "dependsOn": [
         {
