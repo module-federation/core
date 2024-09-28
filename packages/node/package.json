@@ -2,8 +2,8 @@
   "public": true,
   "name": "@module-federation/node",
   "version": "2.5.16",
-  "type": "commonjs",
-  "main": "./dist/src/index.js",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
   "exports": {
     ".": {
       "import": "./dist/index.esm.js",
