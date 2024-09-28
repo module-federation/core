@@ -22,7 +22,6 @@ module.exports = (rollupConfig, projectOptions) => {
     delete rollupConfig.input.helpers;
   }
 
-  rollupConfig.external = [/@module-federation/];
   rollupConfig.output = {
     ...rollupConfig.output,
     manualChunks: (id) => {
