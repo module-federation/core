@@ -74,7 +74,11 @@ function writeTempTsConfig(
 }
 
 const removeExt = (f: string): string => {
+  const vueExt = '.vue';
   const ext = extname(f);
+  if (ext === vueExt) {
+    return f;
+  }
   const regexPattern = new RegExp(`\\${ext}$`);
   return f.replace(regexPattern, '');
 };
@@ -176,6 +180,7 @@ export const compileTs = async (
       throw new Error(`compile TS failed, the original command is '${cmd}'`);
     }
 
+    debugger;
     const mapExposeToEntry = Object.fromEntries(
       Object.entries(mapComponentsToExpose).map(([exposed, filename]) => {
         const normalizedFileName = normalize(filename);
@@ -191,7 +196,7 @@ export const compileTs = async (
             resolve(remoteOptions.context, normalizedFileName),
           );
         }
-
+        console.log(333, relativeFileName);
         return [removeExt(relativeFileName), exposed];
       }),
     );
