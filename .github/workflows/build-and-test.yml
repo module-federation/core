@@ -46,13 +46,13 @@ jobs:
         uses: nick-fields/retry@v3
         with:
           max_attempts: 2
-          command: npx nx affected -t test --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache
+          command: npx nx affected -t test --parallel=1 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
       - name: Run Affected Experimental Tests
         uses: nick-fields/retry@v3
         with:
           max_attempts: 2
-          command: npx nx affected -t test:experiments --parallel=2 --exclude='*,!tag:type:pkg' --skip-nx-cache
+          command: npx nx affected -t test:experiments --parallel=1 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
   e2e-modern:
     needs: checkout-install
