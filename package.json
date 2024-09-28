@@ -22,6 +22,7 @@
     "nx": "nx",
     "commit": "cz",
     "docs": "typedoc",
+    "f": "nx format:write",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "build": "nx run-many --target=build --parallel=5  --projects=tag:type:pkg",
