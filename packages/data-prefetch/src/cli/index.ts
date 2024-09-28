@@ -47,8 +47,8 @@ export class PrefetchPlugin implements WebpackPluginInstance {
       this.options.runtimePlugins = [];
     }
 
-    const runtimePath = path.resolve(__dirname, '../esm/plugin.js');
-    const sharedPath = path.resolve(__dirname, '../esm/shared/index.js');
+    const runtimePath = path.resolve(__dirname, './plugin.esm.js');
+    const sharedPath = path.resolve(__dirname, './shared.esm.js');
     if (!this.options.runtimePlugins?.includes(runtimePath)) {
       this.options.runtimePlugins!.push(runtimePath);
     }
@@ -135,14 +135,16 @@ export class PrefetchPlugin implements WebpackPluginInstance {
       fs.existsSync(prefetchEntry)
         ? Template.indent([
             'function injectPrefetch() {',
-            `globalThis.__FEDERATION__ = globalThis.__FEDERATION__ || {};`,
-            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] || {`,
-            `entryLoading: {},`,
-            `instance: new Map(),`,
-            `__PREFETCH_EXPORTS__: {},`,
-            `};`,
-            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] || {};`,
-            `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}']['${options.name}'] = import('${prefetchEntry}');`,
+            Template.indent([
+              `globalThis.__FEDERATION__ = globalThis.__FEDERATION__ || {};`,
+              `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}'] || {`,
+              `entryLoading: {},`,
+              `instance: new Map(),`,
+              `__PREFETCH_EXPORTS__: {},`,
+              `};`,
+              `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] = globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}'] || {};`,
+              `globalThis.__FEDERATION__['${MFPrefetchCommon.globalKey}']['${MFPrefetchCommon.exportsKey}']['${options.name}'] = function(){ return import('${prefetchEntry}');}`,
+            ]),
             '}',
             `${federationGlobal}.prefetch = injectPrefetch`,
           ])

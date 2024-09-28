@@ -65,13 +65,14 @@ describe('MF Data Prefetch', () => {
       [encodeName(exposeId)]: exposeExport,
     };
     globalThis.__FEDERATION__.__PREFETCH__.__PREFETCH_EXPORTS__[options.name] =
-      Promise.resolve(projectExport);
+      () => Promise.resolve(projectExport);
 
     await prefetch.getProjectExports();
     expect(prefetch.getExposeExports(`${options.name}/button`)).toEqual(
       exposeExport,
     );
   });
+
   // Prefetching with memory and executing prefetch function
   it('executes prefetch using prefetch function with and without memory', async () => {
     const id = options.name;
@@ -84,7 +85,7 @@ describe('MF Data Prefetch', () => {
     const prefetchExports = { [functionId]: executePrefetch };
 
     // Mock Project Exports
-    globalThis.__FEDERATION__.__PREFETCH__.__PREFETCH_EXPORTS__[id] =
+    globalThis.__FEDERATION__.__PREFETCH__.__PREFETCH_EXPORTS__[id] = () =>
       Promise.resolve({
         [encodeName(exposeId)]: prefetchExports,
       });

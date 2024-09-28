@@ -37,10 +37,6 @@ export default defineConfig({
       }
 
       appendPlugins([
-        new AsyncBoundaryPlugin({
-          excludeChunk: chunk => chunk.name === 'app1',
-          eager: module => /\.federation/.test(module?.request || ''),
-        }),
         new ModuleFederationPlugin({
           name: 'app1',
           exposes: {
@@ -48,9 +44,13 @@ export default defineConfig({
             './react-component': './src/components/react-component.tsx',
           },
           runtimePlugins: ['./runtimePlugin.ts'],
+          filename: 'remoteEntry.js',
           shared: {
             react: { singleton: true },
             'react-dom': { singleton: true },
+          },
+          experiments: {
+            federationRuntime: 'hoisted',
           },
           dataPrefetch: true,
         }),
