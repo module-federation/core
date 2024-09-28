@@ -190,39 +190,23 @@ async function loadModule(
   options: {
     vm: any;
     fetch: any;
-  },
-  parentContext?: any,
+  }
 ) {
   const { fetch, vm } = options;
-  const context =
-    parentContext ||
-    vm.createContext({
-      ...global,
-      Event,
-      URL,
-      URLSearchParams,
-      TextDecoder,
-      TextEncoder,
-      console,
-      require: eval('require'),
-      __dirname,
-      __filename,
-    });
   const response = await fetch(url);
   const code = await response.text();
 
   const module: any = new vm.SourceTextModule(code, {
-    context,
     // @ts-ignore
     importModuleDynamically: async (specifier, script) => {
       const resolvedUrl = new URL(specifier, url).href;
-      return loadModule(resolvedUrl, options, context);
+      return loadModule(resolvedUrl, options);
     },
   });
 
   await module.link(async (specifier: string) => {
     const resolvedUrl = new URL(specifier, url).href;
-    const module = await loadModule(resolvedUrl, options, context);
+    const module = await loadModule(resolvedUrl, options);
     return module;
   });
 
