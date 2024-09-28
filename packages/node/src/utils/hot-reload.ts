@@ -17,9 +17,8 @@ const getRequire = (): NodeRequire => {
 
 const find = async function (moduleName: string): Promise<string | undefined> {
   if (moduleName[0] === '.') {
-    // @ts-ignore
-    const callsites = (await import(/*webpackIgnore: true*/ 'callsites'))
-      .default;
+    // Dynamically import callsites
+    const callsites = await import(/* webpackIgnore: true */ 'callsites');
     const stack = callsites.default();
     for (const frame of stack) {
       const filename = frame.getFileName();
