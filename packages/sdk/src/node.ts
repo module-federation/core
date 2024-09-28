@@ -190,7 +190,7 @@ async function loadModule(
   options: {
     vm: any;
     fetch: any;
-  }
+  },
 ) {
   const { fetch, vm } = options;
   const response = await fetch(url);
