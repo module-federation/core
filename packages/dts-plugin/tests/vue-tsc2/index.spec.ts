@@ -48,15 +48,15 @@ describe('DTSManager', () => {
           children: [
             {
               name: 'Button.vue.d.ts',
-              path: join(distFolder, 'compiled-types/Button.vue.d.ts'),
             },
           ],
           name: 'compiled-types',
-          path: join(distFolder, 'compiled-types'),
+        },
+        {
+          name: 'index.d.ts',
         },
       ],
       name: '@mf-types-dts-vue-test',
-      path: distFolder,
     });
   });
 });
