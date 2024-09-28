@@ -46,12 +46,14 @@ jobs:
         uses: nick-fields/retry@v3
         with:
           max_attempts: 2
+          timeout_minutes: 10
           command: npx nx affected -t test --parallel=1 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
       - name: Run Affected Experimental Tests
         uses: nick-fields/retry@v3
         with:
           max_attempts: 2
+          timeout_minutes: 10
           command: npx nx affected -t test:experiments --parallel=1 --exclude='*,!tag:type:pkg' --skip-nx-cache
 
   e2e-modern:
