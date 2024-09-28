@@ -124,6 +124,7 @@ export default function (): FederationRuntimePlugin {
             ) {
               return function (this: unknown) {
                 globalThis.usedChunks.add(id);
+                //eslint-disable-next-line
                 return exposedModuleExports[prop].apply(this, arguments);
               };
             }
@@ -132,6 +133,7 @@ export default function (): FederationRuntimePlugin {
             if (typeof originalMethod === 'function') {
               const proxiedFunction = function (this: unknown) {
                 globalThis.usedChunks.add(id);
+                //eslint-disable-next-line
                 return originalMethod.apply(this, arguments);
               };
 
