@@ -196,7 +196,6 @@ export const compileTs = async (
             resolve(remoteOptions.context, normalizedFileName),
           );
         }
-        console.log(333, relativeFileName);
         return [removeExt(relativeFileName), exposed];
       }),
     );
