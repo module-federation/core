@@ -8,19 +8,6 @@ declare global {
   var moduleGraphDirty: boolean;
 }
 
-function importNodeModule<T>(name: string): Promise<T> {
-  if (!name) {
-    throw new Error('import specifier is required');
-  }
-  const importModule = new Function('name', `return import(name)`);
-  return importModule(name)
-    .then((res: any) => res.default as T)
-    .catch((error: any) => {
-      console.error(`Error importing module ${name}:`, error);
-      throw error;
-    });
-}
-
 const getRequire = (): NodeRequire => {
   //@ts-ignore
   return typeof __non_webpack_require__ !== 'undefined'
@@ -31,9 +18,7 @@ const getRequire = (): NodeRequire => {
 const find = async function (moduleName: string): Promise<string | undefined> {
   if (moduleName[0] === '.') {
     // Dynamically import callsites
-    const callsites = await importNodeModule<{ default: () => any[] }>(
-      'callsites',
-    );
+    const callsites = await import(/* webpackIgnore: true */ 'callsites');
     const stack = callsites.default();
     for (const frame of stack) {
       const filename = frame.getFileName();
