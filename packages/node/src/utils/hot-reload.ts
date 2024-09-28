@@ -8,19 +8,6 @@ declare global {
   var moduleGraphDirty: boolean;
 }
 
-function importNodeModule<T>(name: string): Promise<T> {
-  if (!name) {
-    throw new Error('import specifier is required');
-  }
-  const importModule = new Function('name', `return import(name)`);
-  return importModule(name)
-    .then((res: any) => res.default as T)
-    .catch((error: any) => {
-      console.error(`Error importing module ${name}:`, error);
-      throw error;
-    });
-}
-
 const getRequire = (): NodeRequire => {
   //@ts-ignore
   return typeof __non_webpack_require__ !== 'undefined'
@@ -28,13 +15,27 @@ const getRequire = (): NodeRequire => {
     : require;
 };
 
-const find = async function (moduleName: string): Promise<string | undefined> {
+function callsites(): any[] {
+  const _prepareStackTrace = Error.prepareStackTrace;
+  try {
+    let result: any[] = [];
+    Error.prepareStackTrace = (_, callSites) => {
+      const callSitesWithoutCurrent = callSites.slice(1);
+      result = callSitesWithoutCurrent;
+      return callSitesWithoutCurrent;
+    };
+
+    new Error().stack;
+    return result;
+  } finally {
+    Error.prepareStackTrace = _prepareStackTrace;
+  }
+}
+
+const find = function (moduleName: string): string | undefined {
   if (moduleName[0] === '.') {
-    // Dynamically import callsites
-    const callsites = await importNodeModule<{ default: () => any[] }>(
-      'callsites',
-    );
-    const stack = callsites.default();
+    // Use custom callsites function
+    const stack = callsites();
     for (const frame of stack) {
       const filename = frame.getFileName();
       if (filename && filename !== module.filename) {
@@ -56,7 +57,7 @@ const find = async function (moduleName: string): Promise<string | undefined> {
  */
 const decache = async function (moduleName: string) {
   //@ts-ignore
-  moduleName = await find(moduleName);
+  moduleName = find(moduleName);
 
   if (!moduleName) {
     return;

@@ -2546,9 +2546,6 @@ importers:
       btoa:
         specifier: 1.2.1
         version: 1.2.1
-      callsites:
-        specifier: ^4.2.0
-        version: 4.2.0
       encoding:
         specifier: ^0.1.13
         version: 0.1.13
@@ -10690,10 +10687,6 @@ packages:
   callsites@3.1.0:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
     engines: {node: '>=6'}
-
-  callsites@4.2.0:
-    resolution: {integrity: sha512-kfzR4zzQtAE9PC7CzZsjl3aBNbXWuXiSeOCdLcPpBfGW8YuCqQHcRPFDbr/BPVmd3EEPVpuFzLyuT/cUhPr4OQ==}
-    engines: {node: '>=12.20'}
 
   camel-case@4.1.2:
     resolution: {integrity: sha512-gxGWBrTT1JuMx6R+o5PTXMmUnhnVzLQ9SNutD4YqKtI6ap897t3tKECYla6gCWEkplXnlNybEkZg9GEGxKFCgw==}
@@ -23398,7 +23391,7 @@ snapshots:
       '@types/node': 20.5.1
       chalk: 4.1.2
       cosmiconfig: 8.3.6(typescript@5.5.2)
-      cosmiconfig-typescript-loader: 4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@5.5.2))(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.12))(@types/node@20.5.1)(typescript@5.5.2))(typescript@5.5.2)
+      cosmiconfig-typescript-loader: 4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@5.5.2))(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.12))(@types/node@20.12.12)(typescript@5.5.2))(typescript@5.5.2)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
@@ -26838,12 +26831,6 @@ snapshots:
     transitivePeerDependencies:
       - nx
 
-  '@nrwl/devkit@19.7.4(nx@19.7.4(@swc-node/register@1.6.8(@swc/core@1.6.13(@swc/helpers@0.5.12))(@swc/types@0.1.12)(typescript@5.5.2))(@swc/core@1.6.13(@swc/helpers@0.5.12)))':
-    dependencies:
-      '@nx/devkit': 19.7.4(nx@19.7.4(@swc-node/register@1.6.8(@swc/core@1.6.13(@swc/helpers@0.5.12))(@swc/types@0.1.12)(typescript@5.5.2))(@swc/core@1.6.13(@swc/helpers@0.5.12)))
-    transitivePeerDependencies:
-      - nx
-
   '@nrwl/esbuild@17.2.8(@babel/traverse@7.25.6)(@swc-node/register@1.6.8(@swc/core@1.6.13(@swc/helpers@0.5.12))(@swc/types@0.1.12)(typescript@5.5.2))(@swc/core@1.6.13(@swc/helpers@0.5.12))(@types/node@20.12.12)(esbuild@0.23.0)(nx@17.2.8(@swc-node/register@1.6.8(@swc/core@1.6.13(@swc/helpers@0.5.12))(@swc/types@0.1.12)(typescript@5.5.2))(@swc/core@1.6.13(@swc/helpers@0.5.12)))(typescript@5.5.2)(verdaccio@5.29.2(encoding@0.1.13)(typanion@3.14.0))':
     dependencies:
       '@nx/esbuild': 17.2.8(@babel/traverse@7.25.6)(@swc-node/register@1.6.8(@swc/core@1.6.13(@swc/helpers@0.5.12))(@swc/types@0.1.12)(typescript@5.5.2))(@swc/core@1.6.13(@swc/helpers@0.5.12))(@types/node@20.12.12)(esbuild@0.23.0)(nx@17.2.8(@swc-node/register@1.6.8(@swc/core@1.6.13(@swc/helpers@0.5.12))(@swc/types@0.1.12)(typescript@5.5.2))(@swc/core@1.6.13(@swc/helpers@0.5.12)))(typescript@5.5.2)(verdaccio@5.29.2(encoding@0.1.13)(typanion@3.14.0))
@@ -27434,7 +27421,7 @@ snapshots:
 
   '@nx/devkit@19.7.4(nx@19.7.4(@swc-node/register@1.6.8(@swc/core@1.6.13(@swc/helpers@0.5.12))(@swc/types@0.1.12)(typescript@5.5.2))(@swc/core@1.6.13(@swc/helpers@0.5.12)))':
     dependencies:
-      '@nrwl/devkit': 19.7.4(nx@19.7.4(@swc-node/register@1.6.8(@swc/core@1.6.13(@swc/helpers@0.5.12))(@swc/types@0.1.12)(typescript@5.5.2))(@swc/core@1.6.13(@swc/helpers@0.5.12)))
+      '@nrwl/devkit': 19.7.4(nx@17.2.8(@swc-node/register@1.6.8(@swc/core@1.6.13(@swc/helpers@0.5.12))(@swc/types@0.1.12)(typescript@5.5.2))(@swc/core@1.6.13(@swc/helpers@0.5.12)))
       ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.2
@@ -36105,8 +36092,6 @@ snapshots:
 
   callsites@3.1.0: {}
 
-  callsites@4.2.0: {}
-
   camel-case@4.1.2:
     dependencies:
       pascal-case: 3.1.2
@@ -36766,7 +36751,7 @@ snapshots:
 
   corser@2.0.1: {}
 
-  cosmiconfig-typescript-loader@4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@5.5.2))(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.12))(@types/node@20.5.1)(typescript@5.5.2))(typescript@5.5.2):
+  cosmiconfig-typescript-loader@4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@5.5.2))(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.12))(@types/node@20.12.12)(typescript@5.5.2))(typescript@5.5.2):
     dependencies:
       '@types/node': 20.5.1
       cosmiconfig: 8.3.6(typescript@5.5.2)
