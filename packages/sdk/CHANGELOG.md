@@ -1,5 +1,15 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.6.7
+
+### Patch Changes
+
+- 9e32644: Added experimental option for federation runtime in ContainerPluginOptions.
+
+  - Extended `ContainerPluginOptions` to include an `experiments` property.
+    - Within `experiments`, added a `federationRuntime` option.
+      - `federationRuntime` can be either `false` or `'hoisted'`.
+
 ## 0.6.6
 
 ## 0.6.5

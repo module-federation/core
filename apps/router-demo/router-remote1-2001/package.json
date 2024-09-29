@@ -1,7 +1,7 @@
 {
   "name": "remote1",
   "private": true,
-  "version": "1.0.26",
+  "version": "1.0.27",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "DEBUG=true rsbuild build",
@@ -11,8 +11,8 @@
     "@module-federation/bridge-react": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "antd": "^5.16.2",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-router-dom": "^5.3.4",
     "react-shadow": "^20.4.0"
   },

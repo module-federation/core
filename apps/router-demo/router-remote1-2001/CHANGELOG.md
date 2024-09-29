@@ -1,5 +1,16 @@
 # remote1
 
+## 1.0.27
+
+### Patch Changes
+
+- Updated dependencies [1b6bf0e]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+  - @module-federation/enhanced@0.6.7
+  - @module-federation/bridge-react@0.6.7
+
 ## 1.0.26
 
 ### Patch Changes

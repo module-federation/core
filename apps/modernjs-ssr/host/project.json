@@ -3,6 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/modernjs-ssr/modernjs-ssr-host/src",
   "projectType": "application",
+  "tags": [],
+  "implicitDependencies": ["typescript"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -67,7 +69,5 @@
         ]
       }
     }
-  },
-  "tags": [],
-  "implicitDependencies": ["typescript"]
+  }
 }
