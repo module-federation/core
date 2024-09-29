@@ -17,7 +17,7 @@ export const dependencies = {
 };
 
 export { parseOptions } from './lib/container/options';
-//
+
 export const container = {
   get ContainerEntryModule() {
     return require('./lib/container/ContainerEntryModule').default;
