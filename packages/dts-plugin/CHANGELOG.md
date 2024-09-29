@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 0.6.7
+
+### Patch Changes
+
+- 0216364: fix(dts-plugin): ignore .vue ext
+- Updated dependencies [9e32644]
+  - @module-federation/sdk@0.6.7
+  - @module-federation/managers@0.6.7
+  - @module-federation/third-party-dts-extractor@0.6.7
+
 ## 0.6.6
 
 ### Patch Changes
