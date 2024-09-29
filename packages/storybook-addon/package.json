@@ -42,7 +42,7 @@
     "@module-federation/utilities": "workspace:*"
   },
   "peerDependencies": {
-    "@module-federation/utilities": "^3.1.12",
+    "@module-federation/utilities": "^3.1.13",
     "@nx/react": "~16.0.0 || ~17.0.0 || ~17.2.0",
     "@nx/webpack": "~16.0.0 || ~17.0.0 || ~17.2.0",
     "@storybook/core-common": "^6.5.16 || ^7.0.0",

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "scripts": {
     "build:storybook": "storybook build",
     "storybook": "storybook dev -p 6006",
@@ -70,7 +70,7 @@
     "@module-federation/runtime": "workspace:*",
     "@playwright/test": "1.36.1",
     "@storybook/addon-essentials": "^8",
-    "@types/chrome": "^0.0.268",
+    "@types/chrome": "^0.0.272",
     "@types/dagre": "^0.7.52",
     "@types/jest": "~29.2.4",
     "@types/node": "~20.12.12",
