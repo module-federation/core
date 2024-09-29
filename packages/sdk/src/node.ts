@@ -100,6 +100,7 @@ export function createScriptNode(
         {
           filename,
           importModuleDynamically:
+            //@ts-ignore
             vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
         },
       );

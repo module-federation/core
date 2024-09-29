@@ -1,4 +1,4 @@
-const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+//const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 
-registerPluginTSTranspiler();
+//registerPluginTSTranspiler();
 module.exports = require('./webpack.config');

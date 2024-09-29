@@ -20,6 +20,27 @@ module.exports = (rollupConfig, _projectOptions) => {
     plugin: 'packages/data-prefetch/src/plugin.ts',
     shared: 'packages/data-prefetch/src/shared/index.ts',
   };
-  rollupConfig.external = [/@module-federation/];
+
+  if (Array.isArray(rollupConfig.output)) {
+    rollupConfig.output = rollupConfig.output.map((c) => ({
+      ...c,
+      manualChunks: (id) => {
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
+    }));
+  } else {
+    rollupConfig.output = {
+      ...rollupConfig.output,
+      manualChunks: (id) => {
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
+    };
+  }
+
+  // rollupConfig.external = [/@module-federation/];
   return rollupConfig;
 };
