@@ -38,7 +38,8 @@
     "@storybook/core-common": "7.6.20",
     "@storybook/node-logger": "7.6.20",
     "webpack": "5.93.0",
-    "webpack-virtual-modules": "0.6.2"
+    "webpack-virtual-modules": "0.6.2",
+    "@module-federation/utilities": "workspace:*"
   },
   "peerDependencies": {
     "@module-federation/utilities": "^3.1.13",
