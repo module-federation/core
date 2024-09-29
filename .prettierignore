@@ -10,3 +10,4 @@ pnpm-lock.yaml
 apps/website-new/docs
 
 /.nx/workspace-data
+/.nx/cache

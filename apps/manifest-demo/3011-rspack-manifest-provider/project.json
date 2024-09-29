@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/manifest-demo/3011-rspack-manifest-provider/src",
   "projectType": "application",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/rspack:rspack",
@@ -48,6 +49,5 @@
         }
       }
     }
-  },
-  "tags": []
+  }
 }

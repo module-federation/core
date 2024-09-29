@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/runtime-demo/3005-runtime-host/src",
   "projectType": "application",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
@@ -130,6 +131,5 @@
         ]
       }
     }
-  },
-  "tags": []
+  }
 }

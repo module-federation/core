@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/manifest-demo/3009-webpack-provider/src",
   "projectType": "application",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
@@ -88,6 +89,5 @@
         }
       }
     }
-  },
-  "tags": []
+  }
 }
