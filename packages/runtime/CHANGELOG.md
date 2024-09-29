@@ -13,10 +13,6 @@
   - Exposed the previously private `formatOptions` method in the `FederationHost` class publicly.
   - Enhanced error handling for uninstantiated or unregistered runtime access.
 
-  ```
-
-  ```
-
 - 9e32644: - Refactor `embedded.ts` to use a proxy pattern for better runtime compatibility:
   - Implement FederationHost and Module classes that delegate to the actual runtime implementation
   - Expose all public methods and properties from the original classes
