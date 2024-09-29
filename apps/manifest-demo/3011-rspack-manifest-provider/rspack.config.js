@@ -1,5 +1,5 @@
-const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-registerPluginTSTranspiler();
+// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+// registerPluginTSTranspiler();
 
 const { composePlugins, withNx, withReact } = require('@nx/rspack');
 
@@ -54,7 +54,7 @@ module.exports = composePlugins(
     ];
     config.resolve = {
       extensions: ['*', '.js', '.jsx', '.tsx', '.ts'],
-      tsConfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
+      tsConfig: path.resolve(__dirname, 'tsconfig.app.json'),
     };
     // publicPath must be specific url
     config.output.publicPath = 'http://localhost:3011/';
@@ -67,10 +67,22 @@ module.exports = composePlugins(
           './Component': './src/App.jsx',
         },
         shared: {
-          react: {},
-          'react/': {},
-          'react-dom': {},
-          'react-dom/': {},
+          'react/': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          react: {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          'react-dom': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          'react-dom/': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
         },
       }),
     );
@@ -95,6 +107,7 @@ module.exports = composePlugins(
         ...config.optimization,
         runtimeChunk: false,
         minimize: false,
+        splitChunks: false,
       });
     config.output.clean = true;
 

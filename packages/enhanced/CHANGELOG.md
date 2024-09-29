@@ -1,5 +1,37 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.6.7
+
+### Patch Changes
+
+- 1b6bf0e: ContainerPlugin to use makeHook to addInclude of federation runtime dependency
+- 9e32644: Added support for hoisting federation runtime modules and enhancing dependency management.
+
+  - Introduced `FederationModulesPlugin` to handle federation-related hooks and dependencies.
+  - Added new `FederationRuntimeDependency` and logic to include it conditionally.
+  - Enhanced `ContainerPlugin` and related plugins to support experimental `federationRuntime` options.
+  - Modified `HoistContainerReferencesPlugin` to hoist additional modules in chunks.
+  - Implemented changes across multiple files to support the new plugin and dependency management features.
+
+- 9e32644: Refactor `HoistContainerReferencesPlugin` to optimize module disconnection and cleanup logic.
+
+  - Removed `moduleToDelete` set as it was redundant.
+  - Ensured all referenced modules are disconnected from unused chunks directly.
+  - Added call to `cleanUpChunks` within the main loop to clean up chunks using `allReferencedModules`.
+
+- 9e32644: handle chunk entry modules correctly in MfStartupChunkDependenciesPlugin
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [0216364]
+  - @module-federation/data-prefetch@0.6.7
+  - @module-federation/sdk@0.6.7
+  - @module-federation/dts-plugin@0.6.7
+  - @module-federation/runtime-tools@0.6.7
+  - @module-federation/bridge-react-webpack-plugin@0.6.7
+  - @module-federation/managers@0.6.7
+  - @module-federation/manifest@0.6.7
+  - @module-federation/rspack@0.6.7
+
 ## 0.6.6
 
 ### Patch Changes

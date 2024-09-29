@@ -11,8 +11,7 @@ module.exports = (rollupConfig, projectOptions) => {
     embedded: 'packages/runtime/src/embedded.ts',
   };
 
-  const project = projectOptions.project;
-  const pkg = require(project);
+  const pkg = require('./package.json');
 
   if (rollupConfig.output.format === 'esm' && FEDERATION_DEBUG) {
     rollupConfig.output.format = 'iife';
@@ -22,14 +21,25 @@ module.exports = (rollupConfig, projectOptions) => {
     delete rollupConfig.input.helpers;
   }
 
-  rollupConfig.output = {
-    ...rollupConfig.output,
-    manualChunks: (id) => {
-      if (id.includes('@swc/helpers')) {
-        return 'polyfills';
-      }
-    },
-  };
+  if (Array.isArray(rollupConfig.output)) {
+    rollupConfig.output = rollupConfig.output.map((c) => ({
+      ...c,
+      manualChunks: (id) => {
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
+    }));
+  } else {
+    rollupConfig.output = {
+      ...rollupConfig.output,
+      manualChunks: (id) => {
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
+    };
+  }
 
   rollupConfig.plugins.push(
     replace({

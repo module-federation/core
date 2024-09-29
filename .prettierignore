@@ -8,3 +8,6 @@
 pnpm-lock.yaml
 **/dist/**
 apps/website-new/docs
+
+/.nx/workspace-data
+/.nx/cache

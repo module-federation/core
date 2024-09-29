@@ -8,7 +8,7 @@ import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { FederationHost } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
-import { assert } from '../utils';
+import { assert } from './logger';
 
 async function loadEsmEntry({
   entry,
@@ -147,7 +147,7 @@ async function loadEntryNode({
   remoteInfo: RemoteInfo;
   createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
 }) {
-  const { entry, entryGlobalName: globalName, name } = remoteInfo;
+  const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
     globalName,
@@ -158,7 +158,7 @@ async function loadEntryNode({
   }
 
   return loadScriptNode(entry, {
-    attrs: { name, globalName },
+    attrs: { name, globalName, type },
     createScriptHook: (url, attrs) => {
       const res = createScriptHook.emit({ url, attrs });
 

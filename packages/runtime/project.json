@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/runtime/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
@@ -81,6 +82,5 @@
         ]
       }
     }
-  },
-  "tags": ["type:pkg"]
+  }
 }
