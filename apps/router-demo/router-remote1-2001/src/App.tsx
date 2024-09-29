@@ -1,5 +1,6 @@
 import { Image } from 'antd';
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+// @ts-ignore
+import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
 import {
   StyleProvider,
   legacyLogicalPropertiesTransformer,
@@ -11,13 +12,13 @@ import styles from './App.module.css';
 const dataSource = [
   {
     key: '1',
-    name: '胡彦斌',
+    name: 'Zack',
     age: 32,
     address: '西湖区湖底公园1号',
   },
   {
     key: '2',
-    name: '胡彦祖',
+    name: 'Jack',
     age: 42,
     address: '西湖区湖底公园1号',
   },
@@ -41,10 +42,13 @@ const columns = [
   },
 ];
 
-function Home() {
+function Home({ name, age }: { name: string; age: number }) {
   return (
     <div>
       <h2>Remote1 home page</h2>
+      <h3>
+        name: {name}, age: {age}
+      </h3>
       <Table dataSource={dataSource} columns={columns} />
     </div>
   );
@@ -62,8 +66,7 @@ function Detail() {
   );
 }
 
-const App = (info: any) => {
-  console.log('info', info);
+const App = (info: { name: string; age: number }) => {
   const container = useShadowRoot();
   return (
     <StyleProvider
@@ -84,10 +87,18 @@ const App = (info: any) => {
             </Link>
           </li>
         </ul>
-        <Routes>
-          <Route path="/" Component={Home} />
-          <Route path="/detail" Component={Detail} />
-        </Routes>
+
+        <Switch>
+          <Route path="/home">
+            <Home {...info} />
+          </Route>
+          <Route path="/detail">
+            <Detail />
+          </Route>
+          <Route path="/">
+            <Home {...info} />
+          </Route>
+        </Switch>
       </BrowserRouter>
       {/* <style ref="text/css">
         {

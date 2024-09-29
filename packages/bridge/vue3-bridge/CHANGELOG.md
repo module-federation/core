@@ -1,5 +1,91 @@
 # @module-federation/bridge-vue3
 
+## 0.6.7
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.7
+
+## 0.6.6
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.6
+
+## 0.6.5
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.5
+
+## 0.6.4
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.4
+
+## 0.6.3
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.3
+
+## 0.6.2
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.2
+
+## 0.6.1
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.1
+
+## 0.6.0
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.0
+
+## 0.5.2
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.5.2
+
+## 0.5.1
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.5.1
+
+## 0.5.0
+
+### Patch Changes
+
+- 49d6135: feat(@module-federation/bridge): enhance Bridge capabilities and fix some issues
+- Updated dependencies [49d6135]
+  - @module-federation/bridge-shared@0.5.0
+
+## 0.4.0
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.4.0
+
+## 0.3.5
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.3.5
+
+## 0.3.4
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.3.4
+
 ## 0.3.3
 
 ### Patch Changes

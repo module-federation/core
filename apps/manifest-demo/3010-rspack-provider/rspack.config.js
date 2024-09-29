@@ -1,5 +1,5 @@
-const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-registerPluginTSTranspiler();
+// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+// registerPluginTSTranspiler();
 
 const { composePlugins, withNx, withReact } = require('@nx/rspack');
 
@@ -20,6 +20,12 @@ module.exports = composePlugins(
       context.context.root,
       'apps/manifest-demo/3010-rspack-provider',
     );
+    config.module.parser = {
+      'css/auto': {
+        namedExports: false,
+      },
+    };
+
     // @nx/rspack not sync the latest rspack changes currently, so just override rules
     config.module.rules = [
       {
@@ -44,9 +50,12 @@ module.exports = composePlugins(
         type: 'javascript/auto',
       },
     ];
+    config.experiments = {
+      css: true,
+    };
     config.resolve = {
       extensions: ['*', '.js', '.jsx', '.tsx', '.ts'],
-      tsConfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
+      tsConfig: path.resolve(__dirname, 'tsconfig.app.json'),
     };
     // publicPath must be specific url
     config.output.publicPath = 'http://localhost:3010/';
@@ -61,11 +70,24 @@ module.exports = composePlugins(
         shared: {
           lodash: {},
           antd: {},
-          react: {},
-          'react/': {},
-          'react-dom': {},
-          'react-dom/': {},
+          'react/': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          react: {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          'react-dom': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          'react-dom/': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
         },
+        dataPrefetch: true,
       }),
     );
     (config.devServer = {
@@ -89,6 +111,7 @@ module.exports = composePlugins(
         ...config.optimization,
         runtimeChunk: false,
         minimize: false,
+        splitChunks: false,
       });
     config.output.clean = true;
 

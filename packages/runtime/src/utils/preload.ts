@@ -1,4 +1,4 @@
-import { createLink, createScript } from '@module-federation/sdk';
+import { createLink, createScript, safeToString } from '@module-federation/sdk';
 import {
   PreloadAssets,
   PreloadConfig,
@@ -10,7 +10,6 @@ import {
 } from '../type';
 import { matchRemote } from './manifest';
 import { assert } from './logger';
-import { safeToString } from './tool';
 import { FederationHost } from '../core';
 import { getRemoteEntry } from './load';
 
@@ -80,74 +79,34 @@ export function preloadAssets(
       const module = host.moduleCache.get(remoteInfo.name);
       if (module) {
         getRemoteEntry({
+          origin: host,
           remoteInfo: moduleInfo,
           remoteEntryExports: module.remoteEntryExports,
-          createScriptHook: (url: string, attrs: any) => {
-            const res = host.loaderHook.lifecycle.createScript.emit({
-              url,
-              attrs,
-            });
-            if (!res) return;
-
-            if (typeof document === 'undefined') {
-              //todo: needs real fix
-              return res as HTMLScriptElement;
-            }
-
-            if (res instanceof HTMLScriptElement) {
-              return res;
-            }
-
-            if ('script' in res || 'timeout' in res) {
-              return res;
-            }
-
-            return;
-          },
         });
       } else {
         getRemoteEntry({
+          origin: host,
           remoteInfo: moduleInfo,
           remoteEntryExports: undefined,
-          createScriptHook: (url: string, attrs: any) => {
-            const res = host.loaderHook.lifecycle.createScript.emit({
-              url,
-              attrs,
-            });
-            if (!res) return;
-
-            if (typeof document === 'undefined') {
-              //todo: needs real fix
-              return res as HTMLScriptElement;
-            }
-
-            if (res instanceof HTMLScriptElement) {
-              return res;
-            }
-
-            if ('script' in res || 'timeout' in res) {
-              return res;
-            }
-
-            return;
-          },
         });
       }
     });
 
     if (useLinkPreload) {
+      const defaultAttrs = {
+        rel: 'preload',
+        as: 'style',
+        crossorigin: 'anonymous',
+      };
       cssAssets.forEach((cssUrl) => {
         const { link: cssEl, needAttach } = createLink({
           url: cssUrl,
           cb: () => {},
-          attrs: {
-            rel: 'preload',
-            as: 'style',
-            crossorigin: 'anonymous',
-          },
-          createLinkHook: (url: string) => {
+          attrs: defaultAttrs,
+          createLinkHook: (url, attrs) => {
             const res = host.loaderHook.lifecycle.createLink.emit({
               url,
+              attrs,
             });
             if (res instanceof HTMLLinkElement) {
               return res;
@@ -159,17 +118,19 @@ export function preloadAssets(
         needAttach && document.head.appendChild(cssEl);
       });
     } else {
+      const defaultAttrs = {
+        rel: 'stylesheet',
+        type: 'text/css',
+      };
       cssAssets.forEach((cssUrl) => {
         const { link: cssEl, needAttach } = createLink({
           url: cssUrl,
           cb: () => {},
-          attrs: {
-            rel: 'stylesheet',
-            type: 'text/css',
-          },
-          createLinkHook: (url: string) => {
+          attrs: defaultAttrs,
+          createLinkHook: (url, attrs) => {
             const res = host.loaderHook.lifecycle.createLink.emit({
               url,
+              attrs,
             });
             if (res instanceof HTMLLinkElement) {
               return res;
@@ -184,18 +145,20 @@ export function preloadAssets(
     }
 
     if (useLinkPreload) {
+      const defaultAttrs = {
+        rel: 'preload',
+        as: 'script',
+        crossorigin: 'anonymous',
+      };
       jsAssetsWithoutEntry.forEach((jsUrl) => {
         const { link: linkEl, needAttach } = createLink({
           url: jsUrl,
           cb: () => {},
-          attrs: {
-            rel: 'preload',
-            as: 'script',
-            crossorigin: 'anonymous',
-          },
-          createLinkHook: (url: string) => {
+          attrs: defaultAttrs,
+          createLinkHook: (url: string, attrs) => {
             const res = host.loaderHook.lifecycle.createLink.emit({
               url,
+              attrs,
             });
             if (res instanceof HTMLLinkElement) {
               return res;
@@ -206,14 +169,15 @@ export function preloadAssets(
         needAttach && document.head.appendChild(linkEl);
       });
     } else {
+      const defaultAttrs = {
+        fetchpriority: 'high',
+        type: remoteInfo?.type === 'module' ? 'module' : 'text/javascript',
+      };
       jsAssetsWithoutEntry.forEach((jsUrl) => {
         const { script: scriptEl, needAttach } = createScript({
           url: jsUrl,
           cb: () => {},
-          attrs: {
-            fetchpriority: 'high',
-            type: remoteInfo?.type === 'module' ? 'module' : 'text/javascript',
-          },
+          attrs: defaultAttrs,
           createScriptHook: (url: string, attrs: any) => {
             const res = host.loaderHook.lifecycle.createScript.emit({
               url,

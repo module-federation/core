@@ -4,13 +4,13 @@ import {
   ModuleInfo,
   generateSnapshotFromManifest,
   isManifestProvider,
+  isBrowserEnv,
 } from '@module-federation/sdk';
 import { Optional, Options, Remote } from '../../type';
 import {
   isRemoteInfoWithEntry,
   error,
   getRemoteEntryInfoFromSnapshot,
-  isBrowserEnv,
 } from '../../utils';
 import {
   getGlobalSnapshot,

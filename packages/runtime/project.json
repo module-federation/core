@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/runtime/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
@@ -13,17 +14,15 @@
         "main": "packages/runtime/src/index.ts",
         "additionalEntryPoints": [
           "packages/runtime/src/types.ts",
-          "packages/runtime/src/helpers.ts"
+          "packages/runtime/src/helpers.ts",
+          "packages/runtime/src/embedded.ts"
         ],
         "tsConfig": "packages/runtime/tsconfig.lib.json",
         "assets": [],
         "project": "packages/runtime/package.json",
         "compiler": "swc",
         "rollupConfig": "packages/runtime/rollup.config.js",
-        "format": ["cjs", "esm"],
-        "external": ["@module-federation/*"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
+        "format": ["cjs", "esm"]
       },
       "dependsOn": [
         {
@@ -82,6 +81,5 @@
         ]
       }
     }
-  },
-  "tags": ["type:pkg"]
+  }
 }

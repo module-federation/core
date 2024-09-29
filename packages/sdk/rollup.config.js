@@ -6,12 +6,28 @@ module.exports = (rollupConfig, _projectOptions) => {
       targets: [{ src: 'packages/sdk/LICENSE', dest: 'packages/sdk/dist' }],
     }),
   );
-  // rollupConfig.plugins.push({
-  //   name: 'custom-dynamic-import',
-  //   renderDynamicImport({ moduleId }) {
-  //     return { left: 'import(', right: ')' };
-  //   },
-  // });
+
+  rollupConfig.external = [/@module-federation/];
+
+  if (Array.isArray(rollupConfig.output)) {
+    rollupConfig.output = rollupConfig.output.map((c) => ({
+      ...c,
+      manualChunks: (id) => {
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
+    }));
+  } else {
+    rollupConfig.output = {
+      ...rollupConfig.output,
+      manualChunks: (id) => {
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
+    };
+  }
 
   return rollupConfig;
 };

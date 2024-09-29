@@ -1,14 +1,26 @@
 {
   "name": "@module-federation/bridge-vue3",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "version": "0.3.3",
+  "version": "0.6.7",
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
-  "main": "./dist/index.umd.js",
+  "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist/",
+    "src/",
+    "CHANGELOG.md",
+    "LICENSE",
+    "package.json",
+    "project.json",
+    "README.md",
+    "tsconfig.json",
+    "tsconfig.node.json",
+    "vite.config.ts"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -25,7 +37,7 @@
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
     "typescript": "^5.2.2",
-    "vite": "^5.2.0",
+    "vite": "^5.2.14",
     "vite-plugin-dts": "^3.9.1",
     "vue": "^3.4.21",
     "vue-router": "4.3.2",

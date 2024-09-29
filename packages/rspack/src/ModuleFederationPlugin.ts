@@ -71,10 +71,12 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
     options.implementation = options.implementation || RuntimeToolsPath;
     let disableManifest = options.manifest === false;
+    let disableDts = options.dts === false;
 
-    // @ts-ignore
-    new DtsPlugin(options).apply(compiler);
-
+    if (!disableDts) {
+      // @ts-ignore
+      new DtsPlugin(options).apply(compiler);
+    }
     if (!disableManifest && options.exposes) {
       try {
         const containerManager = new ContainerManager();

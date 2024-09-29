@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/webpack-bundler-runtime/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
@@ -20,9 +21,6 @@
           "packages/webpack-bundler-runtime/src/constant.ts",
           "packages/webpack-bundler-runtime/src/container.ts"
         ],
-        "external": ["@module-federation/*"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true,
         "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.js"
       },
       "dependsOn": [
@@ -72,6 +70,5 @@
         ]
       }
     }
-  },
-  "tags": ["type:pkg"]
+  }
 }

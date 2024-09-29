@@ -1,5 +1,63 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.6.7
+
+### Patch Changes
+
+- 9e32644: Added experimental option for federation runtime in ContainerPluginOptions.
+
+  - Extended `ContainerPluginOptions` to include an `experiments` property.
+    - Within `experiments`, added a `federationRuntime` option.
+      - `federationRuntime` can be either `false` or `'hoisted'`.
+
+## 0.6.6
+
+## 0.6.5
+
+## 0.6.4
+
+## 0.6.3
+
+## 0.6.2
+
+## 0.6.1
+
+### Patch Changes
+
+- 2855583: externalize swc helpers and add them as a dependency
+- 813680f: Remove duplicated util functions and reference central ones in sdk
+
+## 0.6.0
+
+### Minor Changes
+
+- 1d9bb77: Add support for using Virtual Runtime Entrypoints instead of writing a temporary file to disk
+
+## 0.5.2
+
+### Patch Changes
+
+- b90fa7d: feat: add shareStrategy option
+
+## 0.5.1
+
+## 0.5.0
+
+### Patch Changes
+
+- 8378a77: feat(runtime): add loadEntry hook
+
+## 0.4.0
+
+### Patch Changes
+
+- a6e2bed: fix: no add default attrs to the element which is provided by users
+- a6e2bed: fix: add attrs option to createLink hook
+
+## 0.3.5
+
+## 0.3.4
+
 ## 0.3.3
 
 ## 0.3.2

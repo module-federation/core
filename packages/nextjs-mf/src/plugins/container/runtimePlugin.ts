@@ -7,136 +7,131 @@ import {
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
-    //@ts-ignore
-    createScript({ url, attrs = {} }) {
+
+    // Handles loading remote modules and scripts
+    loadRemote: function (args: { url: string; attrs?: Record<string, any> }) {
+      var url = args.url;
+      var attrs = args.attrs;
+
       if (typeof window !== 'undefined') {
-        const script = document.createElement('script');
+        var script = document.createElement('script');
         script.src = url;
         script.async = true;
-        //@ts-ignore
-        delete attrs.crossorigin;
-
-        return { script, timeout: 8000 };
+        delete attrs?.['crossorigin'];
+        return { script: script, timeout: 8000 };
       }
       return undefined;
     },
-    errorLoadRemote({ id, error, from, origin }) {
+
+    errorLoadRemote: function (args: { id: string; error: any; from: string; origin: any }) {
+      var id = args.id;
+      var error = args.error;
+      var from = args.from;
       console.error(id, 'offline');
-      const pg = function () {
+      var pg = function () {
         console.error(id, 'offline', error);
         return null;
       };
 
-      pg.getInitialProps = function (ctx: any) {
+      (pg as any).getInitialProps = function (ctx: any) {
+        // Type assertion to add getInitialProps
         return {};
       };
-      let mod;
+      var mod;
       if (from === 'build') {
-        mod = () => ({
-          __esModule: true,
-          default: pg,
-          getServerSideProps: () => ({ props: {} }),
-        });
+        mod = function () {
+          return {
+            __esModule: true,
+            default: pg,
+            getServerSideProps: function () {
+              return { props: {} };
+            },
+          };
+        };
       } else {
         mod = {
           default: pg,
-          getServerSideProps: () => ({ props: {} }),
+          getServerSideProps: function () {
+            return { props: {} };
+          },
         };
       }
 
       return mod;
     },
-    beforeInit(args) {
-      const { userOptions, shareInfo } = args;
-      const { shared } = userOptions;
-      if (!globalThis.usedChunks) globalThis.usedChunks = new Set();
-      if (shared) {
-        Object.keys(shared || {}).forEach((sharedKey) => {
-          const rawShared = shared[sharedKey];
-          const arrayShared = Array.isArray(rawShared)
-            ? rawShared
-            : [rawShared];
-          arrayShared.forEach((s) => {
-            if (!s.strategy) {
-              s.strategy = 'loaded-first';
-            }
-          });
-        });
-      }
 
-      if (
-        typeof __webpack_runtime_id__ === 'string' &&
-        !__webpack_runtime_id__.startsWith('webpack')
-      ) {
+    beforeInit: function (args) {
+      if (!globalThis.usedChunks) globalThis.usedChunks = new Set();
+      if (typeof __webpack_runtime_id__ === 'string' && !__webpack_runtime_id__.startsWith('webpack')) {
         return args;
       }
 
-      // if (__webpack_runtime_id__ && !__webpack_runtime_id__.startsWith('webpack')) return args;
-      const { moduleCache, name } = args.origin;
-      const gs = new Function('return globalThis')();
-      const attachedRemote = gs[name];
+      var moduleCache = args.origin.moduleCache;
+      var name = args.origin.name;
+      var gs = new Function('return globalThis')();
+      var attachedRemote = gs[name];
       if (attachedRemote) {
         moduleCache.set(name, attachedRemote);
       }
 
       return args;
     },
-    init(args) {
+
+    init: function (args: any) {
       return args;
     },
-    beforeRequest: (args) => {
-      const { options, id } = args;
-      const remoteName = id.split('/').shift();
-      const remote = options.remotes.find(
-        (remote) => remote.name === remoteName,
-      );
+
+    beforeRequest: function (args: any) {
+      var options = args.options;
+      var id = args.id;
+      var remoteName = id.split('/').shift();
+      var remote = options.remotes.find(function (remote: any) {
+        return remote.name === remoteName;
+      });
       if (!remote) return args;
-      //@ts-ignore
-      if (remote?.entry?.includes('?t=')) {
+      if (remote && remote.entry && remote.entry.includes('?t=')) {
         return args;
       }
-      //@ts-ignore
-      remote.entry = `${remote?.entry}?t=${Date.now()}`;
+      remote.entry = remote.entry + '?t=' + Date.now();
       return args;
     },
-    afterResolve(args) {
+
+    afterResolve: function (args: any) {
       return args;
     },
-    onLoad(args) {
-      const { exposeModuleFactory, exposeModule, id } = args;
-      const moduleOrFactory = exposeModuleFactory || exposeModule;
+
+    onLoad: function (args: any) {
+      var exposeModuleFactory = args.exposeModuleFactory;
+      var exposeModule = args.exposeModule;
+      var id = args.id;
+      var moduleOrFactory = exposeModuleFactory || exposeModule;
       if (!moduleOrFactory) return args; // Ensure moduleOrFactory is defined
 
       if (typeof window === 'undefined') {
-        let exposedModuleExports: any;
+        var exposedModuleExports: any;
         try {
           exposedModuleExports = moduleOrFactory();
         } catch (e) {
           exposedModuleExports = moduleOrFactory;
         }
 
-        const handler: ProxyHandler<any> = {
-          get(target, prop, receiver) {
-            // Check if accessing a static property of the function itself
-            if (
-              target === exposedModuleExports &&
-              typeof exposedModuleExports[prop] === 'function'
-            ) {
-              return function (this: unknown, ...args: any[]) {
+        var handler: ProxyHandler<any> = {
+          get: function (target, prop, receiver) {
+            if (target === exposedModuleExports && typeof exposedModuleExports[prop] === 'function') {
+              return function (this: unknown) {
                 globalThis.usedChunks.add(id);
-                return exposedModuleExports[prop].apply(this, args);
+                return exposedModuleExports[prop].apply(this, arguments);
               };
             }
 
-            const originalMethod = target[prop];
+            var originalMethod = target[prop];
             if (typeof originalMethod === 'function') {
-              const proxiedFunction = function (this: unknown, ...args: any[]) {
+              var proxiedFunction = function (this: unknown) {
                 globalThis.usedChunks.add(id);
-                return originalMethod.apply(this, args);
+                return originalMethod.apply(this, arguments);
               };
 
-              // Copy all enumerable properties from the original method to the proxied function
-              Object.keys(originalMethod).forEach((prop) => {
+              Object.keys(originalMethod).forEach(function (prop) {
                 Object.defineProperty(proxiedFunction, prop, {
                   value: originalMethod[prop],
                   writable: true,
@@ -153,23 +148,17 @@ export default function (): FederationRuntimePlugin {
         };
 
         if (typeof exposedModuleExports === 'function') {
-          // If the module export is a function, we create a proxy that can handle both its
-          // call (as a function) and access to its properties (including static methods).
           exposedModuleExports = new Proxy(exposedModuleExports, handler);
-
-          // Proxy static properties specifically
-          const staticProps = Object.getOwnPropertyNames(exposedModuleExports);
-          staticProps.forEach((prop) => {
+          var staticProps = Object.getOwnPropertyNames(exposedModuleExports);
+          staticProps.forEach(function (prop) {
             if (typeof exposedModuleExports[prop] === 'function') {
-              exposedModuleExports[prop] = new Proxy(
-                exposedModuleExports[prop],
-                handler,
-              );
+              exposedModuleExports[prop] = new Proxy(exposedModuleExports[prop], handler);
             }
           });
-          return () => exposedModuleExports;
+          return function () {
+            return exposedModuleExports;
+          };
         } else {
-          // For objects, just wrap the exported object itself
           exposedModuleExports = new Proxy(exposedModuleExports, handler);
         }
 
@@ -178,30 +167,21 @@ export default function (): FederationRuntimePlugin {
 
       return args;
     },
+
     loadRemoteSnapshot(args) {
       const { from, remoteSnapshot, manifestUrl, manifestJson, options } = args;
 
-      // ensure snapshot is loaded from manifest
-      if (
-        from !== 'manifest' ||
-        !manifestUrl ||
-        !manifestJson ||
-        !('publicPath' in remoteSnapshot)
-      ) {
+      if (from !== 'manifest' || !manifestUrl || !manifestJson || !('publicPath' in remoteSnapshot)) {
         return args;
       }
 
-      // re-assign publicPath based on remoteEntry location
       if (options.inBrowser) {
         remoteSnapshot.publicPath = remoteSnapshot.publicPath.substring(
           0,
           remoteSnapshot.publicPath.lastIndexOf('/_next/') + 7,
         );
       } else {
-        const serverPublicPath = manifestUrl.substring(
-          0,
-          manifestUrl.indexOf('mf-manifest.json'),
-        );
+        const serverPublicPath = manifestUrl.substring(0, manifestUrl.indexOf('mf-manifest.json'));
 
         remoteSnapshot.publicPath = serverPublicPath;
         if ('publicPath' in manifestJson.metaData) {
@@ -211,7 +191,8 @@ export default function (): FederationRuntimePlugin {
 
       return args;
     },
-    resolveShare(args) {
+
+    resolveShare: function (args: any) {
       if (
         args.pkgName !== 'react' &&
         args.pkgName !== 'react-dom' &&
@@ -219,8 +200,12 @@ export default function (): FederationRuntimePlugin {
       ) {
         return args;
       }
-      const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
-      const host = GlobalFederation['__INSTANCES__'][0];
+      var shareScopeMap = args.shareScopeMap;
+      var scope = args.scope;
+      var pkgName = args.pkgName;
+      var version = args.version;
+      var GlobalFederation = args.GlobalFederation;
+      var host = GlobalFederation['__INSTANCES__'][0];
       if (!host) {
         return args;
       }
@@ -228,15 +213,14 @@ export default function (): FederationRuntimePlugin {
       if (!host.options.shared[pkgName]) {
         return args;
       }
-
       args.resolver = function () {
-        shareScopeMap[scope][pkgName][version] =
-          host.options.shared[pkgName][0]; // replace local share scope manually with desired module
+        shareScopeMap[scope][pkgName][version] = host.options.shared[pkgName][0];
         return shareScopeMap[scope][pkgName][version];
       };
       return args;
     },
-    async beforeLoadShare(args) {
+
+    beforeLoadShare: async function (args: any) {
       return args;
     },
   };

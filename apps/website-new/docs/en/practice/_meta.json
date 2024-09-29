@@ -20,5 +20,10 @@
     "name": "scenario",
     "label": "Scenarios",
     "collapsed": true
+  },
+  {
+    "type": "dir",
+    "name": "performance",
+    "label": "Performance"
   }
 ]

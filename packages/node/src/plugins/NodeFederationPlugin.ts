@@ -6,11 +6,9 @@ import EntryChunkTrackerPlugin from './EntryChunkTrackerPlugin';
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
  * @interface
- * @property {Record<string, unknown>} experiments - Optional experiments configuration
  * @property {boolean} debug - Optional debug flag
  */
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
-  experiments?: Record<string, unknown>;
   debug?: boolean;
   useRuntimePlugin?: boolean;
 }
@@ -31,7 +29,6 @@ interface Context {
 class NodeFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private context: Context;
-  private experiments: NodeFederationOptions['experiments'];
   private useRuntimePlugin?: boolean;
 
   /**
@@ -41,12 +38,11 @@ class NodeFederationPlugin {
    * @param {Context} context - The context for the NodeFederationPlugin
    */
   constructor(
-    { experiments, debug, useRuntimePlugin, ...options }: NodeFederationOptions,
+    { debug, useRuntimePlugin, ...options }: NodeFederationOptions,
     context: Context,
   ) {
     this._options = options || ({} as ModuleFederationPluginOptions);
     this.context = context || ({} as Context);
-    this.experiments = experiments || {};
     this.useRuntimePlugin = useRuntimePlugin || false;
   }
 

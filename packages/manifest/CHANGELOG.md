@@ -1,5 +1,128 @@
 # @module-federation/manifest
 
+## 0.6.7
+
+### Patch Changes
+
+- Updated dependencies [9e32644]
+- Updated dependencies [0216364]
+  - @module-federation/sdk@0.6.7
+  - @module-federation/dts-plugin@0.6.7
+  - @module-federation/managers@0.6.7
+
+## 0.6.6
+
+### Patch Changes
+
+- 35aead4: fix(dts-plugin): zipName should add prefix if remoteEntry has it
+- Updated dependencies [35aead4]
+  - @module-federation/dts-plugin@0.6.6
+  - @module-federation/sdk@0.6.6
+  - @module-federation/managers@0.6.6
+
+## 0.6.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.5
+- @module-federation/managers@0.6.5
+- @module-federation/dts-plugin@0.6.5
+
+## 0.6.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.4
+- @module-federation/managers@0.6.4
+- @module-federation/dts-plugin@0.6.4
+
+## 0.6.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.3
+- @module-federation/managers@0.6.3
+- @module-federation/dts-plugin@0.6.3
+
+## 0.6.2
+
+### Patch Changes
+
+- @module-federation/dts-plugin@0.6.2
+- @module-federation/sdk@0.6.2
+- @module-federation/managers@0.6.2
+
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/sdk@0.6.1
+  - @module-federation/dts-plugin@0.6.1
+  - @module-federation/managers@0.6.1
+
+## 0.6.0
+
+### Patch Changes
+
+- Updated dependencies [1d9bb77]
+  - @module-federation/sdk@0.6.0
+  - @module-federation/dts-plugin@0.6.0
+  - @module-federation/managers@0.6.0
+
+## 0.5.2
+
+### Patch Changes
+
+- Updated dependencies [b90fa7d]
+  - @module-federation/sdk@0.5.2
+  - @module-federation/dts-plugin@0.5.2
+  - @module-federation/managers@0.5.2
+
+## 0.5.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.5.1
+- @module-federation/managers@0.5.1
+- @module-federation/dts-plugin@0.5.1
+
+## 0.5.0
+
+### Patch Changes
+
+- Updated dependencies [8378a77]
+  - @module-federation/sdk@0.5.0
+  - @module-federation/dts-plugin@0.5.0
+  - @module-federation/managers@0.5.0
+
+## 0.4.0
+
+### Patch Changes
+
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/sdk@0.4.0
+  - @module-federation/dts-plugin@0.4.0
+  - @module-federation/managers@0.4.0
+
+## 0.3.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.5
+- @module-federation/managers@0.3.5
+- @module-federation/dts-plugin@0.3.5
+
+## 0.3.4
+
+### Patch Changes
+
+- @module-federation/dts-plugin@0.3.4
+- @module-federation/sdk@0.3.4
+- @module-federation/managers@0.3.4
+
 ## 0.3.3
 
 ### Patch Changes

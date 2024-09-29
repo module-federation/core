@@ -13,11 +13,7 @@ export interface RenderFnParams extends ProviderParams {
 
 interface RemoteModule {
   provider: () => {
-    render: (
-      info: ProviderParams & {
-        dom: any;
-      },
-    ) => void;
+    render: (info: RenderFnParams) => void;
     destroy: (info: { dom: any }) => void;
   };
 }
@@ -34,6 +30,7 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
       lazyComponent: info.loader,
       exportName,
     });
+
     try {
       const m = (await info.loader()) as RemoteModule;
       // @ts-ignore
@@ -44,8 +41,7 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
       );
 
       // @ts-ignore
-      const exportFn = m[exportName] as any;
-
+      const exportFn = m[exportName];
       if (exportName in m && typeof exportFn === 'function') {
         const RemoteAppComponent = forwardRef<
           HTMLDivElement,
@@ -53,12 +49,15 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
             basename?: ProviderParams['basename'];
             memoryRoute?: ProviderParams['memoryRoute'];
           }
-        >((props, _ref) => {
+        >((props, ref) => {
           return (
             <RemoteApp
-              name={moduleName}
+              // change `name` key to `moduleName` to avoid same property `name` passed by user's props which may cause unexpected issues.
+              moduleName={moduleName}
               providerInfo={exportFn}
               exportName={info.export || 'default'}
+              fallback={info.fallback}
+              ref={ref}
               {...props}
             />
           );
@@ -93,26 +92,23 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
   type ExportType = T[E] extends (...args: any) => any
     ? ReturnType<T[E]>
     : never;
+
   type RawComponentType = '__BRIDGE_FN__' extends keyof ExportType
     ? ExportType['__BRIDGE_FN__'] extends (...args: any) => any
       ? Parameters<ExportType['__BRIDGE_FN__']>[0]
       : {}
     : {};
 
-  const LazyComponent = createLazyRemoteComponent(info);
-
-  return (
-    props: {
-      basename?: ProviderParams['basename'];
-      memoryRoute?: ProviderParams['memoryRoute'];
-    } & RawComponentType,
-  ) => {
-    return (
-      <ErrorBoundary FallbackComponent={info.fallback}>
-        <React.Suspense fallback={info.loading}>
-          <LazyComponent {...props} />
-        </React.Suspense>
-      </ErrorBoundary>
-    );
-  };
+  return forwardRef<HTMLDivElement, ProviderParams & RawComponentType>(
+    (props, ref) => {
+      const LazyComponent = createLazyRemoteComponent(info);
+      return (
+        <ErrorBoundary FallbackComponent={info.fallback}>
+          <React.Suspense fallback={info.loading}>
+            <LazyComponent {...props} ref={ref} />
+          </React.Suspense>
+        </ErrorBoundary>
+      );
+    },
+  );
 }

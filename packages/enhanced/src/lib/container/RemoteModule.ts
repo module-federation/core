@@ -91,7 +91,6 @@ class RemoteModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  // @ts-ignore
   override needBuild(
     context: NeedBuildContext,
     callback: (err: WebpackError | null, needsRebuild?: boolean) => void,
@@ -162,8 +161,7 @@ class RemoteModule extends Module {
   override codeGeneration(
     context: CodeGenerationContext,
   ): CodeGenerationResult {
-    const { runtimeTemplate, moduleGraph, chunkGraph } = context;
-    // @ts-ignore
+    const { moduleGraph, chunkGraph } = context;
     const module = moduleGraph.getModule(this.dependencies[0]);
     const id = module && chunkGraph.getModuleId(module);
     const sources = new Map();

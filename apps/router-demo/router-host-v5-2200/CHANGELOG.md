@@ -1,98 +1,88 @@
 # host-v5
 
-## 1.0.13
+## 1.0.27
 
 ### Patch Changes
 
-- @module-federation/enhanced@0.3.3
-- @module-federation/bridge-react@0.3.3
+- Updated dependencies [1b6bf0e]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+  - @module-federation/enhanced@0.6.7
+  - @module-federation/bridge-react@0.6.7
 
-## 1.0.12
-
-### Patch Changes
-
-- Updated dependencies [85ae159]
-  - @module-federation/enhanced@0.3.2
-  - @module-federation/bridge-react@0.3.2
-
-## 1.0.11
+## 1.0.26
 
 ### Patch Changes
 
-- @module-federation/enhanced@0.3.1
-- @module-federation/bridge-react@0.3.1
+- @module-federation/enhanced@0.6.6
+- @module-federation/bridge-react@0.6.6
 
-## 1.0.10
-
-### Patch Changes
-
-- Updated dependencies [fa37cc4]
-  - @module-federation/enhanced@0.3.0
-  - @module-federation/bridge-react@0.3.0
-
-## 1.0.9
+## 1.0.25
 
 ### Patch Changes
 
-- @module-federation/enhanced@0.2.8
-- @module-federation/bridge-react@0.2.8
+- @module-federation/enhanced@0.6.5
+- @module-federation/bridge-react@0.6.5
 
-## 1.0.8
-
-### Patch Changes
-
-- Updated dependencies [b00ef13]
-  - @module-federation/enhanced@0.2.7
-  - @module-federation/bridge-react@0.2.7
-
-## 1.0.7
+## 1.0.24
 
 ### Patch Changes
 
-- Updated dependencies [4488064]
-  - @module-federation/enhanced@0.2.6
-  - @module-federation/bridge-react@0.2.6
+- @module-federation/enhanced@0.6.4
+- @module-federation/bridge-react@0.6.4
 
-## 1.0.6
-
-### Patch Changes
-
-- @module-federation/enhanced@0.2.5
-- @module-federation/bridge-react@0.2.5
-
-## 1.0.5
+## 1.0.23
 
 ### Patch Changes
 
-- @module-federation/enhanced@0.2.4
-- @module-federation/bridge-react@0.2.4
+- @module-federation/enhanced@0.6.3
+- @module-federation/bridge-react@0.6.3
 
-## 1.0.4
-
-### Patch Changes
-
-- @module-federation/enhanced@0.2.3
-- @module-federation/bridge-react@0.2.3
-
-## 1.0.3
+## 1.0.22
 
 ### Patch Changes
 
-- @module-federation/enhanced@0.2.2
-- @module-federation/bridge-react@0.2.2
+- @module-federation/enhanced@0.6.2
+- @module-federation/bridge-react@0.6.2
 
-## 1.0.2
-
-### Patch Changes
-
-- Updated dependencies [88445e7]
-  - @module-federation/enhanced@0.2.1
-  - @module-federation/bridge-react@0.2.1
-
-## 1.0.1
+## 1.0.21
 
 ### Patch Changes
 
-- Updated dependencies [d2ab821]
-  - @module-federation/bridge-react@0.2.0
-  - @module-federation/enhanced@0.2.0
+- Updated dependencies [2855583]
+- Updated dependencies [2855583]
+  - @module-federation/enhanced@0.6.1
+  - @module-federation/bridge-react@0.6.1
+
+## 1.0.20
+
+### Patch Changes
+
+- Updated dependencies [f245bb3]
+- Updated dependencies [1d9bb77]
+  - @module-federation/enhanced@0.6.0
+  - @module-federation/bridge-react@0.6.0
+
+## 1.0.19
+
+### Patch Changes
+
+- Updated dependencies [b90fa7d]
+  - @module-federation/enhanced@0.5.2
+  - @module-federation/bridge-react@0.5.2
+
+## 1.0.18
+
+### Patch Changes
+
+- @module-federation/enhanced@0.5.1
+- @module-federation/bridge-react@0.5.1
+
+## 1.0.17
+
+### Patch Changes
+
+- Updated dependencies [49d6135]
+  - @module-federation/bridge-react@0.5.0
+  - @module-federation/enhanced@0.5.0

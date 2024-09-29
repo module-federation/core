@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "0.3.3",
+  "version": "0.6.7",
   "files": [
     "dist/",
     "types.d.ts",
@@ -58,7 +58,7 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@swc/helpers": "0.5.3",
+    "@swc/helpers": "0.5.12",
     "@modern-js/utils": "2.54.2",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
@@ -71,11 +71,11 @@
   "devDependencies": {
     "@types/hoist-non-react-statics": "3.3.2",
     "@module-federation/manifest": "workspace:*",
-    "@modern-js/app-tools": "2.56.2",
-    "@modern-js/core": "2.56.2",
-    "@modern-js/runtime": "2.56.2",
-    "@modern-js/module-tools": "2.56.2",
-    "@modern-js/tsconfig": "2.56.2"
+    "@modern-js/app-tools": "2.57.0",
+    "@modern-js/core": "2.57.0",
+    "@modern-js/runtime": "2.57.0",
+    "@modern-js/module-tools": "2.57.0",
+    "@modern-js/tsconfig": "2.57.0"
   },
   "peerDependencies": {
     "react": ">=17",

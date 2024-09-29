@@ -58,5 +58,10 @@
     "type": "file",
     "name": "manifest",
     "label": "manifest"
+  },
+  {
+    "type": "file",
+    "name": "shareStrategy",
+    "label": "shareStrategy"
   }
 ]

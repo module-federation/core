@@ -1,0 +1,53 @@
+name: E2E Test for Next.js Prod
+
+on:
+  workflow_call:
+
+jobs:
+  e2e-next-prod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> $GITHUB_ENV
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Run Build for All
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
+      - name: Run condition check script
+        id: check-ci
+        run: node tools/scripts/ci-is-affected.mjs --appName=3000-home
+
+      - name: E2E Test for Next.js Prod
+        if: steps.check-ci.outcome == 'success'
+        run: |
+          pnpm run --filter @module-federation/3002-checkout --filter @module-federation/3000-home --filter @module-federation/3001-shop build &&
+          pnpm run app:next:prod &
+          sleep 4 &&
+          npx wait-on tcp:3001 &&
+          npx wait-on tcp:3002 &&
+          npx wait-on tcp:3000 &&
+          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 &&
+          npx kill-port 3000,3001,3002

@@ -1,3 +1,4 @@
 {
-  "diffEditor.wordWrap": "on"
+  "diffEditor.wordWrap": "on",
+  "editor.rename.enablePreview": false
 }

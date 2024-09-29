@@ -1,6 +1,7 @@
 import type { WebpackPluginInstance, Compiler } from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type IModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
+import type { ResourceInfo } from '@module-federation/manifest';
 
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import path from 'node:path';
@@ -20,7 +21,11 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler) {
-    if (!compiler.options.plugins.find((p) => p && p.name === PLUGIN_NAME)) {
+    if (
+      !compiler.options.plugins.find(
+        (p: WebpackPluginInstance) => p && p['name'] === PLUGIN_NAME,
+      )
+    ) {
       compiler.options.plugins.push(this);
     }
     process.env['FEDERATION_WEBPACK_PATH'] =
@@ -45,7 +50,7 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
     }
   }
 
-  get statsResourceInfo() {
+  get statsResourceInfo(): Partial<ResourceInfo> | undefined {
     return this._mfPlugin?.statsResourceInfo;
   }
 }

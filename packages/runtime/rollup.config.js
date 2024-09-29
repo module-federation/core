@@ -8,10 +8,10 @@ module.exports = (rollupConfig, projectOptions) => {
     index: 'packages/runtime/src/index.ts',
     types: 'packages/runtime/src/types.ts',
     helpers: 'packages/runtime/src/helpers.ts',
+    embedded: 'packages/runtime/src/embedded.ts',
   };
 
-  const project = projectOptions.project;
-  const pkg = require(project);
+  const pkg = require('./package.json');
 
   if (rollupConfig.output.format === 'esm' && FEDERATION_DEBUG) {
     rollupConfig.output.format = 'iife';
@@ -19,6 +19,28 @@ module.exports = (rollupConfig, projectOptions) => {
     delete rollupConfig.external;
     delete rollupConfig.input.type;
     delete rollupConfig.input.helpers;
+  }
+
+  rollupConfig.external = [/@module-federation/];
+
+  if (Array.isArray(rollupConfig.output)) {
+    rollupConfig.output = rollupConfig.output.map((c) => ({
+      ...c,
+      manualChunks: (id) => {
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
+    }));
+  } else {
+    rollupConfig.output = {
+      ...rollupConfig.output,
+      manualChunks: (id) => {
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
+    };
   }
 
   rollupConfig.plugins.push(

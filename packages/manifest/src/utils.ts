@@ -49,7 +49,7 @@ export function getAssetsByChunkIDs(
   compilation: Compilation,
   chunkIDMap: Record<string, Set<string | number>>,
 ): Record<string, { js: string[]; css: string[] }> {
-  const arrayChunks = Array.from(compilation.chunks);
+  const arrayChunks = Array.from(compilation.chunks) as Chunk[];
   const assetMap: Record<string, { css: Set<string>; js: Set<string> }> = {};
 
   Object.keys(chunkIDMap).forEach((key) => {
@@ -297,7 +297,7 @@ export function getTypesMetaInfo(
       return defaultTypesMetaInfo;
     }
 
-    const { apiFileName, zipName } = retrieveTypesAssetsInfo({
+    const { apiFileName, zipName, zipPrefix } = retrieveTypesAssetsInfo({
       ...normalizedRemote,
       context,
       moduleFederationConfig: pluginOptions,
@@ -306,8 +306,8 @@ export function getTypesMetaInfo(
     return {
       path: '',
       name: '',
-      zip: zipName,
-      api: apiFileName,
+      zip: path.join(zipPrefix, zipName),
+      api: path.join(zipPrefix, apiFileName),
     };
   } catch (err) {
     console.warn(

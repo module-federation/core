@@ -11,14 +11,6 @@ import { getFederationGlobalScope } from '../container/runtime/utils';
 const { Template, RuntimeGlobals, RuntimeModule } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const {
-  parseVersionRuntimeCode,
-  versionLtRuntimeCode,
-  rangeToStringRuntimeCode,
-  satisfyRuntimeCode,
-} = require(
-  normalizeWebpackPath('webpack/lib/util/semver'),
-) as typeof import('webpack/lib/util/semver');
 
 class ConsumeSharedRuntimeModule extends RuntimeModule {
   private _runtimeRequirements: ReadonlySet<string>;
@@ -92,6 +84,13 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         moduleIdToSourceMapping.set(id, sharedInfoAndHandlerStr);
       }
     };
+    // const chunkReferences = this._runtimeRequirements.has(
+    //   'federation-entry-startup',
+    // )
+    //   ? this.chunk?.getAllReferencedChunks()
+    //   : this.chunk?.getAllAsyncChunks();
+    //
+    // const allChunks = chunkReferences || [];
     const allChunks = [...(this.chunk?.getAllReferencedChunks() || [])];
     for (const chunk of allChunks) {
       const modules = chunkGraph.getChunkModulesIterableBySourceType(

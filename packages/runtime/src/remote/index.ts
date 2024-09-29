@@ -2,9 +2,10 @@ import {
   isBrowserEnv,
   warn,
   composeKeyWithSeparator,
+  ModuleInfo,
+  GlobalModuleInfo,
 } from '@module-federation/sdk';
 import { Global, getInfoWithoutType, globalLoading } from '../global';
-import type { ModuleInfo, GlobalModuleInfo } from '@module-federation/sdk';
 import {
   Options,
   UserOptions,
@@ -13,6 +14,8 @@ import {
   PreloadRemoteArgs,
   Remote,
   RemoteInfo,
+  RemoteEntryExports,
+  CallFrom,
 } from '../type';
 import { FederationHost } from '../core';
 import {
@@ -80,14 +83,16 @@ export class RemoteHandler {
       void
     >('onLoad'),
     handlePreloadModule: new SyncHook<
-      {
-        id: string;
-        name: string;
-        remote: Remote;
-        remoteSnapshot: ModuleInfo;
-        preloadConfig: PreloadRemoteArgs;
-        origin: FederationHost;
-      },
+      [
+        {
+          id: string;
+          name: string;
+          remote: Remote;
+          remoteSnapshot: ModuleInfo;
+          preloadConfig: PreloadRemoteArgs;
+          origin: FederationHost;
+        },
+      ],
       void
     >('handlePreloadModule'),
     errorLoadRemote: new AsyncHook<
@@ -96,7 +101,7 @@ export class RemoteHandler {
           id: string;
           error: unknown;
           options?: any;
-          from: 'build' | 'runtime';
+          from: CallFrom;
           lifecycle: 'onLoad' | 'beforeRequest';
           origin: FederationHost;
         },
@@ -131,6 +136,16 @@ export class RemoteHandler {
       options: Options;
       origin: FederationHost;
     }>(),
+    loadEntry: new AsyncHook<
+      [
+        {
+          createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
+          remoteInfo: RemoteInfo;
+          remoteEntryExports?: RemoteEntryExports;
+        },
+      ],
+      Promise<RemoteEntryExports>
+    >(),
   });
 
   constructor(host: FederationHost) {
@@ -167,7 +182,7 @@ export class RemoteHandler {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
     id: string,
-    options?: { loadFactory?: boolean; from: 'build' | 'runtime' },
+    options?: { loadFactory?: boolean; from: CallFrom },
   ): Promise<T | null> {
     const { host } = this;
     try {
@@ -183,8 +198,19 @@ export class RemoteHandler {
         await this.getRemoteModuleAndOptions({
           id,
         });
-      const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
-      const moduleOrFactory = (await module.get(idRes, expose, options)) as T;
+      const {
+        pkgNameOrAlias,
+        remote,
+        expose,
+        id: idRes,
+        remoteSnapshot,
+      } = remoteMatchInfo;
+      const moduleOrFactory = (await module.get(
+        idRes,
+        expose,
+        options,
+        remoteSnapshot,
+      )) as T;
 
       const moduleWrapper = await this.hooks.lifecycle.onLoad.emit({
         id: idRes,
@@ -549,6 +575,7 @@ export class RemoteHandler {
           if (remoteKey) {
             delete hostGlobalSnapshot.remotesInfo[remoteKey];
             if (
+              //eslint-disable-next-line no-extra-boolean-cast
               Boolean(Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey])
             ) {
               delete Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey];

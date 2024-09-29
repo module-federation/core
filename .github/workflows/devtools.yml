@@ -8,7 +8,7 @@ on:
     branches: [main]
 
 env:
-  PLAYWRIGHT_BROWSERS_PATH: 0 # Places binaries to node_modules/@playwright/test
+  PLAYWRIGHT_BROWSERS_PATH: 0
 
 jobs:
   main:
@@ -35,14 +35,40 @@ jobs:
         run: pnpm install
 
       - name: Run Affected Build
-        run: npx nx run-many --targets=build --projects=tag:type:pkg  --skip-nx-cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
 
       - name: Configuration xvfb
         shell: bash
         run: sudo apt-get update && sudo apt-get install xvfb
 
-      - name: E2E Chrome Devtools
-        run: pnpm run app:manifest:dev & echo "done" && sleep 50 && npx nx e2e:devtools chrome-devtools
+      - name: E2E Chrome Devtools Dev
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 15
+          max_attempts: 3
+          command: |
+            npx kill-port 3009 3010 3011 3012 3013 4001 &&
+            pnpm run app:manifest:dev & echo "done" && \
+            npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && \
+            sleep 10 &&
+            npx nx e2e:devtools chrome-devtools
+
+      - name: E2E Chrome Devtools Prod
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 15
+          max_attempts: 3
+          command: |
+            npx kill-port 3009 3010 3011 3012 3013 4001 &&
+            npx kill-port 3009 3010 3011 3012 3013 4001 &&
+            pnpm run app:manifest:prod & echo "done" && \
+            npx kill-port 4001
+            npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && \
+            sleep 10 &&
+            npx nx e2e:devtools chrome-devtools
 
       - name: kill port
-        run: lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
+        run: npx kill-port 3013 3009 3010 3011 3012 4001; exit 0
+
+      - name: Kill All Node Processes
+        run: pkill -f node || true

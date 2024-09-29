@@ -28,7 +28,6 @@ const categories = fs.readdirSync(casesPath).map((cat) => {
       .sort(),
   };
 });
-console.log(333, categories);
 // .filter((i) => i.name === 'container');
 const createLogger = (appendTarget) => {
   return {
@@ -88,6 +87,27 @@ const describeCases = (config) => {
               );
               optionsArr = [].concat(options);
               optionsArr.forEach((options, idx) => {
+                if (config.federation) {
+                  const mfp = options.plugins.find(
+                    (p) => p.name === 'ModuleFederationPlugin',
+                  );
+                  if (mfp) {
+                    if (!mfp._options.experiments) {
+                      mfp._options.experiments = {};
+                    }
+                    if (config.federation?.federationRuntime) {
+                      // dont override if explicitly set
+                      if ('federationRuntime' in mfp._options.experiments) {
+                      } else {
+                        Object.assign(
+                          mfp._options.experiments,
+                          config.federation,
+                        );
+                      }
+                    }
+                  }
+                }
+
                 if (!options.context) options.context = testDirectory;
                 if (!options.mode) options.mode = 'production';
                 if (!options.optimization) options.optimization = {};
@@ -331,6 +351,7 @@ const describeCases = (config) => {
                 ) {
                   return;
                 }
+
                 if (
                   checkArrayExpectation(
                     testDirectory,

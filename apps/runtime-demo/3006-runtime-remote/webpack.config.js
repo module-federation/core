@@ -1,5 +1,5 @@
-const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-registerPluginTSTranspiler();
+// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+// registerPluginTSTranspiler();
 
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
@@ -23,6 +23,9 @@ module.exports = composePlugins(
     config.watchOptions = {
       ignored: ['**/dist/**'],
     };
+    if (!config.devServer) {
+      config.devServer = {};
+    }
     config.devServer.host = '127.0.0.1';
 
     config.plugins.push(
@@ -35,6 +38,7 @@ module.exports = composePlugins(
           './WebpackSvg': './src/components/WebpackSvg',
           './WebpackPng': './src/components/WebpackPng',
         },
+        shareStrategy: 'loaded-first',
         shared: {
           lodash: {
             singleton: true,
@@ -64,7 +68,6 @@ module.exports = composePlugins(
         dts: {
           tsConfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
         },
-        runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
       }),
     );
     // config.externals={
@@ -90,9 +93,10 @@ module.exports = composePlugins(
       scriptType: 'text/javascript',
     };
     config.optimization = {
-      ...config.optimization,
+      // ...config.optimization,
       runtimeChunk: false,
       minimize: false,
+      moduleIds: 'named',
     };
     // const mf = await withModuleFederation(defaultConfig);
     return config;

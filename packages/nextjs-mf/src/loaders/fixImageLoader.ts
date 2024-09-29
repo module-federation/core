@@ -27,9 +27,8 @@ export async function fixImageLoader(
 ) {
   this.cacheable(true);
 
-  const isServer = this._compiler?.options.name !== 'client';
-  //@ts-ignore
-  const { publicPath } = this._compiler.webpack.RuntimeGlobals;
+  const isServer = this._compiler?.options?.name !== 'client';
+  const publicPath = this._compiler?.webpack?.RuntimeGlobals?.publicPath ?? '';
 
   const result = await this.importModule(
     `${this.resourcePath}.webpack[javascript/auto]!=!${remaining}`,
@@ -82,9 +81,8 @@ export async function fixImageLoader(
         Template.indent([
           'try {',
           Template.indent([
-            Template.indent(
-              `return ${publicPath} && ${publicPath}.indexOf('://') > 0 ? new URL(${publicPath}).origin : ''`,
-            ),
+            `const splitted = ${publicPath} ? ${publicPath}.split('/_next') : '';`,
+            `return splitted.length === 2 ? splitted[0] : '';`,
           ]),
           '} catch (e) {',
           Template.indent([

@@ -58,6 +58,7 @@ type SharedBaseArgs = {
   scope?: string | Array<string>;
   deps?: Array<string>;
   strategy?: 'version-first' | 'loaded-first';
+  loaded?: boolean;
 };
 
 export type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
@@ -66,7 +67,7 @@ export type ShareArgs =
   | (SharedBaseArgs & { get: SharedGetter })
   | (SharedBaseArgs & { lib: () => Module })
   | SharedBaseArgs;
-
+export type ShareStrategy = 'version-first' | 'loaded-first';
 export type Shared = {
   version: string;
   get: SharedGetter;
@@ -80,7 +81,10 @@ export type Shared = {
   loading?: null | Promise<any>;
   // compatibility with previous shared
   eager?: boolean;
-  strategy: 'version-first' | 'loaded-first';
+  /**
+   * @deprecated set in initOptions.shareStrategy instead
+   */
+  strategy: ShareStrategy;
 };
 
 export type ShareScopeMap = {
@@ -107,6 +111,7 @@ export interface Options {
   shared: ShareInfos;
   plugins: Array<FederationRuntimePlugin>;
   inBrowser: boolean;
+  shareStrategy?: ShareStrategy;
 }
 
 export type UserOptions = Omit<
@@ -128,8 +133,9 @@ export type RemoteEntryInitOptions = {
   shareScopeMap: ShareScopeMap;
 };
 
-export type InitScope = Array<Record<string, never>>;
-
+export type InitTokens = Record<string, Record<string, any>>;
+export type InitScope = InitTokens[];
+export type CallFrom = 'build' | 'runtime';
 export type RemoteEntryExports = {
   get: (id: string) => () => Promise<Module>;
   init: (

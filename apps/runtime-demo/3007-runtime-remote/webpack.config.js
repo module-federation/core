@@ -1,5 +1,5 @@
-const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-registerPluginTSTranspiler();
+// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+// registerPluginTSTranspiler();
 
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
@@ -51,11 +51,15 @@ module.exports = composePlugins(
             requiredVersion: '^18.2.0',
           },
         },
+        shareStrategy: 'loaded-first',
         dev: {
           disableLiveReload: true,
         },
       }),
     );
+    if (!config.devServer) {
+      config.devServer = {};
+    }
     config.devServer.host = '127.0.0.1';
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {

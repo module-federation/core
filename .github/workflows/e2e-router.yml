@@ -1,0 +1,46 @@
+# .github/workflows/e2e-router-host-2000.yml
+name: E2E Test for Router
+
+on:
+  workflow_call:
+
+jobs:
+  e2e-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> $GITHUB_ENV
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Run Build for All
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
+      - name: Run condition check script
+        id: check-ci
+        run: node tools/scripts/ci-is-affected.mjs --appName=router-host-2000,router-host-v5-2200,router-host-vue3-2100,router-remote1-2001,router-remote2-2002,router-remote3-2003,router-remote4-2004
+
+      - name: E2E Test for Runtime Demo
+        if: steps.check-ci.outcome == 'success'
+        run: npx kill-port --port 2000,2001,2002,2003,2004,2200,2100 && pnpm run app:router:dev & echo "done" && sleep 30 && npx nx run-many --target=test:e2e --projects=router-host-2000 --parallel=1 && lsof -ti tcp:2000,2001,2002,2003,2004,2200,2100 | xargs kill

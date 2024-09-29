@@ -72,7 +72,7 @@ declare global {
 
 const logger = new Logger();
 
-const composeKeyWithSeparator = /* @__PURE__ */ function (
+const composeKeyWithSeparator = function (
   ...args: (string | undefined)[]
 ): string {
   if (!args.length) {
@@ -91,7 +91,7 @@ const composeKeyWithSeparator = /* @__PURE__ */ function (
   }, '') as string;
 };
 
-const encodeName = /* @__PURE__ */ function (
+const encodeName = function (
   name: string,
   prefix = '',
   withExt = false,
@@ -116,7 +116,7 @@ const encodeName = /* @__PURE__ */ function (
   }
 };
 
-const decodeName = /* @__PURE__ */ function (
+const decodeName = function (
   name: string,
   prefix?: string,
   withExt?: boolean,
@@ -151,7 +151,7 @@ const decodeName = /* @__PURE__ */ function (
   }
 };
 
-const generateExposeFilename = /* @__PURE__ */ (
+const generateExposeFilename = (
   exposeName: string,
   withExt: boolean,
 ): string => {
@@ -170,10 +170,7 @@ const generateExposeFilename = /* @__PURE__ */ (
   return encodeName(expose, '__federation_expose_', withExt);
 };
 
-const generateShareFilename = /* @__PURE__ */ (
-  pkgName: string,
-  withExt: boolean,
-): string => {
+const generateShareFilename = (pkgName: string, withExt: boolean): string => {
   if (!pkgName) {
     return '';
   }
@@ -218,6 +215,14 @@ const warn = (msg: Parameters<typeof console.warn>[0]): void => {
   console.warn(`${LOG_CATEGORY}: ${msg}`);
 };
 
+function safeToString(info: any): string {
+  try {
+    return JSON.stringify(info, null, 2);
+  } catch (e) {
+    return '';
+  }
+}
+
 export {
   parseEntry,
   logger,
@@ -230,4 +235,5 @@ export {
   assert,
   error,
   warn,
+  safeToString,
 };

@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/runtime-demo/3006-runtime-remote/src",
   "projectType": "application",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
@@ -13,7 +14,7 @@
         "outputPath": "apps/runtime-demo/3006-runtime-remote/dist",
         "index": "apps/runtime-demo/3006-runtime-remote/src/index.html",
         "baseHref": "/",
-        "main": "apps/runtime-demo/3006-runtime-remote/src/index.ts",
+        "main": "apps/runtime-demo/3006-runtime-remote/src/index.tsx",
         "tsConfig": "apps/runtime-demo/3006-runtime-remote/tsconfig.app.json",
         "styles": [],
         "scripts": [],
@@ -32,7 +33,7 @@
           "outputHashing": "all",
           "sourceMap": false,
           "namedChunks": false,
-          "extractLicenses": true,
+          "extractLicenses": false,
           "vendorChunk": false
         }
       },
@@ -51,6 +52,12 @@
         "hmr": true,
         "port": 3006
       },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
       "configurations": {
         "development": {
           "buildTarget": "3006-runtime-remote:build:development"
@@ -82,6 +89,5 @@
         }
       }
     }
-  },
-  "tags": []
+  }
 }

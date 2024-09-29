@@ -13,7 +13,13 @@ import {
   moduleFederationPlugin,
   RemoteEntryType,
 } from '@module-federation/sdk';
-import { Compilation, Compiler, StatsCompilation, StatsModule } from 'webpack';
+import {
+  Compilation,
+  Compiler,
+  StatsCompilation,
+  StatsModule,
+  Chunk,
+} from 'webpack';
 import {
   isDev,
   getAssetsByChunk,
@@ -58,7 +64,6 @@ class StatsManager {
   get fileName(): string {
     return getFileName(this._options.manifest).statsFileName;
   }
-
   private _getMetaData(
     compiler: Compiler,
     compilation: Compilation,
@@ -86,9 +91,12 @@ class StatsManager {
       const remoteEntryNameChunk = compilation.namedChunks.get(name);
 
       assert(remoteEntryNameChunk, 'Can not get remoteEntry chunk!');
-      const files = Array.from(remoteEntryNameChunk.files).filter(
-        (f) => !f.includes(HOT_UPDATE_SUFFIX) && !f.endsWith('.css'),
+      const files = Array.from(
+        remoteEntryNameChunk.files as Iterable<string>,
+      ).filter(
+        (f: string) => !f.includes(HOT_UPDATE_SUFFIX) && !f.endsWith('.css'),
       );
+      assert(files.length > 0, 'no files found for remoteEntry chunk');
       assert(
         files.length === 1,
         `remoteEntry chunk should not have multiple files!, current files: ${files.join(
@@ -208,25 +216,31 @@ class StatsManager {
       const [sharedModuleName, sharedModule] = item;
       if (!manifestOverrideChunkIDMap[sharedModuleName]) {
         manifestOverrideChunkIDMap[sharedModuleName] = {
-          async: new Set(),
-          sync: new Set(),
+          async: new Set<string | number>(),
+          sync: new Set<string | number>(),
         };
       }
-      sharedModule.chunks!.forEach((chunkID) => {
+      sharedModule.chunks!.forEach((chunkID: string | number) => {
         const chunk = findChunk(chunkID, compilation.chunks);
 
         manifestOverrideChunkIDMap[sharedModuleName].sync.add(chunkID);
-        Array.from(chunk!.getAllInitialChunks()).forEach((syncChunk) => {
-          syncChunk.id &&
-            manifestOverrideChunkIDMap[sharedModuleName].sync.add(syncChunk.id);
-        });
+        Array.from(chunk!.getAllInitialChunks() as Iterable<Chunk>).forEach(
+          (syncChunk: Chunk) => {
+            syncChunk.id &&
+              manifestOverrideChunkIDMap[sharedModuleName].sync.add(
+                syncChunk.id,
+              );
+          },
+        );
 
-        Array.from(chunk!.getAllAsyncChunks()).forEach((asyncChunk) => {
-          asyncChunk.id &&
-            manifestOverrideChunkIDMap[sharedModuleName].async.add(
-              asyncChunk.id,
-            );
-        });
+        Array.from(chunk!.getAllAsyncChunks() as Iterable<Chunk>).forEach(
+          (asyncChunk: Chunk) => {
+            asyncChunk.id &&
+              manifestOverrideChunkIDMap[sharedModuleName].async.add(
+                asyncChunk.id,
+              );
+          },
+        );
       });
     });
 

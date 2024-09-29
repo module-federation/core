@@ -1,4 +1,5 @@
-import { getFMId, safeToString, assert } from '../utils';
+import { getFMId, assert } from '../utils';
+import { safeToString, ModuleInfo } from '@module-federation/sdk';
 import { getRemoteEntry } from '../utils/load';
 import { FederationHost } from '../core';
 import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
@@ -30,31 +31,9 @@ class Module {
 
     // Get remoteEntry.js
     const remoteEntryExports = await getRemoteEntry({
+      origin: this.host,
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
-      createScriptHook: (url: string, attrs: any) => {
-        const res = this.host.loaderHook.lifecycle.createScript.emit({
-          url,
-          attrs,
-        });
-
-        if (!res) return;
-
-        if (typeof document === 'undefined') {
-          //todo: needs real fix
-          return res as HTMLScriptElement;
-        }
-
-        if (res instanceof HTMLScriptElement) {
-          return res;
-        }
-
-        if ('script' in res || 'timeout' in res) {
-          return res;
-        }
-
-        return;
-      },
     });
     assert(
       remoteEntryExports,
@@ -66,7 +45,12 @@ class Module {
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  async get(id: string, expose: string, options?: { loadFactory?: boolean }) {
+  async get(
+    id: string,
+    expose: string,
+    options?: { loadFactory?: boolean },
+    remoteSnapshot?: ModuleInfo,
+  ) {
     const { loadFactory = true } = options || { loadFactory: true };
 
     // Get remoteEntry.js
@@ -103,6 +87,16 @@ class Module {
           origin: this.host,
         });
 
+      if (typeof remoteEntryExports?.init === 'undefined') {
+        console.error(
+          'The remote entry interface does not contain "init"',
+          '\n',
+          'Ensure the name of this remote is not reserved or in use. Check if anything already exists on window[nameOfRemote]',
+          '\n',
+          'Ensure that window[nameOfRemote] is returning a {get,init} object.',
+        );
+      }
+
       await remoteEntryExports.init(
         initContainerOptions.shareScope,
         initContainerOptions.initScope,
@@ -111,6 +105,8 @@ class Module {
 
       await this.host.hooks.lifecycle.initContainer.emit({
         ...initContainerOptions,
+        id,
+        remoteSnapshot,
         remoteEntryExports,
       });
     }

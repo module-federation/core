@@ -1,5 +1,97 @@
 # @module-federation/esbuild
 
+## 0.0.25
+
+### Patch Changes
+
+- Updated dependencies [9e32644]
+  - @module-federation/sdk@0.6.7
+
+## 0.0.24
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.6
+
+## 0.0.23
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.5
+
+## 0.0.22
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.4
+
+## 0.0.21
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.3
+
+## 0.0.20
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.2
+
+## 0.0.19
+
+### Patch Changes
+
+- Updated dependencies [2855583]
+- Updated dependencies [813680f]
+  - @module-federation/sdk@0.6.1
+
+## 0.0.18
+
+### Patch Changes
+
+- Updated dependencies [1d9bb77]
+  - @module-federation/sdk@0.6.0
+
+## 0.0.17
+
+### Patch Changes
+
+- Updated dependencies [b90fa7d]
+  - @module-federation/sdk@0.5.2
+
+## 0.0.16
+
+### Patch Changes
+
+- @module-federation/sdk@0.5.1
+
+## 0.0.15
+
+### Patch Changes
+
+- Updated dependencies [8378a77]
+  - @module-federation/sdk@0.5.0
+
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies [a6e2bed]
+- Updated dependencies [a6e2bed]
+  - @module-federation/sdk@0.4.0
+
+## 0.0.13
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.5
+
+## 0.0.12
+
+### Patch Changes
+
+- @module-federation/sdk@0.3.4
+
 ## 0.0.11
 
 ### Patch Changes
