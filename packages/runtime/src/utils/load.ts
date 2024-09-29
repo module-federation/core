@@ -147,7 +147,7 @@ async function loadEntryNode({
   remoteInfo: RemoteInfo;
   createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
 }) {
-  const { entry, entryGlobalName: globalName, name } = remoteInfo;
+  const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
     globalName,
@@ -158,7 +158,7 @@ async function loadEntryNode({
   }
 
   return loadScriptNode(entry, {
-    attrs: { name, globalName },
+    attrs: { name, globalName, type },
     createScriptHook: (url, attrs) => {
       const res = createScriptHook.emit({ url, attrs });
 
