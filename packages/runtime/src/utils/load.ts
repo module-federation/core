@@ -1,8 +1,10 @@
 import {
+  composeKeyWithSeparator,
   loadScript,
   loadScriptNode,
-  composeKeyWithSeparator,
-  isBrowserEnv,
+  loadScriptReactNative,
+  isNodeEnv,
+  isReactNativeEnv,
 } from '@module-federation/sdk';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { FederationHost } from '../core';
@@ -194,6 +196,60 @@ async function loadEntryNode({
     });
 }
 
+async function loadEntryReactNative({
+  remoteInfo,
+  createScriptHook,
+}: {
+  remoteInfo: RemoteInfo;
+  createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
+}) {
+  const { entry, entryGlobalName: globalName, name } = remoteInfo;
+  const { entryExports: remoteEntryExports } = getRemoteEntryExports(
+    name,
+    globalName,
+  );
+
+  if (remoteEntryExports) {
+    return remoteEntryExports;
+  }
+
+  return loadScriptReactNative(entry, {
+    attrs: { name, globalName },
+    createScriptHook: (url, attrs) => {
+      const res = createScriptHook.emit({ url, attrs });
+
+      if (!res) return;
+
+      if ('url' in res) {
+        return res;
+      }
+
+      return;
+    },
+  })
+    .then(() => {
+      const { remoteEntryKey, entryExports } = getRemoteEntryExports(
+        name,
+        globalName,
+      );
+
+      assert(
+        entryExports,
+        `
+      Unable to use the ${name}'s '${entry}' URL with ${remoteEntryKey}'s globalName to get remoteEntry exports.
+      Possible reasons could be:\n
+      1. '${entry}' is not the correct URL, or the remoteEntry resource or name is incorrect.\n
+      2. ${remoteEntryKey} cannot be used to get remoteEntry exports in the window object.
+    `,
+      );
+
+      return entryExports;
+    })
+    .catch((e) => {
+      throw e;
+    });
+}
+
 export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
   const { entry, name } = remoteInfo;
   return composeKeyWithSeparator(name, entry);
@@ -225,8 +281,13 @@ export async function getRemoteEntry({
         .then((res) => res || undefined);
     } else {
       const createScriptHook = origin.loaderHook.lifecycle.createScript;
-      if (!isBrowserEnv()) {
+      if (isNodeEnv()) {
         globalLoading[uniqueKey] = loadEntryNode({
+          remoteInfo,
+          createScriptHook,
+        });
+      } else if (isReactNativeEnv()) {
+        globalLoading[uniqueKey] = loadEntryReactNative({
           remoteInfo,
           createScriptHook,
         });

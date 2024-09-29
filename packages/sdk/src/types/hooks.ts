@@ -1,5 +1,7 @@
 export type CreateScriptHookReturnNode = { url: string } | void;
 
+export type CreateScriptHookReturnReactNative = { url: string } | void;
+
 export type CreateScriptHookReturnDom =
   | HTMLScriptElement
   | { script?: HTMLScriptElement; timeout?: number }
@@ -7,6 +9,7 @@ export type CreateScriptHookReturnDom =
 
 export type CreateScriptHookReturn =
   | CreateScriptHookReturnNode
+  | CreateScriptHookReturnReactNative
   | CreateScriptHookReturnDom;
 
 export type CreateScriptHookNode = (
