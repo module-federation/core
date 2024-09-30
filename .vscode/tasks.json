@@ -6,6 +6,6 @@
       "type": "shell",
       "command": "pnpm run build",
       "problemMatcher": []
-    },
+    }
   ]
 }
