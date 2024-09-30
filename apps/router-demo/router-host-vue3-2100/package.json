@@ -1,15 +1,15 @@
 {
   "name": "host-vue3",
   "private": true,
-  "version": "1.0.21",
+  "version": "1.0.27",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
     "preview": "rsbuild preview"
   },
   "dependencies": {
-    "@module-federation/enhanced": "workspace:*",
     "@module-federation/bridge-vue3": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
     "vue": "^3.4.19",
     "vue-router": "^4.3.2"
   },

@@ -24,7 +24,6 @@ const SharedNav = () => {
         </>
       ),
       key: '/',
-      onMouseEnter: () => {},
     },
     {
       className: 'shop-menu-link',
