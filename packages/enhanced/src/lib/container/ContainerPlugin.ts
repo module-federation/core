@@ -185,13 +185,15 @@ class ContainerPlugin {
 
     compiler.hooks.make.tapAsync(
       PLUGIN_NAME,
-      (
+      async (
         compilation: Compilation,
         callback: (error?: WebpackError | null | undefined) => void,
       ) => {
         const hasSingleRuntimeChunk =
           compilation.options?.optimization?.runtimeChunk;
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        const federationRuntimeDependency =
+          federationRuntimePluginInstance.getDependency(compiler);
         const dep = new ContainerEntryDependency(
           name,
           //@ts-ignore
@@ -201,68 +203,96 @@ class ContainerPlugin {
           this._options.experiments,
         );
         dep.loc = { name };
-        compilation.addEntry(
-          compilation.options.context || '',
-          dep,
-          {
-            name,
-            filename,
-            runtime: hasSingleRuntimeChunk ? false : runtime,
-            library,
-          },
-          (error: WebpackError | null | undefined) => {
-            if (error) return callback(error);
-            hooks.addContainerEntryModule.call(dep);
-            callback();
-          },
-        );
+
+        await new Promise((resolve, reject) => {
+          compilation.addEntry(
+            compilation.options.context || '',
+            dep,
+            {
+              name,
+              filename,
+              runtime: hasSingleRuntimeChunk ? false : runtime,
+              library,
+            },
+            (error: WebpackError | null | undefined) => {
+              if (error) return reject(error);
+              hooks.addContainerEntryModule.call(dep);
+              resolve(undefined);
+            },
+          );
+        }).catch(callback);
+
+        await new Promise((resolve, reject) => {
+          compilation.addInclude(
+            compiler.context,
+            federationRuntimeDependency,
+            { name: undefined },
+            (err, module) => {
+              if (err) {
+                return reject(err);
+              }
+              hooks.addFederationRuntimeModule.call(
+                federationRuntimeDependency,
+              );
+              resolve(undefined);
+            },
+          );
+        }).catch(callback);
+
+        callback();
       },
     );
 
     compiler.hooks.finishMake.tapAsync(
       PLUGIN_NAME,
-      async (compilation, callback) => {
-        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        const createdRuntimes = new Set();
-        for (const entry of compilation.entries.values()) {
-          if (entry.options.runtime) {
-            if (createdRuntimes.has(entry.options.runtime)) {
-              continue;
-            }
+      async (compilation: Compilation, callback) => {
+        if (
+          compilation.compiler.parentCompilation &&
+          compilation.compiler.parentCompilation !== compilation
+        ) {
+          return callback();
+        }
 
-            createdRuntimes.add(entry.options.runtime);
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        const createdRuntimes = new Set<string>();
+
+        for (const entry of compilation.entries.values()) {
+          const runtime = entry.options.runtime;
+          if (runtime) {
+            createdRuntimes.add(runtime);
           }
         }
 
         if (
-          createdRuntimes.size !== 0 ||
-          compilation.options?.optimization?.runtimeChunk
+          createdRuntimes.size === 0 &&
+          !compilation.options?.optimization?.runtimeChunk
         ) {
-          const dep = new ContainerEntryDependency(
-            name,
-            //@ts-ignore
-            exposes,
-            shareScope,
-            federationRuntimePluginInstance.entryFilePath,
-            this._options.experiments,
-          );
-
-          dep.loc = { name };
-          await new Promise<void>((resolve, reject) => {
-            compilation.addInclude(
-              compilation.options.context || '',
-              dep,
-              {
-                name: undefined,
-              },
-              (error: WebpackError | null | undefined) => {
-                if (error) return reject(error);
-                hooks.addContainerEntryModule.call(dep);
-                resolve();
-              },
-            );
-          });
+          return callback();
         }
+
+        const dep = new ContainerEntryDependency(
+          name,
+          //@ts-ignore
+          exposes,
+          shareScope,
+          federationRuntimePluginInstance.entryFilePath,
+          this._options.experiments,
+        );
+
+        dep.loc = { name };
+
+        await new Promise<void>((resolve, reject) => {
+          compilation.addInclude(
+            compilation.options.context || '',
+            dep,
+            { name: undefined },
+            (error: WebpackError | null | undefined) => {
+              if (error) return reject(error);
+              hooks.addContainerEntryModule.call(dep);
+              resolve();
+            },
+          );
+        }).catch(callback);
 
         const addDependency = async (
           dependency: FederationRuntimeDependency,
