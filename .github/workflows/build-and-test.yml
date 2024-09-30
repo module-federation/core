@@ -28,7 +28,7 @@ jobs:
         uses: nrwl/nx-set-shas@v3
 
       - name: Install Dependencies
-        run: pnpm install
+        run: git clean -fdX && pnpm install
 
       - name: Install Cypress
         run: npx cypress install
