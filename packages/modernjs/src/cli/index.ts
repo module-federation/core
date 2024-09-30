@@ -1,4 +1,4 @@
-import type { CliPlugin, AppTools,webpack } from '@modern-js/app-tools';
+import type { CliPlugin, AppTools, webpack } from '@modern-js/app-tools';
 import {
   ModuleFederationPlugin as WebpackModuleFederationPlugin,
   AsyncBoundaryPlugin,
@@ -9,6 +9,7 @@ import type { PluginOptions, InternalModernPluginOptions } from '../types';
 import { moduleFederationConfigPlugin } from './configPlugin';
 import { moduleFederationSSRPlugin } from './ssrPlugin';
 import { moduleFederationDataLoaderPlugin } from './dataLoader/plugin';
+import { WebpackPluginType } from '../types/modern';
 
 export const moduleFederationPlugin = (
   userConfig: PluginOptions = {},
@@ -49,7 +50,7 @@ export const moduleFederationPlugin = (
                   internalModernPluginOptions.browserPlugin =
                     new WebpackModuleFederationPlugin(browserPluginOptions);
                   config.plugins?.push(
-                    internalModernPluginOptions.browserPlugin as webpack.WebpackPluginInstance,
+                    internalModernPluginOptions.browserPlugin as WebpackPluginType,
                   );
                 }
                 const enableAsyncEntry =
