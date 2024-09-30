@@ -16,19 +16,21 @@ type DestroyParams = {
 };
 type RootType = HTMLElement | ReactDOMClient.Root;
 
+type BridgeHooks = {
+  beforeBridgeRender?: (params: RenderFnParams) => void;
+  beforeBridgeDestroy?: (params: DestroyParams) => void;
+};
+
 type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
   render?: (
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
-  hooks?: {
-    beforeBridgeRender?: (params: RenderFnParams) => void;
-    beforeBridgeDestroy?: (params: DestroyParams) => void;
-  };
+  hooks?: BridgeHooks;
 };
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
-  return () => {
+  return (params: { hooks?: BridgeHooks }) => {
     const rootMap = new Map<any, RootType>();
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
@@ -69,14 +71,18 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           </ErrorBoundary>
         );
 
+        const beforeBridgeRender =
+          (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeRender) ||
+          params?.hooks?.beforeBridgeRender;
+        beforeBridgeRender && beforeBridgeRender(info);
         // call beforeBridgeRender hook
-        if (
-          bridgeInfo?.hooks &&
-          bridgeInfo?.hooks.beforeBridgeRender &&
-          typeof bridgeInfo?.hooks.beforeBridgeRender === 'function'
-        ) {
-          bridgeInfo.hooks.beforeBridgeRender(info);
-        }
+        // if (
+        //   bridgeInfo?.hooks &&
+        //   bridgeInfo?.hooks.beforeBridgeRender &&
+        //   typeof bridgeInfo?.hooks.beforeBridgeRender === 'function'
+        // ) {
+        //   bridgeInfo.hooks.beforeBridgeRender(info);
+        // }
 
         // call render function
         if (atLeastReact18(React)) {
@@ -109,6 +115,11 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         ) {
           bridgeInfo.hooks.beforeBridgeDestroy(info);
         }
+
+        const beforeBridgeDestroy =
+          (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeDestroy) ||
+          params?.hooks?.beforeBridgeDestroy;
+        beforeBridgeDestroy && beforeBridgeDestroy(info);
 
         // call destroy function
         if (atLeastReact18(React)) {

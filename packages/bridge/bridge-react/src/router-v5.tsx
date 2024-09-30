@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 // The upper alias react-router-dom$ into this file avoids the loop
 // @ts-ignore
 import * as ReactRouterDom from 'react-router-dom/index.js';
-
 import { RouterContext } from './context';
 import { LoggerInstance } from './utils';
 
