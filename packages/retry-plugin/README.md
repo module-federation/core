@@ -43,8 +43,6 @@ export default defineConfig({
 
 ```
 
-
-
 ## Documentation
 
 See [https://module-federation.io/plugin/plugins/retry-plugin.html](https://module-federation.io/plugin/plugins/retry-plugin.html) for details.

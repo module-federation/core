@@ -1,5 +1,61 @@
 # @module-federation/runtime
 
+## 0.6.7
+
+### Patch Changes
+
+- 9e32644: Added comprehensive integration tests for the API synchronization and enhanced the embedded module proxy implementation.
+
+  - Added detailed integration tests for API consistency between embedded and index modules.
+    - Tests include export comparison and method consistency for `FederationHost` and `Module` classes.
+  - Introduced and updated the `embedded.ts` file to dynamically access the runtime modules at runtime.
+    - Included detailed implementations for accessing and wrapping existing runtime functions.
+  - Exposed the previously private `formatOptions` method in the `FederationHost` class publicly.
+  - Enhanced error handling for uninstantiated or unregistered runtime access.
+
+- 9e32644: - Refactor `embedded.ts` to use a proxy pattern for better runtime compatibility:
+  - Implement FederationHost and Module classes that delegate to the actual runtime implementation
+  - Expose all public methods and properties from the original classes
+  - Use a lazy initialization approach to ensure proper runtime loading
+  - Add comprehensive test suite for API synchronization between embedded.ts and index.ts
+    - Introduce new test file `sync.spec.ts` with extensive tests for API compatibility
+    - Ensure FederationHost and Module classes have the same methods in both files
+    - Test various scenarios including remote loading, manifest handling, and circular dependencies
+    - Modify `core.ts` to make `formatOptions` method public
+- Updated dependencies [9e32644]
+  - @module-federation/sdk@0.6.7
+
+## 0.6.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.6
+
+## 0.6.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.5
+
+## 0.6.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.4
+
+## 0.6.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.3
+
+## 0.6.2
+
+### Patch Changes
+
+- 9f98292: fix(runtime): set loading if registeredShared not set
+  - @module-federation/sdk@0.6.2
+
 ## 0.6.1
 
 ### Patch Changes

@@ -30,9 +30,7 @@ export const findPackageJson = (startPath: string): string | null => {
   return null;
 };
 
-export const getBridgeRouterAlias = (
-  originalAlias: string,
-): Record<string, string> => {
+const getDependencies = () => {
   const userPackageJsonPath = path.resolve(process.cwd(), 'package.json');
   let userDependencies: Record<string, string> = {};
 
@@ -45,35 +43,19 @@ export const getBridgeRouterAlias = (
       ...userPackageJson.devDependencies,
     };
   }
+  return userDependencies;
+};
 
+const reactRouterDomV5AliasPath =
+  '@module-federation/bridge-react/dist/router-v5.es.js';
+const reactRouterDomV6AliasPath =
+  '@module-federation/bridge-react/dist/router-v6.es.js';
+
+const setRouterAlias = (majorVersion: number, reactRouterDomPath: string) => {
   let bridgeRouterAlias = {};
-  let majorVersion = 0;
-  let reactRouterDomPath = '';
-
-  const reactRouterDomVersion = userDependencies['react-router-dom'];
-
-  if (originalAlias) {
-    reactRouterDomPath = originalAlias;
-  } else if (reactRouterDomVersion) {
-    majorVersion = checkVersion(reactRouterDomVersion);
-    reactRouterDomPath = require.resolve('react-router-dom');
-  } else {
-    reactRouterDomPath = require.resolve('react-router-dom');
-  }
-
-  const packageJsonPath = findPackageJson(reactRouterDomPath);
-
-  if (packageJsonPath) {
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-    majorVersion = checkVersion(packageJson.version);
-  } else {
-    console.warn('Unable to find package.json for react-router-dom');
-  }
-
   if (majorVersion === 5) {
     bridgeRouterAlias = {
-      'react-router-dom$':
-        '@module-federation/bridge-react/dist/router-v5.es.js',
+      'react-router-dom$': reactRouterDomV5AliasPath,
     };
     try {
       require.resolve('react-router-dom/index.js');
@@ -86,10 +68,8 @@ export const getBridgeRouterAlias = (
     }
   } else if (majorVersion === 6) {
     bridgeRouterAlias = {
-      'react-router-dom$':
-        '@module-federation/bridge-react/dist/router-v6.es.js',
+      'react-router-dom$': reactRouterDomV6AliasPath,
     };
-
     try {
       require.resolve('react-router-dom/dist/index.js');
     } catch (error) {
@@ -99,13 +79,40 @@ export const getBridgeRouterAlias = (
         'react-router-dom/dist/index.js': reactRouterDomPath,
       };
     }
-  } else {
-    console.warn('react-router-dom version is not supported');
   }
-
-  console.log(
-    '<<<<<<<<<<<<< bridgeRouterAlias >>>>>>>>>>>>>',
-    bridgeRouterAlias,
-  );
   return bridgeRouterAlias;
+};
+
+export const getBridgeRouterAlias = (
+  originalAlias: string,
+): Record<string, string> => {
+  const userDependencies = getDependencies();
+  const reactRouterDomPath = originalAlias
+    ? originalAlias
+    : userDependencies['react-router-dom']
+      ? require.resolve('react-router-dom')
+      : '';
+  const packageJsonPath = reactRouterDomPath
+    ? findPackageJson(reactRouterDomPath)
+    : '';
+  // if find react-router-dom in package.json
+  if (packageJsonPath) {
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+    const majorVersion = checkVersion(packageJson.version);
+    const bridgeRouterAlias = setRouterAlias(majorVersion, reactRouterDomPath);
+    console.log(
+      '<<<<<<<<<<<<< bridgeRouterAlias >>>>>>>>>>>>>',
+      bridgeRouterAlias,
+    );
+    return bridgeRouterAlias;
+  } else {
+    const bridgeRouterAlias = {
+      'react-router-dom$': reactRouterDomV6AliasPath,
+    };
+    console.log(
+      '<<<<<<<<<<<<< default bridgeRouterAlias >>>>>>>>>>>>>',
+      bridgeRouterAlias,
+    );
+    return bridgeRouterAlias;
+  }
 };

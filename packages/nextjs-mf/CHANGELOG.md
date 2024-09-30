@@ -1,5 +1,89 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.6.0
+
+### Minor Changes
+
+- 9e32644: Simplified InvertedContainerPlugin by removing configuration dependencies and improving runtime module integration.
+
+  - Refactored `InvertedContainerPlugin` to remove redundant configurations.
+  - Deleted `EmbeddedContainerPlugin` and moved its logic into `InvertedContainerPlugin`.
+  - Modified `InvertedContainerRuntimeModule` to dynamically locate and integrate container entry modules.
+  - Commented out runtime chunk creation in `configureServerCompilerOptions`.
+  - Enhanced module dependency handling using `FederationModulesPlugin` hooks.
+
+### Patch Changes
+
+- Updated dependencies [1b6bf0e]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+  - @module-federation/enhanced@0.6.7
+  - @module-federation/runtime@0.6.7
+  - @module-federation/sdk@0.6.7
+  - @module-federation/node@2.5.17
+  - @module-federation/webpack-bundler-runtime@0.6.7
+  - @module-federation/utilities@3.1.13
+
+## 8.5.5
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.6
+- @module-federation/node@2.5.16
+- @module-federation/runtime@0.6.6
+- @module-federation/webpack-bundler-runtime@0.6.6
+- @module-federation/sdk@0.6.6
+- @module-federation/utilities@3.1.12
+
+## 8.5.4
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.5
+- @module-federation/node@2.5.15
+- @module-federation/runtime@0.6.5
+- @module-federation/webpack-bundler-runtime@0.6.5
+- @module-federation/sdk@0.6.5
+- @module-federation/utilities@3.1.11
+
+## 8.5.3
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.4
+- @module-federation/node@2.5.14
+- @module-federation/runtime@0.6.4
+- @module-federation/webpack-bundler-runtime@0.6.4
+- @module-federation/sdk@0.6.4
+- @module-federation/utilities@3.1.10
+
+## 8.5.2
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.3
+- @module-federation/enhanced@0.6.3
+- @module-federation/webpack-bundler-runtime@0.6.3
+- @module-federation/sdk@0.6.3
+- @module-federation/node@2.5.13
+- @module-federation/utilities@3.1.9
+
+## 8.5.1
+
+### Patch Changes
+
+- Updated dependencies [9f98292]
+  - @module-federation/runtime@0.6.2
+  - @module-federation/node@2.5.12
+  - @module-federation/webpack-bundler-runtime@0.6.2
+  - @module-federation/enhanced@0.6.2
+  - @module-federation/sdk@0.6.2
+  - @module-federation/utilities@3.1.8
+
 ## 8.5.0
 
 ### Minor Changes

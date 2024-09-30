@@ -6,14 +6,12 @@ import ContainerEntryDependency from '../ContainerEntryDependency';
 import type FederationRuntimeDependency from './FederationRuntimeDependency';
 import { getAllReferencedModules } from '../HoistContainerReferencesPlugin';
 
-const { RuntimeModule, NormalModule, Template, RuntimeGlobals } = require(
+import type { NormalModule as NormalModuleType } from 'webpack';
+import type FederationRuntimeDependency from './FederationRuntimeDependency';
+
+const { RuntimeModule, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const ConcatenatedModule = require(
-  normalizeWebpackPath('webpack/lib/optimize/ConcatenatedModule'),
-) as typeof import('webpack/lib/optimize/ConcatenatedModule');
-
-const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class EmbedFederationRuntimeModule extends RuntimeModule {
   private experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
@@ -36,7 +34,6 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
   override identifier() {
     return 'webpack/runtime/embed/federation';
   }
-
   override generate(): string | null {
     const { compilation, chunk, chunkGraph, experiments } = this;
     if (!chunk || !chunkGraph || !compilation) {
@@ -99,21 +96,7 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       ]);
     }
 
-    return Template.asString([
-      initRuntimeModuleGetter,
-      // 'console.log(__webpack_require__.federation)',
-      // `federation = ${exportExpr}`,
-      // `var prevFederation = ${federationGlobal};`,
-      // `${federationGlobal} = {};`,
-      // `for (var key in federation) {`,
-      // Template.indent(`${federationGlobal}[key] = federation[key];`),
-      // `}`,
-      // `for (var key in prevFederation) {`,
-      // Template.indent(`${federationGlobal}[key] = prevFederation[key];`),
-      // `}`,
-      // 'federation = undefined;'
-    ]);
+    return Template.asString([`${initRuntimeModuleGetter}`]);
   }
 }
-
 export default EmbedFederationRuntimeModule;

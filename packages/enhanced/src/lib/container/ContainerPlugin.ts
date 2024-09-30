@@ -324,6 +324,7 @@ class ContainerPlugin {
       },
     );
 
+    // add the container entry module
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
@@ -337,6 +338,21 @@ class ContainerPlugin {
           normalModuleFactory,
         );
 
+        compilation.dependencyFactories.set(
+          FederationRuntimeDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyTemplates.set(
+          FederationRuntimeDependency,
+          new ModuleDependency.Template(),
+        );
+      },
+    );
+
+    // add include of federation runtime
+    compiler.hooks.thisCompilation.tap(
+      PLUGIN_NAME,
+      (compilation: Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
           FederationRuntimeDependency,
           normalModuleFactory,

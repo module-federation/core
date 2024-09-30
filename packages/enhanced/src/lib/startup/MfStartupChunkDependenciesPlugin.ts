@@ -16,9 +16,6 @@ const { RuntimeGlobals } = require(
 const StartupEntrypointRuntimeModule = require(
   normalizeWebpackPath('webpack/lib/runtime/StartupEntrypointRuntimeModule'),
 ) as typeof import('webpack/lib/runtime/StartupEntrypointRuntimeModule');
-const ConcatenatedModule = require(
-  normalizeWebpackPath('webpack/lib/optimize/ConcatenatedModule'),
-) as typeof import('webpack/lib/optimize/ConcatenatedModule');
 
 interface Options {
   asyncChunkLoading?: boolean;
@@ -33,8 +30,12 @@ class StartupChunkDependenciesPlugin {
 
   private isEnabledForChunk(chunk: Chunk, compilation: any): boolean {
     if (chunk.id === 'build time chunk') return false;
+
     const [finalEntry] =
-      compilation.chunkGraph.getChunkEntryModulesIterable(chunk) || [];
+      Array.from(
+        compilation.chunkGraph.getChunkEntryModulesIterable(chunk),
+      ).reverse() || [];
+
     return !(finalEntry instanceof ContainerEntryModule);
   }
 
@@ -95,34 +96,6 @@ class StartupChunkDependenciesPlugin {
             if (!isEnabledForChunk(chunk)) {
               return startupSource;
             }
-
-            // let federationRuntimeModule: any = null;
-            //
-            // const isFederationModule = (module: any) =>
-            //   module.context?.endsWith('.federation');
-            // for (const module of chunkGraph.getChunkEntryModulesIterable(
-            //   chunk,
-            // )) {
-            //   if (isFederationModule(module)) {
-            //     federationRuntimeModule = module;
-            //     break;
-            //   }
-            //
-            //   if (module && '_modules' in module) {
-            //     for (const concatModule of (
-            //       module as InstanceType<typeof ConcatenatedModule>
-            //     )._modules) {
-            //       if (isFederationModule(concatModule)) {
-            //         federationRuntimeModule = module;
-            //         break;
-            //       }
-            //     }
-            //   }
-            // }
-            //
-            // if (!federationRuntimeModule) {
-            //   return startupSource;
-            // }
 
             const treeRuntimeRequirements =
               chunkGraph.getTreeRuntimeRequirements(chunk);

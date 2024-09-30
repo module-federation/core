@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/esbuild",
-  "version": "0.0.19",
+  "version": "0.0.25",
   "author": "Zack Jackson (@ScriptedAlchemy)",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
@@ -58,7 +58,7 @@
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^5.0.7",
-    "rollup": "^2.79.0",
+    "rollup": "^2.79.2",
     "@chialab/esbuild-plugin-commonjs": "^0.18.0",
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "rollup-plugin-node-externals": "^4.1.1",

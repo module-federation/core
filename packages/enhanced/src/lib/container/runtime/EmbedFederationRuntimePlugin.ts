@@ -9,6 +9,12 @@ import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
 import { getAllReferencedModules } from '../HoistContainerReferencesPlugin';
 
+import FederationModulesPlugin from './FederationModulesPlugin';
+import type { Compiler, Compilation, Chunk } from 'webpack';
+import { getFederationGlobalScope } from './utils';
+import ContainerEntryDependency from '../ContainerEntryDependency';
+import FederationRuntimeDependency from './FederationRuntimeDependency';
+
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -29,7 +35,9 @@ class EmbedFederationRuntimePlugin {
       'EmbedFederationRuntimePlugin',
       (compilation: Compilation) => {
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        const containerEntrySet: Set<FederationRuntimeDependency> = new Set();
+        const containerEntrySet: Set<
+          ContainerEntryDependency | FederationRuntimeDependency
+        > = new Set();
 
         hooks.addFederationRuntimeModule.tap(
           'EmbedFederationRuntimePlugin',
@@ -49,7 +57,6 @@ class EmbedFederationRuntimePlugin {
           if (!runtimeRequirements.has(federationGlobal)) {
             return;
           }
-
           runtimeRequirements.add('embeddedFederationRuntime');
           const isHost =
             chunk.name === 'webpack' || chunk.name === 'webpack-runtime';
@@ -58,7 +65,6 @@ class EmbedFederationRuntimePlugin {
             containerEntrySet,
             isHost,
           );
-
           compilation.addRuntimeModule(chunk, runtimeModule);
         };
 
@@ -69,5 +75,4 @@ class EmbedFederationRuntimePlugin {
     );
   }
 }
-
 export default EmbedFederationRuntimePlugin;

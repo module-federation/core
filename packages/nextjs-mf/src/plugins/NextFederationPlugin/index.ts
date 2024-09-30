@@ -84,9 +84,32 @@ export class NextFederationPlugin {
         });
       },
     });
-    const runtimeESMPath = require.resolve(
-      '@module-federation/runtime/dist/index.esm.js',
-    );
+
+    const noop = this.getNoopPath();
+
+    if (!this._extraOptions.skipSharingNextInternals) {
+      compiler.hooks.make.tapAsync(
+        'NextFederationPlugin',
+        (compilation, callback) => {
+          const dep = compiler.webpack.EntryPlugin.createDependency(
+            noop,
+            'noop',
+          );
+          compilation.addEntry(
+            compiler.context,
+            dep,
+            { name: 'noop' },
+            (err, module) => {
+              if (err) {
+                return callback(err);
+              }
+              callback();
+            },
+          );
+        },
+      );
+    }
+
     if (!compiler.options.ignoreWarnings) {
       compiler.options.ignoreWarnings = [
         //@ts-ignore
@@ -172,16 +195,7 @@ export class NextFederationPlugin {
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
       : retrieveDefaultShared(isServer);
-    const noop = this.getNoopPath();
 
-    const defaultExpose = this._extraOptions.skipSharingNextInternals
-      ? {}
-      : {
-          './noop': noop,
-          './react': require.resolve('react'),
-          './react-dom': require.resolve('react-dom'),
-          './next/router': require.resolve('next/router'),
-        };
     return {
       ...this._options,
       runtime: false,
@@ -195,7 +209,6 @@ export class NextFederationPlugin {
       ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
       exposes: {
-        ...defaultExpose,
         ...this._options.exposes,
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)

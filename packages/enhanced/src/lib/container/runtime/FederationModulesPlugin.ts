@@ -25,6 +25,8 @@ type CompilationHooks = {
 };
 
 class FederationModulesPlugin {
+  options: any;
+
   /**
    * @param {Compilation} compilation the compilation
    * @returns {CompilationHooks} the attached hooks
@@ -39,8 +41,7 @@ class FederationModulesPlugin {
     if (hooks === undefined) {
       hooks = {
         addContainerEntryModule: new SyncHook(['dependency']),
-        getEntrypointRuntime: new SyncHook(['entrypoint']),
-        addFederationRuntimeModule: new SyncHook(['module']), // Initialize new hook
+        addFederationRuntimeModule: new SyncHook(['module']),
       };
       compilationHooksMap.set(compilation, hooks);
     }
@@ -56,6 +57,7 @@ class FederationModulesPlugin {
     compiler.hooks.compilation.tap(
       PLUGIN_NAME,
       (compilation: CompilationType, { normalModuleFactory }) => {
+        //@ts-ignore
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
       },
     );

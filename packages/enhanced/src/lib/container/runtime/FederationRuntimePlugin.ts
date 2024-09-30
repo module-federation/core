@@ -6,8 +6,9 @@ import type {
   ResolveOptions,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
+import { moduleFederationPlugin } from '@module-federation/sdk';
 import FederationRuntimeModule from './FederationRuntimeModule';
-import type { moduleFederationPlugin } from '@module-federation/sdk';
 import {
   getFederationGlobalScope,
   normalizeRuntimeInitOptionsWithOutShared,
@@ -22,6 +23,11 @@ import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
 import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import pBtoa from 'btoa';
+import FederationRuntimeDependency from './FederationRuntimeDependency';
+
+const ModuleDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
+) as typeof import('webpack/lib/dependencies/ModuleDependency');
 import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
 import ProvideSharedDependency from '../../sharing/ProvideSharedDependency';
@@ -87,12 +93,15 @@ class FederationRuntimePlugin {
   }
 
   static getTemplate(
-    runtimePlugins: string[],
+    compiler: Compiler,
+    options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
     embeddedBundlerRuntimePath?: string,
     experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
     useMinimalRuntime: boolean = false,
   ) {
+    // internal runtime plugin
+    const runtimePlugins = options.runtimePlugins;
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
       useMinimalRuntime
         ? embeddedBundlerRuntimePath || EmbeddedBundlerRuntimePath
@@ -115,7 +124,6 @@ class FederationRuntimePlugin {
         runtimePluginNames.push(runtimePluginName);
       });
     }
-
     const embedRuntimeLines = Template.asString([
       Template.indent([
         `var prevFederation = ${federationGlobal};`,
@@ -172,7 +180,7 @@ class FederationRuntimePlugin {
       Template.indent([
         runtimePluginNames.length
           ? Template.asString([
-              `const pluginsToAdd = [`,
+              `var pluginsToAdd = [`,
               Template.indent(
                 runtimePluginNames.map(
                   (item) => `${item} ? (${item}.default || ${item})() : false,`,
@@ -193,21 +201,26 @@ class FederationRuntimePlugin {
         Template.indent([`${federationGlobal}.installInitialConsumes()`]),
         '}',
       ]),
+      PrefetchPlugin.addRuntime(compiler, {
+        name: options.name!,
+      }),
       '}',
     ]);
   }
 
   static getFilePath(
-    containerName: string,
-    runtimePlugins: string[],
+    compiler: Compiler,
+    options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
     embeddedBundlerRuntimePath?: string,
     experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
     useMinimalRuntime: boolean = false,
   ) {
+    const containerName = options.name;
     const hash = createHash(
       `${containerName} ${FederationRuntimePlugin.getTemplate(
-        runtimePlugins,
+        compiler,
+        options,
         bundlerRuntimePath,
         embeddedBundlerRuntimePath,
         experiments,
@@ -216,8 +229,11 @@ class FederationRuntimePlugin {
     );
     return path.join(TEMP_DIR, `entry.${hash}.js`);
   }
+  getFilePath(compiler: Compiler, useMinimalRuntime: boolean = false) {
+    if (this.entryFilePath) {
+      return this.entryFilePath;
+    }
 
-  getFilePath(useMinimalRuntime: boolean = false) {
     if (!this.options) {
       return '';
     }
@@ -256,12 +272,11 @@ class FederationRuntimePlugin {
 
     return filePath;
   }
-
-  ensureFile(useMinimalRuntime: boolean = false) {
+  ensureFile(compiler: Compiler, useMinimalRuntime: boolean = false) {
     if (!this.options) {
       return;
     }
-    const filePath = this.getFilePath(useMinimalRuntime);
+    const filePath = this.getFilePath(compiler, useMinimalRuntime);
     try {
       fs.readFileSync(filePath);
     } catch (err) {
@@ -269,7 +284,8 @@ class FederationRuntimePlugin {
       fs.writeFileSync(
         filePath,
         FederationRuntimePlugin.getTemplate(
-          this.options.runtimePlugins!,
+          compiler,
+          this.options,
           this.bundlerRuntimePath,
           this.embeddedBundlerRuntimePath,
           this.options.experiments,
@@ -298,100 +314,74 @@ class FederationRuntimePlugin {
     return this.minimalFederationRuntimeDependency;
   }
 
+  getDependency(compiler: Compiler) {
+    if (this.federationRuntimeDependency)
+      return this.federationRuntimeDependency;
+
+    this.ensureFile(compiler);
+
+    this.federationRuntimeDependency = new FederationRuntimeDependency(
+      this.getFilePath(compiler),
+    );
+    return this.federationRuntimeDependency;
+  }
+
   prependEntry(compiler: Compiler) {
     if (!this.options?.virtualRuntimeEntry) {
-      this.ensureFile();
+      this.ensureFile(compiler);
     }
-
     const useHost = this.options?.experiments?.federationRuntime === 'use-host';
 
     if (useHost) {
-      this.ensureFile(true);
+      this.ensureFile(compiler, true);
     }
 
-    compiler.hooks.finishMake.tapAsync(
-      this.constructor.name,
-      async (
-        compilation: Compilation,
-        callback: (err?: Error | null) => void,
-      ) => {
-        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        const logger = compilation.getLogger('FederationRuntimePlugin');
-
-        const addInclude = async (
-          name: string | undefined,
-          dependency: FederationRuntimeDependency,
-          isMinimal: boolean = false,
-        ) => {
-          return new Promise<void>((resolve, reject) => {
-            compilation.addInclude(
-              compiler.context,
-              dependency,
-              { name },
-              (err, module) => {
-                if (err) {
-                  logger.error(
-                    `Error adding ${isMinimal ? 'minimal ' : ''}federation runtime module:`,
-                    err,
-                  );
-                  return reject(err);
-                }
-                hooks.addFederationRuntimeModule.call(dependency);
-                resolve();
-              },
-            );
-          });
-        };
-
-        try {
-          const promises = [];
-          if (useHost) {
-            for (const [name, entry] of compilation.entries) {
-              if (
-                !(entry.dependencies[0] instanceof ContainerEntryDependency)
-              ) {
-                promises.push(addInclude(name, this.getDependency()));
+    //if using runtime experiment, use the new include method else patch entry
+    if (this.options?.experiments?.federationRuntime) {
+      compiler.hooks.thisCompilation.tap(
+        this.constructor.name,
+        (compilation: Compilation, { normalModuleFactory }) => {
+          compilation.dependencyFactories.set(
+            FederationRuntimeDependency,
+            normalModuleFactory,
+          );
+          compilation.dependencyTemplates.set(
+            FederationRuntimeDependency,
+            new ModuleDependency.Template(),
+          );
+        },
+      );
+      compiler.hooks.make.tapAsync(
+        this.constructor.name,
+        (compilation: Compilation, callback) => {
+          const federationRuntimeDependency = this.getDependency(compiler);
+          const hooks =
+            FederationModulesPlugin.getCompilationHooks(compilation);
+          compilation.addInclude(
+            compiler.context,
+            federationRuntimeDependency,
+            { name: undefined },
+            (err, module) => {
+              if (err) {
+                return callback(err);
               }
-            }
-            promises.push(
-              addInclude(undefined, this.getMinimalDependency(), true),
-            );
-          } else {
-            promises.push(addInclude(undefined, this.getDependency()));
-          }
-          await Promise.all(promises);
-          callback();
-        } catch (err) {
-          callback(err as Error);
-        }
-      },
-    );
-
-    compiler.hooks.thisCompilation.tap(
-      this.constructor.name,
-      (compilation: Compilation, { normalModuleFactory }) => {
-        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        const federationRuntimeDependency = this.getDependency();
-
-        compilation.dependencyFactories.set(
-          FederationRuntimeDependency,
-          normalModuleFactory,
-        );
-        compilation.dependencyTemplates.set(
-          FederationRuntimeDependency,
-          new ModuleDependency.Template(),
-        );
-      },
-    );
-
-    if (!this.options?.experiments?.federationRuntime) {
-      const entryFilePath = this.getFilePath();
+              hooks.addFederationRuntimeModule.call(
+                federationRuntimeDependency,
+              );
+              callback();
+            },
+          );
+        },
+      );
+    } else {
+      const entryFilePath = this.getFilePath(compiler);
       modifyEntry({
         compiler,
         prependEntry: (entry) => {
           Object.keys(entry).forEach((entryName) => {
             const entryItem = entry[entryName];
             if (!entryItem.import) {
+              // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
               entryItem.import = ['./src'];
             }
             if (!entryItem.import.includes(entryFilePath)) {
@@ -417,7 +407,7 @@ class FederationRuntimePlugin {
 
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
-      (compilation: Compilation, { normalModuleFactory }) => {
+      (compilation: Compilation) => {
         const handler = (chunk: Chunk, runtimeRequirements: Set<string>) => {
           if (runtimeRequirements.has(federationGlobal)) return;
           runtimeRequirements.add(federationGlobal);

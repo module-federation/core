@@ -82,6 +82,7 @@ export type ExternalsType =
   | 'promise'
   | 'import'
   | 'script'
+  | 'module-import'
   | 'node-commonjs';
 /**
  * Container locations and request scopes from which modules should be resolved and loaded at runtime. When provided, property name is used as request scope, otherwise request scope is automatically inferred from container location.
@@ -107,6 +108,10 @@ export type Shared = (SharedItem | SharedObject)[] | SharedObject;
  * A module that should be shared in the share scope.
  */
 export type SharedItem = string;
+/**
+ * Enable Data Prefetch
+ */
+export type DataPrefetch = boolean;
 
 export interface AdditionalDataOptions {
   stats: Stats;
@@ -227,6 +232,7 @@ export interface ModuleFederationPluginOptions {
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
   async?: boolean | AsyncBoundaryOptions;
+  dataPrefetch?: DataPrefetch;
   virtualRuntimeEntry?: boolean;
   experiments?: {
     federationRuntime?: false | 'hoisted' | 'use-host';

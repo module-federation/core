@@ -11,7 +11,7 @@ import { getFederationGlobalScope } from '../container/runtime/utils';
 const { Template, RuntimeGlobals, RuntimeModule } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const { compareModulesByIdentifier, compareStrings } = require(
+const { compareModulesByIdentifier } = require(
   normalizeWebpackPath('webpack/lib/util/comparators'),
 ) as typeof import('webpack/lib/util/comparators');
 
@@ -29,11 +29,7 @@ class ShareRuntimeModule extends RuntimeModule {
     if (!compilation) {
       throw new Error('Compilation is undefined');
     }
-    const {
-      runtimeTemplate,
-      codeGenerationResults,
-      outputOptions: { uniqueName, ignoreBrowserWarnings },
-    } = compilation;
+    const { runtimeTemplate, codeGenerationResults } = compilation;
     const chunkGraph: ChunkGraph | undefined = this.chunkGraph;
     if (!chunkGraph) {
       throw new Error('ChunkGraph is undefined');
@@ -48,7 +44,6 @@ class ShareRuntimeModule extends RuntimeModule {
       const modules = chunkGraph.getOrderedChunkModulesIterableBySourceType(
         chunk,
         'share-init',
-        // @ts-ignore
         compareModulesByIdentifier,
       );
       if (!modules) continue;

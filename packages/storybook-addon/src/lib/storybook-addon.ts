@@ -57,6 +57,7 @@ export const webpack = async (
 
   if (moduleFederationConfig) {
     logger.info(`=> [MF] Push Module Federation plugin`);
+    // @ts-ignore enhanced add new remoteType 'module-import'
     plugins.push(new ModuleFederationPlugin(moduleFederationConfig));
   }
 

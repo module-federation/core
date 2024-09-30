@@ -1,5 +1,56 @@
 # @module-federation/dts-plugin
 
+## 0.6.7
+
+### Patch Changes
+
+- 0216364: fix(dts-plugin): ignore .vue ext
+- Updated dependencies [9e32644]
+  - @module-federation/sdk@0.6.7
+  - @module-federation/managers@0.6.7
+  - @module-federation/third-party-dts-extractor@0.6.7
+
+## 0.6.6
+
+### Patch Changes
+
+- 35aead4: fix(dts-plugin): zipName should add prefix if remoteEntry has it
+  - @module-federation/sdk@0.6.6
+  - @module-federation/managers@0.6.6
+  - @module-federation/third-party-dts-extractor@0.6.6
+
+## 0.6.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.5
+- @module-federation/managers@0.6.5
+- @module-federation/third-party-dts-extractor@0.6.5
+
+## 0.6.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.4
+- @module-federation/managers@0.6.4
+- @module-federation/third-party-dts-extractor@0.6.4
+
+## 0.6.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.3
+- @module-federation/managers@0.6.3
+- @module-federation/third-party-dts-extractor@0.6.3
+
+## 0.6.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.2
+- @module-federation/managers@0.6.2
+- @module-federation/third-party-dts-extractor@0.6.2
+
 ## 0.6.1
 
 ### Patch Changes

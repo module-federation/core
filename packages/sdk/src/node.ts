@@ -1,4 +1,4 @@
-import { CreateScriptHookNode, FetchHook } from './types';
+import { CreateScriptHookNode } from './types';
 
 function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
@@ -22,10 +22,12 @@ const loadNodeFetch = async (): Promise<typeof fetch> => {
 const lazyLoaderHookFetch = async (
   input: RequestInfo | URL,
   init?: RequestInit,
-  loaderHook?: any,
 ): Promise<Response> => {
+  // @ts-ignore
+  const loaderHooks = __webpack_require__.federation.instance.loaderHook;
+
   const hook = (url: RequestInfo | URL, init: RequestInit) => {
-    return loaderHook.lifecycle.fetch.emit(url, init);
+    return loaderHooks.lifecycle.fetch.emit(url, init);
   };
 
   const res = await hook(input, init || {});
@@ -42,13 +44,10 @@ export function createScriptNode(
   url: string,
   cb: (error?: Error, scriptContext?: any) => void,
   attrs?: Record<string, any>,
-  loaderHook?: {
-    createScriptHook?: CreateScriptHookNode;
-    fetch?: FetchHook;
-  },
+  createScriptHook?: CreateScriptHookNode,
 ) {
-  if (loaderHook?.createScriptHook) {
-    const hookResult = loaderHook.createScriptHook(url);
+  if (createScriptHook) {
+    const hookResult = createScriptHook(url);
     if (hookResult && typeof hookResult === 'object' && 'url' in hookResult) {
       url = hookResult.url;
     }
@@ -64,9 +63,20 @@ export function createScriptNode(
   }
 
   const getFetch = async (): Promise<typeof fetch> => {
-    if (loaderHook?.fetch) {
-      return (input: RequestInfo | URL, init?: RequestInit) =>
-        lazyLoaderHookFetch(input, init, loaderHook);
+    //@ts-ignore
+    if (typeof __webpack_require__ !== 'undefined') {
+      try {
+        //@ts-ignore
+        const loaderHooks = __webpack_require__.federation.instance.loaderHook;
+        if (loaderHooks.lifecycle.fetch) {
+          return lazyLoaderHookFetch;
+        }
+      } catch (e) {
+        console.warn(
+          'federation.instance.loaderHook.lifecycle.fetch failed:',
+          e,
+        );
+      }
     }
 
     return typeof fetch === 'undefined' ? loadNodeFetch() : fetch;
@@ -76,47 +86,35 @@ export function createScriptNode(
     try {
       const res = await f(urlObj.href);
       const data = await res.text();
-      const [path, vm, fs] = await Promise.all([
+      const [path, vm] = await Promise.all([
         importNodeModule<typeof import('path')>('path'),
         importNodeModule<typeof import('vm')>('vm'),
-        importNodeModule<typeof import('fs')>('fs'),
       ]);
 
       const scriptContext = { exports: {}, module: { exports: {} } };
       const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
-      let filename = path.basename(urlObj.pathname);
+      const filename = path.basename(urlObj.pathname);
 
-      if (attrs && attrs['globalName']) {
-        filename = attrs['globalName'] + '_' + filename;
-      }
-      const dir = __dirname;
-      // if(!fs.existsSync(path.join(dir, '../../../', filename))) {
-      fs.writeFileSync(path.join(dir, '../../../', filename), data);
-      // }
-
-      // const script = new vm.Script(
-      //   `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
-      //   {
-      //     filename,
-      //     importModuleDynamically:
-      //       vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
-      //   },
-      // );
-      //
-      // script.runInThisContext()(
-      //   scriptContext.exports,
-      //   scriptContext.module,
-      //   //@ts-ignore
-      //   typeof __non_webpack_require__ === 'undefined' ? eval('require') : __non_webpack_require__,
-      //   urlDirname,
-      //   filename,
-      // );
-      //@ts-ignore
-      const exportedInterface = __non_webpack_require__(
-        path.join(dir, '../../../', filename),
+      const script = new vm.Script(
+        `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
+        {
+          filename,
+          importModuleDynamically:
+            //@ts-ignore
+            vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
+        },
       );
-      // const exportedInterface: Record<string, any> =
-      //   scriptContext.module.exports || scriptContext.exports;
+
+      script.runInThisContext()(
+        scriptContext.exports,
+        scriptContext.module,
+        eval('require'),
+        urlDirname,
+        filename,
+      );
+
+      const exportedInterface: Record<string, any> =
+        scriptContext.module.exports || scriptContext.exports;
 
       if (attrs && exportedInterface && attrs['globalName']) {
         const container =
@@ -135,7 +133,26 @@ export function createScriptNode(
   };
 
   getFetch()
-    .then((f) => handleScriptFetch(f, urlObj))
+    .then(async (f) => {
+      if (attrs?.['type'] === 'esm' || attrs?.['type'] === 'module') {
+        return loadModule(urlObj.href, {
+          fetch: f,
+          vm: await importNodeModule<typeof import('vm')>('vm'),
+        })
+          .then(async (module) => {
+            await module.evaluate();
+            cb(undefined, module.namespace);
+          })
+          .catch((e) => {
+            cb(
+              e instanceof Error
+                ? e
+                : new Error(`Script execution error: ${e}`),
+            );
+          });
+      }
+      handleScriptFetch(f, urlObj);
+    })
     .catch((err) => {
       cb(err);
     });
@@ -145,9 +162,7 @@ export function loadScriptNode(
   url: string,
   info: {
     attrs?: Record<string, any>;
-    loaderHook?: {
-      createScriptHook?: CreateScriptHookNode;
-    };
+    createScriptHook?: CreateScriptHookNode;
   },
 ) {
   return new Promise<void>((resolve, reject) => {
@@ -166,7 +181,35 @@ export function loadScriptNode(
         }
       },
       info.attrs,
-      info.loaderHook,
+      info.createScriptHook,
     );
   });
+}
+
+async function loadModule(
+  url: string,
+  options: {
+    vm: any;
+    fetch: any;
+  },
+) {
+  const { fetch, vm } = options;
+  const response = await fetch(url);
+  const code = await response.text();
+
+  const module: any = new vm.SourceTextModule(code, {
+    // @ts-ignore
+    importModuleDynamically: async (specifier, script) => {
+      const resolvedUrl = new URL(specifier, url).href;
+      return loadModule(resolvedUrl, options);
+    },
+  });
+
+  await module.link(async (specifier: string) => {
+    const resolvedUrl = new URL(specifier, url).href;
+    const module = await loadModule(resolvedUrl, options);
+    return module;
+  });
+
+  return module;
 }

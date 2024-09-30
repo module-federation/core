@@ -4,10 +4,9 @@ import type {
   Chunk,
   WebpackPluginInstance,
   Module,
+  Dependency,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import ContainerEntryModule from './ContainerEntryModule';
-import { moduleFederationPlugin } from '@module-federation/sdk';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
@@ -18,24 +17,17 @@ const { AsyncDependenciesBlock, ExternalModule } = require(
 
 const PLUGIN_NAME = 'HoistContainerReferences';
 
+/**
+ * This class is used to hoist container references in the code.
+ */
 export class HoistContainerReferences implements WebpackPluginInstance {
-  private readonly experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
-
-  constructor(
-    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
-  ) {
-    this.experiments = experiments;
-  }
-
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation) => {
+        const logger = compilation.getLogger(PLUGIN_NAME);
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        const containerEntryDependencies = new Set<
-          ContainerEntryDependency | FederationRuntimeDependency
-        >();
-
+        const containerEntryDependencies = new Set<Dependency>();
         hooks.addContainerEntryModule.tap(
           'HoistContainerReferences',
           (dep: ContainerEntryDependency) => {
@@ -49,6 +41,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
           },
         );
 
+        // Hook into the optimizeChunks phase
         compilation.hooks.optimizeChunks.tap(
           {
             name: PLUGIN_NAME,
@@ -56,7 +49,14 @@ export class HoistContainerReferences implements WebpackPluginInstance {
             stage: 11, // advanced + 1
           },
           (chunks: Iterable<Chunk>) => {
-            this.hoistModulesInChunks(compilation, containerEntryDependencies);
+            const runtimeChunks = this.getRuntimeChunks(compilation);
+            this.hoistModulesInChunks(
+              compilation,
+              runtimeChunks,
+              chunks,
+              logger,
+              containerEntryDependencies,
+            );
           },
         );
       },
@@ -66,11 +66,14 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   // Method to hoist modules in chunks
   private hoistModulesInChunks(
     compilation: Compilation,
-    containerEntryDependencies: Set<
-      FederationRuntimeDependency | ContainerEntryDependency
-    >,
+    runtimeChunks: Set<Chunk>,
+    chunks: Iterable<Chunk>,
+    logger: ReturnType<Compilation['getLogger']>,
+    containerEntryDependencies: Set<Dependency>,
   ): void {
     const { chunkGraph, moduleGraph } = compilation;
+    // when runtimeChunk: single is set - ContainerPlugin will create a "partial" chunk we can use to
+    // move modules into the runtime chunk
     for (const dep of containerEntryDependencies) {
       const containerEntryModule = moduleGraph.getModule(dep);
       if (!containerEntryModule) continue;
@@ -115,7 +118,6 @@ export class HoistContainerReferences implements WebpackPluginInstance {
           }
         }
       }
-
       this.cleanUpChunks(compilation, allReferencedModules);
     }
   }

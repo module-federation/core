@@ -1,6 +1,5 @@
 import type { WebpackPluginInstance, Compiler } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { moduleFederationPlugin } from '@module-federation/sdk';
 
 const PLUGIN_NAME = 'HoistContainerReferencesPlugin';
 
@@ -8,12 +7,7 @@ export default class HoistContainerReferencesPlugin
   implements WebpackPluginInstance
 {
   name: string;
-  private readonly experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
-
-  constructor(
-    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
-  ) {
-    this.experiments = experiments;
+  constructor() {
     this.name = PLUGIN_NAME;
   }
 
@@ -23,6 +17,6 @@ export default class HoistContainerReferencesPlugin
     const CoreHoistContainerReferencesPlugin =
       require('../lib/container/HoistContainerReferencesPlugin')
         .default as typeof import('../lib/container/HoistContainerReferencesPlugin').default;
-    new CoreHoistContainerReferencesPlugin(this.experiments).apply(compiler);
+    new CoreHoistContainerReferencesPlugin().apply(compiler);
   }
 }
