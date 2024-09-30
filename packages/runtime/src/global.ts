@@ -115,10 +115,11 @@ export function resetFederationGlobalInfo(): void {
 export function getGlobalFederationInstance(
   name: string,
   version: string | undefined,
+  builderId?: string | undefined,
 ): FederationHost | undefined {
-  const buildId = getBuilderId();
+  const buildId = builderId || getBuilderId();
   return globalThis.__FEDERATION__.__INSTANCES__.find((GMInstance) => {
-    if (buildId && GMInstance.options.id === getBuilderId()) {
+    if (buildId && GMInstance.options.id === (builderId || getBuilderId())) {
       return true;
     }
 
