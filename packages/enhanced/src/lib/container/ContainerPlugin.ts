@@ -220,7 +220,7 @@ class ContainerPlugin {
               resolve(undefined);
             },
           );
-        }).catch(callback);
+        }).catch((error) => callback(error));
 
         await new Promise((resolve, reject) => {
           compilation.addInclude(
@@ -237,7 +237,7 @@ class ContainerPlugin {
               resolve(undefined);
             },
           );
-        }).catch(callback);
+        }).catch((error) => callback(error));
 
         callback();
       },
@@ -292,7 +292,7 @@ class ContainerPlugin {
               resolve();
             },
           );
-        }).catch(callback);
+        }).catch((error) => callback(error));
 
         const addDependency = async (
           dependency: FederationRuntimeDependency,
@@ -308,16 +308,16 @@ class ContainerPlugin {
                 resolve();
               },
             );
-          });
+          }).catch((error) => callback(error));
         };
 
         if (this._options?.experiments?.federationRuntime === 'use-host') {
           const externalRuntimeDependency =
-            federationRuntimePluginInstance.getMinimalDependency();
+            federationRuntimePluginInstance.getMinimalDependency(compiler);
           await addDependency(externalRuntimeDependency);
         } else {
           const federationRuntimeDependency =
-            federationRuntimePluginInstance.getDependency();
+            federationRuntimePluginInstance.getDependency(compiler);
           await addDependency(federationRuntimeDependency);
         }
         callback();

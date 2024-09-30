@@ -1,10 +1,9 @@
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Zackary Jackson @ScriptedAlchemy
+*/
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { moduleFederationPlugin } from '@module-federation/sdk';
-import { getFederationGlobalScope } from './utils';
-import type { Chunk, Module, NormalModule as NormalModuleType } from 'webpack';
 import ContainerEntryDependency from '../ContainerEntryDependency';
-import type FederationRuntimeDependency from './FederationRuntimeDependency';
-import { getAllReferencedModules } from '../HoistContainerReferencesPlugin';
 
 import type { NormalModule as NormalModuleType } from 'webpack';
 import type FederationRuntimeDependency from './FederationRuntimeDependency';
@@ -14,28 +13,25 @@ const { RuntimeModule, Template } = require(
 ) as typeof import('webpack');
 
 class EmbedFederationRuntimeModule extends RuntimeModule {
-  private experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
   private containerEntrySet: Set<
     ContainerEntryDependency | FederationRuntimeDependency
   >;
 
   constructor(
-    experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
     containerEntrySet: Set<
       ContainerEntryDependency | FederationRuntimeDependency
     >,
-    isHost: boolean,
   ) {
     super('embed federation', RuntimeModule.STAGE_ATTACH - 1);
-    this.experiments = experiments;
     this.containerEntrySet = containerEntrySet;
   }
 
   override identifier() {
     return 'webpack/runtime/embed/federation';
   }
+
   override generate(): string | null {
-    const { compilation, chunk, chunkGraph, experiments } = this;
+    const { compilation, chunk, chunkGraph } = this;
     if (!chunk || !chunkGraph || !compilation) {
       return null;
     }

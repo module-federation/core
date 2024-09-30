@@ -7,7 +7,7 @@ const ModuleDependency = require(
 class FederationRuntimeDependency extends ModuleDependency {
   minimal: boolean;
 
-  constructor(request: string, minimal: boolean = false) {
+  constructor(request: string, minimal = false) {
     super(request);
     this.minimal = minimal;
   }

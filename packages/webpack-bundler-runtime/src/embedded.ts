@@ -5,7 +5,6 @@ import { initializeSharing } from './initializeSharing';
 import { installInitialConsumes } from './installInitialConsumes';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
-
 export * from './types';
 
 // Access the shared runtime from Webpack's federation plugin
@@ -49,6 +48,7 @@ const federation: Federation = {
     loadScript: sharedRuntime.loadScript,
     loadScriptNode: sharedRuntime.loadScriptNode,
     FederationManager: sharedRuntime.FederationManager,
+    Module: sharedRuntime.Module,
     // Runtime instance-specific methods with correct `this` binding
     init: boundInit,
     getInstance: boundGetInstance,

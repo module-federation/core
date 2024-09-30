@@ -43,18 +43,24 @@ export const applyPathFixes = (
     },
   );
 
-  compiler.options.module.rules.forEach((rule: RuleSetRule) => {
-    // next-image-loader fix which adds remote's hostname to the assets url
-    if (options.enableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
-      injectRuleLoader(rule, {
-        loader: require.resolve('../../loaders/fixImageLoader'),
-      });
-    }
+  compiler.options.module.rules.forEach((rule) => {
+    if (typeof rule === 'object' && rule !== null) {
+      const typedRule = rule as RuleSetRule;
+      // next-image-loader fix which adds remote's hostname to the assets url
+      if (
+        options.enableImageLoaderFix &&
+        hasLoader(typedRule, 'next-image-loader')
+      ) {
+        injectRuleLoader(typedRule, {
+          loader: require.resolve('../../loaders/fixImageLoader'),
+        });
+      }
 
-    if (options.enableUrlLoaderFix && hasLoader(rule, 'url-loader')) {
-      injectRuleLoader(rule, {
-        loader: require.resolve('../../loaders/fixUrlLoader'),
-      });
+      if (options.enableUrlLoaderFix && hasLoader(typedRule, 'url-loader')) {
+        injectRuleLoader(typedRule, {
+          loader: require.resolve('../../loaders/fixUrlLoader'),
+        });
+      }
     }
   });
 
@@ -98,11 +104,11 @@ export const applyPathFixes = (
       include: undefined,
     };
 
-    const oneOfRule = (compiler.options.module.rules as RuleSetRule[]).find(
+    const oneOfRule = compiler.options.module.rules.find(
       (rule): rule is RuleSetRule => {
-        return rule && typeof rule === 'object' && 'oneOf' in rule;
+        return !!rule && typeof rule === 'object' && 'oneOf' in rule;
       },
-    );
+    ) as RuleSetRule | undefined;
 
     if (!oneOfRule) {
       compiler.options.module.rules.unshift({
