@@ -305,9 +305,21 @@ export class SharedHandler {
         id: key,
       });
       if (module.getEntry) {
-        const entry = await module.getEntry();
+        let remoteEntryExports: RemoteEntryExports;
+        try {
+          remoteEntryExports = await module.getEntry();
+        } catch (error) {
+          remoteEntryExports =
+            (await host.remoteHandler.hooks.lifecycle.errorLoadRemote.emit({
+              id: key,
+              error,
+              from: 'runtime',
+              lifecycle: 'beforeLoadShare',
+              origin: host,
+            })) as RemoteEntryExports;
+        }
         if (!module.inited) {
-          await initFn(entry);
+          await initFn(remoteEntryExports);
           module.inited = true;
         }
       }
