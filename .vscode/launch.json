@@ -104,6 +104,18 @@
       "type": "node-terminal"
     },
     {
+      "name": "Run home_app",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/path/to/your/home_app.js",
+      "args": [],
+      "console": "integratedTerminal",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["run", "3000-home:serve:development"],
+      "preLaunchTask": "pnpm build",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
       "command": "npm run app:next:prod",
       "name": "Run app:next:prod",
       "request": "launch",

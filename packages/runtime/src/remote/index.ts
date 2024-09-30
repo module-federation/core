@@ -137,7 +137,7 @@ export class RemoteHandler {
     loadEntry: new AsyncHook<
       [
         {
-          createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
+          loaderHook: FederationHost['loaderHook'];
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports;
         },

@@ -13,8 +13,9 @@ const {
   registerRemotes,
   registerPlugins,
   getInstance,
+  FederationManager,
   //@ts-ignore
-} = __webpack_require__.federation.runtime;
+} = __webpack_require__.federation.runtime as typeof import('./index');
 
 export {
   FederationHost,
@@ -31,4 +32,5 @@ export {
   registerRemotes,
   registerPlugins,
   getInstance,
+  FederationManager,
 };

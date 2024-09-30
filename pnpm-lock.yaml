@@ -6416,7 +6416,7 @@ packages:
       '@changesets/types': 6.0.0
       '@manypkg/get-packages': 1.1.3
       fs-extra: 7.0.1
-      micromatch: 4.0.7
+      micromatch: 4.0.8
     dev: true
 
   /@changesets/errors@0.1.4:
@@ -6465,7 +6465,7 @@ packages:
       '@changesets/types': 5.2.1
       '@manypkg/get-packages': 1.1.3
       is-subdir: 1.2.0
-      micromatch: 4.0.7
+      micromatch: 4.0.8
       spawndamnit: 2.0.0
     dev: true
 
@@ -6477,7 +6477,7 @@ packages:
       '@changesets/types': 6.0.0
       '@manypkg/get-packages': 1.1.3
       is-subdir: 1.2.0
-      micromatch: 4.0.7
+      micromatch: 4.0.8
       spawndamnit: 2.0.0
     dev: true
 
@@ -8551,7 +8551,7 @@ packages:
       jest-util: 29.7.0
       jest-validate: 29.7.0
       jest-watcher: 29.7.0
-      micromatch: 4.0.7
+      micromatch: 4.0.8
       pretty-format: 29.7.0
       slash: 3.0.0
       strip-ansi: 6.0.1
@@ -8706,7 +8706,7 @@ packages:
       jest-haste-map: 29.7.0
       jest-regex-util: 29.6.3
       jest-util: 29.7.0
-      micromatch: 4.0.7
+      micromatch: 4.0.8
       pirates: 4.0.6
       slash: 3.0.0
       write-file-atomic: 4.0.2
@@ -19259,7 +19259,7 @@ packages:
       endent: 2.1.0
       find-cache-dir: 3.3.2
       flat-cache: 3.2.0
-      micromatch: 4.0.7
+      micromatch: 4.0.8
       react-docgen-typescript: 2.2.2(typescript@5.0.4)
       tslib: 2.6.3
       typescript: 5.0.4
@@ -21093,7 +21093,7 @@ packages:
     dependencies:
       '@typescript-eslint/typescript-estree': 6.21.0(typescript@5.5.2)
       '@typescript-eslint/utils': 6.21.0(eslint@8.56.0)(typescript@5.5.2)
-      debug: 4.3.5(supports-color@8.1.1)
+      debug: 4.3.6(supports-color@8.1.1)
       eslint: 8.56.0
       ts-api-utils: 1.3.0(typescript@5.5.2)
       typescript: 5.5.2
@@ -21606,7 +21606,7 @@ packages:
   /@vue/compiler-core@3.4.34:
     resolution: {integrity: sha512-Z0izUf32+wAnQewjHu+pQf1yw00EGOmevl1kE+ljjjMe7oEfpQ+BI3/JNK7yMB4IrUsqLDmPecUrpj3mCP+yJQ==}
     dependencies:
-      '@babel/parser': 7.24.8
+      '@babel/parser': 7.25.6
       '@vue/shared': 3.4.34
       entities: 4.5.0
       estree-walker: 2.0.2
@@ -21621,14 +21621,14 @@ packages:
   /@vue/compiler-sfc@3.4.34:
     resolution: {integrity: sha512-x6lm0UrM03jjDXTPZgD9Ad8bIVD1ifWNit2EaWQIZB5CULr46+FbLQ5RpK7AXtDHGjx9rmvC7QRCTjsiGkAwRw==}
     dependencies:
-      '@babel/parser': 7.24.8
+      '@babel/parser': 7.25.6
       '@vue/compiler-core': 3.4.34
       '@vue/compiler-dom': 3.4.34
       '@vue/compiler-ssr': 3.4.34
       '@vue/shared': 3.4.34
       estree-walker: 2.0.2
       magic-string: 0.30.10
-      postcss: 8.4.40
+      postcss: 8.4.44
       source-map-js: 1.2.0
 
   /@vue/compiler-ssr@3.4.34:
@@ -23525,7 +23525,7 @@ packages:
     resolution: {integrity: sha512-GAwkz0AihzY5bkwIY5QDR+LvsRQgB/B+1foMPvi0FZPMl5fjD7ICiznUiBdLYMH1QYe6vqu4gWYytZOccLouFw==}
     engines: {node: '>= 10.0.0'}
     dependencies:
-      '@babel/types': 7.24.9
+      '@babel/types': 7.25.6
     dev: true
 
   /bail@1.0.5:
@@ -24854,7 +24854,7 @@ packages:
   /constantinople@4.0.1:
     resolution: {integrity: sha512-vCrqcSIq4//Gx74TXXCGnHpulY1dskqLTFGDmhrGxzeXL8lF8kvXv6mpNWlJj1uD4DW23D4ljAqbY4RRaaUZIw==}
     dependencies:
-      '@babel/parser': 7.24.8
+      '@babel/parser': 7.25.6
       '@babel/types': 7.24.9
     dev: true
 
@@ -28529,7 +28529,7 @@ packages:
       '@nodelib/fs.walk': 1.2.8
       glob-parent: 5.1.2
       merge2: 1.4.1
-      micromatch: 4.0.7
+      micromatch: 4.0.8
 
   /fast-glob@3.3.2:
     resolution: {integrity: sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==}
@@ -28539,7 +28539,7 @@ packages:
       '@nodelib/fs.walk': 1.2.8
       glob-parent: 5.1.2
       merge2: 1.4.1
-      micromatch: 4.0.7
+      micromatch: 4.0.8
 
   /fast-json-parse@1.0.3:
     resolution: {integrity: sha512-FRWsaZRWEJ1ESVNbDWmsAlqDk96gPQezzLghafp5J4GUKjbCz3OkAHuZs5TuPEtkbVQERysLp9xv6c24fBm8Aw==}
@@ -28862,7 +28862,7 @@ packages:
   /find-yarn-workspace-root2@1.2.16:
     resolution: {integrity: sha512-hr6hb1w8ePMpPVUK39S4RlwJzi+xPLuVuG8XlwXU3KD5Yn3qgBWVfy3AzNlDhWvE1EORCE65/Qm26rFQt3VLVA==}
     dependencies:
-      micromatch: 4.0.7
+      micromatch: 4.0.8
       pkg-dir: 4.2.0
     dev: true
 
@@ -28872,7 +28872,7 @@ packages:
     dependencies:
       detect-file: 1.0.0
       is-glob: 4.0.3
-      micromatch: 4.0.7
+      micromatch: 4.0.8
       resolve-dir: 1.0.1
     dev: true
 
@@ -29283,7 +29283,7 @@ packages:
     resolution: {integrity: sha512-oWb1Z6mkHIskLzEJ/XWX0srkpkTQ7vaopMQkyaEIoq0fmtFVxOthb8cCxeT+p3ynTdkk/RZwbgG4brR5BeWECw==}
     engines: {node: '>= 4.0'}
     os: [darwin]
-    deprecated: The v1 package contains DANGEROUS / INSECURE binaries. Upgrade to safe fsevents v2
+    deprecated: Upgrade to fsevents v2 to mitigate potential security issues
     requiresBuild: true
     dependencies:
       bindings: 1.5.0
@@ -30553,7 +30553,7 @@ packages:
     engines: {node: '>= 14'}
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.5(supports-color@8.1.1)
+      debug: 4.3.6(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -30572,7 +30572,7 @@ packages:
       http-proxy: 1.18.1
       is-glob: 4.0.3
       is-plain-obj: 3.0.0
-      micromatch: 4.0.7
+      micromatch: 4.0.8
     transitivePeerDependencies:
       - debug
 
@@ -30658,7 +30658,7 @@ packages:
     engines: {node: '>= 14'}
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.5(supports-color@8.1.1)
+      debug: 4.3.6(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -31781,7 +31781,7 @@ packages:
       jest-runner: 29.7.0
       jest-util: 29.7.0
       jest-validate: 29.7.0
-      micromatch: 4.0.7
+      micromatch: 4.0.8
       parse-json: 5.2.0
       pretty-format: 29.7.0
       slash: 3.0.0
@@ -31871,7 +31871,7 @@ packages:
       jest-regex-util: 29.6.3
       jest-util: 29.7.0
       jest-worker: 29.7.0
-      micromatch: 4.0.7
+      micromatch: 4.0.8
       walker: 1.0.8
     optionalDependencies:
       fsevents: 2.3.3
@@ -31904,7 +31904,7 @@ packages:
       '@types/stack-utils': 2.0.3
       chalk: 4.1.2
       graceful-fs: 4.2.11
-      micromatch: 4.0.7
+      micromatch: 4.0.8
       pretty-format: 29.7.0
       slash: 3.0.0
       stack-utils: 2.0.6
@@ -32513,7 +32513,7 @@ packages:
       content-disposition: 0.5.4
       content-type: 1.0.5
       cookies: 0.9.1
-      debug: 4.3.5(supports-color@8.1.1)
+      debug: 4.3.6(supports-color@8.1.1)
       delegates: 1.0.0
       depd: 2.0.0
       destroy: 1.2.0
@@ -32781,7 +32781,7 @@ packages:
       object-assign: 4.1.1
       opn: 6.0.0
       proxy-middleware: 0.15.0
-      send: 0.18.0
+      send: 0.19.0
       serve-index: 1.9.1
     transitivePeerDependencies:
       - supports-color
@@ -33015,7 +33015,7 @@ packages:
     engines: {node: '>=8.0'}
     dependencies:
       date-format: 4.0.14
-      debug: 4.3.5(supports-color@8.1.1)
+      debug: 4.3.6(supports-color@8.1.1)
       flatted: 3.3.1
       rfdc: 1.4.1
       streamroller: 3.1.5
@@ -42678,6 +42678,27 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
+  /send@0.19.0:
+    resolution: {integrity: sha512-dW41u5VfLXu8SJh5bwRmyYUbAoSB3c9uQh6L8h/KtsFREPWpbX1lrljJo186Jc4nmci/sGUZ9a0a0J2zgfq2hw==}
+    engines: {node: '>= 0.8.0'}
+    dependencies:
+      debug: 2.6.9
+      depd: 2.0.0
+      destroy: 1.2.0
+      encodeurl: 1.0.2
+      escape-html: 1.0.3
+      etag: 1.8.1
+      fresh: 0.5.2
+      http-errors: 2.0.0
+      mime: 1.6.0
+      ms: 2.1.3
+      on-finished: 2.4.1
+      range-parser: 1.2.1
+      statuses: 2.0.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /serialize-javascript@4.0.0:
     resolution: {integrity: sha512-GaNA54380uFefWghODBWEGisLZFj00nS5ACs6yHa9nLqlLpVLO8ChDGeKRjZnV4Nh4n0Qi7nhYZD/9fCPzEqkw==}
     dependencies:
@@ -44755,7 +44776,7 @@ packages:
     dependencies:
       chalk: 4.1.2
       enhanced-resolve: 5.17.1
-      micromatch: 4.0.7
+      micromatch: 4.0.8
       semver: 7.6.3
       typescript: 5.0.4
       webpack: 5.93.0(@swc/core@1.6.13)(esbuild@0.18.20)
@@ -44770,7 +44791,7 @@ packages:
     dependencies:
       chalk: 4.1.2
       enhanced-resolve: 5.17.1
-      micromatch: 4.0.7
+      micromatch: 4.0.8
       semver: 7.6.3
       typescript: 5.5.2
       webpack: 5.93.0(@swc/core@1.6.13)(esbuild@0.17.19)
@@ -46183,7 +46204,7 @@ packages:
       '@microsoft/api-extractor': 7.43.0(@types/node@16.11.68)
       '@rollup/pluginutils': 5.1.0(rollup@2.79.1)
       '@vue/language-core': 1.8.27(typescript@5.5.2)
-      debug: 4.3.5(supports-color@8.1.1)
+      debug: 4.3.6(supports-color@8.1.1)
       kolorist: 1.8.0
       magic-string: 0.30.10
       typescript: 5.5.2
@@ -46208,7 +46229,7 @@ packages:
       '@microsoft/api-extractor': 7.43.0(@types/node@20.12.12)
       '@rollup/pluginutils': 5.1.0(rollup@2.79.1)
       '@vue/language-core': 1.8.27(typescript@5.5.2)
-      debug: 4.3.5(supports-color@8.1.1)
+      debug: 4.3.6(supports-color@8.1.1)
       kolorist: 1.8.0
       magic-string: 0.30.10
       typescript: 5.5.2
@@ -47175,7 +47196,7 @@ packages:
     resolution: {integrity: sha512-RNGKj82nUPg3g5ygxkQl0R937xLyho1J24ItRCBTr/m1YnZkzJy1hUiHUJrc/VlsDQzsCnInEGSg3bci0Lmd4w==}
     engines: {node: '>= 10.0.0'}
     dependencies:
-      '@babel/parser': 7.24.8
+      '@babel/parser': 7.25.6
       '@babel/types': 7.24.9
       assert-never: 1.3.0
       babel-walk: 3.0.0-canary-5

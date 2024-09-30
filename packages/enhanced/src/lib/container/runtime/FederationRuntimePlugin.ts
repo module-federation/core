@@ -82,7 +82,7 @@ class FederationRuntimePlugin {
     this.bundlerRuntimePath = BundlerRuntimePath;
     this.federationRuntimeDependency = undefined;
     this.minimalFederationRuntimeDependency = undefined;
-    this.embeddedBundlerRuntimePath = EmbeddedRuntimePath;
+    this.embeddedBundlerRuntimePath = EmbeddedBundlerRuntimePath;
     this.embeddedEntryFilePath = '';
   }
 
@@ -117,7 +117,6 @@ class FederationRuntimePlugin {
     }
 
     const embedRuntimeLines = Template.asString([
-      `if(!${federationGlobal}.runtime){`,
       Template.indent([
         `var prevFederation = ${federationGlobal};`,
         `${federationGlobal} = {}`,
@@ -128,17 +127,45 @@ class FederationRuntimePlugin {
         Template.indent([`${federationGlobal}[key] = prevFederation[key];`]),
         '}',
       ]),
-      '}',
     ]);
+
+    if (useMinimalRuntime) {
+      return Template.asString([
+        `import federation from '${normalizedBundlerRuntimePath}';`,
+        runtimePluginTemplates,
+        embedRuntimeLines,
+        `if(!${federationGlobal}.instance){`,
+        Template.indent([
+          runtimePluginNames.length
+            ? Template.asString([
+                `const pluginsToAdd = [`,
+                Template.indent(
+                  runtimePluginNames.map(
+                    (item) =>
+                      `${item} ? (${item}.default || ${item})() : false,`,
+                  ),
+                ),
+                `].filter(Boolean);`,
+                `${federationGlobal}.initOptions.plugins = ${federationGlobal}.initOptions.plugins ? `,
+                `${federationGlobal}.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;`,
+              ])
+            : '',
+        ]),
+        `${federationGlobal}.instance = federation.runtime.init(${federationGlobal}.initOptions);`,
+        `if(${federationGlobal}.attachShareScopeMap){`,
+        Template.indent([
+          `${federationGlobal}.attachShareScopeMap(${RuntimeGlobals.require})`,
+        ]),
+        '}',
+        `if(${federationGlobal}.installInitialConsumes){`,
+        Template.indent([`${federationGlobal}.installInitialConsumes()`]),
+        '}',
+        `}`,
+      ]);
+    }
 
     return Template.asString([
       `import federation from '${normalizedBundlerRuntimePath}';`,
-      // webpack module method to include without evaluating the module factory
-      // dont want to evaluate it since require.federation will not be set yet
-      // just need the dependency to be included for hoisting
-      // `import "${includedEmbeddedruntime}"`,
-      // should resolve to module-federation/runtime/embedded
-      '',
       runtimePluginTemplates,
       embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
@@ -167,7 +194,6 @@ class FederationRuntimePlugin {
         '}',
       ]),
       '}',
-      'console.log(__webpack_require__.federation.runtime)',
     ]);
   }
 
@@ -539,12 +565,14 @@ class FederationRuntimePlugin {
         '.esm.js',
       );
 
-      new EmbedFederationRuntimePlugin(this.bundlerRuntimePath).apply(compiler);
+      new EmbedFederationRuntimePlugin(this.options.experiments).apply(
+        compiler,
+      );
 
       new HoistContainerReferences(this.options.experiments).apply(compiler);
 
       new compiler.webpack.NormalModuleReplacementPlugin(
-        /@module-federation\/runtime/,
+        /@module-federation\/runtime(?!\/embedded)/,
         (resolveData) => {
           if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
             resolveData.request = RuntimePath.replace('cjs', 'esm');

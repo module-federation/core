@@ -1,22 +1,27 @@
+import type { Compiler, Compilation, Chunk, Module } from 'webpack';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
+
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import EmbedFederationRuntimeModule from './EmbedFederationRuntimeModule';
 import FederationModulesPlugin from './FederationModulesPlugin';
-import type { Dependency } from 'webpack';
+import { getFederationGlobalScope } from './utils';
+import ContainerEntryDependency from '../ContainerEntryDependency';
+import FederationRuntimeDependency from './FederationRuntimeDependency';
+import { getAllReferencedModules } from '../HoistContainerReferencesPlugin';
 
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-import type { Compiler, Compilation, Chunk, Module, ChunkGraph } from 'webpack';
-import { getFederationGlobalScope } from './utils';
-import ContainerEntryDependency from '../ContainerEntryDependency';
-import FederationRuntimeDependency from './FederationRuntimeDependency';
+
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class EmbedFederationRuntimePlugin {
-  private bundlerRuntimePath: string;
+  experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
 
-  constructor(path: string) {
-    this.bundlerRuntimePath = path;
+  constructor(
+    experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
+  ) {
+    this.experiments = experiments;
   }
 
   apply(compiler: Compiler): void {
@@ -24,16 +29,12 @@ class EmbedFederationRuntimePlugin {
       'EmbedFederationRuntimePlugin',
       (compilation: Compilation) => {
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        const containerEntrySet: Set<
-          ContainerEntryDependency | FederationRuntimeDependency
-        > = new Set();
+        const containerEntrySet: Set<FederationRuntimeDependency> = new Set();
 
         hooks.addFederationRuntimeModule.tap(
           'EmbedFederationRuntimePlugin',
           (dependency: FederationRuntimeDependency) => {
-            if (!dependency.minimal) {
-              containerEntrySet.add(dependency);
-            }
+            containerEntrySet.add(dependency);
           },
         );
 
@@ -50,9 +51,12 @@ class EmbedFederationRuntimePlugin {
           }
 
           runtimeRequirements.add('embeddedFederationRuntime');
+          const isHost =
+            chunk.name === 'webpack' || chunk.name === 'webpack-runtime';
           const runtimeModule = new EmbedFederationRuntimeModule(
-            this.bundlerRuntimePath,
+            this.experiments,
             containerEntrySet,
+            isHost,
           );
 
           compilation.addRuntimeModule(chunk, runtimeModule);
