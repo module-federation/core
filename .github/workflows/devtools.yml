@@ -62,7 +62,6 @@ jobs:
             npx kill-port 3009 3010 3011 3012 3013 4001 &&
             npx kill-port 3009 3010 3011 3012 3013 4001 &&
             pnpm run app:manifest:prod & echo "done" && \
-            npx kill-port 4001
             npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 tcp:4001  && \
             sleep 20 &&
             npx nx e2e:devtools chrome-devtools
