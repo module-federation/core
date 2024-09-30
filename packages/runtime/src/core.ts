@@ -222,10 +222,7 @@ export class FederationHost {
     this.sharedHandler.initShareScopeMap(scopeName, shareScope, extraOptions);
   }
 
-  private formatOptions(
-    globalOptions: Options,
-    userOptions: UserOptions,
-  ): Options {
+  formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
     const { shared } = formatShareConfigs(globalOptions, userOptions);
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({

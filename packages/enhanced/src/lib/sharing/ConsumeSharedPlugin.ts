@@ -30,9 +30,6 @@ import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugi
 import ShareRuntimeModule from './ShareRuntimeModule';
 import type { SemVerRange } from 'webpack/lib/util/semver';
 
-const { parseRange } = require(
-  normalizeWebpackPath('webpack/lib/util/semver'),
-) as typeof import('webpack/lib/util/semver');
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
 ) as typeof import('webpack/lib/ModuleNotFoundError');
