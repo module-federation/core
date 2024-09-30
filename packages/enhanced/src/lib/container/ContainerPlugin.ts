@@ -13,6 +13,7 @@ import type {
   Compilation,
   WebpackError,
   WebpackPluginInstance,
+  WebpackPluginFunction,
 } from 'webpack';
 import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
@@ -20,6 +21,8 @@ import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
 import schema from '../../schemas/container/ContainerPlugin';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
+import type { OptimizationSplitChunksCacheGroup } from 'webpack/lib/optimize/SplitChunksPlugin';
+import type { Falsy } from 'webpack/declarations/WebpackOptions';
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
@@ -160,7 +163,7 @@ class ContainerPlugin {
 
   apply(compiler: Compiler): void {
     const useModuleFederationPlugin = compiler.options.plugins.find(
-      (p: WebpackPluginInstance) => {
+      (p: Falsy | WebpackPluginInstance | WebpackPluginFunction) => {
         if (typeof p !== 'object' || !p) {
           return false;
         }

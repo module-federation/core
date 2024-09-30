@@ -42,7 +42,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   private _patchBundlerConfig(compiler: Compiler): void {
     const { name } = this._options;
     const MFPluginNum = compiler.options.plugins.filter(
-      (p: WebpackPluginInstance) => p && p['name'] === 'ModuleFederationPlugin',
+      (p): p is WebpackPluginInstance =>
+        !!p && (p as any).name === 'ModuleFederationPlugin',
     ).length;
     if (name && MFPluginNum < 2) {
       new compiler.webpack.DefinePlugin({
@@ -118,6 +119,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     ) {
       compiler.options.output.enabledLibraryTypes?.push(library.type);
     }
+
     compiler.hooks.afterPlugins.tap('ModuleFederationPlugin', () => {
       if (useContainerPlugin) {
         new ContainerPlugin({
