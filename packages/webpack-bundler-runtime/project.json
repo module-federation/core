@@ -19,7 +19,8 @@
         "format": ["cjs", "esm"],
         "additionalEntryPoints": [
           "packages/webpack-bundler-runtime/src/constant.ts",
-          "packages/webpack-bundler-runtime/src/container.ts"
+          "packages/webpack-bundler-runtime/src/container.ts",
+          "packages/webpack-bundler-runtime/src/embedded.ts"
         ],
         "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.js"
       },

@@ -15,6 +15,14 @@ const { RuntimeGlobals } = require(
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class EmbedFederationRuntimePlugin {
+  experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
+
+  constructor(
+    experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
+  ) {
+    this.experiments = experiments;
+  }
+
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'EmbedFederationRuntimePlugin',

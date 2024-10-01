@@ -45,6 +45,7 @@ class FederationModulesPlugin {
   }
 
   constructor(options = {}) {
+    //@ts-ignore
     this.options = options;
   }
 

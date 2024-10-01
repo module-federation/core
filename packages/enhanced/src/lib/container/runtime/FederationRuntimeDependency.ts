@@ -5,11 +5,17 @@ const ModuleDependency = require(
 ) as typeof import('webpack/lib/dependencies/ModuleDependency');
 
 class FederationRuntimeDependency extends ModuleDependency {
-  constructor(request: string) {
+  minimal: boolean;
+
+  constructor(request: string, minimal = false) {
     super(request);
+    this.minimal = minimal;
   }
 
   override get type() {
+    if (this.minimal) {
+      return 'minimal federation runtime dependency';
+    }
     return 'federation runtime dependency';
   }
 }

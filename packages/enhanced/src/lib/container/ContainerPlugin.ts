@@ -8,7 +8,6 @@ import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { parseOptions } from './options';
 import type {
-  optimize,
   Compiler,
   Compilation,
   WebpackError,
@@ -27,16 +26,6 @@ import type { Falsy } from 'webpack/declarations/WebpackOptions';
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
 ) as typeof import('webpack/lib/dependencies/ModuleDependency');
-
-type ExcludeUndefined<T> = T extends undefined ? never : T;
-type NonUndefined<T> = ExcludeUndefined<T>;
-
-type OptimizationSplitChunksOptions = NonUndefined<
-  ConstructorParameters<typeof optimize.SplitChunksPlugin>[0]
->;
-
-type CacheGroups = OptimizationSplitChunksOptions['cacheGroups'];
-type CacheGroup = NonUndefined<CacheGroups>[string];
 
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
@@ -86,7 +75,14 @@ class ContainerPlugin {
   // container should not be affected by splitChunks
   static patchChunkSplit(compiler: Compiler, name: string): void {
     const { splitChunks } = compiler.options.optimization;
-    const patchChunkSplit = (cacheGroup: CacheGroup) => {
+    const patchChunkSplit = (
+      cacheGroup:
+        | string
+        | false
+        | ((...args: any[]) => any)
+        | RegExp
+        | OptimizationSplitChunksCacheGroup,
+    ) => {
       switch (typeof cacheGroup) {
         case 'boolean':
         case 'string':
@@ -228,7 +224,7 @@ class ContainerPlugin {
               resolve(undefined);
             },
           );
-        }).catch(callback);
+        }).catch((error) => callback(error));
 
         await new Promise((resolve, reject) => {
           compilation.addInclude(
@@ -255,7 +251,7 @@ class ContainerPlugin {
     // we have to use finishMake in order to check the entries created and see if there are multiple runtime chunks
     compiler.hooks.finishMake.tapAsync(
       PLUGIN_NAME,
-      (compilation: Compilation, callback) => {
+      async (compilation: Compilation, callback) => {
         if (
           compilation.compiler.parentCompilation &&
           compilation.compiler.parentCompilation !== compilation
@@ -291,16 +287,46 @@ class ContainerPlugin {
 
         dep.loc = { name };
 
-        compilation.addInclude(
-          compilation.options.context || '',
-          dep,
-          { name: undefined },
-          (error: WebpackError | null | undefined) => {
-            if (error) return callback(error);
-            hooks.addContainerEntryModule.call(dep);
-            callback();
-          },
-        );
+        await new Promise<void>((resolve, reject) => {
+          compilation.addInclude(
+            compilation.options.context || '',
+            dep,
+            { name: undefined },
+            (error: WebpackError | null | undefined) => {
+              if (error) return reject(error);
+              hooks.addContainerEntryModule.call(dep);
+              resolve();
+            },
+          );
+        }).catch((error) => callback(error));
+
+        const addDependency = async (
+          dependency: FederationRuntimeDependency,
+        ) => {
+          await new Promise<void>((resolve, reject) => {
+            compilation.addInclude(
+              compiler.context,
+              dependency,
+              { name: name, runtime: runtime },
+              (err, module) => {
+                if (err) return reject(err);
+                hooks.addFederationRuntimeModule.call(dependency);
+                resolve();
+              },
+            );
+          }).catch((error) => callback(error));
+        };
+
+        if (this._options?.experiments?.federationRuntime === 'use-host') {
+          const externalRuntimeDependency =
+            federationRuntimePluginInstance.getMinimalDependency(compiler);
+          await addDependency(externalRuntimeDependency);
+        } else {
+          const federationRuntimeDependency =
+            federationRuntimePluginInstance.getDependency(compiler);
+          await addDependency(federationRuntimeDependency);
+        }
+        callback();
       },
     );
 
@@ -316,6 +342,15 @@ class ContainerPlugin {
         compilation.dependencyFactories.set(
           ContainerExposedDependency,
           normalModuleFactory,
+        );
+
+        compilation.dependencyFactories.set(
+          FederationRuntimeDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyTemplates.set(
+          FederationRuntimeDependency,
+          new ModuleDependency.Template(),
         );
       },
     );
