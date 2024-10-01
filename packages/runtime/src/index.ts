@@ -6,6 +6,7 @@ import {
   setGlobalFederationConstructor,
 } from './global';
 import { UserOptions, FederationRuntimePlugin } from './type';
+import { getBuilderId } from './utils';
 import { assert } from './utils/logger';
 
 export { FederationHost } from './core';
@@ -17,84 +18,140 @@ export { Module } from './module';
 export type { Federation } from './global';
 export type { FederationRuntimePlugin };
 
-let FederationInstance: FederationHost | null = null;
-export function init(options: UserOptions): FederationHost {
-  // Retrieve the same instance with the same name
-  const instance = getGlobalFederationInstance(options.name, options.version);
-  if (!instance) {
-    // Retrieve debug constructor
-    const FederationConstructor =
-      getGlobalFederationConstructor() || FederationHost;
-    FederationInstance = new FederationConstructor(options);
-    setGlobalFederationInstance(FederationInstance);
-    return FederationInstance;
-  } else {
-    // Merge options
-    instance.initOptions(options);
-    if (!FederationInstance) {
-      FederationInstance = instance;
-    }
-    return instance;
+export class FederationManager {
+  private federationInstance: FederationHost | null = null;
+  private _bundlerId: string; // Add this line to declare the property
+
+  constructor(bundlerId?: string) {
+    this._bundlerId = bundlerId || getBuilderId();
+    setGlobalFederationConstructor(FederationHost);
   }
+  init(options: UserOptions): FederationHost {
+    // Retrieve the same instance with the same name
+    const instance = getGlobalFederationInstance(options.name, options.version);
+    if (!instance) {
+      // Retrieve debug constructor
+      const FederationConstructor =
+        getGlobalFederationConstructor() || FederationHost;
+      this.federationInstance = new FederationConstructor(options);
+      setGlobalFederationInstance(this.federationInstance);
+      return this.federationInstance;
+    } else {
+      // Merge options
+      instance.initOptions(options);
+      if (!this.federationInstance) {
+        this.federationInstance = instance;
+      }
+      return instance;
+    }
+  }
+
+  loadRemote<T>(
+    ...args: Parameters<FederationHost['loadRemote']>
+  ): Promise<T | null> {
+    assert(this.federationInstance, 'Please call init first');
+    const loadRemote: typeof this.federationInstance.loadRemote<T> =
+      this.federationInstance.loadRemote;
+    return loadRemote.apply(this.federationInstance, args);
+  }
+
+  loadShare<T>(
+    ...args: Parameters<FederationHost['loadShare']>
+  ): Promise<false | (() => T | undefined)> {
+    assert(this.federationInstance, 'Please call init first');
+    const loadShare: typeof this.federationInstance.loadShare<T> =
+      this.federationInstance.loadShare;
+    return loadShare.apply(this.federationInstance, args);
+  }
+
+  loadShareSync<T>(
+    ...args: Parameters<FederationHost['loadShareSync']>
+  ): () => T | never {
+    assert(this.federationInstance, 'Please call init first');
+    const loadShareSync: typeof this.federationInstance.loadShareSync<T> =
+      this.federationInstance.loadShareSync;
+    return loadShareSync.apply(this.federationInstance, args);
+  }
+
+  preloadRemote(
+    ...args: Parameters<FederationHost['preloadRemote']>
+  ): ReturnType<FederationHost['preloadRemote']> {
+    assert(this.federationInstance, 'Please call init first');
+    return this.federationInstance.preloadRemote.apply(
+      this.federationInstance,
+      args,
+    );
+  }
+
+  registerRemotes(
+    ...args: Parameters<FederationHost['registerRemotes']>
+  ): ReturnType<FederationHost['registerRemotes']> {
+    assert(this.federationInstance, 'Please call init first');
+    return this.federationInstance.registerRemotes.apply(
+      this.federationInstance,
+      args,
+    );
+  }
+
+  registerPlugins(
+    ...args: Parameters<FederationHost['registerPlugins']>
+  ): ReturnType<FederationHost['registerPlugins']> {
+    assert(this.federationInstance, 'Please call init first');
+    return this.federationInstance.registerPlugins.apply(
+      this.federationInstance,
+      args,
+    );
+  }
+
+  getInstance() {
+    return this.federationInstance;
+  }
+}
+
+// Create a singleton instance of the Federation class
+const federation = new FederationManager();
+
+// Re-export the functions with the same names
+export function init(options: UserOptions): FederationHost {
+  return federation.init(options);
 }
 
 export function loadRemote<T>(
   ...args: Parameters<FederationHost['loadRemote']>
 ): Promise<T | null> {
-  assert(FederationInstance, 'Please call init first');
-  const loadRemote: typeof FederationInstance.loadRemote<T> =
-    FederationInstance.loadRemote;
-  // eslint-disable-next-line prefer-spread
-  return loadRemote.apply(FederationInstance, args);
+  return federation.loadRemote(...args);
 }
 
 export function loadShare<T>(
   ...args: Parameters<FederationHost['loadShare']>
 ): Promise<false | (() => T | undefined)> {
-  assert(FederationInstance, 'Please call init first');
-  // eslint-disable-next-line prefer-spread
-  const loadShare: typeof FederationInstance.loadShare<T> =
-    FederationInstance.loadShare;
-  return loadShare.apply(FederationInstance, args);
+  return federation.loadShare(...args);
 }
 
 export function loadShareSync<T>(
   ...args: Parameters<FederationHost['loadShareSync']>
 ): () => T | never {
-  assert(FederationInstance, 'Please call init first');
-  const loadShareSync: typeof FederationInstance.loadShareSync<T> =
-    FederationInstance.loadShareSync;
-  // eslint-disable-next-line prefer-spread
-  return loadShareSync.apply(FederationInstance, args);
+  return federation.loadShareSync(...args);
 }
 
 export function preloadRemote(
   ...args: Parameters<FederationHost['preloadRemote']>
 ): ReturnType<FederationHost['preloadRemote']> {
-  assert(FederationInstance, 'Please call init first');
-  // eslint-disable-next-line prefer-spread
-  return FederationInstance.preloadRemote.apply(FederationInstance, args);
+  return federation.preloadRemote(...args);
 }
 
 export function registerRemotes(
   ...args: Parameters<FederationHost['registerRemotes']>
 ): ReturnType<FederationHost['registerRemotes']> {
-  assert(FederationInstance, 'Please call init first');
-  // eslint-disable-next-line prefer-spread
-  return FederationInstance.registerRemotes.apply(FederationInstance, args);
+  return federation.registerRemotes(...args);
 }
 
 export function registerPlugins(
   ...args: Parameters<FederationHost['registerPlugins']>
-): ReturnType<FederationHost['registerRemotes']> {
-  assert(FederationInstance, 'Please call init first');
-  // eslint-disable-next-line prefer-spread
-  return FederationInstance.registerPlugins.apply(FederationInstance, args);
+): ReturnType<FederationHost['registerPlugins']> {
+  return federation.registerPlugins(...args);
 }
 
 export function getInstance() {
-  return FederationInstance;
+  return federation.getInstance();
 }
-
-// Inject for debug
-setGlobalFederationConstructor(FederationHost);
