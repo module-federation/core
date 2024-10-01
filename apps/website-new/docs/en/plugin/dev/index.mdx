@@ -546,3 +546,136 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
 };
 ```
 
+### loadEntry
+The `loadEntry` function allows for full customization of remotes, enabling you to extend and create new remote types. The following two simple examples demonstrate loading JSON data and module delegation.
+
+`asyncHook`
+
+- **Type**
+
+```typescript
+function createScript(args: LoadEntryOptions): HTMLScriptElement | {script?: HTMLScriptElement, timeout?: number } | void;
+
+type LoadEntryOptions = {
+  createScriptHook: SyncHook,
+  remoteEntryExports?: RemoteEntryExports,
+  remoteInfo: RemoteInfo
+};
+interface RemoteInfo {
+  name: string;
+  version?: string;
+  buildVersion?: string;
+  entry: string;
+  type: RemoteEntryType;
+  entryGlobalName: string;
+  shareScope: string;
+}
+export type RemoteEntryExports = {
+  get: (id: string) => () => Promise<Module>;
+  init: (
+    shareScope: ShareScopeMap[string],
+    initScope?: InitScope,
+    remoteEntryInitOPtions?: RemoteEntryInitOptions,
+  ) => void | Promise<void>;
+};
+```
+
+- Example Loading JSON Data
+
+```typescript
+// load-json-data-plugin.ts
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'load-json-data-plugin',
+    loadEntry({ remoteInfo }) {
+      if (remoteInfo.jsonA === "jsonA") {
+        return {
+          init(shareScope, initScope, remoteEntryInitOPtions) {},
+          async get(path) {
+            const json = await fetch(remoteInfo.entry + ".json").then(res => res.json())
+            return () => ({
+              path,
+              json
+            })
+          }
+        }
+      }
+    },
+  };
+};
+```
+```ts
+// module-federation-config
+{
+  remotes: {
+    jsonA: "jsonA@https://cdn.jsdelivr.net/npm/@module-federation/runtime/package"
+  }
+}
+```
+```ts
+// src/bootstrap.js
+import jsonA from "jsonA"
+jsonA // {...json data}
+```
+
+- Exmaple Delegate Modules
+
+```typescript
+// delegate-modules-plugin.ts
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'delegate-modules-plugin',
+    loadEntry({ remoteInfo }) {
+      if (remoteInfo.name === "delegateModulesA") {
+        return {
+          init(shareScope, initScope, remoteEntryInitOPtions) {},
+          async get(path) {
+            path = path.replace("./", "")
+            const {[path]: factory} = await import("./delegateModulesA.js")
+            const result = await factory()
+            return () => result
+          }
+        }
+      }
+    },
+  };
+};
+```
+```ts
+// ./src/delegateModulesA.js
+export async function test1() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve("test1 value")
+    }, 3000)
+  })
+}
+export async function test2() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve("test2 value")
+    }, 3000)
+  })
+}
+```
+```ts
+// module-federation-config
+{
+  remotes: {
+    delegateModulesA: "delegateModulesA@https://delegateModulesA.js"
+  }
+}
+```
+```ts
+// src/bootstrap.js
+import test1 from "delegateModulesA/test1"
+import test2 from "delegateModulesA/test2"
+test1 // "test1 value"
+test2 // "test2 value"
+```

@@ -266,4 +266,91 @@ describe('hooks', () => {
     assert(res);
     expect(res()).toBe('hello app2');
   });
+
+  it('loaderEntry hooks', async () => {
+    const data = {
+      id: '@loader-hooks/app2',
+      name: '@loader-hooks/app2',
+      metaData: {
+        name: '@loader-hooks/app2',
+        publicPath: 'http://localhost:1111/',
+        type: 'app',
+        buildInfo: {
+          buildVersion: 'custom',
+        },
+        remoteEntry: {
+          name: 'federation-remote-entry.js',
+          path: 'resources/hooks/app2/',
+        },
+        types: {
+          name: 'index.d.ts',
+          path: './',
+        },
+        globalName: '@loader-hooks/app2',
+      },
+      remotes: [],
+      shared: [],
+      exposes: [],
+    };
+
+    const responseBody = new Response(JSON.stringify(data), {
+      status: 200,
+      statusText: 'OK',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    const fetchPlugin: () => FederationRuntimePlugin = function () {
+      return {
+        name: 'fetch-plugin',
+        fetch(url, options) {
+          if (
+            url === 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json'
+          ) {
+            return Promise.resolve(responseBody);
+          }
+        },
+      };
+    };
+    const loadEntryPlugin = function (): FederationRuntimePlugin {
+      return {
+        name: 'load-entry-plugin',
+        loadEntry({ remoteInfo }) {
+          if (remoteInfo.name === '@loader-hooks/app3') {
+            return {
+              init() {},
+              get(path) {
+                return () => path;
+              },
+            };
+          }
+        },
+      } as any;
+    };
+
+    const INSTANCE = new FederationHost({
+      name: '@loader-hooks/fetch',
+      remotes: [
+        {
+          name: '@loader-hooks/app2',
+          entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
+        },
+        {
+          name: '@loader-hooks/app3',
+          entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
+        },
+      ],
+      plugins: [fetchPlugin(), loadEntryPlugin()],
+    });
+
+    const res = await INSTANCE.loadRemote<() => string>(
+      '@loader-hooks/app2/say',
+    );
+    assert(res);
+    expect(res()).toBe('hello app2');
+    const loadEntryTestRes = await INSTANCE.loadRemote<() => string>(
+      '@loader-hooks/app3/testtest',
+    );
+    assert(loadEntryTestRes);
+    expect(loadEntryTestRes).toBe('./testtest');
+  });
 });
