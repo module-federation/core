@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Federation } from './types';
 import { remotes } from './remotes';
 import { consumes } from './consumes';

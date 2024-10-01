@@ -259,7 +259,7 @@ describe('preload-remote inBrowser', () => {
     ],
     plugins: [
       {
-        name: 'preload-resouce-inbrowser',
+        name: 'preload-resource-inbrowser',
         beforeInit(args) {
           args.options.inBrowser = true;
           return args;

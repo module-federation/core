@@ -1,9 +1,9 @@
 import { FederationHost } from './core';
 import {
-  getGlobalFederationConstructor,
-  setGlobalFederationConstructor,
   getGlobalFederationInstance,
+  getGlobalFederationConstructor,
   setGlobalFederationInstance,
+  setGlobalFederationConstructor,
 } from './global';
 import { UserOptions, FederationRuntimePlugin } from './type';
 import { getBuilderId } from './utils';
@@ -18,159 +18,147 @@ export { Module } from './module';
 export type { Federation } from './global';
 export type { FederationRuntimePlugin };
 
-class FederationManager {
-  private instance: FederationHost | null = null;
-  private _bundlerId: string | undefined;
+export class FederationManager {
+  private federationInstance: FederationHost | null = null;
+  private _bundlerId: string; // Add this line to declare the property
 
   constructor(bundlerId?: string) {
     this._bundlerId = bundlerId || getBuilderId();
+    setGlobalFederationConstructor(FederationHost);
   }
-
-  getMethods() {
-    return {
-      init: this.init,
-      getInstance: this.getInstance,
-      loadRemote: this.loadRemote,
-      loadShare: this.loadShare,
-      loadShareSync: this.loadShareSync,
-      preloadRemote: this.preloadRemote,
-      registerRemotes: this.registerRemotes,
-      registerPlugins: this.registerPlugins,
-    };
-  }
-
   init(options: UserOptions): FederationHost {
-    if (!this.instance) {
-      const bid = this._bundlerId;
-      const existingInstance = getGlobalFederationInstance(
-        options.name,
-        options.version,
-        bid,
+    // Retrieve the same instance with the same name
+    const instance = getGlobalFederationInstance(
+      options.name,
+      options.version,
+      this._bundlerId,
+    );
+    if (!instance) {
+      // Retrieve debug constructor
+      const FederationConstructor =
+        getGlobalFederationConstructor() || FederationHost;
+      this.federationInstance = new FederationConstructor(
+        options,
+        this._bundlerId,
       );
-      if (
-        existingInstance &&
-        options.name === 'checkout' &&
-        existingInstance.name !== 'checkout'
-      ) {
-        console.error('wrong instance');
-      }
-
-      if (existingInstance) {
-        this.instance = existingInstance;
-        this.instance.initOptions(options);
-      } else {
-        const FederationConstructor =
-          getGlobalFederationConstructor() || FederationHost;
-        this.instance = new FederationConstructor(options, this._bundlerId);
-        setGlobalFederationInstance(this.instance);
-      }
+      setGlobalFederationInstance(this.federationInstance);
+      return this.federationInstance;
     } else {
-      this.instance.initOptions(options);
+      // Merge options
+      instance.initOptions(options);
+      if (!this.federationInstance) {
+        this.federationInstance = instance;
+      }
+      return instance;
     }
-
-    return this.instance;
-  }
-
-  getInstance(): FederationHost | null {
-    return this.instance;
   }
 
   loadRemote<T>(
     ...args: Parameters<FederationHost['loadRemote']>
   ): Promise<T | null> {
-    const instance = this.getInstance();
-    assert(instance, 'Please call init first');
-    return instance.loadRemote(...args);
+    assert(this.federationInstance, 'Please call init first');
+    const loadRemote: typeof this.federationInstance.loadRemote<T> =
+      this.federationInstance.loadRemote;
+    return loadRemote.apply(this.federationInstance, args);
   }
 
   loadShare<T>(
     ...args: Parameters<FederationHost['loadShare']>
   ): Promise<false | (() => T | undefined)> {
-    const instance = this.getInstance();
-    assert(instance, 'Please call init first');
-    return instance.loadShare(...args);
+    assert(this.federationInstance, 'Please call init first');
+    const loadShare: typeof this.federationInstance.loadShare<T> =
+      this.federationInstance.loadShare;
+    return loadShare.apply(this.federationInstance, args);
   }
 
   loadShareSync<T>(
     ...args: Parameters<FederationHost['loadShareSync']>
   ): () => T | never {
-    const instance = this.getInstance();
-    assert(instance, 'Please call init first');
-    return instance.loadShareSync(...args);
+    assert(this.federationInstance, 'Please call init first');
+    const loadShareSync: typeof this.federationInstance.loadShareSync<T> =
+      this.federationInstance.loadShareSync;
+    return loadShareSync.apply(this.federationInstance, args);
   }
 
   preloadRemote(
     ...args: Parameters<FederationHost['preloadRemote']>
   ): ReturnType<FederationHost['preloadRemote']> {
-    const instance = this.getInstance();
-    assert(instance, 'Please call init first');
-    return instance.preloadRemote(...args);
+    assert(this.federationInstance, 'Please call init first');
+    return this.federationInstance.preloadRemote.apply(
+      this.federationInstance,
+      args,
+    );
   }
 
   registerRemotes(
     ...args: Parameters<FederationHost['registerRemotes']>
   ): ReturnType<FederationHost['registerRemotes']> {
-    const instance = this.getInstance();
-    assert(instance, 'Please call init first');
-    return instance.registerRemotes(...args);
+    assert(this.federationInstance, 'Please call init first');
+    return this.federationInstance.registerRemotes.apply(
+      this.federationInstance,
+      args,
+    );
   }
 
   registerPlugins(
     ...args: Parameters<FederationHost['registerPlugins']>
-  ): ReturnType<FederationHost['registerRemotes']> {
-    const instance = this.getInstance();
-    assert(instance, 'Please call init first');
-    return instance.registerPlugins(...args);
+  ): ReturnType<FederationHost['registerPlugins']> {
+    assert(this.federationInstance, 'Please call init first');
+    return this.federationInstance.registerPlugins.apply(
+      this.federationInstance,
+      args,
+    );
+  }
+
+  getInstance() {
+    return this.federationInstance;
   }
 }
 
-const federationManager = new FederationManager();
+// Create a singleton instance of the Federation class
+const federation = new FederationManager();
 
+// Re-export the functions with the same names
 export function init(options: UserOptions): FederationHost {
-  return federationManager.init(options);
+  return federation.init(options);
 }
 
 export function loadRemote<T>(
   ...args: Parameters<FederationHost['loadRemote']>
 ): Promise<T | null> {
-  return federationManager.loadRemote(...args);
+  return federation.loadRemote(...args);
 }
 
 export function loadShare<T>(
   ...args: Parameters<FederationHost['loadShare']>
 ): Promise<false | (() => T | undefined)> {
-  return federationManager.loadShare(...args);
+  return federation.loadShare(...args);
 }
 
 export function loadShareSync<T>(
   ...args: Parameters<FederationHost['loadShareSync']>
 ): () => T | never {
-  return federationManager.loadShareSync(...args);
+  return federation.loadShareSync(...args);
 }
 
 export function preloadRemote(
   ...args: Parameters<FederationHost['preloadRemote']>
 ): ReturnType<FederationHost['preloadRemote']> {
-  return federationManager.preloadRemote(...args);
+  return federation.preloadRemote(...args);
 }
 
 export function registerRemotes(
   ...args: Parameters<FederationHost['registerRemotes']>
 ): ReturnType<FederationHost['registerRemotes']> {
-  return federationManager.registerRemotes(...args);
+  return federation.registerRemotes(...args);
 }
 
 export function registerPlugins(
   ...args: Parameters<FederationHost['registerPlugins']>
-): ReturnType<FederationHost['registerRemotes']> {
-  return federationManager.registerPlugins(...args);
+): ReturnType<FederationHost['registerPlugins']> {
+  return federation.registerPlugins(...args);
 }
 
-export function getInstance(): FederationHost | null {
-  return federationManager.getInstance();
+export function getInstance() {
+  return federation.getInstance();
 }
-
-export { FederationManager };
-
-// Inject for debug
-setGlobalFederationConstructor(FederationHost);

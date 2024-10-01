@@ -1,7 +1,6 @@
 import {
   loadScript,
   loadScriptNode,
-  CreateScriptHookNode,
   composeKeyWithSeparator,
   isBrowserEnv,
 } from '@module-federation/sdk';

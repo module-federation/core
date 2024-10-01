@@ -15,6 +15,7 @@ describe('global', () => {
     );
     expect(globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__).toBeCalledWith(
       injectArgs,
+      '',
     );
   });
 

@@ -13,7 +13,7 @@ import {
 } from '@module-federation/sdk';
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Compiler, WebpackPluginInstance, Compilation } from 'webpack';
+import type { Compiler, WebpackPluginInstance } from 'webpack';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
@@ -22,8 +22,6 @@ import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
 import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
-import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
-import { getAllReferencedModules } from './HoistContainerReferencesPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(

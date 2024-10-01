@@ -1,9 +1,8 @@
-import { describe, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { init } from '../src';
-
 // eslint-disable-next-line max-lines-per-function
 describe('api', () => {
-  it('apis', () => {
+  it('initializes and validates API structure', () => {
     const FM = init({
       name: '@federation/name',
       remotes: [],
@@ -11,9 +10,7 @@ describe('api', () => {
     expect(FM.loadShare).not.toBe(null);
     expect(FM.loadRemote).not.toBe(null);
   });
-
-  it('init with same name', () => {
-    // get same instance
+  it('initializes with the same name and returns the same instance', () => {
     const FM1 = init({
       name: '@federation/same-name',
       remotes: [],
@@ -24,9 +21,7 @@ describe('api', () => {
     });
     expect(FM1).toBe(FM2);
   });
-
-  it('init with same name with diffrent version', () => {
-    // get same instance
+  it('initializes with the same name but different versions and returns different instances', () => {
     const FM1 = init({
       name: '@federation/same-name-with-version',
       version: '1.0.1',
@@ -39,9 +34,7 @@ describe('api', () => {
     });
     expect(FM1).not.toBe(FM2);
   });
-
-  it('init merge remotes', () => {
-    // get same instance
+  it('merges remotes when initialized with the same name', () => {
     const FM1 = init({
       name: '@federation/merge-remotes',
       remotes: [
@@ -60,7 +53,6 @@ describe('api', () => {
         },
       ],
     });
-    // merge remotes
     expect(FM1.options.remotes).toEqual(
       expect.arrayContaining([
         {
@@ -78,9 +70,7 @@ describe('api', () => {
       ]),
     );
   });
-
-  it('init with diffrent same name', () => {
-    // get different instance
+  it('initializes with different names and returns different instances', () => {
     const FM3 = init({
       name: '@federation/main3',
       remotes: [],
