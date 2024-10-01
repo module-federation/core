@@ -174,9 +174,10 @@ export function getAllReferencedModules(
     const currentModule = stack.pop();
     if (!currentModule) continue;
 
-    const mgm = compilation.moduleGraph._getModuleGraphModule(currentModule);
-    if (!mgm?.outgoingConnections) continue;
-    for (const connection of mgm.outgoingConnections) {
+    const outgoingConnections =
+      compilation.moduleGraph.getOutgoingConnections(currentModule);
+    if (!outgoingConnections) continue;
+    for (const connection of outgoingConnections) {
       const connectedModule = connection.module;
 
       // Skip if module has already been visited
