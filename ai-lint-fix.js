@@ -110,7 +110,9 @@ async function main() {
       const files = await glob.glob(argv.pattern);
 
       for (const filePath of files) {
+        console.log(filePath);
         await processFile(filePath);
+        console.log(filePath, 'processed');
       }
     } catch (err) {
       console.error('Error finding files:', err.message);
