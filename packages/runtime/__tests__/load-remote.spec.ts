@@ -10,9 +10,8 @@ import {
   setGlobalFederationConstructor,
 } from '../src/global';
 import { requestList } from './mock/env';
-
 describe('matchRemote', () => {
-  it('match default export with pkgName', () => {
+  it('matches default export with pkgName', () => {
     const matchInfo = matchRemoteWithNameAndExpose(
       [
         {
@@ -34,8 +33,7 @@ describe('matchRemote', () => {
       version: '1.0.0',
     });
   });
-
-  it('match default export with alias', () => {
+  it('matches default export with alias', () => {
     const matchInfo = matchRemoteWithNameAndExpose(
       [
         {
@@ -59,8 +57,7 @@ describe('matchRemote', () => {
       alias: 'hello',
     });
   });
-
-  it('match pkgName', () => {
+  it('matches pkgName', () => {
     const matchInfo = matchRemoteWithNameAndExpose(
       [
         {
@@ -82,8 +79,7 @@ describe('matchRemote', () => {
       version: '1.0.0',
     });
   });
-
-  it('match alias', () => {
+  it('matches alias', () => {
     const matchInfo = matchRemoteWithNameAndExpose(
       [
         {
@@ -108,10 +104,9 @@ describe('matchRemote', () => {
     });
   });
 });
-
 // eslint-disable-next-line max-lines-per-function
 describe('loadRemote', () => {
-  it('api', () => {
+  it('api functionality', () => {
     const FederationInstance = new FederationHost({
       name: '@federation-test/loadRemote-api',
       remotes: [],
@@ -151,7 +146,6 @@ describe('loadRemote', () => {
           'http://localhost:1111/resources/app2/federation-remote-entry.js',
       },
     });
-
     const FederationInstance = new FederationHost({
       name: '@federation-test/globalinfo',
       remotes: [
@@ -161,7 +155,6 @@ describe('loadRemote', () => {
         },
       ],
     });
-
     const module = await FederationInstance.loadRemote<() => string>(
       '@federation-test/app2/say',
     );
@@ -197,7 +190,6 @@ describe('loadRemote', () => {
         remoteEntry: 'federation-remote-entry.js',
       },
     });
-
     const FM = new FederationHost({
       name: 'xxxxx',
       remotes: [
@@ -211,18 +203,15 @@ describe('loadRemote', () => {
         },
       ],
     });
-
     const module = await FM.loadRemote<() => string>('@load-remote/app1/say');
     assert(module, 'module should be a function');
     expect(module()).toBe('hello app1');
-
     const module2 = await FM.loadRemote<() => string>('@load-remote/app2/say');
     assert(module2, 'module should be a function');
     expect(module2()).toBe('hello app2');
     reset();
   });
-
-  it('compatible with old structor', async () => {
+  it('is compatible with old structure', async () => {
     const reset = addGlobalSnapshot({
       '@federation-test/compatible': {
         globalName: '',
@@ -254,7 +243,6 @@ describe('loadRemote', () => {
           'http://localhost:1111/resources/app2/federation-remote-entry.js',
       },
     });
-
     const FederationInstance = new FederationHost({
       name: '@federation-test/compatible',
       remotes: [
@@ -271,8 +259,7 @@ describe('loadRemote', () => {
     expect(module()).toBe('hello app2');
     reset();
   });
-
-  it('remote entry url with query', async () => {
+  it('handles remote entry URL with query', async () => {
     const FederationInstance = new FederationHost({
       name: '@federation-test/compatible',
       remotes: [
@@ -289,8 +276,7 @@ describe('loadRemote', () => {
     assert(module, 'module should be a function');
     expect(module()).toBe('hello app2');
   });
-
-  it('different instance with same module', async () => {
+  it('handles different instances with the same module', async () => {
     const reset = addGlobalSnapshot({
       '@module-federation/load-remote-different-instance': {
         buildVersion: 'custom',
@@ -358,9 +344,8 @@ describe('loadRemote', () => {
     reset();
   });
 });
-
 describe('loadRemote with manifest.json', () => {
-  it('duplicate request manifest.json', async () => {
+  it('handles duplicate request to manifest.json', async () => {
     const FM = new FederationHost({
       name: '@demo/host',
       remotes: [
@@ -371,7 +356,6 @@ describe('loadRemote with manifest.json', () => {
         },
       ],
     });
-
     const FM2 = new FederationHost({
       name: '@demo/host2',
       remotes: [
@@ -382,7 +366,6 @@ describe('loadRemote with manifest.json', () => {
         },
       ],
     });
-
     const [module, , module2] = await Promise.all([
       FM.loadRemote<Promise<() => string>>('@demo/main/say'),
       FM.loadRemote<Promise<() => string>>('@demo/main/add'),
@@ -398,8 +381,7 @@ describe('loadRemote with manifest.json', () => {
       ),
     ).toBe(1);
   });
-
-  it('circulate deps', async () => {
+  it('handles circular dependencies', async () => {
     setGlobalFederationConstructor(FederationHost, true);
     const FM = init({
       name: '@circulate-deps/app1',
@@ -411,19 +393,16 @@ describe('loadRemote with manifest.json', () => {
         },
       ],
     });
-
     const app1Module = await FM.loadRemote<Promise<() => string>>(
       '@circulate-deps/app2/say',
     );
     assert(app1Module);
     const res = await app1Module();
     expect(res).toBe('@circulate-deps/app2');
-
     Global.__FEDERATION__.__INSTANCES__ = [];
     setGlobalFederationConstructor(undefined, true);
   });
-
-  it('manifest.json with query', async () => {
+  it('handles manifest.json with query', async () => {
     const FM = new FederationHost({
       name: '@demo/host',
       remotes: [
@@ -434,7 +413,6 @@ describe('loadRemote with manifest.json', () => {
         },
       ],
     });
-
     const [module, ,] = await Promise.all([
       FM.loadRemote<Promise<() => string>>('@demo/main/say'),
     ]);
@@ -442,9 +420,8 @@ describe('loadRemote with manifest.json', () => {
     expect(module()).toBe('hello world');
   });
 });
-
-describe('lazy loadRemote add remote into snapshot', () => {
-  it('load remoteEntry', async () => {
+describe('lazy loadRemote and add remote into snapshot', () => {
+  it('loads remoteEntry', async () => {
     const reset = addGlobalSnapshot({
       '@demo/app2': {
         buildVersion: '1.0.2',
@@ -491,15 +468,13 @@ describe('lazy loadRemote add remote into snapshot', () => {
     const beforeHostRemotesInfo = hostModuleInfo.remotesInfo;
     const beforeRemotesLength = Object.keys(beforeHostRemotesInfo).length;
     expect(beforeRemotesLength).toBe(0);
-
     await federationInstance.loadRemote('app2/say');
     const afterHostRemotesInfo = hostModuleInfo.remotesInfo;
     const afterRemotesLength = Object.keys(afterHostRemotesInfo).length;
     expect(afterRemotesLength).toBe(1);
     reset();
   });
-
-  it('load manifest', async () => {
+  it('loads manifest', async () => {
     const reset = addGlobalSnapshot({
       '@demo/app1': {
         globalName: `__FEDERATION_${'@load-remote/app1:custom'}__`,
@@ -514,7 +489,6 @@ describe('lazy loadRemote add remote into snapshot', () => {
         remoteEntry: 'federation-remote-entry.js',
       },
     });
-
     const federationInstance = new FederationHost({
       name: '@demo/app1',
       remotes: [
@@ -535,7 +509,6 @@ describe('lazy loadRemote add remote into snapshot', () => {
     const beforeHostRemotesInfo = hostModuleInfo.remotesInfo;
     const beforeRemotesLength = Object.keys(beforeHostRemotesInfo).length;
     expect(beforeRemotesLength).toBe(0);
-
     await federationInstance.loadRemote('main/say');
     const afterHostRemotesInfo = hostModuleInfo.remotesInfo;
     const afterRemotesLength = Object.keys(afterHostRemotesInfo).length;
@@ -543,9 +516,8 @@ describe('lazy loadRemote add remote into snapshot', () => {
     reset();
   });
 });
-
 describe('loadRemote', () => {
-  it('api', async () => {
+  it('loads remote synchronously', async () => {
     const jsSyncAssetPath = 'resources/load-remote/app2/say.sync.js';
     const remotePublicPath = 'http://localhost:1111/';
     const reset = addGlobalSnapshot({

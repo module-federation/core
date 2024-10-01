@@ -7,16 +7,13 @@ import {
   setGlobalFederationConstructor,
 } from '../src/global';
 import { requestList } from './mock/env';
-
 // Helper function to check if a method is private
 function isPrivate(methodName: string): boolean {
   return methodName.startsWith('_');
 }
-
 describe('Embed Module Proxy', async () => {
   // Dynamically import the index module
   const Index = await import('../src/index');
-
   beforeAll(async () => {
     // Mock the global __webpack_require__ to provide the runtime
     //@ts-ignore
@@ -26,13 +23,11 @@ describe('Embed Module Proxy', async () => {
       },
     };
   });
-
   afterAll(async () => {
     // Clean up the global __webpack_require__ mock
     //@ts-ignore
     delete globalThis.__webpack_require__;
   });
-
   // Dynamically import the embedded module
   const Embedded = await import('../src/embedded');
   describe('Api Sync', () => {
@@ -44,7 +39,6 @@ describe('Embed Module Proxy', async () => {
         .filter((n) => n !== 'FederationManager');
       expect(embeddedExports).toEqual(indexExports);
     });
-
     it('FederationHost class should have the same methods in embedded.ts and index.ts', () => {
       // Create instances of FederationHost from both embedded.ts and index.ts
       const embeddedHost = new Embedded.FederationHost({
@@ -55,7 +49,6 @@ describe('Embed Module Proxy', async () => {
         name: '@federation/test',
         remotes: [],
       });
-
       // Get the method names of FederationHost instances, excluding private methods
       const embeddedMethods = Object.getOwnPropertyNames(
         Object.getPrototypeOf(embeddedHost),
@@ -72,11 +65,9 @@ describe('Embed Module Proxy', async () => {
           (prop) => typeof indexHost[prop] === 'function' && !isPrivate(prop),
         )
         .sort();
-
       // Compare the method names
       expect(embeddedMethods).toEqual(indexMethods);
     });
-
     it('Module class should have the same methods in embedded.ts and index.ts', () => {
       // Create instances of Module from both embedded.ts and index.ts
       const embeddedModule = new Embedded.Module({
@@ -105,7 +96,6 @@ describe('Embed Module Proxy', async () => {
           remotes: [],
         }),
       });
-
       // Get the method names of Module instances, excluding private methods
       const embeddedMethods = Object.getOwnPropertyNames(
         Object.getPrototypeOf(embeddedModule),
@@ -150,7 +140,6 @@ describe('Embed Module Proxy', async () => {
           version: '1.0.0',
         });
       });
-
       it('match default export with alias', () => {
         const matchInfo = matchRemoteWithNameAndExpose(
           [
@@ -175,7 +164,6 @@ describe('Embed Module Proxy', async () => {
           alias: 'hello',
         });
       });
-
       it('match pkgName', () => {
         const matchInfo = matchRemoteWithNameAndExpose(
           [
@@ -198,7 +186,6 @@ describe('Embed Module Proxy', async () => {
           version: '1.0.0',
         });
       });
-
       it('match alias', () => {
         const matchInfo = matchRemoteWithNameAndExpose(
           [
@@ -224,7 +211,6 @@ describe('Embed Module Proxy', async () => {
         });
       });
     });
-
     // eslint-disable-next-line max-lines-per-function
     describe('loadRemote', () => {
       it('api', () => {
@@ -234,7 +220,6 @@ describe('Embed Module Proxy', async () => {
         });
         expect(FederationInstance.loadRemote).toBeInstanceOf(Function);
       });
-
       it('loadRemote from global', async () => {
         const reset = addGlobalSnapshot({
           '@federation-test/globalinfo': {
@@ -267,7 +252,6 @@ describe('Embed Module Proxy', async () => {
               'http://localhost:1111/resources/app2/federation-remote-entry.js',
           },
         });
-
         const FederationInstance = new Embedded.FederationHost({
           name: '@federation-test/globalinfo',
           remotes: [
@@ -277,7 +261,6 @@ describe('Embed Module Proxy', async () => {
             },
           ],
         });
-
         const module = await FederationInstance.loadRemote<() => string>(
           '@federation-test/app2/say',
         );
@@ -285,7 +268,6 @@ describe('Embed Module Proxy', async () => {
         expect(module()).toBe('hello app2');
         reset();
       });
-
       it('loadRemote from global without hostSnapshot', async () => {
         const reset = addGlobalSnapshot({
           '@load-remote/app1': {
@@ -313,7 +295,6 @@ describe('Embed Module Proxy', async () => {
             remoteEntry: 'federation-remote-entry.js',
           },
         });
-
         const FM = new Embedded.FederationHost({
           name: 'xxxxx',
           remotes: [
@@ -327,13 +308,11 @@ describe('Embed Module Proxy', async () => {
             },
           ],
         });
-
         const module = await FM.loadRemote<() => string>(
           '@load-remote/app1/say',
         );
         assert(module, 'module should be a function');
         expect(module()).toBe('hello app1');
-
         const module2 = await FM.loadRemote<() => string>(
           '@load-remote/app2/say',
         );
@@ -341,8 +320,7 @@ describe('Embed Module Proxy', async () => {
         expect(module2()).toBe('hello app2');
         reset();
       });
-
-      it('compatible with old structor', async () => {
+      it('compatible with old structure', async () => {
         const reset = addGlobalSnapshot({
           '@federation-test/compatible': {
             globalName: '',
@@ -374,7 +352,6 @@ describe('Embed Module Proxy', async () => {
               'http://localhost:1111/resources/app2/federation-remote-entry.js',
           },
         });
-
         const FederationInstance = new Embedded.FederationHost({
           name: '@federation-test/compatible',
           remotes: [
@@ -391,7 +368,6 @@ describe('Embed Module Proxy', async () => {
         expect(module()).toBe('hello app2');
         reset();
       });
-
       it('remote entry url with query', async () => {
         const FederationInstance = new Embedded.FederationHost({
           name: '@federation-test/compatible',
@@ -409,7 +385,6 @@ describe('Embed Module Proxy', async () => {
         assert(module, 'module should be a function');
         expect(module()).toBe('hello app2');
       });
-
       it('different instance with same module', async () => {
         const reset = addGlobalSnapshot({
           '@module-federation/load-remote-different-instance': {
@@ -451,7 +426,7 @@ describe('Embed Module Proxy', async () => {
           ],
           plugins: [
             {
-              name: 'load-resouce-inbrowser',
+              name: 'load-resource-inbrowser',
               beforeInit(args: any) {
                 args.options.inBrowser = true;
                 return args;
@@ -478,7 +453,6 @@ describe('Embed Module Proxy', async () => {
         reset();
       });
     });
-
     describe('loadRemote with manifest.json', () => {
       it('duplicate request manifest.json', async () => {
         const FM = new Embedded.FederationHost({
@@ -491,7 +465,6 @@ describe('Embed Module Proxy', async () => {
             },
           ],
         });
-
         const FM2 = new Embedded.FederationHost({
           name: '@demo/host2',
           remotes: [
@@ -502,7 +475,6 @@ describe('Embed Module Proxy', async () => {
             },
           ],
         });
-
         const [module, , module2] = await Promise.all([
           FM.loadRemote<Promise<() => string>>('@demo/main/say'),
           FM.loadRemote<Promise<() => string>>('@demo/main/add'),
@@ -518,7 +490,6 @@ describe('Embed Module Proxy', async () => {
           ),
         ).toBe(1);
       });
-
       it('circulate deps', async () => {
         setGlobalFederationConstructor(Embedded.FederationHost, true);
         const FM = Embedded.init({
@@ -531,18 +502,15 @@ describe('Embed Module Proxy', async () => {
             },
           ],
         });
-
         const app1Module = await FM.loadRemote<Promise<() => string>>(
           '@circulate-deps/app2/say',
         );
         assert(app1Module);
         const res = await app1Module();
         expect(res).toBe('@circulate-deps/app2');
-
         Global.__FEDERATION__.__INSTANCES__ = [];
         setGlobalFederationConstructor(undefined, true);
       });
-
       it('manifest.json with query', async () => {
         const FM = new Embedded.FederationHost({
           name: '@demo/host',
@@ -554,7 +522,6 @@ describe('Embed Module Proxy', async () => {
             },
           ],
         });
-
         const [module] = await Promise.all([
           FM.loadRemote<Promise<() => string>>('@demo/main/say'),
         ]);
@@ -562,7 +529,6 @@ describe('Embed Module Proxy', async () => {
         expect(module()).toBe('hello world');
       });
     });
-
     describe('lazy loadRemote add remote into snapshot', () => {
       it('load remoteEntry', async () => {
         const reset = addGlobalSnapshot({

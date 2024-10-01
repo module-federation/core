@@ -1,47 +1,37 @@
-import { describe, it } from 'vitest';
+import { describe, it, beforeEach, expect } from 'vitest';
 import { init } from '../src/index';
 import { mockStaticServer } from './mock/utils';
 import { Global, addGlobalSnapshot } from '../src/global';
 interface LinkInfo {
   type: string;
   href: string;
+  rel: string;
 }
-
 interface ScriptInfo {
   src: string;
   crossorigin: string;
 }
-
 function getLinkInfos(): Array<LinkInfo> {
   const links = document.querySelectorAll('link');
-  const linkInfos: Array<LinkInfo> = [...links].map((link) => ({
+  return Array.from(links).map((link) => ({
     type: link.getAttribute('as') || '',
     href: link.getAttribute('href') || '',
     rel: link.getAttribute('rel') || '',
   }));
-  return linkInfos;
 }
 function getScriptInfos(): Array<ScriptInfo> {
   const scripts = document.querySelectorAll('script');
-  const scriptInfos: Array<ScriptInfo> = [...scripts].map((script) => ({
+  return Array.from(scripts).map((script) => ({
     src: script.getAttribute('src') || '',
     crossorigin: script.getAttribute('crossorigin') || '',
   }));
-
-  return scriptInfos;
 }
-
-function getPreloadElInfos(): {
-  links: LinkInfo[];
-  scripts: ScriptInfo[];
-} {
+function getPreloadElInfos() {
   return {
     links: getLinkInfos(),
     scripts: getScriptInfos(),
   };
 }
-
-// eslint-disable-next-line max-lines-per-function
 describe('preload-remote inBrowser', () => {
   mockStaticServer({
     baseDir: __dirname,
@@ -54,15 +44,9 @@ describe('preload-remote inBrowser', () => {
       publicPath: 'http://localhost:1111/resources/preload/preload-resource/',
       remoteEntry: 'federation-remote-entry.js',
       remotesInfo: {
-        '@federation/sub1': {
-          matchedVersion: '1.0.2',
-        },
-        '@federation/sub2': {
-          matchedVersion: '1.0.3',
-        },
-        '@federation/sub3': {
-          matchedVersion: '1.0.3',
-        },
+        '@federation/sub1': { matchedVersion: '1.0.2' },
+        '@federation/sub2': { matchedVersion: '1.0.3' },
+        '@federation/sub3': { matchedVersion: '1.0.3' },
       },
     },
     '@federation/sub1:1.0.2': {
@@ -85,12 +69,8 @@ describe('preload-remote inBrowser', () => {
       publicPath: 'http://localhost:1111/resources/preload/preload-resource/',
       remoteEntry: 'federation-remote-entry.js',
       remotesInfo: {
-        '@federation/sub1-button': {
-          matchedVersion: '1.0.3',
-        },
-        '@federation/sub1-add': {
-          matchedVersion: '1.0.3',
-        },
+        '@federation/sub1-button': { matchedVersion: '1.0.3' },
+        '@federation/sub1-add': { matchedVersion: '1.0.3' },
       },
     },
     '@federation/sub1-button:1.0.3': {
@@ -99,10 +79,7 @@ describe('preload-remote inBrowser', () => {
         {
           moduleName: 'button',
           assets: {
-            css: {
-              sync: [],
-              async: [],
-            },
+            css: { sync: [], async: [] },
             js: {
               sync: ['sub1-button/button.sync.js'],
               async: ['sub1-button/button.async.js'],
@@ -119,10 +96,7 @@ describe('preload-remote inBrowser', () => {
         {
           moduleName: 'add',
           assets: {
-            css: {
-              sync: [],
-              async: [],
-            },
+            css: { sync: [], async: [] },
             js: {
               sync: ['sub1-add/add.sync.js'],
               async: ['sub1-add/add.async.js'],
@@ -153,12 +127,8 @@ describe('preload-remote inBrowser', () => {
       publicPath: 'http://localhost:1111/resources/preload/preload-resource/',
       remoteEntry: 'sub2/federation-remote-entry.js',
       remotesInfo: {
-        '@federation/sub2-button': {
-          matchedVersion: '1.0.3',
-        },
-        '@federation/sub2-add': {
-          matchedVersion: '1.0.3',
-        },
+        '@federation/sub2-button': { matchedVersion: '1.0.3' },
+        '@federation/sub2-add': { matchedVersion: '1.0.3' },
       },
     },
     '@federation/sub2-button:1.0.3': {
@@ -167,10 +137,7 @@ describe('preload-remote inBrowser', () => {
         {
           moduleName: 'button',
           assets: {
-            css: {
-              sync: [],
-              async: [],
-            },
+            css: { sync: [], async: [] },
             js: {
               sync: ['sub2-button/button.sync.js'],
               async: ['sub2-button/button.async.js'],
@@ -187,10 +154,7 @@ describe('preload-remote inBrowser', () => {
         {
           moduleName: 'add',
           assets: {
-            css: {
-              sync: [],
-              async: [],
-            },
+            css: { sync: [], async: [] },
             js: {
               sync: ['sub2-add/add.sync.js'],
               async: ['sub2-add/add.async.js'],
@@ -207,27 +171,15 @@ describe('preload-remote inBrowser', () => {
         {
           moduleName: 'button',
           assets: {
-            css: {
-              sync: [],
-              async: [],
-            },
-            js: {
-              sync: ['sub3/button.sync.js'],
-              async: [],
-            },
+            css: { sync: [], async: [] },
+            js: { sync: ['sub3/button.sync.js'], async: [] },
           },
         },
         {
           moduleName: 'add',
           assets: {
-            css: {
-              sync: [],
-              async: [],
-            },
-            js: {
-              sync: ['sub3/add.sync.js'],
-              async: [],
-            },
+            css: { sync: [], async: [] },
+            js: { sync: ['sub3/add.sync.js'], async: [] },
           },
         },
       ],
@@ -240,22 +192,12 @@ describe('preload-remote inBrowser', () => {
     document.body.innerHTML = '';
     Global.__FEDERATION__.__PRELOADED_MAP__.clear();
   });
-
   const FMInstance = init({
     name: '@federation/preload-remote',
     remotes: [
-      {
-        name: '@federation/sub1',
-        version: '1.0.2',
-      },
-      {
-        name: '@federation/sub2',
-        version: '1.0.3',
-      },
-      {
-        name: '@federation/sub3',
-        version: '1.0.3',
-      },
+      { name: '@federation/sub1', version: '1.0.2' },
+      { name: '@federation/sub2', version: '1.0.3' },
+      { name: '@federation/sub3', version: '1.0.3' },
     ],
     plugins: [
       {
@@ -267,13 +209,9 @@ describe('preload-remote inBrowser', () => {
       },
     ],
   });
-
-  // eslint-disable-next-line max-lines-per-function
   it('1 preload with default config', async () => {
     const reset = addGlobalSnapshot(mockSnapshot);
-
     expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(0);
-
     await FMInstance.preloadRemote([
       {
         nameOrAlias: '@federation/sub1',
@@ -283,7 +221,6 @@ describe('preload-remote inBrowser', () => {
         depsRemote: [{ nameOrAlias: '@federation/sub1-button' }],
       },
     ]);
-
     expect(getPreloadElInfos()).toMatchSnapshot();
     expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(2);
     expect(
@@ -296,8 +233,7 @@ describe('preload-remote inBrowser', () => {
     ).toBe(true);
     reset();
   });
-
-  it('2 preload with all config ', async () => {
+  it('2 preload with all config', async () => {
     const reset = addGlobalSnapshot(mockSnapshot);
     expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(0);
     await FMInstance.preloadRemote([
@@ -306,7 +242,6 @@ describe('preload-remote inBrowser', () => {
         resourceCategory: 'all',
       },
     ]);
-
     expect(getPreloadElInfos()).toMatchSnapshot();
     expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(3);
     expect(
@@ -322,10 +257,8 @@ describe('preload-remote inBrowser', () => {
     ).toBe(true);
     reset();
   });
-
-  it('3 preload with expose config ', async () => {
+  it('3 preload with expose config', async () => {
     const reset = addGlobalSnapshot(mockSnapshot);
-
     expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(0);
     await FMInstance.preloadRemote([
       {
@@ -335,12 +268,10 @@ describe('preload-remote inBrowser', () => {
       },
     ]);
     expect(getPreloadElInfos()).toMatchSnapshot();
-
     expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(1);
     expect(
       Global.__FEDERATION__.__PRELOADED_MAP__.get('@federation/sub3/add'),
     ).toBe(true);
-
     await FMInstance.preloadRemote([
       {
         nameOrAlias: '@federation/sub3',

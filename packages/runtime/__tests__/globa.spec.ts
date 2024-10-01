@@ -1,4 +1,4 @@
-import { assert, describe, test, it, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest'; // Removed unused imports
 import { init } from '../src/index';
 
 describe('global', () => {

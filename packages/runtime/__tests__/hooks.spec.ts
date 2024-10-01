@@ -46,7 +46,6 @@ describe('hooks', () => {
         loadRemoteArgs = args;
       },
     });
-
     const options = {
       name: '@federation/hooks',
       remotes: [
@@ -71,16 +70,15 @@ describe('hooks', () => {
     expect(beforeInitArgs.userOptions.plugins).toEqual(
       expect.arrayContaining(options.plugins),
     );
+    assert(initArgs, "initArgs can't be undefined");
     expect(initArgs).toMatchObject({
       options: GM.options,
       origin: GM,
     });
-    assert(initArgs, "initArgs can't be undefined");
     expect(initArgs.options.plugins).toEqual(
       expect.arrayContaining(options.plugins),
     );
-
-    // modify ./sub expose to ./add
+    // Modify ./sub to expose ./add
     const module =
       await GM.loadRemote<(...args: Array<number>) => number>('@demo/main/sub');
     assert(module, 'loadRemote should return a module');
@@ -229,26 +227,19 @@ describe('hooks', () => {
       shared: [],
       exposes: [],
     };
-
     const responseBody = new Response(JSON.stringify(data), {
       status: 200,
       statusText: 'OK',
       headers: { 'Content-Type': 'application/json' },
     });
-
-    const fetchPlugin: () => FederationRuntimePlugin = function () {
-      return {
-        name: 'fetch-plugin',
-        fetch(url, options) {
-          if (
-            url === 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json'
-          ) {
-            return Promise.resolve(responseBody);
-          }
-        },
-      };
-    };
-
+    const fetchPlugin: () => FederationRuntimePlugin = () => ({
+      name: 'fetch-plugin',
+      fetch(url, options) {
+        if (url === 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json') {
+          return Promise.resolve(responseBody);
+        }
+      },
+    });
     const INSTANCE = new FederationHost({
       name: '@loader-hooks/fetch',
       remotes: [
@@ -259,7 +250,6 @@ describe('hooks', () => {
       ],
       plugins: [fetchPlugin()],
     });
-
     const res = await INSTANCE.loadRemote<() => string>(
       '@loader-hooks/app2/say',
     );
