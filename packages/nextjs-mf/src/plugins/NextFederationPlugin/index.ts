@@ -55,6 +55,7 @@ export class NextFederationPlugin {
    * @param compiler The webpack compiler object.
    */
   apply(compiler: Compiler) {
+    compiler.options.devtool = false;
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] ||
       getWebpackPath(compiler, { framework: 'nextjs' });
@@ -227,7 +228,7 @@ export class NextFederationPlugin {
       dts: this._options.dts ?? false,
       shareStrategy: this._options.shareStrategy ?? 'loaded-first',
       experiments: {
-        federationRuntime: 'hoisted',
+        federationRuntime: 'use-host',
       },
     };
   }

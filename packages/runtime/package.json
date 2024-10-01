@@ -46,6 +46,9 @@
       ],
       "types": [
         "./dist/types.cjs.d.ts"
+      ],
+      "embedded": [
+        "./dist/embedded.cjs.d.ts"
       ]
     }
   },

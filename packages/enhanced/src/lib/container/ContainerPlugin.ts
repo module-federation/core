@@ -72,7 +72,6 @@ class ContainerPlugin {
     };
   }
 
-  // container should not be affected by splitChunks
   static patchChunkSplit(compiler: Compiler, name: string): void {
     const { splitChunks } = compiler.options.optimization;
     const patchChunkSplit = (
@@ -88,7 +87,6 @@ class ContainerPlugin {
         case 'string':
         case 'function':
           break;
-        //  cacheGroup.chunks will inherit splitChunks.chunks, so you only need to modify the chunks that are set separately
         case 'object':
           {
             if (cacheGroup instanceof RegExp) {
@@ -143,7 +141,6 @@ class ContainerPlugin {
     if (!splitChunks) {
       return;
     }
-    // patch splitChunk.chunks
     patchChunkSplit(splitChunks);
 
     const cacheGroups = splitChunks.cacheGroups;
@@ -151,7 +148,6 @@ class ContainerPlugin {
       return;
     }
 
-    // patch splitChunk.cacheGroups[key].chunks
     Object.keys(cacheGroups).forEach((cacheGroupKey) => {
       patchChunkSplit(cacheGroups[cacheGroupKey]);
     });
@@ -241,14 +237,12 @@ class ContainerPlugin {
               resolve(undefined);
             },
           );
-        }).catch(callback);
+        }).catch((error) => callback(error));
 
         callback();
       },
     );
 
-    // this will still be copied into child compiler, so it needs a check to avoid running hook on child
-    // we have to use finishMake in order to check the entries created and see if there are multiple runtime chunks
     compiler.hooks.finishMake.tapAsync(
       PLUGIN_NAME,
       async (compilation: Compilation, callback) => {
