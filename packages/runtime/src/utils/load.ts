@@ -217,29 +217,23 @@ export async function getRemoteEntry({
 
   if (!globalLoading[uniqueKey]) {
     const loadEntryHook = origin.remoteHandler.hooks.lifecycle.loadEntry;
-    if (loadEntryHook.listeners.size) {
-      globalLoading[uniqueKey] = loadEntryHook
-        .emit({
-          loaderHook: origin.loaderHook,
-          remoteInfo,
-          remoteEntryExports,
-        })
-        .then((res) => res || undefined);
-    } else {
-      const loaderHook = origin.loaderHook;
-      if (!isBrowserEnv()) {
-        globalLoading[uniqueKey] = loadEntryNode({
-          remoteInfo,
-          loaderHook,
-        });
-      } else {
-        globalLoading[uniqueKey] = loadEntryDom({
-          remoteInfo,
-          remoteEntryExports,
-          loaderHook,
-        });
-      }
-    }
+    const createScriptHook = origin.loaderHook.lifecycle.createScript;
+    const loaderHook = origin.loaderHook;
+
+    globalLoading[uniqueKey] = loadEntryHook
+      .emit({
+        loaderHook,
+        remoteInfo,
+        remoteEntryExports,
+      })
+      .then((res) => {
+        if (res) {
+          return res;
+        }
+        return isBrowserEnv()
+          ? loadEntryDom({ remoteInfo, remoteEntryExports, loaderHook })
+          : loadEntryNode({ remoteInfo, loaderHook });
+      });
   }
 
   return globalLoading[uniqueKey];
