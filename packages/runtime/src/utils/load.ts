@@ -62,12 +62,12 @@ async function loadEntryScript({
   name,
   globalName,
   entry,
-  createScriptHook,
+  loaderHook,
 }: {
   name: string;
   globalName: string;
   entry: string;
-  createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
+  loaderHook: FederationHost['loaderHook'];
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -81,7 +81,7 @@ async function loadEntryScript({
   return loadScript(entry, {
     attrs: {},
     createScriptHook: (url, attrs) => {
-      const res = createScriptHook.emit({ url, attrs });
+      const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
 
       if (!res) return;
 
@@ -122,11 +122,11 @@ async function loadEntryScript({
 async function loadEntryDom({
   remoteInfo,
   remoteEntryExports,
-  createScriptHook,
+  loaderHook,
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
-  createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
+  loaderHook: FederationHost['loaderHook'];
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   switch (type) {
@@ -136,16 +136,16 @@ async function loadEntryDom({
     case 'system':
       return loadSystemJsEntry({ entry, remoteEntryExports });
     default:
-      return loadEntryScript({ entry, globalName, name, createScriptHook });
+      return loadEntryScript({ entry, globalName, name, loaderHook });
   }
 }
 
 async function loadEntryNode({
   remoteInfo,
-  createScriptHook,
+  loaderHook,
 }: {
   remoteInfo: RemoteInfo;
-  createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
+  loaderHook: FederationHost['loaderHook'];
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
@@ -159,16 +159,18 @@ async function loadEntryNode({
 
   return loadScriptNode(entry, {
     attrs: { name, globalName, type },
-    createScriptHook: (url, attrs) => {
-      const res = createScriptHook.emit({ url, attrs });
+    loaderHook: {
+      createScriptHook: (url, attrs) => {
+        const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
 
-      if (!res) return;
+        if (!res) return;
 
-      if ('url' in res) {
-        return res;
-      }
+        if ('url' in res) {
+          return res;
+        }
 
-      return;
+        return;
+      },
     },
   })
     .then(() => {
@@ -218,23 +220,23 @@ export async function getRemoteEntry({
     if (loadEntryHook.listeners.size) {
       globalLoading[uniqueKey] = loadEntryHook
         .emit({
-          createScriptHook: origin.loaderHook.lifecycle.createScript,
+          loaderHook: origin.loaderHook,
           remoteInfo,
           remoteEntryExports,
         })
         .then((res) => res || undefined);
     } else {
-      const createScriptHook = origin.loaderHook.lifecycle.createScript;
+      const loaderHook = origin.loaderHook;
       if (!isBrowserEnv()) {
         globalLoading[uniqueKey] = loadEntryNode({
           remoteInfo,
-          createScriptHook,
+          loaderHook,
         });
       } else {
         globalLoading[uniqueKey] = loadEntryDom({
           remoteInfo,
           remoteEntryExports,
-          createScriptHook,
+          loaderHook,
         });
       }
     }

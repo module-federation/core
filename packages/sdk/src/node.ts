@@ -1,4 +1,4 @@
-import { CreateScriptHookNode } from './types';
+import { CreateScriptHookNode, FetchHook } from './types';
 
 function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
@@ -22,12 +22,10 @@ const loadNodeFetch = async (): Promise<typeof fetch> => {
 const lazyLoaderHookFetch = async (
   input: RequestInfo | URL,
   init?: RequestInit,
+  loaderHook?: any,
 ): Promise<Response> => {
-  // @ts-ignore
-  const loaderHooks = __webpack_require__.federation.instance.loaderHook;
-
   const hook = (url: RequestInfo | URL, init: RequestInit) => {
-    return loaderHooks.lifecycle.fetch.emit(url, init);
+    return loaderHook.lifecycle.fetch.emit(url, init);
   };
 
   const res = await hook(input, init || {});
@@ -44,10 +42,13 @@ export function createScriptNode(
   url: string,
   cb: (error?: Error, scriptContext?: any) => void,
   attrs?: Record<string, any>,
-  createScriptHook?: CreateScriptHookNode,
+  loaderHook?: {
+    createScriptHook?: CreateScriptHookNode;
+    fetch?: FetchHook;
+  },
 ) {
-  if (createScriptHook) {
-    const hookResult = createScriptHook(url);
+  if (loaderHook?.createScriptHook) {
+    const hookResult = loaderHook.createScriptHook(url);
     if (hookResult && typeof hookResult === 'object' && 'url' in hookResult) {
       url = hookResult.url;
     }
@@ -63,20 +64,9 @@ export function createScriptNode(
   }
 
   const getFetch = async (): Promise<typeof fetch> => {
-    //@ts-ignore
-    if (typeof __webpack_require__ !== 'undefined') {
-      try {
-        //@ts-ignore
-        const loaderHooks = __webpack_require__.federation.instance.loaderHook;
-        if (loaderHooks.lifecycle.fetch) {
-          return lazyLoaderHookFetch;
-        }
-      } catch (e) {
-        console.warn(
-          'federation.instance.loaderHook.lifecycle.fetch failed:',
-          e,
-        );
-      }
+    if (loaderHook?.fetch) {
+      return (input: RequestInfo | URL, init?: RequestInit) =>
+        lazyLoaderHookFetch(input, init, loaderHook);
     }
 
     return typeof fetch === 'undefined' ? loadNodeFetch() : fetch;
@@ -162,7 +152,9 @@ export function loadScriptNode(
   url: string,
   info: {
     attrs?: Record<string, any>;
-    createScriptHook?: CreateScriptHookNode;
+    loaderHook?: {
+      createScriptHook?: CreateScriptHookNode;
+    };
   },
 ) {
   return new Promise<void>((resolve, reject) => {
@@ -181,7 +173,7 @@ export function loadScriptNode(
         }
       },
       info.attrs,
-      info.createScriptHook,
+      info.loaderHook,
     );
   });
 }
