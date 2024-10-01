@@ -25,7 +25,7 @@ describe('api', () => {
     expect(FM1).toBe(FM2);
   });
 
-  it('init with same name with diffrent version', () => {
+  it('init with same name with different version', () => {
     // get same instance
     const FM1 = init({
       name: '@federation/same-name-with-version',
@@ -79,7 +79,7 @@ describe('api', () => {
     );
   });
 
-  it('init with diffrent same name', () => {
+  it('init with different same name', () => {
     // get different instance
     const FM3 = init({
       name: '@federation/main3',
