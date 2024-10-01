@@ -28,12 +28,19 @@ export class FederationManager {
   }
   init(options: UserOptions): FederationHost {
     // Retrieve the same instance with the same name
-    const instance = getGlobalFederationInstance(options.name, options.version);
+    const instance = getGlobalFederationInstance(
+      options.name,
+      options.version,
+      this._bundlerId,
+    );
     if (!instance) {
       // Retrieve debug constructor
       const FederationConstructor =
         getGlobalFederationConstructor() || FederationHost;
-      this.federationInstance = new FederationConstructor(options);
+      this.federationInstance = new FederationConstructor(
+        options,
+        this._bundlerId,
+      );
       setGlobalFederationInstance(this.federationInstance);
       return this.federationInstance;
     } else {
