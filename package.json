@@ -159,7 +159,7 @@
     "@vitest/coverage-istanbul": "1.6.0",
     "@vitest/coverage-v8": "1.6.0",
     "@vitest/ui": "1.6.0",
-    "autoprefixer": "10.4.19",
+    "autoprefixer": "10.4.20",
     "babel-jest": "29.7.0",
     "babel-loader": "9.2.1",
     "classnames": "2.5.1",
