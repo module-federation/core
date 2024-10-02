@@ -10,6 +10,7 @@ import {
   setGlobalFederationConstructor,
 } from '../src/global';
 import { requestList } from './mock/env';
+
 describe('matchRemote', () => {
   it('matches default export with pkgName', () => {
     const matchInfo = matchRemoteWithNameAndExpose(
@@ -104,6 +105,7 @@ describe('matchRemote', () => {
     });
   });
 });
+
 // eslint-disable-next-line max-lines-per-function
 describe('loadRemote', () => {
   it('api functionality', () => {
@@ -146,6 +148,7 @@ describe('loadRemote', () => {
           'http://localhost:1111/resources/app2/federation-remote-entry.js',
       },
     });
+
     const FederationInstance = new FederationHost({
       name: '@federation-test/globalinfo',
       remotes: [
@@ -155,6 +158,7 @@ describe('loadRemote', () => {
         },
       ],
     });
+
     const module = await FederationInstance.loadRemote<() => string>(
       '@federation-test/app2/say',
     );
@@ -190,6 +194,7 @@ describe('loadRemote', () => {
         remoteEntry: 'federation-remote-entry.js',
       },
     });
+
     const FM = new FederationHost({
       name: 'xxxxx',
       remotes: [
@@ -203,9 +208,11 @@ describe('loadRemote', () => {
         },
       ],
     });
+
     const module = await FM.loadRemote<() => string>('@load-remote/app1/say');
     assert(module, 'module should be a function');
     expect(module()).toBe('hello app1');
+
     const module2 = await FM.loadRemote<() => string>('@load-remote/app2/say');
     assert(module2, 'module should be a function');
     expect(module2()).toBe('hello app2');
@@ -243,6 +250,7 @@ describe('loadRemote', () => {
           'http://localhost:1111/resources/app2/federation-remote-entry.js',
       },
     });
+
     const FederationInstance = new FederationHost({
       name: '@federation-test/compatible',
       remotes: [
@@ -344,6 +352,7 @@ describe('loadRemote', () => {
     reset();
   });
 });
+
 describe('loadRemote with manifest.json', () => {
   it('handles duplicate request to manifest.json', async () => {
     const FM = new FederationHost({
@@ -356,6 +365,7 @@ describe('loadRemote with manifest.json', () => {
         },
       ],
     });
+
     const FM2 = new FederationHost({
       name: '@demo/host2',
       remotes: [
@@ -366,6 +376,7 @@ describe('loadRemote with manifest.json', () => {
         },
       ],
     });
+
     const [module, , module2] = await Promise.all([
       FM.loadRemote<Promise<() => string>>('@demo/main/say'),
       FM.loadRemote<Promise<() => string>>('@demo/main/add'),
@@ -393,12 +404,14 @@ describe('loadRemote with manifest.json', () => {
         },
       ],
     });
+
     const app1Module = await FM.loadRemote<Promise<() => string>>(
       '@circulate-deps/app2/say',
     );
     assert(app1Module);
     const res = await app1Module();
     expect(res).toBe('@circulate-deps/app2');
+
     Global.__FEDERATION__.__INSTANCES__ = [];
     setGlobalFederationConstructor(undefined, true);
   });
@@ -413,6 +426,7 @@ describe('loadRemote with manifest.json', () => {
         },
       ],
     });
+
     const [module, ,] = await Promise.all([
       FM.loadRemote<Promise<() => string>>('@demo/main/say'),
     ]);
@@ -468,6 +482,7 @@ describe('lazy loadRemote and add remote into snapshot', () => {
     const beforeHostRemotesInfo = hostModuleInfo.remotesInfo;
     const beforeRemotesLength = Object.keys(beforeHostRemotesInfo).length;
     expect(beforeRemotesLength).toBe(0);
+
     await federationInstance.loadRemote('app2/say');
     const afterHostRemotesInfo = hostModuleInfo.remotesInfo;
     const afterRemotesLength = Object.keys(afterHostRemotesInfo).length;
@@ -489,6 +504,7 @@ describe('lazy loadRemote and add remote into snapshot', () => {
         remoteEntry: 'federation-remote-entry.js',
       },
     });
+
     const federationInstance = new FederationHost({
       name: '@demo/app1',
       remotes: [
@@ -509,6 +525,7 @@ describe('lazy loadRemote and add remote into snapshot', () => {
     const beforeHostRemotesInfo = hostModuleInfo.remotesInfo;
     const beforeRemotesLength = Object.keys(beforeHostRemotesInfo).length;
     expect(beforeRemotesLength).toBe(0);
+
     await federationInstance.loadRemote('main/say');
     const afterHostRemotesInfo = hostModuleInfo.remotesInfo;
     const afterRemotesLength = Object.keys(afterHostRemotesInfo).length;
@@ -516,6 +533,7 @@ describe('lazy loadRemote and add remote into snapshot', () => {
     reset();
   });
 });
+
 describe('loadRemote', () => {
   it('loads remote synchronously', async () => {
     const jsSyncAssetPath = 'resources/load-remote/app2/say.sync.js';

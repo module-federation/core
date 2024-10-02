@@ -1,4 +1,4 @@
-import { describe, it, beforeEach, expect } from 'vitest';
+import { describe, it } from 'vitest';
 import { init } from '../src/index';
 import { mockStaticServer } from './mock/utils';
 import { Global, addGlobalSnapshot } from '../src/global';
@@ -7,10 +7,12 @@ interface LinkInfo {
   href: string;
   rel: string;
 }
+
 interface ScriptInfo {
   src: string;
   crossorigin: string;
 }
+
 function getLinkInfos(): Array<LinkInfo> {
   const links = document.querySelectorAll('link');
   return Array.from(links).map((link) => ({
@@ -221,6 +223,7 @@ describe('preload-remote inBrowser', () => {
         depsRemote: [{ nameOrAlias: '@federation/sub1-button' }],
       },
     ]);
+
     expect(getPreloadElInfos()).toMatchSnapshot();
     expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(2);
     expect(
@@ -233,7 +236,8 @@ describe('preload-remote inBrowser', () => {
     ).toBe(true);
     reset();
   });
-  it('2 preload with all config', async () => {
+
+  it('2 preload with all config ', async () => {
     const reset = addGlobalSnapshot(mockSnapshot);
     expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(0);
     await FMInstance.preloadRemote([
@@ -242,6 +246,7 @@ describe('preload-remote inBrowser', () => {
         resourceCategory: 'all',
       },
     ]);
+
     expect(getPreloadElInfos()).toMatchSnapshot();
     expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(3);
     expect(
@@ -257,8 +262,10 @@ describe('preload-remote inBrowser', () => {
     ).toBe(true);
     reset();
   });
-  it('3 preload with expose config', async () => {
+
+  it('3 preload with expose config ', async () => {
     const reset = addGlobalSnapshot(mockSnapshot);
+
     expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(0);
     await FMInstance.preloadRemote([
       {
@@ -268,10 +275,12 @@ describe('preload-remote inBrowser', () => {
       },
     ]);
     expect(getPreloadElInfos()).toMatchSnapshot();
+
     expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(1);
     expect(
       Global.__FEDERATION__.__PRELOADED_MAP__.get('@federation/sub3/add'),
     ).toBe(true);
+
     await FMInstance.preloadRemote([
       {
         nameOrAlias: '@federation/sub3',

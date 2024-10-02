@@ -1,5 +1,6 @@
 import { assert, describe, it, expect } from 'vitest';
 import { FederationHost } from '../src/index';
+
 describe('FederationHost', () => {
   it('registers new remotes and loads them correctly', async () => {
     const FM = new FederationHost({
@@ -13,6 +14,7 @@ describe('FederationHost', () => {
         },
       ],
     });
+
     const app1Module = await FM.loadRemote<Promise<() => string>>(
       '@register-remotes/app1/say',
     );
@@ -54,6 +56,7 @@ describe('FederationHost', () => {
           'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
       },
     ]);
+
     const app1Module = await FM.loadRemote<Promise<() => string>>(
       '@register-remotes/app1/say',
     );
@@ -79,6 +82,7 @@ describe('FederationHost', () => {
     assert(app1Module);
     const app1Res = await app1Module();
     expect(app1Res).toBe('hello app1 entry1');
+
     FM.registerRemotes(
       [
         {

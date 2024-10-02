@@ -1,5 +1,6 @@
 import { assert, describe, test, it } from 'vitest';
 import { FederationHost } from '../src/index';
+
 describe('FederationHost', () => {
   it('should initialize with provided arguments', () => {
     const GM = new FederationHost({

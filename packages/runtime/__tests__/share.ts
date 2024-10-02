@@ -20,6 +20,7 @@ export const mergeShareInfo1 = {
     },
   },
 };
+
 export const mergeShareInfo2 = {
   name: '@federation/merge-shared',
   remotes: [],
@@ -36,6 +37,7 @@ export const mergeShareInfo2 = {
     },
   },
 };
+
 export const mergeShareInfo3 = {
   name: '@federation/merge-shared3',
   remotes: [],
@@ -52,6 +54,7 @@ export const mergeShareInfo3 = {
     },
   },
 };
+
 export const localMergeShareInfos: Options['shared'] = {
   react: [
     {
@@ -86,6 +89,7 @@ export const localMergeShareInfos: Options['shared'] = {
     },
   ],
 };
+
 export const arrayShared = {
   name: '@federation/array-shared',
   remotes: [],
@@ -114,9 +118,11 @@ export const arrayShared = {
     ],
   },
 };
+
 export const arraySharedInfos = {
   'react-dom': arrayShared.shared['react-dom'],
 };
+
 export const shareInfoWithoutLibAndGetConsumer = {
   name: '@federation/shared-config-consumer',
   remotes: [],
@@ -131,6 +137,7 @@ export const shareInfoWithoutLibAndGetConsumer = {
     },
   },
 };
+
 export const shareInfoWithoutLibAndGetProvider = {
   name: '@federation/shared-config-provider',
   remotes: [],

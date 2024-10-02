@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { init } from '../src';
+
 // eslint-disable-next-line max-lines-per-function
 describe('api', () => {
   it('initializes and validates API structure', () => {
@@ -53,6 +54,7 @@ describe('api', () => {
         },
       ],
     });
+    // merge remotes
     expect(FM1.options.remotes).toEqual(
       expect.arrayContaining([
         {
@@ -81,6 +83,7 @@ describe('api', () => {
     });
     expect(FM3).not.toBe(FM4);
   });
+
   it('alias check', () => {
     // 校验 alias 是否等于 remote.name 和 remote.alias 的前缀，如果是则报错
     // 因为引用支持多级路径的引用时无法保证名称是否唯一，所以不支持 alias 为 remote.name 的前缀
@@ -118,6 +121,7 @@ describe('api', () => {
     }).toThrow(
       /The alias @scope of remote @scope\/component is not allowed to be the prefix of @scope\/button name or alias/,
     );
+
     expect(() => {
       init({
         name: '@federation/init-alias1',

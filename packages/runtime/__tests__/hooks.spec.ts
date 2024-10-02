@@ -46,6 +46,7 @@ describe('hooks', () => {
         loadRemoteArgs = args;
       },
     });
+
     const options = {
       name: '@federation/hooks',
       remotes: [
@@ -70,11 +71,11 @@ describe('hooks', () => {
     expect(beforeInitArgs.userOptions.plugins).toEqual(
       expect.arrayContaining(options.plugins),
     );
-    assert(initArgs, "initArgs can't be undefined");
     expect(initArgs).toMatchObject({
       options: GM.options,
       origin: GM,
     });
+    assert(initArgs, "initArgs can't be undefined");
     expect(initArgs.options.plugins).toEqual(
       expect.arrayContaining(options.plugins),
     );
@@ -227,6 +228,7 @@ describe('hooks', () => {
       shared: [],
       exposes: [],
     };
+
     const responseBody = new Response(JSON.stringify(data), {
       status: 200,
       statusText: 'OK',
@@ -250,6 +252,7 @@ describe('hooks', () => {
       ],
       plugins: [fetchPlugin()],
     });
+
     const res = await INSTANCE.loadRemote<() => string>(
       '@loader-hooks/app2/say',
     );
