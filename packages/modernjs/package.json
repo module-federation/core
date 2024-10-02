@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "files": [
     "dist/",
     "types.d.ts",
@@ -69,7 +69,7 @@
     "hoist-non-react-statics": "3.3.2"
   },
   "devDependencies": {
-    "@types/hoist-non-react-statics": "3.3.2",
+    "@types/hoist-non-react-statics": "3.3.5",
     "@module-federation/manifest": "workspace:*",
     "@modern-js/app-tools": "2.57.0",
     "@modern-js/core": "2.57.0",
