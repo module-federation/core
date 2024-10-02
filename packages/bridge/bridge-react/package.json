@@ -50,7 +50,7 @@
   "devDependencies": {
     "@testing-library/react": "15.0.7",
     "@types/react": "18.2.79",
-    "@types/react-dom": "18.2.25",
+    "@types/react-dom": "18.3.0",
     "@vitejs/plugin-react": "^4.3.0",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
