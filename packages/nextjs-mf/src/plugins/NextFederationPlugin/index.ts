@@ -8,7 +8,7 @@
 import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
-} from '@module-federation/utilities';
+} from './next-fragments';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
@@ -69,20 +69,6 @@ export class NextFederationPlugin {
     this.applyConditionalPlugins(compiler, isServer);
 
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
-    modifyEntry({
-      compiler,
-      prependEntry: (entry) => {
-        Object.keys(entry).forEach((entryName) => {
-          const entryItem = entry[entryName];
-          if (!entryName.startsWith('pages/api')) return;
-          if (!entryItem.import) return;
-          // unpatch entry of webpack api runtime
-          entryItem.import = entryItem.import.filter((i) => {
-            return !i.includes('.federation/entry');
-          });
-        });
-      },
-    });
 
     const noop = this.getNoopPath();
 

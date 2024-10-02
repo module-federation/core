@@ -113,3 +113,17 @@ export const applyPathFixes = (
     }
   }
 };
+
+export interface NextFederationPluginExtraOptions {
+  enableImageLoaderFix?: boolean;
+  enableUrlLoaderFix?: boolean;
+  exposePages?: boolean;
+  skipSharingNextInternals?: boolean;
+  automaticPageStitching?: boolean;
+  debug?: boolean;
+}
+
+export interface NextFederationPluginOptions
+  extends moduleFederationPlugin.ModuleFederationPluginOptions {
+  extraOptions: NextFederationPluginExtraOptions;
+}
