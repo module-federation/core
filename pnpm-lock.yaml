@@ -343,8 +343,8 @@ importers:
         specifier: 13.14.2
         version: 13.14.2
       directory-tree:
-        specifier: 3.5.1
-        version: 3.5.1
+        specifier: 3.5.2
+        version: 3.5.2
       esbuild:
         specifier: 0.23.0
         version: 0.23.0
@@ -23491,8 +23491,8 @@ packages:
     dependencies:
       path-type: 4.0.0
 
-  /directory-tree@3.5.1:
-    resolution: {integrity: sha512-HqjZ49fDzUnKYUhHxVw9eKBqbQ+lL0v4kSBInlDlaktmLtGoV9tC54a6A0ZfYeIrkMHWTE6MwwmUXP477+UEKQ==}
+  /directory-tree@3.5.2:
+    resolution: {integrity: sha512-DsOqeZEHkZnZrVOJG3mE/J9M6J8PulImiC6I1ZpoprVlfno8GvLOPDMkxiJihklLK7B9aVudG463L1+S/kzjiw==}
     engines: {node: '>=10.0'}
     hasBin: true
     dependencies:

@@ -167,7 +167,7 @@
     "concurrently": "8.2.2",
     "copy-webpack-plugin": "11.0.0",
     "cypress": "13.14.2",
-    "directory-tree": "3.5.1",
+    "directory-tree": "3.5.2",
     "esbuild": "0.23.0",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.3",
