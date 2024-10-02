@@ -79,8 +79,7 @@ describe('hooks', () => {
     expect(initArgs.options.plugins).toEqual(
       expect.arrayContaining(options.plugins),
     );
-
-    // modify ./sub expose to ./add
+    // Modify ./sub to expose ./add
     const module =
       await GM.loadRemote<(...args: Array<number>) => number>('@demo/main/sub');
     assert(module, 'loadRemote should return a module');
@@ -235,20 +234,14 @@ describe('hooks', () => {
       statusText: 'OK',
       headers: { 'Content-Type': 'application/json' },
     });
-
-    const fetchPlugin: () => FederationRuntimePlugin = function () {
-      return {
-        name: 'fetch-plugin',
-        fetch(url, options) {
-          if (
-            url === 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json'
-          ) {
-            return Promise.resolve(responseBody);
-          }
-        },
-      };
-    };
-
+    const fetchPlugin: () => FederationRuntimePlugin = () => ({
+      name: 'fetch-plugin',
+      fetch(url, options) {
+        if (url === 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json') {
+          return Promise.resolve(responseBody);
+        }
+      },
+    });
     const INSTANCE = new FederationHost({
       name: '@loader-hooks/fetch',
       remotes: [
