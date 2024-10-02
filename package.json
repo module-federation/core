@@ -123,7 +123,7 @@
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^10.0.7",
+    "@semantic-release/github": "^11.0.0",
     "@semantic-release/npm": "^11.0.0",
     "@storybook/addon-essentials": "8.3.3",
     "@storybook/core-common": "8.1.11",
