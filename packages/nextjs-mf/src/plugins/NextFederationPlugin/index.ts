@@ -126,8 +126,8 @@ export class NextFederationPlugin {
 
   private validateOptions(compiler: Compiler): boolean {
     const manifestPlugin = compiler.options.plugins.find(
-      (p: WebpackPluginInstance) =>
-        p?.constructor.name === 'BuildManifestPlugin',
+      (p): p is WebpackPluginInstance =>
+        p?.constructor?.name === 'BuildManifestPlugin',
     );
 
     if (manifestPlugin) {
