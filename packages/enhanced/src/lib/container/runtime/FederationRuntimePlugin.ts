@@ -373,7 +373,7 @@ class FederationRuntimePlugin {
       runtimePath = runtimePath.replace('.cjs', '.esm');
     }
 
-    const alias = compiler.options.resolve.alias || {};
+    const alias: any = compiler.options.resolve.alias || {};
     alias['@module-federation/runtime$'] =
       alias['@module-federation/runtime$'] || runtimePath;
     alias['@module-federation/runtime-tools$'] =
@@ -388,7 +388,7 @@ class FederationRuntimePlugin {
 
   apply(compiler: Compiler) {
     const useModuleFederationPlugin = compiler.options.plugins.find(
-      (p: WebpackPluginInstance) => {
+      (p): p is WebpackPluginInstance & { _options?: any } => {
         if (typeof p !== 'object' || !p) {
           return false;
         }
@@ -402,7 +402,7 @@ class FederationRuntimePlugin {
     }
 
     const useContainerPlugin = compiler.options.plugins.find(
-      (p: WebpackPluginInstance) => {
+      (p): p is WebpackPluginInstance & { _options?: any } => {
         if (typeof p !== 'object' || !p) {
           return false;
         }
