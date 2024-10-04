@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/retry-plugin/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -66,6 +67,5 @@
         ]
       }
     }
-  },
-  "tags": ["type:pkg"]
+  }
 }

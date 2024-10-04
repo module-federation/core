@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dts-plugin",
-  "version": "0.6.6",
+  "version": "0.6.9",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -60,7 +60,7 @@
     "ws": "8.17.1"
   },
   "devDependencies": {
-    "@types/ws": "8.5.10",
+    "@types/ws": "8.5.12",
     "@types/koa": "2.15.0",
     "@types/node-schedule": "2.1.7",
     "@module-federation/runtime": "workspace:*",

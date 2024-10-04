@@ -1,8 +1,5 @@
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import {
-  ModuleFederationPlugin,
-  AsyncBoundaryPlugin,
-} from '@module-federation/enhanced';
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
   dev: {
@@ -30,7 +27,7 @@ export default defineConfig({
     babel(config) {
       config.sourceType = 'unambiguous';
     },
-    webpack: (config, { webpack, appendPlugins }) => {
+    webpack: (config, { appendPlugins }) => {
       if (config?.output) {
         config.output.publicPath = 'http://127.0.0.1:4001/';
         config.output.uniqueName = 'modern-js-app1';
@@ -46,14 +43,28 @@ export default defineConfig({
           runtimePlugins: ['./runtimePlugin.ts'],
           filename: 'remoteEntry.js',
           shared: {
-            react: { singleton: true },
-            'react-dom': { singleton: true },
+            'react/': {
+              singleton: true,
+              requiredVersion: '^18.3.1',
+            },
+            react: {
+              singleton: true,
+              requiredVersion: '^18.3.1',
+            },
+            'react-dom': {
+              singleton: true,
+              requiredVersion: '^18.3.1',
+            },
+            'react-dom/': {
+              singleton: true,
+              requiredVersion: '^18.3.1',
+            },
           },
           experiments: {
             federationRuntime: 'hoisted',
           },
           dataPrefetch: true,
-        }),
+        }) as any,
       ]);
     },
   },

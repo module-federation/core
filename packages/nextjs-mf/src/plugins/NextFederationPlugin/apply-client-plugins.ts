@@ -1,8 +1,8 @@
 import type { Compiler } from 'webpack';
-import { NextFederationPluginExtraOptions } from '@module-federation/utilities';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
+import type { NextFederationPluginExtraOptions } from './next-fragments';
 
 /**
  * Applies client-specific plugins.
