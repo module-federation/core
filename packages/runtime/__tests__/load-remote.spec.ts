@@ -12,7 +12,7 @@ import {
 import { requestList } from './mock/env';
 
 describe('matchRemote', () => {
-  it('match default export with pkgName', () => {
+  it('matches default export with pkgName', () => {
     const matchInfo = matchRemoteWithNameAndExpose(
       [
         {
@@ -34,8 +34,7 @@ describe('matchRemote', () => {
       version: '1.0.0',
     });
   });
-
-  it('match default export with alias', () => {
+  it('matches default export with alias', () => {
     const matchInfo = matchRemoteWithNameAndExpose(
       [
         {
@@ -59,8 +58,7 @@ describe('matchRemote', () => {
       alias: 'hello',
     });
   });
-
-  it('match pkgName', () => {
+  it('matches pkgName', () => {
     const matchInfo = matchRemoteWithNameAndExpose(
       [
         {
@@ -82,8 +80,7 @@ describe('matchRemote', () => {
       version: '1.0.0',
     });
   });
-
-  it('match alias', () => {
+  it('matches alias', () => {
     const matchInfo = matchRemoteWithNameAndExpose(
       [
         {
@@ -111,7 +108,7 @@ describe('matchRemote', () => {
 
 // eslint-disable-next-line max-lines-per-function
 describe('loadRemote', () => {
-  it('api', () => {
+  it('api functionality', () => {
     const FederationInstance = new FederationHost({
       name: '@federation-test/loadRemote-api',
       remotes: [],
@@ -221,8 +218,7 @@ describe('loadRemote', () => {
     expect(module2()).toBe('hello app2');
     reset();
   });
-
-  it('compatible with old structor', async () => {
+  it('is compatible with old structure', async () => {
     const reset = addGlobalSnapshot({
       '@federation-test/compatible': {
         globalName: '',
@@ -271,8 +267,7 @@ describe('loadRemote', () => {
     expect(module()).toBe('hello app2');
     reset();
   });
-
-  it('remote entry url with query', async () => {
+  it('handles remote entry URL with query', async () => {
     const FederationInstance = new FederationHost({
       name: '@federation-test/compatible',
       remotes: [
@@ -289,8 +284,7 @@ describe('loadRemote', () => {
     assert(module, 'module should be a function');
     expect(module()).toBe('hello app2');
   });
-
-  it('different instance with same module', async () => {
+  it('handles different instances with the same module', async () => {
     const reset = addGlobalSnapshot({
       '@module-federation/load-remote-different-instance': {
         buildVersion: 'custom',
@@ -360,7 +354,7 @@ describe('loadRemote', () => {
 });
 
 describe('loadRemote with manifest.json', () => {
-  it('duplicate request manifest.json', async () => {
+  it('handles duplicate request to manifest.json', async () => {
     const FM = new FederationHost({
       name: '@demo/host',
       remotes: [
@@ -398,8 +392,7 @@ describe('loadRemote with manifest.json', () => {
       ),
     ).toBe(1);
   });
-
-  it('circulate deps', async () => {
+  it('handles circular dependencies', async () => {
     setGlobalFederationConstructor(FederationHost, true);
     const FM = init({
       name: '@circulate-deps/app1',
@@ -422,8 +415,7 @@ describe('loadRemote with manifest.json', () => {
     Global.__FEDERATION__.__INSTANCES__ = [];
     setGlobalFederationConstructor(undefined, true);
   });
-
-  it('manifest.json with query', async () => {
+  it('handles manifest.json with query', async () => {
     const FM = new FederationHost({
       name: '@demo/host',
       remotes: [
@@ -442,9 +434,8 @@ describe('loadRemote with manifest.json', () => {
     expect(module()).toBe('hello world');
   });
 });
-
-describe('lazy loadRemote add remote into snapshot', () => {
-  it('load remoteEntry', async () => {
+describe('lazy loadRemote and add remote into snapshot', () => {
+  it('loads remoteEntry', async () => {
     const reset = addGlobalSnapshot({
       '@demo/app2': {
         buildVersion: '1.0.2',
@@ -498,8 +489,7 @@ describe('lazy loadRemote add remote into snapshot', () => {
     expect(afterRemotesLength).toBe(1);
     reset();
   });
-
-  it('load manifest', async () => {
+  it('loads manifest', async () => {
     const reset = addGlobalSnapshot({
       '@demo/app1': {
         globalName: `__FEDERATION_${'@load-remote/app1:custom'}__`,
@@ -545,7 +535,7 @@ describe('lazy loadRemote add remote into snapshot', () => {
 });
 
 describe('loadRemote', () => {
-  it('api', async () => {
+  it('loads remote synchronously', async () => {
     const jsSyncAssetPath = 'resources/load-remote/app2/say.sync.js';
     const remotePublicPath = 'http://localhost:1111/';
     const reset = addGlobalSnapshot({

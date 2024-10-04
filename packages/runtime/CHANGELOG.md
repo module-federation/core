@@ -1,5 +1,21 @@
 # @module-federation/runtime
 
+## 0.6.9
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.9
+
+## 0.6.8
+
+### Patch Changes
+
+- 32db0ac: Manifest protocol to support more than global remote type
+- 6c5f444: load entry to support delegate module responses
+- fac6ecf: fix(runtime): catch init remote error in errorLoadRemote hook
+- Updated dependencies [32db0ac]
+  - @module-federation/sdk@0.6.8
+
 ## 0.6.7
 
 ### Patch Changes

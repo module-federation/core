@@ -34,25 +34,33 @@ export const applyPathFixes = (
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
   options: any,
 ) => {
-  const match = findLoaderForResource(compiler.options.module.rules, {
-    path: path.join(compiler.context, '/something/thing.js'),
-    issuerLayer: undefined,
-    layer: undefined,
-  });
+  const match = findLoaderForResource(
+    compiler.options.module.rules as RuleSetRule[],
+    {
+      path: path.join(compiler.context, '/something/thing.js'),
+      issuerLayer: undefined,
+      layer: undefined,
+    },
+  );
 
-  compiler.options.module.rules.forEach((rule: RuleSetRule) => {
-    // next-image-loader fix which adds remote's hostname to the assets url
-    if (options.enableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
-      injectRuleLoader(rule, {
-        loader: require.resolve('../../loaders/fixImageLoader'),
-      });
-    }
+  compiler.options.module.rules.forEach((rule) => {
+    if (typeof rule === 'object' && rule !== null) {
+      const typedRule = rule as RuleSetRule;
+      // next-image-loader fix which adds remote's hostname to the assets url
+      if (
+        options.enableImageLoaderFix &&
+        hasLoader(typedRule, 'next-image-loader')
+      ) {
+        injectRuleLoader(typedRule, {
+          loader: require.resolve('../../loaders/fixImageLoader'),
+        });
+      }
 
-    // url-loader fix for which adds remote's hostname to the assets url
-    if (options.enableUrlLoaderFix && hasLoader(rule, 'url-loader')) {
-      injectRuleLoader(rule, {
-        loader: require.resolve('../../loaders/fixUrlLoader'),
-      });
+      if (options.enableUrlLoaderFix && hasLoader(typedRule, 'url-loader')) {
+        injectRuleLoader(typedRule, {
+          loader: require.resolve('../../loaders/fixUrlLoader'),
+        });
+      }
     }
   });
 
@@ -80,7 +88,6 @@ export const applyPathFixes = (
       matchCopy = { ...match };
     }
 
-    // Create the first new rule using descriptionData
     const descriptionDataRule: RuleSetRule = {
       ...matchCopy,
       descriptionData: {
@@ -90,7 +97,6 @@ export const applyPathFixes = (
       include: undefined,
     };
 
-    // Create the second new rule using test on regex for /runtimePlugin/
     const testRule: RuleSetRule = {
       ...matchCopy,
       resourceQuery: /runtimePlugin/,
@@ -99,10 +105,10 @@ export const applyPathFixes = (
     };
 
     const oneOfRule = compiler.options.module.rules.find(
-      (rule: RuleSetRule) => {
-        return rule && typeof rule === 'object' && 'oneOf' in rule;
+      (rule): rule is RuleSetRule => {
+        return !!rule && typeof rule === 'object' && 'oneOf' in rule;
       },
-    ) as RuleSetRule;
+    ) as RuleSetRule | undefined;
 
     if (!oneOfRule) {
       compiler.options.module.rules.unshift({
@@ -113,3 +119,17 @@ export const applyPathFixes = (
     }
   }
 };
+
+export interface NextFederationPluginExtraOptions {
+  enableImageLoaderFix?: boolean;
+  enableUrlLoaderFix?: boolean;
+  exposePages?: boolean;
+  skipSharingNextInternals?: boolean;
+  automaticPageStitching?: boolean;
+  debug?: boolean;
+}
+
+export interface NextFederationPluginOptions
+  extends moduleFederationPlugin.ModuleFederationPluginOptions {
+  extraOptions: NextFederationPluginExtraOptions;
+}
