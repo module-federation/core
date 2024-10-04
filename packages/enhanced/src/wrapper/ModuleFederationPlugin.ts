@@ -1,7 +1,12 @@
-import type { WebpackPluginInstance, Compiler } from 'webpack';
+import type {
+  WebpackPluginInstance,
+  Compiler,
+  WebpackPluginFunction,
+} from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type IModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
 import type { ResourceInfo } from '@module-federation/manifest';
+import type { Falsy } from 'webpack/declarations/WebpackOptions';
 
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import path from 'node:path';
@@ -23,7 +28,8 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
   apply(compiler: Compiler) {
     if (
       !compiler.options.plugins.find(
-        (p: WebpackPluginInstance) => p && p['name'] === PLUGIN_NAME,
+        (p: WebpackPluginInstance | WebpackPluginFunction | Falsy) =>
+          p && (p as WebpackPluginInstance)['name'] === PLUGIN_NAME,
       )
     ) {
       compiler.options.plugins.push(this);

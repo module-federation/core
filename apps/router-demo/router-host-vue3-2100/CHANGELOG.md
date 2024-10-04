@@ -1,5 +1,13 @@
 # host-vue3
 
+## 1.0.29
+
+### Patch Changes
+
+- Updated dependencies [70a1708]
+  - @module-federation/enhanced@0.6.9
+  - @module-federation/bridge-vue3@0.6.9
+
 ## 1.0.28
 
 ### Patch Changes
