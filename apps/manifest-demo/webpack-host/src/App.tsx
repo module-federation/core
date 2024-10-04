@@ -1,4 +1,6 @@
 import React, { Suspense, lazy } from 'react';
+// @ts-ignore
+import ReactComponent from 'modern-js-provider/react-component';
 import TestRemoteHook from './test-remote-hook';
 import { loadRemote } from '@module-federation/runtime';
 import LocalBtn from './components/ButtonOldAnt';
@@ -10,8 +12,11 @@ function DynamicRemoteButton() {
   const Comp = React.lazy(async () => {
     //@ts-ignore
     const Button = await loadRemote('dynamic-remote/ButtonOldAnt');
+    console.log('BUTTON');
+    console.log(Button);
     return Button;
   });
+  console.log('loadManifestProvider');
   return (
     <React.Suspense fallback="Loading Button">
       <Comp />
@@ -29,6 +34,7 @@ const WebpackPngRemote = lazy(() => import('remote1/WebpackPng'));
 
 const App = () => (
   <div>
+    <ReactComponent />
     <h2>Manifest Basic Usage</h2>
     <h3>check static remote</h3>
     <table border={1} cellPadding={5}>

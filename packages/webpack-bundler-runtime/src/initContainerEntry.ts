@@ -33,7 +33,9 @@ export function initContainerEntry(
   if (webpackRequire.federation.attachShareScopeMap) {
     webpackRequire.federation.attachShareScopeMap(webpackRequire);
   }
-
+  if (typeof webpackRequire.federation.prefetch === 'function') {
+    webpackRequire.federation.prefetch();
+  }
   // @ts-ignore
   return webpackRequire.I(name, initScope);
 }

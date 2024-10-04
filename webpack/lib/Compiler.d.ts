@@ -62,7 +62,7 @@ declare class Compiler {
   resolverFactory: ResolverFactory;
   infrastructureLogger?: (arg0: string, arg1: LogTypeEnum, arg2: any[]) => void;
   platform: Readonly<PlatformTargetProperties>;
-  options: WebpackOptionsNormalized;
+  options: WebpackOptions;
   context: string;
   requestShortener: RequestShortener;
   cache: Cache;

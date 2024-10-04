@@ -11,6 +11,7 @@ describe('3013-webpack-host/basic', () => {
 
   describe('Image checks', () => {
     it('should check that the home-webpack-png and remote1-webpack-png images are not 404', () => {
+      cy.wait(2000);
       // Get the src attribute of the home-webpack-png image
       cy.get('img.home-webpack-png')
         .invoke('attr', 'src')
@@ -35,6 +36,7 @@ describe('3013-webpack-host/basic', () => {
     });
 
     it('should check that the home-webpack-svg and remote1-webpack-svg images are not 404', () => {
+      cy.wait(2000);
       // Get the src attribute of the home-webpack-png image
       cy.get('img.home-webpack-svg')
         .invoke('attr', 'src')
@@ -61,6 +63,7 @@ describe('3013-webpack-host/basic', () => {
 
   describe('Shared react hook check', () => {
     it('should display text which comes from remote1 hook', () => {
+      cy.wait(1000);
       cy.get('.remote1-text')
         .invoke('html')
         .should('equal', 'Custom hook from localhost:3009 works!');

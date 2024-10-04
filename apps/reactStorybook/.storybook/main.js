@@ -1,11 +1,8 @@
 const nxModuleFederationConfig = require('../module-federation.config');
 
 module.exports = {
-  core: { builder: 'webpack5' },
-  stories: [
-    '../src/app/**/*.stories.mdx',
-    '../src/app/**/*.stories.@(js|jsx|ts|tsx)',
-  ],
+  stories: ['../src/app/**/*.mdx', '../src/app/**/*.stories.@(js|jsx|ts|tsx)'],
+
   addons: [
     '@storybook/addon-essentials',
     '@nx/react/plugins/storybook',
@@ -15,7 +12,19 @@ module.exports = {
         nxModuleFederationConfig: { ...nxModuleFederationConfig },
       },
     },
+    '@chromatic-com/storybook',
   ],
+
+  framework: {
+    name: '@storybook/nextjs',
+    options: {},
+  },
+
+  docs: {},
+
+  typescript: {
+    reactDocgen: 'react-docgen-typescript',
+  },
 };
 
 // To customize your webpack configuration you can use the webpackFinal field.

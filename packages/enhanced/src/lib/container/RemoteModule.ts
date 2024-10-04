@@ -161,8 +161,7 @@ class RemoteModule extends Module {
   override codeGeneration(
     context: CodeGenerationContext,
   ): CodeGenerationResult {
-    const { runtimeTemplate, moduleGraph, chunkGraph } = context;
-    // @ts-ignore
+    const { moduleGraph, chunkGraph } = context;
     const module = moduleGraph.getModule(this.dependencies[0]);
     const id = module && chunkGraph.getModuleId(module);
     const sources = new Map();

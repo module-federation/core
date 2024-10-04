@@ -11,6 +11,7 @@ import {
   composeKeyWithSeparator,
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
+import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import SharePlugin from '../sharing/SharePlugin';
@@ -20,6 +21,7 @@ import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
 import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
+import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -40,7 +42,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   private _patchBundlerConfig(compiler: Compiler): void {
     const { name } = this._options;
     const MFPluginNum = compiler.options.plugins.filter(
-      (p: WebpackPluginInstance) => p && p['name'] === 'ModuleFederationPlugin',
+      (p): p is WebpackPluginInstance =>
+        !!p && (p as any).name === 'ModuleFederationPlugin',
     ).length;
     if (name && MFPluginNum < 2) {
       new compiler.webpack.DefinePlugin({
@@ -64,7 +67,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         compiler,
       );
     }
-    if (options.experiments?.federationRuntime === 'hoisted') {
+    if (options.experiments?.federationRuntime) {
+      new FederationModulesPlugin().apply(compiler);
       new StartupChunkDependenciesPlugin({
         asyncChunkLoading: true,
       }).apply(compiler);
@@ -73,6 +77,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     if (options.dts !== false) {
       new DtsPlugin(options).apply(compiler);
     }
+    new PrefetchPlugin(options).apply(compiler);
 
     new FederationRuntimePlugin(options).apply(compiler);
 
@@ -124,6 +129,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           shareScope: options.shareScope,
           exposes: options.exposes!,
           runtimePlugins: options.runtimePlugins,
+          experiments: options.experiments,
         }).apply(compiler);
       }
       if (

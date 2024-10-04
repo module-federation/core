@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/3000-home",
   "projectType": "application",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/next:build",
@@ -93,6 +94,5 @@
         ]
       }
     }
-  },
-  "tags": []
+  }
 }

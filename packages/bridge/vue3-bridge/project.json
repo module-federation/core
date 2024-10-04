@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/bridge/vue3-bridge/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -10,6 +11,5 @@
         "commands": ["npm run build --prefix packages/bridge/vue3-bridge"]
       }
     }
-  },
-  "tags": ["type:pkg"]
+  }
 }

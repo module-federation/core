@@ -6,6 +6,7 @@ function DynamicRemoteButton() {
   const Comp = React.lazy(async () => {
     //@ts-ignore
     const Button = await loadRemote('dynamic-remote/ButtonOldAnt');
+    console.log(Button);
     return Button;
   });
   return (

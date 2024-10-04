@@ -39,10 +39,12 @@ export class FederatedTypesPlugin {
     );
 
     if (
-      !compiler.options.plugins.some(
-        (p: WebpackPluginInstance) =>
-          SUPPORTED_PLUGINS.indexOf(p?.constructor.name ?? '') !== -1,
-      )
+      !compiler.options.plugins
+        .filter((p): p is WebpackPluginInstance => !!p)
+        .some(
+          (p: WebpackPluginInstance) =>
+            SUPPORTED_PLUGINS.indexOf(p?.constructor.name ?? '') !== -1,
+        )
     ) {
       this.logger.error(
         'Unable to find the Module Federation Plugin, this is plugin no longer provides it by default. Please add it to your webpack config.',

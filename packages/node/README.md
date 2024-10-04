@@ -35,9 +35,10 @@ yarn add @module-federation/node
 ## 🚀 Usage
 
 There are two approaches to using the plugins exported from this package, dependent on your use case.
+
 ### Use as Runtime Plugin
 
-`module-federation/enhanced` supports runtime plugins. 
+`module-federation/enhanced` supports runtime plugins.
 
 ```js
 const { ModuleFederationPlugin } = require('@module-federation/enhanced');
@@ -45,40 +46,37 @@ const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 const options = {
   target: 'async-node',
   output: {
-    chunkFilename: '[id]-[chunkhash].js' // important to hash chunks
+    chunkFilename: '[id]-[chunkhash].js', // important to hash chunks
   },
   plugins: [
     new ModuleFederationPlugin({
       name: 'app1',
       exposes: {},
       remotes: {
-        app2: 'app2@http://'
+        app2: 'app2@http://',
       },
-      runtimePlugins: [
-        require.resolve('@module-federation/node/runtimePlugin')
-      ],
+      runtimePlugins: [require.resolve('@module-federation/node/runtimePlugin')],
       remoteType: 'script',
-      library: { type: 'commonjs-module', name: 'app1' }
-    })
-  ]
+      library: { type: 'commonjs-module', name: 'app1' },
+    }),
+  ],
 };
-
 ```
 
 or you can enable it with some presets via UniversalFederation
 
 ```js
 new UniversalFederationPlugin({
-    name: 'website2',
-    library: { type: 'commonjs-module' },
-    isServer: true, // or false
-    remotes: {},
-    filename: 'remoteEntry.js',
-    useRuntimePlugin: true, // uses the module-federation/enhanced runtime plugin api
-    exposes: {
-      './SharedComponent': './remoteServer/SharedComponent',
-    },
-  })
+  name: 'website2',
+  library: { type: 'commonjs-module' },
+  isServer: true, // or false
+  remotes: {},
+  filename: 'remoteEntry.js',
+  useRuntimePlugin: true, // uses the module-federation/enhanced runtime plugin api
+  exposes: {
+    './SharedComponent': './remoteServer/SharedComponent',
+  },
+});
 ```
 
 ### UniversalFederationPlugin

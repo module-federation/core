@@ -58,20 +58,6 @@ export const generateEntryStartup = (
     chunkRuntimeRequirements.has(federationStartup) ||
     treeRuntimeRequirements.has(federationStartup);
 
-  const hasRemotes =
-    chunkRuntimeRequirements.has(RuntimeGlobals.currentRemoteGetScope) ||
-    // check if tree has req
-    treeRuntimeRequirements.has(RuntimeGlobals.currentRemoteGetScope) ||
-    // check if chunk contains remote module types
-    // currentRemoteGetScope is not reliable requirement for host check
-    !!chunkGraph.getChunkModulesIterableBySourceType(chunk, 'remote');
-
-  const hasConsumes =
-    chunkRuntimeRequirements.has(RuntimeGlobals.initializeSharing) ||
-    treeRuntimeRequirements.has(RuntimeGlobals.initializeSharing) ||
-    chunkRuntimeRequirements.has(RuntimeGlobals.shareScopeMap) ||
-    treeRuntimeRequirements.has(RuntimeGlobals.shareScopeMap);
-
   const runModule = (id: string) => {
     return `__webpack_exec__(${JSON.stringify(id)})`;
   };
@@ -169,7 +155,7 @@ export const generateESMEntryStartup = (
   chunk: Chunk,
   passive: boolean,
 ): string => {
-  const { chunkHasJs, getCompilationHooks, getChunkFilenameTemplate } =
+  const { chunkHasJs, getChunkFilenameTemplate } =
     compilation.compiler.webpack.JavascriptModulesPlugin;
   const { ConcatSource } = compilation.compiler.webpack.sources;
   const hotUpdateChunk = chunk instanceof HotUpdateChunk ? chunk : null;

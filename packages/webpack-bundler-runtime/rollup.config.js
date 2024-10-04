@@ -2,14 +2,27 @@ const copy = require('rollup-plugin-copy');
 
 module.exports = (rollupConfig, projectOptions) => {
   rollupConfig.external = [/@module-federation/];
-  rollupConfig.output = {
-    ...rollupConfig.output,
-    manualChunks: (id) => {
-      if (id.includes('@swc/helpers')) {
-        return 'polyfills';
-      }
-    },
-  };
+  if (Array.isArray(rollupConfig.output)) {
+    rollupConfig.output = rollupConfig.output.map((c) => ({
+      ...c,
+      manualChunks: (id) => {
+        debugger;
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
+    }));
+  } else {
+    rollupConfig.output = {
+      ...rollupConfig.output,
+      manualChunks: (id) => {
+        debugger;
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
+    };
+  }
 
   rollupConfig.plugins.push(
     copy({

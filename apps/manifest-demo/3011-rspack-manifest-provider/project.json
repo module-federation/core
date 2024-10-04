@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/manifest-demo/3011-rspack-manifest-provider/src",
   "projectType": "application",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/rspack:rspack",
@@ -12,7 +13,7 @@
         "target": "web",
         "outputPath": "apps/manifest-demo/3011-rspack-manifest-provider/dist",
         "indexHtml": "apps/manifest-demo/3011-rspack-manifest-provider/src/index.html",
-        "main": "apps/manifest-demo/3011-rspack-manifest-provider/src/index.jsx",
+        "main": "apps/manifest-demo/3011-rspack-manifest-provider/src/index.js",
         "tsConfig": "apps/manifest-demo/3011-rspack-manifest-provider/tsconfig.app.json",
         "rspackConfig": "apps/manifest-demo/3011-rspack-manifest-provider/rspack.config.js"
       },
@@ -48,6 +49,5 @@
         }
       }
     }
-  },
-  "tags": []
+  }
 }

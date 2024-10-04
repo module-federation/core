@@ -60,10 +60,5 @@ export function applyClientPlugins(
   }).apply(compiler);
 
   // Apply the InvertedContainerPlugin to add custom runtime modules to the container runtime
-  new InvertedContainerPlugin({
-    runtime: 'webpack',
-    container: options.name,
-    remotes: options.remotes as Record<string, string>,
-    debug: extraOptions.debug,
-  }).apply(compiler);
+  new InvertedContainerPlugin().apply(compiler);
 }

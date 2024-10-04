@@ -8,6 +8,7 @@ import type { moduleFederationPlugin as MFPluginOptions } from '@module-federati
 import type { PluginOptions, InternalModernPluginOptions } from '../types';
 import { moduleFederationConfigPlugin } from './configPlugin';
 import { moduleFederationSSRPlugin } from './ssrPlugin';
+import { WebpackPluginInstance } from '@rspack/core';
 
 export const moduleFederationPlugin = (
   userConfig: PluginOptions = {},
@@ -47,7 +48,7 @@ export const moduleFederationPlugin = (
                   internalModernPluginOptions.browserPlugin =
                     new WebpackModuleFederationPlugin(browserPluginOptions);
                   config.plugins?.push(
-                    internalModernPluginOptions.browserPlugin,
+                    internalModernPluginOptions.browserPlugin as WebpackPluginInstance,
                   );
                 }
                 const enableAsyncEntry =
@@ -64,7 +65,7 @@ export const moduleFederationPlugin = (
                             chunk.name === browserPluginOptions.name,
                         };
                   config.plugins?.push(
-                    new AsyncBoundaryPlugin(asyncBoundaryPluginOptions),
+                    new AsyncBoundaryPlugin(asyncBoundaryPluginOptions) as any,
                   );
                 }
               },

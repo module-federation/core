@@ -7,21 +7,7 @@ export default class HoistContainerReferencesPlugin
   implements WebpackPluginInstance
 {
   name: string;
-  private containerName: string;
-  private entryFilePath?: string;
-  private bundlerRuntimeDep?: string;
-  private explanation: string;
-
-  constructor(
-    name?: string,
-    entryFilePath?: string,
-    bundlerRuntimeDep?: string,
-  ) {
-    this.containerName = name || 'no known chunk name';
-    this.entryFilePath = entryFilePath;
-    this.bundlerRuntimeDep = bundlerRuntimeDep;
-    this.explanation =
-      'Bundler runtime path module is required for proper functioning';
+  constructor() {
     this.name = PLUGIN_NAME;
   }
 
@@ -31,10 +17,6 @@ export default class HoistContainerReferencesPlugin
     const CoreHoistContainerReferencesPlugin =
       require('../lib/container/HoistContainerReferencesPlugin')
         .default as typeof import('../lib/container/HoistContainerReferencesPlugin').default;
-    new CoreHoistContainerReferencesPlugin(
-      this.containerName,
-      this.entryFilePath,
-      this.bundlerRuntimeDep,
-    ).apply(compiler);
+    new CoreHoistContainerReferencesPlugin().apply(compiler);
   }
 }

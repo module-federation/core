@@ -5,6 +5,7 @@
 
 'use strict';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { containerPlugin } from '@module-federation/sdk';
 import type { Compilation, Dependency } from 'webpack';
 import type {
   InputFileSystem,
@@ -16,6 +17,7 @@ import type {
   ResolverWithOptions,
   WebpackOptions,
 } from 'webpack/lib/Module';
+import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import type WebpackError from 'webpack/lib/WebpackError';
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from '../Constants';
 import ContainerExposedDependency from './ContainerExposedDependency';
@@ -56,30 +58,43 @@ class ContainerEntryModule extends Module {
   private _exposes: [string, ExposeOptions][];
   private _shareScope: string;
   private _injectRuntimeEntry: string;
+  private _experiments: containerPlugin.ContainerPluginOptions['experiments'];
+
   /**
    * @param {string} name container entry name
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
    * @param {string} shareScope name of the share scope
+   * @param {string} injectRuntimeEntry the path of injectRuntime file.
+   * @param {containerPlugin.ContainerPluginOptions['experiments']} experiments additional experiments options
    */
   constructor(
     name: string,
     exposes: [string, ExposeOptions][],
     shareScope: string,
     injectRuntimeEntry: string,
+    experiments: containerPlugin.ContainerPluginOptions['experiments'],
   ) {
     super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
     this._name = name;
     this._exposes = exposes;
     this._shareScope = shareScope;
     this._injectRuntimeEntry = injectRuntimeEntry;
+    this._experiments = experiments;
   }
+
   /**
    * @param {ObjectDeserializerContext} context context
    * @returns {ContainerEntryModule} deserialized container entry module
    */
   static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
     const { read } = context;
-    const obj = new ContainerEntryModule(read(), read(), read(), read());
+    const obj = new ContainerEntryModule(
+      read(),
+      read(),
+      read(),
+      read(),
+      read(),
+    );
     obj.deserialize(context);
     return obj;
   }
@@ -96,7 +111,7 @@ class ContainerEntryModule extends Module {
   override identifier(): string {
     return `container entry (${this._shareScope}) ${JSON.stringify(
       this._exposes,
-    )}`;
+    )} ${this._injectRuntimeEntry} ${JSON.stringify(this._experiments)}`;
   }
   /**
    * @param {RequestShortener} requestShortener the request shortener
@@ -126,7 +141,6 @@ class ContainerEntryModule extends Module {
       arg1: boolean | undefined,
     ) => void,
   ): void {
-    const baseContext = context as NeedBuildContext;
     callback(null, !this.buildMeta);
   }
   /**
@@ -178,8 +192,9 @@ class ContainerEntryModule extends Module {
       ) as unknown as Dependency,
     );
 
-    this.addDependency(new EntryDependency(this._injectRuntimeEntry));
-
+    if (!this._experiments?.federationRuntime) {
+      this.addDependency(new EntryDependency(this._injectRuntimeEntry));
+    }
     callback();
   }
 
@@ -242,16 +257,18 @@ class ContainerEntryModule extends Module {
         )}`,
       );
     }
-
     const initRuntimeDep = this.dependencies[1];
-    const initRuntimeModuleGetter = runtimeTemplate.moduleRaw({
-      module: moduleGraph.getModule(initRuntimeDep),
-      chunkGraph,
-      // @ts-expect-error flaky type definition for Dependency
-      request: initRuntimeDep.userRequest,
-      weak: false,
-      runtimeRequirements,
-    });
+    // no runtime module getter needed if runtime is hoisted
+    const initRuntimeModuleGetter = this._experiments?.federationRuntime
+      ? ''
+      : runtimeTemplate.moduleRaw({
+          module: moduleGraph.getModule(initRuntimeDep),
+          chunkGraph,
+          // @ts-expect-error flaky type definition for Dependency
+          request: initRuntimeDep.userRequest,
+          weak: false,
+          runtimeRequirements,
+        });
     const federationGlobal = getFederationGlobalScope(
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
@@ -293,7 +310,9 @@ class ContainerEntryModule extends Module {
           '})',
         ],
       )};`,
+      PrefetchPlugin.setRemoteIdentifier(),
       `${initRuntimeModuleGetter}`,
+      PrefetchPlugin.removeRemoteIdentifier(),
       '',
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,
@@ -333,9 +352,11 @@ class ContainerEntryModule extends Module {
     write(this._exposes);
     write(this._shareScope);
     write(this._injectRuntimeEntry);
+    write(this._experiments);
     super.serialize(context);
   }
 }
+
 makeSerializable(
   ContainerEntryModule,
   'enhanced/lib/container/ContainerEntryModule',

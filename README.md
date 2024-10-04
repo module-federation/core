@@ -28,11 +28,11 @@ You can consider the module federation capabilities provided by this repository 
 
 ## ✨ What new features does Module Federation provide?
 
-* 🎨 Module Federation Runtime
-* 🧩 Runtime Plugins System
-* 📝 Manifest
-* 🚀 Dynamic type prompt
-* 🛠️ Chrome Devtool
+- 🎨 Module Federation Runtime
+- 🧩 Runtime Plugins System
+- 📝 Manifest
+- 🚀 Dynamic type prompt
+- 🛠️ Chrome Devtool
 
 ## 📚 Getting Started
 

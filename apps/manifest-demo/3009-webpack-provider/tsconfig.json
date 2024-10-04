@@ -10,12 +10,29 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "outDir": "../../../dist/out-tsc",
+    "types": [
+      "node",
+      "@nx/react/typings/cssmodule.d.ts",
+      "@nx/react/typings/image.d.ts"
+    ]
   },
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    }
-  ]
+  "files": [
+    "../../../node_modules/@nx/react/typings/cssmodule.d.ts",
+    "../../../node_modules/@nx/react/typings/image.d.ts"
+  ],
+  "exclude": [
+    "jest.config.ts",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.spec.tsx",
+    "**/*.test.tsx",
+    "**/*.spec.js",
+    "**/*.test.js",
+    "**/*.spec.jsx",
+    "**/*.test.jsx",
+    "dist/**"
+  ],
+  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"]
 }

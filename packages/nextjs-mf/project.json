@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/nextjs-mf/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
@@ -58,6 +59,5 @@
         ]
       }
     }
-  },
-  "tags": ["type:pkg"]
+  }
 }

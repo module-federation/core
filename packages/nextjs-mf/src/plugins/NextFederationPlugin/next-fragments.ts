@@ -13,7 +13,6 @@ import {
   findLoaderForResource,
 } from '../../loaders/helpers';
 import path from 'path';
-
 /**
  * Set up default shared values based on the environment.
  * @param {boolean} isServer - Boolean indicating if the code is running on the server.
@@ -30,62 +29,45 @@ export const retrieveDefaultShared = (
   // If the code is running on the client/browser, always bundle Next.js internals
   return DEFAULT_SHARE_SCOPE_BROWSER;
 };
-
 export const applyPathFixes = (
   compiler: Compiler,
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
   options: any,
 ) => {
-  const match = findLoaderForResource(compiler.options.module.rules, {
-    path: path.join(compiler.context, '/something/thing.js'),
-    issuerLayer: undefined,
-    layer: undefined,
-  });
+  const match = findLoaderForResource(
+    compiler.options.module.rules as RuleSetRule[],
+    {
+      path: path.join(compiler.context, '/something/thing.js'),
+      issuerLayer: undefined,
+      layer: undefined,
+    },
+  );
 
-  // Get ruleset from normalModuleFactory
-  // compiler.hooks.normalModuleFactory.tap('NextFederationPlugin', (nmf) => {
-  //   const ruleSet = nmf.ruleSet;
-  //   return;
-  //   console.log(runtimeModulePath);
-  //   const result = ruleSet.exec({
-  //     resource: runtimeModulePath,
-  //     realResource: runtimeModulePath,
-  //     resourceQuery: undefined,
-  //     resourceFragment: undefined,
-  //     scheme: getScheme(runtimeModulePath),
-  //     assertions: undefined,
-  //     mimetype: 'text/javascript',
-  //     dependency: 'commonjs',
-  //     descriptionData: undefined,
-  //     issuer: undefined,
-  //     compiler: compiler.name,
-  //     issuerLayer: ''
-  //   });
-  //   console.log(result);
-  //   debugger;
-  // });
+  compiler.options.module.rules.forEach((rule) => {
+    if (typeof rule === 'object' && rule !== null) {
+      const typedRule = rule as RuleSetRule;
+      // next-image-loader fix which adds remote's hostname to the assets url
+      if (
+        options.enableImageLoaderFix &&
+        hasLoader(typedRule, 'next-image-loader')
+      ) {
+        injectRuleLoader(typedRule, {
+          loader: require.resolve('../../loaders/fixImageLoader'),
+        });
+      }
 
-  compiler.options.module.rules.forEach((rule: RuleSetRule) => {
-    // next-image-loader fix which adds remote's hostname to the assets url
-    if (options.enableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
-      injectRuleLoader(rule, {
-        loader: require.resolve('../../loaders/fixImageLoader'),
-      });
-    }
-
-    // url-loader fix for which adds remote's hostname to the assets url
-    if (options.enableUrlLoaderFix && hasLoader(rule, 'url-loader')) {
-      injectRuleLoader(rule, {
-        loader: require.resolve('../../loaders/fixUrlLoader'),
-      });
+      if (options.enableUrlLoaderFix && hasLoader(typedRule, 'url-loader')) {
+        injectRuleLoader(typedRule, {
+          loader: require.resolve('../../loaders/fixUrlLoader'),
+        });
+      }
     }
   });
+
   if (match) {
     let matchCopy: RuleSetRule;
-
     if (match.use) {
       matchCopy = { ...match };
-
       if (Array.isArray(match.use)) {
         matchCopy.use = match.use.filter((loader: any) => {
           return (
@@ -95,23 +77,17 @@ export const applyPathFixes = (
           );
         });
       } else if (typeof match.use === 'string') {
-        if (match.use.includes('react')) {
-          matchCopy.use = '';
-        } else {
-          matchCopy.use = match.use;
-        }
+        matchCopy.use = match.use.includes('react') ? '' : match.use;
       } else if (typeof match.use === 'object' && match.use !== null) {
-        if (match.use.loader && match.use.loader.includes('react')) {
-          matchCopy.use = {};
-        } else {
-          matchCopy.use = match.use;
-        }
+        matchCopy.use =
+          match.use.loader && match.use.loader.includes('react')
+            ? {}
+            : match.use;
       }
     } else {
       matchCopy = { ...match };
     }
 
-    // Create the first new rule using descriptionData
     const descriptionDataRule: RuleSetRule = {
       ...matchCopy,
       descriptionData: {
@@ -121,7 +97,6 @@ export const applyPathFixes = (
       include: undefined,
     };
 
-    // Create the second new rule using test on regex for /runtimePlugin/
     const testRule: RuleSetRule = {
       ...matchCopy,
       resourceQuery: /runtimePlugin/,
@@ -130,10 +105,10 @@ export const applyPathFixes = (
     };
 
     const oneOfRule = compiler.options.module.rules.find(
-      (rule: RuleSetRule) => {
-        return rule && typeof rule === 'object' && 'oneOf' in rule;
+      (rule): rule is RuleSetRule => {
+        return !!rule && typeof rule === 'object' && 'oneOf' in rule;
       },
-    ) as RuleSetRule;
+    ) as RuleSetRule | undefined;
 
     if (!oneOfRule) {
       compiler.options.module.rules.unshift({

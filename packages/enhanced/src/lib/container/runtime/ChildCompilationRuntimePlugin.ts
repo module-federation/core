@@ -59,7 +59,7 @@ class RuntimeModuleChunkPlugin {
               chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunk),
             );
             for (let i = 0; i < entries.length; i++) {
-              const [module, entrypoint] = entries[i];
+              const [module, _entrypoint] = entries[i];
               const final = i + 1 === entries.length;
               const moduleId = chunkGraph.getModuleId(module);
               source.add('\n');
@@ -244,7 +244,6 @@ class CustomRuntimePlugin {
 }
 
 class CustomRuntimeModule extends RuntimeModule {
-  private bundledCode: string | null = null;
   private entryModuleId: string | number | undefined;
 
   constructor(

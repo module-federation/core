@@ -13,6 +13,7 @@ import {
   PreloadOptions,
   RemoteInfoOptionalVersion,
   Shared,
+  Remote,
 } from '../type';
 import { assignRemoteInfo } from './snapshot';
 import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
@@ -218,7 +219,7 @@ export function generatePreloadAssets(
             name: remoteInfo.name,
             remoteSnapshot: moduleInfoSnapshot,
             preloadConfig,
-            remote: remoteInfo,
+            remote: remoteInfo as Remote,
             origin,
           });
           const preloaded = getPreloaded(exposeFullPath);
@@ -327,7 +328,7 @@ export const generatePreloadAssetsPlugin: () => FederationRuntimePlugin =
                 moduleInfo: {
                   name: remoteInfo.name,
                   entry: remote.entry,
-                  type: 'global',
+                  type: remoteInfo.type || 'global',
                   entryGlobalName: '',
                   shareScope: '',
                 },

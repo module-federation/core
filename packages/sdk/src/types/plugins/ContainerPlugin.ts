@@ -95,6 +95,10 @@ export interface ContainerPluginOptions {
    * Runtime plugin file paths or package name.
    */
   runtimePlugins?: string[];
+
+  experiments?: {
+    federationRuntime?: false | 'hoisted';
+  };
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

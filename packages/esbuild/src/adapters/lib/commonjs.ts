@@ -132,8 +132,8 @@ export function commonjs({
     typeof ignore === 'function'
       ? ignore
       : Array.isArray(ignore)
-      ? (path: string) => ignore.includes(path)
-      : () => false;
+        ? (path: string) => ignore.includes(path)
+        : () => false;
 
   return {
     name: 'commonjs',

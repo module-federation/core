@@ -28,7 +28,6 @@ const categories = fs.readdirSync(casesPath).map((cat) => {
       .sort(),
   };
 });
-console.log(333, categories);
 // .filter((i) => i.name === 'container');
 const createLogger = (appendTarget) => {
   return {
@@ -352,6 +351,7 @@ const describeCases = (config) => {
                 ) {
                   return;
                 }
+
                 if (
                   checkArrayExpectation(
                     testDirectory,

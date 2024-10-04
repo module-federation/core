@@ -1,6 +1,6 @@
-const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+//const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 
-registerPluginTSTranspiler();
+//registerPluginTSTranspiler();
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');

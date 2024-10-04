@@ -1,10 +1,10 @@
-import { assert, describe, test, it, vi, expectTypeOf } from 'vitest';
+import { expectTypeOf, describe, it, vi, expect } from 'vitest';
 import { init, loadRemote, loadShare, loadShareSync } from '../src/index';
 import { getInfoWithoutType } from '../src/global';
 
 describe('global', () => {
   it('inject mode', () => {
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = vi.fn() as any;
+    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = vi.fn();
     const injectArgs = {
       name: '@federation/inject-mode',
       remotes: [],
@@ -64,7 +64,7 @@ describe('global', () => {
       >();
     });
 
-    it('loadShareSync', async () => {
+    it('loadShareSync', () => {
       const typedLoadShareSync: typeof loadShareSync<string> = loadShareSync;
       expectTypeOf(typedLoadShareSync).returns.toMatchTypeOf<
         () => string | never

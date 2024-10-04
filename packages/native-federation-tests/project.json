@@ -3,6 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/native-federation-tests/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
+  "implicitDependencies": [],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -43,7 +45,5 @@
         ]
       }
     }
-  },
-  "tags": ["type:pkg"],
-  "implicitDependencies": []
+  }
 }

@@ -33,14 +33,14 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
           orderResolve = resolve;
         });
         Object.keys(shareInfo).forEach(async (share) => {
-          // @ts-expect-error legacy runtime shareInfo[share] is shared , and latest i shard[]
+          // @ts-ignore legacy runtime shareInfo[share] is shared , and latest i shard[]
           const sharedArr: Shared[] = Array.isArray(shareInfo[share])
             ? shareInfo[share]
             : [shareInfo[share]];
 
           let twinsSharedArr: Shared[];
           if (twinsShareInfo) {
-            // @ts-expect-error
+            // @ts-ignore
             twinsSharedArr = Array.isArray(twinsShareInfo[share])
               ? twinsShareInfo[share]
               : [twinsShareInfo[share]];

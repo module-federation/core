@@ -19,5 +19,10 @@
     "type": "file",
     "name": "scenario",
     "label": "场景化"
+  },
+  {
+    "type": "dir",
+    "name": "performance",
+    "label": "性能优化"
   }
 ]

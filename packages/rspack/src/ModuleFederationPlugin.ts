@@ -77,7 +77,6 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       // @ts-ignore
       new DtsPlugin(options).apply(compiler);
     }
-
     if (!disableManifest && options.exposes) {
       try {
         const containerManager = new ContainerManager();

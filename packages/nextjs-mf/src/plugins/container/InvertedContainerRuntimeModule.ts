@@ -1,13 +1,14 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Module } from 'webpack';
 import { container } from '@module-federation/enhanced';
-
+import type ContainerEntryModule from '@module-federation/enhanced/src/lib/container/ContainerEntryModule';
 const { RuntimeModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
 interface InvertedContainerRuntimeModuleOptions {
   name?: string;
+  containers: Set<any>; // Adjust the type as necessary
 }
 
 class InvertedContainerRuntimeModule extends RuntimeModule {
@@ -27,41 +28,41 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   }
 
   override generate(): string {
-    if (!this.compilation || !this.chunk || !this.compilation.chunkGraph) {
+    const { compilation, chunk, chunkGraph } = this;
+    if (!compilation || !chunk || !chunkGraph) {
       return '';
     }
-
-    if (this.chunk.runtime === 'webpack-api-runtime') {
+    if (chunk.runtime === 'webpack-api-runtime') {
       return '';
     }
-    const { name } = this.options;
-    const containerEntryModule = this.findEntryModuleOfContainer() as
-      | Module
-      | undefined;
-
-    const containerModuleId = containerEntryModule
-      ? this.compilation.chunkGraph.getModuleId(containerEntryModule)
-      : false;
-
-    if (!containerModuleId) {
-      return '';
+    let containerEntryModule;
+    for (const containerDep of this.options.containers) {
+      const mod = compilation.moduleGraph.getModule(containerDep);
+      if (!mod) continue;
+      if (chunkGraph.isModuleInChunk(mod, chunk)) {
+        containerEntryModule = mod as ContainerEntryModule;
+      }
     }
 
-    const containerModuleIdJSON = JSON.stringify(containerModuleId);
-    const nameJSON = JSON.stringify(name);
+    if (!containerEntryModule) return '';
+
+    const initRuntimeModuleGetter = compilation.runtimeTemplate.moduleRaw({
+      module: containerEntryModule,
+      chunkGraph,
+      weak: false,
+      runtimeRequirements: new Set(),
+    });
+
+    //@ts-ignore
+    const nameJSON = JSON.stringify(containerEntryModule._name);
 
     return Template.asString([
       `var innerRemote;`,
-      `function attachRemote (resolve) {`,
+      `function attachRemote () {`,
       Template.indent([
-        `if(__webpack_require__.m[${containerModuleIdJSON}]) {`,
-        Template.indent(
-          `innerRemote = __webpack_require__(${containerModuleIdJSON});`,
-        ),
-        `}`,
+        `innerRemote = ${initRuntimeModuleGetter};`,
         `var gs = ${RuntimeGlobals.global} || globalThis`,
         `gs[${nameJSON}] = innerRemote`,
-        `if(resolve) resolve(innerRemote);`,
         `return innerRemote;`,
       ]),
       `};`,

@@ -47,7 +47,7 @@ jobs:
       - name: Install deps
         run: pnpm install
 
-      - name: Build and test Packages
+      - name: Build Packages
         run: pnpm run build:pkg
 
       - name: Release
