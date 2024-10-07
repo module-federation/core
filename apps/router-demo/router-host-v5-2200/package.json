@@ -1,7 +1,7 @@
 {
   "name": "host-v5",
   "private": true,
-  "version": "1.0.27",
+  "version": "1.0.29",
   "scripts": {
     "dev": "FEDERATION_DEBUG=true rsbuild dev",
     "build": "rsbuild build",
@@ -21,7 +21,7 @@
     "@rsbuild/core": "^0.6.15",
     "@rsbuild/plugin-react": "^0.6.15",
     "@types/react": "^18.2.79",
-    "@types/react-dom": "^18.2.25",
+    "@types/react-dom": "^18.3.0",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5"
   }
