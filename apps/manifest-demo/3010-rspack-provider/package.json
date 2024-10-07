@@ -10,7 +10,7 @@
     "@rspack/core": "^1.0.2"
   },
   "dependencies": {
-    "antd": "4.24.15",
+    "antd": "5.21.2",
     "react-router-dom": "^6.23.1"
   }
 }

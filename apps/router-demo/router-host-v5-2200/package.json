@@ -12,7 +12,7 @@
     "@module-federation/bridge-react": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@types/react-router-dom": "5",
-    "antd": "^5.16.2",
+    "antd": "^5.21.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^5.3.4"

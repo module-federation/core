@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "antd": "5.19.1",
+    "antd": "5.21.2",
     "@ant-design/cssinjs": "^1.21.0",
     "lodash": "4.17.21",
     "next": "14.2.14",
