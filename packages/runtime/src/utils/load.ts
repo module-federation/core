@@ -20,11 +20,7 @@ async function loadEsmEntry({
   return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
-        // eslint-disable-next-line no-eval
-        new Function(
-          'callbacks',
-          `import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
-        )([resolve, reject]);
+        import(/* webpackIgnore: true */ entry).then(resolve).catch(reject);
       } else {
         resolve(remoteEntryExports);
       }
