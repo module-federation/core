@@ -264,6 +264,10 @@ class FederationRuntimePlugin {
     if (!this.options) {
       return;
     }
+    // skip virtual entry
+    if (this.options?.virtualRuntimeEntry) {
+      return;
+    }
     const filePath = this.getFilePath(compiler, useMinimalRuntime);
     try {
       fs.readFileSync(filePath);

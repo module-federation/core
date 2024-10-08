@@ -1,7 +1,7 @@
 {
   "name": "modernjs-ssr-dynamic-remote",
   "private": true,
-  "version": "0.1.28",
+  "version": "0.1.29",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
@@ -26,17 +26,17 @@
   ],
   "dependencies": {
     "@babel/runtime": "7.24.4",
-    "@modern-js/runtime": "2.57.0",
+    "@modern-js/runtime": "2.60.2",
     "@module-federation/modern-js": "workspace:*",
     "antd": "4.24.15",
     "react": "~18.3.1",
     "react-dom": "~18.3.1"
   },
   "devDependencies": {
-    "@modern-js-app/eslint-config": "2.57.0",
-    "@modern-js/app-tools": "2.57.0",
-    "@modern-js/eslint-config": "2.57.0",
-    "@modern-js/tsconfig": "2.57.0",
+    "@modern-js-app/eslint-config": "2.59.0",
+    "@modern-js/app-tools": "2.60.2",
+    "@modern-js/eslint-config": "2.59.0",
+    "@modern-js/tsconfig": "2.60.2",
     "@types/jest": "~29.5.0",
     "@types/node": "~16.11.7",
     "@types/react": "~18.2.0",
