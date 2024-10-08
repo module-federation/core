@@ -1,29 +1,53 @@
-import { getH1, getH3 } from '../support/app.po';
+import { getH1, getH2, getH3 } from '../support/app.po';
 
 describe('/', () => {
   beforeEach(() => cy.visit('/'));
 
   describe('Warmup ModernJS', () => {
     it('warms pages concurrently', () => {
-      const urls = [
-        '/all',
-        '/remote',
-        '/nested-remote',
-        '/dynamic-remote',
-        '/dynamic-nested-remote',
-      ];
+      const urls = ['/entry-one/nested-routes/pathname', '/entry-two'];
       urls.forEach((url) => {
         cy.request(url); // This makes a GET request, not a full page visit
       });
     });
   });
+  describe('Check render', () => {
+    it('should ssr success', () => {
+      // 若 window._SSR_DATA.renderLevel === 2 ，那么意味着 ssr 成功
+      cy.window().should((win) => {
+        console.log(win);
+        // @ts-ignore
+        expect(win._SSR_DATA.renderLevel).to.equal(2);
+      });
+    });
 
-  describe('Welcome message', () => {
-    it('should display welcome message', () => {
-      getH1().contains('This is SPA combined');
+    it('should render host layout', () => {
+      getH1().contains('entry one layout');
+    });
+
+    it('should render sub page', () => {
+      getH2().contains('sub self provider');
+    });
+
+    it('should render sub page', () => {
+      getH2().contains('sub self provider');
+    });
+
+    it('the button should be interactive', () => {
+      cy.wait(2000);
+      const stub = cy.stub();
+      cy.on('window:alert', stub);
+
+      cy.get('#nested-remote-local-button')
+        .should('be.visible')
+        .click()
+        .then(() => {
+          expect(stub.getCall(0)).to.be.calledWith(
+            '[Nested Remote Page] Client side Javascript works!',
+          );
+        });
     });
   });
-
   describe('Routing checks', () => {
     it('check that clicking back and forwards in client side routeing still renders the content correctly', () => {
       cy.visit('/remote');
