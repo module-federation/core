@@ -1723,6 +1723,9 @@ importers:
       '@module-federation/bridge-shared':
         specifier: workspace:*
         version: link:../bridge-shared
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../../runtime
       react-error-boundary:
         specifier: ^4.0.13
         version: 4.0.13(react@18.3.1)
@@ -1818,6 +1821,9 @@ importers:
       '@module-federation/bridge-shared':
         specifier: workspace:*
         version: link:../bridge-shared
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../../runtime
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^5.0.4
