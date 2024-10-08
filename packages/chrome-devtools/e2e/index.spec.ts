@@ -52,6 +52,7 @@ test.beforeEach(async ({ context: browserContext, extensionId }) => {
 
 test('test proxy', async ({ request }) => {
   targetPage.removeListener('request', beforeHandler);
+  await sleep(3000);
 
   // Check the page proxy status
   let targetPageModuleInfo = await targetPage.evaluate(() => {
@@ -67,6 +68,7 @@ test('test proxy', async ({ request }) => {
       },
     },
   });
+  await sleep(3000);
 
   // Setting proxy logic
   await devtoolsPage.click('div[data-set-e2e=e2eProxyKey]');
@@ -89,6 +91,7 @@ test('test proxy', async ({ request }) => {
     await route.fulfill({ json });
   });
   await sleep(2000);
+  await sleep(3000);
 
   await devtoolsPage.getByPlaceholder('Custom Manifest URL').fill(mockUrl);
   const optionsEle = await devtoolsPage.$$('.arco-select-option');
