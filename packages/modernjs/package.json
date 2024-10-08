@@ -63,7 +63,7 @@
     "@module-federation/sdk": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
-    "@modern-js/node-bundle-require": "2.54.2",
+    "@modern-js/node-bundle-require": "2.60.2",
     "node-fetch": "~3.3.0",
     "react-error-boundary": "4.0.13",
     "hoist-non-react-statics": "3.3.2"
