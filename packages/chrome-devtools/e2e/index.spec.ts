@@ -97,7 +97,7 @@ test('test proxy', async ({ request }) => {
   const optionsEle = await devtoolsPage.$$('.arco-select-option');
   optionsEle[0].click();
 
-  await sleep(1000);
+  await sleep(3000);
 
   await targetPage.bringToFront();
 
