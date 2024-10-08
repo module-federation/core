@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/bridge-vue3",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "version": "0.6.6",
+  "version": "0.6.9",
   "publishConfig": {
     "access": "public"
   },

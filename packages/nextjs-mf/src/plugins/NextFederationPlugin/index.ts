@@ -8,7 +8,7 @@
 import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
-} from '@module-federation/utilities';
+} from './next-fragments';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
@@ -69,23 +69,32 @@ export class NextFederationPlugin {
     this.applyConditionalPlugins(compiler, isServer);
 
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
-    modifyEntry({
-      compiler,
-      prependEntry: (entry) => {
-        Object.keys(entry).forEach((entryName) => {
-          const entryItem = entry[entryName];
-          if (!entryName.startsWith('pages/api')) return;
-          if (!entryItem.import) return;
-          // unpatch entry of webpack api runtime
-          entryItem.import = entryItem.import.filter((i) => {
-            return !i.includes('.federation/entry');
-          });
-        });
-      },
-    });
-    const runtimeESMPath = require.resolve(
-      '@module-federation/runtime/dist/index.esm.js',
-    );
+
+    const noop = this.getNoopPath();
+
+    if (!this._extraOptions.skipSharingNextInternals) {
+      compiler.hooks.make.tapAsync(
+        'NextFederationPlugin',
+        (compilation, callback) => {
+          const dep = compiler.webpack.EntryPlugin.createDependency(
+            noop,
+            'noop',
+          );
+          compilation.addEntry(
+            compiler.context,
+            dep,
+            { name: 'noop' },
+            (err, module) => {
+              if (err) {
+                return callback(err);
+              }
+              callback();
+            },
+          );
+        },
+      );
+    }
+
     if (!compiler.options.ignoreWarnings) {
       compiler.options.ignoreWarnings = [
         //@ts-ignore
@@ -103,8 +112,8 @@ export class NextFederationPlugin {
 
   private validateOptions(compiler: Compiler): boolean {
     const manifestPlugin = compiler.options.plugins.find(
-      (p: WebpackPluginInstance) =>
-        p?.constructor.name === 'BuildManifestPlugin',
+      (p): p is WebpackPluginInstance =>
+        p?.constructor?.name === 'BuildManifestPlugin',
     );
 
     if (manifestPlugin) {
@@ -171,16 +180,7 @@ export class NextFederationPlugin {
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
       : retrieveDefaultShared(isServer);
-    const noop = this.getNoopPath();
 
-    const defaultExpose = this._extraOptions.skipSharingNextInternals
-      ? {}
-      : {
-          './noop': noop,
-          './react': require.resolve('react'),
-          './react-dom': require.resolve('react-dom'),
-          './next/router': require.resolve('next/router'),
-        };
     return {
       ...this._options,
       runtime: false,
@@ -194,7 +194,6 @@ export class NextFederationPlugin {
       ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
       exposes: {
-        ...defaultExpose,
         ...this._options.exposes,
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)

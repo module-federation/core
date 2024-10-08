@@ -74,7 +74,11 @@ function writeTempTsConfig(
 }
 
 const removeExt = (f: string): string => {
+  const vueExt = '.vue';
   const ext = extname(f);
+  if (ext === vueExt) {
+    return f;
+  }
   const regexPattern = new RegExp(`\\${ext}$`);
   return f.replace(regexPattern, '');
 };
@@ -86,8 +90,9 @@ function getExposeKey(options: {
   mapExposeToEntry: Record<string, string>;
 }) {
   const { filePath, rootDir, outDir, mapExposeToEntry } = options;
-  const relativeFilePath = removeExt(
-    relative(outDir, filePath.replace(new RegExp(`\\.d.ts$`), '')),
+  const relativeFilePath = relative(
+    outDir,
+    filePath.replace(new RegExp(`\\.d.ts$`), ''),
   );
   return mapExposeToEntry[relativeFilePath];
 }
@@ -190,7 +195,6 @@ export const compileTs = async (
             resolve(remoteOptions.context, normalizedFileName),
           );
         }
-
         return [removeExt(relativeFileName), exposed];
       }),
     );
