@@ -65,23 +65,9 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
           weak: false,
           runtimeRequirements: new Set(),
         }),
-        'const runtime = __webpack_require__.federation.runtime;',
-        'if(!runtime) console.error("shared runtime is not available");',
-        `globalThis.sharedRuntime = {
-          FederationManager: runtime.FederationManager,
-          FederationHost: runtime.FederationHost,
-          loadScript: runtime.loadScript,
-          loadScriptNode: runtime.loadScriptNode,
-          FederationHost: runtime.FederationHost,
-          registerGlobalPlugins: runtime.registerGlobalPlugins,
-          getRemoteInfo: runtime.getRemoteInfo,
-          getRemoteEntry: runtime.getRemoteEntry,
-          isHost: true
-        }`,
       ]);
     } else if (minimal) {
       initRuntimeModuleGetter = Template.asString([
-        '__webpack_require__.federation.sharedRuntime = globalThis.sharedRuntime;',
         compilation.runtimeTemplate.moduleRaw({
           module: minimal,
           chunkGraph,

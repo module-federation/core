@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { Federation } from './types';
 import { remotes } from './remotes';
 import { consumes } from './consumes';
@@ -8,12 +7,23 @@ import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
 export * from './types';
 
-// Access the shared runtime from Webpack's federation plugin
-//@ts-ignore
-const sharedRuntime = __webpack_require__.federation.sharedRuntime;
+// Ensure nativeGlobal is defined correctly
+export const nativeGlobal: typeof global = (() => {
+  try {
+    return new Function('return this')();
+  } catch {
+    return globalThis;
+  }
+})() as typeof global;
+
+// Safely access the shared runtime
+const sharedRuntime = nativeGlobal.__FEDERATION__?.__SHAREABLE_RUNTIME__;
+
+if (!sharedRuntime) {
+  throw new Error('Shared runtime is not available.');
+}
 
 // Create a new instance of FederationManager, handling the build identifier
-//@ts-ignore
 const federationInstance = new sharedRuntime.FederationManager(
   //@ts-ignore
   typeof FEDERATION_BUILD_IDENTIFIER === 'undefined'

@@ -6,15 +6,17 @@ import {
   setGlobalFederationConstructor,
 } from './global';
 import { UserOptions, FederationRuntimePlugin } from './type';
-import { getBuilderId } from './utils';
+import { getBuilderId, getRemoteEntry, getRemoteInfo } from './utils';
 import { assert } from './utils/logger';
 
 export { FederationHost } from './core';
 export { registerGlobalPlugins } from './global';
+import { registerGlobalPlugins, setGlobalShareableRuntime } from './global';
 export { getRemoteEntry, getRemoteInfo } from './utils';
 export { loadScript, loadScriptNode } from '@module-federation/sdk';
+import { loadScript, loadScriptNode } from '@module-federation/sdk';
 export { Module } from './module';
-
+import { Module } from './module';
 export type { Federation } from './global';
 export type { FederationRuntimePlugin };
 
@@ -84,30 +86,21 @@ export class FederationManager {
     ...args: Parameters<FederationHost['preloadRemote']>
   ): ReturnType<FederationHost['preloadRemote']> {
     assert(this.federationInstance, 'Please call init first');
-    return this.federationInstance.preloadRemote.apply(
-      this.federationInstance,
-      args,
-    );
+    return this.federationInstance.preloadRemote(...args); // Use spread operator
   }
 
   registerRemotes(
     ...args: Parameters<FederationHost['registerRemotes']>
   ): ReturnType<FederationHost['registerRemotes']> {
     assert(this.federationInstance, 'Please call init first');
-    return this.federationInstance.registerRemotes.apply(
-      this.federationInstance,
-      args,
-    );
+    return this.federationInstance.registerRemotes(...args); // Use spread operator
   }
 
   registerPlugins(
     ...args: Parameters<FederationHost['registerPlugins']>
   ): ReturnType<FederationHost['registerPlugins']> {
     assert(this.federationInstance, 'Please call init first');
-    return this.federationInstance.registerPlugins.apply(
-      this.federationInstance,
-      args,
-    );
+    return this.federationInstance.registerPlugins(...args); // Use spread operator
   }
 
   getInstance() {
@@ -162,3 +155,14 @@ export function registerPlugins(
 export function getInstance() {
   return federation.getInstance();
 }
+
+setGlobalShareableRuntime({
+  FederationManager,
+  FederationHost,
+  loadScript,
+  loadScriptNode,
+  registerGlobalPlugins,
+  getRemoteInfo,
+  getRemoteEntry,
+  Module,
+});
