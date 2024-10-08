@@ -406,6 +406,23 @@ registerRemotes([
 ], { force: true });
 ```
 
+
+### registerPlugins
+
+- Type: `registerPlugins(plugins: FederationRuntimePlugin[]): void`
+- 用于在初始化后注册远程插件.
+
+- Example
+
+```ts
+import { registerPlugins } from '@module-federation/enhanced/runtime'
+import runtimePlugin from 'custom-runtime-plugin.ts';
+
+registerPlugins([runtimePlugin()]);
+```
+
+如果你需要开发 Module Federation 插件，可以阅读 [Module Federation 插件系统](../../plugin/dev/index) 获取更多信息。
+
 ## FAQ
 
 ### 构建插件和 Runtime 差异

@@ -406,6 +406,23 @@ registerRemotes([
 ], { force: true });
 ```
 
+### registerPlugins
+
+- Type: `registerPlugins(plugins: FederationRuntimePlugin[]): void`
+- Used to register plugins after initialization
+
+- Example
+
+```ts
+import { registerPlugins } from '@module-federation/enhanced/runtime'
+import runtimePlugin from 'custom-runtime-plugin.ts';
+
+registerPlugins([runtimePlugin()]);
+```
+
+If you want to develop Module Federation plugin, you can read [Module Federation Plugin System](../../plugin/dev/index) for more info.
+
+
 ## FAQ
 
 ### Differences Between Build Plugins and Runtime
