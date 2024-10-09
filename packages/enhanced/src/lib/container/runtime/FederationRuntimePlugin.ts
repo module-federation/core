@@ -198,6 +198,10 @@ class FederationRuntimePlugin {
     if (!this.options) {
       return;
     }
+    // skip virtual entry
+    if (this.options?.virtualRuntimeEntry) {
+      return;
+    }
     const filePath = this.getFilePath(compiler);
     try {
       fs.readFileSync(filePath);
@@ -218,6 +222,9 @@ class FederationRuntimePlugin {
   getDependency(compiler: Compiler) {
     if (this.federationRuntimeDependency)
       return this.federationRuntimeDependency;
+
+    this.ensureFile(compiler);
+
     this.federationRuntimeDependency = new FederationRuntimeDependency(
       this.getFilePath(compiler),
     );
@@ -366,7 +373,7 @@ class FederationRuntimePlugin {
       runtimePath = runtimePath.replace('.cjs', '.esm');
     }
 
-    const alias = compiler.options.resolve.alias || {};
+    const alias: any = compiler.options.resolve.alias || {};
     alias['@module-federation/runtime$'] =
       alias['@module-federation/runtime$'] || runtimePath;
     alias['@module-federation/runtime-tools$'] =
@@ -381,7 +388,7 @@ class FederationRuntimePlugin {
 
   apply(compiler: Compiler) {
     const useModuleFederationPlugin = compiler.options.plugins.find(
-      (p: WebpackPluginInstance) => {
+      (p): p is WebpackPluginInstance & { _options?: any } => {
         if (typeof p !== 'object' || !p) {
           return false;
         }
@@ -395,7 +402,7 @@ class FederationRuntimePlugin {
     }
 
     const useContainerPlugin = compiler.options.plugins.find(
-      (p: WebpackPluginInstance) => {
+      (p): p is WebpackPluginInstance & { _options?: any } => {
         if (typeof p !== 'object' || !p) {
           return false;
         }

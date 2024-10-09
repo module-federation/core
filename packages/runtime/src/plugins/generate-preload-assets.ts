@@ -328,7 +328,7 @@ export const generatePreloadAssetsPlugin: () => FederationRuntimePlugin =
                 moduleInfo: {
                   name: remoteInfo.name,
                   entry: remote.entry,
-                  type: 'global',
+                  type: remoteInfo.type || 'global',
                   entryGlobalName: '',
                   shareScope: '',
                 },

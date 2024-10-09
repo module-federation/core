@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/enhanced/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
@@ -41,7 +42,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "node packages/enhanced/test/script.js",
+            "command": "node --expose-gc --max-old-space-size=4096 --experimental-vm-modules --trace-deprecation ./node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.config.ts --silent",
             "forwardAllArgs": false
           }
         ]
@@ -53,7 +54,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "node packages/enhanced/test/script-experiments.js",
+            "command": "node --expose-gc --max-old-space-size=4096 --experimental-vm-modules --trace-deprecation ./node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.embed.ts --silent",
             "forwardAllArgs": false
           }
         ]
@@ -79,6 +80,5 @@
         ]
       }
     }
-  },
-  "tags": ["type:pkg"]
+  }
 }

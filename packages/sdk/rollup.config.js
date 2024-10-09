@@ -8,14 +8,26 @@ module.exports = (rollupConfig, _projectOptions) => {
   );
 
   rollupConfig.external = [/@module-federation/];
-  rollupConfig.output = {
-    ...rollupConfig.output,
-    manualChunks: (id) => {
-      if (id.includes('@swc/helpers')) {
-        return 'polyfills';
-      }
-    },
-  };
+
+  if (Array.isArray(rollupConfig.output)) {
+    rollupConfig.output = rollupConfig.output.map((c) => ({
+      ...c,
+      manualChunks: (id) => {
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
+    }));
+  } else {
+    rollupConfig.output = {
+      ...rollupConfig.output,
+      manualChunks: (id) => {
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
+    };
+  }
 
   return rollupConfig;
 };
