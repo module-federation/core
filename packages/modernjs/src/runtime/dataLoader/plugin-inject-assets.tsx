@@ -55,10 +55,6 @@ export const ssrDataLoaderInjectAssetsPlugin = ({
                 }),
               );
             });
-            console.log(
-              'plugin-mf-data-loader-inject-assets has assets: ',
-              assets,
-            );
 
             return (
               <>

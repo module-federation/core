@@ -71,42 +71,42 @@ function generateRoutes({
         isRootNode.value.value = false;
       }
 
-      if (!isRootNode) {
-        const lazyComponentNode = findTargetKeyNode(
+      const lazyComponentNode = findTargetKeyNode(
+        path.node.properties,
+        'lazyImport',
+      );
+
+      if (
+        lazyComponentNode &&
+        t.isObjectProperty(lazyComponentNode) &&
+        t.isArrowFunctionExpression(lazyComponentNode.value)
+      ) {
+        lazyComponentName = `LazyComponent_${componentId}`;
+
+        const lazyDeclaration = t.variableDeclaration('const', [
+          t.variableDeclarator(
+            t.identifier(lazyComponentName),
+            lazyComponentNode.value,
+          ),
+        ]);
+
+        lazyComponentNode.value = t.identifier(lazyComponentName);
+        const componentNode = findTargetKeyNode(
           path.node.properties,
-          'lazyImport',
+          'component',
         );
+
         if (
-          lazyComponentNode &&
-          t.isObjectProperty(lazyComponentNode) &&
-          t.isArrowFunctionExpression(lazyComponentNode.value)
+          componentNode &&
+          t.isObjectProperty(componentNode) &&
+          t.isCallExpression(componentNode.value) &&
+          t.isIdentifier(componentNode.value.callee)
         ) {
-          lazyComponentName = `LazyComponent_${componentId}`;
-
-          const lazyDeclaration = t.variableDeclaration('const', [
-            t.variableDeclarator(
-              t.identifier(lazyComponentName),
-              lazyComponentNode.value,
-            ),
+          componentNode.value = t.callExpression(t.identifier('lazy'), [
+            t.identifier(lazyComponentName),
           ]);
-
-          lazyComponentNode.value = t.identifier(lazyComponentName);
-          const componentNode = findTargetKeyNode(
-            path.node.properties,
-            'component',
-          );
-          if (
-            componentNode &&
-            t.isObjectProperty(componentNode) &&
-            t.isCallExpression(componentNode.value) &&
-            t.isIdentifier(componentNode.value.callee)
-          ) {
-            componentNode.value = t.callExpression(t.identifier('lazy'), [
-              t.identifier(lazyComponentName),
-            ]);
-          }
-          lazyComponentDeclarations.push(lazyDeclaration);
         }
+        lazyComponentDeclarations.push(lazyDeclaration);
       }
 
       const componentNode = findTargetKeyNode(
@@ -151,6 +151,15 @@ function generateRoutes({
 
           path.node.properties.push(
             t.objectProperty(t.identifier('element'), jsxElement),
+          );
+        } else {
+          path.node.properties.push(
+            t.objectProperty(
+              t.identifier('Component'),
+              t.callExpression(t.identifier('lazy'), [
+                t.identifier(lazyComponentName),
+              ]),
+            ),
           );
         }
       }

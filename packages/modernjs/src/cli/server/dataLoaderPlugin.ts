@@ -39,7 +39,7 @@ export default ({
       prepare() {
         const { middlewares } = api.useAppContext();
         middlewares.push({
-          name: 'a',
+          name: 'MFPatchRouteMiddleWare',
           handler: async (c, next) => {
             const serverManifest = c.get('serverManifest');
             const { loaderBundles, nestedRoutesJson } = serverManifest;

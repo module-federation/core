@@ -4,8 +4,8 @@ export type ProfileData = {
 const loader = async (): Promise<ProfileData> => {
   const msg = await new Promise<string>((resolve) => {
     setTimeout(() => {
-      resolve('hello world333');
-    }, 1000);
+      resolve('hello world!');
+    }, 0);
   });
   return {
     message: msg,

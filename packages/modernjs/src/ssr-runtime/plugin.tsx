@@ -1,14 +1,13 @@
 import type { Plugin } from '@modern-js/runtime';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import { SSRLiveReload } from './SSRLiveReload';
-console.log('mfSSRPlugin trigger');
+
 export const mfSSRPlugin = ({ metaName }: { metaName: string }): Plugin => ({
   name: '@module-federation/modern-js',
   pre: [`@${metaName}/plugin-router`],
   setup: () => {
     return {
       async beforeRender() {
-        console.log('live reload beforeRender');
         if (typeof window !== 'undefined') {
           return;
         }
@@ -23,7 +22,6 @@ export const mfSSRPlugin = ({ metaName }: { metaName: string }): Plugin => ({
         return;
       },
       wrapRoot(App) {
-        console.log('live reload wrapRoot');
         const AppWrapper = (props: any) => (
           <>
             <SSRLiveReload />

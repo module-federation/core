@@ -12,10 +12,14 @@ const Index = (): JSX.Element => {
   };
   return (
     <div className="container-box">
-      <Link to={'a'}> jump a</Link>
-      provider {data.message}
+      <Link id="sub-link" to={'a'}>
+        {' '}
+        jump a
+      </Link>
+      <p>provider data loader data:</p>
+      <p id="sub-data">{data.message}</p>
       <Image />
-      <h2>sub self provider</h2>
+      <h4>sub self provider</h4>
       <ProviderImage />
     </div>
   );

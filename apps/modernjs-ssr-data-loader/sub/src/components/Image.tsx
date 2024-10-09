@@ -4,7 +4,7 @@ import stuff from './stuff.module.css';
 
 export default (): JSX.Element => (
   <div
-    id="remote-components"
+    id="sub-component"
     style={{
       backgroundColor: '#1ee9c1',
       color: 'lightgrey',
@@ -15,14 +15,14 @@ export default (): JSX.Element => (
       <strong>remote</strong>&nbsp;image
     </h2>
     <button
-      id="remote-components-button"
+      id="sub-component-button"
       style={{ marginBottom: '1rem' }}
-      onClick={() => alert('[remote-components] Client side Javascript works!')}
+      onClick={() => alert('[sub] Client side Javascript works!')}
     >
       Click me to test i'm interactive!
     </button>
     <img
-      id="remote-components-image"
+      id="sub-component-image"
       src="https://module-federation.io/module-federation-logo.svg"
       style={{ width: '100px' }}
       alt="serge"

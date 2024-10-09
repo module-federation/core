@@ -6,7 +6,12 @@ const Index = (): JSX.Element => {
   const data = (useRouteLoaderData(withMFRouteId('a/page')) as ProfileData) || {
     message: '404',
   };
-  return <div>[ page/a] data: {data.message}</div>;
+  return (
+    <div>
+      <p>[page/a] data:</p>
+      <h5>{data.message}</h5>
+    </div>
+  );
 };
 
 export default Index;

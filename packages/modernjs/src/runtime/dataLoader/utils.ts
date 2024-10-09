@@ -71,8 +71,13 @@ export function injectRemoteRoutes(
       if (routes.children) {
         route.children = routes.children;
       }
-      route.element = routes.element;
-      route.Component = routes.Component;
+      routes.element && (route.element = routes.element);
+
+      if (routes.Component) {
+        route.Component = routes.Component;
+      } else if (routes.element) {
+        route.element = routes.element;
+      }
 
       return;
     }
