@@ -6,8 +6,6 @@
   "homepage": "https://github.com/module-federation/core",
   "license": "MIT",
   "scripts": {
-    "dev": "cross-env WATCH=true tsup",
-    "build": "rm -rf dist && tsup",
     "test": "jest"
   },
   "publishConfig": {
@@ -38,11 +36,6 @@
       "import": "./dist/universal.esm.js",
       "require": "./dist/universal.cjs.js",
       "types": "./dist/universal.cjs.d.ts"
-    },
-    "./shared": {
-      "import": "./dist/shared.esm.js",
-      "require": "./dist/shared.cjs.js",
-      "types": "./dist/shared/.cjs.d.ts"
     }
   },
   "typesVersions": {
@@ -58,9 +51,6 @@
       ],
       "universal": [
         "./dist/universal.cjs.d.ts"
-      ],
-      "shared": [
-        "./dist/shared.cjs.d.ts"
       ],
       "babel-plugin": [
         "./dist/babel.cjs.d.ts"
@@ -79,7 +69,6 @@
     "@types/jest": "^29.5.11",
     "@types/node": "^17.0.45",
     "@types/react": "~18.0.38",
-    "esbuild-plugin-replace": "^1.4.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "minimist": "^1.2.8",
@@ -88,7 +77,6 @@
     "react-router": "^6.21.3",
     "react-test-renderer": "^18.2.0",
     "ts-jest": "29.0.1",
-    "tsup": "6.2.0",
     "webpack": "5.75.0"
   },
   "dependencies": {
