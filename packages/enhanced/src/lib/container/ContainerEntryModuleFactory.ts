@@ -39,6 +39,7 @@ export default class ContainerEntryModuleFactory extends ModuleFactory {
         dep.shareScope,
         dep.injectRuntimeEntry,
         dep.experiments,
+        dep.dataPrefetch,
       ),
     });
   }
