@@ -1,4 +1,4 @@
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/rsbuild-plugin/runtime';
 
 // The default external policy is version-first: the version with a higher version is used preferentially, even if the version is not loaded. Internally, it must be compatible with the previous logic, mainly loading
 const sharedStrategy: () => FederationRuntimePlugin = () => ({

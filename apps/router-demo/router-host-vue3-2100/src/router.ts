@@ -5,7 +5,7 @@ import {
 } from 'vue-router';
 import Home from '@/pages/Home.vue';
 import Detail from '@/pages/Detail.vue';
-import { loadRemote, init } from '@module-federation/enhanced/runtime';
+import { loadRemote, init } from '@module-federation/rsbuild-plugin/runtime';
 import * as bridge from '@module-federation/bridge-vue3';
 
 const Remote2 = bridge.createRemoteComponent({

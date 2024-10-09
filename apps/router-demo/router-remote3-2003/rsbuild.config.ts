@@ -1,6 +1,6 @@
 import { defineConfig } from '@rsbuild/core';
 import { pluginVue } from '@rsbuild/plugin-vue';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import path from 'path';
 
 export default defineConfig({
@@ -20,17 +20,17 @@ export default defineConfig({
   tools: {
     rspack: (config, { appendPlugins }) => {
       delete config.optimization?.splitChunks;
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'remote3',
-          exposes: {
-            './export-app': './src/export-app.ts',
-          },
-          shared: ['vue', 'vue-router'],
-        }),
-      ]);
     },
   },
 
-  plugins: [pluginVue()],
+  plugins: [
+    pluginVue(),
+    pluginModuleFederation({
+      name: 'remote3',
+      exposes: {
+        './export-app': './src/export-app.ts',
+      },
+      shared: ['vue', 'vue-router'],
+    }),
+  ],
 });
