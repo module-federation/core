@@ -2,6 +2,7 @@ import { parseOptions } from '@module-federation/enhanced';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 
 import { isRegExp, isRequiredVersion } from '../utils/index';
+import pkgJson from '../../package.json';
 
 import type {
   moduleFederationPlugin,
@@ -13,7 +14,6 @@ type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
 
 const PLUGIN_MODULE_FEDERATION_NAME = 'rsbuild:module-federation-enhanced';
-const pkgName = '@rsbuild/plugin-module-federation';
 export const pluginModuleFederation = (
   moduleFederationOptions: ModuleFederationOptions,
 ): RsbuildPlugin => ({
@@ -87,7 +87,10 @@ export const pluginModuleFederation = (
           let sharedModule;
           if (isRegExp(ext)) {
             const match = shared.some((dep) => {
-              if ((ext as RegExp).test(dep) || (ext as RegExp).test(pkgName)) {
+              if (
+                (ext as RegExp).test(dep) ||
+                (ext as RegExp).test(pkgJson.name)
+              ) {
                 sharedModule = dep;
                 return true;
               }
@@ -103,7 +106,7 @@ export const pluginModuleFederation = (
           }
 
           if (typeof ext === 'string') {
-            if (ext === pkgName) {
+            if (ext === pkgJson.name) {
               return false;
             }
 
