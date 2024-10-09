@@ -58,7 +58,7 @@ loadRemote<{add: (...args: Array<number>)=> number }>("app2/util").then((md)=>{
 ### init
 
 - Type: `init(options: InitOptions): void`
-- Creates a runtime instance, which can be dynamically re-registered, but only one instance exists.
+- Create a runtime instance, which can be called repeatedly, but only one instance exists. If you want to dynamically register remotes or plugins, use [registerPlugins](#registerplugins) or [registerRemotes](#registerremotes)
 - InitOptions:
 
 ```typescript

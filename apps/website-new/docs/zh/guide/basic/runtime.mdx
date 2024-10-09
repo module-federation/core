@@ -58,7 +58,7 @@ loadRemote<{add: (...args: Array<number>)=> number }>("app2/util").then((md)=>{
 ### init
 
 - Type: `init(options: InitOptions): void`
-- 创建运行时实例，它可以通过重新调用动态注册远程，但只存在一个实例。
+- 创建运行时实例，它可以重复调用，但只存在一个实例。若想动态注册远程模块或插件，请使用 [registerPlugins](#registerplugins) 或 [registerRemotes](#registerremotes)
 - InitOptions:
 
 ```ts
