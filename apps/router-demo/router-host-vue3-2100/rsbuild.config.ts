@@ -1,6 +1,6 @@
 import { defineConfig } from '@rsbuild/core';
 import { pluginVue } from '@rsbuild/plugin-vue';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import path from 'path';
 
 export default defineConfig({
@@ -19,19 +19,13 @@ export default defineConfig({
     assetPrefix: 'http://localhost:2100',
     writeToDisk: true,
   },
-  tools: {
-    rspack: (config, { appendPlugins }) => {
-      delete config.optimization?.splitChunks;
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'host2',
-          remotes: {
-            remote1: 'remote1@http://localhost:2001/mf-manifest.json',
-          },
-        }),
-      ]);
-    },
-  },
-
-  plugins: [pluginVue()],
+  plugins: [
+    pluginVue(),
+    pluginModuleFederation({
+      name: 'host2',
+      remotes: {
+        remote1: 'remote1@http://localhost:2001/mf-manifest.json',
+      },
+    }),
+  ],
 });

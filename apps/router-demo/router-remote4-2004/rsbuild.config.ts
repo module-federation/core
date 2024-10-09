@@ -1,4 +1,4 @@
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import path from 'path';
@@ -23,17 +23,7 @@ export default defineConfig({
   },
   tools: {
     rspack: (config, { appendPlugins }) => {
-      config.output!.uniqueName = 'remote4';
       delete config.optimization?.splitChunks;
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'remote4',
-          exposes: {
-            './export-app': './src/export-App.tsx',
-          },
-          shared: ['react', 'react-dom'],
-        }),
-      ]);
     },
     // cssExtract: {
     // 	pluginOptions: {
@@ -52,5 +42,14 @@ export default defineConfig({
     // 	},
     // },
   },
-  plugins: [pluginReact()],
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'remote4',
+      exposes: {
+        './export-app': './src/export-App.tsx',
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
 });

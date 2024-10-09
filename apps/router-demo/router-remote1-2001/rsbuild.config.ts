@@ -1,7 +1,6 @@
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import { createCacheGroups } from '@rsbuild/shared';
 import path from 'path';
 
 export default defineConfig({
@@ -28,31 +27,30 @@ export default defineConfig({
   tools: {
     rspack: (config, { appendPlugins }) => {
       delete config.optimization?.splitChunks;
-      config.output!.uniqueName = 'router-remote1-2001';
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'remote1',
-          exposes: {
-            './button': './src/button.tsx',
-            './export-app': './src/export-App.tsx',
-          },
-          shared: {
-            // react: {
-            //   singleton: true,
-            // },
-            // 'react-dom': {
-            //   singleton: true,
-            // },
-            // 'react-router-dom': {
-            //   singleton: true,
-            // },
-            // antd: {
-            //   singleton: true,
-            // },
-          },
-        }),
-      ]);
     },
   },
-  plugins: [pluginReact()],
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './button': './src/button.tsx',
+        './export-app': './src/export-App.tsx',
+      },
+      shared: {
+        // react: {
+        //   singleton: true,
+        // },
+        // 'react-dom': {
+        //   singleton: true,
+        // },
+        // 'react-router-dom': {
+        //   singleton: true,
+        // },
+        // antd: {
+        //   singleton: true,
+        // },
+      },
+    }),
+  ],
 });
