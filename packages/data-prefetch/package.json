@@ -38,11 +38,6 @@
       "import": "./dist/universal.esm.js",
       "require": "./dist/universal.cjs.js",
       "types": "./dist/universal.cjs.d.ts"
-    },
-    "./shared": {
-      "import": "./dist/shared.esm.js",
-      "require": "./dist/shared.cjs.js",
-      "types": "./dist/shared/.cjs.d.ts"
     }
   },
   "typesVersions": {
@@ -58,9 +53,6 @@
       ],
       "universal": [
         "./dist/universal.cjs.d.ts"
-      ],
-      "shared": [
-        "./dist/shared.cjs.d.ts"
       ],
       "babel-plugin": [
         "./dist/babel.cjs.d.ts"
