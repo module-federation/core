@@ -1,5 +1,16 @@
 # @module-federation/data-prefetch
 
+## 0.6.10
+
+### Patch Changes
+
+- 22a3b83: fix(data-prefetch): apply DataPrefetchPlugin on demand
+- 22a3b83: fix(data-prefetch): set sharedStrategy in build options instead of using runtime plugin
+- Updated dependencies [b704f30]
+- Updated dependencies [22a3b83]
+  - @module-federation/runtime@0.6.10
+  - @module-federation/sdk@0.6.10
+
 ## 0.6.9
 
 ### Patch Changes

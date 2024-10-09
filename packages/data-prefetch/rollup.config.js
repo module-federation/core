@@ -18,7 +18,6 @@ module.exports = (rollupConfig, _projectOptions) => {
     babel: 'packages/data-prefetch/src/cli/babel.ts',
     universal: 'packages/data-prefetch/src/universal/index.ts',
     plugin: 'packages/data-prefetch/src/plugin.ts',
-    shared: 'packages/data-prefetch/src/shared/index.ts',
   };
 
   if (Array.isArray(rollupConfig.output)) {

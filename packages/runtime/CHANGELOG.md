@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.6.10
+
+### Patch Changes
+
+- b704f30: fix(runtime): remove crossorigin attr from link tag which not preload success
+- Updated dependencies [22a3b83]
+  - @module-federation/sdk@0.6.10
+
 ## 0.6.9
 
 ### Patch Changes

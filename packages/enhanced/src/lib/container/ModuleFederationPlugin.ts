@@ -77,7 +77,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     if (options.dts !== false) {
       new DtsPlugin(options).apply(compiler);
     }
-    new PrefetchPlugin(options).apply(compiler);
+    if (options.dataPrefetch) {
+      new PrefetchPlugin(options).apply(compiler);
+    }
 
     new FederationRuntimePlugin(options).apply(compiler);
 
