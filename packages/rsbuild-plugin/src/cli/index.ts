@@ -52,6 +52,8 @@ export const pluginModuleFederation = (
         config.dev.client ||= {};
         config.dev.client.port = config.server.port;
       }
+      config.dev ??= {};
+      config.dev.assetPrefix ??= true;
     });
 
     api.modifyEnvironmentConfig((config, { mergeEnvironmentConfig }) => {
