@@ -53,10 +53,6 @@ export const pluginModuleFederation = (
         config.dev.client ||= {};
         config.dev.client.port = config.server.port;
       }
-      config.dev ??= {};
-      if (config.dev.assetPrefix === DEFAULT_ASSET_PREFIX) {
-        config.dev.assetPrefix = true;
-      }
     });
 
     api.modifyEnvironmentConfig((config, { mergeEnvironmentConfig }) => {
@@ -129,6 +125,12 @@ export const pluginModuleFederation = (
       }
 
       const mfConfig: EnvironmentConfig = {
+        dev: {
+          assetPrefix:
+            config.dev.assetPrefix === DEFAULT_ASSET_PREFIX
+              ? true
+              : config.dev.assetPrefix,
+        },
         tools: {
           rspack: {
             output: {
