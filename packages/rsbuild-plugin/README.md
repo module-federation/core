@@ -1,5 +1,13 @@
 # Example
 
+```
+npm install @module-federation/rsbuild-plugin -D
+```
+
+```
+npm install @module-federation/enhanced
+```
+
 ### Rsbuild App
 ```
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';

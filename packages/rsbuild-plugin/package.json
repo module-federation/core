@@ -17,11 +17,6 @@
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
       "types": "./dist/index.cjs.d.ts"
-    },
-    "./runtime": {
-      "import": "./dist/runtime.esm.js",
-      "require": "./dist/runtime.cjs.js",
-      "types": "./dist/runtime.cjs.d.ts"
     }
   },
   "main": "./dist/index.cjs.js",
@@ -30,24 +25,19 @@
     "*": {
       ".": [
         "./dist/index.cjs.d.ts"
-      ],
-      "runtime": [
-        "./dist/runtime.cjs.d.ts"
       ]
     }
   },
   "files": [
     "dist"
   ],
-  "dependencies": {
-    "@module-federation/enhanced": "workspace:*",
+  "devDependencies": {
+    "@rsbuild/core": "1.0.7",
     "@module-federation/sdk": "workspace:*"
   },
-  "devDependencies": {
-    "@rsbuild/core": "1.0.7"
-  },
   "peerDependencies": {
-    "@rsbuild/core": "1.0.7"
+    "@rsbuild/core": "1.0.7",
+    "@module-federation/enhanced": "workspace:*"
   },
   "engines": {
     "node": ">=16.0.0"
