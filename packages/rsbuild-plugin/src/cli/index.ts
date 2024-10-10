@@ -8,7 +8,7 @@ import type {
   moduleFederationPlugin,
   sharePlugin,
 } from '@module-federation/sdk';
-import type { RsbuildPlugin } from '@rsbuild/core';
+import type { RsbuildPlugin, EnvironmentConfig } from '@rsbuild/core';
 
 type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -19,6 +19,29 @@ export const pluginModuleFederation = (
 ): RsbuildPlugin => ({
   name: PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
+    const sharedOptions: [string, sharePlugin.SharedConfig][] = parseOptions(
+      moduleFederationOptions.shared || [],
+      (item, key) => {
+        if (typeof item !== 'string')
+          throw new Error('Unexpected array in shared');
+        const config: sharePlugin.SharedConfig =
+          item === key || !isRequiredVersion(item)
+            ? {
+                import: item,
+              }
+            : {
+                import: key,
+                requiredVersion: item,
+              };
+        return config;
+      },
+      (item) => item,
+    );
+    // shared[0] is the shared name
+    const shared = sharedOptions.map((shared) =>
+      shared[0].endsWith('/') ? shared[0].slice(0, -1) : shared[0],
+    );
+
     api.modifyRsbuildConfig((config) => {
       if (
         moduleFederationOptions.exposes &&
@@ -31,11 +54,7 @@ export const pluginModuleFederation = (
       }
     });
 
-    api.modifyEnvironmentConfig((config) => {
-      if (!config.moduleFederation?.options) {
-        return;
-      }
-
+    api.modifyEnvironmentConfig((config, { mergeEnvironmentConfig }) => {
       /**
        * Currently, splitChunks will take precedence over module federation shared modules.
        * So we need to disable the default split chunks rules to make shared modules to work properly.
@@ -55,32 +74,8 @@ export const pluginModuleFederation = (
         /@module-federation[\\/]sdk/,
         /@module-federation[\\/]runtime/,
       ];
-    });
 
-    const sharedOptions: [string, sharePlugin.SharedConfig][] = parseOptions(
-      moduleFederationOptions.shared || [],
-      (item, key) => {
-        if (typeof item !== 'string')
-          throw new Error('Unexpected array in shared');
-        const config: sharePlugin.SharedConfig =
-          item === key || !isRequiredVersion(item)
-            ? {
-                import: item,
-              }
-            : {
-                import: key,
-                requiredVersion: item,
-              };
-        return config;
-      },
-      (item) => item,
-    );
-
-    // shared[0] is the shared name
-    const shared = sharedOptions.map((shared) =>
-      shared[0].endsWith('/') ? shared[0].slice(0, -1) : shared[0],
-    );
-    api.modifyEnvironmentConfig((config) => {
+      // filter external with shared config,
       const externals = config.output.externals;
       if (Array.isArray(externals)) {
         config.output.externals = externals.filter((ext) => {
@@ -128,7 +123,16 @@ export const pluginModuleFederation = (
         });
       }
 
-      return config;
+      const mfConfig: EnvironmentConfig = {
+        tools: {
+          rspack: {
+            output: {
+              chunkLoading: 'jsonp',
+            },
+          },
+        },
+      };
+      return mergeEnvironmentConfig(config, mfConfig);
     });
 
     api.modifyBundlerChain(async (chain) => {
@@ -140,9 +144,6 @@ export const pluginModuleFederation = (
       if (!chain.output.get('uniqueName')) {
         chain.output.set('uniqueName', moduleFederationOptions.name);
       }
-
-      // use jsonp mode to load chunk
-      chain.output.set('chunkLoading', 'jsonp');
     });
   },
 });
