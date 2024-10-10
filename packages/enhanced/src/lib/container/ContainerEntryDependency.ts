@@ -21,6 +21,7 @@ class ContainerEntryDependency extends Dependency {
   public shareScope: string;
   public injectRuntimeEntry: string;
   public experiments: containerPlugin.ContainerPluginOptions['experiments'];
+  public dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'];
 
   /**
    * @param {string} name entry name
@@ -28,6 +29,7 @@ class ContainerEntryDependency extends Dependency {
    * @param {string} shareScope name of the share scope
    * @param {string[]} injectRuntimeEntry the path of injectRuntime file.
    * @param {containerPlugin.ContainerPluginOptions['experiments']} experiments additional experiments options
+   * @param {containerPlugin.ContainerPluginOptions['dataPrefetch']} dataPrefetch whether enable dataPrefetch
    */
   constructor(
     name: string,
@@ -35,6 +37,7 @@ class ContainerEntryDependency extends Dependency {
     shareScope: string,
     injectRuntimeEntry: string,
     experiments: containerPlugin.ContainerPluginOptions['experiments'],
+    dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'],
   ) {
     super();
     this.name = name;
@@ -42,6 +45,7 @@ class ContainerEntryDependency extends Dependency {
     this.shareScope = shareScope;
     this.injectRuntimeEntry = injectRuntimeEntry;
     this.experiments = experiments;
+    this.dataPrefetch = dataPrefetch;
   }
 
   /**

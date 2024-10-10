@@ -46,6 +46,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
           requiredVersion: '^18.3.1',
         },
       },
+      dataPrefetch: true,
       experiments: { federationRuntime: 'hoisted' },
       runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
     }),

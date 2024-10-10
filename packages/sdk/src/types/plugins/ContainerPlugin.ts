@@ -65,7 +65,10 @@ export type UmdNamedDefine = boolean;
  * The name of the runtime chunk. If set a runtime chunk with this name is created or an existing entrypoint is used as runtime.
  */
 export type EntryRuntime = false | string;
-
+/**
+ * Enable Data Prefetch
+ */
+export type DataPrefetch = boolean;
 export interface ContainerPluginOptions {
   /**
    * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
@@ -99,6 +102,7 @@ export interface ContainerPluginOptions {
   experiments?: {
     federationRuntime?: false | 'hoisted' | 'use-host';
   };
+  dataPrefetch?: DataPrefetch;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.
