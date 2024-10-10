@@ -32,11 +32,11 @@
     "dist"
   ],
   "devDependencies": {
-    "@rsbuild/core": "1.0.7",
+    "@rsbuild/core": "1.x",
     "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {
-    "@rsbuild/core": "1.0.7",
+    "@rsbuild/core": "1.x",
     "@module-federation/enhanced": "workspace:*"
   },
   "engines": {

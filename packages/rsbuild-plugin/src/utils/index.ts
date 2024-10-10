@@ -1,3 +1,5 @@
+import util from 'util';
+
 // RegExp for version string
 const VERSION_PATTERN_REGEXP: RegExp = /^([\d^=v<>~]|[*xX]$)/;
 
@@ -10,5 +12,5 @@ export function isRequiredVersion(str: string): boolean {
 }
 
 export function isRegExp(target: any) {
-  return Object.prototype.toString.call(target) === '[object RegExp]';
+  return util.types.isRegExp(target);
 }

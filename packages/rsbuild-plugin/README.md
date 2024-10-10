@@ -1,4 +1,6 @@
-# Example
+# @module-federation/rsbuild-plugin
+
+## Example
 
 ```
 npm install @module-federation/rsbuild-plugin -D
@@ -9,7 +11,7 @@ npm install @module-federation/enhanced
 ```
 
 ### Rsbuild App
-```
+``` js
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
@@ -29,10 +31,10 @@ export default defineConfig({
     }),
   ],
 });
-```
+```js
 
 ### Rslib Module
-```
+``` js
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rslib/core';
 
@@ -67,5 +69,4 @@ export default defineConfig({
     },
   ],
 });
-
 ```

@@ -43,6 +43,8 @@ export const pluginModuleFederation = (
     );
 
     api.modifyRsbuildConfig((config) => {
+      // If this is a provider app, Rsbuild should send the ws request to the provider's dev server.
+      // This allows the provider to do HMR when the provider module is loaded in the consumer's page.
       if (
         moduleFederationOptions.exposes &&
         config.server?.port &&
