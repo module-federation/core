@@ -125,13 +125,22 @@ export default function Button () {
 };
 ```
 
-3. Set `dataPrefetch: true` in the producer's ModuleFederationPlugin configuration
+3. Set `dataPrefetch: true` in the provider's ModuleFederationPlugin configuration
 ```ts
 new ModuleFederationPlugin({
   // ...
   dataPrefetch: true
 }),
 ```
+
+4. Set `dataPrefetch: true` in the consumer's ModuleFederationPlugin configuration
+```ts
+new ModuleFederationPlugin({
+  // ...
+  dataPrefetch: true
+}),
+```
+
 This completes the interface pre-request. After `Button` is used by the hosts, the interface request will be sent out in advance (it will be sent when the js resource is loaded, and the normal project needs to wait until the component is rendered).
 In the above example, `Button` will first render `loading...`, and then display the data after 2s
 Click `Resend request with parameters` to re-trigger the request and add parameters to update the component
