@@ -69,7 +69,7 @@ export function preloadAssets(
   host: FederationHost,
   assets: PreloadAssets,
   // It is used to distinguish preload from load remote parallel loading
-  useLinkPreload: boolean = true,
+  useLinkPreload = true,
 ): void {
   const { cssAssets, jsAssetsWithoutEntry, entryAssets } = assets;
 
@@ -96,12 +96,13 @@ export function preloadAssets(
       const defaultAttrs = {
         rel: 'preload',
         as: 'style',
-        crossorigin: 'anonymous',
       };
       cssAssets.forEach((cssUrl) => {
         const { link: cssEl, needAttach } = createLink({
           url: cssUrl,
-          cb: () => {},
+          cb: () => {
+            // noop
+          },
           attrs: defaultAttrs,
           createLinkHook: (url, attrs) => {
             const res = host.loaderHook.lifecycle.createLink.emit({
@@ -125,7 +126,9 @@ export function preloadAssets(
       cssAssets.forEach((cssUrl) => {
         const { link: cssEl, needAttach } = createLink({
           url: cssUrl,
-          cb: () => {},
+          cb: () => {
+            // noop
+          },
           attrs: defaultAttrs,
           createLinkHook: (url, attrs) => {
             const res = host.loaderHook.lifecycle.createLink.emit({
@@ -148,12 +151,13 @@ export function preloadAssets(
       const defaultAttrs = {
         rel: 'preload',
         as: 'script',
-        crossorigin: 'anonymous',
       };
       jsAssetsWithoutEntry.forEach((jsUrl) => {
         const { link: linkEl, needAttach } = createLink({
           url: jsUrl,
-          cb: () => {},
+          cb: () => {
+            // noop
+          },
           attrs: defaultAttrs,
           createLinkHook: (url: string, attrs) => {
             const res = host.loaderHook.lifecycle.createLink.emit({
@@ -176,7 +180,9 @@ export function preloadAssets(
       jsAssetsWithoutEntry.forEach((jsUrl) => {
         const { script: scriptEl, needAttach } = createScript({
           url: jsUrl,
-          cb: () => {},
+          cb: () => {
+            // noop
+          },
           attrs: defaultAttrs,
           createScriptHook: (url: string, attrs: any) => {
             const res = host.loaderHook.lifecycle.createScript.emit({
