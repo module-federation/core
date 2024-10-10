@@ -147,6 +147,7 @@ interface DtsHostOptions {
   deleteTypesFolder?: boolean;
   maxRetries?: number;
   consumeAPITypes?: boolean;
+  remoteBasePath?: string;
 }
 ```
 
@@ -207,6 +208,14 @@ Before loading type files, whether to delete the previously loaded `typesFolder`
 - Default value: `'@mf-types'`
 
 `typesFolder` corresponding to `remotes` directory configuration
+
+#### remoteBasePath
+
+- Type: `string`
+- Required: No
+- Default value: `''`
+
+Used as the default base path for relative remote URLs when locating types
 
 ### tsConfigPath
 
