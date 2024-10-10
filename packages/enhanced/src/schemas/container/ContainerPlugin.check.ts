@@ -297,7 +297,7 @@ const schema21 = {
       type: 'object',
       properties: {
         federationRuntime: {
-          anyOf: [{ type: 'boolean' }, { enum: ['hoisted'] }],
+          anyOf: [{ type: 'boolean' }, { enum: ['hoisted', 'use-host'] }],
         },
       },
       additionalProperties: false,

@@ -1,7 +1,9 @@
+import type { Compiler, Compilation, Chunk } from 'webpack';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
+
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import EmbedFederationRuntimeModule from './EmbedFederationRuntimeModule';
 import FederationModulesPlugin from './FederationModulesPlugin';
-import type { Compiler, Compilation, Chunk } from 'webpack';
 import { getFederationGlobalScope } from './utils';
 import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
@@ -13,6 +15,14 @@ const { RuntimeGlobals } = require(
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class EmbedFederationRuntimePlugin {
+  experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'];
+
+  constructor(
+    experiments: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
+  ) {
+    this.experiments = experiments;
+  }
+
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'EmbedFederationRuntimePlugin',
