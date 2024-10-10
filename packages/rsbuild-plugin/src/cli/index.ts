@@ -2,7 +2,6 @@ import { parseOptions } from '@module-federation/enhanced';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 
 import { isRegExp, isRequiredVersion } from '../utils/index';
-import { DEFAULT_ASSET_PREFIX } from '../utils/constant';
 import pkgJson from '../../package.json';
 
 import type {
@@ -125,12 +124,6 @@ export const pluginModuleFederation = (
       }
 
       const mfConfig: EnvironmentConfig = {
-        dev: {
-          assetPrefix:
-            config.dev.assetPrefix === DEFAULT_ASSET_PREFIX
-              ? true
-              : config.dev.assetPrefix,
-        },
         tools: {
           rspack: {
             output: {
@@ -150,6 +143,12 @@ export const pluginModuleFederation = (
       // `uniqueName` is required for react refresh to work
       if (!chain.output.get('uniqueName')) {
         chain.output.set('uniqueName', moduleFederationOptions.name);
+      }
+
+      const publicPath = chain.output.get('publicPath');
+      // set the default publicPath to 'auto' to make MF work
+      if (publicPath === '/') {
+        chain.output.set('publicPath', 'auto');
       }
     });
   },
