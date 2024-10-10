@@ -18,7 +18,9 @@ type RootType = HTMLElement | ReactDOMClient.Root;
 
 type BridgeHooks = {
   beforeBridgeRender?: (params: RenderFnParams) => void;
+  afterBridgeRender?: (params: RenderFnParams) => void;
   beforeBridgeDestroy?: (params: DestroyParams) => void;
+  afterBridgeDestroy?: (params: DestroyParams) => void;
 };
 
 type ProviderFnParams<T> = {
@@ -74,16 +76,8 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         const beforeBridgeRender =
           (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeRender) ||
           params?.hooks?.beforeBridgeRender;
-        beforeBridgeRender && beforeBridgeRender(info);
-        // call beforeBridgeRender hook
-        // if (
-        //   bridgeInfo?.hooks &&
-        //   bridgeInfo?.hooks.beforeBridgeRender &&
-        //   typeof bridgeInfo?.hooks.beforeBridgeRender === 'function'
-        // ) {
-        //   bridgeInfo.hooks.beforeBridgeRender(info);
-        // }
 
+        beforeBridgeRender && beforeBridgeRender(info);
         // call render function
         if (atLeastReact18(React)) {
           if (bridgeInfo?.render) {
@@ -101,7 +95,13 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           const renderFn = bridgeInfo?.render || ReactDOM.render;
           renderFn?.(rootComponentWithErrorBoundary, info.dom);
         }
+
+        const afterBridgeRender =
+          (bridgeInfo?.hooks && bridgeInfo?.hooks.afterBridgeDestroy) ||
+          params?.hooks?.afterBridgeRender;
+        afterBridgeRender && afterBridgeRender(info);
       },
+
       async destroy(info: DestroyParams) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, {
           dom: info.dom,
@@ -129,6 +129,11 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         } else {
           ReactDOM.unmountComponentAtNode(info.dom);
         }
+
+        const afterBridgeDestroy =
+          (bridgeInfo?.hooks && bridgeInfo?.hooks.afterBridgeDestroy) ||
+          params?.hooks?.afterBridgeDestroy;
+        afterBridgeDestroy && afterBridgeDestroy(info);
       },
       rawComponent: bridgeInfo.rootComponent,
       __BRIDGE_FN__: (_args: T) => {},
