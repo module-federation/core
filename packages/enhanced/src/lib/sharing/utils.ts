@@ -3,6 +3,7 @@
 	Author Tobias Koppers @sokra
 */
 
+import { isRequiredVersion } from '@module-federation/sdk';
 import type { ConsumeOptions } from 'webpack/lib/sharing/ConsumeSharedModule';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { InputFileSystem } from 'webpack/lib/util/fs';
@@ -37,9 +38,6 @@ const RE_HOSTNAME_WITH_COLON: RegExp =
 
 // Reg for url without protocol
 const RE_NO_PROTOCOL: RegExp = /^([^/@#:.]+(?:\.[^/@#:.]+)+)/;
-
-// RegExp for version string
-const VERSION_PATTERN_REGEXP: RegExp = /^([\d^=v<>~]|[*xX]$)/;
 
 // Specific protocol for short url without normal hostname
 const PROTOCOLS_FOR_SHORT: string[] = [
@@ -313,16 +311,6 @@ function getGitUrlVersion(gitUrl: string): string {
   // for protocol short
   return getVersionFromHash(gitUrl);
 }
-
-/**
- * @param {string} str maybe required version
- * @returns {boolean} true, if it looks like a version
- */
-function isRequiredVersion(str: string): boolean {
-  return VERSION_PATTERN_REGEXP.test(str);
-}
-
-export { isRequiredVersion };
 
 /**
  * @see https://docs.npmjs.com/cli/v7/configuring-npm/package-json#urls-as-dependencies

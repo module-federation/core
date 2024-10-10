@@ -31,9 +31,11 @@
   "files": [
     "dist"
   ],
-  "devDependencies": {
-    "@rsbuild/core": "1.x",
+  "dependencies": {
     "@module-federation/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "1.x"
   },
   "peerDependencies": {
     "@rsbuild/core": "1.x",

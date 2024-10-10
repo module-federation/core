@@ -2414,12 +2414,12 @@ importers:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../enhanced
-    devDependencies:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
+    devDependencies:
       '@rsbuild/core':
-        specifier: 1.0.7
+        specifier: 1.x
         version: 1.0.7
 
   packages/rspack:

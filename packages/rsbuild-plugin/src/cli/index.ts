@@ -1,7 +1,8 @@
 import { parseOptions } from '@module-federation/enhanced';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { isRequiredVersion } from '@module-federation/sdk';
 
-import { isRegExp, isRequiredVersion } from '../utils/index';
+import { isRegExp } from '../utils/index';
 import pkgJson from '../../package.json';
 
 import type {
