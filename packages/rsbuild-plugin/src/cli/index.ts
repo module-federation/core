@@ -2,6 +2,7 @@ import { parseOptions } from '@module-federation/enhanced';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 
 import { isRegExp, isRequiredVersion } from '../utils/index';
+import { DEFAULT_ASSET_PREFIX } from '../utils/constant';
 import pkgJson from '../../package.json';
 
 import type {
@@ -53,7 +54,9 @@ export const pluginModuleFederation = (
         config.dev.client.port = config.server.port;
       }
       config.dev ??= {};
-      config.dev.assetPrefix ??= true;
+      if (config.dev.assetPrefix === DEFAULT_ASSET_PREFIX) {
+        config.dev.assetPrefix = true;
+      }
     });
 
     api.modifyEnvironmentConfig((config, { mergeEnvironmentConfig }) => {
