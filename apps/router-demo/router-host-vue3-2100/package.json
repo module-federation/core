@@ -8,12 +8,13 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
-    "@module-federation/rsbuild-plugin": "workspace:*",
     "@module-federation/bridge-vue3": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
     "vue": "^3.4.19",
     "vue-router": "^4.3.2"
   },
   "devDependencies": {
+    "@module-federation/rsbuild-plugin": "workspace:*",
     "@rsbuild/core": "^1.0.7",
     "@rsbuild/plugin-vue": "^1.0.1",
     "tailwindcss": "^3.4.3",

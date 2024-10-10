@@ -13,7 +13,6 @@ module.exports = (rollupConfig, _projectOptions) => {
   );
   rollupConfig.input = {
     index: 'packages/rsbuild-plugin/src/cli/index.ts',
-    runtime: 'packages/rsbuild-plugin/src/runtime/index.ts',
   };
   return rollupConfig;
 };

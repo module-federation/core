@@ -1,4 +1,4 @@
-import { loadRemote } from '@module-federation/rsbuild-plugin/runtime';
+import { loadRemote } from '@module-federation/enhanced/runtime';
 // import Button from 'remote1/button';
 
 // console.log('loadRemote', loadRemote);

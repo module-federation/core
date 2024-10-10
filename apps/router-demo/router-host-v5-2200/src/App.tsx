@@ -3,7 +3,7 @@ import { BrowserRouter, Route } from 'react-router-dom';
 import './App.css';
 import Navigation from './navigation';
 import Home from './pages/Home';
-import { loadRemote } from '@module-federation/rsbuild-plugin/runtime';
+import { loadRemote } from '@module-federation/enhanced/runtime';
 import { createRemoteComponent } from '@module-federation/bridge-react';
 
 const FallbackErrorComp = (info: any) => {

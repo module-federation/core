@@ -1,6 +1,6 @@
 import { useRef, useEffect, ForwardRefExoticComponent } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { init, loadRemote } from '@module-federation/rsbuild-plugin/runtime';
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 import { createRemoteComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';

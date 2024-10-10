@@ -1,4 +1,4 @@
-import { loadRemote } from '@module-federation/rsbuild-plugin/runtime';
+import { loadRemote } from '@module-federation/enhanced/runtime';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { UNSAFE_RouteContext, useLocation } from 'react-router-dom';
 import type {

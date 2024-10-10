@@ -10,13 +10,14 @@
   "dependencies": {
     "@ant-design/icons": "^5.3.6",
     "@module-federation/bridge-react": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
     "react-router-dom": "^6.24.1",
     "@module-federation/retry-plugin": "workspace:*",
-    "@module-federation/rsbuild-plugin": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@module-federation/rsbuild-plugin": "workspace:*",
     "@rsbuild/core": "^1.0.7",
     "@rsbuild/plugin-react": "^1.0.3",
     "@types/react": "^18.2.79",
