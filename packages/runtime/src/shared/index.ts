@@ -290,6 +290,7 @@ export class SharedHandler {
         !activeVersion ||
         (activeVersion.strategy !== 'loaded-first' &&
           !activeVersion.loaded &&
+          !activeVersion.loading &&
           (Boolean(!eager) !== !activeVersionEager
             ? eager
             : hostName > activeVersion.from))
