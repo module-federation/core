@@ -72,7 +72,12 @@ export default function (): FederationRuntimePlugin {
 
       var moduleCache = args.origin.moduleCache;
       var name = args.origin.name;
-      var gs = new Function('return globalThis')();
+      var gs;
+      try {
+        gs = new Function('return globalThis')();
+      } catch (e) {
+        gs = window; // fallback for browsers without 'unsafe-eval' CSP policy enabled
+      }
       var attachedRemote = gs[name];
       if (attachedRemote) {
         moduleCache.set(name, attachedRemote);
