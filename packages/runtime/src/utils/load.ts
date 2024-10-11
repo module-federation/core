@@ -20,11 +20,7 @@ async function loadEsmEntry({
   return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
-        // eslint-disable-next-line no-eval
-        new Function(
-          'callbacks',
-          `import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
-        )([resolve, reject]);
+        import(/* webpackIgnore: true */ entry).then(resolve).catch(reject);
       } else {
         resolve(remoteEntryExports);
       }
@@ -44,11 +40,16 @@ async function loadSystemJsEntry({
   return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
-        // eslint-disable-next-line no-eval
-        new Function(
-          'callbacks',
-          `System.import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
-        )([resolve, reject]);
+        //@ts-ignore
+        if (typeof __system_context__ === 'undefined') {
+          //@ts-ignore
+          System.import(entry).then(resolve).catch(reject);
+        } else {
+          new Function(
+            'callbacks',
+            `System.import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
+          )([resolve, reject]);
+        }
       } else {
         resolve(remoteEntryExports);
       }

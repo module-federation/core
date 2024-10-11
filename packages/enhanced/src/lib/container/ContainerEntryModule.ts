@@ -59,6 +59,7 @@ class ContainerEntryModule extends Module {
   private _shareScope: string;
   private _injectRuntimeEntry: string;
   private _experiments: containerPlugin.ContainerPluginOptions['experiments'];
+  private _dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'];
 
   /**
    * @param {string} name container entry name
@@ -66,6 +67,7 @@ class ContainerEntryModule extends Module {
    * @param {string} shareScope name of the share scope
    * @param {string} injectRuntimeEntry the path of injectRuntime file.
    * @param {containerPlugin.ContainerPluginOptions['experiments']} experiments additional experiments options
+   * @param {containerPlugin.ContainerPluginOptions['dataPrefetch']} dataPrefetch whether enable dataPrefetch
    */
   constructor(
     name: string,
@@ -73,6 +75,7 @@ class ContainerEntryModule extends Module {
     shareScope: string,
     injectRuntimeEntry: string,
     experiments: containerPlugin.ContainerPluginOptions['experiments'],
+    dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'],
   ) {
     super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
     this._name = name;
@@ -80,6 +83,7 @@ class ContainerEntryModule extends Module {
     this._shareScope = shareScope;
     this._injectRuntimeEntry = injectRuntimeEntry;
     this._experiments = experiments;
+    this._dataPrefetch = dataPrefetch;
   }
 
   /**
@@ -89,6 +93,7 @@ class ContainerEntryModule extends Module {
   static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
     const { read } = context;
     const obj = new ContainerEntryModule(
+      read(),
       read(),
       read(),
       read(),
@@ -111,7 +116,7 @@ class ContainerEntryModule extends Module {
   override identifier(): string {
     return `container entry (${this._shareScope}) ${JSON.stringify(
       this._exposes,
-    )} ${this._injectRuntimeEntry} ${JSON.stringify(this._experiments)}`;
+    )} ${this._injectRuntimeEntry} ${JSON.stringify(this._experiments)} ${JSON.stringify(this._dataPrefetch)}`;
   }
   /**
    * @param {RequestShortener} requestShortener the request shortener
@@ -310,10 +315,9 @@ class ContainerEntryModule extends Module {
           '})',
         ],
       )};`,
-      PrefetchPlugin.setRemoteIdentifier(),
+      this._dataPrefetch ? PrefetchPlugin.setRemoteIdentifier() : '',
       `${initRuntimeModuleGetter}`,
-      PrefetchPlugin.removeRemoteIdentifier(),
-      '',
+      this._dataPrefetch ? PrefetchPlugin.removeRemoteIdentifier() : '',
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,
       Template.indent([
@@ -353,6 +357,7 @@ class ContainerEntryModule extends Module {
     write(this._shareScope);
     write(this._injectRuntimeEntry);
     write(this._experiments);
+    write(this._dataPrefetch);
     super.serialize(context);
   }
 }

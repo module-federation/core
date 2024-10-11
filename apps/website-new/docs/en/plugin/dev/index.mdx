@@ -58,11 +58,7 @@ const path = require('path');
 module.exports = {
   plugins: [
     new ModuleFederation({
-      name: 'host',
-      remotes: {
-        'manifest-provider':
-          'manifest_provider@http://localhost:3011/mf-manifest.json',
-      },
+      // ...
       runtimePlugins: [path.resolve(__dirname, './custom-runtime-plugin.ts')],
     }),
   ],
@@ -72,18 +68,10 @@ module.exports = {
 - Runtime registration of plugins
 
 ```typescript
+import { registerPlugins } from '@module-federation/enhanced/runtime'
 import runtimePlugin from 'custom-runtime-plugin.ts';
-init({
-  name: '@demo/app-main',
-  remotes: [
-    {
-      name: '@demo/app2',
-      entry: 'http://localhost:3006/mf-manifest.json',
-      alias: 'app2',
-    },
-  ],
-  plugins: [runtimePlugin()],
-});
+
+registerPlugins([runtimePlugin()]);
 ```
 
 ### Plugin Structure
