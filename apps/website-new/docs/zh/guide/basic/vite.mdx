@@ -40,6 +40,14 @@ module.exports = {
     origin: 'http://localhost:2000',
     port: 2000,
   },
+  remotes: {
+    esm_remote: {
+      type: "module",
+      name: "esm_remote",
+      entry: "https://[...]/remoteEntry.js",
+    },
+    var_remote: "var_remote@https://[...]/remoteEntry.js",
+  },
   base: "http://localhost:2000",
   plugins: [
     federation({
