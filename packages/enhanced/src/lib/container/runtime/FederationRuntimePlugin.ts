@@ -219,10 +219,6 @@ class FederationRuntimePlugin {
     return path.join(TEMP_DIR, `entry.${hash}.js`);
   }
   getFilePath(compiler: Compiler, useMinimalRuntime = false) {
-    if (this.entryFilePath) {
-      return this.entryFilePath;
-    }
-
     if (!this.options) {
       return '';
     }
