@@ -1,0 +1,92 @@
+# Vite Plugin
+
+- 能够构建出满足 `Module Federation` 加载规范的模块
+- 能够使用别名消费 `Module Federation` 规范的模块
+- 能够设置模块的共享依赖配置，当加载模块的宿主环境已经存在对应依赖时将不会重复加载
+
+:::warning 不支持的选项
+除了[dev、dts](../../configure/dev.html) 选项外，其他选项全部支持
+:::
+- roadmap 🗓️
+  - 当模块具备远程类型时将会自动把远程模块的类型下载下来消费
+  - 消费远程模块时将具备热更新能力
+  - nuxt ssr 
+
+## 快速开始
+
+### 安装
+
+你可以通过如下的命令安装插件：
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/vite --save',
+    yarn: 'yarn add @module-federation/vite --save',
+    pnpm: 'pnpm add @module-federation/vite --save',
+    bun: 'bun add @module-federation/vite --save',
+  }}
+/>
+
+### 注册插件
+
+在 `vite` 中，你可以通过 `vite.config.js` 配置文件中的 `plugins` 配置项来添加插件：
+
+```ts title='vite.config.js'
+import { federation } from '@module-federation/vite';
+module.exports = {
+  server: {
+    origin: 'http://localhost:2000',
+    port: 2000,
+  },
+  remotes: {
+    esm_remote: {
+      type: "module",
+      name: "esm_remote",
+      entry: "https://[...]/remoteEntry.js",
+    },
+    var_remote: "var_remote@https://[...]/remoteEntry.js",
+  },
+  base: "http://localhost:2000",
+  plugins: [
+    federation({
+      name: 'vite_provider',
+      manifest: true,
+      exposes: {
+        './button': './src/components/button',
+      },
+      shared: {
+        react: {
+          singleton: true,
+        },
+        'react/': {
+          singleton: true,
+        },
+      },
+    }),
+  ],
+  // Do you need to support build targets lower than chrome89?
+  // You can use 'vite-plugin-top-level-await' plugin for that.
+  build: {
+    target: 'chrome89',
+  },
+};
+```
+
+## 配置构建插件
+
+- Type: `ModuleFederationPlugin(options: ModuleFederationOptions)`
+
+- Module federation 插件的配置结构如下所示：
+
+```ts
+type ModuleFederationOptions {
+    name: string;
+    filename?: string,
+    remotes?: Array<RemoteInfo>;
+    shared?: ShareInfos;
+};
+```
+
+你可以在 [Config 总览](../../configure/index) 页面找到所有配置项的详细说明。
