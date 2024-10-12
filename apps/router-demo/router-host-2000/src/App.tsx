@@ -6,7 +6,6 @@ import { createRemoteComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
-import styles from './index.module.less';
 import './App.css';
 
 init({
@@ -132,14 +131,7 @@ const App = () => {
         <Route path="/detail/*" Component={Detail} />
         <Route
           path="/remote1/*"
-          Component={() => (
-            <Remote1App
-              className={styles.remote1}
-              name={'Ming'}
-              age={12}
-              ref={ref}
-            />
-          )}
+          Component={() => <Remote1App name={'Ming'} age={12} ref={ref} />}
         />
         <Route
           path="/remote2/*"
