@@ -76,7 +76,7 @@ export default function (): FederationRuntimePlugin {
       try {
         gs = new Function('return globalThis')();
       } catch (e) {
-        gs = window; // fallback for browsers without 'unsafe-eval' CSP policy enabled
+        gs = globalThis; // fallback for browsers without 'unsafe-eval' CSP policy enabled
       }
       var attachedRemote = gs[name];
       if (attachedRemote) {
