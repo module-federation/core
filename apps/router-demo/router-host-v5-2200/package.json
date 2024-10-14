@@ -18,8 +18,9 @@
     "react-router-dom": "^5.3.4"
   },
   "devDependencies": {
-    "@rsbuild/core": "^0.6.15",
-    "@rsbuild/plugin-react": "^0.6.15",
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@rsbuild/core": "^1.0.7",
+    "@rsbuild/plugin-react": "^1.0.3",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.3.0",
     "tailwindcss": "^3.4.3",

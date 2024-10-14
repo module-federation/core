@@ -1,0 +1,85 @@
+# Rsbuild Plugin
+
+Help users quickly build Module Federation products in **Rsbuild App** or **Rslib**
+
+## Quick Start
+
+### Installation
+
+You can install the plugin using the following command:
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rsbuild-plugin --save-dev',
+    yarn: 'yarn add @module-federation/rsbuild-plugin --save-dev',
+    pnpm: 'pnpm add @module-federation/rsbuild-plugin --save-dev',
+    bun: 'bun add @module-federation/rsbuild-plugin --save-dev',
+  }}
+/>
+
+### Register plugin
+#### Rsbuild App
+```ts title='rsbuild.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+
+export default defineConfig({
+  server: {
+    port: 2000,
+  },
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'federation_consumer',
+      remotes: {
+        remote1: 'remote1@http://localhost:2001/mf-manifest.json',
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
+});
+```
+
+#### Rslib Module
+``` ts title='rslib.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rslib/core';
+
+export default defineConfig({
+  lib: [
+    // ...
+    {
+      format: 'mf',
+      output: {
+        distPath: {
+          root: './dist/mf',
+        },
+        assetPrefix: 'xxx',
+      },
+      plugins: [
+        // ...
+        pluginModuleFederation({
+          name: 'rslib_provider',
+          exposes: {
+            '.': './src/index.tsx',
+          },
+          shared: {
+            react: {
+              singleton: true,
+            },
+            'react-dom': {
+              singleton: true,
+            },
+          },
+        }),
+      ],
+    },
+  ],
+});
+```
+
+### Note
+If you need to use the Module Federation runtime capabilities, please install [@module-federation/enhanced](/en/guide/basic/runtime.html)
