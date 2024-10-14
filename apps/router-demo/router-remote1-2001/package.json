@@ -10,7 +10,7 @@
   "dependencies": {
     "@module-federation/bridge-react": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
-    "antd": "^5.16.2",
+    "antd": "^5.21.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^5.3.4",
