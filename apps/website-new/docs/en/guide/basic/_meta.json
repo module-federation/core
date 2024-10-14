@@ -1,1 +1,1 @@
-["runtime", "rspack", "webpack", "vite", "chrome-devtool", "type-prompt", "error-catalog"]
+["runtime", "rspack", "webpack", "rsbuild", "vite", "chrome-devtool", "type-prompt", "error-catalog"]

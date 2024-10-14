@@ -1,17 +1,27 @@
-# @module-federation/rsbuild-plugin
+# Rsbuild Plugin
 
-## Example
+Help users quickly build Module Federation products in **Rsbuild App** or **Rslib**
 
-```
-npm install @module-federation/rsbuild-plugin -D
-```
+## Quick Start
 
-```
-npm install @module-federation/enhanced
-```
+### Installation
 
-### Rsbuild App
-``` js
+You can install the plugin using the following command:
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rsbuild-plugin --save-dev',
+    yarn: 'yarn add @module-federation/rsbuild-plugin --save-dev',
+    pnpm: 'pnpm add @module-federation/rsbuild-plugin --save-dev',
+    bun: 'bun add @module-federation/rsbuild-plugin --save-dev',
+  }}
+/>
+
+### Register plugin
+#### Rsbuild App
+```ts title='rsbuild.config.ts'
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
@@ -33,8 +43,8 @@ export default defineConfig({
 });
 ```
 
-### Rslib Module
-``` js
+#### Rslib Module
+``` ts title='rslib.config.ts'
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rslib/core';
 
@@ -47,7 +57,7 @@ export default defineConfig({
         distPath: {
           root: './dist/mf',
         },
-        assetPrefix: 'http://localhost:3001/mf',
+        assetPrefix: 'xxx',
       },
       plugins: [
         // ...
@@ -70,3 +80,6 @@ export default defineConfig({
   ],
 });
 ```
+
+### Note
+If you need to use the Module Federation runtime capabilities, please install [@module-federation/enhanced](/en/guide/basic/runtime.html)
