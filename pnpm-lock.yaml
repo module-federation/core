@@ -2221,8 +2221,8 @@ importers:
         specifier: 2.60.2
         version: 2.60.2
       '@modern-js/utils':
-        specifier: 2.60.2
-        version: 2.60.2
+        specifier: 2.60.3
+        version: 2.60.3
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../enhanced
@@ -5736,6 +5736,7 @@ packages:
 
   /@emnapi/wasi-threads@1.0.1:
     resolution: {integrity: sha512-iIBu7mwkq4UQGeMEM8bLwNK962nXdhodeScX4slfQnRhEMMzvYivHhutCIk8uojvmASXXPC2WNEjwxFWk72Oqw==}
+    requiresBuild: true
     dependencies:
       tslib: 2.6.3
 
@@ -9773,6 +9774,15 @@ packages:
       caniuse-lite: 1.0.30001667
       lodash: 4.17.21
       rslog: 1.2.3
+
+  /@modern-js/utils@2.60.3:
+    resolution: {integrity: sha512-g9kxWsYZ71MZPXMEf2ltDP229WjGIChNB95fjmcvtWRoW9grhINdQJ0/tO+jEaHZiDDQEWuPJlqqUrXWcZB0nQ==}
+    dependencies:
+      '@swc/helpers': 0.5.13
+      caniuse-lite: 1.0.30001667
+      lodash: 4.17.21
+      rslog: 1.2.3
+    dev: false
 
   /@module-federation/bridge-react-webpack-plugin@0.6.6:
     resolution: {integrity: sha512-NANaSOKem+1t/Fbd1GjXnStJRe7O33ya+FR/yYkTUd1H5hmlzVDNo/lYxYuUl3O/gH9Lnlr2Gf9unyWoIW0wHw==}
@@ -14277,7 +14287,7 @@ packages:
     resolution: {integrity: sha512-siBYUQL3qVINLDkIBaxx4caNb+zZ+Jb8WtN2RgRT5buLW+PU5fXUs5vGwjFz6B6wCxO/vLr78X/FjaCmxMv8HA==}
     dependencies:
       '@rspack/core': 0.6.5(@swc/helpers@0.5.13)
-      caniuse-lite: 1.0.30001666
+      caniuse-lite: 1.0.30001667
       postcss: 8.4.47
     optionalDependencies:
       fsevents: 2.3.3
@@ -14289,7 +14299,7 @@ packages:
     resolution: {integrity: sha512-siBYUQL3qVINLDkIBaxx4caNb+zZ+Jb8WtN2RgRT5buLW+PU5fXUs5vGwjFz6B6wCxO/vLr78X/FjaCmxMv8HA==}
     dependencies:
       '@rspack/core': 0.6.5(@swc/helpers@0.5.3)
-      caniuse-lite: 1.0.30001666
+      caniuse-lite: 1.0.30001667
       postcss: 8.4.47
     optionalDependencies:
       fsevents: 2.3.3
@@ -14952,7 +14962,7 @@ packages:
       '@module-federation/runtime-tools': 0.1.6
       '@rspack/binding': 0.6.5
       '@swc/helpers': 0.5.13
-      caniuse-lite: 1.0.30001666
+      caniuse-lite: 1.0.30001667
       enhanced-resolve: 5.12.0
       tapable: 2.2.1
       webpack-sources: 3.2.3
@@ -14970,7 +14980,7 @@ packages:
       '@module-federation/runtime-tools': 0.1.6
       '@rspack/binding': 0.6.5
       '@swc/helpers': 0.5.3
-      caniuse-lite: 1.0.30001666
+      caniuse-lite: 1.0.30001667
       enhanced-resolve: 5.12.0
       tapable: 2.2.1
       webpack-sources: 3.2.3
