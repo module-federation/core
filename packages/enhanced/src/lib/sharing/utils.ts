@@ -348,12 +348,17 @@ export { normalizeVersion };
  * @param {string} directory directory to start looking into
  * @param {string[]} descriptionFiles possible description filenames
  * @param {function((Error | null)=, {data: object, path: string}=): void} callback callback
+ * @param {function({data: Record<string, any>, path: string}=): boolean} satisfiesDescriptionFileData file data compliance check
  */
 const getDescriptionFile = (
   fs: InputFileSystem,
   directory: string,
   descriptionFiles: string[],
   callback: (err: Error | null, data?: { data: object; path: string }) => void,
+  satisfiesDescriptionFileData?: (data: {
+    data: Record<string, any>;
+    path: string;
+  }) => boolean,
 ) => {
   let i = 0;
   const tryLoadCurrent = () => {
@@ -368,6 +373,7 @@ const getDescriptionFile = (
         parentDirectory,
         descriptionFiles,
         callback,
+        satisfiesDescriptionFileData,
       );
     }
     const filePath = join(fs, directory, descriptionFiles[i]);
@@ -383,6 +389,12 @@ const getDescriptionFile = (
         return callback(
           new Error(`Description file ${filePath} is not an object`),
         );
+      }
+      if (typeof satisfiesDescriptionFileData === 'function') {
+        if (!satisfiesDescriptionFileData({ data, path: filePath })) {
+          i++;
+          return tryLoadCurrent();
+        }
       }
       callback(null, { data, path: filePath });
     });
