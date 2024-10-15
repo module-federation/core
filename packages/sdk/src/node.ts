@@ -92,7 +92,7 @@ export function createScriptNode(
       ]);
 
       const scriptContext = { exports: {}, module: { exports: {} } };
-      const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
+      // const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
       const filename = path.basename(urlObj.pathname);
 
       const script = new vm.Script(
@@ -109,7 +109,7 @@ export function createScriptNode(
         scriptContext.exports,
         scriptContext.module,
         eval('require'),
-        urlDirname,
+        __dirname,
         filename,
       );
 
