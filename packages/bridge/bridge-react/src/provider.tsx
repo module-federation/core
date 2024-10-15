@@ -67,7 +67,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         // 可通过beforeBridgeRender返回一个props对象，用于传递额外的 props 参数
         const beforeBridgeRenderRes =
           beforeBridgeRender && beforeBridgeRender(info);
-        const componentProps =
+        const extraProps =
           beforeBridgeRenderRes &&
           typeof beforeBridgeRenderRes === 'object' &&
           beforeBridgeRenderRes?.extraProps
@@ -83,8 +83,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
                 basename,
                 memoryRoute,
               }}
-              // propsInfo={propsInfo}
-              propsInfo={{ propsInfo, ...componentProps } as T}
+              propsInfo={{ ...propsInfo, ...extraProps } as T}
             />
           </ErrorBoundary>
         );

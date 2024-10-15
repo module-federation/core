@@ -67,7 +67,7 @@ const RemoteAppWrapper = forwardRef(function (
         const providerReturn = providerInfo();
         providerInfoRef.current = providerReturn;
 
-        const renderProps = {
+        let renderProps = {
           moduleName,
           dom: rootRef.current,
           basename,
@@ -82,11 +82,22 @@ const RemoteAppWrapper = forwardRef(function (
         );
 
         if (bridgeHook && bridgeHook?.lifecycle?.beforeBridgeRender) {
-          bridgeHook?.lifecycle?.beforeBridgeRender.emit({
-            ...renderProps,
-          });
-        }
+          const beforeBridgeRenderRes =
+            bridgeHook?.lifecycle?.beforeBridgeRender.emit({
+              ...renderProps,
+            });
+          const extraProps =
+            beforeBridgeRenderRes &&
+            typeof beforeBridgeRenderRes === 'object' &&
+            beforeBridgeRenderRes?.extraProps
+              ? beforeBridgeRenderRes?.extraProps
+              : {};
 
+          renderProps = {
+            ...renderProps,
+            ...extraProps,
+          } as any;
+        }
         providerReturn.render(renderProps);
       });
 
@@ -98,8 +109,8 @@ const RemoteAppWrapper = forwardRef(function (
               `createRemoteComponent LazyComponent destroy >>>`,
               { moduleName, basename, dom: renderDom.current },
             );
-            if (bridgeHook && bridgeHook?.lifecycle?.beforeBridgeDestroy) {
-              bridgeHook?.lifecycle?.beforeBridgeDestroy.emit({
+            if (bridgeHook && bridgeHook?.lifecycle?.afterBridgeDestroy) {
+              bridgeHook?.lifecycle?.afterBridgeDestroy.emit({
                 moduleName,
                 dom: renderDom.current,
                 basename,

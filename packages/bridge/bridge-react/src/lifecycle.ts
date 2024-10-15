@@ -5,14 +5,13 @@ function registerBridgeLifeCycle() {
   const { registerPlugins, pluginHelper } = helper.global;
   const host = getInstance();
   const pluginSystem = new pluginHelper.PluginSystem({
-    beforeBridgeRender: new pluginHelper.SyncHook<
-      [Record<string, any>],
-      void
-    >(),
+    beforeBridgeRender: new pluginHelper.SyncHook<[Record<string, any>], any>(),
+    afterBridgeRender: new pluginHelper.SyncHook<[Record<string, any>], any>(),
     beforeBridgeDestroy: new pluginHelper.SyncHook<
       [Record<string, any>],
-      void
+      any
     >(),
+    afterBridgeDestroy: new pluginHelper.SyncHook<[Record<string, any>], any>(),
   });
 
   if (host) {
