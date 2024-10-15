@@ -25,7 +25,6 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation) => {
-        const logger = compilation.getLogger(PLUGIN_NAME);
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const containerEntryDependencies = new Set<Dependency>();
         hooks.addContainerEntryModule.tap(
@@ -80,12 +79,14 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         compilation,
         containerEntryModule,
         'initial',
+        true,
       );
 
       const allRemoteReferences = getAllReferencedModules(
         compilation,
         containerEntryModule,
         'external',
+        true,
       );
 
       for (const remote of allRemoteReferences) {
@@ -218,9 +219,10 @@ export function getAllReferencedModules(
   compilation: Compilation,
   module: Module,
   type?: 'all' | 'initial' | 'external',
+  withInitialModule?: boolean,
 ): Set<Module> {
-  const collectedModules = new Set<Module>([module]);
-  const visitedModules = new WeakSet<Module>([module]);
+  const collectedModules = new Set<Module>(withInitialModule ? [module] : []);
+  const visitedModules = new WeakSet<Module>(withInitialModule ? [module] : []);
   const stack = [module];
 
   while (stack.length > 0) {
