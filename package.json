@@ -170,7 +170,7 @@
     "directory-tree": "3.5.2",
     "esbuild": "0.24.0",
     "eslint": "8.57.1",
-    "eslint-config-next": "14.2.14",
+    "eslint-config-next": "14.2.15",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-cypress": "^2.13.4",
     "eslint-plugin-import": "2.31.0",
