@@ -76,10 +76,3 @@ export function getBuildVersion(): string {
 export function getBuildName(): string | undefined {
   return process.env['MF_BUILD_NAME'];
 }
-
-// RegExp for version string
-const VERSION_PATTERN_REGEXP: RegExp = /^([\d^=v<>~]|[*xX]$)/;
-
-export function isRequiredVersion(str: string): boolean {
-  return VERSION_PATTERN_REGEXP.test(str);
-}

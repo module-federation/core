@@ -20,11 +20,11 @@ This `RetryPlugin` is Provided by the `@module-federation/retry-plugin` package
 />
 
 ## Usage
- 
+
 `RetryPlugin` is a runtime plugin, we can register this plugin through the `runtimePlugin` of the build plugin or register it at runtime and configure retry parameters and retry logic, etc.:
 
 
-:::note 
+:::note
 Note: Choose either of the two ways to register the build plugin and do not register it repeatedly
 
 :::
@@ -33,24 +33,20 @@ Note: Choose either of the two ways to register the build plugin and do not regi
 ### Method1: Register in the build plugin
 
 ```diff
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 
 export default defineConfig({
-  tools: {
-    rspack: (config, { appendPlugins }) => {
-      appendPlugins([
-        new ModuleFederationPlugin({
-          ...,
-+         runtimePlugins: [
-+            path.join(__dirname, './src/runtime-plugin/retry.ts'),
-+         ],
-        }),
-      ]);
-    },
-  },
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      ...,
++     runtimePlugins: [
++       path.join(__dirname, './src/runtime-plugin/retry.ts'),
++     ],
+    }),
+  ],
 });
-
 ```
 
 ```ts
@@ -161,30 +157,30 @@ type ScriptWithRetryOptions = {
 ### 属性
 ### Properties
 
-- **url**: 
+- **url**:
   - `string`
   - Optional. When not set, all failed resources will default to retry logic.
   - The URL of the resource to be retried.
 
-- **options**: 
+- **options**:
   - `RequestInit`
   - Optional.
   - The request options for the fetch request.
 
-- **retryTimes**: 
+- **retryTimes**:
   - `number`
-  - Optional. 
+  - Optional.
   - The number of retry attempts. Defaults to 3.
 
-- **retryDelay**: 
+- **retryDelay**:
   - `number`
-  - Optional. 
+  - Optional.
   - The delay between retry attempts in milliseconds. Defaults to 1000.
 
-- **fallback**: 
+- **fallback**:
   - `() => string`
   - Optional. A function that returns a Promise that resolves to a Response object. This function is called when all retry attempts have failed.
- 
+
 
 ### ScriptWithRetryOptions Type Description
 
@@ -192,22 +188,22 @@ type ScriptWithRetryOptions = {
 
 ### Properties
 
-- **url**: 
+- **url**:
   - `string`
   - Optional. When not set, all failed resources will default to retry logic.
   - The URL of the resource to be retried.
 
-- **attrs**: 
+- **attrs**:
   - `Record<string, string>`
   - Optional
   - The attributes to be passed to the script element.
 
-- **retryTimes**: 
+- **retryTimes**:
   - `number`
   - Optional
   - The number of retry attempts. Defaults to 3.
 
-- **retryDelay**: 
+- **retryDelay**:
   - `number`
   - Optional
   - The delay between retry attempts in milliseconds. Defaults to 1000.

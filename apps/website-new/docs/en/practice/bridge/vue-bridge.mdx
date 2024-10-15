@@ -68,41 +68,36 @@ export default createBridgeComponent({
 
 ```ts
 // rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
 export default defineConfig({
-  tools: {
-    rspack: (config, { appendPlugins }) => {
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'remote1',
-          exposes: {
-            './export-app': './src/export-app.ts',
-          },
-          shared: ['vue', 'vue-router'],
-        }),
-      ]);
-    },
-  },
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.ts',
+      },
+      shared: ['vue', 'vue-router'],
+    }),
+  ],
 });
 ```
 
 > Host
 
 ```ts
-// rsbuild.config.ts
+//rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
 export default defineConfig({
-  tools: {
-    rspack: (config, { appendPlugins }) => {
-      config.output!.uniqueName = 'host';
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'host',
-          remotes: {
-            remote1: 'remote1@http://localhost:2001/mf-manifest.json',
-          },
-        }),
-      ]);
-    },
-  },
+  plugins: [
+    pluginModuleFederation({
+      name: 'host',
+      remotes: {
+        remote1: 'remote1@http://localhost:2001/mf-manifest.json',
+      },
+    }),
+  ],
 });
 ```
 

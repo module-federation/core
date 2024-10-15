@@ -72,7 +72,12 @@ export default function (): FederationRuntimePlugin {
 
       const moduleCache = args.origin.moduleCache;
       const name = args.origin.name;
-      const gs = globalThis;
+      let gs;
+      try {
+        gs = new Function('return globalThis')();
+      } catch (e) {
+        gs = globalThis; // fallback for browsers without 'unsafe-eval' CSP policy enabled
+      }
       //@ts-ignore
       const attachedRemote = gs[name];
       if (attachedRemote) {
