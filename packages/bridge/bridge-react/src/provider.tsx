@@ -17,10 +17,10 @@ type DestroyParams = {
 type RootType = HTMLElement | ReactDOMClient.Root;
 
 type BridgeHooks = {
-  beforeBridgeRender?: (params: RenderFnParams) => void;
-  afterBridgeRender?: (params: RenderFnParams) => void;
-  beforeBridgeDestroy?: (params: DestroyParams) => void;
-  afterBridgeDestroy?: (params: DestroyParams) => void;
+  beforeBridgeRender?: (params: RenderFnParams) => any;
+  afterBridgeRender?: (params: RenderFnParams) => any;
+  beforeBridgeDestroy?: (params: DestroyParams) => any;
+  afterBridgeDestroy?: (params: DestroyParams) => any;
 };
 
 type ProviderFnParams<T> = {
@@ -59,6 +59,21 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           fallback,
           ...propsInfo
         } = info;
+
+        const beforeBridgeRender =
+          (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeRender) ||
+          params?.hooks?.beforeBridgeRender;
+
+        // 可通过beforeBridgeRender返回一个props对象，用于传递额外的 props 参数
+        const beforeBridgeRenderRes =
+          beforeBridgeRender && beforeBridgeRender(info);
+        const componentProps =
+          beforeBridgeRenderRes &&
+          typeof beforeBridgeRenderRes === 'object' &&
+          beforeBridgeRenderRes?.extraProps
+            ? beforeBridgeRenderRes?.extraProps
+            : {};
+
         const rootComponentWithErrorBoundary = (
           // set ErrorBoundary for RawComponent rendering error, usually caused by user app rendering error
           <ErrorBoundary FallbackComponent={fallback}>
@@ -68,16 +83,11 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
                 basename,
                 memoryRoute,
               }}
-              propsInfo={propsInfo}
+              // propsInfo={propsInfo}
+              propsInfo={{ propsInfo, ...componentProps } as T}
             />
           </ErrorBoundary>
         );
-
-        const beforeBridgeRender =
-          (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeRender) ||
-          params?.hooks?.beforeBridgeRender;
-
-        beforeBridgeRender && beforeBridgeRender(info);
         // call render function
         if (atLeastReact18(React)) {
           if (bridgeInfo?.render) {
