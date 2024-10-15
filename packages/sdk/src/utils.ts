@@ -223,6 +223,13 @@ function safeToString(info: any): string {
   }
 }
 
+// RegExp for version string
+const VERSION_PATTERN_REGEXP: RegExp = /^([\d^=v<>~]|[*xX]$)/;
+
+function isRequiredVersion(str: string): boolean {
+  return VERSION_PATTERN_REGEXP.test(str);
+}
+
 export {
   parseEntry,
   logger,
@@ -236,4 +243,5 @@ export {
   error,
   warn,
   safeToString,
+  isRequiredVersion,
 };

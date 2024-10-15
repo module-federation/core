@@ -58,8 +58,8 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@modern-js/node-bundle-require": "2.60.2",
-    "@modern-js/utils": "2.60.2",
+    "@modern-js/node-bundle-require": "2.60.3",
+    "@modern-js/utils": "2.60.3",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
     "@module-federation/sdk": "workspace:*",
@@ -69,11 +69,11 @@
     "react-error-boundary": "4.0.13"
   },
   "devDependencies": {
-    "@modern-js/app-tools": "2.60.2",
-    "@modern-js/core": "2.60.2",
-    "@modern-js/module-tools": "2.60.2",
-    "@modern-js/runtime": "2.60.2",
-    "@modern-js/tsconfig": "2.60.2",
+    "@modern-js/app-tools": "2.60.3",
+    "@modern-js/core": "2.60.3",
+    "@modern-js/module-tools": "2.60.3",
+    "@modern-js/runtime": "2.60.3",
+    "@modern-js/tsconfig": "2.60.3",
     "@module-federation/manifest": "workspace:*",
     "@types/hoist-non-react-statics": "3.3.5"
   },

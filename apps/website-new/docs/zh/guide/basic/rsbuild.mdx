@@ -1,0 +1,85 @@
+# Rsbuild Plugin
+
+帮助用户快速在 **Rsbuild App** 或 **Rslib** 中构建 Module Federation 产物
+
+## 快速开始
+
+### 安装
+
+你可以通过如下的命令安装插件：
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rsbuild-plugin --save-dev',
+    yarn: 'yarn add @module-federation/rsbuild-plugin --save-dev',
+    pnpm: 'pnpm add @module-federation/rsbuild-plugin --save-dev',
+    bun: 'bun add @module-federation/rsbuild-plugin --save-dev',
+  }}
+/>
+
+### 注册插件
+#### Rsbuild App
+```ts title='rsbuild.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+
+export default defineConfig({
+  server: {
+    port: 2000,
+  },
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'federation_consumer',
+      remotes: {
+        remote1: 'remote1@http://localhost:2001/mf-manifest.json',
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
+});
+```
+
+#### Rslib Module
+``` ts title='rslib.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rslib/core';
+
+export default defineConfig({
+  lib: [
+    // ...
+    {
+      format: 'mf',
+      output: {
+        distPath: {
+          root: './dist/mf',
+        },
+        assetPrefix: 'xxx',
+      },
+      plugins: [
+        // ...
+        pluginModuleFederation({
+          name: 'rslib_provider',
+          exposes: {
+            '.': './src/index.tsx',
+          },
+          shared: {
+            react: {
+              singleton: true,
+            },
+            'react-dom': {
+              singleton: true,
+            },
+          },
+        }),
+      ],
+    },
+  ],
+});
+```
+
+### 注意
+如果需要使用 Module Federation 运行时能力，请安装 [@module-federation/enhanced](/zh/guide/basic/runtime.html)
