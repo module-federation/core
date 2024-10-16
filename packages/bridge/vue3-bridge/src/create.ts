@@ -1,7 +1,7 @@
 import { defineAsyncComponent, h } from 'vue';
+import { useRoute } from 'vue-router';
 import RemoteApp from './remoteApp.jsx';
 import { LoggerInstance } from './utils.js';
-import { useRoute } from 'vue-router';
 
 declare const __APP_VERSION__: string;
 
