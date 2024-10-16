@@ -6,6 +6,7 @@ import type {
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
+import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 
 type EntryStaticNormalized = Awaited<
   ReturnType<Extract<WebpackOptionsNormalized['entry'], () => any>>
@@ -74,7 +75,7 @@ export function applyServerPlugins(
       suffix,
     );
   }
-
+  new UniverseEntryChunkTrackerPlugin().apply(compiler);
   new InvertedContainerPlugin().apply(compiler);
 }
 
