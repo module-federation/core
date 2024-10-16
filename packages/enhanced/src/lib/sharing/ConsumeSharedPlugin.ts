@@ -242,8 +242,7 @@ class ConsumeSharedPlugin {
                     );
                     return resolve(undefined);
                   }
-                  //@ts-ignore
-                  const { data, path: descriptionPath } = result;
+                  const { data } = result || {};
                   if (!data) {
                     requiredVersionWarning(
                       `Unable to find description file in ${context}.`,
@@ -259,14 +258,16 @@ class ConsumeSharedPlugin {
                     data,
                     packageName,
                   );
-                  if (typeof requiredVersion !== 'string') {
-                    requiredVersionWarning(
-                      `Unable to find required version for "${packageName}" in description file (${descriptionPath}). It need to be in dependencies, devDependencies or peerDependencies.`,
-                    );
-                    return resolve(undefined);
-                  }
                   // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
                   resolve(requiredVersion);
+                },
+                ({ data }) => {
+                  const maybeRequiredVersion =
+                    getRequiredVersionFromDescriptionFile(data, packageName);
+                  return (
+                    data['name'] === packageName ||
+                    typeof maybeRequiredVersion === 'string'
+                  );
                 },
               );
             }),
