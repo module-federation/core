@@ -1,5 +1,15 @@
 # @module-federation/manifest
 
+## 0.6.11
+
+### Patch Changes
+
+- 83c8620: fix(manifest): record all remotes which are declared in build config
+- Updated dependencies [d5a3072]
+  - @module-federation/sdk@0.6.11
+  - @module-federation/dts-plugin@0.6.11
+  - @module-federation/managers@0.6.11
+
 ## 0.6.10
 
 ### Patch Changes

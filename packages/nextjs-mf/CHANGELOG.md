@@ -1,5 +1,18 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.6.4
+
+### Patch Changes
+
+- 92b6fec: Make the Next.js plugin work with strict CSP settings
+- Updated dependencies [ea6d417]
+- Updated dependencies [d5a3072]
+  - @module-federation/runtime@0.6.11
+  - @module-federation/sdk@0.6.11
+  - @module-federation/node@2.5.21
+  - @module-federation/webpack-bundler-runtime@0.6.11
+  - @module-federation/enhanced@0.6.11
+
 ## 8.6.3
 
 ### Patch Changes

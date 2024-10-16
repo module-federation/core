@@ -1,5 +1,11 @@
 # modernjs-ssr-remote-new-version
 
+## 0.1.33
+
+### Patch Changes
+
+- @module-federation/modern-js@0.6.11
+
 ## 0.1.32
 
 ### Patch Changes
