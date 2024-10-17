@@ -226,7 +226,7 @@ class ContainerPlugin {
               resolve(undefined);
             },
           );
-        }).catch(callback);
+        }).catch((error) => callback(error));
 
         await new Promise((resolve, reject) => {
           compilation.addInclude(
@@ -253,7 +253,7 @@ class ContainerPlugin {
     // we have to use finishMake in order to check the entries created and see if there are multiple runtime chunks
     compiler.hooks.finishMake.tapAsync(
       PLUGIN_NAME,
-      (compilation: Compilation, callback) => {
+      async (compilation: Compilation, callback) => {
         if (
           compilation.compiler.parentCompilation &&
           compilation.compiler.parentCompilation !== compilation
@@ -290,16 +290,46 @@ class ContainerPlugin {
 
         dep.loc = { name };
 
-        compilation.addInclude(
-          compilation.options.context || '',
-          dep,
-          { name: undefined },
-          (error: WebpackError | null | undefined) => {
-            if (error) return callback(error);
-            hooks.addContainerEntryModule.call(dep);
-            callback();
-          },
-        );
+        await new Promise<void>((resolve, reject) => {
+          compilation.addInclude(
+            compilation.options.context || '',
+            dep,
+            { name: undefined },
+            (error: WebpackError | null | undefined) => {
+              if (error) return reject(error);
+              hooks.addContainerEntryModule.call(dep);
+              resolve();
+            },
+          );
+        }).catch((error) => callback(error));
+
+        const addDependency = async (
+          dependency: FederationRuntimeDependency,
+        ) => {
+          await new Promise<void>((resolve, reject) => {
+            compilation.addInclude(
+              compiler.context,
+              dependency,
+              { name: name, runtime: runtime },
+              (err, module) => {
+                if (err) return reject(err);
+                hooks.addFederationRuntimeModule.call(dependency);
+                resolve();
+              },
+            );
+          }).catch((error) => callback(error));
+        };
+
+        if (this._options?.experiments?.federationRuntime === 'use-host') {
+          const externalRuntimeDependency =
+            federationRuntimePluginInstance.getMinimalDependency(compiler);
+          await addDependency(externalRuntimeDependency);
+        } else {
+          const federationRuntimeDependency =
+            federationRuntimePluginInstance.getDependency(compiler);
+          await addDependency(federationRuntimeDependency);
+        }
+        callback();
       },
     );
 
@@ -315,6 +345,15 @@ class ContainerPlugin {
         compilation.dependencyFactories.set(
           ContainerExposedDependency,
           normalModuleFactory,
+        );
+
+        compilation.dependencyFactories.set(
+          FederationRuntimeDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyTemplates.set(
+          FederationRuntimeDependency,
+          new ModuleDependency.Template(),
         );
       },
     );

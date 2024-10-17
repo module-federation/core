@@ -1,3 +1,7 @@
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Zackary Jackson @ScriptedAlchemy
+*/
 import path from 'path';
 import { TEMP_DIR as BasicTempDir } from '@module-federation/sdk';
 

@@ -25,7 +25,6 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation) => {
-        const logger = compilation.getLogger(PLUGIN_NAME);
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const containerEntryDependencies = new Set<Dependency>();
         hooks.addContainerEntryModule.tap(
@@ -50,13 +49,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
           },
           (chunks: Iterable<Chunk>) => {
             const runtimeChunks = this.getRuntimeChunks(compilation);
-            this.hoistModulesInChunks(
-              compilation,
-              runtimeChunks,
-              chunks,
-              logger,
-              containerEntryDependencies,
-            );
+            this.hoistModulesInChunks(compilation, containerEntryDependencies);
           },
         );
       },
@@ -66,14 +59,19 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   // Method to hoist modules in chunks
   private hoistModulesInChunks(
     compilation: Compilation,
-    runtimeChunks: Set<Chunk>,
-    chunks: Iterable<Chunk>,
-    logger: ReturnType<Compilation['getLogger']>,
     containerEntryDependencies: Set<Dependency>,
   ): void {
     const { chunkGraph, moduleGraph } = compilation;
-    // when runtimeChunk: single is set - ContainerPlugin will create a "partial" chunk we can use to
-    // move modules into the runtime chunk
+
+    // First, handle the minimal check and remove included modules from the chunk
+    this.handleMinimalCheck(
+      compilation,
+      containerEntryDependencies,
+      chunkGraph,
+      moduleGraph,
+    );
+
+    // Now, perform the global hoist over all chunks
     for (const dep of containerEntryDependencies) {
       const containerEntryModule = moduleGraph.getModule(dep);
       if (!containerEntryModule) continue;
@@ -81,12 +79,14 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         compilation,
         containerEntryModule,
         'initial',
+        true,
       );
 
       const allRemoteReferences = getAllReferencedModules(
         compilation,
         containerEntryModule,
         'external',
+        true,
       );
 
       for (const remote of allRemoteReferences) {
@@ -119,6 +119,60 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         }
       }
       this.cleanUpChunks(compilation, allReferencedModules);
+    }
+  }
+
+  private handleMinimalCheck(
+    compilation: Compilation,
+    containerEntryDependencies: Set<Dependency>,
+    chunkGraph: Compilation['chunkGraph'],
+    moduleGraph: Compilation['moduleGraph'],
+  ): void {
+    let minimal;
+    for (const dep of containerEntryDependencies as Set<FederationRuntimeDependency>) {
+      if (dep.minimal) {
+        minimal = moduleGraph.getModule(dep);
+      }
+    }
+    if (minimal) {
+      for (const dep of containerEntryDependencies as Set<FederationRuntimeDependency>) {
+        if (dep.minimal) continue;
+        const containerEntryModule = moduleGraph.getModule(dep);
+        if (!containerEntryModule) continue;
+        const allReferencedModules = getAllReferencedModules(
+          compilation,
+          containerEntryModule,
+          'initial',
+        );
+
+        const containerRuntimes =
+          chunkGraph.getModuleRuntimes(containerEntryModule);
+        const runtimes = new Set<string>();
+
+        for (const runtimeSpec of containerRuntimes) {
+          compilation.compiler.webpack.util.runtime.forEachRuntime(
+            runtimeSpec,
+            (runtimeKey) => {
+              if (runtimeKey) {
+                runtimes.add(runtimeKey);
+              }
+            },
+          );
+        }
+
+        for (const runtime of runtimes) {
+          const runtimeChunk = compilation.namedChunks.get(runtime);
+          if (!runtimeChunk) continue;
+          // if there is no minimal chunk in the runtime module, skip it.
+          if (!chunkGraph.isModuleInChunk(minimal, runtimeChunk)) continue;
+
+          for (const module of allReferencedModules) {
+            if (chunkGraph.isModuleInChunk(module, runtimeChunk)) {
+              chunkGraph.disconnectChunkAndModule(runtimeChunk, module);
+            }
+          }
+        }
+      }
     }
   }
 
@@ -165,18 +219,20 @@ export function getAllReferencedModules(
   compilation: Compilation,
   module: Module,
   type?: 'all' | 'initial' | 'external',
+  withInitialModule?: boolean,
 ): Set<Module> {
-  const collectedModules = new Set<Module>([module]);
-  const visitedModules = new WeakSet<Module>([module]);
+  const collectedModules = new Set<Module>(withInitialModule ? [module] : []);
+  const visitedModules = new WeakSet<Module>(withInitialModule ? [module] : []);
   const stack = [module];
 
   while (stack.length > 0) {
     const currentModule = stack.pop();
     if (!currentModule) continue;
 
-    const mgm = compilation.moduleGraph._getModuleGraphModule(currentModule);
-    if (!mgm?.outgoingConnections) continue;
-    for (const connection of mgm.outgoingConnections) {
+    const outgoingConnections =
+      compilation.moduleGraph.getOutgoingConnections(currentModule);
+    if (!outgoingConnections) continue;
+    for (const connection of outgoingConnections) {
       const connectedModule = connection.module;
 
       // Skip if module has already been visited
