@@ -1,0 +1,23 @@
+{
+  "name": "@modern-js/test-single-entry-entry",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "modern dev",
+    "build": "modern build"
+  },
+  "dependencies": {
+    "@modern-js/runtime": "2.60.4",
+    "@module-federation/modern-js": "workspace:*",
+    "react": "~18.2.0",
+    "react-dom": "~18.2.0"
+  },
+  "devDependencies": {
+    "@modern-js/app-tools": "2.60.4",
+    "@modern-js/tsconfig": "2.60.4",
+    "@types/node": "~16.11.7",
+    "@types/react": "~18.0.26",
+    "@types/react-dom": "~18.0.10",
+    "typescript": "~5.0.4"
+  }
+}

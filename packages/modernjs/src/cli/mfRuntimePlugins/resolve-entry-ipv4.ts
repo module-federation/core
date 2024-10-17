@@ -26,45 +26,47 @@ function replaceLocalhost(url: string): string {
   return url.replace(LOCALHOST, ipv4);
 }
 
-const resolveEntryIpv4Plugin: () => FederationRuntimePlugin = () => ({
-  name: 'resolve-entry-ipv4',
+const resolveEntryIpv4Plugin: () => FederationRuntimePlugin = () => {
+  return {
+    name: 'resolve-entry-ipv4',
 
-  beforeRegisterRemote(args) {
-    const { remote } = args;
-    replaceObjectLocalhost('entry', remote);
-    return args;
-  },
-  async afterResolve(args) {
-    const { remoteInfo } = args;
-    replaceObjectLocalhost('entry', remoteInfo);
-    return args;
-  },
-  beforeLoadRemoteSnapshot(args) {
-    const { moduleInfo } = args;
-    if ('entry' in moduleInfo) {
-      replaceObjectLocalhost('entry', moduleInfo);
+    beforeRegisterRemote(args) {
+      const { remote } = args;
+      replaceObjectLocalhost('entry', remote);
       return args;
-    }
-    if ('version' in moduleInfo) {
-      replaceObjectLocalhost('version', moduleInfo);
-    }
-    return args;
-  },
-  loadRemoteSnapshot(args) {
-    const { remoteSnapshot } = args;
-    if ('publicPath' in remoteSnapshot) {
-      replaceObjectLocalhost('publicPath', remoteSnapshot);
-    }
-    if ('getPublicPath' in remoteSnapshot) {
-      replaceObjectLocalhost('getPublicPath', remoteSnapshot);
-    }
-    if (remoteSnapshot.remotesInfo) {
-      Object.keys(remoteSnapshot.remotesInfo).forEach((key) => {
-        const remoteInfo = remoteSnapshot.remotesInfo[key];
-        replaceObjectLocalhost('matchedVersion', remoteInfo);
-      });
-    }
-    return args;
-  },
-});
+    },
+    async afterResolve(args) {
+      const { remoteInfo } = args;
+      replaceObjectLocalhost('entry', remoteInfo);
+      return args;
+    },
+    beforeLoadRemoteSnapshot(args) {
+      const { moduleInfo } = args;
+      if ('entry' in moduleInfo) {
+        replaceObjectLocalhost('entry', moduleInfo);
+        return args;
+      }
+      if ('version' in moduleInfo) {
+        replaceObjectLocalhost('version', moduleInfo);
+      }
+      return args;
+    },
+    loadRemoteSnapshot(args) {
+      const { remoteSnapshot } = args;
+      if ('publicPath' in remoteSnapshot) {
+        replaceObjectLocalhost('publicPath', remoteSnapshot);
+      }
+      if ('getPublicPath' in remoteSnapshot) {
+        replaceObjectLocalhost('getPublicPath', remoteSnapshot);
+      }
+      if (remoteSnapshot.remotesInfo) {
+        Object.keys(remoteSnapshot.remotesInfo).forEach((key) => {
+          const remoteInfo = remoteSnapshot.remotesInfo[key];
+          replaceObjectLocalhost('matchedVersion', remoteInfo);
+        });
+      }
+      return args;
+    },
+  };
+};
 export default resolveEntryIpv4Plugin;

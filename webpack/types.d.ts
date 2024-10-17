@@ -2689,6 +2689,7 @@ declare interface ModuleFederationPluginOptions {
     | 'system'
     | 'promise'
     | 'script'
+    | 'module-import'
     | 'node-commonjs';
 
   /**

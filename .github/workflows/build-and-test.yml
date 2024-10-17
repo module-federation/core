@@ -87,3 +87,8 @@ jobs:
     needs: checkout-install
     uses: ./.github/workflows/e2e-router.yml
     secrets: inherit
+
+  e2e-modern-ssr-data-loader:
+    needs: checkout-install
+    uses: ./.github/workflows/e2e-modern-ssr-data-loader.yml
+    secrets: inherit

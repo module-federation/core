@@ -1,0 +1,71 @@
+---
+title: "Data Fetching"
+---
+# Data Fetching
+:::info
+For complete usage, please refer to [**Modern.js Data Fetch**](https://modernjs.dev/en/guides/basic-features/data/data-fetch.html)
+:::
+
+## Quick Start
+
+### 1. Create `.data` file
+
+Create a `page.data.ts` file at the same level as the corresponding routing `page` file, and export the `loader` function in it, with the following content:
+
+```ts title='page.data.ts'
+export type ProfileData = {
+  /*  some types */
+};
+
+const loader = async (): Promise<ProfileData> => {
+  const msg = await new Promise<string>((resolve) => {
+    setTimeout(() => {
+      resolve('hello world');
+    }, 500);
+  });
+  return {
+    message: msg,
+  };
+};
+export { loader };
+
+```
+### 2. Consume same-layer routing Data Loader data
+
+Call `useLoaderData` in `page.tsx` to obtain `Data Loader` data at the same level. The example is as follows:
+
+```diff title='page.tsx'
++ import { useLoaderData } from '@modern-js/runtime/router';
++
+
+export default function UserLayout() {
++ const data = useLoaderData() as ProfileData;
+  return (
+    <div>
++     <span>{data.message}</span>
+    </div>
+  );
+}
+```
+
+### 3. Consume specified route DataLoader data
+
+In many scenarios, subcomponents need to obtain data from the upper component loader. In this case, you can easily obtain the data of the specified routing component through useRouteLoaderData:
+
+```ts
+import { useRouteLoaderData } from '@modern-js/runtime/router';
+import { withMFRouteId } from '@modern-js/runtime/mf';
+
+
+export function UserLayout() {
+  // Get the data returned by `loader` in routes/user/layout.data.ts
+  // Note: If the project is a routing component, you need to call withMFRouteId to get the actual routeId after processing
+  const data = useRouteLoaderData(withMFRouteId('user/layout'));
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <h2>{data.age}</h2>
+    </div>
+  );
+}
+```

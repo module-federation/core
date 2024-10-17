@@ -1,0 +1,34 @@
+---
+---
+title: "Overview"
+---
+
+# introduce
+
+This chapter will introduce common data request methods and their drawbacks, and briefly describe how Modern.js solves existing problems. Also shows how Module Federation uses this feature.
+
+## Existing problems
+
+In the past, in SSR mode, the producer component could not obtain data directly from the server, and could only load data asynchronously through consumer transparent transmission or using `Await/Suspense`.
+
+This solution will load the corresponding page js resources and then initiate a network request. This process is a serial process, which means that if there are multiple layers of components, the performance of the first screen will be poor.
+
+![serial-request](@public/practice/modernjs/serial-request.jpeg)
+
+## Modern.js solution
+
+In Modern.js, the framework will shard the route and obtain the static resources and data of the corresponding route, and then load the static resources and data in parallel.
+
+![parallel-request](@public/practice/modernjs/parallel-request.jpeg)
+
+## Used in Module Federation
+
+There are different usage methods according to the calling scenario.
+
+### Consumer
+
+If you only use the Data Loader on the consumption page, then follow [Data Fetch](https://modernjs.dev/en/guides/basic-features/data/data-fetch.html) and [Data Writing] in the Modern.js official website ](https://modernjs.dev/en/guides/basic-features/data/data-write.html) just use it.
+
+### Producer
+
+Because Data Loader needs to be bound to routing, regular producers cannot use this function, and the producer needs to be [route component] (../route-component).
