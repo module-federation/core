@@ -101,10 +101,7 @@ export const moduleFederationSSRPlugin = (
                         'Access-Control-Allow-Methods',
                         'GET, POST, PUT, DELETE, PATCH, OPTIONS',
                       );
-                      res.setHeader(
-                        'Access-Control-Allow-Headers',
-                        'X-Requested-With, content-type, Authorization',
-                      );
+                      res.setHeader('Access-Control-Allow-Headers', '*');
                       fs.createReadStream(filepath).pipe(res);
                     } else {
                       next();
