@@ -12,6 +12,21 @@ import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
 import { registerBridgeLifeCycle } from '../lifecycle';
 import { LoggerInstance, pathJoin } from '../utils';
 
+export const getModuleName = (id: string) => {
+  // separate module name without detailed module path
+  // @vmok-e2e/edenx-demo-app2/button -> @vmok-e2e/edenx-demo-app2
+  const idArray = id.split('/');
+  if (idArray.length < 2) {
+    return id;
+  }
+  return idArray[0] + '/' + idArray[1];
+};
+
+export const getRootDomDefaultClassName = (moduleName: string) => {
+  const name = getModuleName(moduleName).replace(/\@/, '').replace(/\//, '-');
+  return `bridge-root-component-${name}`;
+};
+
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {
   dom?: any;
@@ -127,9 +142,11 @@ const RemoteAppWrapper = forwardRef(function (
       };
     }, []);
 
+    // bridge-remote-root
+    const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${props?.className}`;
     return (
       <div
-        className={props?.className}
+        className={rootComponentClassName}
         style={props?.style}
         ref={rootRef}
       ></div>
