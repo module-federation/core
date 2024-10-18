@@ -1,7 +1,8 @@
 import { ref, onMounted, onBeforeUnmount, watch, defineComponent } from 'vue';
-import { useRoute } from 'vue-router';
-import { LoggerInstance } from './utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
+import { useRoute } from 'vue-router';
+import { registerBridgeLifeCycle } from './lifecycle';
+import { LoggerInstance } from './utils';
 
 export default defineComponent({
   name: 'RemoteApp',
@@ -16,6 +17,7 @@ export default defineComponent({
     const providerInfoRef = ref(null);
     const pathname = ref('');
     const route = useRoute();
+    const bridgeHook = registerBridgeLifeCycle();
 
     const renderComponent = () => {
       const providerReturn = props.providerInfo?.();
@@ -30,6 +32,12 @@ export default defineComponent({
         `createRemoteComponent LazyComponent render >>>`,
         renderProps,
       );
+
+      if (bridgeHook && bridgeHook?.lifecycle?.beforeBridgeRender) {
+        bridgeHook?.lifecycle?.beforeBridgeRender.emit({
+          ...renderProps,
+        });
+      }
       providerReturn.render(renderProps);
     };
 
@@ -61,6 +69,15 @@ export default defineComponent({
         ...props,
       });
       watchStopHandle();
+      if (bridgeHook && bridgeHook?.lifecycle?.beforeBridgeRender) {
+        bridgeHook?.lifecycle?.beforeBridgeDestroy.emit({
+          name: props.moduleName,
+          dom: rootRef.value,
+          basename: props.basename,
+          memoryRoute: props.memoryRoute,
+        });
+      }
+
       (providerInfoRef.value as any)?.destroy({ dom: rootRef.value });
     });
 

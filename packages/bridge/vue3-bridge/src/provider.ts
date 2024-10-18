@@ -14,6 +14,7 @@ export function createBridgeComponent(bridgeInfo: any) {
         LoggerInstance.log(`createBridgeComponent render Info`, info);
         const app = Vue.createApp(bridgeInfo.rootComponent);
         rootMap.set(info.dom, app);
+        bridgeInfo?.renderLifecycle?.(info);
         const appOptions = bridgeInfo.appOptions({
           basename: info.basename,
           memoryRoute: info.memoryRoute,
@@ -46,6 +47,7 @@ export function createBridgeComponent(bridgeInfo: any) {
       destroy(info: { dom: HTMLElement }) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, info);
         const root = rootMap.get(info?.dom);
+        bridgeInfo?.destroyLifecycle?.(info);
         root?.unmount();
       },
     };

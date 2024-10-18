@@ -11,7 +11,7 @@ export type PartialOptional<T, K extends keyof T> = Omit<T, K> & {
   [P in K]-?: T[P];
 };
 
-interface RemoteInfoCommon {
+export interface RemoteInfoCommon {
   alias?: string;
   shareScope?: string;
   type?: RemoteEntryType;

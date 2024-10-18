@@ -2,25 +2,37 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import ReactDOMClient from 'react-dom/client';
-import { RouterContext } from './context';
 import type {
   ProviderParams,
   RenderFnParams,
 } from '@module-federation/bridge-shared';
-import { LoggerInstance, atLeastReact18 } from './utils';
 import { ErrorBoundary } from 'react-error-boundary';
+import { RouterContext } from './context';
+import { LoggerInstance, atLeastReact18 } from './utils';
 
+type RenderParams = RenderFnParams & any;
+type DestroyParams = {
+  dom: HTMLElement;
+};
 type RootType = HTMLElement | ReactDOMClient.Root;
+
+type BridgeHooks = {
+  beforeBridgeRender?: (params: RenderFnParams) => any;
+  afterBridgeRender?: (params: RenderFnParams) => any;
+  beforeBridgeDestroy?: (params: DestroyParams) => any;
+  afterBridgeDestroy?: (params: DestroyParams) => any;
+};
+
 type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
   render?: (
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
+  hooks?: BridgeHooks;
 };
-
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
-  return () => {
+  return (params: { hooks?: BridgeHooks }) => {
     const rootMap = new Map<any, RootType>();
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
@@ -37,7 +49,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
     };
 
     return {
-      async render(info: RenderFnParams & any) {
+      async render(info: RenderParams) {
         LoggerInstance.log(`createBridgeComponent render Info`, info);
         const {
           moduleName,
@@ -47,6 +59,21 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           fallback,
           ...propsInfo
         } = info;
+
+        const beforeBridgeRender =
+          (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeRender) ||
+          params?.hooks?.beforeBridgeRender;
+
+        // 可通过beforeBridgeRender返回一个props对象，用于传递额外的 props 参数
+        const beforeBridgeRenderRes =
+          beforeBridgeRender && beforeBridgeRender(info);
+        const extraProps =
+          beforeBridgeRenderRes &&
+          typeof beforeBridgeRenderRes === 'object' &&
+          beforeBridgeRenderRes?.extraProps
+            ? beforeBridgeRenderRes?.extraProps
+            : {};
+
         const rootComponentWithErrorBoundary = (
           // set ErrorBoundary for RawComponent rendering error, usually caused by user app rendering error
           <ErrorBoundary FallbackComponent={fallback}>
@@ -56,11 +83,11 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
                 basename,
                 memoryRoute,
               }}
-              propsInfo={propsInfo}
+              propsInfo={{ ...propsInfo, ...extraProps } as T}
             />
           </ErrorBoundary>
         );
-
+        // call render function
         if (atLeastReact18(React)) {
           if (bridgeInfo?.render) {
             // in case bridgeInfo?.render is an async function, resolve this to promise
@@ -77,11 +104,33 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           const renderFn = bridgeInfo?.render || ReactDOM.render;
           renderFn?.(rootComponentWithErrorBoundary, info.dom);
         }
+
+        const afterBridgeRender =
+          (bridgeInfo?.hooks && bridgeInfo?.hooks.afterBridgeDestroy) ||
+          params?.hooks?.afterBridgeRender;
+        afterBridgeRender && afterBridgeRender(info);
       },
-      async destroy(info: { dom: HTMLElement }) {
+
+      async destroy(info: DestroyParams) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
+
+        // call beforeBridgeDestroy hook
+        if (
+          bridgeInfo?.hooks &&
+          bridgeInfo?.hooks.beforeBridgeDestroy &&
+          typeof bridgeInfo?.hooks.beforeBridgeDestroy === 'function'
+        ) {
+          bridgeInfo.hooks.beforeBridgeDestroy(info);
+        }
+
+        const beforeBridgeDestroy =
+          (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeDestroy) ||
+          params?.hooks?.beforeBridgeDestroy;
+        beforeBridgeDestroy && beforeBridgeDestroy(info);
+
+        // call destroy function
         if (atLeastReact18(React)) {
           const root = rootMap.get(info.dom);
           (root as ReactDOMClient.Root)?.unmount();
@@ -89,6 +138,11 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         } else {
           ReactDOM.unmountComponentAtNode(info.dom);
         }
+
+        const afterBridgeDestroy =
+          (bridgeInfo?.hooks && bridgeInfo?.hooks.afterBridgeDestroy) ||
+          params?.hooks?.afterBridgeDestroy;
+        afterBridgeDestroy && afterBridgeDestroy(info);
       },
       rawComponent: bridgeInfo.rootComponent,
       __BRIDGE_FN__: (_args: T) => {},
