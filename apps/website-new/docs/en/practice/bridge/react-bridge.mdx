@@ -47,20 +47,19 @@ export default createBridgeComponent({
 
 ```ts
 // rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
 export default defineConfig({
-  tools: {
-    rspack: (config, { appendPlugins }) => {
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'remote1',
-          exposes: {
-            './export-app': './src/export-app.tsx',
-          },
-          shared: ['react', 'react-dom'],
-        }),
-      ]);
-    },
-  },
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.tsx',
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
 });
 ```
 
@@ -85,19 +84,15 @@ Why do application type modules need to be wrapped with `createBridgeComponent`?
 ```ts
 // rsbuild.config.ts
 export default defineConfig({
-  tools: {
-    rspack: (config, { appendPlugins }) => {
-      config.output!.uniqueName = 'host';
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'host',
-          remotes: {
-            remote1: 'remote1@http://localhost:2001/mf-manifest.json',
-          },
-        }),
-      ]);
-    },
-  },
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'host',
+      remotes: {
+        remote1: 'remote1@http://localhost:2001/mf-manifest.json',
+      },
+    }),
+  ],
 });
 ```
 
@@ -107,6 +102,7 @@ export default defineConfig({
 // ./src/App.tsx
 import React from 'react';
 import { createRemoteComponent } from '@module-federation/bridge-react';
+import { loadRemote } from '@module-federation/enhanced/runtime'
 import styles from './index.module.less';
 
 // define FallbackErrorComp Component
@@ -182,7 +178,7 @@ making the user experience almost equivalent to using local components.
 ### Methods
 
 #### createBridgeComponent
- 
+
 ```tsx
 export declare function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>): () => {
     render(info: RenderFnParams): Promise<void>;
@@ -216,7 +212,7 @@ export declare interface ProviderParams {
 ```
 
 * `bridgeInfo`
-  * type: 
+  * type:
 ```tsx
 type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
@@ -230,7 +226,7 @@ type ProviderFnParams<T> = {
   * Purpose: Used to pass the root component
   * ReturnType
     * type:
-      
+
       ```tsx
       () => {
         render(info: {
@@ -246,7 +242,7 @@ type ProviderFnParams<T> = {
         destroy(info: { dom: HTMLElement}): Promise<void>;
       }
       ```
-      
+
 #### createRemoteComponent
 
 ```tsx

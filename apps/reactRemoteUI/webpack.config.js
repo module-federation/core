@@ -1,6 +1,6 @@
-const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+//const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 
-registerPluginTSTranspiler();
+//registerPluginTSTranspiler();
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 const { withModuleFederation } = require('@module-federation/storybook-addon');
@@ -14,5 +14,5 @@ const config = {
 module.exports = composePlugins(
   withNx(),
   withReact(),
-  withModuleFederation(config),
+  withModuleFederation(config, { dts: false }),
 );

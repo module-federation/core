@@ -1,5 +1,67 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.5.21
+
+### Patch Changes
+
+- Updated dependencies [ea6d417]
+- Updated dependencies [d5a3072]
+  - @module-federation/runtime@0.6.11
+  - @module-federation/sdk@0.6.11
+  - @module-federation/enhanced@0.6.11
+  - @module-federation/utilities@3.1.17
+
+## 2.5.20
+
+### Patch Changes
+
+- Updated dependencies [6b02145]
+- Updated dependencies [b704f30]
+- Updated dependencies [22a3b83]
+  - @module-federation/enhanced@0.6.10
+  - @module-federation/runtime@0.6.10
+  - @module-federation/sdk@0.6.10
+  - @module-federation/utilities@3.1.16
+
+## 2.5.19
+
+### Patch Changes
+
+- Updated dependencies [70a1708]
+  - @module-federation/enhanced@0.6.9
+  - @module-federation/runtime@0.6.9
+  - @module-federation/sdk@0.6.9
+  - @module-federation/utilities@3.1.15
+
+## 2.5.18
+
+### Patch Changes
+
+- Updated dependencies [32db0ac]
+- Updated dependencies [32db0ac]
+- Updated dependencies [6c5f444]
+- Updated dependencies [fac6ecf]
+  - @module-federation/sdk@0.6.8
+  - @module-federation/runtime@0.6.8
+  - @module-federation/enhanced@0.6.8
+  - @module-federation/utilities@3.1.14
+
+## 2.5.17
+
+### Patch Changes
+
+- Updated dependencies [1b6bf0e]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+  - @module-federation/enhanced@0.6.7
+  - @module-federation/runtime@0.6.7
+  - @module-federation/sdk@0.6.7
+  - @module-federation/utilities@3.1.13
+
 ## 2.5.16
 
 ### Patch Changes

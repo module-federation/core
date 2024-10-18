@@ -58,11 +58,7 @@ const path = require('path');
 module.exports = {
   plugins: [
     new ModuleFederation({
-      name: 'host',
-      remotes: {
-        'manifest-provider':
-          'manifest_provider@http://localhost:3011/mf-manifest.json',
-      },
+      // ...
       runtimePlugins: [path.resolve(__dirname, './custom-runtime-plugin.ts')],
     }),
   ],
@@ -72,18 +68,10 @@ module.exports = {
 - 运行时注册插件
 
 ```ts
+import { registerPlugins } from '@module-federation/enhanced/runtime'
 import runtimePlugin from 'custom-runtime-plugin.ts';
-init({
-  name: '@demo/app-main',
-  remotes: [
-    {
-      name: '@demo/app2',
-      entry: 'http://localhost:3006/mf-manifest.json',
-      alias: 'app2',
-    },
-  ],
-  plugins: [runtimePlugin()],
-});
+
+registerPlugins([runtimePlugin()]);
 ```
 
 ### 插件结构
@@ -542,4 +530,139 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
     },
   };
 };
+```
+
+### loadEntry
+可以完全自定义remote, 可以扩展新的remote类型。
+下面两个简单的例子分别实现了加载json数据和模块代理
+
+`asyncHook`
+
+- 类型
+
+```typescript
+function createScript(args: LoadEntryOptions): HTMLScriptElement | {script?: HTMLScriptElement, timeout?: number } | void;
+
+type LoadEntryOptions = {
+  createScriptHook: SyncHook,
+  remoteEntryExports?: RemoteEntryExports,
+  remoteInfo: RemoteInfo
+};
+interface RemoteInfo {
+  name: string;
+  version?: string;
+  buildVersion?: string;
+  entry: string;
+  type: RemoteEntryType;
+  entryGlobalName: string;
+  shareScope: string;
+}
+export type RemoteEntryExports = {
+  get: (id: string) => () => Promise<Module>;
+  init: (
+    shareScope: ShareScopeMap[string],
+    initScope?: InitScope,
+    remoteEntryInitOPtions?: RemoteEntryInitOptions,
+  ) => void | Promise<void>;
+};
+```
+
+- 示例(加载json数据)
+
+```typescript
+// load-json-data-plugin.ts
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'load-json-data-plugin',
+    loadEntry({ remoteInfo }) {
+      if (remoteInfo.jsonA === "jsonA") {
+        return {
+          init(shareScope, initScope, remoteEntryInitOPtions) {},
+          async get(path) {
+            const json = await fetch(remoteInfo.entry + ".json").then(res => res.json())
+            return () => ({
+              path,
+              json
+            })
+          }
+        }
+      }
+    },
+  };
+};
+```
+```ts
+// module-federation-config
+{
+  remotes: {
+    jsonA: "jsonA@https://cdn.jsdelivr.net/npm/@module-federation/runtime/package"
+  }
+}
+```
+```ts
+// src/bootstrap.js
+import jsonA from "jsonA"
+jsonA // {...json data}
+```
+
+- 示例(模块代理)
+
+```typescript
+// delegate-modules-plugin.ts
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'delegate-modules-plugin',
+    loadEntry({ remoteInfo }) {
+      if (remoteInfo.name === "delegateModulesA") {
+        return {
+          init(shareScope, initScope, remoteEntryInitOPtions) {},
+          async get(path) {
+            path = path.replace("./", "")
+            const {[path]: factory} = await import("./delegateModulesA.js")
+            const result = await factory()
+            return () => result
+          }
+        }
+      }
+    },
+  };
+};
+```
+```ts
+// ./src/delegateModulesA.js
+export async function test1() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve("test1 value")
+    }, 3000)
+  })
+}
+export async function test2() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve("test2 value")
+    }, 3000)
+  })
+}
+```
+```ts
+// module-federation-config
+{
+  remotes: {
+    delegateModulesA: "delegateModulesA@https://delegateModulesA.js"
+  }
+}
+```
+```ts
+// src/bootstrap.js
+import test1 from "delegateModulesA/test1"
+import test2 from "delegateModulesA/test2"
+test1 // "test1 value"
+test2 // "test2 value"
 ```

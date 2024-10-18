@@ -3,6 +3,19 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/utilities/src",
   "projectType": "library",
+  "pre": [
+    {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "commands": [
+          {
+            "command": "rm -f dist"
+          }
+        ]
+      }
+    }
+  ],
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
@@ -21,7 +34,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/utilities/**/*.ts"]
@@ -51,18 +64,5 @@
         ]
       }
     }
-  },
-  "pre": [
-    {
-      "executor": "@nx/js:tsc",
-      "options": {
-        "commands": [
-          {
-            "command": "rm -f dist"
-          }
-        ]
-      }
-    }
-  ],
-  "tags": ["type:pkg"]
+  }
 }

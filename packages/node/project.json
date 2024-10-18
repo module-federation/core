@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/node/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
@@ -23,7 +24,7 @@
       ]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/node/**/*.js", "packages/node/**/*.ts"]
@@ -53,6 +54,5 @@
         ]
       }
     }
-  },
-  "tags": ["type:pkg"]
+  }
 }

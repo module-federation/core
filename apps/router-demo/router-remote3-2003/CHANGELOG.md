@@ -1,5 +1,48 @@
 # remote3
 
+## 1.0.31
+
+### Patch Changes
+
+- Updated dependencies [b41faaa]
+  - @module-federation/rsbuild-plugin@0.0.2
+  - @module-federation/bridge-vue3@0.6.11
+
+## 1.0.30
+
+### Patch Changes
+
+- Updated dependencies [6b02145]
+- Updated dependencies [22a3b83]
+  - @module-federation/enhanced@0.6.10
+  - @module-federation/bridge-vue3@0.6.10
+
+## 1.0.29
+
+### Patch Changes
+
+- Updated dependencies [70a1708]
+  - @module-federation/enhanced@0.6.9
+  - @module-federation/bridge-vue3@0.6.9
+
+## 1.0.28
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.8
+- @module-federation/bridge-vue3@0.6.8
+
+## 1.0.27
+
+### Patch Changes
+
+- Updated dependencies [1b6bf0e]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+  - @module-federation/enhanced@0.6.7
+  - @module-federation/bridge-vue3@0.6.7
+
 ## 1.0.26
 
 ### Patch Changes

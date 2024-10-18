@@ -8,7 +8,7 @@ import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { FederationHost } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
-import { assert } from '../utils';
+import { assert } from './logger';
 
 async function loadEsmEntry({
   entry,
@@ -20,11 +20,7 @@ async function loadEsmEntry({
   return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
-        // eslint-disable-next-line no-eval
-        new Function(
-          'callbacks',
-          `import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
-        )([resolve, reject]);
+        import(/* webpackIgnore: true */ entry).then(resolve).catch(reject);
       } else {
         resolve(remoteEntryExports);
       }
@@ -44,11 +40,16 @@ async function loadSystemJsEntry({
   return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
-        // eslint-disable-next-line no-eval
-        new Function(
-          'callbacks',
-          `System.import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
-        )([resolve, reject]);
+        //@ts-ignore
+        if (typeof __system_context__ === 'undefined') {
+          //@ts-ignore
+          System.import(entry).then(resolve).catch(reject);
+        } else {
+          new Function(
+            'callbacks',
+            `System.import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
+          )([resolve, reject]);
+        }
       } else {
         resolve(remoteEntryExports);
       }
@@ -147,7 +148,7 @@ async function loadEntryNode({
   remoteInfo: RemoteInfo;
   createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
 }) {
-  const { entry, entryGlobalName: globalName, name } = remoteInfo;
+  const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
     globalName,
@@ -158,7 +159,7 @@ async function loadEntryNode({
   }
 
   return loadScriptNode(entry, {
-    attrs: { name, globalName },
+    attrs: { name, globalName, type },
     createScriptHook: (url, attrs) => {
       const res = createScriptHook.emit({ url, attrs });
 
@@ -215,29 +216,21 @@ export async function getRemoteEntry({
 
   if (!globalLoading[uniqueKey]) {
     const loadEntryHook = origin.remoteHandler.hooks.lifecycle.loadEntry;
-    if (loadEntryHook.listeners.size) {
-      globalLoading[uniqueKey] = loadEntryHook
-        .emit({
-          createScriptHook: origin.loaderHook.lifecycle.createScript,
-          remoteInfo,
-          remoteEntryExports,
-        })
-        .then((res) => res || undefined);
-    } else {
-      const createScriptHook = origin.loaderHook.lifecycle.createScript;
-      if (!isBrowserEnv()) {
-        globalLoading[uniqueKey] = loadEntryNode({
-          remoteInfo,
-          createScriptHook,
-        });
-      } else {
-        globalLoading[uniqueKey] = loadEntryDom({
-          remoteInfo,
-          remoteEntryExports,
-          createScriptHook,
-        });
-      }
-    }
+    const createScriptHook = origin.loaderHook.lifecycle.createScript;
+    globalLoading[uniqueKey] = loadEntryHook
+      .emit({
+        createScriptHook,
+        remoteInfo,
+        remoteEntryExports,
+      })
+      .then((res) => {
+        if (res) {
+          return res;
+        }
+        return isBrowserEnv()
+          ? loadEntryDom({ remoteInfo, remoteEntryExports, createScriptHook })
+          : loadEntryNode({ remoteInfo, createScriptHook });
+      });
   }
 
   return globalLoading[uniqueKey];

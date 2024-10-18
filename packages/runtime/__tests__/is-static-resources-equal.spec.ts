@@ -1,43 +1,47 @@
-import { assert, describe, test, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { isStaticResourcesEqual } from '../src/utils/tool';
-// eslint-disable-next-line max-lines-per-function
 describe('isStaticResourcesEqual', () => {
-  it('check resources while url not specify protocol', () => {
+  it('verify resources when URL does not specify protocol', () => {
     const url = '//a.b.c';
-    const sc = document.createElement('script');
-    sc.src = url;
-    expect(sc.src).toBe('http://a.b.c/');
-
-    expect(isStaticResourcesEqual(sc.src, url)).toBe(true);
-    expect(isStaticResourcesEqual(sc.src, 'http://a.b.c/')).toBe(true);
-    expect(isStaticResourcesEqual(sc.src, 'http://a.b.c')).toBe(true);
+    const scriptElement = document.createElement('script');
+    scriptElement.src = url;
+    expect(scriptElement.src).toBe('http://a.b.c/');
+    expect(isStaticResourcesEqual(scriptElement.src, url)).toBe(true);
+    expect(isStaticResourcesEqual(scriptElement.src, 'http://a.b.c/')).toBe(
+      true,
+    );
+    expect(isStaticResourcesEqual(scriptElement.src, 'http://a.b.c')).toBe(
+      true,
+    );
   });
-
-  it('check resources while url specify protocol(https)', () => {
+  it('verify resources when URL specifies protocol (https)', () => {
     const url = 'https://a.b.c';
-    const sc = document.createElement('script');
-    sc.src = url;
-    expect(sc.src).toBe('https://a.b.c/');
-
-    expect(isStaticResourcesEqual(sc.src, url)).toBe(true);
-    expect(isStaticResourcesEqual(sc.src, 'https://a.b.c/')).toBe(true);
-    expect(isStaticResourcesEqual(sc.src, '//a.b.c')).toBe(true);
-    expect(isStaticResourcesEqual(sc.src, 'a.b.c')).toBe(true);
-
-    expect(isStaticResourcesEqual(sc.src, 'http://a.b.c')).toBe(true);
+    const scriptElement = document.createElement('script');
+    scriptElement.src = url;
+    expect(scriptElement.src).toBe('https://a.b.c/');
+    expect(isStaticResourcesEqual(scriptElement.src, url)).toBe(true);
+    expect(isStaticResourcesEqual(scriptElement.src, 'https://a.b.c/')).toBe(
+      true,
+    );
+    expect(isStaticResourcesEqual(scriptElement.src, '//a.b.c')).toBe(true);
+    expect(isStaticResourcesEqual(scriptElement.src, 'a.b.c')).toBe(true);
+    expect(isStaticResourcesEqual(scriptElement.src, 'http://a.b.c')).toBe(
+      true,
+    );
   });
-
-  it('check resources while url specify protocol(http)', () => {
+  it('verify resources when URL specifies protocol (http)', () => {
     const url = 'http://a.b.c';
-    const sc = document.createElement('script');
-    sc.src = url;
-    expect(sc.src).toBe('http://a.b.c/');
-
-    expect(isStaticResourcesEqual(sc.src, url)).toBe(true);
-    expect(isStaticResourcesEqual(sc.src, 'http://a.b.c/')).toBe(true);
-    expect(isStaticResourcesEqual(sc.src, '//a.b.c')).toBe(true);
-    expect(isStaticResourcesEqual(sc.src, 'a.b.c')).toBe(true);
-
-    expect(isStaticResourcesEqual(sc.src, 'https://a.b.c')).toBe(true);
+    const scriptElement = document.createElement('script');
+    scriptElement.src = url;
+    expect(scriptElement.src).toBe('http://a.b.c/');
+    expect(isStaticResourcesEqual(scriptElement.src, url)).toBe(true);
+    expect(isStaticResourcesEqual(scriptElement.src, 'http://a.b.c/')).toBe(
+      true,
+    );
+    expect(isStaticResourcesEqual(scriptElement.src, '//a.b.c')).toBe(true);
+    expect(isStaticResourcesEqual(scriptElement.src, 'a.b.c')).toBe(true);
+    expect(isStaticResourcesEqual(scriptElement.src, 'https://a.b.c')).toBe(
+      true,
+    );
   });
 });

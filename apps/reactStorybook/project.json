@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/reactStorybook/src",
   "projectType": "application",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
@@ -41,7 +42,7 @@
           "outputHashing": "all",
           "sourceMap": false,
           "namedChunks": false,
-          "extractLicenses": true,
+          "extractLicenses": false,
           "vendorChunk": false,
           "webpackConfig": "apps/reactStorybook/webpack.config.prod.js"
         }
@@ -72,7 +73,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/reactStorybook/**/*.{ts,tsx,js,jsx}"]
@@ -135,6 +136,5 @@
         }
       }
     }
-  },
-  "tags": []
+  }
 }

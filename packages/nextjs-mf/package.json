@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "8.5.5",
+  "version": "8.6.4",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -17,7 +17,6 @@
   ],
   "exports": {
     ".": "./dist/src/index.js",
-    "./utilities": "./dist/utilities.js",
     "./utils": "./dist/utils/index.js",
     "./*": "./*"
   },
@@ -28,9 +27,6 @@
       ],
       "utils": [
         "./dist/utils/index.d.ts"
-      ],
-      "utilities": [
-        "./dist/utilities.d.ts"
       ]
     }
   },
@@ -39,7 +35,6 @@
   },
   "dependencies": {
     "fast-glob": "^3.2.11",
-    "@module-federation/utilities": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/enhanced": "workspace:*",

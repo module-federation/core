@@ -3,6 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/native-federation-typescript/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
+  "implicitDependencies": [],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -17,7 +19,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/native-federation-typescript/**/*.ts"]
@@ -48,7 +50,5 @@
     "semantic-release": {
       "executor": "@goestav/nx-semantic-release:semantic-release"
     }
-  },
-  "tags": ["type:pkg"],
-  "implicitDependencies": []
+  }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "0.6.6",
+  "version": "0.6.11",
   "files": [
     "dist/",
     "types.d.ts",
@@ -58,24 +58,24 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@swc/helpers": "0.5.12",
-    "@modern-js/utils": "2.54.2",
-    "@module-federation/sdk": "workspace:*",
+    "@modern-js/node-bundle-require": "2.60.3",
+    "@modern-js/utils": "2.60.3",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
-    "@modern-js/node-bundle-require": "2.54.2",
+    "@module-federation/sdk": "workspace:*",
+    "@swc/helpers": "0.5.12",
+    "hoist-non-react-statics": "3.3.2",
     "node-fetch": "~3.3.0",
-    "react-error-boundary": "4.0.13",
-    "hoist-non-react-statics": "3.3.2"
+    "react-error-boundary": "4.0.13"
   },
   "devDependencies": {
-    "@types/hoist-non-react-statics": "3.3.2",
+    "@modern-js/app-tools": "2.60.3",
+    "@modern-js/core": "2.60.3",
+    "@modern-js/module-tools": "2.60.3",
+    "@modern-js/runtime": "2.60.3",
+    "@modern-js/tsconfig": "2.60.3",
     "@module-federation/manifest": "workspace:*",
-    "@modern-js/app-tools": "2.57.0",
-    "@modern-js/core": "2.57.0",
-    "@modern-js/runtime": "2.57.0",
-    "@modern-js/module-tools": "2.57.0",
-    "@modern-js/tsconfig": "2.57.0"
+    "@types/hoist-non-react-statics": "3.3.5"
   },
   "peerDependencies": {
     "react": ">=17",

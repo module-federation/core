@@ -21,7 +21,7 @@ import { PackageManagerTabs, Tabs, Tab } from '@theme';
 
 `RetryPlugin` 为运行时插件，我们可以通过构建插件的 `runtimePlugin` 注册此插件或在运行时进行插件注册，并配置重试参数和重试逻辑等：
 
-:::note 
+:::note
 注意：构建插件中注册 和 运行时注册两种方式选择任意一种即可，不要重复注册
 
 :::
@@ -29,22 +29,19 @@ import { PackageManagerTabs, Tabs, Tab } from '@theme';
 
 ### 方式一：构建插件中注册
 ```diff
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 
 export default defineConfig({
-  tools: {
-    rspack: (config, { appendPlugins }) => {
-      appendPlugins([
-        new ModuleFederationPlugin({
-          ...,
-+         runtimePlugins: [
-+            path.join(__dirname, './src/runtime-plugin/retry.ts'),
-+         ],
-        }),
-      ]);
-    },
-  },
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      ...,
++     runtimePlugins: [
++       path.join(__dirname, './src/runtime-plugin/retry.ts'),
++     ],
+    }),
+  ],
 });
 
 ```
@@ -152,12 +149,12 @@ type ScriptWithRetryOptions = {
 
 ### FetchWithRetryOptions 类型说明
 
-- **url**: 
+- **url**:
   - `string`
   - 可选。当不设置时对于所有加载失败的 URL 会默认进入重试逻辑
   - 需要重试的资源的 URL。
 
-- **options**: 
+- **options**:
   - `RequestInit`
   - 可选
   - 传递给 fetch 请求的选项。
@@ -167,12 +164,12 @@ type ScriptWithRetryOptions = {
   - 可选
   - 重试的次数，默认为 3。
 
-- **retryDelay**: 
+- **retryDelay**:
   - `number`
   - 可选
   - 每次重试之间的延迟时间（毫秒）。
 
-- **fallback**: 
+- **fallback**:
   - `() => string`
   - 可选
   - 所有重试失败后，返回一个备用资源的 URL。
@@ -184,21 +181,21 @@ type ScriptWithRetryOptions = {
   - 可选。当不设置时对于所有加载失败的 URL 会默认进入重试逻辑
   - 需要重试的脚本资源的 URL。
 
-- **attrs**: 
+- **attrs**:
   - `Record<string, string>`
   - 可选
   - 传递给脚本元素的属性。
 
-- **retryTimes**: 
+- **retryTimes**:
   - `number`
   - 可选
   - 重试的次数，默认为 3。
 
-- **retryDelay**: 
+- **retryDelay**:
   - `number`
   - 可选
   - 每次重试之间的延迟时间（毫秒）。
-  
+
 - **customCreateScript**:
   - `CreateScriptFunc`
   - 可选

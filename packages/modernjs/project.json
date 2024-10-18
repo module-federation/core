@@ -3,6 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/modernjs/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
+  "implicitDependencies": [],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -21,7 +23,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/modernjs/**/*.ts"]
@@ -50,7 +52,5 @@
     "semantic-release": {
       "executor": "@goestav/nx-semantic-release:semantic-release"
     }
-  },
-  "tags": ["type:pkg"],
-  "implicitDependencies": []
+  }
 }

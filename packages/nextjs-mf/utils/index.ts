@@ -1,10 +1,4 @@
 /**
- * Extracts the URL and global from the module federation utilities.
- * @module @module-federation/utilities/src/utils/pure
- */
-export { extractUrlAndGlobal } from '@module-federation/utilities';
-
-/**
  * Flushes chunks from the module federation node utilities.
  * @module @module-federation/node/utils
  */

@@ -60,7 +60,8 @@ function WraperRouterProvider(
     return <RouterProvider router={MemeoryRouterInstance} />;
   } else {
     const BrowserRouterInstance = createBrowserRouter(routers, {
-      basename: routerContextProps.basename || router?.basename,
+      // In host app, the routerContextProps is {}, so we should use router.basename as fallback
+      basename: routerContextProps.basename || router.basename,
       future: router.future,
       window: router.window,
     });

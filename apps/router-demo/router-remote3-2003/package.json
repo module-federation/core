@@ -1,24 +1,24 @@
 {
   "name": "remote3",
   "private": true,
-  "version": "1.0.26",
+  "version": "1.0.31",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
     "preview": "rsbuild preview"
   },
   "dependencies": {
-    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/rsbuild-plugin": "workspace:*",
     "@module-federation/bridge-vue3": "workspace:*",
     "vue": "^3.4.19",
     "vue-router": "^4.3.2"
   },
   "devDependencies": {
-    "@rsbuild/core": "^0.6.15",
-    "@rsbuild/plugin-vue": "^0.6.15",
+    "@rsbuild/core": "^1.0.7",
+    "@rsbuild/plugin-vue": "^1.0.1",
+    "@vue/tsconfig": "^0.5.1",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.2",
-    "vue-tsc": "^2.0.26",
-    "@vue/tsconfig": "^0.5.1"
+    "vue-tsc": "^2.0.26"
   }
 }

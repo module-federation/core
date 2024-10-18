@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.6.6",
+  "version": "0.6.11",
   "scripts": {
     "build:storybook": "storybook build",
     "storybook": "storybook dev -p 6006",
@@ -51,35 +51,35 @@
   },
   "dependencies": {
     "@arco-design/web-react": "^2.59.1",
-    "@modern-js/runtime": "2.52.0",
+    "@modern-js/runtime": "2.60.3",
     "@module-federation/sdk": "workspace:*",
     "ahooks": "^3.7.10",
     "dagre": "^0.8.5",
-    "react": "~18.2.0",
-    "react-dom": "~18.2.0",
-    "reactflow": "11.10.4"
+    "react": "~18.3.1",
+    "react-dom": "~18.3.1",
+    "reactflow": "11.11.4"
   },
   "devDependencies": {
-    "@types/dagre": "^0.7.52",
     "@modern-js-app/eslint-config": "2.54.6",
-    "@modern-js/app-tools": "2.46.1",
-    "@modern-js/eslint-config": "2.54.6",
-    "@modern-js/tsconfig": "2.46.1",
-    "@modern-js/module-tools": "2.46.1",
+    "@modern-js/app-tools": "2.60.3",
     "@modern-js/builder-webpack-provider": "2.46.1",
+    "@modern-js/eslint-config": "2.59.0",
+    "@modern-js/module-tools": "2.60.3",
+    "@modern-js/storybook": "2.60.3",
+    "@modern-js/tsconfig": "2.60.3",
     "@module-federation/runtime": "workspace:*",
     "@playwright/test": "1.36.1",
-    "@types/chrome": "^0.0.268",
+    "@storybook/addon-essentials": "^8",
+    "@types/chrome": "^0.0.272",
+    "@types/dagre": "^0.7.52",
     "@types/jest": "~29.2.4",
     "@types/node": "~20.12.12",
     "@types/react": "~18.2.0",
-    "@types/react-dom": "~18.2.0",
+    "@types/react-dom": "~18.3.0",
     "lint-staged": "~13.1.0",
     "prettier": "~2.8.1",
     "rimraf": "~3.0.2",
     "typescript": "~5.0.4",
-    "vitest": "1.2.2",
-    "@modern-js/storybook": "2.46.1",
-    "@storybook/addon-essentials": "^8"
+    "vitest": "1.2.2"
   }
 }

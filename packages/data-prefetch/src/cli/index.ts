@@ -12,6 +12,7 @@ import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { TEMP_DIR } from '../common/constant';
 import { fileExistsWithCaseSync, fixPrefetchPath } from '../common/node-utils';
 import { getPrefetchId } from '../common/runtime-utils';
+import { SHARED_STRATEGY } from '../constant';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -47,13 +48,15 @@ export class PrefetchPlugin implements WebpackPluginInstance {
       this.options.runtimePlugins = [];
     }
 
-    const runtimePath = path.resolve(__dirname, '../esm/plugin.js');
-    const sharedPath = path.resolve(__dirname, '../esm/shared/index.js');
+    const runtimePath = path.resolve(__dirname, './plugin.esm.js');
     if (!this.options.runtimePlugins?.includes(runtimePath)) {
       this.options.runtimePlugins!.push(runtimePath);
     }
-    if (!this.options.runtimePlugins?.includes(sharedPath)) {
-      this.options.runtimePlugins!.push(sharedPath);
+    if (this.options.shareStrategy !== SHARED_STRATEGY) {
+      this.options.shareStrategy = SHARED_STRATEGY;
+      console.warn(
+        `[Module Federation Data Prefetch]: Your shared strategy is set to '${SHARED_STRATEGY}', this is a necessary condition for data prefetch`,
+      );
     }
 
     const encodedName = encodeName(name as string);

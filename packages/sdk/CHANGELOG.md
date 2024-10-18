@@ -1,5 +1,35 @@
 # [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.6.11
+
+### Patch Changes
+
+- d5a3072: dont set script.src if it is set by createScriptHook
+
+## 0.6.10
+
+### Patch Changes
+
+- 22a3b83: fix(data-prefetch): apply DataPrefetchPlugin on demand
+
+## 0.6.9
+
+## 0.6.8
+
+### Patch Changes
+
+- 32db0ac: Node support for loading esm remote entry
+
+## 0.6.7
+
+### Patch Changes
+
+- 9e32644: Added experimental option for federation runtime in ContainerPluginOptions.
+
+  - Extended `ContainerPluginOptions` to include an `experiments` property.
+    - Within `experiments`, added a `federationRuntime` option.
+      - `federationRuntime` can be either `false` or `'hoisted'`.
+
 ## 0.6.6
 
 ## 0.6.5

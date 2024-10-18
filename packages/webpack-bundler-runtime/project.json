@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/webpack-bundler-runtime/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
@@ -30,7 +31,7 @@
       ]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [
@@ -69,6 +70,5 @@
         ]
       }
     }
-  },
-  "tags": ["type:pkg"]
+  }
 }

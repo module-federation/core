@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/dts-plugin/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -21,7 +22,7 @@
       "outputs": ["{workspaceRoot}/coverage/packages/dts-plugin"]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [
@@ -58,6 +59,5 @@
         ]
       }
     }
-  },
-  "tags": ["type:pkg"]
+  }
 }

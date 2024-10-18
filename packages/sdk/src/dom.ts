@@ -47,9 +47,9 @@ export function createScript(info: {
   }
 
   if (!script) {
+    const attrs = info.attrs;
     script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = info.url;
+    script.type = attrs?.['type'] === 'module' ? 'module' : 'text/javascript';
     let createScriptRes: CreateScriptHookReturnDom = undefined;
     if (info.createScriptHook) {
       createScriptRes = info.createScriptHook(info.url, info.attrs);
@@ -65,7 +65,9 @@ export function createScript(info: {
         }
       }
     }
-    const attrs = info.attrs;
+    if (!script.src) {
+      script.src = info.url;
+    }
     if (attrs && !createScriptRes) {
       Object.keys(attrs).forEach((name) => {
         if (script) {

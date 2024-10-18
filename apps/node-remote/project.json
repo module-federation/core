@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/node-remote/src",
   "projectType": "application",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
@@ -38,7 +39,7 @@
           "outputHashing": "all",
           "sourceMap": false,
           "namedChunks": false,
-          "extractLicenses": true,
+          "extractLicenses": false,
           "vendorChunk": false
         }
       },
@@ -74,7 +75,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/node-remote/**/*.{ts,tsx,js,jsx}"]
@@ -94,6 +95,5 @@
         }
       }
     }
-  },
-  "tags": []
+  }
 }

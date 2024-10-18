@@ -1,5 +1,36 @@
 # @module-federation/bridge-react
 
+## 0.6.11
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.11
+
+## 0.6.10
+
+### Patch Changes
+
+- 8a77291: fix(bridge-react): add default basename for WraperRouterProvider
+  - @module-federation/bridge-shared@0.6.10
+
+## 0.6.9
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.9
+
+## 0.6.8
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.8
+
+## 0.6.7
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.7
+
 ## 0.6.6
 
 ### Patch Changes

@@ -3,6 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/react-ts-host/src",
   "projectType": "application",
+  "tags": [],
+  "implicitDependencies": ["typescript"],
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
@@ -43,7 +45,7 @@
           "outputHashing": "all",
           "sourceMap": false,
           "namedChunks": false,
-          "extractLicenses": true,
+          "extractLicenses": false,
           "vendorChunk": false
         }
       },
@@ -74,7 +76,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/react-ts-host/**/*.{ts,tsx,js,jsx}"]
@@ -96,7 +98,5 @@
         }
       }
     }
-  },
-  "tags": [],
-  "implicitDependencies": ["typescript"]
+  }
 }

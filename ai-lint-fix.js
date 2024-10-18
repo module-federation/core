@@ -7,6 +7,7 @@ const { OpenAI } = require('openai');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const glob = require('glob');
+
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -38,7 +39,8 @@ async function lintFileContent(fileContent) {
 RULES:
 -Should preserve uses of normalizeWebpackPath
 -Should preserve uses of ts-ignore
--Removed commented out code
+-Should improve the source code while ensuing its logic is preserved and functionality is not altered
+-Update existing comments for accuracy
 -Return only the updated file content with no other response text:
 
 ${fileContent}`;
@@ -46,7 +48,7 @@ ${fileContent}`;
   const response = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [{ role: 'user', content: prompt }],
-    max_tokens: 4096,
+    max_completion_tokens: 4096,
   });
 
   let res = response.choices[0].message.content.trim().split('\n');
@@ -67,21 +69,6 @@ async function processFile(filePath) {
     const lintedContent = await lintFileContent(fileContent);
     fs.writeFileSync(filePath, lintedContent, 'utf8');
     console.log(`File has been linted and updated successfully: ${filePath}`);
-    const tsConfigPath = findTsConfig(filePath);
-    try {
-      const tscOutput = execFileSync(
-        'tsc',
-        ['--noEmit', '--project', tsConfigPath],
-        {
-          stdio: 'pipe',
-        },
-      ).toString();
-      console.log(`TypeScript check passed for ${filePath}:\n${tscOutput}`);
-    } catch (error) {
-      console.error(
-        `TypeScript check failed for ${filePath}:\n${error.stdout.toString()}`,
-      );
-    }
   } catch (error) {
     console.error(`Error performing linting on ${filePath}:`, error.message);
     process.exit(1);
@@ -100,6 +87,24 @@ function findTsConfig(filePath) {
   throw new Error('tsconfig.json not found');
 }
 
+async function processFilesWithConcurrencyLimit(files, limit) {
+  const results = [];
+  const executing = [];
+
+  for (const file of files) {
+    const p = processFile(file).then(() => {
+      executing.splice(executing.indexOf(p), 1);
+    });
+    results.push(p);
+    executing.push(p);
+    if (executing.length >= limit) {
+      await Promise.race(executing);
+    }
+  }
+
+  return Promise.all(results);
+}
+
 async function main() {
   if (argv.path) {
     await processFile(argv.path);
@@ -107,10 +112,7 @@ async function main() {
     console.log('pattern', argv.pattern);
     try {
       const files = await glob.glob(argv.pattern);
-
-      for (const filePath of files) {
-        await processFile(filePath);
-      }
+      await processFilesWithConcurrencyLimit(files, 3); // Process files with concurrency limit of 3
     } catch (err) {
       console.error('Error finding files:', err.message);
       process.exit(1);

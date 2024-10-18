@@ -3,6 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/storybook-addon/src",
   "projectType": "library",
+  "tags": ["type:pkg"],
+  "implicitDependencies": ["utils"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
@@ -21,7 +23,7 @@
       ]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/storybook-addon/**/*.ts"]
@@ -57,7 +59,5 @@
         ]
       }
     }
-  },
-  "tags": ["type:pkg"],
-  "implicitDependencies": ["utils"]
+  }
 }

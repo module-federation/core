@@ -1,5 +1,86 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.6.4
+
+### Patch Changes
+
+- 92b6fec: Make the Next.js plugin work with strict CSP settings
+- Updated dependencies [ea6d417]
+- Updated dependencies [d5a3072]
+  - @module-federation/runtime@0.6.11
+  - @module-federation/sdk@0.6.11
+  - @module-federation/node@2.5.21
+  - @module-federation/webpack-bundler-runtime@0.6.11
+  - @module-federation/enhanced@0.6.11
+
+## 8.6.3
+
+### Patch Changes
+
+- Updated dependencies [6b02145]
+- Updated dependencies [b704f30]
+- Updated dependencies [22a3b83]
+  - @module-federation/enhanced@0.6.10
+  - @module-federation/runtime@0.6.10
+  - @module-federation/sdk@0.6.10
+  - @module-federation/node@2.5.20
+  - @module-federation/webpack-bundler-runtime@0.6.10
+
+## 8.6.2
+
+### Patch Changes
+
+- Updated dependencies [70a1708]
+  - @module-federation/enhanced@0.6.9
+  - @module-federation/node@2.5.19
+  - @module-federation/runtime@0.6.9
+  - @module-federation/webpack-bundler-runtime@0.6.9
+  - @module-federation/sdk@0.6.9
+  - @module-federation/utilities@3.1.15
+
+## 8.6.1
+
+### Patch Changes
+
+- Updated dependencies [32db0ac]
+- Updated dependencies [32db0ac]
+- Updated dependencies [6c5f444]
+- Updated dependencies [fac6ecf]
+  - @module-federation/sdk@0.6.8
+  - @module-federation/runtime@0.6.8
+  - @module-federation/enhanced@0.6.8
+  - @module-federation/node@2.5.18
+  - @module-federation/utilities@3.1.14
+  - @module-federation/webpack-bundler-runtime@0.6.8
+
+## 8.6.0
+
+### Minor Changes
+
+- 9e32644: Simplified InvertedContainerPlugin by removing configuration dependencies and improving runtime module integration.
+
+  - Refactored `InvertedContainerPlugin` to remove redundant configurations.
+  - Deleted `EmbeddedContainerPlugin` and moved its logic into `InvertedContainerPlugin`.
+  - Modified `InvertedContainerRuntimeModule` to dynamically locate and integrate container entry modules.
+  - Commented out runtime chunk creation in `configureServerCompilerOptions`.
+  - Enhanced module dependency handling using `FederationModulesPlugin` hooks.
+
+### Patch Changes
+
+- Updated dependencies [1b6bf0e]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+- Updated dependencies [9e32644]
+  - @module-federation/enhanced@0.6.7
+  - @module-federation/runtime@0.6.7
+  - @module-federation/sdk@0.6.7
+  - @module-federation/node@2.5.17
+  - @module-federation/webpack-bundler-runtime@0.6.7
+  - @module-federation/utilities@3.1.13
+
 ## 8.5.5
 
 ### Patch Changes
