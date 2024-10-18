@@ -59,9 +59,9 @@ export const moduleFederationConfigPlugin = (
   setup: async ({ useConfigContext, useAppContext }) => {
     const modernjsConfig = useConfigContext();
     const mfConfig = await getMFConfig(userConfig.originPluginOptions);
-    const csrConfig =
+    const csrConfig: moduleFederationPlugin.ModuleFederationPluginOptions =
       userConfig.csrConfig || JSON.parse(JSON.stringify(mfConfig));
-    const ssrConfig =
+    const ssrConfig: moduleFederationPlugin.ModuleFederationPluginOptions =
       userConfig.ssrConfig || JSON.parse(JSON.stringify(mfConfig));
     userConfig.ssrConfig = ssrConfig;
     userConfig.csrConfig = csrConfig;
@@ -130,7 +130,7 @@ export const moduleFederationConfigPlugin = (
             },
             enableAsyncEntry:
               bundlerType === 'rspack'
-                ? modernjsConfig.source?.enableAsyncEntry ?? true
+                ? (modernjsConfig.source?.enableAsyncEntry ?? true)
                 : modernjsConfig.source?.enableAsyncEntry,
           },
           dev: {

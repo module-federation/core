@@ -83,6 +83,40 @@ export default createModuleFederationConfig({
 }
 ```
 
+## 配置
+
+### config
+
+- 类型：`moduleFederationPlugin.ModuleFederationPluginOptions`
+- 是否必填：否
+- 默认值：`undefined`
+
+默认 `@module-federation/modern-js` 会自动加载 `module-federation.config.ts` 里的配置文件。如果配置了 `config` ，那么会优先使用此配置文件。
+
+### configPath
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`path.resolve(process.cwd(), 'module-federation.config.ts');`
+
+指定配置文件路径，必须为绝对路径。
+
+### exportRoutes
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`undefined`
+
+设置 `true` 后将自动导出当前项目路由。
+
+### importRoutes
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`undefined`
+
+设置 `true` 后，按照[此文档](../../practice/frameworks/modern/ssr/route-component#如何开启此功能？)消费生产者导出的路由。
+
 ## 服务端渲染（SSR）
 
 :::info 注意
@@ -180,3 +214,36 @@ export default Product;
 当组件**加载**或**渲染**失败时，所渲染的容错组件。
 
 注意：当**渲染**失败的时候，该组件仅在客户端渲染此 容错组件。
+
+
+## 路由组件
+
+### withMFRouteId
+
+<Collapse>
+```ts
+declare function withMFRouteId(id: string): string;
+```
+</Collapse>
+
+当需要获取指定路由层级的 Data Loader 数据时，需要用此函数包裹原 `routeId` 。
+
+示例如下：
+
+```ts
+import { useRouteLoaderData } from '@modern-js/runtime/router';
+import { withMFRouteId } from '@modern-js/runtime/mf';
+
+
+export function UserLayout() {
+  // 获取 routes/user/layout.data.ts 中 `loader` 返回的数据
+  // 注意：若该项目是路由组件，那么需要调用 withMFRouteId 获取处理后的实际 routeId
+  const data = useRouteLoaderData(withMFRouteId('user/layout'));
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <h2>{data.age}</h2>
+    </div>
+  );
+}
+```

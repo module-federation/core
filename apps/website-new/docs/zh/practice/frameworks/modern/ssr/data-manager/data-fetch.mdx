@@ -1,0 +1,71 @@
+---
+title: "数据获取"
+---
+# 数据获取
+:::info
+完整使用请参考 [**Modern.js 数据获取**](https://modernjs.dev/guides/basic-features/data/data-fetch.html)
+:::
+
+## 快速开始
+
+### 1. 创建 `.data` 文件
+
+在相应的路由 `page` 文件同级创建 `page.data.ts` 文件，并在里面导出 `loader` 函数，内容如下：
+
+```ts title='page.data.ts'
+export type ProfileData = {
+  /*  some types */
+};
+
+const loader = async (): Promise<ProfileData> => {
+  const msg = await new Promise<string>((resolve) => {
+    setTimeout(() => {
+      resolve('hello world');
+    }, 500);
+  });
+  return {
+    message: msg,
+  };
+};
+export { loader };
+
+```
+### 2. 消费同层路由 Data Loader 数据
+
+在 `page.tsx` 调用 `useLoaderData` 获取**同层级**的 `Data Loader` 数据，示例如下：
+
+```diff title='page.tsx'
++ import { useLoaderData } from '@modern-js/runtime/router';
++
+
+export default function UserLayout() {
++ const data = useLoaderData() as ProfileData;
+  return (
+    <div>
++     <span>{data.message}</span>
+    </div>
+  );
+}
+```
+
+### 3. 消费指定路由 DataLoader 数据
+
+很多场景下，子组件需要获取到上层组件 loader 中的数据，这时可以通过 useRouteLoaderData 方便地获取到指定路由组件的数据：
+
+```ts
+import { useRouteLoaderData } from '@modern-js/runtime/router';
+import { withMFRouteId } from '@modern-js/runtime/mf';
+
+
+export function UserLayout() {
+  // 获取 routes/user/layout.data.ts 中 `loader` 返回的数据
+  // 注意：若该项目是路由组件，那么需要调用 withMFRouteId 获取处理后的实际 routeId
+  const data = useRouteLoaderData(withMFRouteId('user/layout'));
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <h2>{data.age}</h2>
+    </div>
+  );
+}
+```

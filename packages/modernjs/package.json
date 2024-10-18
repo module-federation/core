@@ -26,6 +26,23 @@
       "types": "./dist/types/ssr-runtime/index.d.ts",
       "default": "./dist/esm/ssr-runtime/index.js"
     },
+    "./routes": {
+      "types": "./dist/types/runtime/routes/plugin.d.ts",
+      "default": "./dist/esm/runtime/routes/plugin.js"
+    },
+    "./routes-inject-assets": {
+      "types": "./dist/types/runtime/routes/plugin-inject-assets.d.ts",
+      "default": "./dist/esm/runtime/routes/plugin-inject-assets.js"
+    },
+    "./fetch-router-server-plugin": {
+      "types": "./dist/types/cli/server/fetchRoutePlugin.d.ts",
+      "default": "./dist/cjs/cli/server/fetchRoutePlugin.js"
+    },
+    "./routes-plugin": {
+      "import": "./dist/esm/cli/routes/plugin.js",
+      "require": "./dist/cjs/cli/routes/plugin.js",
+      "types": "./dist/types/cli/routes/plugin.d.ts"
+    },
     "./config-plugin": {
       "import": "./dist/esm/cli/configPlugin.js",
       "require": "./dist/cjs/cli/configPlugin.js",
@@ -50,6 +67,18 @@
       ],
       "ssr-plugin": [
         "./dist/types/cli/ssrPlugin.d.ts"
+      ],
+      "routes-plugin": [
+        "./dist/types/cli/routes/plugin.d.ts"
+      ],
+      "routes": [
+        "./dist/types/runtime/dataLoader/plugin.d.ts"
+      ],
+      "routes-inject-assets": [
+        "./dist/types/runtime/dataLoader/plugin-inject-assets.d.ts"
+      ],
+      "fetch-router-server-plugin": [
+        "./dist/types/cli/server/fetchRoutePlugin.d.ts"
       ]
     }
   },
@@ -58,26 +87,34 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@modern-js/node-bundle-require": "2.60.3",
-    "@modern-js/utils": "2.60.3",
+    "@modern-js/node-bundle-require": "2.60.2",
+    "@modern-js/utils": "2.60.2",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@swc/helpers": "0.5.12",
     "hoist-non-react-statics": "3.3.2",
     "node-fetch": "~3.3.0",
-    "react-error-boundary": "4.0.13"
+    "react-error-boundary": "4.0.13",
+    "@babel/generator": "7.25.0",
+    "@babel/parser": "7.25.3",
+    "@babel/traverse": "7.25.3",
+    "@babel/types": "7.25.2"
   },
   "devDependencies": {
-    "@modern-js/app-tools": "2.60.3",
-    "@modern-js/core": "2.60.3",
-    "@modern-js/module-tools": "2.60.3",
-    "@modern-js/runtime": "2.60.3",
-    "@modern-js/tsconfig": "2.60.3",
+    "@modern-js/app-tools": "2.60.2",
+    "@modern-js/core": "2.60.2",
+    "@modern-js/module-tools": "2.60.2",
+    "@modern-js/runtime": "2.60.2",
+    "@modern-js/tsconfig": "2.60.2",
     "@module-federation/manifest": "workspace:*",
-    "@types/hoist-non-react-statics": "3.3.5"
+    "@types/hoist-non-react-statics": "3.3.5",
+    "@types/babel__traverse": "7.20.6",
+    "@types/babel__generator": "7.6.8",
+    "@modern-js/server-core": "2.60.2"
   },
   "peerDependencies": {
+    "@modern-js/runtime": "^2.60.2",
     "react": ">=17",
     "react-dom": ">=17",
     "typescript": "^4.9.0 || ^5.0.0",
