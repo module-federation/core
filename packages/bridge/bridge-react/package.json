@@ -43,8 +43,8 @@
     "react-error-boundary": "^4.0.13"
   },
   "peerDependencies": {
-    "react": ">=16.9.0",
-    "react-dom": ">=16.9.0",
+    "react": ">=17",
+    "react-dom": ">=17",
     "react-router-dom": ">=4",
     "@module-federation/runtime": "workspace:*"
   },
