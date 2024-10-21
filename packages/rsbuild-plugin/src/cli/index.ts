@@ -157,12 +157,6 @@ export const pluginModuleFederation = (
       if (!chain.output.get('uniqueName')) {
         chain.output.set('uniqueName', moduleFederationOptions.name);
       }
-
-      const publicPath = chain.output.get('publicPath');
-      // set the default publicPath to 'auto' to make MF work
-      if (publicPath === '/') {
-        chain.output.set('publicPath', 'auto');
-      }
     });
   },
 });
