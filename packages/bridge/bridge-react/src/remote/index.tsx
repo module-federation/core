@@ -7,9 +7,25 @@ import React, {
 } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
-import { LoggerInstance, pathJoin } from '../utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
+import { registerBridgeLifeCycle } from '../lifecycle';
+import { LoggerInstance, pathJoin } from '../utils';
+
+export const getModuleName = (id: string) => {
+  // separate module name without detailed module path
+  // @vmok-e2e/edenx-demo-app2/button -> @vmok-e2e/edenx-demo-app2
+  const idArray = id.split('/');
+  if (idArray.length < 2) {
+    return id;
+  }
+  return idArray[0] + '/' + idArray[1];
+};
+
+export const getRootDomDefaultClassName = (moduleName: string) => {
+  const name = getModuleName(moduleName).replace(/\@/, '').replace(/\//, '-');
+  return `bridge-root-component-${name}`;
+};
 
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {
@@ -39,6 +55,7 @@ const RemoteAppWrapper = forwardRef(function (
   props: RemoteAppParams & RenderFnParams,
   ref,
 ) {
+  const bridgeHook = registerBridgeLifeCycle();
   const RemoteApp = () => {
     LoggerInstance.log(`RemoteAppWrapper RemoteApp props >>>`, { props });
     const {
@@ -65,7 +82,7 @@ const RemoteAppWrapper = forwardRef(function (
         const providerReturn = providerInfo();
         providerInfoRef.current = providerReturn;
 
-        const renderProps = {
+        let renderProps = {
           moduleName,
           dom: rootRef.current,
           basename,
@@ -78,6 +95,24 @@ const RemoteAppWrapper = forwardRef(function (
           `createRemoteComponent LazyComponent render >>>`,
           renderProps,
         );
+
+        if (bridgeHook && bridgeHook?.lifecycle?.beforeBridgeRender) {
+          const beforeBridgeRenderRes =
+            bridgeHook?.lifecycle?.beforeBridgeRender.emit({
+              ...renderProps,
+            });
+          const extraProps =
+            beforeBridgeRenderRes &&
+            typeof beforeBridgeRenderRes === 'object' &&
+            beforeBridgeRenderRes?.extraProps
+              ? beforeBridgeRenderRes?.extraProps
+              : {};
+
+          renderProps = {
+            ...renderProps,
+            ...extraProps,
+          } as any;
+        }
         providerReturn.render(renderProps);
       });
 
@@ -89,6 +124,16 @@ const RemoteAppWrapper = forwardRef(function (
               `createRemoteComponent LazyComponent destroy >>>`,
               { moduleName, basename, dom: renderDom.current },
             );
+            if (bridgeHook && bridgeHook?.lifecycle?.afterBridgeDestroy) {
+              bridgeHook?.lifecycle?.afterBridgeDestroy.emit({
+                moduleName,
+                dom: renderDom.current,
+                basename,
+                memoryRoute,
+                fallback,
+                ...resProps,
+              });
+            }
             providerInfoRef.current?.destroy({
               dom: renderDom.current,
             });
@@ -97,9 +142,11 @@ const RemoteAppWrapper = forwardRef(function (
       };
     }, []);
 
+    // bridge-remote-root
+    const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${props?.className}`;
     return (
       <div
-        className={props?.className}
+        className={rootComponentClassName}
         style={props?.style}
         ref={rootRef}
       ></div>
