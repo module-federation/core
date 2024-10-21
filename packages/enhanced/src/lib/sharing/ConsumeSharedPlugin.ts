@@ -8,13 +8,13 @@ import {
   getWebpackPath,
   normalizeWebpackPath,
 } from '@module-federation/sdk/normalize-webpack-path';
+import { isRequiredVersion } from '@module-federation/sdk';
 import type { Compiler, Compilation } from 'webpack';
 import { parseOptions } from '../container/options';
 import { ConsumeOptions } from './ConsumeSharedModule';
 import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
-  isRequiredVersion,
   getDescriptionFile,
   getRequiredVersionFromDescriptionFile,
 } from './utils';
