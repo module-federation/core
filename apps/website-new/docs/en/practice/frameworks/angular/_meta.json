@@ -1,5 +1,6 @@
 [
   "angular-cli",
+  "using-nx-for-angular",
   "angular-mfe",
   "mf-ssr-angular",
   "service-workers-mf",

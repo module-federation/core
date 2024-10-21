@@ -1,7 +1,7 @@
 {
   "name": "modernjs-ssr-nested-remote",
   "private": true,
-  "version": "0.1.30",
+  "version": "0.1.31",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
@@ -26,7 +26,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "7.24.4",
-    "@modern-js/runtime": "2.60.2",
+    "@modern-js/runtime": "2.60.3",
     "@module-federation/modern-js": "workspace:*",
     "antd": "4.24.15",
     "react": "~18.3.1",
@@ -34,9 +34,9 @@
   },
   "devDependencies": {
     "@modern-js-app/eslint-config": "2.59.0",
-    "@modern-js/app-tools": "2.60.2",
+    "@modern-js/app-tools": "2.60.3",
     "@modern-js/eslint-config": "2.59.0",
-    "@modern-js/tsconfig": "2.60.2",
+    "@modern-js/tsconfig": "2.60.3",
     "@types/jest": "~29.5.0",
     "@types/node": "~16.11.7",
     "@types/react": "~18.2.0",

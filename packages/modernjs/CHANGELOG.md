@@ -1,5 +1,14 @@
 # @module-federation/modern-js
 
+## 0.6.11
+
+### Patch Changes
+
+- Updated dependencies [d5a3072]
+  - @module-federation/sdk@0.6.11
+  - @module-federation/node@2.5.21
+  - @module-federation/enhanced@0.6.11
+
 ## 0.6.10
 
 ### Patch Changes

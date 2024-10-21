@@ -364,10 +364,21 @@ class StatsManager {
 
       await Promise.all([
         new Promise<void>((resolve) => {
-          stats.remotes = remotes.map((remote) => ({
-            ...remote,
-            usedIn: Array.from(remote.usedIn.values()),
-          }));
+          const remoteMemo: Set<string> = new Set();
+          stats.remotes = remotes.map((remote) => {
+            remoteMemo.add(remote.federationContainerName);
+            return {
+              ...remote,
+              usedIn: Array.from(remote.usedIn.values()),
+            };
+          });
+          const statsRemoteWithEmptyUsedIn =
+            this._remoteManager.statsRemoteWithEmptyUsedIn;
+          statsRemoteWithEmptyUsedIn.forEach((remoteInfo) => {
+            if (!remoteMemo.has(remoteInfo.federationContainerName)) {
+              stats.remotes.push(remoteInfo);
+            }
+          });
           resolve();
         }),
         new Promise<void>((resolve) => {

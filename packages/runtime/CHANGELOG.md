@@ -1,5 +1,17 @@
 # @module-federation/runtime
 
+## 0.6.11
+
+### Patch Changes
+
+- ea6d417: Replaced dynamic module import using `new Function` with a safer direct `import` call.
+
+  - Removed usage of `new Function` to execute dynamic import
+  - Implemented a direct async import with `/* webpackIgnore: true */` for proper bundler handling
+
+- Updated dependencies [d5a3072]
+  - @module-federation/sdk@0.6.11
+
 ## 0.6.10
 
 ### Patch Changes
