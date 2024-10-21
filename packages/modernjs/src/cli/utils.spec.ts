@@ -38,10 +38,10 @@ describe('patchMFConfig', async () => {
         remote: `http://${ipv4}:3000/remoteEntry.js`,
       },
       remoteType: 'script',
+      shareStrategy: 'loaded-first',
       runtimePlugins: [
-        path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
-        require.resolve('@module-federation/node/runtimePlugin'),
-        path.resolve(__dirname, './mfRuntimePlugins/inject-node-fetch.js'),
+        path.resolve(__dirname, './mfRuntimePlugins/node.js'),
+        path.resolve(__dirname, './mfRuntimePlugins/node-fetch.js'),
       ],
       shared: {
         react: {
@@ -68,9 +68,8 @@ describe('patchMFConfig', async () => {
         remote: `http://${ipv4}:3000/remoteEntry.js`,
       },
       remoteType: 'script',
-      runtimePlugins: [
-        path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
-      ],
+      runtimePlugins: [],
+      shareStrategy: 'loaded-first',
       shared: {
         react: {
           eager: true,

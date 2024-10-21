@@ -26,16 +26,16 @@
   ],
   "dependencies": {
     "@babel/runtime": "7.24.5",
-    "@modern-js/runtime": "2.60.3",
+    "@modern-js/runtime": "2.60.4",
     "@module-federation/enhanced": "workspace:*",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "devDependencies": {
     "@modern-js-app/eslint-config": "2.59.0",
-    "@modern-js/app-tools": "2.60.3",
+    "@modern-js/app-tools": "2.60.4",
     "@modern-js/eslint-config": "2.59.0",
-    "@modern-js/tsconfig": "2.60.3",
+    "@modern-js/tsconfig": "2.60.4",
     "@types/jest": "~29.5.0",
     "@types/node": "~20.12.12",
     "@types/react": "~18.2.0",

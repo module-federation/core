@@ -6,7 +6,7 @@ import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 import { updateStatsAndManifest } from './manifest';
-import { isDev } from './constant';
+import { isDev, META_NAME } from '../constant';
 
 export function setEnv() {
   process.env['MF_DISABLE_EMIT_STATS'] = 'true';
@@ -23,6 +23,7 @@ export const moduleFederationSSRPlugin = (
   ],
   setup: async ({ useConfigContext, useAppContext }) => {
     const modernjsConfig = useConfigContext();
+    const { metaName = META_NAME } = userConfig;
     const enableSSR = Boolean(modernjsConfig?.server?.ssr);
     if (!enableSSR) {
       return {};
@@ -37,7 +38,7 @@ export const moduleFederationSSRPlugin = (
         plugins.push({
           name: 'mfSSR',
           path: '@module-federation/modern-js/ssr-runtime',
-          config: {},
+          config: { metaName },
         });
         return { entrypoint, plugins };
       },

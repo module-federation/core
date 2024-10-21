@@ -1,0 +1,63 @@
+---
+title: "数据写入"
+---
+
+# 数据写入
+
+:::info
+完整使用请参考 [**数据写入**](https://modernjs.dev/guides/basic-features/data/data-write.html)
+:::
+
+本章节将示例如何更新 Data Loader 返回的数据以及将新的数据传递到服务器。
+
+## 快速开始
+
+### 1. 增加 action 函数
+修改 `page.data.ts`，增加 `action` 函数，内容如下：
+
+```ts title='page.data.ts'
+import type { ActionFunction } from '@modern-js/runtime/router';
+
+export const action: ActionFunction = async ({ request }) => {
+  try {
+    const data = await request.json();
+    const { msg } = data;
+    storage.set(key, msg);
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};
+```
+### 触发 action 函数
+
+修改 `page.ts` ，通过 `useFetcher` 获取对应 `submit` 函数，执行并触发 Data Action，示例如下：
+
+```tsx title='page.tsx'
+import { useLoaderData, Link,useFetcher } from '@modern-js/runtime/router';
+import type { ProfileData } from './page.data';
+
+const Index = (): JSX.Element => {
+  const data = (useLoaderData() as ProfileData) || {
+    message: '404',
+  };
+  const { submit } = useFetcher();
+  const editMsg = () => {
+    const newData = {
+      msg: 'Modern.js'
+    }
+    return submit(newData, {
+      method: 'post',
+      encType: 'application/json',
+    })
+  }
+  return (
+    <div className="container-box">
+      <button onClick={editMsg}>click to update data</button>
+      provider {data.message}
+    </div>
+  );
+};
+export default Index;
+```
