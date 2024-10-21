@@ -235,7 +235,7 @@ class ConsumeSharedPlugin {
                 compilation.inputFileSystem,
                 context,
                 ['package.json'],
-                (err, result) => {
+                (err, result, checkedDescriptionFilePaths) => {
                   if (err) {
                     requiredVersionWarning(
                       `Unable to read description file: ${err}`,
@@ -244,9 +244,20 @@ class ConsumeSharedPlugin {
                   }
                   const { data } = result || {};
                   if (!data) {
-                    requiredVersionWarning(
-                      `Unable to find description file in ${context}.`,
-                    );
+                    if (checkedDescriptionFilePaths) {
+                      requiredVersionWarning(
+                        [
+                          `Unable to find required version for "${packageName}" in description file/s`,
+                          checkedDescriptionFilePaths.join('\n'),
+                          'It need to be in dependencies, devDependencies or peerDependencies.',
+                        ].join('\n'),
+                      );
+                    } else {
+                      requiredVersionWarning(
+                        `Unable to find description file in ${context}.`,
+                      );
+                    }
+
                     return resolve(undefined);
                   }
                   //@ts-ignore
