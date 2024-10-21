@@ -2,7 +2,7 @@ import { parseOptions } from '@module-federation/enhanced';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion } from '@module-federation/sdk';
 
-import { isRegExp } from '../utils/index';
+import { isRegExp, DEFAULT_ASSET_PREFIX } from '../utils/index';
 import pkgJson from '../../package.json';
 
 import type {
@@ -44,16 +44,26 @@ export const pluginModuleFederation = (
     );
 
     api.modifyRsbuildConfig((config) => {
-      // If this is a provider app, Rsbuild should send the ws request to the provider's dev server.
-      // This allows the provider to do HMR when the provider module is loaded in the consumer's page.
-      if (
-        moduleFederationOptions.exposes &&
-        config.server?.port &&
-        !config.dev?.client?.port
-      ) {
+      // Change some default configs for remote modules
+      if (moduleFederationOptions.exposes) {
         config.dev ||= {};
-        config.dev.client ||= {};
-        config.dev.client.port = config.server.port;
+
+        // For remote modules, Rsbuild should send the ws request to the provider's dev server.
+        // This allows the provider to do HMR when the provider module is loaded in the consumer's page.
+        if (config.server?.port && !config.dev.client?.port) {
+          config.dev.client ||= {};
+          config.dev.client.port = config.server.port;
+        }
+
+        // Change the default assetPrefix to `true` for remote modules.
+        // This ensures that the remote module's assets can be requested by consumer apps with the correct URL.
+        const originalConfig = api.getRsbuildConfig('original');
+        if (
+          originalConfig.dev?.assetPrefix === undefined &&
+          config.dev.assetPrefix === DEFAULT_ASSET_PREFIX
+        ) {
+          config.dev.assetPrefix = true;
+        }
       }
     });
 
