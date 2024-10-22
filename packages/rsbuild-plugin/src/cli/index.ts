@@ -60,7 +60,7 @@ export const pluginModuleFederation = (
         const originalConfig = api.getRsbuildConfig('original');
         if (
           originalConfig.dev?.assetPrefix === undefined &&
-          config.dev.assetPrefix === DEFAULT_ASSET_PREFIX
+          config.dev.assetPrefix === config.server?.base
         ) {
           config.dev.assetPrefix = true;
         }
