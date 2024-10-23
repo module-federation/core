@@ -1,5 +1,33 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.6.0
+
+### Minor Changes
+
+- 1478f50: Enhanced hot-reload functionality with module decaching and improved type safety.
+
+  - Added `callsite` package for resolving module paths.
+  - Implemented `decache` and `searchCache` functions to remove modules from cache safely.
+    - Ensure proper handling of relative module paths.
+    - Avoid issues with native modules during decaching.
+  - Refactored hot-reload logic to use the new decache functionality.
+  - Improved type definitions and type safety throughout `hot-reload.ts`.
+    - Properly typed function return values.
+    - Added TypeScript annotations for better clarity.
+
+### Patch Changes
+
+- 1478f50: Add global flag `moduleGraphDirty` to control forced revalidation in hot-reload.
+
+  - Introduced new global variable `moduleGraphDirty`.
+    - Initialized `moduleGraphDirty` to `false` in the global scope.
+  - Modified `revalidate` function to check `moduleGraphDirty` flag.
+    - Forces revalidation if `moduleGraphDirty` is `true`.
+  - @module-federation/runtime@0.6.12
+  - @module-federation/enhanced@0.6.12
+  - @module-federation/sdk@0.6.12
+  - @module-federation/utilities@3.1.18
+
 ## 2.5.21
 
 ### Patch Changes

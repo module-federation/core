@@ -157,9 +157,9 @@ export default nextConfig;
 “本地 Webpack”意味着你必须将 webpack 作为依赖项安装，接下来将不会使用其捆绑的 webpack 副本，该副本无法使用，因为它不会导出所有 Webpack 内部结构
 
 ```bash title="shell"
-NEXT_PRIVATE_LOCAL_WEBPACK=true next dev
+cross-env NEXT_PRIVATE_LOCAL_WEBPACK=true next dev
 # or
-NEXT_PRIVATE_LOCAL_WEBPACK=true next build
+cross-env NEXT_PRIVATE_LOCAL_WEBPACK=true next build
 ```
 
 `.env` 也可以设置，但及时设置 `NEXT_PRIVATE_LOCAL_WEBPACK` 可能不可靠。
