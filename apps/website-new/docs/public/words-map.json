@@ -1,0 +1,103 @@
+{
+  "remoteName":{
+    "id":"remoteName",
+    "lang":{
+      "zh":{
+        "aliases":[
+          {"key":"remoteName aliases"}
+        ],
+        "description":"生产者名称",
+        "related_meta":{
+          "docs":[{
+            "id":"remoteName-docs",
+            "title":"生产者名称配置",
+            "url":"/zh/configure/name.html#name"
+          }],
+          "links":[{
+            "id":"remoteName-link",
+            "title":"生产者名称 链接 标题",
+            "url":"https://modernjs.dev/guides/get-started/quick-start.html"
+          }]
+        }
+      },
+      "en":{
+        "aliases":[
+          {"key":"remoteName aliases"}
+        ],
+        "description":"remote name",
+        "related_meta":{
+          "docs":[{
+            "id":"remoteName-docs",
+            "title":"remote name docs title",
+            "url":"https://modernjs.dev/guides/get-started/quick-start.html"
+          }],
+          "links":[{
+            "id":"remoteName-link",
+            "title":"remote name links title",
+            "url":"https://modernjs.dev/guides/get-started/quick-start.html"
+          }]
+        }
+      }
+    }
+  },
+  "remoteEntryUrl":{
+    "id":"remoteEntryUrl",
+    "lang":{
+      "zh":{
+        "aliases":[
+          {"key":"remoteEntryUrl aliases"}
+        ],
+        "description":"生产者入口地址",
+        "related_meta":{
+          "docs":[{
+            "id":"remoteEntryUrl-docs",
+            "title":"生产者",
+            "url":"https://modernjs.dev/guides/get-started/quick-start.html"
+          }],
+          "links":[{
+            "id":"remoteEntryUrl-link",
+            "title":"生产者入口地址 链接 标题",
+            "url":"/zh/configure/name.html#name"
+          }]
+        }
+      },
+      "en":{
+        "aliases":[
+          {"key":"remoteEntryUrl aliases"}
+        ],
+        "description":"remote entry url",
+        "related_meta":{
+          "docs":[{
+            "id":"remoteEntryUrl-docs",
+            "title":"remote entry docs title",
+            "url":"https://modernjs.dev/guides/get-started/quick-start.html"
+          }],
+          "links":[{
+            "id":"remoteEntryUrl-link",
+            "title":"remote entry links title",
+            "url":"https://modernjs.dev/guides/get-started/quick-start.html"
+          }]
+        }
+      }
+    }
+  },
+  "remoteEntryKey":{
+    "id":"remoteEntryKey",
+    "lang":{
+      "zh":{
+        "description":"生产者全局挂载名称",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      },
+      "en":{
+        "description":"remote global mount name",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      }
+    }
+  }
+}
