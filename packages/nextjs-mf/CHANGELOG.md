@@ -1,5 +1,27 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.7.0
+
+### Minor Changes
+
+- 1478f50: Added the UniverseEntryChunkTrackerPlugin to track entry chunks in the server plugin.
+
+  - Applied UniverseEntryChunkTrackerPlugin in the applyServerPlugins function.
+  - This change aims to enhance tracking of entry chunks in the server environment for hot reloading prod instances
+
+### Patch Changes
+
+- 1478f50: - Added `globalThis.moduleGraphDirty = true` to mark the module graph as dirty when an error is detected.
+  - Replaced `new Function('return globalThis')()` with a direct reference to `globalThis`.
+- 450aa37: add next 15 to peer deps
+- Updated dependencies [1478f50]
+- Updated dependencies [1478f50]
+  - @module-federation/node@2.6.0
+  - @module-federation/runtime@0.6.12
+  - @module-federation/enhanced@0.6.12
+  - @module-federation/webpack-bundler-runtime@0.6.12
+  - @module-federation/sdk@0.6.12
+
 ## 8.6.4
 
 ### Patch Changes
