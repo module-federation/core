@@ -61,7 +61,7 @@
     "es-module-lexer": "^1.5.3",
     "esbuild": "^0.18.12",
     "json5": "^2.2.3",
-    "npmlog": "^6.0.2",
+    "npmlog": "^7.0.1",
     "rollup": "^4.24.0",
     "rollup-plugin-node-externals": "^7.1.3"
   }
