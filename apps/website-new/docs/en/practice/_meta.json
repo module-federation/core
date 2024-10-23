@@ -16,7 +16,7 @@
     "collapsed": true
   },
   {
-    "type": "file",
+    "type": "dir",
     "name": "scenario",
     "label": "Scenarios",
     "collapsed": true

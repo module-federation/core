@@ -3,39 +3,17 @@
     "id":"remoteName",
     "lang":{
       "zh":{
-        "aliases":[
-          {"key":"remoteName aliases"}
-        ],
         "description":"生产者名称",
         "related_meta":{
-          "docs":[{
-            "id":"remoteName-docs",
-            "title":"生产者名称配置",
-            "url":"/zh/configure/name.html#name"
-          }],
-          "links":[{
-            "id":"remoteName-link",
-            "title":"生产者名称 链接 标题",
-            "url":"https://modernjs.dev/guides/get-started/quick-start.html"
-          }]
+          "docs":[],
+          "links":[]
         }
       },
       "en":{
-        "aliases":[
-          {"key":"remoteName aliases"}
-        ],
         "description":"remote name",
         "related_meta":{
-          "docs":[{
-            "id":"remoteName-docs",
-            "title":"remote name docs title",
-            "url":"https://modernjs.dev/guides/get-started/quick-start.html"
-          }],
-          "links":[{
-            "id":"remoteName-link",
-            "title":"remote name links title",
-            "url":"https://modernjs.dev/guides/get-started/quick-start.html"
-          }]
+          "docs":[],
+          "links":[]
         }
       }
     }
@@ -44,39 +22,17 @@
     "id":"remoteEntryUrl",
     "lang":{
       "zh":{
-        "aliases":[
-          {"key":"remoteEntryUrl aliases"}
-        ],
         "description":"生产者入口地址",
         "related_meta":{
-          "docs":[{
-            "id":"remoteEntryUrl-docs",
-            "title":"生产者",
-            "url":"https://modernjs.dev/guides/get-started/quick-start.html"
-          }],
-          "links":[{
-            "id":"remoteEntryUrl-link",
-            "title":"生产者入口地址 链接 标题",
-            "url":"/zh/configure/name.html#name"
-          }]
+          "docs":[],
+          "links":[]
         }
       },
       "en":{
-        "aliases":[
-          {"key":"remoteEntryUrl aliases"}
-        ],
         "description":"remote entry url",
         "related_meta":{
-          "docs":[{
-            "id":"remoteEntryUrl-docs",
-            "title":"remote entry docs title",
-            "url":"https://modernjs.dev/guides/get-started/quick-start.html"
-          }],
-          "links":[{
-            "id":"remoteEntryUrl-link",
-            "title":"remote entry links title",
-            "url":"https://modernjs.dev/guides/get-started/quick-start.html"
-          }]
+          "docs":[],
+          "links":[]
         }
       }
     }
@@ -85,14 +41,58 @@
     "id":"remoteEntryKey",
     "lang":{
       "zh":{
-        "description":"生产者全局挂载名称",
+        "description":"生产者全局挂载名称，其值为插件配置中的 name 字段。",
         "related_meta":{
           "docs":[],
           "links":[]
         }
       },
       "en":{
-        "description":"remote global mount name",
+        "description":"remote global mount name, which value is the same as the name in build configuration.",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      }
+    }
+  },
+  "globalSnapshot":{
+    "id":"globalSnapshot",
+    "lang":{
+      "zh":{
+        "aliases":[
+          {"key":"moduleInfo"}
+        ],
+        "description":"Module Federation 依赖快照，里面记录了当前 MF 完整的依赖关系，可以通过在控制台输入 __FEDERATION__.moduleInfo 查看。",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      },
+      "en":{
+        "aliases":[
+          {"key":"moduleInfo"}
+        ],
+        "description":"Module Federation dependency snapshot, which records the complete dependencies of the current MF, can be viewed by entering __FEDERATION__.moduleInfo in the console.",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      }
+    }
+  },
+  "requestId":{
+    "id":"requestId",
+    "lang":{
+      "zh":{
+        "description":"请求生产者的 path ，在导入模块时使用，例如： import Remote from requestId / loadRemote(requestId)",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      },
+      "en":{
+        "description":"The path of the request producer, used when importing the module, for example: import Remote from requestId / loadRemote(requestId)",
         "related_meta":{
           "docs":[],
           "links":[]

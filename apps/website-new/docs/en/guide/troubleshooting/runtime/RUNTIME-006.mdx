@@ -1,0 +1,14 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='RUNTIME-006'/>
+
+## Reasons
+
+The current shared dependency has not been loaded, so `loadShareSync` cannot be used.
+
+## Solutions
+
+Just choose one of the two:
+
+1. Use `loadShare` instead of `loadShareSync`
+2. Provide the [lib](../../basic/runtime#loadshare) function to the current shared dependency

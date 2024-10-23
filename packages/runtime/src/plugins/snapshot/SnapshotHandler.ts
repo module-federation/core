@@ -254,6 +254,8 @@ export class SnapshotHandler {
           globalSnapshot: globalSnapshotRes,
         };
       } else {
+        //TODO: RUNTIME-007 move to bottom / couple with deploy
+        // params globalSnapshot
         error(`
           Cannot get remoteSnapshot with the name: '${
             moduleInfo.name
@@ -303,6 +305,8 @@ export class SnapshotHandler {
         return manifestJson;
       } catch (err) {
         delete this.manifestLoading[manifestUrl];
+        //TODO: RUNTIME-003 move to bottom / couple with deploy
+        // params manifestUrl moduleName
         error(
           `Failed to get manifestJson for ${moduleInfo.name}. The manifest URL is ${manifestUrl}. Please ensure that the manifestUrl is accessible.
           \n Error message:

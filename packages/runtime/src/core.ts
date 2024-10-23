@@ -169,6 +169,7 @@ export class FederationHost {
     pkgName: string,
     extraOptions?: {
       customShareInfo?: Partial<Shared>;
+      from?: 'build' | 'runtime';
       resolver?: (sharedOptions: ShareInfos[string]) => Shared;
     },
   ): () => T | never {

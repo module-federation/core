@@ -1,0 +1,14 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='RUNTIME-006'/>
+
+## 原因
+
+当前共享依赖没有被加载，因此无法使用 `loadShareSync` 。
+
+## 解决方法
+
+两者选一即可：
+
+1. 使用 `loadShare` 替代 `loadShareSync`
+2. 给当前共享依赖提供 [lib](../../basic/runtime#loadshare) 函数

@@ -354,6 +354,7 @@ export class SharedHandler {
   loadShareSync<T>(
     pkgName: string,
     extraOptions?: {
+      from?: 'build' | 'runtime';
       customShareInfo?: Partial<Shared>;
       resolver?: (sharedOptions: ShareInfos[string]) => Shared;
     },
@@ -422,6 +423,11 @@ export class SharedHandler {
       const module = shareInfo.get();
 
       if (module instanceof Promise) {
+        if (extraOptions?.from === 'build') {
+          //TODO: RUNTIME-005
+          // params sharedPkgName moduleName
+        }
+        //TODO: RUNTIME-006
         throw new Error(`
         The loadShareSync function was unable to load ${pkgName}. The ${pkgName} could not be found in ${host.options.name}.
         Possible reasons for failure: \n
@@ -441,7 +447,7 @@ export class SharedHandler {
       });
       return shareInfo.lib as () => T;
     }
-
+    //TODO: RUNTIME-006
     throw new Error(
       `
         The loadShareSync function was unable to load ${pkgName}. The ${pkgName} could not be found in ${host.options.name}.

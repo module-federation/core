@@ -1,17 +1,6 @@
 import ErrorCodeTitle from '@components/ErrorCodeTitle';
-import Table from '@components/Table'
 
 <ErrorCodeTitle code='RUNTIME-001'/>
-
-{/* ## 参数说明
-
-<Table data={[
-  ['参数名称', '描述'],
-  ['remoteName', '生产者名称'],
-  ['remoteEntryUrl', '生产者入口地址'],
-  ['remoteEntryKey', '生产者全局挂载名称'],
-]}/> */}
-
 
 ## 原因
 
@@ -19,8 +8,7 @@ import Table from '@components/Table'
 然而在本次加载过程中，无法获取。该错误存在三种可能原因：
 
 1. remoteEntryUrl 不正确
-2. remoteEntryKey 不正确
-3. 生产者入口文件没有正常挂载容器
+2. 生产者入口文件没有正常挂载容器
 
 ## 解决方法
 
@@ -28,7 +16,4 @@ import Table from '@components/Table'
 
 1. 检查生产者入口地址是否正确
   如果使用的是 manifest ，那么检查 manifest 中的 publicPath 和 remoteEntry.name 字段
-2. 检查 remoteEntryKey 字段是否正确
-  - 若remoteEntry是 js 文件，在 js 文件中搜索 remoteEntryKey 的值，看是否存在
-  - 若使用的是 manifest ，检查 manifest 中的 globalName 字段是否和 remoteEntryKey 值一致
-3. 若项目构建器为 rspack ，查看最终构建配置是否设置了 [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) ，若是则删除此配置
+2. 若项目构建器为 rspack ，查看最终构建配置是否设置了 [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) ，若是则删除此配置

@@ -1,0 +1,19 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='RUNTIME-005'/>
+
+## 原因
+
+设置共享依赖后，对应的依赖库会被判定为异步模块，如果没有开启异步入口，并且没有设置 `eager: true`，那么会发生此错误。
+
+## 解决方法
+
+两者选一即可：
+
+1. 开启异步入口
+
+import EnableAsyncEntry from '@components/zh/EnableAsyncEntry'
+
+<EnableAsyncEntry />
+
+2. shared 设置 `eager: true`

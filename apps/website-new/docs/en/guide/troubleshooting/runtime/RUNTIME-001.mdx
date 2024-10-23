@@ -10,8 +10,7 @@ The remoteEntryGlobalName should be got in globalThis if the remote entry file i
 However, it is not available during this load. There are three possible reasons for this error:
 
 1. The remoteEntryUrl is not right .
-2. The remoteEntryGlobalName is not right
-3. The remoteEntry file does not mount the container correctly .
+2. The remoteEntry file does not mount the container correctly .
 
 ## Solutions
 
@@ -19,7 +18,4 @@ There are corresponding solutions for the reasons:
 
 1. Check whether the remoteEntryUrl is correct.
   - If using manifest, check the publicPath and remoteEntry.name  fields in the manifest
-2. Check whether the remoteEntryGlobalName field is correct
-  - If remoteEntry is a js file, search the value of remoteEntryGlobalName in the js file to see if it exists
-  - If you are using manifest, check whether the globalName field in the manifest is consistent with the remoteEntryGlobalName value.
-3. If the project builder is rspack, check whether [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) is set in the final build configuration. If so, delete this configuration.
+2. If the project builder is rspack, check whether [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) is set in the final build configuration. If so, delete this configuration.
