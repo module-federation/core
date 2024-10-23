@@ -185,38 +185,11 @@ at http://localhost:3000/main.js:196:15:
 
 Credits to [@2heal1](https://github.com/2heal1) for the support.
 
-1. Add a new file `shared-strategy.ts` to your project root
-```ts title="shared-strategy.ts"
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
-
-const sharedStrategy: () => FederationRuntimePlugin = () => ({
-  name: 'shared-strategy-plugin',
-  beforeInit(args) {
-    const { userOptions } = args;
-    const shared = userOptions.shared;
-    if (shared) {
-      Object.keys(shared).forEach((sharedKey) => {
-        const sharedConfigs = shared[sharedKey];
-        const arraySharedConfigs = Array.isArray(sharedConfigs)
-          ? sharedConfigs
-          : [sharedConfigs];
-        arraySharedConfigs.forEach((s) => {
-          s.strategy = 'loaded-first';
-        });
-      });
-    }
-    return args;
-  },
-});
-export default sharedStrategy;
-```
-
-2. Add the `shared-strategy.ts` to your bundler config.
+1. Add the `shareStrategy` field to your build config.
 ```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"
 new ModuleFederationPlugin({
     ...
-    // Make sure both key and value start with "./"
-    runtimePlugins:[path.resolve(__dirname,'shared-strategy.ts')],
+    shareStrategy: 'loaded-first',
     ...
   })
 ```
