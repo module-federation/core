@@ -43,9 +43,9 @@
   },
   "peerDependencies": {
     "webpack": "^5.40.0",
-    "next": "^12 || ^13 || ^14",
-    "react": "^17 || ^18",
-    "react-dom": "^17 || ^18",
+    "next": "^12 || ^13 || ^14 || ^15",
+    "react": "^17 || ^18 || ^19",
+    "react-dom": "^17 || ^18 || ^19",
     "styled-jsx": "*"
   },
   "peerDependenciesMeta": {
