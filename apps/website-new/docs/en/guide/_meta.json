@@ -13,5 +13,10 @@
     "type": "dir",
     "name": "framework",
     "label": "Frameworks"
+  },
+  {
+    "type":"dir",
+    "name":"troubleshooting",
+    "label":"troubleshooting"
   }
 ]
