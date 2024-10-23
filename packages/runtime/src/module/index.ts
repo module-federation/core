@@ -88,6 +88,8 @@ class Module {
         });
 
       if (typeof remoteEntryExports?.init === 'undefined') {
+        //TODO: RUNTIME-002
+        // params entryGlobalName=>remoteEntryKey
         logger.error(
           'The remote entry interface does not contain "init"',
           '\n',

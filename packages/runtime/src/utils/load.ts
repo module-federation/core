@@ -103,6 +103,7 @@ async function loadEntryScript({
         globalName,
       );
 
+      //TODO: RUNTIME-001
       assert(
         entryExports,
         `
@@ -177,7 +178,7 @@ async function loadEntryNode({
         name,
         globalName,
       );
-
+      //TODO: RUNTIME-001
       assert(
         entryExports,
         `
