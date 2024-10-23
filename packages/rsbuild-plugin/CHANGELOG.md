@@ -1,5 +1,13 @@
 # @module-federation/rsbuild-plugin
 
+## 0.6.12
+
+### Patch Changes
+
+- cf14509: fix: configure the default assetPrefix for MF apps correctly
+  - @module-federation/enhanced@0.6.12
+  - @module-federation/sdk@0.6.12
+
 ## 0.0.2
 
 ### Patch Changes
