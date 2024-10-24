@@ -121,6 +121,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     ) {
       compiler.options.output.enabledLibraryTypes?.push(library.type);
     }
+
     compiler.hooks.afterPlugins.tap('ModuleFederationPlugin', () => {
       if (useContainerPlugin) {
         new ContainerPlugin({

@@ -9,10 +9,7 @@ import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
 
 /** @type {WeakMap<import("webpack").Compilation, CompilationHooks>} */
-const compilationHooksMap = new WeakMap<
-  import('webpack').Compilation,
-  CompilationHooks
->();
+const compilationHooksMap = new WeakMap<CompilationType, CompilationHooks>();
 
 const PLUGIN_NAME = 'FederationModulesPlugin';
 
@@ -48,13 +45,14 @@ class FederationModulesPlugin {
   }
 
   constructor(options = {}) {
+    //@ts-ignore
     this.options = options;
   }
 
   apply(compiler: Compiler) {
     compiler.hooks.compilation.tap(
       PLUGIN_NAME,
-      (compilation: CompilationType, { normalModuleFactory }) => {
+      (compilation: CompilationType) => {
         //@ts-ignore
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
       },

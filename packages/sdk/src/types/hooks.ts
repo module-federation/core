@@ -23,3 +23,7 @@ export type CreateScriptHook = (
   url: string,
   attrs?: Record<string, any> | undefined,
 ) => CreateScriptHookReturn;
+
+export type FetchHook = (
+  args: [string, RequestInit],
+) => Promise<Response> | void | false;
