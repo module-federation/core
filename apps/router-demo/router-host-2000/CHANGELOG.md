@@ -1,5 +1,13 @@
 # host
 
+## 1.0.33
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.13
+- @module-federation/bridge-react@0.6.13
+- @module-federation/retry-plugin@0.6.13
+
 ## 1.0.32
 
 ### Patch Changes

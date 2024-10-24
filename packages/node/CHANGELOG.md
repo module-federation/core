@@ -1,5 +1,22 @@
 # [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.6.1
+
+### Patch Changes
+
+- f1b8848: Improved error handling and cache clearing process in hot-reload utility.
+
+  - Added error handling with try-catch block to manage potential exceptions when clearing the path cache.
+  - Replaced direct use of module with a reference to currentChunk for cache path operations.
+  - Ensured compatibility with TypeScript by adding @ts-ignore annotations where necessary.
+
+  ```
+  - @module-federation/runtime@0.6.13
+  - @module-federation/enhanced@0.6.13
+  - @module-federation/sdk@0.6.13
+  - @module-federation/utilities@3.1.19
+  ```
+
 ## 2.6.0
 
 ### Minor Changes
