@@ -1,5 +1,7 @@
 # @module-federation/retry-plugin
 
+## 0.6.13
+
 ## 0.6.12
 
 ## 0.6.11
