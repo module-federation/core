@@ -27,10 +27,11 @@ export interface Federation {
 }
 
 export const nativeGlobal: typeof global = (() => {
+  if (typeof globalThis === 'object') return globalThis;
   try {
-    return new Function('return this')();
-  } catch {
-    return globalThis;
+    return this || new Function('return this')();
+  } catch (e) {
+    if (typeof window === 'object') return window;
   }
 })() as typeof global;
 
