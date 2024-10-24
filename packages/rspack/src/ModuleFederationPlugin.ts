@@ -67,7 +67,12 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
     this._checkSingleton(compiler);
     this._patchBundlerConfig(compiler);
-    this._patchChunkSplit(compiler, options.name);
+    const containerManager = new ContainerManager();
+    containerManager.init(options);
+
+    if (containerManager.enable) {
+      this._patchChunkSplit(compiler, options.name);
+    }
 
     options.implementation = options.implementation || RuntimeToolsPath;
     let disableManifest = options.manifest === false;
@@ -79,8 +84,6 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
     if (!disableManifest && options.exposes) {
       try {
-        const containerManager = new ContainerManager();
-        containerManager.init(options);
         options.exposes = containerManager.containerPluginExposesOptions;
       } catch (err) {
         if (err instanceof Error) {
