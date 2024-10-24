@@ -63,21 +63,28 @@ const decache = async function (moduleName: string) {
     return;
   }
 
+  const currentChunk = getRequire().cache[__filename];
+
   // Run over the cache looking for the files
   // loaded by the specified module name
   searchCache(moduleName, function (mod: NodeModule) {
     delete getRequire().cache[mod.id];
   });
-
-  // Remove cached paths to the module.
-  // Thanks to @bentael for pointing this out.
-  Object.keys((module.constructor as any)._pathCache).forEach(
-    function (cacheKey) {
-      if (cacheKey.indexOf(moduleName) > -1) {
-        delete (module.constructor as any)._pathCache[cacheKey];
-      }
-    },
-  );
+  try {
+    // Remove cached paths to the module.
+    // Thanks to @bentael for pointing this out.
+    //@ts-ignore
+    Object.keys((currentChunk.constructor as any)._pathCache).forEach(
+      function (cacheKey) {
+        if (cacheKey.indexOf(moduleName) > -1) {
+          //@ts-ignore
+          delete (currentChunk.constructor as any)._pathCache[cacheKey];
+        }
+      },
+    );
+  } catch (error) {
+    //null
+  }
 };
 
 /**
