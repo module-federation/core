@@ -335,27 +335,48 @@ export { normalizeVersion };
  * @param {InputFileSystem} fs file system
  * @param {string} directory directory to start looking into
  * @param {string[]} descriptionFiles possible description filenames
- * @param {function((Error | null)=, {data: object, path: string}=): void} callback callback
+ * @param {function((Error | null)=, {data?: object, path?: string}=, (checkedDescriptionFilePaths: string[])=): void} callback callback
+ * @param {function({data: Record<string, any>, path: string}=): boolean} satisfiesDescriptionFileData file data compliance check
  */
 const getDescriptionFile = (
   fs: InputFileSystem,
   directory: string,
   descriptionFiles: string[],
-  callback: (err: Error | null, data?: { data: object; path: string }) => void,
+  callback: (
+    err: Error | null,
+    data?: { data: object; path: string },
+    checkedDescriptionFilePaths?: string[],
+  ) => void,
+  satisfiesDescriptionFileData?: (data: {
+    data: Record<string, any>;
+    path: string;
+  }) => boolean,
 ) => {
   let i = 0;
+
+  // use a function property to store the list of visited files inside the recursive lookup
+  // instead of the public getDescriptionFile property
+  const satisfiesDescriptionFileDataInternal:
+    | (typeof satisfiesDescriptionFileData & { checkedFilePaths?: Set<string> })
+    | undefined = satisfiesDescriptionFileData;
+
   const tryLoadCurrent = () => {
     if (i >= descriptionFiles.length) {
       const parentDirectory = dirname(fs, directory);
       if (!parentDirectory || parentDirectory === directory) {
-        //@ts-ignore
-        return callback();
+        return callback(
+          null,
+          undefined,
+          satisfiesDescriptionFileDataInternal?.checkedFilePaths &&
+            Array.from(satisfiesDescriptionFileDataInternal?.checkedFilePaths),
+        );
       }
       return getDescriptionFile(
         fs,
         parentDirectory,
         descriptionFiles,
         callback,
+        satisfiesDescriptionFileDataInternal,
       );
     }
     const filePath = join(fs, directory, descriptionFiles[i]);
@@ -371,6 +392,23 @@ const getDescriptionFile = (
         return callback(
           new Error(`Description file ${filePath} is not an object`),
         );
+      }
+      if (typeof satisfiesDescriptionFileDataInternal === 'function') {
+        if (!satisfiesDescriptionFileDataInternal({ data, path: filePath })) {
+          i++;
+
+          if (
+            satisfiesDescriptionFileDataInternal.checkedFilePaths instanceof Set
+          ) {
+            satisfiesDescriptionFileDataInternal.checkedFilePaths.add(filePath);
+          } else {
+            satisfiesDescriptionFileDataInternal.checkedFilePaths = new Set([
+              filePath,
+            ]);
+          }
+
+          return tryLoadCurrent();
+        }
       }
       callback(null, { data, path: filePath });
     });

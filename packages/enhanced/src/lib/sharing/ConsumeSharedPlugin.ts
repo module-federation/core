@@ -235,19 +235,29 @@ class ConsumeSharedPlugin {
                 compilation.inputFileSystem,
                 context,
                 ['package.json'],
-                (err, result) => {
+                (err, result, checkedDescriptionFilePaths) => {
                   if (err) {
                     requiredVersionWarning(
                       `Unable to read description file: ${err}`,
                     );
                     return resolve(undefined);
                   }
-                  //@ts-ignore
-                  const { data, path: descriptionPath } = result;
+                  const { data } = result || {};
                   if (!data) {
-                    requiredVersionWarning(
-                      `Unable to find description file in ${context}.`,
-                    );
+                    if (checkedDescriptionFilePaths) {
+                      requiredVersionWarning(
+                        [
+                          `Unable to find required version for "${packageName}" in description file/s`,
+                          checkedDescriptionFilePaths.join('\n'),
+                          'It need to be in dependencies, devDependencies or peerDependencies.',
+                        ].join('\n'),
+                      );
+                    } else {
+                      requiredVersionWarning(
+                        `Unable to find description file in ${context}.`,
+                      );
+                    }
+
                     return resolve(undefined);
                   }
                   //@ts-ignore
@@ -259,14 +269,16 @@ class ConsumeSharedPlugin {
                     data,
                     packageName,
                   );
-                  if (typeof requiredVersion !== 'string') {
-                    requiredVersionWarning(
-                      `Unable to find required version for "${packageName}" in description file (${descriptionPath}). It need to be in dependencies, devDependencies or peerDependencies.`,
-                    );
-                    return resolve(undefined);
-                  }
                   // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
                   resolve(requiredVersion);
+                },
+                ({ data }) => {
+                  const maybeRequiredVersion =
+                    getRequiredVersionFromDescriptionFile(data, packageName);
+                  return (
+                    data['name'] === packageName ||
+                    typeof maybeRequiredVersion === 'string'
+                  );
                 },
               );
             }),
