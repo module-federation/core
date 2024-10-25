@@ -205,12 +205,36 @@ export class RemoteHandler {
         id: idRes,
         remoteSnapshot,
       } = remoteMatchInfo;
-      const moduleOrFactory = (await module.get(
-        idRes,
-        expose,
-        options,
-        remoteSnapshot,
-      )) as T;
+
+      let moduleOrFactory = null as T;
+      let attempts = 0;
+
+      // TODO: how to get these parameters from user
+      const maxAttempts = 3;
+      const retryDelay = 1000;
+
+      while (attempts < maxAttempts) {
+        try {
+          moduleOrFactory = (await module.get(
+            idRes,
+            expose,
+            options,
+            remoteSnapshot,
+          )) as T;
+          break;
+        } catch (error) {
+          attempts++;
+          console.log(
+            `=====Module.get occurred Error, retrying ${attempts} time(s)=====`,
+          );
+          if (attempts >= maxAttempts) {
+            console.log('=====Max retry attempts reached=====');
+            throw error;
+          }
+          // Wait for 1 second before retrying
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        }
+      }
 
       const moduleWrapper = await this.hooks.lifecycle.onLoad.emit({
         id: idRes,
