@@ -31,7 +31,12 @@ import {
   getRemoteEntryUniqueKey,
   matchRemoteWithNameAndExpose,
 } from '../utils';
-import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
+import {
+  DEFAULT_REMOTE_TYPE,
+  DEFAULT_SCOPE,
+  DEFAULT_MAX_RETRY_TIMES,
+  DEFAULT_RETRY_DELAY,
+} from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
 import { getGlobalShareScope } from '../utils/share';
@@ -208,12 +213,7 @@ export class RemoteHandler {
 
       let moduleOrFactory = null as T;
       let attempts = 0;
-
-      // TODO: how to get these parameters from user
-      const maxAttempts = 3;
-      const retryDelay = 1000;
-
-      while (attempts < maxAttempts) {
+      while (attempts < DEFAULT_MAX_RETRY_TIMES) {
         try {
           moduleOrFactory = (await module.get(
             idRes,
@@ -225,14 +225,14 @@ export class RemoteHandler {
         } catch (error) {
           attempts++;
           console.log(
-            `=====Module.get occurred Error, retrying ${attempts} time(s)=====`,
+            `module.get occurred error while loading ${idRes}, retrying ${attempts} time(s)`,
           );
-          if (attempts >= maxAttempts) {
-            console.log('=====Max retry attempts reached=====');
+          if (attempts >= DEFAULT_MAX_RETRY_TIMES) {
             throw error;
           }
-          // Wait for 1 second before retrying
-          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+          await new Promise((resolve) =>
+            setTimeout(resolve, DEFAULT_RETRY_DELAY),
+          );
         }
       }
 

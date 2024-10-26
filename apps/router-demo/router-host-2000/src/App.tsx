@@ -15,7 +15,7 @@ init({
     RetryPlugin({
       fetch: {
         url: 'http://localhost:2008/not-exist-mf-manifest.json',
-        fallback: () => 'http://localhost:2001/mf-manifest.json',
+        // fallback: () => 'http://localhost:2001/mf-manifest.json',
       },
     }),
   ],

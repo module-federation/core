@@ -13,6 +13,7 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
       ...options,
       ...fetchOption?.options,
     };
+
     // if fetch retry rule is configured
     if (fetchOption) {
       // when fetch retry rule is configured, only retry for specified url
