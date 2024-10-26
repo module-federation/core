@@ -9,6 +9,7 @@ import { FederationHost } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
 import { assert } from './logger';
+import { getShortErrorMsg } from '@gshared/error-codes';
 
 async function loadEsmEntry({
   entry,

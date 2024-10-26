@@ -21,3 +21,21 @@ export const errorCodes = {
   // ...buildCodes,
   // ...typeCodes,
 };
+
+const getDocsUrl = (errorCode: string) => {
+  const type = errorCode.split('-')[0].toLowerCase();
+  return `https://module-federation.io/guide/troubleshooting/${type}/${errorCode}`;
+};
+
+export const getShortErrorMsg = (
+  errorCode: keyof typeof runtimeCodes,
+  args: Record<string, unknown>,
+  orignalErrorMsg: string,
+) => {
+  return [
+    errorCodes[errorCode],
+    `args: ${JSON.stringify(args)}`,
+    getDocsUrl(errorCode),
+    `Original Error Message:\n ${orignalErrorMsg}`,
+  ].join('\n');
+};
