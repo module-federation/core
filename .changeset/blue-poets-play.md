@@ -3,4 +3,4 @@
 '@module-federation/runtime': patch
 ---
 
-fix: fix script retry plugin
+fix(retry-plugin): fix script retry logic to make error-boundary should render until script retry finished.
