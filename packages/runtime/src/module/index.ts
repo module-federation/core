@@ -115,7 +115,13 @@ class Module {
     this.inited = true;
 
     // get exposeGetter
-    const moduleFactory = await remoteEntryExports.get(expose);
+    let moduleFactory;
+    try {
+      moduleFactory = await remoteEntryExports.get(expose);
+    } catch (error) {
+      console.log('---------moduleFactory error', error);
+    }
+
     assert(
       moduleFactory,
       `${getFMId(this.remoteInfo)} remote don't export ${expose}.`,

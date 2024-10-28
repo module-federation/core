@@ -8,6 +8,9 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
   script: scriptOption,
 }) => ({
   name: 'retry-plugin',
+  ...{
+    scriptRetry: scriptOption,
+  },
   async fetch(url: string, options: RequestInit) {
     const _options = {
       ...options,
@@ -40,37 +43,37 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
     return fetch(url, options);
   },
 
-  createScript({ url, attrs }) {
-    const scriptAttrs = scriptOption?.attrs
-      ? { ...attrs, ...scriptOption.attrs }
-      : attrs;
-    if (scriptOption) {
-      // when script retry rule is configured, only retry for specified url
-      if (scriptOption?.url) {
-        if (url === scriptOption?.url) {
-          return scriptWithRetry({
-            url: scriptOption?.url as string,
-            attrs: scriptAttrs,
-            retryTimes: scriptOption?.retryTimes,
-            customCreateScript: scriptOption?.customCreateScript
-              ? scriptOption.customCreateScript
-              : undefined,
-          });
-        }
-      } else {
-        // or when script retry rule is configured, retry for all urls
-        return scriptWithRetry({
-          url,
-          attrs: scriptAttrs,
-          retryTimes: scriptOption?.retryTimes,
-          customCreateScript: scriptOption?.customCreateScript
-            ? scriptOption.customCreateScript
-            : undefined,
-        });
-      }
-    }
-    return {};
-  },
+  // createScript({ url, attrs }) {
+  //   const scriptAttrs = scriptOption?.attrs
+  //     ? { ...attrs, ...scriptOption.attrs }
+  //     : attrs;
+  //   if (scriptOption) {
+  //     // when script retry rule is configured, only retry for specified url
+  //     if (scriptOption?.url) {
+  //       if (url === scriptOption?.url) {
+  //         return scriptWithRetry({
+  //           url: scriptOption?.url as string,
+  //           attrs: scriptAttrs,
+  //           retryTimes: scriptOption?.retryTimes,
+  //           customCreateScript: scriptOption?.customCreateScript
+  //             ? scriptOption.customCreateScript
+  //             : undefined,
+  //         });
+  //       }
+  //     } else {
+  //       // or when script retry rule is configured, retry for all urls
+  //       return scriptWithRetry({
+  //         url,
+  //         attrs: scriptAttrs,
+  //         retryTimes: scriptOption?.retryTimes,
+  //         customCreateScript: scriptOption?.customCreateScript
+  //           ? scriptOption.customCreateScript
+  //           : undefined,
+  //       });
+  //     }
+  //   }
+  //   return {};
+  // },
 });
 
 export { RetryPlugin };
