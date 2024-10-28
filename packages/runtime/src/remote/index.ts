@@ -211,48 +211,12 @@ export class RemoteHandler {
         remoteSnapshot,
       } = remoteMatchInfo;
 
-      let moduleOrFactory = null as T;
-
-      const retryPlugin = this.host.loaderHook.registerPlugins['retry-plugin'];
-      // @ts-ignore
-      if (retryPlugin && retryPlugin?.scriptRetry) {
-        // @ts-ignore
-        const {
-          retryDelay = DEFAULT_RETRY_DELAY,
-          retryTimes = DEFAULT_MAX_RETRY_TIMES,
-          cb = () => null,
-        } = retryPlugin.scriptRetry;
-        let attempts = 0;
-        while (attempts < retryTimes) {
-          try {
-            console.log('-----retrying', attempts, retryTimes);
-            moduleOrFactory = (await module.get(
-              idRes,
-              expose,
-              options,
-              remoteSnapshot,
-            )) as T;
-            break;
-          } catch (error) {
-            attempts++;
-            console.log(
-              `module.get occurred error while loading ${idRes}, retrying ${attempts} time(s)`,
-            );
-            if (attempts >= retryTimes) {
-              await new Promise((resolve) => cb && cb(resolve, error));
-              throw error;
-            }
-            await new Promise((resolve) => setTimeout(resolve, retryDelay));
-          }
-        }
-      } else {
-        moduleOrFactory = (await module.get(
-          idRes,
-          expose,
-          options,
-          remoteSnapshot,
-        )) as T;
-      }
+      const moduleOrFactory = (await module.get(
+        idRes,
+        expose,
+        options,
+        remoteSnapshot,
+      )) as T;
 
       const moduleWrapper = await this.hooks.lifecycle.onLoad.emit({
         id: idRes,

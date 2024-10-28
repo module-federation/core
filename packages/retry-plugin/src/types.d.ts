@@ -11,18 +11,14 @@ export interface ScriptWithRetryOptions {
   attrs?: Record<string, string>;
   retryTimes?: number;
   retryDelay?: number;
-  customCreateScript?: CreateScriptFunc;
 }
 
 export type RetryPluginParams = {
   fetch?: FetchWithRetryOptions; // fetch retry options
-  script?: ScriptWithRetryOptions; // script retry options
+  script?: {
+    retryTimes?: number;
+    retryDelay?: number;
+    moduleName?: string;
+    cb?: (resolve: (value: unknown) => void, error: any) => void;
+  };
 };
-
-export type CreateScriptFunc = (
-  url: string,
-  attrs: Record<string, any>,
-) => HTMLScriptElement;
-
-export type RequiredUrl<T extends { url?: string }> = Required<Pick<T, 'url'>> &
-  Omit<T, 'url'>;

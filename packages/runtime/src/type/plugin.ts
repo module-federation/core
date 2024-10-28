@@ -36,4 +36,4 @@ export type FederationRuntimePlugin = CoreLifeCyclePartial &
   ModuleLifeCycleCyclePartial & {
     name: string;
     version?: string;
-  };
+  } & { [k: string]: any };

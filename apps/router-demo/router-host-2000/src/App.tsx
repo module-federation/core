@@ -18,30 +18,14 @@ init({
         fallback: () => 'http://localhost:2001/mf-manifest.json',
       },
       script: {
-        retryTimes: 4,
+        retryTimes: 3,
         retryDelay: 1000,
-        // @ts-ignore
+        moduleName: 'remote1/export-app',
         cb: (resolve, error) => {
           return setTimeout(() => {
-            console.log('----setTimeout end, error: ', error);
             resolve(error);
-          }, 5000);
+          }, 3000);
         },
-
-        // url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
-        // customCreateScript: (url: string, attrs: Record<string, string>) => {
-        //   let script = document.createElement('script');
-        //   script.src = `http://localhost:2011/static/js/async/src_App_tsx.js`;
-        //   script.setAttribute('loader-hoos', 'isTrue');
-        //   script.setAttribute('crossorigin', 'anonymous');
-        //   script.onload = (event) => {
-        //     console.log('--------custom script onload--------', event);
-        //   };
-        //   script.onerror = (event) => {
-        //     console.log('--------custom script onerror--------', event);
-        //   };
-        //   return script;
-        // },
       },
     }),
   ],

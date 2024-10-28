@@ -1,6 +1,6 @@
 import { getFMId, assert } from '../utils';
 import { safeToString, ModuleInfo } from '@module-federation/sdk';
-import { getRemoteEntry } from '../utils/load';
+import { getRemoteEntry, getModuleFactory } from '../utils/load';
 import { FederationHost } from '../core';
 import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
 
@@ -115,12 +115,12 @@ class Module {
     this.inited = true;
 
     // get exposeGetter
-    let moduleFactory;
-    try {
-      moduleFactory = await remoteEntryExports.get(expose);
-    } catch (error) {
-      console.log('---------moduleFactory error', error);
-    }
+    const moduleFactory = await getModuleFactory({
+      origin: this.host,
+      remoteEntryExports,
+      expose,
+      id,
+    });
 
     assert(
       moduleFactory,

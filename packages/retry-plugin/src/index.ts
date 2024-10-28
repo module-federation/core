@@ -1,6 +1,5 @@
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 import { fetchWithRetry } from './fetch-retry';
-import { scriptWithRetry } from './script-retry';
 import type { RetryPluginParams } from './types';
 
 const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
@@ -9,7 +8,7 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
 }) => ({
   name: 'retry-plugin',
   ...{
-    scriptRetry: scriptOption,
+    ...(scriptOption ? { script: scriptOption } : {}),
   },
   async fetch(url: string, options: RequestInit) {
     const _options = {
@@ -17,9 +16,7 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
       ...fetchOption?.options,
     };
 
-    // if fetch retry rule is configured
     if (fetchOption) {
-      // when fetch retry rule is configured, only retry for specified url
       if (fetchOption.url) {
         if (url === fetchOption?.url) {
           return fetchWithRetry({
@@ -39,41 +36,8 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
         });
       }
     }
-    // return default fetch
     return fetch(url, options);
   },
-
-  // createScript({ url, attrs }) {
-  //   const scriptAttrs = scriptOption?.attrs
-  //     ? { ...attrs, ...scriptOption.attrs }
-  //     : attrs;
-  //   if (scriptOption) {
-  //     // when script retry rule is configured, only retry for specified url
-  //     if (scriptOption?.url) {
-  //       if (url === scriptOption?.url) {
-  //         return scriptWithRetry({
-  //           url: scriptOption?.url as string,
-  //           attrs: scriptAttrs,
-  //           retryTimes: scriptOption?.retryTimes,
-  //           customCreateScript: scriptOption?.customCreateScript
-  //             ? scriptOption.customCreateScript
-  //             : undefined,
-  //         });
-  //       }
-  //     } else {
-  //       // or when script retry rule is configured, retry for all urls
-  //       return scriptWithRetry({
-  //         url,
-  //         attrs: scriptAttrs,
-  //         retryTimes: scriptOption?.retryTimes,
-  //         customCreateScript: scriptOption?.customCreateScript
-  //           ? scriptOption.customCreateScript
-  //           : undefined,
-  //       });
-  //     }
-  //   }
-  //   return {};
-  // },
 });
 
 export { RetryPlugin };
