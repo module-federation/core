@@ -27,7 +27,7 @@ import {
   REMOTE_ALIAS_IDENTIFIER,
   HOST_API_TYPES_FILE_NAME,
 } from '../constant';
-import { fileLog } from '../../server';
+import { fileLog, logger } from '../../server';
 import { axiosGet, cloneDeepOptions, isDebugMode } from './utils';
 import { UpdateMode } from '../../server/constant';
 
@@ -163,12 +163,10 @@ class DTSManager {
           console.error(err);
         }
       }
-      console.log(ansiColors.green('Federated types created correctly'));
+      logger.success('Federated types created correctly');
     } catch (error) {
       if (this.options.remote?.abortOnError === false) {
-        console.error(
-          ansiColors.red(`Unable to compile federated types, ${error}`),
-        );
+        logger.error(`Unable to compile federated types, ${error}`);
       } else {
         throw error;
       }
@@ -406,7 +404,7 @@ class DTSManager {
         this.consumeAPITypes(hostOptions);
       }
 
-      console.log(ansiColors.green('Federated types extraction completed'));
+      logger.success('Federated types extraction completed');
     } catch (err) {
       if (this.options.host?.abortOnError === false) {
         fileLog(

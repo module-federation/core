@@ -40,5 +40,8 @@
         "./dist/normalize-webpack-path.cjs.d.ts"
       ]
     }
+  },
+  "dependencies": {
+    "isomorphic-rslog": "0.0.4"
   }
 }

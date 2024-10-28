@@ -1,5 +1,6 @@
 import { ScriptWithRetryOptions, CreateScriptFunc, RequiredUrl } from './types';
 import { defaultRetries, defaultRetryDelay, loadStatus } from './constant';
+import logger from './logger';
 
 export const defaultCreateScript = (
   url: string,
@@ -60,8 +61,8 @@ async function loadScript(
       script.onerror = (event) => {
         if (retries < maxRetries) {
           retries++;
-          console.warn(
-            `【Module Federation RetryPlugin】: Failed to load script. Retrying... (${retries}/${maxRetries})`,
+          logger.warn(
+            `Failed to load script. Retrying... (${retries}/${maxRetries})`,
           );
 
           // reload after a delay
@@ -70,9 +71,8 @@ async function loadScript(
               resolve(attemptLoad());
             }, retryDelay);
         } else {
-          console.error(
-            '【Module Federation RetryPlugin】: Failed to load script after maximum retries. the url is:',
-            url,
+          logger.error(
+            `Failed to load script after maximum retries. the url is: ${url}`,
           );
           resolve({
             status: loadStatus.error,
@@ -101,8 +101,8 @@ function scriptWithRetry({
   const originOnerror = script.onerror;
   const originOnLoad = script.onload;
   script.onerror = async (event) => {
-    console.warn(
-      `【Module Federation RetryPlugin】: Script load failed, retrying (${retryTimes + 1}/${defaultRetries}): ${url}`,
+    logger.warn(
+      `Script load failed, retrying (${retryTimes + 1}/${defaultRetries}): ${url}`,
     );
 
     const scriptLoader = await loadScript(
