@@ -6,15 +6,15 @@ const retryPlugin = () =>
       url: 'http://localhost:2001/mf-manifest.json',
       fallback: () => 'http://localhost:2001/mf-manifest.json',
     },
-    // script: {
-    //   url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
-    //   customCreateScript: (url: string, attrs: Record<string, string>) => {
-    //     let script = document.createElement('script');
-    //     script.src = `http://localhost:2011/static/js/async/src_App_tsx.js`;
-    //     script.setAttribute('loader-hoos', 'isTrue');
-    //     script.setAttribute('crossorigin', 'anonymous');
-    //     return script;
-    //   },
-    // },
+    script: {
+      retryTimes: 3,
+      retryDelay: 1000,
+      moduleName: 'remote1/export-app',
+      cb: (resolve, error) => {
+        return setTimeout(() => {
+          resolve(error);
+        }, 1000);
+      },
+    },
   });
 export default retryPlugin;
