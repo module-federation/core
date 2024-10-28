@@ -143,7 +143,7 @@ class ManifestManager {
     }
 
     if (isDev()) {
-      logger.log(
+      logger.info(
         `Manifest Link: ${chalk.cyan(
           `${
             publicPath === 'auto' ? '{auto}/' : publicPath
