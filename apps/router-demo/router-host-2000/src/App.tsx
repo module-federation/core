@@ -14,18 +14,18 @@ init({
   plugins: [
     RetryPlugin({
       fetch: {
-        url: 'http://localhost:2008/not-exist-mf-manifest.json',
-        fallback: () => 'http://localhost:2001/mf-manifest.json',
+        // url: 'http://localhost:2008/not-exist-mf-manifest.json',
+        // fallback: () => 'http://localhost:2001/mf-manifest.json',
       },
       script: {
-        retryTimes: 3,
-        retryDelay: 1000,
-        moduleName: 'remote1/export-app',
-        cb: (resolve, error) => {
-          return setTimeout(() => {
-            resolve(error);
-          }, 3000);
-        },
+        // retryTimes: 3,
+        // retryDelay: 1000,
+        // moduleName: 'remote1/export-app',
+        // cb: (resolve, error) => {
+        //   return setTimeout(() => {
+        //     resolve(error);
+        //   }, 3000);
+        // },
       },
     }),
   ],
