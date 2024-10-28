@@ -30,6 +30,7 @@ import {
   getRemoteInfo,
   getRemoteEntryUniqueKey,
   matchRemoteWithNameAndExpose,
+  logger,
 } from '../utils';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
@@ -586,7 +587,7 @@ export class RemoteHandler {
         host.moduleCache.delete(remote.name);
       }
     } catch (err) {
-      console.log('removeRemote fail: ', err);
+      logger.log('removeRemote fail: ', err);
     }
   }
 }

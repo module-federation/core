@@ -10,6 +10,7 @@ import { StatsPlugin } from '@module-federation/manifest';
 import {
   composeKeyWithSeparator,
   type moduleFederationPlugin,
+  logger,
 } from '@module-federation/sdk';
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
@@ -110,7 +111,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         if (err instanceof Error) {
           err.message = `[ ModuleFederationPlugin ]: Manifest will not generate, because: ${err.message}`;
         }
-        console.warn(err);
+        logger.warn(err);
         disableManifest = true;
       }
     }

@@ -1,8 +1,5 @@
 import WebSocket from 'isomorphic-ws';
-import {
-  DEFAULT_WEB_SOCKET_PORT,
-  WEB_SOCKET_CONNECT_MAGIC_ID,
-} from './constant';
+import { DEFAULT_WEB_SOCKET_PORT } from './constant';
 import { Message } from './message/Message';
 import { AddWebClientAction } from './message/Action';
 import { APIKind, ReloadWebClientAPI } from './message/API';
