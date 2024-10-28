@@ -1446,8 +1446,8 @@ importers:
         specifier: ^1.0.16
         version: 1.0.16
       '@rsbuild/plugin-vue':
-        specifier: ^1.0.1
-        version: 1.0.1(@rsbuild/core@1.0.16)(@swc/core@1.7.26)(esbuild@0.24.0)(vue@3.5.10)
+        specifier: ^1.0.2
+        version: 1.0.2(@rsbuild/core@1.0.16)(@swc/core@1.7.26)(esbuild@0.24.0)(vue@3.5.10)
       tailwindcss:
         specifier: ^3.4.3
         version: 3.4.3
@@ -1560,8 +1560,8 @@ importers:
         specifier: ^1.0.16
         version: 1.0.16
       '@rsbuild/plugin-vue':
-        specifier: ^1.0.1
-        version: 1.0.1(@rsbuild/core@1.0.16)(@swc/core@1.7.26)(esbuild@0.24.0)(vue@3.5.10)
+        specifier: ^1.0.2
+        version: 1.0.2(@rsbuild/core@1.0.16)(@swc/core@1.7.26)(esbuild@0.24.0)(vue@3.5.10)
       '@vue/tsconfig':
         specifier: ^0.5.1
         version: 0.5.1
@@ -9927,14 +9927,14 @@ packages:
       '@swc/helpers': 0.5.3
       acorn: 8.12.1
       caniuse-lite: 1.0.30001669
-      css-minimizer-webpack-plugin: 5.0.1(esbuild@0.18.20)(webpack@5.95.0)
+      css-minimizer-webpack-plugin: 5.0.1(esbuild@0.18.20)(webpack@5.93.0)
       cssnano: 6.0.1(postcss@8.4.31)
-      fork-ts-checker-webpack-plugin: 8.0.0(typescript@5.0.4)(webpack@5.95.0)
+      fork-ts-checker-webpack-plugin: 8.0.0(typescript@5.0.4)(webpack@5.93.0)
       htmlparser2: 9.0.0
       line-diff: 2.1.1
       postcss: 8.4.31
       source-map: 0.7.4
-      webpack: 5.95.0(@swc/core@1.7.26)(esbuild@0.18.20)
+      webpack: 5.93.0(@swc/core@1.7.26)(esbuild@0.18.20)
       webpack-sources: 3.2.3
       zod: 3.23.8
       zod-validation-error: 1.2.0(zod@3.23.8)
@@ -15869,8 +15869,8 @@ packages:
       '@rsbuild/core': 1.0.16
     dev: true
 
-  /@rsbuild/plugin-vue@1.0.1(@rsbuild/core@1.0.16)(@swc/core@1.7.26)(esbuild@0.24.0)(vue@3.5.10):
-    resolution: {integrity: sha512-HmxGkquVbivxaLovYeZhHk2tm8fm/f6h5rKcGtHTce4BlrDDN63gjRpfCa8eLnbIsmBPYen4rPXmOwMLReEBJQ==}
+  /@rsbuild/plugin-vue@1.0.2(@rsbuild/core@1.0.16)(@swc/core@1.7.26)(esbuild@0.24.0)(vue@3.5.10):
+    resolution: {integrity: sha512-8dKDn3qO82UDEutIcCheLSBqQ22fIWffoMkNZPdgALSrjRn0UUvVe+A4hob6bx2g2olSt05WXBdPiqH07fj4KQ==}
     peerDependencies:
       '@rsbuild/core': 1.x || ^1.0.1-rc.0
     dependencies:
@@ -23076,7 +23076,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001669
-      electron-to-chromium: 1.5.31
+      electron-to-chromium: 1.5.37
       node-releases: 2.0.18
       update-browserslist-db: 1.1.1(browserslist@4.24.0)
 
@@ -24608,7 +24608,6 @@ packages:
       schema-utils: 4.2.0
       serialize-javascript: 6.0.2
       webpack: 5.93.0(@swc/core@1.7.26)(esbuild@0.18.20)
-    dev: false
 
   /css-minimizer-webpack-plugin@5.0.1(esbuild@0.18.20)(webpack@5.95.0):
     resolution: {integrity: sha512-3caImjKFQkS+ws1TGcFn0V1HyDJFq1Euy589JlD6/3rV2kj+w7r5G9WDMgSHvpvXHNZ2calVypZWuEDQd9wfLg==}
@@ -25794,12 +25793,8 @@ packages:
     dependencies:
       jake: 10.9.2
 
-  /electron-to-chromium@1.5.31:
-    resolution: {integrity: sha512-QcDoBbQeYt0+3CWcK/rEbuHvwpbT/8SV9T3OSgs6cX1FlcUAkgrkqbg9zLnDrMM/rLamzQwal4LYFCiWk861Tg==}
-
   /electron-to-chromium@1.5.37:
     resolution: {integrity: sha512-u7000ZB/X0K78TaQqXZ5ktoR7J79B9US7IkE4zyvcILYwOGY2Tx9GRPYstn7HmuPcMxZ+BDGqIsyLpZQi9ufPw==}
-    dev: true
 
   /elliptic@6.5.7:
     resolution: {integrity: sha512-ESVCtTwiA+XhY3wyh24QqRGBoP3rEdDUl3EDUUo9tft074fi19IrdpH7hLCMMP3CIj7jb3W96rn8lt/BqIlt5Q==}
@@ -28086,7 +28081,7 @@ packages:
       typescript: 5.5.2
       webpack: 5.93.0(@swc/core@1.7.26)(esbuild@0.18.20)
 
-  /fork-ts-checker-webpack-plugin@8.0.0(typescript@5.0.4)(webpack@5.95.0):
+  /fork-ts-checker-webpack-plugin@8.0.0(typescript@5.0.4)(webpack@5.93.0):
     resolution: {integrity: sha512-mX3qW3idpueT2klaQXBzrIM/pHw+T0B/V9KHEvNrqijTq9NFnMZU6oreVxDYcf33P8a5cW+67PjodNHthGnNVg==}
     engines: {node: '>=12.13.0', yarn: '>=1.0.0'}
     peerDependencies:
@@ -28106,7 +28101,7 @@ packages:
       semver: 7.6.3
       tapable: 2.2.1
       typescript: 5.0.4
-      webpack: 5.95.0(@swc/core@1.7.26)(esbuild@0.18.20)
+      webpack: 5.93.0(@swc/core@1.7.26)(esbuild@0.18.20)
     dev: true
 
   /fork-ts-checker-webpack-plugin@8.0.0(typescript@5.5.2)(webpack@5.93.0):
@@ -42305,7 +42300,7 @@ packages:
     engines: {node: '>=10.13.0'}
     dependencies:
       chalk: 4.1.2
-      enhanced-resolve: 5.12.0
+      enhanced-resolve: 5.17.1
       tsconfig-paths: 4.2.0
     dev: true
 
