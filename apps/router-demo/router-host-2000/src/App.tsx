@@ -21,11 +21,11 @@ init({
         retryTimes: 3,
         retryDelay: 1000,
         moduleName: 'remote1/export-app',
-        // cb: (resolve, error) => {
-        //   return setTimeout(() => {
-        //     resolve(error);
-        //   }, 1000);
-        // },
+        cb: (resolve, error) => {
+          return setTimeout(() => {
+            resolve(error);
+          }, 1000);
+        },
       },
     }),
   ],
