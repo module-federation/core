@@ -31,12 +31,7 @@ import {
   getRemoteEntryUniqueKey,
   matchRemoteWithNameAndExpose,
 } from '../utils';
-import {
-  DEFAULT_REMOTE_TYPE,
-  DEFAULT_SCOPE,
-  DEFAULT_MAX_RETRY_TIMES,
-  DEFAULT_RETRY_DELAY,
-} from '../constant';
+import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
 import { getGlobalShareScope } from '../utils/share';
