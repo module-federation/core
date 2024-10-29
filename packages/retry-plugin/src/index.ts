@@ -9,6 +9,34 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
   script: scriptOption,
 }) => ({
   name: 'retry-plugin',
+  async fetch(url: string, options: RequestInit) {
+    const _options = {
+      ...options,
+      ...fetchOption?.options,
+    };
+
+    if (fetchOption) {
+      if (fetchOption.url) {
+        if (url === fetchOption?.url) {
+          return fetchWithRetry({
+            url: fetchOption.url,
+            options: _options,
+            retryTimes: fetchOption?.retryTimes,
+            fallback: fetchOption?.fallback,
+          });
+        }
+      } else {
+        // or when fetch retry rule is configured, retry for all urls
+        return fetchWithRetry({
+          url,
+          options: _options,
+          retryTimes: fetchOption?.retryTimes,
+          fallback: fetchOption?.fallback,
+        });
+      }
+    }
+    return fetch(url, options);
+  },
   async getModuleFactory({ remoteEntryExports, expose, id }) {
     let moduleFactory;
     const {
@@ -40,34 +68,6 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
       }
     }
     return moduleFactory;
-  },
-  async fetch(url: string, options: RequestInit) {
-    const _options = {
-      ...options,
-      ...fetchOption?.options,
-    };
-
-    if (fetchOption) {
-      if (fetchOption.url) {
-        if (url === fetchOption?.url) {
-          return fetchWithRetry({
-            url: fetchOption.url,
-            options: _options,
-            retryTimes: fetchOption?.retryTimes,
-            fallback: fetchOption?.fallback,
-          });
-        }
-      } else {
-        // or when fetch retry rule is configured, retry for all urls
-        return fetchWithRetry({
-          url,
-          options: _options,
-          retryTimes: fetchOption?.retryTimes,
-          fallback: fetchOption?.fallback,
-        });
-      }
-    }
-    return fetch(url, options);
   },
 });
 
