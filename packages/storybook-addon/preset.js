@@ -1,7 +1,6 @@
-const path = require('path');
 const {
   withModuleFederation,
-} = require('./dist/src/utils/with-module-federation-enhanced-rsbuild');
+} = require('./src/utils/with-module-federation-enhanced-rsbuild');
 
 module.exports = {
   rsbuildFinal: (config, options) => {

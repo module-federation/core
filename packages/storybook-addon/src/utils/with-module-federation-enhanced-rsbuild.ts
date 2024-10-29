@@ -15,7 +15,9 @@ const generateBootstrap = (entryPath: string) => {
   return `import('${entryPath}')`;
 };
 const writeBootstrap = (entryPath: string) => {
-  fs.unlinkSync(bootstrapPath);
+  if (fs.existsSync(bootstrapPath)) {
+    fs.unlinkSync(bootstrapPath);
+  }
   fs.writeFileSync(bootstrapPath, generateBootstrap(entryPath));
 };
 export const withModuleFederation = async (
