@@ -118,7 +118,7 @@ class Module {
     moduleFactory = await this.host.loaderHook.lifecycle.getModuleFactory.emit({
       remoteEntryExports,
       expose,
-      id,
+      moduleInfo: this.remoteInfo,
     });
 
     // get exposeGetter

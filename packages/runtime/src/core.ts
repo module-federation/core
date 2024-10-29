@@ -120,7 +120,7 @@ export class FederationHost {
         {
           remoteEntryExports: RemoteEntryExports;
           expose: string;
-          id: string;
+          moduleInfo: RemoteInfo;
         },
       ],
       Promise<(() => Promise<Module>) | undefined>

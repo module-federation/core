@@ -36,14 +36,16 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
     }
     return fetch(url, options);
   },
-  async getModuleFactory({ remoteEntryExports, expose, id }) {
+  async getModuleFactory({ remoteEntryExports, expose, moduleInfo }) {
     let moduleFactory;
     const { retryTimes = defaultRetries, retryDelay = defaultRetryDelay } =
       scriptOption || {};
 
     if (
       (scriptOption?.moduleName &&
-        scriptOption?.moduleName.some((m) => id.includes(m))) ||
+        scriptOption?.moduleName.some(
+          (m) => moduleInfo.name === m || (moduleInfo as any)?.alias === m,
+        )) ||
       scriptOption?.moduleName === undefined
     ) {
       let attempts = 0;
