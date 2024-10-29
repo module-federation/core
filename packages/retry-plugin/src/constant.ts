@@ -4,3 +4,5 @@ export const loadStatus = {
   success: 'success',
   error: 'error',
 };
+
+export const PLUGIN_IDENTIFIER = '[ Module Federation RetryPlugin ]';

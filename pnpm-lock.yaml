@@ -1774,6 +1774,9 @@ importers:
       '@module-federation/bridge-shared':
         specifier: workspace:*
         version: link:../bridge-shared
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../../sdk
       react-error-boundary:
         specifier: ^4.0.13
         version: 4.0.13(react@18.3.1)
@@ -1869,6 +1872,9 @@ importers:
       '@module-federation/bridge-shared':
         specifier: workspace:*
         version: link:../bridge-shared
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../../sdk
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^5.0.4
@@ -2434,6 +2440,10 @@ importers:
         version: 5.93.0(@swc/core@1.7.26)(esbuild@0.24.0)
 
   packages/retry-plugin:
+    dependencies:
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../sdk
     devDependencies:
       '@module-federation/runtime':
         specifier: workspace:*
@@ -2498,7 +2508,11 @@ importers:
         specifier: workspace:*
         version: link:../webpack-bundler-runtime
 
-  packages/sdk: {}
+  packages/sdk:
+    dependencies:
+      isomorphic-rslog:
+        specifier: 0.0.4
+        version: 0.0.4
 
   packages/storybook-addon:
     dependencies:
@@ -31049,6 +31063,11 @@ packages:
       sha.js: 2.4.11
       simple-get: 4.0.1
     dev: true
+
+  /isomorphic-rslog@0.0.4:
+    resolution: {integrity: sha512-KwROYmorP1F97yiPCRENbvJRshPiWFLzU73CSzqO8jUVGiGK8d3RqrKBSTmSLc7MKse69LyYydTq6Xy0xBFE0g==}
+    engines: {node: '>=14.17.6'}
+    dev: false
 
   /isomorphic-ws@5.0.0(ws@8.17.1):
     resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}

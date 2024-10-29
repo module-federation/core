@@ -2,7 +2,7 @@ import { parseOptions } from '@module-federation/enhanced';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion } from '@module-federation/sdk';
 
-import { isRegExp, DEFAULT_ASSET_PREFIX } from '../utils/index';
+import { isRegExp } from '../utils/index';
 import pkgJson from '../../package.json';
 
 import type {
@@ -10,6 +10,7 @@ import type {
   sharePlugin,
 } from '@module-federation/sdk';
 import type { RsbuildPlugin, EnvironmentConfig } from '@rsbuild/core';
+import logger from '../logger';
 
 type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -106,8 +107,8 @@ export const pluginModuleFederation = (
             });
 
             if (match) {
-              console.log(
-                `[Module Federation Rsbuild Plugin]: ${sharedModule} is removed from externals because it is a shared module.`,
+              logger.log(
+                `${sharedModule} is removed from externals because it is a shared module.`,
               );
             }
             return !match;
@@ -125,8 +126,8 @@ export const pluginModuleFederation = (
               return dep === ext;
             });
             if (match) {
-              console.log(
-                `[Module Federation Rsbuild Plugin]: ${sharedModule} is removed from externals because it is a shared module.`,
+              logger.log(
+                `${sharedModule} is removed from externals because it is a shared module.`,
               );
               return false;
             }

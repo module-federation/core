@@ -31,7 +31,8 @@
     "vue-router": "=3"
   },
   "dependencies": {
-    "@module-federation/bridge-shared": "workspace:*"
+    "@module-federation/bridge-shared": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

@@ -7,7 +7,7 @@ module.exports = (rollupConfig, _projectOptions) => {
     }),
   );
 
-  rollupConfig.external = [/@module-federation/];
+  rollupConfig.external = [/@module-federation/, 'isomorphic-rslog'];
 
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({
