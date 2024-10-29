@@ -2,14 +2,14 @@
   "name": "3008-share-remote",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "sourceRoot": "apps/runtime-demo/3008-share-remote/src",
+  "sourceRoot": "apps/shared-runtime/3008-share-remote/src",
   "tags": [],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "options": {
         "command": "npm run build",
-        "cwd": "apps/runtime-demo/3008-share-remote"
+        "cwd": "apps/shared-runtime/3008-share-remote"
       },
       "dependsOn": [
         {
@@ -22,7 +22,7 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "npm run dev",
-        "cwd": "apps/runtime-demo/3008-share-remote"
+        "cwd": "apps/shared-runtime/3008-share-remote"
       },
       "dependsOn": [
         {
@@ -35,7 +35,7 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "npm run dev",
-        "cwd": "apps/runtime-demo/3008-share-remote"
+        "cwd": "apps/shared-runtime/3008-share-remote"
       },
       "dependsOn": [
         {

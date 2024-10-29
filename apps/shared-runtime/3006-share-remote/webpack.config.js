@@ -115,7 +115,7 @@ module.exports = composePlugins(
     // parsedConfig.devServer = {
     //   ...(parsedConfig.devServer || {}),
     //   //Needs to resolve static files from the dist folder (@mf-types)
-    //   static: path.resolve(__dirname, '../../dist/apps/runtime-demo/remote'),
+    //   static: path.resolve(__dirname, '../../dist/apps/shared-runtime/remote'),
     // };
 
     // //Temporary workaround - https://github.com/nrwl/nx/issues/16983

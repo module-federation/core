@@ -1,7 +1,7 @@
 {
   "name": "3006-share-remote",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/runtime-demo/3006-share-remote/src",
+  "sourceRoot": "apps/shared-runtime/3006-share-remote/src",
   "projectType": "application",
   "tags": [],
   "targets": {
@@ -11,14 +11,14 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
-        "outputPath": "apps/runtime-demo/3006-share-remote/dist",
-        "index": "apps/runtime-demo/3006-share-remote/src/index.html",
+        "outputPath": "apps/shared-runtime/3006-share-remote/dist",
+        "index": "apps/shared-runtime/3006-share-remote/src/index.html",
         "baseHref": "/",
-        "main": "apps/runtime-demo/3006-share-remote/src/index.tsx",
-        "tsConfig": "apps/runtime-demo/3006-share-remote/tsconfig.app.json",
+        "main": "apps/shared-runtime/3006-share-remote/src/index.tsx",
+        "tsConfig": "apps/shared-runtime/3006-share-remote/tsconfig.app.json",
         "styles": [],
         "scripts": [],
-        "webpackConfig": "apps/runtime-demo/3006-share-remote/webpack.config.js",
+        "webpackConfig": "apps/shared-runtime/3006-share-remote/webpack.config.js",
         "babelUpwardRootMode": true
       },
       "configurations": {

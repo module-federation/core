@@ -1,4 +1,4 @@
-# runtime-demo
+# shared-runtime
 
 This example demos automatic-vendor-sharing, each host/remote will share all vendors possible, with react listed as a singleton
 

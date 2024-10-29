@@ -1,7 +1,7 @@
 {
   "name": "3005-share-host",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/runtime-demo/3005-share-host/src",
+  "sourceRoot": "apps/shared-runtime/3005-share-host/src",
   "projectType": "application",
   "tags": [],
   "targets": {
@@ -11,14 +11,14 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
-        "outputPath": "apps/runtime-demo/3005-share-host/dist",
-        "index": "apps/runtime-demo/3005-share-host/src/index.html",
+        "outputPath": "apps/shared-runtime/3005-share-host/dist",
+        "index": "apps/shared-runtime/3005-share-host/src/index.html",
         "baseHref": "/",
-        "main": "apps/runtime-demo/3005-share-host/src/index.ts",
-        "tsConfig": "apps/runtime-demo/3005-share-host/tsconfig.app.json",
+        "main": "apps/shared-runtime/3005-share-host/src/index.ts",
+        "tsConfig": "apps/shared-runtime/3005-share-host/tsconfig.app.json",
         "styles": [],
         "scripts": [],
-        "webpackConfig": "apps/runtime-demo/3005-share-host/webpack.config.js",
+        "webpackConfig": "apps/shared-runtime/3005-share-host/webpack.config.js",
         "babelUpwardRootMode": true
       },
       "configurations": {
@@ -73,7 +73,7 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/runtime-demo/host/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["apps/shared-runtime/host/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "serve-static": {
@@ -95,7 +95,7 @@
     "e2e": {
       "executor": "@nx/cypress:cypress",
       "options": {
-        "cypressConfig": "apps/runtime-demo/3005-share-host/cypress.config.ts",
+        "cypressConfig": "apps/shared-runtime/3005-share-host/cypress.config.ts",
         "testingType": "e2e",
         "baseUrl": "http://127.0.0.1:3005",
         "browser": "chrome"
