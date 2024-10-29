@@ -101,7 +101,7 @@ type FetchWithRetryOptions = {
 type ScriptWithRetryOptions = {
   retryTimes?: number;
   retryDelay?: number;
-  moduleName?: string;
+  moduleName?: Array<string>;
   cb?: (resolve: (value: unknown) => void, error: any) => void;
 }
 
