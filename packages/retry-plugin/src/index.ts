@@ -42,7 +42,8 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
       scriptOption || {};
 
     if (
-      (scriptOption?.moduleName && scriptOption?.moduleName === id) ||
+      (scriptOption?.moduleName &&
+        scriptOption?.moduleName.some((m) => id.includes(m))) ||
       scriptOption?.moduleName === undefined
     ) {
       let attempts = 0;

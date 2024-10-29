@@ -7,18 +7,13 @@ export interface FetchWithRetryOptions {
 }
 
 export interface ScriptWithRetryOptions {
-  url?: string;
-  attrs?: Record<string, string>;
   retryTimes?: number;
   retryDelay?: number;
+  moduleName?: Array<string>;
+  cb?: (resolve: (value: unknown) => void, error: any) => void;
 }
 
 export type RetryPluginParams = {
-  fetch?: FetchWithRetryOptions; // fetch retry options
-  script?: {
-    retryTimes?: number;
-    retryDelay?: number;
-    moduleName?: string;
-    cb?: (resolve: (value: unknown) => void, error: any) => void;
-  };
+  fetch?: FetchWithRetryOptions;
+  script?: ScriptWithRetryOptions;
 };

@@ -20,7 +20,7 @@ init({
       script: {
         retryTimes: 3,
         retryDelay: 1000,
-        moduleName: 'remote1/export-app',
+        moduleName: ['remote1'],
         cb: (resolve, error) => {
           return setTimeout(() => {
             resolve(error);

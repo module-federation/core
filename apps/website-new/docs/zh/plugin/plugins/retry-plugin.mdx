@@ -192,13 +192,13 @@ init({
         retryTimes: 3,
         // the retry delay
         retryDelay: 1000,
-        // the module name that need to be retried, defualt behavior is to retry all modules
-        moduleName: 'remote1/export-app',
+        // the module name list that need to be retried, defualt behavior is to retry all modules
+        moduleName: ['remote1'],
         // the callback function that will be called after all retried failed
         cb: (resolve, error) => {
           return setTimeout(() => {
             resolve(error);
-          }, 3000);
+          }, 2000);
         },
       },
     }),
