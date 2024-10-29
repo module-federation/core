@@ -1,8 +1,7 @@
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 import { fetchWithRetry } from './fetch-retry';
+import { defaultRetries, defaultRetryDelay } from './constant';
 import type { RetryPluginParams } from './types';
-export const DEFAULT_MAX_RETRY_TIMES = 3;
-export const DEFAULT_RETRY_DELAY = 1000;
 
 const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
   fetch: fetchOption,
@@ -39,10 +38,8 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
   },
   async getModuleFactory({ remoteEntryExports, expose, id }) {
     let moduleFactory;
-    const {
-      retryTimes = DEFAULT_MAX_RETRY_TIMES,
-      retryDelay = DEFAULT_RETRY_DELAY,
-    } = scriptOption || {};
+    const { retryTimes = defaultRetries, retryDelay = defaultRetryDelay } =
+      scriptOption || {};
 
     if (
       (scriptOption?.moduleName && scriptOption?.moduleName === id) ||

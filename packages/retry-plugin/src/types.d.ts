@@ -1,5 +1,5 @@
 export interface FetchWithRetryOptions {
-  url?: string;
+  url: string;
   options?: RequestInit;
   retryTimes?: number;
   retryDelay?: number;
