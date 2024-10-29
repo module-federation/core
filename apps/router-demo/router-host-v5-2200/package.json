@@ -1,7 +1,7 @@
 {
   "name": "host-v5",
   "private": true,
-  "version": "1.0.30",
+  "version": "1.0.33",
   "scripts": {
     "dev": "FEDERATION_DEBUG=true rsbuild dev",
     "build": "rsbuild build",
@@ -19,8 +19,8 @@
   },
   "devDependencies": {
     "@module-federation/rsbuild-plugin": "workspace:*",
-    "@rsbuild/core": "^1.0.7",
-    "@rsbuild/plugin-react": "^1.0.3",
+    "@rsbuild/core": "^1.0.16",
+    "@rsbuild/plugin-react": "^1.0.5",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.3.0",
     "tailwindcss": "^3.4.3",

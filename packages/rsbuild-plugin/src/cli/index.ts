@@ -10,6 +10,7 @@ import type {
   sharePlugin,
 } from '@module-federation/sdk';
 import type { RsbuildPlugin, EnvironmentConfig } from '@rsbuild/core';
+import logger from '../logger';
 
 type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -44,16 +45,26 @@ export const pluginModuleFederation = (
     );
 
     api.modifyRsbuildConfig((config) => {
-      // If this is a provider app, Rsbuild should send the ws request to the provider's dev server.
-      // This allows the provider to do HMR when the provider module is loaded in the consumer's page.
-      if (
-        moduleFederationOptions.exposes &&
-        config.server?.port &&
-        !config.dev?.client?.port
-      ) {
+      // Change some default configs for remote modules
+      if (moduleFederationOptions.exposes) {
         config.dev ||= {};
-        config.dev.client ||= {};
-        config.dev.client.port = config.server.port;
+
+        // For remote modules, Rsbuild should send the ws request to the provider's dev server.
+        // This allows the provider to do HMR when the provider module is loaded in the consumer's page.
+        if (config.server?.port && !config.dev.client?.port) {
+          config.dev.client ||= {};
+          config.dev.client.port = config.server.port;
+        }
+
+        // Change the default assetPrefix to `true` for remote modules.
+        // This ensures that the remote module's assets can be requested by consumer apps with the correct URL.
+        const originalConfig = api.getRsbuildConfig('original');
+        if (
+          originalConfig.dev?.assetPrefix === undefined &&
+          config.dev.assetPrefix === config.server?.base
+        ) {
+          config.dev.assetPrefix = true;
+        }
       }
     });
 
@@ -96,8 +107,8 @@ export const pluginModuleFederation = (
             });
 
             if (match) {
-              console.log(
-                `[Module Federation Rsbuild Plugin]: ${sharedModule} is removed from externals because it is a shared module.`,
+              logger.log(
+                `${sharedModule} is removed from externals because it is a shared module.`,
               );
             }
             return !match;
@@ -115,8 +126,8 @@ export const pluginModuleFederation = (
               return dep === ext;
             });
             if (match) {
-              console.log(
-                `[Module Federation Rsbuild Plugin]: ${sharedModule} is removed from externals because it is a shared module.`,
+              logger.log(
+                `${sharedModule} is removed from externals because it is a shared module.`,
               );
               return false;
             }
@@ -146,12 +157,6 @@ export const pluginModuleFederation = (
       // `uniqueName` is required for react refresh to work
       if (!chain.output.get('uniqueName')) {
         chain.output.set('uniqueName', moduleFederationOptions.name);
-      }
-
-      const publicPath = chain.output.get('publicPath');
-      // set the default publicPath to 'auto' to make MF work
-      if (publicPath === '/') {
-        chain.output.set('publicPath', 'auto');
       }
     });
   },

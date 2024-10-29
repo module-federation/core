@@ -13,6 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import { ConcatSource } from 'webpack-sources';
 import { transformSync } from '@swc/core';
+import { logger } from '@module-federation/sdk';
 
 const { RuntimeModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
@@ -147,7 +148,7 @@ class CustomRuntimePlugin {
         childCompiler.options.devtool = undefined;
         childCompiler.options.optimization.splitChunks = false;
         childCompiler.options.optimization.removeAvailableModules = true;
-        console.log('Creating child compiler for', this.bundlerRuntimePath);
+        logger.log('Creating child compiler for', this.bundlerRuntimePath);
 
         childCompiler.hooks.thisCompilation.tap(
           this.constructor.name,
@@ -179,7 +180,7 @@ class CustomRuntimePlugin {
                 onceForCompilationMap.set(compilation, source);
                 onceForCompilationMap.set(compiler, source);
                 fs.writeFileSync(outputPath, source);
-                console.log('got compilation asset');
+                logger.log('got compilation asset');
                 childCompilation.chunks.forEach((chunk) => {
                   chunk.files.forEach((file) => {
                     childCompilation.deleteAsset(file);
@@ -200,7 +201,7 @@ class CustomRuntimePlugin {
             }
 
             if (!childCompilation) {
-              console.warn(
+              logger.warn(
                 'Embed Federation Runtime: Child compilation is undefined',
               );
               return callback();
@@ -210,7 +211,7 @@ class CustomRuntimePlugin {
               return callback(childCompilation.errors[0]);
             }
 
-            console.log('Code built successfully');
+            logger.log('Code built successfully');
 
             callback();
           },
@@ -238,7 +239,7 @@ class CustomRuntimePlugin {
           );
 
           compilation.addRuntimeModule(chunk, runtimeModule);
-          console.log(`Custom runtime module added to chunk: ${chunk.name}`);
+          logger.log(`Custom runtime module added to chunk: ${chunk.name}`);
         };
         compilation.hooks.runtimeRequirementInTree
           .for(federationGlobal)

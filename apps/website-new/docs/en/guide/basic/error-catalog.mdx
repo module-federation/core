@@ -122,7 +122,7 @@ Undefined factory webpack/container/remote/`remote-name`/`name-of-exposed-file`
 
 #### Solution 1
 
-**Example scenario**: You have an npm package with `eager` remote imports (such as `import Button from 'myRemote/button'`) and share this npm package with `eager: true`.  
+**Example scenario**: You have an npm package with `eager` remote imports (such as `import Button from 'myRemote/button'`) and share this npm package with `eager: true`.
 **Example scenario**: You're sharing a mix of packages, some with `eager: true` and others with `eager: false`, and the `eager: true` packages import the `eager: false` shared packages.
 
 This error occurs when a remote (often a library-like shared module) contains unwanted circular dependencies between the `shared dependencies` of the remote and other consumers or the host application. If the environment is using the Module Federation config `shared: { "package-name": { eager: true } }`, the Rspack/Webpack builder runtime will break with this error.
@@ -133,7 +133,63 @@ Since eager consumption wraps all dependencies inside the entry file of the remo
 
 #### Solution 2
 
-You are missing an "async boundary" in your application. Ensure that you have a dynamic import at the top of the application.  
+You are missing an "async boundary" in your application. Ensure that you have a dynamic import at the top of the application.
 For example, if your entry point is `index.js`, copy the contents of `index.js` into a new file called `bootstrap.js`. Then, in `index.js`, replace the code with `import('./bootstrap.js')`.
 
 Alternatively, you can try the hoisted runtime experiment, which removes the need for an async boundary in user code. Learn more here: [Hoisted Runtime Experiment](https://module-federation.io/configure/experiments.html#federationruntime).
+
+## Unable to compile federated types, Error: compile TS failed
+
+#### Error Message
+:::danger Browser Error Message
+Unable to compile federated types, Error: compile TS failed, the original command is 'npx tsc --project file-path.json'.
+:::
+
+:::danger Browser Error Message
+Error: ENOENT: no such file or directory, open 'project-path/rspack_hmr/application-name/dist/@mf-types.zip'
+:::
+
+#### Solution
+
+Credits to [@2heal1](https://github.com/2heal1), [@pganster](https://github.com/pganster) and [@jeremy-leclerc](https://github.com/jeremy-leclerc) for the support.
+
+1. Make sure all errors and warnings of your Typescript compiler are resolved!
+2. Check your `ModuleFederationPlugin` config field `exposes`:
+
+```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"
+new ModuleFederationPlugin({
+    ...
+    // Make sure both key and value start with "./"
+    exposes: { './Foo': './src/<path-to-file>/Foo.tsx' },
+    ...
+  })
+```
+## Unable to use the **remote_name**'s "remote-origin/remoteEntry.js' URL with **remote_name**'s globalName to get remoteEntry exports.
+
+#### Error Message
+:::danger Browser Error Message
+[ Federation Runtime ]:
+
+Unable to use the remote_name's 'http://localhost:3001/remoteEntry.js' URL with remote_name's globalName to get remoteEntry exports.
+Possible reasons could be:
+
+1 'http://localhost:3001/remoteEntry.js' is not the correct URL, or the remoteEntry resource or name is incorrect.
+
+2 cannot be used to get remoteEntry exports in the window object.
+at error (http://localhost:3000/main.js:2176:11)
+at Object.assert (http://localhost:3000/main.js:2168:9)
+at http://localhost:3000/main.js:196:15:
+:::
+
+#### Solution
+
+Credits to [@2heal1](https://github.com/2heal1) for the support.
+
+1. Add the `shareStrategy` field to your build config.
+```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"
+new ModuleFederationPlugin({
+    ...
+    shareStrategy: 'loaded-first',
+    ...
+  })
+```

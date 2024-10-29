@@ -1,5 +1,28 @@
 # @module-federation/data-prefetch
 
+## 0.6.13
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.13
+- @module-federation/sdk@0.6.13
+
+## 0.6.12
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.12
+- @module-federation/sdk@0.6.12
+
+## 0.6.11
+
+### Patch Changes
+
+- Updated dependencies [ea6d417]
+- Updated dependencies [d5a3072]
+  - @module-federation/runtime@0.6.11
+  - @module-federation/sdk@0.6.11
+
 ## 0.6.10
 
 ### Patch Changes

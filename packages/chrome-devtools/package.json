@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.6.10",
+  "version": "0.6.13",
   "scripts": {
     "build:storybook": "storybook build",
     "storybook": "storybook dev -p 6006",

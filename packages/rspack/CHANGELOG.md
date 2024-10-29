@@ -1,5 +1,40 @@
 # @module-federation/rspack
 
+## 0.6.13
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.13
+- @module-federation/runtime-tools@0.6.13
+- @module-federation/managers@0.6.13
+- @module-federation/manifest@0.6.13
+- @module-federation/dts-plugin@0.6.13
+- @module-federation/bridge-react-webpack-plugin@0.6.13
+
+## 0.6.12
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.12
+- @module-federation/runtime-tools@0.6.12
+- @module-federation/managers@0.6.12
+- @module-federation/manifest@0.6.12
+- @module-federation/dts-plugin@0.6.12
+- @module-federation/bridge-react-webpack-plugin@0.6.12
+
+## 0.6.11
+
+### Patch Changes
+
+- Updated dependencies [83c8620]
+- Updated dependencies [d5a3072]
+  - @module-federation/manifest@0.6.11
+  - @module-federation/sdk@0.6.11
+  - @module-federation/dts-plugin@0.6.11
+  - @module-federation/runtime-tools@0.6.11
+  - @module-federation/bridge-react-webpack-plugin@0.6.11
+  - @module-federation/managers@0.6.11
+
 ## 0.6.10
 
 ### Patch Changes
