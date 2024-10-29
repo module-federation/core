@@ -4,12 +4,7 @@ import {
   composeKeyWithSeparator,
   isBrowserEnv,
 } from '@module-federation/sdk';
-import {
-  DEFAULT_REMOTE_TYPE,
-  DEFAULT_SCOPE,
-  DEFAULT_MAX_RETRY_TIMES,
-  DEFAULT_RETRY_DELAY,
-} from '../constant';
+import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { FederationHost } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
@@ -249,53 +244,4 @@ export function getRemoteInfo(remote: Remote): RemoteInfo {
     entryGlobalName: remote.entryGlobalName || remote.name,
     shareScope: remote.shareScope || DEFAULT_SCOPE,
   };
-}
-
-export async function getModuleFactory({
-  origin,
-  remoteEntryExports,
-  expose,
-  id,
-}: {
-  origin: FederationHost;
-  remoteEntryExports: RemoteEntryExports;
-  expose: string;
-  id: string;
-}) {
-  let moduleFactory;
-  const retryPlugin = origin.loaderHook.registerPlugins['retry-plugin'];
-
-  if (retryPlugin && retryPlugin?.['script']) {
-    const retryOptions = retryPlugin?.['script'];
-    const {
-      retryTimes = DEFAULT_MAX_RETRY_TIMES,
-      retryDelay = DEFAULT_RETRY_DELAY,
-    } = retryOptions;
-
-    if (
-      (retryOptions?.moduleName && retryOptions?.moduleName === id) ||
-      retryOptions?.moduleName === undefined
-    ) {
-      let attempts = 0;
-      while (attempts < retryTimes) {
-        try {
-          moduleFactory = await remoteEntryExports.get(expose);
-          break;
-        } catch (error) {
-          attempts++;
-          if (attempts >= retryTimes) {
-            retryOptions?.cb &&
-              (await new Promise((resolve) =>
-                retryOptions?.cb(resolve, error),
-              ));
-            throw error;
-          }
-          await new Promise((resolve) => setTimeout(resolve, retryDelay));
-        }
-      }
-    }
-  } else {
-    moduleFactory = await remoteEntryExports.get(expose);
-  }
-  return moduleFactory;
 }

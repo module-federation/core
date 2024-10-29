@@ -115,6 +115,16 @@ export class FederationHost {
       [string, RequestInit],
       Promise<Response> | void | false
     >(),
+    getModuleFactory: new AsyncHook<
+      [
+        {
+          remoteEntryExports: RemoteEntryExports;
+          expose: string;
+          id: string;
+        },
+      ],
+      Promise<(() => Promise<Module>) | undefined>
+    >(),
   });
 
   constructor(userOptions: UserOptions) {

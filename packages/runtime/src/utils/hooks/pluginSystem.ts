@@ -5,7 +5,6 @@ export type Plugin<T extends Record<string, any>> = {
 } & {
   name: string;
   version?: string;
-  [key: string]: any;
 };
 
 export class PluginSystem<T extends Record<string, any>> {
