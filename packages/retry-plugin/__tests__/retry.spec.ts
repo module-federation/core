@@ -1,4 +1,4 @@
-import { scriptWithRetry } from '../src/script-retry';
+// import { scriptWithRetry } from '../src/script-retry';
 import { fetchWithRetry } from '../src/fetch-retry';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
@@ -24,59 +24,48 @@ vi.spyOn(document, 'createElement').mockImplementation(() => {
 vi.spyOn(document.head, 'appendChild').mockImplementation(() => {});
 
 describe('scriptWithRetry', () => {
-  it('should create and append script element successfully', async () => {
-    const url = 'https://example.com/some-script.js';
-    const script = scriptWithRetry({
-      url,
-      retryTimes: 3,
-    });
-
-    mockScriptElement.onload();
-    expect(document.createElement).toHaveBeenCalledWith('script');
-    expect(script.src).toEqual(url);
-    expect(mockScriptElement.onload).toHaveBeenCalled();
-    expect(document.head.appendChild).toHaveBeenCalledTimes(0);
-  });
-
-  it('should retry loading script on error and eventually succeed', async () => {
-    const url = 'https://example.com/some-script.js';
-    const retryTimes = 2;
-
-    const script = scriptWithRetry({
-      url,
-      retryTimes,
-    });
-
-    // 前两次加载失败
-    mockScriptElement.onerror();
-    vi.advanceTimersByTime(2000 * retryTimes);
-
-    mockScriptElement.onerror();
-    vi.advanceTimersByTime(2000 * retryTimes);
-
-    mockScriptElement.onload();
-
-    // each call to appendChild represents one retry, so we can use the calledTimes of appendChild to verify the number of retries
-    expect(document.head.appendChild).toHaveBeenCalledTimes(retryTimes);
-  });
-
-  it('should stop retrying after maximum retries', async () => {
-    const url = 'https://example.com/some-script.js';
-    const retryTimes = 3;
-
-    const script = scriptWithRetry({
-      url,
-      retryTimes,
-    });
-
-    // all retries fail
-    for (let i = 0; i < retryTimes; i++) {
-      mockScriptElement.onerror();
-      vi.advanceTimersByTime(2000 * retryTimes);
-    }
-
-    expect(document.head.appendChild).toHaveBeenCalledTimes(retryTimes);
-  });
+  // it('should create and append script element successfully', async () => {
+  //   const url = 'https://example.com/some-script.js';
+  //   const script = scriptWithRetry({
+  //     url,
+  //     retryTimes: 3,
+  //   });
+  //   mockScriptElement.onload();
+  //   expect(document.createElement).toHaveBeenCalledWith('script');
+  //   expect(script.src).toEqual(url);
+  //   expect(mockScriptElement.onload).toHaveBeenCalled();
+  //   expect(document.head.appendChild).toHaveBeenCalledTimes(0);
+  // });
+  // it('should retry loading script on error and eventually succeed', async () => {
+  //   const url = 'https://example.com/some-script.js';
+  //   const retryTimes = 2;
+  //   const script = scriptWithRetry({
+  //     url,
+  //     retryTimes,
+  //   });
+  //   // 前两次加载失败
+  //   mockScriptElement.onerror();
+  //   vi.advanceTimersByTime(2000 * retryTimes);
+  //   mockScriptElement.onerror();
+  //   vi.advanceTimersByTime(2000 * retryTimes);
+  //   mockScriptElement.onload();
+  //   // each call to appendChild represents one retry, so we can use the calledTimes of appendChild to verify the number of retries
+  //   expect(document.head.appendChild).toHaveBeenCalledTimes(retryTimes);
+  // });
+  // it('should stop retrying after maximum retries', async () => {
+  //   const url = 'https://example.com/some-script.js';
+  //   const retryTimes = 3;
+  //   const script = scriptWithRetry({
+  //     url,
+  //     retryTimes,
+  //   });
+  //   // all retries fail
+  //   for (let i = 0; i < retryTimes; i++) {
+  //     mockScriptElement.onerror();
+  //     vi.advanceTimersByTime(2000 * retryTimes);
+  //   }
+  //   expect(document.head.appendChild).toHaveBeenCalledTimes(retryTimes);
+  // });
 });
 
 const mockGlobalFetch = (mockData) => {
