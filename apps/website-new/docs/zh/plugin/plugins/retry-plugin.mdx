@@ -22,7 +22,10 @@ import { PackageManagerTabs, Tabs, Tab } from '@theme';
 `RetryPlugin` 为运行时插件，我们可以通过构建插件的 `runtimePlugin` 注册此插件或在运行时进行插件注册，并配置重试参数和重试逻辑等：
 
 :::note
-注意：构建插件中注册 和 运行时注册两种方式选择任意一种即可，不要重复注册
+注意
+
+- 构建插件中注册 和 运行时注册两种方式选择任意一种即可，不要重复注册
+- 推荐尽量在构建插件中注册，这样能将 RetryPlugin 插件注册时机尽可能提前，避免因资源请求失败导致项目无法启动，无法进入运行时进行重试插件的注册，从而无法进行资源重试
 
 :::
 
@@ -51,25 +54,11 @@ export default defineConfig({
 // ./src/runtime-plugin/retry.ts
 import { RetryPlugin } from '@module-federation/retry-plugin';
 const retryPlugin = () => RetryPlugin({
-    fetch: {
-        url: 'http://localhost:2008/not-exist-mf-manifest.json',
-        fallback: () => 'http://localhost:2001/mf-manifest.json',
-    },
-    script: {
-        // url: 'http://localhost:2008/not-exist-mf-manifest.json',
-        url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
-        customCreateScript: (url: string, attrs: Record<string, string>) => {
-            let script = document.createElement('script');
-            script.src = `http://localhost:2011/static/js/async/src_App_tsx.js`;
-            script.setAttribute('loader-hoos', 'isTrue');
-            script.setAttribute('crossorigin', 'anonymous');
-            return script;
-        },
-    }
+    fetch: {},
+    script: {}
 })
 export default retryPlugin;
 ```
-
 
 ### 方式二：运行时注册
 
@@ -82,24 +71,8 @@ init({
   remotes: [],
   plugins: [
     RetryPlugin({
-      fetch: {
-        // the retry resource url
-        url: 'http://localhost:2008/not-exist-mf-manifest.json',
-        // after all retried failed, set a fallback function to guarantee a fallback resource
-        fallback: () => 'http://localhost:2001/mf-manifest.json',
-      },
-      script: {
-        // the retry resource url
-        url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
-        // if you need to custom create script element, pass `customCreateScript` and plugin will use customCreateScript to create script element
-        customCreateScript: (url: string, attrs: Record<string, string>) => {
-          let script = document.createElement('script');
-          script.src = `http://localhost:2011/static/js/async/src_App_tsx.js`;
-          script.setAttribute('loader-hoos', 'isTrue');
-          script.setAttribute('crossorigin', 'anonymous');
-          return script;
-        },
-      },
+      fetch: {},
+      script: {},
     }),
   ],
 });
@@ -126,10 +99,10 @@ type FetchWithRetryOptions = {
 }
 
 type ScriptWithRetryOptions = {
-  url?: string;
-  attrs?: Record<string, string>;
   retryTimes?: number;
-  customCreateScript?: CreateScriptFunc;
+  retryDelay?: number;
+  moduleName?: Array<string>;
+  cb?: (resolve: (value: unknown) => void, error: any) => void;
 }
 
 ```
@@ -176,16 +149,6 @@ type ScriptWithRetryOptions = {
 
 ### ScriptWithRetryOptions 类型说明
 
-- **url**:
-  - `string`
-  - 可选。当不设置时对于所有加载失败的 URL 会默认进入重试逻辑
-  - 需要重试的脚本资源的 URL。
-
-- **attrs**:
-  - `Record<string, string>`
-  - 可选
-  - 传递给脚本元素的属性。
-
 - **retryTimes**:
   - `number`
   - 可选
@@ -196,7 +159,49 @@ type ScriptWithRetryOptions = {
   - 可选
   - 每次重试之间的延迟时间（毫秒）。
 
-- **customCreateScript**:
-  - `CreateScriptFunc`
+- **moduleName**:
+  - `string`
   - 可选
-  - 自定义创建脚本元素的函数，插件将使用此函数创建脚本元素。
+  - 模块名称，用于标识需要重试的模块。
+
+- **cb**:
+  - `(resolve: (value: unknown) => void, error: any) => void`
+  - 可选
+  - 回调函数，重试失败后的回调
+
+完整的配置可参考如下配置：
+
+
+```ts
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import { RetryPlugin } from '@module-federation/retry-plugin';
+
+init({
+  name: 'federation_consumer',
+  remotes: [],
+  plugins: [
+    RetryPlugin({
+      fetch: {
+        // the retry resource url
+        url: 'http://localhost:2001/-mf-manifest.json',
+        // after all retried failed, set a fallback function to guarantee a fallback resource
+        fallback: () => 'http://localhost:2002/mf-manifest.json',
+      },
+      script: {
+        // the retry times
+        retryTimes: 3,
+        // the retry delay
+        retryDelay: 1000,
+        // the module name list that need to be retried, defualt behavior is to retry all modules
+        moduleName: ['remote1'],
+        // the callback function that will be called after all retried failed
+        cb: (resolve, error) => {
+          return setTimeout(() => {
+            resolve(error);
+          }, 2000);
+        },
+      },
+    }),
+  ],
+});
+```
