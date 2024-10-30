@@ -69,3 +69,5 @@ packages/enhanced/test/js
 
 # storybook cases
 !apps/rslib-module/@mf-types/**
+
+**/vite.config.{js,ts,mjs,mts,cjs,cts}.timestamp*
