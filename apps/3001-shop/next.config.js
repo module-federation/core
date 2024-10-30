@@ -26,6 +26,9 @@ const nextConfig = {
             isServer ? 'ssr' : 'chunks'
           }/remoteEntry.js`,
         },
+        experiments: {
+          federationRuntime: 'use-host',
+        },
         exposes: {
           './useCustomRemoteHook': './components/useCustomRemoteHook',
           './WebpackSvg': './components/WebpackSvg',
