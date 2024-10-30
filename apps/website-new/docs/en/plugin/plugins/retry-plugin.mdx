@@ -160,13 +160,8 @@ type ScriptWithRetryOptions = {
   - The delay time between each retry (in milliseconds).
 
 - **moduleName**:
-  - `string`
-  - optional
-  - The module name, used to identify the module that needs to be retried.
-
-- **moduleName**:
   - `Array<string>`
-  - 可选
+  - optional
   - module name list, the value is the module name or module alias. Used to identify the module that needs to be retried. If not set, it defaults to retrying all modules that failed to load.
 
 - **cb**:
