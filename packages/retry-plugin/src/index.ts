@@ -49,13 +49,14 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
       scriptOption?.moduleName === undefined
     ) {
       let attempts = 0;
-      while (attempts < retryTimes) {
+
+      while (attempts - 1 < retryTimes) {
         try {
           moduleFactory = await remoteEntryExports.get(expose);
           break;
         } catch (error) {
           attempts++;
-          if (attempts >= retryTimes) {
+          if (attempts - 1 >= retryTimes) {
             scriptOption?.cb &&
               (await new Promise(
                 (resolve) =>
