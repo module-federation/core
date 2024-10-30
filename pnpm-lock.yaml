@@ -1446,8 +1446,8 @@ importers:
         specifier: ^1.0.16
         version: 1.0.16
       '@rsbuild/plugin-vue':
-        specifier: ^1.0.1
-        version: 1.0.1(@rsbuild/core@1.0.16)(@swc/core@1.7.26)(esbuild@0.24.0)(vue@3.5.10)
+        specifier: ^1.0.3
+        version: 1.0.3(@rsbuild/core@1.0.16)(@swc/core@1.7.26)(esbuild@0.24.0)(vue@3.5.10)
       tailwindcss:
         specifier: ^3.4.3
         version: 3.4.3
@@ -1560,8 +1560,8 @@ importers:
         specifier: ^1.0.16
         version: 1.0.16
       '@rsbuild/plugin-vue':
-        specifier: ^1.0.1
-        version: 1.0.1(@rsbuild/core@1.0.16)(@swc/core@1.7.26)(esbuild@0.24.0)(vue@3.5.10)
+        specifier: ^1.0.3
+        version: 1.0.3(@rsbuild/core@1.0.16)(@swc/core@1.7.26)(esbuild@0.24.0)(vue@3.5.10)
       '@vue/tsconfig':
         specifier: ^0.5.1
         version: 0.5.1
@@ -16093,10 +16093,10 @@ packages:
       '@rsbuild/core': 1.0.18
     dev: true
 
-  /@rsbuild/plugin-vue@1.0.1(@rsbuild/core@1.0.16)(@swc/core@1.7.26)(esbuild@0.24.0)(vue@3.5.10):
-    resolution: {integrity: sha512-HmxGkquVbivxaLovYeZhHk2tm8fm/f6h5rKcGtHTce4BlrDDN63gjRpfCa8eLnbIsmBPYen4rPXmOwMLReEBJQ==}
+  /@rsbuild/plugin-vue@1.0.3(@rsbuild/core@1.0.16)(@swc/core@1.7.26)(esbuild@0.24.0)(vue@3.5.10):
+    resolution: {integrity: sha512-+g6PaZUQDNBDhM5lx1YuXqNHDdZGBnPwIi1DLMqNLwqKeG4wdAggT4oOj2LjXXyMIvlMrWz0No5J8QroZ3WkEA==}
     peerDependencies:
-      '@rsbuild/core': 1.x || ^1.0.1-rc.0
+      '@rsbuild/core': 1.x
     dependencies:
       '@rsbuild/core': 1.0.16
       vue-loader: 17.4.2(vue@3.5.10)(webpack@5.95.0)
@@ -23523,7 +23523,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001669
-      electron-to-chromium: 1.5.31
+      electron-to-chromium: 1.5.37
       node-releases: 2.0.18
       update-browserslist-db: 1.1.1(browserslist@4.24.0)
 
@@ -26240,12 +26240,8 @@ packages:
     dependencies:
       jake: 10.9.2
 
-  /electron-to-chromium@1.5.31:
-    resolution: {integrity: sha512-QcDoBbQeYt0+3CWcK/rEbuHvwpbT/8SV9T3OSgs6cX1FlcUAkgrkqbg9zLnDrMM/rLamzQwal4LYFCiWk861Tg==}
-
   /electron-to-chromium@1.5.37:
     resolution: {integrity: sha512-u7000ZB/X0K78TaQqXZ5ktoR7J79B9US7IkE4zyvcILYwOGY2Tx9GRPYstn7HmuPcMxZ+BDGqIsyLpZQi9ufPw==}
-    dev: true
 
   /elliptic@6.5.7:
     resolution: {integrity: sha512-ESVCtTwiA+XhY3wyh24QqRGBoP3rEdDUl3EDUUo9tft074fi19IrdpH7hLCMMP3CIj7jb3W96rn8lt/BqIlt5Q==}
@@ -32326,6 +32322,8 @@ packages:
       webpack: '*'
     peerDependenciesMeta:
       webpack:
+        optional: true
+      webpack-sources:
         optional: true
     dependencies:
       webpack: 5.93.0(@swc/core@1.7.26)(esbuild@0.18.20)
@@ -42876,7 +42874,7 @@ packages:
     engines: {node: '>=10.13.0'}
     dependencies:
       chalk: 4.1.2
-      enhanced-resolve: 5.12.0
+      enhanced-resolve: 5.17.1
       tsconfig-paths: 4.2.0
     dev: true
 
