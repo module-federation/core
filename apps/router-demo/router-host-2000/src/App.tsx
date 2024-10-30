@@ -18,19 +18,13 @@ init({
         fallback: () => 'http://localhost:2001/mf-manifest.json',
       },
       script: {
-        url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
-        customCreateScript: (url: string, attrs: Record<string, string>) => {
-          let script = document.createElement('script');
-          script.src = `http://localhost:2011/static/js/async/src_App_tsx.js`;
-          script.setAttribute('loader-hoos', 'isTrue');
-          script.setAttribute('crossorigin', 'anonymous');
-          script.onload = (event) => {
-            console.log('--------custom script onload--------', event);
-          };
-          script.onerror = (event) => {
-            console.log('--------custom script onerror--------', event);
-          };
-          return script;
+        retryTimes: 3,
+        retryDelay: 1000,
+        moduleName: ['remote1'],
+        cb: (resolve, error) => {
+          return setTimeout(() => {
+            resolve(error);
+          }, 1000);
         },
       },
     }),

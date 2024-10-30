@@ -206,6 +206,7 @@ export class RemoteHandler {
         id: idRes,
         remoteSnapshot,
       } = remoteMatchInfo;
+
       const moduleOrFactory = (await module.get(
         idRes,
         expose,

@@ -1,5 +1,13 @@
 # @module-federation/retry-plugin
 
+## 0.6.14
+
+### Patch Changes
+
+- ad605d2: chore: unified logger
+- Updated dependencies [ad605d2]
+  - @module-federation/sdk@0.6.14
+
 ## 0.6.13
 
 ## 0.6.12
