@@ -19,8 +19,8 @@
   },
   "devDependencies": {
     "@module-federation/rsbuild-plugin": "workspace:*",
-    "@rsbuild/core": "^1.0.16",
-    "@rsbuild/plugin-react": "^1.0.5",
+    "@rsbuild/core": "^1.0.19",
+    "@rsbuild/plugin-react": "^1.0.6",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.3.0",
     "tailwindcss": "^3.4.3",
