@@ -1,5 +1,5 @@
 # .github/workflows/e2e-share-host.yml
-name: E2E Test for Runtime
+name: E2E Test for Shared Runtime
 
 on:
   workflow_call:

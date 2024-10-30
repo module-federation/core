@@ -66,6 +66,11 @@ jobs:
     uses: ./.github/workflows/e2e-runtime.yml
     secrets: inherit
 
+  e2e-share:
+    needs: checkout-install
+    uses: ./.github/workflows/e2e-shareruntime.yml
+    secrets: inherit
+
   e2e-manifest:
     needs: checkout-install
     uses: ./.github/workflows/e2e-manifest.yml
