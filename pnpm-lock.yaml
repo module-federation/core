@@ -800,8 +800,8 @@ importers:
         specifier: ~13.1.0
         version: 13.1.4
       prettier:
-        specifier: ~2.8.1
-        version: 2.8.8
+        specifier: ~3.3.3
+        version: 3.3.3
       rimraf:
         specifier: ~3.0.2
         version: 3.0.2
@@ -858,8 +858,8 @@ importers:
         specifier: ~13.1.0
         version: 13.1.4
       prettier:
-        specifier: ~2.8.1
-        version: 2.8.8
+        specifier: ~3.3.3
+        version: 3.3.3
       rimraf:
         specifier: ~3.0.2
         version: 3.0.2
@@ -916,8 +916,8 @@ importers:
         specifier: ~13.1.0
         version: 13.1.4
       prettier:
-        specifier: ~2.8.1
-        version: 2.8.8
+        specifier: ~3.3.3
+        version: 3.3.3
       rimraf:
         specifier: ~3.0.2
         version: 3.0.2
@@ -974,8 +974,8 @@ importers:
         specifier: ~13.1.0
         version: 13.1.4
       prettier:
-        specifier: ~2.8.1
-        version: 2.8.8
+        specifier: ~3.3.3
+        version: 3.3.3
       rimraf:
         specifier: ~3.0.2
         version: 3.0.2
@@ -1032,8 +1032,8 @@ importers:
         specifier: ~13.1.0
         version: 13.1.4
       prettier:
-        specifier: ~2.8.1
-        version: 2.8.8
+        specifier: ~3.3.3
+        version: 3.3.3
       rimraf:
         specifier: ~3.0.2
         version: 3.0.2
@@ -1090,8 +1090,8 @@ importers:
         specifier: ~13.1.0
         version: 13.1.4
       prettier:
-        specifier: ~2.8.1
-        version: 2.8.8
+        specifier: ~3.3.3
+        version: 3.3.3
       rimraf:
         specifier: ~3.0.2
         version: 3.0.2
@@ -1148,8 +1148,8 @@ importers:
         specifier: ~13.1.0
         version: 13.1.4
       prettier:
-        specifier: ~2.8.1
-        version: 2.8.8
+        specifier: ~3.3.3
+        version: 3.3.3
       rimraf:
         specifier: ~3.0.2
         version: 3.0.2
@@ -1206,8 +1206,8 @@ importers:
         specifier: ~13.1.0
         version: 13.1.4
       prettier:
-        specifier: ~2.8.1
-        version: 2.8.8
+        specifier: ~3.3.3
+        version: 3.3.3
       rimraf:
         specifier: ~3.0.2
         version: 3.0.2
@@ -1980,8 +1980,8 @@ importers:
         specifier: ~13.1.0
         version: 13.1.4
       prettier:
-        specifier: ~2.8.1
-        version: 2.8.8
+        specifier: ~3.3.3
+        version: 3.3.3
       rimraf:
         specifier: ~3.0.2
         version: 3.0.2
