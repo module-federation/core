@@ -1,5 +1,18 @@
 # @module-federation/rspack
 
+## 0.6.14
+
+### Patch Changes
+
+- 86b4cdc: fix(rspack): only patchChunkSplit when config set exposes
+- Updated dependencies [ad605d2]
+  - @module-federation/dts-plugin@0.6.14
+  - @module-federation/managers@0.6.14
+  - @module-federation/manifest@0.6.14
+  - @module-federation/sdk@0.6.14
+  - @module-federation/runtime-tools@0.6.14
+  - @module-federation/bridge-react-webpack-plugin@0.6.14
+
 ## 0.6.13
 
 ### Patch Changes
