@@ -7,6 +7,7 @@ import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 import { updateStatsAndManifest } from './manifest';
 import { isDev } from './constant';
+import logger from './logger';
 
 export function setEnv() {
   process.env['MF_DISABLE_EMIT_STATS'] = 'true';
@@ -110,9 +111,7 @@ export const moduleFederationSSRPlugin = (
                       next();
                     }
                   } catch (err) {
-                    if (process.env.FEDERATION_DEBUG) {
-                      console.error(err);
-                    }
+                    logger.debug(err);
                     next();
                   }
                 },
