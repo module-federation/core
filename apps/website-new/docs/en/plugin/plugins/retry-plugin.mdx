@@ -96,7 +96,9 @@ type FetchWithRetryOptions = {
   options?: RequestInit;
   retryTimes?: number;
   retryDelay?: number;
-  fallback?: (() => string) | ((url: string | URL | globalThis.Request) => string);
+  fallback?:
+    | (() => string)
+    | ((url: string | URL | globalThis.Request) => string);
 }
 
 type ScriptWithRetryOptions = {
