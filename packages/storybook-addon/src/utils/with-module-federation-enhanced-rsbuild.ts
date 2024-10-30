@@ -40,6 +40,10 @@ export const withModuleFederation = async (
     setup: function (api) {
       api.modifyRsbuildConfig((config, { mergeRsbuildConfig }) => {
         const mfConfig: RsbuildConfig = {
+          dev: {
+            // remoteEntry already includes one hmr runtime, and an additional one is not necessary.
+            hmr: false,
+          },
           tools: {
             rspack: (config) => {
               config.output ??= {};
