@@ -168,7 +168,7 @@ export const performReload = async (
     }
   });
   //@ts-ignore
-  __webpack_require__.federation.instance.moduleCache.clear();
+  __webpack_require__?.federation?.instance?.moduleCache?.clear();
   helpers.global.resetFederationGlobalInfo();
   globalThis.moduleGraphDirty = false;
   globalThis.mfHashMap = {};
