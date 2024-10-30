@@ -19,5 +19,5 @@ nx serve rslib-module
 Dev package
 
 ```
-nx serve rslib-module && nx storybook rslib-module
+nx serve rslib-module & nx storybook rslib-module
 ```
