@@ -46,7 +46,6 @@ const nextConfig = {
           exposePages: true,
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,
-          automaticPageStitching: false,
         },
       }),
     );

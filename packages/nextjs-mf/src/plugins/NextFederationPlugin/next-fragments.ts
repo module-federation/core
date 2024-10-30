@@ -125,7 +125,6 @@ export interface NextFederationPluginExtraOptions {
   enableUrlLoaderFix?: boolean;
   exposePages?: boolean;
   skipSharingNextInternals?: boolean;
-  automaticPageStitching?: boolean;
   debug?: boolean;
 }
 

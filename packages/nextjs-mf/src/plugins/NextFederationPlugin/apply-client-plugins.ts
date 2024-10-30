@@ -35,11 +35,6 @@ export function applyClientPlugins(
     compiler.options.output.publicPath = 'auto';
   }
 
-  // Log a warning if automatic page stitching is enabled, as it is disabled in v7
-  if (extraOptions.automaticPageStitching) {
-    console.warn('[nextjs-mf]', 'automatic page stitching is disabled in v7');
-  }
-
   // Log an error if a custom library is set, as it is not allowed
   if (options.library) {
     console.error('[nextjs-mf] you cannot set custom library');

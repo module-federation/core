@@ -5,7 +5,6 @@ export interface NextFederationPluginExtraOptions {
   enableUrlLoaderFix?: boolean;
   exposePages?: boolean;
   skipSharingNextInternals?: boolean;
-  automaticPageStitching?: boolean;
   debug?: boolean;
 }
 
@@ -25,7 +24,6 @@ export function setOptions(options: NextFederationPluginOptions): {
    * @type {NextFederationPluginExtraOptions}
    */
   const defaultExtraOptions: NextFederationPluginExtraOptions = {
-    automaticPageStitching: false,
     enableImageLoaderFix: false,
     enableUrlLoaderFix: false,
     skipSharingNextInternals: false,
