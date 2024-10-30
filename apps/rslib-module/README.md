@@ -21,3 +21,5 @@ Dev package
 ```
 nx serve rslib-module & nx storybook rslib-module
 ```
+
+visit http://localhost:6006
