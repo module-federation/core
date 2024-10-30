@@ -228,22 +228,36 @@ class ContainerPlugin {
           );
         }).catch((error) => callback(error));
 
-        await new Promise((resolve, reject) => {
-          compilation.addInclude(
-            compiler.context,
-            federationRuntimeDependency,
-            { name: undefined },
-            (err, module) => {
-              if (err) {
-                return reject(err);
-              }
-              hooks.addFederationRuntimeModule.call(
-                federationRuntimeDependency,
-              );
-              resolve(undefined);
-            },
-          );
-        }).catch(callback);
+        // Add dependency based on federationRuntime option
+        const addDependency = async (
+          dependency: FederationRuntimeDependency,
+        ) => {
+          await new Promise<void>((resolve, reject) => {
+            compilation.addInclude(
+              compiler.context,
+              dependency,
+              {
+                name,
+                library,
+              },
+              (err, module) => {
+                if (err) return reject(err);
+                hooks.addFederationRuntimeModule.call(dependency);
+                resolve();
+              },
+            );
+          }).catch((error) => callback(error));
+        };
+
+        if (this._options?.experiments?.federationRuntime === 'use-host') {
+          const externalRuntimeDependency =
+            federationRuntimePluginInstance.getMinimalDependency(compiler);
+          await addDependency(externalRuntimeDependency);
+        } else {
+          const federationRuntimeDependency =
+            federationRuntimePluginInstance.getDependency(compiler);
+          await addDependency(federationRuntimeDependency);
+        }
 
         callback();
       },

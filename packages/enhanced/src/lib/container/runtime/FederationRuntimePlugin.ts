@@ -310,7 +310,7 @@ class FederationRuntimePlugin {
     }
     const useHost = this.options?.experiments?.federationRuntime === 'use-host';
 
-    if (useHost) {
+    if (useHost && !this.options?.virtualRuntimeEntry) {
       this.ensureFile(compiler, true);
     }
 

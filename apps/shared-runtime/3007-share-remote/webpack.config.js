@@ -16,13 +16,11 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       exposes: {
         './ButtonOldAnt': './src/components/ButtonOldAnt',
       },
+      experiments: { federationRuntime: 'use-host' },
       shared: {
         lodash: {
           singleton: true,
           requiredVersion: '^4.0.0',
-        },
-        experiments: {
-          federationRuntime: 'use-host',
         },
         antd: {
           singleton: true,

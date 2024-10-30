@@ -26,7 +26,9 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       PLUGIN_NAME,
       (compilation: Compilation) => {
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        const containerEntryDependencies = new Set<Dependency>();
+        const containerEntryDependencies = new Set<
+          ContainerEntryDependency | FederationRuntimeDependency
+        >();
         hooks.addContainerEntryModule.tap(
           'HoistContainerReferences',
           (dep: ContainerEntryDependency) => {
@@ -128,27 +130,46 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     chunkGraph: Compilation['chunkGraph'],
     moduleGraph: Compilation['moduleGraph'],
   ): void {
-    let minimal;
+    let minimalModule: Module | null = null;
     for (const dep of containerEntryDependencies as Set<FederationRuntimeDependency>) {
       if (dep.minimal) {
-        minimal = moduleGraph.getModule(dep);
+        minimalModule = moduleGraph.getModule(dep);
+        break;
       }
     }
-    if (minimal) {
-      for (const dep of containerEntryDependencies as Set<FederationRuntimeDependency>) {
+
+    if (minimalModule) {
+      // Collect all modules referenced by the minimal dependency
+      const minimalReferencedModules = getAllReferencedModules(
+        compilation,
+        minimalModule,
+        'initial',
+        true,
+      );
+
+      for (const dep of containerEntryDependencies as Set<
+        FederationRuntimeDependency | ContainerEntryDependency
+      >) {
+        if (dep instanceof ContainerEntryDependency) continue;
         if (dep.minimal) continue;
+
         const containerEntryModule = moduleGraph.getModule(dep);
         if (!containerEntryModule) continue;
+
+        // Collect all modules referenced by the current container entry module
         const allReferencedModules = getAllReferencedModules(
           compilation,
           containerEntryModule,
           'initial',
+          true,
         );
 
+        // Get runtimes for the container entry module
         const containerRuntimes =
           chunkGraph.getModuleRuntimes(containerEntryModule);
         const runtimes = new Set<string>();
 
+        // Collect all runtime keys
         for (const runtimeSpec of containerRuntimes) {
           compilation.compiler.webpack.util.runtime.forEachRuntime(
             runtimeSpec,
@@ -163,12 +184,18 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         for (const runtime of runtimes) {
           const runtimeChunk = compilation.namedChunks.get(runtime);
           if (!runtimeChunk) continue;
-          // if there is no minimal chunk in the runtime module, skip it.
-          if (!chunkGraph.isModuleInChunk(minimal, runtimeChunk)) continue;
 
+          // Check if the minimal module is in the runtime chunk
+          if (!chunkGraph.isModuleInChunk(minimalModule, runtimeChunk))
+            continue;
+
+          // Iterate over all referenced modules of the current container entry module
           for (const module of allReferencedModules) {
             if (chunkGraph.isModuleInChunk(module, runtimeChunk)) {
-              chunkGraph.disconnectChunkAndModule(runtimeChunk, module);
+              // Disconnect modules not referenced by the minimal dependency
+              if (!minimalReferencedModules.has(module)) {
+                chunkGraph.disconnectChunkAndModule(runtimeChunk, module);
+              }
             }
           }
         }

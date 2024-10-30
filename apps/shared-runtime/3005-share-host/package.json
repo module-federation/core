@@ -1,5 +1,5 @@
 {
-  "name": "runtime-host",
+  "name": "share-host",
   "private": true,
   "version": "0.0.0",
   "devDependencies": {

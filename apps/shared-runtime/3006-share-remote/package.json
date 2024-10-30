@@ -1,5 +1,5 @@
 {
-  "name": "runtime-remote1",
+  "name": "share-remote1",
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
