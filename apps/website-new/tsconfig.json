@@ -1,9 +1,6 @@
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "paths": {
-      "@gshared": ["../../shared/*"]
-    }
+    "esModuleInterop": true
   }
 }

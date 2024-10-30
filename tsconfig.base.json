@@ -15,10 +15,7 @@
     "lib": ["es2021", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@gshared/*": ["./shared/*"]
-    }
+    "baseUrl": "."
   },
   "exclude": [
     "node_modules/**",

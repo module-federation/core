@@ -1,5 +1,10 @@
 import { getFMId, assert, logger } from '../utils';
 import { safeToString, ModuleInfo } from '@module-federation/sdk';
+import {
+  getShortErrorMsg,
+  RUNTIME_002,
+  runtimeDescMap,
+} from '@module-federation/error-codes';
 import { getRemoteEntry } from '../utils/load';
 import { FederationHost } from '../core';
 import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
@@ -90,6 +95,12 @@ class Module {
       if (typeof remoteEntryExports?.init === 'undefined') {
         //TODO: RUNTIME-002
         // params entryGlobalName=>remoteEntryKey
+        getShortErrorMsg(RUNTIME_002, runtimeDescMap, {
+          remoteName: name,
+          remoteEntryUrl: entry,
+          remoteEntryKey,
+        });
+
         logger.error(
           'The remote entry interface does not contain "init"',
           '\n',

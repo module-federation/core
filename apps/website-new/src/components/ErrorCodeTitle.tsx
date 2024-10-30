@@ -1,5 +1,5 @@
 import { getCustomMDXComponent } from 'rspress/theme';
-import { runtimeCodes } from '@gshared/error-codes';
+import { runtimeCodes } from '@module-federation/error-codes';
 
 const ErrorCodeTitle = ({ code }: { code: string }) => {
   const { h1, ul, li } = getCustomMDXComponent();

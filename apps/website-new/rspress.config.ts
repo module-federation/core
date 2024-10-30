@@ -88,7 +88,6 @@ export default defineConfig({
         '@site': path.resolve(__dirname),
         '@components': path.join(__dirname, 'src/components'),
         '@public': path.join(__dirname, 'docs/public'),
-        '@gshared': path.join(__dirname, '../../shared'),
       },
     },
   },
