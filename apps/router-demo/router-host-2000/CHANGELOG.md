@@ -1,5 +1,14 @@
 # host
 
+## 1.0.34
+
+### Patch Changes
+
+- Updated dependencies [ad605d2]
+  - @module-federation/bridge-react@0.6.14
+  - @module-federation/retry-plugin@0.6.14
+  - @module-federation/enhanced@0.6.14
+
 ## 1.0.33
 
 ### Patch Changes

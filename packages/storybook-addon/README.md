@@ -43,6 +43,40 @@ module.exports = storybookConfig;
 
 ---
 
+### Rsbuild App or Rslib Module
+
+```
+import { dirname, join } from 'node:path';
+import type { StorybookConfig } from 'storybook-react-rsbuild';
+
+function getAbsolutePath(value: string): any {
+  return dirname(require.resolve(join(value, 'package.json')));
+}
+
+const config: StorybookConfig = {
+  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  framework: {
+    name: getAbsolutePath('storybook-react-rsbuild'),
+    options: {},
+  },
+  addons: [
+    {
+      name: '@module-federation/storybook-addon/preset.js',
+      options: {
+        // add remote here and then you can load remote in your story
+        remotes: {
+          'rslib-module':
+            'rslib-module@http://localhost:3000/mf/mf-manifest.json',
+        },
+      },
+    },
+  ],
+};
+
+export default config;
+
+```
+
 ### For the [NX](https://nx.dev/getting-started/intro) projects:
 
 Replace NX utils `withModuleFederation` in `webpack.config.js` with our utils `withModuleFederation`.

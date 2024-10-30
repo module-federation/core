@@ -114,8 +114,18 @@ class Module {
     this.lib = remoteEntryExports;
     this.inited = true;
 
+    let moduleFactory;
+    moduleFactory = await this.host.loaderHook.lifecycle.getModuleFactory.emit({
+      remoteEntryExports,
+      expose,
+      moduleInfo: this.remoteInfo,
+    });
+
     // get exposeGetter
-    const moduleFactory = await remoteEntryExports.get(expose);
+    if (!moduleFactory) {
+      moduleFactory = await remoteEntryExports.get(expose);
+    }
+
     assert(
       moduleFactory,
       `${getFMId(this.remoteInfo)} remote don't export ${expose}.`,
