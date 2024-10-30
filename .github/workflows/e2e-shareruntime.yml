@@ -1,4 +1,4 @@
-# .github/workflows/e2e-runtime-host.yml
+# .github/workflows/e2e-share-host.yml
 name: E2E Test for Runtime
 
 on:
