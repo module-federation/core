@@ -22,6 +22,12 @@
           "dependencies": true
         }
       ]
+    },
+    "storybook": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run storybook --prefix apps/rslib-module"]
+      }
     }
   }
 }

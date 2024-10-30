@@ -2,17 +2,22 @@
 
 This example demonstrates how to use Rslib to build a simple Module Federation React component.
 
-
 ### Command
 
-build package
+Build package
 
 ```
-pnpm build
+nx build rslib-module
 ```
 
-serve package
+Serve package
 
 ```
-pnpm serve
+nx serve rslib-module
+```
+
+Dev package
+
+```
+nx serve rslib-module && nx storybook rslib-module
 ```
