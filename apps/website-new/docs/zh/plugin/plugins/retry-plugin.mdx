@@ -160,9 +160,9 @@ type ScriptWithRetryOptions = {
   - 每次重试之间的延迟时间（毫秒）。
 
 - **moduleName**:
-  - `string`
+  - `Array<string>`
   - 可选
-  - 模块名称，用于标识需要重试的模块。
+  - 模块名称列表，值为模块名称或模块别名。用于标识需要重试的模块。如果不设置，则默认对所有加载失败的模块进行重试。
 
 - **cb**:
   - `(resolve: (value: unknown) => void, error: any) => void`
