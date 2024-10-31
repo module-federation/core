@@ -19,14 +19,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     this.options = options;
   }
 
-  private findEntryModuleOfContainer(): Module | undefined {
-    if (!this.chunk || !this.chunkGraph) return undefined;
-    const modules = this.chunkGraph.getChunkModules(this.chunk);
-    return Array.from(modules).find(
-      (module) => module instanceof container.ContainerEntryModule,
-    );
-  }
-
   override generate(): string {
     const { compilation, chunk, chunkGraph } = this;
     if (!compilation || !chunk || !chunkGraph) {
@@ -46,6 +38,12 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     if (!containerEntryModule) return '';
 
+    if (
+      compilation.chunkGraph.isEntryModuleInChunk(containerEntryModule, chunk)
+    ) {
+      // dont apply to remote entry itself
+      return '';
+    }
     const initRuntimeModuleGetter = compilation.runtimeTemplate.moduleRaw({
       module: containerEntryModule,
       chunkGraph,
