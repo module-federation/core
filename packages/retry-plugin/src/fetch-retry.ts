@@ -1,5 +1,10 @@
-import type { RequiredUrl, FetchWithRetryOptions } from './types';
-import { defaultRetries, defaultRetryDelay } from './constant';
+import type { FetchWithRetryOptions } from './types';
+import {
+  defaultRetries,
+  defaultRetryDelay,
+  PLUGIN_IDENTIFIER,
+} from './constant';
+import logger from './logger';
 
 async function fetchWithRetry({
   url, // fetch url
@@ -7,7 +12,7 @@ async function fetchWithRetry({
   retryTimes = defaultRetries, // retry times
   retryDelay = defaultRetryDelay, // retry delay
   fallback, // fallback url
-}: RequiredUrl<FetchWithRetryOptions>) {
+}: FetchWithRetryOptions) {
   try {
     const response = await fetch(url, options);
 
@@ -27,8 +32,8 @@ async function fetchWithRetry({
     return response;
   } catch (error) {
     if (retryTimes <= 0) {
-      console.log(
-        `>>>>>>>>> 【Module Federation RetryPlugin】: retry failed after ${retryTimes} times for url: ${url}, now will try fallbackUrl url <<<<<<<<<`,
+      logger.log(
+        `>>>>>>>>> retry failed after ${retryTimes} times for url: ${url}, now will try fallbackUrl url <<<<<<<<<`,
       );
       if (fallback && typeof fallback === 'function') {
         return fetchWithRetry({
@@ -47,15 +52,15 @@ async function fetchWithRetry({
       }
 
       throw new Error(
-        '【Module Federation RetryPlugin】: The request failed three times and has now been abandoned',
+        `${PLUGIN_IDENTIFIER}: The request failed three times and has now been abandoned`,
       );
     } else {
       // If there are remaining times, delay 1 second and try again
       retryDelay > 0 &&
         (await new Promise((resolve) => setTimeout(resolve, retryDelay)));
 
-      console.log(
-        `【Module Federation RetryPlugin】: Trying again. Number of retries available：${retryTimes - 1}`,
+      logger.log(
+        `Trying again. Number of retries available：${retryTimes - 1}`,
       );
       return await fetchWithRetry({
         url,

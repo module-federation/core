@@ -1,3 +1,3 @@
-import { Logger } from '@module-federation/bridge-shared';
+import { createLogger } from '@module-federation/sdk';
 
-export const LoggerInstance = new Logger('vue3-bridge');
+export const LoggerInstance = createLogger('[ Module Federation Bridge Vue3 ]');

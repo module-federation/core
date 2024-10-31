@@ -1,37 +1,152 @@
 import { getAllKnownRemotes } from './flush-chunks';
 import crypto from 'crypto';
+import helpers from '@module-federation/runtime/helpers';
+import path from 'path';
 
 declare global {
   var mfHashMap: Record<string, string> | undefined;
+  var moduleGraphDirty: boolean;
 }
 
+const getRequire = (): NodeRequire => {
+  //@ts-ignore
+  return typeof __non_webpack_require__ !== 'undefined'
+    ? __non_webpack_require__
+    : require;
+};
+
+function callsites(): any[] {
+  const _prepareStackTrace = Error.prepareStackTrace;
+  try {
+    let result: any[] = [];
+    Error.prepareStackTrace = (_, callSites) => {
+      const callSitesWithoutCurrent = callSites.slice(1);
+      result = callSitesWithoutCurrent;
+      return callSitesWithoutCurrent;
+    };
+
+    new Error().stack;
+    return result;
+  } finally {
+    Error.prepareStackTrace = _prepareStackTrace;
+  }
+}
+
+const find = function (moduleName: string): string | undefined {
+  if (moduleName[0] === '.') {
+    // Use custom callsites function
+    const stack = callsites();
+    for (const frame of stack) {
+      const filename = frame.getFileName();
+      if (filename && filename !== module.filename) {
+        moduleName = path.resolve(path.dirname(filename), moduleName);
+        break;
+      }
+    }
+  }
+  try {
+    return getRequire().resolve(moduleName);
+  } catch (e) {
+    return;
+  }
+};
+
+/**
+ * Removes a module from the cache. We need this to re-load our http_request !
+ * see: https://stackoverflow.com/a/14801711/1148249
+ */
+const decache = async function (moduleName: string) {
+  //@ts-ignore
+  moduleName = find(moduleName);
+
+  if (!moduleName) {
+    return;
+  }
+
+  const currentChunk = getRequire().cache[__filename];
+
+  // Run over the cache looking for the files
+  // loaded by the specified module name
+  searchCache(moduleName, function (mod: NodeModule) {
+    delete getRequire().cache[mod.id];
+  });
+  try {
+    // Remove cached paths to the module.
+    // Thanks to @bentael for pointing this out.
+    //@ts-ignore
+    Object.keys((currentChunk.constructor as any)._pathCache).forEach(
+      function (cacheKey) {
+        if (cacheKey.indexOf(moduleName) > -1) {
+          //@ts-ignore
+          delete (currentChunk.constructor as any)._pathCache[cacheKey];
+        }
+      },
+    );
+  } catch (error) {
+    //null
+  }
+};
+
+/**
+ * Runs over the cache to search for all the cached
+ * files
+ */
+const searchCache = function (
+  moduleName: string,
+  callback: (mod: NodeModule) => void,
+) {
+  // Resolve the module identified by the specified name
+  let mod = getRequire().resolve(moduleName);
+  const visited: Record<string, boolean> = {};
+
+  // Check if the module has been resolved and found within
+  // the cache no else so #ignore else https://git.io/vtgMI
+  /* istanbul ignore else */
+  //@ts-ignore
+  if (mod && (mod = getRequire().cache[mod]) !== undefined) {
+    // Recursively go over the results
+    (function run(current: NodeModule) {
+      visited[current.id] = true;
+      // Go over each of the module's children and
+      // run over it
+      current.children.forEach(function (child: NodeModule) {
+        // ignore .node files, decaching native modules throws a
+        // "module did not self-register" error on second require
+        if (path.extname(child.filename) !== '.node' && !visited[child.id]) {
+          run(child);
+        }
+      });
+
+      // Call the specified callback providing the
+      // found module
+      callback(current);
+      //@ts-ignore
+    })(mod);
+  }
+};
+
 const hashmap = globalThis.mfHashMap || ({} as Record<string, string>);
+globalThis.moduleGraphDirty = false;
 
 const requireCacheRegex =
   /(remote|server|hot-reload|react-loadable-manifest|runtime|styled-jsx)/;
 
-export const performReload = async (shouldReload: any) => {
+export const performReload = async (
+  shouldReload: boolean,
+): Promise<boolean> => {
   if (!shouldReload) {
     return false;
   }
 
-  let req: NodeRequire;
-  //@ts-ignore
-  if (typeof __non_webpack_require__ === 'undefined') {
-    req = require;
-  } else {
-    //@ts-ignore
-    req = __non_webpack_require__ as NodeRequire;
-  }
+  const req = getRequire();
 
   const gs = new Function('return globalThis')();
-  const entries = Array.from(gs.entryChunkCache || []);
+  const entries: string[] = gs.entryChunkCache || [];
 
   if (!gs.entryChunkCache) {
     Object.keys(req.cache).forEach((key) => {
-      //delete req.cache[key];
       if (requireCacheRegex.test(key)) {
-        delete req.cache[key];
+        decache(key); // Use decache here
       }
     });
   } else {
@@ -40,9 +155,9 @@ export const performReload = async (shouldReload: any) => {
 
   gs.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
   //@ts-ignore
-  gs.__FEDERATION__.__INSTANCES__.map((i) => {
+  gs.__FEDERATION__.__INSTANCES__.map((i: any) => {
     //@ts-ignore
-    i.moduleCache.forEach((mc) => {
+    i.moduleCache.forEach((mc: any) => {
       if (mc.remoteInfo && mc.remoteInfo.entryGlobalName) {
         delete gs[mc.remoteInfo.entryGlobalName];
       }
@@ -53,23 +168,24 @@ export const performReload = async (shouldReload: any) => {
     }
   });
   //@ts-ignore
-  __webpack_require__.federation.instance.moduleCache.clear();
-  gs.__FEDERATION__.__INSTANCES__ = [];
+  __webpack_require__?.federation?.instance?.moduleCache?.clear();
+  helpers.global.resetFederationGlobalInfo();
+  globalThis.moduleGraphDirty = false;
+  globalThis.mfHashMap = {};
 
   for (const entry of entries) {
-    //@ts-ignore
-    delete __non_webpack_require__.cache[entry];
+    decache(entry);
   }
 
   //reload entries again
   for (const entry of entries) {
-    await __non_webpack_require__(entry);
+    await getRequire()(entry);
   }
 
   return true;
 };
 
-export const checkUnreachableRemote = (remoteScope: any) => {
+export const checkUnreachableRemote = (remoteScope: any): boolean => {
   for (const property in remoteScope.remotes) {
     if (!remoteScope[property]) {
       console.error(
@@ -83,7 +199,10 @@ export const checkUnreachableRemote = (remoteScope: any) => {
   return false;
 };
 
-export const checkMedusaConfigChange = (remoteScope: any, fetchModule: any) => {
+export const checkMedusaConfigChange = (
+  remoteScope: any,
+  fetchModule: any,
+): boolean => {
   //@ts-ignore
   if (remoteScope._medusa) {
     //@ts-ignore
@@ -110,7 +229,7 @@ export const checkMedusaConfigChange = (remoteScope: any, fetchModule: any) => {
   return false;
 };
 
-export const checkFakeRemote = (remoteScope: any) => {
+export const checkFakeRemote = (remoteScope: any): boolean => {
   for (const property in remoteScope._config) {
     let remote = remoteScope._config[property];
 
@@ -135,7 +254,7 @@ export const createFetcher = (
   fetchModule: any,
   name: string,
   cb: (hash: string) => void,
-) => {
+): Promise<void | boolean> => {
   return fetchModule(url)
     .then((re: Response) => {
       if (!re.ok) {
@@ -156,8 +275,11 @@ export const createFetcher = (
     });
 };
 
-export const fetchRemote = (remoteScope: any, fetchModule: any) => {
-  const fetches = [];
+export const fetchRemote = (
+  remoteScope: any,
+  fetchModule: any,
+): Promise<boolean> => {
+  const fetches: Promise<void | boolean>[] = [];
   let needReload = false;
   for (const property in remoteScope) {
     const name = property;
@@ -185,7 +307,10 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
 export const revalidate = async (
   fetchModule: any = getFetchModule() || (() => {}),
   force: boolean = false,
-) => {
+): Promise<boolean> => {
+  if (globalThis.moduleGraphDirty) {
+    force = true;
+  }
   const remotesFromAPI = getAllKnownRemotes();
   //@ts-ignore
   return new Promise((res) => {
@@ -206,12 +331,12 @@ export const revalidate = async (
     fetchRemote(remotesFromAPI, fetchModule).then((val) => {
       res(val);
     });
-  }).then((shouldReload) => {
-    return performReload(shouldReload);
+  }).then((shouldReload: unknown) => {
+    return performReload(shouldReload as boolean);
   });
 };
 
-export function getFetchModule() {
+export function getFetchModule(): any {
   //@ts-ignore
   const loadedModule =
     //@ts-ignore

@@ -1,3 +1,5 @@
+import { BROWSER_LOG_KEY, BROWSER_LOG_VALUE } from './constant';
+
 declare global {
   // eslint-disable-next-line no-var
   var FEDERATION_DEBUG: string | undefined;
@@ -5,6 +7,16 @@ declare global {
 
 function isBrowserEnv(): boolean {
   return typeof window !== 'undefined';
+}
+function isBrowserDebug() {
+  try {
+    if (isBrowserEnv() && window.localStorage) {
+      return localStorage.getItem(BROWSER_LOG_KEY) === BROWSER_LOG_VALUE;
+    }
+  } catch (error) {
+    return false;
+  }
+  return false;
 }
 
 function isDebugMode(): boolean {
@@ -15,7 +27,12 @@ function isDebugMode(): boolean {
   ) {
     return Boolean(process.env['FEDERATION_DEBUG']);
   }
-  return typeof FEDERATION_DEBUG !== 'undefined' && Boolean(FEDERATION_DEBUG);
+
+  if (typeof FEDERATION_DEBUG !== 'undefined' && Boolean(FEDERATION_DEBUG)) {
+    return true;
+  }
+
+  return isBrowserDebug();
 }
 
 const getProcessEnv = function (): Record<string, string | undefined> {

@@ -10,6 +10,7 @@ import {
   WEB_CLIENT_OPTIONS_IDENTIFIER,
   WebClientOptions,
   getIPV4,
+  logger,
 } from '../server';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import path from 'path';
@@ -56,15 +57,15 @@ export class DevPlugin implements WebpackPluginInstance {
 
   private _stopWhenSIGTERMOrSIGINT(): void {
     process.on('SIGTERM', () => {
-      console.log(
-        chalk`{cyan ${this._options.name} Process(${process.pid}) SIGTERM, mf server will exit...}`,
+      logger.info(
+        `${this._options.name} Process(${process.pid}) SIGTERM, mf server will exit...`,
       );
       this._exit(PROCESS_EXIT_CODE.SUCCESS);
     });
 
     process.on('SIGINT', () => {
-      console.log(
-        chalk`{cyan ${this._options.name} Process(${process.pid}) SIGINT, mf server will exit...}`,
+      logger.info(
+        `${this._options.name} Process(${process.pid}) SIGINT, mf server will exit...`,
       );
       this._exit(PROCESS_EXIT_CODE.SUCCESS);
     });
@@ -72,16 +73,16 @@ export class DevPlugin implements WebpackPluginInstance {
 
   private _handleUnexpectedExit(): void {
     process.on('unhandledRejection', (error) => {
-      console.error('Unhandled Rejection Error: ', error);
-      console.log(
-        chalk`{cyan ${this._options.name} Process(${process.pid}) unhandledRejection, mf server will exit...}`,
+      logger.error(error);
+      logger.error(
+        `Process(${process.pid}) unhandledRejection, mf server will exit...`,
       );
       this._exit(PROCESS_EXIT_CODE.FAILURE);
     });
     process.on('uncaughtException', (error) => {
-      console.error('Unhandled Rejection Error: ', error);
-      console.log(
-        chalk`{cyan ${this._options.name} Process(${process.pid}) uncaughtException, mf server will exit...}`,
+      logger.error(error);
+      logger.error(
+        `Process(${process.pid}) uncaughtException, mf server will exit...`,
       );
       this._exit(PROCESS_EXIT_CODE.FAILURE);
     });
