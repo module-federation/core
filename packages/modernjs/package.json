@@ -72,7 +72,7 @@
     "@modern-js/app-tools": "2.60.3",
     "@modern-js/core": "2.60.3",
     "@modern-js/module-tools": "2.60.3",
-    "@modern-js/runtime": "2.60.3",
+    "@modern-js/runtime": "2.60.5",
     "@modern-js/tsconfig": "2.60.3",
     "@module-federation/manifest": "workspace:*",
     "@types/hoist-non-react-statics": "3.3.5"
