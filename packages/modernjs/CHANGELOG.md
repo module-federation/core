@@ -1,5 +1,13 @@
 # @module-federation/modern-js
 
+## 3.0.1
+
+### Patch Changes
+
+- @module-federation/node@2.6.3
+- @module-federation/enhanced@3.0.1
+- @module-federation/sdk@3.0.1
+
 ## 0.6.14
 
 ### Patch Changes

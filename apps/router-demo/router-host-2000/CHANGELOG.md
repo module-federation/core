@@ -1,5 +1,14 @@
 # host
 
+## 1.0.35
+
+### Patch Changes
+
+- Updated dependencies [ec31539]
+  - @module-federation/retry-plugin@3.0.1
+  - @module-federation/enhanced@3.0.1
+  - @module-federation/bridge-react@3.0.1
+
 ## 1.0.34
 
 ### Patch Changes

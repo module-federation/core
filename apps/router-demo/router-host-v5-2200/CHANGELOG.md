@@ -1,5 +1,12 @@
 # host-v5
 
+## 1.0.35
+
+### Patch Changes
+
+- @module-federation/enhanced@3.0.1
+- @module-federation/bridge-react@3.0.1
+
 ## 1.0.34
 
 ### Patch Changes
