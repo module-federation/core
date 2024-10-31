@@ -130,6 +130,7 @@ class FederationRuntimePlugin {
 
     if (useMinimalRuntime) {
       return Template.asString([
+        '// federation minimal runtime entry',
         `import federation from '${normalizedBundlerRuntimePath}';`,
         runtimePluginTemplates,
         embedRuntimeLines,
@@ -164,6 +165,7 @@ class FederationRuntimePlugin {
     }
 
     return Template.asString([
+      '// federation full runtime entry',
       `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
       embedRuntimeLines,

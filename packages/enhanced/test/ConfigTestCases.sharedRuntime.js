@@ -8,12 +8,13 @@ if (globalThis.__FEDERATION__) {
     }
   });
   globalThis.__FEDERATION__.__INSTANCES__ = [];
+  globalThis.__FEDERATION__.__SHAREABLE_RUNTIME__ = undefined;
 }
 const { describeCases } = require('./ConfigTestCases.template');
 jest.resetModules();
 describeCases({
-  name: 'ConfigTestCases',
+  name: 'ShareableRuntime',
   federation: {
-    federationRuntime: 'hoisted',
+    federationRuntime: 'use-host',
   },
 });
