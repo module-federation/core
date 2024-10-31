@@ -1,4 +1,4 @@
-# [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
+# @module-federation/node
 
 ## 2.6.2
 

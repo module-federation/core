@@ -1,4 +1,4 @@
-# [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
+# @module-federation/nextjs-mf
 
 ## 8.7.2
 
@@ -21,10 +21,6 @@
   - Refactored external handling to dynamically find and replace the first function in the 'externals' array.
   - This change improves robustness by ensuring the system correctly overrides external functions regardless of their position in the list.
   - Maintained the existing logic to preserve intended behavior with conditions checking specific package prefixes and names.
-
-  ```
-
-  ```
 
 - Updated dependencies [f1b8848]
   - @module-federation/node@2.6.1

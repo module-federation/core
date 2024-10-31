@@ -1,4 +1,4 @@
-## [2.0.1](https://github.com/module-federation/core/compare/storybook-addon-2.0.0...storybook-addon-2.0.1) (2023-12-05)
+# @module-federation/storybook-addon
 
 ## 3.0.0
 

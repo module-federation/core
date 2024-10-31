@@ -1,4 +1,4 @@
-# [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
+# @module-federation/enhanced
 
 ## 0.6.14
 
