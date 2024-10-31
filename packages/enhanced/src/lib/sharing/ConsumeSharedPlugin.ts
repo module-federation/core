@@ -129,7 +129,6 @@ class ConsumeSharedPlugin {
   }
 
   apply(compiler: Compiler): void {
-    //@ts-ignore
     new FederationRuntimePlugin().apply(compiler);
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
@@ -167,7 +166,6 @@ class ConsumeSharedPlugin {
               `No required version specified and unable to automatically determine one. ${details}`,
             );
             error.file = `shared module ${request}`;
-            //@ts-ignore
             compilation.warnings.push(error);
           };
           const directFallback =
@@ -198,7 +196,6 @@ class ConsumeSharedPlugin {
                   );
                   if (err) {
                     compilation.errors.push(
-                      //@ts-ignore
                       new ModuleNotFoundError(null, err, {
                         name: `resolving fallback for shared module ${request}`,
                       }),
@@ -327,7 +324,6 @@ class ConsumeSharedPlugin {
         );
         normalModuleFactory.hooks.createModule.tapPromise(
           PLUGIN_NAME,
-          //@ts-ignore
           ({ resource }, { context, dependencies }) => {
             if (
               dependencies[0] instanceof ConsumeSharedFallbackDependency ||
@@ -355,7 +351,6 @@ class ConsumeSharedPlugin {
             set.add(RuntimeGlobals.hasOwnProperty);
             compilation.addRuntimeModule(
               chunk,
-              //@ts-ignore
               new ConsumeSharedRuntimeModule(set),
             );
             // FIXME: need to remove webpack internal inject ShareRuntimeModule, otherwise there will be two ShareRuntimeModule
