@@ -3,7 +3,9 @@ export interface FetchWithRetryOptions {
   options?: RequestInit;
   retryTimes?: number;
   retryDelay?: number;
-  fallback?: () => string;
+  fallback?:
+    | (() => string)
+    | ((url: string | URL | globalThis.Request) => string);
 }
 
 export interface ScriptWithRetryOptions {
