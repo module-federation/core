@@ -15,7 +15,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   private options: InvertedContainerRuntimeModuleOptions;
 
   constructor(options: InvertedContainerRuntimeModuleOptions) {
-    super('inverted container startup', RuntimeModule.STAGE_TRIGGER);
+    super('inverted container startup', RuntimeModule.STAGE_ATTACH);
     this.options = options;
   }
 

@@ -44,6 +44,13 @@ const BundlerRuntimePath = require.resolve(
     paths: [RuntimeToolsPath],
   },
 );
+
+const EmbeddedBundlerRuntimePath = require.resolve(
+  '@module-federation/webpack-bundler-runtime/embedded',
+  {
+    paths: [RuntimeToolsPath],
+  },
+);
 const RuntimePath = require.resolve('@module-federation/runtime', {
   paths: [RuntimeToolsPath],
 });
@@ -62,25 +69,34 @@ class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
   bundlerRuntimePath: string;
-  federationRuntimeDependency?: FederationRuntimeDependency; // Add this line
+  embeddedBundlerRuntimePath: string;
+  embeddedEntryFilePath: string;
+  federationRuntimeDependency?: FederationRuntimeDependency;
+  minimalFederationRuntimeDependency?: FederationRuntimeDependency;
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
     this.bundlerRuntimePath = BundlerRuntimePath;
-    this.federationRuntimeDependency = undefined; // Initialize as undefined
+    this.federationRuntimeDependency = undefined;
+    this.minimalFederationRuntimeDependency = undefined;
+    this.embeddedBundlerRuntimePath = EmbeddedBundlerRuntimePath;
+    this.embeddedEntryFilePath = '';
   }
 
   static getTemplate(
     compiler: Compiler,
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
-    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
+    embeddedBundlerRuntimePath?: string,
+    useMinimalRuntime = false,
   ) {
     // internal runtime plugin
     const runtimePlugins = options.runtimePlugins;
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
-      bundlerRuntimePath || BundlerRuntimePath,
+      useMinimalRuntime
+        ? embeddedBundlerRuntimePath || EmbeddedBundlerRuntimePath
+        : bundlerRuntimePath || BundlerRuntimePath,
     );
 
     let runtimePluginTemplates = '';
@@ -100,7 +116,6 @@ class FederationRuntimePlugin {
       });
     }
     const embedRuntimeLines = Template.asString([
-      `if(!${federationGlobal}.runtime){`,
       Template.indent([
         `var prevFederation = ${federationGlobal};`,
         `${federationGlobal} = {}`,
@@ -111,10 +126,46 @@ class FederationRuntimePlugin {
         Template.indent([`${federationGlobal}[key] = prevFederation[key];`]),
         '}',
       ]),
-      '}',
     ]);
 
+    if (useMinimalRuntime) {
+      return Template.asString([
+        '// federation minimal runtime entry',
+        `import federation from '${normalizedBundlerRuntimePath}';`,
+        runtimePluginTemplates,
+        embedRuntimeLines,
+        `if(!${federationGlobal}.instance){`,
+        Template.indent([
+          runtimePluginNames.length
+            ? Template.asString([
+                `const pluginsToAdd = [`,
+                Template.indent(
+                  runtimePluginNames.map(
+                    (item) =>
+                      `${item} ? (${item}.default || ${item})() : false,`,
+                  ),
+                ),
+                `].filter(Boolean);`,
+                `${federationGlobal}.initOptions.plugins = ${federationGlobal}.initOptions.plugins ? `,
+                `${federationGlobal}.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;`,
+              ])
+            : '',
+        ]),
+        `${federationGlobal}.instance = federation.runtime.init(${federationGlobal}.initOptions);`,
+        `if(${federationGlobal}.attachShareScopeMap){`,
+        Template.indent([
+          `${federationGlobal}.attachShareScopeMap(${RuntimeGlobals.require})`,
+        ]),
+        '}',
+        `if(${federationGlobal}.installInitialConsumes){`,
+        Template.indent([`${federationGlobal}.installInitialConsumes()`]),
+        '}',
+        `}`,
+      ]);
+    }
+
     return Template.asString([
+      '// federation full runtime entry',
       `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
       embedRuntimeLines,
@@ -154,7 +205,8 @@ class FederationRuntimePlugin {
     compiler: Compiler,
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
-    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
+    embeddedBundlerRuntimePath?: string,
+    useMinimalRuntime = false,
   ) {
     const containerName = options.name;
     const hash = createHash(
@@ -162,40 +214,51 @@ class FederationRuntimePlugin {
         compiler,
         options,
         bundlerRuntimePath,
-        experiments,
+        embeddedBundlerRuntimePath,
+        useMinimalRuntime,
       )}`,
     );
     return path.join(TEMP_DIR, `entry.${hash}.js`);
   }
-  getFilePath(compiler: Compiler) {
-    if (this.entryFilePath) {
-      return this.entryFilePath;
-    }
-
+  getFilePath(compiler: Compiler, useMinimalRuntime = false) {
     if (!this.options) {
       return '';
     }
 
-    if (!this.options?.virtualRuntimeEntry) {
-      this.entryFilePath = FederationRuntimePlugin.getFilePath(
-        compiler,
-        this.options,
-        this.bundlerRuntimePath,
-        this.options.experiments,
-      );
-    } else {
-      this.entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
-        FederationRuntimePlugin.getTemplate(
+    const cachedFilePath = useMinimalRuntime
+      ? this.embeddedEntryFilePath
+      : this.entryFilePath;
+    if (cachedFilePath) {
+      return cachedFilePath;
+    }
+
+    const filePath = this.options.virtualRuntimeEntry
+      ? `data:text/javascript;charset=utf-8;base64,${pBtoa(
+          FederationRuntimePlugin.getTemplate(
+            compiler,
+            this.options,
+            this.bundlerRuntimePath,
+            this.embeddedBundlerRuntimePath,
+            useMinimalRuntime,
+          ),
+        )}`
+      : FederationRuntimePlugin.getFilePath(
           compiler,
           this.options,
           this.bundlerRuntimePath,
-          this.options.experiments,
-        ),
-      )}`;
+          this.embeddedBundlerRuntimePath,
+          useMinimalRuntime,
+        );
+
+    if (useMinimalRuntime) {
+      this.embeddedEntryFilePath = filePath;
+    } else {
+      this.entryFilePath = filePath;
     }
-    return this.entryFilePath;
+
+    return filePath;
   }
-  ensureFile(compiler: Compiler) {
+  ensureFile(compiler: Compiler, useMinimalRuntime = false) {
     if (!this.options) {
       return;
     }
@@ -203,7 +266,7 @@ class FederationRuntimePlugin {
     if (this.options?.virtualRuntimeEntry) {
       return;
     }
-    const filePath = this.getFilePath(compiler);
+    const filePath = this.getFilePath(compiler, useMinimalRuntime);
     try {
       fs.readFileSync(filePath);
     } catch (err) {
@@ -214,7 +277,8 @@ class FederationRuntimePlugin {
           compiler,
           this.options,
           this.bundlerRuntimePath,
-          this.options.experiments,
+          this.embeddedBundlerRuntimePath,
+          useMinimalRuntime,
         ),
       );
     }
@@ -232,9 +296,24 @@ class FederationRuntimePlugin {
     return this.federationRuntimeDependency;
   }
 
+  getMinimalDependency(compiler: Compiler) {
+    if (this.minimalFederationRuntimeDependency)
+      return this.minimalFederationRuntimeDependency;
+    this.minimalFederationRuntimeDependency = new FederationRuntimeDependency(
+      this.getFilePath(compiler, true),
+      true,
+    );
+    return this.minimalFederationRuntimeDependency;
+  }
+
   prependEntry(compiler: Compiler) {
     if (!this.options?.virtualRuntimeEntry) {
       this.ensureFile(compiler);
+    }
+    const useHost = this.options?.experiments?.federationRuntime === 'use-host';
+
+    if (useHost && !this.options?.virtualRuntimeEntry) {
+      this.ensureFile(compiler, true);
     }
 
     //if using runtime experiment, use the new include method else patch entry
@@ -360,17 +439,19 @@ class FederationRuntimePlugin {
 
   setRuntimeAlias(compiler: Compiler) {
     const { experiments, implementation } = this.options || {};
-    const isHoisted = experiments?.federationRuntime === 'hoisted';
-    let runtimePath = isHoisted ? EmbeddedRuntimePath : RuntimePath;
+    const useExperimentalRuntime = experiments?.federationRuntime;
+    let runtimePath = useExperimentalRuntime
+      ? EmbeddedRuntimePath
+      : RuntimePath;
 
     if (implementation) {
       runtimePath = require.resolve(
-        `@module-federation/runtime${isHoisted ? '/embedded' : ''}`,
+        `@module-federation/runtime${useExperimentalRuntime ? '/embedded' : ''}`,
         { paths: [implementation] },
       );
     }
 
-    if (isHoisted) {
+    if (useExperimentalRuntime) {
       runtimePath = runtimePath.replace('.cjs', '.esm');
     }
 
@@ -434,20 +515,34 @@ class FederationRuntimePlugin {
           paths: [this.options.implementation],
         },
       );
+
+      this.embeddedBundlerRuntimePath = require.resolve(
+        '@module-federation/webpack-bundler-runtime/embedded',
+        {
+          paths: [this.options.implementation],
+        },
+      );
     }
 
-    if (this.options?.experiments?.federationRuntime === 'hoisted') {
+    if (this.options?.experiments?.federationRuntime) {
       this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
         '.cjs.js',
         '.esm.js',
       );
 
-      new EmbedFederationRuntimePlugin().apply(compiler);
+      this.embeddedBundlerRuntimePath = this.embeddedBundlerRuntimePath.replace(
+        '.cjs.js',
+        '.esm.js',
+      );
+
+      new EmbedFederationRuntimePlugin(this.options.experiments).apply(
+        compiler,
+      );
 
       new HoistContainerReferences().apply(compiler);
 
       new compiler.webpack.NormalModuleReplacementPlugin(
-        /@module-federation\/runtime/,
+        /@module-federation\/runtime(?!\/embedded)/,
         (resolveData) => {
           if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
             resolveData.request = RuntimePath.replace('cjs', 'esm');

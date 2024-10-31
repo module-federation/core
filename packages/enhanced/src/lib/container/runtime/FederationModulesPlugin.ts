@@ -45,13 +45,14 @@ class FederationModulesPlugin {
   }
 
   constructor(options = {}) {
+    //@ts-ignore
     this.options = options;
   }
 
   apply(compiler: Compiler) {
     compiler.hooks.compilation.tap(
       PLUGIN_NAME,
-      (compilation: CompilationType, { normalModuleFactory }) => {
+      (compilation: CompilationType) => {
         //@ts-ignore
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
       },

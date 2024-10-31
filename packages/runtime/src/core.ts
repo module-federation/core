@@ -127,11 +127,11 @@ export class FederationHost {
     >(),
   });
 
-  constructor(userOptions: UserOptions) {
+  constructor(userOptions: UserOptions, bundlerId?: string) {
     // TODO: Validate the details of the options
     // Initialize options with default values
     const defaultOptions: Options = {
-      id: getBuilderId(),
+      id: bundlerId || getBuilderId(),
       name: userOptions.name,
       plugins: [snapshotPlugin(), generatePreloadAssetsPlugin()],
       remotes: [],

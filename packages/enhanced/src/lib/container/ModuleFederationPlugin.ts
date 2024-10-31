@@ -85,7 +85,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     new FederationRuntimePlugin(options).apply(compiler);
 
     const library = options.library || { type: 'var', name: options.name };
-    const remoteType =
+    let remoteType =
       options.remoteType ||
       (options.library && isValidExternalsType(options.library.type)
         ? (options.library.type as ExternalsType)
@@ -142,6 +142,17 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           ? options.remotes.length > 0
           : Object.keys(options.remotes).length > 0)
       ) {
+        //todo: support esm by changing use of external module to use dynamic import / promise base
+        //todo: replace ExternalModule use with federation runtime loadEntry
+        if (
+          compiler.options.output.module &&
+          this._options.experiments?.federationRuntime === 'use-host'
+        ) {
+          // external module is import from at top of runtime chunk, before runtime is instantiated, causing it to fail
+          // changing to import remote type works around eager dependency issue of containers
+          remoteType = 'import';
+        }
+
         new ContainerReferencePlugin({
           remoteType,
           shareScope: options.shareScope,

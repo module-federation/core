@@ -4,6 +4,7 @@ packages:
   - 'packages/bridge/*'
   - 'packages/enhance'
   - 'apps/runtime-demo/*'
+  - 'apps/shared-runtime/*'
   - 'apps/modernjs-ssr/*'
   - 'apps/router-demo/*'
   - 'apps/manifest-demo/*'
