@@ -194,6 +194,8 @@ class ContainerPlugin {
         const hasSingleRuntimeChunk =
           compilation.options?.optimization?.runtimeChunk;
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        const federationRuntimeDependency =
+          federationRuntimePluginInstance.getDependency(compiler);
         const dep = new ContainerEntryDependency(
           name,
           //@ts-ignore
