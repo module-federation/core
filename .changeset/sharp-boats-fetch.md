@@ -1,5 +1,5 @@
 ---
-'@module-federation/runtime': minor
+'@module-federation/runtime': patch
 ---
 feat(runtime): Refactored Federation module to enhance initialization and runtime operations.
 - Introduced `FederationManager` class to encapsulate Federation Instance operations.
