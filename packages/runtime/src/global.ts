@@ -15,6 +15,18 @@ import { getBuilderId } from './utils/env';
 import { warn } from './utils/logger';
 import { FederationRuntimePlugin } from './type/plugin';
 
+// Define a type for the shareable runtime
+type ShareableRuntime = {
+  FederationManager: typeof import('./index').FederationManager;
+  FederationHost: typeof import('./index').FederationHost;
+  loadScript: typeof import('./index').loadScript;
+  loadScriptNode: typeof import('./index').loadScriptNode;
+  registerGlobalPlugins: typeof import('./index').registerGlobalPlugins;
+  getRemoteInfo: typeof import('./index').getRemoteInfo;
+  getRemoteEntry: typeof import('./index').getRemoteEntry;
+  Module: typeof import('./index').Module;
+};
+
 export interface Federation {
   __GLOBAL_PLUGIN__: Array<FederationRuntimePlugin>;
   __DEBUG_CONSTRUCTOR_VERSION__?: string;
@@ -24,6 +36,7 @@ export interface Federation {
   __SHARE__: GlobalShareScopeMap;
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
   __PRELOADED_MAP__: Map<string, boolean>;
+  __SHAREABLE_RUNTIME__: ShareableRuntime | undefined;
 }
 
 export const nativeGlobal: typeof global = (() => {
@@ -88,6 +101,7 @@ function setGlobalDefaultVal(target: typeof globalThis) {
       __SHARE__: {},
       __MANIFEST_LOADING__: {},
       __PRELOADED_MAP__: new Map(),
+      __SHAREABLE_RUNTIME__: undefined,
     });
 
     definePropertyGlobalVal(target, '__VMOK__', target.__FEDERATION__);
@@ -99,6 +113,7 @@ function setGlobalDefaultVal(target: typeof globalThis) {
   target.__FEDERATION__.__SHARE__ ??= {};
   target.__FEDERATION__.__MANIFEST_LOADING__ ??= {};
   target.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
+  target.__FEDERATION__.__SHAREABLE_RUNTIME__ ??= undefined;
 }
 
 setGlobalDefaultVal(globalThis);
@@ -115,10 +130,11 @@ export function resetFederationGlobalInfo(): void {
 export function getGlobalFederationInstance(
   name: string,
   version: string | undefined,
+  builderId?: string | undefined,
 ): FederationHost | undefined {
-  const buildId = getBuilderId();
+  const buildId = builderId || getBuilderId();
   return globalThis.__FEDERATION__.__INSTANCES__.find((GMInstance) => {
-    if (buildId && GMInstance.options.id === getBuilderId()) {
+    if (buildId && GMInstance.options.id === (builderId || getBuilderId())) {
       return true;
     }
 
@@ -309,7 +325,16 @@ export const getGlobalHostPlugins = (): Array<FederationRuntimePlugin> =>
   nativeGlobal.__FEDERATION__.__GLOBAL_PLUGIN__;
 
 export const getPreloaded = (id: string) =>
-  globalThis.__FEDERATION__.__PRELOADED_MAP__.get(id);
+  nativeGlobal.__FEDERATION__.__PRELOADED_MAP__.get(id);
 
 export const setPreloaded = (id: string) =>
-  globalThis.__FEDERATION__.__PRELOADED_MAP__.set(id, true);
+  nativeGlobal.__FEDERATION__.__PRELOADED_MAP__.set(id, true);
+
+export function setGlobalShareableRuntime(
+  runtimeExports: ShareableRuntime,
+): void {
+  if (nativeGlobal.__FEDERATION__.__SHAREABLE_RUNTIME__) {
+    return;
+  }
+  nativeGlobal.__FEDERATION__.__SHAREABLE_RUNTIME__ = runtimeExports;
+}

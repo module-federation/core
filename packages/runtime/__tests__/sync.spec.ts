@@ -39,7 +39,9 @@ describe('Embed Module Proxy', async () => {
     it('should have the same exports in embedded.ts and index.ts', () => {
       // Compare the exports of embedded.ts and index.ts
       const embeddedExports = Object.keys(Embedded).sort();
-      const indexExports = Object.keys(Index).sort();
+      const indexExports = Object.keys(Index)
+        .sort()
+        .filter((n) => n !== 'FederationManager');
       expect(embeddedExports).toEqual(indexExports);
     });
 
