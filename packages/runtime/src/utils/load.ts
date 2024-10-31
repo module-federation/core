@@ -161,7 +161,7 @@ async function loadEntryNode({
   return loadScriptNode(entry, {
     attrs: { name, globalName, type },
     loaderHook: {
-      createScriptHook: (url, attrs) => {
+      createScriptHook: (url: string, attrs: Record<string, any> = {}) => {
         const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
 
         if (!res) return;
