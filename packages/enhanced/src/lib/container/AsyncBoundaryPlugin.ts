@@ -1,3 +1,7 @@
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Zackary Jackson @ScriptedAlchemy
+*/
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import type {

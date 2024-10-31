@@ -1,3 +1,8 @@
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Zackary Jackson @ScriptedAlchemy
+*/
+
 // This stores the previous child compilation based solution
 // it is not currently used
 
