@@ -1,5 +1,18 @@
 # [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 4.0.0
+
+### Patch Changes
+
+- @module-federation/data-prefetch@4.0.0
+- @module-federation/dts-plugin@4.0.0
+- @module-federation/runtime-tools@4.0.0
+- @module-federation/rspack@4.0.0
+- @module-federation/sdk@4.0.0
+- @module-federation/managers@4.0.0
+- @module-federation/manifest@4.0.0
+- @module-federation/bridge-react-webpack-plugin@4.0.0
+
 ## 0.6.14
 
 ### Patch Changes

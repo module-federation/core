@@ -1,5 +1,12 @@
 # remote3
 
+## 1.0.35
+
+### Patch Changes
+
+- @module-federation/rsbuild-plugin@4.0.0
+- @module-federation/bridge-vue3@4.0.0
+
 ## 1.0.34
 
 ### Patch Changes

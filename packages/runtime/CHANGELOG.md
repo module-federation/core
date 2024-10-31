@@ -1,5 +1,22 @@
 # @module-federation/runtime
 
+## 4.0.0
+
+### Minor Changes
+
+- 4c5bd77: Refactored Federation module to enhance initialization and runtime operations.
+
+  - Introduced `FederationManager` class to encapsulate Federation Instance operations.
+    - Added `bundlerId` support for constructor methods.
+    - Ensured singleton pattern for `FederationManager`.
+  - Introduced a `ShareableRuntime` type and `__SHAREABLE_RUNTIME__` object for global sharing of runtime exports.
+  - Replaced `createScriptHook` with `loaderHook` for `loadEntryScript`, `loadEntryDom`, and `loadEntryNode` functions.
+
+### Patch Changes
+
+- ec31539: fix(retry-plugin): fix script retry logic to make error-boundary should render until script retry finished.
+  - @module-federation/sdk@4.0.0
+
 ## 0.6.14
 
 ### Patch Changes

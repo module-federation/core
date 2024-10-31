@@ -1,5 +1,17 @@
 # [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.7.3
+
+### Patch Changes
+
+- Updated dependencies [ec31539]
+- Updated dependencies [4c5bd77]
+  - @module-federation/runtime@4.0.0
+  - @module-federation/node@2.6.3
+  - @module-federation/webpack-bundler-runtime@4.0.0
+  - @module-federation/enhanced@4.0.0
+  - @module-federation/sdk@4.0.0
+
 ## 8.7.2
 
 ### Patch Changes
