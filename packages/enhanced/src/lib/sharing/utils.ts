@@ -12,35 +12,33 @@ const { join, dirname, readJson } = require(
 ) as typeof import('webpack/lib/util/fs');
 
 // Extreme shorthand only for github. eg: foo/bar
-const RE_URL_GITHUB_EXTREME_SHORT: RegExp =
-  /^[^/@:.\s][^/@:\s]*\/[^@:\s]*[^/@:\s]#\S+/;
+const RE_URL_GITHUB_EXTREME_SHORT = /^[^/@:.\s][^/@:\s]*\/[^@:\s]*[^/@:\s]#\S+/;
 
 // Short url with specific protocol. eg: github:foo/bar
-const RE_GIT_URL_SHORT: RegExp =
-  /^(github|gitlab|bitbucket|gist):\/?[^/.]+\/?/i;
+const RE_GIT_URL_SHORT = /^(github|gitlab|bitbucket|gist):\/?[^/.]+\/?/i;
 
 // Currently supported protocols
-const RE_PROTOCOL: RegExp =
+const RE_PROTOCOL =
   /^((git\+)?(ssh|https?|file)|git|github|gitlab|bitbucket|gist):$/i;
 
 // Has custom protocol
-const RE_CUSTOM_PROTOCOL: RegExp = /^((git\+)?(ssh|https?|file)|git):\/\//i;
+const RE_CUSTOM_PROTOCOL = /^((git\+)?(ssh|https?|file)|git):\/\//i;
 
 // Valid hash format for npm / yarn ...
-const RE_URL_HASH_VERSION: RegExp = /#(?:semver:)?(.+)/;
+const RE_URL_HASH_VERSION = /#(?:semver:)?(.+)/;
 
 // Simple hostname validate
-const RE_HOSTNAME: RegExp = /^(?:[^/.]+(\.[^/]+)+|localhost)$/;
+const RE_HOSTNAME = /^(?:[^/.]+(\.[^/]+)+|localhost)$/;
 
 // For hostname with colon. eg: ssh://user@github.com:foo/bar
-const RE_HOSTNAME_WITH_COLON: RegExp =
+const RE_HOSTNAME_WITH_COLON =
   /([^/@#:.]+(?:\.[^/@#:.]+)+|localhost):([^#/0-9]+)/;
 
 // Reg for url without protocol
-const RE_NO_PROTOCOL: RegExp = /^([^/@#:.]+(?:\.[^/@#:.]+)+)/;
+const RE_NO_PROTOCOL = /^([^/@#:.]+(?:\.[^/@#:.]+)+)/;
 
 // Specific protocol for short url without normal hostname
-const PROTOCOLS_FOR_SHORT: string[] = [
+const PROTOCOLS_FOR_SHORT = [
   'github:',
   'gitlab:',
   'bitbucket:',
@@ -49,7 +47,7 @@ const PROTOCOLS_FOR_SHORT: string[] = [
 ];
 
 // Default protocol for git url
-const DEF_GIT_PROTOCOL: string = 'git+ssh://';
+const DEF_GIT_PROTOCOL = 'git+ssh://';
 
 // thanks to https://github.com/npm/hosted-git-info/blob/latest/git-host-info.js
 const extractCommithashByDomain: {
@@ -330,35 +328,39 @@ function normalizeVersion(versionDesc: string): string {
 
 export { normalizeVersion };
 
+/** @typedef {{ data: Record<string, any>, path: string }} DescriptionFile */
+
+interface DescriptionFile {
+  data: Record<string, any>;
+  path: string;
+}
+
 /**
  *
  * @param {InputFileSystem} fs file system
  * @param {string} directory directory to start looking into
  * @param {string[]} descriptionFiles possible description filenames
- * @param {function((Error | null)=, {data?: object, path?: string}=, (checkedDescriptionFilePaths: string[])=): void} callback callback
- * @param {function({data: Record<string, any>, path: string}=): boolean} satisfiesDescriptionFileData file data compliance check
+ * @param {function((Error | null)=, {data?: DescriptionFile, path?: string}=, (checkedDescriptionFilePaths: string[])=): void} callback callback
+ * @param {function({data: DescriptionFile}=): boolean} satisfiesDescriptionFileData file data compliance check
  */
-const getDescriptionFile = (
+function getDescriptionFile(
   fs: InputFileSystem,
   directory: string,
   descriptionFiles: string[],
   callback: (
     err: Error | null,
-    data?: { data: object; path: string },
+    data?: DescriptionFile,
     checkedDescriptionFilePaths?: string[],
   ) => void,
-  satisfiesDescriptionFileData?: (data: {
-    data: Record<string, any>;
-    path: string;
-  }) => boolean,
-) => {
+  satisfiesDescriptionFileData?: (data?: DescriptionFile) => boolean,
+) {
   let i = 0;
 
-  // use a function property to store the list of visited files inside the recursive lookup
-  // instead of the public getDescriptionFile property
-  const satisfiesDescriptionFileDataInternal:
-    | (typeof satisfiesDescriptionFileData & { checkedFilePaths?: Set<string> })
-    | undefined = satisfiesDescriptionFileData;
+  // Create an object to hold the function and the checkedFilePaths
+  const satisfiesDescriptionFileDataInternal = {
+    check: satisfiesDescriptionFileData,
+    checkedFilePaths: new Set<string>(),
+  };
 
   const tryLoadCurrent = () => {
     if (i >= descriptionFiles.length) {
@@ -367,8 +369,7 @@ const getDescriptionFile = (
         return callback(
           null,
           undefined,
-          satisfiesDescriptionFileDataInternal?.checkedFilePaths &&
-            Array.from(satisfiesDescriptionFileDataInternal?.checkedFilePaths),
+          Array.from(satisfiesDescriptionFileDataInternal.checkedFilePaths),
         );
       }
       return getDescriptionFile(
@@ -376,7 +377,7 @@ const getDescriptionFile = (
         parentDirectory,
         descriptionFiles,
         callback,
-        satisfiesDescriptionFileDataInternal,
+        satisfiesDescriptionFileDataInternal.check,
       );
     }
     const filePath = join(fs, directory, descriptionFiles[i]);
@@ -393,28 +394,19 @@ const getDescriptionFile = (
           new Error(`Description file ${filePath} is not an object`),
         );
       }
-      if (typeof satisfiesDescriptionFileDataInternal === 'function') {
-        if (!satisfiesDescriptionFileDataInternal({ data, path: filePath })) {
-          i++;
-
-          if (
-            satisfiesDescriptionFileDataInternal.checkedFilePaths instanceof Set
-          ) {
-            satisfiesDescriptionFileDataInternal.checkedFilePaths.add(filePath);
-          } else {
-            satisfiesDescriptionFileDataInternal.checkedFilePaths = new Set([
-              filePath,
-            ]);
-          }
-
-          return tryLoadCurrent();
-        }
+      if (
+        typeof satisfiesDescriptionFileDataInternal.check === 'function' &&
+        !satisfiesDescriptionFileDataInternal.check({ data, path: filePath })
+      ) {
+        i++;
+        satisfiesDescriptionFileDataInternal.checkedFilePaths.add(filePath);
+        return tryLoadCurrent();
       }
       callback(null, { data, path: filePath });
     });
   };
   tryLoadCurrent();
-};
+}
 export { getDescriptionFile };
 /**
  * Get required version from description file

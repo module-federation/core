@@ -239,7 +239,7 @@ class ConsumeSharedPlugin {
                     );
                     return resolve(undefined);
                   }
-                  const { data } = result || {};
+                  const { data } = /** @type {DescriptionFile} */ result || {};
                   if (!data) {
                     if (checkedDescriptionFilePaths) {
                       requiredVersionWarning(
@@ -257,8 +257,7 @@ class ConsumeSharedPlugin {
 
                     return resolve(undefined);
                   }
-                  //@ts-ignore
-                  if (data.name === packageName) {
+                  if (data['name'] === packageName) {
                     // Package self-referencing
                     return resolve(undefined);
                   }
@@ -266,10 +265,13 @@ class ConsumeSharedPlugin {
                     data,
                     packageName,
                   );
+                  //TODO: align with webpck semver parser again
                   // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
                   resolve(requiredVersion);
                 },
-                ({ data }) => {
+                (result) => {
+                  if (!result) return false;
+                  const { data } = result;
                   const maybeRequiredVersion =
                     getRequiredVersionFromDescriptionFile(data, packageName);
                   return (
