@@ -188,12 +188,9 @@ class ContainerPlugin {
       compiler.options.output.enabledLibraryTypes.push(library.type);
     }
 
-    compiler.hooks.make.tapAsync(
+    compiler.hooks.make.tapPromise(
       PLUGIN_NAME,
-      async (
-        compilation: Compilation,
-        callback: (error?: WebpackError | null | undefined) => void,
-      ) => {
+      async (compilation: Compilation) => {
         const hasSingleRuntimeChunk =
           compilation.options?.optimization?.runtimeChunk;
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
@@ -226,12 +223,10 @@ class ContainerPlugin {
               resolve(undefined);
             },
           );
-        }).catch((error) => callback(error));
+        });
 
         // Add dependency based on federationRuntime option
-        const addDependency = async (
-          dependency: FederationRuntimeDependency,
-        ) => {
+        const addIncludes = async (dependency: FederationRuntimeDependency) => {
           await new Promise<void>((resolve, reject) => {
             compilation.addInclude(
               compiler.context,
@@ -246,33 +241,31 @@ class ContainerPlugin {
                 resolve();
               },
             );
-          }).catch((error) => callback(error));
+          });
         };
 
         if (this._options?.experiments?.federationRuntime === 'use-host') {
           const externalRuntimeDependency =
             federationRuntimePluginInstance.getMinimalDependency(compiler);
-          await addDependency(externalRuntimeDependency);
+          await addIncludes(externalRuntimeDependency);
         } else {
           const federationRuntimeDependency =
             federationRuntimePluginInstance.getDependency(compiler);
-          await addDependency(federationRuntimeDependency);
+          await addIncludes(federationRuntimeDependency);
         }
-
-        callback();
       },
     );
 
     // this will still be copied into child compiler, so it needs a check to avoid running hook on child
     // we have to use finishMake in order to check the entries created and see if there are multiple runtime chunks
-    compiler.hooks.finishMake.tapAsync(
+    compiler.hooks.finishMake.tapPromise(
       PLUGIN_NAME,
-      async (compilation: Compilation, callback) => {
+      async (compilation: Compilation) => {
         if (
           compilation.compiler.parentCompilation &&
           compilation.compiler.parentCompilation !== compilation
         ) {
-          return callback();
+          return;
         }
 
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
@@ -289,7 +282,7 @@ class ContainerPlugin {
           createdRuntimes.size === 0 &&
           !compilation.options?.optimization?.runtimeChunk
         ) {
-          return callback();
+          return;
         }
 
         const dep = new ContainerEntryDependency(
@@ -315,7 +308,7 @@ class ContainerPlugin {
               resolve();
             },
           );
-        }).catch((error) => callback(error));
+        });
 
         const addDependency = async (
           dependency: FederationRuntimeDependency,
@@ -331,7 +324,7 @@ class ContainerPlugin {
                 resolve();
               },
             );
-          }).catch((error) => callback(error));
+          });
         };
 
         if (this._options?.experiments?.federationRuntime === 'use-host') {
@@ -343,7 +336,6 @@ class ContainerPlugin {
             federationRuntimePluginInstance.getDependency(compiler);
           await addDependency(federationRuntimeDependency);
         }
-        callback();
       },
     );
 
