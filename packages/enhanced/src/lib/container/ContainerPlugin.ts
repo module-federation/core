@@ -158,6 +158,28 @@ class ContainerPlugin {
     });
   }
 
+  private async _addDependency(
+    compilation: Compilation,
+    compiler: Compiler,
+    dependency: FederationRuntimeDependency,
+    name: string,
+    runtime?: containerPlugin.EntryRuntime,
+  ): Promise<void> {
+    const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+    await new Promise<void>((resolve, reject) => {
+      compilation.addInclude(
+        compiler.context,
+        dependency,
+        { name, runtime },
+        (err, module) => {
+          if (err) return reject(err);
+          hooks.addFederationRuntimeModule.call(dependency);
+          resolve();
+        },
+      );
+    });
+  }
+
   apply(compiler: Compiler): void {
     const useModuleFederationPlugin = compiler.options.plugins.find(
       (p: Falsy | WebpackPluginInstance | WebpackPluginFunction) => {
@@ -194,8 +216,6 @@ class ContainerPlugin {
         const hasSingleRuntimeChunk =
           compilation.options?.optimization?.runtimeChunk;
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        const federationRuntimeDependency =
-          federationRuntimePluginInstance.getDependency(compiler);
         const dep = new ContainerEntryDependency(
           name,
           //@ts-ignore
@@ -226,36 +246,29 @@ class ContainerPlugin {
         });
 
         // Add dependency based on federationRuntime option
-        const addIncludes = async (dependency: FederationRuntimeDependency) => {
-          await new Promise<void>((resolve, reject) => {
-            compilation.addInclude(
-              compiler.context,
-              dependency,
-              {
-                name,
-                library,
-              },
-              (err, module) => {
-                if (err) return reject(err);
-                hooks.addFederationRuntimeModule.call(dependency);
-                resolve();
-              },
-            );
-          });
-        };
-
         if (this._options?.experiments?.federationRuntime === 'use-host') {
           const externalRuntimeDependency =
             federationRuntimePluginInstance.getMinimalDependency(compiler);
-          await addIncludes(externalRuntimeDependency);
+          await this._addDependency(
+            compilation,
+            compiler,
+            externalRuntimeDependency,
+            name,
+          );
         } else {
           const federationRuntimeDependency =
             federationRuntimePluginInstance.getDependency(compiler);
-          await addIncludes(federationRuntimeDependency);
+          await this._addDependency(
+            compilation,
+            compiler,
+            federationRuntimeDependency,
+            name,
+          );
         }
       },
     );
 
+    //TODO: should not auto patch single runtime chunk with another entry
     // this will still be copied into child compiler, so it needs a check to avoid running hook on child
     // we have to use finishMake in order to check the entries created and see if there are multiple runtime chunks
     compiler.hooks.finishMake.tapPromise(
@@ -310,31 +323,26 @@ class ContainerPlugin {
           );
         });
 
-        const addDependency = async (
-          dependency: FederationRuntimeDependency,
-        ) => {
-          await new Promise<void>((resolve, reject) => {
-            compilation.addInclude(
-              compiler.context,
-              dependency,
-              { name: name, runtime: runtime },
-              (err, module) => {
-                if (err) return reject(err);
-                hooks.addFederationRuntimeModule.call(dependency);
-                resolve();
-              },
-            );
-          });
-        };
-
         if (this._options?.experiments?.federationRuntime === 'use-host') {
           const externalRuntimeDependency =
             federationRuntimePluginInstance.getMinimalDependency(compiler);
-          await addDependency(externalRuntimeDependency);
+          await this._addDependency(
+            compilation,
+            compiler,
+            externalRuntimeDependency,
+            name,
+            runtime,
+          );
         } else {
           const federationRuntimeDependency =
             federationRuntimePluginInstance.getDependency(compiler);
-          await addDependency(federationRuntimeDependency);
+          await this._addDependency(
+            compilation,
+            compiler,
+            federationRuntimeDependency,
+            name,
+            runtime,
+          );
         }
       },
     );
