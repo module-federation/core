@@ -1,4 +1,4 @@
-# @module-federation/modernjs
+# @module-federation/modernjsapp
 
 ## 0.1.60
 

@@ -37,7 +37,7 @@ async function fetchWithRetry({
       );
       if (fallback && typeof fallback === 'function') {
         return fetchWithRetry({
-          url: fallback(),
+          url: fallback(url),
           options,
           retryTimes: 0,
           retryDelay: 0,
