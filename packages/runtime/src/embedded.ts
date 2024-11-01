@@ -133,6 +133,10 @@ export class FederationHost implements IndexModule.FederationHost {
     return this._getInstance().loaderHook;
   }
 
+  get bridgeHook() {
+    return this._getInstance().bridgeHook;
+  }
+
   initOptions(...args: Parameters<IndexModule.FederationHost['initOptions']>) {
     return this._getInstance().initOptions(...args);
   }
