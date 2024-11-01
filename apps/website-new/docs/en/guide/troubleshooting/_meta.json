@@ -5,5 +5,11 @@
     "label": "Runtime",
     "collapsed":true
   },
-  "faq"
+  {
+    "type": "dir",
+    "name": "type",
+    "label": "Type",
+    "collapsed":true
+  },
+  "other"
 ]

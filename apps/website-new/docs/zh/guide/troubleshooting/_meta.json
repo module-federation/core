@@ -5,5 +5,11 @@
     "label": "运行时",
     "collapsed":true
   },
-  "faq"
+  {
+    "type": "dir",
+    "name": "type",
+    "label": "类型",
+    "collapsed":true
+  },
+  "other"
 ]

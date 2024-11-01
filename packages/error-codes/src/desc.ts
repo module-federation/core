@@ -6,6 +6,7 @@ import {
   RUNTIME_005,
   RUNTIME_006,
   RUNTIME_007,
+  TYPE_001,
 } from './error-codes';
 
 export const runtimeDescMap = {
@@ -18,6 +19,11 @@ export const runtimeDescMap = {
   [RUNTIME_007]: 'Failed to get remote snapshot.',
 };
 
+export const typeDescMap = {
+  [TYPE_001]: 'Failed to generate type declaration.',
+};
+
 export const errorDescMap = {
   ...runtimeDescMap,
+  ...typeDescMap,
 };

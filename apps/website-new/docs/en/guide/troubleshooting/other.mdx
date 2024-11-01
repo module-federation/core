@@ -1,11 +1,11 @@
-# 常见问题
+# Other
 
-本节收集了与“模块联邦”实现相关的常见问题（非特定错误代码）。
-主要目标是为不熟悉“模块联邦”实现原理的初学者提供额外的上下文和解决方案路径
+This section is a collection of common issues related to the implementation of `Module Federation` in general(not specific error code).
+The main goal is to provide additional context and solution paths for beginners not familiar with the fundamental ways of how `Module Federation` is working at its core.
 
 ## Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
-#### 错误信息
-:::danger 浏览器错误信息
+#### Error Message
+:::danger Browser Error Message
 Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
 
 You might have mismatching versions of React and the renderer (such as React DOM)
@@ -15,13 +15,14 @@ You might be breaking the Rules of Hooks
 You might have more than one copy of React in the same app
 :::
 
-:::danger 浏览器错误信息
+:::danger Browser Error Message
 Uncaught TypeError: Cannot read properties on null (reading `useState`)
 :::
 
-#### 解决方案
-该错误为 React 多实例问题，通常出现在 react 没有复用同一个实例的场景。
-可以通过设置 `shared` 并且设置 `singleton: true` 单例模式 来避免此问题。
+#### Solution
+
+This error is a React multi-instance problem, which usually occurs when react does not reuse the same instance.
+This problem can be avoided by setting `shared` and setting `singleton: true` singleton mode.
 
 ```ts title="modern.config.js"
 {
@@ -49,24 +50,24 @@ Uncaught TypeError: Cannot read properties on null (reading `useState`)
 
 ## Unable to compile federated types, Error: compile TS failed
 
-#### 错误信息
-:::danger 浏览器错误信息
+#### Error Message
+:::danger Browser Error Message
 Unable to compile federated types, Error: compile TS failed, the original command is 'npx tsc --project file-path.json'.
 :::
 
-:::danger 浏览器错误信息
+:::danger Browser Error Message
 Error: ENOENT: no such file or directory, open 'project-path/rspack_hmr/application-name/dist/@mf-types.zip'
 :::
 
-#### 解决方案
+#### Solution
 
-1. 根据错误信息执行 `npx tsc --project file-path.json` ，解决所有碰到的类型问题。
-2. 检查 `ModuleFederationPlugin` 中的 `exposes`字段：
+1. Execute `npx tsc --project file-path.json` according to the error message to solve all type problems encountered.
+2. Check your `ModuleFederationPlugin` config field `exposes`:
 
 ```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"
 new ModuleFederationPlugin({
     ...
-    // 确保所有的 key 都以 "./" 开头
+    // Make sure both key and value start with "./"
     exposes: { './Foo': './src/<path-to-file>/Foo.tsx' },
     ...
   })
