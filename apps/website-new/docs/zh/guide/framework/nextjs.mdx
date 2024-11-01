@@ -109,7 +109,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
 
 "本地 Webpack" 意味着你必须将 webpack 安装为依赖项，并且 next 不会使用其捆绑的 webpack 副本，因为需要访问所有 webpack 内部
 
-- 使用 `NEXT_PRIVATE_LOCAL_WEBPACK=true next dev` 或 `next build`
+- 使用 `cross-env NEXT_PRIVATE_LOCAL_WEBPACK=true next dev` 或 `next build`
 - `npm install webpack`
 
 ## 使用方法

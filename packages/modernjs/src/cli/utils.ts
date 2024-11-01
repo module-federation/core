@@ -12,6 +12,7 @@ import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
 import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
 import { BundlerConfig } from '../interfaces/bundler';
+import logger from './logger';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
 const isDev = process.env.NODE_ENV === 'development';
@@ -283,8 +284,8 @@ export function patchBundlerConfig<T extends Bundler>(options: {
     bundlerConfig.optimization.splitChunks.cacheGroups
   ) {
     bundlerConfig.optimization.splitChunks.chunks = 'async';
-    console.warn(
-      `${PLUGIN_IDENTIFIER} splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"`,
+    logger.warn(
+      `splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"`,
     );
   }
 

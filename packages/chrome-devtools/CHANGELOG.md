@@ -1,5 +1,30 @@
 # @module-federation/devtools
 
+## 0.6.15
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.15
+
+## 0.6.14
+
+### Patch Changes
+
+- Updated dependencies [ad605d2]
+  - @module-federation/sdk@0.6.14
+
+## 0.6.13
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.13
+
+## 0.6.12
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.12
+
 ## 0.6.11
 
 ### Patch Changes

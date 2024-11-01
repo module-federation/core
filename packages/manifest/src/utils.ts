@@ -1,5 +1,4 @@
 import { Chunk, Compilation, StatsCompilation, StatsModule } from 'webpack';
-import chalk from 'chalk';
 import path from 'path';
 import {
   StatsAssets,
@@ -15,6 +14,7 @@ import {
   retrieveTypesAssetsInfo,
 } from '@module-federation/dts-plugin/core';
 import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
+import logger from './logger';
 
 function isHotFile(file: string) {
   return file.includes(HOT_UPDATE_SUFFIX);
@@ -310,8 +310,8 @@ export function getTypesMetaInfo(
       api: path.join(zipPrefix, apiFileName),
     };
   } catch (err) {
-    console.warn(
-      chalk`{bold {yellow [ ${PLUGIN_IDENTIFIER} ]: getTypesMetaInfo failed, it will use the default types meta info, and the errors as belows: ${err} }}`,
+    logger.warn(
+      `getTypesMetaInfo failed, it will use the default types meta info, and the errors as belows: ${err}`,
     );
     return defaultTypesMetaInfo;
   }

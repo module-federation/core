@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable max-depth */
 
-import chalk from 'chalk';
 import {
   StatsRemote,
   StatsBuildInfo,
@@ -31,6 +30,7 @@ import {
   getFileName,
   getTypesMetaInfo,
 } from './utils';
+import logger from './logger';
 import {
   ContainerManager,
   RemoteManager,
@@ -490,13 +490,13 @@ class StatsManager {
     } = compiler.options;
 
     if (typeof publicPath !== 'string') {
-      console.warn(
-        chalk`{bold {yellow [ ${PLUGIN_IDENTIFIER} ]: Manifest will not generate, because publicPath can only be string, but got '${publicPath}' }}`,
+      logger.warn(
+        `Manifest will not generate, because publicPath can only be string, but got '${publicPath}'`,
       );
       return false;
     } else if (publicPath === 'auto') {
-      console.warn(
-        chalk`{bold {blue [ ${PLUGIN_IDENTIFIER} ]: Manifest will use absolute path resolution via its host at runtime, reason: publicPath='${publicPath}'}}`,
+      logger.warn(
+        `Manifest will use absolute path resolution via its host at runtime, reason: publicPath='${publicPath}'`,
       );
       return true;
     }

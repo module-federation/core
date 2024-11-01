@@ -1,5 +1,44 @@
 # @module-federation/modern-js
 
+## 0.6.15
+
+### Patch Changes
+
+- d1e0f3e: fix(modern-js-plugin): set cors responseHeaders as \*
+  - @module-federation/node@2.6.3
+  - @module-federation/enhanced@0.6.15
+  - @module-federation/sdk@0.6.15
+
+## 0.6.14
+
+### Patch Changes
+
+- ad605d2: chore: unified logger
+- Updated dependencies [87a2862]
+- Updated dependencies [ad605d2]
+  - @module-federation/node@2.6.2
+  - @module-federation/enhanced@0.6.14
+  - @module-federation/sdk@0.6.14
+
+## 0.6.13
+
+### Patch Changes
+
+- Updated dependencies [f1b8848]
+  - @module-federation/node@2.6.1
+  - @module-federation/enhanced@0.6.13
+  - @module-federation/sdk@0.6.13
+
+## 0.6.12
+
+### Patch Changes
+
+- Updated dependencies [1478f50]
+- Updated dependencies [1478f50]
+  - @module-federation/node@2.6.0
+  - @module-federation/enhanced@0.6.12
+  - @module-federation/sdk@0.6.12
+
 ## 0.6.11
 
 ### Patch Changes

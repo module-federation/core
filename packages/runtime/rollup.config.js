@@ -21,8 +21,6 @@ module.exports = (rollupConfig, projectOptions) => {
     delete rollupConfig.input.helpers;
   }
 
-  rollupConfig.external = [/@module-federation/];
-
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({
       ...c,

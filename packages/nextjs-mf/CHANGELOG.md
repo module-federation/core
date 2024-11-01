@@ -1,4 +1,66 @@
-# [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
+# @module-federation/nextjs-mf
+
+## 8.7.3
+
+### Patch Changes
+
+- Updated dependencies [ec31539]
+  - @module-federation/runtime@0.6.15
+  - @module-federation/node@2.6.3
+  - @module-federation/webpack-bundler-runtime@0.6.15
+  - @module-federation/enhanced@0.6.15
+  - @module-federation/sdk@0.6.15
+
+## 8.7.2
+
+### Patch Changes
+
+- Updated dependencies [87a2862]
+- Updated dependencies [ad605d2]
+  - @module-federation/node@2.6.2
+  - @module-federation/enhanced@0.6.14
+  - @module-federation/runtime@0.6.14
+  - @module-federation/sdk@0.6.14
+  - @module-federation/webpack-bundler-runtime@0.6.14
+
+## 8.7.1
+
+### Patch Changes
+
+- d3e904b: Support Next 15 externals configuration
+
+  - Refactored external handling to dynamically find and replace the first function in the 'externals' array.
+  - This change improves robustness by ensuring the system correctly overrides external functions regardless of their position in the list.
+  - Maintained the existing logic to preserve intended behavior with conditions checking specific package prefixes and names.
+
+- Updated dependencies [f1b8848]
+  - @module-federation/node@2.6.1
+  - @module-federation/runtime@0.6.13
+  - @module-federation/enhanced@0.6.13
+  - @module-federation/webpack-bundler-runtime@0.6.13
+  - @module-federation/sdk@0.6.13
+
+## 8.7.0
+
+### Minor Changes
+
+- 1478f50: Added the UniverseEntryChunkTrackerPlugin to track entry chunks in the server plugin.
+
+  - Applied UniverseEntryChunkTrackerPlugin in the applyServerPlugins function.
+  - This change aims to enhance tracking of entry chunks in the server environment for hot reloading prod instances
+
+### Patch Changes
+
+- 1478f50: - Added `globalThis.moduleGraphDirty = true` to mark the module graph as dirty when an error is detected.
+  - Replaced `new Function('return globalThis')()` with a direct reference to `globalThis`.
+- 450aa37: add next 15 to peer deps
+- Updated dependencies [1478f50]
+- Updated dependencies [1478f50]
+  - @module-federation/node@2.6.0
+  - @module-federation/runtime@0.6.12
+  - @module-federation/enhanced@0.6.12
+  - @module-federation/webpack-bundler-runtime@0.6.12
+  - @module-federation/sdk@0.6.12
 
 ## 8.6.4
 

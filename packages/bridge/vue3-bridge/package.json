@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/bridge-vue3",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "version": "0.6.11",
+  "version": "0.6.15",
   "publishConfig": {
     "access": "public"
   },
@@ -31,7 +31,8 @@
     "vue-router": "=3"
   },
   "dependencies": {
-    "@module-federation/bridge-shared": "workspace:*"
+    "@module-federation/bridge-shared": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

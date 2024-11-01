@@ -1,3 +1,7 @@
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Zackary Jackson @ScriptedAlchemy
+*/
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import ContainerEntryDependency from '../ContainerEntryDependency';
 
@@ -12,6 +16,7 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
   private containerEntrySet: Set<
     ContainerEntryDependency | FederationRuntimeDependency
   >;
+
   constructor(
     containerEntrySet: Set<
       ContainerEntryDependency | FederationRuntimeDependency
@@ -20,9 +25,11 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
     super('embed federation', RuntimeModule.STAGE_ATTACH);
     this.containerEntrySet = containerEntrySet;
   }
+
   override identifier() {
     return 'webpack/runtime/embed/federation';
   }
+
   override generate(): string | null {
     const { compilation, chunk, chunkGraph } = this;
     if (!chunk || !chunkGraph || !compilation) {
