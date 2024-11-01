@@ -1,4 +1,23 @@
 {
+  "hostName":{
+    "id":"hostName",
+    "lang":{
+      "zh":{
+        "description":"当前宿主（消费者）名称",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      },
+      "en":{
+        "description":"Current host (consumer) name",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      }
+    }
+  },
   "remoteName":{
     "id":"remoteName",
     "lang":{
@@ -11,6 +30,25 @@
       },
       "en":{
         "description":"remote name",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      }
+    }
+  },
+  "hostVersion":{
+    "id":"hostVersion",
+    "lang":{
+      "zh":{
+        "description":"当前宿主（消费者）版本，可以在 __FEDERATION__.moduleInfo 中根据 `hostName:hostVersion` 的 key 获取对应的模块信息",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      },
+      "en":{
+        "description":"The current host (consumer) version, you can get the corresponding module information in __FEDERATION__.moduleInfo according to the key of `hostName:hostVersion`",
         "related_meta":{
           "docs":[],
           "links":[]

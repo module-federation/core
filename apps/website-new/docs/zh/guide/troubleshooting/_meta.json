@@ -1,9 +1,9 @@
 [
-
   {
     "type": "dir",
     "name": "runtime",
     "label": "运行时",
     "collapsed":true
-  }
+  },
+  "faq"
 ]

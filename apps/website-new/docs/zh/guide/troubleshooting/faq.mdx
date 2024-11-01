@@ -1,0 +1,73 @@
+# 常见问题
+
+本节收集了与“模块联邦”实现相关的常见问题（非特定错误代码）。
+主要目标是为不熟悉“模块联邦”实现原理的初学者提供额外的上下文和解决方案路径
+
+## Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+#### 错误信息
+:::danger 浏览器错误信息
+Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+
+You might have mismatching versions of React and the renderer (such as React DOM)
+
+You might be breaking the Rules of Hooks
+
+You might have more than one copy of React in the same app
+:::
+
+:::danger 浏览器错误信息
+Uncaught TypeError: Cannot read properties on null (reading `useState`)
+:::
+
+#### 解决方案
+该错误为 React 多实例问题，通常出现在 react 没有复用同一个实例的场景。
+可以通过设置 `shared` 并且设置 `singleton: true` 单例模式 来避免此问题。
+
+```ts title="modern.config.js"
+{
+    ...
+    new ModuleFederationPlugin({
+            ...,
+         // Default basic configuration
+         // shared: [
+         //   'react',
+         //   'react-dom',
+         //   'my-custom-module'
+         // ]
+
+         // Configuration with more specificity
+            shared: {
+                react: { singleton: true, },
+                'react-dom': { singleton: true, },
+                'my-custom-module': { singleton: true, },
+                ...
+            },
+        })
+      ])
+  }
+```
+
+## Unable to compile federated types, Error: compile TS failed
+
+#### 错误信息
+:::danger 浏览器错误信息
+Unable to compile federated types, Error: compile TS failed, the original command is 'npx tsc --project file-path.json'.
+:::
+
+:::danger 浏览器错误信息
+Error: ENOENT: no such file or directory, open 'project-path/rspack_hmr/application-name/dist/@mf-types.zip'
+:::
+
+#### 解决方案
+
+1. 根据错误信息执行 `npx tsc --project file-path.json` ，解决所有碰到的类型问题。
+2. 检查 `ModuleFederationPlugin` 中的 `exposes`字段：
+
+```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"
+new ModuleFederationPlugin({
+    ...
+    // 确保所有的 key 都以 "./" 开头
+    exposes: { './Foo': './src/<path-to-file>/Foo.tsx' },
+    ...
+  })
+```

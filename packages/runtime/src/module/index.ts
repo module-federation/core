@@ -1,4 +1,4 @@
-import { getFMId, assert, logger } from '../utils';
+import { getFMId, assert, error } from '../utils';
 import { safeToString, ModuleInfo } from '@module-federation/sdk';
 import {
   getShortErrorMsg,
@@ -93,20 +93,12 @@ class Module {
         });
 
       if (typeof remoteEntryExports?.init === 'undefined') {
-        //TODO: RUNTIME-002
-        // params entryGlobalName=>remoteEntryKey
-        getShortErrorMsg(RUNTIME_002, runtimeDescMap, {
-          remoteName: name,
-          remoteEntryUrl: entry,
-          remoteEntryKey,
-        });
-
-        logger.error(
-          'The remote entry interface does not contain "init"',
-          '\n',
-          'Ensure the name of this remote is not reserved or in use. Check if anything already exists on window[nameOfRemote]',
-          '\n',
-          'Ensure that window[nameOfRemote] is returning a {get,init} object.',
+        error(
+          getShortErrorMsg(RUNTIME_002, runtimeDescMap, {
+            remoteName: name,
+            remoteEntryUrl: this.remoteInfo.entry,
+            remoteEntryKey: this.remoteInfo.entryGlobalName,
+          }),
         );
       }
 
