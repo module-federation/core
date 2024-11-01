@@ -116,6 +116,12 @@ export class FederationHost {
       Promise<Response> | void | false
     >(),
   });
+  bridgeHook = new PluginSystem({
+    beforeBridgeRender: new SyncHook<[Record<string, any>], any>(),
+    afterBridgeRender: new SyncHook<[Record<string, any>], any>(),
+    beforeBridgeDestroy: new SyncHook<[Record<string, any>], any>(),
+    afterBridgeDestroy: new SyncHook<[Record<string, any>], any>(),
+  });
 
   constructor(userOptions: UserOptions) {
     // TODO: Validate the details of the options

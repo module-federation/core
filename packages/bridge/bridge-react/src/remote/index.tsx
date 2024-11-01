@@ -9,8 +9,9 @@ import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
-import { registerBridgeLifeCycle } from '../lifecycle';
+// import { registerBridgeLifeCycle } from '../lifecycle';
 import { LoggerInstance, pathJoin } from '../utils';
+import { getInstance } from '@module-federation/runtime';
 
 export const getModuleName = (id: string) => {
   // separate module name without detailed module path
@@ -55,7 +56,8 @@ const RemoteAppWrapper = forwardRef(function (
   props: RemoteAppParams & RenderFnParams,
   ref,
 ) {
-  const bridgeHook = registerBridgeLifeCycle();
+  const host = getInstance();
+  LoggerInstance.log(`RemoteAppWrapper host >>>`, host);
   const RemoteApp = () => {
     LoggerInstance.log(`RemoteAppWrapper RemoteApp props >>>`, { props });
     const {
@@ -96,9 +98,12 @@ const RemoteAppWrapper = forwardRef(function (
           renderProps,
         );
 
-        if (bridgeHook && bridgeHook?.lifecycle?.beforeBridgeRender) {
+        if (
+          host?.bridgeHook &&
+          host?.bridgeHook?.lifecycle?.beforeBridgeRender
+        ) {
           const beforeBridgeRenderRes =
-            bridgeHook?.lifecycle?.beforeBridgeRender.emit({
+            host?.bridgeHook?.lifecycle?.beforeBridgeRender.emit({
               ...renderProps,
             });
           const extraProps =
@@ -124,8 +129,11 @@ const RemoteAppWrapper = forwardRef(function (
               `createRemoteComponent LazyComponent destroy >>>`,
               { moduleName, basename, dom: renderDom.current },
             );
-            if (bridgeHook && bridgeHook?.lifecycle?.afterBridgeDestroy) {
-              bridgeHook?.lifecycle?.afterBridgeDestroy.emit({
+            if (
+              host?.bridgeHook &&
+              host?.bridgeHook?.lifecycle?.afterBridgeDestroy
+            ) {
+              host?.bridgeHook?.lifecycle?.afterBridgeDestroy.emit({
                 moduleName,
                 dom: renderDom.current,
                 basename,

@@ -116,7 +116,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           dom: info.dom,
         });
 
-        // call beforeBridgeDestroy hook
         if (
           bridgeInfo?.hooks &&
           bridgeInfo?.hooks.beforeBridgeDestroy &&
