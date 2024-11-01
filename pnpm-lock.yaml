@@ -2444,9 +2444,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@module-federation/storybook-addon':
-        specifier: workspace:*
-        version: link:../storybook-addon
     devDependencies:
       '@module-federation/runtime':
         specifier: workspace:*
