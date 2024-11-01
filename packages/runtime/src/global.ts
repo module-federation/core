@@ -27,11 +27,26 @@ export interface Federation {
 }
 
 export const nativeGlobal: typeof global = (() => {
-  if (typeof globalThis === 'object') return globalThis;
-  try {
-    return this || new Function('return this')();
-  } catch (e) {
-    if (typeof window === 'object') return window;
+  //@ts-ignore
+  if (typeof __webpack_require__ !== 'undefined') {
+    //@ts-ignore
+    if (__webpack_require__.g) {
+      //@ts-ignore
+      return __webpack_require__.g;
+    }
+    try {
+      return new Function('return this')();
+    } catch (e) {
+      if (typeof window === 'object') return window;
+      if (typeof globalThis === 'object') return globalThis;
+    }
+  } else {
+    if (typeof globalThis === 'object') return globalThis;
+    try {
+      return this || new Function('return this')();
+    } catch (e) {
+      if (typeof window === 'object') return window;
+    }
   }
 })() as typeof global;
 
