@@ -137,5 +137,24 @@
         }
       }
     }
+  },
+  "manifestUrl":{
+    "id":"manifestUrl",
+    "lang":{
+      "zh":{
+        "description":"manifest 请求地址，当设置了 remote entry 为 mf-manifest.json 时，会请求此资源",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      },
+      "en":{
+        "description":"Manifest request address. When the remote entry is set to mf-manifest.json, this resource will be requested.",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      }
+    }
   }
 }
