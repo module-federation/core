@@ -342,6 +342,7 @@ interface DescriptionFile {
  * @param {string[]} descriptionFiles possible description filenames
  * @param {function((Error | null)=, {data?: DescriptionFile, path?: string}=, (checkedDescriptionFilePaths: string[])=): void} callback callback
  * @param {function({data: DescriptionFile}=): boolean} satisfiesDescriptionFileData file data compliance check
+ * @param {Set<string>} [checkedFilePaths] optional set to track checked file paths
  */
 function getDescriptionFile(
   fs: InputFileSystem,
@@ -353,13 +354,14 @@ function getDescriptionFile(
     checkedDescriptionFilePaths?: string[],
   ) => void,
   satisfiesDescriptionFileData?: (data?: DescriptionFile) => boolean,
+  checkedFilePaths: Set<string> = new Set<string>(), // Default to a new Set if not provided
 ) {
   let i = 0;
 
-  // Create an object to hold the function and the checkedFilePaths
+  // Create an object to hold the function and the shared checkedFilePaths
   const satisfiesDescriptionFileDataInternal = {
     check: satisfiesDescriptionFileData,
-    checkedFilePaths: new Set<string>(),
+    checkedFilePaths: checkedFilePaths, // Use the passed Set instance
   };
 
   const tryLoadCurrent = () => {
@@ -378,6 +380,7 @@ function getDescriptionFile(
         descriptionFiles,
         callback,
         satisfiesDescriptionFileDataInternal.check,
+        satisfiesDescriptionFileDataInternal.checkedFilePaths, // Pass the same Set
       );
     }
     const filePath = join(fs, directory, descriptionFiles[i]);
