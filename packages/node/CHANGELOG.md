@@ -1,5 +1,15 @@
 # @module-federation/node
 
+## 2.6.3
+
+### Patch Changes
+
+- Updated dependencies [ec31539]
+  - @module-federation/runtime@0.6.15
+  - @module-federation/enhanced@0.6.15
+  - @module-federation/sdk@0.6.15
+  - @module-federation/utilities@3.1.21
+
 ## 2.6.2
 
 ### Patch Changes

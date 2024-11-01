@@ -96,7 +96,7 @@ type FetchWithRetryOptions = {
   options?: RequestInit;
   retryTimes?: number;
   retryDelay?: number;
-  fallback?: () => string;
+  fallback?: (() => string) | ((url: string | URL | globalThis.Request) => string);
 }
 
 type ScriptWithRetryOptions = {
@@ -143,9 +143,9 @@ type ScriptWithRetryOptions = {
   - The delay time between each retry (in milliseconds).
 
 - **fallback**:
-  - `() => string`
+  - `() => string | ((url: string | URL | globalThis.Request) => string)`
   - optional
-  - Returns the URL of a backup resource after all retries fail.
+  - A function, which can optionally receive the failed URL, that returns a fallback string to be used if all retries fail. This function is called when all retry attempts have failed.
 
 ### ScriptWithRetryOptions 类型说明
 
