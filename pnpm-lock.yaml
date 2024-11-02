@@ -2511,8 +2511,8 @@ importers:
   packages/sdk:
     dependencies:
       isomorphic-rslog:
-        specifier: 0.0.4
-        version: 0.0.4
+        specifier: 0.0.5
+        version: 0.0.5
 
   packages/storybook-addon:
     dependencies:
@@ -30869,6 +30869,12 @@ packages:
   /isomorphic-rslog@0.0.4:
     resolution: {integrity: sha512-KwROYmorP1F97yiPCRENbvJRshPiWFLzU73CSzqO8jUVGiGK8d3RqrKBSTmSLc7MKse69LyYydTq6Xy0xBFE0g==}
     engines: {node: '>=14.17.6'}
+    dev: true
+
+  /isomorphic-rslog@0.0.5:
+    resolution: {integrity: sha512-pkU3vvajRJ0LKLaMFy8Cj7ElbFUdkQKVhUk+DQsVCYsLW4uulU65C2s3l+Sm5OtiOwprzkYYcAIJa/COwCYHWA==}
+    engines: {node: '>=14.17.6'}
+    dev: false
 
   /isomorphic-ws@5.0.0(ws@8.17.1):
     resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}
