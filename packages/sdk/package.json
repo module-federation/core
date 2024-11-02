@@ -42,6 +42,6 @@
     }
   },
   "dependencies": {
-    "isomorphic-rslog": "0.0.4"
+    "isomorphic-rslog": "0.0.5"
   }
 }
