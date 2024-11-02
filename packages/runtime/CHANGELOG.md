@@ -1,5 +1,12 @@
 # @module-federation/runtime
 
+## 0.6.15
+
+### Patch Changes
+
+- ec31539: fix(retry-plugin): fix script retry logic to make error-boundary should render until script retry finished.
+  - @module-federation/sdk@0.6.15
+
 ## 0.6.14
 
 ### Patch Changes

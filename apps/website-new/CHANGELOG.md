@@ -1,5 +1,11 @@
 # website-new
 
+## 1.0.4
+
+### Patch Changes
+
+- 283574b: feat(retry-plugin): allow fallback function to receive failed URL
+
 ## 1.0.3
 
 ### Patch Changes
