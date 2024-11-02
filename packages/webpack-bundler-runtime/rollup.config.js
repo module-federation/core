@@ -27,7 +27,6 @@ function manualChunks(id, projectOptions) {
 
 module.exports = (rollupConfig, projectOptions) => {
   rollupConfig.external = [/@module-federation/];
-  debugger;
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({
       ...c,
