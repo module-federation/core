@@ -1,5 +1,16 @@
 # @module-federation/storybook-addon
 
+## 3.0.2
+
+### Patch Changes
+
+- 3ba956d: chore: re export preset path for rsbuild
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/enhanced@0.6.16
+  - @module-federation/utilities@3.1.22
+
 ## 3.0.1
 
 ### Patch Changes
