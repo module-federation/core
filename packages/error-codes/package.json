@@ -1,0 +1,36 @@
+{
+  "name": "@module-federation/error-codes",
+  "description": "Module Federation Error Codes",
+  "author": "zhanghang <hanric.zhang@gmail.com>",
+  "public": true,
+  "sideEffects": false,
+  "version": "0.6.14",
+  "license": "MIT",
+  "keywords": [
+    "Module Federation",
+    "error codes"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.cjs.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ]
+    }
+  }
+}

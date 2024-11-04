@@ -1,3 +1,9 @@
+import {
+  getShortErrorMsg,
+  RUNTIME_005,
+  RUNTIME_006,
+  runtimeDescMap,
+} from '@module-federation/error-codes';
 import { Federation } from '../global';
 import {
   Options,
@@ -354,6 +360,7 @@ export class SharedHandler {
   loadShareSync<T>(
     pkgName: string,
     extraOptions?: {
+      from?: 'build' | 'runtime';
       customShareInfo?: Partial<Shared>;
       resolver?: (sharedOptions: ShareInfos[string]) => Shared;
     },
@@ -422,12 +429,14 @@ export class SharedHandler {
       const module = shareInfo.get();
 
       if (module instanceof Promise) {
-        throw new Error(`
-        The loadShareSync function was unable to load ${pkgName}. The ${pkgName} could not be found in ${host.options.name}.
-        Possible reasons for failure: \n
-        1. The ${pkgName} share was registered with the 'get' attribute, but loadShare was not used beforehand.\n
-        2. The ${pkgName} share was not registered with the 'lib' attribute.\n
-      `);
+        const errorCode =
+          extraOptions?.from === 'build' ? RUNTIME_005 : RUNTIME_006;
+        throw new Error(
+          getShortErrorMsg(errorCode, runtimeDescMap, {
+            hostName: host.options.name,
+            sharedPkgName: pkgName,
+          }),
+        );
       }
 
       shareInfo.lib = module;
@@ -443,12 +452,10 @@ export class SharedHandler {
     }
 
     throw new Error(
-      `
-        The loadShareSync function was unable to load ${pkgName}. The ${pkgName} could not be found in ${host.options.name}.
-        Possible reasons for failure: \n
-        1. The ${pkgName} share was registered with the 'get' attribute, but loadShare was not used beforehand.\n
-        2. The ${pkgName} share was not registered with the 'lib' attribute.\n
-      `,
+      getShortErrorMsg(RUNTIME_006, runtimeDescMap, {
+        hostName: host.options.name,
+        sharedPkgName: pkgName,
+      }),
     );
   }
 
