@@ -1,0 +1,22 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='TYPE-001'/>
+
+## Reasons
+
+When compiling the exported (`exposes`) file TS type, the current project's `tsconfig.json` will be used. If the configuration file is missing some properties, the build type will fail.
+
+## Solutions
+
+Execute the `cmd` command in the error message parameter in the terminal, and repair the file or `tsconfig` according to the error message.
+
+If the `cmd` command is executed without an error, but the error TS compilation fails is still reported, you need to check the `exposes` field in `ModuleFederationPlugin`:
+
+```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"
+new ModuleFederationPlugin({
+    ...
+    // Make sure all keys start with "./"
+    exposes: { './Foo': './src/<path-to-file>/Foo.tsx' },
+    ...
+  })
+```

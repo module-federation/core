@@ -1,0 +1,11 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='RUNTIME-007'/>
+
+## Reasons
+
+The remote entry is set to the version number instead of the resource address, and the deployment platform does not deliver the correct data information, causing this problem.
+
+## Solutions
+
+Check whether the globalSnapshot contains an object with the key `${moduleName}:${moduleInfo.version}`. If not, you need to check whether the deployment platform data delivery information link is abnormal.
