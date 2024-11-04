@@ -49,9 +49,9 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
       '@module-federation/bridge-react',
     );
     // Check whether react exists
-    if (
-      (fs.existsSync(reactPath) && !this._options?.bridge) ||
-      !this._options.bridge?.disableAlias
+if (
+      fs.existsSync(reactPath) && 
+      (!this._options?.bridge || !this._options.bridge.disableAlias)
     ) {
       new ReactBridgePlugin({
         moduleFederationOptions: this._options,
