@@ -29,6 +29,7 @@ module.exports = (rollupConfig, projectOptions) => {
           return 'polyfills';
         }
       },
+      hoistTransitiveImports: false,
     }));
   } else {
     rollupConfig.output = {
@@ -38,6 +39,7 @@ module.exports = (rollupConfig, projectOptions) => {
           return 'polyfills';
         }
       },
+      hoistTransitiveImports: false,
     };
   }
 

@@ -1,26 +1,44 @@
 const copy = require('rollup-plugin-copy');
 
+function manualChunks(id, projectOptions) {
+  // if (id.includes(projectOptions.main)) {
+  //   return;
+  // }
+  // if (
+  //   projectOptions.additionalEntryPoints.some((entryPoint) => {
+  //     return id.includes(entryPoint);
+  //   })
+  // ) {
+  //   return;
+  // }
+  if (id.includes('@swc/helpers')) {
+    return 'polyfills';
+  }
+  // if (!id.includes('webpack-bundler-runtime')) {
+  //   return;
+  // }
+  // if (id.endsWith('types.ts')) {
+  //   return;
+  // }
+  // if (id.endsWith('.d.ts')) return;
+  // const cName = id.split('src/')[1].replace('/', '_').replace('.ts', '');
+  // return cName;
+}
+
 module.exports = (rollupConfig, projectOptions) => {
   rollupConfig.external = [/@module-federation/];
+
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({
       ...c,
-      manualChunks: (id) => {
-        debugger;
-        if (id.includes('@swc/helpers')) {
-          return 'polyfills';
-        }
-      },
+      manualChunks: (id) => manualChunks(id, projectOptions),
+      hoistTransitiveImports: false,
     }));
   } else {
     rollupConfig.output = {
       ...rollupConfig.output,
-      manualChunks: (id) => {
-        debugger;
-        if (id.includes('@swc/helpers')) {
-          return 'polyfills';
-        }
-      },
+      manualChunks: (id) => manualChunks(id, projectOptions),
+      hoistTransitiveImports: false,
     };
   }
 
