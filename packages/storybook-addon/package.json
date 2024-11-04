@@ -18,11 +18,19 @@
     "README.md"
   ],
   "author": "Fiodorov Andrei <hello@fyodorovandrei.com> (https://github.com/fyodorovandrei)",
+  "main": "dist/src/index.js",
+  "module": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/src/index.js",
       "require": "./dist/src/index.js",
-      "types": "./dist/src/indexd.ts"
+      "types": "./dist/src/index.d.ts"
+    },
+    "./preset": {
+      "import": "./dist/preset.js",
+      "require": "./dist/preset.js",
+      "types": "./dist/preset.d.ts"
     },
     "./*": "./*"
   },
@@ -33,9 +41,11 @@
       ]
     }
   },
-  "devDependencies": {
+  "dependencies": {
     "@module-federation/enhanced": "workspace:*",
-    "@module-federation/sdk": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
+  },
+  "devDependencies": {
     "@module-federation/utilities": "workspace:*",
     "@rsbuild/core": "^1.0.19",
     "@storybook/core-common": "7.6.20",
