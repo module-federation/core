@@ -2530,6 +2530,12 @@ importers:
 
   packages/storybook-addon:
     dependencies:
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../enhanced
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../sdk
       '@nx/react':
         specifier: ~16.0.0 || ~17.0.0 || ~17.2.0
         version: 17.2.8(@swc-node/register@1.10.9)(@swc/core@1.7.26)(@types/node@20.12.14)(eslint@8.57.1)(js-yaml@4.1.0)(nx@18.3.5)(typescript@5.5.2)(verdaccio@5.29.2)(webpack@5.93.0)
@@ -2537,12 +2543,6 @@ importers:
         specifier: ~16.0.0 || ~17.0.0 || ~17.2.0
         version: 17.2.8(@rspack/core@1.0.8)(@swc-node/register@1.10.9)(@swc/core@1.7.26)(@types/node@20.12.14)(esbuild@0.18.20)(html-webpack-plugin@5.6.2)(nx@18.3.5)(typescript@5.5.2)(verdaccio@5.29.2)
     devDependencies:
-      '@module-federation/enhanced':
-        specifier: workspace:*
-        version: link:../enhanced
-      '@module-federation/sdk':
-        specifier: workspace:*
-        version: link:../sdk
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../utilities
@@ -31846,8 +31846,6 @@ packages:
       webpack: '*'
     peerDependenciesMeta:
       webpack:
-        optional: true
-      webpack-sources:
         optional: true
     dependencies:
       webpack: 5.93.0(@swc/core@1.7.26)(esbuild@0.18.20)

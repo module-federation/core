@@ -17,7 +17,7 @@ const config: StorybookConfig = {
   },
   addons: [
     {
-      name: '@module-federation/storybook-addon/preset.js',
+      name: '@module-federation/storybook-addon/preset',
       options: {
         remotes: {
           'rslib-module':
