@@ -18,8 +18,16 @@ nx serve rslib-module
 
 Dev package
 
+1. 
+
 ```
-nx serve rslib-module & nx storybook rslib-module
+nx serve rslib-module
+```
+
+2.
+
+```
+nx storybook rslib-module
 ```
 
 visit http://localhost:6006

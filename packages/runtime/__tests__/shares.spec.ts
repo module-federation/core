@@ -485,7 +485,7 @@ describe('eager shared', () => {
         version: string;
         name: string;
       }>('none-eager-react');
-    }).toThrowError('The loadShareSync');
+    }).toThrowError('Invalid loadShareSync');
   });
 });
 

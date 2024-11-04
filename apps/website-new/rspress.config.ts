@@ -1,6 +1,7 @@
 import * as path from 'path';
 import { defineConfig } from 'rspress/config';
 import { moduleFederationPluginOverview } from './src/moduleFederationPluginOverview';
+import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
 
 const getNavbar = (lang: string) => {
   const cn = lang === 'zh';
@@ -70,6 +71,11 @@ export default defineConfig({
       },
     ],
   },
+  plugins: [
+    pluginAnnotationWords({
+      wordsMapPath: 'words-map.json',
+    }),
+  ],
   builderConfig: {
     plugins: [moduleFederationPluginOverview],
     tools: {
