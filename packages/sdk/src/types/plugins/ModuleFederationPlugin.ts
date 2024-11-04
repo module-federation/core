@@ -237,7 +237,12 @@ export interface ModuleFederationPluginOptions {
   experiments?: {
     federationRuntime?: false | 'hoisted';
   };
-  bridge?: {
+bridge?: {
+    /**
+     * Disables the default alias setting in the bridge.
+     * When true, users must manually handle basename through root component props.
+     * @default false
+     */
     disableAlias?: boolean;
   };
 }
