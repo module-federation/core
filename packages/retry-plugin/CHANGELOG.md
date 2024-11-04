@@ -1,5 +1,13 @@
 # @module-federation/retry-plugin
 
+## 0.6.15
+
+### Patch Changes
+
+- ec31539: fix(retry-plugin): fix script retry logic to make error-boundary should render until script retry finished.
+- 283574b: feat(retry-plugin): allow fallback function to receive failed URL
+  - @module-federation/sdk@0.6.15
+
 ## 0.6.14
 
 ### Patch Changes

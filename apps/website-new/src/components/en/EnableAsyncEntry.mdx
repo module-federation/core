@@ -1,0 +1,24 @@
+If the `@module-federation/modern-js` plug-in is used, the corresponding asynchronous entry will be enabled based on the builder type by default.
+
+But if it is [build mode](https://modernjs.dev/en/guides/concept/entries.html#build-mode-entry), then you still need to set the asynchronous entry manually.
+
+Next, we will demonstrate how to enable asynchronous entry.
+
+Create the bootstrap.js file and copy the contents of the original entry file here:
+
+```diff title="bootstrap.js"
++ import React from 'react';
++ import ReactDOM from 'react-dom';
++ import App from './App';
++ ReactDOM.render(<App />, document.getElementById('root'));
+```
+
+Modify the content of the original entry file and reference bootstrap.js instead:
+
+```diff title="index.js"
++ import('./bootstrap');
+- import React from 'react';
+- import ReactDOM from 'react-dom';
+- import App from './App';
+- ReactDOM.render(<App />, document.getElementById('root'));
+```

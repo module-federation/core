@@ -1,5 +1,13 @@
 # @module-federation/webpack-bundler-runtime
 
+## 0.6.15
+
+### Patch Changes
+
+- Updated dependencies [ec31539]
+  - @module-federation/runtime@0.6.15
+  - @module-federation/sdk@0.6.15
+
 ## 0.6.14
 
 ### Patch Changes

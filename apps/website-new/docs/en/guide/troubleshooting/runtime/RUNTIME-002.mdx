@@ -1,0 +1,18 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+import Table from '@components/Table'
+
+<ErrorCodeTitle code='RUNTIME-002'/>
+
+
+## Reasons
+
+Can not get remote container `init` function.
+
+The remote container should provide an object which value is `{ get, init }`. However, the `init` is `undefined` during this load.
+
+## Solutions
+
+Check in the following order:
+
+1. Before loading the producer, enter window[remoteEntryKey] in `terminal` to check whether this object is occupied. If so, you need to rename the producer [name](../../../configure/name#name)
+2. If the project builder is rspack, check whether [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) is set in the final build configuration. If so, delete this configuration.

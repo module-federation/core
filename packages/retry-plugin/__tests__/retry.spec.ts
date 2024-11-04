@@ -136,4 +136,22 @@ describe('fetchWithRetry', () => {
       }),
     ).rejects.toThrow('Json parse error');
   });
+
+  it('should build fallback URL from remote after retries fail', async () => {
+    mockErrorFetch();
+    const retryTimes = 3;
+    const responsePromise = fetchWithRetry({
+      url: 'https://example.com',
+      retryTimes,
+      retryDelay: 0,
+      fallback: (url) => `${url}/fallback`,
+    });
+    vi.advanceTimersByTime(2000 * retryTimes);
+
+    await expect(responsePromise).rejects.toThrow(
+      'The request failed three times and has now been abandoned',
+    );
+    expect(fetch).toHaveBeenCalledTimes(5); //first fetch + retryTimes fetch
+    expect(fetch).toHaveBeenLastCalledWith('https://example.com/fallback', {});
+  });
 });

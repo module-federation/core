@@ -3,7 +3,7 @@ const copy = require('rollup-plugin-copy');
 
 const FEDERATION_DEBUG = process.env.FEDERATION_DEBUG || '';
 
-module.exports = (rollupConfig, projectOptions) => {
+module.exports = (rollupConfig) => {
   rollupConfig.input = {
     index: 'packages/runtime/src/index.ts',
     types: 'packages/runtime/src/types.ts',
@@ -29,6 +29,7 @@ module.exports = (rollupConfig, projectOptions) => {
           return 'polyfills';
         }
       },
+      hoistTransitiveImports: false,
     }));
   } else {
     rollupConfig.output = {
@@ -38,6 +39,7 @@ module.exports = (rollupConfig, projectOptions) => {
           return 'polyfills';
         }
       },
+      hoistTransitiveImports: false,
     };
   }
 

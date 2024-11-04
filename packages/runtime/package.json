@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime",
-  "version": "0.6.14",
+  "version": "0.6.15",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
@@ -50,6 +50,7 @@
     }
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/error-codes": "workspace:*"
   }
 }

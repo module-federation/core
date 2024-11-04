@@ -1,5 +1,14 @@
 # @module-federation/modern-js
 
+## 0.6.15
+
+### Patch Changes
+
+- d1e0f3e: fix(modern-js-plugin): set cors responseHeaders as \*
+  - @module-federation/node@2.6.3
+  - @module-federation/enhanced@0.6.15
+  - @module-federation/sdk@0.6.15
+
 ## 0.6.14
 
 ### Patch Changes
