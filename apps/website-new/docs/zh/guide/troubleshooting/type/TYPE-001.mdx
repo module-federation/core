@@ -1,0 +1,22 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='TYPE-001'/>
+
+## 原因
+
+编译导出（`exposes`）的文件 TS 类型时，会使用当前项目的 `tsconfig.json` 。如果配置文件有缺失一些属性会导致构建类型失败。
+
+## 解决方法
+
+在 terminal 中执行报错信息参数中的 `cmd` 命令，根据错误信息对文件或者 `tsconfig` 进行修复。
+
+若 `cmd` 命令执行无报错，但仍然报错 TS 编译失败，需要检查 `ModuleFederationPlugin` 中的 `exposes`字段：
+
+```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"
+new ModuleFederationPlugin({
+    ...
+    // 确保所有的 key 都以 "./" 开头
+    exposes: { './Foo': './src/<path-to-file>/Foo.tsx' },
+    ...
+  })
+```

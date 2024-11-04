@@ -1,0 +1,74 @@
+# Other
+
+This section is a collection of common issues related to the implementation of `Module Federation` in general(not specific error code).
+The main goal is to provide additional context and solution paths for beginners not familiar with the fundamental ways of how `Module Federation` is working at its core.
+
+## Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+#### Error Message
+:::danger Browser Error Message
+Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+
+You might have mismatching versions of React and the renderer (such as React DOM)
+
+You might be breaking the Rules of Hooks
+
+You might have more than one copy of React in the same app
+:::
+
+:::danger Browser Error Message
+Uncaught TypeError: Cannot read properties on null (reading `useState`)
+:::
+
+#### Solution
+
+This error is a React multi-instance problem, which usually occurs when react does not reuse the same instance.
+This problem can be avoided by setting `shared` and setting `singleton: true` singleton mode.
+
+```ts title="modern.config.js"
+{
+    ...
+    new ModuleFederationPlugin({
+            ...,
+         // Default basic configuration
+         // shared: [
+         //   'react',
+         //   'react-dom',
+         //   'my-custom-module'
+         // ]
+
+         // Configuration with more specificity
+            shared: {
+                react: { singleton: true, },
+                'react-dom': { singleton: true, },
+                'my-custom-module': { singleton: true, },
+                ...
+            },
+        })
+      ])
+  }
+```
+
+## Unable to compile federated types, Error: compile TS failed
+
+#### Error Message
+:::danger Browser Error Message
+Unable to compile federated types, Error: compile TS failed, the original command is 'npx tsc --project file-path.json'.
+:::
+
+:::danger Browser Error Message
+Error: ENOENT: no such file or directory, open 'project-path/rspack_hmr/application-name/dist/@mf-types.zip'
+:::
+
+#### Solution
+
+1. Execute `npx tsc --project file-path.json` according to the error message to solve all type problems encountered.
+2. Check your `ModuleFederationPlugin` config field `exposes`:
+
+```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"
+new ModuleFederationPlugin({
+    ...
+    // Make sure both key and value start with "./"
+    exposes: { './Foo': './src/<path-to-file>/Foo.tsx' },
+    ...
+  })
+```

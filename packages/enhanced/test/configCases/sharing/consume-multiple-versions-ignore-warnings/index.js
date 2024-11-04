@@ -47,7 +47,7 @@ it('should be able to consume different shared module version depending on conte
     ),
   ).toBe(true);
   expect(() => require('my-module3')).toThrowError(
-    'The loadShareSync function was unable to load shared',
+    'Invalid loadShareSync function',
   );
   expect(require('my-module4')).toBe('shared@9.9.9');
   // expectWarning();

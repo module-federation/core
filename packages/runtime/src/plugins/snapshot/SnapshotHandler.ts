@@ -6,12 +6,14 @@ import {
   isManifestProvider,
   isBrowserEnv,
 } from '@module-federation/sdk';
-import { Optional, Options, Remote } from '../../type';
 import {
-  isRemoteInfoWithEntry,
-  error,
-  getRemoteEntryInfoFromSnapshot,
-} from '../../utils';
+  getShortErrorMsg,
+  RUNTIME_003,
+  RUNTIME_007,
+  runtimeDescMap,
+} from '@module-federation/error-codes';
+import { Options, Remote } from '../../type';
+import { isRemoteInfoWithEntry, error } from '../../utils';
 import {
   getGlobalSnapshot,
   setGlobalSnapshotInfoByModuleInfo,
@@ -254,18 +256,13 @@ export class SnapshotHandler {
           globalSnapshot: globalSnapshotRes,
         };
       } else {
-        error(`
-          Cannot get remoteSnapshot with the name: '${
-            moduleInfo.name
-          }', version: '${
-            moduleInfo.version
-          }' from __FEDERATION__.moduleInfo. The following reasons may be causing the problem:\n
-          1. The Deploy platform did not deliver the correct data. You can use __FEDERATION__.moduleInfo to check the remoteInfo.\n
-          2. The remote '${moduleInfo.name}' version '${
-            moduleInfo.version
-          }' is not released.\n
-          The transformed module info: ${JSON.stringify(globalSnapshotRes)}
-        `);
+        error(
+          getShortErrorMsg(RUNTIME_007, runtimeDescMap, {
+            hostName: moduleInfo.name,
+            hostVersion: moduleInfo.version,
+            globalSnapshot: JSON.stringify(globalSnapshotRes),
+          }),
+        );
       }
     }
   }
@@ -304,9 +301,15 @@ export class SnapshotHandler {
       } catch (err) {
         delete this.manifestLoading[manifestUrl];
         error(
-          `Failed to get manifestJson for ${moduleInfo.name}. The manifest URL is ${manifestUrl}. Please ensure that the manifestUrl is accessible.
-          \n Error message:
-          \n ${err}`,
+          getShortErrorMsg(
+            RUNTIME_003,
+            runtimeDescMap,
+            {
+              manifestUrl,
+              moduleName: moduleInfo.name,
+            },
+            `${err}`,
+          ),
         );
       }
     };
