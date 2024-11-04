@@ -1,5 +1,20 @@
 # @module-federation/enhanced
 
+## 0.6.16
+
+### Patch Changes
+
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/data-prefetch@0.6.16
+  - @module-federation/runtime-tools@0.6.16
+  - @module-federation/managers@0.6.16
+  - @module-federation/manifest@0.6.16
+  - @module-federation/bridge-react-webpack-plugin@0.6.16
+  - @module-federation/dts-plugin@0.6.16
+  - @module-federation/rspack@0.6.16
+
 ## 0.6.15
 
 ### Patch Changes
