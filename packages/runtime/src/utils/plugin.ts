@@ -16,6 +16,7 @@ export function registerPlugins<
     | FederationHost['sharedHandler']['hooks']
     | FederationHost['remoteHandler']['hooks']
     | Module['host']['loaderHook']
+    | Module['host']['bridgeHook']
   >,
 ) {
   const globalPlugins = getGlobalHostPlugins();

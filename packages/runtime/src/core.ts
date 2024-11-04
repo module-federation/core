@@ -280,6 +280,7 @@ export class FederationHost {
       this.sharedHandler.hooks,
       this.snapshotHandler.hooks,
       this.loaderHook,
+      this.bridgeHook,
     ]);
     // Merge plugin
     this.options.plugins = this.options.plugins.reduce((res, plugin) => {
