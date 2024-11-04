@@ -1,5 +1,18 @@
 # @module-federation/nextjs-mf
 
+## 8.7.4
+
+### Patch Changes
+
+- 3b3c488: add warning about end of support for next
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/webpack-bundler-runtime@0.6.16
+  - @module-federation/runtime@0.6.16
+  - @module-federation/enhanced@0.6.16
+  - @module-federation/node@2.6.4
+
 ## 8.7.3
 
 ### Patch Changes
