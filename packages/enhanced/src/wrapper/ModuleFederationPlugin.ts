@@ -53,9 +53,13 @@ if (
       fs.existsSync(reactPath) && 
       (!this._options?.bridge || !this._options.bridge.disableAlias)
     ) {
-      new ReactBridgePlugin({
-        moduleFederationOptions: this._options,
-      }).apply(compiler);
+try {
+        new ReactBridgePlugin({
+          moduleFederationOptions: this._options,
+        }).apply(compiler);
+      } catch (error) {
+        throw new Error(`Failed to initialize ReactBridgePlugin: ${error.message}`);
+      }
     }
   }
 
