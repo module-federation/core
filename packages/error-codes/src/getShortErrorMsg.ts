@@ -9,7 +9,7 @@ export const getShortErrorMsg = (
   args?: Record<string, unknown>,
   originalErrorMsg?: string,
 ) => {
-  const msg = [errorDescMap[errorCode]];
+  const msg = [`${[errorDescMap[errorCode]]} #${errorCode}`];
   args && msg.push(`args: ${JSON.stringify(args)}`);
   msg.push(getDocsUrl(errorCode));
   originalErrorMsg && msg.push(`Original Error Message:\n ${originalErrorMsg}`);
