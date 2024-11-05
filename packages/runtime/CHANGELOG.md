@@ -15,8 +15,8 @@
 - Updated dependencies [4eb09e7]
 - Updated dependencies [206b56d]
 - Updated dependencies [849ef9c]
-  - @module-federation/sdk@1.0.0
-  - @module-federation/error-codes@1.0.0
+  - @module-federation/sdk@0.7.0
+  - @module-federation/error-codes@0.7.0
 
 ## 0.6.16
 

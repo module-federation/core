@@ -9,12 +9,12 @@
 - Updated dependencies [4eb09e7]
 - Updated dependencies [3942740]
 - Updated dependencies [206b56d]
-  - @module-federation/sdk@1.0.0
-  - @module-federation/bridge-react-webpack-plugin@1.0.0
-  - @module-federation/runtime-tools@1.0.0
-  - @module-federation/managers@1.0.0
-  - @module-federation/manifest@1.0.0
-  - @module-federation/dts-plugin@1.0.0
+  - @module-federation/sdk@0.7.0
+  - @module-federation/bridge-react-webpack-plugin@0.7.0
+  - @module-federation/runtime-tools@0.7.0
+  - @module-federation/managers@0.7.0
+  - @module-federation/manifest@0.7.0
+  - @module-federation/dts-plugin@0.7.0
 
 ## 0.6.16
 

@@ -9,8 +9,8 @@
 - Updated dependencies [4eb09e7]
 - Updated dependencies [3942740]
 - Updated dependencies [206b56d]
-  - @module-federation/sdk@1.0.0
-  - @module-federation/bridge-shared@1.0.0
+  - @module-federation/sdk@0.7.0
+  - @module-federation/bridge-shared@0.7.0
 
 ## 0.6.16
 

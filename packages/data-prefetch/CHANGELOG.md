@@ -10,8 +10,8 @@
 - Updated dependencies [879ad87]
 - Updated dependencies [4eb09e7]
 - Updated dependencies [206b56d]
-  - @module-federation/runtime@1.0.0
-  - @module-federation/sdk@1.0.0
+  - @module-federation/runtime@0.7.0
+  - @module-federation/sdk@0.7.0
 
 ## 0.6.16
 

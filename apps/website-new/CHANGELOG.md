@@ -6,7 +6,7 @@
 
 - e44d7fa: fix: parameter url for fetch options should not be necessary
 - Updated dependencies [849ef9c]
-  - @module-federation/error-codes@1.0.0
+  - @module-federation/error-codes@0.7.0
 
 ## 1.0.4
 

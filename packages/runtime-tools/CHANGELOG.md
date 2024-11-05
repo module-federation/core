@@ -9,8 +9,8 @@
 - Updated dependencies [54bfd1c]
 - Updated dependencies [879ad87]
 - Updated dependencies [206b56d]
-  - @module-federation/runtime@1.0.0
-  - @module-federation/webpack-bundler-runtime@1.0.0
+  - @module-federation/runtime@0.7.0
+  - @module-federation/webpack-bundler-runtime@0.7.0
 
 ## 0.6.16
 
