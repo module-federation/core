@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "8.7.3",
+  "version": "8.7.4",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -15,6 +15,9 @@
     "dist/",
     "README.md"
   ],
+  "scripts": {
+    "postinstall": "echo \"Deprecation Notice: We intend to deprecate 'nextjs-mf'. Please see https://github.com/module-federation/core/issues/3153 for more details.\""
+  },
   "exports": {
     ".": "./dist/src/index.js",
     "./utils": "./dist/utils/index.js",

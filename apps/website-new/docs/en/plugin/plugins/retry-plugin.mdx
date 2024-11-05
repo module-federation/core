@@ -184,7 +184,7 @@ init({
         // the retry resource url
         url: 'http://localhost:2001/-mf-manifest.json',
         // after all retried failed, set a fallback function to guarantee a fallback resource
-        fallback: () => 'http://localhost:2002/mf-manifest.json',
+        fallback: (url: string) => 'http://localhost:2002/mf-manifest.json',
       },
       script: {
         // the retry times

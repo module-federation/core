@@ -1,5 +1,14 @@
 # @module-federation/runtime-tools
 
+## 0.6.16
+
+### Patch Changes
+
+- 024df60: disable hoistTransitiveImports for better tree shake
+- Updated dependencies [024df60]
+  - @module-federation/webpack-bundler-runtime@0.6.16
+  - @module-federation/runtime@0.6.16
+
 ## 0.6.15
 
 ### Patch Changes

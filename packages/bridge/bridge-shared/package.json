@@ -1,10 +1,16 @@
 {
   "name": "@module-federation/bridge-shared",
-  "version": "0.6.15",
+  "version": "0.6.16",
   "publishConfig": {
     "access": "public"
   },
   "author": "zhouxiao <codingzx@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core",
+    "directory": "packages/bridge-shared"
+  },
   "type": "module",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",

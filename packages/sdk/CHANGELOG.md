@@ -1,5 +1,12 @@
 # @module-federation/sdk
 
+## 0.6.16
+
+### Patch Changes
+
+- f779188: update rslog package version to resolve type error
+- 024df60: disable hoistTransitiveImports for better tree shake
+
 ## 0.6.15
 
 ## 0.6.14
