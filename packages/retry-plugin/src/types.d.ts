@@ -1,5 +1,5 @@
 export interface FetchWithRetryOptions {
-  url: string;
+  url?: string;
   options?: RequestInit;
   retryTimes?: number;
   retryDelay?: number;
@@ -19,3 +19,8 @@ export type RetryPluginParams = {
   fetch?: FetchWithRetryOptions;
   script?: ScriptWithRetryOptions;
 };
+
+export type RequiredFetchWithRetryOptions = Required<
+  Pick<FetchWithRetryOptions, 'url'>
+> &
+  Omit<FetchWithRetryOptions, 'url'>;
