@@ -5,6 +5,12 @@
     "access": "public"
   },
   "author": "zhouxiao <codingzx@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core",
+    "directory": "packages/bridge-react-webpack-plugin"
+  },
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.cjs.d.ts",
