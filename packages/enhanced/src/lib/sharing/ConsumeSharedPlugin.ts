@@ -241,7 +241,7 @@ class ConsumeSharedPlugin {
                   }
                   const { data } = /** @type {DescriptionFile} */ result || {};
                   if (!data) {
-                    if (checkedDescriptionFilePaths) {
+                    if (checkedDescriptionFilePaths?.length) {
                       requiredVersionWarning(
                         [
                           `Unable to find required version for "${packageName}" in description file/s`,
