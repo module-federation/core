@@ -11,3 +11,4 @@ apps/website-new/docs
 
 /.nx/workspace-data
 /.nx/cache
+/assemble-release-plan

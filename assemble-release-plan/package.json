@@ -1,0 +1,60 @@
+{
+  "name": "@changesets/assemble-release-plan",
+  "version": "6.0.4",
+  "description": "Reads changesets and adds information on dependents that need bumping",
+  "main": "dist/changesets-assemble-release-plan.cjs.js",
+  "module": "dist/changesets-assemble-release-plan.esm.js",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/changesets-assemble-release-plan.cjs.mjs",
+        "default": "./dist/changesets-assemble-release-plan.cjs.js"
+      },
+      "module": "./dist/changesets-assemble-release-plan.esm.js",
+      "import": "./dist/changesets-assemble-release-plan.cjs.mjs",
+      "default": "./dist/changesets-assemble-release-plan.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "test": "jest",
+    "build": "preconstruct build",
+    "watch": "preconstruct watch",
+    "postinstall": "preconstruct dev",
+    "lint": "yarn eslint . --ext .ts,.tsx,.js",
+    "types:check": "tsc",
+    "format": "prettier --list-different \"**/*.{js,ts,tsx,md}\"",
+    "format:fix": "prettier --write \"**/*.{js,ts,tsx,md}\"",
+    "changeset": "packages/cli/bin.js",
+    "check-all": "yarn test && yarn types:check && yarn lint && yarn format",
+    "version-packages": "changeset version && yarn format:fix",
+    "release": "yarn build && changeset publish"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/changesets/changesets/tree/main/packages/assemble-release-plan",
+  "dependencies": {
+    "@changesets/errors": "^0.2.0",
+    "@changesets/get-dependents-graph": "^2.1.2",
+    "@changesets/should-skip-package": "^0.1.1",
+    "@changesets/types": "^6.0.0",
+    "@manypkg/get-packages": "^1.1.3",
+    "semver": "^7.5.3"
+  },
+  "devDependencies": {
+    "@changesets/config": "*",
+    "@preconstruct/cli": "^2.8.1",
+    "@babel/preset-typescript": "^7.26.0",
+    "@babel/preset-env": "^7.26.0"
+  },
+  "preconstruct": {
+    "packages": [
+      "."
+    ],
+    "exports": {
+      "importConditionDefaultExport": "default"
+    },
+    "___experimentalFlags_WILL_CHANGE_IN_PATCH": {
+      "importsConditions": true
+    }
+  }
+}
