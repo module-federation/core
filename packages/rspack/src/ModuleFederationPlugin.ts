@@ -127,7 +127,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     );
 
     // Check whether react exists
-    if (fs.existsSync(reactPath)) {
+    if (
+      fs.existsSync(reactPath) &&
+      (!options?.bridge || !options.bridge.disableAlias)
+    ) {
       new ReactBridgePlugin({
         moduleFederationOptions: this._options,
       }).apply(compiler);
