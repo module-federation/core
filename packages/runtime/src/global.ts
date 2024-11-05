@@ -28,8 +28,10 @@ export interface Federation {
 
 export const nativeGlobal: typeof global = (() => {
   try {
-    return new Function('return this')();
+    // get real window (incase of sandbox)
+    return document.defaultView;
   } catch {
+    // node env
     return globalThis;
   }
 })() as typeof global;
