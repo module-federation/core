@@ -3,6 +3,7 @@ import { moduleFederationPlugin } from '@module-federation/sdk';
 import { ManifestManager } from './ManifestManager';
 import { StatsManager } from './StatsManager';
 import { PLUGIN_IDENTIFIER } from './constants';
+import logger from './logger';
 import { StatsInfo, ManifestInfo, ResourceInfo } from './types';
 
 export class StatsPlugin implements WebpackPluginInstance {
@@ -33,7 +34,7 @@ export class StatsPlugin implements WebpackPluginInstance {
       if (err instanceof Error) {
         err.message = `[ ${PLUGIN_IDENTIFIER} ]: Manifest will not generate, because: ${err.message}`;
       }
-      console.error(err);
+      logger.error(err);
       this._enable = false;
     }
   }

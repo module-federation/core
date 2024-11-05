@@ -1,7 +1,9 @@
 import React from 'react';
-import { Logger } from '@module-federation/bridge-shared';
+import { createLogger } from '@module-federation/sdk';
 
-export const LoggerInstance = new Logger('bridge-react');
+export const LoggerInstance = createLogger(
+  '[ Module Federation Bridge React ]',
+);
 
 type typeReact = typeof React;
 

@@ -1,4 +1,4 @@
-# [1.0.0-canary.1](https://github.com/module-federation/core/compare/native-federation-tests-0.2.1...native-federation-tests-1.0.0-canary.1) (2023-11-06)
+# @module-federation/native-federation-tests
 
 ## 0.6.0
 

@@ -6,14 +6,19 @@ title: "Basic Example"
 
 import {Steps, Tabs, Tab, Badge, SourceCode} from '@theme';
 
+:::danger Project Deprecation
+Support for Next.js is ending [read more](https://github.com/module-federation/core/issues/3153)
+:::
 
 <span className="badge-info">
  <Badge text="Next 12" type="info" />
  <Badge text="Next 13" type="info" />
  <Badge text="Next 14" type="info" />
+ <Badge text="Next 15" type="info" />
  <Badge text="SSR (Pages Router)" type="info" />
 </span>
 <Badge text="App Router" type="danger" />
+<Badge text="Not Reccomended" type="warning" />
 #
 
 :::tip Demo Reference
@@ -157,9 +162,9 @@ export default nextConfig;
 "Local Webpack" means you must have webpack installed as a dependency, and next will not use its bundled copy of webpack which cannot be used as it does not export all of Webpacks internals
 
 ```bash title="shell"
-NEXT_PRIVATE_LOCAL_WEBPACK=true next dev
+cross-env NEXT_PRIVATE_LOCAL_WEBPACK=true next dev
 # or
-NEXT_PRIVATE_LOCAL_WEBPACK=true next build
+cross-env NEXT_PRIVATE_LOCAL_WEBPACK=true next build
 ```
 
 `.env` can be set as well, but can be unreliable in setting `NEXT_PRIVATE_LOCAL_WEBPACK` in time.

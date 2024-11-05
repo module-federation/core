@@ -64,7 +64,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeRender) ||
           params?.hooks?.beforeBridgeRender;
 
-        // 可通过beforeBridgeRender返回一个props对象，用于传递额外的 props 参数
+        // you can return a props object through beforeBridgeRender to pass additional props parameters
         const beforeBridgeRenderRes =
           beforeBridgeRender && beforeBridgeRender(info);
         const extraProps =
@@ -115,14 +115,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
-
-        if (
-          bridgeInfo?.hooks &&
-          bridgeInfo?.hooks.beforeBridgeDestroy &&
-          typeof bridgeInfo?.hooks.beforeBridgeDestroy === 'function'
-        ) {
-          bridgeInfo.hooks.beforeBridgeDestroy(info);
-        }
 
         const beforeBridgeDestroy =
           (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeDestroy) ||

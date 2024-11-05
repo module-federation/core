@@ -1,0 +1,18 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='RUNTIME-004'/>
+
+## 原因
+
+找不到匹配的远程模块，该报错可能是由下列x个原因导致：
+1. 未在消费者注册对应生产者信息
+2. requestId 使用了错误的别名或名称
+3. 有注册 `beforeRequest` hook ，并且没有返回正确的数据
+
+## 解决方法
+
+针对原因，有对应的解决方法：
+
+1. 检查是否在消费者注册了本次请求的生产者信息
+2. 比对注册的生产者信息 (name/alias) 是否和 requestId 一致
+3. 检查项目中是否额外注册 `beforeRequest` hook ，并修改参数的运行时插件

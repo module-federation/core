@@ -1,4 +1,43 @@
-## [1.0.1-canary.1](https://github.com/module-federation/core/compare/runtime-1.0.0...runtime-1.0.1-canary.1) (2023-12-06)
+# @module-federation/runtime-tools
+
+## 0.6.16
+
+### Patch Changes
+
+- 024df60: disable hoistTransitiveImports for better tree shake
+- Updated dependencies [024df60]
+  - @module-federation/webpack-bundler-runtime@0.6.16
+  - @module-federation/runtime@0.6.16
+
+## 0.6.15
+
+### Patch Changes
+
+- Updated dependencies [ec31539]
+  - @module-federation/runtime@0.6.15
+  - @module-federation/webpack-bundler-runtime@0.6.15
+
+## 0.6.14
+
+### Patch Changes
+
+- Updated dependencies [ad605d2]
+  - @module-federation/runtime@0.6.14
+  - @module-federation/webpack-bundler-runtime@0.6.14
+
+## 0.6.13
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.13
+- @module-federation/webpack-bundler-runtime@0.6.13
+
+## 0.6.12
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.12
+- @module-federation/webpack-bundler-runtime@0.6.12
 
 ## 0.6.11
 

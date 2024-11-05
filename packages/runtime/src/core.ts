@@ -115,6 +115,16 @@ export class FederationHost {
       [string, RequestInit],
       Promise<Response> | void | false
     >(),
+    getModuleFactory: new AsyncHook<
+      [
+        {
+          remoteEntryExports: RemoteEntryExports;
+          expose: string;
+          moduleInfo: RemoteInfo;
+        },
+      ],
+      Promise<(() => Promise<Module>) | undefined>
+    >(),
   });
   bridgeHook = new PluginSystem({
     beforeBridgeRender: new SyncHook<[Record<string, any>], any>(),
@@ -175,6 +185,7 @@ export class FederationHost {
     pkgName: string,
     extraOptions?: {
       customShareInfo?: Partial<Shared>;
+      from?: 'build' | 'runtime';
       resolver?: (sharedOptions: ShareInfos[string]) => Shared;
     },
   ): () => T | never {

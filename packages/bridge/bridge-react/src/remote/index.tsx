@@ -9,7 +9,6 @@ import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
-// import { registerBridgeLifeCycle } from '../lifecycle';
 import { LoggerInstance, pathJoin } from '../utils';
 import { getInstance } from '@module-federation/runtime';
 

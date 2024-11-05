@@ -1,3 +1,5 @@
-import { Logger } from '@module-federation/sdk';
+import { createLogger } from '@module-federation/sdk';
 
-export default new Logger('[Module Federation Data Prefetch]');
+const logger = createLogger('[ Module Federation Data Prefetch ]');
+
+export default logger;

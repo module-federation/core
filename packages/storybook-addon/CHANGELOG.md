@@ -1,4 +1,23 @@
-## [2.0.1](https://github.com/module-federation/core/compare/storybook-addon-2.0.0...storybook-addon-2.0.1) (2023-12-05)
+# @module-federation/storybook-addon
+
+## 3.0.2
+
+### Patch Changes
+
+- 3ba956d: chore: re export preset path for rsbuild
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/enhanced@0.6.16
+  - @module-federation/utilities@3.1.22
+
+## 3.0.1
+
+### Patch Changes
+
+- 662a820: feat: support storybook dev remote app in rsbuild(rslib) project [#3131](https://github.com/module-federation/core/pull/3131)
+- a5d003e: fix: storybook addon should disable hmr to avoid conflict with remote module
+  - @module-federation/utilities@3.1.21
 
 ## 3.0.0
 

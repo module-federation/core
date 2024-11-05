@@ -4,4 +4,4 @@
 '@module-federation/runtime': patch
 ---
 
-feat: support module isolated reported
+feat: feat: support lifecycyle hooks in module-deferation bridge

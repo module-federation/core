@@ -28,6 +28,15 @@ module.exports = (rollupConfig, _projectOptions) => {
           return 'polyfills';
         }
       },
+      hoistTransitiveImports: false,
+      entryFileNames:
+        c.format === 'esm'
+          ? c.entryFileNames.replace('.js', '.mjs')
+          : c.entryFileNames,
+      chunkFileNames:
+        c.format === 'esm'
+          ? c.chunkFileNames.replace('.js', '.mjs')
+          : c.chunkFileNames,
     }));
   } else {
     rollupConfig.output = {
@@ -37,6 +46,15 @@ module.exports = (rollupConfig, _projectOptions) => {
           return 'polyfills';
         }
       },
+      hoistTransitiveImports: false,
+      entryFileNames:
+        rollupConfig.output.format === 'esm'
+          ? rollupConfig.output.entryFileNames.replace('.js', '.mjs')
+          : rollupConfig.output.entryFileNames,
+      chunkFileNames:
+        rollupConfig.output.format === 'esm'
+          ? rollupConfig.output.chunkFileNames.replace('.js', '.mjs')
+          : rollupConfig.output.chunkFileNames,
     };
   }
 

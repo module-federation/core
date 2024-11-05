@@ -5,6 +5,11 @@ import {
   ModuleInfo,
   GlobalModuleInfo,
 } from '@module-federation/sdk';
+import {
+  getShortErrorMsg,
+  RUNTIME_004,
+  runtimeDescMap,
+} from '@module-federation/error-codes';
 import { Global, getInfoWithoutType, globalLoading } from '../global';
 import {
   Options,
@@ -30,6 +35,7 @@ import {
   getRemoteInfo,
   getRemoteEntryUniqueKey,
   matchRemoteWithNameAndExpose,
+  logger,
 } from '../utils';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
@@ -205,6 +211,7 @@ export class RemoteHandler {
         id: idRes,
         remoteSnapshot,
       } = remoteMatchInfo;
+
       const moduleOrFactory = (await module.get(
         idRes,
         expose,
@@ -336,23 +343,12 @@ export class RemoteHandler {
       host.options.remotes,
       idRes,
     );
-
     assert(
       remoteSplitInfo,
-      `
-        Unable to locate ${idRes} in ${
-          host.options.name
-        }. Potential reasons for failure include:\n
-        1. ${idRes} was not included in the 'remotes' parameter of ${
-          host.options.name || 'the host'
-        }.\n
-        2. ${idRes} could not be found in the 'remotes' of ${
-          host.options.name
-        } with either 'name' or 'alias' attributes.
-        3. ${idRes} is not online, injected, or loaded.
-        4. ${idRes}  cannot be accessed on the expected.
-        5. The 'beforeRequest' hook was provided but did not return the correct 'remoteInfo' when attempting to load ${idRes}.
-      `,
+      getShortErrorMsg(RUNTIME_004, runtimeDescMap, {
+        hostName: host.options.name,
+        requestId: idRes,
+      }),
     );
 
     const { remote: rawRemote } = remoteSplitInfo;
@@ -586,7 +582,7 @@ export class RemoteHandler {
         host.moduleCache.delete(remote.name);
       }
     } catch (err) {
-      console.log('removeRemote fail: ', err);
+      logger.log('removeRemote fail: ', err);
     }
   }
 }

@@ -1,8 +1,8 @@
 import { ref, onMounted, onBeforeUnmount, watch, defineComponent } from 'vue';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { useRoute } from 'vue-router';
-import { registerBridgeLifeCycle } from './lifecycle';
 import { LoggerInstance } from './utils';
+import { getInstance } from '@module-federation/runtime';
 
 export default defineComponent({
   name: 'RemoteApp',
@@ -17,9 +17,9 @@ export default defineComponent({
     const providerInfoRef = ref(null);
     const pathname = ref('');
     const route = useRoute();
-    const bridgeHook = registerBridgeLifeCycle();
 
     const renderComponent = () => {
+      const host = getInstance();
       const providerReturn = props.providerInfo?.();
       providerInfoRef.value = providerReturn;
       const renderProps = {
@@ -33,8 +33,8 @@ export default defineComponent({
         renderProps,
       );
 
-      if (bridgeHook && bridgeHook?.lifecycle?.beforeBridgeRender) {
-        bridgeHook?.lifecycle?.beforeBridgeRender.emit({
+      if (host?.bridgeHook && host?.bridgeHook?.lifecycle?.beforeBridgeRender) {
+        host?.bridgeHook?.lifecycle?.beforeBridgeRender.emit({
           ...renderProps,
         });
       }
@@ -65,20 +65,21 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
+      const host = getInstance();
       LoggerInstance.log(`createRemoteComponent LazyComponent destroy >>>`, {
         ...props,
       });
       watchStopHandle();
-      if (bridgeHook && bridgeHook?.lifecycle?.beforeBridgeRender) {
-        bridgeHook?.lifecycle?.beforeBridgeDestroy.emit({
+
+      (providerInfoRef.value as any)?.destroy({ dom: rootRef.value });
+      if (host?.bridgeHook && host?.bridgeHook?.lifecycle?.afterBridgeDestroy) {
+        host?.bridgeHook?.lifecycle?.afterBridgeDestroy.emit({
           name: props.moduleName,
           dom: rootRef.value,
           basename: props.basename,
           memoryRoute: props.memoryRoute,
         });
       }
-
-      (providerInfoRef.value as any)?.destroy({ dom: rootRef.value });
     });
 
     return () => <div ref={rootRef}></div>;

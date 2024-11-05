@@ -1,5 +1,64 @@
 # @module-federation/rspack
 
+## 0.6.16
+
+### Patch Changes
+
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/runtime-tools@0.6.16
+  - @module-federation/managers@0.6.16
+  - @module-federation/manifest@0.6.16
+  - @module-federation/bridge-react-webpack-plugin@0.6.16
+  - @module-federation/dts-plugin@0.6.16
+
+## 0.6.15
+
+### Patch Changes
+
+- @module-federation/dts-plugin@0.6.15
+- @module-federation/runtime-tools@0.6.15
+- @module-federation/sdk@0.6.15
+- @module-federation/managers@0.6.15
+- @module-federation/manifest@0.6.15
+- @module-federation/bridge-react-webpack-plugin@0.6.15
+
+## 0.6.14
+
+### Patch Changes
+
+- 86b4cdc: fix(rspack): only patchChunkSplit when config set exposes
+- Updated dependencies [ad605d2]
+  - @module-federation/dts-plugin@0.6.14
+  - @module-federation/managers@0.6.14
+  - @module-federation/manifest@0.6.14
+  - @module-federation/sdk@0.6.14
+  - @module-federation/runtime-tools@0.6.14
+  - @module-federation/bridge-react-webpack-plugin@0.6.14
+
+## 0.6.13
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.13
+- @module-federation/runtime-tools@0.6.13
+- @module-federation/managers@0.6.13
+- @module-federation/manifest@0.6.13
+- @module-federation/dts-plugin@0.6.13
+- @module-federation/bridge-react-webpack-plugin@0.6.13
+
+## 0.6.12
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.12
+- @module-federation/runtime-tools@0.6.12
+- @module-federation/managers@0.6.12
+- @module-federation/manifest@0.6.12
+- @module-federation/dts-plugin@0.6.12
+- @module-federation/bridge-react-webpack-plugin@0.6.12
+
 ## 0.6.11
 
 ### Patch Changes
