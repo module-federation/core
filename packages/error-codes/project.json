@@ -13,6 +13,7 @@
         "outputPath": "packages/error-codes/dist",
         "main": "packages/error-codes/src/index.ts",
         "tsConfig": "packages/error-codes/tsconfig.lib.json",
+        "rollupConfig": "packages/error-codes/rollup.config.js",
         "assets": [],
         "project": "packages/error-codes/package.json",
         "compiler": "swc",
