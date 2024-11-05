@@ -1,9 +1,9 @@
 {
   "name": "@module-federation/runtime",
-  "version": "0.6.14",
+  "version": "0.7.0",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "module": "./dist/index.esm.mjs",
   "types": "./dist/index.cjs.d.ts",
   "license": "MIT",
   "publishConfig": {
@@ -16,22 +16,22 @@
   "exports": {
     ".": {
       "types": "./dist/index.cjs.d.ts",
-      "import": "./dist/index.esm.js",
+      "import": "./dist/index.esm.mjs",
       "require": "./dist/index.cjs.js"
     },
     "./helpers": {
       "types": "./dist/helpers.cjs.d.ts",
-      "import": "./dist/helpers.esm.js",
+      "import": "./dist/helpers.esm.mjs",
       "require": "./dist/helpers.cjs.js"
     },
     "./types": {
       "types": "./dist/types.cjs.d.ts",
-      "import": "./dist/types.esm.js",
+      "import": "./dist/types.esm.mjs",
       "require": "./dist/types.cjs.js"
     },
     "./embedded": {
       "types": "./dist/embedded.cjs.d.ts",
-      "import": "./dist/embedded.esm.js",
+      "import": "./dist/embedded.esm.mjs",
       "require": "./dist/embedded.cjs.js"
     },
     "./*": "./*"
@@ -50,6 +50,7 @@
     }
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/error-codes": "workspace:*"
   }
 }

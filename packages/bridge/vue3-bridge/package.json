@@ -1,7 +1,13 @@
 {
   "name": "@module-federation/bridge-vue3",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "version": "0.6.14",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core",
+    "directory": "packages/vue3-bridge"
+  },
+  "version": "0.7.0",
   "publishConfig": {
     "access": "public"
   },

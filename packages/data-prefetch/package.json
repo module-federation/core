@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/data-prefetch",
   "description": "Module Federation Data Prefetch",
-  "version": "0.6.14",
+  "version": "0.7.0",
   "author": "nieyan <nyqykk@foxmail.com>",
   "homepage": "https://github.com/module-federation/core",
   "license": "MIT",
@@ -13,27 +13,27 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.esm.js",
+      "import": "./dist/index.esm.mjs",
       "require": "./dist/index.cjs",
       "types": "./dist/index.cjs.d.ts"
     },
     "./react": {
-      "import": "./dist/react.esm.js",
+      "import": "./dist/react.esm.mjs",
       "require": "./dist/react.cjs.js",
       "types": "./dist/react.cjs.d.ts"
     },
     "./cli": {
-      "import": "./dist/cli.esm.js",
+      "import": "./dist/cli.esm.mjs",
       "require": "./dist/cli.cjs.js",
       "types": "./dist/cli.cjs.d.ts"
     },
     "./babel-plugin": {
-      "import": "./dist/babel.esm.js",
+      "import": "./dist/babel.esm.mjs",
       "require": "./dist/babel.cjs.js",
       "types": "./dist/babel.cjs.d.ts"
     },
     "./universal": {
-      "import": "./dist/universal.esm.js",
+      "import": "./dist/universal.esm.mjs",
       "require": "./dist/universal.cjs.js",
       "types": "./dist/universal.cjs.d.ts"
     }
@@ -58,7 +58,7 @@
     }
   },
   "main": "dist/index.cjs",
-  "module": "dist/index.esm.js",
+  "module": "dist/index.esm.mjs",
   "peerDependencies": {
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0"

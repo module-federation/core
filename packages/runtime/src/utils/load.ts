@@ -9,6 +9,11 @@ import { FederationHost } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
 import { assert } from './logger';
+import {
+  RUNTIME_001,
+  getShortErrorMsg,
+  runtimeDescMap,
+} from '@module-federation/error-codes';
 
 async function loadEsmEntry({
   entry,
@@ -105,12 +110,11 @@ async function loadEntryScript({
 
       assert(
         entryExports,
-        `
-      Unable to use the ${name}'s '${entry}' URL with ${remoteEntryKey}'s globalName to get remoteEntry exports.
-      Possible reasons could be:\n
-      1. '${entry}' is not the correct URL, or the remoteEntry resource or name is incorrect.\n
-      2. ${remoteEntryKey} cannot be used to get remoteEntry exports in the window object.
-    `,
+        getShortErrorMsg(RUNTIME_001, runtimeDescMap, {
+          remoteName: name,
+          remoteEntryUrl: entry,
+          remoteEntryKey,
+        }),
       );
 
       return entryExports;
@@ -182,12 +186,11 @@ async function loadEntryNode({
 
       assert(
         entryExports,
-        `
-      Unable to use the ${name}'s '${entry}' URL with ${remoteEntryKey}'s globalName to get remoteEntry exports.
-      Possible reasons could be:\n
-      1. '${entry}' is not the correct URL, or the remoteEntry resource or name is incorrect.\n
-      2. ${remoteEntryKey} cannot be used to get remoteEntry exports in the window object.
-    `,
+        getShortErrorMsg(RUNTIME_001, runtimeDescMap, {
+          remoteName: name,
+          remoteEntryUrl: entry,
+          remoteEntryKey,
+        }),
       );
 
       return entryExports;

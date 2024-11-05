@@ -1,5 +1,29 @@
 # @module-federation/devtools
 
+## 0.7.0
+
+### Minor Changes
+
+- 3942740: add license information
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@0.7.0
+
+## 0.6.16
+
+### Patch Changes
+
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+
+## 0.6.15
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.15
+
 ## 0.6.14
 
 ### Patch Changes

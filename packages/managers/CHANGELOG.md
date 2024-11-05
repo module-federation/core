@@ -1,5 +1,30 @@
 # @module-federation/managers
 
+## 0.7.0
+
+### Minor Changes
+
+- 206b56d: disable hoistTransitiveImports for better tree shake
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@0.7.0
+
+## 0.6.16
+
+### Patch Changes
+
+- 024df60: disable hoistTransitiveImports for better tree shake
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+
+## 0.6.15
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.15
+
 ## 0.6.14
 
 ### Patch Changes
