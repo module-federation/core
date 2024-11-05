@@ -1,5 +1,23 @@
 # @module-federation/enhanced
 
+## 0.7.0
+
+### Minor Changes
+
+- 4eb09e7: feat: support disable default alias setting in bridge
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [3942740]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@0.7.0
+  - @module-federation/rspack@0.7.0
+  - @module-federation/bridge-react-webpack-plugin@0.7.0
+  - @module-federation/data-prefetch@0.7.0
+  - @module-federation/runtime-tools@0.7.0
+  - @module-federation/managers@0.7.0
+  - @module-federation/manifest@0.7.0
+  - @module-federation/dts-plugin@0.7.0
+
 ## 0.6.16
 
 ### Patch Changes
