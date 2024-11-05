@@ -14,7 +14,7 @@ const bootstrapPath = path.resolve(
   `node_modules/${TEMP_DIR}/storybook-bootstrap.js`,
 );
 const generateBootstrap = (context: string, entryPath: string) => {
-  return `import '${correctImportPath(context, entryPath)}';`;
+  return `import('${correctImportPath(context, entryPath)}');`;
 };
 const writeBootstrap = (context: string, entryPath: string) => {
   if (fs.existsSync(bootstrapPath)) {
