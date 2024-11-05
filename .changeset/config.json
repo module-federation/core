@@ -22,7 +22,8 @@
       "@module-federation/modern-js",
       "@module-federation/retry-plugin",
       "@module-federation/data-prefetch",
-      "@module-federation/rsbuild-plugin"
+      "@module-federation/rsbuild-plugin",
+      "@module-federation/error-codes"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],
