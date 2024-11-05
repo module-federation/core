@@ -152,6 +152,10 @@ export const isLoaded = (shared: Shared) => {
   return Boolean(shared.loaded) || typeof shared.lib === 'function';
 };
 
+const isLoading = (shared: Shared) => {
+  return Boolean(shared.loading);
+};
+
 function findSingletonVersionOrderByVersion(
   shareScopeMap: ShareScopeMap,
   scope: string,
@@ -173,14 +177,17 @@ function findSingletonVersionOrderByLoaded(
   const versions = shareScopeMap[scope][pkgName];
 
   const callback = function (prev: string, cur: string): boolean {
-    if (isLoaded(versions[cur])) {
-      if (isLoaded(versions[prev])) {
+    const isLoadingOrLoaded = (shared: Shared) => {
+      return isLoaded(shared) || isLoading(shared);
+    };
+    if (isLoadingOrLoaded(versions[cur])) {
+      if (isLoadingOrLoaded(versions[prev])) {
         return Boolean(versionLt(prev, cur));
       } else {
         return true;
       }
     }
-    if (isLoaded(versions[prev])) {
+    if (isLoadingOrLoaded(versions[prev])) {
       return false;
     }
     return versionLt(prev, cur);
