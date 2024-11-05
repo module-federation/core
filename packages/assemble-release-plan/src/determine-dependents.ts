@@ -6,6 +6,7 @@ import {
   VersionType,
 } from '@changesets/types';
 import { Package } from '@manypkg/get-packages';
+//@ts-ignore
 import semverSatisfies from 'semver/functions/satisfies';
 import { incrementVersion } from './increment';
 import { InternalRelease, PreInfo } from './types';
