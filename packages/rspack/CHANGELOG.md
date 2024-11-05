@@ -1,5 +1,21 @@
 # @module-federation/rspack
 
+## 1.0.0
+
+### Patch Changes
+
+- 4eb09e7: feat: support disable default alias setting in bridge
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [3942740]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@1.0.0
+  - @module-federation/bridge-react-webpack-plugin@1.0.0
+  - @module-federation/runtime-tools@1.0.0
+  - @module-federation/managers@1.0.0
+  - @module-federation/manifest@1.0.0
+  - @module-federation/dts-plugin@1.0.0
+
 ## 0.6.16
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # @module-federation/manifest
 
+## 1.0.0
+
+### Patch Changes
+
+- 206b56d: disable hoistTransitiveImports for better tree shake
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@1.0.0
+  - @module-federation/managers@1.0.0
+  - @module-federation/dts-plugin@1.0.0
+
 ## 0.6.16
 
 ### Patch Changes
