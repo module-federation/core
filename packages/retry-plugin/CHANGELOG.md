@@ -1,5 +1,43 @@
 # @module-federation/retry-plugin
 
+## 0.7.0
+
+### Minor Changes
+
+- e44d7fa: fix: parameter url for fetch options should not be necessary
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@0.7.0
+
+## 0.6.16
+
+### Patch Changes
+
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+
+## 0.6.15
+
+### Patch Changes
+
+- ec31539: fix(retry-plugin): fix script retry logic to make error-boundary should render until script retry finished.
+- 283574b: feat(retry-plugin): allow fallback function to receive failed URL
+  - @module-federation/sdk@0.6.15
+
+## 0.6.14
+
+### Patch Changes
+
+- ad605d2: chore: unified logger
+- Updated dependencies [ad605d2]
+  - @module-federation/sdk@0.6.14
+
+## 0.6.13
+
+## 0.6.12
+
 ## 0.6.11
 
 ## 0.6.10

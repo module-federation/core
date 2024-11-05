@@ -156,6 +156,7 @@ export const generateESMEntryStartup = (
   passive: boolean,
 ): string => {
   const { chunkHasJs, getChunkFilenameTemplate } =
+    compilation.compiler.webpack?.javascript?.JavascriptModulesPlugin ||
     compilation.compiler.webpack.JavascriptModulesPlugin;
   const { ConcatSource } = compilation.compiler.webpack.sources;
   const hotUpdateChunk = chunk instanceof HotUpdateChunk ? chunk : null;

@@ -1,4 +1,92 @@
-# [0.2.0-canary.5](https://github.com/module-federation/core/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
+# @module-federation/enhanced
+
+## 0.7.0
+
+### Minor Changes
+
+- 4eb09e7: feat: support disable default alias setting in bridge
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [3942740]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@0.7.0
+  - @module-federation/rspack@0.7.0
+  - @module-federation/bridge-react-webpack-plugin@0.7.0
+  - @module-federation/data-prefetch@0.7.0
+  - @module-federation/runtime-tools@0.7.0
+  - @module-federation/managers@0.7.0
+  - @module-federation/manifest@0.7.0
+  - @module-federation/dts-plugin@0.7.0
+
+## 0.6.16
+
+### Patch Changes
+
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/data-prefetch@0.6.16
+  - @module-federation/runtime-tools@0.6.16
+  - @module-federation/managers@0.6.16
+  - @module-federation/manifest@0.6.16
+  - @module-federation/bridge-react-webpack-plugin@0.6.16
+  - @module-federation/dts-plugin@0.6.16
+  - @module-federation/rspack@0.6.16
+
+## 0.6.15
+
+### Patch Changes
+
+- @module-federation/data-prefetch@0.6.15
+- @module-federation/dts-plugin@0.6.15
+- @module-federation/runtime-tools@0.6.15
+- @module-federation/rspack@0.6.15
+- @module-federation/sdk@0.6.15
+- @module-federation/managers@0.6.15
+- @module-federation/manifest@0.6.15
+- @module-federation/bridge-react-webpack-plugin@0.6.15
+
+## 0.6.14
+
+### Patch Changes
+
+- ad605d2: chore: unified logger
+- Updated dependencies [ad605d2]
+- Updated dependencies [86b4cdc]
+  - @module-federation/data-prefetch@0.6.14
+  - @module-federation/dts-plugin@0.6.14
+  - @module-federation/managers@0.6.14
+  - @module-federation/manifest@0.6.14
+  - @module-federation/sdk@0.6.14
+  - @module-federation/rspack@0.6.14
+  - @module-federation/runtime-tools@0.6.14
+  - @module-federation/bridge-react-webpack-plugin@0.6.14
+
+## 0.6.13
+
+### Patch Changes
+
+- @module-federation/rspack@0.6.13
+- @module-federation/sdk@0.6.13
+- @module-federation/runtime-tools@0.6.13
+- @module-federation/managers@0.6.13
+- @module-federation/manifest@0.6.13
+- @module-federation/dts-plugin@0.6.13
+- @module-federation/bridge-react-webpack-plugin@0.6.13
+- @module-federation/data-prefetch@0.6.13
+
+## 0.6.12
+
+### Patch Changes
+
+- @module-federation/rspack@0.6.12
+- @module-federation/sdk@0.6.12
+- @module-federation/runtime-tools@0.6.12
+- @module-federation/managers@0.6.12
+- @module-federation/manifest@0.6.12
+- @module-federation/dts-plugin@0.6.12
+- @module-federation/bridge-react-webpack-plugin@0.6.12
+- @module-federation/data-prefetch@0.6.12
 
 ## 0.6.11
 

@@ -1,5 +1,10 @@
-import { getFMId, assert } from '../utils';
+import { getFMId, assert, error } from '../utils';
 import { safeToString, ModuleInfo } from '@module-federation/sdk';
+import {
+  getShortErrorMsg,
+  RUNTIME_002,
+  runtimeDescMap,
+} from '@module-federation/error-codes';
 import { getRemoteEntry } from '../utils/load';
 import { FederationHost } from '../core';
 import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
@@ -88,12 +93,12 @@ class Module {
         });
 
       if (typeof remoteEntryExports?.init === 'undefined') {
-        console.error(
-          'The remote entry interface does not contain "init"',
-          '\n',
-          'Ensure the name of this remote is not reserved or in use. Check if anything already exists on window[nameOfRemote]',
-          '\n',
-          'Ensure that window[nameOfRemote] is returning a {get,init} object.',
+        error(
+          getShortErrorMsg(RUNTIME_002, runtimeDescMap, {
+            remoteName: name,
+            remoteEntryUrl: this.remoteInfo.entry,
+            remoteEntryKey: this.remoteInfo.entryGlobalName,
+          }),
         );
       }
 
@@ -114,8 +119,18 @@ class Module {
     this.lib = remoteEntryExports;
     this.inited = true;
 
+    let moduleFactory;
+    moduleFactory = await this.host.loaderHook.lifecycle.getModuleFactory.emit({
+      remoteEntryExports,
+      expose,
+      moduleInfo: this.remoteInfo,
+    });
+
     // get exposeGetter
-    const moduleFactory = await remoteEntryExports.get(expose);
+    if (!moduleFactory) {
+      moduleFactory = await remoteEntryExports.get(expose);
+    }
+
     assert(
       moduleFactory,
       `${getFMId(this.remoteInfo)} remote don't export ${expose}.`,

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "8.6.4",
+  "version": "8.7.5",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -15,6 +15,9 @@
     "dist/",
     "README.md"
   ],
+  "scripts": {
+    "postinstall": "echo \"Deprecation Notice: We intend to deprecate 'nextjs-mf'. Please see https://github.com/module-federation/core/issues/3153 for more details.\""
+  },
   "exports": {
     ".": "./dist/src/index.js",
     "./utils": "./dist/utils/index.js",
@@ -43,9 +46,9 @@
   },
   "peerDependencies": {
     "webpack": "^5.40.0",
-    "next": "^12 || ^13 || ^14",
-    "react": "^17 || ^18",
-    "react-dom": "^17 || ^18",
+    "next": "^12 || ^13 || ^14 || ^15",
+    "react": "^17 || ^18 || ^19",
+    "react-dom": "^17 || ^18 || ^19",
     "styled-jsx": "*"
   },
   "peerDependenciesMeta": {

@@ -1,7 +1,13 @@
 {
   "name": "@module-federation/bridge-vue3",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "version": "0.6.11",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core",
+    "directory": "packages/vue3-bridge"
+  },
+  "version": "0.7.0",
   "publishConfig": {
     "access": "public"
   },
@@ -31,7 +37,8 @@
     "vue-router": "=3"
   },
   "dependencies": {
-    "@module-federation/bridge-shared": "workspace:*"
+    "@module-federation/bridge-shared": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

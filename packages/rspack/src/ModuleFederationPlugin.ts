@@ -67,7 +67,12 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
     this._checkSingleton(compiler);
     this._patchBundlerConfig(compiler);
-    this._patchChunkSplit(compiler, options.name);
+    const containerManager = new ContainerManager();
+    containerManager.init(options);
+
+    if (containerManager.enable) {
+      this._patchChunkSplit(compiler, options.name);
+    }
 
     options.implementation = options.implementation || RuntimeToolsPath;
     let disableManifest = options.manifest === false;
@@ -79,8 +84,6 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
     if (!disableManifest && options.exposes) {
       try {
-        const containerManager = new ContainerManager();
-        containerManager.init(options);
         options.exposes = containerManager.containerPluginExposesOptions;
       } catch (err) {
         if (err instanceof Error) {
@@ -96,7 +99,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     ).apply(compiler);
 
     const runtimeESMPath = require.resolve(
-      '@module-federation/runtime/dist/index.esm.js',
+      '@module-federation/runtime/dist/index.esm.mjs',
       { paths: [options.implementation] },
     );
 
@@ -124,7 +127,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     );
 
     // Check whether react exists
-    if (fs.existsSync(reactPath)) {
+    if (
+      fs.existsSync(reactPath) &&
+      (!options?.bridge || !options.bridge.disableAlias)
+    ) {
       new ReactBridgePlugin({
         moduleFederationOptions: this._options,
       }).apply(compiler);

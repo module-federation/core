@@ -5,16 +5,14 @@ import {
   Stats,
   Manifest,
   ManifestExpose,
-  StatsExpose,
-  StatsShared,
   ManifestShared,
   ManifestRemote,
-  StatsRemote,
   moduleFederationPlugin,
   encodeName,
   MFPrefetchCommon,
 } from '@module-federation/sdk';
 import { getFileName, isDev } from './utils';
+import logger from './logger';
 import type { Compilation, Compiler } from 'webpack';
 import { PLUGIN_IDENTIFIER } from './constants';
 import { ManifestInfo } from './types';
@@ -145,10 +143,12 @@ class ManifestManager {
     }
 
     if (isDev()) {
-      console.log(
-        chalk`{bold {greenBright [ ${PLUGIN_IDENTIFIER} ]} {greenBright Manifest Link:} {cyan ${
-          publicPath === 'auto' ? '{auto}/' : publicPath
-        }${manifestFileName}}}`,
+      logger.info(
+        `Manifest Link: ${chalk.cyan(
+          `${
+            publicPath === 'auto' ? '{auto}/' : publicPath
+          }${manifestFileName}`,
+        )} `,
       );
     }
 

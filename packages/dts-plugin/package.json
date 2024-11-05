@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dts-plugin",
-  "version": "0.6.11",
+  "version": "0.7.0",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -51,6 +51,7 @@
     "@module-federation/managers": "workspace:*",
     "lodash.clonedeepwith": "4.5.0",
     "@module-federation/third-party-dts-extractor": "workspace:*",
+    "@module-federation/error-codes": "workspace:*",
     "chalk": "3.0.0",
     "fs-extra": "9.1.0",
     "isomorphic-ws": "5.0.0",

@@ -1,4 +1,34 @@
-# [1.1.0-canary.1](https://github.com/module-federation/core/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
+# @module-federation/sdk
+
+## 0.7.0
+
+### Minor Changes
+
+- 879ad87: pass all loaderHooks to loadEntry and fetch functions instead of just createScript
+
+### Patch Changes
+
+- 4eb09e7: feat: support disable default alias setting in bridge
+- 206b56d: disable hoistTransitiveImports for better tree shake
+
+## 0.6.16
+
+### Patch Changes
+
+- f779188: update rslog package version to resolve type error
+- 024df60: disable hoistTransitiveImports for better tree shake
+
+## 0.6.15
+
+## 0.6.14
+
+### Patch Changes
+
+- ad605d2: chore: unified logger
+
+## 0.6.13
+
+## 0.6.12
 
 ## 0.6.11
 

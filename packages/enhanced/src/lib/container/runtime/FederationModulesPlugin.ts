@@ -9,10 +9,7 @@ import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
 
 /** @type {WeakMap<import("webpack").Compilation, CompilationHooks>} */
-const compilationHooksMap = new WeakMap<
-  import('webpack').Compilation,
-  CompilationHooks
->();
+const compilationHooksMap = new WeakMap<CompilationType, CompilationHooks>();
 
 const PLUGIN_NAME = 'FederationModulesPlugin';
 

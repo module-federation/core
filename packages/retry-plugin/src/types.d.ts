@@ -3,26 +3,24 @@ export interface FetchWithRetryOptions {
   options?: RequestInit;
   retryTimes?: number;
   retryDelay?: number;
-  fallback?: () => string;
+  fallback?:
+    | (() => string)
+    | ((url: string | URL | globalThis.Request) => string);
 }
 
 export interface ScriptWithRetryOptions {
-  url?: string;
-  attrs?: Record<string, string>;
   retryTimes?: number;
   retryDelay?: number;
-  customCreateScript?: CreateScriptFunc;
+  moduleName?: Array<string>;
+  cb?: (resolve: (value: unknown) => void, error: any) => void;
 }
 
 export type RetryPluginParams = {
-  fetch?: FetchWithRetryOptions; // fetch retry options
-  script?: ScriptWithRetryOptions; // script retry options
+  fetch?: FetchWithRetryOptions;
+  script?: ScriptWithRetryOptions;
 };
 
-export type CreateScriptFunc = (
-  url: string,
-  attrs: Record<string, any>,
-) => HTMLScriptElement;
-
-export type RequiredUrl<T extends { url?: string }> = Required<Pick<T, 'url'>> &
-  Omit<T, 'url'>;
+export type RequiredFetchWithRetryOptions = Required<
+  Pick<FetchWithRetryOptions, 'url'>
+> &
+  Omit<FetchWithRetryOptions, 'url'>;

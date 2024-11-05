@@ -6,6 +6,7 @@ import type {
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
+import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 
 type EntryStaticNormalized = Awaited<
   ReturnType<Extract<WebpackOptionsNormalized['entry'], () => any>>
@@ -74,7 +75,7 @@ export function applyServerPlugins(
       suffix,
     );
   }
-
+  new UniverseEntryChunkTrackerPlugin().apply(compiler);
   new InvertedContainerPlugin().apply(compiler);
 }
 
@@ -106,54 +107,57 @@ export function handleServerExternals(
   compiler: Compiler,
   options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ): void {
-  if (
-    Array.isArray(compiler.options.externals) &&
-    typeof compiler.options.externals[0] === 'function'
-  ) {
-    const originalExternals = compiler.options.externals[0] as (
-      data: ExternalItemFunctionData,
-      callback: any,
-    ) => undefined | string;
+  if (Array.isArray(compiler.options.externals)) {
+    const functionIndex = compiler.options.externals.findIndex(
+      (external) => typeof external === 'function',
+    );
 
-    compiler.options.externals[0] = async function (
-      ctx: ExternalItemFunctionData,
-      callback: any,
-    ) {
-      const fromNext = await originalExternals(ctx, callback);
-      if (!fromNext) {
-        return;
-      }
-      const req = fromNext.split(' ')[1];
-      if (
-        ctx.request &&
-        (ctx.request.includes('@module-federation/utilities') ||
-          Object.keys(options.shared || {}).some((key) => {
-            const sharedOptions = options.shared as Record<
-              string,
-              { import: boolean }
-            >;
-            return (
-              sharedOptions[key]?.import !== false &&
-              (key.endsWith('/') ? req.includes(key) : req === key)
-            );
-          }) ||
-          ctx.request.includes('@module-federation/'))
-      ) {
-        return;
-      }
+    if (functionIndex !== -1) {
+      const originalExternals = compiler.options.externals[functionIndex] as (
+        data: ExternalItemFunctionData,
+        callback: any,
+      ) => undefined | string;
 
-      if (
-        req.startsWith('next') ||
-        req.startsWith('react/') ||
-        req.startsWith('react-dom/') ||
-        req === 'react' ||
-        req === 'styled-jsx/style' ||
-        req === 'react-dom'
+      compiler.options.externals[functionIndex] = async function (
+        ctx: ExternalItemFunctionData,
+        callback: any,
       ) {
-        return fromNext;
-      }
-      return;
-    };
+        const fromNext = await originalExternals(ctx, callback);
+        if (!fromNext) {
+          return;
+        }
+        const req = fromNext.split(' ')[1];
+        if (
+          ctx.request &&
+          (ctx.request.includes('@module-federation/utilities') ||
+            Object.keys(options.shared || {}).some((key) => {
+              const sharedOptions = options.shared as Record<
+                string,
+                { import: boolean }
+              >;
+              return (
+                sharedOptions[key]?.import !== false &&
+                (key.endsWith('/') ? req.includes(key) : req === key)
+              );
+            }) ||
+            ctx.request.includes('@module-federation/'))
+        ) {
+          return;
+        }
+
+        if (
+          req.startsWith('next') ||
+          req.startsWith('react/') ||
+          req.startsWith('react-dom/') ||
+          req === 'react' ||
+          req === 'styled-jsx/style' ||
+          req === 'react-dom'
+        ) {
+          return fromNext;
+        }
+        return;
+      };
+    }
   }
 }
 

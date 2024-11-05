@@ -1,5 +1,62 @@
 # @module-federation/dts-plugin
 
+## 0.7.0
+
+### Minor Changes
+
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+- Updated dependencies [849ef9c]
+  - @module-federation/sdk@0.7.0
+  - @module-federation/managers@0.7.0
+  - @module-federation/error-codes@0.7.0
+  - @module-federation/third-party-dts-extractor@0.7.0
+
+## 0.6.16
+
+### Patch Changes
+
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/managers@0.6.16
+  - @module-federation/third-party-dts-extractor@0.6.16
+
+## 0.6.15
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.15
+- @module-federation/managers@0.6.15
+- @module-federation/third-party-dts-extractor@0.6.15
+
+## 0.6.14
+
+### Patch Changes
+
+- ad605d2: chore: unified logger
+- Updated dependencies [ad605d2]
+  - @module-federation/managers@0.6.14
+  - @module-federation/sdk@0.6.14
+  - @module-federation/third-party-dts-extractor@0.6.14
+
+## 0.6.13
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.13
+- @module-federation/managers@0.6.13
+- @module-federation/third-party-dts-extractor@0.6.13
+
+## 0.6.12
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.12
+- @module-federation/managers@0.6.12
+- @module-federation/third-party-dts-extractor@0.6.12
+
 ## 0.6.11
 
 ### Patch Changes
