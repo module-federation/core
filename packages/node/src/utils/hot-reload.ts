@@ -153,7 +153,9 @@ export const performReload = async (
     gs.entryChunkCache.clear();
   }
 
-  gs.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
+  Object.keys(helpers.global.globalLoading).forEach((key) => {
+    delete helpers.global.globalLoading[key];
+  });
   //@ts-ignore
   gs.__FEDERATION__.__INSTANCES__.map((i: any) => {
     //@ts-ignore
