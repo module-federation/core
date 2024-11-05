@@ -1,8 +1,8 @@
 # @module-federation/rsbuild-plugin
 
-## 1.0.0
+## 0.7.0
 
-### Patch Changes
+### Minor Changes
 
 - Updated dependencies [879ad87]
 - Updated dependencies [4eb09e7]

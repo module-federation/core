@@ -1,8 +1,8 @@
 # @module-federation/rspack
 
-## 1.0.0
+## 0.7.0
 
-### Patch Changes
+### Minor Changes
 
 - 4eb09e7: feat: support disable default alias setting in bridge
 - Updated dependencies [879ad87]

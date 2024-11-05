@@ -1,8 +1,8 @@
 # @module-federation/bridge-react-webpack-plugin
 
-## 1.0.0
+## 0.7.0
 
-### Patch Changes
+### Minor Changes
 
 - 3942740: add license information
 - Updated dependencies [879ad87]

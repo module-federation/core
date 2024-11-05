@@ -1,8 +1,8 @@
 # @module-federation/manifest
 
-## 1.0.0
+## 0.7.0
 
-### Patch Changes
+### Minor Changes
 
 - 206b56d: disable hoistTransitiveImports for better tree shake
 - Updated dependencies [879ad87]

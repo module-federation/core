@@ -1,8 +1,8 @@
 # @module-federation/retry-plugin
 
-## 1.0.0
+## 0.7.0
 
-### Patch Changes
+### Minor Changes
 
 - e44d7fa: fix: parameter url for fetch options should not be necessary
 - Updated dependencies [879ad87]

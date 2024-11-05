@@ -1,7 +1,7 @@
 # @module-federation/error-codes
 
-## 1.0.0
+## 0.7.0
 
-### Patch Changes
+### Minor Changes
 
 - 849ef9c: fix(error-codes): esm should use .mjs ext
