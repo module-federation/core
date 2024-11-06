@@ -19,8 +19,6 @@ import {
   Global,
 } from './global';
 import { getRegisteredShare, getGlobalShareScope } from './utils/share';
-import * as pluginHelper from './utils/hooks';
-import { registerPlugins } from './utils';
 
 interface IShareUtils {
   getRegisteredShare: typeof getRegisteredShare;
@@ -50,8 +48,6 @@ interface IGlobalUtils {
   getGlobalHostPlugins: typeof getGlobalHostPlugins;
   getPreloaded: typeof getPreloaded;
   setPreloaded: typeof setPreloaded;
-  registerPlugins: typeof registerPlugins;
-  pluginHelper: typeof pluginHelper;
 }
 
 const GlobalUtils: IGlobalUtils = {
@@ -73,8 +69,6 @@ const GlobalUtils: IGlobalUtils = {
   getGlobalHostPlugins,
   getPreloaded,
   setPreloaded,
-  registerPlugins,
-  pluginHelper,
 };
 
 export default {

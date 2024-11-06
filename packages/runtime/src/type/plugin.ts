@@ -29,7 +29,7 @@ type RemoteLifeCycleCyclePartial = Partial<{
   [k in keyof RemoteLifeCycle]: Parameters<RemoteLifeCycle[k]['on']>[0];
 }>;
 
-type LifeCycle = CoreLifeCyclePartial &
+export type FederationRuntimePlugin = CoreLifeCyclePartial &
   SnapshotLifeCycleCyclePartial &
   SharedLifeCycleCyclePartial &
   RemoteLifeCycleCyclePartial &
@@ -37,4 +37,3 @@ type LifeCycle = CoreLifeCyclePartial &
     name: string;
     version?: string;
   };
-export type FederationRuntimePlugin<T = LifeCycle> = LifeCycle & T;
