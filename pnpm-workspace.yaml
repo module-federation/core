@@ -10,3 +10,4 @@ packages:
   - 'apps/esbuild'
   - 'apps/*'
   - 'webpack'
+  - 'assemble-release-plan'
