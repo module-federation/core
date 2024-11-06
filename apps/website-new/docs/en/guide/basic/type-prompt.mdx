@@ -22,7 +22,7 @@ add `paths` to `tsconfig.json`:
     "paths": {
       "*": ["./@mf-types/*"]
     }
-  }
+  },
 }
 ```
 
@@ -40,7 +40,13 @@ After modifying the producer code, the consumer will automatically pull the prod
 
 ### Federation Runtime API type prompt
 
-Using `Federation Runtime`'s `loadRemote` can also enjoy type hints and type hot reloading:
+It needs to add `./@mf-types/*` in the `include` field to enjoy `Federation Runtime` `loadRemote` type hints and type hot reloading
+
+```json title="tsconfig.json"
+{
+  "include": ["./@mf-types/*"]
+}
+```
 
 ![hot-types-reload](@public/guide/type-prompt/hot-types-reload.gif)
 
