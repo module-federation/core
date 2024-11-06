@@ -51,7 +51,20 @@
     "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:type:pkg'",
     "changegen": "./changeset-gen.js --path ./packages/enhanced --staged &&./changeset-gen.js --path ./packages/node --staged && ./changeset-gen.js --path ./packages/runtime --staged && ./changeset-gen.js --path ./packages/data-prefetch --staged && ./changeset-gen.js --path ./packages/nextjs-mf --staged",
     "commitgen:staged": "./commit-gen.js --path ./packages --staged",
-    "commitgen:main": "./commit-gen.js --path ./packages"
+    "commitgen:main": "./commit-gen.js --path ./packages",
+    "changeset:status": "changeset status"
+  },
+  "pnpm": {
+    "packageExtensions": {
+      "@changesets/cli": {
+        "dependencies": {
+          "@changesets/assemble-release-plan": "workspace:*"
+        }
+      }
+    },
+    "overrides": {
+      "@changesets/assemble-release-plan": "workspace:*"
+    }
   },
   "dependencies": {
     "@storybook/addon-interactions": "^8.2.8",

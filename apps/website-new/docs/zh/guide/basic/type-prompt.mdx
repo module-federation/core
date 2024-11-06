@@ -40,7 +40,13 @@
 
 ### Federation Runtime API 类型提示
 
-使用 `Federation Runtime` `loadRemote` 同样可以享有类型提示以及类型热重载：
+需要在 `include` 字段增加 `./@mf-types/*` 以享有 `Federation Runtime` `loadRemote` 类型提示以及类型热重载
+
+```json title="tsconfig.json"
+{
+  "include": ["./@mf-types/*"]
+}
+```
 
 ![hot-types-reload](@public/guide/type-prompt/hot-types-reload.gif)
 

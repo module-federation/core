@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/managers",
-  "version": "0.6.16",
+  "version": "0.7.0",
   "license": "MIT",
   "description": "Provide managers for helping handle mf data .",
   "keywords": [

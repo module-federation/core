@@ -23,6 +23,9 @@ export const getModuleName = (id: string) => {
 };
 
 export const getRootDomDefaultClassName = (moduleName: string) => {
+  if (!moduleName) {
+    return '';
+  }
   const name = getModuleName(moduleName).replace(/\@/, '').replace(/\//, '-');
   return `bridge-root-component-${name}`;
 };

@@ -1,5 +1,23 @@
 # @module-federation/runtime
 
+## 0.7.0
+
+### Minor Changes
+
+- 879ad87: pass all loaderHooks to loadEntry and fetch functions instead of just createScript
+
+### Patch Changes
+
+- 752537b: fix(runtime): use loaded or loading shared if sharedStrategy is loaded-first
+- 54bfd1c: fix(runtime): use document.defaultView to get real window object to solve csp issue
+- 206b56d: disable hoistTransitiveImports for better tree shake
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+- Updated dependencies [849ef9c]
+  - @module-federation/sdk@0.7.0
+  - @module-federation/error-codes@0.7.0
+
 ## 0.6.16
 
 ### Patch Changes

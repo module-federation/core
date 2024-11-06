@@ -4,7 +4,7 @@
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "public": true,
   "sideEffects": false,
-  "version": "0.6.14",
+  "version": "0.7.0",
   "license": "MIT",
   "keywords": [
     "Module Federation",
@@ -18,11 +18,11 @@
     "access": "public"
   },
   "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "module": "./dist/index.esm.mjs",
   "types": "./dist/index.cjs.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.esm.js",
+      "import": "./dist/index.esm.mjs",
       "require": "./dist/index.cjs.js"
     }
   },

@@ -32,7 +32,7 @@ type ProviderFnParams<T> = {
   hooks?: BridgeHooks;
 };
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
-  return (params: { hooks?: BridgeHooks }) => {
+  return (params?: { hooks?: BridgeHooks }) => {
     const rootMap = new Map<any, RootType>();
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
