@@ -329,6 +329,9 @@ importers:
       copy-webpack-plugin:
         specifier: 11.0.0
         version: 11.0.0(webpack@5.93.0)
+      cross-spawn:
+        specifier: 7.0.3
+        version: 7.0.3
       cypress:
         specifier: 13.15.0
         version: 13.15.0
@@ -3420,7 +3423,6 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/types': 7.26.0
-    dev: true
 
   /@babel/helper-annotate-as-pure@7.25.9:
     resolution: {integrity: sha512-gv7320KBUFJz1RnylIg5WWYPRXKZ884AGkYpgpWW02TH66Dl+HaC1t1CKd0z3R4b6hdYEcmrNZHUmfCP+1u3/g==}
@@ -3482,11 +3484,11 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/core': 7.25.7
-      '@babel/helper-annotate-as-pure': 7.25.9
+      '@babel/helper-annotate-as-pure': 7.25.7
       '@babel/helper-member-expression-to-functions': 7.25.7
       '@babel/helper-optimise-call-expression': 7.25.7
-      '@babel/helper-replace-supers': 7.25.9(@babel/core@7.25.7)
-      '@babel/helper-skip-transparent-expression-wrappers': 7.25.9
+      '@babel/helper-replace-supers': 7.25.7(@babel/core@7.25.7)
+      '@babel/helper-skip-transparent-expression-wrappers': 7.25.7
       '@babel/traverse': 7.25.9
       semver: 6.3.1
     transitivePeerDependencies:
@@ -3500,11 +3502,11 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/core': 7.25.8
-      '@babel/helper-annotate-as-pure': 7.25.9
+      '@babel/helper-annotate-as-pure': 7.25.7
       '@babel/helper-member-expression-to-functions': 7.25.7
       '@babel/helper-optimise-call-expression': 7.25.7
-      '@babel/helper-replace-supers': 7.25.9(@babel/core@7.25.8)
-      '@babel/helper-skip-transparent-expression-wrappers': 7.25.9
+      '@babel/helper-replace-supers': 7.25.7(@babel/core@7.25.8)
+      '@babel/helper-skip-transparent-expression-wrappers': 7.25.7
       '@babel/traverse': 7.25.9
       semver: 6.3.1
     transitivePeerDependencies:
@@ -3517,11 +3519,11 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/core': 7.26.0
-      '@babel/helper-annotate-as-pure': 7.25.9
+      '@babel/helper-annotate-as-pure': 7.25.7
       '@babel/helper-member-expression-to-functions': 7.25.7
       '@babel/helper-optimise-call-expression': 7.25.7
-      '@babel/helper-replace-supers': 7.25.9(@babel/core@7.26.0)
-      '@babel/helper-skip-transparent-expression-wrappers': 7.25.9
+      '@babel/helper-replace-supers': 7.25.7(@babel/core@7.26.0)
+      '@babel/helper-skip-transparent-expression-wrappers': 7.25.7
       '@babel/traverse': 7.25.9
       semver: 6.3.1
     transitivePeerDependencies:
@@ -3877,6 +3879,47 @@ packages:
       - supports-color
     dev: true
 
+  /@babel/helper-replace-supers@7.25.7(@babel/core@7.25.7):
+    resolution: {integrity: sha512-iy8JhqlUW9PtZkd4pHM96v6BdJ66Ba9yWSE4z0W4TvSZwLBPkyDsiIU3ENe4SmrzRBs76F7rQXTy1lYC49n6Lw==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+    dependencies:
+      '@babel/core': 7.25.7
+      '@babel/helper-member-expression-to-functions': 7.25.7
+      '@babel/helper-optimise-call-expression': 7.25.7
+      '@babel/traverse': 7.25.9
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /@babel/helper-replace-supers@7.25.7(@babel/core@7.25.8):
+    resolution: {integrity: sha512-iy8JhqlUW9PtZkd4pHM96v6BdJ66Ba9yWSE4z0W4TvSZwLBPkyDsiIU3ENe4SmrzRBs76F7rQXTy1lYC49n6Lw==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+    dependencies:
+      '@babel/core': 7.25.8
+      '@babel/helper-member-expression-to-functions': 7.25.7
+      '@babel/helper-optimise-call-expression': 7.25.7
+      '@babel/traverse': 7.25.9
+    transitivePeerDependencies:
+      - supports-color
+
+  /@babel/helper-replace-supers@7.25.7(@babel/core@7.26.0):
+    resolution: {integrity: sha512-iy8JhqlUW9PtZkd4pHM96v6BdJ66Ba9yWSE4z0W4TvSZwLBPkyDsiIU3ENe4SmrzRBs76F7rQXTy1lYC49n6Lw==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+    dependencies:
+      '@babel/core': 7.26.0
+      '@babel/helper-member-expression-to-functions': 7.25.7
+      '@babel/helper-optimise-call-expression': 7.25.7
+      '@babel/traverse': 7.25.9
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /@babel/helper-replace-supers@7.25.9(@babel/core@7.25.7):
     resolution: {integrity: sha512-IiDqTOTBQy0sWyeXyGSC5TBJpGFXBkRynjBeXsvbhQFKj2viwJC76Epz35YLU1fpe/Am6Vppb7W7zM4fPQzLsQ==}
     engines: {node: '>=6.9.0'}
@@ -3953,7 +3996,6 @@ packages:
       '@babel/types': 7.26.0
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
   /@babel/helper-skip-transparent-expression-wrappers@7.25.9:
     resolution: {integrity: sha512-K4Du3BFa3gvyhzgPcntrkDgZzQaq6uozzcpGbOO1OEJaI+EJdqWIMTLgFgQf6lrfiDFo5FU+BxKepI9RmZqahA==}
@@ -17947,7 +17989,7 @@ packages:
     resolution: {integrity: sha512-FwTm11DP7KxQKT2mWLvwe80O5KpikgMSlqnw9CQhBaIHSYEypdJU9ZotbNsXsHdML3xcqg+S9ae3bpovC7KlwQ==}
     dependencies:
       '@rspack/core': 0.7.5(@swc/helpers@0.5.3)
-      caniuse-lite: 1.0.30001677
+      caniuse-lite: 1.0.30001675
       html-webpack-plugin: /html-rspack-plugin@5.7.2(@rspack/core@0.7.5)
       postcss: 8.4.47
     optionalDependencies:
@@ -23860,7 +23902,7 @@ packages:
       '@ant-design/colors': 6.0.0
       '@ant-design/icons': 4.8.3(react-dom@18.2.0)(react@18.2.0)
       '@ant-design/react-slick': 1.0.2(react@18.2.0)
-      '@babel/runtime': 7.25.7
+      '@babel/runtime': 7.24.5
       '@ctrl/tinycolor': 3.6.1
       classnames: 2.5.1
       copy-to-clipboard: 3.3.3

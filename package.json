@@ -231,7 +231,8 @@
     "webpack": "5.93.0",
     "webpack-virtual-modules": "0.6.2",
     "whatwg-fetch": "^3.6.20",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "cross-spawn": "7.0.3"
   },
   "config": {
     "commitizen": {
