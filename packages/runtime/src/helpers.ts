@@ -1,5 +1,4 @@
 import {
-  globalLoading,
   nativeGlobal,
   resetFederationGlobalInfo,
   getGlobalFederationInstance,
@@ -33,7 +32,6 @@ const ShareUtils: IShareUtils = {
 interface IGlobalUtils {
   Global: typeof Global;
   nativeGlobal: typeof global;
-  globalLoading: typeof globalLoading;
   resetFederationGlobalInfo: typeof resetFederationGlobalInfo;
   getGlobalFederationInstance: typeof getGlobalFederationInstance;
   setGlobalFederationInstance: typeof setGlobalFederationInstance;
@@ -55,7 +53,6 @@ interface IGlobalUtils {
 const GlobalUtils: IGlobalUtils = {
   Global,
   nativeGlobal,
-  globalLoading,
   resetFederationGlobalInfo,
   getGlobalFederationInstance,
   setGlobalFederationInstance,

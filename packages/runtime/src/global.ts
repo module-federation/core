@@ -113,6 +113,10 @@ export function resetFederationGlobalInfo(): void {
   CurrentGlobal.__FEDERATION__.moduleInfo = {};
   CurrentGlobal.__FEDERATION__.__SHARE__ = {};
   CurrentGlobal.__FEDERATION__.__MANIFEST_LOADING__ = {};
+
+  Object.keys(globalLoading).forEach((key) => {
+    delete globalLoading[key];
+  });
 }
 
 export function getGlobalFederationInstance(
