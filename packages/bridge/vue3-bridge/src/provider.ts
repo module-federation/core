@@ -10,10 +10,10 @@ type DestroyParams = {
 };
 
 type BridgeHooks = {
-  beforeBridgeRender?: (params: RenderFnParams) => any;
-  afterBridgeRender?: (params: RenderFnParams) => any;
-  beforeBridgeDestroy?: (params: DestroyParams) => any;
-  afterBridgeDestroy?: (params: DestroyParams) => any;
+  beforeBridgeRender?: (params: RenderFnParams) => void | Record<string, any>;
+  afterBridgeRender?: (params: RenderFnParams) => void | Record<string, any>;
+  beforeBridgeDestroy?: (params: DestroyParams) => void | Record<string, any>;
+  afterBridgeDestroy?: (params: DestroyParams) => void | Record<string, any>;
 };
 
 export function createBridgeComponent(bridgeInfo: any) {
