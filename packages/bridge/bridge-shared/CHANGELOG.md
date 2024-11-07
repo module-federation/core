@@ -1,5 +1,7 @@
 # @module-federation/bridge-shared
 
+## 0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

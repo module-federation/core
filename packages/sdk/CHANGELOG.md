@@ -1,5 +1,11 @@
 # @module-federation/sdk
 
+## 0.7.1
+
+### Patch Changes
+
+- 6db4c5f: fix: remove meaningless log
+
 ## 0.7.0
 
 ### Minor Changes
