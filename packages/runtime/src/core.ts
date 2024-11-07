@@ -127,10 +127,22 @@ export class FederationHost {
     >(),
   });
   bridgeHook = new PluginSystem({
-    beforeBridgeRender: new SyncHook<[Record<string, any>], any>(),
-    afterBridgeRender: new SyncHook<[Record<string, any>], any>(),
-    beforeBridgeDestroy: new SyncHook<[Record<string, any>], any>(),
-    afterBridgeDestroy: new SyncHook<[Record<string, any>], any>(),
+    beforeBridgeRender: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+    afterBridgeRender: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+    beforeBridgeDestroy: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+    afterBridgeDestroy: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
   });
 
   constructor(userOptions: UserOptions) {
