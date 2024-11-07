@@ -145,6 +145,7 @@ const RemoteAppWrapper = forwardRef(function (
               });
             }
             providerInfoRef.current?.destroy({
+              moduleName,
               dom: renderDom.current,
             });
           }

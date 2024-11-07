@@ -12,6 +12,7 @@ import { LoggerInstance, atLeastReact18 } from './utils';
 
 type RenderParams = RenderFnParams & any;
 type DestroyParams = {
+  moduleName: string;
   dom: HTMLElement;
 };
 type RootType = HTMLElement | ReactDOMClient.Root;
