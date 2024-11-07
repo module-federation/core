@@ -1,0 +1,15 @@
+{
+  "name": "assemble-release-plan",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/assemble-release-plan/src",
+  "projectType": "library",
+  "tags": ["type:pkg"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run build --prefix packages/assemble-release-plan"]
+      }
+    }
+  }
+}
