@@ -1,5 +1,15 @@
 # @module-federation/runtime
 
+## 0.7.1
+
+### Patch Changes
+
+- 66ba7b1: fix: clear globalLoading cache in node env
+- 8712967: fix(runtime): use wrapper global instead of using globalThis directly
+- Updated dependencies [6db4c5f]
+  - @module-federation/sdk@0.7.1
+  - @module-federation/error-codes@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes
