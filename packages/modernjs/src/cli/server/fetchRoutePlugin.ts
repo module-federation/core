@@ -41,8 +41,6 @@ export default ({
         middlewares.push({
           name: 'MFPatchRouteMiddleWare',
           handler: async (c, next) => {
-            //TODO remove me
-            console.log('MFPatchRouteMiddleWare apply');
             const serverManifest = c.get('serverManifest');
             const { loaderBundles, nestedRoutesJson } = serverManifest;
 
