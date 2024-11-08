@@ -10,7 +10,12 @@ import {
   RUNTIME_004,
   runtimeDescMap,
 } from '@module-federation/error-codes';
-import { Global, getInfoWithoutType, globalLoading } from '../global';
+import {
+  Global,
+  getInfoWithoutType,
+  globalLoading,
+  CurrentGlobal,
+} from '../global';
 import {
   Options,
   UserOptions,
@@ -462,14 +467,16 @@ export class RemoteHandler {
       const loadedModule = host.moduleCache.get(remote.name);
       if (loadedModule) {
         const remoteInfo = loadedModule.remoteInfo;
-        const key = remoteInfo.entryGlobalName as keyof typeof globalThis;
+        const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
 
-        if (globalThis[key]) {
-          if (Object.getOwnPropertyDescriptor(globalThis, key)?.configurable) {
-            delete globalThis[key];
+        if (CurrentGlobal[key]) {
+          if (
+            Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable
+          ) {
+            delete CurrentGlobal[key];
           } else {
             // @ts-ignore
-            globalThis[key] = undefined;
+            CurrentGlobal[key] = undefined;
           }
         }
         const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
@@ -487,7 +494,7 @@ export class RemoteHandler {
           ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
           : remoteInfo.name;
         const remoteInsIndex =
-          globalThis.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
+          CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
             if (remoteInfo.buildVersion) {
               return ins.options.id === remoteInsId;
             } else {
@@ -496,7 +503,7 @@ export class RemoteHandler {
           });
         if (remoteInsIndex !== -1) {
           const remoteIns =
-            globalThis.__FEDERATION__.__INSTANCES__[remoteInsIndex];
+            CurrentGlobal.__FEDERATION__.__INSTANCES__[remoteInsIndex];
           remoteInsId = remoteIns.options.id || remoteInsId;
           const globalShareScopeMap = getGlobalShareScope();
 
@@ -558,7 +565,7 @@ export class RemoteHandler {
               ];
             },
           );
-          globalThis.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
+          CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
         }
 
         const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);

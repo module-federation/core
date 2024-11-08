@@ -45,6 +45,7 @@
     "host-v5",
     "host-vue3",
     "3008-runtime-remote",
-    "modernjs-ssr-*"
+    "modernjs-ssr-*",
+    "@changesets/assemble-release-plan"
   ]
 }

@@ -1,5 +1,19 @@
 # @module-federation/node
 
+## 2.6.6
+
+### Patch Changes
+
+- 66ba7b1: fix: clear globalLoading cache in node env
+- Updated dependencies [66ba7b1]
+- Updated dependencies [8712967]
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/runtime@0.7.1
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+  - @module-federation/utilities@3.1.24
+
 ## 2.6.5
 
 ### Patch Changes

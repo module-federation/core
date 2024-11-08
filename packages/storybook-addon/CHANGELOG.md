@@ -1,5 +1,16 @@
 # @module-federation/storybook-addon
 
+## 3.0.4
+
+### Patch Changes
+
+- 932983e: fix: fix windows path error
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+  - @module-federation/utilities@3.1.24
+
 ## 3.0.3
 
 ### Patch Changes

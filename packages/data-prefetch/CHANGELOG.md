@@ -1,5 +1,15 @@
 # @module-federation/data-prefetch
 
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [66ba7b1]
+- Updated dependencies [8712967]
+- Updated dependencies [6db4c5f]
+  - @module-federation/runtime@0.7.1
+  - @module-federation/sdk@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

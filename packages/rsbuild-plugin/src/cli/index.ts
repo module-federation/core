@@ -92,6 +92,7 @@ export const pluginModuleFederation = (
       // filter external with shared config,
       const externals = config.output.externals;
       if (Array.isArray(externals)) {
+        const sharedModules = new Set<string>();
         config.output.externals = externals.filter((ext) => {
           let sharedModule;
           if (isRegExp(ext)) {
@@ -106,11 +107,7 @@ export const pluginModuleFederation = (
               return false;
             });
 
-            if (match) {
-              logger.log(
-                `${sharedModule} is removed from externals because it is a shared module.`,
-              );
-            }
+            match && sharedModule && sharedModules.add(sharedModule);
             return !match;
           }
 
@@ -126,15 +123,20 @@ export const pluginModuleFederation = (
               return dep === ext;
             });
             if (match) {
-              logger.log(
-                `${sharedModule} is removed from externals because it is a shared module.`,
-              );
+              sharedModule && sharedModules.add(sharedModule);
               return false;
             }
             return true;
           }
           return true;
         });
+        if (sharedModules.size > 0) {
+          for (const sharedModule of sharedModules) {
+            logger.log(
+              `${sharedModule} is removed from externals because it is a shared module.`,
+            );
+          }
+        }
       }
 
       const mfConfig: EnvironmentConfig = {
