@@ -9,26 +9,8 @@ import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
-import { LoggerInstance, pathJoin } from '../utils';
+import { LoggerInstance, pathJoin, getRootDomDefaultClassName } from '../utils';
 import { getInstance } from '@module-federation/runtime';
-
-export const getModuleName = (id: string) => {
-  // separate module name without detailed module path
-  // @vmok-e2e/edenx-demo-app2/button -> @vmok-e2e/edenx-demo-app2
-  const idArray = id.split('/');
-  if (idArray.length < 2) {
-    return id;
-  }
-  return idArray[0] + '/' + idArray[1];
-};
-
-export const getRootDomDefaultClassName = (moduleName: string) => {
-  if (!moduleName) {
-    return '';
-  }
-  const name = getModuleName(moduleName).replace(/\@/, '').replace(/\//, '-');
-  return `bridge-root-component-${name}`;
-};
 
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {
@@ -100,27 +82,13 @@ const RemoteAppWrapper = forwardRef(function (
           renderProps,
         );
 
-        if (
-          host?.bridgeHook &&
-          host?.bridgeHook?.lifecycle?.beforeBridgeRender
-        ) {
-          const beforeBridgeRenderRes =
-            host?.bridgeHook?.lifecycle?.beforeBridgeRender.emit({
-              ...renderProps,
-            });
-          const extraProps =
-            beforeBridgeRenderRes &&
-            typeof beforeBridgeRenderRes === 'object' &&
-            beforeBridgeRenderRes?.extraProps
-              ? beforeBridgeRenderRes?.extraProps
-              : {};
-
-          renderProps = {
-            ...renderProps,
-            ...extraProps,
-          } as any;
-        }
+        // TODO: 寻找当前 remote 实例上的 hostName, 找到 host instance
+        const beforeBridgeRenderRes =
+          host?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(renderProps) ||
+          {};
+        renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
         providerReturn.render(renderProps);
+        host?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
       });
 
       return () => {
@@ -131,22 +99,26 @@ const RemoteAppWrapper = forwardRef(function (
               `createRemoteComponent LazyComponent destroy >>>`,
               { moduleName, basename, dom: renderDom.current },
             );
-            if (
-              host?.bridgeHook &&
-              host?.bridgeHook?.lifecycle?.afterBridgeDestroy
-            ) {
-              host?.bridgeHook?.lifecycle?.afterBridgeDestroy.emit({
-                moduleName,
-                dom: renderDom.current,
-                basename,
-                memoryRoute,
-                fallback,
-                ...resProps,
-              });
-            }
+            host?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
+              moduleName,
+              dom: renderDom.current,
+              basename,
+              memoryRoute,
+              fallback,
+              ...resProps,
+            });
             providerInfoRef.current?.destroy({
               moduleName,
               dom: renderDom.current,
+            });
+
+            host?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
+              moduleName,
+              dom: renderDom.current,
+              basename,
+              memoryRoute,
+              fallback,
+              ...resProps,
             });
           }
         });

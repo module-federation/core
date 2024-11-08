@@ -8,7 +8,7 @@ import type {
 } from '@module-federation/bridge-shared';
 import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
-import { LoggerInstance, atLeastReact18 } from './utils';
+import { LoggerInstance, atLeastReact18, getModuleName } from './utils';
 
 type RenderParams = RenderFnParams & any;
 type DestroyParams = {
@@ -61,19 +61,14 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           ...propsInfo
         } = info;
 
-        const beforeBridgeRender =
-          (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeRender) ||
-          params?.hooks?.beforeBridgeRender;
+        const moduleNameWithoutExpose = getModuleName(moduleName);
+        const instance = __FEDERATION__.__INSTANCES__.find(
+          (v) => v.name === moduleNameWithoutExpose,
+        );
+        LoggerInstance.log(`createBridgeComponent remote instance`, instance);
 
-        // you can return a props object through beforeBridgeRender to pass additional props parameters
         const beforeBridgeRenderRes =
-          beforeBridgeRender && beforeBridgeRender(info);
-        const extraProps =
-          beforeBridgeRenderRes &&
-          typeof beforeBridgeRenderRes === 'object' &&
-          beforeBridgeRenderRes?.extraProps
-            ? beforeBridgeRenderRes?.extraProps
-            : {};
+          instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
 
         const rootComponentWithErrorBoundary = (
           // set ErrorBoundary for RawComponent rendering error, usually caused by user app rendering error
@@ -84,7 +79,9 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
                 basename,
                 memoryRoute,
               }}
-              propsInfo={{ ...propsInfo, ...extraProps } as T}
+              propsInfo={
+                { ...propsInfo, ...beforeBridgeRenderRes?.extraProps } as T
+              }
             />
           </ErrorBoundary>
         );
@@ -116,12 +113,17 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
+        const moduleNameWithoutExpose = getModuleName(info.moduleName);
+        LoggerInstance.log(
+          `createBridgeComponent remote module without expose name >>>`,
+          moduleNameWithoutExpose,
+        );
+        const instance = __FEDERATION__.__INSTANCES__.find(
+          (v) => v.name === moduleNameWithoutExpose,
+        );
+        LoggerInstance.log(`createBridgeComponent remote instance`, instance);
 
-        const beforeBridgeDestroy =
-          (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeDestroy) ||
-          params?.hooks?.beforeBridgeDestroy;
-        beforeBridgeDestroy && beforeBridgeDestroy(info);
-
+        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
         // call destroy function
         if (atLeastReact18(React)) {
           const root = rootMap.get(info.dom);
@@ -131,10 +133,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           ReactDOM.unmountComponentAtNode(info.dom);
         }
 
-        const afterBridgeDestroy =
-          (bridgeInfo?.hooks && bridgeInfo?.hooks.afterBridgeDestroy) ||
-          params?.hooks?.afterBridgeDestroy;
-        afterBridgeDestroy && afterBridgeDestroy(info);
+        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
       },
       rawComponent: bridgeInfo.rootComponent,
       __BRIDGE_FN__: (_args: T) => {},
