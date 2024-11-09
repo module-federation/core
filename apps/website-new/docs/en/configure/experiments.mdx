@@ -31,13 +31,13 @@ new ModuleFederationPlugin({
 
 ### `Hoisted` Runtime
 
-When Runtime is `hoisted` the following happens:
+When the runtime is `hoisted`, the following occurs:
 
-This is useful configurations that need:
-- runtimeChunk: single
-- no `import()` in the user code
-- the runtime packages of module federation are moved into the runtime chunks and out of the entrypoint.
+These configurations are useful for:
 
+- Setting or using`runtimeChunk: 'single'`.
+- Avoiding the `import()` at the top of the app or in the entry point of user code to prevent eager consumption errors. In the past, this was often mandatory and commonly seen as `import('./bootstrap.js')` in example apps.
+- Moving the Module Federation runtime packages into runtime chunks, keeping them out of the entry point - reducing code duplication
 
 1) Optimizations
 

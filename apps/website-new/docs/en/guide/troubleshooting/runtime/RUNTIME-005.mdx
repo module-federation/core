@@ -1,0 +1,19 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='RUNTIME-005'/>
+
+## Reasons
+
+After Shared is set, the corresponding dependent library will be determined to be an asynchronous module. If the asynchronous entry is not enabled and `eager: true` is not set, then this error will occur.
+
+## Solutions
+
+Just choose one of the two:
+
+1. Enable asynchronous entry
+
+import EnableAsyncEntry from '@components/en/EnableAsyncEntry'
+
+<EnableAsyncEntry />
+
+2. Set shared `eager: true`

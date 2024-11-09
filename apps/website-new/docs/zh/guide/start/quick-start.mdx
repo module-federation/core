@@ -95,11 +95,8 @@ import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 
 export default defineConfig({
-  plugins: [pluginReact()],
-  server: {
-    port: 3000,
-  },
   plugins: [
+    pluginReact(),
     pluginModuleFederation({
       name: 'federation_provider',
       exposes: {
@@ -108,6 +105,9 @@ export default defineConfig({
       shared: ['react', 'react-dom'],
     }),
   ],
+  server: {
+    port: 3000,
+  },
 });
 ```
 

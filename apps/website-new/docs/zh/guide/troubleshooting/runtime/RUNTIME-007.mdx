@@ -1,0 +1,12 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='RUNTIME-007'/>
+
+## 原因
+
+设置 remote entry 为版本号而非资源地址，并且部署平台没有下发正确的数据信息导致此问题。
+
+
+## 解决方法
+
+检查 globalSnapshot 中是否包含 key 为 `${moduleName}:${moduleInfo.version}` 的对象，若没有，需要查看部署平台数据下发信息链路是否有异常。
