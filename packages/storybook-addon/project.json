@@ -13,10 +13,7 @@
         "outputPath": "packages/storybook-addon/dist",
         "main": "packages/storybook-addon/src/index.ts",
         "tsConfig": "packages/storybook-addon/tsconfig.lib.json",
-        "assets": [
-          "packages/storybook-addon/*.md",
-          "packages/storybook-addon/preset.js"
-        ]
+        "assets": ["packages/storybook-addon/*.md"]
       },
       "dependsOn": [
         {

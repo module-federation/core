@@ -1,5 +1,46 @@
 # @module-federation/modern-js
 
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [66ba7b1]
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/node@2.6.6
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+
+## 0.7.0
+
+### Minor Changes
+
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@0.7.0
+  - @module-federation/enhanced@0.7.0
+  - @module-federation/node@2.6.5
+
+## 0.6.16
+
+### Patch Changes
+
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/enhanced@0.6.16
+  - @module-federation/node@2.6.4
+
+## 0.6.15
+
+### Patch Changes
+
+- d1e0f3e: fix(modern-js-plugin): set cors responseHeaders as \*
+  - @module-federation/node@2.6.3
+  - @module-federation/enhanced@0.6.15
+  - @module-federation/sdk@0.6.15
+
 ## 0.6.14
 
 ### Patch Changes

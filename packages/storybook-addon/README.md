@@ -61,7 +61,7 @@ const config: StorybookConfig = {
   },
   addons: [
     {
-      name: '@module-federation/storybook-addon/preset.js',
+      name: '@module-federation/storybook-addon/preset',
       options: {
         // add remote here and then you can load remote in your story
         remotes: {

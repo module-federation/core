@@ -129,7 +129,6 @@ class ConsumeSharedPlugin {
   }
 
   apply(compiler: Compiler): void {
-    //@ts-ignore
     new FederationRuntimePlugin().apply(compiler);
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
@@ -167,7 +166,6 @@ class ConsumeSharedPlugin {
               `No required version specified and unable to automatically determine one. ${details}`,
             );
             error.file = `shared module ${request}`;
-            //@ts-ignore
             compilation.warnings.push(error);
           };
           const directFallback =
@@ -198,7 +196,6 @@ class ConsumeSharedPlugin {
                   );
                   if (err) {
                     compilation.errors.push(
-                      //@ts-ignore
                       new ModuleNotFoundError(null, err, {
                         name: `resolving fallback for shared module ${request}`,
                       }),
@@ -235,23 +232,32 @@ class ConsumeSharedPlugin {
                 compilation.inputFileSystem,
                 context,
                 ['package.json'],
-                (err, result) => {
+                (err, result, checkedDescriptionFilePaths) => {
                   if (err) {
                     requiredVersionWarning(
                       `Unable to read description file: ${err}`,
                     );
                     return resolve(undefined);
                   }
-                  //@ts-ignore
-                  const { data, path: descriptionPath } = result;
+                  const { data } = /** @type {DescriptionFile} */ result || {};
                   if (!data) {
-                    requiredVersionWarning(
-                      `Unable to find description file in ${context}.`,
-                    );
+                    if (checkedDescriptionFilePaths?.length) {
+                      requiredVersionWarning(
+                        [
+                          `Unable to find required version for "${packageName}" in description file/s`,
+                          checkedDescriptionFilePaths.join('\n'),
+                          'It need to be in dependencies, devDependencies or peerDependencies.',
+                        ].join('\n'),
+                      );
+                    } else {
+                      requiredVersionWarning(
+                        `Unable to find description file in ${context}.`,
+                      );
+                    }
+
                     return resolve(undefined);
                   }
-                  //@ts-ignore
-                  if (data.name === packageName) {
+                  if (data['name'] === packageName) {
                     // Package self-referencing
                     return resolve(undefined);
                   }
@@ -259,14 +265,19 @@ class ConsumeSharedPlugin {
                     data,
                     packageName,
                   );
-                  if (typeof requiredVersion !== 'string') {
-                    requiredVersionWarning(
-                      `Unable to find required version for "${packageName}" in description file (${descriptionPath}). It need to be in dependencies, devDependencies or peerDependencies.`,
-                    );
-                    return resolve(undefined);
-                  }
+                  //TODO: align with webpck semver parser again
                   // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
                   resolve(requiredVersion);
+                },
+                (result) => {
+                  if (!result) return false;
+                  const { data } = result;
+                  const maybeRequiredVersion =
+                    getRequiredVersionFromDescriptionFile(data, packageName);
+                  return (
+                    data['name'] === packageName ||
+                    typeof maybeRequiredVersion === 'string'
+                  );
                 },
               );
             }),
@@ -315,7 +326,6 @@ class ConsumeSharedPlugin {
         );
         normalModuleFactory.hooks.createModule.tapPromise(
           PLUGIN_NAME,
-          //@ts-ignore
           ({ resource }, { context, dependencies }) => {
             if (
               dependencies[0] instanceof ConsumeSharedFallbackDependency ||
@@ -343,7 +353,6 @@ class ConsumeSharedPlugin {
             set.add(RuntimeGlobals.hasOwnProperty);
             compilation.addRuntimeModule(
               chunk,
-              //@ts-ignore
               new ConsumeSharedRuntimeModule(set),
             );
             // FIXME: need to remove webpack internal inject ShareRuntimeModule, otherwise there will be two ShareRuntimeModule

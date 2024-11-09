@@ -1,5 +1,41 @@
 # @module-federation/rsbuild-plugin
 
+## 0.7.1
+
+### Patch Changes
+
+- 5fc6045: fix(rsbuild-plugin): remove duplicate logs for shared modules.
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+
+## 0.7.0
+
+### Minor Changes
+
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@0.7.0
+  - @module-federation/enhanced@0.7.0
+
+## 0.6.16
+
+### Patch Changes
+
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/enhanced@0.6.16
+
+## 0.6.15
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.15
+- @module-federation/sdk@0.6.15
+
 ## 0.6.14
 
 ### Patch Changes

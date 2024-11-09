@@ -99,7 +99,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     ).apply(compiler);
 
     const runtimeESMPath = require.resolve(
-      '@module-federation/runtime/dist/index.esm.js',
+      '@module-federation/runtime/dist/index.esm.mjs',
       { paths: [options.implementation] },
     );
 
@@ -127,7 +127,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     );
 
     // Check whether react exists
-    if (fs.existsSync(reactPath)) {
+    if (
+      fs.existsSync(reactPath) &&
+      (!options?.bridge || !options.bridge.disableAlias)
+    ) {
       new ReactBridgePlugin({
         moduleFederationOptions: this._options,
       }).apply(compiler);

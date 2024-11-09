@@ -1,5 +1,46 @@
 # @module-federation/webpack-bundler-runtime
 
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [66ba7b1]
+- Updated dependencies [8712967]
+- Updated dependencies [6db4c5f]
+  - @module-federation/runtime@0.7.1
+  - @module-federation/sdk@0.7.1
+
+## 0.7.0
+
+### Minor Changes
+
+- 206b56d: disable hoistTransitiveImports for better tree shake
+- Updated dependencies [752537b]
+- Updated dependencies [54bfd1c]
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/runtime@0.7.0
+  - @module-federation/sdk@0.7.0
+
+## 0.6.16
+
+### Patch Changes
+
+- 024df60: disable hoistTransitiveImports for better tree shake
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/runtime@0.6.16
+
+## 0.6.15
+
+### Patch Changes
+
+- Updated dependencies [ec31539]
+  - @module-federation/runtime@0.6.15
+  - @module-federation/sdk@0.6.15
+
 ## 0.6.14
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # @module-federation/bridge-shared
 
+## 0.7.1
+
+## 0.7.0
+
+### Minor Changes
+
+- 3942740: add license information
+
+## 0.6.16
+
+## 0.6.15
+
 ## 0.6.14
 
 ### Patch Changes

@@ -11,6 +11,11 @@ import {
   extname,
   isAbsolute,
 } from 'path';
+import {
+  getShortErrorMsg,
+  TYPE_001,
+  typeDescMap,
+} from '@module-federation/error-codes';
 import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extractor';
 import { exec } from 'child_process';
 import util from 'util';
@@ -177,7 +182,11 @@ export const compileTs = async (
     try {
       await execPromise(cmd);
     } catch (err) {
-      throw new Error(`compile TS failed, the original command is '${cmd}'`);
+      throw new Error(
+        getShortErrorMsg(TYPE_001, typeDescMap, {
+          cmd,
+        }),
+      );
     }
 
     const mapExposeToEntry = Object.fromEntries(

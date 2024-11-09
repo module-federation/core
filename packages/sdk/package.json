@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/sdk",
-  "version": "0.6.14",
+  "version": "0.7.1",
   "license": "MIT",
   "description": "A sdk for support module federation",
   "keywords": [
@@ -17,17 +17,17 @@
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "sideEffects": false,
   "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "module": "./dist/index.esm.mjs",
   "types": "./dist/index.cjs.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.cjs.d.ts",
-      "import": "./dist/index.esm.js",
+      "import": "./dist/index.esm.mjs",
       "require": "./dist/index.cjs.js"
     },
     "./normalize-webpack-path": {
       "types": "./dist/normalize-webpack-path.cjs.d.ts",
-      "import": "./dist/normalize-webpack-path.esm.js",
+      "import": "./dist/normalize-webpack-path.esm.mjs",
       "require": "./dist/normalize-webpack-path.cjs.js"
     }
   },
@@ -42,6 +42,6 @@
     }
   },
   "dependencies": {
-    "isomorphic-rslog": "0.0.4"
+    "isomorphic-rslog": "0.0.6"
   }
 }

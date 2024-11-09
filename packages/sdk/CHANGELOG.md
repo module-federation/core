@@ -1,5 +1,31 @@
 # @module-federation/sdk
 
+## 0.7.1
+
+### Patch Changes
+
+- 6db4c5f: fix: remove meaningless log
+
+## 0.7.0
+
+### Minor Changes
+
+- 879ad87: pass all loaderHooks to loadEntry and fetch functions instead of just createScript
+
+### Patch Changes
+
+- 4eb09e7: feat: support disable default alias setting in bridge
+- 206b56d: disable hoistTransitiveImports for better tree shake
+
+## 0.6.16
+
+### Patch Changes
+
+- f779188: update rslog package version to resolve type error
+- 024df60: disable hoistTransitiveImports for better tree shake
+
+## 0.6.15
+
 ## 0.6.14
 
 ### Patch Changes
