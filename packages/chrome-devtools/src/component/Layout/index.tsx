@@ -5,6 +5,7 @@ import {
   GlobalModuleInfo,
   MODULE_DEVTOOL_IDENTIFIER,
 } from '@module-federation/sdk';
+import { Federation } from '@module-federation/runtime-core';
 
 import FormComponent from '../Form';
 import Dependency from '../Graph';
@@ -33,11 +34,18 @@ import {
   BROWSER_ENV_KEY,
   __FEDERATION_DEVTOOLS__,
 } from '../../template/constant';
-
 interface FormItemType {
   key: string;
   value: string;
   checked: boolean;
+}
+declare global {
+  interface Window {
+    __FEDERATION__: Federation & {
+      originModuleInfo: GlobalModuleInfo;
+      moduleInfo: GlobalModuleInfo;
+    };
+  }
 }
 
 const Layout = (
