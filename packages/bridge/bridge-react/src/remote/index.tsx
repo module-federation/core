@@ -12,10 +12,9 @@ import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
 import {
   LoggerInstance,
   pathJoin,
-  getModuleName,
   getRootDomDefaultClassName,
+  getHostInstance,
 } from '../utils';
-import { FederationHost } from '@module-federation/runtime';
 
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {
@@ -40,23 +39,6 @@ interface RemoteAppParams {
   exportName: string | number | symbol;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
 }
-
-const getHostInstance = (moduleName: string) => {
-  let hostInstance: FederationHost | undefined = undefined;
-  const currentName = getModuleName(moduleName);
-  const remoteInstance = window?.__FEDERATION__?.__INSTANCES__?.find(
-    (v) => v.name === currentName,
-  );
-
-  // @ts-ignore
-  if (remoteInstance && remoteInstance?.hostName) {
-    // @ts-ignore
-    hostInstance = window.__VMOK__.__INSTANCES__.find(
-      (instance) => instance.name === remoteInstance?.hostName,
-    );
-  }
-  return hostInstance;
-};
 
 const RemoteAppWrapper = forwardRef(function (
   props: RemoteAppParams & RenderFnParams,

@@ -8,7 +8,7 @@ import type {
 } from '@module-federation/bridge-shared';
 import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
-import { LoggerInstance, atLeastReact18, getModuleName } from './utils';
+import { LoggerInstance, atLeastReact18, getRemoteInstance } from './utils';
 
 type RenderParams = RenderFnParams & any;
 type DestroyParams = {
@@ -17,20 +17,12 @@ type DestroyParams = {
 };
 type RootType = HTMLElement | ReactDOMClient.Root;
 
-type BridgeHooks = {
-  beforeBridgeRender?: (params: RenderFnParams) => void | Record<string, any>;
-  afterBridgeRender?: (params: RenderFnParams) => void | Record<string, any>;
-  beforeBridgeDestroy?: (params: DestroyParams) => void | Record<string, any>;
-  afterBridgeDestroy?: (params: DestroyParams) => void | Record<string, any>;
-};
-
 type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
   render?: (
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
-  hooks?: BridgeHooks;
 };
 
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
@@ -50,14 +42,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
       );
     };
 
-    const getModuleInstance = (moduleName: string) => {
-      const moduleNameWithoutExpose = getModuleName(moduleName);
-      const instance = window?.__FEDERATION__?.__INSTANCES__?.find(
-        (v) => v.name === moduleNameWithoutExpose,
-      );
-      return instance;
-    };
-
     return {
       async render(info: RenderParams) {
         LoggerInstance.log(`createBridgeComponent render Info`, info);
@@ -70,7 +54,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           ...propsInfo
         } = info;
 
-        const instance = getModuleInstance(moduleName);
+        const instance = getRemoteInstance(moduleName);
         LoggerInstance.log(`createBridgeComponent remote instance`, instance);
 
         const beforeBridgeRenderRes =
@@ -116,7 +100,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
-        const instance = getModuleInstance(info.moduleName);
+        const instance = getRemoteInstance(info.moduleName);
         LoggerInstance.log(`createBridgeComponent remote instance`, instance);
         instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
 
