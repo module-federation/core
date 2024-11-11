@@ -9,8 +9,13 @@ import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
-import { LoggerInstance, pathJoin, getRootDomDefaultClassName } from '../utils';
-import { getInstance } from '@module-federation/runtime';
+import {
+  LoggerInstance,
+  pathJoin,
+  getModuleName,
+  getRootDomDefaultClassName,
+} from '../utils';
+import { FederationHost } from '@module-federation/runtime';
 
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {
@@ -36,12 +41,27 @@ interface RemoteAppParams {
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
 }
 
+const getHostInstance = (moduleName: string) => {
+  let hostInstance: FederationHost | undefined = undefined;
+  const currentName = getModuleName(moduleName);
+  const remoteInstance = window?.__FEDERATION__?.__INSTANCES__?.find(
+    (v) => v.name === currentName,
+  );
+
+  // @ts-ignore
+  if (remoteInstance && remoteInstance?.hostName) {
+    // @ts-ignore
+    hostInstance = window.__VMOK__.__INSTANCES__.find(
+      (instance) => instance.name === remoteInstance?.hostName,
+    );
+  }
+  return hostInstance;
+};
+
 const RemoteAppWrapper = forwardRef(function (
   props: RemoteAppParams & RenderFnParams,
   ref,
 ) {
-  const host = getInstance();
-  LoggerInstance.log(`RemoteAppWrapper host >>>`, host);
   const RemoteApp = () => {
     LoggerInstance.log(`RemoteAppWrapper RemoteApp props >>>`, { props });
     const {
@@ -62,6 +82,8 @@ const RemoteAppWrapper = forwardRef(function (
 
     const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
     const providerInfoRef = useRef<any>(null);
+    const hostInstance = getHostInstance(moduleName);
+    LoggerInstance.log(`RemoteAppWrapper hostInstance >>>`, hostInstance);
 
     useEffect(() => {
       const renderTimeout = setTimeout(() => {
@@ -82,13 +104,20 @@ const RemoteAppWrapper = forwardRef(function (
           renderProps,
         );
 
-        // TODO: 寻找当前 remote 实例上的 hostName, 找到 host instance
+        LoggerInstance.log(
+          `createRemoteComponent LazyComponent hostInstance >>>`,
+          hostInstance,
+        );
         const beforeBridgeRenderRes =
-          host?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(renderProps) ||
-          {};
+          hostInstance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+            renderProps,
+          ) || {};
+        // @ts-ignore
         renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
         providerReturn.render(renderProps);
-        host?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
+        hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
+          renderProps,
+        );
       });
 
       return () => {
@@ -99,7 +128,8 @@ const RemoteAppWrapper = forwardRef(function (
               `createRemoteComponent LazyComponent destroy >>>`,
               { moduleName, basename, dom: renderDom.current },
             );
-            host?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
+
+            hostInstance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
               moduleName,
               dom: renderDom.current,
               basename,
@@ -107,12 +137,13 @@ const RemoteAppWrapper = forwardRef(function (
               fallback,
               ...resProps,
             });
+
             providerInfoRef.current?.destroy({
               moduleName,
               dom: renderDom.current,
             });
 
-            host?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
+            hostInstance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
               moduleName,
               dom: renderDom.current,
               basename,

@@ -32,8 +32,9 @@ type ProviderFnParams<T> = {
   ) => RootType | Promise<RootType>;
   hooks?: BridgeHooks;
 };
+
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
-  return (params?: { hooks?: BridgeHooks }) => {
+  return () => {
     const rootMap = new Map<any, RootType>();
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
@@ -49,6 +50,14 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
       );
     };
 
+    const getModuleInstance = (moduleName: string) => {
+      const moduleNameWithoutExpose = getModuleName(moduleName);
+      const instance = window?.__FEDERATION__?.__INSTANCES__?.find(
+        (v) => v.name === moduleNameWithoutExpose,
+      );
+      return instance;
+    };
+
     return {
       async render(info: RenderParams) {
         LoggerInstance.log(`createBridgeComponent render Info`, info);
@@ -61,10 +70,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           ...propsInfo
         } = info;
 
-        const moduleNameWithoutExpose = getModuleName(moduleName);
-        const instance = __FEDERATION__.__INSTANCES__.find(
-          (v) => v.name === moduleNameWithoutExpose,
-        );
+        const instance = getModuleInstance(moduleName);
         LoggerInstance.log(`createBridgeComponent remote instance`, instance);
 
         const beforeBridgeRenderRes =
@@ -103,27 +109,17 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           renderFn?.(rootComponentWithErrorBoundary, info.dom);
         }
 
-        const afterBridgeRender =
-          (bridgeInfo?.hooks && bridgeInfo?.hooks.afterBridgeDestroy) ||
-          params?.hooks?.afterBridgeRender;
-        afterBridgeRender && afterBridgeRender(info);
+        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
       },
 
       async destroy(info: DestroyParams) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
-        const moduleNameWithoutExpose = getModuleName(info.moduleName);
-        LoggerInstance.log(
-          `createBridgeComponent remote module without expose name >>>`,
-          moduleNameWithoutExpose,
-        );
-        const instance = __FEDERATION__.__INSTANCES__.find(
-          (v) => v.name === moduleNameWithoutExpose,
-        );
+        const instance = getModuleInstance(info.moduleName);
         LoggerInstance.log(`createBridgeComponent remote instance`, instance);
-
         instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
+
         // call destroy function
         if (atLeastReact18(React)) {
           const root = rootMap.get(info.dom);
