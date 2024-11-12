@@ -6,6 +6,7 @@ import {
   Global,
   setGlobalFederationConstructor,
 } from '@module-federation/runtime-core';
+
 import { requestList } from './mock/env';
 
 // Helper function to check if a method is private

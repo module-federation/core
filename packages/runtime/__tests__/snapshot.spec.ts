@@ -1,6 +1,9 @@
 import { assert, describe, it } from 'vitest';
 import { FederationHost } from '../src';
-import { getGlobalSnapshot, resetFederationGlobalInfo } from '../src/global';
+import {
+  getGlobalSnapshot,
+  resetFederationGlobalInfo,
+} from '@module-federation/runtime-core';
 
 describe('snapshot', () => {
   beforeEach(() => {
