@@ -48,6 +48,10 @@
           {
             "command": "nx run node:build",
             "forwardAllArgs": false
+          },
+          {
+            "command": "rm ./packages/node/dist/package.json",
+            "forwardAllArgs": false
           }
         ]
       }
