@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 0.7.2
+
+### Patch Changes
+
+- 85990e2: fix(dts-plugin): hold the broker server if the remote not start locally
+  - @module-federation/sdk@0.7.2
+  - @module-federation/managers@0.7.2
+  - @module-federation/third-party-dts-extractor@0.7.2
+  - @module-federation/error-codes@0.7.2
+
 ## 0.7.1
 
 ### Patch Changes
