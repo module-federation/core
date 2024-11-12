@@ -15,11 +15,19 @@ import logger from '../logger';
 type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
 
-const PLUGIN_MODULE_FEDERATION_NAME = 'rsbuild:module-federation-enhanced';
+const RSBUILD_PLUGIN_MODULE_FEDERATION_NAME =
+  'rsbuild:module-federation-enhanced';
+const RSPACK_PLUGIN_MODULE_FEDERATION_NAME = 'module-federation';
+
+export {
+  RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
+  RSPACK_PLUGIN_MODULE_FEDERATION_NAME,
+};
+
 export const pluginModuleFederation = (
   moduleFederationOptions: ModuleFederationOptions,
 ): RsbuildPlugin => ({
-  name: PLUGIN_MODULE_FEDERATION_NAME,
+  name: RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
     const sharedOptions: [string, sharePlugin.SharedConfig][] = parseOptions(
       moduleFederationOptions.shared || [],
@@ -153,7 +161,7 @@ export const pluginModuleFederation = (
 
     api.modifyBundlerChain(async (chain) => {
       chain
-        .plugin('module-federation')
+        .plugin(RSPACK_PLUGIN_MODULE_FEDERATION_NAME)
         .use(ModuleFederationPlugin, [moduleFederationOptions]);
 
       // `uniqueName` is required for react refresh to work
