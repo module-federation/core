@@ -23,8 +23,6 @@
         "rollupConfig": "packages/runtime-tools/rollup.config.js",
         "format": ["cjs", "esm"],
         "external": ["@module-federation/*"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true,
         "generatePackageJson": false
       },
       "dependsOn": [
