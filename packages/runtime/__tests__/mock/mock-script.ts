@@ -1,4 +1,4 @@
-import { safeWrapper } from '../../src/utils';
+import { safeWrapper } from '@module-federation/runtime-core';
 import fs from 'fs';
 import path from 'path';
 
