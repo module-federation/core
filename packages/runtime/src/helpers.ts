@@ -3,4 +3,5 @@ export type {
   IGlobalUtils,
   IShareUtils,
 } from '@module-federation/runtime-core';
+
 export default helpers;

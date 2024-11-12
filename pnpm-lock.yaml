@@ -2551,6 +2551,9 @@ importers:
 
   packages/runtime-core:
     dependencies:
+      '@module-federation/error-codes':
+        specifier: workspace:*
+        version: link:../error-codes
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
