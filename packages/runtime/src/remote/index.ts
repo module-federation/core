@@ -193,11 +193,18 @@ export class RemoteHandler {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
     id: string,
-    options?: { loadFactory?: boolean; from: CallFrom },
+    options?: { loadFactory?: boolean; from: CallFrom; shareScope?: string },
   ): Promise<T | null> {
     const { host } = this;
     try {
-      const { loadFactory = true } = options || { loadFactory: true };
+      const { loadFactory = true, shareScope } = options || {
+        loadFactory: true,
+      };
+      if (this.host.options.shareStrategy === 'version-first') {
+        await Promise.all(
+          this.host.sharedHandler.initializeSharing(shareScope),
+        );
+      }
       // 1. Validate the parameters of the retrieved module. There are two module request methods: pkgName + expose and alias + expose.
       // 2. Request the snapshot information of the current host and globally store the obtained snapshot information. The retrieved module information is partially offline and partially online. The online module information will retrieve the modules used online.
       // 3. Retrieve the detailed information of the current module from global (remoteEntry address, expose resource address)
