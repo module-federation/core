@@ -17,7 +17,8 @@
         "assets": [],
         "project": "packages/error-codes/package.json",
         "compiler": "swc",
-        "format": ["cjs", "esm"]
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false
       },
       "dependsOn": [
         {

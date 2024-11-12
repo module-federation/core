@@ -24,7 +24,8 @@
         "format": ["cjs", "esm"],
         "external": ["@module-federation/*"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
+        "updateBuildableProjectDepsInPackageJson": true,
+        "generatePackageJson": false
       },
       "dependsOn": [
         {
