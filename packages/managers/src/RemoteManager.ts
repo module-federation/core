@@ -77,14 +77,17 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
   //   'micro-app-sub3': @garfish/micro-app-sub3:0.0.4
   // }
   get dtsRemotes(): Record<string, string> {
-    return Object.keys(this.normalizedOptions).reduce((sum, remoteAlias) => {
-      const remoteInfo = this.normalizedOptions[remoteAlias];
-      sum[remoteAlias] = composeKeyWithSeparator(
-        remoteInfo.name,
-        'entry' in remoteInfo ? remoteInfo.entry : remoteInfo.version,
-      );
-      return sum;
-    }, {});
+    return Object.keys(this.normalizedOptions).reduce(
+      (sum, remoteAlias) => {
+        const remoteInfo = this.normalizedOptions[remoteAlias];
+        sum[remoteAlias] = composeKeyWithSeparator(
+          remoteInfo.name,
+          'entry' in remoteInfo ? remoteInfo.entry : remoteInfo.version,
+        );
+        return sum;
+      },
+      {} as Record<string, string>,
+    );
   }
 
   get remotes(): moduleFederationPlugin.ModuleFederationPluginOptions['remotes'] {
