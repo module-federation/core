@@ -34,12 +34,12 @@
   },
   "peerDependencies": {
     "vue": "=3",
-    "vue-router": "=3",
-    "@module-federation/runtime": "workspace:*"
+    "vue-router": "=3"
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/runtime": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

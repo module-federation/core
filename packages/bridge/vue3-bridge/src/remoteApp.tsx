@@ -17,12 +17,13 @@ export default defineComponent({
     const providerInfoRef = ref(null);
     const pathname = ref('');
     const route = useRoute();
+    const hostInstance = getInstance();
 
     const renderComponent = () => {
-      const host = getInstance();
       const providerReturn = props.providerInfo?.();
       providerInfoRef.value = providerReturn;
-      const renderProps = {
+
+      let renderProps = {
         name: props.moduleName,
         dom: rootRef.value,
         basename: props.basename,
@@ -33,12 +34,14 @@ export default defineComponent({
         renderProps,
       );
 
-      if (host?.bridgeHook && host?.bridgeHook?.lifecycle?.beforeBridgeRender) {
-        host?.bridgeHook?.lifecycle?.beforeBridgeRender.emit({
-          ...renderProps,
-        });
-      }
+      const beforeBridgeRenderRes =
+        hostInstance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+          renderProps,
+        ) || {};
+
+      renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
       providerReturn.render(renderProps);
+      hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
     };
 
     const watchStopHandle = watch(
@@ -65,21 +68,25 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
-      const host = getInstance();
       LoggerInstance.log(`createRemoteComponent LazyComponent destroy >>>`, {
         ...props,
       });
       watchStopHandle();
 
+      hostInstance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
+        name: props.moduleName,
+        dom: rootRef.value,
+        basename: props.basename,
+        memoryRoute: props.memoryRoute,
+      });
+
       (providerInfoRef.value as any)?.destroy({ dom: rootRef.value });
-      if (host?.bridgeHook && host?.bridgeHook?.lifecycle?.afterBridgeDestroy) {
-        host?.bridgeHook?.lifecycle?.afterBridgeDestroy.emit({
-          name: props.moduleName,
-          dom: rootRef.value,
-          basename: props.basename,
-          memoryRoute: props.memoryRoute,
-        });
-      }
+      hostInstance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
+        name: props.moduleName,
+        dom: rootRef.value,
+        basename: props.basename,
+        memoryRoute: props.memoryRoute,
+      });
     });
 
     return () => <div ref={rootRef}></div>;

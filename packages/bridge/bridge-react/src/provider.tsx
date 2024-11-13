@@ -11,7 +11,9 @@ import { RouterContext } from './context';
 import { LoggerInstance, atLeastReact18 } from './utils';
 import { getInstance } from '@module-federation/runtime';
 
-type RenderParams = RenderFnParams & any;
+type RenderParams = RenderFnParams & {
+  [key: string]: unknown;
+};
 type DestroyParams = {
   moduleName: string;
   dom: HTMLElement;

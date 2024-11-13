@@ -2,37 +2,24 @@ import * as Vue from 'vue';
 import * as VueRouter from 'vue-router';
 import { RenderFnParams } from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
+import { getInstance } from '@module-federation/runtime';
 
 declare const __APP_VERSION__: string;
 
-type DestroyParams = {
-  dom: HTMLElement;
-};
-
-type BridgeHooks = {
-  beforeBridgeRender?: (params: RenderFnParams) => void | Record<string, any>;
-  afterBridgeRender?: (params: RenderFnParams) => void | Record<string, any>;
-  beforeBridgeDestroy?: (params: DestroyParams) => void | Record<string, any>;
-  afterBridgeDestroy?: (params: DestroyParams) => void | Record<string, any>;
-};
-
 export function createBridgeComponent(bridgeInfo: any) {
   const rootMap = new Map();
-  return (params: { hooks?: BridgeHooks }) => {
+  const instance = getInstance();
+  return () => {
     return {
       __APP_VERSION__,
       render(info: RenderFnParams) {
         LoggerInstance.log(`createBridgeComponent render Info`, info);
         const app = Vue.createApp(bridgeInfo.rootComponent);
         rootMap.set(info.dom, app);
-        // bridgeInfo?.renderLifecycle?.(info);
-        const beforeBridgeRender =
-          (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeRender) ||
-          params?.hooks?.beforeBridgeRender;
 
-        // you can return a props object through beforeBridgeRender to pass additional props parameters
         const beforeBridgeRenderRes =
-          beforeBridgeRender && beforeBridgeRender(info);
+          instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
+
         const extraProps =
           beforeBridgeRenderRes &&
           typeof beforeBridgeRenderRes === 'object' &&
@@ -71,25 +58,15 @@ export function createBridgeComponent(bridgeInfo: any) {
           app.mount(info.dom);
         }
 
-        const afterBridgeRender =
-          (bridgeInfo?.hooks && bridgeInfo?.hooks.afterBridgeDestroy) ||
-          params?.hooks?.afterBridgeRender;
-        afterBridgeRender && afterBridgeRender(info);
+        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
       },
       destroy(info: { dom: HTMLElement }) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, info);
         const root = rootMap.get(info?.dom);
 
-        const beforeBridgeDestroy =
-          (bridgeInfo?.hooks && bridgeInfo?.hooks.beforeBridgeDestroy) ||
-          params?.hooks?.beforeBridgeDestroy;
-        beforeBridgeDestroy && beforeBridgeDestroy(info);
-
+        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
         root?.unmount();
-        const afterBridgeDestroy =
-          (bridgeInfo?.hooks && bridgeInfo?.hooks.afterBridgeDestroy) ||
-          params?.hooks?.afterBridgeDestroy;
-        afterBridgeDestroy && afterBridgeDestroy(info);
+        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
       },
     };
   };
