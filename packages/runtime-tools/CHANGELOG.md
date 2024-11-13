@@ -1,5 +1,15 @@
 # @module-federation/runtime-tools
 
+## 0.7.3
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- Updated dependencies [4ab9295]
+- Updated dependencies [c2b1efa]
+  - @module-federation/webpack-bundler-runtime@0.7.3
+  - @module-federation/runtime@0.7.3
+
 ## 0.7.2
 
 ### Patch Changes
