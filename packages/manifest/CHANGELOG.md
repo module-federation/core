@@ -1,5 +1,34 @@
 # @module-federation/manifest
 
+## 0.7.3
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- Updated dependencies [4ab9295]
+- Updated dependencies [7facc10]
+  - @module-federation/managers@0.7.3
+  - @module-federation/sdk@0.7.3
+  - @module-federation/dts-plugin@0.7.3
+
+## 0.7.2
+
+### Patch Changes
+
+- Updated dependencies [85990e2]
+  - @module-federation/dts-plugin@0.7.2
+  - @module-federation/sdk@0.7.2
+  - @module-federation/managers@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [6db4c5f]
+  - @module-federation/sdk@0.7.1
+  - @module-federation/dts-plugin@0.7.1
+  - @module-federation/managers@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

@@ -8,6 +8,7 @@ import { correctImportPath } from './correctImportPath';
 import type { RsbuildConfig, RsbuildPlugin } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
+const tempDirPath = path.resolve(process.cwd(), `node_modules/${TEMP_DIR}`);
 // add bootstrap for host project
 const bootstrapPath = path.resolve(
   process.cwd(),
@@ -17,6 +18,10 @@ const generateBootstrap = (context: string, entryPath: string) => {
   return `import('${correctImportPath(context, entryPath)}');`;
 };
 const writeBootstrap = (context: string, entryPath: string) => {
+  if (!fs.existsSync(tempDirPath)) {
+    fs.mkdirSync(tempDirPath);
+  }
+
   if (fs.existsSync(bootstrapPath)) {
     fs.unlinkSync(bootstrapPath);
   }

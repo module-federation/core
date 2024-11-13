@@ -16,6 +16,7 @@ describe('SharedManager', () => {
       name: '@module-federation/shared-managers-test',
       shared: {
         react: {},
+        'react-dom': { singleton: false, requiredVersion: '^18.0.0' },
       },
     };
     const sharedManager = new SharedManager();
@@ -33,6 +34,7 @@ describe('SharedManager', () => {
         ].includes(key),
       ),
     ).toEqual(true);
+    expect(sharedManager.normalizedOptions['react-dom']).toMatchSnapshot();
   });
 
   it('sharedPluginOptions', () => {

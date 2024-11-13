@@ -1,5 +1,24 @@
 # website-new
 
+## 1.0.8
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+  - @module-federation/error-codes@0.7.3
+
+## 1.0.7
+
+### Patch Changes
+
+- @module-federation/error-codes@0.7.2
+
+## 1.0.6
+
+### Patch Changes
+
+- @module-federation/error-codes@0.7.1
+
 ## 1.0.5
 
 ### Patch Changes

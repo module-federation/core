@@ -1,3 +1,4 @@
+// @ts-ignore this pkg miss types
 import findPkg from 'find-pkg';
 import path from 'path';
 import fs from 'fs-extra';
@@ -40,7 +41,7 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
         import: sharedImport,
       };
       return sum;
-    }, {});
+    }, {} as moduleFederationPlugin.SharedObject);
     return {
       shared,
       shareScope: this.options.shareScope || 'default',
@@ -127,9 +128,7 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
     sharedOptions.forEach((item) => {
       const [sharedName, sharedOptions] = item;
       const pkgInfo = this.findPkg(sharedName, sharedOptions);
-      const sharedConfig = this.transformSharedConfig(
-        sharedOptions[sharedName],
-      );
+      const sharedConfig = this.transformSharedConfig(sharedOptions);
       normalizedShared[sharedName] = {
         ...sharedConfig,
         requiredVersion:
