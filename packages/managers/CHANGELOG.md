@@ -1,5 +1,14 @@
 # @module-federation/managers
 
+## 0.7.3
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- 7facc10: fix(managers): correct manifest shared configuration
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+
 ## 0.7.2
 
 ### Patch Changes

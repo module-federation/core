@@ -1,5 +1,16 @@
 # @module-federation/webpack-bundler-runtime
 
+## 0.7.3
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- c2b1efa: fix: initializeSharing before load remote while shareStrategy is version first
+- Updated dependencies [4ab9295]
+- Updated dependencies [c2b1efa]
+  - @module-federation/runtime@0.7.3
+  - @module-federation/sdk@0.7.3
+
 ## 0.7.2
 
 ### Patch Changes

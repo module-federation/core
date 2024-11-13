@@ -1,5 +1,14 @@
 # @module-federation/rsbuild-plugin
 
+## 0.7.3
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+  - @module-federation/enhanced@0.7.3
+
 ## 0.7.2
 
 ### Patch Changes
