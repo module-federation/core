@@ -1,5 +1,13 @@
 # @module-federation/utilities
 
+## 3.1.26
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+
 ## 3.1.25
 
 ### Patch Changes

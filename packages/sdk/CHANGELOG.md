@@ -1,5 +1,11 @@
 # @module-federation/sdk
 
+## 0.7.3
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+
 ## 0.7.2
 
 ## 0.7.1
