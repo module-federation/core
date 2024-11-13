@@ -9,12 +9,8 @@ import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
-import {
-  LoggerInstance,
-  pathJoin,
-  getRootDomDefaultClassName,
-  getHostInstance,
-} from '../utils';
+import { LoggerInstance, pathJoin, getRootDomDefaultClassName } from '../utils';
+import { getInstance } from '@module-federation/runtime';
 
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {
@@ -64,7 +60,7 @@ const RemoteAppWrapper = forwardRef(function (
 
     const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
     const providerInfoRef = useRef<any>(null);
-    const hostInstance = getHostInstance(moduleName);
+    const hostInstance = getInstance();
     LoggerInstance.log(`RemoteAppWrapper hostInstance >>>`, hostInstance);
 
     useEffect(() => {

@@ -1804,6 +1804,9 @@ importers:
       '@module-federation/bridge-shared':
         specifier: workspace:*
         version: link:../bridge-shared
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../../runtime
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../sdk
@@ -1811,9 +1814,6 @@ importers:
         specifier: ^4.0.13
         version: 4.0.13(react@18.3.1)
     devDependencies:
-      '@module-federation/runtime':
-        specifier: workspace:*
-        version: link:../../runtime
       '@testing-library/react':
         specifier: 15.0.7
         version: 15.0.7(@types/react@18.2.79)(react-dom@18.3.1)(react@18.3.1)

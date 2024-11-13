@@ -63,28 +63,3 @@ export const getRootDomDefaultClassName = (moduleName: string) => {
   const name = getModuleName(moduleName).replace(/\@/, '').replace(/\//, '-');
   return `bridge-root-component-${name}`;
 };
-
-export const getHostInstance = (moduleName: string) => {
-  let hostInstance: FederationHost | undefined = undefined;
-  const currentName = getModuleName(moduleName);
-  const remoteInstance = window?.__FEDERATION__?.__INSTANCES__?.find(
-    (v) => v.name === currentName,
-  );
-
-  // @ts-ignore
-  if (remoteInstance && remoteInstance?.hostName) {
-    hostInstance = window.__VMOK__.__INSTANCES__.find(
-      // @ts-ignore
-      (instance) => instance.name === remoteInstance?.hostName,
-    );
-  }
-  return hostInstance;
-};
-
-export const getRemoteInstance = (moduleName: string) => {
-  const moduleNameWithoutExpose = getModuleName(moduleName);
-  const instance = window?.__FEDERATION__?.__INSTANCES__?.find(
-    (v) => v.name === moduleNameWithoutExpose,
-  );
-  return instance;
-};

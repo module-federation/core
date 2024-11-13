@@ -8,7 +8,8 @@ import type {
 } from '@module-federation/bridge-shared';
 import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
-import { LoggerInstance, atLeastReact18, getRemoteInstance } from './utils';
+import { LoggerInstance, atLeastReact18 } from './utils';
+import { getInstance } from '@module-federation/runtime';
 
 type RenderParams = RenderFnParams & any;
 type DestroyParams = {
@@ -28,6 +29,9 @@ type ProviderFnParams<T> = {
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
   return () => {
     const rootMap = new Map<any, RootType>();
+    const instance = getInstance();
+    LoggerInstance.log(`createBridgeComponent remote instance`, instance);
+
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
       const { moduleName, memoryRoute, basename = '/' } = appInfo;
@@ -53,9 +57,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           fallback,
           ...propsInfo
         } = info;
-
-        const instance = getRemoteInstance(moduleName);
-        LoggerInstance.log(`createBridgeComponent remote instance`, instance);
 
         const beforeBridgeRenderRes =
           instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
@@ -100,8 +101,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
-        const instance = getRemoteInstance(info.moduleName);
-        LoggerInstance.log(`createBridgeComponent remote instance`, instance);
+
         instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
 
         // call destroy function
