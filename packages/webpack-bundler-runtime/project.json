@@ -21,6 +21,7 @@
           "packages/webpack-bundler-runtime/src/constant.ts",
           "packages/webpack-bundler-runtime/src/container.ts"
         ],
+        "generatePackageJson": false,
         "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.js"
       },
       "dependsOn": [

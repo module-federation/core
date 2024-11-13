@@ -15,7 +15,8 @@
         "project": "packages/rsbuild-plugin/package.json",
         "rollupConfig": "packages/rsbuild-plugin/rollup.config.js",
         "compiler": "swc",
-        "format": ["cjs", "esm"]
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false
       }
     },
     "lint": {

@@ -16,7 +16,8 @@
         "project": "packages/data-prefetch/package.json",
         "rollupConfig": "packages/data-prefetch/rollup.config.js",
         "compiler": "swc",
-        "format": ["cjs", "esm"]
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false
       }
     },
     "test": {

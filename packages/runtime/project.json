@@ -23,7 +23,8 @@
         "project": "packages/runtime/package.json",
         "compiler": "swc",
         "rollupConfig": "packages/runtime/rollup.config.js",
-        "format": ["cjs", "esm"]
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false
       },
       "dependsOn": [
         {
