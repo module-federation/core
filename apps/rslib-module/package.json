@@ -13,7 +13,8 @@
   "types": "./dist/cjs/index.d.ts",
   "scripts": {
     "build": "rslib build",
-    "serve": "pnpm build && http-server -p 3000 ./dist/ --cors",
+    "dev": "rslib mf dev",
+    "serve": "pnpm build && http-server -p 3001 ./dist/ --cors",
     "storybook": "storybook dev -p 6006"
   },
   "devDependencies": {
@@ -21,13 +22,14 @@
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@module-federation/storybook-addon": "workspace:*",
     "@rsbuild/plugin-react": "^1.0.6",
-    "@rslib/core": "^0.0.14",
+    "@rslib/core": "^0.0.18",
     "@types/react": "^18.3.11",
     "http-server": "^14.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "storybook": "^8.3.6",
-    "storybook-react-rsbuild": "^0.1.1"
+    "storybook-react-rsbuild": "^0.1.1",
+    "storybook-addon-rslib": "^0.1.4"
   },
   "peerDependencies": {
     "react": "*"

@@ -21,7 +21,7 @@ Dev package
 1. 
 
 ```
-nx serve rslib-module
+nx dev rslib-module
 ```
 
 2.
