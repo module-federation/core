@@ -51,6 +51,10 @@
           {
             "command": "nx run nextjs-mf:build",
             "forwardAllArgs": false
+          },
+          {
+            "command": "rm ./packages/nextjs-mf/dist/package.json",
+            "forwardAllArgs": false
           }
         ]
       }

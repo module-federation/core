@@ -17,7 +17,8 @@
         "project": "packages/managers/package.json",
         "rollupConfig": "packages/managers/rollup.config.js",
         "compiler": "swc",
-        "format": ["cjs", "esm"]
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false
       }
     },
     "lint": {
