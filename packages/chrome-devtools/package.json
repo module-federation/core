@@ -56,7 +56,7 @@
     "types": "./dist/index.d.ts"
   },
   "dependencies": {
-    "@arco-design/web-react": "^2.59.1",
+    "@arco-design/web-react": "^2.64.1",
     "@modern-js/runtime": "2.60.6",
     "@module-federation/sdk": "workspace:*",
     "ahooks": "^3.7.10",
