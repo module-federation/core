@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SharedManager normalizedOptions 1`] = `
+{
+  "eager": false,
+  "name": "react-dom",
+  "requiredVersion": "^18.0.0",
+  "shareScope": "default",
+  "singleton": false,
+  "version": "18.3.1",
+}
+`;

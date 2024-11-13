@@ -1,4 +1,5 @@
 import path from 'path';
+// @ts-ignore this pkg miss types
 import finder from 'find-pkg';
 import fs from 'fs';
 import { MFModuleType, logger } from '@module-federation/sdk';
