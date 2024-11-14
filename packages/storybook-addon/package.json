@@ -22,6 +22,7 @@
   "module": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "import": "./dist/src/index.js",
       "require": "./dist/src/index.js",

@@ -9,6 +9,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{workspaceRoot}/packages/enhanced/dist"],
       "options": {
+        "generatePackageJson": false,
         "outputPath": "packages/enhanced/dist",
         "main": "packages/enhanced/src/index.ts",
         "tsConfig": "packages/enhanced/tsconfig.lib.json",

@@ -9,6 +9,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "generatePackageJson": false,
         "outputPath": "packages/node/dist",
         "main": "packages/node/src/index.js",
         "tsConfig": "packages/node/tsconfig.lib.json",
@@ -47,10 +48,6 @@
           },
           {
             "command": "nx run node:build",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "rm ./packages/node/dist/package.json",
             "forwardAllArgs": false
           }
         ]

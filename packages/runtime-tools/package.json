@@ -10,6 +10,7 @@
     "access": "public"
   },
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "types": "./dist/index.cjs.d.ts",
       "import": "./dist/index.esm.mjs",

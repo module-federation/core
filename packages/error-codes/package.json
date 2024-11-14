@@ -21,6 +21,7 @@
   "module": "./dist/index.esm.mjs",
   "types": "./dist/index.cjs.d.ts",
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "import": "./dist/index.esm.mjs",
       "require": "./dist/index.cjs.js"

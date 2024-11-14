@@ -31,6 +31,7 @@
     "README.md"
   ],
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "require": "./dist/lib/App.js",
       "import": "./dist/es/App.js",
