@@ -1,5 +1,14 @@
 # @module-federation/dts-plugin
 
+## 0.7.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.4
+- @module-federation/managers@0.7.4
+- @module-federation/third-party-dts-extractor@0.7.4
+- @module-federation/error-codes@0.7.4
+
 ## 0.7.3
 
 ### Patch Changes
