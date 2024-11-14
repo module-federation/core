@@ -1,5 +1,13 @@
 # @module-federation/esbuild
 
+## 0.0.38
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+
 ## 0.0.37
 
 ### Patch Changes
