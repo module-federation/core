@@ -1,5 +1,14 @@
 # @module-federation/storybook-addon
 
+## 3.0.7
+
+### Patch Changes
+
+- f8742b7: fix: create folder before writing bootstrap
+  - @module-federation/enhanced@0.7.4
+  - @module-federation/sdk@0.7.4
+  - @module-federation/utilities@3.1.27
+
 ## 3.0.6
 
 ### Patch Changes

@@ -96,6 +96,11 @@ export class SnapshotHandler {
       remoteSnapshot: ModuleInfo;
       from: 'global' | 'manifest';
     }>('loadRemoteSnapshot'),
+    afterLoadSnapshot: new AsyncWaterfallHook<{
+      options: Options;
+      moduleInfo: Remote;
+      remoteSnapshot: ModuleInfo;
+    }>('afterLoadSnapshot'),
   });
   loaderHook: FederationHost['loaderHook'];
   manifestLoading: Record<string, Promise<ModuleInfo>> =
@@ -191,6 +196,8 @@ export class SnapshotHandler {
       globalSnapshot,
     });
 
+    let mSnapshot;
+    let gSnapshot;
     // global snapshot includes manifest or module info includes manifest
     if (globalRemoteSnapshot) {
       if (isManifestProvider(globalRemoteSnapshot)) {
@@ -214,10 +221,8 @@ export class SnapshotHandler {
           },
           moduleSnapshot,
         );
-        return {
-          remoteSnapshot: moduleSnapshot,
-          globalSnapshot: globalSnapshotRes,
-        };
+        mSnapshot = moduleSnapshot;
+        gSnapshot = globalSnapshotRes;
       } else {
         const { remoteSnapshot: remoteSnapshotRes } =
           await this.hooks.lifecycle.loadRemoteSnapshot.emit({
@@ -226,10 +231,8 @@ export class SnapshotHandler {
             remoteSnapshot: globalRemoteSnapshot,
             from: 'global',
           });
-        return {
-          remoteSnapshot: remoteSnapshotRes,
-          globalSnapshot: globalSnapshotRes,
-        };
+        mSnapshot = remoteSnapshotRes;
+        gSnapshot = globalSnapshotRes;
       }
     } else {
       if (isRemoteInfoWithEntry(moduleInfo)) {
@@ -251,10 +254,9 @@ export class SnapshotHandler {
             remoteSnapshot: moduleSnapshot,
             from: 'global',
           });
-        return {
-          remoteSnapshot: remoteSnapshotRes,
-          globalSnapshot: globalSnapshotRes,
-        };
+
+        mSnapshot = remoteSnapshotRes;
+        gSnapshot = globalSnapshotRes;
       } else {
         error(
           getShortErrorMsg(RUNTIME_007, runtimeDescMap, {
@@ -265,6 +267,17 @@ export class SnapshotHandler {
         );
       }
     }
+
+    await this.hooks.lifecycle.afterLoadSnapshot.emit({
+      options,
+      moduleInfo,
+      remoteSnapshot: mSnapshot,
+    });
+
+    return {
+      remoteSnapshot: mSnapshot,
+      globalSnapshot: gSnapshot,
+    };
   }
 
   getGlobalRemoteInfo(moduleInfo: Remote): {

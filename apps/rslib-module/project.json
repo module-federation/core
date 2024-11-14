@@ -23,6 +23,18 @@
         }
       ]
     },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run dev --prefix apps/rslib-module"]
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
     "storybook": {
       "executor": "nx:run-commands",
       "options": {

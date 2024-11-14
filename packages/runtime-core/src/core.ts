@@ -126,6 +126,24 @@ export class FederationHost {
       Promise<(() => Promise<Module>) | undefined>
     >(),
   });
+  bridgeHook = new PluginSystem({
+    beforeBridgeRender: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+    afterBridgeRender: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+    beforeBridgeDestroy: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+    afterBridgeDestroy: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+  });
 
   constructor(userOptions: UserOptions) {
     // TODO: Validate the details of the options
@@ -285,6 +303,7 @@ export class FederationHost {
       this.sharedHandler.hooks,
       this.snapshotHandler.hooks,
       this.loaderHook,
+      this.bridgeHook,
     ]);
     // Merge plugin
     this.options.plugins = this.options.plugins.reduce((res, plugin) => {
