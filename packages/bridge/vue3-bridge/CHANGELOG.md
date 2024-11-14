@@ -1,5 +1,15 @@
 # @module-federation/bridge-vue3
 
+## 0.7.4
+
+### Patch Changes
+
+- ff8ce29: feat: feat: support lifecycyle hooks in module-deferation bridge
+- Updated dependencies [ff8ce29]
+  - @module-federation/runtime@0.7.4
+  - @module-federation/sdk@0.7.4
+  - @module-federation/bridge-shared@0.7.4
+
 ## 0.7.3
 
 ### Patch Changes
