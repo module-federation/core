@@ -2,8 +2,8 @@ import helpers, { type IGlobalUtils, type IShareUtils } from './helpers';
 export { FederationHost } from './core';
 export {
   type Federation,
+  CurrentGlobal,
   Global,
-  getGlobalFederationInstance,
   getGlobalFederationConstructor,
   setGlobalFederationInstance,
   setGlobalFederationConstructor,

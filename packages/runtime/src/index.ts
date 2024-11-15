@@ -1,12 +1,12 @@
 import {
   FederationHost,
   type UserOptions,
-  getGlobalFederationInstance,
   getGlobalFederationConstructor,
   setGlobalFederationInstance,
   assert,
   setGlobalFederationConstructor,
 } from '@module-federation/runtime-core';
+import { getGlobalFederationInstance } from './utils';
 
 export {
   loadScript,

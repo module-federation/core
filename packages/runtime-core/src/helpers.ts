@@ -1,7 +1,6 @@
 import {
   nativeGlobal,
   resetFederationGlobalInfo,
-  getGlobalFederationInstance,
   setGlobalFederationInstance,
   getGlobalFederationConstructor,
   setGlobalFederationConstructor,
@@ -33,7 +32,6 @@ interface IGlobalUtils {
   Global: typeof Global;
   nativeGlobal: typeof global;
   resetFederationGlobalInfo: typeof resetFederationGlobalInfo;
-  getGlobalFederationInstance: typeof getGlobalFederationInstance;
   setGlobalFederationInstance: typeof setGlobalFederationInstance;
   getGlobalFederationConstructor: typeof getGlobalFederationConstructor;
   setGlobalFederationConstructor: typeof setGlobalFederationConstructor;
@@ -54,7 +52,6 @@ const GlobalUtils: IGlobalUtils = {
   Global,
   nativeGlobal,
   resetFederationGlobalInfo,
-  getGlobalFederationInstance,
   setGlobalFederationInstance,
   getGlobalFederationConstructor,
   setGlobalFederationConstructor,
