@@ -69,6 +69,7 @@ function WraperRouterProvider(
   }
 }
 
-export * from 'react-router-dom/dist/index.js';
+// export * from 'react-router-dom/dist/index.js';
+export * from 'react-router-dom/';
 export { WraperRouter as BrowserRouter };
 export { WraperRouterProvider as RouterProvider };
