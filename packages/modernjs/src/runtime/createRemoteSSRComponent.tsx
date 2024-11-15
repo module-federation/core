@@ -143,62 +143,63 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
       ? ReactKey
       : Parameters<T[E]>[0] & ReactKey
     : ReactKey;
+  const exportName = info?.export || 'default';
 
-  return (props: ComponentType) => {
-    const exportName = info?.export || 'default';
-    const LazyComponent = React.lazy(async () => {
-      try {
-        const m = (await info.loader()) as Record<string, React.FC> &
-          Record<symbol, string>;
-        if (!m) {
-          throw new Error('load remote failed');
-        }
-        const moduleId = m && m[Symbol.for('mf_module_id')];
-
-        const assets = collectSSRAssets({
-          id: moduleId,
-        });
-
-        const Com = m[exportName] as React.FC;
-        if (exportName in m && typeof Com === 'function') {
-          return {
-            default: () => (
-              <>
-                {assets}
-                <Com {...props} />
-              </>
-            ),
-          };
-        } else {
-          throw Error(
-            `Make sure that ${moduleId} has the correct export when export is ${String(
-              exportName,
-            )}`,
-          );
-        }
-      } catch (err) {
-        if (!info.fallback) {
-          throw err;
-        }
-        const FallbackFunctionComponent = info.fallback;
-        const FallbackNode = (
-          <FallbackFunctionComponent
-            error={err}
-            resetErrorBoundary={() => {
-              console.log('SSR mode not support "resetErrorBoundary" !');
-            }}
-          />
-        );
-        return {
-          default: () => FallbackNode,
-        };
+  const LazyComponent = React.lazy(async () => {
+    try {
+      const m = (await info.loader()) as Record<string, React.FC> &
+        Record<symbol, string>;
+      if (!m) {
+        throw new Error('load remote failed');
       }
-    });
+      const moduleId = m && m[Symbol.for('mf_module_id')];
 
+      const assets = collectSSRAssets({
+        id: moduleId,
+      });
+
+      const Com = m[exportName] as React.FC;
+      if (exportName in m && typeof Com === 'function') {
+        return {
+          default: (props: Omit<ComponentType, 'key'>) => (
+            <>
+              {assets}
+              <Com {...props} />
+            </>
+          ),
+        };
+      } else {
+        throw Error(
+          `Make sure that ${moduleId} has the correct export when export is ${String(
+            exportName,
+          )}`,
+        );
+      }
+    } catch (err) {
+      if (!info.fallback) {
+        throw err;
+      }
+      const FallbackFunctionComponent = info.fallback;
+      const FallbackNode = (
+        <FallbackFunctionComponent
+          error={err}
+          resetErrorBoundary={() => {
+            console.log('SSR mode not support "resetErrorBoundary" !');
+          }}
+        />
+      );
+      return {
+        default: () => FallbackNode,
+      };
+    }
+  });
+  return (props: ComponentType) => {
+    const { key, ...args } = props;
     return (
       <ErrorBoundary FallbackComponent={info.fallback}>
         <React.Suspense fallback={info.loading}>
-          <LazyComponent />
+          {/* @ts-ignore */}
+          <LazyComponent {...args} />
         </React.Suspense>
       </ErrorBoundary>
     );
