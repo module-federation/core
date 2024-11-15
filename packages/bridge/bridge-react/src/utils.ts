@@ -1,5 +1,4 @@
 import React from 'react';
-import { FederationHost } from '@module-federation/runtime';
 import { createLogger } from '@module-federation/sdk';
 
 export const LoggerInstance = createLogger(
