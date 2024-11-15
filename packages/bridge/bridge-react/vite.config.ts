@@ -21,12 +21,14 @@ export default defineConfig({
     lib: {
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
+        plugin: path.resolve(__dirname, 'src/plugin.ts'),
         router: path.resolve(__dirname, 'src/router.tsx'),
         'router-v5': path.resolve(__dirname, 'src/router-v5.tsx'),
         'router-v6': path.resolve(__dirname, 'src/router-v6.tsx'),
       },
       formats: ['cjs', 'es'],
-      fileName: (format, entryName) => `${entryName}.${format}.js`,
+      fileName: (format, entryName) =>
+        `${entryName}.${format.replace('cjs', '')}.js`,
     },
     rollupOptions: {
       external: [
@@ -36,7 +38,6 @@ export default defineConfig({
         'react-router-dom/',
         'react-router-dom/index.js',
         'react-router-dom/dist/index.js',
-        '@module-federation/runtime',
       ],
       plugins: [
         {

@@ -12,29 +12,34 @@
     "directory": "packages/bridge-react"
   },
   "type": "module",
-  "main": "./dist/index.cjs.js",
+  "main": "./dist/index.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js"
+      "require": "./dist/index.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.es.js",
+      "require": "./dist/plugin.js"
     },
     "./router": {
       "types": "./dist/router.d.ts",
       "import": "./dist/router.es.js",
-      "require": "./dist/router.cjs.js"
+      "require": "./dist/router.js"
     },
     "./router-v5": {
       "types": "./dist/router-v5.d.ts",
       "import": "./dist/router-v5.es.js",
-      "require": "./dist/router-v5.cjs.js"
+      "require": "./dist/router-v5.js"
     },
     "./router-v6": {
       "types": "./dist/router-v6.d.ts",
       "import": "./dist/router-v6.es.js",
-      "require": "./dist/router-v6.cjs.js"
+      "require": "./dist/router-v6.js"
     },
     "./*": "./*"
   },
@@ -47,8 +52,7 @@
     "@loadable/component": "^5.16.4",
     "@module-federation/bridge-shared": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "react-error-boundary": "^4.0.13",
-    "@module-federation/runtime": "workspace:*"
+    "react-error-boundary": "^4.0.13"
   },
   "peerDependencies": {
     "react": ">=16.9.0",
@@ -68,6 +72,7 @@
     "react-router-dom": "6.22.3",
     "typescript": "^5.2.2",
     "vite": "^5.2.14",
-    "vite-plugin-dts": "^3.9.1"
+    "vite-plugin-dts": "^3.9.1",
+    "@module-federation/enhanced": "workspace:*"
   }
 }

@@ -1,17 +1,29 @@
 import { useRef, useEffect, ForwardRefExoticComponent } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import {
+  init,
+  loadRemote,
+  getInstance,
+} from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
-import { createRemoteComponent } from '@module-federation/bridge-react';
+import {
+  createRemoteComponent,
+  BridgeReactPlugin,
+} from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
 import './App.css';
+import { registerPlugins } from '@module-federation/enhanced/runtime';
+
+const hostInstance = getInstance();
+// registerPlugins([BridgeReactPlugin()]);
 
 init({
   name: 'federation_consumer',
   remotes: [],
   plugins: [
+    BridgeReactPlugin(),
     RetryPlugin({
       fetch: {
         url: 'http://localhost:2008/not-exist-mf-manifest.json',
@@ -46,20 +58,23 @@ const FallbackErrorComp = (info: any) => {
 
 const FallbackComp = <div data-test-id="loading">loading...</div>;
 
-const Remote1App = createRemoteComponent({
+// @ts-ignore
+const Remote1App = hostInstance.createRemoteComponent({
   loader: () => loadRemote('remote1/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
-const Remote2App = createRemoteComponent({
+// @ts-ignore
+const Remote2App = hostInstance.createRemoteComponent({
   loader: () => import('remote2/export-app'),
   export: 'provider',
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
-const Remote3App = createRemoteComponent({
+// @ts-ignore
+const Remote3App = hostInstance.createRemoteComponent({
   loader: () => loadRemote('remote3/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,

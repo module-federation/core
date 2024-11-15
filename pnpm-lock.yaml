@@ -1807,9 +1807,6 @@ importers:
       '@module-federation/bridge-shared':
         specifier: workspace:*
         version: link:../bridge-shared
-      '@module-federation/runtime':
-        specifier: workspace:*
-        version: link:../../runtime
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../sdk
@@ -1817,6 +1814,9 @@ importers:
         specifier: ^4.0.13
         version: 4.0.13(react@18.3.1)
     devDependencies:
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../../enhanced
       '@testing-library/react':
         specifier: 15.0.7
         version: 15.0.7(@types/react@18.2.79)(react-dom@18.3.1)(react@18.3.1)
@@ -3397,10 +3397,10 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/core': 7.25.7
-      '@babel/helper-module-imports': 7.25.9
+      '@babel/helper-module-imports': 7.25.7
       '@babel/helper-simple-access': 7.25.7
       '@babel/helper-validator-identifier': 7.25.7
-      '@babel/traverse': 7.25.9
+      '@babel/traverse': 7.25.7
     transitivePeerDependencies:
       - supports-color
 
@@ -3426,10 +3426,10 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/core': 7.26.0
-      '@babel/helper-module-imports': 7.25.9
+      '@babel/helper-module-imports': 7.25.7
       '@babel/helper-simple-access': 7.25.7
       '@babel/helper-validator-identifier': 7.25.7
-      '@babel/traverse': 7.25.9
+      '@babel/traverse': 7.25.7
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -31825,8 +31825,6 @@ packages:
       webpack: '*'
     peerDependenciesMeta:
       webpack:
-        optional: true
-      webpack-sources:
         optional: true
     dependencies:
       webpack: 5.93.0(@swc/core@1.7.26)(esbuild@0.18.20)

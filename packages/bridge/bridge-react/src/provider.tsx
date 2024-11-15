@@ -9,7 +9,7 @@ import type {
 import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
 import { LoggerInstance, atLeastReact18 } from './utils';
-import { getInstance } from '@module-federation/runtime';
+import type { FederationHost } from '@module-federation/enhanced/runtime';
 
 type RenderParams = RenderFnParams & {
   [key: string]: unknown;
@@ -26,13 +26,17 @@ type ProviderFnParams<T> = {
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
+  instance?: FederationHost;
 };
 
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
   return () => {
     const rootMap = new Map<any, RootType>();
-    const instance = getInstance();
-    LoggerInstance.log(`createBridgeComponent remote instance`, instance);
+    const { instance } = bridgeInfo;
+    LoggerInstance.log(
+      `createBridgeComponent instance from props >>>`,
+      instance,
+    );
 
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
@@ -95,7 +99,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           const renderFn = bridgeInfo?.render || ReactDOM.render;
           renderFn?.(rootComponentWithErrorBoundary, info.dom);
         }
-
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
       },
 
@@ -103,7 +106,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
-
         instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
 
         // call destroy function
@@ -115,7 +117,9 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           ReactDOM.unmountComponentAtNode(info.dom);
         }
 
-        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
+        (instance as any)?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(
+          info,
+        );
       },
       rawComponent: bridgeInfo.rootComponent,
       __BRIDGE_FN__: (_args: T) => {},
