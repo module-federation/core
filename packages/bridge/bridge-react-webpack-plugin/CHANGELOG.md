@@ -1,5 +1,12 @@
 # @module-federation/bridge-react-webpack-plugin
 
+## 0.7.5
+
+### Patch Changes
+
+- 0309fb5: fix: wrap try catch with react-router-dom path resolve
+  - @module-federation/sdk@0.7.5
+
 ## 0.7.4
 
 ### Patch Changes

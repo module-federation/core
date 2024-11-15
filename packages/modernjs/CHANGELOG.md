@@ -1,5 +1,14 @@
 # @module-federation/modern-js
 
+## 0.7.5
+
+### Patch Changes
+
+- a50b000: fix(modern-js-plugin): prevent components render multiple times if props change
+  - @module-federation/enhanced@0.7.5
+  - @module-federation/node@2.6.10
+  - @module-federation/sdk@0.7.5
+
 ## 0.7.4
 
 ### Patch Changes
