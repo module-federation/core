@@ -36,6 +36,7 @@ export default defineConfig({
         'react-router-dom/',
         'react-router-dom/index.js',
         'react-router-dom/dist/index.js',
+        '@module-federation/runtime',
       ],
       plugins: [
         {
