@@ -1,7 +1,8 @@
-const ModuleFederationPlugin =
-  require('../../../../src/index').ModuleFederationPlugin;
+const { ModuleFederationPlugin } = require('../../../../dist/src');
 
 module.exports = {
+  mode: 'development',
+  devtool: false,
   entry: {
     main: {
       import: './index.js',
@@ -15,6 +16,11 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
+        issuerLayer: 'entry-layer',
+        layer: 'loader-layer',
+      },
+      {
+        test: /react/,
         issuerLayer: 'entry-layer',
         layer: 'loader-layer',
       },
