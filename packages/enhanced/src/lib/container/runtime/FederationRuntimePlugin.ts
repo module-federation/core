@@ -370,10 +370,6 @@ class FederationRuntimePlugin {
       );
     }
 
-    if (isHoisted) {
-      runtimePath = runtimePath.replace('.cjs.js', '.esm.mjs');
-    }
-
     const alias: any = compiler.options.resolve.alias || {};
     alias['@module-federation/runtime$'] =
       alias['@module-federation/runtime$'] || runtimePath;
@@ -437,11 +433,6 @@ class FederationRuntimePlugin {
     }
 
     if (this.options?.experiments?.federationRuntime === 'hoisted') {
-      this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
-        '.cjs.js',
-        '.esm.mjs',
-      );
-
       new EmbedFederationRuntimePlugin().apply(compiler);
 
       new HoistContainerReferences().apply(compiler);
@@ -450,7 +441,7 @@ class FederationRuntimePlugin {
         /@module-federation\/runtime/,
         (resolveData) => {
           if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
-            resolveData.request = RuntimePath.replace('cjs.js', 'esm.mjs');
+            resolveData.request = RuntimePath;
 
             if (resolveData.createData) {
               resolveData.createData.request = resolveData.request;
