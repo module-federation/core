@@ -1,5 +1,112 @@
 # @module-federation/bridge-react
 
+## 0.7.4
+
+### Patch Changes
+
+- ff8ce29: feat: feat: support lifecycyle hooks in module-deferation bridge
+- Updated dependencies [ff8ce29]
+  - @module-federation/runtime@0.7.4
+  - @module-federation/sdk@0.7.4
+  - @module-federation/bridge-shared@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+  - @module-federation/bridge-shared@0.7.3
+
+## 0.7.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.2
+- @module-federation/bridge-shared@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [6db4c5f]
+  - @module-federation/sdk@0.7.1
+  - @module-federation/bridge-shared@0.7.1
+
+## 0.7.0
+
+### Minor Changes
+
+- 3942740: add license information
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [3942740]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@0.7.0
+  - @module-federation/bridge-shared@0.7.0
+
+## 0.6.16
+
+### Patch Changes
+
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/bridge-shared@0.6.16
+
+## 0.6.15
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.15
+- @module-federation/bridge-shared@0.6.15
+
+## 0.6.14
+
+### Patch Changes
+
+- ad605d2: chore: unified logger
+- Updated dependencies [ad605d2]
+  - @module-federation/bridge-shared@0.6.14
+  - @module-federation/sdk@0.6.14
+
+## 0.6.13
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.13
+
+## 0.6.12
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.12
+
+## 0.6.11
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.11
+
+## 0.6.10
+
+### Patch Changes
+
+- 8a77291: fix(bridge-react): add default basename for WraperRouterProvider
+  - @module-federation/bridge-shared@0.6.10
+
+## 0.6.9
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.9
+
+## 0.6.8
+
+### Patch Changes
+
+- @module-federation/bridge-shared@0.6.8
+
 ## 0.6.7
 
 ### Patch Changes

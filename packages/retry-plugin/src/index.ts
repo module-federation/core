@@ -1,6 +1,6 @@
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 import { fetchWithRetry } from './fetch-retry';
-import { scriptWithRetry } from './script-retry';
+import { defaultRetries, defaultRetryDelay } from './constant';
 import type { RetryPluginParams } from './types';
 
 const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
@@ -13,9 +13,8 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
       ...options,
       ...fetchOption?.options,
     };
-    // if fetch retry rule is configured
+
     if (fetchOption) {
-      // when fetch retry rule is configured, only retry for specified url
       if (fetchOption.url) {
         if (url === fetchOption?.url) {
           return fetchWithRetry({
@@ -35,40 +34,41 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
         });
       }
     }
-    // return default fetch
     return fetch(url, options);
   },
+  async getModuleFactory({ remoteEntryExports, expose, moduleInfo }) {
+    let moduleFactory;
+    const { retryTimes = defaultRetries, retryDelay = defaultRetryDelay } =
+      scriptOption || {};
 
-  createScript({ url, attrs }) {
-    const scriptAttrs = scriptOption?.attrs
-      ? { ...attrs, ...scriptOption.attrs }
-      : attrs;
-    if (scriptOption) {
-      // when script retry rule is configured, only retry for specified url
-      if (scriptOption?.url) {
-        if (url === scriptOption?.url) {
-          return scriptWithRetry({
-            url: scriptOption?.url as string,
-            attrs: scriptAttrs,
-            retryTimes: scriptOption?.retryTimes,
-            customCreateScript: scriptOption?.customCreateScript
-              ? scriptOption.customCreateScript
-              : undefined,
-          });
+    if (
+      (scriptOption?.moduleName &&
+        scriptOption?.moduleName.some(
+          (m) => moduleInfo.name === m || (moduleInfo as any)?.alias === m,
+        )) ||
+      scriptOption?.moduleName === undefined
+    ) {
+      let attempts = 0;
+
+      while (attempts - 1 < retryTimes) {
+        try {
+          moduleFactory = await remoteEntryExports.get(expose);
+          break;
+        } catch (error) {
+          attempts++;
+          if (attempts - 1 >= retryTimes) {
+            scriptOption?.cb &&
+              (await new Promise(
+                (resolve) =>
+                  scriptOption?.cb && scriptOption?.cb(resolve, error),
+              ));
+            throw error;
+          }
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
-      } else {
-        // or when script retry rule is configured, retry for all urls
-        return scriptWithRetry({
-          url,
-          attrs: scriptAttrs,
-          retryTimes: scriptOption?.retryTimes,
-          customCreateScript: scriptOption?.customCreateScript
-            ? scriptOption.customCreateScript
-            : undefined,
-        });
       }
     }
-    return {};
+    return moduleFactory;
   },
 });
 

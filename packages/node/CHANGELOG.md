@@ -1,4 +1,185 @@
-# [2.1.0-canary.6](https://github.com/module-federation/core/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
+# @module-federation/node
+
+## 2.6.9
+
+### Patch Changes
+
+- Updated dependencies [ff8ce29]
+  - @module-federation/runtime@0.7.4
+  - @module-federation/enhanced@0.7.4
+  - @module-federation/sdk@0.7.4
+  - @module-federation/utilities@3.1.27
+
+## 2.6.8
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+- Updated dependencies [c2b1efa]
+  - @module-federation/utilities@3.1.26
+  - @module-federation/runtime@0.7.3
+  - @module-federation/sdk@0.7.3
+  - @module-federation/enhanced@0.7.3
+
+## 2.6.7
+
+### Patch Changes
+
+- @module-federation/enhanced@0.7.2
+- @module-federation/runtime@0.7.2
+- @module-federation/sdk@0.7.2
+- @module-federation/utilities@3.1.25
+
+## 2.6.6
+
+### Patch Changes
+
+- 66ba7b1: fix: clear globalLoading cache in node env
+- Updated dependencies [66ba7b1]
+- Updated dependencies [8712967]
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/runtime@0.7.1
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+  - @module-federation/utilities@3.1.24
+
+## 2.6.5
+
+### Patch Changes
+
+- Updated dependencies [752537b]
+- Updated dependencies [54bfd1c]
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/runtime@0.7.0
+  - @module-federation/sdk@0.7.0
+  - @module-federation/enhanced@0.7.0
+  - @module-federation/utilities@3.1.23
+
+## 2.6.4
+
+### Patch Changes
+
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/runtime@0.6.16
+  - @module-federation/enhanced@0.6.16
+  - @module-federation/utilities@3.1.22
+
+## 2.6.3
+
+### Patch Changes
+
+- Updated dependencies [ec31539]
+  - @module-federation/runtime@0.6.15
+  - @module-federation/enhanced@0.6.15
+  - @module-federation/sdk@0.6.15
+  - @module-federation/utilities@3.1.21
+
+## 2.6.2
+
+### Patch Changes
+
+- 87a2862: add optional check while accessing webpack internals
+- Updated dependencies [ad605d2]
+  - @module-federation/enhanced@0.6.14
+  - @module-federation/runtime@0.6.14
+  - @module-federation/sdk@0.6.14
+  - @module-federation/utilities@3.1.20
+
+## 2.6.1
+
+### Patch Changes
+
+- f1b8848: Improved error handling and cache clearing process in hot-reload utility.
+
+  - Added error handling with try-catch block to manage potential exceptions when clearing the path cache.
+  - Replaced direct use of module with a reference to currentChunk for cache path operations.
+  - Ensured compatibility with TypeScript by adding @ts-ignore annotations where necessary.
+
+  ```
+  - @module-federation/runtime@0.6.13
+  - @module-federation/enhanced@0.6.13
+  - @module-federation/sdk@0.6.13
+  - @module-federation/utilities@3.1.19
+  ```
+
+## 2.6.0
+
+### Minor Changes
+
+- 1478f50: Enhanced hot-reload functionality with module decaching and improved type safety.
+
+  - Added `callsite` package for resolving module paths.
+  - Implemented `decache` and `searchCache` functions to remove modules from cache safely.
+    - Ensure proper handling of relative module paths.
+    - Avoid issues with native modules during decaching.
+  - Refactored hot-reload logic to use the new decache functionality.
+  - Improved type definitions and type safety throughout `hot-reload.ts`.
+    - Properly typed function return values.
+    - Added TypeScript annotations for better clarity.
+
+### Patch Changes
+
+- 1478f50: Add global flag `moduleGraphDirty` to control forced revalidation in hot-reload.
+
+  - Introduced new global variable `moduleGraphDirty`.
+    - Initialized `moduleGraphDirty` to `false` in the global scope.
+  - Modified `revalidate` function to check `moduleGraphDirty` flag.
+    - Forces revalidation if `moduleGraphDirty` is `true`.
+  - @module-federation/runtime@0.6.12
+  - @module-federation/enhanced@0.6.12
+  - @module-federation/sdk@0.6.12
+  - @module-federation/utilities@3.1.18
+
+## 2.5.21
+
+### Patch Changes
+
+- Updated dependencies [ea6d417]
+- Updated dependencies [d5a3072]
+  - @module-federation/runtime@0.6.11
+  - @module-federation/sdk@0.6.11
+  - @module-federation/enhanced@0.6.11
+  - @module-federation/utilities@3.1.17
+
+## 2.5.20
+
+### Patch Changes
+
+- Updated dependencies [6b02145]
+- Updated dependencies [b704f30]
+- Updated dependencies [22a3b83]
+  - @module-federation/enhanced@0.6.10
+  - @module-federation/runtime@0.6.10
+  - @module-federation/sdk@0.6.10
+  - @module-federation/utilities@3.1.16
+
+## 2.5.19
+
+### Patch Changes
+
+- Updated dependencies [70a1708]
+  - @module-federation/enhanced@0.6.9
+  - @module-federation/runtime@0.6.9
+  - @module-federation/sdk@0.6.9
+  - @module-federation/utilities@3.1.15
+
+## 2.5.18
+
+### Patch Changes
+
+- Updated dependencies [32db0ac]
+- Updated dependencies [32db0ac]
+- Updated dependencies [6c5f444]
+- Updated dependencies [fac6ecf]
+  - @module-federation/sdk@0.6.8
+  - @module-federation/runtime@0.6.8
+  - @module-federation/enhanced@0.6.8
+  - @module-federation/utilities@3.1.14
 
 ## 2.5.17
 

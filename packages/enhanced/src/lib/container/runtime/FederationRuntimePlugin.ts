@@ -1,9 +1,13 @@
+import fs from 'fs';
+import path from 'path';
+import pBtoa from 'btoa';
 import type {
   Compiler,
   WebpackPluginInstance,
   Compilation,
   Chunk,
 } from 'webpack';
+import type { EntryDescription } from 'webpack/lib/Entrypoint';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { moduleFederationPlugin } from '@module-federation/sdk';
@@ -15,13 +19,10 @@ import {
   createHash,
   normalizeToPosixPath,
 } from './utils';
-import fs from 'fs';
-import path from 'path';
 import { TEMP_DIR } from '../constant';
 import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
 import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
-import pBtoa from 'btoa';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
 
 const ModuleDependency = require(
@@ -55,7 +56,7 @@ const EmbeddedRuntimePath = require.resolve(
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
-const onceForCompler = new WeakSet();
+const onceForCompler = new WeakSet<Compiler>();
 
 class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -198,6 +199,10 @@ class FederationRuntimePlugin {
     if (!this.options) {
       return;
     }
+    // skip virtual entry
+    if (this.options?.virtualRuntimeEntry) {
+      return;
+    }
     const filePath = this.getFilePath(compiler);
     try {
       fs.readFileSync(filePath);
@@ -273,7 +278,7 @@ class FederationRuntimePlugin {
       const entryFilePath = this.getFilePath(compiler);
       modifyEntry({
         compiler,
-        prependEntry: (entry) => {
+        prependEntry: (entry: Record<string, EntryDescription>) => {
           Object.keys(entry).forEach((entryName) => {
             const entryItem = entry[entryName];
             if (!entryItem.import) {
@@ -366,10 +371,10 @@ class FederationRuntimePlugin {
     }
 
     if (isHoisted) {
-      runtimePath = runtimePath.replace('.cjs', '.esm');
+      runtimePath = runtimePath.replace('.cjs.js', '.esm.mjs');
     }
 
-    const alias = compiler.options.resolve.alias || {};
+    const alias: any = compiler.options.resolve.alias || {};
     alias['@module-federation/runtime$'] =
       alias['@module-federation/runtime$'] || runtimePath;
     alias['@module-federation/runtime-tools$'] =
@@ -384,7 +389,7 @@ class FederationRuntimePlugin {
 
   apply(compiler: Compiler) {
     const useModuleFederationPlugin = compiler.options.plugins.find(
-      (p: WebpackPluginInstance) => {
+      (p): p is WebpackPluginInstance & { _options?: any } => {
         if (typeof p !== 'object' || !p) {
           return false;
         }
@@ -393,12 +398,11 @@ class FederationRuntimePlugin {
     );
 
     if (useModuleFederationPlugin && !this.options) {
-      // @ts-ignore
       this.options = useModuleFederationPlugin._options;
     }
 
     const useContainerPlugin = compiler.options.plugins.find(
-      (p: WebpackPluginInstance) => {
+      (p): p is WebpackPluginInstance & { _options?: any } => {
         if (typeof p !== 'object' || !p) {
           return false;
         }
@@ -435,7 +439,7 @@ class FederationRuntimePlugin {
     if (this.options?.experiments?.federationRuntime === 'hoisted') {
       this.bundlerRuntimePath = this.bundlerRuntimePath.replace(
         '.cjs.js',
-        '.esm.js',
+        '.esm.mjs',
       );
 
       new EmbedFederationRuntimePlugin().apply(compiler);
@@ -446,7 +450,7 @@ class FederationRuntimePlugin {
         /@module-federation\/runtime/,
         (resolveData) => {
           if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
-            resolveData.request = RuntimePath.replace('cjs', 'esm');
+            resolveData.request = RuntimePath.replace('cjs.js', 'esm.mjs');
 
             if (resolveData.createData) {
               resolveData.createData.request = resolveData.request;

@@ -17,11 +17,12 @@
         "project": "packages/rspack/package.json",
         "rollupConfig": "packages/rspack/rollup.config.js",
         "compiler": "swc",
-        "format": ["cjs", "esm"]
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [

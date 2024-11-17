@@ -23,8 +23,7 @@
         "rollupConfig": "packages/runtime-tools/rollup.config.js",
         "format": ["cjs", "esm"],
         "external": ["@module-federation/*"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
+        "generatePackageJson": false
       },
       "dependsOn": [
         {
@@ -34,7 +33,7 @@
       ]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [

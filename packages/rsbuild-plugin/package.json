@@ -1,0 +1,52 @@
+{
+  "name": "@module-federation/rsbuild-plugin",
+  "version": "0.7.4",
+  "description": "Module Federation plugin for Rsbuild",
+  "homepage": "https://module-federation.io",
+  "bugs": {
+    "url": "https://github.com/module-federation/core/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core",
+    "directory": "packages/rsbuild-plugin"
+  },
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "types": "./dist/index.cjs.d.ts"
+    }
+  },
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^1.0.19"
+  },
+  "peerDependencies": {
+    "@module-federation/enhanced": "workspace:*",
+    "@rsbuild/core": "1.x"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
+  }
+}

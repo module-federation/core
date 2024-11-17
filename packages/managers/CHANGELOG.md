@@ -1,5 +1,105 @@
 # @module-federation/managers
 
+## 0.7.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- 7facc10: fix(managers): correct manifest shared configuration
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+
+## 0.7.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [6db4c5f]
+  - @module-federation/sdk@0.7.1
+
+## 0.7.0
+
+### Minor Changes
+
+- 206b56d: disable hoistTransitiveImports for better tree shake
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@0.7.0
+
+## 0.6.16
+
+### Patch Changes
+
+- 024df60: disable hoistTransitiveImports for better tree shake
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+
+## 0.6.15
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.15
+
+## 0.6.14
+
+### Patch Changes
+
+- ad605d2: chore: unified logger
+- Updated dependencies [ad605d2]
+  - @module-federation/sdk@0.6.14
+
+## 0.6.13
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.13
+
+## 0.6.12
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.12
+
+## 0.6.11
+
+### Patch Changes
+
+- Updated dependencies [d5a3072]
+  - @module-federation/sdk@0.6.11
+
+## 0.6.10
+
+### Patch Changes
+
+- Updated dependencies [22a3b83]
+  - @module-federation/sdk@0.6.10
+
+## 0.6.9
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.9
+
+## 0.6.8
+
+### Patch Changes
+
+- Updated dependencies [32db0ac]
+  - @module-federation/sdk@0.6.8
+
 ## 0.6.7
 
 ### Patch Changes

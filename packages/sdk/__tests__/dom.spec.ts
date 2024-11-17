@@ -126,6 +126,7 @@ describe('createScript', () => {
 
     it('should set section attributes on the script element', () => {
       const url = 'https://example.com/script.js';
+      const scriptHookUrl = 'https://example.com/hook-script.js';
       const cb = jest.fn();
       const attrs = {
         async: true,
@@ -138,7 +139,7 @@ describe('createScript', () => {
         attrs,
         createScriptHook: (url) => {
           const scriptEle = document.createElement('script');
-          scriptEle.src = url;
+          scriptEle.src = scriptHookUrl;
           scriptEle.crossOrigin = 'use-credentials';
           scriptEle.async = false;
           return scriptEle;
@@ -146,6 +147,7 @@ describe('createScript', () => {
       });
 
       // if user return element by createScriptHook, it will not add default attrs
+      expect(script.src).toBe(scriptHookUrl);
       expect(script.async).toBe(false);
       expect(script.crossOrigin).toBe('use-credentials');
       expect(script.getAttribute('data-test')).toBe(null);
@@ -223,7 +225,7 @@ describe('createLink', () => {
       },
     });
 
-    // if user return element by createScriptHook, it will not add default attrs
+    // if user return element by createLinkHook, it will not add default attrs
     expect(link.rel).toBe('');
     expect(link.crossOrigin).toBe('use-credentials');
     expect(link.getAttribute('as')).toBe(null);

@@ -1,4 +1,4 @@
-## [3.1.1](https://github.com/module-federation/core/compare/typescript-3.1.0...typescript-3.1.1) (2023-11-24)
+# @module-federation/typescript
 
 ## 3.1.4
 

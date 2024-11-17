@@ -7,9 +7,10 @@ import React, {
 } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import type { ProviderParams } from '@module-federation/bridge-shared';
-import { LoggerInstance, pathJoin } from '../utils';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
+import { LoggerInstance, pathJoin, getRootDomDefaultClassName } from '../utils';
+import { getInstance } from '@module-federation/runtime';
 
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {
@@ -59,13 +60,15 @@ const RemoteAppWrapper = forwardRef(function (
 
     const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
     const providerInfoRef = useRef<any>(null);
+    const hostInstance = getInstance();
+    LoggerInstance.log(`RemoteAppWrapper hostInstance >>>`, hostInstance);
 
     useEffect(() => {
       const renderTimeout = setTimeout(() => {
         const providerReturn = providerInfo();
         providerInfoRef.current = providerReturn;
 
-        const renderProps = {
+        let renderProps = {
           moduleName,
           dom: rootRef.current,
           basename,
@@ -78,7 +81,21 @@ const RemoteAppWrapper = forwardRef(function (
           `createRemoteComponent LazyComponent render >>>`,
           renderProps,
         );
+
+        LoggerInstance.log(
+          `createRemoteComponent LazyComponent hostInstance >>>`,
+          hostInstance,
+        );
+        const beforeBridgeRenderRes =
+          hostInstance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+            renderProps,
+          ) || {};
+        // @ts-ignore
+        renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
         providerReturn.render(renderProps);
+        hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
+          renderProps,
+        );
       });
 
       return () => {
@@ -89,17 +106,39 @@ const RemoteAppWrapper = forwardRef(function (
               `createRemoteComponent LazyComponent destroy >>>`,
               { moduleName, basename, dom: renderDom.current },
             );
-            providerInfoRef.current?.destroy({
+
+            hostInstance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
+              moduleName,
               dom: renderDom.current,
+              basename,
+              memoryRoute,
+              fallback,
+              ...resProps,
+            });
+
+            providerInfoRef.current?.destroy({
+              moduleName,
+              dom: renderDom.current,
+            });
+
+            hostInstance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
+              moduleName,
+              dom: renderDom.current,
+              basename,
+              memoryRoute,
+              fallback,
+              ...resProps,
             });
           }
         });
       };
     }, []);
 
+    // bridge-remote-root
+    const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${props?.className}`;
     return (
       <div
-        className={props?.className}
+        className={rootComponentClassName}
         style={props?.style}
         ref={rootRef}
       ></div>

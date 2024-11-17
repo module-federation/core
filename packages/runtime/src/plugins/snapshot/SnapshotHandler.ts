@@ -6,12 +6,14 @@ import {
   isManifestProvider,
   isBrowserEnv,
 } from '@module-federation/sdk';
-import { Optional, Options, Remote } from '../../type';
 import {
-  isRemoteInfoWithEntry,
-  error,
-  getRemoteEntryInfoFromSnapshot,
-} from '../../utils';
+  getShortErrorMsg,
+  RUNTIME_003,
+  RUNTIME_007,
+  runtimeDescMap,
+} from '@module-federation/error-codes';
+import { Options, Remote } from '../../type';
+import { isRemoteInfoWithEntry, error } from '../../utils';
 import {
   getGlobalSnapshot,
   setGlobalSnapshotInfoByModuleInfo,
@@ -94,6 +96,11 @@ export class SnapshotHandler {
       remoteSnapshot: ModuleInfo;
       from: 'global' | 'manifest';
     }>('loadRemoteSnapshot'),
+    afterLoadSnapshot: new AsyncWaterfallHook<{
+      options: Options;
+      moduleInfo: Remote;
+      remoteSnapshot: ModuleInfo;
+    }>('afterLoadSnapshot'),
   });
   loaderHook: FederationHost['loaderHook'];
   manifestLoading: Record<string, Promise<ModuleInfo>> =
@@ -189,6 +196,8 @@ export class SnapshotHandler {
       globalSnapshot,
     });
 
+    let mSnapshot;
+    let gSnapshot;
     // global snapshot includes manifest or module info includes manifest
     if (globalRemoteSnapshot) {
       if (isManifestProvider(globalRemoteSnapshot)) {
@@ -212,10 +221,8 @@ export class SnapshotHandler {
           },
           moduleSnapshot,
         );
-        return {
-          remoteSnapshot: moduleSnapshot,
-          globalSnapshot: globalSnapshotRes,
-        };
+        mSnapshot = moduleSnapshot;
+        gSnapshot = globalSnapshotRes;
       } else {
         const { remoteSnapshot: remoteSnapshotRes } =
           await this.hooks.lifecycle.loadRemoteSnapshot.emit({
@@ -224,10 +231,8 @@ export class SnapshotHandler {
             remoteSnapshot: globalRemoteSnapshot,
             from: 'global',
           });
-        return {
-          remoteSnapshot: remoteSnapshotRes,
-          globalSnapshot: globalSnapshotRes,
-        };
+        mSnapshot = remoteSnapshotRes;
+        gSnapshot = globalSnapshotRes;
       }
     } else {
       if (isRemoteInfoWithEntry(moduleInfo)) {
@@ -249,25 +254,30 @@ export class SnapshotHandler {
             remoteSnapshot: moduleSnapshot,
             from: 'global',
           });
-        return {
-          remoteSnapshot: remoteSnapshotRes,
-          globalSnapshot: globalSnapshotRes,
-        };
+
+        mSnapshot = remoteSnapshotRes;
+        gSnapshot = globalSnapshotRes;
       } else {
-        error(`
-          Cannot get remoteSnapshot with the name: '${
-            moduleInfo.name
-          }', version: '${
-            moduleInfo.version
-          }' from __FEDERATION__.moduleInfo. The following reasons may be causing the problem:\n
-          1. The Deploy platform did not deliver the correct data. You can use __FEDERATION__.moduleInfo to check the remoteInfo.\n
-          2. The remote '${moduleInfo.name}' version '${
-            moduleInfo.version
-          }' is not released.\n
-          The transformed module info: ${JSON.stringify(globalSnapshotRes)}
-        `);
+        error(
+          getShortErrorMsg(RUNTIME_007, runtimeDescMap, {
+            hostName: moduleInfo.name,
+            hostVersion: moduleInfo.version,
+            globalSnapshot: JSON.stringify(globalSnapshotRes),
+          }),
+        );
       }
     }
+
+    await this.hooks.lifecycle.afterLoadSnapshot.emit({
+      options,
+      moduleInfo,
+      remoteSnapshot: mSnapshot,
+    });
+
+    return {
+      remoteSnapshot: mSnapshot,
+      globalSnapshot: gSnapshot,
+    };
   }
 
   getGlobalRemoteInfo(moduleInfo: Remote): {
@@ -304,9 +314,15 @@ export class SnapshotHandler {
       } catch (err) {
         delete this.manifestLoading[manifestUrl];
         error(
-          `Failed to get manifestJson for ${moduleInfo.name}. The manifest URL is ${manifestUrl}. Please ensure that the manifestUrl is accessible.
-          \n Error message:
-          \n ${err}`,
+          getShortErrorMsg(
+            RUNTIME_003,
+            runtimeDescMap,
+            {
+              manifestUrl,
+              moduleName: moduleInfo.name,
+            },
+            `${err}`,
+          ),
         );
       }
     };

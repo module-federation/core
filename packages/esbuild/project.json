@@ -36,7 +36,8 @@
           "@hyrious/esbuild-plugin-commonjs",
           "rollup",
           "../../resolve/esm-resolver.mjs"
-        ]
+        ],
+        "generatePackageJson": false
       },
       "dependsOn": [
         {
@@ -46,7 +47,7 @@
       ]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [

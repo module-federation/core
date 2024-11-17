@@ -1,0 +1,50 @@
+{
+  "name": "rsbuild-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/rsbuild-plugin/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/rsbuild-plugin/dist",
+        "main": "packages/rsbuild-plugin/cli/src/index.ts",
+        "tsConfig": "packages/rsbuild-plugin/tsconfig.json",
+        "assets": [],
+        "project": "packages/rsbuild-plugin/package.json",
+        "rollupConfig": "packages/rsbuild-plugin/rollup.config.js",
+        "compiler": "swc",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/rsbuild-plugin/**/*.ts",
+          "packages/rsbuild-plugin/package.json"
+        ]
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run rsbuild-plugin:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run rsbuild-plugin:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}

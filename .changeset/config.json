@@ -21,7 +21,9 @@
       "@module-federation/bridge-react-webpack-plugin",
       "@module-federation/modern-js",
       "@module-federation/retry-plugin",
-      "@module-federation/data-prefetch"
+      "@module-federation/data-prefetch",
+      "@module-federation/rsbuild-plugin",
+      "@module-federation/error-codes"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],
@@ -34,6 +36,16 @@
     "node-host-e2e",
     "node-host-e2e",
     "node-local-remote",
-    "node-remote"
+    "node-remote",
+    "remote1",
+    "remote2",
+    "remote3",
+    "remote4",
+    "host",
+    "host-v5",
+    "host-vue3",
+    "3008-runtime-remote",
+    "modernjs-ssr-*",
+    "@changesets/assemble-release-plan"
   ]
 }

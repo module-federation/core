@@ -115,6 +115,34 @@ export class FederationHost {
       [string, RequestInit],
       Promise<Response> | void | false
     >(),
+    getModuleFactory: new AsyncHook<
+      [
+        {
+          remoteEntryExports: RemoteEntryExports;
+          expose: string;
+          moduleInfo: RemoteInfo;
+        },
+      ],
+      Promise<(() => Promise<Module>) | undefined>
+    >(),
+  });
+  bridgeHook = new PluginSystem({
+    beforeBridgeRender: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+    afterBridgeRender: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+    beforeBridgeDestroy: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+    afterBridgeDestroy: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
   });
 
   constructor(userOptions: UserOptions) {
@@ -169,6 +197,7 @@ export class FederationHost {
     pkgName: string,
     extraOptions?: {
       customShareInfo?: Partial<Shared>;
+      from?: 'build' | 'runtime';
       resolver?: (sharedOptions: ShareInfos[string]) => Shared;
     },
   ): () => T | never {
@@ -274,6 +303,7 @@ export class FederationHost {
       this.sharedHandler.hooks,
       this.snapshotHandler.hooks,
       this.loaderHook,
+      this.bridgeHook,
     ]);
     // Merge plugin
     this.options.plugins = this.options.plugins.reduce((res, plugin) => {

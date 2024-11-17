@@ -30,11 +30,12 @@
         "additionalEntryPoints": ["packages/utilities/src/types/types.ts"],
         "external": ["@module-federation/*"],
         "compiler": "swc",
-        "format": ["cjs", "esm"]
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/utilities/**/*.ts"]

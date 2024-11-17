@@ -237,6 +237,14 @@ export interface ModuleFederationPluginOptions {
   experiments?: {
     federationRuntime?: false | 'hoisted';
   };
+  bridge?: {
+    /**
+     * Disables the default alias setting in the bridge.
+     * When true, users must manually handle basename through root component props.
+     * @default false
+     */
+    disableAlias?: boolean;
+  };
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

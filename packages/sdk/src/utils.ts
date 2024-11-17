@@ -6,7 +6,7 @@ import {
   SEPARATOR,
   MANIFEST_EXT,
 } from './constant';
-import { Logger } from './logger';
+import { logger } from './logger';
 import { getProcessEnv } from './env';
 
 const LOG_CATEGORY = '[ Federation Runtime ]';
@@ -69,8 +69,6 @@ declare global {
   // eslint-disable-next-line no-var
   var FEDERATION_DEBUG: string | undefined;
 }
-
-const logger = new Logger();
 
 const composeKeyWithSeparator = function (
   ...args: (string | undefined)[]
@@ -223,6 +221,13 @@ function safeToString(info: any): string {
   }
 }
 
+// RegExp for version string
+const VERSION_PATTERN_REGEXP: RegExp = /^([\d^=v<>~]|[*xX]$)/;
+
+function isRequiredVersion(str: string): boolean {
+  return VERSION_PATTERN_REGEXP.test(str);
+}
+
 export {
   parseEntry,
   logger,
@@ -236,4 +241,5 @@ export {
   error,
   warn,
   safeToString,
+  isRequiredVersion,
 };

@@ -59,7 +59,7 @@ function WrapperRouterProvider(
     return <RouterProvider router={MemeoryRouterInstance} />;
   } else {
     const BrowserRouterInstance = createBrowserRouter(routers, {
-      basename: routerContextProps.basename,
+      basename: routerContextProps.basename || router?.basename,
       future: router.future,
       window: router.window,
     });

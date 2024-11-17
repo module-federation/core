@@ -1,4 +1,122 @@
-## [1.0.1-canary.1](https://github.com/module-federation/core/compare/runtime-1.0.0...runtime-1.0.1-canary.1) (2023-12-06)
+# @module-federation/runtime-tools
+
+## 0.7.4
+
+### Patch Changes
+
+- Updated dependencies [ff8ce29]
+  - @module-federation/runtime@0.7.4
+  - @module-federation/webpack-bundler-runtime@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- Updated dependencies [4ab9295]
+- Updated dependencies [c2b1efa]
+  - @module-federation/webpack-bundler-runtime@0.7.3
+  - @module-federation/runtime@0.7.3
+
+## 0.7.2
+
+### Patch Changes
+
+- @module-federation/runtime@0.7.2
+- @module-federation/webpack-bundler-runtime@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [66ba7b1]
+- Updated dependencies [8712967]
+  - @module-federation/runtime@0.7.1
+  - @module-federation/webpack-bundler-runtime@0.7.1
+
+## 0.7.0
+
+### Minor Changes
+
+- 206b56d: disable hoistTransitiveImports for better tree shake
+- Updated dependencies [752537b]
+- Updated dependencies [54bfd1c]
+- Updated dependencies [879ad87]
+- Updated dependencies [206b56d]
+  - @module-federation/runtime@0.7.0
+  - @module-federation/webpack-bundler-runtime@0.7.0
+
+## 0.6.16
+
+### Patch Changes
+
+- 024df60: disable hoistTransitiveImports for better tree shake
+- Updated dependencies [024df60]
+  - @module-federation/webpack-bundler-runtime@0.6.16
+  - @module-federation/runtime@0.6.16
+
+## 0.6.15
+
+### Patch Changes
+
+- Updated dependencies [ec31539]
+  - @module-federation/runtime@0.6.15
+  - @module-federation/webpack-bundler-runtime@0.6.15
+
+## 0.6.14
+
+### Patch Changes
+
+- Updated dependencies [ad605d2]
+  - @module-federation/runtime@0.6.14
+  - @module-federation/webpack-bundler-runtime@0.6.14
+
+## 0.6.13
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.13
+- @module-federation/webpack-bundler-runtime@0.6.13
+
+## 0.6.12
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.12
+- @module-federation/webpack-bundler-runtime@0.6.12
+
+## 0.6.11
+
+### Patch Changes
+
+- Updated dependencies [ea6d417]
+  - @module-federation/runtime@0.6.11
+  - @module-federation/webpack-bundler-runtime@0.6.11
+
+## 0.6.10
+
+### Patch Changes
+
+- Updated dependencies [b704f30]
+  - @module-federation/runtime@0.6.10
+  - @module-federation/webpack-bundler-runtime@0.6.10
+
+## 0.6.9
+
+### Patch Changes
+
+- @module-federation/runtime@0.6.9
+- @module-federation/webpack-bundler-runtime@0.6.9
+
+## 0.6.8
+
+### Patch Changes
+
+- Updated dependencies [32db0ac]
+- Updated dependencies [6c5f444]
+- Updated dependencies [fac6ecf]
+  - @module-federation/runtime@0.6.8
+  - @module-federation/webpack-bundler-runtime@0.6.8
 
 ## 0.6.7
 

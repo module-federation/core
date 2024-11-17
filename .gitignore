@@ -49,7 +49,6 @@ migrations.json
 packages/**/dist
 apps/**/dist
 
-**/@mf-types
 **/@mf-types/**
 **/cypress/downloads
 
@@ -67,3 +66,8 @@ packages/enhanced/test/js
 **/dist-test/**
 **/cypress/downloads
 /packages/data-prefetch/jest/cache/
+
+# storybook cases
+!apps/rslib-module/@mf-types/**
+
+**/vite.config.{js,ts,mjs,mts,cjs,cts}.timestamp*

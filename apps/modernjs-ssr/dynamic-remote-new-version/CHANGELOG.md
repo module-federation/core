@@ -1,5 +1,48 @@
 # modernjs-ssr-dynamic-remote-new-version
 
+## 0.1.34
+
+### Patch Changes
+
+- Updated dependencies [ad605d2]
+  - @module-federation/modern-js@0.6.14
+
+## 0.1.33
+
+### Patch Changes
+
+- @module-federation/modern-js@0.6.13
+
+## 0.1.32
+
+### Patch Changes
+
+- @module-federation/modern-js@0.6.12
+
+## 0.1.31
+
+### Patch Changes
+
+- @module-federation/modern-js@0.6.11
+
+## 0.1.30
+
+### Patch Changes
+
+- @module-federation/modern-js@0.6.10
+
+## 0.1.29
+
+### Patch Changes
+
+- @module-federation/modern-js@0.6.9
+
+## 0.1.28
+
+### Patch Changes
+
+- @module-federation/modern-js@0.6.8
+
 ## 0.1.27
 
 ### Patch Changes

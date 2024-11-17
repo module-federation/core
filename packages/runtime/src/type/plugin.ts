@@ -19,6 +19,13 @@ type ModuleLifeCycleCyclePartial = Partial<{
   [k in keyof ModuleLifeCycle]: Parameters<ModuleLifeCycle[k]['on']>[0];
 }>;
 
+type ModuleBridgeLifeCycle = Module['host']['bridgeHook']['lifecycle'];
+type ModuleBridgeLifeCycleCyclePartial = Partial<{
+  [k in keyof ModuleBridgeLifeCycle]: Parameters<
+    ModuleBridgeLifeCycle[k]['on']
+  >[0];
+}>;
+
 type SharedLifeCycle = SharedHandler['hooks']['lifecycle'];
 type SharedLifeCycleCyclePartial = Partial<{
   [k in keyof SharedLifeCycle]: Parameters<SharedLifeCycle[k]['on']>[0];
@@ -33,7 +40,8 @@ export type FederationRuntimePlugin = CoreLifeCyclePartial &
   SnapshotLifeCycleCyclePartial &
   SharedLifeCycleCyclePartial &
   RemoteLifeCycleCyclePartial &
-  ModuleLifeCycleCyclePartial & {
+  ModuleLifeCycleCyclePartial &
+  ModuleBridgeLifeCycleCyclePartial & {
     name: string;
     version?: string;
   };

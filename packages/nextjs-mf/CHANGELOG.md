@@ -1,4 +1,194 @@
-# [8.1.0-canary.7](https://github.com/module-federation/core/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
+# @module-federation/nextjs-mf
+
+## 8.7.9
+
+### Patch Changes
+
+- Updated dependencies [ff8ce29]
+  - @module-federation/runtime@0.7.4
+  - @module-federation/node@2.6.9
+  - @module-federation/webpack-bundler-runtime@0.7.4
+  - @module-federation/enhanced@0.7.4
+  - @module-federation/sdk@0.7.4
+
+## 8.7.8
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+- Updated dependencies [c2b1efa]
+  - @module-federation/webpack-bundler-runtime@0.7.3
+  - @module-federation/runtime@0.7.3
+  - @module-federation/sdk@0.7.3
+  - @module-federation/enhanced@0.7.3
+  - @module-federation/node@2.6.8
+
+## 8.7.7
+
+### Patch Changes
+
+- @module-federation/enhanced@0.7.2
+- @module-federation/node@2.6.7
+- @module-federation/runtime@0.7.2
+- @module-federation/webpack-bundler-runtime@0.7.2
+- @module-federation/sdk@0.7.2
+
+## 8.7.6
+
+### Patch Changes
+
+- Updated dependencies [66ba7b1]
+- Updated dependencies [8712967]
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/runtime@0.7.1
+  - @module-federation/node@2.6.6
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+  - @module-federation/webpack-bundler-runtime@0.7.1
+
+## 8.7.5
+
+### Patch Changes
+
+- Updated dependencies [752537b]
+- Updated dependencies [54bfd1c]
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/runtime@0.7.0
+  - @module-federation/sdk@0.7.0
+  - @module-federation/enhanced@0.7.0
+  - @module-federation/webpack-bundler-runtime@0.7.0
+  - @module-federation/node@2.6.5
+
+## 8.7.4
+
+### Patch Changes
+
+- 3b3c488: add warning about end of support for next
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/webpack-bundler-runtime@0.6.16
+  - @module-federation/runtime@0.6.16
+  - @module-federation/enhanced@0.6.16
+  - @module-federation/node@2.6.4
+
+## 8.7.3
+
+### Patch Changes
+
+- Updated dependencies [ec31539]
+  - @module-federation/runtime@0.6.15
+  - @module-federation/node@2.6.3
+  - @module-federation/webpack-bundler-runtime@0.6.15
+  - @module-federation/enhanced@0.6.15
+  - @module-federation/sdk@0.6.15
+
+## 8.7.2
+
+### Patch Changes
+
+- Updated dependencies [87a2862]
+- Updated dependencies [ad605d2]
+  - @module-federation/node@2.6.2
+  - @module-federation/enhanced@0.6.14
+  - @module-federation/runtime@0.6.14
+  - @module-federation/sdk@0.6.14
+  - @module-federation/webpack-bundler-runtime@0.6.14
+
+## 8.7.1
+
+### Patch Changes
+
+- d3e904b: Support Next 15 externals configuration
+
+  - Refactored external handling to dynamically find and replace the first function in the 'externals' array.
+  - This change improves robustness by ensuring the system correctly overrides external functions regardless of their position in the list.
+  - Maintained the existing logic to preserve intended behavior with conditions checking specific package prefixes and names.
+
+- Updated dependencies [f1b8848]
+  - @module-federation/node@2.6.1
+  - @module-federation/runtime@0.6.13
+  - @module-federation/enhanced@0.6.13
+  - @module-federation/webpack-bundler-runtime@0.6.13
+  - @module-federation/sdk@0.6.13
+
+## 8.7.0
+
+### Minor Changes
+
+- 1478f50: Added the UniverseEntryChunkTrackerPlugin to track entry chunks in the server plugin.
+
+  - Applied UniverseEntryChunkTrackerPlugin in the applyServerPlugins function.
+  - This change aims to enhance tracking of entry chunks in the server environment for hot reloading prod instances
+
+### Patch Changes
+
+- 1478f50: - Added `globalThis.moduleGraphDirty = true` to mark the module graph as dirty when an error is detected.
+  - Replaced `new Function('return globalThis')()` with a direct reference to `globalThis`.
+- 450aa37: add next 15 to peer deps
+- Updated dependencies [1478f50]
+- Updated dependencies [1478f50]
+  - @module-federation/node@2.6.0
+  - @module-federation/runtime@0.6.12
+  - @module-federation/enhanced@0.6.12
+  - @module-federation/webpack-bundler-runtime@0.6.12
+  - @module-federation/sdk@0.6.12
+
+## 8.6.4
+
+### Patch Changes
+
+- 92b6fec: Make the Next.js plugin work with strict CSP settings
+- Updated dependencies [ea6d417]
+- Updated dependencies [d5a3072]
+  - @module-federation/runtime@0.6.11
+  - @module-federation/sdk@0.6.11
+  - @module-federation/node@2.5.21
+  - @module-federation/webpack-bundler-runtime@0.6.11
+  - @module-federation/enhanced@0.6.11
+
+## 8.6.3
+
+### Patch Changes
+
+- Updated dependencies [6b02145]
+- Updated dependencies [b704f30]
+- Updated dependencies [22a3b83]
+  - @module-federation/enhanced@0.6.10
+  - @module-federation/runtime@0.6.10
+  - @module-federation/sdk@0.6.10
+  - @module-federation/node@2.5.20
+  - @module-federation/webpack-bundler-runtime@0.6.10
+
+## 8.6.2
+
+### Patch Changes
+
+- Updated dependencies [70a1708]
+  - @module-federation/enhanced@0.6.9
+  - @module-federation/node@2.5.19
+  - @module-federation/runtime@0.6.9
+  - @module-federation/webpack-bundler-runtime@0.6.9
+  - @module-federation/sdk@0.6.9
+  - @module-federation/utilities@3.1.15
+
+## 8.6.1
+
+### Patch Changes
+
+- Updated dependencies [32db0ac]
+- Updated dependencies [32db0ac]
+- Updated dependencies [6c5f444]
+- Updated dependencies [fac6ecf]
+  - @module-federation/sdk@0.6.8
+  - @module-federation/runtime@0.6.8
+  - @module-federation/enhanced@0.6.8
+  - @module-federation/node@2.5.18
+  - @module-federation/utilities@3.1.14
+  - @module-federation/webpack-bundler-runtime@0.6.8
 
 ## 8.6.0
 

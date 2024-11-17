@@ -1,0 +1,71 @@
+{
+  "name": "error-codes",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/error-codes/src",
+  "projectType": "library",
+  "tags": ["type:pkg"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "parallel": false,
+        "outputPath": "packages/error-codes/dist",
+        "main": "packages/error-codes/src/index.ts",
+        "tsConfig": "packages/error-codes/tsconfig.lib.json",
+        "rollupConfig": "packages/error-codes/rollup.config.js",
+        "assets": [],
+        "project": "packages/error-codes/package.json",
+        "compiler": "swc",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/error-codes/**/*.ts",
+          "packages/error-codes/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/error-codes/jest.config.js",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run error-codes:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run error-codes:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  }
+}

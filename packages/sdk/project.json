@@ -17,11 +17,12 @@
         "additionalEntryPoints": ["packages/sdk/src/normalize-webpack-path.ts"],
         "rollupConfig": "packages/sdk/rollup.config.js",
         "compiler": "swc",
+        "generatePackageJson": false,
         "format": ["cjs", "esm"]
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [

@@ -13,9 +13,7 @@
         "main": "packages/typescript/src/index.ts",
         "tsConfig": "packages/typescript/tsconfig.lib.json",
         "assets": ["packages/typescript/*.md"],
-        "skipTypeCheck": true,
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
+        "skipTypeCheck": true
       },
       "dependsOn": [
         {
@@ -25,7 +23,7 @@
       ]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/typescript/**/*.ts"]

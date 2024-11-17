@@ -7,6 +7,7 @@ import {
   moduleFederationPlugin,
 } from '@module-federation/sdk';
 import { BasicPluginOptionsManager } from './BasicPluginOptionsManager';
+import { UNKNOWN_MODULE_NAME } from './constant';
 
 interface NormalizedRemote {
   [remoteName: string]: RemoteEntryInfo & {
@@ -50,7 +51,7 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
         curObj = {
           entry: normalizedOption.entry,
           alias: normalizedOption.alias,
-          moduleName: normalizedOption.name,
+          moduleName: UNKNOWN_MODULE_NAME,
           federationContainerName: normalizedOption.name,
           consumingFederationContainerName: name!,
           usedIn: [],
@@ -58,7 +59,7 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
       } else {
         curObj = {
           alias: normalizedOption.alias,
-          moduleName: normalizedOption.name,
+          moduleName: UNKNOWN_MODULE_NAME,
           version: normalizedOption.version,
           federationContainerName: normalizedOption.name,
           consumingFederationContainerName: name!,
@@ -76,14 +77,17 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
   //   'micro-app-sub3': @garfish/micro-app-sub3:0.0.4
   // }
   get dtsRemotes(): Record<string, string> {
-    return Object.keys(this.normalizedOptions).reduce((sum, remoteAlias) => {
-      const remoteInfo = this.normalizedOptions[remoteAlias];
-      sum[remoteAlias] = composeKeyWithSeparator(
-        remoteInfo.name,
-        'entry' in remoteInfo ? remoteInfo.entry : remoteInfo.version,
-      );
-      return sum;
-    }, {});
+    return Object.keys(this.normalizedOptions).reduce(
+      (sum, remoteAlias) => {
+        const remoteInfo = this.normalizedOptions[remoteAlias];
+        sum[remoteAlias] = composeKeyWithSeparator(
+          remoteInfo.name,
+          'entry' in remoteInfo ? remoteInfo.entry : remoteInfo.version,
+        );
+        return sum;
+      },
+      {} as Record<string, string>,
+    );
   }
 
   get remotes(): moduleFederationPlugin.ModuleFederationPluginOptions['remotes'] {

@@ -1,5 +1,58 @@
 # host-vue3
 
+## 1.0.34
+
+### Patch Changes
+
+- Updated dependencies [ad605d2]
+  - @module-federation/bridge-vue3@0.6.14
+  - @module-federation/enhanced@0.6.14
+
+## 1.0.33
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.13
+- @module-federation/bridge-vue3@0.6.13
+
+## 1.0.32
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.12
+- @module-federation/bridge-vue3@0.6.12
+
+## 1.0.31
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.11
+- @module-federation/bridge-vue3@0.6.11
+
+## 1.0.30
+
+### Patch Changes
+
+- Updated dependencies [6b02145]
+- Updated dependencies [22a3b83]
+  - @module-federation/enhanced@0.6.10
+  - @module-federation/bridge-vue3@0.6.10
+
+## 1.0.29
+
+### Patch Changes
+
+- Updated dependencies [70a1708]
+  - @module-federation/enhanced@0.6.9
+  - @module-federation/bridge-vue3@0.6.9
+
+## 1.0.28
+
+### Patch Changes
+
+- @module-federation/enhanced@0.6.8
+- @module-federation/bridge-vue3@0.6.8
+
 ## 1.0.27
 
 ### Patch Changes

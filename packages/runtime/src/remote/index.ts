@@ -5,7 +5,17 @@ import {
   ModuleInfo,
   GlobalModuleInfo,
 } from '@module-federation/sdk';
-import { Global, getInfoWithoutType, globalLoading } from '../global';
+import {
+  getShortErrorMsg,
+  RUNTIME_004,
+  runtimeDescMap,
+} from '@module-federation/error-codes';
+import {
+  Global,
+  getInfoWithoutType,
+  globalLoading,
+  CurrentGlobal,
+} from '../global';
 import {
   Options,
   UserOptions,
@@ -30,6 +40,7 @@ import {
   getRemoteInfo,
   getRemoteEntryUniqueKey,
   matchRemoteWithNameAndExpose,
+  logger,
 } from '../utils';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
@@ -102,7 +113,7 @@ export class RemoteHandler {
           error: unknown;
           options?: any;
           from: CallFrom;
-          lifecycle: 'onLoad' | 'beforeRequest';
+          lifecycle: 'onLoad' | 'beforeRequest' | 'beforeLoadShare';
           origin: FederationHost;
         },
       ],
@@ -139,7 +150,7 @@ export class RemoteHandler {
     loadEntry: new AsyncHook<
       [
         {
-          createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
+          loaderHook: FederationHost['loaderHook'];
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports;
         },
@@ -186,7 +197,9 @@ export class RemoteHandler {
   ): Promise<T | null> {
     const { host } = this;
     try {
-      const { loadFactory = true } = options || { loadFactory: true };
+      const { loadFactory = true } = options || {
+        loadFactory: true,
+      };
       // 1. Validate the parameters of the retrieved module. There are two module request methods: pkgName + expose and alias + expose.
       // 2. Request the snapshot information of the current host and globally store the obtained snapshot information. The retrieved module information is partially offline and partially online. The online module information will retrieve the modules used online.
       // 3. Retrieve the detailed information of the current module from global (remoteEntry address, expose resource address)
@@ -205,6 +218,7 @@ export class RemoteHandler {
         id: idRes,
         remoteSnapshot,
       } = remoteMatchInfo;
+
       const moduleOrFactory = (await module.get(
         idRes,
         expose,
@@ -336,23 +350,12 @@ export class RemoteHandler {
       host.options.remotes,
       idRes,
     );
-
     assert(
       remoteSplitInfo,
-      `
-        Unable to locate ${idRes} in ${
-          host.options.name
-        }. Potential reasons for failure include:\n
-        1. ${idRes} was not included in the 'remotes' parameter of ${
-          host.options.name || 'the host'
-        }.\n
-        2. ${idRes} could not be found in the 'remotes' of ${
-          host.options.name
-        } with either 'name' or 'alias' attributes.
-        3. ${idRes} is not online, injected, or loaded.
-        4. ${idRes}  cannot be accessed on the expected.
-        5. The 'beforeRequest' hook was provided but did not return the correct 'remoteInfo' when attempting to load ${idRes}.
-      `,
+      getShortErrorMsg(RUNTIME_004, runtimeDescMap, {
+        hostName: host.options.name,
+        requestId: idRes,
+      }),
     );
 
     const { remote: rawRemote } = remoteSplitInfo;
@@ -466,14 +469,16 @@ export class RemoteHandler {
       const loadedModule = host.moduleCache.get(remote.name);
       if (loadedModule) {
         const remoteInfo = loadedModule.remoteInfo;
-        const key = remoteInfo.entryGlobalName as keyof typeof globalThis;
+        const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
 
-        if (globalThis[key]) {
-          if (Object.getOwnPropertyDescriptor(globalThis, key)?.configurable) {
-            delete globalThis[key];
+        if (CurrentGlobal[key]) {
+          if (
+            Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable
+          ) {
+            delete CurrentGlobal[key];
           } else {
             // @ts-ignore
-            globalThis[key] = undefined;
+            CurrentGlobal[key] = undefined;
           }
         }
         const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
@@ -491,7 +496,7 @@ export class RemoteHandler {
           ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
           : remoteInfo.name;
         const remoteInsIndex =
-          globalThis.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
+          CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
             if (remoteInfo.buildVersion) {
               return ins.options.id === remoteInsId;
             } else {
@@ -500,7 +505,7 @@ export class RemoteHandler {
           });
         if (remoteInsIndex !== -1) {
           const remoteIns =
-            globalThis.__FEDERATION__.__INSTANCES__[remoteInsIndex];
+            CurrentGlobal.__FEDERATION__.__INSTANCES__[remoteInsIndex];
           remoteInsId = remoteIns.options.id || remoteInsId;
           const globalShareScopeMap = getGlobalShareScope();
 
@@ -562,7 +567,7 @@ export class RemoteHandler {
               ];
             },
           );
-          globalThis.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
+          CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
         }
 
         const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
@@ -586,7 +591,7 @@ export class RemoteHandler {
         host.moduleCache.delete(remote.name);
       }
     } catch (err) {
-      console.log('removeRemote fail: ', err);
+      logger.log('removeRemote fail: ', err);
     }
   }
 }

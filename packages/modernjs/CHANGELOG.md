@@ -1,5 +1,138 @@
 # @module-federation/modern-js
 
+## 0.7.4
+
+### Patch Changes
+
+- @module-federation/node@2.6.9
+- @module-federation/enhanced@0.7.4
+- @module-federation/sdk@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+  - @module-federation/enhanced@0.7.3
+  - @module-federation/node@2.6.8
+
+## 0.7.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.7.2
+- @module-federation/node@2.6.7
+- @module-federation/sdk@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [66ba7b1]
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/node@2.6.6
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+
+## 0.7.0
+
+### Minor Changes
+
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@0.7.0
+  - @module-federation/enhanced@0.7.0
+  - @module-federation/node@2.6.5
+
+## 0.6.16
+
+### Patch Changes
+
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/enhanced@0.6.16
+  - @module-federation/node@2.6.4
+
+## 0.6.15
+
+### Patch Changes
+
+- d1e0f3e: fix(modern-js-plugin): set cors responseHeaders as \*
+  - @module-federation/node@2.6.3
+  - @module-federation/enhanced@0.6.15
+  - @module-federation/sdk@0.6.15
+
+## 0.6.14
+
+### Patch Changes
+
+- ad605d2: chore: unified logger
+- Updated dependencies [87a2862]
+- Updated dependencies [ad605d2]
+  - @module-federation/node@2.6.2
+  - @module-federation/enhanced@0.6.14
+  - @module-federation/sdk@0.6.14
+
+## 0.6.13
+
+### Patch Changes
+
+- Updated dependencies [f1b8848]
+  - @module-federation/node@2.6.1
+  - @module-federation/enhanced@0.6.13
+  - @module-federation/sdk@0.6.13
+
+## 0.6.12
+
+### Patch Changes
+
+- Updated dependencies [1478f50]
+- Updated dependencies [1478f50]
+  - @module-federation/node@2.6.0
+  - @module-federation/enhanced@0.6.12
+  - @module-federation/sdk@0.6.12
+
+## 0.6.11
+
+### Patch Changes
+
+- Updated dependencies [d5a3072]
+  - @module-federation/sdk@0.6.11
+  - @module-federation/node@2.5.21
+  - @module-federation/enhanced@0.6.11
+
+## 0.6.10
+
+### Patch Changes
+
+- Updated dependencies [6b02145]
+- Updated dependencies [22a3b83]
+  - @module-federation/enhanced@0.6.10
+  - @module-federation/sdk@0.6.10
+  - @module-federation/node@2.5.20
+
+## 0.6.9
+
+### Patch Changes
+
+- Updated dependencies [70a1708]
+  - @module-federation/enhanced@0.6.9
+  - @module-federation/node@2.5.19
+  - @module-federation/sdk@0.6.9
+
+## 0.6.8
+
+### Patch Changes
+
+- Updated dependencies [32db0ac]
+  - @module-federation/sdk@0.6.8
+  - @module-federation/enhanced@0.6.8
+  - @module-federation/node@2.5.18
+
 ## 0.6.7
 
 ### Patch Changes

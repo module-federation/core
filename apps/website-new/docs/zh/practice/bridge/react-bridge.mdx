@@ -31,7 +31,7 @@ import { PackageManagerTabs } from '@theme';
 
 > 在生产者项目中，假设我们需要将应用通过 `@module-federation/bridge-react` 导出为一个应用类型模块，应用入口为 App.tsx 文件
 
-- Step1: 首先，我们新建一个文件 `export-app.tsx`，该文件将作为应用类型模块导出的文件。我们需要使用 `createBridgeComponent` 来包装应用的根组件。  
+- Step1: 首先，我们新建一个文件 `export-app.tsx`，该文件将作为应用类型模块导出的文件。我们需要使用 `createBridgeComponent` 来包装应用的根组件。
 
 ```tsx
 // ./src/export-app.tsx
@@ -47,20 +47,19 @@ export default createBridgeComponent({
 
 ```ts
 // rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
 export default defineConfig({
-  tools: {
-    rspack: (config, { appendPlugins }) => {
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'remote1',
-          exposes: {
-            './export-app': './src/export-app.tsx',
-          },
-          shared: ['react', 'react-dom'],
-        }),
-      ]);
-    },
-  },
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.tsx',
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
 });
 ```
 至此，我们完成了应用类型模块的导出。
@@ -84,19 +83,15 @@ export default defineConfig({
 ```ts
 // rsbuild.config.ts
 export default defineConfig({
-  tools: {
-    rspack: (config, { appendPlugins }) => {
-      config.output!.uniqueName = 'host';
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'host',
-          remotes: {
-            remote1: 'remote1@http://localhost:2001/mf-manifest.json',
-          },
-        }),
-      ]);
-    },
-  },
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'host',
+      remotes: {
+        remote1: 'remote1@http://localhost:2001/mf-manifest.json',
+      },
+    }),
+  ],
 });
 ```
 
@@ -178,7 +173,7 @@ const App = () => {
 ### 方法
 
 #### createBridgeComponent
- 
+
 ```tsx
 export declare function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>): () => {
     render(info: RenderFnParams): Promise<void>;
@@ -212,7 +207,7 @@ export declare interface ProviderParams {
 ```
 
 * `bridgeInfo`
-  * type: 
+  * type:
 ```tsx
 type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
@@ -226,7 +221,7 @@ type ProviderFnParams<T> = {
   * 作用: 用于传递根组件
   * ReturnType
     * type:
-      
+
       ```tsx
       () => {
         render(info: {
@@ -242,7 +237,7 @@ type ProviderFnParams<T> = {
         destroy(info: { dom: HTMLElement}): Promise<void>;
       }
       ```
-      
+
 #### createRemoteComponent
 
 ```tsx

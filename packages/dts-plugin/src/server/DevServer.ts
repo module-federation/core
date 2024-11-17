@@ -314,8 +314,21 @@ export class ModuleFederationDevServer {
         'warn',
       );
 
-      this._subscriberWebsocketMap[identifier] &&
-        this._subscriberWebsocketMap[identifier].close();
+      this._subscriberWebsocketMap[identifier]?.close();
+      delete this._subscriberWebsocketMap[identifier];
+    });
+
+    this._subscriberWebsocketMap[identifier].on('error', (err) => {
+      if ('code' in err && err.code === 'ETIMEDOUT') {
+        fileLog(
+          `Can not connect ${JSON.stringify(remote)}, please make sure this remote is started locally.`,
+          MF_SERVER_IDENTIFIER,
+          'warn',
+        );
+      } else {
+        console.error(err);
+      }
+      this._subscriberWebsocketMap[identifier]?.close();
       delete this._subscriberWebsocketMap[identifier];
     });
   }

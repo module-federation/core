@@ -70,7 +70,7 @@
       ]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/runtime-demo/host/**/*.{ts,tsx,js,jsx}"]

@@ -5,10 +5,10 @@
 
 'use strict';
 import type { Compiler } from 'webpack';
+import { isRequiredVersion } from '@module-federation/sdk';
 import { parseOptions } from '../container/options';
 import ConsumeSharedPlugin from './ConsumeSharedPlugin';
 import ProvideSharedPlugin from './ProvideSharedPlugin';
-import { isRequiredVersion } from './utils';
 import type {
   SharePluginOptions,
   SharedConfig,

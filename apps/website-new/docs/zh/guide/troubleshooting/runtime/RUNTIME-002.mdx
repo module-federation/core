@@ -1,0 +1,16 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='RUNTIME-002'/>
+
+## 原因
+
+无法获取生产者容器的 `init` 函数。
+
+正常生产者容器导出内容是 `{ get, init }` ，然而本次加载过程中，`init` 为 `undefined`，因此报错。
+
+## 解决方法
+
+按照下列顺序依次排查：
+
+1. 在加载生产者之前，在 `terminal` 输入 window[remoteEntryKey] 查看此对象是否已占用，若是，则需要重命名生产者 [name](../../../configure/name#name)
+2. 若项目构建器为 rspack ，查看最终构建配置是否设置了 [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) ，若是则删除此配置

@@ -6,7 +6,6 @@ import { createRemoteComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
-import styles from './index.module.less';
 import './App.css';
 
 init({
@@ -19,19 +18,13 @@ init({
         fallback: () => 'http://localhost:2001/mf-manifest.json',
       },
       script: {
-        url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
-        customCreateScript: (url: string, attrs: Record<string, string>) => {
-          let script = document.createElement('script');
-          script.src = `http://localhost:2011/static/js/async/src_App_tsx.js`;
-          script.setAttribute('loader-hoos', 'isTrue');
-          script.setAttribute('crossorigin', 'anonymous');
-          script.onload = (event) => {
-            console.log('--------custom script onload--------', event);
-          };
-          script.onerror = (event) => {
-            console.log('--------custom script onerror--------', event);
-          };
-          return script;
+        retryTimes: 3,
+        retryDelay: 1000,
+        moduleName: ['remote1'],
+        cb: (resolve, error) => {
+          return setTimeout(() => {
+            resolve(error);
+          }, 1000);
         },
       },
     }),
@@ -132,14 +125,7 @@ const App = () => {
         <Route path="/detail/*" Component={Detail} />
         <Route
           path="/remote1/*"
-          Component={() => (
-            <Remote1App
-              className={styles.remote1}
-              name={'Ming'}
-              age={12}
-              ref={ref}
-            />
-          )}
+          Component={() => <Remote1App name={'Ming'} age={12} ref={ref} />}
         />
         <Route
           path="/remote2/*"

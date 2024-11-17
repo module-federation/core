@@ -1,4 +1,71 @@
-## [2.0.1](https://github.com/module-federation/core/compare/storybook-addon-2.0.0...storybook-addon-2.0.1) (2023-12-05)
+# @module-federation/storybook-addon
+
+## 3.0.7
+
+### Patch Changes
+
+- f8742b7: fix: create folder before writing bootstrap
+  - @module-federation/enhanced@0.7.4
+  - @module-federation/sdk@0.7.4
+  - @module-federation/utilities@3.1.27
+
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+  - @module-federation/utilities@3.1.26
+  - @module-federation/sdk@0.7.3
+  - @module-federation/enhanced@0.7.3
+
+## 3.0.5
+
+### Patch Changes
+
+- @module-federation/enhanced@0.7.2
+- @module-federation/sdk@0.7.2
+- @module-federation/utilities@3.1.25
+
+## 3.0.4
+
+### Patch Changes
+
+- 932983e: fix: fix windows path error
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+  - @module-federation/utilities@3.1.24
+
+## 3.0.3
+
+### Patch Changes
+
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@0.7.0
+  - @module-federation/enhanced@0.7.0
+  - @module-federation/utilities@3.1.23
+
+## 3.0.2
+
+### Patch Changes
+
+- 3ba956d: chore: re export preset path for rsbuild
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+  - @module-federation/enhanced@0.6.16
+  - @module-federation/utilities@3.1.22
+
+## 3.0.1
+
+### Patch Changes
+
+- 662a820: feat: support storybook dev remote app in rsbuild(rslib) project [#3131](https://github.com/module-federation/core/pull/3131)
+- a5d003e: fix: storybook addon should disable hmr to avoid conflict with remote module
+  - @module-federation/utilities@3.1.21
 
 ## 3.0.0
 

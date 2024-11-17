@@ -1,7 +1,6 @@
 import AdmZip from 'adm-zip';
 import { resolve, join } from 'path';
 import { rm } from 'fs/promises';
-import typescript from 'typescript';
 
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';

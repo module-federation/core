@@ -8,11 +8,11 @@ import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { parseOptions } from './options';
 import type {
-  optimize,
   Compiler,
   Compilation,
   WebpackError,
   WebpackPluginInstance,
+  WebpackPluginFunction,
 } from 'webpack';
 import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
@@ -20,20 +20,12 @@ import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
 import schema from '../../schemas/container/ContainerPlugin';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
+import type { OptimizationSplitChunksCacheGroup } from 'webpack/lib/optimize/SplitChunksPlugin';
+import type { Falsy } from 'webpack/declarations/WebpackOptions';
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
 ) as typeof import('webpack/lib/dependencies/ModuleDependency');
-
-type ExcludeUndefined<T> = T extends undefined ? never : T;
-type NonUndefined<T> = ExcludeUndefined<T>;
-
-type OptimizationSplitChunksOptions = NonUndefined<
-  ConstructorParameters<typeof optimize.SplitChunksPlugin>[0]
->;
-
-type CacheGroups = OptimizationSplitChunksOptions['cacheGroups'];
-type CacheGroup = NonUndefined<CacheGroups>[string];
 
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
@@ -77,13 +69,21 @@ class ContainerPlugin {
       ),
       runtimePlugins: options.runtimePlugins,
       experiments: options.experiments,
+      dataPrefetch: options.dataPrefetch,
     };
   }
 
   // container should not be affected by splitChunks
   static patchChunkSplit(compiler: Compiler, name: string): void {
     const { splitChunks } = compiler.options.optimization;
-    const patchChunkSplit = (cacheGroup: CacheGroup) => {
+    const patchChunkSplit = (
+      cacheGroup:
+        | string
+        | false
+        | ((...args: any[]) => any)
+        | RegExp
+        | OptimizationSplitChunksCacheGroup,
+    ) => {
       switch (typeof cacheGroup) {
         case 'boolean':
         case 'string':
@@ -160,7 +160,7 @@ class ContainerPlugin {
 
   apply(compiler: Compiler): void {
     const useModuleFederationPlugin = compiler.options.plugins.find(
-      (p: WebpackPluginInstance) => {
+      (p: Falsy | WebpackPluginInstance | WebpackPluginFunction) => {
         if (typeof p !== 'object' || !p) {
           return false;
         }
@@ -206,6 +206,7 @@ class ContainerPlugin {
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
           this._options.experiments,
+          this._options.dataPrefetch,
         );
         dep.loc = { name };
 
@@ -284,6 +285,7 @@ class ContainerPlugin {
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
           this._options.experiments,
+          this._options.dataPrefetch,
         );
 
         dep.loc = { name };

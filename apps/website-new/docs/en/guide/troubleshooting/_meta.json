@@ -1,0 +1,16 @@
+[
+  "overview",
+  {
+    "type": "dir",
+    "name": "runtime",
+    "label": "Runtime",
+    "collapsed":true
+  },
+  {
+    "type": "dir",
+    "name": "type",
+    "label": "Type",
+    "collapsed":true
+  },
+  "other"
+]

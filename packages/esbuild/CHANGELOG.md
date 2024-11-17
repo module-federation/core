@@ -1,5 +1,101 @@
 # @module-federation/esbuild
 
+## 0.0.39
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.4
+
+## 0.0.38
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+
+## 0.0.37
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.2
+
+## 0.0.36
+
+### Patch Changes
+
+- Updated dependencies [6db4c5f]
+  - @module-federation/sdk@0.7.1
+
+## 0.0.35
+
+### Patch Changes
+
+- Updated dependencies [879ad87]
+- Updated dependencies [4eb09e7]
+- Updated dependencies [206b56d]
+  - @module-federation/sdk@0.7.0
+
+## 0.0.34
+
+### Patch Changes
+
+- Updated dependencies [f779188]
+- Updated dependencies [024df60]
+  - @module-federation/sdk@0.6.16
+
+## 0.0.33
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.15
+
+## 0.0.32
+
+### Patch Changes
+
+- Updated dependencies [ad605d2]
+  - @module-federation/sdk@0.6.14
+
+## 0.0.31
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.13
+
+## 0.0.30
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.12
+
+## 0.0.29
+
+### Patch Changes
+
+- Updated dependencies [d5a3072]
+  - @module-federation/sdk@0.6.11
+
+## 0.0.28
+
+### Patch Changes
+
+- Updated dependencies [22a3b83]
+  - @module-federation/sdk@0.6.10
+
+## 0.0.27
+
+### Patch Changes
+
+- @module-federation/sdk@0.6.9
+
+## 0.0.26
+
+### Patch Changes
+
+- Updated dependencies [32db0ac]
+  - @module-federation/sdk@0.6.8
+
 ## 0.0.25
 
 ### Patch Changes

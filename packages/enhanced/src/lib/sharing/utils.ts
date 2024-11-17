@@ -3,6 +3,7 @@
 	Author Tobias Koppers @sokra
 */
 
+import { isRequiredVersion } from '@module-federation/sdk';
 import type { ConsumeOptions } from 'webpack/lib/sharing/ConsumeSharedModule';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { InputFileSystem } from 'webpack/lib/util/fs';
@@ -11,38 +12,33 @@ const { join, dirname, readJson } = require(
 ) as typeof import('webpack/lib/util/fs');
 
 // Extreme shorthand only for github. eg: foo/bar
-const RE_URL_GITHUB_EXTREME_SHORT: RegExp =
-  /^[^/@:.\s][^/@:\s]*\/[^@:\s]*[^/@:\s]#\S+/;
+const RE_URL_GITHUB_EXTREME_SHORT = /^[^/@:.\s][^/@:\s]*\/[^@:\s]*[^/@:\s]#\S+/;
 
 // Short url with specific protocol. eg: github:foo/bar
-const RE_GIT_URL_SHORT: RegExp =
-  /^(github|gitlab|bitbucket|gist):\/?[^/.]+\/?/i;
+const RE_GIT_URL_SHORT = /^(github|gitlab|bitbucket|gist):\/?[^/.]+\/?/i;
 
 // Currently supported protocols
-const RE_PROTOCOL: RegExp =
+const RE_PROTOCOL =
   /^((git\+)?(ssh|https?|file)|git|github|gitlab|bitbucket|gist):$/i;
 
 // Has custom protocol
-const RE_CUSTOM_PROTOCOL: RegExp = /^((git\+)?(ssh|https?|file)|git):\/\//i;
+const RE_CUSTOM_PROTOCOL = /^((git\+)?(ssh|https?|file)|git):\/\//i;
 
 // Valid hash format for npm / yarn ...
-const RE_URL_HASH_VERSION: RegExp = /#(?:semver:)?(.+)/;
+const RE_URL_HASH_VERSION = /#(?:semver:)?(.+)/;
 
 // Simple hostname validate
-const RE_HOSTNAME: RegExp = /^(?:[^/.]+(\.[^/]+)+|localhost)$/;
+const RE_HOSTNAME = /^(?:[^/.]+(\.[^/]+)+|localhost)$/;
 
 // For hostname with colon. eg: ssh://user@github.com:foo/bar
-const RE_HOSTNAME_WITH_COLON: RegExp =
+const RE_HOSTNAME_WITH_COLON =
   /([^/@#:.]+(?:\.[^/@#:.]+)+|localhost):([^#/0-9]+)/;
 
 // Reg for url without protocol
-const RE_NO_PROTOCOL: RegExp = /^([^/@#:.]+(?:\.[^/@#:.]+)+)/;
-
-// RegExp for version string
-const VERSION_PATTERN_REGEXP: RegExp = /^([\d^=v<>~]|[*xX]$)/;
+const RE_NO_PROTOCOL = /^([^/@#:.]+(?:\.[^/@#:.]+)+)/;
 
 // Specific protocol for short url without normal hostname
-const PROTOCOLS_FOR_SHORT: string[] = [
+const PROTOCOLS_FOR_SHORT = [
   'github:',
   'gitlab:',
   'bitbucket:',
@@ -51,7 +47,7 @@ const PROTOCOLS_FOR_SHORT: string[] = [
 ];
 
 // Default protocol for git url
-const DEF_GIT_PROTOCOL: string = 'git+ssh://';
+const DEF_GIT_PROTOCOL = 'git+ssh://';
 
 // thanks to https://github.com/npm/hosted-git-info/blob/latest/git-host-info.js
 const extractCommithashByDomain: {
@@ -315,16 +311,6 @@ function getGitUrlVersion(gitUrl: string): string {
 }
 
 /**
- * @param {string} str maybe required version
- * @returns {boolean} true, if it looks like a version
- */
-function isRequiredVersion(str: string): boolean {
-  return VERSION_PATTERN_REGEXP.test(str);
-}
-
-export { isRequiredVersion };
-
-/**
  * @see https://docs.npmjs.com/cli/v7/configuring-npm/package-json#urls-as-dependencies
  * @param {string} versionDesc version to be normalized
  * @returns {string} normalized version
@@ -342,32 +328,59 @@ function normalizeVersion(versionDesc: string): string {
 
 export { normalizeVersion };
 
+/** @typedef {{ data: Record<string, any>, path: string }} DescriptionFile */
+
+interface DescriptionFile {
+  data: Record<string, any>;
+  path: string;
+}
+
 /**
  *
  * @param {InputFileSystem} fs file system
  * @param {string} directory directory to start looking into
  * @param {string[]} descriptionFiles possible description filenames
- * @param {function((Error | null)=, {data: object, path: string}=): void} callback callback
+ * @param {function((Error | null)=, {data?: DescriptionFile, path?: string}=, (checkedDescriptionFilePaths: string[])=): void} callback callback
+ * @param {function({data: DescriptionFile}=): boolean} satisfiesDescriptionFileData file data compliance check
+ * @param {Set<string>} [checkedFilePaths] optional set to track checked file paths
  */
-const getDescriptionFile = (
+function getDescriptionFile(
   fs: InputFileSystem,
   directory: string,
   descriptionFiles: string[],
-  callback: (err: Error | null, data?: { data: object; path: string }) => void,
-) => {
+  callback: (
+    err: Error | null,
+    data?: DescriptionFile,
+    checkedDescriptionFilePaths?: string[],
+  ) => void,
+  satisfiesDescriptionFileData?: (data?: DescriptionFile) => boolean,
+  checkedFilePaths: Set<string> = new Set<string>(), // Default to a new Set if not provided
+) {
   let i = 0;
+
+  // Create an object to hold the function and the shared checkedFilePaths
+  const satisfiesDescriptionFileDataInternal = {
+    check: satisfiesDescriptionFileData,
+    checkedFilePaths: checkedFilePaths, // Use the passed Set instance
+  };
+
   const tryLoadCurrent = () => {
     if (i >= descriptionFiles.length) {
       const parentDirectory = dirname(fs, directory);
       if (!parentDirectory || parentDirectory === directory) {
-        //@ts-ignore
-        return callback();
+        return callback(
+          null,
+          undefined,
+          Array.from(satisfiesDescriptionFileDataInternal.checkedFilePaths),
+        );
       }
       return getDescriptionFile(
         fs,
         parentDirectory,
         descriptionFiles,
         callback,
+        satisfiesDescriptionFileDataInternal.check,
+        satisfiesDescriptionFileDataInternal.checkedFilePaths, // Pass the same Set
       );
     }
     const filePath = join(fs, directory, descriptionFiles[i]);
@@ -384,11 +397,19 @@ const getDescriptionFile = (
           new Error(`Description file ${filePath} is not an object`),
         );
       }
+      if (
+        typeof satisfiesDescriptionFileDataInternal.check === 'function' &&
+        !satisfiesDescriptionFileDataInternal.check({ data, path: filePath })
+      ) {
+        i++;
+        satisfiesDescriptionFileDataInternal.checkedFilePaths.add(filePath);
+        return tryLoadCurrent();
+      }
       callback(null, { data, path: filePath });
     });
   };
   tryLoadCurrent();
-};
+}
 export { getDescriptionFile };
 /**
  * Get required version from description file

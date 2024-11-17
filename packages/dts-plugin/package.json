@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dts-plugin",
-  "version": "0.6.7",
+  "version": "0.7.4",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -51,16 +51,17 @@
     "@module-federation/managers": "workspace:*",
     "lodash.clonedeepwith": "4.5.0",
     "@module-federation/third-party-dts-extractor": "workspace:*",
+    "@module-federation/error-codes": "workspace:*",
     "chalk": "3.0.0",
     "fs-extra": "9.1.0",
     "isomorphic-ws": "5.0.0",
     "koa": "2.15.3",
     "log4js": "6.9.1",
     "node-schedule": "2.1.1",
-    "ws": "8.17.1"
+    "ws": "8.18.0"
   },
   "devDependencies": {
-    "@types/ws": "8.5.10",
+    "@types/ws": "8.5.12",
     "@types/koa": "2.15.0",
     "@types/node-schedule": "2.1.7",
     "@module-federation/runtime": "workspace:*",

@@ -9,6 +9,11 @@ import { FederationHost } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
 import { assert } from './logger';
+import {
+  RUNTIME_001,
+  getShortErrorMsg,
+  runtimeDescMap,
+} from '@module-federation/error-codes';
 
 async function loadEsmEntry({
   entry,
@@ -20,11 +25,7 @@ async function loadEsmEntry({
   return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
-        // eslint-disable-next-line no-eval
-        new Function(
-          'callbacks',
-          `import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
-        )([resolve, reject]);
+        import(/* webpackIgnore: true */ entry).then(resolve).catch(reject);
       } else {
         resolve(remoteEntryExports);
       }
@@ -44,11 +45,16 @@ async function loadSystemJsEntry({
   return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
-        // eslint-disable-next-line no-eval
-        new Function(
-          'callbacks',
-          `System.import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
-        )([resolve, reject]);
+        //@ts-ignore
+        if (typeof __system_context__ === 'undefined') {
+          //@ts-ignore
+          System.import(entry).then(resolve).catch(reject);
+        } else {
+          new Function(
+            'callbacks',
+            `System.import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
+          )([resolve, reject]);
+        }
       } else {
         resolve(remoteEntryExports);
       }
@@ -62,12 +68,12 @@ async function loadEntryScript({
   name,
   globalName,
   entry,
-  createScriptHook,
+  loaderHook,
 }: {
   name: string;
   globalName: string;
   entry: string;
-  createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
+  loaderHook: FederationHost['loaderHook'];
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -81,7 +87,7 @@ async function loadEntryScript({
   return loadScript(entry, {
     attrs: {},
     createScriptHook: (url, attrs) => {
-      const res = createScriptHook.emit({ url, attrs });
+      const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
 
       if (!res) return;
 
@@ -104,12 +110,11 @@ async function loadEntryScript({
 
       assert(
         entryExports,
-        `
-      Unable to use the ${name}'s '${entry}' URL with ${remoteEntryKey}'s globalName to get remoteEntry exports.
-      Possible reasons could be:\n
-      1. '${entry}' is not the correct URL, or the remoteEntry resource or name is incorrect.\n
-      2. ${remoteEntryKey} cannot be used to get remoteEntry exports in the window object.
-    `,
+        getShortErrorMsg(RUNTIME_001, runtimeDescMap, {
+          remoteName: name,
+          remoteEntryUrl: entry,
+          remoteEntryKey,
+        }),
       );
 
       return entryExports;
@@ -122,11 +127,11 @@ async function loadEntryScript({
 async function loadEntryDom({
   remoteInfo,
   remoteEntryExports,
-  createScriptHook,
+  loaderHook,
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
-  createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
+  loaderHook: FederationHost['loaderHook'];
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   switch (type) {
@@ -136,16 +141,16 @@ async function loadEntryDom({
     case 'system':
       return loadSystemJsEntry({ entry, remoteEntryExports });
     default:
-      return loadEntryScript({ entry, globalName, name, createScriptHook });
+      return loadEntryScript({ entry, globalName, name, loaderHook });
   }
 }
 
 async function loadEntryNode({
   remoteInfo,
-  createScriptHook,
+  loaderHook,
 }: {
   remoteInfo: RemoteInfo;
-  createScriptHook: FederationHost['loaderHook']['lifecycle']['createScript'];
+  loaderHook: FederationHost['loaderHook'];
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
@@ -159,16 +164,18 @@ async function loadEntryNode({
 
   return loadScriptNode(entry, {
     attrs: { name, globalName, type },
-    createScriptHook: (url, attrs) => {
-      const res = createScriptHook.emit({ url, attrs });
+    loaderHook: {
+      createScriptHook: (url: string, attrs: Record<string, any> = {}) => {
+        const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
 
-      if (!res) return;
+        if (!res) return;
 
-      if ('url' in res) {
-        return res;
-      }
+        if ('url' in res) {
+          return res;
+        }
 
-      return;
+        return;
+      },
     },
   })
     .then(() => {
@@ -179,12 +186,11 @@ async function loadEntryNode({
 
       assert(
         entryExports,
-        `
-      Unable to use the ${name}'s '${entry}' URL with ${remoteEntryKey}'s globalName to get remoteEntry exports.
-      Possible reasons could be:\n
-      1. '${entry}' is not the correct URL, or the remoteEntry resource or name is incorrect.\n
-      2. ${remoteEntryKey} cannot be used to get remoteEntry exports in the window object.
-    `,
+        getShortErrorMsg(RUNTIME_001, runtimeDescMap, {
+          remoteName: name,
+          remoteEntryUrl: entry,
+          remoteEntryKey,
+        }),
       );
 
       return entryExports;
@@ -215,29 +221,23 @@ export async function getRemoteEntry({
 
   if (!globalLoading[uniqueKey]) {
     const loadEntryHook = origin.remoteHandler.hooks.lifecycle.loadEntry;
-    if (loadEntryHook.listeners.size) {
-      globalLoading[uniqueKey] = loadEntryHook
-        .emit({
-          createScriptHook: origin.loaderHook.lifecycle.createScript,
-          remoteInfo,
-          remoteEntryExports,
-        })
-        .then((res) => res || undefined);
-    } else {
-      const createScriptHook = origin.loaderHook.lifecycle.createScript;
-      if (!isBrowserEnv()) {
-        globalLoading[uniqueKey] = loadEntryNode({
-          remoteInfo,
-          createScriptHook,
-        });
-      } else {
-        globalLoading[uniqueKey] = loadEntryDom({
-          remoteInfo,
-          remoteEntryExports,
-          createScriptHook,
-        });
-      }
-    }
+    const createScriptHook = origin.loaderHook.lifecycle.createScript;
+    const loaderHook = origin.loaderHook;
+
+    globalLoading[uniqueKey] = loadEntryHook
+      .emit({
+        loaderHook,
+        remoteInfo,
+        remoteEntryExports,
+      })
+      .then((res) => {
+        if (res) {
+          return res;
+        }
+        return isBrowserEnv()
+          ? loadEntryDom({ remoteInfo, remoteEntryExports, loaderHook })
+          : loadEntryNode({ remoteInfo, loaderHook });
+      });
   }
 
   return globalLoading[uniqueKey];

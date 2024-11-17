@@ -1,0 +1,22 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='RUNTIME-001'/>
+
+## 原因
+
+当生产者入口文件被正常加载后，会在全局对象（globalThis/window）注册此生产者，该生产者可以通过 window[remoteEntryKey] 访问。
+
+然而在本次加载过程中，注册的生产者无法访问。该错误存在三种可能原因：
+
+1. remoteEntryUrl 不正确
+2. 生产者入口文件没有正常挂载容器
+3. 网络问题，该资源无法访问
+
+## 解决方法
+
+针对原因，有对应的解决方法：
+
+1. 检查生产者入口地址是否正确
+  如果使用的是 manifest ，那么检查 manifest 中的 publicPath 和 remoteEntry.name 字段
+2. 若项目构建器为 rspack ，查看最终构建配置是否设置了 [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) ，若是则删除此配置
+3. 检查该资源是否是外部可访问
