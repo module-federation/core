@@ -80,6 +80,7 @@
     "enhanced-resolve": "^5.0.0"
   },
   "dependencies": {
+    "enhanced-resolve": "^5.17.1",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/manifest": "workspace:*",
