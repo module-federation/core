@@ -1,5 +1,11 @@
 # @module-federation/nextjs-mf
 
+## 8.8.0
+
+### Minor Changes
+
+- 5ad75fd: Enabled JSON manifest remote protocol for NextJS plugin
+
 ## 8.7.10
 
 ### Patch Changes
