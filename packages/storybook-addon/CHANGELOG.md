@@ -1,5 +1,15 @@
 # @module-federation/storybook-addon
 
+## 3.0.8
+
+### Patch Changes
+
+- 4c9f725: correct peerDependencies declaration
+- Updated dependencies [5613265]
+  - @module-federation/enhanced@0.7.5
+  - @module-federation/sdk@0.7.5
+  - @module-federation/utilities@3.1.28
+
 ## 3.0.7
 
 ### Patch Changes
