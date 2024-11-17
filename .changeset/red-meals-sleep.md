@@ -2,4 +2,4 @@
 '@module-federation/nextjs-mf': minor
 ---
 
-Enabled JSON manifest entry for NextJS plugin
+Enabled JSON manifest remote protocol for NextJS plugin
