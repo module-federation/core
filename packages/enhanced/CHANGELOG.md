@@ -1,5 +1,20 @@
 # @module-federation/enhanced
 
+## 0.7.5
+
+### Patch Changes
+
+- 5613265: remove module resolve path replacements
+- Updated dependencies [0309fb5]
+  - @module-federation/bridge-react-webpack-plugin@0.7.5
+  - @module-federation/rspack@0.7.5
+  - @module-federation/sdk@0.7.5
+  - @module-federation/runtime-tools@0.7.5
+  - @module-federation/managers@0.7.5
+  - @module-federation/manifest@0.7.5
+  - @module-federation/dts-plugin@0.7.5
+  - @module-federation/data-prefetch@0.7.5
+
 ## 0.7.4
 
 ### Patch Changes
