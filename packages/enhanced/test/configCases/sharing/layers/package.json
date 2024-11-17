@@ -1,0 +1,13 @@
+{
+  "name": "layered-react-test",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "react": "1.0.0"
+  },
+  "layerDependencies": {
+    "layer1": {
+      "react": "2.0.0"
+    }
+  }
+}
