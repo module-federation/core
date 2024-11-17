@@ -1,5 +1,5 @@
 ---
-'@module-federation/nextjs-mf': patch
+'@module-federation/nextjs-mf': minor
 ---
 
 Enabled JSON manifest entry for NextJS plugin
