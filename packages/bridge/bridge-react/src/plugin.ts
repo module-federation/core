@@ -1,4 +1,4 @@
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
 import { createRemoteComponent } from './create';
 import { createBridgeComponent } from './provider';
 

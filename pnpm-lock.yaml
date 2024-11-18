@@ -1814,9 +1814,9 @@ importers:
         specifier: ^4.0.13
         version: 4.0.13(react@18.3.1)
     devDependencies:
-      '@module-federation/enhanced':
+      '@module-federation/runtime':
         specifier: workspace:*
-        version: link:../../enhanced
+        version: link:../../runtime
       '@testing-library/react':
         specifier: 15.0.7
         version: 15.0.7(@types/react@18.2.79)(react-dom@18.3.1)(react@18.3.1)

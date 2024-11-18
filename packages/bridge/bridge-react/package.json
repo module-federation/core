@@ -12,34 +12,34 @@
     "directory": "packages/bridge-react"
   },
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.es.js",
-      "require": "./dist/index.js"
-    },
-    "./plugin": {
-      "types": "./dist/plugin.d.ts",
-      "import": "./dist/plugin.es.js",
-      "require": "./dist/plugin.js"
+      "require": "./dist/index.cjs.js"
     },
     "./router": {
       "types": "./dist/router.d.ts",
       "import": "./dist/router.es.js",
-      "require": "./dist/router.js"
+      "require": "./dist/router.cjs.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.es.js",
+      "require": "./dist/plugin.es.js"
     },
     "./router-v5": {
       "types": "./dist/router-v5.d.ts",
       "import": "./dist/router-v5.es.js",
-      "require": "./dist/router-v5.js"
+      "require": "./dist/router-v5.cjs.js"
     },
     "./router-v6": {
       "types": "./dist/router-v6.d.ts",
       "import": "./dist/router-v6.es.js",
-      "require": "./dist/router-v6.js"
+      "require": "./dist/router-v6.cjs.js"
     },
     "./*": "./*"
   },
@@ -73,6 +73,6 @@
     "typescript": "^5.2.2",
     "vite": "^5.2.14",
     "vite-plugin-dts": "^3.9.1",
-    "@module-federation/enhanced": "workspace:*"
+    "@module-federation/runtime": "workspace:*"
   }
 }

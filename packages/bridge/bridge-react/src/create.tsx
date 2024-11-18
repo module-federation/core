@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import type { FederationHost } from '@module-federation/enhanced/runtime';
+import type { FederationHost } from '@module-federation/runtime';
 import {
   ErrorBoundary,
   ErrorBoundaryPropsWithComponent,

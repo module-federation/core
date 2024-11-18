@@ -10,7 +10,7 @@ import type { ProviderParams } from '@module-federation/bridge-shared';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
 import { LoggerInstance, pathJoin, getRootDomDefaultClassName } from '../utils';
-import type { FederationHost } from '@module-federation/enhanced/runtime';
+import type { FederationHost } from '@module-federation/runtime';
 
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {

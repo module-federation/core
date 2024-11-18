@@ -9,7 +9,7 @@ import type {
 import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
 import { LoggerInstance, atLeastReact18 } from './utils';
-import type { FederationHost } from '@module-federation/enhanced/runtime';
+import type { FederationHost } from '@module-federation/runtime';
 
 type RenderParams = RenderFnParams & {
   [key: string]: unknown;

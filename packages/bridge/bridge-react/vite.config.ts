@@ -27,8 +27,7 @@ export default defineConfig({
         'router-v6': path.resolve(__dirname, 'src/router-v6.tsx'),
       },
       formats: ['cjs', 'es'],
-      fileName: (format, entryName) =>
-        `${entryName}.${format.replace('cjs', '')}.js`,
+      fileName: (format, entryName) => `${entryName}.${format}.js`,
     },
     rollupOptions: {
       external: [
