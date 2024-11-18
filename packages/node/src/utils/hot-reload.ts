@@ -12,7 +12,7 @@ const getRequire = (): NodeRequire => {
   //@ts-ignore
   return typeof __non_webpack_require__ !== 'undefined'
     ? __non_webpack_require__
-    : require;
+    : eval('require');
 };
 
 function callsites(): any[] {
