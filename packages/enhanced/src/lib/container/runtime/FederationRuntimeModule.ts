@@ -46,16 +46,19 @@ class FederationRuntimeModule extends RuntimeModule {
         );
       const { chunkHasJs } = jsModulePlugin;
       if (this.runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)) {
-        const conditionMap = this.compilation.chunkGraph.getChunkConditionMap(
-          this.chunk,
-          chunkHasJs,
-        );
-        const hasJsMatcher = compileBooleanMatcher(conditionMap);
-        if (typeof hasJsMatcher === 'boolean') {
-          matcher = hasJsMatcher;
-        } else {
-          matcher = hasJsMatcher('chunkId');
+        if (this.compilation.chunkGraph) {
+          const conditionMap = this.compilation.chunkGraph.getChunkConditionMap(
+            this.chunk,
+            chunkHasJs,
+          );
+          const hasJsMatcher = compileBooleanMatcher(conditionMap);
+          if (typeof hasJsMatcher === 'boolean') {
+            matcher = hasJsMatcher;
+          } else {
+            matcher = hasJsMatcher('chunkId');
+          }
         }
+
         const outputName = this.compilation.getPath(
           jsModulePlugin.getChunkFilenameTemplate(
             this.chunk,
