@@ -25,7 +25,9 @@ async function loadEsmEntry({
   return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
-        import(/* webpackIgnore: true */ entry).then(resolve).catch(reject);
+        import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
+          .then(resolve)
+          .catch(reject);
       } else {
         resolve(remoteEntryExports);
       }
