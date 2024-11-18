@@ -1426,8 +1426,8 @@ importers:
         specifier: ^3.4.19
         version: 3.5.10(typescript@5.5.2)
       vue-router:
-        specifier: ^4.3.2
-        version: 4.3.2(vue@3.5.10)
+        specifier: ^4.4.5
+        version: 4.4.5(vue@3.5.10)
     devDependencies:
       '@module-federation/rsbuild-plugin':
         specifier: workspace:*
@@ -1543,8 +1543,8 @@ importers:
         specifier: ^3.4.19
         version: 3.5.10(typescript@5.5.2)
       vue-router:
-        specifier: ^4.3.2
-        version: 4.3.2(vue@3.5.10)
+        specifier: ^4.4.5
+        version: 4.4.5(vue@3.5.10)
     devDependencies:
       '@rsbuild/core':
         specifier: ^1.0.19
@@ -1934,8 +1934,8 @@ importers:
         specifier: ^3.4.21
         version: 3.5.10(typescript@5.5.2)
       vue-router:
-        specifier: 4.3.2
-        version: 4.3.2(vue@3.5.10)
+        specifier: 4.4.5
+        version: 4.4.5(vue@3.5.10)
       vue-tsc:
         specifier: ^2.0.6
         version: 2.1.6(typescript@5.5.2)
@@ -42838,8 +42838,8 @@ packages:
       webpack: 5.95.0(@swc/core@1.7.26)(esbuild@0.24.0)
     dev: true
 
-  /vue-router@4.3.2(vue@3.5.10):
-    resolution: {integrity: sha512-hKQJ1vDAZ5LVkKEnHhmm1f9pMiWIBNGF5AwU67PdH7TyXCj/a4hTccuUuYCAMgJK6rO/NVYtQIEN3yL8CECa7Q==}
+  /vue-router@4.4.5(vue@3.5.10):
+    resolution: {integrity: sha512-4fKZygS8cH1yCyuabAXGUAsyi1b2/o/OKgu/RUb+znIYOxPRxdkytJEx+0wGcpBE1pX6vUgh5jwWOKRGvuA/7Q==}
     peerDependencies:
       vue: ^3.2.0
     dependencies:
