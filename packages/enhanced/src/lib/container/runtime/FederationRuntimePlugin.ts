@@ -24,6 +24,7 @@ import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
 import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
+import { CachedInputFileSystem, ResolverFactory } from 'enhanced-resolve';
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
@@ -57,6 +58,14 @@ const EmbeddedRuntimePath = require.resolve(
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompler = new WeakSet<Compiler>();
+
+// Create a resolver instance
+const resolver = ResolverFactory.createResolver({
+  //@ts-ignore
+  fileSystem: new CachedInputFileSystem(fs, 4000),
+  mainFields: ['module', 'exports', 'main'],
+  conditionNames: ['import', 'require', 'node'],
+});
 
 class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -370,6 +379,22 @@ class FederationRuntimePlugin {
       );
     }
 
+    if (isHoisted) {
+      // Use the resolver to resolve the path synchronously
+      try {
+        const resolvedPath = resolver.resolveSync(
+          {},
+          runtimePath.replace('.cjs.js', '').replace('.esm.mjs', ''),
+          '',
+        );
+        if (resolvedPath) {
+          runtimePath = resolvedPath;
+        }
+      } catch (err) {
+        console.error('Error resolving runtime path:', err);
+      }
+    }
+
     const alias: any = compiler.options.resolve.alias || {};
     alias['@module-federation/runtime$'] =
       alias['@module-federation/runtime$'] || runtimePath;
@@ -433,18 +458,36 @@ class FederationRuntimePlugin {
     }
 
     if (this.options?.experiments?.federationRuntime === 'hoisted') {
+      // Use the sync resolver to resolve the path instead of string replacement
+      try {
+        const resolvedPath = resolver.resolveSync(
+          {},
+          RuntimePath.replace('.cjs.js', '').replace('.esm.mjs', ''),
+          '',
+        );
+        if (resolvedPath) {
+          this.bundlerRuntimePath = resolvedPath;
+        }
+      } catch (err) {
+        // Handle error if needed
+      }
+
       new EmbedFederationRuntimePlugin().apply(compiler);
-
       new HoistContainerReferences().apply(compiler);
-
       new compiler.webpack.NormalModuleReplacementPlugin(
         /@module-federation\/runtime/,
         (resolveData) => {
           if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
-            resolveData.request = RuntimePath;
-
-            if (resolveData.createData) {
-              resolveData.createData.request = resolveData.request;
+            try {
+              const resolvedPath = resolver.resolveSync({}, RuntimePath, '');
+              if (resolvedPath) {
+                resolveData.request = resolvedPath;
+                if (resolveData.createData) {
+                  resolveData.createData.request = resolvedPath;
+                }
+              }
+            } catch (err) {
+              // Handle error if needed
             }
           }
         },
