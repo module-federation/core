@@ -103,6 +103,13 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
       type: snapshot.ssrRemoteEntryType || defaultRemoteEntryInfo.type,
       globalName: snapshot.globalName,
     };
+  } else if ('remoteEntry' in snapshot) {
+    // Some plugins may not have ssrRemoteEntry, but have remoteEntry on their manifest (like nextjs-mf)
+    return {
+      url: snapshot.remoteEntry || defaultRemoteEntryInfo.url,
+      type: snapshot.remoteEntryType || defaultRemoteEntryInfo.type,
+      globalName: snapshot.globalName || defaultRemoteEntryInfo.globalName,
+    };
   }
   return defaultRemoteEntryInfo;
 }

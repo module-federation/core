@@ -18,6 +18,7 @@ Thank you for your interest in contributing to Module Federation! Before startin
 **Note:** 
 - Keep your PRs concise, addressing a single issue or feature.
 - Include a detailed description in your PR and link to related issues.
+- For an up-to-date sequency of tasks to be performed in order to buil/test the libraries refer to the [buil-and-test workflow](./.github/workflows/build-and-test.yml)
 
 ## Setup Development Environment
 
@@ -58,6 +59,13 @@ What this will do:
 - Install all dependencies
 - Create symlinks between packages in the monorepo
 
+### Building
+
+To properly run some tests and packages you may need to build the existing packages, to do that simply run:
+
+```sh
+px nx run-many --targets=build --projects=tag:type:pkg
+```
 
 ## Testing
 
