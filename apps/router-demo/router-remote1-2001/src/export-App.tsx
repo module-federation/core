@@ -1,11 +1,8 @@
 import React from 'react';
-import { getInstance } from '@module-federation/enhanced/runtime';
 import App from './App';
+import { createBridgeComponent } from '@module-federation/bridge-react';
 
-const hostInstance = getInstance();
-
-// @ts-ignore
-const provider = hostInstance.createBridgeComponent({
+const provider = createBridgeComponent({
   rootComponent: App,
 });
 

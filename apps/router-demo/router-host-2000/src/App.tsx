@@ -3,12 +3,13 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 import BridgeReactPlugin from '@module-federation/bridge-react/plugin';
+import { createRemoteComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
 import './App.css';
 
-const hostInstance = init({
+init({
   name: 'federation_consumer',
   remotes: [],
   plugins: [
@@ -47,37 +48,32 @@ const FallbackErrorComp = (info: any) => {
 
 const FallbackComp = <div data-test-id="loading">loading...</div>;
 
-// @ts-ignore
-const Remote1App = hostInstance.createRemoteComponent({
+const Remote1App = createRemoteComponent({
   loader: () => loadRemote('remote1/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
-// @ts-ignore
-const Remote2App = hostInstance.createRemoteComponent({
+const Remote2App = createRemoteComponent({
   loader: () => import('remote2/export-app'),
   export: 'provider',
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
-// @ts-ignore
-const Remote3App = hostInstance.createRemoteComponent({
+const Remote3App = createRemoteComponent({
   loader: () => loadRemote('remote3/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
-// @ts-ignore
-const RemoteRenderErrorApp = hostInstance.createRemoteComponent({
+const RemoteRenderErrorApp = createRemoteComponent({
   loader: () => loadRemote('remote-render-error/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 }) as ForwardRefExoticComponent<unknown>;
 
-// @ts-ignore
-const RemoteResourceErrorApp = hostInstance.createRemoteComponent({
+const RemoteResourceErrorApp = createRemoteComponent({
   loader: () => loadRemote('remote-resource-error/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,

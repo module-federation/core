@@ -134,3 +134,11 @@ export function ShadowRoot(info: { children: () => JSX.Element }) {
 
   return <div ref={domRef}>{root && <info.children />}</div>;
 }
+
+export function createBridgeComponentWithInstance<T>(instance: FederationHost) {
+  return (bridgeInfo: ProviderFnParams<T>) => {
+    return createBridgeComponent({ ...bridgeInfo, instance });
+  };
+}
+
+export type CreateBridgeComponent = typeof createBridgeComponent;

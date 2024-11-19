@@ -116,3 +116,13 @@ export function createRemoteComponent<T, E extends keyof T>(
     },
   );
 }
+
+export function createRemoteComponentWithInstance<T, E extends keyof T>(
+  instance: FederationHost,
+) {
+  return (info: LazyRemoteComponentInfo<T, E>) => {
+    return createLazyRemoteComponent({ ...info, instance });
+  };
+}
+
+export type CreateRemoteComponent = typeof createRemoteComponent;
