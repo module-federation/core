@@ -10,7 +10,7 @@ import type { ProviderParams } from '@module-federation/bridge-shared';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
 import { LoggerInstance, pathJoin, getRootDomDefaultClassName } from '../utils';
-import { getInstance } from '@module-federation/runtime';
+import { federationRuntime } from '../plugin';
 
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {
@@ -53,6 +53,7 @@ const RemoteAppWrapper = forwardRef(function (
       ...resProps
     } = props;
 
+    const instance = federationRuntime.instance;
     const rootRef: React.MutableRefObject<HTMLDivElement | null> =
       ref && 'current' in ref
         ? (ref as React.MutableRefObject<HTMLDivElement | null>)
@@ -60,8 +61,8 @@ const RemoteAppWrapper = forwardRef(function (
 
     const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
     const providerInfoRef = useRef<any>(null);
-    const hostInstance = getInstance();
-    LoggerInstance.log(`RemoteAppWrapper hostInstance >>>`, hostInstance);
+
+    LoggerInstance.log(`RemoteAppWrapper instance from props >>>`, instance);
 
     useEffect(() => {
       const renderTimeout = setTimeout(() => {
@@ -84,18 +85,16 @@ const RemoteAppWrapper = forwardRef(function (
 
         LoggerInstance.log(
           `createRemoteComponent LazyComponent hostInstance >>>`,
-          hostInstance,
+          instance,
         );
         const beforeBridgeRenderRes =
-          hostInstance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+          instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
             renderProps,
           ) || {};
         // @ts-ignore
         renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
         providerReturn.render(renderProps);
-        hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
-          renderProps,
-        );
+        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
       });
 
       return () => {
@@ -107,7 +106,7 @@ const RemoteAppWrapper = forwardRef(function (
               { moduleName, basename, dom: renderDom.current },
             );
 
-            hostInstance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
+            instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
               moduleName,
               dom: renderDom.current,
               basename,
@@ -121,7 +120,7 @@ const RemoteAppWrapper = forwardRef(function (
               dom: renderDom.current,
             });
 
-            hostInstance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
+            instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
               moduleName,
               dom: renderDom.current,
               basename,
