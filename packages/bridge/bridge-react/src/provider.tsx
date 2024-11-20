@@ -9,7 +9,7 @@ import type {
 import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
 import { LoggerInstance, atLeastReact18 } from './utils';
-import type { FederationHost } from '@module-federation/runtime';
+import { federationRuntime } from './plugin';
 
 type RenderParams = RenderFnParams & {
   [key: string]: unknown;
@@ -20,19 +20,18 @@ type DestroyParams = {
 };
 type RootType = HTMLElement | ReactDOMClient.Root;
 
-type ProviderFnParams<T> = {
+export type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
   render?: (
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
-  instance?: FederationHost;
 };
 
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
   return () => {
     const rootMap = new Map<any, RootType>();
-    const { instance } = bridgeInfo;
+    const instance = federationRuntime.instance;
     LoggerInstance.log(
       `createBridgeComponent instance from props >>>`,
       instance,
@@ -134,11 +133,3 @@ export function ShadowRoot(info: { children: () => JSX.Element }) {
 
   return <div ref={domRef}>{root && <info.children />}</div>;
 }
-
-export function createBridgeComponentWithInstance<T>(instance: FederationHost) {
-  return (bridgeInfo: ProviderFnParams<T>) => {
-    return createBridgeComponent({ ...bridgeInfo, instance });
-  };
-}
-
-export type CreateBridgeComponent = typeof createBridgeComponent;

@@ -1,5 +1,4 @@
 import React, { forwardRef } from 'react';
-import type { FederationHost } from '@module-federation/runtime';
 import {
   ErrorBoundary,
   ErrorBoundaryPropsWithComponent,
@@ -24,7 +23,6 @@ type LazyRemoteComponentInfo<T, E extends keyof T> = {
   loading: React.ReactNode;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
   export?: E;
-  instance?: FederationHost;
 };
 
 function createLazyRemoteComponent<T, E extends keyof T>(
@@ -64,7 +62,6 @@ function createLazyRemoteComponent<T, E extends keyof T>(
               exportName={info.export || 'default'}
               fallback={info.fallback}
               ref={ref}
-              instance={info.instance}
               {...props}
             />
           );
@@ -116,13 +113,3 @@ export function createRemoteComponent<T, E extends keyof T>(
     },
   );
 }
-
-export function createRemoteComponentWithInstance<T, E extends keyof T>(
-  instance: FederationHost,
-) {
-  return (info: LazyRemoteComponentInfo<T, E>) => {
-    return createLazyRemoteComponent({ ...info, instance });
-  };
-}
-
-export type CreateRemoteComponent = typeof createRemoteComponent;

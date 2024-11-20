@@ -10,7 +10,7 @@ import type { ProviderParams } from '@module-federation/bridge-shared';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
 import { LoggerInstance, pathJoin, getRootDomDefaultClassName } from '../utils';
-import type { FederationHost } from '@module-federation/runtime';
+import { federationRuntime } from '../plugin';
 
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {
@@ -34,7 +34,6 @@ interface RemoteAppParams {
   providerInfo: NonNullable<RemoteModule['provider']>;
   exportName: string | number | symbol;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
-  instance: FederationHost;
 }
 
 const RemoteAppWrapper = forwardRef(function (
@@ -51,10 +50,10 @@ const RemoteAppWrapper = forwardRef(function (
       className,
       style,
       fallback,
-      instance,
       ...resProps
     } = props;
 
+    const instance = federationRuntime.instance;
     const rootRef: React.MutableRefObject<HTMLDivElement | null> =
       ref && 'current' in ref
         ? (ref as React.MutableRefObject<HTMLDivElement | null>)
@@ -62,6 +61,7 @@ const RemoteAppWrapper = forwardRef(function (
 
     const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
     const providerInfoRef = useRef<any>(null);
+
     LoggerInstance.log(`RemoteAppWrapper instance from props >>>`, instance);
 
     useEffect(() => {
