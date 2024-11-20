@@ -116,9 +116,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           ReactDOM.unmountComponentAtNode(info.dom);
         }
 
-        (instance as any)?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(
-          info,
-        );
+        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
       },
       rawComponent: bridgeInfo.rootComponent,
       __BRIDGE_FN__: (_args: T) => {},
