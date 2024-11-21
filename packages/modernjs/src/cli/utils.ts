@@ -146,13 +146,13 @@ export const patchMFConfig = (
   patchDTSConfig(mfConfig, isServer);
 
   injectRuntimePlugins(
-    path.resolve(__dirname, './mfRuntimePlugins/shared-strategy.js'),
+    require.resolve('@module-federation/modern-js/shared-strategy'),
     runtimePlugins,
   );
 
   if (isDev) {
     injectRuntimePlugins(
-      path.resolve(__dirname, './mfRuntimePlugins/resolve-entry-ipv4.js'),
+      require.resolve('@module-federation/modern-js/resolve-entry-ipv4'),
       runtimePlugins,
     );
   }
@@ -172,7 +172,7 @@ export const patchMFConfig = (
     }
 
     injectRuntimePlugins(
-      path.resolve(__dirname, './mfRuntimePlugins/inject-node-fetch.js'),
+      require.resolve('@module-federation/modern-js/inject-node-fetch'),
       runtimePlugins,
     );
 
