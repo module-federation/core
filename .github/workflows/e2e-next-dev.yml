@@ -27,6 +27,9 @@ jobs:
       - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
         run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> $GITHUB_ENV
 
+      - name: Set local webpack
+        run: echo "NEXT_PRIVATE_LOCAL_WEBPACK=true" >> $GITHUB_ENV
+
       - name: Install Dependencies
         run: pnpm install
 

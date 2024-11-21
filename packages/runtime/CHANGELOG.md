@@ -1,5 +1,12 @@
 # @module-federation/runtime
 
+## 0.7.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.6
+- @module-federation/error-codes@0.7.6
+
 ## 0.7.5
 
 ### Patch Changes
