@@ -71,4 +71,8 @@ export interface ConsumesConfig {
    * Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).
    */
   strictVersion?: boolean;
+  /**
+   * Share a specific layer of the module, if the module supports layers.
+   */
+  layer?: string;
 }

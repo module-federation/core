@@ -9,7 +9,7 @@ import {
   normalizeWebpackPath,
 } from '@module-federation/sdk/normalize-webpack-path';
 import { isRequiredVersion } from '@module-federation/sdk';
-import type { Compiler, Compilation } from 'webpack';
+import type { Compiler, Compilation, Module } from 'webpack';
 import { parseOptions } from '../container/options';
 import { ConsumeOptions } from './ConsumeSharedModule';
 import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
@@ -29,6 +29,7 @@ import ProvideForSharedDependency from './ProvideForSharedDependency';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import ShareRuntimeModule from './ShareRuntimeModule';
 import type { SemVerRange } from 'webpack/lib/util/semver';
+import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -48,17 +49,8 @@ const createSchemaValidation = require(
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require(
-    normalizeWebpackPath(
-      'webpack/schemas/plugins/sharing/ConsumeSharedPlugin.check.js',
-    ),
-  ),
-  () =>
-    require(
-      normalizeWebpackPath(
-        'webpack/schemas/plugins/sharing/ConsumeSharedPlugin.json',
-      ),
-    ),
+  require('../../schemas/sharing/ConsumeSharedPlugin.check.js'),
+  () => require('../../schemas/sharing/ConsumeSharedPlugin'),
   {
     name: 'Consume Shared Plugin',
     baseDataPath: 'options',
@@ -94,6 +86,7 @@ class ConsumeSharedPlugin {
                 strictVersion: false,
                 singleton: false,
                 eager: false,
+                layer: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -107,6 +100,7 @@ class ConsumeSharedPlugin {
                 packageName: undefined,
                 singleton: false,
                 eager: false,
+                layer: undefined,
               };
         return result;
       },
@@ -124,6 +118,7 @@ class ConsumeSharedPlugin {
         packageName: item.packageName,
         singleton: !!item.singleton,
         eager: !!item.eager,
+        layer: item.layer ? item.layer : undefined,
       }),
     );
   }
@@ -296,10 +291,11 @@ class ConsumeSharedPlugin {
 
         normalModuleFactory.hooks.factorize.tapPromise(
           PLUGIN_NAME,
-          ({ context, request, dependencies }) =>
+          async (resolveData: ResolveData): Promise<Module | undefined> => {
+            const { context, request, dependencies } = resolveData;
             // wait for resolving to be complete
             //@ts-ignore
-            promise.then(() => {
+            return promise.then(() => {
               if (
                 dependencies[0] instanceof ConsumeSharedFallbackDependency ||
                 dependencies[0] instanceof ProvideForSharedDependency
@@ -322,7 +318,8 @@ class ConsumeSharedPlugin {
                   });
                 }
               }
-            }),
+            });
+          },
         );
         normalModuleFactory.hooks.createModule.tapPromise(
           PLUGIN_NAME,
@@ -336,6 +333,7 @@ class ConsumeSharedPlugin {
             if (resource) {
               const options = resolvedConsumes.get(resource);
               if (options !== undefined) {
+                //@ts-ignore
                 return createConsumeSharedModule(context, resource, options);
               }
             }

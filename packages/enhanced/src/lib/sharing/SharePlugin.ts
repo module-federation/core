@@ -52,6 +52,7 @@ class SharePlugin {
           singleton: options.singleton,
           packageName: options.packageName,
           eager: options.eager,
+          layer: options.layer,
         },
       }),
     );
@@ -66,6 +67,7 @@ class SharePlugin {
           requiredVersion: options.requiredVersion,
           strictVersion: options.strictVersion,
           singleton: options.singleton,
+          layer: options.layer,
         },
       }));
     //@ts-ignore

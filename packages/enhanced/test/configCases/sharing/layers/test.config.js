@@ -1,6 +1,6 @@
 module.exports = {
   layers: true,
   findBundle: function () {
-    return ['main.js'];
+    return ['bundle0.js'];
   },
 };

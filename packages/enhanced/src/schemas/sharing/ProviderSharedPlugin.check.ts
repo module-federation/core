@@ -48,7 +48,8 @@ function r(
               'shareScope' !== r &&
               'singleton' !== r &&
               'strictVersion' !== r &&
-              'version' !== r
+              'version' !== r &&
+              'layer' !== r
             ) {
               const e = {
                 params: {

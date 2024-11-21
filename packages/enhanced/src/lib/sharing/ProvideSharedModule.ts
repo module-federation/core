@@ -97,6 +97,7 @@ class ProvideSharedModule extends Module {
    * @returns {string | null} an identifier for library inclusion
    */
   override libIdent(options: LibIdentOptions): string | null {
+    // debugger;
     return `${this.layer ? `(${this.layer})/` : ''}webpack/sharing/provide/${
       this._shareScope
     }/${this._name}`;

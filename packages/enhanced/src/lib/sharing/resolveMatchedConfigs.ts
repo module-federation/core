@@ -38,7 +38,6 @@ export async function resolveMatchedConfigs<T>(
   // @ts-ignore
   const resolver = compilation.resolverFactory.get('normal', RESOLVE_OPTIONS);
   const context = compilation.compiler.context;
-
   await Promise.all(
     //@ts-ignore
     configs.map(([request, config]) => {
