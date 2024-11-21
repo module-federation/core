@@ -1,5 +1,22 @@
 # @module-federation/nextjs-mf
 
+## 8.8.1
+
+### Patch Changes
+
+- Updated dependencies [6d35cf7]
+  - @module-federation/node@2.6.11
+  - @module-federation/runtime@0.7.6
+  - @module-federation/enhanced@0.7.6
+  - @module-federation/webpack-bundler-runtime@0.7.6
+  - @module-federation/sdk@0.7.6
+
+## 8.8.0
+
+### Minor Changes
+
+- 5ad75fd: Enabled JSON manifest remote protocol for NextJS plugin
+
 ## 8.7.10
 
 ### Patch Changes
