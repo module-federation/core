@@ -9,6 +9,9 @@ on:
 jobs:
   checkout-install:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18, 20]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -18,10 +21,10 @@ jobs:
       - name: Install Pnpm
         run: corepack enable
 
-      - name: Setup Node.js 18
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
 
       - name: Set Nx SHA
