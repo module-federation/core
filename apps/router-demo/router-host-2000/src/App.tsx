@@ -7,11 +7,13 @@ import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
 import './App.css';
+import BridgeReactPlugin from '@module-federation/bridge-react/plugin';
 
 init({
   name: 'federation_consumer',
   remotes: [],
   plugins: [
+    BridgeReactPlugin(),
     RetryPlugin({
       fetch: {
         url: 'http://localhost:2008/not-exist-mf-manifest.json',

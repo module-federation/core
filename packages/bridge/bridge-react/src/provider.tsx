@@ -9,7 +9,7 @@ import type {
 import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
 import { LoggerInstance, atLeastReact18 } from './utils';
-import { getInstance } from '@module-federation/runtime';
+import { federationRuntime } from './plugin';
 
 type RenderParams = RenderFnParams & {
   [key: string]: unknown;
@@ -20,7 +20,7 @@ type DestroyParams = {
 };
 type RootType = HTMLElement | ReactDOMClient.Root;
 
-type ProviderFnParams<T> = {
+export type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
   render?: (
     App: React.ReactElement,
@@ -31,8 +31,11 @@ type ProviderFnParams<T> = {
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
   return () => {
     const rootMap = new Map<any, RootType>();
-    const instance = getInstance();
-    LoggerInstance.log(`createBridgeComponent remote instance`, instance);
+    const instance = federationRuntime.instance;
+    LoggerInstance.log(
+      `createBridgeComponent instance from props >>>`,
+      instance,
+    );
 
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
@@ -95,7 +98,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           const renderFn = bridgeInfo?.render || ReactDOM.render;
           renderFn?.(rootComponentWithErrorBoundary, info.dom);
         }
-
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
       },
 
@@ -103,7 +105,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         LoggerInstance.log(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
-
         instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
 
         // call destroy function

@@ -33,6 +33,9 @@ export default defineConfig({
     pluginReact(),
     pluginModuleFederation({
       name: 'remote1',
+      runtimePlugins: [
+        require.resolve('@module-federation/bridge-react/plugin'),
+      ],
       exposes: {
         './button': './src/button.tsx',
         './export-app': './src/export-App.tsx',
