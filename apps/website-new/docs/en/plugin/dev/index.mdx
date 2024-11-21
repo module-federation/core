@@ -542,7 +542,7 @@ The `loadEntry` function allows for full customization of remotes, enabling you 
 - **Type**
 
 ```typescript
-function createScript(args: LoadEntryOptions): HTMLScriptElement | {script?: HTMLScriptElement, timeout?: number } | void;
+function loadEntry(args: LoadEntryOptions): RemoteEntryExports | void;
 
 type LoadEntryOptions = {
   createScriptHook: SyncHook,
