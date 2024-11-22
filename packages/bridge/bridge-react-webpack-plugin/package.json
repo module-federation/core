@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react-webpack-plugin",
-  "version": "0.7.4",
+  "version": "0.7.6",
   "publishConfig": {
     "access": "public"
   },
@@ -35,6 +35,6 @@
   "devDependencies": {
     "typescript": "^5.2.2",
     "vite": "^5.2.14",
-    "vite-plugin-dts": "^3.9.1"
+    "vite-plugin-dts": "^4.3.0"
   }
 }

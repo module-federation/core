@@ -1,5 +1,25 @@
 # @module-federation/node
 
+## 2.6.11
+
+### Patch Changes
+
+- 6d35cf7: use eval for require to avoid bundler warnings
+  - @module-federation/runtime@0.7.6
+  - @module-federation/enhanced@0.7.6
+  - @module-federation/sdk@0.7.6
+  - @module-federation/utilities@3.1.29
+
+## 2.6.10
+
+### Patch Changes
+
+- Updated dependencies [5613265]
+  - @module-federation/enhanced@0.7.5
+  - @module-federation/runtime@0.7.5
+  - @module-federation/sdk@0.7.5
+  - @module-federation/utilities@3.1.28
+
 ## 2.6.9
 
 ### Patch Changes

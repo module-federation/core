@@ -1,5 +1,17 @@
 # website-new
 
+## 1.0.11
+
+### Patch Changes
+
+- @module-federation/error-codes@0.7.6
+
+## 1.0.10
+
+### Patch Changes
+
+- @module-federation/error-codes@0.7.5
+
 ## 1.0.9
 
 ### Patch Changes

@@ -1,5 +1,22 @@
 # @module-federation/bridge-react
 
+## 0.7.6
+
+### Patch Changes
+
+- @module-federation/runtime@0.7.6
+- @module-federation/sdk@0.7.6
+- @module-federation/bridge-shared@0.7.6
+
+## 0.7.5
+
+### Patch Changes
+
+- 0309fb5: fix: wrap try catch with react-router-dom path resolve
+  - @module-federation/runtime@0.7.5
+  - @module-federation/sdk@0.7.5
+  - @module-federation/bridge-shared@0.7.5
+
 ## 0.7.4
 
 ### Patch Changes

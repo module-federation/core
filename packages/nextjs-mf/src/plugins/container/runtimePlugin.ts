@@ -1,4 +1,8 @@
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import {
+  ModuleInfo,
+  ConsumerModuleInfoWithPublicPath,
+} from '@module-federation/sdk';
 
 export default function (): FederationRuntimePlugin {
   return {
@@ -182,7 +186,39 @@ export default function (): FederationRuntimePlugin {
 
       return args;
     },
+    loadRemoteSnapshot(args) {
+      const { from, remoteSnapshot, manifestUrl, manifestJson, options } = args;
 
+      // ensure snapshot is loaded from manifest
+      if (
+        from !== 'manifest' ||
+        !manifestUrl ||
+        !manifestJson ||
+        !('publicPath' in remoteSnapshot)
+      ) {
+        return args;
+      }
+
+      // re-assign publicPath based on remoteEntry location
+      if (options.inBrowser) {
+        remoteSnapshot.publicPath = remoteSnapshot.publicPath.substring(
+          0,
+          remoteSnapshot.publicPath.lastIndexOf('/_next/') + 7,
+        );
+      } else {
+        const serverPublicPath = manifestUrl.substring(
+          0,
+          manifestUrl.indexOf('mf-manifest.json'),
+        );
+
+        remoteSnapshot.publicPath = serverPublicPath;
+        if ('publicPath' in manifestJson.metaData) {
+          manifestJson.metaData.publicPath = serverPublicPath;
+        }
+      }
+
+      return args;
+    },
     resolveShare: function (args: any) {
       if (
         args.pkgName !== 'react' &&
