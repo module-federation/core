@@ -43,6 +43,11 @@
             }
           ]
         },
+        "issuerLayer": {
+          "description": "Layer in which the issuer should be.",
+          "type": "string",
+          "minLength": 1
+        },
         "packageName": {
           "description": "Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.",
           "type": "string",
@@ -114,6 +119,14 @@
       "description": "Share scope name used for all consumed modules (defaults to 'default').",
       "type": "string",
       "minLength": 1
+    },
+    "layer": {
+      "description": "Layer in which modules should be placed in.",
+      "type": "string"
+    },
+    "issuerLayer": {
+      "description": "Layer in which the issuer should be.",
+      "type": "string"
     }
   },
   "required": ["consumes"]

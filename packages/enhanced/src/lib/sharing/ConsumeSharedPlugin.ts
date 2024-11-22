@@ -87,6 +87,7 @@ class ConsumeSharedPlugin {
                 singleton: false,
                 eager: false,
                 layer: undefined,
+                issuerLayer: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -101,6 +102,7 @@ class ConsumeSharedPlugin {
                 singleton: false,
                 eager: false,
                 layer: undefined,
+                issuerLayer: undefined,
               };
         return result;
       },
@@ -118,7 +120,7 @@ class ConsumeSharedPlugin {
         packageName: item.packageName,
         singleton: !!item.singleton,
         eager: !!item.eager,
-        layer: item.layer ? item.layer : undefined,
+        issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
       }),
     );
   }
@@ -292,7 +294,7 @@ class ConsumeSharedPlugin {
         normalModuleFactory.hooks.factorize.tapPromise(
           PLUGIN_NAME,
           async (resolveData: ResolveData): Promise<Module | undefined> => {
-            const { context, request, dependencies } = resolveData;
+            const { context, request, dependencies, contextInfo } = resolveData;
             // wait for resolving to be complete
             //@ts-ignore
             return promise.then(() => {
@@ -302,8 +304,15 @@ class ConsumeSharedPlugin {
               ) {
                 return;
               }
-              const match = unresolvedConsumes.get(request);
+
+              const match = unresolvedConsumes.get(
+                contextInfo.issuerLayer
+                  ? contextInfo.issuerLayer + request
+                  : request,
+              );
+
               if (match !== undefined) {
+                debugger;
                 return createConsumeSharedModule(context, request, match);
               }
               for (const [prefix, options] of prefixedConsumes) {

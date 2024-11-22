@@ -48,6 +48,7 @@ const validateConsume: ValidationFunction = function validate(
           key !== 'shareScope' &&
           key !== 'singleton' &&
           key !== 'strictVersion' &&
+          key !== 'issuerLayer' &&
           key !== 'layer'
         ) {
           validate.errors = [{ params: { additionalProperty: key } }];

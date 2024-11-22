@@ -185,9 +185,6 @@ class ProvideSharedPlugin {
         normalModuleFactory.hooks.module.tap(
           'ProvideSharedPlugin',
           (module, { resource, resourceResolveData }, resolveData) => {
-            if (resource && resource.includes('/react')) {
-              debugger;
-            }
             if (resource && resolvedProvideMap.has(resource)) {
               return module;
             }

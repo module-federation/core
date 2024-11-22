@@ -1,4 +1,5 @@
 const { ConsumeSharedPlugin } = require('../../../../dist/src');
+const WConsumeSharedPlugin = require('webpack/lib/sharing/ConsumeSharedPlugin');
 
 module.exports = {
   mode: 'development',
@@ -27,7 +28,7 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        issuerLayer: 'consume-share-layer',
+        issuerLayer: 'react-layer',
         layer: 'other-layer',
         use: './uppercase-loader.js',
       },
@@ -36,10 +37,10 @@ module.exports = {
   plugins: [
     new ConsumeSharedPlugin({
       consumes: {
-        // react: {
-        //   singleton: true,
-        //   layer: 'react-layer',
-        // },
+        react: {
+          singleton: true,
+          issuerLayer: 'loader-layer',
+        },
         otherReact: {
           import: 'react',
           shareKey: 'react',

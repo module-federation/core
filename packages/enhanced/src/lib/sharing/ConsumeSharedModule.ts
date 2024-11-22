@@ -82,6 +82,10 @@ export type ConsumeOptions = {
    * Share a specific layer of the module, if the module supports layers.
    */
   layer?: string | null;
+  /**
+   * Issuer layer in which the module should be resolved
+   */
+  issuerLayer?: string | null;
 };
 
 /**
@@ -95,6 +99,8 @@ export type ConsumeOptions = {
  * @property {boolean} strictVersion don't use shared version even if version isn't valid
  * @property {boolean} singleton use single global version
  * @property {boolean} eager include the fallback module in a sync way
+ * @property {string | null=} layer Share a specific layer of the module, if the module supports layers
+ * @property {string | null=} issuerLayer Issuer layer in which the module should be resolved
  */
 
 const TYPES = new Set(['consume-shared']);
@@ -128,10 +134,11 @@ class ConsumeSharedModule extends Module {
       singleton,
       eager,
       layer,
+      issuerLayer,
     } = this.options;
     return `${WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE}|${shareScope}|${shareKey}|${
       requiredVersion && rangeToString(requiredVersion)
-    }|${strictVersion}|${importResolved}|${singleton}|${eager}|${layer}`;
+    }|${strictVersion}|${importResolved}|${singleton}|${eager}|${layer}|${issuerLayer}`;
   }
 
   /**
@@ -148,6 +155,7 @@ class ConsumeSharedModule extends Module {
       singleton,
       eager,
       layer,
+      issuerLayer,
     } = this.options;
     return `consume shared module (${shareScope}) ${shareKey}@${
       requiredVersion ? rangeToString(requiredVersion) : '*'
@@ -155,7 +163,9 @@ class ConsumeSharedModule extends Module {
       importResolved
         ? ` (fallback: ${requestShortener.shorten(importResolved)})`
         : ''
-    }${eager ? ' (eager)' : ''}${layer ? ` (${layer})` : ''}`;
+    }${eager ? ' (eager)' : ''}${layer ? ` (${layer})` : ''}${
+      issuerLayer ? ` (issuer: ${issuerLayer})` : ''
+    }`;
   }
 
   /**

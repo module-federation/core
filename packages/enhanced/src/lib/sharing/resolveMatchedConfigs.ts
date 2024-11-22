@@ -72,8 +72,18 @@ export async function resolveMatchedConfigs<T>(
         // module request prefix
         prefixed.set(request, config);
       } else {
+        let req = request;
+        //@ts-ignore
+        if ('import' in config && config.import && request !== config.import) {
+          req = config.import as string;
+        }
+        //@ts-ignore
+        if ('issuerLayer' in config && config.issuerLayer) {
+          //@ts-ignore
+          req = config.issuerLayer + req;
+        }
         // module request
-        unresolved.set(request, config);
+        unresolved.set(req, config);
       }
     }),
   );

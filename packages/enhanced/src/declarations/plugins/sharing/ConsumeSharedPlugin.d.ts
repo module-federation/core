@@ -75,4 +75,8 @@ export interface ConsumesConfig {
    * Share a specific layer of the module, if the module supports layers.
    */
   layer?: string;
+  /**
+   * Issuer layer for the shared module.
+   */
+  issuerLayer?: string;
 }

@@ -1,3 +1,5 @@
-import * as React from 'react';
+// import * as React from 'react';
+//
+// export default React;
 
-export default React;
+export default { version: 123 };
