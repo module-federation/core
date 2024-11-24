@@ -153,6 +153,9 @@ const Remote1App = createRemoteComponent({ loader: () => loadRemote('remote1/exp
   * `export`
     * type: `string`
     * Purpose: Used to specify module export
+  * `asyncComponentOptions`
+    * type: `Omit<AsyncComponentOptions, 'loader'>`
+    * Purpose: Parameters that will be passed to defineAsyncComponent, except for the loader parameter
 ```tsx
 // remote
 export const provider = createBridgeComponent({
