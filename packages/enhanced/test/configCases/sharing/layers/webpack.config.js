@@ -1,15 +1,14 @@
 const { ConsumeSharedPlugin } = require('../../../../dist/src');
 const WConsumeSharedPlugin = require('webpack/lib/sharing/ConsumeSharedPlugin');
+const path = require('path');
 
 module.exports = {
   mode: 'development',
   devtool: false,
   entry: {
-    other: './other.js',
     main: {
       import: './index.js',
-      layer: 'entry-layer',
-    },
+    }
   },
   experiments: {
     layers: true,
@@ -17,21 +16,24 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        issuerLayer: 'entry-layer',
-        layer: 'loader-layer',
+        test: /index-test.js$/,
+        layer: 'index-layer',
       },
       {
-        test: /react/,
-        issuerLayer: 'entry-layer',
+        test: /async-boundary.js$/,
+        issuerLayer: 'index-layer',
+        layer: 'entry-layer',
+      },
+      {
+        test: /react\/index\.js$/,
         layer: 'react-layer',
-      },
-      {
-        test: /\.js$/,
-        issuerLayer: 'react-layer',
-        layer: 'other-layer',
-        use: './uppercase-loader.js',
-      },
+        issuerLayer: 'entry-layer',
+        use: [
+          {
+            loader: path.resolve(__dirname, './layer-exporter.js')
+          }
+        ]
+      }
     ],
   },
   plugins: [
@@ -39,13 +41,13 @@ module.exports = {
       consumes: {
         react: {
           singleton: true,
-          issuerLayer: 'loader-layer',
         },
-        otherReact: {
+        'layered-react': {
           import: 'react',
           shareKey: 'react',
           singleton: true,
-        },
+          issuerLayer: 'entry-layer'
+        }
       },
     }),
   ],
