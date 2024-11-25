@@ -8,7 +8,7 @@ module.exports = {
   entry: {
     main: {
       import: './index.js',
-    }
+    },
   },
   experiments: {
     layers: true,
@@ -25,15 +25,37 @@ module.exports = {
         layer: 'entry-layer',
       },
       {
+        test: /differing-test.js$/,
+        layer: 'differing-layer',
+      },
+      {
+        issuerLayer: 'differing-layer',
+        exclude: /react\/index2\.js$/,
+        use: [
+          {
+            loader: path.resolve(__dirname, './differing-layer.js'),
+          },
+        ],
+      },
+      {
+        test: /react\/index2\.js$/,
+        layer: 'explicit-layer',
+        use: [
+          {
+            loader: path.resolve(__dirname, './explicit-layer.js'),
+          },
+        ],
+      },
+      {
         test: /react\/index\.js$/,
         layer: 'react-layer',
         issuerLayer: 'entry-layer',
         use: [
           {
-            loader: path.resolve(__dirname, './layer-exporter.js')
-          }
-        ]
-      }
+            loader: path.resolve(__dirname, './layer-exporter.js'),
+          },
+        ],
+      },
     ],
   },
   plugins: [
@@ -42,12 +64,25 @@ module.exports = {
         react: {
           singleton: true,
         },
+        'explicit-layer-react': {
+          import: 'react/index2',
+          shareKey: 'react',
+          singleton: true,
+          issuerLayer: 'differing-layer',
+          requiredLayer: 'explicit-layer',
+        },
+        'differing-layer-react': {
+          import: 'react',
+          shareKey: 'react',
+          singleton: true,
+          issuerLayer: 'differing-layer',
+        },
         'layered-react': {
           import: 'react',
           shareKey: 'react',
           singleton: true,
-          issuerLayer: 'entry-layer'
-        }
+          issuerLayer: 'other-layer',
+        },
       },
     }),
   ],
