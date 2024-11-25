@@ -29,6 +29,7 @@ module.exports = {
         layer: 'differing-layer',
       },
       {
+        layer: 'required-layer',
         issuerLayer: 'differing-layer',
         exclude: /react\/index2\.js$/,
         use: [
@@ -75,7 +76,7 @@ module.exports = {
           import: 'react',
           shareKey: 'react',
           singleton: true,
-          issuerLayer: 'differing-layer',
+          requireLayer: 'required-layer',
         },
         'layered-react': {
           import: 'react',
