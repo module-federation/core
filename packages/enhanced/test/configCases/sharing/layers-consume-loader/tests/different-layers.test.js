@@ -1,4 +1,7 @@
-it('Module graph should have a layer different layer', async () => {
+/**
+ * Tests for different layer configurations
+ */
+it('Module graph should have a different layer', async () => {
   const { version, layer } = await import('react');
   expect(version).toBe('1.0.0');
   expect(layer).toBe('differing-layer');

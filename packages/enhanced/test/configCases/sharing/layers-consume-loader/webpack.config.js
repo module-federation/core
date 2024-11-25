@@ -7,7 +7,7 @@ module.exports = {
   devtool: false,
   entry: {
     main: {
-      import: './index.js',
+      import: './src/index.js',
     },
   },
   experiments: {
@@ -16,16 +16,16 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /index-test.js$/,
+        test: /tests\/layer-inheritance\.test\.js$/,
         layer: 'index-layer',
       },
       {
-        test: /async-boundary.js$/,
+        test: /shared\/react-boundary\.js$/,
         issuerLayer: 'index-layer',
         layer: 'entry-layer',
       },
       {
-        test: /differing-test.js$/,
+        test: /tests\/different-layers\.test\.js$/,
         layer: 'differing-layer',
       },
       {
@@ -34,7 +34,10 @@ module.exports = {
         exclude: /react\/index2\.js$/,
         use: [
           {
-            loader: path.resolve(__dirname, './differing-layer.js'),
+            loader: path.resolve(
+              __dirname,
+              './loaders/different-layer-loader.js',
+            ),
           },
         ],
       },
@@ -43,7 +46,10 @@ module.exports = {
         layer: 'explicit-layer',
         use: [
           {
-            loader: path.resolve(__dirname, './explicit-layer.js'),
+            loader: path.resolve(
+              __dirname,
+              './loaders/explicit-layer-loader.js',
+            ),
           },
         ],
       },
@@ -53,7 +59,7 @@ module.exports = {
         issuerLayer: 'entry-layer',
         use: [
           {
-            loader: path.resolve(__dirname, './layer-exporter.js'),
+            loader: path.resolve(__dirname, './loaders/react-layer-loader.js'),
           },
         ],
       },
