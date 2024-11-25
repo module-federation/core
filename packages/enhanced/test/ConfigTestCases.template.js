@@ -60,12 +60,10 @@ const describeCases = (config) => {
     jest.setTimeout(20000);
 
     for (const category of categories) {
-      if(category.name === 'container') continue;
       // eslint-disable-next-line no-loop-func
       describe(category.name, () => {
         // category.tests = [category.tests[1]];
         for (const testName of category.tests) {
-          if(testName !== 'layers') continue;
           // eslint-disable-next-line no-loop-func
           describe(testName, function () {
             const testDirectory = path.join(casesPath, category.name, testName);
