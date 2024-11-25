@@ -72,11 +72,11 @@ export interface ConsumesConfig {
    */
   strictVersion?: boolean;
   /**
-   * Share a specific layer of the module, if the module supports layers.
-   */
-  layer?: string;
-  /**
-   * Issuer layer for the shared module.
+   * Issuer layer in which the module should be resolved.
    */
   issuerLayer?: string;
+  /**
+   * Required layer for the shared module.
+   */
+  requiredLayer?: string;
 }

@@ -88,8 +88,13 @@ export default {
             'Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).',
           type: 'boolean',
         },
-        layer: {
-          description: 'Layer in which the shared module should be placed in.',
+        issuerLayer: {
+          description: 'Layer in which the issuer should be.',
+          type: 'string',
+          minLength: 1,
+        },
+        requiredLayer: {
+          description: 'Required layer for the shared module.',
           type: 'string',
           minLength: 1,
         },

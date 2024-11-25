@@ -87,6 +87,7 @@ class ConsumeSharedPlugin {
                 singleton: false,
                 eager: false,
                 issuerLayer: undefined,
+                requiredLayer: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -101,6 +102,7 @@ class ConsumeSharedPlugin {
                 singleton: false,
                 eager: false,
                 issuerLayer: undefined,
+                requiredLayer: undefined,
               };
         return result;
       },
@@ -119,6 +121,7 @@ class ConsumeSharedPlugin {
         singleton: !!item.singleton,
         eager: !!item.eager,
         issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
+        requiredLayer: item.requiredLayer ? item.requiredLayer : undefined,
       }),
     );
   }
@@ -314,7 +317,7 @@ class ConsumeSharedPlugin {
                   ) {
                     return createConsumeSharedModule(context, request, {
                       ...options,
-                      layer: contextInfo.issuerLayer,
+                      layer: options.requiredLayer || contextInfo.issuerLayer,
                     });
                   }
                 }
@@ -325,7 +328,10 @@ class ConsumeSharedPlugin {
               if (match !== undefined) {
                 // Only use non-layer-specific match if it doesn't have issuerLayer
                 if (!match.issuerLayer) {
-                  return createConsumeSharedModule(context, request, match);
+                  return createConsumeSharedModule(context, request, {
+                    ...match,
+                    layer: match.requiredLayer || contextInfo.issuerLayer,
+                  });
                 }
               }
 
@@ -344,7 +350,7 @@ class ConsumeSharedPlugin {
                         ? options.import + remainder
                         : undefined,
                       shareKey: options.shareKey + remainder,
-                      layer: contextInfo.issuerLayer,
+                      layer: options.requiredLayer || contextInfo.issuerLayer,
                     });
                   }
                 }

@@ -79,13 +79,17 @@ export type ConsumeOptions = {
    */
   eager: boolean;
   /**
-   * Share a specific layer of the module, if the module supports layers.
+   * Share a specific layer of the module, if the module supports layers
    */
   layer?: string | null;
   /**
    * Issuer layer in which the module should be resolved
    */
   issuerLayer?: string | null;
+  /**
+   * Required layer for the shared module
+   */
+  requiredLayer?: string | null;
 };
 
 /**
@@ -101,6 +105,7 @@ export type ConsumeOptions = {
  * @property {boolean} eager include the fallback module in a sync way
  * @property {string | null=} layer Share a specific layer of the module, if the module supports layers
  * @property {string | null=} issuerLayer Issuer layer in which the module should be resolved
+ * @property {string | null=} requiredLayer Required layer for the shared module
  */
 
 const TYPES = new Set(['consume-shared']);
