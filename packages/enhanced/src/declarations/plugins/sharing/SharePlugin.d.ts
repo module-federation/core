@@ -76,7 +76,11 @@ export interface SharedConfig {
    */
   version?: false | string;
   /**
-   * Share a specific layer of the module, if the module supports layers.
+   * Issuer layer in which the module should be resolved.
    */
-  layer?: string;
+  issuerLayer?: string;
+  /**
+   * Required layer for the shared module.
+   */
+  requiredLayer?: string;
 }

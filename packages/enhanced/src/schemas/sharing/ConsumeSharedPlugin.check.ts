@@ -49,7 +49,7 @@ const validateConsume: ValidationFunction = function validate(
           key !== 'singleton' &&
           key !== 'strictVersion' &&
           key !== 'issuerLayer' &&
-          key !== 'layer'
+          key !== 'requiredLayer'
         ) {
           validate.errors = [{ params: { additionalProperty: key } }];
           return false;
