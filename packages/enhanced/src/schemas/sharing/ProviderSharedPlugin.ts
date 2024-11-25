@@ -86,11 +86,6 @@ export default {
             },
           ],
         },
-        layer: {
-          description: 'Layer in which the shared module should be placed.',
-          type: 'string',
-          minLength: 1,
-        },
       },
     },
     ProvidesItem: {
