@@ -86,7 +86,6 @@ class ConsumeSharedPlugin {
                 strictVersion: false,
                 singleton: false,
                 eager: false,
-                layer: undefined,
                 issuerLayer: undefined,
               }
             : // key is a request/key
@@ -101,7 +100,6 @@ class ConsumeSharedPlugin {
                 packageName: undefined,
                 singleton: false,
                 eager: false,
-                layer: undefined,
                 issuerLayer: undefined,
               };
         return result;
@@ -305,26 +303,50 @@ class ConsumeSharedPlugin {
                 return;
               }
 
-              const match = unresolvedConsumes.get(
-                contextInfo.issuerLayer
-                  ? contextInfo.issuerLayer + request
-                  : request,
-              );
-
-              if (match !== undefined) {
-                debugger;
-                return createConsumeSharedModule(context, request, match);
+              // First try to match with layer-specific request
+              if (contextInfo.issuerLayer) {
+                // Try to find a layer-specific match
+                for (const [key, options] of unresolvedConsumes) {
+                  if (
+                    options.issuerLayer === contextInfo.issuerLayer &&
+                    (key === request ||
+                      (options.import && options.import === request))
+                  ) {
+                    return createConsumeSharedModule(context, request, {
+                      ...options,
+                      layer: contextInfo.issuerLayer,
+                    });
+                  }
+                }
               }
+
+              // If no layer-specific match found, try regular matching
+              const match = unresolvedConsumes.get(request);
+              if (match !== undefined) {
+                // Only use non-layer-specific match if it doesn't have issuerLayer
+                if (!match.issuerLayer) {
+                  return createConsumeSharedModule(context, request, match);
+                }
+              }
+
+              // Check prefixed consumes
               for (const [prefix, options] of prefixedConsumes) {
                 if (request.startsWith(prefix)) {
-                  const remainder = request.slice(prefix.length);
-                  return createConsumeSharedModule(context, request, {
-                    ...options,
-                    import: options.import
-                      ? options.import + remainder
-                      : undefined,
-                    shareKey: options.shareKey + remainder,
-                  });
+                  // Only use prefixed consume if layer matches or no layer specified
+                  if (
+                    !options.issuerLayer ||
+                    options.issuerLayer === contextInfo.issuerLayer
+                  ) {
+                    const remainder = request.slice(prefix.length);
+                    return createConsumeSharedModule(context, request, {
+                      ...options,
+                      import: options.import
+                        ? options.import + remainder
+                        : undefined,
+                      shareKey: options.shareKey + remainder,
+                      layer: contextInfo.issuerLayer,
+                    });
+                  }
                 }
               }
             });

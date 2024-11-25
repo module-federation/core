@@ -38,6 +38,7 @@ export async function resolveMatchedConfigs<T>(
   // @ts-ignore
   const resolver = compilation.resolverFactory.get('normal', RESOLVE_OPTIONS);
   const context = compilation.compiler.context;
+
   await Promise.all(
     //@ts-ignore
     configs.map(([request, config]) => {
@@ -72,18 +73,8 @@ export async function resolveMatchedConfigs<T>(
         // module request prefix
         prefixed.set(request, config);
       } else {
-        let req = request;
-        //@ts-ignore
-        if ('import' in config && config.import && request !== config.import) {
-          req = config.import as string;
-        }
-        //@ts-ignore
-        if ('issuerLayer' in config && config.issuerLayer) {
-          //@ts-ignore
-          req = config.issuerLayer + req;
-        }
         // module request
-        unresolved.set(req, config);
+        unresolved.set(request, config);
       }
     }),
   );
