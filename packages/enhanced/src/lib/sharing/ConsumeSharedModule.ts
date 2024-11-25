@@ -139,11 +139,10 @@ class ConsumeSharedModule extends Module {
       singleton,
       eager,
       layer,
-      issuerLayer,
     } = this.options;
     return `${WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE}|${shareScope}|${shareKey}|${
       requiredVersion && rangeToString(requiredVersion)
-    }|${strictVersion}|${importResolved}|${singleton}|${eager}|${layer}|${issuerLayer}`;
+    }|${strictVersion}|${importResolved}|${singleton}|${eager}|${layer}`;
   }
 
   /**
@@ -160,7 +159,6 @@ class ConsumeSharedModule extends Module {
       singleton,
       eager,
       layer,
-      issuerLayer,
     } = this.options;
     return `consume shared module (${shareScope}) ${shareKey}@${
       requiredVersion ? rangeToString(requiredVersion) : '*'
@@ -168,9 +166,7 @@ class ConsumeSharedModule extends Module {
       importResolved
         ? ` (fallback: ${requestShortener.shorten(importResolved)})`
         : ''
-    }${eager ? ' (eager)' : ''}${layer ? ` (${layer})` : ''}${
-      issuerLayer ? ` (issuer: ${issuerLayer})` : ''
-    }`;
+    }${eager ? ' (eager)' : ''}${layer ? ` (${layer})` : ''}`;
   }
 
   /**

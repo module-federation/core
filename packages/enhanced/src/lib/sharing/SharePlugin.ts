@@ -68,8 +68,6 @@ class SharePlugin {
           requiredVersion: options.requiredVersion,
           strictVersion: options.strictVersion,
           singleton: options.singleton,
-          issuerLayer: options.issuerLayer,
-          requiredLayer: options.requiredLayer,
         },
       }));
     //@ts-ignore
