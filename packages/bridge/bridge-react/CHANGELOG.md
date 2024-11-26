@@ -1,5 +1,13 @@
 # @module-federation/bridge-react
 
+## 0.7.7
+
+### Patch Changes
+
+- ae5ee1e: feat: mount bridge api to module instance
+  - @module-federation/sdk@0.7.7
+  - @module-federation/bridge-shared@0.7.7
+
 ## 0.7.6
 
 ### Patch Changes

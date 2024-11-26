@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/retry-plugin",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "author": "danpeen <dapeen.feng@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.js",
