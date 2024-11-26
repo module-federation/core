@@ -78,6 +78,18 @@ export type ConsumeOptions = {
    * include the fallback module in a sync way
    */
   eager: boolean;
+  /**
+   * Share a specific layer of the module, if the module supports layers
+   */
+  layer?: string | null;
+  /**
+   * Issuer layer in which the module should be resolved
+   */
+  issuerLayer?: string | null;
+  /**
+   * Required layer for the shared module
+   */
+  requiredLayer?: string | null;
 };
 
 /**
@@ -91,6 +103,9 @@ export type ConsumeOptions = {
  * @property {boolean} strictVersion don't use shared version even if version isn't valid
  * @property {boolean} singleton use single global version
  * @property {boolean} eager include the fallback module in a sync way
+ * @property {string | null=} layer Share a specific layer of the module, if the module supports layers
+ * @property {string | null=} issuerLayer Issuer layer in which the module should be resolved
+ * @property {string | null=} requiredLayer Required layer for the shared module
  */
 
 const TYPES = new Set(['consume-shared']);
@@ -103,7 +118,11 @@ class ConsumeSharedModule extends Module {
    * @param {ConsumeOptions} options consume options
    */
   constructor(context: string, options: ConsumeOptions) {
-    super(WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE, context);
+    super(
+      WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE,
+      context,
+      options.layer ?? undefined,
+    );
     this.options = options;
   }
 
@@ -119,10 +138,11 @@ class ConsumeSharedModule extends Module {
       strictVersion,
       singleton,
       eager,
+      layer,
     } = this.options;
     return `${WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE}|${shareScope}|${shareKey}|${
       requiredVersion && rangeToString(requiredVersion)
-    }|${strictVersion}|${importResolved}|${singleton}|${eager}`;
+    }|${strictVersion}|${importResolved}|${singleton}|${eager}|${layer}`;
   }
 
   /**
@@ -138,6 +158,7 @@ class ConsumeSharedModule extends Module {
       strictVersion,
       singleton,
       eager,
+      layer,
     } = this.options;
     return `consume shared module (${shareScope}) ${shareKey}@${
       requiredVersion ? rangeToString(requiredVersion) : '*'
@@ -145,7 +166,7 @@ class ConsumeSharedModule extends Module {
       importResolved
         ? ` (fallback: ${requestShortener.shorten(importResolved)})`
         : ''
-    }${eager ? ' (eager)' : ''}`;
+    }${eager ? ' (eager)' : ''}${layer ? ` (${layer})` : ''}`;
   }
 
   /**
