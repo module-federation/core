@@ -1,5 +1,14 @@
 # @module-federation/runtime
 
+## 0.7.7
+
+### Patch Changes
+
+- a960c88: fix(runtime): add define constant to help downgrade non-esm project
+- e26d107: add @vite-ignore for dynamic import in loadEsmEntry
+  - @module-federation/sdk@0.7.7
+  - @module-federation/error-codes@0.7.7
+
 ## 0.7.6
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @module-federation/modern-js
 
+## 0.7.7
+
+### Patch Changes
+
+- a960c88: fix(modern-js-plugin): only export esm mfRuntimePlugin
+  - @module-federation/node@2.6.12
+  - @module-federation/enhanced@0.7.7
+  - @module-federation/sdk@0.7.7
+
 ## 0.7.6
 
 ### Patch Changes
