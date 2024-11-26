@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/modernjsapp",
   "private": true,
-  "version": "0.1.63",
+  "version": "0.1.69",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
@@ -25,7 +25,7 @@
     "dist/"
   ],
   "dependencies": {
-    "@babel/runtime": "7.24.5",
+    "@babel/runtime": "7.26.0",
     "@modern-js/runtime": "2.60.6",
     "@module-federation/enhanced": "workspace:*",
     "react": "18.3.1",

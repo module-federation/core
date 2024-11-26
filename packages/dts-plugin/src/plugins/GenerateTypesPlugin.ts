@@ -72,7 +72,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
       return fn;
     };
     const generateTypesFn = getGenerateTypesFn();
-
+    let compiledOnce = false;
     compiler.hooks.thisCompilation.tap('mf:generateTypes', (compilation) => {
       compilation.hooks.processAssets.tapPromise(
         {
@@ -82,6 +82,9 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
         },
         async () => {
+          if (pluginOptions.dev === false && compiledOnce) {
+            return;
+          }
           try {
             const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
               retrieveTypesAssetsInfo(finalOptions.remote);
@@ -124,6 +127,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
                 ),
               );
             }
+            compiledOnce = true;
           } catch (err) {
             console.error(err);
           }

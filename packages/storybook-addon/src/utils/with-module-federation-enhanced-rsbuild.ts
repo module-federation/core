@@ -3,22 +3,29 @@ import path from 'node:path';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { TEMP_DIR } from '@module-federation/sdk';
 
+import { correctImportPath } from './correctImportPath';
+
 import type { RsbuildConfig, RsbuildPlugin } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
+const tempDirPath = path.resolve(process.cwd(), `node_modules/${TEMP_DIR}`);
 // add bootstrap for host project
 const bootstrapPath = path.resolve(
   process.cwd(),
   `node_modules/${TEMP_DIR}/storybook-bootstrap.js`,
 );
-const generateBootstrap = (entryPath: string) => {
-  return `import('${entryPath}')`;
+const generateBootstrap = (context: string, entryPath: string) => {
+  return `import('${correctImportPath(context, entryPath)}');`;
 };
-const writeBootstrap = (entryPath: string) => {
+const writeBootstrap = (context: string, entryPath: string) => {
+  if (!fs.existsSync(tempDirPath)) {
+    fs.mkdirSync(tempDirPath);
+  }
+
   if (fs.existsSync(bootstrapPath)) {
     fs.unlinkSync(bootstrapPath);
   }
-  fs.writeFileSync(bootstrapPath, generateBootstrap(entryPath));
+  fs.writeFileSync(bootstrapPath, generateBootstrap(context, entryPath));
 };
 export const withModuleFederation = async (
   rsbuildConfig: RsbuildConfig,
@@ -28,9 +35,10 @@ export const withModuleFederation = async (
   rsbuildConfig.source ??= {};
   rsbuildConfig.source.entry ??= {};
   const entry = rsbuildConfig.source.entry;
+  const context = rsbuildConfig.root || process.cwd();
   for (const entryName in entry) {
     if (Array.isArray(entry[entryName])) {
-      writeBootstrap(entry[entryName][0]);
+      writeBootstrap(context, entry[entryName][0]);
       entry[entryName] = [bootstrapPath];
     }
   }

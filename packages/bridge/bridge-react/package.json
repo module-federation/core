@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "0.7.0",
+  "version": "0.7.6",
   "publishConfig": {
     "access": "public"
   },
@@ -25,6 +25,11 @@
       "types": "./dist/router.d.ts",
       "import": "./dist/router.es.js",
       "require": "./dist/router.cjs.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.es.js",
+      "require": "./dist/plugin.es.js"
     },
     "./router-v5": {
       "types": "./dist/router-v5.d.ts",
@@ -67,6 +72,7 @@
     "react-router-dom": "6.22.3",
     "typescript": "^5.2.2",
     "vite": "^5.2.14",
-    "vite-plugin-dts": "^3.9.1"
+    "vite-plugin-dts": "^4.3.0",
+    "@module-federation/runtime": "workspace:*"
   }
 }

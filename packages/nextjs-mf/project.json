@@ -12,11 +12,7 @@
         "outputPath": "packages/nextjs-mf/dist",
         "main": "packages/nextjs-mf/src/index.ts",
         "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
-        "assets": ["packages/nextjs-mf/*.md"],
-        "additionalEntryPoints": [
-          "packages/nextjs-mf/utilities.ts",
-          "packages/nextjs-mf/src/utils/index.js"
-        ]
+        "assets": ["packages/nextjs-mf/*.md"]
       },
       "dependsOn": [
         {
@@ -54,6 +50,10 @@
           },
           {
             "command": "nx run nextjs-mf:build",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "rm ./packages/nextjs-mf/dist/package.json",
             "forwardAllArgs": false
           }
         ]

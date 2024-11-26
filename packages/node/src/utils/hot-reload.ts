@@ -12,7 +12,7 @@ const getRequire = (): NodeRequire => {
   //@ts-ignore
   return typeof __non_webpack_require__ !== 'undefined'
     ? __non_webpack_require__
-    : require;
+    : eval('require');
 };
 
 function callsites(): any[] {
@@ -153,7 +153,6 @@ export const performReload = async (
     gs.entryChunkCache.clear();
   }
 
-  gs.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
   //@ts-ignore
   gs.__FEDERATION__.__INSTANCES__.map((i: any) => {
     //@ts-ignore

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "0.7.0",
+  "version": "0.7.6",
   "files": [
     "dist/",
     "types.d.ts",
@@ -35,6 +35,21 @@
       "import": "./dist/esm/cli/ssrPlugin.js",
       "require": "./dist/cjs/cli/ssrPlugin.js",
       "types": "./dist/types/cli/ssrPlugin.d.ts"
+    },
+    "./shared-strategy": {
+      "import": "./dist/esm/cli/mfRuntimePlugins/shared-strategy.js",
+      "require": "./dist/esm/cli/mfRuntimePlugins/shared-strategy.js",
+      "types": "./dist/types/cli/mfRuntimePlugins/shared-strategy.d.ts"
+    },
+    "./resolve-entry-ipv4": {
+      "import": "./dist/esm/cli/mfRuntimePlugins/resolve-entry-ipv4.js",
+      "require": "./dist/esm/cli/mfRuntimePlugins/resolve-entry-ipv4.js",
+      "types": "./dist/types/cli/mfRuntimePlugins/resolve-entry-ipv4.d.ts"
+    },
+    "./inject-node-fetch": {
+      "import": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.js",
+      "require": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.js",
+      "types": "./dist/types/cli/mfRuntimePlugins/inject-node-fetch.d.ts"
     }
   },
   "typesVersions": {
@@ -50,6 +65,15 @@
       ],
       "ssr-plugin": [
         "./dist/types/cli/ssrPlugin.d.ts"
+      ],
+      "shared-strategy": [
+        "./dist/types/cli/mfRuntimePlugins/shared-strategy.d.ts"
+      ],
+      "resolve-entry-ipv4": [
+        "./dist/types/cli/mfRuntimePlugins/resolve-entry-ipv4.d.ts"
+      ],
+      "inject-node-fetch": [
+        "./dist/types/cli/mfRuntimePlugins/inject-node-fetch.d.ts"
       ]
     }
   },

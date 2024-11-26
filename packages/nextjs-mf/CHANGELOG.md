@@ -1,5 +1,80 @@
 # @module-federation/nextjs-mf
 
+## 8.8.1
+
+### Patch Changes
+
+- Updated dependencies [6d35cf7]
+  - @module-federation/node@2.6.11
+  - @module-federation/runtime@0.7.6
+  - @module-federation/enhanced@0.7.6
+  - @module-federation/webpack-bundler-runtime@0.7.6
+  - @module-federation/sdk@0.7.6
+
+## 8.8.0
+
+### Minor Changes
+
+- 5ad75fd: Enabled JSON manifest remote protocol for NextJS plugin
+
+## 8.7.10
+
+### Patch Changes
+
+- Updated dependencies [5613265]
+  - @module-federation/enhanced@0.7.5
+  - @module-federation/node@2.6.10
+  - @module-federation/runtime@0.7.5
+  - @module-federation/webpack-bundler-runtime@0.7.5
+  - @module-federation/sdk@0.7.5
+
+## 8.7.9
+
+### Patch Changes
+
+- Updated dependencies [ff8ce29]
+  - @module-federation/runtime@0.7.4
+  - @module-federation/node@2.6.9
+  - @module-federation/webpack-bundler-runtime@0.7.4
+  - @module-federation/enhanced@0.7.4
+  - @module-federation/sdk@0.7.4
+
+## 8.7.8
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+- Updated dependencies [c2b1efa]
+  - @module-federation/webpack-bundler-runtime@0.7.3
+  - @module-federation/runtime@0.7.3
+  - @module-federation/sdk@0.7.3
+  - @module-federation/enhanced@0.7.3
+  - @module-federation/node@2.6.8
+
+## 8.7.7
+
+### Patch Changes
+
+- @module-federation/enhanced@0.7.2
+- @module-federation/node@2.6.7
+- @module-federation/runtime@0.7.2
+- @module-federation/webpack-bundler-runtime@0.7.2
+- @module-federation/sdk@0.7.2
+
+## 8.7.6
+
+### Patch Changes
+
+- Updated dependencies [66ba7b1]
+- Updated dependencies [8712967]
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/runtime@0.7.1
+  - @module-federation/node@2.6.6
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+  - @module-federation/webpack-bundler-runtime@0.7.1
+
 ## 8.7.5
 
 ### Patch Changes

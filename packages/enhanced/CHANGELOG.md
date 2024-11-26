@@ -1,5 +1,90 @@
 # @module-federation/enhanced
 
+## 0.7.6
+
+### Patch Changes
+
+- @module-federation/rspack@0.7.6
+- @module-federation/sdk@0.7.6
+- @module-federation/runtime-tools@0.7.6
+- @module-federation/managers@0.7.6
+- @module-federation/manifest@0.7.6
+- @module-federation/dts-plugin@0.7.6
+- @module-federation/bridge-react-webpack-plugin@0.7.6
+- @module-federation/data-prefetch@0.7.6
+
+## 0.7.5
+
+### Patch Changes
+
+- 5613265: remove module resolve path replacements
+- Updated dependencies [0309fb5]
+  - @module-federation/bridge-react-webpack-plugin@0.7.5
+  - @module-federation/rspack@0.7.5
+  - @module-federation/sdk@0.7.5
+  - @module-federation/runtime-tools@0.7.5
+  - @module-federation/managers@0.7.5
+  - @module-federation/manifest@0.7.5
+  - @module-federation/dts-plugin@0.7.5
+  - @module-federation/data-prefetch@0.7.5
+
+## 0.7.4
+
+### Patch Changes
+
+- @module-federation/data-prefetch@0.7.4
+- @module-federation/dts-plugin@0.7.4
+- @module-federation/runtime-tools@0.7.4
+- @module-federation/rspack@0.7.4
+- @module-federation/sdk@0.7.4
+- @module-federation/managers@0.7.4
+- @module-federation/manifest@0.7.4
+- @module-federation/bridge-react-webpack-plugin@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+- Updated dependencies [7facc10]
+  - @module-federation/data-prefetch@0.7.3
+  - @module-federation/runtime-tools@0.7.3
+  - @module-federation/managers@0.7.3
+  - @module-federation/manifest@0.7.3
+  - @module-federation/rspack@0.7.3
+  - @module-federation/sdk@0.7.3
+  - @module-federation/dts-plugin@0.7.3
+  - @module-federation/bridge-react-webpack-plugin@0.7.3
+
+## 0.7.2
+
+### Patch Changes
+
+- Updated dependencies [85990e2]
+  - @module-federation/dts-plugin@0.7.2
+  - @module-federation/manifest@0.7.2
+  - @module-federation/rspack@0.7.2
+  - @module-federation/sdk@0.7.2
+  - @module-federation/runtime-tools@0.7.2
+  - @module-federation/managers@0.7.2
+  - @module-federation/bridge-react-webpack-plugin@0.7.2
+  - @module-federation/data-prefetch@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- 47fdbc2: Added recursively search for shared dependency versions
+- Updated dependencies [6db4c5f]
+  - @module-federation/sdk@0.7.1
+  - @module-federation/data-prefetch@0.7.1
+  - @module-federation/dts-plugin@0.7.1
+  - @module-federation/runtime-tools@0.7.1
+  - @module-federation/bridge-react-webpack-plugin@0.7.1
+  - @module-federation/managers@0.7.1
+  - @module-federation/manifest@0.7.1
+  - @module-federation/rspack@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

@@ -11,7 +11,7 @@
 // The SDK can be used to parse entry strings, encode and decode module names, and generate filenames for exposed modules and shared packages.
 // It also includes a logger for debugging and environment detection utilities.
 // Additionally, it provides a function to generate a snapshot from a manifest and environment detection utilities.
-import { parseEntry, encodeName, decodeName, generateExposeFilename, generateShareFilename, Logger, isBrowserEnv, isDebugMode, getProcessEnv, generateSnapshotFromManifest } from '@module-federation/sdk';
+import { parseEntry, encodeName, decodeName, generateExposeFilename, generateShareFilename, createLogger, isBrowserEnv, isDebugMode, getProcessEnv, generateSnapshotFromManifest } from '@module-federation/sdk';
 
 // Parse an entry string into a RemoteEntryInfo object
 parseEntry('entryString');
@@ -28,8 +28,8 @@ generateExposeFilename('exposeName', true);
 // Generate a filename for a shared package
 generateShareFilename('packageName', true);
 
-// Create a new logger
-const logger = new Logger('identifier');
+// Create a logger
+const logger = createLogger('identifier');
 
 // Check if the current environment is a browser
 isBrowserEnv();
@@ -46,12 +46,12 @@ generateSnapshotFromManifest(manifest, options);
 
 ### parseEntry
 
-- Type: `parseEntry(str: string, devVerOrUrl?: string)`
+- Type: `parseEntry(str: string, devVerOrUrl?: string, separator?: string) `
 - Parses a string into a RemoteEntryInfo object.
 
 ### encodeName
 
-- Type: `encodeName(name: string, prefix = '', withExt = false)`
+- Type: `encodeName(name: string, prefix?: string, withExt?: boolean)`
 - Encodes a name with a prefix and optional extension.
 
 ### decodeName
@@ -69,10 +69,10 @@ generateSnapshotFromManifest(manifest, options);
 - Type: `generateShareFilename(pkgName: string, withExt: boolean)`
 - Generates a filename for a shared package.
 
-### Logger
+### createLogger
 
-- Type: `new Logger(identifier?: string)`
-- Creates a new logger for debugging.
+- Type: `createLogger(prefix: string)`
+- Creates a logger for debugging.
 
 ### isBrowserEnv
 
@@ -91,7 +91,7 @@ generateSnapshotFromManifest(manifest, options);
 
 ### generateSnapshotFromManifest
 
-- Type: `generateSnapshotFromManifest(manifest: Manifest, options: IOptions = {})`
+- Type: `generateSnapshotFromManifest(manifest: Manifest, options?: IOptions)`
 - Generates a snapshot from a manifest.
 
 ## Testing

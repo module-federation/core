@@ -1,5 +1,60 @@
 # @module-federation/modern-js
 
+## 0.7.6
+
+### Patch Changes
+
+- Updated dependencies [6d35cf7]
+  - @module-federation/node@2.6.11
+  - @module-federation/enhanced@0.7.6
+  - @module-federation/sdk@0.7.6
+
+## 0.7.5
+
+### Patch Changes
+
+- a50b000: fix(modern-js-plugin): prevent components render multiple times if props change
+- Updated dependencies [5613265]
+  - @module-federation/enhanced@0.7.5
+  - @module-federation/node@2.6.10
+  - @module-federation/sdk@0.7.5
+
+## 0.7.4
+
+### Patch Changes
+
+- @module-federation/node@2.6.9
+- @module-federation/enhanced@0.7.4
+- @module-federation/sdk@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+  - @module-federation/enhanced@0.7.3
+  - @module-federation/node@2.6.8
+
+## 0.7.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.7.2
+- @module-federation/node@2.6.7
+- @module-federation/sdk@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [66ba7b1]
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/node@2.6.6
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

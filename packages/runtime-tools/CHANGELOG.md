@@ -1,5 +1,53 @@
 # @module-federation/runtime-tools
 
+## 0.7.6
+
+### Patch Changes
+
+- @module-federation/runtime@0.7.6
+- @module-federation/webpack-bundler-runtime@0.7.6
+
+## 0.7.5
+
+### Patch Changes
+
+- @module-federation/runtime@0.7.5
+- @module-federation/webpack-bundler-runtime@0.7.5
+
+## 0.7.4
+
+### Patch Changes
+
+- Updated dependencies [ff8ce29]
+  - @module-federation/runtime@0.7.4
+  - @module-federation/webpack-bundler-runtime@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- Updated dependencies [4ab9295]
+- Updated dependencies [c2b1efa]
+  - @module-federation/webpack-bundler-runtime@0.7.3
+  - @module-federation/runtime@0.7.3
+
+## 0.7.2
+
+### Patch Changes
+
+- @module-federation/runtime@0.7.2
+- @module-federation/webpack-bundler-runtime@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [66ba7b1]
+- Updated dependencies [8712967]
+  - @module-federation/runtime@0.7.1
+  - @module-federation/webpack-bundler-runtime@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes
