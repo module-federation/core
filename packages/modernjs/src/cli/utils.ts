@@ -247,7 +247,7 @@ export function patchBundlerConfig<T extends Bundler>(options: {
           );
         } else {
           bundlerConfig.watchOptions.ignored = [
-            bundlerConfig.watchOptions.ignored as string,
+            bundlerConfig.watchOptions.ignored,
           ];
         }
       } else {
