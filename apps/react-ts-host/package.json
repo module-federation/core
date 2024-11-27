@@ -7,6 +7,6 @@
     "@module-federation/core": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
-    "react-refresh": "0.14.0"
+    "react-refresh": "0.14.2"
   }
 }
