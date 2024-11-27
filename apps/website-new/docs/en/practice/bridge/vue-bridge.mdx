@@ -19,17 +19,19 @@ import { PackageManagerTabs } from '@theme';
 
 ```tsx
 function createRemoteComponent<T, E extends keyof T>(
-  // Function to load remote application, e.g., loadRemote('remote1/export-app') or import('remote1/export-app')
-  lazyComponent: () => Promise<T>,
-  info?:
- {
+  options: {
+    // Function to load remote application, e.g., loadRemote('remote1/export-app') or import('remote1/export-app')
+    loader: () => Promise<T>,
     // Default is 'default', used to specify module export
-    export?: E;
+    export?: E,
+    // Parameters that will be passed to defineAsyncComponent
+    asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
   }
 ): (props: {
     basename?: string;
     memoryRoute?: { entryPath: string };
 }) => DefineComponent;
+
 
 function createBridgeComponent(bridgeInfo: {
   rootComponent: VueComponent;
@@ -105,9 +107,7 @@ export default defineConfig({
 // ./src/router.ts
 import * as bridge from '@module-federation/bridge-vue3';
 
-const Remote2 = bridge.createRemoteComponent(() =>
-  loadRemote('remote1/export-app'),
-);
+const Remote2 = bridge.createRemoteComponent({ loader: () => loadRemote('remote1/export-app') });
 
 const router = createRouter({
   history: createWebHistory(),
@@ -132,6 +132,8 @@ function createRemoteComponent<T, E extends keyof T>(
     loader: () => Promise<T>,
     // Default is 'default', used to specify module export
     export?: E;
+    // Parameters that will be passed to defineAsyncComponent
+    asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
   }
 ): (props: {
     basename?: string;
@@ -141,7 +143,7 @@ function createRemoteComponent<T, E extends keyof T>(
 
 
 ```tsx
-const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'));
+const Remote1App = createRemoteComponent({ loader: () => loadRemote('remote1/export-app') });
 ```
 
 * `options`
@@ -151,6 +153,9 @@ const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'))
   * `export`
     * type: `string`
     * Purpose: Used to specify module export
+  * `asyncComponentOptions`
+    * type: `Omit<AsyncComponentOptions, 'loader'>`
+    * Purpose: Parameters that will be passed to defineAsyncComponent, except for the loader parameter
 ```tsx
 // remote
 export const provider = createBridgeComponent({
@@ -158,7 +163,8 @@ export const provider = createBridgeComponent({
 });
 
 // host
-const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'), {
+const Remote1App = createRemoteComponent({
+  loader: () => loadRemote('remote1/export-app'),
   export: 'provider'
 });
 ```
@@ -170,9 +176,7 @@ const Remote1App = createRemoteComponent(() => loadRemote('remote1/export-app'),
 ```tsx
 import * as bridge from '@module-federation/bridge-vue3';
 
-const Remote2 = bridge.createRemoteComponent(() =>
-  loadRemote('remote1/export-app'),
-);
+const Remote2 = bridge.createRemoteComponent({ loader: () => loadRemote('remote1/export-app') });
 
 const router = createRouter({
   history: createWebHistory(),
