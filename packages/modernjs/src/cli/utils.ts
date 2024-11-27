@@ -241,9 +241,15 @@ export function patchBundlerConfig<T extends Bundler>(options: {
     bundlerConfig.watchOptions = bundlerConfig.watchOptions || {};
     if (!Array.isArray(bundlerConfig.watchOptions.ignored)) {
       if (bundlerConfig.watchOptions.ignored) {
-        bundlerConfig.watchOptions.ignored = [
-          bundlerConfig.watchOptions.ignored as string,
-        ];
+        if (typeof bundlerConfig.watchOptions.ignored !== 'string') {
+          logger.warn(
+            `Detect you have set watchOptions.ignore as regexp, please transform it to glob string array and add "**/@mf-types/**" to the array.`,
+          );
+        } else {
+          bundlerConfig.watchOptions.ignored = [
+            bundlerConfig.watchOptions.ignored as string,
+          ];
+        }
       } else {
         bundlerConfig.watchOptions.ignored = [];
       }
