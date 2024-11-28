@@ -237,43 +237,6 @@ export function patchBundlerConfig<T extends Bundler>(options: {
 
   patchIgnoreWarning(bundlerConfig);
 
-  if (bundlerType === 'webpack') {
-    bundlerConfig.watchOptions = bundlerConfig.watchOptions || {};
-    if (!Array.isArray(bundlerConfig.watchOptions.ignored)) {
-      if (bundlerConfig.watchOptions.ignored) {
-        if (typeof bundlerConfig.watchOptions.ignored !== 'string') {
-          logger.warn(
-            `Detect you have set watchOptions.ignore as regexp, please transform it to glob string array and add "**/@mf-types/**" to the array.`,
-          );
-        } else {
-          bundlerConfig.watchOptions.ignored = [
-            bundlerConfig.watchOptions.ignored,
-          ];
-        }
-      } else {
-        bundlerConfig.watchOptions.ignored = [];
-      }
-    }
-
-    if (Array.isArray(bundlerConfig.watchOptions.ignored)) {
-      if (mfConfig.dts !== false) {
-        if (
-          typeof mfConfig.dts === 'object' &&
-          typeof mfConfig.dts.consumeTypes === 'object' &&
-          mfConfig.dts.consumeTypes.remoteTypesFolder
-        ) {
-          bundlerConfig.watchOptions.ignored.push(
-            `**/${mfConfig.dts.consumeTypes.remoteTypesFolder}/**`,
-          );
-        } else {
-          bundlerConfig.watchOptions.ignored.push('**/@mf-types/**');
-        }
-      } else {
-        bundlerConfig.watchOptions.ignored.push('**/@mf-types/**');
-      }
-    }
-  }
-
   if (bundlerConfig.output) {
     if (!bundlerConfig.output?.chunkLoadingGlobal) {
       bundlerConfig.output.chunkLoadingGlobal = `chunk_${mfConfig.name}`;
