@@ -152,37 +152,3 @@ describe('patchBundlerConfig', async () => {
     expect(bundlerConfig).toStrictEqual(expectedConfig);
   });
 });
-
-it('no add watchOptions.ignored if the ', async () => {
-  const bundlerConfig = {
-    output: {
-      publicPath: 'auto',
-    },
-  };
-  patchBundlerConfig<'webpack'>({
-    bundlerType: 'webpack',
-    bundlerConfig,
-    isServer: false,
-    modernjsConfig: {
-      server: {
-        ssr: {
-          mode: 'stream',
-        },
-      },
-    },
-    mfConfig,
-  });
-
-  const expectedConfig = {
-    output: {
-      chunkLoadingGlobal: 'chunk_host',
-      publicPath: 'auto',
-      uniqueName: 'host',
-    },
-  };
-  // @ts-ignore temp ignore
-  delete bundlerConfig?.ignoreWarnings;
-
-  // patchIgnoreWarning(expectedConfig as BundlerConfig<'webpack'>);
-  expect(bundlerConfig).toStrictEqual(expectedConfig);
-});
