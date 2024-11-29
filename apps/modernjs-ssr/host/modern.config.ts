@@ -14,12 +14,5 @@ export default defineConfig({
       mode: 'stream',
     },
   },
-  tools: {
-    webpack: {
-      watchOptions: {
-        ignored: ['**/@mf-types/**'],
-      },
-    },
-  },
   plugins: [appTools(), moduleFederationPlugin()],
 });
