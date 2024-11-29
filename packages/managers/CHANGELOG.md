@@ -1,5 +1,11 @@
 # @module-federation/managers
 
+## 0.8.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.0
+
 ## 0.7.7
 
 ### Patch Changes

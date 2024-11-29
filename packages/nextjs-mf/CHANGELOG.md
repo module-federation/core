@@ -1,5 +1,15 @@
 # @module-federation/nextjs-mf
 
+## 8.8.3
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.0
+- @module-federation/enhanced@0.8.0
+- @module-federation/webpack-bundler-runtime@0.8.0
+- @module-federation/sdk@0.8.0
+- @module-federation/node@2.6.13
+
 ## 8.8.2
 
 ### Patch Changes
