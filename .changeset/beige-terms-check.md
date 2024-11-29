@@ -2,4 +2,4 @@
 '@module-federation/modern-js': patch
 ---
 
-fix: print warn if user set watchOptions.ignored value as regexp type
+fix: override watchOptions.ignored if the modernjs internal value is regexp
