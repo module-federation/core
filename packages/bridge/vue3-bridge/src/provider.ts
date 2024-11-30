@@ -13,7 +13,7 @@ type AddOptionsFnParams = {
     basename: RenderFnParams['basename'];
     memoryRoute: RenderFnParams['memoryRoute'];
     [key: string]: any;
-  }) => { router?: VueRouter.Router };
+  }) => { router?: VueRouter.Router } | void;
 };
 
 export type ProviderFnParams = {
@@ -42,22 +42,22 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
             ? beforeBridgeRenderRes?.extraProps
             : {};
 
-        const { router: remoteRouter } = bridgeInfo.appOptions({
+        const bridgeOptions = bridgeInfo.appOptions({
           app,
           basename: info.basename,
           memoryRoute: info.memoryRoute,
           ...extraProps,
         });
 
-        if (remoteRouter) {
+        if (bridgeOptions?.router) {
           const history = info.memoryRoute
             ? VueRouter.createMemoryHistory(info.basename)
             : VueRouter.createWebHistory(info.basename);
 
           const router = VueRouter.createRouter({
-            ...remoteRouter.options,
+            ...bridgeOptions.router.options,
             history,
-            routes: remoteRouter.getRoutes(),
+            routes: bridgeOptions.router.getRoutes(),
           });
 
           LoggerInstance.log(`createBridgeComponent render router info>>>`, {
