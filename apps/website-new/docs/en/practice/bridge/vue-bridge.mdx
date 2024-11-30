@@ -35,6 +35,12 @@ function createRemoteComponent<T, E extends keyof T>(
 
 function createBridgeComponent(bridgeInfo: {
   rootComponent: VueComponent;
+  appOptions?: (params: {
+    app: Vue.App<VueComponent>;
+    basename?: string;
+    memoryRoute?: { entryPath: string };
+    [key: string]: any;
+  }) => { router?: Router };
 }): () => {
   render(info: {
     name?: string;
@@ -58,13 +64,17 @@ function createBridgeComponent(bridgeInfo: {
 // ./src/export-app.ts
 import App from './App.vue';
 import router from './router';
+import customPlugin from './plugins/custom-vue-plugin';
 import { createBridgeComponent } from '@module-federation/bridge-vue3';
 
 export default createBridgeComponent({
   rootComponent: App,
-  appOptions: () => ({
-    router,
-  }),
+  appOptions: ({app}) => {
+    // Optional: adding a plugin to the new Vue instance on the host application side
+    app.use(customPlugin)
+
+    return {router}
+  },
 });
 ```
 
@@ -193,11 +203,14 @@ export default router;
 #### createBridgeComponent
 
 ```tsx
-function createBridgeComponent<T>(bridgeInfo: {
+function createBridgeComponent(bridgeInfo: {
   rootComponent: VueComponent;
-  appOptions?: () => ({
-    router: Router;
-  });
+  appOptions?: (params: {
+    app: Vue.App<VueComponent>;
+    basename?: string;
+    memoryRoute?: { entryPath: string };
+    [key: string]: any;
+  }) => { router?: Router };
 }): () => {
   render(info: {
     name?: string;
@@ -212,21 +225,25 @@ function createBridgeComponent<T>(bridgeInfo: {
 ```
 
 * `bridgeInfo`
-  * type: `{ rootComponent: VueComponent; appOptions?: () => ({ router: Router }) }`
+  * type: `{ rootComponent: VueComponent; appOptions?: (params: AddOptionsFnParams) => ({ router?: Router }) }`
   * Purpose: Used to pass the root component
 * ReturnType
   * type: `() => { render: (info: RenderFnParams) => void; destroy: (info: { dom: HTMLElement}) => void; }`
 
 ```tsx
 // ./src/export-app.ts
-import { createBridgeComponent } from '@module-federation/bridge-vue3';
+import  { createBridgeComponent } from '@module-federation/bridge-vue3';
 import App from './App.vue';
+import customPlugin from './plugins/custom-vue-plugin';
 import router from './router';
 
 export default createBridgeComponent({
   rootComponent: App,
-  appOptions: () => ({
-    router,
-  }),
+  appOptions: ({app}) => {
+    // Optional: adding a plugin to the new Vue instance on the host application side
+    app.use(customPlugin)
+
+    return {router}
+  },
 });
 ```
