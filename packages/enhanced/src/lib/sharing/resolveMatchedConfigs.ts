@@ -5,6 +5,8 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
 import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
+import type { SemVerRange } from 'webpack/lib/util/semver';
+import type { ConsumeOptions } from './ConsumeSharedModule';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -23,7 +25,26 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
   dependencyType: 'esm',
 };
 
-export async function resolveMatchedConfigs<T>(
+function createCompositeKey(request: string, config: ConsumeOptions): string {
+  // First determine the base key to use
+  const baseRequest =
+    config.import && request !== config.import ? config.import : request;
+  const key =
+    config.shareKey && request !== config.shareKey
+      ? config.shareKey
+      : baseRequest;
+
+  // const key = baseRequest;
+  if (config.issuerLayer) {
+    return `(${config.issuerLayer})${key}`;
+  } else if (config.layer) {
+    return `(${config.layer})${key}`;
+  } else {
+    return key;
+  }
+}
+
+export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   compilation: Compilation,
   configs: [string, T][],
 ): Promise<MatchedConfigs<T>> {
@@ -35,12 +56,10 @@ export async function resolveMatchedConfigs<T>(
     contextDependencies: new LazySet<string>(),
     missingDependencies: new LazySet<string>(),
   };
-  // @ts-ignore
   const resolver = compilation.resolverFactory.get('normal', RESOLVE_OPTIONS);
   const context = compilation.compiler.context;
 
   await Promise.all(
-    //@ts-ignore
     configs.map(([request, config]) => {
       if (/^\.\.?(\/|$)/.test(request)) {
         // relative request
@@ -54,7 +73,6 @@ export async function resolveMatchedConfigs<T>(
               if (err || result === false) {
                 err = err || new Error(`Can't resolve ${request}`);
                 compilation.errors.push(
-                  // @ts-ignore
                   new ModuleNotFoundError(null, err, {
                     name: `shared module ${request}`,
                   }),
@@ -69,12 +87,19 @@ export async function resolveMatchedConfigs<T>(
       } else if (/^(\/|[A-Za-z]:\\|\\\\)/.test(request)) {
         // absolute path
         resolved.set(request, config);
+        return undefined;
       } else if (request.endsWith('/')) {
         // module request prefix
         prefixed.set(request, config);
+        return undefined;
       } else {
         // module request
-        unresolved.set(request, config);
+        const key = createCompositeKey(request, config);
+        unresolved.set(key, config);
+        if (request === config.shareKey && !unresolved.has(request)) {
+          unresolved.set(request, config);
+        }
+        return undefined;
       }
     }),
   );
