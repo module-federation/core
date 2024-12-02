@@ -34,7 +34,7 @@ function r(
           'singleton' !== t &&
           'strictVersion' !== t &&
           'issuerLayer' !== t &&
-          'requiredLayer' !== t
+          'layer' !== t
         )
           return (r.errors = [{ params: { additionalProperty: t } }]), !1;
       if (t === i) {
@@ -179,8 +179,8 @@ function r(
                         l = n === i;
                       } else l = !0;
                       if (l) {
-                        if (void 0 !== e.requiredLayer) {
-                          let t = e.requiredLayer;
+                        if (void 0 !== e.layer) {
+                          let t = e.layer;
                           const n = i;
                           if (i === n) {
                             if ('string' != typeof t)

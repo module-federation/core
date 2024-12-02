@@ -53,7 +53,7 @@ class SharePlugin {
           packageName: options.packageName,
           eager: options.eager,
           issuerLayer: options.issuerLayer,
-          requiredLayer: options.requiredLayer,
+          layer: options.layer,
         },
       }),
     );

@@ -93,8 +93,8 @@ export default {
           type: 'string',
           minLength: 1,
         },
-        requiredLayer: {
-          description: 'Required layer for the shared module.',
+        layer: {
+          description: 'Layer for the shared module.',
           type: 'string',
           minLength: 1,
         },

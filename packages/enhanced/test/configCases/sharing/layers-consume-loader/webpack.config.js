@@ -76,13 +76,13 @@ module.exports = {
           shareKey: 'react',
           singleton: true,
           issuerLayer: 'differing-layer',
-          requiredLayer: 'explicit-layer',
+          layer: 'explicit-layer',
         },
         'differing-layer-react': {
           import: 'react',
           shareKey: 'react',
           singleton: true,
-          requireLayer: 'required-layer',
+          layer: 'required-layer',
         },
         'layered-react': {
           import: 'react',

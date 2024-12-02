@@ -76,7 +76,7 @@ export interface ConsumesConfig {
    */
   issuerLayer?: string;
   /**
-   * Required layer for the shared module.
+   * Layer for the shared module.
    */
-  requiredLayer?: string;
+  layer?: string;
 }

@@ -87,7 +87,7 @@ class ConsumeSharedPlugin {
                 singleton: false,
                 eager: false,
                 issuerLayer: undefined,
-                requiredLayer: undefined,
+                layer: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -102,7 +102,7 @@ class ConsumeSharedPlugin {
                 singleton: false,
                 eager: false,
                 issuerLayer: undefined,
-                requiredLayer: undefined,
+                layer: undefined,
               };
         return result;
       },
@@ -121,7 +121,7 @@ class ConsumeSharedPlugin {
         singleton: !!item.singleton,
         eager: !!item.eager,
         issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
-        requiredLayer: item.requiredLayer ? item.requiredLayer : undefined,
+        layer: item.layer ? item.layer : undefined,
       }),
     );
   }
@@ -317,7 +317,7 @@ class ConsumeSharedPlugin {
                   ) {
                     return createConsumeSharedModule(context, request, {
                       ...options,
-                      layer: options.requiredLayer || contextInfo.issuerLayer,
+                      layer: options.layer || contextInfo.issuerLayer,
                     });
                   }
                 }
@@ -330,7 +330,7 @@ class ConsumeSharedPlugin {
                 if (!match.issuerLayer) {
                   return createConsumeSharedModule(context, request, {
                     ...match,
-                    layer: match.requiredLayer || contextInfo.issuerLayer,
+                    layer: match.layer || contextInfo.issuerLayer,
                   });
                 }
               }
@@ -350,7 +350,7 @@ class ConsumeSharedPlugin {
                         ? options.import + remainder
                         : undefined,
                       shareKey: options.shareKey + remainder,
-                      layer: options.requiredLayer || contextInfo.issuerLayer,
+                      layer: options.layer || contextInfo.issuerLayer,
                     });
                   }
                 }
@@ -370,7 +370,6 @@ class ConsumeSharedPlugin {
             if (resource) {
               const options = resolvedConsumes.get(resource);
               if (options !== undefined) {
-                //@ts-ignore
                 return createConsumeSharedModule(context, resource, options);
               }
             }
