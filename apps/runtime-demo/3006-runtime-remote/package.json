@@ -7,7 +7,7 @@
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/typescript": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
-    "react-refresh": "0.14.0"
+    "react-refresh": "0.14.2"
   },
   "dependencies": {
     "antd": "4.24.15"

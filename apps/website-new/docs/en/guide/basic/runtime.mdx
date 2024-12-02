@@ -46,6 +46,12 @@ init({
       entry: "http://localhost:3006/remoteEntry.js",
       alias: "app2"
     },
+{
+      name: "@demo/app4",
+      entry: "http://localhost:3006/remoteEntry.mjs",
+      alias: "app2",
+      type: 'module' // tell federation its a certain format, like ESM module
+    },
   ],
 });
 

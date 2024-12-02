@@ -1,5 +1,24 @@
 # @module-federation/dts-plugin
 
+## 0.8.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.0
+- @module-federation/managers@0.8.0
+- @module-federation/third-party-dts-extractor@0.8.0
+- @module-federation/error-codes@0.8.0
+
+## 0.7.7
+
+### Patch Changes
+
+- 8db7611: ensure when dev is false that type generation only runs once
+  - @module-federation/sdk@0.7.7
+  - @module-federation/managers@0.7.7
+  - @module-federation/third-party-dts-extractor@0.7.7
+  - @module-federation/error-codes@0.7.7
+
 ## 0.7.6
 
 ### Patch Changes

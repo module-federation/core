@@ -40,6 +40,10 @@ After modifying the producer code, the consumer will automatically pull the prod
 
 ### Federation Runtime API type prompt
 
+:::info
+If the builder is `webpack`, you also need to add `**/@mf-types/**` to [watchOptions.ignored](https://webpack.js.org/configuration/watch/#watchoptionsignored) to avoid Circular compilation issues caused by type updates
+:::
+
 It needs to add `./@mf-types/*` in the `include` field to enjoy `Federation Runtime` `loadRemote` type hints and type hot reloading
 
 ```json title="tsconfig.json"

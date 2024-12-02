@@ -1,12 +1,5 @@
 import { it, expect, describe } from 'vitest';
-import path from 'path';
-import { BundlerConfig } from '../interfaces/bundler';
-import {
-  patchMFConfig,
-  patchBundlerConfig,
-  getIPV4,
-  patchIgnoreWarning,
-} from './utils';
+import { patchMFConfig, patchBundlerConfig, getIPV4 } from './utils';
 
 const mfConfig = {
   name: 'host',
@@ -117,9 +110,6 @@ describe('patchBundlerConfig', async () => {
         publicPath: 'auto',
         uniqueName: 'host',
       },
-      watchOptions: {
-        ignored: ['**/@mf-types/**'],
-      },
     };
     // @ts-ignore temp ignore
 
@@ -153,9 +143,6 @@ describe('patchBundlerConfig', async () => {
         chunkLoadingGlobal: 'chunk_host',
         publicPath: 'auto',
         uniqueName: 'host',
-      },
-      watchOptions: {
-        ignored: ['**/@mf-types/**'],
       },
     };
     // @ts-ignore temp ignore

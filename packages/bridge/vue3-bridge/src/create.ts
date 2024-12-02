@@ -1,4 +1,4 @@
-import { defineAsyncComponent, h } from 'vue';
+import { type AsyncComponentOptions, defineAsyncComponent, h } from 'vue';
 import { useRoute } from 'vue-router';
 import RemoteApp from './remoteApp.jsx';
 import { LoggerInstance } from './utils.js';
@@ -8,9 +8,11 @@ declare const __APP_VERSION__: string;
 export function createRemoteComponent(info: {
   loader: () => Promise<any>;
   export?: string;
+  asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
 }) {
   return defineAsyncComponent({
     __APP_VERSION__,
+    ...info.asyncComponentOptions,
     //@ts-ignore
     loader: async () => {
       const route = useRoute();
@@ -45,7 +47,6 @@ export function createRemoteComponent(info: {
           render() {
             return h(RemoteApp, {
               moduleName,
-              ...info,
               providerInfo: exportFn,
               basename,
             });
@@ -54,13 +55,5 @@ export function createRemoteComponent(info: {
       }
       throw new Error('module not found');
     },
-    loadingComponent: {
-      template: '<div>Loading...</div>',
-    },
-    errorComponent: {
-      template: '<div>Error loading component</div>',
-    },
-    delay: 200,
-    timeout: 3000,
   });
 }
