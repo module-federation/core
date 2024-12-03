@@ -8,7 +8,7 @@ import { normalizeStories } from '@storybook/core/common';
 import withModuleFederation from '../utils/with-module-federation';
 import { correctImportPath } from '../utils/correctImportPath';
 
-import type { ModuleFederationPluginOptions } from '@module-federation/utilities';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { ModuleFederationConfig } from '@nx/webpack';
 
 const { ModuleFederationPlugin } = container;
@@ -16,7 +16,7 @@ const { ModuleFederationPlugin } = container;
 export type Preset = string | { name: string };
 
 type Options = {
-  moduleFederationConfig?: ModuleFederationPluginOptions;
+  moduleFederationConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
   nxModuleFederationConfig?: ModuleFederationConfig;
   presets: {
     apply<T>(preset: Preset): Promise<T>;
