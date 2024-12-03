@@ -14,6 +14,5 @@ export default defineConfig({
       mode: 'stream',
     },
   },
-
   plugins: [appTools(), moduleFederationPlugin()],
 });

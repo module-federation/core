@@ -1,5 +1,24 @@
 # @module-federation/modern-js
 
+## 0.8.0
+
+### Patch Changes
+
+- d5c783b: fix: override watchOptions.ignored if the modernjs internal value is regexp
+- e10725f: chore: no auto add watchOptions.ignored
+  - @module-federation/enhanced@0.8.0
+  - @module-federation/sdk@0.8.0
+  - @module-federation/node@2.6.13
+
+## 0.7.7
+
+### Patch Changes
+
+- a960c88: fix(modern-js-plugin): only export esm mfRuntimePlugin
+  - @module-federation/node@2.6.12
+  - @module-federation/enhanced@0.7.7
+  - @module-federation/sdk@0.7.7
+
 ## 0.7.6
 
 ### Patch Changes

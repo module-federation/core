@@ -1,5 +1,9 @@
 # @module-federation/error-codes
 
+## 0.8.0
+
+## 0.7.7
+
 ## 0.7.6
 
 ## 0.7.5

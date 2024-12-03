@@ -40,6 +40,10 @@
 
 ### Federation Runtime API 类型提示
 
+:::info
+如果构建器为 `webpack` ，还需要再 [watchOptions.ignored](https://webpack.js.org/configuration/watch/#watchoptionsignored) 增加 `**/@mf-types/**`，以避免类型更新导致的循环编译问题
+:::
+
 需要在 `include` 字段增加 `./@mf-types/*` 以享有 `Federation Runtime` `loadRemote` 类型提示以及类型热重载
 
 ```json title="tsconfig.json"
