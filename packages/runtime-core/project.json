@@ -19,7 +19,8 @@
         "project": "packages/runtime-core/package.json",
         "compiler": "swc",
         "rollupConfig": "packages/runtime-core/rollup.config.js",
-        "format": ["cjs", "esm"]
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false
       },
       "dependsOn": [
         {
