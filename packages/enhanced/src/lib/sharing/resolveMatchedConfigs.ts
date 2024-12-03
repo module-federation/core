@@ -15,6 +15,9 @@ const LazySet = require(
   normalizeWebpackPath('webpack/lib/util/LazySet'),
 ) as typeof import('webpack/lib/util/LazySet');
 
+const RELATIVE_REQUEST_REGEX = /^\.\.?(\/|$)/;
+const ABSOLUTE_PATH_REGEX = /^(\/|[A-Za-z]:\\|\\\\)/;
+
 interface MatchedConfigs<T> {
   resolved: Map<string, T>;
   unresolved: Map<string, T>;
@@ -34,12 +37,12 @@ function createCompositeKey(request: string, config: ConsumeOptions): string {
       ? config.shareKey
       : baseRequest;
 
-  // const key = baseRequest;
   if (config.issuerLayer) {
     return `(${config.issuerLayer})${key}`;
   } else if (config.layer) {
     return `(${config.layer})${key}`;
   } else {
+    // return original request for key
     return request;
   }
 }
@@ -61,7 +64,7 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
 
   await Promise.all(
     configs.map(([request, config]) => {
-      if (/^\.\.?(\/|$)/.test(request)) {
+      if (RELATIVE_REQUEST_REGEX.test(request)) {
         // relative request
         return new Promise<void>((resolve) => {
           resolver.resolve(
@@ -84,7 +87,7 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
             },
           );
         });
-      } else if (/^(\/|[A-Za-z]:\\|\\\\)/.test(request)) {
+      } else if (ABSOLUTE_PATH_REGEX.test(request)) {
         // absolute path
         resolved.set(request, config);
         return undefined;
