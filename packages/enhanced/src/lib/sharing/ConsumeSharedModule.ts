@@ -48,6 +48,10 @@ export type ConsumeOptions = {
    */
   importResolved?: string | undefined;
   /**
+   * The actual request to use for importing the module. If not specified, the property name/key will be used.
+   */
+  request?: string;
+  /**
    * global share key
    */
   shareKey: string;

@@ -79,4 +79,8 @@ export interface ConsumesConfig {
    * Layer for the shared module.
    */
   layer?: string;
+  /**
+   * The actual request to use for importing the module. If not specified, the property name/key will be used.
+   */
+  request?: string;
 }

@@ -12,3 +12,15 @@ it('should consume lib-two v1.3.4 using default non-eager share configuration', 
   expect(version).toBe('1.3.4');
   expect(layer).toBe(undefined);
 });
+
+it('should consume thing1 from multi-pkg', async () => {
+  const { version, layer } = await import('multi-pkg/thing1');
+  expect(version).toBe('2.0.0');
+  expect(layer).toBeUndefined();
+});
+
+it('should consume thing2 from multi-pkg', async () => {
+  const { version, layer } = await import('multi-pkg/thing2');
+  expect(version).toBe('2.0.0');
+  expect(layer).toBeUndefined();
+});

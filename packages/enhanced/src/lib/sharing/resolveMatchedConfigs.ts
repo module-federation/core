@@ -29,20 +29,13 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
 };
 
 function createCompositeKey(request: string, config: ConsumeOptions): string {
-  // First determine the base key to use
-  const baseRequest =
-    config.import && request !== config.import ? config.import : request;
-  const key =
-    config.shareKey && request !== config.shareKey
-      ? config.shareKey
-      : baseRequest;
-
   if (config.issuerLayer) {
-    return `(${config.issuerLayer})${key}`;
+    return `(${config.issuerLayer})${request}`;
+    // layer unlikely to be used, issuerLayer is what factorize provides
+    // which is what we need to create a matching key for
   } else if (config.layer) {
-    return `(${config.layer})${key}`;
+    return `(${config.layer})${request}`;
   } else {
-    // return original request for key
     return request;
   }
 }
@@ -64,20 +57,21 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
 
   await Promise.all(
     configs.map(([request, config]) => {
-      if (RELATIVE_REQUEST_REGEX.test(request)) {
+      const resolveRequest = config.request || request;
+      if (RELATIVE_REQUEST_REGEX.test(resolveRequest)) {
         // relative request
         return new Promise<void>((resolve) => {
           resolver.resolve(
             {},
             context,
-            request,
+            resolveRequest,
             resolveContext,
             (err, result) => {
               if (err || result === false) {
-                err = err || new Error(`Can't resolve ${request}`);
+                err = err || new Error(`Can't resolve ${resolveRequest}`);
                 compilation.errors.push(
                   new ModuleNotFoundError(null, err, {
-                    name: `shared module ${request}`,
+                    name: `shared module ${resolveRequest}`,
                   }),
                 );
                 return resolve();
@@ -87,30 +81,19 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
             },
           );
         });
-      } else if (ABSOLUTE_PATH_REGEX.test(request)) {
+      } else if (ABSOLUTE_PATH_REGEX.test(resolveRequest)) {
         // absolute path
-        resolved.set(request, config);
+        resolved.set(resolveRequest, config);
         return undefined;
-      } else if (request.endsWith('/')) {
+      } else if (resolveRequest.endsWith('/')) {
         // module request prefix
-        prefixed.set(request, config);
+        const key = createCompositeKey(resolveRequest, config);
+        prefixed.set(key, config);
         return undefined;
       } else {
         // module request
-        const key = createCompositeKey(request, config);
+        const key = createCompositeKey(resolveRequest, config);
         unresolved.set(key, config);
-        // handle using normal key when request and share key do not differ
-        if (request === config.shareKey && !unresolved.has(request)) {
-          unresolved.set(request, config);
-        } else if (
-          request !== config.shareKey &&
-          request !== config.import &&
-          config.import !== config.shareKey &&
-          !unresolved.has(request)
-        ) {
-          // if request(key), shareKey, and import are all different, add the aliased resolve as the original key
-          unresolved.set(request, config);
-        }
         return undefined;
       }
     }),

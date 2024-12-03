@@ -100,6 +100,7 @@ class ConsumeSharedPlugin {
                 eager: false,
                 issuerLayer: undefined,
                 layer: undefined,
+                request: key,
               }
             : // key is a request/key
               // item is a version
@@ -115,26 +116,33 @@ class ConsumeSharedPlugin {
                 eager: false,
                 issuerLayer: undefined,
                 layer: undefined,
+                request: key,
               };
         return result;
       },
-      (item, key) => ({
-        import: item.import === false ? undefined : item.import || key,
-        shareScope: item.shareScope || options.shareScope || 'default',
-        shareKey: item.shareKey || key,
-        // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
-        requiredVersion: item.requiredVersion,
-        strictVersion:
-          typeof item.strictVersion === 'boolean'
-            ? item.strictVersion
-            : item.import !== false && !item.singleton,
-        //@ts-ignore
-        packageName: item.packageName,
-        singleton: !!item.singleton,
-        eager: !!item.eager,
-        issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
-        layer: item.layer ? item.layer : undefined,
-      }),
+      (item, key) => {
+        const request = item.request || key;
+        return {
+          import: item.import === false ? undefined : item.import || request,
+          shareScope: item.shareScope || options.shareScope || 'default',
+          shareKey: item.shareKey || request,
+          requiredVersion:
+            item.requiredVersion === false
+              ? false
+              : // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+                (item.requiredVersion as SemVerRange),
+          strictVersion:
+            typeof item.strictVersion === 'boolean'
+              ? item.strictVersion
+              : item.import !== false && !item.singleton,
+          packageName: item.packageName,
+          singleton: !!item.singleton,
+          eager: !!item.eager,
+          issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
+          layer: item.layer ? item.layer : undefined,
+          request,
+        } as ConsumeOptions;
+      },
     );
   }
 
@@ -317,29 +325,20 @@ class ConsumeSharedPlugin {
               ) {
                 return;
               }
-              let match = unresolvedConsumes.get(
+              const match = unresolvedConsumes.get(
                 createLookupKey(request, contextInfo),
               );
 
-              if (match === undefined) {
-                // handle case like require('lib-two-layered')
-                //  'lib-two-layered': {
-                //           import: 'lib2',
-                //           shareKey: 'lib-two',
-                //           requiredVersion: '^1.0.0',
-                //           version: '1.3.4',
-                //           strictVersion: true,
-                //           eager: true,
-                //           issuerLayer: 'lib-two-layer',
-                //           layer: 'differing-layer',
-                //         },
-                // fallback to using alias
-                match = unresolvedConsumes.get(request);
-                // check alias matches issuerLayer
-                if (match && match.issuerLayer !== contextInfo.issuerLayer) {
-                  match = undefined;
-                }
-              }
+              // not sure if i need this with the `request` options passthrough
+              // if (match === undefined) {
+
+              //   // fallback to using alias
+              //   match = unresolvedConsumes.get(request);
+              //   // check alias matches issuerLayer
+              //   if (match && match.issuerLayer !== contextInfo.issuerLayer) {
+              //     match = undefined;
+              //   }
+              // }
 
               if (match !== undefined) {
                 return createConsumeSharedModule(context, request, match);
