@@ -5,6 +5,7 @@ module.exports = {
   output: {
     uniqueName: '2-container-full',
   },
+  entry: './index.js',
   plugins: [
     new ModuleFederationPlugin({
       name: 'main',

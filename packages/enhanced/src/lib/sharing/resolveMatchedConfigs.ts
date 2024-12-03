@@ -40,10 +40,10 @@ function createCompositeKey(request: string, config: ConsumeOptions): string {
   } else if (config.layer) {
     return `(${config.layer})${key}`;
   } else {
-    return key;
+    return request;
   }
 }
-
+// TODO: look at passing dedicated request key instead of infer from object key
 export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   compilation: Compilation,
   configs: [string, T][],
@@ -96,7 +96,16 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
         // module request
         const key = createCompositeKey(request, config);
         unresolved.set(key, config);
+        // handle using normal key when request and share key do not differ
         if (request === config.shareKey && !unresolved.has(request)) {
+          unresolved.set(request, config);
+        } else if (
+          request !== config.shareKey &&
+          request !== config.import &&
+          config.import !== config.shareKey &&
+          !unresolved.has(request)
+        ) {
+          // if request(key), shareKey, and import are all different, add the aliased resolve as the original key
           unresolved.set(request, config);
         }
         return undefined;

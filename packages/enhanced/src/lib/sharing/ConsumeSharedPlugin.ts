@@ -317,10 +317,30 @@ class ConsumeSharedPlugin {
               ) {
                 return;
               }
-              const match = unresolvedConsumes.get(
+              let match = unresolvedConsumes.get(
                 createLookupKey(request, contextInfo),
               );
-              debugger;
+
+              if (match === undefined) {
+                // handle case like require('lib-two-layered')
+                //  'lib-two-layered': {
+                //           import: 'lib2',
+                //           shareKey: 'lib-two',
+                //           requiredVersion: '^1.0.0',
+                //           version: '1.3.4',
+                //           strictVersion: true,
+                //           eager: true,
+                //           issuerLayer: 'lib-two-layer',
+                //           layer: 'differing-layer',
+                //         },
+                // fallback to using alias
+                match = unresolvedConsumes.get(request);
+                // check alias matches issuerLayer
+                if (match && match.issuerLayer !== contextInfo.issuerLayer) {
+                  match = undefined;
+                }
+              }
+
               if (match !== undefined) {
                 return createConsumeSharedModule(context, request, match);
               }
