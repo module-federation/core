@@ -180,7 +180,9 @@ export const compileTs = async (
     const execPromise = util.promisify(exec);
     const cmd = `npx ${remoteOptions.compilerInstance} --project ${tempTsConfigJsonPath}`;
     try {
-      await execPromise(cmd);
+      await execPromise(cmd, {
+        cwd: dirname(remoteOptions.tsConfigPath),
+      });
     } catch (err) {
       throw new Error(
         getShortErrorMsg(TYPE_001, typeDescMap, {
