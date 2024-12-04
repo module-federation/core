@@ -23,11 +23,7 @@ export default defineConfig({
       if (process.env.E2ETEST) {
         config.entry.worker = './src/worker/index.ts';
       }
-      config.entry['fast-refresh-init'] =
-        './src/utils/chrome/fast-refresh-init.ts';
       config.entry['fast-refresh'] = './src/utils/chrome/fast-refresh.ts';
-      config.entry['snapshot-plugin-init'] =
-        './src/utils/chrome/snapshot-plugin-init.ts';
       config.entry['snapshot-plugin'] = './src/utils/chrome/snapshot-plugin.ts';
       config.entry['post-message'] = './src/utils/chrome/post-message.ts';
       config.entry['post-message-init'] =
