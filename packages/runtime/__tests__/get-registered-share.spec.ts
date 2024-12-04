@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getRegisteredShare } from '../src/utils/share';
-import { assert } from '../src/utils/logger';
+import { assert, getRegisteredShare } from '@module-federation/runtime-core';
 
 describe('get expected shared', () => {
   it('get loading shared if sharedStrategy is "loaded-first"', () => {

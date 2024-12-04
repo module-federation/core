@@ -1,4 +1,7 @@
-import { GlobalShareScopeMap, Options } from '../src/type';
+import {
+  GlobalShareScopeMap,
+  Options,
+} from '@module-federation/runtime-core/types';
 export const mergeShareInfo1 = {
   name: '@federation/merge-shared',
   remotes: [],

@@ -1,0 +1,24 @@
+{
+  "id": "@snapshot/remote1",
+  "name": "@snapshot/remote1",
+  "metaData": {
+    "name": "@snapshot/remote1",
+    "publicPath": "http://localhost:1111/",
+    "type": "app",
+    "globalName": "@snapshot/remote1",
+    "buildInfo": {
+      "buildVersion": "custom"
+    },
+    "remoteEntry": {
+      "name": "federation-remote-entry.js",
+      "path": "resources/snapshot/remote1"
+    },
+    "types": {
+      "name": "index.d.ts",
+      "path": "./"
+    }
+  },
+  "remotes": [],
+  "shared": [],
+  "exposes": []
+}

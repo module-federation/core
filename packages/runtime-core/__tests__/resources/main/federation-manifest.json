@@ -1,0 +1,38 @@
+{
+  "id": "@demo/main",
+  "name": "@demo/main",
+  "metaData": {
+    "name": "@demo/main",
+    "publicPath": "http://localhost:1111/",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "custom"
+    },
+    "remoteEntry": {
+      "name": "federation-remote-entry.js",
+      "path": "resources/main/"
+    },
+    "types": {
+      "name": "index.d.ts",
+      "path": "./"
+    }
+  },
+  "remotes": [],
+  "shared": [],
+  "exposes": [
+    {
+      "id": "@demo/main:shared-button",
+      "name": "shared-button",
+      "requires": [],
+      "file": "./src/button.tsx",
+      "federationContainerName": "@demo/main",
+      "assets": {
+        "sync": [
+          "src_button_tsx.87761dde02c2b29b68b3.js",
+          "vendors-_eden-mono_temp_node_modules_pnpm_react_17_0_2_node_modules_react_index_js.782f16d0ce02b62c1fe3.js"
+        ],
+        "async": []
+      }
+    }
+  ]
+}
