@@ -13,7 +13,7 @@
         "main": "packages/rspack/src/index.ts",
         "tsConfig": "packages/rspack/tsconfig.lib.json",
         "assets": [],
-        "external": ["@module-federation/*"],
+        "external": ["@module-federation/*", "@rspack/core"],
         "project": "packages/rspack/package.json",
         "rollupConfig": "packages/rspack/rollup.config.js",
         "compiler": "swc",

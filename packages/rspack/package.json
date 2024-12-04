@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rspack",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "license": "MIT",
   "keywords": [
     "Module Federation",
@@ -45,7 +45,8 @@
   },
   "peerDependencies": {
     "typescript": "^4.9.0 || ^5.0.0",
-    "vue-tsc": ">=1.0.24"
+    "vue-tsc": ">=1.0.24",
+    "@rspack/core": ">=0.7"
   },
   "peerDependenciesMeta": {
     "typescript": {
