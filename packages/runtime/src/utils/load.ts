@@ -31,7 +31,9 @@ async function loadEsmEntry({
             `import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
           )([resolve, reject]);
         } else {
-          import(/* webpackIgnore: true */ /* @vite-ignore */ entry).then(resolve).catch(reject);
+          import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
+            .then(resolve)
+            .catch(reject);
         }
       } else {
         resolve(remoteEntryExports);
