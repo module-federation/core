@@ -216,7 +216,7 @@
     "tailwindcss": "3.4.13",
     "terser-webpack-plugin": "^5.3.10",
     "ts-jest": "29.1.5",
-    "tslib": "2.6.3",
+    "tslib": "2.8.1",
     "tsup": "7.2.0",
     "typescript": "5.5.2",
     "url-loader": "4.1.1",
