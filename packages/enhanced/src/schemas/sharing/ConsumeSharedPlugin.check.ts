@@ -34,6 +34,7 @@ function r(
           'singleton' !== t &&
           'strictVersion' !== t &&
           'issuerLayer' !== t &&
+          'request' !== t &&
           'layer' !== t
         )
           return (r.errors = [{ params: { additionalProperty: t } }]), !1;

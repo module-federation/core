@@ -16,17 +16,24 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /tests\/layer-inheritance\.test\.js$/,
-        layer: 'index-layer',
-      },
-      {
-        test: /shared\/react-boundary\.js$/,
-        issuerLayer: 'index-layer',
-        layer: 'entry-layer',
-      },
-      {
         test: /tests\/different-layers\.test\.js$/,
         layer: 'differing-layer',
+      },
+      {
+        test: /tests\/prefixed-share\.test\.js$/,
+        layer: 'prefixed-layer',
+      },
+      {
+        layer: 'multi-pkg-layer',
+        issuerLayer: 'prefixed-layer',
+        use: [
+          {
+            loader: path.resolve(
+              __dirname,
+              './loaders/multi-pkg-layer-loader.js',
+            ),
+          },
+        ],
       },
       {
         layer: 'required-layer',
@@ -54,12 +61,19 @@ module.exports = {
         ],
       },
       {
-        test: /react\/index\.js$/,
-        layer: 'react-layer',
-        issuerLayer: 'entry-layer',
+        test: /tests\/lib-two\.test\.js$/,
+        layer: 'lib-two-layer',
+      },
+      {
+        test: /lib2\/index\.js$/,
+        layer: 'lib-two-required-layer',
+        issuerLayer: 'lib-two-layer',
         use: [
           {
-            loader: path.resolve(__dirname, './loaders/react-layer-loader.js'),
+            loader: path.resolve(
+              __dirname,
+              './loaders/different-layer-loader.js',
+            ),
           },
         ],
       },
@@ -71,7 +85,14 @@ module.exports = {
         react: {
           singleton: true,
         },
+        'react-rsc': {
+          request: 'react',
+          issuerLayer: 'app-layer',
+          layer: 'rsc-layer',
+          shareKey: 'react',
+        },
         'explicit-layer-react': {
+          request: 'react/index2',
           import: 'react/index2',
           shareKey: 'react',
           singleton: true,
@@ -79,16 +100,56 @@ module.exports = {
           layer: 'explicit-layer',
         },
         'differing-layer-react': {
+          request: 'react',
           import: 'react',
           shareKey: 'react',
           singleton: true,
-          layer: 'required-layer',
+          issuerLayer: 'differing-layer',
+          layer: 'differing-layer',
         },
-        'layered-react': {
-          import: 'react',
-          shareKey: 'react',
-          singleton: true,
-          issuerLayer: 'other-layer',
+        'lib-two': {
+          request: 'lib-two',
+          import: 'lib2',
+          requiredVersion: '^1.0.0',
+          version: '1.3.4',
+          strictVersion: true,
+          eager: false,
+        },
+        nonsense: {
+          request: 'lib-two', // reuiqrE('lib-two)
+          import: 'lib2',
+          shareKey: 'lib-two',
+          requiredVersion: '^1.0.0',
+          version: '1.3.4',
+          strictVersion: true,
+          eager: true,
+          issuerLayer: 'lib-two-layer',
+          layer: 'differing-layer',
+        },
+        'lib-two-layered': {
+          import: 'lib2',
+          shareKey: 'lib-two',
+          requiredVersion: '^1.0.0',
+          version: '1.3.4',
+          strictVersion: true,
+          eager: true,
+          issuerLayer: 'lib-two-layer',
+          layer: 'differing-layer',
+        },
+        oruihrioeudjoeijroei: {
+          request: 'multi-pkg/',
+          requiredVersion: '^2.0.0',
+          version: '2.0.0',
+          strictVersion: true,
+          eager: true,
+        },
+        '@tiktok/': {
+          requiredVersion: '^2.0.0',
+          version: '2.0.0',
+          strictVersion: true,
+          eager: true,
+          issuerLayer: 'prefixed-layer',
+          layer: 'multi-pkg-layer',
         },
       },
     }),

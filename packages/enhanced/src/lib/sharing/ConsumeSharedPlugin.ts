@@ -30,6 +30,7 @@ import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugi
 import ShareRuntimeModule from './ShareRuntimeModule';
 import type { SemVerRange } from 'webpack/lib/util/semver';
 import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
+import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFactory';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -61,6 +62,17 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
   dependencyType: 'esm',
 };
 const PLUGIN_NAME = 'ConsumeSharedPlugin';
+
+// Helper function to create composite key
+function createLookupKey(
+  request: string,
+  contextInfo: ModuleFactoryCreateDataContextInfo,
+): string {
+  return contextInfo.issuerLayer
+    ? `(${contextInfo.issuerLayer})${request}`
+    : request;
+}
+
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
 
@@ -88,6 +100,7 @@ class ConsumeSharedPlugin {
                 eager: false,
                 issuerLayer: undefined,
                 layer: undefined,
+                request: key,
               }
             : // key is a request/key
               // item is a version
@@ -103,26 +116,33 @@ class ConsumeSharedPlugin {
                 eager: false,
                 issuerLayer: undefined,
                 layer: undefined,
+                request: key,
               };
         return result;
       },
-      (item, key) => ({
-        import: item.import === false ? undefined : item.import || key,
-        shareScope: item.shareScope || options.shareScope || 'default',
-        shareKey: item.shareKey || key,
-        // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
-        requiredVersion: item.requiredVersion,
-        strictVersion:
-          typeof item.strictVersion === 'boolean'
-            ? item.strictVersion
-            : item.import !== false && !item.singleton,
-        //@ts-ignore
-        packageName: item.packageName,
-        singleton: !!item.singleton,
-        eager: !!item.eager,
-        issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
-        layer: item.layer ? item.layer : undefined,
-      }),
+      (item, key) => {
+        const request = item.request || key;
+        return {
+          import: item.import === false ? undefined : item.import || request,
+          shareScope: item.shareScope || options.shareScope || 'default',
+          shareKey: item.shareKey || request,
+          requiredVersion:
+            item.requiredVersion === false
+              ? false
+              : // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+                (item.requiredVersion as SemVerRange),
+          strictVersion:
+            typeof item.strictVersion === 'boolean'
+              ? item.strictVersion
+              : item.import !== false && !item.singleton,
+          packageName: item.packageName,
+          singleton: !!item.singleton,
+          eager: !!item.eager,
+          issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
+          layer: item.layer ? item.layer : undefined,
+          request,
+        } as ConsumeOptions;
+      },
     );
   }
 
@@ -305,54 +325,35 @@ class ConsumeSharedPlugin {
               ) {
                 return;
               }
+              const match = unresolvedConsumes.get(
+                createLookupKey(request, contextInfo),
+              );
 
-              // First try to match with layer-specific request
-              if (contextInfo.issuerLayer) {
-                // Try to find a layer-specific match
-                for (const [key, options] of unresolvedConsumes) {
-                  if (
-                    options.issuerLayer === contextInfo.issuerLayer &&
-                    (key === request ||
-                      (options.import && options.import === request))
-                  ) {
-                    return createConsumeSharedModule(context, request, {
-                      ...options,
-                      layer: options.layer || contextInfo.issuerLayer,
-                    });
-                  }
-                }
-              }
+              // not sure if i need this with the `request` options passthrough
+              // if (match === undefined) {
 
-              // If no layer-specific match found, try regular matching
-              const match = unresolvedConsumes.get(request);
+              //   // fallback to using alias
+              //   match = unresolvedConsumes.get(request);
+              //   // check alias matches issuerLayer
+              //   if (match && match.issuerLayer !== contextInfo.issuerLayer) {
+              //     match = undefined;
+              //   }
+              // }
+
               if (match !== undefined) {
-                // Only use non-layer-specific match if it doesn't have issuerLayer
-                if (!match.issuerLayer) {
-                  return createConsumeSharedModule(context, request, {
-                    ...match,
-                    layer: match.layer || contextInfo.issuerLayer,
-                  });
-                }
+                return createConsumeSharedModule(context, request, match);
               }
-
-              // Check prefixed consumes
               for (const [prefix, options] of prefixedConsumes) {
                 if (request.startsWith(prefix)) {
-                  // Only use prefixed consume if layer matches or no layer specified
-                  if (
-                    !options.issuerLayer ||
-                    options.issuerLayer === contextInfo.issuerLayer
-                  ) {
-                    const remainder = request.slice(prefix.length);
-                    return createConsumeSharedModule(context, request, {
-                      ...options,
-                      import: options.import
-                        ? options.import + remainder
-                        : undefined,
-                      shareKey: options.shareKey + remainder,
-                      layer: options.layer || contextInfo.issuerLayer,
-                    });
-                  }
+                  const remainder = request.slice(prefix.length);
+                  return createConsumeSharedModule(context, request, {
+                    ...options,
+                    import: options.import
+                      ? options.import + remainder
+                      : undefined,
+                    shareKey: options.shareKey + remainder,
+                    layer: options.layer || contextInfo.issuerLayer,
+                  });
                 }
               }
             });

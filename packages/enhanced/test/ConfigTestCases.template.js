@@ -62,7 +62,6 @@ const describeCases = (config) => {
     for (const category of categories) {
       // eslint-disable-next-line no-loop-func
       describe(category.name, () => {
-        // category.tests = [category.tests[1]];
         for (const testName of category.tests) {
           // eslint-disable-next-line no-loop-func
           describe(testName, function () {
