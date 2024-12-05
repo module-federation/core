@@ -9,6 +9,11 @@
   "publishConfig": {
     "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/runtime"
+  },
   "files": [
     "dist/",
     "README.md"
