@@ -144,6 +144,10 @@ export interface DtsHostOptions {
   maxRetries?: number;
   consumeAPITypes?: boolean;
   runtimePkgs?: string[];
+  /**
+   * Used as the default base path for relative remote URLs when locating types
+   */
+  remoteBasePath?: string;
 }
 
 export interface DtsRemoteOptions {
