@@ -1,5 +1,20 @@
 # @module-federation/bridge-react
 
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.1
+- @module-federation/bridge-shared@0.8.1
+
+## 0.8.0
+
+### Patch Changes
+
+- 542164e: chore(bridge-react): set react-router-dom peer version to >=4 <7
+  - @module-federation/sdk@0.8.0
+  - @module-federation/bridge-shared@0.8.0
+
 ## 0.7.7
 
 ### Patch Changes

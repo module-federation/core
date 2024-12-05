@@ -1,5 +1,32 @@
 # @module-federation/enhanced
 
+## 0.8.1
+
+### Patch Changes
+
+- Updated dependencies [8165419]
+  - @module-federation/rspack@0.8.1
+  - @module-federation/sdk@0.8.1
+  - @module-federation/runtime-tools@0.8.1
+  - @module-federation/managers@0.8.1
+  - @module-federation/manifest@0.8.1
+  - @module-federation/dts-plugin@0.8.1
+  - @module-federation/bridge-react-webpack-plugin@0.8.1
+  - @module-federation/data-prefetch@0.8.1
+
+## 0.8.0
+
+### Patch Changes
+
+- @module-federation/rspack@0.8.0
+- @module-federation/sdk@0.8.0
+- @module-federation/runtime-tools@0.8.0
+- @module-federation/managers@0.8.0
+- @module-federation/manifest@0.8.0
+- @module-federation/dts-plugin@0.8.0
+- @module-federation/bridge-react-webpack-plugin@0.8.0
+- @module-federation/data-prefetch@0.8.0
+
 ## 0.7.7
 
 ### Patch Changes

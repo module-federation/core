@@ -1,4 +1,4 @@
-import type { AppTools, Bundler } from '@modern-js/app-tools';
+import type { AppTools, Bundler, UserConfig } from '@modern-js/app-tools';
 
 type AppToolsUserConfig<T extends Bundler> = AppTools<T>['userConfig']['tools'];
 
@@ -20,6 +20,14 @@ type RspackConfigs =
     ? U
     : never;
 type ObjectRspack = ExtractObjectType<OmitArrayConfiguration<RspackConfigs>>;
+
+type BundlerChain = ExcludeUndefined<
+  ExcludeUndefined<UserConfig<AppTools>['tools']>['bundlerChain']
+>;
+
+type BundlerChainFunc = Extract<BundlerChain, (chain: any, utils: any) => any>;
+
+export type BundlerChainConfig = Parameters<BundlerChainFunc>[0];
 
 export type BundlerConfig<T extends Bundler> = T extends 'rspack'
   ? ObjectRspack
