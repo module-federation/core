@@ -35,7 +35,6 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
           console.log(
             `[retry-plugin] remoteEntryExportsRes retrying ${attempts} times`,
           );
-          // delete globalLoading[uniqueKey];
           beforeExecuteRetry && beforeExecuteRetry();
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }

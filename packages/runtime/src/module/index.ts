@@ -61,9 +61,8 @@ class Module {
       `remoteEntryExports is undefined \n ${safeToString(this.remoteInfo)}`,
     );
 
-    // @ts-ignore
-    this.remoteEntryExports = remoteEntryExports;
-    return this.remoteEntryExports as RemoteEntryExports;
+    this.remoteEntryExports = remoteEntryExports as RemoteEntryExports;
+    return this.remoteEntryExports;
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
