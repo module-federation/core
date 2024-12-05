@@ -1,9 +1,10 @@
-import {
-  init,
-  registerGlobalPlugins,
-} from '@module-federation/enhanced/runtime';
+import { init } from '@module-federation/enhanced/runtime';
 import customPlugin from './runtimePlugin';
 
-registerGlobalPlugins([customPlugin()]);
+init({
+  name: 'runtime_host',
+  remotes: [],
+  globalPlugins: [customPlugin(), customPlugin()],
+});
 
 require('./bootstrap');

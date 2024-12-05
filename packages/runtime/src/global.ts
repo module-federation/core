@@ -300,16 +300,20 @@ export const getRemoteEntryExports = (
 // If a plugin is already registered, a warning message is logged.
 export const registerGlobalPlugins = (
   plugins: Array<FederationRuntimePlugin>,
-): void => {
+): Array<FederationRuntimePlugin> => {
+  const registeredPlugins: Array<FederationRuntimePlugin> = [];
   const { __GLOBAL_PLUGIN__ } = nativeGlobal.__FEDERATION__;
 
-  plugins.forEach((plugin) => {
+  plugins.map((plugin) => {
     if (__GLOBAL_PLUGIN__.findIndex((p) => p.name === plugin.name) === -1) {
       __GLOBAL_PLUGIN__.push(plugin);
+      registeredPlugins.push(plugin);
     } else {
       warn(`The plugin ${plugin.name} has been registered.`);
     }
   });
+
+  return registeredPlugins;
 };
 
 export const getGlobalHostPlugins = (): Array<FederationRuntimePlugin> =>

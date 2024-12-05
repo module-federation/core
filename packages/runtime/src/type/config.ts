@@ -110,12 +110,13 @@ export interface Options {
   remotes: Array<Remote>;
   shared: ShareInfos;
   plugins: Array<FederationRuntimePlugin>;
+  globalPlugins: Array<FederationRuntimePlugin>;
   inBrowser: boolean;
   shareStrategy?: ShareStrategy;
 }
 
 export type UserOptions = Omit<
-  Optional<Options, 'plugins'>,
+  Optional<Options, 'plugins' | 'globalPlugins'>,
   'shared' | 'inBrowser'
 > & {
   shared?: {
