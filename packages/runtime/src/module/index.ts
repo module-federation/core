@@ -5,9 +5,10 @@ import {
   RUNTIME_002,
   runtimeDescMap,
 } from '@module-federation/error-codes';
-import { getRemoteEntry } from '../utils/load';
+import { getRemoteEntry, getRemoteEntryUniqueKey } from '../utils/load';
 import { FederationHost } from '../core';
 import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
+import { globalLoading } from '../global';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
 
@@ -34,19 +35,35 @@ class Module {
       return this.remoteEntryExports;
     }
 
-    // Get remoteEntry.js
-    const remoteEntryExports = await getRemoteEntry({
-      origin: this.host,
-      remoteInfo: this.remoteInfo,
-      remoteEntryExports: this.remoteEntryExports,
-    });
+    let remoteEntryExports;
+    const uniqueKey = getRemoteEntryUniqueKey(this.remoteInfo);
+    remoteEntryExports =
+      await this.host.loaderHook.lifecycle.getRemoteEntryExports.emit({
+        getRemoteEntry,
+        origin: this.host,
+        remoteInfo: this.remoteInfo,
+        remoteEntryExports: this.remoteEntryExports,
+        globalLoading,
+        uniqueKey,
+      });
+
+    // get exposeGetter
+    if (!remoteEntryExports) {
+      remoteEntryExports = await getRemoteEntry({
+        origin: this.host,
+        remoteInfo: this.remoteInfo,
+        remoteEntryExports: this.remoteEntryExports,
+      });
+    }
+
     assert(
       remoteEntryExports,
       `remoteEntryExports is undefined \n ${safeToString(this.remoteInfo)}`,
     );
 
+    // @ts-ignore
     this.remoteEntryExports = remoteEntryExports;
-    return this.remoteEntryExports;
+    return this.remoteEntryExports as RemoteEntryExports;
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

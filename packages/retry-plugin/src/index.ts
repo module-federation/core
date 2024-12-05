@@ -1,7 +1,7 @@
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 import { fetchWithRetry } from './fetch-retry';
-import { defaultRetries, defaultRetryDelay } from './constant';
 import type { RetryPluginParams } from './types';
+import { scriptCommonRetry } from './util';
 
 const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
   fetch: fetchOption,
@@ -36,39 +36,37 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
     }
     return fetch(url, options);
   },
+
+  async getRemoteEntryExports({
+    getRemoteEntry,
+    origin,
+    remoteInfo,
+    remoteEntryExports,
+    globalLoading,
+    uniqueKey,
+  }) {
+    const retryFn = getRemoteEntry;
+    const beforeExecuteRetry = () => delete globalLoading[uniqueKey];
+    const getRemoteEntryRetry = scriptCommonRetry({
+      scriptOption,
+      moduleInfo: remoteInfo,
+      retryFn,
+      beforeExecuteRetry,
+    });
+    return getRemoteEntryRetry({
+      origin,
+      remoteInfo,
+      remoteEntryExports,
+    });
+  },
   async getModuleFactory({ remoteEntryExports, expose, moduleInfo }) {
-    let moduleFactory;
-    const { retryTimes = defaultRetries, retryDelay = defaultRetryDelay } =
-      scriptOption || {};
-
-    if (
-      (scriptOption?.moduleName &&
-        scriptOption?.moduleName.some(
-          (m) => moduleInfo.name === m || (moduleInfo as any)?.alias === m,
-        )) ||
-      scriptOption?.moduleName === undefined
-    ) {
-      let attempts = 0;
-
-      while (attempts - 1 < retryTimes) {
-        try {
-          moduleFactory = await remoteEntryExports.get(expose);
-          break;
-        } catch (error) {
-          attempts++;
-          if (attempts - 1 >= retryTimes) {
-            scriptOption?.cb &&
-              (await new Promise(
-                (resolve) =>
-                  scriptOption?.cb && scriptOption?.cb(resolve, error),
-              ));
-            throw error;
-          }
-          await new Promise((resolve) => setTimeout(resolve, retryDelay));
-        }
-      }
-    }
-    return moduleFactory;
+    const retryFn = remoteEntryExports.get;
+    const getRemoteEntryRetry = scriptCommonRetry({
+      scriptOption,
+      moduleInfo,
+      retryFn,
+    });
+    return getRemoteEntryRetry(expose);
   },
 });
 
