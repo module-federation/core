@@ -11,6 +11,12 @@
         "commands": ["npm run build:lib --prefix packages/chrome-devtools"]
       }
     },
+    "build:chrome-plugins": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run build --prefix packages/chrome-devtools"]
+      }
+    },
     "test": {
       "executor": "nx:run-commands",
       "options": {
