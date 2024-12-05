@@ -4,7 +4,7 @@ import customPlugin from './runtimePlugin';
 init({
   name: 'runtime_host',
   remotes: [],
-  globalPlugins: [customPlugin(), customPlugin()],
+  globalPlugins: [customPlugin()],
 });
 
 require('./bootstrap');
