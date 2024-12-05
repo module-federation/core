@@ -1,6 +1,14 @@
-import { expectTypeOf, describe, it, vi, expect } from 'vitest';
-import { init, loadRemote, loadShare, loadShareSync } from '../src/index';
-import { getInfoWithoutType } from '../src/global';
+import { expectTypeOf, describe, it, vi, expect, assert } from 'vitest';
+import {
+  FederationHost,
+  FederationRuntimePlugin,
+  init,
+  loadRemote,
+  loadShare,
+  loadShareSync,
+} from '../src/index';
+import { getGlobalHostPlugins, getInfoWithoutType } from '../src/global';
+import { mockStaticServer, removeScriptTags } from './mock/utils';
 
 describe('global', () => {
   it('inject mode', () => {
@@ -70,6 +78,118 @@ describe('global', () => {
         () => string | never
       >();
       expectTypeOf(typedLoadShareSync).returns.not.toMatchTypeOf<() => never>();
+    });
+  });
+
+  describe('globalPlugins', async () => {
+    mockStaticServer({
+      baseDir: __dirname,
+      filterKeywords: [],
+      basename: 'http://localhost:1111/',
+    });
+    beforeEach(() => {
+      removeScriptTags();
+    });
+
+    it('should load the globalPlugins to the global instance', async () => {
+      const testPlugin: () => FederationRuntimePlugin = () => ({
+        name: 'testPlugin',
+      });
+      const options = {
+        name: '@federation/hooks',
+        remotes: [],
+        globalPlugins: [testPlugin()],
+      };
+      new FederationHost(options);
+      expect(getGlobalHostPlugins()).toEqual(
+        expect.arrayContaining(options.globalPlugins),
+      );
+    });
+
+    it('core hooks args from global plugin', async () => {
+      let beforeInitArgs: any,
+        initArgs: any,
+        beforeLoadRemoteArgs,
+        loadRemoteArgs;
+
+      const testPlugin: () => FederationRuntimePlugin = () => ({
+        name: 'testPlugin',
+        beforeInit(args) {
+          beforeInitArgs = args;
+          return args;
+        },
+        init(args) {
+          initArgs = args;
+        },
+        beforeRequest(args) {
+          return new Promise((resolve) => {
+            beforeLoadRemoteArgs = args;
+            setTimeout(
+              () =>
+                resolve({
+                  ...args,
+                  id: '@demo/main/add',
+                }),
+              1000,
+            );
+          });
+        },
+        onLoad(args) {
+          loadRemoteArgs = args;
+        },
+      });
+
+      const options = {
+        name: '@federation/hooks',
+        remotes: [
+          {
+            name: '@demo/main',
+            alias: 'main',
+            entry:
+              'http://localhost:1111/resources/main/federation-manifest.json',
+          },
+        ],
+
+        globalPlugins: [testPlugin()],
+      };
+      const GM = new FederationHost(options);
+      assert(beforeInitArgs, "beforeInitArgs can't be undefined");
+      expect(beforeInitArgs).toMatchObject({
+        options: {
+          name: options.name,
+          remotes: options.remotes,
+        },
+        origin: GM,
+      });
+      expect(beforeInitArgs.userOptions.globalPlugins).toEqual(
+        expect.arrayContaining(options.globalPlugins),
+      );
+      expect(initArgs).toMatchObject({
+        options: GM.options,
+        origin: GM,
+      });
+      assert(initArgs, "initArgs can't be undefined");
+      expect(initArgs.options.globalPlugins).toEqual(
+        expect.arrayContaining(options.globalPlugins),
+      );
+      // Modify ./sub to expose ./add
+      const module =
+        await GM.loadRemote<(...args: Array<number>) => number>(
+          '@demo/main/sub',
+        );
+      assert(module, 'loadRemote should return a module');
+      expect(beforeLoadRemoteArgs).toMatchObject({
+        id: '@demo/main/sub',
+        options: GM.options,
+        origin: GM,
+      });
+      expect(loadRemoteArgs).toMatchObject({
+        id: '@demo/main/add',
+        pkgNameOrAlias: '@demo/main',
+        expose: './add',
+        origin: GM,
+      });
+      expect(module(1, 2, 3, 4, 5)).toBe(15);
     });
   });
 });

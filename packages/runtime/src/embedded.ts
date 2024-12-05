@@ -179,6 +179,11 @@ export class FederationHost implements IndexModule.FederationHost {
     return this._getInstance().initShareScopeMap(...args);
   }
 
+  registerGlobalPlugins(
+    ...args: Parameters<IndexModule.FederationHost['registerGlobalPlugins']>
+  ) {
+    return this._getInstance().registerGlobalPlugins(...args);
+  }
   registerPlugins(
     ...args: Parameters<IndexModule.FederationHost['registerPlugins']>
   ) {
