@@ -20,6 +20,7 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
       let attempts = 0;
       while (attempts - 1 < retryTimes) {
         try {
+          beforeExecuteRetry && beforeExecuteRetry();
           retryResponse = await retryFn(...args);
           break;
         } catch (error) {
@@ -35,7 +36,6 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
           console.log(
             `[retry-plugin] remoteEntryExportsRes retrying ${attempts} times`,
           );
-          beforeExecuteRetry && beforeExecuteRetry();
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
       }
