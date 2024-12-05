@@ -75,4 +75,12 @@ export interface SharedConfig {
    * Version of the provided module. Will replace lower matching versions, but not higher.
    */
   version?: false | string;
+  /**
+   * Issuer layer in which the module should be resolved.
+   */
+  issuerLayer?: string;
+  /**
+   * Layer for the shared module.
+   */
+  layer?: string;
 }

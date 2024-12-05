@@ -52,6 +52,8 @@ class SharePlugin {
           singleton: options.singleton,
           packageName: options.packageName,
           eager: options.eager,
+          issuerLayer: options.issuerLayer,
+          layer: options.layer,
         },
       }),
     );
