@@ -115,7 +115,7 @@ export class FederationHost {
       [string, RequestInit],
       Promise<Response> | void | false
     >(),
-    getRemoteEntryExports: new AsyncHook<
+    loadEntryError: new AsyncHook<
       [
         {
           getRemoteEntry: typeof getRemoteEntry;

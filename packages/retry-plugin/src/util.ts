@@ -35,7 +35,9 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
               ));
             throw error;
           }
-          logger.log(`script resource retrying ${attempts} times`);
+          logger.log(
+            `[ Module Federation RetryPlugin ]: script resource retrying ${attempts} times`,
+          );
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
       }

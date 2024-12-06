@@ -37,7 +37,7 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
     return fetch(url, options);
   },
 
-  async getRemoteEntryExports({
+  async loadEntryError({
     getRemoteEntry,
     origin,
     remoteInfo,

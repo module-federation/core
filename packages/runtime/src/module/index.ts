@@ -36,24 +36,23 @@ class Module {
     }
 
     let remoteEntryExports;
-    const uniqueKey = getRemoteEntryUniqueKey(this.remoteInfo);
-    remoteEntryExports =
-      await this.host.loaderHook.lifecycle.getRemoteEntryExports.emit({
-        getRemoteEntry,
-        origin: this.host,
-        remoteInfo: this.remoteInfo,
-        remoteEntryExports: this.remoteEntryExports,
-        globalLoading,
-        uniqueKey,
-      });
-
-    // get exposeGetter
-    if (!remoteEntryExports) {
+    try {
       remoteEntryExports = await getRemoteEntry({
         origin: this.host,
         remoteInfo: this.remoteInfo,
         remoteEntryExports: this.remoteEntryExports,
       });
+    } catch (err) {
+      const uniqueKey = getRemoteEntryUniqueKey(this.remoteInfo);
+      remoteEntryExports =
+        await this.host.loaderHook.lifecycle.loadEntryError.emit({
+          getRemoteEntry,
+          origin: this.host,
+          remoteInfo: this.remoteInfo,
+          remoteEntryExports: this.remoteEntryExports,
+          globalLoading,
+          uniqueKey,
+        });
     }
 
     assert(
