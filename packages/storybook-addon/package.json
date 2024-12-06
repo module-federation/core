@@ -40,6 +40,9 @@
     "*": {
       ".": [
         "./dist/index.d.ts"
+      ],
+      "preset": [
+        "./dist/preset.d.ts"
       ]
     }
   },
