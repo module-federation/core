@@ -27,6 +27,7 @@
     "webpack": "5.93.0"
   },
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
