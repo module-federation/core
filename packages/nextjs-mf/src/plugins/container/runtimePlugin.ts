@@ -1,8 +1,4 @@
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
-import {
-  ModuleInfo,
-  ConsumerModuleInfoWithPublicPath,
-} from '@module-federation/sdk';
 
 export default function (): FederationRuntimePlugin {
   return {
@@ -199,22 +195,23 @@ export default function (): FederationRuntimePlugin {
         return args;
       }
 
-      // re-assign publicPath based on remoteEntry location
-      if (options.inBrowser) {
-        remoteSnapshot.publicPath = remoteSnapshot.publicPath.substring(
+      // re-assign publicPath based on remoteEntry location if in browser nextjs remote
+      const { publicPath } = remoteSnapshot;
+      if (options.inBrowser && publicPath.includes('/_next/')) {
+        remoteSnapshot.publicPath = publicPath.substring(
           0,
-          remoteSnapshot.publicPath.lastIndexOf('/_next/') + 7,
+          publicPath.lastIndexOf('/_next/') + 7,
         );
       } else {
         const serverPublicPath = manifestUrl.substring(
           0,
           manifestUrl.indexOf('mf-manifest.json'),
         );
-
         remoteSnapshot.publicPath = serverPublicPath;
-        if ('publicPath' in manifestJson.metaData) {
-          manifestJson.metaData.publicPath = serverPublicPath;
-        }
+      }
+
+      if ('publicPath' in manifestJson.metaData) {
+        manifestJson.metaData.publicPath = remoteSnapshot.publicPath;
       }
 
       return args;
