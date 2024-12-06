@@ -45,6 +45,7 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
     globalLoading,
     uniqueKey,
   }) {
+    if (!scriptOption) return;
     const retryFn = getRemoteEntry;
     const beforeExecuteRetry = () => delete globalLoading[uniqueKey];
     const getRemoteEntryRetry = scriptCommonRetry({
@@ -60,6 +61,7 @@ const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
     });
   },
   async getModuleFactory({ remoteEntryExports, expose, moduleInfo }) {
+    if (!scriptOption) return;
     const retryFn = remoteEntryExports.get;
     const getRemoteEntryRetry = scriptCommonRetry({
       scriptOption,

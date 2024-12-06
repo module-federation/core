@@ -1,11 +1,13 @@
 import { defaultRetries, defaultRetryDelay } from './constant';
+import type { ScriptCommonRetryOption } from './types';
+import logger from './logger';
 
 export function scriptCommonRetry<T extends (...args: any[]) => void>({
   scriptOption,
   moduleInfo,
   retryFn,
   beforeExecuteRetry = () => {},
-}) {
+}: ScriptCommonRetryOption) {
   return async function (...args: Parameters<T>) {
     let retryResponse;
     const { retryTimes = defaultRetries, retryDelay = defaultRetryDelay } =
@@ -13,7 +15,7 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
     if (
       (scriptOption?.moduleName &&
         scriptOption?.moduleName.some(
-          (m) => moduleInfo.name === m || (moduleInfo as any)?.alias === m,
+          (m) => moduleInfo.name === m || moduleInfo?.alias === m,
         )) ||
       scriptOption?.moduleName === undefined
     ) {
@@ -33,9 +35,7 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
               ));
             throw error;
           }
-          console.log(
-            `[retry-plugin] remoteEntryExportsRes retrying ${attempts} times`,
-          );
+          logger.log(`script resource retrying ${attempts} times`);
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
       }
