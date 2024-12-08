@@ -87,11 +87,12 @@ type ShareArgs =
   | (SharedBaseArgs & { lib: () => Module });
 
 type SharedBaseArgs = {
-  version: string;
+  version?: string;
   shareConfig?: SharedConfig;
   scope?: string | Array<string>;
   deps?: Array<string>;
   strategy?: 'version-first' | 'loaded-first';
+  loaded?: boolean;
 };
 
 type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
@@ -112,22 +113,32 @@ interface RemotesWithEntry {
 
 type ShareInfos = {
   // The name of the dependency, basic information about the dependency, and sharing strategy
-  [pkgName: string]: Share;
+  [pkgName: string]: Shared[];
 };
 
-type Share = {
+type Shared = {
   // The version of the shared dependency
   version: string;
   // Which modules are currently consuming this dependency
-  useIn?: Array<string>;
+  useIn: Array<string>;
   // From which module does the shared dependency come?
-  from?: string;
+  from: string;
   // Factory function to get the shared dependency instance. When no other existing dependencies, it will load its own shared dependencies.
-  lib: () => Module;
+  lib?: () => Module;
   // Sharing strategy, which strategy will be used to decide whether to reuse the dependency
-  shareConfig?: SharedConfig;
+  shareConfig: SharedConfig;
   // The scope where the shared dependency is located, the default value is default
-  scope?: string | Array<string>;
+  scope: Array<string>;
+  // Function to retrieve the shared dependency instance.
+  get: SharedGetter;
+  // List of dependencies that this shared module depends on
+  deps: Array<string>;
+  // Indicates whether the shared dependency has been loaded
+  loaded?: boolean;
+  // Represents the loading state of the shared dependency
+  loading?: null | Promise<any>;
+  // Determines if the shared dependency should be loaded eagerly
+  eager?: boolean;
 };
 ```
 
