@@ -7,18 +7,17 @@ import { getInstance } from '@module-federation/runtime';
 declare const __APP_VERSION__: string;
 
 type AddOptionsFnParams = {
-  rootComponent: Vue.Component;
-  appOptions: (params: {
-    app: Vue.App<Vue.Component>;
-    basename: RenderFnParams['basename'];
-    memoryRoute: RenderFnParams['memoryRoute'];
-    [key: string]: any;
-  }) => { router?: VueRouter.Router } | void;
+  app: Vue.App<Vue.Component>;
+  basename: RenderFnParams['basename'];
+  memoryRoute: RenderFnParams['memoryRoute'];
+  [key: string]: any;
 };
 
 export type ProviderFnParams = {
   rootComponent: Vue.Component;
-  appOptions: (params: AddOptionsFnParams) => { router?: VueRouter.Router };
+  appOptions: (
+    params: AddOptionsFnParams,
+  ) => { router?: VueRouter.Router } | void;
 };
 
 export function createBridgeComponent(bridgeInfo: ProviderFnParams) {

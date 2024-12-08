@@ -40,7 +40,7 @@ function createBridgeComponent(bridgeInfo: {
     basename?: string;
     memoryRoute?: { entryPath: string };
     [key: string]: any;
-  }) => { router?: Router };
+  }) => { router?: Router } | void;
 }): () => {
   render(info: {
     name?: string;
@@ -210,7 +210,7 @@ function createBridgeComponent(bridgeInfo: {
     basename?: string;
     memoryRoute?: { entryPath: string };
     [key: string]: any;
-  }) => { router?: Router };
+  }) => { router?: Router } | void;
 }): () => {
   render(info: {
     name?: string;
