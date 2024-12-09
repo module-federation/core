@@ -116,7 +116,7 @@ module.exports = {
           eager: false,
         },
         nonsense: {
-          request: 'lib-two', // reuiqrE('lib-two)
+          request: 'lib-two',
           import: 'lib2',
           shareKey: 'lib-two',
           requiredVersion: '^1.0.0',
@@ -136,20 +136,12 @@ module.exports = {
           issuerLayer: 'lib-two-layer',
           layer: 'differing-layer',
         },
-        oruihrioeudjoeijroei: {
+        multi: {
           request: 'multi-pkg/',
           requiredVersion: '^2.0.0',
           version: '2.0.0',
           strictVersion: true,
           eager: true,
-        },
-        '@tiktok/': {
-          requiredVersion: '^2.0.0',
-          version: '2.0.0',
-          strictVersion: true,
-          eager: true,
-          issuerLayer: 'prefixed-layer',
-          layer: 'multi-pkg-layer',
         },
       },
     }),
