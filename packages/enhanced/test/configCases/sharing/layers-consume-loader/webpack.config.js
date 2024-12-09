@@ -85,12 +85,6 @@ module.exports = {
         react: {
           singleton: true,
         },
-        'react-rsc': {
-          request: 'react',
-          issuerLayer: 'app-layer',
-          layer: 'rsc-layer',
-          shareKey: 'react',
-        },
         'explicit-layer-react': {
           request: 'react/index2',
           import: 'react/index2',
