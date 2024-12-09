@@ -110,6 +110,7 @@ module.exports = {
         },
         'lib-two': {
           shareKey: 'lib-two',
+          request: 'lib2',
           version: '1.3.4',
           requiredVersion: '^1.0.0',
           strictVersion: true,
@@ -132,15 +133,6 @@ module.exports = {
           strictVersion: true,
           eager: true,
           layer: 'lib-two-required-layer',
-        },
-        nonsense: {
-          request: 'lib2',
-          shareKey: 'lib-two',
-          version: '1.3.4',
-          requiredVersion: '^1.0.0',
-          strictVersion: true,
-          eager: true,
-          layer: 'differing-layer',
         },
         'multi-pkg/': {
           version: '2.0.0',

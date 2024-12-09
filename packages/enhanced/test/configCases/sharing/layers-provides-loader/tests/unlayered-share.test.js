@@ -8,7 +8,7 @@ it('should consume React boundary module using default share configuration witho
 });
 
 it('should consume lib-two v1.3.4 using default non-eager share configuration', async () => {
-  const { version, layer } = await import('lib-two');
+  const { version, layer } = await import('lib2');
   expect(version).toBe('1.3.4');
   expect(layer).toBe(undefined);
 });

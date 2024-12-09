@@ -86,6 +86,17 @@ export default {
             },
           ],
         },
+        layer: {
+          description: 'Layer for the shared module.',
+          type: 'string',
+          minLength: 1,
+        },
+        request: {
+          description:
+            'The actual request to use for importing the module. If not specified, the property name/key will be used.',
+          type: 'string',
+          minLength: 1,
+        },
       },
     },
     ProvidesItem: {
