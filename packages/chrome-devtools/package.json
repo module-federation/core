@@ -74,7 +74,7 @@
     "@modern-js/storybook": "2.60.6",
     "@modern-js/tsconfig": "2.60.6",
     "@module-federation/runtime": "workspace:*",
-    "@playwright/test": "1.48.2",
+    "@playwright/test": "1.49.0",
     "@storybook/addon-essentials": "^8",
     "@types/chrome": "^0.0.272",
     "@types/dagre": "^0.7.52",
