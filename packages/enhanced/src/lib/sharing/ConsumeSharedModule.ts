@@ -133,7 +133,6 @@ class ConsumeSharedModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  // @ts-ignore
   override needBuild(
     context: NeedBuildContext,
     callback: (error?: WebpackError | null, needsRebuild?: boolean) => void,
@@ -149,7 +148,6 @@ class ConsumeSharedModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
-  // @ts-ignore
   override build(
     options: WebpackOptions,
     compilation: Compilation,
@@ -192,10 +190,8 @@ class ConsumeSharedModule extends Module {
    * @param {UpdateHashContext} context context
    * @returns {void}
    */
-  // @ts-ignore
   override updateHash(hash: Hash, context: UpdateHashContext): void {
     hash.update(JSON.stringify(this.options));
-    // @ts-ignore
     super.updateHash(hash, context);
   }
 
@@ -203,7 +199,6 @@ class ConsumeSharedModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
-  // @ts-ignore
   override codeGeneration({
     chunkGraph,
     moduleGraph,
@@ -224,7 +219,6 @@ class ConsumeSharedModule extends Module {
       if (eager) {
         const dep = this.dependencies[0];
         fallbackCode = runtimeTemplate.syncModuleFactory({
-          // @ts-ignore
           dependency: dep,
           chunkGraph,
           runtimeRequirements,
@@ -233,7 +227,6 @@ class ConsumeSharedModule extends Module {
       } else {
         const block = this.blocks[0];
         fallbackCode = runtimeTemplate.asyncModuleFactory({
-          // @ts-ignore
           block,
           chunkGraph,
           runtimeRequirements,
