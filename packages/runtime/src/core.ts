@@ -110,7 +110,6 @@ export class FederationHost {
       ],
       HTMLLinkElement | void
     >(),
-    // only work for manifest , so not open to the public yet
     fetch: new AsyncHook<
       [string, RequestInit],
       Promise<Response> | void | false
