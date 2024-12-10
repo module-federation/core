@@ -181,7 +181,10 @@ export const compileTs = async (
     const cmd = `npx ${remoteOptions.compilerInstance} --project ${tempTsConfigJsonPath}`;
     try {
       await execPromise(cmd, {
-        cwd: dirname(remoteOptions.tsConfigPath),
+        cwd:
+          typeof remoteOptions.moduleFederationConfig.dts !== 'boolean'
+            ? (remoteOptions.moduleFederationConfig.dts?.cwd ?? undefined)
+            : undefined,
       });
     } catch (err) {
       throw new Error(
