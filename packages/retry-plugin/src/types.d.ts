@@ -1,3 +1,4 @@
+import { RemoteInfo } from '@module-federation/runtime/types';
 export interface FetchWithRetryOptions {
   url?: string;
   options?: RequestInit;
@@ -24,3 +25,10 @@ export type RequiredFetchWithRetryOptions = Required<
   Pick<FetchWithRetryOptions, 'url'>
 > &
   Omit<FetchWithRetryOptions, 'url'>;
+
+export type ScriptCommonRetryOption = {
+  scriptOption: ScriptWithRetryOptions;
+  moduleInfo: RemoteInfo & { alias?: string };
+  retryFn: (...args: any[]) => Promise<any> | (() => Promise<any>);
+  beforeExecuteRetry?: (...args: any[]) => void;
+};
