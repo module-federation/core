@@ -110,7 +110,7 @@ class ProvideSharedDependency extends Dependency {
       read(),
       read(),
     );
-    //@ts-ignore
+    // @ts-expect-error - webpack serializer pattern requires static property
     this.shareScope = context.read();
     obj.deserialize(context);
     return obj;

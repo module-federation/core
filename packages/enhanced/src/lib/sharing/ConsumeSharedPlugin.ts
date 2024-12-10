@@ -317,7 +317,6 @@ class ConsumeSharedPlugin {
           async (resolveData: ResolveData): Promise<Module | undefined> => {
             const { context, request, dependencies, contextInfo } = resolveData;
             // wait for resolving to be complete
-            //@ts-ignore
             return promise.then(() => {
               if (
                 dependencies[0] instanceof ConsumeSharedFallbackDependency ||
@@ -345,6 +344,7 @@ class ConsumeSharedPlugin {
                   });
                 }
               }
+              return;
             });
           },
         );
