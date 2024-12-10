@@ -24,6 +24,7 @@ import type {
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import { normalizeConsumeShareOptions } from './utils';
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../Constants';
+import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 
 const { rangeToString, stringifyHoley } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
@@ -38,48 +39,6 @@ const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
 
-export type ConsumeOptions = {
-  /**
-   * fallback request
-   */
-  import?: string | undefined;
-  /**
-   * resolved fallback request
-   */
-  importResolved?: string | undefined;
-  /**
-   * global share key
-   */
-  shareKey: string;
-  /**
-   * share scope
-   */
-  shareScope: string;
-  /**
-   * version requirement
-   */
-  requiredVersion:
-    | import('webpack/lib/util/semver').SemVerRange
-    | false
-    | undefined;
-  /**
-   * package name to determine required version automatically
-   */
-  packageName: string;
-  /**
-   * don't use shared version even if version isn't valid
-   */
-  strictVersion: boolean;
-  /**
-   * use single global version
-   */
-  singleton: boolean;
-  /**
-   * include the fallback module in a sync way
-   */
-  eager: boolean;
-};
-
 /**
  * @typedef {Object} ConsumeOptions
  * @property {string=} import fallback request
@@ -91,6 +50,8 @@ export type ConsumeOptions = {
  * @property {boolean} strictVersion don't use shared version even if version isn't valid
  * @property {boolean} singleton use single global version
  * @property {boolean} eager include the fallback module in a sync way
+ * @property {string | null=} layer Share a specific layer of the module, if the module supports layers
+ * @property {string | null=} issuerLayer Issuer layer in which the module should be resolved
  */
 
 const TYPES = new Set(['consume-shared']);
@@ -103,7 +64,11 @@ class ConsumeSharedModule extends Module {
    * @param {ConsumeOptions} options consume options
    */
   constructor(context: string, options: ConsumeOptions) {
-    super(WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE, context);
+    super(
+      WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE,
+      context,
+      options.layer ?? undefined,
+    );
     this.options = options;
   }
 
@@ -119,10 +84,11 @@ class ConsumeSharedModule extends Module {
       strictVersion,
       singleton,
       eager,
+      layer,
     } = this.options;
     return `${WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE}|${shareScope}|${shareKey}|${
       requiredVersion && rangeToString(requiredVersion)
-    }|${strictVersion}|${importResolved}|${singleton}|${eager}`;
+    }|${strictVersion}|${importResolved}|${singleton}|${eager}|${layer}`;
   }
 
   /**
@@ -138,6 +104,7 @@ class ConsumeSharedModule extends Module {
       strictVersion,
       singleton,
       eager,
+      layer,
     } = this.options;
     return `consume shared module (${shareScope}) ${shareKey}@${
       requiredVersion ? rangeToString(requiredVersion) : '*'
@@ -145,7 +112,7 @@ class ConsumeSharedModule extends Module {
       importResolved
         ? ` (fallback: ${requestShortener.shorten(importResolved)})`
         : ''
-    }${eager ? ' (eager)' : ''}`;
+    }${eager ? ' (eager)' : ''}${layer ? ` (${layer})` : ''}`;
   }
 
   /**
