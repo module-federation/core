@@ -23,7 +23,7 @@
     "commit": "cz",
     "docs": "typedoc",
     "f": "nx format:write",
-    "enhanced:jest": "pnpm build && cd packages/enhanced && NODE_OPTIONS=--experimental-vm-modules npx jest test/ConfigTestCases.basictest.js",
+    "enhanced:jest": "pnpm build && cd packages/enhanced && NODE_OPTIONS=--experimental-vm-modules npx jest test/schema.basictest.js",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "build": "nx run-many --target=build --parallel=5  --projects=tag:type:pkg",

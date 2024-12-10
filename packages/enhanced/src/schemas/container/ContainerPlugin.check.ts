@@ -10,28 +10,9 @@ const absolutePathRegExp = /^(?:[A-Za-z]:[\\/]|\\\\|\/)/;
 const runtimePlugin = {
   type: 'array',
   items: {
-    anyOf: [
-      {
-        type: 'string',
-        minLength: 1,
-        description: 'Runtime Plugin File Path.',
-      },
-      {
-        type: 'object',
-        required: ['import', 'async'],
-        properties: {
-          import: {
-            type: 'string',
-            minLength: 1,
-            description: 'Runtime Plugin File Path.',
-          },
-          async: {
-            type: 'boolean',
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
+    type: 'string',
+    minLength: 1,
+    description: 'Runtime Plugin File Path.',
   },
 };
 
@@ -1406,136 +1387,157 @@ function validate33(
                 var valid3 = true;
               }
               if (valid3) {
-                if (data.root !== undefined) {
-                  let data3 = data.root;
+                if (data.commonjs2 !== undefined) {
                   const _errs15 = errors;
-                  const _errs16 = errors;
-                  let valid4 = false;
-                  const _errs17 = errors;
-                  if (errors === _errs17) {
-                    if (Array.isArray(data3)) {
-                      var valid5 = true;
-                      const len1 = data3.length;
-                      for (let i1 = 0; i1 < len1; i1++) {
-                        let data4 = data3[i1];
-                        const _errs19 = errors;
-                        if (errors === _errs19) {
-                          if (typeof data4 === 'string') {
-                            if (data4.length < 1) {
-                              const err11 = {
-                                params: {},
-                              };
-                              if (vErrors === null) {
-                                vErrors = [err11];
-                              } else {
-                                vErrors.push(err11);
-                              }
-                              errors++;
-                            }
-                          } else {
-                            const err12 = {
-                              params: {
-                                type: 'string',
-                              },
-                            };
-                            if (vErrors === null) {
-                              vErrors = [err12];
-                            } else {
-                              vErrors.push(err12);
-                            }
-                            errors++;
-                          }
-                        }
-                        var valid5 = _errs19 === errors;
-                        if (!valid5) {
-                          break;
-                        }
-                      }
-                    } else {
-                      const err13 = {
-                        params: {
-                          type: 'array',
-                        },
-                      };
-                      if (vErrors === null) {
-                        vErrors = [err13];
-                      } else {
-                        vErrors.push(err13);
-                      }
-                      errors++;
-                    }
-                  }
-                  var _valid1 = _errs17 === errors;
-                  valid4 = valid4 || _valid1;
-                  if (!valid4) {
-                    const _errs21 = errors;
-                    if (errors === _errs21) {
-                      if (typeof data3 === 'string') {
-                        if (data3.length < 1) {
-                          const err14 = {
-                            params: {},
-                          };
-                          if (vErrors === null) {
-                            vErrors = [err14];
-                          } else {
-                            vErrors.push(err14);
-                          }
-                          errors++;
-                        }
-                      } else {
-                        const err15 = {
-                          params: {
-                            type: 'string',
-                          },
-                        };
-                        if (vErrors === null) {
-                          vErrors = [err15];
-                        } else {
-                          vErrors.push(err15);
-                        }
-                        errors++;
-                      }
-                    }
-                    var _valid1 = _errs21 === errors;
-                    valid4 = valid4 || _valid1;
-                  }
-                  if (!valid4) {
-                    const err16 = {
-                      params: {},
+                  if (typeof data.commonjs2 !== 'string') {
+                    const err11 = {
+                      params: {
+                        type: 'string',
+                      },
                     };
                     if (vErrors === null) {
-                      vErrors = [err16];
+                      vErrors = [err11];
                     } else {
-                      vErrors.push(err16);
+                      vErrors.push(err11);
                     }
                     errors++;
-                  } else {
-                    errors = _errs16;
-                    if (vErrors !== null) {
-                      if (_errs16) {
-                        vErrors.length = _errs16;
-                      } else {
-                        vErrors = null;
-                      }
-                    }
                   }
                   var valid3 = _errs15 === errors;
                 } else {
                   var valid3 = true;
                 }
+                if (valid3) {
+                  if (data.root !== undefined) {
+                    let data3 = data.root;
+                    const _errs17 = errors;
+                    const _errs18 = errors;
+                    let valid4 = false;
+                    const _errs19 = errors;
+                    if (errors === _errs19) {
+                      if (Array.isArray(data3)) {
+                        var valid5 = true;
+                        const len1 = data3.length;
+                        for (let i1 = 0; i1 < len1; i1++) {
+                          let data4 = data3[i1];
+                          const _errs21 = errors;
+                          if (errors === _errs21) {
+                            if (typeof data4 === 'string') {
+                              if (data4.length < 1) {
+                                const err12 = {
+                                  params: {},
+                                };
+                                if (vErrors === null) {
+                                  vErrors = [err12];
+                                } else {
+                                  vErrors.push(err12);
+                                }
+                                errors++;
+                              }
+                            } else {
+                              const err13 = {
+                                params: {
+                                  type: 'string',
+                                },
+                              };
+                              if (vErrors === null) {
+                                vErrors = [err13];
+                              } else {
+                                vErrors.push(err13);
+                              }
+                              errors++;
+                            }
+                          }
+                          var valid5 = _errs21 === errors;
+                          if (!valid5) {
+                            break;
+                          }
+                        }
+                      } else {
+                        const err14 = {
+                          params: {
+                            type: 'array',
+                          },
+                        };
+                        if (vErrors === null) {
+                          vErrors = [err14];
+                        } else {
+                          vErrors.push(err14);
+                        }
+                        errors++;
+                      }
+                    }
+                    var _valid1 = _errs19 === errors;
+                    valid4 = valid4 || _valid1;
+                    if (!valid4) {
+                      const _errs23 = errors;
+                      if (errors === _errs23) {
+                        if (typeof data3 === 'string') {
+                          if (data3.length < 1) {
+                            const err15 = {
+                              params: {},
+                            };
+                            if (vErrors === null) {
+                              vErrors = [err15];
+                            } else {
+                              vErrors.push(err15);
+                            }
+                            errors++;
+                          }
+                        } else {
+                          const err16 = {
+                            params: {
+                              type: 'string',
+                            },
+                          };
+                          if (vErrors === null) {
+                            vErrors = [err16];
+                          } else {
+                            vErrors.push(err16);
+                          }
+                          errors++;
+                        }
+                      }
+                      var _valid1 = _errs23 === errors;
+                      valid4 = valid4 || _valid1;
+                    }
+                    if (!valid4) {
+                      const err17 = {
+                        params: {},
+                      };
+                      if (vErrors === null) {
+                        vErrors = [err17];
+                      } else {
+                        vErrors.push(err17);
+                      }
+                      errors++;
+                    } else {
+                      errors = _errs18;
+                      if (vErrors !== null) {
+                        if (_errs18) {
+                          vErrors.length = _errs18;
+                        } else {
+                          vErrors = null;
+                        }
+                      }
+                    }
+                    var valid3 = _errs17 === errors;
+                  } else {
+                    var valid3 = true;
+                  }
+                }
               }
             }
           }
         } else {
-          const err17 = {
+          const err18 = {
             params: {
               type: 'object',
             },
           };
           if (vErrors === null) {
-            vErrors = [err17];
+            vErrors = [err18];
           } else {
-            vErrors.push(err17);
+            vErrors.push(err18);
           }
           errors++;
         }
@@ -1545,13 +1547,13 @@ function validate33(
     }
   }
   if (!valid0) {
-    const err18 = {
+    const err19 = {
       params: {},
     };
     if (vErrors === null) {
-      vErrors = [err18];
+      vErrors = [err19];
     } else {
-      vErrors.push(err18);
+      vErrors.push(err19);
     }
     errors++;
     validate33.errors = vErrors;
