@@ -2,28 +2,9 @@
 const runtimePlugin = {
   type: 'array',
   items: {
-    anyOf: [
-      {
-        type: 'string',
-        minLength: 1,
-        description: 'Runtime Plugin File Path.',
-      },
-      {
-        type: 'object',
-        required: ['import', 'async'],
-        properties: {
-          import: {
-            type: 'string',
-            minLength: 1,
-            description: 'Runtime Plugin File Path.',
-          },
-          async: {
-            type: 'boolean',
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
+    type: 'string',
+    minLength: 1,
+    description: 'Runtime Plugin File Path.',
   },
 };
 
