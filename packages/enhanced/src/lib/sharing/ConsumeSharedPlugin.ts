@@ -11,7 +11,6 @@ import {
 import { isRequiredVersion } from '@module-federation/sdk';
 import type { Compiler, Compilation, Module } from 'webpack';
 import { parseOptions } from '../container/options';
-import { ConsumeOptions } from './ConsumeSharedModule';
 import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
@@ -31,6 +30,7 @@ import ShareRuntimeModule from './ShareRuntimeModule';
 import type { SemVerRange } from 'webpack/lib/util/semver';
 import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
 import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFactory';
+import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -328,17 +328,6 @@ class ConsumeSharedPlugin {
               const match = unresolvedConsumes.get(
                 createLookupKey(request, contextInfo),
               );
-
-              // not sure if i need this with the `request` options passthrough
-              // if (match === undefined) {
-
-              //   // fallback to using alias
-              //   match = unresolvedConsumes.get(request);
-              //   // check alias matches issuerLayer
-              //   if (match && match.issuerLayer !== contextInfo.issuerLayer) {
-              //     match = undefined;
-              //   }
-              // }
 
               if (match !== undefined) {
                 return createConsumeSharedModule(context, request, match);

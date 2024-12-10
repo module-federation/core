@@ -5,8 +5,7 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
 import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
-import type { SemVerRange } from 'webpack/lib/util/semver';
-import type { ConsumeOptions } from './ConsumeSharedModule';
+import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
