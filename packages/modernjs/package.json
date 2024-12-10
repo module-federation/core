@@ -12,6 +12,11 @@
   "scripts": {
     "build": "modern build"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/repository"
+  },
   "exports": {
     ".": {
       "import": "./dist/esm/cli/index.js",

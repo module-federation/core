@@ -15,6 +15,11 @@
   "publishConfig": {
     "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/webpack-bundler-runtime"
+  },
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.mjs",

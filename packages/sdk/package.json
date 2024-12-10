@@ -11,6 +11,11 @@
     "dist/",
     "README.md"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/sdk"
+  },
   "publishConfig": {
     "access": "public"
   },
