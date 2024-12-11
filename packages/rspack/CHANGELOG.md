@@ -1,5 +1,17 @@
 # @module-federation/rspack
 
+## 0.8.2
+
+### Patch Changes
+
+- Updated dependencies [85ef6c4]
+  - @module-federation/manifest@0.8.2
+  - @module-federation/dts-plugin@0.8.2
+  - @module-federation/runtime-tools@0.8.2
+  - @module-federation/sdk@0.8.2
+  - @module-federation/managers@0.8.2
+  - @module-federation/bridge-react-webpack-plugin@0.8.2
+
 ## 0.8.1
 
 ### Patch Changes
