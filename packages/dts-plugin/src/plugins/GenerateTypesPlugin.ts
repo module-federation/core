@@ -179,7 +179,10 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             await generateTypesFn(finalOptions);
             const config = finalOptions.remote.moduleFederationConfig;
             let zipPrefix = '';
-            if (typeof config.manifest === 'object' && config.manifest.filePath) {
+            if (
+              typeof config.manifest === 'object' &&
+              config.manifest.filePath
+            ) {
               zipPrefix = config.manifest.filePath;
             } else if (
               typeof config.manifest === 'object' &&
