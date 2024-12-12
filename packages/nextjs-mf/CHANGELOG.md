@@ -1,5 +1,18 @@
 # @module-federation/nextjs-mf
 
+## 8.8.6
+
+### Patch Changes
+
+- 4239338: fix broken loading of non nextjs json remotes
+- Updated dependencies [f817674]
+- Updated dependencies [8e172c8]
+  - @module-federation/runtime@0.8.3
+  - @module-federation/sdk@0.8.3
+  - @module-federation/node@2.6.16
+  - @module-federation/webpack-bundler-runtime@0.8.3
+  - @module-federation/enhanced@0.8.3
+
 ## 8.8.5
 
 ### Patch Changes
