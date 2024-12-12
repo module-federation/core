@@ -8,499 +8,313 @@
 
 'use strict';
 
-function r(
-  e,
-  {
-    instancePath: t = '',
-    parentData: s,
-    parentDataProperty: n,
-    rootData: o = e,
-  } = {},
-) {
-  let a = null,
-    l = 0;
-  if (0 === l) {
-    if (!e || 'object' != typeof e || Array.isArray(e))
-      return (
-        (r.errors = [
-          {
-            params: {
-              type: 'object',
-            },
-          },
-        ]),
-        !1
-      );
-    for (const t in e) {
-      let s = e[t];
-      const n = l,
-        o = l;
-      let c = !1;
-      const h = l;
-      if (l == l)
-        if (s && 'object' == typeof s && !Array.isArray(s)) {
-          const r = l;
-          for (const r in s)
-            if (
-              'eager' !== r &&
-              'requiredVersion' !== r &&
-              'shareKey' !== r &&
-              'shareScope' !== r &&
-              'singleton' !== r &&
-              'strictVersion' !== r &&
-              'version' !== r &&
-              'layer' !== r &&
-              'request' !== r
-            ) {
-              const e = {
-                params: {
-                  additionalProperty: r,
-                },
-              };
-              null === a ? (a = [e]) : a.push(e), l++;
-              break;
-            }
-          if (r === l) {
-            if (void 0 !== s.request) {
-              let r = s.request;
-              const e = l;
-              if (l === e)
-                if ('string' == typeof r) {
-                  if (r.length < 1) {
-                    const r = {
-                      params: {},
-                    };
-                    null === a ? (a = [r]) : a.push(r), l++;
-                  }
-                } else {
-                  const r = {
-                    params: {
-                      type: 'string',
-                    },
-                  };
-                  null === a ? (a = [r]) : a.push(r), l++;
-                }
-              i = e === l;
-            } else i = !0;
-            if (i) {
-              if (void 0 !== s.eager) {
-                const r = l;
-                if ('boolean' != typeof s.eager) {
-                  const r = {
-                    params: {
-                      type: 'boolean',
-                    },
-                  };
-                  null === a ? (a = [r]) : a.push(r), l++;
-                }
-                var i = r === l;
-              } else i = !0;
-              if (i) {
-                if (void 0 !== s.requiredVersion) {
-                  let r = s.requiredVersion;
-                  const e = l,
-                    t = l;
-                  let n = !1;
-                  const o = l;
-                  if (!1 !== r) {
-                    const r = {
-                      params: {},
-                    };
-                    null === a ? (a = [r]) : a.push(r), l++;
-                  }
-                  var p = o === l;
-                  if (((n = n || p), !n)) {
-                    const e = l;
-                    if ('string' != typeof r) {
-                      const r = {
-                        params: {
-                          type: 'string',
-                        },
-                      };
-                      null === a ? (a = [r]) : a.push(r), l++;
-                    }
-                    (p = e === l), (n = n || p);
-                  }
-                  if (n)
-                    (l = t), null !== a && (t ? (a.length = t) : (a = null));
-                  else {
-                    const r = {
-                      params: {},
-                    };
-                    null === a ? (a = [r]) : a.push(r), l++;
-                  }
-                  i = e === l;
-                } else i = !0;
-                if (i) {
-                  if (void 0 !== s.shareKey) {
-                    let r = s.shareKey;
-                    const e = l;
-                    if (l === e)
-                      if ('string' == typeof r) {
-                        if (r.length < 1) {
-                          const r = {
-                            params: {},
-                          };
-                          null === a ? (a = [r]) : a.push(r), l++;
-                        }
-                      } else {
-                        const r = {
-                          params: {
-                            type: 'string',
-                          },
-                        };
-                        null === a ? (a = [r]) : a.push(r), l++;
-                      }
-                    i = e === l;
-                  } else i = !0;
-                  if (i) {
-                    if (void 0 !== s.shareScope) {
-                      let r = s.shareScope;
-                      const e = l;
-                      if (l === e)
-                        if ('string' == typeof r) {
-                          if (r.length < 1) {
-                            const r = {
-                              params: {},
-                            };
-                            null === a ? (a = [r]) : a.push(r), l++;
-                          }
-                        } else {
-                          const r = {
-                            params: {
-                              type: 'string',
-                            },
-                          };
-                          null === a ? (a = [r]) : a.push(r), l++;
-                        }
-                      i = e === l;
-                    } else i = !0;
-                    if (i) {
-                      if (void 0 !== s.singleton) {
-                        const r = l;
-                        if ('boolean' != typeof s.singleton) {
-                          const r = {
-                            params: {
-                              type: 'boolean',
-                            },
-                          };
-                          null === a ? (a = [r]) : a.push(r), l++;
-                        }
-                        i = r === l;
-                      } else i = !0;
-                      if (i) {
-                        if (void 0 !== s.strictVersion) {
-                          const r = l;
-                          if ('boolean' != typeof s.strictVersion) {
-                            const r = {
-                              params: {
-                                type: 'boolean',
-                              },
-                            };
-                            null === a ? (a = [r]) : a.push(r), l++;
-                          }
-                          i = r === l;
-                        } else i = !0;
-                        if (i)
-                          if (void 0 !== s.version) {
-                            let r = s.version;
-                            const e = l,
-                              t = l;
-                            let n = !1;
-                            const o = l;
-                            if (!1 !== r) {
-                              const r = {
-                                params: {},
-                              };
-                              null === a ? (a = [r]) : a.push(r), l++;
-                            }
-                            var f = o === l;
-                            if (((n = n || f), !n)) {
-                              const e = l;
-                              if ('string' != typeof r) {
-                                const r = {
-                                  params: {
-                                    type: 'string',
-                                  },
-                                };
-                                null === a ? (a = [r]) : a.push(r), l++;
-                              }
-                              (f = e === l), (n = n || f);
-                            }
-                            if (n)
-                              (l = t),
-                                null !== a && (t ? (a.length = t) : (a = null));
-                            else {
-                              const r = {
-                                params: {},
-                              };
-                              null === a ? (a = [r]) : a.push(r), l++;
-                            }
-                            i = e === l;
-                          } else i = !0;
-                        if (i) {
-                          if (void 0 !== s.layer) {
-                            let r = s.layer;
-                            const e = l;
-                            if (l === e)
-                              if ('string' == typeof r) {
-                                if (r.length < 1) {
-                                  const r = {
-                                    params: {},
-                                  };
-                                  null === a ? (a = [r]) : a.push(r), l++;
-                                }
-                              } else {
-                                const r = {
-                                  params: {
-                                    type: 'string',
-                                  },
-                                };
-                                null === a ? (a = [r]) : a.push(r), l++;
-                              }
-                            i = e === l;
-                          } else i = !0;
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        } else {
-          const r = {
-            params: {
-              type: 'object',
-            },
-          };
-          null === a ? (a = [r]) : a.push(r), l++;
-        }
-      var u = h === l;
-      if (((c = c || u), !c)) {
-        const r = l;
-        if (l == l)
-          if ('string' == typeof s) {
-            if (s.length < 1) {
-              const r = {
-                params: {},
-              };
-              null === a ? (a = [r]) : a.push(r), l++;
-            }
-          } else {
-            const r = {
-              params: {
-                type: 'string',
-              },
-            };
-            null === a ? (a = [r]) : a.push(r), l++;
-          }
-        (u = r === l), (c = c || u);
-      }
-      if (!c) {
-        const e = {
-          params: {},
-        };
-        return null === a ? (a = [e]) : a.push(e), l++, (r.errors = a), !1;
-      }
-      if (((l = o), null !== a && (o ? (a.length = o) : (a = null)), n !== l))
-        break;
-    }
-  }
-  return (r.errors = a), 0 === l;
+interface SharedPluginConfig {
+  eager?: boolean;
+  requiredVersion?: string | false;
+  shareKey?: string;
+  shareScope?: string;
+  singleton?: boolean;
+  strictVersion?: boolean;
+  version?: string | false;
+  layer?: string;
+  request?: string;
 }
 
-function e(
-  t,
-  {
-    instancePath: s = '',
-    parentData: n,
-    parentDataProperty: o,
-    rootData: a = t,
-  } = {},
-) {
-  let l = null,
-    i = 0;
-  const p = i;
-  let f = !1;
-  const u = i;
-  if (i === u)
-    if (Array.isArray(t)) {
-      const e = t.length;
-      for (let n = 0; n < e; n++) {
-        let e = t[n];
-        const o = i,
-          p = i;
-        let f = !1;
-        const u = i;
-        if (i == i)
-          if ('string' == typeof e) {
-            if (e.length < 1) {
-              const r = {
-                params: {},
-              };
-              null === l ? (l = [r]) : l.push(r), i++;
-            }
-          } else {
-            const r = {
-              params: {
-                type: 'string',
-              },
-            };
-            null === l ? (l = [r]) : l.push(r), i++;
-          }
-        var c = u === i;
-        if (((f = f || c), !f)) {
-          const o = i;
-          r(e, {
-            instancePath: s + '/' + n,
-            parentData: t,
-            parentDataProperty: n,
-            rootData: a,
-          }) ||
-            ((l = null === l ? r.errors : l.concat(r.errors)), (i = l.length)),
-            (c = o === i),
-            (f = f || c);
-        }
-        if (f) (i = p), null !== l && (p ? (l.length = p) : (l = null));
-        else {
-          const r = {
-            params: {},
-          };
-          null === l ? (l = [r]) : l.push(r), i++;
-        }
-        if (o !== i) break;
-      }
+interface ValidationError {
+  params: {
+    type?: string;
+    additionalProperty?: string;
+    missingProperty?: string;
+  };
+}
+
+interface ValidationContext {
+  instancePath?: string;
+  parentData?: any;
+  parentDataProperty?: any;
+  rootData?: any;
+}
+
+// Validates a single shared plugin configuration
+function validateSharedPluginConfig(
+  config: any,
+  context: ValidationContext = {},
+): boolean {
+  const {
+    instancePath = '',
+    parentData,
+    parentDataProperty,
+    rootData = config,
+  } = context;
+
+  let errors: ValidationError[] | null = null;
+  let errorCount = 0;
+
+  // Helper to add validation errors
+  const addError = (error: ValidationError) => {
+    if (errors === null) {
+      errors = [error];
     } else {
-      const r = {
-        params: {
-          type: 'array',
-        },
-      };
-      null === l ? (l = [r]) : l.push(r), i++;
+      errors.push(error);
     }
-  var h = u === i;
-  if (((f = f || h), !f)) {
-    const e = i;
-    r(t, {
-      instancePath: s,
-      parentData: n,
-      parentDataProperty: o,
-      rootData: a,
-    }) || ((l = null === l ? r.errors : l.concat(r.errors)), (i = l.length)),
-      (h = e === i),
-      (f = f || h);
-  }
-  if (!f) {
-    const r = {
-      params: {},
-    };
-    return null === l ? (l = [r]) : l.push(r), i++, (e.errors = l), !1;
-  }
-  return (
-    (i = p),
-    null !== l && (p ? (l.length = p) : (l = null)),
-    (e.errors = l),
-    0 === i
-  );
-}
+    errorCount++;
+  };
 
-function t(
-  r,
-  {
-    instancePath: s = '',
-    parentData: n,
-    parentDataProperty: o,
-    rootData: a = r,
-  } = {},
-) {
-  let l = null,
-    i = 0;
-  if (0 === i) {
-    if (!r || 'object' != typeof r || Array.isArray(r))
-      return (
-        (t.errors = [
-          {
-            params: {
-              type: 'object',
-            },
-          },
-        ]),
-        !1
-      );
-    {
-      let n;
-      if (void 0 === r.provides && (n = 'provides'))
-        return (
-          (t.errors = [
-            {
-              params: {
-                missingProperty: n,
-              },
-            },
-          ]),
-          !1
-        );
-      {
-        const n = i;
-        for (const e in r)
-          if ('provides' !== e && 'shareScope' !== e)
-            return (
-              (t.errors = [
-                {
-                  params: {
-                    additionalProperty: e,
-                  },
-                },
-              ]),
-              !1
-            );
-        if (n === i) {
-          if (void 0 !== r.provides) {
-            const t = i;
-            e(r.provides, {
-              instancePath: s + '/provides',
-              parentData: r,
-              parentDataProperty: 'provides',
-              rootData: a,
-            }) ||
-              ((l = null === l ? e.errors : l.concat(e.errors)),
-              (i = l.length));
-            var p = t === i;
-          } else p = !0;
-          if (p)
-            if (void 0 !== r.shareScope) {
-              let e = r.shareScope;
-              const s = i;
-              if (i === s) {
-                if ('string' != typeof e)
-                  return (
-                    (t.errors = [
-                      {
-                        params: {
-                          type: 'string',
-                        },
-                      },
-                    ]),
-                    !1
-                  );
-                if (e.length < 1)
-                  return (
-                    (t.errors = [
-                      {
-                        params: {},
-                      },
-                    ]),
-                    !1
-                  );
-              }
-              p = s === i;
-            } else p = !0;
-        }
+  // Validate object type
+  if (!config || typeof config !== 'object' || Array.isArray(config)) {
+    addError({ params: { type: 'object' } });
+    validateSharedPluginConfig.errors = errors;
+    return false;
+  }
+
+  // Validate properties
+  const validProperties = [
+    'eager',
+    'requiredVersion',
+    'shareKey',
+    'shareScope',
+    'singleton',
+    'strictVersion',
+    'version',
+    'layer',
+    'request',
+  ];
+
+  // Check for invalid properties
+  for (const prop in config) {
+    if (!validProperties.includes(prop)) {
+      addError({ params: { additionalProperty: prop } });
+      break;
+    }
+  }
+
+  // Validate string properties with minimum length
+  const stringProps = ['request', 'shareKey', 'shareScope', 'layer'];
+  for (const prop of stringProps) {
+    if (config[prop] !== undefined) {
+      if (typeof config[prop] !== 'string') {
+        addError({ params: { type: 'string' } });
+      } else if (config[prop].length < 1) {
+        addError({ params: {} });
       }
     }
   }
-  return (t.errors = l), 0 === i;
+
+  // Validate boolean properties
+  const booleanProps = ['eager', 'singleton', 'strictVersion'];
+  for (const prop of booleanProps) {
+    if (config[prop] !== undefined && typeof config[prop] !== 'boolean') {
+      addError({ params: { type: 'boolean' } });
+    }
+  }
+
+  // Validate version-like properties that can be string or false
+  const versionProps = ['requiredVersion', 'version'];
+  for (const prop of versionProps) {
+    if (config[prop] !== undefined) {
+      if (config[prop] !== false && typeof config[prop] !== 'string') {
+        addError({ params: {} });
+      }
+    }
+  }
+
+  validateSharedPluginConfig.errors = errors;
+  return errorCount === 0;
 }
 
-export default t;
+// Validates a provides item (string or object)
+function validateProvidesItem(
+  item: any,
+  context: ValidationContext = {},
+): boolean {
+  // String validation
+  if (typeof item === 'string') {
+    if (item.length < 1) {
+      validateProvidesItem.errors = [{ params: {} }];
+      return false;
+    }
+    return true;
+  }
+
+  // Config object validation
+  if (typeof item === 'object' && !Array.isArray(item)) {
+    return validateSharedPluginConfig(item, context);
+  }
+
+  validateProvidesItem.errors = [{ params: {} }];
+  return false;
+}
+
+// Validates an array of shared plugin configurations or a single configuration
+function validateSharedPlugins(
+  input: any,
+  context: ValidationContext = {},
+): boolean {
+  const {
+    instancePath = '',
+    parentData,
+    parentDataProperty,
+    rootData = input,
+  } = context;
+
+  let errors: ValidationError[] | null = null;
+  let errorCount = 0;
+
+  // Helper to add validation errors
+  const addError = (error: ValidationError) => {
+    if (errors === null) {
+      errors = [error];
+    } else {
+      errors.push(error);
+    }
+    errorCount++;
+  };
+
+  // Array validation
+  if (Array.isArray(input)) {
+    for (let i = 0; i < input.length; i++) {
+      const item = input[i];
+
+      // Validate string items
+      if (typeof item === 'string') {
+        if (item.length < 1) {
+          addError({ params: {} });
+        }
+        continue;
+      }
+
+      // Validate object items (could be a provides object with key-value pairs)
+      if (typeof item === 'object' && !Array.isArray(item)) {
+        for (const key in item) {
+          if (
+            !validateProvidesItem(item[key], {
+              instancePath: `${instancePath}/${i}/${key}`,
+              parentData: item,
+              parentDataProperty: key,
+              rootData,
+            })
+          ) {
+            errors = errors || [];
+            errors.push(...(validateProvidesItem.errors || []));
+            errorCount++;
+          }
+        }
+        continue;
+      }
+
+      addError({ params: {} });
+    }
+  }
+  // Object validation (key-value pairs of provides)
+  else if (typeof input === 'object' && !Array.isArray(input)) {
+    for (const key in input) {
+      const value = input[key];
+      if (
+        !validateProvidesItem(value, {
+          instancePath: `${instancePath}/${key}`,
+          parentData: input,
+          parentDataProperty: key,
+          rootData,
+        })
+      ) {
+        errors = errors || [];
+        errors.push(...(validateProvidesItem.errors || []));
+        errorCount++;
+      }
+    }
+  }
+  // Invalid type
+  else {
+    addError({ params: { type: 'object' } });
+  }
+
+  validateSharedPlugins.errors = errors;
+  return errorCount === 0;
+}
+
+// Main validation function for provider shared plugin
+function validateProviderSharedPlugin(
+  config: any,
+  context: ValidationContext = {},
+): boolean {
+  const {
+    instancePath = '',
+    parentData,
+    parentDataProperty,
+    rootData = config,
+  } = context;
+
+  let errors: ValidationError[] | null = null;
+  let errorCount = 0;
+
+  // Validate object type
+  if (!config || typeof config !== 'object' || Array.isArray(config)) {
+    validateProviderSharedPlugin.errors = [
+      {
+        params: { type: 'object' },
+      },
+    ];
+    return false;
+  }
+
+  // Check required properties
+  if (config.provides === undefined) {
+    validateProviderSharedPlugin.errors = [
+      {
+        params: { missingProperty: 'provides' },
+      },
+    ];
+    return false;
+  }
+
+  // Check for invalid properties
+  const validProperties = ['provides', 'shareScope'];
+  for (const prop in config) {
+    if (!validProperties.includes(prop)) {
+      validateProviderSharedPlugin.errors = [
+        {
+          params: { additionalProperty: prop },
+        },
+      ];
+      return false;
+    }
+  }
+
+  // Validate provides array/object
+  if (
+    !validateSharedPlugins(config.provides, {
+      instancePath: `${instancePath}/provides`,
+      parentData: config,
+      parentDataProperty: 'provides',
+      rootData,
+    })
+  ) {
+    errors = validateSharedPlugins.errors;
+    errorCount++;
+  }
+
+  // Validate shareScope if present
+  if (config.shareScope !== undefined) {
+    if (typeof config.shareScope !== 'string') {
+      validateProviderSharedPlugin.errors = [
+        {
+          params: { type: 'string' },
+        },
+      ];
+      return false;
+    }
+    if (config.shareScope.length < 1) {
+      validateProviderSharedPlugin.errors = [
+        {
+          params: {},
+        },
+      ];
+      return false;
+    }
+  }
+
+  validateProviderSharedPlugin.errors = errors;
+  return errorCount === 0;
+}
+
+export default validateProviderSharedPlugin;
