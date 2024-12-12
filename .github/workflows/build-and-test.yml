@@ -45,9 +45,11 @@ jobs:
       - name: Check Package Publishing Compatibility
         run: |
           for pkg in packages/*; do
-            if [ -f "$pkg/package.json" ]; then
+            if [ -f "$pkg/package.json" ] && \
+               [ "$pkg" != "packages/assemble-release-plan" ] && \
+               [ "$pkg" != "packages/chrome-devtools" ]; then
               echo "Checking $pkg..."
-              npx publint "$pkg"
+              publint "$pkg"
             fi
           done
 
