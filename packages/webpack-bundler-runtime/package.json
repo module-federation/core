@@ -24,6 +24,7 @@
     "@module-federation/sdk": "workspace:*"
   },
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "import": "./dist/index.esm.mjs",
       "require": "./dist/index.cjs.js"

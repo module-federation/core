@@ -13,6 +13,7 @@
     "build": "modern build"
   },
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "import": "./dist/esm/cli/index.js",
       "require": "./dist/cjs/cli/index.js",

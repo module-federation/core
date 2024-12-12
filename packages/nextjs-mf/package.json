@@ -19,6 +19,7 @@
     "postinstall": "echo \"Deprecation Notice: We intend to deprecate 'nextjs-mf'. Please see https://github.com/module-federation/core/issues/3153 for more details.\""
   },
   "exports": {
+    "./package.json": "./package.json",
     ".": "./dist/src/index.js",
     "./utils": "./dist/utils/index.js",
     "./*": "./*"
