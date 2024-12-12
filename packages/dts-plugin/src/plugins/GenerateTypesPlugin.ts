@@ -73,6 +73,86 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
     };
     const generateTypesFn = getGenerateTypesFn();
     let compiledOnce = false;
+
+    const emitTypesFiles = async () => {
+      try {
+        const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
+          retrieveTypesAssetsInfo(finalOptions.remote);
+
+        await generateTypesFn(finalOptions);
+        const config = finalOptions.remote.moduleFederationConfig;
+        let zipPrefix = '';
+        if (typeof config.manifest === 'object' && config.manifest.filePath) {
+          zipPrefix = config.manifest.filePath;
+        } else if (
+          typeof config.manifest === 'object' &&
+          config.manifest.fileName
+        ) {
+          zipPrefix = path.dirname(config.manifest.fileName);
+        } else if (config.filename) {
+          zipPrefix = path.dirname(config.filename);
+        }
+
+        if (zipTypesPath) {
+          const zipContent = fs.readFileSync(zipTypesPath);
+          const zipOutputPath = path.join(
+            compiler.outputPath,
+            zipPrefix,
+            zipName,
+          );
+          await new Promise<void>((resolve, reject) => {
+            compiler.outputFileSystem.mkdir(
+              path.dirname(zipOutputPath),
+              { recursive: true },
+              (err) => {
+                if (err) reject(err);
+                else {
+                  compiler.outputFileSystem.writeFile(
+                    zipOutputPath,
+                    zipContent,
+                    (writeErr) => {
+                      if (writeErr) reject(writeErr);
+                      else resolve();
+                    },
+                  );
+                }
+              },
+            );
+          });
+        }
+
+        if (apiTypesPath) {
+          const apiContent = fs.readFileSync(apiTypesPath);
+          const apiOutputPath = path.join(
+            compiler.outputPath,
+            zipPrefix,
+            apiFileName,
+          );
+          await new Promise<void>((resolve, reject) => {
+            compiler.outputFileSystem.mkdir(
+              path.dirname(apiOutputPath),
+              { recursive: true },
+              (err) => {
+                if (err) reject(err);
+                else {
+                  compiler.outputFileSystem.writeFile(
+                    apiOutputPath,
+                    apiContent,
+                    (writeErr) => {
+                      if (writeErr) reject(writeErr);
+                      else resolve();
+                    },
+                  );
+                }
+              },
+            );
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     compiler.hooks.thisCompilation.tap('mf:generateTypes', (compilation) => {
       compilation.hooks.processAssets.tapPromise(
         {
@@ -83,54 +163,51 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         },
         async () => {
           if (pluginOptions.dev === false && compiledOnce) {
+            // Emit files lazily without blocking processAssets
+            emitTypesFiles();
             return;
           }
-          try {
-            const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
-              retrieveTypesAssetsInfo(finalOptions.remote);
-            if (zipName && compilation.getAsset(zipName)) {
-              return;
-            }
-            await generateTypesFn(finalOptions);
-            const config = finalOptions.remote.moduleFederationConfig;
-            let zipPrefix = '';
-            if (
-              typeof config.manifest === 'object' &&
-              config.manifest.filePath
-            ) {
-              zipPrefix = config.manifest.filePath;
-            } else if (
-              typeof config.manifest === 'object' &&
-              config.manifest.fileName
-            ) {
-              zipPrefix = path.dirname(config.manifest.fileName);
-            } else if (config.filename) {
-              zipPrefix = path.dirname(config.filename);
-            }
 
-            if (zipTypesPath) {
-              compilation.emitAsset(
-                path.join(zipPrefix, zipName),
-                new compiler.webpack.sources.RawSource(
-                  fs.readFileSync(zipTypesPath),
-                  false,
-                ),
-              );
-            }
-
-            if (apiTypesPath) {
-              compilation.emitAsset(
-                path.join(zipPrefix, apiFileName),
-                new compiler.webpack.sources.RawSource(
-                  fs.readFileSync(apiTypesPath),
-                  false,
-                ),
-              );
-            }
-            compiledOnce = true;
-          } catch (err) {
-            console.error(err);
+          const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
+            retrieveTypesAssetsInfo(finalOptions.remote);
+          if (zipName && compilation.getAsset(zipName)) {
+            return;
           }
+
+          await generateTypesFn(finalOptions);
+          const config = finalOptions.remote.moduleFederationConfig;
+          let zipPrefix = '';
+          if (typeof config.manifest === 'object' && config.manifest.filePath) {
+            zipPrefix = config.manifest.filePath;
+          } else if (
+            typeof config.manifest === 'object' &&
+            config.manifest.fileName
+          ) {
+            zipPrefix = path.dirname(config.manifest.fileName);
+          } else if (config.filename) {
+            zipPrefix = path.dirname(config.filename);
+          }
+
+          if (zipTypesPath) {
+            compilation.emitAsset(
+              path.join(zipPrefix, zipName),
+              new compiler.webpack.sources.RawSource(
+                fs.readFileSync(zipTypesPath),
+                false,
+              ),
+            );
+          }
+
+          if (apiTypesPath) {
+            compilation.emitAsset(
+              path.join(zipPrefix, apiFileName),
+              new compiler.webpack.sources.RawSource(
+                fs.readFileSync(apiTypesPath),
+                false,
+              ),
+            );
+          }
+          compiledOnce = true;
         },
       );
     });
