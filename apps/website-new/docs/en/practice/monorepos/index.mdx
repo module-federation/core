@@ -2,7 +2,7 @@
 
 Module Federation is a powerful tool that allows you to share code between applications. It enables you to build applications that are more modular, maintainable, and scalable. In this guide, we will explore the benefits of using Module Federation in a monorepo.
 
-Ployrepos (multiple repositories) have long since been the defacto choice for developing micro-frontends, to combat organizational issues, however, they actually introduce more organizational challenges around code sharing, dependency management, versioning and team autonomy.
+Polyrepos (multiple repositories) have long since been the de facto choice for developing micro-frontends, to combat organizational issues, however, they introduce more organizational challenges around code sharing, dependency management, versioning and team autonomy.
 
 Enabling team autonomy via Micro Frontends inadvertently pushed teams towards a polyrepo structure. Each team would have their own repository and would be responsible for maintaining their own codebase. This approach led to a lack of collaboration and a lack of transparency among other challenges.
 
@@ -26,7 +26,7 @@ Even if there is a quality assurance process in place to ensure that changes are
 
 ### Shared Code Strategies
 
-Sharing code between polyrepos is difficult. It tends to involve creating and maintaining a private package registry of some form. Shared code gets built and deployed to this registry and consumed by the other polyrepos. If a change is made to the shared code, it must be manually released to the registry.
+Sharing code between polyrepos is difficult. It tends to involve creating and maintaining a private package registry of some form. Shared code gets built and deployed to this registry and consumed by the other polyrepos. If a change is made to the shared code, it must be released to the registry.
 
 This can be time-consuming and error-prone! It introduces the risk of blockers to feature work if any of the teams rely on the PR for the shared code to be released to the registry.
 
@@ -46,13 +46,13 @@ In a polyrepo setup, the update of React 19 does not immediately inform the team
 
 When teams are working in isolation, they may not have the same testing strategies or tools. This can lead to inconsistent testing across the system, which can be a problem for the overall quality of the application.
 
-It also adds difficulty to the QA process. Either they test each micro frontend separately or they test all of them together.
+It also adds difficulty to the QA process. Either they test each micro-frontend separately or they test all of them together.
 
-Testing individual micro frontends does not provide the same level of confidence in the overall quality of the application because it does not test the integration points nor any shared context between them.
+Testing individual micro-frontends does not provide the same level of confidence in the overall quality of the application because it does not test the integration points nor any shared context between them.
 
 It also means having to build some kind of test framework that can mock certain layers of the full application which introduces a maintenance tax that must be paid to ensure that the test framework stays up to date with the other portions of the application.
 
-Testing the full application will provide a higher level of confidence overall, however, in a polyrepo setup it requires standing up configurable test environments that can deploy the latest versions of each micro frontend.
+Testing the full application will provide a higher level of confidence overall, however, in a polyrepo setup it requires setting up configurable test environments that can deploy the latest versions of each micro-frontend.
 This is time consuming, costs money on cloud resources and means that feedback on issues that arise during testing is delayed, reducing overall iteration speed.
 
 ## How does a Monorepo address these flaws?
@@ -62,7 +62,7 @@ Let's take a closer look at each of the challenges above and how a monorepo can 
 
 ### Feedback Loops
 
-In a monorepo, the feedback loop is simplified because all the code is in the same repository. This means that changes that are made by individual teams will present immediate feedback on how they impact the other teams and micro frontends. This eliminates the need for manual releases and reduces the risk of breaking changes.
+In a monorepo, the feedback loop is simplified because all the code is in the same repository. This means that changes that are made by individual teams will present immediate feedback on how they impact the other teams and micro-frontends. This eliminates the need for manual releases and reduces the risk of breaking changes.
 
 It informs the developer of the impact of their change at the time of making it, allowing them to make the necessary changes to ensure that the impact is minimal.
 
@@ -86,9 +86,9 @@ Teams can still choose to use their own versions of other minor dependencies suc
 
 ### Testing Strategies
 
-Testing strategies are also simplified in a monorepo. This is because all parts of the system are in the same repo, so testing is easier and more consistent. Coordinating local serves to run automated e2e and integration tests against the system is easier because the repository will have the latest from each micro frontend at all times.
+Testing strategies are also simplified in a monorepo. This is because all parts of the system are in the same repo, so testing is easier and more consistent. Coordinating local serves to run automated e2e and integration tests against the system is easier because the repository will have the latest from each micro-frontend at all times.
 
-These automated tests can be run in a CI/CD pipeline, which can be triggered by changes to the monorepo. This ensures that the full system is always tested and that any issues that were previously difficult to identify (integration points between micro frontends) are caught early.
+These automated tests can be run in a CI/CD pipeline, which can be triggered by changes to the monorepo. This ensures that the full system is always tested and that any issues that were previously difficult to identify (integration points between micro-frontends) are caught early.
 
 The test suites can also be written closer to how the user would actually use the final deployed application improving the quality of the final product.
 
