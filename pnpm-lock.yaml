@@ -2582,15 +2582,12 @@ importers:
       '@rsbuild/core':
         specifier: ^1.0.19
         version: 1.0.19
-      '@storybook/core':
-        specifier: ^8.4.6
-        version: 8.4.6(prettier@3.3.3)
+      '@storybook/core-common':
+        specifier: 7.6.20
+        version: 7.6.20(encoding@0.1.13)
       '@storybook/node-logger':
         specifier: 7.6.20
         version: 7.6.20
-      jest-fixed-jsdom:
-        specifier: ^0.0.9
-        version: 0.0.9(jest-environment-jsdom@29.7.0)
       webpack:
         specifier: 5.93.0
         version: 5.93.0(@swc/core@1.7.26)(esbuild@0.18.20)
@@ -17986,32 +17983,6 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@storybook/core@8.4.6(prettier@3.3.3):
-    resolution: {integrity: sha512-WeojVtHy0/t50tzw/15S+DLzKsj8BN9yWdo3vJMvm+nflLFvfq1XvD9WGOWeaFp8E/o3AP+4HprXG0r42KEJtA==}
-    peerDependencies:
-      prettier: ^2 || ^3
-    peerDependenciesMeta:
-      prettier:
-        optional: true
-    dependencies:
-      '@storybook/csf': 0.1.11
-      better-opn: 3.0.2
-      browser-assert: 1.2.1
-      esbuild: 0.18.20
-      esbuild-register: 3.6.0(esbuild@0.18.20)
-      jsdoc-type-pratt-parser: 4.1.0
-      prettier: 3.3.3
-      process: 0.11.10
-      recast: 0.23.9
-      semver: 7.6.3
-      util: 0.12.5
-      ws: 8.18.0
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-    dev: true
-
   /@storybook/csf-plugin@7.6.20:
     resolution: {integrity: sha512-dzBzq0dN+8WLDp6NxYS4G7BCe8+vDeDRBRjHmM0xb0uJ6xgQViL8SDplYVSGnk3bXE/1WmtvyRzQyTffBnaj9Q==}
     dependencies:
@@ -30945,15 +30916,6 @@ packages:
       '@types/node': 20.12.14
       jest-mock: 29.7.0
       jest-util: 29.7.0
-    dev: true
-
-  /jest-fixed-jsdom@0.0.9(jest-environment-jsdom@29.7.0):
-    resolution: {integrity: sha512-KPfqh2+sn5q2B+7LZktwDcwhCpOpUSue8a1I+BcixWLOQoEVyAjAGfH+IYZGoxZsziNojoHGRTC8xRbB1wDD4g==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      jest-environment-jsdom: '>=28.0.0'
-    dependencies:
-      jest-environment-jsdom: 29.7.0
     dev: true
 
   /jest-get-type@29.6.3:
