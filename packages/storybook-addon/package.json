@@ -3,7 +3,11 @@
   "version": "3.0.13",
   "description": "Storybook addon to consume remote module federated apps/components",
   "license": "MIT",
-  "repository": "https://github.com/module-federation/core/tree/main/packages/storybook-addon",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/storybook-addon"
+  },
   "publishConfig": {
     "access": "public"
   },
