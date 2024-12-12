@@ -18,7 +18,7 @@ import {
   InitTokens,
   CallFrom,
 } from './type';
-import { getBuilderId, registerPlugins } from './utils';
+import { getBuilderId, registerPlugins, getRemoteEntry } from './utils';
 import { Module } from './module';
 import {
   AsyncHook,
@@ -110,10 +110,25 @@ export class FederationHost {
       ],
       HTMLLinkElement | void
     >(),
-    // only work for manifest , so not open to the public yet
     fetch: new AsyncHook<
       [string, RequestInit],
       Promise<Response> | void | false
+    >(),
+    loadEntryError: new AsyncHook<
+      [
+        {
+          getRemoteEntry: typeof getRemoteEntry;
+          origin: FederationHost;
+          remoteInfo: RemoteInfo;
+          remoteEntryExports?: RemoteEntryExports | undefined;
+          globalLoading: Record<
+            string,
+            Promise<void | RemoteEntryExports> | undefined
+          >;
+          uniqueKey: string;
+        },
+      ],
+      Promise<(() => Promise<RemoteEntryExports | undefined>) | undefined>
     >(),
     getModuleFactory: new AsyncHook<
       [
