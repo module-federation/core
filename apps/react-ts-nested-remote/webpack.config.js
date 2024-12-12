@@ -11,6 +11,10 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    if (!config.devServer) {
+      config.devServer = {};
+    }
+    config.devServer.host = '127.0.0.1';
     config.output.publicPath = 'http://localhost:3005/';
     // prevent cyclic updates
     config.watchOptions = {
