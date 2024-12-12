@@ -93,6 +93,8 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
           zipPrefix = path.dirname(config.filename);
         }
 
+        debugger;
+
         if (zipTypesPath) {
           const zipContent = fs.readFileSync(zipTypesPath);
           const zipOutputPath = path.join(
@@ -163,7 +165,10 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         },
         async () => {
           if (pluginOptions.dev === false && compiledOnce) {
-            // Emit files lazily without blocking processAssets
+            return;
+          }
+
+          if (compiledOnce) {
             emitTypesFiles();
             return;
           }
