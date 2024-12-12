@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/storybook-addon",
-  "version": "3.1.0",
+  "version": "3.0.14",
   "description": "Storybook addon to consume remote module federated apps/components",
   "license": "MIT",
   "repository": {
@@ -52,29 +52,28 @@
     "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
-    "jest-fixed-jsdom": "^0.0.9",
     "@module-federation/utilities": "workspace:*",
     "@rsbuild/core": "^1.0.19",
+    "@storybook/core-common": "7.6.20",
     "@storybook/node-logger": "7.6.20",
-    "@storybook/core": "^8.4.6",
     "webpack": "5.93.0",
     "webpack-virtual-modules": "0.6.2"
   },
   "peerDependencies": {
     "@rsbuild/core": "^1.0.1",
-    "@module-federation/sdk": "^0.8.0",
+    "@module-federation/utilities": "^3.1.34",
     "@nx/react": ">= 16.0.0",
     "@nx/webpack": ">= 16.0.0",
-    "@storybook/core": ">= 8.2.0",
-    "@storybook/node-logger": "^6.5.16 || ^7.0.0 || ^8.0.0",
+    "@storybook/core-common": "^6.5.16 || ^7.0.0 || ^ 8.0.0",
+    "@storybook/node-logger": "^6.5.16 || ^7.0.0 || ^ 8.0.0",
     "webpack": "^5.75.0",
-    "webpack-virtual-modules": "0.6.2"
+    "webpack-virtual-modules": "^0.5.0 || ^0.6.0"
   },
   "peerDependenciesMeta": {
     "@rsbuild/core": {
       "optional": true
     },
-    "@module-federation/sdk": {
+    "@module-federation/utilities": {
       "optional": true
     },
     "@nx/react": {
@@ -83,7 +82,7 @@
     "@nx/webpack": {
       "optional": true
     },
-    "@storybook/core": {
+    "@storybook/core-common": {
       "optional": true
     },
     "@storybook/node-logger": {
