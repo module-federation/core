@@ -160,55 +160,59 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
         },
         async () => {
-          if (pluginOptions.dev === false && compiledOnce) {
-            return;
-          }
+          try {
+            if (pluginOptions.dev === false && compiledOnce) {
+              return;
+            }
 
-          if (compiledOnce) {
-            emitTypesFiles();
-            return;
-          }
+            if (compiledOnce) {
+              emitTypesFiles();
+              return;
+            }
 
-          const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
-            retrieveTypesAssetsInfo(finalOptions.remote);
-          if (zipName && compilation.getAsset(zipName)) {
-            return;
-          }
+            const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
+              retrieveTypesAssetsInfo(finalOptions.remote);
+            if (zipName && compilation.getAsset(zipName)) {
+              return;
+            }
 
-          await generateTypesFn(finalOptions);
-          const config = finalOptions.remote.moduleFederationConfig;
-          let zipPrefix = '';
-          if (typeof config.manifest === 'object' && config.manifest.filePath) {
-            zipPrefix = config.manifest.filePath;
-          } else if (
-            typeof config.manifest === 'object' &&
-            config.manifest.fileName
-          ) {
-            zipPrefix = path.dirname(config.manifest.fileName);
-          } else if (config.filename) {
-            zipPrefix = path.dirname(config.filename);
-          }
+            await generateTypesFn(finalOptions);
+            const config = finalOptions.remote.moduleFederationConfig;
+            let zipPrefix = '';
+            if (typeof config.manifest === 'object' && config.manifest.filePath) {
+              zipPrefix = config.manifest.filePath;
+            } else if (
+              typeof config.manifest === 'object' &&
+              config.manifest.fileName
+            ) {
+              zipPrefix = path.dirname(config.manifest.fileName);
+            } else if (config.filename) {
+              zipPrefix = path.dirname(config.filename);
+            }
 
-          if (zipTypesPath) {
-            compilation.emitAsset(
-              path.join(zipPrefix, zipName),
-              new compiler.webpack.sources.RawSource(
-                fs.readFileSync(zipTypesPath),
-                false,
-              ),
-            );
-          }
+            if (zipTypesPath) {
+              compilation.emitAsset(
+                path.join(zipPrefix, zipName),
+                new compiler.webpack.sources.RawSource(
+                  fs.readFileSync(zipTypesPath),
+                  false,
+                ),
+              );
+            }
 
-          if (apiTypesPath) {
-            compilation.emitAsset(
-              path.join(zipPrefix, apiFileName),
-              new compiler.webpack.sources.RawSource(
-                fs.readFileSync(apiTypesPath),
-                false,
-              ),
-            );
+            if (apiTypesPath) {
+              compilation.emitAsset(
+                path.join(zipPrefix, apiFileName),
+                new compiler.webpack.sources.RawSource(
+                  fs.readFileSync(apiTypesPath),
+                  false,
+                ),
+              );
+            }
+            compiledOnce = true;
+          } catch (err) {
+            console.error('Error in mf:generateTypes processAssets hook:', err);
           }
-          compiledOnce = true;
         },
       );
     });
