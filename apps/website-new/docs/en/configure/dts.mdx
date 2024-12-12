@@ -14,6 +14,7 @@ interface PluginDtsOptions {
   generateTypes?: boolean | DtsRemoteOptions;
   consumeTypes?: boolean | DtsHostOptions;
   tsConfigPath?: string;
+  cwd?: string;
 }
 ```
 
@@ -215,3 +216,11 @@ Before loading type files, whether to delete the previously loaded `typesFolder`
 - Default value: `path.join(process.cwd(),'./tsconfig.json')`
 
 tsconfig configuration file path
+
+### cwd
+
+- Type: `string`
+- Required: No
+- Default value: `undefined`
+
+The working directory to run the compiler
