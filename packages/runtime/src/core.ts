@@ -35,6 +35,7 @@ import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 import { SharedHandler } from './shared';
 import { RemoteHandler } from './remote';
 import { formatShareConfigs } from './utils/share';
+import { registerGlobalPlugins } from './global';
 
 export class FederationHost {
   options: Options;
@@ -167,6 +168,7 @@ export class FederationHost {
       id: getBuilderId(),
       name: userOptions.name,
       plugins: [snapshotPlugin(), generatePreloadAssetsPlugin()],
+      globalPlugins: [],
       remotes: [],
       shared: {},
       inBrowser: isBrowserEnv(),
@@ -178,6 +180,10 @@ export class FederationHost {
     this.sharedHandler = new SharedHandler(this);
     this.remoteHandler = new RemoteHandler(this);
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
+    this.registerGlobalPlugins([
+      ...defaultOptions.globalPlugins,
+      ...(userOptions.globalPlugins || []),
+    ]);
     this.registerPlugins([
       ...defaultOptions.plugins,
       ...(userOptions.plugins || []),
@@ -186,6 +192,7 @@ export class FederationHost {
   }
 
   initOptions(userOptions: UserOptions): Options {
+    this.registerGlobalPlugins(userOptions.globalPlugins);
     this.registerPlugins(userOptions.plugins);
     const options = this.formatOptions(this.options, userOptions);
 
@@ -286,6 +293,15 @@ export class FederationHost {
       userOptionsRes,
     );
 
+    const globalPlugins = [...globalOptionsRes.globalPlugins];
+
+    if (userOptionsRes.globalPlugins) {
+      userOptionsRes.globalPlugins.forEach((plugin) => {
+        if (!globalPlugins.includes(plugin)) {
+          globalPlugins.push(plugin);
+        }
+      });
+    }
     const plugins = [...globalOptionsRes.plugins];
 
     if (userOptionsRes.plugins) {
@@ -300,6 +316,7 @@ export class FederationHost {
       ...globalOptions,
       ...userOptions,
       plugins,
+      globalPlugins,
       remotes,
       shared: handledShared,
     };
@@ -309,6 +326,12 @@ export class FederationHost {
       options: optionsRes,
     });
     return optionsRes;
+  }
+  registerGlobalPlugins(plugins: UserOptions['globalPlugins']) {
+    if (!plugins) return;
+    const globalPluginsRes = registerGlobalPlugins(plugins);
+    // applies the ones who got registered (duplicates removed)
+    this.options.globalPlugins = [...globalPluginsRes];
   }
 
   registerPlugins(plugins: UserOptions['plugins']) {
