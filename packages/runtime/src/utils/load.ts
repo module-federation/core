@@ -130,10 +130,6 @@ async function loadEntryScript({
       return entryExports;
     })
     .catch((e) => {
-      // const errMsg =  getShortErrorMsg(RUNTIME_008, runtimeDescMap, {
-      //   remoteName: name,
-      //   remoteEntryUrl: entry,
-      // });
       assert(
         undefined,
         getShortErrorMsg(RUNTIME_008, runtimeDescMap, {
@@ -141,8 +137,6 @@ async function loadEntryScript({
           resourceUrl: entry,
         }),
       );
-      // console.error('----loadScript error-----', entry);
-      // console.error(errMsg);
       throw e;
     });
 }
