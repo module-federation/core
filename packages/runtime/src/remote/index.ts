@@ -441,7 +441,7 @@ export class RemoteHandler {
     } else {
       const messages = [
         `The remote "${remote.name}" is already registered.`,
-        'Hope you have known that OVERRIDE it may have some unexpected errors',
+        'Please note that overriding it may cause unexpected errors.',
       ];
       if (options?.force) {
         // remove registered remote
