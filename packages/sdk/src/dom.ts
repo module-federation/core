@@ -25,10 +25,8 @@ export function isStaticResourcesEqual(url1: string, url2: string): boolean {
 
 export function createScript(info: {
   url: string;
-  cb?: {
-    resolve: (value: void | PromiseLike<void>) => void;
-    reject: (error: Error) => void;
-  };
+  cb?: (value: void | PromiseLike<void>) => void;
+  onErrorCallback?: (error: Error) => void;
   attrs?: Record<string, any>;
   needDeleteScript?: boolean;
   createScriptHook?: CreateScriptHookDom;
@@ -94,9 +92,9 @@ export function createScript(info: {
     clearTimeout(timeoutId);
     const onScriptCompleteCallback = () => {
       if (event.type === 'error') {
-        info?.cb?.reject && info?.cb?.reject(event);
+        info?.onErrorCallback && info?.onErrorCallback(event);
       } else {
-        info?.cb?.resolve && info?.cb?.resolve();
+        info?.cb && info?.cb();
       }
     };
 
@@ -139,10 +137,8 @@ export function createScript(info: {
 
 export function createLink(info: {
   url: string;
-  cb?: {
-    resolve: (value: void | PromiseLike<void>) => void;
-    reject: (error: Error) => void;
-  };
+  cb?: (value: void | PromiseLike<void>) => void;
+  onErrorCallback?: (error: Error) => void;
   attrs: Record<string, string>;
   needDeleteLink?: boolean;
   createLinkHook?: (
@@ -201,9 +197,9 @@ export function createLink(info: {
   ): void => {
     const onLinkCompleteCallback = () => {
       if (event.type === 'error') {
-        info?.cb?.reject && info?.cb?.reject(event);
+        info?.onErrorCallback && info?.onErrorCallback(event);
       } else {
-        info?.cb?.resolve && info?.cb?.resolve();
+        info?.cb && info?.cb();
       }
     };
     // Prevent memory leaks in IE.
@@ -243,10 +239,8 @@ export function loadScript(
   return new Promise<void>((resolve, reject) => {
     const { script, needAttach } = createScript({
       url,
-      cb: {
-        resolve,
-        reject,
-      },
+      cb: resolve,
+      onErrorCallback: reject,
       attrs: {
         fetchpriority: 'high',
         ...attrs,
