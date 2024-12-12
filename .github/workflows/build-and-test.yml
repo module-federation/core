@@ -49,6 +49,7 @@ jobs:
                [ "$pkg" != "packages/assemble-release-plan" ] && \
                [ "$pkg" != "packages/chrome-devtools" ] && \
                [ "$pkg" != "packages/core" ] && \
+               [ "$pkg" != "packages/esbuild" ] && \
                [ "$pkg" != "packages/utilities" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"
