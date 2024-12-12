@@ -11,6 +11,7 @@ import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
 import { assert } from './logger';
 import {
   RUNTIME_001,
+  RUNTIME_008,
   getShortErrorMsg,
   runtimeDescMap,
 } from '@module-federation/error-codes';
@@ -129,6 +130,13 @@ async function loadEntryScript({
       return entryExports;
     })
     .catch((e) => {
+      assert(
+        undefined,
+        getShortErrorMsg(RUNTIME_008, runtimeDescMap, {
+          remoteName: name,
+          resourceUrl: entry,
+        }),
+      );
       throw e;
     });
 }
