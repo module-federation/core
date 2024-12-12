@@ -166,6 +166,7 @@ export interface PluginDtsOptions {
   tsConfigPath?: string;
   extraOptions?: Record<string, any>;
   implementation?: string;
+  cwd?: string;
 }
 
 export type AsyncBoundaryOptions = {

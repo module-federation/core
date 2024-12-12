@@ -31,7 +31,7 @@ export default defineConfig({
       shared: ['react', 'react-dom', 'antd'],
       runtimePlugins: [
         path.join(__dirname, './src/runtime-plugin/shared-strategy.ts'),
-        // path.join(__dirname, './src/runtime-plugin/retry.ts'),
+        path.join(__dirname, './src/runtime-plugin/retry.ts'),
       ],
       // bridge: {
       //   disableAlias: true,

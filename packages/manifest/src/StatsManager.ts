@@ -1,7 +1,8 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable max-depth */
-
+import fs from 'fs';
+import path from 'path';
 import {
   StatsRemote,
   StatsBuildInfo,
@@ -11,6 +12,8 @@ import {
   StatsAssets,
   moduleFederationPlugin,
   RemoteEntryType,
+  encodeName,
+  MFPrefetchCommon,
 } from '@module-federation/sdk';
 import {
   Compilation,
@@ -135,6 +138,20 @@ class StatsManager {
       globalName: globalName,
       pluginVersion: this._pluginVersion,
     };
+
+    let prefetchInterface = false;
+    const prefetchFilePath = path.resolve(
+      compiler.options.context || process.cwd(),
+      `node_modules/.mf/${encodeName(name!)}/${MFPrefetchCommon.fileName}`,
+    );
+    const existPrefetch = fs.existsSync(prefetchFilePath);
+    if (existPrefetch) {
+      const content = fs.readFileSync(prefetchFilePath).toString();
+      if (content) {
+        prefetchInterface = true;
+      }
+    }
+    metaData.prefetchInterface = prefetchInterface;
 
     if (this._options.getPublicPath) {
       if ('publicPath' in metaData) {
