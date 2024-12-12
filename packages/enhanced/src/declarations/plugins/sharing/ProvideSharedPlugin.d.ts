@@ -64,4 +64,12 @@ export interface ProvidesConfig {
    * Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).
    */
   strictVersion?: boolean;
+  /**
+   * Layer for the shared module.
+   */
+  layer?: string;
+  /**
+   * The actual request to use for importing the module. If not specified, the property name/key will be used.
+   */
+  request?: string;
 }
