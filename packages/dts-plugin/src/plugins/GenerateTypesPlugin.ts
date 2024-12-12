@@ -93,8 +93,6 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
           zipPrefix = path.dirname(config.filename);
         }
 
-        debugger;
-
         if (zipTypesPath) {
           const zipContent = fs.readFileSync(zipTypesPath);
           const zipOutputPath = path.join(
@@ -105,7 +103,6 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
           await new Promise<void>((resolve, reject) => {
             compiler.outputFileSystem.mkdir(
               path.dirname(zipOutputPath),
-              { recursive: true },
               (err) => {
                 if (err) reject(err);
                 else {
@@ -133,7 +130,6 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
           await new Promise<void>((resolve, reject) => {
             compiler.outputFileSystem.mkdir(
               path.dirname(apiOutputPath),
-              { recursive: true },
               (err) => {
                 if (err) reject(err);
                 else {

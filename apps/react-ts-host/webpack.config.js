@@ -12,6 +12,7 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    config.devServer = config.devServer || {};
     config.devServer.host = '127.0.0.1';
     // prevent cyclic updates
     config.watchOptions = {
