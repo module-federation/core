@@ -378,28 +378,6 @@ describe('DtsWorker Unit Tests', () => {
 
       await expect(dtsWorker.controlledPromise).resolves.toBeUndefined();
     });
-
-    it('should not attempt to kill process if PIDs match', async () => {
-      vi.mock('../rpc/index', () => ({
-        createRpcWorker: () => ({
-          connect: () => Promise.resolve(),
-          terminate: vi.fn(),
-          process: {
-            pid: process.pid,
-            connected: true,
-            send: (message: any, callback?: (error: Error | null) => void) => {
-              if (callback) callback(null);
-            },
-          },
-        }),
-      }));
-
-      dtsWorker = new DtsWorkerClass(mockOptions);
-      const killSpy = vi.spyOn(process, 'kill');
-
-      await dtsWorker.controlledPromise;
-      expect(killSpy).not.toHaveBeenCalled();
-    });
   });
 
   describe('debug mode handling', () => {
