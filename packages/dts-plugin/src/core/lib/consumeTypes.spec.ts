@@ -29,14 +29,16 @@ describe('consumeTypes', () => {
         implementation: 'test-implementation',
         moduleFederationConfig: {
           name: 'test-host',
-          remotes: {}
-        }
-      }
+          remotes: {},
+        },
+      },
     };
 
     await consumeTypes(options);
 
-    expect(getDTSManagerConstructor).toHaveBeenCalledWith('test-implementation');
+    expect(getDTSManagerConstructor).toHaveBeenCalledWith(
+      'test-implementation',
+    );
     expect(mockConsumeTypes).toHaveBeenCalled();
   });
 

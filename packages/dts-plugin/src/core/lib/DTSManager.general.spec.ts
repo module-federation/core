@@ -8,7 +8,10 @@ import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extracto
 import { HostOptions, RemoteInfo } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { downloadTypesArchive } from './archiveHandler';
-import { retrieveHostConfig, retrieveRemoteInfo } from '../configurations/hostPlugin';
+import {
+  retrieveHostConfig,
+  retrieveRemoteInfo,
+} from '../configurations/hostPlugin';
 
 vi.mock('axios');
 vi.mock('fs/promises');
@@ -16,8 +19,8 @@ vi.mock('fs');
 vi.mock('./archiveHandler');
 vi.mock('@module-federation/third-party-dts-extractor', () => ({
   ThirdPartyExtractor: vi.fn().mockImplementation(() => ({
-    collectTypeImports: vi.fn().mockReturnValue([])
-  }))
+    collectTypeImports: vi.fn().mockReturnValue([]),
+  })),
 }));
 
 const projectRoot = path.join(__dirname, '../../..');
@@ -34,23 +37,23 @@ vi.mock('../configurations/hostPlugin', () => ({
       abortOnError: false,
       consumeAPITypes: true,
       maxRetries: 3,
-      runtimePkgs: []
+      runtimePkgs: [],
     },
     mapRemotesToDownload: {
-      'remote1': {
+      remote1: {
         name: 'remote1',
         url: 'http://example.com/remote1',
         alias: 'remote1',
         zipUrl: 'http://example.com/types.zip',
-        apiTypeUrl: 'http://example.com/api.d.ts'
-      }
-    }
+        apiTypeUrl: 'http://example.com/api.d.ts',
+      },
+    },
   })),
   retrieveRemoteInfo: vi.fn().mockImplementation(({ remoteAlias, remote }) => ({
     name: remoteAlias,
     url: remote,
-    alias: remoteAlias
-  }))
+    alias: remoteAlias,
+  })),
 }));
 
 describe('DTSManager General Tests', () => {
@@ -64,12 +67,12 @@ describe('DTSManager General Tests', () => {
         filename: 'remoteEntry.js',
         exposes: {
           './Component': './src/Component.tsx',
-          './utils': './src/utils.ts'
+          './utils': './src/utils.ts',
         },
         shared: {
           react: { singleton: true, eager: true },
-          'react-dom': { singleton: true, eager: true }
-        }
+          'react-dom': { singleton: true, eager: true },
+        },
       },
       typesFolder: '@mf-types',
       context: projectRoot,
@@ -81,7 +84,7 @@ describe('DTSManager General Tests', () => {
       extractRemoteTypes: true,
       extractThirdParty: true,
       implementation: 'webpack',
-      abortOnError: false
+      abortOnError: false,
     };
     dtsManager = new DTSManager({ remote: remoteOptions });
 
@@ -100,13 +103,13 @@ describe('DTSManager General Tests', () => {
     it('should generate correct API types for multiple exposed components', () => {
       const exposeMap = {
         './Component': './src/Component.tsx',
-        './utils': './src/utils.ts'
+        './utils': './src/utils.ts',
       };
 
       const result = dtsManager.generateAPITypes(exposeMap);
       expect(result).toContain("'REMOTE_ALIAS_IDENTIFIER/Component'");
       expect(result).toContain("'REMOTE_ALIAS_IDENTIFIER/utils'");
-      expect(result).toContain("type PackageType<T>");
+      expect(result).toContain('type PackageType<T>');
     });
 
     it('should handle empty expose map', () => {
@@ -121,7 +124,7 @@ describe('DTSManager General Tests', () => {
       const remoteInfo: RemoteInfo = {
         name: 'test',
         url: 'http://example.com/remote',
-        alias: 'test-alias'
+        alias: 'test-alias',
       };
 
       const result = await dtsManager.requestRemoteManifest(remoteInfo);
@@ -134,11 +137,11 @@ describe('DTSManager General Tests', () => {
           metaData: {
             types: {
               zip: 'types.zip',
-              api: 'api.d.ts'
+              api: 'api.d.ts',
             },
-            publicPath: 'auto'
-          }
-        }
+            publicPath: 'auto',
+          },
+        },
       };
 
       vi.mocked(axios.get).mockResolvedValueOnce(manifestResponse);
@@ -146,7 +149,7 @@ describe('DTSManager General Tests', () => {
       const remoteInfo: RemoteInfo = {
         name: 'test',
         url: 'http://example.com/remote.manifest.json',
-        alias: 'test-alias'
+        alias: 'test-alias',
       };
 
       const result = await dtsManager.requestRemoteManifest(remoteInfo);
@@ -160,11 +163,11 @@ describe('DTSManager General Tests', () => {
         data: {
           metaData: {
             types: {
-              zip: 'types.zip'
+              zip: 'types.zip',
             },
-            publicPath: 'http://example.com'
-          }
-        }
+            publicPath: 'http://example.com',
+          },
+        },
       };
 
       vi.mocked(axios.get).mockResolvedValueOnce(manifestResponse);
@@ -172,7 +175,7 @@ describe('DTSManager General Tests', () => {
       const remoteInfo: RemoteInfo = {
         name: 'test',
         url: 'http://example.com/remote.manifest.json',
-        alias: 'test-alias'
+        alias: 'test-alias',
       };
 
       const result = await dtsManager.requestRemoteManifest(remoteInfo);
@@ -186,7 +189,7 @@ describe('DTSManager General Tests', () => {
       const remoteInfo: RemoteInfo = {
         name: 'test',
         url: 'http://example.com/remote.manifest.json',
-        alias: 'test-alias'
+        alias: 'test-alias',
       };
 
       const result = await dtsManager.requestRemoteManifest(remoteInfo);
@@ -199,11 +202,11 @@ describe('DTSManager General Tests', () => {
           metaData: {
             types: {
               zip: 'types.zip',
-              api: 'api.d.ts'
+              api: 'api.d.ts',
             },
-            publicPath: 'http://example.com/custom/'
-          }
-        }
+            publicPath: 'http://example.com/custom/',
+          },
+        },
       };
 
       vi.mocked(axios.get).mockResolvedValueOnce(manifestResponse);
@@ -211,7 +214,7 @@ describe('DTSManager General Tests', () => {
       const remoteInfo: RemoteInfo = {
         name: 'test',
         url: 'http://example.com/remote.manifest.json',
-        alias: 'test-alias'
+        alias: 'test-alias',
       };
 
       const result = await dtsManager.requestRemoteManifest(remoteInfo);
@@ -228,14 +231,14 @@ describe('DTSManager General Tests', () => {
       moduleFederationConfig: {
         name: 'host',
         filename: 'remoteEntry.js',
-        remotes: {}
+        remotes: {},
       },
       remoteTypesFolder: '@mf-types/remotes',
       deleteTypesFolder: false,
       implementation: 'webpack',
       abortOnError: false,
       consumeAPITypes: true,
-      maxRetries: 3
+      maxRetries: 3,
     };
 
     it('should successfully download types archive', async () => {
@@ -244,16 +247,24 @@ describe('DTSManager General Tests', () => {
         url: 'http://example.com/remote',
         alias: 'test-alias',
         zipUrl: 'http://example.com/types.zip',
-        apiTypeUrl: 'http://example.com/api.d.ts'
+        apiTypeUrl: 'http://example.com/api.d.ts',
       };
 
-      const mockDownloader = vi.fn().mockResolvedValue(['test-alias', '/tmp/types']);
+      const mockDownloader = vi
+        .fn()
+        .mockResolvedValue(['test-alias', '/tmp/types']);
       vi.mocked(downloadTypesArchive).mockReturnValue(mockDownloader);
 
-      const result = await dtsManager.consumeTargetRemotes(baseHostOptions, remoteInfo);
+      const result = await dtsManager.consumeTargetRemotes(
+        baseHostOptions,
+        remoteInfo,
+      );
 
       expect(result).toEqual(['test-alias', '/tmp/types']);
-      expect(mockDownloader).toHaveBeenCalledWith(['test-alias', 'http://example.com/types.zip']);
+      expect(mockDownloader).toHaveBeenCalledWith([
+        'test-alias',
+        'http://example.com/types.zip',
+      ]);
     });
 
     it('should throw error when zipUrl is missing', async () => {
@@ -262,11 +273,12 @@ describe('DTSManager General Tests', () => {
         url: 'http://example.com/remote',
         alias: 'test-alias',
         zipUrl: '',
-        apiTypeUrl: ''
+        apiTypeUrl: '',
       };
 
-      await expect(dtsManager.consumeTargetRemotes(baseHostOptions, remoteInfo))
-        .rejects.toThrow("Can not get test's types archive url!");
+      await expect(
+        dtsManager.consumeTargetRemotes(baseHostOptions, remoteInfo),
+      ).rejects.toThrow("Can not get test's types archive url!");
     });
   });
 
@@ -275,26 +287,26 @@ describe('DTSManager General Tests', () => {
       const generateTypesSpy = vi.spyOn(dtsManager, 'generateTypes');
       dtsManager.options.host = {
         moduleFederationConfig: {
-          name: 'testRemote'
-        }
+          name: 'testRemote',
+        },
       };
       dtsManager.options.remote = {
         moduleFederationConfig: {
           name: 'testRemote',
           filename: 'remoteEntry.js',
           exposes: {
-            './Component': './src/Component.tsx'
-          }
+            './Component': './src/Component.tsx',
+          },
         },
         typesFolder: '@mf-types',
         context: projectRoot,
-        tsConfigPath: path.join(projectRoot, 'tsconfig.json')
+        tsConfigPath: path.join(projectRoot, 'tsconfig.json'),
       };
 
       await dtsManager.updateTypes({
         remoteName: 'testRemote',
         updateMode: UpdateMode.POSITIVE,
-        once: true
+        once: true,
       });
 
       expect(generateTypesSpy).toHaveBeenCalled();
@@ -306,7 +318,7 @@ describe('DTSManager General Tests', () => {
       await dtsManager.updateTypes({
         remoteName: 'testRemote',
         updateMode: UpdateMode.POSITIVE,
-        once: true
+        once: true,
       });
 
       // Should not throw and handle gracefully
@@ -321,7 +333,7 @@ describe('DTSManager General Tests', () => {
         url: 'http://example.com/remote',
         alias: 'test-alias',
         zipUrl: 'http://example.com/types.zip',
-        apiTypeUrl: 'http://example.com/api.d.ts'
+        apiTypeUrl: 'http://example.com/api.d.ts',
       };
 
       const apiTypeContent = `
@@ -340,7 +352,9 @@ describe('DTSManager General Tests', () => {
 
       expect(content).toContain('test-alias/Component');
       expect(content).not.toContain('REMOTE_ALIAS_IDENTIFIER');
-      expect(content).toContain("type PackageType<T> = T extends 'test-alias/Component'");
+      expect(content).toContain(
+        "type PackageType<T> = T extends 'test-alias/Component'",
+      );
       expect(dtsManager.loadedRemoteAPIAlias.has('test-alias')).toBe(true);
     });
 
@@ -350,7 +364,7 @@ describe('DTSManager General Tests', () => {
         url: 'http://example.com/remote',
         alias: 'test-alias',
         zipUrl: 'http://example.com/types.zip',
-        apiTypeUrl: ''
+        apiTypeUrl: '',
       };
 
       vi.spyOn(fs, 'writeFileSync');
@@ -367,7 +381,7 @@ describe('DTSManager General Tests', () => {
         url: 'http://example.com/remote',
         alias: 'test-alias',
         zipUrl: 'http://example.com/types.zip',
-        apiTypeUrl: 'http://example.com/api.d.ts'
+        apiTypeUrl: 'http://example.com/api.d.ts',
       };
 
       vi.mocked(axios.get).mockRejectedValueOnce(new Error('Network error'));
@@ -390,18 +404,16 @@ describe('DTSManager General Tests', () => {
         filename: 'remoteEntry.js',
         remotes: {
           remote1: 'remote1@http://example.com/remote1',
-          remote2: 'remote2@http://example.com/remote2'
-        }
+          remote2: 'remote2@http://example.com/remote2',
+        },
       },
       remoteTypesFolder: '@mf-types/remotes',
       deleteTypesFolder: false,
       implementation: 'webpack',
       abortOnError: false,
       consumeAPITypes: true,
-      maxRetries: 3
+      maxRetries: 3,
     };
-
-
 
     it('should handle no loaded remote API aliases', () => {
       vi.spyOn(fs, 'writeFileSync');
@@ -431,7 +443,7 @@ describe('DTSManager General Tests', () => {
         addPkgs: vi.fn(),
         inferPkgDir: vi.fn(),
         collectPkgs: vi.fn(),
-        copyDts: vi.fn().mockResolvedValue(undefined)
+        copyDts: vi.fn().mockResolvedValue(undefined),
       }));
 
       // Add the existing alias to the loadedRemoteAPIAlias set
