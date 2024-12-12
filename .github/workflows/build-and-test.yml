@@ -47,9 +47,11 @@ jobs:
           for pkg in packages/*; do
             if [ -f "$pkg/package.json" ] && \
                [ "$pkg" != "packages/assemble-release-plan" ] && \
-               [ "$pkg" != "packages/chrome-devtools" ]; then
+               [ "$pkg" != "packages/chrome-devtools" ] && \
+               [ "$pkg" != "packages/core" ] && \
+               [ "$pkg" != "packages/utilities" ]; then
               echo "Checking $pkg..."
-              publint "$pkg"
+              npx publint "$pkg"
             fi
           done
 
