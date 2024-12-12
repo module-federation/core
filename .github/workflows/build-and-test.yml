@@ -42,6 +42,15 @@ jobs:
       - name: Run Build for All
         run: npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
 
+      - name: Check Package Publishing Compatibility
+        run: |
+          for pkg in packages/*; do
+            if [ -f "$pkg/package.json" ]; then
+              echo "Checking $pkg..."
+              npx publint "$pkg"
+            fi
+          done
+
       - name: Run Affected Test
         uses: nick-fields/retry@v3
         with:
