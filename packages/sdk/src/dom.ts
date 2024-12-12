@@ -25,7 +25,10 @@ export function isStaticResourcesEqual(url1: string, url2: string): boolean {
 
 export function createScript(info: {
   url: string;
-  cb?: (value: void | PromiseLike<void>) => void;
+  cb?: {
+    resolve: (value: void | PromiseLike<void>) => void;
+    reject: (error: Error) => void;
+  };
   attrs?: Record<string, any>;
   needDeleteScript?: boolean;
   createScriptHook?: CreateScriptHookDom;
@@ -33,9 +36,10 @@ export function createScript(info: {
   // Retrieve the existing script element by its src attribute
   let script: HTMLScriptElement | null = null;
   let needAttach = true;
-  let timeout = 20000;
+  let timeout = 60000;
   let timeoutId: NodeJS.Timeout;
   const scripts = document.getElementsByTagName('script');
+
   for (let i = 0; i < scripts.length; i++) {
     const s = scripts[i];
     const scriptSrc = s.getAttribute('src');
@@ -88,6 +92,14 @@ export function createScript(info: {
     event: any,
   ): Promise<void> => {
     clearTimeout(timeoutId);
+    const onScriptCompleteCallback = () => {
+      if (event.type === 'error') {
+        info?.cb?.reject && info?.cb?.reject(event);
+      } else {
+        info?.cb?.resolve && info?.cb?.resolve();
+      }
+    };
+
     // Prevent memory leaks in IE.
     if (script) {
       script.onerror = null;
@@ -102,14 +114,14 @@ export function createScript(info: {
         const result = (prev as any)(event);
         if (result instanceof Promise) {
           const res = await result;
-          info?.cb?.();
+          onScriptCompleteCallback();
           return res;
         }
-        info?.cb?.();
+        onScriptCompleteCallback();
         return result;
       }
     }
-    info?.cb?.();
+    onScriptCompleteCallback();
   };
 
   script.onerror = onScriptComplete.bind(null, script.onerror);
@@ -127,7 +139,10 @@ export function createScript(info: {
 
 export function createLink(info: {
   url: string;
-  cb: (value: void | PromiseLike<void>) => void;
+  cb?: {
+    resolve: (value: void | PromiseLike<void>) => void;
+    reject: (error: Error) => void;
+  };
   attrs: Record<string, string>;
   needDeleteLink?: boolean;
   createLinkHook?: (
@@ -184,6 +199,13 @@ export function createLink(info: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event: any,
   ): void => {
+    const onLinkCompleteCallback = () => {
+      if (event.type === 'error') {
+        info?.cb?.reject && info?.cb?.reject(event);
+      } else {
+        info?.cb?.resolve && info?.cb?.resolve();
+      }
+    };
     // Prevent memory leaks in IE.
     if (link) {
       link.onerror = null;
@@ -197,11 +219,11 @@ export function createLink(info: {
       if (prev) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const res = (prev as any)(event);
-        info.cb();
+        onLinkCompleteCallback();
         return res;
       }
     }
-    info.cb();
+    onLinkCompleteCallback();
   };
 
   link.onerror = onLinkComplete.bind(null, link.onerror);
@@ -218,10 +240,13 @@ export function loadScript(
   },
 ) {
   const { attrs = {}, createScriptHook } = info;
-  return new Promise<void>((resolve, _reject) => {
+  return new Promise<void>((resolve, reject) => {
     const { script, needAttach } = createScript({
       url,
-      cb: resolve,
+      cb: {
+        resolve,
+        reject,
+      },
       attrs: {
         fetchpriority: 'high',
         ...attrs,

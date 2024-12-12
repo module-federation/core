@@ -6,6 +6,7 @@ import {
   RUNTIME_005,
   RUNTIME_006,
   RUNTIME_007,
+  RUNTIME_008,
   TYPE_001,
 } from './error-codes';
 
@@ -17,6 +18,7 @@ export const runtimeDescMap = {
   [RUNTIME_005]: 'Invalid loadShareSync function call from bundler runtime',
   [RUNTIME_006]: 'Invalid loadShareSync function call from runtime',
   [RUNTIME_007]: 'Failed to get remote snapshot.',
+  [RUNTIME_008]: 'Failed to load script resources.',
 };
 
 export const typeDescMap = {
