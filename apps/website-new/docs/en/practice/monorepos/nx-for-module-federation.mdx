@@ -1,4 +1,4 @@
-# Using Nx for Module Federation
+# Nx and Module Federation
 
 Nx is a powerful open-source build system that works especially well with monorepos and comes with built-in support for Module Federation for Angular and React projects.
 
@@ -13,19 +13,18 @@ It is the best tool for both building and maintaining monorepos as well as for m
 
 - Run Tasks Efficiently: Nx [runs tasks in parallel](https://nx.dev/features/run-tasks) and orders the tasks based on the dependencies between them.
 - Distribute Tasks in CI: Nx scales your CI by [distributing tasks](https://nx.dev/ci/features/distribute-task-execution) across many VMs. Your CI is fast no matter how big your repository is.
-- Cache Locally & Remotely: With [local](https://nx.dev/features/cache-task-results) and [remote caching](https://nx.dev/ci/features/remote-cache), Nx prevents unnecessary re-runs of tasks, saving you valuable dev time.
-- Split E2E Tests and Rerun Flaky Tests: Nx [automatically splits](https://nx.dev/ci/features/split-e2e-tasks) large e2e tests to distribute them across VMs. Nx can also automatically [identify and rerun flaky e2e tests](https://nx.dev/ci/features/flaky-tasks).
+- Cache Locally & Remotely: With [local](https://nx.dev/features/cache-task-results) and [remote caching](https://nx.dev/ci/features/remote-cache), Nx prevents unnecessary re-runs of tasks, saving you valuable dev time while also decreasing CI times.
+- Split E2E Tests and Rerun Flaky Tests: Nx [automatically splits](https://nx.dev/ci/features/split-e2e-tasks) large e2e tests to distribute them across VMs. Nx can also automatically [identify and re-run flaky e2e tests](https://nx.dev/ci/features/flaky-tasks).
 - Automate Dependency Updates: if you leverage [Nx plugins](https://nx.dev/concepts/nx-plugins) you gain additional features such as [code generation](https://nx.dev/features/generate-code) and tools to [automatically upgrade](https://nx.dev/features/automate-updating-dependencies) your codebase and dependencies.
 - Make it Your Own: Nx is highly customizable and extensible. Fine-tune it by [creating a plugin for your organization](https://nx.dev/extending-nx/tutorials/organization-specific-plugin) or [creating a tooling plugin](https://nx.dev/extending-nx/tutorials/tooling-plugin).
 
 ## Nx Module Federation Features
 
-Nx providers out of the box support for Module Federation for Angular and React projects including projects with Server Side Rendering (SSR).
+Nx provides out of the box support for Module Federation for Angular and React projects including projects with Server Side Rendering (SSR).
 
 ### Generators for Scaffolding Module Federation Projects
 
-Generators in Nx provide a consistent and convenient method for scaffolding projects in a monorepo. Nx Plugins provide generators for various frameworks and tools, including Module Federation.
-Rapidly scaffolding Module Federation projects for Angular and React requires just a single command. This is a great way to get started with Module Federation while also providing a consistent structure as you add more Producers (remotes) to your system.
+Nx generators provide a consistent and convenient method of scaffolding projects. Nx Plugins for [Angular (`@nx/angular`)](https://nx.dev/nx-api/angular) and [React (`@nx/react`)](https://nx.dev/nx-api/react) come with generators for rapidly scaffolding Module Federation projects and allow you to easily add Consumers ( hosts) and Producers (remotes) to your system.
 
 You can see an example of the Nx `consumer` generator below:
 ```bash
@@ -45,10 +44,10 @@ Nx provides executors for building and serving your Module Federation applicatio
 - Support for serving the Consumer (host) project along with all of its Producers (remotes) in a single command with the best resource management and DX.
 - Support for serving individual Producers (remotes) that are currently being worked with HMR and file watching for faster local development.
 
-You can learn more about how we [Scale Develop Experience](./nx-for-module-federation#scaling-developer-experience-dx) for Module Federation in Nx below.
+You can learn more about how we [Scale Developer Experience](./nx-for-module-federation#scaling-developer-experience-dx) for Module Federation in Nx below.
 
-By forcing you to serve the Consumer (host) project along with all of its Producers (remotes) in a single command, Nx ensures that you get immediate feedback on any changes you make to the Producer (remote) projects providing immediate feedback if it impacts other projects in the system.
-However, it also allows you to [develop as a user](./nx-for-module-federation#develop-as-a-user) such that you follow the same flow that a user would follow using the deployed application.
+Nx serves the Consumer (host) project along with all of its Producers (remotes) in a single command, which ensures that you get immediate feedback on any changes you make to the Producer (remote) projects providing immediate feedback if it impacts other projects in the system.
+It also allows you to [develop as a user](./nx-for-module-federation#develop-as-a-user) such that you follow the same flow that a user would follow using the deployed application.
 
 To learn more about how Nx achieves this with the `module-federation-dev-server` executor, see the [Nx Module Federation Technical Overview](https://nx.dev/concepts/module-federation/nx-module-federation-technical-overview).
 
