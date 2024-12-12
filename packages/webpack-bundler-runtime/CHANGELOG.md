@@ -1,5 +1,20 @@
 # @module-federation/webpack-bundler-runtime
 
+## 0.8.2
+
+### Patch Changes
+
+- Updated dependencies [fa7a0bd]
+  - @module-federation/runtime@0.8.2
+  - @module-federation/sdk@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.1
+- @module-federation/sdk@0.8.1
+
 ## 0.8.0
 
 ### Patch Changes

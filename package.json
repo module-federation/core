@@ -97,7 +97,7 @@
   "devDependencies": {
     "@babel/core": "^7.24.7",
     "@babel/plugin-transform-react-jsx": "7.25.9",
-    "@babel/preset-react": "^7.24.7",
+    "@babel/preset-react": "^7.26.3",
     "@changesets/cli": "^2.27.9",
     "@chromatic-com/storybook": "^1.7.0",
     "@commitlint/cli": "^19.4.1",

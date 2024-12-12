@@ -5,9 +5,10 @@ import {
   RUNTIME_002,
   runtimeDescMap,
 } from '@module-federation/error-codes';
-import { getRemoteEntry } from '../utils/load';
+import { getRemoteEntry, getRemoteEntryUniqueKey } from '../utils/load';
 import { FederationHost } from '../core';
 import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
+import { globalLoading } from '../global';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
 
@@ -34,18 +35,32 @@ class Module {
       return this.remoteEntryExports;
     }
 
-    // Get remoteEntry.js
-    const remoteEntryExports = await getRemoteEntry({
-      origin: this.host,
-      remoteInfo: this.remoteInfo,
-      remoteEntryExports: this.remoteEntryExports,
-    });
+    let remoteEntryExports;
+    try {
+      remoteEntryExports = await getRemoteEntry({
+        origin: this.host,
+        remoteInfo: this.remoteInfo,
+        remoteEntryExports: this.remoteEntryExports,
+      });
+    } catch (err) {
+      const uniqueKey = getRemoteEntryUniqueKey(this.remoteInfo);
+      remoteEntryExports =
+        await this.host.loaderHook.lifecycle.loadEntryError.emit({
+          getRemoteEntry,
+          origin: this.host,
+          remoteInfo: this.remoteInfo,
+          remoteEntryExports: this.remoteEntryExports,
+          globalLoading,
+          uniqueKey,
+        });
+    }
+
     assert(
       remoteEntryExports,
       `remoteEntryExports is undefined \n ${safeToString(this.remoteInfo)}`,
     );
 
-    this.remoteEntryExports = remoteEntryExports;
+    this.remoteEntryExports = remoteEntryExports as RemoteEntryExports;
     return this.remoteEntryExports;
   }
 

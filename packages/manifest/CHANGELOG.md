@@ -1,5 +1,22 @@
 # @module-federation/manifest
 
+## 0.8.2
+
+### Patch Changes
+
+- 85ef6c4: fix(manifest): stats should add prefetchInterface if enable dataPrefetch
+  - @module-federation/dts-plugin@0.8.2
+  - @module-federation/sdk@0.8.2
+  - @module-federation/managers@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.1
+- @module-federation/managers@0.8.1
+- @module-federation/dts-plugin@0.8.1
+
 ## 0.8.0
 
 ### Patch Changes
