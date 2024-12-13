@@ -35,8 +35,8 @@
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
-      "require": "./dist/src/index.js",
-      "import": "./dist/src/index.js"
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js"
     },
     "./webpack": {
       "types": "./dist/src/webpack.d.ts",
