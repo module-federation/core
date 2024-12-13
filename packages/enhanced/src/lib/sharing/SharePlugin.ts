@@ -70,10 +70,11 @@ class SharePlugin {
           strictVersion: options.strictVersion,
           singleton: options.singleton,
           layer: options.layer,
-          request: options.request || key,
+          request: options.request || options.import || key,
         },
       }));
-    this._shareScope = options.shareScope as string;
+    //@ts-ignore
+    this._shareScope = options.shareScope;
     this._consumes = consumes;
     this._provides = provides;
   }
