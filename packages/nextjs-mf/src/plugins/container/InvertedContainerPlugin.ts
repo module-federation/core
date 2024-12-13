@@ -6,8 +6,6 @@ import {
 } from '@module-federation/enhanced';
 
 class InvertedContainerPlugin {
-  constructor() {}
-
   public apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'EmbeddedContainerPlugin',
