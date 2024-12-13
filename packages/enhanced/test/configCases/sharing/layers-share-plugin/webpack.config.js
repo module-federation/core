@@ -1,24 +1,43 @@
 const { SharePlugin } = require('../../../../dist/src');
 const path = require('path');
 
-/** @type {import("../../../../").Configuration} */
 module.exports = {
   mode: 'development',
   devtool: false,
+  entry: {
+    main: {
+      import: './src/index.js',
+    },
+  },
   experiments: {
     layers: true,
   },
   module: {
     rules: [
-      // Different layer rules
       {
-        test: /different-layer\.test\.js$/,
-        layer: 'different-layer',
+        test: /tests\/different-layers\.test\.js$/,
+        layer: 'differing-layer',
+      },
+      {
+        test: /tests\/prefixed-share\.test\.js$/,
+        layer: 'prefixed-layer',
+      },
+      {
+        layer: 'multi-pkg-layer',
+        issuerLayer: 'prefixed-layer',
+        use: [
+          {
+            loader: path.resolve(
+              __dirname,
+              './loaders/multi-pkg-layer-loader.js',
+            ),
+          },
+        ],
       },
       {
         layer: 'required-layer',
-        issuerLayer: 'different-layer',
-        exclude: /relative2\.js$/,
+        issuerLayer: 'differing-layer',
+        exclude: /react\/index2\.js$/,
         use: [
           {
             loader: path.resolve(
@@ -28,9 +47,8 @@ module.exports = {
           },
         ],
       },
-      // Explicit layer rules
       {
-        test: /relative2\.js$/,
+        test: /react\/index2\.js$/,
         layer: 'explicit-layer',
         use: [
           {
@@ -42,64 +60,82 @@ module.exports = {
         ],
       },
       {
-        test: /explicit\.test\.js$/,
-        layer: 'explicit-layer',
+        test: /tests\/lib-two\.test\.js$/,
+        layer: 'lib-two-layer',
+      },
+      {
+        test: /lib2\/index\.js$/,
+        layer: 'lib-two-required-layer',
+        issuerLayer: 'lib-two-layer',
+        use: [
+          {
+            loader: path.resolve(
+              __dirname,
+              './loaders/different-layer-loader.js',
+            ),
+          },
+        ],
       },
     ],
   },
   plugins: [
     new SharePlugin({
+      shareScope: 'default',
       shared: {
-        // Different layer shared modules
-        lib1: {
-          version: '1.0.0',
-          requiredVersion: '^1.0.0',
-          strictVersion: true,
-          layer: 'different-layer',
+        react: {
+          singleton: true,
         },
-        './relative1': {
-          import: './relative1',
-          version: false,
-          layer: 'different-layer',
+        'explicit-layer-react': {
+          request: 'react/index2',
+          import: 'react/index2',
+          shareKey: 'react',
+          singleton: true,
+          issuerLayer: 'differing-layer',
+          layer: 'explicit-layer',
         },
-
-        // Explicit layer shared modules
+        'differing-layer-react': {
+          request: 'react',
+          import: 'react',
+          shareKey: 'react',
+          singleton: true,
+          issuerLayer: 'differing-layer',
+          layer: 'differing-layer',
+        },
         'lib-two': {
+          request: 'lib-two',
           import: 'lib2',
           requiredVersion: '^1.0.0',
           version: '1.3.4',
           strictVersion: true,
-          eager: true,
-          layer: 'explicit-layer',
+          eager: false,
         },
-        './relative2': {
-          import: false,
-          shareKey: 'store',
-          version: '0',
-          requiredVersion: false,
-          strictVersion: true,
-          layer: 'explicit-layer',
-        },
-
-        // Required layer shared modules
-        lib3: {
-          shareScope: 'other',
-          layer: 'required-layer',
-        },
-        store: {
-          version: '0',
-          layer: 'required-layer',
-        },
-
-        // Unlayered shared modules
-        lib4: {
-          version: '1.0.0',
+        nonsense: {
+          request: 'lib-two',
+          import: 'lib2',
+          shareKey: 'lib-two',
           requiredVersion: '^1.0.0',
+          version: '1.3.4',
           strictVersion: true,
+          eager: true,
+          issuerLayer: 'lib-two-layer',
+          layer: 'differing-layer',
         },
-        './relative3': {
-          import: './relative3',
-          version: false,
+        'lib-two-layered': {
+          import: 'lib2',
+          shareKey: 'lib-two',
+          requiredVersion: '^1.0.0',
+          version: '1.3.4',
+          strictVersion: true,
+          eager: true,
+          issuerLayer: 'lib-two-layer',
+          layer: 'differing-layer',
+        },
+        multi: {
+          request: 'multi-pkg/',
+          requiredVersion: '^2.0.0',
+          version: '2.0.0',
+          strictVersion: true,
+          eager: true,
         },
       },
     }),

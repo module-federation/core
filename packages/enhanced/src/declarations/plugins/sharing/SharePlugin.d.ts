@@ -83,4 +83,8 @@ export interface SharedConfig {
    * Layer for the shared module.
    */
   layer?: string;
+  /**
+   * The actual request to use for importing the module. Defaults to the property name.
+   */
+  request?: string;
 }
