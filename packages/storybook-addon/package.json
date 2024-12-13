@@ -31,13 +31,11 @@
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
-      "import": "./dist/src/index.js",
-      "require": "./dist/src/index.js"
+      "default": "./dist/src/index.js"
     },
     "./preset": {
       "types": "./dist/preset.d.ts",
-      "import": "./dist/preset.js",
-      "require": "./dist/preset.js"
+      "default": "./dist/preset.js"
     },
     "./*": "./*"
   },
