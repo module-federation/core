@@ -1,6 +1,7 @@
 const { SharePlugin } = require('../../../../dist/src');
 const path = require('path');
 
+/** @type {import("../../../../").Configuration} */
 module.exports = {
   mode: 'development',
   devtool: false,
@@ -9,6 +10,7 @@ module.exports = {
   },
   module: {
     rules: [
+      // Different layer rules
       {
         test: /different-layer\.test\.js$/,
         layer: 'different-layer',
@@ -26,6 +28,7 @@ module.exports = {
           },
         ],
       },
+      // Explicit layer rules
       {
         test: /relative2\.js$/,
         layer: 'explicit-layer',
@@ -47,12 +50,20 @@ module.exports = {
   plugins: [
     new SharePlugin({
       shared: {
+        // Different layer shared modules
         lib1: {
           version: '1.0.0',
           requiredVersion: '^1.0.0',
           strictVersion: true,
           layer: 'different-layer',
         },
+        './relative1': {
+          import: './relative1',
+          version: false,
+          layer: 'different-layer',
+        },
+
+        // Explicit layer shared modules
         'lib-two': {
           import: 'lib2',
           requiredVersion: '^1.0.0',
@@ -60,15 +71,6 @@ module.exports = {
           strictVersion: true,
           eager: true,
           layer: 'explicit-layer',
-        },
-        lib3: {
-          shareScope: 'other',
-          layer: 'required-layer',
-        },
-        './relative1': {
-          import: './relative1',
-          version: false,
-          layer: 'different-layer',
         },
         './relative2': {
           import: false,
@@ -78,10 +80,18 @@ module.exports = {
           strictVersion: true,
           layer: 'explicit-layer',
         },
+
+        // Required layer shared modules
+        lib3: {
+          shareScope: 'other',
+          layer: 'required-layer',
+        },
         store: {
           version: '0',
           layer: 'required-layer',
         },
+
+        // Unlayered shared modules
         lib4: {
           version: '1.0.0',
           requiredVersion: '^1.0.0',

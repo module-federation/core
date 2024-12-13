@@ -1,3 +1,6 @@
+/**
+ * Tests for modules shared with explicit-layer configuration
+ */
 it('should provide and consume lib-two in explicit-layer', () => {
   const { default: value, layer } = require('lib-two');
   expect(value).toBe('lib2');
