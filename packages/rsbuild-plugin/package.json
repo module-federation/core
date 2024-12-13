@@ -14,9 +14,9 @@
   "license": "MIT",
   "exports": {
     ".": {
+      "types": "./dist/index.cjs.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js",
-      "types": "./dist/index.cjs.d.ts"
+      "require": "./dist/index.cjs.js"
     }
   },
   "main": "./dist/index.cjs.js",
