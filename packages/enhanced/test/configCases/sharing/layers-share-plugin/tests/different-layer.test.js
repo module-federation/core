@@ -1,3 +1,6 @@
+/**
+ * Tests for modules shared with different-layer configuration
+ */
 it('should provide and consume lib1 in different-layer', async () => {
   const { default: value, layer } = await import('lib1');
   expect(value).toBe('lib1');

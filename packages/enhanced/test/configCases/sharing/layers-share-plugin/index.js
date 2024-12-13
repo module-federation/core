@@ -1,5 +1,6 @@
 import './tests/different-layer.test';
 import './tests/explicit.test';
+import './tests/unlayered.test';
 
 // Test non-layered functionality
 it('should provide and consume a normal library async in a separate shareScope', async () => {

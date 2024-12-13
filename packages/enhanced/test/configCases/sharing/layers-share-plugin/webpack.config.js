@@ -82,6 +82,15 @@ module.exports = {
           version: '0',
           layer: 'required-layer',
         },
+        lib4: {
+          version: '1.0.0',
+          requiredVersion: '^1.0.0',
+          strictVersion: true,
+        },
+        './relative3': {
+          import: './relative3',
+          version: false,
+        },
       },
     }),
   ],
