@@ -26,7 +26,6 @@
   ],
   "author": "Fiodorov Andrei <hello@fyodorovandrei.com> (https://github.com/fyodorovandrei)",
   "main": "dist/src/index.js",
-  "module": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "exports": {
     ".": {
