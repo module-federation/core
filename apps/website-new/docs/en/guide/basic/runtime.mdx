@@ -81,7 +81,7 @@ type InitOptions = {
     [pkgName: string]: ShareArgs | ShareArgs[];
   };
   // Sharing strategy, which strategy will be used to decide whether to reuse the dependency
-  strategy?: 'version-first' | 'loaded-first';
+  shareStrategy?: 'version-first' | 'loaded-first';
 };
 
 type ShareArgs =
