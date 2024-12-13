@@ -1,1 +1,1 @@
-export { ModuleFederationPlugin } from '@module-federation/rspack';
+export { ModuleFederationPlugin } from '@module-federation/rspack/plugin';
