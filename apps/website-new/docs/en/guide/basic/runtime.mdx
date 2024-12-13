@@ -80,6 +80,8 @@ type InitOptions = {
   shared?: {
     [pkgName: string]: ShareArgs | ShareArgs[];
   };
+  // Sharing strategy, which strategy will be used to decide whether to reuse the dependency
+  strategy?: 'version-first' | 'loaded-first';
 };
 
 type ShareArgs =
@@ -91,7 +93,6 @@ type SharedBaseArgs = {
   shareConfig?: SharedConfig;
   scope?: string | Array<string>;
   deps?: Array<string>;
-  strategy?: 'version-first' | 'loaded-first';
   loaded?: boolean;
 };
 
