@@ -16,7 +16,6 @@
       "import": "./dist/src/utils/index.js",
       "require": "./dist/src/utils/index.js"
     },
-    "./src/plugins/RemotePublicPathPlugin.js": "./dist/src/plugins/RemotePublicPathPlugin.js",
     "./src/plugins/NodeFederationPlugin.js": "./dist/src/plugins/NodeFederationPlugin.js",
     "./universe-entry-chunk-tracker-plugin": "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.js",
     "./src/": "./dist/src/"

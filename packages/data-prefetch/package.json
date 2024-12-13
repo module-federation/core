@@ -16,31 +16,36 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "exports": {
     ".": {
+      "types": "./dist/index.cjs.d.ts",
       "import": "./dist/index.esm.mjs",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.cjs.d.ts"
+      "require": "./dist/index.cjs.js"
     },
     "./react": {
+      "types": "./dist/react.cjs.d.ts",
       "import": "./dist/react.esm.mjs",
-      "require": "./dist/react.cjs.js",
-      "types": "./dist/react.cjs.d.ts"
+      "require": "./dist/react.cjs.js"
     },
     "./cli": {
+      "types": "./dist/cli.cjs.d.ts",
       "import": "./dist/cli.esm.mjs",
-      "require": "./dist/cli.cjs.js",
-      "types": "./dist/cli.cjs.d.ts"
+      "require": "./dist/cli.cjs.js"
     },
     "./babel-plugin": {
+      "types": "./dist/babel.cjs.d.ts",
       "import": "./dist/babel.esm.mjs",
-      "require": "./dist/babel.cjs.js",
-      "types": "./dist/babel.cjs.d.ts"
+      "require": "./dist/babel.cjs.js"
     },
     "./universal": {
+      "types": "./dist/universal.cjs.d.ts",
       "import": "./dist/universal.esm.mjs",
-      "require": "./dist/universal.cjs.js",
-      "types": "./dist/universal.cjs.d.ts"
+      "require": "./dist/universal.cjs.js"
     }
   },
   "typesVersions": {
@@ -62,7 +67,7 @@
       ]
     }
   },
-  "main": "dist/index.cjs",
+  "main": "dist/index.cjs.js",
   "module": "dist/index.esm.mjs",
   "peerDependencies": {
     "react": ">=16.9.0",
