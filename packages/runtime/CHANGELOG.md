@@ -1,5 +1,14 @@
 # @module-federation/runtime
 
+## 0.8.3
+
+### Patch Changes
+
+- f817674: chore(runtime): remove duplicate registerRemotes warn
+- Updated dependencies [8e172c8]
+  - @module-federation/sdk@0.8.3
+  - @module-federation/error-codes@0.8.3
+
 ## 0.8.2
 
 ### Patch Changes
