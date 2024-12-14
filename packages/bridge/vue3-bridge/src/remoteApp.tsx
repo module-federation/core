@@ -29,7 +29,7 @@ export default defineComponent({
         basename: props.basename,
         memoryRoute: props.memoryRoute,
       };
-      LoggerInstance.log(
+      LoggerInstance.debug(
         `createRemoteComponent LazyComponent render >>>`,
         renderProps,
       );
@@ -53,10 +53,13 @@ export default defineComponent({
 
         // dispatchPopstateEnv
         if (pathname.value !== '' && pathname.value !== newPath) {
-          LoggerInstance.log(`createRemoteComponent dispatchPopstateEnv >>>`, {
-            ...props,
-            pathname: route.path,
-          });
+          LoggerInstance.debug(
+            `createRemoteComponent dispatchPopstateEnv >>>`,
+            {
+              ...props,
+              pathname: route.path,
+            },
+          );
           dispatchPopstateEnv();
         }
         pathname.value = newPath;
@@ -68,7 +71,7 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
-      LoggerInstance.log(`createRemoteComponent LazyComponent destroy >>>`, {
+      LoggerInstance.debug(`createRemoteComponent LazyComponent destroy >>>`, {
         ...props,
       });
       watchStopHandle();
