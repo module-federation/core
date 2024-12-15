@@ -33,7 +33,7 @@ async function fetchWithRetry({
   } catch (error) {
     if (retryTimes <= 0) {
       logger.log(
-        `[ Module Federation RetryPlugin ]: retry failed after ${retryTimes} times for url: ${url}, now will try fallbackUrl url`,
+        `${PLUGIN_IDENTIFIER}: retry failed after ${retryTimes} times for url: ${url}, now will try fallbackUrl url`,
       );
 
       if (fallback && typeof fallback === 'function') {
