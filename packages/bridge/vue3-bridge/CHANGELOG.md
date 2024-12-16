@@ -1,5 +1,13 @@
 # @module-federation/bridge-vue3
 
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.4
+- @module-federation/sdk@0.8.4
+- @module-federation/bridge-shared@0.8.4
+
 ## 0.8.3
 
 ### Patch Changes
