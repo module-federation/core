@@ -116,8 +116,8 @@ type ScriptWithRetryOptions = {
 
 ### Properties
 
-- **script**: `ScriptWithRetryOptions` (optional)
-  - used to configure the retry options for fetch type resources.
+- **fetch**: `FetchWithRetryOptions` (optional)
+  - `FetchWithRetryOptions` is the type used to configure the retry options for fetch type resources.
 
 - **script**: `ScriptWithRetryOptions` (optional)
   - `ScriptWithRetryOptions` is the type used to configure the retry options for script type resources.
@@ -142,14 +142,14 @@ type ScriptWithRetryOptions = {
 - **retryDelay**:
   - `number`
   - optional
-  - The delay time between each retry (in milliseconds).
+  - The delay time between each retry (in milliseconds), default is 1000 (1 second).
 
 - **fallback**:
   - `() => string | ((url: string | URL | globalThis.Request) => string)`
   - optional
   - A function, which can optionally receive the failed URL, that returns a fallback string to be used if all retries fail. This function is called when all retry attempts have failed.
 
-### ScriptWithRetryOptions 类型说明
+### ScriptWithRetryOptions Description
 
 - **retryTimes**:
   - `number`
@@ -159,7 +159,7 @@ type ScriptWithRetryOptions = {
 - **retryDelay**:
   - `number`
   - optional
-  - The delay time between each retry (in milliseconds).
+  - The delay time between each retry (in milliseconds), default is 1000 (1 second).
 
 - **moduleName**:
   - `Array<string>`
@@ -193,7 +193,7 @@ init({
         retryTimes: 3,
         // the retry delay
         retryDelay: 1000,
-        // the module name list that need to be retried, defualt behavior is to retry all modules
+        // the module name list that need to be retried, default behavior is to retry all modules
         moduleName: ['remote1'],
         // the callback function that will be called after all retried failed
         cb: (resolve, error) => {

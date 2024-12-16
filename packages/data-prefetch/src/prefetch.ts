@@ -99,7 +99,7 @@ export class MFDataPrefetch {
     const exportsPromise =
       typeof exportsPromiseFn === 'function'
         ? exportsPromiseFn()
-        : Promise.resolve({});
+        : exportsPromiseFn;
     const resolve = exportsPromise.then(
       (exports: Record<string, Record<string, any>> = {}) => {
         // Match prefetch based on the function name suffix so that other capabilities can be expanded later.

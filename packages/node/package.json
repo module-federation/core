@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "2.6.11",
+  "version": "2.6.17",
   "type": "commonjs",
   "main": "./dist/src/index.js",
   "exports": {
@@ -57,7 +57,11 @@
   ],
   "types": "src/index.d.ts",
   "description": "Module Federation helper for Node",
-  "repository": "https://github.com/module-federation/core/tree/main/packages/node",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/node"
+  },
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "dependencies": {

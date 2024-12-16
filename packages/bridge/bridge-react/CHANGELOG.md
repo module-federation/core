@@ -1,5 +1,50 @@
 # @module-federation/bridge-react
 
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.4
+- @module-federation/bridge-shared@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [8e172c8]
+  - @module-federation/sdk@0.8.3
+  - @module-federation/bridge-shared@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.2
+- @module-federation/bridge-shared@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.1
+- @module-federation/bridge-shared@0.8.1
+
+## 0.8.0
+
+### Patch Changes
+
+- 542164e: chore(bridge-react): set react-router-dom peer version to >=4 <7
+  - @module-federation/sdk@0.8.0
+  - @module-federation/bridge-shared@0.8.0
+
+## 0.7.7
+
+### Patch Changes
+
+- ae5ee1e: feat: mount bridge api to module instance
+  - @module-federation/sdk@0.7.7
+  - @module-federation/bridge-shared@0.7.7
+
 ## 0.7.6
 
 ### Patch Changes

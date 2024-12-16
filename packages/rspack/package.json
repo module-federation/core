@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rspack",
-  "version": "0.7.6",
+  "version": "0.8.4",
   "license": "MIT",
   "keywords": [
     "Module Federation",
@@ -12,6 +12,11 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/rspack"
   },
   "author": "hanric <hanric.zhang@gmail.com>",
   "sideEffects": false,
@@ -34,18 +39,27 @@
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
       "types": "./dist/index.cjs.d.ts"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.cjs.d.ts",
+      "import": "./dist/plugin.esm.mjs",
+      "require": "./dist/plugin.cjs.js"
     }
   },
   "typesVersions": {
     "*": {
       ".": [
         "./dist/index.cjs.d.ts"
+      ],
+      "plugin": [
+        "./dist/plugin.cjs.d.ts"
       ]
     }
   },
   "peerDependencies": {
     "typescript": "^4.9.0 || ^5.0.0",
-    "vue-tsc": ">=1.0.24"
+    "vue-tsc": ">=1.0.24",
+    "@rspack/core": ">=0.7"
   },
   "peerDependenciesMeta": {
     "typescript": {

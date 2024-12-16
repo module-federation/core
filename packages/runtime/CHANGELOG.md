@@ -1,5 +1,52 @@
 # @module-federation/runtime
 
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.4
+- @module-federation/error-codes@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- f817674: chore(runtime): remove duplicate registerRemotes warn
+- Updated dependencies [8e172c8]
+  - @module-federation/sdk@0.8.3
+  - @module-federation/error-codes@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- fa7a0bd: feat: add remote-entry script resource retry for retry-plugin
+  - @module-federation/sdk@0.8.2
+  - @module-federation/error-codes@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.1
+- @module-federation/error-codes@0.8.1
+
+## 0.8.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.0
+- @module-federation/error-codes@0.8.0
+
+## 0.7.7
+
+### Patch Changes
+
+- a960c88: fix(runtime): add define constant to help downgrade non-esm project
+- e26d107: add @vite-ignore for dynamic import in loadEsmEntry
+  - @module-federation/sdk@0.7.7
+  - @module-federation/error-codes@0.7.7
+
 ## 0.7.6
 
 ### Patch Changes

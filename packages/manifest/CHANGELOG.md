@@ -1,5 +1,57 @@
 # @module-federation/manifest
 
+## 0.8.4
+
+### Patch Changes
+
+- Updated dependencies [5ea7aea]
+  - @module-federation/dts-plugin@0.8.4
+  - @module-federation/sdk@0.8.4
+  - @module-federation/managers@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [8e172c8]
+  - @module-federation/dts-plugin@0.8.3
+  - @module-federation/sdk@0.8.3
+  - @module-federation/managers@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- 85ef6c4: fix(manifest): stats should add prefetchInterface if enable dataPrefetch
+  - @module-federation/dts-plugin@0.8.2
+  - @module-federation/sdk@0.8.2
+  - @module-federation/managers@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.1
+- @module-federation/managers@0.8.1
+- @module-federation/dts-plugin@0.8.1
+
+## 0.8.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.0
+- @module-federation/managers@0.8.0
+- @module-federation/dts-plugin@0.8.0
+
+## 0.7.7
+
+### Patch Changes
+
+- Updated dependencies [8db7611]
+  - @module-federation/dts-plugin@0.7.7
+  - @module-federation/sdk@0.7.7
+  - @module-federation/managers@0.7.7
+
 ## 0.7.6
 
 ### Patch Changes

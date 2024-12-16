@@ -1,5 +1,65 @@
 # @module-federation/bridge-vue3
 
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.4
+- @module-federation/sdk@0.8.4
+- @module-federation/bridge-shared@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [f817674]
+- Updated dependencies [8e172c8]
+  - @module-federation/runtime@0.8.3
+  - @module-federation/sdk@0.8.3
+  - @module-federation/bridge-shared@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- Updated dependencies [fa7a0bd]
+  - @module-federation/runtime@0.8.2
+  - @module-federation/sdk@0.8.2
+  - @module-federation/bridge-shared@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.1
+- @module-federation/sdk@0.8.1
+- @module-federation/bridge-shared@0.8.1
+
+## 0.8.0
+
+### Minor Changes
+
+- 734df18: Added the ability to pass parameters to `defineAsyncComponent`, which solves the following issues:
+  - Enables control over fallback components and their display parameters;
+  - Improves compatibility with Nuxt by allowing configuration of the `suspensible` parameter;
+  - Eliminates the package requirement to `Configure your bundler to alias "vue" to "vue/dist/vue.esm-bundler.js"`.
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.0
+- @module-federation/sdk@0.8.0
+- @module-federation/bridge-shared@0.8.0
+
+## 0.7.7
+
+### Patch Changes
+
+- Updated dependencies [a960c88]
+- Updated dependencies [e26d107]
+  - @module-federation/runtime@0.7.7
+  - @module-federation/sdk@0.7.7
+  - @module-federation/bridge-shared@0.7.7
+
 ## 0.7.6
 
 ### Patch Changes

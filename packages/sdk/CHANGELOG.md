@@ -1,5 +1,21 @@
 # @module-federation/sdk
 
+## 0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- 8e172c8: add `cwd` property to generate types
+
+## 0.8.2
+
+## 0.8.1
+
+## 0.8.0
+
+## 0.7.7
+
 ## 0.7.6
 
 ## 0.7.5

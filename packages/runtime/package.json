@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime",
-  "version": "0.7.6",
+  "version": "0.8.4",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.mjs",
@@ -8,6 +8,11 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/runtime"
   },
   "files": [
     "dist/",

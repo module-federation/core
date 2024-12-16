@@ -1,5 +1,43 @@
 # @module-federation/retry-plugin
 
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [8e172c8]
+  - @module-federation/sdk@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- fa7a0bd: feat: add remote-entry script resource retry for retry-plugin
+  - @module-federation/sdk@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.1
+
+## 0.8.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.0
+
+## 0.7.7
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.7
+
 ## 0.7.6
 
 ### Patch Changes
