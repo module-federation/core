@@ -9,7 +9,7 @@ Enabling team autonomy via Micro Frontends inadvertently pushed teams towards a 
 You can get all the benefits of Module Federation without the hassle of managing multiple repositories when you choose a monorepo, including some additional benefits around code sharing and dependency management.
 This guide will help you understand the benefits of using Module Federation in a monorepo and how they address organizational challenges.
 
-## Flaws with the Polyrepo Approach
+## Potential Drawbacks of a Polyrepo Approach
 
 Total isolation can be very desirable for teams but it comes with its own set of caveats and issues, especially with Module Federation. It's easy to forget that when working with a Module Federation system, the end result that the user experiences is a single application.
 As such, the total isolation and autonomy over tech decisions for polyrepos that comprise portions of the single application can actually lead to inconsistencies in the final experience for the user.
@@ -55,7 +55,7 @@ It also means having to build some kind of test framework that can mock certain 
 Testing the full application will provide a higher level of confidence overall, however, in a polyrepo setup it requires setting up configurable test environments that can deploy the latest versions of each micro-frontend.
 This is time consuming, costs money on cloud resources and means that feedback on issues that arise during testing is delayed, reducing overall iteration speed.
 
-## How does a Monorepo address these flaws?
+## How does a Monorepo address these drawbacks?
 
 A monorepo is a single repository that contains all the code for a project. It is a single source of truth for the entire project.
 Let's take a closer look at each of the challenges above and how a monorepo can address them.
