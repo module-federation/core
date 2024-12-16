@@ -108,7 +108,7 @@
     "@fontsource/roboto-mono": "5.1.0",
     "@nx/cypress": "20.1.4",
     "@nx/devkit": "20.1.4",
-    "@nx/esbuild": "20.1.4",
+    "@nx/esbuild": "20.2.2",
     "@nx/eslint": "20.1.4",
     "@nx/eslint-plugin": "20.1.4",
     "@nx/express": "20.1.4",
