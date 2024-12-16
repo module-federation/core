@@ -1,4 +1,8 @@
-import { defaultRetries, defaultRetryDelay } from './constant';
+import {
+  defaultRetries,
+  defaultRetryDelay,
+  PLUGIN_IDENTIFIER,
+} from './constant';
 import type { ScriptCommonRetryOption } from './types';
 import logger from './logger';
 
@@ -22,7 +26,7 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
       let attempts = 0;
       while (attempts - 1 < retryTimes) {
         try {
-          beforeExecuteRetry && beforeExecuteRetry();
+          beforeExecuteRetry();
           retryResponse = await retryFn(...args);
           break;
         } catch (error) {
@@ -36,7 +40,7 @@ export function scriptCommonRetry<T extends (...args: any[]) => void>({
             throw error;
           }
           logger.log(
-            `[ Module Federation RetryPlugin ]: script resource retrying ${attempts} times`,
+            `${PLUGIN_IDENTIFIER}: script resource retrying ${attempts} times`,
           );
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
