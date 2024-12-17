@@ -95,7 +95,7 @@
     "@swc/helpers": "0.5.13",
     "hoist-non-react-statics": "3.3.2",
     "node-fetch": "~3.3.0",
-    "react-error-boundary": "4.0.13"
+    "react-error-boundary": "4.1.2"
   },
   "devDependencies": {
     "@modern-js/app-tools": "2.60.6",
