@@ -1,5 +1,12 @@
 # @module-federation/bridge-react
 
+## 0.9.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.9.0
+- @module-federation/bridge-shared@0.9.0
+
 ## 0.8.4
 
 ### Patch Changes

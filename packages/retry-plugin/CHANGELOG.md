@@ -1,5 +1,15 @@
 # @module-federation/retry-plugin
 
+## 0.9.0
+
+### Minor Changes
+
+- 7f7bc9b: Allow fallback function to receive the failed URL in order to build the fallback URL.
+
+### Patch Changes
+
+- @module-federation/sdk@0.9.0
+
 ## 0.8.4
 
 ### Patch Changes
