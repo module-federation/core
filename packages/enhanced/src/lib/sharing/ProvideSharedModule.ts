@@ -53,6 +53,7 @@ class ProvideSharedModule extends Module {
    * @param {boolean} requiredVersion version requirement
    * @param {boolean} strictVersion don't use shared version even if version isn't valid
    * @param {boolean} singleton use single global version
+   * @param {string} [layer] layer information
    */
   constructor(
     shareScope: string,
@@ -63,8 +64,9 @@ class ProvideSharedModule extends Module {
     requiredVersion: string | false,
     strictVersion: boolean,
     singleton: boolean,
+    layer?: string,
   ) {
-    super(WEBPACK_MODULE_TYPE_PROVIDE);
+    super(WEBPACK_MODULE_TYPE_PROVIDE, undefined, layer);
     this._shareScope = shareScope;
     this._name = name;
     this._version = version;
@@ -79,7 +81,9 @@ class ProvideSharedModule extends Module {
    * @returns {string} a unique identifier of the module
    */
   override identifier(): string {
-    return `provide module (${this._shareScope}) ${this._name}@${this._version} = ${this._request}`;
+    return `provide module (${this._shareScope})${
+      this.layer ? ` (${this.layer})` : ''
+    } ${this._name}@${this._version} = ${this._request}`;
   }
 
   /**
@@ -87,9 +91,9 @@ class ProvideSharedModule extends Module {
    * @returns {string} a user readable identifier of the module
    */
   override readableIdentifier(requestShortener: RequestShortener): string {
-    return `provide shared module (${this._shareScope}) ${this._name}@${
-      this._version
-    } = ${requestShortener.shorten(this._request)}`;
+    return `provide shared module (${this._shareScope})${
+      this.layer ? ` (${this.layer})` : ''
+    } ${this._name}@${this._version} = ${requestShortener.shorten(this._request)}`;
   }
 
   /**
@@ -107,7 +111,6 @@ class ProvideSharedModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  // @ts-ignore
   override needBuild(
     context: NeedBuildContext,
     callback: (error?: WebpackError | null, needsRebuild?: boolean) => void,
@@ -123,7 +126,6 @@ class ProvideSharedModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
-  // @ts-ignore
   override build(
     options: WebpackOptions,
     compilation: Compilation,
@@ -168,7 +170,6 @@ class ProvideSharedModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
-  // @ts-ignore
   override codeGeneration({
     runtimeTemplate,
     moduleGraph,
@@ -177,14 +178,12 @@ class ProvideSharedModule extends Module {
     const runtimeRequirements = new Set([RuntimeGlobals.initializeSharing]);
     const moduleGetter = this._eager
       ? runtimeTemplate.syncModuleFactory({
-          //@ts-ignore
           dependency: this.dependencies[0],
           chunkGraph,
           request: this._request,
           runtimeRequirements,
         })
       : runtimeTemplate.asyncModuleFactory({
-          //@ts-ignore
           block: this.blocks[0],
           chunkGraph,
           request: this._request,
@@ -231,6 +230,7 @@ class ProvideSharedModule extends Module {
     write(this._requiredVersion);
     write(this._strictVersion);
     write(this._singleton);
+    write(this.layer);
     super.serialize(context);
   }
 
@@ -241,6 +241,7 @@ class ProvideSharedModule extends Module {
   static deserialize(context: ObjectDeserializerContext): ProvideSharedModule {
     const { read } = context;
     const obj = new ProvideSharedModule(
+      read(),
       read(),
       read(),
       read(),
