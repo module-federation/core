@@ -15,7 +15,7 @@ export function setEnv() {
 }
 
 export const moduleFederationSSRPlugin = (
-  userConfig: Required<InternalModernPluginOptions>,
+  pluginOptions: Required<InternalModernPluginOptions>,
 ): CliPlugin<AppTools> => ({
   name: '@modern-js/plugin-module-federation-ssr',
   pre: [
@@ -25,7 +25,7 @@ export const moduleFederationSSRPlugin = (
   setup: async ({ useConfigContext, useAppContext }) => {
     const modernjsConfig = useConfigContext();
     const enableSSR = Boolean(modernjsConfig?.server?.ssr);
-    if (!enableSSR) {
+    if (!enableSSR || pluginOptions.userConfig?.disableSSR) {
       return {};
     }
 
@@ -50,32 +50,32 @@ export const moduleFederationSSRPlugin = (
                 // throw new Error(
                 //   `${PLUGIN_IDENTIFIER} Not support rspack ssr mode yet !`,
                 // );
-                if (!userConfig.nodePlugin) {
-                  userConfig.nodePlugin = new RspackModuleFederationPlugin(
-                    userConfig.ssrConfig,
+                if (!pluginOptions.nodePlugin) {
+                  pluginOptions.nodePlugin = new RspackModuleFederationPlugin(
+                    pluginOptions.ssrConfig,
                   );
                   // @ts-ignore
-                  config.plugins?.push(userConfig.nodePlugin);
+                  config.plugins?.push(pluginOptions.nodePlugin);
                 }
               } else {
-                userConfig.distOutputDir =
-                  userConfig.distOutputDir ||
+                pluginOptions.distOutputDir =
+                  pluginOptions.distOutputDir ||
                   config.output?.path ||
                   path.resolve(process.cwd(), 'dist');
               }
             },
             webpack(config, { isServer }) {
               if (isServer) {
-                if (!userConfig.nodePlugin) {
-                  userConfig.nodePlugin = new ModuleFederationPlugin(
-                    userConfig.ssrConfig,
+                if (!pluginOptions.nodePlugin) {
+                  pluginOptions.nodePlugin = new ModuleFederationPlugin(
+                    pluginOptions.ssrConfig,
                   );
                   // @ts-ignore
-                  config.plugins?.push(userConfig.nodePlugin);
+                  config.plugins?.push(pluginOptions.nodePlugin);
                 }
               } else {
-                userConfig.distOutputDir =
-                  userConfig.distOutputDir ||
+                pluginOptions.distOutputDir =
+                  pluginOptions.distOutputDir ||
                   config.output?.path ||
                   path.resolve(process.cwd(), 'dist');
               }
@@ -133,11 +133,11 @@ export const moduleFederationSSRPlugin = (
         };
       },
       afterBuild: () => {
-        const { nodePlugin, browserPlugin, distOutputDir } = userConfig;
+        const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
         updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
       },
       afterDev: () => {
-        const { nodePlugin, browserPlugin, distOutputDir } = userConfig;
+        const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
         updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
       },
     };
