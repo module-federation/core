@@ -6,7 +6,7 @@ Thank you for your interest in contributing to Module Federation! Before startin
 
 1. [Fork](https://help.github.com/articles/fork-a-repo/) the Module Federation repository into your own GitHub account.
 2. [Clone](https://help.github.com/articles/cloning-a-repository/) the repository to your local machine.
-3. Checkout a new branch from `main` or `canary`.
+3. Checkout a new branch from `main`.
 4. Set up the development environment. Refer to the "Setup Development Environment" section below for guidance.
 5. If you've fixed a bug or added code that should be tested, add some tests.
 6. Ensure all tests pass. See the "Testing" section below for more information.
