@@ -39,6 +39,7 @@ class ProvideSharedModuleFactory extends ModuleFactory {
         dep.requiredVersion,
         dep.strictVersion,
         dep.singleton,
+        dep.layer
       ),
     });
   }
