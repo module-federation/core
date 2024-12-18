@@ -212,6 +212,7 @@ class ProvideSharedModule extends Module {
         requiredVersion: this._requiredVersion,
         strictVersion: this._strictVersion,
         singleton: this._singleton,
+        layer: this.layer
       },
     });
     return { sources, data, runtimeRequirements };

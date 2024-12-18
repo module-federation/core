@@ -4,7 +4,7 @@
 */
 
 import { isRequiredVersion } from '@module-federation/sdk';
-import type { ConsumeOptions } from 'webpack/lib/sharing/ConsumeSharedModule';
+import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { InputFileSystem } from 'webpack/lib/util/fs';
 const { join, dirname, readJson } = require(
@@ -459,6 +459,7 @@ export function normalizeConsumeShareOptions(consumeOptions: ConsumeOptions) {
     eager,
     shareKey,
     shareScope,
+    layer,
   } = consumeOptions;
   return {
     shareConfig: {
@@ -467,6 +468,7 @@ export function normalizeConsumeShareOptions(consumeOptions: ConsumeOptions) {
       strictVersion,
       singleton,
       eager,
+      layer,
     },
     shareScope,
     shareKey,
