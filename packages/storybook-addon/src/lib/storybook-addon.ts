@@ -2,24 +2,21 @@ import fs from 'fs';
 import { dirname, join } from 'path';
 import * as process from 'process';
 import VirtualModulesPlugin from 'webpack-virtual-modules';
-import { container, Configuration } from 'webpack';
+import { container, type Configuration } from 'webpack';
 import { logger } from '@storybook/node-logger';
-// NOTE: @storybook/core-common is deprecated while still available, considering importing
-// from 'storybook/internal/common' or '@storybook/core'. Considering requires Storybook 8
-// at least and change this in the next breaking change version.
-import { normalizeStories } from '@storybook/core-common';
-import { ModuleFederationPluginOptions } from '@module-federation/utilities';
-
-import { ModuleFederationConfig } from '@nx/webpack';
+import { normalizeStories } from '@storybook/core/common';
 import withModuleFederation from '../utils/with-module-federation';
 import { correctImportPath } from '../utils/correctImportPath';
+
+import type { moduleFederationPlugin } from '@module-federation/sdk';
+import type { ModuleFederationConfig } from '@nx/webpack';
 
 const { ModuleFederationPlugin } = container;
 
 export type Preset = string | { name: string };
 
 type Options = {
-  moduleFederationConfig?: ModuleFederationPluginOptions;
+  moduleFederationConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
   nxModuleFederationConfig?: ModuleFederationConfig;
   presets: {
     apply<T>(preset: Preset): Promise<T>;
@@ -70,17 +67,16 @@ export const webpack = async (
   );
 
   const index = plugins.findIndex(
-    //@ts-ignore
-    (plugin) => plugin.constructor.name === 'VirtualModulesPlugin',
+    (plugin) => plugin?.constructor.name === 'VirtualModulesPlugin',
   );
 
   if (index !== -1) {
     logger.info(`=> [MF] Detected plugin VirtualModulesPlugin`);
 
-    /* eslint-disable  @typescript-eslint/no-explicit-any */
-    const plugin = plugins[index] as any;
+    const plugin = plugins[index] as VirtualModulesPlugin;
 
-    const virtualEntries = plugin._staticModules; // TODO: Exist another way to get virtual modules? Or maybe it's good idea to open a PR adding a method to get modules?
+    const virtualEntries: Record<string, string> =
+      plugin.getModuleList('static');
     const virtualEntriesPaths: string[] = Object.keys(virtualEntries);
 
     logger.info(`=> [MF] Write files from VirtualModulesPlugin`);
