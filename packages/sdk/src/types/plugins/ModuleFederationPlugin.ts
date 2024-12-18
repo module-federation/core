@@ -229,7 +229,10 @@ export interface ModuleFederationPluginOptions {
   implementation?: string;
 
   manifest?: boolean | PluginManifestOptions;
-
+  /**
+   * If not find exposes module , it will throw error when abortOnMissingExposes is true
+   */
+  abortOnMissingExposes?: boolean;
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
   async?: boolean | AsyncBoundaryOptions;

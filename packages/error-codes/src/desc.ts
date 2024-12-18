@@ -7,6 +7,7 @@ import {
   RUNTIME_006,
   RUNTIME_007,
   TYPE_001,
+  BUILD_001,
 } from './error-codes';
 
 export const runtimeDescMap = {
@@ -23,7 +24,12 @@ export const typeDescMap = {
   [TYPE_001]: 'Failed to generate type declaration.',
 };
 
+export const buildDescMap = {
+  [BUILD_001]: 'Failed to find expose module.',
+};
+
 export const errorDescMap = {
   ...runtimeDescMap,
   ...typeDescMap,
+  ...buildDescMap,
 };

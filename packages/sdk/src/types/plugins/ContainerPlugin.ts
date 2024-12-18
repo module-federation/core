@@ -103,6 +103,10 @@ export interface ContainerPluginOptions {
     federationRuntime?: false | 'hoisted';
   };
   dataPrefetch?: DataPrefetch;
+  /**
+   * If not find exposes module , it will throw error when abortOnMissingExposes is true
+   */
+  abortOnMissingExposes?: boolean;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.
