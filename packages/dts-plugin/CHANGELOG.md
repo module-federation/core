@@ -1,5 +1,24 @@
 # @module-federation/dts-plugin
 
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.5
+- @module-federation/managers@0.8.5
+- @module-federation/third-party-dts-extractor@0.8.5
+- @module-federation/error-codes@0.8.5
+
+## 0.8.4
+
+### Patch Changes
+
+- 5ea7aea: Lazy emit DTS files on hmr rebuilds, do not block compiler pipeline
+  - @module-federation/sdk@0.8.4
+  - @module-federation/managers@0.8.4
+  - @module-federation/third-party-dts-extractor@0.8.4
+  - @module-federation/error-codes@0.8.4
+
 ## 0.8.3
 
 ### Patch Changes
