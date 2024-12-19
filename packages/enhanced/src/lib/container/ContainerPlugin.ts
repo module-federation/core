@@ -207,6 +207,7 @@ class ContainerPlugin {
           federationRuntimePluginInstance.entryFilePath,
           this._options.experiments,
           this._options.dataPrefetch,
+          this._options.abortOnMissingExposes,
         );
         dep.loc = { name };
 
@@ -286,6 +287,7 @@ class ContainerPlugin {
           federationRuntimePluginInstance.entryFilePath,
           this._options.experiments,
           this._options.dataPrefetch,
+          this._options.abortOnMissingExposes,
         );
 
         dep.loc = { name };
