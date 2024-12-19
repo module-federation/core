@@ -119,7 +119,7 @@
     "@nx/react": "20.1.4",
     "@nx/rollup": "20.1.4",
     "@nx/rspack": "20.1.4",
-    "@nx/storybook": "20.1.4",
+    "@nx/storybook": "20.2.2",
     "@nx/vite": "20.1.4",
     "@nx/web": "20.1.4",
     "@nx/webpack": "20.1.4",
