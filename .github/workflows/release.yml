@@ -16,8 +16,6 @@ on:
         description: 'Release Branch (confirm release branch)'
         required: true
         default: 'main'
-  issue_comment:
-    types: [created]
 
 permissions:
   id-token: write
