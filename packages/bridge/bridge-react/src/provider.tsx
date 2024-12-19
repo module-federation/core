@@ -32,7 +32,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
   return () => {
     const rootMap = new Map<any, RootType>();
     const instance = federationRuntime.instance;
-    LoggerInstance.log(
+    LoggerInstance.debug(
       `createBridgeComponent instance from props >>>`,
       instance,
     );
@@ -53,7 +53,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
 
     return {
       async render(info: RenderParams) {
-        LoggerInstance.log(`createBridgeComponent render Info`, info);
+        LoggerInstance.debug(`createBridgeComponent render Info`, info);
         const {
           moduleName,
           dom,
@@ -102,7 +102,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
       },
 
       async destroy(info: DestroyParams) {
-        LoggerInstance.log(`createBridgeComponent destroy Info`, {
+        LoggerInstance.debug(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
         instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);

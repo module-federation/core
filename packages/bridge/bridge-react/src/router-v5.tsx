@@ -13,7 +13,7 @@ function WraperRouter(
   const { basename, ...propsRes } = props;
   const routerContextProps = useContext(RouterContext) || {};
 
-  LoggerInstance.log(`WraperRouter info >>>`, {
+  LoggerInstance.debug(`WraperRouter info >>>`, {
     ...routerContextProps,
     routerContextProps,
     WraperRouterProps: props,

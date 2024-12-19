@@ -12,7 +12,7 @@ function WrapperRouter(
   const { basename, ...propsRes } = props;
   const routerContextProps = useContext(RouterContext) || {};
 
-  LoggerInstance.log(`WrapperRouter info >>>`, {
+  LoggerInstance.debug(`WrapperRouter info >>>`, {
     ...routerContextProps,
     routerContextProps,
     WrapperRouterProps: props,
@@ -40,7 +40,7 @@ function WrapperRouterProvider(
   const { router, ...propsRes } = props;
   const routerContextProps = useContext(RouterContext) || {};
   const routers = router.routes;
-  LoggerInstance.log(`WrapperRouterProvider info >>>`, {
+  LoggerInstance.debug(`WrapperRouterProvider info >>>`, {
     ...routerContextProps,
     routerContextProps,
     WrapperRouterProviderProps: props,

@@ -27,7 +27,7 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
     return {
       __APP_VERSION__,
       async render(info: RenderFnParams) {
-        LoggerInstance.log(`createBridgeComponent render Info`, info);
+        LoggerInstance.debug(`createBridgeComponent render Info`, info);
         const app = Vue.createApp(bridgeInfo.rootComponent);
         rootMap.set(info.dom, app);
 
@@ -75,7 +75,7 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info);
       },
       destroy(info: { dom: HTMLElement }) {
-        LoggerInstance.log(`createBridgeComponent destroy Info`, info);
+        LoggerInstance.debug(`createBridgeComponent destroy Info`, info);
         const root = rootMap.get(info?.dom);
 
         instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);

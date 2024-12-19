@@ -41,7 +41,7 @@ const RemoteAppWrapper = forwardRef(function (
   ref,
 ) {
   const RemoteApp = () => {
-    LoggerInstance.log(`RemoteAppWrapper RemoteApp props >>>`, { props });
+    LoggerInstance.debug(`RemoteAppWrapper RemoteApp props >>>`, { props });
     const {
       moduleName,
       memoryRoute,
@@ -62,7 +62,7 @@ const RemoteAppWrapper = forwardRef(function (
     const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
     const providerInfoRef = useRef<any>(null);
 
-    LoggerInstance.log(`RemoteAppWrapper instance from props >>>`, instance);
+    LoggerInstance.debug(`RemoteAppWrapper instance from props >>>`, instance);
 
     useEffect(() => {
       const renderTimeout = setTimeout(() => {
@@ -78,12 +78,12 @@ const RemoteAppWrapper = forwardRef(function (
           ...resProps,
         };
         renderDom.current = rootRef.current;
-        LoggerInstance.log(
+        LoggerInstance.debug(
           `createRemoteComponent LazyComponent render >>>`,
           renderProps,
         );
 
-        LoggerInstance.log(
+        LoggerInstance.debug(
           `createRemoteComponent LazyComponent hostInstance >>>`,
           instance,
         );
@@ -101,7 +101,7 @@ const RemoteAppWrapper = forwardRef(function (
         clearTimeout(renderTimeout);
         setTimeout(() => {
           if (providerInfoRef.current?.destroy) {
-            LoggerInstance.log(
+            LoggerInstance.debug(
               `createRemoteComponent LazyComponent destroy >>>`,
               { moduleName, basename, dom: renderDom.current },
             );
@@ -206,7 +206,7 @@ export function withRouterData<
       }
     }
 
-    LoggerInstance.log(`createRemoteComponent withRouterData >>>`, {
+    LoggerInstance.debug(`createRemoteComponent withRouterData >>>`, {
       ...props,
       basename,
       routerContextVal,
@@ -219,10 +219,13 @@ export function withRouterData<
 
       useEffect(() => {
         if (pathname !== '' && pathname !== location.pathname) {
-          LoggerInstance.log(`createRemoteComponent dispatchPopstateEnv >>>`, {
-            name: props.name,
-            pathname: location.pathname,
-          });
+          LoggerInstance.debug(
+            `createRemoteComponent dispatchPopstateEnv >>>`,
+            {
+              name: props.name,
+              pathname: location.pathname,
+            },
+          );
           dispatchPopstateEnv();
         }
         setPathname(location.pathname);
