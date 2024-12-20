@@ -1,11 +1,16 @@
 {
   "name": "@module-federation/esbuild",
-  "version": "0.0.43",
+  "version": "0.0.48",
   "author": "Zack Jackson (@ScriptedAlchemy)",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
   "types": "./dist/index.cjs.d.ts",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/esbuild"
+  },
   "publishConfig": {
     "access": "public"
   },

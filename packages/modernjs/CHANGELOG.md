@@ -1,5 +1,46 @@
 # @module-federation/modern-js
 
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.5
+- @module-federation/sdk@0.8.5
+- @module-federation/node@2.6.18
+
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.4
+- @module-federation/node@2.6.17
+- @module-federation/sdk@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [8e172c8]
+  - @module-federation/sdk@0.8.3
+  - @module-federation/node@2.6.16
+  - @module-federation/enhanced@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.2
+- @module-federation/node@2.6.15
+- @module-federation/sdk@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.1
+- @module-federation/node@2.6.14
+- @module-federation/sdk@0.8.1
+
 ## 0.8.0
 
 ### Patch Changes

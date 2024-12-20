@@ -1,5 +1,37 @@
 # @module-federation/devtools
 
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.5
+
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [8e172c8]
+  - @module-federation/sdk@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- 76cf320: fix: immediately inject global runtime plugins
+  - @module-federation/sdk@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.1
+
 ## 0.8.0
 
 ### Patch Changes

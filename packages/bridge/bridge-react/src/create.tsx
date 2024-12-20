@@ -30,7 +30,7 @@ function createLazyRemoteComponent<T, E extends keyof T>(
 ) {
   const exportName = info?.export || 'default';
   return React.lazy(async () => {
-    LoggerInstance.log(`createRemoteComponent LazyComponent create >>>`, {
+    LoggerInstance.debug(`createRemoteComponent LazyComponent create >>>`, {
       lazyComponent: info.loader,
       exportName,
     });
@@ -39,7 +39,7 @@ function createLazyRemoteComponent<T, E extends keyof T>(
       const m = (await info.loader()) as RemoteModule;
       // @ts-ignore
       const moduleName = m && m[Symbol.for('mf_module_id')];
-      LoggerInstance.log(
+      LoggerInstance.debug(
         `createRemoteComponent LazyComponent loadRemote info >>>`,
         { name: moduleName, module: m, exportName },
       );
@@ -71,7 +71,7 @@ function createLazyRemoteComponent<T, E extends keyof T>(
           default: RemoteAppComponent,
         };
       } else {
-        LoggerInstance.log(
+        LoggerInstance.debug(
           `createRemoteComponent LazyComponent module not found >>>`,
           { name: moduleName, module: m, exportName },
         );

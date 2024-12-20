@@ -1,11 +1,16 @@
 {
   "name": "@module-federation/runtime-tools",
-  "version": "0.8.0",
+  "version": "0.8.5",
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "main": "./dist/index.cjs",
   "module": "./dist/index.esm.mjs",
   "types": "./dist/index.cjs.d.ts",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/runtime-tools"
+  },
   "publishConfig": {
     "access": "public"
   },

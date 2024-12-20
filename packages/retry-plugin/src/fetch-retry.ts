@@ -33,8 +33,9 @@ async function fetchWithRetry({
   } catch (error) {
     if (retryTimes <= 0) {
       logger.log(
-        `>>>>>>>>> retry failed after ${retryTimes} times for url: ${url}, now will try fallbackUrl url <<<<<<<<<`,
+        `${PLUGIN_IDENTIFIER}: retry failed after ${retryTimes} times for url: ${url}, now will try fallbackUrl url`,
       );
+
       if (fallback && typeof fallback === 'function') {
         return fetchWithRetry({
           url: fallback(url),

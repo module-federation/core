@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/manifest",
-  "version": "0.8.0",
+  "version": "0.8.5",
   "license": "MIT",
   "description": "Provide manifest/stats for webpack/rspack MF project .",
   "keywords": [
@@ -17,6 +17,11 @@
     "access": "public"
   },
   "author": "hanric <hanric.zhang@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/manifest"
+  },
   "sideEffects": false,
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
