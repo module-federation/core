@@ -1811,8 +1811,8 @@ importers:
         specifier: workspace:*
         version: link:../../sdk
       react-error-boundary:
-        specifier: ^4.0.13
-        version: 4.0.13(react@18.3.1)
+        specifier: ^4.1.2
+        version: 4.1.2(react@18.3.1)
     devDependencies:
       '@module-federation/runtime':
         specifier: workspace:*
@@ -2334,8 +2334,8 @@ importers:
         specifier: '>=17'
         version: 18.3.1(react@18.3.1)
       react-error-boundary:
-        specifier: 4.0.13
-        version: 4.0.13(react@18.3.1)
+        specifier: 4.1.2
+        version: 4.1.2(react@18.3.1)
       typescript:
         specifier: ^4.9.0 || ^5.0.0
         version: 5.5.2
@@ -37767,12 +37767,12 @@ packages:
       react: 18.3.1
     dev: true
 
-  /react-error-boundary@4.0.13(react@18.3.1):
-    resolution: {integrity: sha512-b6PwbdSv8XeOSYvjt8LpgpKrZ0yGdtZokYwkwV2wlcZbxgopHX/hgPl5VgpnoVOWd868n1hktM8Qm4b+02MiLQ==}
+  /react-error-boundary@4.1.2(react@18.3.1):
+    resolution: {integrity: sha512-GQDxZ5Jd+Aq/qUxbCm1UtzmL/s++V7zKgE8yMktJiCQXCCFZnMZh9ng+6/Ne6PjNSXH0L9CjeOEREfRnq6Duag==}
     peerDependencies:
       react: '>=16.13.1'
     dependencies:
-      '@babel/runtime': 7.25.7
+      '@babel/runtime': 7.26.0
       react: 18.3.1
     dev: false
 
