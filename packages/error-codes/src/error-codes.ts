@@ -5,5 +5,6 @@ export const RUNTIME_004 = 'RUNTIME-004';
 export const RUNTIME_005 = 'RUNTIME-005';
 export const RUNTIME_006 = 'RUNTIME-006';
 export const RUNTIME_007 = 'RUNTIME-007';
+export const RUNTIME_008 = 'RUNTIME-008';
 
 export const TYPE_001 = 'TYPE-001';
