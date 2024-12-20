@@ -72,14 +72,21 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         compiler,
       );
     }
-    if (options.experiments?.externalRuntime === 'provide') {
+    if (options.experiments?.provideExternalRuntime) {
+      if (options.exposes) {
+        throw new Error(
+          'You can only set provideExternalRuntime: true in pure consumer which not expose modules.',
+        );
+      }
       const runtimePlugins = options.runtimePlugins || [];
       options.runtimePlugins = runtimePlugins.concat(
         require.resolve(
           '@module-federation/inject-external-runtime-core-plugin',
         ),
       );
-    } else if (options.experiments?.externalRuntime === true) {
+    }
+
+    if (options.experiments?.externalRuntime === true) {
       const Externals = compiler.webpack.ExternalsPlugin || ExternalsPlugin;
       new Externals(compiler.options.externalsType || 'global', {
         '@module-federation/runtime-core': '_FEDERATION_RUNTIME_CORE',

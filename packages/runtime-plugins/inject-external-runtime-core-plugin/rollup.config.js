@@ -1,4 +1,6 @@
 const copy = require('rollup-plugin-copy');
+const replace = require('@rollup/plugin-replace');
+const pkg = require('./package.json');
 
 module.exports = (rollupConfig, _projectOptions) => {
   rollupConfig.plugins.push(
@@ -52,5 +54,11 @@ module.exports = (rollupConfig, _projectOptions) => {
     };
   }
 
+  rollupConfig.plugins.push(
+    replace({
+      preventAssignment: true,
+      __VERSION__: JSON.stringify(pkg.version),
+    }),
+  );
   return rollupConfig;
 };

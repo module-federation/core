@@ -23,9 +23,6 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         'modern-js-provider': 'app1@http://127.0.0.1:4001/mf-manifest.json',
       },
       filename: 'remoteEntry.js',
-      exposes: {
-        './Button': './src/Button.tsx',
-      },
       shared: {
         lodash: {},
         antd: {},
@@ -50,7 +47,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       // experiments: { federationRuntime: 'hoisted' },
       runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
       experiments: {
-        externalRuntime: 'provide',
+        provideExternalRuntime: true,
         federationRuntime: 'hoisted',
       },
     }),

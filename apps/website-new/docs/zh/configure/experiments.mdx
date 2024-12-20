@@ -69,14 +69,20 @@ new ModuleFederationPlugin({
 
 ## externalRuntime
 
-- Type: `boolean | 'provide'`
+- Type: `boolean`
 - Required: No
 - Default: `false`
 
-用于控制是否 external mf runtime 或提供 mf runtime 。
+设置 `true` 后 会 external MF runtime，并使用消费者提供的 runtime 。（请确保你的消费者有设置 `provideExternalRuntime: true`，否则无法正常运行！）
 
-可以通过下列的配置来进行不同的行为
+## provideExternalRuntime
 
-* `true`: 通常在生产者设置，设置后 会 external MF runtime，并使用消费者提供的 runtime 。（请确保你的消费者有设置 `externalRuntime: "provide"`，否则无法正常运行！）
-* `'provide'`: 通常在最顶层消费者设置，设置后会在全局注入 MF runtime ，生产者若设置了 `externalRuntime: true` ，那么就会使用此消费者提供的运行时。
-* `false`: 默认配置，不会对 runtime 进行任何操作
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+::: warning 注意
+请确保仅在最顶层消费者配置！若同时有多个消费者注入 runtime，后执行的不会覆盖已有的 runtime。
+:::
+
+设置 `true` 后会在消费者处注入 MF runtime。

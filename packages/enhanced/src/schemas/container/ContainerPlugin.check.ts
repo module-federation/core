@@ -1057,7 +1057,11 @@ function l(
               {
                 const t = f;
                 for (const t in r)
-                  if ('externalRuntime' !== t && 'federationRuntime' !== t)
+                  if (
+                    'externalRuntime' !== t &&
+                    'federationRuntime' !== t &&
+                    'provideExternalRuntime' !== t
+                  )
                     return (
                       (l.errors = [
                         {
@@ -1070,45 +1074,21 @@ function l(
                     );
                 if (t === f) {
                   if (void 0 !== r.externalRuntime) {
-                    let t = r.externalRuntime;
-                    const e = f,
-                      n = f;
-                    let s = !1;
-                    const a = f;
-                    if ('provide' !== t) {
-                      const r = {
-                        params: {},
-                      };
-                      null === p ? (p = [r]) : p.push(r), f++;
-                    }
-                    var u = a === f;
-                    if (((s = s || u), !s)) {
-                      const r = f;
-                      if ('boolean' != typeof t) {
-                        const r = {
-                          params: {
-                            type: 'boolean',
-                          },
-                        };
-                        null === p ? (p = [r]) : p.push(r), f++;
-                      }
-                      (u = r === f), (s = s || u);
-                    }
-                    if (!s) {
-                      const r = {
-                        params: {},
-                      };
+                    const t = f;
+                    if ('boolean' != typeof r.externalRuntime)
                       return (
-                        null === p ? (p = [r]) : p.push(r),
-                        f++,
-                        (l.errors = p),
+                        (l.errors = [
+                          {
+                            params: {
+                              type: 'boolean',
+                            },
+                          },
+                        ]),
                         !1
                       );
-                    }
-                    (f = n), null !== p && (n ? (p.length = n) : (p = null));
-                    var c = e === f;
-                  } else c = !0;
-                  if (c)
+                    var u = t === f;
+                  } else u = !0;
+                  if (u) {
                     if (void 0 !== r.federationRuntime) {
                       let t = r.federationRuntime;
                       const e = f,
@@ -1121,8 +1101,8 @@ function l(
                         };
                         null === p ? (p = [r]) : p.push(r), f++;
                       }
-                      var m = a === f;
-                      if (((s = s || m), !s)) {
+                      var c = a === f;
+                      if (((s = s || c), !s)) {
                         const r = f;
                         if ('boolean' != typeof t) {
                           const r = {
@@ -1132,7 +1112,7 @@ function l(
                           };
                           null === p ? (p = [r]) : p.push(r), f++;
                         }
-                        (m = r === f), (s = s || m);
+                        (c = r === f), (s = s || c);
                       }
                       if (!s) {
                         const r = {
@@ -1147,14 +1127,31 @@ function l(
                       }
                       (f = n),
                         null !== p && (n ? (p.length = n) : (p = null)),
-                        (c = e === f);
-                    } else c = !0;
+                        (u = e === f);
+                    } else u = !0;
+                    if (u)
+                      if (void 0 !== r.provideExternalRuntime) {
+                        const t = f;
+                        if ('boolean' != typeof r.provideExternalRuntime)
+                          return (
+                            (l.errors = [
+                              {
+                                params: {
+                                  type: 'boolean',
+                                },
+                              },
+                            ]),
+                            !1
+                          );
+                        u = t === f;
+                      } else u = !0;
+                  }
                 }
               }
             }
-            var y = e === f;
-          } else y = !0;
-          if (y) {
+            var m = e === f;
+          } else m = !0;
+          if (m) {
             if (void 0 !== t.exposes) {
               const r = f;
               s(t.exposes, {
@@ -1165,9 +1162,9 @@ function l(
               }) ||
                 ((p = null === p ? s.errors : p.concat(s.errors)),
                 (f = p.length)),
-                (y = r === f);
-            } else y = !0;
-            if (y) {
+                (m = r === f);
+            } else m = !0;
+            if (m) {
               if (void 0 !== t.filename) {
                 let e = t.filename;
                 const n = f;
@@ -1202,9 +1199,9 @@ function l(
                       !1
                     );
                 }
-                y = n === f;
-              } else y = !0;
-              if (y) {
+                m = n === f;
+              } else m = !0;
+              if (m) {
                 if (void 0 !== t.library) {
                   const r = f;
                   i(t.library, {
@@ -1215,9 +1212,9 @@ function l(
                   }) ||
                     ((p = null === p ? i.errors : p.concat(i.errors)),
                     (f = p.length)),
-                    (y = r === f);
-                } else y = !0;
-                if (y) {
+                    (m = r === f);
+                } else m = !0;
+                if (m) {
                   if (void 0 !== t.name) {
                     let r = t.name;
                     const e = f;
@@ -1243,9 +1240,9 @@ function l(
                           !1
                         );
                     }
-                    y = e === f;
-                  } else y = !0;
-                  if (y) {
+                    m = e === f;
+                  } else m = !0;
+                  if (m) {
                     if (void 0 !== t.runtime) {
                       let r = t.runtime;
                       const e = f,
@@ -1258,8 +1255,8 @@ function l(
                         };
                         null === p ? (p = [r]) : p.push(r), f++;
                       }
-                      var h = a === f;
-                      if (((s = s || h), !s)) {
+                      var y = a === f;
+                      if (((s = s || y), !s)) {
                         const t = f;
                         if (f === t)
                           if ('string' == typeof r) {
@@ -1277,7 +1274,7 @@ function l(
                             };
                             null === p ? (p = [r]) : p.push(r), f++;
                           }
-                        (h = t === f), (s = s || h);
+                        (y = t === f), (s = s || y);
                       }
                       if (!s) {
                         const r = {
@@ -1292,9 +1289,9 @@ function l(
                       }
                       (f = n),
                         null !== p && (n ? (p.length = n) : (p = null)),
-                        (y = e === f);
-                    } else y = !0;
-                    if (y) {
+                        (m = e === f);
+                    } else m = !0;
+                    if (m) {
                       if (void 0 !== t.runtimePlugins) {
                         let r = t.runtimePlugins;
                         const e = f;
@@ -1334,8 +1331,8 @@ function l(
                                   };
                                   null === p ? (p = [r]) : p.push(r), f++;
                                 }
-                              var g = o === f;
-                              if (((a = a || g), !a)) {
+                              var h = o === f;
+                              if (((a = a || h), !a)) {
                                 const r = f;
                                 if (f === r)
                                   if (
@@ -1379,9 +1376,9 @@ function l(
                                             null === p ? (p = [r]) : p.push(r),
                                               f++;
                                           }
-                                          var d = r === f;
-                                        } else d = !0;
-                                        if (d)
+                                          var g = r === f;
+                                        } else g = !0;
+                                        if (g)
                                           if (void 0 !== t.import) {
                                             let r = t.import;
                                             const e = f;
@@ -1407,8 +1404,8 @@ function l(
                                                   : p.push(r),
                                                   f++;
                                               }
-                                            d = e === f;
-                                          } else d = !0;
+                                            g = e === f;
+                                          } else g = !0;
                                       }
                                     }
                                   } else {
@@ -1419,7 +1416,7 @@ function l(
                                     };
                                     null === p ? (p = [r]) : p.push(r), f++;
                                   }
-                                (g = r === f), (a = a || g);
+                                (h = r === f), (a = a || h);
                               }
                               if (!a) {
                                 const r = {
@@ -1441,9 +1438,9 @@ function l(
                             }
                           }
                         }
-                        y = e === f;
-                      } else y = !0;
-                      if (y)
+                        m = e === f;
+                      } else m = !0;
+                      if (m)
                         if (void 0 !== t.shareScope) {
                           let r = t.shareScope;
                           const e = f;
@@ -1469,8 +1466,8 @@ function l(
                                 !1
                               );
                           }
-                          y = e === f;
-                        } else y = !0;
+                          m = e === f;
+                        } else m = !0;
                     }
                   }
                 }

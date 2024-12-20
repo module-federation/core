@@ -5,4 +5,4 @@
 '@module-federation/runtime': patch
 ---
 
-feat: add externalRuntime option to help optimize assets size
+feat: add externalRuntime and provideExternalRuntime fields to help optimize assets size
