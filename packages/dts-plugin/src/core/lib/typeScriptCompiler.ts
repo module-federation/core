@@ -62,13 +62,14 @@ function writeTempTsConfig(
   tsConfig: TsConfigJson,
   context: string,
   name: string,
+  cwd?: string,
 ) {
   const createHash = (contents: string) => {
     return crypto.createHash('md5').update(contents).digest('hex');
   };
   const hash = createHash(`${JSON.stringify(tsConfig)}${name}`);
   const tempTsConfigJsonPath = resolve(
-    context,
+    cwd ?? context,
     'node_modules',
     TEMP_DIR,
     `tsconfig.${hash}.json`,
@@ -170,6 +171,9 @@ export const compileTs = async (
     tsConfig,
     remoteOptions.context,
     remoteOptions.moduleFederationConfig.name || 'mf',
+    typeof remoteOptions.moduleFederationConfig.dts !== 'boolean'
+      ? (remoteOptions.moduleFederationConfig.dts?.cwd ?? undefined)
+      : undefined,
   );
   try {
     const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
