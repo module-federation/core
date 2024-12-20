@@ -92,6 +92,7 @@
     "@module-federation/rspack": "workspace:*",
     "@module-federation/bridge-react-webpack-plugin": "workspace:*",
     "@module-federation/data-prefetch": "workspace:*",
+    "@module-federation/inject-external-runtime-core-plugin": "workspace:*",
     "upath": "2.0.1",
     "btoa": "^1.2.1"
   }

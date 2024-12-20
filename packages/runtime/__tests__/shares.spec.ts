@@ -11,9 +11,16 @@ import {
   shareInfoWithoutLibAndGetProvider,
 } from './share';
 // import { assert } from '../src/utils/logger';
-import { FederationHost } from '../src/core';
-import { UserOptions, ShareScopeMap, Options } from '../src/type';
-import { Global, setGlobalFederationConstructor } from '../src/global';
+import { FederationHost } from '@module-federation/runtime-core';
+import {
+  UserOptions,
+  ShareScopeMap,
+  Options,
+} from '@module-federation/runtime-core/types';
+import {
+  Global,
+  setGlobalFederationConstructor,
+} from '@module-federation/runtime-core';
 
 // eslint-disable-next-line max-lines-per-function
 // TODO: add new load share test cases

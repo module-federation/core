@@ -1,0 +1,49 @@
+{
+  "name": "inject-external-runtime-core-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/runtime-plugins/inject-external-runtime-core-plugin/src",
+  "projectType": "library",
+  "tags": ["type:pkg"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/runtime-plugins/inject-external-runtime-core-plugin/dist",
+        "main": "packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts",
+        "tsConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/tsconfig.lib.json",
+        "assets": [],
+        "project": "packages/runtime-plugins/inject-external-runtime-core-plugin/package.json",
+        "additionalEntryPoints": [
+          "packages/runtime-plugins/inject-external-runtime-core-plugin/src/normalize-webpack-path.ts"
+        ],
+        "rollupConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/rollup.config.js",
+        "compiler": "swc",
+        "generatePackageJson": false,
+        "format": ["cjs", "esm"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/runtime-plugins/inject-external-runtime-core-plugin/**/*.ts",
+          "packages/runtime-plugins/inject-external-runtime-core-plugin/package.json"
+        ]
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run inject-external-runtime-core-plugin:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  }
+}

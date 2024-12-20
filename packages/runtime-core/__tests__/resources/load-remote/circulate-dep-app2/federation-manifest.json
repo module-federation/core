@@ -1,0 +1,51 @@
+{
+  "id": "@circulate-deps/app2",
+  "name": "@circulate-deps/app2",
+  "metaData": {
+    "name": "@circulate-deps/app2",
+    "publicPath": "http://localhost:1111/",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "custom"
+    },
+    "remoteEntry": {
+      "name": "federation-remote-entry.js",
+      "path": "resources/load-remote/circulate-dep-app2/"
+    },
+    "types": {
+      "name": "index.d.ts",
+      "path": "./"
+    },
+    "globalName": "__FEDERATION_@circulate-deps/app2:local__"
+  },
+  "remotes": [
+    {
+      "alias": "@circulate-deps/app1",
+      "consumingFederationContainerName": "@circulate-deps/app2",
+      "federationContainerName": "@circulate-deps/app1",
+      "moduleName": "Say",
+      "usedIn": ["src/routes/user/page.tsx"],
+      "entry": "http://localhost:1111/resources/load-remote/circulate-dep-app1/federation-manifest.json"
+    }
+  ],
+  "shared": [],
+  "exposes": [
+    {
+      "id": "@circulate-deps/app2:shared-button",
+      "name": "say",
+      "requires": [],
+      "file": "./src/say.tsx",
+      "federationContainerName": "@circulate-deps/app2",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    }
+  ]
+}

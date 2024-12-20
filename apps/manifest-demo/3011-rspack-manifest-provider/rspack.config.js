@@ -84,6 +84,9 @@ module.exports = composePlugins(
             requiredVersion: '^18.3.1',
           },
         },
+        experiments: {
+          externalRuntime: true,
+        },
       }),
     );
     (config.devServer = {

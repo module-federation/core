@@ -9,6 +9,7 @@ module.exports = (rollupConfig, projectOptions) => {
     types: 'packages/runtime/src/types.ts',
     helpers: 'packages/runtime/src/helpers.ts',
     embedded: 'packages/runtime/src/embedded.ts',
+    core: 'packages/runtime/src/core.ts',
   };
 
   const pkg = require('./package.json');

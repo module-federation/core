@@ -9,17 +9,16 @@ import {
   ProviderModuleInfo,
 } from '@module-federation/sdk';
 import { Remote } from '@module-federation/runtime/types';
-
+import type { Federation } from '@module-federation/runtime';
 import { getPrefetchId, compatGetPrefetchId } from './common/runtime-utils';
 
-declare module '@module-federation/runtime' {
-  export interface Federation {
-    __PREFETCH__: {
-      entryLoading: Record<string, undefined | Promise<void>>;
-      instance: Map<string, MFDataPrefetch>;
-      __PREFETCH_EXPORTS__: Record<string, () => Promise<Record<string, any>>>;
-    };
-  }
+// Define an interface that extends Federation to include __PREFETCH__
+interface FederationWithPrefetch extends Federation {
+  __PREFETCH__: {
+    entryLoading: Record<string, undefined | Promise<void>>;
+    instance: Map<string, MFDataPrefetch>;
+    __PREFETCH_EXPORTS__: Record<string, () => Promise<Record<string, any>>>;
+  };
 }
 
 type PrefetchExports = Record<string, any>;
@@ -40,11 +39,13 @@ export interface prefetchOptions {
 
 // @ts-ignore init global variable for test
 globalThis.__FEDERATION__ ??= {};
-globalThis.__FEDERATION__.__PREFETCH__ ??= {
+(
+  globalThis.__FEDERATION__ as unknown as FederationWithPrefetch
+).__PREFETCH__ ??= {
   entryLoading: {},
   instance: new Map(),
   __PREFETCH_EXPORTS__: {},
-};
+} as FederationWithPrefetch['__PREFETCH__'];
 export class MFDataPrefetch {
   public prefetchMemory: Map<string, Promise<any>>;
   public recordOutdate: Record<string, Record<string, boolean>>;
@@ -59,12 +60,15 @@ export class MFDataPrefetch {
     this.global.instance.set(options.name, this);
   }
 
-  get global(): Record<string, any> {
-    return globalThis.__FEDERATION__.__PREFETCH__;
+  get global(): FederationWithPrefetch['__PREFETCH__'] {
+    return (globalThis.__FEDERATION__ as unknown as FederationWithPrefetch)
+      .__PREFETCH__;
   }
 
   static getInstance(id: string): MFDataPrefetch | undefined {
-    return globalThis.__FEDERATION__.__PREFETCH__.instance.get(id);
+    return (
+      globalThis.__FEDERATION__ as unknown as FederationWithPrefetch
+    ).__PREFETCH__.instance.get(id);
   }
 
   async loadEntry(entry: string | undefined): Promise<any> {
@@ -94,8 +98,9 @@ export class MFDataPrefetch {
       return this._exports;
     }
     const { name } = this._options;
-    const exportsPromiseFn =
-      globalThis.__FEDERATION__.__PREFETCH__.__PREFETCH_EXPORTS__?.[name];
+    const exportsPromiseFn = (
+      globalThis.__FEDERATION__ as unknown as FederationWithPrefetch
+    ).__PREFETCH__.__PREFETCH_EXPORTS__?.[name];
     const exportsPromise =
       typeof exportsPromiseFn === 'function'
         ? exportsPromiseFn()

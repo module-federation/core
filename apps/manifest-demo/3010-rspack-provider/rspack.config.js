@@ -101,6 +101,9 @@ module.exports = composePlugins(
           },
         },
         dataPrefetch: true,
+        experiments: {
+          externalRuntime: true,
+        },
       }),
     );
     (config.devServer = {

@@ -2,13 +2,13 @@ import 'whatwg-fetch';
 import { assert, describe, it } from 'vitest';
 import { FederationHost, init } from '../src/index';
 import { mockRemoteSnapshot } from './mock/utils';
-import { matchRemoteWithNameAndExpose } from '../src/utils/manifest';
+import { matchRemoteWithNameAndExpose } from '@module-federation/runtime-core';
 import {
   addGlobalSnapshot,
   getGlobalSnapshot,
   Global,
   setGlobalFederationConstructor,
-} from '../src/global';
+} from '@module-federation/runtime-core';
 import { requestList } from './mock/env';
 
 describe('matchRemote', () => {

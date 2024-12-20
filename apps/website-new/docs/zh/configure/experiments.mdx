@@ -1,0 +1,88 @@
+# Experiments
+
+`experiments` 配置用于启用插件中的实验功能。
+
+- Example
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/host',
+  experiments: {
+    federationRuntime: 'hoisted'
+  },
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+  //...
+});
+```
+
+## federationRuntime
+
+- Type: `enum`
+- Required: No
+- Default: `false`
+- Options: `false | "hoisted"`
+
+### `Hoisted` Runtime
+
+当设置 `federationRuntime: 'hoisted'` 时，会发生以下情况：
+
+这些配置可用于下列场景：
+
+- 设置`runtimeChunk: 'single'`。
+- 避免在应用程序顶部或用户代码入口点使用“import()”，以防止急切消费错误。过去，这通常是强制性的，并且在示例应用程序中通常被视为“import('./bootstrap.js')”。
+- 将模块联合运行时包移动到运行时块中，使它们远离入口点 - 减少代码重复
+
+下面会详细解释对应的场景。
+
+1）优化
+
+原先 `module-federation/runtime` 会被加入到编译入口，这意味着在多 entry 的情况下会打包多次 mf runtime，会增大产物体积。
+当设置了某些特定的分包策略，还会导致共享依赖 `eager consumption` 的问题。
+
+并且 `federationRuntime: 'hoisted'` 还允许设置 `runtimeChunk: "single"`。
+
+2）异步启动
+
+：：：警告
+此模式仍然允许设置异步入口。导出 UMD 库时，它会返回 Promise resolve 导出。
+如果您手动 require() Node 中的入口点，它将 module.exports 设置为 Promise.resolve(exports)。
+:::
+
+入口启动将切换到“主动”初始化并使用异步依赖项启动。
+
+你将不再需要强制的设置异步入口：`“import('./bootsrtap')”`。
+
+不再出现共享依赖 `eager consumption` 错误，因为文件本身的初始化表现为异步块。
+
+3) 提升 MF 运行时访问优先级
+
+与原先在入口挂载 MF runtime 不同，现在将会提升到 bundler runtime 初始化阶段挂载 MF runtime 。
+
+这允许 MF runtime 提前可用，从而支持 “异步启动”（不再需要异步入口） 功能等。
+
+## externalRuntime
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+设置 `true` 后 会 external MF runtime，并使用消费者提供的 runtime 。（请确保你的消费者有设置 `provideExternalRuntime: true`，否则无法正常运行！）
+
+## provideExternalRuntime
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+::: warning 注意
+请确保仅在最顶层消费者配置！若同时有多个消费者注入 runtime，后执行的不会覆盖已有的 runtime。
+:::
+
+设置 `true` 后会在消费者处注入 MF runtime。

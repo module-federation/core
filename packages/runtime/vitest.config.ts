@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+//@ts-ignore
 import path from 'path';
 export default defineConfig({
   define: {

@@ -237,6 +237,8 @@ export interface ModuleFederationPluginOptions {
   virtualRuntimeEntry?: boolean;
   experiments?: {
     federationRuntime?: false | 'hoisted';
+    externalRuntime?: boolean;
+    provideExternalRuntime?: boolean;
   };
   bridge?: {
     /**

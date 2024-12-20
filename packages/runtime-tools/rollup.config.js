@@ -4,6 +4,7 @@ module.exports = (rollupConfig) => {
     runtime: 'packages/runtime-tools/src/runtime.ts',
     'webpack-bundler-runtime':
       'packages/runtime-tools/src/webpack-bundler-runtime.ts',
+    'runtime-core': 'packages/runtime-tools/src/runtime-core.ts',
   };
 
   // Check if output is an array and add hoistTransitiveImports: false
