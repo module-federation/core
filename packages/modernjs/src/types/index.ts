@@ -5,6 +5,7 @@ import type { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@mo
 export interface PluginOptions {
   config?: moduleFederationPlugin.ModuleFederationPluginOptions;
   configPath?: string;
+  disableSSR?: boolean;
   remoteIpStrategy?: 'ipv4' | 'inherit';
 }
 
@@ -16,7 +17,9 @@ export interface InternalModernPluginOptions {
   browserPlugin?: BundlerPlugin;
   nodePlugin?: BundlerPlugin;
   remoteIpStrategy?: 'ipv4' | 'inherit';
+  userConfig?: PluginOptions;
 }
+
 export type BundlerPlugin =
   | WebpackModuleFederationPlugin
   | RspackModuleFederationPlugin;
