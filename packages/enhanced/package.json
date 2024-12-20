@@ -88,6 +88,7 @@
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/manifest": "workspace:*",
     "@module-federation/managers": "workspace:*",
+    "@module-federation/error-codes": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/rspack": "workspace:*",
     "@module-federation/bridge-react-webpack-plugin": "workspace:*",

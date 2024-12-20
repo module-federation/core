@@ -8,6 +8,12 @@
   },
   {
     "type": "dir",
+    "name": "build",
+    "label": "构建",
+    "collapsed":true
+  },
+  {
+    "type": "dir",
     "name": "type",
     "label": "类型",
     "collapsed":true

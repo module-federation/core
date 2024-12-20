@@ -5,6 +5,12 @@
 
 'use strict';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { logger } from '@module-federation/sdk';
+import {
+  getShortErrorMsg,
+  buildDescMap,
+  BUILD_001,
+} from '@module-federation/error-codes';
 import type { containerPlugin } from '@module-federation/sdk';
 import type { Compilation, Dependency } from 'webpack';
 import type {
@@ -229,9 +235,13 @@ class ContainerEntryModule extends Module {
 
       let str;
       if (modules.some((m) => !m.module)) {
-        str = runtimeTemplate.throwMissingModuleErrorBlock({
-          request: modules.map((m) => m.request).join(', '),
-        });
+        logger.error(
+          getShortErrorMsg(BUILD_001, buildDescMap, {
+            exposeModules: modules.filter((m) => !m.module),
+            FEDERATION_WEBPACK_PATH: process.env['FEDERATION_WEBPACK_PATH'],
+          }),
+        );
+        process.exit(1);
       } else {
         str = `return ${runtimeTemplate.blockPromise({
           block,

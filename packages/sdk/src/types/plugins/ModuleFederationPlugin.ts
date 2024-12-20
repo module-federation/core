@@ -229,7 +229,6 @@ export interface ModuleFederationPluginOptions {
   implementation?: string;
 
   manifest?: boolean | PluginManifestOptions;
-
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
   async?: boolean | AsyncBoundaryOptions;
