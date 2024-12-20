@@ -40,7 +40,6 @@ export default class ContainerEntryModuleFactory extends ModuleFactory {
         dep.injectRuntimeEntry,
         dep.experiments,
         dep.dataPrefetch,
-        dep.abortOnMissingExposes,
       ),
     });
   }

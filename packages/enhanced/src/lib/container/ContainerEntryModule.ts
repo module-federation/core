@@ -66,7 +66,6 @@ class ContainerEntryModule extends Module {
   private _injectRuntimeEntry: string;
   private _experiments: containerPlugin.ContainerPluginOptions['experiments'];
   private _dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'];
-  private _abortOnMissingExposes: containerPlugin.ContainerPluginOptions['abortOnMissingExposes'];
 
   /**
    * @param {string} name container entry name
@@ -75,7 +74,6 @@ class ContainerEntryModule extends Module {
    * @param {string} injectRuntimeEntry the path of injectRuntime file.
    * @param {containerPlugin.ContainerPluginOptions['experiments']} experiments additional experiments options
    * @param {containerPlugin.ContainerPluginOptions['dataPrefetch']} dataPrefetch whether enable dataPrefetch
-   * @param {containerPlugin.ContainerPluginOptions['abortOnMissingExposes']} abortOnMissingExposes whether abort the compile if miss module
    */
   constructor(
     name: string,
@@ -84,7 +82,6 @@ class ContainerEntryModule extends Module {
     injectRuntimeEntry: string,
     experiments: containerPlugin.ContainerPluginOptions['experiments'],
     dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'],
-    abortOnMissingExposes: containerPlugin.ContainerPluginOptions['abortOnMissingExposes'],
   ) {
     super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
     this._name = name;
@@ -93,7 +90,6 @@ class ContainerEntryModule extends Module {
     this._injectRuntimeEntry = injectRuntimeEntry;
     this._experiments = experiments;
     this._dataPrefetch = dataPrefetch;
-    this._abortOnMissingExposes = abortOnMissingExposes;
   }
 
   /**
@@ -103,7 +99,6 @@ class ContainerEntryModule extends Module {
   static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
     const { read } = context;
     const obj = new ContainerEntryModule(
-      read(),
       read(),
       read(),
       read(),
@@ -240,18 +235,13 @@ class ContainerEntryModule extends Module {
 
       let str;
       if (modules.some((m) => !m.module)) {
-        if (this._abortOnMissingExposes) {
-          logger.error(
-            getShortErrorMsg(BUILD_001, buildDescMap, {
-              exposeModules: modules.filter((m) => !m.module),
-              FEDERATION_WEBPACK_PATH: process.env['FEDERATION_WEBPACK_PATH'],
-            }),
-          );
-          process.exit(1);
-        }
-        str = runtimeTemplate.throwMissingModuleErrorBlock({
-          request: modules.map((m) => m.request).join(', '),
-        });
+        logger.error(
+          getShortErrorMsg(BUILD_001, buildDescMap, {
+            exposeModules: modules.filter((m) => !m.module),
+            FEDERATION_WEBPACK_PATH: process.env['FEDERATION_WEBPACK_PATH'],
+          }),
+        );
+        process.exit(1);
       } else {
         str = `return ${runtimeTemplate.blockPromise({
           block,
@@ -378,7 +368,6 @@ class ContainerEntryModule extends Module {
     write(this._injectRuntimeEntry);
     write(this._experiments);
     write(this._dataPrefetch);
-    write(this._abortOnMissingExposes);
     super.serialize(context);
   }
 }

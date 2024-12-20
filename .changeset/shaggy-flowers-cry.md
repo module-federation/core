@@ -4,4 +4,4 @@
 '@module-federation/sdk': patch
 ---
 
-fix(enhanced): add abortOnMissExpose field
+fix(enhanced): abort process if not find expose modules

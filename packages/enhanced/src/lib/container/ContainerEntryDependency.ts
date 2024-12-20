@@ -23,7 +23,6 @@ class ContainerEntryDependency extends Dependency {
   /** Additional experimental options for container plugin customization */
   public experiments: containerPlugin.ContainerPluginOptions['experiments'];
   public dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'];
-  public abortOnMissingExposes: containerPlugin.ContainerPluginOptions['abortOnMissingExposes'];
 
   /**
    * @param {string} name entry name
@@ -32,7 +31,6 @@ class ContainerEntryDependency extends Dependency {
    * @param {string[]} injectRuntimeEntry the path of injectRuntime file.
    * @param {containerPlugin.ContainerPluginOptions['experiments']} experiments additional experiments options
    * @param {containerPlugin.ContainerPluginOptions['dataPrefetch']} dataPrefetch whether enable dataPrefetch
-   * @param {containerPlugin.ContainerPluginOptions['abortOnMissingExposes']} abortOnMissingExposes whether abort the compile if miss module
    */
   constructor(
     name: string,
@@ -41,7 +39,6 @@ class ContainerEntryDependency extends Dependency {
     injectRuntimeEntry: string,
     experiments: containerPlugin.ContainerPluginOptions['experiments'],
     dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'],
-    abortOnMissingExposes: containerPlugin.ContainerPluginOptions['abortOnMissingExposes'],
   ) {
     super();
     this.name = name;
@@ -50,7 +47,6 @@ class ContainerEntryDependency extends Dependency {
     this.injectRuntimeEntry = injectRuntimeEntry;
     this.experiments = experiments;
     this.dataPrefetch = dataPrefetch;
-    this.abortOnMissingExposes = abortOnMissingExposes;
   }
 
   /**
