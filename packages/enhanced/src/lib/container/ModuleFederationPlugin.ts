@@ -30,6 +30,10 @@ const isValidExternalsType = require(
   ),
 ) as typeof import('webpack/schemas/plugins/container/ExternalsType.check.js');
 
+const { ExternalsPlugin } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+
 class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _statsPlugin?: StatsPlugin;
@@ -68,6 +72,20 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         compiler,
       );
     }
+    if (options.experiments?.externalRuntime === 'provide') {
+      const runtimePlugins = options.runtimePlugins || [];
+      options.runtimePlugins = runtimePlugins.concat(
+        require.resolve(
+          '@module-federation/inject-external-runtime-core-plugin',
+        ),
+      );
+    } else if (options.experiments?.externalRuntime === true) {
+      const Externals = compiler.webpack.ExternalsPlugin || ExternalsPlugin;
+      new Externals(compiler.options.externalsType || 'global', {
+        '@module-federation/runtime-core': '_FEDERATION_RUNTIME_CORE',
+      }).apply(compiler);
+    }
+
     if (options.experiments?.federationRuntime) {
       new FederationModulesPlugin().apply(compiler);
       new StartupChunkDependenciesPlugin({

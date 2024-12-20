@@ -17,8 +17,8 @@
     "build:lib": "rm -rf dist && modern-module build -c modern.lib.config.ts",
     "release": "npm publish --tag canary",
     "test": "vitest run",
-    "test:e2e": "E2ETEST=true pnpm build && DEBUG=pw:api playwright test",
-    "test:e2e:ui": "E2ETEST=true  pnpm build && DEBUG=pw:api playwright test --ui",
+    "test:e2e": "E2ETEST=true pnpm build && playwright test",
+    "test:e2e:ui": "E2ETEST=true  pnpm build && playwright test --ui",
     "start": "modern start",
     "serve": "modern serve",
     "new": "modern new",
@@ -86,7 +86,6 @@
     "prettier": "~3.3.3",
     "rimraf": "~3.0.2",
     "typescript": "~5.0.4",
-    "vitest": "1.2.2",
-    "@module-federation/runtime-core": "workspace:*"
+    "vitest": "1.2.2"
   }
 }

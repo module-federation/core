@@ -86,7 +86,6 @@
   },
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
-    "@module-federation/runtime-core": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "fs-extra": "9.1.0"
   }

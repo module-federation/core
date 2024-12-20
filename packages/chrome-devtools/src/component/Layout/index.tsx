@@ -5,7 +5,7 @@ import {
   GlobalModuleInfo,
   MODULE_DEVTOOL_IDENTIFIER,
 } from '@module-federation/sdk';
-import { Federation } from '@module-federation/runtime-core';
+import type { Federation } from '@module-federation/runtime';
 
 import FormComponent from '../Form';
 import Dependency from '../Graph';

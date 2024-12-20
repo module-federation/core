@@ -34,6 +34,11 @@
       "import": "./dist/types.esm.mjs",
       "require": "./dist/types.cjs.js"
     },
+    "./core": {
+      "types": "./dist/core.cjs.d.ts",
+      "import": "./dist/core.esm.mjs",
+      "require": "./dist/core.cjs.js"
+    },
     "./embedded": {
       "types": "./dist/embedded.cjs.d.ts",
       "import": "./dist/embedded.esm.mjs",
@@ -51,6 +56,9 @@
       ],
       "types": [
         "./dist/types.cjs.d.ts"
+      ],
+      "core": [
+        "./dist/core.cjs.d.ts"
       ]
     }
   },

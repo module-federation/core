@@ -16,6 +16,7 @@ export {
   getRemoteInfo,
   registerGlobalPlugins,
   type FederationRuntimePlugin,
+  type Federation,
 } from '@module-federation/runtime-core';
 export { FederationHost };
 let FederationInstance: FederationHost | null = null;

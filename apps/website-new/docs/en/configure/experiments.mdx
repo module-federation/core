@@ -63,3 +63,16 @@ There should be no "eager consumption" errors possible, as the initialization of
 Instead of federation runtime initilizing in the entrypoint code, it is initialized in a RuntimeModule, within the webpack runtime.
 This allows module federation to be avaliable ahead of time, thus enabling "Async Startup" capabilities etc.
 
+## externalRuntime
+
+- Type: `boolean | 'provide'`
+- Required: No
+- Default: `false`
+
+Used to control whether external mf runtime or mf runtime is provided.
+
+Different behaviors can be performed through the following configurations
+
+* `true`: Usually set in the producer, after setting it will external MF runtime and use the runtime provided by the consumer. (Please make sure your consumer has `externalRuntime: "provide"` set, otherwise it will not run properly!)
+* `'provide'`: Usually set in the top-level consumer. After setting, MF runtime will be injected globally. If the producer sets `externalRuntime: true`, then the runtime provided by this consumer will be used.
+* `false`: Default configuration, no operation will be performed on runtime

@@ -49,6 +49,10 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       dataPrefetch: true,
       // experiments: { federationRuntime: 'hoisted' },
       runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
+      experiments: {
+        externalRuntime: 'provide',
+        federationRuntime: 'hoisted',
+      },
     }),
   );
 
@@ -61,7 +65,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   if (config.devServer) {
     config.devServer.client.overlay = false;
   }
-  config.entry = ['./src/setExternal.ts', './src/bootstrap.tsx'];
+  config.entry = './src/index.tsx';
   //Temporary workaround - https://github.com/nrwl/nx/issues/16983
   config.experiments = { outputModule: false };
 

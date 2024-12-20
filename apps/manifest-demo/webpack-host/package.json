@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "devDependencies": {
     "@module-federation/runtime": "workspace:*",
-    "@module-federation/runtime-core": "workspace:*",
     "@module-federation/typescript": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",

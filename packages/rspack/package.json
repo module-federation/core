@@ -29,6 +29,7 @@
     "@module-federation/managers": "workspace:*",
     "@module-federation/manifest": "workspace:*",
     "@module-federation/runtime-tools": "workspace:*",
+    "@module-federation/inject-external-runtime-core-plugin": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {

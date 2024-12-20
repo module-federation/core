@@ -13,10 +13,6 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
-    config.externalsType = 'global';
-    config.externals = {
-      '@module-federation/runtime-core': 'runtimeCore',
-    };
     config.watchOptions = {
       ignored: ['**/node_modules/**', '**/@mf-types/**'],
     };
@@ -89,6 +85,9 @@ module.exports = composePlugins(
           },
         },
         manifest: false,
+        experiments: {
+          externalRuntime: true,
+        },
       }),
     );
     (config.devServer = {

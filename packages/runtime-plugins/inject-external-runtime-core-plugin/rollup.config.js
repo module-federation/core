@@ -1,16 +1,27 @@
-module.exports = (rollupConfig) => {
-  rollupConfig.input = {
-    index: 'packages/runtime-tools/src/index.ts',
-    runtime: 'packages/runtime-tools/src/runtime.ts',
-    'webpack-bundler-runtime':
-      'packages/runtime-tools/src/webpack-bundler-runtime.ts',
-    'runtime-core': 'packages/runtime-tools/src/runtime-core.ts',
-  };
+const copy = require('rollup-plugin-copy');
 
-  // Check if output is an array and add hoistTransitiveImports: false
+module.exports = (rollupConfig, _projectOptions) => {
+  rollupConfig.plugins.push(
+    copy({
+      targets: [
+        {
+          src: 'packages/runtime-plugins/inject-external-runtime-core-plugin/LICENSE',
+          dest: 'packages/runtime-plugins/inject-external-runtime-core-plugin/dist',
+        },
+      ],
+    }),
+  );
+
+  rollupConfig.external = [/@module-federation/];
+
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({
       ...c,
+      manualChunks: (id) => {
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
       hoistTransitiveImports: false,
       entryFileNames:
         c.format === 'esm'
@@ -24,6 +35,11 @@ module.exports = (rollupConfig) => {
   } else {
     rollupConfig.output = {
       ...rollupConfig.output,
+      manualChunks: (id) => {
+        if (id.includes('@swc/helpers')) {
+          return 'polyfills';
+        }
+      },
       hoistTransitiveImports: false,
       entryFileNames:
         rollupConfig.output.format === 'esm'

@@ -9,7 +9,7 @@ import {
   ProviderModuleInfo,
 } from '@module-federation/sdk';
 import { Remote } from '@module-federation/runtime/types';
-import { Federation } from '@module-federation/runtime-core';
+import type { Federation } from '@module-federation/runtime';
 import { getPrefetchId, compatGetPrefetchId } from './common/runtime-utils';
 
 // Define an interface that extends Federation to include __PREFETCH__
