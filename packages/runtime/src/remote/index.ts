@@ -441,9 +441,7 @@ export class RemoteHandler {
     } else {
       const messages = [
         `The remote "${remote.name}" is already registered.`,
-        options?.force
-          ? 'Hope you have known that OVERRIDE it may have some unexpected errors'
-          : 'If you want to merge the remote, you can set "force: true".',
+        'Please note that overriding it may cause unexpected errors.',
       ];
       if (options?.force) {
         // remove registered remote
@@ -451,8 +449,8 @@ export class RemoteHandler {
         normalizeRemote();
         targetRemotes.push(remote);
         this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
+        warn(messages.join(' '));
       }
-      warn(messages.join(' '));
     }
   }
 

@@ -88,6 +88,7 @@ module.exports = composePlugins(
       client: {
         overlay: false,
       },
+      host: '127.0.0.1',
       port: 3004,
       devMiddleware: {
         writeToDisk: true,
