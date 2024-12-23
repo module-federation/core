@@ -81,7 +81,7 @@
     "react-dom": "^18.3.1",
     "react-router": "^6.21.3",
     "react-test-renderer": "^18.2.0",
-    "ts-jest": "29.0.1",
+    "ts-jest": "29.2.5",
     "webpack": "5.75.0"
   },
   "dependencies": {

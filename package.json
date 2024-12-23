@@ -215,7 +215,7 @@
     "swc-loader": "0.2.6",
     "tailwindcss": "3.4.13",
     "terser-webpack-plugin": "^5.3.10",
-    "ts-jest": "29.1.5",
+    "ts-jest": "29.2.5",
     "tslib": "2.8.1",
     "tsup": "7.2.0",
     "typescript": "5.5.2",
