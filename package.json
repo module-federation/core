@@ -120,7 +120,7 @@
     "@nx/rollup": "20.1.4",
     "@nx/rspack": "20.1.4",
     "@nx/storybook": "20.1.4",
-    "@nx/vite": "20.1.4",
+    "@nx/vite": "20.3.0",
     "@nx/web": "20.1.4",
     "@nx/webpack": "20.1.4",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
