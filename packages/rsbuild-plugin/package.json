@@ -49,6 +49,14 @@
     "@module-federation/enhanced": "workspace:*",
     "@rsbuild/core": "1.x"
   },
+  "peerDependenciesMeta": {
+    "@rsbuild/core": {
+      "optional": true
+    },
+    "@module-federation/enhanced": {
+      "optional": true
+    }
+  },
   "engines": {
     "node": ">=16.0.0"
   },
