@@ -39,23 +39,23 @@ export default defineConfig({
       server: {
         port: 3001,
       },
-      plugins: [
-        pluginModuleFederation({
-          name: 'rslib_provider',
-          exposes: {
-            '.': './src/index.tsx',
-          },
-          shared: {
-            react: {
-              singleton: true,
-            },
-            'react-dom': {
-              singleton: true,
-            },
-          },
-        }),
-      ],
     },
   ],
-  plugins: [pluginReact()],
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'rslib_provider',
+      exposes: {
+        '.': './src/index.tsx',
+      },
+      shared: {
+        react: {
+          singleton: true,
+        },
+        'react-dom': {
+          singleton: true,
+        },
+      },
+    }),
+  ],
 });

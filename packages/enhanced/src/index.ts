@@ -1,5 +1,8 @@
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-export { default as ModuleFederationPlugin } from './wrapper/ModuleFederationPlugin';
+export {
+  default as ModuleFederationPlugin,
+  PLUGIN_NAME,
+} from './wrapper/ModuleFederationPlugin';
 export { default as ContainerReferencePlugin } from './wrapper/ContainerReferencePlugin';
 export { default as SharePlugin } from './wrapper/SharePlugin';
 export { default as ContainerPlugin } from './wrapper/ContainerPlugin';

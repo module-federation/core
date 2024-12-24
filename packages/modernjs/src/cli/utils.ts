@@ -5,6 +5,7 @@ import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
 import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
 import logger from './logger';
+import { autoDeleteSplitChunkCacheGroups } from '@module-federation/rsbuild-plugin/utils';
 
 import type { BundlerConfig, BundlerChainConfig } from '../interfaces/bundler';
 import type {
@@ -419,31 +420,3 @@ const SHARED_SPLIT_CHUNK_MAP = {
   '@douyinfe/semi-ui': SPLIT_CHUNK_MAP.SEMI,
   axios: SPLIT_CHUNK_MAP.AXIOS,
 };
-
-function autoDeleteSplitChunkCacheGroups<T extends Bundler>(
-  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  bundlerConfig: BundlerConfig<T>,
-) {
-  if (!mfConfig.shared) {
-    return;
-  }
-  if (
-    !bundlerConfig.optimization?.splitChunks ||
-    !bundlerConfig.optimization.splitChunks.cacheGroups
-  ) {
-    return;
-  }
-  const arrayShared = Array.isArray(mfConfig.shared)
-    ? mfConfig.shared
-    : Object.keys(mfConfig.shared);
-  for (const shared of arrayShared) {
-    const splitChunkKey =
-      SHARED_SPLIT_CHUNK_MAP[shared as keyof typeof SHARED_SPLIT_CHUNK_MAP];
-    if (!splitChunkKey) {
-      continue;
-    }
-    if (bundlerConfig.optimization.splitChunks.cacheGroups[splitChunkKey]) {
-      delete bundlerConfig.optimization.splitChunks.cacheGroups[splitChunkKey];
-    }
-  }
-}
