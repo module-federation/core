@@ -12,7 +12,7 @@ import type {
   moduleFederationPlugin,
   sharePlugin,
 } from '@module-federation/sdk';
-import type { RsbuildPlugin } from '@rsbuild/core';
+import type { RsbuildPlugin, Rspack } from '@rsbuild/core';
 import logger from '../logger';
 
 type ModuleFederationOptions =
@@ -28,7 +28,18 @@ export {
   PLUGIN_NAME,
 };
 
-export const LIB_FORMAT = ['commonjs', 'umd', 'modern-module'];
+const LIB_FORMAT = ['commonjs', 'umd', 'modern-module'];
+
+export function isMFFormat(bundlerConfig: Rspack.Configuration) {
+  const library = bundlerConfig.output?.library;
+
+  return !(
+    typeof library === 'object' &&
+    !Array.isArray(library) &&
+    'type' in library &&
+    LIB_FORMAT.includes(library.type)
+  );
+}
 
 export const pluginModuleFederation = (
   moduleFederationOptions: ModuleFederationOptions,
@@ -59,15 +70,11 @@ export const pluginModuleFederation = (
     );
 
     api.onBeforeCreateCompiler(({ bundlerConfigs }) => {
+      if (!bundlerConfigs) {
+        throw new Error('Can not get bundlerConfigs!');
+      }
       bundlerConfigs.forEach((bundlerConfig) => {
-        const library = bundlerConfig.output?.library;
-        // lib format
-        if (
-          typeof library === 'object' &&
-          !Array.isArray(library) &&
-          'type' in library &&
-          LIB_FORMAT.includes(library.type)
-        ) {
+        if (!isMFFormat(bundlerConfig)) {
           return;
         } else {
           // mf
