@@ -302,6 +302,7 @@ export function patchBundlerConfig<T extends Bundler>(options: {
   }
 
   if (!isServer) {
+    // @ts-ignore
     autoDeleteSplitChunkCacheGroups(mfConfig, bundlerConfig);
   }
 
