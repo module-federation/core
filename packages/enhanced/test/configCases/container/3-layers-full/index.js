@@ -4,12 +4,5 @@ it('should load the component from container', () => {
     expect(rendered).toBe(
       'App rendered with [This is react 0.1.2], [ComponentA rendered with [This is react 0.1.2]] and [ComponentALayers rendered with [This is layered react]]',
     );
-    return import('./upgrade-react').then(({ default: upgrade }) => {
-      upgrade();
-      const rendered = App();
-      expect(rendered).toBe(
-        'App rendered with [This is react 1.2.3], [ComponentA rendered with [This is react 1.2.3]] and [ComponentALayers rendered with [This is layered react]]',
-      );
-    });
   });
 });

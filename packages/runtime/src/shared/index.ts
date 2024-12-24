@@ -79,17 +79,26 @@ export class SharedHandler {
       userOptions,
     );
 
+    // Initialize default scope
+    if (!this.shareScopeMap[DEFAULT_SCOPE]) {
+      this.shareScopeMap[DEFAULT_SCOPE] = {};
+    }
+
+    // Create layer-specific scopes and register shared modules
     const sharedKeys = Object.keys(shareInfos);
     sharedKeys.forEach((sharedKey) => {
       const sharedVals = shareInfos[sharedKey];
       sharedVals.forEach((sharedVal) => {
-        const registeredShared = getRegisteredShare(
-          this.shareScopeMap,
-          sharedKey,
-          sharedVal,
-          this.hooks.lifecycle.resolveShare,
-        );
-        if (!registeredShared && sharedVal && sharedVal.lib) {
+        // Create layer-specific scope if needed
+        if (sharedVal.shareConfig?.layer) {
+          const layerScope = `(${sharedVal.shareConfig.layer})${DEFAULT_SCOPE}`;
+          if (!this.shareScopeMap[layerScope]) {
+            this.shareScopeMap[layerScope] = {};
+          }
+        }
+
+        // Register in appropriate scopes
+        if (sharedVal && sharedVal.lib) {
           this.setShared({
             pkgName: sharedKey,
             lib: sharedVal.lib,
@@ -126,6 +135,8 @@ export class SharedHandler {
       extraOptions,
       shareInfos: host.options.shared,
     });
+
+    console.log('shareInfo', shareInfo);
 
     if (shareInfo?.scope) {
       await Promise.all(
@@ -494,32 +505,64 @@ export class SharedHandler {
   }): void {
     const { version, scope = 'default', ...shareInfo } = shared;
     const scopes: string[] = Array.isArray(scope) ? scope : [scope];
+
+    // Initialize scopes
     scopes.forEach((sc) => {
       if (!this.shareScopeMap[sc]) {
         this.shareScopeMap[sc] = {};
       }
-      if (!this.shareScopeMap[sc][pkgName]) {
+
+      // Create layer-specific scope if needed
+      if (shareInfo.shareConfig?.layer) {
+        const layerScope = `(${shareInfo.shareConfig.layer})${sc}`;
+        if (!this.shareScopeMap[layerScope]) {
+          this.shareScopeMap[layerScope] = {};
+        }
+        if (!this.shareScopeMap[layerScope][pkgName]) {
+          this.shareScopeMap[layerScope][pkgName] = {};
+        }
+      } else if (!this.shareScopeMap[sc][pkgName]) {
+        // Only create package object in default scope if no layer
         this.shareScopeMap[sc][pkgName] = {};
       }
+    });
 
-      if (!this.shareScopeMap[sc][pkgName][version]) {
-        this.shareScopeMap[sc][pkgName][version] = {
-          version,
-          scope: ['default'],
-          ...shareInfo,
-          lib,
-          loaded,
-          loading,
-        };
-        if (get) {
-          this.shareScopeMap[sc][pkgName][version].get = get;
-        }
-        return;
+    // Register the share in appropriate scopes
+    scopes.forEach((sc) => {
+      const sharedEntry = {
+        version,
+        scope: scopes,
+        ...shareInfo,
+        lib,
+        loaded,
+        loading,
+      };
+
+      if (get) {
+        sharedEntry.get = get;
       }
 
-      const registeredShared = this.shareScopeMap[sc][pkgName][version];
-      if (loading && !registeredShared.loading) {
-        registeredShared.loading = loading;
+      if (shareInfo.shareConfig?.layer) {
+        // Register in layer scope only
+        const layerScope = `(${shareInfo.shareConfig.layer})${sc}`;
+        if (!this.shareScopeMap[layerScope][pkgName][version]) {
+          this.shareScopeMap[layerScope][pkgName][version] = sharedEntry;
+        } else if (
+          loading &&
+          !this.shareScopeMap[layerScope][pkgName][version].loading
+        ) {
+          this.shareScopeMap[layerScope][pkgName][version].loading = loading;
+        }
+      } else {
+        // Register in original scope
+        if (!this.shareScopeMap[sc][pkgName][version]) {
+          this.shareScopeMap[sc][pkgName][version] = sharedEntry;
+        } else if (
+          loading &&
+          !this.shareScopeMap[sc][pkgName][version].loading
+        ) {
+          this.shareScopeMap[sc][pkgName][version].loading = loading;
+        }
       }
     });
   }

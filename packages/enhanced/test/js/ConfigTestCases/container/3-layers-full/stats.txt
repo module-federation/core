@@ -1,0 +1,815 @@
+PublicPath: (none)
+asset container.js 207 KiB {layer_container} [emitted] (name: layer_container)
+asset main.js 207 KiB {main} [emitted] (name: main)
+asset App_js.js 1.75 KiB {App_js} [emitted]
+asset __federation_expose_ComponentALayers.js 1.08 KiB {__federation_expose_ComponentALayers} [emitted] (name: __federation_expose_ComponentALayers)
+asset _layered-components_node_modules_react_js.js 1000 bytes {_layered-components_node_modules_react_js} [emitted]
+asset __federation_expose_ComponentA.js 997 bytes {__federation_expose_ComponentA} [emitted] (name: __federation_expose_ComponentA)
+asset node_modules_react_js.js 939 bytes {node_modules_react_js} [emitted]
+Entrypoint main 207 KiB = main.js
+Entrypoint layer_container 207 KiB = container.js
+Chunk Group __federation_expose_ComponentA 997 bytes = __federation_expose_ComponentA.js
+Chunk Group __federation_expose_ComponentALayers 1.08 KiB = __federation_expose_ComponentALayers.js
+chunk {App_js} (runtime: main) App_js.js 252 bytes (javascript) 12 bytes (remote) 12 bytes (share-init) <{main}> ={webpack_sharing_consume_default_react_react}= >{node_modules_react_js}< [rendered]
+  > ./App [./index.js] ./index.js 2:9-24
+  ./App.js 252 bytes {App_js} [depth 1] [built] [code generated]
+    [exports: default]
+    [used exports unknown]
+    import() ./App [./index.js] 2:9-24
+  remote containerA/ComponentA [webpack/container/remote/containerA/ComponentA] 6 bytes (remote) 6 bytes (share-init) {App_js} [depth 2] [dependent] [built] [code generated]
+    [used exports unknown]
+    harmony side effect evaluation containerA/ComponentA [./App.js] 2:0-47
+    harmony import specifier containerA/ComponentA [./App.js] 6:45-55
+  remote containerA/ComponentALayers [webpack/container/remote/containerA/ComponentALayers] 6 bytes (remote) 6 bytes (share-init) {App_js} [depth 2] [dependent] [built] [code generated]
+    [used exports unknown]
+    harmony side effect evaluation containerA/ComponentALayers [./App.js] 3:0-59
+    harmony import specifier containerA/ComponentALayers [./App.js] 6:67-83
+chunk {__federation_expose_ComponentA} (runtime: layer_container) __federation_expose_ComponentA.js (__federation_expose_ComponentA) 104 bytes <{layer_container}> ={webpack_sharing_consume_default_react_react}= >{node_modules_react_js}< [rendered]
+  > ./ComponentA [webpack/container/entry/layer_container] container entry ./ComponentA
+  ./ComponentA.js 104 bytes {__federation_expose_ComponentA} [depth 1] [built] [code generated]
+    [exports: default]
+    [used exports unknown]
+    container exposed ./ComponentA [webpack/container/entry/layer_container] container entry ./ComponentA[0]
+chunk {__federation_expose_ComponentALayers} (runtime: layer_container) __federation_expose_ComponentALayers.js (__federation_expose_ComponentALayers) 150 bytes (javascript) 42 bytes (consume-shared) <{layer_container}> >{_layered-components_node_modules_react_js}< [rendered]
+  > ./ComponentALayers [webpack/container/entry/layer_container] container entry ./ComponentALayers
+  ./ComponentALayers.js [(layered-components)/./ComponentALayers.js] (in layered-components) 150 bytes {__federation_expose_ComponentALayers} [depth 1] [built] [code generated]
+    [exports: default]
+    [used exports unknown]
+    container exposed ./ComponentALayers [webpack/container/entry/layer_container] container entry ./ComponentALayers[0]
+  consume shared module (default) react@* (singleton) (fallback: ./node_modules/re...(truncated) [(layered-components)/webpack/sharing/consume/default/react/react] (in layered-components) 42 bytes {__federation_expose_ComponentALayers} [depth 2] [dependent] [built] [code generated]
+    [used exports unknown]
+    harmony side effect evaluation react [(layered-components)/./ComponentALayers.js] ./ComponentALayers.js 1:0-31
+    harmony import specifier react [(layered-components)/./ComponentALayers.js] ./ComponentALayers.js 5:44-72
+chunk {_layered-components_node_modules_react_js} (runtime: layer_container, main) _layered-components_node_modules_react_js.js 182 bytes <{__federation_expose_ComponentALayers}> <{layer_container}> <{main}> [rendered]
+  > [(layered-components)/webpack/sharing/consume/default/react/react] consume shared module (default) react@* (singleton) (fallback: ./node_modules/react.js) (layered-components)
+  > [(layered-components)/webpack/sharing/provide/default/react] provide shared module (default) (layered-components) react@false = ./node_modules/react.js
+  ./node_modules/react.js [(layered-components)/./node_modules/react.js] (in layered-components) 182 bytes {_layered-components_node_modules_react_js} [depth 1] [built] [code generated]
+    [exports: default, layeredComponentsReact, setVersion]
+    [used exports unknown]
+    consume shared fallback react [(layered-components)/webpack/sharing/consume/default/react/react] consume shared module (default) react@* (singleton) (fallback: ./node_modules/react.js) (layered-components)
+    provide module for shared /Users/bytedance/dev/universe/packages/enhanced/test/configCases/container/3-layers-full/node_modules/react.js [(layered-components)/webpack/sharing/provide/default/react] provide shared module (default) (layered-components) react@false = ./node_modules/react.js
+chunk {layer_container} (runtime: layer_container) container.js (layer_container) 185 KiB (javascript) 84 bytes (share-init) 8.87 KiB (runtime) >{__federation_expose_ComponentA}< >{__federation_expose_ComponentALayers}< >{_layered-components_node_modules_react_js}< >{node_modules_react_js}< >{webpack_sharing_consume_default_react_react}< [entry] [rendered]
+  > layer_container
+  built modules 185 KiB (javascript) 84 bytes (share-init) [built]
+    dependent modules 185 KiB [dependent]
+      cacheable modules 185 KiB
+        modules by path ../../../../../runtime/dist/*.js 129 KiB
+          ../../../../../runtime/dist/index.cjs.js 86.4 KiB {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: FederationHost, Module, getInstance, getRemoteEntry, getRemoteInfo, init, loadRemote, loadScript, loadScriptNode, loadShare, loadShareSync, preloadRemote, registerGlobalPlugins, registerPlugins, registerRemotes]
+            [used exports unknown]
+            cjs require @module-federation/runtime [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 3:14-51
+          ../../../../../runtime/dist/polyfills.cjs.js 856 bytes {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+            [exports: _extends, _object_without_properties_loose]
+            [used exports unknown]
+            cjs require ./polyfills.cjs.js [../../../../../runtime/dist/index.cjs.js] 3:16-45
+            cjs require ./polyfills.cjs.js [../../../../../runtime/dist/share.cjs.js] 3:16-45
+          ../../../../../runtime/dist/share.cjs.js 41.9 KiB {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+            [exports: CurrentGlobal, DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE, Global, addGlobalSnapshot, addUniqueItem, arrayOptions, assert, error, formatShareConfigs, getBuilderId, getFMId, getGlobalFederationConstructor, getGlobalFederationInstance, getGlobalHostPlugins, getGlobalShareScope, getGlobalSnapshot, getGlobalSnapshotInfoByModuleInfo, getInfoWithoutType, getPreloaded, getRegisteredShare, getRemoteEntryExports, getRemoteEntryInfoFromSnapshot, getTargetSharedOptions, getTargetSnapshotInfoByModuleInfo, globalLoading, isObject, isPlainObject, isPureRemoteEntry, isRemoteInfoWithEntry, logger, nativeGlobal, processModuleAlias, registerGlobalPlugins, resetFederationGlobalInfo, setGlobalFederationConstructor, setGlobalFederationInstance, setGlobalSnapshotInfoByModuleInfo, setPreloaded, warn]
+            [used exports unknown]
+            cjs require ./share.cjs.js [../../../../../runtime/dist/index.cjs.js] 5:12-37
+        modules by path ../../../../../webpack-bundler-runtime/dist/*.js 13.4 KiB
+          ../../../../../webpack-bundler-runtime/dist/constant.cjs.js 311 bytes {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: ENCODE_NAME_PREFIX, FEDERATION_SUPPORTED_TYPES]
+            [used exports unknown]
+            cjs require ./constant.cjs.js [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 4:15-43
+          ../../../../../webpack-bundler-runtime/dist/index.cjs.js 12.7 KiB {layer_container} {main} [depth 1] [dependent] [built] [code generated]
+            [used exports unknown]
+            CommonJS bailout: module.exports is used directly at 312:0-14
+            harmony side effect evaluation /Users/bytedance/dev/universe/packages/webpack-bundler-runtime/dist/index.cjs.js [../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js] 1:0-106
+            harmony import specifier /Users/bytedance/dev/universe/packages/webpack-bundler-runtime/dist/index.cjs.js [../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js] 6:16-26
+            harmony import specifier /Users/bytedance/dev/universe/packages/webpack-bundler-runtime/dist/index.cjs.js [../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js] 7:40-50
+            cjs self exports reference [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 312:0-14
+          ../../../../../webpack-bundler-runtime/dist/polyfills.cjs.js 417 bytes {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: _extends]
+            [used exports unknown]
+            cjs require ./polyfills.cjs.js [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 6:16-45
+        modules by path ../../../../../sdk/dist/*.js 28.6 KiB
+          ../../../../../sdk/dist/index.cjs.js 28.2 KiB {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: BROWSER_LOG_KEY, BROWSER_LOG_VALUE, ENCODE_NAME_PREFIX, EncodedNameTransformMap, FederationModuleManifest, MANIFEST_EXT, MFModuleType, MFPrefetchCommon, MODULE_DEVTOOL_IDENTIFIER, ManifestFileName, NameTransformMap, NameTransformSymbol, SEPARATOR, StatsFileName, TEMP_DIR, assert, composeKeyWithSeparator, containerPlugin, containerReferencePlugin, createLink, createLogger, createScript, createScriptNode, decodeName, encodeName, error, generateExposeFilename, generateShareFilename, generateSnapshotFromManifest, getProcessEnv, getResourceUrl, inferAutoPublicPath, isBrowserEnv, isDebugMode, isManifestProvider, isRequiredVersion, isStaticResourcesEqual, loadScript, loadScriptNode, logger, moduleFederationPlugin, normalizeOptions, parseEntry, safeToString, safeWrapper, sharePlugin, simpleJoinRemoteEntry, warn]
+            [used exports unknown]
+            cjs require @module-federation/sdk [../../../../../runtime/dist/index.cjs.js] 4:10-43
+            cjs require @module-federation/sdk [../../../../../runtime/dist/share.cjs.js] 4:10-43
+            cjs require @module-federation/sdk [../../../../../webpack-bundler-runtime/dist/constant.cjs.js] 3:10-43
+            cjs require @module-federation/sdk [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 5:10-43
+          ../../../../../sdk/dist/polyfills.cjs.js 417 bytes {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+            [exports: _extends]
+            [used exports unknown]
+            cjs require ./polyfills.cjs.js [../../../../../sdk/dist/index.cjs.js] 4:16-45
+        ../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorp...(truncated) 10.8 KiB {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+          [used exports unknown]
+          CommonJS bailout: module.exports is used directly at 36:0-14
+          cjs require isomorphic-rslog [../../../../../sdk/dist/index.cjs.js] 3:22-49
+          cjs self exports reference [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 36:0-14
+        ../../../../../error-codes/dist/index.cjs.js 2.2 KiB {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+          [exports: RUNTIME_001, RUNTIME_002, RUNTIME_003, RUNTIME_004, RUNTIME_005, RUNTIME_006, RUNTIME_007, TYPE_001, errorDescMap, getShortErrorMsg, runtimeDescMap, typeDescMap]
+          [used exports unknown]
+          cjs require @module-federation/error-codes [../../../../../runtime/dist/index.cjs.js] 6:17-58
+        ../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js 1010 bytes {layer_container} {main} [depth 0] [dependent] [built] [code generated]
+          [no exports]
+          [used exports unknown]
+          entry /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js [webpack/container/entry/layer_container] container entry
+          entry /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js main
+          federation runtime dependency /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js
+      external "os" [os] 42 bytes {layer_container} {main} [depth 4] [dependent] [built] [code generated]
+        [used exports unknown]
+        cjs require os [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 112:29-42
+      external "process" [process] 42 bytes {layer_container} {main} [depth 4] [dependent] [built] [code generated]
+        [used exports unknown]
+        cjs require process [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 111:34-52
+      external "tty" [tty] 42 bytes {layer_container} {main} [depth 4] [dependent] [built] [code generated]
+        [used exports unknown]
+        cjs require tty [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 113:30-44
+    provide-module modules 84 bytes
+      provide shared module (default) (layered-components) react@false = ./node_mo...(truncated) [(layered-components)/webpack/sharing/provide/default/react] (in layered-components) 42 bytes {layer_container} {main} [depth 0] [built] [code generated]
+        [used exports unknown]
+        provide shared module
+      provide shared module (default) react@false = ./node_modules/react.js [webpack/sharing/provide/default/react] 42 bytes {layer_container} {main} [depth 0] [built] [code generated]
+        [used exports unknown]
+        provide shared module
+    container entry [webpack/container/entry/layer_container] 42 bytes {layer_container} [depth 0] [built] [code generated]
+      [exports: get, init]
+      [used exports unknown]
+      container entry layer_container
+      used as library export
+  runtime modules 8.87 KiB
+    webpack/runtime/compat get default export 267 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/consumes 1.56 KiB {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/define property getters 308 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/ensure chunk 326 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/federation runtime 346 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/get javascript chunk filename 167 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/hasOwnProperty shorthand 88 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/make namespace object 274 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/readFile chunk loading 1.84 KiB {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/remotes loading 468 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/sharing 1.04 KiB {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/sharing 2.24 KiB {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+chunk {main} (runtime: main) main.js (main) 186 KiB (javascript) 84 bytes (share-init) 9.04 KiB (runtime) >{App_js}< >{_layered-components_node_modules_react_js}< >{node_modules_react_js}< >{webpack_sharing_consume_default_react_react}< [entry] [rendered]
+  > ./index.js main
+  > /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js main
+  built modules 186 KiB (javascript) 84 bytes (share-init) [built]
+    dependent modules 184 KiB [dependent]
+      cacheable modules 184 KiB
+        modules by path ../../../../../runtime/dist/*.js 129 KiB
+          ../../../../../runtime/dist/index.cjs.js 86.4 KiB {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: FederationHost, Module, getInstance, getRemoteEntry, getRemoteInfo, init, loadRemote, loadScript, loadScriptNode, loadShare, loadShareSync, preloadRemote, registerGlobalPlugins, registerPlugins, registerRemotes]
+            [used exports unknown]
+            cjs require @module-federation/runtime [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 3:14-51
+          ../../../../../runtime/dist/polyfills.cjs.js 856 bytes {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+            [exports: _extends, _object_without_properties_loose]
+            [used exports unknown]
+            cjs require ./polyfills.cjs.js [../../../../../runtime/dist/index.cjs.js] 3:16-45
+            cjs require ./polyfills.cjs.js [../../../../../runtime/dist/share.cjs.js] 3:16-45
+          ../../../../../runtime/dist/share.cjs.js 41.9 KiB {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+            [exports: CurrentGlobal, DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE, Global, addGlobalSnapshot, addUniqueItem, arrayOptions, assert, error, formatShareConfigs, getBuilderId, getFMId, getGlobalFederationConstructor, getGlobalFederationInstance, getGlobalHostPlugins, getGlobalShareScope, getGlobalSnapshot, getGlobalSnapshotInfoByModuleInfo, getInfoWithoutType, getPreloaded, getRegisteredShare, getRemoteEntryExports, getRemoteEntryInfoFromSnapshot, getTargetSharedOptions, getTargetSnapshotInfoByModuleInfo, globalLoading, isObject, isPlainObject, isPureRemoteEntry, isRemoteInfoWithEntry, logger, nativeGlobal, processModuleAlias, registerGlobalPlugins, resetFederationGlobalInfo, setGlobalFederationConstructor, setGlobalFederationInstance, setGlobalSnapshotInfoByModuleInfo, setPreloaded, warn]
+            [used exports unknown]
+            cjs require ./share.cjs.js [../../../../../runtime/dist/index.cjs.js] 5:12-37
+        modules by path ../../../../../webpack-bundler-runtime/dist/*.js 13.4 KiB
+          ../../../../../webpack-bundler-runtime/dist/constant.cjs.js 311 bytes {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: ENCODE_NAME_PREFIX, FEDERATION_SUPPORTED_TYPES]
+            [used exports unknown]
+            cjs require ./constant.cjs.js [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 4:15-43
+          ../../../../../webpack-bundler-runtime/dist/index.cjs.js 12.7 KiB {layer_container} {main} [depth 1] [dependent] [built] [code generated]
+            [used exports unknown]
+            CommonJS bailout: module.exports is used directly at 312:0-14
+            harmony side effect evaluation /Users/bytedance/dev/universe/packages/webpack-bundler-runtime/dist/index.cjs.js [../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js] 1:0-106
+            harmony import specifier /Users/bytedance/dev/universe/packages/webpack-bundler-runtime/dist/index.cjs.js [../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js] 6:16-26
+            harmony import specifier /Users/bytedance/dev/universe/packages/webpack-bundler-runtime/dist/index.cjs.js [../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js] 7:40-50
+            cjs self exports reference [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 312:0-14
+          ../../../../../webpack-bundler-runtime/dist/polyfills.cjs.js 417 bytes {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: _extends]
+            [used exports unknown]
+            cjs require ./polyfills.cjs.js [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 6:16-45
+        modules by path ../../../../../sdk/dist/*.js 28.6 KiB
+          ../../../../../sdk/dist/index.cjs.js 28.2 KiB {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: BROWSER_LOG_KEY, BROWSER_LOG_VALUE, ENCODE_NAME_PREFIX, EncodedNameTransformMap, FederationModuleManifest, MANIFEST_EXT, MFModuleType, MFPrefetchCommon, MODULE_DEVTOOL_IDENTIFIER, ManifestFileName, NameTransformMap, NameTransformSymbol, SEPARATOR, StatsFileName, TEMP_DIR, assert, composeKeyWithSeparator, containerPlugin, containerReferencePlugin, createLink, createLogger, createScript, createScriptNode, decodeName, encodeName, error, generateExposeFilename, generateShareFilename, generateSnapshotFromManifest, getProcessEnv, getResourceUrl, inferAutoPublicPath, isBrowserEnv, isDebugMode, isManifestProvider, isRequiredVersion, isStaticResourcesEqual, loadScript, loadScriptNode, logger, moduleFederationPlugin, normalizeOptions, parseEntry, safeToString, safeWrapper, sharePlugin, simpleJoinRemoteEntry, warn]
+            [used exports unknown]
+            cjs require @module-federation/sdk [../../../../../runtime/dist/index.cjs.js] 4:10-43
+            cjs require @module-federation/sdk [../../../../../runtime/dist/share.cjs.js] 4:10-43
+            cjs require @module-federation/sdk [../../../../../webpack-bundler-runtime/dist/constant.cjs.js] 3:10-43
+            cjs require @module-federation/sdk [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 5:10-43
+          ../../../../../sdk/dist/polyfills.cjs.js 417 bytes {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+            [exports: _extends]
+            [used exports unknown]
+            cjs require ./polyfills.cjs.js [../../../../../sdk/dist/index.cjs.js] 4:16-45
+        ../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorp...(truncated) 10.8 KiB {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+          [used exports unknown]
+          CommonJS bailout: module.exports is used directly at 36:0-14
+          cjs require isomorphic-rslog [../../../../../sdk/dist/index.cjs.js] 3:22-49
+          cjs self exports reference [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 36:0-14
+        ../../../../../error-codes/dist/index.cjs.js 2.2 KiB {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+          [exports: RUNTIME_001, RUNTIME_002, RUNTIME_003, RUNTIME_004, RUNTIME_005, RUNTIME_006, RUNTIME_007, TYPE_001, errorDescMap, getShortErrorMsg, runtimeDescMap, typeDescMap]
+          [used exports unknown]
+          cjs require @module-federation/error-codes [../../../../../runtime/dist/index.cjs.js] 6:17-58
+      external "os" [os] 42 bytes {layer_container} {main} [depth 4] [dependent] [built] [code generated]
+        [used exports unknown]
+        cjs require os [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 112:29-42
+      external "process" [process] 42 bytes {layer_container} {main} [depth 4] [dependent] [built] [code generated]
+        [used exports unknown]
+        cjs require process [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 111:34-52
+      external "tty" [tty] 42 bytes {layer_container} {main} [depth 4] [dependent] [built] [code generated]
+        [used exports unknown]
+        cjs require tty [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 113:30-44
+    provide-module modules 84 bytes
+      provide shared module (default) (layered-components) react@false = ./node_mo...(truncated) [(layered-components)/webpack/sharing/provide/default/react] (in layered-components) 42 bytes {layer_container} {main} [depth 0] [built] [code generated]
+        [used exports unknown]
+        provide shared module
+      provide shared module (default) react@false = ./node_modules/react.js [webpack/sharing/provide/default/react] 42 bytes {layer_container} {main} [depth 0] [built] [code generated]
+        [used exports unknown]
+        provide shared module
+    ../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js 1010 bytes {layer_container} {main} [depth 0] [built] [code generated]
+      [no exports]
+      [used exports unknown]
+      entry /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js [webpack/container/entry/layer_container] container entry
+      entry /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js main
+      federation runtime dependency /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js
+    ./index.js 341 bytes {main} [depth 0] [built] [code generated]
+      [used exports unknown]
+      entry ./index.js main
+    external "./container.js" [webpack/container/reference/containerA] 42 bytes {main} [depth 3] [built] [code generated]
+      [used exports unknown]
+      remote to external webpack/container/reference/containerA [webpack/container/remote/containerA/ComponentA] remote containerA/ComponentA
+      remote to external webpack/container/reference/containerA [webpack/container/remote/containerA/ComponentALayers] remote containerA/ComponentALayers
+  runtime modules 9.04 KiB
+    webpack/runtime/compat get default export 267 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/consumes 958 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/define property getters 308 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/ensure chunk 326 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/federation runtime 346 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/get javascript chunk filename 167 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/hasOwnProperty shorthand 88 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/make namespace object 274 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/readFile chunk loading 1.83 KiB {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/remotes loading 1.21 KiB {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/sharing 1.04 KiB {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/sharing 2.29 KiB {main} [code generated]
+      [no exports]
+      [used exports unknown]
+chunk {node_modules_react_js} (runtime: layer_container, main) node_modules_react_js.js 182 bytes <{App_js}> <{__federation_expose_ComponentA}> <{layer_container}> <{main}> <{webpack_sharing_consume_default_react_react}> [rendered]
+  > [webpack/sharing/consume/default/react/react] consume shared module (default) react@* (singleton) (fallback: ./node_modules/react.js)
+  > [webpack/sharing/provide/default/react] provide shared module (default) react@false = ./node_modules/react.js
+  ./node_modules/react.js 182 bytes {node_modules_react_js} [depth 1] [built] [code generated]
+    [exports: default, layeredComponentsReact, setVersion]
+    [used exports unknown]
+    consume shared fallback react [webpack/sharing/consume/default/react/react] consume shared module (default) react@* (singleton) (fallback: ./node_modules/react.js)
+    provide module for shared /Users/bytedance/dev/universe/packages/enhanced/test/configCases/container/3-layers-full/node_modules/react.js [webpack/sharing/provide/default/react] provide shared module (default) react@false = ./node_modules/react.js
+chunk {webpack_sharing_consume_default_react_react} (runtime: layer_container, main) 42 bytes <{layer_container}> <{main}> ={App_js}= ={__federation_expose_ComponentA}= >{node_modules_react_js}< split chunk (cache group: default)
+  > ./App [./index.js] ./index.js 2:9-24
+  > ./ComponentA [webpack/container/entry/layer_container] container entry ./ComponentA
+  consume shared module (default) react@* (singleton) (fallback: ./node_mod...(truncated) [webpack/sharing/consume/default/react/react] 42 bytes {webpack_sharing_consume_default_react_react} [depth 2] [built] [code generated]
+    [used exports unknown]
+    from origin ./App.js
+      harmony side effect evaluation react [./App.js] 1:0-26
+      harmony import specifier react [./App.js] 6:31-36
+    from origin ./ComponentA.js
+      harmony side effect evaluation react [./ComponentA.js] 1:0-26
+      harmony import specifier react [./ComponentA.js] 4:38-43
+  
+
+LOG from webpack.Compiler
+<t> make hook: 164.77475 ms
+<t> finish make hook: 6.240833 ms
+<t> finish compilation: 1.828083 ms
+<t> seal compilation: 21.637542 ms
+<t> afterCompile hook: 0.004209 ms
+<t> emitAssets: 13.188958 ms
+<t> emitRecords: 0.032167 ms
+<t> done hook: 0.040875 ms
+<t> beginIdle: 0.003542 ms
+
+LOG from webpack.Compilation
+<t> compute affected modules: 0.001917 ms
+<t> finish modules: 1.588666 ms
+<t> report dependency errors and warnings: 0.224833 ms
+<t> optimize dependencies: 0.05125 ms
+<t> create chunks: 1.901792 ms
+<t> compute affected modules with chunk graph: 0.001084 ms
+<t> optimize: 2.231875 ms
+    44 modules hashed, 0 from cache (1.57 variants per module in average)
+<t> module hashing: 2.386875 ms
+    100% code generated (28 generated, 0 from cache)
+<t> code generation: 4.710167 ms
+<t> runtime requirements.modules: 0.298875 ms
+<t> runtime requirements.chunks: 0.399167 ms
+<t> runtime requirements.entries: 1.696708 ms
+<t> runtime requirements: 2.418834 ms
+<t> hashing: initialize hash: 0.002584 ms
+<t> hashing: sort chunks: 0.0295 ms
+<t> hashing: hash runtime modules: 3.630751 ms
+<t> hashing: hash chunks: 1.222458 ms
+<t> hashing: hash digest: 0.018042 ms
+<t> hashing: process full hash modules: 0.000875 ms
+<t> hashing: 4.962958 ms
+    100% code generated (24 generated, 0 from cache)
+<t> record hash: 0.020208 ms
+<t> module assets: 0.033833 ms
+<t> create chunk assets: 2.081916 ms
+<t> process assets: 0.051125 ms
+
+LOG from webpack.ResolverCachePlugin
+    83% really resolved (19 real resolves with 0 cached but invalid, 4 cached valid, 0 concurrent)
+
+LOG from webpack.FlagDependencyExportsPlugin
+<t> restore cached provided exports: 0.207875 ms
+<t> figure out provided exports: 0.940167 ms
+    68% of exports of modules have been determined (9 no declared exports, 14 not cached, 5 flagged uncacheable, 0 from cache, 0 from mem cache, 0 additional calculations due to dependencies)
+<t> store provided exports into cache: 0.171833 ms
+
+LOG from webpack.SideEffectsFlagPlugin
+<t> update dependencies: 0.019083 ms
+
+LOG from webpack.buildChunkGraph
+<t> visitModules: prepare: 0.250379 ms
+<t> visitModules: visiting: 0.981916 ms
+<t> visitModules: calculating available modules: 0.0705 ms
+<t> visitModules: merging available modules: 0.032459 ms
+<t> visitModules: check modules for revisit: 0.0635 ms
+<t> visitModules: prepare: 0.025082 ms
+<t> visitModules: visiting: 0.231291 ms
+<t> visitModules: calculating available modules: 0.006541 ms
+<t> visitModules: merging available modules: 0.00275 ms
+<t> visitModules: check modules for revisit: 0.001334 ms
+<t> visitModules: prepare: 0.004375 ms
+<t> visitModules: visiting: 0.020917 ms
+    108 queue items processed (57 blocks)
+    10 chunk groups connected
+    7 chunk groups processed for merging (10 module sets, 0 forked, 0 + 0 modules forked, 0 + 0 modules merged into fork, 0 resulting modules)
+    7 chunk group info updated (0 already connected chunk groups reconnected)
+<t> visitModules: 1.502458 ms
+<t> connectChunkGroups: 0.073459 ms
+<t> cleanup: 0.002834 ms
+
+LOG from webpack.SplitChunksPlugin
+<t> prepare: 0.013791 ms
+<t> modules: 0.517584 ms
+<t> queue: 0.131958 ms
+<t> maxSize: 0.084375 ms
+
+LOG from webpack.FileSystemInfo
+    36 new snapshots created
+    0% root snapshot uncached (0 / 4)
+    0% children snapshot uncached (0 / 0)
+    0 entries tested
+    File info in cache: 139 timestamps 0 hashes 0 timestamp hash combinations
+    File timestamp snapshot optimization: 63% (168/268) entries shared via 10 shared snapshots (25 times referenced)
+    Directory info in cache: 0 timestamps 0 hashes 0 timestamp hash combinations
+    Missing items snapshot optimization: 43% (49/114) entries shared via 4 shared snapshots (6 times referenced)
+    Managed items info in cache: 1 items
+    Managed items snapshot optimization: 0% (0/3) entries shared via 0 shared snapshots (0 times referenced)
+    Managed missing snapshot optimization: 0% (0/3) entries shared via 0 shared snapshots (0 times referenced)
+
+2024-12-23 17:14:18: webpack 5.93.0 compiled successfully in 212 ms (00827a35ff92dbeaf458)
+
+PublicPath: auto
+asset module/container.mjs 207 KiB {layer_container} [emitted] [javascript module] (name: layer_container)
+asset module/main.mjs 206 KiB {main} [emitted] [javascript module] (name: main)
+asset module/App_js.mjs 1.75 KiB {App_js} [emitted] [javascript module]
+asset module/__federation_expose_ComponentALayers.mjs 1.08 KiB {__federation_expose_ComponentALayers} [emitted] [javascript module] (name: __federation_expose_ComponentALayers)
+asset module/_layered-components_node_modules_react_js.mjs 1000 bytes {_layered-components_node_modules_react_js} [emitted] [javascript module]
+asset module/__federation_expose_ComponentA.mjs 997 bytes {__federation_expose_ComponentA} [emitted] [javascript module] (name: __federation_expose_ComponentA)
+asset module/node_modules_react_js.mjs 939 bytes {node_modules_react_js} [emitted] [javascript module]
+Entrypoint main 206 KiB = module/main.mjs
+Entrypoint layer_container 207 KiB = module/container.mjs
+Chunk Group __federation_expose_ComponentA 997 bytes = module/__federation_expose_ComponentA.mjs
+Chunk Group __federation_expose_ComponentALayers 1.08 KiB = module/__federation_expose_ComponentALayers.mjs
+chunk {App_js} (runtime: main) module/App_js.mjs 252 bytes (javascript) 12 bytes (remote) 12 bytes (share-init) <{main}> ={webpack_sharing_consume_default_react_react}= >{node_modules_react_js}< [rendered]
+  > ./App [./index.js] ./index.js 2:9-24
+  ./App.js 252 bytes {App_js} [depth 1] [built] [code generated]
+    [exports: default]
+    [used exports unknown]
+    import() ./App [./index.js] 2:9-24
+  remote containerA/ComponentA [webpack/container/remote/containerA/ComponentA] 6 bytes (remote) 6 bytes (share-init) {App_js} [depth 2] [dependent] [built] [code generated]
+    [used exports unknown]
+    harmony side effect evaluation containerA/ComponentA [./App.js] 2:0-47
+    harmony import specifier containerA/ComponentA [./App.js] 6:45-55
+  remote containerA/ComponentALayers [webpack/container/remote/containerA/ComponentALayers] 6 bytes (remote) 6 bytes (share-init) {App_js} [depth 2] [dependent] [built] [code generated]
+    [used exports unknown]
+    harmony side effect evaluation containerA/ComponentALayers [./App.js] 3:0-59
+    harmony import specifier containerA/ComponentALayers [./App.js] 6:67-83
+chunk {__federation_expose_ComponentA} (runtime: layer_container) module/__federation_expose_ComponentA.mjs (__federation_expose_ComponentA) 104 bytes <{layer_container}> ={webpack_sharing_consume_default_react_react}= >{node_modules_react_js}< [rendered]
+  > ./ComponentA [webpack/container/entry/layer_container] container entry ./ComponentA
+  ./ComponentA.js 104 bytes {__federation_expose_ComponentA} [depth 1] [built] [code generated]
+    [exports: default]
+    [used exports unknown]
+    container exposed ./ComponentA [webpack/container/entry/layer_container] container entry ./ComponentA[0]
+chunk {__federation_expose_ComponentALayers} (runtime: layer_container) module/__federation_expose_ComponentALayers.mjs (__federation_expose_ComponentALayers) 150 bytes (javascript) 42 bytes (consume-shared) <{layer_container}> >{_layered-components_node_modules_react_js}< [rendered]
+  > ./ComponentALayers [webpack/container/entry/layer_container] container entry ./ComponentALayers
+  ./ComponentALayers.js [(layered-components)/./ComponentALayers.js] (in layered-components) 150 bytes {__federation_expose_ComponentALayers} [depth 1] [built] [code generated]
+    [exports: default]
+    [used exports unknown]
+    container exposed ./ComponentALayers [webpack/container/entry/layer_container] container entry ./ComponentALayers[0]
+  consume shared module (default) react@* (singleton) (fallback: ./node_modules/re...(truncated) [(layered-components)/webpack/sharing/consume/default/react/react] (in layered-components) 42 bytes {__federation_expose_ComponentALayers} [depth 2] [dependent] [built] [code generated]
+    [used exports unknown]
+    harmony side effect evaluation react [(layered-components)/./ComponentALayers.js] ./ComponentALayers.js 1:0-31
+    harmony import specifier react [(layered-components)/./ComponentALayers.js] ./ComponentALayers.js 5:44-72
+chunk {_layered-components_node_modules_react_js} (runtime: layer_container, main) module/_layered-components_node_modules_react_js.mjs 182 bytes <{__federation_expose_ComponentALayers}> <{layer_container}> <{main}> [rendered]
+  > [(layered-components)/webpack/sharing/consume/default/react/react] consume shared module (default) react@* (singleton) (fallback: ./node_modules/react.js) (layered-components)
+  > [(layered-components)/webpack/sharing/provide/default/react] provide shared module (default) (layered-components) react@false = ./node_modules/react.js
+  ./node_modules/react.js [(layered-components)/./node_modules/react.js] (in layered-components) 182 bytes {_layered-components_node_modules_react_js} [depth 1] [built] [code generated]
+    [exports: default, layeredComponentsReact, setVersion]
+    [used exports unknown]
+    consume shared fallback react [(layered-components)/webpack/sharing/consume/default/react/react] consume shared module (default) react@* (singleton) (fallback: ./node_modules/react.js) (layered-components)
+    provide module for shared /Users/bytedance/dev/universe/packages/enhanced/test/configCases/container/3-layers-full/node_modules/react.js [(layered-components)/webpack/sharing/provide/default/react] provide shared module (default) (layered-components) react@false = ./node_modules/react.js
+chunk {layer_container} (runtime: layer_container) module/container.mjs (layer_container) 185 KiB (javascript) 84 bytes (share-init) 8.84 KiB (runtime) >{__federation_expose_ComponentA}< >{__federation_expose_ComponentALayers}< >{_layered-components_node_modules_react_js}< >{node_modules_react_js}< >{webpack_sharing_consume_default_react_react}< [entry] [rendered]
+  > layer_container
+  built modules 185 KiB (javascript) 84 bytes (share-init) [built]
+    dependent modules 185 KiB [dependent]
+      cacheable modules 185 KiB
+        modules by path ../../../../../runtime/dist/*.js 129 KiB
+          ../../../../../runtime/dist/index.cjs.js 86.4 KiB {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: FederationHost, Module, getInstance, getRemoteEntry, getRemoteInfo, init, loadRemote, loadScript, loadScriptNode, loadShare, loadShareSync, preloadRemote, registerGlobalPlugins, registerPlugins, registerRemotes]
+            [used exports unknown]
+            cjs require @module-federation/runtime [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 3:14-51
+          ../../../../../runtime/dist/polyfills.cjs.js 856 bytes {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+            [exports: _extends, _object_without_properties_loose]
+            [used exports unknown]
+            cjs require ./polyfills.cjs.js [../../../../../runtime/dist/index.cjs.js] 3:16-45
+            cjs require ./polyfills.cjs.js [../../../../../runtime/dist/share.cjs.js] 3:16-45
+          ../../../../../runtime/dist/share.cjs.js 41.9 KiB {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+            [exports: CurrentGlobal, DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE, Global, addGlobalSnapshot, addUniqueItem, arrayOptions, assert, error, formatShareConfigs, getBuilderId, getFMId, getGlobalFederationConstructor, getGlobalFederationInstance, getGlobalHostPlugins, getGlobalShareScope, getGlobalSnapshot, getGlobalSnapshotInfoByModuleInfo, getInfoWithoutType, getPreloaded, getRegisteredShare, getRemoteEntryExports, getRemoteEntryInfoFromSnapshot, getTargetSharedOptions, getTargetSnapshotInfoByModuleInfo, globalLoading, isObject, isPlainObject, isPureRemoteEntry, isRemoteInfoWithEntry, logger, nativeGlobal, processModuleAlias, registerGlobalPlugins, resetFederationGlobalInfo, setGlobalFederationConstructor, setGlobalFederationInstance, setGlobalSnapshotInfoByModuleInfo, setPreloaded, warn]
+            [used exports unknown]
+            cjs require ./share.cjs.js [../../../../../runtime/dist/index.cjs.js] 5:12-37
+        modules by path ../../../../../webpack-bundler-runtime/dist/*.js 13.4 KiB
+          ../../../../../webpack-bundler-runtime/dist/constant.cjs.js 311 bytes {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: ENCODE_NAME_PREFIX, FEDERATION_SUPPORTED_TYPES]
+            [used exports unknown]
+            cjs require ./constant.cjs.js [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 4:15-43
+          ../../../../../webpack-bundler-runtime/dist/index.cjs.js 12.7 KiB {layer_container} {main} [depth 1] [dependent] [built] [code generated]
+            [used exports unknown]
+            CommonJS bailout: module.exports is used directly at 312:0-14
+            harmony side effect evaluation /Users/bytedance/dev/universe/packages/webpack-bundler-runtime/dist/index.cjs.js [../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js] 1:0-106
+            harmony import specifier /Users/bytedance/dev/universe/packages/webpack-bundler-runtime/dist/index.cjs.js [../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js] 6:16-26
+            harmony import specifier /Users/bytedance/dev/universe/packages/webpack-bundler-runtime/dist/index.cjs.js [../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js] 7:40-50
+            cjs self exports reference [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 312:0-14
+          ../../../../../webpack-bundler-runtime/dist/polyfills.cjs.js 417 bytes {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: _extends]
+            [used exports unknown]
+            cjs require ./polyfills.cjs.js [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 6:16-45
+        modules by path ../../../../../sdk/dist/*.js 28.6 KiB
+          ../../../../../sdk/dist/index.cjs.js 28.2 KiB {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: BROWSER_LOG_KEY, BROWSER_LOG_VALUE, ENCODE_NAME_PREFIX, EncodedNameTransformMap, FederationModuleManifest, MANIFEST_EXT, MFModuleType, MFPrefetchCommon, MODULE_DEVTOOL_IDENTIFIER, ManifestFileName, NameTransformMap, NameTransformSymbol, SEPARATOR, StatsFileName, TEMP_DIR, assert, composeKeyWithSeparator, containerPlugin, containerReferencePlugin, createLink, createLogger, createScript, createScriptNode, decodeName, encodeName, error, generateExposeFilename, generateShareFilename, generateSnapshotFromManifest, getProcessEnv, getResourceUrl, inferAutoPublicPath, isBrowserEnv, isDebugMode, isManifestProvider, isRequiredVersion, isStaticResourcesEqual, loadScript, loadScriptNode, logger, moduleFederationPlugin, normalizeOptions, parseEntry, safeToString, safeWrapper, sharePlugin, simpleJoinRemoteEntry, warn]
+            [used exports unknown]
+            cjs require @module-federation/sdk [../../../../../runtime/dist/index.cjs.js] 4:10-43
+            cjs require @module-federation/sdk [../../../../../runtime/dist/share.cjs.js] 4:10-43
+            cjs require @module-federation/sdk [../../../../../webpack-bundler-runtime/dist/constant.cjs.js] 3:10-43
+            cjs require @module-federation/sdk [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 5:10-43
+          ../../../../../sdk/dist/polyfills.cjs.js 417 bytes {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+            [exports: _extends]
+            [used exports unknown]
+            cjs require ./polyfills.cjs.js [../../../../../sdk/dist/index.cjs.js] 4:16-45
+        ../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorp...(truncated) 10.8 KiB {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+          [used exports unknown]
+          CommonJS bailout: module.exports is used directly at 36:0-14
+          cjs require isomorphic-rslog [../../../../../sdk/dist/index.cjs.js] 3:22-49
+          cjs self exports reference [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 36:0-14
+        ../../../../../error-codes/dist/index.cjs.js 2.2 KiB {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+          [exports: RUNTIME_001, RUNTIME_002, RUNTIME_003, RUNTIME_004, RUNTIME_005, RUNTIME_006, RUNTIME_007, TYPE_001, errorDescMap, getShortErrorMsg, runtimeDescMap, typeDescMap]
+          [used exports unknown]
+          cjs require @module-federation/error-codes [../../../../../runtime/dist/index.cjs.js] 6:17-58
+        ../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js 1010 bytes {layer_container} {main} [depth 0] [dependent] [built] [code generated]
+          [no exports]
+          [used exports unknown]
+          entry /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js [webpack/container/entry/layer_container] container entry
+          entry /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js main
+          federation runtime dependency /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js
+      external "os" [os] 42 bytes {layer_container} {main} [depth 4] [dependent] [built] [code generated]
+        [used exports unknown]
+        cjs require os [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 112:29-42
+      external "process" [process] 42 bytes {layer_container} {main} [depth 4] [dependent] [built] [code generated]
+        [used exports unknown]
+        cjs require process [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 111:34-52
+      external "tty" [tty] 42 bytes {layer_container} {main} [depth 4] [dependent] [built] [code generated]
+        [used exports unknown]
+        cjs require tty [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 113:30-44
+    provide-module modules 84 bytes
+      provide shared module (default) (layered-components) react@false = ./node_mo...(truncated) [(layered-components)/webpack/sharing/provide/default/react] (in layered-components) 42 bytes {layer_container} {main} [depth 0] [built] [code generated]
+        [used exports unknown]
+        provide shared module
+      provide shared module (default) react@false = ./node_modules/react.js [webpack/sharing/provide/default/react] 42 bytes {layer_container} {main} [depth 0] [built] [code generated]
+        [used exports unknown]
+        provide shared module
+    container entry [webpack/container/entry/layer_container] 42 bytes {layer_container} [depth 0] [built] [code generated]
+      [exports: get, init]
+      [used exports unknown]
+      container entry layer_container
+      used as library export
+  runtime modules 8.84 KiB
+    webpack/runtime/compat get default export 267 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/consumes 1.56 KiB {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/define property getters 308 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/ensure chunk 326 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/federation runtime 349 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/get javascript chunk filename 175 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/hasOwnProperty shorthand 88 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/import chunk loading 1.8 KiB {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/make namespace object 274 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/remotes loading 468 bytes {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/sharing 1.04 KiB {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/sharing 2.24 KiB {layer_container} [code generated]
+      [no exports]
+      [used exports unknown]
+chunk {main} (runtime: main) module/main.mjs (main) 186 KiB (javascript) 84 bytes (share-init) 9 KiB (runtime) >{App_js}< >{_layered-components_node_modules_react_js}< >{node_modules_react_js}< >{webpack_sharing_consume_default_react_react}< [entry] [rendered]
+  > ./index.js main
+  > /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js main
+  built modules 186 KiB (javascript) 84 bytes (share-init) [built]
+    dependent modules 184 KiB [dependent]
+      cacheable modules 184 KiB
+        modules by path ../../../../../runtime/dist/*.js 129 KiB
+          ../../../../../runtime/dist/index.cjs.js 86.4 KiB {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: FederationHost, Module, getInstance, getRemoteEntry, getRemoteInfo, init, loadRemote, loadScript, loadScriptNode, loadShare, loadShareSync, preloadRemote, registerGlobalPlugins, registerPlugins, registerRemotes]
+            [used exports unknown]
+            cjs require @module-federation/runtime [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 3:14-51
+          ../../../../../runtime/dist/polyfills.cjs.js 856 bytes {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+            [exports: _extends, _object_without_properties_loose]
+            [used exports unknown]
+            cjs require ./polyfills.cjs.js [../../../../../runtime/dist/index.cjs.js] 3:16-45
+            cjs require ./polyfills.cjs.js [../../../../../runtime/dist/share.cjs.js] 3:16-45
+          ../../../../../runtime/dist/share.cjs.js 41.9 KiB {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+            [exports: CurrentGlobal, DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE, Global, addGlobalSnapshot, addUniqueItem, arrayOptions, assert, error, formatShareConfigs, getBuilderId, getFMId, getGlobalFederationConstructor, getGlobalFederationInstance, getGlobalHostPlugins, getGlobalShareScope, getGlobalSnapshot, getGlobalSnapshotInfoByModuleInfo, getInfoWithoutType, getPreloaded, getRegisteredShare, getRemoteEntryExports, getRemoteEntryInfoFromSnapshot, getTargetSharedOptions, getTargetSnapshotInfoByModuleInfo, globalLoading, isObject, isPlainObject, isPureRemoteEntry, isRemoteInfoWithEntry, logger, nativeGlobal, processModuleAlias, registerGlobalPlugins, resetFederationGlobalInfo, setGlobalFederationConstructor, setGlobalFederationInstance, setGlobalSnapshotInfoByModuleInfo, setPreloaded, warn]
+            [used exports unknown]
+            cjs require ./share.cjs.js [../../../../../runtime/dist/index.cjs.js] 5:12-37
+        modules by path ../../../../../webpack-bundler-runtime/dist/*.js 13.4 KiB
+          ../../../../../webpack-bundler-runtime/dist/constant.cjs.js 311 bytes {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: ENCODE_NAME_PREFIX, FEDERATION_SUPPORTED_TYPES]
+            [used exports unknown]
+            cjs require ./constant.cjs.js [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 4:15-43
+          ../../../../../webpack-bundler-runtime/dist/index.cjs.js 12.7 KiB {layer_container} {main} [depth 1] [dependent] [built] [code generated]
+            [used exports unknown]
+            CommonJS bailout: module.exports is used directly at 312:0-14
+            harmony side effect evaluation /Users/bytedance/dev/universe/packages/webpack-bundler-runtime/dist/index.cjs.js [../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js] 1:0-106
+            harmony import specifier /Users/bytedance/dev/universe/packages/webpack-bundler-runtime/dist/index.cjs.js [../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js] 6:16-26
+            harmony import specifier /Users/bytedance/dev/universe/packages/webpack-bundler-runtime/dist/index.cjs.js [../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js] 7:40-50
+            cjs self exports reference [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 312:0-14
+          ../../../../../webpack-bundler-runtime/dist/polyfills.cjs.js 417 bytes {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: _extends]
+            [used exports unknown]
+            cjs require ./polyfills.cjs.js [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 6:16-45
+        modules by path ../../../../../sdk/dist/*.js 28.6 KiB
+          ../../../../../sdk/dist/index.cjs.js 28.2 KiB {layer_container} {main} [depth 2] [dependent] [built] [code generated]
+            [exports: BROWSER_LOG_KEY, BROWSER_LOG_VALUE, ENCODE_NAME_PREFIX, EncodedNameTransformMap, FederationModuleManifest, MANIFEST_EXT, MFModuleType, MFPrefetchCommon, MODULE_DEVTOOL_IDENTIFIER, ManifestFileName, NameTransformMap, NameTransformSymbol, SEPARATOR, StatsFileName, TEMP_DIR, assert, composeKeyWithSeparator, containerPlugin, containerReferencePlugin, createLink, createLogger, createScript, createScriptNode, decodeName, encodeName, error, generateExposeFilename, generateShareFilename, generateSnapshotFromManifest, getProcessEnv, getResourceUrl, inferAutoPublicPath, isBrowserEnv, isDebugMode, isManifestProvider, isRequiredVersion, isStaticResourcesEqual, loadScript, loadScriptNode, logger, moduleFederationPlugin, normalizeOptions, parseEntry, safeToString, safeWrapper, sharePlugin, simpleJoinRemoteEntry, warn]
+            [used exports unknown]
+            cjs require @module-federation/sdk [../../../../../runtime/dist/index.cjs.js] 4:10-43
+            cjs require @module-federation/sdk [../../../../../runtime/dist/share.cjs.js] 4:10-43
+            cjs require @module-federation/sdk [../../../../../webpack-bundler-runtime/dist/constant.cjs.js] 3:10-43
+            cjs require @module-federation/sdk [../../../../../webpack-bundler-runtime/dist/index.cjs.js] 5:10-43
+          ../../../../../sdk/dist/polyfills.cjs.js 417 bytes {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+            [exports: _extends]
+            [used exports unknown]
+            cjs require ./polyfills.cjs.js [../../../../../sdk/dist/index.cjs.js] 4:16-45
+        ../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorp...(truncated) 10.8 KiB {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+          [used exports unknown]
+          CommonJS bailout: module.exports is used directly at 36:0-14
+          cjs require isomorphic-rslog [../../../../../sdk/dist/index.cjs.js] 3:22-49
+          cjs self exports reference [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 36:0-14
+        ../../../../../error-codes/dist/index.cjs.js 2.2 KiB {layer_container} {main} [depth 3] [dependent] [built] [code generated]
+          [exports: RUNTIME_001, RUNTIME_002, RUNTIME_003, RUNTIME_004, RUNTIME_005, RUNTIME_006, RUNTIME_007, TYPE_001, errorDescMap, getShortErrorMsg, runtimeDescMap, typeDescMap]
+          [used exports unknown]
+          cjs require @module-federation/error-codes [../../../../../runtime/dist/index.cjs.js] 6:17-58
+      external "os" [os] 42 bytes {layer_container} {main} [depth 4] [dependent] [built] [code generated]
+        [used exports unknown]
+        cjs require os [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 112:29-42
+      external "process" [process] 42 bytes {layer_container} {main} [depth 4] [dependent] [built] [code generated]
+        [used exports unknown]
+        cjs require process [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 111:34-52
+      external "tty" [tty] 42 bytes {layer_container} {main} [depth 4] [dependent] [built] [code generated]
+        [used exports unknown]
+        cjs require tty [../../../../../../node_modules/.pnpm/isomorphic-rslog@0.0.6/node_modules/isomorphic-rslog/dist/node/index.cjs] 113:30-44
+    provide-module modules 84 bytes
+      provide shared module (default) (layered-components) react@false = ./node_mo...(truncated) [(layered-components)/webpack/sharing/provide/default/react] (in layered-components) 42 bytes {layer_container} {main} [depth 0] [built] [code generated]
+        [used exports unknown]
+        provide shared module
+      provide shared module (default) react@false = ./node_modules/react.js [webpack/sharing/provide/default/react] 42 bytes {layer_container} {main} [depth 0] [built] [code generated]
+        [used exports unknown]
+        provide shared module
+    ../../../../node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js 1010 bytes {layer_container} {main} [depth 0] [built] [code generated]
+      [no exports]
+      [used exports unknown]
+      entry /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js [webpack/container/entry/layer_container] container entry
+      entry /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js main
+      federation runtime dependency /Users/bytedance/dev/universe/packages/enhanced/node_modules/.federation/entry.9960ea71cc728b3fcd9c7be15914152a.js
+    ./index.js 341 bytes {main} [depth 0] [built] [code generated]
+      [used exports unknown]
+      entry ./index.js main
+    external "./container.mjs" [webpack/container/reference/containerA] 42 bytes {main} [depth 3] [built] [code generated]
+      [used exports unknown]
+      remote to external webpack/container/reference/containerA [webpack/container/remote/containerA/ComponentA] remote containerA/ComponentA
+      remote to external webpack/container/reference/containerA [webpack/container/remote/containerA/ComponentALayers] remote containerA/ComponentALayers
+  runtime modules 9 KiB
+    webpack/runtime/compat get default export 267 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/consumes 958 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/define property getters 308 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/ensure chunk 326 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/federation runtime 349 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/get javascript chunk filename 175 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/hasOwnProperty shorthand 88 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/import chunk loading 1.79 KiB {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/make namespace object 274 bytes {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/remotes loading 1.19 KiB {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/sharing 1.04 KiB {main} [code generated]
+      [no exports]
+      [used exports unknown]
+    webpack/runtime/sharing 2.3 KiB {main} [code generated]
+      [no exports]
+      [used exports unknown]
+chunk {node_modules_react_js} (runtime: layer_container, main) module/node_modules_react_js.mjs 182 bytes <{App_js}> <{__federation_expose_ComponentA}> <{layer_container}> <{main}> <{webpack_sharing_consume_default_react_react}> [rendered]
+  > [webpack/sharing/consume/default/react/react] consume shared module (default) react@* (singleton) (fallback: ./node_modules/react.js)
+  > [webpack/sharing/provide/default/react] provide shared module (default) react@false = ./node_modules/react.js
+  ./node_modules/react.js 182 bytes {node_modules_react_js} [depth 1] [built] [code generated]
+    [exports: default, layeredComponentsReact, setVersion]
+    [used exports unknown]
+    consume shared fallback react [webpack/sharing/consume/default/react/react] consume shared module (default) react@* (singleton) (fallback: ./node_modules/react.js)
+    provide module for shared /Users/bytedance/dev/universe/packages/enhanced/test/configCases/container/3-layers-full/node_modules/react.js [webpack/sharing/provide/default/react] provide shared module (default) react@false = ./node_modules/react.js
+chunk {webpack_sharing_consume_default_react_react} (runtime: layer_container, main) 42 bytes <{layer_container}> <{main}> ={App_js}= ={__federation_expose_ComponentA}= >{node_modules_react_js}< split chunk (cache group: default)
+  > ./App [./index.js] ./index.js 2:9-24
+  > ./ComponentA [webpack/container/entry/layer_container] container entry ./ComponentA
+  consume shared module (default) react@* (singleton) (fallback: ./node_mod...(truncated) [webpack/sharing/consume/default/react/react] 42 bytes {webpack_sharing_consume_default_react_react} [depth 2] [built] [code generated]
+    [used exports unknown]
+    from origin ./App.js
+      harmony side effect evaluation react [./App.js] 1:0-26
+      harmony import specifier react [./App.js] 6:31-36
+    from origin ./ComponentA.js
+      harmony side effect evaluation react [./ComponentA.js] 1:0-26
+      harmony import specifier react [./ComponentA.js] 4:38-43
+  
+
+LOG from webpack.Compiler
+<t> make hook: 167.712792 ms
+<t> finish make hook: 28.05175 ms
+<t> finish compilation: 0.7645 ms
+<t> seal compilation: 8.729958 ms
+<t> afterCompile hook: 0.005 ms
+<t> emitAssets: 2.579416 ms
+<t> emitRecords: 0.001875 ms
+<t> done hook: 0.057042 ms
+<t> beginIdle: 0.0035 ms
+
+LOG from webpack.Compilation
+<t> compute affected modules: 0.001042 ms
+<t> finish modules: 0.559083 ms
+<t> report dependency errors and warnings: 0.195583 ms
+<t> optimize dependencies: 0.040667 ms
+<t> create chunks: 0.733208 ms
+<t> compute affected modules with chunk graph: 0.000917 ms
+<t> optimize: 0.718667 ms
+    44 modules hashed, 0 from cache (1.57 variants per module in average)
+<t> module hashing: 1.154 ms
+    100% code generated (28 generated, 0 from cache)
+<t> code generation: 1.352916 ms
+<t> runtime requirements.modules: 0.100375 ms
+<t> runtime requirements.chunks: 0.1015 ms
+<t> runtime requirements.entries: 0.613416 ms
+<t> runtime requirements: 0.83325 ms
+<t> hashing: initialize hash: 0.002209 ms
+<t> hashing: sort chunks: 0.018084 ms
+<t> hashing: hash runtime modules: 1.581542 ms
+<t> hashing: hash chunks: 0.698459 ms
+<t> hashing: hash digest: 0.009083 ms
+<t> hashing: process full hash modules: 0.000792 ms
+<t> hashing: 2.342208 ms
+    100% code generated (24 generated, 0 from cache)
+<t> record hash: 0.003916 ms
+<t> module assets: 0.117333 ms
+<t> create chunk assets: 1.097125 ms
+<t> process assets: 0.031667 ms
+
+LOG from webpack.ResolverCachePlugin
+    83% really resolved (19 real resolves with 0 cached but invalid, 4 cached valid, 0 concurrent)
+
+LOG from webpack.FlagDependencyExportsPlugin
+<t> restore cached provided exports: 0.056458 ms
+<t> figure out provided exports: 0.239416 ms
+    68% of exports of modules have been determined (9 no declared exports, 14 not cached, 5 flagged uncacheable, 0 from cache, 0 from mem cache, 0 additional calculations due to dependencies)
+<t> store provided exports into cache: 0.07 ms
+
+LOG from webpack.SideEffectsFlagPlugin
+<t> update dependencies: 0.015 ms
+
+LOG from webpack.buildChunkGraph
+<t> visitModules: prepare: 0.055335 ms
+<t> visitModules: visiting: 0.227834 ms
+<t> visitModules: calculating available modules: 0.007209 ms
+<t> visitModules: merging available modules: 0.004042 ms
+<t> visitModules: check modules for revisit: 0.001834 ms
+<t> visitModules: prepare: 0.016959 ms
+<t> visitModules: visiting: 0.080666 ms
+<t> visitModules: calculating available modules: 0.004208 ms
+<t> visitModules: merging available modules: 0.098791 ms
+<t> visitModules: check modules for revisit: 0.001417 ms
+<t> visitModules: prepare: 0.003417 ms
+<t> visitModules: visiting: 0.016083 ms
+    108 queue items processed (57 blocks)
+    10 chunk groups connected
+    7 chunk groups processed for merging (10 module sets, 0 forked, 0 + 0 modules forked, 0 + 0 modules merged into fork, 0 resulting modules)
+    7 chunk group info updated (0 already connected chunk groups reconnected)
+<t> visitModules: 0.4925 ms
+<t> connectChunkGroups: 0.079916 ms
+<t> cleanup: 0.002083 ms
+
+LOG from webpack.SplitChunksPlugin
+<t> prepare: 0.011208 ms
+<t> modules: 0.252459 ms
+<t> queue: 0.029042 ms
+<t> maxSize: 0.010042 ms
+
+LOG from webpack.FileSystemInfo
+    36 new snapshots created
+    0% root snapshot uncached (0 / 4)
+    0% children snapshot uncached (0 / 0)
+    0 entries tested
+    File info in cache: 139 timestamps 0 hashes 0 timestamp hash combinations
+    File timestamp snapshot optimization: 63% (168/268) entries shared via 10 shared snapshots (25 times referenced)
+    Directory info in cache: 0 timestamps 0 hashes 0 timestamp hash combinations
+    Missing items snapshot optimization: 43% (49/114) entries shared via 4 shared snapshots (6 times referenced)
+    Managed items info in cache: 1 items
+    Managed items snapshot optimization: 0% (0/3) entries shared via 0 shared snapshots (0 times referenced)
+    Managed missing snapshot optimization: 0% (0/3) entries shared via 0 shared snapshots (0 times referenced)
+
+2024-12-23 17:14:18: webpack 5.93.0 compiled successfully in 210 ms (96c14e8403cdabc5e8aa)

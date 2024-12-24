@@ -265,7 +265,7 @@ class ProvideSharedPlugin {
                     config.requiredVersion!,
                     config.strictVersion!,
                     config.singleton!,
-                    config.layer
+                    config.layer,
                   ),
                   {
                     name: undefined,
