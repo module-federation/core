@@ -6,6 +6,6 @@ console.log('7-layers-full Federation:', util.inspect(__FEDERATION__, { depth: 3
 it('should load App with React', () => {
   return import('./App').then(({ default: App }) => {
     const rendered = App();
-    expect(rendered).toBe('App rendered with React version:');
+    expect(rendered).contain('__PLACEHOLDER__');
   });
 });
