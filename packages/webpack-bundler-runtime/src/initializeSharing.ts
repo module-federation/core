@@ -9,6 +9,7 @@ export function initializeSharing({
   initTokens,
   initScope,
 }: InitializeSharingOptions): Promise<boolean> | boolean | void {
+  console.log('InitializeSharing', shareScopeName, initScope);
   if (!initScope) initScope = [];
   const mfInstance = webpackRequire.federation.instance!;
 
