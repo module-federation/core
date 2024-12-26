@@ -15,8 +15,10 @@ import type {
 import type { RsbuildPlugin, Rspack } from '@rsbuild/core';
 import logger from '../logger';
 
-export type ModuleFederationOptions =
+type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
+
+export type { ModuleFederationOptions };
 
 const RSBUILD_PLUGIN_MODULE_FEDERATION_NAME =
   'rsbuild:module-federation-enhanced';
