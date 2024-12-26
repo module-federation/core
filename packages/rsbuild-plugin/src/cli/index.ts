@@ -133,7 +133,7 @@ export const pluginModuleFederation = (
           }
 
           if (!bundlerConfig.output?.chunkLoadingGlobal) {
-            bundlerConfig.output!.chunkLoadingGlobal = 'jsonp';
+            bundlerConfig.output!.chunkLoading = 'jsonp';
           }
 
           // `uniqueName` is required for react refresh to work
@@ -177,7 +177,7 @@ export const pluginModuleFederation = (
       }
     });
 
-    api.modifyEnvironmentConfig((config, { mergeEnvironmentConfig }) => {
+    api.modifyEnvironmentConfig((config) => {
       // Module Federation runtime uses ES6+ syntax,
       // adding to include and let SWC transform it
       config.source.include = [
