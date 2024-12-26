@@ -5,3 +5,4 @@ export function isRegExp(target: any) {
 }
 
 export * from './constant';
+export * from './autoDeleteSplitChunkCacheGroups';

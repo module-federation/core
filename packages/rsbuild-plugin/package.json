@@ -14,9 +14,14 @@
   "license": "MIT",
   "exports": {
     ".": {
+      "types": "./dist/index.cjs.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js",
-      "types": "./dist/index.cjs.d.ts"
+      "require": "./dist/index.cjs.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.cjs.d.ts",
+      "import": "./dist/utils.esm.js",
+      "require": "./dist/utils.cjs.js"
     }
   },
   "main": "./dist/index.cjs.js",
@@ -25,6 +30,9 @@
     "*": {
       ".": [
         "./dist/index.cjs.d.ts"
+      ],
+      "utils": [
+        "./dist/utils.cjs.d.ts"
       ]
     }
   },
@@ -40,6 +48,14 @@
   "peerDependencies": {
     "@module-federation/enhanced": "workspace:*",
     "@rsbuild/core": "1.x"
+  },
+  "peerDependenciesMeta": {
+    "@rsbuild/core": {
+      "optional": true
+    },
+    "@module-federation/enhanced": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=16.0.0"
