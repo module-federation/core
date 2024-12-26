@@ -82,7 +82,7 @@
     "react-router": "^6.21.3",
     "react-test-renderer": "^18.2.0",
     "ts-jest": "29.0.1",
-    "webpack": "5.75.0"
+    "webpack": "5.94.0"
   },
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
