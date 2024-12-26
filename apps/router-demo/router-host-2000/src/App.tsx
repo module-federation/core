@@ -127,7 +127,9 @@ const App = () => {
         <Route path="/detail/*" Component={Detail} />
         <Route
           path="/remote1/*"
-          Component={() => <Remote1App name={'Ming'} age={12} ref={ref} />}
+          Component={() => (
+            <Remote1App name={'Ming'} age={122} basename="/remote1" />
+          )}
         />
         <Route
           path="/remote2/*"
