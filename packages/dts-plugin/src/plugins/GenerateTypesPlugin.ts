@@ -10,6 +10,7 @@ import {
   generateTypes,
   generateTypesInChildProcess,
   retrieveTypesAssetsInfo,
+  type DTSManagerOptions,
 } from '../core/index';
 import path from 'path';
 
@@ -42,10 +43,14 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
       return;
     }
 
-    const finalOptions = {
+    const finalOptions: DTSManagerOptions = {
       remote: {
         implementation: dtsOptions.implementation,
         context: compiler.context,
+        outputDir: path.relative(
+          compiler.context,
+          compiler.outputPath || compiler.options.output.path,
+        ),
         moduleFederationConfig: pluginOptions,
         ...normalizedGenerateTypes,
       },
@@ -74,8 +79,11 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
     const generateTypesFn = getGenerateTypesFn();
     let compiledOnce = false;
 
-    const emitTypesFiles = async () => {
+    const emitTypesFilesDev = async () => {
       try {
+        if (!isDev()) {
+          return;
+        }
         const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
           retrieveTypesAssetsInfo(finalOptions.remote);
 
@@ -166,7 +174,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             }
 
             if (compiledOnce) {
-              emitTypesFiles();
+              emitTypesFilesDev();
               return;
             }
 
