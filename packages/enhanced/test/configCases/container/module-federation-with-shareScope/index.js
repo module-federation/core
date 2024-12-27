@@ -1,4 +1,23 @@
-it('should load the component from container', () => {
+if (globalThis.__FEDERATION__) {
+  globalThis.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
+  //@ts-ignore
+  globalThis.__FEDERATION__.__INSTANCES__.map((i) => {
+    i.moduleCache.clear();
+    if (globalThis[i.name]) {
+      delete globalThis[i.name];
+    }
+  });
+  globalThis.__FEDERATION__.__INSTANCES__ = [];
+}
+
+it('should load the component from container', async () => {
+  await __webpack_init_sharing__('test-scope');
+
+  // 2 scopes for "0-container-full-mjs" & "mf-with-shareScope-mjs"
+  expect(Object.keys(__webpack_share_scopes__['test-scope'].react).length).toBe(
+    2,
+  );
+
   return import('./App').then(({ default: App }) => {
     const rendered = App();
     expect(rendered).toBe(
