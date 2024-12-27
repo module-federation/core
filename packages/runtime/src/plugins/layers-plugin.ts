@@ -1,3 +1,4 @@
+//never use issuerLayer in this plugin
 import type { FederationRuntimePlugin, RemoteEntryExports } from '../type';
 import type { FederationHost } from '../core';
 import type {
@@ -25,6 +26,21 @@ import type { LoadRemoteMatch } from '../remote';
 import type { Federation } from '../global';
 import type { Module } from '../module';
 
+// Safely handle inspect for both Node.js and browser environments
+const safeInspect = (
+  obj: any,
+  options?: { depth?: number | null; colors?: boolean },
+) => {
+  try {
+    // Use eval(require()) to avoid bundler issues
+    const util = eval('require("util")');
+    return util.inspect(obj, options);
+  } catch {
+    // Fallback for browser environment
+    return JSON.stringify(obj, null, 2);
+  }
+};
+
 export const layersPlugin: () => FederationRuntimePlugin = function () {
   return {
     name: 'layers-plugin',
@@ -41,16 +57,25 @@ export const layersPlugin: () => FederationRuntimePlugin = function () {
       origin: FederationHost;
       shareInfo: ShareInfos;
     }) {
-      console.log('beforeInit hook triggered', {
-        userOptions,
-        options,
-        shareInfo,
-      });
+      console.log(
+        'beforeInit hook triggered',
+        safeInspect(
+          {
+            userOptions,
+            options,
+            shareInfo,
+          },
+          { depth: null, colors: true },
+        ),
+      );
       return { userOptions, options, origin, shareInfo };
     },
 
     init({ options, origin }: { options: Options; origin: FederationHost }) {
-      console.log('init hook triggered', { options });
+      console.log(
+        'init hook triggered',
+        safeInspect({ options }, { depth: null, colors: true }),
+      );
     },
 
     beforeInitContainer({
@@ -66,12 +91,18 @@ export const layersPlugin: () => FederationRuntimePlugin = function () {
       remoteInfo: RemoteInfo;
       origin: FederationHost;
     }) {
-      console.log('beforeInitContainer hook triggered', {
-        shareScope,
-        initScope,
-        remoteEntryInitOptions,
-        remoteInfo,
-      });
+      console.log(
+        'beforeInitContainer hook triggered',
+        safeInspect(
+          {
+            shareScope,
+            initScope,
+            remoteEntryInitOptions,
+            remoteInfo,
+          },
+          { depth: null, colors: true },
+        ),
+      );
       return {
         shareScope,
         initScope,
@@ -100,15 +131,21 @@ export const layersPlugin: () => FederationRuntimePlugin = function () {
       id: string;
       remoteSnapshot?: ModuleInfo;
     }) {
-      console.log('initContainer hook triggered', {
-        shareScope,
-        initScope,
-        remoteEntryInitOptions,
-        remoteInfo,
-        remoteEntryExports,
-        id,
-        remoteSnapshot,
-      });
+      console.log(
+        'initContainer hook triggered',
+        safeInspect(
+          {
+            shareScope,
+            initScope,
+            remoteEntryInitOptions,
+            remoteInfo,
+            remoteEntryExports,
+            id,
+            remoteSnapshot,
+          },
+          { depth: null, colors: true },
+        ),
+      );
       return {
         shareScope,
         initScope,
@@ -135,12 +172,18 @@ export const layersPlugin: () => FederationRuntimePlugin = function () {
       scopeName: string;
       hostShareScopeMap?: ShareScopeMap;
     }) {
-      console.log('initContainerShareScopeMap hook triggered', {
-        shareScope,
-        options,
-        scopeName,
-        hostShareScopeMap,
-      });
+      console.log(
+        'initContainerShareScopeMap hook triggered',
+        safeInspect(
+          {
+            shareScope,
+            options,
+            scopeName,
+            hostShareScopeMap,
+          },
+          { depth: null, colors: true },
+        ),
+      );
       return { shareScope, options, origin, scopeName, hostShareScopeMap };
     },
 
@@ -155,17 +198,20 @@ export const layersPlugin: () => FederationRuntimePlugin = function () {
       shared: Options['shared'];
       origin: FederationHost;
     }) {
-      if (shareInfo?.shareConfig?.layer && shareInfo.scope) {
-        // Create new layered scopes for each scope
-        shareInfo.scope = shareInfo.scope.map(
-          (scope) => `(${shareInfo.shareConfig.layer})${scope}`,
-        );
+      console.log(
+        'beforeLoadShare hook triggered',
+        safeInspect(
+          { pkgName, shareInfo, shared },
+          { depth: null, colors: true },
+        ),
+      );
+
+      // If there's layer information in the share config, modify the pkgName to include layer
+      if (shareInfo?.shareConfig?.layer) {
+        const layeredPkgName = `${pkgName}@layer:${shareInfo.shareConfig.layer}`;
+        return { pkgName: layeredPkgName, shareInfo, shared, origin };
       }
-      console.log('beforeLoadShare hook triggered', {
-        pkgName,
-        shareInfo,
-        shared,
-      });
+
       return { pkgName, shareInfo, shared, origin };
     },
 
@@ -174,8 +220,10 @@ export const layersPlugin: () => FederationRuntimePlugin = function () {
       pkgName: string,
       shareInfo: ShareInfos,
     ) {
-      debugger;
-      console.log('loadShare hook triggered', { pkgName, shareInfo });
+      console.log(
+        'loadShare hook triggered',
+        safeInspect({ pkgName, shareInfo }, { depth: null, colors: true }),
+      );
     },
 
     resolveShare({
@@ -193,420 +241,68 @@ export const layersPlugin: () => FederationRuntimePlugin = function () {
       GlobalFederation: Federation;
       resolver: () => Shared | undefined;
     }) {
-      debugger;
-      console.log('resolveShare hook triggered', {
-        shareScopeMap,
-        scope,
-        pkgName,
-        version,
-        GlobalFederation,
-        resolver,
-      });
+      console.log(
+        'resolveShare hook triggered',
+        safeInspect(
+          {
+            shareScopeMap,
+            scope,
+            pkgName,
+            version,
+            GlobalFederation,
+          },
+          { depth: null, colors: true },
+        ),
+      );
 
-      // debugger;
+      // Check if this is a layered package request
+      const [basePkgName, layerInfo] = pkgName.split('@layer:');
+
+      // If this is a layered request, try to find the layered version first
+      if (layerInfo) {
+        const originalResolver = resolver;
+        return {
+          shareScopeMap,
+          scope,
+          pkgName: basePkgName,
+          version,
+          GlobalFederation,
+          resolver: () => {
+            const share = originalResolver();
+            if (share?.shareConfig?.layer === layerInfo) {
+              return share;
+            }
+            // If no layered version found, return undefined to continue resolution
+            return undefined;
+          },
+        };
+      }
+
+      // For non-layered requests, only return non-layered shares
+      const originalResolver = resolver;
       return {
         shareScopeMap,
         scope,
         pkgName,
         version,
         GlobalFederation,
-        resolver,
+        resolver: () => {
+          const share = originalResolver();
+          if (!share?.shareConfig?.layer) {
+            return share;
+          }
+          // If only layered version found for non-layered request, return undefined
+          return undefined;
+        },
       };
     },
 
     async afterResolve(args: LoadRemoteMatch) {
-      console.log('afterResolve hook triggered', args);
-      return args;
-    },
-
-    // 3. Remote Module Handling Phase
-    beforeRegisterRemote({
-      remote,
-      origin,
-    }: {
-      remote: Remote;
-      origin: FederationHost;
-    }) {
-      console.log('beforeRegisterRemote hook triggered', { remote });
-      return { remote, origin };
-    },
-
-    registerRemote({
-      remote,
-      origin,
-    }: {
-      remote: Remote;
-      origin: FederationHost;
-    }) {
-      console.log('registerRemote hook triggered', { remote });
-      return { remote, origin };
-    },
-
-    async beforePreloadRemote({
-      preloadOps,
-      options,
-      origin,
-    }: {
-      preloadOps: Array<PreloadRemoteArgs>;
-      options: Options;
-      origin: FederationHost;
-    }) {
-      console.log('beforePreloadRemote hook triggered', {
-        preloadOps,
-        options,
-      });
-    },
-
-    async generatePreloadAssets({
-      origin,
-      preloadOptions,
-      remote,
-      remoteInfo,
-      remoteSnapshot,
-      globalSnapshot,
-    }: {
-      origin: FederationHost;
-      preloadOptions: PreloadOptions[number];
-      remote: Remote;
-      remoteInfo: RemoteInfo;
-      remoteSnapshot: ModuleInfo;
-      globalSnapshot: GlobalModuleInfo;
-    }) {
-      console.log('generatePreloadAssets hook triggered', {
-        preloadOptions,
-        remote,
-        remoteInfo,
-        remoteSnapshot,
-        globalSnapshot,
-      });
-      return {
-        cssAssets: [],
-        jsAssetsWithoutEntry: [],
-        entryAssets: [],
-      };
-    },
-
-    async afterPreloadRemote({
-      preloadOps,
-      options,
-      origin,
-    }: {
-      preloadOps: Array<PreloadRemoteArgs>;
-      options: Options;
-      origin: FederationHost;
-    }) {
-      console.log('afterPreloadRemote hook triggered', { preloadOps, options });
-    },
-
-    async beforeRequest({
-      id,
-      options,
-      origin,
-    }: {
-      id: string;
-      options: Options;
-      origin: FederationHost;
-    }) {
-      console.log('beforeRequest hook triggered', { id, options });
-      return { id, options, origin };
-    },
-
-    async loadEntry({
-      loaderHook,
-      remoteInfo,
-      remoteEntryExports,
-    }: {
-      loaderHook: FederationHost['loaderHook'];
-      remoteInfo: RemoteInfo;
-      remoteEntryExports?: RemoteEntryExports;
-    }): Promise<RemoteEntryExports> {
-      console.log('loadEntry hook triggered', {
-        loaderHook,
-        remoteInfo,
-        remoteEntryExports,
-      });
-      return (
-        remoteEntryExports || {
-          get: () => async () => ({}),
-          init: async () => {
-            return;
-          },
-        }
+      console.log(
+        'afterResolve hook triggered',
+        safeInspect(args, { depth: null, colors: true }),
       );
-    },
-
-    async onLoad({
-      id,
-      expose,
-      pkgNameOrAlias,
-      remote,
-      options,
-      origin,
-      exposeModule,
-      exposeModuleFactory,
-      moduleInstance,
-    }: {
-      id: string;
-      expose: string;
-      pkgNameOrAlias: string;
-      remote: Remote;
-      options: { remoteInfo: RemoteInfo; host: FederationHost };
-      origin: FederationHost;
-      exposeModule: any;
-      exposeModuleFactory: any;
-      moduleInstance: Module;
-    }) {
-      console.log('onLoad hook triggered', {
-        id,
-        expose,
-        pkgNameOrAlias,
-        remote,
-        options,
-        exposeModule,
-        exposeModuleFactory,
-        moduleInstance,
-      });
-    },
-
-    handlePreloadModule({
-      id,
-      name,
-      remote,
-      remoteSnapshot,
-      preloadConfig,
-      origin,
-    }: {
-      id: string;
-      name: string;
-      remote: Remote;
-      remoteSnapshot: ModuleInfo;
-      preloadConfig: PreloadRemoteArgs;
-      origin: FederationHost;
-    }) {
-      console.log('handlePreloadModule hook triggered', {
-        id,
-        name,
-        remote,
-        remoteSnapshot,
-        preloadConfig,
-      });
-    },
-
-    async errorLoadRemote({
-      id,
-      error,
-      options,
-      from,
-      lifecycle,
-      origin,
-    }: {
-      id: string;
-      error: unknown;
-      options?: any;
-      from: CallFrom;
-      lifecycle: 'beforeLoadShare' | 'beforeRequest' | 'onLoad';
-      origin: FederationHost;
-    }) {
-      console.log('errorLoadRemote hook triggered', {
-        id,
-        error,
-        options,
-        from,
-        lifecycle,
-      });
-    },
-
-    // 4. Module Factory and Info Phase
-    getModuleInfo({ target, key }: { target: Record<string, any>; key: any }) {
-      console.log('getModuleInfo hook triggered', { target, key });
-      return undefined;
-    },
-
-    async getModuleFactory({
-      remoteEntryExports,
-      expose,
-      moduleInfo,
-    }: {
-      remoteEntryExports: RemoteEntryExports;
-      expose: string;
-      moduleInfo: RemoteInfo;
-    }) {
-      console.log('getModuleFactory hook triggered', {
-        remoteEntryExports,
-        expose,
-        moduleInfo,
-      });
-      return undefined;
-    },
-
-    // 5. Resource Loading Phase
-    createScript({ url, attrs }: { url: string; attrs?: Record<string, any> }) {
-      console.log('createScript hook triggered', { url, attrs });
-      return undefined;
-    },
-
-    createLink({ url, attrs }: { url: string; attrs?: Record<string, any> }) {
-      console.log('createLink hook triggered', { url, attrs });
-      return undefined;
-    },
-
-    fetch(url: string, init: RequestInit): Promise<Response> | void | false {
-      console.log('fetch hook triggered', { url, init });
-      return false;
-    },
-
-    async loadEntryError({
-      getRemoteEntry,
-      origin,
-      remoteInfo,
-      remoteEntryExports,
-      globalLoading,
-      uniqueKey,
-    }: {
-      getRemoteEntry: ({
-        origin,
-        remoteEntryExports,
-        remoteInfo,
-      }: {
-        origin: FederationHost;
-        remoteInfo: RemoteInfo;
-        remoteEntryExports?: RemoteEntryExports;
-      }) => Promise<RemoteEntryExports | false | void>;
-      origin: FederationHost;
-      remoteInfo: RemoteInfo;
-      remoteEntryExports?: RemoteEntryExports;
-      globalLoading: Record<
-        string,
-        Promise<void | RemoteEntryExports> | undefined
-      >;
-      uniqueKey: string;
-    }) {
-      console.log('loadEntryError hook triggered', {
-        getRemoteEntry,
-        remoteInfo,
-        remoteEntryExports,
-        globalLoading,
-        uniqueKey,
-      });
-      return undefined;
-    },
-
-    // 6. Bridge Lifecycle Phase
-    beforeBridgeRender(args: Record<string, any>) {
-      console.log('beforeBridgeRender hook triggered', args);
-      return undefined;
-    },
-
-    afterBridgeRender(args: Record<string, any>) {
-      console.log('afterBridgeRender hook triggered', args);
-      return undefined;
-    },
-
-    beforeBridgeDestroy(args: Record<string, any>) {
-      console.log('beforeBridgeDestroy hook triggered', args);
-      return undefined;
-    },
-
-    afterBridgeDestroy(args: Record<string, any>) {
-      console.log('afterBridgeDestroy hook triggered', args);
-      return undefined;
-    },
-
-    // 7. Snapshot Handling Phase
-    async beforeLoadRemoteSnapshot({
-      options,
-      moduleInfo,
-    }: {
-      options: Options;
-      moduleInfo: Remote;
-    }) {
-      console.log('beforeLoadRemoteSnapshot hook triggered', {
-        options,
-        moduleInfo,
-      });
-    },
-
-    async loadSnapshot({
-      options,
-      moduleInfo,
-      hostGlobalSnapshot,
-      globalSnapshot,
-      remoteSnapshot,
-    }: {
-      options: Options;
-      moduleInfo: Remote;
-      hostGlobalSnapshot:
-        | ModuleInfo
-        | ManifestProvider
-        | PureEntryProvider
-        | undefined;
-      globalSnapshot: GlobalModuleInfo;
-      remoteSnapshot?: ModuleInfo | ManifestProvider | PureEntryProvider;
-    }) {
-      console.log('loadSnapshot hook triggered', {
-        options,
-        moduleInfo,
-        hostGlobalSnapshot,
-        globalSnapshot,
-        remoteSnapshot,
-      });
-      return {
-        options,
-        moduleInfo,
-        hostGlobalSnapshot,
-        globalSnapshot,
-        remoteSnapshot,
-      };
-    },
-
-    async loadRemoteSnapshot({
-      options,
-      moduleInfo,
-      manifestJson,
-      manifestUrl,
-      remoteSnapshot,
-      from,
-    }: {
-      options: Options;
-      moduleInfo: Remote;
-      manifestJson?: Manifest;
-      manifestUrl?: string;
-      remoteSnapshot: ModuleInfo;
-      from: 'global' | 'manifest';
-    }) {
-      console.log('loadRemoteSnapshot hook triggered', {
-        options,
-        moduleInfo,
-        manifestJson,
-        manifestUrl,
-        remoteSnapshot,
-        from,
-      });
-      return {
-        options,
-        moduleInfo,
-        manifestJson,
-        manifestUrl,
-        remoteSnapshot,
-        from,
-      };
-    },
-
-    async afterLoadSnapshot({
-      options,
-      moduleInfo,
-      remoteSnapshot,
-    }: {
-      options: Options;
-      moduleInfo: Remote;
-      remoteSnapshot: ModuleInfo;
-    }) {
-      console.log('afterLoadSnapshot hook triggered', {
-        options,
-        moduleInfo,
-        remoteSnapshot,
-      });
-      return { options, moduleInfo, remoteSnapshot };
+      return args;
     },
   };
 };

@@ -498,24 +498,21 @@ export class SharedHandler {
     const { version, scope = 'default', ...shareInfo } = shared;
     const scopes: string[] = Array.isArray(scope) ? scope : [scope];
 
-    // Process each scope, handling both regular and layered scopes
+    // Process each scope
     scopes.forEach((sc) => {
-      // Ensure the base scope exists
+      // Ensure the scope exists in shareScopeMap
       if (!this.shareScopeMap[sc]) {
         this.shareScopeMap[sc] = {};
       }
 
-      // Determine which scope to use based on layer configuration
-      const targetScope = sc.startsWith('(') ? sc : sc; // Already layered or regular scope
-
-      // Initialize package map in the target scope if it doesn't exist
-      if (!this.shareScopeMap[targetScope][pkgName]) {
-        this.shareScopeMap[targetScope][pkgName] = {};
+      // Initialize package map in the scope if it doesn't exist
+      if (!this.shareScopeMap[sc][pkgName]) {
+        this.shareScopeMap[sc][pkgName] = {};
       }
 
       // Register the version if it doesn't exist
-      if (!this.shareScopeMap[targetScope][pkgName][version]) {
-        this.shareScopeMap[targetScope][pkgName][version] = {
+      if (!this.shareScopeMap[sc][pkgName][version]) {
+        this.shareScopeMap[sc][pkgName][version] = {
           version,
           scope: scopes,
           ...shareInfo,
@@ -524,14 +521,13 @@ export class SharedHandler {
           loading,
         };
         if (get) {
-          this.shareScopeMap[targetScope][pkgName][version].get = get;
+          this.shareScopeMap[sc][pkgName][version].get = get;
         }
         return;
       }
 
       // Update existing registration if needed
-      const registeredShared =
-        this.shareScopeMap[targetScope][pkgName][version];
+      const registeredShared = this.shareScopeMap[sc][pkgName][version];
       if (loading && !registeredShared.loading) {
         registeredShared.loading = loading;
       }

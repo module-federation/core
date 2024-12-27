@@ -1,1 +1,2 @@
-when running enhanced tests, always run pnpm enhanced:jest
+- when running tests, ALWAYS run "pnpm enhanced:jest" command
+- issuerLayer is webpack specific and not used in the runtime code
