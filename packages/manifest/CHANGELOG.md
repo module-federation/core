@@ -1,5 +1,15 @@
 # @module-federation/manifest
 
+## 0.8.6
+
+### Patch Changes
+
+- 4a2cf82: fix(manifest): add default exposes fields if set disableAssetsAnalyze: true
+- Updated dependencies [c90bba2]
+  - @module-federation/dts-plugin@0.8.6
+  - @module-federation/sdk@0.8.6
+  - @module-federation/managers@0.8.6
+
 ## 0.8.5
 
 ### Patch Changes

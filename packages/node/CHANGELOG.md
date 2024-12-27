@@ -1,5 +1,14 @@
 # @module-federation/node
 
+## 2.6.19
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.6
+- @module-federation/runtime@0.8.6
+- @module-federation/sdk@0.8.6
+- @module-federation/utilities@3.1.37
+
 ## 2.6.18
 
 ### Patch Changes

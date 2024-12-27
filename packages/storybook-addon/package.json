@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/storybook-addon",
-  "version": "3.0.16",
+  "version": "3.0.17",
   "description": "Storybook addon to consume remote module federated apps/components",
   "license": "MIT",
   "repository": {
@@ -64,7 +64,7 @@
   },
   "peerDependencies": {
     "@rsbuild/core": "^1.0.1",
-    "@module-federation/utilities": "^3.1.36",
+    "@module-federation/utilities": "^3.1.37",
     "@nx/react": ">= 16.0.0",
     "@nx/webpack": ">= 16.0.0",
     "@storybook/core-common": "^6.5.16 || ^7.0.0 || ^ 8.0.0",

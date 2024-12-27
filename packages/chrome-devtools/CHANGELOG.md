@@ -1,5 +1,12 @@
 # @module-federation/devtools
 
+## 0.8.6
+
+### Patch Changes
+
+- 5b347f5: feat(chrome-devtools): add option customValueValidate for form component
+  - @module-federation/sdk@0.8.6
+
 ## 0.8.5
 
 ### Patch Changes
