@@ -6,20 +6,22 @@ module.exports = {
   devtool: false,
   output: {
     filename: '[name].js',
-    uniqueName: '3-layers-full',
+    uniqueName: '4-layers-full',
   },
   plugins: [
     new ModuleFederationPlugin({
-      name: 'container_a',
+      name: 'container_b',
       filename: 'container.js',
       library: { type: 'commonjs-module' },
-      exposes: {
-        './ComponentA': './ComponentA',
+      remotes: {
+        containerA: '../3-layers-full/container.js'
       },
       shared: {
         react: {
           singleton: true,
-          requiredVersion: false
+          requiredVersion: false,
+          version: false,
+          import:false
         }
       }
     }),
