@@ -16,13 +16,13 @@ module.exports = {
     rules: [
       {
         layer: 'react-layer',
-        test: /ComponentA\.js$/  // Our local App will not be in a layer
+        test: /ComponentA\.js$/, // Our local App will not be in a layer
       },
       {
         test: /react\.js$/,
         issuerLayer: 'react-layer',
         layer: 'react-layer',
-      }
+      },
     ],
   },
   plugins: [
@@ -39,16 +39,18 @@ module.exports = {
         react: {
           singleton: true,
           requiredVersion: false,
-          import: false
+          import: false,
         },
-        'layered-react': {
+        randomvalue: {
           request: 'react',
           import: false,
           shareKey: 'react',
           singleton: true,
+          shareScope: 'react-layer',
           requiredVersion: false,
           layer: 'react-layer',
-        }
+          issuerLayer: 'react-layer',
+        },
       },
     }),
   ],

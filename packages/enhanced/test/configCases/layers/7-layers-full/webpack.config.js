@@ -7,7 +7,7 @@ module.exports = {
   devtool: false,
   target: 'node',
   experiments: {
-    layers: true
+    layers: true,
   },
   output: {
     filename: '[name].js',
@@ -28,8 +28,8 @@ module.exports = {
             loader: path.resolve(__dirname, './layered-react-loader.js'),
           },
         ],
-      }
-    ]
+      },
+    ],
   },
   plugins: [
     new ModuleFederationPlugin({
@@ -38,23 +38,25 @@ module.exports = {
       library: { type: 'commonjs-module' },
       exposes: {
         './ComponentA': './ComponentA',
-        './App': './App'
+        './App': './App',
+        './noop': './emptyComponent',
       },
       shared: {
         react: {
           singleton: true,
-          requiredVersion: false
+          requiredVersion: false,
         },
-        'layered-react': {
+        randomvalue: {
           request: 'react',
           import: 'react',
           shareKey: 'react',
+          shareScope: 'react-layer',
           singleton: true,
           requiredVersion: false,
           layer: 'react-layer',
-          issuerLayer: 'react-layer'
-        }
-      }
+          issuerLayer: 'react-layer', // only used by the compiler
+        },
+      },
     }),
   ],
 };

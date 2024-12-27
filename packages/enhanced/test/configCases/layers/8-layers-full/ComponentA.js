@@ -1,5 +1,5 @@
-import React from 'react';
+import React, { layeredComponentsReact } from 'react';
 
 export default function ComponentA() {
-  return `ComponentA (Regular React: ${React()})`;
+  return `LocalComponentA (in react-layer) rendered with React version: [${React()}], layered React value: [${layeredComponentsReact()}]`;
 }
