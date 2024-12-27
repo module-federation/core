@@ -62,7 +62,7 @@ module.exports = [
     ...commonConfig,
     output: {
       filename: '[name].js',
-      uniqueName: '3-layers-full',
+      uniqueName: '1-layers-full',
     },
     plugins: [
       new ModuleFederationPlugin({
@@ -85,7 +85,7 @@ module.exports = [
     },
     output: {
       filename: 'module/[name].mjs',
-      uniqueName: '3-layers-full-mjs',
+      uniqueName: '1-layers-full-mjs',
     },
     plugins: [
       new ModuleFederationPlugin({

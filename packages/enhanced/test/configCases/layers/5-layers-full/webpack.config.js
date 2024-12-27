@@ -26,7 +26,6 @@ module.exports = {
     ],
   },
   plugins: [
-    // NEVER ADD shareScope to the plugin
     new ModuleFederationPlugin({
       name: 'container_5',
       filename: 'container.js',

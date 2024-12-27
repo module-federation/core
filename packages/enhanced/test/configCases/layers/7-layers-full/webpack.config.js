@@ -49,11 +49,11 @@ module.exports = {
         randomvalue: {
           request: 'react',
           import: 'react',
-          shareKey: '(react-layer)react',
+          shareKey: 'react',
           singleton: true,
           requiredVersion: false,
           layer: 'react-layer',
-          issuerLayer: 'react-layer', // only used by the compiler
+          issuerLayer: 'react-layer',
         },
       },
     }),

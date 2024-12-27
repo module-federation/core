@@ -16,7 +16,7 @@ module.exports = {
     rules: [
       {
         layer: 'react-layer',
-        test: /ComponentA\.js$/, // Our local App will not be in a layer
+        test: /ComponentA\.js$/,
       },
       {
         test: /react\.js$/,
@@ -44,7 +44,7 @@ module.exports = {
         randomvalue: {
           request: 'react',
           import: false,
-          shareKey: '(react-layer)react',
+          shareKey: 'react',
           singleton: true,
           requiredVersion: false,
           layer: 'react-layer',

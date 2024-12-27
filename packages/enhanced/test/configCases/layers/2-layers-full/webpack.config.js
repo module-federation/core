@@ -24,7 +24,7 @@ module.exports = [
     ...common,
     output: {
       filename: '[name].js',
-      uniqueName: '4-layers-full',
+      uniqueName: '2-layers-full',
     },
     plugins: [
       new ModuleFederationPlugin({
@@ -32,7 +32,7 @@ module.exports = [
         library: { type: 'commonjs-module' },
         filename: 'container.js',
         remotes: {
-          containerA: '../3-layers-full/container.js',
+          containerA: '../1-layers-full/container.js',
           containerB: './container.js',
         },
         ...commonMF,
@@ -46,7 +46,7 @@ module.exports = [
     },
     output: {
       filename: 'module/[name].mjs',
-      uniqueName: '4-layers-full-mjs',
+      uniqueName: '2-layers-full-mjs',
     },
     plugins: [
       new ModuleFederationPlugin({
@@ -54,7 +54,7 @@ module.exports = [
         library: { type: 'module' },
         filename: 'module/container.mjs',
         remotes: {
-          containerA: '../../3-layers-full/module/container.mjs',
+          containerA: '../../1-layers-full/module/container.mjs',
           containerB: './container.mjs',
         },
         ...commonMF,
