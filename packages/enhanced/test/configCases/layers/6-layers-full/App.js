@@ -1,5 +1,5 @@
-import ComponentA from 'containerA/ComponentA';
 import React from 'react';
+import ComponentA from 'containerA/ComponentA';
 import LocalComponentA from './ComponentA';
 
 export default function App() {

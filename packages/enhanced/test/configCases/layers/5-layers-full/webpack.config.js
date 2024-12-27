@@ -38,8 +38,8 @@ module.exports = {
         react: {
           singleton: true,
           requiredVersion: false,
-          // layer: 'react-layer',
-          // issuerLayer: 'react-layer',
+          layer: 'react-layer',
+          issuerLayer: 'react-layer',
         },
       },
     }),

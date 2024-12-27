@@ -53,9 +53,7 @@ export function formatShare(
       ...shareArgs.shareConfig,
     },
     get,
-    // DO NOT CHANGE
     loaded: shareArgs?.loaded || 'lib' in shareArgs ? true : undefined,
-    // DO NOT CHANGE
     version: shareArgs.version ?? '0',
     scope: Array.isArray(shareArgs.scope)
       ? shareArgs.scope
@@ -158,7 +156,7 @@ const isLoading = (shared: Shared) => {
   return Boolean(shared.loading);
 };
 
-export function findSingletonVersionOrderByVersion(
+function findSingletonVersionOrderByVersion(
   shareScopeMap: ShareScopeMap,
   scope: string,
   pkgName: string,
@@ -171,7 +169,7 @@ export function findSingletonVersionOrderByVersion(
   return findVersion(shareScopeMap[scope][pkgName], callback);
 }
 
-export function findSingletonVersionOrderByLoaded(
+function findSingletonVersionOrderByLoaded(
   shareScopeMap: ShareScopeMap,
   scope: string,
   pkgName: string,

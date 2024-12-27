@@ -89,7 +89,6 @@ export class SharedHandler {
           sharedVal,
           this.hooks.lifecycle.resolveShare,
         );
-
         if (!registeredShared && sharedVal && sharedVal.lib) {
           this.setShared({
             pkgName: sharedKey,
@@ -204,7 +203,6 @@ export class SharedHandler {
         return factory as () => T;
       };
       const loading = asyncLoadProcess();
-      debugger;
       this.setShared({
         pkgName,
         loaded: false,
@@ -236,7 +234,6 @@ export class SharedHandler {
         return factory as () => T;
       };
       const loading = asyncLoadProcess();
-      debugger;
       this.setShared({
         pkgName,
         loaded: false,
@@ -483,8 +480,8 @@ export class SharedHandler {
     shared,
     from,
     lib,
-    loaded,
     loading,
+    loaded,
     get,
   }: {
     pkgName: string;
@@ -497,24 +494,18 @@ export class SharedHandler {
   }): void {
     const { version, scope = 'default', ...shareInfo } = shared;
     const scopes: string[] = Array.isArray(scope) ? scope : [scope];
-
-    // Process each scope
     scopes.forEach((sc) => {
-      // Ensure the scope exists in shareScopeMap
       if (!this.shareScopeMap[sc]) {
         this.shareScopeMap[sc] = {};
       }
-
-      // Initialize package map in the scope if it doesn't exist
       if (!this.shareScopeMap[sc][pkgName]) {
         this.shareScopeMap[sc][pkgName] = {};
       }
 
-      // Register the version if it doesn't exist
       if (!this.shareScopeMap[sc][pkgName][version]) {
         this.shareScopeMap[sc][pkgName][version] = {
           version,
-          scope: scopes,
+          scope: ['default'],
           ...shareInfo,
           lib,
           loaded,
@@ -526,7 +517,6 @@ export class SharedHandler {
         return;
       }
 
-      // Update existing registration if needed
       const registeredShared = this.shareScopeMap[sc][pkgName][version];
       if (loading && !registeredShared.loading) {
         registeredShared.loading = loading;
