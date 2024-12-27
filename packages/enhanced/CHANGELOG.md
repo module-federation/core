@@ -1,5 +1,63 @@
 # @module-federation/enhanced
 
+## 0.8.6
+
+### Patch Changes
+
+- Updated dependencies [c90bba2]
+- Updated dependencies [4a2cf82]
+  - @module-federation/dts-plugin@0.8.6
+  - @module-federation/manifest@0.8.6
+  - @module-federation/rspack@0.8.6
+  - @module-federation/sdk@0.8.6
+  - @module-federation/runtime-tools@0.8.6
+  - @module-federation/managers@0.8.6
+  - @module-federation/bridge-react-webpack-plugin@0.8.6
+  - @module-federation/data-prefetch@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/rspack@0.8.5
+- @module-federation/sdk@0.8.5
+- @module-federation/runtime-tools@0.8.5
+- @module-federation/managers@0.8.5
+- @module-federation/manifest@0.8.5
+- @module-federation/dts-plugin@0.8.5
+- @module-federation/bridge-react-webpack-plugin@0.8.5
+- @module-federation/data-prefetch@0.8.5
+
+## 0.8.4
+
+### Patch Changes
+
+- Updated dependencies [61625d4]
+- Updated dependencies [5ea7aea]
+  - @module-federation/rspack@0.8.4
+  - @module-federation/dts-plugin@0.8.4
+  - @module-federation/manifest@0.8.4
+  - @module-federation/sdk@0.8.4
+  - @module-federation/runtime-tools@0.8.4
+  - @module-federation/managers@0.8.4
+  - @module-federation/bridge-react-webpack-plugin@0.8.4
+  - @module-federation/data-prefetch@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [5b637c3]
+- Updated dependencies [8e172c8]
+  - @module-federation/data-prefetch@0.8.3
+  - @module-federation/dts-plugin@0.8.3
+  - @module-federation/sdk@0.8.3
+  - @module-federation/runtime-tools@0.8.3
+  - @module-federation/manifest@0.8.3
+  - @module-federation/rspack@0.8.3
+  - @module-federation/bridge-react-webpack-plugin@0.8.3
+  - @module-federation/managers@0.8.3
+
 ## 0.8.2
 
 ### Patch Changes

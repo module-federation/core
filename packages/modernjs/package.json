@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "0.8.2",
+  "version": "0.8.6",
   "files": [
     "dist/",
     "types.d.ts",
@@ -11,6 +11,11 @@
   },
   "scripts": {
     "build": "modern build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/repository"
   },
   "exports": {
     ".": {
@@ -83,6 +88,7 @@
   "license": "MIT",
   "dependencies": {
     "@modern-js/node-bundle-require": "2.60.6",
+    "@module-federation/rsbuild-plugin": "workspace:*",
     "@modern-js/utils": "2.60.6",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
@@ -90,7 +96,7 @@
     "@swc/helpers": "0.5.13",
     "hoist-non-react-statics": "3.3.2",
     "node-fetch": "~3.3.0",
-    "react-error-boundary": "4.0.13"
+    "react-error-boundary": "4.1.2"
   },
   "devDependencies": {
     "@modern-js/app-tools": "2.60.6",

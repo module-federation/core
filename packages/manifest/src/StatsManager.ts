@@ -42,7 +42,7 @@ import {
   utils,
 } from '@module-federation/managers';
 import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
-import { ModuleHandler } from './ModuleHandler';
+import { ModuleHandler, getExposeItem } from './ModuleHandler';
 import { StatsInfo } from './types';
 
 class StatsManager {
@@ -300,7 +300,11 @@ class StatsManager {
     extraOptions?: {},
   ): Promise<Stats> {
     try {
-      const { name, manifest: manifestOptions = {} } = this._options;
+      const {
+        name,
+        manifest: manifestOptions = {},
+        exposes = {},
+      } = this._options;
 
       const metaData = this._getMetaData(compiler, compilation, extraOptions);
 
@@ -320,6 +324,15 @@ class StatsManager {
         const remotes: StatsRemote[] =
           this._remoteManager.statsRemoteWithEmptyUsedIn;
         stats.remotes = remotes;
+        stats.exposes = Object.keys(exposes).map((exposeKey) => {
+          return getExposeItem({
+            exposeKey,
+            name: name!,
+            file: {
+              import: exposes[exposeKey].import,
+            },
+          });
+        });
         return stats;
       }
 

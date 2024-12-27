@@ -2,7 +2,7 @@ import { removeUnnecessarySharedKeys } from './remove-unnecessary-shared-keys';
 
 describe('removeUnnecessarySharedKeys', () => {
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
   });
 
   afterEach(() => {

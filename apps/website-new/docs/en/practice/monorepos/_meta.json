@@ -1,0 +1,14 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Benefits of Module Federation in a Monorepo",
+    "collapsed": true
+  },
+  {
+    "type": "file",
+    "name": "nx-for-module-federation",
+    "label": "Nx and Module Federation",
+    "collapsed": true
+  }
+]

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/utilities",
-  "version": "3.1.33",
+  "version": "3.1.37",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
   "types": "./dist/index.cjs.d.ts",
@@ -12,7 +12,11 @@
     "dist/",
     "README.md"
   ],
-  "repository": "https://github.com/module-federation/core/tree/main/packages/utilities",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/utilities"
+  },
   "devDependencies": {
     "react": "18.3.1"
   },

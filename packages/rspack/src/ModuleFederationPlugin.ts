@@ -1,4 +1,4 @@
-import {
+import type {
   Compiler,
   ModuleFederationPluginOptions,
   RspackPluginInstance,
@@ -25,8 +25,9 @@ declare const __VERSION__: string;
 
 const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
 
+export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
 export class ModuleFederationPlugin implements RspackPluginInstance {
-  readonly name = 'RspackModuleFederationPlugin';
+  readonly name = PLUGIN_NAME;
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _statsPlugin?: StatsPlugin;
 
