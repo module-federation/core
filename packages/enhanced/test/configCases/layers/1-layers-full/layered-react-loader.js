@@ -1,4 +1,4 @@
 // DO NOT EDIT
 module.exports = function (source) {
-  return source.replace('__PLACEHOLDER__', 'This is layered react');
+  return source.replace('No Layer', 'This is layered react');
 };
