@@ -3,14 +3,14 @@ const { ModuleFederationPlugin } = require('../../../../dist/src');
 module.exports = {
   entry: './index.js',
   mode: 'development',
-  target: 'node',
   devtool: false,
+  target: 'node',
   experiments: {
     layers: true,
   },
   output: {
     filename: '[name].js',
-    uniqueName: '6-layers-full',
+    uniqueName: '5-layers-full',
   },
   module: {
     rules: [
@@ -18,25 +18,28 @@ module.exports = {
         test: /\.js$/,
         layer: 'react-layer',
       },
+      {
+        test: /react\.js$/,
+        issuerLayer: 'react-layer',
+        loader: require.resolve('./layered-react-loader'),
+      },
     ],
   },
   plugins: [
     // NEVER ADD shareScope to the plugin
     new ModuleFederationPlugin({
-      name: 'container_6',
+      name: 'container_5',
       filename: 'container.js',
       library: { type: 'commonjs-module' },
-      remotes: {
-        containerA: {
-          external: '../5-layers-full/container.js',
-        },
+      exposes: {
+        './ComponentA': './ComponentA',
       },
       shared: {
         react: {
           singleton: true,
           requiredVersion: false,
-          import: false,
-          layer: 'react-layer',
+          // layer: 'react-layer',
+          // issuerLayer: 'react-layer',
         },
       },
     }),
