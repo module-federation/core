@@ -34,7 +34,7 @@ export function createScript(info: {
   // Retrieve the existing script element by its src attribute
   let script: HTMLScriptElement | null = null;
   let needAttach = true;
-  let timeout = 60000;
+  let timeout = 20000;
   let timeoutId: NodeJS.Timeout;
   const scripts = document.getElementsByTagName('script');
 
