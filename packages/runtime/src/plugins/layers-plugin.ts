@@ -25,15 +25,14 @@ import type {
 import type { LoadRemoteMatch } from '../remote';
 import type { Federation } from '../global';
 import type { Module } from '../module';
-
+// Use eval(require()) to avoid bundler issues
+const util = eval('require("util")');
 // Safely handle inspect for both Node.js and browser environments
 const safeInspect = (
   obj: any,
   options?: { depth?: number | null; colors?: boolean },
 ) => {
   try {
-    // Use eval(require()) to avoid bundler issues
-    const util = eval('require("util")');
     return util.inspect(obj, options);
   } catch {
     // Fallback for browser environment
@@ -206,12 +205,8 @@ export const layersPlugin: () => FederationRuntimePlugin = function () {
         ),
       );
 
-      // If there's layer information in the share config, modify the pkgName to include layer
-      if (shareInfo?.shareConfig?.layer) {
-        const layeredPkgName = `${pkgName}@layer:${shareInfo.shareConfig.layer}`;
-        return { pkgName: layeredPkgName, shareInfo, shared, origin };
-      }
-
+      // Layer information is now encoded in the share key by the compiler
+      // No need to modify the pkgName
       return { pkgName, shareInfo, shared, origin };
     },
 
@@ -255,45 +250,49 @@ export const layersPlugin: () => FederationRuntimePlugin = function () {
         ),
       );
 
-      // Check if this is a layered package request
-      const [basePkgName, layerInfo] = pkgName.split('@layer:');
+      // Get all shares for this package in this scope
+      const scopeShares = shareScopeMap[scope] || {};
 
-      // If this is a layered request, try to find the layered version first
-      if (layerInfo) {
-        const originalResolver = resolver;
+      // Try to find shares for both the original package name and any layer-encoded versions
+      const shares = scopeShares[pkgName] || {};
+
+      // If we have a version match, use it
+      if (shares[version]) {
         return {
           shareScopeMap,
           scope,
-          pkgName: basePkgName,
+          pkgName,
           version,
           GlobalFederation,
-          resolver: () => {
-            const share = originalResolver();
-            if (share?.shareConfig?.layer === layerInfo) {
-              return share;
-            }
-            // If no layered version found, return undefined to continue resolution
-            return undefined;
-          },
+          resolver: () => shares[version],
         };
       }
 
-      // For non-layered requests, only return non-layered shares
-      const originalResolver = resolver;
+      // If the package name is layer-encoded (e.g., "(react-layer)react"), try the base name
+      const match = pkgName.match(/\((.*?)\)(.*)/);
+      if (match) {
+        const baseName = match[2];
+        const baseShares = scopeShares[baseName] || {};
+        if (baseShares[version]) {
+          return {
+            shareScopeMap,
+            scope,
+            pkgName: baseName,
+            version,
+            GlobalFederation,
+            resolver: () => baseShares[version],
+          };
+        }
+      }
+
+      // Return the original resolver if no matches found
       return {
         shareScopeMap,
         scope,
         pkgName,
         version,
         GlobalFederation,
-        resolver: () => {
-          const share = originalResolver();
-          if (!share?.shareConfig?.layer) {
-            return share;
-          }
-          // If only layered version found for non-layered request, return undefined
-          return undefined;
-        },
+        resolver,
       };
     },
 

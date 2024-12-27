@@ -1,5 +1,5 @@
 import React, { layeredComponentsReact } from 'react';
 import ComponentA from './ComponentA';
 export default function App() {
-  return `App rendered with [${React()}] with layered value: [${layeredComponentsReact()}] and ${ComponentA()}`;
+  return `App (no layer) rendered with React version: [${React()}] with non-layered React value: [${layeredComponentsReact()}] and imported: ${ComponentA()}`;
 }

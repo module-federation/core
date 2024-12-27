@@ -39,6 +39,7 @@ module.exports = {
       exposes: {
         './ComponentA': './ComponentA',
         './App': './App',
+        './noop': './emptyComponent',
       },
       shared: {
         react: {
@@ -48,7 +49,7 @@ module.exports = {
         randomvalue: {
           request: 'react',
           import: 'react',
-          shareKey: 'react',
+          shareKey: '(react-layer)react',
           singleton: true,
           requiredVersion: false,
           layer: 'react-layer',

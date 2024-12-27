@@ -41,13 +41,14 @@ module.exports = {
           requiredVersion: false,
           import: false,
         },
-        'layered-react': {
+        randomvalue: {
           request: 'react',
           import: false,
-          shareKey: 'react',
+          shareKey: '(react-layer)react',
           singleton: true,
           requiredVersion: false,
           layer: 'react-layer',
+          issuerLayer: 'react-layer',
         },
       },
     }),
