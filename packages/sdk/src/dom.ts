@@ -91,7 +91,7 @@ export function createScript(info: {
   ): Promise<void> => {
     clearTimeout(timeoutId);
     const onScriptCompleteCallback = () => {
-      if (event.type === 'error') {
+      if (event?.type === 'error') {
         info?.onErrorCallback && info?.onErrorCallback(event);
       } else {
         info?.cb && info?.cb();
@@ -196,7 +196,7 @@ export function createLink(info: {
     event: any,
   ): void => {
     const onLinkCompleteCallback = () => {
-      if (event.type === 'error') {
+      if (event?.type === 'error') {
         info?.onErrorCallback && info?.onErrorCallback(event);
       } else {
         info?.cb && info?.cb();
