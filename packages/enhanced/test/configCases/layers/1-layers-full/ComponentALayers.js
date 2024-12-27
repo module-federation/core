@@ -1,6 +1,5 @@
-import * as React from 'react';
+import React, { layeredComponentsReact } from 'react';
 
 export default () => {
-  debugger;
-  return `ComponentALayers rendered with [${React.layeredComponentsReact()}]`;
+  return `ComponentALayers ${React()} rendered with [${layeredComponentsReact()}]`;
 };

@@ -13,16 +13,16 @@ const common = {
   },
   shared: {
     react: {
-      version: false,
-      requiredVersion: false,
+      version: '18.0.0',
+      requiredVersion: '^18.0.0',
       singleton: true,
     },
     'layered-react': {
       request: 'react',
       import: 'react',
       shareKey: 'react',
-      version: false,
-      requiredVersion: false,
+      version: '16.0.0',
+      requiredVersion: '^16.0.0',
       singleton: true,
       layer: 'layered-components',
       issuerLayer: 'layered-components',
@@ -44,7 +44,7 @@ const commonConfig = {
         layer: 'layered-components',
       },
       {
-        test: /react$/,
+        test: /react\.js$/,
         issuerLayer: 'layered-components',
         layer: 'layered-components',
         use: [

@@ -1,5 +1,5 @@
-import React from 'react';
+import React, { layeredComponentsReact } from 'react';
 
 export default () => {
-  return `ComponentA rendered with [${React()}]`;
+  return `ComponentA rendered with [${React()}]${layeredComponentsReact()}`;
 };

@@ -1,4 +1,5 @@
 const { ModuleFederationPlugin } = require('../../../../dist/src');
+const path = require('path');
 
 const common = {
   entry: {
@@ -15,13 +16,55 @@ const commonMF = {
     './ComponentB': './ComponentB',
     './ComponentC': './ComponentC',
   },
-  shared: ['react'],
+  shared: {
+    react: {
+      version: '17.0.0',
+      requiredVersion: '^17.0.0',
+      singleton: true,
+    },
+    'layered-react': {
+      request: 'react',
+      import: 'react',
+      shareKey: 'react',
+      version: '17.0.0',
+      requiredVersion: '^17.0.0',
+      singleton: true,
+      layer: 'layered-components',
+      issuerLayer: 'layered-components',
+    },
+  },
+};
+
+const commonConfig = {
+  ...common,
+  devtool: false,
+  experiments: {
+    layers: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /ComponentALayers\.js$/,
+        layer: 'layered-components',
+      },
+      {
+        test: /react\.js$/,
+        issuerLayer: 'layered-components',
+        layer: 'layered-components',
+        use: [
+          {
+            loader: path.resolve(__dirname, './layered-react-loader.js'),
+          },
+        ],
+      },
+    ],
+  },
 };
 
 /** @type {import("../../../../").Configuration[]} */
 module.exports = [
   {
-    ...common,
+    ...commonConfig,
     output: {
       filename: '[name].js',
       uniqueName: '2-layers-full',
@@ -40,8 +83,9 @@ module.exports = [
     ],
   },
   {
-    ...common,
+    ...commonConfig,
     experiments: {
+      ...commonConfig.experiments,
       outputModule: true,
     },
     output: {
