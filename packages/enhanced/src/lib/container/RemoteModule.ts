@@ -60,7 +60,8 @@ class RemoteModule extends Module {
     this.externalRequests = externalRequests;
     this.internalRequest = internalRequest;
     // Compose share scope with layer if present
-    this.shareScope = layer ? `(${layer})${shareScope}` : shareScope;
+    //this.shareScope = layer ? `(${layer})${shareScope}` : shareScope;
+    this.shareScope = shareScope;
     this._identifier = `remote (${this.shareScope}) ${this.externalRequests.join(
       ' ',
     )} ${this.internalRequest}`;

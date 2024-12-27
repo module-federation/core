@@ -21,7 +21,6 @@ module.exports = {
     ],
   },
   plugins: [
-    // NEVER ADD shareScope to the plugin
     new ModuleFederationPlugin({
       name: 'container_6',
       filename: 'container.js',
@@ -33,9 +32,11 @@ module.exports = {
       },
       shared: {
         react: {
+          request: 'react',
+          import: false,
+          shareKey: 'react',
           singleton: true,
           requiredVersion: false,
-          import: false,
           layer: 'react-layer',
           issuerLayer: 'react-layer',
         },
