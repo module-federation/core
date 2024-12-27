@@ -1,11 +1,1 @@
-for layers implementation:
-
-- shareConfig should contain layer key / value, it may be undefiend if there is none set by user. there should be no issuerLayer in the runtime package
-- the layer should be composited into shareScope as layer ? (layer)+shareScope : shareScope
-- for resolving layers, we should reconstruct the composite scope then search for the version
-- do not remove asserts
-- do not delete code or comments
-- do not add or remove early returns from the function flow
-
-
-to run tests execute "pnpm runtime:test"
+when running enhanced tests, always run pnpm enhanced:jest

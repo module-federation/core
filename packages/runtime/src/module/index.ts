@@ -75,7 +75,6 @@ class Module {
 
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry();
-
     if (!this.inited) {
       const localShareScopeMap = this.host.shareScopeMap;
       const remoteShareScope = this.remoteInfo.shareScope || 'default';
@@ -122,7 +121,6 @@ class Module {
         initContainerOptions.initScope,
         initContainerOptions.remoteEntryInitOptions,
       );
-
       await this.host.hooks.lifecycle.initContainer.emit({
         ...initContainerOptions,
         id,

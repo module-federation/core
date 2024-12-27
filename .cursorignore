@@ -1,25 +1,51 @@
-# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
-./tmp
-./scripts
-./.git
-packages/storybook-addon
-packages/core
-packages/utilities
-packages/typescript
-packages/native-*
-packages/*
-!packages/runtime
-apps
-**/configCases
-!**/configCases/container
-**/dist
-apps/**
-*.snap
-*.js
-webpack/*
-tools/*
-.github
-.vscode
-*.py
-.husky
-.changeset
+# Ignore everything
+*
+
+# Include parent directories
+!packages/
+!packages/runtime/
+!packages/runtime/src/
+!packages/runtime/src/shared/
+!packages/runtime/src/plugins/
+
+# Only include specific files
+!packages/runtime/src/shared/index.ts
+!packages/runtime/src/core.ts
+!packages/runtime/src/plugins/layers-plugin.ts
+!.cursorignore
+
+# Commented out ignores for reference
+# **/node_modules/
+# **/dist/
+# **/.cache/
+# **/.temp/
+# **/coverage/
+# **/*.md
+# **/*.yaml
+# **/*/stats.json
+# **/*.yml
+# **/.eslintrc*
+# **/.prettierrc*
+# **/.swcrc
+# **/jest.config.*
+# **/tsconfig.*
+
+# Other previously included packages (commented for reference)
+# !packages/webpack-bundler-runtime/
+# !packages/webpack-bundler-runtime/**/*
+# !packages/sdk/
+# !packages/sdk/**/*
+# !packages/enhanced/
+# !packages/enhanced/**/*
+# !package.json
+# !packages/*/package.json
+# !**/package.json
+
+# Previously ignored packages (commented for reference)
+# packages/dts-plugin/
+# packages/runtime-tools/
+# packages/assemble-release-plan/
+# packages/third-party-dts-extractor/
+# packages/native-federation-typescript/
+# packages/retry-plugin/
+# packages/core/

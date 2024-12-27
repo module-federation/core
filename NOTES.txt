@@ -1,0 +1,773 @@
+Module Federation Runtime Files Interconnections and Flow
+
+1. index.ts - Core Federation Runtime
+- Serves as the main entry point for the webpack bundler runtime
+- Exports a federation object that contains:
+  * runtime: Reference to @module-federation/runtime
+  * instance: Federation runtime instance (initialized later)
+  * initOptions: Configuration options
+  * bundlerRuntime: Core runtime functions
+    - remotes: Handles remote module loading
+    - consumes: Manages shared module consumption
+    - I: Initializes sharing system
+    - installInitialConsumes: Sets up eager shared modules
+    - initContainerEntry: Initializes container entry points
+  * attachShareScopeMap: Connects webpack require to share scope
+- Acts as the central hub connecting all other runtime components
+
+2. constant.ts - Shared Constants
+- Defines FEDERATION_SUPPORTED_TYPES = ['script']
+- Exports ENCODE_NAME_PREFIX from @module-federation/sdk
+- Used across multiple files for consistent type checking and name encoding
+
+3. attachShareScopeMap.ts - Share Scope Management
+- Provides function to connect webpack require with federation share scope
+- Key function: attachShareScopeMap
+  * Checks if share scope needs to be attached
+  * Connects webpackRequire.S to federation instance's shareScopeMap
+  * Prevents multiple attachments via hasAttachShareScopeMap flag
+- Used by:
+  * consumes.ts
+  * remotes.ts
+  * initContainerEntry.ts
+  * initializeSharing.ts
+
+4. consumes.ts - Shared Module Consumer
+- Handles consumption of shared modules
+- Key function: consumes
+  * Processes chunk mappings for shared modules
+  * Loads shared modules via federation instance
+  * Manages module installation and error handling
+  * Uses attachShareScopeMap to ensure share scope is available
+- Integrates with:
+  * federation instance's loadShare functionality
+  * webpack module system
+  * share scope management
+
+5. container.ts - Container Creation
+- Provides container creation functionality
+- Key functions:
+  * createContainer: Creates synchronous container
+  * createContainerAsync: Async container creation wrapper
+- Sets up webpack environment with:
+  * Module cache
+  * Module loading system
+  * Share scope initialization
+  * Federation runtime initialization
+- Integrates with:
+  * bundler runtime
+  * webpack module system
+  * federation instance initialization
+  * share scope management
+
+6. initContainerEntry.ts - Container Entry Initialization
+- Handles initialization of container entry points
+- Key function: initContainerEntry
+  * Initializes federation instance with container options
+  * Sets up share scope maps for default and layered scopes
+  * Connects share scope to webpack require
+  * Handles prefetching if configured
+- Critical for:
+  * Container startup
+  * Share scope initialization
+  * Layer management
+  * Remote module loading
+
+7. initializeSharing.ts - Share System Initialization
+- Manages the initialization of the sharing system
+- Key function: initializeSharing
+  * Handles circular initialization detection via tokens
+  * Manages initialization promises and tokens per scope
+  * Initializes external modules with error handling
+  * Sets up share scope maps with versioning support
+  * Processes remote entries with type checking
+- Critical for:
+  * Share scope setup and versioning
+  * Remote module initialization with circular checks
+  * External module loading with promise handling
+  * Layer management with scope isolation
+
+8. installInitialConsumes.ts - Eager Shared Module Setup
+- Handles installation of eager shared modules
+- Key functions:
+  * handleInitialConsumes: Processes individual eager modules
+    - Performs sync loading of shared modules
+    - Validates factory results
+    - Handles layer-aware module loading
+  * installInitialConsumes: Sets up all eager modules
+    - Manages webpack module system integration
+    - Handles module cache updates
+    - Provides error boundaries
+- Manages:
+  * Synchronous module loading with validation
+  * Module factory setup with caching
+  * Error handling for eager consumption
+  * Layer-aware module initialization
+- Critical for initial application setup
+
+9. remotes.ts - Remote Module Management
+- Handles loading and initialization of remote modules
+- Key function: remotes
+  * Processes chunk mappings for remotes
+  * Manages remote loading states with promises
+  * Handles remote module initialization with error boundaries
+  * Supports both runtime and external loading paths
+  * Implements version checking and compatibility
+- Error Handling:
+  * Detailed error messages for loading failures
+  * Container missing detection
+  * Version mismatch handling
+- Promise Management:
+  * Tracks loading promises per remote
+  * Handles async and sync loading paths
+  * Manages initialization order
+- Integrates with:
+  * Federation instance for remote resolution
+  * Share scope system for versioning
+  * Module loading system with caching
+  * Layer system for scoped remotes
+
+10. FederationRuntimePlugin.ts - Webpack Plugin Integration
+- Main webpack plugin for Module Federation
+- Key responsibilities:
+  * Runtime injection and setup with dependency tracking
+  * Entry point management (virtual or physical)
+  * Share scope initialization with versioning
+  * Remote module configuration and hoisting
+- Features:
+  * Virtual runtime entry support with base64 encoding
+  * Runtime plugin system with dynamic loading
+  * Layer support with scope isolation
+  * Share scope management with version control
+- Plugin Components:
+  * FederationRuntimeModule: Handles runtime requirements
+  * FederationRuntimeDependency: Manages runtime dependencies
+  * EmbedFederationRuntimePlugin: Handles runtime embedding
+- Core integration point between:
+  * Webpack build system with hooks
+  * Federation runtime with versioning
+  * Share system with scoping
+  * Remote loading system with caching
+
+11. FederationRuntimePlugin and Bundler Runtime Integration Flow
+- Plugin Initialization:
+  * Plugin detects existing ModuleFederationPlugin or ContainerPlugin
+  * Inherits or creates federation options with validation
+  * Sets up unique container name with timestamp fallback
+  * Initializes runtime dependency tracking
+
+- Runtime Setup Process:
+  1. prependEntry:
+     * Creates runtime entry file (virtual or physical)
+     * Injects federation runtime initialization code
+     * Prepends entry to webpack compilation
+     * Manages runtime dependency injection
+
+  2. injectRuntime:
+     * Adds FederationRuntimeModule to chunks
+     * Sets up runtime requirements with versioning
+     * Initializes global federation scope with sharing
+     * Configures share scope and remote scope with layers
+     * Handles runtime module dependencies
+
+  3. setRuntimeAlias:
+     * Sets up aliases for runtime packages
+     * Handles hoisted runtime mode with embedding
+     * Configures implementation paths with resolution
+     * Manages runtime package versioning
+
+- Bundler Runtime Integration:
+  * Plugin generates entry code that imports bundler runtime
+  * Entry code initializes federation instance with options
+  * Connects webpack require system to federation runtime:
+    - Share scope connection (webpackRequire.S)
+    - Remote loading system with promise handling
+    - Module consumption system with caching
+    - Layer support with scope isolation
+  * Handles runtime plugins and extensions with versioning
+
+- Runtime Bootstrapping Flow:
+  1. Entry point loads bundler runtime with dependency checks
+  2. Federation instance is created with scope initialization
+  3. Share scope is initialized with version management
+  4. Remote containers are set up with promise tracking
+  5. Initial consumes are installed with error boundaries
+  6. Runtime plugins are activated with extension support
+  7. Layer system is initialized if configured
+
+- Layer Support Integration:
+  * Plugin detects layer configuration from options
+  * Sets up layered share scopes with isolation
+  * Configures scope prefixing for versioning
+  * Manages layer resolution in runtime with caching
+  * Handles cross-layer dependencies
+  * Supports layer-specific versioning
+  * Provides layer-aware module loading
+
+This integration ensures that the webpack build system properly initializes and connects with the federation runtime system, enabling module sharing, remote loading, and runtime federation features with proper versioning, caching, and error handling.
+
+12. Runtime Core Implementation (core.ts)
+- FederationHost Class - Core Runtime Implementation
+  * Singleton per container name (version-aware)
+  * Manages the entire federation lifecycle
+  * Provides extensible hook systems:
+    - beforeInit: Configuration preprocessing with plugin support
+    - init: Runtime initialization with handler setup
+    - beforeInitContainer: Container preparation with async support
+    - initContainer: Container initialization with remote entry handling
+    - Various loader hooks for module loading and error handling
+
+- Key Components (Initialized in Constructor):
+  * Module Cache Management:
+    - Tracks loaded modules via moduleCache Map
+    - Prevents duplicate loading with version checks
+    - Manages module state and lifecycle
+
+  * Handler Systems:
+    - snapshotHandler: Module state snapshots and restoration
+    - sharedHandler: Shared module management with versioning
+    - remoteHandler: Remote module operations and caching
+    - shareScopeMap: Share scope tracking with layer support
+
+  * Core Operations:
+    - loadShare: Async shared module loading with version checks
+    - loadShareSync: Sync shared module access (eager mode)
+    - initializeSharing: Share system setup with scope isolation
+    - loadRemote: Remote module loading with caching
+    - preloadRemote: Remote module prefetching with promise tracking
+    - initShareScopeMap: Share scope initialization with layer support
+    - formatOptions: Options processing with plugin hooks
+    - registerPlugins: Plugin system extension with hook registration
+
+  * Plugin System:
+    - Manages runtime plugins with lifecycle hooks
+    - Handles hooks across all subsystems
+    - Supports custom extensions with hook injection
+    - Provides error boundaries and recovery
+
+13. Runtime Entry Point (index.ts)
+- Federation Instance Management:
+  * Global singleton pattern with version awareness
+  * Instance tracking via global registry
+  * Version-aware instance retrieval and merging
+  * Debug constructor injection support
+
+- Core API Surface:
+  * init: Creates/retrieves federation instance with options merging
+  * loadRemote: Remote module loading with error assertions
+  * loadShare: Shared module loading with type safety
+  * loadShareSync: Sync shared module access with validation
+  * preloadRemote: Remote prefetching with promise handling
+  * registerRemotes: Remote registration with validation
+  * registerPlugins: Plugin system extension with hook binding
+  * getInstance: Global instance access with type safety
+
+- Global Registration:
+  * registerGlobalPlugins: System-wide plugin registration
+  * getGlobalFederationInstance: Version-aware instance lookup
+  * setGlobalFederationInstance: Instance registration
+  * setGlobalFederationConstructor: Debug constructor injection
+
+Integration with Overall Flow:
+
+1. Initialization Chain:
+   * FederationRuntimePlugin triggers runtime setup via entry point
+   * index.ts::init creates/retrieves FederationHost instance
+   * core.ts::FederationHost constructor initializes all subsystems
+   * Handlers and hooks are established with plugin support
+   * Options are processed through plugin pipeline
+
+2. Module Loading Flow:
+   * Webpack requires trigger federation operations via public API
+   * index.ts APIs validate and route to core.ts implementations
+   * core.ts coordinates with appropriate handlers:
+     - sharedHandler for shared modules with versioning
+     - remoteHandler for remote modules with caching
+     - snapshotHandler for state management and restoration
+   * Results are cached and reused when possible
+
+3. Share Scope Management:
+   * webpack-bundler-runtime connects to core via index.ts API
+   * core.ts manages share scopes through dedicated handlers
+   * Layer support implemented with scope isolation
+   * Version management with compatibility checks
+   * Circular dependency detection and handling
+
+4. Plugin System Integration:
+   * FederationRuntimePlugin registers system plugins at build time
+   * core.ts manages plugin lifecycle with versioning
+   * Handlers provide specialized plugin interfaces per subsystem
+   * Custom plugins extend core functionality with type safety
+   * Hook system provides extensibility across all operations
+
+5. Error Handling and Recovery:
+   * core.ts provides error boundaries at multiple levels
+   * Handlers implement specific error strategies per operation
+   * Plugin system allows custom error handling injection
+   * Recovery mechanisms coordinated through core with retries
+   * Detailed error messages with context preservation
+
+This core implementation serves as the foundation for the entire Module Federation system, with index.ts providing the type-safe public API and core.ts implementing the underlying functionality with proper error handling and extensibility. The webpack bundler runtime integrates with this core through the plugin system and API surface, creating a cohesive federation system with proper versioning, caching, and error recovery.
+
+14. Share System and Runtime Integration Flow
+
+A. Share System Components
+- share.ts (Core Share Utilities):
+  * formatShare: Normalizes share configurations
+    - Handles get/lib functions
+    - Sets up version requirements
+    - Configures singleton and eager flags
+    - Manages layer information
+  * getRegisteredShare: Share resolution logic
+    - Handles layer-specific share lookup
+    - Manages version compatibility
+    - Supports singleton shares
+    - Implements share scope isolation
+  * Version Management:
+    - versionLt: Version comparison
+    - findVersion: Best version selection
+    - Version strategy implementation (loaded-first/version-first)
+
+B. Runtime Integration Chain
+1. Plugin Template Generation (FederationRuntimePlugin):
+   * Creates runtime entry with bundler integration:
+   ```javascript
+   import federation from '@module-federation/webpack-bundler-runtime';
+   // Initialize federation global scope
+   if(!__webpack_require__.federation.instance){
+     __webpack_require__.federation.instance =
+       __webpack_require__.federation.runtime.init(initOptions);
+     // Connect share scope
+     __webpack_require__.federation.attachShareScopeMap(__webpack_require__);
+     // Install initial shares
+     __webpack_require__.federation.installInitialConsumes();
+   }
+   ```
+
+2. Share Scope Initialization Flow:
+   * FederationRuntimePlugin generates entry
+   * Entry imports webpack-bundler-runtime
+   * Runtime init creates FederationHost instance
+   * Share system initialization sequence:
+     1. formatShareConfigs processes share options
+     2. initShareScopeMap sets up scope structure
+     3. attachShareScopeMap connects to webpack
+     4. registerShared populates share scopes
+
+3. Container and Share Integration:
+   * Container Entry Setup:
+     - Initializes federation instance
+     - Sets up share scope maps
+     - Configures layer support
+     - Connects remote containers
+   * Share Resolution Process:
+     1. Container requests shared module
+     2. getRegisteredShare checks scopes
+     3. Version compatibility verified
+     4. Module loaded and cached
+     5. Share scope updated
+
+4. Layer-Aware Share Management:
+   * Layer Detection:
+     - Plugin reads layer configuration
+     - Sets up layered share scopes
+     - Manages scope prefixing
+   * Share Resolution:
+     - Checks layer-specific scopes first
+     - Falls back to default scope
+     - Handles cross-layer dependencies
+     - Maintains version compatibility
+
+5. Runtime Share Loading Sequence:
+   a. Eager Loading:
+      * Plugin identifies eager shares
+      * installInitialConsumes loads them
+      * Shares cached in scope map
+      * Version conflicts resolved
+
+   b. On-Demand Loading:
+      * Container requests share
+      * loadShare checks existing shares
+      * Version compatibility verified
+      * Share loaded and cached
+      * Scope map updated
+
+6. Share Scope Synchronization:
+   * Between Containers:
+     - Share scope map shared globally
+     - Version conflicts resolved
+     - Singletons managed
+     - Layer isolation maintained
+   * With Webpack:
+     - webpack_require.S connected
+     - Share scope kept in sync
+     - Module cache managed
+     - Dependencies tracked
+
+This integration creates a cohesive system where:
+- FederationRuntimePlugin sets up the foundation
+- webpack-bundler-runtime provides the bridge
+- Runtime core manages the federation lifecycle
+- Share system handles module sharing
+- Layer system provides isolation
+- Version management ensures compatibility
+- Caching optimizes performance
+
+The flow ensures that shared modules are:
+1. Properly scoped and isolated
+2. Version compatible
+3. Efficiently cached
+4. Layer aware
+5. Correctly initialized
+6. Safely shared between containers
+
+15. Module System and Container Integration (module/index.ts)
+
+A. Module Class Core Functionality
+- Container Module Management:
+  * Handles remote entry loading and caching
+  * Manages module initialization state
+  * Provides module factory wrapping
+  * Coordinates share scope initialization
+
+B. Key Operations
+1. Remote Entry Management:
+   * getEntry():
+     - Caches remote entry exports
+     - Handles entry loading errors
+     - Manages global loading state
+     - Provides error recovery hooks
+
+2. Module Loading Process (get):
+   * Container Initialization:
+     ```typescript
+     // Share scope setup
+     const localShareScopeMap = this.host.shareScopeMap;
+     const remoteShareScope = this.remoteInfo.shareScope || 'default';
+
+     // Initialize container with share scope
+     await remoteEntryExports.init(
+       initContainerOptions.shareScope,
+       initContainerOptions.initScope,
+       initContainerOptions.remoteEntryInitOptions
+     );
+     ```
+   * Module Factory Resolution:
+     - Gets module factory from remote
+     - Wraps factory for debugging
+     - Handles async/sync factories
+     - Manages module symbols
+
+C. Integration Points
+
+1. With Share System:
+   * Share Scope Setup:
+     - Initializes container-specific share scope
+     - Connects with global share scope
+     - Manages scope inheritance
+     - Handles layer-specific scopes
+
+2. With Runtime Core:
+   * Host Integration:
+     - Accesses federation host instance
+     - Uses host hooks for lifecycle events
+     - Manages module cache through host
+     - Coordinates with host handlers
+
+3. With Container System:
+   * Remote Entry Lifecycle:
+     - Loads remote entry
+     - Initializes container
+     - Sets up share scope
+     - Manages module exports
+
+D. Module Loading Flow
+1. Initial Request:
+   ```
+   Container Request -> Module.get() -> getEntry() -> Container Init -> Module Factory
+   ```
+
+2. Share Scope Integration:
+   ```
+   Module Init -> Share Scope Setup -> Remote Init -> Factory Resolution
+   ```
+
+3. Factory Management:
+   ```
+   Get Factory -> Wrap Factory -> Add Debug Info -> Return Module
+   ```
+
+E. Key Integration Features
+
+1. Share Scope Management:
+   * Initializes container-specific scopes
+   * Manages share scope inheritance
+   * Handles layer-specific initialization
+   * Coordinates with global share system
+
+2. Module Factory Handling:
+   * Wraps factories for debugging
+   * Adds module identification
+   * Manages async/sync behavior
+   * Provides error boundaries
+
+3. Container Lifecycle:
+   * Manages initialization state
+   * Coordinates share scope setup
+   * Handles remote entry loading
+   * Manages module caching
+
+4. Error Handling:
+   * Remote entry loading errors
+   * Module factory errors
+   * Share scope initialization errors
+   * Container initialization errors
+
+This module system provides the critical link between:
+- Container initialization and runtime
+- Share scope management and module loading
+- Remote entry handling and caching
+- Module factory management and debugging
+
+The Module class serves as the foundation for:
+1. Remote container management
+2. Share scope initialization
+3. Module factory handling
+4. Debug support
+5. Error recovery
+6. Caching optimization
+
+This completes the full picture of how modules, containers, share system, and runtime work together in the Module Federation system.
+
+16. Share Scope and Layer System Deep Dive (Updated from Runtime Tests)
+
+A. Share Resolution Flow (From Test Logs)
+1. Initial Configuration Resolution:
+   ```typescript
+   // Initial config processing
+   {
+     request: 'layered-react',
+     resolveRequest: 'react',
+     shareKey: 'react',
+     layer: 'react-layer',
+     issuerLayer: 'react-layer'
+   }
+   ```
+
+2. Layer Scope Creation:
+   * Creates multiple scope levels:
+     ```typescript
+     shareScopes: [
+       'default',
+       '(react-layer)default',
+       '(react-layer)(react-layer)default'
+     ]
+     ```
+   * Scope naming pattern: `(layerName)scopeName`
+   * Nested layers supported via multiple prefixes
+
+B. Share Loading Process (Runtime Flow)
+1. Share Registration:
+   ```typescript
+   shareInfo = {
+     deps: [],
+     useIn: ['container_7'],
+     from: 'container_7',
+     version: '1.0.0',
+     scope: ['(react-layer)default'],
+     shareConfig: {
+       singleton: true,
+       eager: false,
+       layer: 'react-layer'
+     }
+   }
+   ```
+
+2. Share State Management:
+   ```typescript
+   shareScopeState = {
+     "react": {
+       "1.0.0": {
+         "deps": [],
+         "useIn": ["container_7"],
+         "from": "container_7",
+         "version": "1.0.0",
+         "scope": ["default"],
+         "shareConfig": {
+           "singleton": true,
+           "eager": false,
+           "layer": null
+         }
+       }
+     }
+   }
+   ```
+
+C. Layer Resolution Strategy
+1. Resolution Order:
+   * Check layer-specific scope first
+   * Fall back to default scope if needed
+   * Handle cross-layer dependencies
+   * Manage singleton shares across layers
+
+2. Version Management:
+   * Per-layer version tracking
+   * Singleton version resolution
+   * Version compatibility checks
+   * Strategy inheritance
+
+D. Runtime Integration Points
+1. Container Initialization:
+   ```typescript
+   // Container entry initialization
+   {
+     name: 'default',
+     hasShareScope: true,
+     hasInitScope: true,
+     availableScopes: ['react']
+   }
+   ```
+
+2. Share Scope Initialization:
+   * Checks for existing scopes
+   * Creates new scopes as needed
+   * Handles host share scope maps
+   * Manages initialization tokens
+
+E. Key Runtime Behaviors (From Tests)
+
+1. Share Resolution:
+   ```
+   Request Share ->
+   Check Layer Config ->
+   Check Layer Scope ->
+   Check Default Scope ->
+   Load Module ->
+   Update Share State
+   ```
+
+2. Layer Management:
+   * Layer isolation maintained
+   * Cross-layer sharing supported
+   * Singleton shares handled globally
+   * Version conflicts resolved
+
+3. Share State Tracking:
+   * Per-container tracking
+   * Layer-aware caching
+   * Version state management
+   * Loading state handling
+
+F. Practical Implementation Details
+
+1. Share Loading:
+   ```typescript
+   // Share loading with layer support
+   if (shareConfig?.layer) {
+     const layerScope = `(${shareConfig.layer})${scope}`;
+     const layerShare = checkScope(layerScope);
+     if (layerShare) return layerShare;
+   }
+   return checkScope(DEFAULT_SCOPE);
+   ```
+
+2. Initialization Flow:
+   ```typescript
+   // Runtime initialization sequence
+   federation.initShareScopeMap(name, shareScope, {
+     hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap
+   });
+
+   // Layer scope initialization
+   Object.keys(shareScope).forEach(scope => {
+     if (scope.startsWith('(')) {
+       federation.initShareScopeMap(scope, { [scope]: shareScope[scope] });
+     }
+   });
+   ```
+
+G. Error Handling and Edge Cases
+
+1. Layer Resolution Fallbacks:
+   * Layer not found -> Check default scope
+   * Version mismatch -> Check other layers
+   * Singleton conflict -> Use highest version
+
+2. Initialization Safeguards:
+   * Circular dependency detection
+   * Duplicate initialization prevention
+   * Token-based scope tracking
+   * Version conflict resolution
+
+H. Performance Considerations
+
+1. Share Scope Caching:
+   * Layer-specific caching
+   * Version state caching
+   * Loading state tracking
+   * Promise management
+
+2. Optimization Strategies:
+   * Eager loading support
+   * Layer-aware prefetching
+   * Singleton optimization
+   * Version deduplication
+
+This deep dive reflects the actual runtime behavior observed in tests, showing how:
+1. Layer scopes are created and managed
+2. Share resolution handles layers
+3. Version management works across layers
+4. Initialization flow handles complex scenarios
+5. Error cases are properly handled
+6. Performance is optimized for different scenarios
+
+Test Analysis for layer-8-full:
+
+1. Share Resolution Flow:
+- Test tries to load App with React and remote components
+- Share resolution starts in default scope
+- Layered share resolution is attempted for react-layer
+- Share info shows React version 1.0.0 being loaded from container_7
+
+2. Component Loading:
+- ComponentA is loaded from containerA
+- App is loaded from containerA
+- Both components are trying to access React
+
+3. Version Mismatch:
+Expected output:
+```
+App rendered with React version: 1.0.0
+    Non-layered remote component: ComponentA (Regular React: 1.0.0)
+    Layered remote component: App rendered with React version: 1.0.0
+```
+
+Actual output:
+```
+App rendered with React version: undefined
+    Non-layered remote component: ComponentA rendered with React version: [This is react 0.1.2] with layer This is layered react from react-layer
+    Layered remote component: App rendered with [This is react 0.1.2] with layered value: [No Layer] and ComponentA rendered with React version: [This is react 0.1.2] with layer This is layered react from react-layer
+```
+
+4. Issues Identified:
+- React version is undefined in the main App
+- ComponentA is getting React 0.1.2 from react-layer instead of 1.0.0
+- Layer information is being mixed between layered and non-layered contexts
+- The share resolution might be preferring layered versions when it shouldn't
+
+5. Share Resolution Logs:
+- Share scope includes: default, (react-layer)default, (react-layer)(react-layer)default
+- Initial share state shows React 1.0.0 in default scope
+- Layer resolution is happening but might be picking wrong versions
+
+6. Potential Problems:
+- Share resolution might not be correctly handling layer boundaries
+- Version resolution strategy might need adjustment
+- Singleton behavior across layers needs verification
+- Layer inheritance rules might need clarification
+
+7. Debug Focus Areas:
+- Check share resolution order between layers
+- Verify singleton behavior across layer boundaries
+- Examine how layer context is passed to components
+- Review version resolution strategy in layered contexts

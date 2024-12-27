@@ -53,7 +53,7 @@ class RemoteModule extends Module {
     internalRequest: string,
     shareScope: string,
     layer?: string,
-    context?: string
+    context?: string,
   ) {
     super(WEBPACK_MODULE_TYPE_REMOTE, context, layer);
     this.request = request;
@@ -190,7 +190,6 @@ class RemoteModule extends Module {
     write(this.externalRequests);
     write(this.internalRequest);
     write(this.shareScope);
-    write(this.layer);
     super.serialize(context);
   }
 

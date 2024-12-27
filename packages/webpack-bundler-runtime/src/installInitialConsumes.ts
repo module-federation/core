@@ -4,13 +4,13 @@ import {
 } from './types';
 function handleInitialConsumes(options: HandleInitialConsumesOptions) {
   const { moduleId, moduleToHandlerMapping, webpackRequire } = options;
-console.log('Initialized module', options);
+
   const federationInstance = webpackRequire.federation.instance;
   if (!federationInstance) {
     throw new Error('Federation instance not found!');
   }
   const { shareKey, shareInfo } = moduleToHandlerMapping[moduleId];
-  debugger;
+
   try {
     return federationInstance.loadShareSync(shareKey, {
       customShareInfo: shareInfo,
@@ -31,8 +31,6 @@ export function installInitialConsumes(options: InstallInitialConsumesOptions) {
     installedModules,
     initialConsumes,
   } = options;
-
-  console.log('Initialized initial consumes', installedModules);
 
   initialConsumes.forEach((id) => {
     webpackRequire.m[id] = (module) => {

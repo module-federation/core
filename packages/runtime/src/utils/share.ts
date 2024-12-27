@@ -198,173 +198,11 @@ export function findSingletonVersionOrderByLoaded(
   return findVersion(shareScopeMap[scope][pkgName], callback);
 }
 
-export function getFindShareFunction(strategy: Shared['strategy']) {
+function getFindShareFunction(strategy: Shared['strategy']) {
   if (strategy === 'loaded-first') {
     return findSingletonVersionOrderByLoaded;
   }
   return findSingletonVersionOrderByVersion;
-}
-
-export function getRegisteredShareFromLayer(
-  localShareScopeMap: ShareScopeMap,
-  pkgName: string,
-  shareInfo: Shared,
-  resolveShare: SyncWaterfallHook<{
-    shareScopeMap: ShareScopeMap;
-    scope: string;
-    pkgName: string;
-    version: string;
-    GlobalFederation: Federation;
-    resolver: () => Shared | undefined;
-  }>,
-): Shared | void {
-  const { shareConfig, scope = DEFAULT_SCOPE, strategy } = shareInfo;
-  const scopes = Array.isArray(scope) ? scope : [scope];
-
-  if (!shareConfig?.layer) {
-    return;
-  }
-
-  for (const sc of scopes) {
-    const compositeScope = `(${shareConfig.layer})${sc}`;
-    console.log('checking composite scope:', compositeScope);
-
-    if (localShareScopeMap[compositeScope]?.[pkgName]) {
-      const findShareFunction = getFindShareFunction(strategy);
-      const maxOrSingletonVersion = findShareFunction(
-        localShareScopeMap,
-        compositeScope,
-        pkgName,
-      );
-      console.log('found version in composite scope:', maxOrSingletonVersion);
-
-      const defaultResolver = () => {
-        if (shareConfig.singleton) {
-          if (
-            typeof shareConfig.requiredVersion === 'string' &&
-            !satisfy(maxOrSingletonVersion, shareConfig.requiredVersion)
-          ) {
-            const msg = `Version ${maxOrSingletonVersion} from ${
-              maxOrSingletonVersion &&
-              localShareScopeMap[compositeScope][pkgName][maxOrSingletonVersion]
-                .from
-            } of shared singleton module ${pkgName} does not satisfy the requirement of ${
-              shareInfo.from
-            } which needs ${shareConfig.requiredVersion})`;
-
-            if (shareConfig.strictVersion) {
-              error(msg);
-            } else {
-              warn(msg);
-            }
-          }
-          return localShareScopeMap[compositeScope][pkgName][
-            maxOrSingletonVersion
-          ];
-        } else {
-          if (
-            shareConfig.requiredVersion === false ||
-            shareConfig.requiredVersion === '*'
-          ) {
-            return localShareScopeMap[compositeScope][pkgName][
-              maxOrSingletonVersion
-            ];
-          }
-          if (satisfy(maxOrSingletonVersion, shareConfig.requiredVersion)) {
-            return localShareScopeMap[compositeScope][pkgName][
-              maxOrSingletonVersion
-            ];
-          }
-
-          for (const [versionKey, versionValue] of Object.entries(
-            localShareScopeMap[compositeScope][pkgName],
-          )) {
-            if (satisfy(versionKey, shareConfig.requiredVersion)) {
-              return versionValue;
-            }
-          }
-          return undefined;
-        }
-      };
-
-      const params = {
-        shareScopeMap: localShareScopeMap,
-        scope: compositeScope,
-        pkgName,
-        version: maxOrSingletonVersion,
-        GlobalFederation: Global.__FEDERATION__,
-        resolver: defaultResolver,
-      };
-      const resolveShared = resolveShare.emit(params) || params;
-      const result = resolveShared.resolver();
-      if (result) return result;
-    }
-
-    // If no matching share found in layer scope, check default scope
-    if (localShareScopeMap[sc]?.[pkgName]) {
-      const findShareFunction = getFindShareFunction(strategy);
-      const maxOrSingletonVersion = findShareFunction(
-        localShareScopeMap,
-        sc,
-        pkgName,
-      );
-      console.log('found version in default scope:', maxOrSingletonVersion);
-
-      const defaultResolver = () => {
-        if (shareConfig.singleton) {
-          if (
-            typeof shareConfig.requiredVersion === 'string' &&
-            !satisfy(maxOrSingletonVersion, shareConfig.requiredVersion)
-          ) {
-            const msg = `Version ${maxOrSingletonVersion} from ${
-              maxOrSingletonVersion &&
-              localShareScopeMap[sc][pkgName][maxOrSingletonVersion].from
-            } of shared singleton module ${pkgName} does not satisfy the requirement of ${
-              shareInfo.from
-            } which needs ${shareConfig.requiredVersion})`;
-
-            if (shareConfig.strictVersion) {
-              error(msg);
-            } else {
-              warn(msg);
-            }
-          }
-          return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
-        } else {
-          if (
-            shareConfig.requiredVersion === false ||
-            shareConfig.requiredVersion === '*'
-          ) {
-            return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
-          }
-          if (satisfy(maxOrSingletonVersion, shareConfig.requiredVersion)) {
-            return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
-          }
-
-          for (const [versionKey, versionValue] of Object.entries(
-            localShareScopeMap[sc][pkgName],
-          )) {
-            if (satisfy(versionKey, shareConfig.requiredVersion)) {
-              return versionValue;
-            }
-          }
-          return undefined;
-        }
-      };
-
-      const params = {
-        shareScopeMap: localShareScopeMap,
-        scope: sc,
-        pkgName,
-        version: maxOrSingletonVersion,
-        GlobalFederation: Global.__FEDERATION__,
-        resolver: defaultResolver,
-      };
-      const resolveShared = resolveShare.emit(params) || params;
-      const result = resolveShared.resolver();
-      if (result) return result;
-    }
-  }
 }
 
 export function getRegisteredShare(
@@ -385,28 +223,7 @@ export function getRegisteredShare(
   }
   const { shareConfig, scope = DEFAULT_SCOPE, strategy } = shareInfo;
   const scopes = Array.isArray(scope) ? scope : [scope];
-
-  console.log(
-    'getRegisteredShare - scopes:',
-    scopes,
-    'layer:',
-    shareConfig?.layer,
-  );
-
-  // Check layer scopes first if layer exists
-  if (shareConfig?.layer) {
-    const layerResult = getRegisteredShareFromLayer(
-      localShareScopeMap,
-      pkgName,
-      shareInfo,
-      resolveShare,
-    );
-    if (layerResult) return layerResult;
-  }
-
-  // Then check original scopes
   for (const sc of scopes) {
-    console.log('checking scope:', sc);
     if (
       shareConfig &&
       localShareScopeMap[sc] &&
@@ -419,7 +236,6 @@ export function getRegisteredShare(
         sc,
         pkgName,
       );
-      console.log('found version in scope:', maxOrSingletonVersion);
 
       //@ts-ignore
       const defaultResolver = () => {

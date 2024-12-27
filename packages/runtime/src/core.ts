@@ -28,6 +28,7 @@ import {
   SyncWaterfallHook,
 } from './utils/hooks';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
+import { layersPlugin } from './plugins/layers-plugin';
 import { snapshotPlugin } from './plugins/snapshot';
 import { getRemoteInfo } from './utils/load';
 import { DEFAULT_SCOPE } from './constant';
@@ -166,7 +167,11 @@ export class FederationHost {
     const defaultOptions: Options = {
       id: getBuilderId(),
       name: userOptions.name,
-      plugins: [snapshotPlugin(), generatePreloadAssetsPlugin()],
+      plugins: [
+        snapshotPlugin(),
+        generatePreloadAssetsPlugin(),
+        layersPlugin(),
+      ],
       remotes: [],
       shared: {},
       inBrowser: isBrowserEnv(),
