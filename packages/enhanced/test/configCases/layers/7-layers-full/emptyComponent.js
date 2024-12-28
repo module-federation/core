@@ -1,1 +1,1 @@
-export default 'testnoop'
+export default 'testnoop';
