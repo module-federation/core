@@ -5,9 +5,9 @@ const common = {
   entry: {
     main: './index.js',
   },
-  optimization: {
-    runtimeChunk: 'single',
-  },
+  // optimization: {
+  //   runtimeChunk: 'single',
+  // },
 };
 
 const commonMF = {
@@ -15,6 +15,7 @@ const commonMF = {
   exposes: {
     './ComponentB': './ComponentB',
     './ComponentC': './ComponentC',
+    './ComponentALayers': './ComponentALayers',
   },
   shared: {
     react: {

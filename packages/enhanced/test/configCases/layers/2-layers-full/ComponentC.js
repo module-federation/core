@@ -3,5 +3,5 @@ import ComponentA from 'containerA/ComponentA';
 import ComponentB from 'containerB/ComponentB';
 
 export default () => {
-  return `ComponentC rendered with [${React()}] ${layeredComponentsReact()} and [${ComponentA()}] and [${ComponentB()}]`;
+  return `LocalComponentC rendered with [${React()}] ${layeredComponentsReact()} and [${ComponentA()}] and [${ComponentB()}]`;
 };
