@@ -1,16 +1,32 @@
 const { ModuleFederationPlugin } = require('../../../../dist/src');
 
-module.exports = {
+const common = {
+  name: 'container_6',
+  filename: 'container.js',
+  remotes: {
+    containerA: {
+      external: '../5-layers-full/container.js',
+    },
+  },
+  shared: {
+    react: {
+      request: 'react',
+      import: false,
+      shareKey: 'react',
+      singleton: true,
+      requiredVersion: false,
+      layer: 'react-layer',
+      issuerLayer: 'react-layer',
+    },
+  },
+};
+
+const commonConfig = {
   entry: './index.js',
   mode: 'development',
-  target: 'node',
   devtool: false,
   experiments: {
     layers: true,
-  },
-  output: {
-    filename: '[name].js',
-    uniqueName: '6-layers-full',
   },
   module: {
     rules: [
@@ -20,27 +36,44 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    new ModuleFederationPlugin({
-      name: 'container_6',
-      filename: 'container.js',
-      library: { type: 'commonjs-module' },
-      remotes: {
-        containerA: {
-          external: '../5-layers-full/container.js',
-        },
-      },
-      shared: {
-        react: {
-          request: 'react',
-          import: false,
-          shareKey: 'react',
-          singleton: true,
-          requiredVersion: false,
-          layer: 'react-layer',
-          issuerLayer: 'react-layer',
-        },
-      },
-    }),
-  ],
 };
+
+module.exports = [
+  {
+    ...commonConfig,
+    output: {
+      filename: '[name].js',
+      uniqueName: '6-layers-full',
+    },
+    plugins: [
+      new ModuleFederationPlugin({
+        ...common,
+        library: { type: 'commonjs-module' },
+      }),
+    ],
+  },
+  {
+    ...commonConfig,
+    experiments: {
+      ...commonConfig.experiments,
+      outputModule: true,
+    },
+    output: {
+      filename: 'module/[name].mjs',
+      uniqueName: '6-layers-full-mjs',
+    },
+    plugins: [
+      new ModuleFederationPlugin({
+        ...common,
+        library: { type: 'module' },
+        filename: 'module/container.mjs',
+        remotes: {
+          containerA: {
+            external: '../../5-layers-full/module/container.mjs',
+          },
+        },
+      }),
+    ],
+    target: 'node14',
+  },
+];
