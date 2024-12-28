@@ -49,6 +49,10 @@ const commonConfig = {
         layer: 'layered-components',
       },
       {
+        test: /layered-upgrade-react\.js$/,
+        layer: 'layered-components',
+      },
+      {
         test: /react\.js$/,
         issuerLayer: 'layered-components',
         layer: 'layered-components',
