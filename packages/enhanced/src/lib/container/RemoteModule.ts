@@ -44,25 +44,19 @@ class RemoteModule extends Module {
    * @param {string[]} externalRequests list of external requests to containers
    * @param {string} internalRequest name of exposed module in container
    * @param {string} shareScope the used share scope name
-   * @param {string=} layer optional layer name
-   * @param {string=} context optional context name
    */
   constructor(
     request: string,
     externalRequests: string[],
     internalRequest: string,
     shareScope: string,
-    layer?: string,
-    context?: string,
   ) {
-    super(WEBPACK_MODULE_TYPE_REMOTE, context, layer);
+    super(WEBPACK_MODULE_TYPE_REMOTE);
     this.request = request;
     this.externalRequests = externalRequests;
     this.internalRequest = internalRequest;
-    // Compose share scope with layer if present
-    //this.shareScope = layer ? `(${layer})${shareScope}` : shareScope;
     this.shareScope = shareScope;
-    this._identifier = `remote (${this.shareScope}) ${this.externalRequests.join(
+    this._identifier = `remote (${shareScope}) ${this.externalRequests.join(
       ' ',
     )} ${this.internalRequest}`;
   }
@@ -112,6 +106,7 @@ class RemoteModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
+  // @ts-ignore
   override build(
     options: WebpackOptionsNormalized,
     compilation: Compilation,
@@ -162,6 +157,7 @@ class RemoteModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
+  // @ts-ignore
   override codeGeneration(
     context: CodeGenerationContext,
   ): CodeGenerationResult {
@@ -180,11 +176,6 @@ class RemoteModule extends Module {
     ]);
     return { sources, data, runtimeRequirements: RUNTIME_REQUIREMENTS };
   }
-
-  /**
-   * Serializes the module
-   * @param {any} context serialization context
-   */
   override serialize(context: any) {
     const { write } = context;
     write(this.request);

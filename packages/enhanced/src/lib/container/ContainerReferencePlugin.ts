@@ -131,8 +131,6 @@ class ContainerReferencePlugin {
                     `.${data.request.slice(key.length)}`,
                     //@ts-ignore
                     config.shareScope,
-                    data.contextInfo?.issuerLayer || undefined,
-                    compiler.context
                   );
                 }
               }
