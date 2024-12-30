@@ -247,3 +247,39 @@ export function UserLayout() {
   );
 }
 ```
+
+## Configuration
+
+### ssr
+
+- Type: `false`
+- Is it required: No
+- Default value: `undefined`
+
+`@module-federation/modern-js` will automatically add SSR related build presets based on `server.ssr` in modern.js config.
+
+If the current project only needs to load MF in the CSR, you can set `ssr: false` to help progressive migration.
+
+```title='modern.config.ts'
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import { moduleFederationPlugin } from '@module-federation/modern-js';
+
+// https://modernjs.dev/en/configure/app/usage
+export default defineConfig({
+  dev: {
+    port: 3050,
+  },
+  runtime: {
+    router: true,
+  },
+  server: {
+    ssr: {
+      mode: 'stream',
+    },
+  },
+  plugins: [
+    appTools(),
+    moduleFederationPlugin({ ssr: false })
+  ],
+});
+```

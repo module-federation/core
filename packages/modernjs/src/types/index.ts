@@ -7,6 +7,8 @@ export interface PluginOptions {
   configPath?: string;
   exportRoutes?: boolean;
   importRoutes?: boolean;
+  ssr?: false;
+  remoteIpStrategy?: 'ipv4' | 'inherit';
 }
 
 export interface InternalModernPluginOptions {
@@ -18,7 +20,9 @@ export interface InternalModernPluginOptions {
   browserPlugin?: BundlerPlugin;
   nodePlugin?: BundlerPlugin;
   remoteIpStrategy?: 'ipv4' | 'inherit';
+  userConfig?: PluginOptions;
 }
+
 export type BundlerPlugin =
   | WebpackModuleFederationPlugin
   | RspackModuleFederationPlugin;

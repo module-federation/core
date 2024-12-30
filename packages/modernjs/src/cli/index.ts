@@ -21,7 +21,8 @@ export const moduleFederationPlugin = (
     nodePlugin: undefined,
     distOutputDir: '',
     originPluginOptions: userConfig,
-    remoteIpStrategy: undefined,
+    remoteIpStrategy: userConfig?.remoteIpStrategy,
+    userConfig,
   };
 
   return {
