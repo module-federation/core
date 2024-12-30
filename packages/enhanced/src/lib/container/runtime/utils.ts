@@ -12,6 +12,7 @@ import type webpack from 'webpack';
 import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { NormalizedRuntimeInitOptionsWithOutShared } from '../../../types/runtime';
+import { FEDERATION_SUPPORTED_TYPES } from '../constant';
 
 const extractUrlAndGlobal = require(
   normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
@@ -21,7 +22,11 @@ type EntryStaticNormalized = Awaited<
   ReturnType<Extract<webpack.WebpackOptionsNormalized['entry'], () => any>>
 >;
 
-type Remotes = Parameters<typeof init>[0]['remotes'];
+type BaseRemote = Parameters<typeof init>[0]['remotes'][0];
+type Remote = BaseRemote & {
+  externalType?: string;
+};
+type Remotes = Remote[];
 
 interface ModifyEntryOptions {
   compiler: webpack.Compiler;
@@ -49,6 +54,7 @@ export function normalizeRuntimeInitOptionsWithOutShared(
       shareScope: item.shareScope || options.shareScope || 'default',
     }),
   );
+  const remoteType = options.remoteType || options.library?.type || 'script';
   const remoteOptions: Remotes = [];
   parsedOptions.forEach((parsedOption) => {
     const [alias, remoteInfos] = parsedOption;
@@ -65,9 +71,18 @@ export function normalizeRuntimeInitOptionsWithOutShared(
         name: globalName,
         entry: url,
         shareScope: shareScope,
-        // externalType
-      });
+        externalType: remoteType,
+      } as Remote);
     } catch (err) {
+      if (remoteType && FEDERATION_SUPPORTED_TYPES.includes(remoteType)) {
+        remoteOptions.push({
+          alias,
+          name: undefined,
+          entry: external[0],
+          shareScope: shareScope,
+          externalType: remoteType,
+        } as unknown as Remote);
+      }
       return;
     }
   });
