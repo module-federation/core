@@ -1,5 +1,115 @@
 # @module-federation/bridge-react
 
+## 0.8.6
+
+### Patch Changes
+
+- 85e7482: fix(bridge-react): change all logs from info to debug in all bridge packages
+  - @module-federation/sdk@0.8.6
+  - @module-federation/bridge-shared@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.5
+- @module-federation/bridge-shared@0.8.5
+
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.4
+- @module-federation/bridge-shared@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [8e172c8]
+  - @module-federation/sdk@0.8.3
+  - @module-federation/bridge-shared@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.2
+- @module-federation/bridge-shared@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.1
+- @module-federation/bridge-shared@0.8.1
+
+## 0.8.0
+
+### Patch Changes
+
+- 542164e: chore(bridge-react): set react-router-dom peer version to >=4 <7
+  - @module-federation/sdk@0.8.0
+  - @module-federation/bridge-shared@0.8.0
+
+## 0.7.7
+
+### Patch Changes
+
+- ae5ee1e: feat: mount bridge api to module instance
+  - @module-federation/sdk@0.7.7
+  - @module-federation/bridge-shared@0.7.7
+
+## 0.7.6
+
+### Patch Changes
+
+- @module-federation/runtime@0.7.6
+- @module-federation/sdk@0.7.6
+- @module-federation/bridge-shared@0.7.6
+
+## 0.7.5
+
+### Patch Changes
+
+- 0309fb5: fix: wrap try catch with react-router-dom path resolve
+  - @module-federation/runtime@0.7.5
+  - @module-federation/sdk@0.7.5
+  - @module-federation/bridge-shared@0.7.5
+
+## 0.7.4
+
+### Patch Changes
+
+- ff8ce29: feat: feat: support lifecycyle hooks in module-deferation bridge
+- Updated dependencies [ff8ce29]
+  - @module-federation/runtime@0.7.4
+  - @module-federation/sdk@0.7.4
+  - @module-federation/bridge-shared@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+  - @module-federation/bridge-shared@0.7.3
+
+## 0.7.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.2
+- @module-federation/bridge-shared@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [6db4c5f]
+  - @module-federation/sdk@0.7.1
+  - @module-federation/bridge-shared@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

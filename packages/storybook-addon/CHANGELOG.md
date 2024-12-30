@@ -1,5 +1,126 @@
 # @module-federation/storybook-addon
 
+## 3.0.17
+
+### Patch Changes
+
+- a1d46b7: chore: export plugin name
+  - @module-federation/enhanced@0.8.6
+  - @module-federation/sdk@0.8.6
+  - @module-federation/utilities@3.1.37
+
+## 3.0.16
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.5
+- @module-federation/sdk@0.8.5
+- @module-federation/utilities@3.1.36
+
+## 3.0.15
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.4
+- @module-federation/sdk@0.8.4
+- @module-federation/utilities@3.1.35
+
+## 3.0.14
+
+### Patch Changes
+
+- Updated dependencies [8e172c8]
+  - @module-federation/sdk@0.8.3
+  - @module-federation/enhanced@0.8.3
+  - @module-federation/utilities@3.1.34
+
+## 3.0.13
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.2
+- @module-federation/sdk@0.8.2
+- @module-federation/utilities@3.1.33
+
+## 3.0.12
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.1
+- @module-federation/sdk@0.8.1
+- @module-federation/utilities@3.1.32
+
+## 3.0.11
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.0
+- @module-federation/sdk@0.8.0
+- @module-federation/utilities@3.1.31
+
+## 3.0.10
+
+### Patch Changes
+
+- @module-federation/enhanced@0.7.7
+- @module-federation/sdk@0.7.7
+- @module-federation/utilities@3.1.30
+
+## 3.0.9
+
+### Patch Changes
+
+- @module-federation/enhanced@0.7.6
+- @module-federation/sdk@0.7.6
+- @module-federation/utilities@3.1.29
+
+## 3.0.8
+
+### Patch Changes
+
+- 4c9f725: correct peerDependencies declaration
+- Updated dependencies [5613265]
+  - @module-federation/enhanced@0.7.5
+  - @module-federation/sdk@0.7.5
+  - @module-federation/utilities@3.1.28
+
+## 3.0.7
+
+### Patch Changes
+
+- f8742b7: fix: create folder before writing bootstrap
+  - @module-federation/enhanced@0.7.4
+  - @module-federation/sdk@0.7.4
+  - @module-federation/utilities@3.1.27
+
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+  - @module-federation/utilities@3.1.26
+  - @module-federation/sdk@0.7.3
+  - @module-federation/enhanced@0.7.3
+
+## 3.0.5
+
+### Patch Changes
+
+- @module-federation/enhanced@0.7.2
+- @module-federation/sdk@0.7.2
+- @module-federation/utilities@3.1.25
+
+## 3.0.4
+
+### Patch Changes
+
+- 932983e: fix: fix windows path error
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+  - @module-federation/utilities@3.1.24
+
 ## 3.0.3
 
 ### Patch Changes

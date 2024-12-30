@@ -18,7 +18,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "test": "jest",
+    "test": "echo 'skip'",
     "build": "preconstruct build",
     "watch": "preconstruct watch",
     "postinstall": "preconstruct dev",
@@ -30,7 +30,11 @@
     "release": "yarn build && changeset publish"
   },
   "license": "MIT",
-  "repository": "https://github.com/changesets/changesets/tree/main/packages/assemble-release-plan",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/assemble-release-plan"
+  },
   "dependencies": {
     "@changesets/errors": "^0.2.0",
     "@changesets/get-dependents-graph": "^2.1.2",

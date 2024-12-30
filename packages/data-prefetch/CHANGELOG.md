@@ -1,5 +1,116 @@
 # @module-federation/data-prefetch
 
+## 0.8.6
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.6
+- @module-federation/sdk@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.5
+- @module-federation/sdk@0.8.5
+
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.4
+- @module-federation/sdk@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- 5b637c3: fix(data-prefetch): the prefetch exports type is promise or function
+- Updated dependencies [f817674]
+- Updated dependencies [8e172c8]
+  - @module-federation/runtime@0.8.3
+  - @module-federation/sdk@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- Updated dependencies [fa7a0bd]
+  - @module-federation/runtime@0.8.2
+  - @module-federation/sdk@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.1
+- @module-federation/sdk@0.8.1
+
+## 0.8.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.0
+- @module-federation/sdk@0.8.0
+
+## 0.7.7
+
+### Patch Changes
+
+- Updated dependencies [a960c88]
+- Updated dependencies [e26d107]
+  - @module-federation/runtime@0.7.7
+  - @module-federation/sdk@0.7.7
+
+## 0.7.6
+
+### Patch Changes
+
+- @module-federation/runtime@0.7.6
+- @module-federation/sdk@0.7.6
+
+## 0.7.5
+
+### Patch Changes
+
+- @module-federation/runtime@0.7.5
+- @module-federation/sdk@0.7.5
+
+## 0.7.4
+
+### Patch Changes
+
+- Updated dependencies [ff8ce29]
+  - @module-federation/runtime@0.7.4
+  - @module-federation/sdk@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- Updated dependencies [4ab9295]
+- Updated dependencies [c2b1efa]
+  - @module-federation/runtime@0.7.3
+  - @module-federation/sdk@0.7.3
+
+## 0.7.2
+
+### Patch Changes
+
+- @module-federation/runtime@0.7.2
+- @module-federation/sdk@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [66ba7b1]
+- Updated dependencies [8712967]
+- Updated dependencies [6db4c5f]
+  - @module-federation/runtime@0.7.1
+  - @module-federation/sdk@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

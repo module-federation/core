@@ -13,7 +13,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 
-const PLUGIN_NAME = 'ModuleFederationPlugin';
+export const PLUGIN_NAME = 'ModuleFederationPlugin';
 
 export default class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;

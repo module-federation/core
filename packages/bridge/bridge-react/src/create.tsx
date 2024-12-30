@@ -1,11 +1,11 @@
 import React, { forwardRef } from 'react';
-import type { ProviderParams } from '@module-federation/bridge-shared';
-import { LoggerInstance } from './utils';
 import {
   ErrorBoundary,
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
+import { LoggerInstance } from './utils';
 import RemoteApp from './remote';
+import type { ProviderParams } from '@module-federation/bridge-shared';
 
 export interface RenderFnParams extends ProviderParams {
   dom?: any;
@@ -18,15 +18,19 @@ interface RemoteModule {
   };
 }
 
-function createLazyRemoteComponent<T, E extends keyof T>(info: {
+type LazyRemoteComponentInfo<T, E extends keyof T> = {
   loader: () => Promise<T>;
   loading: React.ReactNode;
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
   export?: E;
-}) {
+};
+
+function createLazyRemoteComponent<T, E extends keyof T>(
+  info: LazyRemoteComponentInfo<T, E>,
+) {
   const exportName = info?.export || 'default';
   return React.lazy(async () => {
-    LoggerInstance.log(`createRemoteComponent LazyComponent create >>>`, {
+    LoggerInstance.debug(`createRemoteComponent LazyComponent create >>>`, {
       lazyComponent: info.loader,
       exportName,
     });
@@ -35,7 +39,7 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
       const m = (await info.loader()) as RemoteModule;
       // @ts-ignore
       const moduleName = m && m[Symbol.for('mf_module_id')];
-      LoggerInstance.log(
+      LoggerInstance.debug(
         `createRemoteComponent LazyComponent loadRemote info >>>`,
         { name: moduleName, module: m, exportName },
       );
@@ -67,7 +71,7 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
           default: RemoteAppComponent,
         };
       } else {
-        LoggerInstance.log(
+        LoggerInstance.debug(
           `createRemoteComponent LazyComponent module not found >>>`,
           { name: moduleName, module: m, exportName },
         );
@@ -83,12 +87,9 @@ function createLazyRemoteComponent<T, E extends keyof T>(info: {
   });
 }
 
-export function createRemoteComponent<T, E extends keyof T>(info: {
-  loader: () => Promise<T>;
-  loading: React.ReactNode;
-  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
-  export?: E;
-}) {
+export function createRemoteComponent<T, E extends keyof T>(
+  info: LazyRemoteComponentInfo<T, E>,
+) {
   type ExportType = T[E] extends (...args: any) => any
     ? ReturnType<T[E]>
     : never;

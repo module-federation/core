@@ -48,6 +48,8 @@ Come and chat with us on [Discussions](https://github.com/module-federation/univ
 
 Please read the [Contributing Guide](https://github.com/module-federation/core/blob/main/CONTRIBUTING.md).
 
+![Alt](https://repobeats.axiom.co/api/embed/856dc1d4a6965d225232b1bd2da5d54549dc169e.svg "Repobeats analytics image")
+
 ## 🙌 Code of Conduct
 
 This repo has adopted the Code of Conduct. Please check [Code of Conduct](./CODE_OF_CONDUCT.md) for more details.

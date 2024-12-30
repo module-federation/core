@@ -5,4 +5,5 @@ export interface RemoteOptions extends moduleFederationPlugin.DtsRemoteOptions {
   context?: string;
   implementation?: string;
   hostRemoteTypesFolder?: string;
+  outputDir?: string;
 }

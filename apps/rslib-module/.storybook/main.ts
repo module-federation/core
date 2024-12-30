@@ -17,13 +17,20 @@ const config: StorybookConfig = {
   },
   addons: [
     {
+      name: getAbsolutePath('storybook-addon-rslib'),
+      options: {
+        rslib: {
+          include: ['**/stories/**'],
+        },
+      },
+    },
+    {
       name: '@module-federation/storybook-addon/preset',
       options: {
         remotes: {
           'rslib-module':
-            'rslib-module@http://localhost:3000/mf/mf-manifest.json',
+            'rslib_provider@http://localhost:3001/mf-manifest.json',
         },
-        shareStrategy: 'loaded-first',
       },
     },
   ],

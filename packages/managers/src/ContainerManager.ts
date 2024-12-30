@@ -5,7 +5,7 @@ import type {
   ManifestModuleInfos,
   moduleFederationPlugin,
 } from '@module-federation/sdk';
-import { getBuildVersion, parseOptions } from './utils';
+import { parseOptions } from './utils';
 import type { EntryObject } from 'webpack';
 import { BasicPluginOptionsManager } from './BasicPluginOptionsManager';
 
@@ -65,7 +65,7 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
       const [exposeKey, exposeObj] = item;
       sum[exposeKey] = exposeObj;
       return sum;
-    }, {});
+    }, {} as moduleFederationPlugin.ExposesObject);
   }
   // { '.' : './src/Button.jsx' } => { '__federation_expose_Component' : ['src/Buttton'] }
   get exposeFileNameImportMap(): Record<string, string[]> {
@@ -81,30 +81,36 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
         name: item.name || generateExposeFilename(key, false),
       }),
     );
-    return parsedOptions.reduce((sum, item) => {
-      const [_exposeKey, exposeObj] = item;
-      const { name, import: importPath } = exposeObj;
-      sum[name] = importPath;
-      return sum;
-    }, {});
+    return parsedOptions.reduce(
+      (sum, item) => {
+        const [_exposeKey, exposeObj] = item;
+        const { name, import: importPath } = exposeObj;
+        sum[name] = importPath;
+        return sum;
+      },
+      {} as Record<string, string[]>,
+    );
   }
 
   // { '.' : './src/Button.jsx' } => { '.' : ['src/Button'] }
-  get exposeObject(): Record<string, string> {
+  get exposeObject(): Record<string, string[]> {
     const parsedOptions = this._parseOptions();
 
-    return parsedOptions.reduce((sum, item) => {
-      const [exposeKey, exposeObject] = item;
-      sum[exposeKey] = [];
-      exposeObject.import.forEach((item) => {
-        const relativePath = path.relative(
-          '.',
-          item.replace(path.extname(item), ''),
-        );
-        sum[exposeKey].push(relativePath);
-      });
-      return sum;
-    }, {});
+    return parsedOptions.reduce(
+      (sum, item) => {
+        const [exposeKey, exposeObject] = item;
+        sum[exposeKey] = [];
+        exposeObject.import.forEach((item) => {
+          const relativePath = path.relative(
+            '.',
+            item.replace(path.extname(item), ''),
+          );
+          sum[exposeKey].push(relativePath);
+        });
+        return sum;
+      },
+      {} as Record<string, string[]>,
+    );
   }
 
   // { '.' : './src/Button.jsx' } => ['./src/Button.jsx']

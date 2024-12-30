@@ -182,7 +182,40 @@ export default function (): FederationRuntimePlugin {
 
       return args;
     },
+    loadRemoteSnapshot(args) {
+      const { from, remoteSnapshot, manifestUrl, manifestJson, options } = args;
 
+      // ensure snapshot is loaded from manifest
+      if (
+        from !== 'manifest' ||
+        !manifestUrl ||
+        !manifestJson ||
+        !('publicPath' in remoteSnapshot)
+      ) {
+        return args;
+      }
+
+      // re-assign publicPath based on remoteEntry location if in browser nextjs remote
+      const { publicPath } = remoteSnapshot;
+      if (options.inBrowser && publicPath.includes('/_next/')) {
+        remoteSnapshot.publicPath = publicPath.substring(
+          0,
+          publicPath.lastIndexOf('/_next/') + 7,
+        );
+      } else {
+        const serverPublicPath = manifestUrl.substring(
+          0,
+          manifestUrl.indexOf('mf-manifest.json'),
+        );
+        remoteSnapshot.publicPath = serverPublicPath;
+      }
+
+      if ('publicPath' in manifestJson.metaData) {
+        manifestJson.metaData.publicPath = remoteSnapshot.publicPath;
+      }
+
+      return args;
+    },
     resolveShare: function (args: any) {
       if (
         args.pkgName !== 'react' &&

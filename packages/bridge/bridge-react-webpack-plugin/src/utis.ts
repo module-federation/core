@@ -87,18 +87,28 @@ export const getBridgeRouterAlias = (
   originalAlias: string,
 ): Record<string, string> => {
   const userDependencies = getDependencies();
-  const reactRouterDomPath = originalAlias
-    ? originalAlias
-    : userDependencies['react-router-dom']
-      ? require.resolve('react-router-dom')
-      : '';
-  const packageJsonPath = reactRouterDomPath
-    ? findPackageJson(reactRouterDomPath)
-    : '';
+  let reactRouterDomPath = '';
+
+  if (originalAlias) {
+    reactRouterDomPath = originalAlias;
+  } else if (userDependencies['react-router-dom']) {
+    try {
+      reactRouterDomPath = path.resolve(
+        process.cwd(),
+        'node_modules/react-router-dom',
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   // if find react-router-dom in package.json
-  if (packageJsonPath) {
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-    const majorVersion = checkVersion(packageJson.version);
+  if (reactRouterDomPath) {
+    const packageJsonPath = findPackageJson(reactRouterDomPath) || '';
+    const packageJsonContent = JSON.parse(
+      fs.readFileSync(packageJsonPath, 'utf-8'),
+    );
+    const majorVersion = checkVersion(packageJsonContent.version);
     const bridgeRouterAlias = setRouterAlias(majorVersion, reactRouterDomPath);
     console.log(
       '<<<<<<<<<<<<< bridgeRouterAlias >>>>>>>>>>>>>',

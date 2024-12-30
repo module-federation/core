@@ -35,26 +35,27 @@ export default defineConfig({
         distPath: {
           root: './dist/mf',
         },
-        assetPrefix: 'http://localhost:3000/mf',
-        minify: true,
       },
-      plugins: [
-        pluginModuleFederation({
-          name: 'rslib_provider',
-          exposes: {
-            '.': './src/index.tsx',
-          },
-          shared: {
-            react: {
-              singleton: true,
-            },
-            'react-dom': {
-              singleton: true,
-            },
-          },
-        }),
-      ],
+      server: {
+        port: 3001,
+      },
     },
   ],
-  plugins: [pluginReact()],
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'rslib_provider',
+      exposes: {
+        '.': './src/index.tsx',
+      },
+      shared: {
+        react: {
+          singleton: true,
+        },
+        'react-dom': {
+          singleton: true,
+        },
+      },
+    }),
+  ],
 });

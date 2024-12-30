@@ -14,7 +14,7 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "declaration": true,
-    "noImplicitAny": false
+    "noImplicitAny": true
   },
   "files": [],
   "include": [],

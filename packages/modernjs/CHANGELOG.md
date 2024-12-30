@@ -1,5 +1,130 @@
 # @module-federation/modern-js
 
+## 0.8.6
+
+### Patch Changes
+
+- Updated dependencies [a1d46b7]
+  - @module-federation/rsbuild-plugin@0.8.6
+  - @module-federation/enhanced@0.8.6
+  - @module-federation/node@2.6.19
+  - @module-federation/sdk@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.5
+- @module-federation/sdk@0.8.5
+- @module-federation/node@2.6.18
+
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.4
+- @module-federation/node@2.6.17
+- @module-federation/sdk@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [8e172c8]
+  - @module-federation/sdk@0.8.3
+  - @module-federation/node@2.6.16
+  - @module-federation/enhanced@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.2
+- @module-federation/node@2.6.15
+- @module-federation/sdk@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.1
+- @module-federation/node@2.6.14
+- @module-federation/sdk@0.8.1
+
+## 0.8.0
+
+### Patch Changes
+
+- d5c783b: fix: override watchOptions.ignored if the modernjs internal value is regexp
+- e10725f: chore: no auto add watchOptions.ignored
+  - @module-federation/enhanced@0.8.0
+  - @module-federation/sdk@0.8.0
+  - @module-federation/node@2.6.13
+
+## 0.7.7
+
+### Patch Changes
+
+- a960c88: fix(modern-js-plugin): only export esm mfRuntimePlugin
+  - @module-federation/node@2.6.12
+  - @module-federation/enhanced@0.7.7
+  - @module-federation/sdk@0.7.7
+
+## 0.7.6
+
+### Patch Changes
+
+- Updated dependencies [6d35cf7]
+  - @module-federation/node@2.6.11
+  - @module-federation/enhanced@0.7.6
+  - @module-federation/sdk@0.7.6
+
+## 0.7.5
+
+### Patch Changes
+
+- a50b000: fix(modern-js-plugin): prevent components render multiple times if props change
+- Updated dependencies [5613265]
+  - @module-federation/enhanced@0.7.5
+  - @module-federation/node@2.6.10
+  - @module-federation/sdk@0.7.5
+
+## 0.7.4
+
+### Patch Changes
+
+- @module-federation/node@2.6.9
+- @module-federation/enhanced@0.7.4
+- @module-federation/sdk@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+  - @module-federation/enhanced@0.7.3
+  - @module-federation/node@2.6.8
+
+## 0.7.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.7.2
+- @module-federation/node@2.6.7
+- @module-federation/sdk@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [66ba7b1]
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/node@2.6.6
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

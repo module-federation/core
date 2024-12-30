@@ -11,6 +11,7 @@ import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
 import { assert } from './logger';
 import {
   RUNTIME_001,
+  RUNTIME_008,
   getShortErrorMsg,
   runtimeDescMap,
 } from '@module-federation/error-codes';
@@ -25,7 +26,16 @@ async function loadEsmEntry({
   return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
-        import(/* webpackIgnore: true */ entry).then(resolve).catch(reject);
+        if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
+          new Function(
+            'callbacks',
+            `import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
+          )([resolve, reject]);
+        } else {
+          import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
+            .then(resolve)
+            .catch(reject);
+        }
       } else {
         resolve(remoteEntryExports);
       }
@@ -120,6 +130,13 @@ async function loadEntryScript({
       return entryExports;
     })
     .catch((e) => {
+      assert(
+        undefined,
+        getShortErrorMsg(RUNTIME_008, runtimeDescMap, {
+          remoteName: name,
+          resourceUrl: entry,
+        }),
+      );
       throw e;
     });
 }
@@ -221,7 +238,6 @@ export async function getRemoteEntry({
 
   if (!globalLoading[uniqueKey]) {
     const loadEntryHook = origin.remoteHandler.hooks.lifecycle.loadEntry;
-    const createScriptHook = origin.loaderHook.lifecycle.createScript;
     const loaderHook = origin.loaderHook;
 
     globalLoading[uniqueKey] = loadEntryHook

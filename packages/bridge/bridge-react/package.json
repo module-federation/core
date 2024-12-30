@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "0.7.0",
+  "version": "0.8.6",
   "publishConfig": {
     "access": "public"
   },
@@ -26,6 +26,11 @@
       "import": "./dist/router.es.js",
       "require": "./dist/router.cjs.js"
     },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.es.js",
+      "require": "./dist/plugin.es.js"
+    },
     "./router-v5": {
       "types": "./dist/router-v5.d.ts",
       "import": "./dist/router-v5.es.js",
@@ -47,18 +52,18 @@
     "@loadable/component": "^5.16.4",
     "@module-federation/bridge-shared": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "react-error-boundary": "^4.0.13"
+    "react-error-boundary": "^4.1.2"
   },
   "peerDependencies": {
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0",
-    "react-router-dom": ">=4"
+    "react-router-dom": "^4 || ^5 || ^6"
   },
   "devDependencies": {
     "@testing-library/react": "15.0.7",
     "@types/react": "18.2.79",
     "@types/react-dom": "18.3.0",
-    "@vitejs/plugin-react": "^4.3.0",
+    "@vitejs/plugin-react": "^4.3.3",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
     "jsdom": "^24.1.0",
@@ -67,6 +72,7 @@
     "react-router-dom": "6.22.3",
     "typescript": "^5.2.2",
     "vite": "^5.2.14",
-    "vite-plugin-dts": "^3.9.1"
+    "vite-plugin-dts": "^4.3.0",
+    "@module-federation/runtime": "workspace:*"
   }
 }

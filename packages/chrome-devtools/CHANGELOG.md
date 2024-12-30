@@ -1,5 +1,94 @@
 # @module-federation/devtools
 
+## 0.8.6
+
+### Patch Changes
+
+- 5b347f5: feat(chrome-devtools): add option customValueValidate for form component
+  - @module-federation/sdk@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.5
+
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [8e172c8]
+  - @module-federation/sdk@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- 76cf320: fix: immediately inject global runtime plugins
+  - @module-federation/sdk@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.1
+
+## 0.8.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.0
+
+## 0.7.7
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.7
+
+## 0.7.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.6
+
+## 0.7.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.5
+
+## 0.7.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+
+## 0.7.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [6db4c5f]
+  - @module-federation/sdk@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

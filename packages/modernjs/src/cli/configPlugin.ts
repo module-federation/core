@@ -12,6 +12,7 @@ import {
   getIPV4,
   getMFConfig,
   patchMFConfig,
+  addMyTypes2Ignored,
 } from './utils';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 
@@ -83,6 +84,9 @@ export const moduleFederationConfigPlugin = (
 
         return {
           tools: {
+            bundlerChain(chain, { isServer }) {
+              addMyTypes2Ignored(chain, isServer ? ssrConfig : csrConfig);
+            },
             rspack(config, { isServer }) {
               modifyBundlerConfig({
                 bundlerType,

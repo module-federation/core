@@ -1,7 +1,8 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable max-depth */
-
+import fs from 'fs';
+import path from 'path';
 import {
   StatsRemote,
   StatsBuildInfo,
@@ -11,6 +12,8 @@ import {
   StatsAssets,
   moduleFederationPlugin,
   RemoteEntryType,
+  encodeName,
+  MFPrefetchCommon,
 } from '@module-federation/sdk';
 import {
   Compilation,
@@ -39,7 +42,7 @@ import {
   utils,
 } from '@module-federation/managers';
 import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
-import { ModuleHandler } from './ModuleHandler';
+import { ModuleHandler, getExposeItem } from './ModuleHandler';
 import { StatsInfo } from './types';
 
 class StatsManager {
@@ -135,6 +138,20 @@ class StatsManager {
       globalName: globalName,
       pluginVersion: this._pluginVersion,
     };
+
+    let prefetchInterface = false;
+    const prefetchFilePath = path.resolve(
+      compiler.options.context || process.cwd(),
+      `node_modules/.mf/${encodeName(name!)}/${MFPrefetchCommon.fileName}`,
+    );
+    const existPrefetch = fs.existsSync(prefetchFilePath);
+    if (existPrefetch) {
+      const content = fs.readFileSync(prefetchFilePath).toString();
+      if (content) {
+        prefetchInterface = true;
+      }
+    }
+    metaData.prefetchInterface = prefetchInterface;
 
     if (this._options.getPublicPath) {
       if ('publicPath' in metaData) {
@@ -283,7 +300,11 @@ class StatsManager {
     extraOptions?: {},
   ): Promise<Stats> {
     try {
-      const { name, manifest: manifestOptions = {} } = this._options;
+      const {
+        name,
+        manifest: manifestOptions = {},
+        exposes = {},
+      } = this._options;
 
       const metaData = this._getMetaData(compiler, compilation, extraOptions);
 
@@ -303,6 +324,15 @@ class StatsManager {
         const remotes: StatsRemote[] =
           this._remoteManager.statsRemoteWithEmptyUsedIn;
         stats.remotes = remotes;
+        stats.exposes = Object.keys(exposes).map((exposeKey) => {
+          return getExposeItem({
+            exposeKey,
+            name: name!,
+            file: {
+              import: exposes[exposeKey].import,
+            },
+          });
+        });
         return stats;
       }
 

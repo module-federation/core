@@ -18,7 +18,7 @@ import {
   InitTokens,
   CallFrom,
 } from './type';
-import { getBuilderId, registerPlugins } from './utils';
+import { getBuilderId, registerPlugins, getRemoteEntry } from './utils';
 import { Module } from './module';
 import {
   AsyncHook,
@@ -110,10 +110,25 @@ export class FederationHost {
       ],
       HTMLLinkElement | void
     >(),
-    // only work for manifest , so not open to the public yet
     fetch: new AsyncHook<
       [string, RequestInit],
       Promise<Response> | void | false
+    >(),
+    loadEntryError: new AsyncHook<
+      [
+        {
+          getRemoteEntry: typeof getRemoteEntry;
+          origin: FederationHost;
+          remoteInfo: RemoteInfo;
+          remoteEntryExports?: RemoteEntryExports | undefined;
+          globalLoading: Record<
+            string,
+            Promise<void | RemoteEntryExports> | undefined
+          >;
+          uniqueKey: string;
+        },
+      ],
+      Promise<(() => Promise<RemoteEntryExports | undefined>) | undefined>
     >(),
     getModuleFactory: new AsyncHook<
       [
@@ -124,6 +139,24 @@ export class FederationHost {
         },
       ],
       Promise<(() => Promise<Module>) | undefined>
+    >(),
+  });
+  bridgeHook = new PluginSystem({
+    beforeBridgeRender: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+    afterBridgeRender: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+    beforeBridgeDestroy: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
+    >(),
+    afterBridgeDestroy: new SyncHook<
+      [Record<string, any>],
+      void | Record<string, any>
     >(),
   });
 
@@ -285,6 +318,7 @@ export class FederationHost {
       this.sharedHandler.hooks,
       this.snapshotHandler.hooks,
       this.loaderHook,
+      this.bridgeHook,
     ]);
     // Merge plugin
     this.options.plugins = this.options.plugins.reduce((res, plugin) => {

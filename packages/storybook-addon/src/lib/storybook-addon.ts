@@ -4,6 +4,9 @@ import * as process from 'process';
 import VirtualModulesPlugin from 'webpack-virtual-modules';
 import { container, Configuration } from 'webpack';
 import { logger } from '@storybook/node-logger';
+// NOTE: @storybook/core-common is deprecated while still available, considering importing
+// from 'storybook/internal/common' or '@storybook/core'. Considering requires Storybook 8
+// at least and change this in the next breaking change version.
 import { normalizeStories } from '@storybook/core-common';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 

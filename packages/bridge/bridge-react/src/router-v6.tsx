@@ -13,7 +13,7 @@ function WraperRouter(
   const { basename, ...propsRes } = props;
   const routerContextProps = useContext(RouterContext) || {};
 
-  LoggerInstance.log(`WraperRouter info >>>`, {
+  LoggerInstance.debug(`WraperRouter info >>>`, {
     ...routerContextProps,
     routerContextProps,
     WraperRouterProps: props,
@@ -41,7 +41,7 @@ function WraperRouterProvider(
   const { router, ...propsRes } = props;
   const routerContextProps = useContext(RouterContext) || {};
   const routers = router.routes;
-  LoggerInstance.log(`WraperRouterProvider info >>>`, {
+  LoggerInstance.debug(`WraperRouterProvider info >>>`, {
     ...routerContextProps,
     routerContextProps,
     WraperRouterProviderProps: props,
@@ -69,6 +69,7 @@ function WraperRouterProvider(
   }
 }
 
-export * from 'react-router-dom/dist/index.js';
+// export * from 'react-router-dom/dist/index.js';
+export * from 'react-router-dom/';
 export { WraperRouter as BrowserRouter };
 export { WraperRouterProvider as RouterProvider };

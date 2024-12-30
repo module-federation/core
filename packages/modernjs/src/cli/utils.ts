@@ -1,3 +1,13 @@
+import os from 'os';
+import path from 'path';
+import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
+import { bundle } from '@modern-js/node-bundle-require';
+import { PluginOptions } from '../types';
+import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
+import logger from './logger';
+import { autoDeleteSplitChunkCacheGroups } from '@module-federation/rsbuild-plugin/utils';
+
+import type { BundlerConfig, BundlerChainConfig } from '../interfaces/bundler';
 import type {
   webpack,
   UserConfig,
@@ -5,14 +15,6 @@ import type {
   Rspack,
   Bundler,
 } from '@modern-js/app-tools';
-import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
-import path from 'path';
-import os from 'os';
-import { bundle } from '@modern-js/node-bundle-require';
-import { PluginOptions } from '../types';
-import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
-import { BundlerConfig } from '../interfaces/bundler';
-import logger from './logger';
 import type { init } from '@module-federation/enhanced/runtime';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
@@ -152,9 +154,14 @@ export const patchMFConfig = (
   mfConfig.shareStrategy = mfConfig.shareStrategy ?? 'loaded-first';
   patchDTSConfig(mfConfig, isServer);
 
+  injectRuntimePlugins(
+    require.resolve('@module-federation/modern-js/shared-strategy'),
+    runtimePlugins,
+  );
+
   if (isDev) {
     injectRuntimePlugins(
-      path.resolve(__dirname, './mfRuntimePlugins/resolve-entry-ipv4.js'),
+      require.resolve('@module-federation/modern-js/resolve-entry-ipv4'),
       runtimePlugins,
     );
   }
@@ -174,7 +181,7 @@ export const patchMFConfig = (
     }
 
     injectRuntimePlugins(
-      path.resolve(__dirname, './mfRuntimePlugins/node-fetch.js'),
+      require.resolve('@module-federation/modern-js/inject-node-fetch'),
       runtimePlugins,
     );
 
@@ -224,6 +231,59 @@ export function patchIgnoreWarning<T extends Bundler>(
     return false;
   });
 }
+
+export function addMyTypes2Ignored(
+  chain: BundlerChainConfig,
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+) {
+  const watchOptions = chain.get(
+    'watchOptions',
+  ) as webpack.Configuration['watchOptions'];
+  if (!watchOptions || !watchOptions.ignored) {
+    chain.watchOptions({
+      ignored: /[\\/](?:\.git|node_modules|@mf-types)[\\/]/,
+    });
+    return;
+  }
+  const ignored = watchOptions.ignored;
+  const DEFAULT_IGNORED_GLOB = '**/@mf-types/**';
+
+  if (Array.isArray(ignored)) {
+    if (
+      mfConfig.dts !== false &&
+      typeof mfConfig.dts === 'object' &&
+      typeof mfConfig.dts.consumeTypes === 'object' &&
+      mfConfig.dts.consumeTypes.remoteTypesFolder
+    ) {
+      chain.watchOptions({
+        ...watchOptions,
+        ignored: ignored.concat(
+          `**/${mfConfig.dts.consumeTypes.remoteTypesFolder}/**`,
+        ),
+      });
+    } else {
+      chain.watchOptions({
+        ...watchOptions,
+        ignored: ignored.concat(DEFAULT_IGNORED_GLOB),
+      });
+    }
+
+    return;
+  }
+
+  if (typeof ignored !== 'string') {
+    chain.watchOptions({
+      ...watchOptions,
+      ignored: /[\\/](?:\.git|node_modules|@mf-types)[\\/]/,
+    });
+    return;
+  }
+
+  chain.watchOptions({
+    ...watchOptions,
+    ignored: ignored.concat(DEFAULT_IGNORED_GLOB),
+  });
+}
 export function patchBundlerConfig<T extends Bundler>(options: {
   bundlerConfig: BundlerConfig<T>;
   isServer: boolean;
@@ -239,33 +299,6 @@ export function patchBundlerConfig<T extends Bundler>(options: {
 
   patchIgnoreWarning(bundlerConfig);
 
-  if (bundlerType === 'webpack') {
-    bundlerConfig.watchOptions = bundlerConfig.watchOptions || {};
-    if (!Array.isArray(bundlerConfig.watchOptions.ignored)) {
-      if (bundlerConfig.watchOptions.ignored) {
-        bundlerConfig.watchOptions.ignored = [
-          bundlerConfig.watchOptions.ignored as string,
-        ];
-      } else {
-        bundlerConfig.watchOptions.ignored = [];
-      }
-    }
-    if (mfConfig.dts !== false) {
-      if (
-        typeof mfConfig.dts === 'object' &&
-        typeof mfConfig.dts.consumeTypes === 'object' &&
-        mfConfig.dts.consumeTypes.remoteTypesFolder
-      ) {
-        bundlerConfig.watchOptions.ignored.push(
-          `**/${mfConfig.dts.consumeTypes.remoteTypesFolder}/**`,
-        );
-      } else {
-        bundlerConfig.watchOptions.ignored.push('**/@mf-types/**');
-      }
-    } else {
-      bundlerConfig.watchOptions.ignored.push('**/@mf-types/**');
-    }
-  }
   if (bundlerConfig.output) {
     if (!bundlerConfig.output?.chunkLoadingGlobal) {
       bundlerConfig.output.chunkLoadingGlobal = `chunk_${mfConfig.name}`;
@@ -276,6 +309,7 @@ export function patchBundlerConfig<T extends Bundler>(options: {
   }
 
   if (!isServer) {
+    // @ts-ignore
     autoDeleteSplitChunkCacheGroups(mfConfig, bundlerConfig);
   }
 
@@ -394,31 +428,3 @@ const SHARED_SPLIT_CHUNK_MAP = {
   '@douyinfe/semi-ui': SPLIT_CHUNK_MAP.SEMI,
   axios: SPLIT_CHUNK_MAP.AXIOS,
 };
-
-function autoDeleteSplitChunkCacheGroups<T extends Bundler>(
-  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  bundlerConfig: BundlerConfig<T>,
-) {
-  if (!mfConfig.shared) {
-    return;
-  }
-  if (
-    !bundlerConfig.optimization?.splitChunks ||
-    !bundlerConfig.optimization.splitChunks.cacheGroups
-  ) {
-    return;
-  }
-  const arrayShared = Array.isArray(mfConfig.shared)
-    ? mfConfig.shared
-    : Object.keys(mfConfig.shared);
-  for (const shared of arrayShared) {
-    const splitChunkKey =
-      SHARED_SPLIT_CHUNK_MAP[shared as keyof typeof SHARED_SPLIT_CHUNK_MAP];
-    if (!splitChunkKey) {
-      continue;
-    }
-    if (bundlerConfig.optimization.splitChunks.cacheGroups[splitChunkKey]) {
-      delete bundlerConfig.optimization.splitChunks.cacheGroups[splitChunkKey];
-    }
-  }
-}

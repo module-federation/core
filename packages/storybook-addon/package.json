@@ -1,9 +1,13 @@
 {
   "name": "@module-federation/storybook-addon",
-  "version": "3.0.3",
+  "version": "3.0.17",
   "description": "Storybook addon to consume remote module federated apps/components",
   "license": "MIT",
-  "repository": "https://github.com/module-federation/core/tree/main/packages/storybook-addon",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/storybook-addon"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -11,6 +15,8 @@
     "module-federation",
     "typescript",
     "storybook",
+    "rsbuild",
+    "storybook-rsbuild",
     "addon"
   ],
   "files": [
@@ -38,6 +44,9 @@
     "*": {
       ".": [
         "./dist/index.d.ts"
+      ],
+      "preset": [
+        "./dist/preset.d.ts"
       ]
     }
   },
@@ -54,12 +63,39 @@
     "webpack-virtual-modules": "0.6.2"
   },
   "peerDependencies": {
-    "@module-federation/utilities": "^3.1.23",
-    "@nx/react": "~16.0.0 || ~17.0.0 || ~17.2.0",
-    "@nx/webpack": "~16.0.0 || ~17.0.0 || ~17.2.0",
-    "@storybook/core-common": "^6.5.16 || ^7.0.0",
-    "@storybook/node-logger": "^6.5.16 || ^7.0.0",
+    "@rsbuild/core": "^1.0.1",
+    "@module-federation/utilities": "^3.1.37",
+    "@nx/react": ">= 16.0.0",
+    "@nx/webpack": ">= 16.0.0",
+    "@storybook/core-common": "^6.5.16 || ^7.0.0 || ^ 8.0.0",
+    "@storybook/node-logger": "^6.5.16 || ^7.0.0 || ^ 8.0.0",
     "webpack": "^5.75.0",
     "webpack-virtual-modules": "^0.5.0 || ^0.6.0"
+  },
+  "peerDependenciesMeta": {
+    "@rsbuild/core": {
+      "optional": true
+    },
+    "@module-federation/utilities": {
+      "optional": true
+    },
+    "@nx/react": {
+      "optional": true
+    },
+    "@nx/webpack": {
+      "optional": true
+    },
+    "@storybook/core-common": {
+      "optional": true
+    },
+    "@storybook/node-logger": {
+      "optional": true
+    },
+    "webpack": {
+      "optional": true
+    },
+    "webpack-virtual-modules": {
+      "optional": true
+    }
   }
 }

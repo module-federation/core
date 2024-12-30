@@ -1,12 +1,5 @@
 import { it, expect, describe } from 'vitest';
-import path from 'path';
-import { BundlerConfig } from '../interfaces/bundler';
-import {
-  patchMFConfig,
-  patchBundlerConfig,
-  getIPV4,
-  patchIgnoreWarning,
-} from './utils';
+import { patchMFConfig, patchBundlerConfig, getIPV4 } from './utils';
 
 const mfConfig = {
   name: 'host',
@@ -40,8 +33,9 @@ describe('patchMFConfig', async () => {
       remoteType: 'script',
       shareStrategy: 'loaded-first',
       runtimePlugins: [
-        path.resolve(__dirname, './mfRuntimePlugins/node.js'),
-        path.resolve(__dirname, './mfRuntimePlugins/node-fetch.js'),
+        require.resolve('@module-federation/modern-js/shared-strategy'),
+        require.resolve('@module-federation/node/runtimePlugin'),
+        require.resolve('@module-federation/modern-js/inject-node-fetch'),
       ],
       shared: {
         react: {
@@ -68,8 +62,9 @@ describe('patchMFConfig', async () => {
         remote: `http://${ipv4}:3000/remoteEntry.js`,
       },
       remoteType: 'script',
-      runtimePlugins: [],
-      shareStrategy: 'loaded-first',
+      runtimePlugins: [
+        require.resolve('@module-federation/modern-js/shared-strategy'),
+      ],
       shared: {
         react: {
           eager: true,
@@ -116,9 +111,6 @@ describe('patchBundlerConfig', async () => {
         publicPath: 'auto',
         uniqueName: 'host',
       },
-      watchOptions: {
-        ignored: ['**/@mf-types/**'],
-      },
     };
     // @ts-ignore temp ignore
 
@@ -152,9 +144,6 @@ describe('patchBundlerConfig', async () => {
         chunkLoadingGlobal: 'chunk_host',
         publicPath: 'auto',
         uniqueName: 'host',
-      },
-      watchOptions: {
-        ignored: ['**/@mf-types/**'],
       },
     };
     // @ts-ignore temp ignore

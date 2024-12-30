@@ -34,8 +34,14 @@ jobs:
           node-version: '18'
           cache: 'pnpm'
 
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
       - name: Install Dependencies
         run: pnpm install --ignore-scripts
+        # assemble-release-plan is forked, so need to build it before execute pnpm changeset version
+      - name: Build Internal Changesets Dependencies
+        run: npx nx build assemble-release-plan
 
       - name: Create Release Pull Request
         uses: module-federation/actions@v2

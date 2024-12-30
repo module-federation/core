@@ -1,5 +1,115 @@
 # @module-federation/runtime
 
+## 0.8.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.6
+- @module-federation/error-codes@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.5
+- @module-federation/error-codes@0.8.5
+
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.4
+- @module-federation/error-codes@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- f817674: chore(runtime): remove duplicate registerRemotes warn
+- Updated dependencies [8e172c8]
+  - @module-federation/sdk@0.8.3
+  - @module-federation/error-codes@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- fa7a0bd: feat: add remote-entry script resource retry for retry-plugin
+  - @module-federation/sdk@0.8.2
+  - @module-federation/error-codes@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.1
+- @module-federation/error-codes@0.8.1
+
+## 0.8.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.0
+- @module-federation/error-codes@0.8.0
+
+## 0.7.7
+
+### Patch Changes
+
+- a960c88: fix(runtime): add define constant to help downgrade non-esm project
+- e26d107: add @vite-ignore for dynamic import in loadEsmEntry
+  - @module-federation/sdk@0.7.7
+  - @module-federation/error-codes@0.7.7
+
+## 0.7.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.6
+- @module-federation/error-codes@0.7.6
+
+## 0.7.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.5
+- @module-federation/error-codes@0.7.5
+
+## 0.7.4
+
+### Patch Changes
+
+- ff8ce29: feat: feat: support lifecycyle hooks in module-deferation bridge
+  - @module-federation/sdk@0.7.4
+  - @module-federation/error-codes@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- 4ab9295: disable package json generation during build
+- c2b1efa: fix: initializeSharing before load remote while shareStrategy is version first
+- Updated dependencies [4ab9295]
+  - @module-federation/error-codes@0.7.3
+  - @module-federation/sdk@0.7.3
+
+## 0.7.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.2
+- @module-federation/error-codes@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- 66ba7b1: fix: clear globalLoading cache in node env
+- 8712967: fix(runtime): use wrapper global instead of using globalThis directly
+- Updated dependencies [6db4c5f]
+  - @module-federation/sdk@0.7.1
+  - @module-federation/error-codes@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

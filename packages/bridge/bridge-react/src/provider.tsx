@@ -2,16 +2,25 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import ReactDOMClient from 'react-dom/client';
-import { RouterContext } from './context';
 import type {
   ProviderParams,
   RenderFnParams,
 } from '@module-federation/bridge-shared';
-import { LoggerInstance, atLeastReact18 } from './utils';
 import { ErrorBoundary } from 'react-error-boundary';
+import { RouterContext } from './context';
+import { LoggerInstance, atLeastReact18 } from './utils';
+import { federationRuntime } from './plugin';
 
+type RenderParams = RenderFnParams & {
+  [key: string]: unknown;
+};
+type DestroyParams = {
+  moduleName: string;
+  dom: HTMLElement;
+};
 type RootType = HTMLElement | ReactDOMClient.Root;
-type ProviderFnParams<T> = {
+
+export type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
   render?: (
     App: React.ReactElement,
@@ -22,6 +31,12 @@ type ProviderFnParams<T> = {
 export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
   return () => {
     const rootMap = new Map<any, RootType>();
+    const instance = federationRuntime.instance;
+    LoggerInstance.debug(
+      `createBridgeComponent instance from props >>>`,
+      instance,
+    );
+
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
       const { moduleName, memoryRoute, basename = '/' } = appInfo;
@@ -37,8 +52,8 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
     };
 
     return {
-      async render(info: RenderFnParams & any) {
-        LoggerInstance.log(`createBridgeComponent render Info`, info);
+      async render(info: RenderParams) {
+        LoggerInstance.debug(`createBridgeComponent render Info`, info);
         const {
           moduleName,
           dom,
@@ -47,6 +62,10 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           fallback,
           ...propsInfo
         } = info;
+
+        const beforeBridgeRenderRes =
+          instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
+
         const rootComponentWithErrorBoundary = (
           // set ErrorBoundary for RawComponent rendering error, usually caused by user app rendering error
           <ErrorBoundary FallbackComponent={fallback}>
@@ -56,11 +75,13 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
                 basename,
                 memoryRoute,
               }}
-              propsInfo={propsInfo}
+              propsInfo={
+                { ...propsInfo, ...beforeBridgeRenderRes?.extraProps } as T
+              }
             />
           </ErrorBoundary>
         );
-
+        // call render function
         if (atLeastReact18(React)) {
           if (bridgeInfo?.render) {
             // in case bridgeInfo?.render is an async function, resolve this to promise
@@ -77,11 +98,16 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           const renderFn = bridgeInfo?.render || ReactDOM.render;
           renderFn?.(rootComponentWithErrorBoundary, info.dom);
         }
+        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
       },
-      async destroy(info: { dom: HTMLElement }) {
-        LoggerInstance.log(`createBridgeComponent destroy Info`, {
+
+      async destroy(info: DestroyParams) {
+        LoggerInstance.debug(`createBridgeComponent destroy Info`, {
           dom: info.dom,
         });
+        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
+
+        // call destroy function
         if (atLeastReact18(React)) {
           const root = rootMap.get(info.dom);
           (root as ReactDOMClient.Root)?.unmount();
@@ -89,6 +115,8 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
         } else {
           ReactDOM.unmountComponentAtNode(info.dom);
         }
+
+        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
       },
       rawComponent: bridgeInfo.rootComponent,
       __BRIDGE_FN__: (_args: T) => {},

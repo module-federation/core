@@ -1,5 +1,146 @@
 # @module-federation/node
 
+## 2.6.19
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.6
+- @module-federation/runtime@0.8.6
+- @module-federation/sdk@0.8.6
+- @module-federation/utilities@3.1.37
+
+## 2.6.18
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.5
+- @module-federation/enhanced@0.8.5
+- @module-federation/sdk@0.8.5
+- @module-federation/utilities@3.1.36
+
+## 2.6.17
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.4
+- @module-federation/runtime@0.8.4
+- @module-federation/sdk@0.8.4
+- @module-federation/utilities@3.1.35
+
+## 2.6.16
+
+### Patch Changes
+
+- Updated dependencies [f817674]
+- Updated dependencies [8e172c8]
+  - @module-federation/runtime@0.8.3
+  - @module-federation/sdk@0.8.3
+  - @module-federation/enhanced@0.8.3
+  - @module-federation/utilities@3.1.34
+
+## 2.6.15
+
+### Patch Changes
+
+- Updated dependencies [fa7a0bd]
+  - @module-federation/runtime@0.8.2
+  - @module-federation/enhanced@0.8.2
+  - @module-federation/sdk@0.8.2
+  - @module-federation/utilities@3.1.33
+
+## 2.6.14
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.1
+- @module-federation/runtime@0.8.1
+- @module-federation/sdk@0.8.1
+- @module-federation/utilities@3.1.32
+
+## 2.6.13
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.0
+- @module-federation/enhanced@0.8.0
+- @module-federation/sdk@0.8.0
+- @module-federation/utilities@3.1.31
+
+## 2.6.12
+
+### Patch Changes
+
+- Updated dependencies [a960c88]
+- Updated dependencies [e26d107]
+  - @module-federation/runtime@0.7.7
+  - @module-federation/enhanced@0.7.7
+  - @module-federation/sdk@0.7.7
+  - @module-federation/utilities@3.1.30
+
+## 2.6.11
+
+### Patch Changes
+
+- 6d35cf7: use eval for require to avoid bundler warnings
+  - @module-federation/runtime@0.7.6
+  - @module-federation/enhanced@0.7.6
+  - @module-federation/sdk@0.7.6
+  - @module-federation/utilities@3.1.29
+
+## 2.6.10
+
+### Patch Changes
+
+- Updated dependencies [5613265]
+  - @module-federation/enhanced@0.7.5
+  - @module-federation/runtime@0.7.5
+  - @module-federation/sdk@0.7.5
+  - @module-federation/utilities@3.1.28
+
+## 2.6.9
+
+### Patch Changes
+
+- Updated dependencies [ff8ce29]
+  - @module-federation/runtime@0.7.4
+  - @module-federation/enhanced@0.7.4
+  - @module-federation/sdk@0.7.4
+  - @module-federation/utilities@3.1.27
+
+## 2.6.8
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+- Updated dependencies [c2b1efa]
+  - @module-federation/utilities@3.1.26
+  - @module-federation/runtime@0.7.3
+  - @module-federation/sdk@0.7.3
+  - @module-federation/enhanced@0.7.3
+
+## 2.6.7
+
+### Patch Changes
+
+- @module-federation/enhanced@0.7.2
+- @module-federation/runtime@0.7.2
+- @module-federation/sdk@0.7.2
+- @module-federation/utilities@3.1.25
+
+## 2.6.6
+
+### Patch Changes
+
+- 66ba7b1: fix: clear globalLoading cache in node env
+- Updated dependencies [66ba7b1]
+- Updated dependencies [8712967]
+- Updated dependencies [6db4c5f]
+- Updated dependencies [47fdbc2]
+  - @module-federation/runtime@0.7.1
+  - @module-federation/sdk@0.7.1
+  - @module-federation/enhanced@0.7.1
+  - @module-federation/utilities@3.1.24
+
 ## 2.6.5
 
 ### Patch Changes

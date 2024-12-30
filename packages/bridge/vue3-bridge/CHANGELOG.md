@@ -1,5 +1,132 @@
 # @module-federation/bridge-vue3
 
+## 0.8.6
+
+### Patch Changes
+
+- 85e7482: fix(bridge-react): change all logs from info to debug in all bridge packages
+  - @module-federation/runtime@0.8.6
+  - @module-federation/sdk@0.8.6
+  - @module-federation/bridge-shared@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- d161cbe: 1. Added type annotations for the argument in the `createBridgeComponent` function. 2. Added passing the instance of the created Vue-application to `appOptions` so that necessary plugins can be registered in this callback. 3. Made `router` returned from `appOptions` optional. 4. Fixed issues reported by TypeScript and ESLint, including allowing `beforeBridgeRenderRes` to be a promise. 5. Updated the documentation.
+  - @module-federation/runtime@0.8.5
+  - @module-federation/sdk@0.8.5
+  - @module-federation/bridge-shared@0.8.5
+
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.4
+- @module-federation/sdk@0.8.4
+- @module-federation/bridge-shared@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [f817674]
+- Updated dependencies [8e172c8]
+  - @module-federation/runtime@0.8.3
+  - @module-federation/sdk@0.8.3
+  - @module-federation/bridge-shared@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- Updated dependencies [fa7a0bd]
+  - @module-federation/runtime@0.8.2
+  - @module-federation/sdk@0.8.2
+  - @module-federation/bridge-shared@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.1
+- @module-federation/sdk@0.8.1
+- @module-federation/bridge-shared@0.8.1
+
+## 0.8.0
+
+### Minor Changes
+
+- 734df18: Added the ability to pass parameters to `defineAsyncComponent`, which solves the following issues:
+  - Enables control over fallback components and their display parameters;
+  - Improves compatibility with Nuxt by allowing configuration of the `suspensible` parameter;
+  - Eliminates the package requirement to `Configure your bundler to alias "vue" to "vue/dist/vue.esm-bundler.js"`.
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.0
+- @module-federation/sdk@0.8.0
+- @module-federation/bridge-shared@0.8.0
+
+## 0.7.7
+
+### Patch Changes
+
+- Updated dependencies [a960c88]
+- Updated dependencies [e26d107]
+  - @module-federation/runtime@0.7.7
+  - @module-federation/sdk@0.7.7
+  - @module-federation/bridge-shared@0.7.7
+
+## 0.7.6
+
+### Patch Changes
+
+- @module-federation/runtime@0.7.6
+- @module-federation/sdk@0.7.6
+- @module-federation/bridge-shared@0.7.6
+
+## 0.7.5
+
+### Patch Changes
+
+- @module-federation/runtime@0.7.5
+- @module-federation/sdk@0.7.5
+- @module-federation/bridge-shared@0.7.5
+
+## 0.7.4
+
+### Patch Changes
+
+- ff8ce29: feat: feat: support lifecycyle hooks in module-deferation bridge
+- Updated dependencies [ff8ce29]
+  - @module-federation/runtime@0.7.4
+  - @module-federation/sdk@0.7.4
+  - @module-federation/bridge-shared@0.7.4
+
+## 0.7.3
+
+### Patch Changes
+
+- Updated dependencies [4ab9295]
+  - @module-federation/sdk@0.7.3
+  - @module-federation/bridge-shared@0.7.3
+
+## 0.7.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.7.2
+- @module-federation/bridge-shared@0.7.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [6db4c5f]
+  - @module-federation/sdk@0.7.1
+  - @module-federation/bridge-shared@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

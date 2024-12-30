@@ -22,7 +22,7 @@ export type { FlushedChunksProps } from './flushedChunks';
  */
 export const revalidate = function (
   fetchModule: any = undefined,
-  force: boolean = false,
+  force = false,
 ): Promise<boolean> {
   if (typeof window !== 'undefined') {
     console.error('revalidate should only be called server-side');
