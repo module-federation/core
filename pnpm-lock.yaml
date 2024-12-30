@@ -2179,6 +2179,9 @@ importers:
       '@module-federation/dts-plugin':
         specifier: workspace:*
         version: link:../dts-plugin
+      '@module-federation/error-codes':
+        specifier: workspace:*
+        version: link:../error-codes
       '@module-federation/managers':
         specifier: workspace:*
         version: link:../managers

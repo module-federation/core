@@ -8,3 +8,4 @@ export const RUNTIME_007 = 'RUNTIME-007';
 export const RUNTIME_008 = 'RUNTIME-008';
 
 export const TYPE_001 = 'TYPE-001';
+export const BUILD_001 = 'BUILD-001';
