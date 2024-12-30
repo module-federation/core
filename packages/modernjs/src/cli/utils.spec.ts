@@ -65,6 +65,7 @@ describe('patchMFConfig', async () => {
       runtimePlugins: [
         require.resolve('@module-federation/modern-js/shared-strategy'),
       ],
+      shareStrategy: 'loaded-first',
       shared: {
         react: {
           eager: true,

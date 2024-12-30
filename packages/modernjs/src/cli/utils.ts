@@ -168,7 +168,7 @@ export const patchMFConfig = (
 
   if (isServer) {
     injectRuntimePlugins(
-      path.resolve(__dirname, './mfRuntimePlugins/node.js'),
+      require.resolve('@module-federation/node/runtimePlugin'),
       runtimePlugins,
     );
     if (isDev) {
