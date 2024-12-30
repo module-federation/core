@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/modernjsapp",
   "private": true,
-  "version": "0.1.76",
+  "version": "0.1.77",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
