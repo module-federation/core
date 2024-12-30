@@ -24,7 +24,7 @@ export const moduleFederationSSRPlugin = (
   ],
   setup: async ({ useConfigContext, useAppContext }) => {
     const modernjsConfig = useConfigContext();
-    const { metaName = META_NAME } = userConfig;
+    const { metaName = META_NAME } = pluginOptions;
     const enableSSR = Boolean(modernjsConfig?.server?.ssr);
     if (!enableSSR || pluginOptions.userConfig?.ssr === false) {
       return {};
