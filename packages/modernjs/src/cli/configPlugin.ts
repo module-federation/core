@@ -72,9 +72,10 @@ export const moduleFederationConfigPlugin = (
         const bundlerType =
           useAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
         const ipv4 = getIPV4();
-        const enableSSR = userConfig.userConfig?.disableSSR
-          ? false
-          : Boolean(modernjsConfig?.server?.ssr);
+        const enableSSR =
+          userConfig.userConfig?.ssr === false
+            ? false
+            : Boolean(modernjsConfig?.server?.ssr);
 
         if (userConfig.remoteIpStrategy === undefined) {
           if (!enableSSR) {

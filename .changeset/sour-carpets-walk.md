@@ -2,4 +2,4 @@
 '@module-federation/modern-js': patch
 ---
 
-chore(modern-js-plugin): add disableSSR option
+chore(modern-js-plugin): add ssr option
