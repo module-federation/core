@@ -1,5 +1,14 @@
 # @module-federation/storybook-addon
 
+## 3.0.17
+
+### Patch Changes
+
+- a1d46b7: chore: export plugin name
+  - @module-federation/enhanced@0.8.6
+  - @module-federation/sdk@0.8.6
+  - @module-federation/utilities@3.1.37
+
 ## 3.0.16
 
 ### Patch Changes
