@@ -1,5 +1,24 @@
 # @module-federation/rsbuild-plugin
 
+## 0.8.7
+
+### Patch Changes
+
+- Updated dependencies [835b09c]
+- Updated dependencies [f573ad0]
+- Updated dependencies [336f3d8]
+- Updated dependencies [4fd33fb]
+  - @module-federation/sdk@0.8.7
+  - @module-federation/enhanced@0.8.7
+
+## 0.8.6
+
+### Patch Changes
+
+- a1d46b7: chore(rsbuild-plugin): split setUp function to help extend
+  - @module-federation/enhanced@0.8.6
+  - @module-federation/sdk@0.8.6
+
 ## 0.8.5
 
 ### Patch Changes

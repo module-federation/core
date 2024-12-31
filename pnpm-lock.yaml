@@ -2179,6 +2179,12 @@ importers:
       '@module-federation/dts-plugin':
         specifier: workspace:*
         version: link:../dts-plugin
+      '@module-federation/error-codes':
+        specifier: workspace:*
+        version: link:../error-codes
+      '@module-federation/inject-external-runtime-core-plugin':
+        specifier: workspace:*
+        version: link:../runtime-plugins/inject-external-runtime-core-plugin
       '@module-federation/managers':
         specifier: workspace:*
         version: link:../managers
@@ -2517,6 +2523,9 @@ importers:
       '@module-federation/dts-plugin':
         specifier: workspace:*
         version: link:../dts-plugin
+      '@module-federation/inject-external-runtime-core-plugin':
+        specifier: workspace:*
+        version: link:../runtime-plugins/inject-external-runtime-core-plugin
       '@module-federation/managers':
         specifier: workspace:*
         version: link:../managers
@@ -2545,9 +2554,27 @@ importers:
       '@module-federation/error-codes':
         specifier: workspace:*
         version: link:../error-codes
+      '@module-federation/runtime-core':
+        specifier: workspace:*
+        version: link:../runtime-core
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
+
+  packages/runtime-core:
+    dependencies:
+      '@module-federation/error-codes':
+        specifier: workspace:*
+        version: link:../error-codes
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+
+  packages/runtime-plugins/inject-external-runtime-core-plugin:
+    devDependencies:
+      '@module-federation/runtime-tools':
+        specifier: workspace:*
+        version: link:../../runtime-tools
 
   packages/runtime-tools:
     dependencies:
@@ -25241,6 +25268,7 @@ packages:
     dependencies:
       ms: 2.1.3
       supports-color: 8.1.1
+    dev: true
 
   /debug@4.3.7(supports-color@9.3.1):
     resolution: {integrity: sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==}

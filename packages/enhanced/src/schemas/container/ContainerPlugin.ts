@@ -343,6 +343,9 @@ export default {
         federationRuntime: {
           anyOf: [{ type: 'boolean' }, { enum: ['hoisted'] }],
         },
+        externalRuntime: {
+          anyOf: [{ type: 'boolean' }, { enum: ['provide'] }],
+        },
       },
       additionalProperties: false,
     },

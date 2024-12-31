@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime",
-  "version": "0.8.5",
+  "version": "0.8.7",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.mjs",
@@ -34,6 +34,11 @@
       "import": "./dist/types.esm.mjs",
       "require": "./dist/types.cjs.js"
     },
+    "./core": {
+      "types": "./dist/core.cjs.d.ts",
+      "import": "./dist/core.esm.mjs",
+      "require": "./dist/core.cjs.js"
+    },
     "./embedded": {
       "types": "./dist/embedded.cjs.d.ts",
       "import": "./dist/embedded.esm.mjs",
@@ -51,11 +56,15 @@
       ],
       "types": [
         "./dist/types.cjs.d.ts"
+      ],
+      "core": [
+        "./dist/core.cjs.d.ts"
       ]
     }
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
-    "@module-federation/error-codes": "workspace:*"
+    "@module-federation/error-codes": "workspace:*",
+    "@module-federation/runtime-core": "workspace:*"
   }
 }
