@@ -31,6 +31,7 @@ describe('patchMFConfig', async () => {
         remote: `http://${ipv4}:3000/remoteEntry.js`,
       },
       remoteType: 'script',
+      shareStrategy: 'loaded-first',
       runtimePlugins: [
         require.resolve('@module-federation/modern-js/shared-strategy'),
         require.resolve('@module-federation/node/runtimePlugin'),
@@ -64,6 +65,7 @@ describe('patchMFConfig', async () => {
       runtimePlugins: [
         require.resolve('@module-federation/modern-js/shared-strategy'),
       ],
+      shareStrategy: 'loaded-first',
       shared: {
         react: {
           eager: true,

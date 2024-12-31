@@ -15,6 +15,7 @@ import type {
   Rspack,
   Bundler,
 } from '@modern-js/app-tools';
+import type { init } from '@module-federation/enhanced/runtime';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
 const isDev = process.env.NODE_ENV === 'development';
@@ -50,8 +51,10 @@ const injectRuntimePlugins = (
   }
 };
 
-const replaceRemoteUrl = (
-  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+export const replaceRemoteUrl = (
+  mfConfig:
+    | moduleFederationPlugin.ModuleFederationPluginOptions
+    | Parameters<typeof init>[0],
   remoteIpStrategy?: 'ipv4' | 'inherit',
 ) => {
   if (remoteIpStrategy && remoteIpStrategy === 'inherit') {
@@ -83,12 +86,16 @@ const replaceRemoteUrl = (
     });
   };
   if (Array.isArray(mfConfig.remotes)) {
-    mfConfig.remotes.forEach((remoteObject) => {
-      if (typeof remoteObject === 'string') {
-        return;
-      }
-      handleRemoteObject(remoteObject);
-    });
+    (mfConfig.remotes as Parameters<typeof init>[0]['remotes']).forEach(
+      (remoteObject) => {
+        if (typeof remoteObject === 'string') {
+          return;
+        }
+        if ('entry' in remoteObject && typeof remoteObject.entry === 'string') {
+          remoteObject.entry = remoteObject.entry.replace(LOCALHOST, ipv4);
+        }
+      },
+    );
   } else if (typeof mfConfig.remotes !== 'string') {
     handleRemoteObject(mfConfig.remotes);
   }
@@ -144,7 +151,7 @@ export const patchMFConfig = (
     throw new Error(`${PLUGIN_IDENTIFIER} mfConfig.name can not be empty!`);
   }
   const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
-
+  mfConfig.shareStrategy = mfConfig.shareStrategy ?? 'loaded-first';
   patchDTSConfig(mfConfig, isServer);
 
   injectRuntimePlugins(

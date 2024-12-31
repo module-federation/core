@@ -1,1 +1,15 @@
-["index","dynamic-remote"]
+[
+  "index",
+  {
+    "type": "dir",
+    "name": "ssr",
+    "label": "服务端渲染（SSR）",
+    "collapsed": true
+  },
+  {
+    "type": "dir",
+    "name": "csr",
+    "label": "客户端渲染（CSR）",
+    "collapsed": true
+  }
+]

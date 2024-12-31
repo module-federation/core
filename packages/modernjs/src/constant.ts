@@ -1,3 +1,14 @@
 export const MODERN_JS_SERVER_DIR = 'bundles';
 export const LOCALHOST = 'localhost';
 export const PLUGIN_IDENTIFIER = '[ Modern.js Module Federation ]';
+export const isDev = process.env.NODE_ENV === 'development';
+export const MODERN_JS_FILE_SYSTEM_ROUTES_FILE_NAME = 'routes';
+export const MODERN_JS_ROUTE_SERVER_LOADER = 'route-server-loaders';
+export const META_NAME = 'modern-js';
+export const FOLD_IDENTIFIER = '@mf';
+export const SEPARATOR = '_';
+export const MF_ROUTES = 'mf-routes';
+export const DEFAULT_ENTRY = 'main';
+export const DEFAULT_LAYOUT = 'layout';
+export const MF_JSON = 'mf.json';
+export const ROUTE_ID = 'ROUTE_ID';
