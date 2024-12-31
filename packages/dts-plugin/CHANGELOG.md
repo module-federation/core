@@ -1,5 +1,36 @@
 # @module-federation/dts-plugin
 
+## 0.8.7
+
+### Patch Changes
+
+- Updated dependencies [835b09c]
+- Updated dependencies [336f3d8]
+- Updated dependencies [4fd33fb]
+  - @module-federation/sdk@0.8.7
+  - @module-federation/error-codes@0.8.7
+  - @module-federation/managers@0.8.7
+  - @module-federation/third-party-dts-extractor@0.8.7
+
+## 0.8.6
+
+### Patch Changes
+
+- c90bba2: fix(dts-plugin): auto inject compiler output path to avoid duplicate zip file
+  - @module-federation/sdk@0.8.6
+  - @module-federation/managers@0.8.6
+  - @module-federation/third-party-dts-extractor@0.8.6
+  - @module-federation/error-codes@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.5
+- @module-federation/managers@0.8.5
+- @module-federation/third-party-dts-extractor@0.8.5
+- @module-federation/error-codes@0.8.5
+
 ## 0.8.4
 
 ### Patch Changes

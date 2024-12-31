@@ -11,3 +11,4 @@ packages:
   - 'apps/*'
   - 'webpack'
   - 'assemble-release-plan'
+  - 'packages/runtime-plugins/*'

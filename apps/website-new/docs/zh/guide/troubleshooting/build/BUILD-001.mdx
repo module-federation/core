@@ -1,0 +1,19 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='BUILD-001'/>
+
+## 原因
+
+未能正常找到 Expose 模块资源。
+
+该问题原因有两个：
+1. `exposes` 设置的 exposeModules 文件路径不正确，指向一个不存在的地址。
+2. 使用了 `Next.js` 或其他内置了 webpack 的框架，MF 使用的 webpack 地址与其不对
+
+## 解决方法
+
+针对原因，有对应的解决方法：
+
+1. 检查 exposes 对应的模块文件路径是否正确，此处注意大小写。
+2. 检查 FEDERATION_WEBPACK_PATH 与框架使用的 webpack 地址是否一致，如果不对，可以查看依赖是否正常安装，或者设置 process.env.FEDERATION_WEBPACK_PATH 指向实际使用的 webpack 地址。
+

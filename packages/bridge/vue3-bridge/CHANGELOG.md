@@ -1,5 +1,35 @@
 # @module-federation/bridge-vue3
 
+## 0.8.7
+
+### Patch Changes
+
+- Updated dependencies [835b09c]
+- Updated dependencies [f573ad0]
+- Updated dependencies [336f3d8]
+- Updated dependencies [4fd33fb]
+  - @module-federation/sdk@0.8.7
+  - @module-federation/runtime@0.8.7
+  - @module-federation/bridge-shared@0.8.7
+
+## 0.8.6
+
+### Patch Changes
+
+- 85e7482: fix(bridge-react): change all logs from info to debug in all bridge packages
+  - @module-federation/runtime@0.8.6
+  - @module-federation/sdk@0.8.6
+  - @module-federation/bridge-shared@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- d161cbe: 1. Added type annotations for the argument in the `createBridgeComponent` function. 2. Added passing the instance of the created Vue-application to `appOptions` so that necessary plugins can be registered in this callback. 3. Made `router` returned from `appOptions` optional. 4. Fixed issues reported by TypeScript and ESLint, including allowing `beforeBridgeRenderRes` to be a promise. 5. Updated the documentation.
+  - @module-federation/runtime@0.8.5
+  - @module-federation/sdk@0.8.5
+  - @module-federation/bridge-shared@0.8.5
+
 ## 0.8.4
 
 ### Patch Changes

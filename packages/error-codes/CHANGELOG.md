@@ -1,5 +1,16 @@
 # @module-federation/error-codes
 
+## 0.8.7
+
+### Patch Changes
+
+- 336f3d8: fix(enhanced): abort process if not find expose modules
+- 4fd33fb: fix: throw RUNTIME-008 Error when script resources load failed
+
+## 0.8.6
+
+## 0.8.5
+
 ## 0.8.4
 
 ## 0.8.3

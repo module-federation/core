@@ -1,8 +1,10 @@
 import { assert, describe, test, it } from 'vitest';
-import { FederationHost } from '../src/core';
-import { FederationRuntimePlugin } from '../src/type/plugin';
+import {
+  FederationHost,
+  addGlobalSnapshot,
+} from '@module-federation/runtime-core';
+import { FederationRuntimePlugin } from '@module-federation/runtime-core/types';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
-import { addGlobalSnapshot } from '../src/global';
 
 // eslint-disable-next-line max-lines-per-function
 describe('hooks', () => {
