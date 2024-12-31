@@ -45,9 +45,7 @@ class SharePlugin {
       ([key, options]) => ({
         [key]: {
           import: options.import,
-          shareKey: options.layer
-            ? `(${options.layer})${options.shareKey || key}`
-            : options.shareKey || key,
+          shareKey: options.shareKey || key,
           shareScope: options.shareScope,
           requiredVersion: options.requiredVersion,
           strictVersion: options.strictVersion,
@@ -64,9 +62,7 @@ class SharePlugin {
       .filter(([, options]) => options.import !== false)
       .map(([key, options]) => ({
         [options.import || key]: {
-          shareKey: options.layer
-            ? `(${options.layer})${options.shareKey || key}`
-            : options.shareKey || key,
+          shareKey: options.shareKey || key,
           shareScope: options.shareScope,
           version: options.version,
           eager: options.eager,

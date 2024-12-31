@@ -95,17 +95,22 @@ class ProvideSharedPlugin {
         };
         return result;
       },
-      (item, key) => ({
-        shareKey: item.shareKey || key,
-        version: item.version,
-        shareScope: item.shareScope || options.shareScope || 'default',
-        eager: !!item.eager,
-        requiredVersion: item.requiredVersion || false,
-        strictVersion: item.strictVersion || false,
-        singleton: item.singleton || false,
-        layer: item.layer,
-        request: item.request || key,
-      }),
+      (item, key) => {
+        const request = item.request || key;
+        return {
+          shareScope: item.shareScope || options.shareScope || 'default',
+          shareKey: item.layer
+            ? `(${item.layer})${item.shareKey || request}`
+            : item.shareKey || request,
+          version: item.version,
+          eager: !!item.eager,
+          requiredVersion: item.requiredVersion,
+          strictVersion: item.strictVersion,
+          singleton: !!item.singleton,
+          layer: item.layer,
+          request,
+        };
+      },
     );
     this._provides.sort(([a], [b]) => {
       if (a < b) return -1;
