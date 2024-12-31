@@ -128,8 +128,7 @@ export function remotes(options: RemotesOptions) {
 
       const useRuntimeLoad =
         remoteInfos.length === 1 &&
-        FEDERATION_SUPPORTED_TYPES.includes(remoteInfos[0].externalType) &&
-        remoteInfos[0].name;
+        FEDERATION_SUPPORTED_TYPES.includes(remoteInfos[0].externalType);
 
       if (useRuntimeLoad) {
         handleFunction(onRemoteLoaded, data[2], 0, 0, onFactory, 1);

@@ -12,6 +12,7 @@ import type webpack from 'webpack';
 import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { NormalizedRuntimeInitOptionsWithOutShared } from '../../../types/runtime';
+import { FEDERATION_SUPPORTED_TYPES } from '../constant';
 
 const extractUrlAndGlobal = require(
   normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
@@ -21,13 +22,20 @@ type EntryStaticNormalized = Awaited<
   ReturnType<Extract<webpack.WebpackOptionsNormalized['entry'], () => any>>
 >;
 
-type Remotes = Parameters<typeof init>[0]['remotes'];
+type BaseRemote = Parameters<typeof init>[0]['remotes'][0];
+type Remote = BaseRemote & {
+  externalType?: string;
+};
+type Remotes = Remote[];
 
 interface ModifyEntryOptions {
   compiler: webpack.Compiler;
   prependEntry?: (entry: EntryStaticNormalized) => void;
   staticEntry?: EntryStaticNormalized;
 }
+
+// Add supported types constant
+const SUPPORTED_TYPES = [...FEDERATION_SUPPORTED_TYPES, 'commonjs-module'];
 
 export function getFederationGlobalScope(
   runtimeGlobals: typeof RuntimeGlobals,
@@ -49,25 +57,69 @@ export function normalizeRuntimeInitOptionsWithOutShared(
       shareScope: item.shareScope || options.shareScope || 'default',
     }),
   );
+  const generalRemoteType =
+    options.remoteType || options.library?.type || 'script';
   const remoteOptions: Remotes = [];
   parsedOptions.forEach((parsedOption) => {
     const [alias, remoteInfos] = parsedOption;
     const { external, shareScope } = remoteInfos;
     try {
-      // only fit for remoteType: 'script'
       const entry = external[0];
-      if (/\s/.test(entry)) {
+      if (!entry || typeof entry !== 'string') return;
+
+      // Skip invalid entries with spaces (unless they have a valid type prefix)
+      if (
+        /^\s|\s$/.test(entry) ||
+        (/\s/.test(entry) &&
+          !entry.match(/^(commonjs|commonjs-module|script)\s/))
+      ) {
         return;
       }
-      const [url, globalName] = extractUrlAndGlobal(external[0]);
+
+      // Check if entry starts with a supported type prefix
+      const typeMatch = entry.match(
+        /^(commonjs|commonjs-module|script)\s+(.+)$/,
+      );
+      const externalType = typeMatch ? typeMatch[1] : generalRemoteType;
+      const actualEntry = typeMatch ? typeMatch[2] : entry;
+
+      let url;
+      let globalName = '';
+
+      // Try to extract URL and global name first
+      try {
+        const [extractedUrl, extractedGlobal] =
+          extractUrlAndGlobal(actualEntry);
+        url = extractedUrl;
+        globalName = extractedGlobal || '';
+      } catch (err) {
+        // If extractUrlAndGlobal fails, check if it's a URL with @ format
+        const atMatch = actualEntry.match(/^([^@]+)@(.+)$/);
+        if (atMatch) {
+          globalName = atMatch[1];
+          url = atMatch[2];
+        } else {
+          // If neither works, use the entry as is
+          url = actualEntry;
+          // For commonjs types, we don't need a global name
+          if (
+            externalType !== 'commonjs' &&
+            externalType !== 'commonjs-module'
+          ) {
+            globalName = '';
+          }
+        }
+      }
+
       remoteOptions.push({
         alias,
         name: globalName,
         entry: url,
         shareScope: shareScope,
-        // externalType
-      });
+        externalType,
+      } as Remote);
     } catch (err) {
+      // Skip invalid entries
       return;
     }
   });

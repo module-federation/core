@@ -33,7 +33,12 @@ export default {
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/enhanced',
   rootDir: __dirname,
-  testMatch: ['<rootDir>/test/*.basictest.js'],
+  testMatch: [
+    '<rootDir>/test/*.basictest.js',
+    '<rootDir>/src/**/*.spec.ts',
+    '<rootDir>/test/**/*.spec.ts',
+    '<rootDir>/src/**/*.test.ts',
+  ],
 
   testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
   setupFilesAfterEnv: ['<rootDir>/test/setupTestFramework.js'],
