@@ -8,6 +8,12 @@
   },
   {
     "type": "dir",
+    "name": "build",
+    "label": "Build",
+    "collapsed":true
+  },
+  {
+    "type": "dir",
     "name": "type",
     "label": "Type",
     "collapsed":true

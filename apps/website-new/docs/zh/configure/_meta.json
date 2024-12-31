@@ -63,5 +63,10 @@
     "type": "file",
     "name": "shareStrategy",
     "label": "shareStrategy"
+  },
+  {
+    "type": "file",
+    "name": "experiments",
+    "label": "experiments"
   }
 ]

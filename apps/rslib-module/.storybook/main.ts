@@ -29,7 +29,7 @@ const config: StorybookConfig = {
       options: {
         remotes: {
           'rslib-module':
-            'rslib-module@http://localhost:3001/mf/mf-manifest.json',
+            'rslib_provider@http://localhost:3001/mf-manifest.json',
         },
       },
     },

@@ -14,6 +14,37 @@ type ShareMap = { [sharedKey: string]: StatsShared };
 type ExposeMap = { [exposeImportValue: string]: StatsExpose };
 type RemotesConsumerMap = { [remoteKey: string]: StatsRemote };
 
+export function getExposeItem({
+  exposeKey,
+  name,
+  file,
+}: {
+  exposeKey: string;
+  name: string;
+  file: { import: string[] };
+}): StatsExpose {
+  const exposeModuleName = exposeKey.replace('./', '');
+
+  return {
+    path: exposeKey,
+    id: `${name}:${exposeModuleName}`,
+    name: exposeModuleName,
+    // @ts-ignore to deduplicate
+    requires: new Set(),
+    file: path.relative(process.cwd(), file.import[0]),
+    assets: {
+      js: {
+        async: [],
+        sync: [],
+      },
+      css: {
+        async: [],
+        sync: [],
+      },
+    },
+  };
+}
+
 class ModuleHandler {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _bundler: 'webpack' | 'rspack' = 'webpack';
@@ -258,26 +289,12 @@ class ModuleHandler {
     const data = identifier.split(' ');
 
     JSON.parse(data[3]).forEach(([prefixedName, file]) => {
-      const exposeModuleName = prefixedName.replace('./', '');
       // TODO: support multiple import
-      exposesMap[getFileNameWithOutExt(file.import[0])] = {
-        path: prefixedName,
-        id: `${this._options.name}:${exposeModuleName}`,
-        name: exposeModuleName,
-        // @ts-ignore to deduplicate
-        requires: new Set(),
-        file: path.relative(process.cwd(), file.import[0]),
-        assets: {
-          js: {
-            async: [],
-            sync: [],
-          },
-          css: {
-            async: [],
-            sync: [],
-          },
-        },
-      };
+      exposesMap[getFileNameWithOutExt(file.import[0])] = getExposeItem({
+        exposeKey: prefixedName,
+        name: this._options.name!,
+        file,
+      });
     });
   }
 

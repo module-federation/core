@@ -1,5 +1,19 @@
 # website-new
 
+## 1.0.20
+
+### Patch Changes
+
+- Updated dependencies [336f3d8]
+- Updated dependencies [4fd33fb]
+  - @module-federation/error-codes@0.8.7
+
+## 1.0.19
+
+### Patch Changes
+
+- @module-federation/error-codes@0.8.6
+
 ## 1.0.18
 
 ### Patch Changes
