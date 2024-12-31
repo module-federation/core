@@ -50,6 +50,7 @@ export interface SharedConfig {
   requiredVersion: false | string;
   eager?: boolean;
   strictVersion?: boolean;
+  layer?: string | null;
 }
 
 type SharedBaseArgs = {
