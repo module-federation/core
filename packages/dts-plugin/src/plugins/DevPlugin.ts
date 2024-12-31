@@ -191,6 +191,10 @@ export class DevPlugin implements WebpackPluginInstance {
                 ? undefined
                 : normalizedDtsOptions.implementation,
             context: compiler.context,
+            outputDir: path.relative(
+              compiler.context,
+              compiler.outputPath || compiler.options.output.path,
+            ),
             moduleFederationConfig: {
               ...this._options,
             },

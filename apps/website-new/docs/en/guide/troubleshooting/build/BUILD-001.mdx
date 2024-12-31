@@ -1,0 +1,18 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='BUILD-001'/>
+
+## Reason
+
+The Expose module resource could not be found properly.
+
+There are two reasons for this problem:
+1. The exposeModules file path set by `exposes` is incorrect and points to a non-existent address.
+2. When using `Next.js` or other frameworks with built-in webpack, the webpack address used by MF is incorrect.
+
+## Solutions
+
+There are corresponding solutions for the reasons:
+
+1. Check whether the module file path corresponding to exposes is correct. Pay attention to the case here.
+2. Check whether FEDERATION_WEBPACK_PATH is consistent with the webpack address used by the framework. If not, you can check whether the dependency is installed normally, or set process.env.FEDERATION_WEBPACK_PATH to point to the actual webpack address used.

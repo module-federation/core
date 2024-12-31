@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.8.3",
+  "version": "0.8.6",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "repository": {
@@ -88,6 +88,7 @@
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/manifest": "workspace:*",
     "@module-federation/managers": "workspace:*",
+    "@module-federation/error-codes": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/rspack": "workspace:*",
     "@module-federation/bridge-react-webpack-plugin": "workspace:*",
