@@ -158,6 +158,11 @@ export function withRouterData<
   WrappedComponent: React.ComponentType<P & ExtraDataProps>,
 ): React.FC<Omit<P, keyof ExtraDataProps>> {
   const Component = forwardRef(function (props: any, ref) {
+    if (props?.basename) {
+      return (
+        <WrappedComponent {...props} basename={props.basename} ref={ref} />
+      );
+    }
     let enableDispathPopstate = false;
     let routerContextVal: any;
     try {
