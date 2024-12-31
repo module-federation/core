@@ -1,21 +1,20 @@
-
 if (typeof it === 'undefined') {
-  function it(name, fn) {return  fn()}
-  global.it = it
+  global.it = function (s, cb) {
+    return cb();
+  };
 }
 
 if (typeof expect === 'undefined') {
-   function expect(actual) {
+  global.expect = function (actual) {
     return {
-      toBe: function(expected) {
+      toBe: function (expected) {
         if (actual !== expected) {
           throw new Error(`Expected: ${expected}\nReceived: ${actual}`);
         }
         return true;
-      }
+      },
     };
   };
-   global.expect = expect;
 }
 
 it('should load the component from container', () => {

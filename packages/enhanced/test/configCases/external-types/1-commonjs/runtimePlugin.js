@@ -3,31 +3,21 @@ const createRuntimePlugin = () => {
     name: 'runtime-plugin',
 
     init(args) {
-      debugger;
       return args;
     },
     // Main entry loading implementation
     async loadEntry({ remoteInfo }) {
-      console.log('loadEntry hook triggered', { remoteInfo });
-      debugger;
-      return {
-        get: () => async () => ({}),
-        init: async () => {
-          return;
-        },
-      };
+      if (!remoteInfo.externalType?.startsWith('commonjs')) {
+        return undefined;
+      }
+      try {
+        // Always use __non_webpack_require__ for loading modules
+        return __non_webpack_require__(remoteInfo.entry);
+      } catch (error) {
+        console.error('Error loading entry:', error);
+        return undefined;
+      }
     },
-
-    // Error handling hooks
-    async errorLoadRemote({ id, error, origin }) {
-      console.log('errorLoadRemote hook triggered', { id, error });
-      return { id, error, origin };
-    },
-
-    async loadEntryError({ origin, uniqueKey }) {
-      console.log('loadEntryError hook triggered', { uniqueKey });
-      return undefined;
-    }
   };
 };
 

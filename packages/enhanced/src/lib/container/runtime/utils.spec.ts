@@ -6,22 +6,24 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: 'commonjs ./container.js'
-      }
+        app1: 'commonjs ./container.js',
+      },
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -29,23 +31,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: './container.js'
+        app1: './container.js',
       },
-      remoteType: 'commonjs'
+      remoteType: 'commonjs',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -53,23 +57,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: 'app1@http://localhost:3001/remoteEntry.js'
+        app1: 'app1@http://localhost:3001/remoteEntry.js',
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: 'app1',
-        entry: 'http://localhost:3001/remoteEntry.js',
-        shareScope: 'default',
-        externalType: 'script'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: 'app1',
+          entry: 'http://localhost:3001/remoteEntry.js',
+          shareScope: 'default',
+          externalType: 'script',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -77,23 +83,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: 'http://localhost:3001/remoteEntry.js'
+        app1: 'http://localhost:3001/remoteEntry.js',
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: 'http://localhost:3001/remoteEntry.js',
-        shareScope: 'default',
-        externalType: 'script'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: 'http://localhost:3001/remoteEntry.js',
+          shareScope: 'default',
+          externalType: 'script',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -101,25 +109,27 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: 'app1@http://localhost:3001/remoteEntry.js'
+        app1: 'app1@http://localhost:3001/remoteEntry.js',
       },
       library: {
-        type: 'commonjs'
-      }
+        type: 'commonjs',
+      },
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: 'app1',
-        entry: 'http://localhost:3001/remoteEntry.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: 'app1',
+          entry: 'http://localhost:3001/remoteEntry.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -127,22 +137,24 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: 'app1@http://localhost:3001/remoteEntry.js'
-      }
+        app1: 'app1@http://localhost:3001/remoteEntry.js',
+      },
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: 'app1',
-        entry: 'http://localhost:3001/remoteEntry.js',
-        shareScope: 'default',
-        externalType: 'script'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: 'app1',
+          entry: 'http://localhost:3001/remoteEntry.js',
+          shareScope: 'default',
+          externalType: 'script',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -150,23 +162,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: ['app1@http://localhost:3001/remoteEntry.js']
+        app1: ['app1@http://localhost:3001/remoteEntry.js'],
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: 'app1',
-        entry: 'http://localhost:3001/remoteEntry.js',
-        shareScope: 'default',
-        externalType: 'script'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: 'app1',
+          entry: 'http://localhost:3001/remoteEntry.js',
+          shareScope: 'default',
+          externalType: 'script',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -176,24 +190,26 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
       remotes: {
         app1: {
           external: 'app1@http://localhost:3001/remoteEntry.js',
-          shareScope: 'custom'
-        }
+          shareScope: 'custom',
+        },
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: 'app1',
-        entry: 'http://localhost:3001/remoteEntry.js',
-        shareScope: 'custom',
-        externalType: 'script'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: 'app1',
+          entry: 'http://localhost:3001/remoteEntry.js',
+          shareScope: 'custom',
+          externalType: 'script',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -203,24 +219,26 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
       remotes: {
         app1: {
           external: ['app1@http://localhost:3001/remoteEntry.js'],
-          shareScope: 'custom'
-        }
+          shareScope: 'custom',
+        },
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: 'app1',
-        entry: 'http://localhost:3001/remoteEntry.js',
-        shareScope: 'custom',
-        externalType: 'script'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: 'app1',
+          entry: 'http://localhost:3001/remoteEntry.js',
+          shareScope: 'custom',
+          externalType: 'script',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -228,9 +246,9 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: 'invalid entry with spaces'
+        app1: 'invalid entry with spaces',
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
@@ -238,7 +256,7 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     expect(result).toEqual({
       name: 'test',
       remotes: [],
-      shareStrategy: 'version-first'
+      shareStrategy: 'version-first',
     });
   });
 
@@ -246,24 +264,26 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: 'app1@http://localhost:3001/remoteEntry.js'
+        app1: 'app1@http://localhost:3001/remoteEntry.js',
       },
       remoteType: 'script',
-      shareStrategy: 'loaded-first'
+      shareStrategy: 'loaded-first',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: 'app1',
-        entry: 'http://localhost:3001/remoteEntry.js',
-        shareScope: 'default',
-        externalType: 'script'
-      }],
-      shareStrategy: 'loaded-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: 'app1',
+          entry: 'http://localhost:3001/remoteEntry.js',
+          shareScope: 'default',
+          externalType: 'script',
+        },
+      ],
+      shareStrategy: 'loaded-first',
     });
   });
 
@@ -271,23 +291,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: './container.js'
+        app1: './container.js',
       },
-      remoteType: 'commonjs-module'
+      remoteType: 'commonjs-module',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs-module'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs-module',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -295,23 +317,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: 'commonjs ./container.js'
+        app1: 'commonjs ./container.js',
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -319,23 +343,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: 'commonjs ./container.js'
+        app1: 'commonjs ./container.js',
       },
-      remoteType: 'commonjs'
+      remoteType: 'commonjs',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -344,24 +370,26 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
       name: 'test',
       remotes: {
         app1: {
-          external: './container.js'
-        }
+          external: './container.js',
+        },
       },
-      remoteType: 'commonjs'
+      remoteType: 'commonjs',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -370,24 +398,26 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
       name: 'test',
       remotes: {
         app1: {
-          external: 'commonjs ./container.js'
-        }
+          external: 'commonjs ./container.js',
+        },
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -395,23 +425,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: ['./container.js']
+        app1: ['./container.js'],
       },
-      remoteType: 'commonjs'
+      remoteType: 'commonjs',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -419,23 +451,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: ['commonjs ./container.js']
+        app1: ['commonjs ./container.js'],
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -443,23 +477,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: 'commonjs ./container.js'
+        app1: 'commonjs ./container.js',
       },
-      remoteType: 'commonjs'
+      remoteType: 'commonjs',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -467,23 +503,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: 'commonjs ./container.js'
+        app1: 'commonjs ./container.js',
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -492,24 +530,26 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
       name: 'test',
       remotes: {
         app1: {
-          external: 'commonjs ./container.js'
-        }
+          external: 'commonjs ./container.js',
+        },
       },
-      remoteType: 'commonjs'
+      remoteType: 'commonjs',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -518,24 +558,26 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
       name: 'test',
       remotes: {
         app1: {
-          external: 'commonjs ./container.js'
-        }
+          external: 'commonjs ./container.js',
+        },
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -543,23 +585,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: ['commonjs ./container.js']
+        app1: ['commonjs ./container.js'],
       },
-      remoteType: 'commonjs'
+      remoteType: 'commonjs',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -567,23 +611,25 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
     const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
       name: 'test',
       remotes: {
-        app1: ['commonjs ./container.js']
+        app1: ['commonjs ./container.js'],
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'default',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'default',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 
@@ -593,24 +639,26 @@ describe('normalizeRuntimeInitOptionsWithOutShared', () => {
       remotes: {
         app1: {
           external: 'commonjs ./container.js',
-          shareScope: 'custom'
-        }
+          shareScope: 'custom',
+        },
       },
-      remoteType: 'script'
+      remoteType: 'script',
     };
 
     const result = normalizeRuntimeInitOptionsWithOutShared(options);
 
     expect(result).toEqual({
       name: 'test',
-      remotes: [{
-        alias: 'app1',
-        name: undefined,
-        entry: './container.js',
-        shareScope: 'custom',
-        externalType: 'commonjs'
-      }],
-      shareStrategy: 'version-first'
+      remotes: [
+        {
+          alias: 'app1',
+          name: '',
+          entry: './container.js',
+          shareScope: 'custom',
+          externalType: 'commonjs',
+        },
+      ],
+      shareStrategy: 'version-first',
     });
   });
 });
