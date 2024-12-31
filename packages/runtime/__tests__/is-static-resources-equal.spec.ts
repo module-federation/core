@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isStaticResourcesEqual } from '../src/utils/tool';
+import { isStaticResourcesEqual } from '@module-federation/runtime-core';
 describe('isStaticResourcesEqual', () => {
   it('verify resources when URL does not specify protocol', () => {
     const url = '//a.b.c';

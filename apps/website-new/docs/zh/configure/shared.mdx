@@ -44,13 +44,13 @@ new ModuleFederationPlugin({
 
 - 类型：`boolean`
 - 是否必填：否
-- 默认值：`true`
+- 默认值：`false`
 
 是否在共享作用域中只允许共享模块的一个版本 (单例模式).
 
 - 如果值为 true，开启单例模式；值为 false，不开启单例模式。
-- 如果启用单例模式，那么 remote 应用组件和 host 应用共享的依赖只加载一次，当版本不一致时加载更高的版本。此时对于版本更低的那一方会给出警告：
-- 不开启单例模式下，如果 remote 应用和 host 应用共享依赖的版本不一致，则 remote 应用和 host 应用加载各自的依赖
+- 如果启用单例模式，那么 remote 应用组件和 host 应用共享的依赖只加载一次，当版本不一致时加载更高的版本。此时对于版本更低的那一方会给出警告。
+- 不开启单例模式下，如果 remote 应用和 host 应用共享依赖的版本不一致，则 remote 应用和 host 应用加载各自的依赖。
 
 ## requiredVersion
 
@@ -61,7 +61,7 @@ new ModuleFederationPlugin({
 所需版本，可以是一个版本区间。默认值为当前应用的依赖版本。
 
 - 在使用共享依赖时，会判断该依赖版本是否大于等于 requiredVersion ，如果是则会正常使用。如果小于 requiredVersion 那么会在控制台警告，并使用当前共享依赖中最小的版本。
-- 当一方设置 requiredVersion ，另一方设置 singleton 时，会加载 requiredVersion 的依赖，singleton 方直接使用 requiredVersion 的依赖，不论版本高低
+- 当一方设置 requiredVersion ，另一方设置 singleton 时，会加载 requiredVersion 的依赖，singleton 方直接使用 requiredVersion 的依赖，不论版本高低。
 
 ## eager
 
@@ -121,13 +121,13 @@ new ModuleFederationPlugin({
 ```ts
 new ModuleFederationPlugin({
   name: '@demo/button',
-    shared: {
-      react: {
-        singleton: true,
-        requiredVersion: '~18.2.0'
-        fixedDependencies: true
-      }
+  shared: {
+    react: {
+      singleton: true,
+      requiredVersion: '~18.2.0',
+      fixedDependencies: true
     }
+  },
   //...
 });
 ```

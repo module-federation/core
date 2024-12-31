@@ -1,5 +1,62 @@
 # @module-federation/nextjs-mf
 
+## 8.8.10
+
+### Patch Changes
+
+- Updated dependencies [835b09c]
+- Updated dependencies [f573ad0]
+- Updated dependencies [336f3d8]
+- Updated dependencies [4fd33fb]
+  - @module-federation/sdk@0.8.7
+  - @module-federation/enhanced@0.8.7
+  - @module-federation/runtime@0.8.7
+  - @module-federation/node@2.6.20
+  - @module-federation/webpack-bundler-runtime@0.8.7
+
+## 8.8.9
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.6
+- @module-federation/node@2.6.19
+- @module-federation/runtime@0.8.6
+- @module-federation/webpack-bundler-runtime@0.8.6
+- @module-federation/sdk@0.8.6
+
+## 8.8.8
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.5
+- @module-federation/enhanced@0.8.5
+- @module-federation/webpack-bundler-runtime@0.8.5
+- @module-federation/sdk@0.8.5
+- @module-federation/node@2.6.18
+
+## 8.8.7
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.4
+- @module-federation/node@2.6.17
+- @module-federation/runtime@0.8.4
+- @module-federation/webpack-bundler-runtime@0.8.4
+- @module-federation/sdk@0.8.4
+
+## 8.8.6
+
+### Patch Changes
+
+- 4239338: fix broken loading of non nextjs json remotes
+- Updated dependencies [f817674]
+- Updated dependencies [8e172c8]
+  - @module-federation/runtime@0.8.3
+  - @module-federation/sdk@0.8.3
+  - @module-federation/node@2.6.16
+  - @module-federation/webpack-bundler-runtime@0.8.3
+  - @module-federation/enhanced@0.8.3
+
 ## 8.8.5
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rspack",
-  "version": "0.8.2",
+  "version": "0.8.7",
   "license": "MIT",
   "keywords": [
     "Module Federation",
@@ -29,6 +29,7 @@
     "@module-federation/managers": "workspace:*",
     "@module-federation/manifest": "workspace:*",
     "@module-federation/runtime-tools": "workspace:*",
+    "@module-federation/inject-external-runtime-core-plugin": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
@@ -38,13 +39,22 @@
     ".": {
       "types": "./dist/index.cjs.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "require": "./dist/index.cjs.js",
+      "types": "./dist/index.cjs.d.ts"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.cjs.d.ts",
+      "import": "./dist/plugin.esm.mjs",
+      "require": "./dist/plugin.cjs.js"
     }
   },
   "typesVersions": {
     "*": {
       ".": [
         "./dist/index.cjs.d.ts"
+      ],
+      "plugin": [
+        "./dist/plugin.cjs.d.ts"
       ]
     }
   },

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "0.8.2",
+  "version": "0.8.7",
   "publishConfig": {
     "access": "public"
   },
@@ -52,7 +52,7 @@
     "@loadable/component": "^5.16.4",
     "@module-federation/bridge-shared": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "react-error-boundary": "^4.0.13"
+    "react-error-boundary": "^4.1.2"
   },
   "peerDependencies": {
     "react": ">=16.9.0",

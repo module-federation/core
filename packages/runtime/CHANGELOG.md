@@ -1,5 +1,49 @@
 # @module-federation/runtime
 
+## 0.8.7
+
+### Patch Changes
+
+- f573ad0: feat: add externalRuntime and provideExternalRuntime fields to help optimize assets size
+- 4fd33fb: fix: throw RUNTIME-008 Error when script resources load failed
+- Updated dependencies [835b09c]
+- Updated dependencies [f573ad0]
+- Updated dependencies [336f3d8]
+- Updated dependencies [4fd33fb]
+  - @module-federation/sdk@0.8.7
+  - @module-federation/runtime-core@0.6.15
+  - @module-federation/error-codes@0.8.7
+
+## 0.8.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.6
+- @module-federation/error-codes@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.5
+- @module-federation/error-codes@0.8.5
+
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.4
+- @module-federation/error-codes@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- f817674: chore(runtime): remove duplicate registerRemotes warn
+- Updated dependencies [8e172c8]
+  - @module-federation/sdk@0.8.3
+  - @module-federation/error-codes@0.8.3
+
 ## 0.8.2
 
 ### Patch Changes

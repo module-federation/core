@@ -1,4 +1,4 @@
-import {
+import type {
   Compiler,
   ModuleFederationPluginOptions,
   RspackPluginInstance,
@@ -25,8 +25,9 @@ declare const __VERSION__: string;
 
 const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
 
+export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
 export class ModuleFederationPlugin implements RspackPluginInstance {
-  readonly name = 'RspackModuleFederationPlugin';
+  readonly name = PLUGIN_NAME;
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _statsPlugin?: StatsPlugin;
 
@@ -72,6 +73,28 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
     if (containerManager.enable) {
       this._patchChunkSplit(compiler, options.name);
+    }
+
+    if (options.experiments?.provideExternalRuntime) {
+      if (options.exposes) {
+        throw new Error(
+          'You can only set provideExternalRuntime: true in pure consumer which not expose modules.',
+        );
+      }
+
+      const runtimePlugins = options.runtimePlugins || [];
+      options.runtimePlugins = runtimePlugins.concat(
+        require.resolve(
+          '@module-federation/inject-external-runtime-core-plugin',
+        ),
+      );
+    }
+
+    if (options.experiments?.externalRuntime === true) {
+      const Externals = compiler.webpack.ExternalsPlugin;
+      new Externals(compiler.options.externalsType || 'global', {
+        '@module-federation/runtime-core': '_FEDERATION_RUNTIME_CORE',
+      }).apply(compiler);
     }
 
     options.implementation = options.implementation || RuntimeToolsPath;

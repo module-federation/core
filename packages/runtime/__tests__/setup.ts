@@ -2,7 +2,7 @@ import 'whatwg-fetch';
 import { server } from './mock/server';
 import { mockScriptDomResponse } from './mock/mock-script';
 import { requestList } from './mock/env';
-import { resetFederationGlobalInfo } from '../src/global';
+import { resetFederationGlobalInfo } from '@module-federation/runtime-core';
 
 mockScriptDomResponse({
   baseDir: __dirname,

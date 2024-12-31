@@ -80,6 +80,8 @@ type InitOptions = {
   shared?: {
     [pkgName: string]: ShareArgs | ShareArgs[];
   };
+  // Sharing strategy, which strategy will be used to decide whether to reuse the dependency
+  shareStrategy?: 'version-first' | 'loaded-first';
 };
 
 type ShareArgs =
@@ -91,7 +93,6 @@ type SharedBaseArgs = {
   shareConfig?: SharedConfig;
   scope?: string | Array<string>;
   deps?: Array<string>;
-  strategy?: 'version-first' | 'loaded-first';
   loaded?: boolean;
 };
 
@@ -104,41 +105,11 @@ type RemoteInfo = (RemotesWithEntry | RemotesWithVersion) & {
 interface RemotesWithVersion {
   name: string;
   version: string;
-}
+};
 
 interface RemotesWithEntry {
   name: string;
   entry: string;
-}
-
-type ShareInfos = {
-  // The name of the dependency, basic information about the dependency, and sharing strategy
-  [pkgName: string]: Shared[];
-};
-
-type Shared = {
-  // The version of the shared dependency
-  version: string;
-  // Which modules are currently consuming this dependency
-  useIn: Array<string>;
-  // From which module does the shared dependency come?
-  from: string;
-  // Factory function to get the shared dependency instance. When no other existing dependencies, it will load its own shared dependencies.
-  lib?: () => Module;
-  // Sharing strategy, which strategy will be used to decide whether to reuse the dependency
-  shareConfig: SharedConfig;
-  // The scope where the shared dependency is located, the default value is default
-  scope: Array<string>;
-  // Function to retrieve the shared dependency instance.
-  get: SharedGetter;
-  // List of dependencies that this shared module depends on
-  deps: Array<string>;
-  // Indicates whether the shared dependency has been loaded
-  loaded?: boolean;
-  // Represents the loading state of the shared dependency
-  loading?: null | Promise<any>;
-  // Determines if the shared dependency should be loaded eagerly
-  eager?: boolean;
 };
 ```
 
@@ -175,6 +146,38 @@ loadRemote('app2/util').then((m) => m.add(1, 2, 3));
 - Type: `loadShare(pkgName: string, extraOptions?: { customShareInfo?: Partial<Shared>;resolver?: (sharedOptions: ShareInfos[string]) => Shared;})`
 - Obtains the `share` dependency. When a "shared" dependency matching the current consumer exists in the global environment, the existing and eligible dependency will be reused first. Otherwise, it loads its own dependency and stores it in the global cache.
 - This `API` is usually not called directly by users but is used by the build plugin to convert its own dependencies.
+
+```typescript
+type ShareInfos = {
+  // The name of the dependency, basic information about the dependency, and sharing strategy
+  [pkgName: string]: Shared[];
+};
+
+type Shared = {
+  // The version of the shared dependency
+  version: string;
+  // Which modules are currently consuming this dependency
+  useIn: Array<string>;
+  // From which module does the shared dependency come?
+  from: string;
+  // Factory function to get the shared dependency instance. When no other existing dependencies, it will load its own shared dependencies.
+  lib?: () => Module;
+  // Sharing strategy, which strategy will be used to decide whether to reuse the dependency
+  shareConfig: SharedConfig;
+  // The scope where the shared dependency is located, the default value is default
+  scope: Array<string>;
+  // Function to retrieve the shared dependency instance.
+  get: SharedGetter;
+  // List of dependencies that this shared module depends on
+  deps: Array<string>;
+  // Indicates whether the shared dependency has been loaded
+  loaded?: boolean;
+  // Represents the loading state of the shared dependency
+  loading?: null | Promise<any>;
+  // Determines if the shared dependency should be loaded eagerly
+  eager?: boolean;
+};
+```
 
 - Example
 

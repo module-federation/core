@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll, assert } from 'vitest';
-import { matchRemoteWithNameAndExpose } from '../src/utils';
+import { matchRemoteWithNameAndExpose } from '@module-federation/runtime-core';
 import {
   addGlobalSnapshot,
   getGlobalSnapshot,
   Global,
   setGlobalFederationConstructor,
-} from '../src/global';
+} from '@module-federation/runtime-core';
+
 import { requestList } from './mock/env';
 
 // Helper function to check if a method is private
