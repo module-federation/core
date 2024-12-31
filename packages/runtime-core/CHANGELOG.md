@@ -1,5 +1,16 @@
 # @module-federation/runtime
 
+## 0.6.15
+
+### Patch Changes
+
+- f573ad0: feat: add externalRuntime and provideExternalRuntime fields to help optimize assets size
+- Updated dependencies [835b09c]
+- Updated dependencies [336f3d8]
+- Updated dependencies [4fd33fb]
+  - @module-federation/sdk@0.8.7
+  - @module-federation/error-codes@0.8.7
+
 ## 0.6.14
 
 ### Patch Changes
