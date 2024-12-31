@@ -1,2 +1,0 @@
-- when running tests, ALWAYS run "pnpm enhanced:jest" command
-- issuerLayer is webpack specific and not used in the runtime code
