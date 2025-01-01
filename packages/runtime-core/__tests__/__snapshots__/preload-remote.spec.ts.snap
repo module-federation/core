@@ -1,0 +1,126 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`preload-remote inBrowser > 1 preload with default config 1`] = `
+{
+  "links": [
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/button.sync.css",
+      "rel": "preload",
+      "type": "style",
+    },
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/button.sync.js",
+      "rel": "preload",
+      "type": "script",
+    },
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/sub1-button/button.sync.js",
+      "rel": "preload",
+      "type": "script",
+    },
+  ],
+  "scripts": [
+    {
+      "crossorigin": "",
+      "src": "http://localhost:1111/resources/preload/preload-resource/federation-remote-entry.js",
+    },
+    {
+      "crossorigin": "",
+      "src": "http://localhost:1111/resources/preload/preload-resource/sub1-button/federation-remote-entry.js",
+    },
+  ],
+}
+`;
+
+exports[`preload-remote inBrowser > 2 preload with all config  1`] = `
+{
+  "links": [
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/sub2/button.async.css",
+      "rel": "preload",
+      "type": "style",
+    },
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/sub2/button.sync.css",
+      "rel": "preload",
+      "type": "style",
+    },
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/sub2/button.async.js",
+      "rel": "preload",
+      "type": "script",
+    },
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/sub2/button.sync.js",
+      "rel": "preload",
+      "type": "script",
+    },
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/sub2-button/button.async.js",
+      "rel": "preload",
+      "type": "script",
+    },
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/sub2-button/button.sync.js",
+      "rel": "preload",
+      "type": "script",
+    },
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/sub2-add/add.async.js",
+      "rel": "preload",
+      "type": "script",
+    },
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/sub2-add/add.sync.js",
+      "rel": "preload",
+      "type": "script",
+    },
+  ],
+  "scripts": [
+    {
+      "crossorigin": "",
+      "src": "http://localhost:1111/resources/preload/preload-resource/sub2/federation-remote-entry.js",
+    },
+    {
+      "crossorigin": "",
+      "src": "http://localhost:1111/resources/preload/preload-resource/sub2-button/federation-remote-entry.js",
+    },
+  ],
+}
+`;
+
+exports[`preload-remote inBrowser > 3 preload with expose config  1`] = `
+{
+  "links": [
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/sub3/add.sync.js",
+      "rel": "preload",
+      "type": "script",
+    },
+  ],
+  "scripts": [
+    {
+      "crossorigin": "",
+      "src": "http://localhost:1111/resources/preload/preload-resource/sub3/federation-remote-entry.js",
+    },
+  ],
+}
+`;
+
+exports[`preload-remote inBrowser > 3 preload with expose config  2`] = `
+{
+  "links": [
+    {
+      "href": "http://localhost:1111/resources/preload/preload-resource/sub3/add.sync.js",
+      "rel": "preload",
+      "type": "script",
+    },
+  ],
+  "scripts": [
+    {
+      "crossorigin": "",
+      "src": "http://localhost:1111/resources/preload/preload-resource/sub3/federation-remote-entry.js",
+    },
+  ],
+}
+`;

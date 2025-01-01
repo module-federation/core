@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "files": [
     "dist/",
     "types.d.ts",
@@ -19,9 +19,9 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/types/cli/index.d.ts",
       "import": "./dist/esm/cli/index.js",
-      "require": "./dist/cjs/cli/index.js",
-      "types": "./dist/types/cli/index.d.ts"
+      "require": "./dist/cjs/cli/index.js"
     },
     "./runtime": {
       "types": "./dist/types/runtime/index.d.ts",
@@ -32,29 +32,29 @@
       "default": "./dist/esm/ssr-runtime/index.js"
     },
     "./config-plugin": {
+      "types": "./dist/types/cli/configPlugin.d.ts",
       "import": "./dist/esm/cli/configPlugin.js",
-      "require": "./dist/cjs/cli/configPlugin.js",
-      "types": "./dist/types/cli/configPlugin.d.ts"
+      "require": "./dist/cjs/cli/configPlugin.js"
     },
     "./ssr-plugin": {
+      "types": "./dist/types/cli/ssrPlugin.d.ts",
       "import": "./dist/esm/cli/ssrPlugin.js",
-      "require": "./dist/cjs/cli/ssrPlugin.js",
-      "types": "./dist/types/cli/ssrPlugin.d.ts"
+      "require": "./dist/cjs/cli/ssrPlugin.js"
     },
     "./shared-strategy": {
+      "types": "./dist/types/cli/mfRuntimePlugins/shared-strategy.d.ts",
       "import": "./dist/esm/cli/mfRuntimePlugins/shared-strategy.js",
-      "require": "./dist/esm/cli/mfRuntimePlugins/shared-strategy.js",
-      "types": "./dist/types/cli/mfRuntimePlugins/shared-strategy.d.ts"
+      "require": "./dist/esm/cli/mfRuntimePlugins/shared-strategy.js"
     },
     "./resolve-entry-ipv4": {
+      "types": "./dist/types/cli/mfRuntimePlugins/resolve-entry-ipv4.d.ts",
       "import": "./dist/esm/cli/mfRuntimePlugins/resolve-entry-ipv4.js",
-      "require": "./dist/esm/cli/mfRuntimePlugins/resolve-entry-ipv4.js",
-      "types": "./dist/types/cli/mfRuntimePlugins/resolve-entry-ipv4.d.ts"
+      "require": "./dist/esm/cli/mfRuntimePlugins/resolve-entry-ipv4.js"
     },
     "./inject-node-fetch": {
+      "types": "./dist/types/cli/mfRuntimePlugins/inject-node-fetch.d.ts",
       "import": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.js",
-      "require": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.js",
-      "types": "./dist/types/cli/mfRuntimePlugins/inject-node-fetch.d.ts"
+      "require": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.js"
     }
   },
   "typesVersions": {

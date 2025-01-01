@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "2.6.19",
+  "version": "2.6.20",
   "type": "commonjs",
   "main": "./dist/src/index.js",
   "exports": {
@@ -16,7 +16,6 @@
       "import": "./dist/src/utils/index.js",
       "require": "./dist/src/utils/index.js"
     },
-    "./src/plugins/RemotePublicPathPlugin.js": "./dist/src/plugins/RemotePublicPathPlugin.js",
     "./src/plugins/NodeFederationPlugin.js": "./dist/src/plugins/NodeFederationPlugin.js",
     "./universe-entry-chunk-tracker-plugin": "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.js",
     "./src/": "./dist/src/"

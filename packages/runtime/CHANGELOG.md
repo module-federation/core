@@ -1,5 +1,19 @@
 # @module-federation/runtime
 
+## 0.8.7
+
+### Patch Changes
+
+- f573ad0: feat: add externalRuntime and provideExternalRuntime fields to help optimize assets size
+- 4fd33fb: fix: throw RUNTIME-008 Error when script resources load failed
+- Updated dependencies [835b09c]
+- Updated dependencies [f573ad0]
+- Updated dependencies [336f3d8]
+- Updated dependencies [4fd33fb]
+  - @module-federation/sdk@0.8.7
+  - @module-federation/runtime-core@0.6.15
+  - @module-federation/error-codes@0.8.7
+
 ## 0.8.6
 
 ### Patch Changes
