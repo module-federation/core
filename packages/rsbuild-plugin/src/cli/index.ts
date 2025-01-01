@@ -18,6 +18,8 @@ import logger from '../logger';
 type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
 
+export type { ModuleFederationOptions };
+
 const RSBUILD_PLUGIN_MODULE_FEDERATION_NAME =
   'rsbuild:module-federation-enhanced';
 const RSPACK_PLUGIN_MODULE_FEDERATION_NAME = 'module-federation';
