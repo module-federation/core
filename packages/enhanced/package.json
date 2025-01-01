@@ -35,28 +35,28 @@
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
-      "require": "./dist/src/index.js",
-      "import": "./dist/src/index.js"
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js"
     },
     "./webpack": {
       "types": "./dist/src/webpack.d.ts",
-      "require": "./dist/src/webpack.js",
-      "import": "./dist/src/webpack.js"
+      "import": "./dist/src/webpack.js",
+      "require": "./dist/src/webpack.js"
     },
     "./rspack": {
       "types": "./dist/src/rspack.d.ts",
-      "require": "./dist/src/rspack.js",
-      "import": "./dist/src/rspack.js"
+      "import": "./dist/src/rspack.js",
+      "require": "./dist/src/rspack.js"
     },
     "./runtime": {
       "types": "./dist/src/runtime.d.ts",
-      "require": "./dist/src/runtime.js",
-      "import": "./dist/src/runtime.js"
+      "import": "./dist/src/runtime.js",
+      "require": "./dist/src/runtime.js"
     },
     "./prefetch": {
       "types": "./dist/src/prefetch.d.ts",
-      "require": "./dist/src/prefetch.js",
-      "import": "./dist/src/prefetch.js"
+      "import": "./dist/src/prefetch.js",
+      "require": "./dist/src/prefetch.js"
     }
   },
   "typesVersions": {

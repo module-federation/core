@@ -21,7 +21,7 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "sideEffects": false,
   "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "module": "./dist/index.esm.mjs",
   "types": "./dist/index.cjs.d.ts",
   "dependencies": {
     "@module-federation/bridge-react-webpack-plugin": "workspace:*",
@@ -37,9 +37,9 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js",
-      "types": "./dist/index.cjs.d.ts"
+      "types": "./dist/index.cjs.d.ts",
+      "import": "./dist/index.esm.mjs",
+      "require": "./dist/index.cjs.js"
     },
     "./plugin": {
       "types": "./dist/plugin.cjs.d.ts",
