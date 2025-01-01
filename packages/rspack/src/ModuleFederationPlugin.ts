@@ -75,6 +75,28 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       this._patchChunkSplit(compiler, options.name);
     }
 
+    if (options.experiments?.provideExternalRuntime) {
+      if (options.exposes) {
+        throw new Error(
+          'You can only set provideExternalRuntime: true in pure consumer which not expose modules.',
+        );
+      }
+
+      const runtimePlugins = options.runtimePlugins || [];
+      options.runtimePlugins = runtimePlugins.concat(
+        require.resolve(
+          '@module-federation/inject-external-runtime-core-plugin',
+        ),
+      );
+    }
+
+    if (options.experiments?.externalRuntime === true) {
+      const Externals = compiler.webpack.ExternalsPlugin;
+      new Externals(compiler.options.externalsType || 'global', {
+        '@module-federation/runtime-core': '_FEDERATION_RUNTIME_CORE',
+      }).apply(compiler);
+    }
+
     options.implementation = options.implementation || RuntimeToolsPath;
     let disableManifest = options.manifest === false;
     let disableDts = options.dts === false;

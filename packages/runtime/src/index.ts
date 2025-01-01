@@ -1,22 +1,24 @@
-import { FederationHost } from './core';
 import {
-  getGlobalFederationInstance,
+  FederationHost,
+  type UserOptions,
   getGlobalFederationConstructor,
   setGlobalFederationInstance,
+  assert,
   setGlobalFederationConstructor,
-} from './global';
-import { UserOptions, FederationRuntimePlugin } from './type';
-import { assert } from './utils/logger';
+} from '@module-federation/runtime-core';
+import { getGlobalFederationInstance } from './utils';
 
-export { FederationHost } from './core';
-export { registerGlobalPlugins } from './global';
-export { getRemoteEntry, getRemoteInfo } from './utils';
-export { loadScript, loadScriptNode } from '@module-federation/sdk';
-export { Module } from './module';
-
-export type { Federation } from './global';
-export type { FederationRuntimePlugin };
-
+export {
+  loadScript,
+  loadScriptNode,
+  Module,
+  getRemoteEntry,
+  getRemoteInfo,
+  registerGlobalPlugins,
+  type FederationRuntimePlugin,
+  type Federation,
+} from '@module-federation/runtime-core';
+export { FederationHost };
 let FederationInstance: FederationHost | null = null;
 export function init(options: UserOptions): FederationHost {
   // Retrieve the same instance with the same name

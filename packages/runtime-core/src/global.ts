@@ -119,35 +119,6 @@ export function resetFederationGlobalInfo(): void {
   });
 }
 
-export function getGlobalFederationInstance(
-  name: string,
-  version: string | undefined,
-): FederationHost | undefined {
-  const buildId = getBuilderId();
-  return CurrentGlobal.__FEDERATION__.__INSTANCES__.find((GMInstance) => {
-    if (buildId && GMInstance.options.id === getBuilderId()) {
-      return true;
-    }
-
-    if (
-      GMInstance.options.name === name &&
-      !GMInstance.options.version &&
-      !version
-    ) {
-      return true;
-    }
-
-    if (
-      GMInstance.options.name === name &&
-      version &&
-      GMInstance.options.version === version
-    ) {
-      return true;
-    }
-    return false;
-  });
-}
-
 export function setGlobalFederationInstance(
   FederationInstance: FederationHost,
 ): void {
