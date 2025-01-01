@@ -18,3 +18,4 @@ export default {
     });
   },
 };
+export { PLUGIN_NAME } from './src/utils/with-module-federation-enhanced-rsbuild';

@@ -22,6 +22,7 @@ const defaultOptions = {
   abortOnError: true,
   extractRemoteTypes: false,
   extractThirdParty: false,
+  outputDir: '',
 } satisfies Partial<RemoteOptions>;
 
 function getEffectiveRootDir(
@@ -59,6 +60,7 @@ const readTsConfig = (
     compiledTypesFolder,
     context,
     additionalFilesToCompile,
+    outputDir,
   }: Required<RemoteOptions>,
   mapComponentsToExpose: Record<string, string>,
 ): TsConfigJson => {
@@ -84,7 +86,7 @@ const readTsConfig = (
 
   const outDir = resolve(
     context,
-    configContent.options.outDir || 'dist',
+    outputDir || configContent.options.outDir || 'dist',
     typesFolder,
     compiledTypesFolder,
   );

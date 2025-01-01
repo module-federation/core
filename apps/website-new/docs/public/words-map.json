@@ -156,5 +156,53 @@
         }
       }
     }
+  },
+  "exposeModules":{
+    "id":"exposeModules",
+    "lang":{
+      "zh":{
+        "description":"Module Federation 中 expose 所对应的模块。",
+        "related_meta":{
+          "docs":[],
+          "links":[
+            {
+              "id":"webpack-modules-link",
+              "title":"Webpack modules",
+              "url":"https://webpack.docschina.org/concepts/modules/"
+            }]
+        }
+      },
+      "en":{
+        "description":"The module corresponding to expose in Module Federation.",
+        "related_meta":{
+          "docs":[],
+          "links":[
+            {
+              "id":"webpack-modules-link",
+              "title":"Webpack modules",
+              "url":"https://webpack.js.org/concepts/modules/#root"
+            }]
+        }
+      }
+    }
+  },
+  "FEDERATION_WEBPACK_PATH":{
+    "id":"FEDERATION_WEBPACK_PATH",
+    "lang":{
+      "zh":{
+        "description":"Module Federation 实际使用的 webpack 地址。",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      },
+      "en":{
+        "description":"The webpack address actually used by Module Federation.",
+        "related_meta":{
+          "docs":[],
+          "links":[]
+        }
+      }
+    }
   }
 }

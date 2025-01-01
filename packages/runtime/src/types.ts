@@ -1,1 +1,1 @@
-export * from './type';
+export * from '@module-federation/runtime-core/types';
