@@ -67,8 +67,9 @@ class ConsumeSharedModule extends Module {
     super(
       WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE,
       context,
-      options.layer ?? undefined,
+      options?.layer ?? null,
     );
+    this.layer = options?.layer ?? null;
     this.options = options;
   }
 
@@ -280,6 +281,7 @@ class ConsumeSharedModule extends Module {
   override serialize(context: ObjectSerializerContext): void {
     const { write } = context;
     write(this.options);
+    write(this.layer);
     super.serialize(context);
   }
 
@@ -288,7 +290,10 @@ class ConsumeSharedModule extends Module {
    */
   override deserialize(context: ObjectDeserializerContext): void {
     const { read } = context;
-    this.options = read();
+    const options = read();
+    const layer = read();
+    this.options = options;
+    this.layer = layer;
     super.deserialize(context);
   }
 }
