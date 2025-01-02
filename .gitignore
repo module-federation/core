@@ -9,7 +9,7 @@
 /.nx
 # dependencies
 node_modules
-
+next.js
 # IDEs and editors
 /.idea
 .project
