@@ -184,7 +184,7 @@ class DTSManager {
 
       const url = remoteInfo.url;
       const res = await axiosGet(url, {
-        family: !useIpv6(this.options.host.moduleFederationConfig) ? 4 : 6,
+        family: !useIpv6(this.options.host?.moduleFederationConfig) ? 4 : 6,
       });
       const manifestJson = res.data as unknown as Manifest;
       if (!manifestJson.metaData.types.zip) {
@@ -259,7 +259,7 @@ class DTSManager {
     try {
       const url = apiTypeUrl;
       const res = await axiosGet(url, {
-        family: !useIpv6(this.options.host.moduleFederationConfig) ? 4 : 6,
+        family: !useIpv6(this.options.host?.moduleFederationConfig) ? 4 : 6,
       });
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(
