@@ -18,6 +18,7 @@ const defaultOptions = {
   abortOnError: true,
   consumeAPITypes: false,
   runtimePkgs: [],
+  useIpv6: false,
 } satisfies Partial<HostOptions>;
 
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {

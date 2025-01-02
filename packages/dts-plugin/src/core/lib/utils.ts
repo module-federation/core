@@ -135,7 +135,7 @@ export function cloneDeepOptions(options: DTSManagerOptions) {
 export function useIpv6(
   config: moduleFederationPlugin.ModuleFederationPluginOptions,
 ) {
-  const { dts } = this.options.host.moduleFederationConfig;
+  const { dts } = config;
   if (dts) {
     if (typeof dts === 'object' && dts !== null) {
       const { consumeTypes } = dts;
