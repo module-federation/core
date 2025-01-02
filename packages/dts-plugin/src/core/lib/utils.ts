@@ -132,8 +132,24 @@ export function cloneDeepOptions(options: DTSManagerOptions) {
   });
 }
 
+export function useIpv6(
+  config: moduleFederationPlugin.ModuleFederationPluginOptions,
+) {
+  const { dts } = this.options.host.moduleFederationConfig;
+  if (dts) {
+    if (typeof dts === 'object' && dts !== null) {
+      const { consumeTypes } = dts;
+      if (typeof consumeTypes === 'object' && consumeTypes !== null) {
+        return consumeTypes.useIpv6;
+      }
+    }
+  }
+
+  return false;
+}
+
 export async function axiosGet(url: string, config?: AxiosRequestConfig) {
-  const httpAgent = new http.Agent({ family: 4 });
-  const httpsAgent = new https.Agent({ family: 4 });
+  const httpAgent = new http.Agent({ family: config?.family ?? 4 });
+  const httpsAgent = new https.Agent({ family: config?.family ?? 4 });
   return axios.get(url, { httpAgent, httpsAgent, ...config });
 }
