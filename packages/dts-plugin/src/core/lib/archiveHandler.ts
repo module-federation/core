@@ -6,7 +6,7 @@ import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { retrieveMfTypesPath } from './typeScriptCompiler';
 import { fileLog } from '../../server';
-import { axiosGet } from './utils';
+import { axiosGet, getIpFamilyFromConfig } from './utils';
 import { TsConfigJson } from '../interfaces/TsConfigJson';
 
 export const retrieveTypesZipPath = (
@@ -62,6 +62,7 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
         const url = fileToDownload;
         const response = await axiosGet(url, {
           responseType: 'arraybuffer',
+          family: getIpFamilyFromConfig(hostOptions.moduleFederationConfig),
         }).catch(downloadErrorLogger(destinationFolder, url));
 
         try {

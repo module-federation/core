@@ -144,6 +144,7 @@ export interface DtsHostOptions {
   maxRetries?: number;
   consumeAPITypes?: boolean;
   runtimePkgs?: string[];
+  ipVersion?: 'ipv4' | 'ipv6';
 }
 
 export interface DtsRemoteOptions {
