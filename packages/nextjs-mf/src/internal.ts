@@ -1,5 +1,113 @@
 import type { sharePlugin } from '@module-federation/sdk';
 
+// Extend the SharedConfig type to include layer properties
+type ExtendedSharedConfig = sharePlugin.SharedConfig & {
+  layer?: string;
+  issuerLayer?: string | string[];
+  request?: string;
+  shareKey?: string;
+};
+
+const WEBPACK_LAYERS_NAMES = {
+  /**
+   * The layer for the shared code between the client and server bundles.
+   */
+  shared: 'shared',
+  /**
+   * The layer for server-only runtime and picking up `react-server` export conditions.
+   * Including app router RSC pages and app router custom routes and metadata routes.
+   */
+  reactServerComponents: 'rsc',
+  /**
+   * Server Side Rendering layer for app (ssr).
+   */
+  serverSideRendering: 'ssr',
+  /**
+   * The browser client bundle layer for actions.
+   */
+  actionBrowser: 'action-browser',
+  /**
+   * The layer for the API routes.
+   */
+  api: 'api',
+  /**
+   * The layer for the middleware code.
+   */
+  middleware: 'middleware',
+  /**
+   * The layer for the instrumentation hooks.
+   */
+  instrument: 'instrument',
+  /**
+   * The layer for assets on the edge.
+   */
+  edgeAsset: 'edge-asset',
+  /**
+   * The browser client bundle layer for App directory.
+   */
+  appPagesBrowser: 'app-pages-browser',
+} as const;
+
+const reactShares = [
+  WEBPACK_LAYERS_NAMES.reactServerComponents,
+  WEBPACK_LAYERS_NAMES.serverSideRendering,
+  undefined,
+].reduce(
+  (acc, layer) => {
+    const key = layer ? `react-${layer}` : 'react';
+    acc[key] = {
+      singleton: true,
+      requiredVersion: false,
+      import: layer ? undefined : false,
+      shareKey: 'react',
+      request: 'react',
+      layer,
+      issuerLayer: layer,
+    };
+    return acc;
+  },
+  {} as Record<string, ExtendedSharedConfig>,
+);
+
+const reactDomShares = [
+  WEBPACK_LAYERS_NAMES.reactServerComponents,
+  WEBPACK_LAYERS_NAMES.serverSideRendering,
+  undefined,
+].reduce(
+  (acc, layer) => {
+    const key = layer ? `react-${layer}` : 'react';
+    acc[key] = {
+      singleton: true,
+      requiredVersion: false,
+      import: layer ? undefined : false,
+      shareKey: 'react-dom',
+      request: 'react-dom',
+      layer,
+      issuerLayer: layer,
+    };
+    return acc;
+  },
+  {} as Record<string, ExtendedSharedConfig>,
+);
+
+const nextNavigationShares = [
+  WEBPACK_LAYERS_NAMES.reactServerComponents,
+  WEBPACK_LAYERS_NAMES.serverSideRendering,
+].reduce(
+  (acc, layer) => {
+    const key = layer ? `next-navigation-${layer}` : 'next-navigation';
+    acc[key] = {
+      singleton: true,
+      requiredVersion: false,
+      shareKey: 'next/navigation',
+      request: 'next/navigation',
+      layer,
+      issuerLayer: layer,
+    };
+    return acc;
+  },
+  {} as Record<string, ExtendedSharedConfig>,
+);
 /**
  * @typedef SharedObject
  * @type {object}
@@ -8,8 +116,13 @@ import type { sharePlugin } from '@module-federation/sdk';
  * @property {boolean} key.requiredVersion - Whether a specific version of the shared object is required.
  * @property {boolean} key.eager - Whether the shared object should be eagerly loaded.
  * @property {boolean} key.import - Whether the shared object should be imported or not.
+ * @property {string} key.layer - The webpack layer this shared module belongs to.
+ * @property {string|string[]} key.issuerLayer - The webpack layer that can import this shared module.
  */
 export const DEFAULT_SHARE_SCOPE: sharePlugin.SharedObject = {
+  ...reactShares,
+  ...reactDomShares,
+  ...nextNavigationShares,
   'next/dynamic': {
     requiredVersion: undefined,
     singleton: true,
@@ -40,34 +153,34 @@ export const DEFAULT_SHARE_SCOPE: sharePlugin.SharedObject = {
     singleton: true,
     import: undefined,
   },
-  react: {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react/': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react-dom/': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react-dom': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react/jsx-dev-runtime': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'react/jsx-runtime': {
-    singleton: true,
-    requiredVersion: false,
-  },
+  // react: {
+  //   singleton: true,
+  //   requiredVersion: false,
+  //   import: false,
+  // },
+  // 'react/': {
+  //   singleton: true,
+  //   requiredVersion: false,
+  //   import: false,
+  // },
+  // 'react-dom/': {
+  //   singleton: true,
+  //   requiredVersion: false,
+  //   import: false,
+  // },
+  // 'react-dom': {
+  //   singleton: true,
+  //   requiredVersion: false,
+  //   import: false,
+  // },
+  // 'react/jsx-dev-runtime': {
+  //   singleton: true,
+  //   requiredVersion: false,
+  // },
+  // 'react/jsx-runtime': {
+  //   singleton: true,
+  //   requiredVersion: false,
+  // },
   'styled-jsx': {
     singleton: true,
     import: undefined,
