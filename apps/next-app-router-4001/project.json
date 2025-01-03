@@ -25,24 +25,10 @@
       ]
     },
     "serve": {
-      "executor": "@nx/next:server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "next-app-router-4001:build",
-        "dev": true,
-        "port": 4001
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "next-app-router-4001:build:development",
-          "dev": true,
-          "port": 4001
-        },
-        "production": {
-          "buildTarget": "next-app-router-4001:build:production",
-          "dev": false,
-          "port": 4001
-        }
+        "command": "pnpm dev",
+        "cwd": "apps/next-app-router-4001"
       },
       "dependsOn": [
         {

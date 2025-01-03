@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev",
+    "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4001",
     "lint": "next lint",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write --ignore-unknown .",

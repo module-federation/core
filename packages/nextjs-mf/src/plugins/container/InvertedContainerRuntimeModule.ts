@@ -1,6 +1,4 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Module } from 'webpack';
-import { container } from '@module-federation/enhanced';
 import type ContainerEntryModule from '@module-federation/enhanced/src/lib/container/ContainerEntryModule';
 const { RuntimeModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),

@@ -15,40 +15,42 @@ const nextConfig = {
     config.watchOptions = {
       ignored: ['**/node_modules/**', '**/@mf-types/**'],
     };
-    // used for testing build output snapshots
-    const remotes = {
-      checkout: `checkout@http://localhost:3002/_next/static/${
-        isServer ? 'ssr' : 'chunks'
-      }/remoteEntry.js`,
-      home_app: `home_app@http://localhost:3000/_next/static/${
-        isServer ? 'ssr' : 'chunks'
-      }/remoteEntry.js`,
-      shop: `shop@http://localhost:3001/_next/static/${
-        isServer ? 'ssr' : 'chunks'
-      }/remoteEntry.js`,
-    };
-
     config.plugins.push(
       new NextFederationPlugin({
-        name: 'home_app',
+        name: 'remote_4001',
         filename: 'static/chunks/remoteEntry.js',
-        remotes: {
-          shop: remotes.shop,
-          checkout: remotes.checkout,
+        exposes: {
+          // Core UI Components
+          './Button': './ui/button',
+          // './Header': './ui/header',
+          // './Footer': './ui/footer',
+          // './GlobalNav': './ui/global-nav',
+          //
+          // // Product Related Components
+          // './ProductCard': './ui/product-card',
+          // './ProductPrice': './ui/product-price',
+          // './ProductRating': './ui/product-rating',
+          // './ProductDeal': './ui/product-deal',
+          //
+          // // Navigation Components
+          // './TabGroup': './ui/tab-group',
+          // './TabNavItem': './ui/tab-nav-item',
+          //
+          // // Utility Components
+          // './Boundary': './ui/boundary',
+          // './CountUp': './ui/count-up',
+          // './RenderedTimeAgo': './ui/rendered-time-ago',
+          // './RenderingInfo': './ui/rendering-info'
         },
-        // exposes: {
-        //   './SharedNav': './components/SharedNav',
-        //   './menu': './components/menu',
-        // },
         shared: {
-          // 'lodash/': {},
-          // antd: {
-          //   requiredVersion: '5.19.1',
-          //   version: '5.19.1',
-          // },
-          // '@ant-design/': {
+          // 'react': {
           //   singleton: true,
+          //   requiredVersion: false
           // },
+          // 'react-dom': {
+          //   singleton: true,
+          //   requiredVersion: false
+          // }
         },
         extraOptions: {
           debug: false,

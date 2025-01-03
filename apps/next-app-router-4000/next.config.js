@@ -10,6 +10,7 @@ const nextConfig = {
     // See: https://github.com/gregberge/svgr
     svgr: false,
   },
+  port: 4000,
   webpack(config, options) {
     const { isServer } = options;
     config.watchOptions = {
@@ -17,13 +18,16 @@ const nextConfig = {
     };
     // used for testing build output snapshots
     const remotes = {
-      checkout: `checkout@http://localhost:3002/_next/static/${
+      remote_4001: `remote_4001@http://localhost:4001/_next/static/${
         isServer ? 'ssr' : 'chunks'
       }/remoteEntry.js`,
-      home_app: `home_app@http://localhost:3000/_next/static/${
+      checkout: `checkout@http://localhost:4000/_next/static/${
         isServer ? 'ssr' : 'chunks'
       }/remoteEntry.js`,
-      shop: `shop@http://localhost:3001/_next/static/${
+      home_app: `home_app@http://localhost:4000/_next/static/${
+        isServer ? 'ssr' : 'chunks'
+      }/remoteEntry.js`,
+      shop: `shop@http://localhost:4000/_next/static/${
         isServer ? 'ssr' : 'chunks'
       }/remoteEntry.js`,
     };
@@ -33,28 +37,25 @@ const nextConfig = {
         name: 'home_app',
         filename: 'static/chunks/remoteEntry.js',
         remotes: {
+          remote_4001: remotes.remote_4001,
           shop: remotes.shop,
           checkout: remotes.checkout,
         },
-        // exposes: {
-        //   './SharedNav': './components/SharedNav',
-        //   './menu': './components/menu',
-        // },
         shared: {
-          // 'lodash/': {},
-          // antd: {
-          //   requiredVersion: '5.19.1',
-          //   version: '5.19.1',
-          // },
-          // '@ant-design/': {
+          // 'react': {
           //   singleton: true,
+          //   requiredVersion: false
           // },
+          // 'react-dom': {
+          //   singleton: true,
+          //   requiredVersion: false
+          // }
         },
         extraOptions: {
-          debug: false,
-          exposePages: true,
-          enableImageLoaderFix: true,
-          enableUrlLoaderFix: true,
+          // debug: false,
+          // exposePages: true,
+          // enableImageLoaderFix: true,
+          // enableUrlLoaderFix: true,
         },
       }),
     );

@@ -25,24 +25,10 @@
       ]
     },
     "serve": {
-      "executor": "@nx/next:server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "next-app-router-4000:build",
-        "dev": true,
-        "port": 4000
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "next-app-router-4000:build:development",
-          "dev": true,
-          "port": 4000
-        },
-        "production": {
-          "buildTarget": "next-app-router-4000:build:production",
-          "dev": false,
-          "port": 4000
-        }
+        "command": "pnpm dev",
+        "cwd": "apps/next-app-router-4000"
       },
       "dependsOn": [
         {
