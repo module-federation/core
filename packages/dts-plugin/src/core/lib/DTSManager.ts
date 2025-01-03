@@ -28,7 +28,12 @@ import {
   HOST_API_TYPES_FILE_NAME,
 } from '../constant';
 import { fileLog, logger } from '../../server';
-import { axiosGet, cloneDeepOptions, isDebugMode, useIpv6 } from './utils';
+import {
+  axiosGet,
+  cloneDeepOptions,
+  isDebugMode,
+  getIpFamilyFromConfig,
+} from './utils';
 import { UpdateMode } from '../../server/constant';
 import { ModuleFederationPluginOptions } from '@module-federation/sdk/dist/src/types/plugins/ModuleFederationPlugin';
 
@@ -184,7 +189,9 @@ class DTSManager {
 
       const url = remoteInfo.url;
       const res = await axiosGet(url, {
-        family: !useIpv6(this.options.host?.moduleFederationConfig) ? 4 : 6,
+        family: getIpFamilyFromConfig(
+          this.options.host?.moduleFederationConfig,
+        ),
       });
       const manifestJson = res.data as unknown as Manifest;
       if (!manifestJson.metaData.types.zip) {
@@ -259,7 +266,9 @@ class DTSManager {
     try {
       const url = apiTypeUrl;
       const res = await axiosGet(url, {
-        family: !useIpv6(this.options.host?.moduleFederationConfig) ? 4 : 6,
+        family: getIpFamilyFromConfig(
+          this.options.host?.moduleFederationConfig,
+        ),
       });
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(

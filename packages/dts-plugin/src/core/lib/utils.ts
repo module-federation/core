@@ -132,22 +132,24 @@ export function cloneDeepOptions(options: DTSManagerOptions) {
   });
 }
 
-export function useIpv6(
+/**
+ * Extracts IP version from Module Federation plugin configuration
+ * Defaults to 'ipv4' if not specified
+ */
+export function getIpFamilyFromConfig(
   config: moduleFederationPlugin.ModuleFederationPluginOptions,
-) {
-  if (!config) return false;
+): AxiosRequestConfig['family'] {
+  if (!config) return 4;
 
   const { dts } = config;
-  if (dts) {
-    if (typeof dts === 'object' && dts !== null) {
-      const { consumeTypes } = dts;
-      if (typeof consumeTypes === 'object' && consumeTypes !== null) {
-        return consumeTypes.useIpv6;
-      }
+  if (dts && typeof dts === 'object' && dts !== null) {
+    const { consumeTypes } = dts;
+    if (typeof consumeTypes === 'object' && consumeTypes !== null) {
+      return consumeTypes.ipVersion === 'ipv6' ? 6 : 4;
     }
   }
 
-  return false;
+  return 4;
 }
 
 export async function axiosGet(url: string, config?: AxiosRequestConfig) {
