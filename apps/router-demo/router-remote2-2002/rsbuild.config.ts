@@ -17,28 +17,6 @@ export default defineConfig({
   server: {
     port: 2002,
   },
-  dev: {
-    // It is necessary to configure assetPrefix, and in the production environment, you need to configure output.assetPrefix
-    assetPrefix: 'http://localhost:2002',
-  },
-  tools: {
-    // cssExtract: {
-    // 	pluginOptions: {
-    // 		insert(element) {
-    // 			console.log('element22222233333333333333',document.querySelector("#remote2-style-component"));
-    // 			document.querySelector("#remote2-style-component")?.appendChild(element);
-    // 		},
-    // 	}
-    // },
-    // styleLoader: {
-    // 	insert: (element)=> {
-    // 		debugger
-    // 		const styleContainer = document.querySelector(".remote2_export-app") || document.head;
-    // 		styleContainer.appendChild(element);
-    // 		console.log('styleContainer', styleContainer)
-    // 	},
-    // },
-  },
   plugins: [
     pluginReact(),
     pluginModuleFederation({
