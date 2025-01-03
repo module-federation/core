@@ -117,6 +117,40 @@ export default createModuleFederationConfig({
 
 设置 `true` 后，按照[此文档](../../practice/frameworks/modern/ssr/route-component#如何开启此功能？)消费生产者导出的路由。
 
+### ssr
+
+- 类型：`false`
+- 是否必填：否
+- 默认值：`undefined`
+
+`@module-federation/modern-js` 会根据 modern.js config 中的 `server.ssr` 来自动添加 SSR 相关的构建预设。
+
+如果当前项目仅需要在 CSR 加载 MF ，那么可以设置 `ssr: false` 来帮助渐进式迁移。
+
+```title='modern.config.ts'
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import { moduleFederationPlugin } from '@module-federation/modern-js';
+
+// https://modernjs.dev/en/configure/app/usage
+export default defineConfig({
+  dev: {
+    port: 3050,
+  },
+  runtime: {
+    router: true,
+  },
+  server: {
+    ssr: {
+      mode: 'stream',
+    },
+  },
+  plugins: [
+    appTools(),
+    moduleFederationPlugin({ ssr: false })
+  ],
+});
+```
+
 ## 服务端渲染（SSR）
 
 :::info 注意
@@ -246,40 +280,4 @@ export function UserLayout() {
     </div>
   );
 }
-```
-
-## 配置
-
-### ssr
-
-- 类型：`false`
-- 是否必填：否
-- 默认值：`undefined`
-
-`@module-federation/modern-js` 会根据 modern.js config 中的 `server.ssr` 来自动添加 SSR 相关的构建预设。
-
-如果当前项目仅需要在 CSR 加载 MF ，那么可以设置 `ssr: false` 来帮助渐进式迁移。
-
-```title='modern.config.ts'
-import { appTools, defineConfig } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/modern-js';
-
-// https://modernjs.dev/en/configure/app/usage
-export default defineConfig({
-  dev: {
-    port: 3050,
-  },
-  runtime: {
-    router: true,
-  },
-  server: {
-    ssr: {
-      mode: 'stream',
-    },
-  },
-  plugins: [
-    appTools(),
-    moduleFederationPlugin({ ssr: false })
-  ],
-});
 ```
