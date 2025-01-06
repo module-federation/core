@@ -4,6 +4,7 @@ import {
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
 import { validateOptions, consumeTypes } from '../core/index';
+import { isDev } from './utils';
 
 export class ConsumeTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -20,6 +21,9 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler) {
+    if (!isDev()) {
+      return;
+    }
     const { dtsOptions, defaultOptions, pluginOptions } = this;
 
     const normalizedConsumeTypes =
