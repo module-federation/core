@@ -201,7 +201,8 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
               zipPrefix = path.dirname(config.filename);
             }
 
-            if (zipTypesPath) {
+            const zipAssetName = path.join(zipPrefix, zipName);
+            if (zipTypesPath && !compilation.getAsset(zipAssetName)) {
               compilation.emitAsset(
                 path.join(zipPrefix, zipName),
                 new compiler.webpack.sources.RawSource(
@@ -211,7 +212,8 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
               );
             }
 
-            if (apiTypesPath) {
+            const apiAssetName = path.join(zipPrefix, apiFileName);
+            if (apiTypesPath && !compilation.getAsset(apiAssetName)) {
               compilation.emitAsset(
                 path.join(zipPrefix, apiFileName),
                 new compiler.webpack.sources.RawSource(

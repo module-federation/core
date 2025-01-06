@@ -133,7 +133,7 @@ export function cloneDeepOptions(options: DTSManagerOptions) {
 }
 
 const getEnvHeaders = (): Record<string, string> => {
-  const headersStr = getProcessEnv().MF_ENV_HEADERS || '{}';
+  const headersStr = getProcessEnv()['MF_ENV_HEADERS'] || '{}';
 
   return {
     ...JSON.parse(headersStr),
