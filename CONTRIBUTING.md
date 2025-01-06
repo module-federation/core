@@ -6,11 +6,11 @@ Thank you for your interest in contributing to Module Federation! Before startin
 
 1. [Fork](https://help.github.com/articles/fork-a-repo/) the Module Federation repository into your own GitHub account.
 2. [Clone](https://help.github.com/articles/cloning-a-repository/) the repository to your local machine.
-3. Checkout a new branch from `main` or `canary`.
+3. Checkout a new branch from `main`.
 4. Set up the development environment. Refer to the "Setup Development Environment" section below for guidance.
-5. If you've fixed a bug or added code that should be tested, add some tests.
-6. Ensure all tests pass. See the "Testing" section below for more information.
-7. Run `nx format:write` and `nx affected -t lint --parallel=7 --exclude='*,!tag:type:pkg'` to check and fix the code style.
+5. Add tests for your changes. See the "Testing" section below for more information.
+6. Format your code with `nx format:write`
+7. Check the code style with `nx affected -t lint --parallel=7 --exclude='*,!tag:type:pkg'`.
 8. If you've changed Node.js packages, run `npm run commit` for semantic versioning and commit.
 9. Submit the Pull Request, ensuring all CI runs pass.
 10. Your Pull Request will be reviewed by the maintainers soon.
@@ -28,28 +28,28 @@ We recommend using Node.js 18 LTS. Check your Node.js version with `node -v`.
 To install Node.js, use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm):
 
 ```bash
-# Install Node.js 18 LTS
 nvm install 18 --lts
-nvm alias default 18
 nvm use 18
+```
+
+To keep the Node.js version consistent in new instances of your terminal, run:
+
+```bash
+nvm alias default 18
 ```
 
 ### Install Dependencies
 
+Enable `pnpm` with [corepack](https://nodejs.org/api/corepack.html).
+
 ```sh
-# Enable pnpm with corepack, only available on Node.js >= `v14.19.0`
 corepack enable
 ```
 
-Add nx to global
+Open a new terminal that will pick up the required version of `pnpm` and run the following commands:
 
 ```bash
 pnpm add nx@latest -g
-```
-
-First, install NX globally:
-
-```sh
 pnpm install
 ```
 
@@ -98,7 +98,7 @@ This command ensures that only relevant tests are executed, saving time and reso
 
 ### Add a Changeset
 
-Universe is using [Changesets](https://github.com/changesets/changesets) to manage the versioning and changelogs.
+Module Federation uses [Changesets](https://github.com/changesets/changesets) to manage the versioning and changelogs.
 
 If you've changed some packages, you need add a new changeset for the changes. Please run `changeset` command to select the changed packages and add the changeset info.
 
