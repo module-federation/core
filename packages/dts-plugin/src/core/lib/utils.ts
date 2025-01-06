@@ -3,7 +3,7 @@ import path from 'path';
 import axios, { type AxiosRequestConfig } from 'axios';
 import http from 'http';
 import https from 'https';
-import { moduleFederationPlugin } from '@module-federation/sdk';
+import { moduleFederationPlugin, getProcessEnv } from '@module-federation/sdk';
 import ansiColors from 'ansi-colors';
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
 import { HostOptions } from '../interfaces/HostOptions';
@@ -132,8 +132,23 @@ export function cloneDeepOptions(options: DTSManagerOptions) {
   });
 }
 
+const getEnvHeaders = (): Record<string, string> => {
+  const headersStr = getProcessEnv().MF_ENV_HEADERS || '{}';
+
+  return {
+    ...JSON.parse(headersStr),
+  };
+};
+
 export async function axiosGet(url: string, config?: AxiosRequestConfig) {
   const httpAgent = new http.Agent({ family: 4 });
   const httpsAgent = new https.Agent({ family: 4 });
-  return axios.get(url, { httpAgent, httpsAgent, ...config });
+  return axios.get(url, {
+    httpAgent,
+    httpsAgent,
+    ...{
+      headers: getEnvHeaders(),
+    },
+    ...config,
+  });
 }
