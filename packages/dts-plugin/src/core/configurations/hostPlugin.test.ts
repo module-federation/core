@@ -42,8 +42,7 @@ describe('hostPlugin', () => {
           abortOnError: true,
           consumeAPITypes: false,
           runtimePkgs: [],
-          ipVersion:
-            'ipv4' as moduleFederationPlugin.DtsHostOptions['ipVersion'],
+          family: 4 as moduleFederationPlugin.DtsHostOptions['family'],
         });
 
         expect(mapRemotesToDownload).toStrictEqual({
@@ -69,8 +68,7 @@ describe('hostPlugin', () => {
           abortOnError: true,
           consumeAPITypes: false,
           runtimePkgs: [],
-          ipVersion:
-            'ipv4' as moduleFederationPlugin.DtsHostOptions['ipVersion'],
+          family: 4 as moduleFederationPlugin.DtsHostOptions['family'],
         };
 
         const { hostOptions, mapRemotesToDownload } =
