@@ -1,5 +1,13 @@
 # @module-federation/rsbuild-plugin
 
+## 0.8.8
+
+### Patch Changes
+
+- Updated dependencies [eda5184]
+  - @module-federation/enhanced@0.8.8
+  - @module-federation/sdk@0.8.8
+
 ## 0.8.7
 
 ### Patch Changes
