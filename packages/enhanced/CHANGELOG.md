@@ -1,5 +1,24 @@
 # @module-federation/enhanced
 
+## 0.8.8
+
+### Patch Changes
+
+- eda5184: Reordered the "import" and "require" fields in export mappings for consistency.
+
+  ```
+  - @module-federation/rspack@0.8.8
+  - @module-federation/sdk@0.8.8
+  - @module-federation/runtime-tools@0.8.8
+  - @module-federation/managers@0.8.8
+  - @module-federation/manifest@0.8.8
+  - @module-federation/dts-plugin@0.8.8
+  - @module-federation/bridge-react-webpack-plugin@0.8.8
+  - @module-federation/data-prefetch@0.8.8
+  - @module-federation/error-codes@0.8.8
+  - @module-federation/inject-external-runtime-core-plugin@0.8.8
+  ```
+
 ## 0.8.7
 
 ### Patch Changes
