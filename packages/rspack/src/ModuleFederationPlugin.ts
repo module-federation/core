@@ -1,8 +1,3 @@
-import type {
-  Compiler,
-  ModuleFederationPluginOptions,
-  RspackPluginInstance,
-} from '@rspack/core';
 import {
   composeKeyWithSeparator,
   moduleFederationPlugin,
@@ -13,6 +8,13 @@ import { DtsPlugin } from '@module-federation/dts-plugin';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
+
+import type { ResourceInfo } from '@module-federation/manifest';
+import type {
+  Compiler,
+  ModuleFederationPluginOptions,
+  RspackPluginInstance,
+} from '@rspack/core';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
 type SplitChunks = Compiler['options']['optimization']['splitChunks'];
@@ -240,7 +242,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     });
   }
 
-  get statsResourceInfo() {
+  get statsResourceInfo(): Partial<ResourceInfo> | undefined {
     return this._statsPlugin?.resourceInfo;
   }
 }
