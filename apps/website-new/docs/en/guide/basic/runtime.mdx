@@ -313,15 +313,15 @@ init({
   remotes: [
     {
       name: '@demo/sub1',
-      entry: 'http://localhost:2001/vmok-manifest.json',
+      entry: 'http://localhost:2001/mf-manifest.json',
     },
     {
       name: '@demo/sub2',
-      entry: 'http://localhost:2002/vmok-manifest.json',
+      entry: 'http://localhost:2002/mf-manifest.json',
     },
     {
       name: '@demo/sub3',
-      entry: 'http://localhost:2003/vmok-manifest.json',
+      entry: 'http://localhost:2003/mf-manifest.json',
     },
   ],
 });
@@ -460,7 +460,7 @@ There are the following differences between `Federation Runtime` and `Build Plug
 | `shared` must provide specific version and instance information                                                              | `shared` only requires configuration rules, no specific version or instance information needed |
 | `shared` dependencies can only be used externally, cannot use external `shared` dependencies                                 | `shared` dependencies can be shared bidirectionally according to specific rules                |
 | Can affect the loading process through `runtime`'s `plugin` mechanism                                                        | Can affect the loading process through `runtimePlugin` configuration                           |
-| Pure runtime does not support remote type hints                                                                              | Supports remote type hints                                                                     |
+| Supports remote module type hints                                                                              | Supports remote module type hints                                                                     |
 
 ### Why Runtime
 
