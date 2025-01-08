@@ -62,13 +62,13 @@ loadRemote("app2/util").then((md)=>{
 ### 解绑 Webpack，支持跨工具共享模块
 
 
-新版 Module Federation 插件采用了全新的 Runtime 架构。这一变化使得构建工具不再需要与 Runtime 强绑定。开发者有望在项目中自由地引入由不同构建工具的产物，并灵活地组装它们进行运行。
+新版 Module Federation 插件采用了全新的 Runtime 架构。这一变化使得构建工具不再需要与 Runtime 强绑定。开发者可在项目中自由地引入由不同构建工具的产物，并灵活地组装它们运行。
 
 目前，已经有多个构建工具与之兼容，包括 Webpack、Rspack 。其他构建工具也可以依据这一标准实现 Module Federation，这将保持运行时的一致性和标准化。
 
 ### 类型提示
 
-Module Federation 插件的新版本引入了一项突破性的功能——动态模块类型提示！这一功能有效地解决了将本地模块转换为动态远程模块时，在 TypeScript 项目中遇到的类型丢失问题。现在，使用该插件不仅可以自动生成和使用远程类型，而且当所有项目都在本地运行时，还能实现类似于 npm link 的类型实时更新体验。
+Module Federation 插件的新版本引入了一项突破性的功能——动态模块类型提示！这一功能有效地解决了将本地模块转换为动态远程模块时，在 TypeScript 项目中遇到的类型丢失问题。现在，使用该插件不仅可以自动生成和使用远程类型，而且当所有项目都在本地运行时，还能实现媲美 npm link 的类型实时更新体验。
 
 ![](https://module-federation-assest.netlify.app/document/announcement/blog/announcement/demo-type-hint.gif)
 
