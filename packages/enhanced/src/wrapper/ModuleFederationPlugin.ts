@@ -1,12 +1,7 @@
-import type {
-  WebpackPluginInstance,
-  Compiler,
-  WebpackPluginFunction,
-} from 'webpack';
+import type { WebpackPluginInstance, Compiler } from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type IModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
 import type { ResourceInfo } from '@module-federation/manifest';
-import type { Falsy } from 'webpack/declarations/WebpackOptions';
 
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import path from 'node:path';

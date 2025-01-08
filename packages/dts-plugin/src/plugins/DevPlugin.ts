@@ -36,9 +36,14 @@ export class DevPlugin implements WebpackPluginInstance {
   private _devWorker?: DevWorker;
   private updateDebounceTimer: NodeJS.Timeout | null = null;
   private readonly UPDATE_DEBOUNCE_DELAY = 300;
+  fetchTypesPromise: Promise<void>;
 
-  constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
+  constructor(
+    options: moduleFederationPlugin.ModuleFederationPluginOptions,
+    fetchTypesPromise: Promise<void>,
+  ) {
     this._options = options;
+    this.fetchTypesPromise = fetchTypesPromise;
   }
 
   static ensureLiveReloadEntry(
@@ -260,14 +265,15 @@ export class DevPlugin implements WebpackPluginInstance {
     ) {
       remote.tsConfigPath = normalizedDtsOptions.tsConfigPath;
     }
-
-    this._devWorker = createDevWorker({
-      name,
-      remote: remote,
-      host: host,
-      extraOptions: extraOptions,
-      disableLiveReload: normalizedDev.disableHotTypesReload,
-      disableHotTypesReload: normalizedDev.disableHotTypesReload,
+    this.fetchTypesPromise.then(() => {
+      this._devWorker = createDevWorker({
+        name,
+        remote: remote,
+        host: host,
+        extraOptions: extraOptions,
+        disableLiveReload: normalizedDev.disableHotTypesReload,
+        disableHotTypesReload: normalizedDev.disableHotTypesReload,
+      });
     });
 
     this._stopWhenSIGTERMOrSIGINT();
