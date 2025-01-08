@@ -18,6 +18,8 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
   dtsOptions: moduleFederationPlugin.PluginDtsOptions;
   defaultOptions: moduleFederationPlugin.DtsRemoteOptions;
+  fetchTypesPromise: Promise<void>;
+
   private debounceTimer: NodeJS.Timeout | null = null;
   private isProcessing = false;
   private pendingTask = false;
@@ -27,14 +29,17 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
     pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
     dtsOptions: moduleFederationPlugin.PluginDtsOptions,
     defaultOptions: moduleFederationPlugin.DtsRemoteOptions,
+    fetchTypesPromise: Promise<void>,
   ) {
     this.pluginOptions = pluginOptions;
     this.dtsOptions = dtsOptions;
     this.defaultOptions = defaultOptions;
+    this.fetchTypesPromise = fetchTypesPromise;
   }
 
   apply(compiler: Compiler) {
-    const { dtsOptions, defaultOptions, pluginOptions } = this;
+    const { dtsOptions, defaultOptions, pluginOptions, fetchTypesPromise } =
+      this;
 
     const normalizedGenerateTypes =
       normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
@@ -193,6 +198,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
         },
         async () => {
+          await fetchTypesPromise;
           try {
             if (pluginOptions.dev === false && compiledOnce) {
               return;

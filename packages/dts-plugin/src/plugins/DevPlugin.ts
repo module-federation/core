@@ -1,5 +1,4 @@
 import fs from 'fs-extra';
-import chalk from 'chalk';
 import { type DevWorker, createDevWorker } from '../dev-worker';
 import {
   moduleFederationPlugin,

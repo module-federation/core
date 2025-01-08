@@ -39,15 +39,23 @@ class TypesPlugin implements WebpackPluginInstance {
       return;
     }
 
+    let resolve;
+
+    const promise: Promise<void> = new Promise((res, rej) => {
+      resolve = res;
+    });
+
     new GenerateTypesPlugin(
       options,
       normalizedDtsOptions,
       defaultGenerateTypes,
+      promise,
     ).apply(compiler);
     new ConsumeTypesPlugin(
       options,
       normalizedDtsOptions,
       defaultConsumeTypes,
+      resolve,
     ).apply(compiler);
   }
 }
