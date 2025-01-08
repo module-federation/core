@@ -28,8 +28,14 @@ import {
   HOST_API_TYPES_FILE_NAME,
 } from '../constant';
 import { fileLog, logger } from '../../server';
-import { axiosGet, cloneDeepOptions, isDebugMode } from './utils';
+import {
+  axiosGet,
+  cloneDeepOptions,
+  isDebugMode,
+  getIpFamilyFromConfig,
+} from './utils';
 import { UpdateMode } from '../../server/constant';
+import { ModuleFederationPluginOptions } from '@module-federation/sdk/dist/src/types/plugins/ModuleFederationPlugin';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
 
@@ -180,8 +186,13 @@ class DTSManager {
       if (!remoteInfo.url.includes(MANIFEST_EXT)) {
         return remoteInfo as Required<RemoteInfo>;
       }
+
       const url = remoteInfo.url;
-      const res = await axiosGet(url);
+      const res = await axiosGet(url, {
+        family: getIpFamilyFromConfig(
+          this.options.host?.moduleFederationConfig,
+        ),
+      });
       const manifestJson = res.data as unknown as Manifest;
       if (!manifestJson.metaData.types.zip) {
         throw new Error(`Can not get ${remoteInfo.name}'s types archive url!`);
@@ -254,7 +265,11 @@ class DTSManager {
     }
     try {
       const url = apiTypeUrl;
-      const res = await axiosGet(url);
+      const res = await axiosGet(url, {
+        family: getIpFamilyFromConfig(
+          this.options.host?.moduleFederationConfig,
+        ),
+      });
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(
         REMOTE_ALIAS_IDENTIFIER,

@@ -3,6 +3,7 @@ import path from 'path';
 
 import { retrieveHostConfig } from './hostPlugin';
 import { retrieveTypesArchiveDestinationPath } from '../lib/archiveHandler';
+import { moduleFederationPlugin } from '@module-federation/sdk/.';
 
 describe('hostPlugin', () => {
   const moduleFederationConfig = {
@@ -41,6 +42,7 @@ describe('hostPlugin', () => {
           abortOnError: true,
           consumeAPITypes: false,
           runtimePkgs: [],
+          family: 4 as moduleFederationPlugin.DtsHostOptions['family'],
         });
 
         expect(mapRemotesToDownload).toStrictEqual({
@@ -66,6 +68,7 @@ describe('hostPlugin', () => {
           abortOnError: true,
           consumeAPITypes: false,
           runtimePkgs: [],
+          family: 4 as moduleFederationPlugin.DtsHostOptions['family'],
         };
 
         const { hostOptions, mapRemotesToDownload } =

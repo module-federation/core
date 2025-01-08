@@ -16,6 +16,10 @@ import {
 } from './typeScriptCompiler';
 import cloneDeepWith from 'lodash.clonedeepwith';
 import { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
+import {
+  DtsHostOptions,
+  PluginDtsOptions,
+} from '@module-federation/sdk/dist/src/types/plugins/ModuleFederationPlugin';
 
 export function getDTSManagerConstructor(
   implementation?: string,
@@ -132,8 +136,19 @@ export function cloneDeepOptions(options: DTSManagerOptions) {
   });
 }
 
+/**
+ * Extracts IP Family from Module Federation plugin configuration
+ * Defaults to 4 if not specified
+ */
+export function getIpFamilyFromConfig(
+  config: moduleFederationPlugin.ModuleFederationPluginOptions,
+): AxiosRequestConfig['family'] {
+  const dtsPlugin = config?.dts as PluginDtsOptions;
+  return (dtsPlugin?.consumeTypes as DtsHostOptions)?.family;
+}
+
 export async function axiosGet(url: string, config?: AxiosRequestConfig) {
-  const httpAgent = new http.Agent({ family: 4 });
-  const httpsAgent = new https.Agent({ family: 4 });
+  const httpAgent = new http.Agent({ family: config?.family ?? 4 });
+  const httpsAgent = new https.Agent({ family: config?.family ?? 4 });
   return axios.get(url, { httpAgent, httpsAgent, ...config });
 }
