@@ -108,12 +108,14 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             zipPrefix,
             zipName,
           );
+
           await new Promise<void>((resolve, reject) => {
             compiler.outputFileSystem.mkdir(
               path.dirname(zipOutputPath),
               (err) => {
-                if (err) reject(err);
-                else {
+                if (err && err.code !== 'EEXIST') {
+                  reject(err);
+                } else {
                   compiler.outputFileSystem.writeFile(
                     zipOutputPath,
                     zipContent,
@@ -139,8 +141,9 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             compiler.outputFileSystem.mkdir(
               path.dirname(apiOutputPath),
               (err) => {
-                if (err) reject(err);
-                else {
+                if (err && err.code !== 'EEXIST') {
+                  reject(err);
+                } else {
                   compiler.outputFileSystem.writeFile(
                     apiOutputPath,
                     apiContent,
