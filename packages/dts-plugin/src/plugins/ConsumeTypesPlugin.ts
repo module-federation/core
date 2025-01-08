@@ -40,6 +40,7 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
       )(dtsOptions.consumeTypes);
 
     if (!normalizedConsumeTypes) {
+      callback();
       return;
     }
 
