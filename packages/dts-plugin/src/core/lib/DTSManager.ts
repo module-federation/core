@@ -266,7 +266,7 @@ class DTSManager {
     } catch (err) {
       fileLog(
         `Unable to download "${remoteInfo.name}" api types, ${err}`,
-        'consumeTargetRemotes',
+        'downloadAPITypes',
         'error',
       );
     }
