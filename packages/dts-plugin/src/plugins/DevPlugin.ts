@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
-import { type DevWorker, createDevWorker } from '../dev-worker';
+import path from 'path';
+import { createDevWorker } from '../dev-worker';
 import {
   moduleFederationPlugin,
   normalizeOptions,
@@ -11,10 +12,11 @@ import {
   getIPV4,
   logger,
 } from '../server';
-import type { Compiler, WebpackPluginInstance } from 'webpack';
-import path from 'path';
-import { isDev } from './utils';
+import { getCompilerOutputDir, isDev } from './utils';
 import { isTSProject } from '../core/lib/utils';
+
+import type { Compiler, WebpackPluginInstance } from 'webpack';
+import type { DevWorker } from '../dev-worker';
 
 enum PROCESS_EXIT_CODE {
   SUCCESS = 0,
@@ -210,10 +212,7 @@ export class DevPlugin implements WebpackPluginInstance {
                 ? undefined
                 : normalizedDtsOptions.implementation,
             context: compiler.context,
-            outputDir: path.relative(
-              compiler.context,
-              compiler.outputPath || compiler.options.output.path,
-            ),
+            outputDir: getCompilerOutputDir(compiler),
             moduleFederationConfig: {
               ...this._options,
             },

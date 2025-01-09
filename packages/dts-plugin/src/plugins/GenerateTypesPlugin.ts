@@ -1,6 +1,7 @@
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import fs from 'fs';
-import { isDev } from './utils';
+import path from 'path';
+import { isDev, getCompilerOutputDir } from './utils';
 import {
   normalizeOptions,
   type moduleFederationPlugin,
@@ -12,7 +13,6 @@ import {
   retrieveTypesAssetsInfo,
   type DTSManagerOptions,
 } from '../core/index';
-import path from 'path';
 
 export class GenerateTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -65,10 +65,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
       remote: {
         implementation: dtsOptions.implementation,
         context: compiler.context,
-        outputDir: path.relative(
-          compiler.context,
-          compiler.outputPath || compiler.options.output.path,
-        ),
+        outputDir: getCompilerOutputDir(compiler),
         moduleFederationConfig: pluginOptions,
         ...normalizedGenerateTypes,
       },
