@@ -63,12 +63,10 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
         const response = await axiosGet(url, {
           responseType: 'arraybuffer',
         }).catch(downloadErrorLogger(destinationFolder, url));
-        debugger;
         if (
           typeof response.headers?.['content-type'] === 'string' &&
           response.headers['content-type'].includes('text/html')
         ) {
-          console.log(11111111, response.headers['content-type']);
           throw new Error(
             `${url} receives invalid content-type: ${response.headers['content-type']}`,
           );
