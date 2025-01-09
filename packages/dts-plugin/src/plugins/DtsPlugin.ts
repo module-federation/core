@@ -39,25 +39,34 @@ export class DtsPlugin implements WebpackPluginInstance {
       return;
     }
 
-    let resolve;
-
-    const fetchTypesPromise: Promise<void> = new Promise((res, rej) => {
-      resolve = res;
+    let consumeTypesPromiseResolve;
+    const consumeTypesPromise: Promise<void> = new Promise((resolve) => {
+      consumeTypesPromiseResolve = resolve;
     });
 
-    new DevPlugin(options, fetchTypesPromise).apply(compiler);
+    let generateTypesPromiseResolve;
+    const generateTypesPromise: Promise<void> = new Promise((resolve) => {
+      generateTypesPromiseResolve = resolve;
+    });
 
+    // Because the plugin will delete dist/@mf-types.zip while generating types, which will be used in GenerateTypesPlugin
+    // So it should apply after GenerateTypesPlugin
+    new DevPlugin(options, generateTypesPromise).apply(compiler);
+
+    // The exposes files may use remote types, so it need to consume types first, otherwise the generate types will fail
     new GenerateTypesPlugin(
       options,
       normalizedDtsOptions,
       defaultGenerateTypes,
-      fetchTypesPromise,
+      consumeTypesPromise,
+      generateTypesPromiseResolve,
     ).apply(compiler);
+
     new ConsumeTypesPlugin(
       options,
       normalizedDtsOptions,
       defaultConsumeTypes,
-      resolve,
+      consumeTypesPromiseResolve,
     ).apply(compiler);
   }
 }

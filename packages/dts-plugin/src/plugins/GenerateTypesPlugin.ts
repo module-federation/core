@@ -18,7 +18,8 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
   dtsOptions: moduleFederationPlugin.PluginDtsOptions;
   defaultOptions: moduleFederationPlugin.DtsRemoteOptions;
-  fetchTypesPromise: Promise<void>;
+  consumeTypesPromise: Promise<void>;
+  callback: () => void;
 
   private debounceTimer: NodeJS.Timeout | null = null;
   private isProcessing = false;
@@ -29,17 +30,24 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
     pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
     dtsOptions: moduleFederationPlugin.PluginDtsOptions,
     defaultOptions: moduleFederationPlugin.DtsRemoteOptions,
-    fetchTypesPromise: Promise<void>,
+    consumeTypesPromise: Promise<void>,
+    callback: () => void,
   ) {
     this.pluginOptions = pluginOptions;
     this.dtsOptions = dtsOptions;
     this.defaultOptions = defaultOptions;
-    this.fetchTypesPromise = fetchTypesPromise;
+    this.consumeTypesPromise = consumeTypesPromise;
+    this.callback = callback;
   }
 
   apply(compiler: Compiler) {
-    const { dtsOptions, defaultOptions, pluginOptions, fetchTypesPromise } =
-      this;
+    const {
+      dtsOptions,
+      defaultOptions,
+      pluginOptions,
+      consumeTypesPromise,
+      callback,
+    } = this;
 
     const normalizedGenerateTypes =
       normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
@@ -49,6 +57,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
       )(dtsOptions.generateTypes);
 
     if (!normalizedGenerateTypes) {
+      callback();
       return;
     }
 
@@ -198,7 +207,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
         },
         async () => {
-          await fetchTypesPromise;
+          await consumeTypesPromise;
           try {
             if (pluginOptions.dev === false && compiledOnce) {
               return;
@@ -254,7 +263,9 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
               );
             }
             compiledOnce = true;
+            callback();
           } catch (err) {
+            callback();
             console.error('Error in mf:generateTypes processAssets hook:', err);
           }
         },
