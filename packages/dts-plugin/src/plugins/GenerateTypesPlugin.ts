@@ -21,11 +21,6 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
   consumeTypesPromise: Promise<void>;
   callback: () => void;
 
-  private debounceTimer: NodeJS.Timeout | null = null;
-  private isProcessing = false;
-  private pendingTask = false;
-  private readonly DEBOUNCE_DELAY = 300;
-
   constructor(
     pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
     dtsOptions: moduleFederationPlugin.PluginDtsOptions,
@@ -94,105 +89,87 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
     const generateTypesFn = getGenerateTypesFn();
     let compiledOnce = false;
 
-    const debouncedEmitTypesFilesDev = async () => {
-      if (this.isProcessing) {
-        this.pendingTask = true;
-        return;
-      }
-      if (this.debounceTimer) {
-        clearTimeout(this.debounceTimer);
-      }
-      this.debounceTimer = setTimeout(async () => {
-        try {
-          this.isProcessing = true;
-          if (!isDev()) {
-            return;
-          }
-          const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
-            retrieveTypesAssetsInfo(finalOptions.remote);
-
-          await generateTypesFn(finalOptions);
-          const config = finalOptions.remote.moduleFederationConfig;
-          let zipPrefix = '';
-          if (typeof config.manifest === 'object' && config.manifest.filePath) {
-            zipPrefix = config.manifest.filePath;
-          } else if (
-            typeof config.manifest === 'object' &&
-            config.manifest.fileName
-          ) {
-            zipPrefix = path.dirname(config.manifest.fileName);
-          } else if (config.filename) {
-            zipPrefix = path.dirname(config.filename);
-          }
-
-          if (zipTypesPath) {
-            const zipContent = fs.readFileSync(zipTypesPath);
-            const zipOutputPath = path.join(
-              compiler.outputPath,
-              zipPrefix,
-              zipName,
-            );
-
-            await new Promise<void>((resolve, reject) => {
-              compiler.outputFileSystem.mkdir(
-                path.dirname(zipOutputPath),
-                (err) => {
-                  if (err && err.code !== 'EEXIST') {
-                    reject(err);
-                  } else {
-                    compiler.outputFileSystem.writeFile(
-                      zipOutputPath,
-                      zipContent,
-                      (writeErr) => {
-                        if (writeErr) reject(writeErr);
-                        else resolve();
-                      },
-                    );
-                  }
-                },
-              );
-            });
-          }
-
-          if (apiTypesPath) {
-            const apiContent = fs.readFileSync(apiTypesPath);
-            const apiOutputPath = path.join(
-              compiler.outputPath,
-              zipPrefix,
-              apiFileName,
-            );
-            await new Promise<void>((resolve, reject) => {
-              compiler.outputFileSystem.mkdir(
-                path.dirname(apiOutputPath),
-                (err) => {
-                  if (err && err.code !== 'EEXIST') {
-                    reject(err);
-                  } else {
-                    compiler.outputFileSystem.writeFile(
-                      apiOutputPath,
-                      apiContent,
-                      (writeErr) => {
-                        if (writeErr) reject(writeErr);
-                        else resolve();
-                      },
-                    );
-                  }
-                },
-              );
-            });
-          }
-        } catch (err) {
-          console.error(err);
-        } finally {
-          this.isProcessing = false;
-          this.debounceTimer = null;
-
-          if (this.pendingTask) {
-            this.pendingTask = false;
-            await debouncedEmitTypesFilesDev();
-          }
+    const emitTypesFilesDev = async () => {
+      try {
+        if (!isDev()) {
+          return;
         }
-      }, this.DEBOUNCE_DELAY);
+        const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
+          retrieveTypesAssetsInfo(finalOptions.remote);
+
+        await generateTypesFn(finalOptions);
+        const config = finalOptions.remote.moduleFederationConfig;
+        let zipPrefix = '';
+        if (typeof config.manifest === 'object' && config.manifest.filePath) {
+          zipPrefix = config.manifest.filePath;
+        } else if (
+          typeof config.manifest === 'object' &&
+          config.manifest.fileName
+        ) {
+          zipPrefix = path.dirname(config.manifest.fileName);
+        } else if (config.filename) {
+          zipPrefix = path.dirname(config.filename);
+        }
+
+        if (zipTypesPath) {
+          const zipContent = fs.readFileSync(zipTypesPath);
+          const zipOutputPath = path.join(
+            compiler.outputPath,
+            zipPrefix,
+            zipName,
+          );
+
+          await new Promise<void>((resolve, reject) => {
+            compiler.outputFileSystem.mkdir(
+              path.dirname(zipOutputPath),
+              (err) => {
+                if (err && err.code !== 'EEXIST') {
+                  reject(err);
+                } else {
+                  compiler.outputFileSystem.writeFile(
+                    zipOutputPath,
+                    zipContent,
+                    (writeErr) => {
+                      if (writeErr) reject(writeErr);
+                      else resolve();
+                    },
+                  );
+                }
+              },
+            );
+          });
+        }
+
+        if (apiTypesPath) {
+          const apiContent = fs.readFileSync(apiTypesPath);
+          const apiOutputPath = path.join(
+            compiler.outputPath,
+            zipPrefix,
+            apiFileName,
+          );
+          await new Promise<void>((resolve, reject) => {
+            compiler.outputFileSystem.mkdir(
+              path.dirname(apiOutputPath),
+              (err) => {
+                if (err && err.code !== 'EEXIST') {
+                  reject(err);
+                } else {
+                  compiler.outputFileSystem.writeFile(
+                    apiOutputPath,
+                    apiContent,
+                    (writeErr) => {
+                      if (writeErr) reject(writeErr);
+                      else resolve();
+                    },
+                  );
+                }
+              },
+            );
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
     };
 
     compiler.hooks.thisCompilation.tap('mf:generateTypes', (compilation) => {
@@ -211,7 +188,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             }
 
             if (compiledOnce) {
-              debouncedEmitTypesFilesDev();
+              emitTypesFilesDev();
               return;
             }
 

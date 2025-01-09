@@ -36,8 +36,6 @@ export class DevPlugin implements WebpackPluginInstance {
   readonly name = 'MFDevPlugin';
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _devWorker?: DevWorker;
-  private updateDebounceTimer: NodeJS.Timeout | null = null;
-  private readonly UPDATE_DEBOUNCE_DELAY = 300;
   fetchTypesPromise: Promise<void>;
 
   constructor(
@@ -101,21 +99,8 @@ export class DevPlugin implements WebpackPluginInstance {
     process.exit(exitCode);
   }
 
-  private _debouncedUpdate() {
-    if (this.updateDebounceTimer) {
-      clearTimeout(this.updateDebounceTimer);
-    }
-    this.updateDebounceTimer = setTimeout(async () => {
-      try {
-        this._devWorker?.update();
-      } catch (err) {
-        console.error(err);
-      }
-    }, this.UPDATE_DEBOUNCE_DELAY);
-  }
-
   private _afterEmit(): void {
-    this._debouncedUpdate();
+    this._devWorker?.update();
   }
 
   apply(compiler: Compiler): void {
