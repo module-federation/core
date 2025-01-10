@@ -429,8 +429,8 @@ class DTSManager {
       } = options;
       const hostName = this.options?.host?.moduleFederationConfig?.name;
       fileLog(
-        `updateTypes options:, ${JSON.stringify(options, null, 2)}`,
-        'consumeTypes',
+        `options: ${JSON.stringify(options, null, 2)};\nhostName: ${hostName}`,
+        'updateTypes',
         'info',
       );
       if (updateMode === UpdateMode.POSITIVE && remoteName === hostName) {
@@ -454,18 +454,29 @@ class DTSManager {
         const consumeTypes = async (
           requiredRemoteInfo: Required<RemoteInfo>,
         ) => {
+          fileLog(`consumeTypes start`, 'updateTypes', 'info');
           const [_alias, destinationPath] = await this.consumeTargetRemotes(
             hostOptions,
             requiredRemoteInfo,
           );
           await this.downloadAPITypes(requiredRemoteInfo, destinationPath);
+          fileLog(`consumeTypes end`, 'updateTypes', 'info');
         };
-
+        fileLog(
+          `loadedRemoteInfo: ${JSON.stringify(loadedRemoteInfo, null, 2)}`,
+          'updateTypes',
+          'info',
+        );
         if (!loadedRemoteInfo) {
           const remoteInfo = Object.values(mapRemotesToDownload).find(
             (item) => {
               return item.name === remoteName;
             },
+          );
+          fileLog(
+            `remoteInfo: ${JSON.stringify(remoteInfo, null, 2)}`,
+            'updateTypes',
+            'info',
           );
           if (remoteInfo) {
             if (!this.remoteAliasMap[remoteInfo.alias]) {
@@ -496,7 +507,7 @@ class DTSManager {
                   null,
                   2,
                 )}`,
-                'consumeTypes',
+                'updateTypes',
                 'info',
               );
               await consumeDynamicRemoteTypes();
