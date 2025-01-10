@@ -89,6 +89,11 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
 
         const zip = new AdmZip(Buffer.from(response.data));
         zip.extractAllTo(destinationPath, true);
+        fileLog(
+          `zip.extractAllTo success destinationPath: ${destinationPath}; url: ${url}`,
+          'downloadTypesArchive',
+          'info',
+        );
         return [destinationFolder, destinationPath];
       } catch (error: any) {
         fileLog(

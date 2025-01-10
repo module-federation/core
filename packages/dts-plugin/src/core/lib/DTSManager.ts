@@ -263,6 +263,7 @@ class DTSManager {
       const filePath = path.join(destinationPath, REMOTE_API_TYPES_FILE_NAME);
       fs.writeFileSync(filePath, apiTypeFile);
       this.loadedRemoteAPIAlias.add(remoteInfo.alias);
+      fileLog(`success`, 'downloadAPITypes', 'info');
     } catch (err) {
       fileLog(
         `Unable to download "${remoteInfo.name}" api types, ${err}`,
