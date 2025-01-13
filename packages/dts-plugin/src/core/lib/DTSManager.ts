@@ -421,10 +421,10 @@ class DTSManager {
 
   async updateTypes(options: UpdateTypesOptions): Promise<void> {
     try {
-      // can use remoteTarPath directly in the future
       const {
         remoteName,
         updateMode,
+        remoteTarPath,
         remoteInfo: updatedRemoteInfo,
         once,
       } = options;
@@ -456,9 +456,18 @@ class DTSManager {
           requiredRemoteInfo: Required<RemoteInfo>,
         ) => {
           fileLog(`consumeTypes start`, 'updateTypes', 'info');
+          if (!requiredRemoteInfo.zipUrl) {
+            throw new Error(
+              `Can not get ${requiredRemoteInfo.name}'s types archive url!`,
+            );
+          }
           const [_alias, destinationPath] = await this.consumeTargetRemotes(
             hostOptions,
-            requiredRemoteInfo,
+            {
+              ...requiredRemoteInfo,
+              // use remoteTarPath first
+              zipUrl: remoteTarPath || requiredRemoteInfo.zipUrl,
+            },
           );
           await this.downloadAPITypes(requiredRemoteInfo, destinationPath);
           fileLog(`consumeTypes end`, 'updateTypes', 'info');
