@@ -175,7 +175,7 @@ describe('createLink', () => {
     expect(needAttach).toBe(true);
   });
 
-  xit('should reuse an existing link element if one exists', () => {
+  it('should reuse an existing link element if one exists', () => {
     const url = 'https://example.com/script.js';
     const cb = jest.fn();
     document.head.innerHTML = `<link href="${url}" rel="preload" as="script">`;

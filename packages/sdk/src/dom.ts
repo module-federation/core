@@ -155,11 +155,11 @@ export function createLink(info: {
   for (let i = 0; i < links.length; i++) {
     const l = links[i];
     const linkHref = l.getAttribute('href');
-    const linkRef = l.getAttribute('ref');
+    const linkRel = l.getAttribute('rel');
     if (
       linkHref &&
       isStaticResourcesEqual(linkHref, info.url) &&
-      linkRef === info.attrs['ref']
+      linkRel === info.attrs['rel']
     ) {
       link = l;
       needAttach = false;
