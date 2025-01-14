@@ -166,7 +166,7 @@ class DTSManager {
       logger.success('Federated types created correctly');
     } catch (error) {
       if (this.options.remote?.abortOnError === false) {
-        logger.error(`Unable to compile federated types, ${error}`);
+        logger.error(`Unable to compile federated types${error}`);
       } else {
         throw error;
       }
@@ -263,10 +263,11 @@ class DTSManager {
       const filePath = path.join(destinationPath, REMOTE_API_TYPES_FILE_NAME);
       fs.writeFileSync(filePath, apiTypeFile);
       this.loadedRemoteAPIAlias.add(remoteInfo.alias);
+      fileLog(`success`, 'downloadAPITypes', 'info');
     } catch (err) {
       fileLog(
         `Unable to download "${remoteInfo.name}" api types, ${err}`,
-        'consumeTargetRemotes',
+        'downloadAPITypes',
         'error',
       );
     }
@@ -420,17 +421,17 @@ class DTSManager {
 
   async updateTypes(options: UpdateTypesOptions): Promise<void> {
     try {
-      // can use remoteTarPath directly in the future
       const {
         remoteName,
         updateMode,
+        remoteTarPath,
         remoteInfo: updatedRemoteInfo,
         once,
       } = options;
       const hostName = this.options?.host?.moduleFederationConfig?.name;
       fileLog(
-        `updateTypes options:, ${JSON.stringify(options, null, 2)}`,
-        'consumeTypes',
+        `options: ${JSON.stringify(options, null, 2)};\nhostName: ${hostName}`,
+        'updateTypes',
         'info',
       );
       if (updateMode === UpdateMode.POSITIVE && remoteName === hostName) {
@@ -454,18 +455,38 @@ class DTSManager {
         const consumeTypes = async (
           requiredRemoteInfo: Required<RemoteInfo>,
         ) => {
+          fileLog(`consumeTypes start`, 'updateTypes', 'info');
+          if (!requiredRemoteInfo.zipUrl) {
+            throw new Error(
+              `Can not get ${requiredRemoteInfo.name}'s types archive url!`,
+            );
+          }
           const [_alias, destinationPath] = await this.consumeTargetRemotes(
             hostOptions,
-            requiredRemoteInfo,
+            {
+              ...requiredRemoteInfo,
+              // use remoteTarPath first
+              zipUrl: remoteTarPath || requiredRemoteInfo.zipUrl,
+            },
           );
           await this.downloadAPITypes(requiredRemoteInfo, destinationPath);
+          fileLog(`consumeTypes end`, 'updateTypes', 'info');
         };
-
+        fileLog(
+          `loadedRemoteInfo: ${JSON.stringify(loadedRemoteInfo, null, 2)}`,
+          'updateTypes',
+          'info',
+        );
         if (!loadedRemoteInfo) {
           const remoteInfo = Object.values(mapRemotesToDownload).find(
             (item) => {
               return item.name === remoteName;
             },
+          );
+          fileLog(
+            `remoteInfo: ${JSON.stringify(remoteInfo, null, 2)}`,
+            'updateTypes',
+            'info',
           );
           if (remoteInfo) {
             if (!this.remoteAliasMap[remoteInfo.alias]) {
@@ -496,7 +517,7 @@ class DTSManager {
                   null,
                   2,
                 )}`,
-                'consumeTypes',
+                'updateTypes',
                 'info',
               );
               await consumeDynamicRemoteTypes();

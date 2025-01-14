@@ -4,23 +4,33 @@ import {
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
 import { validateOptions, consumeTypes } from '../core/index';
+import { isPrd } from './utils';
 
 export class ConsumeTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
   dtsOptions: moduleFederationPlugin.PluginDtsOptions;
   defaultOptions: moduleFederationPlugin.DtsHostOptions;
+  callback: () => void;
+
   constructor(
     pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
     dtsOptions: moduleFederationPlugin.PluginDtsOptions,
     defaultOptions: moduleFederationPlugin.DtsHostOptions,
+    callback: () => void,
   ) {
     this.pluginOptions = pluginOptions;
     this.dtsOptions = dtsOptions;
     this.defaultOptions = defaultOptions;
+    this.callback = callback;
   }
 
   apply(compiler: Compiler) {
-    const { dtsOptions, defaultOptions, pluginOptions } = this;
+    const { dtsOptions, defaultOptions, pluginOptions, callback } = this;
+
+    if (isPrd()) {
+      callback();
+      return;
+    }
 
     const normalizedConsumeTypes =
       normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
@@ -30,6 +40,7 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
       )(dtsOptions.consumeTypes);
 
     if (!normalizedConsumeTypes) {
+      callback();
       return;
     }
 
@@ -46,6 +57,12 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
     validateOptions(finalOptions.host);
 
     // only consume once , if remotes update types , DevPlugin will auto sync the latest types
-    consumeTypes(finalOptions);
+    consumeTypes(finalOptions)
+      .then(() => {
+        callback();
+      })
+      .catch(() => {
+        callback();
+      });
   }
 }
