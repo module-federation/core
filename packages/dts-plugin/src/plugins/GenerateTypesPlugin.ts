@@ -65,6 +65,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         ...normalizedGenerateTypes,
       },
       extraOptions: dtsOptions.extraOptions || {},
+      displayErrorInTerminal: dtsOptions.displayErrorInTerminal,
     };
 
     if (dtsOptions.tsConfigPath && !finalOptions.remote.tsConfigPath) {

@@ -52,6 +52,7 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
         ...normalizedConsumeTypes,
       },
       extraOptions: dtsOptions.extraOptions || {},
+      displayErrorInTerminal: dtsOptions.displayErrorInTerminal,
     };
 
     validateOptions(finalOptions.host);
