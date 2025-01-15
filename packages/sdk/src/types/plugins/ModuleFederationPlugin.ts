@@ -167,6 +167,7 @@ export interface PluginDtsOptions {
   extraOptions?: Record<string, any>;
   implementation?: string;
   cwd?: string;
+  displayErrorInTerminal?: boolean;
 }
 
 export type AsyncBoundaryOptions = {

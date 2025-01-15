@@ -65,6 +65,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         ...normalizedGenerateTypes,
       },
       extraOptions: dtsOptions.extraOptions || {},
+      displayErrorInTerminal: dtsOptions.displayErrorInTerminal,
     };
 
     if (dtsOptions.tsConfigPath && !finalOptions.remote.tsConfigPath) {
@@ -157,7 +158,12 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             callback();
           } catch (err) {
             callback();
-            console.error('Error in mf:generateTypes processAssets hook:', err);
+            if (finalOptions.displayErrorInTerminal) {
+              console.error(
+                'Error in mf:generateTypes processAssets hook:',
+                err,
+              );
+            }
           }
         },
       );

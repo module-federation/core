@@ -31,6 +31,7 @@ export class DtsPlugin implements WebpackPluginInstance {
           generateTypes: defaultGenerateTypes,
           consumeTypes: defaultConsumeTypes,
           extraOptions: {},
+          displayErrorInTerminal: true,
         },
         'mfOptions.dts',
       )(options.dts);
@@ -51,7 +52,9 @@ export class DtsPlugin implements WebpackPluginInstance {
 
     // Because the plugin will delete dist/@mf-types.zip while generating types, which will be used in GenerateTypesPlugin
     // So it should apply after GenerateTypesPlugin
-    new DevPlugin(options, generateTypesPromise).apply(compiler);
+    new DevPlugin(options, normalizedDtsOptions, generateTypesPromise).apply(
+      compiler,
+    );
 
     // The exposes files may use remote types, so it need to consume types first, otherwise the generate types will fail
     new GenerateTypesPlugin(

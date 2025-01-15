@@ -36,14 +36,17 @@ export class DevPlugin implements WebpackPluginInstance {
   readonly name = 'MFDevPlugin';
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _devWorker?: DevWorker;
+  dtsOptions: moduleFederationPlugin.PluginDtsOptions;
   fetchTypesPromise: Promise<void>;
 
   constructor(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
+    dtsOptions: moduleFederationPlugin.PluginDtsOptions,
     fetchTypesPromise: Promise<void>,
   ) {
     this._options = options;
     this.fetchTypesPromise = fetchTypesPromise;
+    this.dtsOptions = dtsOptions;
   }
 
   static ensureLiveReloadEntry(
@@ -173,6 +176,7 @@ export class DevPlugin implements WebpackPluginInstance {
           generateTypes: defaultGenerateTypes,
           consumeTypes: defaultConsumeTypes,
           extraOptions: {},
+          displayErrorInTerminal: this.dtsOptions?.displayErrorInTerminal,
         },
         'mfOptions.dts',
       )(dts);

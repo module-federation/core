@@ -166,7 +166,9 @@ class DTSManager {
       logger.success('Federated types created correctly');
     } catch (error) {
       if (this.options.remote?.abortOnError === false) {
-        logger.error(`Unable to compile federated types${error}`);
+        if (this.options.displayErrorInTerminal) {
+          logger.error(`Unable to compile federated types${error}`);
+        }
       } else {
         throw error;
       }
