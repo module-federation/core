@@ -52,6 +52,9 @@ class SharePlugin {
           singleton: options.singleton,
           packageName: options.packageName,
           eager: options.eager,
+          issuerLayer: options.issuerLayer,
+          layer: options.layer,
+          request: options.request || key,
         },
       }),
     );
@@ -66,6 +69,8 @@ class SharePlugin {
           requiredVersion: options.requiredVersion,
           strictVersion: options.strictVersion,
           singleton: options.singleton,
+          layer: options.layer,
+          request: options.request || options.import || key,
         },
       }));
     //@ts-ignore
@@ -75,11 +80,10 @@ class SharePlugin {
   }
 
   /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
+   * Applies the plugin to the webpack compiler instance
+   * @param compiler - The webpack compiler instance
    */
-  apply(compiler: Compiler) {
+  apply(compiler: Compiler): void {
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
