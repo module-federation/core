@@ -1,5 +1,61 @@
 # website-new
 
+## 1.0.22
+
+### Patch Changes
+
+- @module-federation/error-codes@0.8.9
+
+## 1.0.21
+
+### Patch Changes
+
+- @module-federation/error-codes@0.8.8
+
+## 1.0.20
+
+### Patch Changes
+
+- Updated dependencies [336f3d8]
+- Updated dependencies [4fd33fb]
+  - @module-federation/error-codes@0.8.7
+
+## 1.0.19
+
+### Patch Changes
+
+- @module-federation/error-codes@0.8.6
+
+## 1.0.18
+
+### Patch Changes
+
+- @module-federation/error-codes@0.8.5
+
+## 1.0.17
+
+### Patch Changes
+
+- @module-federation/error-codes@0.8.4
+
+## 1.0.16
+
+### Patch Changes
+
+- @module-federation/error-codes@0.8.3
+
+## 1.0.15
+
+### Patch Changes
+
+- @module-federation/error-codes@0.8.2
+
+## 1.0.14
+
+### Patch Changes
+
+- @module-federation/error-codes@0.8.1
+
 ## 1.0.13
 
 ### Patch Changes

@@ -1,5 +1,72 @@
 # @module-federation/runtime-tools
 
+## 0.8.9
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.9
+- @module-federation/webpack-bundler-runtime@0.8.9
+
+## 0.8.8
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.8
+- @module-federation/webpack-bundler-runtime@0.8.8
+
+## 0.8.7
+
+### Patch Changes
+
+- Updated dependencies [f573ad0]
+- Updated dependencies [4fd33fb]
+  - @module-federation/runtime@0.8.7
+  - @module-federation/webpack-bundler-runtime@0.8.7
+
+## 0.8.6
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.6
+- @module-federation/webpack-bundler-runtime@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.5
+- @module-federation/webpack-bundler-runtime@0.8.5
+
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.4
+- @module-federation/webpack-bundler-runtime@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [f817674]
+  - @module-federation/runtime@0.8.3
+  - @module-federation/webpack-bundler-runtime@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- Updated dependencies [fa7a0bd]
+  - @module-federation/runtime@0.8.2
+  - @module-federation/webpack-bundler-runtime@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.1
+- @module-federation/webpack-bundler-runtime@0.8.1
+
 ## 0.8.0
 
 ### Patch Changes

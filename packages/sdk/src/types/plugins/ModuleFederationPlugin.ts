@@ -170,6 +170,8 @@ export interface PluginDtsOptions {
   tsConfigPath?: string;
   extraOptions?: Record<string, any>;
   implementation?: string;
+  cwd?: string;
+  displayErrorInTerminal?: boolean;
 }
 
 export type AsyncBoundaryOptions = {
@@ -232,7 +234,6 @@ export interface ModuleFederationPluginOptions {
   implementation?: string;
 
   manifest?: boolean | PluginManifestOptions;
-
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
   async?: boolean | AsyncBoundaryOptions;
@@ -240,6 +241,8 @@ export interface ModuleFederationPluginOptions {
   virtualRuntimeEntry?: boolean;
   experiments?: {
     federationRuntime?: false | 'hoisted';
+    externalRuntime?: boolean;
+    provideExternalRuntime?: boolean;
   };
   bridge?: {
     /**

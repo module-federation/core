@@ -14,22 +14,22 @@ init({
   remotes: [],
   plugins: [
     BridgeReactPlugin(),
-    RetryPlugin({
-      fetch: {
-        url: 'http://localhost:2008/not-exist-mf-manifest.json',
-        fallback: () => 'http://localhost:2001/mf-manifest.json',
-      },
-      script: {
-        retryTimes: 3,
-        retryDelay: 1000,
-        moduleName: ['remote1'],
-        cb: (resolve, error) => {
-          return setTimeout(() => {
-            resolve(error);
-          }, 1000);
-        },
-      },
-    }),
+    // RetryPlugin({
+    //   fetch: {
+    //     url: 'http://localhost:2008/not-exist-mf-manifest.json',
+    //     fallback: () => 'http://localhost:2001/mf-manifest.json',
+    //   },
+    //   script: {
+    //     retryTimes: 3,
+    //     retryDelay: 1000,
+    //     moduleName: ['remote1'],
+    //     cb: (resolve, error) => {
+    //       return setTimeout(() => {
+    //         resolve(error);
+    //       }, 1000);
+    //     },
+    //   },
+    // }),
   ],
 });
 
@@ -127,7 +127,9 @@ const App = () => {
         <Route path="/detail/*" Component={Detail} />
         <Route
           path="/remote1/*"
-          Component={() => <Remote1App name={'Ming'} age={12} ref={ref} />}
+          Component={() => (
+            <Remote1App name={'Ming'} age={12} ref={ref} basename="/remote1" />
+          )}
         />
         <Route
           path="/remote2/*"

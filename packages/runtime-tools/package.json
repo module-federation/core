@@ -1,11 +1,16 @@
 {
   "name": "@module-federation/runtime-tools",
-  "version": "0.8.0",
+  "version": "0.8.9",
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "main": "./dist/index.cjs",
   "module": "./dist/index.esm.mjs",
   "types": "./dist/index.cjs.d.ts",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/runtime-tools"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -19,6 +24,11 @@
       "types": "./dist/runtime.cjs.d.ts",
       "import": "./dist/runtime.esm.mjs",
       "require": "./dist/runtime.cjs.js"
+    },
+    "./runtime-core": {
+      "types": "./dist/runtime-core.cjs.d.ts",
+      "import": "./dist/runtime-core.esm.mjs",
+      "require": "./dist/runtime-core.cjs.js"
     },
     "./webpack-bundler-runtime": {
       "types": "./dist/webpack-bundler-runtime.cjs.d.ts",
@@ -37,6 +47,9 @@
       ],
       "webpack-bundler-runtime": [
         "./dist/webpack-bundler-runtime.cjs.d.ts"
+      ],
+      "runtime-core": [
+        "./dist/runtime-core.cjs.d.ts"
       ]
     }
   },

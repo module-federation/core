@@ -7,7 +7,7 @@
 - modern.js ^2.56.1
 - 包含服务器端渲染（SSR）
 
-强烈推荐参考这个应用，它充分利用了最佳功能：
+强烈推荐参考这个应用，它提供了 Modern.js 与 Module Federation 结合的最佳实践：
 [module-federation 示例](https://github.com/module-federation/core/tree/main/apps/modernjs-ssr)
 
 ## 快速开始
@@ -180,3 +180,39 @@ export default Product;
 当组件**加载**或**渲染**失败时，所渲染的容错组件。
 
 注意：当**渲染**失败的时候，该组件仅在客户端渲染此 容错组件。
+
+## 配置
+
+### ssr
+
+- 类型：`false`
+- 是否必填：否
+- 默认值：`undefined`
+
+`@module-federation/modern-js` 会根据 modern.js config 中的 `server.ssr` 来自动添加 SSR 相关的构建预设。
+
+如果当前项目仅需要在 CSR 加载 MF ，那么可以设置 `ssr: false` 来帮助渐进式迁移。
+
+```title='modern.config.ts'
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import { moduleFederationPlugin } from '@module-federation/modern-js';
+
+// https://modernjs.dev/en/configure/app/usage
+export default defineConfig({
+  dev: {
+    port: 3050,
+  },
+  runtime: {
+    router: true,
+  },
+  server: {
+    ssr: {
+      mode: 'stream',
+    },
+  },
+  plugins: [
+    appTools(),
+    moduleFederationPlugin({ ssr: false })
+  ],
+});
+```

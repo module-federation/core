@@ -28,7 +28,7 @@ export function createRemoteComponent(info: {
       }
 
       const exportName = info?.export || 'default';
-      LoggerInstance.log(`createRemoteComponent LazyComponent create >>>`, {
+      LoggerInstance.debug(`createRemoteComponent LazyComponent create >>>`, {
         basename,
         info,
       });
@@ -37,7 +37,7 @@ export function createRemoteComponent(info: {
       const moduleName = module && module[Symbol.for('mf_module_id')];
       const exportFn = module[exportName];
 
-      LoggerInstance.log(
+      LoggerInstance.debug(
         `createRemoteComponent LazyComponent loadRemote info >>>`,
         { name: moduleName, module, exportName, basename, route },
       );

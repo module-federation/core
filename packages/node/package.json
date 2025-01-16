@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "2.6.13",
+  "version": "2.6.22",
   "type": "commonjs",
   "main": "./dist/src/index.js",
   "exports": {
@@ -16,7 +16,6 @@
       "import": "./dist/src/utils/index.js",
       "require": "./dist/src/utils/index.js"
     },
-    "./src/plugins/RemotePublicPathPlugin.js": "./dist/src/plugins/RemotePublicPathPlugin.js",
     "./src/plugins/NodeFederationPlugin.js": "./dist/src/plugins/NodeFederationPlugin.js",
     "./universe-entry-chunk-tracker-plugin": "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.js",
     "./src/": "./dist/src/"
@@ -57,7 +56,11 @@
   ],
   "types": "src/index.d.ts",
   "description": "Module Federation helper for Node",
-  "repository": "https://github.com/module-federation/core/tree/main/packages/node",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/node"
+  },
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "dependencies": {

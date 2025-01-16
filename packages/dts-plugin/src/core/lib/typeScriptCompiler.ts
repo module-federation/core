@@ -66,7 +66,7 @@ function writeTempTsConfig(
   const createHash = (contents: string) => {
     return crypto.createHash('md5').update(contents).digest('hex');
   };
-  const hash = createHash(`${JSON.stringify(tsConfig)}${name}`);
+  const hash = createHash(`${JSON.stringify(tsConfig)}${name}${Date.now()}`);
   const tempTsConfigJsonPath = resolve(
     context,
     'node_modules',
@@ -180,7 +180,12 @@ export const compileTs = async (
     const execPromise = util.promisify(exec);
     const cmd = `npx ${remoteOptions.compilerInstance} --project ${tempTsConfigJsonPath}`;
     try {
-      await execPromise(cmd);
+      await execPromise(cmd, {
+        cwd:
+          typeof remoteOptions.moduleFederationConfig.dts !== 'boolean'
+            ? (remoteOptions.moduleFederationConfig.dts?.cwd ?? undefined)
+            : undefined,
+      });
     } catch (err) {
       throw new Error(
         getShortErrorMsg(TYPE_001, typeDescMap, {

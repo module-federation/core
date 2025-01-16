@@ -252,9 +252,11 @@ describe('createLink', () => {
   it('should call the callback when the link fails to load', () => {
     const url = 'https://example.com/script.js';
     const cb = jest.fn();
+    const onErrorCallback = jest.fn();
     const { link, needAttach } = createLink({
       url,
       cb,
+      onErrorCallback,
       attrs: { as: 'script' },
     });
 
@@ -262,8 +264,7 @@ describe('createLink', () => {
       document.head.appendChild(link);
     }
     link?.onerror?.(new Event('error'));
-
-    expect(cb).toHaveBeenCalled();
+    expect(onErrorCallback).toHaveBeenCalled();
   });
 
   it('should use the link element returned by createLinkHook', () => {

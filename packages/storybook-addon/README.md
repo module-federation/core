@@ -45,7 +45,7 @@ module.exports = storybookConfig;
 
 ### Rsbuild App or Rslib Module
 
-```
+```js
 import { dirname, join } from 'node:path';
 import type { StorybookConfig } from 'storybook-react-rsbuild';
 

@@ -1,19 +1,14 @@
-import type {
-  WebpackPluginInstance,
-  Compiler,
-  WebpackPluginFunction,
-} from 'webpack';
+import type { WebpackPluginInstance, Compiler } from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type IModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
 import type { ResourceInfo } from '@module-federation/manifest';
-import type { Falsy } from 'webpack/declarations/WebpackOptions';
 
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import path from 'node:path';
 import fs from 'node:fs';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 
-const PLUGIN_NAME = 'ModuleFederationPlugin';
+export const PLUGIN_NAME = 'ModuleFederationPlugin';
 
 export default class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -26,14 +21,6 @@ export default class ModuleFederationPlugin implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler) {
-    if (
-      !compiler.options.plugins.find(
-        (p: WebpackPluginInstance | WebpackPluginFunction | Falsy) =>
-          p && (p as WebpackPluginInstance)['name'] === PLUGIN_NAME,
-      )
-    ) {
-      compiler.options.plugins.push(this);
-    }
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
     const CoreModuleFederationPlugin =

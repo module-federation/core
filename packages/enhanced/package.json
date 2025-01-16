@@ -1,9 +1,13 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.8.0",
+  "version": "0.8.9",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
-  "repository": "https://github.com/module-federation/core/tree/main/packages/enhanced",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/enhanced"
+  },
   "files": [
     "dist/",
     "README.md"
@@ -31,28 +35,28 @@
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
-      "require": "./dist/src/index.js",
-      "import": "./dist/src/index.js"
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js"
     },
     "./webpack": {
       "types": "./dist/src/webpack.d.ts",
-      "require": "./dist/src/webpack.js",
-      "import": "./dist/src/webpack.js"
+      "import": "./dist/src/webpack.js",
+      "require": "./dist/src/webpack.js"
     },
     "./rspack": {
       "types": "./dist/src/rspack.d.ts",
-      "require": "./dist/src/rspack.js",
-      "import": "./dist/src/rspack.js"
+      "import": "./dist/src/rspack.js",
+      "require": "./dist/src/rspack.js"
     },
     "./runtime": {
       "types": "./dist/src/runtime.d.ts",
-      "require": "./dist/src/runtime.js",
-      "import": "./dist/src/runtime.js"
+      "import": "./dist/src/runtime.js",
+      "require": "./dist/src/runtime.js"
     },
     "./prefetch": {
       "types": "./dist/src/prefetch.d.ts",
-      "require": "./dist/src/prefetch.js",
-      "import": "./dist/src/prefetch.js"
+      "import": "./dist/src/prefetch.js",
+      "require": "./dist/src/prefetch.js"
     }
   },
   "typesVersions": {
@@ -84,10 +88,12 @@
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/manifest": "workspace:*",
     "@module-federation/managers": "workspace:*",
+    "@module-federation/error-codes": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/rspack": "workspace:*",
     "@module-federation/bridge-react-webpack-plugin": "workspace:*",
     "@module-federation/data-prefetch": "workspace:*",
+    "@module-federation/inject-external-runtime-core-plugin": "workspace:*",
     "upath": "2.0.1",
     "btoa": "^1.2.1"
   }

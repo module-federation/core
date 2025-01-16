@@ -14,6 +14,7 @@ interface PluginDtsOptions {
   generateTypes?: boolean | DtsRemoteOptions;
   consumeTypes?: boolean | DtsHostOptions;
   tsConfigPath?: string;
+  cwd?: string;
 }
 ```
 
@@ -224,3 +225,19 @@ Used as the default base path for relative remote URLs when locating types
 - Default value: `path.join(process.cwd(),'./tsconfig.json')`
 
 tsconfig configuration file path
+
+### cwd
+
+- Type: `string`
+- Required: No
+- Default value: `undefined`
+
+The working directory to run the compiler
+
+### displayErrorInTerminal
+
+- Type: `boolean`
+- Required: No
+- Default value: `true`
+
+Whether print error log in terminal

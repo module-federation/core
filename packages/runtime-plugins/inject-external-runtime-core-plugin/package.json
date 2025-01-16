@@ -1,0 +1,42 @@
+{
+  "name": "@module-federation/inject-external-runtime-core-plugin",
+  "version": "0.8.9",
+  "license": "MIT",
+  "description": "A sdk for support module federation",
+  "keywords": [
+    "Module Federation",
+    "sdk"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "zhanghang <hanric.zhang@gmail.com>",
+  "sideEffects": false,
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.mjs",
+  "types": "./dist/index.cjs.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.cjs.d.ts",
+      "import": "./dist/index.esm.mjs",
+      "require": "./dist/index.cjs.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@module-federation/runtime-tools": "workspace:*"
+  },
+  "devDependencies": {
+    "@module-federation/runtime-tools": "workspace:*"
+  }
+}

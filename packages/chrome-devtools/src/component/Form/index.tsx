@@ -58,6 +58,7 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     versionList,
     setVersionList,
     getVersion,
+    customValueValidate,
   } = props;
   const { moduleInfo } = window.__FEDERATION__;
   let { producer } = separateType(moduleInfo);
@@ -145,7 +146,12 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
       };
     }
 
-    if (validateCustom(value) || validateSemver(value) || validatePort(value)) {
+    if (
+      validateCustom(value) ||
+      validateSemver(value) ||
+      validatePort(value) ||
+      customValueValidate?.(value)
+    ) {
       statusSet[index].valueStatus = true;
       flushSync(() => setFormStatus(statusSet));
       return callback();

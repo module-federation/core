@@ -1,5 +1,76 @@
 # @module-federation/data-prefetch
 
+## 0.8.9
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.9
+- @module-federation/sdk@0.8.9
+
+## 0.8.8
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.8
+- @module-federation/sdk@0.8.8
+
+## 0.8.7
+
+### Patch Changes
+
+- Updated dependencies [835b09c]
+- Updated dependencies [f573ad0]
+- Updated dependencies [336f3d8]
+- Updated dependencies [4fd33fb]
+  - @module-federation/sdk@0.8.7
+  - @module-federation/runtime@0.8.7
+
+## 0.8.6
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.6
+- @module-federation/sdk@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.5
+- @module-federation/sdk@0.8.5
+
+## 0.8.4
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.4
+- @module-federation/sdk@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- 5b637c3: fix(data-prefetch): the prefetch exports type is promise or function
+- Updated dependencies [f817674]
+- Updated dependencies [8e172c8]
+  - @module-federation/runtime@0.8.3
+  - @module-federation/sdk@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- Updated dependencies [fa7a0bd]
+  - @module-federation/runtime@0.8.2
+  - @module-federation/sdk@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.1
+- @module-federation/sdk@0.8.1
+
 ## 0.8.0
 
 ### Patch Changes

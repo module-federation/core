@@ -1,6 +1,6 @@
 import { expectTypeOf, describe, it, vi, expect } from 'vitest';
 import { init, loadRemote, loadShare, loadShareSync } from '../src/index';
-import { getInfoWithoutType } from '../src/global';
+import { getInfoWithoutType } from '@module-federation/runtime-core';
 
 describe('global', () => {
   it('inject mode', () => {

@@ -85,6 +85,9 @@ module.exports = composePlugins(
           },
         },
         manifest: false,
+        experiments: {
+          externalRuntime: true,
+        },
       }),
     );
     (config.devServer = {

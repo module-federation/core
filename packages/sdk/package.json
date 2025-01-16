@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/sdk",
-  "version": "0.8.0",
+  "version": "0.8.9",
   "license": "MIT",
   "description": "A sdk for support module federation",
   "keywords": [
@@ -11,6 +11,11 @@
     "dist/",
     "README.md"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/sdk"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -42,6 +47,6 @@
     }
   },
   "dependencies": {
-    "isomorphic-rslog": "0.0.6"
+    "isomorphic-rslog": "0.0.7"
   }
 }

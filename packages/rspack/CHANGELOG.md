@@ -1,5 +1,126 @@
 # @module-federation/rspack
 
+## 0.8.9
+
+### Patch Changes
+
+- Updated dependencies [6e3afc6]
+- Updated dependencies [1be9d62]
+- Updated dependencies [6e3afc6]
+- Updated dependencies [6e3afc6]
+- Updated dependencies [6e3afc6]
+- Updated dependencies [6e3afc6]
+- Updated dependencies [6e3afc6]
+- Updated dependencies [6e3afc6]
+  - @module-federation/dts-plugin@0.8.9
+  - @module-federation/manifest@0.8.9
+  - @module-federation/sdk@0.8.9
+  - @module-federation/runtime-tools@0.8.9
+  - @module-federation/managers@0.8.9
+  - @module-federation/bridge-react-webpack-plugin@0.8.9
+  - @module-federation/inject-external-runtime-core-plugin@0.8.9
+
+## 0.8.8
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.8
+- @module-federation/runtime-tools@0.8.8
+- @module-federation/managers@0.8.8
+- @module-federation/manifest@0.8.8
+- @module-federation/dts-plugin@0.8.8
+- @module-federation/bridge-react-webpack-plugin@0.8.8
+- @module-federation/inject-external-runtime-core-plugin@0.8.8
+
+## 0.8.7
+
+### Patch Changes
+
+- Updated dependencies [835b09c]
+- Updated dependencies [f573ad0]
+- Updated dependencies [336f3d8]
+- Updated dependencies [4fd33fb]
+  - @module-federation/sdk@0.8.7
+  - @module-federation/inject-external-runtime-core-plugin@0.8.7
+  - @module-federation/bridge-react-webpack-plugin@0.8.7
+  - @module-federation/dts-plugin@0.8.7
+  - @module-federation/managers@0.8.7
+  - @module-federation/manifest@0.8.7
+  - @module-federation/runtime-tools@0.8.7
+
+## 0.8.6
+
+### Patch Changes
+
+- Updated dependencies [c90bba2]
+- Updated dependencies [4a2cf82]
+  - @module-federation/dts-plugin@0.8.6
+  - @module-federation/manifest@0.8.6
+  - @module-federation/sdk@0.8.6
+  - @module-federation/runtime-tools@0.8.6
+  - @module-federation/managers@0.8.6
+  - @module-federation/bridge-react-webpack-plugin@0.8.6
+
+## 0.8.5
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.5
+- @module-federation/runtime-tools@0.8.5
+- @module-federation/managers@0.8.5
+- @module-federation/manifest@0.8.5
+- @module-federation/dts-plugin@0.8.5
+- @module-federation/bridge-react-webpack-plugin@0.8.5
+
+## 0.8.4
+
+### Patch Changes
+
+- 61625d4: fix(rspack): import plugin from sub path
+- Updated dependencies [5ea7aea]
+  - @module-federation/dts-plugin@0.8.4
+  - @module-federation/manifest@0.8.4
+  - @module-federation/sdk@0.8.4
+  - @module-federation/runtime-tools@0.8.4
+  - @module-federation/managers@0.8.4
+  - @module-federation/bridge-react-webpack-plugin@0.8.4
+
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [8e172c8]
+  - @module-federation/dts-plugin@0.8.3
+  - @module-federation/sdk@0.8.3
+  - @module-federation/runtime-tools@0.8.3
+  - @module-federation/manifest@0.8.3
+  - @module-federation/bridge-react-webpack-plugin@0.8.3
+  - @module-federation/managers@0.8.3
+
+## 0.8.2
+
+### Patch Changes
+
+- Updated dependencies [85ef6c4]
+  - @module-federation/manifest@0.8.2
+  - @module-federation/dts-plugin@0.8.2
+  - @module-federation/runtime-tools@0.8.2
+  - @module-federation/sdk@0.8.2
+  - @module-federation/managers@0.8.2
+  - @module-federation/bridge-react-webpack-plugin@0.8.2
+
+## 0.8.1
+
+### Patch Changes
+
+- 8165419: re-export ContainerPlugin and ContainerReferencePlugin from rspack core
+  - @module-federation/sdk@0.8.1
+  - @module-federation/runtime-tools@0.8.1
+  - @module-federation/managers@0.8.1
+  - @module-federation/manifest@0.8.1
+  - @module-federation/dts-plugin@0.8.1
+  - @module-federation/bridge-react-webpack-plugin@0.8.1
+
 ## 0.8.0
 
 ### Patch Changes

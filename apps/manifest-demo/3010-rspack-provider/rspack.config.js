@@ -42,6 +42,7 @@ module.exports = composePlugins(
               transform: {
                 react: {
                   runtime: 'automatic',
+                  refresh: true,
                 },
               },
             },
@@ -60,6 +61,18 @@ module.exports = composePlugins(
     // publicPath must be specific url
     config.output.publicPath = 'http://localhost:3010/';
 
+    const rspackPlugin = config.plugins.find((plugin) => {
+      return plugin.name === 'HtmlRspackPlugin';
+    });
+
+    if (rspackPlugin && rspackPlugin._args && rspackPlugin._args[0]) {
+      rspackPlugin._args[0].excludeChunks = ['rspack_provider'];
+    } else {
+      console.warn(
+        'HtmlRspackPlugin not found or has unexpected structure. Skipping excludeChunks configuration.',
+      );
+    }
+
     config.plugins.push(
       new ModuleFederationPlugin({
         name: 'rspack_provider',
@@ -70,10 +83,10 @@ module.exports = composePlugins(
         shared: {
           lodash: {},
           antd: {},
-          'react/': {
-            singleton: true,
-            requiredVersion: '^18.3.1',
-          },
+          // 'react/': {
+          //   singleton: true,
+          //   requiredVersion: '^18.3.1',
+          // },
           react: {
             singleton: true,
             requiredVersion: '^18.3.1',
@@ -88,6 +101,9 @@ module.exports = composePlugins(
           },
         },
         dataPrefetch: true,
+        experiments: {
+          externalRuntime: true,
+        },
       }),
     );
     (config.devServer = {
