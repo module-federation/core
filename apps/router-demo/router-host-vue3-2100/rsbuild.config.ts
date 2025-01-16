@@ -15,8 +15,6 @@ export default defineConfig({
     port: 2100,
   },
   dev: {
-    // It is necessary to configure assetPrefix, and in the production environment, you need to configure output.assetPrefix
-    assetPrefix: 'http://localhost:2100',
     writeToDisk: true,
   },
   plugins: [
