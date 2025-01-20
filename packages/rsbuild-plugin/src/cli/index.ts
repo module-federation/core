@@ -43,6 +43,17 @@ function isStoryBook(rsbuildConfig: RsbuildConfig) {
   }
 }
 
+function isStoryBook(rsbuildConfig: RsbuildConfig) {
+  if (
+    rsbuildConfig.plugins?.find(
+      (p) =>
+        p && 'name' in p && p.name === 'module-federation-storybook-plugin',
+    )
+  ) {
+    return true;
+  }
+}
+
 export function isMFFormat(bundlerConfig: Rspack.Configuration) {
   const library = bundlerConfig.output?.library;
 
