@@ -1,0 +1,46 @@
+.footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100px;
+  color: inherit;
+  text-decoration: none;
+  transition: 0.15s ease;
+  width: 45%;
+}
+
+.card:hover,
+.card:focus {
+  transform: scale(1.05);
+}
+
+.card h2 {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.card p {
+  display: flex;
+  opacity: 0.6;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-top: 1rem;
+}
+
+.arrow-right {
+  width: 1.3rem;
+  margin-left: 0.5rem;
+  margin-top: 3px;
+}

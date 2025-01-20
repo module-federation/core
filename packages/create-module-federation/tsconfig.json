@@ -1,22 +1,24 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "lib": ["DOM", "ESNext"],
+    "target": "ES2020",
+    "module": "Node16",
     "forceConsistentCasingInFileNames": true,
+    "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "declaration": true
+    "declaration": true,
+    "noImplicitReturns": false
   },
   "files": [],
   "include": [],
-  "exclude": ["node_modules"],
   "references": [
     {
       "path": "./tsconfig.lib.json"

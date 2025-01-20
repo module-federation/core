@@ -1,6 +1,7 @@
-import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { defineConfig } from '@rslib/core';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import moduleFederationConfig from './module-federation.config';
 
 const shared = {
   dts: {
@@ -41,21 +42,5 @@ export default defineConfig({
   server: {
     port: 3001,
   },
-  plugins: [
-    pluginReact(),
-    pluginModuleFederation({
-      name: 'rslib_provider',
-      exposes: {
-        '.': './src/index.tsx',
-      },
-      shared: {
-        react: {
-          singleton: true,
-        },
-        'react-dom': {
-          singleton: true,
-        },
-      },
-    }),
-  ],
+  plugins: [pluginReact(), pluginModuleFederation(moduleFederationConfig)],
 });

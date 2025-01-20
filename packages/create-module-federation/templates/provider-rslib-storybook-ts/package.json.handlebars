@@ -1,0 +1,34 @@
+{
+  "name": "{{ mfName }}",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rslib build",
+    "dev": "rslib build --watch",
+    "mf-dev": "rslib mf-dev"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "1.2.0-beta.0",
+    "@rsbuild/plugin-react": "^1.1.0",
+    "@rslib/core": "^0.3.1",
+    "@types/react": "^19.0.4",
+    "react": "^19.0.0",
+    "typescript": "^5.7.3",
+    "@module-federation/rsbuild-plugin":"^0.8.9"
+  },
+  "peerDependencies": {
+    "react": ">=16.9.0",
+    "react-dom": ">=16.9.0"
+  }
+}

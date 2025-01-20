@@ -1,0 +1,44 @@
+{
+  "name": "create-module-federation",
+  "description": "Create a new Module Federation project",
+  "public": true,
+  "sideEffects": false,
+  "version": "0.0.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/create-module-federation"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "rslib build"
+  },
+  "main": "./dist/index.js",
+  "bin": {
+    "create-module-federation": "./dist/index.js"
+  },
+  "files": [
+    "template",
+    "dist"
+  ],
+  "dependencies": {
+    "@clack/prompts": "^0.8.2",
+    "execa": "5.1.1",
+    "fs-extra": "9.1.0",
+    "minimist": "^1.2.8",
+    "rslog": "^1.2.3",
+    "glob": "7.2.0",
+    "handlebars": "4.7.7"
+  },
+  "devDependencies": {
+    "@types/glob": "7.2.0",
+    "@types/minimist": "^1.2.5",
+    "@types/fs-extra": "9.0.6",
+    "@rslib/core": "^0.3.1",
+    "rsbuild-plugin-publint": "^0.2.1"
+  }
+}
