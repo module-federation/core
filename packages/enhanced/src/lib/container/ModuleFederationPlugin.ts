@@ -160,7 +160,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           shareScope: options.shareScope,
           exposes: options.exposes!,
           runtimePlugins: options.runtimePlugins,
-          experiments: options.experiments,
         }).apply(compiler);
       }
       if (
