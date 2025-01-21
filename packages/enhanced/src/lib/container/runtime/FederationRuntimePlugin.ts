@@ -47,9 +47,12 @@ const BundlerRuntimePath = require.resolve(
 const RuntimePath = require.resolve('@module-federation/runtime', {
   paths: [RuntimeToolsPath],
 });
-const EmbeddedRuntimePath = require.resolve('@module-federation/runtime-core', {
-  paths: [RuntimeToolsPath],
-});
+const EmbeddedRuntimePath = require.resolve(
+  '@module-federation/runtime/embedded',
+  {
+    paths: [RuntimeToolsPath],
+  },
+);
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
