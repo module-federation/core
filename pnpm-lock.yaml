@@ -2225,9 +2225,15 @@ importers:
       '@types/btoa':
         specifier: ^1.2.5
         version: 1.2.5
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
       enhanced-resolve:
         specifier: ^5.0.0
         version: 5.17.1
+      terser:
+        specifier: ^5.37.0
+        version: 5.37.0
 
   packages/error-codes: {}
 
@@ -41536,6 +41542,17 @@ packages:
       acorn: 8.12.1
       commander: 2.20.3
       source-map-support: 0.5.21
+
+  /terser@5.37.0:
+    resolution: {integrity: sha512-B8wRRkmre4ERucLM/uXx4MOV5cbnOlVAqUst+1+iLKPI0dOgFO28f84ptoQt9HEI537PMzfYa/d+GEPKTRXmYA==}
+    engines: {node: '>=10'}
+    hasBin: true
+    dependencies:
+      '@jridgewell/source-map': 0.3.6
+      acorn: 8.12.1
+      commander: 2.20.3
+      source-map-support: 0.5.21
+    dev: true
 
   /test-exclude@6.0.0:
     resolution: {integrity: sha512-cAGWPIyOHU6zlmg88jwm7VRyXnMN7iV68OGAbYDk/Mh/xC/pzVPlQtY6ngoIH/5/tciuhGfvESU8GrHrcxD56w==}
