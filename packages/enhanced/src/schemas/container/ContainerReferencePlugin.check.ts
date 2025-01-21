@@ -1,937 +1,382 @@
+// @ts-nocheck
 /* eslint-disable */
-//@ts-nocheck
 /*
  * This file was automatically generated.
  * DO NOT MODIFY BY HAND.
- * Run `yarn special-lint-fix` to update
  */
-
-const schema40 = {
-  definitions: {
-    ExternalsType: {
-      enum: [
-        'var',
-        'module',
-        'assign',
-        'this',
-        'window',
-        'self',
-        'global',
-        'commonjs',
-        'commonjs2',
-        'commonjs-module',
-        'commonjs-static',
-        'amd',
-        'amd-require',
-        'umd',
-        'umd2',
-        'jsonp',
-        'system',
-        'promise',
-        'import',
-        'script',
-        'node-commonjs',
-      ],
-    },
-    Remotes: {
-      anyOf: [
-        {
-          type: 'array',
-          items: {
-            anyOf: [
-              {
-                $ref: '#/definitions/RemotesItem',
-              },
-              {
-                $ref: '#/definitions/RemotesObject',
-              },
-            ],
-          },
-        },
-        {
-          $ref: '#/definitions/RemotesObject',
-        },
-      ],
-    },
-    RemotesConfig: {
-      type: 'object',
-      additionalProperties: false,
-      properties: {
-        external: {
-          anyOf: [
-            {
-              $ref: '#/definitions/RemotesItem',
-            },
-            {
-              $ref: '#/definitions/RemotesItems',
-            },
-          ],
-        },
-        shareScope: {
-          type: 'string',
-          minLength: 1,
-        },
-      },
-      required: ['external'],
-    },
-    RemotesItem: {
-      type: 'string',
-      minLength: 1,
-    },
-    RemotesItems: {
-      type: 'array',
-      items: {
-        $ref: '#/definitions/RemotesItem',
-      },
-    },
-    RemotesObject: {
-      type: 'object',
-      additionalProperties: {
-        anyOf: [
-          {
-            $ref: '#/definitions/RemotesConfig',
-          },
-          {
-            $ref: '#/definitions/RemotesItem',
-          },
-          {
-            $ref: '#/definitions/RemotesItems',
-          },
-        ],
-      },
-    },
-  },
-  type: 'object',
-  additionalProperties: false,
-  properties: {
-    remoteType: {
-      oneOf: [
-        {
-          $ref: '#/definitions/ExternalsType',
-        },
-      ],
-    },
-    remotes: {
-      $ref: '#/definitions/Remotes',
-    },
-    shareScope: {
-      type: 'string',
-      minLength: 1,
-    },
-  },
-  required: ['remoteType', 'remotes'],
-};
-const schema41 = {
-  enum: [
-    'var',
-    'module',
-    'assign',
-    'this',
-    'window',
-    'self',
-    'global',
-    'commonjs',
-    'commonjs2',
-    'commonjs-module',
-    'commonjs-static',
-    'amd',
-    'amd-require',
-    'umd',
-    'umd2',
-    'jsonp',
-    'system',
-    'promise',
-    'import',
-    'script',
-    'node-commonjs',
-  ],
-};
-const schema42 = {
-  anyOf: [
-    {
-      type: 'array',
-      items: {
-        anyOf: [
-          {
-            $ref: '#/definitions/RemotesItem',
-          },
-          {
-            $ref: '#/definitions/RemotesObject',
-          },
-        ],
-      },
-    },
-    {
-      $ref: '#/definitions/RemotesObject',
-    },
-  ],
-};
-const schema43 = {
-  type: 'string',
-  minLength: 1,
-};
-const schema44 = {
-  type: 'object',
-  additionalProperties: {
-    anyOf: [
-      {
-        $ref: '#/definitions/RemotesConfig',
-      },
-      {
-        $ref: '#/definitions/RemotesItem',
-      },
-      {
-        $ref: '#/definitions/RemotesItems',
-      },
+export const validate = s;
+export default s;
+const r = {
+    enum: [
+      'var',
+      'module',
+      'assign',
+      'this',
+      'window',
+      'self',
+      'global',
+      'commonjs',
+      'commonjs2',
+      'commonjs-module',
+      'commonjs-static',
+      'amd',
+      'amd-require',
+      'umd',
+      'umd2',
+      'jsonp',
+      'system',
+      'promise',
+      'import',
+      'script',
+      'node-commonjs',
     ],
   },
-};
-const schema45 = {
-  type: 'object',
-  additionalProperties: false,
-  properties: {
-    external: {
-      anyOf: [
-        {
-          $ref: '#/definitions/RemotesItem',
-        },
-        {
-          $ref: '#/definitions/RemotesItems',
-        },
-      ],
-    },
-    name: {
-      type: 'string',
-      minLength: 1,
-    },
-    shareScope: {
-      type: 'string',
-      minLength: 1,
-    },
-  },
-  required: ['external'],
-};
-const schema47 = {
-  type: 'array',
-  items: {
-    $ref: '#/definitions/RemotesItem',
-  },
-};
-
-function validate40(
-  data,
-  { instancePath = '', parentData, parentDataProperty, rootData = data } = {},
+  t = require('ajv/dist/runtime/ucs2length').default;
+function e(
+  r,
+  {
+    instancePath: a = '',
+    parentData: n,
+    parentDataProperty: o,
+    rootData: s = r,
+  } = {},
 ) {
-  let vErrors = null;
-  let errors = 0;
-  if (errors === 0) {
-    if (Array.isArray(data)) {
-      var valid0 = true;
-      const len0 = data.length;
-      for (let i0 = 0; i0 < len0; i0++) {
-        let data0 = data[i0];
-        const _errs1 = errors;
-        const _errs2 = errors;
-        if (errors === _errs2) {
-          if (typeof data0 === 'string') {
-            if (data0.length < 1) {
-              validate40.errors = [
-                {
-                  params: {},
-                },
-              ];
-              return false;
-            }
-          } else {
-            validate40.errors = [
-              {
-                params: {
-                  type: 'string',
-                },
-              },
-            ];
-            return false;
-          }
-        }
-        var valid0 = _errs1 === errors;
-        if (!valid0) {
-          break;
-        }
-      }
-    } else {
-      validate40.errors = [
-        {
-          params: {
-            type: 'array',
-          },
-        },
-      ];
-      return false;
+  if (!Array.isArray(r))
+    return (e.errors = [{ params: { type: 'array' } }]), !1;
+  {
+    const a = r.length;
+    for (let n = 0; n < a; n++) {
+      let a = r[n];
+      const o = 0;
+      if ('string' != typeof a)
+        return (e.errors = [{ params: { type: 'string' } }]), !1;
+      if (t(a) < 1) return (e.errors = [{ params: { limit: 1 } }]), !1;
+      if (0 !== o) break;
     }
   }
-  validate40.errors = vErrors;
-  return errors === 0;
+  return (e.errors = null), !0;
 }
-
-function validate39(
-  data,
-  { instancePath = '', parentData, parentDataProperty, rootData = data } = {},
+function a(
+  r,
+  {
+    instancePath: n = '',
+    parentData: o,
+    parentDataProperty: s,
+    rootData: l = r,
+  } = {},
 ) {
-  let vErrors = null;
-  let errors = 0;
-  if (errors === 0) {
-    if (data && typeof data == 'object' && !Array.isArray(data)) {
-      let missing0;
-      if (data.external === undefined && (missing0 = 'external')) {
-        validate39.errors = [
-          {
-            params: {
-              missingProperty: missing0,
-            },
-          },
-        ];
-        return false;
-      } else {
-        const _errs1 = errors;
-        for (const key0 in data) {
-          if (!(key0 === 'external' || key0 === 'shareScope')) {
-            validate39.errors = [
-              {
-                params: {
-                  additionalProperty: key0,
-                },
-              },
-            ];
-            return false;
-            break;
-          }
-        }
-        if (_errs1 === errors) {
-          if (data.external !== undefined) {
-            let data0 = data.external;
-            const _errs2 = errors;
-            const _errs3 = errors;
-            let valid1 = false;
-            const _errs4 = errors;
-            const _errs5 = errors;
-            if (errors === _errs5) {
-              if (typeof data0 === 'string') {
-                if (data0.length < 1) {
-                  const err0 = {
-                    params: {},
-                  };
-                  if (vErrors === null) {
-                    vErrors = [err0];
-                  } else {
-                    vErrors.push(err0);
-                  }
-                  errors++;
+  let i = null,
+    p = 0;
+  if (0 === p) {
+    if (!r || 'object' != typeof r || Array.isArray(r))
+      return (a.errors = [{ params: { type: 'object' } }]), !1;
+    {
+      let o;
+      if (void 0 === r.external && (o = 'external'))
+        return (a.errors = [{ params: { missingProperty: o } }]), !1;
+      {
+        const o = p;
+        for (const t in r)
+          if ('external' !== t && 'shareScope' !== t)
+            return (a.errors = [{ params: { additionalProperty: t } }]), !1;
+        if (o === p) {
+          if (void 0 !== r.external) {
+            let o = r.external;
+            const s = p,
+              m = p;
+            let f = !1;
+            const y = p;
+            if (p == p)
+              if ('string' == typeof o) {
+                if (t(o) < 1) {
+                  const r = { params: { limit: 1 } };
+                  null === i ? (i = [r]) : i.push(r), p++;
                 }
               } else {
-                const err1 = {
-                  params: {
-                    type: 'string',
-                  },
-                };
-                if (vErrors === null) {
-                  vErrors = [err1];
-                } else {
-                  vErrors.push(err1);
-                }
-                errors++;
+                const r = { params: { type: 'string' } };
+                null === i ? (i = [r]) : i.push(r), p++;
               }
+            var c = y === p;
+            if (((f = f || c), !f)) {
+              const t = p;
+              e(o, {
+                instancePath: n + '/external',
+                parentData: r,
+                parentDataProperty: 'external',
+                rootData: l,
+              }) ||
+                ((i = null === i ? e.errors : i.concat(e.errors)),
+                (p = i.length)),
+                (c = t === p),
+                (f = f || c);
             }
-            var _valid0 = _errs4 === errors;
-            valid1 = valid1 || _valid0;
-            if (!valid1) {
-              const _errs7 = errors;
-              if (
-                !validate40(data0, {
-                  instancePath: instancePath + '/external',
-                  parentData: data,
-                  parentDataProperty: 'external',
-                  rootData,
-                })
-              ) {
-                vErrors =
-                  vErrors === null
-                    ? validate40.errors
-                    : vErrors.concat(validate40.errors);
-                errors = vErrors.length;
-              }
-              var _valid0 = _errs7 === errors;
-              valid1 = valid1 || _valid0;
+            if (!f) {
+              const r = { params: {} };
+              return (
+                null === i ? (i = [r]) : i.push(r), p++, (a.errors = i), !1
+              );
             }
-            if (!valid1) {
-              const err2 = {
-                params: {},
-              };
-              if (vErrors === null) {
-                vErrors = [err2];
-              } else {
-                vErrors.push(err2);
+            (p = m), null !== i && (m ? (i.length = m) : (i = null));
+            var u = s === p;
+          } else u = !0;
+          if (u)
+            if (void 0 !== r.shareScope) {
+              let e = r.shareScope;
+              const n = p;
+              if (p === n) {
+                if ('string' != typeof e)
+                  return (a.errors = [{ params: { type: 'string' } }]), !1;
+                if (t(e) < 1)
+                  return (a.errors = [{ params: { limit: 1 } }]), !1;
               }
-              errors++;
-              validate39.errors = vErrors;
-              return false;
-            } else {
-              errors = _errs3;
-              if (vErrors !== null) {
-                if (_errs3) {
-                  vErrors.length = _errs3;
-                } else {
-                  vErrors = null;
-                }
-              }
-            }
-            var valid0 = _errs2 === errors;
-          } else {
-            var valid0 = true;
-          }
-          if (valid0) {
-            if (data.name !== undefined) {
-              let data1 = data.name;
-              const _errs8 = errors;
-              if (errors === _errs8) {
-                if (typeof data1 === 'string') {
-                  if (data1.length < 1) {
-                    validate39.errors = [
-                      {
-                        params: {},
-                      },
-                    ];
-                    return false;
-                  }
-                } else {
-                  validate39.errors = [
-                    {
-                      params: {
-                        type: 'string',
-                      },
-                    },
-                  ];
-                  return false;
-                }
-              }
-              var valid0 = _errs8 === errors;
-            } else {
-              var valid0 = true;
-            }
-            if (valid0) {
-              if (data.shareScope !== undefined) {
-                let data2 = data.shareScope;
-                const _errs10 = errors;
-                if (errors === _errs10) {
-                  if (typeof data2 === 'string') {
-                    if (data2.length < 1) {
-                      validate39.errors = [
-                        {
-                          params: {},
-                        },
-                      ];
-                      return false;
-                    }
-                  } else {
-                    validate39.errors = [
-                      {
-                        params: {
-                          type: 'string',
-                        },
-                      },
-                    ];
-                    return false;
-                  }
-                }
-                var valid0 = _errs10 === errors;
-              } else {
-                var valid0 = true;
-              }
-            }
-          }
+              u = n === p;
+            } else u = !0;
         }
       }
-    } else {
-      validate39.errors = [
-        {
-          params: {
-            type: 'object',
-          },
-        },
-      ];
-      return false;
     }
   }
-  validate39.errors = vErrors;
-  return errors === 0;
+  return (a.errors = i), 0 === p;
 }
-
-function validate38(
-  data,
-  { instancePath = '', parentData, parentDataProperty, rootData = data } = {},
+function n(
+  r,
+  {
+    instancePath: o = '',
+    parentData: s,
+    parentDataProperty: l,
+    rootData: i = r,
+  } = {},
 ) {
-  let vErrors = null;
-  let errors = 0;
-  if (errors === 0) {
-    if (data && typeof data == 'object' && !Array.isArray(data)) {
-      for (const key0 in data) {
-        let data0 = data[key0];
-        const _errs2 = errors;
-        const _errs3 = errors;
-        let valid1 = false;
-        const _errs4 = errors;
-        if (
-          !validate39(data0, {
-            instancePath:
-              instancePath +
-              '/' +
-              key0.replace(/~/g, '~0').replace(/\//g, '~1'),
-            parentData: data,
-            parentDataProperty: key0,
-            rootData,
-          })
-        ) {
-          vErrors =
-            vErrors === null
-              ? validate39.errors
-              : vErrors.concat(validate39.errors);
-          errors = vErrors.length;
-        }
-        var _valid0 = _errs4 === errors;
-        valid1 = valid1 || _valid0;
-        if (!valid1) {
-          const _errs5 = errors;
-          const _errs6 = errors;
-          if (errors === _errs6) {
-            if (typeof data0 === 'string') {
-              if (data0.length < 1) {
-                const err0 = {
-                  params: {},
-                };
-                if (vErrors === null) {
-                  vErrors = [err0];
-                } else {
-                  vErrors.push(err0);
-                }
-                errors++;
-              }
-            } else {
-              const err1 = {
-                params: {
-                  type: 'string',
-                },
-              };
-              if (vErrors === null) {
-                vErrors = [err1];
-              } else {
-                vErrors.push(err1);
-              }
-              errors++;
+  let p = null,
+    c = 0;
+  if (0 === c) {
+    if (!r || 'object' != typeof r || Array.isArray(r))
+      return (n.errors = [{ params: { type: 'object' } }]), !1;
+    for (const s in r) {
+      let l = r[s];
+      const m = c,
+        f = c;
+      let y = !1;
+      const h = c;
+      a(l, {
+        instancePath: o + '/' + s.replace(/~/g, '~0').replace(/\//g, '~1'),
+        parentData: r,
+        parentDataProperty: s,
+        rootData: i,
+      }) || ((p = null === p ? a.errors : p.concat(a.errors)), (c = p.length));
+      var u = h === c;
+      if (((y = y || u), !y)) {
+        const a = c;
+        if (c == c)
+          if ('string' == typeof l) {
+            if (t(l) < 1) {
+              const r = { params: { limit: 1 } };
+              null === p ? (p = [r]) : p.push(r), c++;
             }
-          }
-          var _valid0 = _errs5 === errors;
-          valid1 = valid1 || _valid0;
-          if (!valid1) {
-            const _errs8 = errors;
-            if (
-              !validate40(data0, {
-                instancePath:
-                  instancePath +
-                  '/' +
-                  key0.replace(/~/g, '~0').replace(/\//g, '~1'),
-                parentData: data,
-                parentDataProperty: key0,
-                rootData,
-              })
-            ) {
-              vErrors =
-                vErrors === null
-                  ? validate40.errors
-                  : vErrors.concat(validate40.errors);
-              errors = vErrors.length;
-            }
-            var _valid0 = _errs8 === errors;
-            valid1 = valid1 || _valid0;
-          }
-        }
-        if (!valid1) {
-          const err2 = {
-            params: {},
-          };
-          if (vErrors === null) {
-            vErrors = [err2];
           } else {
-            vErrors.push(err2);
+            const r = { params: { type: 'string' } };
+            null === p ? (p = [r]) : p.push(r), c++;
           }
-          errors++;
-          validate38.errors = vErrors;
-          return false;
-        } else {
-          errors = _errs3;
-          if (vErrors !== null) {
-            if (_errs3) {
-              vErrors.length = _errs3;
-            } else {
-              vErrors = null;
-            }
-          }
-        }
-        var valid0 = _errs2 === errors;
-        if (!valid0) {
-          break;
+        if (((u = a === c), (y = y || u), !y)) {
+          const t = c;
+          e(l, {
+            instancePath: o + '/' + s.replace(/~/g, '~0').replace(/\//g, '~1'),
+            parentData: r,
+            parentDataProperty: s,
+            rootData: i,
+          }) ||
+            ((p = null === p ? e.errors : p.concat(e.errors)), (c = p.length)),
+            (u = t === c),
+            (y = y || u);
         }
       }
-    } else {
-      validate38.errors = [
-        {
-          params: {
-            type: 'object',
-          },
-        },
-      ];
-      return false;
+      if (!y) {
+        const r = { params: {} };
+        return null === p ? (p = [r]) : p.push(r), c++, (n.errors = p), !1;
+      }
+      if (((c = f), null !== p && (f ? (p.length = f) : (p = null)), m !== c))
+        break;
     }
   }
-  validate38.errors = vErrors;
-  return errors === 0;
+  return (n.errors = p), 0 === c;
 }
-
-function validate37(
-  data,
-  { instancePath = '', parentData, parentDataProperty, rootData = data } = {},
+function o(
+  r,
+  {
+    instancePath: e = '',
+    parentData: a,
+    parentDataProperty: s,
+    rootData: l = r,
+  } = {},
 ) {
-  let vErrors = null;
-  let errors = 0;
-  const _errs0 = errors;
-  let valid0 = false;
-  const _errs1 = errors;
-  if (errors === _errs1) {
-    if (Array.isArray(data)) {
-      var valid1 = true;
-      const len0 = data.length;
-      for (let i0 = 0; i0 < len0; i0++) {
-        let data0 = data[i0];
-        const _errs3 = errors;
-        const _errs4 = errors;
-        let valid2 = false;
-        const _errs5 = errors;
-        const _errs6 = errors;
-        if (errors === _errs6) {
-          if (typeof data0 === 'string') {
-            if (data0.length < 1) {
-              const err0 = {
-                params: {},
-              };
-              if (vErrors === null) {
-                vErrors = [err0];
-              } else {
-                vErrors.push(err0);
-              }
-              errors++;
+  let i = null,
+    p = 0;
+  const c = p;
+  let u = !1;
+  const m = p;
+  if (p === m)
+    if (Array.isArray(r)) {
+      const a = r.length;
+      for (let o = 0; o < a; o++) {
+        let a = r[o];
+        const s = p,
+          c = p;
+        let u = !1;
+        const m = p;
+        if (p == p)
+          if ('string' == typeof a) {
+            if (t(a) < 1) {
+              const r = { params: { limit: 1 } };
+              null === i ? (i = [r]) : i.push(r), p++;
             }
           } else {
-            const err1 = {
-              params: {
-                type: 'string',
-              },
-            };
-            if (vErrors === null) {
-              vErrors = [err1];
-            } else {
-              vErrors.push(err1);
-            }
-            errors++;
+            const r = { params: { type: 'string' } };
+            null === i ? (i = [r]) : i.push(r), p++;
           }
+        var f = m === p;
+        if (((u = u || f), !u)) {
+          const t = p;
+          n(a, {
+            instancePath: e + '/' + o,
+            parentData: r,
+            parentDataProperty: o,
+            rootData: l,
+          }) ||
+            ((i = null === i ? n.errors : i.concat(n.errors)), (p = i.length)),
+            (f = t === p),
+            (u = u || f);
         }
-        var _valid1 = _errs5 === errors;
-        valid2 = valid2 || _valid1;
-        if (!valid2) {
-          const _errs8 = errors;
-          if (
-            !validate38(data0, {
-              instancePath: instancePath + '/' + i0,
-              parentData: data,
-              parentDataProperty: i0,
-              rootData,
-            })
-          ) {
-            vErrors =
-              vErrors === null
-                ? validate38.errors
-                : vErrors.concat(validate38.errors);
-            errors = vErrors.length;
-          }
-          var _valid1 = _errs8 === errors;
-          valid2 = valid2 || _valid1;
+        if (u) (p = c), null !== i && (c ? (i.length = c) : (i = null));
+        else {
+          const r = { params: {} };
+          null === i ? (i = [r]) : i.push(r), p++;
         }
-        if (!valid2) {
-          const err2 = {
-            params: {},
-          };
-          if (vErrors === null) {
-            vErrors = [err2];
-          } else {
-            vErrors.push(err2);
-          }
-          errors++;
-        } else {
-          errors = _errs4;
-          if (vErrors !== null) {
-            if (_errs4) {
-              vErrors.length = _errs4;
-            } else {
-              vErrors = null;
-            }
-          }
-        }
-        var valid1 = _errs3 === errors;
-        if (!valid1) {
-          break;
-        }
+        if (s !== p) break;
       }
     } else {
-      const err3 = {
-        params: {
-          type: 'array',
-        },
-      };
-      if (vErrors === null) {
-        vErrors = [err3];
-      } else {
-        vErrors.push(err3);
-      }
-      errors++;
+      const r = { params: { type: 'array' } };
+      null === i ? (i = [r]) : i.push(r), p++;
     }
+  var y = m === p;
+  if (((u = u || y), !u)) {
+    const t = p;
+    n(r, {
+      instancePath: e,
+      parentData: a,
+      parentDataProperty: s,
+      rootData: l,
+    }) || ((i = null === i ? n.errors : i.concat(n.errors)), (p = i.length)),
+      (y = t === p),
+      (u = u || y);
   }
-  var _valid0 = _errs1 === errors;
-  valid0 = valid0 || _valid0;
-  if (!valid0) {
-    const _errs9 = errors;
-    if (
-      !validate38(data, {
-        instancePath,
-        parentData,
-        parentDataProperty,
-        rootData,
-      })
-    ) {
-      vErrors =
-        vErrors === null
-          ? validate38.errors
-          : vErrors.concat(validate38.errors);
-      errors = vErrors.length;
-    }
-    var _valid0 = _errs9 === errors;
-    valid0 = valid0 || _valid0;
+  if (!u) {
+    const r = { params: {} };
+    return null === i ? (i = [r]) : i.push(r), p++, (o.errors = i), !1;
   }
-  if (!valid0) {
-    const err4 = {
-      params: {},
-    };
-    if (vErrors === null) {
-      vErrors = [err4];
-    } else {
-      vErrors.push(err4);
-    }
-    errors++;
-    validate37.errors = vErrors;
-    return false;
-  } else {
-    errors = _errs0;
-    if (vErrors !== null) {
-      if (_errs0) {
-        vErrors.length = _errs0;
-      } else {
-        vErrors = null;
-      }
-    }
-  }
-  validate37.errors = vErrors;
-  return errors === 0;
+  return (
+    (p = c),
+    null !== i && (c ? (i.length = c) : (i = null)),
+    (o.errors = i),
+    0 === p
+  );
 }
-
-function validate36(
-  data,
-  { instancePath = '', parentData, parentDataProperty, rootData = data } = {},
+function s(
+  e,
+  {
+    instancePath: a = '',
+    parentData: n,
+    parentDataProperty: l,
+    rootData: i = e,
+  } = {},
 ) {
-  /*# sourceURL="" */ let vErrors = null;
-  let errors = 0;
-  if (errors === 0) {
-    if (data && typeof data == 'object' && !Array.isArray(data)) {
-      let missing0;
+  let p = null,
+    c = 0;
+  if (0 === c) {
+    if (!e || 'object' != typeof e || Array.isArray(e))
+      return (s.errors = [{ params: { type: 'object' } }]), !1;
+    {
+      let n;
       if (
-        (data.remoteType === undefined && (missing0 = 'remoteType')) ||
-        (data.remotes === undefined && (missing0 = 'remotes'))
-      ) {
-        validate36.errors = [
-          {
-            params: {
-              missingProperty: missing0,
-            },
-          },
-        ];
-        return false;
-      } else {
-        const _errs1 = errors;
-        for (const key0 in data) {
-          if (
-            !(
-              key0 === 'remoteType' ||
-              key0 === 'remotes' ||
-              key0 === 'shareScope'
-            )
-          ) {
-            validate36.errors = [
-              {
-                params: {
-                  additionalProperty: key0,
-                },
-              },
-            ];
-            return false;
-            break;
-          }
-        }
-        if (_errs1 === errors) {
-          if (data.remoteType !== undefined) {
-            let data0 = data.remoteType;
-            const _errs2 = errors;
-            const _errs3 = errors;
-            let valid1 = false;
-            let passing0 = null;
-            const _errs4 = errors;
+        (void 0 === e.remoteType && (n = 'remoteType')) ||
+        (void 0 === e.remotes && (n = 'remotes'))
+      )
+        return (s.errors = [{ params: { missingProperty: n } }]), !1;
+      {
+        const n = c;
+        for (const r in e)
+          if ('remoteType' !== r && 'remotes' !== r && 'shareScope' !== r)
+            return (s.errors = [{ params: { additionalProperty: r } }]), !1;
+        if (n === c) {
+          if (void 0 !== e.remoteType) {
+            let t = e.remoteType;
+            const a = c,
+              n = c;
+            let o = !1,
+              l = null;
+            const i = c;
             if (
-              data0 !== 'var' &&
-              data0 !== 'module' &&
-              data0 !== 'assign' &&
-              data0 !== 'this' &&
-              data0 !== 'window' &&
-              data0 !== 'self' &&
-              data0 !== 'global' &&
-              data0 !== 'commonjs' &&
-              data0 !== 'commonjs2' &&
-              data0 !== 'commonjs-module' &&
-              data0 !== 'commonjs-static' &&
-              data0 !== 'amd' &&
-              data0 !== 'amd-require' &&
-              data0 !== 'umd' &&
-              data0 !== 'umd2' &&
-              data0 !== 'jsonp' &&
-              data0 !== 'system' &&
-              data0 !== 'promise' &&
-              data0 !== 'import' &&
-              data0 !== 'script' &&
-              data0 !== 'node-commonjs'
+              'var' !== t &&
+              'module' !== t &&
+              'assign' !== t &&
+              'this' !== t &&
+              'window' !== t &&
+              'self' !== t &&
+              'global' !== t &&
+              'commonjs' !== t &&
+              'commonjs2' !== t &&
+              'commonjs-module' !== t &&
+              'commonjs-static' !== t &&
+              'amd' !== t &&
+              'amd-require' !== t &&
+              'umd' !== t &&
+              'umd2' !== t &&
+              'jsonp' !== t &&
+              'system' !== t &&
+              'promise' !== t &&
+              'import' !== t &&
+              'script' !== t &&
+              'node-commonjs' !== t
             ) {
-              const err0 = {
-                params: {},
-              };
-              if (vErrors === null) {
-                vErrors = [err0];
-              } else {
-                vErrors.push(err0);
-              }
-              errors++;
+              const t = { params: { allowedValues: r.enum } };
+              null === p ? (p = [t]) : p.push(t), c++;
             }
-            var _valid0 = _errs4 === errors;
-            if (_valid0) {
-              valid1 = true;
-              passing0 = 0;
+            if ((i === c && ((o = !0), (l = 0)), !o)) {
+              const r = { params: { passingSchemas: l } };
+              return (
+                null === p ? (p = [r]) : p.push(r), c++, (s.errors = p), !1
+              );
             }
-            if (!valid1) {
-              const err1 = {
-                params: {
-                  passingSchemas: passing0,
-                },
-              };
-              if (vErrors === null) {
-                vErrors = [err1];
-              } else {
-                vErrors.push(err1);
-              }
-              errors++;
-              validate36.errors = vErrors;
-              return false;
-            } else {
-              errors = _errs3;
-              if (vErrors !== null) {
-                if (_errs3) {
-                  vErrors.length = _errs3;
-                } else {
-                  vErrors = null;
+            (c = n), null !== p && (n ? (p.length = n) : (p = null));
+            var u = a === c;
+          } else u = !0;
+          if (u) {
+            if (void 0 !== e.remotes) {
+              const r = c;
+              o(e.remotes, {
+                instancePath: a + '/remotes',
+                parentData: e,
+                parentDataProperty: 'remotes',
+                rootData: i,
+              }) ||
+                ((p = null === p ? o.errors : p.concat(o.errors)),
+                (c = p.length)),
+                (u = r === c);
+            } else u = !0;
+            if (u)
+              if (void 0 !== e.shareScope) {
+                let r = e.shareScope;
+                const a = c;
+                if (c === a) {
+                  if ('string' != typeof r)
+                    return (s.errors = [{ params: { type: 'string' } }]), !1;
+                  if (t(r) < 1)
+                    return (s.errors = [{ params: { limit: 1 } }]), !1;
                 }
-              }
-            }
-            var valid0 = _errs2 === errors;
-          } else {
-            var valid0 = true;
-          }
-          if (valid0) {
-            if (data.remotes !== undefined) {
-              const _errs6 = errors;
-              if (
-                !validate37(data.remotes, {
-                  instancePath: instancePath + '/remotes',
-                  parentData: data,
-                  parentDataProperty: 'remotes',
-                  rootData,
-                })
-              ) {
-                vErrors =
-                  vErrors === null
-                    ? validate37.errors
-                    : vErrors.concat(validate37.errors);
-                errors = vErrors.length;
-              }
-              var valid0 = _errs6 === errors;
-            } else {
-              var valid0 = true;
-            }
-            if (valid0) {
-              if (data.shareScope !== undefined) {
-                let data2 = data.shareScope;
-                const _errs7 = errors;
-                if (errors === _errs7) {
-                  if (typeof data2 === 'string') {
-                    if (data2.length < 1) {
-                      validate36.errors = [
-                        {
-                          params: {},
-                        },
-                      ];
-                      return false;
-                    }
-                  } else {
-                    validate36.errors = [
-                      {
-                        params: {
-                          type: 'string',
-                        },
-                      },
-                    ];
-                    return false;
-                  }
-                }
-                var valid0 = _errs7 === errors;
-              } else {
-                var valid0 = true;
-              }
-            }
+                u = a === c;
+              } else u = !0;
           }
         }
       }
-    } else {
-      validate36.errors = [
-        {
-          params: {
-            type: 'object',
-          },
-        },
-      ];
-      return false;
     }
   }
-  validate36.errors = vErrors;
-  return errors === 0;
+  return (s.errors = p), 0 === c;
 }
-
-export default validate36;

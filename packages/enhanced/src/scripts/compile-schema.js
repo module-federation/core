@@ -9,32 +9,37 @@ const standaloneCode = require('ajv/dist/standalone').default;
 const terser = require('terser');
 const glob = require('fast-glob');
 
-const ajv = new Ajv({
-  code: { source: true, optimize: true, esm: true },
-  messages: false,
-  strictNumbers: false,
-  logger: false,
-  loadSchema: async (uri) => {
-    const loadedSchemaPath = fileURLToPath(uri);
-    const schema = require(loadedSchemaPath);
-    const processedSchema = processJson(schema);
-    processedSchema.$id = uri;
-    return processedSchema;
-  },
-});
+// Create Ajv instance factory to avoid ID conflicts
+const createAjv = () =>
+  new Ajv({
+    code: { source: true, optimize: true, esm: true },
+    messages: false,
+    strictNumbers: false,
+    logger: false,
+    loadSchema: async (uri) => {
+      const loadedSchemaPath = fileURLToPath(uri);
+      const schema = require(loadedSchemaPath);
+      const processedSchema = processJson(schema);
+      processedSchema.$id = uri;
+      return processedSchema;
+    },
+  });
 
-// Add custom keywords
-ajv.addKeyword({
-  keyword: 'absolutePath',
-  type: 'string',
-  schemaType: 'boolean',
-  code(ctx) {
-    const { data, schema } = ctx;
-    ctx.fail(
-      _`${data}.includes("!") || (absolutePathRegExp.test(${data}) !== ${schema})`,
-    );
-  },
-});
+// Add custom keywords factory
+const addCustomKeywords = (ajv) => {
+  ajv.addKeyword({
+    keyword: 'absolutePath',
+    type: 'string',
+    schemaType: 'boolean',
+    code(ctx) {
+      const { data, schema } = ctx;
+      ctx.fail(
+        _`${data}.includes("!") || (absolutePathRegExp.test(${data}) !== ${schema})`,
+      );
+    },
+  });
+  return ajv;
+};
 
 const EXCLUDED_PROPERTIES = [
   'title',
@@ -111,6 +116,8 @@ async function compileSchema(inputPath) {
     const processedSchema = processJson(schema);
     processedSchema.$id = pathToFileURL(inputPath).href;
 
+    // Create new Ajv instance for each schema
+    const ajv = addCustomKeywords(createAjv());
     const validate = await ajv.compileAsync(processedSchema);
     const code = await postprocessValidation(standaloneCode(ajv, validate));
 

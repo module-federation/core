@@ -1,5 +1,12 @@
 {
   "definitions": {
+    "RuntimePlugin": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Runtime plugin file paths or package name."
+    },
     "AmdContainer": {
       "description": "Add a container for define/require functions in the AMD module.",
       "type": "string",
@@ -264,31 +271,13 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "experiments": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "asyncStartup": {
-          "type": "boolean"
-        },
-        "externalRuntime": {
-          "anyOf": [
-            {
-              "enum": ["provide"]
-            },
-            {
-              "type": "boolean"
-            }
-          ]
-        }
-      }
-    },
     "exposes": {
       "$ref": "#/definitions/Exposes"
     },
     "filename": {
       "description": "The filename for this container relative path inside the `output.path` directory.",
       "type": "string",
+      "absolutePath": false,
       "minLength": 1
     },
     "library": {
@@ -303,16 +292,24 @@
       "$ref": "#/definitions/EntryRuntime"
     },
     "runtimePlugins": {
-      "description": "Runtime plugin file paths or package name.",
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "$ref": "#/definitions/RuntimePlugin"
     },
     "shareScope": {
       "description": "The name of the share scope which is shared with the host (defaults to 'default').",
       "type": "string",
       "minLength": 1
+    },
+    "experiments": {
+      "type": "object",
+      "properties": {
+        "federationRuntime": {
+          "anyOf": [{ "type": "boolean" }, { "enum": ["hoisted"] }]
+        },
+        "externalRuntime": {
+          "anyOf": [{ "type": "boolean" }, { "enum": ["provide"] }]
+        }
+      },
+      "additionalProperties": false
     }
   },
   "required": ["name", "exposes"]
