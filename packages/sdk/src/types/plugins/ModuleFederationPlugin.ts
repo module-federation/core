@@ -170,6 +170,11 @@ export interface PluginDtsOptions {
   displayErrorInTerminal?: boolean;
 }
 
+export type AsyncBoundaryOptions = {
+  eager?: RegExp | ((module: any) => boolean);
+  excludeChunk?: (chunk: any) => boolean;
+};
+
 export interface ModuleFederationPluginOptions {
   /**
    * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
