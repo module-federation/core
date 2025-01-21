@@ -261,6 +261,7 @@ export function getFileName(
 export function getTypesMetaInfo(
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
   context: string,
+  compilation: Compilation,
 ): MetaDataTypes {
   const defaultRemoteOptions = {
     generateAPITypes: true,
@@ -303,11 +304,32 @@ export function getTypesMetaInfo(
       moduleFederationConfig: pluginOptions,
     });
 
+    const zip = path.join(zipPrefix, zipName);
+    const api = path.join(zipPrefix, apiFileName);
+
+    if (!zip || !compilation.getAsset(zip)) {
+      return {
+        path: '',
+        name: '',
+        zip: '',
+        api: '',
+      };
+    }
+
+    if (!api || !compilation.getAsset(api)) {
+      return {
+        path: '',
+        name: '',
+        zip,
+        api: '',
+      };
+    }
+
     return {
       path: '',
       name: '',
-      zip: path.join(zipPrefix, zipName),
-      api: path.join(zipPrefix, apiFileName),
+      zip,
+      api,
     };
   } catch (err) {
     logger.warn(

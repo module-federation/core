@@ -309,9 +309,6 @@ describe('typeScriptCompiler', () => {
                         name: 'GenerateTypesPlugin.d.ts',
                       },
                       {
-                        name: 'TypesPlugin.d.ts',
-                      },
-                      {
                         name: 'utils.d.ts',
                       },
                     ],

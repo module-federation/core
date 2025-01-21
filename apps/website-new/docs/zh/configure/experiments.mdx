@@ -35,9 +35,9 @@ new ModuleFederationPlugin({
 
 这些配置可用于下列场景：
 
-- 设置`runtimeChunk: 'single'`。
-- 避免在应用程序顶部或用户代码入口点使用“import()”，以防止急切消费错误。过去，这通常是强制性的，并且在示例应用程序中通常被视为“import('./bootstrap.js')”。
-- 将模块联合运行时包移动到运行时块中，使它们远离入口点 - 减少代码重复
+- 设置 `runtimeChunk: 'single'`。
+- 避免在应用的顶部或用户代码的入口点使用 import()，以防止 `eager` 的错误。在过去，这通常是强制性的，并且常见的示例应用中会看到 `import('./bootstrap.js')`。
+- 将模块联邦运行时包移入运行时代码块，将它们从入口点中移出，从而减少代码重复。
 
 下面会详细解释对应的场景。
 
@@ -50,7 +50,7 @@ new ModuleFederationPlugin({
 
 2）异步启动
 
-：：：警告
+:::warning
 此模式仍然允许设置异步入口。导出 UMD 库时，它会返回 Promise resolve 导出。
 如果您手动 require() Node 中的入口点，它将 module.exports 设置为 Promise.resolve(exports)。
 :::
@@ -61,7 +61,7 @@ new ModuleFederationPlugin({
 
 不再出现共享依赖 `eager consumption` 错误，因为文件本身的初始化表现为异步块。
 
-3) 提升 MF 运行时访问优先级
+3）提升 MF 运行时访问优先级
 
 与原先在入口挂载 MF runtime 不同，现在将会提升到 bundler runtime 初始化阶段挂载 MF runtime 。
 
