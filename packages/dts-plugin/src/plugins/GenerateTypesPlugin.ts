@@ -120,7 +120,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
           const apiAssetName = path.join(zipPrefix, apiFileName);
           if (zipTypesPath && !compilation.getAsset(zipAssetName)) {
             compilation.emitAsset(
-              path.join(zipPrefix, zipName),
+              zipAssetName,
               new compiler.webpack.sources.RawSource(
                 fs.readFileSync(zipTypesPath),
                 false,
@@ -130,7 +130,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
 
           if (apiTypesPath && !compilation.getAsset(apiAssetName)) {
             compilation.emitAsset(
-              path.join(zipPrefix, apiFileName),
+              apiAssetName,
               new compiler.webpack.sources.RawSource(
                 fs.readFileSync(apiTypesPath),
                 false,
