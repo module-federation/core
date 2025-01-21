@@ -1,0 +1,23 @@
+.description {
+  text-align: center;
+  line-height: 1.5;
+  font-size: 1.3rem;
+  color: #1b3a42;
+  margin-bottom: 5rem;
+}
+
+.code {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 0.6rem 0.9rem;
+  font-size: 1.05rem;
+  font-family:
+    Menlo,
+    Monaco,
+    Lucida Console,
+    Liberation Mono,
+    DejaVu Sans Mono,
+    Bitstream Vera Sans Mono,
+    Courier New,
+    monospace;
+}

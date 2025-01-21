@@ -1,0 +1,12 @@
+import { createModuleFederationConfig } from '@module-federation/modern-js';
+
+export default createModuleFederationConfig({
+  name: '{{mfName}}',
+  remotes: {
+    'provider': 'rslib_provider@https://unpkg.com/module-federation-rslib-provider@latest/dist/mf/mf-manifest.json',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});

@@ -1,0 +1,45 @@
+{
+  "name": "new-provider",
+  "version": "0.1.0",
+  "scripts": {
+    "reset": "npx rimraf node_modules ./**/node_modules",
+    "dev": "modern dev",
+    "build": "modern build",
+    "start": "modern start",
+    "serve": "modern serve",
+    "new": "modern new",
+    "lint": "biome check",
+    "prepare": "simple-git-hooks",
+    "upgrade": "modern upgrade"
+  },
+  "engines": {
+    "node": ">=16.18.1"
+  },
+  "lint-staged": {
+    "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
+      "biome check --files-ignore-unknown=true"
+    ]
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "dependencies": {
+    "@modern-js/runtime": "2.63.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@modern-js/app-tools": "2.63.7",
+    "@modern-js/tsconfig": "2.63.7",
+    "@biomejs/biome": "1.8.3",
+    "typescript": "~5.0.4",
+    "@types/jest": "~29.2.4",
+    "@types/node": "~18.11.9",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "~18.3.1",
+    "lint-staged": "~13.1.0",
+    "simple-git-hooks": "^2.11.1",
+    "rimraf": "^6.0.1",
+    "@module-federation/modern-js": "^0.8.9"
+  }
+}

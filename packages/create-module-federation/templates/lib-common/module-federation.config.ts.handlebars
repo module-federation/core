@@ -1,0 +1,17 @@
+export default {
+  name: '{{mfName}}',
+  exposes: {
+    '.': './src/index.tsx',
+    './Header': './src/Header.tsx',
+    './Description': './src/Description.tsx',
+    './Footer': './src/Footer.tsx',
+  },
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+}

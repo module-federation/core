@@ -1,0 +1,11 @@
+.header {
+  display: flex;
+  margin: 4rem 0 4rem;
+  align-items: center;
+  font-size: 4rem;
+  font-weight: 600;
+}
+
+.name {
+  color: #4ecaff;
+}
