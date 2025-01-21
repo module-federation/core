@@ -48,66 +48,54 @@ const WEBPACK_LAYERS_NAMES = {
   appPagesBrowser: 'app-pages-browser',
 } as const;
 
-const reactShares = [
+const createSharedConfig = (
+  name: string,
+  layers: (string | undefined)[],
+  options: { request?: string; import?: false | undefined } = {},
+) => {
+  return layers.reduce(
+    (acc, layer) => {
+      const key = layer ? `${name}-${layer}` : name;
+      acc[key] = {
+        singleton: true,
+        requiredVersion: false,
+        import: layer ? undefined : (options.import ?? false),
+        shareKey: options.request ?? name,
+        request: options.request ?? name,
+        layer,
+        issuerLayer: layer,
+      };
+      return acc;
+    },
+    {} as Record<string, ExtendedSharedConfig>,
+  );
+};
+
+const defaultLayers = [
   WEBPACK_LAYERS_NAMES.reactServerComponents,
   WEBPACK_LAYERS_NAMES.serverSideRendering,
   undefined,
-].reduce(
-  (acc, layer) => {
-    const key = layer ? `react-${layer}` : 'react';
-    acc[key] = {
-      singleton: true,
-      requiredVersion: false,
-      import: layer ? undefined : false,
-      shareKey: 'react',
-      request: 'react',
-      layer,
-      issuerLayer: layer,
-    };
-    return acc;
-  },
-  {} as Record<string, ExtendedSharedConfig>,
-);
+];
 
-const reactDomShares = [
+const navigationLayers = [
   WEBPACK_LAYERS_NAMES.reactServerComponents,
   WEBPACK_LAYERS_NAMES.serverSideRendering,
-  undefined,
-].reduce(
-  (acc, layer) => {
-    const key = layer ? `react-${layer}` : 'react';
-    acc[key] = {
-      singleton: true,
-      requiredVersion: false,
-      import: layer ? undefined : false,
-      shareKey: 'react-dom',
-      request: 'react-dom',
-      layer,
-      issuerLayer: layer,
-    };
-    return acc;
-  },
-  {} as Record<string, ExtendedSharedConfig>,
+];
+
+const reactShares = createSharedConfig('react', defaultLayers);
+const reactDomShares = createSharedConfig('react', defaultLayers, {
+  request: 'react-dom',
+});
+const jsxRuntimeShares = createSharedConfig('react/', navigationLayers, {
+  request: 'react/',
+  import: undefined,
+});
+const nextNavigationShares = createSharedConfig(
+  'next-navigation',
+  navigationLayers,
+  { request: 'next/navigation' },
 );
 
-const nextNavigationShares = [
-  WEBPACK_LAYERS_NAMES.reactServerComponents,
-  WEBPACK_LAYERS_NAMES.serverSideRendering,
-].reduce(
-  (acc, layer) => {
-    const key = layer ? `next-navigation-${layer}` : 'next-navigation';
-    acc[key] = {
-      singleton: true,
-      requiredVersion: false,
-      shareKey: 'next/navigation',
-      request: 'next/navigation',
-      layer,
-      issuerLayer: layer,
-    };
-    return acc;
-  },
-  {} as Record<string, ExtendedSharedConfig>,
-);
 /**
  * @typedef SharedObject
  * @type {object}
@@ -123,6 +111,7 @@ export const DEFAULT_SHARE_SCOPE: sharePlugin.SharedObject = {
   ...reactShares,
   ...reactDomShares,
   ...nextNavigationShares,
+  ...jsxRuntimeShares,
   'next/dynamic': {
     requiredVersion: undefined,
     singleton: true,
@@ -153,34 +142,34 @@ export const DEFAULT_SHARE_SCOPE: sharePlugin.SharedObject = {
     singleton: true,
     import: undefined,
   },
-  // react: {
-  //   singleton: true,
-  //   requiredVersion: false,
-  //   import: false,
-  // },
-  // 'react/': {
-  //   singleton: true,
-  //   requiredVersion: false,
-  //   import: false,
-  // },
-  // 'react-dom/': {
-  //   singleton: true,
-  //   requiredVersion: false,
-  //   import: false,
-  // },
-  // 'react-dom': {
-  //   singleton: true,
-  //   requiredVersion: false,
-  //   import: false,
-  // },
-  // 'react/jsx-dev-runtime': {
-  //   singleton: true,
-  //   requiredVersion: false,
-  // },
-  // 'react/jsx-runtime': {
-  //   singleton: true,
-  //   requiredVersion: false,
-  // },
+  react: {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react/': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react/jsx-dev-runtime': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react/jsx-runtime': {
+    singleton: true,
+    requiredVersion: false,
+  },
   'styled-jsx': {
     singleton: true,
     import: undefined,

@@ -334,8 +334,9 @@ class ConsumeSharedPlugin {
                 return createConsumeSharedModule(context, request, match);
               }
               for (const [prefix, options] of prefixedConsumes) {
-                if (request.startsWith(prefix)) {
-                  const remainder = request.slice(prefix.length);
+                const lookup = options.request || prefix;
+                if (request.startsWith(lookup)) {
+                  const remainder = request.slice(lookup.length);
                   return createConsumeSharedModule(context, request, {
                     ...options,
                     import: options.import

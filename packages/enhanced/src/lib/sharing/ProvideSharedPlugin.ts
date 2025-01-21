@@ -229,8 +229,10 @@ class ProvideSharedPlugin {
               }
             }
             for (const [prefix, config] of prefixMatchProvides) {
-              if (request.startsWith(prefix) && resource) {
-                const remainder = request.slice(prefix.length);
+              const lookup = config.request || prefix;
+              if (request.startsWith(lookup) && resource) {
+                const remainder = request.slice(lookup.length);
+                debugger;
                 provideSharedModule(
                   resource,
                   {
