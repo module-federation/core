@@ -203,9 +203,8 @@ class ContainerEntryModule extends Module {
       ) as unknown as Dependency,
     );
 
-    if (!this._experiments?.federationRuntime) {
-      this.addDependency(new EntryDependency(this._injectRuntimeEntry));
-    }
+    this.addDependency(new EntryDependency(this._injectRuntimeEntry));
+
     callback();
   }
 
@@ -272,18 +271,6 @@ class ContainerEntryModule extends Module {
         )}`,
       );
     }
-    const initRuntimeDep = this.dependencies[1];
-    // no runtime module getter needed if runtime is hoisted
-    const initRuntimeModuleGetter = this._experiments?.federationRuntime
-      ? ''
-      : runtimeTemplate.moduleRaw({
-          module: moduleGraph.getModule(initRuntimeDep),
-          chunkGraph,
-          // @ts-expect-error flaky type definition for Dependency
-          request: initRuntimeDep.userRequest,
-          weak: false,
-          runtimeRequirements,
-        });
     const federationGlobal = getFederationGlobalScope(
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
@@ -326,7 +313,6 @@ class ContainerEntryModule extends Module {
         ],
       )};`,
       this._dataPrefetch ? PrefetchPlugin.setRemoteIdentifier() : '',
-      `${initRuntimeModuleGetter}`,
       this._dataPrefetch ? PrefetchPlugin.removeRemoteIdentifier() : '',
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,

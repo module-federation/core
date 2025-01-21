@@ -1,31 +1,4 @@
 //@ts-nocheck
-const runtimePlugin = {
-  type: 'array',
-  items: {
-    anyOf: [
-      {
-        type: 'string',
-        minLength: 1,
-        description: 'Runtime Plugin File Path.',
-      },
-      {
-        type: 'object',
-        required: ['import', 'async'],
-        properties: {
-          import: {
-            type: 'string',
-            minLength: 1,
-            description: 'Runtime Plugin File Path.',
-          },
-          async: {
-            type: 'boolean',
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
-  },
-};
 
 export default {
   definitions: {
@@ -330,7 +303,13 @@ export default {
     runtime: {
       $ref: '#/definitions/EntryRuntime',
     },
-    runtimePlugins: runtimePlugin,
+    runtimePlugins: {
+      description: 'Runtime plugin file paths or package name.',
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+    },
     shareScope: {
       description:
         "The name of the share scope which is shared with the host (defaults to 'default').",
@@ -340,11 +319,11 @@ export default {
     experiments: {
       type: 'object',
       properties: {
-        federationRuntime: {
-          anyOf: [{ type: 'boolean' }, { enum: ['hoisted'] }],
-        },
         externalRuntime: {
           anyOf: [{ type: 'boolean' }, { enum: ['provide'] }],
+        },
+        asyncStartup: {
+          type: 'boolean',
         },
       },
       additionalProperties: false,

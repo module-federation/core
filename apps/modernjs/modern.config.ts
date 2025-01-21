@@ -60,9 +60,6 @@ export default defineConfig({
               requiredVersion: '^18.3.1',
             },
           },
-          experiments: {
-            federationRuntime: 'hoisted',
-          },
           dataPrefetch: true,
         }) as any,
       ]);

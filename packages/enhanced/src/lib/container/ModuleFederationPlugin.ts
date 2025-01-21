@@ -93,8 +93,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       }).apply(compiler);
     }
 
-    if (options.experiments?.federationRuntime) {
-      new FederationModulesPlugin().apply(compiler);
+    // federation hooks
+    new FederationModulesPlugin().apply(compiler);
+
+    if (options.experiments?.asyncStartup) {
       new StartupChunkDependenciesPlugin({
         asyncChunkLoading: true,
       }).apply(compiler);
