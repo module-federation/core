@@ -7,6 +7,7 @@ const Ajv = require('ajv');
 const { _, Name } = require('ajv/dist/compile/codegen');
 const standaloneCode = require('ajv/dist/standalone').default;
 const terser = require('terser');
+const glob = require('fast-glob');
 
 const ajv = new Ajv({
   code: { source: true, optimize: true, esm: true },
@@ -104,7 +105,7 @@ export default ${JSON.stringify(schema, null, 2)} as const;
   fs.writeFileSync(outputPath, schemaContent, 'utf-8');
 };
 
-async function compileSchema(inputPath, outputPath) {
+async function compileSchema(inputPath) {
   try {
     const schema = require(inputPath);
     const processedSchema = processJson(schema);
@@ -114,8 +115,8 @@ async function compileSchema(inputPath, outputPath) {
     const code = await postprocessValidation(standaloneCode(ajv, validate));
 
     // Generate both files
-    const baseDir = path.dirname(outputPath);
-    const baseName = path.basename(outputPath, path.extname(outputPath));
+    const baseDir = path.dirname(inputPath);
+    const baseName = path.basename(inputPath, '.json');
 
     // Generate validation file (.check.ts)
     const validationPath = path.join(baseDir, `${baseName}.check.ts`);
@@ -125,7 +126,7 @@ async function compileSchema(inputPath, outputPath) {
     const tsPath = path.join(baseDir, `${baseName}.ts`);
     generateSchemaFile(schema, tsPath);
 
-    console.log(`Successfully generated:
+    console.log(`Successfully generated for ${baseName}:
 - ${validationPath} (validation)
 - ${tsPath} (schema)`);
   } catch (err) {
@@ -134,12 +135,21 @@ async function compileSchema(inputPath, outputPath) {
   }
 }
 
-// Parse command line arguments
-const args = process.argv.slice(2);
-if (args.length !== 2) {
-  console.error('Usage: compile-schema <input-schema.json> <output-file.js>');
-  process.exit(1);
+async function main() {
+  const schemasDir = path.resolve(__dirname, '../schemas');
+  const jsonFiles = await glob('**/*.json', {
+    cwd: schemasDir,
+    absolute: true,
+  });
+
+  console.log(`Found ${jsonFiles.length} schema files to process...`);
+
+  for (const jsonFile of jsonFiles) {
+    await compileSchema(jsonFile);
+  }
 }
 
-const [inputSchema, outputFile] = args;
-compileSchema(path.resolve(inputSchema), path.resolve(outputFile));
+main().catch((err) => {
+  console.error('Error processing schemas:', err);
+  process.exit(1);
+});

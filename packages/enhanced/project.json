@@ -5,6 +5,13 @@
   "projectType": "library",
   "tags": ["type:pkg"],
   "targets": {
+    "generate:schema": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node src/scripts/compile-schema.js",
+        "cwd": "packages/enhanced"
+      }
+    },
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{workspaceRoot}/packages/enhanced/dist"],
@@ -26,6 +33,10 @@
         {
           "target": "build",
           "dependencies": true
+        },
+        {
+          "target": "generate:schema",
+          "projects": "self"
         }
       ]
     },

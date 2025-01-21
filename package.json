@@ -52,7 +52,8 @@
     "changegen": "./changeset-gen.js --path ./packages/enhanced --staged && ./changeset-gen.js --path ./packages/node --staged && ./changeset-gen.js --path ./packages/runtime --staged && ./changeset-gen.js --path ./packages/data-prefetch --staged && ./changeset-gen.js --path ./packages/nextjs-mf --staged && ./changeset-gen.js --path ./packages/dts-plugin --staged",
     "commitgen:staged": "./commit-gen.js --path ./packages --staged",
     "commitgen:main": "./commit-gen.js --path ./packages",
-    "changeset:status": "changeset status"
+    "changeset:status": "changeset status",
+    "generate:schema": "node packages/enhanced/src/scripts/compile-schema.js"
   },
   "pnpm": {
     "packageExtensions": {
