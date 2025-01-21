@@ -1,5 +1,6 @@
 import { Chunk, Compilation, StatsCompilation, StatsModule } from 'webpack';
 import path from 'path';
+import fs from 'fs';
 import {
   StatsAssets,
   moduleFederationPlugin,
@@ -307,7 +308,18 @@ export function getTypesMetaInfo(
     const zip = path.join(zipPrefix, zipName);
     const api = path.join(zipPrefix, apiFileName);
 
-    if (!zip || !compilation.getAsset(zip)) {
+    const getTargetFile = (filename: string) => {
+      try {
+        if (!isDev()) {
+          return Boolean(compilation.getAsset(path.join(zipPrefix, filename)));
+        }
+        return Boolean(fs.readFileSync(filename));
+      } catch (e) {
+        return false;
+      }
+    };
+
+    if (!zip || !getTargetFile(zipName)) {
       return {
         path: '',
         name: '',
@@ -316,7 +328,7 @@ export function getTypesMetaInfo(
       };
     }
 
-    if (!api || !compilation.getAsset(api)) {
+    if (!api || !getTargetFile(apiFileName)) {
       return {
         path: '',
         name: '',
