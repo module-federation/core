@@ -2,4 +2,4 @@
 '@module-federation/rsbuild-plugin': patch
 ---
 
-fix(rsbuild-plugin): skip when current project is storybook
+fix: skip when current project is storybook
