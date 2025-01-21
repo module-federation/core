@@ -308,35 +308,6 @@ export function getTypesMetaInfo(
     const zip = path.join(zipPrefix, zipName);
     const api = path.join(zipPrefix, apiFileName);
 
-    const getTargetFile = (filename: string) => {
-      try {
-        if (!isDev()) {
-          return Boolean(compilation.getAsset(path.join(zipPrefix, filename)));
-        }
-        return Boolean(fs.readFileSync(filename));
-      } catch (e) {
-        return false;
-      }
-    };
-
-    if (!zip || !getTargetFile(zipName)) {
-      return {
-        path: '',
-        name: '',
-        zip: '',
-        api: '',
-      };
-    }
-
-    if (!api || !getTargetFile(apiFileName)) {
-      return {
-        path: '',
-        name: '',
-        zip,
-        api: '',
-      };
-    }
-
     return {
       path: '',
       name: '',
