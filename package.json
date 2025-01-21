@@ -53,7 +53,7 @@
     "commitgen:staged": "./commit-gen.js --path ./packages --staged",
     "commitgen:main": "./commit-gen.js --path ./packages",
     "changeset:status": "changeset status",
-    "generate:schema": "node packages/enhanced/src/scripts/compile-schema.js"
+    "generate:schema": "nx run enhanced:generate:schema && nx format:write"
   },
   "pnpm": {
     "packageExtensions": {

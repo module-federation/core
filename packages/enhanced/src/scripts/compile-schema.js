@@ -12,7 +12,15 @@ const glob = require('fast-glob');
 // Create Ajv instance factory to avoid ID conflicts
 const createAjv = () =>
   new Ajv({
-    code: { source: true, optimize: true, esm: true },
+    code: {
+      source: true,
+      optimize: true,
+      lines: true,
+      esm: true,
+      formats: false,
+    },
+    uriResolver: undefined,
+    unicodeRegExp: false,
     messages: false,
     strictNumbers: false,
     logger: false,
@@ -27,6 +35,19 @@ const createAjv = () =>
 
 // Add custom keywords factory
 const addCustomKeywords = (ajv) => {
+  // Remove any existing keywords that might use runtime dependencies
+  ajv.removeKeyword('minLength');
+
+  ajv.addKeyword({
+    keyword: 'minLength',
+    type: 'string',
+    schemaType: 'number',
+    code(ctx) {
+      const { data, schema } = ctx;
+      ctx.fail(_`${data}.length < ${schema}`);
+    },
+  });
+
   ajv.addKeyword({
     keyword: 'absolutePath',
     type: 'string',
@@ -73,9 +94,10 @@ const postprocessValidation = async (code) => {
     .replace(/"\$id":".+?"/, '');
 
   // Convert to ESM
-  code = code
-    .replace('module.exports =', 'export const validate =')
-    .replace('module.exports.default =', 'export default');
+  code = code.replace(
+    /^(?:module\.)?exports\s*=\s*([^;]+)/m,
+    'const a = $1;\nexport const validate = a;\nexport default a;',
+  );
 
   // Minimize
   code = (

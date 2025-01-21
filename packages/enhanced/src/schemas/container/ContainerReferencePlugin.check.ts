@@ -4,34 +4,57 @@
  * This file was automatically generated.
  * DO NOT MODIFY BY HAND.
  */
-export const validate = s;
-export default s;
+export const validate = o;
+export default o;
 const r = {
-    enum: [
-      'var',
-      'module',
-      'assign',
-      'this',
-      'window',
-      'self',
-      'global',
-      'commonjs',
-      'commonjs2',
-      'commonjs-module',
-      'commonjs-static',
-      'amd',
-      'amd-require',
-      'umd',
-      'umd2',
-      'jsonp',
-      'system',
-      'promise',
-      'import',
-      'script',
-      'node-commonjs',
-    ],
-  },
-  t = require('ajv/dist/runtime/ucs2length').default;
+  enum: [
+    'var',
+    'module',
+    'assign',
+    'this',
+    'window',
+    'self',
+    'global',
+    'commonjs',
+    'commonjs2',
+    'commonjs-module',
+    'commonjs-static',
+    'amd',
+    'amd-require',
+    'umd',
+    'umd2',
+    'jsonp',
+    'system',
+    'promise',
+    'import',
+    'script',
+    'node-commonjs',
+  ],
+};
+function t(
+  r,
+  {
+    instancePath: e = '',
+    parentData: a,
+    parentDataProperty: n,
+    rootData: o = r,
+  } = {},
+) {
+  if (!Array.isArray(r))
+    return (t.errors = [{ params: { type: 'array' } }]), !1;
+  {
+    const e = r.length;
+    for (let a = 0; a < e; a++) {
+      let e = r[a];
+      const n = 0;
+      if ('string' != typeof e)
+        return (t.errors = [{ params: { type: 'string' } }]), !1;
+      if (e.length < 1) return (t.errors = [{ params: {} }]), !1;
+      if (0 !== n) break;
+    }
+  }
+  return (t.errors = null), !0;
+}
 function e(
   r,
   {
@@ -41,20 +64,76 @@ function e(
     rootData: s = r,
   } = {},
 ) {
-  if (!Array.isArray(r))
-    return (e.errors = [{ params: { type: 'array' } }]), !1;
-  {
-    const a = r.length;
-    for (let n = 0; n < a; n++) {
-      let a = r[n];
-      const o = 0;
-      if ('string' != typeof a)
-        return (e.errors = [{ params: { type: 'string' } }]), !1;
-      if (t(a) < 1) return (e.errors = [{ params: { limit: 1 } }]), !1;
-      if (0 !== o) break;
+  let l = null,
+    i = 0;
+  if (0 === i) {
+    if (!r || 'object' != typeof r || Array.isArray(r))
+      return (e.errors = [{ params: { type: 'object' } }]), !1;
+    {
+      let n;
+      if (void 0 === r.external && (n = 'external'))
+        return (e.errors = [{ params: { missingProperty: n } }]), !1;
+      {
+        const n = i;
+        for (const t in r)
+          if ('external' !== t && 'shareScope' !== t)
+            return (e.errors = [{ params: { additionalProperty: t } }]), !1;
+        if (n === i) {
+          if (void 0 !== r.external) {
+            let n = r.external;
+            const o = i,
+              u = i;
+            let m = !1;
+            const f = i;
+            if (i == i)
+              if ('string' == typeof n) {
+                if (n.length < 1) {
+                  const r = { params: {} };
+                  null === l ? (l = [r]) : l.push(r), i++;
+                }
+              } else {
+                const r = { params: { type: 'string' } };
+                null === l ? (l = [r]) : l.push(r), i++;
+              }
+            var p = f === i;
+            if (((m = m || p), !m)) {
+              const e = i;
+              t(n, {
+                instancePath: a + '/external',
+                parentData: r,
+                parentDataProperty: 'external',
+                rootData: s,
+              }) ||
+                ((l = null === l ? t.errors : l.concat(t.errors)),
+                (i = l.length)),
+                (p = e === i),
+                (m = m || p);
+            }
+            if (!m) {
+              const r = { params: {} };
+              return (
+                null === l ? (l = [r]) : l.push(r), i++, (e.errors = l), !1
+              );
+            }
+            (i = u), null !== l && (u ? (l.length = u) : (l = null));
+            var c = o === i;
+          } else c = !0;
+          if (c)
+            if (void 0 !== r.shareScope) {
+              let t = r.shareScope;
+              const a = i;
+              if (i === a) {
+                if ('string' != typeof t)
+                  return (e.errors = [{ params: { type: 'string' } }]), !1;
+                if (t.length < 1) return (e.errors = [{ params: {} }]), !1;
+              }
+              c = a === i;
+            } else c = !0;
+        }
+      }
     }
   }
-  return (e.errors = null), !0;
+  return (e.errors = l), 0 === i;
 }
 function a(
   r,
@@ -70,69 +149,50 @@ function a(
   if (0 === p) {
     if (!r || 'object' != typeof r || Array.isArray(r))
       return (a.errors = [{ params: { type: 'object' } }]), !1;
-    {
-      let o;
-      if (void 0 === r.external && (o = 'external'))
-        return (a.errors = [{ params: { missingProperty: o } }]), !1;
-      {
-        const o = p;
-        for (const t in r)
-          if ('external' !== t && 'shareScope' !== t)
-            return (a.errors = [{ params: { additionalProperty: t } }]), !1;
-        if (o === p) {
-          if (void 0 !== r.external) {
-            let o = r.external;
-            const s = p,
-              m = p;
-            let f = !1;
-            const y = p;
-            if (p == p)
-              if ('string' == typeof o) {
-                if (t(o) < 1) {
-                  const r = { params: { limit: 1 } };
-                  null === i ? (i = [r]) : i.push(r), p++;
-                }
-              } else {
-                const r = { params: { type: 'string' } };
-                null === i ? (i = [r]) : i.push(r), p++;
-              }
-            var c = y === p;
-            if (((f = f || c), !f)) {
-              const t = p;
-              e(o, {
-                instancePath: n + '/external',
-                parentData: r,
-                parentDataProperty: 'external',
-                rootData: l,
-              }) ||
-                ((i = null === i ? e.errors : i.concat(e.errors)),
-                (p = i.length)),
-                (c = t === p),
-                (f = f || c);
-            }
-            if (!f) {
+    for (const o in r) {
+      let s = r[o];
+      const u = p,
+        m = p;
+      let f = !1;
+      const y = p;
+      e(s, {
+        instancePath: n + '/' + o.replace(/~/g, '~0').replace(/\//g, '~1'),
+        parentData: r,
+        parentDataProperty: o,
+        rootData: l,
+      }) || ((i = null === i ? e.errors : i.concat(e.errors)), (p = i.length));
+      var c = y === p;
+      if (((f = f || c), !f)) {
+        const e = p;
+        if (p == p)
+          if ('string' == typeof s) {
+            if (s.length < 1) {
               const r = { params: {} };
-              return (
-                null === i ? (i = [r]) : i.push(r), p++, (a.errors = i), !1
-              );
+              null === i ? (i = [r]) : i.push(r), p++;
             }
-            (p = m), null !== i && (m ? (i.length = m) : (i = null));
-            var u = s === p;
-          } else u = !0;
-          if (u)
-            if (void 0 !== r.shareScope) {
-              let e = r.shareScope;
-              const n = p;
-              if (p === n) {
-                if ('string' != typeof e)
-                  return (a.errors = [{ params: { type: 'string' } }]), !1;
-                if (t(e) < 1)
-                  return (a.errors = [{ params: { limit: 1 } }]), !1;
-              }
-              u = n === p;
-            } else u = !0;
+          } else {
+            const r = { params: { type: 'string' } };
+            null === i ? (i = [r]) : i.push(r), p++;
+          }
+        if (((c = e === p), (f = f || c), !f)) {
+          const e = p;
+          t(s, {
+            instancePath: n + '/' + o.replace(/~/g, '~0').replace(/\//g, '~1'),
+            parentData: r,
+            parentDataProperty: o,
+            rootData: l,
+          }) ||
+            ((i = null === i ? t.errors : i.concat(t.errors)), (p = i.length)),
+            (c = e === p),
+            (f = f || c);
         }
       }
+      if (!f) {
+        const r = { params: {} };
+        return null === i ? (i = [r]) : i.push(r), p++, (a.errors = i), !1;
+      }
+      if (((p = m), null !== i && (m ? (i.length = m) : (i = null)), u !== p))
+        break;
     }
   }
   return (a.errors = i), 0 === p;
@@ -140,243 +200,180 @@ function a(
 function n(
   r,
   {
-    instancePath: o = '',
-    parentData: s,
-    parentDataProperty: l,
-    rootData: i = r,
+    instancePath: t = '',
+    parentData: e,
+    parentDataProperty: o,
+    rootData: s = r,
   } = {},
 ) {
-  let p = null,
-    c = 0;
-  if (0 === c) {
-    if (!r || 'object' != typeof r || Array.isArray(r))
-      return (n.errors = [{ params: { type: 'object' } }]), !1;
-    for (const s in r) {
-      let l = r[s];
-      const m = c,
-        f = c;
-      let y = !1;
-      const h = c;
-      a(l, {
-        instancePath: o + '/' + s.replace(/~/g, '~0').replace(/\//g, '~1'),
-        parentData: r,
-        parentDataProperty: s,
-        rootData: i,
-      }) || ((p = null === p ? a.errors : p.concat(a.errors)), (c = p.length));
-      var u = h === c;
-      if (((y = y || u), !y)) {
-        const a = c;
-        if (c == c)
-          if ('string' == typeof l) {
-            if (t(l) < 1) {
-              const r = { params: { limit: 1 } };
-              null === p ? (p = [r]) : p.push(r), c++;
+  let l = null,
+    i = 0;
+  const p = i;
+  let c = !1;
+  const u = i;
+  if (i === u)
+    if (Array.isArray(r)) {
+      const e = r.length;
+      for (let n = 0; n < e; n++) {
+        let e = r[n];
+        const o = i,
+          p = i;
+        let c = !1;
+        const u = i;
+        if (i == i)
+          if ('string' == typeof e) {
+            if (e.length < 1) {
+              const r = { params: {} };
+              null === l ? (l = [r]) : l.push(r), i++;
             }
           } else {
             const r = { params: { type: 'string' } };
-            null === p ? (p = [r]) : p.push(r), c++;
+            null === l ? (l = [r]) : l.push(r), i++;
           }
-        if (((u = a === c), (y = y || u), !y)) {
-          const t = c;
-          e(l, {
-            instancePath: o + '/' + s.replace(/~/g, '~0').replace(/\//g, '~1'),
+        var m = u === i;
+        if (((c = c || m), !c)) {
+          const o = i;
+          a(e, {
+            instancePath: t + '/' + n,
             parentData: r,
-            parentDataProperty: s,
-            rootData: i,
+            parentDataProperty: n,
+            rootData: s,
           }) ||
-            ((p = null === p ? e.errors : p.concat(e.errors)), (c = p.length)),
-            (u = t === c),
-            (y = y || u);
+            ((l = null === l ? a.errors : l.concat(a.errors)), (i = l.length)),
+            (m = o === i),
+            (c = c || m);
         }
+        if (c) (i = p), null !== l && (p ? (l.length = p) : (l = null));
+        else {
+          const r = { params: {} };
+          null === l ? (l = [r]) : l.push(r), i++;
+        }
+        if (o !== i) break;
       }
-      if (!y) {
-        const r = { params: {} };
-        return null === p ? (p = [r]) : p.push(r), c++, (n.errors = p), !1;
-      }
-      if (((c = f), null !== p && (f ? (p.length = f) : (p = null)), m !== c))
-        break;
+    } else {
+      const r = { params: { type: 'array' } };
+      null === l ? (l = [r]) : l.push(r), i++;
     }
+  var f = u === i;
+  if (((c = c || f), !c)) {
+    const n = i;
+    a(r, {
+      instancePath: t,
+      parentData: e,
+      parentDataProperty: o,
+      rootData: s,
+    }) || ((l = null === l ? a.errors : l.concat(a.errors)), (i = l.length)),
+      (f = n === i),
+      (c = c || f);
   }
-  return (n.errors = p), 0 === c;
+  if (!c) {
+    const r = { params: {} };
+    return null === l ? (l = [r]) : l.push(r), i++, (n.errors = l), !1;
+  }
+  return (
+    (i = p),
+    null !== l && (p ? (l.length = p) : (l = null)),
+    (n.errors = l),
+    0 === i
+  );
 }
 function o(
-  r,
+  t,
   {
     instancePath: e = '',
     parentData: a,
     parentDataProperty: s,
-    rootData: l = r,
+    rootData: l = t,
   } = {},
 ) {
   let i = null,
     p = 0;
-  const c = p;
-  let u = !1;
-  const m = p;
-  if (p === m)
-    if (Array.isArray(r)) {
-      const a = r.length;
-      for (let o = 0; o < a; o++) {
-        let a = r[o];
-        const s = p,
-          c = p;
-        let u = !1;
-        const m = p;
-        if (p == p)
-          if ('string' == typeof a) {
-            if (t(a) < 1) {
-              const r = { params: { limit: 1 } };
-              null === i ? (i = [r]) : i.push(r), p++;
-            }
-          } else {
-            const r = { params: { type: 'string' } };
-            null === i ? (i = [r]) : i.push(r), p++;
-          }
-        var f = m === p;
-        if (((u = u || f), !u)) {
-          const t = p;
-          n(a, {
-            instancePath: e + '/' + o,
-            parentData: r,
-            parentDataProperty: o,
-            rootData: l,
-          }) ||
-            ((i = null === i ? n.errors : i.concat(n.errors)), (p = i.length)),
-            (f = t === p),
-            (u = u || f);
-        }
-        if (u) (p = c), null !== i && (c ? (i.length = c) : (i = null));
-        else {
-          const r = { params: {} };
-          null === i ? (i = [r]) : i.push(r), p++;
-        }
-        if (s !== p) break;
-      }
-    } else {
-      const r = { params: { type: 'array' } };
-      null === i ? (i = [r]) : i.push(r), p++;
-    }
-  var y = m === p;
-  if (((u = u || y), !u)) {
-    const t = p;
-    n(r, {
-      instancePath: e,
-      parentData: a,
-      parentDataProperty: s,
-      rootData: l,
-    }) || ((i = null === i ? n.errors : i.concat(n.errors)), (p = i.length)),
-      (y = t === p),
-      (u = u || y);
-  }
-  if (!u) {
-    const r = { params: {} };
-    return null === i ? (i = [r]) : i.push(r), p++, (o.errors = i), !1;
-  }
-  return (
-    (p = c),
-    null !== i && (c ? (i.length = c) : (i = null)),
-    (o.errors = i),
-    0 === p
-  );
-}
-function s(
-  e,
-  {
-    instancePath: a = '',
-    parentData: n,
-    parentDataProperty: l,
-    rootData: i = e,
-  } = {},
-) {
-  let p = null,
-    c = 0;
-  if (0 === c) {
-    if (!e || 'object' != typeof e || Array.isArray(e))
-      return (s.errors = [{ params: { type: 'object' } }]), !1;
+  if (0 === p) {
+    if (!t || 'object' != typeof t || Array.isArray(t))
+      return (o.errors = [{ params: { type: 'object' } }]), !1;
     {
-      let n;
+      let a;
       if (
-        (void 0 === e.remoteType && (n = 'remoteType')) ||
-        (void 0 === e.remotes && (n = 'remotes'))
+        (void 0 === t.remoteType && (a = 'remoteType')) ||
+        (void 0 === t.remotes && (a = 'remotes'))
       )
-        return (s.errors = [{ params: { missingProperty: n } }]), !1;
+        return (o.errors = [{ params: { missingProperty: a } }]), !1;
       {
-        const n = c;
-        for (const r in e)
+        const a = p;
+        for (const r in t)
           if ('remoteType' !== r && 'remotes' !== r && 'shareScope' !== r)
-            return (s.errors = [{ params: { additionalProperty: r } }]), !1;
-        if (n === c) {
-          if (void 0 !== e.remoteType) {
-            let t = e.remoteType;
-            const a = c,
-              n = c;
-            let o = !1,
+            return (o.errors = [{ params: { additionalProperty: r } }]), !1;
+        if (a === p) {
+          if (void 0 !== t.remoteType) {
+            let e = t.remoteType;
+            const a = p,
+              n = p;
+            let s = !1,
               l = null;
-            const i = c;
+            const u = p;
             if (
-              'var' !== t &&
-              'module' !== t &&
-              'assign' !== t &&
-              'this' !== t &&
-              'window' !== t &&
-              'self' !== t &&
-              'global' !== t &&
-              'commonjs' !== t &&
-              'commonjs2' !== t &&
-              'commonjs-module' !== t &&
-              'commonjs-static' !== t &&
-              'amd' !== t &&
-              'amd-require' !== t &&
-              'umd' !== t &&
-              'umd2' !== t &&
-              'jsonp' !== t &&
-              'system' !== t &&
-              'promise' !== t &&
-              'import' !== t &&
-              'script' !== t &&
-              'node-commonjs' !== t
+              'var' !== e &&
+              'module' !== e &&
+              'assign' !== e &&
+              'this' !== e &&
+              'window' !== e &&
+              'self' !== e &&
+              'global' !== e &&
+              'commonjs' !== e &&
+              'commonjs2' !== e &&
+              'commonjs-module' !== e &&
+              'commonjs-static' !== e &&
+              'amd' !== e &&
+              'amd-require' !== e &&
+              'umd' !== e &&
+              'umd2' !== e &&
+              'jsonp' !== e &&
+              'system' !== e &&
+              'promise' !== e &&
+              'import' !== e &&
+              'script' !== e &&
+              'node-commonjs' !== e
             ) {
               const t = { params: { allowedValues: r.enum } };
-              null === p ? (p = [t]) : p.push(t), c++;
+              null === i ? (i = [t]) : i.push(t), p++;
             }
-            if ((i === c && ((o = !0), (l = 0)), !o)) {
+            if ((u === p && ((s = !0), (l = 0)), !s)) {
               const r = { params: { passingSchemas: l } };
               return (
-                null === p ? (p = [r]) : p.push(r), c++, (s.errors = p), !1
+                null === i ? (i = [r]) : i.push(r), p++, (o.errors = i), !1
               );
             }
-            (c = n), null !== p && (n ? (p.length = n) : (p = null));
-            var u = a === c;
-          } else u = !0;
-          if (u) {
-            if (void 0 !== e.remotes) {
-              const r = c;
-              o(e.remotes, {
-                instancePath: a + '/remotes',
-                parentData: e,
+            (p = n), null !== i && (n ? (i.length = n) : (i = null));
+            var c = a === p;
+          } else c = !0;
+          if (c) {
+            if (void 0 !== t.remotes) {
+              const r = p;
+              n(t.remotes, {
+                instancePath: e + '/remotes',
+                parentData: t,
                 parentDataProperty: 'remotes',
-                rootData: i,
+                rootData: l,
               }) ||
-                ((p = null === p ? o.errors : p.concat(o.errors)),
-                (c = p.length)),
-                (u = r === c);
-            } else u = !0;
-            if (u)
-              if (void 0 !== e.shareScope) {
-                let r = e.shareScope;
-                const a = c;
-                if (c === a) {
+                ((i = null === i ? n.errors : i.concat(n.errors)),
+                (p = i.length)),
+                (c = r === p);
+            } else c = !0;
+            if (c)
+              if (void 0 !== t.shareScope) {
+                let r = t.shareScope;
+                const e = p;
+                if (p === e) {
                   if ('string' != typeof r)
-                    return (s.errors = [{ params: { type: 'string' } }]), !1;
-                  if (t(r) < 1)
-                    return (s.errors = [{ params: { limit: 1 } }]), !1;
+                    return (o.errors = [{ params: { type: 'string' } }]), !1;
+                  if (r.length < 1) return (o.errors = [{ params: {} }]), !1;
                 }
-                u = a === c;
-              } else u = !0;
+                c = e === p;
+              } else c = !0;
           }
         }
       }
     }
   }
-  return (s.errors = p), 0 === c;
+  return (o.errors = i), 0 === p;
 }
