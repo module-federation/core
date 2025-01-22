@@ -41,6 +41,9 @@ export default defineConfig({
             './react-component': './src/components/react-component.tsx',
           },
           runtimePlugins: ['./runtimePlugin.ts'],
+          experiments: {
+            asyncStartup: true,
+          },
           filename: 'remoteEntry.js',
           shared: {
             'react/': {
