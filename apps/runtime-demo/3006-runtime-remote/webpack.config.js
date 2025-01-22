@@ -39,6 +39,9 @@ module.exports = composePlugins(
           './WebpackPng': './src/components/WebpackPng',
         },
         shareStrategy: 'loaded-first',
+        experiments: {
+          asyncStartup: true,
+        },
         shared: {
           lodash: {
             singleton: true,
