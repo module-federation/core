@@ -94,7 +94,6 @@
     "@module-federation/node": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@swc/helpers": "0.5.13",
-    "hoist-non-react-statics": "3.3.2",
     "node-fetch": "~3.3.0",
     "react-error-boundary": "4.1.2"
   },
@@ -104,8 +103,7 @@
     "@modern-js/module-tools": "2.64.0",
     "@modern-js/runtime": "2.64.0",
     "@modern-js/tsconfig": "2.64.0",
-    "@module-federation/manifest": "workspace:*",
-    "@types/hoist-non-react-statics": "3.3.5"
+    "@module-federation/manifest": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=17",
