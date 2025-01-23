@@ -9,7 +9,7 @@
 /.nx
 # dependencies
 node_modules
-
+./webpack-lib
 # IDEs and editors
 /.idea
 .project
