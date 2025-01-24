@@ -14,33 +14,11 @@ export default defineConfig({
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     },
   },
+  dev: {
+    writeToDisk: true,
+  },
   server: {
     port: 2004,
-  },
-  dev: {
-    // It is necessary to configure assetPrefix, and in the production environment, you need to configure output.assetPrefix
-    assetPrefix: 'http://localhost:2004',
-  },
-  tools: {
-    rspack: (config, { appendPlugins }) => {
-      delete config.optimization?.splitChunks;
-    },
-    // cssExtract: {
-    // 	pluginOptions: {
-    // 		insert(element) {
-    // 			console.log('element22222233333333333333',document.querySelector("#remote2-style-component"));
-    // 			document.querySelector("#remote2-style-component")?.appendChild(element);
-    // 		},
-    // 	}
-    // },
-    // styleLoader: {
-    // 	insert: (element)=> {
-    // 		debugger
-    // 		const styleContainer = document.querySelector(".remote2_export-app") || document.head;
-    // 		styleContainer.appendChild(element);
-    // 		console.log('styleContainer', styleContainer)
-    // 	},
-    // },
   },
   plugins: [
     pluginReact(),
@@ -50,6 +28,8 @@ export default defineConfig({
         './export-app': './src/export-App.tsx',
       },
       shared: ['react', 'react-dom'],
+      // getPublicPath: `return 'http://localhost:2004/'`,
+      getPublicPath: `function(originalPublicPath){console.log(originalPublicPath);__webpack_require__.p = 'http://localhost:2004/'}`,
     }),
   ],
 });

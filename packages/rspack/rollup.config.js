@@ -9,6 +9,10 @@ module.exports = (rollupConfig, projectOptions) => {
     process.cwd(),
     './packages/rspack/src/ModuleFederationPlugin.ts',
   );
+  rollupConfig.input['remote-entry-plugin'] = path.resolve(
+    process.cwd(),
+    './packages/rspack/src/RemoteEntryPlugin.ts',
+  );
 
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({
