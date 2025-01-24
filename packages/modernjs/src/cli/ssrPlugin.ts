@@ -23,7 +23,7 @@ export const moduleFederationSSRPlugin = (
     '@modern-js/plugin-module-federation',
   ],
   setup: async (api) => {
-    const modernjsConfig = api.useConfigContext();
+    const modernjsConfig = api.getConfig();
     const enableSSR = Boolean(modernjsConfig?.server?.ssr);
     if (!enableSSR || pluginOptions.userConfig?.ssr === false) {
       return {} as any;
@@ -41,7 +41,7 @@ export const moduleFederationSSRPlugin = (
         config: {},
       });
       return { entrypoint, plugins };
-    })
+    });
     api.config(() => {
       return {
         tools: {
@@ -92,10 +92,7 @@ export const moduleFederationSSRPlugin = (
                     req.url?.includes('.json') &&
                     !req.url?.includes('hot-update')
                   ) {
-                    const filepath = path.join(
-                      process.cwd(),
-                      `dist${req.url}`,
-                    );
+                    const filepath = path.join(process.cwd(), `dist${req.url}`);
                     fs.statSync(filepath);
                     res.setHeader('Access-Control-Allow-Origin', '*');
                     res.setHeader(
@@ -131,15 +128,15 @@ export const moduleFederationSSRPlugin = (
           },
         },
       };
-    })
+    });
     api.onAfterBuild(() => {
       const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
       updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
-    })
+    });
     api.onDevCompileDone(() => {
       const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
       updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
-    })
+    });
   },
 });
 
