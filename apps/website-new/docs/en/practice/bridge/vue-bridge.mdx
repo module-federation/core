@@ -1,7 +1,6 @@
+# Vue Bridge (for Vue v3)
 
-## Vue Bridge (for Vue v3)
-
-`@module-federation/bridge-vue3` provides a `bridge` utility function for Vue v3 applications. The provided `createBridgeComponent` can be used to export application-level modules, and `createRemoteComponent` can be used to load application-level modules.
+`@module-federation/bridge-vue3` provides a `bridge` utility function for Vue V3 applications. The provided `createBridgeComponent` can be used to export application-level modules, and `createRemoteComponent` can be used to load application-level modules.
 
 ### Installation
 
@@ -71,9 +70,8 @@ export default createBridgeComponent({
   rootComponent: App,
   appOptions: ({app}) => {
     // Optional: adding a plugin to the new Vue instance on the host application side
-    app.use(customPlugin)
-
-    return {router}
+    app.use(customPlugin);
+    return { router };
   },
 });
 ```
@@ -242,8 +240,7 @@ export default createBridgeComponent({
   appOptions: ({app}) => {
     // Optional: adding a plugin to the new Vue instance on the host application side
     app.use(customPlugin)
-
-    return {router}
+    return { router };
   },
 });
 ```
