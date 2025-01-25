@@ -95,6 +95,7 @@
     "@module-federation/data-prefetch": "workspace:*",
     "@module-federation/inject-external-runtime-core-plugin": "workspace:*",
     "upath": "2.0.1",
-    "btoa": "^1.2.1"
+    "btoa": "^1.2.1",
+    "tapable": "^2.2.0"
   }
 }
