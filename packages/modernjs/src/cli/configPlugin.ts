@@ -1,6 +1,6 @@
 import path from 'path';
 import type {
-  CliPlugin,
+  CliPluginFuture,
   AppTools,
   UserConfig,
   Bundler,
@@ -53,12 +53,12 @@ export function modifyBundlerConfig<T extends Bundler>(options: {
 
 export const moduleFederationConfigPlugin = (
   userConfig: InternalModernPluginOptions,
-): CliPlugin<AppTools> => ({
+): CliPluginFuture<AppTools> => ({
   name: '@modern-js/plugin-module-federation-config',
   pre: ['@modern-js/plugin-initialize'],
   post: ['@modern-js/plugin-module-federation'],
-  setup: async ({ useConfigContext, useAppContext }) => {
-    const modernjsConfig = useConfigContext();
+  setup: async (api) => {
+    const modernjsConfig = api.getConfig();
     const mfConfig = await getMFConfig(userConfig.originPluginOptions);
     const csrConfig =
       userConfig.csrConfig || JSON.parse(JSON.stringify(mfConfig));
@@ -67,86 +67,84 @@ export const moduleFederationConfigPlugin = (
     userConfig.ssrConfig = ssrConfig;
     userConfig.csrConfig = csrConfig;
 
-    return {
-      config: async () => {
-        const bundlerType =
-          useAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
-        const ipv4 = getIPV4();
-        const enableSSR =
-          userConfig.userConfig?.ssr === false
-            ? false
-            : Boolean(modernjsConfig?.server?.ssr);
+    api.config(() => {
+      const bundlerType =
+        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
+      const ipv4 = getIPV4();
+      const enableSSR =
+        userConfig.userConfig?.ssr === false
+          ? false
+          : Boolean(modernjsConfig?.server?.ssr);
 
-        if (userConfig.remoteIpStrategy === undefined) {
-          if (!enableSSR) {
-            userConfig.remoteIpStrategy = 'inherit';
-          } else {
-            userConfig.remoteIpStrategy = 'ipv4';
-          }
+      if (userConfig.remoteIpStrategy === undefined) {
+        if (!enableSSR) {
+          userConfig.remoteIpStrategy = 'inherit';
+        } else {
+          userConfig.remoteIpStrategy = 'ipv4';
         }
+      }
 
-        return {
-          tools: {
-            bundlerChain(chain, { isServer }) {
-              addMyTypes2Ignored(chain, isServer ? ssrConfig : csrConfig);
-            },
-            rspack(config, { isServer }) {
-              modifyBundlerConfig({
-                bundlerType,
-                mfConfig: isServer ? ssrConfig : csrConfig,
-                config,
-                isServer,
-                modernjsConfig,
-                remoteIpStrategy: userConfig.remoteIpStrategy,
-              });
-              userConfig.distOutputDir =
-                config.output?.path || path.resolve(process.cwd(), 'dist');
-            },
-            webpack(config, { isServer }) {
-              modifyBundlerConfig({
-                bundlerType,
-                mfConfig: isServer ? ssrConfig : csrConfig,
-                config,
-                isServer,
-                modernjsConfig,
-                remoteIpStrategy: userConfig.remoteIpStrategy,
-              });
+      return {
+        tools: {
+          bundlerChain(chain, { isServer }) {
+            addMyTypes2Ignored(chain, isServer ? ssrConfig : csrConfig);
+          },
+          rspack(config, { isServer }) {
+            modifyBundlerConfig({
+              bundlerType,
+              mfConfig: isServer ? ssrConfig : csrConfig,
+              config,
+              isServer,
+              modernjsConfig,
+              remoteIpStrategy: userConfig.remoteIpStrategy,
+            });
+            userConfig.distOutputDir =
+              config.output?.path || path.resolve(process.cwd(), 'dist');
+          },
+          webpack(config, { isServer }) {
+            modifyBundlerConfig({
+              bundlerType,
+              mfConfig: isServer ? ssrConfig : csrConfig,
+              config,
+              isServer,
+              modernjsConfig,
+              remoteIpStrategy: userConfig.remoteIpStrategy,
+            });
 
-              userConfig.distOutputDir =
-                config.output?.path || path.resolve(process.cwd(), 'dist');
-            },
-            devServer: {
-              headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods':
-                  'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-                'Access-Control-Allow-Headers': '*',
-              },
+            userConfig.distOutputDir =
+              config.output?.path || path.resolve(process.cwd(), 'dist');
+          },
+          devServer: {
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods':
+                'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+              'Access-Control-Allow-Headers': '*',
             },
           },
-          source: {
-            alias: {
-              '@modern-js/runtime/mf': require.resolve(
-                '@module-federation/modern-js/runtime',
-              ),
-            },
-            define: {
-              FEDERATION_IPV4: JSON.stringify(ipv4),
-              REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
-            },
-            enableAsyncEntry:
-              bundlerType === 'rspack'
-                ? (modernjsConfig.source?.enableAsyncEntry ?? true)
-                : modernjsConfig.source?.enableAsyncEntry,
+        },
+        source: {
+          alias: {
+            '@modern-js/runtime/mf': require.resolve(
+              '@module-federation/modern-js/runtime',
+            ),
           },
-          dev: {
-            assetPrefix: modernjsConfig?.dev?.assetPrefix
-              ? modernjsConfig.dev.assetPrefix
-              : true,
+          define: {
+            FEDERATION_IPV4: JSON.stringify(ipv4),
+            REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
           },
-        };
-      },
-    };
+          enableAsyncEntry:
+            bundlerType === 'rspack'
+              ? (modernjsConfig.source?.enableAsyncEntry ?? true)
+              : modernjsConfig.source?.enableAsyncEntry,
+        },
+        dev: {
+          assetPrefix: modernjsConfig?.dev?.assetPrefix
+            ? modernjsConfig.dev.assetPrefix
+            : true,
+        },
+      };
+    });
   },
 });
 
