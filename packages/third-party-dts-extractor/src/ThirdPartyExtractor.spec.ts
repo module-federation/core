@@ -8,12 +8,17 @@ describe('ThirdPartyExtractor', () => {
   const destDir = join(projectRoot, 'dist', 'third-party-extractor');
   const thirdPartyExtractor = new ThirdPartyExtractor(destDir, projectRoot);
 
-  it('should correctly infer pkg dir with types field in package.json', () => {
+  it("should correctly infer pkg's types dir with types/typings field in package.json", () => {
     const tsupDir = thirdPartyExtractor.inferPkgDir('tsup');
-    const pkgJson = fs.readJSONSync(`${tsupDir}/package.json`);
 
-    expect(pkgJson.name).toBe('tsup');
-    expect(Boolean(pkgJson.types || pkgJson.typings)).toEqual(true);
+    if (!tsupDir) {
+      throw new Error('tsup dir not found');
+    }
+
+    const dirContent = fs.readdirSync(tsupDir);
+    const dtsFiles = dirContent.filter((file) => file.endsWith('.d.ts'));
+
+    expect(dtsFiles.length).toBeGreaterThan(0);
   });
 
   it('should correctly infer pkg types dir without types field in package.json', () => {
