@@ -14,10 +14,26 @@ import Home from './pages/Home';
 import './App.css';
 import BridgeReactPlugin from '@module-federation/bridge-react/plugin';
 import { ErrorBoundary } from 'react-error-boundary';
+import Remote1AppNew from 'remote1/app';
+
+const fallbackPlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'fallback-plugin',
+    errorLoadRemote(args) {
+      return { default: () => <div> fallback component </div> };
+    },
+  };
+};
 
 init({
   name: 'federation_consumer',
-  remotes: [],
+  remotes: [
+    {
+      name: 'remote1',
+      alias: 'remote1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    },
+  ],
   plugins: [
     BridgeReactPlugin(),
     // RetryPlugin({
@@ -36,6 +52,7 @@ init({
     //     },
     //   },
     // }),
+    fallbackPlugin(),
   ],
 });
 
@@ -63,9 +80,7 @@ const Remote1App = createRemoteComponent({
 const Remote1AppWithLoadRemote = React.lazy(() => loadRemote('remote1/app'));
 const Remote1AppWithErrorBoundary = React.forwardRef<any, any>((props, ref) => (
   <ErrorBoundary fallback={<div>Error loading Remote1App...</div>}>
-    <Suspense
-      fallback={<div style={{ color: 'red' }}> Loading Remote1App...</div>}
-    >
+    <Suspense fallback={<div> Loading Remote1App...</div>}>
       <Remote1AppWithLoadRemote {...props} ref={ref} />
     </Suspense>
   </ErrorBoundary>
@@ -102,12 +117,12 @@ function Wraper3() {
       <div className="flex flex-row">
         <div className="grow">
           <h2>Remote1</h2>
-          <Remote1App name={'Ming'} age={12} memoryRoute={{ entryPath: '/' }} />
-          {/* <Remote1AppWithErrorBoundary
+          {/* <Remote1App name={'Ming'} age={12} memoryRoute={{ entryPath: '/' }} /> */}
+          <Remote1AppWithErrorBoundary
             name={'Ming'}
             age={12}
             memoryRoute={{ entryPath: '/' }}
-          /> */}
+          />
         </div>
         <div className="grow">
           <h2>Remote2</h2>
@@ -156,11 +171,7 @@ const App = () => {
             //   ref={ref}
             //   basename="/remote1"
             // />
-            <Remote1App
-              name={'Ming'}
-              age={12}
-              memoryRoute={{ entryPath: '/' }}
-            />
+            <Remote1AppNew name={'Ming'} age={12} />
           )}
         />
         <Route

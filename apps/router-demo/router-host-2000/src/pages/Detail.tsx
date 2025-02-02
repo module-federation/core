@@ -1,5 +1,5 @@
 import { loadRemote } from '@module-federation/enhanced/runtime';
-import Button from 'remote1/button';
+// import Button from 'remote1/button';
 
 // console.log('loadRemote', loadRemote);
 // loadRemote("remote1/button").then((m) => {
@@ -11,7 +11,7 @@ function Detail() {
     <div>
       Detail
       <h5>Remote Button</h5>
-      <Button />
+      {/* <Button /> */}
     </div>
   );
 }
