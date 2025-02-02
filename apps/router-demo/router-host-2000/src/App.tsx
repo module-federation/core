@@ -102,12 +102,12 @@ function Wraper3() {
       <div className="flex flex-row">
         <div className="grow">
           <h2>Remote1</h2>
-          {/* <Remote1App name={'Ming'} age={12} memoryRoute={{ entryPath: '/' }} /> */}
-          <Remote1AppWithErrorBoundary
+          <Remote1App name={'Ming'} age={12} memoryRoute={{ entryPath: '/' }} />
+          {/* <Remote1AppWithErrorBoundary
             name={'Ming'}
             age={12}
             memoryRoute={{ entryPath: '/' }}
-          />
+          /> */}
         </div>
         <div className="grow">
           <h2>Remote2</h2>
@@ -150,13 +150,17 @@ const App = () => {
         <Route
           path="/remote1/*"
           Component={() => (
-            <Remote1AppWithErrorBoundary
+            // <Remote1AppWithErrorBoundary
+            //   name={'Ming'}
+            //   age={12}
+            //   ref={ref}
+            //   basename="/remote1"
+            // />
+            <Remote1App
               name={'Ming'}
               age={12}
-              ref={ref}
-              basename="/remote1"
+              memoryRoute={{ entryPath: '/' }}
             />
-            // <Remote1App name={'Ming'} age={12} memoryRoute={{ entryPath: '/' }} />
           )}
         />
         <Route
