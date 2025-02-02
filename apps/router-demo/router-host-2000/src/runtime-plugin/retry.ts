@@ -4,7 +4,7 @@ const retryPlugin = () =>
   RetryPlugin({
     fetch: {
       url: 'http://localhost:2001/mf-manifest.json',
-      fallback: () => 'http://localhost:2001/mf-manifest.json',
+      // fallback: () => 'http://localhost:2001/mf-manifest.json',
     },
     script: {
       retryTimes: 3,
