@@ -14,7 +14,8 @@ import Home from './pages/Home';
 import './App.css';
 import BridgeReactPlugin from '@module-federation/bridge-react/plugin';
 import { ErrorBoundary } from 'react-error-boundary';
-import Remote1AppNew from 'remote1/app';
+// import Remote1AppNew from 'remote1/app';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const fallbackPlugin: () => FederationRuntimePlugin = function () {
   return {
@@ -28,11 +29,11 @@ const fallbackPlugin: () => FederationRuntimePlugin = function () {
 init({
   name: 'federation_consumer',
   remotes: [
-    {
-      name: 'remote1',
-      alias: 'remote1',
-      entry: 'http://localhost:2001/mf-manifest.json',
-    },
+    // {
+    //   name: 'remote1',
+    //   alias: 'remote1',
+    //   entry: 'http://localhost:2001/mf-manifest.json',
+    // },
   ],
   plugins: [
     BridgeReactPlugin(),
@@ -52,7 +53,7 @@ init({
     //     },
     //   },
     // }),
-    fallbackPlugin(),
+    // fallbackPlugin(),
   ],
 });
 
@@ -117,12 +118,12 @@ function Wraper3() {
       <div className="flex flex-row">
         <div className="grow">
           <h2>Remote1</h2>
-          {/* <Remote1App name={'Ming'} age={12} memoryRoute={{ entryPath: '/' }} /> */}
-          <Remote1AppWithErrorBoundary
+          <Remote1App name={'Ming'} age={12} memoryRoute={{ entryPath: '/' }} />
+          {/* <Remote1AppWithErrorBoundary
             name={'Ming'}
             age={12}
             memoryRoute={{ entryPath: '/' }}
-          />
+          /> */}
         </div>
         <div className="grow">
           <h2>Remote2</h2>
@@ -165,13 +166,17 @@ const App = () => {
         <Route
           path="/remote1/*"
           Component={() => (
+            <Remote1App name={'Ming'} age={12} />
             // <Remote1AppWithErrorBoundary
             //   name={'Ming'}
             //   age={12}
             //   ref={ref}
             //   basename="/remote1"
             // />
-            <Remote1AppNew name={'Ming'} age={12} />
+            // <Remote1AppNew name={'Ming'} age={12} />
+            // <React.Suspense fallback={<div> Loading Remote1App...</div>}>
+            //   <Remote1AppWithLoadRemote />
+            // </React.Suspense>
           )}
         />
         <Route
