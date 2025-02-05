@@ -14,7 +14,9 @@ jobs:
           fetch-depth: 0
 
       - name: Install Pnpm
-        run: corepack enable
+        run: |
+          corepack prepare pnpm@8.11.0 --activate
+          corepack enable
 
       - name: Setup Node.js 18
         uses: actions/setup-node@v3
