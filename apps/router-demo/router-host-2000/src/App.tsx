@@ -166,7 +166,7 @@ const App = () => {
         <Route
           path="/remote1/*"
           Component={() => (
-            <Remote1App name={'Ming'} age={12} ref={ref} />
+            <Remote1App name={'Ming'} age={12} ref={ref} basename="/remote1" />
             // <Remote1AppWithErrorBoundary
             //   name={'Ming'}
             //   age={12}

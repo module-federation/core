@@ -3,4 +3,4 @@
 'website-new': patch
 ---
 
-feat: allow errorLoadRemote hook can catch remote entry resource loading error
+feat: allow errorLoadRemote hook catch remote entry resource loading error
