@@ -224,7 +224,7 @@
     "verdaccio": "5.29.2",
     "vite": "5.2.14",
     "vite-tsconfig-paths": "4.2.3",
-    "vitest": "1.6.0",
+    "vitest": "1.6.1",
     "vitest-fetch-mock": "^0.2.2",
     "vue-tsc": "^2.0.26",
     "wait-on": "^7.2.0",
