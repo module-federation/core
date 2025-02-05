@@ -232,7 +232,6 @@ export interface ModuleFederationPluginOptions {
   manifest?: boolean | PluginManifestOptions;
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
-  async?: boolean | AsyncBoundaryOptions;
   dataPrefetch?: DataPrefetch;
   virtualRuntimeEntry?: boolean;
   experiments?: {
@@ -248,6 +247,10 @@ export interface ModuleFederationPluginOptions {
      */
     disableAlias?: boolean;
   };
+  /**
+   * Configuration for async boundary plugin
+   */
+  async?: boolean | AsyncBoundaryOptions;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

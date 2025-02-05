@@ -2225,9 +2225,15 @@ importers:
       '@types/btoa':
         specifier: ^1.2.5
         version: 1.2.5
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
       enhanced-resolve:
         specifier: ^5.0.0
         version: 5.17.1
+      terser:
+        specifier: ^5.37.0
+        version: 5.37.0
 
   packages/error-codes: {}
 
