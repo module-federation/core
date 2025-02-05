@@ -13,7 +13,7 @@ import Detail from './pages/Detail';
 import Home from './pages/Home';
 import './App.css';
 import BridgeReactPlugin from '@module-federation/bridge-react/plugin';
-import { ErrorBoundary } from 'react-error-boundary';
+// import { ErrorBoundary } from 'react-error-boundary';
 // import Remote1AppNew from 'remote1/app';
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -79,13 +79,13 @@ const Remote1App = createRemoteComponent({
 });
 
 const Remote1AppWithLoadRemote = React.lazy(() => loadRemote('remote1/app'));
-const Remote1AppWithErrorBoundary = React.forwardRef<any, any>((props, ref) => (
-  <ErrorBoundary fallback={<div>Error loading Remote1App...</div>}>
-    <Suspense fallback={<div> Loading Remote1App...</div>}>
-      <Remote1AppWithLoadRemote {...props} ref={ref} />
-    </Suspense>
-  </ErrorBoundary>
-));
+// const Remote1AppWithErrorBoundary = React.forwardRef<any, any>((props, ref) => (
+//   <ErrorBoundary fallback={<div>Error loading Remote1App...</div>}>
+//     <Suspense fallback={<div> Loading Remote1App...</div>}>
+//       <Remote1AppWithLoadRemote {...props} ref={ref} />
+//     </Suspense>
+//   </ErrorBoundary>
+// ));
 
 const Remote2App = createRemoteComponent({
   loader: () => import('remote2/export-app'),
