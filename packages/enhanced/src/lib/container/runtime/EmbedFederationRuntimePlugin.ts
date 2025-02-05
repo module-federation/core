@@ -11,6 +11,8 @@ const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
+const PLUGIN_NAME = 'EmbedFederationRuntimePlugin';
+
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 interface EmbedFederationRuntimePluginOptions {
@@ -58,15 +60,14 @@ class EmbedFederationRuntimePlugin {
   apply(compiler: Compiler): void {
     // Prevent double application of plugin
     const compilationTaps = compiler.hooks.thisCompilation.taps || [];
-    if (
-      this.isHookAlreadyTapped(compilationTaps, 'EmbedFederationRuntimePlugin')
-    ) {
+    if (this.isHookAlreadyTapped(compilationTaps, PLUGIN_NAME)) {
       return;
     }
 
     compiler.hooks.thisCompilation.tap(
-      'EmbedFederationRuntimePlugin',
+      PLUGIN_NAME,
       (compilation: Compilation) => {
+        debugger;
         const { renderStartup } =
           compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
             compilation,
@@ -74,17 +75,12 @@ class EmbedFederationRuntimePlugin {
 
         // Prevent double tapping of renderStartup hook
         const startupTaps = renderStartup.taps || [];
-        if (
-          this.isHookAlreadyTapped(
-            startupTaps,
-            'MfStartupChunkDependenciesPlugin',
-          )
-        ) {
+        if (this.isHookAlreadyTapped(startupTaps, PLUGIN_NAME)) {
           return;
         }
 
         renderStartup.tap(
-          'MfStartupChunkDependenciesPlugin',
+          PLUGIN_NAME,
           (startupSource, lastInlinedModule, renderContext) => {
             const { chunk, chunkGraph } = renderContext;
 
@@ -124,7 +120,7 @@ class EmbedFederationRuntimePlugin {
     );
 
     compiler.hooks.thisCompilation.tap(
-      'EmbedFederationRuntimePlugin',
+      PLUGIN_NAME,
       (compilation: Compilation) => {
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const containerEntrySet: Set<
@@ -132,7 +128,7 @@ class EmbedFederationRuntimePlugin {
         > = new Set();
 
         hooks.addFederationRuntimeModule.tap(
-          'EmbedFederationRuntimePlugin',
+          PLUGIN_NAME,
           (dependency: FederationRuntimeDependency) => {
             containerEntrySet.add(dependency);
           },
@@ -161,7 +157,7 @@ class EmbedFederationRuntimePlugin {
 
         compilation.hooks.runtimeRequirementInTree
           .for(federationGlobal)
-          .tap('EmbedFederationRuntimePlugin', handleRuntimeRequirements);
+          .tap(PLUGIN_NAME, handleRuntimeRequirements);
       },
     );
   }

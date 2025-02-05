@@ -62,6 +62,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     config.devServer.client.overlay = false;
     config.devServer.devMiddleware.writeToDisk = true;
   }
+  config.devtool = false;
   config.entry = './src/index.tsx';
   //Temporary workaround - https://github.com/nrwl/nx/issues/16983
   config.experiments = { outputModule: false };
