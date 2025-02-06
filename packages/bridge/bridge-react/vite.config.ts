@@ -33,6 +33,7 @@ export default defineConfig({
       external: [
         ...perDepsKeys,
         '@remix-run/router',
+        /react-dom\/.*/,
         'react-router',
         'react-router-dom/',
         'react-router-dom/index.js',
