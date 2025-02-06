@@ -38,8 +38,8 @@ app.get('/api', async (req, res) => {
   res.send({
     message: 'Welcome to node-host!',
     remotes: {
-      // node_remote: await remoteMsg,
-      // node_local_remote,
+      node_remote: await remoteMsg,
+      node_local_remote,
     },
   });
 });
