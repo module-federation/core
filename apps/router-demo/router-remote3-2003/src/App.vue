@@ -11,3 +11,12 @@
 </template>
 
 <style scoped></style>
+
+<script lang="ts" setup>
+interface Props {
+  test?: string;
+}
+
+const props = defineProps<Props>();
+console.log('props', props);
+</script>

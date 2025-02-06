@@ -28,7 +28,8 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
       __APP_VERSION__,
       async render(info: RenderFnParams) {
         LoggerInstance.debug(`createBridgeComponent render Info`, info);
-        const app = Vue.createApp(bridgeInfo.rootComponent);
+        const { moduleName, dom, basename, memoryRoute, ...propsInfo } = info;
+        const app = Vue.createApp(bridgeInfo.rootComponent, propsInfo);
         rootMap.set(info.dom, app);
 
         const beforeBridgeRenderRes =
@@ -43,8 +44,9 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
 
         const bridgeOptions = bridgeInfo.appOptions({
           app,
-          basename: info.basename,
-          memoryRoute: info.memoryRoute,
+          basename,
+          memoryRoute,
+          ...propsInfo,
           ...extraProps,
         });
 
