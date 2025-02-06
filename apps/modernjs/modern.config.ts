@@ -35,6 +35,7 @@ export default defineConfig({
 
       appendPlugins([
         new ModuleFederationPlugin({
+          runtime: false,
           name: 'app1',
           exposes: {
             './thing': './src/test.ts',

@@ -66,58 +66,102 @@ class EmbedFederationRuntimePlugin {
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
-      (compilation: Compilation) => {
-        debugger;
+      (compilation /*: Compilation */) => {
         const { renderStartup } =
           compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
             compilation,
           );
-
-        // Prevent double tapping of renderStartup hook
-        const startupTaps = renderStartup.taps || [];
-        if (this.isHookAlreadyTapped(startupTaps, PLUGIN_NAME)) {
-          return;
-        }
 
         renderStartup.tap(
           PLUGIN_NAME,
           (startupSource, lastInlinedModule, renderContext) => {
             const { chunk, chunkGraph } = renderContext;
 
-            if (!this.isEnabledForChunk(chunk)) {
+            if (this.isEnabledForChunk(chunk)) {
               return startupSource;
             }
 
-            const treeRuntimeRequirements =
+            const runtimeRequirements =
               chunkGraph.getTreeRuntimeRequirements(chunk);
-            const chunkRuntimeRequirements =
-              chunkGraph.getChunkRuntimeRequirements(chunk);
+            const entryModuleCount = chunkGraph.getNumberOfEntryModules(chunk);
 
-            const federation =
-              chunkRuntimeRequirements.has(federationGlobal) ||
-              treeRuntimeRequirements.has(federationGlobal);
-
-            if (!federation) {
+            // The original renderBootstrap pushes a startup call automatically when either:
+            //   - There is at least one entry module, OR
+            //   - runtimeRequirements.has(RuntimeGlobals.startupNoDefault) is true.
+            // (In all other cases—even if one of the startup keys is set—the startup function is defined
+            // but not called.)
+            if (
+              entryModuleCount > 0 ||
+              runtimeRequirements.has(RuntimeGlobals.startupNoDefault)
+            ) {
               return startupSource;
             }
 
-            // Skip if chunk was already processed
-            if (this.processedChunks.get(chunk)) {
-              return startupSource;
-            }
-
-            // Mark chunk as processed
-            this.processedChunks.set(chunk, true);
-
-            // Add basic startup call
+            // Otherwise, append a startup call.
             return new ConcatSource(
               startupSource,
+              '\n// Custom hook: appended startup call because none was added automatically\n',
               `${RuntimeGlobals.startup}();\n`,
             );
           },
         );
       },
     );
+
+    //     compiler.hooks.thisCompilation.tap(
+    //       PLUGIN_NAME,
+    //       (compilation: Compilation) => {
+    //         const { renderStartup } =
+    //           compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
+    //             compilation,
+    //           );
+    //
+    //         // Prevent double tapping of renderStartup hook
+    //         const startupTaps = renderStartup.taps || [];
+    //         if (this.isHookAlreadyTapped(startupTaps, PLUGIN_NAME)) {
+    //           return;
+    //         }
+    //
+    //         renderStartup.tap(
+    //           PLUGIN_NAME,
+    //           (startupSource, lastInlinedModule, renderContext) => {
+    //             const { chunk, chunkGraph } = renderContext;
+    //
+    //             if (!this.isEnabledForChunk(chunk)) {
+    //               return startupSource;
+    //             }
+    //
+    //             const treeRuntimeRequirements =
+    //               chunkGraph.getTreeRuntimeRequirements(chunk);
+    //             const chunkRuntimeRequirements =
+    //               chunkGraph.getChunkRuntimeRequirements(chunk);
+    //
+    //             const federation =
+    //               chunkRuntimeRequirements.has(federationGlobal) ||
+    //               treeRuntimeRequirements.has(federationGlobal);
+    //
+    //             if (!federation) {
+    //               return startupSource;
+    //             }
+    //
+    //             // Skip if chunk was already processed
+    //             if (this.processedChunks.get(chunk)) {
+    //               return startupSource;
+    //             }
+    //
+    //             // Mark chunk as processed
+    //             this.processedChunks.set(chunk, true);
+    // debugger;
+    //             // Add basic startup call
+    //             return new ConcatSource(
+    //               startupSource,
+    //               // add only when not added already
+    //               `${RuntimeGlobals.startup}();\n`,
+    //             );
+    //           },
+    //         );
+    //       },
+    //     );
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
@@ -126,6 +170,14 @@ class EmbedFederationRuntimePlugin {
         const containerEntrySet: Set<
           ContainerEntryDependency | FederationRuntimeDependency
         > = new Set();
+
+        // Proactively add startupOnlyBefore to all chunks
+        compilation.hooks.additionalChunkRuntimeRequirements.tap(
+          PLUGIN_NAME,
+          (chunk: Chunk, runtimeRequirements: Set<string>) => {
+            runtimeRequirements.add(RuntimeGlobals.startupOnlyBefore);
+          },
+        );
 
         hooks.addFederationRuntimeModule.tap(
           PLUGIN_NAME,
@@ -138,6 +190,8 @@ class EmbedFederationRuntimePlugin {
           chunk: Chunk,
           runtimeRequirements: Set<string>,
         ) => {
+          runtimeRequirements.add(RuntimeGlobals.startupOnlyBefore);
+
           if (!this.isEnabledForChunk(chunk)) {
             return;
           }
