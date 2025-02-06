@@ -73,7 +73,7 @@ type InitOptions = {
   name: string;
   // The list of remote modules to depend on
   // When using the version content, it needs to be used with snapshot, which is still under construction
-  remotes: Array<RemoteInfo>;
+  remotes: Array<Remote>;
   // The list of dependencies that the current consumer needs to share
   // When using the build plugin, users can configure the dependencies to be shared in the build plugin, and the build plugin will inject the shared dependencies into the runtime sharing configuration
   // Shared must be manually passed in the version instance when passed at runtime because it cannot be directly passed at runtime.
@@ -98,9 +98,7 @@ type SharedBaseArgs = {
 
 type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
 
-type RemoteInfo = (RemotesWithEntry | RemotesWithVersion) & {
-  alias?: string;
-};
+type Remote = (RemotesWithEntry | RemotesWithVersion) & RemoteInfoCommon;
 
 interface RemotesWithVersion {
   name: string;
@@ -111,6 +109,15 @@ interface RemotesWithEntry {
   name: string;
   entry: string;
 };
+
+interface RemoteInfoCommon {
+  alias?: string;
+  shareScope?: string;
+  type?: RemoteEntryType;
+  entryGlobalName?: string;
+}
+
+type RemoteEntryType =|'var'|'module'|'assign'|'assign-properties'|'this'|'window'|'self'|'global'|'commonjs'|'commonjs2'|'commonjs-module'| 'commonjs-static'|'amd'|'amd-require'|'umd'|'umd2'|'jsonp'|'system'| string;
 ```
 
 ### loadRemote
