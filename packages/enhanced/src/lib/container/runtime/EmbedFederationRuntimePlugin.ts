@@ -77,7 +77,7 @@ class EmbedFederationRuntimePlugin {
           (startupSource, lastInlinedModule, renderContext) => {
             const { chunk, chunkGraph } = renderContext;
 
-            if (this.isEnabledForChunk(chunk)) {
+            if (!this.isEnabledForChunk(chunk)) {
               return startupSource;
             }
 
