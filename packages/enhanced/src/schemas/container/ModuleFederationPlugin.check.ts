@@ -360,12 +360,7 @@ const t = {
       experiments: {
         type: 'object',
         properties: {
-          federationRuntime: {
-            anyOf: [
-              { type: 'boolean', enum: [!1] },
-              { type: 'string', enum: ['hoisted'] },
-            ],
-          },
+          asyncStartup: { type: 'boolean' },
           externalRuntime: { type: 'boolean' },
           provideExternalRuntime: { type: 'boolean' },
         },
@@ -455,9 +450,9 @@ function a(
           if (void 0 !== e.import) {
             let r = e.import;
             const n = l,
-              m = l;
-            let y = !1;
-            const u = l;
+              y = l;
+            let c = !1;
+            const m = l;
             if (l == l)
               if ('string' == typeof r) {
                 if (r.length < 1) {
@@ -468,8 +463,8 @@ function a(
                 const e = { params: { type: 'string' } };
                 null === i ? (i = [e]) : i.push(e), l++;
               }
-            var p = u === l;
-            if (((y = y || p), !y)) {
+            var p = m === l;
+            if (((c = c || p), !c)) {
               const n = l;
               o(r, {
                 instancePath: t + '/import',
@@ -480,15 +475,15 @@ function a(
                 ((i = null === i ? o.errors : i.concat(o.errors)),
                 (l = i.length)),
                 (p = n === l),
-                (y = y || p);
+                (c = c || p);
             }
-            if (!y) {
+            if (!c) {
               const e = { params: {} };
               return (
                 null === i ? (i = [e]) : i.push(e), l++, (a.errors = i), !1
               );
             }
-            (l = m), null !== i && (m ? (i.length = m) : (i = null));
+            (l = y), null !== i && (y ? (i.length = y) : (i = null));
             var f = n === l;
           } else f = !0;
           if (f)
@@ -520,18 +515,18 @@ function i(
       return (i.errors = [{ params: { type: 'object' } }]), !1;
     for (const r in e) {
       let n = e[r];
-      const m = p,
-        y = p;
-      let u = !1;
-      const c = p;
+      const y = p,
+        c = p;
+      let m = !1;
+      const u = p;
       a(n, {
         instancePath: t + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
         parentData: e,
         parentDataProperty: r,
         rootData: s,
       }) || ((l = null === l ? a.errors : l.concat(a.errors)), (p = l.length));
-      var f = c === p;
-      if (((u = u || f), !u)) {
+      var f = u === p;
+      if (((m = m || f), !m)) {
         const a = p;
         if (p == p)
           if ('string' == typeof n) {
@@ -543,7 +538,7 @@ function i(
             const e = { params: { type: 'string' } };
             null === l ? (l = [e]) : l.push(e), p++;
           }
-        if (((f = a === p), (u = u || f), !u)) {
+        if (((f = a === p), (m = m || f), !m)) {
           const a = p;
           o(n, {
             instancePath: t + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
@@ -553,14 +548,14 @@ function i(
           }) ||
             ((l = null === l ? o.errors : l.concat(o.errors)), (p = l.length)),
             (f = a === p),
-            (u = u || f);
+            (m = m || f);
         }
       }
-      if (!u) {
+      if (!m) {
         const e = { params: {} };
         return null === l ? (l = [e]) : l.push(e), p++, (i.errors = l), !1;
       }
-      if (((p = y), null !== l && (y ? (l.length = y) : (l = null)), m !== p))
+      if (((p = c), null !== l && (c ? (l.length = c) : (l = null)), y !== p))
         break;
     }
   }
@@ -579,8 +574,8 @@ function l(
     a = 0;
   const p = a;
   let f = !1;
-  const m = a;
-  if (a === m)
+  const y = a;
+  if (a === y)
     if (Array.isArray(e)) {
       const r = e.length;
       for (let n = 0; n < r; n++) {
@@ -588,7 +583,7 @@ function l(
         const l = a,
           p = a;
         let f = !1;
-        const m = a;
+        const y = a;
         if (a == a)
           if ('string' == typeof r) {
             if (r.length < 1) {
@@ -599,8 +594,8 @@ function l(
             const e = { params: { type: 'string' } };
             null === o ? (o = [e]) : o.push(e), a++;
           }
-        var y = m === a;
-        if (((f = f || y), !f)) {
+        var c = y === a;
+        if (((f = f || c), !f)) {
           const l = a;
           i(r, {
             instancePath: t + '/' + n,
@@ -609,8 +604,8 @@ function l(
             rootData: s,
           }) ||
             ((o = null === o ? i.errors : o.concat(i.errors)), (a = o.length)),
-            (y = l === a),
-            (f = f || y);
+            (c = l === a),
+            (f = f || c);
         }
         if (f) (a = p), null !== o && (p ? (o.length = p) : (o = null));
         else {
@@ -623,8 +618,8 @@ function l(
       const e = { params: { type: 'array' } };
       null === o ? (o = [e]) : o.push(e), a++;
     }
-  var u = m === a;
-  if (((f = f || u), !f)) {
+  var m = y === a;
+  if (((f = f || m), !f)) {
     const l = a;
     i(e, {
       instancePath: t,
@@ -632,8 +627,8 @@ function l(
       parentDataProperty: n,
       rootData: s,
     }) || ((o = null === o ? i.errors : o.concat(i.errors)), (a = o.length)),
-      (u = l === a),
-      (f = f || u);
+      (m = l === a),
+      (f = f || m);
   }
   if (!f) {
     const e = { params: {} };
@@ -691,8 +686,8 @@ function f(
     const e = { params: { type: 'string' } };
     null === o ? (o = [e]) : o.push(e), a++;
   }
-  var m = p === a;
-  if (((l = l || m), !l)) {
+  var y = p === a;
+  if (((l = l || y), !l)) {
     const t = a;
     if (a == a)
       if (e && 'object' == typeof e && !Array.isArray(e)) {
@@ -715,35 +710,35 @@ function f(
               const e = { params: { type: 'string' } };
               null === o ? (o = [e]) : o.push(e), a++;
             }
-            var y = t === a;
-          } else y = !0;
-          if (y) {
+            var c = t === a;
+          } else c = !0;
+          if (c) {
             if (void 0 !== e.commonjs) {
               const t = a;
               if ('string' != typeof e.commonjs) {
                 const e = { params: { type: 'string' } };
                 null === o ? (o = [e]) : o.push(e), a++;
               }
-              y = t === a;
-            } else y = !0;
-            if (y) {
+              c = t === a;
+            } else c = !0;
+            if (c) {
               if (void 0 !== e.commonjs2) {
                 const t = a;
                 if ('string' != typeof e.commonjs2) {
                   const e = { params: { type: 'string' } };
                   null === o ? (o = [e]) : o.push(e), a++;
                 }
-                y = t === a;
-              } else y = !0;
-              if (y)
+                c = t === a;
+              } else c = !0;
+              if (c)
                 if (void 0 !== e.root) {
                   const t = a;
                   if ('string' != typeof e.root) {
                     const e = { params: { type: 'string' } };
                     null === o ? (o = [e]) : o.push(e), a++;
                   }
-                  y = t === a;
-                } else y = !0;
+                  c = t === a;
+                } else c = !0;
             }
           }
         }
@@ -751,7 +746,7 @@ function f(
         const e = { params: { type: 'object' } };
         null === o ? (o = [e]) : o.push(e), a++;
       }
-    (m = t === a), (l = l || m);
+    (y = t === a), (l = l || y);
   }
   if (!l) {
     const e = { params: {} };
@@ -764,7 +759,7 @@ function f(
     0 === a
   );
 }
-function m(
+function y(
   e,
   {
     instancePath: t = '',
@@ -843,9 +838,9 @@ function m(
                   const e = { params: { type: 'string' } };
                   null === o ? (o = [e]) : o.push(e), a++;
                 }
-              var y = r === a;
-            } else y = !0;
-            if (y) {
+              var c = r === a;
+            } else c = !0;
+            if (c) {
               if (void 0 !== e.commonjs) {
                 let t = e.commonjs;
                 const r = a;
@@ -859,9 +854,9 @@ function m(
                     const e = { params: { type: 'string' } };
                     null === o ? (o = [e]) : o.push(e), a++;
                   }
-                y = r === a;
-              } else y = !0;
-              if (y)
+                c = r === a;
+              } else c = !0;
+              if (c)
                 if (void 0 !== e.root) {
                   let t = e.root;
                   const r = a,
@@ -890,8 +885,8 @@ function m(
                       const e = { params: { type: 'array' } };
                       null === o ? (o = [e]) : o.push(e), a++;
                     }
-                  var u = i === a;
-                  if (((s = s || u), !s)) {
+                  var m = i === a;
+                  if (((s = s || m), !s)) {
                     const e = a;
                     if (a === e)
                       if ('string' == typeof t) {
@@ -903,7 +898,7 @@ function m(
                         const e = { params: { type: 'string' } };
                         null === o ? (o = [e]) : o.push(e), a++;
                       }
-                    (u = e === a), (s = s || u);
+                    (m = e === a), (s = s || m);
                   }
                   if (s)
                     (a = n), null !== o && (n ? (o.length = n) : (o = null));
@@ -911,8 +906,8 @@ function m(
                     const e = { params: {} };
                     null === o ? (o = [e]) : o.push(e), a++;
                   }
-                  y = r === a;
-                } else y = !0;
+                  c = r === a;
+                } else c = !0;
             }
           }
         } else {
@@ -924,16 +919,16 @@ function m(
   }
   if (!l) {
     const e = { params: {} };
-    return null === o ? (o = [e]) : o.push(e), a++, (m.errors = o), !1;
+    return null === o ? (o = [e]) : o.push(e), a++, (y.errors = o), !1;
   }
   return (
     (a = i),
     null !== o && (i ? (o.length = i) : (o = null)),
-    (m.errors = o),
+    (y.errors = o),
     0 === a
   );
 }
-function y(
+function c(
   e,
   {
     instancePath: t = '',
@@ -946,11 +941,11 @@ function y(
     a = 0;
   if (0 === a) {
     if (!e || 'object' != typeof e || Array.isArray(e))
-      return (y.errors = [{ params: { type: 'object' } }]), !1;
+      return (c.errors = [{ params: { type: 'object' } }]), !1;
     {
       let r;
       if (void 0 === e.type && (r = 'type'))
-        return (y.errors = [{ params: { missingProperty: r } }]), !1;
+        return (c.errors = [{ params: { missingProperty: r } }]), !1;
       {
         const r = a;
         for (const t in e)
@@ -962,15 +957,15 @@ function y(
             'type' !== t &&
             'umdNamedDefine' !== t
           )
-            return (y.errors = [{ params: { additionalProperty: t } }]), !1;
+            return (c.errors = [{ params: { additionalProperty: t } }]), !1;
         if (r === a) {
           if (void 0 !== e.amdContainer) {
             let t = e.amdContainer;
             const r = a;
             if (a == a) {
               if ('string' != typeof t)
-                return (y.errors = [{ params: { type: 'string' } }]), !1;
-              if (t.length < 1) return (y.errors = [{ params: {} }]), !1;
+                return (c.errors = [{ params: { type: 'string' } }]), !1;
+              if (t.length < 1) return (c.errors = [{ params: {} }]), !1;
             }
             var i = r === a;
           } else i = !0;
@@ -1034,7 +1029,7 @@ function y(
                 if (!s) {
                   const e = { params: {} };
                   return (
-                    null === o ? (o = [e]) : o.push(e), a++, (y.errors = o), !1
+                    null === o ? (o = [e]) : o.push(e), a++, (c.errors = o), !1
                   );
                 }
                 (a = n),
@@ -1044,13 +1039,13 @@ function y(
               if (i) {
                 if (void 0 !== e.name) {
                   const r = a;
-                  m(e.name, {
+                  y(e.name, {
                     instancePath: t + '/name',
                     parentData: e,
                     parentDataProperty: 'name',
                     rootData: s,
                   }) ||
-                    ((o = null === o ? m.errors : o.concat(m.errors)),
+                    ((o = null === o ? y.errors : o.concat(y.errors)),
                     (a = o.length)),
                     (i = r === a);
                 } else i = !0;
@@ -1084,21 +1079,21 @@ function y(
                       const e = { params: { allowedValues: p.anyOf[0].enum } };
                       null === o ? (o = [e]) : o.push(e), a++;
                     }
-                    var u = l === a;
-                    if (((s = s || u), !s)) {
+                    var m = l === a;
+                    if (((s = s || m), !s)) {
                       const e = a;
                       if ('string' != typeof t) {
                         const e = { params: { type: 'string' } };
                         null === o ? (o = [e]) : o.push(e), a++;
                       }
-                      (u = e === a), (s = s || u);
+                      (m = e === a), (s = s || m);
                     }
                     if (!s) {
                       const e = { params: {} };
                       return (
                         null === o ? (o = [e]) : o.push(e),
                         a++,
-                        (y.errors = o),
+                        (c.errors = o),
                         !1
                       );
                     }
@@ -1111,7 +1106,7 @@ function y(
                       const t = a;
                       if ('boolean' != typeof e.umdNamedDefine)
                         return (
-                          (y.errors = [{ params: { type: 'boolean' } }]), !1
+                          (c.errors = [{ params: { type: 'boolean' } }]), !1
                         );
                       i = t === a;
                     } else i = !0;
@@ -1123,9 +1118,9 @@ function y(
       }
     }
   }
-  return (y.errors = o), 0 === a;
+  return (c.errors = o), 0 === a;
 }
-function u(
+function m(
   e,
   {
     instancePath: t = '',
@@ -1135,21 +1130,21 @@ function u(
   } = {},
 ) {
   if (!Array.isArray(e))
-    return (u.errors = [{ params: { type: 'array' } }]), !1;
+    return (m.errors = [{ params: { type: 'array' } }]), !1;
   {
     const t = e.length;
     for (let r = 0; r < t; r++) {
       let t = e[r];
       const n = 0;
       if ('string' != typeof t)
-        return (u.errors = [{ params: { type: 'string' } }]), !1;
-      if (t.length < 1) return (u.errors = [{ params: {} }]), !1;
+        return (m.errors = [{ params: { type: 'string' } }]), !1;
+      if (t.length < 1) return (m.errors = [{ params: {} }]), !1;
       if (0 !== n) break;
     }
   }
-  return (u.errors = null), !0;
+  return (m.errors = null), !0;
 }
-function c(
+function u(
   e,
   {
     instancePath: t = '',
@@ -1162,23 +1157,23 @@ function c(
     a = 0;
   if (0 === a) {
     if (!e || 'object' != typeof e || Array.isArray(e))
-      return (c.errors = [{ params: { type: 'object' } }]), !1;
+      return (u.errors = [{ params: { type: 'object' } }]), !1;
     {
       let r;
       if (void 0 === e.external && (r = 'external'))
-        return (c.errors = [{ params: { missingProperty: r } }]), !1;
+        return (u.errors = [{ params: { missingProperty: r } }]), !1;
       {
         const r = a;
         for (const t in e)
           if ('external' !== t && 'shareScope' !== t)
-            return (c.errors = [{ params: { additionalProperty: t } }]), !1;
+            return (u.errors = [{ params: { additionalProperty: t } }]), !1;
         if (r === a) {
           if (void 0 !== e.external) {
             let r = e.external;
             const n = a,
               p = a;
             let f = !1;
-            const m = a;
+            const y = a;
             if (a == a)
               if ('string' == typeof r) {
                 if (r.length < 1) {
@@ -1189,16 +1184,16 @@ function c(
                 const e = { params: { type: 'string' } };
                 null === o ? (o = [e]) : o.push(e), a++;
               }
-            var i = m === a;
+            var i = y === a;
             if (((f = f || i), !f)) {
               const n = a;
-              u(r, {
+              m(r, {
                 instancePath: t + '/external',
                 parentData: e,
                 parentDataProperty: 'external',
                 rootData: s,
               }) ||
-                ((o = null === o ? u.errors : o.concat(u.errors)),
+                ((o = null === o ? m.errors : o.concat(m.errors)),
                 (a = o.length)),
                 (i = n === a),
                 (f = f || i);
@@ -1206,7 +1201,7 @@ function c(
             if (!f) {
               const e = { params: {} };
               return (
-                null === o ? (o = [e]) : o.push(e), a++, (c.errors = o), !1
+                null === o ? (o = [e]) : o.push(e), a++, (u.errors = o), !1
               );
             }
             (a = p), null !== o && (p ? (o.length = p) : (o = null));
@@ -1218,8 +1213,8 @@ function c(
               const r = a;
               if (a === r) {
                 if ('string' != typeof t)
-                  return (c.errors = [{ params: { type: 'string' } }]), !1;
-                if (t.length < 1) return (c.errors = [{ params: {} }]), !1;
+                  return (u.errors = [{ params: { type: 'string' } }]), !1;
+                if (t.length < 1) return (u.errors = [{ params: {} }]), !1;
               }
               l = r === a;
             } else l = !0;
@@ -1227,7 +1222,7 @@ function c(
       }
     }
   }
-  return (c.errors = o), 0 === a;
+  return (u.errors = o), 0 === a;
 }
 function d(
   e,
@@ -1248,14 +1243,14 @@ function d(
       const l = a,
         p = a;
       let f = !1;
-      const m = a;
-      c(n, {
+      const y = a;
+      u(n, {
         instancePath: t + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
         parentData: e,
         parentDataProperty: r,
         rootData: s,
-      }) || ((o = null === o ? c.errors : o.concat(c.errors)), (a = o.length));
-      var i = m === a;
+      }) || ((o = null === o ? u.errors : o.concat(u.errors)), (a = o.length));
+      var i = y === a;
       if (((f = f || i), !f)) {
         const l = a;
         if (a == a)
@@ -1270,13 +1265,13 @@ function d(
           }
         if (((i = l === a), (f = f || i), !f)) {
           const l = a;
-          u(n, {
+          m(n, {
             instancePath: t + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
             parentData: e,
             parentDataProperty: r,
             rootData: s,
           }) ||
-            ((o = null === o ? u.errors : o.concat(u.errors)), (a = o.length)),
+            ((o = null === o ? m.errors : o.concat(m.errors)), (a = o.length)),
             (i = l === a),
             (f = f || i);
         }
@@ -1313,7 +1308,7 @@ function g(
         const i = a,
           l = a;
         let p = !1;
-        const m = a;
+        const y = a;
         if (a == a)
           if ('string' == typeof r) {
             if (r.length < 1) {
@@ -1324,7 +1319,7 @@ function g(
             const e = { params: { type: 'string' } };
             null === o ? (o = [e]) : o.push(e), a++;
           }
-        var f = m === a;
+        var f = y === a;
         if (((p = p || f), !p)) {
           const i = a;
           d(r, {
@@ -1348,8 +1343,8 @@ function g(
       const e = { params: { type: 'array' } };
       null === o ? (o = [e]) : o.push(e), a++;
     }
-  var m = p === a;
-  if (((l = l || m), !l)) {
+  var y = p === a;
+  if (((l = l || y), !l)) {
     const i = a;
     d(e, {
       instancePath: t,
@@ -1357,8 +1352,8 @@ function g(
       parentDataProperty: n,
       rootData: s,
     }) || ((o = null === o ? d.errors : o.concat(d.errors)), (a = o.length)),
-      (m = i === a),
-      (l = l || m);
+      (y = i === a),
+      (l = l || y);
   }
   if (!l) {
     const e = { params: {} };
@@ -1572,14 +1567,14 @@ function b(
                               };
                               null === a ? (a = [e]) : a.push(e), i++;
                             }
-                            var m = o === i;
-                            if (((s = s || m), !s)) {
+                            var y = o === i;
+                            if (((s = s || y), !s)) {
                               const e = i;
                               if ('string' != typeof t) {
                                 const e = { params: { type: 'string' } };
                                 null === a ? (a = [e]) : a.push(e), i++;
                               }
-                              (m = e === i), (s = s || m);
+                              (y = e === i), (s = s || y);
                             }
                             if (!s) {
                               const e = { params: {} };
@@ -1626,14 +1621,14 @@ function v(
       const l = a,
         p = a;
       let f = !1;
-      const m = a;
+      const y = a;
       b(n, {
         instancePath: t + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
         parentData: e,
         parentDataProperty: r,
         rootData: s,
       }) || ((o = null === o ? b.errors : o.concat(b.errors)), (a = o.length));
-      var i = m === a;
+      var i = y === a;
       if (((f = f || i), !f)) {
         const e = a;
         if (a == a)
@@ -1680,7 +1675,7 @@ function P(
         const i = a,
           l = a;
         let p = !1;
-        const m = a;
+        const y = a;
         if (a == a)
           if ('string' == typeof r) {
             if (r.length < 1) {
@@ -1691,7 +1686,7 @@ function P(
             const e = { params: { type: 'string' } };
             null === o ? (o = [e]) : o.push(e), a++;
           }
-        var f = m === a;
+        var f = y === a;
         if (((p = p || f), !p)) {
           const i = a;
           v(r, {
@@ -1715,8 +1710,8 @@ function P(
       const e = { params: { type: 'array' } };
       null === o ? (o = [e]) : o.push(e), a++;
     }
-  var m = p === a;
-  if (((l = l || m), !l)) {
+  var y = p === a;
+  if (((l = l || y), !l)) {
     const i = a;
     v(e, {
       instancePath: t,
@@ -1724,8 +1719,8 @@ function P(
       parentDataProperty: n,
       rootData: s,
     }) || ((o = null === o ? v.errors : o.concat(v.errors)), (a = o.length)),
-      (m = i === a),
-      (l = l || m);
+      (y = i === a),
+      (l = l || y);
   }
   if (!l) {
     const e = { params: {} };
@@ -1747,166 +1742,166 @@ function j(
     rootData: f = o,
   } = {},
 ) {
-  let m = null,
-    u = 0;
-  if (0 === u) {
+  let y = null,
+    m = 0;
+  if (0 === m) {
     if (!o || 'object' != typeof o || Array.isArray(o))
       return (j.errors = [{ params: { type: 'object' } }]), !1;
     {
-      const i = u;
+      const i = m;
       for (const e in o)
         if (!s.call(t.properties, e))
           return (j.errors = [{ params: { additionalProperty: e } }]), !1;
-      if (i === u) {
+      if (i === m) {
         if (void 0 !== o.dataPrefetch) {
-          const e = u;
+          const e = m;
           if ('boolean' != typeof o.dataPrefetch)
             return (j.errors = [{ params: { type: 'boolean' } }]), !1;
-          var c = e === u;
-        } else c = !0;
-        if (c) {
+          var u = e === m;
+        } else u = !0;
+        if (u) {
           if (void 0 !== o.exposes) {
-            const e = u;
+            const e = m;
             l(o.exposes, {
               instancePath: a + '/exposes',
               parentData: o,
               parentDataProperty: 'exposes',
               rootData: f,
             }) ||
-              ((m = null === m ? l.errors : m.concat(l.errors)),
-              (u = m.length)),
-              (c = e === u);
-          } else c = !0;
-          if (c) {
+              ((y = null === y ? l.errors : y.concat(l.errors)),
+              (m = y.length)),
+              (u = e === m);
+          } else u = !0;
+          if (u) {
             if (void 0 !== o.filename) {
               let t = o.filename;
-              const r = u;
-              if (u === r) {
+              const r = m;
+              if (m === r) {
                 if ('string' != typeof t)
                   return (j.errors = [{ params: { type: 'string' } }]), !1;
                 if (t.includes('!') || !1 !== e.test(t))
                   return (j.errors = [{ params: {} }]), !1;
               }
-              c = r === u;
-            } else c = !0;
-            if (c) {
+              u = r === m;
+            } else u = !0;
+            if (u) {
               if (void 0 !== o.getPublicPath) {
-                const e = u;
+                const e = m;
                 if ('string' != typeof o.getPublicPath)
                   return (j.errors = [{ params: { type: 'string' } }]), !1;
-                c = e === u;
-              } else c = !0;
-              if (c) {
+                u = e === m;
+              } else u = !0;
+              if (u) {
                 if (void 0 !== o.implementation) {
-                  const e = u;
+                  const e = m;
                   if ('string' != typeof o.implementation)
                     return (j.errors = [{ params: { type: 'string' } }]), !1;
-                  c = e === u;
-                } else c = !0;
-                if (c) {
+                  u = e === m;
+                } else u = !0;
+                if (u) {
                   if (void 0 !== o.library) {
-                    const e = u;
-                    y(o.library, {
+                    const e = m;
+                    c(o.library, {
                       instancePath: a + '/library',
                       parentData: o,
                       parentDataProperty: 'library',
                       rootData: f,
                     }) ||
-                      ((m = null === m ? y.errors : m.concat(y.errors)),
-                      (u = m.length)),
-                      (c = e === u);
-                  } else c = !0;
-                  if (c) {
+                      ((y = null === y ? c.errors : y.concat(c.errors)),
+                      (m = y.length)),
+                      (u = e === m);
+                  } else u = !0;
+                  if (u) {
                     if (void 0 !== o.manifest) {
                       let e = o.manifest;
-                      const t = u,
-                        r = u;
+                      const t = m,
+                        r = m;
                       let n = !1;
-                      const s = u;
+                      const s = m;
                       if ('boolean' != typeof e) {
                         const e = { params: { type: 'boolean' } };
-                        null === m ? (m = [e]) : m.push(e), u++;
+                        null === y ? (y = [e]) : y.push(e), m++;
                       }
-                      var d = s === u;
+                      var d = s === m;
                       if (((n = n || d), !n)) {
-                        const t = u;
-                        if (u === t)
+                        const t = m;
+                        if (m === t)
                           if (e && 'object' == typeof e && !Array.isArray(e)) {
                             if (void 0 !== e.filePath) {
-                              const t = u;
+                              const t = m;
                               if ('string' != typeof e.filePath) {
                                 const e = { params: { type: 'string' } };
-                                null === m ? (m = [e]) : m.push(e), u++;
+                                null === y ? (y = [e]) : y.push(e), m++;
                               }
-                              var h = t === u;
+                              var h = t === m;
                             } else h = !0;
                             if (h) {
                               if (void 0 !== e.disableAssetsAnalyze) {
-                                const t = u;
+                                const t = m;
                                 if (
                                   'boolean' != typeof e.disableAssetsAnalyze
                                 ) {
                                   const e = { params: { type: 'boolean' } };
-                                  null === m ? (m = [e]) : m.push(e), u++;
+                                  null === y ? (y = [e]) : y.push(e), m++;
                                 }
-                                h = t === u;
+                                h = t === m;
                               } else h = !0;
                               if (h) {
                                 if (void 0 !== e.fileName) {
-                                  const t = u;
+                                  const t = m;
                                   if ('string' != typeof e.fileName) {
                                     const e = { params: { type: 'string' } };
-                                    null === m ? (m = [e]) : m.push(e), u++;
+                                    null === y ? (y = [e]) : y.push(e), m++;
                                   }
-                                  h = t === u;
+                                  h = t === m;
                                 } else h = !0;
                                 if (h)
                                   if (void 0 !== e.additionalData) {
-                                    const t = u;
+                                    const t = m;
                                     if ('string' != typeof e.additionalData) {
                                       const e = { params: { type: 'string' } };
-                                      null === m ? (m = [e]) : m.push(e), u++;
+                                      null === y ? (y = [e]) : y.push(e), m++;
                                     }
-                                    h = t === u;
+                                    h = t === m;
                                   } else h = !0;
                               }
                             }
                           } else {
                             const e = { params: { type: 'object' } };
-                            null === m ? (m = [e]) : m.push(e), u++;
+                            null === y ? (y = [e]) : y.push(e), m++;
                           }
-                        (d = t === u), (n = n || d);
+                        (d = t === m), (n = n || d);
                       }
                       if (!n) {
                         const e = { params: {} };
                         return (
-                          null === m ? (m = [e]) : m.push(e),
-                          u++,
-                          (j.errors = m),
+                          null === y ? (y = [e]) : y.push(e),
+                          m++,
+                          (j.errors = y),
                           !1
                         );
                       }
-                      (u = r),
-                        null !== m && (r ? (m.length = r) : (m = null)),
-                        (c = t === u);
-                    } else c = !0;
-                    if (c) {
+                      (m = r),
+                        null !== y && (r ? (y.length = r) : (y = null)),
+                        (u = t === m);
+                    } else u = !0;
+                    if (u) {
                       if (void 0 !== o.name) {
-                        const e = u;
+                        const e = m;
                         if ('string' != typeof o.name)
                           return (
                             (j.errors = [{ params: { type: 'string' } }]), !1
                           );
-                        c = e === u;
-                      } else c = !0;
-                      if (c) {
+                        u = e === m;
+                      } else u = !0;
+                      if (u) {
                         if (void 0 !== o.remoteType) {
                           let e = o.remoteType;
-                          const t = u,
-                            n = u;
+                          const t = m,
+                            n = m;
                           let s = !1,
                             a = null;
-                          const i = u;
+                          const i = m;
                           if (
                             'var' !== e &&
                             'module' !== e &&
@@ -1932,80 +1927,80 @@ function j(
                             'node-commonjs' !== e
                           ) {
                             const e = { params: { allowedValues: r.enum } };
-                            null === m ? (m = [e]) : m.push(e), u++;
+                            null === y ? (y = [e]) : y.push(e), m++;
                           }
-                          if ((i === u && ((s = !0), (a = 0)), !s)) {
+                          if ((i === m && ((s = !0), (a = 0)), !s)) {
                             const e = { params: { passingSchemas: a } };
                             return (
-                              null === m ? (m = [e]) : m.push(e),
-                              u++,
-                              (j.errors = m),
+                              null === y ? (y = [e]) : y.push(e),
+                              m++,
+                              (j.errors = y),
                               !1
                             );
                           }
-                          (u = n),
-                            null !== m && (n ? (m.length = n) : (m = null)),
-                            (c = t === u);
-                        } else c = !0;
-                        if (c) {
+                          (m = n),
+                            null !== y && (n ? (y.length = n) : (y = null)),
+                            (u = t === m);
+                        } else u = !0;
+                        if (u) {
                           if (void 0 !== o.remotes) {
-                            const e = u;
+                            const e = m;
                             g(o.remotes, {
                               instancePath: a + '/remotes',
                               parentData: o,
                               parentDataProperty: 'remotes',
                               rootData: f,
                             }) ||
-                              ((m = null === m ? g.errors : m.concat(g.errors)),
-                              (u = m.length)),
-                              (c = e === u);
-                          } else c = !0;
-                          if (c) {
+                              ((y = null === y ? g.errors : y.concat(g.errors)),
+                              (m = y.length)),
+                              (u = e === m);
+                          } else u = !0;
+                          if (u) {
                             if (void 0 !== o.runtime) {
                               let e = o.runtime;
-                              const t = u,
-                                r = u;
+                              const t = m,
+                                r = m;
                               let s = !1;
-                              const a = u;
+                              const a = m;
                               if (!1 !== e) {
                                 const e = {
                                   params: { allowedValues: n.anyOf[0].enum },
                                 };
-                                null === m ? (m = [e]) : m.push(e), u++;
+                                null === y ? (y = [e]) : y.push(e), m++;
                               }
-                              var b = a === u;
+                              var b = a === m;
                               if (((s = s || b), !s)) {
-                                const t = u;
-                                if (u === t)
+                                const t = m;
+                                if (m === t)
                                   if ('string' == typeof e) {
                                     if (e.length < 1) {
                                       const e = { params: {} };
-                                      null === m ? (m = [e]) : m.push(e), u++;
+                                      null === y ? (y = [e]) : y.push(e), m++;
                                     }
                                   } else {
                                     const e = { params: { type: 'string' } };
-                                    null === m ? (m = [e]) : m.push(e), u++;
+                                    null === y ? (y = [e]) : y.push(e), m++;
                                   }
-                                (b = t === u), (s = s || b);
+                                (b = t === m), (s = s || b);
                               }
                               if (!s) {
                                 const e = { params: {} };
                                 return (
-                                  null === m ? (m = [e]) : m.push(e),
-                                  u++,
-                                  (j.errors = m),
+                                  null === y ? (y = [e]) : y.push(e),
+                                  m++,
+                                  (j.errors = y),
                                   !1
                                 );
                               }
-                              (u = r),
-                                null !== m && (r ? (m.length = r) : (m = null)),
-                                (c = t === u);
-                            } else c = !0;
-                            if (c) {
+                              (m = r),
+                                null !== y && (r ? (y.length = r) : (y = null)),
+                                (u = t === m);
+                            } else u = !0;
+                            if (u) {
                               if (void 0 !== o.runtimePlugins) {
                                 let e = o.runtimePlugins;
-                                const t = u;
-                                if (u === t) {
+                                const t = m;
+                                if (m === t) {
                                   if (!Array.isArray(e))
                                     return (
                                       (j.errors = [
@@ -2016,7 +2011,7 @@ function j(
                                   {
                                     const t = e.length;
                                     for (let r = 0; r < t; r++) {
-                                      const t = u;
+                                      const t = m;
                                       if ('string' != typeof e[r])
                                         return (
                                           (j.errors = [
@@ -2024,17 +2019,17 @@ function j(
                                           ]),
                                           !1
                                         );
-                                      if (t !== u) break;
+                                      if (t !== m) break;
                                     }
                                   }
                                 }
-                                c = t === u;
-                              } else c = !0;
-                              if (c) {
+                                u = t === m;
+                              } else u = !0;
+                              if (u) {
                                 if (void 0 !== o.shareScope) {
                                   let e = o.shareScope;
-                                  const t = u;
-                                  if (u === t) {
+                                  const t = m;
+                                  if (m === t) {
                                     if ('string' != typeof e)
                                       return (
                                         (j.errors = [
@@ -2045,12 +2040,12 @@ function j(
                                     if (e.length < 1)
                                       return (j.errors = [{ params: {} }]), !1;
                                   }
-                                  c = t === u;
-                                } else c = !0;
-                                if (c) {
+                                  u = t === m;
+                                } else u = !0;
+                                if (u) {
                                   if (void 0 !== o.shareStrategy) {
                                     let e = o.shareStrategy;
-                                    const r = u;
+                                    const r = m;
                                     if (
                                       'version-first' !== e &&
                                       'loaded-first' !== e
@@ -2066,27 +2061,27 @@ function j(
                                         ]),
                                         !1
                                       );
-                                    c = r === u;
-                                  } else c = !0;
-                                  if (c) {
+                                    u = r === m;
+                                  } else u = !0;
+                                  if (u) {
                                     if (void 0 !== o.shared) {
-                                      const e = u;
+                                      const e = m;
                                       P(o.shared, {
                                         instancePath: a + '/shared',
                                         parentData: o,
                                         parentDataProperty: 'shared',
                                         rootData: f,
                                       }) ||
-                                        ((m =
-                                          null === m
+                                        ((y =
+                                          null === y
                                             ? P.errors
-                                            : m.concat(P.errors)),
-                                        (u = m.length)),
-                                        (c = e === u);
-                                    } else c = !0;
-                                    if (c) {
+                                            : y.concat(P.errors)),
+                                        (m = y.length)),
+                                        (u = e === m);
+                                    } else u = !0;
+                                    if (u) {
                                       if (void 0 !== o.virtualRuntimeEntry) {
-                                        const e = u;
+                                        const e = m;
                                         if (
                                           'boolean' !=
                                           typeof o.virtualRuntimeEntry
@@ -2097,26 +2092,26 @@ function j(
                                             ]),
                                             !1
                                           );
-                                        c = e === u;
-                                      } else c = !0;
-                                      if (c) {
+                                        u = e === m;
+                                      } else u = !0;
+                                      if (u) {
                                         if (void 0 !== o.dev) {
                                           let e = o.dev;
-                                          const t = u,
-                                            r = u;
+                                          const t = m,
+                                            r = m;
                                           let n = !1;
-                                          const s = u;
+                                          const s = m;
                                           if ('boolean' != typeof e) {
                                             const e = {
                                               params: { type: 'boolean' },
                                             };
-                                            null === m ? (m = [e]) : m.push(e),
-                                              u++;
+                                            null === y ? (y = [e]) : y.push(e),
+                                              m++;
                                           }
-                                          var v = s === u;
+                                          var v = s === m;
                                           if (((n = n || v), !n)) {
-                                            const t = u;
-                                            if (u === t)
+                                            const t = m;
+                                            if (m === t)
                                               if (
                                                 e &&
                                                 'object' == typeof e &&
@@ -2125,7 +2120,7 @@ function j(
                                                 if (
                                                   void 0 !== e.disableLiveReload
                                                 ) {
-                                                  const t = u;
+                                                  const t = m;
                                                   if (
                                                     'boolean' !=
                                                     typeof e.disableLiveReload
@@ -2135,19 +2130,19 @@ function j(
                                                         type: 'boolean',
                                                       },
                                                     };
-                                                    null === m
-                                                      ? (m = [e])
-                                                      : m.push(e),
-                                                      u++;
+                                                    null === y
+                                                      ? (y = [e])
+                                                      : y.push(e),
+                                                      m++;
                                                   }
-                                                  var D = t === u;
+                                                  var D = t === m;
                                                 } else D = !0;
                                                 if (D) {
                                                   if (
                                                     void 0 !==
                                                     e.disableHotTypesReload
                                                   ) {
-                                                    const t = u;
+                                                    const t = m;
                                                     if (
                                                       'boolean' !=
                                                       typeof e.disableHotTypesReload
@@ -2157,19 +2152,19 @@ function j(
                                                           type: 'boolean',
                                                         },
                                                       };
-                                                      null === m
-                                                        ? (m = [e])
-                                                        : m.push(e),
-                                                        u++;
+                                                      null === y
+                                                        ? (y = [e])
+                                                        : y.push(e),
+                                                        m++;
                                                     }
-                                                    D = t === u;
+                                                    D = t === m;
                                                   } else D = !0;
                                                   if (D)
                                                     if (
                                                       void 0 !==
                                                       e.disableDynamicRemoteTypeHints
                                                     ) {
-                                                      const t = u;
+                                                      const t = m;
                                                       if (
                                                         'boolean' !=
                                                         typeof e.disableDynamicRemoteTypeHints
@@ -2179,61 +2174,61 @@ function j(
                                                             type: 'boolean',
                                                           },
                                                         };
-                                                        null === m
-                                                          ? (m = [e])
-                                                          : m.push(e),
-                                                          u++;
+                                                        null === y
+                                                          ? (y = [e])
+                                                          : y.push(e),
+                                                          m++;
                                                       }
-                                                      D = t === u;
+                                                      D = t === m;
                                                     } else D = !0;
                                                 }
                                               } else {
                                                 const e = {
                                                   params: { type: 'object' },
                                                 };
-                                                null === m
-                                                  ? (m = [e])
-                                                  : m.push(e),
-                                                  u++;
+                                                null === y
+                                                  ? (y = [e])
+                                                  : y.push(e),
+                                                  m++;
                                               }
-                                            (v = t === u), (n = n || v);
+                                            (v = t === m), (n = n || v);
                                           }
                                           if (!n) {
                                             const e = { params: {} };
                                             return (
-                                              null === m
-                                                ? (m = [e])
-                                                : m.push(e),
-                                              u++,
-                                              (j.errors = m),
+                                              null === y
+                                                ? (y = [e])
+                                                : y.push(e),
+                                              m++,
+                                              (j.errors = y),
                                               !1
                                             );
                                           }
-                                          (u = r),
-                                            null !== m &&
-                                              (r ? (m.length = r) : (m = null)),
-                                            (c = t === u);
-                                        } else c = !0;
-                                        if (c) {
+                                          (m = r),
+                                            null !== y &&
+                                              (r ? (y.length = r) : (y = null)),
+                                            (u = t === m);
+                                        } else u = !0;
+                                        if (u) {
                                           if (void 0 !== o.dts) {
                                             let e = o.dts;
-                                            const r = u,
-                                              n = u;
+                                            const r = m,
+                                              n = m;
                                             let s = !1;
-                                            const a = u;
+                                            const a = m;
                                             if ('boolean' != typeof e) {
                                               const e = {
                                                 params: { type: 'boolean' },
                                               };
-                                              null === m
-                                                ? (m = [e])
-                                                : m.push(e),
-                                                u++;
+                                              null === y
+                                                ? (y = [e])
+                                                : y.push(e),
+                                                m++;
                                             }
-                                            var A = a === u;
+                                            var A = a === m;
                                             if (((s = s || A), !s)) {
-                                              const r = u;
-                                              if (u === r)
+                                              const r = m;
+                                              if (m === r)
                                                 if (
                                                   e &&
                                                   'object' == typeof e &&
@@ -2243,25 +2238,25 @@ function j(
                                                     void 0 !== e.generateTypes
                                                   ) {
                                                     let r = e.generateTypes;
-                                                    const n = u,
-                                                      s = u;
+                                                    const n = m,
+                                                      s = m;
                                                     let o = !1;
-                                                    const a = u;
+                                                    const a = m;
                                                     if ('boolean' != typeof r) {
                                                       const e = {
                                                         params: {
                                                           type: 'boolean',
                                                         },
                                                       };
-                                                      null === m
-                                                        ? (m = [e])
-                                                        : m.push(e),
-                                                        u++;
+                                                      null === y
+                                                        ? (y = [e])
+                                                        : y.push(e),
+                                                        m++;
                                                     }
-                                                    var x = a === u;
+                                                    var x = a === m;
                                                     if (((o = o || x), !o)) {
-                                                      const e = u;
-                                                      if (u === e)
+                                                      const e = m;
+                                                      if (m === e)
                                                         if (
                                                           r &&
                                                           'object' ==
@@ -2272,7 +2267,7 @@ function j(
                                                             void 0 !==
                                                             r.tsConfigPath
                                                           ) {
-                                                            const e = u;
+                                                            const e = m;
                                                             if (
                                                               'string' !=
                                                               typeof r.tsConfigPath
@@ -2282,19 +2277,19 @@ function j(
                                                                   type: 'string',
                                                                 },
                                                               };
-                                                              null === m
-                                                                ? (m = [e])
-                                                                : m.push(e),
-                                                                u++;
+                                                              null === y
+                                                                ? (y = [e])
+                                                                : y.push(e),
+                                                                m++;
                                                             }
-                                                            var O = e === u;
+                                                            var O = e === m;
                                                           } else O = !0;
                                                           if (O) {
                                                             if (
                                                               void 0 !==
                                                               r.typesFolder
                                                             ) {
-                                                              const e = u;
+                                                              const e = m;
                                                               if (
                                                                 'string' !=
                                                                 typeof r.typesFolder
@@ -2304,19 +2299,19 @@ function j(
                                                                     type: 'string',
                                                                   },
                                                                 };
-                                                                null === m
-                                                                  ? (m = [e])
-                                                                  : m.push(e),
-                                                                  u++;
+                                                                null === y
+                                                                  ? (y = [e])
+                                                                  : y.push(e),
+                                                                  m++;
                                                               }
-                                                              O = e === u;
+                                                              O = e === m;
                                                             } else O = !0;
                                                             if (O) {
                                                               if (
                                                                 void 0 !==
                                                                 r.compiledTypesFolder
                                                               ) {
-                                                                const e = u;
+                                                                const e = m;
                                                                 if (
                                                                   'string' !=
                                                                   typeof r.compiledTypesFolder
@@ -2326,19 +2321,19 @@ function j(
                                                                       type: 'string',
                                                                     },
                                                                   };
-                                                                  null === m
-                                                                    ? (m = [e])
-                                                                    : m.push(e),
-                                                                    u++;
+                                                                  null === y
+                                                                    ? (y = [e])
+                                                                    : y.push(e),
+                                                                    m++;
                                                                 }
-                                                                O = e === u;
+                                                                O = e === m;
                                                               } else O = !0;
                                                               if (O) {
                                                                 if (
                                                                   void 0 !==
                                                                   r.deleteTypesFolder
                                                                 ) {
-                                                                  const e = u;
+                                                                  const e = m;
                                                                   if (
                                                                     'boolean' !=
                                                                     typeof r.deleteTypesFolder
@@ -2348,16 +2343,16 @@ function j(
                                                                         type: 'boolean',
                                                                       },
                                                                     };
-                                                                    null === m
-                                                                      ? (m = [
+                                                                    null === y
+                                                                      ? (y = [
                                                                           e,
                                                                         ])
-                                                                      : m.push(
+                                                                      : y.push(
                                                                           e,
                                                                         ),
-                                                                      u++;
+                                                                      m++;
                                                                   }
-                                                                  O = e === u;
+                                                                  O = e === m;
                                                                 } else O = !0;
                                                                 if (O) {
                                                                   if (
@@ -2366,8 +2361,8 @@ function j(
                                                                   ) {
                                                                     let e =
                                                                       r.additionalFilesToCompile;
-                                                                    const t = u;
-                                                                    if (u === t)
+                                                                    const t = m;
+                                                                    if (m === t)
                                                                       if (
                                                                         Array.isArray(
                                                                           e,
@@ -2381,7 +2376,7 @@ function j(
                                                                           r++
                                                                         ) {
                                                                           const t =
-                                                                            u;
+                                                                            m;
                                                                           if (
                                                                             'string' !=
                                                                             typeof e[
@@ -2396,19 +2391,19 @@ function j(
                                                                                   },
                                                                               };
                                                                             null ===
-                                                                            m
-                                                                              ? (m =
+                                                                            y
+                                                                              ? (y =
                                                                                   [
                                                                                     e,
                                                                                   ])
-                                                                              : m.push(
+                                                                              : y.push(
                                                                                   e,
                                                                                 ),
-                                                                              u++;
+                                                                              m++;
                                                                           }
                                                                           if (
                                                                             t !==
-                                                                            u
+                                                                            m
                                                                           )
                                                                             break;
                                                                         }
@@ -2421,17 +2416,17 @@ function j(
                                                                               },
                                                                           };
                                                                         null ===
-                                                                        m
-                                                                          ? (m =
+                                                                        y
+                                                                          ? (y =
                                                                               [
                                                                                 e,
                                                                               ])
-                                                                          : m.push(
+                                                                          : y.push(
                                                                               e,
                                                                             ),
-                                                                          u++;
+                                                                          m++;
                                                                       }
-                                                                    O = t === u;
+                                                                    O = t === m;
                                                                   } else O = !0;
                                                                   if (O) {
                                                                     if (
@@ -2439,7 +2434,7 @@ function j(
                                                                       r.compileInChildProcess
                                                                     ) {
                                                                       const e =
-                                                                        u;
+                                                                        m;
                                                                       if (
                                                                         'boolean' !=
                                                                         typeof r.compileInChildProcess
@@ -2452,18 +2447,18 @@ function j(
                                                                               },
                                                                           };
                                                                         null ===
-                                                                        m
-                                                                          ? (m =
+                                                                        y
+                                                                          ? (y =
                                                                               [
                                                                                 e,
                                                                               ])
-                                                                          : m.push(
+                                                                          : y.push(
                                                                               e,
                                                                             ),
-                                                                          u++;
+                                                                          m++;
                                                                       }
                                                                       O =
-                                                                        e === u;
+                                                                        e === m;
                                                                     } else
                                                                       O = !0;
                                                                     if (O) {
@@ -2474,7 +2469,7 @@ function j(
                                                                         let e =
                                                                           r.compilerInstance;
                                                                         const n =
-                                                                          u;
+                                                                          m;
                                                                         if (
                                                                           'tsc' !==
                                                                             e &&
@@ -2499,19 +2494,19 @@ function j(
                                                                                 },
                                                                             };
                                                                           null ===
-                                                                          m
-                                                                            ? (m =
+                                                                          y
+                                                                            ? (y =
                                                                                 [
                                                                                   e,
                                                                                 ])
-                                                                            : m.push(
+                                                                            : y.push(
                                                                                 e,
                                                                               ),
-                                                                            u++;
+                                                                            m++;
                                                                         }
                                                                         O =
                                                                           n ===
-                                                                          u;
+                                                                          m;
                                                                       } else
                                                                         O = !0;
                                                                       if (O) {
@@ -2520,7 +2515,7 @@ function j(
                                                                           r.generateAPITypes
                                                                         ) {
                                                                           const e =
-                                                                            u;
+                                                                            m;
                                                                           if (
                                                                             'boolean' !=
                                                                             typeof r.generateAPITypes
@@ -2533,19 +2528,19 @@ function j(
                                                                                   },
                                                                               };
                                                                             null ===
-                                                                            m
-                                                                              ? (m =
+                                                                            y
+                                                                              ? (y =
                                                                                   [
                                                                                     e,
                                                                                   ])
-                                                                              : m.push(
+                                                                              : y.push(
                                                                                   e,
                                                                                 ),
-                                                                              u++;
+                                                                              m++;
                                                                           }
                                                                           O =
                                                                             e ===
-                                                                            u;
+                                                                            m;
                                                                         } else
                                                                           O =
                                                                             !0;
@@ -2555,7 +2550,7 @@ function j(
                                                                             r.extractThirdParty
                                                                           ) {
                                                                             const e =
-                                                                              u;
+                                                                              m;
                                                                             if (
                                                                               'boolean' !=
                                                                               typeof r.extractThirdParty
@@ -2568,19 +2563,19 @@ function j(
                                                                                     },
                                                                                 };
                                                                               null ===
-                                                                              m
-                                                                                ? (m =
+                                                                              y
+                                                                                ? (y =
                                                                                     [
                                                                                       e,
                                                                                     ])
-                                                                                : m.push(
+                                                                                : y.push(
                                                                                     e,
                                                                                   ),
-                                                                                u++;
+                                                                                m++;
                                                                             }
                                                                             O =
                                                                               e ===
-                                                                              u;
+                                                                              m;
                                                                           } else
                                                                             O =
                                                                               !0;
@@ -2592,7 +2587,7 @@ function j(
                                                                               r.extractRemoteTypes
                                                                             ) {
                                                                               const e =
-                                                                                u;
+                                                                                m;
                                                                               if (
                                                                                 'boolean' !=
                                                                                 typeof r.extractRemoteTypes
@@ -2605,19 +2600,19 @@ function j(
                                                                                       },
                                                                                   };
                                                                                 null ===
-                                                                                m
-                                                                                  ? (m =
+                                                                                y
+                                                                                  ? (y =
                                                                                       [
                                                                                         e,
                                                                                       ])
-                                                                                  : m.push(
+                                                                                  : y.push(
                                                                                       e,
                                                                                     ),
-                                                                                  u++;
+                                                                                  m++;
                                                                               }
                                                                               O =
                                                                                 e ===
-                                                                                u;
+                                                                                m;
                                                                             } else
                                                                               O =
                                                                                 !0;
@@ -2629,7 +2624,7 @@ function j(
                                                                                 r.abortOnError
                                                                               ) {
                                                                                 const e =
-                                                                                  u;
+                                                                                  m;
                                                                                 if (
                                                                                   'boolean' !=
                                                                                   typeof r.abortOnError
@@ -2642,19 +2637,19 @@ function j(
                                                                                         },
                                                                                     };
                                                                                   null ===
-                                                                                  m
-                                                                                    ? (m =
+                                                                                  y
+                                                                                    ? (y =
                                                                                         [
                                                                                           e,
                                                                                         ])
-                                                                                    : m.push(
+                                                                                    : y.push(
                                                                                         e,
                                                                                       ),
-                                                                                    u++;
+                                                                                    m++;
                                                                                 }
                                                                                 O =
                                                                                   e ===
-                                                                                  u;
+                                                                                  m;
                                                                               } else
                                                                                 O =
                                                                                   !0;
@@ -2673,38 +2668,38 @@ function j(
                                                               type: 'object',
                                                             },
                                                           };
-                                                          null === m
-                                                            ? (m = [e])
-                                                            : m.push(e),
-                                                            u++;
+                                                          null === y
+                                                            ? (y = [e])
+                                                            : y.push(e),
+                                                            m++;
                                                         }
-                                                      (x = e === u),
+                                                      (x = e === m),
                                                         (o = o || x);
                                                     }
                                                     if (o)
-                                                      (u = s),
-                                                        null !== m &&
+                                                      (m = s),
+                                                        null !== y &&
                                                           (s
-                                                            ? (m.length = s)
-                                                            : (m = null));
+                                                            ? (y.length = s)
+                                                            : (y = null));
                                                     else {
                                                       const e = { params: {} };
-                                                      null === m
-                                                        ? (m = [e])
-                                                        : m.push(e),
-                                                        u++;
+                                                      null === y
+                                                        ? (y = [e])
+                                                        : y.push(e),
+                                                        m++;
                                                     }
-                                                    var T = n === u;
+                                                    var T = n === m;
                                                   } else T = !0;
                                                   if (T) {
                                                     if (
                                                       void 0 !== e.consumeTypes
                                                     ) {
                                                       let t = e.consumeTypes;
-                                                      const r = u,
-                                                        n = u;
+                                                      const r = m,
+                                                        n = m;
                                                       let s = !1;
-                                                      const o = u;
+                                                      const o = m;
                                                       if (
                                                         'boolean' != typeof t
                                                       ) {
@@ -2713,15 +2708,15 @@ function j(
                                                             type: 'boolean',
                                                           },
                                                         };
-                                                        null === m
-                                                          ? (m = [e])
-                                                          : m.push(e),
-                                                          u++;
+                                                        null === y
+                                                          ? (y = [e])
+                                                          : y.push(e),
+                                                          m++;
                                                       }
-                                                      var R = o === u;
+                                                      var R = o === m;
                                                       if (((s = s || R), !s)) {
-                                                        const e = u;
-                                                        if (u === e)
+                                                        const e = m;
+                                                        if (m === e)
                                                           if (
                                                             t &&
                                                             'object' ==
@@ -2732,7 +2727,7 @@ function j(
                                                               void 0 !==
                                                               t.typesFolder
                                                             ) {
-                                                              const e = u;
+                                                              const e = m;
                                                               if (
                                                                 'string' !=
                                                                 typeof t.typesFolder
@@ -2742,19 +2737,19 @@ function j(
                                                                     type: 'string',
                                                                   },
                                                                 };
-                                                                null === m
-                                                                  ? (m = [e])
-                                                                  : m.push(e),
-                                                                  u++;
+                                                                null === y
+                                                                  ? (y = [e])
+                                                                  : y.push(e),
+                                                                  m++;
                                                               }
-                                                              var $ = e === u;
+                                                              var $ = e === m;
                                                             } else $ = !0;
                                                             if ($) {
                                                               if (
                                                                 void 0 !==
                                                                 t.abortOnError
                                                               ) {
-                                                                const e = u;
+                                                                const e = m;
                                                                 if (
                                                                   'boolean' !=
                                                                   typeof t.abortOnError
@@ -2764,19 +2759,19 @@ function j(
                                                                       type: 'boolean',
                                                                     },
                                                                   };
-                                                                  null === m
-                                                                    ? (m = [e])
-                                                                    : m.push(e),
-                                                                    u++;
+                                                                  null === y
+                                                                    ? (y = [e])
+                                                                    : y.push(e),
+                                                                    m++;
                                                                 }
-                                                                $ = e === u;
+                                                                $ = e === m;
                                                               } else $ = !0;
                                                               if ($) {
                                                                 if (
                                                                   void 0 !==
                                                                   t.remoteTypesFolder
                                                                 ) {
-                                                                  const e = u;
+                                                                  const e = m;
                                                                   if (
                                                                     'string' !=
                                                                     typeof t.remoteTypesFolder
@@ -2786,23 +2781,23 @@ function j(
                                                                         type: 'string',
                                                                       },
                                                                     };
-                                                                    null === m
-                                                                      ? (m = [
+                                                                    null === y
+                                                                      ? (y = [
                                                                           e,
                                                                         ])
-                                                                      : m.push(
+                                                                      : y.push(
                                                                           e,
                                                                         ),
-                                                                      u++;
+                                                                      m++;
                                                                   }
-                                                                  $ = e === u;
+                                                                  $ = e === m;
                                                                 } else $ = !0;
                                                                 if ($) {
                                                                   if (
                                                                     void 0 !==
                                                                     t.deleteTypesFolder
                                                                   ) {
-                                                                    const e = u;
+                                                                    const e = m;
                                                                     if (
                                                                       'boolean' !=
                                                                       typeof t.deleteTypesFolder
@@ -2814,16 +2809,16 @@ function j(
                                                                               type: 'boolean',
                                                                             },
                                                                         };
-                                                                      null === m
-                                                                        ? (m = [
+                                                                      null === y
+                                                                        ? (y = [
                                                                             e,
                                                                           ])
-                                                                        : m.push(
+                                                                        : y.push(
                                                                             e,
                                                                           ),
-                                                                        u++;
+                                                                        m++;
                                                                     }
-                                                                    $ = e === u;
+                                                                    $ = e === m;
                                                                   } else $ = !0;
                                                                   if ($) {
                                                                     if (
@@ -2831,7 +2826,7 @@ function j(
                                                                       t.maxRetries
                                                                     ) {
                                                                       const e =
-                                                                        u;
+                                                                        m;
                                                                       if (
                                                                         'number' !=
                                                                         typeof t.maxRetries
@@ -2844,18 +2839,18 @@ function j(
                                                                               },
                                                                           };
                                                                         null ===
-                                                                        m
-                                                                          ? (m =
+                                                                        y
+                                                                          ? (y =
                                                                               [
                                                                                 e,
                                                                               ])
-                                                                          : m.push(
+                                                                          : y.push(
                                                                               e,
                                                                             ),
-                                                                          u++;
+                                                                          m++;
                                                                       }
                                                                       $ =
-                                                                        e === u;
+                                                                        e === m;
                                                                     } else
                                                                       $ = !0;
                                                                     if ($) {
@@ -2864,7 +2859,7 @@ function j(
                                                                         t.consumeAPITypes
                                                                       ) {
                                                                         const e =
-                                                                          u;
+                                                                          m;
                                                                         if (
                                                                           'boolean' !=
                                                                           typeof t.consumeAPITypes
@@ -2877,19 +2872,19 @@ function j(
                                                                                 },
                                                                             };
                                                                           null ===
-                                                                          m
-                                                                            ? (m =
+                                                                          y
+                                                                            ? (y =
                                                                                 [
                                                                                   e,
                                                                                 ])
-                                                                            : m.push(
+                                                                            : y.push(
                                                                                 e,
                                                                               ),
-                                                                            u++;
+                                                                            m++;
                                                                         }
                                                                         $ =
                                                                           e ===
-                                                                          u;
+                                                                          m;
                                                                       } else
                                                                         $ = !0;
                                                                       if ($)
@@ -2900,9 +2895,9 @@ function j(
                                                                           let e =
                                                                             t.runtimePkgs;
                                                                           const r =
-                                                                            u;
+                                                                            m;
                                                                           if (
-                                                                            u ===
+                                                                            m ===
                                                                             r
                                                                           )
                                                                             if (
@@ -2919,7 +2914,7 @@ function j(
                                                                                 r++
                                                                               ) {
                                                                                 const t =
-                                                                                  u;
+                                                                                  m;
                                                                                 if (
                                                                                   'string' !=
                                                                                   typeof e[
@@ -2934,19 +2929,19 @@ function j(
                                                                                         },
                                                                                     };
                                                                                   null ===
-                                                                                  m
-                                                                                    ? (m =
+                                                                                  y
+                                                                                    ? (y =
                                                                                         [
                                                                                           e,
                                                                                         ])
-                                                                                    : m.push(
+                                                                                    : y.push(
                                                                                         e,
                                                                                       ),
-                                                                                    u++;
+                                                                                    m++;
                                                                                 }
                                                                                 if (
                                                                                   t !==
-                                                                                  u
+                                                                                  m
                                                                                 )
                                                                                   break;
                                                                               }
@@ -2959,19 +2954,19 @@ function j(
                                                                                     },
                                                                                 };
                                                                               null ===
-                                                                              m
-                                                                                ? (m =
+                                                                              y
+                                                                                ? (y =
                                                                                     [
                                                                                       e,
                                                                                     ])
-                                                                                : m.push(
+                                                                                : y.push(
                                                                                     e,
                                                                                   ),
-                                                                                u++;
+                                                                                m++;
                                                                             }
                                                                           $ =
                                                                             r ===
-                                                                            u;
+                                                                            m;
                                                                         } else
                                                                           $ =
                                                                             !0;
@@ -2986,37 +2981,37 @@ function j(
                                                                 type: 'object',
                                                               },
                                                             };
-                                                            null === m
-                                                              ? (m = [e])
-                                                              : m.push(e),
-                                                              u++;
+                                                            null === y
+                                                              ? (y = [e])
+                                                              : y.push(e),
+                                                              m++;
                                                           }
-                                                        (R = e === u),
+                                                        (R = e === m),
                                                           (s = s || R);
                                                       }
                                                       if (s)
-                                                        (u = n),
-                                                          null !== m &&
+                                                        (m = n),
+                                                          null !== y &&
                                                             (n
-                                                              ? (m.length = n)
-                                                              : (m = null));
+                                                              ? (y.length = n)
+                                                              : (y = null));
                                                       else {
                                                         const e = {
                                                           params: {},
                                                         };
-                                                        null === m
-                                                          ? (m = [e])
-                                                          : m.push(e),
-                                                          u++;
+                                                        null === y
+                                                          ? (y = [e])
+                                                          : y.push(e),
+                                                          m++;
                                                       }
-                                                      T = r === u;
+                                                      T = r === m;
                                                     } else T = !0;
                                                     if (T) {
                                                       if (
                                                         void 0 !==
                                                         e.tsConfigPath
                                                       ) {
-                                                        const t = u;
+                                                        const t = m;
                                                         if (
                                                           'string' !=
                                                           typeof e.tsConfigPath
@@ -3026,12 +3021,12 @@ function j(
                                                               type: 'string',
                                                             },
                                                           };
-                                                          null === m
-                                                            ? (m = [e])
-                                                            : m.push(e),
-                                                            u++;
+                                                          null === y
+                                                            ? (y = [e])
+                                                            : y.push(e),
+                                                            m++;
                                                         }
-                                                        T = t === u;
+                                                        T = t === m;
                                                       } else T = !0;
                                                       if (T) {
                                                         if (
@@ -3040,7 +3035,7 @@ function j(
                                                         ) {
                                                           let t =
                                                             e.extraOptions;
-                                                          const r = u;
+                                                          const r = m;
                                                           if (
                                                             !t ||
                                                             'object' !=
@@ -3052,19 +3047,19 @@ function j(
                                                                 type: 'object',
                                                               },
                                                             };
-                                                            null === m
-                                                              ? (m = [e])
-                                                              : m.push(e),
-                                                              u++;
+                                                            null === y
+                                                              ? (y = [e])
+                                                              : y.push(e),
+                                                              m++;
                                                           }
-                                                          T = r === u;
+                                                          T = r === m;
                                                         } else T = !0;
                                                         if (T) {
                                                           if (
                                                             void 0 !==
                                                             e.implementation
                                                           ) {
-                                                            const t = u;
+                                                            const t = m;
                                                             if (
                                                               'string' !=
                                                               typeof e.implementation
@@ -3074,18 +3069,18 @@ function j(
                                                                   type: 'string',
                                                                 },
                                                               };
-                                                              null === m
-                                                                ? (m = [e])
-                                                                : m.push(e),
-                                                                u++;
+                                                              null === y
+                                                                ? (y = [e])
+                                                                : y.push(e),
+                                                                m++;
                                                             }
-                                                            T = t === u;
+                                                            T = t === m;
                                                           } else T = !0;
                                                           if (T) {
                                                             if (
                                                               void 0 !== e.cwd
                                                             ) {
-                                                              const t = u;
+                                                              const t = m;
                                                               if (
                                                                 'string' !=
                                                                 typeof e.cwd
@@ -3095,19 +3090,19 @@ function j(
                                                                     type: 'string',
                                                                   },
                                                                 };
-                                                                null === m
-                                                                  ? (m = [e])
-                                                                  : m.push(e),
-                                                                  u++;
+                                                                null === y
+                                                                  ? (y = [e])
+                                                                  : y.push(e),
+                                                                  m++;
                                                               }
-                                                              T = t === u;
+                                                              T = t === m;
                                                             } else T = !0;
                                                             if (T)
                                                               if (
                                                                 void 0 !==
                                                                 e.displayErrorInTerminal
                                                               ) {
-                                                                const t = u;
+                                                                const t = m;
                                                                 if (
                                                                   'boolean' !=
                                                                   typeof e.displayErrorInTerminal
@@ -3117,12 +3112,12 @@ function j(
                                                                       type: 'boolean',
                                                                     },
                                                                   };
-                                                                  null === m
-                                                                    ? (m = [e])
-                                                                    : m.push(e),
-                                                                    u++;
+                                                                  null === y
+                                                                    ? (y = [e])
+                                                                    : y.push(e),
+                                                                    m++;
                                                                 }
-                                                                T = t === u;
+                                                                T = t === m;
                                                               } else T = !0;
                                                           }
                                                         }
@@ -3133,36 +3128,36 @@ function j(
                                                   const e = {
                                                     params: { type: 'object' },
                                                   };
-                                                  null === m
-                                                    ? (m = [e])
-                                                    : m.push(e),
-                                                    u++;
+                                                  null === y
+                                                    ? (y = [e])
+                                                    : y.push(e),
+                                                    m++;
                                                 }
-                                              (A = r === u), (s = s || A);
+                                              (A = r === m), (s = s || A);
                                             }
                                             if (!s) {
                                               const e = { params: {} };
                                               return (
-                                                null === m
-                                                  ? (m = [e])
-                                                  : m.push(e),
-                                                u++,
-                                                (j.errors = m),
+                                                null === y
+                                                  ? (y = [e])
+                                                  : y.push(e),
+                                                m++,
+                                                (j.errors = y),
                                                 !1
                                               );
                                             }
-                                            (u = n),
-                                              null !== m &&
+                                            (m = n),
+                                              null !== y &&
                                                 (n
-                                                  ? (m.length = n)
-                                                  : (m = null)),
-                                              (c = r === u);
-                                          } else c = !0;
-                                          if (c) {
+                                                  ? (y.length = n)
+                                                  : (y = null)),
+                                              (u = r === m);
+                                          } else u = !0;
+                                          if (u) {
                                             if (void 0 !== o.experiments) {
                                               let e = o.experiments;
-                                              const r = u;
-                                              if (u === r) {
+                                              const t = m;
+                                              if (m === t) {
                                                 if (
                                                   !e ||
                                                   'object' != typeof e ||
@@ -3178,96 +3173,29 @@ function j(
                                                     ]),
                                                     !1
                                                   );
-                                                if (
-                                                  void 0 !== e.federationRuntime
-                                                ) {
-                                                  let r = e.federationRuntime;
-                                                  const n = u,
-                                                    s = u;
-                                                  let o = !1;
-                                                  const a = u;
-                                                  if ('boolean' != typeof r) {
-                                                    const e = {
-                                                      params: {
-                                                        type: 'boolean',
-                                                      },
-                                                    };
-                                                    null === m
-                                                      ? (m = [e])
-                                                      : m.push(e),
-                                                      u++;
-                                                  }
-                                                  if (!1 !== r) {
-                                                    const e = {
-                                                      params: {
-                                                        allowedValues:
-                                                          t.properties
-                                                            .experiments
-                                                            .properties
-                                                            .federationRuntime
-                                                            .anyOf[0].enum,
-                                                      },
-                                                    };
-                                                    null === m
-                                                      ? (m = [e])
-                                                      : m.push(e),
-                                                      u++;
-                                                  }
-                                                  var C = a === u;
-                                                  if (((o = o || C), !o)) {
-                                                    const e = u;
-                                                    if ('string' != typeof r) {
-                                                      const e = {
-                                                        params: {
-                                                          type: 'string',
-                                                        },
-                                                      };
-                                                      null === m
-                                                        ? (m = [e])
-                                                        : m.push(e),
-                                                        u++;
-                                                    }
-                                                    if ('hoisted' !== r) {
-                                                      const e = {
-                                                        params: {
-                                                          allowedValues:
-                                                            t.properties
-                                                              .experiments
-                                                              .properties
-                                                              .federationRuntime
-                                                              .anyOf[1].enum,
-                                                        },
-                                                      };
-                                                      null === m
-                                                        ? (m = [e])
-                                                        : m.push(e),
-                                                        u++;
-                                                    }
-                                                    (C = e === u), (o = o || C);
-                                                  }
-                                                  if (!o) {
-                                                    const e = { params: {} };
+                                                if (void 0 !== e.asyncStartup) {
+                                                  const t = m;
+                                                  if (
+                                                    'boolean' !=
+                                                    typeof e.asyncStartup
+                                                  )
                                                     return (
-                                                      null === m
-                                                        ? (m = [e])
-                                                        : m.push(e),
-                                                      u++,
-                                                      (j.errors = m),
+                                                      (j.errors = [
+                                                        {
+                                                          params: {
+                                                            type: 'boolean',
+                                                          },
+                                                        },
+                                                      ]),
                                                       !1
                                                     );
-                                                  }
-                                                  (u = s),
-                                                    null !== m &&
-                                                      (s
-                                                        ? (m.length = s)
-                                                        : (m = null));
-                                                  var I = n === u;
-                                                } else I = !0;
-                                                if (I) {
+                                                  var C = t === m;
+                                                } else C = !0;
+                                                if (C) {
                                                   if (
                                                     void 0 !== e.externalRuntime
                                                   ) {
-                                                    const t = u;
+                                                    const t = m;
                                                     if (
                                                       'boolean' !=
                                                       typeof e.externalRuntime
@@ -3282,14 +3210,14 @@ function j(
                                                         ]),
                                                         !1
                                                       );
-                                                    I = t === u;
-                                                  } else I = !0;
-                                                  if (I)
+                                                    C = t === m;
+                                                  } else C = !0;
+                                                  if (C)
                                                     if (
                                                       void 0 !==
                                                       e.provideExternalRuntime
                                                     ) {
-                                                      const t = u;
+                                                      const t = m;
                                                       if (
                                                         'boolean' !=
                                                         typeof e.provideExternalRuntime
@@ -3304,17 +3232,17 @@ function j(
                                                           ]),
                                                           !1
                                                         );
-                                                      I = t === u;
-                                                    } else I = !0;
+                                                      C = t === m;
+                                                    } else C = !0;
                                                 }
                                               }
-                                              c = r === u;
-                                            } else c = !0;
-                                            if (c)
+                                              u = t === m;
+                                            } else u = !0;
+                                            if (u)
                                               if (void 0 !== o.bridge) {
                                                 let e = o.bridge;
-                                                const t = u;
-                                                if (u === t) {
+                                                const t = m;
+                                                if (m === t) {
                                                   if (
                                                     !e ||
                                                     'object' != typeof e ||
@@ -3346,8 +3274,8 @@ function j(
                                                       !1
                                                     );
                                                 }
-                                                c = t === u;
-                                              } else c = !0;
+                                                u = t === m;
+                                              } else u = !0;
                                           }
                                         }
                                       }
@@ -3369,5 +3297,5 @@ function j(
       }
     }
   }
-  return (j.errors = m), 0 === u;
+  return (j.errors = y), 0 === m;
 }
