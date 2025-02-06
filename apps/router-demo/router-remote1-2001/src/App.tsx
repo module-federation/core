@@ -1,13 +1,11 @@
 import { Image } from 'antd';
-// @ts-ignore
 import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
 import {
   StyleProvider,
   legacyLogicalPropertiesTransformer,
 } from '@ant-design/cssinjs';
-import ReactShadow, { useShadowRoot } from 'react-shadow';
+import { useShadowRoot } from 'react-shadow';
 import { Table } from 'antd';
-import styles from './App.module.css';
 
 const dataSource = [
   {
@@ -100,21 +98,8 @@ const App = (info: { name: string; age: number }) => {
           </Route>
         </Switch>
       </BrowserRouter>
-      {/* <style ref="text/css">
-        {
-          style
-        }
-      </style> */}
     </StyleProvider>
   );
 };
-
-// function WrapApp(info: any) {
-//   return (
-//     // <ReactShadow.div>
-//     <App />
-//     // </ReactShadow.div>
-//   );
-// }
 
 export default App;

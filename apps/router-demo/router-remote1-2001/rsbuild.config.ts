@@ -48,17 +48,10 @@ export default defineConfig({
         'react-dom': {
           singleton: true,
         },
-        // 'react-router-dom': {
-        //   // singleton: true,
-        //   requiredVersion: '5.x',
-        // },
         antd: {
           singleton: true,
         },
       },
-      // bridge: {
-      //   disableAlias: true,
-      // },
     }),
   ],
 });

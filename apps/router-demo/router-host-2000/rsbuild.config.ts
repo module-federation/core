@@ -35,19 +35,12 @@ export default defineConfig({
         'react-dom': {
           singleton: true,
         },
-        // 'react-router-dom': {
-        //   // singleton: true,
-        //   requiredVersion: '6.x',
-        // },
       },
       runtimePlugins: [
         path.join(__dirname, './src/runtime-plugin/shared-strategy.ts'),
         path.join(__dirname, './src/runtime-plugin/retry.ts'),
         path.join(__dirname, './src/runtime-plugin/fallback.ts'),
       ],
-      // bridge: {
-      //   disableAlias: true,
-      // },
     }),
   ],
 });

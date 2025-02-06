@@ -1,37 +1,36 @@
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import {
+  createLifecycleBasedPlugin,
+  createSimplePlugin,
+} from './error-handling';
 
-const fallbackPlugin = (): FederationRuntimePlugin => {
-  return {
-    name: 'fallback-plugin',
-    async errorLoadRemote(args) {
-      // if (args.lifecycle === 'onLoad') {
-      //   const React = await import('react');
-      //   const FallbackComponent = React.memo(() =>
-      //     React.createElement('div', null, 'fallback component'),
-      //   );
-      //   FallbackComponent.displayName = 'FallbackComponent';
-      //   return () => ({
-      //     __esModule: true,
-      //     default: FallbackComponent,
-      //   });
-      // } else if (args.lifecycle === 'afterResolve') {
-      //   // you can try another fall back remote entry or return a constant manifest data
-      //   // const response = await fetch('http://localhost:2002/mf-manifest.json');
-      //   // const manifestJson = (await response.json()) as Manifest;
-      //   // return manifestJson;
-      // }
-      // return args;
+interface FallbackConfig {
+  // Backup service address
+  backupEntryUrl?: string;
+  // Custom error message
+  errorMessage?: string;
+  // Error handling strategy: 'simple' | 'lifecycle-based'
+  strategy?: 'simple' | 'lifecycle-based';
+}
 
-      const React = await import('react');
-      const FallbackComponent = React.memo(() =>
-        React.createElement('div', null, 'fallback component'),
-      );
-      FallbackComponent.displayName = 'FallbackComponent';
-      return () => ({
-        __esModule: true,
-        default: FallbackComponent,
-      });
-    },
-  };
+const fallbackPlugin = (
+  config: FallbackConfig = {},
+): FederationRuntimePlugin => {
+  const {
+    backupEntryUrl = 'http://localhost:2002/mf-manifest.json',
+    errorMessage = 'Module loading failed, please try again later',
+    strategy = 'lifecycle-based',
+  } = config;
+
+  // Use the selected error handling strategy
+  if (strategy === 'simple') {
+    return createSimplePlugin({ errorMessage });
+  }
+
+  return createLifecycleBasedPlugin({
+    backupEntryUrl,
+    errorMessage,
+  });
 };
+
 export default fallbackPlugin;

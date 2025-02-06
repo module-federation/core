@@ -14,8 +14,9 @@ import Home from './pages/Home';
 import './App.css';
 import BridgeReactPlugin from '@module-federation/bridge-react/plugin';
 import { ErrorBoundary } from 'react-error-boundary';
-// import Remote1AppNew from 'remote1/app';
+import Remote1AppNew from 'remote1/app';
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import { Spin } from 'antd';
 
 const fallbackPlugin: () => FederationRuntimePlugin = function () {
   return {
@@ -28,13 +29,7 @@ const fallbackPlugin: () => FederationRuntimePlugin = function () {
 
 init({
   name: 'federation_consumer',
-  remotes: [
-    // {
-    //   name: 'remote1',
-    //   alias: 'remote1',
-    //   entry: 'http://localhost:2001/mf-manifest.json',
-    // },
-  ],
+  remotes: [],
   plugins: [
     BridgeReactPlugin(),
     // RetryPlugin({
@@ -78,10 +73,58 @@ const Remote1App = createRemoteComponent({
   loading: FallbackComp,
 });
 
-const Remote1AppWithLoadRemote = React.lazy(() => loadRemote('remote1/app'));
+const Remote1AppWithLoadRemote = React.lazy(
+  () =>
+    new Promise((resolve) => {
+      // delay 2000ms to show suspense effects
+      setTimeout(() => {
+        resolve(loadRemote('remote1/app'));
+      }, 2000);
+    }),
+);
+
+const LoadingFallback = () => (
+  <div
+    style={{
+      padding: '50px',
+      textAlign: 'center',
+      background: '#f5f5f5',
+      border: '1px solid #d9d9d9',
+      borderRadius: '4px',
+      marginTop: '20px',
+    }}
+  >
+    <Spin size="large" />
+    <div
+      style={{
+        marginTop: '16px',
+        color: '#1677ff',
+        fontSize: '16px',
+      }}
+    >
+      Loading Remote1 App...
+    </div>
+  </div>
+);
+
 const Remote1AppWithErrorBoundary = React.forwardRef<any, any>((props, ref) => (
-  <ErrorBoundary fallback={<div>Error loading Remote1App...</div>}>
-    <Suspense fallback={<div> Loading Remote1App...</div>}>
+  <ErrorBoundary
+    fallback={
+      <div
+        style={{
+          padding: '20px',
+          background: '#fff2f0',
+          border: '1px solid #ffccc7',
+          borderRadius: '4px',
+          color: '#cf1322',
+          marginTop: '20px',
+        }}
+      >
+        Error loading Remote1App. Please try again later.
+      </div>
+    }
+  >
+    <Suspense fallback={<LoadingFallback />}>
       <Remote1AppWithLoadRemote {...props} ref={ref} />
     </Suspense>
   </ErrorBoundary>
@@ -119,11 +162,6 @@ function Wraper3() {
         <div className="grow">
           <h2>Remote1</h2>
           <Remote1App name={'Ming'} age={12} memoryRoute={{ entryPath: '/' }} />
-          {/* <Remote1AppWithErrorBoundary
-            name={'Ming'}
-            age={12}
-            memoryRoute={{ entryPath: '/' }}
-          /> */}
         </div>
         <div className="grow">
           <h2>Remote2</h2>
@@ -167,16 +205,6 @@ const App = () => {
           path="/remote1/*"
           Component={() => (
             <Remote1App name={'Ming'} age={12} ref={ref} basename="/remote1" />
-            // <Remote1AppWithErrorBoundary
-            //   name={'Ming'}
-            //   age={12}
-            //   ref={ref}
-            //   basename="/remote1"
-            // />
-            // <Remote1AppNew name={'Ming'} age={12} />
-            // <React.Suspense fallback={<div> Loading Remote1App...</div>}>
-            //   <Remote1AppWithLoadRemote />
-            // </React.Suspense>
           )}
         />
         <Route
@@ -192,6 +220,27 @@ const App = () => {
         <Route
           path="/remote-resource-error/*"
           Component={() => <RemoteResourceErrorApp />}
+        />
+        <Route
+          path="/error-load-with-hook/*"
+          Component={() => (
+            <Remote1AppNew name={'Ming'} age={12} />
+            // <React.Suspense fallback={<div> Loading Remote1App...</div>}>
+            //   <Remote1AppWithLoadRemote name={'Ming'} age={12} />
+            // </React.Suspense>
+          )}
+        />
+
+        <Route
+          path="/error-load-with-error-boundary/*"
+          Component={() => (
+            <Remote1AppWithErrorBoundary
+              name={'Ming'}
+              age={12}
+              ref={ref}
+              basename="/remote1"
+            />
+          )}
         />
       </Routes>
     </div>
