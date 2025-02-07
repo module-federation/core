@@ -12,7 +12,6 @@ import ContainerEntryModule from '../container/ContainerEntryModule';
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-
 const StartupEntrypointRuntimeModule = require(
   normalizeWebpackPath('webpack/lib/runtime/StartupEntrypointRuntimeModule'),
 ) as typeof import('webpack/lib/runtime/StartupEntrypointRuntimeModule');
@@ -43,6 +42,7 @@ class StartupChunkDependenciesPlugin {
     compiler.hooks.thisCompilation.tap(
       'MfStartupChunkDependenciesPlugin',
       (compilation) => {
+        // Add additional runtime requirements at the tree level.
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'StartupChunkDependenciesPlugin',
           (chunk, set, { chunkGraph }) => {
@@ -55,6 +55,7 @@ class StartupChunkDependenciesPlugin {
           },
         );
 
+        // Add additional runtime requirements at the chunk level if there are entry modules.
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'MfStartupChunkDependenciesPlugin',
           (chunk, set, { chunkGraph }) => {
@@ -64,6 +65,7 @@ class StartupChunkDependenciesPlugin {
           },
         );
 
+        // When the startupEntrypoint requirement is present, add extra keys and a runtime module.
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.startupEntrypoint)
           .tap(
@@ -80,6 +82,7 @@ class StartupChunkDependenciesPlugin {
             },
           );
 
+        // Replace the generated startup with a custom version if entry modules exist.
         const { renderStartup } =
           compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
             compilation,
@@ -94,8 +97,9 @@ class StartupChunkDependenciesPlugin {
               return startupSource;
             }
 
-            if (chunkGraph.getNumberOfEntryModules(chunk) === 0)
+            if (chunkGraph.getNumberOfEntryModules(chunk) === 0) {
               return startupSource;
+            }
 
             const treeRuntimeRequirements =
               chunkGraph.getTreeRuntimeRequirements(chunk);

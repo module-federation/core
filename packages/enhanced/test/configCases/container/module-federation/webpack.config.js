@@ -11,7 +11,7 @@ function createConfig() {
         filename: 'container.js',
         library: { type: 'system' },
         exposes: ['./other', './self', './dep'],
-        experiments: { federationRuntime: false },
+        experiments: { asyncStartup: false },
         remotes: {
           abc: 'ABC',
           def: 'DEF',
@@ -24,7 +24,7 @@ function createConfig() {
         filename: 'container2.js',
         library: { type: 'system' },
         exposes: ['./other', './self', './dep'],
-        experiments: { federationRuntime: false },
+        experiments: { asyncStartup: false },
         remotes: {
           abc: 'ABC',
           def: 'DEF',

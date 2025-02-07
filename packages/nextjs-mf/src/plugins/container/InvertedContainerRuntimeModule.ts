@@ -55,16 +55,29 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const nameJSON = JSON.stringify(containerEntryModule._name);
 
     return Template.asString([
-      `var innerRemote;`,
-      `function attachRemote () {`,
-      Template.indent([
-        `innerRemote = ${initRuntimeModuleGetter};`,
-        `var gs = ${RuntimeGlobals.global} || globalThis`,
-        `gs[${nameJSON}] = innerRemote`,
-        `return innerRemote;`,
-      ]),
-      `};`,
-      `attachRemote();`,
+      `var prevStartup = ${RuntimeGlobals.startup};`,
+      `var hasRun = false;`,
+      `var cachedRemote;`,
+      `${RuntimeGlobals.startup} = ${compilation.runtimeTemplate.basicFunction(
+        '',
+        Template.asString([
+          `if (!hasRun) {`,
+          `  hasRun = true;`,
+          `  console.log("startup");`,
+          `  if (typeof prevStartup === 'function') {`,
+          `    console.log('running prevStartup');`,
+          `    prevStartup();`,
+          `  }`,
+          `  cachedRemote = ${initRuntimeModuleGetter};`,
+          `  var gs = ${RuntimeGlobals.global} || globalThis;`,
+          `  gs[${nameJSON}] = cachedRemote;`,
+          `  console.log(cachedRemote);`,
+          `} else if (typeof prevStartup === 'function') {`,
+          `  prevStartup();`,
+          `}`,
+          `return cachedRemote;`,
+        ]),
+      )};`,
     ]);
   }
 }

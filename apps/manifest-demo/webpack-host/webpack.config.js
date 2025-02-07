@@ -13,6 +13,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   };
   config.plugins.push(
     new ModuleFederationPlugin({
+      runtime: false,
       name: 'manifest_host',
       remotes: {
         remote1: 'webpack_provider@http://localhost:3009/mf-manifest.json',
