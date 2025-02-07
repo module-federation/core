@@ -1,6 +1,14 @@
-# Handling Remote Module Loading Failures
+---
+title: Remote Rendering Error Handle Solutions
+---
+
+# Remote Rendering Error Handle Solutions
 
 import BlogGifGrid from '@components/BlogGifGrid.tsx';
+
+:::tip Version Requirement
+This solution requires `@module-federation/runtime` version 0.8.10 or above
+:::
 
 ## Background
 Remote module loading can fail due to various factors such as network resource loading failures or internal business logic rendering errors.
@@ -9,7 +17,10 @@ While Module Federation Runtime provides detailed error logging and runtime hook
 
 ## Solutions
 
-To build a robust remote module loading mechanism, we can address potential issues at three levels:
+To build a robust remote module rendering mechanism, we can address potential issues at three levels:
+
+> The following solutions can be referenced in the [router-demo](https://github.com/module-federation/core/tree/main/apps/router-demo) example.
+
 
 ### Network Layer: Retry Mechanism
 

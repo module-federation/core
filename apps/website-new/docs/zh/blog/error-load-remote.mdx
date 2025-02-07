@@ -1,6 +1,16 @@
-# 远程模块加载失败处理方案
+---
+title: 远程模块渲染错误处理方案
+---
+
+# 远程模块渲染错误处理方案
 
 import BlogGifGrid from '@components/BlogGifGrid.tsx';
+
+
+:::tip 版本要求
+此方案需要升级 `@module-federation/runtime` 版本至 0.8.10 或以上版本
+:::
+
 
 ## 背景
 远程模块加载过程可能会因网络资源加载失败或自身业务逻辑渲染失败等因素造成远程模块加载失败。
@@ -10,6 +20,8 @@ import BlogGifGrid from '@components/BlogGifGrid.tsx';
 ## 解决方案
 
 为了构建一个健壮的远程模块加载机制，我们可以从以下三个层面来处理可能出现的问题：
+
+> 以下解决方案均可参考 [router-demo](https://github.com/module-federation/core/tree/main/apps/router-demo) 中示例。
 
 ### 网络层：重试机制
 
