@@ -29,7 +29,7 @@ features:
     details: Supports Rspack and Webpack builds, accelerating your application builds.
     icon: 🦀
   - title: Development Experience
-    details: Module federation supports dynamic type hints and chrome devtool to enhance the development experience.
+    details: Module federation supports dynamic type hints and Chrome Devtool to enhance the development experience.
     icon: 🚀
   - title: Plugin System
     details: Hooks allow you to quickly define your own plugins to control the behavior of module loading.
