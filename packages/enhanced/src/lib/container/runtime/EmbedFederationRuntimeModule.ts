@@ -63,9 +63,16 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
 
     const result = Template.asString([
       `var oldStartup = ${RuntimeGlobals.startup};`,
+      `var hasRun = false;`,
       `${RuntimeGlobals.startup} = ${compilation.runtimeTemplate.basicFunction(
         '',
-        [`${initRuntimeModuleGetter};`, `return oldStartup();`],
+        [
+          `if (!hasRun) {`,
+          `  hasRun = true;`,
+          `  ${initRuntimeModuleGetter};`,
+          `}`,
+          `return oldStartup();`,
+        ],
       )};`,
     ]);
     this._cachedGeneratedCode = result;
