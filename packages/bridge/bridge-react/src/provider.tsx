@@ -1,15 +1,14 @@
-import { useLayoutEffect, useRef, useState } from 'react';
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import ReactDOMClient from 'react-dom/client';
 import type {
   ProviderParams,
   RenderFnParams,
 } from '@module-federation/bridge-shared';
 import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
-import { LoggerInstance, atLeastReact18 } from './utils';
+import { LoggerInstance } from './utils';
 import { federationRuntime } from './plugin';
+import { createRoot } from './compat';
 
 type RenderParams = RenderFnParams & {
   [key: string]: unknown;
@@ -18,7 +17,7 @@ type DestroyParams = {
   moduleName: string;
   dom: HTMLElement;
 };
-type RootType = HTMLElement | ReactDOMClient.Root;
+type RootType = HTMLElement | ReturnType<typeof createRoot>;
 
 export type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
@@ -67,7 +66,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
 
         const rootComponentWithErrorBoundary = (
-          // set ErrorBoundary for RawComponent rendering error, usually caused by user app rendering error
           <ErrorBoundary FallbackComponent={fallback}>
             <RawComponent
               appInfo={{
@@ -81,53 +79,39 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
             />
           </ErrorBoundary>
         );
-        // call render function
-        if (atLeastReact18(React)) {
-          if (bridgeInfo?.render) {
-            // in case bridgeInfo?.render is an async function, resolve this to promise
-            Promise.resolve(
-              bridgeInfo?.render(rootComponentWithErrorBoundary, dom),
-            ).then((root: RootType) => rootMap.set(info.dom, root));
-          } else {
-            const root: RootType = ReactDOMClient.createRoot(info.dom);
-            root.render(rootComponentWithErrorBoundary);
-            rootMap.set(info.dom, root);
-          }
+
+        if (bridgeInfo?.render) {
+          // in case bridgeInfo?.render is an async function, resolve this to promise
+          Promise.resolve(
+            bridgeInfo?.render(rootComponentWithErrorBoundary, dom),
+          ).then((root: RootType) => rootMap.set(info.dom, root));
         } else {
-          // react 17 render
-          const renderFn = bridgeInfo?.render || ReactDOM.render;
-          renderFn?.(rootComponentWithErrorBoundary, info.dom);
+          // Dynamically import react-dom/client
+          import('react-dom/client').then(
+            (ReactDOMClient: typeof import('react-dom/client')) => {
+              const root = ReactDOMClient.createRoot(info.dom);
+              root.render(rootComponentWithErrorBoundary);
+              rootMap.set(info.dom, root);
+            },
+          );
         }
+
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
       },
 
-      async destroy(info: DestroyParams) {
-        LoggerInstance.debug(`createBridgeComponent destroy Info`, {
-          dom: info.dom,
-        });
-        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
-
-        // call destroy function
-        if (atLeastReact18(React)) {
-          const root = rootMap.get(info.dom);
-          (root as ReactDOMClient.Root)?.unmount();
+      destroy(info: DestroyParams) {
+        LoggerInstance.debug(`createBridgeComponent destroy Info`, info);
+        const root = rootMap.get(info.dom);
+        if (root) {
+          if ('unmount' in root) {
+            root.unmount();
+          } else {
+            ReactDOM.unmountComponentAtNode(root as HTMLElement);
+          }
           rootMap.delete(info.dom);
-        } else {
-          ReactDOM.unmountComponentAtNode(info.dom);
         }
-
-        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
+        instance?.bridgeHook?.lifecycle?.destroyBridge?.emit(info);
       },
-      rawComponent: bridgeInfo.rootComponent,
-      __BRIDGE_FN__: (_args: T) => {},
     };
   };
-}
-
-export function ShadowRoot(info: { children: () => JSX.Element }) {
-  const [root] = useState(null);
-  const domRef = useRef(null);
-  useLayoutEffect(() => {});
-
-  return <div ref={domRef}>{root && <info.children />}</div>;
 }
