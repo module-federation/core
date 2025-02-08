@@ -86,14 +86,9 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
             bridgeInfo?.render(rootComponentWithErrorBoundary, dom),
           ).then((root: RootType) => rootMap.set(info.dom, root));
         } else {
-          // Dynamically import react-dom/client
-          import('react-dom/client').then(
-            (ReactDOMClient: typeof import('react-dom/client')) => {
-              const root = ReactDOMClient.createRoot(info.dom);
-              root.render(rootComponentWithErrorBoundary);
-              rootMap.set(info.dom, root);
-            },
-          );
+          const root = createRoot(info.dom);
+          root.render(rootComponentWithErrorBoundary);
+          rootMap.set(info.dom, root);
         }
 
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};

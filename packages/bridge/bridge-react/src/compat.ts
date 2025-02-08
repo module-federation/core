@@ -11,7 +11,6 @@ interface Root {
   unmount(): void;
 }
 
-// Check if we're running React 18
 const isReact18 = ReactDOM.version.startsWith('18');
 
 /**
@@ -27,9 +26,10 @@ export function createRoot(
     return (ReactDOM as any).createRoot(container, options);
   }
 
-  // For React 16, simulate the new root API using render/unmountComponentAtNode
+  // For React 16/17, simulate the new root API using render/unmountComponentAtNode
   return {
     render(children: React.ReactNode) {
+      // @ts-ignore - React 17's render method is deprecated but still functional
       ReactDOM.render(children, container);
     },
     unmount() {
@@ -52,9 +52,10 @@ export function hydrateRoot(
     return (ReactDOM as any).hydrateRoot(container, initialChildren, options);
   }
 
-  // For React 16, simulate the new root API using hydrate
+  // For React 16/17, simulate the new root API using hydrate
   return {
     render(children: React.ReactNode) {
+      // @ts-ignore - React 17's hydrate method is deprecated but still functional
       ReactDOM.hydrate(children, container);
     },
     unmount() {
