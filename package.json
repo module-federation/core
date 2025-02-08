@@ -138,7 +138,7 @@
     "@storybook/core-common": "8.1.11",
     "@storybook/core-server": "8.3.5",
     "@storybook/nextjs": "^8.3.5",
-    "@storybook/node-logger": "8.1.11",
+    "@storybook/node-logger": "8.5.3",
     "@storybook/react": "8.3.5",
     "@svgr/webpack": "8.1.0",
     "@swc-node/register": "1.10.9",
