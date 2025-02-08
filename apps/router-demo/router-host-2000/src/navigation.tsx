@@ -133,6 +133,20 @@ function Navgation() {
       key: '/remote-resource-error',
       icon: <GroupOutlined />,
     },
+    {
+      label: <Link to="/error-load-with-hook">error-load-with-hook</Link>,
+      key: '/error-load-with-hook',
+      icon: <GroupOutlined />,
+    },
+    {
+      label: (
+        <Link to="/error-load-with-error-boundary">
+          error-load-with-error-boundary
+        </Link>
+      ),
+      key: '/error-load-with-error-boundary',
+      icon: <GroupOutlined />,
+    },
   ];
 
   const onClick: MenuProps['onClick'] = (e) => {

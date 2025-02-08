@@ -11,6 +11,11 @@ const retryPlugin = () =>
       retryDelay: 1000,
       moduleName: ['remote1'],
       cb: (resolve, error) => {
+        if (error) {
+          throw new Error(
+            'The request failed three times and has now been abandoned',
+          );
+        }
         return setTimeout(() => {
           resolve(error);
         }, 1000);

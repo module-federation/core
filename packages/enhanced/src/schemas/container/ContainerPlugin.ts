@@ -1,34 +1,19 @@
-//@ts-nocheck
-const runtimePlugin = {
-  type: 'array',
-  items: {
-    anyOf: [
-      {
-        type: 'string',
-        minLength: 1,
-        description: 'Runtime Plugin File Path.',
-      },
-      {
-        type: 'object',
-        required: ['import', 'async'],
-        properties: {
-          import: {
-            type: 'string',
-            minLength: 1,
-            description: 'Runtime Plugin File Path.',
-          },
-          async: {
-            type: 'boolean',
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
-  },
-};
+// @ts-nocheck
+/* eslint-disable */
+/*
+ * This file was automatically generated.
+ * DO NOT MODIFY BY HAND.
+ */
 
 export default {
   definitions: {
+    RuntimePlugin: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      description: 'Runtime plugin file paths or package name.',
+    },
     AmdContainer: {
       description:
         'Add a container for define/require functions in the AMD module.',
@@ -330,7 +315,9 @@ export default {
     runtime: {
       $ref: '#/definitions/EntryRuntime',
     },
-    runtimePlugins: runtimePlugin,
+    runtimePlugins: {
+      $ref: '#/definitions/RuntimePlugin',
+    },
     shareScope: {
       description:
         "The name of the share scope which is shared with the host (defaults to 'default').",
@@ -341,14 +328,28 @@ export default {
       type: 'object',
       properties: {
         federationRuntime: {
-          anyOf: [{ type: 'boolean' }, { enum: ['hoisted'] }],
+          anyOf: [
+            {
+              type: 'boolean',
+            },
+            {
+              enum: ['hoisted'],
+            },
+          ],
         },
         externalRuntime: {
-          anyOf: [{ type: 'boolean' }, { enum: ['provide'] }],
+          anyOf: [
+            {
+              type: 'boolean',
+            },
+            {
+              enum: ['provide'],
+            },
+          ],
         },
       },
       additionalProperties: false,
     },
   },
   required: ['name', 'exposes'],
-};
+} as const;

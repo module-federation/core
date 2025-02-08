@@ -113,7 +113,11 @@ export class RemoteHandler {
           error: unknown;
           options?: any;
           from: CallFrom;
-          lifecycle: 'onLoad' | 'beforeRequest' | 'beforeLoadShare';
+          lifecycle:
+            | 'beforeRequest'
+            | 'beforeLoadShare'
+            | 'afterResolve'
+            | 'onLoad';
           origin: FederationHost;
         },
       ],

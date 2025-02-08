@@ -1,4 +1,10 @@
-//@ts-nocheck
+// @ts-nocheck
+/* eslint-disable */
+/*
+ * This file was automatically generated.
+ * DO NOT MODIFY BY HAND.
+ */
+
 export default {
   definitions: {
     ExternalsType: {
@@ -136,4 +142,4 @@ export default {
     },
   },
   required: ['remoteType', 'remotes'],
-};
+} as const;

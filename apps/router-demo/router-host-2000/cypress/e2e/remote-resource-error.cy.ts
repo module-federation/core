@@ -6,7 +6,7 @@ describe('router-remote-error in host', () => {
   describe('Remote Resource Error render and will trigger ErrorBoundary', () => {
     Cypress.on('uncaught:exception', () => false);
     it('jump to remote error page', async () => {
-      cy.get('.host-menu > li:nth-child(8)').click();
+      cy.get('.host-menu > li:nth-child(8)').click({ force: true });
 
       cy.get('[data-test-id="loading"]').should('have.length', 1);
       cy.get('[data-test-id="loading"]')
@@ -16,7 +16,7 @@ describe('router-remote-error in host', () => {
       await wait5s();
       getP().contains('Something went wrong');
       getPre().contains(
-        'Error: The request failed three times and has now been abandoned',
+        'The request failed three times and has now been abandoned',
       );
     });
   });

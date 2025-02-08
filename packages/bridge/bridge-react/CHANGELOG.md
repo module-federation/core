@@ -1,5 +1,13 @@
 # @module-federation/bridge-react
 
+## 0.8.10
+
+### Patch Changes
+
+- e751ad0: change rollup config to prevent react-dom/client code being bundled into the bridge-react package
+  - @module-federation/sdk@0.8.10
+  - @module-federation/bridge-shared@0.8.10
+
 ## 0.8.9
 
 ### Patch Changes
