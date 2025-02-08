@@ -117,7 +117,7 @@
     "@nx/js": "20.1.4",
     "@nx/next": "20.1.4",
     "@nx/node": "20.1.4",
-    "@nx/react": "20.1.4",
+    "@nx/react": "20.4.2",
     "@nx/rollup": "20.1.4",
     "@nx/rspack": "20.1.4",
     "@nx/storybook": "20.1.4",
