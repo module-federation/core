@@ -41,6 +41,9 @@ export default defineConfig({
             './react-component': './src/components/react-component.tsx',
           },
           runtimePlugins: ['./runtimePlugin.ts'],
+          experiments: {
+            asyncStartup: true,
+          },
           filename: 'remoteEntry.js',
           shared: {
             'react/': {
@@ -59,9 +62,6 @@ export default defineConfig({
               singleton: true,
               requiredVersion: '^18.3.1',
             },
-          },
-          experiments: {
-            federationRuntime: 'hoisted',
           },
           dataPrefetch: true,
         }) as any,

@@ -99,9 +99,6 @@ export interface ContainerPluginOptions {
    */
   runtimePlugins?: string[];
 
-  experiments?: {
-    federationRuntime?: false | 'hoisted';
-  };
   dataPrefetch?: DataPrefetch;
 }
 /**

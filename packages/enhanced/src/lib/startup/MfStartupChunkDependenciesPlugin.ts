@@ -43,13 +43,10 @@ class StartupChunkDependenciesPlugin {
     compiler.hooks.thisCompilation.tap(
       'MfStartupChunkDependenciesPlugin',
       (compilation) => {
-        const isEnabledForChunk = (chunk: Chunk) =>
-          this.isEnabledForChunk(chunk, compilation);
-
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'StartupChunkDependenciesPlugin',
           (chunk, set, { chunkGraph }) => {
-            if (!isEnabledForChunk(chunk)) return;
+            if (!this.isEnabledForChunk(chunk, compilation)) return;
             if (chunk.hasRuntime()) {
               set.add(RuntimeGlobals.startupEntrypoint);
               set.add(RuntimeGlobals.ensureChunk);
@@ -61,7 +58,7 @@ class StartupChunkDependenciesPlugin {
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'MfStartupChunkDependenciesPlugin',
           (chunk, set, { chunkGraph }) => {
-            if (!isEnabledForChunk(chunk)) return;
+            if (!this.isEnabledForChunk(chunk, compilation)) return;
             if (chunkGraph.getNumberOfEntryModules(chunk) === 0) return;
             set.add(federationStartup);
           },
@@ -72,7 +69,7 @@ class StartupChunkDependenciesPlugin {
           .tap(
             'StartupChunkDependenciesPlugin',
             (chunk, set, { chunkGraph }) => {
-              if (!isEnabledForChunk(chunk)) return;
+              if (!this.isEnabledForChunk(chunk, compilation)) return;
               set.add(RuntimeGlobals.require);
               set.add(RuntimeGlobals.ensureChunk);
               set.add(RuntimeGlobals.ensureChunkIncludeEntries);
@@ -93,9 +90,12 @@ class StartupChunkDependenciesPlugin {
           (startupSource, lastInlinedModule, renderContext) => {
             const { chunk, chunkGraph, runtimeTemplate } = renderContext;
 
-            if (!isEnabledForChunk(chunk)) {
+            if (!this.isEnabledForChunk(chunk, compilation)) {
               return startupSource;
             }
+
+            if (chunkGraph.getNumberOfEntryModules(chunk) === 0)
+              return startupSource;
 
             const treeRuntimeRequirements =
               chunkGraph.getTreeRuntimeRequirements(chunk);
