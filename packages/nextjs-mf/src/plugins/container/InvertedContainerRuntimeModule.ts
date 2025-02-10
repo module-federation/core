@@ -1,6 +1,4 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Module } from 'webpack';
-import { container } from '@module-federation/enhanced';
 import type ContainerEntryModule from '@module-federation/enhanced/src/lib/container/ContainerEntryModule';
 const { RuntimeModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
@@ -27,6 +25,15 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     if (chunk.runtime === 'webpack-api-runtime') {
       return '';
     }
+
+    const runtimeChunk = compilation.options.optimization?.runtimeChunk;
+    if (runtimeChunk === 'single' || typeof runtimeChunk === 'object') {
+      const logger = compilation.getLogger('InvertedContainerRuntimeModule');
+      logger.info(
+        'Runtime chunk is set to single. Consider adding runtime: false to your ModuleFederationPlugin configuration to prevent runtime conflicts.',
+      );
+    }
+
     let containerEntryModule;
     for (const containerDep of this.options.containers) {
       const mod = compilation.moduleGraph.getModule(containerDep);
