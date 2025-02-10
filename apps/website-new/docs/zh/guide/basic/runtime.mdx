@@ -67,7 +67,7 @@ type InitOptions {
     name: string;
     // 依赖的远程模块列表
     // 使用 version 内容的时候需要配合 snapshot 使用，该内容还在施工中
-    remotes: Array<RemoteInfo>;
+    remotes: Array<Remote>;
     // 当前消费者需要共享的依赖项列表
     // 当使用构建插件时，用户可以在构建插件中配置需要共享的依赖项，而构建插件会将需要共享的依赖项注入到运行时共享配置中
     // Shared 在运行时传入时必须在版本实例引用中手动传入，因为它不能在运行时直接传入。
@@ -90,9 +90,7 @@ type SharedBaseArgs = {
 
 type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
 
-type RemoteInfo = (RemotesWithEntry | RemotesWithVersion) & {
-   alias?: string;
-};
+type Remote = (RemotesWithEntry | RemotesWithVersion) & RemoteInfoCommon
 
 interface RemotesWithVersion {
    name: string;
@@ -103,6 +101,15 @@ interface RemotesWithEntry {
    name: string;
    entry: string;
 }
+
+interface RemoteInfoCommon {
+  alias?: string;
+  shareScope?: string;
+  type?: RemoteEntryType;
+  entryGlobalName?: string;
+}
+
+type RemoteEntryType =|'var'|'module'|'assign'|'assign-properties'|'this'|'window'|'self'|'global'|'commonjs'|'commonjs2'|'commonjs-module'| 'commonjs-static'|'amd'|'amd-require'|'umd'|'umd2'|'jsonp'|'system'| string;
 
 type ShareInfos = {
    // 依赖的包名、依赖的基本信息和共享策略
