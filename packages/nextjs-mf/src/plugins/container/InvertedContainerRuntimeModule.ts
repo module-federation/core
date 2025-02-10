@@ -41,7 +41,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     if (
       compilation.chunkGraph.isEntryModuleInChunk(containerEntryModule, chunk)
     ) {
-      // dont apply to remote entry itself
+      // Don't apply to the remote entry itself
       return '';
     }
     const initRuntimeModuleGetter = compilation.runtimeTemplate.moduleRaw({
@@ -62,20 +62,20 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         '',
         Template.asString([
           `if (!hasRun) {`,
-          `  hasRun = true;`,
-          `  console.log("startup");`,
-          `  if (typeof prevStartup === 'function') {`,
-          `    console.log('running prevStartup');`,
-          `    prevStartup();`,
-          `  }`,
-          `  cachedRemote = ${initRuntimeModuleGetter};`,
-          `  var gs = ${RuntimeGlobals.global} || globalThis;`,
-          `  gs[${nameJSON}] = cachedRemote;`,
-          `  console.log(cachedRemote);`,
+          Template.indent(
+            Template.asString([
+              `hasRun = true;`,
+              `if (typeof prevStartup === 'function') {`,
+              Template.indent(Template.asString([`prevStartup();`])),
+              `}`,
+              `cachedRemote = ${initRuntimeModuleGetter};`,
+              `var gs = ${RuntimeGlobals.global} || globalThis;`,
+              `gs[${nameJSON}] = cachedRemote;`,
+            ]),
+          ),
           `} else if (typeof prevStartup === 'function') {`,
-          `  prevStartup();`,
+          Template.indent(`prevStartup();`),
           `}`,
-          `return cachedRemote;`,
         ]),
       )};`,
     ]);
