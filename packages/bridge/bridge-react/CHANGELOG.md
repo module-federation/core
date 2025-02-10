@@ -1,13 +1,5 @@
 # @module-federation/bridge-react
 
-## 0.8.11
-
-### Patch Changes
-
-- 646314d: fix: the bridge-react package was failing when used with React 16 due to missing react-dom/client module
-  - @module-federation/sdk@0.8.11
-  - @module-federation/bridge-shared@0.8.11
-
 ## 0.8.10
 
 ### Patch Changes
