@@ -35,12 +35,16 @@ export default defineConfig({
 
       appendPlugins([
         new ModuleFederationPlugin({
+          runtime: false,
           name: 'app1',
           exposes: {
             './thing': './src/test.ts',
             './react-component': './src/components/react-component.tsx',
           },
           runtimePlugins: ['./runtimePlugin.ts'],
+          experiments: {
+            asyncStartup: true,
+          },
           filename: 'remoteEntry.js',
           shared: {
             'react/': {
@@ -59,9 +63,6 @@ export default defineConfig({
               singleton: true,
               requiredVersion: '^18.3.1',
             },
-          },
-          experiments: {
-            federationRuntime: 'hoisted',
           },
           dataPrefetch: true,
         }) as any,
