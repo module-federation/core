@@ -20,15 +20,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        // index: path.resolve(__dirname, 'src/index.ts'),
-        // plugin: path.resolve(__dirname, 'src/plugin.ts'),
         index: path.resolve(__dirname, 'src/index.ts'),
         plugin: path.resolve(__dirname, 'src/provider/plugin.ts'),
-
-        // router: path.resolve(__dirname, 'src/router.tsx'),
-        // 'router-v5': path.resolve(__dirname, 'src/router-v5.tsx'),
-        // 'router-v6': path.resolve(__dirname, 'src/router-v6.tsx'),
-
         router: path.resolve(__dirname, 'src/router/default.tsx'),
         'router-v5': path.resolve(__dirname, 'src/router/v5.tsx'),
         'router-v6': path.resolve(__dirname, 'src/router/v6.tsx'),
