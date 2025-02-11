@@ -11,7 +11,6 @@ import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
 import { LoggerInstance, pathJoin, getRootDomDefaultClassName } from '../utils';
 import { federationRuntime } from '../provider/plugin';
-// import { RouterContext } from '../core/context';
 
 declare const __APP_VERSION__: string;
 export interface RenderFnParams extends ProviderParams {
