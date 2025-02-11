@@ -13,4 +13,4 @@ export {
 } from './v6';
 
 // Re-export base router components
-export { BrowserRouter, RouterProvider as BaseRouterProvider } from './base';
+export { BrowserRouter, RouterProvider as BaseRouterProvider } from './default';

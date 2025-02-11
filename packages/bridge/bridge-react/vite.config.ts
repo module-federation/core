@@ -19,8 +19,8 @@ export default defineConfig({
     lib: {
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
-        plugin: path.resolve(__dirname, 'src/core/plugin.ts'),
-        router: path.resolve(__dirname, 'src/router/base.tsx'),
+        plugin: path.resolve(__dirname, 'src/provider/plugin.ts'),
+        router: path.resolve(__dirname, 'src/router/default.tsx'),
         'router-v5': path.resolve(__dirname, 'src/router/v5.tsx'),
         'router-v6': path.resolve(__dirname, 'src/router/v6.tsx'),
       },
@@ -70,14 +70,14 @@ export default defineConfig({
                     );
                 }
                 // 处理基础路由
-                if (
-                  fileName.includes('router.') &&
-                  !fileName.includes('router-')
-                ) {
-                  chunk.code = chunk.code
-                    .replace(/['"]react-router-dom['"]/g, "'react-router-dom'")
-                    .replace(/['"]react-router['"]/g, "'react-router'");
-                }
+                // if (
+                //   fileName.includes('router.') &&
+                //   !fileName.includes('router-')
+                // ) {
+                //   chunk.code = chunk.code
+                //     .replace(/['"]react-router-dom['"]/g, "'react-router-dom'")
+                //     .replace(/['"]react-router['"]/g, "'react-router'");
+                // }
               }
             }
           },
