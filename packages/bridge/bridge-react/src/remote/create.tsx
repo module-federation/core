@@ -4,7 +4,7 @@ import {
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
 import { LoggerInstance } from '../utils';
-import RemoteApp from './index';
+import RemoteApp from './component';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 
 export interface RenderFnParams extends ProviderParams {
