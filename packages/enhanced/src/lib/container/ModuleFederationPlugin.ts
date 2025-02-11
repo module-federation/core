@@ -73,7 +73,11 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       );
     }
     if (options.experiments?.provideExternalRuntime) {
-      if (options.exposes) {
+      if (
+        (typeof options.exposes === 'object' &&
+          Object.keys(options.exposes).length === 0) ||
+        options.exposes
+      ) {
         throw new Error(
           'You can only set provideExternalRuntime: true in pure consumer which not expose modules.',
         );
