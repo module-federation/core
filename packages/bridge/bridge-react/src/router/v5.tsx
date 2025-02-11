@@ -2,8 +2,8 @@ import React, { useContext } from 'react';
 // The upper alias react-router-dom$ into this file avoids the loop
 // @ts-ignore
 import * as ReactRouterDom from 'react-router-dom/index.js';
-import { RouterContext } from './context';
-import { LoggerInstance } from './utils';
+import { RouterContext } from '../core/context';
+import { LoggerInstance } from '../utils';
 
 function WraperRouter(
   props:
@@ -36,8 +36,7 @@ function WraperRouter(
 }
 
 // @ts-ignore
-// because export directly from react-router-dom/index.js will cause build falied.
+// because export directly from react-router-dom/index.js will cause build failed.
 // it will be replace by react-router-dom/index.js in building phase
 export * from 'react-router-dom/';
-
 export { WraperRouter as BrowserRouter };

@@ -6,7 +6,7 @@ import type {
 } from '@module-federation/bridge-shared';
 import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
-import { LoggerInstance } from './utils';
+import { LoggerInstance } from '../utils';
 import { federationRuntime } from './plugin';
 import { createRoot } from './compat';
 

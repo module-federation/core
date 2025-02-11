@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 // The upper alias react-router-dom$ into this file avoids the loop
 import * as ReactRouterDom from 'react-router-dom/';
-import { RouterContext } from './context';
-import { LoggerInstance } from './utils';
+import { RouterContext } from '../core/context';
+import { LoggerInstance } from '../utils';
 
 function WrapperRouter(
   props:
