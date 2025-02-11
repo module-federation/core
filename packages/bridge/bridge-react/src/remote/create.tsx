@@ -3,8 +3,8 @@ import {
   ErrorBoundary,
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
-import { LoggerInstance } from './utils';
-import RemoteApp from './remote';
+import { LoggerInstance } from '../utils';
+import RemoteApp from './index';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 
 export interface RenderFnParams extends ProviderParams {

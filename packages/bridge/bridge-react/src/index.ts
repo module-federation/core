@@ -1,5 +1,7 @@
-export { createRemoteComponent } from './create';
-export { createBridgeComponent } from './provider';
+// export { createRemoteComponent } from './create';
+// export { createBridgeComponent } from './provider';
+export { createRemoteComponent } from './remote/create';
+export { createBridgeComponent } from './provider/create';
 export type {
   ProviderParams,
   RenderFnParams,
