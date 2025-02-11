@@ -21,10 +21,10 @@ export default defineConfig({
     lib: {
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
-        plugin: path.resolve(__dirname, 'src/plugin.ts'),
-        router: path.resolve(__dirname, 'src/router.tsx'),
-        'router-v5': path.resolve(__dirname, 'src/router-v5.tsx'),
-        'router-v6': path.resolve(__dirname, 'src/router-v6.tsx'),
+        plugin: path.resolve(__dirname, 'src/provider/plugin.ts'),
+        router: path.resolve(__dirname, 'src/router/default.tsx'),
+        'router-v5': path.resolve(__dirname, 'src/router/v5.tsx'),
+        'router-v6': path.resolve(__dirname, 'src/router/v6.tsx'),
       },
       formats: ['cjs', 'es'],
       fileName: (format, entryName) => `${entryName}.${format}.js`,
