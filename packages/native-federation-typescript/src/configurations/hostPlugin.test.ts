@@ -21,78 +21,97 @@ describe('hostPlugin', () => {
       const invokeRetrieve = () => retrieveHostConfig({});
       expect(invokeRetrieve).toThrowError('moduleFederationConfig is required');
     });
+  });
 
-    describe('correctly intersect with default options', () => {
-      it('only moduleFederationConfig provided', () => {
-        const { hostOptions, mapRemotesToDownload } = retrieveHostConfig({
-          moduleFederationConfig,
-        });
-
-        expect(hostOptions).toStrictEqual({
-          moduleFederationConfig,
-          typesFolder: '@mf-types',
-          deleteTypesFolder: true,
-          maxRetries: 3,
-        });
-
-        expect(mapRemotesToDownload).toStrictEqual({
-          moduleFederationTypescript: 'http://localhost:3000/@mf-types.zip',
-        });
+  describe('correctly intersect with default options', () => {
+    it('only moduleFederationConfig provided', () => {
+      const { hostOptions, mapRemotesToDownload } = retrieveHostConfig({
+        moduleFederationConfig,
       });
 
-      it('all options provided', () => {
-        const options = {
-          moduleFederationConfig,
-          typesFolder: 'custom-types',
-          deleteTypesFolder: false,
-          maxRetries: 1,
-        };
-
-        const { hostOptions, mapRemotesToDownload } =
-          retrieveHostConfig(options);
-
-        expect(hostOptions).toStrictEqual(options);
-
-        expect(mapRemotesToDownload).toStrictEqual({
-          moduleFederationTypescript: 'http://localhost:3000/custom-types.zip',
-        });
-      });
-    });
-
-    it('correctly resolve subpath remotes', () => {
-      const subpathModuleFederationConfig = {
-        ...moduleFederationConfig,
-        remotes: {
-          moduleFederationTypescript:
-            'http://localhost:3000/subpatha/subpathb/remoteEntry.js',
-        },
-      };
-
-      const { mapRemotesToDownload } = retrieveHostConfig({
-        moduleFederationConfig: subpathModuleFederationConfig,
+      expect(hostOptions).toStrictEqual({
+        moduleFederationConfig,
+        typesFolder: '@mf-types',
+        deleteTypesFolder: true,
+        maxRetries: 3,
       });
 
       expect(mapRemotesToDownload).toStrictEqual({
+        moduleFederationTypescript: 'http://localhost:3000/@mf-types.zip',
+      });
+    });
+
+    it('all options provided', () => {
+      const options = {
+        moduleFederationConfig,
+        typesFolder: 'custom-types',
+        deleteTypesFolder: false,
+        maxRetries: 1,
+      };
+
+      const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(options);
+
+      expect(hostOptions).toStrictEqual(options);
+
+      expect(mapRemotesToDownload).toStrictEqual({
+        moduleFederationTypescript: 'http://localhost:3000/custom-types.zip',
+      });
+    });
+  });
+
+  it('correctly resolve subpath remotes', () => {
+    const subpathModuleFederationConfig = {
+      ...moduleFederationConfig,
+      remotes: {
         moduleFederationTypescript:
-          'http://localhost:3000/subpatha/subpathb/@mf-types.zip',
-      });
+          'http://localhost:3000/subpatha/subpathb/remoteEntry.js',
+      },
+    };
+
+    const { mapRemotesToDownload } = retrieveHostConfig({
+      moduleFederationConfig: subpathModuleFederationConfig,
     });
 
-    it('correctly resolve remotes with relative reference in place of absolute url', () => {
-      const subpathModuleFederationConfig = {
-        ...moduleFederationConfig,
-        remotes: {
-          moduleFederationTypescript: '/subpatha/remoteEntry.js',
+    expect(mapRemotesToDownload).toStrictEqual({
+      moduleFederationTypescript:
+        'http://localhost:3000/subpatha/subpathb/@mf-types.zip',
+    });
+  });
+
+  it('correctly resolve remotes with relative reference in place of absolute url', () => {
+    const subpathModuleFederationConfig = {
+      ...moduleFederationConfig,
+      remotes: {
+        moduleFederationTypescript: '/subpatha/remoteEntry.js',
+      },
+    };
+
+    const { mapRemotesToDownload } = retrieveHostConfig({
+      moduleFederationConfig: subpathModuleFederationConfig,
+    });
+
+    expect(mapRemotesToDownload).toStrictEqual({
+      moduleFederationTypescript: '/subpatha/@mf-types.zip',
+    });
+  });
+
+  it('correctly resolve remotes with object entry', () => {
+    const subpathModuleFederationConfig = {
+      ...moduleFederationConfig,
+      remotes: {
+        moduleFederationTypescript: {
+          entry: 'http://localhost:3000/subpatha/subpathb/remoteEntry.js',
         },
-      };
+      },
+    };
 
-      const { mapRemotesToDownload } = retrieveHostConfig({
-        moduleFederationConfig: subpathModuleFederationConfig,
-      });
+    const { mapRemotesToDownload } = retrieveHostConfig({
+      moduleFederationConfig: subpathModuleFederationConfig,
+    });
 
-      expect(mapRemotesToDownload).toStrictEqual({
-        moduleFederationTypescript: '/subpatha/@mf-types.zip',
-      });
+    expect(mapRemotesToDownload).toStrictEqual({
+      moduleFederationTypescript:
+        'http://localhost:3000/subpatha/subpathb/@mf-types.zip',
     });
   });
 });
