@@ -6,9 +6,18 @@ const defaultOptions = {
   maxRetries: 3,
 } satisfies Partial<HostOptions>;
 
-const retrieveRemoteStringUrl = (remote: string) => {
-  const splittedRemote = remote.split('@');
-  return splittedRemote[splittedRemote.length - 1];
+const retrieveRemoteStringUrl = (remote: string | Record<string, string>) => {
+  if (typeof remote === 'string') {
+    const splittedRemote = remote.split('@');
+    return splittedRemote[splittedRemote.length - 1];
+  }
+
+  if (typeof remote === 'object' && 'entry' in remote) {
+    const splittedRemote = remote.entry.split('@');
+    return splittedRemote[splittedRemote.length - 1];
+  }
+
+  throw new Error(`Invalid type of remote: ${typeof remote}`);
 };
 
 const FILE_PROTOCOL = 'file:';
