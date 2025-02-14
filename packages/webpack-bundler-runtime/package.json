@@ -37,10 +37,6 @@
       "import": "./dist/constant.esm.mjs",
       "require": "./dist/constant.cjs.js"
     },
-    "./container": {
-      "import": "./dist/container.esm.mjs",
-      "require": "./dist/container.cjs.js"
-    },
     "./*": "./*"
   },
   "typesVersions": {
