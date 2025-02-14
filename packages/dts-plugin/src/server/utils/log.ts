@@ -1,6 +1,5 @@
-import { createLogger } from '@module-federation/sdk';
+import { createLogger } from '@module-federation/sdk/logger';
 import * as log4js from 'log4js';
-import chalk from 'chalk';
 import { MF_SERVER_IDENTIFIER } from '../constant';
 import { ActionKind } from '../message/Action';
 
