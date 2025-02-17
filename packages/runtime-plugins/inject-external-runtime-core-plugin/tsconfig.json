@@ -13,7 +13,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "declaration": true
+    "declaration": true,
+    "paths": {
+      "@module-federation/runtime-tools/runtime-core": ["../../runtime-core"]
+    }
   },
   "files": [],
   "include": [],
