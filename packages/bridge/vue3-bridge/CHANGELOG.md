@@ -1,5 +1,22 @@
 # @module-federation/bridge-vue3
 
+## 0.8.11
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.11
+- @module-federation/sdk@0.8.11
+- @module-federation/bridge-shared@0.8.11
+
+## 0.8.10
+
+### Patch Changes
+
+- f141396: fix(vue3-bridge): bridge-vue3 parameter lossing issue
+  - @module-federation/runtime@0.8.10
+  - @module-federation/sdk@0.8.10
+  - @module-federation/bridge-shared@0.8.10
+
 ## 0.8.9
 
 ### Patch Changes

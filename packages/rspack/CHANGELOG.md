@@ -1,5 +1,29 @@
 # @module-federation/rspack
 
+## 0.8.11
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.11
+- @module-federation/runtime-tools@0.8.11
+- @module-federation/managers@0.8.11
+- @module-federation/manifest@0.8.11
+- @module-federation/dts-plugin@0.8.11
+- @module-federation/bridge-react-webpack-plugin@0.8.11
+- @module-federation/inject-external-runtime-core-plugin@0.8.11
+
+## 0.8.10
+
+### Patch Changes
+
+- @module-federation/dts-plugin@0.8.10
+- @module-federation/runtime-tools@0.8.10
+- @module-federation/inject-external-runtime-core-plugin@0.8.10
+- @module-federation/sdk@0.8.10
+- @module-federation/managers@0.8.10
+- @module-federation/manifest@0.8.10
+- @module-federation/bridge-react-webpack-plugin@0.8.10
+
 ## 0.8.9
 
 ### Patch Changes

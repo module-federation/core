@@ -1,5 +1,7 @@
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
-import type { FederationHost } from '@module-federation/runtime';
+import type {
+  FederationRuntimePlugin,
+  FederationHost,
+} from '@module-federation/runtime';
 
 export type FederationRuntimeType = {
   instance: FederationHost | null;

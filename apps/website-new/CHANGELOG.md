@@ -1,5 +1,18 @@
 # website-new
 
+## 1.0.24
+
+### Patch Changes
+
+- @module-federation/error-codes@0.8.11
+
+## 1.0.23
+
+### Patch Changes
+
+- 9566fbc: feat: allow errorLoadRemote hook catch remote entry resource loading error
+  - @module-federation/error-codes@0.8.10
+
 ## 1.0.22
 
 ### Patch Changes

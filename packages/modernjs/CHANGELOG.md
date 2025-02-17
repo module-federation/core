@@ -1,5 +1,24 @@
 # @module-federation/modern-js
 
+## 0.8.11
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.11
+- @module-federation/sdk@0.8.11
+- @module-federation/rsbuild-plugin@0.8.11
+- @module-federation/node@2.6.24
+
+## 0.8.10
+
+### Patch Changes
+
+- 21cc62c: chore: use new modern.js plugin for improved functionality
+  - @module-federation/node@2.6.23
+  - @module-federation/enhanced@0.8.10
+  - @module-federation/rsbuild-plugin@0.8.10
+  - @module-federation/sdk@0.8.10
+
 ## 0.8.9
 
 ### Patch Changes
