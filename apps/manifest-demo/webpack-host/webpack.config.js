@@ -22,9 +22,6 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
           'rspack_js_entry_provider@http://localhost:3012/remoteEntry.js',
         'modern-js-provider': 'app1@http://127.0.0.1:4001/mf-manifest.json',
       },
-      exposes: {
-        '.': './src/App.tsx',
-      },
       filename: 'remoteEntry.js',
       shared: {
         lodash: {},
@@ -49,10 +46,10 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       dataPrefetch: true,
       // experiments: { federationRuntime: 'hoisted' },
       runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
-      // experiments: {
-      //   provideExternalRuntime: true,
-      //   federationRuntime: 'hoisted',
-      // },
+      experiments: {
+        provideExternalRuntime: true,
+        federationRuntime: 'hoisted',
+      },
     }),
   );
 
