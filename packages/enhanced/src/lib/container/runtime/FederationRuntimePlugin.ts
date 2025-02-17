@@ -56,7 +56,8 @@ const EmbeddedRuntimePath = require.resolve(
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
-const onceForCompler = new WeakSet<Compiler>();
+const onceForCompiler = new WeakSet<Compiler>();
+const onceForCompilerEntryMap = new WeakMap<Compiler, string>();
 
 class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -176,6 +177,13 @@ class FederationRuntimePlugin {
       return '';
     }
 
+    const existedFilePath = onceForCompilerEntryMap.get(compiler);
+
+    if (existedFilePath) {
+      this.entryFilePath = existedFilePath;
+      return existedFilePath;
+    }
+
     if (!this.options?.virtualRuntimeEntry) {
       this.entryFilePath = FederationRuntimePlugin.getFilePath(
         compiler,
@@ -192,6 +200,10 @@ class FederationRuntimePlugin {
           this.options.experiments,
         ),
       )}`;
+    }
+
+    if (!existedFilePath) {
+      onceForCompilerEntryMap.set(compiler, this.entryFilePath);
     }
     return this.entryFilePath;
   }
@@ -451,11 +463,11 @@ class FederationRuntimePlugin {
       ).apply(compiler);
     }
     // dont run multiple times on every apply()
-    if (!onceForCompler.has(compiler)) {
+    if (!onceForCompiler.has(compiler)) {
       this.prependEntry(compiler);
       this.injectRuntime(compiler);
       this.setRuntimeAlias(compiler);
-      onceForCompler.add(compiler);
+      onceForCompiler.add(compiler);
     }
   }
 }
