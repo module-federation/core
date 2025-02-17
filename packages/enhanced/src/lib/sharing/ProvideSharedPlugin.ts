@@ -99,9 +99,7 @@ class ProvideSharedPlugin {
         const request = item.request || key;
         return {
           shareScope: item.shareScope || options.shareScope || 'default',
-          shareKey: item.layer
-            ? `(${item.layer})${item.shareKey || request}`
-            : item.shareKey || request,
+          shareKey: item.shareKey || request,
           version: item.version,
           eager: !!item.eager,
           requiredVersion: item.requiredVersion,

@@ -125,9 +125,7 @@ class ConsumeSharedPlugin {
         return {
           import: item.import === false ? undefined : item.import || request,
           shareScope: item.shareScope || options.shareScope || 'default',
-          shareKey: item.layer
-            ? `(${item.layer})${item.shareKey || request}`
-            : item.shareKey || request,
+          shareKey: item.shareKey || request,
           requiredVersion:
             item.requiredVersion === false
               ? false
