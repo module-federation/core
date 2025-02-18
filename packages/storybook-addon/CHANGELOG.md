@@ -1,5 +1,43 @@
 # @module-federation/storybook-addon
 
+## 4.0.3
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.11
+- @module-federation/sdk@0.8.11
+- @module-federation/utilities@3.1.42
+
+## 4.0.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.10
+- @module-federation/sdk@0.8.10
+- @module-federation/utilities@3.1.41
+
+## 4.0.1
+
+### Patch Changes
+
+- Updated dependencies [6e3afc6]
+  - @module-federation/enhanced@0.8.9
+  - @module-federation/sdk@0.8.9
+  - @module-federation/utilities@3.1.40
+
+## 4.0.0
+
+### Major Changes
+
+- 3f9677d: Use new api to get the virtual static modules
+
+### Patch Changes
+
+- Updated dependencies [eda5184]
+  - @module-federation/enhanced@0.8.8
+  - @module-federation/sdk@0.8.8
+  - @module-federation/utilities@3.1.39
+
 ## 3.0.18
 
 ### Patch Changes
