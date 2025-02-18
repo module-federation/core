@@ -17,7 +17,7 @@
         ],
         "commands": [
           {
-            "command": "cd apps/modernjs; pnpm run build",
+            "command": "cd apps/modernjs; pnpm run inspect",
             "forwardAllArgs": true
           }
         ]

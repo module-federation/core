@@ -1,11 +1,5 @@
 import path from 'path';
-import type {
-  CliPluginFuture,
-  AppTools,
-  UserConfig,
-  Bundler,
-} from '@modern-js/app-tools';
-import type { BundlerConfig } from '../interfaces/bundler';
+import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
 import type { InternalModernPluginOptions } from '../types';
 import {
   patchBundlerConfig,
@@ -14,41 +8,12 @@ import {
   patchMFConfig,
   addMyTypes2Ignored,
 } from './utils';
-import { moduleFederationPlugin } from '@module-federation/sdk';
 
 export function setEnv(enableSSR: boolean) {
   if (enableSSR) {
     process.env['MF_DISABLE_EMIT_STATS'] = 'true';
     process.env['MF_SSR_PRJ'] = 'true';
   }
-}
-
-export function modifyBundlerConfig<T extends Bundler>(options: {
-  bundlerType: Bundler;
-  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
-  config: BundlerConfig<T>;
-  isServer: boolean;
-  modernjsConfig: UserConfig<AppTools>;
-  remoteIpStrategy?: 'ipv4' | 'inherit';
-}) {
-  const {
-    mfConfig,
-    config,
-    isServer,
-    modernjsConfig,
-    remoteIpStrategy = 'ipv4',
-    bundlerType,
-  } = options;
-
-  patchMFConfig(mfConfig, isServer, remoteIpStrategy);
-
-  patchBundlerConfig({
-    bundlerType,
-    bundlerConfig: config,
-    isServer,
-    modernjsConfig,
-    mfConfig,
-  });
 }
 
 export const moduleFederationConfigPlugin = (
@@ -67,6 +32,31 @@ export const moduleFederationConfigPlugin = (
     userConfig.ssrConfig = ssrConfig;
     userConfig.csrConfig = csrConfig;
 
+    api.modifyBundlerChain((chain, { isProd, isServer }) => {
+      const bundlerType =
+        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
+
+      // @ts-expect-error chain type is not correct
+      addMyTypes2Ignored(chain, isServer ? ssrConfig : csrConfig);
+
+      const targetMFConfig = isServer ? ssrConfig : csrConfig;
+      patchMFConfig(
+        targetMFConfig,
+        isServer,
+        userConfig.remoteIpStrategy || 'ipv4',
+      );
+
+      patchBundlerConfig({
+        // @ts-expect-error chain type is not correct
+        chain,
+        isServer,
+        modernjsConfig,
+        mfConfig,
+      });
+
+      userConfig.distOutputDir =
+        chain.output.get('path') || path.resolve(process.cwd(), 'dist');
+    });
     api.config(() => {
       const bundlerType =
         api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
@@ -86,34 +76,6 @@ export const moduleFederationConfigPlugin = (
 
       return {
         tools: {
-          bundlerChain(chain, { isServer }) {
-            addMyTypes2Ignored(chain, isServer ? ssrConfig : csrConfig);
-          },
-          rspack(config, { isServer }) {
-            modifyBundlerConfig({
-              bundlerType,
-              mfConfig: isServer ? ssrConfig : csrConfig,
-              config,
-              isServer,
-              modernjsConfig,
-              remoteIpStrategy: userConfig.remoteIpStrategy,
-            });
-            userConfig.distOutputDir =
-              config.output?.path || path.resolve(process.cwd(), 'dist');
-          },
-          webpack(config, { isServer }) {
-            modifyBundlerConfig({
-              bundlerType,
-              mfConfig: isServer ? ssrConfig : csrConfig,
-              config,
-              isServer,
-              modernjsConfig,
-              remoteIpStrategy: userConfig.remoteIpStrategy,
-            });
-
-            userConfig.distOutputDir =
-              config.output?.path || path.resolve(process.cwd(), 'dist');
-          },
           devServer: {
             headers: {
               'Access-Control-Allow-Origin': '*',

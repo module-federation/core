@@ -64,7 +64,8 @@
       }
     },
     "overrides": {
-      "@changesets/assemble-release-plan": "workspace:*"
+      "@changesets/assemble-release-plan": "workspace:*",
+      "@modern-js/app-tools": "2.64.3-alpha.0"
     }
   },
   "dependencies": {

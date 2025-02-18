@@ -45,44 +45,35 @@ export const moduleFederationSSRPlugin = (
       });
       return { entrypoint, plugins };
     });
+    api.modifyBundlerChain((chain, { isProd, isServer }) => {
+      const bundlerType =
+        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
+
+      const MFPlugin =
+        bundlerType === 'webpack'
+          ? ModuleFederationPlugin
+          : RspackModuleFederationPlugin;
+
+      if (isServer) {
+        if (!pluginOptions.nodePlugin) {
+          chain
+            .plugin('plugin-module-federation-server')
+            .use(MFPlugin, [pluginOptions.ssrConfig])
+            .init((Plugin: typeof MFPlugin, args) => {
+              pluginOptions.nodePlugin = new Plugin(args[0]);
+              return pluginOptions.nodePlugin;
+            });
+        }
+      } else {
+        pluginOptions.distOutputDir =
+          pluginOptions.distOutputDir ||
+          chain.output.get('path') ||
+          path.resolve(process.cwd(), 'dist');
+      }
+    });
     api.config(() => {
       return {
         tools: {
-          rspack(config, { isServer }) {
-            if (isServer) {
-              // throw new Error(
-              //   `${PLUGIN_IDENTIFIER} Not support rspack ssr mode yet !`,
-              // );
-              if (!pluginOptions.nodePlugin) {
-                pluginOptions.nodePlugin = new RspackModuleFederationPlugin(
-                  pluginOptions.ssrConfig,
-                );
-                // @ts-ignore
-                config.plugins?.push(pluginOptions.nodePlugin);
-              }
-            } else {
-              pluginOptions.distOutputDir =
-                pluginOptions.distOutputDir ||
-                config.output?.path ||
-                path.resolve(process.cwd(), 'dist');
-            }
-          },
-          webpack(config, { isServer }) {
-            if (isServer) {
-              if (!pluginOptions.nodePlugin) {
-                pluginOptions.nodePlugin = new ModuleFederationPlugin(
-                  pluginOptions.ssrConfig,
-                );
-                // @ts-ignore
-                config.plugins?.push(pluginOptions.nodePlugin);
-              }
-            } else {
-              pluginOptions.distOutputDir =
-                pluginOptions.distOutputDir ||
-                config.output?.path ||
-                path.resolve(process.cwd(), 'dist');
-            }
-          },
           devServer: {
             before: [
               (req, res, next) => {

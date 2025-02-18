@@ -35,15 +35,13 @@ const SHARED_SPLIT_CHUNK_MAP = {
 
 export function autoDeleteSplitChunkCacheGroups(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  bundlerConfig: Rspack.Configuration,
+  optimizationConfig: Rspack.Configuration['optimization'],
 ) {
   if (!mfConfig.shared) {
     return;
   }
-  if (
-    !bundlerConfig.optimization?.splitChunks ||
-    !bundlerConfig.optimization.splitChunks.cacheGroups
-  ) {
+  const splitChunks = optimizationConfig?.splitChunks;
+  if (!splitChunks || !splitChunks?.cacheGroups) {
     return;
   }
   const arrayShared = Array.isArray(mfConfig.shared)
@@ -55,8 +53,9 @@ export function autoDeleteSplitChunkCacheGroups(
     if (!splitChunkKey) {
       continue;
     }
-    if (bundlerConfig.optimization.splitChunks.cacheGroups[splitChunkKey]) {
-      delete bundlerConfig.optimization.splitChunks.cacheGroups[splitChunkKey];
+    if (splitChunks.cacheGroups[splitChunkKey]) {
+      delete splitChunks.cacheGroups[splitChunkKey];
     }
   }
+  return splitChunks;
 }

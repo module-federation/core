@@ -208,21 +208,20 @@ export const patchMFConfig = (
   return mfConfig;
 };
 
-export function patchIgnoreWarning<T extends Bundler>(
-  bundlerConfig: BundlerConfig<T>,
-) {
-  bundlerConfig.ignoreWarnings = bundlerConfig.ignoreWarnings || [];
+function patchIgnoreWarning<T extends Bundler>(chain: BundlerChainConfig) {
+  const ignoreWarnings = chain.get('ignoreWarnings') || [];
   const ignoredMsgs = [
     'external script',
     'process.env.WS_NO_BUFFER_UTIL',
     `Can't resolve 'utf-8-validate`,
   ];
-  bundlerConfig.ignoreWarnings.push((warning) => {
+  ignoreWarnings.push((warning) => {
     if (ignoredMsgs.some((msg) => warning.message.includes(msg))) {
       return true;
     }
     return false;
   });
+  chain.ignoreWarnings(ignoreWarnings);
 }
 
 export function addMyTypes2Ignored(
@@ -278,86 +277,75 @@ export function addMyTypes2Ignored(
   });
 }
 export function patchBundlerConfig<T extends Bundler>(options: {
-  bundlerConfig: BundlerConfig<T>;
+  chain: BundlerChainConfig;
   isServer: boolean;
   modernjsConfig: UserConfig<AppTools>;
-  bundlerType: Bundler;
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
 }) {
-  const { bundlerConfig, modernjsConfig, isServer, mfConfig, bundlerType } =
-    options;
+  const { chain, modernjsConfig, isServer, mfConfig } = options;
   const enableSSR = Boolean(modernjsConfig.server?.ssr);
 
-  delete bundlerConfig.optimization?.runtimeChunk;
+  chain.optimization.runtimeChunk(false);
 
-  patchIgnoreWarning(bundlerConfig);
+  patchIgnoreWarning(chain);
 
-  if (bundlerConfig.output) {
-    if (!bundlerConfig.output?.chunkLoadingGlobal) {
-      bundlerConfig.output.chunkLoadingGlobal = `chunk_${mfConfig.name}`;
-    }
-    if (!bundlerConfig.output?.uniqueName) {
-      bundlerConfig.output.uniqueName = mfConfig.name;
-    }
+  if (!chain.output.get('chunkLoadingGlobal')) {
+    chain.output.chunkLoadingGlobal(`chunk_${mfConfig.name}`);
+  }
+  if (!chain.output.get('uniqueName')) {
+    chain.output.uniqueName(mfConfig.name!);
   }
 
+  const optimizationConfig = chain.optimization.entries();
   if (!isServer) {
-    // @ts-ignore
-    autoDeleteSplitChunkCacheGroups(mfConfig, bundlerConfig);
+    autoDeleteSplitChunkCacheGroups(mfConfig, optimizationConfig);
   }
 
   if (
     !isServer &&
     enableSSR &&
-    typeof bundlerConfig.optimization?.splitChunks === 'object' &&
-    bundlerConfig.optimization.splitChunks.cacheGroups
+    typeof optimizationConfig?.splitChunks === 'object' &&
+    optimizationConfig.splitChunks.cacheGroups
   ) {
-    bundlerConfig.optimization.splitChunks.chunks = 'async';
+    optimizationConfig.splitChunks.chunks = 'async';
     logger.warn(
       `splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"`,
     );
   }
 
-  if (isDev && bundlerConfig.output?.publicPath === 'auto') {
+  if (isDev && chain.output.get('publicPath') === 'auto') {
     // TODO: only in dev temp
     const port =
       modernjsConfig.dev?.port || modernjsConfig.server?.port || 8080;
     const publicPath = `http://localhost:${port}/`;
-    bundlerConfig.output.publicPath = publicPath;
+    chain.output.publicPath(publicPath);
   }
 
   if (isServer && enableSSR) {
-    const { output } = bundlerConfig;
-    const uniqueName = mfConfig.name || output?.uniqueName;
-    const chunkFileName = output?.chunkFilename;
+    const uniqueName = mfConfig.name || chain.output.get('uniqueName');
+    const chunkFileName = chain.output.get('chunkFilename');
     if (
-      output &&
       typeof chunkFileName === 'string' &&
       uniqueName &&
       !chunkFileName.includes(uniqueName)
     ) {
       const suffix = `${encodeName(uniqueName)}-[chunkhash].js`;
-      output.chunkFilename = chunkFileName.replace('.js', suffix);
+      chain.output.chunkFilename(chunkFileName.replace('.js', suffix));
     }
   }
   // modernjs project has the same entry for server/client, add polyfill:false to skip compile error in browser target
   if (isDev && enableSSR && !isServer) {
-    bundlerConfig.resolve!.fallback = {
-      ...bundlerConfig.resolve!.fallback,
-      crypto: false,
-      stream: false,
-      vm: false,
-    };
+    chain.resolve.fallback
+      .set('crypto', false)
+      .set('stream', false)
+      .set('vm', false);
   }
 
   if (
     modernjsConfig.deploy?.microFrontend &&
     Object.keys(mfConfig.exposes || {}).length
   ) {
-    if (!bundlerConfig.optimization) {
-      bundlerConfig.optimization = {};
-    }
-    bundlerConfig.optimization.usedExports = false;
+    chain.optimization.usedExports(false);
   }
 }
 
