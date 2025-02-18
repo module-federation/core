@@ -27,6 +27,7 @@ const r = {
     'system',
     'promise',
     'import',
+    'module-import',
     'script',
     'node-commonjs',
   ],
@@ -301,75 +302,90 @@ function o(
       {
         const a = p;
         for (const r in t)
-          if ('remoteType' !== r && 'remotes' !== r && 'shareScope' !== r)
+          if (
+            'async' !== r &&
+            'remoteType' !== r &&
+            'remotes' !== r &&
+            'shareScope' !== r
+          )
             return (o.errors = [{ params: { additionalProperty: r } }]), !1;
         if (a === p) {
-          if (void 0 !== t.remoteType) {
-            let e = t.remoteType;
-            const a = p,
-              n = p;
-            let s = !1,
-              l = null;
-            const u = p;
-            if (
-              'var' !== e &&
-              'module' !== e &&
-              'assign' !== e &&
-              'this' !== e &&
-              'window' !== e &&
-              'self' !== e &&
-              'global' !== e &&
-              'commonjs' !== e &&
-              'commonjs2' !== e &&
-              'commonjs-module' !== e &&
-              'commonjs-static' !== e &&
-              'amd' !== e &&
-              'amd-require' !== e &&
-              'umd' !== e &&
-              'umd2' !== e &&
-              'jsonp' !== e &&
-              'system' !== e &&
-              'promise' !== e &&
-              'import' !== e &&
-              'script' !== e &&
-              'node-commonjs' !== e
-            ) {
-              const t = { params: { allowedValues: r.enum } };
-              null === i ? (i = [t]) : i.push(t), p++;
-            }
-            if ((u === p && ((s = !0), (l = 0)), !s)) {
-              const r = { params: { passingSchemas: l } };
-              return (
-                null === i ? (i = [r]) : i.push(r), p++, (o.errors = i), !1
-              );
-            }
-            (p = n), null !== i && (n ? (i.length = n) : (i = null));
-            var c = a === p;
+          if (void 0 !== t.async) {
+            const r = p;
+            if ('boolean' != typeof t.async)
+              return (o.errors = [{ params: { type: 'boolean' } }]), !1;
+            var c = r === p;
           } else c = !0;
           if (c) {
-            if (void 0 !== t.remotes) {
-              const r = p;
-              n(t.remotes, {
-                instancePath: e + '/remotes',
-                parentData: t,
-                parentDataProperty: 'remotes',
-                rootData: l,
-              }) ||
-                ((i = null === i ? n.errors : i.concat(n.errors)),
-                (p = i.length)),
-                (c = r === p);
+            if (void 0 !== t.remoteType) {
+              let e = t.remoteType;
+              const a = p,
+                n = p;
+              let s = !1,
+                l = null;
+              const u = p;
+              if (
+                'var' !== e &&
+                'module' !== e &&
+                'assign' !== e &&
+                'this' !== e &&
+                'window' !== e &&
+                'self' !== e &&
+                'global' !== e &&
+                'commonjs' !== e &&
+                'commonjs2' !== e &&
+                'commonjs-module' !== e &&
+                'commonjs-static' !== e &&
+                'amd' !== e &&
+                'amd-require' !== e &&
+                'umd' !== e &&
+                'umd2' !== e &&
+                'jsonp' !== e &&
+                'system' !== e &&
+                'promise' !== e &&
+                'import' !== e &&
+                'module-import' !== e &&
+                'script' !== e &&
+                'node-commonjs' !== e
+              ) {
+                const t = { params: { allowedValues: r.enum } };
+                null === i ? (i = [t]) : i.push(t), p++;
+              }
+              if ((u === p && ((s = !0), (l = 0)), !s)) {
+                const r = { params: { passingSchemas: l } };
+                return (
+                  null === i ? (i = [r]) : i.push(r), p++, (o.errors = i), !1
+                );
+              }
+              (p = n),
+                null !== i && (n ? (i.length = n) : (i = null)),
+                (c = a === p);
             } else c = !0;
-            if (c)
-              if (void 0 !== t.shareScope) {
-                let r = t.shareScope;
-                const e = p;
-                if (p === e) {
-                  if ('string' != typeof r)
-                    return (o.errors = [{ params: { type: 'string' } }]), !1;
-                  if (r.length < 1) return (o.errors = [{ params: {} }]), !1;
-                }
-                c = e === p;
+            if (c) {
+              if (void 0 !== t.remotes) {
+                const r = p;
+                n(t.remotes, {
+                  instancePath: e + '/remotes',
+                  parentData: t,
+                  parentDataProperty: 'remotes',
+                  rootData: l,
+                }) ||
+                  ((i = null === i ? n.errors : i.concat(n.errors)),
+                  (p = i.length)),
+                  (c = r === p);
               } else c = !0;
+              if (c)
+                if (void 0 !== t.shareScope) {
+                  let r = t.shareScope;
+                  const e = p;
+                  if (p === e) {
+                    if ('string' != typeof r)
+                      return (o.errors = [{ params: { type: 'string' } }]), !1;
+                    if (r.length < 1) return (o.errors = [{ params: {} }]), !1;
+                  }
+                  c = e === p;
+                } else c = !0;
+            }
           }
         }
       }

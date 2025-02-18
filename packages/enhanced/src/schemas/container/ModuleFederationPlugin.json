@@ -126,8 +126,8 @@
         "system",
         "promise",
         "import",
-        "script",
         "module-import",
+        "script",
         "node-commonjs"
       ]
     },
@@ -401,6 +401,21 @@
             }
           ]
         },
+        "request": {
+          "description": "Import request to match on",
+          "type": "string",
+          "minLength": 1
+        },
+        "layer": {
+          "description": "Layer in which the shared module should be placed.",
+          "type": "string",
+          "minLength": 1
+        },
+        "issuerLayer": {
+          "description": "Layer of the issuer.",
+          "type": "string",
+          "minLength": 1
+        },
         "packageName": {
           "description": "Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.",
           "type": "string",
@@ -428,10 +443,6 @@
           "description": "Share scope name.",
           "type": "string",
           "minLength": 1
-        },
-        "shareStrategy": {
-          "description": "load shared strategy(defaults to 'version-first').",
-          "enum": ["version-first", "loaded-first"]
         },
         "singleton": {
           "description": "Allow only a single version of the shared module in share scope (disabled by default).",
@@ -485,58 +496,26 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "dataPrefetch": {
-      "description": "Enable Data Prefetch",
+    "async": {
+      "description": "Enable/disable asynchronous loading of runtime modules. When enabled, entry points will be wrapped in asynchronous chunks.",
       "type": "boolean"
     },
     "exposes": {
       "$ref": "#/definitions/Exposes"
     },
     "filename": {
-      "description": "The filename of the container as relative path inside the `output.path` directory.",
+      "description": "The filename for this container relative path inside the `output.path` directory.",
       "type": "string",
-      "absolutePath": false
-    },
-    "getPublicPath": {
-      "description": "Custom public path function",
-      "type": "string"
-    },
-    "implementation": {
-      "description": "Bundler runtime path",
-      "type": "string"
+      "absolutePath": false,
+      "minLength": 1
     },
     "library": {
       "$ref": "#/definitions/LibraryOptions"
     },
-    "manifest": {
-      "description": "Manifest generation options",
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "object",
-          "properties": {
-            "filePath": {
-              "type": "string"
-            },
-            "disableAssetsAnalyze": {
-              "type": "boolean"
-            },
-            "fileName": {
-              "type": "string"
-            },
-            "additionalData": {
-              "type": "string",
-              "description": "Function string to provide additional data to the manifest"
-            }
-          }
-        }
-      ]
-    },
     "name": {
-      "description": "The name of the container.",
-      "type": "string"
+      "description": "The name for this container.",
+      "type": "string",
+      "minLength": 1
     },
     "remoteType": {
       "description": "The external type of the remote containers.",
@@ -552,195 +531,49 @@
     "runtime": {
       "$ref": "#/definitions/EntryRuntime"
     },
+    "shareScope": {
+      "description": "The name of the share scope which is shared with the host (defaults to 'default').",
+      "type": "string",
+      "minLength": 1
+    },
+    "shared": {
+      "$ref": "#/definitions/Shared"
+    },
+    "experiments": {
+      "description": "Experimental features configuration",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "asyncStartup": {
+          "description": "Enable asynchronous startup",
+          "type": "boolean"
+        },
+        "externalRuntime": {
+          "description": "After setting true, the external MF runtime will be used and the runtime provided by the consumer will be used. (Please make sure your consumer has provideExternalRuntime: true set, otherwise it will not run properly!)",
+          "type": "boolean",
+          "default": false
+        },
+        "provideExternalRuntime": {
+          "description": "Enable providing external runtime",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
     "runtimePlugins": {
-      "description": "Runtime plugin file paths or package name",
+      "description": "Array of runtime plugins to be applied",
       "type": "array",
       "items": {
         "type": "string"
       }
     },
-    "shareScope": {
-      "description": "Share scope name used for all shared modules (defaults to 'default').",
-      "type": "string",
-      "minLength": 1
-    },
-    "shareStrategy": {
-      "description": "load shared strategy(defaults to 'version-first').",
-      "enum": ["version-first", "loaded-first"]
-    },
-    "shared": {
-      "$ref": "#/definitions/Shared"
-    },
-    "virtualRuntimeEntry": {
-      "description": "Enable virtual runtime entry",
+    "dataPrefetch": {
+      "description": "Enable data prefetching for container modules.",
       "type": "boolean"
     },
-    "dev": {
-      "description": "Development options",
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "object",
-          "properties": {
-            "disableLiveReload": {
-              "type": "boolean"
-            },
-            "disableHotTypesReload": {
-              "type": "boolean"
-            },
-            "disableDynamicRemoteTypeHints": {
-              "type": "boolean"
-            }
-          }
-        }
-      ]
-    },
-    "dts": {
-      "description": "TypeScript declaration file generation options",
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "object",
-          "properties": {
-            "generateTypes": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "tsConfigPath": {
-                      "type": "string"
-                    },
-                    "typesFolder": {
-                      "type": "string"
-                    },
-                    "compiledTypesFolder": {
-                      "type": "string"
-                    },
-                    "deleteTypesFolder": {
-                      "type": "boolean"
-                    },
-                    "additionalFilesToCompile": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "compileInChildProcess": {
-                      "type": "boolean"
-                    },
-                    "compilerInstance": {
-                      "enum": ["tsc", "vue-tsc"]
-                    },
-                    "generateAPITypes": {
-                      "type": "boolean"
-                    },
-                    "extractThirdParty": {
-                      "type": "boolean"
-                    },
-                    "extractRemoteTypes": {
-                      "type": "boolean"
-                    },
-                    "abortOnError": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              ]
-            },
-            "consumeTypes": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "typesFolder": {
-                      "type": "string"
-                    },
-                    "abortOnError": {
-                      "type": "boolean"
-                    },
-                    "remoteTypesFolder": {
-                      "type": "string"
-                    },
-                    "deleteTypesFolder": {
-                      "type": "boolean"
-                    },
-                    "maxRetries": {
-                      "type": "number"
-                    },
-                    "consumeAPITypes": {
-                      "type": "boolean"
-                    },
-                    "runtimePkgs": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              ]
-            },
-            "tsConfigPath": {
-              "type": "string"
-            },
-            "extraOptions": {
-              "type": "object"
-            },
-            "implementation": {
-              "type": "string"
-            },
-            "cwd": {
-              "type": "string"
-            },
-            "displayErrorInTerminal": {
-              "type": "boolean"
-            }
-          }
-        }
-      ]
-    },
-    "experiments": {
-      "type": "object",
-      "properties": {
-        "federationRuntime": {
-          "anyOf": [
-            {
-              "type": "boolean",
-              "enum": [false]
-            },
-            {
-              "type": "string",
-              "enum": ["hoisted"]
-            }
-          ]
-        },
-        "externalRuntime": {
-          "type": "boolean"
-        },
-        "provideExternalRuntime": {
-          "type": "boolean"
-        }
-      }
-    },
-    "bridge": {
-      "type": "object",
-      "properties": {
-        "disableAlias": {
-          "description": "Disables the default alias setting in the bridge. When true, users must manually handle basename through root component props.",
-          "type": "boolean",
-          "default": false
-        }
-      }
+    "virtualRuntimeEntry": {
+      "description": "Use virtual module for federation runtime injection.",
+      "type": "boolean"
     }
   }
 }

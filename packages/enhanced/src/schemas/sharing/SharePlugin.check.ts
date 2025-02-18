@@ -376,32 +376,40 @@ function s(
       {
         const t = l;
         for (const e in r)
-          if ('shareScope' !== e && 'shared' !== e)
+          if ('async' !== e && 'shareScope' !== e && 'shared' !== e)
             return (s.errors = [{ params: { additionalProperty: e } }]), !1;
         if (t === l) {
-          if (void 0 !== r.shareScope) {
-            let e = r.shareScope;
-            const t = l;
-            if (l === t) {
-              if ('string' != typeof e)
-                return (s.errors = [{ params: { type: 'string' } }]), !1;
-              if (e.length < 1) return (s.errors = [{ params: {} }]), !1;
-            }
-            var p = t === l;
+          if (void 0 !== r.async) {
+            const e = l;
+            if ('boolean' != typeof r.async)
+              return (s.errors = [{ params: { type: 'boolean' } }]), !1;
+            var p = e === l;
           } else p = !0;
-          if (p)
-            if (void 0 !== r.shared) {
+          if (p) {
+            if (void 0 !== r.shareScope) {
+              let e = r.shareScope;
               const t = l;
-              a(r.shared, {
-                instancePath: e + '/shared',
-                parentData: r,
-                parentDataProperty: 'shared',
-                rootData: o,
-              }) ||
-                ((i = null === i ? a.errors : i.concat(a.errors)),
-                (l = i.length)),
-                (p = t === l);
+              if (l === t) {
+                if ('string' != typeof e)
+                  return (s.errors = [{ params: { type: 'string' } }]), !1;
+                if (e.length < 1) return (s.errors = [{ params: {} }]), !1;
+              }
+              p = t === l;
             } else p = !0;
+            if (p)
+              if (void 0 !== r.shared) {
+                const t = l;
+                a(r.shared, {
+                  instancePath: e + '/shared',
+                  parentData: r,
+                  parentDataProperty: 'shared',
+                  rootData: o,
+                }) ||
+                  ((i = null === i ? a.errors : i.concat(a.errors)),
+                  (l = i.length)),
+                  (p = t === l);
+              } else p = !0;
+          }
         }
       }
     }
