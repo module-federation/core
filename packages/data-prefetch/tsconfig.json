@@ -19,8 +19,7 @@
     "declaration": true,
     "paths": {
       "@/*": ["./*"],
-      "@src/*": ["./src/*"],
-      "@module-federation/runtime/types": ["./runtime/types"]
+      "@src/*": ["./src/*"]
     }
   },
   "include": ["src", "../../global.d.ts", "__tests__/**/*"],
