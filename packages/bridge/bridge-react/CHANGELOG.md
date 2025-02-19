@@ -1,5 +1,13 @@
 # @module-federation/bridge-react
 
+## 0.8.12
+
+### Patch Changes
+
+- 4ef21d2: chore: adjust bridge-react to structure directory
+  - @module-federation/sdk@0.8.12
+  - @module-federation/bridge-shared@0.8.12
+
 ## 0.8.11
 
 ### Patch Changes
