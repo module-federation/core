@@ -247,6 +247,10 @@ export interface ModuleFederationPluginOptions {
      */
     disableAlias?: boolean;
   };
+  /**
+   * Configuration for async boundary plugin
+   */
+  async?: boolean | AsyncBoundaryOptions;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

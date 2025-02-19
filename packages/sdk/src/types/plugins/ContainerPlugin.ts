@@ -100,7 +100,7 @@ export interface ContainerPluginOptions {
   runtimePlugins?: string[];
 
   experiments?: {
-    federationRuntime?: false | 'hoisted';
+    asyncStartup?: boolean;
   };
   dataPrefetch?: DataPrefetch;
 }
