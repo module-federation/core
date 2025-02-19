@@ -33,9 +33,6 @@ export const moduleFederationConfigPlugin = (
     userConfig.csrConfig = csrConfig;
 
     api.modifyBundlerChain((chain, { isProd, isServer }) => {
-      const bundlerType =
-        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
-
       // @ts-expect-error chain type is not correct
       addMyTypes2Ignored(chain, isServer ? ssrConfig : csrConfig);
 

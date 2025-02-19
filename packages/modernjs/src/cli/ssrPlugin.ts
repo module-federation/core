@@ -45,7 +45,7 @@ export const moduleFederationSSRPlugin = (
       });
       return { entrypoint, plugins };
     });
-    api.modifyBundlerChain((chain, { isProd, isServer }) => {
+    api.modifyBundlerChain((chain, { isServer }) => {
       const bundlerType =
         api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
 
@@ -64,11 +64,27 @@ export const moduleFederationSSRPlugin = (
               return pluginOptions.nodePlugin;
             });
         }
-      } else {
-        pluginOptions.distOutputDir =
-          pluginOptions.distOutputDir ||
-          chain.output.get('path') ||
-          path.resolve(process.cwd(), 'dist');
+      }
+      // else {
+      //   pluginOptions.distOutputDir =
+      //     pluginOptions.distOutputDir ||
+      //     chain.output.get('path') ||
+      //     path.resolve(process.cwd(), 'dist');
+      // }
+
+      if (isServer) {
+        chain.target('async-node');
+        if (isDev) {
+          chain
+            .plugin('UniverseEntryChunkTrackerPlugin')
+            .use(UniverseEntryChunkTrackerPlugin);
+        }
+      }
+
+      if (isDev && !isServer) {
+        chain.externals({
+          '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
+        });
       }
     });
     api.config(() => {
@@ -104,21 +120,6 @@ export const moduleFederationSSRPlugin = (
                 }
               },
             ],
-          },
-          bundlerChain(chain, { isServer }) {
-            if (isServer) {
-              chain.target('async-node');
-              if (isDev) {
-                chain
-                  .plugin('UniverseEntryChunkTrackerPlugin')
-                  .use(UniverseEntryChunkTrackerPlugin);
-              }
-            }
-            if (isDev && !isServer) {
-              chain.externals({
-                '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
-              });
-            }
           },
         },
       };

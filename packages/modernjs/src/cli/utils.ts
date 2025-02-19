@@ -7,7 +7,7 @@ import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
 import logger from './logger';
 import { autoDeleteSplitChunkCacheGroups } from '@module-federation/rsbuild-plugin/utils';
 
-import type { BundlerConfig, BundlerChainConfig } from '../interfaces/bundler';
+import type { BundlerChainConfig } from '../interfaces/bundler';
 import type {
   webpack,
   UserConfig,
@@ -376,36 +376,4 @@ export const getIPV4 = (): string => {
   const ipv4Interfaces = getIpv4Interfaces();
   const ipv4Interface = ipv4Interfaces[0] || { address: localIpv4 };
   return ipv4Interface.address;
-};
-
-// lib-polyfill.js: include core-js，@babel/runtime，@swc/helpers，tslib.
-// lib-react.js: include react，react-dom.
-// lib-router.js: include react-router，react-router-dom，history，@remix-run/router.
-// lib-lodash.js: include lodash，lodash-es.
-// lib-antd.js: include antd.
-// lib-arco.js: include @arco-design/web-react.
-// lib-semi.js: include @douyinfe/semi-ui.
-// lib-axios.js: include axios.
-
-const SPLIT_CHUNK_MAP = {
-  REACT: 'react',
-  ROUTER: 'router',
-  LODASH: 'lib-lodash',
-  ANTD: 'lib-antd',
-  ARCO: 'lib-arco',
-  SEMI: 'lib-semi',
-  AXIOS: 'lib-axios',
-};
-const SHARED_SPLIT_CHUNK_MAP = {
-  react: SPLIT_CHUNK_MAP.REACT,
-  'react-dom': SPLIT_CHUNK_MAP.REACT,
-  'react-router': SPLIT_CHUNK_MAP.ROUTER,
-  'react-router-dom': SPLIT_CHUNK_MAP.ROUTER,
-  '@remix-run/router': SPLIT_CHUNK_MAP.ROUTER,
-  lodash: SPLIT_CHUNK_MAP.LODASH,
-  'lodash-es': SPLIT_CHUNK_MAP.LODASH,
-  antd: SPLIT_CHUNK_MAP.ANTD,
-  '@arco-design/web-react': SPLIT_CHUNK_MAP.ARCO,
-  '@douyinfe/semi-ui': SPLIT_CHUNK_MAP.SEMI,
-  axios: SPLIT_CHUNK_MAP.AXIOS,
 };

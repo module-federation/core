@@ -2,6 +2,7 @@ import { createModuleFederationConfig } from '@module-federation/modern-js';
 export default createModuleFederationConfig({
   name: 'nested_remote',
   filename: 'remoteEntry.js',
+  dts: false,
   exposes: {
     './Content': './src/components/Content.tsx',
   },
