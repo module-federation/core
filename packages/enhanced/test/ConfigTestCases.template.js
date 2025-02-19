@@ -97,7 +97,7 @@ const describeCases = (config) => {
                     }
                     if (config.federation?.federationRuntime) {
                       // dont override if explicitly set
-                      if ('federationRuntime' in mfp._options.experiments) {
+                      if ('asyncStartup' in mfp._options.experiments) {
                       } else {
                         Object.assign(
                           mfp._options.experiments,
