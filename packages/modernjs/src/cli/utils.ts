@@ -296,8 +296,9 @@ export function patchBundlerConfig<T extends Bundler>(options: {
     chain.output.uniqueName(mfConfig.name!);
   }
 
-  const splitChunkConfig = chain.optimization.entries();
+  const splitChunkConfig = chain.optimization.splitChunks.entries();
   if (!isServer) {
+    // @ts-ignore type not the same
     autoDeleteSplitChunkCacheGroups(mfConfig, splitChunkConfig);
   }
 
