@@ -540,11 +540,6 @@ export default {
   type: 'object',
   additionalProperties: false,
   properties: {
-    async: {
-      description:
-        'Enable/disable asynchronous loading of runtime modules. When enabled, entry points will be wrapped in asynchronous chunks.',
-      type: 'boolean',
-    },
     exposes: {
       $ref: '#/definitions/Exposes',
     },
@@ -583,6 +578,11 @@ export default {
       type: 'string',
       minLength: 1,
     },
+    shareStrategy: {
+      description: 'Strategy for resolving shared modules',
+      enum: ['version-first', 'loaded-first'],
+      type: 'string',
+    },
     shared: {
       $ref: '#/definitions/Shared',
     },
@@ -609,11 +609,55 @@ export default {
       },
     },
     runtimePlugins: {
-      description: 'Array of runtime plugins to be applied',
+      description: 'Runtime plugin file paths or package names',
       type: 'array',
       items: {
         type: 'string',
       },
+    },
+    getPublicPath: {
+      description: 'Custom public path function',
+      type: 'string',
+    },
+    implementation: {
+      description: 'Bundler runtime path',
+      type: 'string',
+    },
+    manifest: {
+      description: 'Manifest configuration',
+      oneOf: [
+        {
+          type: 'boolean',
+        },
+        {
+          type: 'object',
+          title: 'PluginManifestOptions',
+        },
+      ],
+    },
+    dev: {
+      description: 'Development mode configuration',
+      oneOf: [
+        {
+          type: 'boolean',
+        },
+        {
+          type: 'object',
+          title: 'PluginDevOptions',
+        },
+      ],
+    },
+    dts: {
+      description: 'TypeScript declaration file generation configuration',
+      oneOf: [
+        {
+          type: 'boolean',
+        },
+        {
+          type: 'object',
+          title: 'PluginDtsOptions',
+        },
+      ],
     },
     dataPrefetch: {
       description: 'Enable data prefetching for container modules.',
@@ -622,6 +666,19 @@ export default {
     virtualRuntimeEntry: {
       description: 'Use virtual module for federation runtime injection.',
       type: 'boolean',
+    },
+    bridge: {
+      description: 'Bridge configuration options',
+      type: 'object',
+      properties: {
+        disableAlias: {
+          description:
+            'Disables the default alias setting in the bridge. When true, users must manually handle basename through root component props.',
+          type: 'boolean',
+          default: false,
+        },
+      },
+      additionalProperties: false,
     },
   },
 } as const;
