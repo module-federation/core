@@ -56,7 +56,8 @@ const EmbeddedRuntimePath = require.resolve(
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
-const onceForCompler = new WeakSet<Compiler>();
+const onceForCompiler = new WeakSet<Compiler>();
+const onceForCompilerEntryMap = new WeakMap<Compiler, string>();
 
 class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -150,42 +151,31 @@ class FederationRuntimePlugin {
     ]);
   }
 
-  static getFilePath(
-    compiler: Compiler,
-    options: moduleFederationPlugin.ModuleFederationPluginOptions,
-    bundlerRuntimePath?: string,
-    experiments?: moduleFederationPlugin.ModuleFederationPluginOptions['experiments'],
-  ) {
-    const containerName = options.name;
-    const hash = createHash(
-      `${containerName} ${FederationRuntimePlugin.getTemplate(
-        compiler,
-        options,
-        bundlerRuntimePath,
-        experiments,
-      )}`,
-    );
-    return path.join(TEMP_DIR, `entry.${hash}.js`);
-  }
-
   getFilePath(compiler: Compiler) {
-    if (this.entryFilePath) {
-      return this.entryFilePath;
-    }
-
     if (!this.options) {
       return '';
     }
 
+    const existedFilePath = onceForCompilerEntryMap.get(compiler);
+
+    if (existedFilePath) {
+      return existedFilePath;
+    }
+
+    let entryFilePath = '';
     if (!this.options?.virtualRuntimeEntry) {
-      this.entryFilePath = FederationRuntimePlugin.getFilePath(
-        compiler,
-        this.options,
-        this.bundlerRuntimePath,
-        this.options.experiments,
+      const containerName = this.options.name;
+      const hash = createHash(
+        `${containerName} ${FederationRuntimePlugin.getTemplate(
+          compiler,
+          this.options,
+          this.bundlerRuntimePath,
+          this.options.experiments,
+        )}`,
       );
+      entryFilePath = path.join(TEMP_DIR, `entry.${hash}.js`);
     } else {
-      this.entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
+      entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
         FederationRuntimePlugin.getTemplate(
           compiler,
           this.options,
@@ -194,7 +184,10 @@ class FederationRuntimePlugin {
         ),
       )}`;
     }
-    return this.entryFilePath;
+
+    onceForCompilerEntryMap.set(compiler, entryFilePath);
+
+    return entryFilePath;
   }
 
   ensureFile(compiler: Compiler) {
@@ -205,7 +198,7 @@ class FederationRuntimePlugin {
     if (this.options?.virtualRuntimeEntry) {
       return;
     }
-    const filePath = this.getFilePath(compiler);
+    const filePath = this.entryFilePath;
     try {
       fs.readFileSync(filePath);
     } catch (err) {
@@ -229,7 +222,7 @@ class FederationRuntimePlugin {
     this.ensureFile(compiler);
 
     this.federationRuntimeDependency = new FederationRuntimeDependency(
-      this.getFilePath(compiler),
+      this.entryFilePath,
     );
     return this.federationRuntimeDependency;
   }
@@ -409,6 +402,8 @@ class FederationRuntimePlugin {
       );
     }
 
+    this.entryFilePath = this.getFilePath(compiler);
+
     new EmbedFederationRuntimePlugin().apply(compiler);
 
     new HoistContainerReferences().apply(compiler);
@@ -426,11 +421,11 @@ class FederationRuntimePlugin {
       },
     ).apply(compiler);
     // dont run multiple times on every apply()
-    if (!onceForCompler.has(compiler)) {
+    if (!onceForCompiler.has(compiler)) {
       this.prependEntry(compiler);
       this.injectRuntime(compiler);
       this.setRuntimeAlias(compiler);
-      onceForCompler.add(compiler);
+      onceForCompiler.add(compiler);
     }
   }
 }

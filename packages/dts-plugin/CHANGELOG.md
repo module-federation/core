@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 0.8.12
+
+### Patch Changes
+
+- d227303: fix(dts-plugin): only block build process in prod env when generating types
+  - @module-federation/sdk@0.8.12
+  - @module-federation/managers@0.8.12
+  - @module-federation/third-party-dts-extractor@0.8.12
+  - @module-federation/error-codes@0.8.12
+
 ## 0.8.11
 
 ### Patch Changes
