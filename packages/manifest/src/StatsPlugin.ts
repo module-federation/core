@@ -40,17 +40,10 @@ export class StatsPlugin implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler): void {
-    console.log(
-      'StatsPlugin apply come in',
-      compiler.options.name,
-      this._enable,
-    );
-
     if (!this._enable) {
       return;
     }
     const res = this._statsManager.validate(compiler);
-    console.log('StatsPlugin apply res', res);
 
     if (!res) {
       return;
@@ -64,7 +57,6 @@ export class StatsPlugin implements WebpackPluginInstance {
           stage: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
         },
         async () => {
-          console.log('StatsPlugin come in', compiler.options.name);
           if (this._options.manifest !== false) {
             this.statsInfo = await this._statsManager.generateStats(
               compiler,

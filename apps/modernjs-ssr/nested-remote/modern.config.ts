@@ -21,13 +21,4 @@ export default defineConfig({
     }),
     moduleFederationPlugin(),
   ],
-  tools: {
-    rspack(config, { rspack }) {
-      config.plugins?.push(
-        new rspack.ProgressPlugin({
-          profile: true,
-        }),
-      );
-    },
-  },
 });

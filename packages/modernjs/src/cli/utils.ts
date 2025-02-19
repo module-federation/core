@@ -287,7 +287,7 @@ export function patchBundlerConfig<T extends Bundler>(options: {
 
   chain.optimization.delete('runtimeChunk');
 
-  // patchIgnoreWarning(chain);
+  patchIgnoreWarning(chain);
 
   if (!chain.output.get('chunkLoadingGlobal')) {
     chain.output.chunkLoadingGlobal(`chunk_${mfConfig.name}`);

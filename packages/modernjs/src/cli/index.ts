@@ -30,8 +30,6 @@ export const moduleFederationPlugin = (
       api.modifyBundlerChain((chain, { isServer }) => {
         const bundlerType =
           api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
-        console.log('index bundlerType', bundlerType);
-        console.log('index isServer', isServer);
         const browserPluginOptions =
           internalModernPluginOptions.csrConfig as MFPluginOptions.ModuleFederationPluginOptions;
 

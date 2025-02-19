@@ -29,8 +29,6 @@ export const moduleFederationSSRPlugin = (
         ? false
         : Boolean(modernjsConfig?.server?.ssr);
 
-    console.log('enableSSR: ', enableSSR);
-    console.log('isDev: ', isDev);
     if (!enableSSR) {
       return;
     }
@@ -51,8 +49,6 @@ export const moduleFederationSSRPlugin = (
     api.modifyBundlerChain((chain, { isServer }) => {
       const bundlerType =
         api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
-      console.log('ssrPlugin bundlerType: ', bundlerType);
-      console.log('ssrPlugin isServer: ', isServer);
       const MFPlugin =
         bundlerType === 'webpack'
           ? ModuleFederationPlugin
