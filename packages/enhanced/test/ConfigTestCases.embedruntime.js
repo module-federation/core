@@ -14,6 +14,6 @@ jest.resetModules();
 describeCases({
   name: 'ConfigTestCases',
   federation: {
-    asyncStartup: true,
+    federationRuntime: 'hoisted',
   },
 });

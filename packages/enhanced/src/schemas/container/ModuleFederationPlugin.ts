@@ -540,6 +540,11 @@ export default {
   type: 'object',
   additionalProperties: false,
   properties: {
+    async: {
+      description:
+        'Enable/disable asynchronous loading of runtime modules. When enabled, entry points will be wrapped in asynchronous chunks.',
+      type: 'boolean',
+    },
     exposes: {
       $ref: '#/definitions/Exposes',
     },

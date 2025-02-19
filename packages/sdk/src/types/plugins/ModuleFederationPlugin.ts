@@ -235,7 +235,7 @@ export interface ModuleFederationPluginOptions {
   dataPrefetch?: DataPrefetch;
   virtualRuntimeEntry?: boolean;
   experiments?: {
-    asyncStartup?: boolean;
+    federationRuntime?: false | 'hoisted';
     externalRuntime?: boolean;
     provideExternalRuntime?: boolean;
   };

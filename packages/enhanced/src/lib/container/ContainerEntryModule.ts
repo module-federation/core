@@ -203,7 +203,7 @@ class ContainerEntryModule extends Module {
       ) as unknown as Dependency,
     );
 
-    if (!this._experiments?.asyncStartup) {
+    if (!this._experiments?.federationRuntime) {
       this.addDependency(new EntryDependency(this._injectRuntimeEntry));
     }
     callback();
@@ -274,7 +274,7 @@ class ContainerEntryModule extends Module {
     }
     const initRuntimeDep = this.dependencies[1];
     // no runtime module getter needed if runtime is hoisted
-    const initRuntimeModuleGetter = this._experiments?.asyncStartup
+    const initRuntimeModuleGetter = this._experiments?.federationRuntime
       ? ''
       : runtimeTemplate.moduleRaw({
           module: moduleGraph.getModule(initRuntimeDep),

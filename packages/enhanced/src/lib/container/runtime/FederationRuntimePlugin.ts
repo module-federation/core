@@ -233,7 +233,7 @@ class FederationRuntimePlugin {
     }
 
     //if using runtime experiment, use the new include method else patch entry
-    if (this.options?.experiments) {
+    if (this.options?.experiments?.federationRuntime) {
       compiler.hooks.thisCompilation.tap(
         this.constructor.name,
         (compilation: Compilation, { normalModuleFactory }) => {
@@ -355,7 +355,7 @@ class FederationRuntimePlugin {
 
   setRuntimeAlias(compiler: Compiler) {
     const { experiments, implementation } = this.options || {};
-    const isHoisted = experiments?.asyncStartup;
+    const isHoisted = experiments?.federationRuntime === 'hoisted';
     let runtimePath = isHoisted ? EmbeddedRuntimePath : RuntimePath;
 
     if (implementation) {
@@ -429,7 +429,7 @@ class FederationRuntimePlugin {
 
     this.entryFilePath = this.getFilePath(compiler);
 
-    if (this.options?.experiments?.asyncStartup) {
+    if (this.options?.experiments?.federationRuntime === 'hoisted') {
       new EmbedFederationRuntimePlugin().apply(compiler);
 
       new HoistContainerReferences().apply(compiler);
