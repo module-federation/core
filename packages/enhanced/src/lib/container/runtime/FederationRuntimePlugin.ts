@@ -185,9 +185,8 @@ class FederationRuntimePlugin {
       )}`;
     }
 
-    if (!existedFilePath) {
-      onceForCompilerEntryMap.set(compiler, entryFilePath);
-    }
+    onceForCompilerEntryMap.set(compiler, entryFilePath);
+
     return entryFilePath;
   }
 
