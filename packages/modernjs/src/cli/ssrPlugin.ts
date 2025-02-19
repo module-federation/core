@@ -13,7 +13,7 @@ export function setEnv() {
   process.env['MF_DISABLE_EMIT_STATS'] = 'true';
   process.env['MF_SSR_PRJ'] = 'true';
 }
-
+export const CHAIN_MF_PLUGIN_ID = 'plugin-module-federation-server';
 export const moduleFederationSSRPlugin = (
   pluginOptions: Required<InternalModernPluginOptions>,
 ): CliPluginFuture<AppTools> => ({
@@ -55,9 +55,9 @@ export const moduleFederationSSRPlugin = (
           : RspackModuleFederationPlugin;
 
       if (isServer) {
-        if (!pluginOptions.nodePlugin) {
+        if (!chain.plugins.has(CHAIN_MF_PLUGIN_ID)) {
           chain
-            .plugin('plugin-module-federation-server')
+            .plugin(CHAIN_MF_PLUGIN_ID)
             .use(MFPlugin, [pluginOptions.ssrConfig])
             .init((Plugin: typeof MFPlugin, args) => {
               pluginOptions.nodePlugin = new Plugin(args[0]);
