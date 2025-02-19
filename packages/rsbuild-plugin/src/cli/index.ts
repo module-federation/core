@@ -82,7 +82,7 @@ export const pluginModuleFederation = (
           // mf
           autoDeleteSplitChunkCacheGroups(
             moduleFederationOptions,
-            bundlerConfig?.optimization,
+            bundlerConfig?.optimization?.splitChunks,
           );
 
           const externals = bundlerConfig.externals;

@@ -285,7 +285,7 @@ export function patchBundlerConfig<T extends Bundler>(options: {
   const { chain, modernjsConfig, isServer, mfConfig } = options;
   const enableSSR = Boolean(modernjsConfig.server?.ssr);
 
-  chain.optimization.runtimeChunk(false);
+  chain.optimization.delete('runtimeChunk');
 
   // patchIgnoreWarning(chain);
 
@@ -296,18 +296,19 @@ export function patchBundlerConfig<T extends Bundler>(options: {
     chain.output.uniqueName(mfConfig.name!);
   }
 
-  const optimizationConfig = chain.optimization.entries();
+  const splitChunkConfig = chain.optimization.entries();
   if (!isServer) {
-    autoDeleteSplitChunkCacheGroups(mfConfig, optimizationConfig);
+    autoDeleteSplitChunkCacheGroups(mfConfig, splitChunkConfig);
   }
 
   if (
     !isServer &&
     enableSSR &&
-    typeof optimizationConfig?.splitChunks === 'object' &&
-    optimizationConfig.splitChunks.cacheGroups
+    splitChunkConfig &&
+    typeof splitChunkConfig === 'object' &&
+    splitChunkConfig.cacheGroups
   ) {
-    optimizationConfig.splitChunks.chunks = 'async';
+    splitChunkConfig.chunks = 'async';
     logger.warn(
       `splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"`,
     );
