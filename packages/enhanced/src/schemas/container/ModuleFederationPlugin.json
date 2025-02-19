@@ -549,9 +549,16 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "asyncStartup": {
+        "federationRuntime": {
           "description": "Enable asynchronous startup",
-          "type": "boolean"
+          "oneOf": [
+            {
+              "enum": [false]
+            },
+            {
+              "enum": ["hoisted"]
+            }
+          ]
         },
         "externalRuntime": {
           "description": "After setting true, the external MF runtime will be used and the runtime provided by the consumer will be used. (Please make sure your consumer has provideExternalRuntime: true set, otherwise it will not run properly!)",
