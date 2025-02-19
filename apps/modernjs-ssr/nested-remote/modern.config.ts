@@ -17,8 +17,17 @@ export default defineConfig({
   },
   plugins: [
     appTools({
-      bundler: 'experimental-rspack',
+      bundler: 'rspack',
     }),
     moduleFederationPlugin(),
   ],
+  tools: {
+    rspack(config, { rspack }) {
+      config.plugins?.push(
+        new rspack.ProgressPlugin({
+          profile: true,
+        }),
+      );
+    },
+  },
 });
