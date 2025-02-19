@@ -57,13 +57,28 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
 
     validateOptions(finalOptions.host);
 
-    // only consume once , if remotes update types , DevPlugin will auto sync the latest types
-    consumeTypes(finalOptions)
+    const promise = consumeTypes(finalOptions)
       .then(() => {
         callback();
       })
       .catch(() => {
         callback();
       });
+
+    compiler.hooks.thisCompilation.tap('mf:generateTypes', (compilation) => {
+      compilation.hooks.processAssets.tapPromise(
+        {
+          name: 'mf:generateTypes',
+          stage:
+            // @ts-expect-error use runtime variable in case peer dep not installed , it should execute before generate types
+            compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER - 1,
+        },
+        async () => {
+          // await consume types promise to make sure the consumer not throw types error
+          await promise;
+        },
+      );
+    });
+    // only consume once , if remotes update types , DevPlugin will auto sync the latest types
   }
 }
