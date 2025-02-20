@@ -61,6 +61,7 @@ const readTsConfig = (
     context,
     additionalFilesToCompile,
     outputDir,
+    moduleFederationConfig,
   }: Required<RemoteOptions>,
   mapComponentsToExpose: Record<string, string>,
 ): TsConfigJson => {
@@ -97,13 +98,16 @@ const readTsConfig = (
     noEmit: false,
     declaration: true,
     outDir,
-    incremental: true,
-    tsBuildInfoFile: resolve(context, 'node_modules/.cache/.tsbuildinfo'),
   };
 
   rawTsConfigJson.compilerOptions = rawTsConfigJson.compilerOptions || {};
 
   rawTsConfigJson.compilerOptions = {
+    incremental: true,
+    tsBuildInfoFile: resolve(
+      context,
+      `node_modules/.cache/${moduleFederationConfig.name}/.tsbuildinfo`,
+    ),
     ...rawTsConfigJson.compilerOptions,
     ...defaultCompilerOptions,
   };
@@ -182,6 +186,14 @@ export const retrieveRemoteConfig = (options: RemoteOptions) => {
   };
   const mapComponentsToExpose = resolveExposes(remoteOptions);
   const tsConfig = readTsConfig(remoteOptions, mapComponentsToExpose);
+
+  if (
+    tsConfig.compilerOptions.incremental &&
+    tsConfig.compilerOptions.tsBuildInfoFile &&
+    options.deleteTypesFolder !== true
+  ) {
+    remoteOptions.deleteTypesFolder = false;
+  }
 
   return {
     tsConfig,
