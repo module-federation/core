@@ -264,8 +264,10 @@ class DTSManager {
       );
       const filePath = path.join(destinationPath, REMOTE_API_TYPES_FILE_NAME);
       fs.writeFileSync(filePath, apiTypeFile);
+      const existed = this.loadedRemoteAPIAlias.has(remoteInfo.alias);
       this.loadedRemoteAPIAlias.add(remoteInfo.alias);
       fileLog(`success`, 'downloadAPITypes', 'info');
+      return existed;
     } catch (err) {
       fileLog(
         `Unable to download "${remoteInfo.name}" api types, ${err}`,
@@ -471,7 +473,13 @@ class DTSManager {
               zipUrl: remoteTarPath || requiredRemoteInfo.zipUrl,
             },
           );
-          await this.downloadAPITypes(requiredRemoteInfo, destinationPath);
+          const addNew = await this.downloadAPITypes(
+            requiredRemoteInfo,
+            destinationPath,
+          );
+          if (addNew) {
+            this.consumeAPITypes(hostOptions);
+          }
           fileLog(`consumeTypes end`, 'updateTypes', 'info');
         };
         fileLog(
