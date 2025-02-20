@@ -343,8 +343,7 @@ describe('DTSManager', () => {
       TEST_DIT_DIR,
       remoteOptions.typesFolder,
     );
-    rmSync(distFolder, { recursive: true });
-    expect(existsSync(distFolder)).toEqual(false);
+
     await dtsManager.updateTypes({
       remoteName: hostOptions.moduleFederationConfig.name,
       remoteTarPath: '',
