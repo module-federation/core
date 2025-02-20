@@ -106,7 +106,7 @@ const readTsConfig = (
     incremental: true,
     tsBuildInfoFile: resolve(
       context,
-      `node_modules/.cache/${moduleFederationConfig.name}/.tsbuildinfo`,
+      `node_modules/.cache/mf-types/${moduleFederationConfig.name}/.tsbuildinfo`,
     ),
     ...rawTsConfigJson.compilerOptions,
     ...defaultCompilerOptions,

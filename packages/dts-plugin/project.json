@@ -18,6 +18,17 @@
       }
     },
     "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/packages/dts-plugin"],
+      "options": {
+        "parallel": false,
+        "commands": [
+          "cd packages/dts-plugin; rm -rf node_modules/.cache/mf-types",
+          "nx run dts-plugin:test-impl"
+        ]
+      }
+    },
+    "test-impl": {
       "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/packages/dts-plugin"]
     },
