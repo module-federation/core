@@ -28,9 +28,12 @@ const parseEntry = (
   // Check if the string starts with a type
   if (strSplit.length >= 2) {
     let [name, ...versionOrEntryArr] = strSplit;
+    // @name@manifest-url.json
     if (str.startsWith(separator)) {
-      versionOrEntryArr = [devVersionOrUrl || strSplit.slice(-1)[0]];
-      name = strSplit.slice(0, -1).join(separator);
+      name = strSplit.slice(0, 2).join(separator);
+      versionOrEntryArr = [
+        devVersionOrUrl || strSplit.slice(2).join(separator),
+      ];
     }
 
     let versionOrEntry = devVersionOrUrl || versionOrEntryArr.join(separator);
