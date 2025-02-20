@@ -97,6 +97,8 @@ const readTsConfig = (
     noEmit: false,
     declaration: true,
     outDir,
+    incremental: true,
+    tsBuildInfoFile: resolve(context, 'node_modules/.cache/.tsbuildinfo'),
   };
 
   rawTsConfigJson.compilerOptions = rawTsConfigJson.compilerOptions || {};

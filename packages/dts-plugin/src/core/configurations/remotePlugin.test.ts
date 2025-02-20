@@ -54,6 +54,11 @@ describe('hostPlugin', () => {
               'dist/@mf-types/compiled-types',
             ),
             rootDir: resolve(__dirname),
+            incremental: true,
+            tsBuildInfoFile: resolve(
+              remoteOptions.context,
+              'node_modules/.cache/.tsbuildinfo',
+            ),
           },
           files: ['./src/components/button', './src/components/anotherButton'],
           include: [],
@@ -118,6 +123,11 @@ describe('hostPlugin', () => {
               'dist/typesFolder/compiledTypesFolder',
             ),
             rootDir: resolve(__dirname),
+            incremental: true,
+            tsBuildInfoFile: resolve(
+              remoteOptions.context,
+              'node_modules/.cache/.tsbuildinfo',
+            ),
           },
           exclude: [],
           include: [],
