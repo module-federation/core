@@ -1,12 +1,15 @@
 import path from 'path';
 import { Stats, Manifest } from '@module-federation/sdk';
 import { fs } from '@modern-js/utils';
-import { MODERN_JS_SERVER_DIR } from '../constant';
 import { BundlerPlugin } from '../types';
 
-function mergeStats(browserStats: Stats, nodeStats: Stats): Stats {
+function mergeStats(
+  browserStats: Stats,
+  nodeStats: Stats,
+  ssrDir: string,
+): Stats {
   const ssrRemoteEntry = nodeStats.metaData.remoteEntry;
-  ssrRemoteEntry.path = MODERN_JS_SERVER_DIR;
+  ssrRemoteEntry.path = ssrDir;
   browserStats.metaData.ssrRemoteEntry = ssrRemoteEntry;
 
   return browserStats;
@@ -15,9 +18,10 @@ function mergeStats(browserStats: Stats, nodeStats: Stats): Stats {
 function mergeManifest(
   browserManifest: Manifest,
   nodeManifest: Manifest,
+  ssrDir: string,
 ): Manifest {
   const ssrRemoteEntry = nodeManifest.metaData.remoteEntry;
-  ssrRemoteEntry.path = MODERN_JS_SERVER_DIR;
+  ssrRemoteEntry.path = ssrDir;
   browserManifest.metaData.ssrRemoteEntry = ssrRemoteEntry;
 
   return browserManifest;
@@ -26,6 +30,7 @@ function mergeManifest(
 function mergeStatsAndManifest(
   nodePlugin: BundlerPlugin,
   browserPlugin: BundlerPlugin,
+  ssrDir: string,
 ): {
   mergedStats: Stats;
   mergedStatsFilePath: string;
@@ -47,10 +52,12 @@ function mergeStatsAndManifest(
   const mergedStats = mergeStats(
     browserResourceInfo.stats.stats,
     nodeResourceInfo.stats.stats,
+    ssrDir,
   );
   const mergedManifest = mergeManifest(
     browserResourceInfo.manifest.manifest,
     nodeResourceInfo.manifest.manifest,
+    ssrDir,
   );
 
   return {
@@ -65,13 +72,14 @@ export function updateStatsAndManifest(
   nodePlugin: BundlerPlugin,
   browserPlugin: BundlerPlugin,
   outputDir: string,
+  ssrDir: string,
 ) {
   const {
     mergedStats,
     mergedStatsFilePath,
     mergedManifest,
     mergedManifestFilePath,
-  } = mergeStatsAndManifest(nodePlugin, browserPlugin);
+  } = mergeStatsAndManifest(nodePlugin, browserPlugin, ssrDir);
 
   fs.writeFileSync(
     path.resolve(outputDir, mergedStatsFilePath),

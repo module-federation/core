@@ -48,7 +48,6 @@ export class StatsPlugin implements WebpackPluginInstance {
     if (!res) {
       return;
     }
-    debugger;
     compiler.hooks.thisCompilation.tap('generateStats', (compilation) => {
       compilation.hooks.processAssets.tapPromise(
         {

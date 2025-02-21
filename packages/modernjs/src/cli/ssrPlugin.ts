@@ -7,6 +7,7 @@ import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 import { updateStatsAndManifest } from './manifest';
 import { isDev } from './constant';
+import { MODERN_JS_SERVER_DIR } from '../constant';
 import logger from './logger';
 
 export function setEnv() {
@@ -26,6 +27,8 @@ export const moduleFederationSSRPlugin = (
     const modernjsConfig = api.getConfig();
     const enableSSR =
       pluginOptions.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr);
+    let csrOutputPath = '';
+    let ssrOutputPath = '';
 
     if (!enableSSR) {
       return;
@@ -84,6 +87,15 @@ export const moduleFederationSSRPlugin = (
           '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
         });
       }
+
+      if (isServer) {
+        ssrOutputPath =
+          chain.output.get('path') ||
+          path.resolve(process.cwd(), `dist/${MODERN_JS_SERVER_DIR}`);
+      } else {
+        csrOutputPath =
+          chain.output.get('path') || path.resolve(process.cwd(), 'dist');
+      }
     });
     api.config(() => {
       return {
@@ -124,11 +136,21 @@ export const moduleFederationSSRPlugin = (
     });
     api.onAfterBuild(() => {
       const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
-      updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
+      updateStatsAndManifest(
+        nodePlugin,
+        browserPlugin,
+        distOutputDir,
+        path.relative(csrOutputPath, ssrOutputPath),
+      );
     });
     api.onDevCompileDone(() => {
       const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
-      updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
+      updateStatsAndManifest(
+        nodePlugin,
+        browserPlugin,
+        distOutputDir,
+        path.relative(csrOutputPath, ssrOutputPath),
+      );
     });
   },
 });
