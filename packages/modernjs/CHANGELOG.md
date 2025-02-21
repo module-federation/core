@@ -1,5 +1,25 @@
 # @module-federation/modern-js
 
+## 0.9.0
+
+### Patch Changes
+
+- @module-federation/enhanced@0.9.0
+- @module-federation/node@2.6.26
+- @module-federation/rsbuild-plugin@0.9.0
+- @module-federation/sdk@0.9.0
+
+## 0.8.12
+
+### Patch Changes
+
+- e602d82: fix: enable SSR by utilizing pluginOptions and configuration adjustments for improved accuracy
+- Updated dependencies [9062cee]
+  - @module-federation/enhanced@0.8.12
+  - @module-federation/node@2.6.25
+  - @module-federation/rsbuild-plugin@0.8.12
+  - @module-federation/sdk@0.8.12
+
 ## 0.8.11
 
 ### Patch Changes

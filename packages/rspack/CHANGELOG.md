@@ -1,5 +1,32 @@
 # @module-federation/rspack
 
+## 0.9.0
+
+### Patch Changes
+
+- Updated dependencies [5ebc53f]
+- Updated dependencies [d872b35]
+  - @module-federation/dts-plugin@0.9.0
+  - @module-federation/manifest@0.9.0
+  - @module-federation/sdk@0.9.0
+  - @module-federation/runtime-tools@0.9.0
+  - @module-federation/managers@0.9.0
+  - @module-federation/bridge-react-webpack-plugin@0.9.0
+  - @module-federation/inject-external-runtime-core-plugin@0.9.0
+
+## 0.8.12
+
+### Patch Changes
+
+- Updated dependencies [d227303]
+  - @module-federation/dts-plugin@0.8.12
+  - @module-federation/manifest@0.8.12
+  - @module-federation/sdk@0.8.12
+  - @module-federation/runtime-tools@0.8.12
+  - @module-federation/managers@0.8.12
+  - @module-federation/bridge-react-webpack-plugin@0.8.12
+  - @module-federation/inject-external-runtime-core-plugin@0.8.12
+
 ## 0.8.11
 
 ### Patch Changes

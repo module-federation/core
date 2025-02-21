@@ -86,6 +86,9 @@ describe('DTSManager General Tests', () => {
       implementation: 'webpack',
       abortOnError: false,
     };
+    fs.rmSync(path.join(projectRoot, 'node_modules/.cache/mf-types'), {
+      recursive: true,
+    });
     dtsManager = new DTSManager({ remote: remoteOptions });
 
     // Add mock implementations
