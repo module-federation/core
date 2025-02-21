@@ -510,7 +510,6 @@ class DTSManager {
               await consumeTypes(
                 this.updatedRemoteInfos[updatedRemoteInfo.name],
               );
-              this.consumeAPITypes(hostOptions);
             };
             if (!this.updatedRemoteInfos[updatedRemoteInfo.name]) {
               const parsedRemoteInfo = retrieveRemoteInfo({
