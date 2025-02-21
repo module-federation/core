@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import {
   ErrorBoundary,
   ErrorBoundaryPropsWithComponent,
@@ -102,7 +102,8 @@ export function createRemoteComponent<T, E extends keyof T>(
 
   return forwardRef<HTMLDivElement, ProviderParams & RawComponentType>(
     (props, ref) => {
-      const LazyComponent = createLazyRemoteComponent(info);
+      // const LazyComponent = createLazyRemoteComponent(info);
+      const LazyComponent = useMemo(() => createLazyRemoteComponent(info), []);
       return (
         <ErrorBoundary FallbackComponent={info.fallback}>
           <React.Suspense fallback={info.loading}>
