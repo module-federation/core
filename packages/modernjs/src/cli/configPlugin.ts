@@ -31,6 +31,8 @@ export const moduleFederationConfigPlugin = (
       userConfig.ssrConfig || JSON.parse(JSON.stringify(mfConfig));
     userConfig.ssrConfig = ssrConfig;
     userConfig.csrConfig = csrConfig;
+    const enableSSR =
+      userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr);
 
     api.modifyBundlerChain((chain, { isProd, isServer }) => {
       // @ts-expect-error chain type is not correct
@@ -49,6 +51,7 @@ export const moduleFederationConfigPlugin = (
         isServer,
         modernjsConfig,
         mfConfig,
+        enableSSR,
       });
 
       userConfig.distOutputDir =
@@ -58,10 +61,6 @@ export const moduleFederationConfigPlugin = (
       const bundlerType =
         api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
       const ipv4 = getIPV4();
-      const enableSSR =
-        userConfig.userConfig?.ssr === false
-          ? false
-          : Boolean(modernjsConfig?.server?.ssr);
 
       if (userConfig.remoteIpStrategy === undefined) {
         if (!enableSSR) {

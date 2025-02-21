@@ -276,14 +276,14 @@ export function addMyTypes2Ignored(
     ignored: ignored.concat(DEFAULT_IGNORED_GLOB),
   });
 }
-export function patchBundlerConfig<T extends Bundler>(options: {
+export function patchBundlerConfig(options: {
   chain: BundlerChainConfig;
   isServer: boolean;
   modernjsConfig: UserConfig<AppTools>;
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
+  enableSSR: boolean;
 }) {
   const { chain, modernjsConfig, isServer, mfConfig } = options;
-  const enableSSR = Boolean(modernjsConfig.server?.ssr);
 
   chain.optimization.delete('runtimeChunk');
 
