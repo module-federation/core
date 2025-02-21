@@ -3,7 +3,7 @@ import axios from 'axios';
 import dirTree from 'directory-tree';
 import { rmSync, existsSync } from 'fs';
 import { join } from 'path';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeAll } from 'vitest';
 import { DTSManager } from './DTSManager';
 import { UpdateMode } from '../../server/constant';
 
@@ -51,6 +51,16 @@ describe('DTSManager', () => {
   const dtsManager = new DTSManager({
     remote: remoteOptions,
     host: hostOptions,
+  });
+
+  beforeAll(() => {
+    try {
+      rmSync(join(projectRoot, 'node_modules/.cache/mf-types'), {
+        recursive: true,
+      });
+    } catch (err) {
+      //noop
+    }
   });
 
   it('generate types', async () => {

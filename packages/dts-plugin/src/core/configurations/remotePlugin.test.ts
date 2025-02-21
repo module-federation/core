@@ -57,7 +57,7 @@ describe('hostPlugin', () => {
             incremental: true,
             tsBuildInfoFile: resolve(
               remoteOptions.context,
-              `node_modules/.cache/mf-types/${remoteOptions.moduleFederationConfig.name}/.tsbuildinfo`,
+              'node_modules/.cache/mf-types/.tsbuildinfo',
             ),
           },
           files: ['./src/components/button', './src/components/anotherButton'],
@@ -126,7 +126,7 @@ describe('hostPlugin', () => {
             incremental: true,
             tsBuildInfoFile: resolve(
               remoteOptions.context,
-              `node_modules/.cache/mf-types/${remoteOptions.moduleFederationConfig.name}/.tsbuildinfo`,
+              'node_modules/.cache/mf-types/.tsbuildinfo',
             ),
           },
           exclude: [],

@@ -23,7 +23,7 @@
       "options": {
         "parallel": false,
         "commands": [
-          "rimraf packages/dts-plugin/node_modules/.cache packages/dts-plugin/dist-test",
+          "rimraf packages/dts-plugin/dist-test",
           "nx run dts-plugin:test-impl"
         ]
       }
