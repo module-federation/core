@@ -283,7 +283,7 @@ export function patchBundlerConfig(options: {
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
   enableSSR: boolean;
 }) {
-  const { chain, modernjsConfig, isServer, mfConfig } = options;
+  const { chain, modernjsConfig, isServer, mfConfig, enableSSR } = options;
 
   chain.optimization.delete('runtimeChunk');
 
