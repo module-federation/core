@@ -40,112 +40,98 @@ const RemoteAppWrapper = forwardRef(function (
   props: RemoteAppParams & RenderFnParams,
   ref,
 ) {
-  const RemoteApp = () => {
-    LoggerInstance.debug(`RemoteAppWrapper RemoteApp props >>>`, { props });
-    const {
-      moduleName,
-      memoryRoute,
-      basename,
-      providerInfo,
-      className,
-      style,
-      fallback,
-      ...resProps
-    } = props;
+  const {
+    moduleName,
+    memoryRoute,
+    basename,
+    providerInfo,
+    className,
+    style,
+    fallback,
+    ...resProps
+  } = props;
 
-    const instance = federationRuntime.instance;
-    const rootRef: React.MutableRefObject<HTMLDivElement | null> =
-      ref && 'current' in ref
-        ? (ref as React.MutableRefObject<HTMLDivElement | null>)
-        : useRef(null);
+  const instance = federationRuntime.instance;
+  const rootRef: React.MutableRefObject<HTMLDivElement | null> =
+    ref && 'current' in ref
+      ? (ref as React.MutableRefObject<HTMLDivElement | null>)
+      : useRef(null);
 
-    const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
-    const providerInfoRef = useRef<any>(null);
+  const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
+  const providerInfoRef = useRef<any>(null);
+  const [initialized, setInitialized] = useState(false);
 
-    LoggerInstance.debug(`RemoteAppWrapper instance from props >>>`, instance);
+  LoggerInstance.debug(`RemoteAppWrapper instance from props >>>`, instance);
 
-    useEffect(() => {
-      const renderTimeout = setTimeout(() => {
-        const providerReturn = providerInfo();
-        providerInfoRef.current = providerReturn;
+  // 初始化远程组件
+  useEffect(() => {
+    if (initialized) return;
 
-        let renderProps = {
+    const providerReturn = providerInfo();
+    providerInfoRef.current = providerReturn;
+    setInitialized(true);
+
+    return () => {
+      if (providerInfoRef.current?.destroy) {
+        LoggerInstance.debug(
+          `createRemoteComponent LazyComponent destroy >>>`,
+          { moduleName, basename, dom: renderDom.current },
+        );
+
+        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
           moduleName,
-          dom: rootRef.current,
+          dom: renderDom.current,
           basename,
           memoryRoute,
           fallback,
           ...resProps,
-        };
-        renderDom.current = rootRef.current;
-        LoggerInstance.debug(
-          `createRemoteComponent LazyComponent render >>>`,
-          renderProps,
-        );
-
-        LoggerInstance.debug(
-          `createRemoteComponent LazyComponent hostInstance >>>`,
-          instance,
-        );
-        const beforeBridgeRenderRes =
-          instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
-            renderProps,
-          ) || {};
-        // @ts-ignore
-        renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
-        providerReturn.render(renderProps);
-        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
-      });
-
-      return () => {
-        clearTimeout(renderTimeout);
-        setTimeout(() => {
-          if (providerInfoRef.current?.destroy) {
-            LoggerInstance.debug(
-              `createRemoteComponent LazyComponent destroy >>>`,
-              { moduleName, basename, dom: renderDom.current },
-            );
-
-            instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
-              moduleName,
-              dom: renderDom.current,
-              basename,
-              memoryRoute,
-              fallback,
-              ...resProps,
-            });
-
-            providerInfoRef.current?.destroy({
-              moduleName,
-              dom: renderDom.current,
-            });
-
-            instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
-              moduleName,
-              dom: renderDom.current,
-              basename,
-              memoryRoute,
-              fallback,
-              ...resProps,
-            });
-          }
         });
-      };
-    }, []);
 
-    // bridge-remote-root
-    const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${props?.className}`;
-    return (
-      <div
-        className={rootComponentClassName}
-        style={props?.style}
-        ref={rootRef}
-      ></div>
-    );
-  };
+        providerInfoRef.current?.destroy({
+          moduleName,
+          dom: renderDom.current,
+        });
 
-  (RemoteApp as any)['__APP_VERSION__'] = __APP_VERSION__;
-  return <RemoteApp />;
+        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
+          moduleName,
+          dom: renderDom.current,
+          basename,
+          memoryRoute,
+          fallback,
+          ...resProps,
+        });
+      }
+    };
+  }, [moduleName]);
+
+  // 处理 props 更新
+  useEffect(() => {
+    if (!initialized || !providerInfoRef.current) return;
+
+    let renderProps = {
+      moduleName,
+      dom: rootRef.current,
+      basename,
+      memoryRoute,
+      fallback,
+      ...resProps,
+    };
+    renderDom.current = rootRef.current;
+
+    const beforeBridgeRenderRes =
+      instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(renderProps) ||
+      {};
+    // @ts-ignore
+    renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
+    providerInfoRef.current.render(renderProps);
+    instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
+  }, [initialized, ...Object.values(props)]);
+
+  // bridge-remote-root
+  const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${className || ''}`;
+  return (
+    <div className={rootComponentClassName} style={style} ref={rootRef}></div>
+  );
 });
 
 interface ExtraDataProps {
