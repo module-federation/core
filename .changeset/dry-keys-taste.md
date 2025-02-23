@@ -1,5 +1,5 @@
 ---
-'@module-federation/bridge-react': patch
+'@module-federation/bridge-react': minor
 ---
 
-fix: prevent destroy/render the remote component every time rerendering from the host
+fix(bridge-react): prevent destroy/render the remote component every time after the states changed
