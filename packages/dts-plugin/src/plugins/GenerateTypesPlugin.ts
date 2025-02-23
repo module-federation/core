@@ -18,20 +18,24 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
   dtsOptions: moduleFederationPlugin.PluginDtsOptions;
   defaultOptions: moduleFederationPlugin.DtsRemoteOptions;
-  consumeTypesPromise: Promise<void>;
+  fetchRemoteTypeUrlsPromise: Promise<
+    moduleFederationPlugin.DtsHostOptions['remoteTypeUrls'] | undefined
+  >;
   callback: () => void;
 
   constructor(
     pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
     dtsOptions: moduleFederationPlugin.PluginDtsOptions,
     defaultOptions: moduleFederationPlugin.DtsRemoteOptions,
-    consumeTypesPromise: Promise<void>,
+    fetchRemoteTypeUrlsPromise: Promise<
+      moduleFederationPlugin.DtsHostOptions['remoteTypeUrls'] | undefined
+    >,
     callback: () => void,
   ) {
     this.pluginOptions = pluginOptions;
     this.dtsOptions = dtsOptions;
     this.defaultOptions = defaultOptions;
-    this.consumeTypesPromise = consumeTypesPromise;
+    this.fetchRemoteTypeUrlsPromise = fetchRemoteTypeUrlsPromise;
     this.callback = callback;
   }
 
@@ -40,7 +44,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
       dtsOptions,
       defaultOptions,
       pluginOptions,
-      consumeTypesPromise,
+      fetchRemoteTypeUrlsPromise,
       callback,
     } = this;
 
@@ -82,7 +86,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         fn = generateTypesInChildProcess;
       }
       if (isProd) {
-        res = fn(finalOptions);
+        res = fn(finalOptions, { consumeTypes: false });
         return () => res;
       }
       return fn;
@@ -222,7 +226,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
         },
         async () => {
-          await consumeTypesPromise;
+          await fetchRemoteTypeUrlsPromise;
           const emitTypesFilesPromise = emitTypesFiles(compilation);
           if (isProd) {
             await emitTypesFilesPromise;

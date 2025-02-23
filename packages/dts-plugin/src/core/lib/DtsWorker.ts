@@ -12,10 +12,13 @@ export class DtsWorker {
   rpcWorker: RpcWorker<RpcMethod>;
   private _options: DtsWorkerOptions;
   private _res: Promise<any>;
-
-  constructor(options: DtsWorkerOptions) {
+  private _generateTypesOptions: { consumeTypes?: boolean };
+  constructor(
+    options: DtsWorkerOptions,
+    generateTypesOptions?: { consumeTypes?: boolean },
+  ) {
     this._options = cloneDeepOptions(options);
-
+    this._generateTypesOptions = generateTypesOptions || { consumeTypes: true };
     this.removeUnSerializationOptions();
     this.rpcWorker = createRpcWorker(
       path.resolve(__dirname, './fork-generate-dts.js'),
@@ -24,7 +27,10 @@ export class DtsWorker {
       true,
     );
 
-    this._res = this.rpcWorker.connect(this._options);
+    this._res = this.rpcWorker.connect(
+      this._options,
+      this._generateTypesOptions,
+    );
   }
 
   removeUnSerializationOptions() {

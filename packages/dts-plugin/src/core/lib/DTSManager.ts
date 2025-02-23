@@ -84,7 +84,10 @@ class DTSManager {
     type PackageType<T> = ${packageType}`;
   }
 
-  async extractRemoteTypes(options: ReturnType<typeof retrieveRemoteConfig>) {
+  async extractRemoteTypes(
+    options: ReturnType<typeof retrieveRemoteConfig>,
+    { consumeTypes = true }: { consumeTypes?: boolean },
+  ) {
     const { remoteOptions, tsConfig } = options;
 
     if (!remoteOptions.extractRemoteTypes) {
@@ -103,7 +106,7 @@ class DTSManager {
 
     const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
 
-    if (hasRemotes) {
+    if (hasRemotes && consumeTypes) {
       const tempHostOptions = {
         moduleFederationConfig: remoteOptions.moduleFederationConfig,
         typesFolder: path.join(mfTypesPath, 'node_modules'),
@@ -118,7 +121,9 @@ class DTSManager {
     }
   }
 
-  async generateTypes() {
+  async generateTypes(
+    generateTypesOptions: { consumeTypes?: boolean } = { consumeTypes: true },
+  ) {
     try {
       const { options } = this;
       if (!options.remote) {
@@ -134,11 +139,14 @@ class DTSManager {
         return;
       }
 
-      await this.extractRemoteTypes({
-        remoteOptions,
-        tsConfig,
-        mapComponentsToExpose,
-      });
+      await this.extractRemoteTypes(
+        {
+          remoteOptions,
+          tsConfig,
+          mapComponentsToExpose,
+        },
+        generateTypesOptions,
+      );
 
       await compileTs(mapComponentsToExpose, tsConfig, remoteOptions);
 
