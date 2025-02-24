@@ -60,6 +60,13 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
       return;
     }
 
+    const normalizedConsumeTypes =
+      normalizeOptions<moduleFederationPlugin.DtsHostOptions>(
+        true,
+        defaultOptions,
+        'mfOptions.dts.consumeTypes',
+      )(dtsOptions.consumeTypes);
+
     const finalOptions: DTSManagerOptions = {
       remote: {
         implementation: dtsOptions.implementation,
@@ -68,6 +75,14 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         moduleFederationConfig: pluginOptions,
         ...normalizedGenerateTypes,
       },
+      host:
+        normalizedConsumeTypes === false
+          ? undefined
+          : {
+              context: compiler.context,
+              moduleFederationConfig: pluginOptions,
+              ...normalizedGenerateTypes,
+            },
       extraOptions: dtsOptions.extraOptions || {},
       displayErrorInTerminal: dtsOptions.displayErrorInTerminal,
     };
@@ -86,7 +101,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         fn = generateTypesInChildProcess;
       }
       if (isProd) {
-        res = fn(finalOptions, { consumeTypes: false });
+        res = fn(finalOptions);
         return () => res;
       }
       return fn;

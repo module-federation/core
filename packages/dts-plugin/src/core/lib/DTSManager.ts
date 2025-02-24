@@ -84,10 +84,7 @@ class DTSManager {
     type PackageType<T> = ${packageType}`;
   }
 
-  async extractRemoteTypes(
-    options: ReturnType<typeof retrieveRemoteConfig>,
-    { consumeTypes = true }: { consumeTypes?: boolean },
-  ) {
+  async extractRemoteTypes(options: ReturnType<typeof retrieveRemoteConfig>) {
     const { remoteOptions, tsConfig } = options;
 
     if (!remoteOptions.extractRemoteTypes) {
@@ -106,24 +103,43 @@ class DTSManager {
 
     const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
 
-    if (hasRemotes && consumeTypes) {
-      const tempHostOptions = {
-        moduleFederationConfig: remoteOptions.moduleFederationConfig,
-        typesFolder: path.join(mfTypesPath, 'node_modules'),
-        remoteTypesFolder:
-          remoteOptions?.hostRemoteTypesFolder || remoteOptions.typesFolder,
-        deleteTypesFolder: true,
-        context: remoteOptions.context,
-        implementation: remoteOptions.implementation,
-        abortOnError: false,
-      };
-      await this.consumeArchiveTypes(tempHostOptions);
+    if (hasRemotes && this.options.host) {
+      try {
+        const { hostOptions } = retrieveHostConfig(this.options.host);
+        const remoteTypesFolder = path.resolve(
+          hostOptions.context,
+          hostOptions.typesFolder,
+        );
+
+        const targetDir = path.join(mfTypesPath, 'node_modules');
+        if (fs.existsSync(remoteTypesFolder) && targetDir) {
+          const targetFolder = path.resolve(remoteOptions.context, targetDir);
+          if (!fs.existsSync(targetFolder)) {
+            fs.mkdirSync(targetFolder, { recursive: true });
+          }
+          const files = fs.readdirSync(remoteTypesFolder);
+          files.forEach((file) => {
+            const srcPath = path.join(remoteTypesFolder, file);
+            const destPath = path.join(targetFolder, file);
+            fs.copyFileSync(srcPath, destPath);
+          });
+        }
+      } catch (err) {
+        if (this.options.host?.abortOnError === false) {
+          fileLog(
+            `Unable to copy remote types, ${err}`,
+            'extractRemoteTypes',
+            'error',
+          );
+        } else {
+          throw err;
+        }
+      }
     }
   }
 
-  async generateTypes(
-    generateTypesOptions: { consumeTypes?: boolean } = { consumeTypes: true },
-  ) {
+  // it must execute after consumeTypes
+  async generateTypes() {
     try {
       const { options } = this;
       if (!options.remote) {
@@ -139,14 +155,11 @@ class DTSManager {
         return;
       }
 
-      await this.extractRemoteTypes(
-        {
-          remoteOptions,
-          tsConfig,
-          mapComponentsToExpose,
-        },
-        generateTypesOptions,
-      );
+      await this.extractRemoteTypes({
+        remoteOptions,
+        tsConfig,
+        mapComponentsToExpose,
+      });
 
       await compileTs(mapComponentsToExpose, tsConfig, remoteOptions);
 
