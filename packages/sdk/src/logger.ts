@@ -11,10 +11,10 @@ class Logger {
     console.log(this.prefix, ...args);
   }
   warn(...args: any[]) {
-    console.warn(this.prefix, ...args);
+    console.log(this.prefix, ...args);
   }
   error(...args: any[]) {
-    console.error(this.prefix, ...args);
+    console.log(this.prefix, ...args);
   }
 
   success(...args: any[]) {
