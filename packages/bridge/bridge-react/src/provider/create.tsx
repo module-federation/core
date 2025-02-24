@@ -86,7 +86,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
             bridgeInfo?.render(rootComponentWithErrorBoundary, dom),
           ).then((root: RootType) => rootMap.set(info.dom, root));
         } else {
-          console.log('--------createBridgeComponent render Info', info);
           let root = rootMap.get(info.dom);
           if (!root) {
             root = createRoot(info.dom);
@@ -101,7 +100,6 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
       destroy(info: DestroyParams) {
         LoggerInstance.debug(`createBridgeComponent destroy Info`, info);
         const root = rootMap.get(info.dom);
-        console.log('--------createBridgeComponent destroy Info', info);
         if (root) {
           if ('unmount' in root) {
             root.unmount();

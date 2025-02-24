@@ -73,7 +73,6 @@ const Remote1App = createRemoteComponent({
   loading: FallbackComp,
 });
 
-// export default CountContainer;
 const Remote1AppWithLoadRemote = React.lazy(
   () =>
     new Promise((resolve) => {
