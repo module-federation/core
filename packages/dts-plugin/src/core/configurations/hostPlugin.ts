@@ -63,18 +63,21 @@ export const retrieveRemoteInfo = (options: {
 
   let zipUrl = '';
   let apiTypeUrl = '';
-  if (typeof remoteTypeUrls === 'object' && remoteTypeUrls[remoteAlias]) {
-    zipUrl = remoteTypeUrls[remoteAlias].zip;
-    apiTypeUrl = remoteTypeUrls[remoteAlias].api;
-  } else {
-    if (url) {
-      zipUrl = buildZipUrl(hostOptions, url);
-    }
+  const name = parsedInfo.name || remoteAlias;
+  if (typeof remoteTypeUrls === 'object' && remoteTypeUrls[name]) {
+    zipUrl = remoteTypeUrls[name].zip;
+    apiTypeUrl = remoteTypeUrls[name].api;
+  }
+  if (!zipUrl && url) {
+    zipUrl = buildZipUrl(hostOptions, url);
+  }
+
+  if (!apiTypeUrl && zipUrl) {
     apiTypeUrl = buildApiTypeUrl(zipUrl);
   }
 
   return {
-    name: parsedInfo.name || remoteAlias,
+    name,
     url: url,
     zipUrl,
     apiTypeUrl,
