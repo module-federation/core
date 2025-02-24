@@ -190,6 +190,9 @@ class DTSManager {
       if (!remoteInfo.url.includes(MANIFEST_EXT)) {
         return remoteInfo as Required<RemoteInfo>;
       }
+      if (remoteInfo.zipUrl) {
+        return remoteInfo as Required<RemoteInfo>;
+      }
       const url = remoteInfo.url;
       const res = await axiosGet(url);
       const manifestJson = res.data as unknown as Manifest;
