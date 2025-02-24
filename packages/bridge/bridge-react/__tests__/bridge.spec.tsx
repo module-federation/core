@@ -102,4 +102,36 @@ describe('bridge', () => {
     expect(getHtml(container)).toMatch('hello world');
     expect(ref.current).not.toBeNull();
   });
+
+  it.only('createRemoteComponent with custom createRoot prop', async () => {
+    const renderMock = vi.fn();
+
+    function Component({ props }: { props?: Record<string, any> }) {
+      return <div>life cycle render {props?.msg}</div>;
+    }
+    const BridgeComponent = createBridgeComponent({
+      rootComponent: Component,
+      createRoot: () => {
+        return {
+          render: renderMock,
+          unmount: vi.fn(),
+        };
+      },
+    });
+    const RemoteComponent = createRemoteComponent({
+      loader: async () => {
+        return {
+          default: BridgeComponent,
+        };
+      },
+      fallback: () => <div></div>,
+      loading: <div>loading</div>,
+    });
+
+    const { container } = render(<RemoteComponent />);
+    expect(getHtml(container)).toMatch('loading');
+
+    await sleep(200);
+    expect(renderMock).toHaveBeenCalledTimes(1);
+  });
 });
