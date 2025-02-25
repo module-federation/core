@@ -57,7 +57,7 @@ describe('hostPlugin', () => {
             incremental: true,
             tsBuildInfoFile: resolve(
               remoteOptions.context,
-              'node_modules/.cache/.tsbuildinfo',
+              'node_modules/.cache/mf-types/.tsbuildinfo',
             ),
           },
           files: ['./src/components/button', './src/components/anotherButton'],
@@ -76,7 +76,7 @@ describe('hostPlugin', () => {
           typesFolder: '@mf-types',
           compiledTypesFolder: 'compiled-types',
           hostRemoteTypesFolder: '@mf-types',
-          deleteTypesFolder: true,
+          deleteTypesFolder: false,
           moduleFederationConfig,
           compilerInstance: 'tsc',
           compileInChildProcess: false,
@@ -126,7 +126,7 @@ describe('hostPlugin', () => {
             incremental: true,
             tsBuildInfoFile: resolve(
               remoteOptions.context,
-              'node_modules/.cache/.tsbuildinfo',
+              'node_modules/.cache/mf-types/.tsbuildinfo',
             ),
           },
           exclude: [],

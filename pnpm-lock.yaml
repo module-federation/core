@@ -2170,6 +2170,9 @@ importers:
       '@vue/tsconfig':
         specifier: ^0.5.1
         version: 0.5.1
+      rimraf:
+        specifier: ~3.0.2
+        version: 3.0.2
       vue:
         specifier: ^3.4.29
         version: 3.5.10(typescript@5.5.2)
@@ -2594,11 +2597,7 @@ importers:
         specifier: workspace:*
         version: link:../webpack-bundler-runtime
 
-  packages/sdk:
-    dependencies:
-      isomorphic-rslog:
-        specifier: 0.0.7
-        version: 0.0.7
+  packages/sdk: {}
 
   packages/storybook-addon:
     dependencies:
@@ -3717,8 +3716,8 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/core': 7.25.2
-      '@babel/helper-member-expression-to-functions': 7.25.7
-      '@babel/helper-optimise-call-expression': 7.25.7
+      '@babel/helper-member-expression-to-functions': 7.25.9
+      '@babel/helper-optimise-call-expression': 7.25.9
       '@babel/traverse': 7.25.9
     transitivePeerDependencies:
       - supports-color
@@ -32740,11 +32739,6 @@ packages:
     resolution: {integrity: sha512-HM0q6XqQ93psDlqvuViNs/Ea3hAyGDkIdVAHlrEocjjAwGrs1fZ+EdQjS9eUPacnYB7Y8SoDdSY3H8p3ce205A==}
     engines: {node: '>=14.17.6'}
     dev: true
-
-  /isomorphic-rslog@0.0.7:
-    resolution: {integrity: sha512-n6/XnKnZ5eLEj6VllG4XmamXG7/F69nls8dcynHyhcTpsPUYgcgx4ifEaCo4lQJ2uzwfmIT+F0KBGwBcMKmt5g==}
-    engines: {node: '>=14.17.6'}
-    dev: false
 
   /isomorphic-ws@5.0.0(ws@8.17.1):
     resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}
