@@ -31,6 +31,7 @@ import type { SemVerRange } from 'webpack/lib/util/semver';
 import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
 import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFactory';
 import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
+import { createSchemaValidation } from '../../utils';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -44,14 +45,11 @@ const LazySet = require(
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
-const createSchemaValidation = require(
-  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
-) as typeof import('webpack/lib/util/create-schema-validation');
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require('../../schemas/sharing/ConsumeSharedPlugin.check.js'),
-  () => require('../../schemas/sharing/ConsumeSharedPlugin'),
+  require('../../schemas/sharing/ConsumeSharedPlugin.check.js').validate,
+  () => require('../../schemas/sharing/ConsumeSharedPlugin').default,
   {
     name: 'Consume Shared Plugin',
     baseDataPath: 'options',

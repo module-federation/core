@@ -1,3 +1,10 @@
+// @ts-nocheck
+/* eslint-disable */
+/*
+ * This file was automatically generated.
+ * DO NOT MODIFY BY HAND.
+ */
+
 export default {
   definitions: {
     Consumes: {
@@ -78,6 +85,21 @@ export default {
           type: 'string',
           minLength: 1,
         },
+        layer: {
+          description: 'Layer in which the shared module should be placed.',
+          type: 'string',
+          minLength: 1,
+        },
+        issuerLayer: {
+          description: 'Layer of the issuer.',
+          type: 'string',
+          minLength: 1,
+        },
+        request: {
+          description: 'Import request to match on',
+          type: 'string',
+          minLength: 1,
+        },
         singleton: {
           description:
             'Allow only a single version of the shared module in share scope (disabled by default).',
@@ -87,22 +109,6 @@ export default {
           description:
             'Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).',
           type: 'boolean',
-        },
-        issuerLayer: {
-          description: 'Layer in which the issuer should be.',
-          type: 'string',
-          minLength: 1,
-        },
-        layer: {
-          description: 'Layer for the shared module.',
-          type: 'string',
-          minLength: 1,
-        },
-        request: {
-          description:
-            'The actual request to use for importing the module. If not specified, the property name/key will be used.',
-          type: 'string',
-          minLength: 1,
         },
       },
     },
@@ -144,4 +150,4 @@ export default {
     },
   },
   required: ['consumes'],
-};
+} as const;

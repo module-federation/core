@@ -1,6 +1,6 @@
 import path from 'path';
 import { fs } from '@modern-js/utils';
-import type { CliPlugin, AppTools } from '@modern-js/app-tools';
+import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
 import type { InternalModernPluginOptions } from '../types';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
@@ -16,131 +16,130 @@ export function setEnv() {
 
 export const moduleFederationSSRPlugin = (
   pluginOptions: Required<InternalModernPluginOptions>,
-): CliPlugin<AppTools> => ({
+): CliPluginFuture<AppTools> => ({
   name: '@modern-js/plugin-module-federation-ssr',
   pre: [
     '@modern-js/plugin-module-federation-config',
     '@modern-js/plugin-module-federation',
   ],
-  setup: async ({ useConfigContext, useAppContext }) => {
-    const modernjsConfig = useConfigContext();
-    const enableSSR = Boolean(modernjsConfig?.server?.ssr);
-    if (!enableSSR || pluginOptions.userConfig?.ssr === false) {
-      return {};
+  setup: async (api) => {
+    const modernjsConfig = api.getConfig();
+    const enableSSR =
+      pluginOptions.userConfig?.ssr === false
+        ? false
+        : Boolean(modernjsConfig?.server?.ssr);
+    if (!enableSSR) {
+      return;
     }
 
     setEnv();
-    return {
-      _internalRuntimePlugins: ({ entrypoint, plugins }) => {
-        if (!isDev) {
-          return { entrypoint, plugins };
-        }
-        plugins.push({
-          name: 'mfSSR',
-          path: '@module-federation/modern-js/ssr-runtime',
-          config: {},
-        });
+
+    api._internalRuntimePlugins(({ entrypoint, plugins }) => {
+      if (!isDev) {
         return { entrypoint, plugins };
-      },
-      config: async () => {
-        return {
-          tools: {
-            rspack(config, { isServer }) {
-              if (isServer) {
-                // throw new Error(
-                //   `${PLUGIN_IDENTIFIER} Not support rspack ssr mode yet !`,
-                // );
-                if (!pluginOptions.nodePlugin) {
-                  pluginOptions.nodePlugin = new RspackModuleFederationPlugin(
-                    pluginOptions.ssrConfig,
-                  );
-                  // @ts-ignore
-                  config.plugins?.push(pluginOptions.nodePlugin);
-                }
-              } else {
-                pluginOptions.distOutputDir =
-                  pluginOptions.distOutputDir ||
-                  config.output?.path ||
-                  path.resolve(process.cwd(), 'dist');
+      }
+      plugins.push({
+        name: 'mfSSR',
+        path: '@module-federation/modern-js/ssr-runtime',
+        config: {},
+      });
+      return { entrypoint, plugins };
+    });
+    api.config(() => {
+      return {
+        tools: {
+          rspack(config, { isServer }) {
+            if (isServer) {
+              // throw new Error(
+              //   `${PLUGIN_IDENTIFIER} Not support rspack ssr mode yet !`,
+              // );
+              if (!pluginOptions.nodePlugin) {
+                pluginOptions.nodePlugin = new RspackModuleFederationPlugin(
+                  pluginOptions.ssrConfig,
+                );
+                // @ts-ignore
+                config.plugins?.push(pluginOptions.nodePlugin);
               }
-            },
-            webpack(config, { isServer }) {
-              if (isServer) {
-                if (!pluginOptions.nodePlugin) {
-                  pluginOptions.nodePlugin = new ModuleFederationPlugin(
-                    pluginOptions.ssrConfig,
-                  );
-                  // @ts-ignore
-                  config.plugins?.push(pluginOptions.nodePlugin);
-                }
-              } else {
-                pluginOptions.distOutputDir =
-                  pluginOptions.distOutputDir ||
-                  config.output?.path ||
-                  path.resolve(process.cwd(), 'dist');
-              }
-            },
-            devServer: {
-              before: [
-                (req, res, next) => {
-                  if (!enableSSR) {
-                    next();
-                    return;
-                  }
-                  try {
-                    if (
-                      req.url?.includes('.json') &&
-                      !req.url?.includes('hot-update')
-                    ) {
-                      const filepath = path.join(
-                        process.cwd(),
-                        `dist${req.url}`,
-                      );
-                      fs.statSync(filepath);
-                      res.setHeader('Access-Control-Allow-Origin', '*');
-                      res.setHeader(
-                        'Access-Control-Allow-Methods',
-                        'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-                      );
-                      res.setHeader('Access-Control-Allow-Headers', '*');
-                      fs.createReadStream(filepath).pipe(res);
-                    } else {
-                      next();
-                    }
-                  } catch (err) {
-                    logger.debug(err);
-                    next();
-                  }
-                },
-              ],
-            },
-            bundlerChain(chain, { isServer }) {
-              if (isServer) {
-                chain.target('async-node');
-                if (isDev) {
-                  chain
-                    .plugin('UniverseEntryChunkTrackerPlugin')
-                    .use(UniverseEntryChunkTrackerPlugin);
-                }
-              }
-              if (isDev && !isServer) {
-                chain.externals({
-                  '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
-                });
-              }
-            },
+            } else {
+              pluginOptions.distOutputDir =
+                pluginOptions.distOutputDir ||
+                config.output?.path ||
+                path.resolve(process.cwd(), 'dist');
+            }
           },
-        };
-      },
-      afterBuild: () => {
-        const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
-        updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
-      },
-      afterDev: () => {
-        const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
-        updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
-      },
-    };
+          webpack(config, { isServer }) {
+            if (isServer) {
+              if (!pluginOptions.nodePlugin) {
+                pluginOptions.nodePlugin = new ModuleFederationPlugin(
+                  pluginOptions.ssrConfig,
+                );
+                // @ts-ignore
+                config.plugins?.push(pluginOptions.nodePlugin);
+              }
+            } else {
+              pluginOptions.distOutputDir =
+                pluginOptions.distOutputDir ||
+                config.output?.path ||
+                path.resolve(process.cwd(), 'dist');
+            }
+          },
+          devServer: {
+            before: [
+              (req, res, next) => {
+                if (!enableSSR) {
+                  next();
+                  return;
+                }
+                try {
+                  if (
+                    req.url?.includes('.json') &&
+                    !req.url?.includes('hot-update')
+                  ) {
+                    const filepath = path.join(process.cwd(), `dist${req.url}`);
+                    fs.statSync(filepath);
+                    res.setHeader('Access-Control-Allow-Origin', '*');
+                    res.setHeader(
+                      'Access-Control-Allow-Methods',
+                      'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+                    );
+                    res.setHeader('Access-Control-Allow-Headers', '*');
+                    fs.createReadStream(filepath).pipe(res);
+                  } else {
+                    next();
+                  }
+                } catch (err) {
+                  logger.debug(err);
+                  next();
+                }
+              },
+            ],
+          },
+          bundlerChain(chain, { isServer }) {
+            if (isServer) {
+              chain.target('async-node');
+              if (isDev) {
+                chain
+                  .plugin('UniverseEntryChunkTrackerPlugin')
+                  .use(UniverseEntryChunkTrackerPlugin);
+              }
+            }
+            if (isDev && !isServer) {
+              chain.externals({
+                '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
+              });
+            }
+          },
+        },
+      };
+    });
+    api.onAfterBuild(() => {
+      const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
+      updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
+    });
+    api.onDevCompileDone(() => {
+      const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
+      updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
+    });
   },
 });
 

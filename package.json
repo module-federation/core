@@ -53,7 +53,8 @@
     "changegen": "./changeset-gen.js --path ./packages/enhanced --staged && ./changeset-gen.js --path ./packages/node --staged && ./changeset-gen.js --path ./packages/runtime --staged && ./changeset-gen.js --path ./packages/data-prefetch --staged && ./changeset-gen.js --path ./packages/nextjs-mf --staged && ./changeset-gen.js --path ./packages/dts-plugin --staged",
     "commitgen:staged": "./commit-gen.js --path ./packages --staged",
     "commitgen:main": "./commit-gen.js --path ./packages",
-    "changeset:status": "changeset status"
+    "changeset:status": "changeset status",
+    "generate:schema": "nx run enhanced:generate:schema && nx format:write"
   },
   "pnpm": {
     "packageExtensions": {
@@ -92,7 +93,7 @@
     "tapable": "2.2.1",
     "tsup": "7.2.0",
     "typedoc": "0.25.8",
-    "undici": "5.28.4",
+    "undici": "5.28.5",
     "unplugin": "1.9.0"
   },
   "devDependencies": {

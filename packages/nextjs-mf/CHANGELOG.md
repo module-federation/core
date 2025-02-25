@@ -1,5 +1,68 @@
 # @module-federation/nextjs-mf
 
+## 8.8.16
+
+### Patch Changes
+
+- @module-federation/enhanced@0.9.0
+- @module-federation/node@2.6.26
+- @module-federation/runtime@0.9.0
+- @module-federation/webpack-bundler-runtime@0.9.0
+- @module-federation/sdk@0.9.0
+
+## 8.8.15
+
+### Patch Changes
+
+- Updated dependencies [9062cee]
+  - @module-federation/enhanced@0.8.12
+  - @module-federation/node@2.6.25
+  - @module-federation/runtime@0.8.12
+  - @module-federation/webpack-bundler-runtime@0.8.12
+  - @module-federation/sdk@0.8.12
+
+## 8.8.14
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.11
+- @module-federation/enhanced@0.8.11
+- @module-federation/webpack-bundler-runtime@0.8.11
+- @module-federation/sdk@0.8.11
+- @module-federation/node@2.6.24
+
+## 8.8.13
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.10
+- @module-federation/node@2.6.23
+- @module-federation/webpack-bundler-runtime@0.8.10
+- @module-federation/enhanced@0.8.10
+- @module-federation/sdk@0.8.10
+
+## 8.8.12
+
+### Patch Changes
+
+- Updated dependencies [6e3afc6]
+  - @module-federation/enhanced@0.8.9
+  - @module-federation/node@2.6.22
+  - @module-federation/runtime@0.8.9
+  - @module-federation/webpack-bundler-runtime@0.8.9
+  - @module-federation/sdk@0.8.9
+
+## 8.8.11
+
+### Patch Changes
+
+- Updated dependencies [eda5184]
+  - @module-federation/enhanced@0.8.8
+  - @module-federation/node@2.6.21
+  - @module-federation/runtime@0.8.8
+  - @module-federation/webpack-bundler-runtime@0.8.8
+  - @module-federation/sdk@0.8.8
+
 ## 8.8.10
 
 ### Patch Changes

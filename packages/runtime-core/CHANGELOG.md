@@ -1,5 +1,48 @@
 # @module-federation/runtime
 
+## 0.6.21
+
+### Patch Changes
+
+- @module-federation/sdk@0.9.0
+- @module-federation/error-codes@0.9.0
+
+## 0.6.20
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.12
+- @module-federation/error-codes@0.8.12
+
+## 0.6.19
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.11
+- @module-federation/error-codes@0.8.11
+
+## 0.6.18
+
+### Patch Changes
+
+- 9566fbc: feat: allow errorLoadRemote hook catch remote entry resource loading error
+  - @module-federation/sdk@0.8.10
+  - @module-federation/error-codes@0.8.10
+
+## 0.6.17
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.9
+- @module-federation/error-codes@0.8.9
+
+## 0.6.16
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.8
+- @module-federation/error-codes@0.8.8
+
 ## 0.6.15
 
 ### Patch Changes

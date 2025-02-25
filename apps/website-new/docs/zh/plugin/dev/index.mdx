@@ -110,7 +110,7 @@ export default pluginFooBar;
 
 `SyncWaterfallHook`
 
-在远程容器的初始化过程之前更新联合主机配置。
+在远程容器的初始化过程之前更新 Federation 实例配置。
 
 - 类型
 
@@ -201,7 +201,7 @@ type AfterResolveOptions = {
 
 `AsyncHook`
 
-联合模块加载完毕时触发，允许访问和修改已加载文件的导出内容。
+远程模块加载完毕时触发，允许访问和修改已加载文件的导出内容。
 
 - 类型
 
@@ -240,7 +240,7 @@ interface RemoteInfo {
 
 `SyncHook`
 
-处理联合模块预加载逻辑。
+处理远程模块预加载逻辑。
 
 - 类型
 
@@ -259,7 +259,7 @@ type HandlePreloadModuleOptions = {
 
 `AsyncHook`
 
-当联合模块加载失败时，此钩子将被触发，允许自定义错误处理策略。
+当远程模块加载失败时，此钩子将被触发，允许自定义错误处理策略。
 
 它被设计为在模块加载的各个生命周期阶段失败时触发。
 

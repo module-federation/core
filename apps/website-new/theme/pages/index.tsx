@@ -13,7 +13,7 @@ export function HomeLayout() {
     <div>
       {/* Landing Page */}
       <div
-        className="relative border-b dark:border-dark-50"
+        className="relative dark:border-dark-50"
         style={{
           background: 'var(--rp-home-bg)',
           minHeight: 'calc(80rem - var(--rp-nav-height))',
@@ -34,7 +34,7 @@ export function HomeLayout() {
       {/* <NoSSR>
         <Benchmark />
       </NoSSR> */}
-      <Contributors />
+      {/* <Contributors /> */}
       {/* Footer */}
       <HomeFooter />
     </div>

@@ -29,7 +29,7 @@ features:
     details: 支持 Rspack 和 Webpack 构建，可以加快你的应用构建。
     icon: 🦀
   - title: 开发体验
-    details: Module federation 支持动态类型提示和 chrome devtool，以提高开发体验。
+    details: Module federation 支持动态类型提示和 Chrome Devtool，以提高开发体验。
     icon: 🚀
   - title: 插件系统
     details: Hooks 允许你快速定义自己的插件来控制模块加载的行为。

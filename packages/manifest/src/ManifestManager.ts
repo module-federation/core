@@ -1,4 +1,3 @@
-import fs from 'fs';
 import chalk from 'chalk';
 import {
   Stats,
@@ -7,13 +6,10 @@ import {
   ManifestShared,
   ManifestRemote,
   moduleFederationPlugin,
-  encodeName,
-  MFPrefetchCommon,
 } from '@module-federation/sdk';
 import { getFileName, isDev } from './utils';
 import logger from './logger';
 import type { Compilation, Compiler } from 'webpack';
-import { PLUGIN_IDENTIFIER } from './constants';
 import { ManifestInfo } from './types';
 
 interface GenerateManifestOptions {

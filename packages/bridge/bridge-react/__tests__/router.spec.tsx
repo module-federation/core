@@ -8,8 +8,8 @@ import {
   Outlet,
   createBrowserRouter,
 } from 'react-router-dom';
-import { BrowserRouter, RouterProvider } from '../src/router';
-import { RouterContext } from '../src/context';
+import { BrowserRouter, RouterProvider } from '../src/router/default';
+import { RouterContext } from '../src/provider/context';
 import { getHtml, getWindowImpl } from './util';
 
 describe('react router proxy', () => {

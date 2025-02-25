@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/sdk",
-  "version": "0.8.7",
+  "version": "0.9.0",
   "license": "MIT",
   "description": "A sdk for support module federation",
   "keywords": [
@@ -45,8 +45,5 @@
         "./dist/normalize-webpack-path.cjs.d.ts"
       ]
     }
-  },
-  "dependencies": {
-    "isomorphic-rslog": "0.0.7"
   }
 }

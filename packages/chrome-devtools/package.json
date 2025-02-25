@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.8.7",
+  "version": "0.9.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "@arco-design/web-react": "^2.64.1",
-    "@modern-js/runtime": "2.60.6",
+    "@modern-js/runtime": "2.64.0",
     "@module-federation/sdk": "workspace:*",
     "ahooks": "^3.7.10",
     "dagre": "^0.8.5",
@@ -67,12 +67,12 @@
   },
   "devDependencies": {
     "@modern-js-app/eslint-config": "2.54.6",
-    "@modern-js/app-tools": "2.60.6",
+    "@modern-js/app-tools": "2.64.0",
     "@modern-js/builder-webpack-provider": "2.46.1",
     "@modern-js/eslint-config": "2.59.0",
-    "@modern-js/module-tools": "2.60.6",
-    "@modern-js/storybook": "2.60.6",
-    "@modern-js/tsconfig": "2.60.6",
+    "@modern-js/module-tools": "2.64.0",
+    "@modern-js/storybook": "2.64.0",
+    "@modern-js/tsconfig": "2.64.0",
     "@module-federation/runtime": "workspace:*",
     "@playwright/test": "1.49.1",
     "@storybook/addon-essentials": "^8",

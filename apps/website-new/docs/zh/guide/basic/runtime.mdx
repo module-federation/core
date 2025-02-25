@@ -67,7 +67,7 @@ type InitOptions {
     name: string;
     // 依赖的远程模块列表
     // 使用 version 内容的时候需要配合 snapshot 使用，该内容还在施工中
-    remotes: Array<RemoteInfo>;
+    remotes: Array<Remote>;
     // 当前消费者需要共享的依赖项列表
     // 当使用构建插件时，用户可以在构建插件中配置需要共享的依赖项，而构建插件会将需要共享的依赖项注入到运行时共享配置中
     // Shared 在运行时传入时必须在版本实例引用中手动传入，因为它不能在运行时直接传入。
@@ -90,9 +90,7 @@ type SharedBaseArgs = {
 
 type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
 
-type RemoteInfo = (RemotesWithEntry | RemotesWithVersion) & {
-   alias?: string;
-};
+type Remote = (RemotesWithEntry | RemotesWithVersion) & RemoteInfoCommon
 
 interface RemotesWithVersion {
    name: string;
@@ -103,6 +101,15 @@ interface RemotesWithEntry {
    name: string;
    entry: string;
 }
+
+interface RemoteInfoCommon {
+  alias?: string;
+  shareScope?: string;
+  type?: RemoteEntryType;
+  entryGlobalName?: string;
+}
+
+type RemoteEntryType =|'var'|'module'|'assign'|'assign-properties'|'this'|'window'|'self'|'global'|'commonjs'|'commonjs2'|'commonjs-module'| 'commonjs-static'|'amd'|'amd-require'|'umd'|'umd2'|'jsonp'|'system'| string;
 
 type ShareInfos = {
    // 依赖的包名、依赖的基本信息和共享策略
@@ -293,15 +300,15 @@ init({
   remotes: [
     {
       name: '@demo/sub1',
-      entry: 'http://localhost:2001/vmok-manifest.json',
+      entry: 'http://localhost:2001/mf-manifest.json',
     },
     {
       name: '@demo/sub2',
-      entry: 'http://localhost:2002/vmok-manifest.json',
+      entry: 'http://localhost:2002/mf-manifest.json',
     },
     {
       name: '@demo/sub3',
-      entry: 'http://localhost:2003/vmok-manifest.json',
+      entry: 'http://localhost:2003/mf-manifest.json',
     },
   ],
 });
@@ -369,10 +376,12 @@ interface RemoteWithVersion {
 }
 ```
 
-- 细节
-  **info**: 设置 `force:true` 时请小心 !
+:::warning
+请谨慎设置 `force:true`!
 
-如果设置 `force: true`，它将合并远程（包括已加载的远程），并移除已加载的远程缓存，同时会使用 `console.warn` 来警告此操作可能存在风险。
+在你设置 `force: true` 后我们将合并远程（包括已加载的远程），并移除已加载的远程缓存，同时我们将使用 `console.warn` 来警告此操作可能存在风险。
+:::
+
 
 - Example
 
@@ -440,7 +449,7 @@ registerPlugins([runtimePlugin()]);
 | 设置 `shared` 必须提供具体版本和实例信息                                 | 设置 `shared` 只需要配置规则即可，无须提供具体版本及实例信息 |
 | `shared` 依赖只能供外部使用，无法使用外部 `shared` 依赖                  | `shared` 依赖按照特定规则双向共享                            |
 | 可以通过 `runtime` 的 `plugin` 机制影响加载流程                          | 可以通过 `runtimePlugin` 配置影响加载流程                    |
-| 纯运行时不支持远程类型提示                                               | 支持远程类型提示                                             |
+| 支持远程模块类型提示                                               | 支持远程模块类型提示                                             |
 
 ### Why Runtime
 

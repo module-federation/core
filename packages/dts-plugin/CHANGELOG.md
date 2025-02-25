@@ -1,5 +1,73 @@
 # @module-federation/dts-plugin
 
+## 0.9.0
+
+### Minor Changes
+
+- 5ebc53f: feat: enable tsc incremental build
+
+### Patch Changes
+
+- d872b35: fix(dts-plugin): cache file should have name as its unique path
+  - @module-federation/sdk@0.9.0
+  - @module-federation/managers@0.9.0
+  - @module-federation/third-party-dts-extractor@0.9.0
+  - @module-federation/error-codes@0.9.0
+
+## 0.8.12
+
+### Patch Changes
+
+- d227303: fix(dts-plugin): only block build process in prod env when generating types
+  - @module-federation/sdk@0.8.12
+  - @module-federation/managers@0.8.12
+  - @module-federation/third-party-dts-extractor@0.8.12
+  - @module-federation/error-codes@0.8.12
+
+## 0.8.11
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.11
+- @module-federation/managers@0.8.11
+- @module-federation/third-party-dts-extractor@0.8.11
+- @module-federation/error-codes@0.8.11
+
+## 0.8.10
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.10
+- @module-federation/managers@0.8.10
+- @module-federation/third-party-dts-extractor@0.8.10
+- @module-federation/error-codes@0.8.10
+
+## 0.8.9
+
+### Patch Changes
+
+- 6e3afc6: feat(dts-plugin): support pass headers when request types url
+- 1be9d62: feat(dts-plugin): add dts.displayErrorInTerminal to help control display error
+- 6e3afc6: fix(dts-plugin): set outputDir default value
+- 6e3afc6: fix(dts-plugin): use remoteTarPath first to fetch hot types
+- 6e3afc6: fix(dts-plugin): only consume types in dev
+- 6e3afc6: fix(dts-plugin): throw error while downloading types archive hit historyApiFallback
+- 6e3afc6: fix(dts-plugin): generateTypes should after consumeTypes finished
+- 6e3afc6: fix(dts-plugin): dev plugin should apply after fetchPromise resolved
+  - @module-federation/sdk@0.8.9
+  - @module-federation/managers@0.8.9
+  - @module-federation/third-party-dts-extractor@0.8.9
+  - @module-federation/error-codes@0.8.9
+
+## 0.8.8
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.8
+- @module-federation/managers@0.8.8
+- @module-federation/third-party-dts-extractor@0.8.8
+- @module-federation/error-codes@0.8.8
+
 ## 0.8.7
 
 ### Patch Changes

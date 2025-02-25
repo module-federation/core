@@ -216,3 +216,19 @@ interface DtsHostOptions {
 - 默认值：`path.join(process.cwd(),'./tsconfig.json')`
 
 tsconfig 配置文件路径
+
+### cwd
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`undefined`
+
+运行 tsc 的路径，默认为项目根目录。
+
+### displayErrorInTerminal
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`true`
+
+是否在 terminal 输出错误日志

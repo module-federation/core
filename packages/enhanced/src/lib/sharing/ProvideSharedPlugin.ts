@@ -22,12 +22,7 @@ import type {
   ProvidesConfig,
 } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
-import checkOptions from '../../schemas/sharing/ProviderSharedPlugin.check';
-import schema from '../../schemas/sharing/ProviderSharedPlugin';
-
-const createSchemaValidation = require(
-  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
-) as typeof import('webpack/lib/util/create-schema-validation');
+import { createSchemaValidation } from '../../utils';
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
@@ -41,10 +36,15 @@ export type ResolvedProvideMap = Map<
   }
 >;
 
-const validate = createSchemaValidation(checkOptions, () => schema, {
-  name: 'Provide Shared Plugin',
-  baseDataPath: 'options',
-});
+const validate = createSchemaValidation(
+  //eslint-disable-next-line
+  require('../../schemas/sharing/ProvideSharedPlugin.check.js').validate,
+  () => require('../../schemas/sharing/ProvideSharedPlugin').default,
+  {
+    name: 'Provide Shared Plugin',
+    baseDataPath: 'options',
+  },
+);
 
 /**
  * @typedef {Object} ProvideOptions
@@ -76,6 +76,7 @@ class ProvideSharedPlugin {
    */
   constructor(options: ProvideSharedPluginOptions) {
     validate(options);
+
     this._provides = parseOptions(
       options.provides,
       (item) => {
@@ -230,7 +231,6 @@ class ProvideSharedPlugin {
               const lookup = config.request || prefix;
               if (request.startsWith(lookup) && resource) {
                 const remainder = request.slice(lookup.length);
-                debugger;
                 provideSharedModule(
                   resource,
                   {

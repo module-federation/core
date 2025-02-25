@@ -1,31 +1,9 @@
-//@ts-nocheck
-const runtimePlugin = {
-  type: 'array',
-  items: {
-    anyOf: [
-      {
-        type: 'string',
-        minLength: 1,
-        description: 'Runtime Plugin File Path.',
-      },
-      {
-        type: 'object',
-        required: ['import', 'async'],
-        properties: {
-          import: {
-            type: 'string',
-            minLength: 1,
-            description: 'Runtime Plugin File Path.',
-          },
-          async: {
-            type: 'boolean',
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
-  },
-};
+// @ts-nocheck
+/* eslint-disable */
+/*
+ * This file was automatically generated.
+ * DO NOT MODIFY BY HAND.
+ */
 
 export default {
   definitions: {
@@ -330,7 +308,6 @@ export default {
     runtime: {
       $ref: '#/definitions/EntryRuntime',
     },
-    runtimePlugins: runtimePlugin,
     shareScope: {
       description:
         "The name of the share scope which is shared with the host (defaults to 'default').",
@@ -338,17 +315,46 @@ export default {
       minLength: 1,
     },
     experiments: {
+      description: 'Experimental features configuration',
       type: 'object',
+      additionalProperties: false,
       properties: {
         federationRuntime: {
-          anyOf: [{ type: 'boolean' }, { enum: ['hoisted'] }],
+          description:
+            "Configure federation runtime mode. When set to 'hoisted', enables hoisted runtime mode. When false, disables federation runtime.",
+          oneOf: [
+            {
+              enum: [false],
+            },
+            {
+              enum: ['hoisted'],
+            },
+          ],
         },
         externalRuntime: {
-          anyOf: [{ type: 'boolean' }, { enum: ['provide'] }],
+          description:
+            'After setting true, the external MF runtime will be used and the runtime provided by the consumer will be used. (Please make sure your consumer has provideExternalRuntime: true set, otherwise it will not run properly!)',
+          type: 'boolean',
+          default: false,
+        },
+        provideExternalRuntime: {
+          description: 'Enable providing external runtime',
+          type: 'boolean',
+          default: false,
         },
       },
-      additionalProperties: false,
+    },
+    dataPrefetch: {
+      description: 'Enable data prefetching for container modules.',
+      type: 'boolean',
+    },
+    runtimePlugins: {
+      description: 'Array of runtime plugins to be applied',
+      type: 'array',
+      items: {
+        type: 'string',
+      },
     },
   },
   required: ['name', 'exposes'],
-};
+} as const;

@@ -19,13 +19,15 @@ describe('typeScriptCompiler', () => {
   const basicConfig = readJSONSync(
     join(__dirname, '../../..', './tsconfig.spec.json'),
   );
+  const projectRoot = join(__dirname, '../../..');
+
   const tsConfig: TsConfigJson = {
     ...basicConfig,
-    extends: resolve(join(__dirname, '../../..'), basicConfig.extends),
+    extends: resolve(projectRoot, basicConfig.extends),
     compilerOptions: {
       ...basicConfig.compilerOptions,
       outDir: join(tmpDir, 'typesRemoteFolder', 'compiledTypesFolder'),
-      rootDir: join(__dirname, '../../..'),
+      rootDir: projectRoot,
       emitDeclarationOnly: true,
       noEmit: false,
       declaration: true,
@@ -47,9 +49,10 @@ describe('typeScriptCompiler', () => {
     extractThirdParty: false,
     extractRemoteTypes: false,
     implementation: '',
-    context: join(__dirname, '../../..'),
+    context: projectRoot,
     hostRemoteTypesFolder: '@mf-types',
     abortOnError: true,
+    outputDir: 'outputDir',
   };
 
   it('retrieveMfTypesPath correctly calculate path', () => {
@@ -307,9 +310,6 @@ describe('typeScriptCompiler', () => {
                       },
                       {
                         name: 'GenerateTypesPlugin.d.ts',
-                      },
-                      {
-                        name: 'TypesPlugin.d.ts',
                       },
                       {
                         name: 'utils.d.ts',
