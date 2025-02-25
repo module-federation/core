@@ -10,6 +10,8 @@ When compiling the exported (`exposes`) file TS type, the current project's `tsc
 
 Execute the `cmd` command in the error message parameter in the terminal, and repair the file or `tsconfig` according to the error message.
 
+If you want to ignore the type check error in ts, you can set [`compilerOptions.noCheck`](https://www.typescriptlang.org/tsconfig/#noCheck) to `true` in `tsconfig.json` (This option is only supported for ts 5.5 and above)
+
 If the `cmd` command is executed without an error, but the error TS compilation fails is still reported, you need to check the `exposes` field in `ModuleFederationPlugin`:
 
 ```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"

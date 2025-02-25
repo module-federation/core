@@ -1,5 +1,19 @@
 # @module-federation/dts-plugin
 
+## 0.9.0
+
+### Minor Changes
+
+- 5ebc53f: feat: enable tsc incremental build
+
+### Patch Changes
+
+- d872b35: fix(dts-plugin): cache file should have name as its unique path
+  - @module-federation/sdk@0.9.0
+  - @module-federation/managers@0.9.0
+  - @module-federation/third-party-dts-extractor@0.9.0
+  - @module-federation/error-codes@0.9.0
+
 ## 0.8.12
 
 ### Patch Changes
