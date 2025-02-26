@@ -66,7 +66,6 @@ const RemoteAppWrapper = forwardRef(function (
   // 初始化远程组件
   useEffect(() => {
     if (initialized) return;
-
     const providerReturn = providerInfo();
     providerInfoRef.current = providerReturn;
     setInitialized(true);
@@ -104,7 +103,7 @@ const RemoteAppWrapper = forwardRef(function (
     };
   }, [moduleName]);
 
-  // 处理 props 更新
+  // trigger render after props updated
   useEffect(() => {
     if (!initialized || !providerInfoRef.current) return;
 

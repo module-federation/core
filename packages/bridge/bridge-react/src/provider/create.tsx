@@ -87,6 +87,7 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           ).then((root: RootType) => rootMap.set(info.dom, root));
         } else {
           let root = rootMap.get(info.dom);
+          // do not call createRoot multiple times
           if (!root) {
             root = createRoot(info.dom);
             rootMap.set(info.dom, root);
