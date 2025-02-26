@@ -124,9 +124,13 @@ export const isTSProject = (
 
 export function cloneDeepOptions(options: DTSManagerOptions) {
   const excludeKeys = ['manifest', 'async'];
-  return cloneDeepWith(options, (_value, key) => {
+
+  return cloneDeepWith(options, (value, key) => {
     // moduleFederationConfig.manifest may have un serialization options
     if (typeof key === 'string' && excludeKeys.includes(key)) {
+      return false;
+    }
+    if (typeof value === 'function') {
       return false;
     }
   });

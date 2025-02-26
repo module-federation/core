@@ -1,5 +1,14 @@
 # @module-federation/utilities
 
+## 3.1.45
+
+### Patch Changes
+
+- Updated dependencies [35d925b]
+- Updated dependencies [35d925b]
+- Updated dependencies [8acd217]
+  - @module-federation/sdk@0.9.1
+
 ## 3.1.44
 
 ### Patch Changes

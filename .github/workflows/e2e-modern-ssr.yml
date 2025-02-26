@@ -47,7 +47,7 @@ jobs:
         run: |
           lsof -ti tcp:3050,3051,3052,3053,3054,3055,3056 | xargs -r kill &&
           pnpm run app:modern:dev &
-          sleep 1 &&
+          sleep 30 &&
           npx wait-on http://127.0.0.1:3050/ &&
           npx wait-on http://127.0.0.1:3051/ &&
           npx wait-on http://127.0.0.1:3052/ &&

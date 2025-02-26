@@ -1,5 +1,13 @@
 # @module-federation/runtime-tools
 
+## 0.9.1
+
+### Patch Changes
+
+- Updated dependencies [2580dd7]
+  - @module-federation/webpack-bundler-runtime@0.9.1
+  - @module-federation/runtime@0.9.1
+
 ## 0.9.0
 
 ### Patch Changes

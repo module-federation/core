@@ -11,36 +11,46 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
   dtsOptions: moduleFederationPlugin.PluginDtsOptions;
   defaultOptions: moduleFederationPlugin.DtsHostOptions;
   callback: () => void;
+  fetchRemoteTypeUrlsResolve: (
+    options: moduleFederationPlugin.RemoteTypeUrls,
+  ) => void;
 
   constructor(
     pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
     dtsOptions: moduleFederationPlugin.PluginDtsOptions,
     defaultOptions: moduleFederationPlugin.DtsHostOptions,
-    callback: () => void,
+    fetchRemoteTypeUrlsResolve: (
+      options: moduleFederationPlugin.RemoteTypeUrls,
+    ) => void,
   ) {
     this.pluginOptions = pluginOptions;
     this.dtsOptions = dtsOptions;
     this.defaultOptions = defaultOptions;
-    this.callback = callback;
+    this.fetchRemoteTypeUrlsResolve = fetchRemoteTypeUrlsResolve;
   }
 
   apply(compiler: Compiler) {
-    const { dtsOptions, defaultOptions, pluginOptions, callback } = this;
+    const {
+      dtsOptions,
+      defaultOptions,
+      pluginOptions,
+      fetchRemoteTypeUrlsResolve,
+    } = this;
 
     if (isPrd()) {
-      callback();
+      fetchRemoteTypeUrlsResolve(undefined);
       return;
     }
 
     const normalizedConsumeTypes =
-      normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
+      normalizeOptions<moduleFederationPlugin.DtsHostOptions>(
         true,
         defaultOptions,
         'mfOptions.dts.consumeTypes',
       )(dtsOptions.consumeTypes);
 
     if (!normalizedConsumeTypes) {
-      callback();
+      fetchRemoteTypeUrlsResolve(undefined);
       return;
     }
 
@@ -56,14 +66,25 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
     };
 
     validateOptions(finalOptions.host);
-
-    const promise = consumeTypes(finalOptions)
-      .then(() => {
-        callback();
+    const fetchRemoteTypeUrlsPromise =
+      typeof normalizedConsumeTypes.remoteTypeUrls === 'function'
+        ? normalizedConsumeTypes.remoteTypeUrls()
+        : Promise.resolve(normalizedConsumeTypes.remoteTypeUrls);
+    const promise = fetchRemoteTypeUrlsPromise.then((remoteTypeUrls) => {
+      consumeTypes({
+        ...finalOptions,
+        host: {
+          ...finalOptions.host,
+          remoteTypeUrls,
+        },
       })
-      .catch(() => {
-        callback();
-      });
+        .then(() => {
+          fetchRemoteTypeUrlsResolve(remoteTypeUrls);
+        })
+        .catch(() => {
+          fetchRemoteTypeUrlsResolve(remoteTypeUrls);
+        });
+    });
 
     compiler.hooks.thisCompilation.tap('mf:generateTypes', (compilation) => {
       compilation.hooks.processAssets.tapPromise(
