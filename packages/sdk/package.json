@@ -30,11 +30,6 @@
       "import": "./dist/index.esm.mjs",
       "require": "./dist/index.cjs.js"
     },
-    "./logger": {
-      "types": "./dist/logger.cjs.d.ts",
-      "import": "./dist/logger.esm.mjs",
-      "require": "./dist/logger.cjs.js"
-    },
     "./normalize-webpack-path": {
       "types": "./dist/normalize-webpack-path.cjs.d.ts",
       "import": "./dist/normalize-webpack-path.esm.mjs",
@@ -48,9 +43,6 @@
       ],
       "normalize-webpack-path": [
         "./dist/normalize-webpack-path.cjs.d.ts"
-      ],
-      "logger": [
-        "./dist/logger.cjs.d.ts"
       ]
     }
   }

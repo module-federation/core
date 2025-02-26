@@ -1,4 +1,4 @@
-import { createLogger } from '@module-federation/sdk/logger';
+import { createLogger } from '@module-federation/sdk';
 
 const logger = createLogger('[ Module Federation Data Prefetch ]');
 

@@ -1,4 +1,4 @@
-import { createLogger } from '@module-federation/sdk/logger';
+import { createLogger } from '@module-federation/sdk';
 import { PLUGIN_IDENTIFIER } from '../constant';
 
 const logger = createLogger(PLUGIN_IDENTIFIER);

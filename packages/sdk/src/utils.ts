@@ -6,7 +6,6 @@ import {
   SEPARATOR,
   MANIFEST_EXT,
 } from './constant';
-// import { logger } from './logger';
 import { getProcessEnv } from './env';
 
 const LOG_CATEGORY = '[ Federation Runtime ]';

@@ -7,6 +7,7 @@ export {
   simpleJoinRemoteEntry,
   inferAutoPublicPath,
 } from './generateSnapshotFromManifest';
+export * from './logger';
 export * from './env';
 export * from './dom';
 export * from './node';

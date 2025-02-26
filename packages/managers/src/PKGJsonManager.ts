@@ -3,7 +3,7 @@ import path from 'path';
 import finder from 'find-pkg';
 import fs from 'fs';
 import { MFModuleType } from '@module-federation/sdk';
-import { logger } from '@module-federation/sdk/logger';
+import { logger } from '@module-federation/sdk';
 
 export class PKGJsonManager {
   private _pkg?: Record<string, any>;

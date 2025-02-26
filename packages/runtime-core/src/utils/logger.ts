@@ -1,4 +1,4 @@
-import { createLogger } from '@module-federation/sdk/logger';
+import { createLogger } from '@module-federation/sdk';
 
 const LOG_CATEGORY = '[ Federation Runtime ]';
 // FIXME: pre-bundle ?

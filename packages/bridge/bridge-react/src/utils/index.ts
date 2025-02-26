@@ -1,5 +1,5 @@
 import React from 'react';
-import { createLogger } from '@module-federation/sdk/logger';
+import { createLogger } from '@module-federation/sdk';
 
 export const LoggerInstance = createLogger(
   '[ Module Federation Bridge React ]',

@@ -11,7 +11,7 @@ import {
   composeKeyWithSeparator,
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
-import { logger } from '@module-federation/sdk/logger';
+import { logger } from '@module-federation/sdk';
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
