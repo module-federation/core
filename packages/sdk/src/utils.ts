@@ -6,7 +6,6 @@ import {
   SEPARATOR,
   MANIFEST_EXT,
 } from './constant';
-import { logger } from './logger';
 import { getProcessEnv } from './env';
 
 const LOG_CATEGORY = '[ Federation Runtime ]';
@@ -233,7 +232,6 @@ function isRequiredVersion(str: string): boolean {
 
 export {
   parseEntry,
-  logger,
   decodeName,
   encodeName,
   composeKeyWithSeparator,
