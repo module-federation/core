@@ -1,5 +1,13 @@
 # @module-federation/sdk
 
+## 0.9.1
+
+### Patch Changes
+
+- 35d925b: feat(dts-plugin): support remoteTypeUrls option which allow user to specify the remote types url
+- 35d925b: fix(dts-plugin): support parse @scope@manifest-url.json entry
+- 8acd217: chore: remove isomorphic-rslog
+
 ## 0.9.0
 
 ## 0.8.12

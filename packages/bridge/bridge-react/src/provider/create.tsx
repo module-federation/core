@@ -93,9 +93,13 @@ export function createBridgeComponent<T>({
             bridgeInfo?.render(rootComponentWithErrorBoundary, dom),
           ).then((root: RootType) => rootMap.set(info.dom, root));
         } else {
-          const root = createRoot(info.dom);
+          let root = rootMap.get(info.dom);
+          // do not call createRoot multiple times
+          if (!root) {
+            root = createRoot(info.dom);
+            rootMap.set(info.dom, root);
+          }
           root.render(rootComponentWithErrorBoundary);
-          rootMap.set(info.dom, root);
         }
 
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
@@ -112,7 +116,7 @@ export function createBridgeComponent<T>({
           }
           rootMap.delete(info.dom);
         }
-        instance?.bridgeHook?.lifecycle?.destroyBridge?.emit(info);
+        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
       },
     };
   };

@@ -39,6 +39,7 @@ export default defineConfig({
       exposes: {
         './button': './src/button.tsx',
         './export-app': './src/export-App.tsx',
+        './export-button': './src/export-Button.tsx',
         './app': './src/App.tsx',
       },
       shared: {

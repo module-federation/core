@@ -1,5 +1,20 @@
 # @module-federation/dts-plugin
 
+## 0.9.1
+
+### Patch Changes
+
+- 35d925b: feat(dts-plugin): support remoteTypeUrls option which allow user to specify the remote types url
+- 35d925b: fix(dts-plugin): support parse @scope@manifest-url.json entry
+- 7a37360: fix(dts-plugin): consume api types if adding new one
+- Updated dependencies [35d925b]
+- Updated dependencies [35d925b]
+- Updated dependencies [8acd217]
+  - @module-federation/sdk@0.9.1
+  - @module-federation/managers@0.9.1
+  - @module-federation/third-party-dts-extractor@0.9.1
+  - @module-federation/error-codes@0.9.1
+
 ## 0.9.0
 
 ### Minor Changes

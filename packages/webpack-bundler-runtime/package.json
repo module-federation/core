@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/webpack-bundler-runtime",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "license": "MIT",
   "description": "Module Federation Runtime for webpack",
   "keywords": [
@@ -36,10 +36,6 @@
     "./constant": {
       "import": "./dist/constant.esm.mjs",
       "require": "./dist/constant.cjs.js"
-    },
-    "./container": {
-      "import": "./dist/container.esm.mjs",
-      "require": "./dist/container.cjs.js"
     },
     "./*": "./*"
   },
