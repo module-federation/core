@@ -1,5 +1,4 @@
 import {
-  MANIFEST_EXT,
   parseEntry,
   ENCODE_NAME_PREFIX,
   decodeName,

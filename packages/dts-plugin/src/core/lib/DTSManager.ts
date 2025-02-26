@@ -148,6 +148,21 @@ class DTSManager {
         return;
       }
 
+      if (tsConfig.compilerOptions.tsBuildInfoFile) {
+        try {
+          const tsBuildInfoFile = path.resolve(
+            remoteOptions.context,
+            tsConfig.compilerOptions.tsBuildInfoFile,
+          );
+          const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
+          if (!fs.existsSync(mfTypesPath)) {
+            fs.rmSync(tsBuildInfoFile, { force: true });
+          }
+        } catch (e) {
+          //noop
+        }
+      }
+
       await this.extractRemoteTypes({
         remoteOptions,
         tsConfig,
@@ -164,7 +179,6 @@ class DTSManager {
         apiTypesPath = retrieveMfAPITypesPath(tsConfig, remoteOptions);
         fs.writeFileSync(apiTypesPath, apiTypes);
       }
-
       try {
         if (remoteOptions.deleteTypesFolder) {
           await rm(retrieveMfTypesPath(tsConfig, remoteOptions), {
@@ -181,7 +195,7 @@ class DTSManager {
     } catch (error) {
       if (this.options.remote?.abortOnError === false) {
         if (this.options.displayErrorInTerminal) {
-          logger.error(`Unable to compile federated types${error}`);
+          logger.error(`Unable to compile federated types ${error}`);
         }
       } else {
         throw error;
