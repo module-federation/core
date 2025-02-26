@@ -1,7 +1,7 @@
-import ansiColors from 'ansi-colors';
 import path from 'path';
 import { rm } from 'fs/promises';
 import fs from 'fs';
+import fse from 'fs-extra';
 import {
   MANIFEST_EXT,
   Manifest,
@@ -112,17 +112,10 @@ class DTSManager {
         );
 
         const targetDir = path.join(mfTypesPath, 'node_modules');
-        if (fs.existsSync(remoteTypesFolder) && targetDir) {
+        if (fs.existsSync(remoteTypesFolder)) {
           const targetFolder = path.resolve(remoteOptions.context, targetDir);
-          if (!fs.existsSync(targetFolder)) {
-            fs.mkdirSync(targetFolder, { recursive: true });
-          }
-          const files = fs.readdirSync(remoteTypesFolder);
-          files.forEach((file) => {
-            const srcPath = path.join(remoteTypesFolder, file);
-            const destPath = path.join(targetFolder, file);
-            fs.copyFileSync(srcPath, destPath);
-          });
+          await fse.ensureDir(targetFolder);
+          await fse.copy(remoteTypesFolder, targetFolder, { overwrite: true });
         }
       } catch (err) {
         if (this.options.host?.abortOnError === false) {
