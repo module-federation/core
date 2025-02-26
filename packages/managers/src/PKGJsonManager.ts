@@ -2,8 +2,7 @@ import path from 'path';
 // @ts-ignore this pkg miss types
 import finder from 'find-pkg';
 import fs from 'fs';
-import { MFModuleType } from '@module-federation/sdk';
-import { logger } from '@module-federation/sdk';
+import { MFModuleType, logger } from '@module-federation/sdk';
 
 export class PKGJsonManager {
   private _pkg?: Record<string, any>;
