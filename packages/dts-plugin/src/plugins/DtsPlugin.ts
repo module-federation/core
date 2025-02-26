@@ -20,8 +20,8 @@ export class DtsPlugin implements WebpackPluginInstance {
       generateAPITypes: true,
       compileInChildProcess: true,
       abortOnError: false,
-      extractThirdParty: true,
-      extractRemoteTypes: true,
+      extractThirdParty: false,
+      extractRemoteTypes: false,
     };
     const defaultConsumeTypes = { abortOnError: false, consumeAPITypes: true };
     const normalizedDtsOptions =
