@@ -136,6 +136,15 @@ export interface PluginDevOptions {
   disableDynamicRemoteTypeHints?: boolean;
 }
 
+interface RemoteTypeUrl {
+  api: string;
+  zip: string;
+}
+
+export interface RemoteTypeUrls {
+  [remoteName: string]: RemoteTypeUrl;
+}
+
 export interface DtsHostOptions {
   typesFolder?: string;
   abortOnError?: boolean;
@@ -144,6 +153,7 @@ export interface DtsHostOptions {
   maxRetries?: number;
   consumeAPITypes?: boolean;
   runtimePkgs?: string[];
+  remoteTypeUrls?: (() => Promise<RemoteTypeUrls>) | RemoteTypeUrls;
 }
 
 export interface DtsRemoteOptions {

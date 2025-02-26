@@ -1,7 +1,7 @@
-import ansiColors from 'ansi-colors';
 import path from 'path';
 import { rm } from 'fs/promises';
 import fs from 'fs';
+import fse from 'fs-extra';
 import {
   MANIFEST_EXT,
   Manifest,
@@ -103,21 +103,35 @@ class DTSManager {
 
     const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
 
-    if (hasRemotes) {
-      const tempHostOptions = {
-        moduleFederationConfig: remoteOptions.moduleFederationConfig,
-        typesFolder: path.join(mfTypesPath, 'node_modules'),
-        remoteTypesFolder:
-          remoteOptions?.hostRemoteTypesFolder || remoteOptions.typesFolder,
-        deleteTypesFolder: true,
-        context: remoteOptions.context,
-        implementation: remoteOptions.implementation,
-        abortOnError: false,
-      };
-      await this.consumeArchiveTypes(tempHostOptions);
+    if (hasRemotes && this.options.host) {
+      try {
+        const { hostOptions } = retrieveHostConfig(this.options.host);
+        const remoteTypesFolder = path.resolve(
+          hostOptions.context,
+          hostOptions.typesFolder,
+        );
+
+        const targetDir = path.join(mfTypesPath, 'node_modules');
+        if (fs.existsSync(remoteTypesFolder)) {
+          const targetFolder = path.resolve(remoteOptions.context, targetDir);
+          await fse.ensureDir(targetFolder);
+          await fse.copy(remoteTypesFolder, targetFolder, { overwrite: true });
+        }
+      } catch (err) {
+        if (this.options.host?.abortOnError === false) {
+          fileLog(
+            `Unable to copy remote types, ${err}`,
+            'extractRemoteTypes',
+            'error',
+          );
+        } else {
+          throw err;
+        }
+      }
     }
   }
 
+  // it must execute after consumeTypes
   async generateTypes() {
     try {
       const { options } = this;
@@ -132,6 +146,21 @@ class DTSManager {
 
       if (!Object.keys(mapComponentsToExpose).length) {
         return;
+      }
+
+      if (tsConfig.compilerOptions.tsBuildInfoFile) {
+        try {
+          const tsBuildInfoFile = path.resolve(
+            remoteOptions.context,
+            tsConfig.compilerOptions.tsBuildInfoFile,
+          );
+          const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
+          if (!fs.existsSync(mfTypesPath)) {
+            fs.rmSync(tsBuildInfoFile, { force: true });
+          }
+        } catch (e) {
+          //noop
+        }
       }
 
       await this.extractRemoteTypes({
@@ -150,7 +179,6 @@ class DTSManager {
         apiTypesPath = retrieveMfAPITypesPath(tsConfig, remoteOptions);
         fs.writeFileSync(apiTypesPath, apiTypes);
       }
-
       try {
         if (remoteOptions.deleteTypesFolder) {
           await rm(retrieveMfTypesPath(tsConfig, remoteOptions), {
@@ -167,7 +195,7 @@ class DTSManager {
     } catch (error) {
       if (this.options.remote?.abortOnError === false) {
         if (this.options.displayErrorInTerminal) {
-          logger.error(`Unable to compile federated types${error}`);
+          logger.error(`Unable to compile federated types ${error}`);
         }
       } else {
         throw error;
@@ -180,6 +208,9 @@ class DTSManager {
   ): Promise<Required<RemoteInfo>> {
     try {
       if (!remoteInfo.url.includes(MANIFEST_EXT)) {
+        return remoteInfo as Required<RemoteInfo>;
+      }
+      if (remoteInfo.zipUrl) {
         return remoteInfo as Required<RemoteInfo>;
       }
       const url = remoteInfo.url;

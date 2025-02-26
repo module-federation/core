@@ -18,20 +18,24 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
   dtsOptions: moduleFederationPlugin.PluginDtsOptions;
   defaultOptions: moduleFederationPlugin.DtsRemoteOptions;
-  consumeTypesPromise: Promise<void>;
+  fetchRemoteTypeUrlsPromise: Promise<
+    moduleFederationPlugin.DtsHostOptions['remoteTypeUrls'] | undefined
+  >;
   callback: () => void;
 
   constructor(
     pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
     dtsOptions: moduleFederationPlugin.PluginDtsOptions,
     defaultOptions: moduleFederationPlugin.DtsRemoteOptions,
-    consumeTypesPromise: Promise<void>,
+    fetchRemoteTypeUrlsPromise: Promise<
+      moduleFederationPlugin.DtsHostOptions['remoteTypeUrls'] | undefined
+    >,
     callback: () => void,
   ) {
     this.pluginOptions = pluginOptions;
     this.dtsOptions = dtsOptions;
     this.defaultOptions = defaultOptions;
-    this.consumeTypesPromise = consumeTypesPromise;
+    this.fetchRemoteTypeUrlsPromise = fetchRemoteTypeUrlsPromise;
     this.callback = callback;
   }
 
@@ -40,7 +44,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
       dtsOptions,
       defaultOptions,
       pluginOptions,
-      consumeTypesPromise,
+      fetchRemoteTypeUrlsPromise,
       callback,
     } = this;
 
@@ -56,6 +60,13 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
       return;
     }
 
+    const normalizedConsumeTypes =
+      normalizeOptions<moduleFederationPlugin.DtsHostOptions>(
+        true,
+        defaultOptions,
+        'mfOptions.dts.consumeTypes',
+      )(dtsOptions.consumeTypes);
+
     const finalOptions: DTSManagerOptions = {
       remote: {
         implementation: dtsOptions.implementation,
@@ -64,6 +75,14 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         moduleFederationConfig: pluginOptions,
         ...normalizedGenerateTypes,
       },
+      host:
+        normalizedConsumeTypes === false
+          ? undefined
+          : {
+              context: compiler.context,
+              moduleFederationConfig: pluginOptions,
+              ...normalizedGenerateTypes,
+            },
       extraOptions: dtsOptions.extraOptions || {},
       displayErrorInTerminal: dtsOptions.displayErrorInTerminal,
     };
@@ -222,7 +241,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
         },
         async () => {
-          await consumeTypesPromise;
+          await fetchRemoteTypeUrlsPromise;
           const emitTypesFilesPromise = emitTypesFiles(compilation);
           if (isProd) {
             await emitTypesFilesPromise;
