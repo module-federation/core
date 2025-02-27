@@ -17,6 +17,7 @@ const common = {
       requiredVersion: false,
       layer: 'react-layer',
       issuerLayer: 'react-layer',
+      shareScope: 'react-layer',
     },
   },
 };

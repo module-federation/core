@@ -7,6 +7,6 @@
     "build": "webpack --config=webpack.config.js"
   },
   "dependencies": {
-    "react": "*"
+    "react": "0.1.2"
   }
 }

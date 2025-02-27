@@ -32,6 +32,7 @@ const commonMF = {
       singleton: true,
       layer: 'layered-components',
       issuerLayer: 'layered-components',
+      shareScope: 'layered-components',
     },
   },
 };
