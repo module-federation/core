@@ -8,6 +8,7 @@ import type { moduleFederationPlugin as MFPluginOptions } from '@module-federati
 import type { PluginOptions, InternalModernPluginOptions } from '../types';
 import { moduleFederationConfigPlugin } from './configPlugin';
 import { moduleFederationSSRPlugin } from './ssrPlugin';
+import { isWebTarget } from './utils';
 
 export const moduleFederationPlugin = (
   userConfig: PluginOptions = {},
@@ -27,7 +28,7 @@ export const moduleFederationPlugin = (
     setup: async (api) => {
       const modernjsConfig = api.getConfig();
 
-      api.modifyBundlerChain((chain, { isServer }) => {
+      api.modifyBundlerChain((chain) => {
         const bundlerType =
           api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
         const browserPluginOptions =
@@ -37,7 +38,7 @@ export const moduleFederationPlugin = (
           bundlerType === 'webpack'
             ? WebpackModuleFederationPlugin
             : RspackModuleFederationPlugin;
-        if (!isServer) {
+        if (isWebTarget(chain.get('target'))) {
           chain
             .plugin('plugin-module-federation')
             .use(MFPlugin, [browserPluginOptions])

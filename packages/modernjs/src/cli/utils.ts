@@ -379,3 +379,13 @@ export const getIPV4 = (): string => {
   const ipv4Interface = ipv4Interfaces[0] || { address: localIpv4 };
   return ipv4Interface.address;
 };
+
+export const isWebTarget = (target: string[] | string) => {
+  const WEB_TARGET = 'web';
+  if (Array.isArray(target)) {
+    return target.includes(WEB_TARGET);
+  } else if (typeof target === 'string') {
+    return target === WEB_TARGET;
+  }
+  return false;
+};

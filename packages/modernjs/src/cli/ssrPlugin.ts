@@ -9,6 +9,7 @@ import { updateStatsAndManifest } from './manifest';
 import { isDev } from './constant';
 import { MODERN_JS_SERVER_DIR } from '../constant';
 import logger from './logger';
+import { isWebTarget } from './utils';
 
 export function setEnv() {
   process.env['MF_DISABLE_EMIT_STATS'] = 'true';
@@ -55,7 +56,9 @@ export const moduleFederationSSRPlugin = (
           ? ModuleFederationPlugin
           : RspackModuleFederationPlugin;
 
-      if (isServer) {
+      const isWeb = isWebTarget(chain.get('target'));
+
+      if (!isWeb) {
         if (!chain.plugins.has(CHAIN_MF_PLUGIN_ID)) {
           chain
             .plugin(CHAIN_MF_PLUGIN_ID)
@@ -66,14 +69,8 @@ export const moduleFederationSSRPlugin = (
             });
         }
       }
-      // else {
-      //   pluginOptions.distOutputDir =
-      //     pluginOptions.distOutputDir ||
-      //     chain.output.get('path') ||
-      //     path.resolve(process.cwd(), 'dist');
-      // }
 
-      if (isServer) {
+      if (!isWeb) {
         chain.target('async-node');
         if (isDev) {
           chain

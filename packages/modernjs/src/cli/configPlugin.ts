@@ -34,7 +34,7 @@ export const moduleFederationConfigPlugin = (
     const enableSSR =
       userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr);
 
-    api.modifyBundlerChain((chain, { isProd, isServer }) => {
+    api.modifyBundlerChain((chain, { isServer }) => {
       // @ts-expect-error chain type is not correct
       addMyTypes2Ignored(chain, isServer ? ssrConfig : csrConfig);
 
