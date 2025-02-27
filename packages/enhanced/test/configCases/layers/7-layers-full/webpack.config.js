@@ -9,17 +9,16 @@ const common = {
     './App': './App',
     './noop': './emptyComponent',
   },
+  shareStrategy: 'version-first',
   shared: {
     react: {
       singleton: true,
-      requiredVersion: false,
     },
     randomvalue: {
       request: 'react',
       import: 'react',
       shareKey: 'react',
       singleton: true,
-      requiredVersion: false,
       layer: 'react-layer',
       issuerLayer: 'react-layer',
       shareScope: 'react-layer',
