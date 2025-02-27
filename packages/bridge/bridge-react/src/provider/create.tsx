@@ -3,33 +3,16 @@ import ReactDOM from 'react-dom';
 import type {
   ProviderParams,
   RenderFnParams,
-} from '@module-federation/bridge-shared';
+  ProviderFnParams,
+  RootType,
+  DestroyParams,
+  RenderParams,
+} from '../types';
 import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
 import { LoggerInstance } from '../utils';
 import { federationRuntime } from './plugin';
 import { createRoot as defaultCreateRoot } from './compat';
-
-type RenderParams = RenderFnParams & {
-  [key: string]: unknown;
-};
-type DestroyParams = {
-  moduleName: string;
-  dom: HTMLElement;
-};
-type RootType = HTMLElement | ReturnType<typeof defaultCreateRoot>;
-
-export type ProviderFnParams<T> = {
-  rootComponent: React.ComponentType<T>;
-  render?: (
-    App: React.ReactElement,
-    id?: HTMLElement | string,
-  ) => RootType | Promise<RootType>;
-  createRoot?: (
-    container: Parameters<typeof defaultCreateRoot>[0],
-    options?: Parameters<typeof defaultCreateRoot>[1],
-  ) => ReturnType<typeof defaultCreateRoot>;
-};
 
 export function createBridgeComponent<T>({
   createRoot = defaultCreateRoot,
@@ -87,10 +70,9 @@ export function createBridgeComponent<T>({
           </ErrorBoundary>
         );
 
-        if (bridgeInfo?.render) {
-          // in case bridgeInfo?.render is an async function, resolve this to promise
-          Promise.resolve(
-            bridgeInfo?.render(rootComponentWithErrorBoundary, dom),
+        if (bridgeInfo.render) {
+          await Promise.resolve(
+            bridgeInfo.render(rootComponentWithErrorBoundary, dom),
           ).then((root: RootType) => rootMap.set(info.dom, root));
         } else {
           let root = rootMap.get(info.dom);
@@ -99,7 +81,10 @@ export function createBridgeComponent<T>({
             root = createRoot(info.dom);
             rootMap.set(info.dom, root);
           }
-          root.render(rootComponentWithErrorBoundary);
+
+          if ('render' in root) {
+            root.render(rootComponentWithErrorBoundary);
+          }
         }
 
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};

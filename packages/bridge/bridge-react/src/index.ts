@@ -3,4 +3,12 @@ export { createBridgeComponent } from './provider/create';
 export type {
   ProviderParams,
   RenderFnParams,
-} from '@module-federation/bridge-shared';
+  ProviderFnParams,
+  RootType,
+  Root,
+  CreateRootOptions,
+  DestroyParams,
+  RenderParams,
+  RemoteComponentParams,
+  RemoteComponentProps,
+} from './types';

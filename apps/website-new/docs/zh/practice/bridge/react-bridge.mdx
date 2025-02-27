@@ -182,19 +182,34 @@ export declare function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>
     }): Promise<void>;
 };
 
-type ProviderFnParams<T> = {
+interface ProviderFnParams<T> {
   rootComponent: React.ComponentType<T>;
   render?: (
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
+  createRoot?: (
+    container: Element | DocumentFragment,
+    options?: CreateRootOptions,
+  ) => Root;
 };
 
-export declare interface RenderFnParams extends ProviderParams {
+interface CreateRootOptions {
+  identifierPrefix?: string;
+  onRecoverableError?: (error: unknown) => void;
+  transitionCallbacks?: unknown;
+}
+
+interface Root {
+  render(children: React.ReactNode): void;
+  unmount(): void;
+}
+
+interface RenderFnParams extends ProviderParams {
     dom: HTMLElement;
 }
 
-export declare interface ProviderParams {
+interface ProviderParams {
     moduleName?: string;
     basename?: string;
     memoryRoute?: {
@@ -209,16 +224,23 @@ export declare interface ProviderParams {
 * `bridgeInfo`
   * type:
 ```tsx
-type ProviderFnParams<T> = {
+interface ProviderFnParams<T> {
   rootComponent: React.ComponentType<T>;
   render?: (
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
+  createRoot?: (
+    container: Element | DocumentFragment,
+    options?: CreateRootOptions,
+  ) => Root;
 };
 ```
 
   * 作用: 用于传递根组件
+    * `rootComponent`: 需要被远程加载的根组件
+    * `render`: 自定义渲染函数，用于自定义渲染逻辑
+    * `createRoot`: 自定义 createRoot 函数，用于自定义 React 根节点的创建方式，可用于兼容不同版本的 React 或实现特定的渲染行为
   * ReturnType
     * type:
 
