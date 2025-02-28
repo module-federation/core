@@ -134,7 +134,10 @@ export const pluginModuleFederation = (
             }
           }
 
-          if (!bundlerConfig.output?.chunkLoadingGlobal) {
+          if (
+            !bundlerConfig.output?.chunkLoadingGlobal &&
+            bundlerConfig.output?.chunkFormat !== 'module'
+          ) {
             bundlerConfig.output!.chunkLoading = 'jsonp';
           }
 
