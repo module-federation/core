@@ -1,22 +1,12 @@
 import React, { forwardRef } from 'react';
-import {
-  ErrorBoundary,
-  ErrorBoundaryPropsWithComponent,
-} from 'react-error-boundary';
+import { ErrorBoundary } from 'react-error-boundary';
 import { LoggerInstance } from '../utils';
 import RemoteApp from './component';
 import {
   RemoteComponentParams,
   RemoteComponentProps,
-  RenderFnParams,
+  RemoteModule,
 } from '../types';
-
-interface RemoteModule {
-  provider: () => {
-    render: (info: RenderFnParams) => void;
-    destroy: (info: { dom: any }) => void;
-  };
-}
 
 type LazyRemoteComponentInfo<T, E extends keyof T> = RemoteComponentParams<T>;
 

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
 
 /**
  * Options for creating a React root
@@ -82,7 +83,6 @@ export interface RemoteComponentProps<T = Record<string, unknown>> {
   props?: T;
   fallback?: React.ComponentType<{ error: Error }>;
   loading?: React.ReactNode;
-  onError?: (error: Error) => void;
   [key: string]: unknown;
 }
 
@@ -98,4 +98,24 @@ export interface RemoteComponentParams<
   fallback: React.ComponentType<{ error: Error }>;
   export?: E;
   props?: T;
+}
+
+/**
+ * Interface for a remote module provider
+ */
+export interface RemoteModule {
+  provider: () => {
+    render: (info: RenderFnParams) => void;
+    destroy: (info: { dom: any }) => void;
+  };
+}
+
+/**
+ * Parameters for a remote app component
+ */
+export interface RemoteAppParams extends ProviderParams {
+  moduleName: string;
+  providerInfo: NonNullable<RemoteModule['provider']>;
+  exportName: string | number | symbol;
+  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
 }
