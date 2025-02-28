@@ -6,7 +6,6 @@
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
     "build": "modern build",
-    "inspect": "modern inspect",
     "start": "modern start",
     "serve": "PORT=4001 modern serve",
     "new": "modern new",
