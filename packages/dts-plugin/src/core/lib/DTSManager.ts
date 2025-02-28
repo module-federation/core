@@ -205,6 +205,7 @@ class DTSManager {
 
   async requestRemoteManifest(
     remoteInfo: RemoteInfo,
+    hostOptions: Required<HostOptions>,
   ): Promise<Required<RemoteInfo>> {
     try {
       if (!remoteInfo.url.includes(MANIFEST_EXT)) {
@@ -214,7 +215,7 @@ class DTSManager {
         return remoteInfo as Required<RemoteInfo>;
       }
       const url = remoteInfo.url;
-      const res = await axiosGet(url);
+      const res = await axiosGet(url, { timeout: hostOptions.timeout });
       const manifestJson = res.data as unknown as Manifest;
       if (!manifestJson.metaData.types.zip) {
         throw new Error(`Can not get ${remoteInfo.name}'s types archive url!`);
@@ -280,6 +281,7 @@ class DTSManager {
   async downloadAPITypes(
     remoteInfo: Required<RemoteInfo>,
     destinationPath: string,
+    hostOptions: Required<HostOptions>,
   ) {
     const { apiTypeUrl } = remoteInfo;
     if (!apiTypeUrl) {
@@ -287,7 +289,7 @@ class DTSManager {
     }
     try {
       const url = apiTypeUrl;
-      const res = await axiosGet(url);
+      const res = await axiosGet(url, { timeout: hostOptions.timeout });
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(
         REMOTE_ALIAS_IDENTIFIER,
@@ -389,8 +391,10 @@ class DTSManager {
       async (item) => {
         const remoteInfo = item[1];
         if (!this.remoteAliasMap[remoteInfo.alias]) {
-          const requiredRemoteInfo =
-            await this.requestRemoteManifest(remoteInfo);
+          const requiredRemoteInfo = await this.requestRemoteManifest(
+            remoteInfo,
+            hostOptions,
+          );
           this.remoteAliasMap[remoteInfo.alias] = requiredRemoteInfo;
         }
 
@@ -434,7 +438,11 @@ class DTSManager {
               return;
             }
 
-            await this.downloadAPITypes(remoteInfo, destinationPath);
+            await this.downloadAPITypes(
+              remoteInfo,
+              destinationPath,
+              hostOptions,
+            );
           }),
         );
         this.consumeAPITypes(hostOptions);
@@ -507,6 +515,7 @@ class DTSManager {
           const addNew = await this.downloadAPITypes(
             requiredRemoteInfo,
             destinationPath,
+            hostOptions,
           );
           if (addNew) {
             this.consumeAPITypes(hostOptions);
@@ -531,8 +540,10 @@ class DTSManager {
           );
           if (remoteInfo) {
             if (!this.remoteAliasMap[remoteInfo.alias]) {
-              const requiredRemoteInfo =
-                await this.requestRemoteManifest(remoteInfo);
+              const requiredRemoteInfo = await this.requestRemoteManifest(
+                remoteInfo,
+                hostOptions,
+              );
               this.remoteAliasMap[remoteInfo.alias] = requiredRemoteInfo;
             }
             await consumeTypes(this.remoteAliasMap[remoteInfo.alias]);
@@ -550,7 +561,7 @@ class DTSManager {
               });
               fileLog(`start request manifest`, 'consumeTypes', 'info');
               this.updatedRemoteInfos[updatedRemoteInfo.name] =
-                await this.requestRemoteManifest(parsedRemoteInfo);
+                await this.requestRemoteManifest(parsedRemoteInfo, hostOptions);
               fileLog(
                 `end request manifest, this.updatedRemoteInfos[updatedRemoteInfo.name]: ${JSON.stringify(
                   this.updatedRemoteInfos[updatedRemoteInfo.name],

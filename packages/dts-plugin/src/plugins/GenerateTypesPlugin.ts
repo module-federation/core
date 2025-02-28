@@ -1,8 +1,8 @@
-import type { Compilation, Compiler, WebpackPluginInstance } from 'webpack';
 import fs from 'fs';
 import path from 'path';
 import { isDev, getCompilerOutputDir } from './utils';
 import {
+  logger,
   normalizeOptions,
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
@@ -13,6 +13,8 @@ import {
   retrieveTypesAssetsInfo,
   type DTSManagerOptions,
 } from '../core/index';
+
+import type { Compilation, Compiler, WebpackPluginInstance } from 'webpack';
 
 export class GenerateTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -119,7 +121,9 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
           return;
         }
 
+        logger.debug('start generating types...');
         await generateTypesFn(finalOptions);
+        logger.debug('generate types success!');
         const config = finalOptions.remote.moduleFederationConfig;
         let zipPrefix = '';
         if (typeof config.manifest === 'object' && config.manifest.filePath) {
@@ -229,6 +233,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         if (finalOptions.displayErrorInTerminal) {
           console.error('Error in mf:generateTypes processAssets hook:', err);
         }
+        logger.debug('generate types fail!');
       }
     };
 

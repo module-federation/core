@@ -62,6 +62,7 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
         const url = fileToDownload;
         const response = await axiosGet(url, {
           responseType: 'arraybuffer',
+          timeout: hostOptions.timeout,
         }).catch(downloadErrorLogger(destinationFolder, url));
         if (
           typeof response.headers?.['content-type'] === 'string' &&
