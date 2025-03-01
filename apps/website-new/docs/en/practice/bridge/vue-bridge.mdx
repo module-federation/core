@@ -124,7 +124,7 @@ const router = createRouter({
   routes: [
     // Define your routes here
     { path: '/', component: Home },
-    { path: '/remote1/:pathMatch(.*)*', component: Remote2 },
+    { path: '/remote1/:pathMatch(.*)*', component: Remote2, props: { foo: 'bar' } },
     // Other routes
   ],
 });
@@ -198,7 +198,7 @@ const router = createRouter({
   routes: [
     // Define your routes here
     { path: '/', component: Home },
-    { path: '/remote1/:pathMatch(.*)*', component: Remote2 },
+    { path: '/remote1/:pathMatch(.*)*', component: Remote2, props: { foo: 'bar' } },
     // Other routes
   ],
 });
