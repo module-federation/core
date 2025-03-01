@@ -61,7 +61,7 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
             routes: bridgeOptions.router.getRoutes(),
           });
 
-          LoggerInstance.log(`createBridgeComponent render router info>>>`, {
+          LoggerInstance.debug(`createBridgeComponent render router info>>>`, {
             moduleName,
             router,
           });
