@@ -20,11 +20,11 @@ import { PackageManagerTabs } from '@theme';
 function createRemoteComponent<T, E extends keyof T>(
   options: {
     // Function to load remote application, e.g., loadRemote('remote1/export-app') or import('remote1/export-app')
-    loader: () => Promise<T>,
+    loader: () => Promise<T>;
     // Default is 'default', used to specify module export
-    export?: E,
+    export?: E;
     // Parameters that will be passed to defineAsyncComponent
-    asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>,
+    asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
     // Attributes that will be bound to the root container where the remote Vue application will be mounted
     rootAttrs?: Record<string, unknown>;
   }
@@ -139,11 +139,11 @@ export default router;
 function createRemoteComponent<T, E extends keyof T>(
   options: {
     // Function to load remote application, e.g., loadRemote('remote1/export-app') or import('remote1/export-app')
-    loader: () => Promise<T>,
+    loader: () => Promise<T>;
     // Default is 'default', used to specify module export
-    export?: E,
+    export?: E;
     // Parameters that will be passed to defineAsyncComponent
-    asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>,
+    asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
     // Attributes that will be bound to the root container where the remote Vue application will be mounted
     rootAttrs?: Record<string, unknown>;
   }
