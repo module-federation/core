@@ -39,7 +39,7 @@ export function isMFFormat(bundlerConfig: Rspack.Configuration) {
     typeof library === 'object' &&
     !Array.isArray(library) &&
     'type' in library &&
-    LIB_FORMAT.includes(library.type)
+    (LIB_FORMAT.includes(library.type) || /commonjs/.test(library.type))
   );
 }
 
