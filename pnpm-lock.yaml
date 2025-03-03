@@ -264,8 +264,8 @@ importers:
         specifier: 4.17.21
         version: 4.17.21
       '@types/fs-extra':
-        specifier: 9.0.13
-        version: 9.0.13
+        specifier: 9.0.6
+        version: 9.0.6
       '@types/jest':
         specifier: 29.5.13
         version: 29.5.13
@@ -2303,6 +2303,9 @@ importers:
         specifier: 9.1.0
         version: 9.1.0
     devDependencies:
+      '@types/fs-extra':
+        specifier: 9.0.6
+        version: 9.0.6
       webpack:
         specifier: 5.93.0
         version: 5.93.0(@swc/core@1.7.26)(esbuild@0.24.0)
@@ -21395,12 +21398,6 @@ packages:
 
   /@types/fs-extra@8.1.5:
     resolution: {integrity: sha512-0dzKcwO+S8s2kuF5Z9oUWatQJj5Uq/iqphEtE3GQJVRRYm/tD1LglU2UnXi2A8jLq5umkGouOXOR9y0n613ZwQ==}
-    dependencies:
-      '@types/node': 20.12.14
-    dev: true
-
-  /@types/fs-extra@9.0.13:
-    resolution: {integrity: sha512-nEnwB++1u5lVDM2UI4c1+5R+FYaKfaAzS4OococimjVm3nQw3TuzH5UNsocrcTBbhnerblyHj4A49qXbIiZdpA==}
     dependencies:
       '@types/node': 20.12.14
     dev: true
