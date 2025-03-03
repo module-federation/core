@@ -44,6 +44,7 @@ export class StatsPlugin implements WebpackPluginInstance {
       return;
     }
     const res = this._statsManager.validate(compiler);
+
     if (!res) {
       return;
     }
