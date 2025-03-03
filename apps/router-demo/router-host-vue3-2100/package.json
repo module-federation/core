@@ -10,14 +10,14 @@
   "dependencies": {
     "@module-federation/bridge-vue3": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
-    "vue": "^3.4.19",
+    "vue": "^3.4.29",
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@rsbuild/core": "^1.0.19",
     "@rsbuild/plugin-vue": "^1.0.3",
-    "tailwindcss": "^3.4.3",
-    "typescript": "^5.4.2"
+    "tailwindcss": "3.4.13",
+    "typescript": "5.5.2"
   }
 }

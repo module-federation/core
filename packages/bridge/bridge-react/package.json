@@ -52,7 +52,7 @@
     "@loadable/component": "^5.16.4",
     "@module-federation/bridge-shared": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "react-error-boundary": "^4.1.2"
+    "react-error-boundary": "4.1.2"
   },
   "peerDependencies": {
     "react": ">=16.9.0",
@@ -61,17 +61,17 @@
   },
   "devDependencies": {
     "@testing-library/react": "15.0.7",
-    "@types/react": "18.2.79",
-    "@types/react-dom": "18.3.0",
+    "@types/react": "~18.2.0",
+    "@types/react-dom": "~18.3.0",
     "@vitejs/plugin-react": "^4.3.3",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
     "jsdom": "^24.1.0",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-router-dom": "6.22.3",
-    "typescript": "^5.2.2",
-    "vite": "^5.2.14",
+    "typescript": "5.5.2",
+    "vite": "5.2.14",
     "vite-plugin-dts": "^4.3.0",
     "@module-federation/runtime": "workspace:*"
   }

@@ -44,6 +44,9 @@ jobs:
       - name: Run Build for All
         run: npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
 
+      - name: Check Dependency Version
+        run: pnpm run check-dependency-version
+
       - name: Check Package Publishing Compatibility
         run: |
           for pkg in packages/*; do

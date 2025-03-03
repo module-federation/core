@@ -12,15 +12,15 @@
     "@emotion/styled": "^11.11.5",
     "@module-federation/bridge-react": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "react-router-dom": "6.24.1"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "6.22.3"
   },
   "devDependencies": {
     "@rsbuild/core": "^1.0.19",
     "@rsbuild/plugin-react": "^1.0.6",
-    "@types/react": "^18.2.79",
-    "@types/react-dom": "^18.3.0",
-    "typescript": "^5.4.5"
+    "@types/react": "~18.2.0",
+    "@types/react-dom": "~18.3.0",
+    "typescript": "5.5.2"
   }
 }

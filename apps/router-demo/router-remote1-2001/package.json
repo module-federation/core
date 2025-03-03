@@ -10,20 +10,20 @@
   "dependencies": {
     "@module-federation/bridge-react": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
-    "antd": "^5.16.2",
+    "antd": "^5.19.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "^5.3.4",
     "react-shadow": "^20.4.0"
   },
   "devDependencies": {
-    "@ant-design/cssinjs": "^1.20.0",
+    "@ant-design/cssinjs": "^1.21.0",
     "@rsbuild/core": "^1.0.19",
     "@rsbuild/plugin-react": "^1.0.6",
     "@rsbuild/shared": "^0.7.10",
-    "@types/react": "^18.2.79",
-    "@types/react-dom": "^18.3.0",
-    "@types/react-router-dom": "^5.3.3",
-    "typescript": "^5.4.5"
+    "@types/react": "~18.2.0",
+    "@types/react-dom": "~18.3.0",
+    "@types/react-router-dom": "5",
+    "typescript": "5.5.2"
   }
 }

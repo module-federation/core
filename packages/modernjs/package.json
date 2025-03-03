@@ -94,7 +94,7 @@
     "@module-federation/node": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@swc/helpers": "0.5.13",
-    "node-fetch": "~3.3.0",
+    "node-fetch": "3.3.0",
     "react-error-boundary": "4.1.2"
   },
   "devDependencies": {

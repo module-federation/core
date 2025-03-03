@@ -20,12 +20,12 @@
     "@module-federation/esbuild": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/webpack-bundler-runtime": "workspace:*",
-    "@types/node": "^18.7.13",
+    "@types/node": "^20",
     "concurrently": "^8.2.2",
-    "esbuild": "^0.15.5",
-    "json5": "^2.2.1",
+    "esbuild": "0.24.0",
+    "json5": "^2.2.3",
     "live-server": "^1.1.0",
-    "typescript": "^4.8.2"
+    "typescript": "5.5.2"
   },
   "dependencies": {
     "react": "^18.3.1",
