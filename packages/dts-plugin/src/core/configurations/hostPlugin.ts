@@ -18,6 +18,7 @@ const defaultOptions = {
   consumeAPITypes: false,
   runtimePkgs: [],
   remoteTypeUrls: {},
+  timeout: 60000,
 } satisfies Partial<HostOptions>;
 
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {

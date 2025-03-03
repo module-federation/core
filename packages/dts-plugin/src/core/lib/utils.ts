@@ -154,5 +154,6 @@ export async function axiosGet(url: string, config?: AxiosRequestConfig) {
       headers: getEnvHeaders(),
     },
     ...config,
+    timeout: config?.timeout || 60000,
   });
 }
