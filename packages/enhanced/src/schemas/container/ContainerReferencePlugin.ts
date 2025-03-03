@@ -30,6 +30,7 @@ export default {
         'system',
         'promise',
         'import',
+        'module-import',
         'script',
         'node-commonjs',
       ],
@@ -123,6 +124,11 @@ export default {
   type: 'object',
   additionalProperties: false,
   properties: {
+    async: {
+      description:
+        'Enable/disable asynchronous loading of runtime modules. When enabled, entry points will be wrapped in asynchronous chunks.',
+      type: 'boolean',
+    },
     remoteType: {
       description: 'The external type of the remote containers.',
       oneOf: [

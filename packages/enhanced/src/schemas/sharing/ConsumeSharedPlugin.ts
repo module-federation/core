@@ -85,6 +85,21 @@ export default {
           type: 'string',
           minLength: 1,
         },
+        layer: {
+          description: 'Layer in which the shared module should be placed.',
+          type: 'string',
+          minLength: 1,
+        },
+        issuerLayer: {
+          description: 'Layer of the issuer.',
+          type: 'string',
+          minLength: 1,
+        },
+        request: {
+          description: 'Import request to match on',
+          type: 'string',
+          minLength: 1,
+        },
         singleton: {
           description:
             'Allow only a single version of the shared module in share scope (disabled by default).',
