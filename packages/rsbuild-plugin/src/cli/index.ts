@@ -30,7 +30,7 @@ export {
   PLUGIN_NAME,
 };
 
-const LIB_FORMAT = ['commonjs', 'umd', 'modern-module'];
+const LIB_FORMAT = ['umd', 'modern-module'];
 
 export function isMFFormat(bundlerConfig: Rspack.Configuration) {
   const library = bundlerConfig.output?.library;
@@ -39,6 +39,7 @@ export function isMFFormat(bundlerConfig: Rspack.Configuration) {
     typeof library === 'object' &&
     !Array.isArray(library) &&
     'type' in library &&
+    //  if the type is umd/modern-module or commonjs*, means this is a normal library , not mf
     (LIB_FORMAT.includes(library.type) || /commonjs/.test(library.type))
   );
 }
