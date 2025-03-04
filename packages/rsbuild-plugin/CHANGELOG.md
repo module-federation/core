@@ -1,5 +1,17 @@
 # @module-federation/rsbuild-plugin
 
+## 0.10.0
+
+### Patch Changes
+
+- 5b391b5: chore(rsbuild-plugin): update mf format judgment conditions
+- 1010f96: chore(modern-js-plugin): use bundlerChain instead of tools.webpack or tools.rspack
+- 3c8bd83: fix(rsbuild-plugin): add more MF packages to `source.include`
+- Updated dependencies [0f71cbc]
+- Updated dependencies [22fcccd]
+  - @module-federation/sdk@0.10.0
+  - @module-federation/enhanced@0.10.0
+
 ## 0.9.1
 
 ### Patch Changes
