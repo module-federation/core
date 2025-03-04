@@ -9,7 +9,6 @@
     "skipLibCheck": true,
     "moduleResolution": "node",
     "allowJs": false,
-    "strict": true,
     "types": ["jest", "node"],
     "experimentalDecorators": true,
     "resolveJsonModule": true,
