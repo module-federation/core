@@ -8,7 +8,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
 import { LoggerInstance } from '../utils';
 import { federationRuntime } from './plugin';
-import { createRoot } from './compat';
+import { createRoot as defaultCreateRoot } from './compat';
 
 type RenderParams = RenderFnParams & {
   [key: string]: unknown;
@@ -17,7 +17,7 @@ type DestroyParams = {
   moduleName: string;
   dom: HTMLElement;
 };
-type RootType = HTMLElement | ReturnType<typeof createRoot>;
+type RootType = HTMLElement | ReturnType<typeof defaultCreateRoot>;
 
 export type ProviderFnParams<T> = {
   rootComponent: React.ComponentType<T>;
@@ -25,9 +25,16 @@ export type ProviderFnParams<T> = {
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
+  createRoot?: (
+    container: Parameters<typeof defaultCreateRoot>[0],
+    options?: Parameters<typeof defaultCreateRoot>[1],
+  ) => ReturnType<typeof defaultCreateRoot>;
 };
 
-export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
+export function createBridgeComponent<T>({
+  createRoot = defaultCreateRoot,
+  ...bridgeInfo
+}: ProviderFnParams<T>) {
   return () => {
     const rootMap = new Map<any, RootType>();
     const instance = federationRuntime.instance;
