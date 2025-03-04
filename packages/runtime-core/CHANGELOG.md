@@ -1,6 +1,6 @@
 # @module-federation/runtime
 
-## 0.9.2
+## 0.10.0
 
 ### Patch Changes
 
