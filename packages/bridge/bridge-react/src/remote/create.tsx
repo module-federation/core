@@ -1,33 +1,19 @@
 import React, { forwardRef } from 'react';
-import {
-  ErrorBoundary,
-  ErrorBoundaryPropsWithComponent,
-} from 'react-error-boundary';
+import { ErrorBoundary } from 'react-error-boundary';
 import { LoggerInstance } from '../utils';
 import RemoteApp from './component';
-import type { ProviderParams } from '@module-federation/bridge-shared';
+import {
+  RemoteComponentParams,
+  RemoteComponentProps,
+  RemoteModule,
+} from '../types';
 
-export interface RenderFnParams extends ProviderParams {
-  dom?: any;
-}
+type LazyRemoteComponentInfo<T, E extends keyof T> = RemoteComponentParams<T>;
 
-interface RemoteModule {
-  provider: () => {
-    render: (info: RenderFnParams) => void;
-    destroy: (info: { dom: any }) => void;
-  };
-}
-
-type LazyRemoteComponentInfo<T, E extends keyof T> = {
-  loader: () => Promise<T>;
-  loading: React.ReactNode;
-  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
-  export?: E;
-};
-
-function createLazyRemoteComponent<T, E extends keyof T>(
-  info: LazyRemoteComponentInfo<T, E>,
-) {
+function createLazyRemoteComponent<
+  T = Record<string, unknown>,
+  E extends keyof T = keyof T,
+>(info: LazyRemoteComponentInfo<T, E>) {
   const exportName = info?.export || 'default';
   return React.lazy(async () => {
     LoggerInstance.debug(`createRemoteComponent LazyComponent create >>>`, {
@@ -49,10 +35,7 @@ function createLazyRemoteComponent<T, E extends keyof T>(
       if (exportName in m && typeof exportFn === 'function') {
         const RemoteAppComponent = forwardRef<
           HTMLDivElement,
-          {
-            basename?: ProviderParams['basename'];
-            memoryRoute?: ProviderParams['memoryRoute'];
-          }
+          RemoteComponentProps
         >((props, ref) => {
           return (
             <RemoteApp
@@ -87,29 +70,18 @@ function createLazyRemoteComponent<T, E extends keyof T>(
   });
 }
 
-export function createRemoteComponent<T, E extends keyof T>(
-  info: LazyRemoteComponentInfo<T, E>,
-) {
-  type ExportType = T[E] extends (...args: any) => any
-    ? ReturnType<T[E]>
-    : never;
-
-  type RawComponentType = '__BRIDGE_FN__' extends keyof ExportType
-    ? ExportType['__BRIDGE_FN__'] extends (...args: any) => any
-      ? Parameters<ExportType['__BRIDGE_FN__']>[0]
-      : {}
-    : {};
-
+export function createRemoteComponent<
+  T = Record<string, unknown>,
+  E extends keyof T = keyof T,
+>(info: LazyRemoteComponentInfo<T, E>) {
   const LazyComponent = createLazyRemoteComponent(info);
-  return forwardRef<HTMLDivElement, ProviderParams & RawComponentType>(
-    (props, ref) => {
-      return (
-        <ErrorBoundary FallbackComponent={info.fallback}>
-          <React.Suspense fallback={info.loading}>
-            <LazyComponent {...props} ref={ref} />
-          </React.Suspense>
-        </ErrorBoundary>
-      );
-    },
-  );
+  return forwardRef<HTMLDivElement, RemoteComponentProps>((props, ref) => {
+    return (
+      <ErrorBoundary FallbackComponent={info.fallback}>
+        <React.Suspense fallback={info.loading}>
+          <LazyComponent {...props} ref={ref} />
+        </React.Suspense>
+      </ErrorBoundary>
+    );
+  });
 }
