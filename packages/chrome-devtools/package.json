@@ -61,12 +61,12 @@
     "@module-federation/sdk": "workspace:*",
     "ahooks": "^3.7.10",
     "dagre": "^0.8.5",
-    "react": "~18.3.1",
-    "react-dom": "~18.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "reactflow": "11.11.4"
   },
   "devDependencies": {
-    "@modern-js-app/eslint-config": "2.54.6",
+    "@modern-js-app/eslint-config": "2.59.0",
     "@modern-js/app-tools": "2.65.1",
     "@modern-js/builder-webpack-provider": "2.46.1",
     "@modern-js/eslint-config": "2.59.0",
@@ -75,17 +75,17 @@
     "@modern-js/tsconfig": "2.65.1",
     "@module-federation/runtime": "workspace:*",
     "@playwright/test": "1.49.1",
-    "@storybook/addon-essentials": "^8",
-    "@types/chrome": "^0.0.272",
+    "@storybook/addon-essentials": "8.3.5",
+    "@types/chrome": "0.0.277",
     "@types/dagre": "^0.7.52",
-    "@types/jest": "~29.2.4",
-    "@types/node": "~20.12.12",
+    "@types/jest": "~29.5.0",
+    "@types/node": "^20",
     "@types/react": "~18.2.0",
     "@types/react-dom": "~18.3.0",
     "lint-staged": "~13.1.0",
     "prettier": "~3.3.3",
     "rimraf": "~3.0.2",
-    "typescript": "~5.0.4",
-    "vitest": "1.2.2"
+    "typescript": "5.5.2",
+    "vitest": "1.6.0"
   }
 }

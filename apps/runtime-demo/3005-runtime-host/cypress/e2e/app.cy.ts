@@ -73,7 +73,7 @@ describe('3005-runtime-host/', () => {
         cy.get('button.test-remote2').contains('Button');
       });
       it('should use host shared(antd)', () => {
-        cy.get('button.test-remote2').contains('Button from antd@4.24.15');
+        cy.get('button.test-remote2').contains('Button from antd@5.19.1');
       });
     });
   });

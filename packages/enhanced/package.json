@@ -82,7 +82,7 @@
     "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@types/btoa": "^1.2.5",
     "ajv": "^8.17.1",
-    "enhanced-resolve": "^5.0.0",
+    "enhanced-resolve": "^5.17.1",
     "terser": "^5.37.0"
   },
   "dependencies": {
@@ -96,7 +96,7 @@
     "@module-federation/rspack": "workspace:*",
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "btoa": "^1.2.1",
+    "btoa": "1.2.1",
     "upath": "2.0.1"
   }
 }
