@@ -1,10 +1,12 @@
-import type { Compiler, WebpackPluginInstance } from 'webpack';
+import { logger } from '@module-federation/sdk';
 import {
   normalizeOptions,
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
 import { validateOptions, consumeTypes } from '../core/index';
 import { isPrd } from './utils';
+
+import type { Compiler, WebpackPluginInstance } from 'webpack';
 
 export class ConsumeTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -70,6 +72,7 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
       typeof normalizedConsumeTypes.remoteTypeUrls === 'function'
         ? normalizedConsumeTypes.remoteTypeUrls()
         : Promise.resolve(normalizedConsumeTypes.remoteTypeUrls);
+    logger.debug('start fetching remote types...');
     const promise = fetchRemoteTypeUrlsPromise.then((remoteTypeUrls) => {
       consumeTypes({
         ...finalOptions,
@@ -97,6 +100,7 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
         async () => {
           // await consume types promise to make sure the consumer not throw types error
           await promise;
+          logger.debug('fetch remote types success!');
         },
       );
     });
