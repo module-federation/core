@@ -2,7 +2,6 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import type {
   ProviderParams,
-  RenderFnParams,
   ProviderFnParams,
   RootType,
   DestroyParams,
@@ -73,13 +72,13 @@ export function createBridgeComponent<T>({
         if (bridgeInfo.render) {
           await Promise.resolve(
             bridgeInfo.render(rootComponentWithErrorBoundary, dom),
-          ).then((root: RootType) => rootMap.set(info.dom, root));
+          ).then((root: RootType) => rootMap.set(dom, root));
         } else {
-          let root = rootMap.get(info.dom);
+          let root = rootMap.get(dom);
           // do not call createRoot multiple times
           if (!root) {
-            root = createRoot(info.dom);
-            rootMap.set(info.dom, root);
+            root = createRoot(dom);
+            rootMap.set(dom, root);
           }
 
           if ('render' in root) {
@@ -91,15 +90,16 @@ export function createBridgeComponent<T>({
       },
 
       destroy(info: DestroyParams) {
+        const { dom } = info;
         LoggerInstance.debug(`createBridgeComponent destroy Info`, info);
-        const root = rootMap.get(info.dom);
+        const root = rootMap.get(dom);
         if (root) {
           if ('unmount' in root) {
             root.unmount();
           } else {
             ReactDOM.unmountComponentAtNode(root as HTMLElement);
           }
-          rootMap.delete(info.dom);
+          rootMap.delete(dom);
         }
         instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
       },

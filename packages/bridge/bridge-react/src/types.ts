@@ -27,6 +27,13 @@ export type RootType = HTMLElement | Root;
  * Parameters for the render function
  */
 export interface RenderParams {
+  moduleName?: string;
+  basename?: string;
+  memoryRoute?: {
+    entryPath: string;
+    initialState?: Record<string, unknown>;
+  };
+  dom: HTMLElement;
   [key: string]: unknown;
 }
 
