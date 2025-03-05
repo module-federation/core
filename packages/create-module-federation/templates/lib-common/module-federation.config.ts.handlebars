@@ -1,5 +1,8 @@
-export default {
-  name: '{{mfName}}',
+import {createModuleFederationConfig} from '@module-federation/rsbuild-plugin';
+import pkg from './package.json';
+
+export default createModuleFederationConfig({
+  name: pkg.name,
   exposes: {
     '.': './src/index.tsx',
   },
@@ -11,4 +14,4 @@ export default {
       singleton: true,
     },
   },
-}
+})

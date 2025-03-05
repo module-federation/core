@@ -363,7 +363,7 @@ export async function create({
   const nextSteps = [
     `cd ${targetDir}`,
     `${pkgManager} install`,
-    `${pkgManager} run dev`,
+    `${pkgManager} run ${projectType === 'lib' ? 'mf-dev' : 'dev'}`,
   ];
 
   note(nextSteps.join('\n'), 'Next steps');
