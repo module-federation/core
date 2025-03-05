@@ -34,7 +34,7 @@ type Argv = {
 
 type ProjectType = 'lib' | 'app' | 'zephyr';
 type RoleType = 'consumer' | 'provider';
-type AppTemplateName = 'modern' | 'rsbuild';
+type AppTemplateName = 'modern' | 'rsbuild' | 'zephyr';
 type ZephyrTemplateName = 'webpack' | 'rspack' | 'vite';
 type LibTemplateName = 'rslib';
 type ProviderInfo = {
@@ -209,7 +209,7 @@ function getTemplateName(
   }: {
     projectType: ProjectType;
     roleType: RoleType;
-    framework: AppTemplateName | null;
+    framework: AppTemplateName;
   },
   args: Argv,
 ) {
@@ -217,7 +217,7 @@ function getTemplateName(
     return getAppTemplateName(
       {
         roleType,
-        framework: framework as AppTemplateName,
+        framework,
       },
       args,
     );
@@ -247,7 +247,7 @@ async function forgeTemplate({
   templateParameters: Record<string, string>;
   distFolder: string;
 }) {
-  let framework: AppTemplateName | null = 'modern';
+  let framework: AppTemplateName = 'modern';
   let roleType: RoleType = 'provider';
 
   if (projectType === 'app') {
@@ -272,7 +272,7 @@ async function forgeTemplate({
       }),
     );
   } else if (projectType === 'zephyr') {
-    framework = null;
+    framework = 'zephyr';
 
     roleType = checkCancel<RoleType>(
       await select({
