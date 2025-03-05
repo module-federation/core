@@ -28,10 +28,10 @@ import { withZephyr } from 'vite-plugin-zephyr';
 const mfConfig = {
   name: 'consumer',
   remotes: {
-    'provider': {
+    provider: {
       name: 'provider',
       entry: 'http://localhost:3004/remoteEntry.js',
-    }
+    },
   },
   // Module Federation configuration
 };

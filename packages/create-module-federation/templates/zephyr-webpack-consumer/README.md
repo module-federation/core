@@ -31,7 +31,7 @@ module.exports = withZephyr()({
     new ModuleFederationPlugin({
       name: 'consumer',
       remotes: {
-        'provider': 'provider@http://localhost:3000/remoteEntry.js',
+        provider: 'provider@http://localhost:3000/remoteEntry.js',
       },
       // ...
     }),
