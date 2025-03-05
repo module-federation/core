@@ -100,9 +100,9 @@ export function createRemoteComponent<T, E extends keyof T>(
       : {}
     : {};
 
+  const LazyComponent = createLazyRemoteComponent(info);
   return forwardRef<HTMLDivElement, ProviderParams & RawComponentType>(
     (props, ref) => {
-      const LazyComponent = createLazyRemoteComponent(info);
       return (
         <ErrorBoundary FallbackComponent={info.fallback}>
           <React.Suspense fallback={info.loading}>

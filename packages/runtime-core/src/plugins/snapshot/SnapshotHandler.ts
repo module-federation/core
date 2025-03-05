@@ -310,7 +310,7 @@ export class SnapshotHandler {
           (await this.HostInstance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(
             {
               id: manifestUrl,
-              error,
+              error: err,
               from: 'runtime',
               lifecycle: 'afterResolve',
               origin: this.HostInstance,

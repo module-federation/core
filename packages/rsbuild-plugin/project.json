@@ -29,6 +29,10 @@
         ]
       }
     },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/rsbuild-plugin"]
+    },
     "pre-release": {
       "executor": "nx:run-commands",
       "options": {

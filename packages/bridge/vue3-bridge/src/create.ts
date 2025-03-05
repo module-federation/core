@@ -9,6 +9,7 @@ export function createRemoteComponent(info: {
   loader: () => Promise<any>;
   export?: string;
   asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
+  rootAttrs?: Record<string, unknown>;
 }) {
   return defineAsyncComponent({
     __APP_VERSION__,
@@ -39,7 +40,7 @@ export function createRemoteComponent(info: {
 
       LoggerInstance.debug(
         `createRemoteComponent LazyComponent loadRemote info >>>`,
-        { name: moduleName, module, exportName, basename, route },
+        { moduleName, module, exportName, basename, route },
       );
 
       if (exportName in module && typeof exportFn === 'function') {
@@ -49,6 +50,7 @@ export function createRemoteComponent(info: {
               moduleName,
               providerInfo: exportFn,
               basename,
+              rootAttrs: info.rootAttrs,
             });
           },
         };

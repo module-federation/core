@@ -1,5 +1,5 @@
 import { it, expect, describe } from 'vitest';
-import { patchMFConfig, patchBundlerConfig, getIPV4 } from './utils';
+import { patchMFConfig, getIPV4 } from './utils';
 
 const mfConfig = {
   name: 'host',
@@ -80,75 +80,5 @@ describe('patchMFConfig', async () => {
         },
       },
     });
-  });
-});
-
-describe('patchBundlerConfig', async () => {
-  it('patchBundlerConfig: server', async () => {
-    const bundlerConfig = {
-      output: {
-        publicPath: 'auto',
-      },
-    };
-    patchBundlerConfig<'webpack'>({
-      bundlerType: 'webpack',
-      bundlerConfig,
-      isServer: true,
-      modernjsConfig: {
-        server: {
-          ssr: {
-            mode: 'stream',
-          },
-        },
-      },
-      mfConfig,
-    });
-
-    const expectedConfig = {
-      output: {
-        chunkLoadingGlobal: 'chunk_host',
-        publicPath: 'auto',
-        uniqueName: 'host',
-      },
-    };
-    // @ts-ignore temp ignore
-
-    delete bundlerConfig?.ignoreWarnings;
-    // patchIgnoreWarning(expectedConfig as BundlerConfig<'webpack'>);
-    expect(bundlerConfig).toStrictEqual(expectedConfig);
-  });
-
-  it('patchBundlerConfig: client', async () => {
-    const bundlerConfig = {
-      output: {
-        publicPath: 'auto',
-      },
-    };
-    patchBundlerConfig<'webpack'>({
-      bundlerType: 'webpack',
-      bundlerConfig,
-      isServer: false,
-      modernjsConfig: {
-        server: {
-          ssr: {
-            mode: 'stream',
-          },
-        },
-      },
-      mfConfig,
-    });
-
-    const expectedConfig = {
-      output: {
-        chunkLoadingGlobal: 'chunk_host',
-        publicPath: 'auto',
-        uniqueName: 'host',
-      },
-    };
-    // @ts-ignore temp ignore
-    delete bundlerConfig?.ignoreWarnings;
-
-    // patchIgnoreWarning(expectedConfig as BundlerConfig<'webpack'>);
-    expect(bundlerConfig).toStrictEqual(expectedConfig);
   });
 });

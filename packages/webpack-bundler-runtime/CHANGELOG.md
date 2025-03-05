@@ -1,5 +1,25 @@
 # @module-federation/webpack-bundler-runtime
 
+## 0.10.0
+
+### Patch Changes
+
+- Updated dependencies [0f71cbc]
+- Updated dependencies [22fcccd]
+  - @module-federation/sdk@0.10.0
+  - @module-federation/runtime@0.10.0
+
+## 0.9.1
+
+### Patch Changes
+
+- 2580dd7: perf(webpack-bundler-runtime): bundle sdk into output to help treeshake
+- Updated dependencies [35d925b]
+- Updated dependencies [35d925b]
+- Updated dependencies [8acd217]
+  - @module-federation/sdk@0.9.1
+  - @module-federation/runtime@0.9.1
+
 ## 0.9.0
 
 ### Patch Changes
