@@ -6,7 +6,7 @@ const RemoteButton = lazy(() => import('provider/Button'));
 
 const App = () => (
   <div style={{ fontFamily: 'system-ui, sans-serif', padding: '2rem' }}>
-    <h1>Zephyr Webpack Consumer - {{ mfName }}</h1>
+    <h1>Zephyr Webpack Consumer</h1>
     <p>This application consumes a federated component:</p>
     <div style={{ marginTop: '1rem' }}>
       <Suspense fallback={<div>Loading Button from Provider...</div>}>
@@ -16,6 +16,6 @@ const App = () => (
   </div>
 );
 
-const rootElement = document.getElementById('root');
+const rootElement = document.getElementById('root')!;
 const root = createRoot(rootElement);
 root.render(<App />);

@@ -13,7 +13,7 @@ const App = () => (
       margin: '0 auto',
     }}
   >
-    <h1>Zephyr Vite Consumer - {{ mfName }}</h1>
+    <h1>Zephyr Vite Consumer</h1>
     <p>
       This application consumes a federated Footer component from the provider
       application.
@@ -42,7 +42,7 @@ const App = () => (
   </div>
 );
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
