@@ -32,9 +32,10 @@ type Argv = {
   override?: boolean;
 };
 
-type ProjectType = 'lib' | 'app';
+type ProjectType = 'lib' | 'app' | 'zephyr';
 type RoleType = 'consumer' | 'provider';
 type AppTemplateName = 'modern' | 'rsbuild';
+type ZephyrTemplateName = 'webpack' | 'rspack' | 'vite';
 type LibTemplateName = 'rslib';
 type ProviderInfo = {
   name: string;
@@ -58,7 +59,13 @@ function logHelpMessage(name: string, templates: string[]) {
 
    Templates:
 
-     ${templates.join(', ')}
+     Standard Templates:
+     ${templates.filter((t) => !t.startsWith('zephyr')).join(', ')}
+
+     Zephyr Integration Templates:
+     - Webpack: ${templates.filter((t) => t.startsWith('zephyr-webpack')).join(', ')}
+     - Rspack: ${templates.filter((t) => t.startsWith('zephyr-rspack')).join(', ')}
+     - Vite: ${templates.filter((t) => t.startsWith('zephyr-vite')).join(', ')}
 `);
 }
 
@@ -130,6 +137,32 @@ async function getAppTemplateName(
   return `${roleType}-${framework}-ts`;
 }
 
+async function getZephyrTemplateName(
+  {
+    roleType,
+  }: {
+    roleType: RoleType;
+  },
+  { template }: Argv,
+) {
+  if (template) {
+    return template;
+  }
+
+  const framework = checkCancel<ZephyrTemplateName>(
+    await select({
+      message: 'Select Zephyr integration',
+      options: [
+        { value: 'webpack', label: 'Webpack' },
+        { value: 'rspack', label: 'Rspack' },
+        { value: 'vite', label: 'Vite' },
+      ],
+    }),
+  );
+
+  return `zephyr-${framework}-${roleType}`;
+}
+
 async function getLibTemplateName({ template }: Argv) {
   if (template) {
     return `${template}-ts`;
@@ -176,7 +209,7 @@ function getTemplateName(
   }: {
     projectType: ProjectType;
     roleType: RoleType;
-    framework: AppTemplateName;
+    framework: AppTemplateName | null;
   },
   args: Argv,
 ) {
@@ -184,7 +217,14 @@ function getTemplateName(
     return getAppTemplateName(
       {
         roleType,
-        framework,
+        framework: framework as AppTemplateName,
+      },
+      args,
+    );
+  } else if (projectType === 'zephyr') {
+    return getZephyrTemplateName(
+      {
+        roleType,
       },
       args,
     );
@@ -207,7 +247,7 @@ async function forgeTemplate({
   templateParameters: Record<string, string>;
   distFolder: string;
 }) {
-  let framework: AppTemplateName = 'modern';
+  let framework: AppTemplateName | null = 'modern';
   let roleType: RoleType = 'provider';
 
   if (projectType === 'app') {
@@ -220,6 +260,19 @@ async function forgeTemplate({
         ],
       }),
     );
+
+    roleType = checkCancel<RoleType>(
+      await select({
+        message: 'Please select the role of project you want to create:',
+        initialValue: 'provider',
+        options: [
+          { value: 'consumer', label: 'Consumer' },
+          { value: 'provider', label: 'Provider' },
+        ],
+      }),
+    );
+  } else if (projectType === 'zephyr') {
+    framework = null;
 
     roleType = checkCancel<RoleType>(
       await select({
@@ -278,11 +331,15 @@ async function forgeTemplate({
   let commonTemplateDir = '';
   if (projectType === 'lib') {
     commonTemplateDir = 'templates/lib-common/';
-  } else {
+  } else if (projectType === 'app') {
     commonTemplateDir = `templates/${framework}-common/`;
   }
+  // Zephyr templates are self-contained without common templates
 
-  await renderTemplate(commonTemplateDir);
+  // Only render common templates if they exist and are applicable
+  if (commonTemplateDir) {
+    await renderTemplate(commonTemplateDir);
+  }
   await renderTemplate(templateDir);
 }
 
@@ -349,11 +406,13 @@ export async function create({
       options: [
         { value: 'app', label: 'Application' },
         { value: 'lib', label: 'Lib' },
+        { value: 'zephyr', label: 'Zephyr Powered' },
       ],
     }),
   );
 
   const mfVersion = __VERSION__;
+
   await forgeTemplate({
     projectType,
     argv,

@@ -7,12 +7,21 @@ interface Template {
 }
 
 export const TEMPLATES = [
+  // Standard templates
   'provider-modern',
   'consumer-modern',
   'provider-rsbuild',
   'consumer-rsbuild',
   'rslib',
   'rslib-storybook',
+
+  // Zephyr integration templates
+  'zephyr-webpack-provider',
+  'zephyr-webpack-consumer',
+  'zephyr-rspack-provider',
+  'zephyr-rspack-consumer',
+  'zephyr-vite-provider',
+  'zephyr-vite-consumer',
 ];
 
 create({

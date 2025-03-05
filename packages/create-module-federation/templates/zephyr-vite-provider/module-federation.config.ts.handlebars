@@ -1,0 +1,17 @@
+const config = {
+  name: '{{mfName}}',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './Footer': './src/Footer.tsx',
+  },
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+};
+
+export default config;

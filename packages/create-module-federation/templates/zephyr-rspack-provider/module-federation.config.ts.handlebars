@@ -1,0 +1,15 @@
+import { ModuleFederationPluginOptions } from "@rspack/core";
+
+const moduleFederationConfig: ModuleFederationPluginOptions = {
+  name: '{{mfName}}',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './Card': './src/Card.tsx',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+};
+
+export default moduleFederationConfig;
