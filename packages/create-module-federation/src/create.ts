@@ -23,6 +23,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const packageDir = path.resolve(__dirname, '..');
 
+declare const __VERSION__: string;
+
 type Argv = {
   help?: boolean;
   dir?: string;
@@ -351,11 +353,13 @@ export async function create({
     }),
   );
 
+  const mfVersion = __VERSION__;
   await forgeTemplate({
     projectType,
     argv,
     templateParameters: {
       mfName,
+      mfVersion,
     },
     distFolder,
   });
