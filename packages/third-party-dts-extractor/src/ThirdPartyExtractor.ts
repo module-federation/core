@@ -2,7 +2,7 @@ import findPkg from 'find-pkg';
 import fs from 'fs-extra';
 import path from 'path';
 import resolve from 'resolve';
-import { getTypedName } from './utils';
+import { getTypedName, getPackageRootDir } from './utils';
 
 const ignoredPkgs = ['typescript'];
 
@@ -48,7 +48,8 @@ class ThirdPartyExtractor {
       if (isNodeUtils(importEntry, importPath)) {
         return;
       }
-      const pkgJsonPath = findPkg.sync(importEntry) as string;
+      const packageDir = getPackageRootDir(importPath);
+      const pkgJsonPath = path.join(packageDir, 'package.json');
 
       const dir = path.dirname(pkgJsonPath);
       const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')) as Record<
@@ -61,8 +62,9 @@ class ThirdPartyExtractor {
       }
 
       if (types) {
-        this.addPkgs(pkg.name, dir);
-        return dir;
+        const typesDir = path.dirname(path.resolve(dir, types));
+        this.addPkgs(pkg.name, typesDir);
+        return typesDir;
       } else if (fs.existsSync(path.resolve(dir, 'index.d.ts'))) {
         this.addPkgs(pkg.name, dir);
         return dir;
