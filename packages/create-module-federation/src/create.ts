@@ -26,19 +26,25 @@ const packageDir = path.resolve(__dirname, '..');
 
 declare const __VERSION__: string;
 
+const enum ProjectType {
+  app = 'app',
+  lib = 'lib',
+  other = 'other',
+}
+
+const enum RoleType {
+  consumer = 'consumer',
+  provider = 'provider',
+}
+
 type Argv = {
   help?: boolean;
   dir?: string;
   template?: string;
   override?: boolean;
   name?: string;
+  role?: RoleType;
 };
-
-const enum ProjectType {
-  app = 'app',
-  lib = 'lib',
-  other = 'other',
-}
 
 const OTHER_TYPE: {
   [typeName: string]: {
@@ -54,7 +60,6 @@ const OTHER_TYPE: {
   },
 };
 
-type RoleType = 'consumer' | 'provider';
 type AppTemplateName = 'modern' | 'rsbuild';
 type LibTemplateName = 'rslib';
 
@@ -72,6 +77,7 @@ function logHelpMessage(name: string, templates: string[]) {
      -d, --dir        create project in specified directory
      -t, --template   specify the template to use
      -n, --name       specify the mf name
+     -r, --role       specify the mf role type: provider or consumer
      --override       override files in target directory
 
    Templates:
@@ -177,7 +183,7 @@ async function getLibTemplateName({ template }: Argv) {
   );
 
   // not support consumer yet, only support consume by runtime api
-  const roleType: RoleType = 'provider';
+  const roleType: RoleType = RoleType.provider;
 
   if (!tools || !Object.keys(tools).length) {
     return `${roleType}-${templateName}-ts`;
@@ -226,9 +232,9 @@ async function forgeTemplate({
   distFolder: string;
 }) {
   let framework: AppTemplateName = 'modern';
-  let roleType: RoleType = 'provider';
+  let roleType: RoleType = RoleType.provider;
 
-  if (projectType === 'app') {
+  if (!argv?.template && projectType === 'app') {
     framework = checkCancel<AppTemplateName>(
       await select({
         message: 'Select template',
@@ -239,16 +245,18 @@ async function forgeTemplate({
       }),
     );
 
-    roleType = checkCancel<RoleType>(
-      await select({
-        message: 'Please select the role of project you want to create:',
-        initialValue: 'provider',
-        options: [
-          { value: 'consumer', label: 'Consumer' },
-          { value: 'provider', label: 'Provider' },
-        ],
-      }),
-    );
+    roleType =
+      argv.role ||
+      checkCancel<RoleType>(
+        await select({
+          message: 'Please select the role of project you want to create:',
+          initialValue: 'provider',
+          options: [
+            { value: 'consumer', label: 'Consumer' },
+            { value: 'provider', label: 'Provider' },
+          ],
+        }),
+      );
   }
 
   const templateName = await getTemplateName(
@@ -337,7 +345,7 @@ export async function create({
   templates: string[];
 }) {
   const argv = minimist<Argv>(process.argv.slice(2), {
-    alias: { h: 'help', d: 'dir', t: 'template', n: 'name' },
+    alias: { h: 'help', d: 'dir', t: 'template', n: 'name', r: 'role' },
   });
 
   console.log('');
@@ -368,7 +376,7 @@ export async function create({
       }),
     );
 
-  const { targetDir } = formatProjectName(path.join(argv.dir || '', mfName));
+  const { targetDir } = formatProjectName(path.join(argv.dir || mfName));
   const distFolder = path.isAbsolute(targetDir)
     ? targetDir
     : path.join(cwd, targetDir);
@@ -411,7 +419,8 @@ export async function create({
       `${pkgManager} create `,
     );
 
-    const [cmd, ...cmdArgs] = commandWithManager.split(' ');
+    const realCommand = `${commandWithManager} -d ${distFolder} -n ${mfName}${argv.override ? ' --override' : ''}`;
+    const [cmd, ...cmdArgs] = realCommand.split(' ');
     const { status } = spawnSync(cmd, cmdArgs, {
       stdio: 'inherit',
     });
