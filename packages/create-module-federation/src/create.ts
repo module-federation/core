@@ -397,6 +397,10 @@ export async function create({
     }
   }
 
+  argv.template = templates.includes(argv.template || '')
+    ? argv.template
+    : undefined;
+
   const projectType = await getProjectType(argv.template);
 
   if (projectType === ProjectType.other) {
