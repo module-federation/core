@@ -15,13 +15,8 @@ export const TEMPLATES = [
   'rslib',
   'rslib-storybook',
 
-  // Zephyr integration templates
-  'zephyr-webpack-provider',
-  'zephyr-webpack-consumer',
-  'zephyr-rspack-provider',
-  'zephyr-rspack-consumer',
-  'zephyr-vite-provider',
-  'zephyr-vite-consumer',
+  // other
+  'create-zephyr',
 ];
 
 create({

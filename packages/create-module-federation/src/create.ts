@@ -4,6 +4,7 @@
  */
 import path from 'path';
 import fs from 'fs';
+import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import {
   cancel,
@@ -25,11 +26,38 @@ const packageDir = path.resolve(__dirname, '..');
 
 declare const __VERSION__: string;
 
+const enum ProjectType {
+  app = 'app',
+  lib = 'lib',
+  other = 'other',
+}
+
+const enum RoleType {
+  consumer = 'consumer',
+  provider = 'provider',
+}
+
 type Argv = {
   help?: boolean;
   dir?: string;
   template?: string;
   override?: boolean;
+  name?: string;
+  role?: RoleType;
+};
+
+const OTHER_TYPE: {
+  [typeName: string]: {
+    label: string;
+    command: string;
+    hint?: string;
+  };
+} = {
+  zephyr: {
+    label: 'zephyr',
+    command: 'npm create zephyr@latest',
+    hint: 'npm create zephyr@latest',
+  },
 };
 
 type ProjectType = 'lib' | 'app' | 'zephyr';
@@ -37,10 +65,6 @@ type RoleType = 'consumer' | 'provider';
 type AppTemplateName = 'modern' | 'rsbuild' | 'zephyr';
 type ZephyrTemplateName = 'webpack' | 'rspack' | 'vite';
 type LibTemplateName = 'rslib';
-type ProviderInfo = {
-  name: string;
-  entry: string;
-};
 
 function upperFirst(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -55,6 +79,8 @@ function logHelpMessage(name: string, templates: string[]) {
      -h, --help       display help for command
      -d, --dir        create project in specified directory
      -t, --template   specify the template to use
+     -n, --name       specify the mf name
+     -r, --role       specify the mf role type: provider or consumer
      --override       override files in target directory
 
    Templates:
@@ -192,7 +218,7 @@ async function getLibTemplateName({ template }: Argv) {
   );
 
   // not support consumer yet, only support consume by runtime api
-  const roleType: RoleType = 'provider';
+  const roleType: RoleType = RoleType.provider;
 
   if (!tools || !Object.keys(tools).length) {
     return `${roleType}-${templateName}-ts`;
@@ -248,9 +274,9 @@ async function forgeTemplate({
   distFolder: string;
 }) {
   let framework: AppTemplateName = 'modern';
-  let roleType: RoleType = 'provider';
+  let roleType: RoleType = RoleType.provider;
 
-  if (projectType === 'app') {
+  if (!argv?.template && projectType === 'app') {
     framework = checkCancel<AppTemplateName>(
       await select({
         message: 'Select template',
@@ -329,7 +355,7 @@ async function forgeTemplate({
   const templateDir = getTemplateDir(templateName);
 
   let commonTemplateDir = '';
-  if (projectType === 'lib') {
+  if (projectType === ProjectType.lib) {
     commonTemplateDir = 'templates/lib-common/';
   } else if (projectType === 'app') {
     commonTemplateDir = `templates/${framework}-common/`;
@@ -343,6 +369,31 @@ async function forgeTemplate({
   await renderTemplate(templateDir);
 }
 
+async function getProjectType(template?: string) {
+  if (!template) {
+    return checkCancel<ProjectType>(
+      await select({
+        message: 'Please select the type of project you want to create:',
+        options: [
+          { value: ProjectType.app, label: 'Application' },
+          { value: ProjectType.lib, label: 'Lib' },
+          { value: ProjectType.other, label: 'Other' },
+        ],
+      }),
+    );
+  }
+
+  if (template.startsWith('create-')) {
+    return ProjectType.other;
+  }
+
+  if (template.includes('lib')) {
+    return ProjectType.lib;
+  }
+
+  return ProjectType.app;
+}
+
 export async function create({
   name,
   templates,
@@ -351,7 +402,7 @@ export async function create({
   templates: string[];
 }) {
   const argv = minimist<Argv>(process.argv.slice(2), {
-    alias: { h: 'help', d: 'dir', t: 'template' },
+    alias: { h: 'help', d: 'dir', t: 'template', n: 'name', r: 'role' },
   });
 
   console.log('');
@@ -365,21 +416,24 @@ export async function create({
   const cwd = process.cwd();
   const pkgInfo = pkgFromUserAgent(process.env['npm_config_user_agent']);
   const pkgManager = pkgInfo ? pkgInfo.name : 'npm';
+  const mfVersion = __VERSION__;
 
-  const mfName = checkCancel<string>(
-    await text({
-      message: 'Please input Module Federation name:',
-      placeholder: 'mf_project_name',
-      defaultValue: 'mf_project_name',
-      validate(value) {
-        if (value.length === 0) {
-          return 'Name is required';
-        }
-      },
-    }),
-  );
+  const mfName =
+    argv.name ||
+    checkCancel<string>(
+      await text({
+        message: 'Please input Module Federation name:',
+        placeholder: 'mf_project_name',
+        defaultValue: 'mf_project_name',
+        validate(value) {
+          if (value.length === 0) {
+            return 'Name is required';
+          }
+        },
+      }),
+    );
 
-  const { targetDir } = formatProjectName(path.join(argv.dir || '', mfName));
+  const { targetDir } = formatProjectName(path.join(argv.dir || mfName));
   const distFolder = path.isAbsolute(targetDir)
     ? targetDir
     : path.join(cwd, targetDir);
@@ -426,7 +480,7 @@ export async function create({
   const nextSteps = [
     `cd ${targetDir}`,
     `${pkgManager} install`,
-    `${pkgManager} run ${projectType === 'lib' ? 'mf-dev' : 'dev'}`,
+    `${pkgManager} run ${projectType === ProjectType.lib ? 'mf-dev' : 'dev'}`,
   ];
 
   note(nextSteps.join('\n'), 'Next steps');
