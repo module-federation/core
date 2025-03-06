@@ -44,11 +44,13 @@ const OTHER_TYPE: {
   [typeName: string]: {
     label: string;
     command: string;
+    hint?: string;
   };
 } = {
   zephyr: {
     label: 'zephyr',
-    command: 'npm create zephyr',
+    command: 'npm create zephyr@latest',
+    hint: 'npm create zephyr@latest',
   },
 };
 
