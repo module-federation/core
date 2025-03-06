@@ -423,7 +423,14 @@ export async function create({
       `${pkgManager} create `,
     );
 
-    const realCommand = `${commandWithManager} -d ${distFolder} -n ${mfName}${argv.override ? ' --override' : ''}`;
+    // extra double-dash for npm > 7
+    const npmParams =
+      pkgManager === 'npm' &&
+      pkgInfo?.version &&
+      parseInt(pkgInfo.version.split('.')[0], 10) < 7
+        ? ' --'
+        : '';
+    const realCommand = `${commandWithManager}${npmParams} -d ${distFolder} -n ${mfName}${argv.override ? ' --override' : ''}`;
     const [cmd, ...cmdArgs] = realCommand.split(' ');
     const { status } = spawnSync(cmd, cmdArgs, {
       stdio: 'inherit',
