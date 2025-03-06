@@ -97,7 +97,6 @@
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "btoa": "^1.2.1",
-    "upath": "2.0.1",
-    "webpack-sources": "^3.2.3"
+    "upath": "2.0.1"
   }
 }
