@@ -411,8 +411,7 @@ export async function create({
       `${pkgManager} create `,
     );
 
-    const realCommand = `${commandWithManager} -d ${distFolder} -n ${mfName}${argv.override ? ' --override' : ''}`;
-    const [cmd, ...cmdArgs] = realCommand.split(' ');
+    const [cmd, ...cmdArgs] = commandWithManager.split(' ');
     const { status } = spawnSync(cmd, cmdArgs, {
       stdio: 'inherit',
     });
