@@ -7,16 +7,12 @@ interface Template {
 }
 
 export const TEMPLATES = [
-  // Standard templates
   'provider-modern',
   'consumer-modern',
   'provider-rsbuild',
   'consumer-rsbuild',
   'rslib',
   'rslib-storybook',
-
-  // other
-  'create-zephyr',
 ];
 
 create({

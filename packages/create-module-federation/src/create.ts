@@ -313,31 +313,6 @@ async function forgeTemplate({
   await renderTemplate(templateDir);
 }
 
-async function getProjectType(template?: string) {
-  if (!template) {
-    return checkCancel<ProjectType>(
-      await select({
-        message: 'Please select the type of project you want to create:',
-        options: [
-          { value: ProjectType.app, label: 'Application' },
-          { value: ProjectType.lib, label: 'Lib' },
-          { value: ProjectType.other, label: 'Other' },
-        ],
-      }),
-    );
-  }
-
-  if (template.startsWith('create-')) {
-    return ProjectType.other;
-  }
-
-  if (template.includes('lib')) {
-    return ProjectType.lib;
-  }
-
-  return ProjectType.app;
-}
-
 export async function create({
   name,
   templates,
@@ -376,13 +351,11 @@ export async function create({
     }),
   );
 
-  // If Zephyr is selected, run the zephyr-apps command and exit
   if (projectType === ProjectType.zephyr) {
     const zephyrPackage = OTHER_TYPE['zephyr'].packageName;
     const zephyrCommand = `${pkgManager} create ${zephyrPackage}`;
     note(`Running: ${zephyrCommand}`, 'Launching Zephyr setup');
 
-    // Execute the Zephyr command based on the user's package manager
     spawnSync(pkgManager, ['create', zephyrPackage], {
       stdio: 'inherit',
       shell: true,
