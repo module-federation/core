@@ -29,6 +29,7 @@ declare const __VERSION__: string;
 const enum ProjectType {
   app = 'app',
   lib = 'lib',
+  zephyr = 'zephyr',
   other = 'other',
 }
 
@@ -49,21 +50,18 @@ type Argv = {
 const OTHER_TYPE: {
   [typeName: string]: {
     label: string;
-    command: string;
+    packageName: string;
     hint?: string;
   };
 } = {
   zephyr: {
     label: 'zephyr',
-    command: 'npm create zephyr@latest',
-    hint: 'npm create zephyr@latest',
+    packageName: 'zephyr-apps@latest',
+    hint: 'create zephyr-apps@latest',
   },
 };
 
-type ProjectType = 'lib' | 'app' | 'zephyr';
-type RoleType = 'consumer' | 'provider';
-type AppTemplateName = 'modern' | 'rsbuild' | 'zephyr';
-type ZephyrTemplateName = 'webpack' | 'rspack' | 'vite';
+type AppTemplateName = 'modern' | 'rsbuild';
 type LibTemplateName = 'rslib';
 
 function upperFirst(str: string) {
@@ -84,14 +82,7 @@ function logHelpMessage(name: string, templates: string[]) {
      --override       override files in target directory
 
    Templates:
-
-     Standard Templates:
      ${templates.filter((t) => !t.startsWith('zephyr')).join(', ')}
-
-     Zephyr Integration Templates:
-     - Webpack: ${templates.filter((t) => t.startsWith('zephyr-webpack')).join(', ')}
-     - Rspack: ${templates.filter((t) => t.startsWith('zephyr-rspack')).join(', ')}
-     - Vite: ${templates.filter((t) => t.startsWith('zephyr-vite')).join(', ')}
 `);
 }
 
@@ -163,32 +154,6 @@ async function getAppTemplateName(
   return `${roleType}-${framework}-ts`;
 }
 
-async function getZephyrTemplateName(
-  {
-    roleType,
-  }: {
-    roleType: RoleType;
-  },
-  { template }: Argv,
-) {
-  if (template) {
-    return template;
-  }
-
-  const framework = checkCancel<ZephyrTemplateName>(
-    await select({
-      message: 'Select Zephyr integration',
-      options: [
-        { value: 'webpack', label: 'Webpack' },
-        { value: 'rspack', label: 'Rspack' },
-        { value: 'vite', label: 'Vite' },
-      ],
-    }),
-  );
-
-  return `zephyr-${framework}-${roleType}`;
-}
-
 async function getLibTemplateName({ template }: Argv) {
   if (template) {
     return `${template}-ts`;
@@ -247,13 +212,6 @@ function getTemplateName(
       },
       args,
     );
-  } else if (projectType === 'zephyr') {
-    return getZephyrTemplateName(
-      {
-        roleType,
-      },
-      args,
-    );
   }
   return getLibTemplateName(args);
 }
@@ -286,19 +244,6 @@ async function forgeTemplate({
         ],
       }),
     );
-
-    roleType = checkCancel<RoleType>(
-      await select({
-        message: 'Please select the role of project you want to create:',
-        initialValue: 'provider',
-        options: [
-          { value: 'consumer', label: 'Consumer' },
-          { value: 'provider', label: 'Provider' },
-        ],
-      }),
-    );
-  } else if (projectType === 'zephyr') {
-    framework = 'zephyr';
 
     roleType = checkCancel<RoleType>(
       await select({
@@ -360,7 +305,6 @@ async function forgeTemplate({
   } else if (projectType === 'app') {
     commonTemplateDir = `templates/${framework}-common/`;
   }
-  // Zephyr templates are self-contained without common templates
 
   // Only render common templates if they exist and are applicable
   if (commonTemplateDir) {
@@ -418,6 +362,36 @@ export async function create({
   const pkgManager = pkgInfo ? pkgInfo.name : 'npm';
   const mfVersion = __VERSION__;
 
+  const projectType = checkCancel<ProjectType>(
+    await select({
+      message: 'Please select the type of project you want to create:',
+      options: [
+        { value: 'app', label: 'Application' },
+        { value: 'lib', label: 'Lib' },
+        {
+          value: 'zephyr',
+          label: 'Zephyr Powered (Learn more at https://zephyr-cloud.io)',
+        },
+      ],
+    }),
+  );
+
+  // If Zephyr is selected, run the zephyr-apps command and exit
+  if (projectType === ProjectType.zephyr) {
+    const zephyrPackage = OTHER_TYPE['zephyr'].packageName;
+    const zephyrCommand = `${pkgManager} create ${zephyrPackage}`;
+    note(`Running: ${zephyrCommand}`, 'Launching Zephyr setup');
+
+    // Execute the Zephyr command based on the user's package manager
+    spawnSync(pkgManager, ['create', zephyrPackage], {
+      stdio: 'inherit',
+      shell: true,
+    });
+
+    outro('Done.');
+    return;
+  }
+
   const mfName =
     argv.name ||
     checkCancel<string>(
@@ -453,19 +427,6 @@ export async function create({
       cancelAndExit();
     }
   }
-
-  const projectType = checkCancel<ProjectType>(
-    await select({
-      message: 'Please select the type of project you want to create:',
-      options: [
-        { value: 'app', label: 'Application' },
-        { value: 'lib', label: 'Lib' },
-        { value: 'zephyr', label: 'Zephyr Powered' },
-      ],
-    }),
-  );
-
-  const mfVersion = __VERSION__;
 
   await forgeTemplate({
     projectType,
