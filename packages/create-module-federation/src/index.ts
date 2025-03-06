@@ -13,6 +13,9 @@ export const TEMPLATES = [
   'consumer-rsbuild',
   'rslib',
   'rslib-storybook',
+
+  // other
+  'create-zephyr',
 ];
 
 create({
