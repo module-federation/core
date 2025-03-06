@@ -4,6 +4,7 @@
  */
 import path from 'path';
 import fs from 'fs';
+import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import {
   cancel,
@@ -30,16 +31,30 @@ type Argv = {
   dir?: string;
   template?: string;
   override?: boolean;
+  name?: string;
 };
 
-type ProjectType = 'lib' | 'app';
+const enum ProjectType {
+  app = 'app',
+  lib = 'lib',
+  other = 'other',
+}
+
+const OTHER_TYPE: {
+  [typeName: string]: {
+    label: string;
+    command: string;
+  };
+} = {
+  zephyr: {
+    label: 'zephyr',
+    command: 'npm create zephyr',
+  },
+};
+
 type RoleType = 'consumer' | 'provider';
 type AppTemplateName = 'modern' | 'rsbuild';
 type LibTemplateName = 'rslib';
-type ProviderInfo = {
-  name: string;
-  entry: string;
-};
 
 function upperFirst(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -54,6 +69,7 @@ function logHelpMessage(name: string, templates: string[]) {
      -h, --help       display help for command
      -d, --dir        create project in specified directory
      -t, --template   specify the template to use
+     -n, --name       specify the mf name
      --override       override files in target directory
 
    Templates:
@@ -276,7 +292,7 @@ async function forgeTemplate({
   const templateDir = getTemplateDir(templateName);
 
   let commonTemplateDir = '';
-  if (projectType === 'lib') {
+  if (projectType === ProjectType.lib) {
     commonTemplateDir = 'templates/lib-common/';
   } else {
     commonTemplateDir = `templates/${framework}-common/`;
@@ -284,6 +300,31 @@ async function forgeTemplate({
 
   await renderTemplate(commonTemplateDir);
   await renderTemplate(templateDir);
+}
+
+async function getProjectType(template?: string) {
+  if (!template) {
+    return checkCancel<ProjectType>(
+      await select({
+        message: 'Please select the type of project you want to create:',
+        options: [
+          { value: ProjectType.app, label: 'Application' },
+          { value: ProjectType.lib, label: 'Lib' },
+          { value: ProjectType.other, label: 'Other' },
+        ],
+      }),
+    );
+  }
+
+  if (template.startsWith('create-')) {
+    return ProjectType.other;
+  }
+
+  if (template.includes('lib')) {
+    return ProjectType.lib;
+  }
+
+  return ProjectType.app;
 }
 
 export async function create({
@@ -294,7 +335,7 @@ export async function create({
   templates: string[];
 }) {
   const argv = minimist<Argv>(process.argv.slice(2), {
-    alias: { h: 'help', d: 'dir', t: 'template' },
+    alias: { h: 'help', d: 'dir', t: 'template', n: 'name' },
   });
 
   console.log('');
@@ -308,19 +349,22 @@ export async function create({
   const cwd = process.cwd();
   const pkgInfo = pkgFromUserAgent(process.env['npm_config_user_agent']);
   const pkgManager = pkgInfo ? pkgInfo.name : 'npm';
+  const mfVersion = __VERSION__;
 
-  const mfName = checkCancel<string>(
-    await text({
-      message: 'Please input Module Federation name:',
-      placeholder: 'mf_project_name',
-      defaultValue: 'mf_project_name',
-      validate(value) {
-        if (value.length === 0) {
-          return 'Name is required';
-        }
-      },
-    }),
-  );
+  const mfName =
+    argv.name ||
+    checkCancel<string>(
+      await text({
+        message: 'Please input Module Federation name:',
+        placeholder: 'mf_project_name',
+        defaultValue: 'mf_project_name',
+        validate(value) {
+          if (value.length === 0) {
+            return 'Name is required';
+          }
+        },
+      }),
+    );
 
   const { targetDir } = formatProjectName(path.join(argv.dir || '', mfName));
   const distFolder = path.isAbsolute(targetDir)
@@ -343,17 +387,36 @@ export async function create({
     }
   }
 
-  const projectType = checkCancel<ProjectType>(
-    await select({
-      message: 'Please select the type of project you want to create:',
-      options: [
-        { value: 'app', label: 'Application' },
-        { value: 'lib', label: 'Lib' },
-      ],
-    }),
-  );
+  const projectType = await getProjectType(argv.template);
 
-  const mfVersion = __VERSION__;
+  if (projectType === ProjectType.other) {
+    const otherOptions = Object.keys(OTHER_TYPE).map((key) => {
+      return {
+        value: key,
+        label: OTHER_TYPE[key].label,
+      };
+    });
+    const otherProjectKey = checkCancel<string>(
+      await select({
+        message: 'Please select the type of template you want to create:',
+        options: otherOptions,
+      }),
+    );
+
+    const { command } = OTHER_TYPE[otherProjectKey];
+    const commandWithManager = command.replace(
+      /^npm create /,
+      `${pkgManager} create `,
+    );
+
+    const realCommand = `${commandWithManager} -d ${distFolder} -n ${mfName}${argv.override ? ' --override' : ''}`;
+    const [cmd, ...cmdArgs] = realCommand.split(' ');
+    const { status } = spawnSync(cmd, cmdArgs, {
+      stdio: 'inherit',
+    });
+    process.exit(status ?? 0);
+  }
+
   await forgeTemplate({
     projectType,
     argv,
@@ -367,7 +430,7 @@ export async function create({
   const nextSteps = [
     `cd ${targetDir}`,
     `${pkgManager} install`,
-    `${pkgManager} run ${projectType === 'lib' ? 'mf-dev' : 'dev'}`,
+    `${pkgManager} run ${projectType === ProjectType.lib ? 'mf-dev' : 'dev'}`,
   ];
 
   note(nextSteps.join('\n'), 'Next steps');
