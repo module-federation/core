@@ -408,6 +408,7 @@ export async function create({
       return {
         value: key,
         label: OTHER_TYPE[key].label,
+        hint: OTHER_TYPE[key].hint,
       };
     });
     const otherProjectKey = checkCancel<string>(
