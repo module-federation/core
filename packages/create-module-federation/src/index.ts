@@ -8,9 +8,7 @@ interface Template {
 
 export const TEMPLATES = [
   'provider-modern',
-  'consumer-modern',
   'provider-rsbuild',
-  'consumer-rsbuild',
   'rslib',
   'rslib-storybook',
 ];
