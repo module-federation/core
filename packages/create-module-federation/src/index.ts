@@ -11,11 +11,6 @@ export const TEMPLATES = [
   'provider-rsbuild',
   'rslib',
   'rslib-storybook',
-  'consumer-modern',
-  'consumer-rsbuild',
-
-  // other
-  'create-zephyr',
 ];
 
 create({
