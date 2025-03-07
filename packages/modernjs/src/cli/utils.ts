@@ -152,6 +152,11 @@ export const patchMFConfig = (
     runtimePlugins,
   );
 
+  injectRuntimePlugins(
+    require.resolve('@module-federation/modern-js/auto-fetch-data'),
+    runtimePlugins,
+  );
+
   if (isDev) {
     injectRuntimePlugins(
       require.resolve('@module-federation/modern-js/resolve-entry-ipv4'),

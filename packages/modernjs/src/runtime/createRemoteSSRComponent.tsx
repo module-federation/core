@@ -1,4 +1,5 @@
 import React from 'react';
+import helpers from '@module-federation/runtime/helpers';
 import {
   getInstance,
   type FederationHost,
@@ -7,6 +8,7 @@ import {
   ErrorBoundary,
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
+import { getDataFetchInfo } from './utils';
 
 type IProps = {
   id: string;
@@ -16,7 +18,7 @@ type IProps = {
 
 type ReactKey = { key?: React.Key | null };
 
-async function fetchData(id: string) {
+async function fetchData(id: string): Promise<unknown | undefined> {
   const instance = getInstance();
   if (!instance) {
     return;
@@ -29,11 +31,16 @@ async function fetchData(id: string) {
   if (!module) {
     return;
   }
-  const dataFetch = module.dataFetchMap[id];
-  if (!dataFetch) {
+  const dataFetchInfo = getDataFetchInfo({
+    id,
+    name,
+    alias: module.remoteInfo.alias,
+  });
+  if (!dataFetchInfo) {
     return;
   }
-  return dataFetch;
+  const key = `${name}@${module.remoteInfo.version}@${dataFetchInfo.dataFetchName}`;
+  return helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__[key];
 }
 
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {

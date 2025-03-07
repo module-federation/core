@@ -31,6 +31,7 @@ export type LoadShareExtraOptions = {
 };
 
 export interface RemoteInfo {
+  alias?: string;
   name: string;
   version?: string;
   buildVersion?: string;

@@ -82,8 +82,6 @@ export class SnapshotHandler {
       void
     >('beforeLoadRemoteSnapshot'),
     loadSnapshot: new AsyncWaterfallHook<{
-      id?: string;
-      expose?: string;
       options: Options;
       moduleInfo: Remote;
       hostGlobalSnapshot: GlobalModuleInfo[string] | undefined;
@@ -99,6 +97,8 @@ export class SnapshotHandler {
       from: 'global' | 'manifest';
     }>('loadRemoteSnapshot'),
     afterLoadSnapshot: new AsyncWaterfallHook<{
+      id?: string;
+      host: FederationHost;
       options: Options;
       moduleInfo: Remote;
       remoteSnapshot: ModuleInfo;
@@ -175,8 +175,6 @@ export class SnapshotHandler {
       remoteSnapshot: globalRemoteSnapshot,
       globalSnapshot: globalSnapshotRes,
     } = await this.hooks.lifecycle.loadSnapshot.emit({
-      id,
-      expose,
       options,
       moduleInfo,
       hostGlobalSnapshot,
@@ -257,6 +255,8 @@ export class SnapshotHandler {
     }
 
     await this.hooks.lifecycle.afterLoadSnapshot.emit({
+      id,
+      host: this.HostInstance,
       options,
       moduleInfo,
       remoteSnapshot: mSnapshot,

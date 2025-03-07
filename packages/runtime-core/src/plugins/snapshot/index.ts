@@ -48,7 +48,6 @@ export function snapshotPlugin(): FederationRuntimePlugin {
           await origin.snapshotHandler.loadRemoteSnapshotInfo({
             moduleInfo: remote,
             id,
-            expose,
           });
 
         assignRemoteInfo(remoteInfo, remoteSnapshot);
