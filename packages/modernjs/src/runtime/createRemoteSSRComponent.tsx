@@ -16,6 +16,26 @@ type IProps = {
 
 type ReactKey = { key?: React.Key | null };
 
+async function fetchData(id: string) {
+  const instance = getInstance();
+  if (!instance) {
+    return;
+  }
+  const { name } = instance.remoteHandler.idToRemoteMap[id] || {};
+  if (!name) {
+    return;
+  }
+  const module = instance.moduleCache.get(name);
+  if (!module) {
+    return;
+  }
+  const dataFetch = module.dataFetchMap[id];
+  if (!dataFetch) {
+    return;
+  }
+  return dataFetch;
+}
+
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
   const { name, expose } = instance.remoteHandler.idToRemoteMap[id] || {};
   if (!name) {
@@ -140,9 +160,9 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
 }) {
   type ComponentType = T[E] extends (...args: any) => any
     ? Parameters<T[E]>[0] extends undefined
-      ? ReactKey
-      : Parameters<T[E]>[0] & ReactKey
-    : ReactKey;
+      ? ReactKey & { _mf_data?: any }
+      : Parameters<T[E]>[0] & ReactKey & { _mfData?: any }
+    : ReactKey & { _mfData?: any };
   const exportName = info?.export || 'default';
 
   const LazyComponent = React.lazy(async () => {
@@ -154,17 +174,19 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
       }
       const moduleId = m && m[Symbol.for('mf_module_id')];
 
+      const data = await fetchData(moduleId);
+
       const assets = collectSSRAssets({
         id: moduleId,
       });
 
-      const Com = m[exportName] as React.FC;
+      const Com = m[exportName] as React.FC<ComponentType>;
       if (exportName in m && typeof Com === 'function') {
         return {
           default: (props: Omit<ComponentType, 'key'>) => (
             <>
               {assets}
-              <Com {...props} />
+              <Com {...props} _mfData={data} />
             </>
           ),
         };
