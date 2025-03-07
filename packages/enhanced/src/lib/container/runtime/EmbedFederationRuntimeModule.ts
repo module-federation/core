@@ -8,7 +8,7 @@ import ContainerEntryDependency from '../ContainerEntryDependency';
 import type { NormalModule as NormalModuleType } from 'webpack';
 import type FederationRuntimeDependency from './FederationRuntimeDependency';
 
-const { RuntimeModule, Template } = require(
+const { RuntimeModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
@@ -16,6 +16,7 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
   private containerEntrySet: Set<
     ContainerEntryDependency | FederationRuntimeDependency
   >;
+  public override _cachedGeneratedCode: string | undefined;
 
   constructor(
     containerEntrySet: Set<
@@ -24,6 +25,7 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
   ) {
     super('embed federation', RuntimeModule.STAGE_ATTACH);
     this.containerEntrySet = containerEntrySet;
+    this._cachedGeneratedCode = undefined;
   }
 
   override identifier() {
@@ -31,6 +33,9 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
   }
 
   override generate(): string | null {
+    if (this._cachedGeneratedCode !== undefined) {
+      return this._cachedGeneratedCode;
+    }
     const { compilation, chunk, chunkGraph } = this;
     if (!chunk || !chunkGraph || !compilation) {
       return null;
@@ -55,7 +60,23 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       weak: false,
       runtimeRequirements: new Set(),
     });
-    return Template.asString([`${initRuntimeModuleGetter}`]);
+
+    const result = Template.asString([
+      `var oldStartup = ${RuntimeGlobals.startup};`,
+      `var hasRun = false;`,
+      `${RuntimeGlobals.startup} = ${compilation.runtimeTemplate.basicFunction(
+        '',
+        [
+          `if (!hasRun) {`,
+          `  hasRun = true;`,
+          `  ${initRuntimeModuleGetter};`,
+          `}`,
+          `return oldStartup();`,
+        ],
+      )};`,
+    ]);
+    this._cachedGeneratedCode = result;
+    return result;
   }
 }
 export default EmbedFederationRuntimeModule;

@@ -14,3 +14,5 @@ const { describeCases } = require('./ConfigTestCases.template');
 describeCases({
   name: 'ConfigTestCases',
 });
+
+describe('ConfigTestCases', () => {});

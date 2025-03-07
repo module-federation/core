@@ -8,7 +8,7 @@ module.exports = {
       exposes: {
         './Button': './Button',
       },
-      experiments: { federationRuntime: false },
+      experiments: { asyncStartup: false },
       shared: {
         react: {
           eager: true,

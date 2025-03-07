@@ -8,7 +8,9 @@ The `experiments` configuration is used to enable experimental capabilities in t
 new ModuleFederationPlugin({
   name: '@demo/host',
   experiments: {
-    federationRuntime: 'hoisted'
+    asyncStartup: true,
+    externalRuntime: false,
+    provideExternalRuntime: false
   },
   shared: {
     react: {
@@ -22,46 +24,21 @@ new ModuleFederationPlugin({
 });
 ```
 
-## federationRuntime
+## asyncStartup
 
-- Type: `enum`
+- Type: `boolean`
 - Required: No
 - Default: `false`
-- Options: `false | "hoisted"`
 
-### `Hoisted` Runtime
+When `asyncStartup` is enabled, all Module Federation entrypoints will initialize asynchronously by default. This means:
 
-When the runtime is `hoisted`, the following occurs:
-
-These configurations are useful for:
-
-- Setting or using`runtimeChunk: 'single'`.
-- Avoiding the `import()` at the top of the app or in the entry point of user code to prevent eager consumption errors. In the past, this was often mandatory and commonly seen as `import('./bootstrap.js')` in example apps.
-- Moving the Module Federation runtime packages into runtime chunks, keeping them out of the entry point - reducing code duplication
-
-1) Optimizations
-
-The `module-federation/runtime` is patched onto entrypoints. This causes multiple copies to exist in some builds.
-It also causes some "eager consumption" errors when chunk splitting is configured in certain ways.
-
-This resolves a common issue with runtimeChunk: single
-
-2) Async startup
+- No need for manual `import()` statements at the top of your app (e.g., `import('./bootstrap')`)
+- All entrypoints automatically handle async initialization
+- Prevention of "eager consumption" errors through automatic async handling
 
 :::warning
-This mode allows for async startup. When exporting a UMD library, it can return a promise resolving to the export.
-If you manually require() an entrypoint in Node, it sets module.exports to Promise.resolve(exports).
+When using this mode, all entrypoints will initialize asynchronously. If you're manually requiring a bundled entrypoint or exposing a UMD library, it will return a promise resolving to the exports.
 :::
-
-Entrypoint startup will switch to "active" initialization and use async dependency startup.
-
-You will no longer need a mandatory `import('./bootsrtap')` dynamic import in order for consumers / hosts to function.
-There should be no "eager consumption" errors possible, as the initialization of the files themselves behave as async chunks.
-
-3) Eager Runtime Access
-
-Instead of federation runtime initilizing in the entrypoint code, it is initialized in a RuntimeModule, within the webpack runtime.
-This allows module federation to be avaliable ahead of time, thus enabling "Async Startup" capabilities etc.
 
 ## externalRuntime
 

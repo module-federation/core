@@ -93,8 +93,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       }).apply(compiler);
     }
 
-    if (options.experiments?.federationRuntime) {
-      new FederationModulesPlugin().apply(compiler);
+    // federation hooks
+    new FederationModulesPlugin().apply(compiler);
+
+    if (options.experiments?.asyncStartup) {
       new StartupChunkDependenciesPlugin({
         asyncChunkLoading: true,
       }).apply(compiler);
@@ -158,7 +160,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           shareScope: options.shareScope,
           exposes: options.exposes!,
           runtimePlugins: options.runtimePlugins,
-          experiments: options.experiments,
         }).apply(compiler);
       }
       if (

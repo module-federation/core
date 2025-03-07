@@ -8,7 +8,9 @@
 new ModuleFederationPlugin({
   name: '@demo/host',
   experiments: {
-    federationRuntime: 'hoisted'
+    asyncStartup: true,
+    externalRuntime: false,
+    provideExternalRuntime: false
   },
   shared: {
     react: {
@@ -22,50 +24,21 @@ new ModuleFederationPlugin({
 });
 ```
 
-## federationRuntime
+## asyncStartup
 
-- Type: `enum`
+- Type: `boolean`
 - Required: No
 - Default: `false`
-- Options: `false | "hoisted"`
 
-### `Hoisted` Runtime
+启用 `asyncStartup` 后，所有 Module Federation 入口将默认以异步方式初始化。这意味着：
 
-当设置 `federationRuntime: 'hoisted'` 时，会发生以下情况：
-
-这些配置可用于下列场景：
-
-- 设置 `runtimeChunk: 'single'`。
-- 避免在应用的顶部或用户代码的入口点使用 import()，以防止 `eager` 的错误。在过去，这通常是强制性的，并且常见的示例应用中会看到 `import('./bootstrap.js')`。
-- 将模块联邦运行时包移入运行时代码块，将它们从入口点中移出，从而减少代码重复。
-
-下面会详细解释对应的场景。
-
-1）优化
-
-原先 `module-federation/runtime` 会被加入到编译入口，这意味着在多 entry 的情况下会打包多次 mf runtime，会增大产物体积。
-当设置了某些特定的分包策略，还会导致共享依赖 `eager consumption` 的问题。
-
-并且 `federationRuntime: 'hoisted'` 还允许设置 `runtimeChunk: "single"`。
-
-2）异步启动
+- 无需在应用顶部手动添加 `import()` 语句（例如 `import('./bootstrap')`）
+- 所有入口都会自动处理异步初始化
+- 通过自动的异步处理机制防止 "eager consumption" 错误
 
 :::warning
-此模式仍然允许设置异步入口。导出 UMD 库时，它会返回 Promise resolve 导出。
-如果您手动 require() Node 中的入口点，它将 module.exports 设置为 Promise.resolve(exports)。
+使用此模式时，所有入口都将异步初始化。如果你手动 require 一个打包后的入口或导出 UMD 库，它将返回一个 promise 来解析导出内容。
 :::
-
-入口启动将切换到“主动”初始化并使用异步依赖项启动。
-
-你将不再需要强制的设置异步入口：`“import('./bootsrtap')”`。
-
-不再出现共享依赖 `eager consumption` 错误，因为文件本身的初始化表现为异步块。
-
-3）提升 MF 运行时访问优先级
-
-与原先在入口挂载 MF runtime 不同，现在将会提升到 bundler runtime 初始化阶段挂载 MF runtime 。
-
-这允许 MF runtime 提前可用，从而支持 “异步启动”（不再需要异步入口） 功能等。
 
 ## externalRuntime
 

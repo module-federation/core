@@ -327,15 +327,9 @@ export default {
     experiments: {
       type: 'object',
       properties: {
-        federationRuntime: {
-          anyOf: [
-            {
-              type: 'boolean',
-            },
-            {
-              enum: ['hoisted'],
-            },
-          ],
+        asyncStartup: {
+          description: 'Enable async startup for the container',
+          type: 'boolean',
         },
         externalRuntime: {
           anyOf: [

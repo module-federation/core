@@ -49,6 +49,7 @@ export const generateEntryStartup = (
     '',
     '\n',
     'var promises = [];',
+    '__webpack_require__.x();',
   ];
 
   const treeRuntimeRequirements = chunkGraph.getTreeRuntimeRequirements(chunk);
