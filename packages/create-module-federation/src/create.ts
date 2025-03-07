@@ -29,6 +29,7 @@ declare const __VERSION__: string;
 const enum ProjectType {
   app = 'app',
   lib = 'lib',
+  zephyr = 'zephyr',
   other = 'other',
 }
 
@@ -49,14 +50,14 @@ type Argv = {
 const OTHER_TYPE: {
   [typeName: string]: {
     label: string;
-    command: string;
+    packageName: string;
     hint?: string;
   };
 } = {
   zephyr: {
     label: 'zephyr',
-    command: 'npm create zephyr@latest',
-    hint: 'npm create zephyr@latest',
+    packageName: 'zephyr-apps@latest',
+    hint: 'create zephyr-apps@latest',
   },
 };
 
@@ -81,8 +82,7 @@ function logHelpMessage(name: string, templates: string[]) {
      --override       override files in target directory
 
    Templates:
-
-     ${templates.join(', ')}
+     ${templates.filter((t) => !t.startsWith('zephyr')).join(', ')}
 `);
 }
 
@@ -245,18 +245,16 @@ async function forgeTemplate({
       }),
     );
 
-    roleType =
-      argv.role ||
-      checkCancel<RoleType>(
-        await select({
-          message: 'Please select the role of project you want to create:',
-          initialValue: 'provider',
-          options: [
-            { value: 'consumer', label: 'Consumer' },
-            { value: 'provider', label: 'Provider' },
-          ],
-        }),
-      );
+    roleType = checkCancel<RoleType>(
+      await select({
+        message: 'Please select the role of project you want to create:',
+        initialValue: 'provider',
+        options: [
+          { value: 'consumer', label: 'Consumer' },
+          { value: 'provider', label: 'Provider' },
+        ],
+      }),
+    );
   }
 
   const templateName = await getTemplateName(
@@ -304,37 +302,15 @@ async function forgeTemplate({
   let commonTemplateDir = '';
   if (projectType === ProjectType.lib) {
     commonTemplateDir = 'templates/lib-common/';
-  } else {
+  } else if (projectType === 'app') {
     commonTemplateDir = `templates/${framework}-common/`;
   }
 
-  await renderTemplate(commonTemplateDir);
+  // Only render common templates if they exist and are applicable
+  if (commonTemplateDir) {
+    await renderTemplate(commonTemplateDir);
+  }
   await renderTemplate(templateDir);
-}
-
-async function getProjectType(template?: string) {
-  if (!template) {
-    return checkCancel<ProjectType>(
-      await select({
-        message: 'Please select the type of project you want to create:',
-        options: [
-          { value: ProjectType.app, label: 'Application' },
-          { value: ProjectType.lib, label: 'Lib' },
-          { value: ProjectType.other, label: 'Other' },
-        ],
-      }),
-    );
-  }
-
-  if (template.startsWith('create-')) {
-    return ProjectType.other;
-  }
-
-  if (template.includes('lib')) {
-    return ProjectType.lib;
-  }
-
-  return ProjectType.app;
 }
 
 export async function create({
@@ -360,6 +336,34 @@ export async function create({
   const pkgInfo = pkgFromUserAgent(process.env['npm_config_user_agent']);
   const pkgManager = pkgInfo ? pkgInfo.name : 'npm';
   const mfVersion = __VERSION__;
+
+  const projectType = checkCancel<ProjectType>(
+    await select({
+      message: 'Please select the type of project you want to create:',
+      options: [
+        { value: 'app', label: 'Application' },
+        { value: 'lib', label: 'Lib' },
+        {
+          value: 'zephyr',
+          label: 'Zephyr Powered (Learn more at https://zephyr-cloud.io)',
+        },
+      ],
+    }),
+  );
+
+  if (projectType === ProjectType.zephyr) {
+    const zephyrPackage = OTHER_TYPE['zephyr'].packageName;
+    const zephyrCommand = `${pkgManager} create ${zephyrPackage}`;
+    note(`Running: ${zephyrCommand}`, 'Launching Zephyr setup');
+
+    spawnSync(pkgManager, ['create', zephyrPackage], {
+      stdio: 'inherit',
+      shell: true,
+    });
+
+    outro('Done.');
+    return;
+  }
 
   const mfName =
     argv.name ||
@@ -395,48 +399,6 @@ export async function create({
     if (option === 'no') {
       cancelAndExit();
     }
-  }
-
-  argv.template = templates.includes(argv.template || '')
-    ? argv.template
-    : undefined;
-
-  const projectType = await getProjectType(argv.template);
-
-  if (projectType === ProjectType.other) {
-    const otherOptions = Object.keys(OTHER_TYPE).map((key) => {
-      return {
-        value: key,
-        label: OTHER_TYPE[key].label,
-        hint: OTHER_TYPE[key].hint,
-      };
-    });
-    const otherProjectKey = checkCancel<string>(
-      await select({
-        message: 'Please select the type of template you want to create:',
-        options: otherOptions,
-      }),
-    );
-
-    const { command } = OTHER_TYPE[otherProjectKey];
-    const commandWithManager = command.replace(
-      /^npm create /,
-      `${pkgManager} create `,
-    );
-
-    // extra double-dash for npm > 7
-    const npmParams =
-      pkgManager === 'npm' &&
-      pkgInfo?.version &&
-      parseInt(pkgInfo.version.split('.')[0], 10) < 7
-        ? ' --'
-        : '';
-    const realCommand = `${commandWithManager}${npmParams} -d ${distFolder} -n ${mfName}${argv.override ? ' --override' : ''}`;
-    const [cmd, ...cmdArgs] = realCommand.split(' ');
-    const { status } = spawnSync(cmd, cmdArgs, {
-      stdio: 'inherit',
-    });
-    process.exit(status ?? 0);
   }
 
   await forgeTemplate({
