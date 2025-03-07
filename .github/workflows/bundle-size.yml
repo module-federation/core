@@ -5,7 +5,45 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  check-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.11.0
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Check package build sizes
+        uses: preactjs/compressed-size-action@v2
+        with:
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'
+          build-script: 'build:pkg'
+          pattern: './packages/**/dist/**/*.{js,mjs,cjs}'
+          exclude: '{**/*.map,**/node_modules/**}'
+          compression: 'gzip'
+          comment-key: 'packages'
+
+  check-apps:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,49 +74,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build and compare sizes
+      - name: Build packages (prerequisite for building apps)
+        run: pnpm build:pkg
+
+      - name: Check app build sizes
         uses: preactjs/compressed-size-action@v2
         with:
-          build-script: 'build:pkg && app:next:build'
-          pattern: '{./packages/**/dist/**/*.{js,mjs,cjs},./apps/**/dist/**/*.{js,mjs,cjs}}'
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'
+          build-script: 'app:next:build'
+          pattern: './apps/**/dist/**/*.{js,mjs,cjs}'
           exclude: '{**/*.map,**/node_modules/**}'
-          clean-script: 'rm -rf packages/*/dist apps/*/dist'
           compression: 'gzip'
-          save-stats: true
-          stats-path: 'bundle-stats.json'
-
-      - name: Generate detailed report
-        uses: NejcZdovc/bundle-size-diff@v1
-        with:
-          base_path: './bundle-stats.json'
-          pr_path: './bundle-stats.json'
-          excluded_assets: ".*\\.map$"
-
-      - name: Comment PR
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const stats = require('./bundle-stats.json');
-            const comment = `## Bundle Size Report
-
-            ### Package Builds
-            ${Object.entries(stats.packages || {})
-              .map(([name, size]) => `- ${name}: ${size}`)
-              .join('\n')}
-
-            ### App Builds
-            ${Object.entries(stats.apps || {})
-              .map(([name, size]) => `- ${name}: ${size}`)
-              .join('\n')}
-
-            ### Total Changes
-            - Total Size: ${stats.total}
-            - Gzipped Size: ${stats.gzipped}
-            `;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
+          comment-key: 'apps'
+          clean-script: 'rm -rf apps/*/dist'
