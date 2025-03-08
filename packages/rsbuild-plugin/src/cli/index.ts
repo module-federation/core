@@ -30,7 +30,7 @@ export {
   PLUGIN_NAME,
 };
 
-const LIB_FORMAT = ['commonjs', 'umd', 'modern-module'];
+const LIB_FORMAT = ['umd', 'modern-module'];
 
 export function isMFFormat(bundlerConfig: Rspack.Configuration) {
   const library = bundlerConfig.output?.library;
@@ -39,7 +39,8 @@ export function isMFFormat(bundlerConfig: Rspack.Configuration) {
     typeof library === 'object' &&
     !Array.isArray(library) &&
     'type' in library &&
-    LIB_FORMAT.includes(library.type)
+    //  if the type is umd/modern-module or commonjs*, means this is a normal library , not mf
+    (LIB_FORMAT.includes(library.type) || /commonjs/.test(library.type))
   );
 }
 
@@ -82,7 +83,7 @@ export const pluginModuleFederation = (
           // mf
           autoDeleteSplitChunkCacheGroups(
             moduleFederationOptions,
-            bundlerConfig,
+            bundlerConfig?.optimization?.splitChunks,
           );
 
           const externals = bundlerConfig.externals;
@@ -187,8 +188,7 @@ export const pluginModuleFederation = (
       // adding to include and let SWC transform it
       config.source.include = [
         ...(config.source.include || []),
-        /@module-federation[\\/]sdk/,
-        /@module-federation[\\/]runtime/,
+        /@module-federation[\\/]/,
       ];
 
       return config;

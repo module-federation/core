@@ -5,7 +5,7 @@ import type { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@mo
 export interface PluginOptions {
   config?: moduleFederationPlugin.ModuleFederationPluginOptions;
   configPath?: string;
-  ssr?: false;
+  ssr?: boolean;
   remoteIpStrategy?: 'ipv4' | 'inherit';
 }
 
