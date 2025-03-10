@@ -30,6 +30,7 @@ const enum ProjectType {
   app = 'app',
   lib = 'lib',
   zephyr = 'zephyr',
+  // not used yet
   other = 'other',
 }
 
@@ -220,6 +221,29 @@ function getTemplateDir(templateName: string) {
   return `templates/${templateName}/`;
 }
 
+async function getProjectType(template?: string) {
+  if (!template) {
+    return checkCancel<ProjectType>(
+      await select({
+        message: 'Please select the type of project you want to create:',
+        options: [
+          { value: ProjectType.app, label: 'Application' },
+          { value: ProjectType.lib, label: 'Lib' },
+          {
+            value: ProjectType.zephyr,
+            label: 'Zephyr Powered (Learn more at https://zephyr-cloud.io)',
+          },
+        ],
+      }),
+    );
+  }
+
+  if (template.includes('lib')) {
+    return ProjectType.lib;
+  }
+
+  return ProjectType.app;
+}
 async function forgeTemplate({
   projectType,
   argv,
@@ -245,16 +269,18 @@ async function forgeTemplate({
       }),
     );
 
-    roleType = checkCancel<RoleType>(
-      await select({
-        message: 'Please select the role of project you want to create:',
-        initialValue: 'provider',
-        options: [
-          { value: 'consumer', label: 'Consumer' },
-          { value: 'provider', label: 'Provider' },
-        ],
-      }),
-    );
+    roleType =
+      argv.role ||
+      checkCancel<RoleType>(
+        await select({
+          message: 'Please select the role of project you want to create:',
+          initialValue: 'provider',
+          options: [
+            { value: 'consumer', label: 'Consumer' },
+            { value: 'provider', label: 'Provider' },
+          ],
+        }),
+      );
   }
 
   const templateName = await getTemplateName(
@@ -337,19 +363,11 @@ export async function create({
   const pkgManager = pkgInfo ? pkgInfo.name : 'npm';
   const mfVersion = __VERSION__;
 
-  const projectType = checkCancel<ProjectType>(
-    await select({
-      message: 'Please select the type of project you want to create:',
-      options: [
-        { value: 'app', label: 'Application' },
-        { value: 'lib', label: 'Lib' },
-        {
-          value: 'zephyr',
-          label: 'Zephyr Powered (Learn more at https://zephyr-cloud.io)',
-        },
-      ],
-    }),
-  );
+  argv.template = templates.includes(argv.template || '')
+    ? argv.template
+    : undefined;
+
+  const projectType = await getProjectType(argv.template);
 
   if (projectType === ProjectType.zephyr) {
     const zephyrPackage = OTHER_TYPE['zephyr'].packageName;
