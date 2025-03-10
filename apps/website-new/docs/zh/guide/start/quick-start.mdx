@@ -2,13 +2,172 @@
 
 在阅读本指南前，请先阅读 [设置环境](./setting-up-env)。本指南将引导你逐步学习使用 Module Federation。我们将构建两个独立的单页面应用程序 (SPA)，它们会使用 Module Federation 共享组件，下文中遇到不熟的名词请查看[名词解释](./glossary)。
 
-## 创建一个生产者
+## 新项目创建
 
-### 1. 初始化项目
+Module Federation 提供了 `create-module-federation` 工具来创建项目，不需要全局安装，直接使用 npx 按需运行即可。
 
-使用 [Rsbuild](https://rsbuild.dev/) 来创建一个生产者，调用以下命令：
+你可以使用 `create-module-federation` 来创建一个 Module Federation 项目，调用以下命令：
 
 import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm create module-federation@latest',
+    yarn: 'yarn create module-federation',
+    pnpm: 'pnpm create module-federation@latest',
+  }}
+/>
+
+按照提示一步步操作即可。在创建过程中，你可以选择项目类型、角色类型等。
+
+### 模板
+
+在创建项目时，你可以选择 `create-module-federation` 提供的下列模板：
+
+| 模板                      | 描述                                                         |
+| ------------------------- | ------------------------------------------------------------ |
+| provider-modern           | 使用 [Modern.js](https://modernjs.dev/) 的生产者             |
+| provider-rsbuild          | 使用 [Rsbuild](https://rsbuild.dev/) 的生产者                |
+| rslib                     | 使用 [Rslib](https://lib.rsbuild.dev/) 的生产者              |
+| rslib-storybook           | 使用 [Rslib](https://lib.rsbuild.dev/) 的生产者，并且开启了 storybook 功能 |
+| consumer-modern           | 使用 [Modern.js](https://modernjs.dev/) 的消费者             |
+| consumer-rsbuild          | 使用 [Rsbuild](https://rsbuild.dev/) 的消费者                |
+
+
+### 快速创建
+
+[create-module-federation](https://www.npmjs.com/package/create-module-federation) 提供了一些 CLI 选项。通过设置这些 CLI 选项，你可以跳过交互式的选择步骤，一键创建项目。
+
+比如，一键创建名称为 provider 的 Modern.js 生产者项目到 `my-project` 目录：
+
+```bash
+npx create-module-federation --dir my-project --template provider-modern --name provider
+
+# 使用缩写
+npx create-module-federation -d my-project -t provider-modern -n provider
+```
+
+`create-module-federation` 完整的 CLI 选项如下：
+
+```text
+Usage: create-module-federation [options]
+
+Options:
+
+  -h, --help       display help for command
+  -d, --dir        create project in specified directory
+  -t, --template   specify the template to use
+  -n, --name       specify the mf name
+  -r, --role       specify the mf role type: provider or consumer
+  --override       override files in target directory
+
+Templates:
+
+  provider-modern, provider-rsbuild, rslib, rslib-storybook, consumer-modern, consumer-rsbuild
+```
+
+### 创建一个生产者
+
+执行 `create-module-federation` 命令，按照需求选择需要的框架和类型，并选择角色类型为生产者即可创建项目。
+
+此处以创建一个 rsbuild 生产者项目为例：
+
+```bash
+➜  ~  ✗ npm create module-federation@latest
+
+> npx
+> create-module-federation
+
+◆  Create Module Federation Project
+│
+◇  Please input Module Federation name:
+│  mf_provider
+│
+◇  Please select the type of project you want to create:
+│  Application
+│
+◇  Select template
+│  Rsbuild
+│
+◇  Please select the role of project you want to create:
+│  Provider
+│
+◇  Next steps ─────╮
+│                  │
+│  cd mf_provider  │
+│  npm install     │
+│  npm run dev     │
+│                  │
+├──────────────────╯
+│
+└  Done.
+```
+
+### 创建一个消费者
+
+执行 `create-module-federation` 命令，按照需求选择需要的框架和类型，并选择角色类型为消费者即可创建项目。
+
+此处以创建一个 rsbuild 消费者项目为例：
+
+```bash
+➜  ~  ✗ npm create module-federation@latest
+
+> npx
+> create-module-federation
+
+◆  Create Module Federation Project
+│
+◇  Please input Module Federation name:
+│  mf_consumer
+│
+◇  Please select the type of project you want to create:
+│  Application
+│
+◇  Select template
+│  Rsbuild
+│
+◇  Please select the role of project you want to create:
+│  Consumer
+│
+◇  Next steps ─────╮
+│                  │
+│  cd mf_provider  │
+│  npm install     │
+│  npm run dev     │
+│                  │
+├──────────────────╯
+│
+└  Done.
+```
+
+#### 替换生产者
+
+默认创建的消费者项目会消费一个已发布的生产者，如果你想替换生产者，需要在 `module-federation.config.js` 中修改 `remotes` 配置。
+
+```diff title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
+
+export default createModuleFederationConfig({
+  name: 'mf_consumer',
+  remotes: {
+-   'provider': 'rslib_provider@https://unpkg.com/module-federation-rslib-provider@latest/dist/mf/mf-manifest.json',
++   'provider': 'rslib_provider@http://localhost:3000/mf-manifest.json',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+
+```
+
+## 已有项目创建
+
+### 创建一个生产者
+
+#### 1. 初始化项目
+
+使用 [Rsbuild](https://rsbuild.dev/) 来创建一个生产者，调用以下命令：
 
 <PackageManagerTabs
   command={{
@@ -27,7 +186,7 @@ import { PackageManagerTabs } from '@theme';
 ? Select language -> TypeScript
 ```
 
-### 2. 安装 Module Federation 构建插件
+#### 2. 安装 Module Federation 构建插件
 
 根据上面初始化项目的步骤，我们创建了名为 `federation_provider` 的 `React` 项目，依次执行以下命令
 
@@ -56,7 +215,7 @@ bun add @module-federation/rsbuild-plugin --save-dev
   }}
 />
 
-### 3. 生产者导出模块
+#### 3. 生产者导出模块
 
 > 将入口改为异步
 
@@ -111,7 +270,7 @@ export default defineConfig({
 });
 ```
 
-### 4. 启动生产者
+#### 4. 启动生产者
 
 <PackageManagerTabs
   command={{
@@ -140,9 +299,9 @@ start   Compiling...
 
 项目启动后出现 `Manifest Link: http://localhost:3000/mf-manifest.json` 信息，这是 Module federation 的 manifest 信息链接
 
-## 创建一个消费者
+### 创建一个消费者
 
-### 1. 初始化项目
+#### 1. 初始化项目
 
 使用 [Rsbuild](https://rsbuild.dev/) 来创建一个消费者，调用以下命令：
 
@@ -163,7 +322,7 @@ start   Compiling...
 ? Select language -> TypeScript
 ```
 
-### 2. 安装 Module Federation 构建插件
+#### 2. 安装 Module Federation 构建插件
 
 根据上面初始化项目的步骤，我们创建了名为 `federation_consumer` 的 `React` 项目，依次执行以下命令
 
@@ -192,7 +351,7 @@ bun add @module-federation/rsbuild-plugin --save-dev
   }}
 />
 
-### 3. 消费生产者
+#### 3. 消费生产者
 
 > 增加 Module Federation 插件消费远程模块
 

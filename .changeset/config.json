@@ -25,7 +25,8 @@
       "@module-federation/rsbuild-plugin",
       "@module-federation/error-codes",
       "@module-federation/inject-external-runtime-core-plugin",
-      "@module-federation/runtime-core"
+      "@module-federation/runtime-core",
+      "create-module-federation"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],

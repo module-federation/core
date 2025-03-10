@@ -1,4 +1,4 @@
-import { Badge } from "@theme";
+import { Badge, PackageManagerTabs } from "@theme";
 
 # Quick Start Guide
 
@@ -6,14 +6,169 @@ Before reading this guide, please first read the [Setting Up Environment](./sett
 
 _<Badge text="Note:" type="info" /> <small>You can also use [Nx](https://nx.dev) to rapidly scaffold Module Federation projects for [React](../../practice/frameworks/react/using-nx-for-react) and [Angular](../../practice/frameworks/angular/using-nx-for-angular).</small>_
 
-## Creating a Producer
+## Creating a New Project
 
-### 1. Initializing the Project
+Module Federation provides the `create-module-federation` tool to create projects. You don't need to install it globally; you can directly use `npx` to run it on-demand.
 
-Use [Rsbuild](https://rsbuild.dev/) to create a producer and call the following command:
+You can use `create-module-federation` to create a Module Federation project by running the following command:
 
+<PackageManagerTabs
+  command={{
+    npm: 'npm create module-federation@latest',
+    yarn: 'yarn create module-federation',
+    pnpm: 'pnpm create module-federation@latest',
+  }}
+/>
 
-import { PackageManagerTabs } from '@theme';
+Just follow the prompts step by step. During the creation process, you can select the project type, role type, etc.
+
+### Templates
+
+When creating a project, you can choose from the following templates provided by `create-module-federation`:
+
+| Template              | Description                                                         |
+| --------------------- | ------------------------------------------------------------ |
+| provider-modern       | A provider using [Modern.js](https://modernjs.dev/)             |
+| provider-rsbuild      | A provider using [Rsbuild](https://rsbuild.dev/)                |
+| rslib                 | A provider using [Rslib](https://lib.rsbuild.dev/)              |
+| rslib-storybook       | A provider using [Rslib](https://lib.rsbuild.dev/) with the storybook feature enabled |
+| consumer-modern       | A consumer using [Modern.js](https://modernjs.dev/)             |
+| consumer-rsbuild      | A consumer using [Rsbuild](https://rsbuild.dev/)                |
+
+### Quick Creation
+
+[create-module-federation](https://www.npmjs.com/package/create-module-federation) provides some CLI options. By setting these CLI options, you can skip the interactive selection steps and create a project with one click.
+
+For example, to create a Modern.js provider project named `provider` in the `my-project` directory with one click:
+
+```bash
+npx create-module-federation --dir my-project --template provider-modern --name provider
+
+# Use abbreviations
+npx create-module-federation -d my-project -t provider-modern -n provider
+```
+
+The complete CLI options for `create-module-federation` are as follows:
+
+```text
+Usage: create-module-federation [options]
+
+Options:
+
+  -h, --help       display help for command
+  -d, --dir        create project in specified directory
+  -t, --template   specify the template to use
+  -n, --name       specify the mf name
+  -r, --role       specify the mf role type: provider or consumer
+  --override       override files in target directory
+
+Templates:
+
+  provider-modern, provider-rsbuild, rslib, rslib-storybook, consumer-modern, consumer-rsbuild
+```
+
+### Create a provider
+
+Execute the `create-module-federation` command, select the required framework and type according to your needs, and select the role type as provider to create a project.
+
+Here we take creating an rsbuild provider project as an example:
+
+```bash
+➜  ~  ✗ npm create module-federation@latest
+
+> npx
+> create-module-federation
+
+◆  Create Module Federation Project
+│
+◇  Please input Module Federation name:
+│  mf_provider
+│
+◇  Please select the type of project you want to create:
+│  Application
+│
+◇  Select template
+│  Rsbuild
+│
+◇  Please select the role of project you want to create:
+│  Provider
+│
+◇  Next steps ─────╮
+│                  │
+│  cd mf_provider  │
+│  npm install     │
+│  npm run dev     │
+│                  │
+├──────────────────╯
+│
+└  Done.
+```
+
+### Create a consumer
+
+Execute the `create-module-federation` command, select the required framework and type according to your needs, and select the role type as consumer to create a project.
+
+Here is an example of creating an rsbuild consumer project:
+
+```bash
+➜  ~  ✗ npm create module-federation@latest
+
+> npx
+> create-module-federation
+
+◆  Create Module Federation Project
+│
+◇  Please input Module Federation name:
+│  mf_consumer
+│
+◇  Please select the type of project you want to create:
+│  Application
+│
+◇  Select template
+│  Rsbuild
+│
+◇  Please select the role of project you want to create:
+│  Consumer
+│
+◇  Next steps ─────╮
+│                  │
+│  cd mf_provider  │
+│  npm install     │
+│  npm run dev     │
+│                  │
+├──────────────────╯
+│
+└  Done.
+```
+
+#### Replace provider
+
+The default consumer project created will consume a published provider. If you want to replace the provider, you need to modify the `remotes` configuration in `module-federation.config.js`.
+
+```diff title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
+
+export default createModuleFederationConfig({
+  name: 'mf_consumer',
+  remotes: {
+-   'provider': 'rslib_provider@https://unpkg.com/module-federation-rslib-provider@latest/dist/mf/mf-manifest.json',
++   'provider': 'rslib_provider@http://localhost:3000/mf-manifest.json',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+
+```
+
+## Create from existing project
+
+### Creating a Producer
+
+#### 1. Initializing the Project
+
+Use [Rsbuild](https://rsbuild.dev/) to create a provider and call the following command:
 
 <PackageManagerTabs
   command={{
@@ -33,7 +188,7 @@ import { PackageManagerTabs } from '@theme';
 ? Select language -> TypeScript
 ```
 
-### 2. Installing Module Federation Build Plugin
+#### 2. Installing Module Federation Build Plugin
 
 Following the steps above for initializing the project, we created a `React` project named `federation_provider`. Execute the following commands in sequence:
 
@@ -62,7 +217,7 @@ bun add @module-federation/rsbuild-plugin --save-dev
   }}
 />
 
-### 3. Exporting Modules by the Producer
+#### 3. Exporting Modules by the Producer
 
 > Change the entry file to asynchronous
 
@@ -118,7 +273,7 @@ export default defineConfig({
 });
 ```
 
-### 4. Starting the Producer
+#### 4. Starting the Producer
 
 <PackageManagerTabs
   command={{
@@ -147,9 +302,9 @@ start   Compiling...
 
 After the project starts, the `Manifest Link: http://localhost:3000/mf-manifest.json` message appears, which is the manifest information link for Module Federation.
 
-## Creating a Consumer
+### Creating a Consumer
 
-### 1. Initializing the Project
+#### 1. Initializing the Project
 
 Use [Rsbuild](https://rsbuild.dev/) to create a consumer and call the following command:
 
@@ -171,7 +326,7 @@ Use [Rsbuild](https://rsbuild.dev/) to create a consumer and call the following 
 ? Select language -> TypeScript
 ```
 
-### 2. Installing Module Federation Build Plugin
+#### 2. Installing Module Federation Build Plugin
 
 Following the steps above for initializing the project, we created a `React` project named `federation_consumer`. Execute the following commands in sequence:
 
@@ -201,7 +356,7 @@ bun add @module-federation/rsbuild-plugin --save-dev
 />
 
 
-### 3. Consuming the Producer
+#### 3. Consuming the Producer
 
 > Declare the `Module Federation` type path in `tsconfig.json`
 
@@ -285,7 +440,7 @@ export default App;
 
 ## Summary
 
-Through the above process, you have completed the export of a component from a 'producer' for use by a 'consumer' based on Module Federation. Along the way, you have preliminarily used and understood the configurations of remotes, exposes, and shared in the Module Federation plugin.
+Through the above process, you have completed the export of a component from a 'provider' for use by a 'consumer' based on Module Federation. Along the way, you have preliminarily used and understood the configurations of remotes, exposes, and shared in the Module Federation plugin.
 
 If you wish to learn how to directly export and consume remote modules on Webpack and Rspack build tools, you can refer to: [Rspack Plugin](../basic/rspack), [Webpack Plugin](../basic/webpack)
 
