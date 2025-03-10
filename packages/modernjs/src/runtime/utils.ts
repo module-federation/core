@@ -9,7 +9,7 @@ export const getDataFetchInfo = ({
 }) => {
   const regex = new RegExp(`^${name}(/[^/].*|)$`);
   const nameOrAlias = regex.test(id) ? name : alias || name;
-  const DATA_FETCH = 'mf-data';
+  const DATA_FETCH = 'data';
 
   const expose = id.replace(nameOrAlias, '');
   let dataFetchName = '';

@@ -40,6 +40,11 @@ async function fetchData(id: string): Promise<unknown | undefined> {
     return;
   }
   const key = `${name}@${module.remoteInfo.version}@${dataFetchInfo.dataFetchName}`;
+  console.log('------key', key);
+  console.log(
+    '------ helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__[key];',
+    helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__,
+  );
   return helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__[key];
 }
 

@@ -25,11 +25,17 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
     const { modules, version } = remoteSnapshot;
 
     const key = `${name}@${version}@${dataFetchName}`;
+    console.log('======= auto fetch plugin key: ', key);
     if (helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__[key]) {
       return args;
     }
 
-    if (modules.find((module) => module.moduleName === dataFetchName)) {
+    if (!modules.find((module) => module.moduleName === dataFetchName)) {
+      console.log(
+        '======= auto fetch plugin module name not existed',
+        modules.map((i) => i.moduleName).join(', '),
+      );
+
       return args;
     }
 
@@ -39,11 +45,16 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
         if (
           m &&
           typeof m === 'object' &&
-          'prefetch' in m &&
-          typeof m.prefetch === 'function'
+          'fetchData' in m &&
+          typeof m.fetchData === 'function'
         ) {
-          return m.prefetch();
+          console.log('======= auto fetch plugin fetchData', m.fetchData);
+          return m.fetchData();
         }
+      })
+      .catch((e) => {
+        console.log('======= auto fetch plugin fetchData error', e);
+        return null;
       });
 
     return args;
