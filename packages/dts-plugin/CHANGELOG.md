@@ -1,5 +1,17 @@
 # @module-federation/dts-plugin
 
+## 0.10.0
+
+### Patch Changes
+
+- 22fcccd: perf(dts-plugin): add fetch timeout and add log
+- Updated dependencies [0f71cbc]
+- Updated dependencies [22fcccd]
+  - @module-federation/sdk@0.10.0
+  - @module-federation/managers@0.10.0
+  - @module-federation/third-party-dts-extractor@0.10.0
+  - @module-federation/error-codes@0.10.0
+
 ## 0.9.1
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @module-federation/sdk
 
+## 0.10.0
+
+### Patch Changes
+
+- 0f71cbc: fix(sdk): createLink hook error dom attr rel
+- 22fcccd: perf(dts-plugin): add fetch timeout and add log
+
 ## 0.9.1
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # @module-federation/bridge-react
 
+## 0.10.0
+
+### Minor Changes
+
+- 578aa43: fix(bridge-react): prevent destroy/render the remote component every time after the states changed
+
+### Patch Changes
+
+- Updated dependencies [0f71cbc]
+- Updated dependencies [22fcccd]
+  - @module-federation/sdk@0.10.0
+  - @module-federation/bridge-shared@0.10.0
+
 ## 0.9.1
 
 ### Patch Changes
