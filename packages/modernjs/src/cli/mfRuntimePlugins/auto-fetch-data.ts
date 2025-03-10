@@ -8,8 +8,11 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
     if (typeof window !== 'undefined') {
       return args;
     }
-    const { id, moduleInfo, remoteSnapshot, host } = args;
 
+    const { id, moduleInfo, remoteSnapshot, host } = args;
+    if (typeof id === 'string' && id.includes('data')) {
+      return args;
+    }
     if (!remoteSnapshot || !id || !('modules' in remoteSnapshot)) {
       return args;
     }

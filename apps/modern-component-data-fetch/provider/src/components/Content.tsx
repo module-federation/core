@@ -3,7 +3,7 @@ import Button from 'antd/lib/button';
 import stuff from './stuff.module.css';
 import type { Data } from './Content.data';
 
-export default (props: { _mfData: Data }): JSX.Element => {
+const Content = (props: { _mfData: Data }): JSX.Element => {
   console.log(333, props);
   return (
     <div
@@ -29,3 +29,5 @@ export default (props: { _mfData: Data }): JSX.Element => {
     </div>
   );
 };
+
+export default Content;

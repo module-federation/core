@@ -116,7 +116,7 @@ export function collectSSRAssets(options: IProps) {
   const {
     id,
     injectLink = true,
-    injectScript = true,
+    injectScript = false,
   } = typeof options === 'string' ? { id: options } : options;
   const links: React.ReactNode[] = [];
   const scripts: React.ReactNode[] = [];
@@ -131,39 +131,37 @@ export function collectSSRAssets(options: IProps) {
   }
   const { module: targetModule, publicPath, remoteEntry } = moduleAndPublicPath;
   if (injectLink) {
-    [...targetModule.assets.css.sync, ...targetModule.assets.css.async]
-      .sort()
-      .forEach((file, index) => {
-        links.push(
-          <link
-            key={`${file.split('.')[0]}_${index}`}
-            href={`${publicPath}${file}`}
-            rel="stylesheet"
-            type="text/css"
-          />,
-        );
-      });
-  }
-  if (injectScript) {
-    scripts.push(
-      <script
-        async={true}
-        key={remoteEntry.split('.')[0]}
-        src={`${publicPath}${remoteEntry}`}
-        crossOrigin="anonymous"
-      />,
-    );
-    [...targetModule.assets.js.sync].sort().forEach((file, index) => {
-      scripts.push(
-        <script
+    [...targetModule.assets.css.async].sort().forEach((file, index) => {
+      links.push(
+        <link
           key={`${file.split('.')[0]}_${index}`}
-          async={true}
-          src={`${publicPath}${file}`}
-          crossOrigin="anonymous"
+          href={`${publicPath}${file}`}
+          rel="stylesheet"
+          type="text/css"
         />,
       );
     });
   }
+  scripts.push(
+    <script
+      async={true}
+      key={remoteEntry.split('.')[0]}
+      src={`${publicPath}${remoteEntry}`}
+      crossOrigin="anonymous"
+    />,
+  );
+  // if (injectScript) {
+  //   [...targetModule.assets.js.sync].sort().forEach((file, index) => {
+  //     scripts.push(
+  //       <script
+  //         key={`${file.split('.')[0]}_${index}`}
+  //         async={true}
+  //         src={`${publicPath}${file}`}
+  //         crossOrigin="anonymous"
+  //       />,
+  //     );
+  //   });
+  // }
 
   return [...scripts, ...links];
 }
@@ -190,14 +188,16 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
       }
       const moduleId = m && m[Symbol.for('mf_module_id')];
 
-      //@ts-ignore
-      const data =
-        typeof window !== 'undefined' ? window._ssd : await fetchData(moduleId);
-
       const assets = collectSSRAssets({
         id: moduleId,
       });
-      console.log('assets: ', assets);
+      const data =
+        //@ts-ignore
+        typeof window !== 'undefined' ? window._ssd : await fetchData(moduleId);
+
+      // const data = {data:'fetch data from provider'}
+
+      // console.log('assets: ', assets);
       console.log(assets.length);
       console.log('mfData: ', data);
 
