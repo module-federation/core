@@ -15,8 +15,6 @@
 **/tsconfig.*
 **/*/stats.json
 
-# First ignore everything
-*
 
 # Then allow specific packages and their contents
 !packages/webpack-bundler-runtime/
@@ -25,17 +23,14 @@
 !packages/sdk/**/*
 !packages/enhanced/
 !packages/enhanced/**/*
+!packages/rsbuild-plugin/
+!packages/rsbuild-plugin/**/*
 
 # Allow package.json files
 !package.json
 !packages/*/package.json
 !**/package.json
 
-# Explicitly ignore specific packages
-packages/dts-plugin/
-packages/typescript/
-packages/native-*
-packages/core/
 packages/assemble-release-plan/
 packages/native-federation-typescript/
 packages/esbuild/

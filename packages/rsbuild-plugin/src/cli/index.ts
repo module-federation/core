@@ -16,7 +16,14 @@ import type { RsbuildPlugin, Rspack } from '@rsbuild/core';
 import logger from '../logger';
 
 type ModuleFederationOptions =
-  moduleFederationPlugin.ModuleFederationPluginOptions;
+  moduleFederationPlugin.ModuleFederationPluginOptions & {
+    /**
+     * When set to true, Module Federation will be applied to all formats,
+     * overriding the isMFFormat check
+     * @default false
+     */
+    forceMfOnAllFormats?: boolean;
+  };
 
 export type { ModuleFederationOptions };
 
@@ -44,13 +51,19 @@ export function isMFFormat(bundlerConfig: Rspack.Configuration) {
   );
 }
 
+/**
+ * Module Federation plugin for Rsbuild
+ * @param options Plugin options
+ */
 export const pluginModuleFederation = (
   moduleFederationOptions: ModuleFederationOptions,
 ): RsbuildPlugin => ({
   name: RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
+    const { forceMfOnAllFormats = false, ...restOptions } =
+      moduleFederationOptions;
     const sharedOptions: [string, sharePlugin.SharedConfig][] = parseOptions(
-      moduleFederationOptions.shared || [],
+      restOptions.shared || [],
       (item, key) => {
         if (typeof item !== 'string')
           throw new Error('Unexpected array in shared');
@@ -77,7 +90,7 @@ export const pluginModuleFederation = (
         throw new Error('Can not get bundlerConfigs!');
       }
       bundlerConfigs.forEach((bundlerConfig) => {
-        if (!isMFFormat(bundlerConfig)) {
+        if (!forceMfOnAllFormats && !isMFFormat(bundlerConfig)) {
           return;
         } else {
           // mf
@@ -144,14 +157,14 @@ export const pluginModuleFederation = (
 
           // `uniqueName` is required for react refresh to work
           if (!bundlerConfig.output?.uniqueName) {
-            bundlerConfig.output!.uniqueName = moduleFederationOptions.name;
+            bundlerConfig.output!.uniqueName = restOptions.name;
           }
 
           if (
             !bundlerConfig.plugins!.find((p) => p && p.name === PLUGIN_NAME)
           ) {
             bundlerConfig.plugins!.push(
-              new ModuleFederationPlugin(moduleFederationOptions),
+              new ModuleFederationPlugin(restOptions),
             );
           }
         }
@@ -161,7 +174,7 @@ export const pluginModuleFederation = (
     // dev config only works on format: 'mf'
     api.modifyRsbuildConfig((config) => {
       // Change some default configs for remote modules
-      if (moduleFederationOptions.exposes) {
+      if (restOptions.exposes) {
         config.dev ||= {};
 
         // For remote modules, Rsbuild should send the ws request to the provider's dev server.
