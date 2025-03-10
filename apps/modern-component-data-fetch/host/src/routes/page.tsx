@@ -15,9 +15,11 @@ const RemoteSSRComponent = createRemoteSSRComponent({
 });
 
 const Index = () => (
-  <div className="container-box">
-    <RemoteSSRComponent />
-  </div>
+  <>
+    <div className="container-box">
+      <RemoteSSRComponent />
+    </div>
+  </>
 );
 
 export default Index;

@@ -19,6 +19,10 @@ type IProps = {
 type ReactKey = { key?: React.Key | null };
 
 async function fetchData(id: string): Promise<unknown | undefined> {
+  if (typeof window !== 'undefined') {
+    // @ts-ignore
+    return window._ssd;
+  }
   const instance = getInstance();
   if (!instance) {
     return;
@@ -45,7 +49,7 @@ async function fetchData(id: string): Promise<unknown | undefined> {
     '------ helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__[key];',
     helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__,
   );
-  return helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__[key];
+  return helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__.get(key);
 }
 
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
@@ -127,8 +131,9 @@ export function collectSSRAssets(options: IProps) {
   }
   const { module: targetModule, publicPath, remoteEntry } = moduleAndPublicPath;
   if (injectLink) {
-    [...targetModule.assets.css.sync, ...targetModule.assets.css.async].forEach(
-      (file, index) => {
+    [...targetModule.assets.css.sync, ...targetModule.assets.css.async]
+      .sort()
+      .forEach((file, index) => {
         links.push(
           <link
             key={`${file.split('.')[0]}_${index}`}
@@ -137,8 +142,7 @@ export function collectSSRAssets(options: IProps) {
             type="text/css"
           />,
         );
-      },
-    );
+      });
   }
   if (injectScript) {
     scripts.push(
@@ -149,7 +153,7 @@ export function collectSSRAssets(options: IProps) {
         crossOrigin="anonymous"
       />,
     );
-    [...targetModule.assets.js.sync].forEach((file, index) => {
+    [...targetModule.assets.js.sync].sort().forEach((file, index) => {
       scripts.push(
         <script
           key={`${file.split('.')[0]}_${index}`}
@@ -172,9 +176,9 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
 }) {
   type ComponentType = T[E] extends (...args: any) => any
     ? Parameters<T[E]>[0] extends undefined
-      ? ReactKey & { _mf_data?: any }
-      : Parameters<T[E]>[0] & ReactKey & { _mfData?: any }
-    : ReactKey & { _mfData?: any };
+      ? ReactKey
+      : Parameters<T[E]>[0] & ReactKey
+    : ReactKey;
   const exportName = info?.export || 'default';
 
   const LazyComponent = React.lazy(async () => {
@@ -186,17 +190,29 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
       }
       const moduleId = m && m[Symbol.for('mf_module_id')];
 
-      const data = await fetchData(moduleId);
+      //@ts-ignore
+      const data =
+        typeof window !== 'undefined' ? window._ssd : await fetchData(moduleId);
 
       const assets = collectSSRAssets({
         id: moduleId,
       });
+      console.log('assets: ', assets);
+      console.log(assets.length);
+      console.log('mfData: ', data);
 
       const Com = m[exportName] as React.FC<ComponentType>;
       if (exportName in m && typeof Com === 'function') {
         return {
           default: (props: Omit<ComponentType, 'key'>) => (
             <>
+              <script
+                dangerouslySetInnerHTML={{
+                  __html: String.raw`
+      window._ssd=${JSON.stringify(data)}
+   `,
+                }}
+              ></script>
               {assets}
               <Com {...props} _mfData={data} />
             </>

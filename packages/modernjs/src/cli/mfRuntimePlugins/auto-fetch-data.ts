@@ -5,6 +5,9 @@ import { getDataFetchInfo } from '../../runtime/utils';
 const autoFetchData: () => FederationRuntimePlugin = () => ({
   name: 'auto-fetch-data-plugin',
   afterLoadSnapshot(args) {
+    if (typeof window !== 'undefined') {
+      return args;
+    }
     const { id, moduleInfo, remoteSnapshot, host } = args;
 
     if (!remoteSnapshot || !id || !('modules' in remoteSnapshot)) {
@@ -39,23 +42,26 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
       return args;
     }
 
-    helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__[key] = host
-      .loadRemote(dataFetchId)
-      .then((m) => {
-        if (
-          m &&
-          typeof m === 'object' &&
-          'fetchData' in m &&
-          typeof m.fetchData === 'function'
-        ) {
-          console.log('======= auto fetch plugin fetchData', m.fetchData);
-          return m.fetchData();
-        }
-      })
-      .catch((e) => {
-        console.log('======= auto fetch plugin fetchData error', e);
-        return null;
-      });
+    helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__.set(
+      key,
+      host
+        .loadRemote(dataFetchId)
+        .then((m) => {
+          if (
+            m &&
+            typeof m === 'object' &&
+            'fetchData' in m &&
+            typeof m.fetchData === 'function'
+          ) {
+            console.log('======= auto fetch plugin fetchData', m.fetchData);
+            return m.fetchData();
+          }
+        })
+        .catch((e) => {
+          console.log('======= auto fetch plugin fetchData error', e);
+          return null;
+        }),
+    );
 
     return args;
   },
