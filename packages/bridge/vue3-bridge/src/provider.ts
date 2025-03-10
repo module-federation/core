@@ -51,26 +51,31 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
         });
 
         if (bridgeOptions?.router) {
-          const history = info.memoryRoute
-            ? VueRouter.createMemoryHistory(info.basename)
-            : VueRouter.createWebHistory(info.basename);
+          // const history = info.memoryRoute
+          //   ? VueRouter.createMemoryHistory(info.basename)
+          //   : VueRouter.createWebHistory(info.basename);
 
-          const router = VueRouter.createRouter({
-            ...bridgeOptions.router.options,
-            history,
-            routes: bridgeOptions.router.getRoutes(),
-          });
+          console.log(
+            'vue3-bridge==>bridgeOptions.router',
+            bridgeOptions.router,
+          );
 
-          LoggerInstance.debug(`createBridgeComponent render router info>>>`, {
-            moduleName,
-            router,
-          });
-          // memory route Initializes the route
-          if (memoryRoute) {
-            await router.push(memoryRoute.entryPath);
-          }
+          // const router = VueRouter.createRouter({
+          //   ...bridgeOptions.router.options,
+          //   history,
+          //   routes: bridgeOptions.router.getRoutes(),
+          // });
 
-          app.use(router);
+          // LoggerInstance.debug(`createBridgeComponent render router info>>>`, {
+          //   moduleName,
+          //   router,
+          // });
+          // // memory route Initializes the route
+          // if (memoryRoute) {
+          //   await router.push(memoryRoute.entryPath);
+          // }
+
+          app.use(bridgeOptions.router);
         }
 
         app.mount(dom);
