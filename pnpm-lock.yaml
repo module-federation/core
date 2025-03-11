@@ -2037,6 +2037,28 @@ importers:
         specifier: 1.2.2
         version: 1.2.2(@types/node@20.12.14)(@vitest/ui@1.6.0)(less@4.2.2)(stylus@0.64.0)
 
+  packages/cli:
+    dependencies:
+      '@modern-js/node-bundle-require':
+        specifier: 2.65.1
+        version: 2.65.1
+      '@module-federation/dts-plugin':
+        specifier: workspace:*
+        version: link:../dts-plugin
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+      chalk:
+        specifier: 3.0.0
+        version: 3.0.0
+      commander:
+        specifier: 11.1.0
+        version: 11.1.0
+    devDependencies:
+      '@types/node':
+        specifier: ~16.11.7
+        version: 16.11.68
+
   packages/core:
     dependencies:
       webpack:
@@ -3113,7 +3135,7 @@ packages:
       '@babel/traverse': 7.25.7
       '@babel/types': 7.25.7
       convert-source-map: 2.0.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -14999,7 +15021,7 @@ packages:
       nx: 20.1.1(@swc-node/register@1.10.9)(@swc/core@1.7.26)
       semver: 7.6.3
       tmp: 0.2.3
-      tslib: 2.6.3
+      tslib: 2.8.1
       yargs-parser: 21.1.1
     dev: false
 
@@ -15015,7 +15037,7 @@ packages:
       nx: 20.1.4(@swc-node/register@1.10.9)(@swc/core@1.7.26)
       semver: 7.6.3
       tmp: 0.2.3
-      tslib: 2.6.3
+      tslib: 2.8.1
       yargs-parser: 21.1.1
     dev: false
 
@@ -15111,7 +15133,7 @@ packages:
       '@nx/js': 20.1.1(@swc-node/register@1.10.9)(@swc/core@1.7.26)(@types/node@20.12.14)(nx@20.1.4)(typescript@5.4.5)(verdaccio@5.29.2)
       eslint: 8.57.1
       semver: 7.6.3
-      tslib: 2.6.3
+      tslib: 2.8.1
       typescript: 5.4.5
     transitivePeerDependencies:
       - '@babel/traverse'
@@ -15254,7 +15276,7 @@ packages:
       source-map-support: 0.5.19
       ts-node: 10.9.1(@swc/core@1.7.26)(@types/node@20.12.14)(typescript@5.4.5)
       tsconfig-paths: 4.2.0
-      tslib: 2.6.3
+      tslib: 2.8.1
       verdaccio: 5.29.2(encoding@0.1.13)(typanion@3.14.0)
     transitivePeerDependencies:
       - '@babel/traverse'
@@ -15305,7 +15327,7 @@ packages:
       source-map-support: 0.5.19
       ts-node: 10.9.1(@swc/core@1.7.26)(@types/node@20.12.14)(typescript@5.5.2)
       tsconfig-paths: 4.2.0
-      tslib: 2.6.3
+      tslib: 2.8.1
       verdaccio: 5.29.2(encoding@0.1.13)(typanion@3.14.0)
     transitivePeerDependencies:
       - '@babel/traverse'
@@ -15903,7 +15925,7 @@ packages:
       detect-port: 1.6.1
       http-server: 14.1.1
       picocolors: 1.1.1
-      tslib: 2.6.3
+      tslib: 2.8.1
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -16113,7 +16135,7 @@ packages:
       chalk: 4.1.2
       enquirer: 2.3.6
       nx: 20.1.4(@swc-node/register@1.10.9)(@swc/core@1.7.26)
-      tslib: 2.6.3
+      tslib: 2.8.1
       yargs-parser: 21.1.1
     transitivePeerDependencies:
       - '@swc-node/register'
@@ -18693,7 +18715,7 @@ packages:
     resolution: {integrity: sha512-FwTm11DP7KxQKT2mWLvwe80O5KpikgMSlqnw9CQhBaIHSYEypdJU9ZotbNsXsHdML3xcqg+S9ae3bpovC7KlwQ==}
     dependencies:
       '@rspack/core': 0.7.5(@swc/helpers@0.5.3)
-      caniuse-lite: 1.0.30001667
+      caniuse-lite: 1.0.30001700
       html-webpack-plugin: /html-rspack-plugin@5.7.2(@rspack/core@0.7.5)
       postcss: 8.4.47
     optionalDependencies:
@@ -20297,7 +20319,7 @@ packages:
     dependencies:
       '@semantic-release/error': 3.0.0
       aggregate-error: 3.1.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       execa: 5.1.1
       lodash: 4.17.21
       parse-json: 5.2.0
@@ -20314,13 +20336,40 @@ packages:
     dependencies:
       '@semantic-release/error': 3.0.0
       aggregate-error: 3.1.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       dir-glob: 3.0.1
       execa: 5.1.1
       lodash: 4.17.21
       micromatch: 4.0.8
       p-reduce: 2.1.0
       semantic-release: 24.2.3(typescript@5.5.2)
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /@semantic-release/github@11.0.0(semantic-release@24.2.3):
+    resolution: {integrity: sha512-Uon6G6gJD8U1JNvPm7X0j46yxNRJ8Ui6SgK4Zw5Ktu8RgjEft3BGn+l/RX1TTzhhO3/uUcKuqM+/9/ETFxWS/Q==}
+    engines: {node: '>=20.8.1'}
+    peerDependencies:
+      semantic-release: '>=24.1.0'
+    dependencies:
+      '@octokit/core': 6.1.2
+      '@octokit/plugin-paginate-rest': 11.3.5(@octokit/core@6.1.2)
+      '@octokit/plugin-retry': 7.1.2(@octokit/core@6.1.2)
+      '@octokit/plugin-throttling': 9.3.1(@octokit/core@6.1.2)
+      '@semantic-release/error': 4.0.0
+      aggregate-error: 5.0.0
+      debug: 4.3.7(supports-color@8.1.1)
+      dir-glob: 3.0.1
+      globby: 14.0.2
+      http-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.5
+      issue-parser: 7.0.1
+      lodash-es: 4.17.21
+      mime: 4.0.4
+      p-filter: 4.1.0
+      semantic-release: 24.2.3(typescript@5.5.2)
+      url-join: 5.0.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -22265,7 +22314,7 @@ packages:
       '@swc-node/sourcemap-support': 0.5.1
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       colorette: 2.0.20
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       oxc-resolver: 1.12.0
       pirates: 4.0.6
       tslib: 2.6.3
@@ -22278,7 +22327,7 @@ packages:
     resolution: {integrity: sha512-JxIvIo/Hrpv0JCHSyRpetAdQ6lB27oFYhv0PKCNf1g2gUXOjpeR1exrXccRxLMuAV5WAmGFBwRnNOJqN38+qtg==}
     dependencies:
       source-map-support: 0.5.21
-      tslib: 2.6.3
+      tslib: 2.8.1
 
   /@swc/cli@0.5.0(@swc/core@1.7.26):
     resolution: {integrity: sha512-eFsrNt85SbHTeX6svpBNcA5DQLP/wrSyCs3KVZjbuEHWD7JGpajZOIwH74lVhyrmrXOcGxgbnxXEbDIfRlLcSw==}
@@ -22546,7 +22595,7 @@ packages:
   /@swc/helpers@0.5.3:
     resolution: {integrity: sha512-FaruWX6KdudYloq1AHD/4nU+UsMTdNE8CKyrseXWEcgjDAbvkwJg2QGPAnfIJLIWsjZOSPLOAykK6fuYp4vp4A==}
     dependencies:
-      tslib: 2.6.3
+      tslib: 2.8.1
     dev: true
 
   /@swc/helpers@0.5.5:
@@ -23738,7 +23787,7 @@ packages:
       '@typescript-eslint/types': 7.18.0
       '@typescript-eslint/typescript-estree': 7.18.0(typescript@5.5.2)
       '@typescript-eslint/visitor-keys': 7.18.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       eslint: 8.57.1
       typescript: 5.5.2
     transitivePeerDependencies:
@@ -24344,7 +24393,7 @@ packages:
     peerDependencies:
       vitest: 1.6.0
     dependencies:
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-instrument: 6.0.3
       istanbul-lib-report: 3.0.1
@@ -24365,7 +24414,7 @@ packages:
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-report: 3.0.1
       istanbul-lib-source-maps: 5.0.6
@@ -26121,7 +26170,7 @@ packages:
       postcss: ^8.1.0
     dependencies:
       browserslist: 4.24.0
-      caniuse-lite: 1.0.30001668
+      caniuse-lite: 1.0.30001700
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.1.1
@@ -27739,6 +27788,11 @@ packages:
     engines: {node: '>=14'}
     dev: true
 
+  /commander@11.1.0:
+    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
+    engines: {node: '>=16'}
+    dev: false
+
   /commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
 
@@ -29292,7 +29346,6 @@ packages:
     dependencies:
       ms: 2.1.3
       supports-color: 8.1.1
-    dev: true
 
   /debug@4.3.7(supports-color@9.3.1):
     resolution: {integrity: sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==}
@@ -29305,6 +29358,7 @@ packages:
     dependencies:
       ms: 2.1.3
       supports-color: 9.3.1
+    dev: true
 
   /debug@4.4.0(supports-color@5.5.0):
     resolution: {integrity: sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==}
@@ -35894,7 +35948,7 @@ packages:
     dependencies:
       copy-anything: 2.0.6
       parse-node-version: 1.0.1
-      tslib: 2.6.3
+      tslib: 2.8.1
     optionalDependencies:
       errno: 0.1.8
       graceful-fs: 4.2.11
@@ -44033,7 +44087,7 @@ packages:
       fs-extra: 10.1.0
       rollup: 4.24.0
       semver: 7.6.3
-      tslib: 2.6.3
+      tslib: 2.8.1
       typescript: 5.5.2
     dev: true
 
@@ -46335,6 +46389,7 @@ packages:
   /supports-color@9.3.1:
     resolution: {integrity: sha512-knBY82pjmnIzK3NifMo3RxEIRD9E0kIzV4BKcyTZ9+9kWgLMxd4PrsTSMoFQUabgRBbF8KOLRDCyKgNV+iK44Q==}
     engines: {node: '>=12'}
+    dev: true
 
   /supports-hyperlinks@2.3.0:
     resolution: {integrity: sha512-RpsAZlpWcDwOPQA22aCH4J0t7L8JmAvsCxfOSEwm7cQs3LshN36QaTkwd70DnBOXDWGssw2eUoc8CaRWT0XunA==}
@@ -46426,7 +46481,7 @@ packages:
     engines: {node: ^14.18.0 || >=16.0.0}
     dependencies:
       '@pkgr/core': 0.1.1
-      tslib: 2.6.3
+      tslib: 2.8.1
     dev: true
 
   /table-layout@1.0.2:
@@ -47600,7 +47655,7 @@ packages:
       bundle-require: 4.2.1(esbuild@0.18.20)
       cac: 6.7.14
       chokidar: 3.6.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       esbuild: 0.18.20
       execa: 5.1.1
       globby: 11.1.0
@@ -47642,7 +47697,7 @@ packages:
       cac: 6.7.14
       chokidar: 3.6.0
       consola: 3.2.3
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       esbuild: 0.23.0
       execa: 5.1.1
       joycon: 3.1.1
@@ -48456,7 +48511,7 @@ packages:
       compression: 1.7.4
       cookies: 0.9.1
       cors: 2.8.5
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       envinfo: 7.11.0
       express: 4.18.2
       express-rate-limit: 5.5.1
@@ -48624,7 +48679,7 @@ packages:
       '@volar/typescript': 2.4.5
       '@vue/language-core': 2.1.6(typescript@5.5.2)
       compare-versions: 6.1.1
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       kolorist: 1.8.0
       local-pkg: 0.5.0
       magic-string: 0.30.17
@@ -48671,7 +48726,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       globrex: 0.1.2
       tsconfck: 2.1.2(typescript@5.5.2)
       vite: 5.4.12(@types/node@18.16.9)(less@4.2.2)(stylus@0.64.0)
@@ -48850,7 +48905,7 @@ packages:
       acorn-walk: 8.3.4
       cac: 6.7.14
       chai: 4.5.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       execa: 8.0.1
       local-pkg: 0.5.0
       magic-string: 0.30.11
@@ -48908,7 +48963,7 @@ packages:
       '@vitest/utils': 1.6.0
       acorn-walk: 8.3.4
       chai: 4.5.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       execa: 8.0.1
       local-pkg: 0.5.0
       magic-string: 0.30.11
