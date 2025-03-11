@@ -1,0 +1,16 @@
+import logger from './logger';
+
+export function prepareCli(): void {
+  // Print a blank line to keep the greet log nice.
+  // Some package managers automatically output a blank line, some do not.
+  const { npm_execpath } = process.env;
+  if (
+    !npm_execpath ||
+    npm_execpath.includes('npx-cli.js') ||
+    npm_execpath.includes('.bun')
+  ) {
+    console.log();
+  }
+
+  logger.info(`  ${`Module Federation v${__VERSION__}`}\n`);
+}

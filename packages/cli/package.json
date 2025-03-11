@@ -1,0 +1,59 @@
+{
+  "name": "@module-federation/cli",
+  "version": "0.10.0",
+  "description": "Module Federation CLI",
+  "homepage": "https://module-federation.io",
+  "bugs": {
+    "url": "https://github.com/module-federation/core/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core",
+    "directory": "packages/cli"
+  },
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.cjs.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.cjs.d.ts",
+      "import": "./dist/utils.esm.js",
+      "require": "./dist/utils.cjs.js"
+    }
+  },
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ],
+      "utils": [
+        "./dist/utils.cjs.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/dts-plugin": "workspace:*",
+    "commander": "11.1.0",
+    "chalk": "3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.11.7"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
+  }
+}

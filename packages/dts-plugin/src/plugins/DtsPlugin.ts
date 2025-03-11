@@ -1,7 +1,13 @@
 import { DevPlugin } from './DevPlugin';
 import { normalizeOptions } from '@module-federation/sdk';
-import { ConsumeTypesPlugin } from './ConsumeTypesPlugin';
-import { GenerateTypesPlugin } from './GenerateTypesPlugin';
+import {
+  ConsumeTypesPlugin,
+  DEFAULT_CONSUME_TYPES,
+} from './ConsumeTypesPlugin';
+import {
+  GenerateTypesPlugin,
+  DEFAULT_GENERATE_TYPES,
+} from './GenerateTypesPlugin';
 import { isTSProject } from '../core';
 
 import { type moduleFederationPlugin } from '@module-federation/sdk';
@@ -16,20 +22,12 @@ export class DtsPlugin implements WebpackPluginInstance {
   apply(compiler: Compiler) {
     const { options } = this;
 
-    const defaultGenerateTypes = {
-      generateAPITypes: true,
-      compileInChildProcess: true,
-      abortOnError: false,
-      extractThirdParty: false,
-      extractRemoteTypes: false,
-    };
-    const defaultConsumeTypes = { abortOnError: false, consumeAPITypes: true };
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
         isTSProject(options.dts, compiler.context),
         {
-          generateTypes: defaultGenerateTypes,
-          consumeTypes: defaultConsumeTypes,
+          generateTypes: DEFAULT_GENERATE_TYPES,
+          consumeTypes: DEFAULT_CONSUME_TYPES,
           extraOptions: {},
           displayErrorInTerminal: true,
         },
@@ -67,7 +65,6 @@ export class DtsPlugin implements WebpackPluginInstance {
     new GenerateTypesPlugin(
       options,
       normalizedDtsOptions,
-      defaultGenerateTypes,
       fetchRemoteTypeUrlsPromise,
       generateTypesPromiseResolve,
     ).apply(compiler);
@@ -75,7 +72,6 @@ export class DtsPlugin implements WebpackPluginInstance {
     new ConsumeTypesPlugin(
       options,
       normalizedDtsOptions,
-      defaultConsumeTypes,
       fetchRemoteTypeUrlsResolve,
     ).apply(compiler);
   }

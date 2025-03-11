@@ -2040,6 +2040,25 @@ importers:
         specifier: 1.2.2
         version: 1.2.2(@types/node@20.12.14)(@vitest/ui@1.6.0)(less@4.2.2)(stylus@0.64.0)
 
+  packages/cli:
+    dependencies:
+      '@module-federation/dts-plugin':
+        specifier: workspace:*
+        version: link:../dts-plugin
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+      chalk:
+        specifier: 3.0.0
+        version: 3.0.0
+      commander:
+        specifier: 11.1.0
+        version: 11.1.0
+    devDependencies:
+      '@types/node':
+        specifier: ~16.11.7
+        version: 16.11.68
+
   packages/core:
     dependencies:
       webpack:
@@ -25881,6 +25900,11 @@ packages:
     engines: {node: '>=14'}
     dev: true
 
+  /commander@11.1.0:
+    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
+    engines: {node: '>=16'}
+    dev: false
+
   /commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
 
@@ -46705,10 +46729,10 @@ packages:
       '@volar/typescript': 2.4.5
       '@vue/language-core': 2.1.6(typescript@5.5.2)
       compare-versions: 6.1.1
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.4.0(supports-color@8.1.1)
       kolorist: 1.8.0
       local-pkg: 0.5.0
-      magic-string: 0.30.12
+      magic-string: 0.30.17
       typescript: 5.5.2
       vite: 5.2.14(@types/node@16.11.68)(less@4.2.2)(stylus@0.64.0)
     transitivePeerDependencies:
