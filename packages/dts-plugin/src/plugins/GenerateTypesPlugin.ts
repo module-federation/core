@@ -16,10 +16,97 @@ import {
 
 import type { Compilation, Compiler, WebpackPluginInstance } from 'webpack';
 
+export const DEFAULT_GENERATE_TYPES = {
+  generateAPITypes: true,
+  compileInChildProcess: true,
+  abortOnError: false,
+  extractThirdParty: false,
+  extractRemoteTypes: false,
+};
+
+export const normalizeGenerateTypesOptions = ({
+  context,
+  outputDir,
+  dtsOptions,
+  pluginOptions,
+}: {
+  context?: string;
+  outputDir?: string;
+  dtsOptions: moduleFederationPlugin.PluginDtsOptions;
+  pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
+}) => {
+  const normalizedGenerateTypes =
+    normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
+      true,
+      DEFAULT_GENERATE_TYPES,
+      'mfOptions.dts.generateTypes',
+    )(dtsOptions.generateTypes);
+
+  if (!normalizedGenerateTypes) {
+    return;
+  }
+
+  const normalizedConsumeTypes =
+    normalizeOptions<moduleFederationPlugin.DtsHostOptions>(
+      true,
+      {},
+      'mfOptions.dts.consumeTypes',
+    )(dtsOptions.consumeTypes);
+
+  const finalOptions: DTSManagerOptions = {
+    remote: {
+      implementation: dtsOptions.implementation,
+      context,
+      outputDir,
+      moduleFederationConfig: pluginOptions,
+      ...normalizedGenerateTypes,
+    },
+    host:
+      normalizedConsumeTypes === false
+        ? undefined
+        : {
+            context,
+            moduleFederationConfig: pluginOptions,
+            ...normalizedGenerateTypes,
+          },
+    extraOptions: dtsOptions.extraOptions || {},
+    displayErrorInTerminal: dtsOptions.displayErrorInTerminal,
+  };
+
+  if (dtsOptions.tsConfigPath && !finalOptions.remote.tsConfigPath) {
+    finalOptions.remote.tsConfigPath = dtsOptions.tsConfigPath;
+  }
+
+  validateOptions(finalOptions.remote);
+
+  return finalOptions;
+};
+
+export const generateTypesAPI = async ({
+  dtsManagerOptions,
+}: {
+  dtsManagerOptions: DTSManagerOptions;
+}) => {
+  const isProd = !isDev();
+  const getGenerateTypesFn = () => {
+    let fn: typeof generateTypes | typeof generateTypesInChildProcess =
+      generateTypes;
+    let res: ReturnType<typeof generateTypes>;
+    if (dtsManagerOptions.remote.compileInChildProcess) {
+      fn = generateTypesInChildProcess;
+    }
+    if (isProd) {
+      res = fn(dtsManagerOptions);
+      return () => res;
+    }
+    return fn;
+  };
+  return getGenerateTypesFn();
+};
+
 export class GenerateTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
   dtsOptions: moduleFederationPlugin.PluginDtsOptions;
-  defaultOptions: moduleFederationPlugin.DtsRemoteOptions;
   fetchRemoteTypeUrlsPromise: Promise<
     moduleFederationPlugin.DtsHostOptions['remoteTypeUrls'] | undefined
   >;
@@ -28,7 +115,6 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
   constructor(
     pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
     dtsOptions: moduleFederationPlugin.PluginDtsOptions,
-    defaultOptions: moduleFederationPlugin.DtsRemoteOptions,
     fetchRemoteTypeUrlsPromise: Promise<
       moduleFederationPlugin.DtsHostOptions['remoteTypeUrls'] | undefined
     >,
@@ -36,85 +122,36 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
   ) {
     this.pluginOptions = pluginOptions;
     this.dtsOptions = dtsOptions;
-    this.defaultOptions = defaultOptions;
     this.fetchRemoteTypeUrlsPromise = fetchRemoteTypeUrlsPromise;
     this.callback = callback;
   }
 
   apply(compiler: Compiler) {
-    const {
+    const { dtsOptions, pluginOptions, fetchRemoteTypeUrlsPromise, callback } =
+      this;
+
+    const outputDir = getCompilerOutputDir(compiler);
+    const context = compiler.context;
+
+    const dtsManagerOptions = normalizeGenerateTypesOptions({
+      context,
+      outputDir,
       dtsOptions,
-      defaultOptions,
       pluginOptions,
-      fetchRemoteTypeUrlsPromise,
-      callback,
-    } = this;
+    });
 
-    const normalizedGenerateTypes =
-      normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
-        true,
-        defaultOptions,
-        'mfOptions.dts.generateTypes',
-      )(dtsOptions.generateTypes);
-
-    if (!normalizedGenerateTypes) {
+    if (!dtsManagerOptions) {
       callback();
       return;
     }
 
-    const normalizedConsumeTypes =
-      normalizeOptions<moduleFederationPlugin.DtsHostOptions>(
-        true,
-        defaultOptions,
-        'mfOptions.dts.consumeTypes',
-      )(dtsOptions.consumeTypes);
-
-    const finalOptions: DTSManagerOptions = {
-      remote: {
-        implementation: dtsOptions.implementation,
-        context: compiler.context,
-        outputDir: getCompilerOutputDir(compiler),
-        moduleFederationConfig: pluginOptions,
-        ...normalizedGenerateTypes,
-      },
-      host:
-        normalizedConsumeTypes === false
-          ? undefined
-          : {
-              context: compiler.context,
-              moduleFederationConfig: pluginOptions,
-              ...normalizedGenerateTypes,
-            },
-      extraOptions: dtsOptions.extraOptions || {},
-      displayErrorInTerminal: dtsOptions.displayErrorInTerminal,
-    };
-
-    if (dtsOptions.tsConfigPath && !finalOptions.remote.tsConfigPath) {
-      finalOptions.remote.tsConfigPath = dtsOptions.tsConfigPath;
-    }
-
-    validateOptions(finalOptions.remote);
     const isProd = !isDev();
-    const getGenerateTypesFn = () => {
-      let fn: typeof generateTypes | typeof generateTypesInChildProcess =
-        generateTypes;
-      let res: ReturnType<typeof generateTypes>;
-      if (finalOptions.remote.compileInChildProcess) {
-        fn = generateTypesInChildProcess;
-      }
-      if (isProd) {
-        res = fn(finalOptions);
-        return () => res;
-      }
-      return fn;
-    };
-    const generateTypesFn = getGenerateTypesFn();
 
     const emitTypesFiles = async (compilation: Compilation) => {
       // Dev types will be generated by DevPlugin, the archive filename usually is dist/.dev-server.zip
       try {
         const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
-          retrieveTypesAssetsInfo(finalOptions.remote);
+          retrieveTypesAssetsInfo(dtsManagerOptions.remote);
 
         if (isProd && zipName && compilation.getAsset(zipName)) {
           callback();
@@ -122,9 +159,9 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         }
 
         logger.debug('start generating types...');
-        await generateTypesFn(finalOptions);
+        await generateTypesAPI({ dtsManagerOptions });
         logger.debug('generate types success!');
-        const config = finalOptions.remote.moduleFederationConfig;
+        const config = dtsManagerOptions.remote.moduleFederationConfig;
         let zipPrefix = '';
         if (typeof config.manifest === 'object' && config.manifest.filePath) {
           zipPrefix = config.manifest.filePath;
@@ -165,7 +202,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             return err.code == 'EEXIST';
           };
           if (zipTypesPath) {
-            const zipContent = fs.readFileSync(zipTypesPath);
+            const zipContent = fs.readFileSync(zipTypesPath, 'utf-8');
             const zipOutputPath = path.join(
               compiler.outputPath,
               zipPrefix,
@@ -196,7 +233,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
           }
 
           if (apiTypesPath) {
-            const apiContent = fs.readFileSync(apiTypesPath);
+            const apiContent = fs.readFileSync(apiTypesPath, 'utf-8');
             const apiOutputPath = path.join(
               compiler.outputPath,
               zipPrefix,
@@ -230,7 +267,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         }
       } catch (err) {
         callback();
-        if (finalOptions.displayErrorInTerminal) {
+        if (dtsManagerOptions.displayErrorInTerminal) {
           console.error('Error in mf:generateTypes processAssets hook:', err);
         }
         logger.debug('generate types fail!');

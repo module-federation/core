@@ -26,7 +26,8 @@
       "@module-federation/error-codes",
       "@module-federation/inject-external-runtime-core-plugin",
       "@module-federation/runtime-core",
-      "create-module-federation"
+      "create-module-federation",
+      "@module-federation/cli"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],
