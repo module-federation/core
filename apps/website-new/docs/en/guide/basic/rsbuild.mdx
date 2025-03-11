@@ -38,6 +38,8 @@ export default defineConfig({
         remote1: 'remote1@http://localhost:2001/mf-manifest.json',
       },
       shared: ['react', 'react-dom'],
+      // Optional: Force Module Federation to be applied to all formats
+      // forceMfOnAllFormats: true,
     }),
   ],
 });
@@ -80,6 +82,14 @@ export default defineConfig({
   ],
 });
 ```
+
+### Configuration Options
+
+The `pluginModuleFederation` accepts all standard Module Federation plugin options, plus these additional options:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `forceMfOnAllFormats` | `boolean` | `false` | When set to `true`, Module Federation will be applied to all formats, overriding the internal format check. This allows applying Module Federation even to library formats like UMD or CommonJS. |
 
 ### Note
 If you need to use the Module Federation runtime capabilities, please install [@module-federation/enhanced](/en/guide/basic/runtime.html)
