@@ -155,7 +155,7 @@ async function getAppTemplateName(
   return `${roleType}-${framework}-ts`;
 }
 
-async function getLibTemplateName({ template }: Argv) {
+async function getLibTemplateName({ template, role }: Argv) {
   if (template) {
     return `${template}-ts`;
   }
@@ -184,7 +184,7 @@ async function getLibTemplateName({ template }: Argv) {
   );
 
   // not support consumer yet, only support consume by runtime api
-  const roleType: RoleType = RoleType.provider;
+  const roleType: RoleType = role || RoleType.provider;
 
   if (!tools || !Object.keys(tools).length) {
     return `${roleType}-${templateName}-ts`;
