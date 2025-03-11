@@ -1,21 +1,25 @@
 import {Tabs, Tab} from '@theme'
 
-# Hoisted Runtime
+# Async Startup in Module Federation
 
 > Sep 5, 2024
 
-We’re excited to announce a new experimental feature: `experiments.federationRuntime = 'hoisted'`.
+We're excited to announce a new experimental feature: `experiments.asyncStartup = true`.
 
-This release introduces **runtime hoisting**, unlocking several powerful capabilities for Module Federation.
-
+This release introduces **asynchronous startup**, enabling automatic async initialization for Module Federation entrypoints.
 
 ## 🚀 Key Features
 
-### No More Dynamic Imports!
+### Automatic Async Initialization
 
-With runtime hoisting enabled, **dynamic imports (`import()`) at the top of your app are no longer required**. All entrypoints will now initialize asynchronously by default. This means:
-- No more eager errors.
-- No need for "async boundaries" in userland code.
+With async startup enabled, **dynamic imports (`import()`) at the top of your app are no longer required**. All entrypoints will now initialize asynchronously by default. This means:
+- No more eager errors
+- No need for "async boundaries" in userland code
+- Automatic handling of async initialization
+
+:::note
+This only affects entry point initialization. You can still use dynamic imports normally throughout your application, including for importing remote modules. This feature doesn't change or limit how dynamic imports work in your code.
+:::
 
 :::tip
 **Note:** Asynchronous entrypoints will always export a promise. This is particularly relevant if you're manually requiring a bundled entrypoint or exposing something like a UMD library to the global scope.
@@ -23,7 +27,7 @@ With runtime hoisting enabled, **dynamic imports (`import()`) at the top of your
 
 #### Before & After Comparison
 
-See how the new hoisting behavior simplifies entrypoints. Click on the "Before" and "After" tabs to see the difference.
+See how the new async behavior simplifies entrypoints. Click on the "Before" and "After" tabs to see the difference.
 
 <Tabs>
   <Tab label="Before">
@@ -61,35 +65,13 @@ See how the new hoisting behavior simplifies entrypoints. Click on the "Before" 
   </Tab>
 </Tabs>
 
+### Important Notes
 
-### Support for `runtimeChunk: single`
+When using async startup:
+- All entrypoints initialize asynchronously by default
+- Exports from entrypoints will be promises that resolve to the actual exports
+- No manual async boundaries or dynamic imports needed
+- Eager consumption errors are automatically prevented through async initialization
 
-In the past, using **single runtime chunks** could lead to problems with Module Federation, as federation code and remote modules were bundled in the entrypoint instead of the runtime.
-
-With **hoisted runtime**, all necessary modules are moved into the runtime chunks, eliminating these issues and making Federation work smoothly with single runtime chunks. This also resolves long-standing issues from Module Federation V1.
-
-
-### Performance Improvements
-
-While we plan to focus on further **bundle size optimization** in future updates, this is a solid first step.
-
-- **Duplicate code removal**: Hoisting removes redundant code in entrypoints that resulted from injecting the runtime into the entrypoints instead of the runtime chunk.
-- **Size reduction**: For projects using `runtimeChunk: single`, you can expect a reduction of approximately **100 KB** per entrypoint.
-
-
-### Eager Runtime Access
-
-A more **low-level enhancement** is the immediate initialization of the federation runtime as a **Webpack `RuntimeModule`**.
-
-In the past, federation would start with the user’s entrypoint, leading to issues with chunk loading. Now, federation begins with Webpack's runtime, preventing "chicken and egg" issues with **split chunks**.
-
-
-### Improved Split Chunks Support
-
-Previously, using `splitChunks: all` could lead to issues with Module Federation. With the new hoisting feature, **split chunk support** is significantly improved, and such issues should no longer arise.
-
-
-### Preparing for Shareable Runtime
-
-While this feature isn’t included in the current release, hoisting lays the groundwork for a future enhancement: **shareable federation runtimes**. This will allow you to rely on the host’s copy of `module-federation/runtime`, reducing the payload size of remote entry files.
+This feature simplifies Module Federation setup by removing the need for manual async handling while ensuring proper initialization of federated modules.
 

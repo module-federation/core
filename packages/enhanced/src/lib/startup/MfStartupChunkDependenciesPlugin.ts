@@ -12,7 +12,6 @@ import ContainerEntryModule from '../container/ContainerEntryModule';
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-
 const StartupEntrypointRuntimeModule = require(
   normalizeWebpackPath('webpack/lib/runtime/StartupEntrypointRuntimeModule'),
 ) as typeof import('webpack/lib/runtime/StartupEntrypointRuntimeModule');
@@ -43,13 +42,11 @@ class StartupChunkDependenciesPlugin {
     compiler.hooks.thisCompilation.tap(
       'MfStartupChunkDependenciesPlugin',
       (compilation) => {
-        const isEnabledForChunk = (chunk: Chunk) =>
-          this.isEnabledForChunk(chunk, compilation);
-
+        // Add additional runtime requirements at the tree level.
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'StartupChunkDependenciesPlugin',
           (chunk, set, { chunkGraph }) => {
-            if (!isEnabledForChunk(chunk)) return;
+            if (!this.isEnabledForChunk(chunk, compilation)) return;
             if (chunk.hasRuntime()) {
               set.add(RuntimeGlobals.startupEntrypoint);
               set.add(RuntimeGlobals.ensureChunk);
@@ -58,21 +55,23 @@ class StartupChunkDependenciesPlugin {
           },
         );
 
+        // Add additional runtime requirements at the chunk level if there are entry modules.
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'MfStartupChunkDependenciesPlugin',
           (chunk, set, { chunkGraph }) => {
-            if (!isEnabledForChunk(chunk)) return;
+            if (!this.isEnabledForChunk(chunk, compilation)) return;
             if (chunkGraph.getNumberOfEntryModules(chunk) === 0) return;
             set.add(federationStartup);
           },
         );
 
+        // When the startupEntrypoint requirement is present, add extra keys and a runtime module.
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.startupEntrypoint)
           .tap(
             'StartupChunkDependenciesPlugin',
             (chunk, set, { chunkGraph }) => {
-              if (!isEnabledForChunk(chunk)) return;
+              if (!this.isEnabledForChunk(chunk, compilation)) return;
               set.add(RuntimeGlobals.require);
               set.add(RuntimeGlobals.ensureChunk);
               set.add(RuntimeGlobals.ensureChunkIncludeEntries);
@@ -83,6 +82,7 @@ class StartupChunkDependenciesPlugin {
             },
           );
 
+        // Replace the generated startup with a custom version if entry modules exist.
         const { renderStartup } =
           compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
             compilation,
@@ -93,7 +93,11 @@ class StartupChunkDependenciesPlugin {
           (startupSource, lastInlinedModule, renderContext) => {
             const { chunk, chunkGraph, runtimeTemplate } = renderContext;
 
-            if (!isEnabledForChunk(chunk)) {
+            if (!this.isEnabledForChunk(chunk, compilation)) {
+              return startupSource;
+            }
+
+            if (chunkGraph.getNumberOfEntryModules(chunk) === 0) {
               return startupSource;
             }
 
