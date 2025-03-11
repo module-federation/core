@@ -1,5 +1,28 @@
 # @module-federation/sdk
 
+## 0.10.0
+
+### Patch Changes
+
+- 0f71cbc: fix(sdk): createLink hook error dom attr rel
+- 22fcccd: perf(dts-plugin): add fetch timeout and add log
+
+## 0.9.1
+
+### Patch Changes
+
+- 35d925b: feat(dts-plugin): support remoteTypeUrls option which allow user to specify the remote types url
+- 35d925b: fix(dts-plugin): support parse @scope@manifest-url.json entry
+- 8acd217: chore: remove isomorphic-rslog
+
+## 0.9.0
+
+## 0.8.12
+
+## 0.8.11
+
+## 0.8.10
+
 ## 0.8.9
 
 ## 0.8.8

@@ -3,8 +3,8 @@ import {
   ErrorBoundary,
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
-import { LoggerInstance } from './utils';
-import RemoteApp from './remote';
+import { LoggerInstance } from '../utils';
+import RemoteApp from './component';
 import type { ProviderParams } from '@module-federation/bridge-shared';
 
 export interface RenderFnParams extends ProviderParams {
@@ -100,9 +100,9 @@ export function createRemoteComponent<T, E extends keyof T>(
       : {}
     : {};
 
+  const LazyComponent = createLazyRemoteComponent(info);
   return forwardRef<HTMLDivElement, ProviderParams & RawComponentType>(
     (props, ref) => {
-      const LazyComponent = createLazyRemoteComponent(info);
       return (
         <ErrorBoundary FallbackComponent={info.fallback}>
           <React.Suspense fallback={info.loading}>

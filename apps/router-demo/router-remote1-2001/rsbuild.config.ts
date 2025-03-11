@@ -39,20 +39,19 @@ export default defineConfig({
       exposes: {
         './button': './src/button.tsx',
         './export-app': './src/export-App.tsx',
+        './export-button': './src/export-Button.tsx',
+        './app': './src/App.tsx',
       },
       shared: {
-        // react: {
-        //   singleton: true,
-        // },
-        // 'react-dom': {
-        //   singleton: true,
-        // },
-        // 'react-router-dom': {
-        //   singleton: true,
-        // },
-        // antd: {
-        //   singleton: true,
-        // },
+        react: {
+          singleton: true,
+        },
+        'react-dom': {
+          singleton: true,
+        },
+        antd: {
+          singleton: true,
+        },
       },
     }),
   ],

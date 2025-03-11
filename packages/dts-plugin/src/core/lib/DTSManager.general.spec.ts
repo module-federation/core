@@ -86,6 +86,9 @@ describe('DTSManager General Tests', () => {
       implementation: 'webpack',
       abortOnError: false,
     };
+    fs.rmSync(path.join(projectRoot, 'node_modules/.cache/mf-types'), {
+      recursive: true,
+    });
     dtsManager = new DTSManager({ remote: remoteOptions });
 
     // Add mock implementations
@@ -151,8 +154,8 @@ describe('DTSManager General Tests', () => {
         url: 'http://example.com/remote.manifest.json',
         alias: 'test-alias',
       };
-
-      const result = await dtsManager.requestRemoteManifest(remoteInfo);
+      // @ts-expect-error only need timeout, which is not required
+      const result = await dtsManager.requestRemoteManifest(remoteInfo, {});
       expect(result.zipUrl).toBeDefined();
       expect(result.apiTypeUrl).toBeDefined();
       expect(result.zipUrl).toContain('http://example.com/types.zip');
@@ -178,7 +181,8 @@ describe('DTSManager General Tests', () => {
         alias: 'test-alias',
       };
 
-      const result = await dtsManager.requestRemoteManifest(remoteInfo);
+      // @ts-expect-error only need timeout, which is not required
+      const result = await dtsManager.requestRemoteManifest(remoteInfo, {});
       expect(result.zipUrl).toBeDefined();
       expect(result.apiTypeUrl).toBe('');
     });
@@ -192,7 +196,8 @@ describe('DTSManager General Tests', () => {
         alias: 'test-alias',
       };
 
-      const result = await dtsManager.requestRemoteManifest(remoteInfo);
+      // @ts-expect-error only need timeout, which is not required
+      const result = await dtsManager.requestRemoteManifest(remoteInfo, {});
       expect(result).toEqual(remoteInfo);
     });
 
@@ -217,7 +222,8 @@ describe('DTSManager General Tests', () => {
         alias: 'test-alias',
       };
 
-      const result = await dtsManager.requestRemoteManifest(remoteInfo);
+      // @ts-expect-error only need timeout, which is not required
+      const result = await dtsManager.requestRemoteManifest(remoteInfo, {});
       expect(result.zipUrl).toContain('http://example.com/custom/types.zip');
       expect(result.apiTypeUrl).toContain('http://example.com/custom/api.d.ts');
     });
@@ -239,6 +245,7 @@ describe('DTSManager General Tests', () => {
       abortOnError: false,
       consumeAPITypes: true,
       maxRetries: 3,
+      timeout: 60000,
     };
 
     it('should successfully download types archive', async () => {
@@ -344,7 +351,8 @@ describe('DTSManager General Tests', () => {
       vi.mocked(axios.get).mockResolvedValueOnce({ data: apiTypeContent });
       vi.spyOn(fs, 'writeFileSync');
 
-      await dtsManager.downloadAPITypes(remoteInfo, '/tmp/types');
+      // @ts-expect-error only need timeout, which is not required
+      await dtsManager.downloadAPITypes(remoteInfo, '/tmp/types', {});
 
       expect(fs.writeFileSync).toHaveBeenCalled();
       const writeCall = vi.mocked(fs.writeFileSync).mock.calls[0];

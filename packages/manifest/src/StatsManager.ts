@@ -41,7 +41,7 @@ import {
   PKGJsonManager,
   utils,
 } from '@module-federation/managers';
-import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
+import { HOT_UPDATE_SUFFIX } from './constants';
 import { ModuleHandler, getExposeItem } from './ModuleHandler';
 import { StatsInfo } from './types';
 

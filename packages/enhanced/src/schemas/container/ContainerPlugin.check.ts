@@ -1,1473 +1,1139 @@
+// @ts-nocheck
 /* eslint-disable */
-//@ts-nocheck
 /*
  * This file was automatically generated.
  * DO NOT MODIFY BY HAND.
- * Run `yarn special-lint-fix` to update
  */
-const r = /^(?:[A-Za-z]:[\\/]|\\\\|\/)/;
-
-function t(
-  r,
-  {
-    instancePath: e = '',
-    parentData: n,
-    parentDataProperty: s,
-    rootData: a = r,
-  } = {},
-) {
-  if (!Array.isArray(r))
-    return (
-      (t.errors = [
-        {
-          params: {
-            type: 'array',
-          },
-        },
-      ]),
-      !1
-    );
-  {
-    const e = r.length;
-    for (let n = 0; n < e; n++) {
-      let e = r[n];
-      const s = 0;
-      if ('string' != typeof e)
-        return (
-          (t.errors = [
-            {
-              params: {
-                type: 'string',
-              },
-            },
-          ]),
-          !1
-        );
-      if (e.length < 1)
-        return (
-          (t.errors = [
-            {
-              params: {},
-            },
-          ]),
-          !1
-        );
-      if (0 !== s) break;
-    }
-  }
-  return (t.errors = null), !0;
-}
-
-function e(
-  r,
-  {
-    instancePath: n = '',
-    parentData: s,
-    parentDataProperty: a,
-    rootData: o = r,
-  } = {},
-) {
-  let i = null,
-    l = 0;
-  if (0 === l) {
-    if (!r || 'object' != typeof r || Array.isArray(r))
-      return (
-        (e.errors = [
-          {
-            params: {
-              type: 'object',
-            },
-          },
-        ]),
-        !1
-      );
-    {
-      let s;
-      if (void 0 === r.import && (s = 'import'))
-        return (
-          (e.errors = [
-            {
-              params: {
-                missingProperty: s,
-              },
-            },
-          ]),
-          !1
-        );
-      {
-        const s = l;
-        for (const t in r)
-          if ('import' !== t && 'name' !== t)
-            return (
-              (e.errors = [
-                {
-                  params: {
-                    additionalProperty: t,
-                  },
-                },
-              ]),
-              !1
-            );
-        if (s === l) {
-          if (void 0 !== r.import) {
-            let s = r.import;
-            const a = l,
-              u = l;
-            let c = !1;
-            const m = l;
-            if (l == l)
-              if ('string' == typeof s) {
-                if (s.length < 1) {
-                  const r = {
-                    params: {},
-                  };
-                  null === i ? (i = [r]) : i.push(r), l++;
-                }
-              } else {
-                const r = {
-                  params: {
-                    type: 'string',
-                  },
-                };
-                null === i ? (i = [r]) : i.push(r), l++;
-              }
-            var p = m === l;
-            if (((c = c || p), !c)) {
-              const e = l;
-              t(s, {
-                instancePath: n + '/import',
-                parentData: r,
-                parentDataProperty: 'import',
-                rootData: o,
-              }) ||
-                ((i = null === i ? t.errors : i.concat(t.errors)),
-                (l = i.length)),
-                (p = e === l),
-                (c = c || p);
-            }
-            if (!c) {
-              const r = {
-                params: {},
-              };
-              return (
-                null === i ? (i = [r]) : i.push(r), l++, (e.errors = i), !1
-              );
-            }
-            (l = u), null !== i && (u ? (i.length = u) : (i = null));
-            var f = a === l;
-          } else f = !0;
-          if (f)
-            if (void 0 !== r.name) {
-              const t = l;
-              if ('string' != typeof r.name)
-                return (
-                  (e.errors = [
-                    {
-                      params: {
-                        type: 'string',
-                      },
-                    },
-                  ]),
-                  !1
-                );
-              f = t === l;
-            } else f = !0;
-        }
-      }
-    }
-  }
-  return (e.errors = i), 0 === l;
-}
-
-function n(
-  r,
-  {
-    instancePath: s = '',
-    parentData: a,
-    parentDataProperty: o,
-    rootData: i = r,
-  } = {},
-) {
-  let l = null,
-    p = 0;
-  if (0 === p) {
-    if (!r || 'object' != typeof r || Array.isArray(r))
-      return (
-        (n.errors = [
-          {
-            params: {
-              type: 'object',
-            },
-          },
-        ]),
-        !1
-      );
-    for (const a in r) {
-      let o = r[a];
-      const u = p,
-        c = p;
-      let m = !1;
-      const y = p;
-      e(o, {
-        instancePath: s + '/' + a.replace(/~/g, '~0').replace(/\//g, '~1'),
-        parentData: r,
-        parentDataProperty: a,
-        rootData: i,
-      }) || ((l = null === l ? e.errors : l.concat(e.errors)), (p = l.length));
-      var f = y === p;
-      if (((m = m || f), !m)) {
-        const e = p;
-        if (p == p)
-          if ('string' == typeof o) {
-            if (o.length < 1) {
-              const r = {
-                params: {},
-              };
-              null === l ? (l = [r]) : l.push(r), p++;
-            }
-          } else {
-            const r = {
-              params: {
-                type: 'string',
-              },
-            };
-            null === l ? (l = [r]) : l.push(r), p++;
-          }
-        if (((f = e === p), (m = m || f), !m)) {
-          const e = p;
-          t(o, {
-            instancePath: s + '/' + a.replace(/~/g, '~0').replace(/\//g, '~1'),
-            parentData: r,
-            parentDataProperty: a,
-            rootData: i,
-          }) ||
-            ((l = null === l ? t.errors : l.concat(t.errors)), (p = l.length)),
-            (f = e === p),
-            (m = m || f);
-        }
-      }
-      if (!m) {
-        const r = {
-          params: {},
-        };
-        return null === l ? (l = [r]) : l.push(r), p++, (n.errors = l), !1;
-      }
-      if (((p = c), null !== l && (c ? (l.length = c) : (l = null)), u !== p))
-        break;
-    }
-  }
-  return (n.errors = l), 0 === p;
-}
-
-function s(
-  r,
-  {
-    instancePath: t = '',
-    parentData: e,
-    parentDataProperty: a,
-    rootData: o = r,
-  } = {},
-) {
-  let i = null,
-    l = 0;
-  const p = l;
-  let f = !1;
-  const u = l;
-  if (l === u)
-    if (Array.isArray(r)) {
-      const e = r.length;
-      for (let s = 0; s < e; s++) {
-        let e = r[s];
-        const a = l,
-          p = l;
-        let f = !1;
-        const u = l;
-        if (l == l)
-          if ('string' == typeof e) {
-            if (e.length < 1) {
-              const r = {
-                params: {},
-              };
-              null === i ? (i = [r]) : i.push(r), l++;
-            }
-          } else {
-            const r = {
-              params: {
-                type: 'string',
-              },
-            };
-            null === i ? (i = [r]) : i.push(r), l++;
-          }
-        var c = u === l;
-        if (((f = f || c), !f)) {
-          const a = l;
-          n(e, {
-            instancePath: t + '/' + s,
-            parentData: r,
-            parentDataProperty: s,
-            rootData: o,
-          }) ||
-            ((i = null === i ? n.errors : i.concat(n.errors)), (l = i.length)),
-            (c = a === l),
-            (f = f || c);
-        }
-        if (f) (l = p), null !== i && (p ? (i.length = p) : (i = null));
-        else {
-          const r = {
-            params: {},
-          };
-          null === i ? (i = [r]) : i.push(r), l++;
-        }
-        if (a !== l) break;
-      }
-    } else {
-      const r = {
-        params: {
-          type: 'array',
-        },
-      };
-      null === i ? (i = [r]) : i.push(r), l++;
-    }
-  var m = u === l;
-  if (((f = f || m), !f)) {
-    const s = l;
-    n(r, {
-      instancePath: t,
-      parentData: e,
-      parentDataProperty: a,
-      rootData: o,
-    }) || ((i = null === i ? n.errors : i.concat(n.errors)), (l = i.length)),
-      (m = s === l),
-      (f = f || m);
-  }
-  if (!f) {
-    const r = {
-      params: {},
-    };
-    return null === i ? (i = [r]) : i.push(r), l++, (s.errors = i), !1;
-  }
-  return (
-    (l = p),
-    null !== i && (p ? (i.length = p) : (i = null)),
-    (s.errors = i),
-    0 === l
-  );
-}
-
-function a(
-  r,
-  {
-    instancePath: t = '',
-    parentData: e,
-    parentDataProperty: n,
-    rootData: s = r,
-  } = {},
-) {
-  let o = null,
-    i = 0;
-  const l = i;
-  let p = !1;
-  const f = i;
-  if ('string' != typeof r) {
-    const r = {
-      params: {
-        type: 'string',
+const t = /^(?:[A-Za-z]:[\\/]|\\\\|\/)/;
+export const validate = m;
+export default m;
+const e = {
+    definitions: {
+      RuntimePlugin: { type: 'array', items: { type: 'string' } },
+      AmdContainer: { type: 'string', minLength: 1 },
+      AuxiliaryComment: {
+        anyOf: [
+          { type: 'string' },
+          { $ref: '#/definitions/LibraryCustomUmdCommentObject' },
+        ],
       },
-    };
-    null === o ? (o = [r]) : o.push(r), i++;
-  }
-  var u = f === i;
-  if (((p = p || u), !p)) {
-    const t = i;
-    if (i == i)
-      if (r && 'object' == typeof r && !Array.isArray(r)) {
-        const t = i;
-        for (const t in r)
-          if (
-            'amd' !== t &&
-            'commonjs' !== t &&
-            'commonjs2' !== t &&
-            'root' !== t
-          ) {
-            const r = {
-              params: {
-                additionalProperty: t,
-              },
-            };
-            null === o ? (o = [r]) : o.push(r), i++;
-            break;
-          }
-        if (t === i) {
-          if (void 0 !== r.amd) {
-            const t = i;
-            if ('string' != typeof r.amd) {
-              const r = {
-                params: {
-                  type: 'string',
-                },
-              };
-              null === o ? (o = [r]) : o.push(r), i++;
-            }
-            var c = t === i;
-          } else c = !0;
-          if (c) {
-            if (void 0 !== r.commonjs) {
-              const t = i;
-              if ('string' != typeof r.commonjs) {
-                const r = {
-                  params: {
-                    type: 'string',
-                  },
-                };
-                null === o ? (o = [r]) : o.push(r), i++;
-              }
-              c = t === i;
-            } else c = !0;
-            if (c) {
-              if (void 0 !== r.commonjs2) {
-                const t = i;
-                if ('string' != typeof r.commonjs2) {
-                  const r = {
-                    params: {
-                      type: 'string',
-                    },
-                  };
-                  null === o ? (o = [r]) : o.push(r), i++;
-                }
-                c = t === i;
-              } else c = !0;
-              if (c)
-                if (void 0 !== r.root) {
-                  const t = i;
-                  if ('string' != typeof r.root) {
-                    const r = {
-                      params: {
-                        type: 'string',
-                      },
-                    };
-                    null === o ? (o = [r]) : o.push(r), i++;
-                  }
-                  c = t === i;
-                } else c = !0;
-            }
-          }
-        }
-      } else {
-        const r = {
-          params: {
-            type: 'object',
-          },
-        };
-        null === o ? (o = [r]) : o.push(r), i++;
-      }
-    (u = t === i), (p = p || u);
-  }
-  if (!p) {
-    const r = {
-      params: {},
-    };
-    return null === o ? (o = [r]) : o.push(r), i++, (a.errors = o), !1;
-  }
-  return (
-    (i = l),
-    null !== o && (l ? (o.length = l) : (o = null)),
-    (a.errors = o),
-    0 === i
-  );
-}
-
-function o(
-  r,
-  {
-    instancePath: t = '',
-    parentData: e,
-    parentDataProperty: n,
-    rootData: s = r,
-  } = {},
-) {
-  let a = null,
-    i = 0;
-  const l = i;
-  let p = !1;
-  const f = i;
-  if (i === f)
-    if (Array.isArray(r))
-      if (r.length < 1) {
-        const r = {
-          params: {
-            limit: 1,
-          },
-        };
-        null === a ? (a = [r]) : a.push(r), i++;
-      } else {
-        const t = r.length;
-        for (let e = 0; e < t; e++) {
-          let t = r[e];
-          const n = i;
-          if (i === n)
-            if ('string' == typeof t) {
-              if (t.length < 1) {
-                const r = {
-                  params: {},
-                };
-                null === a ? (a = [r]) : a.push(r), i++;
-              }
-            } else {
-              const r = {
-                params: {
-                  type: 'string',
-                },
-              };
-              null === a ? (a = [r]) : a.push(r), i++;
-            }
-          if (n !== i) break;
-        }
-      }
-    else {
-      const r = {
-        params: {
-          type: 'array',
-        },
-      };
-      null === a ? (a = [r]) : a.push(r), i++;
-    }
-  var u = f === i;
-  if (((p = p || u), !p)) {
-    const t = i;
-    if (i === t)
-      if ('string' == typeof r) {
-        if (r.length < 1) {
-          const r = {
-            params: {},
-          };
-          null === a ? (a = [r]) : a.push(r), i++;
-        }
-      } else {
-        const r = {
-          params: {
-            type: 'string',
-          },
-        };
-        null === a ? (a = [r]) : a.push(r), i++;
-      }
-    if (((u = t === i), (p = p || u), !p)) {
-      const t = i;
-      if (i == i)
-        if (r && 'object' == typeof r && !Array.isArray(r)) {
-          const t = i;
-          for (const t in r)
-            if ('amd' !== t && 'commonjs' !== t && 'root' !== t) {
-              const r = {
-                params: {
-                  additionalProperty: t,
-                },
-              };
-              null === a ? (a = [r]) : a.push(r), i++;
-              break;
-            }
-          if (t === i) {
-            if (void 0 !== r.amd) {
-              let t = r.amd;
-              const e = i;
-              if (i === e)
-                if ('string' == typeof t) {
-                  if (t.length < 1) {
-                    const r = {
-                      params: {},
-                    };
-                    null === a ? (a = [r]) : a.push(r), i++;
-                  }
-                } else {
-                  const r = {
-                    params: {
-                      type: 'string',
-                    },
-                  };
-                  null === a ? (a = [r]) : a.push(r), i++;
-                }
-              var c = e === i;
-            } else c = !0;
-            if (c) {
-              if (void 0 !== r.commonjs) {
-                let t = r.commonjs;
-                const e = i;
-                if (i === e)
-                  if ('string' == typeof t) {
-                    if (t.length < 1) {
-                      const r = {
-                        params: {},
-                      };
-                      null === a ? (a = [r]) : a.push(r), i++;
-                    }
-                  } else {
-                    const r = {
-                      params: {
-                        type: 'string',
-                      },
-                    };
-                    null === a ? (a = [r]) : a.push(r), i++;
-                  }
-                c = e === i;
-              } else c = !0;
-              if (c)
-                if (void 0 !== r.root) {
-                  let t = r.root;
-                  const e = i,
-                    n = i;
-                  let s = !1;
-                  const o = i;
-                  if (i === o)
-                    if (Array.isArray(t)) {
-                      const r = t.length;
-                      for (let e = 0; e < r; e++) {
-                        let r = t[e];
-                        const n = i;
-                        if (i === n)
-                          if ('string' == typeof r) {
-                            if (r.length < 1) {
-                              const r = {
-                                params: {},
-                              };
-                              null === a ? (a = [r]) : a.push(r), i++;
-                            }
-                          } else {
-                            const r = {
-                              params: {
-                                type: 'string',
-                              },
-                            };
-                            null === a ? (a = [r]) : a.push(r), i++;
-                          }
-                        if (n !== i) break;
-                      }
-                    } else {
-                      const r = {
-                        params: {
-                          type: 'array',
-                        },
-                      };
-                      null === a ? (a = [r]) : a.push(r), i++;
-                    }
-                  var m = o === i;
-                  if (((s = s || m), !s)) {
-                    const r = i;
-                    if (i === r)
-                      if ('string' == typeof t) {
-                        if (t.length < 1) {
-                          const r = {
-                            params: {},
-                          };
-                          null === a ? (a = [r]) : a.push(r), i++;
-                        }
-                      } else {
-                        const r = {
-                          params: {
-                            type: 'string',
-                          },
-                        };
-                        null === a ? (a = [r]) : a.push(r), i++;
-                      }
-                    (m = r === i), (s = s || m);
-                  }
-                  if (s)
-                    (i = n), null !== a && (n ? (a.length = n) : (a = null));
-                  else {
-                    const r = {
-                      params: {},
-                    };
-                    null === a ? (a = [r]) : a.push(r), i++;
-                  }
-                  c = e === i;
-                } else c = !0;
-            }
-          }
-        } else {
-          const r = {
-            params: {
-              type: 'object',
-            },
-          };
-          null === a ? (a = [r]) : a.push(r), i++;
-        }
-      (u = t === i), (p = p || u);
-    }
-  }
-  if (!p) {
-    const r = {
-      params: {},
-    };
-    return null === a ? (a = [r]) : a.push(r), i++, (o.errors = a), !1;
-  }
-  return (
-    (i = l),
-    null !== a && (l ? (a.length = l) : (a = null)),
-    (o.errors = a),
-    0 === i
-  );
-}
-
-function i(
-  r,
-  {
-    instancePath: t = '',
-    parentData: e,
-    parentDataProperty: n,
-    rootData: s = r,
-  } = {},
-) {
-  let l = null,
-    p = 0;
-  if (0 === p) {
-    if (!r || 'object' != typeof r || Array.isArray(r))
-      return (
-        (i.errors = [
+      EntryRuntime: {
+        anyOf: [{ enum: [!1] }, { type: 'string', minLength: 1 }],
+      },
+      Exposes: {
+        anyOf: [
           {
-            params: {
-              type: 'object',
+            type: 'array',
+            items: {
+              anyOf: [
+                { $ref: '#/definitions/ExposesItem' },
+                { $ref: '#/definitions/ExposesObject' },
+              ],
             },
           },
-        ]),
-        !1
-      );
-    {
-      let e;
-      if (void 0 === r.type && (e = 'type'))
-        return (
-          (i.errors = [
-            {
-              params: {
-                missingProperty: e,
-              },
-            },
-          ]),
-          !1
-        );
-      {
-        const e = p;
-        for (const t in r)
-          if (
-            'amdContainer' !== t &&
-            'auxiliaryComment' !== t &&
-            'export' !== t &&
-            'name' !== t &&
-            'type' !== t &&
-            'umdNamedDefine' !== t
-          )
-            return (
-              (i.errors = [
-                {
-                  params: {
-                    additionalProperty: t,
-                  },
-                },
-              ]),
-              !1
-            );
-        if (e === p) {
-          if (void 0 !== r.amdContainer) {
-            let t = r.amdContainer;
-            const e = p;
-            if (p == p) {
-              if ('string' != typeof t)
-                return (
-                  (i.errors = [
-                    {
-                      params: {
-                        type: 'string',
-                      },
-                    },
-                  ]),
-                  !1
-                );
-              if (t.length < 1)
-                return (
-                  (i.errors = [
-                    {
-                      params: {},
-                    },
-                  ]),
-                  !1
-                );
-            }
-            var f = e === p;
-          } else f = !0;
-          if (f) {
-            if (void 0 !== r.auxiliaryComment) {
-              const e = p;
-              a(r.auxiliaryComment, {
-                instancePath: t + '/auxiliaryComment',
-                parentData: r,
-                parentDataProperty: 'auxiliaryComment',
-                rootData: s,
-              }) ||
-                ((l = null === l ? a.errors : l.concat(a.errors)),
-                (p = l.length)),
-                (f = e === p);
-            } else f = !0;
-            if (f) {
-              if (void 0 !== r.export) {
-                let t = r.export;
-                const e = p,
-                  n = p;
-                let s = !1;
-                const a = p;
-                if (p === a)
-                  if (Array.isArray(t)) {
-                    const r = t.length;
-                    for (let e = 0; e < r; e++) {
-                      let r = t[e];
-                      const n = p;
-                      if (p === n)
-                        if ('string' == typeof r) {
-                          if (r.length < 1) {
-                            const r = {
-                              params: {},
-                            };
-                            null === l ? (l = [r]) : l.push(r), p++;
-                          }
-                        } else {
-                          const r = {
-                            params: {
-                              type: 'string',
-                            },
-                          };
-                          null === l ? (l = [r]) : l.push(r), p++;
-                        }
-                      if (n !== p) break;
-                    }
-                  } else {
-                    const r = {
-                      params: {
-                        type: 'array',
-                      },
-                    };
-                    null === l ? (l = [r]) : l.push(r), p++;
-                  }
-                var u = a === p;
-                if (((s = s || u), !s)) {
-                  const r = p;
-                  if (p === r)
-                    if ('string' == typeof t) {
-                      if (t.length < 1) {
-                        const r = {
-                          params: {},
-                        };
-                        null === l ? (l = [r]) : l.push(r), p++;
-                      }
-                    } else {
-                      const r = {
-                        params: {
-                          type: 'string',
-                        },
-                      };
-                      null === l ? (l = [r]) : l.push(r), p++;
-                    }
-                  (u = r === p), (s = s || u);
-                }
-                if (!s) {
-                  const r = {
-                    params: {},
-                  };
-                  return (
-                    null === l ? (l = [r]) : l.push(r), p++, (i.errors = l), !1
-                  );
-                }
-                (p = n),
-                  null !== l && (n ? (l.length = n) : (l = null)),
-                  (f = e === p);
-              } else f = !0;
-              if (f) {
-                if (void 0 !== r.name) {
-                  const e = p;
-                  o(r.name, {
-                    instancePath: t + '/name',
-                    parentData: r,
-                    parentDataProperty: 'name',
-                    rootData: s,
-                  }) ||
-                    ((l = null === l ? o.errors : l.concat(o.errors)),
-                    (p = l.length)),
-                    (f = e === p);
-                } else f = !0;
-                if (f) {
-                  if (void 0 !== r.type) {
-                    let t = r.type;
-                    const e = p,
-                      n = p;
-                    let s = !1;
-                    const a = p;
-                    if (
-                      'var' !== t &&
-                      'module' !== t &&
-                      'assign' !== t &&
-                      'assign-properties' !== t &&
-                      'this' !== t &&
-                      'window' !== t &&
-                      'self' !== t &&
-                      'global' !== t &&
-                      'commonjs' !== t &&
-                      'commonjs2' !== t &&
-                      'commonjs-module' !== t &&
-                      'commonjs-static' !== t &&
-                      'amd' !== t &&
-                      'amd-require' !== t &&
-                      'umd' !== t &&
-                      'umd2' !== t &&
-                      'jsonp' !== t &&
-                      'system' !== t
-                    ) {
-                      const r = {
-                        params: {},
-                      };
-                      null === l ? (l = [r]) : l.push(r), p++;
-                    }
-                    var c = a === p;
-                    if (((s = s || c), !s)) {
-                      const r = p;
-                      if ('string' != typeof t) {
-                        const r = {
-                          params: {
-                            type: 'string',
-                          },
-                        };
-                        null === l ? (l = [r]) : l.push(r), p++;
-                      }
-                      (c = r === p), (s = s || c);
-                    }
-                    if (!s) {
-                      const r = {
-                        params: {},
-                      };
-                      return (
-                        null === l ? (l = [r]) : l.push(r),
-                        p++,
-                        (i.errors = l),
-                        !1
-                      );
-                    }
-                    (p = n),
-                      null !== l && (n ? (l.length = n) : (l = null)),
-                      (f = e === p);
-                  } else f = !0;
-                  if (f)
-                    if (void 0 !== r.umdNamedDefine) {
-                      const t = p;
-                      if ('boolean' != typeof r.umdNamedDefine)
-                        return (
-                          (i.errors = [
-                            {
-                              params: {
-                                type: 'boolean',
-                              },
-                            },
-                          ]),
-                          !1
-                        );
-                      f = t === p;
-                    } else f = !0;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return (i.errors = l), 0 === p;
-}
-
-function l(
+          { $ref: '#/definitions/ExposesObject' },
+        ],
+      },
+      ExposesConfig: {
+        type: 'object',
+        additionalProperties: !1,
+        properties: {
+          import: {
+            anyOf: [
+              { $ref: '#/definitions/ExposesItem' },
+              { $ref: '#/definitions/ExposesItems' },
+            ],
+          },
+          name: { type: 'string' },
+        },
+        required: ['import'],
+      },
+      ExposesItem: { type: 'string', minLength: 1 },
+      ExposesItems: {
+        type: 'array',
+        items: { $ref: '#/definitions/ExposesItem' },
+      },
+      ExposesObject: {
+        type: 'object',
+        additionalProperties: {
+          anyOf: [
+            { $ref: '#/definitions/ExposesConfig' },
+            { $ref: '#/definitions/ExposesItem' },
+            { $ref: '#/definitions/ExposesItems' },
+          ],
+        },
+      },
+      LibraryCustomUmdCommentObject: {
+        type: 'object',
+        additionalProperties: !1,
+        properties: {
+          amd: { type: 'string' },
+          commonjs: { type: 'string' },
+          commonjs2: { type: 'string' },
+          root: { type: 'string' },
+        },
+      },
+      LibraryCustomUmdObject: {
+        type: 'object',
+        additionalProperties: !1,
+        properties: {
+          amd: { type: 'string', minLength: 1 },
+          commonjs: { type: 'string', minLength: 1 },
+          root: {
+            anyOf: [
+              { type: 'array', items: { type: 'string', minLength: 1 } },
+              { type: 'string', minLength: 1 },
+            ],
+          },
+        },
+      },
+      LibraryExport: {
+        anyOf: [
+          { type: 'array', items: { type: 'string', minLength: 1 } },
+          { type: 'string', minLength: 1 },
+        ],
+      },
+      LibraryName: {
+        anyOf: [
+          {
+            type: 'array',
+            items: { type: 'string', minLength: 1 },
+            minItems: 1,
+          },
+          { type: 'string', minLength: 1 },
+          { $ref: '#/definitions/LibraryCustomUmdObject' },
+        ],
+      },
+      LibraryOptions: {
+        type: 'object',
+        additionalProperties: !1,
+        properties: {
+          amdContainer: { $ref: '#/definitions/AmdContainer' },
+          auxiliaryComment: { $ref: '#/definitions/AuxiliaryComment' },
+          export: { $ref: '#/definitions/LibraryExport' },
+          name: { $ref: '#/definitions/LibraryName' },
+          type: { $ref: '#/definitions/LibraryType' },
+          umdNamedDefine: { $ref: '#/definitions/UmdNamedDefine' },
+        },
+        required: ['type'],
+      },
+      LibraryType: {
+        anyOf: [
+          {
+            enum: [
+              'var',
+              'module',
+              'assign',
+              'assign-properties',
+              'this',
+              'window',
+              'self',
+              'global',
+              'commonjs',
+              'commonjs2',
+              'commonjs-module',
+              'commonjs-static',
+              'amd',
+              'amd-require',
+              'umd',
+              'umd2',
+              'jsonp',
+              'system',
+            ],
+          },
+          { type: 'string' },
+        ],
+      },
+      UmdNamedDefine: { type: 'boolean' },
+    },
+    type: 'object',
+    additionalProperties: !1,
+    properties: {
+      exposes: { $ref: '#/definitions/Exposes' },
+      filename: { type: 'string', absolutePath: !1, minLength: 1 },
+      library: { $ref: '#/definitions/LibraryOptions' },
+      name: { type: 'string', minLength: 1 },
+      runtime: { $ref: '#/definitions/EntryRuntime' },
+      runtimePlugins: { $ref: '#/definitions/RuntimePlugin' },
+      shareScope: { type: 'string', minLength: 1 },
+      experiments: {
+        type: 'object',
+        properties: {
+          asyncStartup: { type: 'boolean' },
+          externalRuntime: {
+            anyOf: [{ type: 'boolean' }, { enum: ['provide'] }],
+          },
+        },
+        additionalProperties: !1,
+      },
+    },
+    required: ['name', 'exposes'],
+  },
+  r = { anyOf: [{ enum: [!1] }, { type: 'string', minLength: 1 }] };
+function n(
   t,
   {
     instancePath: e = '',
-    parentData: n,
+    parentData: r,
+    parentDataProperty: s,
+    rootData: a = t,
+  } = {},
+) {
+  if (!Array.isArray(t))
+    return (n.errors = [{ params: { type: 'array' } }]), !1;
+  {
+    const e = t.length;
+    for (let r = 0; r < e; r++) {
+      let e = t[r];
+      const s = 0;
+      if ('string' != typeof e)
+        return (n.errors = [{ params: { type: 'string' } }]), !1;
+      if (e.length < 1) return (n.errors = [{ params: {} }]), !1;
+      if (0 !== s) break;
+    }
+  }
+  return (n.errors = null), !0;
+}
+function s(
+  t,
+  {
+    instancePath: e = '',
+    parentData: r,
     parentDataProperty: a,
     rootData: o = t,
   } = {},
 ) {
-  let p = null,
-    f = 0;
-  if (0 === f) {
+  let i = null,
+    p = 0;
+  if (0 === p) {
     if (!t || 'object' != typeof t || Array.isArray(t))
-      return (
-        (l.errors = [
-          {
-            params: {
-              type: 'object',
-            },
-          },
-        ]),
-        !1
-      );
+      return (s.errors = [{ params: { type: 'object' } }]), !1;
     {
-      let n;
-      if (
-        (void 0 === t.name && (n = 'name')) ||
-        (void 0 === t.exposes && (n = 'exposes'))
-      )
-        return (
-          (l.errors = [
-            {
-              params: {
-                missingProperty: n,
-              },
-            },
-          ]),
-          !1
-        );
+      let r;
+      if (void 0 === t.import && (r = 'import'))
+        return (s.errors = [{ params: { missingProperty: r } }]), !1;
       {
-        const n = f;
-        for (const r in t)
+        const r = p;
+        for (const e in t)
+          if ('import' !== e && 'name' !== e)
+            return (s.errors = [{ params: { additionalProperty: e } }]), !1;
+        if (r === p) {
+          if (void 0 !== t.import) {
+            let r = t.import;
+            const a = p,
+              m = p;
+            let u = !1;
+            const c = p;
+            if (p == p)
+              if ('string' == typeof r) {
+                if (r.length < 1) {
+                  const t = { params: {} };
+                  null === i ? (i = [t]) : i.push(t), p++;
+                }
+              } else {
+                const t = { params: { type: 'string' } };
+                null === i ? (i = [t]) : i.push(t), p++;
+              }
+            var l = c === p;
+            if (((u = u || l), !u)) {
+              const s = p;
+              n(r, {
+                instancePath: e + '/import',
+                parentData: t,
+                parentDataProperty: 'import',
+                rootData: o,
+              }) ||
+                ((i = null === i ? n.errors : i.concat(n.errors)),
+                (p = i.length)),
+                (l = s === p),
+                (u = u || l);
+            }
+            if (!u) {
+              const t = { params: {} };
+              return (
+                null === i ? (i = [t]) : i.push(t), p++, (s.errors = i), !1
+              );
+            }
+            (p = m), null !== i && (m ? (i.length = m) : (i = null));
+            var f = a === p;
+          } else f = !0;
+          if (f)
+            if (void 0 !== t.name) {
+              const e = p;
+              if ('string' != typeof t.name)
+                return (s.errors = [{ params: { type: 'string' } }]), !1;
+              f = e === p;
+            } else f = !0;
+        }
+      }
+    }
+  }
+  return (s.errors = i), 0 === p;
+}
+function a(
+  t,
+  {
+    instancePath: e = '',
+    parentData: r,
+    parentDataProperty: o,
+    rootData: i = t,
+  } = {},
+) {
+  let p = null,
+    l = 0;
+  if (0 === l) {
+    if (!t || 'object' != typeof t || Array.isArray(t))
+      return (a.errors = [{ params: { type: 'object' } }]), !1;
+    for (const r in t) {
+      let o = t[r];
+      const m = l,
+        u = l;
+      let c = !1;
+      const y = l;
+      s(o, {
+        instancePath: e + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
+        parentData: t,
+        parentDataProperty: r,
+        rootData: i,
+      }) || ((p = null === p ? s.errors : p.concat(s.errors)), (l = p.length));
+      var f = y === l;
+      if (((c = c || f), !c)) {
+        const s = l;
+        if (l == l)
+          if ('string' == typeof o) {
+            if (o.length < 1) {
+              const t = { params: {} };
+              null === p ? (p = [t]) : p.push(t), l++;
+            }
+          } else {
+            const t = { params: { type: 'string' } };
+            null === p ? (p = [t]) : p.push(t), l++;
+          }
+        if (((f = s === l), (c = c || f), !c)) {
+          const s = l;
+          n(o, {
+            instancePath: e + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
+            parentData: t,
+            parentDataProperty: r,
+            rootData: i,
+          }) ||
+            ((p = null === p ? n.errors : p.concat(n.errors)), (l = p.length)),
+            (f = s === l),
+            (c = c || f);
+        }
+      }
+      if (!c) {
+        const t = { params: {} };
+        return null === p ? (p = [t]) : p.push(t), l++, (a.errors = p), !1;
+      }
+      if (((l = u), null !== p && (u ? (p.length = u) : (p = null)), m !== l))
+        break;
+    }
+  }
+  return (a.errors = p), 0 === l;
+}
+function o(
+  t,
+  {
+    instancePath: e = '',
+    parentData: r,
+    parentDataProperty: n,
+    rootData: s = t,
+  } = {},
+) {
+  let i = null,
+    p = 0;
+  const l = p;
+  let f = !1;
+  const m = p;
+  if (p === m)
+    if (Array.isArray(t)) {
+      const r = t.length;
+      for (let n = 0; n < r; n++) {
+        let r = t[n];
+        const o = p,
+          l = p;
+        let f = !1;
+        const m = p;
+        if (p == p)
+          if ('string' == typeof r) {
+            if (r.length < 1) {
+              const t = { params: {} };
+              null === i ? (i = [t]) : i.push(t), p++;
+            }
+          } else {
+            const t = { params: { type: 'string' } };
+            null === i ? (i = [t]) : i.push(t), p++;
+          }
+        var u = m === p;
+        if (((f = f || u), !f)) {
+          const o = p;
+          a(r, {
+            instancePath: e + '/' + n,
+            parentData: t,
+            parentDataProperty: n,
+            rootData: s,
+          }) ||
+            ((i = null === i ? a.errors : i.concat(a.errors)), (p = i.length)),
+            (u = o === p),
+            (f = f || u);
+        }
+        if (f) (p = l), null !== i && (l ? (i.length = l) : (i = null));
+        else {
+          const t = { params: {} };
+          null === i ? (i = [t]) : i.push(t), p++;
+        }
+        if (o !== p) break;
+      }
+    } else {
+      const t = { params: { type: 'array' } };
+      null === i ? (i = [t]) : i.push(t), p++;
+    }
+  var c = m === p;
+  if (((f = f || c), !f)) {
+    const o = p;
+    a(t, {
+      instancePath: e,
+      parentData: r,
+      parentDataProperty: n,
+      rootData: s,
+    }) || ((i = null === i ? a.errors : i.concat(a.errors)), (p = i.length)),
+      (c = o === p),
+      (f = f || c);
+  }
+  if (!f) {
+    const t = { params: {} };
+    return null === i ? (i = [t]) : i.push(t), p++, (o.errors = i), !1;
+  }
+  return (
+    (p = l),
+    null !== i && (l ? (i.length = l) : (i = null)),
+    (o.errors = i),
+    0 === p
+  );
+}
+const i = {
+  anyOf: [
+    {
+      enum: [
+        'var',
+        'module',
+        'assign',
+        'assign-properties',
+        'this',
+        'window',
+        'self',
+        'global',
+        'commonjs',
+        'commonjs2',
+        'commonjs-module',
+        'commonjs-static',
+        'amd',
+        'amd-require',
+        'umd',
+        'umd2',
+        'jsonp',
+        'system',
+      ],
+    },
+    { type: 'string' },
+  ],
+};
+function p(
+  t,
+  {
+    instancePath: e = '',
+    parentData: r,
+    parentDataProperty: n,
+    rootData: s = t,
+  } = {},
+) {
+  let a = null,
+    o = 0;
+  const i = o;
+  let l = !1;
+  const f = o;
+  if ('string' != typeof t) {
+    const t = { params: { type: 'string' } };
+    null === a ? (a = [t]) : a.push(t), o++;
+  }
+  var m = f === o;
+  if (((l = l || m), !l)) {
+    const e = o;
+    if (o == o)
+      if (t && 'object' == typeof t && !Array.isArray(t)) {
+        const e = o;
+        for (const e in t)
           if (
-            'experiments' !== r &&
-            'exposes' !== r &&
-            'filename' !== r &&
-            'library' !== r &&
-            'name' !== r &&
-            'runtime' !== r &&
-            'runtimePlugins' !== r &&
-            'shareScope' !== r
+            'amd' !== e &&
+            'commonjs' !== e &&
+            'commonjs2' !== e &&
+            'root' !== e
+          ) {
+            const t = { params: { additionalProperty: e } };
+            null === a ? (a = [t]) : a.push(t), o++;
+            break;
+          }
+        if (e === o) {
+          if (void 0 !== t.amd) {
+            const e = o;
+            if ('string' != typeof t.amd) {
+              const t = { params: { type: 'string' } };
+              null === a ? (a = [t]) : a.push(t), o++;
+            }
+            var u = e === o;
+          } else u = !0;
+          if (u) {
+            if (void 0 !== t.commonjs) {
+              const e = o;
+              if ('string' != typeof t.commonjs) {
+                const t = { params: { type: 'string' } };
+                null === a ? (a = [t]) : a.push(t), o++;
+              }
+              u = e === o;
+            } else u = !0;
+            if (u) {
+              if (void 0 !== t.commonjs2) {
+                const e = o;
+                if ('string' != typeof t.commonjs2) {
+                  const t = { params: { type: 'string' } };
+                  null === a ? (a = [t]) : a.push(t), o++;
+                }
+                u = e === o;
+              } else u = !0;
+              if (u)
+                if (void 0 !== t.root) {
+                  const e = o;
+                  if ('string' != typeof t.root) {
+                    const t = { params: { type: 'string' } };
+                    null === a ? (a = [t]) : a.push(t), o++;
+                  }
+                  u = e === o;
+                } else u = !0;
+            }
+          }
+        }
+      } else {
+        const t = { params: { type: 'object' } };
+        null === a ? (a = [t]) : a.push(t), o++;
+      }
+    (m = e === o), (l = l || m);
+  }
+  if (!l) {
+    const t = { params: {} };
+    return null === a ? (a = [t]) : a.push(t), o++, (p.errors = a), !1;
+  }
+  return (
+    (o = i),
+    null !== a && (i ? (a.length = i) : (a = null)),
+    (p.errors = a),
+    0 === o
+  );
+}
+function l(
+  t,
+  {
+    instancePath: e = '',
+    parentData: r,
+    parentDataProperty: n,
+    rootData: s = t,
+  } = {},
+) {
+  let a = null,
+    o = 0;
+  const i = o;
+  let p = !1;
+  const f = o;
+  if (o === f)
+    if (Array.isArray(t))
+      if (t.length < 1) {
+        const t = { params: { limit: 1 } };
+        null === a ? (a = [t]) : a.push(t), o++;
+      } else {
+        const e = t.length;
+        for (let r = 0; r < e; r++) {
+          let e = t[r];
+          const n = o;
+          if (o === n)
+            if ('string' == typeof e) {
+              if (e.length < 1) {
+                const t = { params: {} };
+                null === a ? (a = [t]) : a.push(t), o++;
+              }
+            } else {
+              const t = { params: { type: 'string' } };
+              null === a ? (a = [t]) : a.push(t), o++;
+            }
+          if (n !== o) break;
+        }
+      }
+    else {
+      const t = { params: { type: 'array' } };
+      null === a ? (a = [t]) : a.push(t), o++;
+    }
+  var m = f === o;
+  if (((p = p || m), !p)) {
+    const e = o;
+    if (o === e)
+      if ('string' == typeof t) {
+        if (t.length < 1) {
+          const t = { params: {} };
+          null === a ? (a = [t]) : a.push(t), o++;
+        }
+      } else {
+        const t = { params: { type: 'string' } };
+        null === a ? (a = [t]) : a.push(t), o++;
+      }
+    if (((m = e === o), (p = p || m), !p)) {
+      const e = o;
+      if (o == o)
+        if (t && 'object' == typeof t && !Array.isArray(t)) {
+          const e = o;
+          for (const e in t)
+            if ('amd' !== e && 'commonjs' !== e && 'root' !== e) {
+              const t = { params: { additionalProperty: e } };
+              null === a ? (a = [t]) : a.push(t), o++;
+              break;
+            }
+          if (e === o) {
+            if (void 0 !== t.amd) {
+              let e = t.amd;
+              const r = o;
+              if (o === r)
+                if ('string' == typeof e) {
+                  if (e.length < 1) {
+                    const t = { params: {} };
+                    null === a ? (a = [t]) : a.push(t), o++;
+                  }
+                } else {
+                  const t = { params: { type: 'string' } };
+                  null === a ? (a = [t]) : a.push(t), o++;
+                }
+              var u = r === o;
+            } else u = !0;
+            if (u) {
+              if (void 0 !== t.commonjs) {
+                let e = t.commonjs;
+                const r = o;
+                if (o === r)
+                  if ('string' == typeof e) {
+                    if (e.length < 1) {
+                      const t = { params: {} };
+                      null === a ? (a = [t]) : a.push(t), o++;
+                    }
+                  } else {
+                    const t = { params: { type: 'string' } };
+                    null === a ? (a = [t]) : a.push(t), o++;
+                  }
+                u = r === o;
+              } else u = !0;
+              if (u)
+                if (void 0 !== t.root) {
+                  let e = t.root;
+                  const r = o,
+                    n = o;
+                  let s = !1;
+                  const i = o;
+                  if (o === i)
+                    if (Array.isArray(e)) {
+                      const t = e.length;
+                      for (let r = 0; r < t; r++) {
+                        let t = e[r];
+                        const n = o;
+                        if (o === n)
+                          if ('string' == typeof t) {
+                            if (t.length < 1) {
+                              const t = { params: {} };
+                              null === a ? (a = [t]) : a.push(t), o++;
+                            }
+                          } else {
+                            const t = { params: { type: 'string' } };
+                            null === a ? (a = [t]) : a.push(t), o++;
+                          }
+                        if (n !== o) break;
+                      }
+                    } else {
+                      const t = { params: { type: 'array' } };
+                      null === a ? (a = [t]) : a.push(t), o++;
+                    }
+                  var c = i === o;
+                  if (((s = s || c), !s)) {
+                    const t = o;
+                    if (o === t)
+                      if ('string' == typeof e) {
+                        if (e.length < 1) {
+                          const t = { params: {} };
+                          null === a ? (a = [t]) : a.push(t), o++;
+                        }
+                      } else {
+                        const t = { params: { type: 'string' } };
+                        null === a ? (a = [t]) : a.push(t), o++;
+                      }
+                    (c = t === o), (s = s || c);
+                  }
+                  if (s)
+                    (o = n), null !== a && (n ? (a.length = n) : (a = null));
+                  else {
+                    const t = { params: {} };
+                    null === a ? (a = [t]) : a.push(t), o++;
+                  }
+                  u = r === o;
+                } else u = !0;
+            }
+          }
+        } else {
+          const t = { params: { type: 'object' } };
+          null === a ? (a = [t]) : a.push(t), o++;
+        }
+      (m = e === o), (p = p || m);
+    }
+  }
+  if (!p) {
+    const t = { params: {} };
+    return null === a ? (a = [t]) : a.push(t), o++, (l.errors = a), !1;
+  }
+  return (
+    (o = i),
+    null !== a && (i ? (a.length = i) : (a = null)),
+    (l.errors = a),
+    0 === o
+  );
+}
+function f(
+  t,
+  {
+    instancePath: e = '',
+    parentData: r,
+    parentDataProperty: n,
+    rootData: s = t,
+  } = {},
+) {
+  let a = null,
+    o = 0;
+  if (0 === o) {
+    if (!t || 'object' != typeof t || Array.isArray(t))
+      return (f.errors = [{ params: { type: 'object' } }]), !1;
+    {
+      let r;
+      if (void 0 === t.type && (r = 'type'))
+        return (f.errors = [{ params: { missingProperty: r } }]), !1;
+      {
+        const r = o;
+        for (const e in t)
+          if (
+            'amdContainer' !== e &&
+            'auxiliaryComment' !== e &&
+            'export' !== e &&
+            'name' !== e &&
+            'type' !== e &&
+            'umdNamedDefine' !== e
           )
-            return (
-              (l.errors = [
-                {
-                  params: {
-                    additionalProperty: r,
-                  },
-                },
-              ]),
-              !1
-            );
-        if (n === f) {
-          if (void 0 !== t.experiments) {
-            let r = t.experiments;
-            const e = f;
-            if (f === e) {
-              if (!r || 'object' != typeof r || Array.isArray(r))
-                return (
-                  (l.errors = [
-                    {
-                      params: {
-                        type: 'object',
-                      },
-                    },
-                  ]),
-                  !1
-                );
-              {
-                const t = f;
-                for (const t in r)
-                  if (
-                    'externalRuntime' !== t &&
-                    'federationRuntime' !== t &&
-                    'provideExternalRuntime' !== t
-                  )
-                    return (
-                      (l.errors = [
-                        {
-                          params: {
-                            additionalProperty: t,
-                          },
-                        },
-                      ]),
-                      !1
-                    );
-                if (t === f) {
-                  if (void 0 !== r.externalRuntime) {
-                    const t = f;
-                    if ('boolean' != typeof r.externalRuntime)
+            return (f.errors = [{ params: { additionalProperty: e } }]), !1;
+        if (r === o) {
+          if (void 0 !== t.amdContainer) {
+            let e = t.amdContainer;
+            const r = o;
+            if (o == o) {
+              if ('string' != typeof e)
+                return (f.errors = [{ params: { type: 'string' } }]), !1;
+              if (e.length < 1) return (f.errors = [{ params: {} }]), !1;
+            }
+            var m = r === o;
+          } else m = !0;
+          if (m) {
+            if (void 0 !== t.auxiliaryComment) {
+              const r = o;
+              p(t.auxiliaryComment, {
+                instancePath: e + '/auxiliaryComment',
+                parentData: t,
+                parentDataProperty: 'auxiliaryComment',
+                rootData: s,
+              }) ||
+                ((a = null === a ? p.errors : a.concat(p.errors)),
+                (o = a.length)),
+                (m = r === o);
+            } else m = !0;
+            if (m) {
+              if (void 0 !== t.export) {
+                let e = t.export;
+                const r = o,
+                  n = o;
+                let s = !1;
+                const i = o;
+                if (o === i)
+                  if (Array.isArray(e)) {
+                    const t = e.length;
+                    for (let r = 0; r < t; r++) {
+                      let t = e[r];
+                      const n = o;
+                      if (o === n)
+                        if ('string' == typeof t) {
+                          if (t.length < 1) {
+                            const t = { params: {} };
+                            null === a ? (a = [t]) : a.push(t), o++;
+                          }
+                        } else {
+                          const t = { params: { type: 'string' } };
+                          null === a ? (a = [t]) : a.push(t), o++;
+                        }
+                      if (n !== o) break;
+                    }
+                  } else {
+                    const t = { params: { type: 'array' } };
+                    null === a ? (a = [t]) : a.push(t), o++;
+                  }
+                var u = i === o;
+                if (((s = s || u), !s)) {
+                  const t = o;
+                  if (o === t)
+                    if ('string' == typeof e) {
+                      if (e.length < 1) {
+                        const t = { params: {} };
+                        null === a ? (a = [t]) : a.push(t), o++;
+                      }
+                    } else {
+                      const t = { params: { type: 'string' } };
+                      null === a ? (a = [t]) : a.push(t), o++;
+                    }
+                  (u = t === o), (s = s || u);
+                }
+                if (!s) {
+                  const t = { params: {} };
+                  return (
+                    null === a ? (a = [t]) : a.push(t), o++, (f.errors = a), !1
+                  );
+                }
+                (o = n),
+                  null !== a && (n ? (a.length = n) : (a = null)),
+                  (m = r === o);
+              } else m = !0;
+              if (m) {
+                if (void 0 !== t.name) {
+                  const r = o;
+                  l(t.name, {
+                    instancePath: e + '/name',
+                    parentData: t,
+                    parentDataProperty: 'name',
+                    rootData: s,
+                  }) ||
+                    ((a = null === a ? l.errors : a.concat(l.errors)),
+                    (o = a.length)),
+                    (m = r === o);
+                } else m = !0;
+                if (m) {
+                  if (void 0 !== t.type) {
+                    let e = t.type;
+                    const r = o,
+                      n = o;
+                    let s = !1;
+                    const p = o;
+                    if (
+                      'var' !== e &&
+                      'module' !== e &&
+                      'assign' !== e &&
+                      'assign-properties' !== e &&
+                      'this' !== e &&
+                      'window' !== e &&
+                      'self' !== e &&
+                      'global' !== e &&
+                      'commonjs' !== e &&
+                      'commonjs2' !== e &&
+                      'commonjs-module' !== e &&
+                      'commonjs-static' !== e &&
+                      'amd' !== e &&
+                      'amd-require' !== e &&
+                      'umd' !== e &&
+                      'umd2' !== e &&
+                      'jsonp' !== e &&
+                      'system' !== e
+                    ) {
+                      const t = { params: { allowedValues: i.anyOf[0].enum } };
+                      null === a ? (a = [t]) : a.push(t), o++;
+                    }
+                    var c = p === o;
+                    if (((s = s || c), !s)) {
+                      const t = o;
+                      if ('string' != typeof e) {
+                        const t = { params: { type: 'string' } };
+                        null === a ? (a = [t]) : a.push(t), o++;
+                      }
+                      (c = t === o), (s = s || c);
+                    }
+                    if (!s) {
+                      const t = { params: {} };
                       return (
-                        (l.errors = [
-                          {
-                            params: {
-                              type: 'boolean',
-                            },
-                          },
-                        ]),
+                        null === a ? (a = [t]) : a.push(t),
+                        o++,
+                        (f.errors = a),
                         !1
                       );
-                    var u = t === f;
-                  } else u = !0;
-                  if (u) {
-                    if (void 0 !== r.federationRuntime) {
-                      let t = r.federationRuntime;
-                      const e = f,
-                        n = f;
-                      let s = !1;
-                      const a = f;
-                      if ('hoisted' !== t) {
-                        const r = {
-                          params: {},
-                        };
-                        null === p ? (p = [r]) : p.push(r), f++;
-                      }
-                      var c = a === f;
-                      if (((s = s || c), !s)) {
-                        const r = f;
-                        if ('boolean' != typeof t) {
-                          const r = {
-                            params: {
-                              type: 'boolean',
-                            },
-                          };
-                          null === p ? (p = [r]) : p.push(r), f++;
-                        }
-                        (c = r === f), (s = s || c);
-                      }
-                      if (!s) {
-                        const r = {
-                          params: {},
-                        };
+                    }
+                    (o = n),
+                      null !== a && (n ? (a.length = n) : (a = null)),
+                      (m = r === o);
+                  } else m = !0;
+                  if (m)
+                    if (void 0 !== t.umdNamedDefine) {
+                      const e = o;
+                      if ('boolean' != typeof t.umdNamedDefine)
                         return (
-                          null === p ? (p = [r]) : p.push(r),
-                          f++,
-                          (l.errors = p),
-                          !1
+                          (f.errors = [{ params: { type: 'boolean' } }]), !1
                         );
-                      }
-                      (f = n),
-                        null !== p && (n ? (p.length = n) : (p = null)),
-                        (u = e === f);
-                    } else u = !0;
-                    if (u)
-                      if (void 0 !== r.provideExternalRuntime) {
-                        const t = f;
-                        if ('boolean' != typeof r.provideExternalRuntime)
-                          return (
-                            (l.errors = [
-                              {
-                                params: {
-                                  type: 'boolean',
-                                },
-                              },
-                            ]),
-                            !1
-                          );
-                        u = t === f;
-                      } else u = !0;
-                  }
+                      m = e === o;
+                    } else m = !0;
                 }
               }
             }
-            var m = e === f;
-          } else m = !0;
-          if (m) {
-            if (void 0 !== t.exposes) {
-              const r = f;
-              s(t.exposes, {
-                instancePath: e + '/exposes',
-                parentData: t,
-                parentDataProperty: 'exposes',
-                rootData: o,
-              }) ||
-                ((p = null === p ? s.errors : p.concat(s.errors)),
-                (f = p.length)),
-                (m = r === f);
-            } else m = !0;
-            if (m) {
-              if (void 0 !== t.filename) {
-                let e = t.filename;
-                const n = f;
-                if (f === n) {
-                  if ('string' != typeof e)
-                    return (
-                      (l.errors = [
-                        {
-                          params: {
-                            type: 'string',
-                          },
-                        },
-                      ]),
-                      !1
-                    );
-                  if (e.includes('!') || !1 !== r.test(e))
-                    return (
-                      (l.errors = [
-                        {
-                          params: {},
-                        },
-                      ]),
-                      !1
-                    );
-                  if (e.length < 1)
-                    return (
-                      (l.errors = [
-                        {
-                          params: {},
-                        },
-                      ]),
-                      !1
-                    );
-                }
-                m = n === f;
-              } else m = !0;
-              if (m) {
-                if (void 0 !== t.library) {
-                  const r = f;
-                  i(t.library, {
-                    instancePath: e + '/library',
-                    parentData: t,
-                    parentDataProperty: 'library',
-                    rootData: o,
-                  }) ||
-                    ((p = null === p ? i.errors : p.concat(i.errors)),
-                    (f = p.length)),
-                    (m = r === f);
-                } else m = !0;
-                if (m) {
-                  if (void 0 !== t.name) {
-                    let r = t.name;
-                    const e = f;
-                    if (f === e) {
-                      if ('string' != typeof r)
-                        return (
-                          (l.errors = [
-                            {
-                              params: {
-                                type: 'string',
-                              },
-                            },
-                          ]),
-                          !1
-                        );
-                      if (r.length < 1)
-                        return (
-                          (l.errors = [
-                            {
-                              params: {},
-                            },
-                          ]),
-                          !1
-                        );
+          }
+        }
+      }
+    }
+  }
+  return (f.errors = a), 0 === o;
+}
+function m(
+  n,
+  {
+    instancePath: s = '',
+    parentData: a,
+    parentDataProperty: i,
+    rootData: p = n,
+  } = {},
+) {
+  let l = null,
+    u = 0;
+  if (0 === u) {
+    if (!n || 'object' != typeof n || Array.isArray(n))
+      return (m.errors = [{ params: { type: 'object' } }]), !1;
+    {
+      let a;
+      if (
+        (void 0 === n.name && (a = 'name')) ||
+        (void 0 === n.exposes && (a = 'exposes'))
+      )
+        return (m.errors = [{ params: { missingProperty: a } }]), !1;
+      {
+        const a = u;
+        for (const t in n)
+          if (
+            'exposes' !== t &&
+            'filename' !== t &&
+            'library' !== t &&
+            'name' !== t &&
+            'runtime' !== t &&
+            'runtimePlugins' !== t &&
+            'shareScope' !== t &&
+            'experiments' !== t
+          )
+            return (m.errors = [{ params: { additionalProperty: t } }]), !1;
+        if (a === u) {
+          if (void 0 !== n.exposes) {
+            const t = u;
+            o(n.exposes, {
+              instancePath: s + '/exposes',
+              parentData: n,
+              parentDataProperty: 'exposes',
+              rootData: p,
+            }) ||
+              ((l = null === l ? o.errors : l.concat(o.errors)),
+              (u = l.length));
+            var c = t === u;
+          } else c = !0;
+          if (c) {
+            if (void 0 !== n.filename) {
+              let e = n.filename;
+              const r = u;
+              if (u === r) {
+                if ('string' != typeof e)
+                  return (m.errors = [{ params: { type: 'string' } }]), !1;
+                if (e.length < 1) return (m.errors = [{ params: {} }]), !1;
+                if (e.includes('!') || !1 !== t.test(e))
+                  return (m.errors = [{ params: {} }]), !1;
+              }
+              c = r === u;
+            } else c = !0;
+            if (c) {
+              if (void 0 !== n.library) {
+                const t = u;
+                f(n.library, {
+                  instancePath: s + '/library',
+                  parentData: n,
+                  parentDataProperty: 'library',
+                  rootData: p,
+                }) ||
+                  ((l = null === l ? f.errors : l.concat(f.errors)),
+                  (u = l.length)),
+                  (c = t === u);
+              } else c = !0;
+              if (c) {
+                if (void 0 !== n.name) {
+                  let t = n.name;
+                  const e = u;
+                  if (u === e) {
+                    if ('string' != typeof t)
+                      return (m.errors = [{ params: { type: 'string' } }]), !1;
+                    if (t.length < 1) return (m.errors = [{ params: {} }]), !1;
+                  }
+                  c = e === u;
+                } else c = !0;
+                if (c) {
+                  if (void 0 !== n.runtime) {
+                    let t = n.runtime;
+                    const e = u,
+                      s = u;
+                    let a = !1;
+                    const o = u;
+                    if (!1 !== t) {
+                      const t = { params: { allowedValues: r.anyOf[0].enum } };
+                      null === l ? (l = [t]) : l.push(t), u++;
                     }
-                    m = e === f;
-                  } else m = !0;
-                  if (m) {
-                    if (void 0 !== t.runtime) {
-                      let r = t.runtime;
-                      const e = f,
-                        n = f;
-                      let s = !1;
-                      const a = f;
-                      if (!1 !== r) {
-                        const r = {
-                          params: {},
-                        };
-                        null === p ? (p = [r]) : p.push(r), f++;
-                      }
-                      var y = a === f;
-                      if (((s = s || y), !s)) {
-                        const t = f;
-                        if (f === t)
-                          if ('string' == typeof r) {
-                            if (r.length < 1) {
-                              const r = {
-                                params: {},
-                              };
-                              null === p ? (p = [r]) : p.push(r), f++;
-                            }
-                          } else {
-                            const r = {
-                              params: {
-                                type: 'string',
-                              },
-                            };
-                            null === p ? (p = [r]) : p.push(r), f++;
+                    var y = o === u;
+                    if (((a = a || y), !a)) {
+                      const e = u;
+                      if (u === e)
+                        if ('string' == typeof t) {
+                          if (t.length < 1) {
+                            const t = { params: {} };
+                            null === l ? (l = [t]) : l.push(t), u++;
                           }
-                        (y = t === f), (s = s || y);
-                      }
-                      if (!s) {
-                        const r = {
-                          params: {},
-                        };
-                        return (
-                          null === p ? (p = [r]) : p.push(r),
-                          f++,
-                          (l.errors = p),
-                          !1
-                        );
-                      }
-                      (f = n),
-                        null !== p && (n ? (p.length = n) : (p = null)),
-                        (m = e === f);
-                    } else m = !0;
-                    if (m) {
-                      if (void 0 !== t.runtimePlugins) {
-                        let r = t.runtimePlugins;
-                        const e = f;
-                        if (f === e) {
-                          if (!Array.isArray(r))
-                            return (
-                              (l.errors = [
-                                {
-                                  params: {
-                                    type: 'array',
-                                  },
-                                },
-                              ]),
-                              !1
-                            );
-                          {
-                            const t = r.length;
-                            for (let e = 0; e < t; e++) {
-                              let t = r[e];
-                              const n = f,
-                                s = f;
-                              let a = !1;
-                              const o = f;
-                              if (f === o)
-                                if ('string' == typeof t) {
-                                  if (t.length < 1) {
-                                    const r = {
-                                      params: {},
-                                    };
-                                    null === p ? (p = [r]) : p.push(r), f++;
-                                  }
-                                } else {
-                                  const r = {
-                                    params: {
-                                      type: 'string',
-                                    },
-                                  };
-                                  null === p ? (p = [r]) : p.push(r), f++;
-                                }
-                              var h = o === f;
-                              if (((a = a || h), !a)) {
-                                const r = f;
-                                if (f === r)
-                                  if (
-                                    t &&
-                                    'object' == typeof t &&
-                                    !Array.isArray(t)
-                                  ) {
-                                    let r;
-                                    if (
-                                      (void 0 === t.import && (r = 'import')) ||
-                                      (void 0 === t.async && (r = 'async'))
-                                    ) {
-                                      const t = {
-                                        params: {
-                                          missingProperty: r,
-                                        },
-                                      };
-                                      null === p ? (p = [t]) : p.push(t), f++;
-                                    } else {
-                                      const r = f;
-                                      for (const r in t)
-                                        if ('async' !== r && 'import' !== r) {
-                                          const t = {
-                                            params: {
-                                              additionalProperty: r,
-                                            },
-                                          };
-                                          null === p ? (p = [t]) : p.push(t),
-                                            f++;
-                                          break;
-                                        }
-                                      if (r === f) {
-                                        if (void 0 !== t.async) {
-                                          const r = f;
-                                          if ('boolean' != typeof t.async) {
-                                            const r = {
-                                              params: {
-                                                type: 'boolean',
-                                              },
-                                            };
-                                            null === p ? (p = [r]) : p.push(r),
-                                              f++;
-                                          }
-                                          var g = r === f;
-                                        } else g = !0;
-                                        if (g)
-                                          if (void 0 !== t.import) {
-                                            let r = t.import;
-                                            const e = f;
-                                            if (f === e)
-                                              if ('string' == typeof r) {
-                                                if (r.length < 1) {
-                                                  const r = {
-                                                    params: {},
-                                                  };
-                                                  null === p
-                                                    ? (p = [r])
-                                                    : p.push(r),
-                                                    f++;
-                                                }
-                                              } else {
-                                                const r = {
-                                                  params: {
-                                                    type: 'string',
-                                                  },
-                                                };
-                                                null === p
-                                                  ? (p = [r])
-                                                  : p.push(r),
-                                                  f++;
-                                              }
-                                            g = e === f;
-                                          } else g = !0;
-                                      }
-                                    }
-                                  } else {
-                                    const r = {
-                                      params: {
-                                        type: 'object',
-                                      },
-                                    };
-                                    null === p ? (p = [r]) : p.push(r), f++;
-                                  }
-                                (h = r === f), (a = a || h);
-                              }
-                              if (!a) {
-                                const r = {
-                                  params: {},
-                                };
-                                return (
-                                  null === p ? (p = [r]) : p.push(r),
-                                  f++,
-                                  (l.errors = p),
-                                  !1
-                                );
-                              }
-                              if (
-                                ((f = s),
-                                null !== p && (s ? (p.length = s) : (p = null)),
-                                n !== f)
-                              )
-                                break;
-                            }
+                        } else {
+                          const t = { params: { type: 'string' } };
+                          null === l ? (l = [t]) : l.push(t), u++;
+                        }
+                      (y = e === u), (a = a || y);
+                    }
+                    if (!a) {
+                      const t = { params: {} };
+                      return (
+                        null === l ? (l = [t]) : l.push(t),
+                        u++,
+                        (m.errors = l),
+                        !1
+                      );
+                    }
+                    (u = s),
+                      null !== l && (s ? (l.length = s) : (l = null)),
+                      (c = e === u);
+                  } else c = !0;
+                  if (c) {
+                    if (void 0 !== n.runtimePlugins) {
+                      let t = n.runtimePlugins;
+                      const e = u;
+                      if (u == u) {
+                        if (!Array.isArray(t))
+                          return (
+                            (m.errors = [{ params: { type: 'array' } }]), !1
+                          );
+                        {
+                          const e = t.length;
+                          for (let r = 0; r < e; r++) {
+                            const e = u;
+                            if ('string' != typeof t[r])
+                              return (
+                                (m.errors = [{ params: { type: 'string' } }]),
+                                !1
+                              );
+                            if (e !== u) break;
                           }
                         }
-                        m = e === f;
-                      } else m = !0;
-                      if (m)
-                        if (void 0 !== t.shareScope) {
-                          let r = t.shareScope;
-                          const e = f;
-                          if (f === e) {
-                            if ('string' != typeof r)
+                      }
+                      c = e === u;
+                    } else c = !0;
+                    if (c) {
+                      if (void 0 !== n.shareScope) {
+                        let t = n.shareScope;
+                        const e = u;
+                        if (u === e) {
+                          if ('string' != typeof t)
+                            return (
+                              (m.errors = [{ params: { type: 'string' } }]), !1
+                            );
+                          if (t.length < 1)
+                            return (m.errors = [{ params: {} }]), !1;
+                        }
+                        c = e === u;
+                      } else c = !0;
+                      if (c)
+                        if (void 0 !== n.experiments) {
+                          let t = n.experiments;
+                          const r = u;
+                          if (u === r) {
+                            if (!t || 'object' != typeof t || Array.isArray(t))
                               return (
-                                (l.errors = [
-                                  {
-                                    params: {
-                                      type: 'string',
-                                    },
-                                  },
-                                ]),
+                                (m.errors = [{ params: { type: 'object' } }]),
                                 !1
                               );
-                            if (r.length < 1)
-                              return (
-                                (l.errors = [
-                                  {
-                                    params: {},
-                                  },
-                                ]),
-                                !1
-                              );
+                            {
+                              const r = u;
+                              for (const e in t)
+                                if (
+                                  'asyncStartup' !== e &&
+                                  'externalRuntime' !== e
+                                )
+                                  return (
+                                    (m.errors = [
+                                      { params: { additionalProperty: e } },
+                                    ]),
+                                    !1
+                                  );
+                              if (r === u) {
+                                if (void 0 !== t.asyncStartup) {
+                                  const e = u;
+                                  if ('boolean' != typeof t.asyncStartup)
+                                    return (
+                                      (m.errors = [
+                                        { params: { type: 'boolean' } },
+                                      ]),
+                                      !1
+                                    );
+                                  var g = e === u;
+                                } else g = !0;
+                                if (g)
+                                  if (void 0 !== t.externalRuntime) {
+                                    let r = t.externalRuntime;
+                                    const n = u,
+                                      s = u;
+                                    let a = !1;
+                                    const o = u;
+                                    if ('boolean' != typeof r) {
+                                      const t = { params: { type: 'boolean' } };
+                                      null === l ? (l = [t]) : l.push(t), u++;
+                                    }
+                                    var d = o === u;
+                                    if (((a = a || d), !a)) {
+                                      const t = u;
+                                      if ('provide' !== r) {
+                                        const t = {
+                                          params: {
+                                            allowedValues:
+                                              e.properties.experiments
+                                                .properties.externalRuntime
+                                                .anyOf[1].enum,
+                                          },
+                                        };
+                                        null === l ? (l = [t]) : l.push(t), u++;
+                                      }
+                                      (d = t === u), (a = a || d);
+                                    }
+                                    if (!a) {
+                                      const t = { params: {} };
+                                      return (
+                                        null === l ? (l = [t]) : l.push(t),
+                                        u++,
+                                        (m.errors = l),
+                                        !1
+                                      );
+                                    }
+                                    (u = s),
+                                      null !== l &&
+                                        (s ? (l.length = s) : (l = null)),
+                                      (g = n === u);
+                                  } else g = !0;
+                              }
+                            }
                           }
-                          m = e === f;
-                        } else m = !0;
+                          c = r === u;
+                        } else c = !0;
                     }
                   }
                 }
@@ -1478,6 +1144,5 @@ function l(
       }
     }
   }
-  return (l.errors = p), 0 === f;
+  return (m.errors = l), 0 === u;
 }
-export default l;

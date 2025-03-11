@@ -9,7 +9,7 @@
 /.nx
 # dependencies
 node_modules
-
+./webpack-lib
 # IDEs and editors
 /.idea
 .project
@@ -71,3 +71,4 @@ packages/enhanced/test/js
 !apps/rslib-module/@mf-types/**
 
 **/vite.config.{js,ts,mjs,mts,cjs,cts}.timestamp*
+/webpack-lib/

@@ -1,5 +1,4 @@
 import {
-  MANIFEST_EXT,
   parseEntry,
   ENCODE_NAME_PREFIX,
   decodeName,
@@ -18,6 +17,8 @@ const defaultOptions = {
   abortOnError: true,
   consumeAPITypes: false,
   runtimePkgs: [],
+  remoteTypeUrls: {},
+  timeout: 60000,
 } satisfies Partial<HostOptions>;
 
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {
@@ -45,6 +46,7 @@ export const retrieveRemoteInfo = (options: {
   remote: string;
 }): RemoteInfo => {
   const { hostOptions, remoteAlias, remote } = options;
+  const { remoteTypeUrls } = hostOptions;
   let decodedRemote = remote;
   if (decodedRemote.startsWith(ENCODE_NAME_PREFIX)) {
     decodedRemote = decodeName(decodedRemote, ENCODE_NAME_PREFIX);
@@ -59,13 +61,26 @@ export const retrieveRemoteInfo = (options: {
         ? decodedRemote
         : '';
 
-  const zipUrl = url ? buildZipUrl(hostOptions, url) : '';
+  let zipUrl = '';
+  let apiTypeUrl = '';
+  const name = parsedInfo.name || remoteAlias;
+  if (typeof remoteTypeUrls === 'object' && remoteTypeUrls[name]) {
+    zipUrl = remoteTypeUrls[name].zip;
+    apiTypeUrl = remoteTypeUrls[name].api;
+  }
+  if (!zipUrl && url) {
+    zipUrl = buildZipUrl(hostOptions, url);
+  }
+
+  if (!apiTypeUrl && zipUrl) {
+    apiTypeUrl = buildApiTypeUrl(zipUrl);
+  }
 
   return {
-    name: parsedInfo.name || remoteAlias,
+    name,
     url: url,
     zipUrl,
-    apiTypeUrl: buildApiTypeUrl(zipUrl),
+    apiTypeUrl,
     alias: remoteAlias,
   };
 };

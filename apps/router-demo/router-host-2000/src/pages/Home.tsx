@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { Space, Table, Tag } from 'antd';
 import type { TableProps } from 'antd';
 import type React from 'react';
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import { createRemoteComponent } from '@module-federation/bridge-react';
 
 interface DataType {
   key: string;
@@ -83,11 +86,23 @@ const data: DataType[] = [
   },
 ];
 
+const Remote1Button = createRemoteComponent<any, any>({
+  loader: () => loadRemote('remote1/export-button'),
+  // @ts-ignore
+  fallback: null,
+  loading: null,
+});
+
 const Home: React.FC = () => {
+  const [count, setCount] = useState(0);
   return (
     <>
       <h2>Router host Home page</h2>
       <Table columns={columns} dataSource={data} />
+      <Remote1Button
+        text={`Hit me! ${count}`}
+        onClick={() => setCount((prevState: number) => prevState + 1)}
+      />
     </>
   );
 };
