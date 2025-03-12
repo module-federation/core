@@ -55,11 +55,6 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           //   ? VueRouter.createMemoryHistory(info.basename)
           //   : VueRouter.createWebHistory(info.basename);
 
-          console.log(
-            'vue3-bridge==>bridgeOptions.router',
-            bridgeOptions.router,
-          );
-
           // const router = VueRouter.createRouter({
           //   ...bridgeOptions.router.options,
           //   history,
