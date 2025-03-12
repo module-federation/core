@@ -1,4 +1,4 @@
-import type { CliPlugin, AppTools } from '@modern-js/app-tools';
+import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
 import {
   ModuleFederationPlugin as WebpackModuleFederationPlugin,
   AsyncBoundaryPlugin,
@@ -8,11 +8,11 @@ import type { moduleFederationPlugin as MFPluginOptions } from '@module-federati
 import type { PluginOptions, InternalModernPluginOptions } from '../types';
 import { moduleFederationConfigPlugin } from './configPlugin';
 import { moduleFederationSSRPlugin } from './ssrPlugin';
-import { WebpackPluginInstance } from '@rspack/core';
+import { isWebTarget } from './utils';
 
 export const moduleFederationPlugin = (
   userConfig: PluginOptions = {},
-): CliPlugin<AppTools> => {
+): CliPluginFuture<AppTools> => {
   const internalModernPluginOptions: InternalModernPluginOptions = {
     csrConfig: undefined,
     ssrConfig: undefined,
@@ -25,55 +25,47 @@ export const moduleFederationPlugin = (
   };
   return {
     name: '@modern-js/plugin-module-federation',
-    setup: async ({ useConfigContext }) => {
-      const modernjsConfig = useConfigContext();
-      return {
-        config: async () => {
-          return {
-            tools: {
-              rspack(config, { isServer }) {
-                const browserPluginOptions =
-                  internalModernPluginOptions.csrConfig as MFPluginOptions.ModuleFederationPluginOptions;
-                if (!isServer) {
-                  internalModernPluginOptions.browserPlugin =
-                    new RspackModuleFederationPlugin(browserPluginOptions);
-                  config.plugins?.push(
-                    internalModernPluginOptions.browserPlugin,
-                  );
-                }
-              },
-              webpack(config, { isServer }) {
-                const browserPluginOptions =
-                  internalModernPluginOptions.csrConfig as MFPluginOptions.ModuleFederationPluginOptions;
-                if (!isServer) {
-                  internalModernPluginOptions.browserPlugin =
-                    new WebpackModuleFederationPlugin(browserPluginOptions);
-                  config.plugins?.push(
-                    internalModernPluginOptions.browserPlugin as WebpackPluginInstance,
-                  );
-                }
-                const enableAsyncEntry =
-                  modernjsConfig.source?.enableAsyncEntry;
-                if (!enableAsyncEntry && browserPluginOptions.async !== false) {
-                  const asyncBoundaryPluginOptions =
-                    typeof browserPluginOptions.async === 'object'
-                      ? browserPluginOptions.async
-                      : {
-                          eager: (module) =>
-                            module &&
-                            /\.federation/.test(module?.request || ''),
-                          excludeChunk: (chunk) =>
-                            chunk.name === browserPluginOptions.name,
-                        };
-                  config.plugins?.push(
-                    new AsyncBoundaryPlugin(asyncBoundaryPluginOptions) as any,
-                  );
-                }
-              },
-            },
-          };
-        },
-      };
+    setup: async (api) => {
+      const modernjsConfig = api.getConfig();
+
+      api.modifyBundlerChain((chain) => {
+        const bundlerType =
+          api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
+        const browserPluginOptions =
+          internalModernPluginOptions.csrConfig as MFPluginOptions.ModuleFederationPluginOptions;
+
+        const MFPlugin =
+          bundlerType === 'webpack'
+            ? WebpackModuleFederationPlugin
+            : RspackModuleFederationPlugin;
+        if (isWebTarget(chain.get('target'))) {
+          chain
+            .plugin('plugin-module-federation')
+            .use(MFPlugin, [browserPluginOptions])
+            .init((Plugin: typeof MFPlugin, args) => {
+              internalModernPluginOptions.browserPlugin = new Plugin(args[0]);
+              return internalModernPluginOptions.browserPlugin;
+            });
+        }
+
+        if (bundlerType === 'webpack') {
+          const enableAsyncEntry = modernjsConfig.source?.enableAsyncEntry;
+          if (!enableAsyncEntry && browserPluginOptions.async !== false) {
+            const asyncBoundaryPluginOptions =
+              typeof browserPluginOptions.async === 'object'
+                ? browserPluginOptions.async
+                : {
+                    eager: (module) =>
+                      module && /\.federation/.test(module?.request || ''),
+                    excludeChunk: (chunk) =>
+                      chunk.name === browserPluginOptions.name,
+                  };
+            chain
+              .plugin('async-boundary-plugin')
+              .use(AsyncBoundaryPlugin, [asyncBoundaryPluginOptions]);
+          }
+        }
+      });
     },
     usePlugins: [
       moduleFederationConfigPlugin(internalModernPluginOptions),

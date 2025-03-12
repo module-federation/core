@@ -28,8 +28,9 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
       __APP_VERSION__,
       async render(info: RenderFnParams) {
         LoggerInstance.debug(`createBridgeComponent render Info`, info);
-        const app = Vue.createApp(bridgeInfo.rootComponent);
-        rootMap.set(info.dom, app);
+        const { moduleName, dom, basename, memoryRoute, ...propsInfo } = info;
+        const app = Vue.createApp(bridgeInfo.rootComponent, propsInfo);
+        rootMap.set(dom, app);
 
         const beforeBridgeRenderRes =
           await instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info);
@@ -43,8 +44,9 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
 
         const bridgeOptions = bridgeInfo.appOptions({
           app,
-          basename: info.basename,
-          memoryRoute: info.memoryRoute,
+          basename,
+          memoryRoute,
+          ...propsInfo,
           ...extraProps,
         });
 
@@ -59,19 +61,19 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
             routes: bridgeOptions.router.getRoutes(),
           });
 
-          LoggerInstance.log(`createBridgeComponent render router info>>>`, {
-            name: info.moduleName,
+          LoggerInstance.debug(`createBridgeComponent render router info>>>`, {
+            moduleName,
             router,
           });
           // memory route Initializes the route
-          if (info.memoryRoute) {
-            await router.push(info.memoryRoute.entryPath);
+          if (memoryRoute) {
+            await router.push(memoryRoute.entryPath);
           }
 
           app.use(router);
         }
 
-        app.mount(info.dom);
+        app.mount(dom);
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info);
       },
       destroy(info: { dom: HTMLElement }) {

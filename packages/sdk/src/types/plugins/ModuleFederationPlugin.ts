@@ -136,6 +136,15 @@ export interface PluginDevOptions {
   disableDynamicRemoteTypeHints?: boolean;
 }
 
+interface RemoteTypeUrl {
+  api: string;
+  zip: string;
+}
+
+export interface RemoteTypeUrls {
+  [remoteName: string]: RemoteTypeUrl;
+}
+
 export interface DtsHostOptions {
   typesFolder?: string;
   abortOnError?: boolean;
@@ -144,6 +153,8 @@ export interface DtsHostOptions {
   maxRetries?: number;
   consumeAPITypes?: boolean;
   runtimePkgs?: string[];
+  remoteTypeUrls?: (() => Promise<RemoteTypeUrls>) | RemoteTypeUrls;
+  timeout?: number;
 }
 
 export interface DtsRemoteOptions {
@@ -167,6 +178,7 @@ export interface PluginDtsOptions {
   extraOptions?: Record<string, any>;
   implementation?: string;
   cwd?: string;
+  displayErrorInTerminal?: boolean;
 }
 
 export type AsyncBoundaryOptions = {
@@ -231,13 +243,12 @@ export interface ModuleFederationPluginOptions {
   manifest?: boolean | PluginManifestOptions;
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
-  async?: boolean | AsyncBoundaryOptions;
   dataPrefetch?: DataPrefetch;
   virtualRuntimeEntry?: boolean;
   experiments?: {
-    federationRuntime?: false | 'hoisted';
     externalRuntime?: boolean;
     provideExternalRuntime?: boolean;
+    asyncStartup?: boolean;
   };
   bridge?: {
     /**
@@ -247,6 +258,10 @@ export interface ModuleFederationPluginOptions {
      */
     disableAlias?: boolean;
   };
+  /**
+   * Configuration for async boundary plugin
+   */
+  async?: boolean | AsyncBoundaryOptions;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

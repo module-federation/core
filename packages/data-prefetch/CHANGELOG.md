@@ -1,5 +1,66 @@
 # @module-federation/data-prefetch
 
+## 0.10.0
+
+### Patch Changes
+
+- Updated dependencies [0f71cbc]
+- Updated dependencies [22fcccd]
+  - @module-federation/sdk@0.10.0
+  - @module-federation/runtime@0.10.0
+
+## 0.9.1
+
+### Patch Changes
+
+- Updated dependencies [35d925b]
+- Updated dependencies [35d925b]
+- Updated dependencies [8acd217]
+  - @module-federation/sdk@0.9.1
+  - @module-federation/runtime@0.9.1
+
+## 0.9.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.9.0
+- @module-federation/sdk@0.9.0
+
+## 0.8.12
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.12
+- @module-federation/sdk@0.8.12
+
+## 0.8.11
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.11
+- @module-federation/sdk@0.8.11
+
+## 0.8.10
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.10
+- @module-federation/sdk@0.8.10
+
+## 0.8.9
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.9
+- @module-federation/sdk@0.8.9
+
+## 0.8.8
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.8
+- @module-federation/sdk@0.8.8
+
 ## 0.8.7
 
 ### Patch Changes

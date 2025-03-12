@@ -62,7 +62,16 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
         const url = fileToDownload;
         const response = await axiosGet(url, {
           responseType: 'arraybuffer',
+          timeout: hostOptions.timeout,
         }).catch(downloadErrorLogger(destinationFolder, url));
+        if (
+          typeof response.headers?.['content-type'] === 'string' &&
+          response.headers['content-type'].includes('text/html')
+        ) {
+          throw new Error(
+            `${url} receives invalid content-type: ${response.headers['content-type']}`,
+          );
+        }
 
         try {
           if (hostOptions.deleteTypesFolder) {
@@ -81,6 +90,11 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
 
         const zip = new AdmZip(Buffer.from(response.data));
         zip.extractAllTo(destinationPath, true);
+        fileLog(
+          `zip.extractAllTo success destinationPath: ${destinationPath}; url: ${url}`,
+          'downloadTypesArchive',
+          'info',
+        );
         return [destinationFolder, destinationPath];
       } catch (error: any) {
         fileLog(

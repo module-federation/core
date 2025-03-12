@@ -3,7 +3,7 @@ import path from 'path';
 import axios, { type AxiosRequestConfig } from 'axios';
 import http from 'http';
 import https from 'https';
-import { moduleFederationPlugin } from '@module-federation/sdk';
+import { moduleFederationPlugin, getProcessEnv } from '@module-federation/sdk';
 import ansiColors from 'ansi-colors';
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
 import { HostOptions } from '../interfaces/HostOptions';
@@ -124,16 +124,36 @@ export const isTSProject = (
 
 export function cloneDeepOptions(options: DTSManagerOptions) {
   const excludeKeys = ['manifest', 'async'];
-  return cloneDeepWith(options, (_value, key) => {
+
+  return cloneDeepWith(options, (value, key) => {
     // moduleFederationConfig.manifest may have un serialization options
     if (typeof key === 'string' && excludeKeys.includes(key)) {
+      return false;
+    }
+    if (typeof value === 'function') {
       return false;
     }
   });
 }
 
+const getEnvHeaders = (): Record<string, string> => {
+  const headersStr = getProcessEnv()['MF_ENV_HEADERS'] || '{}';
+
+  return {
+    ...JSON.parse(headersStr),
+  };
+};
+
 export async function axiosGet(url: string, config?: AxiosRequestConfig) {
   const httpAgent = new http.Agent({ family: 4 });
   const httpsAgent = new https.Agent({ family: 4 });
-  return axios.get(url, { httpAgent, httpsAgent, ...config });
+  return axios.get(url, {
+    httpAgent,
+    httpsAgent,
+    ...{
+      headers: getEnvHeaders(),
+    },
+    ...config,
+    timeout: config?.timeout || 60000,
+  });
 }

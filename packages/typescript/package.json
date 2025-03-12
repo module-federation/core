@@ -58,8 +58,8 @@
   },
   "exports": {
     ".": {
-      "require": "./dist/src/index.js",
-      "types": "./dist/src/index.d.ts"
+      "types": "./dist/src/index.d.ts",
+      "require": "./dist/src/index.js"
     }
   }
 }

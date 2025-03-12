@@ -1,5 +1,72 @@
 # @module-federation/rsbuild-plugin
 
+## 0.10.0
+
+### Patch Changes
+
+- 5b391b5: chore(rsbuild-plugin): update mf format judgment conditions
+- 1010f96: chore(modern-js-plugin): use bundlerChain instead of tools.webpack or tools.rspack
+- 3c8bd83: fix(rsbuild-plugin): add more MF packages to `source.include`
+- Updated dependencies [0f71cbc]
+- Updated dependencies [22fcccd]
+  - @module-federation/sdk@0.10.0
+  - @module-federation/enhanced@0.10.0
+
+## 0.9.1
+
+### Patch Changes
+
+- Updated dependencies [35d925b]
+- Updated dependencies [35d925b]
+- Updated dependencies [8acd217]
+  - @module-federation/sdk@0.9.1
+  - @module-federation/enhanced@0.9.1
+
+## 0.9.0
+
+### Patch Changes
+
+- @module-federation/enhanced@0.9.0
+- @module-federation/sdk@0.9.0
+
+## 0.8.12
+
+### Patch Changes
+
+- Updated dependencies [9062cee]
+  - @module-federation/enhanced@0.8.12
+  - @module-federation/sdk@0.8.12
+
+## 0.8.11
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.11
+- @module-federation/sdk@0.8.11
+
+## 0.8.10
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.10
+- @module-federation/sdk@0.8.10
+
+## 0.8.9
+
+### Patch Changes
+
+- Updated dependencies [6e3afc6]
+  - @module-federation/enhanced@0.8.9
+  - @module-federation/sdk@0.8.9
+
+## 0.8.8
+
+### Patch Changes
+
+- Updated dependencies [eda5184]
+  - @module-federation/enhanced@0.8.8
+  - @module-federation/sdk@0.8.8
+
 ## 0.8.7
 
 ### Patch Changes

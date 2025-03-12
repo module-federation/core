@@ -1,5 +1,6 @@
 import { Chunk, Compilation, StatsCompilation, StatsModule } from 'webpack';
 import path from 'path';
+import fs from 'fs';
 import {
   StatsAssets,
   moduleFederationPlugin,
@@ -261,6 +262,7 @@ export function getFileName(
 export function getTypesMetaInfo(
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
   context: string,
+  compilation: Compilation,
 ): MetaDataTypes {
   const defaultRemoteOptions = {
     generateAPITypes: true,
@@ -303,11 +305,14 @@ export function getTypesMetaInfo(
       moduleFederationConfig: pluginOptions,
     });
 
+    const zip = path.join(zipPrefix, zipName);
+    const api = path.join(zipPrefix, apiFileName);
+
     return {
       path: '',
       name: '',
-      zip: path.join(zipPrefix, zipName),
-      api: path.join(zipPrefix, apiFileName),
+      zip,
+      api,
     };
   } catch (err) {
     logger.warn(

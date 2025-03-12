@@ -1,7 +1,8 @@
 {
   "name": "@module-federation/storybook-addon",
-  "version": "3.0.18",
+  "version": "4.0.7",
   "description": "Storybook addon to consume remote module federated apps/components",
+  "type": "commonjs",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -25,18 +26,15 @@
   ],
   "author": "Fiodorov Andrei <hello@fyodorovandrei.com> (https://github.com/fyodorovandrei)",
   "main": "dist/src/index.js",
-  "module": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/src/index.js",
-      "require": "./dist/src/index.js",
-      "types": "./dist/src/index.d.ts"
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
     },
     "./preset": {
-      "import": "./dist/preset.js",
-      "require": "./dist/preset.js",
-      "types": "./dist/preset.d.ts"
+      "types": "./dist/preset.d.ts",
+      "default": "./dist/preset.js"
     },
     "./*": "./*"
   },
@@ -55,28 +53,30 @@
     "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
+    "jest-fixed-jsdom": "^0.0.9",
     "@module-federation/utilities": "workspace:*",
     "@rsbuild/core": "^1.0.19",
-    "@storybook/core-common": "7.6.20",
     "@storybook/node-logger": "7.6.20",
+    "@storybook/core": "^8.4.6",
     "webpack": "5.93.0",
     "webpack-virtual-modules": "0.6.2"
   },
   "peerDependencies": {
     "@rsbuild/core": "^1.0.1",
-    "@module-federation/utilities": "^3.1.38",
+    "@module-federation/utilities": "^3.1.46",
+    "@module-federation/sdk": "^0.10.0",
     "@nx/react": ">= 16.0.0",
     "@nx/webpack": ">= 16.0.0",
-    "@storybook/core-common": "^6.5.16 || ^7.0.0 || ^ 8.0.0",
-    "@storybook/node-logger": "^6.5.16 || ^7.0.0 || ^ 8.0.0",
+    "@storybook/core": ">= 8.2.0",
+    "@storybook/node-logger": "^6.5.16 || ^7.0.0 || ^8.0.0",
     "webpack": "^5.75.0",
-    "webpack-virtual-modules": "^0.5.0 || ^0.6.0"
+    "webpack-virtual-modules": "0.6.2"
   },
   "peerDependenciesMeta": {
     "@rsbuild/core": {
       "optional": true
     },
-    "@module-federation/utilities": {
+    "@module-federation/sdk": {
       "optional": true
     },
     "@nx/react": {
@@ -85,7 +85,7 @@
     "@nx/webpack": {
       "optional": true
     },
-    "@storybook/core-common": {
+    "@storybook/core": {
       "optional": true
     },
     "@storybook/node-logger": {

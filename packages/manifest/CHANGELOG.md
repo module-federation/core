@@ -1,5 +1,87 @@
 # @module-federation/manifest
 
+## 0.10.0
+
+### Patch Changes
+
+- Updated dependencies [0f71cbc]
+- Updated dependencies [22fcccd]
+  - @module-federation/sdk@0.10.0
+  - @module-federation/dts-plugin@0.10.0
+  - @module-federation/managers@0.10.0
+
+## 0.9.1
+
+### Patch Changes
+
+- 8acd217: chore: remove isomorphic-rslog
+- Updated dependencies [35d925b]
+- Updated dependencies [35d925b]
+- Updated dependencies [7a37360]
+- Updated dependencies [8acd217]
+  - @module-federation/dts-plugin@0.9.1
+  - @module-federation/sdk@0.9.1
+  - @module-federation/managers@0.9.1
+
+## 0.9.0
+
+### Patch Changes
+
+- Updated dependencies [5ebc53f]
+- Updated dependencies [d872b35]
+  - @module-federation/dts-plugin@0.9.0
+  - @module-federation/sdk@0.9.0
+  - @module-federation/managers@0.9.0
+
+## 0.8.12
+
+### Patch Changes
+
+- Updated dependencies [d227303]
+  - @module-federation/dts-plugin@0.8.12
+  - @module-federation/sdk@0.8.12
+  - @module-federation/managers@0.8.12
+
+## 0.8.11
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.11
+- @module-federation/managers@0.8.11
+- @module-federation/dts-plugin@0.8.11
+
+## 0.8.10
+
+### Patch Changes
+
+- @module-federation/dts-plugin@0.8.10
+- @module-federation/sdk@0.8.10
+- @module-federation/managers@0.8.10
+
+## 0.8.9
+
+### Patch Changes
+
+- Updated dependencies [6e3afc6]
+- Updated dependencies [1be9d62]
+- Updated dependencies [6e3afc6]
+- Updated dependencies [6e3afc6]
+- Updated dependencies [6e3afc6]
+- Updated dependencies [6e3afc6]
+- Updated dependencies [6e3afc6]
+- Updated dependencies [6e3afc6]
+  - @module-federation/dts-plugin@0.8.9
+  - @module-federation/sdk@0.8.9
+  - @module-federation/managers@0.8.9
+
+## 0.8.8
+
+### Patch Changes
+
+- @module-federation/sdk@0.8.8
+- @module-federation/managers@0.8.8
+- @module-federation/dts-plugin@0.8.8
+
 ## 0.8.7
 
 ### Patch Changes

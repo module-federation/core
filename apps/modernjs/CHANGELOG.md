@@ -1,5 +1,57 @@
 # @module-federation/modernjsapp
 
+## 0.1.86
+
+### Patch Changes
+
+- 1010f96: chore(modern-js-plugin): use bundlerChain instead of tools.webpack or tools.rspack
+  - @module-federation/enhanced@0.10.0
+
+## 0.1.85
+
+### Patch Changes
+
+- @module-federation/enhanced@0.9.1
+
+## 0.1.84
+
+### Patch Changes
+
+- @module-federation/enhanced@0.9.0
+
+## 0.1.83
+
+### Patch Changes
+
+- Updated dependencies [9062cee]
+  - @module-federation/enhanced@0.8.12
+
+## 0.1.82
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.11
+
+## 0.1.81
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.10
+
+## 0.1.80
+
+### Patch Changes
+
+- Updated dependencies [6e3afc6]
+  - @module-federation/enhanced@0.8.9
+
+## 0.1.79
+
+### Patch Changes
+
+- Updated dependencies [eda5184]
+  - @module-federation/enhanced@0.8.8
+
 ## 0.1.78
 
 ### Patch Changes

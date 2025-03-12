@@ -67,7 +67,7 @@ function writeTempTsConfig(
   const createHash = (contents: string) => {
     return crypto.createHash('md5').update(contents).digest('hex');
   };
-  const hash = createHash(`${JSON.stringify(tsConfig)}${name}`);
+  const hash = createHash(`${JSON.stringify(tsConfig)}${name}${Date.now()}`);
   const tempTsConfigJsonPath = resolve(
     cwd ?? context,
     'node_modules',

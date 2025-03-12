@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rsbuild-plugin",
-  "version": "0.8.7",
+  "version": "0.10.0",
   "description": "Module Federation plugin for Rsbuild",
   "homepage": "https://module-federation.io",
   "bugs": {
@@ -40,20 +40,17 @@
     "dist"
   ],
   "dependencies": {
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/enhanced": "workspace:*"
   },
   "devDependencies": {
     "@rsbuild/core": "^1.0.19"
   },
   "peerDependencies": {
-    "@module-federation/enhanced": "workspace:*",
     "@rsbuild/core": "1.x"
   },
   "peerDependenciesMeta": {
     "@rsbuild/core": {
-      "optional": true
-    },
-    "@module-federation/enhanced": {
       "optional": true
     }
   },

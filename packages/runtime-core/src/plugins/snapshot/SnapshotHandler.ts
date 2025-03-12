@@ -305,26 +305,40 @@ export class SnapshotHandler {
           res = await fetch(manifestUrl, {});
         }
         manifestJson = (await res.json()) as Manifest;
-        assert(
-          manifestJson.metaData && manifestJson.exposes && manifestJson.shared,
-          `${manifestUrl} is not a federation manifest`,
-        );
-        this.manifestCache.set(manifestUrl, manifestJson);
-        return manifestJson;
       } catch (err) {
-        delete this.manifestLoading[manifestUrl];
-        error(
-          getShortErrorMsg(
-            RUNTIME_003,
-            runtimeDescMap,
+        manifestJson =
+          (await this.HostInstance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(
             {
-              manifestUrl,
-              moduleName: moduleInfo.name,
+              id: manifestUrl,
+              error: err,
+              from: 'runtime',
+              lifecycle: 'afterResolve',
+              origin: this.HostInstance,
             },
-            `${err}`,
-          ),
-        );
+          )) as Manifest | undefined;
+
+        if (!manifestJson) {
+          delete this.manifestLoading[manifestUrl];
+          error(
+            getShortErrorMsg(
+              RUNTIME_003,
+              runtimeDescMap,
+              {
+                manifestUrl,
+                moduleName: moduleInfo.name,
+              },
+              `${err}`,
+            ),
+          );
+        }
       }
+
+      assert(
+        manifestJson.metaData && manifestJson.exposes && manifestJson.shared,
+        `${manifestUrl} is not a federation manifest`,
+      );
+      this.manifestCache.set(manifestUrl, manifestJson);
+      return manifestJson;
     };
 
     const asyncLoadProcess = async () => {

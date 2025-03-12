@@ -1,5 +1,91 @@
 # @module-federation/modern-js
 
+## 0.10.0
+
+### Patch Changes
+
+- 1010f96: chore(modern-js-plugin): use bundlerChain instead of tools.webpack or tools.rspack
+- Updated dependencies [0f71cbc]
+- Updated dependencies [5b391b5]
+- Updated dependencies [1010f96]
+- Updated dependencies [22fcccd]
+- Updated dependencies [3c8bd83]
+  - @module-federation/sdk@0.10.0
+  - @module-federation/rsbuild-plugin@0.10.0
+  - @module-federation/enhanced@0.10.0
+  - @module-federation/node@2.6.28
+
+## 0.9.1
+
+### Patch Changes
+
+- Updated dependencies [35d925b]
+- Updated dependencies [35d925b]
+- Updated dependencies [8acd217]
+  - @module-federation/sdk@0.9.1
+  - @module-federation/enhanced@0.9.1
+  - @module-federation/node@2.6.27
+  - @module-federation/rsbuild-plugin@0.9.1
+
+## 0.9.0
+
+### Patch Changes
+
+- @module-federation/enhanced@0.9.0
+- @module-federation/node@2.6.26
+- @module-federation/rsbuild-plugin@0.9.0
+- @module-federation/sdk@0.9.0
+
+## 0.8.12
+
+### Patch Changes
+
+- e602d82: fix: enable SSR by utilizing pluginOptions and configuration adjustments for improved accuracy
+- Updated dependencies [9062cee]
+  - @module-federation/enhanced@0.8.12
+  - @module-federation/node@2.6.25
+  - @module-federation/rsbuild-plugin@0.8.12
+  - @module-federation/sdk@0.8.12
+
+## 0.8.11
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.11
+- @module-federation/sdk@0.8.11
+- @module-federation/rsbuild-plugin@0.8.11
+- @module-federation/node@2.6.24
+
+## 0.8.10
+
+### Patch Changes
+
+- 21cc62c: chore: use new modern.js plugin for improved functionality
+  - @module-federation/node@2.6.23
+  - @module-federation/enhanced@0.8.10
+  - @module-federation/rsbuild-plugin@0.8.10
+  - @module-federation/sdk@0.8.10
+
+## 0.8.9
+
+### Patch Changes
+
+- Updated dependencies [6e3afc6]
+  - @module-federation/enhanced@0.8.9
+  - @module-federation/node@2.6.22
+  - @module-federation/rsbuild-plugin@0.8.9
+  - @module-federation/sdk@0.8.9
+
+## 0.8.8
+
+### Patch Changes
+
+- Updated dependencies [eda5184]
+  - @module-federation/enhanced@0.8.8
+  - @module-federation/node@2.6.21
+  - @module-federation/rsbuild-plugin@0.8.8
+  - @module-federation/sdk@0.8.8
+
 ## 0.8.7
 
 ### Patch Changes

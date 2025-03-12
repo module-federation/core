@@ -1,4 +1,11 @@
-import { ref, onMounted, onBeforeUnmount, watch, defineComponent } from 'vue';
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  defineComponent,
+  useAttrs,
+} from 'vue';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { useRoute } from 'vue-router';
 import { LoggerInstance } from './utils';
@@ -11,20 +18,24 @@ export default defineComponent({
     basename: String,
     memoryRoute: Object,
     providerInfo: Function,
+    rootAttrs: Object,
   },
+  inheritAttrs: false,
   setup(props) {
     const rootRef = ref(null);
     const providerInfoRef = ref(null);
     const pathname = ref('');
     const route = useRoute();
     const hostInstance = getInstance();
+    const componentAttrs = useAttrs();
 
-    const renderComponent = () => {
+    const renderComponent = async () => {
       const providerReturn = props.providerInfo?.();
       providerInfoRef.value = providerReturn;
 
       let renderProps = {
-        name: props.moduleName,
+        ...componentAttrs,
+        moduleName: props.moduleName,
         dom: rootRef.value,
         basename: props.basename,
         memoryRoute: props.memoryRoute,
@@ -35,9 +46,9 @@ export default defineComponent({
       );
 
       const beforeBridgeRenderRes =
-        hostInstance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+        (await hostInstance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
           renderProps,
-        ) || {};
+        )) || {};
 
       renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
       providerReturn.render(renderProps);
@@ -92,6 +103,6 @@ export default defineComponent({
       });
     });
 
-    return () => <div ref={rootRef}></div>;
+    return () => <div {...(props.rootAttrs || {})} ref={rootRef}></div>;
   },
 });

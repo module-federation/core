@@ -1,5 +1,82 @@
 # @module-federation/bridge-vue3
 
+## 0.10.0
+
+### Patch Changes
+
+- 6bc13cf: Fixed several issues:
+
+  1. Resolved inconsistencies in naming between `name` and `moduleName` to align with the type defined in `packages/bridge/bridge-shared/src/type.ts`. This also fixed an issue where `name` was being passed to the remote component, and if it was `<router-view>`, it caused rendering issues.
+  2. Issue: When passing props from a Vue 3 host application to a Vue 3 remote application created with `createRemoteComponent`, the props were being applied as attributes on the root container instead of being passed to the remote component.
+     Fix: Set `inheritAttrs: false` in `remoteApp.tsx` and explicitly pass all attributes to the remote component using `useAttrs()`.
+  3. Added a `rootAttrs` parameter to `createRemoteComponent` to allow passing attributes to the root container where the remote application is mounted. This enables setting classes, identifiers, and other attributes for the container element.
+
+- Updated dependencies [0f71cbc]
+- Updated dependencies [22fcccd]
+  - @module-federation/sdk@0.10.0
+  - @module-federation/runtime@0.10.0
+  - @module-federation/bridge-shared@0.10.0
+
+## 0.9.1
+
+### Patch Changes
+
+- Updated dependencies [35d925b]
+- Updated dependencies [35d925b]
+- Updated dependencies [8acd217]
+  - @module-federation/sdk@0.9.1
+  - @module-federation/runtime@0.9.1
+  - @module-federation/bridge-shared@0.9.1
+
+## 0.9.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.9.0
+- @module-federation/sdk@0.9.0
+- @module-federation/bridge-shared@0.9.0
+
+## 0.8.12
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.12
+- @module-federation/sdk@0.8.12
+- @module-federation/bridge-shared@0.8.12
+
+## 0.8.11
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.11
+- @module-federation/sdk@0.8.11
+- @module-federation/bridge-shared@0.8.11
+
+## 0.8.10
+
+### Patch Changes
+
+- f141396: fix(vue3-bridge): bridge-vue3 parameter lossing issue
+  - @module-federation/runtime@0.8.10
+  - @module-federation/sdk@0.8.10
+  - @module-federation/bridge-shared@0.8.10
+
+## 0.8.9
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.9
+- @module-federation/sdk@0.8.9
+- @module-federation/bridge-shared@0.8.9
+
+## 0.8.8
+
+### Patch Changes
+
+- @module-federation/runtime@0.8.8
+- @module-federation/sdk@0.8.8
+- @module-federation/bridge-shared@0.8.8
+
 ## 0.8.7
 
 ### Patch Changes

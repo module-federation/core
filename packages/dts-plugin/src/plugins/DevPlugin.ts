@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
-import chalk from 'chalk';
-import { type DevWorker, createDevWorker } from '../dev-worker';
+import path from 'path';
+import { createDevWorker } from '../dev-worker';
 import {
   moduleFederationPlugin,
   normalizeOptions,
@@ -12,10 +12,11 @@ import {
   getIPV4,
   logger,
 } from '../server';
-import type { Compiler, WebpackPluginInstance } from 'webpack';
-import path from 'path';
-import { isDev } from './utils';
+import { getCompilerOutputDir, isDev } from './utils';
 import { isTSProject } from '../core/lib/utils';
+
+import type { Compiler, WebpackPluginInstance } from 'webpack';
+import type { DevWorker } from '../dev-worker';
 
 enum PROCESS_EXIT_CODE {
   SUCCESS = 0,
@@ -35,9 +36,24 @@ export class DevPlugin implements WebpackPluginInstance {
   readonly name = 'MFDevPlugin';
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _devWorker?: DevWorker;
+  dtsOptions: moduleFederationPlugin.PluginDtsOptions;
+  generateTypesPromise: Promise<void>;
+  fetchRemoteTypeUrlsPromise: Promise<
+    moduleFederationPlugin.DtsHostOptions['remoteTypeUrls'] | undefined
+  >;
 
-  constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
+  constructor(
+    options: moduleFederationPlugin.ModuleFederationPluginOptions,
+    dtsOptions: moduleFederationPlugin.PluginDtsOptions,
+    generateTypesPromise: Promise<void>,
+    fetchRemoteTypeUrlsPromise: Promise<
+      moduleFederationPlugin.DtsHostOptions['remoteTypeUrls'] | undefined
+    >,
+  ) {
     this._options = options;
+    this.generateTypesPromise = generateTypesPromise;
+    this.dtsOptions = dtsOptions;
+    this.fetchRemoteTypeUrlsPromise = fetchRemoteTypeUrlsPromise;
   }
 
   static ensureLiveReloadEntry(
@@ -167,6 +183,7 @@ export class DevPlugin implements WebpackPluginInstance {
           generateTypes: defaultGenerateTypes,
           consumeTypes: defaultConsumeTypes,
           extraOptions: {},
+          displayErrorInTerminal: this.dtsOptions?.displayErrorInTerminal,
         },
         'mfOptions.dts',
       )(dts);
@@ -191,10 +208,7 @@ export class DevPlugin implements WebpackPluginInstance {
                 ? undefined
                 : normalizedDtsOptions.implementation,
             context: compiler.context,
-            outputDir: path.relative(
-              compiler.context,
-              compiler.outputPath || compiler.options.output.path,
-            ),
+            outputDir: getCompilerOutputDir(compiler),
             moduleFederationConfig: {
               ...this._options,
             },
@@ -247,13 +261,21 @@ export class DevPlugin implements WebpackPluginInstance {
       remote.tsConfigPath = normalizedDtsOptions.tsConfigPath;
     }
 
-    this._devWorker = createDevWorker({
-      name,
-      remote: remote,
-      host: host,
-      extraOptions: extraOptions,
-      disableLiveReload: normalizedDev.disableHotTypesReload,
-      disableHotTypesReload: normalizedDev.disableHotTypesReload,
+    Promise.all([
+      this.generateTypesPromise,
+      this.fetchRemoteTypeUrlsPromise,
+    ]).then(([_, remoteTypeUrls]) => {
+      this._devWorker = createDevWorker({
+        name,
+        remote: remote,
+        host: {
+          ...host,
+          remoteTypeUrls,
+        },
+        extraOptions: extraOptions,
+        disableLiveReload: normalizedDev.disableHotTypesReload,
+        disableHotTypesReload: normalizedDev.disableHotTypesReload,
+      });
     });
 
     this._stopWhenSIGTERMOrSIGINT();

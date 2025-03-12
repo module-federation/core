@@ -12,10 +12,8 @@ export class DtsWorker {
   rpcWorker: RpcWorker<RpcMethod>;
   private _options: DtsWorkerOptions;
   private _res: Promise<any>;
-
   constructor(options: DtsWorkerOptions) {
     this._options = cloneDeepOptions(options);
-
     this.removeUnSerializationOptions();
     this.rpcWorker = createRpcWorker(
       path.resolve(__dirname, './fork-generate-dts.js'),

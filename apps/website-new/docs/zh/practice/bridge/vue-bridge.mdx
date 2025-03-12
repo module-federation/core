@@ -1,6 +1,6 @@
 # Vue Bridge（for Vue v3）
 
-`@module-federation/bridge-vue3` 提供了用于 Vue v3 应用的 `bridge` 工具函数，其提供的 `createBridgeComponent` 可用于导出应用级别模块，`createRemoteComponent` 用于加载应用级别模块。[Demo](https://github.com/module-federation/core/tree/main/apps/router-demo)
+`@module-federation/bridge-vue3` 提供了用于 Vue V3 应用的 `bridge` 工具函数，其提供的 `createBridgeComponent` 可用于导出应用级别模块，`createRemoteComponent` 用于加载应用级别模块。[Demo](https://github.com/module-federation/core/tree/main/apps/router-demo)
 
 ### 安装
 
@@ -14,6 +14,51 @@ import { PackageManagerTabs } from '@theme';
   }}
 />
 
+
+### 类型
+
+```tsx
+function createRemoteComponent<T, E extends keyof T>(
+  options: {
+    // Function to load remote application, e.g., loadRemote('remote1/export-app') or import('remote1/export-app')
+    loader: () => Promise<T>;
+    // Default is 'default', used to specify module export
+    export?: E;
+    // Parameters that will be passed to defineAsyncComponent
+    asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
+    // Attributes that will be bound to the root container where the remote Vue application will be mounted
+    rootAttrs?: Record<string, unknown>;
+  }
+): (props: {
+    basename?: string;
+    memoryRoute?: { entryPath: string };
+}) => DefineComponent;
+
+
+function createBridgeComponent(bridgeInfo: {
+  rootComponent: VueComponent;
+  appOptions?: (params: {
+    app: Vue.App<VueComponent>;
+    basename?: string;
+    memoryRoute?: { entryPath: string };
+    [key: string]: any;
+  }) => { router?: Router } | void;
+}): () => {
+  render(info: {
+    name?: string;
+    basename?: string;
+    memoryRoute?: {
+      entryPath: string;
+    };
+    dom?: HTMLElement;
+  }): void;
+  destroy(info: {
+    dom: HTMLElement;
+  }): void;
+}
+```
+
+
 ### 示例
 
 > Remote
@@ -22,13 +67,16 @@ import { PackageManagerTabs } from '@theme';
 // ./src/export-app.ts
 import App from './App.vue';
 import router from './router';
+import customPlugin from './plugins/custom-vue-plugin';
 import { createBridgeComponent } from '@module-federation/bridge-vue3';
 
 export default createBridgeComponent({
   rootComponent: App,
-  appOptions: () => ({
-    router,
-  }),
+  appOptions: ({ app }) => {
+    // Optional: adding a plugin to the new Vue instance on the host application side
+    app.use(customPlugin);
+    return { router };
+  },
 });
 ```
 
@@ -93,11 +141,15 @@ export default router;
 
 ```tsx
 function createRemoteComponent<T, E extends keyof T>(
-  options?: {
-    // 加载远程应用的函数，例如：loadRemote('remote1/export-app')、import('remote1/export-app')
-    loader: () => Promise<T>,
-    // 默认为 default，用于指定模块的 export
+  options: {
+    // Function to load remote application, e.g., loadRemote('remote1/export-app') or import('remote1/export-app')
+    loader: () => Promise<T>;
+    // Default is 'default', used to specify module export
     export?: E;
+    // Parameters that will be passed to defineAsyncComponent
+    asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
+    // Attributes that will be bound to the root container where the remote Vue application will be mounted
+    rootAttrs?: Record<string, unknown>;
   }
 ): (props: {
     basename?: string;
@@ -105,19 +157,24 @@ function createRemoteComponent<T, E extends keyof T>(
 }) => DefineComponent;
 ```
 
-* `options`
-  * `loader`
-    * type: `() => Promise<Module>`
-    * 作用: 用于加载远程模块的函数，例如：`loadRemote('remote1/export-app')`、`import('remote1/export-app')`
 
 ```tsx
 const Remote1App = createRemoteComponent({ loader: () => loadRemote('remote1/export-app') });
-const Remote2App = createRemoteComponent({ loader: () => import('remote2/export-app') });
 ```
 
+* `options`
+  * `loader`
+    * type: `() => Promise<Module>`
+    * Purpose: Used to load remote modules, e.g., `loadRemote('remote1/export-app')` or `import('remote1/export-app')`
   * `export`
     * type: `string`
-    * 作用: 可以指定模块的 export
+    * Purpose: Used to specify module export
+  * `asyncComponentOptions`
+    * type: `Omit<AsyncComponentOptions, 'loader'>`
+    * Purpose: Parameters that will be passed to defineAsyncComponent, except for the loader parameter
+  * `rootAttrs`
+    * type: `Record<string, unknown>`
+    * Purpose: Attributes that will be bound to the root container where the remote Vue application will be mounted
 ```tsx
 // remote
 export const provider = createBridgeComponent({
@@ -127,28 +184,26 @@ export const provider = createBridgeComponent({
 // host
 const Remote1App = createRemoteComponent({
   loader: () => loadRemote('remote1/export-app'),
+  export: 'provider'
 });
-
 ```
 
 * ReturnType
   * type: `VueComponent`
-  * 作用: 用于渲染远程模块组件
+  * Purpose: Used to render remote module components
 
 ```tsx
 import * as bridge from '@module-federation/bridge-vue3';
 
-const remote1 = bridge.createRemoteComponent({
-  loader: () => loadRemote('remote1/export-app'),
-});
+const Remote2 = bridge.createRemoteComponent({ loader: () => loadRemote('remote1/export-app'), rootAttrs: {class: 'root-element-class'} });
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    // 在这里定义你的路由
+    // Define your routes here
     { path: '/', component: Home },
-    { path: '/remote1/:pathMatch(.*)*', component: Remote1 },
-    // 其他路由
+    { path: '/remote1/:pathMatch(.*)*', component: Remote2, props: { foo: 'bar' } },
+    // Other routes
   ],
 });
 export default router;
@@ -157,11 +212,14 @@ export default router;
 #### createBridgeComponent
 
 ```tsx
-function createBridgeComponent<T>(bridgeInfo: {
+function createBridgeComponent(bridgeInfo: {
   rootComponent: VueComponent;
-  appOptions?: ()=> ({
-    router: Router
-  })
+  appOptions?: (params: {
+    app: Vue.App<VueComponent>;
+    basename?: string;
+    memoryRoute?: { entryPath: string };
+    [key: string]: any;
+  }) => { router?: Router } | void;
 }): () => {
   render(info: {
     name?: string;
@@ -170,27 +228,30 @@ function createBridgeComponent<T>(bridgeInfo: {
       entryPath: string;
     };
     dom?: HTMLElement;
-}): void;
-  destroy(info: { dom: HTMLElement}): void;
+  }): void;
+  destroy(info: { dom: HTMLElement }): void;
 }
 ```
 
 * `bridgeInfo`
-  * type: `{ rootComponent: VueComponent; appOptions?: ()=> ({ router: Router }) }`
-  * 作用: 用于传递根组件
+  * type: `{ rootComponent: VueComponent; appOptions?: (params: AddOptionsFnParams) => ({ router?: Router }) }`
+  * Purpose: Used to pass the root component
 * ReturnType
   * type: `() => { render: (info: RenderFnParams) => void; destroy: (info: { dom: HTMLElement}) => void; }`
 
 ```tsx
 // ./src/export-app.ts
-import { createBridgeComponent } from '@module-federation/bridge-vue3';
+import  { createBridgeComponent } from '@module-federation/bridge-vue3';
 import App from './App.vue';
+import customPlugin from './plugins/custom-vue-plugin';
 import router from './router';
 
 export default createBridgeComponent({
   rootComponent: App,
-  appOptions: () => ({
-    router,
-  }),
+  appOptions: ({ app }) => {
+    // Optional: adding a plugin to the new Vue instance on the host application side
+    app.use(customPlugin);
+    return { router };
+  },
 });
 ```

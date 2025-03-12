@@ -8,13 +8,13 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
       "options": {
-        "dependsOn": [
-          {
-            "target": "build",
-            "dependencies": true
-          }
-        ],
         "commands": [
           {
             "command": "cd apps/modernjs; pnpm run build",
@@ -25,13 +25,13 @@
     },
     "serve": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
       "options": {
-        "dependsOn": [
-          {
-            "target": "build",
-            "dependencies": true
-          }
-        ],
         "commands": [
           {
             "command": "cd apps/modernjs; pnpm run dev",

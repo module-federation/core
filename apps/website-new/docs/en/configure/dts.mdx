@@ -48,8 +48,8 @@ When configuring `generateTypes` to `true`, the following configuration will be 
 {
   "generateAPITypes": true,
   "abortOnError": false,
-  "extractThirdParty": true,
-  "extractRemoteTypes": true,
+  "extractThirdParty": false,
+  "extractRemoteTypes": false,
   "compileInChildProcess": true
 }
 ```
@@ -224,3 +224,11 @@ tsconfig configuration file path
 - Default value: `undefined`
 
 The working directory to run the compiler
+
+### displayErrorInTerminal
+
+- Type: `boolean`
+- Required: No
+- Default value: `true`
+
+Whether print error log in terminal
