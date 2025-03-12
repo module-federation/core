@@ -1,6 +1,7 @@
 import logger from './logger';
+import type { CliOptions } from '../types';
 
-export function prepareCli(): void {
+export function prepareCli({ welcomeMsg }: Required<CliOptions>): void {
   // Print a blank line to keep the greet log nice.
   // Some package managers automatically output a blank line, some do not.
   const { npm_execpath } = process.env;
@@ -12,5 +13,5 @@ export function prepareCli(): void {
     console.log();
   }
 
-  logger.info(`  ${`Module Federation v${__VERSION__}`}\n`);
+  logger.info(welcomeMsg);
 }

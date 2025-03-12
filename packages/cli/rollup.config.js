@@ -16,5 +16,6 @@ module.exports = (rollupConfig, _projectOptions) => {
       ],
     }),
   );
+
   return rollupConfig;
 };

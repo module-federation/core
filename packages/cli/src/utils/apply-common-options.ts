@@ -1,4 +1,4 @@
-import { type Command } from 'commander';
+import type { Command } from 'commander';
 
 export const applyCommonOptions = (command: Command) => {
   command.option(

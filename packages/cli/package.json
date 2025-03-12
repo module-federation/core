@@ -1,6 +1,7 @@
 {
   "name": "@module-federation/cli",
   "version": "0.10.0",
+  "type": "commonjs",
   "description": "Module Federation CLI",
   "homepage": "https://module-federation.io",
   "bugs": {
@@ -11,39 +12,21 @@
     "url": "https://github.com/module-federation/core",
     "directory": "packages/cli"
   },
+  "bin": {
+    "mf": "./bin/mf.js"
+  },
   "license": "MIT",
-  "exports": {
-    ".": {
-      "types": "./dist/index.cjs.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
-    },
-    "./utils": {
-      "types": "./dist/utils.cjs.d.ts",
-      "import": "./dist/utils.esm.js",
-      "require": "./dist/utils.cjs.js"
-    }
-  },
   "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
-  "typesVersions": {
-    "*": {
-      ".": [
-        "./dist/index.cjs.d.ts"
-      ],
-      "utils": [
-        "./dist/utils.cjs.d.ts"
-      ]
-    }
-  },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
     "commander": "11.1.0",
-    "chalk": "3.0.0"
+    "chalk": "3.0.0",
+    "@modern-js/node-bundle-require": "2.65.1"
   },
   "devDependencies": {
     "@types/node": "~16.11.7"

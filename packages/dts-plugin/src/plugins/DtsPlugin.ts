@@ -13,6 +13,28 @@ import { isTSProject } from '../core';
 import { type moduleFederationPlugin } from '@module-federation/sdk';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 
+export const normalizeDtsOptions = (
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
+  context: string,
+  defaultOptions?: {
+    defaultGenerateOptions?: moduleFederationPlugin.DtsRemoteOptions;
+    defaultConsumeOptions?: moduleFederationPlugin.DtsHostOptions;
+  },
+) => {
+  return normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
+    isTSProject(options.dts, context),
+    {
+      generateTypes:
+        defaultOptions?.defaultGenerateOptions || DEFAULT_GENERATE_TYPES,
+      consumeTypes:
+        defaultOptions?.defaultConsumeOptions || DEFAULT_CONSUME_TYPES,
+      extraOptions: {},
+      displayErrorInTerminal: true,
+    },
+    'mfOptions.dts',
+  )(options.dts);
+};
+
 export class DtsPlugin implements WebpackPluginInstance {
   options: moduleFederationPlugin.ModuleFederationPluginOptions;
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
@@ -22,17 +44,7 @@ export class DtsPlugin implements WebpackPluginInstance {
   apply(compiler: Compiler) {
     const { options } = this;
 
-    const normalizedDtsOptions =
-      normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
-        isTSProject(options.dts, compiler.context),
-        {
-          generateTypes: DEFAULT_GENERATE_TYPES,
-          consumeTypes: DEFAULT_CONSUME_TYPES,
-          extraOptions: {},
-          displayErrorInTerminal: true,
-        },
-        'mfOptions.dts',
-      )(options.dts);
+    const normalizedDtsOptions = normalizeDtsOptions(options, compiler.context);
 
     if (typeof normalizedDtsOptions !== 'object') {
       return;

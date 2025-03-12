@@ -59,7 +59,6 @@ export const consumeTypesAPI = async (
     typeof dtsManagerOptions.host.remoteTypeUrls === 'function'
       ? dtsManagerOptions.host.remoteTypeUrls()
       : Promise.resolve(dtsManagerOptions.host.remoteTypeUrls);
-  logger.debug('start fetching remote types...');
   return fetchRemoteTypeUrlsPromise.then((remoteTypeUrls) => {
     consumeTypes({
       ...dtsManagerOptions,
@@ -69,10 +68,10 @@ export const consumeTypesAPI = async (
       },
     })
       .then(() => {
-        cb(remoteTypeUrls);
+        typeof cb === 'function' && cb(remoteTypeUrls);
       })
       .catch(() => {
-        cb(remoteTypeUrls);
+        typeof cb === 'function' && cb(remoteTypeUrls);
       });
   });
 };
@@ -116,6 +115,7 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
       return;
     }
 
+    logger.debug('start fetching remote types...');
     const promise = consumeTypesAPI(
       dtsManagerOptions,
       fetchRemoteTypeUrlsResolve,
