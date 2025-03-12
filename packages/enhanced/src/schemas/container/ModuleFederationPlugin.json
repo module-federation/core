@@ -544,26 +544,11 @@
     "shared": {
       "$ref": "#/definitions/Shared"
     },
-    "experiments": {
-      "description": "Experimental features configuration",
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "federationRuntime": {
-          "description": "Enable asynchronous startup",
-          "oneOf": [
-            {
-              "enum": [false]
-            },
-            {
-              "enum": ["hoisted"]
-            }
-          ]
-        },
-        "externalRuntime": {
-          "description": "After setting true, the external MF runtime will be used and the runtime provided by the consumer will be used. (Please make sure your consumer has provideExternalRuntime: true set, otherwise it will not run properly!)",
-          "type": "boolean",
-          "default": false
+    "dts": {
+      "description": "TypeScript declaration file generation options",
+      "anyOf": [
+        {
+          "type": "boolean"
         },
         {
           "type": "object",
