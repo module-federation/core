@@ -13,7 +13,9 @@ jobs:
           fetch-depth: 0
 
       - name: Install Pnpm
-        run: corepack enable
+        run: |
+          corepack prepare pnpm@8.11.0 --activate
+          corepack enable
 
       - name: Setup Node.js 18
         uses: actions/setup-node@v3
@@ -46,6 +48,7 @@ jobs:
       - name: E2E Test for Next.js Dev
         if: steps.check-ci.outcome == 'success'
         run: |
+          npx kill-port 3000,3001,3002 &&
           pnpm run app:next:dev &
           sleep 1 &&
           npx wait-on tcp:3001 &&

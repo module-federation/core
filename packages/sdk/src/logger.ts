@@ -1,40 +1,41 @@
-import { type Logger, createLogger as _createLogger } from 'isomorphic-rslog';
 import { isDebugMode } from './env';
 
 const PREFIX = '[ Module Federation ]';
 
-function setDebug(loggerInstance: Logger) {
-  if (isDebugMode()) {
-    loggerInstance.level = 'verbose';
+class Logger {
+  prefix: string;
+  constructor(prefix: string) {
+    this.prefix = prefix;
+  }
+  log(...args: any[]) {
+    console.log(this.prefix, ...args);
+  }
+  warn(...args: any[]) {
+    console.log(this.prefix, ...args);
+  }
+  error(...args: any[]) {
+    console.log(this.prefix, ...args);
+  }
+
+  success(...args: any[]) {
+    console.log(this.prefix, ...args);
+  }
+  info(...args: any[]) {
+    console.log(this.prefix, ...args);
+  }
+  ready(...args: any[]) {
+    console.log(this.prefix, ...args);
+  }
+
+  debug(...args: any[]) {
+    if (isDebugMode()) {
+      console.log(this.prefix, ...args);
+    }
   }
 }
 
-function setPrefix(loggerInstance: Logger, prefix: string) {
-  loggerInstance.labels = {
-    warn: `${prefix} Warn`,
-    error: `${prefix} Error`,
-    success: `${prefix} Success`,
-    info: `${prefix} Info`,
-    ready: `${prefix} Ready`,
-    debug: `${prefix} Debug`,
-  };
-}
-
 function createLogger(prefix: string) {
-  const loggerInstance = _createLogger({
-    labels: {
-      warn: `${PREFIX} Warn`,
-      error: `${PREFIX} Error`,
-      success: `${PREFIX} Success`,
-      info: `${PREFIX} Info`,
-      ready: `${PREFIX} Ready`,
-      debug: `${PREFIX} Debug`,
-    },
-  });
-
-  setDebug(loggerInstance);
-  setPrefix(loggerInstance, prefix);
-  return loggerInstance;
+  return new Logger(prefix);
 }
 
 const logger = createLogger(PREFIX);

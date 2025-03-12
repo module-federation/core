@@ -1,5 +1,59 @@
 # @module-federation/storybook-addon
 
+## 4.0.7
+
+### Patch Changes
+
+- Updated dependencies [0f71cbc]
+- Updated dependencies [22fcccd]
+  - @module-federation/sdk@0.10.0
+  - @module-federation/enhanced@0.10.0
+  - @module-federation/utilities@3.1.46
+
+## 4.0.6
+
+### Patch Changes
+
+- Updated dependencies [35d925b]
+- Updated dependencies [35d925b]
+- Updated dependencies [8acd217]
+  - @module-federation/sdk@0.9.1
+  - @module-federation/enhanced@0.9.1
+  - @module-federation/utilities@3.1.45
+
+## 4.0.5
+
+### Patch Changes
+
+- @module-federation/enhanced@0.9.0
+- @module-federation/sdk@0.9.0
+- @module-federation/utilities@3.1.44
+
+## 4.0.4
+
+### Patch Changes
+
+- Updated dependencies [9062cee]
+  - @module-federation/enhanced@0.8.12
+  - @module-federation/sdk@0.8.12
+  - @module-federation/utilities@3.1.43
+
+## 4.0.3
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.11
+- @module-federation/sdk@0.8.11
+- @module-federation/utilities@3.1.42
+
+## 4.0.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.8.10
+- @module-federation/sdk@0.8.10
+- @module-federation/utilities@3.1.41
+
 ## 4.0.1
 
 ### Patch Changes

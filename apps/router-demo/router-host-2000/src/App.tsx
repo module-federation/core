@@ -1,4 +1,9 @@
-import { useRef, useEffect, ForwardRefExoticComponent } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  ForwardRefExoticComponent,
+  Suspense,
+} from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
@@ -8,6 +13,19 @@ import Detail from './pages/Detail';
 import Home from './pages/Home';
 import './App.css';
 import BridgeReactPlugin from '@module-federation/bridge-react/plugin';
+import { ErrorBoundary } from 'react-error-boundary';
+import Remote1AppNew from 'remote1/app';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import { Spin } from 'antd';
+
+const fallbackPlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'fallback-plugin',
+    errorLoadRemote(args) {
+      return { default: () => <div> fallback component </div> };
+    },
+  };
+};
 
 init({
   name: 'federation_consumer',
@@ -30,6 +48,7 @@ init({
     //     },
     //   },
     // }),
+    // fallbackPlugin(),
   ],
 });
 
@@ -53,6 +72,63 @@ const Remote1App = createRemoteComponent({
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
+
+const Remote1AppWithLoadRemote = React.lazy(
+  () =>
+    new Promise((resolve) => {
+      // delay 2000ms to show suspense effects
+      setTimeout(() => {
+        resolve(loadRemote('remote1/app'));
+      }, 2000);
+    }),
+);
+
+const LoadingFallback = () => (
+  <div
+    style={{
+      padding: '50px',
+      textAlign: 'center',
+      background: '#f5f5f5',
+      border: '1px solid #d9d9d9',
+      borderRadius: '4px',
+      marginTop: '20px',
+    }}
+  >
+    <Spin size="large" />
+    <div
+      style={{
+        marginTop: '16px',
+        color: '#1677ff',
+        fontSize: '16px',
+      }}
+    >
+      Loading Remote1 App...
+    </div>
+  </div>
+);
+
+const Remote1AppWithErrorBoundary = React.forwardRef<any, any>((props, ref) => (
+  <ErrorBoundary
+    fallback={
+      <div
+        style={{
+          padding: '20px',
+          background: '#fff2f0',
+          border: '1px solid #ffccc7',
+          borderRadius: '4px',
+          color: '#cf1322',
+          marginTop: '20px',
+        }}
+      >
+        Error loading Remote1App. Please try again later.
+      </div>
+    }
+  >
+    <Suspense fallback={<LoadingFallback />}>
+      <Remote1AppWithLoadRemote {...props} ref={ref} />
+    </Suspense>
+  </ErrorBoundary>
+));
 
 const Remote2App = createRemoteComponent({
   loader: () => import('remote2/export-app'),
@@ -144,6 +220,27 @@ const App = () => {
         <Route
           path="/remote-resource-error/*"
           Component={() => <RemoteResourceErrorApp />}
+        />
+        <Route
+          path="/error-load-with-hook/*"
+          Component={() => (
+            <Remote1AppNew name={'Ming'} age={12} />
+            // <React.Suspense fallback={<div> Loading Remote1App...</div>}>
+            //   <Remote1AppWithLoadRemote name={'Ming'} age={12} />
+            // </React.Suspense>
+          )}
+        />
+
+        <Route
+          path="/error-load-with-error-boundary/*"
+          Component={() => (
+            <Remote1AppWithErrorBoundary
+              name={'Ming'}
+              age={12}
+              ref={ref}
+              basename="/remote1"
+            />
+          )}
         />
       </Routes>
     </div>

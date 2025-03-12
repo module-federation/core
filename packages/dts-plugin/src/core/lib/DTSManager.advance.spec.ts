@@ -3,7 +3,7 @@ import axios from 'axios';
 import dirTree from 'directory-tree';
 import { readFileSync, rmSync } from 'fs';
 import { join } from 'path';
-import { describe, expect, it, vi, afterAll } from 'vitest';
+import { describe, expect, it, vi, beforeAll } from 'vitest';
 import { DTSManager } from './DTSManager';
 const TEST_DIT_DIR = 'dist-test';
 
@@ -53,6 +53,16 @@ describe('DTSManager advance usage', () => {
   const dtsManager = new DTSManager({
     remote: remoteOptions,
     host: hostOptions,
+  });
+
+  beforeAll(() => {
+    try {
+      rmSync(join(projectRoot, 'node_modules/.cache/mf-types'), {
+        recursive: true,
+      });
+    } catch (err) {
+      //noop
+    }
   });
 
   it('generate types with api declaration file', async () => {
