@@ -20,8 +20,6 @@ class ContainerEntryDependency extends Dependency {
   public exposes: [string, ExposeOptions][];
   public shareScope: string | string[];
   public injectRuntimeEntry: string;
-  /** Additional experimental options for container plugin customization */
-  public experiments: containerPlugin.ContainerPluginOptions['experiments'];
   public dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'];
 
   /**
@@ -29,7 +27,6 @@ class ContainerEntryDependency extends Dependency {
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
    * @param {string|string[]} shareScope name of the share scope
    * @param {string[]} injectRuntimeEntry the path of injectRuntime file.
-   * @param {containerPlugin.ContainerPluginOptions['experiments']} experiments additional experiments options
    * @param {containerPlugin.ContainerPluginOptions['dataPrefetch']} dataPrefetch whether enable dataPrefetch
    */
   constructor(
@@ -37,7 +34,6 @@ class ContainerEntryDependency extends Dependency {
     exposes: [string, ExposeOptions][],
     shareScope: string | string[],
     injectRuntimeEntry: string,
-    experiments: containerPlugin.ContainerPluginOptions['experiments'],
     dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'],
   ) {
     super();
@@ -45,7 +41,6 @@ class ContainerEntryDependency extends Dependency {
     this.exposes = exposes;
     this.shareScope = shareScope;
     this.injectRuntimeEntry = injectRuntimeEntry;
-    this.experiments = experiments;
     this.dataPrefetch = dataPrefetch;
   }
 

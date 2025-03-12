@@ -64,7 +64,6 @@ class ContainerEntryModule extends Module {
   private _exposes: [string, ExposeOptions][];
   private _shareScope: string | string[];
   private _injectRuntimeEntry: string;
-  private _experiments: containerPlugin.ContainerPluginOptions['experiments'];
   private _dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'];
 
   /**
@@ -72,7 +71,6 @@ class ContainerEntryModule extends Module {
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
    * @param {string|string[]} shareScope name of the share scope
    * @param {string} injectRuntimeEntry the path of injectRuntime file.
-   * @param {containerPlugin.ContainerPluginOptions['experiments']} experiments additional experiments options
    * @param {containerPlugin.ContainerPluginOptions['dataPrefetch']} dataPrefetch whether enable dataPrefetch
    */
   constructor(
@@ -80,7 +78,6 @@ class ContainerEntryModule extends Module {
     exposes: [string, ExposeOptions][],
     shareScope: string | string[],
     injectRuntimeEntry: string,
-    experiments: containerPlugin.ContainerPluginOptions['experiments'],
     dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'],
   ) {
     super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
@@ -88,7 +85,6 @@ class ContainerEntryModule extends Module {
     this._exposes = exposes;
     this._shareScope = shareScope;
     this._injectRuntimeEntry = injectRuntimeEntry;
-    this._experiments = experiments;
     this._dataPrefetch = dataPrefetch;
   }
 
@@ -99,7 +95,6 @@ class ContainerEntryModule extends Module {
   static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
     const { read } = context;
     const obj = new ContainerEntryModule(
-      read(),
       read(),
       read(),
       read(),
@@ -126,7 +121,7 @@ class ContainerEntryModule extends Module {
 
     return `container entry (${scopeStr}) ${JSON.stringify(
       this._exposes,
-    )} ${this._injectRuntimeEntry} ${JSON.stringify(this._experiments)} ${JSON.stringify(this._dataPrefetch)}`;
+    )} ${this._injectRuntimeEntry} ${JSON.stringify(this._dataPrefetch)}`;
   }
   /**
    * @param {RequestShortener} requestShortener the request shortener
@@ -207,9 +202,8 @@ class ContainerEntryModule extends Module {
       ) as unknown as Dependency,
     );
 
-    if (!this._experiments?.federationRuntime) {
-      this.addDependency(new EntryDependency(this._injectRuntimeEntry));
-    }
+    this.addDependency(new EntryDependency(this._injectRuntimeEntry));
+
     callback();
   }
 
@@ -276,18 +270,6 @@ class ContainerEntryModule extends Module {
         )}`,
       );
     }
-    const initRuntimeDep = this.dependencies[1];
-    // no runtime module getter needed if runtime is hoisted
-    const initRuntimeModuleGetter = this._experiments?.federationRuntime
-      ? ''
-      : runtimeTemplate.moduleRaw({
-          module: moduleGraph.getModule(initRuntimeDep),
-          chunkGraph,
-          // @ts-expect-error flaky type definition for Dependency
-          request: initRuntimeDep.userRequest,
-          weak: false,
-          runtimeRequirements,
-        });
     const federationGlobal = getFederationGlobalScope(
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
@@ -330,7 +312,6 @@ class ContainerEntryModule extends Module {
         ],
       )};`,
       this._dataPrefetch ? PrefetchPlugin.setRemoteIdentifier() : '',
-      `${initRuntimeModuleGetter}`,
       this._dataPrefetch ? PrefetchPlugin.removeRemoteIdentifier() : '',
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,
@@ -370,7 +351,6 @@ class ContainerEntryModule extends Module {
     write(this._exposes);
     write(this._shareScope);
     write(this._injectRuntimeEntry);
-    write(this._experiments);
     write(this._dataPrefetch);
     super.serialize(context);
   }

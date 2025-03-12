@@ -9,6 +9,7 @@
 /.nx
 # dependencies
 node_modules
+./webpack-lib
 next.js
 # IDEs and editors
 /.idea

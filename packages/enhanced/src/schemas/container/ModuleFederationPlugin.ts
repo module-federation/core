@@ -624,93 +624,132 @@ export default {
     shared: {
       $ref: '#/definitions/Shared',
     },
+    dts: {
+      description: 'TypeScript declaration file generation options',
+      anyOf: [
+        {
+          type: 'boolean',
+        },
+        {
+          type: 'object',
+          properties: {
+            generateTypes: {
+              anyOf: [
+                {
+                  type: 'boolean',
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    tsConfigPath: {
+                      type: 'string',
+                    },
+                    typesFolder: {
+                      type: 'string',
+                    },
+                    compiledTypesFolder: {
+                      type: 'string',
+                    },
+                    deleteTypesFolder: {
+                      type: 'boolean',
+                    },
+                    additionalFilesToCompile: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                      },
+                    },
+                    compileInChildProcess: {
+                      type: 'boolean',
+                    },
+                    compilerInstance: {
+                      enum: ['tsc', 'vue-tsc'],
+                    },
+                    generateAPITypes: {
+                      type: 'boolean',
+                    },
+                    extractThirdParty: {
+                      type: 'boolean',
+                    },
+                    extractRemoteTypes: {
+                      type: 'boolean',
+                    },
+                    abortOnError: {
+                      type: 'boolean',
+                    },
+                  },
+                },
+              ],
+            },
+            consumeTypes: {
+              anyOf: [
+                {
+                  type: 'boolean',
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    typesFolder: {
+                      type: 'string',
+                    },
+                    abortOnError: {
+                      type: 'boolean',
+                    },
+                    remoteTypesFolder: {
+                      type: 'string',
+                    },
+                    deleteTypesFolder: {
+                      type: 'boolean',
+                    },
+                    maxRetries: {
+                      type: 'number',
+                    },
+                    consumeAPITypes: {
+                      type: 'boolean',
+                    },
+                    runtimePkgs: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+            tsConfigPath: {
+              type: 'string',
+            },
+            extraOptions: {
+              type: 'object',
+            },
+            implementation: {
+              type: 'string',
+            },
+            cwd: {
+              type: 'string',
+            },
+            displayErrorInTerminal: {
+              type: 'boolean',
+            },
+          },
+        },
+      ],
+    },
     experiments: {
-      description: 'Experimental features configuration',
       type: 'object',
-      additionalProperties: false,
       properties: {
-        federationRuntime: {
-          description: 'Enable asynchronous startup',
-          oneOf: [
-            {
-              enum: [false],
-            },
-            {
-              enum: ['hoisted'],
-            },
-          ],
+        asyncStartup: {
+          description: 'Enable async startup for the container',
+          type: 'boolean',
         },
         externalRuntime: {
-          description:
-            'After setting true, the external MF runtime will be used and the runtime provided by the consumer will be used. (Please make sure your consumer has provideExternalRuntime: true set, otherwise it will not run properly!)',
           type: 'boolean',
-          default: false,
         },
         provideExternalRuntime: {
-          description: 'Enable providing external runtime',
           type: 'boolean',
-          default: false,
         },
       },
-    },
-    runtimePlugins: {
-      description: 'Runtime plugin file paths or package names',
-      type: 'array',
-      items: {
-        type: 'string',
-      },
-    },
-    getPublicPath: {
-      description: 'Custom public path function',
-      type: 'string',
-    },
-    implementation: {
-      description: 'Bundler runtime path',
-      type: 'string',
-    },
-    manifest: {
-      description: 'Manifest configuration',
-      oneOf: [
-        {
-          type: 'boolean',
-        },
-        {
-          type: 'object',
-          title: 'PluginManifestOptions',
-        },
-      ],
-    },
-    dev: {
-      description: 'Development mode configuration',
-      oneOf: [
-        {
-          type: 'boolean',
-        },
-        {
-          type: 'object',
-          title: 'PluginDevOptions',
-        },
-      ],
-    },
-    dts: {
-      description: 'TypeScript declaration file generation configuration',
-      oneOf: [
-        {
-          type: 'boolean',
-        },
-        {
-          type: 'object',
-          title: 'PluginDtsOptions',
-        },
-      ],
-    },
-    dataPrefetch: {
-      description: 'Enable data prefetching for container modules.',
-      type: 'boolean',
-    },
-    virtualRuntimeEntry: {
-      description: 'Use virtual module for federation runtime injection.',
-      type: 'boolean',
     },
     bridge: {
       description: 'Bridge configuration options',

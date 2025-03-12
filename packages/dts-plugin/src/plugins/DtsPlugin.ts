@@ -20,8 +20,8 @@ export class DtsPlugin implements WebpackPluginInstance {
       generateAPITypes: true,
       compileInChildProcess: true,
       abortOnError: false,
-      extractThirdParty: true,
-      extractRemoteTypes: true,
+      extractThirdParty: false,
+      extractRemoteTypes: false,
     };
     const defaultConsumeTypes = { abortOnError: false, consumeAPITypes: true };
     const normalizedDtsOptions =
@@ -40,9 +40,13 @@ export class DtsPlugin implements WebpackPluginInstance {
       return;
     }
 
-    let consumeTypesPromiseResolve;
-    const consumeTypesPromise: Promise<void> = new Promise((resolve) => {
-      consumeTypesPromiseResolve = resolve;
+    let fetchRemoteTypeUrlsResolve: (
+      options: moduleFederationPlugin.RemoteTypeUrls,
+    ) => void;
+    const fetchRemoteTypeUrlsPromise: Promise<
+      moduleFederationPlugin.DtsHostOptions['remoteTypeUrls'] | undefined
+    > = new Promise((resolve) => {
+      fetchRemoteTypeUrlsResolve = resolve;
     });
 
     let generateTypesPromiseResolve;
@@ -52,16 +56,19 @@ export class DtsPlugin implements WebpackPluginInstance {
 
     // Because the plugin will delete dist/@mf-types.zip while generating types, which will be used in GenerateTypesPlugin
     // So it should apply after GenerateTypesPlugin
-    new DevPlugin(options, normalizedDtsOptions, generateTypesPromise).apply(
-      compiler,
-    );
+    new DevPlugin(
+      options,
+      normalizedDtsOptions,
+      generateTypesPromise,
+      fetchRemoteTypeUrlsPromise,
+    ).apply(compiler);
 
     // The exposes files may use remote types, so it need to consume types first, otherwise the generate types will fail
     new GenerateTypesPlugin(
       options,
       normalizedDtsOptions,
       defaultGenerateTypes,
-      consumeTypesPromise,
+      fetchRemoteTypeUrlsPromise,
       generateTypesPromiseResolve,
     ).apply(compiler);
 
@@ -69,7 +76,7 @@ export class DtsPlugin implements WebpackPluginInstance {
       options,
       normalizedDtsOptions,
       defaultConsumeTypes,
-      consumeTypesPromiseResolve,
+      fetchRemoteTypeUrlsResolve,
     ).apply(compiler);
   }
 }

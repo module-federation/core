@@ -68,7 +68,6 @@ class ContainerPlugin {
         }),
       ),
       runtimePlugins: options.runtimePlugins,
-      experiments: options.experiments,
       dataPrefetch: options.dataPrefetch,
     };
   }
@@ -194,8 +193,6 @@ class ContainerPlugin {
         compilation: Compilation,
         callback: (error?: WebpackError | null | undefined) => void,
       ) => {
-        const hasSingleRuntimeChunk =
-          compilation.options?.optimization?.runtimeChunk;
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const federationRuntimeDependency =
           federationRuntimePluginInstance.getDependency(compiler);
@@ -205,7 +202,6 @@ class ContainerPlugin {
           exposes,
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
-          this._options.experiments,
           this._options.dataPrefetch,
         );
         dep.loc = { name };
@@ -217,7 +213,7 @@ class ContainerPlugin {
             {
               name,
               filename,
-              runtime: hasSingleRuntimeChunk ? false : runtime,
+              runtime,
               library,
             },
             (error: WebpackError | null | undefined) => {
@@ -284,7 +280,6 @@ class ContainerPlugin {
           exposes,
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
-          this._options.experiments,
           this._options.dataPrefetch,
         );
 

@@ -305,16 +305,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "federationRuntime": {
-          "description": "Configure federation runtime mode. When set to 'hoisted', enables hoisted runtime mode. When false, disables federation runtime.",
-          "oneOf": [
-            {
-              "enum": [false]
-            },
-            {
-              "enum": ["hoisted"]
-            }
-          ]
+        "asyncStartup": {
+          "description": "Enable async startup for the container",
+          "type": "boolean"
         },
         "externalRuntime": {
           "description": "After setting true, the external MF runtime will be used and the runtime provided by the consumer will be used. (Please make sure your consumer has provideExternalRuntime: true set, otherwise it will not run properly!)",

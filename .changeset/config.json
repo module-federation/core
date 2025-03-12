@@ -24,7 +24,8 @@
       "@module-federation/data-prefetch",
       "@module-federation/rsbuild-plugin",
       "@module-federation/error-codes",
-      "@module-federation/inject-external-runtime-core-plugin"
+      "@module-federation/inject-external-runtime-core-plugin",
+      "@module-federation/runtime-core"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],
