@@ -17,7 +17,12 @@ const r = {
       packageName: { type: 'string', minLength: 1 },
       requiredVersion: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
       shareKey: { type: 'string', minLength: 1 },
-      shareScope: { type: 'string', minLength: 1 },
+      shareScope: {
+        anyOf: [
+          { type: 'string', minLength: 1 },
+          { type: 'array', items: { type: 'string', minLength: 1 } },
+        ],
+      },
       layer: { type: 'string', minLength: 1 },
       issuerLayer: { type: 'string', minLength: 1 },
       request: { type: 'string', minLength: 1 },
@@ -149,16 +154,59 @@ function t(
                 if (f) {
                   if (void 0 !== n.shareScope) {
                     let r = n.shareScope;
-                    const e = p;
-                    if (p === e) {
-                      if ('string' != typeof r)
-                        return (
-                          (t.errors = [{ params: { type: 'string' } }]), !1
-                        );
-                      if (r.length < 1)
-                        return (t.errors = [{ params: {} }]), !1;
+                    const e = p,
+                      s = p;
+                    let a = !1;
+                    const o = p;
+                    if (p === o)
+                      if ('string' == typeof r) {
+                        if (r.length < 1) {
+                          const r = { params: {} };
+                          null === l ? (l = [r]) : l.push(r), p++;
+                        }
+                      } else {
+                        const r = { params: { type: 'string' } };
+                        null === l ? (l = [r]) : l.push(r), p++;
+                      }
+                    var y = o === p;
+                    if (((a = a || y), !a)) {
+                      const e = p;
+                      if (p === e)
+                        if (Array.isArray(r)) {
+                          const e = r.length;
+                          for (let t = 0; t < e; t++) {
+                            let e = r[t];
+                            const n = p;
+                            if (p === n)
+                              if ('string' == typeof e) {
+                                if (e.length < 1) {
+                                  const r = { params: {} };
+                                  null === l ? (l = [r]) : l.push(r), p++;
+                                }
+                              } else {
+                                const r = { params: { type: 'string' } };
+                                null === l ? (l = [r]) : l.push(r), p++;
+                              }
+                            if (n !== p) break;
+                          }
+                        } else {
+                          const r = { params: { type: 'array' } };
+                          null === l ? (l = [r]) : l.push(r), p++;
+                        }
+                      (y = e === p), (a = a || y);
                     }
-                    f = e === p;
+                    if (!a) {
+                      const r = { params: {} };
+                      return (
+                        null === l ? (l = [r]) : l.push(r),
+                        p++,
+                        (t.errors = l),
+                        !1
+                      );
+                    }
+                    (p = s),
+                      null !== l && (s ? (l.length = s) : (l = null)),
+                      (f = e === p);
                   } else f = !0;
                   if (f) {
                     if (void 0 !== n.layer) {
@@ -409,13 +457,56 @@ function a(
           if (p)
             if (void 0 !== r.shareScope) {
               let e = r.shareScope;
-              const t = l;
-              if (l === t) {
-                if ('string' != typeof e)
-                  return (a.errors = [{ params: { type: 'string' } }]), !1;
-                if (e.length < 1) return (a.errors = [{ params: {} }]), !1;
+              const t = l,
+                n = l;
+              let s = !1;
+              const o = l;
+              if (l === o)
+                if ('string' == typeof e) {
+                  if (e.length < 1) {
+                    const r = { params: {} };
+                    null === i ? (i = [r]) : i.push(r), l++;
+                  }
+                } else {
+                  const r = { params: { type: 'string' } };
+                  null === i ? (i = [r]) : i.push(r), l++;
+                }
+              var f = o === l;
+              if (((s = s || f), !s)) {
+                const r = l;
+                if (l === r)
+                  if (Array.isArray(e)) {
+                    const r = e.length;
+                    for (let t = 0; t < r; t++) {
+                      let r = e[t];
+                      const n = l;
+                      if (l === n)
+                        if ('string' == typeof r) {
+                          if (r.length < 1) {
+                            const r = { params: {} };
+                            null === i ? (i = [r]) : i.push(r), l++;
+                          }
+                        } else {
+                          const r = { params: { type: 'string' } };
+                          null === i ? (i = [r]) : i.push(r), l++;
+                        }
+                      if (n !== l) break;
+                    }
+                  } else {
+                    const r = { params: { type: 'array' } };
+                    null === i ? (i = [r]) : i.push(r), l++;
+                  }
+                (f = r === l), (s = s || f);
               }
-              p = t === l;
+              if (!s) {
+                const r = { params: {} };
+                return (
+                  null === i ? (i = [r]) : i.push(r), l++, (a.errors = i), !1
+                );
+              }
+              (l = n),
+                null !== i && (n ? (i.length = n) : (i = null)),
+                (p = t === l);
             } else p = !0;
         }
       }

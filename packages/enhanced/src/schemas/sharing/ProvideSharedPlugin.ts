@@ -55,8 +55,19 @@ export default {
         },
         shareScope: {
           description: 'Share scope name.',
-          type: 'string',
-          minLength: 1,
+          anyOf: [
+            {
+              type: 'string',
+              minLength: 1,
+            },
+            {
+              type: 'array',
+              items: {
+                type: 'string',
+                minLength: 1,
+              },
+            },
+          ],
         },
         requiredVersion: {
           description: 'Version requirement from module in share scope.',
@@ -143,8 +154,19 @@ export default {
     shareScope: {
       description:
         "Share scope name used for all provided modules (defaults to 'default').",
-      type: 'string',
-      minLength: 1,
+      anyOf: [
+        {
+          type: 'string',
+          minLength: 1,
+        },
+        {
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
+          },
+        },
+      ],
     },
   },
   required: ['provides'],

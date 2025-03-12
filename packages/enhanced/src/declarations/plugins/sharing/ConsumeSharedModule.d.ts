@@ -18,7 +18,7 @@ export type ConsumeOptions = {
   /**
    * share scope
    */
-  shareScope: string;
+  shareScope: string | string[];
   /**
    * version requirement
    */

@@ -82,8 +82,19 @@ export default {
         },
         shareScope: {
           description: 'Share scope name.',
-          type: 'string',
-          minLength: 1,
+          anyOf: [
+            {
+              type: 'string',
+              minLength: 1,
+            },
+            {
+              type: 'array',
+              items: {
+                type: 'string',
+                minLength: 1,
+              },
+            },
+          ],
         },
         layer: {
           description: 'Layer in which the shared module should be placed.',
@@ -145,8 +156,19 @@ export default {
     shareScope: {
       description:
         "Share scope name used for all consumed modules (defaults to 'default').",
-      type: 'string',
-      minLength: 1,
+      anyOf: [
+        {
+          type: 'string',
+          minLength: 1,
+        },
+        {
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
+          },
+        },
+      ],
     },
   },
   required: ['consumes'],

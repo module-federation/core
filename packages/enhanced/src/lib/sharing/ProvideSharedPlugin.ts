@@ -49,7 +49,7 @@ const validate = createSchemaValidation(
 /**
  * @typedef {Object} ProvideOptions
  * @property {string} shareKey
- * @property {string} shareScope
+ * @property {string | string[]} shareScope
  * @property {string | undefined | false} version
  * @property {boolean} eager
  * @property {string} [request] The actual request to use for importing the module

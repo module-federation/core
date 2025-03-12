@@ -207,7 +207,7 @@ export interface ModuleFederationPluginOptions {
   /**
    * Share scope name used for all shared modules (defaults to 'default').
    */
-  shareScope?: string;
+  shareScope?: string | string[];
   /**
    * load shared strategy(defaults to 'version-first').
    */

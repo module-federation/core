@@ -71,6 +71,7 @@ class ShareRuntimeModule extends RuntimeModule {
           chunk.runtime,
           'share-init-option',
         );
+
         if (sharedOption) {
           sharedInitOptions[sharedOption.name] =
             sharedInitOptions[sharedOption.name] || [];
@@ -98,7 +99,7 @@ class ShareRuntimeModule extends RuntimeModule {
           str += `{${Template.indent([
             `version: ${option.version},`,
             `get: ${option.getter},`,
-            `scope: ${JSON.stringify(option.shareScope)},`,
+            `scope: ${JSON.stringify(Array.isArray(option.shareScope) ? option.shareScope.flat() : [option.shareScope])},`,
             `shareConfig: ${JSON.stringify(option.shareConfig)}`,
           ])}},`;
         });
@@ -113,41 +114,6 @@ class ShareRuntimeModule extends RuntimeModule {
     const federationGlobal = getFederationGlobalScope(
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
-
-    // Group shared modules by scope and layer
-    const scopedModules = new Map<
-      string,
-      Map<string | undefined, Set<string>>
-    >();
-    for (const [scopeName, stages] of initCodePerScope) {
-      const layeredModules = new Map<string | undefined, Set<string>>();
-      scopedModules.set(scopeName, layeredModules);
-
-      for (const [, inits] of stages) {
-        for (const init of inits) {
-          const layer = init.match(/layer:\s*["']([^"']+)["']/)?.[1];
-          let moduleSet = layeredModules.get(layer);
-          if (!moduleSet) {
-            moduleSet = new Set();
-            layeredModules.set(layer, moduleSet);
-          }
-          moduleSet.add(init);
-        }
-      }
-    }
-
-    // Generate the registration code
-    const registrationCode = Array.from(scopedModules.entries())
-      .map(([scopeName, layeredModules]) => {
-        const cases = Array.from(layeredModules.entries())
-          .map(([layer, inits]) => {
-            const initCode = Array.from(inits).join('\n');
-            return `case "${scopeName}": {\n${Template.indent(initCode)}\n}`;
-          })
-          .join('\nbreak;\n');
-        return cases;
-      })
-      .join('\n');
 
     return Template.asString([
       `${getFederationGlobalScope(

@@ -25,11 +25,9 @@ class ProvideSharedModuleFactory extends ModuleFactory {
     data: ModuleFactoryCreateData,
     callback: (error: Error | null, result?: ModuleFactoryResult) => void,
   ): void {
-    // @ts-ignore
     const dep: ProvideSharedDependency = data
       .dependencies[0] as ProvideSharedDependency;
     callback(null, {
-      // @ts-ignore
       module: new ProvideSharedModule(
         dep.shareScope,
         dep.name,

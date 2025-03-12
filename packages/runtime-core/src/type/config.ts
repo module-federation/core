@@ -13,7 +13,7 @@ export type PartialOptional<T, K extends keyof T> = Omit<T, K> & {
 
 export interface RemoteInfoCommon {
   alias?: string;
-  shareScope?: string;
+  shareScope?: string | string[];
   type?: RemoteEntryType;
   entryGlobalName?: string;
 }

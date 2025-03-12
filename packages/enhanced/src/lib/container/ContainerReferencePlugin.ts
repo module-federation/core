@@ -109,7 +109,7 @@ class ContainerReferencePlugin {
 
         normalModuleFactory.hooks.factorize.tap(
           'ContainerReferencePlugin',
-          // @ts-ignore
+          //@ts-ignore
           (data) => {
             if (!data.request.includes('!')) {
               for (const [key, config] of remotes) {

@@ -21,7 +21,7 @@ export interface ProvideSharedPluginOptions {
   /**
    * Share scope name used for all provided modules (defaults to 'default').
    */
-  shareScope?: string;
+  shareScope?: string | string[];
 }
 /**
  * Modules that should be provided as shared modules to the share scope. Property names are used as share keys.
@@ -47,7 +47,7 @@ export interface ProvidesConfig {
   /**
    * Share scope name.
    */
-  shareScope?: string;
+  shareScope?: string | string[];
   /**
    * Version of the provided module. Will replace lower matching versions, but not higher.
    */

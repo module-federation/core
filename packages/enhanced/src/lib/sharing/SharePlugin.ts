@@ -18,7 +18,7 @@ import type { ProvidesConfig } from '../../declarations/plugins/sharing/ProvideS
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 class SharePlugin {
-  private _shareScope: string;
+  private _shareScope: string | string[];
   private _consumes: Record<string, ConsumesConfig>[];
   private _provides: Record<string, ProvidesConfig>[];
 
@@ -73,8 +73,8 @@ class SharePlugin {
           request: options.request || options.import || key,
         },
       }));
-    //@ts-ignore
-    this._shareScope = options.shareScope;
+
+    this._shareScope = options.shareScope || 'default';
     this._consumes = consumes;
     this._provides = provides;
   }

@@ -18,7 +18,7 @@ import type {
 } from 'webpack/lib/Dependency';
 
 class ProvideSharedDependency extends Dependency {
-  shareScope: string;
+  shareScope: string | string[];
   name: string;
   version: string | false;
   request: string;
@@ -29,7 +29,7 @@ class ProvideSharedDependency extends Dependency {
   layer?: string;
 
   /**
-   * @param {string} shareScope share scope
+   * @param {string|string[]} shareScope share scope
    * @param {string} name module name
    * @param {string | false} version version
    * @param {string} request request
@@ -40,7 +40,7 @@ class ProvideSharedDependency extends Dependency {
    * @param {string} [layer] layer information
    */
   constructor(
-    shareScope: string,
+    shareScope: string | string[],
     name: string,
     version: string | false,
     request: string,
@@ -70,7 +70,11 @@ class ProvideSharedDependency extends Dependency {
    * @returns {string | null} an identifier to merge equal requests
    */
   override getResourceIdentifier(): string | null {
-    return `provide module (${this.shareScope})${this.layer ? ` (${this.layer})` : ''} ${this.request} as ${
+    const scopeStr = Array.isArray(this.shareScope)
+      ? this.shareScope.join('|')
+      : this.shareScope;
+
+    return `provide module (${scopeStr})${this.layer ? ` (${this.layer})` : ''} ${this.request} as ${
       this.name
     } @ ${this.version}${this.eager ? ' (eager)' : ''}`;
   }

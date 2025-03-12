@@ -34,7 +34,7 @@ const TYPES = new Set(['share-init']);
  * @extends {Module}
  */
 class ProvideSharedModule extends Module {
-  private _shareScope: string;
+  private _shareScope: string | string[];
   private _name: string;
   private _version: string | false;
   private _request: string;
@@ -45,7 +45,7 @@ class ProvideSharedModule extends Module {
 
   /**
    * @constructor
-   * @param {string} shareScope shared scope name
+   * @param {string|string[]} shareScope shared scope name
    * @param {string} name shared key
    * @param {string | false} version version
    * @param {string} request request to the provided module
@@ -56,7 +56,7 @@ class ProvideSharedModule extends Module {
    * @param {string} [layer] layer information
    */
   constructor(
-    shareScope: string,
+    shareScope: string | string[],
     name: string,
     version: string | false,
     request: string,
@@ -206,7 +206,7 @@ class ProvideSharedModule extends Module {
       version: JSON.stringify(this._version || '0'),
       request: this._request,
       getter: moduleGetter,
-      shareScope: [this._shareScope],
+      shareScope: this._shareScope,
       shareConfig: {
         eager: this._eager,
         requiredVersion: this._requiredVersion,
