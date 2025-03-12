@@ -76,3 +76,12 @@ export interface SharedConfig {
    */
   version?: false | string;
 }
+
+export declare class SharePlugin {
+  constructor(options: SharePluginOptions);
+
+  /**
+   * Apply the plugin
+   */
+  apply(compiler: any): void;
+}

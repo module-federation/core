@@ -37,7 +37,7 @@ export interface RemoteInfo {
   entry: string;
   type: RemoteEntryType;
   entryGlobalName: string;
-  shareScope: string;
+  shareScope: string | string[];
 }
 
 export type HostInfo = Pick<
