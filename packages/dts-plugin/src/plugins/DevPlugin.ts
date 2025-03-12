@@ -37,16 +37,23 @@ export class DevPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _devWorker?: DevWorker;
   dtsOptions: moduleFederationPlugin.PluginDtsOptions;
-  fetchTypesPromise: Promise<void>;
+  generateTypesPromise: Promise<void>;
+  fetchRemoteTypeUrlsPromise: Promise<
+    moduleFederationPlugin.DtsHostOptions['remoteTypeUrls'] | undefined
+  >;
 
   constructor(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
     dtsOptions: moduleFederationPlugin.PluginDtsOptions,
-    fetchTypesPromise: Promise<void>,
+    generateTypesPromise: Promise<void>,
+    fetchRemoteTypeUrlsPromise: Promise<
+      moduleFederationPlugin.DtsHostOptions['remoteTypeUrls'] | undefined
+    >,
   ) {
     this._options = options;
-    this.fetchTypesPromise = fetchTypesPromise;
+    this.generateTypesPromise = generateTypesPromise;
     this.dtsOptions = dtsOptions;
+    this.fetchRemoteTypeUrlsPromise = fetchRemoteTypeUrlsPromise;
   }
 
   static ensureLiveReloadEntry(
@@ -253,11 +260,18 @@ export class DevPlugin implements WebpackPluginInstance {
     ) {
       remote.tsConfigPath = normalizedDtsOptions.tsConfigPath;
     }
-    this.fetchTypesPromise.then(() => {
+
+    Promise.all([
+      this.generateTypesPromise,
+      this.fetchRemoteTypeUrlsPromise,
+    ]).then(([_, remoteTypeUrls]) => {
       this._devWorker = createDevWorker({
         name,
         remote: remote,
-        host: host,
+        host: {
+          ...host,
+          remoteTypeUrls,
+        },
         extraOptions: extraOptions,
         disableLiveReload: normalizedDev.disableHotTypesReload,
         disableHotTypesReload: normalizedDev.disableHotTypesReload,

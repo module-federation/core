@@ -1,5 +1,41 @@
 # @module-federation/enhanced
 
+## 0.10.0
+
+### Patch Changes
+
+- Updated dependencies [0f71cbc]
+- Updated dependencies [22fcccd]
+  - @module-federation/sdk@0.10.0
+  - @module-federation/dts-plugin@0.10.0
+  - @module-federation/bridge-react-webpack-plugin@0.10.0
+  - @module-federation/data-prefetch@0.10.0
+  - @module-federation/managers@0.10.0
+  - @module-federation/manifest@0.10.0
+  - @module-federation/rspack@0.10.0
+  - @module-federation/runtime-tools@0.10.0
+  - @module-federation/inject-external-runtime-core-plugin@0.10.0
+  - @module-federation/error-codes@0.10.0
+
+## 0.9.1
+
+### Patch Changes
+
+- Updated dependencies [35d925b]
+- Updated dependencies [35d925b]
+- Updated dependencies [7a37360]
+- Updated dependencies [8acd217]
+  - @module-federation/dts-plugin@0.9.1
+  - @module-federation/sdk@0.9.1
+  - @module-federation/manifest@0.9.1
+  - @module-federation/rspack@0.9.1
+  - @module-federation/bridge-react-webpack-plugin@0.9.1
+  - @module-federation/data-prefetch@0.9.1
+  - @module-federation/managers@0.9.1
+  - @module-federation/runtime-tools@0.9.1
+  - @module-federation/inject-external-runtime-core-plugin@0.9.1
+  - @module-federation/error-codes@0.9.1
+
 ## 0.9.0
 
 ### Patch Changes

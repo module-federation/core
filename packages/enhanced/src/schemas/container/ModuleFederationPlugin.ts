@@ -653,31 +653,22 @@ export default {
         {
           type: 'boolean',
         },
-        {
-          type: 'object',
-          title: 'PluginDevOptions',
-        },
       ],
     },
-    dts: {
-      description: 'TypeScript declaration file generation configuration',
-      oneOf: [
-        {
+    experiments: {
+      type: 'object',
+      properties: {
+        asyncStartup: {
+          description: 'Enable async startup for the container',
           type: 'boolean',
         },
-        {
-          type: 'object',
-          title: 'PluginDtsOptions',
+        externalRuntime: {
+          type: 'boolean',
         },
-      ],
-    },
-    dataPrefetch: {
-      description: 'Enable data prefetching for container modules.',
-      type: 'boolean',
-    },
-    virtualRuntimeEntry: {
-      description: 'Use virtual module for federation runtime injection.',
-      type: 'boolean',
+        provideExternalRuntime: {
+          type: 'boolean',
+        },
+      },
     },
     bridge: {
       description: 'Bridge configuration options',

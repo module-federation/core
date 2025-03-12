@@ -136,6 +136,15 @@ export interface PluginDevOptions {
   disableDynamicRemoteTypeHints?: boolean;
 }
 
+interface RemoteTypeUrl {
+  api: string;
+  zip: string;
+}
+
+export interface RemoteTypeUrls {
+  [remoteName: string]: RemoteTypeUrl;
+}
+
 export interface DtsHostOptions {
   typesFolder?: string;
   abortOnError?: boolean;
@@ -144,6 +153,8 @@ export interface DtsHostOptions {
   maxRetries?: number;
   consumeAPITypes?: boolean;
   runtimePkgs?: string[];
+  remoteTypeUrls?: (() => Promise<RemoteTypeUrls>) | RemoteTypeUrls;
+  timeout?: number;
 }
 
 export interface DtsRemoteOptions {
@@ -235,9 +246,9 @@ export interface ModuleFederationPluginOptions {
   dataPrefetch?: DataPrefetch;
   virtualRuntimeEntry?: boolean;
   experiments?: {
-    federationRuntime?: false | 'hoisted';
     externalRuntime?: boolean;
     provideExternalRuntime?: boolean;
+    asyncStartup?: boolean;
   };
   bridge?: {
     /**

@@ -319,17 +319,9 @@ export default {
       type: 'object',
       additionalProperties: false,
       properties: {
-        federationRuntime: {
-          description:
-            "Configure federation runtime mode. When set to 'hoisted', enables hoisted runtime mode. When false, disables federation runtime.",
-          oneOf: [
-            {
-              enum: [false],
-            },
-            {
-              enum: ['hoisted'],
-            },
-          ],
+        asyncStartup: {
+          description: 'Enable async startup for the container',
+          type: 'boolean',
         },
         externalRuntime: {
           description:

@@ -21,11 +21,13 @@ import { PackageManagerTabs } from '@theme';
 function createRemoteComponent<T, E extends keyof T>(
   options: {
     // Function to load remote application, e.g., loadRemote('remote1/export-app') or import('remote1/export-app')
-    loader: () => Promise<T>,
+    loader: () => Promise<T>;
     // Default is 'default', used to specify module export
-    export?: E,
+    export?: E;
     // Parameters that will be passed to defineAsyncComponent
     asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
+    // Attributes that will be bound to the root container where the remote Vue application will be mounted
+    rootAttrs?: Record<string, unknown>;
   }
 ): (props: {
     basename?: string;
@@ -141,11 +143,13 @@ export default router;
 function createRemoteComponent<T, E extends keyof T>(
   options: {
     // Function to load remote application, e.g., loadRemote('remote1/export-app') or import('remote1/export-app')
-    loader: () => Promise<T>,
+    loader: () => Promise<T>;
     // Default is 'default', used to specify module export
     export?: E;
     // Parameters that will be passed to defineAsyncComponent
     asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
+    // Attributes that will be bound to the root container where the remote Vue application will be mounted
+    rootAttrs?: Record<string, unknown>;
   }
 ): (props: {
     basename?: string;
@@ -168,6 +172,9 @@ const Remote1App = createRemoteComponent({ loader: () => loadRemote('remote1/exp
   * `asyncComponentOptions`
     * type: `Omit<AsyncComponentOptions, 'loader'>`
     * Purpose: Parameters that will be passed to defineAsyncComponent, except for the loader parameter
+  * `rootAttrs`
+    * type: `Record<string, unknown>`
+    * Purpose: Attributes that will be bound to the root container where the remote Vue application will be mounted
 ```tsx
 // remote
 export const provider = createBridgeComponent({
@@ -188,14 +195,14 @@ const Remote1App = createRemoteComponent({
 ```tsx
 import * as bridge from '@module-federation/bridge-vue3';
 
-const Remote2 = bridge.createRemoteComponent({ loader: () => loadRemote('remote1/export-app') });
+const Remote2 = bridge.createRemoteComponent({ loader: () => loadRemote('remote1/export-app'), rootAttrs: {class: 'root-element-class'} });
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     // Define your routes here
     { path: '/', component: Home },
-    { path: '/remote1/:pathMatch(.*)*', component: Remote2 },
+    { path: '/remote1/:pathMatch(.*)*', component: Remote2, props: { foo: 'bar' } },
     // Other routes
   ],
 });
