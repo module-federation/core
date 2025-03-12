@@ -23,6 +23,7 @@ export declare function createRemoteComponent(info: {
   export?: string;
   asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
   rootAttrs?: Record<string, unknown>;
+  basename?: string;
 }): new () => ComponentPublicInstance;
 
 declare type ProviderFnParams = {

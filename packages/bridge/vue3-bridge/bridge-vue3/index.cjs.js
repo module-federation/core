@@ -3147,34 +3147,28 @@ function createRemoteComponent(n) {
     __APP_VERSION__: '0.10.0',
     ...n.asyncComponentOptions,
     loader: async () => {
-      var c;
-      const t = vueRouter.useRoute();
-      let o = '/';
-      const r = (c = t.matched[0]) == null ? void 0 : c.path;
-      r &&
-        (r.endsWith('/:pathMatch(.*)*')
-          ? (o = r.replace('/:pathMatch(.*)*', ''))
-          : (o = t.matched[0].path));
-      const s = (n == null ? void 0 : n.export) || 'default';
+      const t = vueRouter.useRoute(),
+        o = (n == null ? void 0 : n.basename) || '/',
+        r = (n == null ? void 0 : n.export) || 'default';
       LoggerInstance.debug('createRemoteComponent LazyComponent create >>>', {
         basename: o,
         info: n,
       });
-      const l = await n.loader(),
-        a = l && l[Symbol.for('mf_module_id')],
-        i = l[s];
+      const s = await n.loader(),
+        l = s && s[Symbol.for('mf_module_id')],
+        a = s[r];
       if (
         (LoggerInstance.debug(
           'createRemoteComponent LazyComponent loadRemote info >>>',
-          { moduleName: a, module: l, exportName: s, basename: o, route: t },
+          { moduleName: l, module: s, exportName: r, basename: o, route: t },
         ),
-        s in l && typeof i == 'function')
+        r in s && typeof a == 'function')
       )
         return {
           render() {
             return Vue.h(RemoteApp, {
-              moduleName: a,
-              providerInfo: i,
+              moduleName: l,
+              providerInfo: a,
               basename: o,
               rootAttrs: n.rootAttrs,
             });

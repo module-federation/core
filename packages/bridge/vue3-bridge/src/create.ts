@@ -10,6 +10,7 @@ export function createRemoteComponent(info: {
   export?: string;
   asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
   rootAttrs?: Record<string, unknown>;
+  basename?: string;
 }) {
   return defineAsyncComponent({
     __APP_VERSION__,
@@ -18,15 +19,15 @@ export function createRemoteComponent(info: {
     loader: async () => {
       const route = useRoute();
 
-      let basename = '/';
-      const matchPath = route.matched[0]?.path;
-      if (matchPath) {
-        if (matchPath.endsWith('/:pathMatch(.*)*')) {
-          basename = matchPath.replace('/:pathMatch(.*)*', '');
-        } else {
-          basename = route.matched[0].path;
-        }
-      }
+      const basename = info?.basename || '/';
+      // const matchPath = route.matched[0]?.path;
+      // if (matchPath) {
+      //   if (matchPath.endsWith('/:pathMatch(.*)*')) {
+      //     basename = matchPath.replace('/:pathMatch(.*)*', '');
+      //   } else {
+      //     basename = route.matched[0].path;
+      //   }
+      // }
 
       const exportName = info?.export || 'default';
       LoggerInstance.debug(`createRemoteComponent LazyComponent create >>>`, {
