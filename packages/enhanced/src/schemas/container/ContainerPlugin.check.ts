@@ -153,7 +153,12 @@ const e = {
       library: { $ref: '#/definitions/LibraryOptions' },
       name: { type: 'string', minLength: 1 },
       runtime: { $ref: '#/definitions/EntryRuntime' },
-      shareScope: { type: 'string', minLength: 1 },
+      shareScope: {
+        anyOf: [
+          { type: 'string', minLength: 1 },
+          { type: 'array', items: { type: 'string', minLength: 1 } },
+        ],
+      },
       experiments: {
         type: 'object',
         additionalProperties: !1,
@@ -1009,16 +1014,59 @@ function u(
                   if (y) {
                     if (void 0 !== s.shareScope) {
                       let t = s.shareScope;
-                      const e = c;
-                      if (c === e) {
-                        if ('string' != typeof t)
-                          return (
-                            (u.errors = [{ params: { type: 'string' } }]), !1
-                          );
-                        if (t.length < 1)
-                          return (u.errors = [{ params: {} }]), !1;
+                      const e = c,
+                        r = c;
+                      let n = !1;
+                      const a = c;
+                      if (c === a)
+                        if ('string' == typeof t) {
+                          if (t.length < 1) {
+                            const t = { params: {} };
+                            null === f ? (f = [t]) : f.push(t), c++;
+                          }
+                        } else {
+                          const t = { params: { type: 'string' } };
+                          null === f ? (f = [t]) : f.push(t), c++;
+                        }
+                      var h = a === c;
+                      if (((n = n || h), !n)) {
+                        const e = c;
+                        if (c === e)
+                          if (Array.isArray(t)) {
+                            const e = t.length;
+                            for (let r = 0; r < e; r++) {
+                              let e = t[r];
+                              const n = c;
+                              if (c === n)
+                                if ('string' == typeof e) {
+                                  if (e.length < 1) {
+                                    const t = { params: {} };
+                                    null === f ? (f = [t]) : f.push(t), c++;
+                                  }
+                                } else {
+                                  const t = { params: { type: 'string' } };
+                                  null === f ? (f = [t]) : f.push(t), c++;
+                                }
+                              if (n !== c) break;
+                            }
+                          } else {
+                            const t = { params: { type: 'array' } };
+                            null === f ? (f = [t]) : f.push(t), c++;
+                          }
+                        (h = e === c), (n = n || h);
                       }
-                      y = e === c;
+                      if (!n) {
+                        const t = { params: {} };
+                        return (
+                          null === f ? (f = [t]) : f.push(t),
+                          c++,
+                          (u.errors = f),
+                          !1
+                        );
+                      }
+                      (c = r),
+                        null !== f && (r ? (f.length = r) : (f = null)),
+                        (y = e === c);
                     } else y = !0;
                     if (y) {
                       if (void 0 !== s.experiments) {
