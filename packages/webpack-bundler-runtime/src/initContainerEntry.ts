@@ -30,18 +30,28 @@ export function initContainerEntry(
   const hostShareScopeMap = remoteEntryInitOptions?.shareScopeMap;
 
   // host: 'default' remote: 'default'  remote['default'] = hostShareScopeMap['default']
-  // host: ['default', 'scope1'] remote: 'default'  remote['default'] = hostShareScopeMap['default']
+  // host: ['default', 'scope1'] remote: 'default'  remote['default'] = hostShareScopeMap['default']; remote['scope1'] = hostShareScopeMap['scop1']
   // host: 'default' remote: ['default','scope1']  remote['default'] = hostShareScopeMap['default']; remote['scope1'] = hostShareScopeMap['scope1'] = {}
   // host: ['scope1','default'] remote: ['scope1','scope2'] => remote['scope1'] = hostShareScopeMap['scope1']; remote['scope2'] = hostShareScopeMap['scope2'] = {};
   if (!shareScopeKey || typeof shareScopeKey === 'string') {
     const key = shareScopeKey || 'default';
     if (Array.isArray(hostShareScopeKeys)) {
-      const sc = hostShareScopeMap![key];
-      if (!sc) {
-        throw new Error('shareScopeKey is not exist in hostShareScopeMap');
-      }
-      federationInstance.initShareScopeMap(key, sc, {
-        hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
+      // const sc = hostShareScopeMap![key];
+      // if (!sc) {
+      //   throw new Error('shareScopeKey is not exist in hostShareScopeMap');
+      // }
+      // federationInstance.initShareScopeMap(key, sc, {
+      //   hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
+      // });
+
+      hostShareScopeKeys.forEach((hostKey) => {
+        if (!hostShareScopeMap![hostKey]) {
+          hostShareScopeMap![hostKey] = {};
+        }
+        const sc = hostShareScopeMap![hostKey];
+        federationInstance.initShareScopeMap(hostKey, sc, {
+          hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
+        });
       });
     } else {
       federationInstance.initShareScopeMap(key, shareScope, {

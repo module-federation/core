@@ -6,6 +6,7 @@ const common = {
   remotes: {
     containerA: {
       external: '../7-layers-full/container.js',
+      shareScope: ['react-layer', 'default'],
     },
   },
   shareStrategy: 'loaded-first',
