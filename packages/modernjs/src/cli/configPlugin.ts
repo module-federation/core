@@ -7,6 +7,7 @@ import {
   getMFConfig,
   patchMFConfig,
   addMyTypes2Ignored,
+  isWebTarget,
 } from './utils';
 
 export function setEnv(enableSSR: boolean) {
@@ -34,21 +35,22 @@ export const moduleFederationConfigPlugin = (
     const enableSSR =
       userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr);
 
-    api.modifyBundlerChain((chain, { isServer }) => {
+    api.modifyBundlerChain((chain) => {
+      const isWeb = isWebTarget(chain.get('target'));
       // @ts-expect-error chain type is not correct
-      addMyTypes2Ignored(chain, isServer ? ssrConfig : csrConfig);
+      addMyTypes2Ignored(chain, isWeb ? ssrConfig : csrConfig);
 
-      const targetMFConfig = isServer ? ssrConfig : csrConfig;
+      const targetMFConfig = isWeb ? ssrConfig : csrConfig;
       patchMFConfig(
         targetMFConfig,
-        isServer,
+        isWeb,
         userConfig.remoteIpStrategy || 'ipv4',
       );
 
       patchBundlerConfig({
         // @ts-expect-error chain type is not correct
         chain,
-        isServer,
+        isServer: isWeb,
         modernjsConfig,
         mfConfig,
         enableSSR,
