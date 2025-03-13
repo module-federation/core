@@ -15,6 +15,12 @@ module.exports = composePlugins(
     config.watchOptions = {
       ignored: ['**/node_modules/**', '**/@mf-types/**'],
     };
+    config.devServer = {
+      ...config.devServer,
+      devMiddleware: {
+        writeToDisk: true,
+      },
+    };
     // publicPath must be specific url
     config.output.publicPath = 'auto';
     config.plugins.push(
