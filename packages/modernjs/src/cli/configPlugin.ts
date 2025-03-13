@@ -38,19 +38,19 @@ export const moduleFederationConfigPlugin = (
     api.modifyBundlerChain((chain) => {
       const isWeb = isWebTarget(chain.get('target'));
       // @ts-expect-error chain type is not correct
-      addMyTypes2Ignored(chain, isWeb ? ssrConfig : csrConfig);
+      addMyTypes2Ignored(chain, !isWeb ? ssrConfig : csrConfig);
 
-      const targetMFConfig = isWeb ? ssrConfig : csrConfig;
+      const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
       patchMFConfig(
         targetMFConfig,
-        isWeb,
+        !isWeb,
         userConfig.remoteIpStrategy || 'ipv4',
       );
 
       patchBundlerConfig({
         // @ts-expect-error chain type is not correct
         chain,
-        isServer: isWeb,
+        isServer: !isWeb,
         modernjsConfig,
         mfConfig,
         enableSSR,
