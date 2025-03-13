@@ -1,0 +1,62 @@
+{
+  "name": "cli",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/cli/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/cli/dist",
+        "main": "packages/cli/src/index.ts",
+        "tsConfig": "packages/cli/tsconfig.json",
+        "assets": [],
+        "project": "packages/cli/package.json",
+        "rollupConfig": "packages/cli/rollup.config.js",
+        "compiler": "swc",
+        "format": ["cjs"],
+        "generatePackageJson": false
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/cli/**/*.ts",
+          "packages/cli/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "echo 'waiting for adding test case...'",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run cli:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run cli:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  },
+  "tags": ["type:pkg"]
+}
