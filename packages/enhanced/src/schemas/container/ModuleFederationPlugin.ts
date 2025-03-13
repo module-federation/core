@@ -764,5 +764,10 @@ export default {
       },
       additionalProperties: false,
     },
+    virtualRuntimeEntry: {
+      description:
+        'Uses a virtual module instead of a file for federation runtime entry',
+      type: 'boolean',
+    },
   },
 } as const;
