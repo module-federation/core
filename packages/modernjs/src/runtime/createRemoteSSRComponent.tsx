@@ -131,37 +131,40 @@ export function collectSSRAssets(options: IProps) {
   }
   const { module: targetModule, publicPath, remoteEntry } = moduleAndPublicPath;
   if (injectLink) {
-    [...targetModule.assets.css.async].sort().forEach((file, index) => {
-      links.push(
-        <link
+    [...targetModule.assets.css.sync, ...targetModule.assets.css.async]
+      .sort()
+      .forEach((file, index) => {
+        links.push(
+          <link
+            key={`${file.split('.')[0]}_${index}`}
+            href={`${publicPath}${file}`}
+            rel="stylesheet"
+            type="text/css"
+          />,
+        );
+      });
+  }
+
+  if (injectScript) {
+    scripts.push(
+      <script
+        async={true}
+        key={remoteEntry.split('.')[0]}
+        src={`${publicPath}${remoteEntry}`}
+        crossOrigin="anonymous"
+      />,
+    );
+    [...targetModule.assets.js.sync].sort().forEach((file, index) => {
+      scripts.push(
+        <script
           key={`${file.split('.')[0]}_${index}`}
-          href={`${publicPath}${file}`}
-          rel="stylesheet"
-          type="text/css"
+          async={true}
+          src={`${publicPath}${file}`}
+          crossOrigin="anonymous"
         />,
       );
     });
   }
-  scripts.push(
-    <script
-      async={true}
-      key={remoteEntry.split('.')[0]}
-      src={`${publicPath}${remoteEntry}`}
-      crossOrigin="anonymous"
-    />,
-  );
-  // if (injectScript) {
-  //   [...targetModule.assets.js.sync].sort().forEach((file, index) => {
-  //     scripts.push(
-  //       <script
-  //         key={`${file.split('.')[0]}_${index}`}
-  //         async={true}
-  //         src={`${publicPath}${file}`}
-  //         crossOrigin="anonymous"
-  //       />,
-  //     );
-  //   });
-  // }
 
   return [...scripts, ...links];
 }
