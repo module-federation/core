@@ -6,6 +6,7 @@ const common = {
   exposes: {
     './ComponentA': './ComponentA',
   },
+  shareScope: ['react-layer', 'default'],
   shared: {
     react: {
       singleton: true,

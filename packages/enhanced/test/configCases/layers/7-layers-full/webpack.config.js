@@ -13,6 +13,8 @@ const common = {
   shared: {
     react: {
       singleton: true,
+      requiredVersion: '0.1.2',
+      strictVersion: true,
     },
     randomvalue: {
       request: 'react',
