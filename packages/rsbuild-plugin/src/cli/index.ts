@@ -12,7 +12,7 @@ import type {
   moduleFederationPlugin,
   sharePlugin,
 } from '@module-federation/sdk';
-import type { RsbuildPlugin, Rspack } from '@rsbuild/core';
+import type { RsbuildConfig, RsbuildPlugin, Rspack } from '@rsbuild/core';
 import logger from '../logger';
 
 type ModuleFederationOptions =
@@ -31,6 +31,17 @@ export {
 };
 
 const LIB_FORMAT = ['umd', 'modern-module'];
+
+function isStoryBook(rsbuildConfig: RsbuildConfig) {
+  if (
+    rsbuildConfig.plugins?.find(
+      (p) =>
+        p && 'name' in p && p.name === 'module-federation-storybook-plugin',
+    )
+  ) {
+    return true;
+  }
+}
 
 export function isMFFormat(bundlerConfig: Rspack.Configuration) {
   const library = bundlerConfig.output?.library;
@@ -79,6 +90,8 @@ export const pluginModuleFederation = (
       bundlerConfigs.forEach((bundlerConfig) => {
         if (!isMFFormat(bundlerConfig)) {
           return;
+        } else if (isStoryBook(api.getRsbuildConfig())) {
+          bundlerConfig.output!.uniqueName = `${moduleFederationOptions.name}-storybook-host`;
         } else {
           // mf
           autoDeleteSplitChunkCacheGroups(
@@ -147,6 +160,9 @@ export const pluginModuleFederation = (
           if (
             !bundlerConfig.plugins!.find((p) => p && p.name === PLUGIN_NAME)
           ) {
+            if (!moduleFederationOptions.shareStrategy) {
+              moduleFederationOptions.shareStrategy = 'loaded-first';
+            }
             bundlerConfig.plugins!.push(
               new ModuleFederationPlugin(moduleFederationOptions),
             );
@@ -157,6 +173,10 @@ export const pluginModuleFederation = (
 
     // dev config only works on format: 'mf'
     api.modifyRsbuildConfig((config) => {
+      // skip storybook
+      if (isStoryBook(config)) {
+        return;
+      }
       // Change some default configs for remote modules
       if (moduleFederationOptions.exposes) {
         config.dev ||= {};
@@ -192,3 +212,5 @@ export const pluginModuleFederation = (
     });
   },
 });
+
+export { createModuleFederationConfig } from '@module-federation/enhanced';

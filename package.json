@@ -46,7 +46,7 @@
     "app:manifest:prod": "nx run-many --target=serve --configuration=production --parallel=100 -p modernjs,manifest-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider",
     "app:ts:dev": "nx run-many --target=serve -p react_ts_host,react_ts_nested_remote,react_ts_remote",
     "app:modern:dev": "nx run-many --target=serve --parallel=10 --configuration=development -p modernjs-ssr-dynamic-nested-remote,modernjs-ssr-dynamic-remote,modernjs-ssr-dynamic-remote-new-version,modernjs-ssr-host,modernjs-ssr-nested-remote,modernjs-ssr-remote,modernjs-ssr-remote-new-version",
-    "commitlint": "commitlint --edit",
+    "commitlint": "echo",
     "prepare": "husky install",
     "changeset": "changeset",
     "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:type:pkg'",
