@@ -1,6 +1,8 @@
-import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { defineConfig } from '@rslib/core';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import moduleFederationConfig from './module-federation.config';
+import pkg from './package.json';
 
 const shared = {
   dts: {
@@ -32,6 +34,11 @@ export default defineConfig({
       ...shared,
       format: 'mf',
       output: {
+        // set unpkg cdn as assetPrefix if you want to publish
+        assetPrefix:
+          process.env.NODE_ENV === 'production'
+            ? `https://unpkg.com/${pkg.name}@latest/dist/mf/`
+            : undefined,
         distPath: {
           root: './dist/mf',
         },
@@ -41,21 +48,5 @@ export default defineConfig({
   server: {
     port: 3001,
   },
-  plugins: [
-    pluginReact(),
-    pluginModuleFederation({
-      name: 'rslib_provider',
-      exposes: {
-        '.': './src/index.tsx',
-      },
-      shared: {
-        react: {
-          singleton: true,
-        },
-        'react-dom': {
-          singleton: true,
-        },
-      },
-    }),
-  ],
+  plugins: [pluginReact(), pluginModuleFederation(moduleFederationConfig)],
 });

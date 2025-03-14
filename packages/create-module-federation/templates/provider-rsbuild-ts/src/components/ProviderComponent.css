@@ -1,0 +1,52 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(45deg, #3a65f2, #6a5acd, #8a2be2, #023cfc);
+  background-size: 400% 400%;
+  animation: gradientFlow 6s ease infinite;
+}
+
+.icon-container {
+  width: 180px;
+  margin-bottom: 20px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.logo-image {
+  width: 100%;
+  transition: opacity 0.3s ease;
+}
+
+.title {
+  font-size: 3rem;
+  color: #fff;
+  margin-bottom: 20px;
+  animation: fadeInUp 1s ease-out;
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
