@@ -19,7 +19,7 @@ export function createRemoteComponent(info: {
       const route = useRoute();
 
       let basename = '/';
-      const matchPath = route.matched[0]?.path;
+      const matchPath = route?.matched?.[0]?.path;
       if (matchPath) {
         if (matchPath.endsWith('/:pathMatch(.*)*')) {
           basename = matchPath.replace('/:pathMatch(.*)*', '');
