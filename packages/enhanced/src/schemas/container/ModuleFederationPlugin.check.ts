@@ -389,6 +389,8 @@ const t = {
           },
         ],
       },
+      runtimePlugins: { type: 'array', items: { type: 'string' } },
+      getPublicPath: { type: 'string' },
     },
   },
   r = {
@@ -1349,7 +1351,7 @@ function d(
   }
   return (d.errors = o), 0 === a;
 }
-function h(
+function g(
   e,
   {
     instancePath: t = '',
@@ -1420,16 +1422,16 @@ function h(
   }
   if (!l) {
     const e = { params: {} };
-    return null === o ? (o = [e]) : o.push(e), a++, (h.errors = o), !1;
+    return null === o ? (o = [e]) : o.push(e), a++, (g.errors = o), !1;
   }
   return (
     (a = i),
     null !== o && (i ? (o.length = i) : (o = null)),
-    (h.errors = o),
+    (g.errors = o),
     0 === a
   );
 }
-const g = {
+const h = {
   type: 'object',
   additionalProperties: !1,
   properties: {
@@ -1469,7 +1471,7 @@ function b(
     {
       const t = i;
       for (const t in e)
-        if (!s.call(g.properties, t))
+        if (!s.call(h.properties, t))
           return (b.errors = [{ params: { additionalProperty: t } }]), !1;
       if (t === i) {
         if (void 0 !== e.eager) {
@@ -1487,7 +1489,7 @@ function b(
             const o = i;
             if (!1 !== t) {
               const e = {
-                params: { allowedValues: g.properties.import.anyOf[0].enum },
+                params: { allowedValues: h.properties.import.anyOf[0].enum },
               };
               null === a ? (a = [e]) : a.push(e), i++;
             }
@@ -1574,7 +1576,7 @@ function b(
                         const e = {
                           params: {
                             allowedValues:
-                              g.properties.requiredVersion.anyOf[0].enum,
+                              h.properties.requiredVersion.anyOf[0].enum,
                           },
                         };
                         null === a ? (a = [e]) : a.push(e), i++;
@@ -1705,7 +1707,7 @@ function b(
                                   const e = {
                                     params: {
                                       allowedValues:
-                                        g.properties.version.anyOf[0].enum,
+                                        h.properties.version.anyOf[0].enum,
                                     },
                                   };
                                   null === a ? (a = [e]) : a.push(e), i++;
@@ -2006,13 +2008,13 @@ function j(
                   if (m) {
                     if (void 0 !== o.remotes) {
                       const e = u;
-                      h(o.remotes, {
+                      g(o.remotes, {
                         instancePath: a + '/remotes',
                         parentData: o,
                         parentDataProperty: 'remotes',
                         rootData: f,
                       }) ||
-                        ((y = null === y ? h.errors : y.concat(h.errors)),
+                        ((y = null === y ? g.errors : y.concat(g.errors)),
                         (u = y.length)),
                         (m = e === u);
                     } else m = !0;
@@ -2074,8 +2076,8 @@ function j(
                               const e = { params: { type: 'string' } };
                               null === y ? (y = [e]) : y.push(e), u++;
                             }
-                          var g = s === u;
-                          if (((n = n || g), !n)) {
+                          var h = s === u;
+                          if (((n = n || h), !n)) {
                             const t = u;
                             if (u === t)
                               if (Array.isArray(e)) {
@@ -2099,7 +2101,7 @@ function j(
                                 const e = { params: { type: 'array' } };
                                 null === y ? (y = [e]) : y.push(e), u++;
                               }
-                            (g = t === u), (n = n || g);
+                            (h = t === u), (n = n || h);
                           }
                           if (!n) {
                             const e = { params: {} };
@@ -3118,7 +3120,7 @@ function j(
                                             (r ? (y.length = r) : (y = null)),
                                           (m = t === u);
                                       } else m = !0;
-                                      if (m)
+                                      if (m) {
                                         if (void 0 !== o.manifest) {
                                           let e = o.manifest;
                                           const t = u,
@@ -3279,6 +3281,62 @@ function j(
                                               (r ? (y.length = r) : (y = null)),
                                             (m = t === u);
                                         } else m = !0;
+                                        if (m) {
+                                          if (void 0 !== o.runtimePlugins) {
+                                            let e = o.runtimePlugins;
+                                            const t = u;
+                                            if (u === t) {
+                                              if (!Array.isArray(e))
+                                                return (
+                                                  (j.errors = [
+                                                    {
+                                                      params: { type: 'array' },
+                                                    },
+                                                  ]),
+                                                  !1
+                                                );
+                                              {
+                                                const t = e.length;
+                                                for (let r = 0; r < t; r++) {
+                                                  const t = u;
+                                                  if ('string' != typeof e[r])
+                                                    return (
+                                                      (j.errors = [
+                                                        {
+                                                          params: {
+                                                            type: 'string',
+                                                          },
+                                                        },
+                                                      ]),
+                                                      !1
+                                                    );
+                                                  if (t !== u) break;
+                                                }
+                                              }
+                                            }
+                                            m = t === u;
+                                          } else m = !0;
+                                          if (m)
+                                            if (void 0 !== o.getPublicPath) {
+                                              const e = u;
+                                              if (
+                                                'string' !=
+                                                typeof o.getPublicPath
+                                              )
+                                                return (
+                                                  (j.errors = [
+                                                    {
+                                                      params: {
+                                                        type: 'string',
+                                                      },
+                                                    },
+                                                  ]),
+                                                  !1
+                                                );
+                                              m = e === u;
+                                            } else m = !0;
+                                        }
+                                      }
                                     }
                                   }
                                 }

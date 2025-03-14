@@ -828,5 +828,17 @@ export default {
         },
       ],
     },
+    runtimePlugins: {
+      description:
+        'Runtime plugin file paths or package names to be included in federation runtime',
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+    },
+    getPublicPath: {
+      description: 'Custom public path function for remote entry',
+      type: 'string',
+    },
   },
 } as const;
