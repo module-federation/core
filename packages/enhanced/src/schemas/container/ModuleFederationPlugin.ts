@@ -349,8 +349,19 @@ export default {
         },
         shareScope: {
           description: 'The name of the share scope shared with this remote.',
-          type: 'string',
-          minLength: 1,
+          anyOf: [
+            {
+              type: 'string',
+              minLength: 1,
+            },
+            {
+              type: 'array',
+              items: {
+                type: 'string',
+                minLength: 1,
+              },
+            },
+          ],
         },
       },
       required: ['external'],
@@ -479,8 +490,19 @@ export default {
         },
         shareScope: {
           description: 'Share scope name.',
-          type: 'string',
-          minLength: 1,
+          anyOf: [
+            {
+              type: 'string',
+              minLength: 1,
+            },
+            {
+              type: 'array',
+              items: {
+                type: 'string',
+                minLength: 1,
+              },
+            },
+          ],
         },
         singleton: {
           description:
@@ -580,8 +602,19 @@ export default {
     shareScope: {
       description:
         "The name of the share scope which is shared with the host (defaults to 'default').",
-      type: 'string',
-      minLength: 1,
+      anyOf: [
+        {
+          type: 'string',
+          minLength: 1,
+        },
+        {
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
+          },
+        },
+      ],
     },
     shareStrategy: {
       description: 'Strategy for resolving shared modules',
@@ -730,6 +763,86 @@ export default {
         },
       },
       additionalProperties: false,
+    },
+    virtualRuntimeEntry: {
+      description:
+        'Uses a virtual module instead of a file for federation runtime entry',
+      type: 'boolean',
+    },
+    dev: {
+      description: 'Development mode configuration options',
+      anyOf: [
+        {
+          type: 'boolean',
+        },
+        {
+          type: 'object',
+          properties: {
+            disableLiveReload: {
+              description: 'Disable live reload for development mode',
+              type: 'boolean',
+            },
+            disableHotTypesReload: {
+              description: 'Disable hot types reload for development mode',
+              type: 'boolean',
+            },
+            disableDynamicRemoteTypeHints: {
+              description:
+                'Disable dynamic remote type hints for development mode',
+              type: 'boolean',
+            },
+          },
+          additionalProperties: false,
+        },
+      ],
+    },
+    manifest: {
+      description:
+        'Manifest generation configuration options. IMPORTANT: When using this option, you must set a string value for `output.publicPath` in your webpack configuration.',
+      anyOf: [
+        {
+          type: 'boolean',
+        },
+        {
+          type: 'object',
+          properties: {
+            filePath: {
+              description: 'Path where the manifest file will be generated',
+              type: 'string',
+            },
+            disableAssetsAnalyze: {
+              description: 'Disable assets analyze for manifest generation',
+              type: 'boolean',
+            },
+            fileName: {
+              description: 'Name of the manifest file',
+              type: 'string',
+            },
+            additionalData: {
+              description:
+                'Function that provides additional data to the manifest',
+              type: 'object',
+            },
+          },
+          additionalProperties: false,
+        },
+      ],
+    },
+    runtimePlugins: {
+      description:
+        'Runtime plugin file paths or package names to be included in federation runtime',
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+    },
+    getPublicPath: {
+      description: 'Custom public path function for remote entry',
+      type: 'string',
+    },
+    dataPrefetch: {
+      description: 'Whether enable data prefetch',
+      type: 'boolean',
     },
   },
 } as const;

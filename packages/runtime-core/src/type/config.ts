@@ -13,7 +13,7 @@ export type PartialOptional<T, K extends keyof T> = Omit<T, K> & {
 
 export interface RemoteInfoCommon {
   alias?: string;
-  shareScope?: string;
+  shareScope?: string | string[];
   type?: RemoteEntryType;
   entryGlobalName?: string;
 }
@@ -37,7 +37,7 @@ export interface RemoteInfo {
   entry: string;
   type: RemoteEntryType;
   entryGlobalName: string;
-  shareScope: string;
+  shareScope: string | string[];
 }
 
 export type HostInfo = Pick<
@@ -131,7 +131,8 @@ export type LoadModuleOptions = {
 // Only for legacy federation provider
 export type RemoteEntryInitOptions = {
   version: string;
-  shareScopeMap: ShareScopeMap;
+  shareScopeMap?: ShareScopeMap;
+  shareScopeKeys: string | string[];
 };
 
 export type InitTokens = Record<string, Record<string, any>>;

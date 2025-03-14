@@ -49,7 +49,7 @@ const validate = createSchemaValidation(
 /**
  * @typedef {Object} ProvideOptions
  * @property {string} shareKey
- * @property {string} shareScope
+ * @property {string | string[]} shareScope
  * @property {string | undefined | false} version
  * @property {boolean} eager
  * @property {string} [request] The actual request to use for importing the module
@@ -100,9 +100,7 @@ class ProvideSharedPlugin {
         const request = item.request || key;
         return {
           shareScope: item.shareScope || options.shareScope || 'default',
-          shareKey: item.layer
-            ? `(${item.layer})${item.shareKey || request}`
-            : item.shareKey || request,
+          shareKey: item.shareKey || request,
           version: item.version,
           eager: !!item.eager,
           requiredVersion: item.requiredVersion,

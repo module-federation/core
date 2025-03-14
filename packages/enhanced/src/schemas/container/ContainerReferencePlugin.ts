@@ -79,8 +79,19 @@ export default {
         },
         shareScope: {
           description: 'The name of the share scope shared with this remote.',
-          type: 'string',
-          minLength: 1,
+          anyOf: [
+            {
+              type: 'string',
+              minLength: 1,
+            },
+            {
+              type: 'array',
+              items: {
+                type: 'string',
+                minLength: 1,
+              },
+            },
+          ],
         },
       },
       required: ['external'],
@@ -143,8 +154,19 @@ export default {
     shareScope: {
       description:
         "The name of the share scope shared with all remotes (defaults to 'default').",
-      type: 'string',
-      minLength: 1,
+      anyOf: [
+        {
+          type: 'string',
+          minLength: 1,
+        },
+        {
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
+          },
+        },
+      ],
     },
   },
   required: ['remoteType', 'remotes'],

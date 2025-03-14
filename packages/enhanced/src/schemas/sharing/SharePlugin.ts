@@ -82,8 +82,19 @@ export default {
         },
         shareScope: {
           description: 'Share scope name.',
-          type: 'string',
-          minLength: 1,
+          anyOf: [
+            {
+              type: 'string',
+              minLength: 1,
+            },
+            {
+              type: 'array',
+              items: {
+                type: 'string',
+                minLength: 1,
+              },
+            },
+          ],
         },
         singleton: {
           description:
@@ -147,8 +158,19 @@ export default {
     shareScope: {
       description:
         "Share scope name used for all shared modules (defaults to 'default').",
-      type: 'string',
-      minLength: 1,
+      anyOf: [
+        {
+          type: 'string',
+          minLength: 1,
+        },
+        {
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
+          },
+        },
+      ],
     },
     shared: {
       $ref: '#/definitions/Shared',

@@ -311,8 +311,19 @@ export default {
     shareScope: {
       description:
         "The name of the share scope which is shared with the host (defaults to 'default').",
-      type: 'string',
-      minLength: 1,
+      anyOf: [
+        {
+          type: 'string',
+          minLength: 1,
+        },
+        {
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
+          },
+        },
+      ],
     },
     experiments: {
       description: 'Experimental features configuration',

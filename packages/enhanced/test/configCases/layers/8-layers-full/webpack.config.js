@@ -6,22 +6,27 @@ const common = {
   remotes: {
     containerA: {
       external: '../7-layers-full/container.js',
+      shareScope: ['react-layer', 'default'],
     },
   },
+  shareStrategy: 'loaded-first',
   shared: {
     react: {
-      singleton: true,
-      requiredVersion: false,
-      import: false,
+      singleton: false,
+      requiredVersion: '0.1.2',
+      strictVersion: true,
+      // import: false,
     },
     randomvalue: {
+      strictVersion: true,
       request: 'react',
-      import: false,
+      // import: false,
       shareKey: 'react',
-      singleton: true,
-      requiredVersion: false,
+      singleton: false,
+      requiredVersion: '0.1.2',
       layer: 'react-layer',
       issuerLayer: 'react-layer',
+      shareScope: 'react-layer',
     },
   },
 };

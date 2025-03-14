@@ -87,7 +87,13 @@ class ConsumeSharedModule extends Module {
       eager,
       layer,
     } = this.options;
-    return `${WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE}|${shareScope}|${shareKey}|${
+
+    // Convert shareScope array to string for the identifier
+    const normalizedShareScope = Array.isArray(shareScope)
+      ? shareScope.join('|')
+      : shareScope;
+
+    return `${WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE}|${normalizedShareScope}|${shareKey}|${
       requiredVersion && rangeToString(requiredVersion)
     }|${strictVersion}|${importResolved}|${singleton}|${eager}|${layer}`;
   }
@@ -107,7 +113,11 @@ class ConsumeSharedModule extends Module {
       eager,
       layer,
     } = this.options;
-    return `consume shared module (${shareScope}) ${shareKey}@${
+    const normalizedShareScope = Array.isArray(shareScope)
+      ? shareScope.join('|')
+      : shareScope;
+
+    return `consume shared module (${normalizedShareScope}) ${shareKey}@${
       requiredVersion ? rangeToString(requiredVersion) : '*'
     }${strictVersion ? ' (strict)' : ''}${singleton ? ' (singleton)' : ''}${
       importResolved
@@ -122,9 +132,13 @@ class ConsumeSharedModule extends Module {
    */
   override libIdent(options: LibIdentOptions): string | null {
     const { shareKey, shareScope, import: request } = this.options;
+    const normalizedShareScope = Array.isArray(shareScope)
+      ? shareScope.join('|')
+      : shareScope;
+
     return `${
       this.layer ? `(${this.layer})/` : ''
-    }webpack/sharing/consume/${shareScope}/${shareKey}${
+    }webpack/sharing/consume/${normalizedShareScope}/${shareKey}${
       request ? `/${request}` : ''
     }`;
   }

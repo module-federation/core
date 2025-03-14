@@ -1,4 +1,7 @@
-import type { sharePlugin } from '@module-federation/sdk';
+import type {
+  moduleFederationPlugin,
+  sharePlugin,
+} from '@module-federation/sdk';
 
 // Extend the SharedConfig type to include layer properties
 type ExtendedSharedConfig = sharePlugin.SharedConfig & {
@@ -107,7 +110,7 @@ const nextNavigationShares = createSharedConfig(
  * @property {string} key.layer - The webpack layer this shared module belongs to.
  * @property {string|string[]} key.issuerLayer - The webpack layer that can import this shared module.
  */
-export const DEFAULT_SHARE_SCOPE: sharePlugin.SharedObject = {
+export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
   ...reactShares,
   ...reactDomShares,
   ...nextNavigationShares,
@@ -200,15 +203,15 @@ export const DEFAULT_SHARE_SCOPE: sharePlugin.SharedObject = {
  * @returns {SharedObject} - The modified share scope for the browser environment.
  */
 
-export const DEFAULT_SHARE_SCOPE_BROWSER: sharePlugin.SharedObject =
+export const DEFAULT_SHARE_SCOPE_BROWSER: moduleFederationPlugin.SharedObject =
   Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc, item) => {
-    const [key, value] = item as [string, sharePlugin.SharedConfig];
+    const [key, value] = item as [string, moduleFederationPlugin.SharedConfig];
 
     // Set eager and import to undefined for all entries, except for the ones specified above
     acc[key] = { ...value, import: undefined };
 
     return acc;
-  }, {} as sharePlugin.SharedObject);
+  }, {} as moduleFederationPlugin.SharedObject);
 
 /**
  * Checks if the remote value is an internal or promise delegate module reference.
