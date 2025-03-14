@@ -843,6 +843,6 @@ export default {
     dataPrefetch: {
       description: 'Whether enable data prefetch',
       type: 'boolean',
-    }
+    },
   },
 } as const;

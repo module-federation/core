@@ -391,6 +391,7 @@ const t = {
       },
       runtimePlugins: { type: 'array', items: { type: 'string' } },
       getPublicPath: { type: 'string' },
+      dataPrefetch: { type: 'boolean' },
     },
   },
   r = {
@@ -505,7 +506,7 @@ function a(
                 null === i ? (i = [e]) : i.push(e), l++, (a.errors = i), !1
               );
             }
-            (l = u), null !== i && (u ? (i.length = u) : (i = null));
+            (l = y), null !== i && (y ? (i.length = y) : (i = null));
             var f = n === l;
           } else f = !0;
           if (f)
@@ -596,8 +597,8 @@ function l(
     a = 0;
   const p = a;
   let f = !1;
-  const u = a;
-  if (a === u)
+  const y = a;
+  if (a === y)
     if (Array.isArray(e)) {
       const r = e.length;
       for (let n = 0; n < r; n++) {
@@ -605,7 +606,7 @@ function l(
         const l = a,
           p = a;
         let f = !1;
-        const u = a;
+        const y = a;
         if (a == a)
           if ('string' == typeof r) {
             if (r.length < 1) {
@@ -708,8 +709,8 @@ function f(
     const e = { params: { type: 'string' } };
     null === o ? (o = [e]) : o.push(e), a++;
   }
-  var u = p === a;
-  if (((l = l || u), !l)) {
+  var y = p === a;
+  if (((l = l || y), !l)) {
     const t = a;
     if (a == a)
       if (e && 'object' == typeof e && !Array.isArray(e)) {
@@ -768,7 +769,7 @@ function f(
         const e = { params: { type: 'object' } };
         null === o ? (o = [e]) : o.push(e), a++;
       }
-    (u = t === a), (l = l || u);
+    (y = t === a), (l = l || y);
   }
   if (!l) {
     const e = { params: {} };
@@ -781,7 +782,7 @@ function f(
     0 === a
   );
 }
-function u(
+function y(
   e,
   {
     instancePath: t = '',
@@ -941,12 +942,12 @@ function u(
   }
   if (!l) {
     const e = { params: {} };
-    return null === o ? (o = [e]) : o.push(e), a++, (u.errors = o), !1;
+    return null === o ? (o = [e]) : o.push(e), a++, (y.errors = o), !1;
   }
   return (
     (a = i),
     null !== o && (i ? (o.length = i) : (o = null)),
-    (u.errors = o),
+    (y.errors = o),
     0 === a
   );
 }
@@ -1061,13 +1062,13 @@ function c(
               if (i) {
                 if (void 0 !== e.name) {
                   const r = a;
-                  u(e.name, {
+                  y(e.name, {
                     instancePath: t + '/name',
                     parentData: e,
                     parentDataProperty: 'name',
                     rootData: s,
                   }) ||
-                    ((o = null === o ? u.errors : o.concat(u.errors)),
+                    ((o = null === o ? y.errors : o.concat(y.errors)),
                     (a = o.length)),
                     (i = r === a);
                 } else i = !0;
@@ -1195,7 +1196,7 @@ function m(
             const n = a,
               p = a;
             let f = !1;
-            const u = a;
+            const y = a;
             if (a == a)
               if ('string' == typeof r) {
                 if (r.length < 1) {
@@ -1206,7 +1207,7 @@ function m(
                 const e = { params: { type: 'string' } };
                 null === o ? (o = [e]) : o.push(e), a++;
               }
-            var i = u === a;
+            var i = y === a;
             if (((f = f || i), !f)) {
               const n = a;
               u(r, {
@@ -1308,14 +1309,14 @@ function d(
       const l = a,
         p = a;
       let f = !1;
-      const u = a;
+      const y = a;
       m(n, {
         instancePath: t + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
         parentData: e,
         parentDataProperty: r,
         rootData: s,
       }) || ((o = null === o ? m.errors : o.concat(m.errors)), (a = o.length));
-      var i = u === a;
+      var i = y === a;
       if (((f = f || i), !f)) {
         const l = a;
         if (a == a)
@@ -1373,7 +1374,7 @@ function g(
         const i = a,
           l = a;
         let p = !1;
-        const u = a;
+        const y = a;
         if (a == a)
           if ('string' == typeof r) {
             if (r.length < 1) {
@@ -1384,7 +1385,7 @@ function g(
             const e = { params: { type: 'string' } };
             null === o ? (o = [e]) : o.push(e), a++;
           }
-        var f = u === a;
+        var f = y === a;
         if (((p = p || f), !p)) {
           const i = a;
           d(r, {
@@ -1408,8 +1409,8 @@ function g(
       const e = { params: { type: 'array' } };
       null === o ? (o = [e]) : o.push(e), a++;
     }
-  var u = p === a;
-  if (((l = l || u), !l)) {
+  var y = p === a;
+  if (((l = l || y), !l)) {
     const i = a;
     d(e, {
       instancePath: t,
@@ -1634,8 +1635,8 @@ function b(
                               const e = { params: { type: 'string' } };
                               null === a ? (a = [e]) : a.push(e), i++;
                             }
-                          var u = o === i;
-                          if (((s = s || u), !s)) {
+                          var y = o === i;
+                          if (((s = s || y), !s)) {
                             const e = i;
                             if (i === e)
                               if (Array.isArray(t)) {
@@ -1659,7 +1660,7 @@ function b(
                                 const e = { params: { type: 'array' } };
                                 null === a ? (a = [e]) : a.push(e), i++;
                               }
-                            (u = e === i), (s = s || u);
+                            (y = e === i), (s = s || y);
                           }
                           if (!s) {
                             const e = { params: {} };
@@ -1769,14 +1770,14 @@ function v(
       const l = a,
         p = a;
       let f = !1;
-      const u = a;
+      const y = a;
       b(n, {
         instancePath: t + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
         parentData: e,
         parentDataProperty: r,
         rootData: s,
       }) || ((o = null === o ? b.errors : o.concat(b.errors)), (a = o.length));
-      var i = u === a;
+      var i = y === a;
       if (((f = f || i), !f)) {
         const e = a;
         if (a == a)
@@ -1823,7 +1824,7 @@ function P(
         const i = a,
           l = a;
         let p = !1;
-        const u = a;
+        const y = a;
         if (a == a)
           if ('string' == typeof r) {
             if (r.length < 1) {
@@ -1834,7 +1835,7 @@ function P(
             const e = { params: { type: 'string' } };
             null === o ? (o = [e]) : o.push(e), a++;
           }
-        var f = u === a;
+        var f = y === a;
         if (((p = p || f), !p)) {
           const i = a;
           v(r, {
@@ -1858,8 +1859,8 @@ function P(
       const e = { params: { type: 'array' } };
       null === o ? (o = [e]) : o.push(e), a++;
     }
-  var u = p === a;
-  if (((l = l || u), !l)) {
+  var y = p === a;
+  if (((l = l || y), !l)) {
     const i = a;
     v(e, {
       instancePath: t,
@@ -1867,8 +1868,8 @@ function P(
       parentDataProperty: n,
       rootData: s,
     }) || ((o = null === o ? v.errors : o.concat(v.errors)), (a = o.length)),
-      (u = i === a),
-      (l = l || u);
+      (y = i === a),
+      (l = l || y);
   }
   if (!l) {
     const e = { params: {} };
@@ -2437,11 +2438,11 @@ function j(
                                                                         type: 'boolean',
                                                                       },
                                                                     };
-                                                                    null === u
-                                                                      ? (u = [
+                                                                    null === y
+                                                                      ? (y = [
                                                                           e,
                                                                         ])
-                                                                      : u.push(
+                                                                      : y.push(
                                                                           e,
                                                                         ),
                                                                       u++;
@@ -2465,11 +2466,11 @@ function j(
                                                                               type: 'boolean',
                                                                             },
                                                                         };
-                                                                      null === u
-                                                                        ? (u = [
+                                                                      null === y
+                                                                        ? (y = [
                                                                             e,
                                                                           ])
-                                                                        : u.push(
+                                                                        : y.push(
                                                                             e,
                                                                           ),
                                                                         u++;
@@ -2692,11 +2693,11 @@ function j(
                                                                               type: 'string',
                                                                             },
                                                                         };
-                                                                      null === u
-                                                                        ? (u = [
+                                                                      null === y
+                                                                        ? (y = [
                                                                             e,
                                                                           ])
-                                                                        : u.push(
+                                                                        : y.push(
                                                                             e,
                                                                           ),
                                                                         u++;
@@ -2737,8 +2738,8 @@ function j(
                                             (u = n),
                                               null !== y &&
                                                 (n
-                                                  ? (u.length = n)
-                                                  : (u = null));
+                                                  ? (y.length = n)
+                                                  : (y = null));
                                           else {
                                             const e = { params: {} };
                                             null === y ? (y = [e]) : y.push(e),
@@ -3316,7 +3317,7 @@ function j(
                                             }
                                             m = t === u;
                                           } else m = !0;
-                                          if (m)
+                                          if (m) {
                                             if (void 0 !== o.getPublicPath) {
                                               const e = u;
                                               if (
@@ -3335,6 +3336,26 @@ function j(
                                                 );
                                               m = e === u;
                                             } else m = !0;
+                                            if (m)
+                                              if (void 0 !== o.dataPrefetch) {
+                                                const e = u;
+                                                if (
+                                                  'boolean' !=
+                                                  typeof o.dataPrefetch
+                                                )
+                                                  return (
+                                                    (j.errors = [
+                                                      {
+                                                        params: {
+                                                          type: 'boolean',
+                                                        },
+                                                      },
+                                                    ]),
+                                                    !1
+                                                  );
+                                                m = e === u;
+                                              } else m = !0;
+                                          }
                                         }
                                       }
                                     }
