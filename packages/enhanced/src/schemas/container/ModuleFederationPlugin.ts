@@ -840,5 +840,9 @@ export default {
       description: 'Custom public path function for remote entry',
       type: 'string',
     },
+    dataPrefetch: {
+      description: 'Whether enable data prefetch',
+      type: 'boolean',
+    }
   },
 } as const;
