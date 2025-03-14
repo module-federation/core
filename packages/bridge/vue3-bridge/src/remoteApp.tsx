@@ -56,7 +56,7 @@ export default defineComponent({
     };
 
     const watchStopHandle = watch(
-      () => route.path,
+      () => route?.path,
       (newPath) => {
         if (newPath !== route.path) {
           renderComponent();
