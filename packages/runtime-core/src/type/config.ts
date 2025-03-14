@@ -131,7 +131,8 @@ export type LoadModuleOptions = {
 // Only for legacy federation provider
 export type RemoteEntryInitOptions = {
   version: string;
-  shareScopeMap: ShareScopeMap;
+  shareScopeMap?: ShareScopeMap;
+  shareScopeKeys: string | string[];
 };
 
 export type InitTokens = Record<string, Record<string, any>>;
