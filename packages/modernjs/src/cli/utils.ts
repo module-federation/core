@@ -382,11 +382,20 @@ export const getIPV4 = (): string => {
 
 export const isWebTarget = (target: string[] | string) => {
   const WEB_TARGET = 'web';
-  const WEB_WORKER_TARGET = 'webworker';
   if (Array.isArray(target)) {
-    return target.includes(WEB_TARGET) || target.includes(WEB_WORKER_TARGET);
+    return target.includes(WEB_TARGET);
   } else if (typeof target === 'string') {
-    return target === WEB_TARGET || target === WEB_WORKER_TARGET;
+    return target === WEB_TARGET;
+  }
+  return false;
+};
+
+export const skipByTarget = (target: string[] | string) => {
+  const IGNORE_TARGET = 'webworker';
+  if (Array.isArray(target)) {
+    return target.includes(IGNORE_TARGET);
+  } else if (typeof target === 'string') {
+    return target === IGNORE_TARGET;
   }
   return false;
 };

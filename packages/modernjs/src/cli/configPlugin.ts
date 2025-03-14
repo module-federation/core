@@ -8,6 +8,7 @@ import {
   patchMFConfig,
   addMyTypes2Ignored,
   isWebTarget,
+  skipByTarget,
 } from './utils';
 
 export function setEnv(enableSSR: boolean) {
@@ -36,7 +37,11 @@ export const moduleFederationConfigPlugin = (
       userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr);
 
     api.modifyBundlerChain((chain) => {
-      const isWeb = isWebTarget(chain.get('target'));
+      const target = chain.get('target');
+      if (skipByTarget(target)) {
+        return;
+      }
+      const isWeb = isWebTarget(target);
       // @ts-expect-error chain type is not correct
       addMyTypes2Ignored(chain, !isWeb ? ssrConfig : csrConfig);
 
@@ -109,3 +114,5 @@ export const moduleFederationConfigPlugin = (
 });
 
 export default moduleFederationConfigPlugin;
+
+export { isWebTarget, skipByTarget };
