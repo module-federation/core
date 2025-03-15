@@ -2,32 +2,21 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import type {
   ProviderParams,
-  RenderFnParams,
-} from '@module-federation/bridge-shared';
+  ProviderFnParams,
+  RootType,
+  DestroyParams,
+  RenderParams,
+} from '../types';
 import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
 import { LoggerInstance } from '../utils';
 import { federationRuntime } from './plugin';
-import { createRoot } from './compat';
+import { createRoot as defaultCreateRoot } from './compat';
 
-type RenderParams = RenderFnParams & {
-  [key: string]: unknown;
-};
-type DestroyParams = {
-  moduleName: string;
-  dom: HTMLElement;
-};
-type RootType = HTMLElement | ReturnType<typeof createRoot>;
-
-export type ProviderFnParams<T> = {
-  rootComponent: React.ComponentType<T>;
-  render?: (
-    App: React.ReactElement,
-    id?: HTMLElement | string,
-  ) => RootType | Promise<RootType>;
-};
-
-export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
+export function createBridgeComponent<T>({
+  createRoot = defaultCreateRoot,
+  ...bridgeInfo
+}: ProviderFnParams<T>) {
   return () => {
     const rootMap = new Map<any, RootType>();
     const instance = federationRuntime.instance;
@@ -80,34 +69,37 @@ export function createBridgeComponent<T>(bridgeInfo: ProviderFnParams<T>) {
           </ErrorBoundary>
         );
 
-        if (bridgeInfo?.render) {
-          // in case bridgeInfo?.render is an async function, resolve this to promise
-          Promise.resolve(
-            bridgeInfo?.render(rootComponentWithErrorBoundary, dom),
-          ).then((root: RootType) => rootMap.set(info.dom, root));
+        if (bridgeInfo.render) {
+          await Promise.resolve(
+            bridgeInfo.render(rootComponentWithErrorBoundary, dom),
+          ).then((root: RootType) => rootMap.set(dom, root));
         } else {
-          let root = rootMap.get(info.dom);
+          let root = rootMap.get(dom);
           // do not call createRoot multiple times
           if (!root) {
-            root = createRoot(info.dom);
-            rootMap.set(info.dom, root);
+            root = createRoot(dom);
+            rootMap.set(dom, root);
           }
-          root.render(rootComponentWithErrorBoundary);
+
+          if ('render' in root) {
+            root.render(rootComponentWithErrorBoundary);
+          }
         }
 
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
       },
 
       destroy(info: DestroyParams) {
+        const { dom } = info;
         LoggerInstance.debug(`createBridgeComponent destroy Info`, info);
-        const root = rootMap.get(info.dom);
+        const root = rootMap.get(dom);
         if (root) {
           if ('unmount' in root) {
             root.unmount();
           } else {
             ReactDOM.unmountComponentAtNode(root as HTMLElement);
           }
-          rootMap.delete(info.dom);
+          rootMap.delete(dom);
         }
         instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
       },
