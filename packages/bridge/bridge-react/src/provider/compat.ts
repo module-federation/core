@@ -1,15 +1,5 @@
 import ReactDOM from 'react-dom';
-
-interface CreateRootOptions {
-  identifierPrefix?: string;
-  onRecoverableError?: (error: unknown) => void;
-  transitionCallbacks?: unknown;
-}
-
-interface Root {
-  render(children: React.ReactNode): void;
-  unmount(): void;
-}
+import { CreateRootOptions, Root } from '../types';
 
 // ReactDOM.version is only available in React 16.13.0 and later
 const isReact18 = ReactDOM.version?.startsWith('18');
@@ -30,7 +20,6 @@ export function createRoot(
   // For React 16/17, simulate the new root API using render/unmountComponentAtNode
   return {
     render(children: React.ReactNode) {
-      // @ts-ignore - React 17's render method is deprecated but still functional
       ReactDOM.render(children, container);
     },
     unmount() {
@@ -53,11 +42,16 @@ export function hydrateRoot(
     return (ReactDOM as any).hydrateRoot(container, initialChildren, options);
   }
 
-  // For React 16/17, simulate the new root API using hydrate
+  // For React 16/17, simulate the new root API using hydrate/unmountComponentAtNode
   return {
     render(children: React.ReactNode) {
-      // @ts-ignore - React 17's hydrate method is deprecated but still functional
-      ReactDOM.hydrate(children, container);
+      // For the initial render, use hydrate
+      if (children === initialChildren) {
+        ReactDOM.hydrate(children, container);
+      } else {
+        // For subsequent renders, use regular render
+        ReactDOM.render(children, container);
+      }
     },
     unmount() {
       ReactDOM.unmountComponentAtNode(container);
