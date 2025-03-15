@@ -1,7 +1,8 @@
 import ReactDOM from 'react-dom';
 import { CreateRootOptions, Root } from '../types';
 
-const isReact18 = ReactDOM.version.startsWith('18');
+// ReactDOM.version is only available in React 16.13.0 and later
+const isReact18 = ReactDOM.version?.startsWith('18');
 
 /**
  * Creates a root for a container element compatible with both React 16 and 18
