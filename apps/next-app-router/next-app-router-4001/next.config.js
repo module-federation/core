@@ -23,10 +23,10 @@ const nextConfig = {
           // Core UI Components
           './Button': './ui/button',
           // './Header': isServer ? './ui/header?rsc' : './ui/header?shared',
-          './Footer': './ui/footer',
+          // './Footer': './ui/footer',
           // './GlobalNav(rsc)': isServer ? './ui/global-nav?rsc' : './ui/global-nav',
           // './GlobalNav(ssr)': isServer ? './ui/global-nav?ssr' : './ui/global-nav',
-          './GlobalNav': './ui/global-nav',
+          // './GlobalNav': './ui/global-nav',
           //
           // // Product Related Components
           // './ProductCard': './ui/product-card',
