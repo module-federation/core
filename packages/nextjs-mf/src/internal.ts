@@ -11,7 +11,7 @@ type ExtendedSharedConfig = sharePlugin.SharedConfig & {
   shareKey?: string;
 };
 
-const WEBPACK_LAYERS_NAMES = {
+export const WEBPACK_LAYERS_NAMES = {
   /**
    * The layer for the shared code between the client and server bundles.
    */
@@ -58,7 +58,7 @@ const createSharedConfig = (
 ) => {
   return layers.reduce(
     (acc, layer) => {
-      const key = layer ? `${name}-${layer}` : name;
+      const key = layer ? `${layer}-${name}` : name;
       acc[key] = {
         singleton: true,
         requiredVersion: false,
@@ -67,6 +67,7 @@ const createSharedConfig = (
         request: options.request ?? name,
         layer,
         issuerLayer: layer,
+        shareScope: layer ? [layer] : undefined,
       };
       return acc;
     },
@@ -85,11 +86,30 @@ const navigationLayers = [
   WEBPACK_LAYERS_NAMES.serverSideRendering,
 ];
 
-const reactShares = createSharedConfig('react', defaultLayers);
+const reactShares = createSharedConfig('react', defaultLayers, {
+  request: 'react',
+  import: undefined,
+});
 const reactDomShares = createSharedConfig('react', defaultLayers, {
   request: 'react-dom',
 });
-const jsxRuntimeShares = createSharedConfig('react/', navigationLayers, {
+const jsxRuntimeShares = createSharedConfig(
+  'react/jsx-runtime',
+  navigationLayers,
+  {
+    request: 'react/jsx-runtime',
+    import: undefined,
+  },
+);
+const jsxDevRuntimeShares = createSharedConfig(
+  'react/jsx-dev-runtime',
+  navigationLayers,
+  {
+    request: 'react/jsx-dev-runtime',
+    import: undefined,
+  },
+);
+const prefixReact = createSharedConfig('react/', defaultLayers, {
   request: 'react/',
   import: undefined,
 });
@@ -110,11 +130,83 @@ const nextNavigationShares = createSharedConfig(
  * @property {string} key.layer - The webpack layer this shared module belongs to.
  * @property {string|string[]} key.issuerLayer - The webpack layer that can import this shared module.
  */
-export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
-  ...reactShares,
-  ...reactDomShares,
-  ...nextNavigationShares,
-  ...jsxRuntimeShares,
+// Group React related packages
+const reactGroup = {
+  // "react": {
+  //   singleton: true,
+  //   import: false
+  // },
+  'ssr-react': {
+    requiredVersion: false,
+    request: 'react',
+    import: 'next/dist/server/route-modules/app-page/vendored/ssr/react.js',
+    singleton: true,
+    shareKey: 'react',
+    layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+    issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+    shareScope: [WEBPACK_LAYERS_NAMES.serverSideRendering],
+  },
+  'rsc-react': {
+    requiredVersion: false,
+    singleton: true,
+    shareKey: 'react',
+    request: 'react',
+    import: 'next/dist/server/route-modules/app-page/vendored/rsc/react.js',
+    layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+    issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+    shareScope: [WEBPACK_LAYERS_NAMES.reactServerComponents],
+  },
+};
+
+const reactJsxRuntimeGroup = {
+  'react/jsx-dev-runtime': {
+    singleton: true,
+    import: false,
+  },
+  // "react/jsx-dev-runtime-ssr": {
+  //   singleton: true,
+  //   shareKey: 'react/jsx-dev-runtime',
+  //   request: 'react/jsx-dev-runtime',
+  //   layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+  //   issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+  //   shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+  // },
+  // "react/jsx-dev-runtime-rsc": {
+  //   request: 'react/jsx-dev-runtime',
+  //   singleton: true,
+  //   shareKey: 'react/jsx-dev-runtime',
+  //   layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+  //   issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+  //   shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+  // }
+};
+
+// Group React-DOM related packages
+const reactDomGroup = {
+  // "react-dom": {
+  //   singleton: true,
+  //   import: false,
+  // },
+  // "rsc-react-dom": {
+  //   singleton: true,
+  //   shareKey: 'react-dom',
+  //   request: 'react-dom',
+  //   layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+  //   issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+  //   shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+  // },
+  // "react-dom-ssr": {
+  //   request: 'react-dom',
+  //   singleton: true,
+  //   shareKey: 'react-dom',
+  //   layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+  //   issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+  //   shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+  // }
+};
+
+// Group Next.js related packages
+const nextGroup = {
   'next/dynamic': {
     requiredVersion: undefined,
     singleton: true,
@@ -145,34 +237,10 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
     singleton: true,
     import: undefined,
   },
-  react: {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react/': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react-dom/': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react-dom': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react/jsx-dev-runtime': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'react/jsx-runtime': {
-    singleton: true,
-    requiredVersion: false,
-  },
+};
+
+// Group styled-jsx related packages
+const styledJsxGroup = {
   'styled-jsx': {
     singleton: true,
     import: undefined,
@@ -193,6 +261,15 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
   },
 };
 
+//@ts-ignore
+export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
+  ...reactGroup,
+  ...reactDomGroup,
+  // ...nextGroup,
+  // ...styledJsxGroup,
+  // ...reactJsxRuntimeGroup,
+};
+
 /**
  * Defines a default share scope for the browser environment.
  * This function takes the DEFAULT_SHARE_SCOPE and sets eager to undefined and import to undefined for all entries.
@@ -206,7 +283,13 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
 export const DEFAULT_SHARE_SCOPE_BROWSER: moduleFederationPlugin.SharedObject =
   Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc, item) => {
     const [key, value] = item as [string, moduleFederationPlugin.SharedConfig];
-
+    // if(key.startsWith(WEBPACK_LAYERS_NAMES.reactServerComponents) || key.startsWith(WEBPACK_LAYERS_NAMES.serverSideRendering)) {
+    //   return acc
+    // }
+    //
+    // if(key === 'next-navigation') {
+    //   return acc;
+    // }
     // Set eager and import to undefined for all entries, except for the ones specified above
     acc[key] = { ...value, import: undefined };
 
