@@ -2,7 +2,6 @@
 import findPkg from 'find-pkg';
 import path from 'path';
 import fs from 'fs-extra';
-import { sharing } from 'webpack';
 import {
   moduleFederationPlugin,
   sharePlugin,
@@ -12,7 +11,9 @@ import { NormalizedSharedOptions } from './types';
 import { BasicPluginOptionsManager } from './BasicPluginOptionsManager';
 import { parseOptions } from './utils';
 
-type SharePluginOptions = ConstructorParameters<typeof sharing.SharePlugin>[0];
+type SharePluginOptions = ConstructorParameters<
+  typeof sharePlugin.SharePlugin
+>[0];
 
 class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.ModuleFederationPluginOptions> {
   normalizedOptions: NormalizedSharedOptions = {};

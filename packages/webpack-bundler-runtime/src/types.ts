@@ -23,7 +23,7 @@ export type ShareScopeMap = runtime.FederationHost['shareScopeMap'];
 type InitToken = Record<string, Record<string, any>>;
 
 export interface InitializeSharingOptions {
-  shareScopeName: string;
+  shareScopeName: string | string[];
   webpackRequire: WebpackRequire;
   initPromises: Record<string, Promise<boolean> | boolean>;
   initTokens: InitToken;
@@ -60,7 +60,8 @@ export interface WebpackRequire {
   m: Record<string, (mod: any) => any>;
   c: Record<string, any>;
   I: (
-    scopeName: string,
+    // v1 use string , v2 support string[]
+    scopeName: string | string[],
     initScope?: InitializeSharingOptions['initScope'],
   ) => ReturnType<typeof initializeSharing>;
   S?: InferredGlobalShareScope;
@@ -119,7 +120,7 @@ export interface ConsumesOptions {
 }
 export interface InitContainerEntryOptions {
   shareScope: ShareScopeMap[string];
-  shareScopeKey: string;
+  shareScopeKey: string | string[];
   webpackRequire: WebpackRequire;
   remoteEntryInitOptions?: RemoteEntryInitOptions;
   initScope?: InitializeSharingOptions['initScope'];

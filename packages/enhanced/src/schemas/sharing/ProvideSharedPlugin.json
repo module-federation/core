@@ -36,8 +36,55 @@
           "type": "string",
           "minLength": 1
         },
+        "request": {
+          "description": "Import request to match on",
+          "type": "string",
+          "minLength": 1
+        },
         "shareScope": {
           "description": "Share scope name.",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          ]
+        },
+        "requiredVersion": {
+          "description": "Version requirement from module in share scope.",
+          "anyOf": [
+            {
+              "description": "No version requirement check.",
+              "enum": [false]
+            },
+            {
+              "description": "Version as string. Can be prefixed with '^' or '~' for minimum matches. Each part of the version should be separated by a dot '.'.",
+              "type": "string"
+            }
+          ]
+        },
+        "strictVersion": {
+          "description": "Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).",
+          "type": "boolean"
+        },
+        "singleton": {
+          "description": "Allow only a single version of the shared module in share scope (disabled by default).",
+          "type": "boolean"
+        },
+        "layer": {
+          "description": "Layer in which the shared module should be placed.",
+          "type": "string",
+          "minLength": 1
+        },
+        "issuerLayer": {
+          "description": "Layer of the issuer.",
           "type": "string",
           "minLength": 1
         },
@@ -86,8 +133,19 @@
     },
     "shareScope": {
       "description": "Share scope name used for all provided modules (defaults to 'default').",
-      "type": "string",
-      "minLength": 1
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
     }
   },
   "required": ["provides"]

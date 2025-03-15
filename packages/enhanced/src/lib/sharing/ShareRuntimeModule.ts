@@ -71,13 +71,18 @@ class ShareRuntimeModule extends RuntimeModule {
           chunk.runtime,
           'share-init-option',
         );
+
         if (sharedOption) {
           sharedInitOptions[sharedOption.name] =
             sharedInitOptions[sharedOption.name] || [];
-          const isSameVersion = sharedInitOptions[sharedOption.name].find(
-            (s) => s.version === sharedOption.version,
+          const isSameVersionAndLayer = sharedInitOptions[
+            sharedOption.name
+          ].find(
+            (s) =>
+              s.version === sharedOption.version &&
+              s.shareConfig?.layer === sharedOption.shareConfig?.layer,
           );
-          if (!isSameVersion) {
+          if (!isSameVersionAndLayer) {
             sharedInitOptions[sharedOption.name].push(sharedOption);
           }
         }
@@ -88,18 +93,19 @@ class ShareRuntimeModule extends RuntimeModule {
       (sum, sharedName) => {
         const sharedOptions = sharedInitOptions[sharedName];
         let str = '';
-        sharedOptions.forEach((sharedOption) => {
+
+        // Ensure all options are included without filtering
+        sharedOptions.forEach((option) => {
           str += `{${Template.indent([
-            `version: ${sharedOption.version},`,
-            `get: ${sharedOption.getter},`,
-            `scope: ${JSON.stringify(sharedOption.shareScope)},`,
-            `shareConfig: ${JSON.stringify(sharedOption.shareConfig)}`,
+            `version: ${option.version},`,
+            `get: ${option.getter},`,
+            `scope: ${JSON.stringify(Array.isArray(option.shareScope) ? option.shareScope.flat() : [option.shareScope])},`,
+            `shareConfig: ${JSON.stringify(option.shareConfig)}`,
           ])}},`;
         });
+
         str = `[${str}]`;
-
         sum += `${Template.indent([`"${sharedName}": ${str},`])}`;
-
         return sum;
       },
       '',
@@ -108,6 +114,7 @@ class ShareRuntimeModule extends RuntimeModule {
     const federationGlobal = getFederationGlobalScope(
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
+
     return Template.asString([
       `${getFederationGlobalScope(
         RuntimeGlobals,
