@@ -132,10 +132,10 @@ const nextNavigationShares = createSharedConfig(
  */
 // Group React related packages
 const reactGroup = {
-  // "react": {
-  //   singleton: true,
-  //   import: false
-  // },
+  react: {
+    singleton: true,
+    import: false,
+  },
   'ssr-react': {
     requiredVersion: false,
     request: 'react',
