@@ -103,7 +103,7 @@ describe('bridge', () => {
     expect(ref.current).not.toBeNull();
   });
 
-  it.only('createRemoteComponent with custom createRoot prop', async () => {
+  it('createRemoteComponent with custom createRoot prop', async () => {
     const renderMock = vi.fn();
 
     function Component({ props }: { props?: Record<string, any> }) {
