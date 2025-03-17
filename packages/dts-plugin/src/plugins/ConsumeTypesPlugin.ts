@@ -39,11 +39,6 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
       fetchRemoteTypeUrlsResolve,
     } = this;
 
-    if (isPrd()) {
-      fetchRemoteTypeUrlsResolve(undefined);
-      return;
-    }
-
     const normalizedConsumeTypes =
       normalizeOptions<moduleFederationPlugin.DtsHostOptions>(
         true,
@@ -52,6 +47,12 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
       )(dtsOptions.consumeTypes);
 
     if (!normalizedConsumeTypes) {
+      fetchRemoteTypeUrlsResolve(undefined);
+      return;
+    }
+
+    // Only skip type sync in production if syncInProduction option is not explicitly set to true
+    if (isPrd() && normalizedConsumeTypes.syncInProduction !== true) {
       fetchRemoteTypeUrlsResolve(undefined);
       return;
     }

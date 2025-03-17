@@ -23,7 +23,11 @@ export class DtsPlugin implements WebpackPluginInstance {
       extractThirdParty: false,
       extractRemoteTypes: false,
     };
-    const defaultConsumeTypes = { abortOnError: false, consumeAPITypes: true };
+    const defaultConsumeTypes = {
+      abortOnError: false,
+      consumeAPITypes: true,
+      syncInProduction: false,
+    };
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
         isTSProject(options.dts, compiler.context),

@@ -16,7 +16,7 @@
 **/*/stats.json
 
 # First ignore everything
-*
+
 
 # Then allow specific packages and their contents
 !packages/webpack-bundler-runtime/
@@ -32,7 +32,6 @@
 !**/package.json
 
 # Explicitly ignore specific packages
-packages/dts-plugin/
 packages/typescript/
 packages/native-*
 packages/core/
