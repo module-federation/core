@@ -20,7 +20,7 @@ import path from 'path';
  */
 export const retrieveDefaultShared = (
   isServer: boolean,
-): sharePlugin.SharedObject => {
+): moduleFederationPlugin.SharedObject => {
   // If the code is running on the server, treat some Next.js internals as import false to make them external
   // This is because they will be provided by the server environment and not by the remote container
   if (isServer) {
