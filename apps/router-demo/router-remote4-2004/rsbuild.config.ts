@@ -50,7 +50,7 @@ export default defineConfig({
         './export-app': './src/export-App.tsx',
       },
       shared: ['react', 'react-dom'],
-      getPublicPath: `function(originalPublicPath){console.log(originalPublicPath);__webpack_require__.p = 'http://localhost:2004/'}`,
+      getPublicPath: `function(){return 'http://localhost:2004/'}`,
     }),
   ],
 });
