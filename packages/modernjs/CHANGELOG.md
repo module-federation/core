@@ -1,5 +1,18 @@
 # @module-federation/modern-js
 
+## 0.11.0
+
+### Patch Changes
+
+- Updated dependencies [fce107e]
+- Updated dependencies [fce107e]
+- Updated dependencies [5c4175e]
+- Updated dependencies [f302eeb]
+  - @module-federation/enhanced@0.11.0
+  - @module-federation/sdk@0.11.0
+  - @module-federation/node@2.6.29
+  - @module-federation/rsbuild-plugin@0.11.0
+
 ## 0.10.0
 
 ### Patch Changes
