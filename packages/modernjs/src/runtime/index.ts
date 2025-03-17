@@ -1,2 +1,5 @@
 export * from '@module-federation/enhanced/runtime';
-export { createRemoteSSRComponent } from './createRemoteSSRComponent';
+export {
+  createRemoteSSRComponent,
+  collectSSRAssets,
+} from './createRemoteSSRComponent';
