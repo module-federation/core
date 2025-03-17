@@ -14,9 +14,6 @@
         "tsConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/tsconfig.lib.json",
         "assets": [],
         "project": "packages/runtime-plugins/inject-external-runtime-core-plugin/package.json",
-        "additionalEntryPoints": [
-          "packages/runtime-plugins/inject-external-runtime-core-plugin/src/normalize-webpack-path.ts"
-        ],
         "rollupConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/rollup.config.js",
         "compiler": "swc",
         "generatePackageJson": false,

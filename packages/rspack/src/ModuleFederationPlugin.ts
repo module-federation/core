@@ -13,6 +13,7 @@ import { DtsPlugin } from '@module-federation/dts-plugin';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
+import { RemoteEntryPlugin } from './RemoteEntryPlugin';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
 type SplitChunks = Compiler['options']['optimization']['splitChunks'];
@@ -73,6 +74,13 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
     if (containerManager.enable) {
       this._patchChunkSplit(compiler, options.name);
+    }
+
+    // must before ModuleFederationPlugin
+    if (options.getPublicPath && options.name) {
+      new RemoteEntryPlugin(options.name, options.getPublicPath).apply(
+        compiler,
+      );
     }
 
     if (options.experiments?.provideExternalRuntime) {
