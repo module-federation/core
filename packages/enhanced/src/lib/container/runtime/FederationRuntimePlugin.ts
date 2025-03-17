@@ -47,12 +47,6 @@ const BundlerRuntimePath = require.resolve(
 const RuntimePath = require.resolve('@module-federation/runtime', {
   paths: [RuntimeToolsPath],
 });
-const EmbeddedRuntimePath = require.resolve(
-  '@module-federation/runtime/embedded',
-  {
-    paths: [RuntimeToolsPath],
-  },
-);
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
@@ -331,11 +325,11 @@ class FederationRuntimePlugin {
   }
 
   setRuntimeAlias(compiler: Compiler) {
-    const { experiments, implementation } = this.options || {};
-    let runtimePath = EmbeddedRuntimePath;
+    const { implementation } = this.options || {};
+    let runtimePath = RuntimePath;
 
     if (implementation) {
-      runtimePath = require.resolve(`@module-federation/runtime/embedded`, {
+      runtimePath = require.resolve(`@module-federation/runtime`, {
         paths: [implementation],
       });
     }
