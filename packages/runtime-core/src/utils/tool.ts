@@ -88,23 +88,20 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
     type: 'global',
     globalName: '',
   };
-  if (isBrowserEnv()) {
-    return 'remoteEntry' in snapshot
-      ? {
-          url: snapshot.remoteEntry,
-          type: snapshot.remoteEntryType,
-          globalName: snapshot.globalName,
-        }
-      : defaultRemoteEntryInfo;
-  }
-  if ('ssrRemoteEntry' in snapshot) {
+  if (!isBrowserEnv() && 'ssrRemoteEntry' in snapshot) {
     return {
       url: snapshot.ssrRemoteEntry || defaultRemoteEntryInfo.url,
       type: snapshot.ssrRemoteEntryType || defaultRemoteEntryInfo.type,
       globalName: snapshot.globalName,
     };
   }
-  return defaultRemoteEntryInfo;
+  return 'remoteEntry' in snapshot
+    ? {
+        url: snapshot.remoteEntry,
+        type: snapshot.remoteEntryType,
+        globalName: snapshot.globalName,
+      }
+    : defaultRemoteEntryInfo;
 }
 
 export const processModuleAlias = (name: string, subPath: string) => {

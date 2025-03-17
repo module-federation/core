@@ -6,7 +6,9 @@ declare global {
 }
 
 function isBrowserEnv(): boolean {
-  return typeof window !== 'undefined';
+  return (
+    typeof window !== 'undefined' && typeof window.document !== 'undefined'
+  );
 }
 function isBrowserDebug() {
   try {
