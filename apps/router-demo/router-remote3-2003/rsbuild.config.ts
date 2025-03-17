@@ -31,6 +31,7 @@ export default defineConfig({
         './export-app': './src/export-app.ts',
       },
       shared: ['vue', 'vue-router'],
+      getPublicPath: `return 'http://localhost:2003/'`,
     }),
   ],
 });
