@@ -34,7 +34,7 @@
   },
   "peerDependencies": {
     "vue": "=3",
-    "vue-router": "=3"
+    "vue-router": "=4"
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",
