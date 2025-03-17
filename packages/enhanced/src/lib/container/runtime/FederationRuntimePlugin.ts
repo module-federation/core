@@ -327,14 +327,18 @@ class FederationRuntimePlugin {
   setRuntimeAlias(compiler: Compiler) {
     const { implementation } = this.options || {};
     let runtimePath = RuntimePath;
+    const alias: any = compiler.options.resolve.alias || {};
 
-    if (implementation) {
-      runtimePath = require.resolve(`@module-federation/runtime`, {
-        paths: [implementation],
-      });
+    if (alias['@module-federation/runtime$']) {
+      runtimePath = alias['@module-federation/runtime$'];
+    } else {
+      if (implementation) {
+        runtimePath = require.resolve(`@module-federation/runtime`, {
+          paths: [implementation],
+        });
+      }
     }
 
-    const alias: any = compiler.options.resolve.alias || {};
     alias['@module-federation/runtime$'] =
       alias['@module-federation/runtime$'] || runtimePath;
     alias['@module-federation/runtime-tools$'] =
