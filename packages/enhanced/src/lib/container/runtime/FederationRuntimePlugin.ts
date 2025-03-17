@@ -44,12 +44,9 @@ const BundlerRuntimePath = require.resolve(
     paths: [RuntimeToolsPath],
   },
 );
-const RuntimePath = require.resolve(
-  '@module-federation/runtime/dist/index.esm.mjs',
-  {
-    paths: [RuntimeToolsPath],
-  },
-);
+const RuntimePath = require.resolve('@module-federation/runtime', {
+  paths: [RuntimeToolsPath],
+});
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
@@ -332,12 +329,9 @@ class FederationRuntimePlugin {
     let runtimePath = RuntimePath;
 
     if (implementation) {
-      runtimePath = require.resolve(
-        `@module-federation/runtime/dist/index.esm.mjs`,
-        {
-          paths: [implementation],
-        },
-      );
+      runtimePath = require.resolve(`@module-federation/runtime`, {
+        paths: [implementation],
+      });
     }
 
     const alias: any = compiler.options.resolve.alias || {};
