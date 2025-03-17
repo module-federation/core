@@ -1,5 +1,12 @@
 # @module-federation/esbuild
 
+## 0.0.59
+
+### Patch Changes
+
+- Updated dependencies [fce107e]
+  - @module-federation/sdk@0.11.0
+
 ## 0.0.58
 
 ### Patch Changes
