@@ -324,7 +324,7 @@ class FederationRuntimePlugin {
     );
   }
 
-  setRuntimeAlias(compiler: Compiler) {
+  getRuntimeAlias(compiler: Compiler) {
     const { implementation } = this.options || {};
     let runtimePath = RuntimePath;
     const alias: any = compiler.options.resolve.alias || {};
@@ -339,6 +339,13 @@ class FederationRuntimePlugin {
       }
     }
 
+    return runtimePath;
+  }
+
+  setRuntimeAlias(compiler: Compiler) {
+    const { implementation } = this.options || {};
+    const alias: any = compiler.options.resolve.alias || {};
+    const runtimePath = this.getRuntimeAlias(compiler);
     alias['@module-federation/runtime$'] =
       alias['@module-federation/runtime$'] || runtimePath;
     alias['@module-federation/runtime-tools$'] =
@@ -406,11 +413,12 @@ class FederationRuntimePlugin {
 
     new HoistContainerReferences().apply(compiler);
 
+    const runtimePath = this.getRuntimeAlias(compiler);
     new compiler.webpack.NormalModuleReplacementPlugin(
       /@module-federation\/runtime/,
       (resolveData) => {
         if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
-          resolveData.request = RuntimePath;
+          resolveData.request = runtimePath;
 
           if (resolveData.createData) {
             resolveData.createData.request = resolveData.request;
