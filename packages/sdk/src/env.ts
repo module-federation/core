@@ -10,6 +10,13 @@ function isBrowserEnv(): boolean {
     typeof window !== 'undefined' && typeof window.document !== 'undefined'
   );
 }
+
+function isReactNativeEnv(): boolean {
+  return (
+    typeof navigator !== 'undefined' && navigator?.product === 'ReactNative'
+  );
+}
+
 function isBrowserDebug() {
   try {
     if (isBrowserEnv() && window.localStorage) {
@@ -41,4 +48,4 @@ const getProcessEnv = function (): Record<string, string | undefined> {
   return typeof process !== 'undefined' && process.env ? process.env : {};
 };
 
-export { isBrowserEnv, isDebugMode, getProcessEnv };
+export { isBrowserEnv, isReactNativeEnv, isDebugMode, getProcessEnv };

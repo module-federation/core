@@ -3,6 +3,7 @@ import {
   ModuleInfo,
   RemoteEntryType,
   isBrowserEnv,
+  isReactNativeEnv,
 } from '@module-federation/sdk';
 import { Remote, RemoteInfoOptionalVersion } from '../type';
 import { warn } from './logger';
@@ -88,20 +89,23 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
     type: 'global',
     globalName: '',
   };
-  if (!isBrowserEnv() && 'ssrRemoteEntry' in snapshot) {
+  if (isBrowserEnv() || isReactNativeEnv()) {
+    return 'remoteEntry' in snapshot
+      ? {
+          url: snapshot.remoteEntry,
+          type: snapshot.remoteEntryType,
+          globalName: snapshot.globalName,
+        }
+      : defaultRemoteEntryInfo;
+  }
+  if ('ssrRemoteEntry' in snapshot) {
     return {
       url: snapshot.ssrRemoteEntry || defaultRemoteEntryInfo.url,
       type: snapshot.ssrRemoteEntryType || defaultRemoteEntryInfo.type,
       globalName: snapshot.globalName,
     };
   }
-  return 'remoteEntry' in snapshot
-    ? {
-        url: snapshot.remoteEntry,
-        type: snapshot.remoteEntryType,
-        globalName: snapshot.globalName,
-      }
-    : defaultRemoteEntryInfo;
+  return defaultRemoteEntryInfo;
 }
 
 export const processModuleAlias = (name: string, subPath: string) => {
