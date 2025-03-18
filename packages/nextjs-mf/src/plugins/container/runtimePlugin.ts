@@ -224,6 +224,7 @@ export default function (): FederationRuntimePlugin {
       ) {
         return args;
       }
+      console.log(args);
       const shareScopeMap = args.shareScopeMap;
       const scope = args.scope;
       const pkgName = args.pkgName;
@@ -237,11 +238,11 @@ export default function (): FederationRuntimePlugin {
       if (!host.options.shared[pkgName]) {
         return args;
       }
-      args.resolver = function () {
-        shareScopeMap[scope][pkgName][version] =
-          host.options.shared[pkgName][0];
-        return shareScopeMap[scope][pkgName][version];
-      };
+      // args.resolver = function () {
+      //   shareScopeMap[scope][pkgName][version] =
+      //     host.options.shared[pkgName][0];
+      //   return shareScopeMap[scope][pkgName][version];
+      // };
       return args;
     },
     beforeLoadShare: async function (args: any) {

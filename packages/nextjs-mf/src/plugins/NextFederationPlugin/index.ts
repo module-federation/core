@@ -30,6 +30,7 @@ import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 import path from 'path';
+import { WEBPACK_LAYERS_NAMES } from '../../internal';
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
@@ -222,6 +223,10 @@ export class NextFederationPlugin {
       remotes: {
         ...this._options.remotes,
       },
+      shareScope: Object.values({
+        ...WEBPACK_LAYERS_NAMES,
+        default: 'default',
+      }),
       shared: {
         ...defaultShared,
         ...this._options.shared,
