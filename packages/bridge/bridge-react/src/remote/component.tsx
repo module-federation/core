@@ -6,38 +6,13 @@ import React, {
   forwardRef,
 } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
-import type { ProviderParams } from '@module-federation/bridge-shared';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
-import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
 import { LoggerInstance, pathJoin, getRootDomDefaultClassName } from '../utils';
 import { federationRuntime } from '../provider/plugin';
-
-declare const __APP_VERSION__: string;
-export interface RenderFnParams extends ProviderParams {
-  dom?: any;
-  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
-}
-
-interface RemoteModule {
-  provider: () => {
-    render: (
-      info: ProviderParams & {
-        dom: any;
-      },
-    ) => void;
-    destroy: (info: { dom: any }) => void;
-  };
-}
-
-interface RemoteAppParams {
-  moduleName: string;
-  providerInfo: NonNullable<RemoteModule['provider']>;
-  exportName: string | number | symbol;
-  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
-}
+import { RemoteComponentProps, RemoteAppParams } from '../types';
 
 const RemoteAppWrapper = forwardRef(function (
-  props: RemoteAppParams & RenderFnParams,
+  props: RemoteAppParams & RemoteComponentProps,
   ref,
 ) {
   const {
