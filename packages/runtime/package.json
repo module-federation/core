@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.mjs",
@@ -38,11 +38,6 @@
       "types": "./dist/core.cjs.d.ts",
       "import": "./dist/core.esm.mjs",
       "require": "./dist/core.cjs.js"
-    },
-    "./embedded": {
-      "types": "./dist/embedded.cjs.d.ts",
-      "import": "./dist/embedded.esm.mjs",
-      "require": "./dist/embedded.cjs.js"
     },
     "./*": "./*"
   },
