@@ -181,15 +181,23 @@ export const resolveUrl = (
     const url = new URL(entryUrl);
     const path = __non_webpack_require__('path');
 
-    // Combine rootOutputDir with chunkName to create the proper path
-    // rootOutputDir is mandatory and must be used in the URL construction
+    // Extract the directory path from the remote entry URL
+    // e.g., from "http://url/static/js/remoteEntry.js" to "/static/js/"
+    const urlPath = url.pathname;
+    const lastSlashIndex = urlPath.lastIndexOf('/');
+    const directoryPath =
+      lastSlashIndex >= 0 ? urlPath.substring(0, lastSlashIndex + 1) : '/';
+
+    // Get rootDir from webpack configuration
     const rootDir = __webpack_require__.federation.rootOutputDir || '';
 
-    // Create a URL using the origin of the entryUrl and the combined path
-    const fullPath = path.join(rootDir, chunkName).replace(/\\/g, '/');
-    const chunkUrl = new URL(fullPath, url.origin);
-
-    return chunkUrl;
+    // Use path.join to combine the paths properly while handling slashes
+    // Convert Windows-style paths to URL-style paths
+    const combinedPath = path
+      .join(directoryPath, rootDir, chunkName)
+      .replace(/\\/g, '/');
+    // Create the final URL
+    return new URL(combinedPath, url.origin);
   }
 };
 

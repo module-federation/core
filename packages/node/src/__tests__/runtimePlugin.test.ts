@@ -437,6 +437,40 @@ describe('runtimePlugin', () => {
       global.URL = originalURL;
     });
 
+    it('should preserve directory path from remote entry URL', () => {
+      // Mock URL constructor to throw on first call to trigger fallback path
+      const originalURL = global.URL;
+      let firstCall = true;
+      global.URL = jest
+        .fn()
+        .mockImplementation((...args: [string, string?]) => {
+          if (firstCall) {
+            firstCall = false;
+            throw new Error('Invalid URL');
+          }
+          return new originalURL(args[0], args[1]);
+        }) as any;
+
+      // Mock a complex remote entry URL with a path
+      const mockEntryUrl = 'http://example.com/static/js/remoteEntry.js';
+      jest
+        .spyOn(runtimePluginModule, 'returnFromCache')
+        .mockReturnValue(mockEntryUrl);
+
+      // Set a rootDir for testing combined paths
+      (global as any).__webpack_require__.federation.rootOutputDir = 'dist';
+
+      const result = resolveUrl('test-remote', 'chunk123.js');
+
+      // Check that the URL preserves the directory path from the remote entry
+      expect(result?.href).toBe(
+        'http://example.com/static/js/dist/chunk123.js',
+      );
+
+      // Restore the original URL constructor
+      global.URL = originalURL;
+    });
+
     it('should return null when URL cannot be resolved', () => {
       // Make URL constructor throw
       const originalURL = global.URL;
@@ -445,21 +479,21 @@ describe('runtimePlugin', () => {
       }) as any;
 
       // Mock returnFromCache and returnFromGlobalInstances to return null
-      const originalReturnFromCache = returnFromCache;
-      const originalReturnFromGlobalInstances = returnFromGlobalInstances;
-      (global as any).returnFromCache = jest.fn().mockReturnValue(null);
-      (global as any).returnFromGlobalInstances = jest
-        .fn()
+      const spyReturnFromCache = jest
+        .spyOn(runtimePluginModule, 'returnFromCache')
+        .mockReturnValue(null);
+      const spyReturnFromGlobalInstances = jest
+        .spyOn(runtimePluginModule, 'returnFromGlobalInstances')
         .mockReturnValue(null);
 
       const result = resolveUrl('non-existent-remote', 'chunk.js');
 
       expect(result).toBeNull();
 
+      // Clean up mocks
       global.URL = originalURL;
-      (global as any).returnFromCache = originalReturnFromCache;
-      (global as any).returnFromGlobalInstances =
-        originalReturnFromGlobalInstances;
+      spyReturnFromCache.mockRestore();
+      spyReturnFromGlobalInstances.mockRestore();
     });
   });
 
@@ -502,23 +536,26 @@ describe('runtimePlugin', () => {
 
       const mockFetchAndRun = jest
         .spyOn(runtimePluginModule, 'fetchAndRun')
-        .mockImplementation((url, args, callback) => callback(null, mockChunk));
+        .mockImplementation((url, chunkId, callback, args) =>
+          callback(null, mockChunk),
+        );
 
       // Create a proper URL object
       const testUrl = new URL('http://example.com/chunk.js');
-      jest.spyOn(runtimePluginModule, 'resolveUrl').mockReturnValue(testUrl);
+      const resolveUrlSpy = jest
+        .spyOn(runtimePluginModule, 'resolveUrl')
+        .mockReturnValue(testUrl);
 
       loadChunk('url', 'test-chunk', '/dist', mockCallback, {});
 
       // Fix the parameter order to match the implementation: (remoteName, chunkName)
-      expect(runtimePluginModule.resolveUrl).toHaveBeenCalledWith(
-        '/dist',
-        'test-chunk',
-      );
+      expect(resolveUrlSpy).toHaveBeenCalledWith('/dist', 'test-chunk');
       expect(mockFetchAndRun).toHaveBeenCalled();
       expect(mockCallback).toHaveBeenCalledWith(null, mockChunk);
 
+      // Restore mocks
       mockFetchAndRun.mockRestore();
+      resolveUrlSpy.mockRestore();
     });
 
     it('should handle unknown strategies', () => {
