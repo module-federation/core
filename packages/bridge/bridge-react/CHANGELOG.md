@@ -1,5 +1,13 @@
 # @module-federation/bridge-react
 
+## 0.11.1
+
+### Patch Changes
+
+- 790bdea: fix(bridge-react): export DestroyParams and RenderParams types
+  - @module-federation/sdk@0.11.1
+  - @module-federation/bridge-shared@0.11.1
+
 ## 0.11.0
 
 ### Patch Changes
