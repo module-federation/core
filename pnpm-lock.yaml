@@ -1810,9 +1810,6 @@ importers:
 
   packages/bridge/bridge-react:
     dependencies:
-      '@loadable/component':
-        specifier: ^5.16.4
-        version: 5.16.4(react@18.3.1)
       '@module-federation/bridge-shared':
         specifier: workspace:*
         version: link:../bridge-shared
