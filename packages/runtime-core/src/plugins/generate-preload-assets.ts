@@ -102,11 +102,9 @@ function traverseModuleInfo(
   }
 }
 
-const filterExistedAssets = (type: 'link' | 'script', url: string) => {
-  return Boolean(
-    document.querySelector(
-      `${type}[${type === 'link' ? 'href' : 'src'}="${url}"]`,
-    ),
+const isExisted = (type: 'link' | 'script', url: string) => {
+  return document.querySelector(
+    `${type}[${type === 'link' ? 'href' : 'src'}="${url}"]`,
   );
 };
 
@@ -299,20 +297,16 @@ export function generatePreloadAssets(
   }
 
   const needPreloadJsAssets = jsAssets.filter(
-    (asset) =>
-      !loadedSharedJsAssets.has(asset) && filterExistedAssets('script', asset),
+    (asset) => !loadedSharedJsAssets.has(asset) && !isExisted('script', asset),
   );
   const needPreloadCssAssets = cssAssets.filter(
-    (asset) =>
-      !loadedSharedCssAssets.has(asset) && filterExistedAssets('link', asset),
+    (asset) => !loadedSharedCssAssets.has(asset) && !isExisted('link', asset),
   );
 
   return {
     cssAssets: needPreloadCssAssets,
     jsAssetsWithoutEntry: needPreloadJsAssets,
-    entryAssets: entryAssets.filter((entry) =>
-      filterExistedAssets('script', entry.url),
-    ),
+    entryAssets: entryAssets.filter((entry) => !isExisted('script', entry.url)),
   };
 }
 

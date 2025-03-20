@@ -19,7 +19,7 @@ import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
-import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
+import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
 import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
@@ -69,6 +69,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     // must before ModuleFederationPlugin
     if (options.getPublicPath && options.name) {
       new RemoteEntryPlugin(options.name, options.getPublicPath).apply(
+        // @ts-ignore
         compiler,
       );
     }
@@ -93,8 +94,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       }).apply(compiler);
     }
 
-    if (options.experiments?.federationRuntime) {
-      new FederationModulesPlugin().apply(compiler);
+    // federation hooks
+    new FederationModulesPlugin().apply(compiler);
+
+    if (options.experiments?.asyncStartup) {
       new StartupChunkDependenciesPlugin({
         asyncChunkLoading: true,
       }).apply(compiler);
@@ -158,7 +161,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           shareScope: options.shareScope,
           exposes: options.exposes!,
           runtimePlugins: options.runtimePlugins,
-          experiments: options.experiments,
         }).apply(compiler);
       }
       if (

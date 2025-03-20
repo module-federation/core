@@ -1,5 +1,32 @@
 # @module-federation/rspack
 
+## 0.11.1
+
+### Patch Changes
+
+- c01715a: fix(rspack): support getPublicPath
+  - @module-federation/sdk@0.11.1
+  - @module-federation/runtime-tools@0.11.1
+  - @module-federation/managers@0.11.1
+  - @module-federation/manifest@0.11.1
+  - @module-federation/dts-plugin@0.11.1
+  - @module-federation/bridge-react-webpack-plugin@0.11.1
+  - @module-federation/inject-external-runtime-core-plugin@0.11.1
+
+## 0.11.0
+
+### Patch Changes
+
+- Updated dependencies [fce107e]
+- Updated dependencies [eecee74]
+  - @module-federation/sdk@0.11.0
+  - @module-federation/dts-plugin@0.11.0
+  - @module-federation/bridge-react-webpack-plugin@0.11.0
+  - @module-federation/managers@0.11.0
+  - @module-federation/manifest@0.11.0
+  - @module-federation/runtime-tools@0.11.0
+  - @module-federation/inject-external-runtime-core-plugin@0.11.0
+
 ## 0.10.0
 
 ### Patch Changes

@@ -1,5 +1,23 @@
 # @module-federation/rsbuild-plugin
 
+## 0.11.1
+
+### Patch Changes
+
+- Updated dependencies [09d6bc1]
+  - @module-federation/enhanced@0.11.1
+  - @module-federation/sdk@0.11.1
+
+## 0.11.0
+
+### Patch Changes
+
+- f302eeb: chore(rsbuild-plugin): set 'loaded-first' as default shareStrategy
+- Updated dependencies [fce107e]
+- Updated dependencies [fce107e]
+  - @module-federation/enhanced@0.11.0
+  - @module-federation/sdk@0.11.0
+
 ## 0.10.0
 
 ### Patch Changes

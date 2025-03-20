@@ -1,5 +1,51 @@
 # @module-federation/enhanced
 
+## 0.11.1
+
+### Patch Changes
+
+- 09d6bc1: fix(enhanced): use default runtime export
+- Updated dependencies [c01715a]
+  - @module-federation/rspack@0.11.1
+  - @module-federation/sdk@0.11.1
+  - @module-federation/runtime-tools@0.11.1
+  - @module-federation/managers@0.11.1
+  - @module-federation/manifest@0.11.1
+  - @module-federation/dts-plugin@0.11.1
+  - @module-federation/bridge-react-webpack-plugin@0.11.1
+  - @module-federation/data-prefetch@0.11.1
+  - @module-federation/error-codes@0.11.1
+  - @module-federation/inject-external-runtime-core-plugin@0.11.1
+
+## 0.11.0
+
+### Minor Changes
+
+- fce107e: Enhanced module federation plugin to remove the `federationRuntime` experiment and replace it with `asyncStartup`.
+
+  - Dropped support for `federationRuntime` experiment and introduced `asyncStartup` to enable asynchronous container startup.
+  - Refactored EmbedFederationRuntimePlugin for improved runtime embedding and startup management.
+    - Added options to enable runtime embedding for all chunks.
+    - Integrated measures to ensure proper initialization and avoid duplicate hooks.
+  - Simplified constructor and class dependencies by removing the `experiments` parameter.
+  - Revised schema and validation definitions to accommodate new asynchronous startup configurations.
+  - Updated test cases to reflect the change from `federationRuntime` to `asyncStartup`.
+
+### Patch Changes
+
+- Updated dependencies [fce107e]
+- Updated dependencies [eecee74]
+  - @module-federation/sdk@0.11.0
+  - @module-federation/dts-plugin@0.11.0
+  - @module-federation/bridge-react-webpack-plugin@0.11.0
+  - @module-federation/data-prefetch@0.11.0
+  - @module-federation/managers@0.11.0
+  - @module-federation/manifest@0.11.0
+  - @module-federation/rspack@0.11.0
+  - @module-federation/runtime-tools@0.11.0
+  - @module-federation/inject-external-runtime-core-plugin@0.11.0
+  - @module-federation/error-codes@0.11.0
+
 ## 0.10.0
 
 ### Patch Changes

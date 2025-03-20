@@ -20,7 +20,6 @@ import {
   validatePluginOptions,
 } from './validate-options';
 import {
-  modifyEntry,
   applyServerPlugins,
   configureServerCompilerOptions,
   configureServerLibraryAndFilename,
@@ -101,13 +100,6 @@ export class NextFederationPlugin {
         (message) => /your target environment does not appear/.test(message),
       ];
     }
-    compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
-      compiler.options.resolve.alias = {
-        ...compiler.options.resolve.alias,
-        //useing embedded runtime
-        // '@module-federation/runtime$': runtimeESMPath,
-      };
-    });
   }
 
   private validateOptions(compiler: Compiler): boolean {
@@ -213,7 +205,7 @@ export class NextFederationPlugin {
       dts: this._options.dts ?? false,
       shareStrategy: this._options.shareStrategy ?? 'loaded-first',
       experiments: {
-        federationRuntime: 'hoisted',
+        asyncStartup: true,
       },
     };
   }

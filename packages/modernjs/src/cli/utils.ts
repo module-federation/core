@@ -394,3 +394,13 @@ export const isWebTarget = (target: string[] | string) => {
   }
   return false;
 };
+
+export const skipByTarget = (target: string[] | string) => {
+  const IGNORE_TARGET = 'webworker';
+  if (Array.isArray(target)) {
+    return target.includes(IGNORE_TARGET);
+  } else if (typeof target === 'string') {
+    return target === IGNORE_TARGET;
+  }
+  return false;
+};

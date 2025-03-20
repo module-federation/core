@@ -13,6 +13,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   };
   config.plugins.push(
     new ModuleFederationPlugin({
+      runtime: false,
       name: 'manifest_host',
       remotes: {
         remote1: 'webpack_provider@http://localhost:3009/mf-manifest.json',
@@ -44,11 +45,10 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         },
       },
       dataPrefetch: true,
-      // experiments: { federationRuntime: 'hoisted' },
       runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
       experiments: {
         provideExternalRuntime: true,
-        federationRuntime: 'hoisted',
+        asyncStartup: true,
       },
     }),
   );
@@ -61,7 +61,9 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   });
   if (config.devServer) {
     config.devServer.client.overlay = false;
+    config.devServer.devMiddleware.writeToDisk = true;
   }
+  config.devtool = false;
   config.entry = './src/index.tsx';
   //Temporary workaround - https://github.com/nrwl/nx/issues/16983
   config.experiments = { outputModule: false };
