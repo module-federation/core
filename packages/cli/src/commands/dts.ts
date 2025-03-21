@@ -1,5 +1,3 @@
-import path from 'path';
-import logger from '../utils/logger';
 import {
   isTSProject,
   normalizeDtsOptions,
@@ -8,31 +6,21 @@ import {
   normalizeGenerateTypesOptions,
   normalizeConsumeTypesOptions,
 } from '@module-federation/dts-plugin';
-import { bundle } from '@modern-js/node-bundle-require';
+import logger from '../utils/logger';
+import { readConfig } from '../utils/readConfig';
 
 import type { DtsOptions } from '../types';
-import { moduleFederationPlugin } from '@module-federation/sdk';
 
-export async function dts(
-  options: DtsOptions,
-  { defaultConfig }: { defaultConfig: string },
-) {
-  const defaultPath = path.resolve(process.cwd(), defaultConfig);
+export async function dts(options: DtsOptions) {
   const {
     fetch = true,
     generate = true,
     root = process.cwd(),
     output,
-    config = defaultPath,
+    config,
   } = options;
 
-  const configPath = path.isAbsolute(config)
-    ? config
-    : path.resolve(process.cwd(), config);
-
-  const preBundlePath = await bundle(configPath);
-  const mfConfig = (await import(preBundlePath)).default
-    .default as unknown as moduleFederationPlugin.ModuleFederationPluginOptions;
+  const mfConfig = await readConfig(config);
 
   if (!isTSProject(mfConfig.dts, root)) {
     logger.error('dts is only supported for TypeScript projects');
