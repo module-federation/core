@@ -43,7 +43,6 @@ class Module {
         remoteEntryExports: this.remoteEntryExports,
       });
     } catch (err) {
-      console.error(err);
       const uniqueKey = getRemoteEntryUniqueKey(this.remoteInfo);
       remoteEntryExports =
         await this.host.loaderHook.lifecycle.loadEntryError.emit({
