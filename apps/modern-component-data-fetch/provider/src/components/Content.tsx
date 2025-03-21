@@ -4,7 +4,6 @@ import stuff from './stuff.module.css';
 import type { Data } from './Content.data';
 
 const Content = (props: { _mfData: Data }): JSX.Element => {
-  console.log(333, props);
   return (
     <div
       id="nested-remote-components"

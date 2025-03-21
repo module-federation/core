@@ -24,7 +24,10 @@ export interface Federation {
   __SHARE__: GlobalShareScopeMap;
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
   __PRELOADED_MAP__: Map<string, boolean>;
-  __DATA_FETCH_MAP__: Map<string, Promise<unknown>>;
+  __DATA_FETCH_MAP__: Map<
+    string,
+    Promise<(() => Promise<unknown>) | undefined>
+  >;
 }
 export const CurrentGlobal =
   typeof globalThis === 'object' ? globalThis : window;

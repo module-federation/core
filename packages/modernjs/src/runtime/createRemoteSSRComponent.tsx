@@ -4,11 +4,13 @@ import {
   getInstance,
   type FederationHost,
 } from '@module-federation/enhanced/runtime';
+import { isBrowserEnv } from '@module-federation/sdk';
 import {
   ErrorBoundary,
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
 import { getDataFetchInfo } from './utils';
+import { Await } from './Await';
 
 type IProps = {
   id: string;
@@ -18,15 +20,31 @@ type IProps = {
 
 type ReactKey = { key?: React.Key | null };
 
-async function fetchData(id: string): Promise<unknown | undefined> {
-  if (typeof window !== 'undefined') {
-    // @ts-ignore
-    return window._ssd;
+async function fetchData(
+  id: string,
+  uid: string,
+): Promise<unknown | undefined> {
+  if (isBrowserEnv()) {
+    if (!globalThis._MF__DATA_FETCH_ID_MAP__) {
+      globalThis._MF__DATA_FETCH_ID_MAP__ = {};
+    }
+    if (globalThis._MF__DATA_FETCH_ID_MAP__[uid]) {
+      return;
+    }
+    let res;
+    let rej;
+    const p = new Promise((resolve, reject) => {
+      res = resolve;
+      rej = reject;
+    });
+    globalThis._MF__DATA_FETCH_ID_MAP__[uid] = [p, res, rej];
+    return globalThis._MF__DATA_FETCH_ID_MAP__[uid][0];
   }
   const instance = getInstance();
   if (!instance) {
     return;
   }
+
   const { name } = instance.remoteHandler.idToRemoteMap[id] || {};
   if (!name) {
     return;
@@ -44,12 +62,18 @@ async function fetchData(id: string): Promise<unknown | undefined> {
     return;
   }
   const key = `${name}@${module.remoteInfo.version}@${dataFetchInfo.dataFetchName}`;
-  console.log('------key', key);
-  console.log(
-    '------ helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__[key];',
-    helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__,
-  );
-  return helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__.get(key);
+  const fetchDataPromise =
+    helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__.get(key);
+  if (!fetchDataPromise) {
+    return;
+  }
+
+  const fetchDataFn = await fetchDataPromise;
+  if (!fetchDataFn) {
+    return;
+  }
+  console.log('fetchDataFn: ', fetchDataFn.toString());
+  return fetchDataFn();
 }
 
 function getLoadedRemoteInfos(instance: FederationHost, id: string) {
@@ -175,6 +199,9 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
   export?: E;
 }) {
+  // const [uid,setUid] = useState('')
+  console.log('createRemoteSSRComponent trigger');
+
   type ComponentType = T[E] extends (...args: any) => any
     ? Parameters<T[E]>[0] extends undefined
       ? ReactKey
@@ -182,42 +209,50 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
     : ReactKey;
   const exportName = info?.export || 'default';
 
+  const callLoader = async () => {
+    const m = (await info.loader()) as Record<string, React.FC> &
+      Record<symbol, string>;
+    if (!m) {
+      throw new Error('load remote failed');
+    }
+    return m;
+  };
+
+  const getData = async () => {
+    // const nodeUid = isBrowserEnv () ? document.get : uid
+    const m = await callLoader();
+    const moduleId = m && m[Symbol.for('mf_module_id')];
+    const data = await fetchData(moduleId, moduleId);
+    console.log('data: ', data);
+    return data;
+  };
+
   const LazyComponent = React.lazy(async () => {
     try {
-      const m = (await info.loader()) as Record<string, React.FC> &
-        Record<symbol, string>;
-      if (!m) {
-        throw new Error('load remote failed');
-      }
+      const m = await callLoader();
       const moduleId = m && m[Symbol.for('mf_module_id')];
 
       const assets = collectSSRAssets({
         id: moduleId,
       });
-      const data =
-        //@ts-ignore
-        typeof window !== 'undefined' ? window._ssd : await fetchData(moduleId);
-
-      // const data = {data:'fetch data from provider'}
-
-      // console.log('assets: ', assets);
-      console.log(assets.length);
-      console.log('mfData: ', data);
 
       const Com = m[exportName] as React.FC<ComponentType>;
       if (exportName in m && typeof Com === 'function') {
         return {
-          default: (props: Omit<ComponentType, 'key'>) => (
+          default: (
+            props: Omit<ComponentType, 'key'> & { _mfData: unknown },
+          ) => (
             <>
               <script
+                suppressHydrationWarning
                 dangerouslySetInnerHTML={{
                   __html: String.raw`
-      window._ssd=${JSON.stringify(data)}
+      globalThis._MF__DATA_FETCH_ID_MAP__['${moduleId}'][1](${JSON.stringify(props._mfData)})
    `,
                 }}
               ></script>
               {assets}
-              <Com {...props} _mfData={data} />
+              <Com {...props} />
             </>
           ),
         };
@@ -246,14 +281,16 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
       };
     }
   });
+
   return (props: ComponentType) => {
     const { key, ...args } = props;
+
     return (
       <ErrorBoundary FallbackComponent={info.fallback}>
-        <React.Suspense fallback={info.loading}>
+        <Await resolve={getData()} loading={info.loading}>
           {/* @ts-ignore */}
-          <LazyComponent {...args} />
-        </React.Suspense>
+          {(data) => <LazyComponent {...args} _mfData={data} />}
+        </Await>
       </ErrorBoundary>
     );
   };

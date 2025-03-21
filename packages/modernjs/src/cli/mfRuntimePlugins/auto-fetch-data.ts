@@ -45,25 +45,26 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
       return args;
     }
 
+    const fetchData = host
+      .loadRemote(dataFetchId)
+      .then((m) => {
+        if (
+          m &&
+          typeof m === 'object' &&
+          'fetchData' in m &&
+          typeof m.fetchData === 'function'
+        ) {
+          return m.fetchData as () => Promise<unknown>;
+        }
+      })
+      .catch((e) => {
+        console.log('======= auto fetch plugin fetchData error', e);
+        return undefined;
+      });
+
     helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__.set(
       key,
-      host
-        .loadRemote(dataFetchId)
-        .then((m) => {
-          if (
-            m &&
-            typeof m === 'object' &&
-            'fetchData' in m &&
-            typeof m.fetchData === 'function'
-          ) {
-            console.log('======= auto fetch plugin fetchData', m.fetchData);
-            return m.fetchData();
-          }
-        })
-        .catch((e) => {
-          console.log('======= auto fetch plugin fetchData error', e);
-          return null;
-        }),
+      fetchData,
     );
 
     return args;

@@ -7,6 +7,8 @@ const RemoteSSRComponent = createRemoteSSRComponent({
   loading: 'loading...',
   export: 'default',
   fallback: ({ error }) => {
+    console.log(33333333333);
+    console.error(error);
     if (error instanceof Error && error.message.includes('not exist')) {
       return <div>fallback - not existed id</div>;
     }
