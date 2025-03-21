@@ -31,6 +31,7 @@ Module Federation CLI provides several common flags that can be used with all co
 | Flag                       | Description                                                                                                                                       |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `-c, --config <config>`    | Specify the configuration file, can be a relative or absolute path, default value is `module-federation.ts` |
+| `-m, --mode <mode>`        | Specify the runtime environment. You can choose "dev" or "prod". The default value is "dev". After setting, the `process.env.NODE_ENV` environment variable will be automatically injected with "development" or "production" according to the value. |
 | `-h, --help`               | Display help for command                                                                                                                          |
 
 ## mf dts
@@ -48,5 +49,7 @@ Options:
   --fetch <boolean>     fetch types from remote, default is true (default: true)
   --generate <boolean>  generate types, default is true (default: true)
   -c --config <config>  specify the configuration file, can be a relative or absolute path
+  -m --mode <mode>      Specify the runtime environment. You can choose "dev" or "prod". The default value is "dev". After setting, the process.env.NODE_ENV environment variable will be
+                        automatically injected with "development" or "production" according to the value. (default: "dev")
   -h, --help            display help for command
 ```

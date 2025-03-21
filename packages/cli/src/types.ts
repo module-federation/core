@@ -3,6 +3,7 @@ import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 export type CommonOptions = {
   config?: string;
+  mode?: string;
 };
 
 export type DtsOptions = {
