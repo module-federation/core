@@ -2,15 +2,13 @@ import { program } from 'commander';
 import { applyCommonOptions } from './utils/apply-common-options';
 import { dts } from './commands/dts';
 import { prepareCli } from './utils/prepare';
+import logger, { PREFIX } from './utils/logger';
+import { readConfig } from './utils/readConfig';
 
 import type { DtsOptions, CliOptions } from './types';
 
-function cli({
-  name,
-  version,
-  applyCommands,
-  config,
-}: Required<CliOptions>): void {
+function cli(cliOptions: Required<CliOptions>): void {
+  const { name, version, applyCommands } = cliOptions;
   program.name(name).usage('<command> [options]').version(version);
 
   const dtsCommand = program.command('dts');
@@ -37,7 +35,7 @@ function cli({
     .description('generate or fetch the mf types')
     .action(async (options: DtsOptions) => {
       try {
-        await dts(options, { defaultConfig: config });
+        await dts(options, cliOptions);
       } catch (err) {
         console.error(err);
         process.exit(1);
@@ -53,13 +51,16 @@ function cli({
 
 export function runCli(options: CliOptions) {
   const normalizedOptions: Required<CliOptions> = {
+    loggerPrefix: PREFIX,
     welcomeMsg: `${`Module Federation v${__VERSION__}`}\n`,
     name: 'mf',
-    config: 'module-federation.config.ts',
+    readConfig,
     version: __VERSION__,
     applyCommands: () => {},
     ...options,
   };
+
+  logger.setPrefix(normalizedOptions.loggerPrefix);
 
   prepareCli(normalizedOptions);
 

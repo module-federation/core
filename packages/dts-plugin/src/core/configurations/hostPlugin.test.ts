@@ -147,5 +147,62 @@ describe('hostPlugin', () => {
         },
       });
     });
+
+    it('correctly resolve remoteTypeUrls', () => {
+      const mfConfigWithRemoteTypeUrls = {
+        ...moduleFederationConfig,
+        remotes: {
+          'remote1-alias': 'remote1@http://localhost:3001/remoteEntry.js',
+          'remote2-alias': 'remote2@http://localhost:3002/remoteEntry.js',
+        },
+      };
+
+      const { mapRemotesToDownload } = retrieveHostConfig({
+        moduleFederationConfig: mfConfigWithRemoteTypeUrls,
+        remoteTypeUrls: {
+          remote1: {
+            alias: 'remote1-alias',
+            zip: 'http://localhost:3001/custom-dir/@mf-types.zip',
+            api: 'http://localhost:3001/custom-dir/@mf-types.d.ts',
+          },
+        },
+      });
+
+      expect(mapRemotesToDownload).toStrictEqual({
+        'remote1-alias': {
+          name: 'remote1',
+          alias: 'remote1-alias',
+          url: '',
+          zipUrl: 'http://localhost:3001/custom-dir/@mf-types.zip',
+          apiTypeUrl: 'http://localhost:3001/custom-dir/@mf-types.d.ts',
+        },
+        'remote2-alias': {
+          name: 'remote2',
+          alias: 'remote2-alias',
+          url: 'http://localhost:3002/remoteEntry.js',
+          zipUrl: 'http://localhost:3002/@mf-types.zip',
+          apiTypeUrl: 'http://localhost:3002/@mf-types.d.ts',
+        },
+      });
+    });
+
+    it('throw error if typeof remoteTypeUrls is not object', () => {
+      const options = {
+        moduleFederationConfig,
+        remoteTypeUrls: () =>
+          Promise.resolve({
+            remote1: {
+              alias: 'remote1-alias',
+              zip: 'http://localhost:3001/custom-dir/@mf-types.zip',
+              api: 'http://localhost:3001/custom-dir/@mf-types.d.ts',
+            },
+          }),
+      };
+
+      const invokeRetrieve = () => retrieveHostConfig(options);
+      expect(invokeRetrieve).toThrowError(
+        'remoteTypeUrls must be consumed before resolveRemotes',
+      );
+    });
   });
 });

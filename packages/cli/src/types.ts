@@ -1,7 +1,9 @@
 import type { Command } from 'commander';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 export type CommonOptions = {
   config?: string;
+  mode?: string;
 };
 
 export type DtsOptions = {
@@ -13,9 +15,12 @@ export type DtsOptions = {
 
 export type CliOptions = {
   welcomeMsg?: string;
+  loggerPrefix?: string;
   name?: string;
   version?: string;
-  config?: string;
+  readConfig?: (
+    userConfigPath?: string,
+  ) => Promise<moduleFederationPlugin.ModuleFederationPluginOptions>;
   applyCommands?: (
     command: Command,
     applyCommonOptions: (command: Command) => void,

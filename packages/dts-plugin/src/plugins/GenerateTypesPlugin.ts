@@ -82,26 +82,22 @@ export const normalizeGenerateTypesOptions = ({
   return finalOptions;
 };
 
-export const generateTypesAPI = async ({
+const getGenerateTypesFn = (dtsManagerOptions: DTSManagerOptions) => {
+  let fn: typeof generateTypes | typeof generateTypesInChildProcess =
+    generateTypes;
+  if (dtsManagerOptions.remote.compileInChildProcess) {
+    fn = generateTypesInChildProcess;
+  }
+  return fn;
+};
+
+export const generateTypesAPI = ({
   dtsManagerOptions,
 }: {
   dtsManagerOptions: DTSManagerOptions;
 }) => {
-  const isProd = !isDev();
-  const getGenerateTypesFn = () => {
-    let fn: typeof generateTypes | typeof generateTypesInChildProcess =
-      generateTypes;
-    let res: ReturnType<typeof generateTypes>;
-    if (dtsManagerOptions.remote.compileInChildProcess) {
-      fn = generateTypesInChildProcess;
-    }
-    if (isProd) {
-      res = fn(dtsManagerOptions);
-      return () => res;
-    }
-    return fn;
-  };
-  return getGenerateTypesFn();
+  const fn = getGenerateTypesFn(dtsManagerOptions);
+  return fn(dtsManagerOptions);
 };
 
 export class GenerateTypesPlugin implements WebpackPluginInstance {
@@ -202,7 +198,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             return err.code == 'EEXIST';
           };
           if (zipTypesPath) {
-            const zipContent = fs.readFileSync(zipTypesPath, 'utf-8');
+            const zipContent = fs.readFileSync(zipTypesPath);
             const zipOutputPath = path.join(
               compiler.outputPath,
               zipPrefix,
@@ -217,6 +213,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
                   } else {
                     compiler.outputFileSystem.writeFile(
                       zipOutputPath,
+                      // @ts-ignore
                       zipContent,
                       (writeErr) => {
                         if (writeErr && !isEEXIST(writeErr)) {
@@ -233,7 +230,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
           }
 
           if (apiTypesPath) {
-            const apiContent = fs.readFileSync(apiTypesPath, 'utf-8');
+            const apiContent = fs.readFileSync(apiTypesPath);
             const apiOutputPath = path.join(
               compiler.outputPath,
               zipPrefix,
@@ -248,6 +245,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
                   } else {
                     compiler.outputFileSystem.writeFile(
                       apiOutputPath,
+                      // @ts-ignore
                       apiContent,
                       (writeErr) => {
                         if (writeErr && !isEEXIST(writeErr)) {

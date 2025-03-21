@@ -1,13 +1,13 @@
 # CLI
 
-Module Federation provides a lightweight CLI.
+`@module-federation/enhanced` and `@module-federation/modern-js` provides a lightweight CLI.
 
 ## All commands
 
 To view all available CLI commands, run the following command in the project directory:
 
 ```bash
-npx @module-federation/cli -h
+npx mf -h
 ```
 
 The output is shown below:
@@ -31,6 +31,7 @@ Module Federation CLI provides several common flags that can be used with all co
 | Flag                       | Description                                                                                                                                       |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `-c, --config <config>`    | Specify the configuration file, can be a relative or absolute path, default value is `module-federation.ts` |
+| `-m, --mode <mode>`        | Specify the runtime environment. You can choose "dev" or "prod". The default value is "dev". After setting, the `process.env.NODE_ENV` environment variable will be automatically injected with "development" or "production" according to the value. |
 | `-h, --help`               | Display help for command                                                                                                                          |
 
 ## mf dts
@@ -48,5 +49,16 @@ Options:
   --fetch <boolean>     fetch types from remote, default is true (default: true)
   --generate <boolean>  generate types, default is true (default: true)
   -c --config <config>  specify the configuration file, can be a relative or absolute path
+  -m --mode <mode>      Specify the runtime environment. You can choose "dev" or "prod". The default value is "dev". After setting, the process.env.NODE_ENV environment variable will be
+                        automatically injected with "development" or "production" according to the value. (default: "dev")
   -h, --help            display help for command
 ```
+
+:::info Note
+
+The `mf dts` command will automatically generate or pull type declaration files based on the configuration in `module-federation.config.ts`. This means you must provide a valid configuration file, otherwise the command will not work properly.
+
+If you only use the runtime API, you need to create a temporary `module-federation.config.ts` file, write the remote configuration you need to get the type, and then run the `mf dts` command.
+If you are only using the runtime API, you need to create a temporary `module-federation.config.ts` file, configure [dts.consumeTypes.remoteTypeUrls](../../configure/dts#remotetypeurls), and then run the `mf dts` command.
+
+:::

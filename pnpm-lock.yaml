@@ -2244,6 +2244,9 @@ importers:
       '@module-federation/bridge-react-webpack-plugin':
         specifier: workspace:*
         version: link:../bridge/bridge-react-webpack-plugin
+      '@module-federation/cli':
+        specifier: workspace:*
+        version: link:../cli
       '@module-federation/data-prefetch':
         specifier: workspace:*
         version: link:../data-prefetch
@@ -2392,6 +2395,9 @@ importers:
       '@modern-js/utils':
         specifier: 2.65.1
         version: 2.65.1
+      '@module-federation/cli':
+        specifier: workspace:*
+        version: link:../cli
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../enhanced
@@ -18715,7 +18721,7 @@ packages:
     resolution: {integrity: sha512-FwTm11DP7KxQKT2mWLvwe80O5KpikgMSlqnw9CQhBaIHSYEypdJU9ZotbNsXsHdML3xcqg+S9ae3bpovC7KlwQ==}
     dependencies:
       '@rspack/core': 0.7.5(@swc/helpers@0.5.3)
-      caniuse-lite: 1.0.30001700
+      caniuse-lite: 1.0.30001667
       html-webpack-plugin: /html-rspack-plugin@5.7.2(@rspack/core@0.7.5)
       postcss: 8.4.47
     optionalDependencies:
@@ -20343,33 +20349,6 @@ packages:
       micromatch: 4.0.8
       p-reduce: 2.1.0
       semantic-release: 24.2.3(typescript@5.5.2)
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
-  /@semantic-release/github@11.0.0(semantic-release@24.2.3):
-    resolution: {integrity: sha512-Uon6G6gJD8U1JNvPm7X0j46yxNRJ8Ui6SgK4Zw5Ktu8RgjEft3BGn+l/RX1TTzhhO3/uUcKuqM+/9/ETFxWS/Q==}
-    engines: {node: '>=20.8.1'}
-    peerDependencies:
-      semantic-release: '>=24.1.0'
-    dependencies:
-      '@octokit/core': 6.1.2
-      '@octokit/plugin-paginate-rest': 11.3.5(@octokit/core@6.1.2)
-      '@octokit/plugin-retry': 7.1.2(@octokit/core@6.1.2)
-      '@octokit/plugin-throttling': 9.3.1(@octokit/core@6.1.2)
-      '@semantic-release/error': 4.0.0
-      aggregate-error: 5.0.0
-      debug: 4.3.7(supports-color@8.1.1)
-      dir-glob: 3.0.1
-      globby: 14.0.2
-      http-proxy-agent: 7.0.2
-      https-proxy-agent: 7.0.5
-      issue-parser: 7.0.1
-      lodash-es: 4.17.21
-      mime: 4.0.4
-      p-filter: 4.1.0
-      semantic-release: 24.2.3(typescript@5.5.2)
-      url-join: 5.0.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -26170,7 +26149,7 @@ packages:
       postcss: ^8.1.0
     dependencies:
       browserslist: 4.24.0
-      caniuse-lite: 1.0.30001700
+      caniuse-lite: 1.0.30001668
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.1.1
@@ -36305,7 +36284,7 @@ packages:
     engines: {node: '>=8.0'}
     dependencies:
       date-format: 4.0.14
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       flatted: 3.3.1
       rfdc: 1.4.1
       streamroller: 3.1.5
@@ -48706,7 +48685,7 @@ packages:
       '@volar/typescript': 2.4.5
       '@vue/language-core': 2.1.6(typescript@5.5.2)
       compare-versions: 6.1.1
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       kolorist: 1.8.0
       local-pkg: 0.5.0
       magic-string: 0.30.17
