@@ -36,7 +36,10 @@
     }
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
-    "@module-federation/error-codes": "workspace:*"
+    "@module-federation/error-codes": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4"
   }
 }
