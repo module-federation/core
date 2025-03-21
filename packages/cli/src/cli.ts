@@ -7,7 +7,8 @@ import { readConfig } from './utils/readConfig';
 
 import type { DtsOptions, CliOptions } from './types';
 
-function cli({ name, version, applyCommands }: Required<CliOptions>): void {
+function cli(cliOptions: Required<CliOptions>): void {
+  const { name, version, applyCommands } = cliOptions;
   program.name(name).usage('<command> [options]').version(version);
 
   const dtsCommand = program.command('dts');
@@ -34,7 +35,7 @@ function cli({ name, version, applyCommands }: Required<CliOptions>): void {
     .description('generate or fetch the mf types')
     .action(async (options: DtsOptions) => {
       try {
-        await dts(options);
+        await dts(options, cliOptions);
       } catch (err) {
         console.error(err);
         process.exit(1);

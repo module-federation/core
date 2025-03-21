@@ -7,11 +7,13 @@ import {
   normalizeConsumeTypesOptions,
 } from '@module-federation/dts-plugin';
 import logger from '../utils/logger';
-import { readConfig } from '../utils/readConfig';
 
-import type { DtsOptions } from '../types';
+import type { CliOptions, DtsOptions } from '../types';
 
-export async function dts(options: DtsOptions) {
+export async function dts(
+  options: DtsOptions,
+  { readConfig }: Required<CliOptions>,
+) {
   const {
     fetch = true,
     generate = true,
