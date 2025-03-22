@@ -86,6 +86,6 @@
     "prettier": "~3.3.3",
     "rimraf": "~6.0.1",
     "typescript": "~5.0.4",
-    "vitest": "1.2.2"
+    "vitest": "1.6.1"
   }
 }
