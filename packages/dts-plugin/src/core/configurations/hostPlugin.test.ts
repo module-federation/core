@@ -172,7 +172,7 @@ describe('hostPlugin', () => {
         'remote1-alias': {
           name: 'remote1',
           alias: 'remote1-alias',
-          url: '',
+          url: 'http://localhost:3001/remoteEntry.js',
           zipUrl: 'http://localhost:3001/custom-dir/@mf-types.zip',
           apiTypeUrl: 'http://localhost:3001/custom-dir/@mf-types.d.ts',
         },
