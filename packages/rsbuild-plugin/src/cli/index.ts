@@ -160,9 +160,6 @@ export const pluginModuleFederation = (
           if (
             !bundlerConfig.plugins!.find((p) => p && p.name === PLUGIN_NAME)
           ) {
-            if (!moduleFederationOptions.shareStrategy) {
-              moduleFederationOptions.shareStrategy = 'loaded-first';
-            }
             bundlerConfig.plugins!.push(
               new ModuleFederationPlugin(moduleFederationOptions),
             );
