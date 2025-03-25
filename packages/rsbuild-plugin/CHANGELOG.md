@@ -1,5 +1,14 @@
 # @module-federation/rsbuild-plugin
 
+## 0.11.2
+
+### Patch Changes
+
+- 60d1fc1: chore(rsbuild-plugin): revert sharedStrategy default value
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/enhanced@0.11.2
+
 ## 0.11.1
 
 ### Patch Changes
