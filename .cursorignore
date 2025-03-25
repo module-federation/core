@@ -15,8 +15,6 @@
 **/tsconfig.*
 **/*/stats.json
 
-# First ignore everything
-*
 
 # Then allow specific packages and their contents
 !packages/webpack-bundler-runtime/
