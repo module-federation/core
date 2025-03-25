@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.10.0",
+  "version": "0.11.1",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "repository": {
@@ -9,9 +9,13 @@
     "directory": "packages/enhanced"
   },
   "files": [
+    "bin",
     "dist/",
     "README.md"
   ],
+  "bin": {
+    "mf": "./bin/mf.js"
+  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -96,6 +100,7 @@
     "@module-federation/rspack": "workspace:*",
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/sdk": "workspace:*",
+    "@module-federation/cli": "workspace:*",
     "btoa": "^1.2.1",
     "upath": "2.0.1"
   }

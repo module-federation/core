@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dts-plugin",
-  "version": "0.10.0",
+  "version": "0.11.1",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -73,7 +73,7 @@
     "vue": "^3.4.29",
     "@vue/tsconfig": "^0.5.1",
     "vue-tsc": "^2.0.26",
-    "rimraf": "~3.0.2"
+    "rimraf": "~6.0.1"
   },
   "peerDependencies": {
     "typescript": "^4.9.0 || ^5.0.0",

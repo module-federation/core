@@ -1,5 +1,21 @@
 # @module-federation/runtime
 
+## 0.11.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.11.1
+- @module-federation/error-codes@0.11.1
+
+## 0.11.0
+
+### Patch Changes
+
+- bce6cd9: fix(runtime): preload filter loaded resources
+- Updated dependencies [fce107e]
+  - @module-federation/sdk@0.11.0
+  - @module-federation/error-codes@0.11.0
+
 ## 0.10.0
 
 ### Patch Changes

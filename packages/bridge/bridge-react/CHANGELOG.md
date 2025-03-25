@@ -1,5 +1,24 @@
 # @module-federation/bridge-react
 
+## 0.11.1
+
+### Patch Changes
+
+- 790bdea: fix(bridge-react): export DestroyParams and RenderParams types
+  - @module-federation/sdk@0.11.1
+  - @module-federation/bridge-shared@0.11.1
+
+## 0.11.0
+
+### Patch Changes
+
+- 4d67b8f: feat(bridge-react): enable custom createRoot in bridge-react
+- 2d086fc: Fix react-bridge version check for React versions earlier than 16.13.0
+- 4d67b8f: refactor(bridge-react): centralize type definitions into a single file for better maintainability and consistency
+- Updated dependencies [fce107e]
+  - @module-federation/sdk@0.11.0
+  - @module-federation/bridge-shared@0.11.0
+
 ## 0.10.0
 
 ### Minor Changes

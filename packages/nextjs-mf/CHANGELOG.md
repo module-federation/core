@@ -1,5 +1,31 @@
 # @module-federation/nextjs-mf
 
+## 8.8.20
+
+### Patch Changes
+
+- Updated dependencies [09d6bc1]
+  - @module-federation/enhanced@0.11.1
+  - @module-federation/node@2.6.30
+  - @module-federation/runtime@0.11.1
+  - @module-federation/webpack-bundler-runtime@0.11.1
+  - @module-federation/sdk@0.11.1
+
+## 8.8.19
+
+### Patch Changes
+
+- fce107e: - Changed experiment configuration from `federationRuntime: 'hoisted'` to `asyncStartup: true`.
+  - Improved initialization logic in the runtime module to enable better caching and startup handling.
+- Updated dependencies [fce107e]
+- Updated dependencies [fce107e]
+- Updated dependencies [5c4175e]
+  - @module-federation/enhanced@0.11.0
+  - @module-federation/sdk@0.11.0
+  - @module-federation/node@2.6.29
+  - @module-federation/runtime@0.11.0
+  - @module-federation/webpack-bundler-runtime@0.11.0
+
 ## 8.8.18
 
 ### Patch Changes

@@ -3,4 +3,6 @@ export { createBridgeComponent } from './provider/create';
 export type {
   ProviderParams,
   RenderFnParams,
-} from '@module-federation/bridge-shared';
+  DestroyParams,
+  RenderParams,
+} from './types';

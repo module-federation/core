@@ -141,17 +141,7 @@ export const performReload = async (
   const req = getRequire();
 
   const gs = new Function('return globalThis')();
-  const entries: string[] = gs.entryChunkCache || [];
-
-  if (!gs.entryChunkCache) {
-    Object.keys(req.cache).forEach((key) => {
-      if (requireCacheRegex.test(key)) {
-        decache(key); // Use decache here
-      }
-    });
-  } else {
-    gs.entryChunkCache.clear();
-  }
+  const entries: Set<string> = gs.entryChunkCache || new Set();
 
   //@ts-ignore
   gs.__FEDERATION__.__INSTANCES__.map((i: any) => {
@@ -172,13 +162,18 @@ export const performReload = async (
   globalThis.moduleGraphDirty = false;
   globalThis.mfHashMap = {};
 
-  for (const entry of entries) {
-    decache(entry);
-  }
-
-  //reload entries again
-  for (const entry of entries) {
-    await getRequire()(entry);
+  if (!entries) {
+    Object.keys(req.cache).forEach((key) => {
+      if (requireCacheRegex.test(key)) {
+        decache(key); // Use decache here
+      }
+    });
+  } else {
+    for (const entry of entries) {
+      decache(entry);
+      //reload entries again
+      await getRequire()(entry);
+    }
   }
 
   return true;

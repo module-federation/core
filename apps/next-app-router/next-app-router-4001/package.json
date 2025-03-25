@@ -1,0 +1,52 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4001",
+    "lint": "next lint",
+    "lint-staged": "lint-staged",
+    "prettier": "prettier --write --ignore-unknown .",
+    "prettier:check": "prettier --check --ignore-unknown .",
+    "start": "next start",
+    "test": "pnpm prettier:check && pnpm lint"
+  },
+  "git": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*": "prettier --write --ignore-unknown"
+  },
+  "dependencies": {
+    "@heroicons/react": "2.1.3",
+    "clsx": "2.1.1",
+    "date-fns": "3.6.0",
+    "dinero.js": "2.0.0-alpha.10",
+    "ms": "3.0.0-canary.1",
+    "next": "15.0.0-canary.193",
+    "react": "19.0.0-rc-cd22717c-20241013",
+    "react-dom": "19.0.0-rc-cd22717c-20241013",
+    "server-only": "0.0.1",
+    "styled-components": "6.1.8",
+    "use-count-up": "3.0.1",
+    "vercel": "34.0.0",
+    "@module-federation/nextjs-mf": "workspace:*"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "0.5.7",
+    "@tailwindcss/typography": "0.5.12",
+    "@types/ms": "0.7.34",
+    "@types/node": "20.12.7",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@vercel/git-hooks": "1.0.0",
+    "autoprefixer": "10.4.19",
+    "eslint": "9.0.0",
+    "eslint-config-next": "14.2.2",
+    "lint-staged": "15.2.2",
+    "postcss": "8.4.38",
+    "prettier": "3.2.5",
+    "prettier-plugin-tailwindcss": "0.5.14",
+    "tailwindcss": "3.4.3",
+    "typescript": "5.4.5"
+  }
+}

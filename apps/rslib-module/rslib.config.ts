@@ -36,11 +36,11 @@ export default defineConfig({
           root: './dist/mf',
         },
       },
-      server: {
-        port: 3001,
-      },
     },
   ],
+  server: {
+    port: 3001,
+  },
   plugins: [
     pluginReact(),
     pluginModuleFederation({
