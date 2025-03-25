@@ -1,5 +1,11 @@
 # @module-federation/sdk
 
+## 0.11.2
+
+### Patch Changes
+
+- 047857b: fix(sdk): stricter browser env check
+
 ## 0.11.1
 
 ## 0.11.0
