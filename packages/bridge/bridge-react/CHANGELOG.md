@@ -1,5 +1,14 @@
 # @module-federation/bridge-react
 
+## 0.11.2
+
+### Patch Changes
+
+- f4f843d: remove @loadable/component from package.json
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/bridge-shared@0.11.2
+
 ## 0.11.1
 
 ### Patch Changes
