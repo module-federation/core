@@ -1,6 +1,3 @@
 # node-host
 
-
----
-
-*Optimized by Aiden*
+This is the example application for Module Federation core.
