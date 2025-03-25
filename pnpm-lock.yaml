@@ -2560,11 +2560,11 @@ importers:
         specifier: 2.7.0
         version: 2.7.0(encoding@0.1.13)
       react:
-        specifier: ^16||^17||^18|^19
-        version: 17.0.2
+        specifier: ^16||^17||^18||^19
+        version: 18.3.1
       react-dom:
         specifier: ^16||^17||^18||^19
-        version: 18.3.1(react@17.0.2)
+        version: 18.3.1(react@18.3.1)
       webpack:
         specifier: ^5.40.0
         version: 5.93.0(@swc/core@1.7.26)(esbuild@0.25.0)
@@ -42872,16 +42872,6 @@ packages:
       object-assign: 4.1.1
       react: 17.0.2
       scheduler: 0.20.2
-
-  /react-dom@18.3.1(react@17.0.2):
-    resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
-    peerDependencies:
-      react: ^18.3.1
-    dependencies:
-      loose-envify: 1.4.0
-      react: 17.0.2
-      scheduler: 0.23.2
-    dev: false
 
   /react-dom@18.3.1(react@18.3.1):
     resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}

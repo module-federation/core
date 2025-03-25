@@ -73,7 +73,7 @@
     "@module-federation/runtime": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^16||^17||^18|^19",
+    "react": "^16||^17||^18||^19",
     "react-dom": "^16||^17||^18||^19",
     "webpack": "^5.40.0"
   },
