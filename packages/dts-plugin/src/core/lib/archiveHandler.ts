@@ -8,6 +8,7 @@ import { retrieveMfTypesPath } from './typeScriptCompiler';
 import { fileLog } from '../../server';
 import { axiosGet } from './utils';
 import { TsConfigJson } from '../interfaces/TsConfigJson';
+import { logger } from '../../server';
 
 export const retrieveTypesZipPath = (
   mfTypesPath: string,
@@ -105,6 +106,9 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
           'error',
         );
         if (retries >= hostOptions.maxRetries) {
+          logger.error(
+            `Failed to download ${fileToDownload}, you can set FEDERATION_DEBUG=true to see detail message.`,
+          );
           if (hostOptions.abortOnError !== false) {
             throw error;
           }

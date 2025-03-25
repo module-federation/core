@@ -137,6 +137,7 @@ export interface PluginDevOptions {
 }
 
 interface RemoteTypeUrl {
+  alias?: string;
   api: string;
   zip: string;
 }

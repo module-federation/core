@@ -64,10 +64,13 @@ export const retrieveRemoteInfo = (options: {
   let zipUrl = '';
   let apiTypeUrl = '';
   const name = parsedInfo.name || remoteAlias;
+
+  // for updated remote
   if (typeof remoteTypeUrls === 'object' && remoteTypeUrls[name]) {
     zipUrl = remoteTypeUrls[name].zip;
     apiTypeUrl = remoteTypeUrls[name].api;
   }
+
   if (!zipUrl && url) {
     zipUrl = buildZipUrl(hostOptions, url);
   }
@@ -98,18 +101,45 @@ const resolveRemotes = (hostOptions: Required<HostOptions>) => {
     }),
   );
 
-  return parsedOptions.reduce(
-    (accumulator, item) => {
-      const { key, remote } = item[1];
-      accumulator[key] = retrieveRemoteInfo({
-        hostOptions,
-        remoteAlias: key,
-        remote,
-      });
-      return accumulator;
+  const remoteTypeUrls = hostOptions.remoteTypeUrls ?? {};
+  if (typeof remoteTypeUrls !== 'object') {
+    throw new Error('remoteTypeUrls must be consumed before resolveRemotes');
+  }
+  const remoteInfos = Object.keys(remoteTypeUrls).reduce(
+    (sum, remoteName) => {
+      const { zip, api, alias } = remoteTypeUrls[remoteName];
+      sum[alias] = {
+        name: remoteName,
+        url: '',
+        zipUrl: zip,
+        apiTypeUrl: api,
+        alias: alias || remoteName,
+      };
+      return sum;
     },
     {} as Record<string, RemoteInfo>,
   );
+
+  return parsedOptions.reduce((accumulator, item) => {
+    const { key, remote } = item[1];
+    const res = retrieveRemoteInfo({
+      hostOptions,
+      remoteAlias: key,
+      remote,
+    });
+
+    if (accumulator[key]) {
+      accumulator[key] = {
+        ...accumulator[key],
+        url: res.url,
+        apiTypeUrl: accumulator[key].apiTypeUrl || res.apiTypeUrl,
+      };
+      return accumulator;
+    }
+
+    accumulator[key] = res;
+    return accumulator;
+  }, remoteInfos);
 };
 
 export const retrieveHostConfig = (options: HostOptions) => {
