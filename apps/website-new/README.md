@@ -1,6 +1,3 @@
 # website-new
 
-
-## Links
-
-- [Module Federation Docs](https://module-federation.io/)
+This is the example application for Module Federation core.
