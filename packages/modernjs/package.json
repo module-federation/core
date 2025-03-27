@@ -55,6 +55,11 @@
       "types": "./dist/types/cli/mfRuntimePlugins/inject-node-fetch.d.ts",
       "import": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.js",
       "require": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.js"
+    },
+    "./correct-ssr-public-path": {
+      "types": "./dist/types/cli/mfRuntimePlugins/correct-ssr-public-path.d.ts",
+      "import": "./dist/esm/cli/mfRuntimePlugins/correct-ssr-public-path.js",
+      "require": "./dist/esm/cli/mfRuntimePlugins/correct-ssr-public-path.js"
     }
   },
   "typesVersions": {
@@ -79,6 +84,9 @@
       ],
       "inject-node-fetch": [
         "./dist/types/cli/mfRuntimePlugins/inject-node-fetch.d.ts"
+      ],
+      "correct-ssr-public-path": [
+        "./dist/types/cli/mfRuntimePlugins/correct-ssr-public-path.d.ts"
       ]
     }
   },
