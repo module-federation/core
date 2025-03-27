@@ -5,14 +5,14 @@ declare const __webpack_require__: Record<string, unknown>;
 const correctSsrPublicPathPlugin: () => FederationRuntimePlugin = () => ({
   name: 'correct-ssr-public-path-plugin',
   beforeInit(args) {
-    const { options } = args;
-    if (typeof window !== 'undefined' || !options.version) {
+    const { options, userOptions } = args;
+    if (typeof window !== 'undefined' || !userOptions.version) {
       return args;
     }
     if (typeof __webpack_require__ !== 'undefined' && __webpack_require__.p) {
       const publicPath = __webpack_require__.p as string;
       const snapshot = getGlobalSnapshotInfoByModuleInfo({
-        version: options.version,
+        version: userOptions.version,
         name: options.name,
       });
       if (
