@@ -3,7 +3,7 @@ import { getGlobalSnapshotInfoByModuleInfo } from '@module-federation/enhanced/r
 
 declare const __webpack_require__: Record<string, unknown>;
 const correctSsrPublicPathPlugin: () => FederationRuntimePlugin = () => ({
-  name: 'inject-node-fetch-plugin',
+  name: 'correct-ssr-public-path-plugin',
   beforeInit(args) {
     const { options } = args;
     if (typeof window !== 'undefined' || !options.version) {
