@@ -2,7 +2,7 @@ import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtim
 import { getGlobalSnapshotInfoByModuleInfo } from '@module-federation/enhanced/runtime-core';
 
 declare const __webpack_require__: Record<string, unknown>;
-const correctSsrPublicPathPlugin: () => FederationRuntimePlugin = () => ({
+const correctSSRPublicPathPlugin: () => FederationRuntimePlugin = () => ({
   name: 'correct-ssr-public-path-plugin',
   beforeInit(args) {
     const { options, userOptions } = args;
@@ -31,4 +31,4 @@ const correctSsrPublicPathPlugin: () => FederationRuntimePlugin = () => ({
     return args;
   },
 });
-export default correctSsrPublicPathPlugin;
+export default correctSSRPublicPathPlugin;
