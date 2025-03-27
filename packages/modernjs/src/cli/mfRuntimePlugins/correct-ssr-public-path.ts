@@ -24,7 +24,7 @@ const correctSsrPublicPathPlugin: () => FederationRuntimePlugin = () => ({
       }
       const ssrPath =
         snapshot.ssrRemoteEntry.split('/').slice(0, -1).join('/') + '/';
-      if (publicPath.endsWith(ssrPath)) {
+      if (!publicPath.endsWith(ssrPath)) {
         __webpack_require__.p = publicPath + ssrPath;
       }
     }
