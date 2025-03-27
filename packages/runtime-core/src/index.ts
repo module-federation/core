@@ -11,6 +11,7 @@ export {
   addGlobalSnapshot,
   getGlobalSnapshot,
   getInfoWithoutType,
+  getGlobalSnapshotInfoByModuleInfo,
 } from './global';
 export type { UserOptions, FederationRuntimePlugin } from './type';
 export { assert } from './utils/logger';

@@ -57,6 +57,11 @@
       "import": "./dist/src/runtime.js",
       "require": "./dist/src/runtime.js"
     },
+    "./runtime-core": {
+      "types": "./dist/src/runtime-core.d.ts",
+      "import": "./dist/src/runtime-core.js",
+      "require": "./dist/src/runtime-core.js"
+    },
     "./prefetch": {
       "types": "./dist/src/prefetch.d.ts",
       "import": "./dist/src/prefetch.js",
@@ -76,6 +81,9 @@
       ],
       "runtime": [
         "./dist/src/runtime.d.ts"
+      ],
+      "runtime-core": [
+        "./dist/src/runtime-core.d.ts"
       ],
       "prefetch": [
         "./dist/src/prefetch.d.ts"

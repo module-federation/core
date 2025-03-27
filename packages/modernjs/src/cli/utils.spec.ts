@@ -35,6 +35,7 @@ describe('patchMFConfig', async () => {
         require.resolve('@module-federation/modern-js/shared-strategy'),
         require.resolve('@module-federation/node/runtimePlugin'),
         require.resolve('@module-federation/modern-js/inject-node-fetch'),
+        require.resolve('@module-federation/modern-js/correct-ssr-public-path'),
       ],
       shared: {
         react: {
