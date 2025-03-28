@@ -12,7 +12,7 @@ import { UNKNOWN_MODULE_NAME } from './constant';
 interface NormalizedRemote {
   [remoteName: string]: RemoteEntryInfo & {
     alias: string;
-    shareScope: string;
+    shareScope: string | string[];
   };
 }
 

@@ -1,4 +1,103 @@
-import type { sharePlugin } from '@module-federation/sdk';
+import type {
+  moduleFederationPlugin,
+  sharePlugin,
+} from '@module-federation/sdk';
+
+// Extend the SharedConfig type to include layer properties
+type ExtendedSharedConfig = sharePlugin.SharedConfig & {
+  layer?: string;
+  issuerLayer?: string | string[];
+  request?: string;
+  shareKey?: string;
+};
+
+const WEBPACK_LAYERS_NAMES = {
+  /**
+   * The layer for the shared code between the client and server bundles.
+   */
+  shared: 'shared',
+  /**
+   * The layer for server-only runtime and picking up `react-server` export conditions.
+   * Including app router RSC pages and app router custom routes and metadata routes.
+   */
+  reactServerComponents: 'rsc',
+  /**
+   * Server Side Rendering layer for app (ssr).
+   */
+  serverSideRendering: 'ssr',
+  /**
+   * The browser client bundle layer for actions.
+   */
+  actionBrowser: 'action-browser',
+  /**
+   * The layer for the API routes.
+   */
+  api: 'api',
+  /**
+   * The layer for the middleware code.
+   */
+  middleware: 'middleware',
+  /**
+   * The layer for the instrumentation hooks.
+   */
+  instrument: 'instrument',
+  /**
+   * The layer for assets on the edge.
+   */
+  edgeAsset: 'edge-asset',
+  /**
+   * The browser client bundle layer for App directory.
+   */
+  appPagesBrowser: 'app-pages-browser',
+} as const;
+
+const createSharedConfig = (
+  name: string,
+  layers: (string | undefined)[],
+  options: { request?: string; import?: false | undefined } = {},
+) => {
+  return layers.reduce(
+    (acc, layer) => {
+      const key = layer ? `${name}-${layer}` : name;
+      acc[key] = {
+        singleton: true,
+        requiredVersion: false,
+        import: layer ? undefined : (options.import ?? false),
+        shareKey: options.request ?? name,
+        request: options.request ?? name,
+        layer,
+        issuerLayer: layer,
+      };
+      return acc;
+    },
+    {} as Record<string, ExtendedSharedConfig>,
+  );
+};
+
+const defaultLayers = [
+  WEBPACK_LAYERS_NAMES.reactServerComponents,
+  WEBPACK_LAYERS_NAMES.serverSideRendering,
+  undefined,
+];
+
+const navigationLayers = [
+  WEBPACK_LAYERS_NAMES.reactServerComponents,
+  WEBPACK_LAYERS_NAMES.serverSideRendering,
+];
+
+const reactShares = createSharedConfig('react', defaultLayers);
+const reactDomShares = createSharedConfig('react', defaultLayers, {
+  request: 'react-dom',
+});
+const jsxRuntimeShares = createSharedConfig('react/', navigationLayers, {
+  request: 'react/',
+  import: undefined,
+});
+const nextNavigationShares = createSharedConfig(
+  'next-navigation',
+  navigationLayers,
+  { request: 'next/navigation' },
+);
 
 /**
  * @typedef SharedObject
@@ -8,8 +107,14 @@ import type { sharePlugin } from '@module-federation/sdk';
  * @property {boolean} key.requiredVersion - Whether a specific version of the shared object is required.
  * @property {boolean} key.eager - Whether the shared object should be eagerly loaded.
  * @property {boolean} key.import - Whether the shared object should be imported or not.
+ * @property {string} key.layer - The webpack layer this shared module belongs to.
+ * @property {string|string[]} key.issuerLayer - The webpack layer that can import this shared module.
  */
-export const DEFAULT_SHARE_SCOPE: sharePlugin.SharedObject = {
+export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
+  // ...reactShares,
+  // ...reactDomShares,
+  // ...nextNavigationShares,
+  // ...jsxRuntimeShares,
   'next/dynamic': {
     requiredVersion: undefined,
     singleton: true,
@@ -98,15 +203,15 @@ export const DEFAULT_SHARE_SCOPE: sharePlugin.SharedObject = {
  * @returns {SharedObject} - The modified share scope for the browser environment.
  */
 
-export const DEFAULT_SHARE_SCOPE_BROWSER: sharePlugin.SharedObject =
+export const DEFAULT_SHARE_SCOPE_BROWSER: moduleFederationPlugin.SharedObject =
   Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc, item) => {
-    const [key, value] = item as [string, sharePlugin.SharedConfig];
+    const [key, value] = item as [string, moduleFederationPlugin.SharedConfig];
 
     // Set eager and import to undefined for all entries, except for the ones specified above
     acc[key] = { ...value, import: undefined };
 
     return acc;
-  }, {} as sharePlugin.SharedObject);
+  }, {} as moduleFederationPlugin.SharedObject);
 
 /**
  * Checks if the remote value is an internal or promise delegate module reference.

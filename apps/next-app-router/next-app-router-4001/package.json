@@ -1,5 +1,6 @@
 {
   "private": true,
+  "name": "app-router-4001",
   "scripts": {
     "build": "next build",
     "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4001",

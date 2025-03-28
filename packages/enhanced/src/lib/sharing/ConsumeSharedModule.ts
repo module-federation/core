@@ -24,6 +24,7 @@ import type {
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import { normalizeConsumeShareOptions } from './utils';
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../Constants';
+import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 
 const { rangeToString, stringifyHoley } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
@@ -38,48 +39,6 @@ const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
 
-export type ConsumeOptions = {
-  /**
-   * fallback request
-   */
-  import?: string | undefined;
-  /**
-   * resolved fallback request
-   */
-  importResolved?: string | undefined;
-  /**
-   * global share key
-   */
-  shareKey: string;
-  /**
-   * share scope
-   */
-  shareScope: string;
-  /**
-   * version requirement
-   */
-  requiredVersion:
-    | import('webpack/lib/util/semver').SemVerRange
-    | false
-    | undefined;
-  /**
-   * package name to determine required version automatically
-   */
-  packageName: string;
-  /**
-   * don't use shared version even if version isn't valid
-   */
-  strictVersion: boolean;
-  /**
-   * use single global version
-   */
-  singleton: boolean;
-  /**
-   * include the fallback module in a sync way
-   */
-  eager: boolean;
-};
-
 /**
  * @typedef {Object} ConsumeOptions
  * @property {string=} import fallback request
@@ -91,6 +50,8 @@ export type ConsumeOptions = {
  * @property {boolean} strictVersion don't use shared version even if version isn't valid
  * @property {boolean} singleton use single global version
  * @property {boolean} eager include the fallback module in a sync way
+ * @property {string | null=} layer Share a specific layer of the module, if the module supports layers
+ * @property {string | null=} issuerLayer Issuer layer in which the module should be resolved
  */
 
 const TYPES = new Set(['consume-shared']);
@@ -103,7 +64,12 @@ class ConsumeSharedModule extends Module {
    * @param {ConsumeOptions} options consume options
    */
   constructor(context: string, options: ConsumeOptions) {
-    super(WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE, context);
+    super(
+      WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE,
+      context,
+      options?.layer ?? null,
+    );
+    this.layer = options?.layer ?? null;
     this.options = options;
   }
 
@@ -119,10 +85,17 @@ class ConsumeSharedModule extends Module {
       strictVersion,
       singleton,
       eager,
+      layer,
     } = this.options;
-    return `${WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE}|${shareScope}|${shareKey}|${
+
+    // Convert shareScope array to string for the identifier
+    const normalizedShareScope = Array.isArray(shareScope)
+      ? shareScope.join('|')
+      : shareScope;
+
+    return `${WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE}|${normalizedShareScope}|${shareKey}|${
       requiredVersion && rangeToString(requiredVersion)
-    }|${strictVersion}|${importResolved}|${singleton}|${eager}`;
+    }|${strictVersion}|${importResolved}|${singleton}|${eager}|${layer}`;
   }
 
   /**
@@ -138,14 +111,19 @@ class ConsumeSharedModule extends Module {
       strictVersion,
       singleton,
       eager,
+      layer,
     } = this.options;
-    return `consume shared module (${shareScope}) ${shareKey}@${
+    const normalizedShareScope = Array.isArray(shareScope)
+      ? shareScope.join('|')
+      : shareScope;
+
+    return `consume shared module (${normalizedShareScope}) ${shareKey}@${
       requiredVersion ? rangeToString(requiredVersion) : '*'
     }${strictVersion ? ' (strict)' : ''}${singleton ? ' (singleton)' : ''}${
       importResolved
         ? ` (fallback: ${requestShortener.shorten(importResolved)})`
         : ''
-    }${eager ? ' (eager)' : ''}`;
+    }${eager ? ' (eager)' : ''}${layer ? ` (${layer})` : ''}`;
   }
 
   /**
@@ -154,9 +132,13 @@ class ConsumeSharedModule extends Module {
    */
   override libIdent(options: LibIdentOptions): string | null {
     const { shareKey, shareScope, import: request } = this.options;
+    const normalizedShareScope = Array.isArray(shareScope)
+      ? shareScope.join('|')
+      : shareScope;
+
     return `${
       this.layer ? `(${this.layer})/` : ''
-    }webpack/sharing/consume/${shareScope}/${shareKey}${
+    }webpack/sharing/consume/${normalizedShareScope}/${shareKey}${
       request ? `/${request}` : ''
     }`;
   }
@@ -166,7 +148,6 @@ class ConsumeSharedModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  // @ts-ignore
   override needBuild(
     context: NeedBuildContext,
     callback: (error?: WebpackError | null, needsRebuild?: boolean) => void,
@@ -182,7 +163,6 @@ class ConsumeSharedModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
-  // @ts-ignore
   override build(
     options: WebpackOptions,
     compilation: Compilation,
@@ -225,10 +205,8 @@ class ConsumeSharedModule extends Module {
    * @param {UpdateHashContext} context context
    * @returns {void}
    */
-  // @ts-ignore
   override updateHash(hash: Hash, context: UpdateHashContext): void {
     hash.update(JSON.stringify(this.options));
-    // @ts-ignore
     super.updateHash(hash, context);
   }
 
@@ -236,7 +214,6 @@ class ConsumeSharedModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
-  // @ts-ignore
   override codeGeneration({
     chunkGraph,
     moduleGraph,
@@ -257,7 +234,6 @@ class ConsumeSharedModule extends Module {
       if (eager) {
         const dep = this.dependencies[0];
         fallbackCode = runtimeTemplate.syncModuleFactory({
-          // @ts-ignore
           dependency: dep,
           chunkGraph,
           runtimeRequirements,
@@ -266,7 +242,6 @@ class ConsumeSharedModule extends Module {
       } else {
         const block = this.blocks[0];
         fallbackCode = runtimeTemplate.asyncModuleFactory({
-          // @ts-ignore
           block,
           chunkGraph,
           runtimeRequirements,
@@ -320,6 +295,7 @@ class ConsumeSharedModule extends Module {
   override serialize(context: ObjectSerializerContext): void {
     const { write } = context;
     write(this.options);
+    write(this.layer);
     super.serialize(context);
   }
 
@@ -328,7 +304,10 @@ class ConsumeSharedModule extends Module {
    */
   override deserialize(context: ObjectDeserializerContext): void {
     const { read } = context;
-    this.options = read();
+    const options = read();
+    const layer = read();
+    this.options = options;
+    this.layer = layer;
     super.deserialize(context);
   }
 }

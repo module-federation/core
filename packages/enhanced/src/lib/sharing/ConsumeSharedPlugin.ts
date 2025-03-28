@@ -9,9 +9,8 @@ import {
   normalizeWebpackPath,
 } from '@module-federation/sdk/normalize-webpack-path';
 import { isRequiredVersion } from '@module-federation/sdk';
-import type { Compiler, Compilation } from 'webpack';
+import type { Compiler, Compilation, Module } from 'webpack';
 import { parseOptions } from '../container/options';
-import { ConsumeOptions } from './ConsumeSharedModule';
 import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
@@ -29,6 +28,10 @@ import ProvideForSharedDependency from './ProvideForSharedDependency';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import ShareRuntimeModule from './ShareRuntimeModule';
 import type { SemVerRange } from 'webpack/lib/util/semver';
+import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
+import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFactory';
+import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
+import { createSchemaValidation } from '../../utils';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -42,23 +45,11 @@ const LazySet = require(
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
-const createSchemaValidation = require(
-  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
-) as typeof import('webpack/lib/util/create-schema-validation');
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require(
-    normalizeWebpackPath(
-      'webpack/schemas/plugins/sharing/ConsumeSharedPlugin.check.js',
-    ),
-  ),
-  () =>
-    require(
-      normalizeWebpackPath(
-        'webpack/schemas/plugins/sharing/ConsumeSharedPlugin.json',
-      ),
-    ),
+  require('../../schemas/sharing/ConsumeSharedPlugin.check.js').validate,
+  () => require('../../schemas/sharing/ConsumeSharedPlugin').default,
   {
     name: 'Consume Shared Plugin',
     baseDataPath: 'options',
@@ -69,6 +60,17 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
   dependencyType: 'esm',
 };
 const PLUGIN_NAME = 'ConsumeSharedPlugin';
+
+// Helper function to create composite key
+function createLookupKey(
+  request: string,
+  contextInfo: ModuleFactoryCreateDataContextInfo,
+): string {
+  return contextInfo.issuerLayer
+    ? `(${contextInfo.issuerLayer})${request}`
+    : request;
+}
+
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
 
@@ -94,6 +96,9 @@ class ConsumeSharedPlugin {
                 strictVersion: false,
                 singleton: false,
                 eager: false,
+                issuerLayer: undefined,
+                layer: undefined,
+                request: key,
               }
             : // key is a request/key
               // item is a version
@@ -107,24 +112,35 @@ class ConsumeSharedPlugin {
                 packageName: undefined,
                 singleton: false,
                 eager: false,
+                issuerLayer: undefined,
+                layer: undefined,
+                request: key,
               };
         return result;
       },
-      (item, key) => ({
-        import: item.import === false ? undefined : item.import || key,
-        shareScope: item.shareScope || options.shareScope || 'default',
-        shareKey: item.shareKey || key,
-        // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
-        requiredVersion: item.requiredVersion,
-        strictVersion:
-          typeof item.strictVersion === 'boolean'
-            ? item.strictVersion
-            : item.import !== false && !item.singleton,
-        //@ts-ignore
-        packageName: item.packageName,
-        singleton: !!item.singleton,
-        eager: !!item.eager,
-      }),
+      (item, key) => {
+        const request = item.request || key;
+        return {
+          import: item.import === false ? undefined : item.import || request,
+          shareScope: item.shareScope || options.shareScope || 'default',
+          shareKey: item.shareKey || request,
+          requiredVersion:
+            item.requiredVersion === false
+              ? false
+              : // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+                (item.requiredVersion as SemVerRange),
+          strictVersion:
+            typeof item.strictVersion === 'boolean'
+              ? item.strictVersion
+              : item.import !== false && !item.singleton,
+          packageName: item.packageName,
+          singleton: !!item.singleton,
+          eager: !!item.eager,
+          issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
+          layer: item.layer ? item.layer : undefined,
+          request,
+        } as ConsumeOptions;
+      },
     );
   }
 
@@ -296,33 +312,40 @@ class ConsumeSharedPlugin {
 
         normalModuleFactory.hooks.factorize.tapPromise(
           PLUGIN_NAME,
-          ({ context, request, dependencies }) =>
+          async (resolveData: ResolveData): Promise<Module | undefined> => {
+            const { context, request, dependencies, contextInfo } = resolveData;
             // wait for resolving to be complete
-            //@ts-ignore
-            promise.then(() => {
+            return promise.then(() => {
               if (
                 dependencies[0] instanceof ConsumeSharedFallbackDependency ||
                 dependencies[0] instanceof ProvideForSharedDependency
               ) {
                 return;
               }
-              const match = unresolvedConsumes.get(request);
+              const match = unresolvedConsumes.get(
+                createLookupKey(request, contextInfo),
+              );
+
               if (match !== undefined) {
                 return createConsumeSharedModule(context, request, match);
               }
               for (const [prefix, options] of prefixedConsumes) {
-                if (request.startsWith(prefix)) {
-                  const remainder = request.slice(prefix.length);
+                const lookup = options.request || prefix;
+                if (request.startsWith(lookup)) {
+                  const remainder = request.slice(lookup.length);
                   return createConsumeSharedModule(context, request, {
                     ...options,
                     import: options.import
                       ? options.import + remainder
                       : undefined,
                     shareKey: options.shareKey + remainder,
+                    layer: options.layer || contextInfo.issuerLayer,
                   });
                 }
               }
-            }),
+              return;
+            });
+          },
         );
         normalModuleFactory.hooks.createModule.tapPromise(
           PLUGIN_NAME,

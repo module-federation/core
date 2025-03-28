@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "engines": {
+    "node": ">=10.13.0"
+  },
+  "scripts": {
+    "build": "webpack --config=webpack.config.js"
+  },
+  "dependencies": {
+    "react": "0.1.1"
+  }
+}
