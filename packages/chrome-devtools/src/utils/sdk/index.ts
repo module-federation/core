@@ -41,6 +41,12 @@ export const getUnpkgUrl = (pkg: string, version: string) => {
     return `https://unpkg.com/react@${version}/umd/react.development.js`;
   } else if (pkg === 'react-dom') {
     return `https://unpkg.com/react-dom@${version}/umd/react-dom.development.js`;
+  } else if (pkg === 'vue') {
+    if ((version || '').split('.')[0] === '3') {
+      return `https://unpkg.com/vue@${version}/dist/vue.global.js`;
+    } else {
+      return `https://unpkg.com/vue@${version}/dist/vue.common.dev.js`;
+    }
   }
 };
 
