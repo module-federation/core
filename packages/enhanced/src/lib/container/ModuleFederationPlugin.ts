@@ -57,6 +57,20 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         ),
       }).apply(compiler);
     }
+
+    const { splitChunks } = compiler.options.optimization;
+    if (!splitChunks) {
+      return;
+    }
+    const cacheGroups = splitChunks.cacheGroups;
+    if (!cacheGroups) {
+      return;
+    }
+    cacheGroups['mf'] = cacheGroups['mf'] || {
+      name: 'module-federation',
+      test: /@module-federation/,
+      priority: 0,
+    };
   }
 
   /**
