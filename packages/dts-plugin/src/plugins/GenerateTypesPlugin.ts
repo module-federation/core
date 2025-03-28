@@ -207,6 +207,9 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             await new Promise<void>((resolve, reject) => {
               compiler.outputFileSystem.mkdir(
                 path.dirname(zipOutputPath),
+                {
+                  recursive: true,
+                },
                 (err) => {
                   if (err && !isEEXIST(err)) {
                     reject(err);
@@ -239,6 +242,9 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             await new Promise<void>((resolve, reject) => {
               compiler.outputFileSystem.mkdir(
                 path.dirname(apiOutputPath),
+                {
+                  recursive: true,
+                },
                 (err) => {
                   if (err && !isEEXIST(err)) {
                     reject(err);
