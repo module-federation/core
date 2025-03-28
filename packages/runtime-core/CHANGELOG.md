@@ -1,5 +1,30 @@
 # @module-federation/runtime
 
+## 0.11.2
+
+### Patch Changes
+
+- 047857b: fix(runtime-core): check for `remoteEntry` in snapshot outside browser env
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/error-codes@0.11.2
+
+## 0.11.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.11.1
+- @module-federation/error-codes@0.11.1
+
+## 0.11.0
+
+### Patch Changes
+
+- bce6cd9: fix(runtime): preload filter loaded resources
+- Updated dependencies [fce107e]
+  - @module-federation/sdk@0.11.0
+  - @module-federation/error-codes@0.11.0
+
 ## 0.10.0
 
 ### Patch Changes

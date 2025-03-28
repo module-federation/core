@@ -1,0 +1,60 @@
+# Cache and temporary files
+**/.cache/
+**/.temp/
+**/coverage/
+**/dist/
+
+# Documentation and config files
+**/*.md
+**/*.yaml
+**/*.yml
+**/.eslintrc*
+**/.prettierrc*
+**/.swcrc
+**/jest.config.*
+**/tsconfig.*
+**/*/stats.json
+
+# Explicitly ignore specific packages
+packages/typescript/
+packages/native-*
+packages/core/
+packages/assemble-release-plan/
+packages/native-federation-typescript/
+packages/esbuild/
+
+# Ignore specific directories
+apps/
+webpack/tooling/
+webpack/setup/
+webpack/test/
+webpack/benchmark/
+tools/
+.husky/
+.github/
+.vscode/
+.verdaccio/
+
+!apps/manifest-demo/*.ts
+
+# Ignore specific files
+.cursorignore
+jest.preset.js
+babel.config.json
+nx.json
+LICENSE
+.nxignore
+netlify.toml
+renovate.json
+.npmrc
+.cursorrules
+.prettierignore
+.editorconfig
+ai-lint-fix.js
+manifest.json
+typedoc.json
+typedoc.base.json
+commitlint.config.js
+.eslintignore
+commit-gen.js
+main.py

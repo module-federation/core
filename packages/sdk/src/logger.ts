@@ -7,6 +7,11 @@ class Logger {
   constructor(prefix: string) {
     this.prefix = prefix;
   }
+
+  setPrefix(prefix: string) {
+    this.prefix = prefix;
+  }
+
   log(...args: any[]) {
     console.log(this.prefix, ...args);
   }

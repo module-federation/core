@@ -1,5 +1,37 @@
 # @module-federation/node
 
+## 2.6.31
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/runtime@0.11.2
+  - @module-federation/enhanced@0.11.2
+  - @module-federation/utilities@3.1.49
+
+## 2.6.30
+
+### Patch Changes
+
+- Updated dependencies [09d6bc1]
+  - @module-federation/enhanced@0.11.1
+  - @module-federation/runtime@0.11.1
+  - @module-federation/sdk@0.11.1
+  - @module-federation/utilities@3.1.48
+
+## 2.6.29
+
+### Patch Changes
+
+- 5c4175e: fix(node): delete server module cache if hot reload
+- Updated dependencies [fce107e]
+- Updated dependencies [fce107e]
+  - @module-federation/enhanced@0.11.0
+  - @module-federation/sdk@0.11.0
+  - @module-federation/runtime@0.11.0
+  - @module-federation/utilities@3.1.47
+
 ## 2.6.28
 
 ### Patch Changes

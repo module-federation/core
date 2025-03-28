@@ -1,5 +1,35 @@
 # @module-federation/dts-plugin
 
+## 0.11.2
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/managers@0.11.2
+  - @module-federation/third-party-dts-extractor@0.11.2
+  - @module-federation/error-codes@0.11.2
+
+## 0.11.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.11.1
+- @module-federation/managers@0.11.1
+- @module-federation/third-party-dts-extractor@0.11.1
+- @module-federation/error-codes@0.11.1
+
+## 0.11.0
+
+### Patch Changes
+
+- eecee74: use `cwd` to create Module Federation tsconfig
+- Updated dependencies [fce107e]
+  - @module-federation/sdk@0.11.0
+  - @module-federation/managers@0.11.0
+  - @module-federation/third-party-dts-extractor@0.11.0
+  - @module-federation/error-codes@0.11.0
+
 ## 0.10.0
 
 ### Patch Changes

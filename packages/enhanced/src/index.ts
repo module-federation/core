@@ -32,3 +32,5 @@ export const createModuleFederationConfig = (
 ): moduleFederationPlugin.ModuleFederationPluginOptions => {
   return options;
 };
+
+export type { moduleFederationPlugin };

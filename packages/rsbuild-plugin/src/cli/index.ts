@@ -160,9 +160,6 @@ export const pluginModuleFederation = (
           if (
             !bundlerConfig.plugins!.find((p) => p && p.name === PLUGIN_NAME)
           ) {
-            if (!moduleFederationOptions.shareStrategy) {
-              moduleFederationOptions.shareStrategy = 'loaded-first';
-            }
             bundlerConfig.plugins!.push(
               new ModuleFederationPlugin(moduleFederationOptions),
             );
@@ -180,6 +177,12 @@ export const pluginModuleFederation = (
       // Change some default configs for remote modules
       if (moduleFederationOptions.exposes) {
         config.dev ||= {};
+        config.server ||= {};
+
+        // Allow remote modules to be loaded by setting CORS headers
+        // This is required for MF to work properly across different origins
+        config.server.headers ||= {};
+        config.server.headers['Access-Control-Allow-Origin'] ||= '*';
 
         // For remote modules, Rsbuild should send the ws request to the provider's dev server.
         // This allows the provider to do HMR when the provider module is loaded in the consumer's page.

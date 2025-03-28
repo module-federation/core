@@ -1,5 +1,21 @@
 # @module-federation/sdk
 
+## 0.11.2
+
+### Patch Changes
+
+- 047857b: fix(sdk): stricter browser env check
+
+## 0.11.1
+
+## 0.11.0
+
+### Minor Changes
+
+- fce107e: - Removed `federationRuntime` option from `ContainerPluginOptions`'s `experiments`.
+  - Removed `federationRuntime` option from `ModuleFederationPluginOptions`'s `experiments`.
+  - Added `asyncStartup` option to `ModuleFederationPluginOptions`'s `experiments`.
+
 ## 0.10.0
 
 ### Patch Changes

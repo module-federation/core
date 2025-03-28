@@ -9,7 +9,7 @@ import { updateStatsAndManifest } from './manifest';
 import { isDev } from './constant';
 import { MODERN_JS_SERVER_DIR } from '../constant';
 import logger from './logger';
-import { isWebTarget } from './utils';
+import { isWebTarget, skipByTarget } from './utils';
 
 export function setEnv() {
   process.env['MF_DISABLE_EMIT_STATS'] = 'true';
@@ -48,7 +48,11 @@ export const moduleFederationSSRPlugin = (
       });
       return { entrypoint, plugins };
     });
-    api.modifyBundlerChain((chain, { isServer }) => {
+    api.modifyBundlerChain((chain) => {
+      const target = chain.get('target');
+      if (skipByTarget(target)) {
+        return;
+      }
       const bundlerType =
         api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
       const MFPlugin =
@@ -56,7 +60,7 @@ export const moduleFederationSSRPlugin = (
           ? ModuleFederationPlugin
           : RspackModuleFederationPlugin;
 
-      const isWeb = isWebTarget(chain.get('target'));
+      const isWeb = isWebTarget(target);
 
       if (!isWeb) {
         if (!chain.plugins.has(CHAIN_MF_PLUGIN_ID)) {
@@ -79,13 +83,13 @@ export const moduleFederationSSRPlugin = (
         }
       }
 
-      if (isDev && !isServer) {
+      if (isDev && isWeb) {
         chain.externals({
           '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
         });
       }
 
-      if (isServer) {
+      if (!isWeb) {
         ssrOutputPath =
           chain.output.get('path') ||
           path.resolve(process.cwd(), `dist/${MODERN_JS_SERVER_DIR}`);
