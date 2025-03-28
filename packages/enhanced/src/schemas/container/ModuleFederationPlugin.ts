@@ -821,7 +821,7 @@ export default {
             additionalData: {
               description:
                 'Function that provides additional data to the manifest',
-              type: 'object',
+              instanceof: 'Function',
             },
           },
           additionalProperties: false,
@@ -843,6 +843,10 @@ export default {
     dataPrefetch: {
       description: 'Whether enable data prefetch',
       type: 'boolean',
+    },
+    implementation: {
+      description: 'Bundler runtime path',
+      type: 'string',
     },
   },
 } as const;
