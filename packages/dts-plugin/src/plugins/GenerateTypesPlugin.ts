@@ -210,6 +210,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
                 {
                   recursive: true,
                 },
+                // @ts-ignore  type fixed in  https://github.com/webpack/webpack/releases/tag/v5.91.0
                 (err) => {
                   if (err && !isEEXIST(err)) {
                     reject(err);
@@ -245,6 +246,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
                 {
                   recursive: true,
                 },
+                // @ts-ignore  type fixed in  https://github.com/webpack/webpack/releases/tag/v5.91.0
                 (err) => {
                   if (err && !isEEXIST(err)) {
                     reject(err);
