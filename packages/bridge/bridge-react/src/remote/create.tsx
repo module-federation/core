@@ -23,7 +23,6 @@ function createLazyRemoteComponent<
 
     try {
       const m = (await info.loader()) as RemoteModule;
-      console.log('-------m', m);
       // @ts-ignore
       const moduleName = m && m[Symbol.for('mf_module_id')];
       LoggerInstance.debug(

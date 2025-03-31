@@ -218,7 +218,6 @@ const App = () => {
           Component={() => <Remote2App style={{ padding: '20px' }} />}
         />
         <Route path="/remote3/*" Component={() => <Remote3App test="123" />} />
-        <Route path="/remote5/*" Component={() => <Remote5App />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
         <Route
           path="/remote-render-error/*"
@@ -237,7 +236,6 @@ const App = () => {
             // </React.Suspense>
           )}
         />
-
         <Route
           path="/error-load-with-error-boundary/*"
           Component={() => (
@@ -249,6 +247,7 @@ const App = () => {
             />
           )}
         />
+        <Route path="/remote5/*" Component={() => <Remote5App />} />
       </Routes>
     </div>
   );

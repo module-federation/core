@@ -53,7 +53,7 @@ function Navgation() {
       ],
     },
     {
-      label: <Link to="/remote2">Remote2</Link>,
+      label: <Link to="/remote2">33</Link>,
       key: '/remote2',
       icon: <GroupOutlined />,
       children: [
@@ -90,7 +90,7 @@ function Navgation() {
       ],
     },
     {
-      label: <Link to="/remote3">Remote3</Link>,
+      label: <Link to="/remote3">23</Link>,
       key: '/remote3',
       icon: <GroupOutlined />,
       children: [
@@ -119,37 +119,33 @@ function Navgation() {
       ],
     },
     {
-      label: <Link to="/remote5">Remote5</Link>,
-      key: '/remote5',
-      icon: <GroupOutlined />,
-    },
-    {
-      label: <Link to="/memory-router">Memory-router</Link>,
+      label: <Link to="/memory-router">Memory</Link>,
       key: '/memory-router',
       icon: <GroupOutlined />,
     },
     {
-      label: <Link to="/remote-render-error">render-error</Link>,
+      label: <Link to="/remote-render-error">1</Link>,
       key: '/remote-render-error',
       icon: <GroupOutlined />,
     },
     {
-      label: <Link to="/remote-resource-error">resource-error</Link>,
+      label: <Link to="/remote-resource-error">2</Link>,
       key: '/remote-resource-error',
       icon: <GroupOutlined />,
     },
     {
-      label: <Link to="/error-load-with-hook">error-load-with-hook</Link>,
+      label: <Link to="/error-load-with-hook">3</Link>,
       key: '/error-load-with-hook',
       icon: <GroupOutlined />,
     },
     {
-      label: (
-        <Link to="/error-load-with-error-boundary">
-          error-load-with-error-boundary
-        </Link>
-      ),
+      label: <Link to="/error-load-with-error-boundary">4</Link>,
       key: '/error-load-with-error-boundary',
+      icon: <GroupOutlined />,
+    },
+    {
+      label: <Link to="/remote5">React19</Link>,
+      key: '/remote5',
       icon: <GroupOutlined />,
     },
   ];
