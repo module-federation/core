@@ -41,6 +41,33 @@ export class HoistContainerReferences implements WebpackPluginInstance {
           },
         );
 
+        // Add modules that reference @module-federation/runtime
+        compilation.hooks.finishModules.tap(PLUGIN_NAME, (modules) => {
+          for (const module of modules) {
+            // Check if this is a normal module with a resource
+            if (!('resource' in module) || !module.resource) continue;
+
+            // Check module dependencies for @module-federation/runtime references
+            const mgm = compilation.moduleGraph._getModuleGraphModule(module);
+            if (!mgm?.outgoingConnections) continue;
+
+            for (const connection of mgm.outgoingConnections) {
+              // Safely check if dependency has a request property and if it includes our target
+              if (
+                connection.dependency &&
+                'request' in connection.dependency &&
+                typeof connection.dependency.request === 'string' &&
+                connection.dependency.request.includes(
+                  '@module-federation/runtime',
+                )
+              ) {
+                containerEntryDependencies.add(connection.dependency);
+                break;
+              }
+            }
+          }
+        });
+
         // Hook into the optimizeChunks phase
         compilation.hooks.optimizeChunks.tap(
           {
