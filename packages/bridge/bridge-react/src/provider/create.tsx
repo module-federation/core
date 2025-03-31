@@ -85,7 +85,6 @@ export function createBridgeComponent<T>({
             root.render(rootComponentWithErrorBoundary);
           }
         }
-
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
       },
 

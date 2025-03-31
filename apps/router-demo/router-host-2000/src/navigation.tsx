@@ -119,6 +119,11 @@ function Navgation() {
       ],
     },
     {
+      label: <Link to="/remote5">Remote5</Link>,
+      key: '/remote5',
+      icon: <GroupOutlined />,
+    },
+    {
       label: <Link to="/memory-router">Memory-router</Link>,
       key: '/memory-router',
       icon: <GroupOutlined />,
