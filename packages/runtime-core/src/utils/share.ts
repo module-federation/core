@@ -34,11 +34,6 @@ export function formatShare(
         throw new Error(`Can not get shared '${name}'!`);
       });
   }
-  if (shareArgs.strategy) {
-    warn(
-      `"shared.strategy is deprecated, please set in initOptions.shareStrategy instead!"`,
-    );
-  }
   return {
     deps: [],
     useIn: [],

@@ -1,5 +1,16 @@
 # @module-federation/nextjs-mf
 
+## 8.8.22
+
+### Patch Changes
+
+- Updated dependencies [e5fae18]
+  - @module-federation/node@2.6.32
+  - @module-federation/runtime@0.11.3
+  - @module-federation/enhanced@0.11.3
+  - @module-federation/webpack-bundler-runtime@0.11.3
+  - @module-federation/sdk@0.11.3
+
 ## 8.8.21
 
 ### Patch Changes
