@@ -413,19 +413,6 @@ class FederationRuntimePlugin {
 
     new HoistContainerReferences().apply(compiler);
 
-    const runtimePath = this.getRuntimeAlias(compiler);
-    new compiler.webpack.NormalModuleReplacementPlugin(
-      /@module-federation\/runtime/,
-      (resolveData) => {
-        if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
-          resolveData.request = runtimePath;
-
-          if (resolveData.createData) {
-            resolveData.createData.request = resolveData.request;
-          }
-        }
-      },
-    ).apply(compiler);
     // dont run multiple times on every apply()
     if (!onceForCompiler.has(compiler)) {
       this.prependEntry(compiler);
