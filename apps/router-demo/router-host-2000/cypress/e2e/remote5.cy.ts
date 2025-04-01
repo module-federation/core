@@ -13,10 +13,7 @@ describe('router-remote5-2005 in host', () => {
 
   describe('Remote5 render and destroy', () => {
     it('jump to remote5 home page', () => {
-      // Use custom command to click menu item - note the lowercase "remote5"
       cy.clickMenuItem('remote5');
-
-      // Verify content is loaded correctly
       cy.verifyContent('This is the remote app5 with React 19');
     });
   });
