@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom';
 
-interface CreateRootOptions {
+export interface CreateRootOptions {
   identifierPrefix?: string;
   onRecoverableError?: (error: unknown) => void;
   transitionCallbacks?: unknown;
@@ -26,7 +26,6 @@ async function loadReactDOMClient() {
   if (!isReact19) return null;
 
   if (!reactDOMClientPromise) {
-    console.log('Loading react-dom/client...');
     reactDOMClientPromise = import('react-dom/client');
   }
 

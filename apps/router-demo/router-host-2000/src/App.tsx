@@ -215,7 +215,21 @@ const App = () => {
         />
         <Route
           path="/remote2/*"
-          Component={() => <Remote2App style={{ padding: '20px' }} />}
+          Component={() => (
+            // Example for React 18: Passing rootOptions when rendering a remote component
+            <Remote2App
+              style={{ padding: '20px' }}
+              rootOptions={{
+                identifierPrefix: 'remote2-instance-',
+                onRecoverableError: (error: Error) => {
+                  console.error(
+                    '[Host] Remote2 React 18 recoverable error:',
+                    error,
+                  );
+                },
+              }}
+            />
+          )}
         />
         <Route path="/remote3/*" Component={() => <Remote3App test="123" />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
@@ -247,7 +261,19 @@ const App = () => {
             />
           )}
         />
-        <Route path="/remote5/*" Component={() => <Remote5App />} />
+        <Route
+          path="/remote5/*"
+          Component={() => (
+            <Remote5App
+              rootOptions={{
+                identifierPrefix: 'remote5-instance-',
+                onRecoverableError: (error: Error) => {
+                  console.error('[Host] Remote5 recoverable error:', error);
+                },
+              }}
+            />
+          )}
+        />
       </Routes>
     </div>
   );
