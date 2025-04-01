@@ -48,6 +48,13 @@ const RuntimePath = require.resolve('@module-federation/runtime', {
   paths: [RuntimeToolsPath],
 });
 
+const EmbeddedRuntimePath = require.resolve(
+  '@module-federation/runtime/embedded',
+  {
+    paths: [RuntimeToolsPath],
+  },
+);
+
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompiler = new WeakSet<Compiler>();
@@ -419,6 +426,12 @@ class FederationRuntimePlugin {
       (resolveData) => {
         if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
           resolveData.request = runtimePath;
+
+          if (resolveData.createData) {
+            resolveData.createData.request = resolveData.request;
+          }
+        } else {
+          resolveData.request = EmbeddedRuntimePath;
 
           if (resolveData.createData) {
             resolveData.createData.request = resolveData.request;
