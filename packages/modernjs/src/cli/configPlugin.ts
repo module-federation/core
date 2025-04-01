@@ -10,6 +10,7 @@ import {
   isWebTarget,
   skipByTarget,
 } from './utils';
+import logger from './logger';
 
 export function setEnv(enableSSR: boolean) {
   if (enableSSR) {
@@ -77,15 +78,47 @@ export const moduleFederationConfigPlugin = (
         }
       }
 
+      const devServerConfig = modernjsConfig.tools?.devServer;
+      const corsWarnMsgs = [
+        ', which exposes your dev server to all origins, potentially compromising your source code security. It is recommended to specify an allowlist of trusted origins instead.',
+      ];
+      if (
+        typeof devServerConfig !== 'object' ||
+        !('headers' in devServerConfig)
+      ) {
+        corsWarnMsgs.unshift(
+          'Detect devServer.headers is empty, mf modern plugin will add default cors header: devServer.headers["Access-Control-Allow-Headers"] = "*"',
+        );
+      } else if (
+        devServerConfig.headers?.['Access-Control-Allow-Headers'] === '*'
+      ) {
+        corsWarnMsgs.unshift(
+          'Detect devServer.headers["Access-Control-Allow-Headers"] is *',
+        );
+      }
+
+      const exposes = userConfig.csrConfig?.exposes;
+      const hasExposes =
+        exposes && Array.isArray(exposes)
+          ? exposes.length
+          : Object.keys(exposes ?? {}).length;
+
+      if (corsWarnMsgs.length > 1 && hasExposes) {
+        logger.warn(corsWarnMsgs.join(''));
+      }
+
+      const corsHeaders = hasExposes
+        ? {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods':
+              'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+            'Access-Control-Allow-Headers': '*',
+          }
+        : undefined;
       return {
         tools: {
           devServer: {
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods':
-                'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-              'Access-Control-Allow-Headers': '*',
-            },
+            headers: corsHeaders,
           },
         },
         source: {
