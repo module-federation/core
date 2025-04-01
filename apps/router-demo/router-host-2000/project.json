@@ -56,7 +56,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 4 && nx run router-host-2000:e2e --watch",
+            "command": "sleep 4 && nx run router-host-2000:e2e",
             "forwardAllArgs": true
           }
         ]
