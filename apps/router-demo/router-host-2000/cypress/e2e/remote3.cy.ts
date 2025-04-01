@@ -5,9 +5,9 @@ describe('router-remote3-2003/', () => {
 
   describe('visit', () => {
     it('jump to home page', () => {
-      getH2().contains('Remote3 home page');
-      cy.get('.self-remote3-detail-link').click();
-      getH2().contains('Remote3 detail page');
+      cy.verifyContent('Remote3 home page');
+      cy.clickByClass('.self-remote3-detail-link');
+      cy.verifyContent('Remote3 detail page');
     });
   });
 });
@@ -17,12 +17,20 @@ describe('router-remote3-2003 in host', () => {
 
   describe('Remote3 render and destroy', () => {
     it('jump to remote3 home page', () => {
-      cy.get('.host-menu > li:nth-child(5)').click();
-      cy.get('.menu-remote3-home-link').click();
+      // Use custom command to click menu item - note the capitalization "Remote3"
+      cy.clickMenuItem('Remote3');
 
-      getH2().contains('Remote3 home page');
-      cy.get('.menu-remote3-detail-link').click();
-      getH2().contains('Remote3 detail page');
+      // Click the remote3 home link
+      cy.clickByClass('.menu-remote3-home-link');
+
+      // Verify content is loaded correctly
+      cy.verifyContent('Remote3 home page');
+
+      // Click the detail page link
+      cy.clickByClass('.menu-remote3-detail-link');
+
+      // Verify detail page content is loaded correctly
+      cy.verifyContent('Remote3 detail page');
     });
   });
 });

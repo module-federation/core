@@ -5,9 +5,9 @@ describe('router-remote2-2002/', () => {
 
   describe('visit', () => {
     it('jump to home page', () => {
-      getH2().contains('Remote2 home page');
-      cy.get('.self-remote2-detail-link').click();
-      getH2().contains('Remote2 detail page');
+      cy.verifyContent('Remote2 home page');
+      cy.clickByClass('.self-remote2-detail-link');
+      cy.verifyContent('Remote2 detail page');
     });
   });
 });
@@ -17,12 +17,20 @@ describe('router-remote2-2002 in host', () => {
 
   describe('Remote2 render and destroy', () => {
     it('jump to remote2 home page', () => {
-      cy.get('.host-menu > li:nth-child(4)').click();
-      cy.get('.menu-remote2-home-link').click();
+      // Use custom command to click menu item - note the capitalization "Remote2"
+      cy.clickMenuItem('Remote2');
 
-      getH2().contains('Remote2 home page');
-      cy.get('.menu-remote2-detail-link').click();
-      getH2().contains('Remote2 detail page');
+      // Click the remote2 home link
+      cy.clickByClass('.menu-remote2-home-link');
+
+      // Verify content is loaded correctly
+      cy.verifyContent('Remote2 home page');
+
+      // Click the detail page link
+      cy.clickByClass('.menu-remote2-detail-link');
+
+      // Verify detail page content is loaded correctly
+      cy.verifyContent('Remote2 detail page');
     });
   });
 });

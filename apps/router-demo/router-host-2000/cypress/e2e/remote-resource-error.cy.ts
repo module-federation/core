@@ -4,18 +4,19 @@ describe('router-remote-error in host', () => {
   beforeEach(() => cy.visit('/'));
 
   describe('Remote Resource Error render and will trigger ErrorBoundary', () => {
+    // Ignore uncaught exceptions since this test is specifically testing error scenarios
     Cypress.on('uncaught:exception', () => false);
-    it('jump to remote error page', async () => {
-      cy.get('.host-menu > li:nth-child(8)').click({ force: true });
 
-      cy.get('[data-test-id="loading"]').should('have.length', 1);
-      cy.get('[data-test-id="loading"]')
-        .first()
-        .should('have.text', 'loading...');
+    it('jump to remote error page', () => {
+      // Use custom command to click menu item - with the correct menu text "resource-error"
+      cy.clickMenuItem('resource-error');
 
-      await wait5s();
-      getP().contains('Something went wrong');
-      getPre().contains(
+      // Check loading state
+      cy.checkLoading('[data-test-id="loading"]', 'loading...', 5000);
+
+      // Verify error content is displayed correctly
+      cy.verifyContent('Something went wrong');
+      cy.verifyContent(
         'The request failed three times and has now been abandoned',
       );
     });

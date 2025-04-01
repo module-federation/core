@@ -5,9 +5,9 @@ describe('router-remote1-2001/', () => {
 
   describe('visit', () => {
     it('jump to home page', () => {
-      getH2().contains('Remote1 home page');
-      cy.get('.self-remote1-detail-link').click();
-      getH2().contains('Remote1 detail page');
+      cy.verifyContent('Remote1 home page');
+      cy.clickByClass('.self-remote1-detail-link');
+      cy.verifyContent('Remote1 detail page');
     });
   });
 });
@@ -17,16 +17,23 @@ describe('router-remote1-2001 in host', () => {
 
   describe('Remote1 render and destroy', () => {
     it('jump to remote1 home page', () => {
-      cy.get('.host-menu > li:nth-child(3)').click();
-      cy.get('.menu-remote1-home-link').click();
+      // Use custom command to click menu item - note the capitalization "Remote1"
+      cy.clickMenuItem('Remote1');
 
-      getH2().contains('Remote1 home page');
-      getH3().contains('Ming');
-      getH3().contains('12');
-      getH4().contains('Some text');
+      // Click the remote1 home link
+      cy.clickByClass('.menu-remote1-home-link');
 
-      cy.get('.menu-remote1-detail-link').click();
-      getH2().contains('Remote1 detail page');
+      // Verify content is loaded correctly
+      cy.verifyContent('Remote1 home page');
+      cy.verifyContent('Ming');
+      cy.verifyContent('12');
+      cy.verifyContent('Some text');
+
+      // Click the detail page link
+      cy.clickByClass('.menu-remote1-detail-link');
+
+      // Verify detail page content is loaded correctly
+      cy.verifyContent('Remote1 detail page');
     });
   });
 });
