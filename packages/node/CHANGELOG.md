@@ -1,5 +1,15 @@
 # @module-federation/node
 
+## 2.6.32
+
+### Patch Changes
+
+- e5fae18: support undoPath and rootOutputDir for correct remote chunk resolution in node
+  - @module-federation/runtime@0.11.3
+  - @module-federation/enhanced@0.11.3
+  - @module-federation/sdk@0.11.3
+  - @module-federation/utilities@3.1.50
+
 ## 2.6.31
 
 ### Patch Changes
