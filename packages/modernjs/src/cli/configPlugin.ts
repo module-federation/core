@@ -87,7 +87,7 @@ export const moduleFederationConfigPlugin = (
         !('headers' in devServerConfig)
       ) {
         corsWarnMsgs.unshift(
-          'Detect devServer.headers is empty, mf modern plugin will add default cors header: devServer.headers["Access-Control-Allow-Headers"] = "*", which exposes your dev server to all origins, potentially compromising your source code security. It is recommended to specify an allowlist of trusted origins instead.',
+          'Detect devServer.headers is empty, mf modern plugin will add default cors header: devServer.headers["Access-Control-Allow-Headers"] = "*". It is recommended to specify an allowlist of trusted origins instead.',
         );
       }
 
