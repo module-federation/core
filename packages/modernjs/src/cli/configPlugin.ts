@@ -80,20 +80,14 @@ export const moduleFederationConfigPlugin = (
 
       const devServerConfig = modernjsConfig.tools?.devServer;
       const corsWarnMsgs = [
-        ', which exposes your dev server to all origins, potentially compromising your source code security. It is recommended to specify an allowlist of trusted origins instead.',
+        'View https://module-federation.io/guide/troubleshooting/other.html#cors-warn for more details.',
       ];
       if (
         typeof devServerConfig !== 'object' ||
         !('headers' in devServerConfig)
       ) {
         corsWarnMsgs.unshift(
-          'Detect devServer.headers is empty, mf modern plugin will add default cors header: devServer.headers["Access-Control-Allow-Headers"] = "*"',
-        );
-      } else if (
-        devServerConfig.headers?.['Access-Control-Allow-Headers'] === '*'
-      ) {
-        corsWarnMsgs.unshift(
-          'Detect devServer.headers["Access-Control-Allow-Headers"] is *',
+          'Detect devServer.headers is empty, mf modern plugin will add default cors header: devServer.headers["Access-Control-Allow-Headers"] = "*", which exposes your dev server to all origins, potentially compromising your source code security. It is recommended to specify an allowlist of trusted origins instead.',
         );
       }
 
@@ -104,7 +98,7 @@ export const moduleFederationConfigPlugin = (
           : Object.keys(exposes ?? {}).length;
 
       if (corsWarnMsgs.length > 1 && hasExposes) {
-        logger.warn(corsWarnMsgs.join(''));
+        logger.warn(corsWarnMsgs.join('\n'));
       }
 
       const corsHeaders = hasExposes
