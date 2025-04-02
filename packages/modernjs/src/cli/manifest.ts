@@ -6,31 +6,33 @@ import { BundlerPlugin } from '../types';
 function mergeStats(
   browserStats: Stats,
   nodeStats: Stats,
-  ssrDir: string,
+  ssrPublicPath: string,
 ): Stats {
   const ssrRemoteEntry = nodeStats.metaData.remoteEntry;
-  ssrRemoteEntry.path = ssrDir;
   browserStats.metaData.ssrRemoteEntry = ssrRemoteEntry;
-
+  if ('publicPath' in browserStats.metaData) {
+    browserStats.metaData.ssrPublicPath = ssrPublicPath;
+  }
   return browserStats;
 }
 
 function mergeManifest(
   browserManifest: Manifest,
   nodeManifest: Manifest,
-  ssrDir: string,
+  ssrPublicPath: string,
 ): Manifest {
   const ssrRemoteEntry = nodeManifest.metaData.remoteEntry;
-  ssrRemoteEntry.path = ssrDir;
   browserManifest.metaData.ssrRemoteEntry = ssrRemoteEntry;
-
+  if ('publicPath' in browserManifest.metaData) {
+    browserManifest.metaData.ssrPublicPath = ssrPublicPath;
+  }
   return browserManifest;
 }
 
 function mergeStatsAndManifest(
   nodePlugin: BundlerPlugin,
   browserPlugin: BundlerPlugin,
-  ssrDir: string,
+  ssrPublicPath: string,
 ): {
   mergedStats: Stats;
   mergedStatsFilePath: string;
@@ -52,12 +54,12 @@ function mergeStatsAndManifest(
   const mergedStats = mergeStats(
     browserResourceInfo.stats.stats,
     nodeResourceInfo.stats.stats,
-    ssrDir,
+    ssrPublicPath,
   );
   const mergedManifest = mergeManifest(
     browserResourceInfo.manifest.manifest,
     nodeResourceInfo.manifest.manifest,
-    ssrDir,
+    ssrPublicPath,
   );
 
   return {
@@ -72,14 +74,14 @@ export function updateStatsAndManifest(
   nodePlugin: BundlerPlugin,
   browserPlugin: BundlerPlugin,
   outputDir: string,
-  ssrDir: string,
+  ssrPublicPath: string,
 ) {
   const {
     mergedStats,
     mergedStatsFilePath,
     mergedManifest,
     mergedManifestFilePath,
-  } = mergeStatsAndManifest(nodePlugin, browserPlugin, ssrDir);
+  } = mergeStatsAndManifest(nodePlugin, browserPlugin, ssrPublicPath);
 
   fs.writeFileSync(
     path.resolve(outputDir, mergedStatsFilePath),
