@@ -53,7 +53,7 @@ jobs:
             while true; do
               response=$(curl -s -I http://127.0.0.1:$port/mf-manifest.json)
               content_type=$(echo "$response" | grep -i "Content-Type" | awk '{print $2}' | tr -d '\r')
-              if [[ $content_type == *"application/json"* ]]; then
+              if [[ $content_type != *"text/html"* ]]; then
                 break
               fi
               sleep 1
