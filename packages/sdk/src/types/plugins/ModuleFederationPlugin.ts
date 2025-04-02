@@ -165,7 +165,7 @@ export interface DtsRemoteOptions {
   deleteTypesFolder?: boolean;
   additionalFilesToCompile?: string[];
   compileInChildProcess?: boolean;
-  compilerInstance?: 'tsc' | 'vue-tsc';
+  compilerInstance?: 'tsc' | 'vue-tsc' | 'tspc' | string;
   generateAPITypes?: boolean;
   extractThirdParty?: boolean;
   extractRemoteTypes?: boolean;
