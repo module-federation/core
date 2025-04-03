@@ -20,7 +20,7 @@ export interface SharePluginOptions {
   /**
    * Share scope name used for all shared modules (defaults to 'default').
    */
-  shareScope?: string;
+  shareScope?: string | string[];
   /**
    * Modules that should be shared in the share scope. When provided, property names are used to match requested modules in this compilation.
    */
@@ -62,7 +62,7 @@ export interface SharedConfig {
   /**
    * Share scope name.
    */
-  shareScope?: string;
+  shareScope?: string | string[];
   /**
    * Allow only a single version of the shared module in share scope (disabled by default).
    */
@@ -75,4 +75,16 @@ export interface SharedConfig {
    * Version of the provided module. Will replace lower matching versions, but not higher.
    */
   version?: false | string;
+  /**
+   * Issuer layer in which the module should be resolved.
+   */
+  issuerLayer?: string;
+  /**
+   * Layer for the shared module.
+   */
+  layer?: string;
+  /**
+   * The actual request to use for importing the module. Defaults to the property name.
+   */
+  request?: string;
 }

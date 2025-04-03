@@ -21,7 +21,7 @@ export interface ProvideSharedPluginOptions {
   /**
    * Share scope name used for all provided modules (defaults to 'default').
    */
-  shareScope?: string;
+  shareScope?: string | string[];
 }
 /**
  * Modules that should be provided as shared modules to the share scope. Property names are used as share keys.
@@ -47,7 +47,7 @@ export interface ProvidesConfig {
   /**
    * Share scope name.
    */
-  shareScope?: string;
+  shareScope?: string | string[];
   /**
    * Version of the provided module. Will replace lower matching versions, but not higher.
    */
@@ -64,4 +64,12 @@ export interface ProvidesConfig {
    * Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).
    */
   strictVersion?: boolean;
+  /**
+   * Layer for the shared module.
+   */
+  layer?: string;
+  /**
+   * The actual request to use for importing the module. If not specified, the property name/key will be used.
+   */
+  request?: string;
 }

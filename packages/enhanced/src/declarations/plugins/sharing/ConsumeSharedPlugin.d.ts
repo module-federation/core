@@ -24,7 +24,7 @@ export interface ConsumeSharedPluginOptions {
   /**
    * Share scope name used for all consumed modules (defaults to 'default').
    */
-  shareScope?: string;
+  shareScope?: string | string[];
 }
 /**
  * Modules that should be consumed from share scope. Property names are used to match requested modules in this compilation. Relative requests are resolved, module requests are matched unresolved, absolute paths will match resolved requests. A trailing slash will match all requests with this prefix. In this case shareKey must also have a trailing slash.
@@ -62,7 +62,7 @@ export interface ConsumesConfig {
   /**
    * Share scope name.
    */
-  shareScope?: string;
+  shareScope?: string | string[];
   /**
    * Allow only a single version of the shared module in share scope (disabled by default).
    */
@@ -71,4 +71,16 @@ export interface ConsumesConfig {
    * Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).
    */
   strictVersion?: boolean;
+  /**
+   * Issuer layer in which the module should be resolved.
+   */
+  issuerLayer?: string;
+  /**
+   * Layer for the shared module.
+   */
+  layer?: string;
+  /**
+   * The actual request to use for importing the module. If not specified, the property name/key will be used.
+   */
+  request?: string;
 }

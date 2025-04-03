@@ -140,8 +140,8 @@ export default {
         'system',
         'promise',
         'import',
-        'script',
         'module-import',
+        'script',
         'node-commonjs',
       ],
     },
@@ -349,8 +349,19 @@ export default {
         },
         shareScope: {
           description: 'The name of the share scope shared with this remote.',
-          type: 'string',
-          minLength: 1,
+          anyOf: [
+            {
+              type: 'string',
+              minLength: 1,
+            },
+            {
+              type: 'array',
+              items: {
+                type: 'string',
+                minLength: 1,
+              },
+            },
+          ],
         },
       },
       required: ['external'],
@@ -436,6 +447,21 @@ export default {
             },
           ],
         },
+        request: {
+          description: 'Import request to match on',
+          type: 'string',
+          minLength: 1,
+        },
+        layer: {
+          description: 'Layer in which the shared module should be placed.',
+          type: 'string',
+          minLength: 1,
+        },
+        issuerLayer: {
+          description: 'Layer of the issuer.',
+          type: 'string',
+          minLength: 1,
+        },
         packageName: {
           description:
             "Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.",
@@ -464,12 +490,19 @@ export default {
         },
         shareScope: {
           description: 'Share scope name.',
-          type: 'string',
-          minLength: 1,
-        },
-        shareStrategy: {
-          description: "load shared strategy(defaults to 'version-first').",
-          enum: ['version-first', 'loaded-first'],
+          anyOf: [
+            {
+              type: 'string',
+              minLength: 1,
+            },
+            {
+              type: 'array',
+              items: {
+                type: 'string',
+                minLength: 1,
+              },
+            },
+          ],
         },
         singleton: {
           description:
@@ -529,8 +562,9 @@ export default {
   type: 'object',
   additionalProperties: false,
   properties: {
-    dataPrefetch: {
-      description: 'Enable Data Prefetch',
+    async: {
+      description:
+        'Enable/disable asynchronous loading of runtime modules. When enabled, entry points will be wrapped in asynchronous chunks.',
       type: 'boolean',
     },
     exposes: {
@@ -538,51 +572,18 @@ export default {
     },
     filename: {
       description:
-        'The filename of the container as relative path inside the `output.path` directory.',
+        'The filename for this container relative path inside the `output.path` directory.',
       type: 'string',
       absolutePath: false,
-    },
-    getPublicPath: {
-      description: 'Custom public path function',
-      type: 'string',
-    },
-    implementation: {
-      description: 'Bundler runtime path',
-      type: 'string',
+      minLength: 1,
     },
     library: {
       $ref: '#/definitions/LibraryOptions',
     },
-    manifest: {
-      description: 'Manifest generation options',
-      anyOf: [
-        {
-          type: 'boolean',
-        },
-        {
-          type: 'object',
-          properties: {
-            filePath: {
-              type: 'string',
-            },
-            disableAssetsAnalyze: {
-              type: 'boolean',
-            },
-            fileName: {
-              type: 'string',
-            },
-            additionalData: {
-              type: 'string',
-              description:
-                'Function string to provide additional data to the manifest',
-            },
-          },
-        },
-      ],
-    },
     name: {
-      description: 'The name of the container.',
+      description: 'The name for this container.',
       type: 'string',
+      minLength: 1,
     },
     remoteType: {
       description: 'The external type of the remote containers.',
@@ -598,51 +599,30 @@ export default {
     runtime: {
       $ref: '#/definitions/EntryRuntime',
     },
-    runtimePlugins: {
-      description: 'Runtime plugin file paths or package name',
-      type: 'array',
-      items: {
-        type: 'string',
-      },
-    },
     shareScope: {
       description:
-        "Share scope name used for all shared modules (defaults to 'default').",
-      type: 'string',
-      minLength: 1,
-    },
-    shareStrategy: {
-      description: "load shared strategy(defaults to 'version-first').",
-      enum: ['version-first', 'loaded-first'],
-    },
-    shared: {
-      $ref: '#/definitions/Shared',
-    },
-    virtualRuntimeEntry: {
-      description: 'Enable virtual runtime entry',
-      type: 'boolean',
-    },
-    dev: {
-      description: 'Development options',
+        "The name of the share scope which is shared with the host (defaults to 'default').",
       anyOf: [
         {
-          type: 'boolean',
+          type: 'string',
+          minLength: 1,
         },
         {
-          type: 'object',
-          properties: {
-            disableLiveReload: {
-              type: 'boolean',
-            },
-            disableHotTypesReload: {
-              type: 'boolean',
-            },
-            disableDynamicRemoteTypeHints: {
-              type: 'boolean',
-            },
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
           },
         },
       ],
+    },
+    shareStrategy: {
+      description: 'Strategy for resolving shared modules',
+      enum: ['version-first', 'loaded-first'],
+      type: 'string',
+    },
+    shared: {
+      $ref: '#/definitions/Shared',
     },
     dts: {
       description: 'TypeScript declaration file generation options',
@@ -772,6 +752,7 @@ export default {
       },
     },
     bridge: {
+      description: 'Bridge configuration options',
       type: 'object',
       properties: {
         disableAlias: {
@@ -781,6 +762,91 @@ export default {
           default: false,
         },
       },
+      additionalProperties: false,
+    },
+    virtualRuntimeEntry: {
+      description:
+        'Uses a virtual module instead of a file for federation runtime entry',
+      type: 'boolean',
+    },
+    dev: {
+      description: 'Development mode configuration options',
+      anyOf: [
+        {
+          type: 'boolean',
+        },
+        {
+          type: 'object',
+          properties: {
+            disableLiveReload: {
+              description: 'Disable live reload for development mode',
+              type: 'boolean',
+            },
+            disableHotTypesReload: {
+              description: 'Disable hot types reload for development mode',
+              type: 'boolean',
+            },
+            disableDynamicRemoteTypeHints: {
+              description:
+                'Disable dynamic remote type hints for development mode',
+              type: 'boolean',
+            },
+          },
+          additionalProperties: false,
+        },
+      ],
+    },
+    manifest: {
+      description:
+        'Manifest generation configuration options. IMPORTANT: When using this option, you must set a string value for `output.publicPath` in your webpack configuration.',
+      anyOf: [
+        {
+          type: 'boolean',
+        },
+        {
+          type: 'object',
+          properties: {
+            filePath: {
+              description: 'Path where the manifest file will be generated',
+              type: 'string',
+            },
+            disableAssetsAnalyze: {
+              description: 'Disable assets analyze for manifest generation',
+              type: 'boolean',
+            },
+            fileName: {
+              description: 'Name of the manifest file',
+              type: 'string',
+            },
+            additionalData: {
+              description:
+                'Function that provides additional data to the manifest',
+              instanceof: 'Function',
+            },
+          },
+          additionalProperties: false,
+        },
+      ],
+    },
+    runtimePlugins: {
+      description:
+        'Runtime plugin file paths or package names to be included in federation runtime',
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+    },
+    getPublicPath: {
+      description: 'Custom public path function for remote entry',
+      type: 'string',
+    },
+    dataPrefetch: {
+      description: 'Whether enable data prefetch',
+      type: 'boolean',
+    },
+    implementation: {
+      description: 'Bundler runtime path',
+      type: 'string',
     },
   },
 } as const;

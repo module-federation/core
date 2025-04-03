@@ -78,16 +78,28 @@ class Module {
 
     if (!this.inited) {
       const localShareScopeMap = this.host.shareScopeMap;
-      const remoteShareScope = this.remoteInfo.shareScope || 'default';
-
-      if (!localShareScopeMap[remoteShareScope]) {
-        localShareScopeMap[remoteShareScope] = {};
+      const shareScopeKeys = Array.isArray(this.remoteInfo.shareScope)
+        ? this.remoteInfo.shareScope
+        : [this.remoteInfo.shareScope];
+      if (!shareScopeKeys.length) {
+        shareScopeKeys.push('default');
       }
-      const shareScope = localShareScopeMap[remoteShareScope];
+
+      shareScopeKeys.forEach((shareScopeKey) => {
+        if (!localShareScopeMap[shareScopeKey]) {
+          localShareScopeMap[shareScopeKey] = {};
+        }
+      });
+
+      // TODO: compate legacy init params, should use shareScopeMap if exist
+      const shareScope = localShareScopeMap[shareScopeKeys[0]];
       const initScope: InitScope = [];
 
       const remoteEntryInitOptions = {
         version: this.remoteInfo.version || '',
+        shareScopeKeys: Array.isArray(this.remoteInfo.shareScope)
+          ? shareScopeKeys
+          : this.remoteInfo.shareScope || 'default',
       };
 
       // Help to find host instance
