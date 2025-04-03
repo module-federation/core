@@ -13,6 +13,7 @@ export interface InternalModernPluginOptions {
   csrConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
   ssrConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
   distOutputDir: string;
+  ssrDistOutputDir?: string;
   originPluginOptions: PluginOptions;
   browserPlugin?: BundlerPlugin;
   nodePlugin?: BundlerPlugin;

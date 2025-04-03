@@ -19,6 +19,7 @@ export const moduleFederationPlugin = (
     browserPlugin: undefined,
     nodePlugin: undefined,
     distOutputDir: '',
+    ssrDistOutputDir: '',
     originPluginOptions: userConfig,
     remoteIpStrategy: userConfig?.remoteIpStrategy,
     userConfig,

@@ -65,7 +65,7 @@ const mfSSRRsbuildPlugin = (
         if (ssrEnv !== utils.environment.name) {
           return config;
         }
-        config.output!.publicPath = `${config.output!.publicPath}${path.relative(csrOutputPath, ssrOutputPath)}/`;
+        config.output!.publicPath = `${config.output!.publicPath}${pluginOptions.ssrDistOutputDir || path.relative(csrOutputPath, ssrOutputPath)}/`;
         return config;
       };
       api.modifyWebpackConfig((config, utils) => {
