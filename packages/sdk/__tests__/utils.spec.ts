@@ -2,7 +2,7 @@ import { getResourceUrl } from '../src/utils';
 import { ModuleInfo } from '../src/types';
 import { isBrowserEnv, isReactNativeEnv } from '../src/env';
 
-jest.mock('./env', () => ({
+jest.mock('../src/env', () => ({
   isBrowserEnv: jest.fn(),
   isReactNativeEnv: jest.fn(),
 }));
