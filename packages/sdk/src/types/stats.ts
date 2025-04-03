@@ -58,6 +58,7 @@ type StatsMetaDataWithGetPublicPath<T = BasicStatsMetaData> = T & {
 
 type StatsMetaDataWithPublicPath<T = BasicStatsMetaData> = T & {
   publicPath: string;
+  ssrPublicPath?: string;
 };
 
 export type StatsMetaData<T = BasicStatsMetaData> =

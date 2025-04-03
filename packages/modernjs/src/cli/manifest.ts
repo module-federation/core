@@ -3,34 +3,32 @@ import { Stats, Manifest } from '@module-federation/sdk';
 import { fs } from '@modern-js/utils';
 import { BundlerPlugin } from '../types';
 
-function mergeStats(
-  browserStats: Stats,
-  nodeStats: Stats,
-  ssrDir: string,
-): Stats {
+function mergeStats(browserStats: Stats, nodeStats: Stats): Stats {
   const ssrRemoteEntry = nodeStats.metaData.remoteEntry;
-  ssrRemoteEntry.path = ssrDir;
   browserStats.metaData.ssrRemoteEntry = ssrRemoteEntry;
-
+  if ('publicPath' in browserStats.metaData) {
+    // @ts-ignore nodeStats has the same structure with browserStats
+    browserStats.metaData.ssrPublicPath = nodeStats.metaData.publicPath;
+  }
   return browserStats;
 }
 
 function mergeManifest(
   browserManifest: Manifest,
   nodeManifest: Manifest,
-  ssrDir: string,
 ): Manifest {
   const ssrRemoteEntry = nodeManifest.metaData.remoteEntry;
-  ssrRemoteEntry.path = ssrDir;
   browserManifest.metaData.ssrRemoteEntry = ssrRemoteEntry;
-
+  if ('publicPath' in browserManifest.metaData) {
+    // @ts-ignore nodeStats has the same structure with browserStats
+    browserManifest.metaData.ssrPublicPath = nodeManifest.metaData.publicPath;
+  }
   return browserManifest;
 }
 
 function mergeStatsAndManifest(
   nodePlugin: BundlerPlugin,
   browserPlugin: BundlerPlugin,
-  ssrDir: string,
 ): {
   mergedStats: Stats;
   mergedStatsFilePath: string;
@@ -52,12 +50,10 @@ function mergeStatsAndManifest(
   const mergedStats = mergeStats(
     browserResourceInfo.stats.stats,
     nodeResourceInfo.stats.stats,
-    ssrDir,
   );
   const mergedManifest = mergeManifest(
     browserResourceInfo.manifest.manifest,
     nodeResourceInfo.manifest.manifest,
-    ssrDir,
   );
 
   return {
@@ -72,14 +68,13 @@ export function updateStatsAndManifest(
   nodePlugin: BundlerPlugin,
   browserPlugin: BundlerPlugin,
   outputDir: string,
-  ssrDir: string,
 ) {
   const {
     mergedStats,
     mergedStatsFilePath,
     mergedManifest,
     mergedManifestFilePath,
-  } = mergeStatsAndManifest(nodePlugin, browserPlugin, ssrDir);
+  } = mergeStatsAndManifest(nodePlugin, browserPlugin);
 
   fs.writeFileSync(
     path.resolve(outputDir, mergedStatsFilePath),
