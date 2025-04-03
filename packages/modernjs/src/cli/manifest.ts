@@ -3,15 +3,12 @@ import { Stats, Manifest } from '@module-federation/sdk';
 import { fs } from '@modern-js/utils';
 import { BundlerPlugin } from '../types';
 
-function mergeStats(
-  browserStats: Stats,
-  nodeStats: Stats,
-  ssrPublicPath: string,
-): Stats {
+function mergeStats(browserStats: Stats, nodeStats: Stats): Stats {
   const ssrRemoteEntry = nodeStats.metaData.remoteEntry;
   browserStats.metaData.ssrRemoteEntry = ssrRemoteEntry;
   if ('publicPath' in browserStats.metaData) {
-    browserStats.metaData.ssrPublicPath = ssrPublicPath;
+    // @ts-ignore nodeStats has the same structure with browserStats
+    browserStats.metaData.ssrPublicPath = nodeStats.metaData.publicPath;
   }
   return browserStats;
 }
@@ -19,12 +16,12 @@ function mergeStats(
 function mergeManifest(
   browserManifest: Manifest,
   nodeManifest: Manifest,
-  ssrPublicPath: string,
 ): Manifest {
   const ssrRemoteEntry = nodeManifest.metaData.remoteEntry;
   browserManifest.metaData.ssrRemoteEntry = ssrRemoteEntry;
   if ('publicPath' in browserManifest.metaData) {
-    browserManifest.metaData.ssrPublicPath = ssrPublicPath;
+    // @ts-ignore nodeStats has the same structure with browserStats
+    browserManifest.metaData.ssrPublicPath = nodeManifest.metaData.publicPath;
   }
   return browserManifest;
 }
@@ -32,7 +29,6 @@ function mergeManifest(
 function mergeStatsAndManifest(
   nodePlugin: BundlerPlugin,
   browserPlugin: BundlerPlugin,
-  ssrPublicPath: string,
 ): {
   mergedStats: Stats;
   mergedStatsFilePath: string;
@@ -54,12 +50,10 @@ function mergeStatsAndManifest(
   const mergedStats = mergeStats(
     browserResourceInfo.stats.stats,
     nodeResourceInfo.stats.stats,
-    ssrPublicPath,
   );
   const mergedManifest = mergeManifest(
     browserResourceInfo.manifest.manifest,
     nodeResourceInfo.manifest.manifest,
-    ssrPublicPath,
   );
 
   return {
@@ -74,14 +68,13 @@ export function updateStatsAndManifest(
   nodePlugin: BundlerPlugin,
   browserPlugin: BundlerPlugin,
   outputDir: string,
-  ssrPublicPath: string,
 ) {
   const {
     mergedStats,
     mergedStatsFilePath,
     mergedManifest,
     mergedManifestFilePath,
-  } = mergeStatsAndManifest(nodePlugin, browserPlugin, ssrPublicPath);
+  } = mergeStatsAndManifest(nodePlugin, browserPlugin);
 
   fs.writeFileSync(
     path.resolve(outputDir, mergedStatsFilePath),

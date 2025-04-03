@@ -23,8 +23,6 @@ export function setEnv() {
 
 export const CHAIN_MF_PLUGIN_ID = 'plugin-module-federation-server';
 
-let ssrPublicPath = '';
-
 type ModifyBundlerConfiguration =
   | Parameters<ModifyWebpackConfigFn>[0]
   | Parameters<ModifyRspackConfigFn>[0];
@@ -67,8 +65,7 @@ const mfSSRRsbuildPlugin = (
         if (ssrEnv !== utils.environment.name) {
           return config;
         }
-        ssrPublicPath = `${config.output!.publicPath}${path.relative(csrOutputPath, ssrOutputPath)}/`;
-        config.output!.publicPath = ssrPublicPath;
+        config.output!.publicPath = `${config.output!.publicPath}${path.relative(csrOutputPath, ssrOutputPath)}/`;
         return config;
       };
       api.modifyWebpackConfig((config, utils) => {
@@ -194,21 +191,11 @@ export const moduleFederationSSRPlugin = (
     });
     api.onAfterBuild(() => {
       const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
-      updateStatsAndManifest(
-        nodePlugin,
-        browserPlugin,
-        distOutputDir,
-        ssrPublicPath,
-      );
+      updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
     });
     api.onDevCompileDone(() => {
       const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
-      updateStatsAndManifest(
-        nodePlugin,
-        browserPlugin,
-        distOutputDir,
-        ssrPublicPath,
-      );
+      updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
     });
   },
 });
