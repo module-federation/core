@@ -15,41 +15,24 @@ export default defineConfig({
     },
   },
   server: {
-    port: 2004,
+    port: 2005,
   },
   dev: {
     // It is necessary to configure assetPrefix, and in the production environment, you need to configure output.assetPrefix
-    assetPrefix: 'http://localhost:2004',
+    assetPrefix: 'http://localhost:2005',
   },
   tools: {
     rspack: (config, { appendPlugins }) => {
       delete config.optimization?.splitChunks;
     },
-    // cssExtract: {
-    // 	pluginOptions: {
-    // 		insert(element) {
-    // 			console.log('element22222233333333333333',document.querySelector("#remote2-style-component"));
-    // 			document.querySelector("#remote2-style-component")?.appendChild(element);
-    // 		},
-    // 	}
-    // },
-    // styleLoader: {
-    // 	insert: (element)=> {
-    // 		debugger
-    // 		const styleContainer = document.querySelector(".remote2_export-app") || document.head;
-    // 		styleContainer.appendChild(element);
-    // 		console.log('styleContainer', styleContainer)
-    // 	},
-    // },
   },
   plugins: [
     pluginReact(),
     pluginModuleFederation({
-      name: 'remote4',
+      name: 'remote5',
       exposes: {
         './export-app': './src/export-App.tsx',
       },
-      shared: ['react', 'react-dom'],
     }),
   ],
 });
