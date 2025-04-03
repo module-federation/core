@@ -14,3 +14,7 @@ Clear `.nx` cache if you encounter unexpected build issues.
 - Remote loading
 - Shared dependencies
 - Type safety
+
+## Usage
+
+Run the development server and navigate to the provided localhost URL.
