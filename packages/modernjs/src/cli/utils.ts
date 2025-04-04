@@ -178,6 +178,11 @@ export const patchMFConfig = (
       runtimePlugins,
     );
 
+    injectRuntimePlugins(
+      require.resolve('@module-federation/modern-js/correct-ssr-public-path'),
+      runtimePlugins,
+    );
+
     if (!mfConfig.library) {
       mfConfig.library = {
         type: 'commonjs-module',
