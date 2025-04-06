@@ -1,9 +1,45 @@
 const replace = require('@rollup/plugin-replace');
 const copy = require('rollup-plugin-copy');
+const createRefOptimizer = require('@module-federation/ref-optimizer');
 
 const FEDERATION_DEBUG = process.env.FEDERATION_DEBUG || '';
 
 module.exports = (rollupConfig, projectOptions) => {
+  // Find the TypeScript plugin index
+  const tsPluginIndex = rollupConfig.plugins.findIndex(
+    (p) => p.name === 'rpt2' || p.name === 'typescript',
+  );
+
+  // --- Aggressive Mode Control ---
+  // Set to true for aggressive mode (minOccurrences: 1, include built-ins)
+  // Set to false for default mode (respects analyzerOptions/manglingOptions below)
+  const aggressiveMode = true;
+  // ------------------------------
+
+  // Create the ref-optimizer plugin instance
+  const refOptimizerPlugin = createRefOptimizer({
+    aggressive: false, // Pass the aggressive mode flag
+    patterns: ['packages/runtime-core/src/**/*.{ts,tsx}'],
+    virtualModuleId: 'virtual:property-literals-runtime-core',
+    manglingOptions: {
+      minOccurrences: 3, // Default when not aggressive
+      prefix: 'RC_',
+      excludeBuiltIns: true, // Default when not aggressive
+    },
+    // These options are used only if aggressiveMode is false
+    analyzerOptions: {
+      excludeBuiltIns: true, // Default when not aggressive
+      minOccurrences: 3, // Default when not aggressive
+    },
+  });
+
+  // Insert the ref-optimizer plugin after the TypeScript plugin
+  if (tsPluginIndex !== -1) {
+    rollupConfig.plugins.splice(tsPluginIndex + 1, 0, refOptimizerPlugin);
+  } else {
+    rollupConfig.plugins.push(refOptimizerPlugin);
+  }
+
   rollupConfig.input = {
     index: 'packages/runtime-core/src/index.ts',
     types: 'packages/runtime-core/src/types.ts',
@@ -29,12 +65,12 @@ module.exports = (rollupConfig, projectOptions) => {
       },
       hoistTransitiveImports: false,
       entryFileNames:
-        c.format === 'esm'
-          ? c.entryFileNames.replace('.js', '.mjs')
+        c.format === 'cjs'
+          ? c.entryFileNames.replace('.js', '.cjs')
           : c.entryFileNames,
       chunkFileNames:
-        c.format === 'esm'
-          ? c.chunkFileNames.replace('.js', '.mjs')
+        c.format === 'cjs'
+          ? c.chunkFileNames.replace('.js', '.cjs')
           : c.chunkFileNames,
     }));
   } else {
@@ -47,12 +83,12 @@ module.exports = (rollupConfig, projectOptions) => {
       },
       hoistTransitiveImports: false,
       entryFileNames:
-        rollupConfig.output.format === 'esm'
-          ? rollupConfig.output.entryFileNames.replace('.js', '.mjs')
+        rollupConfig.output.format === 'cjs'
+          ? rollupConfig.output.entryFileNames.replace('.js', '.cjs')
           : rollupConfig.output.entryFileNames,
       chunkFileNames:
-        rollupConfig.output.format === 'esm'
-          ? rollupConfig.output.chunkFileNames.replace('.js', '.mjs')
+        rollupConfig.output.format === 'cjs'
+          ? rollupConfig.output.chunkFileNames.replace('.js', '.cjs')
           : rollupConfig.output.chunkFileNames,
     };
   }

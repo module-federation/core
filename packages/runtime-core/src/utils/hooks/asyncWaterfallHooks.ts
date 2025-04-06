@@ -1,5 +1,5 @@
 import { error, warn } from '../logger';
-import { isObject } from '../tool';
+import { isObject, ensureObjectData } from '../tool';
 import { SyncHook } from './syncHook';
 import { checkReturnData } from './syncWaterfallHook';
 
@@ -16,9 +16,7 @@ export class AsyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
   }
 
   override emit(data: T): Promise<T> {
-    if (!isObject(data)) {
-      error(`The response data for the "${this.type}" hook must be an object.`);
-    }
+    ensureObjectData(data, this.type);
     const ls = Array.from(this.listeners);
 
     if (ls.length > 0) {

@@ -36,18 +36,24 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
-const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
-
+const RuntimeToolsPath = require.resolve(
+  '@module-federation/runtime-tools/dist/index.esm.js',
+);
+console.log(RuntimeToolsPath);
 const BundlerRuntimePath = require.resolve(
-  '@module-federation/webpack-bundler-runtime',
+  '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
   {
     paths: [RuntimeToolsPath],
   },
 );
-const RuntimePath = require.resolve('@module-federation/runtime', {
-  paths: [RuntimeToolsPath],
-});
-
+console.log(BundlerRuntimePath);
+const RuntimePath = require.resolve(
+  '@module-federation/runtime/dist/index.esm.js',
+  {
+    paths: [RuntimeToolsPath],
+  },
+);
+console.log(RuntimePath);
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompiler = new WeakSet<Compiler>();

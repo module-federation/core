@@ -15,46 +15,31 @@ export function matchRemoteWithNameAndExpose(
     }
   | undefined {
   for (const remote of remotes) {
+    const { name, alias } = remote;
     // match pkgName
-    const isNameMatched = id.startsWith(remote.name);
-    let expose = id.replace(remote.name, '');
+    const isNameMatched = id.startsWith(name);
+    let expose = id.replace(name, '');
     if (isNameMatched) {
-      if (expose.startsWith('/')) {
-        const pkgNameOrAlias = remote.name;
-        expose = `.${expose}`;
-        return {
-          pkgNameOrAlias,
-          expose,
-          remote,
-        };
-      } else if (expose === '') {
-        return {
-          pkgNameOrAlias: remote.name,
-          expose: '.',
-          remote,
-        };
-      }
+      expose = normalizeExpose(expose);
+
+      return {
+        pkgNameOrAlias: name,
+        expose,
+        remote,
+      };
     }
 
     // match alias
-    const isAliasMatched = remote.alias && id.startsWith(remote.alias);
-    let exposeWithAlias = remote.alias && id.replace(remote.alias, '');
-    if (remote.alias && isAliasMatched) {
-      if (exposeWithAlias && exposeWithAlias.startsWith('/')) {
-        const pkgNameOrAlias = remote.alias;
-        exposeWithAlias = `.${exposeWithAlias}`;
-        return {
-          pkgNameOrAlias,
-          expose: exposeWithAlias,
-          remote,
-        };
-      } else if (exposeWithAlias === '') {
-        return {
-          pkgNameOrAlias: remote.alias,
-          expose: '.',
-          remote,
-        };
-      }
+    const isAliasMatched = alias && id.startsWith(alias);
+    let exposeWithAlias = alias && id.replace(alias, '');
+    if (alias && isAliasMatched) {
+      exposeWithAlias = normalizeExpose(exposeWithAlias || '');
+
+      return {
+        pkgNameOrAlias: alias,
+        expose: exposeWithAlias,
+        remote,
+      };
     }
   }
 
@@ -66,16 +51,29 @@ export function matchRemote(
   remotes: Array<Remote>,
   nameOrAlias: string,
 ): Remote | undefined {
-  for (const remote of remotes) {
-    const isNameMatched = nameOrAlias === remote.name;
-    if (isNameMatched) {
-      return remote;
-    }
+  // Use shared function
+  return findRemoteByNameOrAlias(remotes, nameOrAlias);
+}
 
-    const isAliasMatched = remote.alias && nameOrAlias === remote.alias;
-    if (isAliasMatched) {
+// Function to normalize the expose string (from Candidates 19, 66)
+function normalizeExpose(expose: string): string {
+  if (expose.startsWith('/')) {
+    expose = `.${expose}`;
+  } else if (expose === '') {
+    expose = '.';
+  }
+  return expose;
+}
+
+// Shared function to find a remote by name or alias (from Candidate 5)
+function findRemoteByNameOrAlias(
+  remotes: Remote[],
+  nameOrAlias: string,
+): Remote | undefined {
+  for (const remote of remotes) {
+    if (remote.name === nameOrAlias || remote.alias === nameOrAlias) {
       return remote;
     }
   }
-  return;
+  return undefined;
 }

@@ -1,9 +1,40 @@
 const replace = require('@rollup/plugin-replace');
 const copy = require('rollup-plugin-copy');
+const createRefOptimizer = require('@module-federation/ref-optimizer');
 
 const FEDERATION_DEBUG = process.env.FEDERATION_DEBUG || '';
 
 module.exports = (rollupConfig, projectOptions) => {
+  // Find the TypeScript plugin index
+  const tsPluginIndex = rollupConfig.plugins.findIndex(
+    (p) => p.name === 'rpt2' || p.name === 'typescript',
+  );
+
+  // Create the ref-optimizer plugin instance
+  const refOptimizerPlugin = createRefOptimizer({
+    patterns: ['packages/runtime/src/**/*.{ts,tsx}'],
+    virtualModuleId: 'virtual:property-literals-runtime',
+    manglingOptions: {
+      minOccurrences: 3,
+      prefix: 'R_',
+      excludeBuiltIns: true,
+    },
+    analyzerOptions: {
+      excludeBuiltIns: true,
+      minOccurrences: 3,
+    },
+  });
+
+  // Insert the ref-optimizer plugin after the TypeScript plugin
+  if (tsPluginIndex !== -1) {
+    rollupConfig.plugins.splice(tsPluginIndex + 1, 0, refOptimizerPlugin);
+  } else {
+    rollupConfig.plugins.push(refOptimizerPlugin);
+  }
+
+  // Enable recommended tree-shaking
+  rollupConfig.treeshake = { preset: 'recommended' };
+
   rollupConfig.input = {
     index: 'packages/runtime/src/index.ts',
     types: 'packages/runtime/src/types.ts',
@@ -31,13 +62,14 @@ module.exports = (rollupConfig, projectOptions) => {
       },
       hoistTransitiveImports: false,
       entryFileNames:
-        c.format === 'esm'
-          ? c.entryFileNames.replace('.js', '.mjs')
+        c.format === 'cjs'
+          ? c.entryFileNames.replace(/\.js$/, '.cjs')
           : c.entryFileNames,
       chunkFileNames:
-        c.format === 'esm'
-          ? c.chunkFileNames.replace('.js', '.mjs')
+        c.format === 'cjs'
+          ? c.chunkFileNames.replace(/\.js$/, '.cjs')
           : c.chunkFileNames,
+      ...(c.format === 'cjs' ? { externalLiveBindings: false } : {}),
     }));
   } else {
     rollupConfig.output = {
@@ -49,13 +81,16 @@ module.exports = (rollupConfig, projectOptions) => {
       },
       hoistTransitiveImports: false,
       entryFileNames:
-        rollupConfig.output.format === 'esm'
-          ? rollupConfig.output.entryFileNames.replace('.js', '.mjs')
+        rollupConfig.output.format === 'cjs'
+          ? rollupConfig.output.entryFileNames.replace(/\.js$/, '.cjs')
           : rollupConfig.output.entryFileNames,
       chunkFileNames:
-        rollupConfig.output.format === 'esm'
-          ? rollupConfig.output.chunkFileNames.replace('.js', '.mjs')
+        rollupConfig.output.format === 'cjs'
+          ? rollupConfig.output.chunkFileNames.replace(/\.js$/, '.cjs')
           : rollupConfig.output.chunkFileNames,
+      ...(rollupConfig.output.format === 'cjs'
+        ? { externalLiveBindings: false }
+        : {}),
     };
   }
 

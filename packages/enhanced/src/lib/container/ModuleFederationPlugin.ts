@@ -45,18 +45,47 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   }
 
   private _patchBundlerConfig(compiler: Compiler): void {
-    const { name } = this._options;
+    const { name, experiments } = this._options;
+    const definePluginOptions: Record<string, string | boolean> = {};
+
     const MFPluginNum = compiler.options.plugins.filter(
       (p): p is WebpackPluginInstance =>
         !!p && (p as any).name === 'ModuleFederationPlugin',
     ).length;
+
     if (name && MFPluginNum < 2) {
-      new compiler.webpack.DefinePlugin({
-        FEDERATION_BUILD_IDENTIFIER: JSON.stringify(
-          composeKeyWithSeparator(name, utils.getBuildVersion()),
-        ),
-      }).apply(compiler);
+      definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
+        composeKeyWithSeparator(name, utils.getBuildVersion()),
+      );
     }
+
+    const disableSnapshot = experiments?.optimization?.disableSnapshot ?? false;
+    definePluginOptions['FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN'] =
+      disableSnapshot;
+
+    let targetEnv: 'web' | 'node';
+    if (experiments?.optimization?.target) {
+      targetEnv = experiments.optimization.target;
+    } else {
+      targetEnv = 'web';
+      const webpackTarget = compiler.options.target;
+      if (typeof webpackTarget === 'string') {
+        if (webpackTarget.startsWith('node')) {
+          targetEnv = 'node';
+        }
+      } else if (Array.isArray(webpackTarget)) {
+        if (
+          webpackTarget.some(
+            (t) => typeof t === 'string' && t.startsWith('node'),
+          )
+        ) {
+          targetEnv = 'node';
+        }
+      }
+    }
+    definePluginOptions['ENV_TARGET'] = JSON.stringify(targetEnv);
+
+    new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
   }
 
   /**

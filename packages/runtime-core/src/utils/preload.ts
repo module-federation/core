@@ -12,56 +12,63 @@ import { matchRemote } from './manifest';
 import { assert } from './logger';
 import { FederationHost } from '../core';
 import { getRemoteEntry } from './load';
+import { normalizePreloadExposes, formatPreloadArgs } from './tool';
 
-export function defaultPreloadArgs(
-  preloadConfig: PreloadRemoteArgs | depsPreloadArg,
-): PreloadConfig {
-  return {
-    resourceCategory: 'sync',
-    share: true,
-    depsRemote: true,
-    prefetchInterface: false,
-    ...preloadConfig,
-  } as PreloadConfig;
+// Shared function for creating and appending LINK elements
+function createAndAppendLink(
+  url: string,
+  attrs: Record<string, string>,
+  host: FederationHost,
+  needDeleteLink = true,
+): void {
+  const { link: linkEl, needAttach } = createLink({
+    url: url,
+    cb: () => {
+      // noop
+    },
+    attrs: attrs,
+    createLinkHook: (hookUrl, hookAttrs) => {
+      const res = host.loaderHook.lifecycle.createLink.emit({
+        url: hookUrl,
+        attrs: hookAttrs,
+      });
+      if (res instanceof HTMLLinkElement) {
+        return res;
+      }
+      return;
+    },
+    needDeleteLink: needDeleteLink,
+  });
+
+  needAttach && document.head.appendChild(linkEl);
 }
 
-export function formatPreloadArgs(
-  remotes: Array<Remote>,
-  preloadArgs: Array<PreloadRemoteArgs>,
-): PreloadOptions {
-  return preloadArgs.map((args) => {
-    const remoteInfo = matchRemote(remotes, args.nameOrAlias);
-    assert(
-      remoteInfo,
-      `Unable to preload ${args.nameOrAlias} as it is not included in ${
-        !remoteInfo &&
-        safeToString({
-          remoteInfo,
-          remotes,
-        })
-      }`,
-    );
-    return {
-      remote: remoteInfo,
-      preloadConfig: defaultPreloadArgs(args),
-    };
+// Shared function for creating and appending SCRIPT elements
+function createAndAppendScript(
+  url: string,
+  attrs: Record<string, any>,
+  host: FederationHost,
+  needDeleteScript = true,
+): void {
+  const { script: scriptEl, needAttach } = createScript({
+    url: url,
+    cb: () => {
+      // noop
+    },
+    attrs: attrs,
+    createScriptHook: (hookUrl: string, hookAttrs: any) => {
+      const res = host.loaderHook.lifecycle.createScript.emit({
+        url: hookUrl,
+        attrs: hookAttrs,
+      });
+      if (res instanceof HTMLScriptElement) {
+        return res;
+      }
+      return;
+    },
+    needDeleteScript: needDeleteScript,
   });
-}
-
-export function normalizePreloadExposes(exposes?: string[]): string[] {
-  if (!exposes) {
-    return [];
-  }
-
-  return exposes.map((expose) => {
-    if (expose === '.') {
-      return expose;
-    }
-    if (expose.startsWith('./')) {
-      return expose.replace('./', '');
-    }
-    return expose;
-  });
+  needAttach && document.head.appendChild(scriptEl);
 }
 
 export function preloadAssets(
@@ -98,25 +105,7 @@ export function preloadAssets(
         as: 'style',
       };
       cssAssets.forEach((cssUrl) => {
-        const { link: cssEl, needAttach } = createLink({
-          url: cssUrl,
-          cb: () => {
-            // noop
-          },
-          attrs: defaultAttrs,
-          createLinkHook: (url, attrs) => {
-            const res = host.loaderHook.lifecycle.createLink.emit({
-              url,
-              attrs,
-            });
-            if (res instanceof HTMLLinkElement) {
-              return res;
-            }
-            return;
-          },
-        });
-
-        needAttach && document.head.appendChild(cssEl);
+        createAndAppendLink(cssUrl, defaultAttrs, host);
       });
     } else {
       const defaultAttrs = {
@@ -124,26 +113,7 @@ export function preloadAssets(
         type: 'text/css',
       };
       cssAssets.forEach((cssUrl) => {
-        const { link: cssEl, needAttach } = createLink({
-          url: cssUrl,
-          cb: () => {
-            // noop
-          },
-          attrs: defaultAttrs,
-          createLinkHook: (url, attrs) => {
-            const res = host.loaderHook.lifecycle.createLink.emit({
-              url,
-              attrs,
-            });
-            if (res instanceof HTMLLinkElement) {
-              return res;
-            }
-            return;
-          },
-          needDeleteLink: false,
-        });
-
-        needAttach && document.head.appendChild(cssEl);
+        createAndAppendLink(cssUrl, defaultAttrs, host, false);
       });
     }
 
@@ -153,24 +123,7 @@ export function preloadAssets(
         as: 'script',
       };
       jsAssetsWithoutEntry.forEach((jsUrl) => {
-        const { link: linkEl, needAttach } = createLink({
-          url: jsUrl,
-          cb: () => {
-            // noop
-          },
-          attrs: defaultAttrs,
-          createLinkHook: (url: string, attrs) => {
-            const res = host.loaderHook.lifecycle.createLink.emit({
-              url,
-              attrs,
-            });
-            if (res instanceof HTMLLinkElement) {
-              return res;
-            }
-            return;
-          },
-        });
-        needAttach && document.head.appendChild(linkEl);
+        createAndAppendLink(jsUrl, defaultAttrs, host);
       });
     } else {
       const defaultAttrs = {
@@ -178,25 +131,7 @@ export function preloadAssets(
         type: remoteInfo?.type === 'module' ? 'module' : 'text/javascript',
       };
       jsAssetsWithoutEntry.forEach((jsUrl) => {
-        const { script: scriptEl, needAttach } = createScript({
-          url: jsUrl,
-          cb: () => {
-            // noop
-          },
-          attrs: defaultAttrs,
-          createScriptHook: (url: string, attrs: any) => {
-            const res = host.loaderHook.lifecycle.createScript.emit({
-              url,
-              attrs,
-            });
-            if (res instanceof HTMLScriptElement) {
-              return res;
-            }
-            return;
-          },
-          needDeleteScript: true,
-        });
-        needAttach && document.head.appendChild(scriptEl);
+        createAndAppendScript(jsUrl, defaultAttrs, host, true);
       });
     }
   }

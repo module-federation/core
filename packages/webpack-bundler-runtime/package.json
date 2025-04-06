@@ -2,6 +2,7 @@
   "public": true,
   "name": "@module-federation/webpack-bundler-runtime",
   "version": "0.11.3",
+  "type": "module",
   "license": "MIT",
   "description": "Module Federation Runtime for webpack",
   "keywords": [
@@ -21,21 +22,30 @@
     "directory": "packages/webpack-bundler-runtime"
   },
   "author": "zhanghang <hanric.zhang@gmail.com>",
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.mjs",
+  "sideEffects": false,
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
   "types": "./dist/index.cjs.d.ts",
-  "dependencies": {
-    "@module-federation/runtime": "workspace:*",
-    "@module-federation/sdk": "workspace:*"
-  },
   "exports": {
     ".": {
-      "import": "./dist/index.esm.mjs",
-      "require": "./dist/index.cjs.js"
+      "import": {
+        "types": "./dist/index.esm.d.ts",
+        "default": "./dist/index.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.cjs.d.ts",
+        "default": "./dist/index.cjs.cjs"
+      }
     },
     "./constant": {
-      "import": "./dist/constant.esm.mjs",
-      "require": "./dist/constant.cjs.js"
+      "import": {
+        "types": "./dist/constant.esm.d.ts",
+        "default": "./dist/constant.esm.js"
+      },
+      "require": {
+        "types": "./dist/constant.cjs.d.ts",
+        "default": "./dist/constant.cjs.cjs"
+      }
     },
     "./*": "./*"
   },
@@ -49,7 +59,11 @@
       ]
     }
   },
+  "dependencies": {
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
+  },
   "devDependencies": {
-    "@module-federation/runtime": "workspace:*"
+    "@module-federation/ref-optimizer": "workspace:*"
   }
 }

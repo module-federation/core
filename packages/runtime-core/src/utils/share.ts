@@ -48,8 +48,9 @@ export function formatShare(
       ...shareArgs.shareConfig,
     },
     get,
-    loaded: shareArgs?.loaded || 'lib' in shareArgs ? true : undefined,
-    version: shareArgs.version ?? '0',
+    loaded:
+      (shareArgs && shareArgs.loaded) || 'lib' in shareArgs ? true : undefined,
+    version: shareArgs.version || '0',
     scope: Array.isArray(shareArgs.scope)
       ? shareArgs.scope
       : [shareArgs.scope ?? 'default'],

@@ -5,15 +5,15 @@
     "build": {
       "inputs": ["production", "^production"],
       "dependsOn": ["^build"],
-      "cache": true
+      "cache": false
     },
     "lint": {
       "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
-      "cache": true
+      "cache": false
     },
     "test": {
       "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
-      "cache": true
+      "cache": false
     },
     "build-storybook": {
       "inputs": [
@@ -22,11 +22,11 @@
         "{projectRoot}/.storybook/**/*",
         "{projectRoot}/tsconfig.storybook.json"
       ],
-      "cache": true
+      "cache": false
     },
     "e2e": {
       "inputs": ["default", "^production"],
-      "cache": true
+      "cache": false
     },
     "@nx/webpack:webpack": {
       "inputs": [
@@ -42,13 +42,13 @@
       "dependsOn": ["^build"]
     },
     "3000-home:build:production": {
-      "cache": true
+      "cache": false
     },
     "3001-shop:build:production": {
-      "cache": true
+      "cache": false
     },
     "3002-checkout:build:production": {
-      "cache": true
+      "cache": false
     }
   },
   "namedInputs": {
@@ -108,5 +108,5 @@
   "useInferencePlugins": false,
   "defaultBase": "main",
   "nxCloudAccessToken": "NTVlZTRhOWItMGRjYy00YmJjLTllNzAtNDFkNzRhNzdjZDkwfHJlYWQtd3JpdGU=",
-  "useLegacyCache": true
+  "useLegacyCache": false
 }

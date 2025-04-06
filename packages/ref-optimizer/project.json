@@ -1,0 +1,71 @@
+{
+  "name": "ref-optimizer",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/ref-optimizer/src",
+  "projectType": "library",
+  "tags": ["type:pkg"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "parallel": false,
+        "outputPath": "packages/ref-optimizer/dist",
+        "main": "packages/ref-optimizer/src/index.ts",
+        "tsConfig": "packages/ref-optimizer/tsconfig.lib.json",
+        "assets": [],
+        "project": "packages/ref-optimizer/package.json",
+        "compiler": "tsc",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false,
+        "rollupConfig": "packages/ref-optimizer/rollup.config.js"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/ref-optimizer/**/*.ts",
+          "packages/ref-optimizer/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/ref-optimizer/jest.config.js",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run ref-optimizer:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run ref-optimizer:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  }
+}

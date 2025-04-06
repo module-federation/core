@@ -15,6 +15,9 @@ import {
   getInfoWithoutType,
   globalLoading,
   CurrentGlobal,
+  getGlobalSnapshot,
+  setGlobalSnapshotInfoByModuleInfo,
+  addGlobalSnapshot,
 } from '../global';
 import {
   Options,
@@ -41,10 +44,13 @@ import {
   getRemoteEntryUniqueKey,
   matchRemoteWithNameAndExpose,
   logger,
+  formatPreloadArgs,
+  defaultPreloadArgs,
+  getFMId,
 } from '../utils';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
-import { formatPreloadArgs, preloadAssets } from '../utils/preload';
+import { preloadAssets } from '../utils/preload';
 import { getGlobalShareScope } from '../utils/share';
 import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
 
@@ -513,50 +519,57 @@ export class RemoteHandler {
 
           let isAllSharedNotUsed = true;
           const needDeleteKeys: Array<[string, string, string, string]> = [];
-          Object.keys(globalShareScopeMap).forEach((instId) => {
-            const shareScopeMap = globalShareScopeMap[instId];
-            shareScopeMap &&
-              Object.keys(shareScopeMap).forEach((shareScope) => {
-                const shareScopeVal = shareScopeMap[shareScope];
-                shareScopeVal &&
-                  Object.keys(shareScopeVal).forEach((shareName) => {
-                    const sharedPkgs = shareScopeVal[shareName];
-                    sharedPkgs &&
-                      Object.keys(sharedPkgs).forEach((shareVersion) => {
-                        const shared = sharedPkgs[shareVersion];
-                        if (
-                          shared &&
-                          typeof shared === 'object' &&
-                          shared.from === remoteInfo.name
-                        ) {
-                          if (shared.loaded || shared.loading) {
-                            shared.useIn = shared.useIn.filter(
-                              (usedHostName) =>
-                                usedHostName !== remoteInfo.name,
-                            );
-                            if (shared.useIn.length) {
-                              isAllSharedNotUsed = false;
-                            } else {
-                              needDeleteKeys.push([
-                                instId,
-                                shareScope,
-                                shareName,
-                                shareVersion,
-                              ]);
-                            }
-                          } else {
-                            needDeleteKeys.push([
-                              instId,
-                              shareScope,
-                              shareName,
-                              shareVersion,
-                            ]);
-                          }
-                        }
-                      });
-                  });
-              });
-          });
+          for (const [instId, shareScopeMap] of Object.entries(
+            globalShareScopeMap,
+          )) {
+            if (!shareScopeMap) continue;
+            for (const [shareScope, shareScopeVal] of Object.entries(
+              shareScopeMap,
+            )) {
+              if (!shareScopeVal) continue;
+              for (const [shareName, sharedPkgs] of Object.entries(
+                shareScopeVal,
+              )) {
+                if (!sharedPkgs) continue;
+                for (const [shareVersion, shared] of Object.entries(
+                  sharedPkgs,
+                )) {
+                  if (
+                    shared &&
+                    typeof shared === 'object' &&
+                    shared.from === remoteInfo.name
+                  ) {
+                    if (shared.loaded || shared.loading) {
+                      // Filter out the current remote from useIn
+                      shared.useIn = shared.useIn.filter(
+                        (usedHostName) => usedHostName !== remoteInfo.name,
+                      );
+                      // Check if still used by others
+                      if (shared.useIn.length > 0) {
+                        isAllSharedNotUsed = false;
+                      } else {
+                        // Mark for deletion if no longer used
+                        needDeleteKeys.push([
+                          instId,
+                          shareScope,
+                          shareName,
+                          shareVersion,
+                        ]);
+                      }
+                    } else {
+                      // Mark for deletion if never loaded/loading
+                      needDeleteKeys.push([
+                        instId,
+                        shareScope,
+                        shareName,
+                        shareVersion,
+                      ]);
+                    }
+                  }
+                }
+              }
+            }
+          }
 
           if (isAllSharedNotUsed) {
             remoteIns.shareScopeMap = {};
@@ -574,18 +587,18 @@ export class RemoteHandler {
 
         const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
         if (hostGlobalSnapshot) {
-          const remoteKey =
-            hostGlobalSnapshot &&
-            'remotesInfo' in hostGlobalSnapshot &&
-            hostGlobalSnapshot.remotesInfo &&
-            getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
-          if (remoteKey) {
-            delete hostGlobalSnapshot.remotesInfo[remoteKey];
+          const id = hostGlobalSnapshot.remotesInfo?.[remote.name]
+            ? // @ts-ignore
+              getInfoWithoutType(hostGlobalSnapshot, remote.name).key // Pass full snapshot
+            : getFMId(remote);
+          const remoteFromSnapshot = hostGlobalSnapshot.remotesInfo?.[id];
+          if (remoteFromSnapshot) {
+            delete hostGlobalSnapshot.remotesInfo[id];
             if (
               //eslint-disable-next-line no-extra-boolean-cast
-              Boolean(Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey])
+              Boolean(Global.__FEDERATION__.__MANIFEST_LOADING__[id])
             ) {
-              delete Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey];
+              delete Global.__FEDERATION__.__MANIFEST_LOADING__[id];
             }
           }
         }

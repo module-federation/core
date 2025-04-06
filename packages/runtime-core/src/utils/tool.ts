@@ -4,9 +4,12 @@ import {
   RemoteEntryType,
   isBrowserEnv,
   isReactNativeEnv,
+  GlobalModuleInfo,
+  isManifestProvider,
 } from '@module-federation/sdk';
-import { Remote, RemoteInfoOptionalVersion } from '../type';
-import { warn } from './logger';
+import { Remote, RemoteInfoOptionalVersion, RemoteInfo } from '../type';
+import { warn, error } from './logger';
+import { getResourceUrl } from '@module-federation/sdk';
 
 export function addUniqueItem(arr: Array<string>, item: string): Array<string> {
   if (arr.findIndex((name) => name === item) === -1) {
@@ -123,3 +126,131 @@ export const processModuleAlias = (name: string, subPath: string) => {
   moduleName = moduleName + subPath;
   return moduleName;
 };
+
+export function ensureObjectData(data: any, hookType: string): void {
+  if (!isObject(data)) {
+    error(`The data for the "${hookType}" hook should be an object.`);
+  }
+}
+
+// ADDED splitId function
+// name
+// name:version
+export function splitId(id: string): {
+  name: string;
+  version: string | undefined;
+} {
+  const splitInfo = id.split(':');
+  if (splitInfo.length === 1) {
+    return {
+      name: splitInfo[0],
+      version: undefined,
+    };
+  } else if (splitInfo.length === 2) {
+    return {
+      name: splitInfo[0],
+      version: splitInfo[1],
+    };
+  } else {
+    return {
+      name: splitInfo[1],
+      version: splitInfo[2],
+    };
+  }
+}
+
+// ADDED normalizePreloadExposes function
+export function normalizePreloadExposes(exposes?: string[]): string[] {
+  if (!exposes) {
+    return [];
+  }
+
+  return exposes.map((expose) => {
+    if (expose === '.') {
+      return expose;
+    }
+    if (expose.startsWith('./')) {
+      return expose.replace('./', '');
+    }
+    return expose;
+  });
+}
+
+// ADDED formatPreloadArgs function
+import {
+  PreloadRemoteArgs,
+  PreloadConfig,
+  PreloadOptions,
+  depsPreloadArg,
+} from '../type';
+import { matchRemote } from './manifest';
+import { assert } from './logger';
+import { safeToString } from '@module-federation/sdk';
+
+export function defaultPreloadArgs(
+  preloadConfig: PreloadRemoteArgs | depsPreloadArg,
+): PreloadConfig {
+  return {
+    resourceCategory: 'sync',
+    share: true,
+    depsRemote: true,
+    prefetchInterface: false,
+    ...preloadConfig,
+  } as PreloadConfig;
+}
+
+export function formatPreloadArgs(
+  remotes: Array<Remote>,
+  preloadArgs: Array<PreloadRemoteArgs>,
+): PreloadOptions {
+  return preloadArgs.map((args) => {
+    const remoteInfo = matchRemote(remotes, args.nameOrAlias);
+    assert(
+      remoteInfo,
+      `Unable to preload ${args.nameOrAlias} as it is not included in ${
+        !remoteInfo &&
+        safeToString({
+          remoteInfo,
+          remotes,
+        })
+      }`,
+    );
+    return {
+      remote: remoteInfo,
+      preloadConfig: defaultPreloadArgs(args),
+    };
+  });
+}
+
+// ADDED assignRemoteInfo function
+export function assignRemoteInfo(
+  remoteInfo: RemoteInfo,
+  remoteSnapshot: ModuleInfo,
+): void {
+  const remoteEntryInfo = getRemoteEntryInfoFromSnapshot(remoteSnapshot);
+  if (!remoteEntryInfo.url) {
+    error(
+      `The attribute remoteEntry of ${remoteInfo.name} must not be undefined.`,
+    );
+  }
+
+  let entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url);
+
+  if (!isBrowserEnv() && !entryUrl.startsWith('http')) {
+    entryUrl = `https:${entryUrl}`;
+  }
+
+  remoteInfo.type = remoteEntryInfo.type;
+  remoteInfo.entryGlobalName = remoteEntryInfo.globalName;
+  remoteInfo.entry = entryUrl;
+  remoteInfo.version = remoteSnapshot.version;
+  remoteInfo.buildVersion = remoteSnapshot.buildVersion;
+}
+
+// Move getInfoWithoutType back to global.ts for now
+// export function getInfoWithoutType(globalSnapshot: GlobalModuleInfo, id: string): {
+//   key: string;
+//   value: ModuleInfo | null;
+// } {
+//  ...
+// }

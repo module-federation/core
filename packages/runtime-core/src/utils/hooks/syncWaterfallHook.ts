@@ -1,5 +1,5 @@
 import { error, warn } from '../logger';
-import { isObject } from '../tool';
+import { isObject, ensureObjectData } from '../tool';
 import { SyncHook } from './syncHook';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -30,9 +30,7 @@ export class SyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
   }
 
   override emit(data: T): T {
-    if (!isObject(data)) {
-      error(`The data for the "${this.type}" hook should be an object.`);
-    }
+    ensureObjectData(data, this.type);
     for (const fn of this.listeners) {
       try {
         const tempData = fn(data);

@@ -9,33 +9,10 @@ import {
   isPureRemoteEntry,
   isRemoteInfoWithEntry,
   getRemoteEntryInfoFromSnapshot,
+  assignRemoteInfo,
 } from '../../utils';
 import { PreloadOptions, RemoteInfo } from '../../type';
 import { preloadAssets } from '../../utils/preload';
-
-export function assignRemoteInfo(
-  remoteInfo: RemoteInfo,
-  remoteSnapshot: ModuleInfo,
-): void {
-  const remoteEntryInfo = getRemoteEntryInfoFromSnapshot(remoteSnapshot);
-  if (!remoteEntryInfo.url) {
-    error(
-      `The attribute remoteEntry of ${remoteInfo.name} must not be undefined.`,
-    );
-  }
-
-  let entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url);
-
-  if (!isBrowserEnv() && !entryUrl.startsWith('http')) {
-    entryUrl = `https:${entryUrl}`;
-  }
-
-  remoteInfo.type = remoteEntryInfo.type;
-  remoteInfo.entryGlobalName = remoteEntryInfo.globalName;
-  remoteInfo.entry = entryUrl;
-  remoteInfo.version = remoteSnapshot.version;
-  remoteInfo.buildVersion = remoteSnapshot.buildVersion;
-}
 
 export function snapshotPlugin(): FederationRuntimePlugin {
   return {

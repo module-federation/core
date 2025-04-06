@@ -1,5 +1,5 @@
-export const FederationModuleManifest = 'federation-manifest.json';
 export const MANIFEST_EXT = '.json';
+export const FederationModuleManifest = `federation-manifest${MANIFEST_EXT}`;
 
 export const BROWSER_LOG_KEY = 'FEDERATION_DEBUG';
 export const BROWSER_LOG_VALUE = '1';
@@ -23,8 +23,8 @@ export const EncodedNameTransformMap = {
 
 export const SEPARATOR = ':';
 
-export const ManifestFileName = 'mf-manifest.json';
-export const StatsFileName = 'mf-stats.json';
+export const ManifestFileName = `mf-manifest${MANIFEST_EXT}`;
+export const StatsFileName = `mf-stats${MANIFEST_EXT}`;
 
 export const MFModuleType = {
   NPM: 'npm',

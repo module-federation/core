@@ -14,11 +14,13 @@ export async function safeWrapper<T extends (...args: Array<any>) => any>(
   }
 }
 
+const REG_EXP = /^(https?:)?\/\//i;
+const transform = (url: string) => url.replace(REG_EXP, '').replace(/\/$/, '');
+
 export function isStaticResourcesEqual(url1: string, url2: string): boolean {
-  const REG_EXP = /^(https?:)?\/\//i;
   // Transform url1 and url2 into relative paths
-  const relativeUrl1 = url1.replace(REG_EXP, '').replace(/\/$/, '');
-  const relativeUrl2 = url2.replace(REG_EXP, '').replace(/\/$/, '');
+  const relativeUrl1 = transform(url1);
+  const relativeUrl2 = transform(url2);
   // Check if the relative paths are identical
   return relativeUrl1 === relativeUrl2;
 }

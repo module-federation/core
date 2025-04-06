@@ -16,47 +16,24 @@ import {
   Shared,
   Remote,
 } from '../type';
-import { assignRemoteInfo } from './snapshot';
-import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
 import { FederationHost } from '../core';
-import { defaultPreloadArgs, normalizePreloadExposes } from '../utils/preload';
 import { getRegisteredShare } from '../utils/share';
 import {
   arrayOptions,
+  splitId,
   getFMId,
   getRemoteEntryInfoFromSnapshot,
   isPureRemoteEntry,
   isRemoteInfoWithEntry,
+  assignRemoteInfo,
+  defaultPreloadArgs,
+  normalizePreloadExposes,
 } from '../utils';
+import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
 
 declare global {
   // eslint-disable-next-line no-var
   var __INIT_VMOK_DEPLOY_GLOBAL_DATA__: boolean | undefined;
-}
-
-// name
-// name:version
-function splitId(id: string): {
-  name: string;
-  version: string | undefined;
-} {
-  const splitInfo = id.split(':');
-  if (splitInfo.length === 1) {
-    return {
-      name: splitInfo[0],
-      version: undefined,
-    };
-  } else if (splitInfo.length === 2) {
-    return {
-      name: splitInfo[0],
-      version: splitInfo[1],
-    };
-  } else {
-    return {
-      name: splitInfo[1],
-      version: splitInfo[2],
-    };
-  }
 }
 
 // Traverse all nodes in moduleInfo and traverse the entire snapshot

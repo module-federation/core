@@ -11,23 +11,29 @@ import {
   BUILD_001,
 } from './error-codes';
 
+const failedTo = 'Failed to';
+const remote = 'remote';
+const get = 'get';
+const invalid = 'Invalid';
+const loadShareSync = 'loadShareSync function call from';
+
 export const runtimeDescMap = {
-  [RUNTIME_001]: 'Failed to get remoteEntry exports.',
-  [RUNTIME_002]: 'The remote entry interface does not contain "init"',
-  [RUNTIME_003]: 'Failed to get manifest.',
-  [RUNTIME_004]: 'Failed to locate remote.',
-  [RUNTIME_005]: 'Invalid loadShareSync function call from bundler runtime',
-  [RUNTIME_006]: 'Invalid loadShareSync function call from runtime',
-  [RUNTIME_007]: 'Failed to get remote snapshot.',
-  [RUNTIME_008]: 'Failed to load script resources.',
+  [RUNTIME_001]: `${failedTo} ${get} ${remote}Entry exports.`,
+  [RUNTIME_002]: `The ${remote} entry interface does not contain "init"`,
+  [RUNTIME_003]: `${failedTo} ${get} manifest.`,
+  [RUNTIME_004]: `${failedTo} locate ${remote}.`,
+  [RUNTIME_005]: `${invalid} ${loadShareSync} bundler runtime`,
+  [RUNTIME_006]: `${invalid} ${loadShareSync} runtime`,
+  [RUNTIME_007]: `${failedTo} ${get} ${remote} snapshot.`,
+  [RUNTIME_008]: `${failedTo} load script resources.`,
 };
 
 export const typeDescMap = {
-  [TYPE_001]: 'Failed to generate type declaration.',
+  [TYPE_001]: `${failedTo} generate type declaration.`,
 };
 
 export const buildDescMap = {
-  [BUILD_001]: 'Failed to find expose module.',
+  [BUILD_001]: `${failedTo} find expose module.`,
 };
 
 export const errorDescMap = {

@@ -96,12 +96,24 @@ function setGlobalDefaultVal(target: typeof CurrentGlobal) {
     definePropertyGlobalVal(target, '__VMOK__', target.__FEDERATION__);
   }
 
-  target.__FEDERATION__.__GLOBAL_PLUGIN__ ??= [];
-  target.__FEDERATION__.__INSTANCES__ ??= [];
-  target.__FEDERATION__.moduleInfo ??= {};
-  target.__FEDERATION__.__SHARE__ ??= {};
-  target.__FEDERATION__.__MANIFEST_LOADING__ ??= {};
-  target.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
+  if (!target.__FEDERATION__.__GLOBAL_PLUGIN__) {
+    target.__FEDERATION__.__GLOBAL_PLUGIN__ = [];
+  }
+  if (!target.__FEDERATION__.__INSTANCES__) {
+    target.__FEDERATION__.__INSTANCES__ = [];
+  }
+  if (!target.__FEDERATION__.moduleInfo) {
+    target.__FEDERATION__.moduleInfo = {};
+  }
+  if (!target.__FEDERATION__.__SHARE__) {
+    target.__FEDERATION__.__SHARE__ = {};
+  }
+  if (!target.__FEDERATION__.__MANIFEST_LOADING__) {
+    target.__FEDERATION__.__MANIFEST_LOADING__ = {};
+  }
+  if (!target.__FEDERATION__.__PRELOADED_MAP__) {
+    target.__FEDERATION__.__PRELOADED_MAP__ = new Map();
+  }
 }
 
 setGlobalDefaultVal(CurrentGlobal);

@@ -162,15 +162,11 @@ export class SharedHandler {
       this.hooks.lifecycle.resolveShare,
     );
 
-    const addUseIn = (shared: Shared): void => {
-      if (!shared.useIn) {
-        shared.useIn = [];
-      }
-      addUniqueItem(shared.useIn, host.options.name);
-    };
-
     if (registeredShared && registeredShared.lib) {
-      addUseIn(registeredShared);
+      if (!registeredShared.useIn) {
+        registeredShared.useIn = [];
+      }
+      addUniqueItem(registeredShared.useIn, host.options.name);
       return registeredShared.lib as () => T;
     } else if (
       registeredShared &&
@@ -182,14 +178,20 @@ export class SharedHandler {
       if (!registeredShared.lib) {
         registeredShared.lib = factory;
       }
-      addUseIn(registeredShared);
+      if (!registeredShared.useIn) {
+        registeredShared.useIn = [];
+      }
+      addUniqueItem(registeredShared.useIn, host.options.name);
       return factory;
     } else if (registeredShared) {
       const asyncLoadProcess = async () => {
         const factory = await registeredShared.get();
         shareInfoRes.lib = factory;
         shareInfoRes.loaded = true;
-        addUseIn(shareInfoRes);
+        if (!shareInfoRes.useIn) {
+          shareInfoRes.useIn = [];
+        }
+        addUniqueItem(shareInfoRes.useIn, host.options.name);
         const gShared = getRegisteredShare(
           this.shareScopeMap,
           pkgName,
@@ -220,7 +222,10 @@ export class SharedHandler {
         const factory = await shareInfoRes.get();
         shareInfoRes.lib = factory;
         shareInfoRes.loaded = true;
-        addUseIn(shareInfoRes);
+        if (!shareInfoRes.useIn) {
+          shareInfoRes.useIn = [];
+        }
+        addUniqueItem(shareInfoRes.useIn, host.options.name);
         const gShared = getRegisteredShare(
           this.shareScopeMap,
           pkgName,
@@ -384,16 +389,12 @@ export class SharedHandler {
       this.hooks.lifecycle.resolveShare,
     );
 
-    const addUseIn = (shared: Shared): void => {
-      if (!shared.useIn) {
-        shared.useIn = [];
-      }
-      addUniqueItem(shared.useIn, host.options.name);
-    };
-
     if (registeredShared) {
       if (typeof registeredShared.lib === 'function') {
-        addUseIn(registeredShared);
+        if (!registeredShared.useIn) {
+          registeredShared.useIn = [];
+        }
+        addUniqueItem(registeredShared.useIn, host.options.name);
         if (!registeredShared.loaded) {
           registeredShared.loaded = true;
           if (registeredShared.from === host.options.name) {
@@ -405,7 +406,10 @@ export class SharedHandler {
       if (typeof registeredShared.get === 'function') {
         const module = registeredShared.get();
         if (!(module instanceof Promise)) {
-          addUseIn(registeredShared);
+          if (!registeredShared.useIn) {
+            registeredShared.useIn = [];
+          }
+          addUniqueItem(registeredShared.useIn, host.options.name);
           this.setShared({
             pkgName,
             loaded: true,
