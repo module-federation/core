@@ -9,7 +9,7 @@ export interface PluginOptions {
     | {
         distOutputDir?: string;
       }
-    | false;
+    | boolean;
   remoteIpStrategy?: 'ipv4' | 'inherit';
 }
 

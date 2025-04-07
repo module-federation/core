@@ -65,7 +65,11 @@ const mfSSRRsbuildPlugin = (
         if (ssrEnv !== utils.environment.name) {
           return config;
         }
-        const userSSRConfig = pluginOptions.userConfig.ssr || {};
+        const userSSRConfig = pluginOptions.userConfig.ssr
+          ? typeof pluginOptions.userConfig.ssr === 'object'
+            ? pluginOptions.userConfig.ssr
+            : {}
+          : {};
         config.output!.publicPath = `${config.output!.publicPath}${userSSRConfig.distOutputDir || path.relative(csrOutputPath, ssrOutputPath)}/`;
         return config;
       };
