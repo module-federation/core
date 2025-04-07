@@ -175,6 +175,7 @@ export function generateSnapshotFromManifest(
     remoteSnapshot = {
       ...basicRemoteSnapshot,
       publicPath: getPublicPath(),
+      ssrPublicPath: manifest.metaData.ssrPublicPath,
     };
   } else {
     remoteSnapshot = {
