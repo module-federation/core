@@ -375,8 +375,9 @@ export const moduleFederationConfigPlugin = (
       userConfig.ssrConfig || JSON.parse(JSON.stringify(mfConfig));
     userConfig.ssrConfig = ssrConfig;
     userConfig.csrConfig = csrConfig;
-    const enableSSR =
-      userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr);
+    const enableSSR = Boolean(
+      userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr),
+    );
 
     api.modifyBundlerChain((chain) => {
       const target = chain.get('target');

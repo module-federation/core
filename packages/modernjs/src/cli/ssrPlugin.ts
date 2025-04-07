@@ -14,7 +14,7 @@ import type {
   ModifyRspackConfigFn,
 } from '@rsbuild/core';
 import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
-import type { InternalModernPluginOptions } from '../types';
+import type { InternalModernPluginOptions, PluginOptions } from '../types';
 
 export function setEnv() {
   process.env['MF_DISABLE_EMIT_STATS'] = 'true';
@@ -65,7 +65,8 @@ const mfSSRRsbuildPlugin = (
         if (ssrEnv !== utils.environment.name) {
           return config;
         }
-        config.output!.publicPath = `${config.output!.publicPath}${pluginOptions.ssrDistOutputDir || path.relative(csrOutputPath, ssrOutputPath)}/`;
+        const userSSRConfig = pluginOptions.userConfig.ssr || {};
+        config.output!.publicPath = `${config.output!.publicPath}${userSSRConfig.distOutputDir || path.relative(csrOutputPath, ssrOutputPath)}/`;
         return config;
       };
       api.modifyWebpackConfig((config, utils) => {

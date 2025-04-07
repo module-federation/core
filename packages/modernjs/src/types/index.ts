@@ -5,7 +5,11 @@ import type { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@mo
 export interface PluginOptions {
   config?: moduleFederationPlugin.ModuleFederationPluginOptions;
   configPath?: string;
-  ssr?: boolean;
+  ssr?:
+    | {
+        distOutputDir?: string;
+      }
+    | false;
   remoteIpStrategy?: 'ipv4' | 'inherit';
 }
 
@@ -13,7 +17,6 @@ export interface InternalModernPluginOptions {
   csrConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
   ssrConfig?: moduleFederationPlugin.ModuleFederationPluginOptions;
   distOutputDir: string;
-  ssrDistOutputDir?: string;
   originPluginOptions: PluginOptions;
   browserPlugin?: BundlerPlugin;
   nodePlugin?: BundlerPlugin;
