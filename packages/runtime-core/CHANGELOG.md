@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.11.3
+
+### Patch Changes
+
+- e112c16: chore(runtime): remove shared strategy warn
+  - @module-federation/sdk@0.11.3
+  - @module-federation/error-codes@0.11.3
+
 ## 0.11.2
 
 ### Patch Changes
