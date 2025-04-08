@@ -1,19 +1,8 @@
-# React Bridge（for React v16, v17, v18, v19）
+# React Bridge
 
 `@module-federation/bridge-react` 提供了用于 React 应用的 bridge 工具函数：
 - `createBridgeComponent`：用于导出应用级别模块，适用于生产者包装其作为应用类型导出的模块
 - `createRemoteComponent`：用于加载应用级别模块，适用于消费者加载作为应用类型加载的模块
-
-### React 版本兼容性
-
-`@module-federation/bridge-react` 支持多个 React 主要版本，确保在不同 React 版本的应用之间实现无缝集成：
-
-- **React 16**: 完全支持，使用传统 `ReactDOM.render` 和 `ReactDOM.hydrate` API
-- **React 17**: 完全支持，保持与 React 16 相同的 API 调用方式
-- **React 18**: 完全支持，自动使用新的 `createRoot` 和 `hydrateRoot` API
-- **React 19**: 完全支持，通过动态导入 `react-dom/client` 实现，确保即使在较旧的环境中也能正常工作
-
-这种多版本兼容性使得不同团队可以独立选择和升级他们的 React 版本，同时保持模块联邦集成的稳定性。
 
 [查看 Demo](https://github.com/module-federation/core/tree/main/apps/router-demo)
 
@@ -342,7 +331,6 @@ function App() {
       <Routes>
         <Route
           path="/remote1/*"
-          // 使用 Remote1App 组件, 将会被懒加载
           Component={() => (
             <Remote1App
               className={styles.remote1}
@@ -361,49 +349,3 @@ function App() {
     </BrowserRouter>
   );
 }
-
-```
-
-#### 配置 React v18/v19 的 createRoot 选项
-
-对于 React v18/v19，`@module-federation/bridge-react` 支持传递选项到 `createRoot` 方法，这允许您自定义根组件的行为：
-
-##### 在创建桥接组件时设置默认选项
-
-```tsx
-import { createBridgeComponent } from '@module-federation/bridge-react';
-
-export default createBridgeComponent({
-  rootComponent: App,
-  // 为所有使用此组件的实例设置默认的 createRoot 选项
-  defaultRootOptions: {
-    identifierPrefix: 'my-app-',
-    onRecoverableError: (error) => {
-      console.error('可恢复的渲染错误:', error);
-    }
-  }
-});
-```
-
-##### 在渲染时设置选项
-
-```tsx
-// 在消费者应用中
-const RemoteApp = createRemoteComponent({
-  url: 'http://localhost:3001/remoteEntry.js',
-  scope: 'remote',
-  module: './App',
-});
-
-// 渲染时传递 rootOptions
-<RemoteApp 
-  props={{ message: 'Hello' }} 
-  rootOptions={{
-    identifierPrefix: 'instance-',
-    onRecoverableError: (error) => {
-      console.error('此实例的可恢复错误:', error);
-    }
-  }}
-/>
-
-渲染时传递的选项会覆盖创建组件时设置的默认选项。

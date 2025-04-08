@@ -134,17 +134,16 @@ function Navgation() {
       icon: <GroupOutlined />,
     },
     {
-      label: <Link to="/remote5">remote5</Link>,
-      key: '/remote5',
-      icon: <GroupOutlined />,
-    },
-    {
-      label: <Link to="/error-load-with-hook">loader-hook</Link>,
+      label: <Link to="/error-load-with-hook">error-load-with-hook</Link>,
       key: '/error-load-with-hook',
       icon: <GroupOutlined />,
     },
     {
-      label: <Link to="/error-load-with-error-boundary">error-boundary</Link>,
+      label: (
+        <Link to="/error-load-with-error-boundary">
+          error-load-with-error-boundary
+        </Link>
+      ),
       key: '/error-load-with-error-boundary',
       icon: <GroupOutlined />,
     },
