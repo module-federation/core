@@ -9,3 +9,7 @@
 ## Links
 
 - [Module Federation Docs](https://module-federation.io/)
+
+## Usage
+
+Run the development server and navigate to the provided localhost URL.
