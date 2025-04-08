@@ -1,5 +1,18 @@
 # @module-federation/node
 
+## 2.6.33
+
+### Patch Changes
+
+- ed8bda3: support undoPath and rootOutputDir for correct remote chunk resolution in node
+- Updated dependencies [64a2bc1]
+- Updated dependencies [ebe7d89]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.12.0
+  - @module-federation/enhanced@0.12.0
+  - @module-federation/runtime@0.12.0
+  - @module-federation/utilities@3.1.51
+
 ## 2.6.32
 
 ### Patch Changes

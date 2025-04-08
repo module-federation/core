@@ -1,5 +1,19 @@
 # @module-federation/bridge-react
 
+## 0.12.0
+
+### Minor Changes
+
+- 8b3f9d0: feat(react-bridge): Add native support for React 19 in bridge-react with enhanced createRoot options
+
+### Patch Changes
+
+- 8b3f9d0: feat(bridge-react): support react v19 in react compat file.
+- Updated dependencies [64a2bc1]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.12.0
+  - @module-federation/bridge-shared@0.12.0
+
 ## 0.11.3
 
 ### Patch Changes

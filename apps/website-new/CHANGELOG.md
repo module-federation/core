@@ -1,5 +1,15 @@
 # website-new
 
+## 1.1.0
+
+### Minor Changes
+
+- 8b3f9d0: feat(react-bridge): Add native support for React 19 in bridge-react with enhanced createRoot options
+
+### Patch Changes
+
+- @module-federation/error-codes@0.12.0
+
 ## 1.0.32
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @module-federation/sdk
 
+## 0.12.0
+
+### Patch Changes
+
+- 64a2bc1: feat(sdk): add ssrPublicPath field
+- c14842f: feat(dts-plugin): support tspc
+
 ## 0.11.3
 
 ## 0.11.2
