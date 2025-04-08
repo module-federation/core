@@ -1,5 +1,3 @@
 export default function Button(props: { text: string; onClick: () => void }) {
-  return (
-    <button onClick={props.onClick}>{props.text} --------- hello world </button>
-  );
+  return <button onClick={props.onClick}>{props.text}</button>;
 }

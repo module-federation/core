@@ -6,7 +6,6 @@ import type {
   RootType,
   DestroyParams,
   RenderParams,
-  CreateRootOptions,
 } from '../types';
 import { ErrorBoundary } from 'react-error-boundary';
 import { RouterContext } from './context';
@@ -16,7 +15,6 @@ import { createRoot as defaultCreateRoot } from './compat';
 
 export function createBridgeComponent<T>({
   createRoot = defaultCreateRoot,
-  defaultRootOptions,
   ...bridgeInfo
 }: ProviderFnParams<T>) {
   return () => {
@@ -50,15 +48,8 @@ export function createBridgeComponent<T>({
           basename,
           memoryRoute,
           fallback,
-          rootOptions,
           ...propsInfo
         } = info;
-
-        // Merge default root options with render-specific root options
-        const mergedRootOptions: CreateRootOptions | undefined = {
-          ...defaultRootOptions,
-          ...(rootOptions as CreateRootOptions),
-        };
 
         const beforeBridgeRenderRes =
           instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
@@ -72,10 +63,7 @@ export function createBridgeComponent<T>({
                 memoryRoute,
               }}
               propsInfo={
-                {
-                  ...propsInfo,
-                  ...(beforeBridgeRenderRes as any)?.extraProps,
-                } as T
+                { ...propsInfo, ...beforeBridgeRenderRes?.extraProps } as T
               }
             />
           </ErrorBoundary>
@@ -89,7 +77,7 @@ export function createBridgeComponent<T>({
           let root = rootMap.get(dom);
           // do not call createRoot multiple times
           if (!root) {
-            root = createRoot(dom, mergedRootOptions);
+            root = createRoot(dom);
             rootMap.set(dom, root);
           }
 
@@ -97,6 +85,7 @@ export function createBridgeComponent<T>({
             root.render(rootComponentWithErrorBoundary);
           }
         }
+
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
       },
 
