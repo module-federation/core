@@ -4,8 +4,8 @@ import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
 import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
 import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
-import logger from './logger';
 import { autoDeleteSplitChunkCacheGroups } from '@module-federation/rsbuild-plugin/utils';
+import logger from './logger';
 
 import type { InternalModernPluginOptions } from '../types';
 import type {
@@ -420,15 +420,41 @@ export const moduleFederationConfigPlugin = (
         }
       }
 
+      const devServerConfig = modernjsConfig.tools?.devServer;
+      const corsWarnMsgs = [
+        'View https://module-federation.io/guide/troubleshooting/other.html#cors-warn for more details.',
+      ];
+      if (
+        typeof devServerConfig !== 'object' ||
+        !('headers' in devServerConfig)
+      ) {
+        corsWarnMsgs.unshift(
+          'Detect devServer.headers is empty, mf modern plugin will add default cors header: devServer.headers["Access-Control-Allow-Headers"] = "*". It is recommended to specify an allowlist of trusted origins instead.',
+        );
+      }
+
+      const exposes = userConfig.csrConfig?.exposes;
+      const hasExposes =
+        exposes && Array.isArray(exposes)
+          ? exposes.length
+          : Object.keys(exposes ?? {}).length;
+
+      if (corsWarnMsgs.length > 1 && hasExposes) {
+        logger.warn(corsWarnMsgs.join('\n'));
+      }
+
+      const corsHeaders = hasExposes
+        ? {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods':
+              'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+            'Access-Control-Allow-Headers': '*',
+          }
+        : undefined;
       return {
         tools: {
           devServer: {
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods':
-                'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-              'Access-Control-Allow-Headers': '*',
-            },
+            headers: corsHeaders,
           },
         },
         source: {
