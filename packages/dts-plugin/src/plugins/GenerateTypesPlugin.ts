@@ -274,7 +274,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
       } catch (err) {
         callback();
         if (dtsManagerOptions.displayErrorInTerminal) {
-          console.error('Error in mf:generateTypes processAssets hook:', err);
+          console.error(err);
         }
         logger.debug('generate types fail!');
       }
