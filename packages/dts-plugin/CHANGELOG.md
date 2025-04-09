@@ -1,5 +1,27 @@
 # @module-federation/dts-plugin
 
+## 0.11.4
+
+### Patch Changes
+
+- ed8bda3: remove query strings from exposed modules to fix tsc resolves
+- Updated dependencies [64a2bc1]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/managers@0.11.4
+  - @module-federation/third-party-dts-extractor@0.11.4
+  - @module-federation/error-codes@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- e2c0a89: fix(dts-plugin): add recursive:true while generate types hit cache
+  - @module-federation/sdk@0.11.3
+  - @module-federation/managers@0.11.3
+  - @module-federation/third-party-dts-extractor@0.11.3
+  - @module-federation/error-codes@0.11.3
+
 ## 0.11.2
 
 ### Patch Changes

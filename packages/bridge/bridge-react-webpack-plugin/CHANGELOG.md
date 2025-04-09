@@ -1,5 +1,19 @@
 # @module-federation/bridge-react-webpack-plugin
 
+## 0.11.4
+
+### Patch Changes
+
+- Updated dependencies [64a2bc1]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.11.3
+
 ## 0.11.2
 
 ### Patch Changes

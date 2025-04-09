@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "0.11.2",
+  "version": "0.11.4",
   "files": [
     "dist/",
     "types.d.ts",
@@ -99,6 +99,7 @@
     "react-error-boundary": "4.1.2"
   },
   "devDependencies": {
+    "@rsbuild/core": "1.2.8",
     "@modern-js/app-tools": "2.65.1",
     "@modern-js/core": "2.65.1",
     "@modern-js/module-tools": "2.65.1",

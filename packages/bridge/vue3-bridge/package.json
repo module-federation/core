@@ -7,13 +7,13 @@
     "url": "https://github.com/module-federation/core",
     "directory": "packages/vue3-bridge"
   },
-  "version": "0.11.2",
+  "version": "0.11.4",
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.es.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist/",

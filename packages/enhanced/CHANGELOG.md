@@ -1,5 +1,42 @@
 # @module-federation/enhanced
 
+## 0.11.4
+
+### Patch Changes
+
+- ebe7d89: remove normal module replacement on federation runtime. rely on alias instead
+- Updated dependencies [64a2bc1]
+- Updated dependencies [ed8bda3]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/dts-plugin@0.11.4
+  - @module-federation/bridge-react-webpack-plugin@0.11.4
+  - @module-federation/cli@0.11.4
+  - @module-federation/data-prefetch@0.11.4
+  - @module-federation/managers@0.11.4
+  - @module-federation/manifest@0.11.4
+  - @module-federation/rspack@0.11.4
+  - @module-federation/runtime-tools@0.11.4
+  - @module-federation/inject-external-runtime-core-plugin@0.11.4
+  - @module-federation/error-codes@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- Updated dependencies [e2c0a89]
+  - @module-federation/dts-plugin@0.11.3
+  - @module-federation/cli@0.11.3
+  - @module-federation/manifest@0.11.3
+  - @module-federation/rspack@0.11.3
+  - @module-federation/data-prefetch@0.11.3
+  - @module-federation/runtime-tools@0.11.3
+  - @module-federation/inject-external-runtime-core-plugin@0.11.3
+  - @module-federation/sdk@0.11.3
+  - @module-federation/managers@0.11.3
+  - @module-federation/bridge-react-webpack-plugin@0.11.3
+  - @module-federation/error-codes@0.11.3
+
 ## 0.11.2
 
 ### Patch Changes
