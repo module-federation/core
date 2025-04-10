@@ -1,7 +1,7 @@
 import React, { StrictMode } from 'react';
 import { init } from '@module-federation/enhanced/runtime';
 import * as ReactDOM from 'react-dom/client';
-import App from './App';
+import HelloWorld from './HelloWorld';
 
 init({
   name: 'bundle_size',
@@ -13,6 +13,6 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <StrictMode>
-    <App />
+    <HelloWorld />
   </StrictMode>,
 );
