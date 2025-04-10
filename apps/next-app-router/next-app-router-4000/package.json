@@ -1,4 +1,5 @@
 {
+  "name": "app-router-4000",
   "private": true,
   "scripts": {
     "build": "next build",

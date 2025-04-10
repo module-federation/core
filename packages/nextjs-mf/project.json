@@ -5,7 +5,7 @@
   "projectType": "library",
   "tags": ["type:pkg"],
   "targets": {
-    "build": {
+    "build-tsc": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -20,6 +20,35 @@
           "dependencies": true
         }
       ]
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run nextjs-mf:build-tsc",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run nextjs-mf:rename-dist-files",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "rename-dist-files": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "mv packages/nextjs-mf/dist/src/federation-noop.js packages/nextjs-mf/dist/src/federation-noop.cjs"
+          },
+          {
+            "command": "mv packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.js packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.cjs"
+          }
+        ]
+      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",

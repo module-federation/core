@@ -18,21 +18,21 @@ const { Dependency } = require(
 class ContainerEntryDependency extends Dependency {
   public name: string;
   public exposes: [string, ExposeOptions][];
-  public shareScope: string;
+  public shareScope: string | string[];
   public injectRuntimeEntry: string;
   public dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'];
 
   /**
    * @param {string} name entry name
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
-   * @param {string} shareScope name of the share scope
+   * @param {string|string[]} shareScope name of the share scope
    * @param {string[]} injectRuntimeEntry the path of injectRuntime file.
    * @param {containerPlugin.ContainerPluginOptions['dataPrefetch']} dataPrefetch whether enable dataPrefetch
    */
   constructor(
     name: string,
     exposes: [string, ExposeOptions][],
-    shareScope: string,
+    shareScope: string | string[],
     injectRuntimeEntry: string,
     dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'],
   ) {

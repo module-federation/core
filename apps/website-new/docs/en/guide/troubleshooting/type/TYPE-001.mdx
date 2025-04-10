@@ -8,7 +8,7 @@ When compiling the exported (`exposes`) file TS type, the current project's `tsc
 
 ## Solutions
 
-1. Delete the `node_modules/.cache/mf-types` directory
+1. Delete the tsconfig.json `incremental` and `tsBuildInfoFile` configurations in the `cmd` command.
 2. Execute the `cmd` command in the error message parameter in the terminal, and repair the file or `tsconfig` according to the error message.
 
 If you want to ignore the type check error in ts, you can set [`compilerOptions.noCheck`](https://www.typescriptlang.org/tsconfig/#noCheck) to `true` in `tsconfig.json` (This option is only supported for ts 5.5 and above)
