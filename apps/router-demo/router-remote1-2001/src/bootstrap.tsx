@@ -1,6 +1,13 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 
 const rootNode = document.getElementById('root');
-ReactDOM.render(<App basename={'/'} />, rootNode);
+if (!rootNode) throw new Error('Root element not found');
+
+const root = createRoot(rootNode);
+root.render(
+  <React.StrictMode>
+    <App basename={'/'} />
+  </React.StrictMode>,
+);

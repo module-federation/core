@@ -1,15 +1,14 @@
 /**
  * Entry point for React 18 specific bridge components
  */
-import type { ProviderFnParams } from '../../types';
+import React from 'react';
+import { createRoot as createReactRoot, hydrateRoot } from 'react-dom/client';
 import { createBaseBridgeComponent } from './bridge-base';
-import ReactDOM from 'react-dom';
+import type { ProviderFnParams } from '../../types';
 
-// 定义接口
 export interface CreateRootOptions {
   identifierPrefix?: string;
-  onRecoverableError?: (error: unknown) => void;
-  transitionCallbacks?: unknown;
+  onRecoverableError?: (error: unknown, errorInfo: unknown) => void;
 }
 
 export interface Root {
@@ -17,20 +16,25 @@ export interface Root {
   unmount(): void;
 }
 
-/**
- * Creates a root for React 18 using ReactDOM.createRoot
- */
 export function createReact18Root(
   container: Element | DocumentFragment,
   options?: CreateRootOptions,
 ): Root {
-  // @ts-ignore - Types will be available in React 18
-  return (ReactDOM as any).createRoot(container, options);
+  return createReactRoot(container, options);
 }
 
-/**
- * 创建React 18桥接组件
- */
+export function hydrateReact18Root(
+  container: Element | DocumentFragment,
+  initialChildren: React.ReactNode,
+  options?: CreateRootOptions,
+) {
+  return hydrateRoot(
+    container as Element,
+    initialChildren as React.ReactElement,
+    options,
+  );
+}
+
 export function createBridgeComponent<T = any>(
   bridgeInfo: Omit<ProviderFnParams<T>, 'createRoot'>,
 ) {

@@ -1,6 +1,6 @@
 /**
- * 基础桥接组件实现
- * 此文件包含所有React版本共享的桥接组件逻辑
+ * Base bridge component implementation
+ * This file contains bridge component logic shared across all React versions
  */
 import * as React from 'react';
 import type {
@@ -16,10 +16,6 @@ import { RouterContext } from '../context';
 import { LoggerInstance } from '../../utils';
 import { federationRuntime } from '../plugin';
 
-/**
- * 创建基础桥接组件
- * 此函数提供了所有React版本共享的基础实现
- */
 export function createBaseBridgeComponent<T>({
   createRoot,
   defaultRootOptions,
@@ -60,7 +56,6 @@ export function createBaseBridgeComponent<T>({
           ...propsInfo
         } = info;
 
-        // Merge default root options with render-specific root options
         const mergedRootOptions: CreateRootOptions | undefined = {
           ...defaultRootOptions,
           ...(rootOptions as CreateRootOptions),
@@ -95,7 +90,7 @@ export function createBaseBridgeComponent<T>({
           ).then((root: RootType) => rootMap.set(dom, root));
         } else {
           let root = rootMap.get(dom);
-          // do not call createRoot multiple times
+          // Do not call createRoot multiple times
           if (!root && createRoot) {
             root = createRoot(dom, mergedRootOptions);
             rootMap.set(dom, root as any);
@@ -116,7 +111,6 @@ export function createBaseBridgeComponent<T>({
           if ('unmount' in root) {
             root.unmount();
           } else {
-            // 对于不支持unmount的情况，需要在特定版本中处理
             console.warn('Root does not have unmount method');
           }
           rootMap.delete(dom);

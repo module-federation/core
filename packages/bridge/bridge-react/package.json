@@ -21,10 +21,10 @@
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
     },
-    "./v16": {
-      "types": "./dist/v16.d.ts",
-      "import": "./dist/v16.es.js",
-      "require": "./dist/v16.cjs.js"
+    "./legacy": {
+      "types": "./dist/legacy.d.ts",
+      "import": "./dist/legacy.es.js",
+      "require": "./dist/legacy.cjs.js"
     },
     "./v18": {
       "types": "./dist/v18.d.ts",
