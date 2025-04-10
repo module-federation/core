@@ -5,15 +5,9 @@
 **/dist/
 
 # Documentation and config files
-**/*.md
 **/*.yaml
 **/*.yml
-**/.eslintrc*
-**/.prettierrc*
-**/.swcrc
-**/jest.config.*
-**/tsconfig.*
-**/*/stats.json
+
 
 # Explicitly ignore specific packages
 packages/typescript/
