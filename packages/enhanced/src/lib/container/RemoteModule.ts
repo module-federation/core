@@ -37,26 +37,29 @@ class RemoteModule extends Module {
   public request: string;
   public externalRequests: string[];
   public internalRequest: string;
-  public shareScope: string;
+  public shareScope: string | string[];
 
   /**
    * @param {string} request request string
    * @param {string[]} externalRequests list of external requests to containers
    * @param {string} internalRequest name of exposed module in container
-   * @param {string} shareScope the used share scope name
+   * @param {string|string[]} shareScope scope in which modules are shared
    */
   constructor(
     request: string,
     externalRequests: string[],
     internalRequest: string,
-    shareScope: string,
+    shareScope: string | string[],
   ) {
     super(WEBPACK_MODULE_TYPE_REMOTE);
     this.request = request;
     this.externalRequests = externalRequests;
     this.internalRequest = internalRequest;
     this.shareScope = shareScope;
-    this._identifier = `remote (${shareScope}) ${this.externalRequests.join(
+    const scopeStr = Array.isArray(shareScope)
+      ? shareScope.join('|')
+      : shareScope;
+    this._identifier = `remote (${scopeStr}) ${this.externalRequests.join(
       ' ',
     )} ${this.internalRequest}`;
   }
