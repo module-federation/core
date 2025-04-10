@@ -224,7 +224,7 @@
     "typescript": "5.5.2",
     "url-loader": "4.1.1",
     "verdaccio": "5.29.2",
-    "vite": "5.4.12",
+    "vite": "5.4.17",
     "vite-tsconfig-paths": "4.2.3",
     "vitest": "1.6.0",
     "vitest-fetch-mock": "^0.2.2",
