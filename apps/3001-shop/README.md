@@ -23,3 +23,7 @@ pnpm install
 
 - `pnpm start`: Start dev server
 - `pnpm build`: Build production bundle
+
+## Usage
+
+Run the development server and navigate to the provided localhost URL.
