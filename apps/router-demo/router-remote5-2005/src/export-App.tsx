@@ -1,12 +1,13 @@
 import App from './App';
-import { createBridgeComponent } from '@module-federation/bridge-react';
+import { createBridgeComponent } from '@module-federation/bridge-react/v19';
 
 const provider = createBridgeComponent({
   rootComponent: App,
   defaultRootOptions: {
     identifierPrefix: 'remote5-app-',
     onRecoverableError: (error: unknown) => {
-      console.log('[Remote5] Recoverable rendering error:', error);
+      console.log('[Remote5] React 19 recoverable rendering error:', error);
+      // You can add custom error reporting or analytics here
     },
   },
 });

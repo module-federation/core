@@ -191,6 +191,13 @@ export const compileTs = async (
             : undefined,
       });
     } catch (err) {
+      if (compilerOptions.tsBuildInfoFile) {
+        try {
+          await rm(compilerOptions.tsBuildInfoFile);
+        } catch (e) {
+          // noop
+        }
+      }
       throw new Error(
         getShortErrorMsg(TYPE_001, typeDescMap, {
           cmd,

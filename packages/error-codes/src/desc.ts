@@ -23,7 +23,8 @@ export const runtimeDescMap = {
 };
 
 export const typeDescMap = {
-  [TYPE_001]: 'Failed to generate type declaration.',
+  [TYPE_001]:
+    'Failed to generate type declaration. Execute the below cmd to reproduce and fix the error.',
 };
 
 export const buildDescMap = {
