@@ -15,7 +15,6 @@ import {
   ShareScopeMap,
   InitScope,
   RemoteEntryInitOptions,
-  InitTokens,
   CallFrom,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry } from './utils';

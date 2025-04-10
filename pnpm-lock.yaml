@@ -594,6 +594,34 @@ importers:
         specifier: workspace:*
         version: link:../../packages/utilities
 
+  apps/bundle-size:
+    dependencies:
+      antd:
+        specifier: 4.24.15
+        version: 4.24.15(react-dom@18.3.1)(react@18.3.1)
+    devDependencies:
+      '@module-federation/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@module-federation/dts-plugin':
+        specifier: workspace:*
+        version: link:../../packages/dts-plugin
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../../packages/enhanced
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+      '@module-federation/typescript':
+        specifier: workspace:*
+        version: link:../../packages/typescript
+      '@pmmmwh/react-refresh-webpack-plugin':
+        specifier: 0.5.15
+        version: 0.5.15(react-refresh@0.14.2)(webpack@5.94.0)
+      react-refresh:
+        specifier: 0.14.2
+        version: 0.14.2
+
   apps/esbuild:
     dependencies:
       react:
@@ -3336,7 +3364,7 @@ packages:
       '@babel/traverse': 7.25.7
       '@babel/types': 7.25.7
       convert-source-map: 2.0.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -12028,7 +12056,7 @@ packages:
     peerDependencies:
       react: ^16.3.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@babel/runtime': 7.25.7
+      '@babel/runtime': 7.26.0
       hoist-non-react-statics: 3.3.2
       react: 18.3.1
       react-is: 16.13.1
@@ -16832,7 +16860,7 @@ packages:
       html-entities: 2.5.2
       loader-utils: 2.0.4
       react-refresh: 0.14.2
-      schema-utils: 4.2.0
+      schema-utils: 4.3.0
       source-map: 0.7.4
       webpack: 5.94.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
     dev: true
@@ -16869,7 +16897,7 @@ packages:
       html-entities: 2.5.2
       loader-utils: 2.0.4
       react-refresh: 0.14.2
-      schema-utils: 4.2.0
+      schema-utils: 4.3.0
       source-map: 0.7.4
       webpack: 5.98.0(@swc/core@1.10.16)(esbuild@0.17.19)(webpack-cli@5.1.4)
     dev: true
@@ -20459,7 +20487,7 @@ packages:
     dependencies:
       '@semantic-release/error': 3.0.0
       aggregate-error: 3.1.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       execa: 5.1.1
       lodash: 4.17.21
       parse-json: 5.2.0
@@ -20476,7 +20504,7 @@ packages:
     dependencies:
       '@semantic-release/error': 3.0.0
       aggregate-error: 3.1.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       dir-glob: 3.0.1
       execa: 5.1.1
       lodash: 4.17.21
@@ -22431,7 +22459,7 @@ packages:
       '@swc-node/sourcemap-support': 0.5.1
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       colorette: 2.0.20
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       oxc-resolver: 1.12.0
       pirates: 4.0.6
       tslib: 2.6.3
@@ -23963,7 +23991,7 @@ packages:
       '@typescript-eslint/types': 7.18.0
       '@typescript-eslint/typescript-estree': 7.18.0(typescript@5.5.2)
       '@typescript-eslint/visitor-keys': 7.18.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       eslint: 8.57.1
       typescript: 5.5.2
     transitivePeerDependencies:
@@ -24779,7 +24807,7 @@ packages:
     peerDependencies:
       vitest: 1.6.0
     dependencies:
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-instrument: 6.0.3
       istanbul-lib-report: 3.0.1
@@ -24800,7 +24828,7 @@ packages:
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-report: 3.0.1
       istanbul-lib-source-maps: 5.0.6
@@ -26072,7 +26100,7 @@ packages:
       '@ant-design/colors': 6.0.0
       '@ant-design/icons': 4.8.3(react-dom@18.3.1)(react@18.3.1)
       '@ant-design/react-slick': 1.0.2(react@18.3.1)
-      '@babel/runtime': 7.24.5
+      '@babel/runtime': 7.26.0
       '@ctrl/tinycolor': 3.6.1
       classnames: 2.5.1
       copy-to-clipboard: 3.3.3
@@ -29816,7 +29844,6 @@ packages:
     dependencies:
       ms: 2.1.3
       supports-color: 8.1.1
-    dev: true
 
   /debug@4.3.7(supports-color@9.3.1):
     resolution: {integrity: sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==}
@@ -29829,6 +29856,7 @@ packages:
     dependencies:
       ms: 2.1.3
       supports-color: 9.3.1
+    dev: true
 
   /debug@4.4.0(supports-color@5.5.0):
     resolution: {integrity: sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==}
@@ -37435,7 +37463,7 @@ packages:
     engines: {node: '>=8.0'}
     dependencies:
       date-format: 4.0.14
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       flatted: 3.3.1
       rfdc: 1.4.1
       streamroller: 3.1.5
@@ -45988,16 +46016,6 @@ packages:
       ajv: 6.12.6
       ajv-keywords: 3.5.2(ajv@6.12.6)
 
-  /schema-utils@4.2.0:
-    resolution: {integrity: sha512-L0jRsrPpjdckP3oPug3/VxNKt2trR8TcabrM6FOAAlvC/9Phcmm+cuAgTlxBqdBR1WJx7Naj9WHw+aOmheSVbw==}
-    engines: {node: '>= 12.13.0'}
-    dependencies:
-      '@types/json-schema': 7.0.15
-      ajv: 8.17.1
-      ajv-formats: 2.1.1(ajv@8.17.1)
-      ajv-keywords: 5.1.0(ajv@8.17.1)
-    dev: true
-
   /schema-utils@4.3.0:
     resolution: {integrity: sha512-Gf9qqc58SpCA/xdziiHz35F4GNIWYWZrEshUc/G/r5BnLph6xpKuLeoJoQuj5WfBIx/eQLf+hmVPYHaxJu7V2g==}
     engines: {node: '>= 10.13.0'}
@@ -47569,6 +47587,7 @@ packages:
   /supports-color@9.3.1:
     resolution: {integrity: sha512-knBY82pjmnIzK3NifMo3RxEIRD9E0kIzV4BKcyTZ9+9kWgLMxd4PrsTSMoFQUabgRBbF8KOLRDCyKgNV+iK44Q==}
     engines: {node: '>=12'}
+    dev: true
 
   /supports-hyperlinks@2.3.0:
     resolution: {integrity: sha512-RpsAZlpWcDwOPQA22aCH4J0t7L8JmAvsCxfOSEwm7cQs3LshN36QaTkwd70DnBOXDWGssw2eUoc8CaRWT0XunA==}
@@ -49887,7 +49906,7 @@ packages:
       compression: 1.7.4
       cookies: 0.9.1
       cors: 2.8.5
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       envinfo: 7.11.0
       express: 4.18.2
       express-rate-limit: 5.5.1
@@ -50055,7 +50074,7 @@ packages:
       '@volar/typescript': 2.4.5
       '@vue/language-core': 2.1.6(typescript@5.5.2)
       compare-versions: 6.1.1
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       kolorist: 1.8.0
       local-pkg: 0.5.0
       magic-string: 0.30.17
@@ -50082,7 +50101,7 @@ packages:
       '@volar/typescript': 2.4.5
       '@vue/language-core': 2.1.6(typescript@5.5.2)
       compare-versions: 6.1.1
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       kolorist: 1.8.0
       local-pkg: 0.5.0
       magic-string: 0.30.17
@@ -50102,7 +50121,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       globrex: 0.1.2
       tsconfck: 2.1.2(typescript@5.5.2)
       vite: 5.4.12(@types/node@18.16.9)(less@4.3.0)(stylus@0.64.0)
@@ -50281,7 +50300,7 @@ packages:
       acorn-walk: 8.3.4
       cac: 6.7.14
       chai: 4.5.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       execa: 8.0.1
       local-pkg: 0.5.0
       magic-string: 0.30.11
@@ -50339,7 +50358,7 @@ packages:
       '@vitest/utils': 1.6.0
       acorn-walk: 8.3.4
       chai: 4.5.0
-      debug: 4.3.7(supports-color@9.3.1)
+      debug: 4.3.7(supports-color@8.1.1)
       execa: 8.0.1
       local-pkg: 0.5.0
       magic-string: 0.30.11

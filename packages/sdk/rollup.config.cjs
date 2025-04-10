@@ -1,20 +1,13 @@
 const copy = require('rollup-plugin-copy');
-const replace = require('@rollup/plugin-replace');
-const pkg = require('./package.json');
 
 module.exports = (rollupConfig, _projectOptions) => {
   rollupConfig.plugins.push(
     copy({
-      targets: [
-        {
-          src: 'packages/runtime-plugins/inject-external-runtime-core-plugin/LICENSE',
-          dest: 'packages/runtime-plugins/inject-external-runtime-core-plugin/dist',
-        },
-      ],
+      targets: [{ src: 'packages/sdk/LICENSE', dest: 'packages/sdk/dist' }],
     }),
   );
 
-  rollupConfig.external = [/@module-federation/];
+  rollupConfig.external = [/@module-federation/, 'isomorphic-rslog'];
 
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output = rollupConfig.output.map((c) => ({
@@ -25,14 +18,16 @@ module.exports = (rollupConfig, _projectOptions) => {
         }
       },
       hoistTransitiveImports: false,
+      minifyInternalExports: true,
       entryFileNames:
-        c.format === 'esm'
-          ? c.entryFileNames.replace('.js', '.mjs')
+        c.format === 'cjs'
+          ? c.entryFileNames.replace('.js', '.cjs')
           : c.entryFileNames,
       chunkFileNames:
-        c.format === 'esm'
-          ? c.chunkFileNames.replace('.js', '.mjs')
+        c.format === 'cjs'
+          ? c.chunkFileNames.replace('.js', '.cjs')
           : c.chunkFileNames,
+      ...(c.format === 'cjs' ? { externalLiveBindings: false } : {}),
     }));
   } else {
     rollupConfig.output = {
@@ -43,22 +38,20 @@ module.exports = (rollupConfig, _projectOptions) => {
         }
       },
       hoistTransitiveImports: false,
+      minifyInternalExports: true,
       entryFileNames:
-        rollupConfig.output.format === 'esm'
-          ? rollupConfig.output.entryFileNames.replace('.js', '.mjs')
+        rollupConfig.output.format === 'cjs'
+          ? rollupConfig.output.entryFileNames.replace('.js', '.cjs')
           : rollupConfig.output.entryFileNames,
       chunkFileNames:
-        rollupConfig.output.format === 'esm'
-          ? rollupConfig.output.chunkFileNames.replace('.js', '.mjs')
+        rollupConfig.output.format === 'cjs'
+          ? rollupConfig.output.chunkFileNames.replace('.js', '.cjs')
           : rollupConfig.output.chunkFileNames,
+      ...(rollupConfig.output.format === 'cjs'
+        ? { externalLiveBindings: false }
+        : {}),
     };
   }
 
-  rollupConfig.plugins.push(
-    replace({
-      preventAssignment: true,
-      __VERSION__: JSON.stringify(pkg.version),
-    }),
-  );
   return rollupConfig;
 };

@@ -20,7 +20,7 @@
         "assets": [],
         "project": "packages/runtime-tools/package.json",
         "compiler": "swc",
-        "rollupConfig": "packages/runtime-tools/rollup.config.js",
+        "rollupConfig": "packages/runtime-tools/rollup.config.cjs",
         "format": ["cjs", "esm"],
         "external": ["@module-federation/*"],
         "generatePackageJson": false

@@ -130,7 +130,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     ).apply(compiler);
 
     const runtimeESMPath = require.resolve(
-      '@module-federation/runtime/dist/index.esm.mjs',
+      '@module-federation/runtime/dist/index.esm.js',
       { paths: [options.implementation] },
     );
 

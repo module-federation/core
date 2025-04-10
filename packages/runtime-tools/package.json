@@ -1,9 +1,10 @@
 {
   "name": "@module-federation/runtime-tools",
   "version": "0.11.4",
+  "type": "module",
   "author": "zhanghang <hanric.zhang@gmail.com>",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.esm.mjs",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
   "types": "./dist/index.cjs.d.ts",
   "license": "MIT",
   "repository": {
@@ -16,24 +17,44 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.cjs.d.ts",
-      "import": "./dist/index.esm.mjs",
-      "require": "./dist/index.cjs.js"
+      "import": {
+        "types": "./dist/index.esm.d.ts",
+        "default": "./dist/index.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.cjs.d.ts",
+        "default": "./dist/index.cjs.cjs"
+      }
     },
     "./runtime": {
-      "types": "./dist/runtime.cjs.d.ts",
-      "import": "./dist/runtime.esm.mjs",
-      "require": "./dist/runtime.cjs.js"
+      "import": {
+        "types": "./dist/runtime.esm.d.ts",
+        "default": "./dist/runtime.esm.js"
+      },
+      "require": {
+        "types": "./dist/runtime.cjs.d.ts",
+        "default": "./dist/runtime.cjs.cjs"
+      }
     },
     "./runtime-core": {
-      "types": "./dist/runtime-core.cjs.d.ts",
-      "import": "./dist/runtime-core.esm.mjs",
-      "require": "./dist/runtime-core.cjs.js"
+      "import": {
+        "types": "./dist/runtime-core.esm.d.ts",
+        "default": "./dist/runtime-core.esm.js"
+      },
+      "require": {
+        "types": "./dist/runtime-core.cjs.d.ts",
+        "default": "./dist/runtime-core.cjs.cjs"
+      }
     },
     "./webpack-bundler-runtime": {
-      "types": "./dist/webpack-bundler-runtime.cjs.d.ts",
-      "import": "./dist/webpack-bundler-runtime.esm.mjs",
-      "require": "./dist/webpack-bundler-runtime.cjs.js"
+      "import": {
+        "types": "./dist/webpack-bundler-runtime.esm.d.ts",
+        "default": "./dist/webpack-bundler-runtime.esm.js"
+      },
+      "require": {
+        "types": "./dist/webpack-bundler-runtime.cjs.d.ts",
+        "default": "./dist/webpack-bundler-runtime.cjs.cjs"
+      }
     },
     "./*": "./*"
   },

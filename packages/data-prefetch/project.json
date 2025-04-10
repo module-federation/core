@@ -14,7 +14,7 @@
         "tsConfig": "packages/data-prefetch/tsconfig.lib.json",
         "assets": [],
         "project": "packages/data-prefetch/package.json",
-        "rollupConfig": "packages/data-prefetch/rollup.config.js",
+        "rollupConfig": "packages/data-prefetch/rollup.config.cjs",
         "compiler": "swc",
         "format": ["cjs", "esm"],
         "generatePackageJson": false
@@ -24,7 +24,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/data-prefetch/jest.config.js",
+        "jestConfig": "packages/data-prefetch/jest.config.cjs",
         "passWithNoTests": true
       },
       "configurations": {

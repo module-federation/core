@@ -18,7 +18,7 @@
     },
     "./src/plugins/NodeFederationPlugin.js": "./dist/src/plugins/NodeFederationPlugin.js",
     "./universe-entry-chunk-tracker-plugin": "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.js",
-    "./src/": "./dist/src/"
+    "./src/*": "./dist/src/*"
   },
   "typesVersions": {
     "*": {

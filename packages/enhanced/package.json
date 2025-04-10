@@ -5,7 +5,7 @@
   "types": "./dist/src/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/enhanced"
   },
   "files": [

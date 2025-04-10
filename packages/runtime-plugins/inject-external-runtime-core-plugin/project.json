@@ -14,7 +14,7 @@
         "tsConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/tsconfig.lib.json",
         "assets": [],
         "project": "packages/runtime-plugins/inject-external-runtime-core-plugin/package.json",
-        "rollupConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/rollup.config.js",
+        "rollupConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/rollup.config.cjs",
         "compiler": "swc",
         "generatePackageJson": false,
         "format": ["cjs", "esm"]
