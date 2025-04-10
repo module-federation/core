@@ -14,6 +14,7 @@ code-analyzer.ts
 # dependencies
 node_modules
 ./webpack-lib
+next.js
 # IDEs and editors
 /.idea
 .project
@@ -75,4 +76,6 @@ packages/enhanced/test/js
 !apps/rslib-module/@mf-types/**
 
 **/vite.config.{js,ts,mjs,mts,cjs,cts}.timestamp*
-/webpack-lib/
+
+# Federation
+**/.federation

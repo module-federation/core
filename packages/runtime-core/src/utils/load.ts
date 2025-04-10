@@ -31,10 +31,10 @@ async function loadEsmEntry({
     try {
       if (!remoteEntryExports) {
         if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
-          new Function(
-            'callbacks',
-            `import("${entry}")${importCallback}`,
-          )([resolve, reject]);
+          new Function('callbacks', `import("${entry}")${importCallback}`)([
+            resolve,
+            reject,
+          ]);
         } else {
           import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
             .then(resolve)
@@ -248,8 +248,8 @@ export async function getRemoteEntry({
         if (res) {
           return res;
         }
-          // Use ENV_TARGET if defined, otherwise fallback to isBrowserEnv, must keep this
-          const isWebEnvironment =
+        // Use ENV_TARGET if defined, otherwise fallback to isBrowserEnv, must keep this
+        const isWebEnvironment =
           typeof ENV_TARGET !== 'undefined'
             ? ENV_TARGET === 'web'
             : isBrowserEnv();

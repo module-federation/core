@@ -1,5 +1,6 @@
 import { it, expect, describe } from 'vitest';
-import { patchMFConfig, getIPV4 } from './utils';
+import { patchMFConfig } from './configPlugin';
+import { getIPV4 } from './utils';
 
 const mfConfig = {
   name: 'host',
