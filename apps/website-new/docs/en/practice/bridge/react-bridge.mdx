@@ -8,10 +8,27 @@
 
 `@module-federation/bridge-react` supports multiple major React versions, ensuring seamless integration between applications using different React versions:
 
-- **React 16**: Fully supported, using traditional `ReactDOM.render` and `ReactDOM.hydrate` APIs
-- **React 17**: Fully supported, maintaining the same API calling pattern as React 16
-- **React 18**: Fully supported, automatically using the new `createRoot` and `hydrateRoot` APIs
-- **React 19**: Fully supported, implemented through dynamic import of `react-dom/client`, ensuring it works even in older environments
+- **React 16/17 (Legacy)**: Fully supported, using traditional `ReactDOM.render` and `ReactDOM.unmountComponentAtNode` APIs
+- **React 18**: Fully supported, using the new `createRoot` and `hydrateRoot` APIs
+- **React 19**: Fully supported, using `createRoot` and `hydrateRoot` APIs, but with legacy render methods completely removed
+
+### Version-Specific Imports
+
+You can choose specific import paths based on the React version used in your project:
+
+```jsx
+// Auto-detect React version (recommended for most scenarios)
+import { createBridgeComponent } from '@module-federation/bridge-react';
+
+// Explicitly specify React 16/17 version (Legacy mode)
+import { createBridgeComponent } from '@module-federation/bridge-react/legacy';
+
+// Explicitly specify React 18 version
+import { createBridgeComponent } from '@module-federation/bridge-react/v18';
+
+// Explicitly specify React 19 version
+import { createBridgeComponent } from '@module-federation/bridge-react/v19';
+```
 
 This multi-version compatibility allows different teams to independently choose and upgrade their React versions while maintaining stable Module Federation integration.
 
@@ -104,22 +121,20 @@ export default defineConfig({
 });
 ```
 
-- Step 2: In the consumer project, we need to load the application type module. We use `createRemoteComponent` to load the application type module
+- Step 2: In the host application, we need to use `createRemoteComponent` to load the remote application.
 
 ```tsx
 // ./src/App.tsx
-import React from 'react';
 import { createRemoteComponent } from '@module-federation/bridge-react';
-import styles from './index.module.less';
+import { loadRemote } from '@module-federation/runtime';
 
-// Define FallbackErrorComp component
-const FallbackErrorComp = ({ error, resetErrorBoundary }) => {
+// Define FallbackError component
+const FallbackErrorComp = ({ error }: { error: Error }) => {
   return (
     <div>
-      <h2>This is ErrorBoundary Component</h2>
-      <p>Something went wrong:</p>
-      <pre style={{ color: 'red' }}>{error.message}</pre>
-      <button onClick={() => resetErrorBoundary()}>
+      <h1>Error loading remote component</h1>
+      <p>{error.message}</p>
+      <button onClick={() => window.location.reload()}>
         resetErrorBoundary(try again)
       </button>
     </div>
@@ -149,16 +164,11 @@ const App = () => {
           // Use Remote1App component, will be lazy loaded
           Component={() => (
             <Remote1App
-              // Can set className and style, will be automatically injected into the component
-              className={styles.remote1}
-              style={{ color: 'red' }}
-              // name and age are remote component props, will be automatically passed to the remote component
-              name={'Ming'}
-              age={12}
-              // Can set ref, will be forwarded to the remote component, can get ref object to operate DOM
-              ref={ref}
-              // Use memoryRoute to control child application routing as memoryRouter, will not directly display URL in browser address bar
-              memoryRoute={{ entryPath: '/detail' }}
+              // Set basename for remote application
+              basename="/remote1"
+              // Other properties will be passed to remote component
+              props1={'props_value'}
+              props2={'another_props_value'}
             />
           )}
         />
@@ -167,7 +177,6 @@ const App = () => {
   );
 };
 ```
-At this point, we have completed loading the application type module.
 
 :::info
 
@@ -177,23 +186,19 @@ making cross-framework rendering of applications possible.
 2. Additionally, `createRemoteComponent` will automatically handle module loading, module destruction, error handling, loading, routing, and other logic,
 allowing developers to focus solely on how to use the remote component.
 
-3. For remote modules exported through `createRemoteComponent`, you can use them like regular React components: passing className, style, props, ref, and other attributes will be automatically passed through to the remote component,
-making the user experience almost equivalent to using local components.
-
 :::
-
 
 ### API Reference
 
 #### createBridgeComponent
 
-`createBridgeComponent` is used to wrap React components into remotely loadable modules.
+`createBridgeComponent` is used to export remote React components.
 
 ```tsx
 /**
- * Create a remotely loadable React component
- * @param bridgeInfo - Bridge Component Config information
- * @returns Returns a function that returns an object containing render and destroy methods
+ * Create a bridge component for remote loading
+ * @param bridgeInfo - Bridge component configuration information
+ * @returns Returns a function that provides render and destroy methods
  */
 function createBridgeComponent<T>(
   bridgeInfo: ProviderFnParams<T>
@@ -212,35 +217,33 @@ interface ProviderFnParams<T> {
   /** 
    * Custom render function for custom rendering logic
    * @param App - React element
-   * @param id - DOM element or string ID
-   * @returns React root element or Promise
+   * @param container - DOM container
+   * @param options - Render options
    */
   render?: (
     App: React.ReactElement,
-    id?: HTMLElement | string,
-  ) => RootType | Promise<RootType>;
+    container: HTMLElement,
+    options?: RenderParams
+  ) => void;
   
-  /**
-   * Custom function to create React root node
-   * @param container - Container element
-   * @param options - Options for creating root node
-   * @returns React root node
+  /** 
+   * Custom destroy function for custom destruction logic
+   * @param container - DOM container
+   */
+  destroy?: (container: HTMLElement) => void;
+  
+  /** 
+   * Custom createRoot function for React 18 and above
+   * @param container - DOM container
+   * @param options - CreateRoot options
    */
   createRoot?: (
     container: Element | DocumentFragment,
-    options?: CreateRootOptions,
+    options?: CreateRootOptions
   ) => Root;
-}
-
-/**
- * Options for creating React root node
- */
-interface CreateRootOptions {
-  /** Add prefix to generated React IDs to avoid ID conflicts */
-  identifierPrefix?: string;
   
-  /** Callback function to handle recoverable errors during React rendering */
-  onRecoverableError?: (error: unknown) => void;
+  /** Default options for createRoot */
+  defaultRootOptions?: CreateRootOptions;
   
   /** Transition callbacks for React 18 concurrent features */
   transitionCallbacks?: TransitionCallbacks;

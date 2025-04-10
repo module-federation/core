@@ -8,10 +8,27 @@
 
 `@module-federation/bridge-react` 支持多个 React 主要版本，确保在不同 React 版本的应用之间实现无缝集成：
 
-- **React 16**: 完全支持，使用传统 `ReactDOM.render` 和 `ReactDOM.hydrate` API
-- **React 17**: 完全支持，保持与 React 16 相同的 API 调用方式
-- **React 18**: 完全支持，自动使用新的 `createRoot` 和 `hydrateRoot` API
-- **React 19**: 完全支持，通过动态导入 `react-dom/client` 实现，确保即使在较旧的环境中也能正常工作
+- **React 16/17 (Legacy)**: 完全支持，使用传统 `ReactDOM.render` 和 `ReactDOM.unmountComponentAtNode` API
+- **React 18**: 完全支持，使用新的 `createRoot` 和 `hydrateRoot` API
+- **React 19**: 完全支持，使用 `createRoot` 和 `hydrateRoot` API，但移除了对传统渲染方法的支持
+
+### 版本特定导入
+
+您可以根据项目中使用的 React 版本，选择特定的导入方式：
+
+```jsx
+// 自动检测 React 版本（推荐用于大多数场景）
+import { createBridgeComponent } from '@module-federation/bridge-react';
+
+// 明确指定 React 16/17 版本（Legacy 模式）
+import { createBridgeComponent } from '@module-federation/bridge-react/legacy';
+
+// 明确指定 React 18 版本
+import { createBridgeComponent } from '@module-federation/bridge-react/v18';
+
+// 明确指定 React 19 版本
+import { createBridgeComponent } from '@module-federation/bridge-react/v19';
+```
 
 这种多版本兼容性使得不同团队可以独立选择和升级他们的 React 版本，同时保持模块联邦集成的稳定性。
 
@@ -29,7 +46,6 @@ import { PackageManagerTabs } from '@theme';
     pnpm: 'pnpm add @module-federation/bridge-react@latest',
   }}
 />
-
 
 ### 示例
 
