@@ -10,3 +10,7 @@
 ## Build
 
 Output will be located in the `dist` or `.next` folder.
+
+---
+
+*Optimized by Aiden*
