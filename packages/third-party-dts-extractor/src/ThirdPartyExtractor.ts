@@ -10,23 +10,49 @@ const ignoredPkgs = ['typescript'];
 const isNodeUtils = (pkgJsonPath: string, importPath: string) => {
   return pkgJsonPath === importPath;
 };
+
+type ThirdPartyExtractorOptions = {
+  destDir: string;
+  context?: string;
+  exclude?: Array<string | RegExp>;
+};
+
 class ThirdPartyExtractor {
   pkgs: Record<string, string>;
   pattern: RegExp;
   context: string;
   destDir: string;
+  exclude: Array<string | RegExp>;
 
-  constructor(destDir: string, context = process.cwd()) {
+  constructor({
+    destDir,
+    context = process.cwd(),
+    exclude = [],
+  }: ThirdPartyExtractorOptions) {
     this.destDir = destDir;
     this.context = context;
     this.pkgs = {};
     this.pattern = /(from|import\()\s*['"]([^'"]+)['"]/g;
+    this.exclude = exclude;
   }
 
   addPkgs(pkgName: string, dirName: string): void {
     if (ignoredPkgs.includes(pkgName)) {
       return;
     }
+
+    if (
+      this.exclude.some((pattern) => {
+        if (typeof pattern === 'string') {
+          return new RegExp(pattern).test(pkgName);
+        } else {
+          return pattern.test(pkgName);
+        }
+      })
+    ) {
+      return;
+    }
+
     this.pkgs[pkgName] = dirName;
   }
 

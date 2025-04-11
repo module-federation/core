@@ -177,10 +177,14 @@ export const compileTs = async (
   );
   try {
     const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
-    const thirdPartyExtractor = new ThirdPartyExtractor(
-      resolve(mfTypePath, 'node_modules'),
-      remoteOptions.context,
-    );
+    const thirdPartyExtractor = new ThirdPartyExtractor({
+      destDir: resolve(mfTypePath, 'node_modules'),
+      context: remoteOptions.context,
+      exclude:
+        typeof remoteOptions.extractThirdParty === 'object'
+          ? remoteOptions.extractThirdParty.exclude
+          : undefined,
+    });
     const execPromise = util.promisify(exec);
     const cmd = `npx ${remoteOptions.compilerInstance} --project ${tempTsConfigJsonPath}`;
     try {

@@ -61,7 +61,6 @@ const readTsConfig = (
     context,
     additionalFilesToCompile,
     outputDir,
-    moduleFederationConfig,
   }: Required<RemoteOptions>,
   mapComponentsToExpose: Record<string, string>,
 ): TsConfigJson => {
@@ -116,9 +115,18 @@ const readTsConfig = (
     rawTsConfigJson.compilerOptions || {};
   rawTsConfigJson.compilerOptions = restCompilerOptions;
 
+  const outDirWithoutTypesFolder = resolve(
+    context,
+    outputDir || configContent.options.outDir || 'dist',
+  );
+
   const filesToCompile = [
     ...Object.values(mapComponentsToExpose),
-    ...configContent.fileNames.filter((filename) => filename.endsWith('.d.ts')),
+    ...configContent.fileNames.filter(
+      (filename) =>
+        filename.endsWith('.d.ts') &&
+        !filename.startsWith(outDirWithoutTypesFolder),
+    ),
     ...additionalFilesToCompile,
   ];
 

@@ -8,10 +8,6 @@ import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extracto
 import { HostOptions, RemoteInfo } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { downloadTypesArchive } from './archiveHandler';
-import {
-  retrieveHostConfig,
-  retrieveRemoteInfo,
-} from '../configurations/hostPlugin';
 
 vi.mock('axios');
 vi.mock('fs/promises');
@@ -452,6 +448,7 @@ describe('DTSManager General Tests', () => {
         inferPkgDir: vi.fn(),
         collectPkgs: vi.fn(),
         copyDts: vi.fn().mockResolvedValue(undefined),
+        exclude: [],
       }));
 
       // Add the existing alias to the loadedRemoteAPIAlias set
