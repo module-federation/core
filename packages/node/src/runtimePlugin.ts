@@ -235,6 +235,15 @@ export const installChunk = (
   }
 };
 
+// Hoisted utility function to remove a chunk on fail
+export const deleteChunk = (
+  chunkId: string,
+  installedChunks: { [key: string]: any },
+): boolean => {
+  delete installedChunks[chunkId];
+  return true;
+};
+
 // Hoisted function to set up webpack script loader
 export const setupScriptLoader = (): void => {
   __webpack_require__.l = (
@@ -297,7 +306,8 @@ export const setupChunkHandler = (
                 chunkId,
                 __webpack_require__.federation.rootOutputDir || '',
                 (err, chunk) => {
-                  if (err) return reject(err);
+                  if (err)
+                    return deleteChunk(chunkId, installedChunks) && reject(err);
                   if (chunk) installChunk(chunk, installedChunks);
                   resolve(chunk);
                 },
@@ -312,7 +322,8 @@ export const setupChunkHandler = (
                 chunkName,
                 __webpack_require__.federation.initOptions.name,
                 (err, chunk) => {
-                  if (err) return reject(err);
+                  if (err)
+                    return deleteChunk(chunkId, installedChunks) && reject(err);
                   if (chunk) installChunk(chunk, installedChunks);
                   resolve(chunk);
                 },
