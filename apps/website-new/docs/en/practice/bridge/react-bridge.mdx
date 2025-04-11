@@ -1,4 +1,4 @@
-# React Bridge（for React v16, v17, v18, v19）
+# React Bridge（for React v16-v19）
 
 `@module-federation/bridge-react` provides bridge utility functions for React applications:
 - `createBridgeComponent`: Used for exporting application-level modules, suitable for producers to wrap modules exported as application types
@@ -217,36 +217,35 @@ interface ProviderFnParams<T> {
   /** 
    * Custom render function for custom rendering logic
    * @param App - React element
-   * @param container - DOM container
-   * @param options - Render options
+   * @param id - DOM element or string ID
+   * @returns React root element or Promise
    */
   render?: (
     App: React.ReactElement,
-    container: HTMLElement,
-    options?: RenderParams
-  ) => void;
-  
-  /** 
-   * Custom destroy function for custom destruction logic
-   * @param container - DOM container
-   */
-  destroy?: (container: HTMLElement) => void;
+    id?: HTMLElement | string,
+  ) => RootType | Promise<RootType>;
   
   /** 
    * Custom createRoot function for React 18 and above
    * @param container - DOM container
    * @param options - CreateRoot options
+   * @returns React root node
    */
   createRoot?: (
     container: Element | DocumentFragment,
-    options?: CreateRootOptions
+    options?: CreateRootOptions,
   ) => Root;
   
-  /** Default options for createRoot */
+  /**
+   * Default options for createRoot in React 18 and 19
+   * These options will be used when creating a root unless overridden by rootOptions in render params
+   * @example
+   * {
+   *   identifierPrefix: 'app-',
+   *   onRecoverableError: (err) => console.error(err)
+   * }
+   */
   defaultRootOptions?: CreateRootOptions;
-  
-  /** Transition callbacks for React 18 concurrent features */
-  transitionCallbacks?: TransitionCallbacks;
 }
 ```
 
@@ -362,13 +361,13 @@ function App() {
     </BrowserRouter>
   );
 }
+```
 
-
-### Configuring createRoot Options for React 18 and 19
+## Configuring createRoot Options for React 18 and 19
 
 For React 18 and 19, `@module-federation/bridge-react` supports passing options to the `createRoot` method, allowing you to customize the behavior of your root component:
 
-#### Setting Default Options When Creating a Bridge Component
+### Setting Default Options When Creating a Bridge Component
 
 ```tsx
 import { createBridgeComponent } from '@module-federation/bridge-react';
@@ -385,7 +384,7 @@ export default createBridgeComponent({
 });
 ```
 
-#### Setting Options at Render Time
+### Setting Options at Render Time
 
 ```tsx
 // In the consumer application
