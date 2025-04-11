@@ -187,13 +187,11 @@ class StatsManager {
 
   private _getModuleAssets(
     compilation: Compilation,
+    entryPointNames: string[],
   ): Record<string, StatsAssets> {
     const { chunks } = compilation;
     const { exposeFileNameImportMap } = this._containerManager;
     const assets: Record<string, StatsAssets> = {};
-    const entryPointNames = [...compilation.entrypoints.values()]
-      .map((e) => e.name)
-      .filter((v) => !!v) as Array<string>;
 
     chunks.forEach((chunk) => {
       if (
@@ -214,6 +212,7 @@ class StatsManager {
   private _getProvideSharedAssets(
     compilation: Compilation,
     stats: StatsCompilation,
+    entryPointNames: string[],
   ): StatsAssets {
     const sharedModules = stats.modules!.filter((module) => {
       if (!module || !module.name) {
@@ -241,23 +240,14 @@ class StatsManager {
         const chunk = findChunk(chunkID, compilation.chunks);
 
         manifestOverrideChunkIDMap[sharedModuleName].sync.add(chunkID);
-        Array.from(chunk!.getAllInitialChunks() as Iterable<Chunk>).forEach(
-          (syncChunk: Chunk) => {
-            syncChunk.id &&
-              manifestOverrideChunkIDMap[sharedModuleName].sync.add(
-                syncChunk.id,
-              );
-          },
-        );
-
-        Array.from(chunk!.getAllAsyncChunks() as Iterable<Chunk>).forEach(
-          (asyncChunk: Chunk) => {
-            asyncChunk.id &&
-              manifestOverrideChunkIDMap[sharedModuleName].async.add(
-                asyncChunk.id,
-              );
-          },
-        );
+        if (!chunk) {
+          return;
+        }
+        [...chunk.groupsIterable].forEach((group) => {
+          if (group.name && !entryPointNames.includes(group.name)) {
+            manifestOverrideChunkIDMap[sharedModuleName].sync.add(group.id);
+          }
+        });
       });
     });
 
@@ -360,12 +350,16 @@ class StatsManager {
         bundler: this._bundler,
       });
       const { remotes, exposesMap, sharedMap } = moduleHandler.collect();
+      const entryPointNames = [...compilation.entrypoints.values()]
+        .map((e) => e.name)
+        .filter((v) => !!v) as Array<string>;
 
       await Promise.all([
         new Promise<void>((resolve) => {
           const sharedAssets = this._getProvideSharedAssets(
             compilation,
             webpackStats,
+            entryPointNames,
           );
 
           Object.keys(sharedMap).forEach((sharedKey) => {
@@ -377,7 +371,10 @@ class StatsManager {
           resolve();
         }),
         new Promise<void>((resolve) => {
-          const moduleAssets = this._getModuleAssets(compilation);
+          const moduleAssets = this._getModuleAssets(
+            compilation,
+            entryPointNames,
+          );
 
           Object.keys(exposesMap).forEach((exposeKey) => {
             const assets = moduleAssets[exposeKey];
@@ -418,13 +415,34 @@ class StatsManager {
           }));
           resolve();
         }),
-        new Promise<void>((resolve) => {
-          stats.exposes = Object.values(exposesMap).map((expose) => ({
-            ...expose,
-          }));
-          resolve();
-        }),
       ]);
+
+      await new Promise<void>((resolve) => {
+        const sharedAssets = stats.shared.reduce((sum, shared) => {
+          const { js, css } = shared.assets;
+          [...js.sync, ...js.async, ...css.async, css.sync].forEach((asset) => {
+            sum.add(asset);
+          });
+          return sum;
+        }, new Set());
+        stats.exposes = Object.values(exposesMap).map((expose) => {
+          const { js, css } = expose.assets;
+          return {
+            ...expose,
+            assets: {
+              js: {
+                sync: js.sync.filter((asset) => !sharedAssets.has(asset)),
+                async: js.async.filter((asset) => !sharedAssets.has(asset)),
+              },
+              css: {
+                sync: css.sync.filter((asset) => !sharedAssets.has(asset)),
+                async: css.async.filter((asset) => !sharedAssets.has(asset)),
+              },
+            },
+          };
+        });
+        resolve();
+      });
 
       return stats;
     } catch (err) {
