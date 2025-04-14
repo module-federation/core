@@ -1,0 +1,47 @@
+{
+  "name": "@module-federation/mcp",
+  "version": "0.11.4",
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rslib build",
+    "dev": "rslib build --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core/",
+    "directory": "packages/mcp"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/cli/index.d.ts",
+      "import": "./dist/esm/cli/index.js",
+      "require": "./dist/cjs/cli/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types/cli/index.d.ts"
+      ]
+    }
+  },
+  "main": "./dist/cjs/cli/index.js",
+  "types": "./dist/types/cli/index.d.ts",
+  "author": "hanric <hanric.zhang@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "@modelcontextprotocol/sdk": "^1.4.1",
+    "openai": "^4.77.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@rslib/core": "^0.3.1"
+  }
+}
