@@ -13,3 +13,7 @@
 ## Usage
 
 Run the development server and navigate to the provided localhost URL.
+
+## Build
+
+Output will be located in the `dist` or `.next` folder.
