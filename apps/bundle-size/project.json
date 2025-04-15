@@ -1,0 +1,145 @@
+{
+  "name": "bundle-size",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/bundle-size/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "babel",
+        "outputPath": "apps/bundle-size/dist",
+        "index": "apps/bundle-size/src/index.html",
+        "baseHref": "/",
+        "main": "apps/bundle-size/src/index.ts",
+        "tsConfig": "apps/bundle-size/tsconfig.app.json",
+        "styles": [],
+        "scripts": [],
+        "webpackConfig": "apps/bundle-size/webpack.config.js",
+        "babelUpwardRootMode": true
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": false,
+          "vendorChunk": false
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "serve": {
+      "executor": "@nx/webpack:dev-server",
+      "defaultConfiguration": "production",
+      "options": {
+        "buildTarget": "bundle-size:build",
+        "hmr": true,
+        "port": 3005,
+        "devRemotes": ["3006-runtime-remote"]
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "bundle-size:build:development"
+        },
+        "production": {
+          "buildTarget": "bundle-size:build:production",
+          "hmr": false
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/bundle-size/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "bundle-size:build",
+        "port": 3005
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "bundle-size:build:development"
+        },
+        "production": {
+          "buildTarget": "bundle-size:build:production"
+        }
+      }
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/bundle-size/cypress.config.ts",
+        "testingType": "e2e",
+        "baseUrl": "http://127.0.0.1:3005",
+        "browser": "chrome"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
+      "configurations": {
+        "development": {
+          "runnerUi": true,
+          "browser": "electron",
+          "exit": false,
+          "watch": true
+        }
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
+          {
+            "command": "lsof -i :3005 || nx run bundle-size:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "sleep 4 && nx run bundle-size:e2e",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "getsize": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "npx nx build bundle-size --configuration=production && sleep 1 && if [ -f apps/bundle-size/dist/remoteEntry.js ]; then ls -lah apps/bundle-size/dist/remoteEntry.js | awk '{print \"remoteEntry.js size: \" $5}' && gzip -c apps/bundle-size/dist/remoteEntry.js | wc -c | awk '{print \"gzip size: \" $1 \" bytes\"}' && brotli -c apps/bundle-size/dist/remoteEntry.js | wc -c | awk '{print \"brotli size: \" $1 \" bytes\"}'; else echo \"remoteEntry.js not found\"; fi"
+          }
+        ]
+      }
+    }
+  }
+}
