@@ -22,7 +22,6 @@
     "directory": "packages/webpack-bundler-runtime"
   },
   "author": "zhanghang <hanric.zhang@gmail.com>",
-  "sideEffects": false,
   "main": "./dist/index.cjs.cjs",
   "module": "./dist/index.esm.js",
   "types": "./dist/index.cjs.d.ts",

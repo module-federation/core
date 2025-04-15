@@ -39,21 +39,18 @@ const { mkdirpSync } = require(
 const RuntimeToolsPath = require.resolve(
   '@module-federation/runtime-tools/dist/index.esm.js',
 );
-console.log(RuntimeToolsPath);
 const BundlerRuntimePath = require.resolve(
   '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
   {
     paths: [RuntimeToolsPath],
   },
 );
-console.log(BundlerRuntimePath);
 const RuntimePath = require.resolve(
   '@module-federation/runtime/dist/index.esm.js',
   {
     paths: [RuntimeToolsPath],
   },
 );
-console.log(RuntimePath);
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompiler = new WeakSet<Compiler>();
@@ -339,9 +336,12 @@ class FederationRuntimePlugin {
       runtimePath = alias['@module-federation/runtime$'];
     } else {
       if (implementation) {
-        runtimePath = require.resolve(`@module-federation/runtime`, {
-          paths: [implementation],
-        });
+        runtimePath = require.resolve(
+          `@module-federation/runtime/dist/index.esm.js`,
+          {
+            paths: [implementation],
+          },
+        );
       }
     }
 
@@ -406,7 +406,7 @@ class FederationRuntimePlugin {
 
     if (this.options?.implementation) {
       this.bundlerRuntimePath = require.resolve(
-        '@module-federation/webpack-bundler-runtime',
+        '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
         {
           paths: [this.options.implementation],
         },

@@ -44,7 +44,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/webpack-bundler-runtime/jest.config.js",
+        "jestConfig": "packages/webpack-bundler-runtime/jest.config.cjs",
         "passWithNoTests": true
       },
       "configurations": {
