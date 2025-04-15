@@ -6,7 +6,11 @@ import { ThirdPartyExtractor } from './ThirdPartyExtractor';
 describe('ThirdPartyExtractor', () => {
   const projectRoot = join(__dirname, '..', '..', '..');
   const destDir = join(projectRoot, 'dist', 'third-party-extractor');
-  const thirdPartyExtractor = new ThirdPartyExtractor(destDir, projectRoot);
+  const thirdPartyExtractor = new ThirdPartyExtractor({
+    destDir,
+    context: projectRoot,
+    exclude: ['ignore-pkg', /ignore-pkg2-/, /ignore-pkg3/.toString()],
+  });
 
   it('should correctly infer pkg dir with types field in package.json', () => {
     const tsupDir = thirdPartyExtractor.inferPkgDir('tsup');
@@ -51,5 +55,15 @@ describe('ThirdPartyExtractor', () => {
     await thirdPartyExtractor.copyDts();
     expect(fs.existsSync(join(destDir, 'tsup'))).toEqual(true);
     expect(fs.existsSync(join(destDir, '@types/react'))).toEqual(true);
+  });
+
+  it('exclude pkg', async () => {
+    const excludePkg = ['ignore-pkg', 'ignore-pkg2-subpath', 'ignore-pkg3'];
+    excludePkg.forEach((pkg) => {
+      thirdPartyExtractor.addPkgs(pkg, `${pkg}-dir`);
+    });
+    expect(
+      Object.keys(thirdPartyExtractor.pkgs).some((p) => excludePkg.includes(p)),
+    ).toEqual(false);
   });
 });
