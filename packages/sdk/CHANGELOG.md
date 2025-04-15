@@ -1,5 +1,16 @@
 # @module-federation/sdk
 
+## 0.12.0
+
+### Minor Changes
+
+- c399b9a: Switch to esm modules by default
+- f4fb242: Support share layers and multiple share scopes
+
+### Patch Changes
+
+- ef96c4d: feat(dts-plugin): support exclude extract specify third party dts
+
 ## 0.11.4
 
 ### Patch Changes
