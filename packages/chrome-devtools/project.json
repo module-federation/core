@@ -13,7 +13,7 @@
       "dependsOn": [
         {
           "target": "build",
-          "projects": "dependencies"
+          "dependencies": true
         }
       ]
     },
@@ -21,7 +21,13 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": ["npm run build --prefix packages/chrome-devtools"]
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "test": {
       "executor": "nx:run-commands",
