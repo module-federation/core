@@ -1,3 +1,8 @@
+---
+title: Type Errors Overview | Module Federation Troubleshooting
+description: Overview of Module Federation type errors, covering fixed error codes and scenario-specific issues like type aliases.
+---
+
 # Overview
 
 Type errors are divided into two types: fixed error code errors and scenario-related errors.

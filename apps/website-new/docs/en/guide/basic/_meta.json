@@ -1,1 +1,42 @@
-["runtime", "rsbuild", "rspack", "webpack", "vite", "chrome-devtool", "type-prompt","cli"]
+[
+  {
+    "type": "file",
+    "name": "runtime",
+    "label": "Runtime"
+  },
+  {
+    "type": "file",
+    "name": "rsbuild",
+    "label": "Rsbuild Plugin"
+  },
+  {
+    "type": "file",
+    "name": "rspack",
+    "label": "Rspack Plugin"
+  },
+  {
+    "type": "file",
+    "name": "webpack",
+    "label": "Webpack Plugin"
+  },
+  {
+    "type": "file",
+    "name": "vite",
+    "label": "Vite Plugin"
+  },
+  {
+    "type": "file",
+    "name": "chrome-devtool",
+    "label": "Chrome DevTools"
+  },
+  {
+    "type": "file",
+    "name": "type-prompt",
+    "label": "Type Prompt"
+  },
+  {
+    "type": "file",
+    "name": "cli",
+    "label": "CLI"
+  }
+]

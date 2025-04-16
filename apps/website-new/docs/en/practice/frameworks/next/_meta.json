@@ -1,1 +1,27 @@
-["index", "importing-components","importing-pages","express","presets"]
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Next.js Integration"
+  },
+  {
+    "type": "file",
+    "name": "importing-components",
+    "label": "Component Importing"
+  },
+  {
+    "type": "file",
+    "name": "importing-pages",
+    "label": "Page Importing"
+  },
+  {
+    "type": "file",
+    "name": "express",
+    "label": "Express Integration"
+  },
+  {
+    "type": "file",
+    "name": "presets",
+    "label": "Preset Configuration"
+  }
+]
