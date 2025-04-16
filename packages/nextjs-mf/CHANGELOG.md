@@ -1,5 +1,24 @@
 # @module-federation/nextjs-mf
 
+## 8.8.24
+
+### Patch Changes
+
+- f4fb242: Support share layers and multiple share scopes
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+  - @module-federation/enhanced@0.12.0
+  - @module-federation/runtime@0.12.0
+  - @module-federation/webpack-bundler-runtime@0.12.0
+  - @module-federation/node@2.7.0
+  - @module-federation/sdk@0.12.0
+
 ## 8.8.23
 
 ### Patch Changes

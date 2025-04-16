@@ -1,5 +1,18 @@
 # @module-federation/manifest
 
+## 0.12.0
+
+### Patch Changes
+
+- 451b4f5: fix(manifest): correct shared assets and filter expose assets
+- Updated dependencies [ebef2d0]
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/dts-plugin@0.12.0
+  - @module-federation/sdk@0.12.0
+  - @module-federation/managers@0.12.0
+
 ## 0.11.4
 
 ### Patch Changes
