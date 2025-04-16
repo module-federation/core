@@ -33,6 +33,7 @@ module.exports = (rollupConfig, _projectOptions) => {
         c.format === 'cjs'
           ? c.chunkFileNames.replace('.js', '.cjs')
           : c.chunkFileNames,
+      ...(c.format === 'cjs' ? { externalLiveBindings: false } : {}),
     }));
   } else {
     rollupConfig.output = {
@@ -51,6 +52,9 @@ module.exports = (rollupConfig, _projectOptions) => {
         rollupConfig.output.format === 'cjs'
           ? rollupConfig.output.chunkFileNames.replace('.js', '.cjs')
           : rollupConfig.output.chunkFileNames,
+      ...(rollupConfig.output.format === 'cjs'
+        ? { externalLiveBindings: false }
+        : {}),
     };
   }
 
