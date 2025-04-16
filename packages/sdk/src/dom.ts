@@ -156,10 +156,11 @@ export function createLink(info: {
     const l = links[i];
     const linkHref = l.getAttribute('href');
     const linkRel = l.getAttribute('rel');
+    // Use == to treat null and undefined as equivalent (see https://github.com/module-federation/core/issues/3705)
     if (
       linkHref &&
       isStaticResourcesEqual(linkHref, info.url) &&
-      linkRel === info.attrs['rel']
+      linkRel == info.attrs['rel']
     ) {
       link = l;
       needAttach = false;
