@@ -1,22 +1,30 @@
 [
-  "overview",
+  {
+    "type": "file",
+    "name": "overview",
+    "label": "Overview"
+  },
   {
     "type": "dir",
     "name": "runtime",
     "label": "Runtime",
-    "collapsed":true
+    "collapsed": true
   },
   {
     "type": "dir",
     "name": "build",
     "label": "Build",
-    "collapsed":true
+    "collapsed": true
   },
   {
     "type": "dir",
     "name": "type",
     "label": "Type",
-    "collapsed":true
+    "collapsed": true
   },
-  "other"
+  {
+    "type": "file",
+    "name": "other",
+    "label": "Other"
+  }
 ]

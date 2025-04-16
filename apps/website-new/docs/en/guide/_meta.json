@@ -7,7 +7,7 @@
   {
     "type": "dir",
     "name": "basic",
-    "label": "basic"
+    "label": "Basic"
   },
   {
     "type": "dir",
@@ -15,8 +15,8 @@
     "label": "Frameworks"
   },
   {
-    "type":"dir",
-    "name":"troubleshooting",
-    "label":"Troubleshooting"
+    "type": "dir",
+    "name": "troubleshooting",
+    "label": "Troubleshooting"
   }
 ]

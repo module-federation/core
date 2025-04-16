@@ -1,1 +1,7 @@
-["index"]
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Plugin System"
+  }
+]

@@ -1,1 +1,12 @@
-["index", "retry-plugin"]
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Node Plugin"
+  },
+  {
+    "type": "file",
+    "name": "retry-plugin",
+    "label": "Resource Retry Plugin"
+  }
+]

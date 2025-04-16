@@ -1,1 +1,17 @@
-["index", "using-nx-for-react", "i18n-react"]
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "React with Rsbuild"
+  },
+  {
+    "type": "file",
+    "name": "using-nx-for-react",
+    "label": "Nx CLI Integration"
+  },
+  {
+    "type": "file",
+    "name": "i18n-react",
+    "label": "React i18n Integration"
+  }
+]
