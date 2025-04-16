@@ -1,5 +1,15 @@
 # @module-federation/esbuild
 
+## 0.0.64
+
+### Patch Changes
+
+- c399b9a: Switch to esm modules by default
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/sdk@0.12.0
+
 ## 0.0.63
 
 ### Patch Changes

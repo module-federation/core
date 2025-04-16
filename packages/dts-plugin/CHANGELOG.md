@@ -1,5 +1,19 @@
 # @module-federation/dts-plugin
 
+## 0.12.0
+
+### Patch Changes
+
+- ebef2d0: chore(dts-plugin): optimize type-001 message
+- ef96c4d: feat(dts-plugin): support exclude extract specify third party dts
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/sdk@0.12.0
+  - @module-federation/third-party-dts-extractor@0.12.0
+  - @module-federation/managers@0.12.0
+  - @module-federation/error-codes@0.12.0
+
 ## 0.11.4
 
 ### Patch Changes

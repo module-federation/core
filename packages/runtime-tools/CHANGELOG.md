@@ -1,5 +1,19 @@
 # @module-federation/runtime-tools
 
+## 0.12.0
+
+### Minor Changes
+
+- c399b9a: Switch to esm modules by default
+
+### Patch Changes
+
+- Updated dependencies [f4fb242]
+- Updated dependencies [c399b9a]
+- Updated dependencies [f4fb242]
+  - @module-federation/runtime@0.12.0
+  - @module-federation/webpack-bundler-runtime@0.12.0
+
 ## 0.11.4
 
 ### Patch Changes

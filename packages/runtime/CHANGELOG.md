@@ -1,5 +1,21 @@
 # @module-federation/runtime
 
+## 0.12.0
+
+### Minor Changes
+
+- f4fb242: - Added a new property 'layer' of type string or null to SharedConfig.
+- c399b9a: Switch to esm modules by default
+
+### Patch Changes
+
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/runtime-core@0.12.0
+  - @module-federation/sdk@0.12.0
+  - @module-federation/error-codes@0.12.0
+
 ## 0.11.4
 
 ### Patch Changes

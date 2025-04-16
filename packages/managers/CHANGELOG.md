@@ -1,5 +1,18 @@
 # @module-federation/managers
 
+## 0.12.0
+
+### Minor Changes
+
+- f4fb242: Support share layers and multiple share scopes
+
+### Patch Changes
+
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/sdk@0.12.0
+
 ## 0.11.4
 
 ### Patch Changes
