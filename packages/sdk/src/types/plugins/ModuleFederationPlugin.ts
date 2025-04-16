@@ -167,7 +167,11 @@ export interface DtsRemoteOptions {
   compileInChildProcess?: boolean;
   compilerInstance?: 'tsc' | 'vue-tsc' | 'tspc' | string;
   generateAPITypes?: boolean;
-  extractThirdParty?: boolean;
+  extractThirdParty?:
+    | boolean
+    | {
+        exclude?: Array<string | RegExp>;
+      };
   extractRemoteTypes?: boolean;
   abortOnError?: boolean;
 }
