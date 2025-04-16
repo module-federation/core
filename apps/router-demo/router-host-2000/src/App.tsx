@@ -73,6 +73,12 @@ const Remote1App = createRemoteComponent({
   loading: FallbackComp,
 });
 
+const Remote5App = createRemoteComponent({
+  loader: () => loadRemote('remote5/export-app'),
+  fallback: FallbackErrorComp,
+  loading: FallbackComp,
+});
+
 const Remote1AppWithLoadRemote = React.lazy(
   () =>
     new Promise((resolve) => {
@@ -209,7 +215,21 @@ const App = () => {
         />
         <Route
           path="/remote2/*"
-          Component={() => <Remote2App style={{ padding: '20px' }} />}
+          Component={() => (
+            // Example for React 18: Passing rootOptions when rendering a remote component
+            <Remote2App
+              style={{ padding: '20px' }}
+              rootOptions={{
+                identifierPrefix: 'remote2-instance-',
+                onRecoverableError: (error: Error) => {
+                  console.error(
+                    '[Host] Remote2 React 18 recoverable error:',
+                    error,
+                  );
+                },
+              }}
+            />
+          )}
         />
         <Route path="/remote3/*" Component={() => <Remote3App test="123" />} />
         <Route path="/memory-router/*" Component={() => <Wraper3 />} />
@@ -230,7 +250,6 @@ const App = () => {
             // </React.Suspense>
           )}
         />
-
         <Route
           path="/error-load-with-error-boundary/*"
           Component={() => (
@@ -239,6 +258,19 @@ const App = () => {
               age={12}
               ref={ref}
               basename="/remote1"
+            />
+          )}
+        />
+        <Route
+          path="/remote5/*"
+          Component={() => (
+            <Remote5App
+              rootOptions={{
+                identifierPrefix: 'remote5-instance-',
+                onRecoverableError: (error: Error) => {
+                  console.error('[Host] Remote5 recoverable error:', error);
+                },
+              }}
             />
           )}
         />
