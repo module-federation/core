@@ -62,7 +62,6 @@ export const createScriptNode =
             url = hookResult.url;
           }
         }
-        console.log('zack was here');
 
         let urlObj: URL;
         try {
