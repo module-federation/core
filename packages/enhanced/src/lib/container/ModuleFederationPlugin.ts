@@ -75,21 +75,19 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     definePluginOptions['FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN'] =
       disableSnapshot;
 
-    let targetEnv: 'web' | 'node';
-    if (experiments?.optimization?.target) {
+    let targetEnv: 'web' | 'node' | undefined;
+    if (experiments?.optimization && 'target' in experiments.optimization) {
       targetEnv = experiments.optimization.target;
     } else {
       targetEnv = 'web';
       const webpackTarget = compiler.options.target;
       if (typeof webpackTarget === 'string') {
-        if (webpackTarget.startsWith('node')) {
+        if (webpackTarget.includes('node')) {
           targetEnv = 'node';
         }
       } else if (Array.isArray(webpackTarget)) {
         if (
-          webpackTarget.some(
-            (t) => typeof t === 'string' && t.startsWith('node'),
-          )
+          webpackTarget.some((t) => typeof t === 'string' && t.includes('node'))
         ) {
           targetEnv = 'node';
         }
