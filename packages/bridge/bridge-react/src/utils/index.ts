@@ -1,28 +1,8 @@
-import React from 'react';
 import { createLogger } from '@module-federation/sdk';
 
 export const LoggerInstance = createLogger(
   '[ Module Federation Bridge React ]',
 );
-
-type typeReact = typeof React;
-
-export function atLeastReact18(React: typeReact) {
-  if (
-    React &&
-    typeof React.version === 'string' &&
-    React.version.indexOf('.') >= 0
-  ) {
-    const majorVersionString = React.version.split('.')[0];
-    try {
-      return Number(majorVersionString) >= 18;
-    } catch (err) {
-      return false;
-    }
-  } else {
-    return false;
-  }
-}
 
 export function pathJoin(...args: string[]) {
   const res = args.reduce((res, path: string) => {
