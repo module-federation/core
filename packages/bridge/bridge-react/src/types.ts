@@ -34,6 +34,15 @@ export interface RenderParams {
     initialState?: Record<string, unknown>;
   };
   dom: HTMLElement;
+  /**
+   * Options to pass to createRoot for React 18 and 19
+   * @example
+   * {
+   *   identifierPrefix: 'app-',
+   *   onRecoverableError: (err) => console.error(err)
+   * }
+   */
+  rootOptions?: CreateRootOptions;
   [key: string]: unknown;
 }
 
@@ -81,6 +90,16 @@ export interface ProviderFnParams<T> {
     container: Element | DocumentFragment,
     options?: CreateRootOptions,
   ) => Root;
+  /**
+   * Default options to pass to createRoot for React 18 and 19
+   * These options will be used when creating a root unless overridden by rootOptions in render params
+   * @example
+   * {
+   *   identifierPrefix: 'app-',
+   *   onRecoverableError: (err) => console.error(err)
+   * }
+   */
+  defaultRootOptions?: CreateRootOptions;
 }
 
 /**

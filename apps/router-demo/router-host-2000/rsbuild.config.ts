@@ -27,6 +27,7 @@ export default defineConfig({
           'remote-render-error@http://localhost:2004/mf-manifest.json',
         'remote-resource-error':
           'remote-resource-error@http://localhost:2008/not-exist-mf-manifest.json',
+        remote5: 'remote5@http://localhost:2005/mf-manifest.json',
       },
       shared: {
         react: {

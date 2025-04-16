@@ -21,6 +21,21 @@
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
     },
+    "./legacy": {
+      "types": "./dist/legacy.d.ts",
+      "import": "./dist/legacy.es.js",
+      "require": "./dist/legacy.cjs.js"
+    },
+    "./v18": {
+      "types": "./dist/v18.d.ts",
+      "import": "./dist/v18.es.js",
+      "require": "./dist/v18.cjs.js"
+    },
+    "./v19": {
+      "types": "./dist/v19.d.ts",
+      "import": "./dist/v19.es.js",
+      "require": "./dist/v19.cjs.js"
+    },
     "./router": {
       "types": "./dist/router.d.ts",
       "import": "./dist/router.es.js",
