@@ -5,15 +5,9 @@
 **/dist/
 
 # Documentation and config files
-**/*.md
 **/*.yaml
 **/*.yml
-**/.eslintrc*
-**/.prettierrc*
-**/.swcrc
-**/jest.config.*
-**/tsconfig.*
-**/*/stats.json
+
 
 # Explicitly ignore specific packages
 packages/typescript/
@@ -24,7 +18,6 @@ packages/native-federation-typescript/
 packages/esbuild/
 
 # Ignore specific directories
-apps/
 webpack/tooling/
 webpack/setup/
 webpack/test/
@@ -35,7 +28,7 @@ tools/
 .vscode/
 .verdaccio/
 
-!apps/manifest-demo/*.ts
+
 
 # Ignore specific files
 .cursorignore

@@ -133,6 +133,11 @@ export function cloneDeepOptions(options: DTSManagerOptions) {
     if (typeof value === 'function') {
       return false;
     }
+    if (key === 'extractThirdParty' && Array.isArray(value)) {
+      return value.map((item) => {
+        return item.toString();
+      });
+    }
   });
 }
 

@@ -318,9 +318,9 @@ class DTSManager {
     );
     try {
       const existedFile = fs.readFileSync(apiTypeFileName, 'utf-8');
-      const existedImports = new ThirdPartyExtractor('').collectTypeImports(
-        existedFile,
-      );
+      const existedImports = new ThirdPartyExtractor({
+        destDir: '',
+      }).collectTypeImports(existedFile);
       existedImports.forEach((existedImport) => {
         const alias = existedImport
           .split('./')

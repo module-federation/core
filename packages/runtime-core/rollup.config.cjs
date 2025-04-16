@@ -29,13 +29,14 @@ module.exports = (rollupConfig, projectOptions) => {
       },
       hoistTransitiveImports: false,
       entryFileNames:
-        c.format === 'esm'
-          ? c.entryFileNames.replace('.js', '.mjs')
+        c.format === 'cjs'
+          ? c.entryFileNames.replace('.js', '.cjs')
           : c.entryFileNames,
       chunkFileNames:
-        c.format === 'esm'
-          ? c.chunkFileNames.replace('.js', '.mjs')
+        c.format === 'cjs'
+          ? c.chunkFileNames.replace('.js', '.cjs')
           : c.chunkFileNames,
+      ...(c.format === 'cjs' ? { externalLiveBindings: false } : {}),
     }));
   } else {
     rollupConfig.output = {
@@ -47,13 +48,16 @@ module.exports = (rollupConfig, projectOptions) => {
       },
       hoistTransitiveImports: false,
       entryFileNames:
-        rollupConfig.output.format === 'esm'
-          ? rollupConfig.output.entryFileNames.replace('.js', '.mjs')
+        rollupConfig.output.format === 'cjs'
+          ? rollupConfig.output.entryFileNames.replace('.js', '.cjs')
           : rollupConfig.output.entryFileNames,
       chunkFileNames:
-        rollupConfig.output.format === 'esm'
-          ? rollupConfig.output.chunkFileNames.replace('.js', '.mjs')
+        rollupConfig.output.format === 'cjs'
+          ? rollupConfig.output.chunkFileNames.replace('.js', '.cjs')
           : rollupConfig.output.chunkFileNames,
+      ...(rollupConfig.output.format === 'cjs'
+        ? { externalLiveBindings: false }
+        : {}),
     };
   }
 
