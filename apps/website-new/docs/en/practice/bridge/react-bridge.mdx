@@ -1,3 +1,8 @@
+---
+title: React Bridge | Module Federation Practice
+description: Guide to using @module-federation/bridge-react for exporting and consuming React application-level modules within a Module Federation architecture.
+---
+
 # React Bridge
 
 `@module-federation/bridge-react` provides bridge utility functions for React applications:
@@ -198,8 +203,8 @@ function createBridgeComponent<T>(
 interface ProviderFnParams<T> {
   /** Root component to be remotely loaded */
   rootComponent: React.ComponentType<T>;
-  
-  /** 
+
+  /**
    * Custom render function for custom rendering logic
    * @param App - React element
    * @param id - DOM element or string ID
@@ -209,7 +214,7 @@ interface ProviderFnParams<T> {
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
-  
+
   /**
    * Custom function to create React root node
    * @param container - Container element
@@ -228,10 +233,10 @@ interface ProviderFnParams<T> {
 interface CreateRootOptions {
   /** Add prefix to generated React IDs to avoid ID conflicts */
   identifierPrefix?: string;
-  
+
   /** Callback function to handle recoverable errors during React rendering */
   onRecoverableError?: (error: unknown) => void;
-  
+
   /** Transition callbacks for React 18 concurrent features */
   transitionCallbacks?: TransitionCallbacks;
 }
@@ -260,19 +265,19 @@ interface RemoteComponentParams<
   T = Record<string, unknown>,
   E extends keyof T = keyof T
 > {
-  /** 
+  /**
    * Function to load remote module
    * Example: () => loadRemote('remote1/export-app') or () => import('remote1/export-app')
    */
   loader: () => Promise<T>;
-  
+
   /** Component displayed when loading remote module */
   loading: React.ReactNode;
-  
+
   /** Error component displayed when loading or rendering remote module fails */
   fallback: React.ComponentType<{ error: Error }>;
-  
-  /** 
+
+  /**
    * Specify module export name
    * Default is 'default'
    */
@@ -286,18 +291,18 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
   /** Properties passed to remote component */
   props?: T;
 
-  /** 
+  /**
    * Memory route configuration, used to control child application routing as memoryRouter
    * Will not directly display URL in browser address bar
    */
   memoryRoute?: { entryPath: string };
-  
+
   /** Base path name */
   basename?: string;
-  
+
   /** Style */
   style?: React.CSSProperties;
-  
+
   /** Class name */
   className?: string;
 }
