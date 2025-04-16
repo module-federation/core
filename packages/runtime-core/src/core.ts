@@ -35,6 +35,15 @@ import { SharedHandler } from './shared';
 import { RemoteHandler } from './remote';
 import { formatShareConfigs } from './utils/share';
 
+// Declare the global constant that will be defined by DefinePlugin
+// Default to true if not defined (e.g., when runtime-core is used outside of webpack)
+// so that snapshot functionality is included by default.
+declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
+const USE_SNAPSHOT =
+  typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean'
+    ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
+    : true;
+
 export class FederationHost {
   options: Options;
   hooks = new PluginSystem({
@@ -160,12 +169,15 @@ export class FederationHost {
   });
 
   constructor(userOptions: UserOptions) {
+    const plugins = USE_SNAPSHOT
+      ? [snapshotPlugin(), generatePreloadAssetsPlugin()]
+      : [];
     // TODO: Validate the details of the options
     // Initialize options with default values
     const defaultOptions: Options = {
       id: getBuilderId(),
       name: userOptions.name,
-      plugins: [snapshotPlugin(), generatePreloadAssetsPlugin()],
+      plugins,
       remotes: [],
       shared: {},
       inBrowser: isBrowserEnv(),

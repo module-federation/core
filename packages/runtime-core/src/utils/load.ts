@@ -16,6 +16,10 @@ import {
   runtimeDescMap,
 } from '@module-federation/error-codes';
 
+// Declare the ENV_TARGET constant that will be defined by DefinePlugin
+declare const ENV_TARGET: 'web' | 'node';
+const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
+
 async function loadEsmEntry({
   entry,
   remoteEntryExports,
@@ -27,10 +31,10 @@ async function loadEsmEntry({
     try {
       if (!remoteEntryExports) {
         if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
-          new Function(
-            'callbacks',
-            `import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
-          )([resolve, reject]);
+          new Function('callbacks', `import("${entry}")${importCallback}`)([
+            resolve,
+            reject,
+          ]);
         } else {
           import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
             .then(resolve)
@@ -62,7 +66,7 @@ async function loadSystemJsEntry({
         } else {
           new Function(
             'callbacks',
-            `System.import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
+            `System.import("${entry}")${importCallback}`,
           )([resolve, reject]);
         }
       } else {
@@ -72,6 +76,28 @@ async function loadSystemJsEntry({
       reject(e);
     }
   });
+}
+
+function handleRemoteEntryLoaded(
+  name: string,
+  globalName: string,
+  entry: string,
+): RemoteEntryExports {
+  const { remoteEntryKey, entryExports } = getRemoteEntryExports(
+    name,
+    globalName,
+  );
+
+  assert(
+    entryExports,
+    getShortErrorMsg(RUNTIME_001, runtimeDescMap, {
+      remoteName: name,
+      remoteEntryUrl: entry,
+      remoteEntryKey,
+    }),
+  );
+
+  return entryExports;
 }
 
 async function loadEntryScript({
@@ -113,21 +139,7 @@ async function loadEntryScript({
     },
   })
     .then(() => {
-      const { remoteEntryKey, entryExports } = getRemoteEntryExports(
-        name,
-        globalName,
-      );
-
-      assert(
-        entryExports,
-        getShortErrorMsg(RUNTIME_001, runtimeDescMap, {
-          remoteName: name,
-          remoteEntryUrl: entry,
-          remoteEntryKey,
-        }),
-      );
-
-      return entryExports;
+      return handleRemoteEntryLoaded(name, globalName, entry);
     })
     .catch((e) => {
       assert(
@@ -196,21 +208,7 @@ async function loadEntryNode({
     },
   })
     .then(() => {
-      const { remoteEntryKey, entryExports } = getRemoteEntryExports(
-        name,
-        globalName,
-      );
-
-      assert(
-        entryExports,
-        getShortErrorMsg(RUNTIME_001, runtimeDescMap, {
-          remoteName: name,
-          remoteEntryUrl: entry,
-          remoteEntryKey,
-        }),
-      );
-
-      return entryExports;
+      return handleRemoteEntryLoaded(name, globalName, entry);
     })
     .catch((e) => {
       throw e;
@@ -250,7 +248,13 @@ export async function getRemoteEntry({
         if (res) {
           return res;
         }
-        return isBrowserEnv()
+        // Use ENV_TARGET if defined, otherwise fallback to isBrowserEnv, must keep this
+        const isWebEnvironment =
+          typeof ENV_TARGET !== 'undefined'
+            ? ENV_TARGET === 'web'
+            : isBrowserEnv();
+
+        return isWebEnvironment
           ? loadEntryDom({ remoteInfo, remoteEntryExports, loaderHook })
           : loadEntryNode({ remoteInfo, loaderHook });
       });
