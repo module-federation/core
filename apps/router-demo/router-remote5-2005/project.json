@@ -1,0 +1,23 @@
+{
+  "name": "router-remote5-2005",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/router-demo/router-remote5-2005/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/router-demo/router-remote5-2005",
+        "command": "pnpm build"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/router-demo/router-remote5-2005",
+        "command": "pnpm dev"
+      }
+    }
+  },
+  "tags": []
+}

@@ -1,5 +1,11 @@
 # @module-federation/third-party-dts-extractor
 
+## 0.12.0
+
+### Patch Changes
+
+- ef96c4d: feat(dts-plugin): support exclude extract specify third party dts
+
 ## 0.11.4
 
 ## 0.11.3

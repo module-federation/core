@@ -21,7 +21,7 @@
         "external": ["@module-federation/*"],
         "project": "packages/runtime/package.json",
         "compiler": "swc",
-        "rollupConfig": "packages/runtime/rollup.config.js",
+        "rollupConfig": "packages/runtime/rollup.config.cjs",
         "format": ["cjs", "esm"],
         "generatePackageJson": false
       },

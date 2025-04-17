@@ -50,7 +50,6 @@ export default defineConfig({
         './export-app': './src/export-App.tsx',
       },
       shared: ['react', 'react-dom'],
-      getPublicPath: `function(){return 'http://localhost:2004/'}`,
     }),
   ],
 });

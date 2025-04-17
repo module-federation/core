@@ -15,7 +15,7 @@
         "assets": [],
         "project": "packages/sdk/package.json",
         "additionalEntryPoints": ["packages/sdk/src/normalize-webpack-path.ts"],
-        "rollupConfig": "packages/sdk/rollup.config.js",
+        "rollupConfig": "packages/sdk/rollup.config.cjs",
         "compiler": "swc",
         "generatePackageJson": false,
         "format": ["cjs", "esm"]
@@ -35,7 +35,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/sdk/jest.config.js",
+        "jestConfig": "packages/sdk/jest.config.cjs",
         "passWithNoTests": true
       },
       "configurations": {
