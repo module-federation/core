@@ -30,6 +30,16 @@ function defaultCreateRoot(
 } {
   const reactVersion = ReactDOM.version || '';
   const isReact18 = reactVersion.startsWith('18');
+  const isReact19 = reactVersion.startsWith('19');
+
+  // For React 19, throw error and suggest using version-specific import
+  if (isReact19) {
+    throw new Error(
+      `React 19 detected. The default export is not compatible with React 19. ` +
+        `Please use the version-specific import instead: ` +
+        `import { createBridgeComponent } from '@module-federation/bridge-react/v19'`,
+    );
+  }
 
   // For React 18, use createRoot API
   if (isReact18) {
