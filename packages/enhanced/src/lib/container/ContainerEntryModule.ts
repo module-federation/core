@@ -233,6 +233,7 @@ class ContainerEntryModule extends Module {
 
       let str;
       if (modules.some((m) => !m.module)) {
+        console.log('\n');
         logger.error(
           getShortErrorMsg(BUILD_001, buildDescMap, {
             exposeModules: modules.filter((m) => !m.module),

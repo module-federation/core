@@ -1,9 +1,13 @@
 import { defineConfig } from '@rslib/core';
+import pkg from './package.json';
 
 export default defineConfig({
   lib: [
     {
       source: {
+        define: {
+          __VERSION__: JSON.stringify(pkg.version),
+        },
         entry: {
           index: './src',
         },
@@ -19,9 +23,9 @@ export default defineConfig({
       syntax: 'es2021',
     },
   ],
-  // output: {
-  //   copy: {
-  //     patterns: [{ from: 'src/resources', to: 'resources' }],
-  //   },
-  // },
+  output: {
+    copy: {
+      patterns: [{ from: 'src/resources', to: 'resources' }],
+    },
+  },
 });

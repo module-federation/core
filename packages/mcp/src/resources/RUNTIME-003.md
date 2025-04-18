@@ -1,0 +1,10 @@
+# RUNTIME-003
+
+## Reasons
+
+Failed to load the manifest, the manifest url may be wrong
+
+## Solutions
+
+1. Check whether manifestUrl can be accessed normally alone
+2. Check manifestUrl for cross-domain issues
