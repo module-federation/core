@@ -24,8 +24,6 @@ export default defineConfig({
         router: path.resolve(__dirname, 'src/router/default.tsx'),
         'router-v5': path.resolve(__dirname, 'src/router/v5.tsx'),
         'router-v6': path.resolve(__dirname, 'src/router/v6.tsx'),
-        v16: path.resolve(__dirname, 'src/legacy.ts'),
-        legacy: path.resolve(__dirname, 'src/legacy.ts'),
         v18: path.resolve(__dirname, 'src/v18.ts'),
         v19: path.resolve(__dirname, 'src/v19.ts'),
       },

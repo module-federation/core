@@ -118,7 +118,14 @@ For projects using Create React App, you can refer to the [CRA Migration Guide](
 
 Ensure that Webpack version 5 or above is installed by checking the installation report provided by Yarn.
 
-## Step 2: Update Entry Files
+## Step 2: Installing Module Federation Build Plugin
+
+```bash
+pnpm add @module-federation/enhanced
+pnpm add @module-federation/rsbuild-plugin --save-dev
+```
+
+## Step 3: Update Entry Files
 
 In both applications, rename the `index.js` file to `bootstrap.js`. This change allows `bootstrap.js` to load asynchronously, which is essential for Module Federation to function correctly between the two applications.
 
@@ -147,12 +154,13 @@ Now, create a new `index.tsx` file in both applications with the following conte
 import('./bootstrap');
 ```
 
-## Step 3: Create and Expose
+## Step 4: Create and Expose
 
 Now, create a component to expose from `MFE2`
 
 <Steps>
-### 3.1 Create Button Component
+
+### 4.1 Create Button Component
 
 In `MFE2`, create a new file named `Button.tsx` in the src directory with the following content:
 
@@ -164,7 +172,7 @@ const Button = () => (
 export default Button;
 ```
 
-### 3.2 Update App.tsx
+### 4.2 Update App.tsx
 
 Update `App.tsx` in `MFE2` to import and render the Button component:
 
@@ -183,51 +191,59 @@ const App = () => {
 
 export default App;
 ```
+</Steps>
 
-## Step 3.3: Configure Rsbuild in MFE2
+## Step 5: Configure Rsbuild in MFE2
 
-Create a `rsbuild.config.ts` file in the root directory of `MFE2` with the following configuration:
+First create `module-federation.config.ts` in file in the root directory of `MFE2` with the following configuration:
 
-```ts title="rsbuild.config.ts"
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
+
+export default createModuleFederationConfig({
+  name: 'remote',
+  exposes: {
+    './Button': './src/Button',
+  },
+  filename: 'remoteEntry.js',
+  shared: {
+    ...dependencies,
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+});
+
+```
+
+And then modify the `rsbuild.config.ts` file in the root directory of `MFE2` with the following configuration:
+
+```diff title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import { dependencies }  from './package.json';
++ import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
++ import mfConfig from './module-federation.config';
 
 export default defineConfig({
   server: {
     port: 3002
   },
-  moduleFederation: {
-    options: {
-     name: 'remote',
-      exposes: {
-        './Button': './src/Button',
-      },
-      filename: 'remoteEntry.js',
-      shared: {
-        ...dependencies,
-        react: {
-          singleton: true,
-          requiredVersion: dependencies['react'],
-        },
-        'react-dom': {
-          singleton: true,
-          requiredVersion: dependencies['react-dom'],
-        },
-      },
-    }
-  },
-  plugins: [pluginReact()]
+  plugins: [
+    pluginReact()
++   pluginModuleFederation(mfConfig)
+  ]
 });
 ```
-</Steps>
 
-## Step 4: Consume Remote Module
+## Step 6: Consume Remote Module
 
 Consume the exposed module from `MFE2` in `MFE1`
 
 <Steps>
-### 4.1 Update App.tsx
+### 6.1 Update App.tsx
 
 Update `App.tsx` in `MFE1` to import and render the `MFE2` Button component:
 
@@ -247,39 +263,46 @@ function App() {
 export default App;
 ```
 
-### Step 4.2: Configure Rsbuild in MFE1
+### Step 6.2: Configure Rsbuild in MFE1
 
-Create a `rsbuild.config.ts` file in the root directory of `MFE1` with the following configuration:
+First create `module-federation.config.ts` in file in the root directory of `MFE1` with the following configuration:
 
-```ts title="rsbuild.config.ts"
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
+
+export default createModuleFederationConfig({
+  name: 'host',
+  remotes: {
+    remote: 'remote@http://localhost:3002/remoteEntry.js',
+  },
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+});
+
+```
+
+And then modify the `rsbuild.config.ts` file in the root directory of `MFE1` with the following configuration:
+
+```diff title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import { dependencies }  from './package.json';
++ import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
++ import mfConfig from './module-federation.config';
 
 export default defineConfig({
   server: {
     port: 3001
   },
-  moduleFederation: {
-    options: {
-     name: 'host',
-     remotes: {
-       remote: 'remote@http://localhost:3002/remoteEntry.js',
-     },
-     shared: {
-       ...dependencies,
-       react: {
-         singleton: true,
-         requiredVersion: dependencies['react'],
-       },
-       'react-dom': {
-         singleton: true,
-         requiredVersion: dependencies['react-dom'],
-       },
-     },
-    }
-  },
-  plugins: [pluginReact()]
+  plugins: [
+    pluginReact(),
++   pluginModuleFederation(mfConfig)
+  ]
 });
 ```
 </Steps>

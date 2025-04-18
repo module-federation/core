@@ -39,8 +39,8 @@ export function createBridgeComponent<T = any>(
   bridgeInfo: Omit<ProviderFnParams<T>, 'createRoot'>,
 ) {
   const fullBridgeInfo = {
-    ...bridgeInfo,
     createRoot: createReact18Root,
+    ...bridgeInfo,
   } as unknown as ProviderFnParams<T>;
 
   return createBaseBridgeComponent(fullBridgeInfo);

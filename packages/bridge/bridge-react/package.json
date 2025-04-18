@@ -21,11 +21,6 @@
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
     },
-    "./legacy": {
-      "types": "./dist/legacy.d.ts",
-      "import": "./dist/legacy.es.js",
-      "require": "./dist/legacy.cjs.js"
-    },
     "./v18": {
       "types": "./dist/v18.d.ts",
       "import": "./dist/v18.es.js",
@@ -85,7 +80,7 @@
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
     "typescript": "^5.2.2",
-    "vite": "^5.4.12",
+    "vite": "^5.4.18",
     "vite-plugin-dts": "^4.3.0",
     "@module-federation/runtime": "workspace:*"
   }
