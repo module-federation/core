@@ -21,11 +21,6 @@
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
     },
-    "./legacy": {
-      "types": "./dist/legacy.d.ts",
-      "import": "./dist/legacy.es.js",
-      "require": "./dist/legacy.cjs.js"
-    },
     "./v18": {
       "types": "./dist/v18.d.ts",
       "import": "./dist/v18.es.js",

@@ -16,17 +16,14 @@
 
 You can choose specific import paths based on the React version used in your project:
 
-```jsx
-// Auto-detect React version (recommended for most scenarios)
+```tsx
+// Explicitly specify React 16/17 version (recommended for React 16/17)
 import { createBridgeComponent } from '@module-federation/bridge-react';
 
-// Explicitly specify React 16/17 version (Legacy mode)
-import { createBridgeComponent } from '@module-federation/bridge-react/legacy';
-
-// Explicitly specify React 18 version
+// Explicitly specify React 18 version (recommended for React 18)
 import { createBridgeComponent } from '@module-federation/bridge-react/v18';
 
-// Explicitly specify React 19 version
+// Explicitly specify React 19 version (recommended for React 19)
 import { createBridgeComponent } from '@module-federation/bridge-react/v19';
 ```
 

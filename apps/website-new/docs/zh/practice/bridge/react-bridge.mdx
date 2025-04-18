@@ -16,17 +16,14 @@
 
 您可以根据项目中使用的 React 版本，选择特定的导入方式：
 
-```jsx
-// 自动检测 React 版本（适用于 React 16/17/18）
+```tsx
+// Explicitly specify React 16/17 version (recommended for React 16/17)
 import { createBridgeComponent } from '@module-federation/bridge-react';
 
-// 明确指定 React 16/17 版本（Legacy 模式）
-import { createBridgeComponent } from '@module-federation/bridge-react/legacy';
-
-// 明确指定 React 18 版本
+// Explicitly specify React 18 version (recommended for React 18)
 import { createBridgeComponent } from '@module-federation/bridge-react/v18';
 
-// 明确指定 React 19 版本
+// Explicitly specify React 19 version (recommended for React 19)
 import { createBridgeComponent } from '@module-federation/bridge-react/v19';
 ```
 
