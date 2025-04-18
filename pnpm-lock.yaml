@@ -2810,9 +2810,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@module-federation/utilities':
-        specifier: workspace:*
-        version: link:../utilities
       btoa:
         specifier: 1.2.1
         version: 1.2.1
