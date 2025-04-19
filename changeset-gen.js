@@ -87,8 +87,8 @@ Only return the changeset, nothing else.`;
 
   return response.choices[0].message.content
     .trim()
-    .replace('```markdown', '')
-    .replace('```', '')
+    .replace(/```markdown/g, '')
+    .replace(/```/g, '')
     .replace(/<!--[\s\S]*?-->\n?/g, '')
     .replace(/<\/?[^>]+(>|$)/g, '') // Remove all HTML tags
     .trim();
