@@ -1,0 +1,38 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Code Organization and Structure
+
+## Monorepo Structure
+
+This project follows a monorepo architecture with two main code directories:
+
+1. **Apps Directory** ([apps/](mdc:apps))
+   - Contains complete applications
+   - Each app is a standalone implementation
+   - Apps can consume shared packages
+
+2. **Packages Directory** ([packages/](mdc:packages))
+   - Contains shared libraries and modules
+   - Core Module Federation functionality
+   - Reusable utilities and components
+
+## Configuration
+
+- TypeScript configuration in [tsconfig.base.json](mdc:tsconfig.base.json)
+- Build configuration in [webpack/](mdc:webpack)
+- Package management in [package.json](mdc:package.json)
+
+## Documentation
+
+- Main documentation in [docs/](mdc:docs)
+- API documentation and guides
+- Contributing guidelines in [CONTRIBUTING.md](mdc:CONTRIBUTING.md)
+
+## Build Output
+
+- Build artifacts go to [dist/](mdc:dist)
+- Temporary files in [tmp/](mdc:tmp)
+- Build logs and output in [build_output_main/](mdc:build_output_main)

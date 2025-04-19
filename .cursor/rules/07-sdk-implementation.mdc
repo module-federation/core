@@ -1,0 +1,56 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Module Federation SDK Implementation
+
+## Source Code Structure
+
+The implementation is organized into several key modules in [src/](mdc:packages/sdk/src/):
+
+### Core Modules
+
+- [index.ts](mdc:packages/sdk/src/index.ts): Main entry point and exports
+- [constant.ts](mdc:packages/sdk/src/constant.ts): Shared constants
+- [utils.ts](mdc:packages/sdk/src/utils.ts): Common utility functions
+
+### Environment Handling
+
+- [env.ts](mdc:packages/sdk/src/env.ts): Environment detection utilities
+- [node.ts](mdc:packages/sdk/src/node.ts): Node.js specific functionality
+- [dom.ts](mdc:packages/sdk/src/dom.ts): Browser/DOM specific functionality
+
+### Module Management
+
+- [normalize-webpack-path.ts](mdc:packages/sdk/src/normalize-webpack-path.ts): Webpack path normalization
+- [normalizeOptions.ts](mdc:packages/sdk/src/normalizeOptions.ts): Options normalization
+- [generateSnapshotFromManifest.ts](mdc:packages/sdk/src/generateSnapshotFromManifest.ts): Manifest snapshot generation
+
+### Debugging
+
+- [logger.ts](mdc:packages/sdk/src/logger.ts): Logging and debugging utilities
+
+## Implementation Guidelines
+
+When working with this codebase:
+
+1. **Code Organization**
+   - Keep platform-specific code in appropriate files (node.ts/dom.ts)
+   - Use types directory for type definitions
+   - Follow modular design patterns
+
+2. **API Design**
+   - Maintain consistent function signatures
+   - Document all public APIs
+   - Follow TypeScript best practices
+
+3. **Cross-Platform Support**
+   - Handle both Node.js and browser environments
+   - Use appropriate environment checks
+   - Consider bundler compatibility
+
+4. **Testing**
+   - Write comprehensive tests
+   - Cover both Node.js and browser scenarios
+   - Test error cases and edge conditions

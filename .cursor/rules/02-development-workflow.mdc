@@ -1,0 +1,31 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Development Workflow
+
+## Build and Development
+
+The project uses several key tools and processes:
+
+- **Package Management**: Node.js package management with npm/yarn
+- **Build System**: Webpack-based build system in [webpack/](mdc:webpack)
+- **Testing**: Jest testing framework configured in [jest.config.ts](mdc:jest.config.ts)
+- **Code Quality**:
+  - ESLint for linting: [.eslintrc.json](mdc:.eslintrc.json)
+  - Prettier for formatting: [.prettierrc](mdc:.prettierrc)
+
+## Directory Structure
+
+- `apps/`: Application implementations
+- `packages/`: Shared packages and core modules
+- `docs/`: Documentation files
+- `scripts/`: Build and utility scripts
+- `tools/`: Development tools and utilities
+
+## Version Control
+
+- Uses Git for version control
+- Changesets for version management
+- Husky for Git hooks in [.husky/](mdc:.husky)
