@@ -3,15 +3,82 @@ import {
   normalizeOptions,
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
-import { validateOptions, consumeTypes } from '../core/index';
+import {
+  validateOptions,
+  consumeTypes,
+  DTSManagerOptions,
+} from '../core/index';
 import { isPrd } from './utils';
 
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 
+export const DEFAULT_CONSUME_TYPES = {
+  abortOnError: false,
+  consumeAPITypes: true,
+};
+
+export const normalizeConsumeTypesOptions = ({
+  context,
+  dtsOptions,
+  pluginOptions,
+}: {
+  context?: string;
+  dtsOptions: moduleFederationPlugin.PluginDtsOptions;
+  pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
+}) => {
+  const normalizedConsumeTypes =
+    normalizeOptions<moduleFederationPlugin.DtsHostOptions>(
+      true,
+      DEFAULT_CONSUME_TYPES,
+      'mfOptions.dts.consumeTypes',
+    )(dtsOptions.consumeTypes);
+
+  if (!normalizedConsumeTypes) {
+    return;
+  }
+  const dtsManagerOptions = {
+    host: {
+      implementation: dtsOptions.implementation,
+      context,
+      moduleFederationConfig: pluginOptions,
+      ...normalizedConsumeTypes,
+    },
+    extraOptions: dtsOptions.extraOptions || {},
+    displayErrorInTerminal: dtsOptions.displayErrorInTerminal,
+  };
+  validateOptions(dtsManagerOptions.host);
+
+  return dtsManagerOptions;
+};
+
+export const consumeTypesAPI = async (
+  dtsManagerOptions: DTSManagerOptions,
+  cb?: (options: moduleFederationPlugin.RemoteTypeUrls) => void,
+) => {
+  const fetchRemoteTypeUrlsPromise =
+    typeof dtsManagerOptions.host.remoteTypeUrls === 'function'
+      ? dtsManagerOptions.host.remoteTypeUrls()
+      : Promise.resolve(dtsManagerOptions.host.remoteTypeUrls);
+  return fetchRemoteTypeUrlsPromise.then((remoteTypeUrls) => {
+    consumeTypes({
+      ...dtsManagerOptions,
+      host: {
+        ...dtsManagerOptions.host,
+        remoteTypeUrls,
+      },
+    })
+      .then(() => {
+        typeof cb === 'function' && cb(remoteTypeUrls);
+      })
+      .catch(() => {
+        typeof cb === 'function' && cb(remoteTypeUrls);
+      });
+  });
+};
+
 export class ConsumeTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
   dtsOptions: moduleFederationPlugin.PluginDtsOptions;
-  defaultOptions: moduleFederationPlugin.DtsHostOptions;
   callback: () => void;
   fetchRemoteTypeUrlsResolve: (
     options: moduleFederationPlugin.RemoteTypeUrls,
@@ -20,74 +87,39 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
   constructor(
     pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
     dtsOptions: moduleFederationPlugin.PluginDtsOptions,
-    defaultOptions: moduleFederationPlugin.DtsHostOptions,
     fetchRemoteTypeUrlsResolve: (
       options: moduleFederationPlugin.RemoteTypeUrls,
     ) => void,
   ) {
     this.pluginOptions = pluginOptions;
     this.dtsOptions = dtsOptions;
-    this.defaultOptions = defaultOptions;
     this.fetchRemoteTypeUrlsResolve = fetchRemoteTypeUrlsResolve;
   }
 
   apply(compiler: Compiler) {
-    const {
-      dtsOptions,
-      defaultOptions,
-      pluginOptions,
-      fetchRemoteTypeUrlsResolve,
-    } = this;
+    const { dtsOptions, pluginOptions, fetchRemoteTypeUrlsResolve } = this;
 
     if (isPrd()) {
       fetchRemoteTypeUrlsResolve(undefined);
       return;
     }
 
-    const normalizedConsumeTypes =
-      normalizeOptions<moduleFederationPlugin.DtsHostOptions>(
-        true,
-        defaultOptions,
-        'mfOptions.dts.consumeTypes',
-      )(dtsOptions.consumeTypes);
+    const dtsManagerOptions = normalizeConsumeTypesOptions({
+      context: compiler.context,
+      dtsOptions,
+      pluginOptions,
+    });
 
-    if (!normalizedConsumeTypes) {
+    if (!dtsManagerOptions) {
       fetchRemoteTypeUrlsResolve(undefined);
       return;
     }
 
-    const finalOptions = {
-      host: {
-        implementation: dtsOptions.implementation,
-        context: compiler.context,
-        moduleFederationConfig: pluginOptions,
-        ...normalizedConsumeTypes,
-      },
-      extraOptions: dtsOptions.extraOptions || {},
-      displayErrorInTerminal: dtsOptions.displayErrorInTerminal,
-    };
-
-    validateOptions(finalOptions.host);
-    const fetchRemoteTypeUrlsPromise =
-      typeof normalizedConsumeTypes.remoteTypeUrls === 'function'
-        ? normalizedConsumeTypes.remoteTypeUrls()
-        : Promise.resolve(normalizedConsumeTypes.remoteTypeUrls);
     logger.debug('start fetching remote types...');
-    const promise = fetchRemoteTypeUrlsPromise.then((remoteTypeUrls) => {
-      consumeTypes({
-        ...finalOptions,
-        host: {
-          ...finalOptions.host,
-          remoteTypeUrls,
-        },
-      })
-        .then(() => {
-          fetchRemoteTypeUrlsResolve(remoteTypeUrls);
-        })
-        .catch(() => {
-          fetchRemoteTypeUrlsResolve(remoteTypeUrls);
-        });
-    });
+    const promise = consumeTypesAPI(
+      dtsManagerOptions,
+      fetchRemoteTypeUrlsResolve,
+    );
 
     compiler.hooks.thisCompilation.tap('mf:generateTypes', (compilation) => {
       compilation.hooks.processAssets.tapPromise(

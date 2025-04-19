@@ -1,5 +1,81 @@
 # @module-federation/node
 
+## 2.7.0
+
+### Minor Changes
+
+- c399b9a: Switch to esm modules by default
+
+### Patch Changes
+
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+  - @module-federation/enhanced@0.12.0
+  - @module-federation/runtime@0.12.0
+  - @module-federation/sdk@0.12.0
+  - @module-federation/utilities@3.1.52
+
+## 2.6.33
+
+### Patch Changes
+
+- ed8bda3: support undoPath and rootOutputDir for correct remote chunk resolution in node
+- Updated dependencies [64a2bc1]
+- Updated dependencies [ebe7d89]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/enhanced@0.11.4
+  - @module-federation/runtime@0.11.4
+  - @module-federation/utilities@3.1.51
+
+## 2.6.32
+
+### Patch Changes
+
+- e5fae18: support undoPath and rootOutputDir for correct remote chunk resolution in node
+  - @module-federation/runtime@0.11.3
+  - @module-federation/enhanced@0.11.3
+  - @module-federation/sdk@0.11.3
+  - @module-federation/utilities@3.1.50
+
+## 2.6.31
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/runtime@0.11.2
+  - @module-federation/enhanced@0.11.2
+  - @module-federation/utilities@3.1.49
+
+## 2.6.30
+
+### Patch Changes
+
+- Updated dependencies [09d6bc1]
+  - @module-federation/enhanced@0.11.1
+  - @module-federation/runtime@0.11.1
+  - @module-federation/sdk@0.11.1
+  - @module-federation/utilities@3.1.48
+
+## 2.6.29
+
+### Patch Changes
+
+- 5c4175e: fix(node): delete server module cache if hot reload
+- Updated dependencies [fce107e]
+- Updated dependencies [fce107e]
+  - @module-federation/enhanced@0.11.0
+  - @module-federation/sdk@0.11.0
+  - @module-federation/runtime@0.11.0
+  - @module-federation/utilities@3.1.47
+
 ## 2.6.28
 
 ### Patch Changes

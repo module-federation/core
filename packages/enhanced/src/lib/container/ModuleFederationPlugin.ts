@@ -19,10 +19,11 @@ import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
-import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
+import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
 import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
+import { createSchemaValidation } from '../../utils';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -34,6 +35,16 @@ const { ExternalsPlugin } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
+const validate = createSchemaValidation(
+  //eslint-disable-next-line
+  require('../../schemas/container/ModuleFederationPlugin.check.js').validate,
+  () => require('../../schemas/container/ModuleFederationPlugin').default,
+  {
+    name: 'Module Federation Plugin',
+    baseDataPath: 'options',
+  },
+);
+
 class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _statsPlugin?: StatsPlugin;
@@ -41,6 +52,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options options
    */
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
+    validate(options);
     this._options = options;
   }
 
@@ -69,6 +81,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     // must before ModuleFederationPlugin
     if (options.getPublicPath && options.name) {
       new RemoteEntryPlugin(options.name, options.getPublicPath).apply(
+        // @ts-ignore
         compiler,
       );
     }

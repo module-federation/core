@@ -36,24 +36,21 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
-const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
-
+const RuntimeToolsPath = require.resolve(
+  '@module-federation/runtime-tools/dist/index.esm.js',
+);
 const BundlerRuntimePath = require.resolve(
-  '@module-federation/webpack-bundler-runtime',
+  '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
   {
     paths: [RuntimeToolsPath],
   },
 );
-const RuntimePath = require.resolve('@module-federation/runtime', {
-  paths: [RuntimeToolsPath],
-});
-const EmbeddedRuntimePath = require.resolve(
-  '@module-federation/runtime/embedded',
+const RuntimePath = require.resolve(
+  '@module-federation/runtime/dist/index.esm.js',
   {
     paths: [RuntimeToolsPath],
   },
 );
-
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompiler = new WeakSet<Compiler>();
@@ -330,17 +327,31 @@ class FederationRuntimePlugin {
     );
   }
 
-  setRuntimeAlias(compiler: Compiler) {
-    const { experiments, implementation } = this.options || {};
-    let runtimePath = EmbeddedRuntimePath;
+  getRuntimeAlias(compiler: Compiler) {
+    const { implementation } = this.options || {};
+    let runtimePath = RuntimePath;
+    const alias: any = compiler.options.resolve.alias || {};
 
-    if (implementation) {
-      runtimePath = require.resolve(`@module-federation/runtime/embedded`, {
-        paths: [implementation],
-      });
+    if (alias['@module-federation/runtime$']) {
+      runtimePath = alias['@module-federation/runtime$'];
+    } else {
+      if (implementation) {
+        runtimePath = require.resolve(
+          `@module-federation/runtime/dist/index.esm.js`,
+          {
+            paths: [implementation],
+          },
+        );
+      }
     }
 
+    return runtimePath;
+  }
+
+  setRuntimeAlias(compiler: Compiler) {
+    const { implementation } = this.options || {};
     const alias: any = compiler.options.resolve.alias || {};
+    const runtimePath = this.getRuntimeAlias(compiler);
     alias['@module-federation/runtime$'] =
       alias['@module-federation/runtime$'] || runtimePath;
     alias['@module-federation/runtime-tools$'] =
@@ -395,7 +406,7 @@ class FederationRuntimePlugin {
 
     if (this.options?.implementation) {
       this.bundlerRuntimePath = require.resolve(
-        '@module-federation/webpack-bundler-runtime',
+        '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
         {
           paths: [this.options.implementation],
         },
@@ -408,18 +419,6 @@ class FederationRuntimePlugin {
 
     new HoistContainerReferences().apply(compiler);
 
-    new compiler.webpack.NormalModuleReplacementPlugin(
-      /@module-federation\/runtime/,
-      (resolveData) => {
-        if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
-          resolveData.request = RuntimePath;
-
-          if (resolveData.createData) {
-            resolveData.createData.request = resolveData.request;
-          }
-        }
-      },
-    ).apply(compiler);
     // dont run multiple times on every apply()
     if (!onceForCompiler.has(compiler)) {
       this.prependEntry(compiler);

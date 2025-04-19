@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rspack",
-  "version": "0.10.0",
+  "version": "0.12.0",
   "license": "MIT",
   "keywords": [
     "Module Federation",
@@ -24,6 +24,7 @@
   "module": "./dist/index.esm.mjs",
   "types": "./dist/index.cjs.d.ts",
   "dependencies": {
+    "btoa": "1.2.1",
     "@module-federation/bridge-react-webpack-plugin": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/managers": "workspace:*",
@@ -45,6 +46,11 @@
       "types": "./dist/plugin.cjs.d.ts",
       "import": "./dist/plugin.esm.mjs",
       "require": "./dist/plugin.cjs.js"
+    },
+    "./remote-entry-plugin": {
+      "types": "./dist/remote-entry-plugin.cjs.d.ts",
+      "import": "./dist/remote-entry-plugin.esm.mjs",
+      "require": "./dist/remote-entry-plugin.cjs.js"
     }
   },
   "typesVersions": {
@@ -54,6 +60,9 @@
       ],
       "plugin": [
         "./dist/plugin.cjs.d.ts"
+      ],
+      "remote-entry-plugin": [
+        "./dist/remote-entry-plugin.cjs.d.ts"
       ]
     }
   },

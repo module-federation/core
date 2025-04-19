@@ -18,7 +18,7 @@ import type {
 } from 'webpack/lib/Dependency';
 
 class ProvideSharedDependency extends Dependency {
-  shareScope: string;
+  shareScope: string | string[];
   name: string;
   version: string | false;
   request: string;
@@ -26,9 +26,10 @@ class ProvideSharedDependency extends Dependency {
   requiredVersion: string | false;
   strictVersion: boolean;
   singleton: boolean;
+  layer?: string;
 
   /**
-   * @param {string} shareScope share scope
+   * @param {string|string[]} shareScope share scope
    * @param {string} name module name
    * @param {string | false} version version
    * @param {string} request request
@@ -36,9 +37,10 @@ class ProvideSharedDependency extends Dependency {
    * @param {boolean} requiredVersion version requirement
    * @param {boolean} strictVersion don't use shared version even if version isn't valid
    * @param {boolean} singleton use single global version
+   * @param {string} [layer] layer information
    */
   constructor(
-    shareScope: string,
+    shareScope: string | string[],
     name: string,
     version: string | false,
     request: string,
@@ -46,6 +48,7 @@ class ProvideSharedDependency extends Dependency {
     requiredVersion: string | false,
     strictVersion: boolean,
     singleton: boolean,
+    layer?: string,
   ) {
     super();
     this.shareScope = shareScope;
@@ -56,6 +59,7 @@ class ProvideSharedDependency extends Dependency {
     this.requiredVersion = requiredVersion;
     this.strictVersion = strictVersion;
     this.singleton = singleton;
+    this.layer = layer;
   }
 
   override get type(): string {
@@ -66,7 +70,11 @@ class ProvideSharedDependency extends Dependency {
    * @returns {string | null} an identifier to merge equal requests
    */
   override getResourceIdentifier(): string | null {
-    return `provide module (${this.shareScope}) ${this.request} as ${
+    const scopeStr = Array.isArray(this.shareScope)
+      ? this.shareScope.join('|')
+      : this.shareScope;
+
+    return `provide module (${scopeStr})${this.layer ? ` (${this.layer})` : ''} ${this.request} as ${
       this.name
     } @ ${this.version}${this.eager ? ' (eager)' : ''}`;
   }
@@ -77,12 +85,13 @@ class ProvideSharedDependency extends Dependency {
   override serialize(context: ObjectSerializerContext): void {
     context.write(this.shareScope);
     context.write(this.name);
-    context.write(this.request);
     context.write(this.version);
+    context.write(this.request);
     context.write(this.eager);
     context.write(this.requiredVersion);
     context.write(this.strictVersion);
     context.write(this.singleton);
+    context.write(this.layer);
     super.serialize(context);
   }
 
@@ -103,8 +112,9 @@ class ProvideSharedDependency extends Dependency {
       read(),
       read(),
       read(),
+      read(),
     );
-    //@ts-ignore
+    // @ts-expect-error - webpack serializer pattern requires static property
     this.shareScope = context.read();
     obj.deserialize(context);
     return obj;

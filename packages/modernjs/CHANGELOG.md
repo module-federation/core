@@ -1,5 +1,85 @@
 # @module-federation/modern-js
 
+## 0.12.0
+
+### Patch Changes
+
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+  - @module-federation/enhanced@0.12.0
+  - @module-federation/node@2.7.0
+  - @module-federation/sdk@0.12.0
+  - @module-federation/rsbuild-plugin@0.12.0
+  - @module-federation/cli@0.12.0
+
+## 0.11.4
+
+### Patch Changes
+
+- 64a2bc1: fix(modern-js-plugin): correct publicpath in build
+- 292f2fd: chore(modern-js-plugin): warn if header origin is not specified
+- 21c2fb9: fix(modern-js-plugin): apply ssr.distOutputDir in bundlerChain
+- Updated dependencies [64a2bc1]
+- Updated dependencies [ed8bda3]
+- Updated dependencies [ebe7d89]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/node@2.6.33
+  - @module-federation/enhanced@0.11.4
+  - @module-federation/cli@0.11.4
+  - @module-federation/rsbuild-plugin@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- Updated dependencies [e5fae18]
+  - @module-federation/node@2.6.32
+  - @module-federation/cli@0.11.3
+  - @module-federation/enhanced@0.11.3
+  - @module-federation/rsbuild-plugin@0.11.3
+  - @module-federation/sdk@0.11.3
+
+## 0.11.2
+
+### Patch Changes
+
+- Updated dependencies [60d1fc1]
+- Updated dependencies [047857b]
+  - @module-federation/rsbuild-plugin@0.11.2
+  - @module-federation/sdk@0.11.2
+  - @module-federation/cli@0.11.2
+  - @module-federation/enhanced@0.11.2
+  - @module-federation/node@2.6.31
+
+## 0.11.1
+
+### Patch Changes
+
+- Updated dependencies [09d6bc1]
+  - @module-federation/enhanced@0.11.1
+  - @module-federation/node@2.6.30
+  - @module-federation/rsbuild-plugin@0.11.1
+  - @module-federation/sdk@0.11.1
+
+## 0.11.0
+
+### Patch Changes
+
+- Updated dependencies [fce107e]
+- Updated dependencies [fce107e]
+- Updated dependencies [5c4175e]
+- Updated dependencies [f302eeb]
+  - @module-federation/enhanced@0.11.0
+  - @module-federation/sdk@0.11.0
+  - @module-federation/node@2.6.29
+  - @module-federation/rsbuild-plugin@0.11.0
+
 ## 0.10.0
 
 ### Patch Changes

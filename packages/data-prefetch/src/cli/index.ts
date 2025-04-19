@@ -48,7 +48,7 @@ export class PrefetchPlugin implements WebpackPluginInstance {
       this.options.runtimePlugins = [];
     }
 
-    const runtimePath = path.resolve(__dirname, './plugin.esm.mjs');
+    const runtimePath = path.resolve(__dirname, './plugin.esm.js');
     if (!this.options.runtimePlugins?.includes(runtimePath)) {
       this.options.runtimePlugins!.push(runtimePath);
     }

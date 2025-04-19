@@ -39,6 +39,7 @@ export interface BasicProviderModuleInfo extends BasicModuleInfo {
 interface BasicProviderModuleInfoWithPublicPath
   extends BasicProviderModuleInfo {
   publicPath: string;
+  ssrPublicPath?: string;
 }
 
 interface BasicProviderModuleInfoWithGetPublicPath
@@ -64,6 +65,7 @@ export interface ConsumerModuleInfoWithPublicPath
   extends BasicConsumerModuleInfo,
     BasicProviderModuleInfo {
   publicPath: string;
+  ssrPublicPath?: string;
 }
 
 interface ConsumerModuleInfoWithGetPublicPath

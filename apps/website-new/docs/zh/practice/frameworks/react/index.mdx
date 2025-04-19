@@ -117,7 +117,14 @@ export default defineConfig({
 
 通过检查 Yarn 提供的安装报告，确保 Webpack 版本 5 或更高版本已安装。
 
-## 步骤 2：更新入口文件
+## 步骤 2：安装 Module Federation 插件
+
+```bash
+pnpm add @module-federation/enhanced
+pnpm add @module-federation/rsbuild-plugin --save-dev
+```
+
+## 步骤 3：更新入口文件
 
 在这两个应用程序中，将 `index.js` 文件重命名为 `bootstrap.js`。此更改允许异步加载 `bootstrap.js`，这对于模块联邦在两个应用程序之间正确运行至关重要。
 
@@ -146,15 +153,14 @@ root.render(
 import('./bootstrap');
 ```
 
-## 步骤 3：创建并导出
+## 步骤 4：创建并导出
 
 现在，创建一个从 `MFE2` 导出的组件
-
 
 <Steps>
 
 
-### 3.1 创建按钮组件
+### 4.1 创建按钮组件
 
 在`MFE2`中，在 src 目录中创建一个名为 `Button.tsx` 的新文件，其中包含以下内容：
 
@@ -166,7 +172,7 @@ const Button = () => (
 export default Button;
 ```
 
-### 3.2 更新 App.tsx
+### 4.2 更新 App.tsx
 
 更新 `MFE2` 中的 `App.tsx` 以导入并渲染 Button 组件：
 
@@ -185,49 +191,60 @@ const App = () => {
 
 export default App;
 ```
-## 3.3：在 MFE2 中配置 Rsbuild
+</Steps>
 
-在 `MFE2` 根目录下创建 `rsbuild.config.ts` 文件，配置如下：
+## 步骤 5：在 MFE2 中配置 Rsbuild
 
-```ts title="rsbuild.config.ts"
+首先在 `MFE2` 根目录下创建 `module-federation.config.ts`文件，配置如下：
+
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
+
+export default createModuleFederationConfig({
+  name: 'remote',
+  exposes: {
+    './Button': './src/Button',
+  },
+  filename: 'remoteEntry.js',
+  shared: {
+    ...dependencies,
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+});
+
+```
+
+然后修改在 `MFE2` 根目录下的 `rsbuild.config.ts` 文件，配置如下：
+
+```diff title="rsbuild.config.ts"
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import { dependencies }  from './package.json';
++ import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
++ import mfConfig from './module-federation.config';
 
 export default defineConfig({
   server: {
     port: 3002
   },
-  moduleFederation: {
-    options: {
-     name: 'remote',
-      exposes: {
-        './Button': './src/Button',
-      },
-      filename: 'remoteEntry.js',
-      shared: {
-        ...dependencies,
-        react: {
-          singleton: true,
-          requiredVersion: dependencies['react'],
-        },
-        'react-dom': {
-          singleton: true,
-          requiredVersion: dependencies['react-dom'],
-        },
-      },
-    }
-  },
-  plugins: [pluginReact()]
+  plugins: [
+    pluginReact()
++   pluginModuleFederation(mfConfig)
+  ]
 });
 ```
-</Steps>
-## 步骤 4：使用远程模块
+
+## 步骤 6：使用远程模块
 
 在 `MFE1` 中使用 `MFE2` 公开的模块
 
 <Steps>
-### 4.1 更新 App.tsx
+
+### 6.1 更新 App.tsx
 
 更新 `MFE1` 中的 `App.tsx` 以导入并渲染 `MFE2` 按钮组件：
 
@@ -247,7 +264,7 @@ function App() {
 export default App;
 ```
 
-### 4.2：在 MFE1 中配置 Rsbuild
+### 6.2：在 MFE1 中配置 Rsbuild
 
 在 `MFE1` 根目录中创建 `rsbuild.config.ts` 文件，配置如下：
 

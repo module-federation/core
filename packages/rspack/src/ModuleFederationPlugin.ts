@@ -15,6 +15,7 @@ import { DtsPlugin } from '@module-federation/dts-plugin';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
+import { RemoteEntryPlugin } from './RemoteEntryPlugin';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
 type SplitChunks = Compiler['options']['optimization']['splitChunks'];
@@ -83,6 +84,13 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       this._patchChunkSplit(compiler, options.name);
     }
 
+    // must before ModuleFederationPlugin
+    if (options.getPublicPath && options.name) {
+      new RemoteEntryPlugin(options.name, options.getPublicPath).apply(
+        compiler,
+      );
+    }
+
     if (options.experiments?.provideExternalRuntime) {
       if (options.exposes) {
         throw new Error(
@@ -130,7 +138,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     ).apply(compiler);
 
     const runtimeESMPath = require.resolve(
-      '@module-federation/runtime/dist/index.esm.mjs',
+      '@module-federation/runtime/dist/index.esm.js',
       { paths: [options.implementation] },
     );
 

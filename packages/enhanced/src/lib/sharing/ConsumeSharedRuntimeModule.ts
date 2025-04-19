@@ -72,9 +72,11 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
                 null,
                 2,
               )},`,
-              `scope: [${JSON.stringify(
-                shareOption.shareScope || 'default',
-              )}],`,
+              `scope: ${JSON.stringify(
+                Array.isArray(shareOption.shareScope)
+                  ? shareOption.shareScope
+                  : [shareOption.shareScope || 'default'],
+              )},`,
             ]),
             '},',
             `shareKey: "${shareOption.shareKey}",`,

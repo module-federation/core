@@ -49,6 +49,15 @@ const addCustomKeywords = (ajv) => {
   });
 
   ajv.addKeyword({
+    keyword: 'instanceof',
+    schemaType: 'string',
+    code(ctx) {
+      const { data, schema } = ctx;
+      ctx.fail(_`!(${data} instanceof ${new Name(schema)})`);
+    },
+  });
+
+  ajv.addKeyword({
     keyword: 'absolutePath',
     type: 'string',
     schemaType: 'boolean',

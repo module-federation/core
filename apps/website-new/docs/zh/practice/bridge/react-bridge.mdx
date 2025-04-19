@@ -1,13 +1,37 @@
-# React Bridge
+# React Bridge（for React v16-v19）
 
 `@module-federation/bridge-react` 提供了用于 React 应用的 bridge 工具函数：
 - `createBridgeComponent`：用于导出应用级别模块，适用于生产者包装其作为应用类型导出的模块
 - `createRemoteComponent`：用于加载应用级别模块，适用于消费者加载作为应用类型加载的模块
 
+## React 版本兼容性
+
+`@module-federation/bridge-react` 支持多个 React 主要版本，以确保在不同 React 版本的应用之间实现无缝集成：
+
+- **React 16/17 (Legacy)**: 完全支持，使用传统 `ReactDOM.render` 和 `ReactDOM.unmountComponentAtNode` API
+- **React 18**: 完全支持，使用新的 `createRoot` 和 `hydrateRoot` API
+- **React 19**: 完全支持，使用 `createRoot` 和 `hydrateRoot` API，但移除了对传统渲染方法的支持
+
+## 版本特定导入
+
+您可以根据项目中使用的 React 版本，选择特定的导入方式：
+
+```tsx
+// Explicitly specify React 16/17 version (recommended for React 16/17)
+import { createBridgeComponent } from '@module-federation/bridge-react';
+
+// Explicitly specify React 18 version (recommended for React 18)
+import { createBridgeComponent } from '@module-federation/bridge-react/v18';
+
+// Explicitly specify React 19 version (recommended for React 19)
+import { createBridgeComponent } from '@module-federation/bridge-react/v19';
+```
+
+这种多版本兼容性使得不同团队可以独立选择和升级他们的 React 版本，同时保持模块联邦集成的稳定性。
+
 [查看 Demo](https://github.com/module-federation/core/tree/main/apps/router-demo)
 
-
-### 安装
+## 安装
 
 import { PackageManagerTabs } from '@theme';
 
@@ -19,18 +43,21 @@ import { PackageManagerTabs } from '@theme';
   }}
 />
 
+## 使用示例
 
-### 示例
+### 导出应用类型模块
 
-#### 导出应用类型模块
-
-:::danger
-请注意：使用 `@module-federation/bridge-react` 后不能将 `react-router-dom` 设置成 shared，否则构建工具将会提示异常。这是因为 `@module-federation/bridge-react` 通过代理 `react-router-dom` 实现了对路由的控制，以保证应用间路由能够正常协同工作。
+:::danger 注意
+使用 `@module-federation/bridge-react` 后不能将 `react-router-dom` 设置成 shared，否则构建工具将会提示异常。这是因为 `@module-federation/bridge-react` 通过代理 `react-router-dom` 实现了对路由的控制，以保证应用间路由能够正常协同工作。
 :::
 
-> 在生产者项目中，假设我们需要将应用通过 `@module-federation/bridge-react` 导出为一个应用类型模块，应用入口为 App.tsx 文件
+#### 在生产者项目中
 
-- Step1: 首先，我们新建一个文件 `export-app.tsx`，该文件将作为应用类型模块导出的文件。我们需要使用 `createBridgeComponent` 来包装应用的根组件。
+假设我们需要将应用通过 `@module-federation/bridge-react` 导出为一个应用类型模块，应用入口为 App.tsx 文件：
+
+**步骤 1**: 创建导出文件
+
+首先，我们新建一个文件 `export-app.tsx`，该文件将作为应用类型模块导出的文件。我们需要使用 `createBridgeComponent` 来包装应用的根组件。
 
 ```tsx
 // ./src/export-app.tsx
@@ -42,7 +69,9 @@ export default createBridgeComponent({
 });
 ```
 
-- Step2: 在 `rsbuild.config.ts` 配置文件中，我们需要将 `export-app.tsx` 作为应用类型模块导出
+**步骤 2**: 配置模块联邦
+
+在 `rsbuild.config.ts` 配置文件中，我们需要将 `export-app.tsx` 作为应用类型模块导出：
 
 ```ts
 // rsbuild.config.ts
@@ -61,23 +90,28 @@ export default defineConfig({
   ],
 });
 ```
-至此，我们完成了应用类型模块的导出。
+
+至此，我们已经完成了应用类型模块的导出。
 
 :::info
 
-为什么应用类型模块需要使用 `createBridgeComponent` 包装？原因主要有三点：
+**为什么需要使用 createBridgeComponent?**
 
-1. 支持跨框架渲染。通过 `createBridgeComponent` 包装的组件将符合应用类型消费方的加载协议，这使得跨框架渲染成为可能
-2. 自动注入 `basename`。通过 `createBridgeComponent` 包装的组件将自动注入 `basename`，这能保证生产者应用在消费者项目下也能正常工作
-3. 包裹 ErrorBoundary。通过 `createBridgeComponent` 包装的组件将包裹 ErrorBoundary，以保证在远程加载失败或渲染出错时，能够自动进入兜底逻辑
+应用类型模块需要使用 `createBridgeComponent` 包装有三个主要原因：
+
+1. **支持跨框架渲染**：使用 `createBridgeComponent` 包装的组件将符合应用类型消费者的加载协议，使得跨框架渲染成为可能。
+2. **自动注入 basename**：使用 `createBridgeComponent` 包装的组件将自动注入 `basename`，确保生产者应用在消费者项目下正常工作。
+3. **包装 ErrorBoundary**：使用 `createBridgeComponent` 包装的组件将被 ErrorBoundary 包装，确保在远程加载失败或渲染错误时自动进入 fallback 逻辑。
 
 :::
 
-#### 加载应用类型模块
+### 加载应用类型模块
 
-> Host
+#### 在消费者项目中
 
-- Step1: 在 `rsbuild.config.ts` 配置中，我们需要注册远程模块，这点与其它 Module Federation 配置无异。
+**步骤 1**: 配置远程模块
+
+在 `rsbuild.config.ts` 配置中，我们需要注册远程模块，这与其他模块联邦配置没有区别：
 
 ```ts
 // rsbuild.config.ts
@@ -94,38 +128,38 @@ export default defineConfig({
 });
 ```
 
-- Step2: 在消费者项目中，我们需要加载应用类型模块，我们使用 `createRemoteComponent` 来加载应用类型模块
+**步骤 2**: 加载远程应用
+
+在消费者项目中，我们需要使用 `createRemoteComponent` 来加载应用类型模块：
 
 ```tsx
 // ./src/App.tsx
-import React from 'react';
 import { createRemoteComponent } from '@module-federation/bridge-react';
-import styles from './index.module.less';
+import { loadRemote } from '@module-federation/runtime';
 
-// 定义 FallbackErrorComp 组件
-const FallbackErrorComp = ({ error, resetErrorBoundary }) => {
+// 定义错误回退组件
+const FallbackErrorComp = ({ error }) => {
   return (
     <div>
-      <h2>This is ErrorBoundary Component</h2>
-      <p>Something went wrong:</p>
-      <pre style={{ color: 'red' }}>{error.message}</pre>
-      <button onClick={() => resetErrorBoundary()}>
-        resetErrorBoundary(try again)
+      <h1>加载远程组件时出错</h1>
+      <p>{error.message}</p>
+      <button onClick={() => window.location.reload()}>
+        重试
       </button>
     </div>
   );
 };
 
-// 定义 FallbackLoading 组件
-const FallbackComp = <div data-test-id="loading">loading...</div>;
+// 定义加载中组件
+const FallbackComp = <div data-test-id="loading">加载中...</div>;
 
 // 使用 createRemoteComponent 创建远程组件
 const Remote1App = createRemoteComponent({
-  // loader 用于加载远程模块，例如：loadRemote('remote1/export-app')、import('remote1/export-app')
+  // loader 用于加载远程模块，例如：loadRemote('remote1/export-app')，import('remote1/export-app')
   loader: () => loadRemote('remote1/export-app'),
-  // fallback 用于在加载远程模块失败时展示的组件
+  // fallback 用于在远程模块加载失败时显示的组件
   fallback: FallbackErrorComp,
-  // loading 用于在加载远程模块时展示的组件
+  // loading 用于在加载远程模块时显示的组件
   loading: FallbackComp,
 });
 
@@ -136,19 +170,14 @@ const App = () => {
         <Route path="/" Component={Home} />
         <Route
           path="/remote1/*"
-          // 使用 Remote1App 组件, 将会被懒加载
+          // 使用 Remote1App 组件，将会被懒加载
           Component={() => (
             <Remote1App
-              // 可设置 className 和 style 样式，将自动注入到组件上
-              className={styles.remote1}
-              style={{ color: 'red' }}
-              // name 和 age 为远程组件 props, 将自动透传到远程组件
-              name={'Ming'}
-              age={12}
-              // 可设置 ref, 将自动转发到远程组件，可获取 ref 对象操作 dom
-              ref={ref}
-              // 通过 memoryRoute 来将子应用路由控制为 memoryRouter，将不会直接将 url 展示在浏览器地址上
-              memoryRoute={{ entryPath: '/detail' }}
+              // 设置远程应用的 basename
+              basename="/remote1"
+              // 其他属性将传递给远程组件
+              props1={'props_value'}
+              props2={'another_props_value'}
             />
           )}
         />
@@ -157,33 +186,27 @@ const App = () => {
   );
 };
 ```
-至此，我们完成了应用类型模块的加载。
 
 :::info
 
-1. 通过 `createRemoteComponent` 导出的远程模块将会自动使用 react-bridge 加载协议加载模块，
-这使得应用的跨框架渲染成为可能。
+**关于远程组件加载**
 
-2. 此外，`createRemoteComponent` 会自动处理模块加载、模块销毁、错误处理、loading、路由 等逻辑，
-开发者只需要关注如何使用远程组件即可。
-
-3. 通过 `createRemoteComponent` 导出的远程模块，你可以像使用普通 React 组件一样使用远程组件：传递 className、style、props、ref 等属性均会自动透传到远程组件,
-这使得用户在体验上几乎等同于使用本地组件
+1. 通过 `createRemoteComponent` 导出的远程模块将自动使用 react-bridge 加载协议加载模块，使得应用的跨框架渲染成为可能。
+2. 此外，`createRemoteComponent` 将自动处理模块加载、模块销毁、错误处理、加载中、路由等逻辑，让开发者只需要关注如何使用远程组件。
 
 :::
 
+## API 参考
 
-### API 参考
+### createBridgeComponent
 
-#### createBridgeComponent
-
-`createBridgeComponent` 用于将 React 组件包装成可远程加载的模块。
+`createBridgeComponent` 用于导出远程 React 组件。
 
 ```tsx
 /**
- * 创建一个可远程加载的 React 组件
- * @param bridgeInfo - Bridge Component Config information
- * @returns 返回一个函数，该函数返回包含 render 和 destroy 方法的对象
+ * 创建用于远程加载的 Bridge Component
+ * @param bridgeInfo - Bridge Component配置信息
+ * @returns 返回一个提供 render 和 destroy 方法的函数
  */
 function createBridgeComponent<T>(
   bridgeInfo: ProviderFnParams<T>
@@ -193,10 +216,10 @@ function createBridgeComponent<T>(
 };
 
 /**
- * 桥接组件配置信息
+ * Bridge Component 配置信息
  */
 interface ProviderFnParams<T> {
-  /** 需要被远程加载的根组件 */
+  /** 要远程加载的根组件 */
   rootComponent: React.ComponentType<T>;
   
   /** 
@@ -210,34 +233,31 @@ interface ProviderFnParams<T> {
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
   
-  /**
-   * 自定义创建 React 根节点的函数
-   * @param container - 容器元素
-   * @param options - 创建根节点的选项
+  /** 
+   * 自定义 createRoot 函数，用于 React 18 及以上版本
+   * @param container - DOM 容器
+   * @param options - CreateRoot 选项
    * @returns React 根节点
    */
   createRoot?: (
     container: Element | DocumentFragment,
     options?: CreateRootOptions,
   ) => Root;
-}
-
-/**
- * 创建 React 根节点的选项
- */
-interface CreateRootOptions {
-  /** 为生成的 React ID 添加前缀，用于避免 ID 冲突 */
-  identifierPrefix?: string;
   
-  /** 处理 React 在渲染过程中可恢复的错误的回调函数 */
-  onRecoverableError?: (error: unknown) => void;
-  
-  /** 过渡回调函数，用于 React 18 的并发特性 */
-  transitionCallbacks?: TransitionCallbacks;
+  /**
+   * React 18 和 19 的 createRoot 默认选项
+   * 这些选项将在创建根节点时使用，除非在渲染参数中被 rootOptions 覆盖
+   * @example
+   * {
+   *   identifierPrefix: 'app-',
+   *   onRecoverableError: (err) => console.error(err)
+   * }
+   */
+  defaultRootOptions?: CreateRootOptions;
 }
 ```
 
-#### createRemoteComponent
+### createRemoteComponent
 
 `createRemoteComponent` 用于加载远程 React 组件。
 
@@ -245,7 +265,7 @@ interface CreateRootOptions {
 /**
  * 创建远程 React 组件
  * @param options - 远程组件配置选项
- * @returns 返回一个 React 组件，可以接收 props 并渲染远程组件
+ * @returns 返回一个可以接收 props 并渲染远程组件的 React 组件
  */
 function createRemoteComponent<T, E extends keyof T = 'default'>(
   options: RemoteComponentParams<T, E>
@@ -273,7 +293,7 @@ interface RemoteComponentParams<
   fallback: React.ComponentType<{ error: Error }>;
   
   /** 
-   * 指定模块的导出名称
+   * 指定模块导出名称
    * 默认为 'default'
    */
   export?: E;
@@ -287,8 +307,8 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
   props?: T;
 
   /** 
-   * 内存路由配置，用于将子应用路由控制为 memoryRouter
-   * 将不会直接将 URL 展示在浏览器地址栏上
+   * 内存路由配置，用于将子应用路由作为 memoryRouter 控制
+   * 不会直接在浏览器地址栏中显示 URL
    */
   memoryRoute?: { entryPath: string };
   
@@ -303,17 +323,17 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
 }
 ```
 
-### 使用示例
+## 使用示例
 
-#### 使用 export 指定模块导出
+### 使用 export 指定模块导出
 
 ```tsx
-// remote
+// 远程应用
 export const provider = createBridgeComponent({
   rootComponent: App
 });
 
-// host
+// 宿主应用
 const Remote1App = createRemoteComponent({
   loader: () => loadRemote('remote1/export-app'),
   export: 'provider', // 指定使用 provider 导出
@@ -322,7 +342,7 @@ const Remote1App = createRemoteComponent({
 });
 ```
 
-#### 使用 memoryRoute 控制路由
+### 使用 memoryRoute 控制路由
 
 ```tsx
 function App() {
@@ -335,10 +355,10 @@ function App() {
             <Remote1App
               className={styles.remote1}
               style={{ color: 'red' }}
-              // 通过 memoryRoute 来将子应用路由控制为 memoryRouter
-              // 将不会直接将 URL 展示在浏览器地址栏上
+              // 使用 memoryRoute 将子应用路由作为 memoryRouter 控制
+              // 不会直接在浏览器地址栏中显示 URL
               memoryRoute={{ entryPath: '/detail' }}
-              // 其他属性会透传给远程组件
+              // 其他属性将传递给远程组件
               props1={'props_value'}
               props2={'another_props_value'}
               ref={ref}
@@ -349,3 +369,49 @@ function App() {
     </BrowserRouter>
   );
 }
+```
+
+## 为 React 18 和 19 配置 createRoot 选项
+
+对于 React 18 和 19，`@module-federation/bridge-react` 支持向 `createRoot` 方法传递选项，允许您自定义根组件的行为：
+
+### 创建bridge component时设置默认选项
+
+```tsx
+import { createBridgeComponent } from '@module-federation/bridge-react';
+
+export default createBridgeComponent({
+  rootComponent: App,
+  // 为使用此组件的所有实例设置默认 createRoot 选项
+  defaultRootOptions: {
+    identifierPrefix: 'my-app-',
+    onRecoverableError: (error) => {
+      console.error('可恢复的渲染错误:', error);
+    }
+  }
+});
+```
+
+### 在渲染时设置选项
+
+```tsx
+// 在消费者应用中
+const RemoteApp = createRemoteComponent({
+  url: 'http://localhost:3001/remoteEntry.js',
+  scope: 'remote',
+  module: './App',
+});
+
+// 在渲染时传递 rootOptions
+<RemoteApp 
+  props={{ message: 'Hello' }} 
+  rootOptions={{
+    identifierPrefix: 'instance-',
+    onRecoverableError: (error) => {
+      console.error('此实例的可恢复错误:', error);
+    }
+  }}
+/>
+```
+
+渲染时传递的选项将覆盖创建组件时设置的默认选项。

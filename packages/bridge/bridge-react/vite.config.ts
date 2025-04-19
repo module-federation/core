@@ -1,14 +1,13 @@
 import { defineConfig } from 'vite';
-// import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import dts from 'vite-plugin-dts';
-// import react from '@vitejs/plugin-react';
 import packageJson from './package.json';
 
 const perDepsKeys = Object.keys(packageJson.peerDependencies);
 
 export default defineConfig({
   plugins: [
+    // 添加我们的自定义插件
     dts({
       rollupTypes: true,
       bundledPackages: [
@@ -25,6 +24,8 @@ export default defineConfig({
         router: path.resolve(__dirname, 'src/router/default.tsx'),
         'router-v5': path.resolve(__dirname, 'src/router/v5.tsx'),
         'router-v6': path.resolve(__dirname, 'src/router/v6.tsx'),
+        v18: path.resolve(__dirname, 'src/v18.ts'),
+        v19: path.resolve(__dirname, 'src/v19.ts'),
       },
       formats: ['cjs', 'es'],
       fileName: (format, entryName) => `${entryName}.${format}.js`,

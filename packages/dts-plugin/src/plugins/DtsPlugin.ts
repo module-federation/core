@@ -1,11 +1,39 @@
 import { DevPlugin } from './DevPlugin';
 import { normalizeOptions } from '@module-federation/sdk';
-import { ConsumeTypesPlugin } from './ConsumeTypesPlugin';
-import { GenerateTypesPlugin } from './GenerateTypesPlugin';
+import {
+  ConsumeTypesPlugin,
+  DEFAULT_CONSUME_TYPES,
+} from './ConsumeTypesPlugin';
+import {
+  GenerateTypesPlugin,
+  DEFAULT_GENERATE_TYPES,
+} from './GenerateTypesPlugin';
 import { isTSProject } from '../core';
 
 import { type moduleFederationPlugin } from '@module-federation/sdk';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
+
+export const normalizeDtsOptions = (
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
+  context: string,
+  defaultOptions?: {
+    defaultGenerateOptions?: moduleFederationPlugin.DtsRemoteOptions;
+    defaultConsumeOptions?: moduleFederationPlugin.DtsHostOptions;
+  },
+) => {
+  return normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
+    isTSProject(options.dts, context),
+    {
+      generateTypes:
+        defaultOptions?.defaultGenerateOptions || DEFAULT_GENERATE_TYPES,
+      consumeTypes:
+        defaultOptions?.defaultConsumeOptions || DEFAULT_CONSUME_TYPES,
+      extraOptions: {},
+      displayErrorInTerminal: true,
+    },
+    'mfOptions.dts',
+  )(options.dts);
+};
 
 export class DtsPlugin implements WebpackPluginInstance {
   options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -16,25 +44,26 @@ export class DtsPlugin implements WebpackPluginInstance {
   apply(compiler: Compiler) {
     const { options } = this;
 
-    const defaultGenerateTypes = {
-      generateAPITypes: true,
-      compileInChildProcess: true,
-      abortOnError: false,
-      extractThirdParty: false,
-      extractRemoteTypes: false,
-    };
-    const defaultConsumeTypes = { abortOnError: false, consumeAPITypes: true };
-    const normalizedDtsOptions =
-      normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
-        isTSProject(options.dts, compiler.context),
-        {
-          generateTypes: defaultGenerateTypes,
-          consumeTypes: defaultConsumeTypes,
-          extraOptions: {},
-          displayErrorInTerminal: true,
-        },
-        'mfOptions.dts',
-      )(options.dts);
+    // Create a shallow clone of the options object to avoid mutating the original
+    const clonedOptions = { ...options };
+
+    // Clean up query parameters in exposes paths without mutating original
+    if (options.exposes && typeof options.exposes === 'object') {
+      const cleanedExposes: Record<string, any> = {};
+      Object.entries(options.exposes).forEach(([key, value]) => {
+        if (typeof value === 'string') {
+          cleanedExposes[key] = value.split('?')[0];
+        } else {
+          cleanedExposes[key] = value;
+        }
+      });
+      clonedOptions.exposes = cleanedExposes;
+    }
+
+    const normalizedDtsOptions = normalizeDtsOptions(
+      clonedOptions,
+      compiler.context,
+    );
 
     if (typeof normalizedDtsOptions !== 'object') {
       return;
@@ -57,7 +86,7 @@ export class DtsPlugin implements WebpackPluginInstance {
     // Because the plugin will delete dist/@mf-types.zip while generating types, which will be used in GenerateTypesPlugin
     // So it should apply after GenerateTypesPlugin
     new DevPlugin(
-      options,
+      clonedOptions,
       normalizedDtsOptions,
       generateTypesPromise,
       fetchRemoteTypeUrlsPromise,
@@ -65,17 +94,15 @@ export class DtsPlugin implements WebpackPluginInstance {
 
     // The exposes files may use remote types, so it need to consume types first, otherwise the generate types will fail
     new GenerateTypesPlugin(
-      options,
+      clonedOptions,
       normalizedDtsOptions,
-      defaultGenerateTypes,
       fetchRemoteTypeUrlsPromise,
       generateTypesPromiseResolve,
     ).apply(compiler);
 
     new ConsumeTypesPlugin(
-      options,
+      clonedOptions,
       normalizedDtsOptions,
-      defaultConsumeTypes,
       fetchRemoteTypeUrlsResolve,
     ).apply(compiler);
   }

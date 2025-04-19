@@ -5,34 +5,11 @@
 **/dist/
 
 # Documentation and config files
-**/*.md
 **/*.yaml
 **/*.yml
-**/.eslintrc*
-**/.prettierrc*
-**/.swcrc
-**/jest.config.*
-**/tsconfig.*
-**/*/stats.json
 
-# First ignore everything
-*
-
-# Then allow specific packages and their contents
-!packages/webpack-bundler-runtime/
-!packages/webpack-bundler-runtime/**/*
-!packages/sdk/
-!packages/sdk/**/*
-!packages/enhanced/
-!packages/enhanced/**/*
-
-# Allow package.json files
-!package.json
-!packages/*/package.json
-!**/package.json
 
 # Explicitly ignore specific packages
-packages/dts-plugin/
 packages/typescript/
 packages/native-*
 packages/core/
@@ -41,7 +18,6 @@ packages/native-federation-typescript/
 packages/esbuild/
 
 # Ignore specific directories
-apps/
 webpack/tooling/
 webpack/setup/
 webpack/test/
@@ -52,7 +28,7 @@ tools/
 .vscode/
 .verdaccio/
 
-!apps/manifest-demo/*.ts
+
 
 # Ignore specific files
 .cursorignore

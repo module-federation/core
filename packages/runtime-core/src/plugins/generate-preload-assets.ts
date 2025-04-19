@@ -4,6 +4,7 @@ import {
   ProviderModuleInfo,
   isManifestProvider,
   getResourceUrl,
+  isBrowserEnv,
 } from '@module-federation/sdk';
 import {
   EntryAssets,
@@ -100,6 +101,12 @@ function traverseModuleInfo(
     }
   }
 }
+
+const isExisted = (type: 'link' | 'script', url: string) => {
+  return document.querySelector(
+    `${type}[${type === 'link' ? 'href' : 'src'}="${url}"]`,
+  );
+};
 
 // eslint-disable-next-line max-lines-per-function
 export function generatePreloadAssets(
@@ -290,16 +297,16 @@ export function generatePreloadAssets(
   }
 
   const needPreloadJsAssets = jsAssets.filter(
-    (asset) => !loadedSharedJsAssets.has(asset),
+    (asset) => !loadedSharedJsAssets.has(asset) && !isExisted('script', asset),
   );
   const needPreloadCssAssets = cssAssets.filter(
-    (asset) => !loadedSharedCssAssets.has(asset),
+    (asset) => !loadedSharedCssAssets.has(asset) && !isExisted('link', asset),
   );
 
   return {
     cssAssets: needPreloadCssAssets,
     jsAssetsWithoutEntry: needPreloadJsAssets,
-    entryAssets,
+    entryAssets: entryAssets.filter((entry) => !isExisted('script', entry.url)),
   };
 }
 
@@ -316,6 +323,13 @@ export const generatePreloadAssetsPlugin: () => FederationRuntimePlugin =
           globalSnapshot,
           remoteSnapshot,
         } = args;
+        if (!isBrowserEnv()) {
+          return {
+            cssAssets: [],
+            jsAssetsWithoutEntry: [],
+            entryAssets: [],
+          };
+        }
 
         if (isRemoteInfoWithEntry(remote) && isPureRemoteEntry(remote)) {
           return {
