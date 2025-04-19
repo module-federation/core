@@ -1,0 +1,19 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# Module Federation SDK Package
+
+## Overview
+
+The `@module-federation/sdk` package provides essential utilities and tools for implementing Module Federation. Located in [packages/sdk](mdc:packages/sdk), it offers core functionality for module handling, environment detection, and debugging.
+
+## Key Features
+
+- Module name parsing and encoding
+- Filename generation for exposed/shared modules
+- Environment detection utilities
+- Debugging and logging tools
+- Manifest snapshot generation

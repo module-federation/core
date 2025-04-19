@@ -1,0 +1,66 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# Module Federation Manifest Package
+
+## Overview
+
+The `@module-federation/manifest` package provides manifest and stats functionality for Module Federation projects. Located in [packages/manifest](mdc:packages/manifest), it handles module exposure configuration and stats collection for webpack/rspack projects.
+
+## Key Features
+
+- Module exposure management
+- Stats collection and processing
+- Webpack/Rspack integration
+- Container management
+- Type generation support
+
+## Package Structure
+
+- **Source Code**: Main implementation in [src/](mdc:packages/manifest/src/)
+- **Tests**: Test suite in [__tests__/](mdc:packages/manifest/__tests__/)
+- **Configuration**:
+  - [rollup.config.js](mdc:packages/manifest/rollup.config.js): Build setup
+  - [tsconfig.json](mdc:packages/manifest/tsconfig.json): TypeScript config
+  - [jest.config.js](mdc:packages/manifest/jest.config.js): Test configuration
+
+## Build System
+
+The package uses:
+- Rollup for bundling (CJS and ESM outputs)
+- TypeScript for type safety
+- Jest for testing
+- Standard JS module format
+
+## Core Dependencies
+
+- `@module-federation/sdk`: Core utilities
+- `@module-federation/dts-plugin`: Type generation
+- `@module-federation/managers`: Container management
+
+## Usage Example
+
+```javascript
+import { StatsPlugin } from '@module-federation/manifest';
+
+// Configure stats plugin
+new StatsPlugin(mfOptions, {
+  pluginVersion: pkg.version,
+  bundler: 'webpack'
+}).apply(compiler);
+
+// Container management
+import { ContainerManager } from '@module-federation/managers';
+const containerManager = new ContainerManager();
+containerManager.init(options);
+options.exposes = containerManager.containerPluginExposesOptions;
+```
+
+## Documentation
+
+For more details, see:
+- [README.md](mdc:packages/manifest/README.md): Package documentation
+- Module Federation documentation

@@ -1,0 +1,93 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Module Federation Runtime Implementation
+
+## Source Code Structure
+
+The implementation is organized into several key modules in [src/](mdc:packages/runtime/src/):
+
+### Core Modules
+
+- [index.ts](mdc:packages/runtime/src/index.ts): Main entry point and public API
+- [core.ts](mdc:packages/runtime/src/core.ts): Core runtime exports
+- [types.ts](mdc:packages/runtime/src/types.ts): Type definitions
+
+### Utility Modules
+
+- [helpers.ts](mdc:packages/runtime/src/helpers.ts): Helper functions
+- [utils.ts](mdc:packages/runtime/src/utils.ts): Utility functions
+
+## Implementation Guidelines
+
+When working with this codebase:
+
+1. **API Design**
+   - Keep APIs simple and intuitive
+   - Maintain backward compatibility
+   - Document all public interfaces
+   - Follow TypeScript best practices
+
+2. **Runtime Integration**
+   - Use runtime-core for core functionality
+   - Extend core features appropriately
+   - Maintain plugin compatibility
+   - Consider performance implications
+
+3. **Error Handling**
+   - Use error-codes package
+   - Provide helpful error messages
+   - Handle edge cases gracefully
+   - Maintain error consistency
+
+4. **Testing Requirements**
+   - Test public APIs thoroughly
+   - Verify runtime integration
+   - Test error scenarios
+   - Cover edge cases
+
+## Usage Patterns
+
+1. **Module Loading**
+```typescript
+import { loadModule } from '@module-federation/runtime';
+await loadModule('remote/module');
+```
+
+2. **Plugin Integration**
+```typescript
+import { registerPlugin } from '@module-federation/runtime';
+registerPlugin('name', plugin);
+```
+
+3. **Error Handling**
+```typescript
+import { handleError } from '@module-federation/runtime';
+try {
+  // runtime operations
+} catch (error) {
+  handleError(error);
+}
+```
+
+## Best Practices
+
+1. **Performance**
+   - Use selective loading
+   - Share dependencies efficiently
+   - Minimize runtime overhead
+   - Optimize plugin usage
+
+2. **Maintainability**
+   - Follow consistent patterns
+   - Document complex logic
+   - Keep code modular
+   - Use type safety
+
+3. **Compatibility**
+   - Support multiple environments
+   - Handle version differences
+   - Maintain plugin compatibility
+   - Consider bundler support

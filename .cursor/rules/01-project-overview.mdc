@@ -1,0 +1,16 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Module Federation Project Overview
+
+This repository contains Module Federation 2.0, an advanced system for sharing code and resources across JavaScript applications. The project is primarily defined in [package.json](mdc:package.json) and uses a monorepo structure.
+
+## Core Concepts
+
+- **Module Federation Runtime**: Advanced runtime system for module sharing
+- **Plugin System**: Extensible architecture with runtime plugins
+- **Manifest System**: Enhanced module manifest handling
+- **Type Support**: Dynamic type hinting capabilities
+- **Developer Tools**: Including Chrome DevTools integration

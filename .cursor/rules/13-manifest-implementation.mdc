@@ -1,0 +1,16 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Module Federation Manifest Implementation
+
+## Source Code Structure
+
+The implementation is organized into several key modules in [src/](mdc:packages/manifest/src/):
+
+### Core Components
+
+- [index.ts](mdc:packages/manifest/src/index.ts): Main entry point
+- [StatsPlugin.ts](mdc:packages/manifest/src/StatsPlugin.ts): Webpack/Rspack plugin
+- [types.ts](mdc:packages/manifest/src/types.ts): Type definitions

@@ -1,0 +1,19 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Module Federation Enhanced Implementation
+
+## Source Code Structure
+
+The implementation is organized into several key directories in [src/](mdc:packages/enhanced/src/):
+
+### Core Files
+
+- [index.ts](mdc:packages/enhanced/src/index.ts): Main entry point and exports
+- [webpack.ts](mdc:packages/enhanced/src/webpack.ts): Webpack integration
+- [rspack.ts](mdc:packages/enhanced/src/rspack.ts): Rspack integration
+- [runtime.ts](mdc:packages/enhanced/src/runtime.ts): Runtime exports
+- [prefetch.ts](mdc:packages/enhanced/src/prefetch.ts): Prefetching functionality
+- [utils.ts](mdc:packages/enhanced/src/utils.ts): Shared utilities

@@ -1,0 +1,74 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Module Federation Runtime Core Implementation
+
+## Source Code Structure
+
+The implementation is organized into several key modules in [src/](mdc:packages/runtime-core/src/):
+
+### Core Runtime
+
+- [core.ts](mdc:packages/runtime-core/src/core.ts): Core runtime implementation
+- [global.ts](mdc:packages/runtime-core/src/global.ts): Global state management
+- [index.ts](mdc:packages/runtime-core/src/index.ts): Public API exports
+- [helpers.ts](mdc:packages/runtime-core/src/helpers.ts): Utility functions
+
+### Module System
+
+- [module/](mdc:packages/runtime-core/src/module/): Module management
+- [remote/](mdc:packages/runtime-core/src/remote/): Remote module handling
+- [shared/](mdc:packages/runtime-core/src/shared/): Shared module system
+
+### Plugin System
+
+- [plugins/](mdc:packages/runtime-core/src/plugins/): Plugin architecture
+- [type/](mdc:packages/runtime-core/src/type/): Type definitions
+- [utils/](mdc:packages/runtime-core/src/utils/): Utility functions
+
+## Implementation Guidelines
+
+When working with this codebase:
+
+1. **Core Runtime**
+   - Maintain backward compatibility
+   - Handle global state carefully
+   - Follow error handling patterns
+   - Document runtime behaviors
+
+2. **Module Management**
+   - Implement proper module loading
+   - Handle circular dependencies
+   - Manage module lifecycle
+   - Support hot reloading
+
+3. **Plugin System**
+   - Follow plugin interface
+   - Maintain extensibility
+   - Document plugin hooks
+   - Handle plugin errors
+
+4. **Testing Requirements**
+   - Test core runtime features
+   - Cover plugin scenarios
+   - Test module loading
+   - Verify error handling
+
+## Architecture Principles
+
+1. **Modularity**
+   - Keep components isolated
+   - Use clear interfaces
+   - Follow single responsibility
+
+2. **Performance**
+   - Optimize module loading
+   - Minimize runtime overhead
+   - Efficient dependency sharing
+
+3. **Reliability**
+   - Handle edge cases
+   - Proper error recovery
+   - Maintain stability

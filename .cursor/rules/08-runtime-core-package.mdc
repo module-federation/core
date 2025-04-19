@@ -1,0 +1,18 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Module Federation Runtime Core Package
+
+## Overview
+
+The `@module-federation/runtime-core` package provides the core runtime implementation for Module Federation. Located in [packages/runtime-core](mdc:packages/runtime-core), it handles dependency sharing, module loading, and runtime plugin system.
+
+## Key Features
+
+- Dependency sharing and optimization
+- Selective module loading
+- Extensible plugin system
+- Runtime module federation
+- Global state management

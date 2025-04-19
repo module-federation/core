@@ -1,0 +1,47 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Module Federation Runtime Package
+
+## Overview
+
+The `@module-federation/runtime` package provides the main runtime interface for Module Federation. Located in [packages/runtime](mdc:packages/runtime), it builds on top of runtime-core to provide a user-friendly API for module federation features.
+
+## Key Features
+
+- Smart dependency sharing
+- Selective module loading
+- Plugin system integration
+- Performance optimization
+- Runtime extension support
+
+## Package Structure
+
+- **Source Code**: Main implementation in [src/](mdc:packages/runtime/src/)
+- **Tests**: Test suite in [__tests__/](mdc:packages/runtime/__tests__/)
+- **Configuration**:
+  - [rollup.config.cjs](mdc:packages/runtime/rollup.config.cjs): Build setup
+  - [tsconfig.json](mdc:packages/runtime/tsconfig.json): TypeScript config
+  - [vitest.config.ts](mdc:packages/runtime/vitest.config.ts): Test configuration
+
+## Build System
+
+The package uses:
+- Rollup for bundling (CJS and ESM outputs)
+- TypeScript for type safety
+- Vitest for testing
+- SWC for fast compilation
+
+## Core Dependencies
+
+- `@module-federation/runtime-core`: Core runtime functionality
+- `@module-federation/sdk`: Utility functions
+- `@module-federation/error-codes`: Error handling
+
+## Documentation
+
+Detailed documentation available at:
+- [README.md](mdc:packages/runtime/README.md): Package overview
+- [Module Federation Runtime Guide](https://module-federation.io/guide/basic/runtime.html)

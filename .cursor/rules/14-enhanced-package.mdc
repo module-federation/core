@@ -1,0 +1,82 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# Module Federation Enhanced Package
+
+## Overview
+
+The `@module-federation/enhanced` package provides advanced features and plugins for Module Federation. Located in [packages/enhanced](mdc:packages/enhanced), it offers a comprehensive set of tools for module federation, including webpack/rspack plugins, runtime enhancements, and CLI utilities.
+
+## Key Components
+
+### Core Plugins
+- ModuleFederationPlugin
+- ContainerPlugin
+- ContainerReferencePlugin
+- SharePlugin
+- ConsumeSharedPlugin
+- ProvideSharedPlugin
+- FederationRuntimePlugin
+- AsyncBoundaryPlugin
+- HoistContainerReferencesPlugin
+
+### CLI Tools
+- Type generation utilities
+- Remote type fetching
+- Configuration management
+
+## Package Structure
+
+- **Source Code**: Core implementation in [src/](mdc:packages/enhanced/src/)
+  - [lib/](mdc:packages/enhanced/src/lib/): Core functionality
+  - [runtime/](mdc:packages/enhanced/src/runtime/): Runtime components
+  - [schemas/](mdc:packages/enhanced/src/schemas/): JSON schemas
+  - [types/](mdc:packages/enhanced/src/types/): TypeScript definitions
+  - [wrapper/](mdc:packages/enhanced/src/wrapper/): Plugin wrappers
+
+- **CLI Tools**: Command-line utilities in [bin/](mdc:packages/enhanced/bin/)
+- **Tests**: Test suite in [test/](mdc:packages/enhanced/test/)
+- **Configuration**:
+  - [tsconfig.json](mdc:packages/enhanced/tsconfig.json): TypeScript settings
+  - [jest.config.ts](mdc:packages/enhanced/jest.config.ts): Test configuration
+  - [.swcrc](mdc:packages/enhanced/.swcrc): SWC compiler config
+
+## Core Dependencies
+
+### Runtime Dependencies
+- `@module-federation/runtime-tools`: Runtime utilities
+- `@module-federation/sdk`: Core SDK
+- `@module-federation/managers`: Container management
+
+### Build Dependencies
+- `@module-federation/dts-plugin`: Type generation
+- `@module-federation/manifest`: Manifest handling
+- `@module-federation/rspack`: Rspack integration
+
+## Configuration Options
+
+### ModuleFederationPlugin Options
+- `name`: Container name
+- `exposes`: Module exposure configuration
+- `remotes`: Remote module configuration
+- `shared`: Dependency sharing settings
+- `runtimePlugins`: Additional runtime plugins
+
+### CLI Options
+```bash
+mf dts [options]
+  --root      # Project root directory
+  --output    # DTS output directory
+  --fetch     # Fetch remote types
+  --generate  # Generate types
+  --config    # Configuration file
+```
+
+## Documentation
+
+For detailed documentation, see:
+- [README.md](mdc:packages/enhanced/README.md): Package documentation
+- [Module Federation Guide](https://module-federation.io/guide/basic/webpack.html)

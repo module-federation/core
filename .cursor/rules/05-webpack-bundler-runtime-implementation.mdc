@@ -1,0 +1,47 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Webpack Bundler Runtime Implementation
+
+## Source Code Structure
+
+The implementation is organized into several key modules in [src/](mdc:packages/webpack-bundler-runtime/src/):
+
+### Core Modules
+
+- [index.ts](mdc:packages/webpack-bundler-runtime/src/index.ts): Main entry point and exports
+- [types.ts](mdc:packages/webpack-bundler-runtime/src/types.ts): TypeScript type definitions
+- [constant.ts](mdc:packages/webpack-bundler-runtime/src/constant.ts): Shared constants
+
+### Container Management
+
+- [container.ts](mdc:packages/webpack-bundler-runtime/src/container.ts): Core container implementation
+- [initContainerEntry.ts](mdc:packages/webpack-bundler-runtime/src/initContainerEntry.ts): Container entry initialization
+- [remotes.ts](mdc:packages/webpack-bundler-runtime/src/remotes.ts): Remote modules handling
+
+### Sharing System
+
+- [initializeSharing.ts](mdc:packages/webpack-bundler-runtime/src/initializeSharing.ts): Share scope initialization
+- [attachShareScopeMap.ts](mdc:packages/webpack-bundler-runtime/src/attachShareScopeMap.ts): Share scope mapping
+- [consumes.ts](mdc:packages/webpack-bundler-runtime/src/consumes.ts): Consumed modules management
+- [installInitialConsumes.ts](mdc:packages/webpack-bundler-runtime/src/installInitialConsumes.ts): Initial module consumption
+
+## Implementation Guidelines
+
+When working with this codebase:
+
+1. **Type Safety**
+   - All new code must be fully typed
+   - Types are defined in [types.ts](mdc:packages/webpack-bundler-runtime/src/types.ts)
+
+2. **Module Organization**
+   - Keep related functionality grouped
+   - Follow existing file naming conventions
+   - Maintain clear separation of concerns
+
+3. **Runtime Integration**
+   - Code must be compatible with webpack/rspack
+   - Follow Module Federation specifications
+   - Consider both CJS and ESM environments

@@ -283,4 +283,25 @@ describe('createLink', () => {
 
     expect(link).toBe(customLink);
   });
+
+  it('should not create a duplicate link when existing link has no rel and attrs.rel is undefined (https://github.com/module-federation/core/issues/3705)', () => {
+    // Simulate an existing link with no rel attribute
+    const url = 'https://example.com/stylesheet.css';
+    const existingLink = document.createElement('link');
+    existingLink.setAttribute('href', url);
+    // Note: no rel attribute set
+    document.head.appendChild(existingLink);
+
+    // Now call createLink with matching url and no rel in attrs
+    const cb = jest.fn();
+    const { link, needAttach } = createLink({
+      url,
+      cb,
+      attrs: { as: 'style' }, // rel is omitted, so info.attrs['rel'] is undefined
+    });
+
+    // Should reuse the existing link, not create a new one
+    expect(link).toBe(existingLink);
+    expect(needAttach).toBe(false);
+  });
 });

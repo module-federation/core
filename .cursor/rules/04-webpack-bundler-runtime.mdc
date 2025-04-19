@@ -1,0 +1,19 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Webpack Bundler Runtime Package
+
+## Overview
+
+The `@module-federation/webpack-bundler-runtime` package provides the runtime implementation for Module Federation in webpack/rspack environments. Located in [packages/webpack-bundler-runtime](mdc:packages/webpack-bundler-runtime), it handles runtime extraction and integration.
+
+## Package Structure
+
+- **Source Code**: Main implementation in [src/](mdc:packages/webpack-bundler-runtime/src/)
+- **Tests**: Test files in [__tests__/](mdc:packages/webpack-bundler-runtime/__tests__/)
+- **Configuration**:
+  - [rollup.config.cjs](mdc:packages/webpack-bundler-runtime/rollup.config.cjs): Build configuration
+  - [tsconfig.json](mdc:packages/webpack-bundler-runtime/tsconfig.json): TypeScript settings
+  - [.swcrc](mdc:packages/webpack-bundler-runtime/.swcrc): SWC compiler config
