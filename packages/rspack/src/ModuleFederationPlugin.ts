@@ -77,11 +77,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
 
     // must before ModuleFederationPlugin
-    if (options.getPublicPath && options.name) {
-      new RemoteEntryPlugin(options.name, options.getPublicPath).apply(
-        compiler,
-      );
-    }
+    new RemoteEntryPlugin(options).apply(compiler);
 
     if (options.experiments?.provideExternalRuntime) {
       if (options.exposes) {
