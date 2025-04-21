@@ -3,6 +3,7 @@ import {
   ModuleInfo,
   RemoteEntryType,
   isBrowserEnv,
+  isReactNativeEnv,
 } from '@module-federation/sdk';
 import { Remote, RemoteInfoOptionalVersion } from '../type';
 import { warn } from './logger';
@@ -88,7 +89,7 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
     type: 'global',
     globalName: '',
   };
-  if (isBrowserEnv()) {
+  if (isBrowserEnv() || isReactNativeEnv()) {
     return 'remoteEntry' in snapshot
       ? {
           url: snapshot.remoteEntry,

@@ -11,6 +11,7 @@ module.exports = (rollupConfig, projectOptions) => {
         c.format === 'esm'
           ? c.chunkFileNames.replace('.js', '.mjs')
           : c.chunkFileNames,
+      ...(c.format === 'cjs' ? { externalLiveBindings: false } : {}),
     }));
   } else {
     rollupConfig.output = {
@@ -25,6 +26,9 @@ module.exports = (rollupConfig, projectOptions) => {
         rollupConfig.output.format === 'esm'
           ? rollupConfig.output.chunkFileNames.replace('.js', '.mjs')
           : rollupConfig.output.chunkFileNames,
+      ...(rollupConfig.output.format === 'cjs'
+        ? { externalLiveBindings: false }
+        : {}),
     };
   }
 

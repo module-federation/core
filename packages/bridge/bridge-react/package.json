@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "0.10.0",
+  "version": "0.12.0",
   "publishConfig": {
     "access": "public"
   },
@@ -20,6 +20,16 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
+    },
+    "./v18": {
+      "types": "./dist/v18.d.ts",
+      "import": "./dist/v18.es.js",
+      "require": "./dist/v18.cjs.js"
+    },
+    "./v19": {
+      "types": "./dist/v19.d.ts",
+      "import": "./dist/v19.es.js",
+      "require": "./dist/v19.cjs.js"
     },
     "./router": {
       "types": "./dist/router.d.ts",
@@ -49,7 +59,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@loadable/component": "^5.16.4",
     "@module-federation/bridge-shared": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "react-error-boundary": "^4.1.2"
@@ -57,7 +66,7 @@
   "peerDependencies": {
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0",
-    "react-router-dom": "^4 || ^5 || ^6"
+    "react-router-dom": "^4 || ^5 || ^6 || ^7"
   },
   "devDependencies": {
     "@testing-library/react": "15.0.7",
@@ -71,7 +80,7 @@
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
     "typescript": "^5.2.2",
-    "vite": "^5.4.12",
+    "vite": "^5.4.18",
     "vite-plugin-dts": "^4.3.0",
     "@module-federation/runtime": "workspace:*"
   }

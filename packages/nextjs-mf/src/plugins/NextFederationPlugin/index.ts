@@ -101,13 +101,6 @@ export class NextFederationPlugin {
         (message) => /your target environment does not appear/.test(message),
       ];
     }
-    compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
-      compiler.options.resolve.alias = {
-        ...compiler.options.resolve.alias,
-        //useing embedded runtime
-        // '@module-federation/runtime$': runtimeESMPath,
-      };
-    });
   }
 
   private validateOptions(compiler: Compiler): boolean {

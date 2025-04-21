@@ -19,7 +19,7 @@ import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
-import { RemoteEntryPlugin } from './runtime/RemoteEntryPlugin';
+import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
 import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
@@ -79,11 +79,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   apply(compiler: Compiler): void {
     const { _options: options } = this;
     // must before ModuleFederationPlugin
-    if (options.getPublicPath && options.name) {
-      new RemoteEntryPlugin(options.name, options.getPublicPath).apply(
-        compiler,
-      );
-    }
+    new RemoteEntryPlugin(options).apply(
+      // @ts-ignore
+      compiler,
+    );
     if (options.experiments?.provideExternalRuntime) {
       if (options.exposes) {
         throw new Error(

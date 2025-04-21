@@ -1,6 +1,6 @@
 const getDocsUrl = (errorCode: string) => {
   const type = errorCode.split('-')[0].toLowerCase();
-  return `https://module-federation.io/guide/troubleshooting/${type}/${errorCode}`;
+  return `View the docs to see how to solve: https://module-federation.io/guide/troubleshooting/${type}/${errorCode}`;
 };
 
 export const getShortErrorMsg = (

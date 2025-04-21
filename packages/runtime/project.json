@@ -14,15 +14,14 @@
         "main": "packages/runtime/src/index.ts",
         "additionalEntryPoints": [
           "packages/runtime/src/types.ts",
-          "packages/runtime/src/helpers.ts",
-          "packages/runtime/src/embedded.ts"
+          "packages/runtime/src/helpers.ts"
         ],
         "tsConfig": "packages/runtime/tsconfig.lib.json",
         "assets": [],
         "external": ["@module-federation/*"],
         "project": "packages/runtime/package.json",
         "compiler": "swc",
-        "rollupConfig": "packages/runtime/rollup.config.js",
+        "rollupConfig": "packages/runtime/rollup.config.cjs",
         "format": ["cjs", "esm"],
         "generatePackageJson": false
       },

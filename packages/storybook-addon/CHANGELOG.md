@@ -1,5 +1,67 @@
 # @module-federation/storybook-addon
 
+## 4.0.13
+
+### Patch Changes
+
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+  - @module-federation/enhanced@0.12.0
+  - @module-federation/sdk@0.12.0
+  - @module-federation/utilities@3.1.52
+
+## 4.0.12
+
+### Patch Changes
+
+- Updated dependencies [64a2bc1]
+- Updated dependencies [ebe7d89]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/enhanced@0.11.4
+  - @module-federation/utilities@3.1.51
+
+## 4.0.11
+
+### Patch Changes
+
+- @module-federation/enhanced@0.11.3
+- @module-federation/sdk@0.11.3
+- @module-federation/utilities@3.1.50
+
+## 4.0.10
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/enhanced@0.11.2
+  - @module-federation/utilities@3.1.49
+
+## 4.0.9
+
+### Patch Changes
+
+- Updated dependencies [09d6bc1]
+  - @module-federation/enhanced@0.11.1
+  - @module-federation/sdk@0.11.1
+  - @module-federation/utilities@3.1.48
+
+## 4.0.8
+
+### Patch Changes
+
+- Updated dependencies [fce107e]
+- Updated dependencies [fce107e]
+  - @module-federation/enhanced@0.11.0
+  - @module-federation/sdk@0.11.0
+  - @module-federation/utilities@3.1.47
+
 ## 4.0.7
 
 ### Patch Changes

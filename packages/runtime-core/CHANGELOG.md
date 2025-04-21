@@ -1,5 +1,62 @@
 # @module-federation/runtime
 
+## 0.12.0
+
+### Minor Changes
+
+- c399b9a: Switch to esm modules by default
+- f4fb242: Support share layers and multiple share scopes
+
+### Patch Changes
+
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/sdk@0.12.0
+  - @module-federation/error-codes@0.12.0
+
+## 0.11.4
+
+### Patch Changes
+
+- Updated dependencies [64a2bc1]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/error-codes@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- e112c16: chore(runtime): remove shared strategy warn
+  - @module-federation/sdk@0.11.3
+  - @module-federation/error-codes@0.11.3
+
+## 0.11.2
+
+### Patch Changes
+
+- 047857b: fix(runtime-core): check for `remoteEntry` in snapshot outside browser env
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/error-codes@0.11.2
+
+## 0.11.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.11.1
+- @module-federation/error-codes@0.11.1
+
+## 0.11.0
+
+### Patch Changes
+
+- bce6cd9: fix(runtime): preload filter loaded resources
+- Updated dependencies [fce107e]
+  - @module-federation/sdk@0.11.0
+  - @module-federation/error-codes@0.11.0
+
 ## 0.10.0
 
 ### Patch Changes

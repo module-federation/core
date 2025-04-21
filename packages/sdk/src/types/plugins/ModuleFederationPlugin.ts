@@ -137,6 +137,7 @@ export interface PluginDevOptions {
 }
 
 interface RemoteTypeUrl {
+  alias?: string;
   api: string;
   zip: string;
 }
@@ -164,9 +165,13 @@ export interface DtsRemoteOptions {
   deleteTypesFolder?: boolean;
   additionalFilesToCompile?: string[];
   compileInChildProcess?: boolean;
-  compilerInstance?: 'tsc' | 'vue-tsc';
+  compilerInstance?: 'tsc' | 'vue-tsc' | 'tspc' | string;
   generateAPITypes?: boolean;
-  extractThirdParty?: boolean;
+  extractThirdParty?:
+    | boolean
+    | {
+        exclude?: Array<string | RegExp>;
+      };
   extractRemoteTypes?: boolean;
   abortOnError?: boolean;
 }

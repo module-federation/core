@@ -195,7 +195,7 @@ class DTSManager {
     } catch (error) {
       if (this.options.remote?.abortOnError === false) {
         if (this.options.displayErrorInTerminal) {
-          logger.error(`Unable to compile federated types ${error}`);
+          logger.error(error);
         }
       } else {
         throw error;
@@ -318,9 +318,9 @@ class DTSManager {
     );
     try {
       const existedFile = fs.readFileSync(apiTypeFileName, 'utf-8');
-      const existedImports = new ThirdPartyExtractor('').collectTypeImports(
-        existedFile,
-      );
+      const existedImports = new ThirdPartyExtractor({
+        destDir: '',
+      }).collectTypeImports(existedFile);
       existedImports.forEach((existedImport) => {
         const alias = existedImport
           .split('./')

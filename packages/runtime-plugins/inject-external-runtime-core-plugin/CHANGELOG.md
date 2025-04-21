@@ -1,5 +1,46 @@
 # @module-federation/inject-external-runtime-core-plugin
 
+## 0.12.0
+
+### Minor Changes
+
+- c399b9a: Switch to esm modules by default
+
+### Patch Changes
+
+- Updated dependencies [c399b9a]
+  - @module-federation/runtime-tools@0.12.0
+
+## 0.11.4
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.11.3
+
+## 0.11.2
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.11.2
+
+## 0.11.1
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.11.1
+
+## 0.11.0
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.11.0
+
 ## 0.10.0
 
 ### Patch Changes

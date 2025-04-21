@@ -7,7 +7,6 @@ import {
   ManifestProvider,
 } from './types';
 import { MANIFEST_EXT } from './constant';
-import { isBrowserEnv } from './env';
 
 interface IOptions {
   remotes?: Record<string, string>;
@@ -176,6 +175,7 @@ export function generateSnapshotFromManifest(
     remoteSnapshot = {
       ...basicRemoteSnapshot,
       publicPath: getPublicPath(),
+      ssrPublicPath: manifest.metaData.ssrPublicPath,
     };
   } else {
     remoteSnapshot = {
