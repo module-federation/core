@@ -1,5 +1,16 @@
 # @module-federation/storybook-addon
 
+## 4.0.14
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [9efb9b9]
+- Updated dependencies [38f324f]
+  - @module-federation/enhanced@0.13.0
+  - @module-federation/utilities@3.1.53
+  - @module-federation/sdk@0.13.0
+
 ## 4.0.13
 
 ### Patch Changes
