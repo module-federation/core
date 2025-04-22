@@ -1,5 +1,11 @@
 # @module-federation/sdk
 
+## 0.13.0
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+
 ## 0.12.0
 
 ### Minor Changes

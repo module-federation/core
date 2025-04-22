@@ -1,20 +1,24 @@
+/**
+ * Base bridge component implementation
+ * This file contains bridge component logic shared across all React versions
+ */
 import * as React from 'react';
-import ReactDOM from 'react-dom';
 import type {
   ProviderParams,
   ProviderFnParams,
   RootType,
   DestroyParams,
   RenderParams,
-} from '../types';
-import { ErrorBoundary } from 'react-error-boundary';
-import { RouterContext } from './context';
-import { LoggerInstance } from '../utils';
-import { federationRuntime } from './plugin';
-import { createRoot as defaultCreateRoot } from './compat';
+  CreateRootOptions,
+} from '../../types';
+import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
+import { RouterContext } from '../context';
+import { LoggerInstance } from '../../utils';
+import { federationRuntime } from '../plugin';
 
-export function createBridgeComponent<T>({
-  createRoot = defaultCreateRoot,
+export function createBaseBridgeComponent<T>({
+  createRoot,
+  defaultRootOptions,
   ...bridgeInfo
 }: ProviderFnParams<T>) {
   return () => {
@@ -48,14 +52,22 @@ export function createBridgeComponent<T>({
           basename,
           memoryRoute,
           fallback,
+          rootOptions,
           ...propsInfo
         } = info;
+
+        const mergedRootOptions: CreateRootOptions | undefined = {
+          ...defaultRootOptions,
+          ...(rootOptions as CreateRootOptions),
+        };
 
         const beforeBridgeRenderRes =
           instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
 
         const rootComponentWithErrorBoundary = (
-          <ErrorBoundary FallbackComponent={fallback}>
+          <ErrorBoundary
+            FallbackComponent={fallback as React.ComponentType<FallbackProps>}
+          >
             <RawComponent
               appInfo={{
                 moduleName,
@@ -63,7 +75,10 @@ export function createBridgeComponent<T>({
                 memoryRoute,
               }}
               propsInfo={
-                { ...propsInfo, ...beforeBridgeRenderRes?.extraProps } as T
+                {
+                  ...propsInfo,
+                  ...(beforeBridgeRenderRes as any)?.extraProps,
+                } as T
               }
             />
           </ErrorBoundary>
@@ -75,17 +90,16 @@ export function createBridgeComponent<T>({
           ).then((root: RootType) => rootMap.set(dom, root));
         } else {
           let root = rootMap.get(dom);
-          // do not call createRoot multiple times
-          if (!root) {
-            root = createRoot(dom);
-            rootMap.set(dom, root);
+          // Do not call createRoot multiple times
+          if (!root && createRoot) {
+            root = createRoot(dom, mergedRootOptions);
+            rootMap.set(dom, root as any);
           }
 
-          if ('render' in root) {
+          if (root && 'render' in root) {
             root.render(rootComponentWithErrorBoundary);
           }
         }
-
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
       },
 
@@ -97,7 +111,7 @@ export function createBridgeComponent<T>({
           if ('unmount' in root) {
             root.unmount();
           } else {
-            ReactDOM.unmountComponentAtNode(root as HTMLElement);
+            console.warn('Root does not have unmount method');
           }
           rootMap.delete(dom);
         }
