@@ -28,7 +28,14 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
       __APP_VERSION__,
       async render(info: RenderFnParams) {
         LoggerInstance.debug(`createBridgeComponent render Info`, info);
-        const { moduleName, dom, basename, memoryRoute, ...propsInfo } = info;
+        const {
+          moduleName,
+          dom,
+          basename,
+          memoryRoute,
+          hashRoute,
+          ...propsInfo
+        } = info;
         const app = Vue.createApp(bridgeInfo.rootComponent, propsInfo);
         rootMap.set(dom, app);
 
@@ -46,19 +53,32 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           app,
           basename,
           memoryRoute,
+          hashRoute,
           ...propsInfo,
           ...extraProps,
         });
-
         if (bridgeOptions?.router) {
-          const history = info.memoryRoute
-            ? VueRouter.createMemoryHistory(info.basename)
-            : VueRouter.createWebHistory(info.basename);
+          let history;
+          let routes = bridgeOptions.router.getRoutes();
+
+          if (info.memoryRoute) {
+            history = VueRouter.createMemoryHistory(info.basename);
+          } else if (info.hashRoute) {
+            history = VueRouter.createWebHashHistory();
+            routes = routes.map((route) => {
+              return {
+                ...route,
+                path: info.basename + route.path,
+              };
+            });
+          } else {
+            history = VueRouter.createWebHistory(info.basename);
+          }
 
           const router = VueRouter.createRouter({
             ...bridgeOptions.router.options,
             history,
-            routes: bridgeOptions.router.getRoutes(),
+            routes,
           });
 
           LoggerInstance.debug(`createBridgeComponent render router info>>>`, {
