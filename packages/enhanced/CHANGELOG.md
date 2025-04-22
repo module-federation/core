@@ -1,5 +1,27 @@
 # @module-federation/enhanced
 
+## 0.13.0
+
+### Patch Changes
+
+- 9efb9b9: fix(enhanced): apply getPublicPath only if exposes is set
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [e9a0681]
+- Updated dependencies [92882ec]
+- Updated dependencies [9efb9b9]
+- Updated dependencies [38f324f]
+  - @module-federation/cli@0.13.0
+  - @module-federation/manifest@0.13.0
+  - @module-federation/rspack@0.13.0
+  - @module-federation/inject-external-runtime-core-plugin@0.13.0
+  - @module-federation/bridge-react-webpack-plugin@0.13.0
+  - @module-federation/data-prefetch@0.13.0
+  - @module-federation/runtime-tools@0.13.0
+  - @module-federation/error-codes@0.13.0
+  - @module-federation/dts-plugin@0.13.0
+  - @module-federation/managers@0.13.0
+  - @module-federation/sdk@0.13.0
+
 ## 0.12.0
 
 ### Minor Changes

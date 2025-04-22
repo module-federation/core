@@ -1,5 +1,13 @@
 # @module-federation/esbuild
 
+## 0.0.65
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [38f324f]
+  - @module-federation/sdk@0.13.0
+
 ## 0.0.64
 
 ### Patch Changes
