@@ -1,6 +1,8 @@
 import type {
   Compiler,
+  Falsy,
   ModuleFederationPluginOptions,
+  RspackPluginFunction,
   RspackPluginInstance,
 } from '@rspack/core';
 import {
@@ -49,16 +51,22 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
   private _checkSingleton(compiler: Compiler): void {
     let count = 0;
-    compiler.options.plugins.forEach((p: any) => {
-      if (p.name === this.name) {
-        count++;
-        if (count > 1) {
-          throw new Error(
-            `Detect duplicate register ${this.name},please ensure ${this.name} is singleton!`,
-          );
+    compiler.options.plugins.forEach(
+      (p: Falsy | RspackPluginInstance | RspackPluginFunction) => {
+        if (typeof p !== 'object' || !p) {
+          return;
         }
-      }
-    });
+
+        if (p['name'] === this.name) {
+          count++;
+          if (count > 1) {
+            throw new Error(
+              `Detect duplicate register ${this.name},please ensure ${this.name} is singleton!`,
+            );
+          }
+        }
+      },
+    );
   }
 
   apply(compiler: Compiler): void {
