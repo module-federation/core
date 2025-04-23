@@ -2,6 +2,7 @@ import type {
   moduleFederationPlugin,
   sharePlugin,
 } from '@module-federation/sdk';
+import type { Compiler } from 'webpack';
 
 // Extend the SharedConfig type to include layer properties
 type ExtendedSharedConfig = sharePlugin.SharedConfig & {
@@ -51,158 +52,248 @@ export const WEBPACK_LAYERS_NAMES = {
   appPagesBrowser: 'app-pages-browser',
 } as const;
 
-const createSharedConfig = (
-  name: string,
-  layers: (string | undefined)[],
-  options: { request?: string; import?: false | undefined } = {},
-) => {
-  return layers.reduce(
-    (acc, layer) => {
-      const key = layer ? `${layer}-${name}` : name;
-      acc[key] = {
-        singleton: true,
-        requiredVersion: false,
-        import: layer ? undefined : (options.import ?? false),
-        shareKey: options.request ?? name,
-        request: options.request ?? name,
-        layer,
-        issuerLayer: layer,
-        shareScope: layer ? [layer] : undefined,
-      };
-      return acc;
-    },
-    {} as Record<string, ExtendedSharedConfig>,
-  );
-};
-
-const defaultLayers = [
-  WEBPACK_LAYERS_NAMES.reactServerComponents,
-  WEBPACK_LAYERS_NAMES.serverSideRendering,
-  undefined,
-];
-
-const navigationLayers = [
-  WEBPACK_LAYERS_NAMES.reactServerComponents,
-  WEBPACK_LAYERS_NAMES.serverSideRendering,
-];
-
-const reactShares = createSharedConfig('react', defaultLayers, {
-  request: 'react',
-  import: undefined,
-});
-const reactDomShares = createSharedConfig('react', defaultLayers, {
-  request: 'react-dom',
-});
-const jsxRuntimeShares = createSharedConfig(
-  'react/jsx-runtime',
-  navigationLayers,
-  {
-    request: 'react/jsx-runtime',
-    import: undefined,
-  },
-);
-const jsxDevRuntimeShares = createSharedConfig(
-  'react/jsx-dev-runtime',
-  navigationLayers,
-  {
-    request: 'react/jsx-dev-runtime',
-    import: undefined,
-  },
-);
-const prefixReact = createSharedConfig('react/', defaultLayers, {
-  request: 'react/',
-  import: undefined,
-});
-const nextNavigationShares = createSharedConfig(
-  'next-navigation',
-  navigationLayers,
-  { request: 'next/navigation' },
-);
-
 /**
- * @typedef SharedObject
- * @type {object}
- * @property {object} [key] - The key representing the shared object's package name.
- * @property {boolean} key.singleton - Whether the shared object should be a singleton.
- * @property {boolean} key.requiredVersion - Whether a specific version of the shared object is required.
- * @property {boolean} key.eager - Whether the shared object should be eagerly loaded.
- * @property {boolean} key.import - Whether the shared object should be imported or not.
- * @property {string} key.layer - The webpack layer this shared module belongs to.
- * @property {string|string[]} key.issuerLayer - The webpack layer that can import this shared module.
+ * Gets the alias for a given name from the compiler's alias configuration.
+ * If the alias doesn't exist, it returns the fallback value.
+ *
+ * @param {Compiler} compiler - The webpack compiler instance
+ * @param {string} aliasName - The name of the alias to look up
+ * @param {string} fallback - The fallback value if the alias doesn't exist
+ * @returns {string} - The alias value or fallback
  */
-// Group React related packages
-const reactGroup = {
-  react: {
-    singleton: true,
-    import: false,
-  },
-  'ssr-react': {
-    requiredVersion: false,
-    request: 'react',
-    import: 'next/dist/server/route-modules/app-page/vendored/ssr/react.js',
-    singleton: true,
-    shareKey: 'react',
-    layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-    issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-    shareScope: [WEBPACK_LAYERS_NAMES.serverSideRendering],
-  },
-  'rsc-react': {
-    requiredVersion: false,
-    singleton: true,
-    shareKey: 'react',
-    request: 'react',
-    import: 'next/dist/server/route-modules/app-page/vendored/rsc/react.js',
-    layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-    issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-    shareScope: [WEBPACK_LAYERS_NAMES.reactServerComponents],
-  },
+function getAlias(
+  compiler: Compiler,
+  aliasName: string,
+  fallback: string,
+): string {
+  if (
+    !compiler ||
+    !compiler.options ||
+    !compiler.options.resolve ||
+    !compiler.options.resolve.alias
+  ) {
+    return fallback;
+  }
+
+  const alias = compiler.options.resolve.alias as Record<string, string>;
+
+  return alias[aliasName] || alias[aliasName.replace('$', '')] || fallback;
+}
+
+// Function defining the React related packages group
+const getReactGroup = (
+  compiler: Compiler,
+): Record<string, ExtendedSharedConfig> => {
+  const aliases = {
+    ssr: getAlias(
+      compiler,
+      'react$',
+      'next/dist/server/route-modules/app-page/vendored/ssr/react.js',
+    ),
+    rsc: getAlias(
+      compiler,
+      'react$',
+      'next/dist/server/route-modules/app-page/vendored/rsc/react.js',
+    ),
+    browser: getAlias(compiler, 'react$', 'next/dist/compiled/react'),
+  };
+
+  const reactVersion = require(
+    require.resolve(aliases.browser, { paths: [compiler.context] }),
+  ).version;
+
+  const createSharedConfig = (
+    layer: keyof typeof WEBPACK_LAYERS_NAMES,
+    alias: string,
+    request: string,
+    overrides?: Partial<ExtendedSharedConfig>,
+  ) => {
+    const baseConfig: ExtendedSharedConfig = {
+      request,
+      singleton: true,
+      shareKey: 'react',
+      layer: WEBPACK_LAYERS_NAMES[layer],
+      issuerLayer: WEBPACK_LAYERS_NAMES[layer],
+      shareScope: WEBPACK_LAYERS_NAMES[layer],
+      import: alias,
+      version: reactVersion,
+    };
+    return { ...baseConfig, ...overrides };
+  };
+
+  if (compiler.options.name === 'client') {
+    const browserConfig = createSharedConfig(
+      'appPagesBrowser',
+      aliases.browser,
+      'next/dist/compiled/react',
+    );
+    return {
+      react: browserConfig,
+      'react-app-userRequest': createSharedConfig(
+        'appPagesBrowser',
+        aliases.browser,
+        'next/dist/compiled/react',
+        { request: 'react' },
+      ),
+    };
+  }
+
+  // Server side configurations
+  return {
+    react: {
+      singleton: true,
+      import: false,
+      shareKey: 'react',
+      version: reactVersion,
+    }, // Base react config for server
+    'react-ssr-userRequest': createSharedConfig(
+      'serverSideRendering',
+      aliases.ssr,
+      'react',
+    ),
+    'react-rsc-userRequest': createSharedConfig(
+      'reactServerComponents',
+      aliases.rsc,
+      'react',
+    ),
+    'react-ssr': createSharedConfig(
+      'serverSideRendering',
+      aliases.ssr,
+      'react',
+      {
+        requiredVersion: false,
+        request: aliases.ssr,
+      },
+    ),
+    'rsc-react': createSharedConfig(
+      'reactServerComponents',
+      aliases.rsc,
+      'react',
+      {
+        requiredVersion: false,
+        request: aliases.rsc,
+      },
+    ),
+  };
 };
 
-const reactJsxRuntimeGroup = {
-  'react/jsx-dev-runtime': {
-    singleton: true,
-    import: false,
-  },
-  // "react/jsx-dev-runtime-ssr": {
-  //   singleton: true,
-  //   shareKey: 'react/jsx-dev-runtime',
-  //   request: 'react/jsx-dev-runtime',
-  //   layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-  //   issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-  //   shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-  // },
-  // "react/jsx-dev-runtime-rsc": {
-  //   request: 'react/jsx-dev-runtime',
-  //   singleton: true,
-  //   shareKey: 'react/jsx-dev-runtime',
-  //   layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-  //   issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-  //   shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+// Function defining the React-JSX related packages group
+const getReactJsxDevRuntimeGroup = (
+  compiler: Compiler,
+): Record<string, ExtendedSharedConfig> => {
+  // if(compiler.options.name === 'client') {
+  //   return {
+  //     'react/jsx-dev-runtime': {
+  //       singleton: true,
+  //     },
+  //   }
   // }
+
+  return {
+    'react/jsx-dev-runtime': {
+      singleton: true,
+      import: false,
+    },
+    'react/jsx-dev-runtime-ssr': {
+      singleton: true,
+      shareKey: 'react/jsx-dev-runtime',
+      request: 'react/jsx-dev-runtime',
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      import:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js',
+    },
+    'react/jsx-dev-runtime-rsc': {
+      request: 'react/jsx-dev-runtime',
+      singleton: true,
+      shareKey: 'react/jsx-dev-runtime',
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.js',
+    },
+  };
 };
 
-// Group React-DOM related packages
-const reactDomGroup = {
-  // "react-dom": {
-  //   singleton: true,
-  //   import: false,
-  // },
-  // "rsc-react-dom": {
-  //   singleton: true,
-  //   shareKey: 'react-dom',
-  //   request: 'react-dom',
-  //   layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-  //   issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-  //   shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-  // },
-  // "react-dom-ssr": {
-  //   request: 'react-dom',
-  //   singleton: true,
-  //   shareKey: 'react-dom',
-  //   layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-  //   issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-  //   shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+// Function defining the React-JSX related packages group
+const getReactJsxRuntimeGroup = (
+  compiler: Compiler,
+): Record<string, ExtendedSharedConfig> => {
+  // if(compiler.options.name === 'client') {
+  //   return {
+  //     'react/jsx-dev-runtime': {
+  //       singleton: true,
+  //     },
+  //   }
   // }
+
+  return {
+    'react/jsx-runtime': {
+      singleton: true,
+      import: false,
+    },
+    'react/jsx-runtime-ssr': {
+      singleton: true,
+      shareKey: 'react/jsx-runtime',
+      request: 'react/jsx-runtime',
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      import:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime.js',
+    },
+    'react/jsx-runtime-rsc': {
+      request: 'react/jsx-runtime',
+      singleton: true,
+      shareKey: 'react/jsx-runtime',
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-runtime.js',
+    },
+  };
+};
+
+// Function defining the React-DOM related packages group
+const getReactDomGroup = (
+  compiler: Compiler,
+): Record<string, ExtendedSharedConfig> => {
+  // if(compiler.options.name === 'client') {
+  //   return {
+  //     "react-dom": {
+  //       singleton: true,
+  //     },
+  //   }
+  // }
+  return {
+    'react-dom': {
+      singleton: true,
+      import: false,
+    },
+    'rsc-react-dom': {
+      singleton: true,
+      shareKey: 'react-dom',
+      request: 'react-dom',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-dom.js',
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+    },
+    'react-dom-ssr': {
+      request: 'react-dom',
+      singleton: true,
+      shareKey: 'react-dom',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-dom.js',
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+    },
+  };
 };
 
 // Group Next.js related packages
@@ -261,40 +352,62 @@ const styledJsxGroup = {
   },
 };
 
-//@ts-ignore
-export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
-  ...reactGroup,
-  ...reactDomGroup,
-  // ...nextGroup,
-  // ...styledJsxGroup,
-  // ...reactJsxRuntimeGroup,
-};
+// --- New getShareScope Function ---
 
 /**
- * Defines a default share scope for the browser environment.
- * This function takes the DEFAULT_SHARE_SCOPE and sets eager to undefined and import to undefined for all entries.
- * For 'react', 'react-dom', 'next/router', and 'next/link', it sets eager to true.
- * The module hoisting system relocates these modules into the right runtime and out of the remote.
- *
- * @type {SharedObject}
- * @returns {SharedObject} - The modified share scope for the browser environment.
+ * Generates the appropriate default share scope based on the compiler context.
+ * @param {Compiler} compiler - The webpack compiler instance.
+ * @returns {moduleFederationPlugin.SharedObject} - The generated share scope.
  */
+export const getShareScope = (
+  compiler: Compiler,
+): moduleFederationPlugin.SharedObject => {
+  const isClient = compiler.options.name === 'client';
 
-export const DEFAULT_SHARE_SCOPE_BROWSER: moduleFederationPlugin.SharedObject =
-  Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc, item) => {
-    const [key, value] = item as [string, moduleFederationPlugin.SharedConfig];
-    // if(key.startsWith(WEBPACK_LAYERS_NAMES.reactServerComponents) || key.startsWith(WEBPACK_LAYERS_NAMES.serverSideRendering)) {
-    //   return acc
-    // }
-    //
-    // if(key === 'next-navigation') {
-    //   return acc;
-    // }
-    // Set eager and import to undefined for all entries, except for the ones specified above
-    acc[key] = { ...value, import: undefined };
+  // Generate the base groups by calling the new functions
+  const reactGroup = getReactGroup(compiler);
+  const reactDomGroup = getReactDomGroup(compiler);
+  const reactJsxDevRuntimeGroup = getReactJsxDevRuntimeGroup(compiler);
+  const reactJsxRuntimeGroup = getReactJsxRuntimeGroup(compiler);
 
-    return acc;
-  }, {} as moduleFederationPlugin.SharedObject);
+  // Combine the groups manually
+  let combinedScope: moduleFederationPlugin.SharedObject = { ...reactGroup };
+  if (compiler.options.name === 'server') {
+    Object.keys(reactDomGroup).forEach((key) => {
+      combinedScope[key] = reactDomGroup[key];
+    });
+    Object.keys(reactJsxDevRuntimeGroup).forEach((key) => {
+      combinedScope[key] = reactJsxDevRuntimeGroup[key];
+    });
+    Object.keys(reactJsxRuntimeGroup).forEach((key) => {
+      combinedScope[key] = reactJsxRuntimeGroup[key];
+    });
+  }
+
+  // Apply browser-specific modifications
+  if (isClient) {
+    combinedScope = Object.entries(combinedScope).reduce(
+      (acc, [key, value]) => {
+        // Ensure value is treated correctly if it's a simple string (though unlikely with current groups)
+        const configValue =
+          typeof value === 'string' ? { import: value } : value;
+
+        // ONLY change `import: false` to `import: undefined` for client builds.
+        // Keep other import values (strings, undefined) as they are.
+        // if (configValue.import === false) {
+        //    acc[key] = { ...configValue, import: undefined };
+        // } else {
+        //   // Otherwise, keep the original value entirely
+        acc[key] = value;
+        // }
+        return acc;
+      },
+      {} as moduleFederationPlugin.SharedObject,
+    );
+  }
+
+  return combinedScope;
+};
 
 /**
  * Checks if the remote value is an internal or promise delegate module reference.

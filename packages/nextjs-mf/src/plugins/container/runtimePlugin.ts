@@ -217,6 +217,7 @@ export default function (): FederationRuntimePlugin {
       return args;
     },
     resolveShare: function (args: any) {
+      console.log('Resolving share for package:', args.pkgName);
       if (
         args.pkgName !== 'react' &&
         args.pkgName !== 'react-dom' &&
@@ -224,7 +225,6 @@ export default function (): FederationRuntimePlugin {
       ) {
         return args;
       }
-      console.log(args);
       const shareScopeMap = args.shareScopeMap;
       const scope = args.scope;
       const pkgName = args.pkgName;
@@ -232,6 +232,7 @@ export default function (): FederationRuntimePlugin {
       const GlobalFederation = args.GlobalFederation;
       const host = GlobalFederation['__INSTANCES__'][0];
       if (!host) {
+        console.log('No host instance found');
         return args;
       }
 
