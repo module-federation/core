@@ -1,5 +1,13 @@
 # @module-federation/inject-external-runtime-core-plugin
 
+## 0.13.0
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [38f324f]
+  - @module-federation/runtime-tools@0.13.0
+
 ## 0.12.0
 
 ### Minor Changes
