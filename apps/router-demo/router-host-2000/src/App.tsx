@@ -5,8 +5,7 @@ import React, {
   Suspense,
 } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
-import { RetryPlugin } from '@module-federation/retry-plugin';
+import { init } from '@module-federation/enhanced/runtime';
 import { createRemoteComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
@@ -68,13 +67,15 @@ const FallbackErrorComp = (info: any) => {
 const FallbackComp = <div data-test-id="loading">loading...</div>;
 
 const Remote1App = createRemoteComponent({
-  loader: () => loadRemote('remote1/export-app'),
+  // if runtime is registered in runtime, use loadRemote instead
+  // loader: () => loadRemote('remote1/export-app'),
+  loader: () => import('remote1/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
 const Remote5App = createRemoteComponent({
-  loader: () => loadRemote('remote5/export-app'),
+  loader: () => import('remote5/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
@@ -84,7 +85,7 @@ const Remote1AppWithLoadRemote = React.lazy(
     new Promise((resolve) => {
       // delay 2000ms to show suspense effects
       setTimeout(() => {
-        resolve(loadRemote('remote1/app'));
+        resolve(import('remote1/app'));
       }, 2000);
     }),
 );
@@ -144,19 +145,19 @@ const Remote2App = createRemoteComponent({
 });
 
 const Remote3App = createRemoteComponent({
-  loader: () => loadRemote('remote3/export-app'),
+  loader: () => import('remote3/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
 const RemoteRenderErrorApp = createRemoteComponent({
-  loader: () => loadRemote('remote-render-error/export-app'),
+  loader: () => import('remote-render-error/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 }) as ForwardRefExoticComponent<unknown>;
 
 const RemoteResourceErrorApp = createRemoteComponent({
-  loader: () => loadRemote('remote-resource-error/export-app'),
+  loader: () => import('remote-resource-error/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 }) as ForwardRefExoticComponent<unknown>;

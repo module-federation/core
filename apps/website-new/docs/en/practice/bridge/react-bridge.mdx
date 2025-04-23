@@ -123,7 +123,6 @@ export default defineConfig({
 ```tsx
 // ./src/App.tsx
 import { createRemoteComponent } from '@module-federation/bridge-react';
-import { loadRemote } from '@module-federation/runtime';
 
 // Define FallbackError component
 const FallbackErrorComp = ({ error }: { error: Error }) => {
@@ -143,8 +142,8 @@ const FallbackComp = <div data-test-id="loading">loading...</div>;
 
 // Use createRemoteComponent to create remote component
 const Remote1App = createRemoteComponent({
-  // loader is used to load remote modules, e.g.: loadRemote('remote1/export-app'), import('remote1/export-app')
-  loader: () => loadRemote('remote1/export-app'),
+  // loader is used to load remote modules, e.g.: import('remote1/export-app'), loadRemote('remote1/export-app')
+  loader: () => import('remote1/export-app'),
   // fallback is used for displaying components when remote module loading fails
   fallback: FallbackErrorComp,
   // loading is used for displaying components when loading remote modules
@@ -210,8 +209,8 @@ function createBridgeComponent<T>(
 interface ProviderFnParams<T> {
   /** Root component to be remotely loaded */
   rootComponent: React.ComponentType<T>;
-  
-  /** 
+
+  /**
    * Custom render function for custom rendering logic
    * @param App - React element
    * @param id - DOM element or string ID
@@ -221,8 +220,8 @@ interface ProviderFnParams<T> {
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
-  
-  /** 
+
+  /**
    * Custom createRoot function for React 18 and above
    * @param container - DOM container
    * @param options - CreateRoot options
@@ -232,7 +231,7 @@ interface ProviderFnParams<T> {
     container: Element | DocumentFragment,
     options?: CreateRootOptions,
   ) => Root;
-  
+
   /**
    * Default options for createRoot in React 18 and 19
    * These options will be used when creating a root unless overridden by rootOptions in render params
@@ -269,19 +268,19 @@ interface RemoteComponentParams<
   T = Record<string, unknown>,
   E extends keyof T = keyof T
 > {
-  /** 
+  /**
    * Function to load remote module
    * Example: () => loadRemote('remote1/export-app') or () => import('remote1/export-app')
    */
   loader: () => Promise<T>;
-  
+
   /** Component displayed when loading remote module */
   loading: React.ReactNode;
-  
+
   /** Error component displayed when loading or rendering remote module fails */
   fallback: React.ComponentType<{ error: Error }>;
-  
-  /** 
+
+  /**
    * Specify module export name
    * Default is 'default'
    */
@@ -295,18 +294,18 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
   /** Properties passed to remote component */
   props?: T;
 
-  /** 
+  /**
    * Memory route configuration, used to control child application routing as memoryRouter
    * Will not directly display URL in browser address bar
    */
   memoryRoute?: { entryPath: string };
-  
+
   /** Base path name */
   basename?: string;
-  
+
   /** Style */
   style?: React.CSSProperties;
-  
+
   /** Class name */
   className?: string;
 }
@@ -324,7 +323,7 @@ export const provider = createBridgeComponent({
 
 // host
 const Remote1App = createRemoteComponent({
-  loader: () => loadRemote('remote1/export-app'),
+  loader: () => import('remote1/export-app'),
   export: 'provider', // Specify to use provider export
   fallback: FallbackErrorComp,
   loading: FallbackComp,
@@ -392,8 +391,8 @@ const RemoteApp = createRemoteComponent({
 });
 
 // Pass rootOptions when rendering
-<RemoteApp 
-  props={{ message: 'Hello' }} 
+<RemoteApp
+  props={{ message: 'Hello' }}
   rootOptions={{
     identifierPrefix: 'instance-',
     onRecoverableError: (error) => {

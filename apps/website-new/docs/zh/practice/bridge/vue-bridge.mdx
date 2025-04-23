@@ -120,7 +120,7 @@ export default defineConfig({
 import * as bridge from '@module-federation/bridge-vue3';
 
 const Remote1 = bridge.createRemoteComponent({
-  loader: () => loadRemote('remote1/export-app'),
+  loader: () => import('remote1/export-app'),
 });
 
 const router = createRouter({
@@ -159,13 +159,13 @@ function createRemoteComponent<T, E extends keyof T>(
 
 
 ```tsx
-const Remote1App = createRemoteComponent({ loader: () => loadRemote('remote1/export-app') });
+const Remote1App = createRemoteComponent({ loader: () => import('remote1/export-app') });
 ```
 
 * `options`
   * `loader`
     * type: `() => Promise<Module>`
-    * Purpose: Used to load remote modules, e.g., `loadRemote('remote1/export-app')` or `import('remote1/export-app')`
+    * Purpose: Used to load remote modules, e.g., `import('remote1/export-app')` or `loadRemote('remote1/export-app')`
   * `export`
     * type: `string`
     * Purpose: Used to specify module export
@@ -183,7 +183,7 @@ export const provider = createBridgeComponent({
 
 // host
 const Remote1App = createRemoteComponent({
-  loader: () => loadRemote('remote1/export-app'),
+  loader: () => import('remote1/export-app'),
   export: 'provider'
 });
 ```
@@ -195,7 +195,7 @@ const Remote1App = createRemoteComponent({
 ```tsx
 import * as bridge from '@module-federation/bridge-vue3';
 
-const Remote2 = bridge.createRemoteComponent({ loader: () => loadRemote('remote1/export-app'), rootAttrs: {class: 'root-element-class'} });
+const Remote2 = bridge.createRemoteComponent({ loader: () => import('remote1/export-app'), rootAttrs: {class: 'root-element-class'} });
 
 const router = createRouter({
   history: createWebHistory(),
