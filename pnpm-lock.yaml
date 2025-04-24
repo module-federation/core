@@ -2401,8 +2401,8 @@ importers:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
       react-router:
-        specifier: ^6.21.3
-        version: 6.26.2(react@18.3.1)
+        specifier: ^7.5.2
+        version: 7.5.2(react-dom@18.3.1)(react@18.3.1)
       react-test-renderer:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
@@ -14969,7 +14969,7 @@ packages:
     engines: {node: '>=14'}
     dependencies:
       '@types/set-cookie-parser': 2.4.10
-      set-cookie-parser: 2.7.0
+      set-cookie-parser: 2.7.1
     dev: true
 
   /@mswjs/interceptors@0.17.10:
@@ -18185,6 +18185,7 @@ packages:
   /@remix-run/router@1.19.2:
     resolution: {integrity: sha512-baiMx18+IMuD1yyvOGaHM9QrVUPGGG0jC+z+IPHnRJWUAUvaKuWKyE8gjDj2rzv3sz9zOGoRSPgeBVHRhZnBlA==}
     engines: {node: '>=14.0.0'}
+    dev: false
 
   /@remix-run/router@1.20.0:
     resolution: {integrity: sha512-mUnk8rPJBI9loFDZ+YzPGdeniYK+FTmRD1TMCz7ev2SNIozyKKpnGgsxO34u6Z4z/t0ITuu7voi/AshfsGsgFg==}
@@ -19280,7 +19281,7 @@ packages:
     resolution: {integrity: sha512-PjjrUe1mstoy7N7A6Xr1i5sAKSGPfNay/cEbRt3SBvdYPOsK87TLE6DS9WtViSp8QYHh97cgJ6z1ufuluElDDw==}
     dependencies:
       '@rspack/core': 0.5.3(@swc/helpers@0.5.3)
-      caniuse-lite: 1.0.30001714
+      caniuse-lite: 1.0.30001715
       lodash: 4.17.21
       postcss: 8.4.38
     transitivePeerDependencies:
@@ -20291,8 +20292,8 @@ packages:
       terminal-link: 2.1.1
       watchpack: 2.4.2
       webpack-sources: 3.2.3
-      zod: 3.24.2
-      zod-validation-error: 1.3.1(zod@3.24.2)
+      zod: 3.24.3
+      zod-validation-error: 1.3.1(zod@3.24.3)
     dev: true
 
   /@rspack/core@0.7.5(@swc/helpers@0.5.13):
@@ -28202,8 +28203,8 @@ packages:
   /caniuse-lite@1.0.30001706:
     resolution: {integrity: sha512-3ZczoTApMAZwPKYWmwVbQMFpXBDds3/0VciVoUwPUbldlYyVLmRVuRs/PcUZtHpbLRpzzDvrvnFuREsGt6lUug==}
 
-  /caniuse-lite@1.0.30001714:
-    resolution: {integrity: sha512-mtgapdwDLSSBnCI3JokHM7oEQBLxiJKVRtg10AxM1AyeiKcM96f0Mkbqeq+1AbiCtvMcHRulAAEMu693JrSWqg==}
+  /caniuse-lite@1.0.30001715:
+    resolution: {integrity: sha512-7ptkFGMm2OAOgvZpwgA4yjQ5SQbrNVGdRjzH0pBdy1Fasvcr+KAeECmbCAECzTuDuoX0FCY8KzUxjf9+9kfZEw==}
     dev: true
 
   /case-sensitive-paths-webpack-plugin@2.4.0:
@@ -29055,6 +29056,11 @@ packages:
   /cookie@0.7.2:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
+
+  /cookie@1.0.2:
+    resolution: {integrity: sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==}
+    engines: {node: '>=18'}
+    dev: true
 
   /cookies@0.9.1:
     resolution: {integrity: sha512-TG2hpqe4ELx54QER/S3HQ9SRVnQnGBtKUz5bLQWtYAQ+o6GpgMs6sYUvaiJjVxb+UXwhRhAEP3m7LbsIZ77Hmw==}
@@ -31101,6 +31107,10 @@ packages:
 
   /es-module-lexer@1.6.0:
     resolution: {integrity: sha512-qqnD1yMU6tk/jnaMosogGySTZP8YtUgAffA9nMN+E/rjxcfRQ6IEk7IiozUjgxKoFHBGjTLnrHB/YC45r/59EQ==}
+
+  /es-module-lexer@1.7.0:
+    resolution: {integrity: sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==}
+    dev: true
 
   /es-object-atoms@1.1.1:
     resolution: {integrity: sha512-FGgH2h8zKNim9ljj7dankFPcICIK9Cp5bm+c2gQSYePhpaG5+esrLODihIorn+Pe6FGJzWhXQotPv73jTaldXA==}
@@ -44845,6 +44855,7 @@ packages:
     dependencies:
       '@remix-run/router': 1.19.2
       react: 18.3.1
+    dev: false
 
   /react-router@6.27.0(react@18.3.1):
     resolution: {integrity: sha512-YA+HGZXz4jaAkVoYBE98VQl+nVzI+cVI2Oj/06F5ZM+0u3TgedN9Y9kmMRo2mnkSK2nCpNQn0DVob4HCsY/WLw==}
@@ -44854,6 +44865,23 @@ packages:
     dependencies:
       '@remix-run/router': 1.20.0
       react: 18.3.1
+
+  /react-router@7.5.2(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-9Rw8r199klMnlGZ8VAsV/I8WrIF6IyJ90JQUdboupx1cdkgYqwnrYjH+I/nY/7cA1X5zia4mDJqH36npP7sxGQ==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+    dependencies:
+      cookie: 1.0.2
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      set-cookie-parser: 2.7.1
+      turbo-stream: 2.4.0
+    dev: true
 
   /react-server-dom-webpack@19.0.0(react-dom@18.3.1)(react@18.3.1)(webpack@5.94.0):
     resolution: {integrity: sha512-hLug9KEXLc8vnU9lDNe2b2rKKDaqrp5gNiES4uyu2Up3FZfZJZmdwLFXlWzdA9gTB/6/cWduSB2K1Lfag2pSvw==}
@@ -46784,8 +46812,8 @@ packages:
   /set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
 
-  /set-cookie-parser@2.7.0:
-    resolution: {integrity: sha512-lXLOiqpkUumhRdFF3k1osNXCy9akgx/dyPZ5p8qAg9seJzXr5ZrlqZuWIMuY6ejOsVLE6flJ5/h3lsn57fQ/PQ==}
+  /set-cookie-parser@2.7.1:
+    resolution: {integrity: sha512-IOc8uWeOZgnb3ptbCURJWNjWUPcO3ZnTTdzsurqERrP6nPyv+paC55vJM0LpOlT2ne+Ix+9+CRG1MNLlyZ4GjQ==}
     dev: true
 
   /set-function-length@1.2.2:
@@ -47408,7 +47436,7 @@ packages:
       case-sensitive-paths-webpack-plugin: 2.4.0
       cjs-module-lexer: 1.4.3
       constants-browserify: 1.0.0
-      es-module-lexer: 1.6.0
+      es-module-lexer: 1.7.0
       find-cache-dir: 5.0.0
       fs-extra: 11.3.0
       magic-string: 0.30.17
@@ -49576,6 +49604,10 @@ packages:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
     dependencies:
       safe-buffer: 5.2.1
+
+  /turbo-stream@2.4.0:
+    resolution: {integrity: sha512-FHncC10WpBd2eOmGwpmQsWLDoK4cqsA/UT/GqNoaKOQnT8uzhtCbg3EoUDMvqpOSAI0S26mr0rkjzbOO6S3v1g==}
+    dev: true
 
   /tween-functions@1.2.0:
     resolution: {integrity: sha512-PZBtLYcCLtEcjL14Fzb1gSxPBeL7nWvGhO5ZFPGqziCcr8uvHp0NDmdjBchp6KHL+tExcg0m3NISmKxhU394dA==}
@@ -52232,21 +52264,21 @@ packages:
       zod: 3.23.8
     dev: true
 
-  /zod-validation-error@1.3.1(zod@3.24.2):
+  /zod-validation-error@1.3.1(zod@3.24.3):
     resolution: {integrity: sha512-cNEXpla+tREtNdAnNKY4xKY1SGOn2yzyuZMu4O0RQylX9apRpUjNcPkEc3uHIAr5Ct7LenjZt6RzjEH6+JsqVQ==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       zod: ^3.18.0
     dependencies:
-      zod: 3.24.2
+      zod: 3.24.3
     dev: true
 
   /zod@3.23.8:
     resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
     dev: true
 
-  /zod@3.24.2:
-    resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
+  /zod@3.24.3:
+    resolution: {integrity: sha512-HhY1oqzWCQWuUqvBFnsyrtZRhyPeR7SUGv+C4+MsisMuVfSPx8HpwWqH8tRahSlt6M3PiFAcoeFhZAqIXTxoSg==}
     dev: true
 
   /zustand@4.5.5(@types/react@18.2.79)(react@18.3.1):
