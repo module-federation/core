@@ -41,9 +41,10 @@ jest.mock('vm', () => ({
   },
 }));
 
-global.fetch = jest.fn().mockResolvedValue({
+(global as unknown as any).fetch = jest.fn().mockResolvedValue({
   text: jest.fn().mockResolvedValue('// mock chunk content'),
 });
+const globalFetch = (global as unknown as any).fetch as jest.Mock;
 
 const mockWebpackRequire = {
   u: jest.fn((chunkId: string) => `/chunks/${chunkId}.js`),
@@ -77,7 +78,7 @@ const mockNonWebpackRequire = jest.fn().mockImplementation((id: string) => {
   if (id === 'path') return require('path');
   if (id === 'fs') return require('fs');
   if (id === 'vm') return require('vm');
-  if (id === 'node-fetch') return { default: global.fetch };
+  if (id === 'node-fetch') return { default: globalFetch };
   return {};
 });
 
@@ -343,11 +344,11 @@ describe('runtimePlugin', () => {
 
   describe('fetchAndRun', () => {
     beforeEach(() => {
-      (global.fetch as jest.Mock).mockReset();
+      (globalFetch as jest.Mock).mockReset();
     });
 
     it('should fetch and execute remote content', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalFetch as jest.Mock).mockResolvedValue({
         text: jest.fn().mockResolvedValue('// mock script content'),
       });
 
@@ -381,7 +382,7 @@ describe('runtimePlugin', () => {
 
     it('should handle fetch errors', async () => {
       const fetchError = new Error('Fetch failed');
-      (global.fetch as jest.Mock).mockRejectedValue(fetchError);
+      (globalFetch as jest.Mock).mockRejectedValue(fetchError);
 
       const url = new URL('http://example.com/chunk.js');
       const callback = jest.fn();
@@ -403,6 +404,9 @@ describe('runtimePlugin', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(callback).toHaveBeenCalledWith(expect.any(Error), null);
+      expect(callback.mock.calls[0][0].message.includes(url.href)).toEqual(
+        true,
+      );
     });
   });
 
@@ -745,6 +749,50 @@ describe('runtimePlugin', () => {
 
       // The original promise should be reused
       expect(promises[0]).toBe(originalPromise);
+    });
+
+    it('should delete chunks from the installedChunks when loadChunk fails', async () => {
+      // mock loadChunk to fail
+      jest
+        .spyOn(runtimePluginModule, 'loadChunk')
+        .mockImplementationOnce((strategy, chunkId, root, callback, args) => {
+          Promise.resolve().then(() => {
+            callback(new Error('failed to load'), undefined);
+          });
+        });
+
+      jest
+        .spyOn(runtimePluginModule, 'installChunk')
+        .mockImplementationOnce((chunk, installedChunks) => {
+          // Mock implementation that doesn't rely on iterating chunk.ids
+          installedChunks['test-chunk'] = 0;
+        });
+
+      // Mock installedChunks
+      const installedChunks: Record<string, any> = {};
+
+      // Call the function under test - returns the handler function, doesn't set webpack_require.f.require
+      const handler = setupChunkHandler(installedChunks, {});
+
+      const promises: Promise<any>[] = [];
+      let res, err;
+
+      try {
+        // Call the handler with mock chunk ID and promises array
+        handler('test-chunk', promises);
+        // Verify that installedChunks has test-chunk before the promise rejects
+        expect(installedChunks['test-chunk']).toBeDefined();
+        res = await promises[0];
+      } catch (e) {
+        err = e;
+      }
+
+      // Verify that an error was thrown, and the response is undefined
+      expect(res).not.toBeDefined();
+      expect(err instanceof Error).toEqual(true);
+
+      // Verify the chunk data was properly removed
+      expect(installedChunks['test-chunk']).not.toBeDefined();
     });
   });
 

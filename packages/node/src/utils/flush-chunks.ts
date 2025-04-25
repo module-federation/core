@@ -1,5 +1,7 @@
 /* eslint-disable no-undef */
 
+import { Response } from 'node-fetch';
+
 // @ts-ignore
 if (!globalThis.usedChunks) {
   // @ts-ignore
@@ -121,7 +123,9 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     let stats = {};
 
     try {
-      stats = await fetch(statsFile).then((res) => res.json());
+      stats = await (global as any)
+        .fetch(statsFile)
+        .then((res: Response) => res.json());
     } catch (e) {
       console.error('flush error', e);
     }
