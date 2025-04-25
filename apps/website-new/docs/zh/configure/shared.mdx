@@ -20,6 +20,7 @@ interface SharedConfig {
   requiredVersion?: string;
   eager?: boolean;
   shareScope?: string;
+  import?: string | false;
 }
 ```
 
@@ -84,6 +85,16 @@ new ModuleFederationPlugin({
 - 默认值：`'default'`
 
 共享依赖作用域，默认值为 `'default'` 。
+
+## import
+
+- 类型：`string | false`
+- 是否必填：否
+- 默认值：`undefined`
+
+共享依赖的导入路径，默认值为 `undefined` 。
+
+若设置为 `false` ，则不会将此 shared 打包到产物中，仅使用消费者提供的 `shared`。 因此设置前请确认消费者已提供对应 `shared`。
 
 ## FAQ
 
