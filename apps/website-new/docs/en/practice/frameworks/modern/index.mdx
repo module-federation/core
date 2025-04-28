@@ -260,8 +260,10 @@ This is because the producer's style files cannot be injected into the correspon
 This issue can be solved by using the [createremotessrcomponent](../../../guide/framework/modernjs#createremotessrcomponent) provided by `@module-federation/modern-js`.
 
 ```tsx title='page.tsx'
-import { createRemoteSSRComponent } from '@modern-js/runtime/mf'
+import { kit } from '@module-federation/modern-js/runtime'
 import './index.css';
+
+const { createRemoteSSRComponent } = kit;
 
 const RemoteSSRComponent = createRemoteSSRComponent({
   loader: () => import('remote/Image'),

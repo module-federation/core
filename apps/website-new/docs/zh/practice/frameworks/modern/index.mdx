@@ -263,8 +263,10 @@ export default Index;
 修改消费者引用生产者处的代码（`src/routes/page.tsx`）：
 
 ```tsx title='page.tsx'
-import { createRemoteSSRComponent } from '@modern-js/runtime/mf'
+import { kit } from '@module-federation/modern-js/runtime'
 import './index.css';
+
+const { createRemoteSSRComponent } = kit;
 
 const RemoteSSRComponent = createRemoteSSRComponent({
   loader: () => import('remote/Image'),

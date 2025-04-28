@@ -1,11 +1,9 @@
 import React from 'react';
 import Button from 'antd/lib/button';
-import {
-  registerRemotes,
-  loadRemote,
-  createRemoteSSRComponent,
-} from '@modern-js/runtime/mf';
+import { registerRemotes, loadRemote, kit } from '@modern-js/runtime/mf';
 import stuff from './stuff.module.css';
+
+const { createRemoteSSRComponent } = kit;
 
 registerRemotes([
   {

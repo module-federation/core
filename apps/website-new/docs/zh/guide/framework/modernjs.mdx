@@ -124,9 +124,11 @@ type ComponentType = T[E] extends (...args: any) => any
 
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
-import { registerRemotes, createRemoteSSRComponent } from '@modern-js/runtime/mf';
+import { registerRemotes, kit } from '@module-federation/modern-js/runtime';
 // 在构建插件声明过的 remote 可以直接在顶层 import
 import RemoteComp from 'remote/Image';
+
+const { createRemoteSSRComponent } = kit;
 
 const RemoteSSRComponent = createRemoteSSRComponent({
   // 在构建插件声明过的 remote 也可以使用此函数加载：loader: () => import('remote/Image'),
