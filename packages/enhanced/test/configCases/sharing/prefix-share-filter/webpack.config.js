@@ -11,8 +11,8 @@ module.exports = {
         '@scoped/package': {},
         'prefix/': {
           filter: {
-            request: /deep/
-          }
+            request: /deep/,
+          },
         },
       },
     }),
