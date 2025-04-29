@@ -3,9 +3,11 @@ import Button from 'antd/lib/button';
 import {
   registerRemotes,
   loadRemote,
-  createRemoteSSRComponent,
-} from '@modern-js/runtime/mf';
+  kit,
+} from '@module-federation/modern-js/runtime';
 import stuff from './stuff.module.css';
+
+const { createRemoteSSRComponent } = kit;
 
 registerRemotes([
   {

@@ -1,5 +1,19 @@
 # @module-federation/rspack
 
+## 0.13.1
+
+### Patch Changes
+
+- f323928: Check for falsy values when looking for duplicate ModuleFederationPlugin entries
+- Updated dependencies [129dac6]
+  - @module-federation/managers@0.13.1
+  - @module-federation/dts-plugin@0.13.1
+  - @module-federation/manifest@0.13.1
+  - @module-federation/sdk@0.13.1
+  - @module-federation/runtime-tools@0.13.1
+  - @module-federation/bridge-react-webpack-plugin@0.13.1
+  - @module-federation/inject-external-runtime-core-plugin@0.13.1
+
 ## 0.13.0
 
 ### Patch Changes

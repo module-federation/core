@@ -217,12 +217,6 @@ export default defineConfig({
 ```
 #### 3. Type hint
 
-Add `/// <reference types='@module-federation/modern-js/types' />` to the `modern-app-env.d.ts` file to get the runtime `@modern-js/runtime/mf` type support.
-
-```diff title='modern-app-env.d.ts'
-+ /// <reference types='@module-federation/modern-js/types' />
-```
-
 Add `paths` in `tsconfig.json` to get the producer's type:
 
 ```json
@@ -260,8 +254,10 @@ This is because the producer's style files cannot be injected into the correspon
 This issue can be solved by using the [createremotessrcomponent](../../../guide/framework/modernjs#createremotessrcomponent) provided by `@module-federation/modern-js`.
 
 ```tsx title='page.tsx'
-import { createRemoteSSRComponent } from '@modern-js/runtime/mf'
+import { kit } from '@module-federation/modern-js/runtime'
 import './index.css';
+
+const { createRemoteSSRComponent } = kit;
 
 const RemoteSSRComponent = createRemoteSSRComponent({
   loader: () => import('remote/Image'),
