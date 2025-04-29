@@ -36,6 +36,7 @@ export default {
   testMatch: [
     '<rootDir>/test/*.basictest.js',
     '<rootDir>/test/unit/**/*.test.ts',
+    '<rootDir>/test/configCases/**/*.js',
   ],
   silent: true,
   verbose: false,
