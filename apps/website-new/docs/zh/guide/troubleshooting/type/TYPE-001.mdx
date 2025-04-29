@@ -8,7 +8,7 @@ import ErrorCodeTitle from '@components/ErrorCodeTitle';
 
 ## 解决方法
 
-1. 删除 `node_modules/.cache/mf-types` 目录
+1. 删除 `cmd` 命令中的 tsconfig.json `incremental` 和 `tsBuildInfoFile` 配置。
 2. 在 terminal 中执行报错信息参数中的 `cmd` 命令，根据错误信息对文件或者 `tsconfig` 进行修复。
 
 若你希望忽略 ts 中的类型检查错误，可在 `tsconfig.json` 中设置 [`compilerOptions.noCheck`](https://www.typescriptlang.org/tsconfig/#noCheck) 为 `true`（该选项仅支持 ts 5.5 及以上版本）

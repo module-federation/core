@@ -44,7 +44,26 @@ export class DtsPlugin implements WebpackPluginInstance {
   apply(compiler: Compiler) {
     const { options } = this;
 
-    const normalizedDtsOptions = normalizeDtsOptions(options, compiler.context);
+    // Create a shallow clone of the options object to avoid mutating the original
+    const clonedOptions = { ...options };
+
+    // Clean up query parameters in exposes paths without mutating original
+    if (options.exposes && typeof options.exposes === 'object') {
+      const cleanedExposes: Record<string, any> = {};
+      Object.entries(options.exposes).forEach(([key, value]) => {
+        if (typeof value === 'string') {
+          cleanedExposes[key] = value.split('?')[0];
+        } else {
+          cleanedExposes[key] = value;
+        }
+      });
+      clonedOptions.exposes = cleanedExposes;
+    }
+
+    const normalizedDtsOptions = normalizeDtsOptions(
+      clonedOptions,
+      compiler.context,
+    );
 
     if (typeof normalizedDtsOptions !== 'object') {
       return;
@@ -67,7 +86,7 @@ export class DtsPlugin implements WebpackPluginInstance {
     // Because the plugin will delete dist/@mf-types.zip while generating types, which will be used in GenerateTypesPlugin
     // So it should apply after GenerateTypesPlugin
     new DevPlugin(
-      options,
+      clonedOptions,
       normalizedDtsOptions,
       generateTypesPromise,
       fetchRemoteTypeUrlsPromise,
@@ -75,14 +94,14 @@ export class DtsPlugin implements WebpackPluginInstance {
 
     // The exposes files may use remote types, so it need to consume types first, otherwise the generate types will fail
     new GenerateTypesPlugin(
-      options,
+      clonedOptions,
       normalizedDtsOptions,
       fetchRemoteTypeUrlsPromise,
       generateTypesPromiseResolve,
     ).apply(compiler);
 
     new ConsumeTypesPlugin(
-      options,
+      clonedOptions,
       normalizedDtsOptions,
       fetchRemoteTypeUrlsResolve,
     ).apply(compiler);

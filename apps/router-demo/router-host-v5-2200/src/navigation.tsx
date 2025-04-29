@@ -9,6 +9,8 @@ import type React from 'react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
+import { createRoot } from 'react-dom/client';
+
 function Navgation(Info: {
   setInitialEntrie: (value: React.SetStateAction<string>) => void;
   setAbc: (value: React.SetStateAction<number>) => void;

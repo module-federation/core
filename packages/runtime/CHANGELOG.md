@@ -1,5 +1,60 @@
 # @module-federation/runtime
 
+## 0.13.0
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [38f324f]
+  - @module-federation/runtime-core@0.13.0
+  - @module-federation/error-codes@0.13.0
+  - @module-federation/sdk@0.13.0
+
+## 0.12.0
+
+### Minor Changes
+
+- f4fb242: - Added a new property 'layer' of type string or null to SharedConfig.
+- c399b9a: Switch to esm modules by default
+
+### Patch Changes
+
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/runtime-core@0.12.0
+  - @module-federation/sdk@0.12.0
+  - @module-federation/error-codes@0.12.0
+
+## 0.11.4
+
+### Patch Changes
+
+- Updated dependencies [64a2bc1]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/runtime-core@0.11.4
+  - @module-federation/error-codes@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- Updated dependencies [e112c16]
+  - @module-federation/runtime-core@0.11.3
+  - @module-federation/sdk@0.11.3
+  - @module-federation/error-codes@0.11.3
+
+## 0.11.2
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+- Updated dependencies [047857b]
+  - @module-federation/runtime-core@0.11.2
+  - @module-federation/sdk@0.11.2
+  - @module-federation/error-codes@0.11.2
+
 ## 0.11.1
 
 ### Patch Changes

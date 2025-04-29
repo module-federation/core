@@ -1,5 +1,43 @@
 # @module-federation/utilities
 
+## 3.1.53
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [38f324f]
+  - @module-federation/sdk@0.13.0
+
+## 3.1.52
+
+### Patch Changes
+
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/sdk@0.12.0
+
+## 3.1.51
+
+### Patch Changes
+
+- Updated dependencies [64a2bc1]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+
+## 3.1.50
+
+### Patch Changes
+
+- @module-federation/sdk@0.11.3
+
+## 3.1.49
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+
 ## 3.1.48
 
 ### Patch Changes

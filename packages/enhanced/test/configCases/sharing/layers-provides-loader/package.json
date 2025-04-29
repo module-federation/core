@@ -1,0 +1,11 @@
+{
+  "name": "layered-react-test",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "webpack --config=webpack.config.js"
+  },
+  "dependencies": {
+    "react": "1.0.0"
+  }
+}

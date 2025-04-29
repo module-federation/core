@@ -2,8 +2,10 @@ import React, { useState, Suspense } from 'react';
 import {
   loadRemote,
   registerRemotes,
-  createRemoteSSRComponent,
-} from '@modern-js/runtime/mf';
+  kit,
+} from '@module-federation/modern-js/runtime';
+
+const { createRemoteSSRComponent } = kit;
 
 registerRemotes([
   {

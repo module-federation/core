@@ -1,21 +1,93 @@
 import path from 'path';
 import { fs } from '@modern-js/utils';
-import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
-import type { InternalModernPluginOptions } from '../types';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 import { updateStatsAndManifest } from './manifest';
 import { isDev } from './constant';
-import { MODERN_JS_SERVER_DIR } from '../constant';
 import logger from './logger';
 import { isWebTarget, skipByTarget } from './utils';
+
+import type {
+  RsbuildPlugin,
+  ModifyWebpackConfigFn,
+  ModifyRspackConfigFn,
+} from '@rsbuild/core';
+import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
+import type { InternalModernPluginOptions, PluginOptions } from '../types';
 
 export function setEnv() {
   process.env['MF_DISABLE_EMIT_STATS'] = 'true';
   process.env['MF_SSR_PRJ'] = 'true';
 }
+
 export const CHAIN_MF_PLUGIN_ID = 'plugin-module-federation-server';
+
+type ModifyBundlerConfiguration =
+  | Parameters<ModifyWebpackConfigFn>[0]
+  | Parameters<ModifyRspackConfigFn>[0];
+type ModifyBundlerUtils =
+  | Parameters<ModifyWebpackConfigFn>[1]
+  | Parameters<ModifyRspackConfigFn>[1];
+
+const mfSSRRsbuildPlugin = (
+  pluginOptions: Required<InternalModernPluginOptions>,
+): RsbuildPlugin => {
+  return {
+    name: '@modern-js/plugin-mf-post-config',
+    pre: ['@modern-js/builder-plugin-ssr'],
+    setup(api) {
+      if (pluginOptions.csrConfig.getPublicPath) {
+        return;
+      }
+      let csrOutputPath = '';
+      let ssrOutputPath = '';
+      let ssrEnv = '';
+
+      api.modifyEnvironmentConfig((config, { name }) => {
+        const target = config.output.target;
+        if (skipByTarget(target)) {
+          return config;
+        }
+        if (isWebTarget(target)) {
+          csrOutputPath = config.output.distPath.root;
+        } else {
+          ssrOutputPath = config.output.distPath.root;
+          ssrEnv = name;
+        }
+        return config;
+      });
+
+      const modifySSRPublicPath = (
+        config: ModifyBundlerConfiguration,
+        utils: ModifyBundlerUtils,
+      ) => {
+        if (ssrEnv !== utils.environment.name) {
+          return config;
+        }
+        const userSSRConfig = pluginOptions.userConfig.ssr
+          ? typeof pluginOptions.userConfig.ssr === 'object'
+            ? pluginOptions.userConfig.ssr
+            : {}
+          : {};
+        if (userSSRConfig.distOutputDir) {
+          return;
+        }
+        config.output!.publicPath = `${config.output!.publicPath}${path.relative(csrOutputPath, ssrOutputPath)}/`;
+        return config;
+      };
+      api.modifyWebpackConfig((config, utils) => {
+        modifySSRPublicPath(config, utils);
+        return config;
+      });
+      api.modifyRspackConfig((config, utils) => {
+        modifySSRPublicPath(config, utils);
+        return config;
+      });
+    },
+  };
+};
+
 export const moduleFederationSSRPlugin = (
   pluginOptions: Required<InternalModernPluginOptions>,
 ): CliPluginFuture<AppTools> => ({
@@ -28,8 +100,6 @@ export const moduleFederationSSRPlugin = (
     const modernjsConfig = api.getConfig();
     const enableSSR =
       pluginOptions.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr);
-    let csrOutputPath = '';
-    let ssrOutputPath = '';
 
     if (!enableSSR) {
       return;
@@ -81,6 +151,17 @@ export const moduleFederationSSRPlugin = (
             .plugin('UniverseEntryChunkTrackerPlugin')
             .use(UniverseEntryChunkTrackerPlugin);
         }
+        const userSSRConfig = pluginOptions.userConfig.ssr
+          ? typeof pluginOptions.userConfig.ssr === 'object'
+            ? pluginOptions.userConfig.ssr
+            : {}
+          : {};
+        const publicPath = chain.output.get('publicPath');
+        if (userSSRConfig.distOutputDir && publicPath) {
+          chain.output.publicPath(
+            `${publicPath}${userSSRConfig.distOutputDir}/`,
+          );
+        }
       }
 
       if (isDev && isWeb) {
@@ -88,18 +169,10 @@ export const moduleFederationSSRPlugin = (
           '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
         });
       }
-
-      if (!isWeb) {
-        ssrOutputPath =
-          chain.output.get('path') ||
-          path.resolve(process.cwd(), `dist/${MODERN_JS_SERVER_DIR}`);
-      } else {
-        csrOutputPath =
-          chain.output.get('path') || path.resolve(process.cwd(), 'dist');
-      }
     });
     api.config(() => {
       return {
+        builderPlugins: [mfSSRRsbuildPlugin(pluginOptions)],
         tools: {
           devServer: {
             before: [
@@ -137,21 +210,11 @@ export const moduleFederationSSRPlugin = (
     });
     api.onAfterBuild(() => {
       const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
-      updateStatsAndManifest(
-        nodePlugin,
-        browserPlugin,
-        distOutputDir,
-        path.relative(csrOutputPath, ssrOutputPath),
-      );
+      updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
     });
     api.onDevCompileDone(() => {
       const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
-      updateStatsAndManifest(
-        nodePlugin,
-        browserPlugin,
-        distOutputDir,
-        path.relative(csrOutputPath, ssrOutputPath),
-      );
+      updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
     });
   },
 });

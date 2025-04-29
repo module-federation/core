@@ -1,5 +1,44 @@
 # @module-federation/esbuild
 
+## 0.0.65
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [38f324f]
+  - @module-federation/sdk@0.13.0
+
+## 0.0.64
+
+### Patch Changes
+
+- c399b9a: Switch to esm modules by default
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/sdk@0.12.0
+
+## 0.0.63
+
+### Patch Changes
+
+- Updated dependencies [64a2bc1]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+
+## 0.0.62
+
+### Patch Changes
+
+- @module-federation/sdk@0.11.3
+
+## 0.0.61
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+
 ## 0.0.60
 
 ### Patch Changes

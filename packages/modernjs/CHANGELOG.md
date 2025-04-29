@@ -1,5 +1,77 @@
 # @module-federation/modern-js
 
+## 0.13.0
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [e9a0681]
+- Updated dependencies [9efb9b9]
+- Updated dependencies [122f1b3]
+- Updated dependencies [38f324f]
+  - @module-federation/cli@0.13.0
+  - @module-federation/enhanced@0.13.0
+  - @module-federation/node@2.7.1
+  - @module-federation/rsbuild-plugin@0.13.0
+  - @module-federation/sdk@0.13.0
+
+## 0.12.0
+
+### Patch Changes
+
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+  - @module-federation/enhanced@0.12.0
+  - @module-federation/node@2.7.0
+  - @module-federation/sdk@0.12.0
+  - @module-federation/rsbuild-plugin@0.12.0
+  - @module-federation/cli@0.12.0
+
+## 0.11.4
+
+### Patch Changes
+
+- 64a2bc1: fix(modern-js-plugin): correct publicpath in build
+- 292f2fd: chore(modern-js-plugin): warn if header origin is not specified
+- 21c2fb9: fix(modern-js-plugin): apply ssr.distOutputDir in bundlerChain
+- Updated dependencies [64a2bc1]
+- Updated dependencies [ed8bda3]
+- Updated dependencies [ebe7d89]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/node@2.6.33
+  - @module-federation/enhanced@0.11.4
+  - @module-federation/cli@0.11.4
+  - @module-federation/rsbuild-plugin@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- Updated dependencies [e5fae18]
+  - @module-federation/node@2.6.32
+  - @module-federation/cli@0.11.3
+  - @module-federation/enhanced@0.11.3
+  - @module-federation/rsbuild-plugin@0.11.3
+  - @module-federation/sdk@0.11.3
+
+## 0.11.2
+
+### Patch Changes
+
+- Updated dependencies [60d1fc1]
+- Updated dependencies [047857b]
+  - @module-federation/rsbuild-plugin@0.11.2
+  - @module-federation/sdk@0.11.2
+  - @module-federation/cli@0.11.2
+  - @module-federation/enhanced@0.11.2
+  - @module-federation/node@2.6.31
+
 ## 0.11.1
 
 ### Patch Changes

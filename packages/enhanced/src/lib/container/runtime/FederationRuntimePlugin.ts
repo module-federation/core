@@ -36,18 +36,21 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
-const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
-
+const RuntimeToolsPath = require.resolve(
+  '@module-federation/runtime-tools/dist/index.esm.js',
+);
 const BundlerRuntimePath = require.resolve(
-  '@module-federation/webpack-bundler-runtime',
+  '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
   {
     paths: [RuntimeToolsPath],
   },
 );
-const RuntimePath = require.resolve('@module-federation/runtime', {
-  paths: [RuntimeToolsPath],
-});
-
+const RuntimePath = require.resolve(
+  '@module-federation/runtime/dist/index.esm.js',
+  {
+    paths: [RuntimeToolsPath],
+  },
+);
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompiler = new WeakSet<Compiler>();
@@ -333,9 +336,12 @@ class FederationRuntimePlugin {
       runtimePath = alias['@module-federation/runtime$'];
     } else {
       if (implementation) {
-        runtimePath = require.resolve(`@module-federation/runtime`, {
-          paths: [implementation],
-        });
+        runtimePath = require.resolve(
+          `@module-federation/runtime/dist/index.esm.js`,
+          {
+            paths: [implementation],
+          },
+        );
       }
     }
 
@@ -400,7 +406,7 @@ class FederationRuntimePlugin {
 
     if (this.options?.implementation) {
       this.bundlerRuntimePath = require.resolve(
-        '@module-federation/webpack-bundler-runtime',
+        '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
         {
           paths: [this.options.implementation],
         },
@@ -413,19 +419,6 @@ class FederationRuntimePlugin {
 
     new HoistContainerReferences().apply(compiler);
 
-    const runtimePath = this.getRuntimeAlias(compiler);
-    new compiler.webpack.NormalModuleReplacementPlugin(
-      /@module-federation\/runtime/,
-      (resolveData) => {
-        if (/webpack-bundler-runtime/.test(resolveData.contextInfo.issuer)) {
-          resolveData.request = runtimePath;
-
-          if (resolveData.createData) {
-            resolveData.createData.request = resolveData.request;
-          }
-        }
-      },
-    ).apply(compiler);
     // dont run multiple times on every apply()
     if (!onceForCompiler.has(compiler)) {
       this.prependEntry(compiler);

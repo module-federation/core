@@ -1,5 +1,74 @@
 # @module-federation/nextjs-mf
 
+## 8.8.25
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [9efb9b9]
+- Updated dependencies [122f1b3]
+- Updated dependencies [38f324f]
+  - @module-federation/enhanced@0.13.0
+  - @module-federation/node@2.7.1
+  - @module-federation/webpack-bundler-runtime@0.13.0
+  - @module-federation/runtime@0.13.0
+  - @module-federation/sdk@0.13.0
+
+## 8.8.24
+
+### Patch Changes
+
+- f4fb242: Support share layers and multiple share scopes
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+  - @module-federation/enhanced@0.12.0
+  - @module-federation/runtime@0.12.0
+  - @module-federation/webpack-bundler-runtime@0.12.0
+  - @module-federation/node@2.7.0
+  - @module-federation/sdk@0.12.0
+
+## 8.8.23
+
+### Patch Changes
+
+- Updated dependencies [64a2bc1]
+- Updated dependencies [ed8bda3]
+- Updated dependencies [ebe7d89]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/node@2.6.33
+  - @module-federation/enhanced@0.11.4
+  - @module-federation/runtime@0.11.4
+  - @module-federation/webpack-bundler-runtime@0.11.4
+
+## 8.8.22
+
+### Patch Changes
+
+- Updated dependencies [e5fae18]
+  - @module-federation/node@2.6.32
+  - @module-federation/runtime@0.11.3
+  - @module-federation/enhanced@0.11.3
+  - @module-federation/webpack-bundler-runtime@0.11.3
+  - @module-federation/sdk@0.11.3
+
+## 8.8.21
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/runtime@0.11.2
+  - @module-federation/enhanced@0.11.2
+  - @module-federation/node@2.6.31
+  - @module-federation/webpack-bundler-runtime@0.11.2
+
 ## 8.8.20
 
 ### Patch Changes

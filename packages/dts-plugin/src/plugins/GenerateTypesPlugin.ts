@@ -173,7 +173,11 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         if (isProd) {
           const zipAssetName = path.join(zipPrefix, zipName);
           const apiAssetName = path.join(zipPrefix, apiFileName);
-          if (zipTypesPath && !compilation.getAsset(zipAssetName)) {
+          if (
+            zipTypesPath &&
+            !compilation.getAsset(zipAssetName) &&
+            fs.existsSync(zipTypesPath)
+          ) {
             compilation.emitAsset(
               zipAssetName,
               new compiler.webpack.sources.RawSource(
@@ -183,7 +187,11 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             );
           }
 
-          if (apiTypesPath && !compilation.getAsset(apiAssetName)) {
+          if (
+            apiTypesPath &&
+            !compilation.getAsset(apiAssetName) &&
+            fs.existsSync(apiTypesPath)
+          ) {
             compilation.emitAsset(
               apiAssetName,
               new compiler.webpack.sources.RawSource(
@@ -197,7 +205,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
           const isEEXIST = (err: NodeJS.ErrnoException) => {
             return err.code == 'EEXIST';
           };
-          if (zipTypesPath) {
+          if (zipTypesPath && fs.existsSync(zipTypesPath)) {
             const zipContent = fs.readFileSync(zipTypesPath);
             const zipOutputPath = path.join(
               compiler.outputPath,
@@ -207,6 +215,10 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             await new Promise<void>((resolve, reject) => {
               compiler.outputFileSystem.mkdir(
                 path.dirname(zipOutputPath),
+                {
+                  recursive: true,
+                },
+                // @ts-ignore  type fixed in  https://github.com/webpack/webpack/releases/tag/v5.91.0
                 (err) => {
                   if (err && !isEEXIST(err)) {
                     reject(err);
@@ -229,7 +241,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             });
           }
 
-          if (apiTypesPath) {
+          if (apiTypesPath && fs.existsSync(apiTypesPath)) {
             const apiContent = fs.readFileSync(apiTypesPath);
             const apiOutputPath = path.join(
               compiler.outputPath,
@@ -239,6 +251,10 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             await new Promise<void>((resolve, reject) => {
               compiler.outputFileSystem.mkdir(
                 path.dirname(apiOutputPath),
+                {
+                  recursive: true,
+                },
+                // @ts-ignore  type fixed in  https://github.com/webpack/webpack/releases/tag/v5.91.0
                 (err) => {
                   if (err && !isEEXIST(err)) {
                     reject(err);
@@ -266,7 +282,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
       } catch (err) {
         callback();
         if (dtsManagerOptions.displayErrorInTerminal) {
-          console.error('Error in mf:generateTypes processAssets hook:', err);
+          console.error(err);
         }
         logger.debug('generate types fail!');
       }

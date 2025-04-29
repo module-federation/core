@@ -1,5 +1,62 @@
 # @module-federation/dts-plugin
 
+## 0.13.0
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [38f324f]
+  - @module-federation/third-party-dts-extractor@0.13.0
+  - @module-federation/error-codes@0.13.0
+  - @module-federation/managers@0.13.0
+  - @module-federation/sdk@0.13.0
+
+## 0.12.0
+
+### Patch Changes
+
+- ebef2d0: chore(dts-plugin): optimize type-001 message
+- ef96c4d: feat(dts-plugin): support exclude extract specify third party dts
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/sdk@0.12.0
+  - @module-federation/third-party-dts-extractor@0.12.0
+  - @module-federation/managers@0.12.0
+  - @module-federation/error-codes@0.12.0
+
+## 0.11.4
+
+### Patch Changes
+
+- ed8bda3: remove query strings from exposed modules to fix tsc resolves
+- Updated dependencies [64a2bc1]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/managers@0.11.4
+  - @module-federation/third-party-dts-extractor@0.11.4
+  - @module-federation/error-codes@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- e2c0a89: fix(dts-plugin): add recursive:true while generate types hit cache
+  - @module-federation/sdk@0.11.3
+  - @module-federation/managers@0.11.3
+  - @module-federation/third-party-dts-extractor@0.11.3
+  - @module-federation/error-codes@0.11.3
+
+## 0.11.2
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/managers@0.11.2
+  - @module-federation/third-party-dts-extractor@0.11.2
+  - @module-federation/error-codes@0.11.2
+
 ## 0.11.1
 
 ### Patch Changes

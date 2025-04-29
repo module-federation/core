@@ -50,8 +50,16 @@ class ManifestManager {
       additionalData,
     } = options;
     const { disableEmit } = extraOptions;
+
+    // Initialize manifest with required properties from stats
+    const { id, name, metaData } = stats;
     const manifest: Manifest = {
-      ...stats,
+      id,
+      name,
+      metaData,
+      shared: [],
+      remotes: [],
+      exposes: [],
     };
 
     manifest.exposes = stats.exposes.reduce((sum, cur) => {

@@ -1,11 +1,11 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.11.1",
+  "version": "0.13.0",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/enhanced"
   },
   "files": [
@@ -102,6 +102,7 @@
     "@module-federation/sdk": "workspace:*",
     "@module-federation/cli": "workspace:*",
     "btoa": "^1.2.1",
-    "upath": "2.0.1"
+    "upath": "2.0.1",
+    "schema-utils": "^4.3.0"
   }
 }

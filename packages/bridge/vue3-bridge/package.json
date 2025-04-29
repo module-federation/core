@@ -7,13 +7,13 @@
     "url": "https://github.com/module-federation/core",
     "directory": "packages/vue3-bridge"
   },
-  "version": "0.11.1",
+  "version": "0.13.0",
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.es.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist/",
@@ -45,7 +45,7 @@
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
     "typescript": "^5.2.2",
-    "vite": "^5.4.12",
+    "vite": "^5.4.18",
     "vite-plugin-dts": "^4.3.0",
     "vue": "^3.4.21",
     "vue-router": "4.4.5",

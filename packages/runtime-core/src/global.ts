@@ -11,7 +11,6 @@ import {
   ModuleInfo,
   isDebugMode,
 } from '@module-federation/sdk';
-import { getBuilderId } from './utils/env';
 import { warn } from './utils/logger';
 import { FederationRuntimePlugin } from './type/plugin';
 

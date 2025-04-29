@@ -1,5 +1,79 @@
 # @module-federation/rspack
 
+## 0.13.0
+
+### Patch Changes
+
+- 9efb9b9: fix(enhanced): apply getPublicPath only if exposes is set
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [92882ec]
+- Updated dependencies [38f324f]
+  - @module-federation/manifest@0.13.0
+  - @module-federation/inject-external-runtime-core-plugin@0.13.0
+  - @module-federation/bridge-react-webpack-plugin@0.13.0
+  - @module-federation/runtime-tools@0.13.0
+  - @module-federation/dts-plugin@0.13.0
+  - @module-federation/managers@0.13.0
+  - @module-federation/sdk@0.13.0
+
+## 0.12.0
+
+### Patch Changes
+
+- Updated dependencies [ebef2d0]
+- Updated dependencies [c399b9a]
+- Updated dependencies [451b4f5]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/dts-plugin@0.12.0
+  - @module-federation/inject-external-runtime-core-plugin@0.12.0
+  - @module-federation/runtime-tools@0.12.0
+  - @module-federation/sdk@0.12.0
+  - @module-federation/manifest@0.12.0
+  - @module-federation/managers@0.12.0
+  - @module-federation/bridge-react-webpack-plugin@0.12.0
+
+## 0.11.4
+
+### Patch Changes
+
+- Updated dependencies [64a2bc1]
+- Updated dependencies [ed8bda3]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/dts-plugin@0.11.4
+  - @module-federation/bridge-react-webpack-plugin@0.11.4
+  - @module-federation/managers@0.11.4
+  - @module-federation/manifest@0.11.4
+  - @module-federation/runtime-tools@0.11.4
+  - @module-federation/inject-external-runtime-core-plugin@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- Updated dependencies [e2c0a89]
+  - @module-federation/dts-plugin@0.11.3
+  - @module-federation/manifest@0.11.3
+  - @module-federation/runtime-tools@0.11.3
+  - @module-federation/inject-external-runtime-core-plugin@0.11.3
+  - @module-federation/sdk@0.11.3
+  - @module-federation/managers@0.11.3
+  - @module-federation/bridge-react-webpack-plugin@0.11.3
+
+## 0.11.2
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/bridge-react-webpack-plugin@0.11.2
+  - @module-federation/dts-plugin@0.11.2
+  - @module-federation/managers@0.11.2
+  - @module-federation/manifest@0.11.2
+  - @module-federation/runtime-tools@0.11.2
+  - @module-federation/inject-external-runtime-core-plugin@0.11.2
+
 ## 0.11.1
 
 ### Patch Changes
