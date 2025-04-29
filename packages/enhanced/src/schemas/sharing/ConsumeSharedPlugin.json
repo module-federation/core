@@ -107,14 +107,7 @@
         },
         "filter": {
           "description": "Filter consumed modules based on the request path.",
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "request": {
-              "description": "A RegExp object to test against the request path suffix (after the prefix).",
-              "type": "object"
-            }
-          }
+          "$ref": "#/definitions/Filter"
         }
       }
     },
@@ -136,6 +129,17 @@
             "$ref": "#/definitions/ConsumesItem"
           }
         ]
+      }
+    },
+    "Filter": {
+      "description": "Advanced filtering options.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "description": "A RegExp object to test against the request path suffix (after the prefix).",
+          "instanceof": "RegExp"
+        }
       }
     }
   },

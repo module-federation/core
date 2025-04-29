@@ -72,4 +72,10 @@ export interface ProvidesConfig {
    * The actual request to use for importing the module. If not specified, the property name/key will be used.
    */
   request?: string;
+  /**
+   * Filter for the shared module.
+   */
+  filter?: {
+    request?: RegExp;
+  };
 }

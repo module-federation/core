@@ -337,7 +337,8 @@ class ConsumeSharedPlugin {
                   if (
                     options.filter &&
                     options.filter.request &&
-                    !options.filter.request.test(remainder)
+                    // Skip if the remainder DOES match the filter
+                    options.filter.request.test(remainder)
                   ) {
                     continue;
                   }
