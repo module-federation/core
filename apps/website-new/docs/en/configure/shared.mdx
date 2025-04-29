@@ -20,6 +20,7 @@ interface SharedConfig {
   requiredVersion?: string;
   eager?: boolean;
   shareScope?: string;
+  import?: string | false;
 }
 ```
 
@@ -84,6 +85,16 @@ Under normal circumstances, you need to enable lazy entry, and then asynchronous
 - Default: `'default'`
 
 share scope name, default value is `'default'` .
+
+## import
+
+- Type: `string | false`
+- Required: No
+- Default: `undefined`
+
+Control import path of shared dependencies, default value is `undefined` .
+
+If set to `false`, this shared will not be packaged into the product, and only the `shared` provided by the consumer will be used. Therefore, please make sure that the consumer has provided the corresponding `shared` before setting.
 
 ## FAQ
 

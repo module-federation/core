@@ -1,5 +1,11 @@
 # @module-federation/third-party-dts-extractor
 
+## 0.13.1
+
+### Patch Changes
+
+- 723d0f8: fix(third-party-dts-extractor): correctly sets the source of the package types
+
 ## 0.13.0
 
 ### Patch Changes

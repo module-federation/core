@@ -1,6 +1,9 @@
 import React, { useState, Suspense } from 'react';
 import Comp from 'remote/Image';
-import { registerRemotes, loadRemote } from '@modern-js/runtime/mf';
+import {
+  registerRemotes,
+  loadRemote,
+} from '@module-federation/modern-js/runtime';
 
 const NewRemoteCom = React.lazy(() =>
   loadRemote('remote/Image').then((m) => {
