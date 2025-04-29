@@ -1,5 +1,7 @@
 # @module-federation/bridge-shared
 
+## 0.13.1
+
 ## 0.13.0
 
 ### Patch Changes
