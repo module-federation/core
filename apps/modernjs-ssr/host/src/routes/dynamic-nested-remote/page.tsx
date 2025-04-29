@@ -1,5 +1,8 @@
 import React from 'react';
-import { loadRemote, registerRemotes } from '@modern-js/runtime/mf';
+import {
+  loadRemote,
+  registerRemotes,
+} from '@module-federation/modern-js/runtime';
 
 registerRemotes([
   {
