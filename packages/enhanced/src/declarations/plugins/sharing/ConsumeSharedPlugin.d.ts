@@ -83,4 +83,7 @@ export interface ConsumesConfig {
    * The actual request to use for importing the module. If not specified, the property name/key will be used.
    */
   request?: string;
+  filter?: {
+    request?: RegExp;
+  };
 }

@@ -136,6 +136,7 @@ class ConsumeSharedPlugin {
           packageName: item.packageName,
           singleton: !!item.singleton,
           eager: !!item.eager,
+          filter: item.filter,
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
@@ -333,6 +334,14 @@ class ConsumeSharedPlugin {
                 const lookup = options.request || prefix;
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
+                  if (
+                    options.filter &&
+                    options.filter.request &&
+                    // Skip if the remainder DOES match the filter
+                    options.filter.request.test(remainder)
+                  ) {
+                    continue;
+                  }
                   return createConsumeSharedModule(context, request, {
                     ...options,
                     import: options.import

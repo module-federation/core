@@ -434,6 +434,11 @@ export default {
             'Include the provided and fallback module directly instead behind an async request. This allows to use this shared module in initial load too. All possible shared modules need to be eager too.',
           type: 'boolean',
         },
+        filter: {
+          description:
+            'Filter configuration using regular expression to control which modules should be shared.',
+          $ref: '#/definitions/Filter',
+        },
         import: {
           description:
             "Provided module that should be provided to share scope. Also acts as fallback module if no shared module is found in share scope or version isn't valid. Defaults to the property name.",
@@ -556,6 +561,17 @@ export default {
       description:
         'If `output.libraryTarget` is set to umd and `output.library` is set, setting this to true will name the AMD module.',
       type: 'boolean',
+    },
+    Filter: {
+      description: 'Advanced filtering options.',
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        request: {
+          description: 'Regular expression pattern to filter module requests',
+          instanceof: 'RegExp',
+        },
+      },
     },
   },
   title: 'ModuleFederationPluginOptions',
