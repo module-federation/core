@@ -14,6 +14,8 @@ import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
 import { getShareScope } from '../../internal';
+import { getNextInternalsShareScopeClient } from '../../share-internals-client';
+import { getNextInternalsShareScopeServer } from '../../share-internals-server';
 import { setOptions } from './set-options';
 import {
   validateCompilerOptions,
@@ -32,7 +34,7 @@ import RscManifestInterceptPlugin from './RscManifestInterceptPlugin';
 import { applyPathFixes } from './next-fragments';
 
 import path from 'path';
-import { WEBPACK_LAYERS_NAMES } from '../../internal';
+import { WEBPACK_LAYERS_NAMES } from '../../constants';
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
@@ -196,7 +198,10 @@ export class NextFederationPlugin {
       applyServerPlugins(compiler, this._options);
       handleServerExternals(compiler, {
         ...this._options,
-        shared: { ...getShareScope(compiler), ...this._options.shared },
+        shared: {
+          ...getNextInternalsShareScopeServer(compiler),
+          ...this._options.shared,
+        },
       });
     } else {
       applyClientPlugins(compiler, this._options, this._extraOptions);
@@ -209,7 +214,9 @@ export class NextFederationPlugin {
   ): moduleFederationPlugin.ModuleFederationPluginOptions {
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
-      : getShareScope(compiler);
+      : compiler.options.name === 'client'
+        ? getNextInternalsShareScopeClient(compiler)
+        : getNextInternalsShareScopeServer(compiler);
 
     return {
       ...this._options,

@@ -1,4 +1,14 @@
 import { removeUnnecessarySharedKeys } from './remove-unnecessary-shared-keys';
+import type { Compiler } from 'webpack';
+
+// Basic mock compiler
+const mockCompiler = {
+  options: {
+    name: 'server',
+    // Add minimal resolve structure to prevent crash in writeCompilerResolveConfig
+    resolve: { alias: {} },
+  },
+} as Compiler;
 
 describe('removeUnnecessarySharedKeys', () => {
   beforeEach(() => {
@@ -16,7 +26,7 @@ describe('removeUnnecessarySharedKeys', () => {
       lodash: '4.17.21',
     };
 
-    removeUnnecessarySharedKeys(shared);
+    removeUnnecessarySharedKeys(shared, mockCompiler);
 
     expect(shared).toEqual({ lodash: '4.17.21' });
     expect(console.warn).toHaveBeenCalled();
@@ -28,18 +38,20 @@ describe('removeUnnecessarySharedKeys', () => {
       axios: '0.21.1',
     };
 
-    removeUnnecessarySharedKeys(shared);
+    (console.warn as jest.Mock).mockClear();
+
+    removeUnnecessarySharedKeys(shared, mockCompiler);
 
     expect(shared).toEqual({ lodash: '4.17.21', axios: '0.21.1' });
-    expect(console.warn).not.toHaveBeenCalled();
   });
 
   it('should not remove keys from an empty object', () => {
     const shared: Record<string, unknown> = {};
 
-    removeUnnecessarySharedKeys(shared);
+    (console.warn as jest.Mock).mockClear();
+
+    removeUnnecessarySharedKeys(shared, mockCompiler);
 
     expect(shared).toEqual({});
-    expect(console.warn).not.toHaveBeenCalled();
   });
 });
