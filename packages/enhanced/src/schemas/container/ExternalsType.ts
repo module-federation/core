@@ -6,5 +6,5 @@
  */
 
 export default {
-  "$ref": "./ModuleFederationPlugin.json#/definitions/ExternalsType"
+  $ref: './ModuleFederationPlugin.json#/definitions/ExternalsType',
 } as const;
