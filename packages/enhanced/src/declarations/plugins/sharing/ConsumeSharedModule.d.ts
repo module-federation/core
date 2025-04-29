@@ -57,6 +57,16 @@ export type ConsumeOptions = {
    */
   eager: boolean;
   /**
+   * Filter object for consuming shared modules.
+   */
+  filter?: {
+    /**
+     * RegExp to filter requests for prefix consumes.
+     * Applied to the part of the request after the prefix.
+     */
+    request?: RegExp;
+  };
+  /**
    * Share a specific layer of the module, if the module supports layers
    */
   layer?: string | null;
