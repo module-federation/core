@@ -247,7 +247,7 @@ export class FederationHost {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
     id: string,
-    options?: { loadFactory?: boolean; from: CallFrom },
+    options?: { loadFactory?: boolean; from: CallFrom; root?: HTMLElement },
   ): Promise<T | null> {
     return this.remoteHandler.loadRemote(id, options);
   }
