@@ -535,6 +535,14 @@ describe('lazy loadRemote and add remote into snapshot', () => {
 });
 
 describe('loadRemote', () => {
+  beforeEach(() => {
+    document.querySelectorAll('script').forEach((script) => {
+      script.remove();
+    });
+    document.querySelectorAll('link').forEach((link) => {
+      link.remove();
+    });
+  });
   it('loads remote synchronously', async () => {
     const jsSyncAssetPath = 'resources/load-remote/app2/say.sync.js';
     const remotePublicPath = 'http://localhost:1111/';
