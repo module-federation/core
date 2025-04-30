@@ -41,7 +41,7 @@ export function snapshotPlugin(): FederationRuntimePlugin {
   return {
     name: 'snapshot-plugin',
     async afterResolve(args) {
-      const { remote, pkgNameOrAlias, expose, origin, remoteInfo } = args;
+      const { remote, pkgNameOrAlias, expose, origin, remoteInfo, root } = args;
 
       if (!isRemoteInfoWithEntry(remote) || !isPureRemoteEntry(remote)) {
         const { remoteSnapshot, globalSnapshot } =
@@ -73,7 +73,7 @@ export function snapshotPlugin(): FederationRuntimePlugin {
           );
 
         if (assets) {
-          preloadAssets(remoteInfo, origin, assets, false);
+          preloadAssets(remoteInfo, origin, assets, false, root);
         }
 
         return {

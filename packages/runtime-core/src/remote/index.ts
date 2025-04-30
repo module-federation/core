@@ -57,6 +57,7 @@ export interface LoadRemoteMatch {
   origin: FederationHost;
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
+  root?: HTMLElement;
 }
 
 export class RemoteHandler {
@@ -197,7 +198,7 @@ export class RemoteHandler {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
     id: string,
-    options?: { loadFactory?: boolean; from: CallFrom },
+    options?: { loadFactory?: boolean; from: CallFrom; root?: HTMLElement },
   ): Promise<T | null> {
     const { host } = this;
     try {
@@ -214,6 +215,7 @@ export class RemoteHandler {
       const { module, moduleOptions, remoteMatchInfo } =
         await this.getRemoteModuleAndOptions({
           id,
+          root: options?.root,
         });
       const {
         pkgNameOrAlias,
@@ -314,7 +316,10 @@ export class RemoteHandler {
     });
   }
 
-  async getRemoteModuleAndOptions(options: { id: string }): Promise<{
+  async getRemoteModuleAndOptions(options: {
+    id: string;
+    root?: HTMLElement;
+  }): Promise<{
     module: Module;
     moduleOptions: ModuleOptions;
     remoteMatchInfo: LoadRemoteMatch;
@@ -371,6 +376,7 @@ export class RemoteHandler {
         options: host.options,
         origin: host,
         remoteInfo,
+        root: options.root,
       });
 
     const { remote, expose } = matchInfo;

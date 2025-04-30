@@ -70,6 +70,7 @@ export function preloadAssets(
   assets: PreloadAssets,
   // It is used to distinguish preload from load remote parallel loading
   useLinkPreload = true,
+  root: HTMLElement = document.head,
 ): void {
   const { cssAssets, jsAssetsWithoutEntry, entryAssets } = assets;
 
@@ -116,7 +117,7 @@ export function preloadAssets(
           },
         });
 
-        needAttach && document.head.appendChild(cssEl);
+        needAttach && root.appendChild(cssEl);
       });
     } else {
       const defaultAttrs = {
@@ -143,7 +144,7 @@ export function preloadAssets(
           needDeleteLink: false,
         });
 
-        needAttach && document.head.appendChild(cssEl);
+        needAttach && root.appendChild(cssEl);
       });
     }
 
@@ -170,7 +171,7 @@ export function preloadAssets(
             return;
           },
         });
-        needAttach && document.head.appendChild(linkEl);
+        needAttach && root.appendChild(linkEl);
       });
     } else {
       const defaultAttrs = {
@@ -196,7 +197,7 @@ export function preloadAssets(
           },
           needDeleteScript: true,
         });
-        needAttach && document.head.appendChild(scriptEl);
+        needAttach && root.appendChild(scriptEl);
       });
     }
   }
