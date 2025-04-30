@@ -100,6 +100,7 @@ export function preloadAssets(
       };
       cssAssets.forEach((cssUrl) => {
         const { link: cssEl, needAttach } = createLink({
+          root,
           url: cssUrl,
           cb: () => {
             // noop
@@ -126,6 +127,7 @@ export function preloadAssets(
       };
       cssAssets.forEach((cssUrl) => {
         const { link: cssEl, needAttach } = createLink({
+          root,
           url: cssUrl,
           cb: () => {
             // noop
@@ -155,6 +157,7 @@ export function preloadAssets(
       };
       jsAssetsWithoutEntry.forEach((jsUrl) => {
         const { link: linkEl, needAttach } = createLink({
+          root: document.head,
           url: jsUrl,
           cb: () => {
             // noop
@@ -171,7 +174,7 @@ export function preloadAssets(
             return;
           },
         });
-        needAttach && root.appendChild(linkEl);
+        needAttach && document.head.appendChild(linkEl);
       });
     } else {
       const defaultAttrs = {
@@ -197,7 +200,7 @@ export function preloadAssets(
           },
           needDeleteScript: true,
         });
-        needAttach && root.appendChild(scriptEl);
+        needAttach && document.head.appendChild(scriptEl);
       });
     }
   }
