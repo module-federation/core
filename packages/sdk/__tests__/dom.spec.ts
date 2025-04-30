@@ -164,6 +164,7 @@ describe('createLink', () => {
     const url = 'https://example.com/script.js';
     const cb = jest.fn();
     const { link, needAttach } = createLink({
+      root: document.head,
       url,
       cb,
       attrs: { as: 'script' },
@@ -181,6 +182,7 @@ describe('createLink', () => {
     document.head.innerHTML = `<link href="${url}" rel="preload" as="script">`;
     const { link, needAttach } = createLink({
       url,
+      root: document.head,
       cb,
       attrs: {
         rel: 'preload',
@@ -197,7 +199,7 @@ describe('createLink', () => {
     const url = 'https://example.com/script.js';
     const cb = jest.fn();
     const attrs = { rel: 'preload', as: 'script', 'data-test': 'test' };
-    const { link } = createLink({ url, cb, attrs });
+    const { link } = createLink({ url, cb, attrs, root: document.head });
 
     expect(link.rel).toBe('preload');
     expect(link.getAttribute('as')).toBe('script');
@@ -215,6 +217,7 @@ describe('createLink', () => {
     };
     const { link } = createLink({
       url,
+      root: document.head,
       cb,
       attrs,
       createLinkHook: (url) => {
@@ -237,6 +240,7 @@ describe('createLink', () => {
     const cb = jest.fn();
     const { link, needAttach } = createLink({
       url,
+      root: document.head,
       cb,
       attrs: { as: 'script' },
     });
@@ -255,6 +259,7 @@ describe('createLink', () => {
     const onErrorCallback = jest.fn();
     const { link, needAttach } = createLink({
       url,
+      root: document.head,
       cb,
       onErrorCallback,
       attrs: { as: 'script' },
@@ -277,6 +282,7 @@ describe('createLink', () => {
     const { link } = createLink({
       url,
       cb,
+      root: document.head,
       attrs: {},
       createLinkHook: () => customLink,
     });
