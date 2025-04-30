@@ -15,7 +15,7 @@ const Collapse = (props) => {
         <span
           className={collapse ? styles['arrow-right'] : styles['arrow-down']}
         ></span>
-        &nbsp; Type declaration
+        &nbsp; {props.title || 'Type declaration'}
       </summary>
       {props.children}
     </details>
