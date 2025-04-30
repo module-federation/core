@@ -198,7 +198,7 @@ export class RemoteHandler {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
     id: string,
-    options?: { loadFactory?: boolean; from: CallFrom; root?: HTMLElement },
+    options?: { loadFactory?: boolean; from?: CallFrom; root?: HTMLElement },
   ): Promise<T | null> {
     const { host } = this;
     try {

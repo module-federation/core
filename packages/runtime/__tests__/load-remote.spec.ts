@@ -600,17 +600,20 @@ describe('loadRemote', () => {
     const loadedSrcs = [...document.querySelectorAll('script')].map(
       (i) => (i as any).fakeSrc,
     );
+    const loadedStyles = [...document.querySelectorAll('link')].map(
+      (link) => link.href,
+    );
     expect(loadedSrcs.includes(`${remotePublicPath}${jsSyncAssetPath}`));
+    expect(loadedStyles.includes(`${remotePublicPath}sub2/say.sync.css`));
+
     reset();
   });
 
-  it('renders css in shadowRoot when providing a different root', async () => {
-    const shadowRoot = document.createElement('div');
-    const cssSyncPath = 'sub2/say.sync.css';
-    const cssAsyncPath = 'sub2/say.async.css';
+  it('loads remote synchronously in a custom root', async () => {
+    const jsSyncAssetPath = 'resources/load-remote/app2/say.sync.js';
     const remotePublicPath = 'http://localhost:1111/';
     const reset = addGlobalSnapshot({
-      '@federation-test/shadow-css': {
+      '@federation-test/globalinfo': {
         globalName: '',
         buildVersion: '',
         publicPath: '',
@@ -639,11 +642,11 @@ describe('loadRemote', () => {
             moduleName: 'say',
             assets: {
               css: {
-                sync: [cssSyncPath],
-                async: [cssAsyncPath],
+                sync: ['sub2/say.sync.css'],
+                async: ['sub2/say.async.css'],
               },
               js: {
-                sync: ['resources/load-remote/app2/say.sync.js'],
+                sync: [jsSyncAssetPath],
                 async: [],
               },
             },
@@ -655,7 +658,7 @@ describe('loadRemote', () => {
     });
 
     const FederationInstance = new FederationHost({
-      name: '@federation-test/shadow-css',
+      name: '@federation-test/globalinfo',
       remotes: [
         {
           name: '@federation-test/app2',
@@ -664,32 +667,24 @@ describe('loadRemote', () => {
       ],
     });
 
+    const root = document.createElement('div');
     await FederationInstance.loadRemote<() => string>(
       '@federation-test/app2/say',
-      { root: shadowRoot },
+      { root },
     );
-
-    // Verify CSS links were appended to the shadowRoot
-    const cssLinks = shadowRoot.querySelectorAll('link');
-    console.log(document.head.querySelectorAll('link'));
-    expect(cssLinks.length).toBeGreaterThan(0); // Should have CSS links
-
-    // Check that the CSS links have the correct href attributes
-    const hrefs = Array.from(cssLinks).map((link) => link.getAttribute('href'));
-
-    // At least one of the CSS files should be loaded in the shadowRoot
-    const hasCssInShadowRoot = hrefs.some(
-      (href) =>
-        href === `${remotePublicPath}${cssSyncPath}` ||
-        href === `${remotePublicPath}${cssAsyncPath}`,
+    // @ts-ignore fakeSrc is local mock attr, which value is the same as src
+    const loadedSrcs = [...document.querySelectorAll('script')].map(
+      (i) => (i as any).fakeSrc,
     );
-    expect(hasCssInShadowRoot).toBe(true);
-
-    // Verify the links have the correct rel attribute for stylesheets
-    const stylesheetLinks = Array.from(cssLinks).filter(
-      (link) => link.getAttribute('rel') === 'stylesheet',
+    const loadedStyles = [...root.querySelectorAll('link')].map(
+      (link) => link.href,
     );
-    expect(stylesheetLinks.length).toBeGreaterThan(0);
+    const documentStyles = [...document.head.querySelectorAll('link')].map(
+      (link) => link.href,
+    );
+    expect(loadedSrcs.includes(`${remotePublicPath}${jsSyncAssetPath}`));
+    expect(loadedStyles.includes(`${remotePublicPath}sub2/say.sync.css`));
+    expect(documentStyles).toEqual([]);
 
     reset();
   });
