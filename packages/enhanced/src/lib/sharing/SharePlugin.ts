@@ -66,8 +66,8 @@ class SharePlugin {
           eager: options.eager,
           issuerLayer: options.issuerLayer,
           layer: options.layer,
-          filter: options.filter,
           request: options.request || key,
+          filter: options.filter,
         },
       }),
     );

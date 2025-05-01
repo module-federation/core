@@ -32,6 +32,8 @@ import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
 import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFactory';
 import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 import { createSchemaValidation } from '../../utils';
+import path from 'path';
+import { satisfy } from '@module-federation/runtime-tools/runtime-core';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -47,7 +49,7 @@ const WebpackError = require(
 ) as typeof import('webpack/lib/WebpackError');
 
 const validate = createSchemaValidation(
-  //eslint-disable-next-line
+  // eslint-disable-next-line
   require('../../schemas/sharing/ConsumeSharedPlugin.check.js').validate,
   () => require('../../schemas/sharing/ConsumeSharedPlugin').default,
   {
@@ -168,6 +170,7 @@ class ConsumeSharedPlugin {
             prefixedConsumes = prefixed;
           },
         );
+
         const resolver: ResolverWithOptions = compilation.resolverFactory.get(
           'normal',
           RESOLVE_OPTIONS as ResolveOptionsWithDependencyType,
@@ -299,15 +302,90 @@ class ConsumeSharedPlugin {
               );
             }),
           ]).then(([importResolved, requiredVersion]) => {
-            return new ConsumeSharedModule(
+            // --- Start of Filter Logic ---
+            // Check if consumption is excluded by filter.version
+            const currentConfig = {
+              ...config,
+              importResolved,
+              import: importResolved ? config.import : undefined,
+              requiredVersion,
+            };
+            const consumedModule = new ConsumeSharedModule(
               directFallback ? compiler.context : context,
-              {
-                ...config,
-                importResolved,
-                import: importResolved ? config.import : undefined,
-                requiredVersion,
-              },
+              currentConfig,
             );
+
+            // Check if filter criteria is provided
+            if (config.filter && typeof config.filter.version === 'string') {
+              // Without a resolved import, we cannot proceed with exclusion check
+              if (!importResolved) {
+                return consumedModule; // Cannot exclude, return original
+              }
+
+              // If a fallback version is provided by the user, use that to check
+              if (
+                config.filter &&
+                typeof config.filter.fallbackVersion === 'string' &&
+                config.filter.fallbackVersion
+              ) {
+                if (
+                  satisfy(
+                    config.filter.fallbackVersion, // The specific version
+                    config.filter.version, // The range to check against for exclusion
+                  )
+                ) {
+                  // Version matches the exclusion range, return undefined to skip consumption
+                  return undefined as unknown as ConsumeSharedModule; // Return undefined
+                }
+                // Fallback version provided but doesn't match exclusion range
+                return consumedModule;
+              }
+
+              // No fallback version, try to get version from resolved import's package.json
+              return new Promise((resolveFilter) => {
+                getDescriptionFile(
+                  compilation.inputFileSystem,
+                  path.dirname(importResolved as string),
+                  ['package.json'],
+                  (err, result) => {
+                    if (err) {
+                      // Error reading description file, cannot exclude
+                      return resolveFilter(consumedModule);
+                    }
+                    const { data } = result || {};
+                    if (
+                      !data ||
+                      !data['version'] ||
+                      data['name'] !== request // Check if package name matches the request
+                    ) {
+                      // If we cannot determine version from package.json, return the consumed module
+                      return resolveFilter(consumedModule);
+                    }
+
+                    // Perform check using the version from package.json
+                    if (
+                      config.filter &&
+                      typeof config.filter.version === 'string' &&
+                      satisfy(
+                        data['version'], // The specific version from package.json
+                        config.filter.version, // The range to check against for exclusion
+                      )
+                    ) {
+                      // Version matches the exclusion range, return undefined to skip consumption
+                      return resolveFilter(
+                        undefined as unknown as ConsumeSharedModule,
+                      ); // Return undefined
+                    }
+                    // Version doesn't match exclusion range
+                    return resolveFilter(consumedModule);
+                  },
+                );
+              });
+            }
+            // --- End of Filter Logic ---
+
+            // No filter defined or filter didn't exclude, return the module
+            return consumedModule;
           });
         };
 

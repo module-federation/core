@@ -77,5 +77,7 @@ export interface ProvidesConfig {
    */
   filter?: {
     request?: RegExp;
+    version?: string;
+    fallbackVersion?: string;
   };
 }

@@ -51,6 +51,15 @@ export type ConsumeOptions = {
      * Applied to the part of the request after the prefix.
      */
     request?: RegExp;
+    /**
+     * Version range to filter against. Modules matching this range will be excluded.
+     */
+    version?: string;
+    /**
+     * Optional specific version to check against the filter.version range.
+     * If provided, this is used instead of reading from package.json.
+     */
+    fallbackVersion?: string;
   };
   /**
    * Share a specific layer of the module, if the module supports layers

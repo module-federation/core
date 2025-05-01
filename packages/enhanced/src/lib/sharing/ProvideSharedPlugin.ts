@@ -23,6 +23,7 @@ import type {
 } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
+import { satisfy } from '@module-federation/runtime-tools/runtime-core';
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
@@ -195,6 +196,21 @@ class ProvideSharedPlugin {
               compilation.warnings.push(error);
             }
           }
+
+          // --- Add Filter Check ---
+          // Check if the determined version should be excluded based on filter.version
+          if (
+            config.filter &&
+            typeof config.filter.version === 'string' &&
+            typeof version === 'string' && // Ensure version is a string before checking
+            version && // Ensure version is not empty
+            satisfy(version, config.filter.version)
+          ) {
+            // Version matches the filter range, so skip providing this module version
+            return;
+          }
+          // --- End Filter Check ---
+
           const lookupKey = createLookupKey(resource, config);
           resolvedProvideMap.set(lookupKey, {
             config,
