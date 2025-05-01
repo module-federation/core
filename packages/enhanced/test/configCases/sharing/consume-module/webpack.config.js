@@ -1,8 +1,9 @@
-const { ConsumeSharedPlugin } = require('../../../../dist/src');
+// eslint-disable-next-line node/no-unpublished-require
+const { ConsumeSharedPlugin } = require('../../../../');
 
+/** @type {import("../../../../").Configuration} */
 module.exports = {
   mode: 'development',
-  devtool: false,
   plugins: [
     new ConsumeSharedPlugin({
       shareScope: 'test-scope',
@@ -18,7 +19,6 @@ module.exports = {
             requiredVersion: '^1.2.3',
             shareScope: 'other-scope',
             strictVersion: true,
-            singleton: false,
           },
         },
       ],
@@ -60,6 +60,45 @@ module.exports = {
           singleton: true,
         },
       },
+    }),
+    new ConsumeSharedPlugin({
+      shareScope: 'exclude-scope',
+      consumes: [
+        {
+          x: {
+            filter: {
+              version: '2.x',
+              fallbackVersion: '2.0.0',
+            },
+            shareScope: 'exclude-scope',
+          },
+        },
+        {
+          '@abc/y': {
+            filter: {
+              version: '*',
+            },
+            shareScope: 'exclude-scope',
+          },
+        },
+        {
+          foo: {
+            filter: {
+              version: '1.x',
+            },
+            shareScope: 'exclude-scope',
+          },
+        },
+        {
+          bar: {
+            filter: {
+              version: '1.x',
+              fallbackVersion: '2.0.0',
+            },
+            shareScope: 'exclude-scope',
+          },
+        },
+      ],
     }),
   ],
 };
