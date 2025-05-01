@@ -571,6 +571,16 @@ export default {
           description: 'Regular expression pattern to filter module requests',
           instanceof: 'RegExp',
         },
+        version: {
+          description:
+            'Specific version string or range to filter by (exclude matches).',
+          type: 'string',
+        },
+        fallbackVersion: {
+          description:
+            'Optional specific version string to check against the filter.version range instead of reading package.json.',
+          type: 'string',
+        },
       },
     },
   },

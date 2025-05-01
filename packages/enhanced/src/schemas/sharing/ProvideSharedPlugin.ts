@@ -156,6 +156,10 @@ export default {
           description: 'Regular expression to filter requests.',
           instanceof: 'RegExp',
         },
+        version: {
+          description: 'Specific version string to filter by.',
+          type: 'string',
+        },
       },
     },
   },
