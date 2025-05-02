@@ -334,10 +334,10 @@ describe('SharePlugin', () => {
           react: {
             requiredVersion: '^17.0.0',
             exclude: {
-              version: '^16.0.0'
-            }
-          }
-        }
+              version: '^16.0.0',
+            },
+          },
+        },
       });
 
       plugin.apply(mockCompiler);
@@ -346,7 +346,7 @@ describe('SharePlugin', () => {
       expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
       const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
       const reactConsume = consumeOptions.consumes.find(
-        consume => Object.keys(consume)[0] === 'react'
+        (consume) => Object.keys(consume)[0] === 'react',
       );
       expect(reactConsume.react.exclude).toEqual({ version: '^16.0.0' });
     });
@@ -358,10 +358,10 @@ describe('SharePlugin', () => {
           '@scope/prefix/': {
             requiredVersion: '^1.0.0',
             exclude: {
-              request: /excluded-path$/
-            }
-          }
-        }
+              request: /excluded-path$/,
+            },
+          },
+        },
       });
 
       plugin.apply(mockCompiler);
@@ -370,10 +370,14 @@ describe('SharePlugin', () => {
       expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
       const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
       const prefixConsume = consumeOptions.consumes.find(
-        consume => Object.keys(consume)[0] === '@scope/prefix/'
+        (consume) => Object.keys(consume)[0] === '@scope/prefix/',
       );
-      expect(prefixConsume['@scope/prefix/'].exclude.request).toBeInstanceOf(RegExp);
-      expect(prefixConsume['@scope/prefix/'].exclude.request.source).toBe('excluded-path$');
+      expect(prefixConsume['@scope/prefix/'].exclude.request).toBeInstanceOf(
+        RegExp,
+      );
+      expect(prefixConsume['@scope/prefix/'].exclude.request.source).toBe(
+        'excluded-path$',
+      );
     });
 
     it('should handle version-based exclusion in provides', () => {
@@ -383,10 +387,10 @@ describe('SharePlugin', () => {
           react: {
             version: '17.0.2',
             exclude: {
-              version: '^16.0.0'
-            }
-          }
-        }
+              version: '^16.0.0',
+            },
+          },
+        },
       });
 
       plugin.apply(mockCompiler);
@@ -395,7 +399,7 @@ describe('SharePlugin', () => {
       expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
       const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
       const reactProvide = provideOptions.provides.find(
-        provide => Object.keys(provide)[0] === 'react'
+        (provide) => Object.keys(provide)[0] === 'react',
       );
       expect(reactProvide.react.exclude).toEqual({ version: '^16.0.0' });
     });
@@ -407,10 +411,10 @@ describe('SharePlugin', () => {
           '@scope/prefix/': {
             version: '1.0.0',
             exclude: {
-              request: /excluded-path$/
-            }
-          }
-        }
+              request: /excluded-path$/,
+            },
+          },
+        },
       });
 
       plugin.apply(mockCompiler);
@@ -419,10 +423,14 @@ describe('SharePlugin', () => {
       expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
       const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
       const prefixProvide = provideOptions.provides.find(
-        provide => Object.keys(provide)[0] === '@scope/prefix/'
+        (provide) => Object.keys(provide)[0] === '@scope/prefix/',
       );
-      expect(prefixProvide['@scope/prefix/'].exclude.request).toBeInstanceOf(RegExp);
-      expect(prefixProvide['@scope/prefix/'].exclude.request.source).toBe('excluded-path$');
+      expect(prefixProvide['@scope/prefix/'].exclude.request).toBeInstanceOf(
+        RegExp,
+      );
+      expect(prefixProvide['@scope/prefix/'].exclude.request.source).toBe(
+        'excluded-path$',
+      );
     });
 
     it('should handle both version and request exclusion together', () => {
@@ -433,10 +441,10 @@ describe('SharePlugin', () => {
             version: '1.0.0',
             exclude: {
               version: '^0.9.0',
-              request: /excluded-path$/
-            }
-          }
-        }
+              request: /excluded-path$/,
+            },
+          },
+        },
       });
 
       plugin.apply(mockCompiler);
@@ -446,20 +454,20 @@ describe('SharePlugin', () => {
       const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
 
       const prefixConsume = consumeOptions.consumes.find(
-        consume => Object.keys(consume)[0] === '@scope/prefix/'
+        (consume) => Object.keys(consume)[0] === '@scope/prefix/',
       );
       const prefixProvide = provideOptions.provides.find(
-        provide => Object.keys(provide)[0] === '@scope/prefix/'
+        (provide) => Object.keys(provide)[0] === '@scope/prefix/',
       );
 
       // Both should have version and request exclusion
       expect(prefixConsume['@scope/prefix/'].exclude).toEqual({
         version: '^0.9.0',
-        request: expect.any(RegExp)
+        request: expect.any(RegExp),
       });
       expect(prefixProvide['@scope/prefix/'].exclude).toEqual({
         version: '^0.9.0',
-        request: expect.any(RegExp)
+        request: expect.any(RegExp),
       });
     });
 
@@ -471,10 +479,10 @@ describe('SharePlugin', () => {
             import: false,
             requiredVersion: '^17.0.0',
             exclude: {
-              version: '^16.0.0'
-            }
-          }
-        }
+              version: '^16.0.0',
+            },
+          },
+        },
       });
 
       plugin.apply(mockCompiler);
@@ -487,7 +495,7 @@ describe('SharePlugin', () => {
       // Check ConsumeSharedPlugin still has the exclude config
       const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
       const reactConsume = consumeOptions.consumes.find(
-        consume => Object.keys(consume)[0] === 'react'
+        (consume) => Object.keys(consume)[0] === 'react',
       );
       expect(reactConsume.react.exclude).toEqual({ version: '^16.0.0' });
     });

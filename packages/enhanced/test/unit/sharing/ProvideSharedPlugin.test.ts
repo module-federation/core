@@ -105,7 +105,7 @@ interface testModuleOptions {
   shareScope: string | string[];
   shareKey: string;
   version: string;
-  request?: string;  // Add optional request property
+  request?: string; // Add optional request property
 }
 
 describe('ProvideSharedPlugin', () => {
@@ -465,8 +465,8 @@ describe('ProvideSharedPlugin', () => {
               version: '17.0.2',
               shareKey: 'react',
               exclude: {
-                version: '^17.0.0'
-              }
+                version: '^17.0.0',
+              },
             },
           },
         });
@@ -495,11 +495,7 @@ describe('ProvideSharedPlugin', () => {
         };
 
         // Directly execute the module callback that was stored
-        mockNormalModuleFactory.moduleCallback(
-          {},
-          moduleData,
-          resolveData,
-        );
+        mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
 
         // Should not have added to resolvedProvideMap since version matches exclude
         expect(resolvedProvideMap.has('/path/to/react')).toBe(false);
@@ -513,15 +509,15 @@ describe('ProvideSharedPlugin', () => {
           version: '17.0.2',
           shareKey: 'react',
           exclude: {
-            version: '^16.0.0'
+            version: '^16.0.0',
           },
-          request: 'react'  // No trailing slash for non-prefix
+          request: 'react', // No trailing slash for non-prefix
         };
 
         const plugin = new ProvideSharedPlugin({
           shareScope: shareScopes.string,
           provides: {
-            react: testConfig
+            react: testConfig,
           },
         });
 
@@ -532,7 +528,7 @@ describe('ProvideSharedPlugin', () => {
           resource: '/path/to/react',
           resourceResolveData: {
             descriptionFileData: { version: '17.0.2' },
-            descriptionFilePath: '/path/to/package.json'
+            descriptionFilePath: '/path/to/package.json',
           },
         };
         const resolveData = {
@@ -541,11 +537,7 @@ describe('ProvideSharedPlugin', () => {
         };
 
         // Directly execute the module callback that was stored
-        mockNormalModuleFactory.moduleCallback(
-          {},
-          moduleData,
-          resolveData,
-        );
+        mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
 
         // *** Simulate finishMake hook execution ***
         await mockCompiler.finishMakeCallback(mockCompilation);
@@ -554,14 +546,15 @@ describe('ProvideSharedPlugin', () => {
         expect(mockCompilation.addInclude).toHaveBeenCalled();
         expect(mockCompilation.addInclude).toHaveBeenCalledWith(
           mockCompiler.context,
-          expect.objectContaining({ // Check properties of ProvideSharedDependency
+          expect.objectContaining({
+            // Check properties of ProvideSharedDependency
             _shareScope: shareScopes.string,
             _shareKey: 'react',
             _version: '17.0.2', // The determined version
-            _request: '/path/to/react' // The resource path
+            _request: '/path/to/react', // The resource path
           }),
           expect.any(Object),
-          expect.any(Function)
+          expect.any(Function),
         );
       });
 
@@ -569,13 +562,14 @@ describe('ProvideSharedPlugin', () => {
         const plugin = new ProvideSharedPlugin({
           shareScope: shareScopes.string,
           provides: {
-            '@scope/prefix/': {  // Key can have trailing slash
+            '@scope/prefix/': {
+              // Key can have trailing slash
               version: '1.0.0',
-              shareKey: '@scope/prefix',  // No trailing slash
-              request: '@scope/prefix/',  // Yes trailing slash
+              shareKey: '@scope/prefix', // No trailing slash
+              request: '@scope/prefix/', // Yes trailing slash
               exclude: {
-                request: /excluded-path$/
-              }
+                request: /excluded-path$/,
+              },
             },
           },
         });
@@ -586,13 +580,13 @@ describe('ProvideSharedPlugin', () => {
           [
             '@scope/prefix/',
             {
-              shareKey: '@scope/prefix',  // No trailing slash
+              shareKey: '@scope/prefix', // No trailing slash
               version: '1.0.0',
               shareScope: shareScopes.string,
               exclude: {
-                request: /excluded-path$/
+                request: /excluded-path$/,
               },
-              request: '@scope/prefix/'  // Yes trailing slash
+              request: '@scope/prefix/', // Yes trailing slash
             },
           ],
         ];
@@ -604,7 +598,7 @@ describe('ProvideSharedPlugin', () => {
           resource: '/path/to/@scope/prefix/excluded-path',
           resourceResolveData: {
             descriptionFileData: { version: '1.0.0' },
-            descriptionFilePath: '/path/to/package.json'
+            descriptionFilePath: '/path/to/package.json',
           },
         };
         const resolveData = {
@@ -613,11 +607,7 @@ describe('ProvideSharedPlugin', () => {
         };
 
         // Directly execute the module callback that was stored
-        mockNormalModuleFactory.moduleCallback(
-          {},
-          moduleData,
-          resolveData,
-        );
+        mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
 
         // *** Simulate finishMake hook execution ***
         await mockCompiler.finishMakeCallback(mockCompilation);
@@ -631,11 +621,11 @@ describe('ProvideSharedPlugin', () => {
         expect(mockCompilation.addInclude).not.toHaveBeenCalledWith(
           mockCompiler.context,
           expect.objectContaining({
-             _shareKey: '@scope/prefixexcluded-path', // The combined key that would have been created
-             _request: '/path/to/@scope/prefix/excluded-path'
+            _shareKey: '@scope/prefixexcluded-path', // The combined key that would have been created
+            _request: '/path/to/@scope/prefix/excluded-path',
           }),
           expect.any(Object),
-          expect.any(Function)
+          expect.any(Function),
         );
         // More robust check: Ensure the final resolvedProvideMap (accessible via finishMake) doesn't contain the excluded item.
         // This requires modifying the test setup slightly.
@@ -644,29 +634,24 @@ describe('ProvideSharedPlugin', () => {
       it('should NOT exclude module when request does not match exclude.request pattern', async () => {
         const testConfig = {
           version: '1.0.0',
-          shareKey: '@scope/prefix',  // No trailing slash
-          request: '@scope/prefix/',  // Yes trailing slash for prefix
+          shareKey: '@scope/prefix', // No trailing slash
+          request: '@scope/prefix/', // Yes trailing slash for prefix
           shareScope: shareScopes.string, // Explicitly set shareScope
           exclude: {
-            request: /internal$/
-          }
+            request: /internal$/,
+          },
         };
 
         const plugin = new ProvideSharedPlugin({
           shareScope: shareScopes.string,
           provides: {
-            '@scope/prefix/': testConfig
+            '@scope/prefix/': testConfig,
           },
         });
 
         // Setup mocks for the internal checks in the plugin
         // @ts-ignore accessing private property for testing
-        plugin._provides = [
-          [
-            '@scope/prefix/',
-            testConfig
-          ],
-        ];
+        plugin._provides = [['@scope/prefix/', testConfig]];
 
         plugin.apply(mockCompiler);
 
@@ -675,20 +660,16 @@ describe('ProvideSharedPlugin', () => {
           resource: '@scope/prefix/included-path', // Changed to npm package style path
           resourceResolveData: {
             descriptionFileData: { version: '1.0.0' },
-            descriptionFilePath: '/path/to/package.json'
+            descriptionFilePath: '/path/to/package.json',
           },
         };
         const resolveData = {
           cacheable: true,
-          request: '@scope/prefix/included-path',  // Full request path
+          request: '@scope/prefix/included-path', // Full request path
         };
 
         // Directly execute the module callback that was stored
-        mockNormalModuleFactory.moduleCallback(
-          {},
-          moduleData,
-          resolveData,
-        );
+        mockNormalModuleFactory.moduleCallback({}, moduleData, resolveData);
 
         // *** Simulate finishMake hook execution ***
         await mockCompiler.finishMakeCallback(mockCompilation);
@@ -697,14 +678,15 @@ describe('ProvideSharedPlugin', () => {
         expect(mockCompilation.addInclude).toHaveBeenCalled();
         expect(mockCompilation.addInclude).toHaveBeenCalledWith(
           mockCompiler.context,
-          expect.objectContaining({ // Check properties of ProvideSharedDependency
+          expect.objectContaining({
+            // Check properties of ProvideSharedDependency
             _shareScope: shareScopes.string,
             _shareKey: '@scope/prefixincluded-path', // The combined key created in the prefix loop
             _version: '1.0.0',
-            _request: '@scope/prefix/included-path' // Updated to match the npm package style path
+            _request: '@scope/prefix/included-path', // Updated to match the npm package style path
           }),
           expect.any(Object),
-          expect.any(Function)
+          expect.any(Function),
         );
       });
     });
@@ -828,21 +810,35 @@ describe('ProvideSharedPlugin', () => {
       const key = 'react';
       const resource = '/path/to/react';
       // Config where version needs to be determined
-      const config = { shareKey: 'react', shareScope: 'default', version: undefined };
-      const resourceResolveData = { descriptionFileData: { version: '17.0.2' }, descriptionFilePath: '/path/to/package.json' };
+      const config = {
+        shareKey: 'react',
+        shareScope: 'default',
+        version: undefined,
+      };
+      const resourceResolveData = {
+        descriptionFileData: { version: '17.0.2' },
+        descriptionFilePath: '/path/to/package.json',
+      };
 
       (satisfy as jest.Mock).mockReturnValue(false);
 
       // @ts-ignore Accessing private method for testing
-      plugin.provideSharedModule(mockCompilation, resolvedProvideMap, key, config, resource, resourceResolveData);
+      plugin.provideSharedModule(
+        mockCompilation,
+        resolvedProvideMap,
+        key,
+        config,
+        resource,
+        resourceResolveData,
+      );
 
       const lookupKey = resource; // Assuming config.layer is undefined for simplicity
       expect(resolvedProvideMap.has(lookupKey)).toBe(true);
       const mapEntry = resolvedProvideMap.get(lookupKey);
       expect(mapEntry).toEqual({
-          config: config,
-          version: '17.0.2', // Version determined
-          resource: resource,
+        config: config,
+        version: '17.0.2', // Version determined
+        resource: resource,
       });
       expect(mockCompilation.warnings.push).not.toHaveBeenCalled();
       // satisfy not called as config.exclude is undefined
@@ -850,42 +846,73 @@ describe('ProvideSharedPlugin', () => {
     });
 
     it('should add module to map when version is provided directly and not excluded', () => {
-        const key = 'react';
-        const resource = '/path/to/react';
-        // Config with version specified
-        const config = { shareKey: 'react', shareScope: 'default', version: '17.0.1' };
-        // resourceResolveData might be incomplete or missing
-        const resourceResolveData = { descriptionFileData: { version: '17.0.2' }, descriptionFilePath: '/path/to/package.json' };
+      const key = 'react';
+      const resource = '/path/to/react';
+      // Config with version specified
+      const config = {
+        shareKey: 'react',
+        shareScope: 'default',
+        version: '17.0.1',
+      };
+      // resourceResolveData might be incomplete or missing
+      const resourceResolveData = {
+        descriptionFileData: { version: '17.0.2' },
+        descriptionFilePath: '/path/to/package.json',
+      };
 
-        (satisfy as jest.Mock).mockReturnValue(false);
+      (satisfy as jest.Mock).mockReturnValue(false);
 
-        // @ts-ignore
-        plugin.provideSharedModule(mockCompilation, resolvedProvideMap, key, config, resource, resourceResolveData);
+      // @ts-ignore
+      plugin.provideSharedModule(
+        mockCompilation,
+        resolvedProvideMap,
+        key,
+        config,
+        resource,
+        resourceResolveData,
+      );
 
-        const lookupKey = resource;
-        expect(resolvedProvideMap.has(lookupKey)).toBe(true);
-        const mapEntry = resolvedProvideMap.get(lookupKey);
-        expect(mapEntry).toEqual({
-            config: config,
-            version: '17.0.1', // Uses the directly provided version
-            resource: resource,
-        });
-        expect(mockCompilation.warnings.push).not.toHaveBeenCalled();
-        expect(satisfy).not.toHaveBeenCalled();
+      const lookupKey = resource;
+      expect(resolvedProvideMap.has(lookupKey)).toBe(true);
+      const mapEntry = resolvedProvideMap.get(lookupKey);
+      expect(mapEntry).toEqual({
+        config: config,
+        version: '17.0.1', // Uses the directly provided version
+        resource: resource,
       });
+      expect(mockCompilation.warnings.push).not.toHaveBeenCalled();
+      expect(satisfy).not.toHaveBeenCalled();
+    });
 
     it('should push warning if version is undefined and not determinable (no description file data)', () => {
       const key = 'vue';
       const resource = '/path/to/vue';
-      const config = { shareKey: 'vue', shareScope: 'default', version: undefined };
-      const resourceResolveData = { /* descriptionFileData is missing */ }; // Missing version info
+      const config = {
+        shareKey: 'vue',
+        shareScope: 'default',
+        version: undefined,
+      };
+      const resourceResolveData = {
+        /* descriptionFileData is missing */
+      }; // Missing version info
 
       // @ts-ignore
-      plugin.provideSharedModule(mockCompilation, resolvedProvideMap, key, config, resource, resourceResolveData);
+      plugin.provideSharedModule(
+        mockCompilation,
+        resolvedProvideMap,
+        key,
+        config,
+        resource,
+        resourceResolveData,
+      );
 
       expect(mockCompilation.warnings.push).toHaveBeenCalledTimes(1);
       expect(WebpackError).toHaveBeenCalledTimes(1);
-      expect(WebpackError).toHaveBeenCalledWith(expect.stringContaining('No description file (usually package.json) found'));
+      expect(WebpackError).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'No description file (usually package.json) found',
+        ),
+      );
       const pushedError = mockCompilation.warnings.push.mock.calls[0][0];
       expect(pushedError.file).toBe(`shared module ${key} -> ${resource}`);
 
@@ -895,44 +922,75 @@ describe('ProvideSharedPlugin', () => {
     });
 
     it('should push warning if version is undefined and not determinable (no version in description file)', () => {
-        const key = 'vue';
-        const resource = '/path/to/vue';
-        const config = { shareKey: 'vue', shareScope: 'default', version: undefined };
-        const resourceResolveData = { descriptionFileData: { /* no version property */ }, descriptionFilePath: '/path/to/some/package.json' }; // Missing version info
+      const key = 'vue';
+      const resource = '/path/to/vue';
+      const config = {
+        shareKey: 'vue',
+        shareScope: 'default',
+        version: undefined,
+      };
+      const resourceResolveData = {
+        descriptionFileData: {
+          /* no version property */
+        },
+        descriptionFilePath: '/path/to/some/package.json',
+      }; // Missing version info
 
-        // @ts-ignore
-        plugin.provideSharedModule(mockCompilation, resolvedProvideMap, key, config, resource, resourceResolveData);
+      // @ts-ignore
+      plugin.provideSharedModule(
+        mockCompilation,
+        resolvedProvideMap,
+        key,
+        config,
+        resource,
+        resourceResolveData,
+      );
 
-        expect(mockCompilation.warnings.push).toHaveBeenCalledTimes(1);
-        expect(WebpackError).toHaveBeenCalledTimes(1);
-        expect(WebpackError).toHaveBeenCalledWith(expect.stringContaining('No version in description file'));
-        const pushedError = mockCompilation.warnings.push.mock.calls[0][0];
-        expect(pushedError.file).toBe(`shared module ${key} -> ${resource}`);
+      expect(mockCompilation.warnings.push).toHaveBeenCalledTimes(1);
+      expect(WebpackError).toHaveBeenCalledTimes(1);
+      expect(WebpackError).toHaveBeenCalledWith(
+        expect.stringContaining('No version in description file'),
+      );
+      const pushedError = mockCompilation.warnings.push.mock.calls[0][0];
+      expect(pushedError.file).toBe(`shared module ${key} -> ${resource}`);
 
-        const lookupKey = resource;
-        expect(resolvedProvideMap.has(lookupKey)).toBe(true);
-        expect(resolvedProvideMap.get(lookupKey)?.version).toBeUndefined();
-      });
+      const lookupKey = resource;
+      expect(resolvedProvideMap.has(lookupKey)).toBe(true);
+      expect(resolvedProvideMap.get(lookupKey)?.version).toBeUndefined();
+    });
 
-      it('should push warning if version is undefined and not determinable (no resolve data)', () => {
-        const key = 'vue';
-        const resource = '/path/to/vue';
-        const config = { shareKey: 'vue', shareScope: 'default', version: undefined };
-        const resourceResolveData = undefined; // No resolve data at all
+    it('should push warning if version is undefined and not determinable (no resolve data)', () => {
+      const key = 'vue';
+      const resource = '/path/to/vue';
+      const config = {
+        shareKey: 'vue',
+        shareScope: 'default',
+        version: undefined,
+      };
+      const resourceResolveData = undefined; // No resolve data at all
 
-        // @ts-ignore
-        plugin.provideSharedModule(mockCompilation, resolvedProvideMap, key, config, resource, resourceResolveData);
+      // @ts-ignore
+      plugin.provideSharedModule(
+        mockCompilation,
+        resolvedProvideMap,
+        key,
+        config,
+        resource,
+        resourceResolveData,
+      );
 
-        expect(mockCompilation.warnings.push).toHaveBeenCalledTimes(1);
-        expect(WebpackError).toHaveBeenCalledTimes(1);
-        expect(WebpackError).toHaveBeenCalledWith(expect.stringContaining('No resolve data provided from resolver'));
-        const pushedError = mockCompilation.warnings.push.mock.calls[0][0];
-        expect(pushedError.file).toBe(`shared module ${key} -> ${resource}`);
+      expect(mockCompilation.warnings.push).toHaveBeenCalledTimes(1);
+      expect(WebpackError).toHaveBeenCalledTimes(1);
+      expect(WebpackError).toHaveBeenCalledWith(
+        expect.stringContaining('No resolve data provided from resolver'),
+      );
+      const pushedError = mockCompilation.warnings.push.mock.calls[0][0];
+      expect(pushedError.file).toBe(`shared module ${key} -> ${resource}`);
 
-        const lookupKey = resource;
-        expect(resolvedProvideMap.has(lookupKey)).toBe(true);
-        expect(resolvedProvideMap.get(lookupKey)?.version).toBeUndefined();
-      });
+      const lookupKey = resource;
+      expect(resolvedProvideMap.has(lookupKey)).toBe(true);
+      expect(resolvedProvideMap.get(lookupKey)?.version).toBeUndefined();
+    });
 
     it('should exclude module if version matches exclude.version', () => {
       const key = 'react';
@@ -941,14 +999,24 @@ describe('ProvideSharedPlugin', () => {
         shareKey: 'react',
         shareScope: 'default',
         version: undefined, // Determine version
-        exclude: { version: '^16.0.0' }
+        exclude: { version: '^16.0.0' },
       };
-      const resourceResolveData = { descriptionFileData: { version: '16.8.0' }, descriptionFilePath: '...' };
+      const resourceResolveData = {
+        descriptionFileData: { version: '16.8.0' },
+        descriptionFilePath: '...',
+      };
 
       (satisfy as jest.Mock).mockReturnValue(true); // Version matches exclude range
 
       // @ts-ignore
-      plugin.provideSharedModule(mockCompilation, resolvedProvideMap, key, config, resource, resourceResolveData);
+      plugin.provideSharedModule(
+        mockCompilation,
+        resolvedProvideMap,
+        key,
+        config,
+        resource,
+        resourceResolveData,
+      );
 
       expect(satisfy).toHaveBeenCalledWith('16.8.0', '^16.0.0');
       expect(resolvedProvideMap.size).toBe(0); // Not added to map
@@ -962,14 +1030,24 @@ describe('ProvideSharedPlugin', () => {
         shareKey: 'react',
         shareScope: 'default',
         version: undefined,
-        exclude: { version: '^16.0.0' }
+        exclude: { version: '^16.0.0' },
       };
-      const resourceResolveData = { descriptionFileData: { version: '17.0.2' }, descriptionFilePath: '...' };
+      const resourceResolveData = {
+        descriptionFileData: { version: '17.0.2' },
+        descriptionFilePath: '...',
+      };
 
       (satisfy as jest.Mock).mockReturnValue(false); // Version does NOT match exclude range
 
       // @ts-ignore
-      plugin.provideSharedModule(mockCompilation, resolvedProvideMap, key, config, resource, resourceResolveData);
+      plugin.provideSharedModule(
+        mockCompilation,
+        resolvedProvideMap,
+        key,
+        config,
+        resource,
+        resourceResolveData,
+      );
 
       expect(satisfy).toHaveBeenCalledWith('17.0.2', '^16.0.0');
       const lookupKey = resource;
@@ -985,14 +1063,21 @@ describe('ProvideSharedPlugin', () => {
         shareKey: 'my-lib/internal',
         shareScope: 'default',
         version: '1.0.0', // Version provided directly
-        exclude: { request: /internal$/ }
+        exclude: { request: /internal$/ },
       };
-      const resourceResolveData = { };
+      const resourceResolveData = {};
 
       (satisfy as jest.Mock).mockReturnValue(false);
 
       // @ts-ignore
-      plugin.provideSharedModule(mockCompilation, resolvedProvideMap, key, config, resource, resourceResolveData);
+      plugin.provideSharedModule(
+        mockCompilation,
+        resolvedProvideMap,
+        key,
+        config,
+        resource,
+        resourceResolveData,
+      );
 
       // satisfy not called as version provided directly doesn't trigger version-based exclusion check path before request check
       expect(satisfy).not.toHaveBeenCalled();
@@ -1007,14 +1092,21 @@ describe('ProvideSharedPlugin', () => {
         shareKey: 'my-lib/public',
         shareScope: 'default',
         version: '1.0.0',
-        exclude: { request: /internal$/ }
+        exclude: { request: /internal$/ },
       };
-      const resourceResolveData = { };
+      const resourceResolveData = {};
 
       (satisfy as jest.Mock).mockReturnValue(false);
 
       // @ts-ignore
-      plugin.provideSharedModule(mockCompilation, resolvedProvideMap, key, config, resource, resourceResolveData);
+      plugin.provideSharedModule(
+        mockCompilation,
+        resolvedProvideMap,
+        key,
+        config,
+        resource,
+        resourceResolveData,
+      );
 
       expect(satisfy).not.toHaveBeenCalled();
       const lookupKey = resource;
@@ -1023,28 +1115,39 @@ describe('ProvideSharedPlugin', () => {
       expect(mockCompilation.warnings.push).not.toHaveBeenCalled();
     });
 
-     it('should handle config with layer correctly for lookupKey', () => {
-        const key = 'react';
-        const resource = '/path/to/react';
-        const config = { shareKey: 'react', shareScope: 'default', version: '17.0.1', layer: 'ssr' };
-        const resourceResolveData = {};
+    it('should handle config with layer correctly for lookupKey', () => {
+      const key = 'react';
+      const resource = '/path/to/react';
+      const config = {
+        shareKey: 'react',
+        shareScope: 'default',
+        version: '17.0.1',
+        layer: 'ssr',
+      };
+      const resourceResolveData = {};
 
-        (satisfy as jest.Mock).mockReturnValue(false);
+      (satisfy as jest.Mock).mockReturnValue(false);
 
-        // @ts-ignore
-        plugin.provideSharedModule(mockCompilation, resolvedProvideMap, key, config, resource, resourceResolveData);
+      // @ts-ignore
+      plugin.provideSharedModule(
+        mockCompilation,
+        resolvedProvideMap,
+        key,
+        config,
+        resource,
+        resourceResolveData,
+      );
 
-        // Use the actual createLookupKey function to verify the key used in the map
-        const lookupKey = `(${config.layer})${resource}`;
-        expect(resolvedProvideMap.has(lookupKey)).toBe(true);
-        const mapEntry = resolvedProvideMap.get(lookupKey);
-        expect(mapEntry).toEqual({
-            config: config,
-            version: '17.0.1',
-            resource: resource,
-        });
-        expect(mockCompilation.warnings.push).not.toHaveBeenCalled();
+      // Use the actual createLookupKey function to verify the key used in the map
+      const lookupKey = `(${config.layer})${resource}`;
+      expect(resolvedProvideMap.has(lookupKey)).toBe(true);
+      const mapEntry = resolvedProvideMap.get(lookupKey);
+      expect(mapEntry).toEqual({
+        config: config,
+        version: '17.0.1',
+        resource: resource,
       });
-
+      expect(mockCompilation.warnings.push).not.toHaveBeenCalled();
+    });
   });
 });

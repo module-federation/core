@@ -104,12 +104,10 @@ const ConsumeSharedPlugin =
   require('../../../src/lib/sharing/ConsumeSharedPlugin').default;
 
 // Import the MOCKED functions HERE
-const { resolveMatchedConfigs } = require(
-  '../../../src/lib/sharing/resolveMatchedConfigs',
-);
-const { getDescriptionFile } = require(
-  '../../../src/lib/sharing/utils',
-);
+const {
+  resolveMatchedConfigs,
+} = require('../../../src/lib/sharing/resolveMatchedConfigs');
+const { getDescriptionFile } = require('../../../src/lib/sharing/utils');
 
 describe('ConsumeSharedPlugin', () => {
   // --- Global beforeEach for default mocks ---
@@ -303,7 +301,6 @@ describe('ConsumeSharedPlugin', () => {
     });
   });
 
-
   describe('exclude functionality', () => {
     let testEnv;
 
@@ -340,28 +337,36 @@ describe('ConsumeSharedPlugin', () => {
           prefixed: new Map(),
         });
 
-        (getDescriptionFile as jest.Mock).mockImplementationOnce((fs, context, files, callback) => {
-          callback(null, { data: { name: 'react', version: '17.0.2' } }, ['package.json']);
-        });
+        (getDescriptionFile as jest.Mock).mockImplementationOnce(
+          (fs, context, files, callback) => {
+            callback(null, { data: { name: 'react', version: '17.0.2' } }, [
+              'package.json',
+            ]);
+          },
+        );
 
-        testEnv.mockResolver.resolve.mockImplementationOnce((ctx, context, request, resolveContext, callback) => {
-          callback(null, '/mock/fallback/react');
-        });
+        testEnv.mockResolver.resolve.mockImplementationOnce(
+          (ctx, context, request, resolveContext, callback) => {
+            callback(null, '/mock/fallback/react');
+          },
+        );
 
         // Explicitly mock satisfy for this test
         (satisfy as jest.Mock).mockImplementationOnce(() => true); // Should exclude
 
         // We don't need the factorize hook, but need resolver for createConsumeSharedModule internal call
-        testEnv.mockResolver.resolve.mockImplementationOnce((ctx, context, request, resolveContext, callback) => {
-          callback(null, '/mock/fallback/react');
-        });
+        testEnv.mockResolver.resolve.mockImplementationOnce(
+          (ctx, context, request, resolveContext, callback) => {
+            callback(null, '/mock/fallback/react');
+          },
+        );
 
         // Directly call createConsumeSharedModule
         const result = await plugin.createConsumeSharedModule(
           testEnv.mockCompilation,
           '/mock/context',
           'react',
-          plugin._consumes[0][1]
+          plugin._consumes[0][1],
         );
 
         expect(result).toBeUndefined(); // Module should be undefined since version matches exclude
@@ -377,9 +382,9 @@ describe('ConsumeSharedPlugin', () => {
           singleton: false,
           eager: false,
           exclude: {
-            version: '^16.0.0'
+            version: '^16.0.0',
           },
-          request: 'react'
+          request: 'react',
         };
         const plugin = new ConsumeSharedPlugin({
           consumes: { react: testConfig },
@@ -388,21 +393,29 @@ describe('ConsumeSharedPlugin', () => {
         testEnv.simulateCompilation();
 
         // Mock resolveMatchedConfigs to return our config
-        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(async () => ({
-          resolved: new Map(),
-          unresolved: new Map([['react', testConfig]]),
-          prefixed: new Map(),
-        }));
+        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(
+          async () => ({
+            resolved: new Map(),
+            unresolved: new Map([['react', testConfig]]),
+            prefixed: new Map(),
+          }),
+        );
 
         // Mock resolver to return a valid path
-        testEnv.mockResolver.resolve.mockImplementationOnce((ctx, context, request, resolveContext, callback) => {
-          callback(null, '/mock/fallback/react');
-        });
+        testEnv.mockResolver.resolve.mockImplementationOnce(
+          (ctx, context, request, resolveContext, callback) => {
+            callback(null, '/mock/fallback/react');
+          },
+        );
 
         // Mock getDescriptionFile to return a version that shouldn't match exclude
-        (getDescriptionFile as jest.Mock).mockImplementationOnce((fs, context, files, callback) => {
-          callback(null, { data: { name: 'react', version: '17.0.2' } }, ['package.json']);
-        });
+        (getDescriptionFile as jest.Mock).mockImplementationOnce(
+          (fs, context, files, callback) => {
+            callback(null, { data: { name: 'react', version: '17.0.2' } }, [
+              'package.json',
+            ]);
+          },
+        );
 
         // Mock satisfy to return false (version doesn't match exclude)
         (satisfy as jest.Mock).mockImplementationOnce(() => false);
@@ -412,14 +425,14 @@ describe('ConsumeSharedPlugin', () => {
           testEnv.mockCompilation,
           '/mock/context',
           'react',
-          testConfig
+          testConfig,
         );
 
         expect(result).toBeDefined();
         expect(satisfy).toHaveBeenCalledWith('17.0.2', '^16.0.0');
         expect(result).toHaveProperty('options', {
           ...testConfig,
-          importResolved: '/mock/fallback/react'
+          importResolved: '/mock/fallback/react',
         });
       });
 
@@ -434,9 +447,9 @@ describe('ConsumeSharedPlugin', () => {
           eager: false,
           exclude: {
             version: '^16.0.0',
-            fallbackVersion: '17.0.2'
+            fallbackVersion: '17.0.2',
           },
-          request: 'react'
+          request: 'react',
         };
         const plugin = new ConsumeSharedPlugin({
           consumes: { react: testConfig },
@@ -445,11 +458,13 @@ describe('ConsumeSharedPlugin', () => {
         testEnv.simulateCompilation();
 
         // Mock resolveMatchedConfigs to return our config
-        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(async () => ({
-          resolved: new Map(),
-          unresolved: new Map([['react', testConfig]]),
-          prefixed: new Map(),
-        }));
+        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(
+          async () => ({
+            resolved: new Map(),
+            unresolved: new Map([['react', testConfig]]),
+            prefixed: new Map(),
+          }),
+        );
 
         // Mock satisfy to return true for fallbackVersion matching exclude version
         (satisfy as jest.Mock).mockImplementationOnce(() => true);
@@ -459,7 +474,7 @@ describe('ConsumeSharedPlugin', () => {
           testEnv.mockCompilation,
           '/mock/context',
           'react',
-          testConfig
+          testConfig,
         );
 
         expect(result).toBeUndefined();
@@ -477,9 +492,9 @@ describe('ConsumeSharedPlugin', () => {
           eager: false,
           exclude: {
             version: '^16.0.0',
-            fallbackVersion: '17.0.2'
+            fallbackVersion: '17.0.2',
           },
-          request: 'react'
+          request: 'react',
         };
         const plugin = new ConsumeSharedPlugin({
           consumes: { react: testConfig },
@@ -488,16 +503,20 @@ describe('ConsumeSharedPlugin', () => {
         testEnv.simulateCompilation();
 
         // Mock resolveMatchedConfigs to return our config
-        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(async () => ({
-          resolved: new Map(),
-          unresolved: new Map([['react', testConfig]]),
-          prefixed: new Map(),
-        }));
+        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(
+          async () => ({
+            resolved: new Map(),
+            unresolved: new Map([['react', testConfig]]),
+            prefixed: new Map(),
+          }),
+        );
 
         // Mock resolver to return a valid path
-        testEnv.mockResolver.resolve.mockImplementationOnce((ctx, context, request, resolveContext, callback) => {
-          callback(null, '/mock/fallback/react');
-        });
+        testEnv.mockResolver.resolve.mockImplementationOnce(
+          (ctx, context, request, resolveContext, callback) => {
+            callback(null, '/mock/fallback/react');
+          },
+        );
 
         // Mock satisfy to return false (fallbackVersion doesn't match exclude version)
         (satisfy as jest.Mock).mockImplementationOnce(() => false);
@@ -507,14 +526,14 @@ describe('ConsumeSharedPlugin', () => {
           testEnv.mockCompilation,
           '/mock/context',
           'react',
-          testConfig
+          testConfig,
         );
 
         expect(result).toBeDefined();
         expect(satisfy).toHaveBeenCalledWith('17.0.2', '^16.0.0');
         expect(result).toHaveProperty('options', {
           ...testConfig,
-          importResolved: '/mock/fallback/react'
+          importResolved: '/mock/fallback/react',
         });
       });
     });
@@ -526,20 +545,20 @@ describe('ConsumeSharedPlugin', () => {
 
       it('should exclude module when request matches exclude.request pattern', async () => {
         const testConfig = {
-          import: './base-path',  // No trailing slash
+          import: './base-path', // No trailing slash
           shareScope: 'test-scope',
-          shareKey: '@scope/prefix',  // No trailing slash
+          shareKey: '@scope/prefix', // No trailing slash
           requiredVersion: '^1.0.0',
           strictVersion: true,
           singleton: false,
           eager: false,
           exclude: {
-            request: /excluded-path$/  // Match remainder without leading slash
+            request: /excluded-path$/, // Match remainder without leading slash
           },
-          request: '@scope/prefix/'  // Add trailing slash only to request
+          request: '@scope/prefix/', // Add trailing slash only to request
         };
         const plugin = new ConsumeSharedPlugin({
-          consumes: { '@scope/prefix/': testConfig },  // Add trailing slash to prefix key
+          consumes: { '@scope/prefix/': testConfig }, // Add trailing slash to prefix key
         });
 
         // Apply the plugin and simulate compilation
@@ -547,23 +566,27 @@ describe('ConsumeSharedPlugin', () => {
         testEnv.simulateCompilation();
 
         // Mock resolveMatchedConfigs to return our config in prefixed map
-        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(async () => ({
-          resolved: new Map(),
-          unresolved: new Map(),
-          prefixed: new Map([['@scope/prefix/', testConfig]]),  // Add trailing slash to prefix key
-        }));
+        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(
+          async () => ({
+            resolved: new Map(),
+            unresolved: new Map(),
+            prefixed: new Map([['@scope/prefix/', testConfig]]), // Add trailing slash to prefix key
+          }),
+        );
 
         // Mock resolver to return a path that should match our exclude pattern
-        testEnv.mockResolver.resolve.mockImplementationOnce((ctx, context, request, resolveContext, callback) => {
-          callback(null, '/mock/base-path/excluded-path');
-        });
+        testEnv.mockResolver.resolve.mockImplementationOnce(
+          (ctx, context, request, resolveContext, callback) => {
+            callback(null, '/mock/base-path/excluded-path');
+          },
+        );
 
         // Call the factorize hook through the normalModuleFactory
         const result = await testEnv.normalModuleFactory.factorize({
           context: '/mock/context',
-          request: '@scope/prefix/excluded-path',  // Full request path
+          request: '@scope/prefix/excluded-path', // Full request path
           dependencies: [{}],
-          contextInfo: {}
+          contextInfo: {},
         });
 
         expect(result).toBeUndefined();
@@ -581,7 +604,7 @@ describe('ConsumeSharedPlugin', () => {
           exclude: {
             request: /^@scoped\//, // Example pattern that won't match 'react'
           },
-          request: 'react'
+          request: 'react',
         };
         const plugin = new ConsumeSharedPlugin({
           consumes: { react: testConfig },
@@ -590,34 +613,42 @@ describe('ConsumeSharedPlugin', () => {
         testEnv.simulateCompilation();
 
         // Mock resolveMatchedConfigs to return our config
-        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(async () => ({
-          resolved: new Map(),
-          unresolved: new Map([['react', testConfig]]),
-          prefixed: new Map(),
-        }));
+        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(
+          async () => ({
+            resolved: new Map(),
+            unresolved: new Map([['react', testConfig]]),
+            prefixed: new Map(),
+          }),
+        );
 
         // Mock resolver to return a valid path
-        testEnv.mockResolver.resolve.mockImplementationOnce((ctx, context, request, resolveContext, callback) => {
-          callback(null, '/mock/fallback/react');
-        });
+        testEnv.mockResolver.resolve.mockImplementationOnce(
+          (ctx, context, request, resolveContext, callback) => {
+            callback(null, '/mock/fallback/react');
+          },
+        );
 
         // Mock getDescriptionFile to return a version
-        (getDescriptionFile as jest.Mock).mockImplementationOnce((fs, context, files, callback) => {
-          callback(null, { data: { name: 'react', version: '17.0.2' } }, ['package.json']);
-        });
+        (getDescriptionFile as jest.Mock).mockImplementationOnce(
+          (fs, context, files, callback) => {
+            callback(null, { data: { name: 'react', version: '17.0.2' } }, [
+              'package.json',
+            ]);
+          },
+        );
 
         // Directly call createConsumeSharedModule
         const result = await plugin.createConsumeSharedModule(
           testEnv.mockCompilation,
           '/mock/context',
           'react',
-          testConfig
+          testConfig,
         );
 
         expect(result).toBeDefined();
         expect(result).toHaveProperty('options', {
           ...testConfig,
-          importResolved: '/mock/fallback/react'
+          importResolved: '/mock/fallback/react',
         });
       });
     });
