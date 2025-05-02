@@ -118,9 +118,9 @@ export default {
             },
           ],
         },
-        filter: {
+        exclude: {
           description: 'Filter for the shared module.',
-          $ref: '#/definitions/Filter',
+          $ref: '#/definitions/Exclude',
         },
       },
     },
@@ -147,7 +147,7 @@ export default {
         ],
       },
     },
-    Filter: {
+    Exclude: {
       description: 'Advanced filtering options.',
       type: 'object',
       additionalProperties: false,
@@ -155,6 +155,10 @@ export default {
         request: {
           description: 'Regular expression to filter requests.',
           instanceof: 'RegExp',
+        },
+        version: {
+          description: 'Specific version string to filter by.',
+          type: 'string',
         },
       },
     },
