@@ -121,9 +121,9 @@ export default {
             'Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).',
           type: 'boolean',
         },
-        filter: {
+        exclude: {
           description: 'Filter consumed modules based on the request path.',
-          $ref: '#/definitions/Filter',
+          $ref: '#/definitions/Exclude',
         },
       },
     },
@@ -148,7 +148,7 @@ export default {
         ],
       },
     },
-    Filter: {
+    Exclude: {
       description: 'Advanced filtering options.',
       type: 'object',
       additionalProperties: false,

@@ -45,7 +45,7 @@ export type ConsumeOptions = {
   /**
    * Filter object for consuming shared modules.
    */
-  filter?: {
+  exclude?: {
     /**
      * RegExp to filter requests for prefix consumes.
      * Applied to the part of the request after the prefix.

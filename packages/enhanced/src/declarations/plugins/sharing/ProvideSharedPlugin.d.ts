@@ -75,7 +75,7 @@ export interface ProvidesConfig {
   /**
    * Filter for the shared module.
    */
-  filter?: {
+  exclude?: {
     request?: RegExp;
     version?: string;
     fallbackVersion?: string;

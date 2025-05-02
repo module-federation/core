@@ -11,7 +11,7 @@ const r = {
     additionalProperties: !1,
     properties: {
       eager: { type: 'boolean' },
-      filter: { $ref: '#/definitions/Filter' },
+      exclude: { $ref: '#/definitions/Exclude' },
       import: { anyOf: [{ enum: [!1] }, { $ref: '#/definitions/SharedItem' }] },
       packageName: { type: 'string', minLength: 1 },
       requiredVersion: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
@@ -58,8 +58,8 @@ function t(
           var f = r === p;
         } else f = !0;
         if (f) {
-          if (void 0 !== s.filter) {
-            let r = s.filter;
+          if (void 0 !== s.exclude) {
+            let r = s.exclude;
             const e = p;
             if (p == p) {
               if (!r || 'object' != typeof r || Array.isArray(r))

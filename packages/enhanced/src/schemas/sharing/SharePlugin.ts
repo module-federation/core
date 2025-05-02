@@ -41,10 +41,10 @@ export default {
             'Include the provided and fallback module directly instead behind an async request. This allows to use this shared module in initial load too. All possible shared modules need to be eager too.',
           type: 'boolean',
         },
-        filter: {
+        exclude: {
           description:
             'Filter configuration using regular expression to control which modules should be shared.',
-          $ref: '#/definitions/Filter',
+          $ref: '#/definitions/Exclude',
         },
         import: {
           description:
@@ -164,7 +164,7 @@ export default {
         ],
       },
     },
-    Filter: {
+    Exclude: {
       description: 'Advanced filtering options.',
       type: 'object',
       additionalProperties: false,

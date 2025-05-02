@@ -236,7 +236,7 @@ const t = {
         additionalProperties: !1,
         properties: {
           eager: { type: 'boolean' },
-          filter: { $ref: '#/definitions/Filter' },
+          exclude: { $ref: '#/definitions/Exclude' },
           import: {
             anyOf: [{ enum: [!1] }, { $ref: '#/definitions/SharedItem' }],
           },
@@ -268,7 +268,7 @@ const t = {
         },
       },
       UmdNamedDefine: { type: 'boolean' },
-      Filter: {
+      Exclude: {
         type: 'object',
         additionalProperties: !1,
         properties: {
@@ -1448,7 +1448,7 @@ const h = {
   additionalProperties: !1,
   properties: {
     eager: { type: 'boolean' },
-    filter: { $ref: '#/definitions/Filter' },
+    exclude: { $ref: '#/definitions/Exclude' },
     import: { anyOf: [{ enum: [!1] }, { $ref: '#/definitions/SharedItem' }] },
     request: { type: 'string', minLength: 1 },
     layer: { type: 'string', minLength: 1 },
@@ -1494,8 +1494,8 @@ function b(
           var l = t === i;
         } else l = !0;
         if (l) {
-          if (void 0 !== e.filter) {
-            let t = e.filter;
+          if (void 0 !== e.exclude) {
+            let t = e.exclude;
             const r = i;
             if (i == i) {
               if (!t || 'object' != typeof t || Array.isArray(t))
@@ -3206,8 +3206,8 @@ function j(
                                             null === y ? (y = [e]) : y.push(e),
                                               u++;
                                           }
-                                          var $ = s === u;
-                                          if (((n = n || $), !n)) {
+                                          var E = s === u;
+                                          if (((n = n || E), !n)) {
                                             const t = u;
                                             if (u === t)
                                               if (
@@ -3252,9 +3252,9 @@ function j(
                                                         : y.push(e),
                                                         u++;
                                                     }
-                                                    var C = t === u;
-                                                  } else C = !0;
-                                                  if (C) {
+                                                    var $ = t === u;
+                                                  } else $ = !0;
+                                                  if ($) {
                                                     if (
                                                       void 0 !==
                                                       e.disableAssetsAnalyze
@@ -3274,9 +3274,9 @@ function j(
                                                           : y.push(e),
                                                           u++;
                                                       }
-                                                      C = t === u;
-                                                    } else C = !0;
-                                                    if (C) {
+                                                      $ = t === u;
+                                                    } else $ = !0;
+                                                    if ($) {
                                                       if (
                                                         void 0 !== e.fileName
                                                       ) {
@@ -3295,9 +3295,9 @@ function j(
                                                             : y.push(e),
                                                             u++;
                                                         }
-                                                        C = t === u;
-                                                      } else C = !0;
-                                                      if (C)
+                                                        $ = t === u;
+                                                      } else $ = !0;
+                                                      if ($)
                                                         if (
                                                           void 0 !==
                                                           e.additionalData
@@ -3317,8 +3317,8 @@ function j(
                                                               : y.push(e),
                                                               u++;
                                                           }
-                                                          C = t === u;
-                                                        } else C = !0;
+                                                          $ = t === u;
+                                                        } else $ = !0;
                                                     }
                                                   }
                                                 }
@@ -3331,7 +3331,7 @@ function j(
                                                   : y.push(e),
                                                   u++;
                                               }
-                                            ($ = t === u), (n = n || $);
+                                            (E = t === u), (n = n || E);
                                           }
                                           if (!n) {
                                             const e = { params: {} };

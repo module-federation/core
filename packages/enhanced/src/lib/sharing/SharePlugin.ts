@@ -67,7 +67,7 @@ class SharePlugin {
           issuerLayer: options.issuerLayer,
           layer: options.layer,
           request: options.request || key,
-          filter: options.filter,
+          exclude: options.exclude,
         },
       }),
     );
@@ -84,7 +84,7 @@ class SharePlugin {
           singleton: options.singleton,
           layer: options.layer,
           request: options.request || options.import || key,
-          filter: options.filter,
+          exclude: options.exclude,
         },
       }));
 

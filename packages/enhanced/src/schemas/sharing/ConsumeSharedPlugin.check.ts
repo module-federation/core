@@ -28,7 +28,7 @@ const r = {
       request: { type: 'string', minLength: 1 },
       singleton: { type: 'boolean' },
       strictVersion: { type: 'boolean' },
-      filter: { $ref: '#/definitions/Filter' },
+      exclude: { $ref: '#/definitions/Exclude' },
     },
   },
   e = Object.prototype.hasOwnProperty;
@@ -275,8 +275,8 @@ function t(
                               f = r === p;
                             } else f = !0;
                             if (f)
-                              if (void 0 !== s.filter) {
-                                let r = s.filter;
+                              if (void 0 !== s.exclude) {
+                                let r = s.exclude;
                                 const e = p;
                                 if (p == p) {
                                   if (
