@@ -32,6 +32,8 @@ import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
 import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFactory';
 import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 import { createSchemaValidation } from '../../utils';
+import path from 'path';
+import { satisfy } from '@module-federation/runtime-tools/runtime-core';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -47,7 +49,7 @@ const WebpackError = require(
 ) as typeof import('webpack/lib/WebpackError');
 
 const validate = createSchemaValidation(
-  //eslint-disable-next-line
+  // eslint-disable-next-line
   require('../../schemas/sharing/ConsumeSharedPlugin.check.js').validate,
   () => require('../../schemas/sharing/ConsumeSharedPlugin').default,
   {
@@ -136,13 +138,205 @@ class ConsumeSharedPlugin {
           packageName: item.packageName,
           singleton: !!item.singleton,
           eager: !!item.eager,
-          filter: item.filter,
+          exclude: item.exclude,
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
         } as ConsumeOptions;
       },
     );
+  }
+
+  createConsumeSharedModule(
+    compilation: Compilation,
+    context: string,
+    request: string,
+    config: ConsumeOptions,
+  ): Promise<ConsumeSharedModule> {
+    const requiredVersionWarning = (details: string) => {
+      const error = new WebpackError(
+        `No required version specified and unable to automatically determine one. ${details}`,
+      );
+      error.file = `shared module ${request}`;
+      compilation.warnings.push(error);
+    };
+    const directFallback =
+      config.import && /^(\.\.?(\/|$)|\/|[A-Za-z]:|\\\\)/.test(config.import);
+
+    const resolver: ResolverWithOptions = compilation.resolverFactory.get(
+      'normal',
+      RESOLVE_OPTIONS as ResolveOptionsWithDependencyType,
+    );
+
+    return Promise.all([
+      new Promise<string | undefined>((resolve) => {
+        if (!config.import) return resolve(undefined);
+        const resolveContext = {
+          fileDependencies: new LazySet<string>(),
+          contextDependencies: new LazySet<string>(),
+          missingDependencies: new LazySet<string>(),
+        };
+        resolver.resolve(
+          {},
+          directFallback ? compilation.compiler.context : context,
+          config.import,
+          resolveContext,
+          (err, result) => {
+            compilation.contextDependencies.addAll(
+              resolveContext.contextDependencies,
+            );
+            compilation.fileDependencies.addAll(
+              resolveContext.fileDependencies,
+            );
+            compilation.missingDependencies.addAll(
+              resolveContext.missingDependencies,
+            );
+            if (err) {
+              compilation.errors.push(
+                new ModuleNotFoundError(null, err, {
+                  name: `resolving fallback for shared module ${request}`,
+                }),
+              );
+              return resolve(undefined);
+            }
+            //@ts-ignore
+            resolve(result);
+          },
+        );
+      }),
+      new Promise<false | undefined | SemVerRange>((resolve) => {
+        if (config.requiredVersion !== undefined) {
+          return resolve(config.requiredVersion);
+        }
+        let packageName = config.packageName;
+        if (packageName === undefined) {
+          if (/^(\/|[A-Za-z]:|\\\\)/.test(request)) {
+            // For relative or absolute requests we don't automatically use a packageName.
+            // If wished one can specify one with the packageName option.
+            return resolve(undefined);
+          }
+          const match = /^((?:@[^\\/]+[\\/])?[^\\/]+)/.exec(request);
+          if (!match) {
+            requiredVersionWarning(
+              'Unable to extract the package name from request.',
+            );
+            return resolve(undefined);
+          }
+          packageName = match[0];
+        }
+
+        getDescriptionFile(
+          compilation.inputFileSystem,
+          context,
+          ['package.json'],
+          (err, result, checkedDescriptionFilePaths) => {
+            if (err) {
+              requiredVersionWarning(`Unable to read description file: ${err}`);
+              return resolve(undefined);
+            }
+            const { data } = /** @type {DescriptionFile} */ result || {};
+            if (!data) {
+              if (checkedDescriptionFilePaths?.length) {
+                requiredVersionWarning(
+                  [
+                    `Unable to find required version for "${packageName}" in description file/s`,
+                    checkedDescriptionFilePaths.join('\n'),
+                    'It need to be in dependencies, devDependencies or peerDependencies.',
+                  ].join('\n'),
+                );
+              } else {
+                requiredVersionWarning(
+                  `Unable to find description file in ${context}.`,
+                );
+              }
+
+              return resolve(undefined);
+            }
+            if (data['name'] === packageName) {
+              // Package self-referencing
+              return resolve(undefined);
+            }
+            const requiredVersion = getRequiredVersionFromDescriptionFile(
+              data,
+              packageName,
+            );
+            //TODO: align with webpck semver parser again
+            // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+            resolve(requiredVersion);
+          },
+          (result) => {
+            if (!result) return false;
+            const { data } = result;
+            const maybeRequiredVersion = getRequiredVersionFromDescriptionFile(
+              data,
+              packageName,
+            );
+            return (
+              data['name'] === packageName ||
+              typeof maybeRequiredVersion === 'string'
+            );
+          },
+        );
+      }),
+    ]).then(([importResolved, requiredVersion]) => {
+      const currentConfig = {
+        ...config,
+        importResolved,
+        import: importResolved ? config.import : undefined,
+        requiredVersion,
+      };
+      const consumedModule = new ConsumeSharedModule(
+        directFallback ? compilation.compiler.context : context,
+        currentConfig,
+      );
+
+      if (config.exclude && typeof config.exclude.version === 'string') {
+        if (!importResolved) {
+          return consumedModule;
+        }
+
+        if (
+          config.exclude &&
+          typeof config.exclude.fallbackVersion === 'string' &&
+          config.exclude.fallbackVersion
+        ) {
+          if (satisfy(config.exclude.fallbackVersion, config.exclude.version)) {
+            return undefined as unknown as ConsumeSharedModule;
+          }
+          return consumedModule;
+        }
+
+        return new Promise((resolveFilter) => {
+          getDescriptionFile(
+            compilation.inputFileSystem,
+            path.dirname(importResolved as string),
+            ['package.json'],
+            (err, result) => {
+              if (err) {
+                return resolveFilter(consumedModule);
+              }
+              const { data } = result || {};
+              if (!data || !data['version'] || data['name'] !== request) {
+                return resolveFilter(consumedModule);
+              }
+
+              if (
+                config.exclude &&
+                typeof config.exclude.version === 'string' &&
+                satisfy(data['version'], config.exclude.version)
+              ) {
+                return resolveFilter(
+                  undefined as unknown as ConsumeSharedModule,
+                );
+              }
+              return resolveFilter(consumedModule);
+            },
+          );
+        });
+      }
+
+      return consumedModule;
+    });
   }
 
   apply(compiler: Compiler): void {
@@ -168,154 +362,16 @@ class ConsumeSharedPlugin {
             prefixedConsumes = prefixed;
           },
         );
-        const resolver: ResolverWithOptions = compilation.resolverFactory.get(
-          'normal',
-          RESOLVE_OPTIONS as ResolveOptionsWithDependencyType,
-        );
-
-        const createConsumeSharedModule = (
-          context: string,
-          request: string,
-          config: ConsumeOptions,
-        ): Promise<ConsumeSharedModule> => {
-          const requiredVersionWarning = (details: string) => {
-            const error = new WebpackError(
-              `No required version specified and unable to automatically determine one. ${details}`,
-            );
-            error.file = `shared module ${request}`;
-            compilation.warnings.push(error);
-          };
-          const directFallback =
-            config.import &&
-            /^(\.\.?(\/|$)|\/|[A-Za-z]:|\\\\)/.test(config.import);
-          return Promise.all([
-            new Promise<string | undefined>((resolve) => {
-              if (!config.import) return resolve(undefined);
-              const resolveContext = {
-                fileDependencies: new LazySet<string>(),
-                contextDependencies: new LazySet<string>(),
-                missingDependencies: new LazySet<string>(),
-              };
-              resolver.resolve(
-                {},
-                directFallback ? compiler.context : context,
-                config.import,
-                resolveContext,
-                (err, result) => {
-                  compilation.contextDependencies.addAll(
-                    resolveContext.contextDependencies,
-                  );
-                  compilation.fileDependencies.addAll(
-                    resolveContext.fileDependencies,
-                  );
-                  compilation.missingDependencies.addAll(
-                    resolveContext.missingDependencies,
-                  );
-                  if (err) {
-                    compilation.errors.push(
-                      new ModuleNotFoundError(null, err, {
-                        name: `resolving fallback for shared module ${request}`,
-                      }),
-                    );
-                    return resolve(undefined);
-                  }
-                  //@ts-ignore
-                  resolve(result);
-                },
-              );
-            }),
-            new Promise<false | undefined | SemVerRange>((resolve) => {
-              if (config.requiredVersion !== undefined) {
-                return resolve(config.requiredVersion);
-              }
-              let packageName = config.packageName;
-              if (packageName === undefined) {
-                if (/^(\/|[A-Za-z]:|\\\\)/.test(request)) {
-                  // For relative or absolute requests we don't automatically use a packageName.
-                  // If wished one can specify one with the packageName option.
-                  return resolve(undefined);
-                }
-                const match = /^((?:@[^\\/]+[\\/])?[^\\/]+)/.exec(request);
-                if (!match) {
-                  requiredVersionWarning(
-                    'Unable to extract the package name from request.',
-                  );
-                  return resolve(undefined);
-                }
-                packageName = match[0];
-              }
-
-              getDescriptionFile(
-                compilation.inputFileSystem,
-                context,
-                ['package.json'],
-                (err, result, checkedDescriptionFilePaths) => {
-                  if (err) {
-                    requiredVersionWarning(
-                      `Unable to read description file: ${err}`,
-                    );
-                    return resolve(undefined);
-                  }
-                  const { data } = /** @type {DescriptionFile} */ result || {};
-                  if (!data) {
-                    if (checkedDescriptionFilePaths?.length) {
-                      requiredVersionWarning(
-                        [
-                          `Unable to find required version for "${packageName}" in description file/s`,
-                          checkedDescriptionFilePaths.join('\n'),
-                          'It need to be in dependencies, devDependencies or peerDependencies.',
-                        ].join('\n'),
-                      );
-                    } else {
-                      requiredVersionWarning(
-                        `Unable to find description file in ${context}.`,
-                      );
-                    }
-
-                    return resolve(undefined);
-                  }
-                  if (data['name'] === packageName) {
-                    // Package self-referencing
-                    return resolve(undefined);
-                  }
-                  const requiredVersion = getRequiredVersionFromDescriptionFile(
-                    data,
-                    packageName,
-                  );
-                  //TODO: align with webpck semver parser again
-                  // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
-                  resolve(requiredVersion);
-                },
-                (result) => {
-                  if (!result) return false;
-                  const { data } = result;
-                  const maybeRequiredVersion =
-                    getRequiredVersionFromDescriptionFile(data, packageName);
-                  return (
-                    data['name'] === packageName ||
-                    typeof maybeRequiredVersion === 'string'
-                  );
-                },
-              );
-            }),
-          ]).then(([importResolved, requiredVersion]) => {
-            return new ConsumeSharedModule(
-              directFallback ? compiler.context : context,
-              {
-                ...config,
-                importResolved,
-                import: importResolved ? config.import : undefined,
-                requiredVersion,
-              },
-            );
-          });
-        };
 
         normalModuleFactory.hooks.factorize.tapPromise(
           PLUGIN_NAME,
           async (resolveData: ResolveData): Promise<Module | undefined> => {
             const { context, request, dependencies, contextInfo } = resolveData;
             // wait for resolving to be complete
+            // BIND `this` for createConsumeSharedModule call
+            const boundCreateConsumeSharedModule =
+              this.createConsumeSharedModule.bind(this);
+
             return promise.then(() => {
               if (
                 dependencies[0] instanceof ConsumeSharedFallbackDependency ||
@@ -328,28 +384,40 @@ class ConsumeSharedPlugin {
               );
 
               if (match !== undefined) {
-                return createConsumeSharedModule(context, request, match);
+                // Use the bound function
+                return boundCreateConsumeSharedModule(
+                  compilation,
+                  context,
+                  request,
+                  match,
+                );
               }
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
                   if (
-                    options.filter &&
-                    options.filter.request &&
+                    options.exclude &&
+                    options.exclude.request &&
                     // Skip if the remainder DOES match the filter
-                    options.filter.request.test(remainder)
+                    options.exclude.request.test(remainder)
                   ) {
                     continue;
                   }
-                  return createConsumeSharedModule(context, request, {
-                    ...options,
-                    import: options.import
-                      ? options.import + remainder
-                      : undefined,
-                    shareKey: options.shareKey + remainder,
-                    layer: options.layer || contextInfo.issuerLayer,
-                  });
+                  // Use the bound function
+                  return boundCreateConsumeSharedModule(
+                    compilation,
+                    context,
+                    request,
+                    {
+                      ...options,
+                      import: options.import
+                        ? options.import + remainder
+                        : undefined,
+                      shareKey: options.shareKey + remainder,
+                      layer: options.layer || contextInfo.issuerLayer,
+                    },
+                  );
                 }
               }
               return;
@@ -359,6 +427,9 @@ class ConsumeSharedPlugin {
         normalModuleFactory.hooks.createModule.tapPromise(
           PLUGIN_NAME,
           ({ resource }, { context, dependencies }) => {
+            // BIND `this` for createConsumeSharedModule call
+            const boundCreateConsumeSharedModule =
+              this.createConsumeSharedModule.bind(this);
             if (
               dependencies[0] instanceof ConsumeSharedFallbackDependency ||
               dependencies[0] instanceof ProvideForSharedDependency
@@ -368,7 +439,13 @@ class ConsumeSharedPlugin {
             if (resource) {
               const options = resolvedConsumes.get(resource);
               if (options !== undefined) {
-                return createConsumeSharedModule(context, resource, options);
+                // Use the bound function
+                return boundCreateConsumeSharedModule(
+                  compilation,
+                  context,
+                  resource,
+                  options,
+                );
               }
             }
             return Promise.resolve();

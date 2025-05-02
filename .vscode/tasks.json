@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "pnpm-build-enhanced",
+      "type": "shell",
+      // Use nx to build only the 'enhanced' package dependencies if possible
+      // Adjust 'enhanced' if the nx project name is different
+      // --- Updated Command to include NVM ---
+      // This assumes NVM is installed in the default location ($HOME/.nvm)
+      // and uses the latest installed Node v18. Adjust if needed.
+      "command": "source $HOME/.nvm/nvm.sh && nvm use 18 && pnpm nx build enhanced",
+      // args are no longer needed as the full command is specified above
+      // "args": ["nx", "build", "enhanced"],
+      "problemMatcher": [],
+      "options": {
+        // Ensure the shell runs commands correctly
+        "shell": {
+          "executable": "/bin/zsh", // Or your preferred shell like /bin/bash
+          "args": ["-l", "-c"] // Use login shell args to potentially source NVM automatically, then execute command
+        }
+      },
+      "presentation": {
+        "reveal": "silent", // Don't show the terminal panel unless there's an error
+        "panel": "dedicated",
+        "clear": true
+      },
+      "detail": "Sources NVM, uses Node v18, then builds the 'enhanced' package using nx."
+    }
+  ]
+}

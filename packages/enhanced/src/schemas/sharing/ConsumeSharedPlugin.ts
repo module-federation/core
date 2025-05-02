@@ -121,9 +121,9 @@ export default {
             'Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).',
           type: 'boolean',
         },
-        filter: {
+        exclude: {
           description: 'Filter consumed modules based on the request path.',
-          $ref: '#/definitions/Filter',
+          $ref: '#/definitions/Exclude',
         },
       },
     },
@@ -148,7 +148,7 @@ export default {
         ],
       },
     },
-    Filter: {
+    Exclude: {
       description: 'Advanced filtering options.',
       type: 'object',
       additionalProperties: false,
@@ -157,6 +157,16 @@ export default {
           description:
             'A RegExp object to test against the request path suffix (after the prefix).',
           instanceof: 'RegExp',
+        },
+        version: {
+          description:
+            'Specific version string or range to filter by (exclude matches).',
+          type: 'string',
+        },
+        fallbackVersion: {
+          description:
+            'Optional specific version string to check against the filter.version range instead of reading package.json.',
+          type: 'string',
         },
       },
     },
