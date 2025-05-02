@@ -67,7 +67,7 @@ packages/enhanced/test/js
 **/dist-test/**
 **/cypress/downloads
 /packages/data-prefetch/jest/cache/
-
+/packages/enhanced/test/unit
 # storybook cases
 !apps/rslib-module/@mf-types/**
 
