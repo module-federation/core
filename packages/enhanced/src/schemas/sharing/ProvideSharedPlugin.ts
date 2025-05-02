@@ -118,6 +118,10 @@ export default {
             },
           ],
         },
+        filter: {
+          description: 'Filter for the shared module.',
+          $ref: '#/definitions/Filter',
+        },
       },
     },
     ProvidesItem: {
@@ -141,6 +145,17 @@ export default {
             $ref: '#/definitions/ProvidesItem',
           },
         ],
+      },
+    },
+    Filter: {
+      description: 'Advanced filtering options.',
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        request: {
+          description: 'Regular expression to filter requests.',
+          instanceof: 'RegExp',
+        },
       },
     },
   },

@@ -93,6 +93,7 @@ class ProvideSharedPlugin {
           singleton: false,
           layer: undefined,
           request: item,
+          filter: undefined,
         };
         return result;
       },
@@ -108,6 +109,7 @@ class ProvideSharedPlugin {
           singleton: !!item.singleton,
           layer: item.layer,
           request,
+          filter: item.filter,
         };
       },
     );
@@ -231,6 +233,13 @@ class ProvideSharedPlugin {
               const lookup = config.request || prefix;
               if (request.startsWith(lookup) && resource) {
                 const remainder = request.slice(lookup.length);
+                if (
+                  config.filter &&
+                  config.filter.request &&
+                  config.filter.request.test(remainder)
+                ) {
+                  continue;
+                }
                 provideSharedModule(
                   resource,
                   {

@@ -5,12 +5,14 @@ module.exports = {
   devtool: false,
   plugins: [
     new SharePlugin({
+      shareScope: 'test-scope',
       shared: {
-        react: {
-          requiredVersion: false,
-          singleton: true,
-          strictVersion: false,
-          version: '0.1.2',
+        package: {},
+        '@scoped/package': {},
+        'prefix/': {
+          filter: {
+            request: /deep/,
+          },
         },
       },
     }),

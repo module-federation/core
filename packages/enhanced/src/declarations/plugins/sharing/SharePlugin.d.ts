@@ -87,4 +87,10 @@ export interface SharedConfig {
    * The actual request to use for importing the module. Defaults to the property name.
    */
   request?: string;
+  /**
+   * Filter for the shared module.
+   */
+  filter?: {
+    request?: RegExp;
+  };
 }

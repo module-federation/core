@@ -28,6 +28,7 @@ const r = {
       request: { type: 'string', minLength: 1 },
       singleton: { type: 'boolean' },
       strictVersion: { type: 'boolean' },
+      filter: { $ref: '#/definitions/Filter' },
     },
   },
   e = Object.prototype.hasOwnProperty;
@@ -261,7 +262,7 @@ function t(
                               );
                             f = r === p;
                           } else f = !0;
-                          if (f)
+                          if (f) {
                             if (void 0 !== n.strictVersion) {
                               const r = p;
                               if ('boolean' != typeof n.strictVersion)
@@ -273,6 +274,45 @@ function t(
                                 );
                               f = r === p;
                             } else f = !0;
+                            if (f)
+                              if (void 0 !== n.filter) {
+                                let r = n.filter;
+                                const e = p;
+                                if (p == p) {
+                                  if (
+                                    !r ||
+                                    'object' != typeof r ||
+                                    Array.isArray(r)
+                                  )
+                                    return (
+                                      (t.errors = [
+                                        { params: { type: 'object' } },
+                                      ]),
+                                      !1
+                                    );
+                                  {
+                                    const e = p;
+                                    for (const e in r)
+                                      if ('request' !== e)
+                                        return (
+                                          (t.errors = [
+                                            {
+                                              params: { additionalProperty: e },
+                                            },
+                                          ]),
+                                          !1
+                                        );
+                                    if (
+                                      e === p &&
+                                      void 0 !== r.request &&
+                                      !(r.request instanceof RegExp)
+                                    )
+                                      return (t.errors = [{ params: {} }]), !1;
+                                  }
+                                }
+                                f = e === p;
+                              } else f = !0;
+                          }
                         }
                       }
                     }
