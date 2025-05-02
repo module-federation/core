@@ -1,0 +1,25 @@
+# 开启调试模式
+
+为了便于排查问题，Module Federation 提供了调试模式，你可以在执行构建时添加 FEDERATION_DEBUG=true 环境变量或者在浏览器执行 `localStorage.setItem('FEDERATION_DEBUG','true')` 来开启 Module Federation 的调试模式。
+
+构建添加环境变量：
+
+```bash
+# 调试开发模式
+FEDERATION_DEBUG=true pnpm dev
+
+# 调试生产模式
+FEDERATION_DEBUG=true pnpm build
+```
+
+运行时添加环境变量：
+
+```
+localStorage.setItem('FEDERATION_DEBUG','true')
+```
+
+## 日志信息
+
+开启调试模式后，你可以在控制台看到如下信息：
+
+在调试模式下，你会看到 terminal 中输出了一些以 `[ Module Federation ]` 开头的日志。

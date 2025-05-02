@@ -110,7 +110,7 @@ const patchDTSConfig = (
   if (isServer) {
     return;
   }
-  const ModernJSRuntime = '@modern-js/runtime/mf';
+  const ModernJSRuntime = '@module-federation/modern-js/runtime';
   if (mfConfig.dts !== false) {
     if (typeof mfConfig.dts === 'boolean' || mfConfig.dts === undefined) {
       mfConfig.dts = {
@@ -459,6 +459,7 @@ export const moduleFederationConfigPlugin = (
         },
         source: {
           alias: {
+            // TODO: deprecated
             '@modern-js/runtime/mf': require.resolve(
               '@module-federation/modern-js/runtime',
             ),

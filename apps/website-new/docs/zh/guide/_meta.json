@@ -16,6 +16,11 @@
   },
   {
     "type":"dir",
+    "name":"debug",
+    "label":"调试"
+  },
+  {
+    "type":"dir",
     "name":"troubleshooting",
     "label":"Troubleshooting"
   }

@@ -17,6 +17,7 @@ export default defineComponent({
     moduleName: String,
     basename: String,
     memoryRoute: Object,
+    hashRoute: Boolean,
     providerInfo: Function,
     rootAttrs: Object,
   },
@@ -39,6 +40,7 @@ export default defineComponent({
         dom: rootRef.value,
         basename: props.basename,
         memoryRoute: props.memoryRoute,
+        hashRoute: props.hashRoute,
       };
       LoggerInstance.debug(
         `createRemoteComponent LazyComponent render >>>`,
@@ -92,6 +94,7 @@ export default defineComponent({
         dom: rootRef.value,
         basename: props.basename,
         memoryRoute: props.memoryRoute,
+        hashRoute: props.hashRoute,
       });
 
       (providerInfoRef.value as any)?.destroy({ dom: rootRef.value });
@@ -100,6 +103,7 @@ export default defineComponent({
         dom: rootRef.value,
         basename: props.basename,
         memoryRoute: props.memoryRoute,
+        hashRoute: props.hashRoute,
       });
     });
 
