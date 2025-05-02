@@ -66,7 +66,7 @@ module.exports = {
       consumes: [
         {
           x: {
-            filter: {
+            exclude: {
               version: '2.x',
               fallbackVersion: '2.0.0',
             },
@@ -75,7 +75,7 @@ module.exports = {
         },
         {
           '@abc/y': {
-            filter: {
+            exclude: {
               version: '*',
             },
             shareScope: 'exclude-scope',
@@ -83,7 +83,7 @@ module.exports = {
         },
         {
           foo: {
-            filter: {
+            exclude: {
               version: '1.x',
             },
             shareScope: 'exclude-scope',
@@ -91,7 +91,7 @@ module.exports = {
         },
         {
           bar: {
-            filter: {
+            exclude: {
               version: '1.x',
               fallbackVersion: '2.0.0',
             },
