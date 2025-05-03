@@ -94,5 +94,5 @@ export type ModuleInfo =
   | ProviderModuleInfo;
 
 export type GlobalModuleInfo = {
-  [key: string]: ModuleInfo | ManifestProvider | PureEntryProvider | undefined;
+  [key: string]: ModuleInfo | ManifestProvider | PureEntryProvider;
 };
