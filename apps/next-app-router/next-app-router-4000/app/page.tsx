@@ -7,7 +7,7 @@ const Button = lazy(() => import('remote_4001/Button'));
 export default function Page() {
   return (
     <div className="space-  y-8">
-      <Button>Button from remote</Button>
+      {/*<Button>Button from remote</Button>*/}
       <h1 className="text-xl font-medium text-gray-300">Examples</h1>
 
       <div className="space-y-10 text-white">

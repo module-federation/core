@@ -94,7 +94,6 @@ export const loadFromFs = (
   const fs = __non_webpack_require__('fs') as typeof import('fs');
   const path = __non_webpack_require__('path') as typeof import('path');
   const vm = __non_webpack_require__('vm') as typeof import('vm');
-
   if (fs.existsSync(filename)) {
     fs.readFile(filename, 'utf-8', (err, content) => {
       if (err) return callback(err, null);
@@ -299,7 +298,8 @@ export const setupChunkHandler = (
                     chunkId,
                   )
                 : false;
-
+            const runtimeid = __webpack_runtime_id__;
+            console.log(runtimeid, filename, __dirname);
             if (fs && fs.existsSync(filename)) {
               loadChunk(
                 'filesystem',

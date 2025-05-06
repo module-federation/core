@@ -7,6 +7,8 @@ const Compilation = require(
 import { SyncHook } from 'tapable';
 import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
+import RemoteToExternalDependency from '../RemoteToExternalDependency';
+import FallbackDependency from '../FallbackDependency';
 
 /** @type {WeakMap<import("webpack").Compilation, CompilationHooks>} */
 const compilationHooksMap = new WeakMap<CompilationType, CompilationHooks>();
@@ -16,8 +18,12 @@ const PLUGIN_NAME = 'FederationModulesPlugin';
 /** @typedef {{ header: string[], beforeStartup: string[], startup: string[], afterStartup: string[], allowInlineStartup: boolean }} Bootstrap */
 
 type CompilationHooks = {
-  addContainerEntryModule: SyncHook<[ContainerEntryDependency], void>;
-  addFederationRuntimeModule: SyncHook<[FederationRuntimeDependency], void>;
+  addContainerEntryDependency: SyncHook<[ContainerEntryDependency], void>;
+  addFederationRuntimeDependency: SyncHook<[FederationRuntimeDependency], void>;
+  addRemoteDependency: SyncHook<
+    [RemoteToExternalDependency | FallbackDependency],
+    void
+  >;
 };
 
 class FederationModulesPlugin {
@@ -36,8 +42,9 @@ class FederationModulesPlugin {
     let hooks = compilationHooksMap.get(compilation);
     if (hooks === undefined) {
       hooks = {
-        addContainerEntryModule: new SyncHook(['dependency']),
-        addFederationRuntimeModule: new SyncHook(['module']),
+        addContainerEntryDependency: new SyncHook(['dependency']),
+        addFederationRuntimeDependency: new SyncHook(['dependency']),
+        addRemoteDependency: new SyncHook(['dependency']),
       };
       compilationHooksMap.set(compilation, hooks);
     }

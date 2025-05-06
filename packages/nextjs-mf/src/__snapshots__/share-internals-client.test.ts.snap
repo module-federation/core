@@ -1,0 +1,149 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getNextInternalsShareScopeClient returns the correct share scope for a client compiler (Next 14) 1`] = `
+Object {
+  "next-compiled": Object {
+    "issuerLayer": "app-pages-browser",
+    "layer": "app-pages-browser",
+    "request": "next/dist/compiled/",
+    "shareKey": "next/dist/compiled/",
+    "shareScope": "app-pages-browser",
+    "singleton": true,
+  },
+  "next-compiled-react": Object {
+    "exclude": Object {
+      "request": /\\^\\(\\?!\\.\\*react\\)\\.\\*\\|react-refresh/,
+    },
+    "issuerLayer": "app-pages-browser",
+    "layer": "app-pages-browser",
+    "request": "next/dist/compiled/",
+    "requiredVersion": "^18.2.0",
+    "shareKey": "next/dist/compiled/",
+    "shareScope": "app-pages-browser",
+    "singleton": true,
+    "version": "18.2.0",
+  },
+  "next/": Object {
+    "exclude": Object {
+      "request": /dist/,
+    },
+    "singleton": true,
+  },
+  "react-dom-original": Object {
+    "request": "react-dom",
+    "shareKey": "react-dom",
+    "shareScope": "default",
+    "singleton": true,
+  },
+  "react-dom/client-original": Object {
+    "request": "react-dom/client",
+    "shareKey": "react-dom/client",
+    "shareScope": "default",
+    "singleton": true,
+  },
+  "react-original": Object {
+    "request": "react",
+    "shareKey": "react",
+    "shareScope": "default",
+    "singleton": true,
+  },
+  "react/jsx-dev-runtime-original": Object {
+    "request": "react/jsx-dev-runtime",
+    "shareKey": "react/jsx-dev-runtime",
+    "shareScope": "default",
+    "singleton": true,
+  },
+  "react/jsx-runtime-original": Object {
+    "request": "react/jsx-runtime",
+    "shareKey": "react/jsx-runtime",
+    "shareScope": "default",
+    "singleton": true,
+  },
+  "styled-jsx": Object {
+    "singleton": true,
+  },
+  "styled-jsx/": Object {
+    "singleton": true,
+  },
+}
+`;
+
+exports[`getNextInternalsShareScopeClient returns the correct share scope for a client compiler (Next 15) 1`] = `
+Object {
+  "next-compiled": Object {
+    "issuerLayer": "app-pages-browser",
+    "layer": "app-pages-browser",
+    "request": "next/dist/compiled/",
+    "shareKey": "next/dist/compiled/",
+    "shareScope": "app-pages-browser",
+    "singleton": true,
+  },
+  "next-compiled-react": Object {
+    "exclude": Object {
+      "request": /\\^\\(\\?!\\.\\*react\\)\\.\\*\\|react-refresh/,
+    },
+    "issuerLayer": "app-pages-browser",
+    "layer": "app-pages-browser",
+    "request": "next/dist/compiled/",
+    "requiredVersion": "^18.2.0",
+    "shareKey": "next/dist/compiled/",
+    "shareScope": "app-pages-browser",
+    "singleton": true,
+    "version": "18.2.0",
+  },
+  "next/": Object {
+    "exclude": Object {
+      "request": /dist/,
+    },
+    "singleton": true,
+  },
+  "react-dom-original": Object {
+    "exclude": Object {
+      "version": "18.x",
+    },
+    "request": "react-dom",
+    "shareKey": "react-dom",
+    "shareScope": "default",
+    "singleton": true,
+  },
+  "react-dom/client-original": Object {
+    "exclude": Object {
+      "version": "18.x",
+    },
+    "request": "react-dom/client",
+    "shareKey": "react-dom/client",
+    "shareScope": "default",
+    "singleton": true,
+  },
+  "react-original": Object {
+    "exclude": Object {
+      "version": "18.x",
+    },
+    "request": "react",
+    "shareKey": "react",
+    "shareScope": "default",
+    "singleton": true,
+  },
+  "react/jsx-dev-runtime-original": Object {
+    "exclude": Object {
+      "version": "18.x",
+    },
+    "request": "react/jsx-dev-runtime",
+    "shareKey": "react/jsx-dev-runtime",
+    "shareScope": "default",
+    "singleton": true,
+  },
+  "react/jsx-runtime-original": Object {
+    "request": "react/jsx-runtime",
+    "shareKey": "react/jsx-runtime",
+    "shareScope": "default",
+    "singleton": true,
+  },
+  "styled-jsx": Object {
+    "singleton": true,
+  },
+  "styled-jsx/": Object {
+    "singleton": true,
+  },
+}
+`;

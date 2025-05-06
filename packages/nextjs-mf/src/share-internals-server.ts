@@ -1,7 +1,7 @@
 import type {
-  moduleFederationPlugin,
-  sharePlugin,
-} from '@module-federation/sdk';
+  SharedConfig,
+  SharedObject,
+} from '../../enhanced/src/declarations/plugins/sharing/SharePlugin';
 import type { Compiler } from 'webpack';
 import {
   WEBPACK_LAYERS as WL,
@@ -9,14 +9,6 @@ import {
   WEBPACK_LAYERS_NAMES,
 } from './constants';
 import { safeRequireResolve, getReactVersionSafely } from './internal-helpers';
-
-// Extend the SharedConfig type to include layer properties
-export type ExtendedSharedConfig = sharePlugin.SharedConfig & {
-  layer?: string;
-  issuerLayer?: string | string[];
-  request?: string;
-  shareKey?: string;
-};
 
 /**
  * Gets the appropriate React alias based on the layer
@@ -113,7 +105,7 @@ const getReactServerDomWebpackAliasForLayer = (
  */
 export const getReactGroupServer = (
   compiler: Compiler,
-): Record<string, ExtendedSharedConfig> => {
+): Record<string, SharedConfig> => {
   const rscAlias = getReactAliasForLayer(WL.reactServerComponents);
   const ssrAlias = getReactAliasForLayer(WL.serverSideRendering);
 
@@ -174,7 +166,7 @@ export const getReactGroupServer = (
  */
 export const getReactDomGroupServer = (
   compiler: Compiler,
-): Record<string, ExtendedSharedConfig> => {
+): Record<string, SharedConfig> => {
   const rscAlias = getReactDomAliasForLayer(WL.reactServerComponents);
   const ssrAlias = getReactDomAliasForLayer(WL.serverSideRendering);
 
@@ -261,7 +253,7 @@ export const getReactDomGroupServer = (
  */
 export const getReactServerDomWebpackGroupServer = (
   compiler: Compiler,
-): Record<string, ExtendedSharedConfig> => {
+): Record<string, SharedConfig> => {
   const rscConfig = getReactServerDomWebpackAliasForLayer(
     WL.reactServerComponents,
   );
@@ -323,7 +315,7 @@ export const getReactServerDomWebpackGroupServer = (
  */
 export const getReactJsxRuntimeGroupServer = (
   compiler: Compiler,
-): Record<string, ExtendedSharedConfig> => {
+): Record<string, SharedConfig> => {
   const rscAlias = getReactJsxRuntimeAliasForLayer(WL.reactServerComponents);
   const ssrAlias = getReactJsxRuntimeAliasForLayer(WL.serverSideRendering);
 
@@ -388,7 +380,7 @@ export const getReactJsxRuntimeGroupServer = (
  */
 export const getReactJsxDevRuntimeGroupServer = (
   compiler: Compiler,
-): Record<string, ExtendedSharedConfig> => {
+): Record<string, SharedConfig> => {
   const rscAlias = getReactJsxDevRuntimeAliasForLayer(WL.reactServerComponents);
   const ssrAlias = getReactJsxDevRuntimeAliasForLayer(WL.serverSideRendering);
 
@@ -451,15 +443,29 @@ export const getReactJsxDevRuntimeGroupServer = (
 /**
  * Generates the appropriate share scope for Next.js internals based on the server compiler context.
  * @param {Compiler} compiler - The webpack compiler instance.
- * @returns {moduleFederationPlugin.SharedObject} - The generated share scope.
+ * @returns {SharedObject} - The generated share scope.
  */
 export const getNextInternalsShareScopeServer = (
   compiler: Compiler,
-): moduleFederationPlugin.SharedObject => {
+): SharedObject => {
   // Only proceed if this is a server compiler
   if (compiler.options.name !== 'server') {
     return {};
   }
+  return {
+    'next/dist/': {
+      singleton: true,
+      exclude: {
+        request: /^(?!.*react).*|react-refresh/,
+      },
+    },
+    'styled-jsx': {
+      singleton: true,
+    },
+    'styled-jsx/': {
+      singleton: true,
+    },
+  };
 
   // Generate all the server-side sharing groups
   const reactGroup = getReactGroupServer(compiler);

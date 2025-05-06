@@ -106,8 +106,6 @@ class EmbedFederationRuntimePlugin {
         );
 
         // --- Part 2: Embed Federation Runtime Module and adjust runtime requirements ---
-        const federationHooks =
-          FederationModulesPlugin.getCompilationHooks(compilation);
         const containerEntrySet: Set<
           ContainerEntryDependency | FederationRuntimeDependency
         > = new Set();
@@ -124,7 +122,10 @@ class EmbedFederationRuntimePlugin {
         );
 
         // Collect federation runtime dependencies.
-        federationHooks.addFederationRuntimeModule.tap(
+        //@ts-ignore
+        const federationHooks =
+          FederationModulesPlugin.getCompilationHooks(compilation);
+        federationHooks.addFederationRuntimeDependency.tap(
           PLUGIN_NAME,
           (dependency: FederationRuntimeDependency) => {
             containerEntrySet.add(dependency);
