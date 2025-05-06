@@ -9,6 +9,8 @@ export default defineConfig({
     },
   },
   output: {
+    injectStyles: process.env.INSPECTOR ? true : false,
+    cleanDistPath: process.env.INSPECTOR ? true : false,
     disableInlineRuntimeChunk: true,
     disableFilenameHash: true,
     disableMinimize: true,
@@ -20,6 +22,16 @@ export default defineConfig({
   },
   tools: {
     webpack: (config: Record<string, any>) => {
+      if (process.env.INSPECTOR) {
+        config.entry = {
+          'inspector-plugin': './src/utils/chrome/inspector-plugin.ts',
+        };
+        config.externals = {
+          react: '_mfReact',
+        };
+        return config;
+      }
+
       if (process.env.E2ETEST) {
         config.entry.worker = './src/worker/index.ts';
       }

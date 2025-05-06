@@ -44,8 +44,10 @@ interface FormProps {
   setFormStatus: React.Dispatch<SetStateAction<FormItemStatus[]>>;
   validateForm: any;
   enableHMR: string;
+  enableInspector: string;
   onHMRChange: (on: boolean) => void;
   headerSlot?: ReactNode;
+  onInspectorChange: (on: boolean) => void;
 }
 const FormComponent = (props: FormProps & RootComponentProps) => {
   const {
@@ -55,7 +57,9 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     setFormStatus,
     validateForm,
     enableHMR,
+    enableInspector,
     onHMRChange,
+    onInspectorChange,
     versionList,
     setVersionList,
     getVersion,
@@ -186,6 +190,10 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     onHMRChange(on);
   };
 
+  const inspectorChange = (on: boolean) => {
+    onInspectorChange(on);
+  };
+
   const onKeyChange = async (key: string, index: number) => {
     const version = await getVersion?.(key);
     if (version) {
@@ -225,14 +233,24 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
               <span className={styles.message}>{condition.message}</span>
               <span className={styles.headerSlot}>
                 {props.headerSlot}
-                <Switch
-                  checked={enableHMR === 'enable'}
-                  checkedText={'Enable HMR'}
-                  uncheckedText={'Disable HMR'}
-                  onChange={hmrChange}
-                  className={styles.switch}
-                />
+                <span>
+                   <Switch
+                checked={enableHMR === 'enable'}
+                checkedText={'Enable HMR'}
+                uncheckedText={'Disable HMR'}
+                onChange={hmrChange}
+                className={styles.switch}
+              />
+              <Switch
+                checked={enableInspector === 'enable'}
+                checkedText={'Enable Inspector'}
+                uncheckedText={'Disable Inspector'}
+                onChange={inspectorChange}
+                className={styles.switch}
+              />
+                </span>
               </span>
+
             </div>
           </div>
 

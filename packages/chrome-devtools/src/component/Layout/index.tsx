@@ -33,6 +33,8 @@ import {
   __ENABLE_FAST_REFRESH__,
   BROWSER_ENV_KEY,
   __FEDERATION_DEVTOOLS__,
+  ENABLEINSPECTOR,
+  __ENABLE_INSPECTOR__,
 } from '../../template/constant';
 interface FormItemType {
   key: string;
@@ -67,6 +69,7 @@ const Layout = (
   const [snapshot, setSnapshot] = useState(moduleInfo);
   const [form] = Form.useForm();
   const [enableHMR, setEnalbeHMR] = useState('disable');
+  const [enableInspector, setEnalbeInspector] = useState('disable');
 
   const { run } = useDebounceFn(
     async (formData) => {
@@ -160,6 +163,12 @@ const Layout = (
         onHMRChange(enable);
       }
     });
+    chrome.storage.sync.get([ENABLEINSPECTOR]).then((data) => {
+      const enable = data[ENABLEINSPECTOR];
+      if (typeof enable === 'boolean') {
+        onHMRChange(enable);
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -201,6 +210,19 @@ const Layout = (
     injectScript(reloadPage, false);
   };
 
+  const onInspectorChange = (on: boolean) => {
+    setEnalbeInspector(on ? 'enable' : 'disable');
+    chrome.storage.sync.set({
+      [ENABLEINSPECTOR]: on,
+    });
+    if (on) {
+      mergeStorage(__FEDERATION_DEVTOOLS__, __ENABLE_INSPECTOR__, on);
+    } else {
+      removeStorageKey(__FEDERATION_DEVTOOLS__, __ENABLE_INSPECTOR__);
+    }
+    injectScript(reloadPage, false);
+  };
+
   return (
     <>
       <Form
@@ -216,6 +238,8 @@ const Layout = (
           validateForm={() => validateForm(form)}
           enableHMR={enableHMR}
           onHMRChange={onHMRChange}
+          enableInspector={enableInspector}
+          onInspectorChange={onInspectorChange}
           versionList={versionList}
           setVersionList={setVersionList}
           getVersion={getVersion}

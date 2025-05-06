@@ -1,6 +1,7 @@
 export const FormID = 'FormID';
 
 export const ENABLEHMR = 'enableHMR';
+export const ENABLEINSPECTOR = 'enableInspector';
 
 export const proxyFormField = 'proxyFormField';
 
@@ -51,6 +52,7 @@ export const statusInfo: Record<
 };
 
 export const __ENABLE_FAST_REFRESH__ = 'enableFastRefresh';
+export const __ENABLE_INSPECTOR__ = 'enableInspector';
 
 export const BROWSER_ENV_KEY = 'MF_ENV';
 

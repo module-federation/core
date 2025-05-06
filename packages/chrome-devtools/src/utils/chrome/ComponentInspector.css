@@ -1,0 +1,86 @@
+.component-inspector {
+  position: relative;
+  display: inline-block;
+}
+
+.inspector-info {
+  position: fixed;
+  z-index: 1000;
+  background: #1a1a1a;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #fff;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inspector-overlay {
+  position: fixed;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 999;
+  background:
+    linear-gradient(90deg, #3b82f6 0%, #ec4899 50%, #3b82f6 100%) 0 0,
+    linear-gradient(90deg, #3b82f6 0%, #ec4899 50%, #3b82f6 100%) 0 100%,
+    linear-gradient(0deg, #3b82f6 0%, #ec4899 50%, #3b82f6 100%) 0 0,
+    linear-gradient(0deg, #3b82f6 0%, #ec4899 50%, #3b82f6 100%) 100% 0;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size:
+    200% 3px,
+    200% 3px,
+    3px 200%,
+    3px 200%; /* 将边框从 2px 加粗到 3px */
+  animation: borderRotate 4s linear infinite;
+}
+
+@keyframes borderRotate {
+  0% {
+    background-position:
+      0% 0,
+      0% 100%,
+      0 0%,
+      100% 0%;
+  }
+  100% {
+    background-position:
+      200% 0,
+      -200% 100%,
+      0 -200%,
+      100% 200%;
+  }
+}
+.mf-tag {
+  color: #646cff;
+  font-weight: 500;
+  position: relative;
+  padding-left: 16px;
+}
+
+.mf-tag::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background-image: url('https://module-federation.io/svg.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.divider {
+  color: #4a4a4a;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #60a5fa, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 500;
+}
