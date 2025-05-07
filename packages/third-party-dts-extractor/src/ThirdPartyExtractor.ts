@@ -2,7 +2,7 @@ import findPkg from 'find-pkg';
 import fs from 'fs-extra';
 import path from 'path';
 import resolve from 'resolve';
-import { getTypedName } from './utils';
+import { getTypedName, getPackageRootDir } from './utils';
 
 const ignoredPkgs = ['typescript'];
 
@@ -10,23 +10,49 @@ const ignoredPkgs = ['typescript'];
 const isNodeUtils = (pkgJsonPath: string, importPath: string) => {
   return pkgJsonPath === importPath;
 };
+
+type ThirdPartyExtractorOptions = {
+  destDir: string;
+  context?: string;
+  exclude?: Array<string | RegExp>;
+};
+
 class ThirdPartyExtractor {
   pkgs: Record<string, string>;
   pattern: RegExp;
   context: string;
   destDir: string;
+  exclude: Array<string | RegExp>;
 
-  constructor(destDir: string, context = process.cwd()) {
+  constructor({
+    destDir,
+    context = process.cwd(),
+    exclude = [],
+  }: ThirdPartyExtractorOptions) {
     this.destDir = destDir;
     this.context = context;
     this.pkgs = {};
     this.pattern = /(from|import\()\s*['"]([^'"]+)['"]/g;
+    this.exclude = exclude;
   }
 
   addPkgs(pkgName: string, dirName: string): void {
     if (ignoredPkgs.includes(pkgName)) {
       return;
     }
+
+    if (
+      this.exclude.some((pattern) => {
+        if (typeof pattern === 'string') {
+          return new RegExp(pattern).test(pkgName);
+        } else {
+          return pattern.test(pkgName);
+        }
+      })
+    ) {
+      return;
+    }
+
     this.pkgs[pkgName] = dirName;
   }
 
@@ -48,7 +74,8 @@ class ThirdPartyExtractor {
       if (isNodeUtils(importEntry, importPath)) {
         return;
       }
-      const pkgJsonPath = findPkg.sync(importEntry) as string;
+      const packageDir = getPackageRootDir(importPath);
+      const pkgJsonPath = path.join(packageDir, 'package.json');
 
       const dir = path.dirname(pkgJsonPath);
       const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')) as Record<
@@ -61,8 +88,9 @@ class ThirdPartyExtractor {
       }
 
       if (types) {
-        this.addPkgs(pkg.name, dir);
-        return dir;
+        const typesDir = path.dirname(path.resolve(dir, types));
+        this.addPkgs(pkg.name, typesDir);
+        return typesDir;
       } else if (fs.existsSync(path.resolve(dir, 'index.d.ts'))) {
         this.addPkgs(pkg.name, dir);
         return dir;

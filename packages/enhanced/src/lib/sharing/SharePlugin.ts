@@ -18,7 +18,7 @@ import type { ProvidesConfig } from '../../declarations/plugins/sharing/ProvideS
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 class SharePlugin {
-  private _shareScope: string;
+  private _shareScope: string | string[];
   private _consumes: Record<string, ConsumesConfig>[];
   private _provides: Record<string, ProvidesConfig>[];
 
@@ -52,6 +52,9 @@ class SharePlugin {
           singleton: options.singleton,
           packageName: options.packageName,
           eager: options.eager,
+          issuerLayer: options.issuerLayer,
+          layer: options.layer,
+          request: options.request || key,
         },
       }),
     );
@@ -66,20 +69,21 @@ class SharePlugin {
           requiredVersion: options.requiredVersion,
           strictVersion: options.strictVersion,
           singleton: options.singleton,
+          layer: options.layer,
+          request: options.request || options.import || key,
         },
       }));
-    //@ts-ignore
-    this._shareScope = options.shareScope;
+
+    this._shareScope = options.shareScope || 'default';
     this._consumes = consumes;
     this._provides = provides;
   }
 
   /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
+   * Applies the plugin to the webpack compiler instance
+   * @param compiler - The webpack compiler instance
    */
-  apply(compiler: Compiler) {
+  apply(compiler: Compiler): void {
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 

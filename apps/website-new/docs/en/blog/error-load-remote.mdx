@@ -396,11 +396,36 @@ return () => ({
      ```ts
      if (args.lifecycle === 'afterResolve') {
        // Use predefined backup manifest
-       const backupManifest = {
-         scope: 'remote1',
-         module: './button',
-         url: '/fallback/remote1-button.js'
-       };
+       const backupManifest =const backupManifest = {
+          id: 'fallback',
+          name: 'fallback',
+          metaData: {
+            name: 'fallback',
+            type: 'app',
+            buildInfo: {
+              buildVersion: 'local',
+              buildName: 'fallback',
+            },
+            remoteEntry: {
+              name: 'remoteEntry.js',
+              path: '',
+              type: 'global',
+            },
+            types: {
+              path: '',
+              name: '',
+              zip: '@mf-types.zip',
+              api: '@mf-types.d.ts',
+            },
+            globalName: 'fallback',
+            pluginVersion: '1',
+            prefetchInterface: false,
+            publicPath: 'https://example.com/',
+          },
+          shared: [],
+          remotes: [],
+          exposes: [],
+        };
        return backupManifest;
      }
      ```

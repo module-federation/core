@@ -5,6 +5,7 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
 import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
+import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -12,6 +13,9 @@ const ModuleNotFoundError = require(
 const LazySet = require(
   normalizeWebpackPath('webpack/lib/util/LazySet'),
 ) as typeof import('webpack/lib/util/LazySet');
+
+const RELATIVE_REQUEST_REGEX = /^\.\.?(\/|$)/;
+const ABSOLUTE_PATH_REGEX = /^(\/|[A-Za-z]:\\|\\\\)/;
 
 interface MatchedConfigs<T> {
   resolved: Map<string, T>;
@@ -23,7 +27,19 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
   dependencyType: 'esm',
 };
 
-export async function resolveMatchedConfigs<T>(
+function createCompositeKey(request: string, config: ConsumeOptions): string {
+  if (config.issuerLayer) {
+    return `(${config.issuerLayer})${request}`;
+    // layer unlikely to be used, issuerLayer is what factorize provides
+    // which is what we need to create a matching key for
+  } else if (config.layer) {
+    return `(${config.layer})${request}`;
+  } else {
+    return request;
+  }
+}
+// TODO: look at passing dedicated request key instead of infer from object key
+export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   compilation: Compilation,
   configs: [string, T][],
 ): Promise<MatchedConfigs<T>> {
@@ -35,28 +51,26 @@ export async function resolveMatchedConfigs<T>(
     contextDependencies: new LazySet<string>(),
     missingDependencies: new LazySet<string>(),
   };
-  // @ts-ignore
   const resolver = compilation.resolverFactory.get('normal', RESOLVE_OPTIONS);
   const context = compilation.compiler.context;
 
   await Promise.all(
-    //@ts-ignore
     configs.map(([request, config]) => {
-      if (/^\.\.?(\/|$)/.test(request)) {
+      const resolveRequest = config.request || request;
+      if (RELATIVE_REQUEST_REGEX.test(resolveRequest)) {
         // relative request
         return new Promise<void>((resolve) => {
           resolver.resolve(
             {},
             context,
-            request,
+            resolveRequest,
             resolveContext,
             (err, result) => {
               if (err || result === false) {
-                err = err || new Error(`Can't resolve ${request}`);
+                err = err || new Error(`Can't resolve ${resolveRequest}`);
                 compilation.errors.push(
-                  // @ts-ignore
                   new ModuleNotFoundError(null, err, {
-                    name: `shared module ${request}`,
+                    name: `shared module ${resolveRequest}`,
                   }),
                 );
                 return resolve();
@@ -66,15 +80,20 @@ export async function resolveMatchedConfigs<T>(
             },
           );
         });
-      } else if (/^(\/|[A-Za-z]:\\|\\\\)/.test(request)) {
+      } else if (ABSOLUTE_PATH_REGEX.test(resolveRequest)) {
         // absolute path
-        resolved.set(request, config);
-      } else if (request.endsWith('/')) {
+        resolved.set(resolveRequest, config);
+        return undefined;
+      } else if (resolveRequest.endsWith('/')) {
         // module request prefix
-        prefixed.set(request, config);
+        const key = createCompositeKey(resolveRequest, config);
+        prefixed.set(key, config);
+        return undefined;
       } else {
         // module request
-        unresolved.set(request, config);
+        const key = createCompositeKey(resolveRequest, config);
+        unresolved.set(key, config);
+        return undefined;
       }
     }),
   );

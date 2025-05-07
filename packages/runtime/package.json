@@ -1,9 +1,10 @@
 {
   "name": "@module-federation/runtime",
-  "version": "0.11.1",
+  "version": "0.13.1",
+  "type": "module",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.mjs",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
   "types": "./dist/index.cjs.d.ts",
   "license": "MIT",
   "publishConfig": {
@@ -20,24 +21,44 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.cjs.d.ts",
-      "import": "./dist/index.esm.mjs",
-      "require": "./dist/index.cjs.js"
+      "import": {
+        "types": "./dist/index.esm.d.ts",
+        "default": "./dist/index.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.cjs.d.ts",
+        "default": "./dist/index.cjs.cjs"
+      }
     },
     "./helpers": {
-      "types": "./dist/helpers.cjs.d.ts",
-      "import": "./dist/helpers.esm.mjs",
-      "require": "./dist/helpers.cjs.js"
+      "import": {
+        "types": "./dist/helpers.esm.d.ts",
+        "default": "./dist/helpers.esm.js"
+      },
+      "require": {
+        "types": "./dist/helpers.cjs.d.ts",
+        "default": "./dist/helpers.cjs.cjs"
+      }
     },
     "./types": {
-      "types": "./dist/types.cjs.d.ts",
-      "import": "./dist/types.esm.mjs",
-      "require": "./dist/types.cjs.js"
+      "import": {
+        "types": "./dist/types.esm.d.ts",
+        "default": "./dist/types.esm.js"
+      },
+      "require": {
+        "types": "./dist/types.cjs.d.ts",
+        "default": "./dist/types.cjs.cjs"
+      }
     },
     "./core": {
-      "types": "./dist/core.cjs.d.ts",
-      "import": "./dist/core.esm.mjs",
-      "require": "./dist/core.cjs.js"
+      "import": {
+        "types": "./dist/core.esm.d.ts",
+        "default": "./dist/core.esm.js"
+      },
+      "require": {
+        "types": "./dist/core.cjs.d.ts",
+        "default": "./dist/core.cjs.cjs"
+      }
     },
     "./*": "./*"
   },

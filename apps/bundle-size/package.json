@@ -1,0 +1,17 @@
+{
+  "name": "bundle-size",
+  "private": true,
+  "version": "0.1.1",
+  "devDependencies": {
+    "@module-federation/core": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/typescript": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/dts-plugin": "workspace:*",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
+    "react-refresh": "0.14.2"
+  },
+  "dependencies": {
+    "antd": "4.24.15"
+  }
+}

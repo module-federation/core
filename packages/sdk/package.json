@@ -1,6 +1,7 @@
 {
   "name": "@module-federation/sdk",
-  "version": "0.11.1",
+  "version": "0.13.1",
+  "type": "module",
   "license": "MIT",
   "description": "A sdk for support module federation",
   "keywords": [
@@ -9,7 +10,8 @@
   ],
   "files": [
     "dist/",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "repository": {
     "type": "git",
@@ -21,19 +23,29 @@
   },
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "sideEffects": false,
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.mjs",
+  "main": "./dist/index.cjs.cjs",
+  "module": "./dist/index.esm.js",
   "types": "./dist/index.cjs.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.cjs.d.ts",
-      "import": "./dist/index.esm.mjs",
-      "require": "./dist/index.cjs.js"
+      "import": {
+        "types": "./dist/index.esm.d.ts",
+        "default": "./dist/index.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.cjs.d.ts",
+        "default": "./dist/index.cjs.cjs"
+      }
     },
     "./normalize-webpack-path": {
-      "types": "./dist/normalize-webpack-path.cjs.d.ts",
-      "import": "./dist/normalize-webpack-path.esm.mjs",
-      "require": "./dist/normalize-webpack-path.cjs.js"
+      "import": {
+        "types": "./dist/normalize-webpack-path.esm.d.ts",
+        "default": "./dist/normalize-webpack-path.esm.js"
+      },
+      "require": {
+        "types": "./dist/normalize-webpack-path.cjs.d.ts",
+        "default": "./dist/normalize-webpack-path.cjs.cjs"
+      }
     }
   },
   "typesVersions": {

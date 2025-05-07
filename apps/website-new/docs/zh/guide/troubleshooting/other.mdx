@@ -46,3 +46,21 @@ Uncaught TypeError: Cannot read properties on null (reading `useState`)
       ])
   }
 ```
+
+## HMR 失效
+
+* 使用 [React Developer Tools](https://chromewebstore.google.com/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
+
+* 若 shared 提供方是线上的 react ，那么需要使用 [Module Federation DevTools](../debug/chrome-devtool)，并点击 `Enable HMR` 按钮
+
+![](@public/guide/chrome-devtools/mf-devtool-hmr.jpg)
+
+## CORS 警告
+
+当项目中设置了 `exposes` ，会被视为生产者，为保证生产者资源能正常被消费者加载，`@module-federation/modern-js`、`@module-federation/rsbuild-plugin` 会设置 `Access-Control-Allow-Origin` 为 `*` ，并同时发出警告。
+
+#### 解决方案
+
+* [Modern.js]: 设置 [devServer.headers](https://modernjs.dev/configure/app/tools/dev-server.html#headers) 值为指定的域名白名单而非 `*`
+
+* [Rsbuild]: 设置 [server.cors.origin](https://rsbuild.dev/config/server/cors#origin) 值为指定的域名白名单而非 `*`

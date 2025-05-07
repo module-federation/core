@@ -1,5 +1,48 @@
 # website-new
 
+## 1.1.1
+
+### Patch Changes
+
+- @module-federation/error-codes@0.13.1
+
+## 1.1.0
+
+### Minor Changes
+
+- 88a018d: feat(react-bridge): Add native support for React 19 in bridge-react with enhanced createRoot options
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- 0eb6d1b: refactor(bridge-react): modify the default mode of the bridge to legacy mode to reduce redundant code
+- Updated dependencies [38f324f]
+  - @module-federation/error-codes@0.13.0
+
+## 1.0.34
+
+### Patch Changes
+
+- @module-federation/error-codes@0.12.0
+
+## 1.0.33
+
+### Patch Changes
+
+- @module-federation/error-codes@0.11.4
+
+## 1.0.32
+
+### Patch Changes
+
+- @module-federation/error-codes@0.11.3
+
+## 1.0.31
+
+### Patch Changes
+
+- @module-federation/error-codes@0.11.2
+
 ## 1.0.30
 
 ### Patch Changes

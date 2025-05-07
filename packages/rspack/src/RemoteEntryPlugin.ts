@@ -1,6 +1,10 @@
-import type { Compiler, RspackPluginInstance } from '@rspack/core';
-// @ts-ignore
 import pBtoa from 'btoa';
+import { ContainerManager } from '@module-federation/managers';
+import logger from './logger';
+
+import type { Compiler, RspackPluginInstance } from '@rspack/core';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
+// @ts-ignore
 
 const charMap: Record<string, string> = {
   '<': '\\u003C',
@@ -23,19 +27,29 @@ function escapeUnsafeChars(str: string) {
 
 export class RemoteEntryPlugin implements RspackPluginInstance {
   readonly name = 'VmokRemoteEntryPlugin';
-  private _name: string;
-  private _getPublicPath: string;
+  _options: moduleFederationPlugin.ModuleFederationPluginOptions;
 
-  constructor(name: string, getPublicPath: string) {
-    this._name = name;
-    this._getPublicPath = getPublicPath;
+  constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
+    this._options = options;
   }
 
   apply(compiler: Compiler): void {
+    const { name, getPublicPath } = this._options;
+    if (!getPublicPath || !name) {
+      return;
+    }
+    const containerManager = new ContainerManager();
+    containerManager.init(this._options);
+    if (!containerManager.enable) {
+      logger.warn(
+        "Detect you don't set exposes, 'getPublicPath' will not have effect.",
+      );
+      return;
+    }
     let code;
-    const sanitizedPublicPath = escapeUnsafeChars(this._getPublicPath);
+    const sanitizedPublicPath = escapeUnsafeChars(getPublicPath);
 
-    if (!this._getPublicPath.startsWith('function')) {
+    if (!getPublicPath.startsWith('function')) {
       code = `${
         compiler.webpack.RuntimeGlobals.publicPath
       } = new Function(${JSON.stringify(sanitizedPublicPath)})()`;
@@ -47,7 +61,7 @@ export class RemoteEntryPlugin implements RspackPluginInstance {
 
     compiler.hooks.afterPlugins.tap('VmokRemoteEntryPlugin', () => {
       new compiler.webpack.EntryPlugin(compiler.context, dataUrl, {
-        name: this._name,
+        name: name,
       }).apply(compiler);
     });
   }

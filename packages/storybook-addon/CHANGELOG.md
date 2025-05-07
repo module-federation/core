@@ -1,5 +1,67 @@
 # @module-federation/storybook-addon
 
+## 4.0.15
+
+### Patch Changes
+
+- @module-federation/enhanced@0.13.1
+- @module-federation/sdk@0.13.1
+- @module-federation/utilities@3.1.54
+
+## 4.0.14
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [9efb9b9]
+- Updated dependencies [38f324f]
+  - @module-federation/enhanced@0.13.0
+  - @module-federation/utilities@3.1.53
+  - @module-federation/sdk@0.13.0
+
+## 4.0.13
+
+### Patch Changes
+
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+- Updated dependencies [f4fb242]
+  - @module-federation/enhanced@0.12.0
+  - @module-federation/sdk@0.12.0
+  - @module-federation/utilities@3.1.52
+
+## 4.0.12
+
+### Patch Changes
+
+- Updated dependencies [64a2bc1]
+- Updated dependencies [ebe7d89]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/enhanced@0.11.4
+  - @module-federation/utilities@3.1.51
+
+## 4.0.11
+
+### Patch Changes
+
+- @module-federation/enhanced@0.11.3
+- @module-federation/sdk@0.11.3
+- @module-federation/utilities@3.1.50
+
+## 4.0.10
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/enhanced@0.11.2
+  - @module-federation/utilities@3.1.49
+
 ## 4.0.9
 
 ### Patch Changes

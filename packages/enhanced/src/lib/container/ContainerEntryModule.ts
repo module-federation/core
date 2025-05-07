@@ -62,21 +62,21 @@ export type ExposeOptions = {
 class ContainerEntryModule extends Module {
   private _name: string;
   private _exposes: [string, ExposeOptions][];
-  private _shareScope: string;
+  private _shareScope: string | string[];
   private _injectRuntimeEntry: string;
   private _dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'];
 
   /**
    * @param {string} name container entry name
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
-   * @param {string} shareScope name of the share scope
+   * @param {string|string[]} shareScope name of the share scope
    * @param {string} injectRuntimeEntry the path of injectRuntime file.
    * @param {containerPlugin.ContainerPluginOptions['dataPrefetch']} dataPrefetch whether enable dataPrefetch
    */
   constructor(
     name: string,
     exposes: [string, ExposeOptions][],
-    shareScope: string,
+    shareScope: string | string[],
     injectRuntimeEntry: string,
     dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'],
   ) {
@@ -115,7 +115,11 @@ class ContainerEntryModule extends Module {
    * @returns {string} a unique identifier of the module
    */
   override identifier(): string {
-    return `container entry (${this._shareScope}) ${JSON.stringify(
+    const scopeStr = Array.isArray(this._shareScope)
+      ? this._shareScope.join('|')
+      : this._shareScope;
+
+    return `container entry (${scopeStr}) ${JSON.stringify(
       this._exposes,
     )} ${this._injectRuntimeEntry} ${JSON.stringify(this._dataPrefetch)}`;
   }

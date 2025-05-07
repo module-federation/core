@@ -1,5 +1,48 @@
 # @module-federation/inject-external-runtime-core-plugin
 
+## 0.13.1
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.13.1
+
+## 0.13.0
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [38f324f]
+  - @module-federation/runtime-tools@0.13.0
+
+## 0.12.0
+
+### Minor Changes
+
+- c399b9a: Switch to esm modules by default
+
+### Patch Changes
+
+- Updated dependencies [c399b9a]
+  - @module-federation/runtime-tools@0.12.0
+
+## 0.11.4
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.11.3
+
+## 0.11.2
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.11.2
+
 ## 0.11.1
 
 ### Patch Changes

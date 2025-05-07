@@ -147,12 +147,14 @@ export const loader = async ({ request }: LoaderFunctionArgs): Promise<DataLoade
 Consume loader data and dynamically load the corresponding producer:
 
 ```tsx
-import { createRemoteSSRComponent, loadRemote, registerRemotes } from '@modern-js/runtime/mf';
+import { kit, loadRemote, registerRemotes } from '@module-federation/modern-js/runtime';
 // Use import type to get data loader types
 import type { DataLoaderRes } from './page.data';
 import { useLoaderData } from '@modern-js/runtime/router';
 
 import './index.css';
+
+const { createRemoteSSRComponent } = kit;
 
 const RemoteSSRComponent = createRemoteSSRComponent({
   loader: () => import('remote/Image'),

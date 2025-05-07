@@ -1,5 +1,137 @@
 # @module-federation/enhanced
 
+## 0.13.1
+
+### Patch Changes
+
+- Updated dependencies [f323928]
+- Updated dependencies [129dac6]
+  - @module-federation/rspack@0.13.1
+  - @module-federation/managers@0.13.1
+  - @module-federation/dts-plugin@0.13.1
+  - @module-federation/manifest@0.13.1
+  - @module-federation/cli@0.13.1
+  - @module-federation/sdk@0.13.1
+  - @module-federation/runtime-tools@0.13.1
+  - @module-federation/bridge-react-webpack-plugin@0.13.1
+  - @module-federation/data-prefetch@0.13.1
+  - @module-federation/error-codes@0.13.1
+  - @module-federation/inject-external-runtime-core-plugin@0.13.1
+
+## 0.13.0
+
+### Patch Changes
+
+- 9efb9b9: fix(enhanced): apply getPublicPath only if exposes is set
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [e9a0681]
+- Updated dependencies [92882ec]
+- Updated dependencies [9efb9b9]
+- Updated dependencies [38f324f]
+  - @module-federation/cli@0.13.0
+  - @module-federation/manifest@0.13.0
+  - @module-federation/rspack@0.13.0
+  - @module-federation/inject-external-runtime-core-plugin@0.13.0
+  - @module-federation/bridge-react-webpack-plugin@0.13.0
+  - @module-federation/data-prefetch@0.13.0
+  - @module-federation/runtime-tools@0.13.0
+  - @module-federation/error-codes@0.13.0
+  - @module-federation/dts-plugin@0.13.0
+  - @module-federation/managers@0.13.0
+  - @module-federation/sdk@0.13.0
+
+## 0.12.0
+
+### Minor Changes
+
+- f4fb242: Enhancements to layer handling in module federation tests and configuration.
+
+  - Introduced new layer configurations to support more nuanced federation scenarios that consider multiple layers of dependency.
+
+- f4fb242: support request option on ConsumeSharePlugin. Allows matching requests like the object key of shared does
+- c399b9a: Switch to esm modules by default
+- f4fb242: Support share layers and multiple share scopes
+- f4fb242: Layer support for Provide Share Plugin
+
+### Patch Changes
+
+- f4fb242: Refactored module sharing configuration handling.
+
+  - Simplified plugin schema for better maintainability
+  - Improved layer-based module sharing test coverage
+  - Removed redundant plugin exports
+
+- Updated dependencies [ebef2d0]
+- Updated dependencies [c399b9a]
+- Updated dependencies [451b4f5]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/dts-plugin@0.12.0
+  - @module-federation/inject-external-runtime-core-plugin@0.12.0
+  - @module-federation/data-prefetch@0.12.0
+  - @module-federation/runtime-tools@0.12.0
+  - @module-federation/sdk@0.12.0
+  - @module-federation/manifest@0.12.0
+  - @module-federation/managers@0.12.0
+  - @module-federation/cli@0.12.0
+  - @module-federation/rspack@0.12.0
+  - @module-federation/bridge-react-webpack-plugin@0.12.0
+  - @module-federation/error-codes@0.12.0
+
+## 0.11.4
+
+### Patch Changes
+
+- ebe7d89: remove normal module replacement on federation runtime. rely on alias instead
+- Updated dependencies [64a2bc1]
+- Updated dependencies [ed8bda3]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/dts-plugin@0.11.4
+  - @module-federation/bridge-react-webpack-plugin@0.11.4
+  - @module-federation/cli@0.11.4
+  - @module-federation/data-prefetch@0.11.4
+  - @module-federation/managers@0.11.4
+  - @module-federation/manifest@0.11.4
+  - @module-federation/rspack@0.11.4
+  - @module-federation/runtime-tools@0.11.4
+  - @module-federation/inject-external-runtime-core-plugin@0.11.4
+  - @module-federation/error-codes@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- Updated dependencies [e2c0a89]
+  - @module-federation/dts-plugin@0.11.3
+  - @module-federation/cli@0.11.3
+  - @module-federation/manifest@0.11.3
+  - @module-federation/rspack@0.11.3
+  - @module-federation/data-prefetch@0.11.3
+  - @module-federation/runtime-tools@0.11.3
+  - @module-federation/inject-external-runtime-core-plugin@0.11.3
+  - @module-federation/sdk@0.11.3
+  - @module-federation/managers@0.11.3
+  - @module-federation/bridge-react-webpack-plugin@0.11.3
+  - @module-federation/error-codes@0.11.3
+
+## 0.11.2
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/bridge-react-webpack-plugin@0.11.2
+  - @module-federation/cli@0.11.2
+  - @module-federation/data-prefetch@0.11.2
+  - @module-federation/dts-plugin@0.11.2
+  - @module-federation/managers@0.11.2
+  - @module-federation/manifest@0.11.2
+  - @module-federation/rspack@0.11.2
+  - @module-federation/runtime-tools@0.11.2
+  - @module-federation/inject-external-runtime-core-plugin@0.11.2
+  - @module-federation/error-codes@0.11.2
+
 ## 0.11.1
 
 ### Patch Changes

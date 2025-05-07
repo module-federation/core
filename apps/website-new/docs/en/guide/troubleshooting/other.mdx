@@ -72,3 +72,21 @@ new ModuleFederationPlugin({
     ...
   })
 ```
+
+## HMR failed
+
+* Use [React Developer Tools](https://chromewebstore.google.com/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
+
+* If shared is provided from online host, use [Module Federation DevTools](../debug/chrome-devtool), and click `Enable HMR` button .
+
+![](@public/guide/chrome-devtools/mf-devtool-hmr.jpg)
+
+## CORS warn
+
+When `exposes` is set in the project, it will be regarded as a producer. To ensure that the producer resources can be loaded normally by consumers, `@module-federation/modern-js` and `@module-federation/rsbuild-plugin` will set `Access-Control-Allow-Origin` to `*` and issue a warning at the same time.
+
+#### Solutions
+
+* [Modern.js]: Set [devServer.headers](https://modernjs.dev/configure/app/tools/dev-server.html#headers) value to the specified domain whitelist instead of `*`
+
+* [Rsbuild]: Set [server.cors.origin](https://rsbuild.dev/config/server/cors#origin) value to the specified domain whitelist instead of `*`

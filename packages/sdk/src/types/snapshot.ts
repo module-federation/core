@@ -24,7 +24,6 @@ export interface BasicProviderModuleInfo extends BasicModuleInfo {
   // ssrRemoteEntry/ssrRemoteEntryType only appear while manifest has serveSideRemoteEntry field
   ssrRemoteEntry?: string;
   ssrRemoteEntryType?: RemoteEntryType;
-  remoteManifest?: string;
   globalName: string;
   modules: Array<{
     moduleName: string;
@@ -32,13 +31,16 @@ export interface BasicProviderModuleInfo extends BasicModuleInfo {
     assets: StatsAssets;
   }>;
   prefetchInterface?: boolean;
+  // @deprecated
   prefetchEntry?: string;
+  // @deprecated
   prefetchEntryType?: RemoteEntryType;
 }
 
 interface BasicProviderModuleInfoWithPublicPath
   extends BasicProviderModuleInfo {
   publicPath: string;
+  ssrPublicPath?: string;
 }
 
 interface BasicProviderModuleInfoWithGetPublicPath
@@ -64,6 +66,7 @@ export interface ConsumerModuleInfoWithPublicPath
   extends BasicConsumerModuleInfo,
     BasicProviderModuleInfo {
   publicPath: string;
+  ssrPublicPath?: string;
 }
 
 interface ConsumerModuleInfoWithGetPublicPath

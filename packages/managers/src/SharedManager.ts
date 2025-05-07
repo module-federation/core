@@ -2,7 +2,6 @@
 import findPkg from 'find-pkg';
 import path from 'path';
 import fs from 'fs-extra';
-import { sharing } from 'webpack';
 import {
   moduleFederationPlugin,
   sharePlugin,
@@ -12,7 +11,9 @@ import { NormalizedSharedOptions } from './types';
 import { BasicPluginOptionsManager } from './BasicPluginOptionsManager';
 import { parseOptions } from './utils';
 
-type SharePluginOptions = ConstructorParameters<typeof sharing.SharePlugin>[0];
+type SharePluginOptions = ConstructorParameters<
+  typeof sharePlugin.SharePlugin
+>[0];
 
 class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.ModuleFederationPluginOptions> {
   normalizedOptions: NormalizedSharedOptions = {};
@@ -63,14 +64,14 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
         if (path.isAbsolute(shareConfig.import)) {
           pkgPath = shareConfig.import;
         } else if (shareConfig.import.startsWith('.')) {
-          pkgPath = path.resolve(process.cwd(), shareConfig.import);
+          pkgPath = path.resolve(this.root, shareConfig.import);
         }
       } else {
         if (shareConfig.packageName) {
           depName = shareConfig.packageName;
         }
       }
-      pkgPath = pkgPath || require.resolve(depName, { paths: [process.cwd()] });
+      pkgPath = pkgPath || require.resolve(depName, { paths: [this.root] });
       const pkgJsonPath = findPkg.sync(pkgPath);
       return {
         pkg: JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')),

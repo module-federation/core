@@ -1,0 +1,42 @@
+{
+  "name": "@module-federation/cli",
+  "version": "0.13.1",
+  "type": "commonjs",
+  "description": "Module Federation CLI",
+  "homepage": "https://module-federation.io",
+  "bugs": {
+    "url": "https://github.com/module-federation/core/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core",
+    "directory": "packages/cli"
+  },
+  "bin": {
+    "mf": "./bin/mf.js"
+  },
+  "license": "MIT",
+  "main": "./dist/index.cjs.js",
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/dts-plugin": "workspace:*",
+    "commander": "11.1.0",
+    "chalk": "3.0.0",
+    "@modern-js/node-bundle-require": "2.65.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.11.7"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
+  }
+}

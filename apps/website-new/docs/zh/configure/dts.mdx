@@ -125,7 +125,7 @@ tsconfig 配置文件路径
 
 #### compilerInstance
 
-- 类型：`'tsc' | 'vue-tsc'`
+- 类型：`'tsc' | 'vue-tsc' | 'tspc' | string`
 - 是否必填：否
 - 默认值：`'tsc'`
 
@@ -208,6 +208,74 @@ interface DtsHostOptions {
 - 默认值：`'@mf-types'`
 
 对应 `remotes` 目录配置的 `typesFolder`
+
+#### remoteTypeUrls
+
+- 类型：`(() => Promise<RemoteTypeUrls>) | RemoteTypeUrls`
+- 是否必填：否
+- 默认值：`undefined`
+
+用于获取 `remote` 类型文件的地址。
+
+应用场景：
+
+* 只使用了 runtime API 加载生产者，没使用构建插件，通过创建 `module-federation.config.ts` 配置文件，并设置此配置，来告知 MF 类型文件地址。
+
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig, type moduleFederationPlugin } from '@module-federation/enhanced';
+
+export default createModuleFederationConfig({
+  // ...
+  remotes: {
+    'remote1-alias': 'remote1@http://localhost:80801/remoteEntry.js'
+  },
+  dts:{
+    consumeTypes:{
+      remoteTypeUrls: async()=>{
+        // 模拟请求接口获取类型文件地址
+        const data = await new Promise<moduleFederationPlugin.RemoteTypeUrls>(resolve=>{
+          setTimeout(()=>{
+            resolve({
+              remote1:{
+                alias: 'remote1-alias',
+                api:'http://localhost:8081/custom-dir/@mf-types.d.ts',
+                zip:'http://localhost:8081/custom-dir/@mf-types.zip'
+              }
+            } )
+          },1000)
+        });
+
+        return data;
+      }
+    }
+  }
+});
+```
+
+* 当 remote 为 `remoteEntry.js` 时，类型文件地址通常会直接替换 js 文件为对应的类型文件，例如 `@mf-types.zip` ，但是实际上传的类型文件地址不是这个，那么可以通过设置此配置来告知 MF 真正的类型文件地址。
+
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/enhanced';
+
+export default createModuleFederationConfig({
+  // ...
+  remotes: {
+    'remote1-alias': 'remote1@http://localhost:80801/remoteEntry.js'
+  },
+  dts:{
+    consumeTypes:{
+      remoteTypeUrls: {
+        // remote name
+        remote1:{
+          alias: 'remote1-alias',
+          api:'http://localhost:8081/custom-dir/@mf-types.d.ts',
+          zip:'http://localhost:8081/custom-dir/@mf-types.zip'
+        }
+      }
+    }
+  }
+});
+```
 
 ### tsConfigPath
 

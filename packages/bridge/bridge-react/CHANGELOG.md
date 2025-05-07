@@ -1,5 +1,63 @@
 # @module-federation/bridge-react
 
+## 0.13.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.13.1
+- @module-federation/bridge-shared@0.13.1
+
+## 0.13.0
+
+### Minor Changes
+
+- 88a018d: feat(react-bridge): Add native support for React 19 in bridge-react with enhanced createRoot options
+
+### Patch Changes
+
+- 88a018d: feat(bridge-react): support react v19 in react compat file.
+- 4db1b0e: feat: add error detection for react v19 under the default export createBaseBridgeComponent
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- 0eb6d1b: refactor(bridge-react): modify the default mode of the bridge to legacy mode to reduce redundant code
+- Updated dependencies [38f324f]
+  - @module-federation/bridge-shared@0.13.0
+  - @module-federation/sdk@0.13.0
+
+## 0.12.0
+
+### Patch Changes
+
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/sdk@0.12.0
+  - @module-federation/bridge-shared@0.12.0
+
+## 0.11.4
+
+### Patch Changes
+
+- Updated dependencies [64a2bc1]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/bridge-shared@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.11.3
+- @module-federation/bridge-shared@0.11.3
+
+## 0.11.2
+
+### Patch Changes
+
+- f4f843d: remove @loadable/component from package.json
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/bridge-shared@0.11.2
+
 ## 0.11.1
 
 ### Patch Changes

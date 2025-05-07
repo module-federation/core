@@ -314,6 +314,7 @@ export class SnapshotHandler {
               {
                 manifestUrl,
                 moduleName: moduleInfo.name,
+                hostName: this.HostInstance.options.name,
               },
               `${err}`,
             ),

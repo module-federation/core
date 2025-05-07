@@ -1,5 +1,61 @@
 # @module-federation/webpack-bundler-runtime
 
+## 0.13.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.13.1
+- @module-federation/sdk@0.13.1
+
+## 0.13.0
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [38f324f]
+  - @module-federation/runtime@0.13.0
+  - @module-federation/sdk@0.13.0
+
+## 0.12.0
+
+### Minor Changes
+
+- c399b9a: Switch to esm modules by default
+- f4fb242: Support share layers and multiple share scopes
+
+### Patch Changes
+
+- Updated dependencies [f4fb242]
+- Updated dependencies [c399b9a]
+- Updated dependencies [ef96c4d]
+- Updated dependencies [f4fb242]
+  - @module-federation/runtime@0.12.0
+  - @module-federation/sdk@0.12.0
+
+## 0.11.4
+
+### Patch Changes
+
+- Updated dependencies [64a2bc1]
+- Updated dependencies [c14842f]
+  - @module-federation/sdk@0.11.4
+  - @module-federation/runtime@0.11.4
+
+## 0.11.3
+
+### Patch Changes
+
+- @module-federation/runtime@0.11.3
+- @module-federation/sdk@0.11.3
+
+## 0.11.2
+
+### Patch Changes
+
+- Updated dependencies [047857b]
+  - @module-federation/sdk@0.11.2
+  - @module-federation/runtime@0.11.2
+
 ## 0.11.1
 
 ### Patch Changes

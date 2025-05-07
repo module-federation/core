@@ -55,7 +55,7 @@ export interface ContainerReferencePluginOptions {
   /**
    * The name of the share scope shared with all remotes (defaults to 'default').
    */
-  shareScope?: string;
+  shareScope?: string | string[];
 }
 /**
  * Container locations from which modules should be resolved and loaded at runtime. Property names are used as request scopes.
@@ -77,5 +77,5 @@ export interface RemotesConfig {
   /**
    * The name of the share scope shared with this remote.
    */
-  shareScope?: string;
+  shareScope?: string | string[];
 }

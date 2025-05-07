@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "8.8.20",
+  "version": "8.8.26",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -8,7 +8,7 @@
   "description": "Module Federation helper for NextJS",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/nextjs-mf"
   },
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
@@ -47,6 +47,9 @@
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
     "@module-federation/webpack-bundler-runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/btoa": "^1.2.5"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",

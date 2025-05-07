@@ -1,5 +1,39 @@
 # @module-federation/sdk
 
+## 0.13.1
+
+## 0.13.0
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+
+## 0.12.0
+
+### Minor Changes
+
+- c399b9a: Switch to esm modules by default
+- f4fb242: Support share layers and multiple share scopes
+
+### Patch Changes
+
+- ef96c4d: feat(dts-plugin): support exclude extract specify third party dts
+
+## 0.11.4
+
+### Patch Changes
+
+- 64a2bc1: feat(sdk): add ssrPublicPath field
+- c14842f: feat(dts-plugin): support tspc
+
+## 0.11.3
+
+## 0.11.2
+
+### Patch Changes
+
+- 047857b: fix(sdk): stricter browser env check
+
 ## 0.11.1
 
 ## 0.11.0

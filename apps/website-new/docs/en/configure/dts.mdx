@@ -125,11 +125,11 @@ Whether to delete the generated type folder
 
 #### compilerInstance
 
-- Type: `'tsc' | 'vue-tsc'`
+- Type: `'tsc' | 'vue-tsc' | 'tspc' | string`
 - Required: No
 - Default value: `'tsc'`
 
-Example of compiled type
+Instance of compiled type
 
 ### consumeTypes
 
@@ -208,6 +208,75 @@ Before loading type files, whether to delete the previously loaded `typesFolder`
 - Default value: `'@mf-types'`
 
 `typesFolder` corresponding to `remotes` directory configuration
+
+#### remoteTypeUrls
+
+- Type: `(() => Promise<RemoteTypeUrls>) | RemoteTypeUrls`
+- Required: No
+- Default value:`undefined`
+
+Used for getting the address of the `remote` type file.
+
+Application scenarios:
+
+* Only the runtime API is used to load the producer, and no build plugin is used. The MF type file address is informed by creating a `module-federation.config.ts` configuration file and setting this configuration.
+
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig, type moduleFederationPlugin } from '@module-federation/enhanced';
+
+export default createModuleFederationConfig({
+  // ...
+  remotes: {
+    'remote1-alias': 'remote1@http://localhost:80801/remoteEntry.js'
+  },
+  dts:{
+    consumeTypes:{
+      remoteTypeUrls: async()=>{
+        // Simulate the request interface to obtain the type file address
+        const data = await new Promise<moduleFederationPlugin.RemoteTypeUrls>(resolve=>{
+          setTimeout(()=>{
+            resolve({
+              remote1:{
+                alias: 'remote1-alias',
+                api:'http://localhost:8081/custom-dir/@mf-types.d.ts',
+                zip:'http://localhost:8081/custom-dir/@mf-types.zip'
+              }
+            } )
+          },1000)
+        });
+
+        return data;
+      }
+    }
+  }
+});
+```
+
+
+* When remote is `remoteEntry.js`, the type file address usually directly replaces the js file with the corresponding type file, such as `@mf-types.zip`, but the actual uploaded type file address is not this, so you can tell MF the real type file address by setting this configuration.
+
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/enhanced';
+
+export default createModuleFederationConfig({
+  // ...
+  remotes: {
+    'remote1-alias': 'remote1@http://localhost:80801/remoteEntry.js'
+  },
+  dts:{
+    consumeTypes:{
+      remoteTypeUrls: {
+        // remote name
+        remote1:{
+          alias: 'remote1-alias',
+          api:'http://localhost:8081/custom-dir/@mf-types.d.ts',
+          zip:'http://localhost:8081/custom-dir/@mf-types.zip'
+        }
+      }
+    }
+  }
+});
+```
 
 ### tsConfigPath
 
