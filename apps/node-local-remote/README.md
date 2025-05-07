@@ -9,3 +9,7 @@
 ## Links
 
 - [Module Federation Docs](https://module-federation.io/)
+
+---
+
+*Optimized by Aiden*
