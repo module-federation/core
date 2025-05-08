@@ -1,6 +1,8 @@
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 import helpers from '@module-federation/runtime/helpers';
 import { getDataFetchInfo } from '../../runtime/utils';
+import logger from '../../runtime/logger';
+import { getDataFetchMapKey } from '../../runtime/dataFetch';
 
 const autoFetchData: () => FederationRuntimePlugin = () => ({
   name: 'auto-fetch-data-plugin',
@@ -30,14 +32,29 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
 
     const { modules, version } = remoteSnapshot;
 
-    const key = `${name}@${version}@${dataFetchName}`;
-    console.log('======= auto fetch plugin key: ', key);
-    if (helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__[key]) {
+    const dataFetchMapKey = getDataFetchMapKey(
+      { name, version },
+      dataFetchInfo,
+    );
+    logger.debug(
+      '======= auto fetch plugin dataFetchMapKey: ',
+      dataFetchMapKey,
+    );
+
+    if (!dataFetchMapKey) {
+      return args;
+    }
+
+    if (
+      helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__[
+        dataFetchMapKey
+      ]
+    ) {
       return args;
     }
 
     if (!modules.find((module) => module.moduleName === dataFetchName)) {
-      console.log(
+      logger.debug(
         '======= auto fetch plugin module name not existed',
         modules.map((i) => i.moduleName).join(', '),
       );
@@ -63,11 +80,12 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
       });
 
     helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__.set(
-      key,
+      dataFetchMapKey,
       fetchData,
     );
 
     return args;
   },
 });
+
 export default autoFetchData;

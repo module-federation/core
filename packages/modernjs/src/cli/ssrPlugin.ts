@@ -5,7 +5,7 @@ import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 import { updateStatsAndManifest } from './manifest';
 import { isDev } from './constant';
-import logger from './logger';
+import logger from '../runtime/logger';
 import { isWebTarget, skipByTarget } from './utils';
 
 import type {

@@ -4,8 +4,11 @@ import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
 import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
 import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
-import { autoDeleteSplitChunkCacheGroups } from '@module-federation/rsbuild-plugin/utils';
-import logger from './logger';
+import {
+  autoDeleteSplitChunkCacheGroups,
+  addDataFetchExposes,
+} from '@module-federation/rsbuild-plugin/utils';
+import logger from '../runtime/logger';
 
 import type { InternalModernPluginOptions } from '../types';
 import type {
@@ -146,12 +149,16 @@ export const patchMFConfig = (
   remoteIpStrategy?: 'ipv4' | 'inherit',
 ) => {
   replaceRemoteUrl(mfConfig, remoteIpStrategy);
+  addDataFetchExposes(mfConfig.exposes, isServer);
+
   if (mfConfig.remoteType === undefined) {
     mfConfig.remoteType = 'script';
   }
+
   if (!mfConfig.name) {
     throw new Error(`${PLUGIN_IDENTIFIER} mfConfig.name can not be empty!`);
   }
+
   const runtimePlugins = [...(mfConfig.runtimePlugins || [])];
 
   patchDTSConfig(mfConfig, isServer);
@@ -485,6 +492,17 @@ export const moduleFederationConfigPlugin = (
         },
       };
     });
+
+    if (enableSSR && mfConfig.remotes) {
+      api._internalServerPlugins(({ plugins }) => {
+        plugins.push({
+          name: '@module-federation/modern-js/data-fetch-server-plugin',
+          options: {},
+        });
+
+        return { plugins };
+      });
+    }
   },
 });
 

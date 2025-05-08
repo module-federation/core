@@ -1,16 +1,13 @@
 import React from 'react';
-import helpers from '@module-federation/runtime/helpers';
-import {
-  getInstance,
-  type FederationHost,
-} from '@module-federation/enhanced/runtime';
-import { isBrowserEnv } from '@module-federation/sdk';
+import logger from './logger';
+import { getInstance } from '@module-federation/enhanced/runtime';
 import {
   ErrorBoundary,
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
-import { getDataFetchInfo } from './utils';
 import { Await } from './Await';
+import { fetchData, getDataFetchMapKey } from './dataFetch';
+import { getDataFetchInfo, getLoadedRemoteInfos } from './utils';
 
 type IProps = {
   id: string;
@@ -20,87 +17,12 @@ type IProps = {
 
 type ReactKey = { key?: React.Key | null };
 
-async function fetchData(
-  id: string,
-  uid: string,
-): Promise<unknown | undefined> {
-  if (isBrowserEnv()) {
-    if (!globalThis._MF__DATA_FETCH_ID_MAP__) {
-      globalThis._MF__DATA_FETCH_ID_MAP__ = {};
-    }
-    if (globalThis._MF__DATA_FETCH_ID_MAP__[uid]) {
-      return;
-    }
-    let res;
-    let rej;
-    const p = new Promise((resolve, reject) => {
-      res = resolve;
-      rej = reject;
-    });
-    globalThis._MF__DATA_FETCH_ID_MAP__[uid] = [p, res, rej];
-    return globalThis._MF__DATA_FETCH_ID_MAP__[uid][0];
-  }
-  const instance = getInstance();
-  if (!instance) {
-    return;
-  }
-
-  const { name } = instance.remoteHandler.idToRemoteMap[id] || {};
-  if (!name) {
-    return;
-  }
-  const module = instance.moduleCache.get(name);
-  if (!module) {
-    return;
-  }
-  const dataFetchInfo = getDataFetchInfo({
-    id,
-    name,
-    alias: module.remoteInfo.alias,
-  });
-  if (!dataFetchInfo) {
-    return;
-  }
-  const key = `${name}@${module.remoteInfo.version}@${dataFetchInfo.dataFetchName}`;
-  const fetchDataPromise =
-    helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__.get(key);
-  if (!fetchDataPromise) {
-    return;
-  }
-
-  const fetchDataFn = await fetchDataPromise;
-  if (!fetchDataFn) {
-    return;
-  }
-  console.log('fetchDataFn: ', fetchDataFn.toString());
-  return fetchDataFn();
-}
-
-function getLoadedRemoteInfos(instance: FederationHost, id: string) {
-  const { name, expose } = instance.remoteHandler.idToRemoteMap[id] || {};
-  if (!name) {
-    return;
-  }
-  const module = instance.moduleCache.get(name);
-  if (!module) {
-    return;
-  }
-  const { remoteSnapshot } = instance.snapshotHandler.getGlobalRemoteInfo(
-    module.remoteInfo,
-  );
-  return {
-    ...module.remoteInfo,
-    snapshot: remoteSnapshot,
-    expose,
-  };
-}
-
 function getTargetModuleInfo(id: string) {
   const instance = getInstance();
   if (!instance) {
     return;
   }
-  const loadedRemoteInfo = getLoadedRemoteInfos(instance, id);
+  const loadedRemoteInfo = getLoadedRemoteInfos(id, instance);
   if (!loadedRemoteInfo) {
     return;
   }
@@ -199,9 +121,6 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
   fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
   export?: E;
 }) {
-  // const [uid,setUid] = useState('')
-  console.log('createRemoteSSRComponent trigger');
-
   type ComponentType = T[E] extends (...args: any) => any
     ? Parameters<T[E]>[0] extends undefined
       ? ReactKey
@@ -219,11 +138,26 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
   };
 
   const getData = async () => {
-    // const nodeUid = isBrowserEnv () ? document.get : uid
     const m = await callLoader();
     const moduleId = m && m[Symbol.for('mf_module_id')];
-    const data = await fetchData(moduleId, moduleId);
-    console.log('data: ', data);
+    const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, getInstance());
+    if (!loadedRemoteInfo) {
+      return;
+    }
+    const dataFetchMapKey = getDataFetchMapKey(
+      { name: loadedRemoteInfo.name, version: loadedRemoteInfo.version },
+      getDataFetchInfo({
+        name: loadedRemoteInfo.name,
+        alias: loadedRemoteInfo.alias,
+        id: moduleId,
+      }),
+    );
+    logger.debug('getData dataFetchMapKey: ', dataFetchMapKey);
+    if (!dataFetchMapKey) {
+      return;
+    }
+    const data = await fetchData(dataFetchMapKey);
+    logger.debug('data: \n', data);
     return data;
   };
 
@@ -231,6 +165,19 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
     try {
       const m = await callLoader();
       const moduleId = m && m[Symbol.for('mf_module_id')];
+      const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, getInstance());
+
+      const dataFetchMapKey = loadedRemoteInfo
+        ? getDataFetchMapKey(
+            { name: loadedRemoteInfo.name, version: loadedRemoteInfo.version },
+            getDataFetchInfo({
+              name: loadedRemoteInfo.name,
+              alias: loadedRemoteInfo.alias,
+              id: moduleId,
+            }),
+          )
+        : undefined;
+      logger.debug('LazyComponent dataFetchMapKey: ', dataFetchMapKey);
 
       const assets = collectSSRAssets({
         id: moduleId,
@@ -243,14 +190,16 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
             props: Omit<ComponentType, 'key'> & { _mfData: unknown },
           ) => (
             <>
-              <script
-                suppressHydrationWarning
-                dangerouslySetInnerHTML={{
-                  __html: String.raw`
-      globalThis._MF__DATA_FETCH_ID_MAP__['${moduleId}'][1](${JSON.stringify(props._mfData)})
+              {dataFetchMapKey && (
+                <script
+                  suppressHydrationWarning
+                  dangerouslySetInnerHTML={{
+                    __html: String.raw`
+      globalThis._MF__DATA_FETCH_ID_MAP__['${dataFetchMapKey}'][1](${JSON.stringify(props._mfData)})
    `,
-                }}
-              ></script>
+                  }}
+                ></script>
+              )}
               {assets}
               <Com {...props} />
             </>

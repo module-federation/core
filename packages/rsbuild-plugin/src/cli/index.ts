@@ -7,13 +7,13 @@ import { isRequiredVersion } from '@module-federation/sdk';
 
 import { isRegExp, autoDeleteSplitChunkCacheGroups } from '../utils/index';
 import pkgJson from '../../package.json';
+import logger from '../logger';
 
 import type {
   moduleFederationPlugin,
   sharePlugin,
 } from '@module-federation/sdk';
 import type { RsbuildConfig, RsbuildPlugin, Rspack } from '@rsbuild/core';
-import logger from '../logger';
 
 type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
