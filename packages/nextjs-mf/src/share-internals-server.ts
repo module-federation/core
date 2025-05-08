@@ -453,18 +453,18 @@ export const getNextInternalsShareScopeServer = (
     return {};
   }
   return {
-    'next/dist/': {
-      singleton: true,
-      exclude: {
-        request: /^(?!.*react).*|react-refresh/,
-      },
-    },
-    'styled-jsx': {
-      singleton: true,
-    },
-    'styled-jsx/': {
-      singleton: true,
-    },
+    // 'next/dist/': {
+    //   singleton: true,
+    //   exclude: {
+    //     request: /^(?!.*react).*|react-refresh/,
+    //   },
+    // },
+    // 'styled-jsx': {
+    //   singleton: true,
+    // },
+    // 'styled-jsx/': {
+    //   singleton: true,
+    // },
   };
 
   // Generate all the server-side sharing groups

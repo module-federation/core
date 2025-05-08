@@ -298,8 +298,7 @@ export const setupChunkHandler = (
                     chunkId,
                   )
                 : false;
-            const runtimeid = __webpack_runtime_id__;
-            console.log(runtimeid, filename, __dirname);
+            
             if (fs && fs.existsSync(filename)) {
               loadChunk(
                 'filesystem',

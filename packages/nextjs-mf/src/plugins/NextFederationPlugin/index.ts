@@ -89,8 +89,11 @@ export class NextFederationPlugin {
     new RscManifestInterceptPlugin().apply(compiler);
 
     const noop = this.getNoopPath();
+    const noopAppDirClient = this.getNoopAppDirClientPath();
+    const noopAppDirServer = this.getNoopAppDirServerPath();
 
     if (!this._extraOptions.skipSharingNextInternals) {
+      // Adds 'noop' entry (unlayered)
       compiler.hooks.make.tapAsync(
         'NextFederationPlugin',
         (compilation, callback) => {
@@ -102,13 +105,76 @@ export class NextFederationPlugin {
             compiler.context,
             dep,
             { name: 'noop' },
-            (err, module) => {
+            (err) => {
               if (err) {
                 return callback(err);
               }
               callback();
             },
           );
+        },
+      );
+
+      // Add entry for app directory client components
+      compiler.hooks.make.tapAsync(
+        'NextFederationPlugin',
+        (compilation, callback) => {
+          if (compiler.name === 'client') {
+            const dep = compiler.webpack.EntryPlugin.createDependency(
+              noopAppDirClient,
+              {
+                name: 'noop-appdir-client',
+                layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+              },
+            );
+            compilation.addEntry(
+              compiler.context,
+              dep,
+              {
+                name: 'noop-appdir-client',
+                layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+              },
+              (err) => {
+                if (err) {
+                  return callback(err);
+                }
+                callback();
+              },
+            );
+          } else {
+            callback();
+          }
+        },
+      );
+      // Add entry for app directory server components
+      compiler.hooks.make.tapAsync(
+        'NextFederationPlugin',
+        (compilation, callback) => {
+          if (compiler.name === 'server') {
+            const dep = compiler.webpack.EntryPlugin.createDependency(
+              noopAppDirServer,
+              {
+                name: 'noop-appdir-server',
+                layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+              },
+            );
+            compilation.addEntry(
+              compiler.context,
+              dep,
+              {
+                name: 'noop-appdir-server',
+                layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+              },
+              (err) => {
+                if (err) {
+                  return callback(err);
+                }
+                callback();
+              },
+            );
+          } else {
+            callback();
+          }
         },
       );
     }
@@ -242,6 +308,7 @@ export class NextFederationPlugin {
       shareScope: Object.values({
         ...WEBPACK_LAYERS_NAMES,
         default: 'default',
+
       }),
       shared: {
         ...defaultShared,
@@ -252,7 +319,7 @@ export class NextFederationPlugin {
         : { manifest: { filePath: '/static/chunks' } }),
       // nextjs project needs to add config.watchOptions = ['**/node_modules/**', '**/@mf-types/**'] to prevent loop types update
       dts: this._options.dts ?? false,
-      shareStrategy: this._options.shareStrategy ?? 'loaded-first',
+      // shareStrategy: this._options.shareStrategy ?? 'loaded-first',
       experiments: {
         asyncStartup: true,
       },
@@ -261,6 +328,14 @@ export class NextFederationPlugin {
 
   private getNoopPath(): string {
     return require.resolve('../../federation-noop.cjs');
+  }
+
+  private getNoopAppDirClientPath(): string {
+    return require.resolve('../../federation-noop-appdir-client.cjs');
+  }
+
+  private getNoopAppDirServerPath(): string {
+    return require.resolve('../../federation-noop-appdir-server.cjs');
   }
 }
 

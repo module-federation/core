@@ -68,25 +68,31 @@ class SharePlugin {
           layer: options.layer,
           request: options.request || key,
           exclude: options.exclude,
+          include: options.include,
         },
       }),
     );
     const provides: Record<string, ProvidesConfig>[] = sharedOptions
       .filter(([, options]) => options.import !== false)
-      .map(([key, options]) => ({
-        [options.import || key]: {
-          shareKey: options.shareKey || key,
-          shareScope: options.shareScope,
-          version: options.version,
-          eager: options.eager,
-          requiredVersion: options.requiredVersion,
-          strictVersion: options.strictVersion,
-          singleton: options.singleton,
-          layer: options.layer,
-          request: options.request || options.import || key,
-          exclude: options.exclude,
-        },
-      }));
+      .map(([key, options]) => {
+        const providesKey = options.import || key;
+
+        return {
+          [providesKey]: {
+            shareKey: options.shareKey || key,
+            shareScope: options.shareScope,
+            version: options.version,
+            eager: options.eager,
+            requiredVersion: options.requiredVersion,
+            strictVersion: options.strictVersion,
+            singleton: options.singleton,
+            layer: options.layer,
+            request: options.request || options.import || key,
+            exclude: options.exclude,
+            include: options.include,
+          },
+        };
+      });
 
     this._shareScope = options.shareScope || 'default';
     this._consumes = consumes;

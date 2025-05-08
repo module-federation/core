@@ -6,16 +6,10 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
-      "defaultConfiguration": "production",
+      "executor": "nx:run-commands",
       "options": {
-        "outputPath": "apps/next-app-router-4001"
-      },
-      "configurations": {
-        "development": {
-          "outputPath": "apps/next-app-router-4001"
-        },
-        "production": {}
+        "command": "npm run build",
+        "cwd": "apps/next-app-router/next-app-router-4001"
       },
       "dependsOn": [
         {

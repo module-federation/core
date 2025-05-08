@@ -43,6 +43,8 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   compilation: Compilation,
   configs: [string, T][],
 ): Promise<MatchedConfigs<T>> {
+  console.log('[resolveMatchedConfigs] Starting with configs count:', configs.length);
+
   const resolved = new Map<string, T>();
   const unresolved = new Map<string, T>();
   const prefixed = new Map<string, T>();
@@ -56,6 +58,12 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
 
   await Promise.all(
     configs.map(([request, config]) => {
+      console.log(`[resolveMatchedConfigs] Processing ${request}:`, {
+        hasInclude: !!config.include,
+        includeDetails: config.include,
+        actualRequest: config.request || request
+      });
+
       const resolveRequest = config.request || request;
       if (RELATIVE_REQUEST_REGEX.test(resolveRequest)) {
         // relative request
@@ -87,11 +95,13 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
       } else if (resolveRequest.endsWith('/')) {
         // module request prefix
         const key = createCompositeKey(resolveRequest, config);
+        console.log(`[resolveMatchedConfigs-DEBUG] Adding to prefixed: key='${key}'`, { config });
         prefixed.set(key, config);
         return undefined;
       } else {
         // module request
         const key = createCompositeKey(resolveRequest, config);
+        console.log(`[resolveMatchedConfigs-DEBUG] Adding to unresolved: key='${key}'`, { config });
         unresolved.set(key, config);
         return undefined;
       }
@@ -100,5 +110,25 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   compilation.contextDependencies.addAll(resolveContext.contextDependencies);
   compilation.fileDependencies.addAll(resolveContext.fileDependencies);
   compilation.missingDependencies.addAll(resolveContext.missingDependencies);
+
+  // Log the final statistics
+  console.log('[resolveMatchedConfigs] Final counts:', {
+    resolvedCount: resolved.size,
+    unresolvedCount: unresolved.size,
+    prefixedCount: prefixed.size
+  });
+
+  // Sample log a few prefix entries for debugging include/exclude
+  const prefixEntries = Array.from(prefixed.entries());
+  if (prefixEntries.length > 0) {
+    console.log('[resolveMatchedConfigs] Sample prefix entries:');
+    prefixEntries.slice(0, Math.min(5, prefixEntries.length)).forEach(([key, config]) => {
+      console.log(`  - Prefix ${key}:`, {
+        hasInclude: !!config.include,
+        includeDetails: config.include
+      });
+    });
+  }
+
   return { resolved, unresolved, prefixed };
 }

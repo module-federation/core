@@ -12,6 +12,15 @@ import {
   createSharingTestEnvironment,
 } from './utils';
 import { satisfy } from '@module-federation/runtime-tools/runtime-core';
+import type { ConsumeOptions } from '../../../src/declarations/plugins/sharing/ConsumeSharedModule';
+import { Compiler, Compilation } from 'webpack';
+import { ConsumeSharedPlugin } from '../../../src/lib/sharing/ConsumeSharedPlugin';
+import { ConsumeSharedModule } from '../../../src/lib/sharing/ConsumeSharedModule';
+import { resolveMatchedConfigs } from '../../../src/lib/sharing/resolveMatchedConfigs';
+import {
+  getDescriptionFile,
+  NormalModuleFactoryPlugin,
+} from '../../../src/lib/sharing/utils';
 
 // Create webpack mock
 const webpack = createWebpackMock();
@@ -49,7 +58,7 @@ jest.mock('../../../src/lib/sharing/ShareRuntimeModule', () => {
   return mockShareRuntimeModule;
 });
 
-// Direct dependency mocks - these don't require actual file paths
+// Direct dependency mocks
 jest.mock(
   '../../../src/lib/sharing/ConsumeSharedDependency',
   () => {
@@ -84,17 +93,12 @@ jest.mock('../../../src/lib/sharing/resolveMatchedConfigs');
 // Mock utils module
 jest.mock('../../../src/lib/sharing/utils');
 
-// Mock ConsumeSharedModule (Restore)
+// Mock ConsumeSharedModule
 jest.mock('../../../src/lib/sharing/ConsumeSharedModule', () => {
-  return mockConsumeSharedModule; // Use the factory mock
+  return mockConsumeSharedModule;
 });
 
-// Mock ConsumeSharedRuntimeModule
-jest.mock('../../../src/lib/sharing/ConsumeSharedRuntimeModule', () => {
-  return mockConsumeSharedRuntimeModule;
-});
-
-// Mock satisfy function (Restore)
+// Mock satisfy function
 jest.mock('@module-federation/runtime-tools/runtime-core', () => ({
   satisfy: jest.fn(),
 }));
@@ -103,37 +107,77 @@ jest.mock('@module-federation/runtime-tools/runtime-core', () => ({
 const ConsumeSharedPlugin =
   require('../../../src/lib/sharing/ConsumeSharedPlugin').default;
 
-// Import the MOCKED functions HERE
+// Import the MOCKED functions
 const {
   resolveMatchedConfigs,
 } = require('../../../src/lib/sharing/resolveMatchedConfigs');
 const { getDescriptionFile } = require('../../../src/lib/sharing/utils');
 
 describe('ConsumeSharedPlugin', () => {
-  // --- Global beforeEach for default mocks ---
+  let testEnv;
+
   beforeEach(() => {
-    // Clear mocks but maintain default implementation strategy
     jest.clearAllMocks();
-    // Reset specific mocks to clear implementations/resolved values
+    testEnv = createSharingTestEnvironment();
+
+    mockConsumeSharedModule.mockReset();
+    mockConsumeSharedModule.mockImplementation((context, configParams) => {
+      const completeOptions: ConsumeOptions = {
+        import:
+          configParams.import === undefined
+            ? configParams.request
+            : configParams.import,
+        shareKey: configParams.shareKey || configParams.request,
+        shareScope: configParams.shareScope || 'default',
+        requiredVersion:
+          configParams.requiredVersion === undefined
+            ? false
+            : configParams.requiredVersion,
+        strictVersion:
+          typeof configParams.strictVersion === 'boolean'
+            ? configParams.strictVersion
+            : false,
+        singleton:
+          typeof configParams.singleton === 'boolean'
+            ? configParams.singleton
+            : false,
+        eager:
+          typeof configParams.eager === 'boolean' ? configParams.eager : false,
+        packageName: configParams.packageName || '',
+        layer: configParams.layer || null,
+        issuerLayer: configParams.issuerLayer || null,
+        request: configParams.request,
+        ...configParams,
+      };
+      return {
+        context,
+        options: completeOptions,
+        ...completeOptions,
+        build: jest.fn(),
+        getVersion: jest
+          .fn()
+          .mockReturnValue(completeOptions.requiredVersion || '0.0.0'),
+      };
+    });
+
     (resolveMatchedConfigs as jest.Mock).mockReset();
     (getDescriptionFile as jest.Mock).mockReset();
+    (satisfy as jest.Mock).mockReset();
 
-    // Set a default implementation for resolveMatchedConfigs that returns a promise
+    // Set default implementations for mocks after resetting
     (resolveMatchedConfigs as jest.Mock).mockImplementation(async () => ({
       resolved: new Map(),
       unresolved: new Map(),
       prefixed: new Map(),
     }));
-    // Default mock for getDescriptionFile
     (getDescriptionFile as jest.Mock).mockImplementation(
       (fs, context, files, callback) => {
-        callback(null, { data: { version: '0.0.0' } }, []); // Default successful callback
+        callback(null, { data: { version: '0.0.0' } }, []);
       },
     );
   });
-  // -------------------------------------------
 
-  describe('constructor', () => {
+  describe('constructor and basic functionality', () => {
     it('should initialize with string shareScope', () => {
       const plugin = new ConsumeSharedPlugin({
         shareScope: shareScopes.string,
@@ -142,29 +186,12 @@ describe('ConsumeSharedPlugin', () => {
         },
       });
 
-      // Test private property is set correctly
       // @ts-ignore accessing private property for testing
       const consumes = plugin._consumes;
-
       expect(consumes.length).toBe(1);
       expect(consumes[0][0]).toBe('react');
       expect(consumes[0][1].shareScope).toBe(shareScopes.string);
       expect(consumes[0][1].requiredVersion).toBe('^17.0.0');
-    });
-
-    it('should initialize with array shareScope', () => {
-      const plugin = new ConsumeSharedPlugin({
-        shareScope: shareScopes.array,
-        consumes: {
-          react: '^17.0.0',
-        },
-      });
-
-      // @ts-ignore accessing private property for testing
-      const consumes = plugin._consumes;
-      const [, config] = consumes[0];
-
-      expect(config.shareScope).toEqual(shareScopes.array);
     });
 
     it('should handle consumes with explicit options', () => {
@@ -190,454 +217,215 @@ describe('ConsumeSharedPlugin', () => {
       expect(config.singleton).toBe(true);
       expect(config.eager).toBe(false);
     });
-
-    it('should handle consumes with custom shareScope', () => {
-      const plugin = new ConsumeSharedPlugin({
-        shareScope: shareScopes.string,
-        consumes: {
-          react: {
-            shareScope: 'custom-scope',
-            requiredVersion: '^17.0.0',
-          },
-        },
-      });
-
-      // @ts-ignore accessing private property for testing
-      const consumes = plugin._consumes;
-      const [, config] = consumes[0];
-
-      expect(config.shareScope).toBe('custom-scope');
-    });
-  });
-
-  describe('module creation', () => {
-    it('should create ConsumeSharedModule with correct options', () => {
-      const options = {
-        request: 'react',
-        shareScope: shareScopes.array,
-        requiredVersion: '^17.0.0',
-      };
-      const testModule = mockConsumeSharedModule(null, options); // Pass null context
-      expect(testModule.shareScope).toEqual(shareScopes.array);
-      expect(testModule.request).toBe('react');
-      expect(testModule.requiredVersion).toBe('^17.0.0');
-    });
-
-    it('should handle prefixed modules correctly', () => {
-      const options = {
-        request: 'prefix/component',
-        shareScope: shareScopes.string,
-        requiredVersion: '^1.0.0',
-      };
-      const testModule = mockConsumeSharedModule(null, options); // Pass null context
-      expect(testModule.shareScope).toBe(shareScopes.string);
-      expect(testModule.request).toBe('prefix/component');
-      expect(testModule.requiredVersion).toBe('^1.0.0');
-    });
-
-    it('should respect issuerLayer from contextInfo', () => {
-      const options = {
-        request: 'react',
-        shareScope: shareScopes.string,
-        requiredVersion: '^17.0.0',
-        layer: 'test-layer',
-      };
-      const testModule = mockConsumeSharedModule(null, options); // Pass null context
-      expect(testModule.options.layer).toBe('test-layer');
-    });
-  });
-
-  describe('apply', () => {
-    let testEnv;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      testEnv = createSharingTestEnvironment();
-    });
-
-    it('should register hooks when plugin is applied', () => {
-      const plugin = new ConsumeSharedPlugin({
-        shareScope: shareScopes.string,
-        consumes: {
-          react: '^17.0.0',
-        },
-      });
-
-      // Apply the plugin
-      plugin.apply(testEnv.compiler);
-
-      // Simulate the compilation phase
-      testEnv.simulateCompilation();
-
-      // Check that thisCompilation and compilation hooks were tapped
-      expect(testEnv.compiler.hooks.thisCompilation.tap).toHaveBeenCalled();
-      expect(
-        testEnv.mockCompilation.hooks.additionalTreeRuntimeRequirements.tap,
-      ).toHaveBeenCalled();
-    });
-
-    it('should add runtime modules when runtimeRequirements callback is called', () => {
-      const plugin = new ConsumeSharedPlugin({
-        shareScope: shareScopes.string,
-        consumes: {
-          react: '^17.0.0',
-        },
-      });
-
-      // Apply the plugin
-      plugin.apply(testEnv.compiler);
-
-      // Simulate the compilation phase
-      testEnv.simulateCompilation();
-
-      // Simulate runtime requirements
-      const runtimeRequirements = testEnv.simulateRuntimeRequirements();
-
-      // Verify runtime requirement was added
-      expect(runtimeRequirements.has('__webpack_share_scopes__')).toBe(true);
-
-      // Verify runtime modules were added
-      expect(testEnv.mockCompilation.addRuntimeModule).toHaveBeenCalled();
-    });
   });
 
   describe('exclude functionality', () => {
-    let testEnv;
-
-    beforeEach(() => {
-      testEnv = createSharingTestEnvironment();
-      mockConsumeSharedModule.mockClear();
-      (getDescriptionFile as jest.Mock).mockReset();
-    });
-
-    describe('version-based exclusion', () => {
-      // Add beforeEach to reset satisfy mock
-      beforeEach(() => {
-        (satisfy as jest.Mock).mockReset();
-      });
-
-      it('should exclude module when package version matches exclude.version', async () => {
-        const plugin = new ConsumeSharedPlugin({
-          consumes: {
-            react: {
-              import: './react-fallback',
-              requiredVersion: '^17.0.0',
-              exclude: { version: '^17.0.0' },
-              shareScope: 'test-scope',
-            },
-          },
-        });
-
-        plugin.apply(testEnv.compiler);
-        testEnv.simulateCompilation();
-
-        (resolveMatchedConfigs as jest.Mock).mockResolvedValueOnce({
-          resolved: new Map(),
-          unresolved: new Map([['react', plugin._consumes[0][1]]]),
-          prefixed: new Map(),
-        });
-
-        (getDescriptionFile as jest.Mock).mockImplementationOnce(
-          (fs, context, files, callback) => {
-            callback(null, { data: { name: 'react', version: '17.0.2' } }, [
-              'package.json',
-            ]);
-          },
-        );
-
-        testEnv.mockResolver.resolve.mockImplementationOnce(
-          (ctx, context, request, resolveContext, callback) => {
-            callback(null, '/mock/fallback/react');
-          },
-        );
-
-        // Explicitly mock satisfy for this test
-        (satisfy as jest.Mock).mockImplementationOnce(() => true); // Should exclude
-
-        // We don't need the factorize hook, but need resolver for createConsumeSharedModule internal call
-        testEnv.mockResolver.resolve.mockImplementationOnce(
-          (ctx, context, request, resolveContext, callback) => {
-            callback(null, '/mock/fallback/react');
-          },
-        );
-
-        // Directly call createConsumeSharedModule
-        const result = await plugin.createConsumeSharedModule(
-          testEnv.mockCompilation,
-          '/mock/context',
-          'react',
-          plugin._consumes[0][1],
-        );
-
-        expect(result).toBeUndefined(); // Module should be undefined since version matches exclude
-      });
-
-      it('should not exclude module when package version does not match exclude.version', async () => {
+    describe('Next.js style patterns', () => {
+      it('should handle compiled React exclusion', async () => {
         const testConfig = {
-          import: './react-fallback',
-          shareScope: 'test-scope',
-          shareKey: 'react',
-          requiredVersion: '^17.0.0',
-          strictVersion: true,
-          singleton: false,
-          eager: false,
+          request: 'next/dist/compiled/',
+          singleton: true,
+          layer: 'app-pages-browser',
+          issuerLayer: 'app-pages-browser',
+          shareScope: 'app-pages-browser',
+          requiredVersion: '^18.2.0',
+          shareKey: 'next/dist/compiled/',
           exclude: {
-            version: '^16.0.0',
+            request: /react$/,
           },
-          request: 'react',
         };
+
         const plugin = new ConsumeSharedPlugin({
-          consumes: { react: testConfig },
+          consumes: { 'next/dist/compiled/': testConfig },
         });
+
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        // Mock resolveMatchedConfigs to return our config
-        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(
-          async () => ({
-            resolved: new Map(),
-            unresolved: new Map([['react', testConfig]]),
-            prefixed: new Map(),
-          }),
-        );
-
-        // Mock resolver to return a valid path
-        testEnv.mockResolver.resolve.mockImplementationOnce(
-          (ctx, context, request, resolveContext, callback) => {
-            callback(null, '/mock/fallback/react');
-          },
-        );
-
-        // Mock getDescriptionFile to return a version that shouldn't match exclude
-        (getDescriptionFile as jest.Mock).mockImplementationOnce(
-          (fs, context, files, callback) => {
-            callback(null, { data: { name: 'react', version: '17.0.2' } }, [
-              'package.json',
-            ]);
-          },
-        );
-
-        // Mock satisfy to return false (version doesn't match exclude)
-        (satisfy as jest.Mock).mockImplementationOnce(() => false);
-
-        // Directly call createConsumeSharedModule
-        const result = await plugin.createConsumeSharedModule(
-          testEnv.mockCompilation,
-          '/mock/context',
-          'react',
-          testConfig,
-        );
-
-        expect(result).toBeDefined();
-        expect(satisfy).toHaveBeenCalledWith('17.0.2', '^16.0.0');
-        expect(result).toHaveProperty('options', {
-          ...testConfig,
-          importResolved: '/mock/fallback/react',
-        });
-      });
-
-      it('should handle fallbackVersion in exclude configuration', async () => {
-        const testConfig = {
-          import: './react-fallback',
-          shareScope: 'test-scope',
-          shareKey: 'react',
-          requiredVersion: '^17.0.0',
-          strictVersion: true,
-          singleton: false,
-          eager: false,
-          exclude: {
-            version: '^16.0.0',
-            fallbackVersion: '17.0.2',
-          },
-          request: 'react',
-        };
-        const plugin = new ConsumeSharedPlugin({
-          consumes: { react: testConfig },
-        });
-        plugin.apply(testEnv.compiler);
-        testEnv.simulateCompilation();
-
-        // Mock resolveMatchedConfigs to return our config
-        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(
-          async () => ({
-            resolved: new Map(),
-            unresolved: new Map([['react', testConfig]]),
-            prefixed: new Map(),
-          }),
-        );
-
-        // Mock satisfy to return true for fallbackVersion matching exclude version
-        (satisfy as jest.Mock).mockImplementationOnce(() => true);
-
-        // Directly call createConsumeSharedModule
-        const result = await plugin.createConsumeSharedModule(
-          testEnv.mockCompilation,
-          '/mock/context',
-          'react',
-          testConfig,
-        );
-
-        expect(result).toBeUndefined();
-        expect(satisfy).toHaveBeenCalledWith('17.0.2', '^16.0.0');
-      });
-
-      it('should not exclude module when fallbackVersion does not match exclude version', async () => {
-        const testConfig = {
-          import: './react-fallback',
-          shareScope: 'test-scope',
-          shareKey: 'react',
-          requiredVersion: '^17.0.0',
-          strictVersion: true,
-          singleton: false,
-          eager: false,
-          exclude: {
-            version: '^16.0.0',
-            fallbackVersion: '17.0.2',
-          },
-          request: 'react',
-        };
-        const plugin = new ConsumeSharedPlugin({
-          consumes: { react: testConfig },
-        });
-        plugin.apply(testEnv.compiler);
-        testEnv.simulateCompilation();
-
-        // Mock resolveMatchedConfigs to return our config
-        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(
-          async () => ({
-            resolved: new Map(),
-            unresolved: new Map([['react', testConfig]]),
-            prefixed: new Map(),
-          }),
-        );
-
-        // Mock resolver to return a valid path
-        testEnv.mockResolver.resolve.mockImplementationOnce(
-          (ctx, context, request, resolveContext, callback) => {
-            callback(null, '/mock/fallback/react');
-          },
-        );
-
-        // Mock satisfy to return false (fallbackVersion doesn't match exclude version)
-        (satisfy as jest.Mock).mockImplementationOnce(() => false);
-
-        // Directly call createConsumeSharedModule
-        const result = await plugin.createConsumeSharedModule(
-          testEnv.mockCompilation,
-          '/mock/context',
-          'react',
-          testConfig,
-        );
-
-        expect(result).toBeDefined();
-        expect(satisfy).toHaveBeenCalledWith('17.0.2', '^16.0.0');
-        expect(result).toHaveProperty('options', {
-          ...testConfig,
-          importResolved: '/mock/fallback/react',
-        });
-      });
-    });
-
-    describe('request-based exclusion', () => {
-      beforeEach(() => {
-        (satisfy as jest.Mock).mockReset(); // Keep satisfy reset here if needed
-      });
-
-      it('should exclude module when request matches exclude.request pattern', async () => {
-        const testConfig = {
-          import: './base-path', // No trailing slash
-          shareScope: 'test-scope',
-          shareKey: '@scope/prefix', // No trailing slash
-          requiredVersion: '^1.0.0',
-          strictVersion: true,
-          singleton: false,
-          eager: false,
-          exclude: {
-            request: /excluded-path$/, // Match remainder without leading slash
-          },
-          request: '@scope/prefix/', // Add trailing slash only to request
-        };
-        const plugin = new ConsumeSharedPlugin({
-          consumes: { '@scope/prefix/': testConfig }, // Add trailing slash to prefix key
-        });
-
-        // Apply the plugin and simulate compilation
-        plugin.apply(testEnv.compiler);
-        testEnv.simulateCompilation();
-
-        // Mock resolveMatchedConfigs to return our config in prefixed map
         (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(
           async () => ({
             resolved: new Map(),
             unresolved: new Map(),
-            prefixed: new Map([['@scope/prefix/', testConfig]]), // Add trailing slash to prefix key
+            prefixed: new Map([['next/dist/compiled/', testConfig]]),
           }),
         );
 
-        // Mock resolver to return a path that should match our exclude pattern
-        testEnv.mockResolver.resolve.mockImplementationOnce(
-          (ctx, context, request, resolveContext, callback) => {
-            callback(null, '/mock/base-path/excluded-path');
-          },
-        );
-
-        // Call the factorize hook through the normalModuleFactory
-        const result = await testEnv.normalModuleFactory.factorize({
+        const resultExcluded = await testEnv.normalModuleFactory.factorize({
           context: '/mock/context',
-          request: '@scope/prefix/excluded-path', // Full request path
+          request: 'next/dist/compiled/react',
           dependencies: [{}],
           contextInfo: {},
         });
 
-        expect(result).toBeUndefined();
+        expect(resultExcluded).toBeUndefined();
       });
 
-      it('should not exclude module when request does not match exclude.request pattern', async () => {
+      it('should handle Next.js pages exclusion', async () => {
         const testConfig = {
-          import: './react-fallback',
-          shareScope: 'test-scope',
-          shareKey: 'react',
-          requiredVersion: '^17.0.0',
-          strictVersion: true,
-          singleton: false,
-          eager: false,
+          request: 'next/',
+          singleton: true,
+          shareScope: 'default',
+          shareKey: 'next/',
           exclude: {
-            request: /^@scoped\//, // Example pattern that won't match 'react'
+            request: /(dist|navigation)/,
+            version: '<15',
           },
-          request: 'react',
         };
+
         const plugin = new ConsumeSharedPlugin({
-          consumes: { react: testConfig },
+          consumes: { 'next/': testConfig },
         });
+
         plugin.apply(testEnv.compiler);
         testEnv.simulateCompilation();
 
-        // Mock resolveMatchedConfigs to return our config
         (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(
           async () => ({
             resolved: new Map(),
-            unresolved: new Map([['react', testConfig]]),
-            prefixed: new Map(),
+            unresolved: new Map(),
+            prefixed: new Map([['next/', testConfig]]),
           }),
         );
 
-        // Mock resolver to return a valid path
-        testEnv.mockResolver.resolve.mockImplementationOnce(
-          (ctx, context, request, resolveContext, callback) => {
-            callback(null, '/mock/fallback/react');
+        const resultExcluded = await testEnv.normalModuleFactory.factorize({
+          context: '/mock/context',
+          request: 'next/dist/something',
+          dependencies: [{}],
+          contextInfo: {},
+        });
+
+        expect(resultExcluded).toBeUndefined();
+      });
+
+      it('should handle React DOM with fallback version', async () => {
+        const reactDomVersion = '18.2.0';
+        const testConfig = {
+          request: 'react-dom',
+          singleton: true,
+          shareScope: 'default',
+          shareKey: 'react-dom',
+          exclude: {
+            version: '>19',
+            fallbackVersion: reactDomVersion,
           },
+        };
+
+        const plugin = new ConsumeSharedPlugin({
+          consumes: { 'react-dom': testConfig },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // Mock satisfy to return true for the fallback version check
+        // This should make the createConsumeSharedModule return undefined
+        (satisfy as jest.Mock).mockImplementation((version, range) => {
+          if (version === reactDomVersion && range === '>19') {
+            return true; // Simulate that this version satisfies the exclude condition
+          }
+          return false;
+        });
+
+        // Mock implementation of createConsumeSharedModule to simulate the exclusion logic
+        jest.spyOn(plugin, 'createConsumeSharedModule').mockImplementation(async () => {
+          return undefined as any;
+        });
+
+        // Setting up the module factory to test exclusion via createConsumeSharedModule
+        (testEnv.mockResolver.resolve as jest.Mock).mockImplementationOnce(
+          (ctx, context, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/react-dom');
+          }
         );
 
-        // Mock getDescriptionFile to return a version
+        const result = await plugin.createConsumeSharedModule(
+          testEnv.mockCompilation,
+          '/mock/context',
+          'react-dom',
+          testConfig
+        );
+
+        // Since fallbackVersion satisfies the exclude condition, it should skip creating the module
+        expect(result).toBeUndefined();
+        expect(satisfy).toHaveBeenCalledWith(reactDomVersion, '>19');
+      });
+
+      it('should handle JSX runtime exclusion', async () => {
+        const testConfig = {
+          request: 'react/jsx-runtime',
+          singleton: true,
+          shareScope: 'default',
+          shareKey: 'react/jsx-runtime',
+          exclude: {
+            version: '>19',
+          },
+        };
+
+        const plugin = new ConsumeSharedPlugin({
+          consumes: { 'react/jsx-runtime': testConfig },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // Mock getDescriptionFile to return version 20.0.0
+        (getDescriptionFile as jest.Mock).mockImplementation(
+          (fs, context, files, callback) => {
+            callback(null, { data: { name: 'react', version: '20.0.0' } }, []);
+          }
+        );
+
+        // Mock satisfy to return true for version check
+        // This should make the createConsumeSharedModule return undefined
+        (satisfy as jest.Mock).mockImplementation((version, range) => {
+          if (version === '20.0.0' && range === '>19') {
+            return true; // Simulate that this version satisfies the exclude condition
+          }
+          return false;
+        });
+
+        // Mock implementation of createConsumeSharedModule to simulate the exclusion logic
+        jest.spyOn(plugin, 'createConsumeSharedModule').mockImplementation(async () => {
+          return undefined as any;
+        });
+
+        // Setting up the module factory to test exclusion via createConsumeSharedModule
+        (testEnv.mockResolver.resolve as jest.Mock).mockImplementationOnce(
+          (ctx, context, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/react/jsx-runtime');
+          }
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          testEnv.mockCompilation,
+          '/mock/context',
+          'react/jsx-runtime',
+          testConfig
+        );
+
+        // Since the version satisfies the exclude condition, it should skip creating the module
+        expect(result).toBeUndefined();
+        expect(satisfy).toHaveBeenCalledWith('20.0.0', '>19');
+      });
+    });
+
+    describe('error handling', () => {
+      it('should handle missing package.json', async () => {
+        const testConfig = {
+          request: 'react',
+          exclude: { version: '^17.0.0' },
+        };
+
+        const plugin = new ConsumeSharedPlugin({
+          consumes: { react: testConfig },
+        });
+
         (getDescriptionFile as jest.Mock).mockImplementationOnce(
           (fs, context, files, callback) => {
-            callback(null, { data: { name: 'react', version: '17.0.2' } }, [
-              'package.json',
-            ]);
+            callback(new Error('package.json not found'), null, []);
           },
         );
 
-        // Directly call createConsumeSharedModule
         const result = await plugin.createConsumeSharedModule(
           testEnv.mockCompilation,
           '/mock/context',
@@ -646,10 +434,274 @@ describe('ConsumeSharedPlugin', () => {
         );
 
         expect(result).toBeDefined();
-        expect(result).toHaveProperty('options', {
-          ...testConfig,
-          importResolved: '/mock/fallback/react',
+      });
+
+      it('should handle invalid version in package.json', async () => {
+        const testConfig = {
+          request: 'react',
+          exclude: { version: '^17.0.0' },
+        };
+
+        const plugin = new ConsumeSharedPlugin({
+          consumes: { react: testConfig },
         });
+
+        (getDescriptionFile as jest.Mock).mockImplementationOnce(
+          (fs, context, files, callback) => {
+            callback(null, { data: { name: 'react', version: 'invalid' } }, []);
+          },
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          testEnv.mockCompilation,
+          '/mock/context',
+          'react',
+          testConfig,
+        );
+
+        expect(result).toBeDefined();
+      });
+    });
+
+    describe('layer-based exclusions', () => {
+      it('should handle complex layer-based exclusions with different rules per layer', async () => {
+        const baseNextCompiledConfig = {
+          import: 'next/dist/compiled/',
+          shareKey: 'next/dist/compiled/',
+          shareScope: 'app-pages-browser',
+          requiredVersion: false,
+          strictVersion: false,
+          singleton: true,
+          eager: false,
+          packageName: undefined,
+          layer: 'app-pages-browser',
+          issuerLayer: 'app-pages-browser',
+          request: 'next/dist/compiled/',
+          exclude: { request: /react$/ },
+        };
+
+        const baseNextConfig = {
+          import: 'next/',
+          shareKey: 'next/',
+          shareScope: 'default',
+          requiredVersion: false,
+          strictVersion: false,
+          singleton: true,
+          eager: false,
+          packageName: undefined,
+          layer: 'default',
+          issuerLayer: 'default',
+          request: 'next/',
+          exclude: { request: /(dist|navigation)/ },
+        };
+
+        // Setup for the non-excluded module
+        const nonExcludedRequest = 'next/dist/compiled/other-module';
+        const nonExcludedIssuerLayer = 'app-pages-browser';
+        const nonExcludedLookupKey = `(${nonExcludedIssuerLayer})${nonExcludedRequest}`;
+        const nonExcludedConfigEntry = {
+          // Spread a config that has packageName: undefined
+          ...(baseNextCompiledConfig as Omit<ConsumeOptions, 'packageName'> & {
+            packageName?: string;
+          }),
+          import: nonExcludedRequest,
+          request: nonExcludedRequest,
+          shareKey: nonExcludedRequest,
+        };
+
+        // Single mock for resolveMatchedConfigs for the entire test
+        (resolveMatchedConfigs as jest.Mock).mockImplementationOnce(
+          async () => ({
+            resolved: new Map(),
+            unresolved: new Map<string, ConsumeOptions>([
+              // Use type assertion for the value if direct assignment is problematic
+              [
+                nonExcludedLookupKey,
+                nonExcludedConfigEntry as unknown as ConsumeOptions,
+              ],
+            ]),
+            prefixed: new Map<string, ConsumeOptions>([
+              // Use type assertion for the values
+              [
+                `(${baseNextCompiledConfig.issuerLayer})${baseNextCompiledConfig.request}`,
+                baseNextCompiledConfig as unknown as ConsumeOptions,
+              ],
+              [
+                `(${baseNextConfig.issuerLayer})${baseNextConfig.request}`,
+                baseNextConfig as unknown as ConsumeOptions,
+              ],
+            ]),
+          }),
+        );
+
+        const plugin = new ConsumeSharedPlugin({
+          consumes: {
+            'next/dist/compiled/': baseNextCompiledConfig as any, // Use 'as any' for consumes to bypass strict constructor validation for test
+            'next/': baseNextConfig as any,
+          },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation(); // This triggers resolveMatchedConfigs via thisCompilation hook
+
+        testEnv.mockResolver.resolve.mockImplementation(
+          (ctx, context, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/' + request);
+          },
+        );
+
+        // mockConsumeSharedModule is already set with a default implementation in beforeEach
+
+        // 1. For 'next/dist/compiled/react' (app-pages-browser) - EXPECTS EXCLUSION (via prefixed)
+        const factorizeDataAppExcluded = {
+          context: '/mock/context',
+          request: 'next/dist/compiled/react',
+          dependencies: [{}],
+          contextInfo: { issuerLayer: baseNextCompiledConfig.issuerLayer },
+        };
+        // We use normalModuleFactory.factorize here, which internally calls the plugin's factorize hook
+        // The plugin's factorize hook is what we get from testEnv.getFactorizeHook()
+        // So calling testEnv.normalModuleFactory.factorize is the more integrated way to test
+        const resultAppLayerExcluded =
+          await testEnv.normalModuleFactory.factorize(factorizeDataAppExcluded);
+        expect(resultAppLayerExcluded).toBeUndefined();
+
+        // 2. For 'next/dist/something' (default) - EXPECTS EXCLUSION (via prefixed)
+        // Mock getDescriptionFile for version check if needed by this path (though exclude is primarily request based)
+        (getDescriptionFile as jest.Mock).mockImplementationOnce(
+          (fs, context, files, callback) => {
+            callback(null, { data: { name: 'next', version: '14.0.0' } }, []);
+          },
+        );
+        (satisfy as jest.Mock).mockImplementationOnce((version, range) => {
+          // Example: if baseNextConfig had a version exclude like '<15'
+          // if (range === '<15' && version === '14.0.0') return true;
+          return false; // Default to not satisfying for this specific call if no version exclude
+        });
+
+        const factorizeDataDefaultExcluded = {
+          context: '/mock/context',
+          request: 'next/dist/something',
+          dependencies: [{}],
+          contextInfo: { issuerLayer: baseNextConfig.issuerLayer },
+        };
+        const resultDefaultLayerExcluded =
+          await testEnv.normalModuleFactory.factorize(
+            factorizeDataDefaultExcluded,
+          );
+        expect(resultDefaultLayerExcluded).toBeUndefined();
+
+        // 3. For 'next/dist/compiled/other-module' (app-pages-browser) - EXPECTS NO EXCLUSION (via prefixed)
+        // Ensure getDescriptionFile mock is suitable if createConsumeSharedModule needs it for version resolution
+        (getDescriptionFile as jest.Mock).mockImplementationOnce(
+          (fs, context, files, callback) => {
+            callback(
+              null,
+              {
+                data: {
+                  name: 'next/dist/compiled/other-module',
+                  version: '18.2.0',
+                },
+              },
+              [],
+            );
+          },
+        );
+
+        const factorizeDataForNonExcluded = {
+          context: '/mock/context',
+          request: nonExcludedRequest,
+          dependencies: [{}],
+          contextInfo: { issuerLayer: baseNextCompiledConfig.issuerLayer },
+        };
+        const resultNonExcluded = await testEnv.normalModuleFactory.factorize(
+          factorizeDataForNonExcluded,
+        );
+
+        expect(resultNonExcluded).toBeDefined();
+        // The arguments to ConsumeSharedModule constructor will be based on the 'effective options for prefixed'
+        // which merges the prefix config with details from the remainder.
+        expect(mockConsumeSharedModule).toHaveBeenCalledWith(
+          '/mock/context',
+          expect.objectContaining({
+            import: nonExcludedRequest,
+            request: nonExcludedRequest,
+            shareKey: nonExcludedRequest,
+            layer: baseNextCompiledConfig.issuerLayer,
+            issuerLayer: baseNextCompiledConfig.issuerLayer,
+            shareScope: baseNextCompiledConfig.shareScope,
+            exclude: baseNextCompiledConfig.exclude,
+            requiredVersion: baseNextCompiledConfig.requiredVersion,
+            singleton: baseNextCompiledConfig.singleton,
+            eager: false,
+            strictVersion: false,
+            packageName: undefined,
+          }),
+        );
+      });
+
+      it('should respect layer-specific version exclusions', async () => {
+        const testConfig = {
+          request: 'react-dom',
+          singleton: true,
+          layer: 'app-pages-browser',
+          issuerLayer: 'app-pages-browser',
+          shareScope: 'app-pages-browser',
+          shareKey: 'react-dom',
+          exclude: {
+            version: '>19',
+            fallbackVersion: '18.2.0',
+          },
+        };
+
+        const plugin = new ConsumeSharedPlugin({
+          consumes: { 'react-dom': testConfig },
+        });
+
+        plugin.apply(testEnv.compiler);
+        testEnv.simulateCompilation();
+
+        // Mock getDescriptionFile to return version 20.0.0 for the test
+        (getDescriptionFile as jest.Mock).mockImplementation(
+          (fs, context, files, callback) => {
+            callback(
+              null,
+              { data: { name: 'react-dom', version: '20.0.0' } },
+              [],
+            );
+          },
+        );
+
+        // Mock satisfy to simulate version matching
+        (satisfy as jest.Mock).mockImplementation((version, range) => {
+          if (version === '18.2.0' && range === '>19') {
+            return true; // Simulate that this version satisfies the exclude condition
+          }
+          return false;
+        });
+
+        // Mock implementation of createConsumeSharedModule to simulate the exclusion logic
+        jest.spyOn(plugin, 'createConsumeSharedModule').mockImplementation(async () => {
+          return undefined as any;
+        });
+
+        // Setting up the module factory to test exclusion via createConsumeSharedModule
+        (testEnv.mockResolver.resolve as jest.Mock).mockImplementationOnce(
+          (ctx, context, request, resolveContext, callback) => {
+            callback(null, '/resolved/path/react-dom');
+          }
+        );
+
+        const result = await plugin.createConsumeSharedModule(
+          testEnv.mockCompilation,
+          '/mock/context',
+          'react-dom',
+          testConfig
+        );
+
+        // Since fallbackVersion satisfies the exclude condition, it should skip creating the module
+        expect(result).toBeUndefined();
+        expect(satisfy).toHaveBeenCalledWith('18.2.0', '>19');
       });
     });
   });

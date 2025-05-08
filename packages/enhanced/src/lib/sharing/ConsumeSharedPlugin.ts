@@ -81,6 +81,10 @@ class ConsumeSharedPlugin {
       validate(options);
     }
 
+    console.log('[ConsumeSharedPlugin] Constructor options:', {
+      consumesCount: Object.keys(options.consumes || {}).length
+    });
+
     this._consumes = parseOptions(
       options.consumes,
       (item, key) => {
@@ -122,6 +126,12 @@ class ConsumeSharedPlugin {
       },
       (item, key) => {
         const request = item.request || key;
+        // Debug log in transform function
+        console.log(`[ConsumeSharedPlugin] Processing consume for ${key}:`, {
+          hasInclude: !!item.include,
+          includeDetails: item.include,
+          request
+        });
         return {
           import: item.import === false ? undefined : item.import || request,
           shareScope: item.shareScope || options.shareScope || 'default',
@@ -139,11 +149,22 @@ class ConsumeSharedPlugin {
           singleton: !!item.singleton,
           eager: !!item.eager,
           exclude: item.exclude,
+          include: item.include,
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
         } as ConsumeOptions;
       },
+    );
+
+    // Debug log after parsing options
+    console.log('[ConsumeSharedPlugin] Parsed consumes:',
+      this._consumes.map(([key, config]) => ({
+        key,
+        hasInclude: !!config.include,
+        includeDetails: config.include,
+        requestFromConfig: config.request
+      }))
     );
   }
 
@@ -290,6 +311,43 @@ class ConsumeSharedPlugin {
         currentConfig,
       );
 
+      // Handle version include/exclude logic
+
+      // Check include.version if specified
+      if (config.include && typeof config.include.version === 'string') {
+        if (!importResolved) {
+          return consumedModule;
+        }
+
+        return new Promise((resolveFilter) => {
+          getDescriptionFile(
+            compilation.inputFileSystem,
+            path.dirname(importResolved as string),
+            ['package.json'],
+            (err, result) => {
+              if (err) {
+                return resolveFilter(consumedModule);
+              }
+              const { data } = result || {};
+              if (!data || !data['version'] || data['name'] !== request) {
+                return resolveFilter(consumedModule);
+              }
+
+              if (
+                config.include &&
+                typeof config.include.version === 'string' &&
+                !satisfy(data['version'], config.include.version)
+              ) {
+                // Version doesn't match include range, skip this module
+                return resolveFilter(undefined as unknown as ConsumeSharedModule);
+              }
+              return resolveFilter(consumedModule);
+            },
+          );
+        });
+      }
+
+      // Check exclude.version if specified
       if (config.exclude && typeof config.exclude.version === 'string') {
         if (!importResolved) {
           return consumedModule;
@@ -360,6 +418,21 @@ class ConsumeSharedPlugin {
             resolvedConsumes = resolved;
             unresolvedConsumes = unresolved;
             prefixedConsumes = prefixed;
+
+            // Debug log after resolving configs
+            console.log('[ConsumeSharedPlugin] Resolved consumes:', {
+              resolvedCount: resolved.size,
+              unresolvedCount: unresolved.size,
+              prefixedCount: prefixed.size
+            });
+
+            // Log prefixed consumes which are most relevant for include/exclude
+            for (const [prefix, options] of prefixed.entries()) {
+              console.log(`[ConsumeSharedPlugin] Prefixed consume for ${prefix}:`, {
+                hasInclude: !!options.include,
+                includeDetails: options.include
+              });
+            }
           },
         );
 
@@ -379,11 +452,14 @@ class ConsumeSharedPlugin {
               ) {
                 return;
               }
-              const match = unresolvedConsumes.get(
-                createLookupKey(request, contextInfo),
-              );
+
+              console.log('[ConsumeSharedPlugin-DEBUG] Factorize hook:', { request, issuerLayer: contextInfo.issuerLayer });
+
+              const unresolvedKey = createLookupKey(request, contextInfo);
+              const match = unresolvedConsumes.get(unresolvedKey);
 
               if (match !== undefined) {
+                console.log(`[ConsumeSharedPlugin-DEBUG] Matched in unresolvedConsumes: key='${unresolvedKey}'`, { match });
                 // Use the bound function
                 return boundCreateConsumeSharedModule(
                   compilation,
@@ -392,31 +468,66 @@ class ConsumeSharedPlugin {
                   match,
                 );
               }
+
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
+                  console.log(`[ConsumeSharedPlugin-DEBUG] Checking prefix: '${prefix}' for request: '${request}'`, { remainder, options });
+
+                  // First check include if it exists - only proceed if request matches include pattern
+                  if (
+                    options.include &&
+                    options.include.request &&
+                    !(options.include.request instanceof RegExp
+                      ? options.include.request.test(remainder)
+                      : remainder === options.include.request)
+                  ) {
+                    if (request.includes('react-is')) {
+                      console.log(`[DEBUG-CONSUME] SKIPPING (include not matched): ${request}`);
+                      console.log(`  include.request:`, options.include.request);
+                      console.log(`  remainder:`, remainder);
+                    }
+                    console.log(`[ConsumeSharedPlugin-DEBUG] Include filter passed for request: '${request}'`);
+                    continue; // Skip if include doesn't match
+                  }
+
+                  // Then check exclude if it exists - skip if request matches exclude pattern
                   if (
                     options.exclude &&
                     options.exclude.request &&
                     // Skip if the remainder DOES match the filter
-                    options.exclude.request.test(remainder)
+                    (options.exclude.request instanceof RegExp
+                      ? options.exclude.request.test(remainder)
+                      : remainder === options.exclude.request)
                   ) {
-                    continue;
+                    if (request.includes('react-is')) {
+                      console.log(`[DEBUG-CONSUME] SKIPPING (exclude matched): ${request}`);
+                      console.log(`  exclude.request:`, options.exclude.request);
+                      console.log(`  remainder:`, remainder);
+                    }
+                    console.log(`[ConsumeSharedPlugin-DEBUG] Exclude filter passed for request: '${request}'`);
+                    continue; // Skip if exclude matches
                   }
+
+                  console.log(`[ConsumeSharedPlugin-DEBUG] Prefix match found: prefix='${prefix}'`, { options, request });
+                  const finalConfig = {
+                    ...options,
+                    import: options.import
+                      ? options.import + remainder
+                      : undefined,
+                    shareKey: options.shareKey + remainder,
+                    // Prioritize config layer, fallback to issuerLayer
+                    layer: options.layer || contextInfo.issuerLayer,
+                  };
+                  console.log(`[ConsumeSharedPlugin-DEBUG] Calling createConsumeSharedModule with finalConfig:`, { finalConfig });
+
                   // Use the bound function
                   return boundCreateConsumeSharedModule(
                     compilation,
                     context,
                     request,
-                    {
-                      ...options,
-                      import: options.import
-                        ? options.import + remainder
-                        : undefined,
-                      shareKey: options.shareKey + remainder,
-                      layer: options.layer || contextInfo.issuerLayer,
-                    },
+                    finalConfig,
                   );
                 }
               }

@@ -1,3 +1,1 @@
-
-      console.log('Host application started, loading exposed module...');
-    
+console.log('Host application started, loading exposed module...');
