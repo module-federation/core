@@ -535,6 +535,14 @@ describe('lazy loadRemote and add remote into snapshot', () => {
 });
 
 describe('loadRemote', () => {
+  beforeEach(() => {
+    document.querySelectorAll('script').forEach((script) => {
+      script.remove();
+    });
+    document.querySelectorAll('link').forEach((link) => {
+      link.remove();
+    });
+  });
   it('loads remote synchronously', async () => {
     const jsSyncAssetPath = 'resources/load-remote/app2/say.sync.js';
     const remotePublicPath = 'http://localhost:1111/';
@@ -600,7 +608,92 @@ describe('loadRemote', () => {
     const loadedSrcs = [...document.querySelectorAll('script')].map(
       (i) => (i as any).fakeSrc,
     );
+    const loadedStyles = [...document.querySelectorAll('link')].map(
+      (link) => link.href,
+    );
     expect(loadedSrcs.includes(`${remotePublicPath}${jsSyncAssetPath}`));
+    expect(loadedStyles.includes(`${remotePublicPath}sub2/say.sync.css`));
+
+    reset();
+  });
+
+  it('loads remote synchronously in a custom root', async () => {
+    const jsSyncAssetPath = 'resources/load-remote/app2/say.sync.js';
+    const remotePublicPath = 'http://localhost:1111/';
+    const reset = addGlobalSnapshot({
+      '@federation-test/globalinfo': {
+        globalName: '',
+        buildVersion: '',
+        publicPath: '',
+        remoteTypes: '',
+        shared: [],
+        remoteEntry: '',
+        remoteEntryType: 'global',
+        modules: [],
+        version: '0.0.1',
+        remotesInfo: {
+          '@federation-test/app2': {
+            matchedVersion: '0.0.1',
+          },
+        },
+      },
+      '@federation-test/app2:0.0.1': {
+        globalName: '',
+        publicPath: remotePublicPath,
+        remoteTypes: '',
+        shared: [],
+        buildVersion: 'custom',
+        remotesInfo: {},
+        remoteEntryType: 'global',
+        modules: [
+          {
+            moduleName: 'say',
+            assets: {
+              css: {
+                sync: ['sub2/say.sync.css'],
+                async: ['sub2/say.async.css'],
+              },
+              js: {
+                sync: [jsSyncAssetPath],
+                async: [],
+              },
+            },
+          },
+        ],
+        version: '0.0.1',
+        remoteEntry: 'resources/app2/federation-remote-entry.js',
+      },
+    });
+
+    const FederationInstance = new FederationHost({
+      name: '@federation-test/globalinfo',
+      remotes: [
+        {
+          name: '@federation-test/app2',
+          version: '*',
+        },
+      ],
+    });
+
+    const root = document.createElement('div');
+    await FederationInstance.loadRemote<() => string>(
+      '@federation-test/app2/say',
+      { root },
+    );
+    // @ts-ignore fakeSrc is local mock attr, which value is the same as src
+    const loadedSrcs = [...document.querySelectorAll('script')].map(
+      (i) => (i as any).fakeSrc,
+    );
+    const loadedStyles = [...root.querySelectorAll('link')].map(
+      (link) => link.href,
+    );
+    const documentStyles = [...document.head.querySelectorAll('link')].map(
+      (link) => link.href,
+    );
+    expect(loadedSrcs.includes(`${remotePublicPath}${jsSyncAssetPath}`));
+    expect(loadedStyles.includes(`${remotePublicPath}sub2/say.sync.css`));
+    expect(documentStyles).toEqual([]);
+
     reset();
   });
 });
