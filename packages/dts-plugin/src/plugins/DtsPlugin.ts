@@ -37,15 +37,15 @@ export const normalizeDtsOptions = (
 
 export class DtsPlugin implements WebpackPluginInstance {
   options: moduleFederationPlugin.ModuleFederationPluginOptions;
+  clonedOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options;
+    // Create a shallow clone of the options object to avoid mutating the original
+    this.clonedOptions = { ...options };
   }
 
   apply(compiler: Compiler) {
-    const { options } = this;
-
-    // Create a shallow clone of the options object to avoid mutating the original
-    const clonedOptions = { ...options };
+    const { options, clonedOptions } = this;
 
     // Clean up query parameters in exposes paths without mutating original
     if (options.exposes && typeof options.exposes === 'object') {
@@ -105,5 +105,19 @@ export class DtsPlugin implements WebpackPluginInstance {
       normalizedDtsOptions,
       fetchRemoteTypeUrlsResolve,
     ).apply(compiler);
+  }
+
+  addRuntimePlugins() {
+    const { options, clonedOptions } = this;
+    if (!clonedOptions.runtimePlugins) {
+      return;
+    }
+    if (!options.runtimePlugins) {
+      options.runtimePlugins = [];
+    }
+    clonedOptions.runtimePlugins.forEach((plugin) => {
+      options.runtimePlugins.includes(plugin) ||
+        options.runtimePlugins.push(plugin);
+    });
   }
 }

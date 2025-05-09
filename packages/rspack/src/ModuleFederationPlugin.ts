@@ -114,8 +114,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     let disableDts = options.dts === false;
 
     if (!disableDts) {
+      const dtsPlugin = new DtsPlugin(options);
       // @ts-ignore
-      new DtsPlugin(options).apply(compiler);
+      dtsPlugin.apply(compiler);
+      dtsPlugin.addRuntimePlugins();
     }
     if (!disableManifest && options.exposes) {
       try {
