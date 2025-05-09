@@ -178,13 +178,17 @@ export const pluginModuleFederation = (
       if (moduleFederationOptions.exposes) {
         config.dev ||= {};
         config.server ||= {};
+        const userConfig = api.getRsbuildConfig('original');
 
         // Allow remote modules to be loaded by setting CORS headers
         // This is required for MF to work properly across different origins
         config.server.headers ||= {};
         if (
           !config.server.headers['Access-Control-Allow-Origin'] &&
-          !config.server.cors
+          !(
+            typeof userConfig.server?.cors === 'object' &&
+            userConfig.server.cors.origin
+          )
         ) {
           const corsWarnMsgs = [
             'Detect that CORS options are not set, mf Rsbuild plugin will add default cors header: server.headers["Access-Control-Allow-Headers"] = "*". It is recommended to specify an allowlist of trusted origins in "server.cors" instead.',
