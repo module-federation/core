@@ -182,18 +182,15 @@ export const pluginModuleFederation = (
         // Allow remote modules to be loaded by setting CORS headers
         // This is required for MF to work properly across different origins
         config.server.headers ||= {};
-        if (
-          !config.server.headers['Access-Control-Allow-Origin'] &&
-          !config.server.cors
-        ) {
+        if (!config.server.headers['Access-Control-Allow-Origin']) {
           const corsWarnMsgs = [
-            'Detect that CORS options are not set, mf Rsbuild plugin will add default cors header: server.headers["Access-Control-Allow-Headers"] = "*". It is recommended to specify an allowlist of trusted origins in "server.cors" instead.',
+            'Detect devServer.headers is empty, mf modern plugin will add default cors header: devServer.headers["Access-Control-Allow-Headers"] = "*". It is recommended to specify an allowlist of trusted origins instead.',
             'View https://module-federation.io/guide/troubleshooting/other.html#cors-warn for more details.',
           ];
 
           logger.warn(corsWarnMsgs.join('\n'));
-          config.server.headers['Access-Control-Allow-Origin'] = '*';
         }
+        config.server.headers['Access-Control-Allow-Origin'] ||= '*';
 
         // For remote modules, Rsbuild should send the ws request to the provider's dev server.
         // This allows the provider to do HMR when the provider module is loaded in the consumer's page.
