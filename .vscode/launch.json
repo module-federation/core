@@ -2,112 +2,176 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "command": "npm run nx",
+      "command": "pnpm run nx",
       "name": "Run nx",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run commit",
+      "command": "pnpm run commit",
       "name": "Run commit",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run docs",
+      "command": "pnpm run docs",
       "name": "Run docs",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run e2e:test",
-      "name": "Run e2e:test",
-      "request": "launch",
-      "type": "node-terminal"
-    },
-    {
-      "command": "npm run lint",
+      "command": "pnpm run lint",
       "name": "Run lint",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run test",
-      "name": "Run test",
-      "request": "launch",
-      "type": "node-terminal"
-    },
-    {
-      "command": "npm run build",
+      "command": "pnpm run build",
       "name": "Run build",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run lint-fix",
+      "command": "pnpm run lint-fix",
       "name": "Run lint-fix",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run trigger-release",
+      "command": "pnpm run trigger-release",
       "name": "Run trigger-release",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run serve:next",
+      "command": "pnpm run serve:next",
       "name": "Run serve:next",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run serve:website",
+      "command": "pnpm run serve:website",
       "name": "Run serve:website",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run build:website",
+      "command": "pnpm run build:website",
       "name": "Run build:website",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run extract-i18n:website",
+      "command": "pnpm run extract-i18n:website",
       "name": "Run extract-i18n:website",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run postinstall",
-      "name": "Run postinstall",
-      "request": "launch",
-      "type": "node-terminal"
-    },
-    {
-      "command": "npm run sync:types:webpack",
-      "name": "Run sync:types:webpack",
-      "request": "launch",
-      "type": "node-terminal"
-    },
-    {
-      "command": "npm run sync:pullMFTypes",
+      "command": "pnpm run sync:pullMFTypes",
       "name": "Run sync:pullMFTypes",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run app:next:dev",
+      "command": "pnpm run app:next:dev",
       "name": "Run app:next:dev",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "npm run app:next:prod",
+      "command": "pnpm run app:next:prod",
       "name": "Run app:next:prod",
       "request": "launch",
       "type": "node-terminal"
+    },
+    {
+      "name": "Debug Enhanced Tests",
+      "type": "node",
+      "request": "launch",
+      "preLaunchTask": "pnpm-build-enhanced",
+      "runtimeExecutable": "/Users/bytedance/.nvm/versions/node/v18.20.8/bin/node",
+      "runtimeArgs": [
+        "${workspaceFolder}/node_modules/jest/bin/jest.js",
+        "test/ConfigTestCases.basictest.js",
+        "test/unit",
+        "--runInBand",
+        "--no-cache"
+      ],
+      "cwd": "${workspaceFolder}/packages/enhanced",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_OPTIONS": "--experimental-vm-modules"
+      },
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/packages/enhanced/dist/**/*.js"],
+      "sourceMaps": true
+    },
+    {
+      "name": "Debug Current Test File",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "nx",
+        "test",
+        "${relativeFileDirname}",
+        "--testFile=${fileBasename}",
+        "--runInBand",
+        "--no-cache"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "NODE_ENV": "test"
+      }
+    },
+    {
+      "name": "Debug Package Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "nx",
+        "test",
+        "${input:package}",
+        "--runInBand",
+        "--no-cache"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "NODE_ENV": "test"
+      }
+    },
+    {
+      "name": "Debug All Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "nx",
+        "run-many",
+        "--target=test",
+        "--runInBand",
+        "--no-cache"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "NODE_ENV": "test"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "package",
+      "type": "promptString",
+      "description": "Enter the package name to test (e.g., enhanced, cli, runtime)"
     }
   ]
 }

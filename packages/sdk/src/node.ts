@@ -102,6 +102,7 @@ export function createScriptNode(
         urlDirname,
         filename,
       );
+
       const exportedInterface: Record<string, any> =
         scriptContext.module.exports || scriptContext.exports;
 

@@ -16,6 +16,17 @@ import type {
 import type { ConsumesConfig } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import type { ProvidesConfig } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { createSchemaValidation } from '../../utils';
+
+const validate = createSchemaValidation(
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('../../schemas/sharing/SharePlugin.check.js').validate,
+  () => require('../../schemas/sharing/SharePlugin').default,
+  {
+    name: 'Share Plugin',
+    baseDataPath: 'options',
+  },
+);
 
 class SharePlugin {
   private _shareScope: string | string[];
@@ -23,6 +34,7 @@ class SharePlugin {
   private _provides: Record<string, ProvidesConfig>[];
 
   constructor(options: SharePluginOptions) {
+    validate(options);
     const sharedOptions: [string, SharedConfig][] = parseOptions(
       options.shared,
       (item, key) => {
@@ -55,24 +67,32 @@ class SharePlugin {
           issuerLayer: options.issuerLayer,
           layer: options.layer,
           request: options.request || key,
+          exclude: options.exclude,
+          include: options.include,
         },
       }),
     );
     const provides: Record<string, ProvidesConfig>[] = sharedOptions
       .filter(([, options]) => options.import !== false)
-      .map(([key, options]) => ({
-        [options.import || key]: {
-          shareKey: options.shareKey || key,
-          shareScope: options.shareScope,
-          version: options.version,
-          eager: options.eager,
-          requiredVersion: options.requiredVersion,
-          strictVersion: options.strictVersion,
-          singleton: options.singleton,
-          layer: options.layer,
-          request: options.request || options.import || key,
-        },
-      }));
+      .map(([key, options]) => {
+        const providesKey = options.import || key;
+
+        return {
+          [providesKey]: {
+            shareKey: options.shareKey || key,
+            shareScope: options.shareScope,
+            version: options.version,
+            eager: options.eager,
+            requiredVersion: options.requiredVersion,
+            strictVersion: options.strictVersion,
+            singleton: options.singleton,
+            layer: options.layer,
+            request: options.request || options.import || key,
+            exclude: options.exclude,
+            include: options.include,
+          },
+        };
+      });
 
     this._shareScope = options.shareScope || 'default';
     this._consumes = consumes;

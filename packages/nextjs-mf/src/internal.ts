@@ -2,16 +2,9 @@ import type {
   moduleFederationPlugin,
   sharePlugin,
 } from '@module-federation/sdk';
+import type { Compiler } from 'webpack';
 
-// Extend the SharedConfig type to include layer properties
-type ExtendedSharedConfig = sharePlugin.SharedConfig & {
-  layer?: string;
-  issuerLayer?: string | string[];
-  request?: string;
-  shareKey?: string;
-};
-
-const WEBPACK_LAYERS_NAMES = {
+export const WEBPACK_LAYERS_NAMES = {
   /**
    * The layer for the shared code between the client and server bundles.
    */
@@ -51,70 +44,8 @@ const WEBPACK_LAYERS_NAMES = {
   appPagesBrowser: 'app-pages-browser',
 } as const;
 
-const createSharedConfig = (
-  name: string,
-  layers: (string | undefined)[],
-  options: { request?: string; import?: false | undefined } = {},
-) => {
-  return layers.reduce(
-    (acc, layer) => {
-      const key = layer ? `${name}-${layer}` : name;
-      acc[key] = {
-        singleton: true,
-        requiredVersion: false,
-        import: layer ? undefined : (options.import ?? false),
-        shareKey: options.request ?? name,
-        request: options.request ?? name,
-        layer,
-        issuerLayer: layer,
-      };
-      return acc;
-    },
-    {} as Record<string, ExtendedSharedConfig>,
-  );
-};
-
-const defaultLayers = [
-  WEBPACK_LAYERS_NAMES.reactServerComponents,
-  WEBPACK_LAYERS_NAMES.serverSideRendering,
-  undefined,
-];
-
-const navigationLayers = [
-  WEBPACK_LAYERS_NAMES.reactServerComponents,
-  WEBPACK_LAYERS_NAMES.serverSideRendering,
-];
-
-const reactShares = createSharedConfig('react', defaultLayers);
-const reactDomShares = createSharedConfig('react', defaultLayers, {
-  request: 'react-dom',
-});
-const jsxRuntimeShares = createSharedConfig('react/', navigationLayers, {
-  request: 'react/',
-  import: undefined,
-});
-const nextNavigationShares = createSharedConfig(
-  'next-navigation',
-  navigationLayers,
-  { request: 'next/navigation' },
-);
-
-/**
- * @typedef SharedObject
- * @type {object}
- * @property {object} [key] - The key representing the shared object's package name.
- * @property {boolean} key.singleton - Whether the shared object should be a singleton.
- * @property {boolean} key.requiredVersion - Whether a specific version of the shared object is required.
- * @property {boolean} key.eager - Whether the shared object should be eagerly loaded.
- * @property {boolean} key.import - Whether the shared object should be imported or not.
- * @property {string} key.layer - The webpack layer this shared module belongs to.
- * @property {string|string[]} key.issuerLayer - The webpack layer that can import this shared module.
- */
-export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
-  // ...reactShares,
-  // ...reactDomShares,
-  // ...nextNavigationShares,
-  // ...jsxRuntimeShares,
+// Group Next.js related packages
+const nextGroup = {
   'next/dynamic': {
     requiredVersion: undefined,
     singleton: true,
@@ -131,7 +62,7 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
     import: undefined,
   },
   'next/router': {
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
@@ -145,34 +76,10 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
     singleton: true,
     import: undefined,
   },
-  react: {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react/': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react-dom/': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react-dom': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react/jsx-dev-runtime': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'react/jsx-runtime': {
-    singleton: true,
-    requiredVersion: false,
-  },
+};
+
+// Group styled-jsx related packages
+const styledJsxGroup = {
   'styled-jsx': {
     singleton: true,
     import: undefined,
@@ -181,7 +88,7 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
   },
   'styled-jsx/style': {
     singleton: true,
-    import: false,
+    import: undefined,
     version: require('styled-jsx/package.json').version,
     requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
@@ -193,25 +100,48 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
   },
 };
 
+// --- New getShareScope Function ---
+
 /**
- * Defines a default share scope for the browser environment.
- * This function takes the DEFAULT_SHARE_SCOPE and sets eager to undefined and import to undefined for all entries.
- * For 'react', 'react-dom', 'next/router', and 'next/link', it sets eager to true.
- * The module hoisting system relocates these modules into the right runtime and out of the remote.
- *
- * @type {SharedObject}
- * @returns {SharedObject} - The modified share scope for the browser environment.
+ * Generates the appropriate default share scope based on the compiler context.
+ * @param {Compiler} compiler - The webpack compiler instance.
+ * @returns {moduleFederationPlugin.SharedObject} - The generated share scope.
  */
+export const getShareScope = (
+  compiler: Compiler,
+): moduleFederationPlugin.SharedObject => {
+  const isClient = compiler.options.name === 'client';
 
-export const DEFAULT_SHARE_SCOPE_BROWSER: moduleFederationPlugin.SharedObject =
-  Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc, item) => {
-    const [key, value] = item as [string, moduleFederationPlugin.SharedConfig];
+  // Combine the groups manually
+  let combinedScope: moduleFederationPlugin.SharedObject = {
+    ...nextGroup,
+    ...styledJsxGroup,
+  };
 
-    // Set eager and import to undefined for all entries, except for the ones specified above
-    acc[key] = { ...value, import: undefined };
+  // Apply browser-specific modifications
+  if (isClient) {
+    combinedScope = Object.entries(combinedScope).reduce(
+      (acc, [key, value]) => {
+        // Ensure value is treated correctly if it's a simple string (though unlikely with current groups)
+        const configValue =
+          typeof value === 'string' ? { import: value } : value;
 
-    return acc;
-  }, {} as moduleFederationPlugin.SharedObject);
+        // ONLY change `import: false` to `import: undefined` for client builds.
+        // Keep other import values (strings, undefined) as they are.
+        // if (configValue.import === false) {
+        //    acc[key] = { ...configValue, import: undefined };
+        // } else {
+        //   // Otherwise, keep the original value entirely
+        acc[key] = value;
+        // }
+        return acc;
+      },
+      {} as moduleFederationPlugin.SharedObject,
+    );
+  }
+
+  return combinedScope;
+};
 
 /**
  * Checks if the remote value is an internal or promise delegate module reference.

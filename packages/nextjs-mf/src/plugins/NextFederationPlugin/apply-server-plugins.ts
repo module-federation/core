@@ -2,9 +2,11 @@ import type {
   WebpackOptionsNormalized,
   Compiler,
   ExternalItemFunctionData,
+  ResolveData,
 } from 'webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import path from 'path';
+import fs from 'fs';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 
@@ -97,11 +99,37 @@ export function configureServerLibraryAndFilename(
   options.filename = path.basename(options.filename as string);
 }
 
+// Define a more specific type for the context object passed to the external function
+// based on the stringified output and common webpack externals function arguments
+interface CustomExternalContext {
+  context?: string;
+  request?: string;
+  dependencyType?: string;
+  contextInfo?: {
+    issuer?: string;
+    issuerLayer?: string | null; // Layer can be null
+    compiler?: string;
+  };
+  getResolve?: (
+    options?: any,
+  ) => (
+    resolveContext: string,
+    requestToResolve: string,
+    callback: (
+      err?: Error | null,
+      result?: string | false,
+      resolveData?: ResolveData,
+    ) => void,
+  ) => void; // A basic signature for getResolve
+  layer?: string | null; // Include layer if available directly on ctx
+}
+
 /**
  * Patches Next.js' default externals function to ensure shared modules are bundled and not treated as external.
+ * (Updated to use Promise-based signature)
  *
  * @param {Compiler} compiler - The Webpack compiler instance.
- * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
+ * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
  */
 export function handleServerExternals(
   compiler: Compiler,
@@ -114,48 +142,71 @@ export function handleServerExternals(
 
     if (functionIndex !== -1) {
       const originalExternals = compiler.options.externals[functionIndex] as (
-        data: ExternalItemFunctionData,
-        callback: any,
-      ) => undefined | string;
+        data: CustomExternalContext,
+      ) => Promise<string | boolean | undefined>;
 
-      compiler.options.externals[functionIndex] = async function (
-        ctx: ExternalItemFunctionData,
-        callback: any,
-      ) {
-        const fromNext = await originalExternals(ctx, callback);
-        if (!fromNext) {
-          return;
+      compiler.options.externals[functionIndex] = async ({
+        context,
+        request,
+        dependencyType,
+        contextInfo,
+        getResolve,
+        layer,
+      }: CustomExternalContext): Promise<string | boolean | undefined> => {
+        let fromNext: string | boolean | undefined;
+
+        try {
+          fromNext = await originalExternals({
+            context,
+            request,
+            dependencyType,
+            contextInfo,
+            getResolve,
+            layer,
+          });
+        } catch (e) {
+          fromNext = undefined;
         }
-        const req = fromNext.split(' ')[1];
-        if (
-          ctx.request &&
-          (ctx.request.includes('@module-federation/utilities') ||
+
+        if (!fromNext) {
+          return undefined;
+        }
+
+        const req =
+          typeof fromNext === 'string' ? fromNext.split(' ')[1] : undefined;
+        if (!req) {
+          return undefined;
+        }
+
+        const shouldBundleFederation =
+          request &&
+          (request.includes('@module-federation/') ||
             Object.keys(options.shared || {}).some((key) => {
               const sharedOptions = options.shared as Record<
                 string,
                 { import: boolean }
               >;
-              return (
-                sharedOptions[key]?.import !== false &&
-                (key.endsWith('/') ? req.includes(key) : req === key)
-              );
-            }) ||
-            ctx.request.includes('@module-federation/'))
-        ) {
-          return;
-        }
+              const match = key.endsWith('/') ? req.includes(key) : req === key;
+              return sharedOptions[key]?.import !== false && match;
+            }));
 
-        if (
+        const shouldExternalizeCore =
           req.startsWith('next') ||
           req.startsWith('react/') ||
           req.startsWith('react-dom/') ||
           req === 'react' ||
           req === 'styled-jsx/style' ||
-          req === 'react-dom'
-        ) {
+          req === 'react-dom';
+
+        if (shouldExternalizeCore) {
           return fromNext;
         }
-        return;
+
+        if (shouldBundleFederation) {
+          return undefined;
+        }
+
+        return undefined;
       };
     }
   }
