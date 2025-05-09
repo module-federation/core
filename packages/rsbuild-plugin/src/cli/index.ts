@@ -182,9 +182,12 @@ export const pluginModuleFederation = (
         // Allow remote modules to be loaded by setting CORS headers
         // This is required for MF to work properly across different origins
         config.server.headers ||= {};
-        if (!config.server.headers['Access-Control-Allow-Origin']) {
+        if (
+          !config.server.headers['Access-Control-Allow-Origin'] &&
+          !config.server.cors
+        ) {
           const corsWarnMsgs = [
-            'Detect devServer.headers is empty, mf modern plugin will add default cors header: devServer.headers["Access-Control-Allow-Headers"] = "*". It is recommended to specify an allowlist of trusted origins instead.',
+            'Detect not set CORS options, mf rsbuild plugin will add default cors header: devServer.headers["Access-Control-Allow-Headers"] = "*". It is recommended to specify an allowlist of trusted origins in "server.cors" instead.',
             'View https://module-federation.io/guide/troubleshooting/other.html#cors-warn for more details.',
           ];
 
