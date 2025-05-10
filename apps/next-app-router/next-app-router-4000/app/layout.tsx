@@ -3,7 +3,7 @@ import { AddressBar } from '#/ui/address-bar';
 import Byline from '#/ui/byline';
 // import { GlobalNav } from 'remote_4001/GlobalNav(rsc)';
 import { Metadata } from 'next';
-
+console.log(require('remote_4001/Button'));
 export const metadata: Metadata = {
   title: {
     default: 'Next.js App Router',
