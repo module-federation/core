@@ -15,6 +15,11 @@
     "label": "Frameworks"
   },
   {
+    "type": "dir",
+    "name": "debug",
+    "label": "Debug"
+  },
+  {
     "type":"dir",
     "name":"troubleshooting",
     "label":"Troubleshooting"
