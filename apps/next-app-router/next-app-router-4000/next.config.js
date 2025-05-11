@@ -1,15 +1,12 @@
-const { withNx } = require('@nx/next/plugins/with-nx');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 /**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ * @type {import('next').NextConfig}
  **/
 const nextConfig = {
-  nx: {
-    // Set this to true if you would like to to use SVGR
-    // See: https://github.com/gregberge/svgr
-    svgr: false,
-  },
+  // Set this to true if you would like to to use SVGR
+  // See: https://github.com/gregberge/svgr
+  svgr: false,
   port: 4000,
   webpack(config, options) {
     const { isServer } = options;
@@ -52,8 +49,8 @@ const nextConfig = {
           // }
         },
         extraOptions: {
-          // debug: false,
-          // exposePages: true,
+          debug: false,
+          exposePages: false,
           // enableImageLoaderFix: true,
           // enableUrlLoaderFix: true,
         },
@@ -69,4 +66,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withNx(nextConfig);
+module.exports = nextConfig;

@@ -52,6 +52,9 @@
           },
           {
             "command": "mv packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.js packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.cjs"
+          },
+          {
+            "command": "cp packages/nextjs-mf/dist/src/router-context.js packages/nextjs-mf/dist/src/router-context.cjs"
           }
         ]
       }

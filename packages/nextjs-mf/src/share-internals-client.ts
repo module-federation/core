@@ -9,7 +9,7 @@ import {
   WEBPACK_LAYERS_NAMES,
 } from './constants';
 import { getReactVersionSafely } from './internal-helpers';
-import path from 'path'
+import path from 'path';
 /**
  * Type guard to check if a value is a RuleSetRule
  */
@@ -29,104 +29,272 @@ export const getReactGroupClient = (
     require.resolve('next/package.json', { paths: [compiler.context] }),
   ).version;
 
-  const reactPath = path.relative(compiler.context,require.resolve('next/dist/compiled/react', { paths: [compiler.context] }));
+  const reactPath = path.relative(
+    compiler.context,
+    require.resolve('next/dist/compiled/react', { paths: [compiler.context] }),
+  );
 
   const reactVersion = getReactVersionSafely(
     'next/dist/compiled/react',
     compiler.context,
   );
-
   // Define configurations as an array of objects
   const reactConfigs = [
-    {
-      request: 'react',
-      singleton: true,
-      shareScope: 'default',
-      shareKey: 'react',
-      issuerLayer: undefined,
-      ...(nextVersion.startsWith('15') ? { exclude: { version: '>19' } } : {}),
-    },
-    {
-      request: 'react/',
-      singleton: true,
-      shareScope: 'default',
-      shareKey: 'react/',
-      issuerLayer: undefined,
-      ...(nextVersion.startsWith('15') ? { exclude: { version: '>19' } } : {}),
-    },
+    // React core - appPagesBrowser layer
     {
       request: 'react',
       singleton: true,
       shareKey: 'react',
-      import: reactPath,
+      import: 'next/dist/compiled/react',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
     },
     {
       request: 'next/dist/compiled/react',
       singleton: true,
       shareKey: 'react',
-      import: reactPath,
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
     },
+    // React core - pagesDirBrowser layer
+    {
+      request: 'react',
+      singleton: true,
+      shareKey: 'react',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+    },
+    {
+      request: 'next/dist/compiled/react',
+      singleton: true,
+      shareKey: 'react',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+    },
+
+    // React DOM - appPagesBrowser layer
     {
       request: 'react-dom',
       singleton: true,
-      shareKey: 'next/dist/compiled/react-dom',
-      import: path.relative(compiler.context, require.resolve('next/dist/compiled/react-dom', { paths: [compiler.context] })),
+      shareKey: 'react-dom',
+      import: 'next/dist/compiled/react-dom',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
     },
+    {
+      request: 'next/dist/compiled/react-dom',
+      singleton: true,
+      shareKey: 'react-dom',
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
+    },
+    // React DOM - pagesDirBrowser layer
+    {
+      request: 'react-dom',
+      singleton: true,
+      shareKey: 'react-dom',
+      import: 'next/dist/compiled/react-dom',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+    },
+    {
+      request: 'next/dist/compiled/react-dom',
+      singleton: true,
+      shareKey: 'react-dom',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+    },
+
+    // React DOM Client - appPagesBrowser layer
     {
       request: 'react-dom/client',
       singleton: true,
-      shareKey: 'next/dist/compiled/react-dom/client',
-      import: path.relative(compiler.context, require.resolve('next/dist/compiled/react-dom/client', { paths: [compiler.context] })),
+      shareKey: 'react-dom/client',
+      import: 'next/dist/compiled/react-dom/client',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
     },
+    {
+      request: 'next/dist/compiled/react-dom/client',
+      singleton: true,
+      shareKey: 'react-dom/client',
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
+    },
+    // React DOM Client - pagesDirBrowser layer
+    {
+      request: 'react-dom/client',
+      singleton: true,
+      shareKey: 'react-dom/client',
+      import: 'next/dist/compiled/react-dom/client',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+    },
+    {
+      request: 'next/dist/compiled/react-dom/client',
+      singleton: true,
+      shareKey: 'react-dom/client',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+    },
+
+    // React JSX Runtime - appPagesBrowser layer
     {
       request: 'react/jsx-runtime',
       singleton: true,
-      shareKey: 'next/dist/compiled/react/jsx-runtime',
-      import: path.relative(compiler.context, require.resolve('next/dist/compiled/react/jsx-runtime', { paths: [compiler.context] })),
+      shareKey: 'react/jsx-runtime',
+      import: 'next/dist/compiled/react/jsx-runtime',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
     },
+    {
+      request: 'next/dist/compiled/react/jsx-runtime',
+      shareKey: 'react/jsx-runtime',
+      singleton: true,
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
+    },
+    // React JSX Runtime - pagesDirBrowser layer
+    {
+      request: 'react/jsx-runtime',
+      singleton: true,
+      shareKey: 'react/jsx-runtime',
+      import: 'next/dist/compiled/react/jsx-runtime',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+    },
+    {
+      request: 'next/dist/compiled/react/jsx-runtime',
+      shareKey: 'react/jsx-runtime',
+      singleton: true,
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+    },
+
+    // React JSX Dev Runtime - appPagesBrowser layer
     {
       request: 'react/jsx-dev-runtime',
       singleton: true,
-      shareScope: 'default',
       shareKey: 'react/jsx-dev-runtime',
-      issuerLayer: undefined,
+      import: 'next/dist/compiled/react/jsx-dev-runtime',
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
     },
-    // {
-    //   request: 'next/dist/compiled/',
-    //   singleton: true,
-    //   layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-    //   issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-    //   shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-    //   shareKey: 'next/dist/compiled/',
-    //   version: reactVersion,
-    //   requiredVersion: '^' + reactVersion,
-    //   include: {
-    //     request: /react/,
-    //   },
-    // },
+    {
+      request: 'next/dist/compiled/react/jsx-dev-runtime',
+      singleton: true,
+      shareKey: 'react/jsx-dev-runtime',
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
+    },
+    // React JSX Dev Runtime - pagesDirBrowser layer
+    {
+      request: 'react/jsx-dev-runtime',
+      singleton: true,
+      shareKey: 'react/jsx-dev-runtime',
+      import: 'next/dist/compiled/react/jsx-dev-runtime',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+    },
+    {
+      request: 'next/dist/compiled/react/jsx-dev-runtime',
+      singleton: true,
+      shareKey: 'react/jsx-dev-runtime',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+    },
+    // React Refresh Runtime - pagesDirBrowser layer
+    {
+      request: 'next/dist/compiled/react-refresh/runtime',
+      singleton: true,
+      shareKey: 'react-refresh/runtime',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+    },
+    {
+      request: 'react-refresh/runtime',
+      singleton: true,
+      shareKey: 'react-refresh/runtime',
+      import: 'next/dist/compiled/react-refresh/runtime',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+    },
+
+    // React Refresh Runtime - appPagesBrowser layer
+    {
+      request: 'next/dist/compiled/react-refresh/runtime',
+      singleton: true,
+      shareKey: 'react-refresh/runtime',
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
+    },
+    {
+      request: 'react-refresh/runtime',
+      singleton: true,
+      shareKey: 'react-refresh/runtime',
+      import: 'next/dist/compiled/react-refresh/runtime',
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
+    },
   ];
 
   // Convert the array to a Record using reduce
-  return reactConfigs.reduce((acc, config, index) => {
-    const key = `${config.request}-${index}${config.layer ? `-${config.layer}` : ''}`;
-    acc[key] = config;
-    return acc;
-  }, {} as Record<string, SharedConfig>);
+  return reactConfigs.reduce(
+    (acc, config, index) => {
+      const key = `${'request' in config ? `${config.request}-` : ''}${config.shareKey}-${index}${config.layer ? `-${config.layer}` : ''}`;
+      acc[key] = config;
+      return acc;
+    },
+    {} as Record<string, SharedConfig>,
+  );
 };
 
 /**
@@ -194,7 +362,12 @@ export const getReactDomGroupClient = (
     },
     'next-compiled-react-dom': {
       request: 'react-dom',
-      import: path.relative(compiler.context, require.resolve('next/dist/compiled/react-dom', { paths: [compiler.context] })),
+      import: path.relative(
+        compiler.context,
+        require.resolve('next/dist/compiled/react-dom', {
+          paths: [compiler.context],
+        }),
+      ),
       shareKey: 'react-dom',
       singleton: true,
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
@@ -292,35 +465,111 @@ const getNextGroup = (compiler: Compiler) => {
   ).version;
 
   return {
-    'next-pages': {
+    'next/': {
+      singleton: true,
       request: 'next/',
-      singleton: true,
-      shareScope: 'default',
-      shareKey: 'next/',
-      exclude: {
-        request: /(dist|navigation)/,
-        ...(nextVersion.startsWith('15') ? { version: '<15' } : {}),
-      },
-    },
-    'next/link': {
-      singleton: true,
-      request: 'next/link',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       exclude: {
-        request: /dist/,
-        ...(nextVersion.startsWith('15') ? { version: '<15.x' } : {}),
+        request: /compiled/,
       },
     },
-    'styled-jsx': {
+    'next/dist/shared/lib/app-router-context.shared-runtime': {
       singleton: true,
-      shareScope: 'default',
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
     },
-    'styled-jsx/': {
-      singleton: true,
-      shareScope: 'default',
-    },
+
+    // 'next/pagesdir/': {
+    //   singleton: true,
+    //   request: 'next/',
+    //   shareKey: 'next/',
+    //   layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+    //   issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+    //   shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+    //   exclude: {
+    //     request: /compiled/,
+    //   },
+    // },
+
+    // // Dedicated shared setup for router context with absolute path
+    // 'next-shared-runtime': {
+    //   singleton: true,
+    //   request: 'next/dist/shared/',
+    //   shareKey: 'next/dist/shared/',
+    //   layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    // },
+
+    // // Pattern for all shared-runtime files
+    // 'next-dist-shared-runtime': {
+    //   singleton: true,
+    //   request: 'next/dist/shared/lib/',
+    //   shareKey: 'next/dist/shared/lib/',
+    //   layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    // },
+
+    // 'shared-router-context': {
+    //   singleton: true,
+    //   request: 'next/dist/shared/lib/router-context.shared-runtime',
+    //   shareKey: 'router-context',
+    //   import: 'next/dist/shared/lib/router-context.shared-runtime',
+    //   layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    // },
+    // 'next/router': {
+    //   singleton: true,
+    //   request: 'next/router',
+    //   layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    // },
+    // 'next/navigation': {
+    //   singleton: true,
+    //   request: 'next/link',
+    //   layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    // },
+
+    //   'styled-jsx-app-pages': {
+    //     request: 'styled-jsx',
+    //     shareKey: 'styled-jsx',
+    //     singleton: true,
+    //     layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //     issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //     shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   },
+    //   'styled-jsx-app-pages/': {
+    //     request: 'styled-jsx/',
+    //     shareKey: 'styled-jsx/',
+    //     singleton: true,
+    //     layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //     issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //     shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   },
+    //   'styled-jsx-pages-dir': {
+    //     request: 'styled-jsx',
+    //     shareKey: 'styled-jsx',
+    //     singleton: true,
+    //     layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+    //     issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+    //     shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+    //   },
+    //   'styled-jsx-pages-dir/': {
+    //     request: 'styled-jsx/',
+    //     shareKey: 'styled-jsx/',
+    //     singleton: true,
+    //     layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+    //     issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+    //     shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+    //   },
   };
 };
 
@@ -351,6 +600,6 @@ export const getNextInternalsShareScopeClient = (
     // ...reactDomClientGroup,
     // ...reactJsxDevRuntimeGroup,
     // ...reactJsxRuntimeGroup,
-    // ...nextGroup,
+    ...nextGroup,
   };
 };

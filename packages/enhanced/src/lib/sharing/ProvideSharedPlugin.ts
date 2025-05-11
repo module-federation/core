@@ -78,9 +78,9 @@ class ProvideSharedPlugin {
   constructor(options: ProvideSharedPluginOptions) {
     validate(options);
 
-    console.log('[ProvideSharedPlugin] Constructor options:', {
-      providesCount: Object.keys(options.provides || {}).length
-    });
+    // console.log('[ProvideSharedPlugin] Constructor options:', {
+    //   providesCount: Object.keys(options.provides || {}).length
+    // });
 
     this._provides = parseOptions(
       options.provides,
@@ -105,11 +105,11 @@ class ProvideSharedPlugin {
       (item, key) => {
         const request = item.request || key;
         // Debug log in transform function
-        console.log(`[ProvideSharedPlugin] Processing provide for ${key}:`, {
-          hasInclude: !!item.include,
-          includeDetails: item.include,
-          request
-        });
+        // console.log(`[ProvideSharedPlugin] Processing provide for ${key}:`, {
+        //   hasInclude: !!item.include,
+        //   includeDetails: item.include,
+        //   request
+        // });
         return {
           shareScope: item.shareScope || options.shareScope || 'default',
           shareKey: item.shareKey || request,
@@ -132,14 +132,14 @@ class ProvideSharedPlugin {
     });
 
     // Debug log after parsing options
-    console.log('[ProvideSharedPlugin] Parsed provides:',
-      this._provides.map(([key, config]) => ({
-        key,
-        hasInclude: !!config.include,
-        includeDetails: config.include,
-        requestFromConfig: config.request
-      }))
-    );
+    // console.log('[ProvideSharedPlugin] Parsed provides:',
+    //   this._provides.map(([key, config]) => ({
+    //     key,
+    //     hasInclude: !!config.include,
+    //     includeDetails: config.include,
+    //     requestFromConfig: config.request
+    //   }))
+    // );
   }
 
   /**
@@ -164,12 +164,12 @@ class ProvideSharedPlugin {
         for (const [request, config] of this._provides) {
           const actualRequest = config.request || request;
           // Debug log for each provides entry
-          console.log(`[ProvideSharedPlugin] Setting up provide for ${request}:`, {
-            actualRequest,
-            hasInclude: !!config.include,
-            includeDetails: config.include,
-            isPrefix: actualRequest.endsWith('/')
-          });
+          // console.log(`[ProvideSharedPlugin] Setting up provide for ${request}:`, {
+          //   actualRequest,
+          //   hasInclude: !!config.include,
+          //   includeDetails: config.include,
+          //   isPrefix: actualRequest.endsWith('/')
+          // });
 
           const lookupKey = createLookupKey(actualRequest, config);
           if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
@@ -187,11 +187,11 @@ class ProvideSharedPlugin {
           } else if (actualRequest.endsWith('/')) {
             // module request prefix
             prefixMatchProvides.set(lookupKey, config);
-            console.log(`[ProvideSharedPlugin] Added to prefixMatchProvides:`, {
-              key: actualRequest,
-              hasInclude: !!config.include,
-              includeDetails: config.include
-            });
+            // console.log(`[ProvideSharedPlugin] Added to prefixMatchProvides:`, {
+            //   key: actualRequest,
+            //   hasInclude: !!config.include,
+            //   includeDetails: config.include
+            // });
           } else {
             // module request
             matchProvides.set(lookupKey, config);
@@ -207,10 +207,46 @@ class ProvideSharedPlugin {
             const lookupKey = createLookupKey(resource || '', {
               layer: moduleLayer || undefined,
             });
-            console.log(`[ProvideSharedPlugin-DEBUG] Module hook: resource='${resource}', layer='${moduleLayer}', request='${resolveData.request}'`);
+            // console.log(`[ProvideSharedPlugin-DEBUG] Module hook: resource='${resource}', layer='${moduleLayer}', request='${resolveData.request}'`);
+            // Special case for router context
+            const routerContextPathFragment =
+              'next/dist/shared/lib/router-context.shared-runtime';
+            if (
+              (resource && resource.includes(routerContextPathFragment)) ||
+              resolveData.request === routerContextPathFragment
+            ) {
+              // console.log(`[ProvideSharedPlugin-DEBUG] Special handling for router-context triggered for resource: '${resource}', request: '${resolveData.request}'`);
+
+              const config = {
+                shareScope: moduleLayer || 'default',
+                shareKey: 'router-context',
+                version: undefined,
+                eager: false,
+                requiredVersion: undefined,
+                strictVersion: undefined,
+                singleton: true,
+                layer: moduleLayer || undefined,
+                request: 'next/dist/shared/lib/router-context.shared-runtime',
+                exclude: undefined,
+                include: undefined,
+              };
+
+              if (resource) {
+                this.provideSharedModule(
+                  compilation,
+                  resolvedProvideMap,
+                  resource,
+                  config,
+                  resource,
+                  resourceResolveData,
+                );
+              }
+              resolveData.cacheable = false;
+              return module;
+            }
 
             if (resource && resolvedProvideMap.has(lookupKey)) {
-              console.log(`[ProvideSharedPlugin-DEBUG] Already resolved: key='${lookupKey}'`);
+              // console.log(`[ProvideSharedPlugin-DEBUG] Already resolved: key='${lookupKey}'`);
               return module;
             }
             const { request } = resolveData;
@@ -220,7 +256,7 @@ class ProvideSharedPlugin {
               });
               const config = matchProvides.get(requestKey);
               if (config !== undefined && resource) {
-                console.log(`[ProvideSharedPlugin-DEBUG] Matched in matchProvides: key='${requestKey}'`, { config });
+                // console.log(`[ProvideSharedPlugin-DEBUG] Matched in matchProvides: key='${requestKey}'`, { config });
                 this.provideSharedModule(
                   compilation,
                   resolvedProvideMap,
@@ -236,7 +272,7 @@ class ProvideSharedPlugin {
               const lookup = config.request || prefix;
               if (request.startsWith(lookup) && resource) {
                 const remainder = request.slice(lookup.length);
-                console.log(`[ProvideSharedPlugin-DEBUG] Checking prefix: '${prefix}' for request: '${request}'`, { remainder, config });
+                // console.log(`[ProvideSharedPlugin-DEBUG] Checking prefix: '${prefix}' for request: '${request}'`, { remainder, config });
 
                 // First check include if it exists - only proceed if request matches include pattern
                 if (
@@ -246,7 +282,7 @@ class ProvideSharedPlugin {
                     ? config.include.request.test(remainder)
                     : remainder === config.include.request)
                 ) {
-                  console.log(`[ProvideSharedPlugin-DEBUG] Include filter passed for request: '${request}'`);
+                  // console.log(`[ProvideSharedPlugin-DEBUG] Include filter passed for request: '${request}'`);
                   continue; // Skip if include doesn't match
                 }
 
@@ -258,15 +294,15 @@ class ProvideSharedPlugin {
                     ? config.exclude.request.test(remainder)
                     : remainder === config.exclude.request)
                 ) {
-                  console.log(`[ProvideSharedPlugin-DEBUG] Exclude filter passed for request: '${request}'`);
+                  // console.log(`[ProvideSharedPlugin-DEBUG] Exclude filter passed for request: '${request}'`);
                   continue; // Skip if exclude matches
                 }
-                console.log(`[ProvideSharedPlugin-DEBUG] Prefix match found: prefix='${prefix}'`, { config, request });
+                // console.log(`[ProvideSharedPlugin-DEBUG] Prefix match found: prefix='${prefix}'`, { config, request });
                 const finalConfig = {
                   ...config,
                   shareKey: config.shareKey + remainder,
                 };
-                console.log(`[ProvideSharedPlugin-DEBUG] Calling provideSharedModule with finalConfig:`, { finalConfig });
+                // console.log(`[ProvideSharedPlugin-DEBUG] Calling provideSharedModule with finalConfig:`, { finalConfig });
                 this.provideSharedModule(
                   compilation,
                   resolvedProvideMap,
@@ -349,7 +385,7 @@ class ProvideSharedPlugin {
     resourceResolveData: any,
   ): void {
     let version = config.version;
-    console.log(`[ProvideSharedPlugin-DEBUG] provideSharedModule called: key='${key}', resource='${resource}'`, { config, initialVersion: version });
+    // console.log(`[ProvideSharedPlugin-DEBUG] provideSharedModule called: key='${key}', resource='${resource}'`, { config, initialVersion: version });
     if (version === undefined) {
       let details = '';
       if (!resourceResolveData) {
@@ -371,9 +407,6 @@ class ProvideSharedPlugin {
         );
         error.file = `shared module ${key} -> ${resource}`;
         compilation.warnings.push(error);
-        console.log(`[ProvideSharedPlugin-DEBUG] Version could not be determined for: '${key}'`);
-      } else {
-        console.log(`[ProvideSharedPlugin-DEBUG] Determined version for '${key}': '${version}'`);
       }
     }
 
@@ -387,8 +420,19 @@ class ProvideSharedPlugin {
       !satisfy(version, config.include.version)
     ) {
       // Version doesn't match the include range, so skip providing this module version
-      console.log(`[ProvideSharedPlugin-DEBUG] Skipping provide (include mismatch): key='${key}', version='${version}', include='${config.include.version}'`);
+      console.log(
+        `[ProvideSharedPlugin-DEBUG] INCLUDE FILTER: SKIPPING key='${key}', resource='${resource}', version='${version}', includeVersionRule='${config.include.version}', satisfyResult='${satisfy(version, config.include.version)}'`,
+      );
       return;
+    } else if (
+      config.include &&
+      typeof config.include.version === 'string' &&
+      typeof version === 'string' &&
+      version
+    ) {
+      console.log(
+        `[ProvideSharedPlugin-DEBUG] INCLUDE FILTER: ALLOWING key='${key}', resource='${resource}', version='${version}', includeVersionRule='${config.include.version}', satisfyResult='${satisfy(version, config.include.version)}'`,
+      );
     }
 
     // --- Add Exclude Check ---
@@ -401,8 +445,19 @@ class ProvideSharedPlugin {
       satisfy(version, config.exclude.version)
     ) {
       // Version matches the exclude range, so skip providing this module version
-      console.log(`[ProvideSharedPlugin-DEBUG] Skipping provide (exclude match): key='${key}', version='${version}', exclude='${config.exclude.version}'`);
+      console.log(
+        `[ProvideSharedPlugin-DEBUG] EXCLUDE FILTER: SKIPPING key='${key}', resource='${resource}', version='${version}', excludeVersionRule='${config.exclude.version}', satisfyResult='${satisfy(version, config.exclude.version)}'`,
+      );
       return;
+    } else if (
+      config.exclude &&
+      typeof config.exclude.version === 'string' &&
+      typeof version === 'string' &&
+      version
+    ) {
+      console.log(
+        `[ProvideSharedPlugin-DEBUG] EXCLUDE FILTER: ALLOWING key='${key}', resource='${resource}', version='${version}', excludeVersionRule='${config.exclude.version}', satisfyResult='${satisfy(version, config.exclude.version)}'`,
+      );
     }
 
     // Check if the request matches the exclude.request pattern
@@ -414,13 +469,16 @@ class ProvideSharedPlugin {
         : resource === config.exclude.request)
     ) {
       // Request matches the exclude pattern, so skip providing this module
-      console.log(`[ProvideSharedPlugin-DEBUG] Skipping provide (exclude request match): key='${key}', resource='${resource}'`, { excludeRequest: config.exclude.request });
+      // console.log(`[ProvideSharedPlugin-DEBUG] Skipping provide (exclude request match): key='${key}', resource='${resource}'`, { excludeRequest: config.exclude.request });
       return;
     }
     // --- End Exclude Check ---
 
     const lookupKey = createLookupKey(resource, config);
-    console.log(`[ProvideSharedPlugin-DEBUG] Setting resolved provide: key='${lookupKey}'`, { config, version, resource });
+    console.log(
+      `[ProvideSharedPlugin-DEBUG] FINAL ADD to resolvedProvideMap: key='${lookupKey}', version='${version}', resource='${resource}'`,
+      { config },
+    );
     resolvedProvideMap.set(lookupKey, {
       config,
       version,

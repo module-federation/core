@@ -2,7 +2,7 @@
 **/.cache/
 **/.temp/
 **/coverage/
-**/dist/
+!**/dist/
 
 # Documentation and config files
 **/*.yaml

@@ -81,10 +81,6 @@ class ConsumeSharedPlugin {
       validate(options);
     }
 
-    console.log('[ConsumeSharedPlugin] Constructor options:', {
-      consumesCount: Object.keys(options.consumes || {}).length
-    });
-
     this._consumes = parseOptions(
       options.consumes,
       (item, key) => {
@@ -126,12 +122,6 @@ class ConsumeSharedPlugin {
       },
       (item, key) => {
         const request = item.request || key;
-        // Debug log in transform function
-        console.log(`[ConsumeSharedPlugin] Processing consume for ${key}:`, {
-          hasInclude: !!item.include,
-          includeDetails: item.include,
-          request
-        });
         return {
           import: item.import === false ? undefined : item.import || request,
           shareScope: item.shareScope || options.shareScope || 'default',
@@ -155,16 +145,6 @@ class ConsumeSharedPlugin {
           request,
         } as ConsumeOptions;
       },
-    );
-
-    // Debug log after parsing options
-    console.log('[ConsumeSharedPlugin] Parsed consumes:',
-      this._consumes.map(([key, config]) => ({
-        key,
-        hasInclude: !!config.include,
-        includeDetails: config.include,
-        requestFromConfig: config.request
-      }))
     );
   }
 
@@ -339,7 +319,9 @@ class ConsumeSharedPlugin {
                 !satisfy(data['version'], config.include.version)
               ) {
                 // Version doesn't match include range, skip this module
-                return resolveFilter(undefined as unknown as ConsumeSharedModule);
+                return resolveFilter(
+                  undefined as unknown as ConsumeSharedModule,
+                );
               }
               return resolveFilter(consumedModule);
             },
@@ -358,9 +340,9 @@ class ConsumeSharedPlugin {
           typeof config.exclude.fallbackVersion === 'string' &&
           config.exclude.fallbackVersion
         ) {
-          if (satisfy(config.exclude.fallbackVersion, config.exclude.version)) {
-            return undefined as unknown as ConsumeSharedModule;
-          }
+          // if (satisfy(config.exclude.fallbackVersion, config.exclude.version)) {
+          //   return undefined as unknown as ConsumeSharedModule;
+          // }
           return consumedModule;
         }
 
@@ -371,23 +353,73 @@ class ConsumeSharedPlugin {
             ['package.json'],
             (err, result) => {
               if (err) {
-                return resolveFilter(consumedModule);
+                console.log(
+                  `[ConsumeSharedPlugin-DEBUG] Fallback exclusion: getDescriptionFile error for ${importResolved}:`,
+                  err,
+                );
+                return resolveFilter(consumedModule); // If error, use fallback
               }
-              const { data } = result || {};
-              if (!data || !data['version'] || data['name'] !== request) {
-                return resolveFilter(consumedModule);
+              const { data } = result || {}; // package.json of the fallback
+
+              // ---- DETAILED DEBUG LOGGING ----
+              console.log(
+                '[ConsumeSharedPlugin-DEBUG] Fallback exclusion check:',
+                {
+                  importResolved,
+                  request: config.request, // Using config.request as 'request' in this scope is the ConsumeSharedModule instance
+                  fallbackPackageName: data ? data['name'] : 'N/A',
+                  fallbackPackageVersion: data ? data['version'] : 'N/A',
+                  configExcludeVersion: config.exclude
+                    ? config.exclude.version
+                    : 'N/A',
+                  configRequiredVersion: config.requiredVersion,
+                  doesNameMatchRequest: data
+                    ? data['name'] === config.request
+                    : 'N/A',
+                  isExcludeConfigPresent: !!(
+                    config.exclude && typeof config.exclude.version === 'string'
+                  ),
+                  isVersionSatisfiedForExclusion:
+                    data &&
+                    data['version'] &&
+                    config.exclude &&
+                    typeof config.exclude.version === 'string'
+                      ? satisfy(data['version'], config.exclude.version)
+                      : 'N/A',
+                },
+              );
+              // ---- END DETAILED DEBUG LOGGING ----
+
+              if (
+                !data ||
+                !data['version'] ||
+                data['name'] !== config.request
+              ) {
+                // Ensure using config.request
+                // If no version, or name mismatch
+                console.log(
+                  `[ConsumeSharedPlugin-DEBUG] Fallback exclusion: Pre-condition fail (no data, no version, or name mismatch). Fallback will be used if not undefined.`,
+                );
+                return resolveFilter(consumedModule); // Use fallback
               }
 
               if (
                 config.exclude &&
                 typeof config.exclude.version === 'string' &&
-                satisfy(data['version'], config.exclude.version)
+                satisfy(data['version'], config.exclude.version) // data['version'] is fallback's version
               ) {
+                // If fallback's version IS excluded, return undefined
+                console.log(
+                  `[ConsumeSharedPlugin-DEBUG] FALLBACK EXCLUDED: request='${config.request}', fallbackVersion='${data['version']}', excludeRule='${config.exclude.version}'`,
+                );
                 return resolveFilter(
                   undefined as unknown as ConsumeSharedModule,
                 );
               }
-              return resolveFilter(consumedModule);
+              console.log(
+                `[ConsumeSharedPlugin-DEBUG] FALLBACK ALLOWED (or no applicable exclude rule): request='${config.request}', fallbackVersion='${data['version']}', excludeRule='${config.exclude?.version}'`,
+              );
+              return resolveFilter(consumedModule); // Otherwise, use the fallback
             },
           );
         });
@@ -418,48 +450,27 @@ class ConsumeSharedPlugin {
             resolvedConsumes = resolved;
             unresolvedConsumes = unresolved;
             prefixedConsumes = prefixed;
-
-            // Debug log after resolving configs
-            console.log('[ConsumeSharedPlugin] Resolved consumes:', {
-              resolvedCount: resolved.size,
-              unresolvedCount: unresolved.size,
-              prefixedCount: prefixed.size
-            });
-
-            // Log prefixed consumes which are most relevant for include/exclude
-            for (const [prefix, options] of prefixed.entries()) {
-              console.log(`[ConsumeSharedPlugin] Prefixed consume for ${prefix}:`, {
-                hasInclude: !!options.include,
-                includeDetails: options.include
-              });
-            }
           },
         );
 
         normalModuleFactory.hooks.factorize.tapPromise(
           PLUGIN_NAME,
-          async (resolveData: ResolveData): Promise<Module | undefined> => {
+          (resolveData: ResolveData): Promise<Module | undefined> => {
             const { context, request, dependencies, contextInfo } = resolveData;
-            // wait for resolving to be complete
-            // BIND `this` for createConsumeSharedModule call
             const boundCreateConsumeSharedModule =
               this.createConsumeSharedModule.bind(this);
 
-            return promise.then(() => {
+            return promise.then(async () => {
               if (
                 dependencies[0] instanceof ConsumeSharedFallbackDependency ||
                 dependencies[0] instanceof ProvideForSharedDependency
               ) {
-                return;
+                return; // These are handled by their respective factories/plugins
               }
-
-              console.log('[ConsumeSharedPlugin-DEBUG] Factorize hook:', { request, issuerLayer: contextInfo.issuerLayer });
 
               const unresolvedKey = createLookupKey(request, contextInfo);
               const match = unresolvedConsumes.get(unresolvedKey);
-
               if (match !== undefined) {
-                console.log(`[ConsumeSharedPlugin-DEBUG] Matched in unresolvedConsumes: key='${unresolvedKey}'`, { match });
                 // Use the bound function
                 return boundCreateConsumeSharedModule(
                   compilation,
@@ -473,7 +484,6 @@ class ConsumeSharedPlugin {
                 const lookup = options.request || prefix;
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
-                  console.log(`[ConsumeSharedPlugin-DEBUG] Checking prefix: '${prefix}' for request: '${request}'`, { remainder, options });
 
                   // First check include if it exists - only proceed if request matches include pattern
                   if (
@@ -483,12 +493,6 @@ class ConsumeSharedPlugin {
                       ? options.include.request.test(remainder)
                       : remainder === options.include.request)
                   ) {
-                    if (request.includes('react-is')) {
-                      console.log(`[DEBUG-CONSUME] SKIPPING (include not matched): ${request}`);
-                      console.log(`  include.request:`, options.include.request);
-                      console.log(`  remainder:`, remainder);
-                    }
-                    console.log(`[ConsumeSharedPlugin-DEBUG] Include filter passed for request: '${request}'`);
                     continue; // Skip if include doesn't match
                   }
 
@@ -501,16 +505,9 @@ class ConsumeSharedPlugin {
                       ? options.exclude.request.test(remainder)
                       : remainder === options.exclude.request)
                   ) {
-                    if (request.includes('react-is')) {
-                      console.log(`[DEBUG-CONSUME] SKIPPING (exclude matched): ${request}`);
-                      console.log(`  exclude.request:`, options.exclude.request);
-                      console.log(`  remainder:`, remainder);
-                    }
-                    console.log(`[ConsumeSharedPlugin-DEBUG] Exclude filter passed for request: '${request}'`);
                     continue; // Skip if exclude matches
                   }
 
-                  console.log(`[ConsumeSharedPlugin-DEBUG] Prefix match found: prefix='${prefix}'`, { options, request });
                   const finalConfig = {
                     ...options,
                     import: options.import
@@ -520,7 +517,6 @@ class ConsumeSharedPlugin {
                     // Prioritize config layer, fallback to issuerLayer
                     layer: options.layer || contextInfo.issuerLayer,
                   };
-                  console.log(`[ConsumeSharedPlugin-DEBUG] Calling createConsumeSharedModule with finalConfig:`, { finalConfig });
 
                   // Use the bound function
                   return boundCreateConsumeSharedModule(

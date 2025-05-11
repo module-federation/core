@@ -32,9 +32,10 @@
       ]
     },
     "export": {
-      "executor": "@nx/next:export",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "next-app-router-4001:build:production"
+        "command": "npm run export",
+        "cwd": "apps/next-app-router/next-app-router-4001"
       }
     },
     "lint": {

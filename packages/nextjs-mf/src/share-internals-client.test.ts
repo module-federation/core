@@ -1,4 +1,7 @@
-import { getNextInternalsShareScopeClient } from './share-internals-client';
+import {
+  getNextInternalsShareScopeClient,
+  getReactGroupClient,
+} from './share-internals-client';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -56,5 +59,22 @@ describe('getNextInternalsShareScopeClient', () => {
     } as any;
     const result = getNextInternalsShareScopeClient(compiler);
     expect(result).toEqual({});
+  });
+
+  // Tests specifically for getReactGroupClient
+  describe('getReactGroupClient', () => {
+    it('returns the correct config for Next 15', () => {
+      const context = setupNextVersion('15.0.0');
+      const compiler = { context } as any;
+      const result = getReactGroupClient(compiler);
+      expect(result).toMatchSnapshot();
+    });
+
+    it('returns the correct config for Next 14', () => {
+      const context = setupNextVersion('14.0.0');
+      const compiler = { context } as any;
+      const result = getReactGroupClient(compiler);
+      expect(result).toMatchSnapshot();
+    });
   });
 });
