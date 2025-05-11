@@ -290,6 +290,60 @@ class ConsumeSharedPlugin {
         currentConfig,
       );
 
+      // Check for include version first
+      if (config.include && typeof config.include.version === 'string') {
+        if (!importResolved) {
+          return consumedModule;
+        }
+
+        return new Promise((resolveFilter) => {
+          getDescriptionFile(
+            compilation.inputFileSystem,
+            path.dirname(importResolved as string),
+            ['package.json'],
+            (err, result) => {
+              if (err) {
+                return resolveFilter(consumedModule);
+              }
+              const { data } = result || {};
+              if (!data || !data['version'] || data['name'] !== request) {
+                return resolveFilter(consumedModule);
+              }
+
+              // Only include if version satisfies the include constraint
+              if (
+                config.include &&
+                satisfy(data['version'], config.include.version as string)
+              ) {
+                return resolveFilter(consumedModule);
+              }
+
+              // Check fallback version
+              if (
+                config.include &&
+                typeof config.include.fallbackVersion === 'string' &&
+                config.include.fallbackVersion
+              ) {
+                if (
+                  satisfy(
+                    config.include.fallbackVersion,
+                    config.include.version as string,
+                  )
+                ) {
+                  return resolveFilter(consumedModule);
+                }
+                return resolveFilter(
+                  undefined as unknown as ConsumeSharedModule,
+                );
+              }
+
+              return resolveFilter(undefined as unknown as ConsumeSharedModule);
+            },
+          );
+        });
+      }
+
+      // Check for exclude version (existing logic)
       if (config.exclude && typeof config.exclude.version === 'string') {
         if (!importResolved) {
           return consumedModule;
@@ -396,14 +450,29 @@ class ConsumeSharedPlugin {
                 const lookup = options.request || prefix;
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
+                  // First check include if it exists - only proceed if request matches include pattern
+                  if (
+                    options.include &&
+                    options.include.request &&
+                    !(options.include.request instanceof RegExp
+                      ? options.include.request.test(remainder)
+                      : remainder === options.include.request)
+                  ) {
+                    continue; // Skip if include doesn't match
+                  }
+
+                  // Then check exclude if it exists - skip if request matches exclude pattern
                   if (
                     options.exclude &&
                     options.exclude.request &&
                     // Skip if the remainder DOES match the filter
-                    options.exclude.request.test(remainder)
+                    (options.exclude.request instanceof RegExp
+                      ? options.exclude.request.test(remainder)
+                      : remainder === options.exclude.request)
                   ) {
-                    continue;
+                    continue; // Skip if exclude matches
                   }
+
                   // Use the bound function
                   return boundCreateConsumeSharedModule(
                     compilation,

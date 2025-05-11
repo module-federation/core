@@ -54,6 +54,8 @@ const validate = createSchemaValidation(
  * @property {string | undefined | false} version
  * @property {boolean} eager
  * @property {string} [request] The actual request to use for importing the module
+ * @property {{ version?: string; request?: string | RegExp; fallbackVersion?: string }} [exclude] Options for excluding certain versions or requests
+ * @property {{ version?: string; request?: string | RegExp; fallbackVersion?: string }} [include] Options for including only certain versions or requests
  */
 
 /** @typedef {Map<string, { config: ProvideOptions, version: string | undefined | false }>} ResolvedProvideMap */
@@ -111,6 +113,7 @@ class ProvideSharedPlugin {
           layer: item.layer,
           request,
           exclude: item.exclude,
+          include: item.include,
         };
       },
     );
@@ -200,12 +203,28 @@ class ProvideSharedPlugin {
               if (request.startsWith(lookup) && resource) {
                 const remainder = request.slice(lookup.length);
                 if (
+                  config.include &&
+                  config.include.request &&
+                  !(config.include.request instanceof RegExp
+                    ? config.include.request.test(remainder)
+                    : remainder === config.include.request)
+                ) {
+                  // console.log(`[ProvideSharedPlugin-DEBUG] Include filter passed for request: '${request}'`);
+                  continue; // Skip if include doesn't match
+                }
+
+                // Then check exclude if it exists - skip if request matches exclude pattern
+                if (
                   config.exclude &&
                   config.exclude.request &&
-                  config.exclude.request.test(remainder)
+                  (config.exclude.request instanceof RegExp
+                    ? config.exclude.request.test(remainder)
+                    : remainder === config.exclude.request)
                 ) {
-                  continue;
+                  // console.log(`[ProvideSharedPlugin-DEBUG] Exclude filter passed for request: '${request}'`);
+                  continue; // Skip if exclude matches
                 }
+
                 this.provideSharedModule(
                   compilation,
                   resolvedProvideMap,
@@ -315,6 +334,32 @@ class ProvideSharedPlugin {
       }
     }
 
+    // --- Add Include Check ---
+    // Only include if the determined version satisfies the include.version constraint
+    if (
+      config.include &&
+      typeof config.include.version === 'string' &&
+      typeof version === 'string' &&
+      version &&
+      !satisfy(version, config.include.version)
+    ) {
+      // Version doesn't satisfy the include range, so skip providing this module version
+      return;
+    }
+
+    // Check if the request matches the include.request pattern
+    if (
+      config.include &&
+      config.include.request &&
+      !(config.include.request instanceof RegExp
+        ? config.include.request.test(resource)
+        : resource === config.include.request)
+    ) {
+      // Request doesn't match the include pattern, so skip providing this module
+      return;
+    }
+    // --- End Include Check ---
+
     // --- Add Exclude Check ---
     // Check if the determined version should be excluded based on exclude.version
     if (
@@ -332,8 +377,10 @@ class ProvideSharedPlugin {
     // This check was added in previous steps, ensure it uses 'exclude'
     if (
       config.exclude &&
-      config.exclude.request instanceof RegExp &&
-      config.exclude.request.test(resource)
+      config.exclude.request &&
+      (config.exclude.request instanceof RegExp
+        ? config.exclude.request.test(resource)
+        : resource === config.exclude.request)
     ) {
       // Request matches the exclude pattern, so skip providing this module
       return;

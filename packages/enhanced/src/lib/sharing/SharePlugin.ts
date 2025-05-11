@@ -68,6 +68,7 @@ class SharePlugin {
           layer: options.layer,
           request: options.request || key,
           exclude: options.exclude,
+          include: options.include,
         },
       }),
     );
@@ -85,6 +86,7 @@ class SharePlugin {
           layer: options.layer,
           request: options.request || options.import || key,
           exclude: options.exclude,
+          include: options.include,
         },
       }));
 
