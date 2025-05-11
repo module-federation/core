@@ -9,6 +9,7 @@ import {
   createModuleMock,
 } from './utils';
 import { WEBPACK_MODULE_TYPE_PROVIDE } from '../../../src/lib/Constants';
+import type { WebpackError } from 'webpack';
 
 // Define interfaces to help with type assertions
 // These are simplified versions of the webpack types
@@ -457,8 +458,8 @@ describe('ProvideSharedModule', () => {
       );
 
       // Create a non-empty callback function to avoid linter errors
-      function buildCallback(err: Error | null) {
-        if (err) throw err;
+      function buildCallback(error?: unknown) {
+        if (error) throw error;
       }
 
       // Create a simple mock compilation
