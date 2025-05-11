@@ -10,7 +10,7 @@ module.exports = {
         package: {},
         '@scoped/package': {},
         'prefix/': {
-          filter: {
+          exclude: {
             request: /deep/,
           },
         },
