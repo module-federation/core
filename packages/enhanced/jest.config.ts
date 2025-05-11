@@ -36,6 +36,7 @@ export default {
   testMatch: [
     '<rootDir>/test/*.basictest.js',
     '<rootDir>/test/unit/**/*.test.ts',
+    '<rootDir>/test/compiler-unit/**/*.test.ts',
   ],
 
   testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),

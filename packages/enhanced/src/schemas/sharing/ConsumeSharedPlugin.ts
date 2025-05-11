@@ -121,9 +121,14 @@ export default {
             'Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).',
           type: 'boolean',
         },
-        filter: {
+        exclude: {
           description: 'Filter consumed modules based on the request path.',
-          $ref: '#/definitions/Filter',
+          $ref: '#/definitions/IncludeExcludeOptions',
+        },
+        include: {
+          description:
+            'Filter consumed modules based on the request path (only include matches).',
+          $ref: '#/definitions/IncludeExcludeOptions',
         },
       },
     },
@@ -148,17 +153,54 @@ export default {
         ],
       },
     },
-    Filter: {
+    Exclude: {
       description: 'Advanced filtering options.',
       type: 'object',
       additionalProperties: false,
       properties: {
         request: {
-          description:
-            'A RegExp object to test against the request path suffix (after the prefix).',
+          description: 'Regular expression pattern to filter module requests',
           instanceof: 'RegExp',
         },
+        version: {
+          description:
+            'Specific version string or range to filter by (exclude matches).',
+          type: 'string',
+        },
+        fallbackVersion: {
+          description:
+            'Optional specific version string to check against the filter.version range instead of reading package.json.',
+          type: 'string',
+        },
       },
+    },
+    IncludeExcludeOptions: {
+      type: 'object',
+      properties: {
+        request: {
+          anyOf: [
+            {
+              type: 'string',
+              description: 'Request string to match exactly.',
+            },
+            {
+              instanceof: 'RegExp',
+              description: 'Regular expression to match the request path.',
+            },
+          ],
+        },
+        version: {
+          type: 'string',
+          description:
+            "Semantic versioning range to match against the module's version.",
+        },
+        fallbackVersion: {
+          type: 'string',
+          description:
+            'Optional specific version string to check against the version range instead of reading package.json.',
+        },
+      },
+      additionalProperties: false,
     },
   },
   title: 'ConsumeSharedPluginOptions',

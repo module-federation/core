@@ -32,6 +32,13 @@ export interface ProvidesObject {
    */
   [k: string]: ProvidesConfig | ProvidesItem;
 }
+
+export interface IncludeExcludeOptions {
+  request?: string | RegExp;
+  version?: string;
+  fallbackVersion?: string;
+}
+
 /**
  * Advanced configuration for modules that should be provided as shared modules to the share scope.
  */
@@ -75,7 +82,9 @@ export interface ProvidesConfig {
   /**
    * Filter for the shared module.
    */
-  filter?: {
-    request?: RegExp;
-  };
+  exclude?: IncludeExcludeOptions;
+  /**
+   * Filter for the shared module.
+   */
+  include?: IncludeExcludeOptions;
 }

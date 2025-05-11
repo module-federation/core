@@ -90,7 +90,15 @@ export interface SharedConfig {
   /**
    * Filter for the shared module.
    */
-  filter?: {
-    request?: RegExp;
-  };
+  exclude?: IncludeExcludeOptions;
+  /**
+   * Filter for the shared module.
+   */
+  include?: IncludeExcludeOptions;
+}
+
+export interface IncludeExcludeOptions {
+  request?: string | RegExp;
+  version?: string;
+  fallbackVersion?: string;
 }

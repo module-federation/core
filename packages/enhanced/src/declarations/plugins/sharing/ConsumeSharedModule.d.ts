@@ -1,3 +1,17 @@
+import type { SemVerRange } from 'webpack/lib/util/semver';
+
+export interface ConsumeSharedModuleExcludeOptions {
+  request?: string | RegExp;
+  version?: string;
+  fallbackVersion?: string;
+}
+
+export interface ConsumeSharedModuleIncludeOptions {
+  request?: string | RegExp;
+  version?: string;
+  fallbackVersion?: string;
+}
+
 export type ConsumeOptions = {
   /**
    * fallback request
@@ -43,16 +57,6 @@ export type ConsumeOptions = {
    */
   eager: boolean;
   /**
-   * Filter object for consuming shared modules.
-   */
-  filter?: {
-    /**
-     * RegExp to filter requests for prefix consumes.
-     * Applied to the part of the request after the prefix.
-     */
-    request?: RegExp;
-  };
-  /**
    * Share a specific layer of the module, if the module supports layers
    */
   layer?: string | null;
@@ -60,4 +64,14 @@ export type ConsumeOptions = {
    * Issuer layer in which the module should be resolved
    */
   issuerLayer?: string | null;
+  /**
+   * Filter object for consuming shared modules.
+   * Modules matching the criteria in this object will be excluded.
+   */
+  exclude?: ConsumeSharedModuleExcludeOptions;
+  /**
+   * Filter object for consuming shared modules.
+   * Only modules matching the criteria in this object will be included.
+   */
+  include?: ConsumeSharedModuleIncludeOptions;
 };

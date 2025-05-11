@@ -434,10 +434,15 @@ export default {
             'Include the provided and fallback module directly instead behind an async request. This allows to use this shared module in initial load too. All possible shared modules need to be eager too.',
           type: 'boolean',
         },
-        filter: {
+        exclude: {
           description:
-            'Filter configuration using regular expression to control which modules should be shared.',
-          $ref: '#/definitions/Filter',
+            "Options for excluding specific versions or request paths of the shared module. When specified, matching modules will not be shared. Cannot be used with 'include'.",
+          $ref: '#/definitions/IncludeExcludeOptions',
+        },
+        include: {
+          description:
+            "Options for including only specific versions or request paths of the shared module. When specified, only matching modules will be shared. Cannot be used with 'exclude'.",
+          $ref: '#/definitions/IncludeExcludeOptions',
         },
         import: {
           description:
@@ -562,7 +567,39 @@ export default {
         'If `output.libraryTarget` is set to umd and `output.library` is set, setting this to true will name the AMD module.',
       type: 'boolean',
     },
-    Filter: {
+    IncludeExcludeOptions: {
+      type: 'object',
+      properties: {
+        request: {
+          type: ['string', 'object'],
+          description:
+            'A string (which can be a regex pattern) or a RegExp object to match the request path.',
+        },
+        version: {
+          type: 'string',
+          description:
+            "Semantic versioning range to match against the module's version.",
+        },
+        fallbackVersion: {
+          type: 'string',
+          description:
+            "Semantic versioning range to match against the fallback module's version for exclusion/inclusion context where applicable.",
+        },
+      },
+      additionalProperties: false,
+      anyOf: [
+        {
+          required: ['request'],
+        },
+        {
+          required: ['version'],
+        },
+        {
+          required: ['fallbackVersion'],
+        },
+      ],
+    },
+    Exclude: {
       description: 'Advanced filtering options.',
       type: 'object',
       additionalProperties: false,
@@ -570,6 +607,16 @@ export default {
         request: {
           description: 'Regular expression pattern to filter module requests',
           instanceof: 'RegExp',
+        },
+        version: {
+          description:
+            'Specific version string or range to filter by (exclude matches).',
+          type: 'string',
+        },
+        fallbackVersion: {
+          description:
+            'Optional specific version string to check against the filter.version range instead of reading package.json.',
+          type: 'string',
         },
       },
     },
