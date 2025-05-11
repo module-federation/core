@@ -10,7 +10,12 @@
       "options": {
         "commands": ["npm run build:lib --prefix packages/chrome-devtools"]
       },
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "build:chrome-plugins": {
       "executor": "nx:run-commands",
