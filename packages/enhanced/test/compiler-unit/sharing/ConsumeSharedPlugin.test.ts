@@ -51,18 +51,22 @@ describe('ConsumeSharedPlugin', () => {
     // Add a project-level package.json to testDir
     fs.writeFileSync(
       path.join(testDir, 'package.json'),
-      JSON.stringify({
-        name: 'test-nested-include',
-        version: '1.0.0',
-        dependencies: {
-          react: '16.8.0',
-          'some-package': '1.0.0',
+      JSON.stringify(
+        {
+          name: 'test-nested-include',
+          version: '1.0.0',
+          dependencies: {
+            react: '16.8.0',
+            'some-package': '1.0.0',
+          },
+          devDependencies: {
+            jest: '^29.0.0',
+            webpack: '^5.0.0',
+          },
         },
-        devDependencies: {
-          jest: '^29.0.0',
-          webpack: '^5.0.0',
-        },
-      }, null, 2),
+        null,
+        2,
+      ),
     );
   });
 
@@ -284,13 +288,17 @@ describe('ConsumeSharedPlugin', () => {
         // Create a root package.json for the test project with react dependency
         fs.writeFileSync(
           path.join(testDir, 'package.json'),
-          JSON.stringify({
-            name: 'test-project',
-            version: '1.0.0',
-            dependencies: {
-              react: '16.8.0',
+          JSON.stringify(
+            {
+              name: 'test-project',
+              version: '1.0.0',
+              dependencies: {
+                react: '16.8.0',
+              },
             },
-          }, null, 2),
+            null,
+            2,
+          ),
         );
 
         // Create entry file
@@ -698,13 +706,17 @@ describe('ConsumeSharedPlugin', () => {
         // Create a root package.json for the test project with react dependency
         fs.writeFileSync(
           path.join(testDir, 'package.json'),
-          JSON.stringify({
-            name: 'test-project',
-            version: '1.0.0',
-            dependencies: {
-              react: '17.0.2',
+          JSON.stringify(
+            {
+              name: 'test-project',
+              version: '1.0.0',
+              dependencies: {
+                react: '17.0.2',
+              },
             },
-          }, null, 2),
+            null,
+            2,
+          ),
         );
 
         // Create entry file
@@ -769,7 +781,7 @@ describe('ConsumeSharedPlugin', () => {
         // There should be at least one module
         expect(consumeSharedModules.length).toBeGreaterThan(0);
         // All included modules should point to the correct fallback path (react@17.0.2)
-        consumeSharedModules.forEach(module => {
+        consumeSharedModules.forEach((module) => {
           expect(module.identifier).toContain('node_modules/react/index.js');
           expect(module.identifier).not.toContain('16.');
         });
@@ -791,7 +803,10 @@ describe('ConsumeSharedPlugin', () => {
 
         // Setup React v16.8.0 in a nested node_modules (should be excluded)
         const nestedPackageDir = path.join(nodeModulesDir, 'some-package');
-        const nestedReactDir = path.join(nestedPackageDir, 'node_modules/react');
+        const nestedReactDir = path.join(
+          nestedPackageDir,
+          'node_modules/react',
+        );
         fs.mkdirSync(nestedReactDir, { recursive: true });
         fs.writeFileSync(
           path.join(nestedReactDir, 'package.json'),
@@ -838,10 +853,7 @@ describe('ConsumeSharedPlugin', () => {
           },
           resolve: {
             extensions: ['.js', '.json'],
-            modules: [
-              'node_modules',
-              path.join(testDir, 'node_modules'),
-            ],
+            modules: ['node_modules', path.join(testDir, 'node_modules')],
           },
           plugins: [
             new FederationRuntimePlugin({
@@ -870,13 +882,26 @@ describe('ConsumeSharedPlugin', () => {
         expect(stats.hasWarnings()).toBe(false);
 
         const output = stats.toJson({ modules: true });
-        const consumeSharedModules = output.modules?.filter(
-          (m) => m.moduleType === 'consume-shared-module' && m.name?.includes('react'),
-        ) || [];
+        const consumeSharedModules =
+          output.modules?.filter(
+            (m) =>
+              m.moduleType === 'consume-shared-module' &&
+              m.name?.includes('react'),
+          ) || [];
         // There should be at least one module for the correct version (root)
-        expect(consumeSharedModules.some(m => m.identifier.includes('node_modules/react/index.js') && !m.identifier.includes('some-package'))).toBe(true);
+        expect(
+          consumeSharedModules.some(
+            (m) =>
+              m.identifier.includes('node_modules/react/index.js') &&
+              !m.identifier.includes('some-package'),
+          ),
+        ).toBe(true);
         // There should be no modules for the nested version (16.x.x)
-        expect(consumeSharedModules.some(m => m.identifier.includes('some-package/node_modules/react/index.js'))).toBe(false);
+        expect(
+          consumeSharedModules.some((m) =>
+            m.identifier.includes('some-package/node_modules/react/index.js'),
+          ),
+        ).toBe(false);
       });
 
       it('should include only nested module when version matches include.version (multi-version structure)', async () => {
@@ -895,14 +920,18 @@ describe('ConsumeSharedPlugin', () => {
         // Add a base package.json to testDir to avoid missing dependency warnings
         fs.writeFileSync(
           path.join(testDir, 'package.json'),
-          JSON.stringify({
-            name: 'test-multi-version-include',
-            version: '1.0.0',
-            dependencies: {
-              shared: '1.0.0',
-              'my-module': '1.0.0',
+          JSON.stringify(
+            {
+              name: 'test-multi-version-include',
+              version: '1.0.0',
+              dependencies: {
+                shared: '1.0.0',
+                'my-module': '1.0.0',
+              },
             },
-          }, null, 2),
+            null,
+            2,
+          ),
         );
 
         // Setup my-module with its own node_modules/shared@2.0.0 (should be included)
@@ -920,7 +949,11 @@ describe('ConsumeSharedPlugin', () => {
         );
         fs.writeFileSync(
           path.join(myModuleDir, 'package.json'),
-          JSON.stringify({ name: 'my-module', version: '1.0.0', dependencies: { shared: '^2.0.0' } }),
+          JSON.stringify({
+            name: 'my-module',
+            version: '1.0.0',
+            dependencies: { shared: '^2.0.0' },
+          }),
         );
         fs.writeFileSync(
           path.join(myModuleDir, 'index.js'),
@@ -947,10 +980,7 @@ describe('ConsumeSharedPlugin', () => {
           },
           resolve: {
             extensions: ['.js', '.json'],
-            modules: [
-              'node_modules',
-              path.join(testDir, 'node_modules'),
-            ],
+            modules: ['node_modules', path.join(testDir, 'node_modules')],
           },
           plugins: [
             new FederationRuntimePlugin({
@@ -979,16 +1009,134 @@ describe('ConsumeSharedPlugin', () => {
         expect(stats.hasWarnings()).toBe(false);
 
         const output = stats.toJson({ modules: true });
-        const consumeSharedModules = output.modules?.filter(
-          (m) => m.moduleType === 'consume-shared-module' && m.name?.includes('shared'),
-        ) || [];
+        const consumeSharedModules =
+          output.modules?.filter(
+            (m) =>
+              m.moduleType === 'consume-shared-module' &&
+              m.name?.includes('shared'),
+          ) || [];
         // --- DEBUG LOGGING ---
-        console.log('DEBUG: consumeSharedModules:', consumeSharedModules.map(m => ({ identifier: m.identifier, version: m.version })));
+        console.log(
+          'DEBUG: consumeSharedModules:',
+          consumeSharedModules.map((m) => ({
+            identifier: m.identifier,
+            version: m.version,
+          })),
+        );
         // There should be at least one module for the correct version (nested)
-        expect(consumeSharedModules.some(m => m.identifier.includes('my-module/node_modules/shared/index.js'))).toBe(true);
+        expect(
+          consumeSharedModules.some((m) =>
+            m.identifier.includes('my-module/node_modules/shared/index.js'),
+          ),
+        ).toBe(true);
         // There should be no modules for the root version (1.0.0)
-        expect(consumeSharedModules.some(m => m.identifier.includes('node_modules/shared/index.js') && !m.identifier.includes('my-module'))).toBe(false);
+        expect(
+          consumeSharedModules.some(
+            (m) =>
+              m.identifier.includes('node_modules/shared/index.js') &&
+              !m.identifier.includes('my-module'),
+          ),
+        ).toBe(false);
       });
     });
+  });
+
+  it('should reconstruct node_modules path and share submodules with nodeModulesReconstructedLookup experiment', async () => {
+    // Setup shared@1.0.0 in the root node_modules
+    const sharedRootDir = path.join(nodeModulesDir, 'shared');
+    const sharedDir = path.join(sharedRootDir, 'directory');
+    fs.mkdirSync(sharedDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(sharedRootDir, 'package.json'),
+      JSON.stringify({ name: 'shared', version: '1.0.0' }),
+    );
+    // shared/directory/thing.js
+    fs.writeFileSync(
+      path.join(sharedDir, 'thing.js'),
+      'module.exports = { thing: "hello from thing" };',
+    );
+    // shared/index.js imports ./directory/thing
+    fs.writeFileSync(
+      path.join(sharedRootDir, 'index.js'),
+      'module.exports = { ...require("./directory/thing") };',
+    );
+    // Add a base package.json to testDir
+    fs.writeFileSync(
+      path.join(testDir, 'package.json'),
+      JSON.stringify(
+        {
+          name: 'test-reconstructed-lookup',
+          version: '1.0.0',
+          dependencies: { shared: '1.0.0' },
+        },
+        null,
+        2,
+      ),
+    );
+    // Entry file imports from shared
+    fs.writeFileSync(
+      path.join(srcDir, 'index.js'),
+      'const shared = require("shared"); console.log(shared.thing);',
+    );
+    const config = {
+      mode: 'development',
+      context: testDir,
+      entry: path.join(srcDir, 'index.js'),
+      output: {
+        path: path.join(testDir, 'dist'),
+        filename: 'bundle.js',
+      },
+      resolve: {
+        extensions: ['.js', '.json'],
+        modules: ['node_modules', path.join(testDir, 'node_modules')],
+      },
+      plugins: [
+        new FederationRuntimePlugin({
+          name: 'consumer',
+          filename: 'remoteEntry.js',
+        }),
+        new ConsumeSharedPlugin({
+          consumes: {
+            shared: {
+              shareKey: 'shared',
+              shareScope: 'default',
+              singleton: false,
+            },
+            'shared/directory/': {
+              shareKey: 'shared/directory/',
+              shareScope: 'default',
+              singleton: false,
+            },
+          },
+          experiments: {
+            nodeModulesReconstructedLookup: true,
+          },
+        }),
+      ],
+    };
+    const compiler = webpack(config);
+    const stats = await compile(compiler);
+    expect(stats.hasErrors()).toBe(false);
+    expect(stats.hasWarnings()).toBe(false);
+    const output = stats.toJson({ modules: true });
+    // Find consume-shared modules for both root and submodule
+    const consumeSharedModules =
+      output.modules?.filter(
+        (m) =>
+          m.moduleType === 'consume-shared-module' &&
+          m.name?.includes('shared'),
+      ) || [];
+    // Should include the submodule (directory/thing)
+    expect(
+      consumeSharedModules.some((m) =>
+        m.identifier.includes('shared/directory/thing.js'),
+      ),
+    ).toBe(true);
+    // Should include the root module
+    expect(
+      consumeSharedModules.some((m) =>
+        m.identifier.includes('shared/index.js'),
+      ),
+    ).toBe(true);
   });
 });
