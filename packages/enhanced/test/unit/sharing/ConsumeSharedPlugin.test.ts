@@ -308,6 +308,15 @@ describe('ConsumeSharedPlugin', () => {
       testEnv = createSharingTestEnvironment();
       mockConsumeSharedModule.mockClear();
       (getDescriptionFile as jest.Mock).mockReset();
+
+      // Make resolveMatchedConfigs return a Promise directly
+      (resolveMatchedConfigs as jest.Mock).mockReturnValue(
+        Promise.resolve({
+          resolved: new Map(),
+          unresolved: new Map(),
+          prefixed: new Map(),
+        })
+      );
     });
 
     describe('version-based exclusion', () => {
