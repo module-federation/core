@@ -228,6 +228,17 @@ export default {
         },
       ],
     },
+    experiments: {
+      description: 'Experimental features configuration',
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        nodeModulesReconstructedLookup: {
+          description: 'Enable reconstructed lookup for node_modules paths',
+          type: 'boolean',
+        },
+      },
+    },
   },
   required: ['consumes'],
 } as const;

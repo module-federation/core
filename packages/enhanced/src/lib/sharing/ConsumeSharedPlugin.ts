@@ -11,7 +11,7 @@ import {
 import { isRequiredVersion } from '@module-federation/sdk';
 import type { Compiler, Compilation, Module } from 'webpack';
 import { parseOptions } from '../container/options';
-import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
+import type { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
   getDescriptionFile,
@@ -75,11 +75,14 @@ function createLookupKey(
 
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
+  private _experiments: NonNullable<ConsumeSharedPluginOptions['experiments']>;
 
   constructor(options: ConsumeSharedPluginOptions) {
     if (typeof options !== 'string') {
       validate(options);
     }
+
+    this._experiments = options.experiments || {};
 
     this._consumes = parseOptions(
       options.consumes,
@@ -101,6 +104,8 @@ class ConsumeSharedPlugin {
                 issuerLayer: undefined,
                 layer: undefined,
                 request: key,
+                include: undefined,
+                exclude: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -117,6 +122,8 @@ class ConsumeSharedPlugin {
                 issuerLayer: undefined,
                 layer: undefined,
                 request: key,
+                include: undefined,
+                exclude: undefined,
               };
         return result;
       },
@@ -139,6 +146,7 @@ class ConsumeSharedPlugin {
           singleton: !!item.singleton,
           eager: !!item.eager,
           exclude: item.exclude,
+          include: item.include,
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
@@ -433,10 +441,13 @@ class ConsumeSharedPlugin {
               ) {
                 return;
               }
+              const { context, request, contextInfo } = resolveData;
+
               const match = unresolvedConsumes.get(
                 createLookupKey(request, contextInfo),
               );
 
+              // First check direct match
               if (match !== undefined) {
                 // Use the bound function
                 return boundCreateConsumeSharedModule(
@@ -446,6 +457,60 @@ class ConsumeSharedPlugin {
                   match,
                 );
               }
+
+              // Then try relative path handling and node_modules paths
+              let reconstructed: string | null = null;
+              let modulePathAfterNodeModules: string | null = null;
+
+              if (
+                this._experiments.nodeModulesReconstructedLookup &&
+                request &&
+                !path.isAbsolute(request) &&
+                /^(\.\.?(\/|$)|\/|[A-Za-z]:|\\\\)/.test(request)
+              ) {
+                reconstructed = path.join(context, request);
+
+                // Check if path contains node_modules and extract the part after it
+                if (reconstructed.includes('node_modules')) {
+                  const nodeModulesIndex =
+                    reconstructed.lastIndexOf('node_modules');
+                  modulePathAfterNodeModules = reconstructed.substring(
+                    nodeModulesIndex + 'node_modules/'.length,
+                  );
+                }
+
+                // Try to match with module path after node_modules
+                if (modulePathAfterNodeModules) {
+                  const moduleMatch = unresolvedConsumes.get(
+                    createLookupKey(modulePathAfterNodeModules, contextInfo),
+                  );
+
+                  if (moduleMatch !== undefined) {
+                    return boundCreateConsumeSharedModule(
+                      compilation,
+                      context,
+                      modulePathAfterNodeModules,
+                      moduleMatch,
+                    );
+                  }
+                }
+
+                // Try to match with the full reconstructed path
+                const reconstructedMatch = unresolvedConsumes.get(
+                  createLookupKey(reconstructed, contextInfo),
+                );
+
+                if (reconstructedMatch !== undefined) {
+                  return boundCreateConsumeSharedModule(
+                    compilation,
+                    context,
+                    reconstructed,
+                    reconstructedMatch,
+                  );
+                }
+              }
+
+              // Check for prefixed consumes with original request
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
                 if (request.startsWith(lookup)) {
@@ -489,6 +554,99 @@ class ConsumeSharedPlugin {
                   );
                 }
               }
+
+              // Also check prefixed consumes with modulePathAfterNodeModules
+              if (modulePathAfterNodeModules) {
+                for (const [prefix, options] of prefixedConsumes) {
+                  const lookup = options.request || prefix;
+                  if (modulePathAfterNodeModules.startsWith(lookup)) {
+                    const remainder = modulePathAfterNodeModules.slice(
+                      lookup.length,
+                    );
+
+                    // Check include/exclude as before
+                    if (
+                      options.include &&
+                      options.include.request &&
+                      !(options.include.request instanceof RegExp
+                        ? options.include.request.test(remainder)
+                        : remainder === options.include.request)
+                    ) {
+                      continue;
+                    }
+
+                    if (
+                      options.exclude &&
+                      options.exclude.request &&
+                      (options.exclude.request instanceof RegExp
+                        ? options.exclude.request.test(remainder)
+                        : remainder === options.exclude.request)
+                    ) {
+                      continue;
+                    }
+
+                    return boundCreateConsumeSharedModule(
+                      compilation,
+                      context,
+                      modulePathAfterNodeModules,
+                      {
+                        ...options,
+                        import: options.import
+                          ? options.import + remainder
+                          : undefined,
+                        shareKey: options.shareKey + remainder,
+                        layer: options.layer || contextInfo.issuerLayer,
+                      },
+                    );
+                  }
+                }
+              }
+
+              // Finally check prefixed consumes with reconstructed path
+              if (reconstructed) {
+                for (const [prefix, options] of prefixedConsumes) {
+                  const lookup = options.request || prefix;
+                  if (reconstructed.startsWith(lookup)) {
+                    const remainder = reconstructed.slice(lookup.length);
+
+                    // Check include/exclude as before
+                    if (
+                      options.include &&
+                      options.include.request &&
+                      !(options.include.request instanceof RegExp
+                        ? options.include.request.test(remainder)
+                        : remainder === options.include.request)
+                    ) {
+                      continue;
+                    }
+
+                    if (
+                      options.exclude &&
+                      options.exclude.request &&
+                      (options.exclude.request instanceof RegExp
+                        ? options.exclude.request.test(remainder)
+                        : remainder === options.exclude.request)
+                    ) {
+                      continue;
+                    }
+
+                    return boundCreateConsumeSharedModule(
+                      compilation,
+                      context,
+                      reconstructed,
+                      {
+                        ...options,
+                        import: options.import
+                          ? options.import + remainder
+                          : undefined,
+                        shareKey: options.shareKey + remainder,
+                        layer: options.layer || contextInfo.issuerLayer,
+                      },
+                    );
+                  }
+                }
+              }
+
               return;
             });
           },

@@ -32,9 +32,13 @@ class SharePlugin {
   private _shareScope: string | string[];
   private _consumes: Record<string, ConsumesConfig>[];
   private _provides: Record<string, ProvidesConfig>[];
+  private _experiments: NonNullable<SharePluginOptions['experiments']>;
 
   constructor(options: SharePluginOptions) {
     validate(options);
+
+    this._experiments = options.experiments || {};
+
     const sharedOptions: [string, SharedConfig][] = parseOptions(
       options.shared,
       (item, key) => {
@@ -106,10 +110,12 @@ class SharePlugin {
     new ConsumeSharedPlugin({
       shareScope: this._shareScope,
       consumes: this._consumes,
+      experiments: this._experiments,
     }).apply(compiler);
     new ProvideSharedPlugin({
       shareScope: this._shareScope,
       provides: this._provides,
+      experiments: this._experiments,
     }).apply(compiler);
   }
 }
