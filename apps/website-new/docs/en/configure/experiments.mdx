@@ -15,6 +15,7 @@ new ModuleFederationPlugin({
       disableSnapshot: false,
       target: 'web',
     },
+    nodeModulesReconstructedLookup: true
   },
   shared: {
     react: {
@@ -43,6 +44,32 @@ When `asyncStartup` is enabled, all Module Federation entrypoints will initializ
 :::warning
 When using this mode, all entrypoints will initialize asynchronously. If you're manually requiring a bundled entrypoint or exposing a UMD library, it will return a promise resolving to the exports.
 :::
+
+## nodeModulesReconstructedLookup
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+Enables enhanced module resolution for packages located in `node_modules`, particularly for modules that use relative imports internally.
+
+**What it solves**: When a shared module uses relative imports (e.g., `import './directory/thing'`), Module Federation might not correctly recognize these as matching your shared configuration. This experiment reconstructs the full path and extracts the proper module name to enable correct sharing.
+
+```ts
+// Simple example
+new ModuleFederationPlugin({
+  name: 'host',
+  experiments: {
+    nodeModulesReconstructedLookup: true
+  },
+  shared: {
+    'shared': {},
+    'shared/directory/': {}
+  }
+});
+```
+
+For detailed examples and explanation of how this works with relative paths, see [Advanced Sharing: Node Modules Path Resolution](/configure/advanced-sharing#node-modules-path-resolution).
 
 ## externalRuntime
 
