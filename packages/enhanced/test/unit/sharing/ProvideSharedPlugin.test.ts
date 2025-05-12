@@ -725,7 +725,7 @@ describe('ProvideSharedPlugin', () => {
           {
             descriptionFileData: { version: '17.0.2' },
             descriptionFilePath: '/path/to/package.json',
-          }
+          },
         );
 
         // Version '17.0.2' satisfies the include.version '^17.0.0',
@@ -763,7 +763,7 @@ describe('ProvideSharedPlugin', () => {
           {
             descriptionFileData: { version: '17.0.2' }, // Version doesn't match include.version
             descriptionFilePath: '/path/to/package.json',
-          }
+          },
         );
 
         // Version '17.0.2' does not satisfy the include.version '^18.0.0',
@@ -797,11 +797,13 @@ describe('ProvideSharedPlugin', () => {
           '/path/to/prefix/features/button',
           {
             descriptionFileData: { version: '1.0.0' },
-          }
+          },
         );
 
         // The request contains 'features/', so it should be included
-        expect(mockResolvedProvideMap.has('/path/to/prefix/features/button')).toBe(true);
+        expect(
+          mockResolvedProvideMap.has('/path/to/prefix/features/button'),
+        ).toBe(true);
       });
 
       it('should NOT include module when request does not match include.request pattern', () => {
@@ -829,11 +831,13 @@ describe('ProvideSharedPlugin', () => {
           '/path/to/prefix/utils/helper',
           {
             descriptionFileData: { version: '1.0.0' },
-          }
+          },
         );
 
         // The request doesn't contain 'features/', so it should NOT be included
-        expect(mockResolvedProvideMap.has('/path/to/prefix/utils/helper')).toBe(false);
+        expect(mockResolvedProvideMap.has('/path/to/prefix/utils/helper')).toBe(
+          false,
+        );
       });
     });
 
@@ -884,9 +888,7 @@ describe('ProvideSharedPlugin', () => {
         });
 
         // @ts-ignore accessing private property for testing
-        plugin._provides = [
-          ['react', testConfig],
-        ];
+        plugin._provides = [['react', testConfig]];
 
         // Verify our input config has the issuerLayer
         expect(testConfig.issuerLayer).toBe('client');
@@ -948,7 +950,7 @@ describe('ProvideSharedPlugin', () => {
           '/path/to/moment',
           {
             descriptionFileData: { version: '1.5.0' }, // Same version as fallbackVersion
-          }
+          },
         );
 
         // satisfy should have been called with the fallbackVersion and exclude.version
@@ -990,7 +992,7 @@ describe('ProvideSharedPlugin', () => {
           '/path/to/react',
           {
             descriptionFileData: { version: '17.0.2' },
-          }
+          },
         );
 
         // Check that satisfy was called with the module's version and include.version
@@ -998,7 +1000,9 @@ describe('ProvideSharedPlugin', () => {
 
         // Module version satisfies include criteria, so it should be in the map
         expect(mockResolvedProvideMap.has('/path/to/react')).toBe(true);
-        expect(mockResolvedProvideMap.get('/path/to/react')?.version).toBe('17.0.2');
+        expect(mockResolvedProvideMap.get('/path/to/react')?.version).toBe(
+          '17.0.2',
+        );
       });
     });
 

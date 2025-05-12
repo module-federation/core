@@ -18,6 +18,7 @@
       "options": {
         "parallel": false,
         "commands": [
+          "sleep 1",
           "cd packages/modernjs; pnpm run build",
           "cp packages/modernjs/LICENSE packages/modernjs/dist"
         ]

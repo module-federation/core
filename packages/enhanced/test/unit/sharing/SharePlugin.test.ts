@@ -622,7 +622,7 @@ describe('SharePlugin', () => {
       );
       expect(reactProvide.react.include).toEqual({
         version: '^17.0.0',
-        fallbackVersion: '16.14.0'
+        fallbackVersion: '16.14.0',
       });
     });
   });
@@ -673,7 +673,7 @@ describe('SharePlugin', () => {
       expect(() => {
         // @ts-ignore - testing invalid types
         new SharePlugin({
-          shared: "not-an-object",
+          shared: 'not-an-object',
         });
       }).toThrow();
 
@@ -721,7 +721,9 @@ describe('SharePlugin', () => {
       plugin.apply(mockCompiler);
 
       // Should set environment variable
-      expect(process.env['FEDERATION_WEBPACK_PATH']).toBe('mocked-webpack-path');
+      expect(process.env['FEDERATION_WEBPACK_PATH']).toBe(
+        'mocked-webpack-path',
+      );
 
       // Should call getWebpackPath
       expect(getWebpackPath).toHaveBeenCalledWith(mockCompiler);

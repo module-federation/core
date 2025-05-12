@@ -254,6 +254,10 @@ export interface ModuleFederationPluginOptions {
     externalRuntime?: boolean;
     provideExternalRuntime?: boolean;
     asyncStartup?: boolean;
+    /**
+     * Enable reconstructed lookup for node_modules paths
+     */
+    nodeModulesReconstructedLookup?: boolean;
   };
   bridge?: {
     /**

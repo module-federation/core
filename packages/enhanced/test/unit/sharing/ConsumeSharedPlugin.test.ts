@@ -315,7 +315,7 @@ describe('ConsumeSharedPlugin', () => {
           resolved: new Map(),
           unresolved: new Map(),
           prefixed: new Map(),
-        })
+        }),
       );
     });
 
