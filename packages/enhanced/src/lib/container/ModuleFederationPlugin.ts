@@ -215,6 +215,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         new SharePlugin({
           shared: options.shared,
           shareScope: options.shareScope,
+          experiments: {
+            nodeModulesReconstructedLookup:
+              options.experiments?.nodeModulesReconstructedLookup,
+          },
         }).apply(compiler);
       }
     });
