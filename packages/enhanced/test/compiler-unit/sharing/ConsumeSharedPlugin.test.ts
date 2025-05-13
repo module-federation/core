@@ -20,6 +20,44 @@ const compile = (compiler: any): Promise<any> => {
   });
 };
 
+// Factory function to create webpack compiler
+interface CompilerFactoryOptions {
+  testDir: string;
+  srcDir: string;
+  entryPath?: string;
+  outputPath?: string;
+  plugins: any[];
+  resolveOptions?: Record<string, any>;
+  additionalConfig?: Partial<Configuration>;
+}
+
+const createCompiler = ({
+  testDir,
+  srcDir,
+  entryPath,
+  outputPath,
+  plugins,
+  resolveOptions = {
+    extensions: ['.js', '.json'],
+  },
+  additionalConfig = {},
+}: CompilerFactoryOptions) => {
+  const config: Configuration = {
+    mode: 'development',
+    context: testDir,
+    entry: entryPath || path.join(srcDir, 'index.js'),
+    output: {
+      path: outputPath || path.join(testDir, 'dist'),
+      filename: 'bundle.js',
+    },
+    resolve: resolveOptions,
+    plugins,
+    ...additionalConfig,
+  };
+
+  return webpack(config);
+};
+
 describe('ConsumeSharedPlugin', () => {
   let testDir: string;
   let srcDir: string;
@@ -85,43 +123,36 @@ describe('ConsumeSharedPlugin', () => {
     `,
     );
 
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
-      },
-      resolve: {
-        extensions: ['.js', '.json'],
-      },
-      plugins: [
-        new FederationRuntimePlugin({
-          name: 'consumer',
-          filename: 'remoteEntry.js',
-          shared: {
-            react: {
-              singleton: false,
-              requiredVersion: '^17.0.0',
-            },
+    const plugins = [
+      new FederationRuntimePlugin({
+        name: 'consumer',
+        filename: 'remoteEntry.js',
+        shared: {
+          react: {
+            singleton: false,
+            requiredVersion: '^17.0.0',
           },
-        }),
-        new ConsumeSharedPlugin({
-          consumes: {
-            react: {
-              import: 'react',
-              shareKey: 'react',
-              shareScope: 'default',
-              requiredVersion: '^17.0.0',
-              singleton: false,
-            },
+        },
+      }),
+      new ConsumeSharedPlugin({
+        consumes: {
+          react: {
+            import: 'react',
+            shareKey: 'react',
+            shareScope: 'default',
+            requiredVersion: '^17.0.0',
+            singleton: false,
           },
-        }),
-      ],
-    };
+        },
+      }),
+    ];
 
-    const compiler = webpack(config);
+    const compiler = createCompiler({
+      testDir,
+      srcDir,
+      plugins,
+    });
+
     const stats = await compile(compiler);
 
     if (!stats) {
@@ -153,45 +184,38 @@ describe('ConsumeSharedPlugin', () => {
     `,
     );
 
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
-      },
-      resolve: {
-        extensions: ['.js', '.json'],
-      },
-      plugins: [
-        new FederationRuntimePlugin({
-          name: 'consumer',
-          filename: 'remoteEntry.js',
-          shared: {
-            react: {
-              singleton: false,
-              requiredVersion: '^17.0.0',
-              eager: true,
-            },
+    const plugins = [
+      new FederationRuntimePlugin({
+        name: 'consumer',
+        filename: 'remoteEntry.js',
+        shared: {
+          react: {
+            singleton: false,
+            requiredVersion: '^17.0.0',
+            eager: true,
           },
-        }),
-        new ConsumeSharedPlugin({
-          consumes: {
-            react: {
-              import: 'react',
-              shareKey: 'react',
-              shareScope: 'default',
-              requiredVersion: '^17.0.0',
-              singleton: false,
-              eager: true,
-            },
+        },
+      }),
+      new ConsumeSharedPlugin({
+        consumes: {
+          react: {
+            import: 'react',
+            shareKey: 'react',
+            shareScope: 'default',
+            requiredVersion: '^17.0.0',
+            singleton: false,
+            eager: true,
           },
-        }),
-      ],
-    };
+        },
+      }),
+    ];
 
-    const compiler = webpack(config);
+    const compiler = createCompiler({
+      testDir,
+      srcDir,
+      plugins,
+    });
+
     const stats = await compile(compiler);
 
     expect(stats.hasErrors()).toBe(false);
@@ -216,45 +240,38 @@ describe('ConsumeSharedPlugin', () => {
     `,
     );
 
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
-      },
-      resolve: {
-        extensions: ['.js', '.json'],
-      },
-      plugins: [
-        new FederationRuntimePlugin({
-          name: 'consumer',
-          filename: 'remoteEntry.js',
-          shared: {
-            react: {
-              requiredVersion: '17.0.2', // Exact version required
-              strictVersion: true,
-              singleton: false,
-            },
+    const plugins = [
+      new FederationRuntimePlugin({
+        name: 'consumer',
+        filename: 'remoteEntry.js',
+        shared: {
+          react: {
+            requiredVersion: '17.0.2', // Exact version required
+            strictVersion: true,
+            singleton: false,
           },
-        }),
-        new ConsumeSharedPlugin({
-          consumes: {
-            react: {
-              import: 'react',
-              shareKey: 'react',
-              shareScope: 'default',
-              requiredVersion: '17.0.2',
-              strictVersion: true,
-              singleton: false,
-            },
+        },
+      }),
+      new ConsumeSharedPlugin({
+        consumes: {
+          react: {
+            import: 'react',
+            shareKey: 'react',
+            shareScope: 'default',
+            requiredVersion: '17.0.2',
+            strictVersion: true,
+            singleton: false,
           },
-        }),
-      ],
-    };
+        },
+      }),
+    ];
 
-    const compiler = webpack(config);
+    const compiler = createCompiler({
+      testDir,
+      srcDir,
+      plugins,
+    });
+
     const stats = await compile(compiler);
 
     expect(stats.hasErrors()).toBe(false);
@@ -310,40 +327,33 @@ describe('ConsumeSharedPlugin', () => {
         `,
         );
 
-        const config: Configuration = {
-          mode: 'development',
-          context: testDir,
-          entry: path.join(srcDir, 'index.js'),
-          output: {
-            path: path.join(testDir, 'dist'),
-            filename: 'bundle.js',
-          },
-          resolve: {
-            extensions: ['.js', '.json'],
-          },
-          plugins: [
-            new FederationRuntimePlugin({
-              name: 'consumer',
-              filename: 'remoteEntry.js',
-            }),
-            new ConsumeSharedPlugin({
-              consumes: {
-                react: {
-                  import: 'react',
-                  shareKey: 'react',
-                  shareScope: 'default',
-                  requiredVersion: '^16.0.0', // Explicitly set requiredVersion
-                  exclude: {
-                    version: '^16.0.0', // Should exclude React 16.x.x
-                  },
-                  singleton: false,
+        const plugins = [
+          new FederationRuntimePlugin({
+            name: 'consumer',
+            filename: 'remoteEntry.js',
+          }),
+          new ConsumeSharedPlugin({
+            consumes: {
+              react: {
+                import: 'react',
+                shareKey: 'react',
+                shareScope: 'default',
+                requiredVersion: '^16.0.0', // Explicitly set requiredVersion
+                exclude: {
+                  version: '^16.0.0', // Should exclude React 16.x.x
                 },
+                singleton: false,
               },
-            }),
-          ],
-        };
+            },
+          }),
+        ];
 
-        const compiler = webpack(config);
+        const compiler = createCompiler({
+          testDir,
+          srcDir,
+          plugins,
+        });
+
         const stats = await compile(compiler);
 
         expect(stats.hasErrors()).toBe(false);
@@ -383,39 +393,32 @@ describe('ConsumeSharedPlugin', () => {
         `,
         );
 
-        const config: Configuration = {
-          mode: 'development',
-          context: testDir,
-          entry: path.join(srcDir, 'index.js'),
-          output: {
-            path: path.join(testDir, 'dist'),
-            filename: 'bundle.js',
-          },
-          resolve: {
-            extensions: ['.js', '.json'],
-          },
-          plugins: [
-            new FederationRuntimePlugin({
-              name: 'consumer',
-              filename: 'remoteEntry.js',
-            }),
-            new ConsumeSharedPlugin({
-              consumes: {
-                react: {
-                  import: 'react',
-                  shareKey: 'react',
-                  shareScope: 'default',
-                  exclude: {
-                    version: '^16.0.0', // Should not exclude React 17.x.x
-                  },
-                  singleton: false,
+        const plugins = [
+          new FederationRuntimePlugin({
+            name: 'consumer',
+            filename: 'remoteEntry.js',
+          }),
+          new ConsumeSharedPlugin({
+            consumes: {
+              react: {
+                import: 'react',
+                shareKey: 'react',
+                shareScope: 'default',
+                exclude: {
+                  version: '^16.0.0', // Should not exclude React 17.x.x
                 },
+                singleton: false,
               },
-            }),
-          ],
-        };
+            },
+          }),
+        ];
 
-        const compiler = webpack(config);
+        const compiler = createCompiler({
+          testDir,
+          srcDir,
+          plugins,
+        });
+
         const stats = await compile(compiler);
 
         expect(stats.hasErrors()).toBe(false);
@@ -468,39 +471,32 @@ describe('ConsumeSharedPlugin', () => {
         `,
         );
 
-        const config: Configuration = {
-          mode: 'development',
-          context: testDir,
-          entry: path.join(srcDir, 'index.js'),
-          output: {
-            path: path.join(testDir, 'dist'),
-            filename: 'bundle.js',
-          },
-          resolve: {
-            extensions: ['.js', '.json'],
-          },
-          plugins: [
-            new FederationRuntimePlugin({
-              name: 'consumer',
-              filename: 'remoteEntry.js',
-            }),
-            new ConsumeSharedPlugin({
-              consumes: {
-                '@scope/prefix/': {
-                  import: '@scope/prefix/',
-                  shareKey: '@scope/prefix',
-                  shareScope: 'default',
-                  exclude: {
-                    request: /excluded-path$/,
-                  },
-                  singleton: false,
+        const plugins = [
+          new FederationRuntimePlugin({
+            name: 'consumer',
+            filename: 'remoteEntry.js',
+          }),
+          new ConsumeSharedPlugin({
+            consumes: {
+              '@scope/prefix/': {
+                import: '@scope/prefix/',
+                shareKey: '@scope/prefix',
+                shareScope: 'default',
+                exclude: {
+                  request: /excluded-path$/,
                 },
+                singleton: false,
               },
-            }),
-          ],
-        };
+            },
+          }),
+        ];
 
-        const compiler = webpack(config);
+        const compiler = createCompiler({
+          testDir,
+          srcDir,
+          plugins,
+        });
+
         const stats = await compile(compiler);
 
         expect(stats.hasErrors()).toBe(false);
@@ -566,37 +562,30 @@ describe('ConsumeSharedPlugin', () => {
       'import RootReact from "react"; import NestedReactPkg from "some-package"; console.log(RootReact.version, NestedReactPkg.default.version);',
     );
 
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
-      },
-      resolve: {
-        extensions: ['.js', '.json'],
-      },
-      plugins: [
-        new FederationRuntimePlugin({
-          name: 'consumer',
-          filename: 'remoteEntry.js',
-        }),
-        new ConsumeSharedPlugin({
-          consumes: {
-            react: {
-              shareKey: 'react',
-              shareScope: 'default',
-              requiredVersion: false, // Allow any version
-              singleton: false, // Explicitly non-singleton
-              eager: false,
-            },
+    const plugins = [
+      new FederationRuntimePlugin({
+        name: 'consumer',
+        filename: 'remoteEntry.js',
+      }),
+      new ConsumeSharedPlugin({
+        consumes: {
+          react: {
+            shareKey: 'react',
+            shareScope: 'default',
+            requiredVersion: false, // Allow any version
+            singleton: false, // Explicitly non-singleton
+            eager: false,
           },
-        }),
-      ],
-    };
+        },
+      }),
+    ];
 
-    const compiler = webpack(config);
+    const compiler = createCompiler({
+      testDir,
+      srcDir,
+      plugins,
+    });
+
     const stats = await compile(compiler);
 
     expect(stats.hasErrors()).toBe(false);
@@ -640,39 +629,32 @@ describe('ConsumeSharedPlugin', () => {
     `,
     );
 
-    const config: Configuration = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
-      },
-      resolve: {
-        extensions: ['.js', '.json'],
-      },
-      plugins: [
-        new FederationRuntimePlugin({
-          name: 'consumer',
-          filename: 'remoteEntry.js',
-        }),
-        new ConsumeSharedPlugin({
-          consumes: {
-            react: {
-              import: 'react',
-              shareKey: 'react',
-              shareScope: 'default',
-              exclude: {
-                version: '^16.0.0', // Should exclude React 16.x.x
-              },
-              singleton: false,
+    const plugins = [
+      new FederationRuntimePlugin({
+        name: 'consumer',
+        filename: 'remoteEntry.js',
+      }),
+      new ConsumeSharedPlugin({
+        consumes: {
+          react: {
+            import: 'react',
+            shareKey: 'react',
+            shareScope: 'default',
+            exclude: {
+              version: '^16.0.0', // Should exclude React 16.x.x
             },
+            singleton: false,
           },
-        }),
-      ],
-    };
+        },
+      }),
+    ];
 
-    const compiler = webpack(config);
+    const compiler = createCompiler({
+      testDir,
+      srcDir,
+      plugins,
+    });
+
     const stats = await compile(compiler);
 
     expect(stats.hasErrors()).toBe(false);
@@ -728,54 +710,44 @@ describe('ConsumeSharedPlugin', () => {
         `,
         );
 
-        const config: Configuration = {
-          mode: 'development',
-          context: testDir,
-          entry: path.join(srcDir, 'index.js'),
-          output: {
-            path: path.join(testDir, 'dist'),
-            filename: 'bundle.js',
-          },
-          resolve: {
-            extensions: ['.js', '.json'],
-          },
-          plugins: [
-            new FederationRuntimePlugin({
-              name: 'consumer',
-              filename: 'remoteEntry.js',
-            }),
-            new ConsumeSharedPlugin({
-              consumes: {
-                react: {
-                  import: 'react',
-                  shareKey: 'react',
-                  shareScope: 'default',
-                  requiredVersion: '^17.0.0',
-                  include: {
-                    version: '^17.0.0', // Should include React 17.x.x
-                  },
-                  singleton: false,
+        const plugins = [
+          new FederationRuntimePlugin({
+            name: 'consumer',
+            filename: 'remoteEntry.js',
+          }),
+          new ConsumeSharedPlugin({
+            consumes: {
+              react: {
+                import: 'react',
+                shareKey: 'react',
+                shareScope: 'default',
+                requiredVersion: '^17.0.0',
+                include: {
+                  version: '^17.0.0', // Should include React 17.x.x
                 },
+                singleton: false,
               },
-            }),
-          ],
-        };
+            },
+          }),
+        ];
 
-        const compiler = webpack(config);
+        const compiler = createCompiler({
+          testDir,
+          srcDir,
+          plugins,
+        });
+
         const stats = await compile(compiler);
 
         expect(stats.hasErrors()).toBe(false);
         expect(stats.hasWarnings()).toBe(false);
 
         const output = stats.toJson();
-        console.log(output);
         const consumeSharedModules = output.modules?.filter(
           (m) =>
             m.moduleType === 'consume-shared-module' &&
             m.name?.includes('react'),
         );
-        console.log(consumeSharedModules);
-        // Module should be included since version matches include pattern
         expect(consumeSharedModules).toBeDefined();
         expect(consumeSharedModules?.length).toBeGreaterThan(0);
         // There should be at least one module
@@ -843,39 +815,31 @@ describe('ConsumeSharedPlugin', () => {
         `,
         );
 
-        const config = {
-          mode: 'development',
-          context: testDir,
-          entry: path.join(srcDir, 'index.js'),
-          output: {
-            path: path.join(testDir, 'dist'),
-            filename: 'bundle.js',
-          },
-          resolve: {
-            extensions: ['.js', '.json'],
-            modules: ['node_modules', path.join(testDir, 'node_modules')],
-          },
-          plugins: [
-            new FederationRuntimePlugin({
-              name: 'consumer',
-              filename: 'remoteEntry.js',
-            }),
-            new ConsumeSharedPlugin({
-              consumes: {
-                react: {
-                  shareKey: 'react',
-                  shareScope: 'default',
-                  include: {
-                    version: '^17.0.0', // Should only include React 17.x.x
-                  },
-                  singleton: false,
+        const plugins = [
+          new FederationRuntimePlugin({
+            name: 'consumer',
+            filename: 'remoteEntry.js',
+          }),
+          new ConsumeSharedPlugin({
+            consumes: {
+              react: {
+                shareKey: 'react',
+                shareScope: 'default',
+                include: {
+                  version: '^17.0.0', // Should only include React 17.x.x
                 },
+                singleton: false,
               },
-            }),
-          ],
-        };
+            },
+          }),
+        ];
 
-        const compiler = webpack(config);
+        const compiler = createCompiler({
+          testDir,
+          srcDir,
+          plugins,
+        });
+
         const stats = await compile(compiler);
 
         expect(stats.hasErrors()).toBe(false);
@@ -970,39 +934,31 @@ describe('ConsumeSharedPlugin', () => {
         `,
         );
 
-        const config = {
-          mode: 'development',
-          context: testDir,
-          entry: path.join(srcDir, 'index.js'),
-          output: {
-            path: path.join(testDir, 'dist'),
-            filename: 'bundle.js',
-          },
-          resolve: {
-            extensions: ['.js', '.json'],
-            modules: ['node_modules', path.join(testDir, 'node_modules')],
-          },
-          plugins: [
-            new FederationRuntimePlugin({
-              name: 'consumer',
-              filename: 'remoteEntry.js',
-            }),
-            new ConsumeSharedPlugin({
-              consumes: {
-                shared: {
-                  shareKey: 'shared',
-                  shareScope: 'default',
-                  include: {
-                    version: '^2.0.0', // Should only include shared@2.0.0
-                  },
-                  singleton: false,
+        const plugins = [
+          new FederationRuntimePlugin({
+            name: 'consumer',
+            filename: 'remoteEntry.js',
+          }),
+          new ConsumeSharedPlugin({
+            consumes: {
+              shared: {
+                shareKey: 'shared',
+                shareScope: 'default',
+                include: {
+                  version: '^2.0.0', // Should only include shared@2.0.0
                 },
+                singleton: false,
               },
-            }),
-          ],
-        };
+            },
+          }),
+        ];
 
-        const compiler = webpack(config);
+        const compiler = createCompiler({
+          testDir,
+          srcDir,
+          plugins,
+        });
+
         const stats = await compile(compiler);
 
         expect(stats.hasErrors()).toBe(false);
@@ -1015,14 +971,6 @@ describe('ConsumeSharedPlugin', () => {
               m.moduleType === 'consume-shared-module' &&
               m.name?.includes('shared'),
           ) || [];
-        // --- DEBUG LOGGING ---
-        console.log(
-          'DEBUG: consumeSharedModules:',
-          consumeSharedModules.map((m) => ({
-            identifier: m.identifier,
-            version: m.version,
-          })),
-        );
         // There should be at least one module for the correct version (nested)
         expect(
           consumeSharedModules.some((m) =>
@@ -1078,43 +1026,34 @@ describe('ConsumeSharedPlugin', () => {
       path.join(srcDir, 'index.js'),
       'const shared = require("shared"); console.log(shared.thing);',
     );
-    const config = {
-      mode: 'development',
-      context: testDir,
-      entry: path.join(srcDir, 'index.js'),
-      output: {
-        path: path.join(testDir, 'dist'),
-        filename: 'bundle.js',
-      },
-      resolve: {
-        extensions: ['.js', '.json'],
-        modules: ['node_modules', path.join(testDir, 'node_modules')],
-      },
-      plugins: [
-        new FederationRuntimePlugin({
-          name: 'consumer',
-          filename: 'remoteEntry.js',
-        }),
-        new ConsumeSharedPlugin({
-          consumes: {
-            shared: {
-              shareKey: 'shared',
-              shareScope: 'default',
-              singleton: false,
-            },
-            'shared/directory/': {
-              shareKey: 'shared/directory/',
-              shareScope: 'default',
-              singleton: false,
-            },
+    const plugins = [
+      new FederationRuntimePlugin({
+        name: 'consumer',
+        filename: 'remoteEntry.js',
+      }),
+      new ConsumeSharedPlugin({
+        consumes: {
+          shared: {
+            shareKey: 'shared',
+            shareScope: 'default',
+            singleton: false,
           },
-          experiments: {
-            nodeModulesReconstructedLookup: true,
+          'shared/directory/': {
+            shareKey: 'shared/directory/',
+            shareScope: 'default',
+            singleton: false,
           },
-        }),
-      ],
-    };
-    const compiler = webpack(config);
+        },
+        experiments: {
+          nodeModulesReconstructedLookup: true,
+        },
+      }),
+    ];
+    const compiler = createCompiler({
+      testDir,
+      srcDir,
+      plugins,
+    });
     const stats = await compile(compiler);
     expect(stats.hasErrors()).toBe(false);
     expect(stats.hasWarnings()).toBe(false);

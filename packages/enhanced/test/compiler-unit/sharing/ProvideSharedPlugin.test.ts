@@ -21,6 +21,46 @@ const compile = (compiler: any): Promise<any> => {
   });
 };
 
+// Factory function to create webpack compiler
+interface CompilerFactoryOptions {
+  testDir: string;
+  srcDir: string;
+  entryPath?: string;
+  outputPath?: string;
+  plugins: any[];
+  resolveOptions?: Record<string, any>;
+  additionalConfig?: Partial<Configuration>;
+}
+
+const createCompiler = ({
+  testDir,
+  srcDir,
+  entryPath,
+  outputPath,
+  plugins,
+  resolveOptions = {
+    mainFields: ['browser', 'module', 'main'],
+    extensions: ['.js', '.json'],
+  },
+  additionalConfig = {},
+}: CompilerFactoryOptions) => {
+  const config: Configuration = {
+    mode: 'development',
+    context: testDir,
+    entry: entryPath || path.join(srcDir, 'index.js'),
+    output: {
+      path: outputPath || path.join(testDir, 'dist'),
+      filename: 'bundle.js',
+      publicPath: 'auto',
+    },
+    resolve: resolveOptions,
+    plugins,
+    ...additionalConfig,
+  };
+
+  return webpack(config);
+};
+
 describe('ProvideSharedPlugin', () => {
   let testDir: string;
   let srcDir: string;
@@ -74,48 +114,39 @@ describe('ProvideSharedPlugin', () => {
         'module.exports = { createElement: () => {} };',
       );
 
-      const config: Configuration = {
-        mode: 'development',
-        context: testDir,
-        entry: path.join(srcDir, 'index.js'),
-        output: {
-          path: path.join(testDir, 'dist'),
-          filename: 'bundle.js',
-          publicPath: 'auto',
-        },
-        resolve: {
-          mainFields: ['browser', 'module', 'main'],
-          extensions: ['.js', '.json'],
-        },
-        plugins: [
-          new FederationRuntimePlugin({
-            name: 'test',
-            filename: 'remoteEntry.js',
-            shared: {
-              react: {
-                singleton: false,
-                requiredVersion: '17.0.2',
-                eager: true,
-                version: '17.0.2',
-              },
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+          shared: {
+            react: {
+              singleton: false,
+              requiredVersion: '17.0.2',
+              eager: true,
+              version: '17.0.2',
             },
-          }),
-          new ProvideSharedPlugin({
-            shareScope: 'default',
-            provides: {
-              react: {
-                shareKey: 'react',
-                version: '17.0.2',
-                eager: true,
-                singleton: false,
-                requiredVersion: '17.0.2',
-              },
+          },
+        }),
+        new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            react: {
+              shareKey: 'react',
+              version: '17.0.2',
+              eager: true,
+              singleton: false,
+              requiredVersion: '17.0.2',
             },
-          }),
-        ],
-      };
+          },
+        }),
+      ];
 
-      const compiler = webpack(config);
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
       const stats = await compile(compiler);
 
       if (!stats) {
@@ -182,7 +213,7 @@ describe('ProvideSharedPlugin', () => {
         provides: {
           '@scope/prefix/': {
             version: '1.0.0',
-            shareKey: '@scope/prefix',
+            shareKey: '@scope/prefix/',
             request: '@scope/prefix/',
             exclude: {
               request: /excluded-path$/,
@@ -191,29 +222,20 @@ describe('ProvideSharedPlugin', () => {
         },
       });
 
-      const config: Configuration = {
-        mode: 'development',
-        context: testDir,
-        entry: path.join(srcDir, 'index.js'),
-        output: {
-          path: path.join(testDir, 'dist'),
-          filename: 'bundle.js',
-          publicPath: 'auto',
-        },
-        resolve: {
-          mainFields: ['browser', 'module', 'main'],
-          extensions: ['.js', '.json'],
-        },
-        plugins: [
-          new FederationRuntimePlugin({
-            name: 'test',
-            filename: 'remoteEntry.js',
-          }),
-          plugin,
-        ],
-      };
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
 
-      const compiler = webpack(config);
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
       const stats = await compile(compiler);
 
       expect(stats.hasErrors()).toBe(false);
@@ -286,44 +308,34 @@ describe('ProvideSharedPlugin', () => {
         'import RootReact from "react"; import NestedReactPkg from "some-package"; console.log(RootReact.version, NestedReactPkg.version);',
       );
 
-      const config: Configuration = {
-        mode: 'development',
-        context: testDir,
-        entry: path.join(srcDir, 'index.js'),
-        output: {
-          path: path.join(testDir, 'dist'),
-          filename: 'bundle.js',
-          publicPath: 'auto',
-        },
-        resolve: {
-          mainFields: ['browser', 'module', 'main'],
-          extensions: ['.js', '.json'],
-        },
-        plugins: [
-          new FederationRuntimePlugin({
-            name: 'test',
-            filename: 'remoteEntry.js',
-            shared: {
-              react: {
-                requiredVersion: '^17.0.0',
-                singleton: false,
-              },
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+          shared: {
+            react: {
+              requiredVersion: '^17.0.0',
+              singleton: false,
             },
-          }),
-          new ProvideSharedPlugin({
-            shareScope: 'default',
-            provides: {
-              react: {
-                shareKey: 'react',
-                singleton: false,
-                eager: false,
-              },
+          },
+        }),
+        new ProvideSharedPlugin({
+          shareScope: 'default',
+          provides: {
+            react: {
+              shareKey: 'react',
+              singleton: false,
+              eager: false,
             },
-          }),
-        ],
-      };
+          },
+        }),
+      ];
 
-      const compiler = webpack(config);
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
 
       const stats = await compile(compiler);
 
@@ -413,25 +425,20 @@ describe('ProvideSharedPlugin', () => {
         },
       });
 
-      const config: Configuration = {
-        mode: 'development',
-        context: testDir,
-        entry: path.join(srcDir, 'index.js'),
-        output: { path: path.join(testDir, 'dist'), filename: 'bundle.js' },
-        resolve: {
-          mainFields: ['browser', 'module', 'main'],
-          extensions: ['.js', '.json'],
-        },
-        plugins: [
-          new FederationRuntimePlugin({
-            name: 'test',
-            filename: 'remoteEntry.js',
-          }),
-          plugin,
-        ],
-      };
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
 
-      const compiler = webpack(config);
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
       const stats = await compile(compiler);
 
       expect(stats.hasErrors()).toBe(false);
@@ -499,28 +506,20 @@ describe('ProvideSharedPlugin', () => {
         'import React from "react"; console.log(React);',
       );
 
-      const config: Configuration = {
-        mode: 'development',
-        context: testDir,
-        entry: path.join(srcDir, 'index.js'),
-        output: {
-          path: path.join(testDir, 'dist'),
-          filename: 'bundle.js',
-        },
-        resolve: {
-          mainFields: ['browser', 'module', 'main'],
-          extensions: ['.js', '.json'],
-        },
-        plugins: [
-          new FederationRuntimePlugin({
-            name: 'test',
-            filename: 'remoteEntry.js',
-          }),
-          plugin,
-        ],
-      };
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
 
-      const compiler = webpack(config);
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
       const stats = await compile(compiler);
 
       expect(stats.hasErrors()).toBe(false);
@@ -578,28 +577,20 @@ describe('ProvideSharedPlugin', () => {
         'import React from "react"; console.log(React);',
       );
 
-      const config: Configuration = {
-        mode: 'development',
-        context: testDir,
-        entry: path.join(srcDir, 'index.js'),
-        output: {
-          path: path.join(testDir, 'dist'),
-          filename: 'bundle.js',
-        },
-        resolve: {
-          mainFields: ['browser', 'module', 'main'],
-          extensions: ['.js', '.json'],
-        },
-        plugins: [
-          new FederationRuntimePlugin({
-            name: 'test',
-            filename: 'remoteEntry.js',
-          }),
-          plugin,
-        ],
-      };
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
 
-      const compiler = webpack(config);
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
       const stats = await compile(compiler);
 
       expect(stats.hasErrors()).toBe(false);
@@ -621,4 +612,474 @@ describe('ProvideSharedPlugin', () => {
       expect(sharedModules.length).toBe(0);
     });
   });
+
+  // --- Tests for include.version ---
+  describe('include.version behavior', () => {
+    it('should SHARE module when version MATCHES include.version range', async () => {
+      const reactVersion = '17.0.2';
+      const includeRange = '^17.0.0'; // Module version 17.0.2 satisfies ^17.0.0
+
+      const plugin = new ProvideSharedPlugin({
+        shareScope: shareScopes.string,
+        provides: {
+          react: {
+            shareKey: 'react',
+            include: {
+              version: includeRange,
+            },
+          },
+        },
+      });
+
+      fs.writeFileSync(
+        path.join(nodeModulesDir, 'react/package.json'),
+        JSON.stringify({ name: 'react', version: reactVersion }),
+      );
+      fs.writeFileSync(
+        path.join(nodeModulesDir, 'react/index.js'),
+        `module.exports = { version: "${reactVersion}" };`,
+      );
+      fs.writeFileSync(
+        path.join(srcDir, 'index.js'),
+        'import React from "react"; console.log(React);',
+      );
+
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
+
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
+      const stats = await compile(compiler);
+
+      expect(stats.hasErrors()).toBe(false);
+      expect(satisfySpy).toHaveBeenCalledWith(reactVersion, includeRange);
+
+      const output = stats.toJson({ modules: true });
+      const sharedModules =
+        output.modules?.filter(
+          (m: any) =>
+            m.name?.includes('react') &&
+            m.name?.includes('provide shared module'),
+        ) || [];
+
+      expect(sharedModules.length).toBe(1); // Module should be shared
+      expect(sharedModules[0].name).toContain(reactVersion);
+    });
+
+    it('should NOT SHARE module when version does NOT MATCH include.version range', async () => {
+      const reactVersion = '16.0.0';
+      const includeRange = '^17.0.0'; // Module version 16.0.0 does NOT satisfy ^17.0.0
+
+      const plugin = new ProvideSharedPlugin({
+        shareScope: shareScopes.string,
+        provides: {
+          react: {
+            shareKey: 'react',
+            include: {
+              version: includeRange,
+            },
+          },
+        },
+      });
+
+      fs.writeFileSync(
+        path.join(nodeModulesDir, 'react/package.json'),
+        JSON.stringify({ name: 'react', version: reactVersion }),
+      );
+      fs.writeFileSync(
+        path.join(nodeModulesDir, 'react/index.js'),
+        `module.exports = { version: "${reactVersion}" };`,
+      );
+      fs.writeFileSync(
+        path.join(srcDir, 'index.js'),
+        'import React from "react"; console.log(React);',
+      );
+
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
+
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
+      const stats = await compile(compiler);
+
+      expect(stats.hasErrors()).toBe(false);
+      expect(satisfySpy).toHaveBeenCalledWith(reactVersion, includeRange);
+
+      const output = stats.toJson({ modules: true });
+      const sharedModules =
+        output.modules?.filter(
+          (m: any) =>
+            m.name?.includes('react') &&
+            m.name?.includes('provide shared module'),
+        ) || [];
+
+      expect(sharedModules.length).toBe(0); // Module should NOT be shared
+    });
+  });
+  // --- End Tests for include.version ---
+
+  // --- Tests for include.request ---
+  describe('include.request behavior', () => {
+    it('should SHARE module when resource MATCHES include.request string', async () => {
+      const reactVersion = '17.0.2';
+      const reactImportName = 'react';
+      const shareScope = shareScopes.string; // 'default'
+
+      const tempReactPackageJsonPath = path.join(nodeModulesDir, reactImportName, 'package.json');
+      const tempReactIndexPath = path.join(nodeModulesDir, reactImportName, 'index.js');
+      fs.mkdirSync(path.dirname(tempReactIndexPath), { recursive: true });
+      fs.writeFileSync(tempReactPackageJsonPath, JSON.stringify({ name: reactImportName, version: reactVersion }));
+      fs.writeFileSync(tempReactIndexPath, `module.exports = { version: "${reactVersion}" };`);
+      const realReactIndexPath = fs.realpathSync(tempReactIndexPath).replace(/\\/g, '/'); // Normalize to forward slashes
+
+      const plugin = new ProvideSharedPlugin({
+        shareScope: shareScope,
+        provides: {
+          [reactImportName]: {
+            shareKey: reactImportName,
+            include: {
+              request: realReactIndexPath,
+            },
+          },
+        },
+      });
+
+      // Entry file imports 'react' by its name
+      fs.writeFileSync(
+        path.join(srcDir, 'index.js'),
+        `import React from '${reactImportName}'; console.log(React);
+      `);
+
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
+
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
+      const stats = await compile(compiler);
+
+      expect(stats.hasErrors()).toBe(false);
+      const output = stats.toJson({ modules: true });
+
+      const expectedIdentifier = `provide module (${shareScope}) ${reactImportName}@${reactVersion} = ${realReactIndexPath}`;
+
+      const sharedModules =
+        output.modules?.filter((m) => {
+          return (
+            m.moduleType === 'provide-module' &&
+            m.identifier === expectedIdentifier
+          );
+        }) || [];
+      expect(sharedModules.length).toBe(1);
+    });
+
+    it('should NOT SHARE module when resource does NOT MATCH include.request string', async () => {
+      const reactVersion = '17.0.2';
+      const reactImportName = 'react';
+      const anotherPath = path.join(nodeModulesDir, 'another-module/index.js'); // A path that won't match
+
+      const tempReactPackageJsonPath = path.join(nodeModulesDir, reactImportName, 'package.json');
+      const tempReactIndexPath = path.join(nodeModulesDir, reactImportName, 'index.js');
+      fs.mkdirSync(path.dirname(tempReactIndexPath), { recursive: true });
+      fs.writeFileSync(tempReactPackageJsonPath, JSON.stringify({ name: reactImportName, version: reactVersion }));
+      fs.writeFileSync(tempReactIndexPath, `module.exports = { version: "${reactVersion}" };`);
+      // realReactIndexPath is not strictly needed for include check if it's a non-matching path
+
+      const plugin = new ProvideSharedPlugin({
+        shareScope: shareScopes.string,
+        provides: {
+          [reactImportName]: {
+            shareKey: reactImportName,
+            include: {
+              request: anotherPath, // This path will not match react's resolved resource
+            },
+          },
+        },
+      });
+
+      fs.writeFileSync(
+        path.join(srcDir, 'index.js'),
+        `import React from '${reactImportName}'; console.log(React);
+      `);
+
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
+
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
+      const stats = await compile(compiler);
+      expect(stats.hasErrors()).toBe(false);
+      const output = stats.toJson({ modules: true });
+      const sharedModules =
+        output.modules?.filter((m) => {
+          return (
+            m.moduleType === 'provide-module' &&
+            typeof m.identifier === 'string' &&
+            m.identifier.startsWith(`provide module default react@${reactVersion} = `)
+          );
+        }) || [];
+      expect(sharedModules.length).toBe(0);
+    });
+
+    it('should SHARE module when resource MATCHES include.request RegExp', async () => {
+      const reactVersion = '17.0.2';
+      const reactImportName = 'react';
+      const shareScope = shareScopes.string;
+
+      const tempReactPackageJsonPath = path.join(nodeModulesDir, reactImportName, 'package.json');
+      const tempReactIndexPath = path.join(nodeModulesDir, reactImportName, 'index.js');
+      fs.mkdirSync(path.dirname(tempReactIndexPath), { recursive: true });
+      fs.writeFileSync(tempReactPackageJsonPath, JSON.stringify({ name: reactImportName, version: reactVersion }));
+      fs.writeFileSync(tempReactIndexPath, `module.exports = { version: "${reactVersion}" };`);
+      const realReactIndexPath = fs.realpathSync(tempReactIndexPath).replace(/\\/g, '/');
+
+      const plugin = new ProvideSharedPlugin({
+        shareScope: shareScope,
+        provides: {
+          [reactImportName]: {
+            shareKey: reactImportName,
+            include: {
+              request: /react\/index\.js$/,
+            },
+          },
+        },
+      });
+
+      fs.writeFileSync(
+        path.join(srcDir, 'index.js'),
+        `import React from '${reactImportName}'; console.log(React);
+      `);
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+      const stats = await compile(compiler);
+      expect(stats.hasErrors()).toBe(false);
+      const output = stats.toJson({ modules: true });
+      const expectedIdentifier = `provide module (${shareScope}) ${reactImportName}@${reactVersion} = ${realReactIndexPath}`;
+
+      const sharedModules =
+        output.modules?.filter((m) => {
+          return (
+            m.moduleType === 'provide-module' &&
+            m.identifier === expectedIdentifier
+          );
+        }) || [];
+      expect(sharedModules.length).toBe(1);
+    });
+
+    it('should NOT SHARE module when resource does NOT MATCH include.request RegExp', async () => {
+      const reactVersion = '17.0.2';
+      const reactImportName = 'react';
+
+      const tempReactPackageJsonPath = path.join(nodeModulesDir, reactImportName, 'package.json');
+      const tempReactIndexPath = path.join(nodeModulesDir, reactImportName, 'index.js');
+      fs.mkdirSync(path.dirname(tempReactIndexPath), { recursive: true });
+      fs.writeFileSync(tempReactPackageJsonPath, JSON.stringify({ name: reactImportName, version: reactVersion }));
+      fs.writeFileSync(tempReactIndexPath, `module.exports = { version: "${reactVersion}" };`);
+      // const realReactIndexPath = fs.realpathSync(tempReactIndexPath);
+
+      const plugin = new ProvideSharedPlugin({
+        shareScope: shareScopes.string,
+        provides: {
+          [reactImportName]: {
+            shareKey: reactImportName,
+            include: {
+              request: /some-other-module\/index\.js$/,
+            },
+          },
+        },
+      });
+      fs.writeFileSync(
+        path.join(srcDir, 'index.js'),
+        `import React from '${reactImportName}'; console.log(React);
+      `);
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+      const stats = await compile(compiler);
+      expect(stats.hasErrors()).toBe(false);
+      const output = stats.toJson({ modules: true });
+      const sharedModules =
+        output.modules?.filter((m) => {
+          return (
+            m.moduleType === 'provide-module' &&
+            typeof m.identifier === 'string' &&
+            m.identifier.startsWith(`provide module default react@${reactVersion} = `)
+          );
+        }) || [];
+      expect(sharedModules.length).toBe(0);
+    });
+
+    it('should SHARE module with prefix provide when remainder MATCHES include.request string', async () => {
+      const version = '1.0.0';
+      const includedPath = 'included-path';
+      const shareScope = 'default';
+      const baseShareKey = '@scope/prefix/';
+      const finalExpectedShareKey = baseShareKey + includedPath;
+
+      const tempPrefixResourcePath = path.join(nodeModulesDir, '@scope/prefix', includedPath, 'index.js');
+      fs.mkdirSync(path.dirname(tempPrefixResourcePath), { recursive: true });
+      fs.writeFileSync(tempPrefixResourcePath, 'module.exports = { included: true };');
+      const prefixResourcePath = fs.realpathSync(tempPrefixResourcePath).replace(/\\/g, '/');
+
+      // Entry file importing the module
+      fs.writeFileSync(
+        path.join(srcDir, 'index.js'),
+        `import val from '@scope/prefix/included-path'; console.log(val);`,
+      );
+
+      // The remainder after the prefix is 'included-path', so include.request must be 'included-path'
+      const plugin = new ProvideSharedPlugin({
+        shareScope: shareScope,
+        provides: {
+          '@scope/prefix/': {
+            shareKey: '@scope/prefix/',
+            version,
+            include: {
+              request: 'included-path', // Must match the remainder after the prefix
+            },
+          },
+        },
+      });
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+      const stats = await compile(compiler);
+      expect(stats.hasErrors()).toBe(false);
+      const output = stats.toJson({ modules: true });
+      const expectedIdentifier = `provide module (${shareScope}) ${finalExpectedShareKey}@${version} = ${prefixResourcePath}`;
+
+      const sharedModules =
+        output.modules?.filter((m) => {
+          return (
+            m.moduleType === 'provide-module' &&
+            m.identifier === expectedIdentifier
+          );
+        }) || [];
+      expect(sharedModules.length).toBe(1);
+    });
+
+    it('should NOT SHARE module with prefix provide when remainder does NOT MATCH include.request string', async () => {
+      const version = '1.0.0';
+      const actualImportPath = 'actual-import';
+      const prefixRequest = '@scope/prefix/actual-import';
+      const tempActualResourcePath = path.join(nodeModulesDir, '@scope/prefix', actualImportPath, 'index.js');
+      fs.mkdirSync(path.dirname(tempActualResourcePath), { recursive: true });
+      fs.writeFileSync(tempActualResourcePath, 'module.exports = { actual: true };');
+      const actualResourcePath = fs.realpathSync(tempActualResourcePath);
+
+      // package.json for the @scope/prefix package
+      fs.writeFileSync(
+        path.join(nodeModulesDir, '@scope/prefix/package.json'),
+        JSON.stringify({ name: '@scope/prefix', version }),
+      );
+
+      // Entry file importing the module
+      fs.writeFileSync(
+        path.join(srcDir, 'index.js'),
+        `import val from '@scope/prefix/actual-import'; console.log(val);`,
+      );
+
+      // The remainder after the prefix is 'actual-import', so include.request is set to 'not-this-one' to ensure it does NOT match
+      const plugin = new ProvideSharedPlugin({
+        shareScope: 'default',
+        provides: {
+          '@scope/prefix/': {
+            shareKey: '@scope/prefix/',
+            version,
+            include: {
+              request: 'not-this-one', // Does not match 'actual-import'
+            },
+          },
+        },
+      });
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+      const stats = await compile(compiler);
+      expect(stats.hasErrors()).toBe(false);
+      const output = stats.toJson({ modules: true });
+      const sharedModules =
+        output.modules?.filter((m) => {
+          return (
+            m.moduleType === 'provide-module' &&
+            typeof m.identifier === 'string' &&
+            m.identifier.startsWith(`provide module default @scope/prefix/actual-import@${version} = `)
+          );
+        }) || [];
+      expect(sharedModules.length).toBe(0);
+    });
+  });
+  // --- End Tests for include.request ---
 });
