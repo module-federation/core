@@ -1170,4 +1170,345 @@ describe('ProvideSharedPlugin', () => {
     });
   });
   // --- End Tests for include.request ---
+
+  describe('exclude with singleton validation', () => {
+    it('should warn when using singleton with version exclusion', async () => {
+      const reactVersion = '17.0.2';
+      const excludeRange = '^16.0.0'; // Will exclude React 16.x
+
+      // Create test files
+      fs.writeFileSync(
+        path.join(nodeModulesDir, 'react/package.json'),
+        JSON.stringify({
+          name: 'react',
+          version: reactVersion,
+        }),
+      );
+      fs.writeFileSync(
+        path.join(nodeModulesDir, 'react/index.js'),
+        `module.exports = { version: "${reactVersion}" };`,
+      );
+      fs.writeFileSync(
+        path.join(srcDir, 'index.js'),
+        `import React from 'react'; console.log(React.version);`,
+      );
+
+      // Create plugin with version exclusion and singleton
+      const plugin = new ProvideSharedPlugin({
+        shareScope: shareScopes.string,
+        provides: {
+          react: {
+            shareKey: 'react',
+            singleton: true, // Setting singleton to true
+            exclude: {
+              version: excludeRange,
+            },
+          },
+        },
+      });
+
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
+
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
+      const stats = await compile(compiler);
+
+      expect(stats.hasErrors()).toBe(false);
+
+      // Check for warnings about singleton with exclude.version
+      const warnings = stats.compilation.warnings;
+      const hasSingletonWarning = warnings.some(
+        (warning) =>
+          warning.message.includes('singleton: true') &&
+          warning.message.includes('exclude.version') &&
+          warning.message.includes('react'),
+      );
+
+      expect(hasSingletonWarning).toBe(true);
+
+      const output = stats.toJson({ modules: true });
+
+      // Check that the shared module is properly provided despite the warning
+      const sharedModules =
+        output.modules?.filter((m) => {
+          return (
+            m.moduleType === 'provide-module' &&
+            typeof m.identifier === 'string' &&
+            m.identifier.startsWith(
+              `provide module (${shareScopes.string}) react@${reactVersion}`,
+            )
+          );
+        }) || [];
+
+      // Module should be shared because v17 doesn't match the exclude range of ^16
+      expect(sharedModules.length).toBe(1);
+    });
+
+    it('should warn when using singleton with version inclusion', async () => {
+      const reactVersion = '17.0.2';
+      const includeRange = '^17.0.0'; // Will include React 17.x
+
+      // Create test files
+      fs.writeFileSync(
+        path.join(nodeModulesDir, 'react/package.json'),
+        JSON.stringify({
+          name: 'react',
+          version: reactVersion,
+        }),
+      );
+      fs.writeFileSync(
+        path.join(nodeModulesDir, 'react/index.js'),
+        `module.exports = { version: "${reactVersion}" };`,
+      );
+      fs.writeFileSync(
+        path.join(srcDir, 'index.js'),
+        `import React from 'react'; console.log(React.version);`,
+      );
+
+      // Create plugin with version inclusion and singleton
+      const plugin = new ProvideSharedPlugin({
+        shareScope: shareScopes.string,
+        provides: {
+          react: {
+            shareKey: 'react',
+            singleton: true, // Setting singleton to true
+            include: {
+              version: includeRange,
+            },
+          },
+        },
+      });
+
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
+
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
+      const stats = await compile(compiler);
+
+      expect(stats.hasErrors()).toBe(false);
+
+      // Check for warnings about singleton with include.version
+      const warnings = stats.compilation.warnings;
+      const hasSingletonWarning = warnings.some(
+        (warning) =>
+          warning.message.includes('singleton: true') &&
+          warning.message.includes('include.version') &&
+          warning.message.includes('react'),
+      );
+
+      expect(hasSingletonWarning).toBe(true);
+
+      const output = stats.toJson({ modules: true });
+
+      // Check that the shared module is properly provided despite the warning
+      const sharedModules =
+        output.modules?.filter((m) => {
+          return (
+            m.moduleType === 'provide-module' &&
+            typeof m.identifier === 'string' &&
+            m.identifier.startsWith(
+              `provide module (${shareScopes.string}) react@${reactVersion}`,
+            )
+          );
+        }) || [];
+
+      // Module should be shared because v17 matches the include range of ^17
+      expect(sharedModules.length).toBe(1);
+    });
+
+    it('should warn when using singleton with request exclusion', async () => {
+      // Setup scoped package structure
+      const scopeDir = path.join(nodeModulesDir, '@scope/prefix');
+      fs.mkdirSync(path.join(scopeDir, 'excluded-path'), { recursive: true });
+      fs.mkdirSync(path.join(scopeDir, 'included-path'), { recursive: true });
+
+      // Create package.json files
+      fs.writeFileSync(
+        path.join(scopeDir, 'package.json'),
+        JSON.stringify({
+          name: '@scope/prefix',
+          version: '1.0.0',
+        }),
+      );
+
+      fs.writeFileSync(
+        path.join(scopeDir, 'excluded-path/package.json'),
+        JSON.stringify({
+          name: '@scope/prefix/excluded-path',
+          version: '1.0.0',
+        }),
+      );
+
+      fs.writeFileSync(
+        path.join(scopeDir, 'included-path/package.json'),
+        JSON.stringify({
+          name: '@scope/prefix/included-path',
+          version: '1.0.0',
+        }),
+      );
+
+      // Create module files
+      fs.writeFileSync(
+        path.join(scopeDir, 'excluded-path/index.js'),
+        'module.exports = { excluded: true };',
+      );
+      fs.writeFileSync(
+        path.join(scopeDir, 'included-path/index.js'),
+        'module.exports = { included: true };',
+      );
+
+      // Update test entry file
+      fs.writeFileSync(
+        path.join(srcDir, 'index.js'),
+        `
+        import included from "@scope/prefix/included-path";
+        console.log(included);
+      `,
+      );
+
+      // Create plugin with request exclusion and singleton
+      const plugin = new ProvideSharedPlugin({
+        shareScope: shareScopes.string,
+        provides: {
+          '@scope/prefix/': {
+            shareKey: '@scope/prefix/',
+            singleton: true, // Setting singleton to true
+            exclude: {
+              request: /excluded-path$/,
+            },
+          },
+        },
+      });
+
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
+
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
+      const stats = await compile(compiler);
+
+      expect(stats.hasErrors()).toBe(false);
+
+      // Check for warnings about singleton with exclude.request
+      const warnings = stats.compilation.warnings;
+      const hasSingletonWarning = warnings.some(
+        (warning) =>
+          warning.message.includes('singleton: true') &&
+          warning.message.includes('exclude.request') &&
+          warning.message.includes('@scope/prefix/'),
+      );
+
+      expect(hasSingletonWarning).toBe(true);
+    });
+
+    it('should warn when using singleton with request inclusion', async () => {
+      // Setup scoped package structure
+      const scopeDir = path.join(nodeModulesDir, '@scope/prefix');
+      fs.mkdirSync(path.join(scopeDir, 'included-path'), { recursive: true });
+
+      // Create package.json files
+      fs.writeFileSync(
+        path.join(scopeDir, 'package.json'),
+        JSON.stringify({
+          name: '@scope/prefix',
+          version: '1.0.0',
+        }),
+      );
+
+      fs.writeFileSync(
+        path.join(scopeDir, 'included-path/package.json'),
+        JSON.stringify({
+          name: '@scope/prefix/included-path',
+          version: '1.0.0',
+        }),
+      );
+
+      // Create module files
+      fs.writeFileSync(
+        path.join(scopeDir, 'included-path/index.js'),
+        'module.exports = { included: true };',
+      );
+
+      // Update test entry file
+      fs.writeFileSync(
+        path.join(srcDir, 'index.js'),
+        `
+        import included from "@scope/prefix/included-path";
+        console.log(included);
+      `,
+      );
+
+      // Create plugin with request inclusion and singleton
+      const plugin = new ProvideSharedPlugin({
+        shareScope: shareScopes.string,
+        provides: {
+          '@scope/prefix/': {
+            shareKey: '@scope/prefix/',
+            singleton: true, // Setting singleton to true
+            include: {
+              request: 'included-path',
+            },
+          },
+        },
+      });
+
+      const plugins = [
+        new FederationRuntimePlugin({
+          name: 'test',
+          filename: 'remoteEntry.js',
+        }),
+        plugin,
+      ];
+
+      const compiler = createCompiler({
+        testDir,
+        srcDir,
+        plugins,
+      });
+
+      const stats = await compile(compiler);
+
+      expect(stats.hasErrors()).toBe(false);
+
+      // Check for warnings about singleton with include.request
+      const warnings = stats.compilation.warnings;
+      const hasSingletonWarning = warnings.some(
+        (warning) =>
+          warning.message.includes('singleton: true') &&
+          warning.message.includes('include.request') &&
+          warning.message.includes('@scope/prefix/'),
+      );
+
+      expect(hasSingletonWarning).toBe(true);
+    });
+  });
 });
