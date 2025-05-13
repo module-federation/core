@@ -34,7 +34,7 @@ import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeS
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
 import { satisfy } from '@module-federation/runtime-tools/runtime-core';
-import { addSingletonFilterWarning } from './utils';
+import { addSingletonFilterWarning, testRequestFilters } from './utils';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -610,27 +610,14 @@ class ConsumeSharedPlugin {
                 const lookup = options.request || prefix;
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
-                  // First check include if it exists - only proceed if request matches include pattern
                   if (
-                    options.include &&
-                    options.include.request &&
-                    !(options.include.request instanceof RegExp
-                      ? options.include.request.test(remainder)
-                      : remainder === options.include.request)
+                    !testRequestFilters(
+                      remainder,
+                      options.include?.request,
+                      options.exclude?.request,
+                    )
                   ) {
-                    continue; // Skip if include doesn't match
-                  }
-
-                  // Then check exclude if it exists - skip if request matches exclude pattern
-                  if (
-                    options.exclude &&
-                    options.exclude.request &&
-                    // Skip if the remainder DOES match the filter
-                    (options.exclude.request instanceof RegExp
-                      ? options.exclude.request.test(remainder)
-                      : remainder === options.exclude.request)
-                  ) {
-                    continue; // Skip if exclude matches
+                    continue;
                   }
 
                   // Check for request filters with singleton for prefixed consumes
@@ -692,23 +679,12 @@ class ConsumeSharedPlugin {
                       lookup.length,
                     );
 
-                    // Check include/exclude as before
                     if (
-                      options.include &&
-                      options.include.request &&
-                      !(options.include.request instanceof RegExp
-                        ? options.include.request.test(remainder)
-                        : remainder === options.include.request)
-                    ) {
-                      continue;
-                    }
-
-                    if (
-                      options.exclude &&
-                      options.exclude.request &&
-                      (options.exclude.request instanceof RegExp
-                        ? options.exclude.request.test(remainder)
-                        : remainder === options.exclude.request)
+                      !testRequestFilters(
+                        remainder,
+                        options.include?.request,
+                        options.exclude?.request,
+                      )
                     ) {
                       continue;
                     }
@@ -737,23 +713,12 @@ class ConsumeSharedPlugin {
                   if (reconstructed.startsWith(lookup)) {
                     const remainder = reconstructed.slice(lookup.length);
 
-                    // Check include/exclude as before
                     if (
-                      options.include &&
-                      options.include.request &&
-                      !(options.include.request instanceof RegExp
-                        ? options.include.request.test(remainder)
-                        : remainder === options.include.request)
-                    ) {
-                      continue;
-                    }
-
-                    if (
-                      options.exclude &&
-                      options.exclude.request &&
-                      (options.exclude.request instanceof RegExp
-                        ? options.exclude.request.test(remainder)
-                        : remainder === options.exclude.request)
+                      !testRequestFilters(
+                        remainder,
+                        options.include?.request,
+                        options.exclude?.request,
+                      )
                     ) {
                       continue;
                     }

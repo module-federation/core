@@ -24,7 +24,7 @@ import type {
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
 import { satisfy } from '@module-federation/runtime-tools/runtime-core';
-import { addSingletonFilterWarning } from './utils';
+import { addSingletonFilterWarning, testRequestFilters } from './utils';
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
@@ -247,23 +247,13 @@ class ProvideSharedPlugin {
               if (request.startsWith(lookupPrefix) && resource) {
                 const remainder = request.slice(lookupPrefix.length);
                 if (
-                  originalPrefixConfig.include &&
-                  originalPrefixConfig.include.request &&
-                  !(originalPrefixConfig.include.request instanceof RegExp
-                    ? originalPrefixConfig.include.request.test(remainder)
-                    : remainder === originalPrefixConfig.include.request)
+                  !testRequestFilters(
+                    remainder,
+                    originalPrefixConfig.include?.request,
+                    originalPrefixConfig.exclude?.request,
+                  )
                 ) {
-                  continue; // Skip if include doesn't match
-                }
-
-                if (
-                  originalPrefixConfig.exclude &&
-                  originalPrefixConfig.exclude.request &&
-                  (originalPrefixConfig.exclude.request instanceof RegExp
-                    ? originalPrefixConfig.exclude.request.test(remainder)
-                    : remainder === originalPrefixConfig.exclude.request)
-                ) {
-                  continue; // Skip if exclude matches
+                  continue;
                 }
 
                 // Check for prefix request filters with singleton
@@ -371,23 +361,13 @@ class ProvideSharedPlugin {
 
                   // Apply include/exclude filters based on remainderPM
                   if (
-                    originalPrefixConfigPM.include &&
-                    originalPrefixConfigPM.include.request &&
-                    !(originalPrefixConfigPM.include.request instanceof RegExp
-                      ? originalPrefixConfigPM.include.request.test(remainderPM)
-                      : remainderPM === originalPrefixConfigPM.include.request)
+                    !testRequestFilters(
+                      remainderPM,
+                      originalPrefixConfigPM.include?.request,
+                      originalPrefixConfigPM.exclude?.request,
+                    )
                   ) {
-                    continue; // Skip if include doesn't match
-                  }
-
-                  if (
-                    originalPrefixConfigPM.exclude &&
-                    originalPrefixConfigPM.exclude.request &&
-                    (originalPrefixConfigPM.exclude.request instanceof RegExp
-                      ? originalPrefixConfigPM.exclude.request.test(remainderPM)
-                      : remainderPM === originalPrefixConfigPM.exclude.request)
-                  ) {
-                    continue; // Skip if exclude matches
+                    continue;
                   }
 
                   this.provideSharedModule(

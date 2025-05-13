@@ -504,3 +504,29 @@ export function addSingletonFilterWarning(
   }
   compilation.warnings.push(warning);
 }
+
+export function testRequestFilters(
+  remainder: string,
+  includeRequest?: string | RegExp,
+  excludeRequest?: string | RegExp,
+): boolean {
+  if (
+    includeRequest &&
+    !(includeRequest instanceof RegExp
+      ? includeRequest.test(remainder)
+      : remainder === includeRequest)
+  ) {
+    return false; // Skip if include doesn't match
+  }
+
+  if (
+    excludeRequest &&
+    (excludeRequest instanceof RegExp
+      ? excludeRequest.test(remainder)
+      : remainder === excludeRequest)
+  ) {
+    return false; // Skip if exclude matches
+  }
+
+  return true; // Process if no filters skip it
+}
