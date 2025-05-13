@@ -19,7 +19,6 @@ it('should share modules NOT matching the filter', async () => {
 
   // This should not be shared due to filter pattern
   const container = __webpack_share_scopes__['test-scope'];
-  console.log(container);
 
   expect(container).toBeDefined();
   expect(container['prefix/a']).toBeDefined();
