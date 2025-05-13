@@ -3,8 +3,7 @@ export type Data = {
 };
 
 export const fetchData = async (): Promise<Data> => {
-  console.log('Content.data.server');
-
+  console.log('Content.data.client');
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({

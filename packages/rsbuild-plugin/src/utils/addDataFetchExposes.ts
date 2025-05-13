@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { TEMP_DIR } from '@module-federation/sdk';
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
@@ -21,7 +22,7 @@ const addDataFetchExpose = (
   if (!exposes[dataFetchKey]) {
     exposes[dataFetchKey] = filepath;
   }
-  return true;
+  return dataFetchKey;
 };
 
 export function addDataFetchExposes(
@@ -46,7 +47,16 @@ export function addDataFetchExposes(
       return;
     }
 
-    addDataFetchExpose(exposes, key, dataFetchPath);
+    const dataFetchKey = addDataFetchExpose(exposes, key, dataFetchPath);
+    if (!isServer && dataFetchKey) {
+      const tempDataFetchFilepath = path.resolve(
+        process.cwd(),
+        `node_modules/${TEMP_DIR}/data-fetch.ts`,
+      );
+      const content = `export const fetchData=()=>{throw new Error('should not be called')};`;
+      fs.writeFileSync(tempDataFetchFilepath, content);
+      exposes[dataFetchKey] = tempDataFetchFilepath;
+    }
     return;
   });
 }
