@@ -100,6 +100,7 @@ class ProvideSharedPlugin {
           layer: undefined,
           request: item,
           exclude: undefined,
+          include: undefined,
         };
         return result;
       },
