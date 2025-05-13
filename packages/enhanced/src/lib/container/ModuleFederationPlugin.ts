@@ -75,25 +75,23 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     definePluginOptions['FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN'] =
       disableSnapshot;
 
-    let targetEnv: 'web' | 'node' | undefined;
-    if (experiments?.optimization && 'target' in experiments.optimization) {
-      targetEnv = experiments.optimization.target;
-    } else {
-      targetEnv = 'web';
-      const webpackTarget = compiler.options.target;
-      if (typeof webpackTarget === 'string') {
-        if (webpackTarget.includes('node')) {
-          targetEnv = 'node';
-        }
-      } else if (Array.isArray(webpackTarget)) {
-        if (
-          webpackTarget.some((t) => typeof t === 'string' && t.includes('node'))
-        ) {
-          targetEnv = 'node';
-        }
+    // Determine ENV_TARGET: only if manually specified in experiments.optimization.target
+    if (
+      experiments?.optimization &&
+      typeof experiments.optimization === 'object' &&
+      experiments.optimization !== null &&
+      'target' in experiments.optimization
+    ) {
+      const manualTarget = experiments.optimization.target as
+        | 'web'
+        | 'node'
+        | undefined;
+      // Ensure the target is one of the expected values before setting
+      if (manualTarget === 'web' || manualTarget === 'node') {
+        definePluginOptions['ENV_TARGET'] = JSON.stringify(manualTarget);
       }
     }
-    definePluginOptions['ENV_TARGET'] = JSON.stringify(targetEnv);
+    // No inference for ENV_TARGET. If not manually set and valid, it's not defined.
 
     new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
   }
