@@ -58,11 +58,11 @@ describe('ConsumeSharedPlugin Layers', () => {
     // Create source files for different layers
     fs.writeFileSync(
       path.join(srcDir, 'module.client.js'),
-      'import React from "react"; console.log("Client React:", React.version);',
+      'import React from "react";',
     );
     fs.writeFileSync(
       path.join(srcDir, 'module.server.js'),
-      'import React from "react"; console.log("Server React:", React.version);',
+      'import React from "react";',
     );
 
     // Base package.json for the test directory
