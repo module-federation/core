@@ -42,7 +42,7 @@ const lazyLoaderHookFetch = async (
 };
 
 export const createScriptNode =
-  typeof ENV_TARGET !== 'undefined' && ENV_TARGET !== 'web'
+  typeof ENV_TARGET === 'undefined' || ENV_TARGET !== 'web'
     ? (
         url: string,
         cb: (error?: Error, scriptContext?: any) => void,
@@ -181,7 +181,7 @@ export const createScriptNode =
       };
 
 export const loadScriptNode =
-  typeof ENV_TARGET !== 'undefined' && ENV_TARGET !== 'web'
+  typeof ENV_TARGET === 'undefined' || ENV_TARGET !== 'web'
     ? (
         url: string,
         info: {

@@ -42,7 +42,7 @@ declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
 const USE_SNAPSHOT =
   typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean'
     ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
-    : true;
+    : true; // Default to true (use snapshot) when not explicitly defined
 
 export class FederationHost {
   options: Options;
