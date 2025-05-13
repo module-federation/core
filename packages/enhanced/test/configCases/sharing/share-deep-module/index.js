@@ -1,6 +1,6 @@
 it('should share a deep module path', async () => {
   await __webpack_init_sharing__('default');
-  console.log(__webpack_share_scopes__.default);
+  // Share scopes are available but we don't need to log them
 
   expect(
     __webpack_share_scopes__.default['shared/directory/thing'],
