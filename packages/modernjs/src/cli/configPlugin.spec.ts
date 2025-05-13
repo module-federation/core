@@ -77,7 +77,7 @@ describe('patchMFConfig', async () => {
       },
       dts: {
         consumeTypes: {
-          runtimePkgs: ['@modern-js/runtime/mf'],
+          runtimePkgs: ['@module-federation/modern-js/runtime'],
         },
       },
     });

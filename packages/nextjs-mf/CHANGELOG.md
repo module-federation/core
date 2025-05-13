@@ -1,5 +1,29 @@
 # @module-federation/nextjs-mf
 
+## 8.8.26
+
+### Patch Changes
+
+- @module-federation/enhanced@0.13.1
+- @module-federation/node@2.7.2
+- @module-federation/runtime@0.13.1
+- @module-federation/webpack-bundler-runtime@0.13.1
+- @module-federation/sdk@0.13.1
+
+## 8.8.25
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [9efb9b9]
+- Updated dependencies [122f1b3]
+- Updated dependencies [38f324f]
+  - @module-federation/enhanced@0.13.0
+  - @module-federation/node@2.7.1
+  - @module-federation/webpack-bundler-runtime@0.13.0
+  - @module-federation/runtime@0.13.0
+  - @module-federation/sdk@0.13.0
+
 ## 8.8.24
 
 ### Patch Changes

@@ -1,5 +1,31 @@
 # @module-federation/modern-js
 
+## 0.13.1
+
+### Patch Changes
+
+- b99d57c: fix(modern-js-plugin): export kit namespace to prevent import react directly
+  - @module-federation/enhanced@0.13.1
+  - @module-federation/cli@0.13.1
+  - @module-federation/node@2.7.2
+  - @module-federation/rsbuild-plugin@0.13.1
+  - @module-federation/sdk@0.13.1
+
+## 0.13.0
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [e9a0681]
+- Updated dependencies [9efb9b9]
+- Updated dependencies [122f1b3]
+- Updated dependencies [38f324f]
+  - @module-federation/cli@0.13.0
+  - @module-federation/enhanced@0.13.0
+  - @module-federation/node@2.7.1
+  - @module-federation/rsbuild-plugin@0.13.0
+  - @module-federation/sdk@0.13.0
+
 ## 0.12.0
 
 ### Patch Changes

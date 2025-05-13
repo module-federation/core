@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "0.12.0",
+  "version": "0.13.1",
   "publishConfig": {
     "access": "public"
   },
@@ -20,11 +20,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
-    },
-    "./legacy": {
-      "types": "./dist/legacy.d.ts",
-      "import": "./dist/legacy.es.js",
-      "require": "./dist/legacy.cjs.js"
     },
     "./v18": {
       "types": "./dist/v18.d.ts",

@@ -106,12 +106,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   apply(compiler: Compiler): void {
     const { _options: options } = this;
     // must before ModuleFederationPlugin
-    if (options.getPublicPath && options.name) {
-      new RemoteEntryPlugin(options.name, options.getPublicPath).apply(
-        // @ts-ignore
-        compiler,
-      );
-    }
+    new RemoteEntryPlugin(options).apply(
+      // @ts-ignore
+      compiler,
+    );
     if (options.experiments?.provideExternalRuntime) {
       if (options.exposes) {
         throw new Error(

@@ -1,5 +1,23 @@
 # @module-federation/bridge-vue3
 
+## 0.13.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.13.1
+- @module-federation/sdk@0.13.1
+- @module-federation/bridge-shared@0.13.1
+
+## 0.13.0
+
+### Patch Changes
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [38f324f]
+  - @module-federation/bridge-shared@0.13.0
+  - @module-federation/runtime@0.13.0
+  - @module-federation/sdk@0.13.0
+
 ## 0.12.0
 
 ### Patch Changes

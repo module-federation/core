@@ -64,14 +64,14 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
         if (path.isAbsolute(shareConfig.import)) {
           pkgPath = shareConfig.import;
         } else if (shareConfig.import.startsWith('.')) {
-          pkgPath = path.resolve(process.cwd(), shareConfig.import);
+          pkgPath = path.resolve(this.root, shareConfig.import);
         }
       } else {
         if (shareConfig.packageName) {
           depName = shareConfig.packageName;
         }
       }
-      pkgPath = pkgPath || require.resolve(depName, { paths: [process.cwd()] });
+      pkgPath = pkgPath || require.resolve(depName, { paths: [this.root] });
       const pkgJsonPath = findPkg.sync(pkgPath);
       return {
         pkg: JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')),

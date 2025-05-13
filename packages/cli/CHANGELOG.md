@@ -1,5 +1,31 @@
 # @module-federation/cli
 
+## 0.13.1
+
+### Patch Changes
+
+- @module-federation/dts-plugin@0.13.1
+- @module-federation/sdk@0.13.1
+
+## 0.13.0
+
+### Patch Changes
+
+- e9a0681: Improve dynamic module import for `readConfig` function to use file URL format.
+
+  - Added `pathToFileURL` import from 'url' module.
+  - Updated the dynamic import statement for `mfConfig` to use `pathToFileURL(preBundlePath).href`.
+  - Ensures compatibility and correctness in environments where file paths require URL format.
+
+  ```
+
+  ```
+
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [38f324f]
+  - @module-federation/dts-plugin@0.13.0
+  - @module-federation/sdk@0.13.0
+
 ## 0.12.0
 
 ### Patch Changes

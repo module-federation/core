@@ -112,10 +112,11 @@ This function will also help inject the corresponding style tag/script while loa
 
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
-import { registerRemotes, createRemoteSSRComponent } from '@modern-js/runtime/mf';
+import { registerRemotes, kit } from '@module-federation/modern-js/runtime';
 // The remote declared in the build plug-in can be imported directly at the top level
 import RemoteComp from 'remote/Image';
 
+const { createRemoteSSRComponent } = kit;
 
 const RemoteSSRComponent = createRemoteSSRComponent({
   // The remote declared in the build plug-in can also be loaded using this function: loader: () => import('remote/Image'),

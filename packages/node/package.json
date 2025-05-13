@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "2.7.0",
+  "version": "2.7.2",
   "type": "commonjs",
   "main": "./dist/src/index.js",
   "exports": {
@@ -69,7 +69,6 @@
     "node-fetch": "2.7.0",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "@module-federation/utilities": "workspace:*",
     "@module-federation/runtime": "workspace:*"
   },
   "peerDependencies": {

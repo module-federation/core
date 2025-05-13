@@ -1,5 +1,26 @@
 # @module-federation/node
 
+## 2.7.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.13.1
+- @module-federation/runtime@0.13.1
+- @module-federation/sdk@0.13.1
+
+## 2.7.1
+
+### Patch Changes
+
+- 122f1b3: fix: remove chunks from installedChunks on fail to enable retries
+- 38f324f: Disable live bindings on cjs builds of the runtime packages
+- Updated dependencies [9efb9b9]
+- Updated dependencies [38f324f]
+  - @module-federation/enhanced@0.13.0
+  - @module-federation/utilities@3.1.53
+  - @module-federation/runtime@0.13.0
+  - @module-federation/sdk@0.13.0
+
 ## 2.7.0
 
 ### Minor Changes
