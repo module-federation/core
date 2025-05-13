@@ -204,7 +204,10 @@ class ProvideSharedPlugin {
             }
 
             // Process normal prefix matches
-            for (const [prefixKey, originalPrefixConfig] of prefixMatchProvides) {
+            for (const [
+              prefixKey,
+              originalPrefixConfig,
+            ] of prefixMatchProvides) {
               const lookupPrefix = originalPrefixConfig.request || prefixKey;
 
               if (request.startsWith(lookupPrefix) && resource) {
@@ -235,8 +238,12 @@ class ProvideSharedPlugin {
                   shareKey: finalShareKey,
                   request: request, // Full matched request
                   // Clear request-based include/exclude as they were for the remainder
-                  include: originalPrefixConfig.include ? { ...originalPrefixConfig.include, request: undefined } : undefined,
-                  exclude: originalPrefixConfig.exclude ? { ...originalPrefixConfig.exclude, request: undefined } : undefined,
+                  include: originalPrefixConfig.include
+                    ? { ...originalPrefixConfig.include, request: undefined }
+                    : undefined,
+                  exclude: originalPrefixConfig.exclude
+                    ? { ...originalPrefixConfig.exclude, request: undefined }
+                    : undefined,
                 };
 
                 this.provideSharedModule(
@@ -285,7 +292,10 @@ class ProvideSharedPlugin {
               }
 
               // Also check for prefix matches with the module path after node_modules
-              for (const [prefixKeyPM, originalPrefixConfigPM] of prefixMatchProvides) {
+              for (const [
+                prefixKeyPM,
+                originalPrefixConfigPM,
+              ] of prefixMatchProvides) {
                 const lookupPM = originalPrefixConfigPM.request || prefixKeyPM;
                 if (modulePathAfterNodeModules.startsWith(lookupPM)) {
                   const remainderPM = modulePathAfterNodeModules.slice(
@@ -440,26 +450,32 @@ class ProvideSharedPlugin {
       let requestIncludeFailed = false;
       if (config.include.request) {
         const includeRequestValue = config.include.request;
-        const requestActuallyMatches = (includeRequestValue instanceof RegExp)
-          ? includeRequestValue.test(resource)
-          : resource === includeRequestValue;
+        const requestActuallyMatches =
+          includeRequestValue instanceof RegExp
+            ? includeRequestValue.test(resource)
+            : resource === includeRequestValue;
         if (!requestActuallyMatches) {
           requestIncludeFailed = true;
         }
       }
 
       // Skip if any specified include condition failed
-      const shouldSkipVersion = typeof config.include.version === 'string' && versionIncludeFailed;
+      const shouldSkipVersion =
+        typeof config.include.version === 'string' && versionIncludeFailed;
       const shouldSkipRequest = config.include.request && requestIncludeFailed;
 
-      if ( shouldSkipVersion || shouldSkipRequest ) {
+      if (shouldSkipVersion || shouldSkipRequest) {
         return;
       }
     }
 
     if (config.exclude) {
       let versionExcludeMatches = false;
-      if (typeof config.exclude.version === 'string' && typeof version === 'string' && version) {
+      if (
+        typeof config.exclude.version === 'string' &&
+        typeof version === 'string' &&
+        version
+      ) {
         if (satisfy(version, config.exclude.version)) {
           versionExcludeMatches = true;
         }
@@ -468,9 +484,10 @@ class ProvideSharedPlugin {
       let requestExcludeMatches = false;
       if (config.exclude.request) {
         const excludeRequestValue = config.exclude.request;
-        const requestActuallyMatchesExclude = (excludeRequestValue instanceof RegExp)
-          ? excludeRequestValue.test(resource)
-          : resource === excludeRequestValue;
+        const requestActuallyMatchesExclude =
+          excludeRequestValue instanceof RegExp
+            ? excludeRequestValue.test(resource)
+            : resource === excludeRequestValue;
         if (requestActuallyMatchesExclude) {
           requestExcludeMatches = true;
         }

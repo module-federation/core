@@ -874,9 +874,7 @@ describe('ProvideSharedPlugin', () => {
         );
 
         // The resource matches include.request, so it should be included
-        expect(
-          mockResolvedProvideMap.has('/path/to/my-lib/button'),
-        ).toBe(true);
+        expect(mockResolvedProvideMap.has('/path/to/my-lib/button')).toBe(true);
       });
 
       it('should NOT include module when request does not match include.request pattern (non-prefix provide, does not match full resource)', () => {
@@ -909,9 +907,9 @@ describe('ProvideSharedPlugin', () => {
         );
 
         // The resource does not match include.request, so it should NOT be included
-        expect(
-          mockResolvedProvideMap.has('/path/to/my-lib/button'),
-        ).toBe(false);
+        expect(mockResolvedProvideMap.has('/path/to/my-lib/button')).toBe(
+          false,
+        );
       });
     });
 
@@ -1564,7 +1562,7 @@ describe('ProvideSharedPlugin', () => {
         request: '/path/to/@scope/prefix/included-path', // The full request that was matched
         // include.request for remainder is now handled *before* provideSharedModule, so it's not in this specific config part anymore
         include: undefined, // Or { version: originalPrefixConfig.include?.version } if version include was present
-        exclude: undefined
+        exclude: undefined,
       };
 
       // @ts-ignore accessing private method for testing
@@ -1576,7 +1574,9 @@ describe('ProvideSharedPlugin', () => {
         '/path/to/@scope/prefix/included-path', // resource
         { descriptionFileData: { version: '1.0.0' } },
       );
-      expect(resolvedProvideMap.has('/path/to/@scope/prefix/included-path')).toBe(true);
+      expect(
+        resolvedProvideMap.has('/path/to/@scope/prefix/included-path'),
+      ).toBe(true);
 
       // Simulate non-matching case (should NOT share because original include.request for remainder didn't match)
       // This part of the test is tricky because provideSharedModule itself doesn't see the *original* remainder check.
@@ -1592,7 +1592,7 @@ describe('ProvideSharedPlugin', () => {
         shareScope: 'default',
         request: '/path/to/@scope/prefix/non-matching-path',
         include: { request: '/some/other/path' }, // This will make provideSharedModule skip
-        exclude: undefined
+        exclude: undefined,
       };
 
       // @ts-ignore
@@ -1604,7 +1604,9 @@ describe('ProvideSharedPlugin', () => {
         '/path/to/@scope/prefix/non-matching-path',
         { descriptionFileData: { version: '1.0.0' } },
       );
-      expect(resolvedProvideMap2.has('/path/to/@scope/prefix/non-matching-path')).toBe(false);
+      expect(
+        resolvedProvideMap2.has('/path/to/@scope/prefix/non-matching-path'),
+      ).toBe(false);
     });
 
     it('should SHARE module with prefix provide when remainder MATCHES include.request string', async () => {
@@ -1636,7 +1638,7 @@ describe('ProvideSharedPlugin', () => {
         // But since the original prefixConfig.include.request was for the remainder, and it was cleared by the apply() logic,
         // we pass include:undefined here.
         include: undefined,
-        exclude: undefined
+        exclude: undefined,
       };
 
       // @ts-ignore
@@ -1676,7 +1678,7 @@ describe('ProvideSharedPlugin', () => {
         // In actual implementation, include.request would be passed through if it's for testing the full resource
         // To test the non-matching behavior, we need to add include.request that won't match the resource
         include: { request: 'does-not-match-resource' },
-        exclude: undefined
+        exclude: undefined,
       };
 
       // @ts-ignore

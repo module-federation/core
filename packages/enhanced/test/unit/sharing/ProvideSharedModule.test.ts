@@ -350,7 +350,6 @@ describe('ProvideSharedModule', () => {
       const hash = {
         update: jest.fn(),
       };
-
     });
   });
 
