@@ -40,9 +40,10 @@ import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFacto
 import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
-const { satisfy, parseRange } = require(
+const { parseRange } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
 ) as typeof import('webpack/lib/util/semver');
+import { satisfy } from '@module-federation/runtime-tools/runtime-core';
 import {
   addSingletonFilterWarning,
   testRequestFilters,
@@ -491,13 +492,9 @@ class ConsumeSharedPlugin {
               }
               const { context, request, contextInfo } = resolveData;
 
-              const match =
-                unresolvedConsumes.get(
-                  createLookupKeyForSharing(request, contextInfo.issuerLayer),
-                ) ||
-                unresolvedConsumes.get(
-                  createLookupKeyForSharing(request, undefined),
-                );
+              const match = unresolvedConsumes.get(
+                createLookupKeyForSharing(request, contextInfo.issuerLayer),
+              );
 
               // First check direct match with original request
               if (match !== undefined) {
