@@ -530,3 +530,22 @@ export function testRequestFilters(
 
   return true; // Process if no filters skip it
 }
+
+export function createLookupKeyForSharing(
+  request: string,
+  layer?: string | null,
+): string {
+  if (layer) {
+    return `(${layer})${request}`;
+  }
+  return request;
+}
+
+export function extractPathAfterNodeModules(filePath: string): string | null {
+  if (filePath.includes('node_modules')) {
+    const nodeModulesIndex = filePath.lastIndexOf('node_modules');
+    // Add length of 'node_modules/' to get the start of the path after it
+    return filePath.substring(nodeModulesIndex + 'node_modules/'.length);
+  }
+  return null;
+}

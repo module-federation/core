@@ -24,7 +24,12 @@ import type {
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
 import { satisfy } from '@module-federation/runtime-tools/runtime-core';
-import { addSingletonFilterWarning, testRequestFilters } from './utils';
+import {
+  addSingletonFilterWarning,
+  testRequestFilters,
+  createLookupKeyForSharing,
+  extractPathAfterNodeModules,
+} from './utils';
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
@@ -60,17 +65,6 @@ const validate = createSchemaValidation(
  */
 
 /** @typedef {Map<string, { config: ProvideOptions, version: string | undefined | false }>} ResolvedProvideMap */
-
-// Helper function to create composite key
-function createLookupKey(
-  request: string,
-  config: { layer?: string | null },
-): string {
-  if (config.layer) {
-    return `(${config.layer})${request}`;
-  }
-  return request;
-}
 
 class ProvideSharedPlugin {
   private _provides: [string, ProvidesConfig][];
@@ -150,7 +144,10 @@ class ProvideSharedPlugin {
         const prefixMatchProvides: Map<string, ProvidesConfig> = new Map();
         for (const [request, config] of this._provides) {
           const actualRequest = config.request || request;
-          const lookupKey = createLookupKey(actualRequest, config);
+          const lookupKey = createLookupKeyForSharing(
+            actualRequest,
+            config.layer,
+          );
           if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
             // relative request
             resolvedProvideMap.set(lookupKey, {
@@ -178,18 +175,20 @@ class ProvideSharedPlugin {
           'ProvideSharedPlugin',
           (module, { resource, resourceResolveData }, resolveData) => {
             const moduleLayer = module.layer;
-            const lookupKey = createLookupKey(resource || '', {
-              layer: moduleLayer || undefined,
-            });
+            const lookupKey = createLookupKeyForSharing(
+              resource || '',
+              moduleLayer || undefined,
+            );
 
             if (resource && resolvedProvideMap.has(lookupKey)) {
               return module;
             }
             const { request } = resolveData;
             {
-              const requestKey = createLookupKey(request, {
-                layer: moduleLayer || undefined,
-              });
+              const requestKey = createLookupKeyForSharing(
+                request,
+                moduleLayer || undefined,
+              );
               const config = matchProvides.get(requestKey);
               if (config !== undefined && resource) {
                 // Check for request filters with singleton here
@@ -322,66 +321,65 @@ class ProvideSharedPlugin {
               resource.includes('node_modules') &&
               !resolvedProvideMap.has(lookupKey)
             ) {
-              const nodeModulesIndex = resource.lastIndexOf('node_modules');
-              const modulePathAfterNodeModules = resource.substring(
-                nodeModulesIndex + 'node_modules/'.length,
-              );
+              const modulePathAfterNodeModules =
+                extractPathAfterNodeModules(resource);
 
-              // Try direct match with module path after node_modules
-              const modulePathKey = createLookupKey(
-                modulePathAfterNodeModules,
-                {
-                  layer: moduleLayer || undefined,
-                },
-              );
-              const moduleConfig = matchProvides.get(modulePathKey);
-
-              if (moduleConfig !== undefined) {
-                this.provideSharedModule(
-                  compilation,
-                  resolvedProvideMap,
+              if (modulePathAfterNodeModules) {
+                // Try direct match with module path after node_modules
+                const modulePathKey = createLookupKeyForSharing(
                   modulePathAfterNodeModules,
-                  moduleConfig,
-                  resource,
-                  resourceResolveData,
+                  moduleLayer || undefined,
                 );
-                resolveData.cacheable = false;
-              }
+                const moduleConfig = matchProvides.get(modulePathKey);
 
-              // Also check for prefix matches with the module path after node_modules
-              for (const [
-                prefixKeyPM,
-                originalPrefixConfigPM,
-              ] of prefixMatchProvides) {
-                const lookupPM = originalPrefixConfigPM.request || prefixKeyPM;
-                if (modulePathAfterNodeModules.startsWith(lookupPM)) {
-                  const remainderPM = modulePathAfterNodeModules.slice(
-                    lookupPM.length,
-                  );
-
-                  // Apply include/exclude filters based on remainderPM
-                  if (
-                    !testRequestFilters(
-                      remainderPM,
-                      originalPrefixConfigPM.include?.request,
-                      originalPrefixConfigPM.exclude?.request,
-                    )
-                  ) {
-                    continue;
-                  }
-
+                if (moduleConfig !== undefined) {
                   this.provideSharedModule(
                     compilation,
                     resolvedProvideMap,
                     modulePathAfterNodeModules,
-                    {
-                      ...originalPrefixConfigPM,
-                      shareKey: originalPrefixConfigPM.shareKey + remainderPM,
-                    },
+                    moduleConfig,
                     resource,
                     resourceResolveData,
                   );
                   resolveData.cacheable = false;
+                }
+
+                // Also check for prefix matches with the module path after node_modules
+                for (const [
+                  prefixKeyPM,
+                  originalPrefixConfigPM,
+                ] of prefixMatchProvides) {
+                  const lookupPM =
+                    originalPrefixConfigPM.request || prefixKeyPM;
+                  if (modulePathAfterNodeModules.startsWith(lookupPM)) {
+                    const remainderPM = modulePathAfterNodeModules.slice(
+                      lookupPM.length,
+                    );
+
+                    // Apply include/exclude filters based on remainderPM
+                    if (
+                      !testRequestFilters(
+                        remainderPM,
+                        originalPrefixConfigPM.include?.request,
+                        originalPrefixConfigPM.exclude?.request,
+                      )
+                    ) {
+                      continue;
+                    }
+
+                    this.provideSharedModule(
+                      compilation,
+                      resolvedProvideMap,
+                      modulePathAfterNodeModules,
+                      {
+                        ...originalPrefixConfigPM,
+                        shareKey: originalPrefixConfigPM.shareKey + remainderPM,
+                      },
+                      resource,
+                      resourceResolveData,
+                    );
+                    resolveData.cacheable = false;
+                  }
                 }
               }
             }
@@ -598,7 +596,7 @@ class ProvideSharedPlugin {
       }
     }
 
-    const lookupKey = createLookupKey(resource, config);
+    const lookupKey = createLookupKeyForSharing(resource, config.layer);
     resolvedProvideMap.set(lookupKey, {
       config,
       version,

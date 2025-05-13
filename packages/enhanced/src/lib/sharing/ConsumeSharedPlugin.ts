@@ -34,7 +34,12 @@ import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeS
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
 import { satisfy } from '@module-federation/runtime-tools/runtime-core';
-import { addSingletonFilterWarning, testRequestFilters } from './utils';
+import {
+  addSingletonFilterWarning,
+  testRequestFilters,
+  createLookupKeyForSharing,
+  extractPathAfterNodeModules,
+} from './utils';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -63,16 +68,6 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
   dependencyType: 'esm',
 };
 const PLUGIN_NAME = 'ConsumeSharedPlugin';
-
-// Helper function to create composite key
-function createLookupKey(
-  request: string,
-  contextInfo: ModuleFactoryCreateDataContextInfo,
-): string {
-  return contextInfo.issuerLayer
-    ? `(${contextInfo.issuerLayer})${request}`
-    : request;
-}
 
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
@@ -514,7 +509,7 @@ class ConsumeSharedPlugin {
               const { context, request, contextInfo } = resolveData;
 
               const match = unresolvedConsumes.get(
-                createLookupKey(request, contextInfo),
+                createLookupKeyForSharing(request, contextInfo.issuerLayer),
               );
 
               // First check direct match
@@ -564,20 +559,16 @@ class ConsumeSharedPlugin {
                 /^(\.\.?(\/|$)|\/|[A-Za-z]:|\\\\)/.test(request)
               ) {
                 reconstructed = path.join(context, request);
-
-                // Check if path contains node_modules and extract the part after it
-                if (reconstructed.includes('node_modules')) {
-                  const nodeModulesIndex =
-                    reconstructed.lastIndexOf('node_modules');
-                  modulePathAfterNodeModules = reconstructed.substring(
-                    nodeModulesIndex + 'node_modules/'.length,
-                  );
-                }
+                modulePathAfterNodeModules =
+                  extractPathAfterNodeModules(reconstructed);
 
                 // Try to match with module path after node_modules
                 if (modulePathAfterNodeModules) {
                   const moduleMatch = unresolvedConsumes.get(
-                    createLookupKey(modulePathAfterNodeModules, contextInfo),
+                    createLookupKeyForSharing(
+                      modulePathAfterNodeModules,
+                      contextInfo.issuerLayer,
+                    ),
                   );
 
                   if (moduleMatch !== undefined) {
@@ -592,7 +583,10 @@ class ConsumeSharedPlugin {
 
                 // Try to match with the full reconstructed path
                 const reconstructedMatch = unresolvedConsumes.get(
-                  createLookupKey(reconstructed, contextInfo),
+                  createLookupKeyForSharing(
+                    reconstructed,
+                    contextInfo.issuerLayer,
+                  ),
                 );
 
                 if (reconstructedMatch !== undefined) {
