@@ -743,12 +743,28 @@ describe('ProvideSharedPlugin', () => {
       const reactImportName = 'react';
       const shareScope = shareScopes.string; // 'default'
 
-      const tempReactPackageJsonPath = path.join(nodeModulesDir, reactImportName, 'package.json');
-      const tempReactIndexPath = path.join(nodeModulesDir, reactImportName, 'index.js');
+      const tempReactPackageJsonPath = path.join(
+        nodeModulesDir,
+        reactImportName,
+        'package.json',
+      );
+      const tempReactIndexPath = path.join(
+        nodeModulesDir,
+        reactImportName,
+        'index.js',
+      );
       fs.mkdirSync(path.dirname(tempReactIndexPath), { recursive: true });
-      fs.writeFileSync(tempReactPackageJsonPath, JSON.stringify({ name: reactImportName, version: reactVersion }));
-      fs.writeFileSync(tempReactIndexPath, `module.exports = { version: "${reactVersion}" };`);
-      const realReactIndexPath = fs.realpathSync(tempReactIndexPath).replace(/\\/g, '/'); // Normalize to forward slashes
+      fs.writeFileSync(
+        tempReactPackageJsonPath,
+        JSON.stringify({ name: reactImportName, version: reactVersion }),
+      );
+      fs.writeFileSync(
+        tempReactIndexPath,
+        `module.exports = { version: "${reactVersion}" };`,
+      );
+      const realReactIndexPath = fs
+        .realpathSync(tempReactIndexPath)
+        .replace(/\\/g, '/'); // Normalize to forward slashes
 
       const plugin = new ProvideSharedPlugin({
         shareScope: shareScope,
@@ -766,7 +782,8 @@ describe('ProvideSharedPlugin', () => {
       fs.writeFileSync(
         path.join(srcDir, 'index.js'),
         `import React from '${reactImportName}'; console.log(React);
-      `);
+      `,
+      );
 
       const plugins = [
         new FederationRuntimePlugin({
@@ -804,11 +821,25 @@ describe('ProvideSharedPlugin', () => {
       const reactImportName = 'react';
       const anotherPath = path.join(nodeModulesDir, 'another-module/index.js'); // A path that won't match
 
-      const tempReactPackageJsonPath = path.join(nodeModulesDir, reactImportName, 'package.json');
-      const tempReactIndexPath = path.join(nodeModulesDir, reactImportName, 'index.js');
+      const tempReactPackageJsonPath = path.join(
+        nodeModulesDir,
+        reactImportName,
+        'package.json',
+      );
+      const tempReactIndexPath = path.join(
+        nodeModulesDir,
+        reactImportName,
+        'index.js',
+      );
       fs.mkdirSync(path.dirname(tempReactIndexPath), { recursive: true });
-      fs.writeFileSync(tempReactPackageJsonPath, JSON.stringify({ name: reactImportName, version: reactVersion }));
-      fs.writeFileSync(tempReactIndexPath, `module.exports = { version: "${reactVersion}" };`);
+      fs.writeFileSync(
+        tempReactPackageJsonPath,
+        JSON.stringify({ name: reactImportName, version: reactVersion }),
+      );
+      fs.writeFileSync(
+        tempReactIndexPath,
+        `module.exports = { version: "${reactVersion}" };`,
+      );
       // realReactIndexPath is not strictly needed for include check if it's a non-matching path
 
       const plugin = new ProvideSharedPlugin({
@@ -826,7 +857,8 @@ describe('ProvideSharedPlugin', () => {
       fs.writeFileSync(
         path.join(srcDir, 'index.js'),
         `import React from '${reactImportName}'; console.log(React);
-      `);
+      `,
+      );
 
       const plugins = [
         new FederationRuntimePlugin({
@@ -850,7 +882,9 @@ describe('ProvideSharedPlugin', () => {
           return (
             m.moduleType === 'provide-module' &&
             typeof m.identifier === 'string' &&
-            m.identifier.startsWith(`provide module default react@${reactVersion} = `)
+            m.identifier.startsWith(
+              `provide module default react@${reactVersion} = `,
+            )
           );
         }) || [];
       expect(sharedModules.length).toBe(0);
@@ -861,12 +895,28 @@ describe('ProvideSharedPlugin', () => {
       const reactImportName = 'react';
       const shareScope = shareScopes.string;
 
-      const tempReactPackageJsonPath = path.join(nodeModulesDir, reactImportName, 'package.json');
-      const tempReactIndexPath = path.join(nodeModulesDir, reactImportName, 'index.js');
+      const tempReactPackageJsonPath = path.join(
+        nodeModulesDir,
+        reactImportName,
+        'package.json',
+      );
+      const tempReactIndexPath = path.join(
+        nodeModulesDir,
+        reactImportName,
+        'index.js',
+      );
       fs.mkdirSync(path.dirname(tempReactIndexPath), { recursive: true });
-      fs.writeFileSync(tempReactPackageJsonPath, JSON.stringify({ name: reactImportName, version: reactVersion }));
-      fs.writeFileSync(tempReactIndexPath, `module.exports = { version: "${reactVersion}" };`);
-      const realReactIndexPath = fs.realpathSync(tempReactIndexPath).replace(/\\/g, '/');
+      fs.writeFileSync(
+        tempReactPackageJsonPath,
+        JSON.stringify({ name: reactImportName, version: reactVersion }),
+      );
+      fs.writeFileSync(
+        tempReactIndexPath,
+        `module.exports = { version: "${reactVersion}" };`,
+      );
+      const realReactIndexPath = fs
+        .realpathSync(tempReactIndexPath)
+        .replace(/\\/g, '/');
 
       const plugin = new ProvideSharedPlugin({
         shareScope: shareScope,
@@ -883,7 +933,8 @@ describe('ProvideSharedPlugin', () => {
       fs.writeFileSync(
         path.join(srcDir, 'index.js'),
         `import React from '${reactImportName}'; console.log(React);
-      `);
+      `,
+      );
       const plugins = [
         new FederationRuntimePlugin({
           name: 'test',
@@ -915,11 +966,25 @@ describe('ProvideSharedPlugin', () => {
       const reactVersion = '17.0.2';
       const reactImportName = 'react';
 
-      const tempReactPackageJsonPath = path.join(nodeModulesDir, reactImportName, 'package.json');
-      const tempReactIndexPath = path.join(nodeModulesDir, reactImportName, 'index.js');
+      const tempReactPackageJsonPath = path.join(
+        nodeModulesDir,
+        reactImportName,
+        'package.json',
+      );
+      const tempReactIndexPath = path.join(
+        nodeModulesDir,
+        reactImportName,
+        'index.js',
+      );
       fs.mkdirSync(path.dirname(tempReactIndexPath), { recursive: true });
-      fs.writeFileSync(tempReactPackageJsonPath, JSON.stringify({ name: reactImportName, version: reactVersion }));
-      fs.writeFileSync(tempReactIndexPath, `module.exports = { version: "${reactVersion}" };`);
+      fs.writeFileSync(
+        tempReactPackageJsonPath,
+        JSON.stringify({ name: reactImportName, version: reactVersion }),
+      );
+      fs.writeFileSync(
+        tempReactIndexPath,
+        `module.exports = { version: "${reactVersion}" };`,
+      );
       // const realReactIndexPath = fs.realpathSync(tempReactIndexPath);
 
       const plugin = new ProvideSharedPlugin({
@@ -936,7 +1001,8 @@ describe('ProvideSharedPlugin', () => {
       fs.writeFileSync(
         path.join(srcDir, 'index.js'),
         `import React from '${reactImportName}'; console.log(React);
-      `);
+      `,
+      );
       const plugins = [
         new FederationRuntimePlugin({
           name: 'test',
@@ -957,7 +1023,9 @@ describe('ProvideSharedPlugin', () => {
           return (
             m.moduleType === 'provide-module' &&
             typeof m.identifier === 'string' &&
-            m.identifier.startsWith(`provide module default react@${reactVersion} = `)
+            m.identifier.startsWith(
+              `provide module default react@${reactVersion} = `,
+            )
           );
         }) || [];
       expect(sharedModules.length).toBe(0);
@@ -970,10 +1038,20 @@ describe('ProvideSharedPlugin', () => {
       const baseShareKey = '@scope/prefix/';
       const finalExpectedShareKey = baseShareKey + includedPath;
 
-      const tempPrefixResourcePath = path.join(nodeModulesDir, '@scope/prefix', includedPath, 'index.js');
+      const tempPrefixResourcePath = path.join(
+        nodeModulesDir,
+        '@scope/prefix',
+        includedPath,
+        'index.js',
+      );
       fs.mkdirSync(path.dirname(tempPrefixResourcePath), { recursive: true });
-      fs.writeFileSync(tempPrefixResourcePath, 'module.exports = { included: true };');
-      const prefixResourcePath = fs.realpathSync(tempPrefixResourcePath).replace(/\\/g, '/');
+      fs.writeFileSync(
+        tempPrefixResourcePath,
+        'module.exports = { included: true };',
+      );
+      const prefixResourcePath = fs
+        .realpathSync(tempPrefixResourcePath)
+        .replace(/\\/g, '/');
 
       // Entry file importing the module
       fs.writeFileSync(
@@ -1025,9 +1103,17 @@ describe('ProvideSharedPlugin', () => {
       const version = '1.0.0';
       const actualImportPath = 'actual-import';
       const prefixRequest = '@scope/prefix/actual-import';
-      const tempActualResourcePath = path.join(nodeModulesDir, '@scope/prefix', actualImportPath, 'index.js');
+      const tempActualResourcePath = path.join(
+        nodeModulesDir,
+        '@scope/prefix',
+        actualImportPath,
+        'index.js',
+      );
       fs.mkdirSync(path.dirname(tempActualResourcePath), { recursive: true });
-      fs.writeFileSync(tempActualResourcePath, 'module.exports = { actual: true };');
+      fs.writeFileSync(
+        tempActualResourcePath,
+        'module.exports = { actual: true };',
+      );
       const actualResourcePath = fs.realpathSync(tempActualResourcePath);
 
       // package.json for the @scope/prefix package
@@ -1075,7 +1161,9 @@ describe('ProvideSharedPlugin', () => {
           return (
             m.moduleType === 'provide-module' &&
             typeof m.identifier === 'string' &&
-            m.identifier.startsWith(`provide module default @scope/prefix/actual-import@${version} = `)
+            m.identifier.startsWith(
+              `provide module default @scope/prefix/actual-import@${version} = `,
+            )
           );
         }) || [];
       expect(sharedModules.length).toBe(0);
