@@ -24,6 +24,7 @@ import type {
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
 import { satisfy } from '@module-federation/runtime-tools/runtime-core';
+import { addSingletonFilterWarning } from './utils';
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
@@ -191,6 +192,39 @@ class ProvideSharedPlugin {
               });
               const config = matchProvides.get(requestKey);
               if (config !== undefined && resource) {
+                // Check for request filters with singleton here
+                if (
+                  config.exclude &&
+                  config.exclude.request &&
+                  config.singleton
+                ) {
+                  addSingletonFilterWarning(
+                    compilation,
+                    config.shareKey || request,
+                    'exclude',
+                    'request',
+                    config.exclude.request,
+                    request, // moduleRequest
+                    resource, // moduleResource
+                  );
+                }
+
+                if (
+                  config.include &&
+                  config.include.request &&
+                  config.singleton
+                ) {
+                  addSingletonFilterWarning(
+                    compilation,
+                    config.shareKey || request,
+                    'include',
+                    'request',
+                    config.include.request,
+                    request, // moduleRequest
+                    resource, // moduleResource
+                  );
+                }
+
                 this.provideSharedModule(
                   compilation,
                   resolvedProvideMap,
@@ -230,6 +264,39 @@ class ProvideSharedPlugin {
                     : remainder === originalPrefixConfig.exclude.request)
                 ) {
                   continue; // Skip if exclude matches
+                }
+
+                // Check for prefix request filters with singleton
+                if (
+                  originalPrefixConfig.exclude &&
+                  originalPrefixConfig.exclude.request &&
+                  originalPrefixConfig.singleton
+                ) {
+                  addSingletonFilterWarning(
+                    compilation,
+                    originalPrefixConfig.shareKey || lookupPrefix,
+                    'exclude',
+                    'request',
+                    originalPrefixConfig.exclude.request,
+                    request, // moduleRequest (full request)
+                    resource, // moduleResource
+                  );
+                }
+
+                if (
+                  originalPrefixConfig.include &&
+                  originalPrefixConfig.include.request &&
+                  originalPrefixConfig.singleton
+                ) {
+                  addSingletonFilterWarning(
+                    compilation,
+                    originalPrefixConfig.shareKey || lookupPrefix,
+                    'include',
+                    'request',
+                    originalPrefixConfig.include.request,
+                    request, // moduleRequest (full request)
+                    resource, // moduleResource
+                  );
                 }
 
                 const finalShareKey = originalPrefixConfig.shareKey + remainder;
@@ -467,6 +534,32 @@ class ProvideSharedPlugin {
       if (shouldSkipVersion || shouldSkipRequest) {
         return;
       }
+
+      // Validate singleton usage when using include.version
+      if (config.include.version && config.singleton) {
+        addSingletonFilterWarning(
+          compilation,
+          config.shareKey || key,
+          'include',
+          'version',
+          config.include.version,
+          key, // moduleRequest
+          resource, // moduleResource
+        );
+      }
+
+      // Validate singleton usage when using include.request
+      if (config.include.request && config.singleton) {
+        addSingletonFilterWarning(
+          compilation,
+          config.shareKey || key,
+          'include',
+          'request',
+          config.include.request,
+          key, // moduleRequest
+          resource, // moduleResource
+        );
+      }
     }
 
     if (config.exclude) {
@@ -496,6 +589,32 @@ class ProvideSharedPlugin {
       // Skip if any specified exclude condition matched
       if (versionExcludeMatches || requestExcludeMatches) {
         return;
+      }
+
+      // Validate singleton usage when using exclude.version
+      if (config.exclude.version && config.singleton) {
+        addSingletonFilterWarning(
+          compilation,
+          config.shareKey || key,
+          'exclude',
+          'version',
+          config.exclude.version,
+          key, // moduleRequest
+          resource, // moduleResource
+        );
+      }
+
+      // Validate singleton usage when using exclude.request
+      if (config.exclude.request && config.singleton) {
+        addSingletonFilterWarning(
+          compilation,
+          config.shareKey || key,
+          'exclude',
+          'request',
+          config.exclude.request,
+          key, // moduleRequest
+          resource, // moduleResource
+        );
       }
     }
 
