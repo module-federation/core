@@ -7,7 +7,7 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["dist"],
+      "outputs": ["{workspaceRoot}/dist"],
       "options": {
         "parallel": false,
         "cwd": "packages/dts-plugin",
@@ -25,10 +25,8 @@
       "outputs": ["{workspaceRoot}/coverage/packages/dts-plugin"],
       "options": {
         "parallel": false,
-        "commands": [
-          "rimraf packages/dts-plugin/dist-test",
-          "nx run dts-plugin:test-impl"
-        ]
+        "cwd": "packages/dts-plugin",
+        "commands": ["rimraf ./dist-test", "nx run dts-plugin:test-impl"]
       }
     },
     "test-impl": {
