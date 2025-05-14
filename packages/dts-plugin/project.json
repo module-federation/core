@@ -25,8 +25,10 @@
       "outputs": ["{workspaceRoot}/coverage/packages/dts-plugin"],
       "options": {
         "parallel": false,
-        "cwd": "packages/dts-plugin",
-        "commands": ["rimraf ./dist-test", "nx run dts-plugin:test-impl"]
+        "commands": [
+          "rimraf packages/dts-plugin/dist-test",
+          "nx run dts-plugin:test-impl"
+        ]
       }
     },
     "test-impl": {
