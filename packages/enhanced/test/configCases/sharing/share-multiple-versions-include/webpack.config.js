@@ -14,7 +14,6 @@ module.exports = {
           include: {
             version: '^2.0.0',
           },
-          requiredVersion: '^2.0.0',
         },
       },
     }),
