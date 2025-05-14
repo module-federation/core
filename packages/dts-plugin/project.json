@@ -13,6 +13,7 @@
         "cwd": "packages/dts-plugin",
         "commands": [
           "tsup --config ./tsup.config.ts",
+          "ls",
           "sleep 1",
           "cp package.json ./dist",
           "cp *.md ./dist"
