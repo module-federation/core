@@ -10,11 +10,13 @@
       "outputs": ["{workspaceRoot}/packages/dts-plugin/dist"],
       "options": {
         "parallel": false,
+        "cwd": "packages/dts-plugin",
         "commands": [
-          "cd packages/dts-plugin && tsup --config ./tsup.config.ts",
-          "cd packages/dts-plugin && ls",
-          "cp packages/dts-plugin/package.json packages/dts-plugin/dist",
-          "cp packages/dts-plugin/*.md packages/dts-plugin/dist"
+          "tsup --config ./tsup.config.ts",
+          "ls",
+          "sleep 1",
+          "cp package.json ./dist",
+          "cp *.md ./dist"
         ]
       }
     },
