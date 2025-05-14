@@ -45,6 +45,7 @@
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
+        "cwd": "packages/dts-plugin",
         "commands": [
           {
             "command": "FEDERATION_DEBUG=true nx run dts-plugin:build",
@@ -57,6 +58,7 @@
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
+        "cwd": "packages/dts-plugin",
         "commands": [
           {
             "command": "nx run dts-plugin:test",
