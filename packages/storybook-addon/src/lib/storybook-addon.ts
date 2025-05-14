@@ -2,7 +2,11 @@ import fs from 'fs';
 import { dirname, join } from 'path';
 import * as process from 'process';
 import VirtualModulesPlugin from 'webpack-virtual-modules';
-import { container, type Configuration } from 'webpack';
+import {
+  container,
+  type Configuration,
+  type WebpackPluginInstance,
+} from 'webpack';
 import { logger } from '@storybook/node-logger';
 import { normalizeStories } from '@storybook/core/common';
 import withModuleFederation from '../utils/with-module-federation';
@@ -73,7 +77,7 @@ export const webpack = async (
   if (index !== -1) {
     logger.info(`=> [MF] Detected plugin VirtualModulesPlugin`);
 
-    const plugin = plugins[index] as VirtualModulesPlugin;
+    const plugin = plugins[index] as unknown as VirtualModulesPlugin;
 
     const virtualEntries: Record<string, string> =
       plugin.getModuleList('static');
@@ -152,9 +156,9 @@ export const webpack = async (
 
   let action = 'Push';
   if (index === -1) {
-    plugins.push(virtualModulePlugin);
+    plugins.push(virtualModulePlugin as unknown as WebpackPluginInstance);
   } else {
-    plugins[index] = virtualModulePlugin;
+    plugins[index] = virtualModulePlugin as unknown as WebpackPluginInstance;
     action = 'Replace';
   }
   logger.info(
