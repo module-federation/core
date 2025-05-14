@@ -27,12 +27,12 @@ describe('HoistContainerReferencesPlugin', () => {
     tempDir = fs.mkdtempSync(path.join(__dirname, 'hoist-test-'));
   });
 
-  // afterEach(() => {
-  //   // Clean up temp dir after each test
-  //   if (tempDir && fs.existsSync(tempDir)) {
-  //     fs.rmSync(tempDir, { recursive: true, force: true });
-  //   }
-  // });
+  afterEach(() => {
+    // Clean up temp dir after each test
+    if (tempDir && fs.existsSync(tempDir)) {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
 
   it('should hoist container runtime modules into the single runtime chunk when using remotes', (done) => {
     // Define input file content

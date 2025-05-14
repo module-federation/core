@@ -320,6 +320,7 @@ export class NextFederationPlugin {
       // shareStrategy: this._options.shareStrategy ?? 'loaded-first',
       experiments: {
         asyncStartup: true,
+        nodeModulesReconstructedLookup: true,
       },
     };
   }
