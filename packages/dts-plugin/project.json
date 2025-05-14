@@ -12,7 +12,7 @@
         "parallel": false,
         "commands": [
           "cd packages/dts-plugin && tsup --config ./tsup.config.ts",
-          "ls",
+          "cd packages/dts-plugin && ls",
           "cp packages/dts-plugin/package.json packages/dts-plugin/dist",
           "cp packages/dts-plugin/*.md packages/dts-plugin/dist"
         ]
