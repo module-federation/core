@@ -83,7 +83,7 @@ new ModuleFederationPlugin({
 });
 ```
 
-## Enhanced Sharing Options: Layers and Filtering
+## Layers
 
 ### `layer`
 
@@ -217,7 +217,8 @@ You can use both `layer` and `issuerLayer` in the same shared config.
 
 This combination is powerful for creating highly specific sharing boundaries, ensuring that shared modules behave correctly and are isolated as needed within different parts of a complex, layered application.
 
-### `include` / `exclude`
+
+## `include` / `exclude`
 
 - Type: `IncludeExcludeOptions`
 - Required: No
@@ -239,10 +240,10 @@ interface IncludeExcludeOptions {
 
 - **`fallbackVersion?: string`**:\n  - **Only used with `exclude.version`** when an `import` (local fallback) is specified.\n  - Provides the version string of the local fallback module for the exclusion check, avoiding a dynamic lookup.\n  - If this `fallbackVersion` satisfies the `exclude.version` range, the local fallback is excluded.
 
-## Why Version Exclusion Matters
+### Why Version Exclusion Matters
 The version exclusion feature addresses several critical use cases in microfrontend architectures:
 
-### Use Case 1: Preventing Problematic Dependency Versions
+#### Use Case 1: Preventing Problematic Dependency Versions
 Sometimes specific versions of dependencies have known bugs or incompatibilities. With version exclusion, you can:
 ```ts
 shared: {
@@ -255,7 +256,7 @@ shared: {
 ```
 This ensures that even if a federated module tries to provide version 2.3.0, it will be ignored, preventing potential application failures.
 
-### Use Case 2: Controlled Migration Paths
+#### Use Case 2: Controlled Migration Paths
 When gradually migrating to newer versions across multiple teams:
 ```ts
 shared: {
@@ -268,7 +269,7 @@ shared: {
 ```
 This configuration prevents sharing of very old versions while still allowing a controlled range of compatible versions.
 
-### Use Case 3: Performance Optimization with `fallbackVersion`
+#### Use Case 3: Performance Optimization with `fallbackVersion`
 The `fallbackVersion` property provides a performance optimization that avoids filesystem lookups:
 ```ts
 shared: {
@@ -284,7 +285,7 @@ shared: {
 ```
 By explicitly specifying `fallbackVersion`, the system can immediately determine whether to use the fallback without having to parse package.json files, which improves build performance.
 
-### Use Case 4: Preventing Loading of Incompatible Singletons
+#### Use Case 4: Preventing Loading of Incompatible Singletons
 For singleton libraries like React, loading incompatible versions can cause runtime errors:
 ```ts
 shared: {
@@ -342,6 +343,101 @@ shared: {
 In this Next.js-style example:
 - `react` is configured differently for `rsc` (React Server Components) layer and `client` layer. Each uses its own `layer`, `issuerLayer`, and `shareScope` to ensure proper isolation and version control.
 - `next/` prefix sharing is applied to the `client` layer, excluding certain subpaths that might not be needed or could cause issues on the client.
+
+## nodeModulesReconstructedLookup
+
+This section covers the nodeModulesReconstructedLookup experiment, which helps with sharing modules that use relative imports internally.
+
+Module Federation offers an experimental feature `nodeModulesReconstructedLookup` to solve a common issue with sharing modules that use relative imports internally.
+
+### The Problem
+
+When you share a module like `'shared'` and its subpaths like `'shared/directory/'`, Module Federation matches the **import request** against these patterns. However, if your module uses **relative imports** internally, Module Federation can't match them properly:
+
+```js
+// shared/index.js
+export * from './package.json';
+export { default as thing } from './directory/thing'; // This relative import won't match 'shared/directory/'
+```
+
+The problem occurs because:
+1. You configure Module Federation to share `'shared'` and `'shared/directory/'`
+2. When code imports `'shared'`, it works fine
+3. But inside `shared/index.js`, there's a relative import `import './directory/thing'`
+4. Module Federation doesn't recognize this as matching `'shared/directory/'` because the import request is `'./directory/thing'` (relative)
+
+### The Solution
+
+The `nodeModulesReconstructedLookup` experiment solves this by:
+1. Detecting relative imports inside shared modules
+2. Reconstructing the full path (e.g., `'node_modules/shared/directory/thing'`)
+3. Extracting the module name after node_modules (e.g., `'shared/directory/thing'`)
+4. Matching it against your shared configuration
+
+### Example Project Structure
+
+```
+your-project/
+├── node_modules/
+│   ├── shared/
+│   │   ├── directory/
+│   │   │   └── thing.js  // Exports a component or functionality
+│   │   ├── index.js      // imports './directory/thing' with relative path
+│   │   └── package.json  // version: 1.0.0
+│   └── my-module/
+│       ├── index.js      // Might also import from shared
+│       └── package.json  // version: 2.0.0
+├── src/
+│   └── index.js          // imports 'shared'
+└── webpack.config.js
+```
+
+### Configuration Example
+
+```js
+// webpack.config.js
+const { ModuleFederationPlugin } = require('@module-federation/enhanced');
+
+module.exports = {
+  // ... webpack config
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      experiments: {
+        nodeModulesReconstructedLookup: true // Enable the feature
+      },
+      shared: {
+        'shared': {}, // Share the root module
+        'shared/directory/': {} // Share all modules under this path
+      }
+    })
+  ]
+};
+```
+
+### Code Example
+
+This is the key difference - you don't directly import the deep path, but it gets shared automatically when used internally:
+
+```js
+// shared/index.js (inside node_modules)
+export * from './package.json';
+export { default as thing } from './directory/thing'; // This relative import gets correctly shared
+
+// In your application code
+import { version } from 'shared'; // You only import the root module
+console.log(version); // "1.0.0"
+console.log(thing); // The correctly shared submodule
+```
+
+Without this experiment, the relative import in `shared/index.js` wouldn't be properly shared, potentially leading to duplicate instances of the same module.
+
+### When to Use This Feature
+
+This feature is particularly useful in scenarios where:
+1. Your shared modules use relative imports internally (e.g., `./directory/thing`)
+2. You're sharing a package that has internal subdirectory imports
+3. Module Federation isn't correctly sharing submodules because the request doesn't match the shared configuration
 
 ## Advanced Filtering Examples (`include`/`exclude`)
 

@@ -11,7 +11,7 @@ import {
 import { isRequiredVersion } from '@module-federation/sdk';
 import type { Compiler, Compilation, Module } from 'webpack';
 import { parseOptions } from '../container/options';
-import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
+import type { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
   getDescriptionFile,
@@ -34,6 +34,12 @@ import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeS
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
 import { satisfy } from '@module-federation/runtime-tools/runtime-core';
+import {
+  addSingletonFilterWarning,
+  testRequestFilters,
+  createLookupKeyForSharing,
+  extractPathAfterNodeModules,
+} from './utils';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
@@ -63,23 +69,16 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
 };
 const PLUGIN_NAME = 'ConsumeSharedPlugin';
 
-// Helper function to create composite key
-function createLookupKey(
-  request: string,
-  contextInfo: ModuleFactoryCreateDataContextInfo,
-): string {
-  return contextInfo.issuerLayer
-    ? `(${contextInfo.issuerLayer})${request}`
-    : request;
-}
-
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
+  private _experiments: NonNullable<ConsumeSharedPluginOptions['experiments']>;
 
   constructor(options: ConsumeSharedPluginOptions) {
     if (typeof options !== 'string') {
       validate(options);
     }
+
+    this._experiments = options.experiments || {};
 
     this._consumes = parseOptions(
       options.consumes,
@@ -101,6 +100,8 @@ class ConsumeSharedPlugin {
                 issuerLayer: undefined,
                 layer: undefined,
                 request: key,
+                include: undefined,
+                exclude: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -117,6 +118,8 @@ class ConsumeSharedPlugin {
                 issuerLayer: undefined,
                 layer: undefined,
                 request: key,
+                include: undefined,
+                exclude: undefined,
               };
         return result;
       },
@@ -291,9 +294,7 @@ class ConsumeSharedPlugin {
         currentConfig,
       );
 
-      // Handle version include/exclude logic
-
-      // Check include.version if specified
+      // Check for include version first
       if (config.include && typeof config.include.version === 'string') {
         if (!importResolved) {
           return consumedModule;
@@ -313,23 +314,74 @@ class ConsumeSharedPlugin {
                 return resolveFilter(consumedModule);
               }
 
+              // Only include if version satisfies the include constraint
               if (
                 config.include &&
-                typeof config.include.version === 'string' &&
-                !satisfy(data['version'], config.include.version)
+                satisfy(data['version'], config.include.version as string)
               ) {
-                // Version doesn't match include range, skip this module
+                // Validate singleton usage with include.version
+                if (
+                  config.include &&
+                  config.include.version &&
+                  config.singleton
+                ) {
+                  addSingletonFilterWarning(
+                    compilation,
+                    config.shareKey || request,
+                    'include',
+                    'version',
+                    config.include.version,
+                    request, // moduleRequest
+                    importResolved, // moduleResource (might be undefined)
+                  );
+                }
+
+                // Validate singleton usage with include.request
+                if (
+                  config.include &&
+                  config.include.request &&
+                  config.singleton
+                ) {
+                  addSingletonFilterWarning(
+                    compilation,
+                    config.shareKey || request,
+                    'include',
+                    'request',
+                    config.include.request,
+                    request, // moduleRequest
+                    importResolved, // moduleResource (might be undefined)
+                  );
+                }
+
+                return resolveFilter(consumedModule);
+              }
+
+              // Check fallback version
+              if (
+                config.include &&
+                typeof config.include.fallbackVersion === 'string' &&
+                config.include.fallbackVersion
+              ) {
+                if (
+                  satisfy(
+                    config.include.fallbackVersion,
+                    config.include.version as string,
+                  )
+                ) {
+                  return resolveFilter(consumedModule);
+                }
                 return resolveFilter(
                   undefined as unknown as ConsumeSharedModule,
                 );
               }
-              return resolveFilter(consumedModule);
+
+              return resolveFilter(undefined as unknown as ConsumeSharedModule);
             },
           );
         });
       }
 
-      // Check exclude.version if specified
+      // Check for exclude version (existing logic)
       if (config.exclude && typeof config.exclude.version === 'string') {
         if (!importResolved) {
           return consumedModule;
@@ -340,9 +392,9 @@ class ConsumeSharedPlugin {
           typeof config.exclude.fallbackVersion === 'string' &&
           config.exclude.fallbackVersion
         ) {
-          // if (satisfy(config.exclude.fallbackVersion, config.exclude.version)) {
-          //   return undefined as unknown as ConsumeSharedModule;
-          // }
+          if (satisfy(config.exclude.fallbackVersion, config.exclude.version)) {
+            return undefined as unknown as ConsumeSharedModule;
+          }
           return consumedModule;
         }
 
@@ -353,73 +405,58 @@ class ConsumeSharedPlugin {
             ['package.json'],
             (err, result) => {
               if (err) {
-                console.log(
-                  `[ConsumeSharedPlugin-DEBUG] Fallback exclusion: getDescriptionFile error for ${importResolved}:`,
-                  err,
-                );
-                return resolveFilter(consumedModule); // If error, use fallback
+                return resolveFilter(consumedModule);
               }
-              const { data } = result || {}; // package.json of the fallback
-
-              // ---- DETAILED DEBUG LOGGING ----
-              console.log(
-                '[ConsumeSharedPlugin-DEBUG] Fallback exclusion check:',
-                {
-                  importResolved,
-                  request: config.request, // Using config.request as 'request' in this scope is the ConsumeSharedModule instance
-                  fallbackPackageName: data ? data['name'] : 'N/A',
-                  fallbackPackageVersion: data ? data['version'] : 'N/A',
-                  configExcludeVersion: config.exclude
-                    ? config.exclude.version
-                    : 'N/A',
-                  configRequiredVersion: config.requiredVersion,
-                  doesNameMatchRequest: data
-                    ? data['name'] === config.request
-                    : 'N/A',
-                  isExcludeConfigPresent: !!(
-                    config.exclude && typeof config.exclude.version === 'string'
-                  ),
-                  isVersionSatisfiedForExclusion:
-                    data &&
-                    data['version'] &&
-                    config.exclude &&
-                    typeof config.exclude.version === 'string'
-                      ? satisfy(data['version'], config.exclude.version)
-                      : 'N/A',
-                },
-              );
-              // ---- END DETAILED DEBUG LOGGING ----
-
-              if (
-                !data ||
-                !data['version'] ||
-                data['name'] !== config.request
-              ) {
-                // Ensure using config.request
-                // If no version, or name mismatch
-                console.log(
-                  `[ConsumeSharedPlugin-DEBUG] Fallback exclusion: Pre-condition fail (no data, no version, or name mismatch). Fallback will be used if not undefined.`,
-                );
-                return resolveFilter(consumedModule); // Use fallback
+              const { data } = result || {};
+              if (!data || !data['version'] || data['name'] !== request) {
+                return resolveFilter(consumedModule);
               }
 
               if (
                 config.exclude &&
                 typeof config.exclude.version === 'string' &&
-                satisfy(data['version'], config.exclude.version) // data['version'] is fallback's version
+                satisfy(data['version'], config.exclude.version)
               ) {
-                // If fallback's version IS excluded, return undefined
-                console.log(
-                  `[ConsumeSharedPlugin-DEBUG] FALLBACK EXCLUDED: request='${config.request}', fallbackVersion='${data['version']}', excludeRule='${config.exclude.version}'`,
-                );
                 return resolveFilter(
                   undefined as unknown as ConsumeSharedModule,
                 );
               }
-              console.log(
-                `[ConsumeSharedPlugin-DEBUG] FALLBACK ALLOWED (or no applicable exclude rule): request='${config.request}', fallbackVersion='${data['version']}', excludeRule='${config.exclude?.version}'`,
-              );
-              return resolveFilter(consumedModule); // Otherwise, use the fallback
+
+              // Validate singleton usage with exclude.version
+              if (
+                config.exclude &&
+                config.exclude.version &&
+                config.singleton
+              ) {
+                addSingletonFilterWarning(
+                  compilation,
+                  config.shareKey || request,
+                  'exclude',
+                  'version',
+                  config.exclude.version,
+                  request, // moduleRequest
+                  importResolved, // moduleResource (might be undefined)
+                );
+              }
+
+              // Validate singleton usage with exclude.request
+              if (
+                config.exclude &&
+                config.exclude.request &&
+                config.singleton
+              ) {
+                addSingletonFilterWarning(
+                  compilation,
+                  config.shareKey || request,
+                  'exclude',
+                  'request',
+                  config.exclude.request,
+                  request, // moduleRequest
+                  importResolved, // moduleResource (might be undefined)
+                );
+              }
+
+              return resolveFilter(consumedModule);
             },
           );
         });
@@ -455,22 +492,53 @@ class ConsumeSharedPlugin {
 
         normalModuleFactory.hooks.factorize.tapPromise(
           PLUGIN_NAME,
-          (resolveData: ResolveData): Promise<Module | undefined> => {
+          async (resolveData: ResolveData): Promise<Module | undefined> => {
             const { context, request, dependencies, contextInfo } = resolveData;
+            // wait for resolving to be complete
+            // BIND `this` for createConsumeSharedModule call
             const boundCreateConsumeSharedModule =
               this.createConsumeSharedModule.bind(this);
 
-            return promise.then(async () => {
+            return promise.then(() => {
               if (
                 dependencies[0] instanceof ConsumeSharedFallbackDependency ||
                 dependencies[0] instanceof ProvideForSharedDependency
               ) {
-                return; // These are handled by their respective factories/plugins
+                return;
               }
+              const { context, request, contextInfo } = resolveData;
 
-              const unresolvedKey = createLookupKey(request, contextInfo);
-              const match = unresolvedConsumes.get(unresolvedKey);
+              const match = unresolvedConsumes.get(
+                createLookupKeyForSharing(request, contextInfo.issuerLayer),
+              );
+
+              // First check direct match
               if (match !== undefined) {
+                // Check for request filters with singleton here
+                if (match.exclude && match.exclude.request && match.singleton) {
+                  addSingletonFilterWarning(
+                    compilation,
+                    match.shareKey || request,
+                    'exclude',
+                    'request',
+                    match.exclude.request,
+                    request, // moduleRequest
+                    undefined, // moduleResource
+                  );
+                }
+
+                if (match.include && match.include.request && match.singleton) {
+                  addSingletonFilterWarning(
+                    compilation,
+                    match.shareKey || request,
+                    'include',
+                    'request',
+                    match.include.request,
+                    request, // moduleRequest
+                    undefined, // moduleResource
+                  );
+                }
+
                 // Use the bound function
                 return boundCreateConsumeSharedModule(
                   compilation,
@@ -480,53 +548,192 @@ class ConsumeSharedPlugin {
                 );
               }
 
+              // Then try relative path handling and node_modules paths
+              let reconstructed: string | null = null;
+              let modulePathAfterNodeModules: string | null = null;
+
+              if (
+                this._experiments.nodeModulesReconstructedLookup &&
+                request &&
+                !path.isAbsolute(request) &&
+                /^(\.\.?(\/|$)|\/|[A-Za-z]:|\\\\)/.test(request)
+              ) {
+                reconstructed = path.join(context, request);
+                modulePathAfterNodeModules =
+                  extractPathAfterNodeModules(reconstructed);
+
+                // Try to match with module path after node_modules
+                if (modulePathAfterNodeModules) {
+                  const moduleMatch = unresolvedConsumes.get(
+                    createLookupKeyForSharing(
+                      modulePathAfterNodeModules,
+                      contextInfo.issuerLayer,
+                    ),
+                  );
+
+                  if (moduleMatch !== undefined) {
+                    return boundCreateConsumeSharedModule(
+                      compilation,
+                      context,
+                      modulePathAfterNodeModules,
+                      moduleMatch,
+                    );
+                  }
+                }
+
+                // Try to match with the full reconstructed path
+                const reconstructedMatch = unresolvedConsumes.get(
+                  createLookupKeyForSharing(
+                    reconstructed,
+                    contextInfo.issuerLayer,
+                  ),
+                );
+
+                if (reconstructedMatch !== undefined) {
+                  return boundCreateConsumeSharedModule(
+                    compilation,
+                    context,
+                    reconstructed,
+                    reconstructedMatch,
+                  );
+                }
+              }
+
+              // Check for prefixed consumes with original request
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
-
-                  // First check include if it exists - only proceed if request matches include pattern
                   if (
-                    options.include &&
-                    options.include.request &&
-                    !(options.include.request instanceof RegExp
-                      ? options.include.request.test(remainder)
-                      : remainder === options.include.request)
+                    !testRequestFilters(
+                      remainder,
+                      options.include?.request,
+                      options.exclude?.request,
+                    )
                   ) {
-                    continue; // Skip if include doesn't match
+                    continue;
                   }
 
-                  // Then check exclude if it exists - skip if request matches exclude pattern
+                  // Check for request filters with singleton for prefixed consumes
                   if (
                     options.exclude &&
                     options.exclude.request &&
-                    // Skip if the remainder DOES match the filter
-                    (options.exclude.request instanceof RegExp
-                      ? options.exclude.request.test(remainder)
-                      : remainder === options.exclude.request)
+                    options.singleton
                   ) {
-                    continue; // Skip if exclude matches
+                    addSingletonFilterWarning(
+                      compilation,
+                      options.shareKey || prefix,
+                      'exclude',
+                      'request',
+                      options.exclude.request,
+                      request, // moduleRequest
+                      undefined, // moduleResource
+                    );
                   }
 
-                  const finalConfig = {
-                    ...options,
-                    import: options.import
-                      ? options.import + remainder
-                      : undefined,
-                    shareKey: options.shareKey + remainder,
-                    // Prioritize config layer, fallback to issuerLayer
-                    layer: options.layer || contextInfo.issuerLayer,
-                  };
+                  if (
+                    options.include &&
+                    options.include.request &&
+                    options.singleton
+                  ) {
+                    addSingletonFilterWarning(
+                      compilation,
+                      options.shareKey || prefix,
+                      'include',
+                      'request',
+                      options.include.request,
+                      request, // moduleRequest
+                      undefined, // moduleResource
+                    );
+                  }
 
                   // Use the bound function
                   return boundCreateConsumeSharedModule(
                     compilation,
                     context,
                     request,
-                    finalConfig,
+                    {
+                      ...options,
+                      import: options.import
+                        ? options.import + remainder
+                        : undefined,
+                      shareKey: options.shareKey + remainder,
+                      layer: options.layer || contextInfo.issuerLayer,
+                    },
                   );
                 }
               }
+
+              // Also check prefixed consumes with modulePathAfterNodeModules
+              if (modulePathAfterNodeModules) {
+                for (const [prefix, options] of prefixedConsumes) {
+                  const lookup = options.request || prefix;
+                  if (modulePathAfterNodeModules.startsWith(lookup)) {
+                    const remainder = modulePathAfterNodeModules.slice(
+                      lookup.length,
+                    );
+
+                    if (
+                      !testRequestFilters(
+                        remainder,
+                        options.include?.request,
+                        options.exclude?.request,
+                      )
+                    ) {
+                      continue;
+                    }
+
+                    return boundCreateConsumeSharedModule(
+                      compilation,
+                      context,
+                      modulePathAfterNodeModules,
+                      {
+                        ...options,
+                        import: options.import
+                          ? options.import + remainder
+                          : undefined,
+                        shareKey: options.shareKey + remainder,
+                        layer: options.layer || contextInfo.issuerLayer,
+                      },
+                    );
+                  }
+                }
+              }
+
+              // Finally check prefixed consumes with reconstructed path
+              if (reconstructed) {
+                for (const [prefix, options] of prefixedConsumes) {
+                  const lookup = options.request || prefix;
+                  if (reconstructed.startsWith(lookup)) {
+                    const remainder = reconstructed.slice(lookup.length);
+
+                    if (
+                      !testRequestFilters(
+                        remainder,
+                        options.include?.request,
+                        options.exclude?.request,
+                      )
+                    ) {
+                      continue;
+                    }
+
+                    return boundCreateConsumeSharedModule(
+                      compilation,
+                      context,
+                      reconstructed,
+                      {
+                        ...options,
+                        import: options.import
+                          ? options.import + remainder
+                          : undefined,
+                        shareKey: options.shareKey + remainder,
+                        layer: options.layer || contextInfo.issuerLayer,
+                      },
+                    );
+                  }
+                }
+              }
+
               return;
             });
           },

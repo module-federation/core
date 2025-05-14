@@ -648,7 +648,7 @@ function o(
       {
         const t = l;
         for (const e in r)
-          if ('provides' !== e && 'shareScope' !== e)
+          if ('provides' !== e && 'shareScope' !== e && 'experiments' !== e)
             return (o.errors = [{ params: { additionalProperty: e } }]), !1;
         if (t === l) {
           if (void 0 !== r.provides) {
@@ -663,7 +663,7 @@ function o(
               (l = i.length));
             var p = t === l;
           } else p = !0;
-          if (p)
+          if (p) {
             if (void 0 !== r.shareScope) {
               let e = r.shareScope;
               const t = l,
@@ -717,6 +717,32 @@ function o(
                 null !== i && (s ? (i.length = s) : (i = null)),
                 (p = t === l);
             } else p = !0;
+            if (p)
+              if (void 0 !== r.experiments) {
+                let e = r.experiments;
+                const t = l;
+                if (l === t) {
+                  if (!e || 'object' != typeof e || Array.isArray(e))
+                    return (o.errors = [{ params: { type: 'object' } }]), !1;
+                  {
+                    const r = l;
+                    for (const r in e)
+                      if ('nodeModulesReconstructedLookup' !== r)
+                        return (
+                          (o.errors = [{ params: { additionalProperty: r } }]),
+                          !1
+                        );
+                    if (
+                      r === l &&
+                      void 0 !== e.nodeModulesReconstructedLookup &&
+                      'boolean' != typeof e.nodeModulesReconstructedLookup
+                    )
+                      return (o.errors = [{ params: { type: 'boolean' } }]), !1;
+                  }
+                }
+                p = t === l;
+              } else p = !0;
+          }
         }
       }
     }

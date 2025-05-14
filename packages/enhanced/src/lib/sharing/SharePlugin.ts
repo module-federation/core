@@ -32,9 +32,13 @@ class SharePlugin {
   private _shareScope: string | string[];
   private _consumes: Record<string, ConsumesConfig>[];
   private _provides: Record<string, ProvidesConfig>[];
+  private _experiments: NonNullable<SharePluginOptions['experiments']>;
 
   constructor(options: SharePluginOptions) {
     validate(options);
+
+    this._experiments = options.experiments || {};
+
     const sharedOptions: [string, SharedConfig][] = parseOptions(
       options.shared,
       (item, key) => {
@@ -74,25 +78,21 @@ class SharePlugin {
     );
     const provides: Record<string, ProvidesConfig>[] = sharedOptions
       .filter(([, options]) => options.import !== false)
-      .map(([key, options]) => {
-        const providesKey = options.import || key;
-
-        return {
-          [providesKey]: {
-            shareKey: options.shareKey || key,
-            shareScope: options.shareScope,
-            version: options.version,
-            eager: options.eager,
-            requiredVersion: options.requiredVersion,
-            strictVersion: options.strictVersion,
-            singleton: options.singleton,
-            layer: options.layer,
-            request: options.request || options.import || key,
-            exclude: options.exclude,
-            include: options.include,
-          },
-        };
-      });
+      .map(([key, options]) => ({
+        [options.import || key]: {
+          shareKey: options.shareKey || key,
+          shareScope: options.shareScope,
+          version: options.version,
+          eager: options.eager,
+          requiredVersion: options.requiredVersion,
+          strictVersion: options.strictVersion,
+          singleton: options.singleton,
+          layer: options.layer,
+          request: options.request || options.import || key,
+          exclude: options.exclude,
+          include: options.include,
+        },
+      }));
 
     this._shareScope = options.shareScope || 'default';
     this._consumes = consumes;
@@ -110,10 +110,12 @@ class SharePlugin {
     new ConsumeSharedPlugin({
       shareScope: this._shareScope,
       consumes: this._consumes,
+      experiments: this._experiments,
     }).apply(compiler);
     new ProvideSharedPlugin({
       shareScope: this._shareScope,
       provides: this._provides,
+      experiments: this._experiments,
     }).apply(compiler);
   }
 }

@@ -3,7 +3,6 @@ it('should provide shared@2.0.0 (from my-module) due to include filter, excludin
 
   // Check the share scope directly
   const sharedScope = __webpack_share_scopes__.default.shared;
-  // console.log('[TEST-DEBUG] share-multiple-versions-include scope:', sharedScope);
 
   // Host's local 1.0.0 should NOT be in the scope due to include: { version: "^2.0.0" }
   expect(sharedScope['1.0.0']).toBeUndefined();

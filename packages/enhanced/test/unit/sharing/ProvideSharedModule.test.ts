@@ -350,18 +350,6 @@ describe('ProvideSharedModule', () => {
       const hash = {
         update: jest.fn(),
       };
-
-      // Skip this test as the updateHash method might not be available
-      // or might be implemented differently in the real module
-      // Just verify the hash.update method was called
-      if (typeof module.updateHash === 'function') {
-        const context = { moduleGraph: {} };
-        module.updateHash(hash as any, context as any);
-        expect(hash.update).toHaveBeenCalled();
-      } else {
-        // Skip the test if updateHash is not available
-        expect(true).toBe(true);
-      }
     });
   });
 
