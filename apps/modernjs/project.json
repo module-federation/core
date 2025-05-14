@@ -17,7 +17,7 @@
       "options": {
         "commands": [
           {
-            "command": "cd apps/modernjs; pnpm run build",
+            "command": "sleep 2 && cd apps/modernjs; pnpm run build",
             "forwardAllArgs": true
           }
         ]
