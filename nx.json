@@ -39,7 +39,8 @@
           "env": "NX_MF_DEV_REMOTES"
         }
       ],
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "cache": true
     },
     "3000-home:build:production": {
       "cache": true
@@ -107,6 +108,5 @@
   },
   "useInferencePlugins": false,
   "defaultBase": "main",
-  "nxCloudAccessToken": "NTVlZTRhOWItMGRjYy00YmJjLTllNzAtNDFkNzRhNzdjZDkwfHJlYWQtd3JpdGU=",
-  "useLegacyCache": true
+  "nxCloudAccessToken": "NTVlZTRhOWItMGRjYy00YmJjLTllNzAtNDFkNzRhNzdjZDkwfHJlYWQtd3JpdGU="
 }
