@@ -42,13 +42,20 @@ jobs:
         id: check-ci
         run: node tools/scripts/ci-is-affected.mjs --appName=3000-home
 
-      - name: E2E Test for Next.js Prod
+      - name: E2E Test for Next.js Prod - Home
         if: steps.check-ci.outcome == 'success'
         run: |
           killall node
           npx nx run 3000-home:test:e2e:production
+
+      - name: E2E Test for Next.js Prod - Shop
+        if: steps.check-ci.outcome == 'success'
+        run: |
           killall node
           npx nx run 3001-shop:test:e2e:production
+
+      - name: E2E Test for Next.js Prod - Checkout
+        if: steps.check-ci.outcome == 'success'
+        run: |
           killall node
           npx nx run 3002-checkout:test:e2e:production
-          killall node
