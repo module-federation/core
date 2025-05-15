@@ -13,7 +13,6 @@
         "cwd": "packages/dts-plugin",
         "commands": [
           "tsup --config ./tsup.config.ts",
-          "ls",
           "sleep 1",
           "cp package.json ./dist",
           "cp *.md ./dist"
@@ -25,10 +24,8 @@
       "outputs": ["{workspaceRoot}/coverage/packages/dts-plugin"],
       "options": {
         "parallel": false,
-        "commands": [
-          "rimraf packages/dts-plugin/dist-test",
-          "nx run dts-plugin:test-impl"
-        ]
+        "cwd": "packages/dts-plugin",
+        "commands": ["rimraf dist-test", "nx run dts-plugin:test-impl"]
       }
     },
     "test-impl": {
