@@ -7,6 +7,6 @@ export default defineConfig({
   splitting: true,
   clean: true,
   format: ['cjs', 'esm'],
-  outDir: 'packages/third-party-dts-extractor/dist',
+  outDir: 'dist',
   external: [join(__dirname, 'package.json')],
 });
