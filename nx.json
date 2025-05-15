@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "defaultProject": "3000-home",
+  "defaultProject": "@module-federation/3000-home",
   "targetDefaults": {
     "build": {
       "inputs": ["production", "^production"],
@@ -42,13 +42,13 @@
       "dependsOn": ["^build"],
       "cache": true
     },
-    "3000-home:build:production": {
+    "@module-federation/3000-home:build:production": {
       "cache": false
     },
-    "3001-shop:build:production": {
+    "@module-federation/3001-shop:build:production": {
       "cache": false
     },
-    "3002-checkout:build:production": {
+    "@module-federation/3002-checkout:build:production": {
       "cache": false
     }
   },

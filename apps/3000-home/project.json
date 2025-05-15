@@ -1,5 +1,5 @@
 {
-  "name": "3000-home",
+  "name": "@module-federation/3000-home",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/3000-home",
   "projectType": "application",
@@ -28,18 +28,18 @@
       "executor": "@nx/next:server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "3000-home:build",
+        "buildTarget": "@module-federation/3000-home:build",
         "dev": true,
         "port": 3000
       },
       "configurations": {
         "development": {
-          "buildTarget": "3000-home:build:development",
+          "buildTarget": "@module-federation/3000-home:build:development",
           "dev": true,
           "port": 3000
         },
         "production": {
-          "buildTarget": "3000-home:build:production",
+          "buildTarget": "@module-federation/3000-home:build:production",
           "dev": false,
           "port": 3000
         }
@@ -54,7 +54,7 @@
     "export": {
       "executor": "@nx/next:export",
       "options": {
-        "buildTarget": "3000-home:build:production"
+        "buildTarget": "@module-federation/3000-home:build:production"
       }
     },
     "lint": {
@@ -75,10 +75,10 @@
       "defaultConfiguration": "development",
       "configurations": {
         "development": {
-          "devServerTarget": "3000-home:serve:development"
+          "devServerTarget": "@module-federation/3000-home:serve:development"
         },
         "production": {
-          "devServerTarget": "3000-home:serve:production"
+          "devServerTarget": "@module-federation/3000-home:serve:production"
         }
       }
     },
@@ -96,7 +96,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "wait-on tcp:3001 tcp:3002 && nx run 3000-home:e2e:development",
+            "command": "wait-on tcp:3001 tcp:3002 && nx run @module-federation/3000-home:e2e:development",
             "forwardAllArgs": true
           }
         ]
@@ -114,7 +114,7 @@
               "forwardAllArgs": false
             },
             {
-              "command": "nx build 3000-home --configuration=production && wait-on tcp:3001 tcp:3002 && NX_TUI=false nx run 3000-home:e2e:production",
+              "command": "nx build @module-federation/3000-home --configuration=production && wait-on tcp:3001 tcp:3002 && NX_TUI=false nx run @module-federation/3000-home:e2e:production",
               "forwardAllArgs": true
             }
           ]

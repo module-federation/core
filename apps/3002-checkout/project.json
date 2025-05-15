@@ -112,7 +112,7 @@
               "forwardAllArgs": false
             },
             {
-              "command": "nx run-many --target=build,serve --projects=3000-home,3001-shop --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3001",
+              "command": "nx run-many --target=build --projects=3000-home,3001-shop --configuration=production --parallel=9 && nx run-many --target=serve --projects=3000-home,3001-shop --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3001",
               "forwardAllArgs": false
             },
             {
