@@ -42,7 +42,7 @@ jobs:
         run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=8
 
       - name: Run Build for All
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=8 --skip-nx-cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=100 --skip-nx-cache
 
       - name: Check Package Publishing Compatibility
         run: |
