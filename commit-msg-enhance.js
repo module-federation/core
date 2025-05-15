@@ -151,9 +151,10 @@ async function rewriteCommitMessage(commitHash, newMessage) {
     const tempFile = path.join(process.cwd(), '.temp-commit-msg');
     fs.writeFileSync(tempFile, newMessage);
 
-    // Use git filter-branch to rewrite the commit message
+    // Use git filter-branch with a proper ref specification
+    // The refs/heads/HEAD..commitHash ensures we have a valid range
     execSync(
-      `git filter-branch --force --msg-filter 'if [ "$GIT_COMMIT" = "${commitHash}" ]; then cat ${tempFile}; else cat; fi' -- ${commitHash}^..${commitHash}`,
+      `git filter-branch --force --msg-filter 'if [ "$GIT_COMMIT" = "${commitHash}" ]; then cat ${tempFile}; else cat; fi' -- ${commitHash}~1..HEAD`,
       { shell: '/bin/bash' },
     );
 
