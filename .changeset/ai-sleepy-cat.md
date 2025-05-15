@@ -10,4 +10,3 @@ Introduced environment-specific handling for `createScriptNode` and `loadScriptN
 - Added logging for debugging purposes.
 - Introduced `optimization` options in `ModuleFederationPluginOptions`.
   - Added config for `disableSnapshot` and `target` environment optimizations.
-```
