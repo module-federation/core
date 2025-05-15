@@ -100,7 +100,11 @@ Please format the commit message as follows:
   const response = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [
-      { role: 'system', content: 'Generate concise commit messages under 100 characters. Never author BREAKING CHANGE commits.' },
+      {
+        role: 'system',
+        content:
+          'Generate concise commit messages under 100 characters. Never author BREAKING CHANGE commits.',
+      },
       { role: 'user', content: prompt },
     ],
     max_tokens: 100,
@@ -148,14 +152,18 @@ function getBranchCommits() {
   try {
     const baseBranch = execSync(
       'git symbolic-ref refs/remotes/origin/HEAD | sed "s@^refs/remotes/origin/@@g" || echo main',
-      { shell: '/bin/bash' }
-    ).toString().trim();
+      { shell: '/bin/bash' },
+    )
+      .toString()
+      .trim();
 
     // Get commits in current branch not in base branch, excluding merge commits
     const output = execSync(
       `git log ${baseBranch}..HEAD --no-merges --format="%H"`,
-      { shell: '/bin/bash' }
-    ).toString().trim();
+      { shell: '/bin/bash' },
+    )
+      .toString()
+      .trim();
 
     return output ? output.split('\n') : [];
   } catch (error) {
@@ -172,7 +180,10 @@ function getCommitDiff(commitHash) {
       maxBuffer: 10 * 1024 * 1024, // 10MB buffer
     }).toString();
   } catch (error) {
-    console.error(`Error getting diff for commit ${commitHash}:`, error.message);
+    console.error(
+      `Error getting diff for commit ${commitHash}:`,
+      error.message,
+    );
     return null;
   }
 }
@@ -187,14 +198,17 @@ async function rewriteCommitMessage(commitHash, newMessage) {
     // Use git filter-branch to rewrite the commit message
     execSync(
       `git filter-branch --force --msg-filter 'if [ "$GIT_COMMIT" = "${commitHash}" ]; then cat ${tempFile}; else cat; fi' -- ${commitHash}^..${commitHash}`,
-      { shell: '/bin/bash' }
+      { shell: '/bin/bash' },
     );
 
     // Remove the temporary file
     fs.unlinkSync(tempFile);
     return true;
   } catch (error) {
-    console.error(`Error rewriting message for commit ${commitHash}:`, error.message);
+    console.error(
+      `Error rewriting message for commit ${commitHash}:`,
+      error.message,
+    );
     return false;
   }
 }
@@ -224,7 +238,9 @@ async function processBranchCommits() {
       if (success) {
         console.log(`Updated commit message for ${commitHash.substring(0, 8)}`);
       } else {
-        console.log(`Failed to update commit message for ${commitHash.substring(0, 8)}`);
+        console.log(
+          `Failed to update commit message for ${commitHash.substring(0, 8)}`,
+        );
       }
     } catch (error) {
       console.error(`Error processing commit ${commitHash}:`, error.message);
