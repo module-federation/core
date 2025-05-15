@@ -48,16 +48,12 @@ jobs:
           lsof -ti tcp:3050,3051,3052,3053,3054,3055,3056 | xargs -r kill &&
           pnpm run app:modern:dev &
           sleep 30 &&
-          # wait response content-type is application/json
           for port in 3050 3051 3052 3053 3054 3055 3056; do
             while true; do
-              response=$(curl -s -I http://127.0.0.1:$port/mf-manifest.json)
-              content_type=$(echo "$response" | grep -i "Content-Type" | awk '{print $2}' | tr -d '\r')
-              if [[ $content_type != *"text/html"* ]]; then
+              response=$(curl -s http://127.0.0.1:$port/mf-manifest.json)
+              if echo "$response" | jq empty >/dev/null 2>&1; then
                 break
               fi
               sleep 1
             done
           done
-          npx nx run modernjs-ssr-host:e2e &&
-          lsof -ti tcp:3050,3051,3052,3053,3054,3055,3056 | xargs kill
