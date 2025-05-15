@@ -1,5 +1,5 @@
 ---
-"@module-federation/enhanced": patch
+"@module-federation/enhanced": minor
 ---
 
 Updated ModuleFederationPlugin to enhance configuration capabilities and target environment identification.
