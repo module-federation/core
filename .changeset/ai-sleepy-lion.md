@@ -9,4 +9,3 @@ Add conditional functionality for snapshots and optimize entry loading.
 - Added ENV_TARGET constant to differentiate between web and node environments.
 - Extracted duplicated logic for handling remote entry loaded into `handleRemoteEntryLoaded` function.
 - Refactored entry loading to use conditional environment checks with `ENV_TARGET`.
-```
