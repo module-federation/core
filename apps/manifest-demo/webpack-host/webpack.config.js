@@ -9,7 +9,7 @@ const { withReact } = require('@nx/react');
 
 module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   config.watchOptions = {
-    ignored: ['**/node_modules/**', '**/@mf-types/**'],
+    ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
   };
   config.plugins.push(
     new ModuleFederationPlugin({

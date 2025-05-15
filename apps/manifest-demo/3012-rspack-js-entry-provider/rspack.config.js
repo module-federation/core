@@ -14,7 +14,7 @@ module.exports = composePlugins(
   withReact(),
   async (config, context) => {
     config.watchOptions = {
-      ignored: ['**/node_modules/**', '**/@mf-types/**'],
+      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
     };
     config.context = path.join(
       context.context.root,
