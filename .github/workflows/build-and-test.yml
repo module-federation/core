@@ -26,6 +26,22 @@ jobs:
           node-version: '18'
           cache: 'pnpm'
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Cache Cypress binary
+        uses: actions/cache@v3
+        id: cypress-cache
+        with:
+          path: |
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-cypress-${{ hashFiles('**/pnpm-lock.yaml') }}
+
       - name: Set Nx SHA
         uses: nrwl/nx-set-shas@v3
 
@@ -33,6 +49,7 @@ jobs:
         run: pnpm install
 
       - name: Install Cypress
+        # if: steps.cypress-cache.outputs.cache-hit != 'true'
         run: npx cypress install
 
       - name: Check Code Format
@@ -42,7 +59,7 @@ jobs:
         run: nproc
 
       - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=8
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Run Build for All
         run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
