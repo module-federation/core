@@ -48,5 +48,9 @@ jobs:
       - name: E2E Test for Next.js Dev
         if: steps.check-ci.outcome == 'success'
         run: |
-          npx kill-port 3000 3001 3002
-          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=false
+          killall node
+          npx nx run 3000-home:test:e2e
+          killall node
+          npx nx run 3001-shop:test:e2e
+          killall node
+          npx nx run 3002-checkout:test:e2e
