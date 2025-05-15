@@ -1,1 +1,1 @@
-chore(core): upgrade nx and add delay in build command
+feat(workflow): optimize build parallelization, add CPU core count logging
