@@ -77,7 +77,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "NX_TUI=false nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=development & disown",
+            "command": "NX_TUI=false nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=development & wait-on tcp:3000 tcp:3002 ",
             "forwardAllArgs": false
           },
           {
