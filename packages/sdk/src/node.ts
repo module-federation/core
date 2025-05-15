@@ -1,5 +1,8 @@
 import { CreateScriptHookNode, FetchHook } from './types';
 
+// Declare the ENV_TARGET constant that will be defined by DefinePlugin
+declare const ENV_TARGET: 'web' | 'node';
+
 function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
     throw new Error('import specifier is required');
@@ -38,144 +41,189 @@ const lazyLoaderHookFetch = async (
   return res;
 };
 
-export function createScriptNode(
-  url: string,
-  cb: (error?: Error, scriptContext?: any) => void,
-  attrs?: Record<string, any>,
-  loaderHook?: {
-    createScriptHook?: CreateScriptHookNode;
-    fetch?: FetchHook;
-  },
-) {
-  if (loaderHook?.createScriptHook) {
-    const hookResult = loaderHook.createScriptHook(url);
-    if (hookResult && typeof hookResult === 'object' && 'url' in hookResult) {
-      url = hookResult.url;
-    }
-  }
-
-  let urlObj: URL;
-  try {
-    urlObj = new URL(url);
-  } catch (e) {
-    console.error('Error constructing URL:', e);
-    cb(new Error(`Invalid URL: ${e}`));
-    return;
-  }
-
-  const getFetch = async (): Promise<typeof fetch> => {
-    if (loaderHook?.fetch) {
-      return (input: RequestInfo | URL, init?: RequestInit) =>
-        lazyLoaderHookFetch(input, init, loaderHook);
-    }
-
-    return typeof fetch === 'undefined' ? loadNodeFetch() : fetch;
-  };
-
-  const handleScriptFetch = async (f: typeof fetch, urlObj: URL) => {
-    try {
-      const res = await f(urlObj.href);
-      const data = await res.text();
-      const [path, vm] = await Promise.all([
-        importNodeModule<typeof import('path')>('path'),
-        importNodeModule<typeof import('vm')>('vm'),
-      ]);
-
-      const scriptContext = { exports: {}, module: { exports: {} } };
-      const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
-      const filename = path.basename(urlObj.pathname);
-
-      const script = new vm.Script(
-        `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
-        {
-          filename,
-          importModuleDynamically:
-            //@ts-ignore
-            vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
+export const createScriptNode =
+  typeof ENV_TARGET === 'undefined' || ENV_TARGET !== 'web'
+    ? (
+        url: string,
+        cb: (error?: Error, scriptContext?: any) => void,
+        attrs?: Record<string, any>,
+        loaderHook?: {
+          createScriptHook?: CreateScriptHookNode;
+          fetch?: FetchHook;
         },
-      );
+      ) => {
+        if (loaderHook?.createScriptHook) {
+          const hookResult = loaderHook.createScriptHook(url);
+          if (
+            hookResult &&
+            typeof hookResult === 'object' &&
+            'url' in hookResult
+          ) {
+            url = hookResult.url;
+          }
+        }
 
-      script.runInThisContext()(
-        scriptContext.exports,
-        scriptContext.module,
-        eval('require'),
-        urlDirname,
-        filename,
-      );
-      const exportedInterface: Record<string, any> =
-        scriptContext.module.exports || scriptContext.exports;
+        let urlObj: URL;
+        try {
+          urlObj = new URL(url);
+        } catch (e) {
+          console.error('Error constructing URL:', e);
+          cb(new Error(`Invalid URL: ${e}`));
+          return;
+        }
 
-      if (attrs && exportedInterface && attrs['globalName']) {
-        const container =
-          exportedInterface[attrs['globalName']] || exportedInterface;
-        cb(undefined, container as keyof typeof scriptContext.module.exports);
-        return;
-      }
+        const getFetch = async (): Promise<typeof fetch> => {
+          if (loaderHook?.fetch) {
+            return (input: RequestInfo | URL, init?: RequestInit) =>
+              lazyLoaderHookFetch(input, init, loaderHook);
+          }
 
-      cb(
-        undefined,
-        exportedInterface as keyof typeof scriptContext.module.exports,
-      );
-    } catch (e) {
-      cb(e instanceof Error ? e : new Error(`Script execution error: ${e}`));
-    }
-  };
+          return typeof fetch === 'undefined' ? loadNodeFetch() : fetch;
+        };
 
-  getFetch()
-    .then(async (f) => {
-      if (attrs?.['type'] === 'esm' || attrs?.['type'] === 'module') {
-        return loadModule(urlObj.href, {
-          fetch: f,
-          vm: await importNodeModule<typeof import('vm')>('vm'),
-        })
-          .then(async (module) => {
-            await module.evaluate();
-            cb(undefined, module.namespace);
-          })
-          .catch((e) => {
+        const handleScriptFetch = async (f: typeof fetch, urlObj: URL) => {
+          try {
+            const res = await f(urlObj.href);
+            const data = await res.text();
+            const [path, vm] = await Promise.all([
+              importNodeModule<typeof import('path')>('path'),
+              importNodeModule<typeof import('vm')>('vm'),
+            ]);
+
+            const scriptContext = { exports: {}, module: { exports: {} } };
+            const urlDirname = urlObj.pathname
+              .split('/')
+              .slice(0, -1)
+              .join('/');
+            const filename = path.basename(urlObj.pathname);
+
+            const script = new vm.Script(
+              `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
+              {
+                filename,
+                importModuleDynamically:
+                  //@ts-ignore
+                  vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ??
+                  importNodeModule,
+              },
+            );
+
+            script.runInThisContext()(
+              scriptContext.exports,
+              scriptContext.module,
+              eval('require'),
+              urlDirname,
+              filename,
+            );
+            const exportedInterface: Record<string, any> =
+              scriptContext.module.exports || scriptContext.exports;
+
+            if (attrs && exportedInterface && attrs['globalName']) {
+              const container =
+                exportedInterface[attrs['globalName']] || exportedInterface;
+              cb(
+                undefined,
+                container as keyof typeof scriptContext.module.exports,
+              );
+              return;
+            }
+
+            cb(
+              undefined,
+              exportedInterface as keyof typeof scriptContext.module.exports,
+            );
+          } catch (e) {
             cb(
               e instanceof Error
                 ? e
                 : new Error(`Script execution error: ${e}`),
             );
+          }
+        };
+
+        getFetch()
+          .then(async (f) => {
+            if (attrs?.['type'] === 'esm' || attrs?.['type'] === 'module') {
+              return loadModule(urlObj.href, {
+                fetch: f,
+                vm: await importNodeModule<typeof import('vm')>('vm'),
+              })
+                .then(async (module) => {
+                  await module.evaluate();
+                  cb(undefined, module.namespace);
+                })
+                .catch((e) => {
+                  cb(
+                    e instanceof Error
+                      ? e
+                      : new Error(`Script execution error: ${e}`),
+                  );
+                });
+            }
+            handleScriptFetch(f, urlObj);
+          })
+          .catch((err) => {
+            cb(err);
           });
       }
-      handleScriptFetch(f, urlObj);
-    })
-    .catch((err) => {
-      cb(err);
-    });
-}
+    : (
+        url: string,
+        cb: (error?: Error, scriptContext?: any) => void,
+        attrs?: Record<string, any>,
+        loaderHook?: {
+          createScriptHook?: CreateScriptHookNode;
+          fetch?: FetchHook;
+        },
+      ) => {
+        cb(
+          new Error('createScriptNode is disabled in non-Node.js environment'),
+        );
+      };
 
-export function loadScriptNode(
-  url: string,
-  info: {
-    attrs?: Record<string, any>;
-    loaderHook?: {
-      createScriptHook?: CreateScriptHookNode;
-    };
-  },
-) {
-  return new Promise<void>((resolve, reject) => {
-    createScriptNode(
-      url,
-      (error, scriptContext) => {
-        if (error) {
-          reject(error);
-        } else {
-          const remoteEntryKey =
-            info?.attrs?.['globalName'] ||
-            `__FEDERATION_${info?.attrs?.['name']}:custom__`;
-          const entryExports = ((globalThis as any)[remoteEntryKey] =
-            scriptContext);
-          resolve(entryExports);
-        }
-      },
-      info.attrs,
-      info.loaderHook,
-    );
-  });
-}
+export const loadScriptNode =
+  typeof ENV_TARGET === 'undefined' || ENV_TARGET !== 'web'
+    ? (
+        url: string,
+        info: {
+          attrs?: Record<string, any>;
+          loaderHook?: {
+            createScriptHook?: CreateScriptHookNode;
+          };
+        },
+      ) => {
+        return new Promise<void>((resolve, reject) => {
+          createScriptNode(
+            url,
+            (error, scriptContext) => {
+              if (error) {
+                reject(error);
+              } else {
+                const remoteEntryKey =
+                  info?.attrs?.['globalName'] ||
+                  `__FEDERATION_${info?.attrs?.['name']}:custom__`;
+                const entryExports = ((globalThis as any)[remoteEntryKey] =
+                  scriptContext);
+                resolve(entryExports);
+              }
+            },
+            info.attrs,
+            info.loaderHook,
+          );
+        });
+      }
+    : (
+        url: string,
+        info: {
+          attrs?: Record<string, any>;
+          loaderHook?: {
+            createScriptHook?: CreateScriptHookNode;
+          };
+        },
+      ) => {
+        throw new Error(
+          'loadScriptNode is disabled in non-Node.js environment',
+        );
+      };
 
 async function loadModule(
   url: string,
