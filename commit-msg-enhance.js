@@ -259,7 +259,12 @@ async function processBranchCommits() {
         scriptContent += `${cmd}\n`;
       });
 
-      // Return to the original branch and force push
+      // After all amends, while still on the detached HEAD at the tip of the rewritten history,
+      // force the original branch to point to this new history.
+      scriptContent += `\n# Update the original branch to point to the new commit history\n`;
+      scriptContent += `git branch -f $CURRENT_BRANCH HEAD\n`;
+
+      // Return to the original branch (which now points to the new history)
       scriptContent += `\n# Return to the original branch\n`;
       scriptContent += `git checkout $CURRENT_BRANCH\n\n`;
       scriptContent += `# Re-enable Husky hooks (optional, as new shells won't inherit HUSKY=0)\n`;
