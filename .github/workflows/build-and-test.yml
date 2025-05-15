@@ -34,6 +34,9 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+      - name: Set Playwright cache status
+        run: echo "PLAYWRIGHT_CACHE_HIT=${{ steps.playwright-cache.outputs.cache-hit }}" >> $GITHUB_ENV
+
       - name: Cache Cypress binary
         uses: actions/cache@v3
         id: cypress-cache
