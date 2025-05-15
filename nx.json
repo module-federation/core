@@ -1,6 +1,5 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "defaultProject": "@module-federation/3000-home",
   "targetDefaults": {
     "build": {
       "inputs": ["production", "^production"],
