@@ -1,5 +1,5 @@
 ---
-"@module-federation/runtime-core": patch
+"@module-federation/runtime-core": minor
 ---
 
 Add conditional functionality for snapshots and optimize entry loading.

@@ -1,5 +1,5 @@
 ---
-"@module-federation/rspack": patch
+"@module-federation/rspack": minor
 ---
 
 Update Rspack ModuleFederationPlugin to support enhanced configuration capabilities and environment targeting.

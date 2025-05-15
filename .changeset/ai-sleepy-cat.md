@@ -1,5 +1,5 @@
 ---
-"@module-federation/sdk": patch
+"@module-federation/sdk": minor
 ---
 
 Introduced environment-specific handling for `createScriptNode` and `loadScriptNode` functions and added build optimization options.
