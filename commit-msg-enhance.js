@@ -6,6 +6,7 @@ const path = require('path');
 const { OpenAI } = require('openai');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
+const os = require('os');
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -18,6 +19,12 @@ const argv = yargs(hideBin(process.argv))
     alias: 'b',
     type: 'string',
     description: 'Base branch to compare against (default: main/master)',
+  })
+  .option('apply', {
+    alias: 'a',
+    type: 'boolean',
+    description: 'Create a shell script to apply changes',
+    default: false,
   })
   .help()
   .alias('help', 'h').argv;
@@ -81,7 +88,7 @@ Please format the commit message as follows:
   return response.choices[0].message.content
     .trim()
     .replace('```markdown', '')
-    .replace('```', '')
+    .replace(/```/g, '')
     .replace(/^```(?:\w+)?|```$/g, '')
     .trim()
     .replace(/^\`/, '')
@@ -144,32 +151,6 @@ function getCommitDiff(commitHash) {
   }
 }
 
-// Rewrite the commit message
-async function rewriteCommitMessage(commitHash, newMessage) {
-  try {
-    // Create a temporary file with the new commit message
-    const tempFile = path.join(process.cwd(), '.temp-commit-msg');
-    fs.writeFileSync(tempFile, newMessage);
-
-    // Use git filter-branch with a proper ref specification
-    // The refs/heads/HEAD..commitHash ensures we have a valid range
-    execSync(
-      `git filter-branch --force --msg-filter 'if [ "$GIT_COMMIT" = "${commitHash}" ]; then cat ${tempFile}; else cat; fi' -- ${commitHash}~1..HEAD`,
-      { shell: '/bin/bash' },
-    );
-
-    // Remove the temporary file
-    fs.unlinkSync(tempFile);
-    return true;
-  } catch (error) {
-    console.error(
-      `Error rewriting message for commit ${commitHash}:`,
-      error.message,
-    );
-    return false;
-  }
-}
-
 // Process all commits in the branch
 async function processBranchCommits() {
   const commits = getBranchCommits(argv['base-branch']);
@@ -181,7 +162,10 @@ async function processBranchCommits() {
 
   console.log(`Found ${commits.length} commits to process.`);
 
-  // Process commits from oldest to newest
+  // Prepare a map of commit hashes to new messages
+  const commitMessages = {};
+
+  // Process commits from oldest to newest (reverse to get chronological order)
   for (const commitHash of commits.reverse()) {
     const diff = getCommitDiff(commitHash);
     if (!diff) continue;
@@ -200,23 +184,85 @@ async function processBranchCommits() {
       const newMessage = await generateCommitMessage(diff);
       console.log(`New message: ${newMessage}`);
 
-      const success = await rewriteCommitMessage(commitHash, newMessage);
-      if (success) {
-        console.log(`Updated commit message for ${commitHash.substring(0, 8)}`);
-      } else {
-        console.log(
-          `Failed to update commit message for ${commitHash.substring(0, 8)}`,
-        );
-      }
+      // Store the new message with the commit hash
+      commitMessages[commitHash] = newMessage;
     } catch (error) {
       console.error(`Error processing commit ${commitHash}:`, error.message);
     }
   }
 
-  console.log('\nFinished processing branch commits.');
-  console.log(
-    'IMPORTANT: You will need to force push these changes with: git push --force',
-  );
+  // Generate manual instructions or a shell script
+  if (Object.keys(commitMessages).length > 0) {
+    console.log('\n\n========== HOW TO UPDATE COMMIT MESSAGES ==========');
+    console.log('Run these commands manually to update each commit message:');
+    console.log(
+      "NOTE: This will change commit hashes, so you'll need to force push afterwards.\n",
+    );
+
+    // Create an array of commands to execute
+    const commands = [];
+
+    // For each commit, provide the command to update it
+    Object.keys(commitMessages).forEach((hash) => {
+      // Properly escape message for shell script
+      const escapedMessage = commitMessages[hash].replace(/'/g, "'\\''"); // Handle single quotes in message
+      const command = `git commit --amend -m "${escapedMessage}" && git rebase --continue`;
+      console.log(`\n# For commit ${hash.substring(0, 8)}:`);
+      console.log(`git checkout ${hash}~0`);
+      console.log(`${command}`);
+
+      commands.push(
+        `echo "Processing commit ${hash.substring(0, 8)}..."`,
+        `git checkout ${hash}~0`,
+        `git commit --amend -m "${escapedMessage}"`,
+      );
+    });
+
+    console.log('\n# After updating all commits:');
+    console.log('git checkout <your-branch-name>');
+    console.log('git push --force-with-lease origin <your-branch-name>');
+
+    // If the user requested, create an apply script
+    if (argv.apply) {
+      const scriptPath = path.join(process.cwd(), 'update-commit-messages.sh');
+
+      // Get current branch name
+      const currentBranch = execSync('git branch --show-current', {
+        shell: '/bin/bash',
+      })
+        .toString()
+        .trim();
+
+      // Create script content
+      let scriptContent = `#!/bin/bash\n\n`;
+      scriptContent += `# Script to update commit messages\n`;
+      scriptContent += `# Generated on ${new Date().toISOString()}\n\n`;
+      scriptContent += `# Store the current branch name\n`;
+      scriptContent += `CURRENT_BRANCH="${currentBranch}"\n\n`;
+      scriptContent += `# Make sure there are no unstaged changes\n`;
+      scriptContent += `if [[ -n $(git status -s) ]]; then\n`;
+      scriptContent += `  echo "Error: You have unstaged changes. Please commit or stash them first."\n`;
+      scriptContent += `  exit 1\n`;
+      scriptContent += `fi\n\n`;
+
+      // Add the commands
+      commands.forEach((cmd) => {
+        scriptContent += `${cmd}\n`;
+      });
+
+      // Return to the original branch and force push
+      scriptContent += `\n# Return to the original branch\n`;
+      scriptContent += `git checkout $CURRENT_BRANCH\n\n`;
+      scriptContent += `echo "All commit messages updated!"\n`;
+      scriptContent += `echo "You can now force push with: git push --force-with-lease origin $CURRENT_BRANCH"\n`;
+
+      // Write the script file
+      fs.writeFileSync(scriptPath, scriptContent, { mode: 0o755 }); // Make executable
+
+      console.log(`\nUpdate script created at: ${scriptPath}`);
+      console.log('You can run it with: bash ./update-commit-messages.sh');
+    }
+  }
 }
 
 // Main function
