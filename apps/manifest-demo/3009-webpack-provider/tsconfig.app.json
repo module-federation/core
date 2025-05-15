@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "jsx": "react-jsx",
     "allowJs": true,
@@ -34,5 +34,16 @@
     "**/*.test.jsx",
     "dist/**"
   ],
-  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"]
+  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
+  "references": [
+    {
+      "path": "../../../packages/typescript"
+    },
+    {
+      "path": "../../../packages/enhanced"
+    },
+    {
+      "path": "../../../packages/core"
+    }
+  ]
 }

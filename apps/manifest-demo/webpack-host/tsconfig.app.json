@@ -24,5 +24,16 @@
     "**/*.test.jsx",
     "dist/**"
   ],
-  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"]
+  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
+  "references": [
+    {
+      "path": "../../../packages/enhanced"
+    },
+    {
+      "path": "../../../packages/typescript"
+    },
+    {
+      "path": "../../../packages/runtime"
+    }
+  ]
 }
