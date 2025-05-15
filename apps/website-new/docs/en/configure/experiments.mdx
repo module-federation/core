@@ -10,7 +10,11 @@ new ModuleFederationPlugin({
   experiments: {
     asyncStartup: true,
     externalRuntime: false,
-    provideExternalRuntime: false
+    provideExternalRuntime: false,
+    optimization: {
+      disableSnapshot: false,
+      target: 'web',
+    },
   },
   shared: {
     react: {
@@ -59,3 +63,40 @@ Make sure to only configure it on the topmost consumer! If multiple consumers in
 :::
 
 Setting `true` will inject the MF runtime at the consumer.
+
+## optimization
+
+This object contains flags related to build-time optimizations that can affect the Module Federation runtime's size and behavior.
+
+### disableSnapshot
+
+- Type: `boolean`
+- Required: No
+- Default: `false`
+
+When set to `true`, this option defines the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` global constant as `true` during the build. In the `@module-federation/runtime-core`, this prevents the `snapshotPlugin()` and `generatePreloadAssetsPlugin()` from being included and initialized within the FederationHost.
+
+**Impact:**
+*   **Benefit:** Can reduce the overall bundle size of the Module Federation runtime by excluding the code for these two plugins.
+*   **Cost:** Disables the functionality provided by these plugins. The `snapshotPlugin` is crucial for the "mf-manifest protocol" – it's responsible for generating or providing runtime access to a build manifest (e.g., `mf-manifest.json`) containing metadata about exposed modules, shared dependencies, versions, and remotes. Disabling it means:
+    *   The runtime loses access to this build manifest data.
+    *   Features relying on the manifest, such as dynamic remote discovery, manifest-based version compatibility checks, advanced asset preloading (also handled by the removed `generatePreloadAssetsPlugin`), and potentially runtime debugging/introspection tools, will not function correctly or will be unavailable.
+    *   Use this option only if you do not rely on these manifest-driven features and prioritize a minimal runtime footprint.
+
+### target
+
+- Type: `'web' | 'node'`
+- Required: No
+- Default: Inferred from Webpack's `target` option (usually `'web'`)
+
+This option defines the `ENV_TARGET` global constant during the build, specifying the intended execution environment.
+
+**Impact:**
+*   **`target: 'web'`**: Optimizes the build for browser environments.
+    *   Ensures browser-specific remote entry loading mechanisms are used (`loadEntryDom`).
+    *   Crucially, enables tree-shaking/dead-code elimination for Node.js-specific code within the `@module-federation/sdk`. Functions like `createScriptNode` and `loadScriptNode`, along with their required Node.js built-in modules (e.g., `vm`, `path`, `http`), are completely removed from the bundle, significantly reducing its size.
+*   **`target: 'node'`**: Optimizes the build for Node.js environments.
+    *   Ensures Node.js-specific remote entry loading mechanisms are used (`loadEntryNode`).
+    *   Includes the necessary Node.js-specific functions from the SDK (`createScriptNode`, `loadScriptNode`) in the bundle, allowing the federated application to function correctly in Node.js.
+
+Explicitly setting this value is recommended to ensure the intended optimizations are applied, especially in universal or server-side rendering scenarios.
