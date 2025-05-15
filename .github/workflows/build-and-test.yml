@@ -26,24 +26,17 @@ jobs:
           node-version: '18'
           cache: 'pnpm'
 
-      - name: Cache Playwright browsers
+      - name: Cache Browsers
         uses: actions/cache@v3
-        id: playwright-cache
+        id: browsers-cache
         with:
           path: |
             ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-browsers-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Set Playwright cache status
-        run: echo "PLAYWRIGHT_CACHE_HIT=${{ steps.playwright-cache.outputs.cache-hit }}" >> $GITHUB_ENV
-
-      - name: Cache Cypress binary
-        uses: actions/cache@v3
-        id: cypress-cache
-        with:
-          path: |
-            ~/.cache/Cypress
-          key: ${{ runner.os }}-cypress-${{ hashFiles('**/pnpm-lock.yaml') }}
+        run: echo "PLAYWRIGHT_CACHE_HIT=${{ steps.browsers-cache.outputs.cache-hit }}" >> $GITHUB_ENV
 
       - name: Set Nx SHA
         uses: nrwl/nx-set-shas@v3
@@ -52,7 +45,7 @@ jobs:
         run: pnpm install
 
       - name: Install Cypress
-        # if: steps.cypress-cache.outputs.cache-hit != 'true'
+        # if: steps.browsers-cache.outputs.cache-hit != 'true'
         run: npx cypress install
 
       - name: Check Code Format
