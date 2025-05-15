@@ -15,10 +15,7 @@
         "development": {
           "outputPath": "apps/3002-checkout"
         },
-        "production": {
-          "cache": false,
-          "outputPath": "apps/3002-checkout"
-        }
+        "production": {}
       },
       "dependsOn": [
         {
