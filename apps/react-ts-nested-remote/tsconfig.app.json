@@ -7,5 +7,10 @@
       "*": ["./@mf-types/*"]
     }
   },
-  "exclude": ["dist/**"]
+  "exclude": ["dist/**"],
+  "references": [
+    {
+      "path": "../../packages/enhanced"
+    }
+  ]
 }

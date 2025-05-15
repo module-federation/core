@@ -27,5 +27,22 @@
     "**/*.test.jsx",
     "dist/**"
   ],
-  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"]
+  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
+  "references": [
+    {
+      "path": "../../packages/dts-plugin"
+    },
+    {
+      "path": "../../packages/enhanced"
+    },
+    {
+      "path": "../../packages/typescript"
+    },
+    {
+      "path": "../../packages/runtime"
+    },
+    {
+      "path": "../../packages/core"
+    }
+  ]
 }

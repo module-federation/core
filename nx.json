@@ -71,6 +71,14 @@
     "appsDir": "apps",
     "libsDir": "packages"
   },
+  "plugins": [
+    {
+      "plugin": "@nx/js/typescript",
+      "options": {
+        "build": false
+      }
+    }
+  ],
   "generators": {
     "@nx/react": {
       "application": {

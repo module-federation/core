@@ -4,11 +4,10 @@
   "sourceRoot": "packages/modernjs/src",
   "projectType": "library",
   "tags": ["type:pkg"],
-  "implicitDependencies": [],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{projectRoot}/dist"],
+      "outputs": ["{projectRoot}packages/modernjs/dist"],
       "dependsOn": [
         {
           "target": "build",
@@ -18,6 +17,7 @@
       "options": {
         "parallel": false,
         "commands": [
+          "sleep 3",
           "cd packages/modernjs; pnpm run build",
           "cp packages/modernjs/LICENSE packages/modernjs/dist"
         ]

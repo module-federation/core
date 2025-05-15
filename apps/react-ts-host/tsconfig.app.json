@@ -7,5 +7,16 @@
       "*": ["./@mf-types/*"]
     }
   },
-  "exclude": ["dist/**"]
+  "exclude": ["dist/**"],
+  "references": [
+    {
+      "path": "../../packages/runtime"
+    },
+    {
+      "path": "../../packages/core"
+    },
+    {
+      "path": "../../packages/enhanced"
+    }
+  ]
 }

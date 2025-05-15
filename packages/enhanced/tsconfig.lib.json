@@ -12,5 +12,16 @@
     "src/**/*.test.ts",
     "dist/**",
     "node_modules/**"
+  ],
+  "references": [
+    {
+      "path": "../cli"
+    },
+    {
+      "path": "../dts-plugin"
+    },
+    {
+      "path": "../bridge/bridge-react-webpack-plugin"
+    }
   ]
 }
