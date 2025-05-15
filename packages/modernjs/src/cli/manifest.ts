@@ -1,6 +1,6 @@
 import path from 'path';
 import { Stats, Manifest } from '@module-federation/sdk';
-import { fs } from '@modern-js/utils';
+import fs from 'fs-extra';
 import { BundlerPlugin } from '../types';
 
 function mergeStats(browserStats: Stats, nodeStats: Stats): Stats {
