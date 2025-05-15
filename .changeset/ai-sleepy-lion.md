@@ -1,3 +1,4 @@
+---
 "@module-federation/runtime-core": patch
 ---
 
