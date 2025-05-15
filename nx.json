@@ -43,13 +43,13 @@
       "cache": true
     },
     "3000-home:build:production": {
-      "cache": true
+      "cache": false
     },
     "3001-shop:build:production": {
-      "cache": true
+      "cache": false
     },
     "3002-checkout:build:production": {
-      "cache": true
+      "cache": false
     }
   },
   "namedInputs": {

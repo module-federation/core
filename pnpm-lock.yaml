@@ -43,9 +43,6 @@ importers:
       glob:
         specifier: ^11.0.0
         version: 11.0.0
-      kill-port:
-        specifier: ^2.0.1
-        version: 2.0.1
       lodash.get:
         specifier: 4.4.2
         version: 4.4.2
@@ -395,6 +392,9 @@ importers:
       js-yaml:
         specifier: 4.1.0
         version: 4.1.0
+      kill-port:
+        specifier: ^2.0.1
+        version: 2.0.1
       mime-types:
         specifier: 2.1.35
         version: 2.1.35
@@ -31526,6 +31526,7 @@ packages:
 
   /get-them-args@1.3.2:
     resolution: {integrity: sha512-LRn8Jlk+DwZE4GTlDbT3Hikd1wSHgLMme/+7ddlqKd7ldwR6LjJgTVWzBnR01wnYGe4KgrXjg287RaI22UHmAw==}
+    dev: true
 
   /get-tsconfig@4.8.1:
     resolution: {integrity: sha512-k9PN+cFBmaLWtVz29SkUoqU5O0slLuHJXt/2P+tMVFT+phsSGXGkp9t3rQIqdz0e+06EHNGs3oM6ZX1s2zHxRg==}
@@ -34828,7 +34829,7 @@ packages:
     dependencies:
       get-them-args: 1.3.2
       shell-exec: 1.0.2
-    dev: false
+    dev: true
 
   /kind-of@2.0.1:
     resolution: {integrity: sha512-0u8i1NZ/mg0b+W3MGGw5I7+6Eib2nx72S/QvXa0hYjEkjTknYmEYQJwGu3mLC0BrhtJjtQafTkyRUQ75Kx0LVg==}
@@ -44457,6 +44458,7 @@ packages:
 
   /shell-exec@1.0.2:
     resolution: {integrity: sha512-jyVd+kU2X+mWKMmGhx4fpWbPsjvD53k9ivqetutVW/BQ+WIZoDoP4d8vUMGezV6saZsiNoW2f9GIhg9Dondohg==}
+    dev: true
 
   /shell-quote@1.8.1:
     resolution: {integrity: sha512-6j1W9l1iAs/4xYBI1SYOVZyFcCis9b4KCLQ8fgAGG07QvzaRLVVRQvAy85yNmmZSjYjg4MWh4gNvlPujU/5LpA==}
