@@ -14,49 +14,13 @@ const openai = new OpenAI({
 
 // Parse command line arguments
 const argv = yargs(hideBin(process.argv))
-  .option('path', {
-    alias: 'p',
+  .option('base-branch', {
+    alias: 'b',
     type: 'string',
-    description: 'Path to the file or directory',
-  })
-  .option('staged', {
-    alias: 's',
-    type: 'boolean',
-    description:
-      'Use staged changes instead of comparing against the base branch',
-    default: false,
-  })
-  .option('rewrite-branch', {
-    alias: 'r',
-    type: 'boolean',
-    description: 'Rewrite all commit messages in the current branch',
-    default: false,
+    description: 'Base branch to compare against (default: main/master)',
   })
   .help()
   .alias('help', 'h').argv;
-
-// Function to find the nearest package.json and get the package name
-function getPackageName(filePath) {
-  let dir = filePath;
-  while (true) {
-    const packageJsonPath = path.join(dir, 'package.json');
-    if (fs.existsSync(packageJsonPath)) {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-      if (packageJson.name) {
-        return packageJson.name;
-      } else {
-        console.error(`Package name not found in ${packageJsonPath}`);
-        process.exit(1);
-      }
-    }
-    const parentDir = path.dirname(dir);
-    if (parentDir === dir) {
-      console.error('Reached root directory without finding package.json');
-      process.exit(1);
-    }
-    dir = parentDir;
-  }
-}
 
 function sanitizeInput(input) {
   return input.replace(/[^a-zA-Z0-9_\-\/\.]/g, '');
@@ -65,6 +29,10 @@ function sanitizeInput(input) {
 function getAllowedScopes() {
   const packagesDir = path.resolve(__dirname, 'packages');
   const scopes = [];
+
+  if (!fs.existsSync(packagesDir)) {
+    return scopes;
+  }
 
   fs.readdirSync(packagesDir).forEach((dir) => {
     const projectJsonPath = path.join(packagesDir, dir, 'project.json');
@@ -79,7 +47,7 @@ function getAllowedScopes() {
   return scopes;
 }
 
-async function generateCommitMessage(patch, packageName) {
+async function generateCommitMessage(patch) {
   const allowedScopes = getAllowedScopes().join(', ');
   const prompt = `Generate a conventional commit message for the following git patch.
 RULES:
@@ -92,7 +60,7 @@ Focus on a statement of work of the changes:
 
 ${patch}
 
-Allowed scopes: ${allowedScopes}
+${allowedScopes.length > 0 ? `Allowed scopes: ${allowedScopes}` : ''}
 
 Please format the commit message as follows:
 <type>(<scope>): <subject>`;
@@ -121,45 +89,29 @@ Please format the commit message as follows:
     .trim();
 }
 
-function getGitDiffPatch(filePath, useStaged) {
-  try {
-    const sanitizedFilePath = sanitizeInput(filePath);
-    let patch;
-    if (useStaged) {
-      patch = execSync(`git diff --cached -- "${sanitizedFilePath}"`, {
-        shell: '/bin/bash',
-      }).toString();
-    } else {
-      const baseBranch = execSync(
-        'git symbolic-ref refs/remotes/origin/HEAD | sed "s@^refs/remotes/origin/@@g" || echo main',
-        { shell: '/bin/bash' },
-      )
-        .toString()
-        .trim();
-      patch = execSync(`git diff ${baseBranch} -- "${sanitizedFilePath}"`, {
-        shell: '/bin/bash',
-      }).toString();
-    }
-    return patch;
-  } catch (error) {
-    console.error('Error getting git diff:', error.message);
-    process.exit(1);
-  }
-}
-
 // Get list of commits in the current branch excluding merge commits
-function getBranchCommits() {
+function getBranchCommits(baseBranch) {
   try {
-    const baseBranch = execSync(
-      'git symbolic-ref refs/remotes/origin/HEAD | sed "s@^refs/remotes/origin/@@g" || echo main',
-      { shell: '/bin/bash' },
-    )
-      .toString()
-      .trim();
+    // If base branch is not specified, try to get the default branch from git
+    if (!baseBranch) {
+      try {
+        baseBranch = execSync(
+          'git symbolic-ref refs/remotes/origin/HEAD | sed "s@^refs/remotes/origin/@@g"',
+          { shell: '/bin/bash' },
+        )
+          .toString()
+          .trim();
+      } catch (e) {
+        // If that fails, default to main
+        baseBranch = 'main';
+      }
+    }
+
+    console.log(`Using base branch: ${baseBranch}`);
 
     // Get commits in current branch not in base branch, excluding merge commits
     const output = execSync(
-      `git log ${baseBranch}..HEAD --no-merges --format="%H"`,
+      `git log origin/${baseBranch}..HEAD --no-merges --format="%H"`,
       { shell: '/bin/bash' },
     )
       .toString()
@@ -175,10 +127,14 @@ function getBranchCommits() {
 // Get the diff for a specific commit
 function getCommitDiff(commitHash) {
   try {
-    return execSync(`git show --patch ${commitHash}`, {
-      shell: '/bin/bash',
-      maxBuffer: 10 * 1024 * 1024, // 10MB buffer
-    }).toString();
+    // Get the diff excluding pnpm-lock.yaml
+    return execSync(
+      `git show --patch ${commitHash} ":(exclude)pnpm-lock.yaml"`,
+      {
+        shell: '/bin/bash',
+        maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+      },
+    ).toString();
   } catch (error) {
     console.error(
       `Error getting diff for commit ${commitHash}:`,
@@ -215,7 +171,7 @@ async function rewriteCommitMessage(commitHash, newMessage) {
 
 // Process all commits in the branch
 async function processBranchCommits() {
-  const commits = getBranchCommits();
+  const commits = getBranchCommits(argv['base-branch']);
 
   if (commits.length === 0) {
     console.log('No commits found in this branch.');
@@ -230,7 +186,16 @@ async function processBranchCommits() {
     if (!diff) continue;
 
     try {
-      console.log(`Processing commit ${commitHash.substring(0, 8)}...`);
+      // Get the original commit message for reference
+      const originalMessage = execSync(`git log -1 --format=%B ${commitHash}`, {
+        shell: '/bin/bash',
+      })
+        .toString()
+        .trim();
+
+      console.log(`\nProcessing commit ${commitHash.substring(0, 8)}...`);
+      console.log(`Original message: ${originalMessage}`);
+
       const newMessage = await generateCommitMessage(diff);
       console.log(`New message: ${newMessage}`);
 
@@ -247,72 +212,18 @@ async function processBranchCommits() {
     }
   }
 
-  console.log('Finished processing branch commits.');
+  console.log('\nFinished processing branch commits.');
+  console.log(
+    'IMPORTANT: You will need to force push these changes with: git push --force',
+  );
 }
 
-// Function to generate a random filename
-function generateRandomFilename() {
-  const adjectives = [
-    'quick',
-    'lazy',
-    'sleepy',
-    'noisy',
-    'hungry',
-    'brave',
-    'calm',
-    'eager',
-    'gentle',
-    'happy',
-  ];
-  const animals = [
-    'fox',
-    'dog',
-    'cat',
-    'mouse',
-    'owl',
-    'tiger',
-    'lion',
-    'bear',
-    'wolf',
-    'eagle',
-  ];
-  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const animal = animals[Math.floor(Math.random() * animals.length)];
-  return `ai-${adjective}-${animal}.md`;
-}
-
+// Main function
 async function main() {
-  if (argv['rewrite-branch']) {
-    await processBranchCommits();
-    return;
-  }
-
-  if (!argv.path) {
-    console.error('Path is required when not using --rewrite-branch');
-    process.exit(1);
-  }
-
-  const filePath = path.resolve(argv.path);
-
-  if (!fs.existsSync(filePath)) {
-    console.error(`File or directory not found: ${filePath}`);
-    process.exit(1);
-  }
-
-  const packageName = getPackageName(filePath);
-
-  const patch = getGitDiffPatch(filePath, argv.staged);
-
-  if (!patch) {
-    console.log('No changes detected.');
-    process.exit(0);
-  }
   try {
-    const commitMessage = await generateCommitMessage(patch, packageName);
-    console.log('Generated Commit Message:');
-    console.log(commitMessage);
+    await processBranchCommits();
   } catch (error) {
-    console.error('Error generating commit message:', error.message);
+    console.error('Error:', error.message);
     process.exit(1);
   }
 }
