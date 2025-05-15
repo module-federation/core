@@ -112,11 +112,11 @@
               "forwardAllArgs": false
             },
             {
-              "command": "NX_TUI=false nx run-many --target=serve --projects=3000-home,3001-shop --configuration=production & disown",
+              "command": "nx run-many --target=build,serve --projects=3000-home,3001-shop --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3001",
               "forwardAllArgs": false
             },
             {
-              "command": "wait-on tcp:3000 tcp:3001 && nx run 3002-checkout:e2e:production",
+              "command": "nx build 3002-checkout --configuration=production && wait-on tcp:3000 tcp:3001 && nx run 3002-checkout:e2e:production",
               "forwardAllArgs": true
             }
           ]

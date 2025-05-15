@@ -39,10 +39,10 @@ jobs:
         run: npx nx format:check
 
       - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=8
 
       - name: Run Build for All
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=8 --skip-nx-cache
 
       - name: Check Package Publishing Compatibility
         run: |
