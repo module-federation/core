@@ -204,19 +204,24 @@ async function processBranchCommits() {
 
     // For each commit, provide the command to update it
     Object.keys(commitMessages).forEach((hash) => {
-      // Properly escape message for shell script
-      const escapedMessage = commitMessages[hash].replace(/'/g, "'''"); // Handle single quotes in message
-      // Add --no-verify to bypass hooks for this automated amend
-      const command = `git commit --amend -m "${escapedMessage}" --no-verify && git rebase --continue`;
+      // Properly escape message for shell script, ensuring outer quotes for the -m string
+      const aiMessage = commitMessages[hash];
+      // Escape for shell: single quotes become '\'', double quotes become '"'
+      const shellEscapedAiMessage = aiMessage
+        .replace(/'/g, "'\\''")
+        .replace(/"/g, '\\"');
+
+      const commandForDisplay = `git commit --amend -m "${aiMessage.replace(/"/g, '\\"')}" --no-verify && git rebase --continue`;
       console.log(`\n# For commit ${hash.substring(0, 8)}:`);
       console.log(`git checkout ${hash}~0`);
-      console.log(`${command}`);
+      console.log(`${commandForDisplay}`);
 
-      // Add HUSKY=0 to disable husky hooks for the automated git commands
+      // Command for the script: use the shell-escaped message directly
       commands.push(
         `echo "Processing commit ${hash.substring(0, 8)}..."`,
         `git checkout ${hash}~0`,
-        `HUSKY=0 git commit --amend -m "${escapedMessage}" --no-verify`,
+        // The escaped message is directly embedded here. HUSKY=0 and --no-verify are critical.
+        `HUSKY=0 git commit --amend -m "${shellEscapedAiMessage}" --no-verify`,
       );
     });
 
@@ -251,12 +256,7 @@ async function processBranchCommits() {
 
       // Add the commands
       commands.forEach((cmd) => {
-        // Ensure HUSKY=0 is prepended if it's a git commit command
-        if (cmd.startsWith('git commit --amend')) {
-          scriptContent += `HUSKY=0 ${cmd}\n`;
-        } else {
-          scriptContent += `${cmd}\n`;
-        }
+        scriptContent += `${cmd}\n`;
       });
 
       // Return to the original branch and force push
