@@ -205,16 +205,18 @@ async function processBranchCommits() {
     // For each commit, provide the command to update it
     Object.keys(commitMessages).forEach((hash) => {
       // Properly escape message for shell script
-      const escapedMessage = commitMessages[hash].replace(/'/g, "'\\''"); // Handle single quotes in message
-      const command = `git commit --amend -m "${escapedMessage}" && git rebase --continue`;
+      const escapedMessage = commitMessages[hash].replace(/'/g, "'''"); // Handle single quotes in message
+      // Add --no-verify to bypass hooks for this automated amend
+      const command = `git commit --amend -m "${escapedMessage}" --no-verify && git rebase --continue`;
       console.log(`\n# For commit ${hash.substring(0, 8)}:`);
       console.log(`git checkout ${hash}~0`);
       console.log(`${command}`);
 
+      // Add HUSKY=0 to disable husky hooks for the automated git commands
       commands.push(
         `echo "Processing commit ${hash.substring(0, 8)}..."`,
         `git checkout ${hash}~0`,
-        `git commit --amend -m "${escapedMessage}"`,
+        `HUSKY=0 git commit --amend -m "${escapedMessage}" --no-verify`,
       );
     });
 
@@ -244,15 +246,24 @@ async function processBranchCommits() {
       scriptContent += `  echo "Error: You have unstaged changes. Please commit or stash them first."\n`;
       scriptContent += `  exit 1\n`;
       scriptContent += `fi\n\n`;
+      scriptContent += `# Temporarily disable Husky hooks for the script's operations\n`;
+      scriptContent += `export HUSKY=0\n\n`;
 
       // Add the commands
       commands.forEach((cmd) => {
-        scriptContent += `${cmd}\n`;
+        // Ensure HUSKY=0 is prepended if it's a git commit command
+        if (cmd.startsWith('git commit --amend')) {
+          scriptContent += `HUSKY=0 ${cmd}\n`;
+        } else {
+          scriptContent += `${cmd}\n`;
+        }
       });
 
       // Return to the original branch and force push
       scriptContent += `\n# Return to the original branch\n`;
       scriptContent += `git checkout $CURRENT_BRANCH\n\n`;
+      scriptContent += `# Re-enable Husky hooks (optional, as new shells won't inherit HUSKY=0)\n`;
+      scriptContent += `# unset HUSKY # or export HUSKY=1\n\n`;
       scriptContent += `echo "All commit messages updated!"\n`;
       scriptContent += `echo "You can now force push with: git push --force-with-lease origin $CURRENT_BRANCH"\n`;
 
