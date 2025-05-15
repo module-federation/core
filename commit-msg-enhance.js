@@ -36,33 +36,54 @@ function sanitizeInput(input) {
 function getAllowedScopes() {
   const scopes = [];
   const workspaceRoot = path.resolve(__dirname);
-  console.log(`[getAllowedScopes] Resolved workspace root to: ${workspaceRoot}`);
+  console.log(
+    `[getAllowedScopes] Resolved workspace root to: ${workspaceRoot}`,
+  );
 
   function findProjectJsonFiles(dir) {
     if (!fs.existsSync(dir)) {
-      console.log(`[getAllowedScopes] Directory does not exist, skipping: ${dir}`);
+      console.log(
+        `[getAllowedScopes] Directory does not exist, skipping: ${dir}`,
+      );
       return;
     }
     try {
-      fs.readdirSync(dir, { withFileTypes: true }).forEach(dirent => {
+      fs.readdirSync(dir, { withFileTypes: true }).forEach((dirent) => {
         const fullPath = path.join(dir, dirent.name);
         if (dirent.isDirectory()) {
-          if (dirent.name === 'node_modules' || dirent.name === '.git' || dirent.name === '.nx' || dirent.name === 'dist' || dirent.name === 'build' || dirent.name.startsWith('.')) {
+          if (
+            dirent.name === 'node_modules' ||
+            dirent.name === '.git' ||
+            dirent.name === '.nx' ||
+            dirent.name === 'dist' ||
+            dirent.name === 'build' ||
+            dirent.name.startsWith('.')
+          ) {
             return;
           }
           const projectJsonPath = path.join(fullPath, 'project.json');
           if (fs.existsSync(projectJsonPath)) {
-            console.log(`[getAllowedScopes] Found project.json at: ${projectJsonPath}`);
+            console.log(
+              `[getAllowedScopes] Found project.json at: ${projectJsonPath}`,
+            );
             try {
-              const projectJson = JSON.parse(fs.readFileSync(projectJsonPath, 'utf8'));
+              const projectJson = JSON.parse(
+                fs.readFileSync(projectJsonPath, 'utf8'),
+              );
               if (projectJson.name) {
                 scopes.push(projectJson.name);
-                console.log(`[getAllowedScopes] Added scope: ${projectJson.name}`);
+                console.log(
+                  `[getAllowedScopes] Added scope: ${projectJson.name}`,
+                );
               } else {
-                console.warn(`[getAllowedScopes] Warning: No name found in ${projectJsonPath}`);
+                console.warn(
+                  `[getAllowedScopes] Warning: No name found in ${projectJsonPath}`,
+                );
               }
             } catch (e) {
-              console.warn(`[getAllowedScopes] Warning: Could not parse ${projectJsonPath}: ${e.message}`);
+              console.warn(
+                `[getAllowedScopes] Warning: Could not parse ${projectJsonPath}: ${e.message}`,
+              );
             }
           } else {
             findProjectJsonFiles(fullPath);
@@ -70,19 +91,23 @@ function getAllowedScopes() {
         }
       });
     } catch (readDirError) {
-        console.error(`[getAllowedScopes] Error reading directory ${dir}: ${readDirError.message}`);
+      console.error(
+        `[getAllowedScopes] Error reading directory ${dir}: ${readDirError.message}`,
+      );
     }
   }
 
   const dirsToScan = ['apps', 'packages', 'libs'];
-  dirsToScan.forEach(d => {
+  dirsToScan.forEach((d) => {
     const scanDir = path.join(workspaceRoot, d);
     console.log(`[getAllowedScopes] Scanning directory: ${scanDir}`);
     findProjectJsonFiles(scanDir);
   });
 
   const uniqueScopes = [...new Set(scopes)];
-  console.log(`[getAllowedScopes] Found unique scopes: ${uniqueScopes.join(', ')}`);
+  console.log(
+    `[getAllowedScopes] Found unique scopes: ${uniqueScopes.join(', ')}`,
+  );
   return uniqueScopes;
 }
 
@@ -120,12 +145,32 @@ Please format the commit message as follows:
     temperature: 0.5,
   });
 
-  return response.choices[0].message.content
+  let message = response.choices[0].message.content
     .trim()
     .replace(/[\`]{3}markdown|[\`]{3}/g, '')
     .trim()
     .replace(/^[\`\"\']|[\`\"\']$/g, '') // Remove leading/trailing backticks, quotes (single or double)
     .trim();
+
+  message = message.replace(
+    /^([Cc][Hh][Oo][Rr][Ee]|[Ff][Ee][Aa][Tt]|[Ff][Ii][Xx]|[Dd][Oo][Cc][Ss]|[Ss][Tt][Yy][Ll][Ee]|[Rr][Ee][Ff][Aa][Cc][Tt][Oo][Rr]|[Pp][Ee][Rr][Ff]|[Tt][Ee][Ss][Tt])(\s*)(\(|:)/,
+    (match, p1, p2, p3) => {
+      return p1.toLowerCase() + (p3 === '(' ? p3 : ':');
+    },
+  );
+
+  // Ensure scope is lowercase if present
+  message = message.replace(
+    /^(\w+\()([^)]+)(\))/,
+    (match, prefixAndOpenParen, scope, closeParen) => {
+      return `${prefixAndOpenParen}${scope.toLowerCase()}${closeParen}`;
+    },
+  );
+
+  // Ensure there's a space after the colon following type or scope
+  message = message.replace(/^([\w()]+:)([^\s])/, '$1 $2');
+
+  return message;
 }
 
 function getBranchCommits(baseBranch) {
@@ -134,24 +179,30 @@ function getBranchCommits(baseBranch) {
       try {
         baseBranch = execSync(
           'git symbolic-ref refs/remotes/origin/HEAD | sed "s@^refs/remotes/origin/@@g"',
-          { shell: '/bin/bash', stdio: 'pipe' }
+          { shell: '/bin/bash', stdio: 'pipe' },
         )
           .toString()
           .trim();
       } catch (e) {
         try {
-            execSync('git rev-parse --verify origin/master', { stdio: 'pipe' });
-            baseBranch = 'master';
+          execSync('git rev-parse --verify origin/master', { stdio: 'pipe' });
+          baseBranch = 'master';
         } catch (masterErr) {
-            baseBranch = 'main';
+          baseBranch = 'main';
         }
-        console.log(`[getBranchCommits] Default remote HEAD not found or ambiguous, trying base branch: ${baseBranch}`);
+        console.log(
+          `[getBranchCommits] Default remote HEAD not found or ambiguous, trying base branch: ${baseBranch}`,
+        );
       }
     }
 
-    console.log(`[getBranchCommits] Using base branch for comparison: origin/${baseBranch}`);
+    console.log(
+      `[getBranchCommits] Using base branch for comparison: origin/${baseBranch}`,
+    );
 
-    const headCommit = execSync('git rev-parse HEAD', { shell: '/bin/bash' }).toString().trim();
+    const headCommit = execSync('git rev-parse HEAD', { shell: '/bin/bash' })
+      .toString()
+      .trim();
     console.log(`[getBranchCommits] Current HEAD is: ${headCommit}`);
 
     const command = `git log origin/${baseBranch}..${headCommit} --no-merges --format="%H" --reverse`;
@@ -159,10 +210,15 @@ function getBranchCommits(baseBranch) {
     const output = execSync(command, { shell: '/bin/bash' }).toString().trim();
 
     const commits = output ? output.split('\n') : [];
-    console.log(`[getBranchCommits] Found ${commits.length} commits to process (oldest first): ${commits.join(', ')}`);
+    console.log(
+      `[getBranchCommits] Found ${commits.length} commits to process (oldest first): ${commits.join(', ')}`,
+    );
     return commits;
   } catch (error) {
-    console.error('[getBranchCommits] Error getting branch commits:', error.message);
+    console.error(
+      '[getBranchCommits] Error getting branch commits:',
+      error.message,
+    );
     console.error('Stderr:', error.stderr ? error.stderr.toString() : 'N/A');
     process.exit(1);
   }
@@ -187,6 +243,46 @@ function getCommitDiff(commitHash) {
 }
 
 async function processBranchCommits() {
+  let gitDir;
+  try {
+    // Assuming process.cwd() is the root of the git repository where the script is run.
+    // git rev-parse --git-dir typically returns '.git' if at the root.
+    gitDir = execSync('git rev-parse --git-dir', {
+      shell: '/bin/bash',
+      stdio: 'pipe',
+    })
+      .toString()
+      .trim();
+  } catch (e) {
+    console.error(
+      'Error: Failed to determine .git directory. Ensure you are running this script within a git repository.',
+      e.message,
+    );
+    process.exit(1);
+  }
+
+  // Resolve indexLockPath: .git is always under toplevel
+  const workspaceRootPath = execSync('git rev-parse --show-toplevel', {
+    shell: '/bin/bash',
+    stdio: 'pipe',
+  })
+    .toString()
+    .trim();
+  const indexLockPath = path.join(workspaceRootPath, '.git', 'index.lock');
+
+  if (fs.existsSync(indexLockPath)) {
+    console.error(`\\nError: Git index lock file found at '${indexLockPath}'.`);
+    console.error(
+      'This usually means another git process is running (e.g., an IDE, a terminal where a git command is active), or a previous git operation crashed.',
+    );
+    console.error(
+      'Please ensure all other git processes are terminated for this repository. If you are certain no other git process is active, you might need to manually remove the lock file: ' +
+        indexLockPath,
+    );
+    console.error('Aborting script to prevent further issues.\\n');
+    process.exit(1);
+  }
+
   const chronologicalCommits = getBranchCommits(argv['base-branch']);
 
   if (chronologicalCommits.length === 0) {
@@ -194,25 +290,34 @@ async function processBranchCommits() {
     return;
   }
 
-  console.log(`Found ${chronologicalCommits.length} commits to process (oldest to newest).`);
+  console.log(
+    `Found ${chronologicalCommits.length} commits to process (oldest to newest).`,
+  );
 
   const commitMessages = {};
 
   for (const originalHash of chronologicalCommits) {
     const diff = getCommitDiff(originalHash);
     if (!diff) {
-        console.warn(`Skipping commit ${originalHash} as no diff could be obtained.`);
-        continue;
+      console.warn(
+        `Skipping commit ${originalHash} as no diff could be obtained.`,
+      );
+      continue;
     }
 
     try {
-      const originalMessage = execSync(`git log -1 --format=%B ${originalHash}`, {
-        shell: '/bin/bash',
-      })
+      const originalMessage = execSync(
+        `git log -1 --format=%B ${originalHash}`,
+        {
+          shell: '/bin/bash',
+        },
+      )
         .toString()
         .trim();
 
-      console.log(`\nProcessing original commit ${originalHash.substring(0, 8)}...`);
+      console.log(
+        `\nProcessing original commit ${originalHash.substring(0, 8)}...`,
+      );
       console.log(`Original message: ${originalMessage}`);
 
       const newMessage = await generateCommitMessage(diff);
@@ -225,23 +330,33 @@ async function processBranchCommits() {
   }
 
   if (Object.keys(commitMessages).length === 0) {
-    console.log("No commit messages were successfully generated. Exiting.");
+    console.log('No commit messages were successfully generated. Exiting.');
     return;
   }
 
   console.log('\n\n========== HOW TO UPDATE COMMIT MESSAGES ==========');
 
   if (!argv.apply) {
-    console.log('Run with --apply to generate an executable script to apply these changes.');
-    console.log('Manual cherry-pick + amend sequence would be complex. Use --apply.');
-    Object.keys(commitMessages).forEach(originalHash => {
-        console.log(`For original commit ${originalHash.substring(0,8)} -> New message: "${commitMessages[originalHash]}"`);
+    console.log(
+      'Run with --apply to generate an executable script to apply these changes.',
+    );
+    console.log(
+      'Manual cherry-pick + amend sequence would be complex. Use --apply.',
+    );
+    Object.keys(commitMessages).forEach((originalHash) => {
+      console.log(
+        `For original commit ${originalHash.substring(0, 8)} -> New message: "${commitMessages[originalHash]}"`,
+      );
     });
     return;
   }
 
   const scriptPath = path.join(process.cwd(), 'update-commit-messages.sh');
-  const currentBranch = execSync('git branch --show-current', { shell: '/bin/bash' }).toString().trim();
+  const currentBranch = execSync('git branch --show-current', {
+    shell: '/bin/bash',
+  })
+    .toString()
+    .trim();
 
   let scriptContent = `#!/bin/bash
 # Shell script to rewrite commit history with new messages
@@ -268,15 +383,18 @@ git checkout "${BASE_FOR_REWRITE}"
 echo "Checked out base ${BASE_FOR_REWRITE} in a detached HEAD state."
 `;
 
-  chronologicalCommits.forEach(originalHash => {
+  chronologicalCommits.forEach((originalHash) => {
     const aiMessage = commitMessages[originalHash];
     if (!aiMessage) {
-        scriptContent += `\necho "Skipping original commit ${originalHash.substring(0,8)} as no new message was generated for it."\n`;
-        return;
+      scriptContent += `\necho "Skipping original commit ${originalHash.substring(0, 8)} as no new message was generated for it."\n`;
+      return;
     }
-    const shellEscapedAiMessage = aiMessage.replace(/'/g, "'\\''").replace(/"/g, '\\"').replace(/`/g, '\\`');
+    const shellEscapedAiMessage = aiMessage
+      .replace(/'/g, "'\\''")
+      .replace(/"/g, '\\"')
+      .replace(/`/g, '\\`');
 
-    scriptContent += `\necho "\nProcessing original commit ${originalHash.substring(0,8)}..."`;
+    scriptContent += `\necho "\nProcessing original commit ${originalHash.substring(0, 8)}..."`;
     scriptContent += `\necho "Cherry-picking ${originalHash} onto current HEAD (\$(git rev-parse --short HEAD))"`;
     scriptContent += `\ngit cherry-pick ${originalHash}`;
     scriptContent += `\necho "Amending just-picked commit with new message: ${aiMessage.replace(/"/g, '\\"')}"`; // for echo, escape only double quotes
@@ -325,7 +443,7 @@ async function main() {
   } catch (error) {
     console.error('Error in main execution:', error.message);
     if (error.stack) {
-        console.error(error.stack);
+      console.error(error.stack);
     }
     process.exit(1);
   }
