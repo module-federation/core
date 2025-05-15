@@ -3,7 +3,12 @@ import { defineConfig } from 'cypress';
 
 export default defineConfig({
   projectId: 'sa6wfn',
-  e2e: nxE2EPreset(__filename, { cypressDir: 'cypress' }),
+  e2e: {
+    ...nxE2EPreset(__filename, { cypressDir: 'cypress' }),
+    // Please ensure you use `cy.origin()` when navigating between domains and remove this option.
+    // See https://docs.cypress.io/app/references/migration-guide#Changes-to-cyorigin
+    injectDocumentDomain: true,
+  },
   defaultCommandTimeout: 20000,
   retries: {
     runMode: 2,

@@ -12,7 +12,7 @@ function generateConfigurations(
       clean: true,
       dts: true,
       legacyOutput: true,
-      outDir: join('packages', 'dts-plugin', 'dist'),
+      outDir: 'dist',
       external: [join(__dirname, 'package.json')],
       ...config,
     };

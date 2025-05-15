@@ -1,6 +1,5 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "defaultProject": "3000-home",
   "targetDefaults": {
     "build": {
       "inputs": ["production", "^production"],
@@ -42,13 +41,13 @@
       "dependsOn": ["^build"]
     },
     "3000-home:build:production": {
-      "cache": true
+      "cache": false
     },
-    "3001-shop:build:production": {
-      "cache": true
+    "@module-federation/3001-shop:build:production": {
+      "cache": false
     },
-    "3002-checkout:build:production": {
-      "cache": true
+    "@module-federation/3002-checkout:build:production": {
+      "cache": false
     }
   },
   "namedInputs": {
@@ -107,6 +106,5 @@
   },
   "useInferencePlugins": false,
   "defaultBase": "main",
-  "nxCloudAccessToken": "NTVlZTRhOWItMGRjYy00YmJjLTllNzAtNDFkNzRhNzdjZDkwfHJlYWQtd3JpdGU=",
-  "useLegacyCache": true
+  "nxCloudAccessToken": "NTVlZTRhOWItMGRjYy00YmJjLTllNzAtNDFkNzRhNzdjZDkwfHJlYWQtd3JpdGU="
 }

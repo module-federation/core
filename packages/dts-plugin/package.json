@@ -70,9 +70,9 @@
     "@types/koa": "2.15.0",
     "@types/node-schedule": "2.1.7",
     "@module-federation/runtime": "workspace:*",
-    "vue": "^3.4.29",
-    "@vue/tsconfig": "^0.5.1",
-    "vue-tsc": "^2.0.26",
+    "vue": "^3.5.13",
+    "@vue/tsconfig": "^0.7.0",
+    "vue-tsc": "^2.2.10",
     "rimraf": "~6.0.1"
   },
   "peerDependencies": {

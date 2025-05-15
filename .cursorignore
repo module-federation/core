@@ -4,11 +4,6 @@
 **/coverage/
 **/dist/
 
-# Documentation and config files
-**/*.yaml
-**/*.yml
-
-
 # Explicitly ignore specific packages
 packages/typescript/
 packages/native-*
@@ -24,7 +19,6 @@ webpack/test/
 webpack/benchmark/
 tools/
 .husky/
-.github/
 .verdaccio/
 
 
@@ -33,7 +27,6 @@ tools/
 .cursorignore
 jest.preset.js
 babel.config.json
-nx.json
 LICENSE
 .nxignore
 netlify.toml

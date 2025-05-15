@@ -1,4 +1,5 @@
 {
   "diffEditor.wordWrap": "on",
-  "editor.rename.enablePreview": false
+  "editor.rename.enablePreview": false,
+  "nxConsole.generateAiAgentRules": true
 }
