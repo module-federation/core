@@ -8,9 +8,21 @@ const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
 module.exports = composePlugins(withNx(), withReact(), (config, context) => {
-  config.watchOptions = {
-    ignored: ['**/node_modules/**', '**/@mf-types/**'],
-  };
+  config.watchOptions = config.watchOptions || {};
+  config.watchOptions.ignored = config.watchOptions.ignored || [];
+
+  // Ensure ignored is an array
+  if (!Array.isArray(config.watchOptions.ignored)) {
+    config.watchOptions.ignored = [config.watchOptions.ignored];
+  }
+
+  // Add our patterns
+  ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'].forEach((pattern) => {
+    if (!config.watchOptions.ignored.includes(pattern)) {
+      config.watchOptions.ignored.push(pattern);
+    }
+  });
+
   config.plugins.push(
     new ModuleFederationPlugin({
       runtime: false,

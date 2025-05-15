@@ -1,4 +1,4 @@
-import { getModuleFederationConfig } from '@nx/react/src/module-federation/utils';
+import { getModuleFederationConfig } from '@nx/module-federation/src/with-module-federation/webpack/utils';
 import { container, Configuration } from 'webpack';
 
 import { ModuleFederationConfig } from '@nx/webpack';

@@ -72,7 +72,11 @@
         "baseUrl": "http://localhost:3000",
         "key": "27e40c91-5ac3-4433-8a87-651d10f51cf6"
       },
+      "defaultConfiguration": "development",
       "configurations": {
+        "development": {
+          "devServerTarget": "3000-home:serve:development"
+        },
         "production": {
           "devServerTarget": "3000-home:serve:production"
         }
@@ -84,14 +88,37 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :3000 || nx run 3000-home:serve",
+            "command": "npx kill-port 3000 3001 3002",
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 4 && nx run 3000-home:e2e",
+            "command": "NX_TUI=false nx run-many --target=serve --projects=3001-shop,3002-checkout --configuration=development & wait-on tcp:3001 tcp:3002",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "wait-on tcp:3001 tcp:3002 && nx run 3000-home:e2e:development",
             "forwardAllArgs": true
           }
         ]
+      },
+      "configurations": {
+        "production": {
+          "parallel": true,
+          "commands": [
+            {
+              "command": "npx kill-port 3000 3001 3002",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "nx run-many --target=build --projects=3001-shop,3002-checkout --configuration=production --parallel=9 && nx run-many --target=serve --projects=3001-shop,3002-checkout --configuration=production --parallel=9 & wait-on tcp:3001 tcp:3002",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "nx build 3000-home --configuration=production && wait-on tcp:3001 tcp:3002 && NX_TUI=false nx run 3000-home:e2e:production",
+              "forwardAllArgs": true
+            }
+          ]
+        }
       }
     }
   }
