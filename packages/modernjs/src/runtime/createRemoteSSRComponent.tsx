@@ -1,12 +1,13 @@
 import React from 'react';
-import {
-  getInstance,
-  type FederationHost,
-} from '@module-federation/enhanced/runtime';
+import logger from './logger';
+import { getInstance } from '@module-federation/enhanced/runtime';
 import {
   ErrorBoundary,
   ErrorBoundaryPropsWithComponent,
 } from 'react-error-boundary';
+import { Await } from './Await';
+import { fetchData, getDataFetchMapKey } from './dataFetch';
+import { getDataFetchInfo, getLoadedRemoteInfos } from './utils';
 
 type IProps = {
   id: string;
@@ -16,31 +17,12 @@ type IProps = {
 
 type ReactKey = { key?: React.Key | null };
 
-function getLoadedRemoteInfos(instance: FederationHost, id: string) {
-  const { name, expose } = instance.remoteHandler.idToRemoteMap[id] || {};
-  if (!name) {
-    return;
-  }
-  const module = instance.moduleCache.get(name);
-  if (!module) {
-    return;
-  }
-  const { remoteSnapshot } = instance.snapshotHandler.getGlobalRemoteInfo(
-    module.remoteInfo,
-  );
-  return {
-    ...module.remoteInfo,
-    snapshot: remoteSnapshot,
-    expose,
-  };
-}
-
 function getTargetModuleInfo(id: string) {
   const instance = getInstance();
   if (!instance) {
     return;
   }
-  const loadedRemoteInfo = getLoadedRemoteInfos(instance, id);
+  const loadedRemoteInfo = getLoadedRemoteInfos(id, instance);
   if (!loadedRemoteInfo) {
     return;
   }
@@ -80,7 +62,7 @@ export function collectSSRAssets(options: IProps) {
   const {
     id,
     injectLink = true,
-    injectScript = true,
+    injectScript = false,
   } = typeof options === 'string' ? { id: options } : options;
   const links: React.ReactNode[] = [];
   const scripts: React.ReactNode[] = [];
@@ -95,8 +77,9 @@ export function collectSSRAssets(options: IProps) {
   }
   const { module: targetModule, publicPath, remoteEntry } = moduleAndPublicPath;
   if (injectLink) {
-    [...targetModule.assets.css.sync, ...targetModule.assets.css.async].forEach(
-      (file, index) => {
+    [...targetModule.assets.css.sync, ...targetModule.assets.css.async]
+      .sort()
+      .forEach((file, index) => {
         links.push(
           <link
             key={`${file.split('.')[0]}_${index}`}
@@ -105,9 +88,9 @@ export function collectSSRAssets(options: IProps) {
             type="text/css"
           />,
         );
-      },
-    );
+      });
   }
+
   if (injectScript) {
     scripts.push(
       <script
@@ -117,7 +100,7 @@ export function collectSSRAssets(options: IProps) {
         crossOrigin="anonymous"
       />,
     );
-    [...targetModule.assets.js.sync].forEach((file, index) => {
+    [...targetModule.assets.js.sync].sort().forEach((file, index) => {
       scripts.push(
         <script
           key={`${file.split('.')[0]}_${index}`}
@@ -145,24 +128,78 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
     : ReactKey;
   const exportName = info?.export || 'default';
 
+  const callLoader = async () => {
+    const m = (await info.loader()) as Record<string, React.FC> &
+      Record<symbol, string>;
+    if (!m) {
+      throw new Error('load remote failed');
+    }
+    return m;
+  };
+
+  const getData = async () => {
+    const m = await callLoader();
+    const moduleId = m && m[Symbol.for('mf_module_id')];
+    const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, getInstance());
+    if (!loadedRemoteInfo) {
+      return;
+    }
+    const dataFetchMapKey = getDataFetchMapKey(
+      { name: loadedRemoteInfo.name, version: loadedRemoteInfo.version },
+      getDataFetchInfo({
+        name: loadedRemoteInfo.name,
+        alias: loadedRemoteInfo.alias,
+        id: moduleId,
+      }),
+    );
+    logger.debug('getData dataFetchMapKey: ', dataFetchMapKey);
+    if (!dataFetchMapKey) {
+      return;
+    }
+    const data = await fetchData(dataFetchMapKey);
+    logger.debug('data: \n', data);
+    return data;
+  };
+
   const LazyComponent = React.lazy(async () => {
     try {
-      const m = (await info.loader()) as Record<string, React.FC> &
-        Record<symbol, string>;
-      if (!m) {
-        throw new Error('load remote failed');
-      }
+      const m = await callLoader();
       const moduleId = m && m[Symbol.for('mf_module_id')];
+      const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, getInstance());
+
+      const dataFetchMapKey = loadedRemoteInfo
+        ? getDataFetchMapKey(
+            { name: loadedRemoteInfo.name, version: loadedRemoteInfo.version },
+            getDataFetchInfo({
+              name: loadedRemoteInfo.name,
+              alias: loadedRemoteInfo.alias,
+              id: moduleId,
+            }),
+          )
+        : undefined;
+      logger.debug('LazyComponent dataFetchMapKey: ', dataFetchMapKey);
 
       const assets = collectSSRAssets({
         id: moduleId,
       });
 
-      const Com = m[exportName] as React.FC;
+      const Com = m[exportName] as React.FC<ComponentType>;
       if (exportName in m && typeof Com === 'function') {
         return {
-          default: (props: Omit<ComponentType, 'key'>) => (
+          default: (
+            props: Omit<ComponentType, 'key'> & { _mfData: unknown },
+          ) => (
             <>
+              {dataFetchMapKey && (
+                <script
+                  suppressHydrationWarning
+                  dangerouslySetInnerHTML={{
+                    __html: String.raw`
+      globalThis._MF__DATA_FETCH_ID_MAP__['${dataFetchMapKey}'][1](${JSON.stringify(props._mfData)})
+   `,
+                  }}
+                ></script>
+              )}
               {assets}
               <Com {...props} />
             </>
@@ -193,14 +230,16 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
       };
     }
   });
+
   return (props: ComponentType) => {
     const { key, ...args } = props;
+
     return (
       <ErrorBoundary FallbackComponent={info.fallback}>
-        <React.Suspense fallback={info.loading}>
+        <Await resolve={getData()} loading={info.loading}>
           {/* @ts-ignore */}
-          <LazyComponent {...args} />
-        </React.Suspense>
+          {(data) => <LazyComponent {...args} _mfData={data} />}
+        </Await>
       </ErrorBoundary>
     );
   };
