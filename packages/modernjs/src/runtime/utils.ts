@@ -63,9 +63,9 @@ export function getLoadedRemoteInfos(
 }
 
 export function isSSRDowngrade() {
-  if (typeof window === 'undefined') {
-    return true;
-  }
-
   return window._SSR_DATA?.renderLevel !== 2;
+}
+
+export function isCSROnly() {
+  return window._SSR_DATA === undefined;
 }

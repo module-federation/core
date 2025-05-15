@@ -6,12 +6,12 @@ export default defineConfig({
   runtime: {
     router: true,
   },
-  server: {
-    ssr: {
-      mode: 'stream',
-    },
-    port: 5002,
-  },
+  // server: {
+  //   ssr: {
+  //     mode: 'stream',
+  //   },
+  //   port: 5002,
+  // },
   plugins: [
     appTools({
       bundler: 'rspack',
