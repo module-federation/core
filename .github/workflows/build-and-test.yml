@@ -9,6 +9,7 @@ on:
 jobs:
   checkout-install:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -26,6 +27,18 @@ jobs:
           node-version: '18'
           cache: 'pnpm'
 
+      - name: Cache Browsers
+        uses: actions/cache@v3
+        id: browsers-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-browsers-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Set Playwright cache status
+        run: echo "PLAYWRIGHT_CACHE_HIT=${{ steps.browsers-cache.outputs.cache-hit }}" >> $GITHUB_ENV
+
       - name: Set Nx SHA
         uses: nrwl/nx-set-shas@v3
 
@@ -33,16 +46,20 @@ jobs:
         run: pnpm install
 
       - name: Install Cypress
+        # if: steps.browsers-cache.outputs.cache-hit != 'true'
         run: npx cypress install
 
       - name: Check Code Format
         run: npx nx format:check
 
+      - name: Print Number of CPU Cores
+        run: nproc
+
       - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Run Build for All
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
 
       - name: Check Package Publishing Compatibility
         run: |
@@ -63,7 +80,7 @@ jobs:
         with:
           max_attempts: 2
           timeout_minutes: 10
-          command: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg' --skip-nx-cache
+          command: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
 
       - name: Run Affected Experimental Tests
         uses: nick-fields/retry@v3

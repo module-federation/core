@@ -1,5 +1,6 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
-
+.temp-commit-msg
+update-commit-messages.sh
 # compiled output
 /dist
 /tmp
@@ -76,3 +77,9 @@ packages/enhanced/test/js
 # Federation
 **/.federation
 *.ts.timestamp*
+
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+.temp-commit-msg
