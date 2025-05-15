@@ -38,8 +38,8 @@ const nextConfig = {
         filename: 'static/chunks/remoteEntry.js',
         remotes: {
           remote_4001: remotes.remote_4001,
-          shop: remotes.shop,
-          checkout: remotes.checkout,
+          // shop: remotes.shop,
+          // checkout: remotes.checkout,
         },
         shared: {
           // 'react': {

@@ -1,7 +1,8 @@
 import { demos } from '#/lib/demos';
 import Link from 'next/link';
+import { lazy } from 'react';
 import dynamic from 'next/dynamic';
-const Button = dynamic(() => import('remote_4001/Button'), { ssr: true });
+const Button = lazy(() => import('remote_4001/Button'));
 
 export default function Page() {
   return (
