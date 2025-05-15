@@ -17,7 +17,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
   }
 
   // Add our patterns
-  ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'].forEach(pattern => {
+  ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'].forEach((pattern) => {
     if (!config.watchOptions.ignored.includes(pattern)) {
       config.watchOptions.ignored.push(pattern);
     }
