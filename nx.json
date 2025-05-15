@@ -41,7 +41,7 @@
       "dependsOn": ["^build"],
       "cache": true
     },
-    "@module-federation/3000-home:build:production": {
+    "3000-home:build:production": {
       "cache": false
     },
     "@module-federation/3001-shop:build:production": {
