@@ -139,7 +139,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     }
 
     if (options.dts !== false) {
-      new DtsPlugin(options).apply(compiler);
+      const dtsPlugin = new DtsPlugin(options);
+      dtsPlugin.apply(compiler);
+      dtsPlugin.addRuntimePlugins();
     }
     if (options.dataPrefetch) {
       new PrefetchPlugin(options).apply(compiler);
