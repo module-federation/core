@@ -522,19 +522,12 @@ class ConsumeSharedPlugin {
 
                 // Try to match with module path after node_modules
                 if (modulePathAfterNodeModules) {
-                  const moduleMatch =
-                    unresolvedConsumes.get(
-                      createLookupKeyForSharing(
-                        modulePathAfterNodeModules,
-                        contextInfo.issuerLayer,
-                      ),
-                    ) ||
-                    unresolvedConsumes.get(
-                      createLookupKeyForSharing(
-                        modulePathAfterNodeModules,
-                        undefined,
-                      ),
-                    );
+                  const moduleMatch = unresolvedConsumes.get(
+                    createLookupKeyForSharing(
+                      modulePathAfterNodeModules,
+                      contextInfo.issuerLayer,
+                    ),
+                  );
 
                   if (
                     moduleMatch !== undefined &&
@@ -550,16 +543,12 @@ class ConsumeSharedPlugin {
                 }
 
                 // Try to match with the full reconstructed path
-                const reconstructedMatch =
-                  unresolvedConsumes.get(
-                    createLookupKeyForSharing(
-                      reconstructed,
-                      contextInfo.issuerLayer,
-                    ),
-                  ) ||
-                  unresolvedConsumes.get(
-                    createLookupKeyForSharing(reconstructed, undefined),
-                  );
+                const reconstructedMatch = unresolvedConsumes.get(
+                  createLookupKeyForSharing(
+                    reconstructed,
+                    contextInfo.issuerLayer,
+                  ),
+                );
 
                 if (reconstructedMatch !== undefined) {
                   return boundCreateConsumeSharedModule(
