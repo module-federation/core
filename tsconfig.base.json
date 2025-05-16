@@ -15,7 +15,10 @@
     "lib": ["es2021", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "rslib": ["tools/rslib/src/index.ts"]
+    }
   },
   "exclude": [
     "node_modules/**",
