@@ -1,5 +1,16 @@
 # @module-federation/dts-plugin
 
+## 0.14.0
+
+### Patch Changes
+
+- 0eb6697: fix(dts-plugin): add dynamic-remote-type-hints-plugin to runtimePlugins if not disable
+- Updated dependencies [82b8cac]
+  - @module-federation/sdk@0.14.0
+  - @module-federation/managers@0.14.0
+  - @module-federation/third-party-dts-extractor@0.14.0
+  - @module-federation/error-codes@0.14.0
+
 ## 0.13.1
 
 ### Patch Changes

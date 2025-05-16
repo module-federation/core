@@ -1,5 +1,11 @@
 # @module-federation/bridge-shared
 
+## 0.14.0
+
+### Patch Changes
+
+- 677aac9: vue.js has router option added to the vue3-bridge
+
 ## 0.13.1
 
 ## 0.13.0

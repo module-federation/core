@@ -1,5 +1,34 @@
 # @module-federation/enhanced
 
+## 0.14.0
+
+### Minor Changes
+
+- 82b8cac: Updated ModuleFederationPlugin to enhance configuration capabilities and target environment identification.
+
+  - Introduced `definePluginOptions` to manage DefinePlugin settings.
+  - Added `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` to handle disabling of snapshot optimizations via experiments.
+  - Implemented environment target detection (`web` or `node`) based on compiler options and experiments.
+  - Consolidated DefinePlugin application with the newly constructed `definePluginOptions`.
+
+### Patch Changes
+
+- 0eb6697: fix(dts-plugin): add dynamic-remote-type-hints-plugin to runtimePlugins if not disable
+- Updated dependencies [82b8cac]
+- Updated dependencies [0eb6697]
+- Updated dependencies [82b8cac]
+  - @module-federation/sdk@0.14.0
+  - @module-federation/dts-plugin@0.14.0
+  - @module-federation/rspack@0.14.0
+  - @module-federation/bridge-react-webpack-plugin@0.14.0
+  - @module-federation/cli@0.14.0
+  - @module-federation/data-prefetch@0.14.0
+  - @module-federation/managers@0.14.0
+  - @module-federation/manifest@0.14.0
+  - @module-federation/runtime-tools@0.14.0
+  - @module-federation/inject-external-runtime-core-plugin@0.14.0
+  - @module-federation/error-codes@0.14.0
+
 ## 0.13.1
 
 ### Patch Changes
