@@ -71,15 +71,6 @@
         "testingType": "e2e",
         "baseUrl": "http://localhost:3000",
         "key": "27e40c91-5ac3-4433-8a87-651d10f51cf6"
-      },
-      "defaultConfiguration": "development",
-      "configurations": {
-        "development": {
-          "devServerTarget": "3000-home:serve:development"
-        },
-        "production": {
-          "devServerTarget": "3000-home:serve:production"
-        }
       }
     },
     "test:e2e": {
@@ -88,11 +79,7 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :3000 || nx run 3000-home:serve",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "sleep 4 && nx run 3000-home:e2e",
+            "command": "nx run 3000-home:e2e",
             "forwardAllArgs": true
           }
         ]
