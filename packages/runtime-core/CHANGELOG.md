@@ -1,5 +1,25 @@
 # @module-federation/runtime
 
+## 0.14.0
+
+### Minor Changes
+
+- 82b8cac: Add conditional functionality for snapshots and optimize entry loading.
+
+  - Introduced FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN constant to control snapshot functionality.
+    - Default to include snapshot functionality if constant is not defined.
+  - Simplified plugin loading logic to check USE_SNAPSHOT flag.
+  - Added ENV_TARGET constant to differentiate between web and node environments.
+  - Extracted duplicated logic for handling remote entry loaded into `handleRemoteEntryLoaded` function.
+  - Refactored entry loading to use conditional environment checks with `ENV_TARGET`.
+
+### Patch Changes
+
+- 0b076b7: Allow extensions other than .js for non-manifest entries
+- Updated dependencies [82b8cac]
+  - @module-federation/sdk@0.14.0
+  - @module-federation/error-codes@0.14.0
+
 ## 0.13.1
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @module-federation/node
 
+## 2.7.3
+
+### Patch Changes
+
+- Updated dependencies [82b8cac]
+- Updated dependencies [82b8cac]
+- Updated dependencies [0eb6697]
+  - @module-federation/enhanced@0.14.0
+  - @module-federation/sdk@0.14.0
+  - @module-federation/runtime@0.14.0
+
 ## 2.7.2
 
 ### Patch Changes
