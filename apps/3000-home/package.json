@@ -12,10 +12,14 @@
   },
   "devDependencies": {
     "@module-federation/nextjs-mf": "workspace:*",
+<<<<<<< HEAD
     "@module-federation/runtime": "workspace:*",
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0",
     "webpack": "5.98.0"
+=======
+    "@module-federation/runtime": "workspace:*"
+>>>>>>> e644b8fe8 (chore: update cmd syntax exit)
   },
   "scripts": {
     "start": "next start",
