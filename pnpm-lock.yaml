@@ -49151,7 +49151,11 @@ packages:
       '@volar/typescript': 2.4.5
       '@vue/language-core': 2.1.6(typescript@5.5.2)
       compare-versions: 6.1.1
+<<<<<<< HEAD
       debug: 4.3.7
+=======
+      debug: 4.3.7(supports-color@9.3.1)
+>>>>>>> 55e811fb6 (chore: update cmd syntax exit)
       kolorist: 1.8.0
       local-pkg: 0.5.0
       magic-string: 0.30.17
