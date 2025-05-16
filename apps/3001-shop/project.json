@@ -73,11 +73,7 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :3001 || nx run 3001-shop:serve",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "sleep 10 && nx run 3001-shop:e2e",
+            "command": "nx run 3001-shop:e2e",
             "forwardAllArgs": true
           }
         ]

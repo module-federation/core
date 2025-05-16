@@ -70,11 +70,7 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :3002 || nx run 3002-checkout:serve",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "sleep 5 && nx run 3002-checkout:e2e",
+            "command": "nx run 3002-checkout:e2e",
             "forwardAllArgs": true
           }
         ]
