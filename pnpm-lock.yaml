@@ -510,6 +510,7 @@ importers:
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
+<<<<<<< HEAD
       '@types/react':
         specifier: 18.3.11
         version: 18.3.11
@@ -519,6 +520,8 @@ importers:
       webpack:
         specifier: 5.98.0
         version: 5.98.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
+=======
+>>>>>>> e644b8fe8 (chore: update cmd syntax exit)
 
   apps/3001-shop:
     dependencies:
@@ -550,6 +553,7 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
+<<<<<<< HEAD
       '@types/react':
         specifier: 18.3.11
         version: 18.3.11
@@ -559,6 +563,8 @@ importers:
       webpack:
         specifier: 5.98.0
         version: 5.98.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
+=======
+>>>>>>> e644b8fe8 (chore: update cmd syntax exit)
 
   apps/3002-checkout:
     dependencies:
@@ -590,6 +596,7 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
+<<<<<<< HEAD
       '@types/react':
         specifier: 18.3.11
         version: 18.3.11
@@ -599,6 +606,8 @@ importers:
       webpack:
         specifier: 5.98.0
         version: 5.98.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
+=======
+>>>>>>> e644b8fe8 (chore: update cmd syntax exit)
 
   apps/bundle-size:
     dependencies:
