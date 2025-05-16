@@ -66,6 +66,12 @@
           }
         ]
       }
+    },
+    "echo": {
+      "executor": "rslib:echo",
+      "options": {
+        "textToEcho": "Hello World"
+      }
     }
   }
 }
