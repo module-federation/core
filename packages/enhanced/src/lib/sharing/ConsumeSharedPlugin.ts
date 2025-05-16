@@ -643,7 +643,7 @@ class ConsumeSharedPlugin {
                           ? options.import + remainder
                           : undefined,
                         shareKey: options.shareKey + remainder,
-                        layer: options.layer,
+                        layer: options.layer || contextInfo.issuerLayer,
                       },
                     );
                   }
