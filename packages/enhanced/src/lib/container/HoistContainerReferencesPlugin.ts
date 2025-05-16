@@ -10,6 +10,8 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
+import RemoteToExternalDependency from './RemoteToExternalDependency';
+import FallbackDependency from './FallbackDependency';
 
 const { AsyncDependenciesBlock, ExternalModule } = require(
   normalizeWebpackPath('webpack'),
@@ -28,16 +30,25 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         const logger = compilation.getLogger(PLUGIN_NAME);
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const containerEntryDependencies = new Set<Dependency>();
-        hooks.addContainerEntryModule.tap(
+        const federationRuntimeDependencies = new Set<Dependency>();
+        const remoteDependencies = new Set<Dependency>();
+
+        hooks.addContainerEntryDependency.tap(
           'HoistContainerReferences',
           (dep: ContainerEntryDependency) => {
             containerEntryDependencies.add(dep);
           },
         );
-        hooks.addFederationRuntimeModule.tap(
+        hooks.addFederationRuntimeDependency.tap(
           'HoistContainerReferences',
           (dep: FederationRuntimeDependency) => {
-            containerEntryDependencies.add(dep);
+            federationRuntimeDependencies.add(dep);
+          },
+        );
+        hooks.addRemoteDependency.tap(
+          'HoistContainerReferences',
+          (dep: RemoteToExternalDependency | FallbackDependency) => {
+            remoteDependencies.add(dep);
           },
         );
 
@@ -53,9 +64,10 @@ export class HoistContainerReferences implements WebpackPluginInstance {
             this.hoistModulesInChunks(
               compilation,
               runtimeChunks,
-              chunks,
               logger,
               containerEntryDependencies,
+              federationRuntimeDependencies,
+              remoteDependencies,
             );
           },
         );
@@ -67,37 +79,27 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   private hoistModulesInChunks(
     compilation: Compilation,
     runtimeChunks: Set<Chunk>,
-    chunks: Iterable<Chunk>,
     logger: ReturnType<Compilation['getLogger']>,
     containerEntryDependencies: Set<Dependency>,
+    federationRuntimeDependencies: Set<Dependency>,
+    remoteDependencies: Set<Dependency>,
   ): void {
     const { chunkGraph, moduleGraph } = compilation;
-    // when runtimeChunk: single is set - ContainerPlugin will create a "partial" chunk we can use to
-    // move modules into the runtime chunk
-    for (const dep of containerEntryDependencies) {
-      const containerEntryModule = moduleGraph.getModule(dep);
-      if (!containerEntryModule) continue;
-      const allReferencedModules = getAllReferencedModules(
+    const allModulesToHoist = new Set<Module>();
+
+    const initialDependencies = new Set([...containerEntryDependencies]);
+    for (const dep of initialDependencies) {
+      const initialModule = moduleGraph.getModule(dep);
+      if (!initialModule) continue;
+      const referencedModules = getAllReferencedModules(
         compilation,
-        containerEntryModule,
+        initialModule,
         'initial',
       );
-
-      const allRemoteReferences = getAllReferencedModules(
-        compilation,
-        containerEntryModule,
-        'external',
-      );
-
-      for (const remote of allRemoteReferences) {
-        allReferencedModules.add(remote);
-      }
-
-      const containerRuntimes =
-        chunkGraph.getModuleRuntimes(containerEntryModule);
+      referencedModules.forEach((m) => allModulesToHoist.add(m));
+      const moduleRuntimes = chunkGraph.getModuleRuntimes(initialModule);
       const runtimes = new Set<string>();
-
-      for (const runtimeSpec of containerRuntimes) {
+      for (const runtimeSpec of moduleRuntimes) {
         compilation.compiler.webpack.util.runtime.forEachRuntime(
           runtimeSpec,
           (runtimeKey) => {
@@ -107,19 +109,79 @@ export class HoistContainerReferences implements WebpackPluginInstance {
           },
         );
       }
-
       for (const runtime of runtimes) {
         const runtimeChunk = compilation.namedChunks.get(runtime);
         if (!runtimeChunk) continue;
-
-        for (const module of allReferencedModules) {
+        for (const module of referencedModules) {
           if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
             chunkGraph.connectChunkAndModule(runtimeChunk, module);
           }
         }
       }
-      this.cleanUpChunks(compilation, allReferencedModules);
     }
+    // Federation Runtime Dependencies: use 'initial' (not 'all')
+    for (const dep of federationRuntimeDependencies) {
+      const runtimeModule = moduleGraph.getModule(dep);
+      if (!runtimeModule) continue;
+      const referencedModules = getAllReferencedModules(
+        compilation,
+        runtimeModule,
+        'initial',
+      );
+      referencedModules.forEach((m) => allModulesToHoist.add(m));
+      const moduleRuntimes = chunkGraph.getModuleRuntimes(runtimeModule);
+      const runtimes = new Set<string>();
+      for (const runtimeSpec of moduleRuntimes) {
+        compilation.compiler.webpack.util.runtime.forEachRuntime(
+          runtimeSpec,
+          (runtimeKey) => {
+            if (runtimeKey) {
+              runtimes.add(runtimeKey);
+            }
+          },
+        );
+      }
+      for (const runtime of runtimes) {
+        const runtimeChunk = compilation.namedChunks.get(runtime);
+        if (!runtimeChunk) continue;
+        for (const module of referencedModules) {
+          if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
+            chunkGraph.connectChunkAndModule(runtimeChunk, module);
+          }
+        }
+      }
+    }
+    for (const remoteDep of remoteDependencies) {
+      const remoteModule = moduleGraph.getModule(remoteDep);
+      if (!remoteModule) continue;
+      const referencedRemoteModules = getAllReferencedModules(
+        compilation,
+        remoteModule,
+        'initial',
+      );
+      referencedRemoteModules.forEach((m) => allModulesToHoist.add(m));
+      const remoteModuleRuntimes = chunkGraph.getModuleRuntimes(remoteModule);
+      const remoteRuntimes = new Set<string>();
+      for (const runtimeSpec of remoteModuleRuntimes) {
+        compilation.compiler.webpack.util.runtime.forEachRuntime(
+          runtimeSpec,
+          (runtimeKey) => {
+            if (runtimeKey) remoteRuntimes.add(runtimeKey);
+          },
+        );
+      }
+      for (const runtime of remoteRuntimes) {
+        const runtimeChunk = compilation.namedChunks.get(runtime);
+        if (!runtimeChunk) continue;
+        for (const module of referencedRemoteModules) {
+          if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
+            chunkGraph.connectChunkAndModule(runtimeChunk, module);
+          }
+        }
+      }
+    }
+
+    this.cleanUpChunks(compilation, allModulesToHoist);
   }
 
   // Method to clean up chunks by disconnecting unused modules

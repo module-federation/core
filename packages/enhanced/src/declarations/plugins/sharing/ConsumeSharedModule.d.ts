@@ -75,3 +75,4 @@ export type ConsumeOptions = {
    */
   include?: ConsumeSharedModuleIncludeOptions;
 };
+const TYPES = new Set(['consume-shared']);

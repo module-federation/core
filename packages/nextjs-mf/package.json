@@ -61,6 +61,9 @@
   "peerDependenciesMeta": {
     "styled-jsx": {
       "optional": true
+    },
+    "next": {
+      "optional": true
     }
   }
 }
