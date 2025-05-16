@@ -298,7 +298,7 @@ export const setupChunkHandler = (
                     chunkId,
                   )
                 : false;
-            
+
             if (fs && fs.existsSync(filename)) {
               loadChunk(
                 'filesystem',
