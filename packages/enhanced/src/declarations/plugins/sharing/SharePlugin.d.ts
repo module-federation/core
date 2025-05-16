@@ -25,6 +25,15 @@ export interface SharePluginOptions {
    * Modules that should be shared in the share scope. When provided, property names are used to match requested modules in this compilation.
    */
   shared: Shared;
+  /**
+   * Experimental features options
+   */
+  experiments?: {
+    /**
+     * Enable reconstructed lookup for node_modules paths
+     */
+    nodeModulesReconstructedLookup?: boolean;
+  };
 }
 /**
  * Modules that should be shared in the share scope. Property names are used to match requested modules in this compilation. Relative requests are resolved, module requests are matched unresolved, absolute paths will match resolved requests. A trailing slash will match all requests with this prefix. In this case shareKey must also have a trailing slash.
@@ -87,4 +96,18 @@ export interface SharedConfig {
    * The actual request to use for importing the module. Defaults to the property name.
    */
   request?: string;
+  /**
+   * Filter for the shared module.
+   */
+  exclude?: IncludeExcludeOptions;
+  /**
+   * Filter for the shared module.
+   */
+  include?: IncludeExcludeOptions;
+}
+
+export interface IncludeExcludeOptions {
+  request?: string | RegExp;
+  version?: string;
+  fallbackVersion?: string;
 }
