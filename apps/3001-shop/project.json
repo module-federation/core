@@ -92,7 +92,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "wait-on tcp:3000 tcp:3002 && nx run 3001-shop:e2e:development",
+            "command": "wait-on tcp:3000 tcp:3002 && nx run 3001-shop:e2e:development && npx kill-port 3000 3001 3002 && exit 0;",
             "forwardAllArgs": true
           }
         ]
@@ -110,7 +110,7 @@
               "forwardAllArgs": false
             },
             {
-              "command": "wait-on tcp:3000 tcp:3002 && nx build 3001-shop --configuration=production && NX_TUI=false nx run 3001-shop:e2e:production",
+              "command": "wait-on tcp:3000 tcp:3002 && nx build 3001-shop --configuration=production && NX_TUI=false nx run 3001-shop:e2e:production && exit 0;",
               "forwardAllArgs": true
             }
           ]
