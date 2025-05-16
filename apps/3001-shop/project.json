@@ -15,7 +15,10 @@
         "development": {
           "outputPath": "apps/3001-shop"
         },
-        "production": {}
+        "production": {
+          "cache": false,
+          "outputPath": "apps/3001-shop"
+        }
       },
       "dependsOn": [
         {
@@ -70,11 +73,7 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :3001 || nx run 3001-shop:serve",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "sleep 10 && nx run 3001-shop:e2e",
+            "command": "nx run 3001-shop:e2e",
             "forwardAllArgs": true
           }
         ]
@@ -87,7 +86,11 @@
         "testingType": "e2e",
         "baseUrl": "http://localhost:3001"
       },
+      "defaultConfiguration": "development",
       "configurations": {
+        "development": {
+          "devServerTarget": "3001-shop:serve:development"
+        },
         "production": {
           "devServerTarget": "3001-shop:serve:production"
         }

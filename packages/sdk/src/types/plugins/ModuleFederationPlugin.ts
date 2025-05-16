@@ -258,6 +258,19 @@ export interface ModuleFederationPluginOptions {
      * Enable reconstructed lookup for node_modules paths
      */
     nodeModulesReconstructedLookup?: boolean;
+    /**
+     * Options related to build optimizations.
+     */
+    optimization?: {
+      /**
+       * Enable optimization to skip snapshot plugin
+       */
+      disableSnapshot?: boolean;
+      /**
+       * Target environment for the build
+       */
+      target?: 'web' | 'node';
+    };
   };
   bridge?: {
     /**

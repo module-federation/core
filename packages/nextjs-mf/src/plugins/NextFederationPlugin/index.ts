@@ -231,27 +231,6 @@ export class NextFederationPlugin {
       asyncFunction: true,
     };
 
-    // Add layer rules for resource queries
-    if (!compiler.options.module.rules) {
-      compiler.options.module.rules = [];
-    }
-
-    // Add layer rules for RSC, client and SSR
-    compiler.options.module.rules.push({
-      resourceQuery: /\?rsc/,
-      layer: 'rsc',
-    });
-
-    compiler.options.module.rules.push({
-      resourceQuery: /\?client/,
-      layer: 'client',
-    });
-
-    compiler.options.module.rules.push({
-      resourceQuery: /\?ssr/,
-      layer: 'ssr',
-    });
-
     applyPathFixes(compiler, this._options, this._extraOptions);
     if (this._extraOptions.debug) {
       compiler.options.devtool = false;
