@@ -531,9 +531,6 @@ importers:
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
-      '@module-federation/utilities':
-        specifier: workspace:*
-        version: link:../../packages/utilities
 
   apps/3001-shop:
     dependencies:
@@ -562,9 +559,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
-      '@module-federation/utilities':
-        specifier: workspace:*
-        version: link:../../packages/utilities
 
   apps/3002-checkout:
     dependencies:
@@ -593,9 +587,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
-      '@module-federation/utilities':
-        specifier: workspace:*
-        version: link:../../packages/utilities
 
   apps/bundle-size:
     dependencies:
