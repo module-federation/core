@@ -136,6 +136,7 @@ export function createScript(info: {
 }
 
 export function createLink(info: {
+  root: HTMLElement;
   url: string;
   cb?: (value: void | PromiseLike<void>) => void;
   onErrorCallback?: (error: Error) => void;
@@ -151,7 +152,7 @@ export function createLink(info: {
   // Retrieve the existing script element by its src attribute
   let link: HTMLLinkElement | null = null;
   let needAttach = true;
-  const links = document.getElementsByTagName('link');
+  const links = info.root.querySelectorAll('link');
   for (let i = 0; i < links.length; i++) {
     const l = links[i];
     const linkHref = l.getAttribute('href');
