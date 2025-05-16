@@ -1,15 +1,28 @@
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
-import helpers from '@module-federation/runtime/helpers';
-import { getDataFetchInfo } from '../../runtime/utils';
+import {
+  getDataFetchInfo,
+  initDataFetchMap,
+  getDataFetchItem,
+  getDataFetchMap,
+  isCSROnly,
+  isSSRDowngrade,
+} from '../../runtime/utils';
 import logger from '../../runtime/logger';
 import { getDataFetchMapKey } from '../../runtime/dataFetch';
+import type { MF_DATA_FETCH_MAP_VALUE } from '../../interfaces/global';
 
 const autoFetchData: () => FederationRuntimePlugin = () => ({
   name: 'auto-fetch-data-plugin',
+  beforeInit(args) {
+    initDataFetchMap();
+    return args;
+  },
   afterLoadSnapshot(args) {
-    if (typeof window !== 'undefined') {
-      return args;
-    }
+    // if (typeof window !== 'undefined' && !(isCSROnly() || isSSRDowngrade() )) {
+    //   if(!globalThis._MF__DATA_FETCH_ID_MAP__['_mfSSRDowngrade']){
+    //     return args;
+    //   }
+    // }
 
     const { id, moduleInfo, remoteSnapshot, host } = args;
     if (typeof id === 'string' && id.includes('data')) {
@@ -30,12 +43,20 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
     }
     const { dataFetchId, dataFetchName } = dataFetchInfo;
 
+    if (
+      !remoteSnapshot.modules.find(
+        (module) => module.moduleName === dataFetchName,
+      )
+    ) {
+      return args;
+    }
+
     const { modules, version } = remoteSnapshot;
 
-    const dataFetchMapKey = getDataFetchMapKey(
-      { name, version },
-      dataFetchInfo,
-    );
+    const dataFetchMapKey = getDataFetchMapKey(dataFetchInfo, {
+      name: host.name,
+      version: host.options.version,
+    });
     logger.debug(
       '======= auto fetch plugin dataFetchMapKey: ',
       dataFetchMapKey,
@@ -45,11 +66,8 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
       return args;
     }
 
-    if (
-      helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__[
-        dataFetchMapKey
-      ]
-    ) {
+    const dataFetchItem = getDataFetchItem(dataFetchMapKey);
+    if (dataFetchItem) {
       return args;
     }
 
@@ -62,9 +80,10 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
       return args;
     }
 
-    const fetchData = host
-      .loadRemote(dataFetchId)
-      .then((m) => {
+    const dataFetchMap = getDataFetchMap();
+
+    const getDataFetchGetter = () =>
+      host.loadRemote(dataFetchId).then((m) => {
         if (
           m &&
           typeof m === 'object' &&
@@ -73,16 +92,23 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
         ) {
           return m.fetchData as () => Promise<unknown>;
         }
-      })
-      .catch((e) => {
-        console.log('======= auto fetch plugin fetchData error', e);
-        return undefined;
+        throw new Error(
+          `fetchData not found in remote ${dataFetchId}, ${JSON.stringify(m)}`,
+        );
       });
+    // .catch((e) => {
+    //   console.log('======= auto fetch plugin fetchData error', e);
+    //   return ()=>`${e}`;
+    // });
 
-    helpers.global.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__.set(
-      dataFetchMapKey,
-      fetchData,
-    );
+    const dataFetchFnItem: MF_DATA_FETCH_MAP_VALUE[0] = [getDataFetchGetter];
+
+    // server client must execute
+    if (typeof window === 'undefined' || isCSROnly()) {
+      dataFetchFnItem.push(getDataFetchGetter());
+    }
+
+    dataFetchMap.set(dataFetchMapKey, [dataFetchFnItem]);
 
     return args;
   },

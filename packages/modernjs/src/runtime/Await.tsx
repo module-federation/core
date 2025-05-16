@@ -1,4 +1,10 @@
 import React, { MutableRefObject, ReactNode, Suspense, useRef } from 'react';
+import logger from './logger';
+import {
+  DATA_FETCH_ERROR_PREFIX,
+  LOAD_REMOTE_ERROR_PREFIX,
+  ERROR_TYPE,
+} from '../constant';
 
 function isPromise<T>(obj: any): obj is PromiseLike<T> {
   return (
@@ -7,16 +13,39 @@ function isPromise<T>(obj: any): obj is PromiseLike<T> {
     typeof obj.then === 'function'
   );
 }
-export const AWAIT_ERROR_PREFIX =
+const AWAIT_ERROR_PREFIX =
   '<Await /> caught the following error during render: ';
 
-export const IsAwaitErrorText = (text: string) =>
-  typeof text === 'string' && text.indexOf(AWAIT_ERROR_PREFIX) === 0;
+export type ErrorInfo = {
+  err: Error;
+  errorType: number;
+};
+
+const transformError = (errMsg: string): ErrorInfo => {
+  const originalMsg = errMsg.replace(AWAIT_ERROR_PREFIX, '');
+  if (originalMsg.indexOf(DATA_FETCH_ERROR_PREFIX) === 0) {
+    return {
+      err: new Error(originalMsg.replace(DATA_FETCH_ERROR_PREFIX, '')),
+      errorType: ERROR_TYPE.DATA_FETCH,
+    };
+  }
+  if (originalMsg.indexOf(LOAD_REMOTE_ERROR_PREFIX) === 0) {
+    return {
+      err: new Error(originalMsg.replace(LOAD_REMOTE_ERROR_PREFIX, '')),
+      errorType: ERROR_TYPE.LOAD_REMOTE,
+    };
+  }
+
+  return {
+    err: new Error(originalMsg),
+    errorType: ERROR_TYPE.UNKNOWN,
+  };
+};
 
 export interface AwaitProps<T> {
   resolve: T | Promise<T>;
   loading?: ReactNode;
-  errorElement?: ReactNode | ((data?: string) => ReactNode);
+  errorElement?: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
   children: (data: T) => ReactNode;
 }
 
@@ -57,7 +86,7 @@ function AwaitSuspense<T>({
   errorElement = DefaultErrorElement,
 }: AwaitErrorHandlerProps<T>) {
   return (
-    <Suspense fallback={loading}>
+    <Suspense>
       <ResolveAwait
         resolve={resolve}
         loading={loading}
@@ -76,10 +105,27 @@ function ResolveAwait<T>({
   errorElement,
 }: AwaitErrorHandlerProps<T>) {
   const data = resolve();
+  logger.debug('resolve data: ', data);
   if (typeof data === 'string' && data.indexOf(AWAIT_ERROR_PREFIX) === 0) {
     return (
       <>
-        {typeof errorElement === 'function' ? errorElement(data) : errorElement}
+        {typeof errorElement === 'function' ? (
+          <>
+            {/* TODO: set _mfSSRDowngrade */}
+            <script
+              suppressHydrationWarning
+              dangerouslySetInnerHTML={{
+                __html: String.raw`
+                  globalThis._MF__DATA_FETCH_ID_MAP__ = globalThis._MF__DATA_FETCH_ID_MAP__ || {};
+    globalThis._MF__DATA_FETCH_ID_MAP__['_mfSSRDowngrade'] = true;
+ `,
+              }}
+            ></script>
+            {errorElement(transformError(data))}
+          </>
+        ) : (
+          errorElement
+        )}
       </>
     );
   }

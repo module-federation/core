@@ -1,4 +1,5 @@
 import type { FederationHost } from '@module-federation/enhanced/runtime';
+import type { MF_DATA_FETCH_MAP, MF_SSR_DOWNGRADE } from '../interfaces/global';
 
 export const DATA_FETCH = 'data';
 
@@ -63,9 +64,21 @@ export function getLoadedRemoteInfos(
 }
 
 export function isSSRDowngrade() {
-  if (typeof window === 'undefined') {
-    return true;
-  }
+  return Boolean(globalThis.__MF_SSR_DOWNGRADE__);
+}
 
-  return window._SSR_DATA?.renderLevel !== 2;
+export function isCSROnly() {
+  return window._SSR_DATA === undefined;
+}
+
+export function initDataFetchMap() {
+  globalThis.__MF_DATA_FETCH_MAP__ ||= new Map();
+}
+
+export function getDataFetchItem(id: string) {
+  return (globalThis.__MF_DATA_FETCH_MAP__ as MF_DATA_FETCH_MAP)?.get(id);
+}
+
+export function getDataFetchMap() {
+  return globalThis.__MF_DATA_FETCH_MAP__ as MF_DATA_FETCH_MAP;
 }

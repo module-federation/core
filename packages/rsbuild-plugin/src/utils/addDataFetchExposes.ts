@@ -28,6 +28,7 @@ const addDataFetchExpose = (
 export function addDataFetchExposes(
   exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'],
   isServer: boolean,
+  enableSSR: boolean,
 ) {
   if (typeof exposes !== 'object' || Array.isArray(exposes)) {
     return;
@@ -48,15 +49,15 @@ export function addDataFetchExposes(
     }
 
     const dataFetchKey = addDataFetchExpose(exposes, key, dataFetchPath);
-    if (!isServer && dataFetchKey) {
-      const tempDataFetchFilepath = path.resolve(
-        process.cwd(),
-        `node_modules/${TEMP_DIR}/data-fetch.ts`,
-      );
-      const content = `export const fetchData=()=>{throw new Error('should not be called')};`;
-      fs.writeFileSync(tempDataFetchFilepath, content);
-      exposes[dataFetchKey] = tempDataFetchFilepath;
-    }
+    // if (!isServer && dataFetchKey && enableSSR) {
+    //   const tempDataFetchFilepath = path.resolve(
+    //     process.cwd(),
+    //     `node_modules/${TEMP_DIR}/data-fetch.ts`,
+    //   );
+    //   const content = `export const fetchData=()=>{throw new Error('should not be called')};`;
+    //   fs.writeFileSync(tempDataFetchFilepath, content);
+    //   exposes[dataFetchKey] = tempDataFetchFilepath;
+    // }
     return;
   });
 }

@@ -11,4 +11,5 @@ export default createModuleFederationConfig({
     react: { singleton: true },
     'react-dom': { singleton: true },
   },
+  runtimePlugins: ['./runtimePlugin.ts'],
 });

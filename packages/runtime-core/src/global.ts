@@ -23,10 +23,6 @@ export interface Federation {
   __SHARE__: GlobalShareScopeMap;
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
   __PRELOADED_MAP__: Map<string, boolean>;
-  __DATA_FETCH_MAP__: Map<
-    string,
-    Promise<(() => Promise<unknown>) | undefined>
-  >;
 }
 export const CurrentGlobal =
   typeof globalThis === 'object' ? globalThis : window;
@@ -94,7 +90,6 @@ function setGlobalDefaultVal(target: typeof CurrentGlobal) {
       __SHARE__: {},
       __MANIFEST_LOADING__: {},
       __PRELOADED_MAP__: new Map(),
-      __DATA_FETCH_MAP__: new Map(),
     });
 
     definePropertyGlobalVal(target, '__VMOK__', target.__FEDERATION__);
@@ -106,7 +101,6 @@ function setGlobalDefaultVal(target: typeof CurrentGlobal) {
   target.__FEDERATION__.__SHARE__ ??= {};
   target.__FEDERATION__.__MANIFEST_LOADING__ ??= {};
   target.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
-  target.__FEDERATION__.__DATA_FETCH_MAP__ ??= new Map();
 }
 
 setGlobalDefaultVal(CurrentGlobal);

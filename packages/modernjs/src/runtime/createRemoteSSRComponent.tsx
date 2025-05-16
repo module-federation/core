@@ -1,13 +1,11 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import logger from './logger';
 import { getInstance } from '@module-federation/enhanced/runtime';
-import {
-  ErrorBoundary,
-  ErrorBoundaryPropsWithComponent,
-} from 'react-error-boundary';
 import { Await } from './Await';
 import { fetchData, getDataFetchMapKey } from './dataFetch';
 import { getDataFetchInfo, getLoadedRemoteInfos } from './utils';
+import { DATA_FETCH_ERROR_PREFIX, LOAD_REMOTE_ERROR_PREFIX } from '../constant';
+import type { ErrorInfo } from './Await';
 
 type IProps = {
   id: string;
@@ -118,7 +116,7 @@ export function collectSSRAssets(options: IProps) {
 export function createRemoteSSRComponent<T, E extends keyof T>(info: {
   loader: () => Promise<T>;
   loading: React.ReactNode;
-  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
+  fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
   export?: E;
 }) {
   type ComponentType = T[E] extends (...args: any) => any
@@ -138,96 +136,95 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
   };
 
   const getData = async () => {
-    const m = await callLoader();
-    const moduleId = m && m[Symbol.for('mf_module_id')];
-    const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, getInstance());
-    if (!loadedRemoteInfo) {
-      return;
+    let loadedRemoteInfo: ReturnType<typeof getLoadedRemoteInfos>;
+    let moduleId: string;
+    const instance = getInstance();
+    try {
+      const m = await callLoader();
+      moduleId = m && m[Symbol.for('mf_module_id')];
+      if (!moduleId) {
+        throw new Error('moduleId is empty');
+      }
+      loadedRemoteInfo = getLoadedRemoteInfos(moduleId, instance);
+      if (!loadedRemoteInfo) {
+        throw new Error(`can not find remote info for moduleId: ${moduleId}`);
+      }
+    } catch (e) {
+      const errMsg = `${LOAD_REMOTE_ERROR_PREFIX}${e}`;
+      logger.debug(e);
+      throw new Error(errMsg);
     }
-    const dataFetchMapKey = getDataFetchMapKey(
-      { name: loadedRemoteInfo.name, version: loadedRemoteInfo.version },
-      getDataFetchInfo({
-        name: loadedRemoteInfo.name,
-        alias: loadedRemoteInfo.alias,
-        id: moduleId,
-      }),
-    );
-    logger.debug('getData dataFetchMapKey: ', dataFetchMapKey);
-    if (!dataFetchMapKey) {
-      return;
+    try {
+      const dataFetchMapKey = getDataFetchMapKey(
+        getDataFetchInfo({
+          name: loadedRemoteInfo.name,
+          alias: loadedRemoteInfo.alias,
+          id: moduleId,
+        }),
+        { name: instance!.name, version: instance?.options.version },
+      );
+      logger.debug('getData dataFetchMapKey: ', dataFetchMapKey);
+      if (!dataFetchMapKey) {
+        return;
+      }
+      const data = await fetchData(dataFetchMapKey);
+      logger.debug('get data res: \n', data);
+      return data;
+    } catch (err) {
+      const errMsg = `${DATA_FETCH_ERROR_PREFIX}${err}`;
+      logger.debug(errMsg);
+      throw new Error(errMsg);
     }
-    const data = await fetchData(dataFetchMapKey);
-    logger.debug('data: \n', data);
-    return data;
   };
 
   const LazyComponent = React.lazy(async () => {
-    try {
-      const m = await callLoader();
-      const moduleId = m && m[Symbol.for('mf_module_id')];
-      const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, getInstance());
+    const m = await callLoader();
+    const moduleId = m && m[Symbol.for('mf_module_id')];
+    const instance = getInstance()!;
+    const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, instance);
 
-      const dataFetchMapKey = loadedRemoteInfo
-        ? getDataFetchMapKey(
-            { name: loadedRemoteInfo.name, version: loadedRemoteInfo.version },
-            getDataFetchInfo({
-              name: loadedRemoteInfo.name,
-              alias: loadedRemoteInfo.alias,
-              id: moduleId,
-            }),
-          )
-        : undefined;
-      logger.debug('LazyComponent dataFetchMapKey: ', dataFetchMapKey);
+    const dataFetchMapKey = loadedRemoteInfo
+      ? getDataFetchMapKey(
+          getDataFetchInfo({
+            name: loadedRemoteInfo.name,
+            alias: loadedRemoteInfo.alias,
+            id: moduleId,
+          }),
+          { name: instance.name, version: instance?.options.version },
+        )
+      : undefined;
+    logger.debug('LazyComponent dataFetchMapKey: ', dataFetchMapKey);
 
-      const assets = collectSSRAssets({
-        id: moduleId,
-      });
+    const assets = collectSSRAssets({
+      id: moduleId,
+    });
 
-      const Com = m[exportName] as React.FC<ComponentType>;
-      if (exportName in m && typeof Com === 'function') {
-        return {
-          default: (
-            props: Omit<ComponentType, 'key'> & { _mfData: unknown },
-          ) => (
-            <>
-              {dataFetchMapKey && (
-                <script
-                  suppressHydrationWarning
-                  dangerouslySetInnerHTML={{
-                    __html: String.raw`
-      globalThis._MF__DATA_FETCH_ID_MAP__['${dataFetchMapKey}'][1](${JSON.stringify(props._mfData)})
-   `,
-                  }}
-                ></script>
-              )}
-              {assets}
-              <Com {...props} />
-            </>
-          ),
-        };
-      } else {
-        throw Error(
-          `Make sure that ${moduleId} has the correct export when export is ${String(
-            exportName,
-          )}`,
-        );
-      }
-    } catch (err) {
-      if (!info.fallback) {
-        throw err;
-      }
-      const FallbackFunctionComponent = info.fallback;
-      const FallbackNode = (
-        <FallbackFunctionComponent
-          error={err}
-          resetErrorBoundary={() => {
-            console.log('SSR mode not support "resetErrorBoundary" !');
-          }}
-        />
-      );
+    const Com = m[exportName] as React.FC<ComponentType>;
+    if (exportName in m && typeof Com === 'function') {
       return {
-        default: () => FallbackNode,
+        default: (props: Omit<ComponentType, 'key'> & { _mfData: unknown }) => (
+          <>
+            {dataFetchMapKey && (
+              <script
+                suppressHydrationWarning
+                dangerouslySetInnerHTML={{
+                  __html: String.raw`
+    globalThis._MF__DATA_FETCH_ID_MAP__['${dataFetchMapKey}'][1](${JSON.stringify(props._mfData)})
+ `,
+                }}
+              ></script>
+            )}
+            {assets}
+            <Com {...props} />
+          </>
+        ),
       };
+    } else {
+      throw Error(
+        `Make sure that ${moduleId} has the correct export when export is ${String(
+          exportName,
+        )}`,
+      );
     }
   });
 
@@ -235,12 +232,14 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
     const { key, ...args } = props;
 
     return (
-      <ErrorBoundary FallbackComponent={info.fallback}>
-        <Await resolve={getData()} loading={info.loading}>
-          {/* @ts-ignore */}
-          {(data) => <LazyComponent {...args} _mfData={data} />}
-        </Await>
-      </ErrorBoundary>
+      <Await
+        resolve={getData()}
+        loading={info.loading}
+        errorElement={info.fallback}
+      >
+        {/* @ts-ignore */}
+        {(data) => <LazyComponent {...args} _mfData={data} />}
+      </Await>
     );
   };
 }

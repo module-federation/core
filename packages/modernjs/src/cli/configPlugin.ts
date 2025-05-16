@@ -146,10 +146,11 @@ const patchDTSConfig = (
 export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
+  enableSSR = false,
   remoteIpStrategy?: 'ipv4' | 'inherit',
 ) => {
   replaceRemoteUrl(mfConfig, remoteIpStrategy);
-  addDataFetchExposes(mfConfig.exposes, isServer);
+  addDataFetchExposes(mfConfig.exposes, isServer, enableSSR);
 
   if (mfConfig.remoteType === undefined) {
     mfConfig.remoteType = 'script';
@@ -404,6 +405,7 @@ export const moduleFederationConfigPlugin = (
       patchMFConfig(
         targetMFConfig,
         !isWeb,
+        enableSSR,
         userConfig.remoteIpStrategy || 'ipv4',
       );
 
