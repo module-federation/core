@@ -96,7 +96,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "wait-on tcp:3001 tcp:3002 && nx run 3000-home:e2e:development",
+            "command": "sh -c 'wait-on tcp:3001 tcp:3002 && nx run 3000-home:e2e:development && exit 0 || exit 1'",
             "forwardAllArgs": true
           }
         ]
@@ -114,7 +114,7 @@
               "forwardAllArgs": false
             },
             {
-              "command": "nx build 3000-home --configuration=production && wait-on tcp:3001 tcp:3002 && NX_TUI=false nx run 3000-home:e2e:production",
+              "command": "sh -c 'nx build 3000-home --configuration=production && wait-on tcp:3001 tcp:3002 && NX_TUI=false nx run 3000-home:e2e:production && exit 0 || exit 1'",
               "forwardAllArgs": true
             }
           ]
