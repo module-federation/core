@@ -25,7 +25,7 @@
     },
     "e2e": {
       "inputs": ["default", "^production"],
-      "cache": true
+      "cache": false
     },
     "@nx/webpack:webpack": {
       "inputs": [
