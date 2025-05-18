@@ -1,14 +1,17 @@
+const { withNx } = require('@nx/next/plugins/with-nx');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 const webpack = require('webpack');
 const path = require('path');
 
 /**
- * @type {import('next').NextConfig}
+ * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
  **/
 const nextConfig = {
-  // Set this to true if you would like to to use SVGR
-  // See: https://github.com/gregberge/svgr
-  svgr: false,
+  nx: {
+    // Set this to true if you would like to to use SVGR
+    // See: https://github.com/gregberge/svgr
+    svgr: false,
+  },
   // Disable TypeScript type checking to prevent build errors
   typescript: {
     // !! WARN !!
@@ -54,6 +57,7 @@ const nextConfig = {
     //   )
     // );
 
+    config.cache = false;
     config.plugins.push(
       new NextFederationPlugin({
         name: 'remote_4001',
@@ -96,8 +100,8 @@ const nextConfig = {
         extraOptions: {
           debug: false,
           exposePages: false,
-          enableImageLoaderFix: true,
-          enableUrlLoaderFix: true,
+          enableImageLoaderFix: false,
+          enableUrlLoaderFix: false,
         },
       }),
     );
@@ -111,4 +115,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withNx(nextConfig);

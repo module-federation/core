@@ -42,40 +42,60 @@ export const getReactGroupClient = (
   );
   // Define configurations as an array of objects
   const reactConfigs = [
-    // React core - appPagesBrowser layer
     {
-      request: 'react',
+      request: 'next/dist/compiled/react-refresh/runtime',
       singleton: true,
-      shareKey: 'react',
-      packageName: 'react',
-      import: 'next/dist/compiled/react',
+      shareKey: 'react-refresh/runtime',
       layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
       shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      requiredVersion: '^' + reactVersion,
-      version: reactVersion,
+      version: '15',
+      // requiredVersion: '^15'
     },
-    // {
-    //   request: 'next/dist/compiled/react',
-    //   singleton: true,
-    //   shareKey: 'react',
-    //   layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-    //   issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-    //   shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-    //   version: reactVersion,
-    //   requiredVersion: reactVersion
-    // },
-    // // React core - pagesDirBrowser layer
+    // React core - appPagesBrowser layer
     // {
     //   request: 'react',
     //   singleton: true,
     //   shareKey: 'react',
-    //   layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-    //   issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-    //   shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
-    //   // version: reactVersion,
-    //   requiredVersion: reactVersion
+    //   packageName: 'react',
+    //   import: 'next/dist/compiled/react',
+    //   layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+    //   requiredVersion: '^' + reactVersion,
+    //   version: reactVersion,
     // },
+    {
+      request: 'next/dist/compiled/react/',
+      singleton: true,
+      shareKey: 'react/',
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: '15',
+      // requiredVersion: '15'
+    },
+    {
+      request: 'next/dist/compiled/react',
+      singleton: true,
+      shareKey: 'react',
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      version: reactVersion,
+      requiredVersion: '^' + reactVersion,
+    },
+    // // React core - pagesDirBrowser layer
+    {
+      request: 'react',
+      singleton: true,
+      shareKey: 'react',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      // version: reactVersion,
+      requiredVersion: '^' + reactVersion,
+    },
     // {
     //   request: 'next/dist/compiled/react',
     //   singleton: true,
