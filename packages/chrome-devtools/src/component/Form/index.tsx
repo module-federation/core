@@ -44,7 +44,9 @@ interface FormProps {
   setFormStatus: React.Dispatch<SetStateAction<FormItemStatus[]>>;
   validateForm: any;
   enableHMR: string;
+  enableInspector: string;
   onHMRChange: (on: boolean) => void;
+  onInspectorChange: (on: boolean) => void;
 }
 const FormComponent = (props: FormProps & RootComponentProps) => {
   const {
@@ -54,7 +56,9 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     setFormStatus,
     validateForm,
     enableHMR,
+    enableInspector,
     onHMRChange,
+    onInspectorChange,
     versionList,
     setVersionList,
     getVersion,
@@ -185,6 +189,10 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
     onHMRChange(on);
   };
 
+  const inspectorChange = (on: boolean) => {
+    onInspectorChange(on);
+  };
+
   const onKeyChange = async (key: string, index: number) => {
     const version = await getVersion?.(key);
     if (version) {
@@ -227,6 +235,13 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                 checkedText={'Enable HMR'}
                 uncheckedText={'Disable HMR'}
                 onChange={hmrChange}
+                className={styles.switch}
+              />
+              <Switch
+                checked={enableInspector === 'enable'}
+                checkedText={'Enable Inspector'}
+                uncheckedText={'Disable Inspector'}
+                onChange={inspectorChange}
                 className={styles.switch}
               />
             </div>
