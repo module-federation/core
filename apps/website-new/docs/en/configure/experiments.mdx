@@ -47,24 +47,24 @@ When using this mode, all entrypoints will initialize asynchronously. If you're 
 
 ## nodeModulesReconstructedLookup
 
-- Type: `boolean`
-- Required: No
-- Default: `false`
+- **Type:** `boolean`
+- **Required:** No
+- **Default:** `false`
 
 Enables enhanced module resolution for packages located in `node_modules`, particularly for modules that use relative imports internally.
 
-**What it solves**: When a shared module uses relative imports (e.g., `import './directory/thing'`), Module Federation might not correctly recognize these as matching your shared configuration. This experiment reconstructs the full path and extracts the proper module name to enable correct sharing.
+**What it solves**: When a shared module uses relative imports (e.g., `import './directory/thing'`), Module Federation might not correctly recognize these as matching your shared configuration. This option reconstructs the full path and extracts the proper module name to enable correct sharing.
+
+**How to use:**
+
+Set `nodeModulesReconstructedLookup: true` on individual shared items that need this behavior:
 
 ```ts
-// Simple example
 new ModuleFederationPlugin({
   name: 'host',
-  experiments: {
-    nodeModulesReconstructedLookup: true
-  },
   shared: {
-    'shared': {},
-    'shared/directory/': {}
+    'shared': { nodeModulesReconstructedLookup: true },
+    'shared/directory/': { nodeModulesReconstructedLookup: true }
   }
 });
 ```
