@@ -3,12 +3,10 @@ export type Data = {
 };
 
 export const fetchData = async (): Promise<Data> => {
-  console.log('Content.data.server');
-
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
-        data: `fetch data from provider ${new Date()}`,
+        data: `[ nested provider - server ] fetched data: ${new Date()}`,
       });
     }, 1000);
   });

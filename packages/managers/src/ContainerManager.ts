@@ -67,6 +67,28 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
       return sum;
     }, {} as moduleFederationPlugin.ExposesObject);
   }
+
+  // { '.' : './src/Button.jsx', './backup': './src/Button.jsx' } => { './src/Button' : ['.','./backup'] }
+  get fileExposeKeyMap(): Record<string, Set<string>> {
+    const parsedOptions = this._parseOptions();
+
+    return parsedOptions.reduce(
+      (sum, item) => {
+        const [exposeKey, exposeObject] = item;
+        exposeObject.import.forEach((exposeFile) => {
+          const exposeFileWithoutExt = exposeFile.replace(
+            path.extname(exposeFile),
+            '',
+          );
+          sum[exposeFileWithoutExt] ||= new Set();
+          sum[exposeFileWithoutExt].add(exposeKey);
+        });
+
+        return sum;
+      },
+      {} as Record<string, Set<string>>,
+    );
+  }
   // { '.' : './src/Button.jsx' } => { '__federation_expose_Component' : ['src/Buttton'] }
   get exposeFileNameImportMap(): Record<string, string[]> {
     const { exposes } = this.options;

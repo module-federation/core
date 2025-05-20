@@ -1,10 +1,14 @@
 import React, { MutableRefObject, ReactNode, Suspense, useRef } from 'react';
-import logger from './logger';
+import logger from '../logger';
 import {
   DATA_FETCH_ERROR_PREFIX,
   LOAD_REMOTE_ERROR_PREFIX,
   ERROR_TYPE,
+  DOWNGRADE_KEY,
+  DOWNGRADE_FUNCTION,
 } from '../constant';
+import { getDataFetchIdWithErrorMsgs, wrapDataFetchId } from '../utils';
+import type { DataFetchParams } from '../interfaces/global';
 
 function isPromise<T>(obj: any): obj is PromiseLike<T> {
   return (
@@ -17,28 +21,42 @@ const AWAIT_ERROR_PREFIX =
   '<Await /> caught the following error during render: ';
 
 export type ErrorInfo = {
-  err: Error;
+  error: Error;
   errorType: number;
+  dataFetchMapKey?: string;
 };
 
-const transformError = (errMsg: string): ErrorInfo => {
+export const transformError = (err: string | Error): ErrorInfo => {
+  const errMsg = err instanceof Error ? err.message : err;
   const originalMsg = errMsg.replace(AWAIT_ERROR_PREFIX, '');
+  const dataFetchMapKey = getDataFetchIdWithErrorMsgs(originalMsg);
   if (originalMsg.indexOf(DATA_FETCH_ERROR_PREFIX) === 0) {
     return {
-      err: new Error(originalMsg.replace(DATA_FETCH_ERROR_PREFIX, '')),
+      error: new Error(
+        originalMsg
+          .replace(DATA_FETCH_ERROR_PREFIX, '')
+          .replace(wrapDataFetchId(dataFetchMapKey), ''),
+      ),
       errorType: ERROR_TYPE.DATA_FETCH,
+      dataFetchMapKey,
     };
   }
   if (originalMsg.indexOf(LOAD_REMOTE_ERROR_PREFIX) === 0) {
     return {
-      err: new Error(originalMsg.replace(LOAD_REMOTE_ERROR_PREFIX, '')),
+      error: new Error(
+        originalMsg
+          .replace(LOAD_REMOTE_ERROR_PREFIX, '')
+          .replace(wrapDataFetchId(dataFetchMapKey), ''),
+      ),
       errorType: ERROR_TYPE.LOAD_REMOTE,
+      dataFetchMapKey,
     };
   }
 
   return {
-    err: new Error(originalMsg),
+    error: new Error(originalMsg.replace(wrapDataFetchId(dataFetchMapKey), '')),
     errorType: ERROR_TYPE.UNKNOWN,
+    dataFetchMapKey,
   };
 };
 
@@ -47,6 +65,7 @@ export interface AwaitProps<T> {
   loading?: ReactNode;
   errorElement?: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
   children: (data: T) => ReactNode;
+  params?: DataFetchParams;
 }
 
 export interface AwaitErrorHandlerProps<T = any>
@@ -57,11 +76,12 @@ export interface AwaitErrorHandlerProps<T = any>
 const DefaultLoading = <></>;
 const DefaultErrorElement = (_data: any) => <div>Error</div>;
 
-export function Await<T>({
+export function AwaitDataFetch<T>({
   resolve,
   loading = DefaultLoading,
   errorElement = DefaultErrorElement,
   children,
+  params,
 }: AwaitProps<T>) {
   const dataRef = useRef<T>();
   const data = dataRef.current || resolve;
@@ -69,6 +89,7 @@ export function Await<T>({
 
   return (
     <AwaitSuspense
+      params={params}
       loading={loading}
       errorElement={errorElement}
       // @ts-ignore
@@ -101,27 +122,38 @@ function AwaitSuspense<T>({
 function ResolveAwait<T>({
   children,
   resolve,
-  loading,
   errorElement,
+  params,
 }: AwaitErrorHandlerProps<T>) {
   const data = resolve();
   logger.debug('resolve data: ', data);
   if (typeof data === 'string' && data.indexOf(AWAIT_ERROR_PREFIX) === 0) {
+    const transformedError = transformError(data);
+    const dataFetchMapKeyStr = `['${transformedError.dataFetchMapKey}']`;
     return (
       <>
         {typeof errorElement === 'function' ? (
           <>
             {/* TODO: set _mfSSRDowngrade */}
-            <script
-              suppressHydrationWarning
-              dangerouslySetInnerHTML={{
-                __html: String.raw`
-                  globalThis._MF__DATA_FETCH_ID_MAP__ = globalThis._MF__DATA_FETCH_ID_MAP__ || {};
-    globalThis._MF__DATA_FETCH_ID_MAP__['_mfSSRDowngrade'] = true;
- `,
-              }}
-            ></script>
-            {errorElement(transformError(data))}
+            {globalThis.FEDERATION_SSR && (
+              <script
+                suppressHydrationWarning
+                dangerouslySetInnerHTML={{
+                  __html: String.raw`
+                  var key = '${transformedError.dataFetchMapKey}';
+                  globalThis['${DOWNGRADE_KEY}'] = true;
+                  if(!globalThis['${DOWNGRADE_KEY}']){
+                    globalThis['${DOWNGRADE_KEY}'] = ${transformedError.dataFetchMapKey ? dataFetchMapKeyStr : true}
+                  }else{
+                    if(Array.isArray(globalThis['${DOWNGRADE_KEY}']) && !globalThis['${DOWNGRADE_KEY}'].includes(key)){
+                      globalThis['${DOWNGRADE_KEY}'].push(key)
+                    }
+                  }
+                  globalThis['${DOWNGRADE_FUNCTION}'] && globalThis['${DOWNGRADE_FUNCTION}'](key,${params ? JSON.stringify(params) : null});`,
+                }}
+              ></script>
+            )}
+            {errorElement(transformedError)}
           </>
         ) : (
           errorElement

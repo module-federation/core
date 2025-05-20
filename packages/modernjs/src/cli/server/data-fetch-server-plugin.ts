@@ -1,53 +1,99 @@
 import { DATA_FETCH_QUERY } from '../../constant';
-import logger from '../../runtime/logger';
-import type { ServerPluginLegacy } from '@modern-js/server-core';
+import logger from '../../logger';
+import { getDataFetchMap } from '../../utils';
+import { fetchData } from '../../utils/dataFetch';
+import type {
+  MiddlewareHandler,
+  ServerPlugin,
+} from '@modern-js/server-runtime';
 
-export default (): ServerPluginLegacy => ({
+function wrapSetTimeout(
+  targetPromise: Promise<unknown>,
+  delay = 20000,
+  id: string,
+) {
+  if (targetPromise && typeof targetPromise.then === 'function') {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        logger.warn(`Data fetch for ID ${id} timed out after 20 seconds.`);
+        reject(new Error(`Data fetch for ID ${id} timed out after 20 seconds`));
+      }, delay);
+
+      targetPromise
+        .then((value: any) => {
+          clearTimeout(timeoutId);
+          resolve(value);
+        })
+        .catch((err: any) => {
+          clearTimeout(timeoutId);
+          reject(err);
+        });
+    });
+  }
+}
+
+const middleware: MiddlewareHandler = async (ctx, next) => {
+  try {
+    const url = new URL(ctx.req.url);
+    const dataFetchId = url.searchParams.get(DATA_FETCH_QUERY);
+    const params = JSON.parse(url.searchParams.get('params') || '{}');
+    if (!dataFetchId) {
+      return next();
+    }
+    logger.debug('dataFetchId: ', dataFetchId);
+    const dataFetchMap = getDataFetchMap();
+    if (!dataFetchMap) {
+      return next();
+    }
+    const fetchDataPromise = dataFetchMap[dataFetchId][1];
+    if (fetchDataPromise) {
+      const targetPromise = fetchDataPromise[0];
+      // Ensure targetPromise is thenable
+      const wrappedPromise = wrapSetTimeout(targetPromise, 20000, dataFetchId);
+      if (wrappedPromise) {
+        const res = await wrappedPromise;
+        return ctx.json(res);
+      }
+      logger.error(
+        `Expected a Promise from fetchDataPromise[0] for dataFetchId ${dataFetchId}, but received:`,
+        targetPromise,
+        'Will try call new dataFetch again...',
+      );
+    }
+
+    const callFetchDataPromise = fetchData(dataFetchId, {
+      ...params,
+      isDowngrade: true,
+    });
+    const wrappedPromise = wrapSetTimeout(
+      callFetchDataPromise,
+      20000,
+      dataFetchId,
+    );
+    if (wrappedPromise) {
+      const res = await wrappedPromise;
+      return ctx.json(res);
+    }
+    return next();
+  } catch (e) {
+    console.log('data fetch error:');
+    console.error(e);
+    return next();
+  }
+};
+
+const dataFetchServePlugin = (): ServerPlugin => ({
   name: 'mf-data-fetch-server-plugin',
-  setup() {
-    return {
-      config(config) {
-        if (!config.render) {
-          config.render = {
-            middleware: [],
-          };
-        } else if (!config.render.middleware) {
-          config.render.middleware = [];
-        }
-
-        config.render!.middleware!.push(
-          async (ctx: { request: any }, next: () => any) => {
-            const { request } = ctx;
-            try {
-              const url = new URL(request.url);
-              const dataFetchId = url.searchParams.get(DATA_FETCH_QUERY);
-              if (!dataFetchId) {
-                return next();
-              }
-              logger.debug('dataFetchId: ', dataFetchId);
-
-              const fetchDataPromise =
-                globalThis.nativeGlobal.__FEDERATION__.__DATA_FETCH_MAP__.get(
-                  dataFetchId,
-                );
-              if (!fetchDataPromise) {
-                return next();
-              }
-
-              const fetchDataFn = await fetchDataPromise;
-              if (!fetchDataFn) {
-                return next();
-              }
-              return fetchDataFn();
-            } catch (e) {
-              console.log('data fetch error:');
-              console.error(e);
-              return next();
-            }
-          },
-        );
-        return config;
-      },
-    };
+  setup: (api) => {
+    api.onPrepare(() => {
+      const { middlewares } = api.getServerContext();
+      middlewares.push({
+        name: 'module-federation-serve-manifest',
+        // @ts-ignore type error
+        handler: middleware,
+      });
+    });
   },
 });
+
+export default dataFetchServePlugin;

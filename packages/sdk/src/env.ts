@@ -1,4 +1,4 @@
-import { BROWSER_LOG_KEY, BROWSER_LOG_VALUE } from './constant';
+import { BROWSER_LOG_KEY } from './constant';
 
 declare global {
   // eslint-disable-next-line no-var

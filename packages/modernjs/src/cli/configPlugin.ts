@@ -8,7 +8,7 @@ import {
   autoDeleteSplitChunkCacheGroups,
   addDataFetchExposes,
 } from '@module-federation/rsbuild-plugin/utils';
-import logger from '../runtime/logger';
+import logger from '../logger';
 
 import type { InternalModernPluginOptions } from '../types';
 import type {
@@ -19,10 +19,10 @@ import type {
   CliPluginFuture,
   Bundler,
 } from '@modern-js/app-tools';
+import { isDev } from './utils';
 import type { BundlerChainConfig } from '../interfaces/bundler';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
-const isDev = process.env.NODE_ENV === 'development';
 
 export type ConfigType<T> = T extends 'webpack'
   ? webpack.Configuration
@@ -174,7 +174,7 @@ export const patchMFConfig = (
     runtimePlugins,
   );
 
-  if (isDev) {
+  if (isDev()) {
     injectRuntimePlugins(
       require.resolve('@module-federation/modern-js/resolve-entry-ipv4'),
       runtimePlugins,
@@ -186,7 +186,7 @@ export const patchMFConfig = (
       require.resolve('@module-federation/node/runtimePlugin'),
       runtimePlugins,
     );
-    if (isDev) {
+    if (isDev()) {
       injectRuntimePlugins(
         require.resolve(
           '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
@@ -337,7 +337,7 @@ export function patchBundlerConfig(options: {
     );
   }
 
-  if (isDev && chain.output.get('publicPath') === 'auto') {
+  if (isDev() && chain.output.get('publicPath') === 'auto') {
     // TODO: only in dev temp
     const port =
       modernjsConfig.dev?.port || modernjsConfig.server?.port || 8080;
@@ -358,7 +358,7 @@ export function patchBundlerConfig(options: {
     }
   }
   // modernjs project has the same entry for server/client, add polyfill:false to skip compile error in browser target
-  if (isDev && enableSSR && !isServer) {
+  if (isDev() && enableSSR && !isServer) {
     chain.resolve.fallback
       .set('crypto', false)
       .set('stream', false)
@@ -481,6 +481,7 @@ export const moduleFederationConfigPlugin = (
           define: {
             FEDERATION_IPV4: JSON.stringify(ipv4),
             REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
+            // FEDERATION_SSR: JSON.stringify(enableSSR),
           },
           enableAsyncEntry:
             bundlerType === 'rspack'

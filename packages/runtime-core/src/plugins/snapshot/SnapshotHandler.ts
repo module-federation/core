@@ -35,7 +35,7 @@ export function getGlobalRemoteInfo(
   remoteSnapshot: GlobalModuleInfo[string] | undefined;
 } {
   const hostGlobalSnapshot = getGlobalSnapshotInfoByModuleInfo({
-    name: origin.options.name,
+    name: origin.name,
     version: origin.options.version,
   });
 

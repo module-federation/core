@@ -1,11 +1,21 @@
-import React, { ReactNode } from 'react';
-import logger from './logger';
+import React, { ReactNode, useEffect, useState } from 'react';
+import logger from '../logger';
 import { getInstance } from '@module-federation/enhanced/runtime';
-import { Await } from './Await';
-import { fetchData, getDataFetchMapKey } from './dataFetch';
-import { getDataFetchInfo, getLoadedRemoteInfos } from './utils';
-import { DATA_FETCH_ERROR_PREFIX, LOAD_REMOTE_ERROR_PREFIX } from '../constant';
-import type { ErrorInfo } from './Await';
+import { AwaitDataFetch, transformError } from './AwaitDataFetch';
+import { fetchData, getDataFetchMapKey } from '../utils/dataFetch';
+import {
+  getDataFetchInfo,
+  getLoadedRemoteInfos,
+  setDataFetchItemLoadedStatus,
+  wrapDataFetchId,
+} from '../utils';
+import {
+  DATA_FETCH_ERROR_PREFIX,
+  LOAD_REMOTE_ERROR_PREFIX,
+  MF_DATA_FETCH_STATUS,
+} from '../constant';
+import type { ErrorInfo } from './AwaitDataFetch';
+import type { DataFetchParams } from '../interfaces/global';
 
 type IProps = {
   id: string;
@@ -113,11 +123,12 @@ export function collectSSRAssets(options: IProps) {
   return [...scripts, ...links];
 }
 
-export function createRemoteSSRComponent<T, E extends keyof T>(info: {
+export function createRemoteComponent<T, E extends keyof T>(info: {
   loader: () => Promise<T>;
   loading: React.ReactNode;
   fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
   export?: E;
+  dataFetchParams?: DataFetchParams;
 }) {
   type ComponentType = T[E] extends (...args: any) => any
     ? Parameters<T[E]>[0] extends undefined
@@ -127,8 +138,10 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
   const exportName = info?.export || 'default';
 
   const callLoader = async () => {
+    logger.debug('callLoader start', Date.now());
     const m = (await info.loader()) as Record<string, React.FC> &
       Record<symbol, string>;
+    logger.debug('callLoader end', Date.now());
     if (!m) {
       throw new Error('load remote failed');
     }
@@ -147,19 +160,21 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
       }
       loadedRemoteInfo = getLoadedRemoteInfos(moduleId, instance);
       if (!loadedRemoteInfo) {
-        throw new Error(`can not find remote info for moduleId: ${moduleId}`);
+        throw new Error(`can not find loaded remote('${moduleId}') info!`);
       }
     } catch (e) {
       const errMsg = `${LOAD_REMOTE_ERROR_PREFIX}${e}`;
       logger.debug(e);
       throw new Error(errMsg);
     }
+    let dataFetchMapKey: string | undefined;
     try {
-      const dataFetchMapKey = getDataFetchMapKey(
+      dataFetchMapKey = getDataFetchMapKey(
         getDataFetchInfo({
           name: loadedRemoteInfo.name,
           alias: loadedRemoteInfo.alias,
           id: moduleId,
+          remoteSnapshot: loadedRemoteInfo.snapshot,
         }),
         { name: instance!.name, version: instance?.options.version },
       );
@@ -167,11 +182,15 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
       if (!dataFetchMapKey) {
         return;
       }
-      const data = await fetchData(dataFetchMapKey);
+      const data = await fetchData(dataFetchMapKey, {
+        ...info.dataFetchParams,
+        isDowngrade: false,
+      });
+      setDataFetchItemLoadedStatus(dataFetchMapKey);
       logger.debug('get data res: \n', data);
       return data;
     } catch (err) {
-      const errMsg = `${DATA_FETCH_ERROR_PREFIX}${err}`;
+      const errMsg = `${DATA_FETCH_ERROR_PREFIX}${wrapDataFetchId(dataFetchMapKey)}${err}`;
       logger.debug(errMsg);
       throw new Error(errMsg);
     }
@@ -182,13 +201,14 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
     const moduleId = m && m[Symbol.for('mf_module_id')];
     const instance = getInstance()!;
     const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, instance);
-
+    loadedRemoteInfo?.snapshot;
     const dataFetchMapKey = loadedRemoteInfo
       ? getDataFetchMapKey(
           getDataFetchInfo({
             name: loadedRemoteInfo.name,
             alias: loadedRemoteInfo.alias,
             id: moduleId,
+            remoteSnapshot: loadedRemoteInfo.snapshot,
           }),
           { name: instance.name, version: instance?.options.version },
         )
@@ -202,19 +222,20 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
     const Com = m[exportName] as React.FC<ComponentType>;
     if (exportName in m && typeof Com === 'function') {
       return {
-        default: (props: Omit<ComponentType, 'key'> & { _mfData: unknown }) => (
+        default: (props: Omit<ComponentType, 'key'> & { mfData?: unknown }) => (
           <>
-            {dataFetchMapKey && (
+            {globalThis.FEDERATION_SSR && dataFetchMapKey && (
               <script
                 suppressHydrationWarning
                 dangerouslySetInnerHTML={{
                   __html: String.raw`
-    globalThis._MF__DATA_FETCH_ID_MAP__['${dataFetchMapKey}'][1](${JSON.stringify(props._mfData)})
+    globalThis.__MF_DATA_FETCH_MAP__['${dataFetchMapKey}'][1][1](${JSON.stringify(props.mfData)});
+    globalThis.__MF_DATA_FETCH_MAP__['${dataFetchMapKey}'][2] = ${MF_DATA_FETCH_STATUS.LOADED}
  `,
                 }}
               ></script>
             )}
-            {assets}
+            {globalThis.FEDERATION_SSR && assets}
             <Com {...props} />
           </>
         ),
@@ -230,16 +251,82 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
 
   return (props: ComponentType) => {
     const { key, ...args } = props;
+    if (globalThis.FEDERATION_SSR) {
+      const { key, ...args } = props;
 
-    return (
-      <Await
-        resolve={getData()}
-        loading={info.loading}
-        errorElement={info.fallback}
-      >
-        {/* @ts-ignore */}
-        {(data) => <LazyComponent {...args} _mfData={data} />}
-      </Await>
-    );
+      return (
+        <AwaitDataFetch
+          resolve={getData()}
+          loading={info.loading}
+          errorElement={info.fallback}
+        >
+          {/* @ts-ignore */}
+          {(data) => <LazyComponent {...args} mfData={data} />}
+        </AwaitDataFetch>
+      );
+    } else {
+      // Client-side rendering logic
+      const [data, setData] = useState<unknown>(null);
+      const [loading, setLoading] = useState<boolean>(true);
+      const [error, setError] = useState<ErrorInfo | null>(null);
+
+      useEffect(() => {
+        let isMounted = true;
+        const fetchDataAsync = async () => {
+          try {
+            setLoading(true);
+            const result = await getData();
+            if (isMounted) {
+              setData(result);
+            }
+          } catch (e: any) {
+            if (isMounted) {
+              setError(transformError(e));
+            }
+          } finally {
+            if (isMounted) {
+              setLoading(false);
+            }
+          }
+        };
+
+        fetchDataAsync();
+
+        return () => {
+          isMounted = false;
+        };
+      }, []);
+
+      if (loading) {
+        return <>{info.loading}</>;
+      }
+
+      if (error) {
+        return (
+          <>
+            {typeof info.fallback === 'function'
+              ? info.fallback(error)
+              : info.fallback}
+          </>
+        );
+      }
+      // @ts-ignore
+      return <LazyComponent {...args} mfData={data} />;
+    }
   };
+}
+
+/**
+ * @deprecated createRemoteSSRComponent is deprecated, please use createRemoteComponent instead!
+ */
+export function createRemoteSSRComponent<T, E extends keyof T>(info: {
+  loader: () => Promise<T>;
+  loading: React.ReactNode;
+  fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
+  export?: E;
+}) {
+  logger.warn(
+    'createRemoteSSRComponent is deprecated, please use createRemoteComponent instead!',
+  );
+  return createRemoteComponent(info);
 }

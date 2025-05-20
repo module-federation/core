@@ -1,15 +1,15 @@
-import fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 import { TEMP_DIR } from '@module-federation/sdk';
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-
-export const DATA_FETCH_IDENTIFIER = 'data';
+import { DATA_FETCH_CLIENT_SUFFIX, DATA_FETCH_IDENTIFIER } from './constant';
 
 const addDataFetchExpose = (
   exposes: moduleFederationPlugin.ExposesObject,
   key: string,
   filepath: string,
+  suffix = '',
 ) => {
   if (!fs.existsSync(filepath)) {
     return false;
@@ -17,8 +17,8 @@ const addDataFetchExpose = (
 
   const dataFetchKey =
     key === '.'
-      ? `./${DATA_FETCH_IDENTIFIER}`
-      : `${key}.${DATA_FETCH_IDENTIFIER}`;
+      ? `./${DATA_FETCH_IDENTIFIER}${suffix}`
+      : `${key}.${DATA_FETCH_IDENTIFIER}${suffix}`;
   if (!exposes[dataFetchKey]) {
     exposes[dataFetchKey] = filepath;
   }
@@ -34,7 +34,19 @@ export function addDataFetchExposes(
     return;
   }
 
-  Object.keys(exposes).forEach((key) => {
+  if (Object.keys(exposes).length === 0) {
+    return;
+  }
+
+  const tempDataFetchFilepath = path.resolve(
+    process.cwd(),
+    `node_modules/${TEMP_DIR}/data-fetch-fallback.ts`,
+  );
+  const content = `export const fetchData=()=>{throw new Error('should not be called')};`;
+  fs.ensureDirSync(path.dirname(tempDataFetchFilepath));
+  fs.writeFileSync(tempDataFetchFilepath, content);
+
+  Object.keys(exposes).forEach((key, index) => {
     const expose = exposes[key];
     if (typeof expose !== 'string') {
       return;
@@ -44,20 +56,22 @@ export function addDataFetchExposes(
 
     const dataFetchClientPath = `${absPath.replace(path.extname(absPath), '')}.${DATA_FETCH_IDENTIFIER}.client.ts`;
 
-    if (!isServer && addDataFetchExpose(exposes, key, dataFetchClientPath)) {
+    const dateFetchClientKey = addDataFetchExpose(
+      exposes,
+      key,
+      dataFetchClientPath,
+      DATA_FETCH_CLIENT_SUFFIX,
+    );
+    if (!isServer && dateFetchClientKey) {
+      exposes[dateFetchClientKey.replace(DATA_FETCH_CLIENT_SUFFIX, '')] =
+        tempDataFetchFilepath;
       return;
     }
 
     const dataFetchKey = addDataFetchExpose(exposes, key, dataFetchPath);
-    // if (!isServer && dataFetchKey && enableSSR) {
-    //   const tempDataFetchFilepath = path.resolve(
-    //     process.cwd(),
-    //     `node_modules/${TEMP_DIR}/data-fetch.ts`,
-    //   );
-    //   const content = `export const fetchData=()=>{throw new Error('should not be called')};`;
-    //   fs.writeFileSync(tempDataFetchFilepath, content);
-    //   exposes[dataFetchKey] = tempDataFetchFilepath;
-    // }
-    return;
+    if (dataFetchKey && fs.existsSync(dataFetchClientPath)) {
+      exposes[`${dataFetchKey}${DATA_FETCH_CLIENT_SUFFIX}`] =
+        tempDataFetchFilepath;
+    }
   });
 }

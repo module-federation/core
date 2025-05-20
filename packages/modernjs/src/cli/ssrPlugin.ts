@@ -4,8 +4,8 @@ import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 import { updateStatsAndManifest } from './manifest';
-import { isDev } from './constant';
-import logger from '../runtime/logger';
+import logger from '../logger';
+import { isDev } from './utils';
 import { isWebTarget, skipByTarget } from './utils';
 
 import type {
@@ -108,12 +108,17 @@ export const moduleFederationSSRPlugin = (
     setEnv();
 
     api._internalRuntimePlugins(({ entrypoint, plugins }) => {
-      if (!isDev) {
+      plugins.push({
+        name: 'mfInjectDowngradeHelpers',
+        path: '@module-federation/modern-js/ssr-inject-downgrade-helpers-plugin',
+        config: {},
+      });
+      if (!isDev()) {
         return { entrypoint, plugins };
       }
       plugins.push({
-        name: 'mfSSR',
-        path: '@module-federation/modern-js/ssr-runtime',
+        name: 'mfSSRDev',
+        path: '@module-federation/modern-js/ssr-dev-plugin',
         config: {},
       });
       return { entrypoint, plugins };
@@ -146,7 +151,7 @@ export const moduleFederationSSRPlugin = (
 
       if (!isWeb) {
         chain.target('async-node');
-        if (isDev) {
+        if (isDev()) {
           chain
             .plugin('UniverseEntryChunkTrackerPlugin')
             .use(UniverseEntryChunkTrackerPlugin);
@@ -164,7 +169,7 @@ export const moduleFederationSSRPlugin = (
         }
       }
 
-      if (isDev && isWeb) {
+      if (isDev() && isWeb) {
         chain.externals({
           '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
         });
@@ -213,6 +218,7 @@ export const moduleFederationSSRPlugin = (
       updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
     });
     api.onDevCompileDone(() => {
+      // 热更后修改 manifest
       const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
       updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
     });

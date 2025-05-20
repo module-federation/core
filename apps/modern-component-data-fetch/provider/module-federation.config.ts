@@ -3,13 +3,12 @@ export default createModuleFederationConfig({
   name: 'provider',
   filename: 'remoteEntry.js',
   exposes: {
-    './Content': './src/components/Content.tsx',
-    './Content2': './src/components/Content2.tsx',
-    // './Content.data': './src/components/Content.data.ts',
+    './BasicComponent': './src/components/BasicComponent/index.tsx',
+    './ClientDowngrade': './src/components/ClientDowngrade/index.tsx',
+    './ServerDowngrade': './src/components/ServerDowngrade/index.tsx',
   },
   shared: {
     react: { singleton: true },
     'react-dom': { singleton: true },
   },
-  runtimePlugins: ['./runtimePlugin.ts'],
 });

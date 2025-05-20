@@ -27,9 +27,13 @@
       "types": "./dist/types/runtime/index.d.ts",
       "default": "./dist/esm/runtime/index.js"
     },
-    "./ssr-runtime": {
-      "types": "./dist/types/ssr-runtime/index.d.ts",
-      "default": "./dist/esm/ssr-runtime/index.js"
+    "./ssr-dev-plugin": {
+      "types": "./dist/types/ssr-runtime/devPlugin.d.ts",
+      "default": "./dist/esm/ssr-runtime/devPlugin.js"
+    },
+    "./ssr-inject-downgrade-helpers-plugin": {
+      "types": "./dist/types/ssr-runtime/injectDowngradeHelpersPlugin.d.ts",
+      "default": "./dist/esm/ssr-runtime/injectDowngradeHelpersPlugin.js"
     },
     "./config-plugin": {
       "types": "./dist/types/cli/configPlugin.d.ts",
@@ -102,9 +106,9 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@modern-js/node-bundle-require": "2.67.3",
+    "@modern-js/node-bundle-require": "2.67.5",
     "@module-federation/rsbuild-plugin": "workspace:*",
-    "@modern-js/utils": "2.67.3",
+    "@modern-js/utils": "2.67.5",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/node": "workspace:*",
@@ -116,13 +120,13 @@
   },
   "devDependencies": {
     "@rsbuild/core": "1.2.8",
-    "@modern-js/app-tools": "2.67.3",
-    "@modern-js/core": "2.67.3",
-    "@modern-js/module-tools": "2.67.3",
-    "@modern-js/runtime": "2.67.3",
-    "@modern-js/tsconfig": "2.67.3",
+    "@modern-js/app-tools": "2.67.5",
+    "@modern-js/core": "2.67.5",
+    "@modern-js/module-tools": "2.67.5",
+    "@modern-js/runtime": "2.67.5",
+    "@modern-js/tsconfig": "2.67.5",
     "@module-federation/manifest": "workspace:*",
-    "@modern-js/server-core": "2.67.3"
+    "@modern-js/server-runtime": "2.67.5"
   },
   "peerDependencies": {
     "react": ">=17",
