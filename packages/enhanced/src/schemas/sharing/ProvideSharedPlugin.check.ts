@@ -27,6 +27,7 @@ const r = {
       version: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
       exclude: { $ref: '#/definitions/Exclude' },
       include: { $ref: '#/definitions/IncludeExcludeOptions' },
+      nodeModulesReconstructedLookup: { type: 'boolean' },
     },
   },
   e = Object.prototype.hasOwnProperty;
@@ -324,7 +325,7 @@ function t(
                               }
                               f = e === p;
                             } else f = !0;
-                            if (f)
+                            if (f) {
                               if (void 0 !== s.include) {
                                 let r = s.include;
                                 const e = p,
@@ -345,8 +346,8 @@ function t(
                                     null === l ? (l = [r]) : l.push(r), p++;
                                   }
                                 }
-                                var h = i === p;
-                                if (((a = a || h), !a)) {
+                                var d = i === p;
+                                if (((a = a || d), !a)) {
                                   const e = p;
                                   if (
                                     r &&
@@ -364,7 +365,7 @@ function t(
                                       null === l ? (l = [r]) : l.push(r), p++;
                                     }
                                   }
-                                  (h = e === p), (a = a || h);
+                                  (d = e === p), (a = a || d);
                                 }
                                 if (!a) {
                                   const r = { params: {} };
@@ -422,15 +423,15 @@ function t(
                                           null === l ? (l = [r]) : l.push(r),
                                             p++;
                                         }
-                                        var m = a === p;
-                                        if (((o = o || m), !o)) {
+                                        var h = a === p;
+                                        if (((o = o || h), !o)) {
                                           const r = p;
                                           if (!(e instanceof RegExp)) {
                                             const r = { params: {} };
                                             null === l ? (l = [r]) : l.push(r),
                                               p++;
                                           }
-                                          (m = r === p), (o = o || m);
+                                          (h = r === p), (o = o || h);
                                         }
                                         if (!o) {
                                           const r = { params: {} };
@@ -444,9 +445,9 @@ function t(
                                         (p = n),
                                           null !== l &&
                                             (n ? (l.length = n) : (l = null));
-                                        var d = s === p;
-                                      } else d = !0;
-                                      if (d) {
+                                        var m = s === p;
+                                      } else m = !0;
+                                      if (m) {
                                         if (void 0 !== r.version) {
                                           const e = p;
                                           if ('string' != typeof r.version)
@@ -456,9 +457,9 @@ function t(
                                               ]),
                                               !1
                                             );
-                                          d = e === p;
-                                        } else d = !0;
-                                        if (d)
+                                          m = e === p;
+                                        } else m = !0;
+                                        if (m)
                                           if (void 0 !== r.fallbackVersion) {
                                             const e = p;
                                             if (
@@ -473,14 +474,32 @@ function t(
                                                 ]),
                                                 !1
                                               );
-                                            d = e === p;
-                                          } else d = !0;
+                                            m = e === p;
+                                          } else m = !0;
                                       }
                                     }
                                   }
                                 }
                                 f = e === p;
                               } else f = !0;
+                              if (f)
+                                if (
+                                  void 0 !== s.nodeModulesReconstructedLookup
+                                ) {
+                                  const r = p;
+                                  if (
+                                    'boolean' !=
+                                    typeof s.nodeModulesReconstructedLookup
+                                  )
+                                    return (
+                                      (t.errors = [
+                                        { params: { type: 'boolean' } },
+                                      ]),
+                                      !1
+                                    );
+                                  f = r === p;
+                                } else f = !0;
+                            }
                           }
                         }
                       }

@@ -542,10 +542,11 @@ export function createLookupKeyForSharing(
 }
 
 export function extractPathAfterNodeModules(filePath: string): string | null {
-  if (filePath.includes('node_modules')) {
+  // Fast check for 'node_modules' substring
+  if (~filePath.indexOf('node_modules')) {
     const nodeModulesIndex = filePath.lastIndexOf('node_modules');
-    // Add length of 'node_modules/' to get the start of the path after it
-    return filePath.substring(nodeModulesIndex + 'node_modules/'.length);
+    const result = filePath.substring(nodeModulesIndex + 13); // 13 = 'node_modules/'.length
+    return result;
   }
   return null;
 }

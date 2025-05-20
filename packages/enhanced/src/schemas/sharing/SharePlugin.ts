@@ -146,6 +146,11 @@ export default {
           type: 'string',
           minLength: 1,
         },
+        nodeModulesReconstructedLookup: {
+          description:
+            'Enable reconstructed lookup for node_modules paths for this share item',
+          type: 'boolean',
+        },
       },
     },
     SharedItem: {
