@@ -628,7 +628,7 @@ export const getReactGroupServer = (
   return reactConfigs.reduce(
     (acc, config, index) => {
       // Construct a unique key for each configuration to avoid overwrites in the accumulator object.
-      const key = `${config.request || 'config'}-${config.shareKey}-${config.layer || 'global'}-${index}`;
+      const key = `${config.request || 'config'}-${config.shareKey}-${config.layer || 'global'}-${index}-${Math.random().toString(36).substring(7)}`;
       if (acc[key]) {
         // This case should ideally not be hit if reactConfigs are generated correctly.
         console.warn(
@@ -657,7 +657,132 @@ export const getNextGroupServer = (
   const nextVersion = require(nextPackageJsonPath).version;
 
   const nextConfigs: SharedConfig[] = [
-    // --- Next.js Internal Contexts (React-specific) ---
+    // --- Server Action Related Modules ---
+    {
+      request:
+        'next/dist/build/webpack/loaders/next-flight-loader/action-validate',
+      shareKey:
+        'next/dist/build/webpack/loaders/next-flight-loader/action-validate',
+      import:
+        'next/dist/build/webpack/loaders/next-flight-loader/action-validate',
+      singleton: true,
+      version: nextVersion,
+      requiredVersion: `^${nextVersion}`,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: 'default', // Assuming default scope for these server utility type modules
+    },
+    {
+      request: 'next/dist/server/app-render/encryption',
+      shareKey: 'next/dist/server/app-render/encryption',
+      import: 'next/dist/server/app-render/encryption',
+      singleton: true,
+      version: nextVersion,
+      requiredVersion: `^${nextVersion}`,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: 'default',
+    },
+    {
+      request:
+        'next/dist/build/webpack/loaders/next-flight-loader/cache-wrapper',
+      shareKey:
+        'next/dist/build/webpack/loaders/next-flight-loader/cache-wrapper',
+      import:
+        'next/dist/build/webpack/loaders/next-flight-loader/cache-wrapper',
+      singleton: true,
+      version: nextVersion,
+      requiredVersion: `^${nextVersion}`,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: 'default',
+    },
+    {
+      request:
+        'next/dist/build/webpack/loaders/next-flight-loader/track-dynamic-import',
+      shareKey:
+        'next/dist/build/webpack/loaders/next-flight-loader/track-dynamic-import',
+      import:
+        'next/dist/build/webpack/loaders/next-flight-loader/track-dynamic-import',
+      singleton: true,
+      version: nextVersion,
+      requiredVersion: `^${nextVersion}`,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents, // Primarily RSC, but could be default if used by SSR too
+      shareScope: 'default',
+    },
+
+    // --- Aliased Next.js Modules ---
+    {
+      request: '@vercel/og', // Request ends with $ to signify exact match for alias
+      shareKey: '@vercel/og', // ShareKey without $
+      import: 'next/dist/server/og/image-response',
+      singleton: true,
+      version: nextVersion,
+      requiredVersion: `^${nextVersion}`,
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering, // Or default if applicable to RSC too
+      shareScope: 'default',
+    },
+    {
+      request: '@opentelemetry/api', // Assuming exact match for alias
+      shareKey: '@opentelemetry/api',
+      import: 'next/dist/compiled/@opentelemetry/api',
+      singleton: true,
+      version: nextVersion, // This should ideally be the version of OTel used by Next.js
+      requiredVersion: `^${nextVersion}`, // Or specific OTel version range
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering, // Or default
+      shareScope: 'default',
+    },
+
+    // --- Core Next.js Server/Shared Utilities ---
+    // For `next/headers` (used in App Router)
+    {
+      request: 'next/headers',
+      shareKey: 'next/headers',
+      // Path based on Next.js's App Router API aliases
+      import: 'next/dist/server/app-render/build/server-inserted-html.js',
+      singleton: true,
+      version: nextVersion,
+      requiredVersion: `^${nextVersion}`,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents, // Primarily for App Router server components
+      shareScope: 'default',
+    },
+    // For `next/cookies` (used in App Router)
+    {
+      request: 'next/cookies',
+      shareKey: 'next/cookies',
+      // Path based on Next.js's App Router API aliases
+      import: 'next/dist/server/app-render/build/server-request-cookies.js', // Updated path based on typical Next.js structure for request cookies in App Router
+      singleton: true,
+      version: nextVersion,
+      requiredVersion: `^${nextVersion}`,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents, // Primarily for App Router server components
+      shareScope: 'default',
+    },
+    // For `next/server` (NextResponse, NextRequest - used in App Router and Middleware)
+    // Sharing the specific components rather than the whole module might be better if possible
+    // For NextResponse
+    {
+      request: 'next/server', // This request might be too broad if only NextResponse is needed
+      shareKey: 'next/server/next-response', // More specific share key
+      import: 'next/dist/server/web/spec-extension/response.js',
+      singleton: true,
+      version: nextVersion,
+      requiredVersion: `^${nextVersion}`,
+      // Applicable to RSC, SSR (edge), and Middleware (edge)
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents, // And potentially others like edge SSR
+      shareScope: 'default',
+    },
+    // For NextRequest
+    {
+      // request: 'next/server', // Already covered or use a more specific request if needed
+      shareKey: 'next/server/next-request', // More specific share key
+      import: 'next/dist/server/web/spec-extension/request.js',
+      singleton: true,
+      version: nextVersion,
+      requiredVersion: `^${nextVersion}`,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents, // And potentially others
+      shareScope: 'default',
+    },
+
+    // --- Existing Next.js Internal Contexts (React-specific) ---
+    // Kept from original structure, ensure they are still relevant and correctly configured
     {
       request: 'next/dist/server/route-modules/app-page/vendored/contexts/',
       shareKey: 'next/dist/server/route-modules/app-page/vendored/contexts/',
@@ -687,7 +812,7 @@ export const getNextGroupServer = (
   ];
   return nextConfigs.reduce(
     (acc, config, index) => {
-      const key = `${config.request || 'config'}-${config.shareKey}-${config.layer || 'global'}-${index}`;
+      const key = `${config.request || 'config'}-${config.shareKey}-${config.layer || 'global'}-${index}-${Math.random().toString(36).substring(7)}`;
       acc[key] = config;
       return acc;
     },
@@ -709,6 +834,6 @@ export const getNextInternalsShareScopeServer = (
   const nextGroup = getNextGroupServer(compiler);
   return {
     ...reactGroup,
-    // ...nextGroup,
+    ...nextGroup, // Ensure nextGroup is included
   };
 };
