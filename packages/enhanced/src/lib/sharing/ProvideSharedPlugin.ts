@@ -193,40 +193,10 @@ class ProvideSharedPlugin {
             );
 
             if (
-              configFromOriginalDirect &&
+              configFromOriginalDirect !== undefined &&
               resource &&
               !resolvedProvideMap.has(lookupKeyForResource)
             ) {
-              // Singleton filter warnings
-              if (
-                configFromOriginalDirect.exclude?.request &&
-                configFromOriginalDirect.singleton
-              ) {
-                addSingletonFilterWarning(
-                  compilation,
-                  configFromOriginalDirect.shareKey || originalRequestString,
-                  'exclude',
-                  'request',
-                  configFromOriginalDirect.exclude.request,
-                  originalRequestString,
-                  resource,
-                );
-              }
-              if (
-                configFromOriginalDirect.include?.request &&
-                configFromOriginalDirect.singleton
-              ) {
-                addSingletonFilterWarning(
-                  compilation,
-                  configFromOriginalDirect.shareKey || originalRequestString,
-                  'include',
-                  'request',
-                  configFromOriginalDirect.include.request,
-                  originalRequestString,
-                  resource,
-                );
-              }
-
               this.provideSharedModule(
                 compilation,
                 resolvedProvideMap,
@@ -274,35 +244,6 @@ class ProvideSharedPlugin {
                     continue;
                   }
 
-                  if (
-                    originalPrefixConfig.exclude?.request &&
-                    originalPrefixConfig.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      originalPrefixConfig.shareKey || configuredPrefix,
-                      'exclude',
-                      'request',
-                      originalPrefixConfig.exclude.request,
-                      originalRequestString,
-                      resource,
-                    );
-                  }
-                  if (
-                    originalPrefixConfig.include?.request &&
-                    originalPrefixConfig.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      originalPrefixConfig.shareKey || configuredPrefix,
-                      'include',
-                      'request',
-                      originalPrefixConfig.include.request,
-                      originalRequestString,
-                      resource,
-                    );
-                  }
-
                   const finalShareKey =
                     (originalPrefixConfig.shareKey || configuredPrefix) +
                     remainder;
@@ -348,40 +289,10 @@ class ProvideSharedPlugin {
                 );
 
                 if (
-                  configFromReconstructedDirect &&
+                  configFromReconstructedDirect !== undefined &&
                   configFromReconstructedDirect.nodeModulesReconstructedLookup &&
                   !resolvedProvideMap.has(lookupKeyForResource)
                 ) {
-                  if (
-                    configFromReconstructedDirect.exclude?.request &&
-                    configFromReconstructedDirect.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      configFromReconstructedDirect.shareKey ||
-                        modulePathAfterNodeModules,
-                      'exclude',
-                      'request',
-                      configFromReconstructedDirect.exclude.request,
-                      modulePathAfterNodeModules,
-                      resource,
-                    );
-                  }
-                  if (
-                    configFromReconstructedDirect.include?.request &&
-                    configFromReconstructedDirect.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      configFromReconstructedDirect.shareKey ||
-                        modulePathAfterNodeModules,
-                      'include',
-                      'request',
-                      configFromReconstructedDirect.include.request,
-                      modulePathAfterNodeModules,
-                      resource,
-                    );
-                  }
                   this.provideSharedModule(
                     compilation,
                     resolvedProvideMap,
@@ -434,34 +345,6 @@ class ProvideSharedPlugin {
                         )
                       ) {
                         continue;
-                      }
-                      if (
-                        originalPrefixConfig.exclude?.request &&
-                        originalPrefixConfig.singleton
-                      ) {
-                        addSingletonFilterWarning(
-                          compilation,
-                          originalPrefixConfig.shareKey || configuredPrefix,
-                          'exclude',
-                          'request',
-                          originalPrefixConfig.exclude.request,
-                          modulePathAfterNodeModules,
-                          resource,
-                        );
-                      }
-                      if (
-                        originalPrefixConfig.include?.request &&
-                        originalPrefixConfig.singleton
-                      ) {
-                        addSingletonFilterWarning(
-                          compilation,
-                          originalPrefixConfig.shareKey || configuredPrefix,
-                          'include',
-                          'request',
-                          originalPrefixConfig.include.request,
-                          modulePathAfterNodeModules,
-                          resource,
-                        );
                       }
 
                       const finalShareKey =
@@ -641,19 +524,6 @@ class ProvideSharedPlugin {
           resource, // moduleResource
         );
       }
-
-      // Validate singleton usage when using include.request
-      if (config.include.request && config.singleton) {
-        addSingletonFilterWarning(
-          compilation,
-          config.shareKey || key,
-          'include',
-          'request',
-          config.include.request,
-          key, // moduleRequest
-          resource, // moduleResource
-        );
-      }
     }
 
     if (config.exclude) {
@@ -693,19 +563,6 @@ class ProvideSharedPlugin {
           'exclude',
           'version',
           config.exclude.version,
-          key, // moduleRequest
-          resource, // moduleResource
-        );
-      }
-
-      // Validate singleton usage when using exclude.request
-      if (config.exclude.request && config.singleton) {
-        addSingletonFilterWarning(
-          compilation,
-          config.shareKey || key,
-          'exclude',
-          'request',
-          config.exclude.request,
           key, // moduleRequest
           resource, // moduleResource
         );
