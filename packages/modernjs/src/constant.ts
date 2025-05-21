@@ -8,6 +8,7 @@ export const LOAD_REMOTE_ERROR_PREFIX =
 export const DOWNGRADE_KEY = '_mfSSRDowngrade';
 export const DATA_FETCH_MAP_KEY = '__MF_DATA_FETCH_MAP__';
 export const DOWNGRADE_FUNCTION = '_mfDowngrade';
+export const FS_HREF = '_mfFSHref';
 export const ERROR_TYPE = {
   DATA_FETCH: 1,
   LOAD_REMOTE: 2,

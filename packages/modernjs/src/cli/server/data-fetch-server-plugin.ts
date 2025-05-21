@@ -1,11 +1,17 @@
 import { DATA_FETCH_QUERY } from '../../constant';
 import logger from '../../logger';
 import { getDataFetchMap } from '../../utils';
-import { fetchData } from '../../utils/dataFetch';
+import {
+  fetchData,
+  initDataFetchMap,
+  loadDataFetchModule,
+} from '../../utils/dataFetch';
+import { SEPARATOR } from '@module-federation/sdk';
 import type {
   MiddlewareHandler,
   ServerPlugin,
 } from '@modern-js/server-runtime';
+import type { NoSSRRemoteInfo } from '../../interfaces/global';
 
 function wrapSetTimeout(
   targetPromise: Promise<unknown>,
@@ -32,20 +38,47 @@ function wrapSetTimeout(
   }
 }
 
+function addProtocol(url: string) {
+  if (url.startsWith('//')) {
+    return 'https:' + url;
+  }
+  return url;
+}
+
+const getDecodeQuery = (url: URL, name: string) => {
+  const res = url.searchParams.get(name);
+  if (!res) {
+    return null;
+  }
+  return decodeURIComponent(res);
+};
+
 const middleware: MiddlewareHandler = async (ctx, next) => {
+  let url: URL;
+  let dataFetchId: string | null;
+  let params: Record<string, unknown>;
+  let remoteInfo: NoSSRRemoteInfo;
   try {
-    const url = new URL(ctx.req.url);
-    const dataFetchId = url.searchParams.get(DATA_FETCH_QUERY);
-    const params = JSON.parse(url.searchParams.get('params') || '{}');
-    if (!dataFetchId) {
-      return next();
-    }
-    logger.debug('dataFetchId: ', dataFetchId);
+    url = new URL(ctx.req.url);
+    dataFetchId = getDecodeQuery(url, DATA_FETCH_QUERY);
+    params = JSON.parse(getDecodeQuery(url, 'params') || '{}');
+    const remoteInfoQuery = getDecodeQuery(url, 'remoteInfo');
+    remoteInfo = remoteInfoQuery ? JSON.parse(remoteInfoQuery) : null;
+  } catch (e) {
+    console.error(e);
+    return next();
+  }
+
+  if (!dataFetchId) {
+    return next();
+  }
+  logger.debug('dataFetchId: ', dataFetchId);
+  try {
     const dataFetchMap = getDataFetchMap();
     if (!dataFetchMap) {
-      return next();
+      initDataFetchMap();
     }
-    const fetchDataPromise = dataFetchMap[dataFetchId][1];
+    const fetchDataPromise = dataFetchMap[dataFetchId]?.[1];
     if (fetchDataPromise) {
       const targetPromise = fetchDataPromise[0];
       // Ensure targetPromise is thenable
@@ -61,24 +94,83 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
       );
     }
 
-    const callFetchDataPromise = fetchData(dataFetchId, {
-      ...params,
-      isDowngrade: true,
-    });
-    const wrappedPromise = wrapSetTimeout(
-      callFetchDataPromise,
-      20000,
-      dataFetchId,
-    );
-    if (wrappedPromise) {
-      const res = await wrappedPromise;
-      return ctx.json(res);
+    if (remoteInfo) {
+      try {
+        const hostInstance = globalThis.__FEDERATION__.__INSTANCES__[0];
+        const remoteEntry = `${addProtocol(remoteInfo.ssrPublicPath) + remoteInfo.ssrRemoteEntry}`;
+        if (!hostInstance) {
+          throw new Error('host instance not found!');
+        }
+        const remote = hostInstance.options.remotes.find(
+          (remote) => remote.name === remoteInfo.name,
+        );
+        logger.debug('find remote: ', JSON.stringify(remote));
+        if (!remote) {
+          hostInstance.registerRemotes([
+            {
+              name: remoteInfo.name,
+              entry: remoteEntry,
+              entryGlobalName: remoteInfo.globalName,
+            },
+          ]);
+        } else {
+          const { hostGlobalSnapshot, remoteSnapshot } =
+            hostInstance.snapshotHandler.getGlobalRemoteInfo(remoteInfo);
+          logger.debug(
+            'find hostGlobalSnapshot: ',
+            JSON.stringify(hostGlobalSnapshot),
+          );
+          logger.debug('find remoteSnapshot: ', JSON.stringify(remoteSnapshot));
+
+          if (!hostGlobalSnapshot || !remoteSnapshot) {
+            if ('version' in remote) {
+              // @ts-ignore
+              delete remote.version;
+            }
+            // @ts-ignore
+            remote.entry = remoteEntry;
+            remote.entryGlobalName = remoteInfo.globalName;
+          }
+        }
+      } catch (e) {
+        ctx.status(500);
+        return ctx.text(
+          `failed to fetch ${remoteInfo.name} data, error:\n ${e}`,
+        );
+      }
     }
-    return next();
+
+    const dataFetchItem = dataFetchMap[dataFetchId];
+    if (dataFetchItem) {
+      const callFetchDataPromise = fetchData(dataFetchId, {
+        ...params,
+        isDowngrade: true,
+      });
+      const wrappedPromise = wrapSetTimeout(
+        callFetchDataPromise,
+        20000,
+        dataFetchId,
+      );
+      if (wrappedPromise) {
+        const res = await wrappedPromise;
+        return ctx.json(res);
+      }
+      return next();
+    }
+
+    const remoteId = dataFetchId.split(SEPARATOR)[0];
+    const hostInstance = globalThis.__FEDERATION__.__INSTANCES__[0];
+    if (!hostInstance) {
+      throw new Error('host instance not found!');
+    }
+    const dataFetchFn = await loadDataFetchModule(hostInstance, remoteId);
+    const data = await dataFetchFn({ ...params, isDowngrade: !remoteInfo });
+    return ctx.json(data);
   } catch (e) {
     console.log('data fetch error:');
     console.error(e);
-    return next();
+    ctx.status(500);
+    return ctx.text(`failed to fetch ${remoteInfo.name} data, error:\n ${e}`);
   }
 };
 

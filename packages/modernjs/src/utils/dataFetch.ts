@@ -10,7 +10,12 @@ import {
 import { DATA_FETCH_IDENTIFIER } from '@module-federation/rsbuild-plugin/constant';
 
 import type { GlobalModuleInfo } from '@module-federation/sdk';
-import type { DataFetchParams, MF_DATA_FETCH_MAP } from '../interfaces/global';
+import type {
+  DataFetchParams,
+  MF_DATA_FETCH_MAP,
+  NoSSRRemoteInfo,
+} from '../interfaces/global';
+import type { FederationHost } from '@module-federation/enhanced/runtime';
 
 export const getDataFetchInfo = ({
   name,
@@ -116,7 +121,7 @@ export const getDataFetchIdWithErrorMsgs = (errMsgs: string) => {
 export async function fetchData(
   id: string,
   params: DataFetchParams,
-  noSSR?: boolean,
+  remoteInfo?: NoSSRRemoteInfo,
 ): Promise<unknown | undefined> {
   const callFetchData = async () => {
     const item = getDataFetchItem(id);
@@ -140,8 +145,13 @@ export async function fetchData(
       return dataFetchItem[1][0];
     }
 
-    if (noSSR) {
-      return callDowngrade(id, params);
+    if (isCSROnly()) {
+      logger.debug('==========csr only!');
+      return callFetchData();
+    }
+
+    if (remoteInfo) {
+      return callDowngrade(id, params, remoteInfo);
     }
 
     const mfDowngrade = getDowngradeTag();
@@ -152,11 +162,6 @@ export async function fetchData(
       if (mfDowngrade.includes(id)) {
         return callDowngrade(id, params);
       }
-    }
-
-    if (isCSROnly()) {
-      logger.debug('==========csr only!');
-      return callFetchData();
     }
 
     let res;
@@ -184,4 +189,23 @@ export function getDataFetchMapKey(
   const { dataFetchId } = dataFetchInfo;
 
   return composeKeyWithSeparator(dataFetchId, hostInfo.name, hostInfo.version);
+}
+
+export async function loadDataFetchModule(
+  instance: FederationHost,
+  id: string,
+) {
+  return instance.loadRemote(id).then((m) => {
+    if (
+      m &&
+      typeof m === 'object' &&
+      'fetchData' in m &&
+      typeof m.fetchData === 'function'
+    ) {
+      return m.fetchData as (params: DataFetchParams) => Promise<unknown>;
+    }
+    throw new Error(
+      `fetchData not found in remote ${id}, ${JSON.stringify(m)}`,
+    );
+  });
 }

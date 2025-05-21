@@ -2,7 +2,12 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import logger from '../logger';
 import { getInstance } from '@module-federation/enhanced/runtime';
 import { AwaitDataFetch, transformError } from './AwaitDataFetch';
-import { fetchData, getDataFetchMapKey } from '../utils/dataFetch';
+import {
+  fetchData,
+  getDataFetchItem,
+  getDataFetchMap,
+  getDataFetchMapKey,
+} from '../utils/dataFetch';
 import {
   getDataFetchInfo,
   getLoadedRemoteInfos,
@@ -11,11 +16,13 @@ import {
 } from '../utils';
 import {
   DATA_FETCH_ERROR_PREFIX,
+  FS_HREF,
   LOAD_REMOTE_ERROR_PREFIX,
   MF_DATA_FETCH_STATUS,
+  MF_DATA_FETCH_TYPE,
 } from '../constant';
 import type { ErrorInfo } from './AwaitDataFetch';
-import type { DataFetchParams } from '../interfaces/global';
+import type { DataFetchParams, NoSSRRemoteInfo } from '../interfaces/global';
 
 type IProps = {
   id: string;
@@ -23,7 +30,7 @@ type IProps = {
   injectLink?: boolean;
 };
 
-type CreateRemoteComponentOptions<T, E extends keyof T> = {
+export type CreateRemoteComponentOptions<T, E extends keyof T> = {
   loader: () => Promise<T>;
   loading: React.ReactNode;
   fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
@@ -132,6 +139,57 @@ export function collectSSRAssets(options: IProps) {
   return [...scripts, ...links];
 }
 
+function getServerNeedRemoteInfo(
+  loadedRemoteInfo: ReturnType<typeof getLoadedRemoteInfos>,
+  id: string,
+  noSSR?: boolean,
+): NoSSRRemoteInfo | undefined {
+  if (
+    noSSR ||
+    (typeof window !== 'undefined' && window.location.href !== window[FS_HREF])
+  ) {
+    if (!loadedRemoteInfo?.version) {
+      throw new Error(`${loadedRemoteInfo?.name} version is empty`);
+    }
+    const { snapshot } = loadedRemoteInfo;
+    if (!snapshot) {
+      throw new Error(`${loadedRemoteInfo?.name} snapshot is empty`);
+    }
+    const dataFetchItem = getDataFetchItem(id);
+    const isFetchServer =
+      dataFetchItem?.[0]?.[1] === MF_DATA_FETCH_TYPE.FETCH_SERVER;
+
+    if (
+      isFetchServer &&
+      (!('ssrPublicPath' in snapshot) || !snapshot.ssrPublicPath)
+    ) {
+      throw new Error(
+        `ssrPublicPath is required while fetching ${loadedRemoteInfo?.name} data in SSR project!`,
+      );
+    }
+
+    if (
+      isFetchServer &&
+      (!('ssrRemoteEntry' in snapshot) || !snapshot.ssrRemoteEntry)
+    ) {
+      throw new Error(
+        `ssrRemoteEntry is required while loading ${loadedRemoteInfo?.name} data loader in SSR project!`,
+      );
+    }
+
+    return {
+      name: loadedRemoteInfo.name,
+      version: loadedRemoteInfo.version,
+      ssrPublicPath:
+        'ssrPublicPath' in snapshot ? snapshot.ssrPublicPath || '' : '',
+      ssrRemoteEntry:
+        'ssrRemoteEntry' in snapshot ? snapshot.ssrRemoteEntry || '' : '',
+      globalName: loadedRemoteInfo.entryGlobalName,
+    };
+  }
+  return;
+}
+
 export function createRemoteComponent<T, E extends keyof T>(
   options: CreateRemoteComponentOptions<T, E>,
 ) {
@@ -193,7 +251,7 @@ export function createRemoteComponent<T, E extends keyof T>(
           ...options.dataFetchParams,
           isDowngrade: false,
         },
-        noSSR,
+        getServerNeedRemoteInfo(loadedRemoteInfo, dataFetchMapKey, noSSR),
       );
       setDataFetchItemLoadedStatus(dataFetchMapKey);
       logger.debug('get data res: \n', data);
@@ -265,7 +323,7 @@ export function createRemoteComponent<T, E extends keyof T>(
 
       return (
         <AwaitDataFetch
-          resolve={getData()}
+          resolve={getData(options.noSSR)}
           loading={options.loading}
           errorElement={options.fallback}
         >
@@ -335,12 +393,4 @@ export function createRemoteSSRComponent<T, E extends keyof T>(
     'createRemoteSSRComponent is deprecated, please use createRemoteComponent instead!',
   );
   return createRemoteComponent(options);
-}
-
-export function wrapNoSSR<T, E extends keyof T>(
-  createComponentFn: typeof createRemoteComponent,
-) {
-  return (options: Omit<CreateRemoteComponentOptions<T, E>, 'noSSR'>) => {
-    return createComponentFn({ ...options, noSSR: true });
-  };
 }

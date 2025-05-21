@@ -1,18 +1,10 @@
-import React from 'react';
-import { type ReactElement, useEffect, useState } from 'react';
+import { createRemoteComponent } from './createRemoteComponent';
+import type { CreateRemoteComponentOptions } from './createRemoteComponent';
 
-export const wrapNoSSR = (
-  props?: React.PropsWithChildren<{ fallback?: ReactElement | string }>,
-): ReactElement | null => {
-  const [isMounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const { children, fallback = null } = props || {};
-  return React.createElement(
-    React.Fragment,
-    null,
-    isMounted ? children : fallback,
-  );
-};
+export function wrapNoSSR<T, E extends keyof T>(
+  createComponentFn: typeof createRemoteComponent<T, E>,
+) {
+  return (options: Omit<CreateRemoteComponentOptions<T, E>, 'noSSR'>) => {
+    return createComponentFn({ ...options, noSSR: true });
+  };
+}

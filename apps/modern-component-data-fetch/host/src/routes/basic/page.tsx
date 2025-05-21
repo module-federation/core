@@ -2,9 +2,9 @@ import { kit } from '@module-federation/modern-js/runtime';
 
 const { createRemoteComponent } = kit;
 
-const BasicNested = createRemoteComponent({
+const Basic = createRemoteComponent({
   loader: () => {
-    return import('nested-remote/Content');
+    return import('remote/BasicComponent');
   },
   loading: 'loading...',
   export: 'default',
@@ -20,8 +20,8 @@ const BasicNested = createRemoteComponent({
 const Index = (): JSX.Element => {
   return (
     <div>
-      <h1>Nested Remote</h1>
-      <BasicNested />
+      <h1>Basic usage with data fetch</h1>
+      <Basic />
     </div>
   );
 };

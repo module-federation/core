@@ -1,4 +1,4 @@
-import { DOWNGRADE_FUNCTION, DOWNGRADE_KEY } from '../constant';
+import { DOWNGRADE_FUNCTION, DOWNGRADE_KEY, FS_HREF } from '../constant';
 import logger from '../logger';
 
 import type { RuntimePluginFuture } from '@modern-js/runtime';
@@ -13,6 +13,8 @@ export const mfInjectDowngradeHelpersPlugin = (): RuntimePluginFuture => ({
       if (typeof window === 'undefined') {
         return;
       }
+      globalThis[FS_HREF] = window.location.href;
+
       globalThis[DOWNGRADE_FUNCTION] ||= async function (id?: string) {
         logger.debug('==========ssr downgrade!');
 

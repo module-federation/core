@@ -2,7 +2,11 @@ import { DATA_FETCH_QUERY, DOWNGRADE_KEY } from '../constant';
 import { MF_DATA_FETCH_STATUS, MF_DATA_FETCH_TYPE } from '../constant';
 import { getDataFetchMap } from '../utils';
 
-import type { DataFetchParams, MF_SSR_DOWNGRADE } from '../interfaces/global';
+import type {
+  DataFetchParams,
+  MF_SSR_DOWNGRADE,
+  NoSSRRemoteInfo,
+} from '../interfaces/global';
 
 export function getDowngradeTag() {
   return globalThis[DOWNGRADE_KEY] as MF_SSR_DOWNGRADE;
@@ -18,7 +22,11 @@ export function callAllDowngrade() {
   });
 }
 
-export async function callDowngrade(id: string, params?: DataFetchParams) {
+export async function callDowngrade(
+  id: string,
+  params?: DataFetchParams,
+  remoteInfo?: NoSSRRemoteInfo,
+) {
   const dataFetchMap = getDataFetchMap();
   if (!dataFetchMap) {
     return;
@@ -57,9 +65,18 @@ export async function callDowngrade(id: string, params?: DataFetchParams) {
     } else if (dataFetchType === MF_DATA_FETCH_TYPE.FETCH_SERVER) {
       try {
         const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set(DATA_FETCH_QUERY, id);
+        currentUrl.searchParams.set(DATA_FETCH_QUERY, encodeURIComponent(id));
         if (params) {
-          currentUrl.searchParams.set('params', JSON.stringify(params));
+          currentUrl.searchParams.set(
+            'params',
+            encodeURIComponent(JSON.stringify(params)),
+          );
+        }
+        if (remoteInfo) {
+          currentUrl.searchParams.set(
+            'remoteInfo',
+            encodeURIComponent(JSON.stringify(remoteInfo)),
+          );
         }
         const fetchUrl = currentUrl.toString();
         const data = await fetch(fetchUrl).then((res) => res.json());

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, useNavigate } from '@modern-js/runtime/router';
+import { Outlet, useNavigate, useLocation } from '@modern-js/runtime/router';
 import { Layout, Menu } from 'antd';
 
 const { Header, Content } = Layout;
@@ -9,8 +9,8 @@ const App: React.FC = () => {
 
   const Navs = [
     'home',
-    'all',
-    'nested',
+    'basic',
+    'csr',
     'server-downgrade',
     'client-downgrade',
   ].map((i) => ({
@@ -25,14 +25,16 @@ const App: React.FC = () => {
       }
     },
   }));
-
+  const location = useLocation();
+  const nav = location.pathname.slice(1);
+  const defaultSelectedKeys = [nav === '' ? 'home' : nav];
   return (
     <Layout>
       <Header style={{ display: 'flex', alignItems: 'center' }}>
         <Menu
           theme="dark"
           mode="horizontal"
-          defaultSelectedKeys={['home']}
+          defaultSelectedKeys={defaultSelectedKeys}
           items={Navs}
           style={{ flex: 1, minWidth: 0 }}
         />

@@ -6,7 +6,7 @@ import {
   isCSROnly,
 } from '../../utils';
 import logger from '../../logger';
-import { getDataFetchMapKey } from '../../utils/dataFetch';
+import { getDataFetchMapKey, loadDataFetchModule } from '../../utils/dataFetch';
 import { MF_DATA_FETCH_TYPE, MF_DATA_FETCH_STATUS } from '../../constant';
 import { DATA_FETCH_CLIENT_SUFFIX } from '@module-federation/rsbuild-plugin/constant';
 
@@ -75,23 +75,7 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
     }
 
     const getDataFetchGetter = () =>
-      host.loadRemote(finalDataFetchId).then((m) => {
-        if (
-          m &&
-          typeof m === 'object' &&
-          'fetchData' in m &&
-          typeof m.fetchData === 'function'
-        ) {
-          return m.fetchData as () => Promise<unknown>;
-        }
-        throw new Error(
-          `fetchData not found in remote ${dataFetchId}, ${JSON.stringify(m)}`,
-        );
-      });
-    // .catch((e) => {
-    //   console.log('======= auto fetch plugin fetchData error', e);
-    //   return ()=>`${e}`;
-    // });
+      loadDataFetchModule(host, finalDataFetchId);
 
     const dataFetchFnItem: MF_DATA_FETCH_MAP_VALUE[0] = [
       getDataFetchGetter,

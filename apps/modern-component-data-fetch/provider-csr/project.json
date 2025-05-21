@@ -1,7 +1,7 @@
 {
-  "name": "modernjs-ssr-data-fetch-nested-provider",
+  "name": "modernjs-ssr-data-fetch-provider-csr",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/modern-component-data-fetch/nested-provider/src",
+  "sourceRoot": "apps/modern-component-data-fetch/provider-csr/src",
   "projectType": "application",
   "tags": [],
   "implicitDependencies": ["typescript"],
@@ -17,7 +17,7 @@
         ],
         "commands": [
           {
-            "command": "cd apps/modern-component-data-fetch/nested-provider; pnpm run build",
+            "command": "cd apps/modern-component-data-fetch/provider-csr; pnpm run build",
             "forwardAllArgs": true
           }
         ]
@@ -34,7 +34,7 @@
         ],
         "commands": [
           {
-            "command": "cd apps/modern-component-data-fetch/nested-provider; pnpm run dev",
+            "command": "cd apps/modern-component-data-fetch/provider-csr; pnpm run dev",
             "forwardAllArgs": false
           }
         ]
@@ -43,7 +43,7 @@
     "e2e": {
       "executor": "@nx/cypress:cypress",
       "options": {
-        "cypressConfig": "apps/modern-component-data-fetch/nested-provider/cypress.config.ts",
+        "cypressConfig": "apps/modern-component-data-fetch/provider-csr/cypress.config.ts",
         "testingType": "e2e",
         "baseUrl": "http://localhost:4001",
         "browser": "chrome"
@@ -63,11 +63,11 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :8080 || nx run modernjs-ssr-data-fetch-nested-provider:serve & echo 'done'",
+            "command": "lsof -i :8080 || nx run modernjs-ssr-data-fetch-provider-csr:serve & echo 'done'",
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 20 && nx run modernjs-ssr-data-fetch-nested-provider:e2e",
+            "command": "sleep 20 && nx run modernjs-ssr-data-fetch-provider-csr:e2e",
             "forwardAllArgs": true
           }
         ]

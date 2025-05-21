@@ -1,12 +1,10 @@
 import { createModuleFederationConfig } from '@module-federation/modern-js';
+
 export default createModuleFederationConfig({
-  name: 'nested_provider',
+  name: 'provider_csr',
   filename: 'remoteEntry.js',
   exposes: {
     './Content': './src/components/Content.tsx',
-  },
-  remotes: {
-    remote: 'provider@http://localhost:5002/mf-manifest.json',
   },
   shared: {
     react: { singleton: true },

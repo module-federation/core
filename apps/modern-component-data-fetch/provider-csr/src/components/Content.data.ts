@@ -6,7 +6,7 @@ export const fetchData = async (): Promise<Data> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
-        data: `[ nested provider - server ] fetched data: ${new Date()}`,
+        data: `[ csr provider - server ] fetched data: ${new Date()}`,
       });
     }, 1000);
   });

@@ -13,4 +13,7 @@ export const kit = {
   get collectSSRAssets(): typeof import('./createRemoteComponent').collectSSRAssets {
     return require('./createRemoteComponent').collectSSRAssets;
   },
+  get wrapNoSSR(): typeof import('./wrapNoSSR').wrapNoSSR {
+    return require('./wrapNoSSR').wrapNoSSR;
+  },
 };
