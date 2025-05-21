@@ -30,6 +30,7 @@ const r = {
       strictVersion: { type: 'boolean' },
       exclude: { $ref: '#/definitions/IncludeExcludeOptions' },
       include: { $ref: '#/definitions/IncludeExcludeOptions' },
+      nodeModulesReconstructedLookup: { type: 'boolean' },
     },
   },
   e = Object.prototype.hasOwnProperty;
@@ -321,15 +322,15 @@ function t(
                                           null === l ? (l = [r]) : l.push(r),
                                             p++;
                                         }
-                                        var g = a === p;
-                                        if (((o = o || g), !o)) {
+                                        var m = a === p;
+                                        if (((o = o || m), !o)) {
                                           const r = p;
                                           if (!(e instanceof RegExp)) {
                                             const r = { params: {} };
                                             null === l ? (l = [r]) : l.push(r),
                                               p++;
                                           }
-                                          (g = r === p), (o = o || g);
+                                          (m = r === p), (o = o || m);
                                         }
                                         if (!o) {
                                           const r = { params: {} };
@@ -343,9 +344,9 @@ function t(
                                         (p = n),
                                           null !== l &&
                                             (n ? (l.length = n) : (l = null));
-                                        var m = s === p;
-                                      } else m = !0;
-                                      if (m) {
+                                        var g = s === p;
+                                      } else g = !0;
+                                      if (g) {
                                         if (void 0 !== r.version) {
                                           const e = p;
                                           if ('string' != typeof r.version)
@@ -355,9 +356,9 @@ function t(
                                               ]),
                                               !1
                                             );
-                                          m = e === p;
-                                        } else m = !0;
-                                        if (m)
+                                          g = e === p;
+                                        } else g = !0;
+                                        if (g)
                                           if (void 0 !== r.fallbackVersion) {
                                             const e = p;
                                             if (
@@ -372,15 +373,15 @@ function t(
                                                 ]),
                                                 !1
                                               );
-                                            m = e === p;
-                                          } else m = !0;
+                                            g = e === p;
+                                          } else g = !0;
                                       }
                                     }
                                   }
                                 }
                                 f = e === p;
                               } else f = !0;
-                              if (f)
+                              if (f) {
                                 if (void 0 !== s.include) {
                                   let r = s.include;
                                   const e = p;
@@ -495,6 +496,24 @@ function t(
                                   }
                                   f = e === p;
                                 } else f = !0;
+                                if (f)
+                                  if (
+                                    void 0 !== s.nodeModulesReconstructedLookup
+                                  ) {
+                                    const r = p;
+                                    if (
+                                      'boolean' !=
+                                      typeof s.nodeModulesReconstructedLookup
+                                    )
+                                      return (
+                                        (t.errors = [
+                                          { params: { type: 'boolean' } },
+                                        ]),
+                                        !1
+                                      );
+                                    f = r === p;
+                                  } else f = !0;
+                              }
                             }
                           }
                         }

@@ -127,6 +127,11 @@ export default {
             "Options for including only certain versions or requests of the provided module. Cannot be used with 'exclude'.",
           $ref: '#/definitions/IncludeExcludeOptions',
         },
+        nodeModulesReconstructedLookup: {
+          description:
+            'Enable reconstructed lookup for node_modules paths for this share item',
+          type: 'boolean',
+        },
       },
     },
     ProvidesItem: {

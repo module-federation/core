@@ -1,15 +1,12 @@
-const { withNx } = require('@nx/next/plugins/with-nx');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 /**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ * @type {import('next').NextConfig}
  **/
 const nextConfig = {
-  nx: {
-    // Set this to true if you would like to to use SVGR
-    // See: https://github.com/gregberge/svgr
-    svgr: false,
-  },
+  // Set this to true if you would like to to use SVGR
+  // See: https://github.com/gregberge/svgr
+  svgr: false,
   port: 4000,
   webpack(config, options) {
     const { isServer } = options;
@@ -24,7 +21,7 @@ const nextConfig = {
       checkout: `checkout@http://localhost:4000/_next/static/${
         isServer ? 'ssr' : 'chunks'
       }/remoteEntry.js`,
-      home_app: `home_app@http://localhost:4000/_next/static/${
+      home_app: `home_app@http://localhost:3000/_next/static/${
         isServer ? 'ssr' : 'chunks'
       }/remoteEntry.js`,
       shop: `shop@http://localhost:4000/_next/static/${
@@ -34,12 +31,12 @@ const nextConfig = {
 
     config.plugins.push(
       new NextFederationPlugin({
-        name: 'home_app',
+        name: 'app_router_4000',
         filename: 'static/chunks/remoteEntry.js',
         remotes: {
           remote_4001: remotes.remote_4001,
-          shop: remotes.shop,
-          checkout: remotes.checkout,
+          home_app: remotes.home_app,
+          // checkout: remotes.checkout,
         },
         shared: {
           // 'react': {
@@ -52,8 +49,8 @@ const nextConfig = {
           // }
         },
         extraOptions: {
-          // debug: false,
-          // exposePages: true,
+          debug: false,
+          exposePages: false,
           // enableImageLoaderFix: true,
           // enableUrlLoaderFix: true,
         },
@@ -69,4 +66,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withNx(nextConfig);
+module.exports = nextConfig;

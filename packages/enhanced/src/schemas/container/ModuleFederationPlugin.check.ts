@@ -256,6 +256,7 @@ const t = {
           singleton: { type: 'boolean' },
           strictVersion: { type: 'boolean' },
           version: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
+          nodeModulesReconstructedLookup: { type: 'boolean' },
         },
       },
       SharedItem: { type: 'string', minLength: 1 },
@@ -1481,6 +1482,7 @@ const h = {
       singleton: { type: 'boolean' },
       strictVersion: { type: 'boolean' },
       version: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
+      nodeModulesReconstructedLookup: { type: 'boolean' },
     },
   },
   b = {
@@ -1959,7 +1961,7 @@ function v(
                                     );
                                   l = t === i;
                                 } else l = !0;
-                                if (l)
+                                if (l) {
                                   if (void 0 !== e.version) {
                                     let t = e.version;
                                     const r = i,
@@ -2000,6 +2002,25 @@ function v(
                                         (n ? (a.length = n) : (a = null)),
                                       (l = r === i);
                                   } else l = !0;
+                                  if (l)
+                                    if (
+                                      void 0 !==
+                                      e.nodeModulesReconstructedLookup
+                                    ) {
+                                      const t = i;
+                                      if (
+                                        'boolean' !=
+                                        typeof e.nodeModulesReconstructedLookup
+                                      )
+                                        return (
+                                          (v.errors = [
+                                            { params: { type: 'boolean' } },
+                                          ]),
+                                          !1
+                                        );
+                                      l = t === i;
+                                    } else l = !0;
+                                }
                               }
                             }
                           }

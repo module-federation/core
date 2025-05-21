@@ -2,7 +2,7 @@
   "private": true,
   "name": "app-router-4001",
   "scripts": {
-    "build": "next build",
+    "build": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
     "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4001",
     "lint": "next lint",
     "lint-staged": "lint-staged",
@@ -23,9 +23,9 @@
     "date-fns": "3.6.0",
     "dinero.js": "2.0.0-alpha.10",
     "ms": "3.0.0-canary.1",
-    "next": "15.0.0-canary.193",
-    "react": "19.0.0-rc-cd22717c-20241013",
-    "react-dom": "19.0.0-rc-cd22717c-20241013",
+    "next": "15.3.2",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "server-only": "0.0.1",
     "styled-components": "6.1.8",
     "use-count-up": "3.0.1",
@@ -33,6 +33,7 @@
     "@module-federation/nextjs-mf": "workspace:*"
   },
   "devDependencies": {
+    "@nx/next": "21.0.3",
     "@tailwindcss/forms": "0.5.7",
     "@tailwindcss/typography": "0.5.12",
     "@types/ms": "0.7.34",
@@ -42,7 +43,7 @@
     "@vercel/git-hooks": "1.0.0",
     "autoprefixer": "10.4.19",
     "eslint": "9.0.0",
-    "eslint-config-next": "14.2.2",
+    "eslint-config-next": "15.3.2",
     "lint-staged": "15.2.2",
     "postcss": "8.4.38",
     "prettier": "3.2.5",
