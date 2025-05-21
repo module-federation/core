@@ -8,7 +8,8 @@ import {
   type WebpackLayerName,
   WEBPACK_LAYERS_NAMES,
 } from './constants';
-import { safeRequireResolve, getReactVersionSafely } from './internal-helpers';
+import { getReactVersionSafely } from './internal-helpers';
+import path from 'path';
 
 /**
  * Gets the appropriate React alias based on the layer
@@ -19,9 +20,10 @@ const getReactAliasForLayer = (layer: WebpackLayerName): string => {
       return 'next/dist/server/route-modules/app-page/vendored/rsc/react';
     case WL.serverSideRendering:
       return 'next/dist/server/route-modules/app-page/vendored/ssr/react';
-    case WL.appPagesBrowser:
-      return 'next/dist/compiled/react';
     default:
+      console.warn(
+        `getReactAliasForLayer: Unexpected layer ${String(layer)}, defaulting to RSC vendored React.`,
+      );
       return 'next/dist/server/route-modules/app-page/vendored/rsc/react';
   }
 };
@@ -35,9 +37,10 @@ const getReactDomAliasForLayer = (layer: WebpackLayerName): string => {
       return 'next/dist/server/route-modules/app-page/vendored/rsc/react-dom';
     case WL.serverSideRendering:
       return 'next/dist/server/route-modules/app-page/vendored/ssr/react-dom';
-    case WL.appPagesBrowser:
-      return 'next/dist/compiled/react-dom';
     default:
+      console.warn(
+        `getReactDomAliasForLayer: Unexpected layer ${String(layer)}, defaulting to RSC vendored React DOM.`,
+      );
       return 'next/dist/server/route-modules/app-page/vendored/rsc/react-dom';
   }
 };
@@ -51,9 +54,10 @@ const getReactJsxRuntimeAliasForLayer = (layer: WebpackLayerName): string => {
       return 'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-runtime';
     case WL.serverSideRendering:
       return 'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime';
-    case WL.appPagesBrowser:
-      return 'next/dist/compiled/react/jsx-runtime';
     default:
+      console.warn(
+        `getReactJsxRuntimeAliasForLayer: Unexpected layer ${String(layer)}, defaulting to RSC vendored JSX runtime.`,
+      );
       return 'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-runtime';
   }
 };
@@ -69,34 +73,11 @@ const getReactJsxDevRuntimeAliasForLayer = (
       return 'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime';
     case WL.serverSideRendering:
       return 'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime';
-    case WL.appPagesBrowser:
-      return 'next/dist/compiled/react/jsx-dev-runtime';
     default:
+      console.warn(
+        `getReactJsxDevRuntimeAliasForLayer: Unexpected layer ${String(layer)}, defaulting to RSC vendored JSX dev runtime.`,
+      );
       return 'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime';
-  }
-};
-
-/**
- * Gets the appropriate React Server DOM Webpack alias based on the layer
- */
-const getReactServerDomWebpackAliasForLayer = (
-  layer: WebpackLayerName,
-): { request: string } => {
-  switch (layer) {
-    case WL.reactServerComponents:
-      return {
-        request:
-          'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-edge',
-      };
-    case WL.serverSideRendering:
-      return {
-        request:
-          'next/dist/server/route-modules/app-page/vendored/ssr/react-server-dom-webpack-client-edge',
-      };
-    default:
-      return {
-        request: 'next/dist/compiled/react-server-dom-webpack/server.edge',
-      };
   }
 };
 
@@ -106,381 +87,628 @@ const getReactServerDomWebpackAliasForLayer = (
 export const getReactGroupServer = (
   compiler: Compiler,
 ): Record<string, SharedConfig> => {
-  const rscAlias = getReactAliasForLayer(WL.reactServerComponents);
-  const ssrAlias = getReactAliasForLayer(WL.serverSideRendering);
+  if (!compiler.context) {
+    console.warn(
+      'Compiler context is not available. Cannot resolve Next.js or React versions.',
+    );
+    return {};
+  }
+  const nextPackageJsonPath = require.resolve('next/package.json', {
+    paths: [compiler.context],
+  });
+  const nextVersion = require(nextPackageJsonPath).version;
 
-  const reactVersion = getReactVersionSafely(rscAlias, compiler.context);
-
-  return {
-    // RSC layer entries
-    'react-rsc': {
-      request: rscAlias,
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      import:
-        safeRequireResolve(rscAlias, { paths: [compiler.context] }) || false,
-      version: reactVersion,
-      shareKey: 'react',
-    },
-    'react-rsc-user': {
-      request: 'react',
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      import:
-        safeRequireResolve(rscAlias, { paths: [compiler.context] }) || false,
-      version: reactVersion,
-      shareKey: 'react',
-    },
-    // SSR layer entries
-    'react-ssr': {
-      request: ssrAlias,
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      import:
-        safeRequireResolve(ssrAlias, { paths: [compiler.context] }) || false,
-      version: reactVersion,
-      shareKey: 'react',
-    },
-    'react-ssr-user': {
-      request: 'react',
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      import:
-        safeRequireResolve(ssrAlias, { paths: [compiler.context] }) || false,
-      version: reactVersion,
-      shareKey: 'react',
-    },
-  };
-};
-
-/**
- * Function defining the React-DOM related packages group for server side
- */
-export const getReactDomGroupServer = (
-  compiler: Compiler,
-): Record<string, SharedConfig> => {
-  const rscAlias = getReactDomAliasForLayer(WL.reactServerComponents);
-  const ssrAlias = getReactDomAliasForLayer(WL.serverSideRendering);
-
-  const reactDomVersion = getReactVersionSafely(rscAlias, compiler.context);
-
-  return {
-    // RSC layer entries
-    'react-dom-rsc': {
-      request: rscAlias,
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      import:
-        safeRequireResolve(rscAlias, { paths: [compiler.context] }) || false,
-      version: reactDomVersion,
-      shareKey: 'react-dom',
-    },
-    'react-dom-rsc-user': {
-      request: 'react-dom',
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      import:
-        safeRequireResolve(rscAlias, { paths: [compiler.context] }) || false,
-      version: reactDomVersion,
-      shareKey: 'react-dom',
-    },
-    // SSR layer entries
-    'react-dom-ssr': {
-      request: ssrAlias,
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      import:
-        safeRequireResolve(ssrAlias, { paths: [compiler.context] }) || false,
-      version: reactDomVersion,
-      shareKey: 'react-dom',
-    },
-    'react-dom-ssr-user': {
-      request: 'react-dom',
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      import:
-        safeRequireResolve(ssrAlias, { paths: [compiler.context] }) || false,
-      version: reactDomVersion,
-      shareKey: 'react-dom',
-    },
-    // Server-specific entries
-    'react-dom/server': {
-      request: 'next/dist/compiled/react-dom/server',
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      import:
-        safeRequireResolve('next/dist/compiled/react-dom/server', {
-          paths: [compiler.context],
-        }) || false,
-      version: reactDomVersion,
-      shareKey: 'react-dom/server',
-    },
-    'react-dom/server.edge': {
-      request: 'next/dist/build/webpack/alias/react-dom-server-edge.js',
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      import:
-        safeRequireResolve(
-          'next/dist/build/webpack/alias/react-dom-server-edge.js',
-          { paths: [compiler.context] },
-        ) || false,
-      version: reactDomVersion,
-      shareKey: 'react-dom/server.edge',
-    },
-  };
-};
-
-/**
- * Function defining the React-Server-DOM-Webpack related packages group for server side
- */
-export const getReactServerDomWebpackGroupServer = (
-  compiler: Compiler,
-): Record<string, SharedConfig> => {
-  const rscConfig = getReactServerDomWebpackAliasForLayer(
-    WL.reactServerComponents,
-  );
-  const ssrConfig = getReactServerDomWebpackAliasForLayer(
-    WL.serverSideRendering,
-  );
-
+  // Get React version.
   const reactVersion = getReactVersionSafely(
-    'next/dist/compiled/react-server-dom-webpack/server.edge',
+    'next/dist/compiled/react',
     compiler.context,
   );
 
-  return {
-    'react-server-dom-webpack/server.edge': {
-      request: rscConfig.request,
+  if (!reactVersion) {
+    console.warn(
+      'Could not determine React version. Sharing configurations for React might be incomplete.',
+    );
+  }
+
+  const reactConfigs: SharedConfig[] = [
+    // --- React (Server Side Rendering) ---
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/ssr/react',
       singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      import:
-        safeRequireResolve(rscConfig.request, {
-          paths: [compiler.context],
-        }) || false,
+      shareKey: 'react',
+      import: 'next/dist/server/route-modules/app-page/vendored/ssr/react',
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
       version: reactVersion,
-      shareKey: 'react-server-dom-webpack/server.edge',
+      requiredVersion: `^${reactVersion}`,
+      nodeModulesReconstructedLookup: false
     },
-    'react-server-dom-webpack/server.node': {
-      request:
+    {
+      request: 'react',
+      singleton: true,
+      shareKey: 'react',
+      import: 'next/dist/server/route-modules/app-page/vendored/ssr/react',
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      version: reactVersion,
+      requiredVersion: `^${reactVersion}`,
+      nodeModulesReconstructedLookup: false
+    },
+    // --- React (React Server Components) ---
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react',
+      singleton: true,
+      shareKey: 'react',
+      import: 'next/dist/server/route-modules/app-page/vendored/rsc/react',
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      version: reactVersion,
+      requiredVersion: `^${reactVersion}`,
+      nodeModulesReconstructedLookup: false
+    },
+    {
+      request: 'react',
+      singleton: true,
+      shareKey: 'react',
+      import: 'next/dist/server/route-modules/app-page/vendored/rsc/react',
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      version: reactVersion,
+      requiredVersion: `^${reactVersion}`,
+      nodeModulesReconstructedLookup: false
+    },
+    // --- React (Default Fallback) ---
+    {
+      request: 'react',
+      singleton: true,
+      shareKey: 'react',
+      import: `next/dist/compiled/react`,
+      shareScope: 'default',
+      version: reactVersion,
+      requiredVersion: `^${reactVersion}`,
+      packageName: 'react',
+      nodeModulesReconstructedLookup: false
+    },
+
+    // --- React DOM (Server Side Rendering) ---
+    {
+      request: 'react-dom',
+      shareKey: 'react-dom',
+      import: 'next/dist/server/route-modules/app-page/vendored/ssr/react-dom',
+      singleton: true,
+      packageName: 'react-dom',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/ssr/react-dom',
+      shareKey: 'react-dom',
+      import: 'next/dist/server/route-modules/app-page/vendored/ssr/react-dom',
+      singleton: true,
+      packageName: 'react-dom',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      nodeModulesReconstructedLookup: false,
+    },
+    // --- React DOM (React Server Components) ---
+    {
+      request: 'react-dom',
+      shareKey: 'react-dom',
+      import: 'next/dist/server/route-modules/app-page/vendored/rsc/react-dom',
+      singleton: true,
+      packageName: 'react-dom',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-dom',
+      shareKey: 'react-dom',
+      import: 'next/dist/server/route-modules/app-page/vendored/rsc/react-dom',
+      singleton: true,
+      packageName: 'react-dom',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    // --- React DOM (Default Fallback) ---
+    {
+      request: 'react-dom',
+      singleton: true,
+      shareKey: 'react-dom',
+      import: `next/dist/compiled/react-dom`,
+      shareScope: 'default',
+      packageName: 'react-dom',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      nodeModulesReconstructedLookup: false,
+    },
+
+    // --- React JSX Runtime (Server Side Rendering) ---
+    {
+      request: 'react/jsx-runtime',
+      shareKey: 'react/jsx-runtime',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime',
+      singleton: true,
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime',
+      shareKey: 'react/jsx-runtime',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime',
+      singleton: true,
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      nodeModulesReconstructedLookup: false,
+    },
+    // --- React JSX Runtime (React Server Components) ---
+    {
+      request: 'react/jsx-runtime',
+      shareKey: 'react/jsx-runtime',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-runtime',
+      singleton: true,
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-runtime',
+      shareKey: 'react/jsx-runtime',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-runtime',
+      singleton: true,
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    // --- React JSX Runtime (Default Fallback) ---
+    {
+      request: 'react/jsx-runtime',
+      singleton: true,
+      shareKey: 'react/jsx-runtime',
+      import: `next/dist/compiled/react/jsx-runtime`,
+      shareScope: 'default',
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      nodeModulesReconstructedLookup: false,
+    },
+
+    // --- React JSX Dev Runtime (Server Side Rendering) ---
+    {
+      request: 'react/jsx-dev-runtime',
+      shareKey: 'react/jsx-dev-runtime',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime',
+      singleton: true,
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime',
+      shareKey: 'react/jsx-dev-runtime',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime',
+      singleton: true,
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      nodeModulesReconstructedLookup: false,
+    },
+    // --- React JSX Dev Runtime (React Server Components) ---
+    {
+      request: 'react/jsx-dev-runtime',
+      shareKey: 'react/jsx-dev-runtime',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime',
+      singleton: true,
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime',
+      shareKey: 'react/jsx-dev-runtime',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime',
+      singleton: true,
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    // --- React JSX Dev Runtime (Default Fallback) ---
+    {
+      request: 'react/jsx-dev-runtime',
+      singleton: true,
+      shareKey: 'react/jsx-dev-runtime',
+      import: `next/dist/compiled/react/jsx-dev-runtime`,
+      shareScope: 'default',
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      nodeModulesReconstructedLookup: false,
+    },
+
+    // --- React Compiler Runtime (Server Side Rendering) ---
+    {
+      request: 'react/compiler-runtime',
+      shareKey: 'react/compiler-runtime',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-compiler-runtime',
+      singleton: true,
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/ssr/react-compiler-runtime',
+      shareKey: 'react/compiler-runtime',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-compiler-runtime',
+      singleton: true,
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      nodeModulesReconstructedLookup: false,
+    },
+    // --- React Compiler Runtime (React Server Components) ---
+    {
+      request: 'react/compiler-runtime',
+      shareKey: 'react/compiler-runtime',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-compiler-runtime',
+      singleton: true,
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-compiler-runtime',
+      shareKey: 'react/compiler-runtime',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-compiler-runtime',
+      singleton: true,
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    // --- React Compiler Runtime (Default Fallback) ---
+    {
+      request: 'react/compiler-runtime',
+      singleton: true,
+      shareKey: 'react/compiler-runtime',
+      import: `next/dist/compiled/react/compiler-runtime`,
+      shareScope: 'default',
+      packageName: 'react',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      nodeModulesReconstructedLookup: false,
+    },
+
+    // --- react-server-dom-webpack/client.edge (Server Side Rendering) ---
+    {
+      request: 'react-server-dom-webpack/client.edge',
+      shareKey: 'react-server-dom-webpack/client.edge',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-server-dom-webpack-client-edge',
+      singleton: true,
+      packageName: 'react-server-dom-webpack',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/ssr/react-server-dom-webpack-client-edge',
+      shareKey: 'react-server-dom-webpack/client.edge',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-server-dom-webpack-client-edge',
+      singleton: true,
+      packageName: 'react-server-dom-webpack',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      nodeModulesReconstructedLookup: false,
+    },
+    // --- react-server-dom-webpack/client.edge (Default Fallback) ---
+    {
+      request: 'react-server-dom-webpack/client.edge',
+      singleton: true,
+      shareKey: 'react-server-dom-webpack/client.edge',
+      import: `next/dist/compiled/react-server-dom-webpack/client.edge`,
+      shareScope: 'default',
+      packageName: 'react-server-dom-webpack',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      nodeModulesReconstructedLookup: false,
+    },
+
+    // --- react-server-dom-webpack/server.edge (React Server Components) ---
+    {
+      request: 'react-server-dom-webpack/server.edge',
+      shareKey: 'react-server-dom-webpack/server.edge',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-edge',
+      singleton: true,
+      packageName: 'react-server-dom-webpack',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-edge',
+      shareKey: 'react-server-dom-webpack/server.edge',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-edge',
+      singleton: true,
+      packageName: 'react-server-dom-webpack',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    // --- react-server-dom-webpack/server.edge (Default Fallback) ---
+    {
+      request: 'react-server-dom-webpack/server.edge',
+      singleton: true,
+      shareKey: 'react-server-dom-webpack/server.edge',
+      import: `next/dist/compiled/react-server-dom-webpack/server.edge`,
+      shareScope: 'default',
+      packageName: 'react-server-dom-webpack',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      nodeModulesReconstructedLookup: false,
+    },
+
+    // --- react-server-dom-webpack/server.node (React Server Components) ---
+    {
+      request: 'react-server-dom-webpack/server.node',
+      shareKey: 'react-server-dom-webpack/server.node',
+      import:
         'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-node',
       singleton: true,
+      packageName: 'react-server-dom-webpack',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
       layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      import:
-        safeRequireResolve(
-          'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-node',
-          {
-            paths: [compiler.context],
-          },
-        ) || false,
-      version: reactVersion,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-node',
       shareKey: 'react-server-dom-webpack/server.node',
-    },
-    'react-server-dom-webpack/client.edge': {
-      request: ssrConfig.request,
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
       import:
-        safeRequireResolve(ssrConfig.request, {
-          paths: [compiler.context],
-        }) || false,
-      version: reactVersion,
-      shareKey: 'react-server-dom-webpack/client.edge',
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-node',
+      singleton: true,
+      packageName: 'react-server-dom-webpack',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
     },
-  };
+    // --- react-server-dom-webpack/server.node (Default Fallback) ---
+    {
+      request: 'react-server-dom-webpack/server.node',
+      singleton: true,
+      shareKey: 'react-server-dom-webpack/server.node',
+      import: `next/dist/compiled/react-server-dom-webpack/server.node`,
+      shareScope: 'default',
+      packageName: 'react-server-dom-webpack',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      nodeModulesReconstructedLookup: false,
+    },
+
+    // --- react-server-dom-webpack/static.edge (React Server Components) ---
+    {
+      request: 'react-server-dom-webpack/static.edge',
+      shareKey: 'react-server-dom-webpack/static.edge',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-static-edge',
+      singleton: true,
+      packageName: 'react-server-dom-webpack',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-static-edge',
+      shareKey: 'react-server-dom-webpack/static.edge',
+      import:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-static-edge',
+      singleton: true,
+      packageName: 'react-server-dom-webpack',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    // --- react-server-dom-webpack/static.edge (Default Fallback) ---
+    {
+      request: 'react-server-dom-webpack/static.edge',
+      singleton: true,
+      shareKey: 'react-server-dom-webpack/static.edge',
+      import: `next/dist/compiled/react-server-dom-webpack/static.edge`,
+      shareScope: 'default',
+      packageName: 'react-server-dom-webpack',
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      nodeModulesReconstructedLookup: false,
+    },
+  ];
+
+
+  // Convert the array to a Record using reduce, ensuring unique keys by including the index.
+  return reactConfigs.reduce(
+    (acc, config, index) => {
+      // Construct a unique key for each configuration to avoid overwrites in the accumulator object.
+      const key = `${config.request || 'config'}-${config.shareKey}-${config.layer || 'global'}-${index}`;
+      if (acc[key]) {
+        // This case should ideally not be hit if reactConfigs are generated correctly.
+        console.warn(
+          `Duplicate key detected in reactConfigs reduction: ${key}. Check configurations.`,
+        );
+      }
+      acc[key] = config;
+      return acc;
+    },
+    {} as Record<string, SharedConfig>,
+  );
 };
 
-/**
- * Function defining the React-JSX-Runtime related packages group for server side
- */
-export const getReactJsxRuntimeGroupServer = (
+export const getNextGroupServer = (
   compiler: Compiler,
 ): Record<string, SharedConfig> => {
-  const rscAlias = getReactJsxRuntimeAliasForLayer(WL.reactServerComponents);
-  const ssrAlias = getReactJsxRuntimeAliasForLayer(WL.serverSideRendering);
+  if (!compiler.context) {
+    console.warn(
+      'Compiler context is not available. Cannot resolve Next.js version for getNextGroupServer.',
+    );
+    return {};
+  }
+  const nextPackageJsonPath = require.resolve('next/package.json', {
+    paths: [compiler.context],
+  });
+  const nextVersion = require(nextPackageJsonPath).version;
 
-  // Use React's version since jsx-runtime is part of React
-  const reactVersion = getReactVersionSafely(
-    'next/dist/compiled/react',
-    compiler.context,
+  const nextConfigs: SharedConfig[] = [
+    // --- Next.js Internal Contexts (React-specific) ---
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/contexts/',
+      shareKey: 'next/dist/server/route-modules/app-page/vendored/contexts/',
+      import: 'next/dist/server/route-modules/app-page/vendored/contexts/',
+      singleton: true,
+      packageName: 'next',
+      version: nextVersion || undefined,
+      requiredVersion: nextVersion ? `^${nextVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'next/dist/server/route-modules/app-page/vendored/contexts/',
+      shareKey: 'next/dist/server/route-modules/app-page/vendored/contexts/',
+      import: 'next/dist/server/route-modules/app-page/vendored/contexts/',
+      singleton: true,
+      packageName: 'next',
+      version: nextVersion || undefined,
+      requiredVersion: nextVersion ? `^${nextVersion}` : undefined,
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      nodeModulesReconstructedLookup: false,
+    },
+  ];
+  return nextConfigs.reduce(
+    (acc, config, index) => {
+      const key = `${config.request || 'config'}-${config.shareKey}-${config.layer || 'global'}-${index}`;
+      acc[key] = config;
+      return acc;
+    },
+    {} as Record<string, SharedConfig>,
   );
-
-  return {
-    // RSC layer entries
-    'react/jsx-runtime-rsc': {
-      request: rscAlias,
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      import:
-        safeRequireResolve(rscAlias, { paths: [compiler.context] }) || false,
-      version: reactVersion,
-      shareKey: 'react/jsx-runtime',
-    },
-    'react/jsx-runtime-rsc-user': {
-      request: 'react/jsx-runtime',
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      import:
-        safeRequireResolve(rscAlias, { paths: [compiler.context] }) || false,
-      version: reactVersion,
-      shareKey: 'react/jsx-runtime',
-    },
-    // SSR layer entries
-    'react/jsx-runtime-ssr': {
-      request: ssrAlias,
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      import:
-        safeRequireResolve(ssrAlias, { paths: [compiler.context] }) || false,
-      version: reactVersion,
-      shareKey: 'react/jsx-runtime',
-    },
-    'react/jsx-runtime-ssr-user': {
-      request: 'react/jsx-runtime',
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      import:
-        safeRequireResolve(ssrAlias, { paths: [compiler.context] }) || false,
-      version: reactVersion,
-      shareKey: 'react/jsx-runtime',
-    },
-  };
 };
 
 /**
- * Function defining the React-JSX-Dev-Runtime related packages group for server side
- */
-export const getReactJsxDevRuntimeGroupServer = (
-  compiler: Compiler,
-): Record<string, SharedConfig> => {
-  const rscAlias = getReactJsxDevRuntimeAliasForLayer(WL.reactServerComponents);
-  const ssrAlias = getReactJsxDevRuntimeAliasForLayer(WL.serverSideRendering);
-
-  // Use React's version since jsx-dev-runtime is part of React
-  const reactVersion = getReactVersionSafely(
-    'next/dist/compiled/react',
-    compiler.context,
-  );
-
-  return {
-    // RSC layer entries
-    'react/jsx-dev-runtime-rsc': {
-      request: rscAlias,
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      import:
-        safeRequireResolve(rscAlias, { paths: [compiler.context] }) || false,
-      version: reactVersion,
-      shareKey: 'react/jsx-dev-runtime',
-    },
-    'react/jsx-dev-runtime-rsc-user': {
-      request: 'react/jsx-dev-runtime',
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      import:
-        safeRequireResolve(rscAlias, { paths: [compiler.context] }) || false,
-      version: reactVersion,
-      shareKey: 'react/jsx-dev-runtime',
-    },
-    // SSR layer entries
-    'react/jsx-dev-runtime-ssr': {
-      request: ssrAlias,
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      import:
-        safeRequireResolve(ssrAlias, { paths: [compiler.context] }) || false,
-      version: reactVersion,
-      shareKey: 'react/jsx-dev-runtime',
-    },
-    'react/jsx-dev-runtime-ssr-user': {
-      request: 'react/jsx-dev-runtime',
-      singleton: true,
-      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
-      import:
-        safeRequireResolve(ssrAlias, { paths: [compiler.context] }) || false,
-      version: reactVersion,
-      shareKey: 'react/jsx-dev-runtime',
-    },
-  };
-};
-
-/**
- * Generates the appropriate share scope for Next.js internals based on the server compiler context.
- * @param {Compiler} compiler - The webpack compiler instance.
  * @returns {SharedObject} - The generated share scope.
  */
 export const getNextInternalsShareScopeServer = (
   compiler: Compiler,
 ): SharedObject => {
-  // Only proceed if this is a server compiler
-  if (compiler.options.name !== 'server') {
+  if (compiler.options.name === 'client') {
     return {};
   }
-  return {
-    // 'next/dist/': {
-    //   singleton: true,
-    //   exclude: {
-    //     request: /^(?!.*react).*|react-refresh/,
-    //   },
-    // },
-    // 'styled-jsx': {
-    //   singleton: true,
-    // },
-    // 'styled-jsx/': {
-    //   singleton: true,
-    // },
-  };
 
-  // Generate all the server-side sharing groups
   const reactGroup = getReactGroupServer(compiler);
-  const reactDomGroup = getReactDomGroupServer(compiler);
-  const reactServerDomWebpackGroup =
-    getReactServerDomWebpackGroupServer(compiler);
-  const reactJsxRuntimeGroup = getReactJsxRuntimeGroupServer(compiler);
-  const reactJsxDevRuntimeGroup = getReactJsxDevRuntimeGroupServer(compiler);
-
-  // Combine all groups
+  const nextGroup = getNextGroupServer(compiler);
   return {
     ...reactGroup,
-    ...reactDomGroup,
-    ...reactServerDomWebpackGroup,
-    ...reactJsxRuntimeGroup,
-    ...reactJsxDevRuntimeGroup,
+    // ...nextGroup,
   };
 };

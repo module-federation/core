@@ -2,12 +2,16 @@ import { demos } from '#/lib/demos';
 import Link from 'next/link';
 import { lazy } from 'react';
 import dynamic from 'next/dynamic';
-const Button = lazy(() => import('remote_4001/Button'));
+const RemoteRSCButton = lazy(() => import('remote_4001/rsc/Button'));
+const RemoteSSRButton = lazy(() => import('remote_4001/Button'));
+import Button from '#/ui/button';
 
 export default function Page() {
   return (
     <div className="space-  y-8">
-      {/*<Button>Button from remote</Button>*/}
+      <Button>Local RSC Button</Button>
+      <RemoteRSCButton>Remote Button from RSC</RemoteRSCButton>
+      <RemoteSSRButton>Remote Button from RSC</RemoteSSRButton>
       <h1 className="text-xl font-medium text-gray-300">Examples</h1>
 
       <div className="space-y-10 text-white">

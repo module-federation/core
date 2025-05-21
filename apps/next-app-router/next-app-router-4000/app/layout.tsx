@@ -3,7 +3,7 @@ import { AddressBar } from '#/ui/address-bar';
 import Byline from '#/ui/byline';
 // import { GlobalNav } from 'remote_4001/GlobalNav(rsc)';
 import { Metadata } from 'next';
-console.log(require('remote_4001/Button'));
+
 export const metadata: Metadata = {
   title: {
     default: 'Next.js App Router',
@@ -32,7 +32,6 @@ export default function RootLayout({
     <html lang="en" className="[color-scheme:dark]">
       <body className="overflow-y-scroll bg-gray-1100 bg-[url('/grid.svg')] pb-36">
         {/*<GlobalNav />*/}
-
         <div className="lg:pl-72">
           <div className="mx-auto max-w-4xl space-y-8 px-2 pt-20 lg:px-8 lg:py-8">
             <div className="rounded-lg bg-vc-border-gradient p-px shadow-lg shadow-black/20">

@@ -84,6 +84,24 @@ new ModuleFederationPlugin({
 });
 ```
 
+## How Share Matching Works
+
+:::note
+Module Federation matches shared modules in a specific order. This applies to both providing and consuming shared modules, and is essential for advanced sharing scenarios.
+:::
+
+**Matching order:**
+
+1. **Direct match:** Exact match for the requested module name (e.g., `'react'`).
+2. **Prefix match:** If no direct match, check for prefix-based shares (e.g., `'next/'` for `'next/router'`).
+3. **Reconstructed path match:** If enabled, try matching the path after `node_modules` (for relative/absolute imports inside node_modules), first direct, then prefix.
+4. **No match:** Falls back to normal module resolution.
+
+- Matching stops at the first match found.
+- `include`/`exclude`, `layer`, and `issuerLayer` filters apply at each step.
+
+See `ProvideSharedPlugin.ts` and `ConsumeSharedPlugin.ts` for implementation details.
+
 ## Layers
 
 ### `layer`

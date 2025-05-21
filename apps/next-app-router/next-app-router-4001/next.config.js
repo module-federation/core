@@ -26,7 +26,7 @@ const nextConfig = {
     config.optimization = config.optimization || {};
     config.optimization.moduleIds = 'named';
     config.optimization.chunkIds = 'named';
-
+    config.devtool = false;
     config.watchOptions = {
       ignored: ['**/node_modules/**', '**/@mf-types/**'],
     };
@@ -64,7 +64,8 @@ const nextConfig = {
         filename: 'static/chunks/remoteEntry.js',
         exposes: {
           // Core UI Components
-          // './Button': './ui/button',
+          './rsc/Button': './rsc/button',
+          './Button': './classic/button',
           // './Header': isServer ? './ui/header?rsc' : './ui/header?shared',
           // './Footer': './ui/footer',
           // './GlobalNav(rsc)': isServer ? './ui/global-nav?rsc' : './ui/global-nav',
@@ -109,6 +110,9 @@ const nextConfig = {
       name: 'xxx',
       apply(compiler) {
         compiler.options.devtool = false;
+        compiler.options.optimization.minimize = false;
+        compiler.options.optimization.moduleIds = 'named';
+        compiler.options.optimization.chunkIds = 'named';
       },
     });
     return config;

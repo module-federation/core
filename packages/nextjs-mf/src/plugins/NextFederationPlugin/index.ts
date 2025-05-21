@@ -184,6 +184,33 @@ export class NextFederationPlugin {
         (message) => /your target environment does not appear/.test(message),
       ];
     }
+
+    // Add a module rule for /rsc/ directory to use nextRscMapLoader
+    compiler.options.module = compiler.options.module || {};
+    compiler.options.module.rules = compiler.options.module.rules || [];
+    if (compiler.options.name === 'client') {
+      // Find or create a top-level oneOf rule
+      let oneOfRule = compiler.options.module.rules.find(
+        (rule) =>
+          rule &&
+          typeof rule === 'object' &&
+          'oneOf' in rule &&
+          Array.isArray((rule as any).oneOf),
+      ) as { oneOf: any[] } | undefined;
+      if (!oneOfRule) {
+        oneOfRule = { oneOf: [] };
+        compiler.options.module.rules.unshift(oneOfRule);
+      }
+      oneOfRule.oneOf.unshift({
+        test: /[\\/]rsc[\\/].*\.(js|jsx|ts|tsx)$/,
+        layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      });
+    } else if (compiler.options.name === 'server') {
+      compiler.options.module.rules.unshift({
+        test: /[\\/]rsc[\\/].*\.(js|jsx|ts|tsx)$/,
+        layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      });
+    }
   }
 
   private validateOptions(compiler: Compiler): boolean {
@@ -299,7 +326,7 @@ export class NextFederationPlugin {
       // shareStrategy: this._options.shareStrategy ?? 'loaded-first',
       experiments: {
         asyncStartup: true,
-        nodeModulesReconstructedLookup: true,
+        nodeModulesReconstructedLookup: false,
       },
     };
   }
