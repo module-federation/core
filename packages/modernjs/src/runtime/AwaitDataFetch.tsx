@@ -107,12 +107,8 @@ function AwaitSuspense<T>({
   errorElement = DefaultErrorElement,
 }: AwaitErrorHandlerProps<T>) {
   return (
-    <Suspense>
-      <ResolveAwait
-        resolve={resolve}
-        loading={loading}
-        errorElement={errorElement}
-      >
+    <Suspense fallback={loading}>
+      <ResolveAwait resolve={resolve} errorElement={errorElement}>
         {children}
       </ResolveAwait>
     </Suspense>
