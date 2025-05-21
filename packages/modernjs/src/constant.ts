@@ -14,7 +14,7 @@ export const ERROR_TYPE = {
   UNKNOWN: 3,
 };
 export const WRAP_DATA_FETCH_ID_IDENTIFIER = 'wrap_dfip_identifier';
-export const enum MF_DOWNGRADE_TYPE {
+export const enum MF_DATA_FETCH_TYPE {
   FETCH_SERVER = 1,
   FETCH_CLIENT = 2,
 }

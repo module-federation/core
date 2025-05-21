@@ -23,6 +23,15 @@ type IProps = {
   injectLink?: boolean;
 };
 
+type CreateRemoteComponentOptions<T, E extends keyof T> = {
+  loader: () => Promise<T>;
+  loading: React.ReactNode;
+  fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
+  export?: E;
+  dataFetchParams?: DataFetchParams;
+  noSSR?: boolean;
+};
+
 type ReactKey = { key?: React.Key | null };
 
 function getTargetModuleInfo(id: string) {
@@ -123,23 +132,19 @@ export function collectSSRAssets(options: IProps) {
   return [...scripts, ...links];
 }
 
-export function createRemoteComponent<T, E extends keyof T>(info: {
-  loader: () => Promise<T>;
-  loading: React.ReactNode;
-  fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
-  export?: E;
-  dataFetchParams?: DataFetchParams;
-}) {
+export function createRemoteComponent<T, E extends keyof T>(
+  options: CreateRemoteComponentOptions<T, E>,
+) {
   type ComponentType = T[E] extends (...args: any) => any
     ? Parameters<T[E]>[0] extends undefined
       ? ReactKey
       : Parameters<T[E]>[0] & ReactKey
     : ReactKey;
-  const exportName = info?.export || 'default';
+  const exportName = options?.export || 'default';
 
   const callLoader = async () => {
     logger.debug('callLoader start', Date.now());
-    const m = (await info.loader()) as Record<string, React.FC> &
+    const m = (await options.loader()) as Record<string, React.FC> &
       Record<symbol, string>;
     logger.debug('callLoader end', Date.now());
     if (!m) {
@@ -148,7 +153,7 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
     return m;
   };
 
-  const getData = async () => {
+  const getData = async (noSSR?: boolean) => {
     let loadedRemoteInfo: ReturnType<typeof getLoadedRemoteInfos>;
     let moduleId: string;
     const instance = getInstance();
@@ -182,10 +187,14 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
       if (!dataFetchMapKey) {
         return;
       }
-      const data = await fetchData(dataFetchMapKey, {
-        ...info.dataFetchParams,
-        isDowngrade: false,
-      });
+      const data = await fetchData(
+        dataFetchMapKey,
+        {
+          ...options.dataFetchParams,
+          isDowngrade: false,
+        },
+        noSSR,
+      );
       setDataFetchItemLoadedStatus(dataFetchMapKey);
       logger.debug('get data res: \n', data);
       return data;
@@ -251,14 +260,14 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
 
   return (props: ComponentType) => {
     const { key, ...args } = props;
-    if (globalThis.FEDERATION_SSR) {
+    if (globalThis.FEDERATION_SSR && !options.noSSR) {
       const { key, ...args } = props;
 
       return (
         <AwaitDataFetch
           resolve={getData()}
-          loading={info.loading}
-          errorElement={info.fallback}
+          loading={options.loading}
+          errorElement={options.fallback}
         >
           {/* @ts-ignore */}
           {(data) => <LazyComponent {...args} mfData={data} />}
@@ -298,15 +307,15 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
       }, []);
 
       if (loading) {
-        return <>{info.loading}</>;
+        return <>{options.loading}</>;
       }
 
       if (error) {
         return (
           <>
-            {typeof info.fallback === 'function'
-              ? info.fallback(error)
-              : info.fallback}
+            {typeof options.fallback === 'function'
+              ? options.fallback(error)
+              : options.fallback}
           </>
         );
       }
@@ -319,14 +328,19 @@ export function createRemoteComponent<T, E extends keyof T>(info: {
 /**
  * @deprecated createRemoteSSRComponent is deprecated, please use createRemoteComponent instead!
  */
-export function createRemoteSSRComponent<T, E extends keyof T>(info: {
-  loader: () => Promise<T>;
-  loading: React.ReactNode;
-  fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
-  export?: E;
-}) {
+export function createRemoteSSRComponent<T, E extends keyof T>(
+  options: CreateRemoteComponentOptions<T, E>,
+) {
   logger.warn(
     'createRemoteSSRComponent is deprecated, please use createRemoteComponent instead!',
   );
-  return createRemoteComponent(info);
+  return createRemoteComponent(options);
+}
+
+export function wrapNoSSR<T, E extends keyof T>(
+  createComponentFn: typeof createRemoteComponent,
+) {
+  return (options: Omit<CreateRemoteComponentOptions<T, E>, 'noSSR'>) => {
+    return createComponentFn({ ...options, noSSR: true });
+  };
 }

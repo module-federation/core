@@ -116,6 +116,7 @@ export const getDataFetchIdWithErrorMsgs = (errMsgs: string) => {
 export async function fetchData(
   id: string,
   params: DataFetchParams,
+  noSSR?: boolean,
 ): Promise<unknown | undefined> {
   const callFetchData = async () => {
     const item = getDataFetchItem(id);
@@ -137,6 +138,10 @@ export async function fetchData(
     }
     if (dataFetchItem[1]?.[0]) {
       return dataFetchItem[1][0];
+    }
+
+    if (noSSR) {
+      return callDowngrade(id, params);
     }
 
     const mfDowngrade = getDowngradeTag();

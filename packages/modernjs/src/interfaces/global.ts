@@ -1,4 +1,4 @@
-import { MF_DOWNGRADE_TYPE, MF_DATA_FETCH_STATUS } from '../constant';
+import { MF_DATA_FETCH_TYPE, MF_DATA_FETCH_STATUS } from '../constant';
 
 export type DataFetchParams = {
   isDowngrade: boolean;
@@ -8,7 +8,7 @@ export type MF_DATA_FETCH_MAP_VALUE = [
   // getDataFetchGetter , getDataFetchPromise
   [
     () => Promise<DataFetch<unknown>>,
-    MF_DOWNGRADE_TYPE,
+    MF_DATA_FETCH_TYPE,
     Promise<DataFetch<unknown>>?,
   ],
   // loading, resolve, reject

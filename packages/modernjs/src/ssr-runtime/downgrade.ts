@@ -1,5 +1,5 @@
 import { DATA_FETCH_QUERY, DOWNGRADE_KEY } from '../constant';
-import { MF_DATA_FETCH_STATUS, MF_DOWNGRADE_TYPE } from '../constant';
+import { MF_DATA_FETCH_STATUS, MF_DATA_FETCH_TYPE } from '../constant';
 import { getDataFetchMap } from '../utils';
 
 import type { DataFetchParams, MF_SSR_DOWNGRADE } from '../interfaces/global';
@@ -38,8 +38,8 @@ export async function callDowngrade(id: string, params?: DataFetchParams) {
       });
       mfDataFetch[1] = [promise, res, rej];
     }
-    const downgradeType = mfDataFetch[0][1];
-    if (downgradeType === MF_DOWNGRADE_TYPE.FETCH_CLIENT) {
+    const dataFetchType = mfDataFetch[0][1];
+    if (dataFetchType === MF_DATA_FETCH_TYPE.FETCH_CLIENT) {
       try {
         mfDataFetch[0][0]().then((getDataFetchFn) => {
           return getDataFetchFn({
@@ -54,7 +54,7 @@ export async function callDowngrade(id: string, params?: DataFetchParams) {
         mfDataFetch[2] = MF_DATA_FETCH_STATUS.ERROR;
         rej(e);
       }
-    } else if (downgradeType === MF_DOWNGRADE_TYPE.FETCH_SERVER) {
+    } else if (dataFetchType === MF_DATA_FETCH_TYPE.FETCH_SERVER) {
       try {
         const currentUrl = new URL(window.location.href);
         currentUrl.searchParams.set(DATA_FETCH_QUERY, id);

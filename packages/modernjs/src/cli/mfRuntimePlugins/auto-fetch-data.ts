@@ -7,7 +7,7 @@ import {
 } from '../../utils';
 import logger from '../../logger';
 import { getDataFetchMapKey } from '../../utils/dataFetch';
-import { MF_DOWNGRADE_TYPE, MF_DATA_FETCH_STATUS } from '../../constant';
+import { MF_DATA_FETCH_TYPE, MF_DATA_FETCH_STATUS } from '../../constant';
 import { DATA_FETCH_CLIENT_SUFFIX } from '@module-federation/rsbuild-plugin/constant';
 
 import type { MF_DATA_FETCH_MAP_VALUE } from '../../interfaces/global';
@@ -63,13 +63,13 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
       (module) =>
         module.moduleName === `${dataFetchName}${DATA_FETCH_CLIENT_SUFFIX}`,
     )
-      ? MF_DOWNGRADE_TYPE.FETCH_CLIENT
-      : MF_DOWNGRADE_TYPE.FETCH_SERVER;
+      ? MF_DATA_FETCH_TYPE.FETCH_CLIENT
+      : MF_DATA_FETCH_TYPE.FETCH_SERVER;
     let finalDataFetchId = dataFetchId;
 
     if (typeof window !== 'undefined') {
       finalDataFetchId =
-        downgradeType === MF_DOWNGRADE_TYPE.FETCH_CLIENT
+        downgradeType === MF_DATA_FETCH_TYPE.FETCH_CLIENT
           ? `${dataFetchId}${DATA_FETCH_CLIENT_SUFFIX}`
           : dataFetchId;
     }
