@@ -343,23 +343,6 @@ class ConsumeSharedPlugin {
                   );
                 }
 
-                // Validate singleton usage with include.request
-                if (
-                  config.include &&
-                  config.include.request &&
-                  config.singleton
-                ) {
-                  addSingletonFilterWarning(
-                    compilation,
-                    config.shareKey || request,
-                    'include',
-                    'request',
-                    config.include.request,
-                    request, // moduleRequest
-                    importResolved, // moduleResource (might be undefined)
-                  );
-                }
-
                 return resolveFilter(consumedModule);
               }
 
@@ -446,23 +429,6 @@ class ConsumeSharedPlugin {
                 );
               }
 
-              // Validate singleton usage with exclude.request
-              if (
-                config.exclude &&
-                config.exclude.request &&
-                config.singleton
-              ) {
-                addSingletonFilterWarning(
-                  compilation,
-                  config.shareKey || request,
-                  'exclude',
-                  'request',
-                  config.exclude.request,
-                  request, // moduleRequest
-                  importResolved, // moduleResource (might be undefined)
-                );
-              }
-
               return resolveFilter(consumedModule);
             },
           );
@@ -521,31 +487,6 @@ class ConsumeSharedPlugin {
 
               // First check direct match with original request
               if (match !== undefined) {
-                // Check for request filters with singleton here
-                if (match.exclude && match.exclude.request && match.singleton) {
-                  addSingletonFilterWarning(
-                    compilation,
-                    match.shareKey || request,
-                    'exclude',
-                    'request',
-                    match.exclude.request,
-                    request, // moduleRequest
-                    undefined, // moduleResource
-                  );
-                }
-
-                if (match.include && match.include.request && match.singleton) {
-                  addSingletonFilterWarning(
-                    compilation,
-                    match.shareKey || request,
-                    'include',
-                    'request',
-                    match.include.request,
-                    request, // moduleRequest
-                    undefined, // moduleResource
-                  );
-                }
-
                 // Use the bound function
                 return boundCreateConsumeSharedModule(
                   compilation,
@@ -578,39 +519,6 @@ class ConsumeSharedPlugin {
                     )
                   ) {
                     continue;
-                  }
-
-                  // Check for request filters with singleton for prefixed consumes
-                  if (
-                    options.exclude &&
-                    options.exclude.request &&
-                    options.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      options.shareKey || prefix,
-                      'exclude',
-                      'request',
-                      options.exclude.request,
-                      request, // moduleRequest
-                      undefined, // moduleResource
-                    );
-                  }
-
-                  if (
-                    options.include &&
-                    options.include.request &&
-                    options.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      options.shareKey || prefix,
-                      'include',
-                      'request',
-                      options.include.request,
-                      request, // moduleRequest
-                      undefined, // moduleResource
-                    );
                   }
 
                   // Use the bound function
@@ -661,31 +569,15 @@ class ConsumeSharedPlugin {
                 // Check for request filters with singleton here
                 if (
                   reconstructedMatch.exclude &&
-                  reconstructedMatch.exclude.request &&
+                  reconstructedMatch.exclude.version &&
                   reconstructedMatch.singleton
                 ) {
                   addSingletonFilterWarning(
                     compilation,
                     reconstructedMatch.shareKey || request,
                     'exclude',
-                    'request',
-                    reconstructedMatch.exclude.request,
-                    request, // moduleRequest
-                    undefined, // moduleResource
-                  );
-                }
-
-                if (
-                  reconstructedMatch.include &&
-                  reconstructedMatch.include.request &&
-                  reconstructedMatch.singleton
-                ) {
-                  addSingletonFilterWarning(
-                    compilation,
-                    reconstructedMatch.shareKey || request,
-                    'include',
-                    'request',
-                    reconstructedMatch.include.request,
+                    'version',
+                    reconstructedMatch.exclude.version,
                     request, // moduleRequest
                     undefined, // moduleResource
                   );
@@ -728,39 +620,6 @@ class ConsumeSharedPlugin {
                     )
                   ) {
                     continue;
-                  }
-
-                  // Check for request filters with singleton for prefixed consumes
-                  if (
-                    options.exclude &&
-                    options.exclude.request &&
-                    options.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      options.shareKey || prefix,
-                      'exclude',
-                      'request',
-                      options.exclude.request,
-                      modulePathAfterNodeModules, // moduleRequest
-                      undefined, // moduleResource
-                    );
-                  }
-
-                  if (
-                    options.include &&
-                    options.include.request &&
-                    options.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      options.shareKey || prefix,
-                      'include',
-                      'request',
-                      options.include.request,
-                      modulePathAfterNodeModules, // moduleRequest
-                      undefined, // moduleResource
-                    );
                   }
 
                   // Use the bound function
