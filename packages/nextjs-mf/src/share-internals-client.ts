@@ -360,7 +360,7 @@ export const getReactGroupClient = (
   // Convert the array to a Record using reduce
   return reactConfigs.reduce(
     (acc, config, index) => {
-      const key = `${'request' in config ? `${config.request}-` : ''}${config.shareKey}-${index}${config.layer ? `-${config.layer}` : ''}-${Math.random().toString(36).substring(7)}`;
+      const key = `${'request' in config ? `${config.request}-` : ''}${config.shareKey}-${index}${config.layer ? `-${config.layer}` : ''}`;
       acc[key] = config;
       return acc;
     },
@@ -406,62 +406,7 @@ const getNextGroup = (compiler: Compiler): Record<string, SharedConfig> => {
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
     },
-    // Optimized Modules/Polyfills
-    {
-      request: 'unfetch',
-      shareKey: 'unfetch',
-      import: 'next/dist/build/polyfills/fetch/index.js',
-      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      singleton: true,
-      requiredVersion: `^${nextVersion}`,
-      version: nextVersion,
-    },
-    {
-      request: 'isomorphic-unfetch',
-      shareKey: 'isomorphic-unfetch',
-      import: 'next/dist/build/polyfills/fetch/index.js',
-      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      singleton: true,
-      requiredVersion: `^${nextVersion}`,
-      version: nextVersion,
-    },
-    {
-      request: 'whatwg-fetch',
-      shareKey: 'whatwg-fetch',
-      import: 'next/dist/build/polyfills/fetch/whatwg-fetch.js',
-      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      singleton: true,
-      requiredVersion: `^${nextVersion}`,
-      version: nextVersion,
-    },
-    {
-      request: 'object-assign',
-      shareKey: 'object-assign',
-      import: 'next/dist/build/polyfills/object-assign.js',
-      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      singleton: true,
-      requiredVersion: `^${nextVersion}`,
-      version: nextVersion,
-    },
-    {
-      request: 'url',
-      shareKey: 'url',
-      import: 'next/dist/compiled/native-url',
-      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
-      singleton: true,
-      requiredVersion: `^${nextVersion}`,
-      version: nextVersion,
-    },
+    // Optimized Modules/Polyfills - REMOVED as per task
     // Core Next.js Client Utilities - appPagesBrowser
     {
       request: 'next/link',
@@ -744,7 +689,7 @@ const getNextGroup = (compiler: Compiler): Record<string, SharedConfig> => {
   // Convert the array to a Record using reduce
   return nextConfigs.reduce(
     (acc, config, index) => {
-      const key = `${'request' in config ? `${config.request}-` : ''}${config.shareKey}-${index}${config.layer ? `-${config.layer}` : ''}-${Math.random().toString(36).substring(7)}`;
+      const key = `${'request' in config ? `${config.request}-` : ''}${config.shareKey}-${index}${config.layer ? `-${config.layer}` : ''}`;
       acc[key] = config;
       return acc;
     },

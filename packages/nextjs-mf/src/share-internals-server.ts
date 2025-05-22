@@ -628,7 +628,7 @@ export const getReactGroupServer = (
   return reactConfigs.reduce(
     (acc, config, index) => {
       // Construct a unique key for each configuration to avoid overwrites in the accumulator object.
-      const key = `${config.request || 'config'}-${config.shareKey}-${config.layer || 'global'}-${index}-${Math.random().toString(36).substring(7)}`;
+      const key = `${config.request || 'config'}-${config.shareKey}-${config.layer || 'global'}-${index}`;
       if (acc[key]) {
         // This case should ideally not be hit if reactConfigs are generated correctly.
         console.warn(
@@ -658,18 +658,19 @@ export const getNextGroupServer = (
 
   const nextConfigs: SharedConfig[] = [
     // --- Server Action Related Modules ---
+    // 'next/dist/build/webpack/loaders/next-flight-loader/action-validate' is REMOVED as per instructions.
     {
       request:
-        'next/dist/build/webpack/loaders/next-flight-loader/action-validate',
+        'next/dist/build/webpack/loaders/next-flight-loader/server-reference',
       shareKey:
-        'next/dist/build/webpack/loaders/next-flight-loader/action-validate',
+        'next/dist/build/webpack/loaders/next-flight-loader/server-reference',
       import:
-        'next/dist/build/webpack/loaders/next-flight-loader/action-validate',
+        'next/dist/build/webpack/loaders/next-flight-loader/server-reference',
       singleton: true,
       version: nextVersion,
       requiredVersion: `^${nextVersion}`,
-      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
-      shareScope: 'default', // Assuming default scope for these server utility type modules
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents, // Or 'default' if broadly applicable
+      shareScope: 'default',
     },
     {
       request: 'next/dist/server/app-render/encryption',
@@ -812,7 +813,7 @@ export const getNextGroupServer = (
   ];
   return nextConfigs.reduce(
     (acc, config, index) => {
-      const key = `${config.request || 'config'}-${config.shareKey}-${config.layer || 'global'}-${index}-${Math.random().toString(36).substring(7)}`;
+      const key = `${config.request || 'config'}-${config.shareKey}-${config.layer || 'global'}-${index}`;
       acc[key] = config;
       return acc;
     },
