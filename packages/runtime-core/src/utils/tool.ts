@@ -34,7 +34,7 @@ export function isRemoteInfoWithEntry(
 }
 
 export function isPureRemoteEntry(remote: RemoteWithEntry): boolean {
-  return !remote.entry.includes('.json') && remote.entry.includes('.js');
+  return !remote.entry.includes('.json');
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

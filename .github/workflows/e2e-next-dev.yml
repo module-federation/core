@@ -6,6 +6,7 @@ on:
 jobs:
   e2e-next-dev:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -44,15 +45,20 @@ jobs:
       - name: Run condition check script
         id: check-ci
         run: node tools/scripts/ci-is-affected.mjs --appName=3000-home
-
-      - name: E2E Test for Next.js Dev
+      - name: E2E Test for Next.js Dev - Home
         if: steps.check-ci.outcome == 'success'
         run: |
-          npx kill-port 3000,3001,3002 &&
-          pnpm run app:next:dev &
-          sleep 1 &&
-          npx wait-on tcp:3001 &&
-          npx wait-on tcp:3002 &&
-          npx wait-on tcp:3000 &&
-          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 &&
-          npx kill-port 3000,3001,3002
+          killall node
+          npx nx run 3000-home:test:e2e
+
+      - name: E2E Test for Next.js Dev - Shop
+        if: steps.check-ci.outcome == 'success'
+        run: |
+          killall node
+          npx nx run 3001-shop:test:e2e
+
+      - name: E2E Test for Next.js Dev - Checkout
+        if: steps.check-ci.outcome == 'success'
+        run: |
+          killall node
+          npx nx run 3002-checkout:test:e2e
