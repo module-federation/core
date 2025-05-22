@@ -34,7 +34,6 @@ describe('downgrade', () => {
         );
       });
     cy.window().then((win) => {
-      console.log(win);
       expect(win.globalThis._mfSSRDowngrade).to.exist;
     });
   });
