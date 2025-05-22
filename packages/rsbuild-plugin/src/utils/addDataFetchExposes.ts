@@ -40,7 +40,7 @@ export function addDataFetchExposes(
 
   const tempDataFetchFilepath = path.resolve(
     process.cwd(),
-    `node_modules/${TEMP_DIR}/data-fetch-fallback.ts`,
+    `node_modules/${TEMP_DIR}/data-fetch-fallback.js`,
   );
   const content = `export const fetchData=()=>{throw new Error('should not be called')};`;
   fs.ensureDirSync(path.dirname(tempDataFetchFilepath));
