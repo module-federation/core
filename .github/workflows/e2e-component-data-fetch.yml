@@ -1,0 +1,63 @@
+name: E2E Test for ModernJS SSR
+
+on:
+  workflow_call:
+
+jobs:
+  e2e-modern:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: |
+          corepack prepare pnpm@8.11.0 --activate
+          corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> $GITHUB_ENV
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Run Build for All
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
+      - name: Run condition check script
+        id: check-ci
+        run: node tools/scripts/ci-is-affected.mjs --appName=modernjs
+
+      - name: E2E Test for Modern.js Component Data Fetch
+        if: steps.check-ci.outcome == 'success'
+        run: |
+          lsof -ti tcp:5001,5002,5003 | xargs -r kill &&
+          pnpm run app:component-data-fetch:dev &
+          sleep 20 &&
+          # wait response content-type is application/json
+          for port in 5001,5002,5003; do
+            while true; do
+              response=$(curl -s -I http://127.0.0.1:$port/mf-manifest.json)
+              content_type=$(echo "$response" | grep -i "Content-Type" | awk '{print $2}' | tr -d '\r')
+              if [[ $content_type != *"text/html"* ]]; then
+                break
+              fi
+              sleep 1
+            done
+          done
+          npx nx run modernjs-ssr-data-fetch-host:e2e &&
+          lsof -ti tcp:5001,5002,5003 | xargs kill

@@ -6,7 +6,7 @@ const Content = (props: { mfData?: Data }): JSX.Element => {
   return (
     <Basic
       {...props}
-      providerName="ServerDowngrade"
+      providerName="client-downgrade"
       backgroundColor="#0effdb"
     />
   );

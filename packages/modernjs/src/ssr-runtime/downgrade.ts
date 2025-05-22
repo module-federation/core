@@ -1,6 +1,6 @@
 import { DATA_FETCH_QUERY, DOWNGRADE_KEY } from '../constant';
 import { MF_DATA_FETCH_STATUS, MF_DATA_FETCH_TYPE } from '../constant';
-import { getDataFetchMap } from '../utils';
+import { getDataFetchMap, initDataFetchMap } from '../utils';
 
 import type {
   DataFetchParams,
@@ -29,7 +29,7 @@ export async function callDowngrade(
 ) {
   const dataFetchMap = getDataFetchMap();
   if (!dataFetchMap) {
-    return;
+    initDataFetchMap();
   }
   const mfDataFetch = dataFetchMap[id];
   if (mfDataFetch[2] === MF_DATA_FETCH_STATUS.AWAIT) {

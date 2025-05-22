@@ -5,7 +5,7 @@ import {
   LOAD_REMOTE_ERROR_PREFIX,
   ERROR_TYPE,
   DOWNGRADE_KEY,
-  DOWNGRADE_FUNCTION,
+  DATA_FETCH_FUNCTION,
 } from '../constant';
 import { getDataFetchIdWithErrorMsgs, wrapDataFetchId } from '../utils';
 import type { DataFetchParams } from '../interfaces/global';
@@ -125,7 +125,6 @@ function ResolveAwait<T>({
   logger.debug('resolve data: ', data);
   if (typeof data === 'string' && data.indexOf(AWAIT_ERROR_PREFIX) === 0) {
     const transformedError = transformError(data);
-    const dataFetchMapKeyStr = `['${transformedError.dataFetchMapKey}']`;
     return (
       <>
         {typeof errorElement === 'function' ? (
@@ -136,16 +135,8 @@ function ResolveAwait<T>({
                 suppressHydrationWarning
                 dangerouslySetInnerHTML={{
                   __html: String.raw`
-                  var key = '${transformedError.dataFetchMapKey}';
-                  globalThis['${DOWNGRADE_KEY}'] = true;
-                  if(!globalThis['${DOWNGRADE_KEY}']){
-                    globalThis['${DOWNGRADE_KEY}'] = ${transformedError.dataFetchMapKey ? dataFetchMapKeyStr : true}
-                  }else{
-                    if(Array.isArray(globalThis['${DOWNGRADE_KEY}']) && !globalThis['${DOWNGRADE_KEY}'].includes(key)){
-                      globalThis['${DOWNGRADE_KEY}'].push(key)
-                    }
-                  }
-                  globalThis['${DOWNGRADE_FUNCTION}'] && globalThis['${DOWNGRADE_FUNCTION}'](key,${params ? JSON.stringify(params) : null});`,
+                  globalThis['${DATA_FETCH_FUNCTION}'] = globalThis['${DATA_FETCH_FUNCTION}']  || []
+                  globalThis['${DATA_FETCH_FUNCTION}'].push([${transformedError.dataFetchMapKey ? `'${transformedError.dataFetchMapKey}'` : ''},${params ? JSON.stringify(params) : null},true]);`,
                 }}
               ></script>
             )}

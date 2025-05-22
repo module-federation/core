@@ -109,8 +109,8 @@ export const moduleFederationSSRPlugin = (
 
     api._internalRuntimePlugins(({ entrypoint, plugins }) => {
       plugins.push({
-        name: 'mfInjectDowngradeHelpers',
-        path: '@module-federation/modern-js/ssr-inject-downgrade-helpers-plugin',
+        name: 'injectDataFetchFunction',
+        path: '@module-federation/modern-js/ssr-inject-data-fetch-function-plugin',
         config: {},
       });
       if (!isDev()) {

@@ -16,6 +16,7 @@ import {
 } from '../utils';
 import {
   DATA_FETCH_ERROR_PREFIX,
+  DATA_FETCH_FUNCTION,
   FS_HREF,
   LOAD_REMOTE_ERROR_PREFIX,
   MF_DATA_FETCH_STATUS,
@@ -296,9 +297,9 @@ export function createRemoteComponent<T, E extends keyof T>(
                 suppressHydrationWarning
                 dangerouslySetInnerHTML={{
                   __html: String.raw`
-    globalThis.__MF_DATA_FETCH_MAP__['${dataFetchMapKey}'][1][1](${JSON.stringify(props.mfData)});
-    globalThis.__MF_DATA_FETCH_MAP__['${dataFetchMapKey}'][2] = ${MF_DATA_FETCH_STATUS.LOADED}
- `,
+                  globalThis['${DATA_FETCH_FUNCTION}'] = globalThis['${DATA_FETCH_FUNCTION}'] || [];
+                  globalThis['${DATA_FETCH_FUNCTION}'].push(['${dataFetchMapKey}',${JSON.stringify(props.mfData)}']);
+                  `,
                 }}
               ></script>
             )}
@@ -342,7 +343,7 @@ export function createRemoteComponent<T, E extends keyof T>(
         const fetchDataAsync = async () => {
           try {
             setLoading(true);
-            const result = await getData();
+            const result = await getData(options.noSSR);
             if (isMounted) {
               setData(result);
             }

@@ -31,9 +31,9 @@
       "types": "./dist/types/ssr-runtime/devPlugin.d.ts",
       "default": "./dist/esm/ssr-runtime/devPlugin.js"
     },
-    "./ssr-inject-downgrade-helpers-plugin": {
-      "types": "./dist/types/ssr-runtime/injectDowngradeHelpersPlugin.d.ts",
-      "default": "./dist/esm/ssr-runtime/injectDowngradeHelpersPlugin.js"
+    "./ssr-inject-data-fetch-function-plugin": {
+      "types": "./dist/types/ssr-runtime/injectDataFetchFunctionPlugin.d.ts",
+      "default": "./dist/esm/ssr-runtime/injectDataFetchFunctionPlugin.js"
     },
     "./config-plugin": {
       "types": "./dist/types/cli/configPlugin.d.ts",

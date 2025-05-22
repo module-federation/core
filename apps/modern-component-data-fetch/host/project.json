@@ -45,7 +45,7 @@
       "options": {
         "cypressConfig": "apps/modern-component-data-fetch/host/cypress.config.ts",
         "testingType": "e2e",
-        "baseUrl": "http://localhost:4001",
+        "baseUrl": "http://localhost:5001",
         "browser": "chrome"
       },
       "configurations": {
@@ -63,11 +63,19 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :8080 || nx run modernjs-ssr-data-fetch-host:serve & echo 'done'",
-            "forwardAllArgs": false
-          },
+            "command": "nx run modernjs-ssr-data-fetch-host:e2e",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "test:e2e:watch": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
           {
-            "command": "sleep 20 && nx run modernjs-ssr-data-fetch-host:e2e",
+            "command": "nx run modernjs-ssr-data-fetch-host:e2e --watch",
             "forwardAllArgs": true
           }
         ]

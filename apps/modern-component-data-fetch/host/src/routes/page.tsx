@@ -1,7 +1,7 @@
 const Index = () => {
   return (
     <>
-      <h1>host</h1>
+      <h1>Welcome message from host</h1>
     </>
   );
 };

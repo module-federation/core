@@ -8,6 +8,7 @@ const Content = (props: {
   providerName?: string;
   backgroundColor?: string;
 }): JSX.Element => {
+  const providerName = props.providerName || 'provider';
   return (
     <div
       style={{
@@ -16,15 +17,15 @@ const Content = (props: {
         padding: '1rem',
       }}
     >
-      <h2 onClick={() => alert('provider Client side Javascript works!')}>
+      <h2>
         <strong>{props?.mfData?.data || 'fallback data'}</strong>
       </h2>
       <Button
+        id={`${providerName}-btn`}
         className={stuff['test-remote2']}
-        onClick={() => alert('[provider] Client side Javascript works!')}
+        onClick={() => alert(`[${providerName}] Client side Javascript works!`)}
       >
-        Click me to test <strong>{props.providerName || 'provider'}</strong>{' '}
-        interactive!
+        Click me to test <strong>{providerName}</strong> interactive!
       </Button>
     </div>
   );
