@@ -5,7 +5,6 @@ import { AwaitDataFetch, transformError } from './AwaitDataFetch';
 import {
   fetchData,
   getDataFetchItem,
-  getDataFetchMap,
   getDataFetchMapKey,
 } from '../utils/dataFetch';
 import {
@@ -19,7 +18,6 @@ import {
   DATA_FETCH_FUNCTION,
   FS_HREF,
   LOAD_REMOTE_ERROR_PREFIX,
-  MF_DATA_FETCH_STATUS,
   MF_DATA_FETCH_TYPE,
 } from '../constant';
 import type { ErrorInfo } from './AwaitDataFetch';

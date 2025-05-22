@@ -1,14 +1,18 @@
 # Modern.js
 
-该插件为 Modern.js 提供 Module Federation 配套功能
+[Modern.js](https://modernjs.dev/zh/guides/get-started/introduction.html) 是一个基于 React 的渐进式 Web 开发框架。在字节跳动内部，Modern.js 支撑了数千个 Web 应用的研发。
+
+Module Federation 团队与 Modern.js 团队紧密合作，并提供 `@module-federation/modern-js` 插件来帮助用户在 Modern.js 中更好的使用 Module Federation。
 
 ## 支持
 
 - modern.js ^2.56.1
 - 包含服务器端渲染（SSR）
 
-强烈推荐参考这个应用，它提供了 Modern.js 与 Module Federation 结合的最佳实践：
-[module-federation 示例](https://github.com/module-federation/core/tree/main/apps/modernjs-ssr)
+强烈推荐参考下列应用，它提供了 Modern.js 与 Module Federation 结合的最佳实践：
+
+* [服务端渲染（SSR）](https://github.com/module-federation/core/tree/main/apps/modernjs-ssr)
+* [组件级别数据获取](https://github.com/module-federation/core/tree/main/apps/modern-component-data-fetch)
 
 ## 快速开始
 
@@ -63,20 +67,6 @@ export default createModuleFederationConfig({
 });
 ```
 
-### 引用类型
-
-在 `tsconfig.json` 添加 `paths` 以获取生产者的类型：
-
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "*": ["./@mf-types/*"]
-    }
-  }
-}
-```
-
 ## 服务端渲染（SSR）
 
 :::info 注意
@@ -85,23 +75,204 @@ export default createModuleFederationConfig({
 
 在 SSR 场景与 CSR 场景中使用 Module Federation 没有任何区别，开发者保持按照原有的开发行为即可。
 
-但为了更好地使用体验，我们提供了配套的函数/组件来帮助开发者更好的使用 Module Federation。
+## 组件级别数据获取
 
-### createRemoteSSRComponent
+### 简介
+
+SSR 场景中， `useEffect` 不会执行，这一行为导致常规情况下，无法先获取数据再渲染组件。
+
+为了支持这一功能，主流框架一般会基于 React Router 提供的 `data loader` 预取数据，并注入给路由组件，路由组件通过 [useLoaderData](https://reactrouter.com/api/hooks/useLoaderData#useloaderdata) 获取数据并渲染。
+
+这一行为强依赖路由功能，在 Module Federation 下就无法正常使用。
+
+为了解决这一问题，Module Federation 提供了**组件**级别数据获取能力，以便开发者可以在 SSR 场景下获取数据并渲染组件。
+
+:::tip 什么是组件级别？
+Module Federation 的使用大体分为两种部分：组件（函数）、应用。两者的区别在于是否带有*路由*功能。
+:::
+
+### 如何使用
+
+根据角色的不同，需要做不同的行为。
+
+#### 生产者
+
+每个 expose 模块都可以有一个同名的 `.data` 文件。这些文件可以导出一个 loader 函数，我们称为 Data Loader，它会在对应的 `expose` 组件渲染之前执行，为组件提供数据。如下面示例：
+
+```bash
+.
+└── src
+    ├── List.tsx
+    └── List.data.ts
+```
+
+其中 `List.data.ts` 需要导出名为 `fetchData` 的函数，该函数将会在 `List` 组件渲染前执行，并将其数据注入，示例如下：
+
+```ts title="List.data.ts"
+import type { DataFetchParams } from '@module-federation/modern-js/runtime';
+export type Data = {
+  data: string;
+};
+
+export const fetchData = async (params: DataFetchParams): Promise<Data> => {
+  console.log('params: ', params);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        data: `data: ${new Date()}`,
+      });
+    }, 1000);
+  });
+};
+```
+
+loader 函数数据会被注入到生产者的 props 中，key 为 `mfData`，因此生产者需要改动代码，消费此数据，示例如下：
+
+```tsx title="List.tsx"
+import React from 'react';
+import type { Data } from './index.data';
+
+const List = (props: {
+  mfData?: Data;
+}): JSX.Element => {
+  return (
+    <div>
+     {props.mfData?.data && props.mfData?.data.map((item,index)=><p key={index}>{item}</p>)}
+    </div>
+  );
+};
+
+export default List;
+```
+
+#### 消费者
+
+在消费者中，我们需要通过 `createRemoteComponent` 来加载远程组件，并获取数据。
+
+```tsx
+import { kit, ERROR_TYPE } from '@module-federation/modern-js/runtime';
+
+const { createRemoteComponent } = kit;
+
+const List = createRemoteComponent({
+  loader: () => {
+    return import('remote/List');
+  },
+  loading: 'loading...',
+  export: 'default',
+  fallback: ({error,errorType,dataFetchMapKey}) => {
+    console.error(error)
+    if(errorType === ERROR_TYPE.LOAD_REMOTE){
+      return <div>load remote failed</div>
+    }
+    if(errorType === ERROR_TYPE.DATA_FETCH){
+      return <div>data fetch failed, the dataFetchMapKey key is: {dataFetchMapKey}</div>
+    }
+    return <div>error type is unknown</div>;
+  },
+});
+
+const Index = (): JSX.Element => {
+  return (
+    <div>
+      <h1>Basic usage with data fetch</h1>
+      <List />
+    </div>
+  );
+};
+
+export default Index;
+```
+
+### loader 函数
+
+#### 入参
+
+默认会往 loader 函数传递参数，其类型为 `DataFetchParams`，包含以下字段：
+
+- `isDowngrade` (boolean): 表示当前执行上下文是否处于降级模式。例如，在服务端渲染 (SSR) 失败，在客户端渲染（CSR）中会重新往服务端发起请求，调用 loader 函数，此时该值为 `true`。
+
+除了默认的参数以外，还可以在 `createRemoteComponent` 中传递 [dataFetchParams](#datafetchparams) 字段，该字段会被透传给 loader 函数。
+
+#### 返回值
+
+loader 函数的返回值只能是**可序列化的数据对象**。
+
+### 在不同环境使用 Data Loader
+
+loader 函数可能会在服务端或浏览器端执行。在服务端执行的 loader 函数，我们称为 Server Loader，在浏览器端执行的称为 Client Loader。
+
+在 CSR 应用中，loader 函数会在浏览器端执行，即默认都是 Client Loader。
+
+在 SSR 应用中，loader 函数只会在服务端执行，即默认都是 Server Loader。在 SSR Module Federation 会直接在服务端调用对应的 loader 函数。在浏览器端切换路由时，Module Federation 会发送一个 http 请求到 SSR 服务，同样在服务端触发 loader 函数。
+
+:::note NOTE
+SSR 应用的 loader 函数只在服务端执行可以带来以下好处：
+
+简化使用方式：保证 SSR 应用获取数据的方式是同构的，开发者无需根据环境区分 loader 函数执行的代码。
+减少浏览器端 bundle 体积：将逻辑代码及其依赖，从浏览器端移动到了服务端。
+提高可维护性：将逻辑代码移动到服务端，减少了数据逻辑对前端 UI 的直接影响。此外，也避免了浏览器端 bundle 中误引入服务端依赖，或服务端 bundle 中误引入浏览器端依赖的问题。
+:::
+
+#### 在 SSR 应用中使用 Client Loader
+
+默认情况下，在 SSR 应用中，loader 函数只会在服务端执行。但有些场景下，开发者可能期望在浏览器端发送的请求不经过 SSR 服务，直接请求数据源，例如：
+
+1. 在浏览器端希望减少网络消耗，直接请求数据源。
+2. 应用在浏览器端有数据缓存，不希望请求 SSR 服务获取数据。
+
+Module Federation 支持在 SSR 应用中额外添加 .data.client 文件，同样具名导出 loader。此时 SSR 应用在服务端执行 Data Loader 报错降级，或浏览器端切换路由时，会像 CSR 应用一样在浏览器端执行该 loader 函数，而不是再向 SSR 服务发送数据请求。
+
+```ts title="List.data.client.ts"
+import cache from 'my-cache';
+
+export async function loader({ params }) {
+  if (cache.has(params.id)) {
+    return cache.get(params.id);
+  }
+  const res = await fetch('URL_ADDRESS?id={params.id}');
+  return {
+    message: res.message,
+  }
+}
+```
+:::warning WARNING
+要使用 Client Loader，必须有对应的 Server Loader，且 Server Loader 必须是 .data 文件约定，不能是 .loader 文件约定。
+:::
+
+### FAQ
+
+#### 应用级别数据获取？
+
+应用级别的模块，我们更希望使用 RSC 来实现，使其功能更加的完善。目前该功能正在探索中，敬请期待。
+
+## API
+
+`@module-federation/modern-js/runtime` 除了导出了 [MF Runtime](../basic/runtime.mdx)，还提供供了一系列的 API 来帮助开发者更好的使用 Module Federation。
+
+为防止与 Shared 冲突，需要通过下列方式引用。
+
+```ts
+import { kit } from '@module-federation/modern-js/runtime';
+const { loadRemote ,createRemoteComponent, createRemoteSSRComponent, wrapNoSSR } = kit;
+```
+
+### createRemoteComponent
 
 import Collapse from '@components/Collapse'
 
 <Collapse>
 ```ts
-declare function createRemoteSSRComponent(
-  props: CreateRemoteSSRComponentOptions
+declare function createRemoteComponent(
+  props: CreateRemoteComponentOptions
 ): (props: ComponentType) => React.JSX.Element;
 
-type CreateRemoteSSRComponentOptions = {
+type CreateRemoteComponentOptions<T, E extends keyof T> = {
   loader: () => Promise<T>;
   loading: React.ReactNode;
-  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
+  fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
   export?: E;
+  dataFetchParams?: DataFetchParams;
 };
 
 type ComponentType = T[E] extends (...args: any) => any
@@ -109,55 +280,62 @@ type ComponentType = T[E] extends (...args: any) => any
     ? Record<string, never>
     : Parameters<T[E]>[0]
   : Record<string, never>;
+
+type DataFetchParams = {
+  isDowngrade: boolean;
+} & Record<string, unknown>;
+
+type ErrorInfo = {
+  error: Error;
+  errorType: number;
+  dataFetchMapKey?: string;
+};
 ```
 </Collapse>
 
-该函数在加载组件同时，还会帮助注入相应的样式标签/脚本 ，此行为可以帮助避免流式渲染带来的 CSS 闪烁问题以及加速 PID （首屏可交互时间）。
+该函数除了支持加载组件之外，还支持下列能力：
+
+1. SSR 模式中会注入对应生产者的样式标签/脚本资源 ，此行为可以帮助避免流式渲染带来的 CSS 闪烁问题以及加速 PID （首屏可交互时间）。
+2. 如果生产者存在数据获取函数，那么会自动调用此函数并注入数据。
 
 #### 示例
 
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
-import { registerRemotes, kit } from '@module-federation/modern-js/runtime';
-// 在构建插件声明过的 remote 可以直接在顶层 import
-import RemoteComp from 'remote/Image';
+import { kit, ERROR_TYPE } from '@module-federation/modern-js/runtime';
 
-const { createRemoteSSRComponent } = kit;
+const { createRemoteComponent } = kit;
 
-const RemoteSSRComponent = createRemoteSSRComponent({
-  // 在构建插件声明过的 remote 也可以使用此函数加载：loader: () => import('remote/Image'),
-  loader: () => loadRemote('dynamic_remote/Image'),
+const RemoteComponent = createRemoteComponent({
+  loader: () => import('remote/Image'),
   loading: <div>loading...</div>,
-  fallback: ({ error }) => {
-    if (error instanceof Error && error.message.includes('not exist')) {
-      return <div>fallback - not existed id</div>;
+  fallback: ({error,errorType,dataFetchMapKey}) => {
+    console.error(error)
+    if(errorType === ERROR_TYPE.LOAD_REMOTE){
+      return <div>load remote failed</div>
     }
-    return <div>fallback</div>;
+    if(errorType === ERROR_TYPE.DATA_FETCH){
+      return <div>data fetch failed, the dataFetchMapKey key is: {dataFetchMapKey}</div>
+    }
+    return <div>error type is unknown</div>;
   },
 });
 
-const Product: FC = () => {
-  registerRemotes([
-    {
-      name: 'dynamic_remote',
-      entry: 'http://localhost:3008/mf-manifest.json',
-    },
-  ]);
-
-  const fallback = (err: Error) => {
-    if (err.message.includes('does not exist in container')) {
-      return <div>404</div>;
-    }
-    throw err;
-  };
-
+const App: FC = () => {
   return <>
-    <RemoteSSRComponent />
-    <RemoteComp />
+    <RemoteComponent />
   </>;
 };
-export default Product;
+export default App;
 ```
+
+#### loader
+
+- 类型：`() => Promise<T>`
+- 是否必填：是
+- 默认值：`undefined`
+
+加载远程组件的函数，通常为 `()=>loadRemote(id)` 或者 `()=>import(id)`。
 
 #### loading
 
@@ -169,13 +347,81 @@ export default Product;
 
 #### fallback
 
-- 类型：`(({ error }: { error: Error}) => React.ReactElement)`
+- 类型：`(({ error }: { error: ErrorInfo}) => React.ReactElement)`
 - 是否必填：是
 - 默认值：`undefined`
 
 当组件**加载**或**渲染**失败时，所渲染的容错组件。
 
-注意：当**渲染**失败的时候，该组件仅在客户端渲染此 容错组件。
+#### export
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`'default'`
+
+如果远程组件是具名导出，那么可以通过此参数指定需要导出的组件名称，默认加载 default 导出。
+
+#### dataFetchParams
+
+- 类型：`DataFetchParams`
+- 是否必填：否
+- 默认值：`undefined`
+
+如果远程组件存在数据获取函数，设置后会传递给数据获取函数。
+
+### createRemoteSSRComponent
+
+:::danger 注意
+此函数将被废弃。推荐使用 [createRemoteComponent](#createremotecomponent)
+:::
+
+### wrapNoSSR
+
+<Collapse>
+```ts
+declare function wrapNoSSR<T, E extends keyof T>(
+  createComponentFn: typeof createRemoteComponent<T, E>,
+) : (options: CreateRemoteComponentOptions<T, E>) => (props: ComponentType) => React.JSX.Element
+```
+</Collapse>
+
+包裹组件，使其在 SSR 场景下不渲染。
+
+使用示例：
+
+```tsx
+import { kit } from '@module-federation/modern-js/runtime';
+
+const { createRemoteComponent, wrapNoSSR } = kit;
+
+const RemoteComponent = wrapNoSSR(createRemoteComponent)({
+  loader: () => {
+    return import('remote/Content');
+  },
+  loading: 'loading...',
+  export: 'default',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+
+const Index = (): JSX.Element => {
+  return (
+    <div>
+      <h1>
+        The component will be render in csr.
+      </h1>
+      <RemoteComponent />
+    </div>
+  );
+};
+
+export default Index;
+
+```
 
 ## 配置
 

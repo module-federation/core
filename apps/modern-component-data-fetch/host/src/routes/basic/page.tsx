@@ -1,4 +1,4 @@
-import { kit } from '@module-federation/modern-js/runtime';
+import { kit, ERROR_TYPE } from '@module-federation/modern-js/runtime';
 
 const { createRemoteComponent } = kit;
 
@@ -8,12 +8,19 @@ const Basic = createRemoteComponent({
   },
   loading: 'loading...',
   export: 'default',
-  fallback: ({ error }) => {
-    // throw new Error('error no caught');
-    if (error instanceof Error && error.message.includes('not exist')) {
-      return <div>fallback - not existed id</div>;
+  fallback: ({ error, errorType, dataFetchMapKey }) => {
+    console.error(error);
+    if (errorType === ERROR_TYPE.LOAD_REMOTE) {
+      return <div>load remote failed</div>;
     }
-    return <div>fallback</div>;
+    if (errorType === ERROR_TYPE.DATA_FETCH) {
+      return (
+        <div>
+          data fetch failed, the dataFetchMapKey key is: {dataFetchMapKey}
+        </div>
+      );
+    }
+    return <div>error type is unknown</div>;
   },
 });
 

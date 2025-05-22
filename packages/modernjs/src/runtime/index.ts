@@ -1,7 +1,7 @@
 export * from '@module-federation/enhanced/runtime';
 
 export type { DataFetchParams } from '../interfaces/global';
-
+export { ERROR_TYPE } from '../constant';
 // avoid import react directly https://github.com/web-infra-dev/modern.js/issues/7096
 export const kit = {
   get createRemoteSSRComponent(): typeof import('./createRemoteComponent').createRemoteSSRComponent {
