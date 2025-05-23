@@ -1,5 +1,13 @@
 # @module-federation/modernjsapp
 
+## 0.1.95
+
+### Patch Changes
+
+- Updated dependencies [82b8cac]
+- Updated dependencies [0eb6697]
+  - @module-federation/enhanced@0.14.0
+
 ## 0.1.94
 
 ### Patch Changes

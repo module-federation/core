@@ -7,6 +7,7 @@ on:
 jobs:
   e2e-manifest:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -45,7 +46,7 @@ jobs:
 
       - name: E2E Test for Manifest Demo Development
         if: steps.check-ci.outcome == 'success'
-        run: pnpm run app:manifest:dev & echo "done" && npx wait-on tcp:3009 && npx wait-on tcp:3012 && npx wait-on http://127.0.0.1:4001/ && npx nx run-many --target=e2e --projects=manifest-webpack-host --parallel=1 && npx kill-port 3013 3009 3010 3011 3012 4001
+        run: pnpm run app:manifest:dev & echo "done" && npx wait-on tcp:3009 && npx wait-on tcp:3012 && npx wait-on http://127.0.0.1:4001/ && npx nx run-many --target=e2e --projects=manifest-webpack-host --parallel=2 && npx kill-port 3013 3009 3010 3011 3012 4001
 
       - name: E2E Test for Manifest Demo Production
         if: steps.check-ci.outcome == 'success'
