@@ -19,16 +19,24 @@ const addDataFetchExpose = (
     key === '.'
       ? `./${DATA_FETCH_IDENTIFIER}${suffix}`
       : `${key}.${DATA_FETCH_IDENTIFIER}${suffix}`;
-  if (!exposes[dataFetchKey]) {
-    exposes[dataFetchKey] = filepath;
+
+  if (exposes[dataFetchKey]) {
+    throw new Error(
+      `data fetch key ${dataFetchKey} already exists, please modify this expose key, do not end with '${DATA_FETCH_IDENTIFIER}' or '${DATA_FETCH_CLIENT_SUFFIX}'`,
+    );
   }
+
+  exposes[dataFetchKey] = filepath;
   return dataFetchKey;
+};
+
+const addExcludeDtsSuffix = (filepath: string) => {
+  return `${filepath}?exclude-mf-dts=true`;
 };
 
 export function addDataFetchExposes(
   exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'],
   isServer: boolean,
-  enableSSR: boolean,
 ) {
   if (typeof exposes !== 'object' || Array.isArray(exposes)) {
     return;
@@ -40,13 +48,13 @@ export function addDataFetchExposes(
 
   const tempDataFetchFilepath = path.resolve(
     process.cwd(),
-    `node_modules/${TEMP_DIR}/data-fetch-fallback.js`,
+    `node_modules/${TEMP_DIR}/data-fetch-fallback.ts`,
   );
   const content = `export const fetchData=()=>{throw new Error('should not be called')};`;
   fs.ensureDirSync(path.dirname(tempDataFetchFilepath));
   fs.writeFileSync(tempDataFetchFilepath, content);
 
-  Object.keys(exposes).forEach((key, index) => {
+  Object.keys(exposes).forEach((key) => {
     const expose = exposes[key];
     if (typeof expose !== 'string') {
       return;
@@ -64,14 +72,14 @@ export function addDataFetchExposes(
     );
     if (!isServer && dateFetchClientKey) {
       exposes[dateFetchClientKey.replace(DATA_FETCH_CLIENT_SUFFIX, '')] =
-        tempDataFetchFilepath;
+        addExcludeDtsSuffix(tempDataFetchFilepath);
       return;
     }
 
     const dataFetchKey = addDataFetchExpose(exposes, key, dataFetchPath);
     if (dataFetchKey && fs.existsSync(dataFetchClientPath)) {
       exposes[`${dataFetchKey}${DATA_FETCH_CLIENT_SUFFIX}`] =
-        tempDataFetchFilepath;
+        addExcludeDtsSuffix(tempDataFetchFilepath);
     }
   });
 }

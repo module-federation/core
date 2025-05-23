@@ -7,7 +7,10 @@ import {
   MF_DATA_FETCH_STATUS,
   WRAP_DATA_FETCH_ID_IDENTIFIER,
 } from '../constant';
-import { DATA_FETCH_IDENTIFIER } from '@module-federation/rsbuild-plugin/constant';
+import {
+  DATA_FETCH_CLIENT_SUFFIX,
+  DATA_FETCH_IDENTIFIER,
+} from '@module-federation/rsbuild-plugin/constant';
 
 import type { GlobalModuleInfo } from '@module-federation/sdk';
 import type {
@@ -208,4 +211,11 @@ export async function loadDataFetchModule(
       `fetchData not found in remote ${id}, ${JSON.stringify(m)}`,
     );
   });
+}
+
+export function isDataLoaderExpose(exposeKey: string) {
+  return (
+    exposeKey.endsWith(DATA_FETCH_IDENTIFIER) ||
+    exposeKey.endsWith(DATA_FETCH_CLIENT_SUFFIX)
+  );
 }

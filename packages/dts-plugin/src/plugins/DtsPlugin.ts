@@ -52,7 +52,11 @@ export class DtsPlugin implements WebpackPluginInstance {
       const cleanedExposes: Record<string, any> = {};
       Object.entries(options.exposes).forEach(([key, value]) => {
         if (typeof value === 'string') {
-          cleanedExposes[key] = value.split('?')[0];
+          const [filepath, query] = value.split('?');
+          if (query.startsWith('exclude-mf-dts')) {
+            return;
+          }
+          cleanedExposes[key] = filepath;
         } else {
           cleanedExposes[key] = value;
         }

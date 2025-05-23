@@ -6,7 +6,11 @@ import {
   isCSROnly,
 } from '../../utils';
 import logger from '../../logger';
-import { getDataFetchMapKey, loadDataFetchModule } from '../../utils/dataFetch';
+import {
+  getDataFetchMapKey,
+  isDataLoaderExpose,
+  loadDataFetchModule,
+} from '../../utils/dataFetch';
 import { MF_DATA_FETCH_TYPE, MF_DATA_FETCH_STATUS } from '../../constant';
 import { DATA_FETCH_CLIENT_SUFFIX } from '@module-federation/rsbuild-plugin/constant';
 
@@ -21,7 +25,7 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
   },
   afterLoadSnapshot(args) {
     const { id, moduleInfo, remoteSnapshot, host } = args;
-    if (typeof id === 'string' && id.includes('data')) {
+    if (typeof id === 'string' && isDataLoaderExpose(id)) {
       return args;
     }
     if (!remoteSnapshot || !id || !('modules' in remoteSnapshot)) {
