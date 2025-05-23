@@ -128,3 +128,8 @@ jobs:
     needs: checkout-install
     uses: ./.github/workflows/e2e-router.yml
     secrets: inherit
+
+  e2e-component-data-fetch:
+    needs: checkout-install
+    uses: ./.github/workflows/e2e-component-data-fetch.yml
+    secrets: inherit
