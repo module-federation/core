@@ -91,10 +91,6 @@ export const injectDataFetchFunctionPlugin = (): RuntimePluginFuture => ({
             return callAllDowngrade();
           }
 
-          if (mfDowngrade.includes(id)) {
-            return;
-          }
-
           mfDowngrade.push(id);
           return callDowngrade(id);
         }
