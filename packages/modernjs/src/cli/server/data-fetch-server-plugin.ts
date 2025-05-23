@@ -173,8 +173,7 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
     const data = await dataFetchFn({ ...params, isDowngrade: !remoteInfo });
     return ctx.json(data);
   } catch (e) {
-    console.log('server plugin data fetch error: ');
-    console.error(e);
+    console.log('server plugin data fetch error: ', e);
     ctx.status(500);
     return ctx.text(`failed to fetch ${remoteInfo.name} data, error:\n ${e}`);
   }
