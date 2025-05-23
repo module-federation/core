@@ -493,17 +493,6 @@ export const moduleFederationConfigPlugin = (
         },
       };
     });
-
-    if (enableSSR && mfConfig.remotes) {
-      api._internalServerPlugins(({ plugins }) => {
-        plugins.push({
-          name: '@module-federation/modern-js/data-fetch-server-plugin',
-          options: {},
-        });
-
-        return { plugins };
-      });
-    }
   },
 });
 
