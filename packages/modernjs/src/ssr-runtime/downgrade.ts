@@ -29,7 +29,7 @@ export async function callDowngrade(
 ) {
   const dataFetchMap = getDataFetchMap();
   if (!dataFetchMap) {
-    initDataFetchMap();
+    return;
   }
   const mfDataFetch = dataFetchMap[id];
   if (mfDataFetch[2] === MF_DATA_FETCH_STATUS.AWAIT) {
