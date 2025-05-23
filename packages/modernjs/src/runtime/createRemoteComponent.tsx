@@ -296,7 +296,7 @@ export function createRemoteComponent<T, E extends keyof T>(
                 dangerouslySetInnerHTML={{
                   __html: String.raw`
                   globalThis['${DATA_FETCH_FUNCTION}'] = globalThis['${DATA_FETCH_FUNCTION}'] || [];
-                  globalThis['${DATA_FETCH_FUNCTION}'].push(['${dataFetchMapKey}',${JSON.stringify(props.mfData)}']);
+                  globalThis['${DATA_FETCH_FUNCTION}'].push(['${dataFetchMapKey}',${JSON.stringify(props.mfData)}]);
                   `,
                 }}
               ></script>
