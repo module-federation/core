@@ -1,4 +1,4 @@
-import { DATA_FETCH_QUERY } from '../../constant';
+import { DATA_FETCH_QUERY, MF_DATA_FETCH_STATUS } from '../../constant';
 import logger from '../../logger';
 import { getDataFetchMap } from '../../utils';
 import {
@@ -72,14 +72,21 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
   if (!dataFetchId) {
     return next();
   }
-  logger.debug('dataFetchId: ', dataFetchId);
+  logger.log('fetch data from server, dataFetchId: ', dataFetchId);
   try {
     const dataFetchMap = getDataFetchMap();
     if (!dataFetchMap) {
       initDataFetchMap();
     }
     const fetchDataPromise = dataFetchMap[dataFetchId]?.[1];
-    if (fetchDataPromise) {
+    if (
+      fetchDataPromise &&
+      dataFetchMap[dataFetchId]?.[2] !== MF_DATA_FETCH_STATUS.ERROR
+    ) {
+      logger.log(
+        'fetch data from server, fetchDataPromise: ',
+        fetchDataPromise,
+      );
       const targetPromise = fetchDataPromise[0];
       // Ensure targetPromise is thenable
       const wrappedPromise = wrapSetTimeout(targetPromise, 20000, dataFetchId);
@@ -155,7 +162,6 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
         const res = await wrappedPromise;
         return ctx.json(res);
       }
-      return next();
     }
 
     const remoteId = dataFetchId.split(SEPARATOR)[0];
