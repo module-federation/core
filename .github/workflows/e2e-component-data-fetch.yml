@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 jobs:
-  e2e-modern:
+  e2e-component-data-fetch:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -36,7 +36,7 @@ jobs:
         run: npx cypress install
 
       - name: Run Build for All
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
 
       - name: Run condition check script
         id: check-ci
