@@ -166,49 +166,6 @@ export default createModuleFederationConfig({
 
 If you want to integrate `Module Federation` into an existing project, you can refer to [docs](../../practice/frameworks/index).
 
-## Inspect and Debug your Configuration in the Browser
-
-### \_\_FEDERATION\_\_
-Module Federation initialization provides a global variable `window.__FEDERATION__`. This is useful to get an overview of available meta information about all detected Module Federation modules.
-Besides helping out with debugging your system, this data is also useful for the creation of custom browser extensions or runtime analysis tools for your environment.
-
-#### \_\_GLOBAL_PLUGIN\_\_
-__Type:__ Array
-
-__Description:__ List of all active RuntimePlugins.
-
-#### \_\_INSTANCES\_\_
-__Type:__ Array
-
-__Description:__ List of information about all running runtimes. Index "0" is always the Host runtime.
-
-#### \_\_MANIFEST_LOADING\_\_
-__Type:__ Object
-
-__Description:__ Object showing all loading manifest meta information about modules.
-
-#### \_\_PRELOADED_MAP\_\_
-__Type:__ Map
-
-__Description:__ Map currently only instantiated, not used by any implementation.
-
-#### \_\_SHARE_SCOPE_LOADING\_\_
-__Type:__ Object
-
-__Description:__ Object not used by any implementation.
-
-#### \_\_SHARE\_\_
-__Type:__ Object
-
-__Description:__ Object collecting all shared dependencies running in the share-scope.
-
-#### moduleInfo
-__Type:__ Object
-
-__Description:__ Object showing all manifest meta information about active modules.
-
-
-
 ## Summary
 
 Through the above process, you have completed the export of a component from a 'provider' for use by a 'consumer' based on Module Federation. Along the way, you have preliminarily used and understood the configurations of remotes, exposes, and shared in the Module Federation plugin.
