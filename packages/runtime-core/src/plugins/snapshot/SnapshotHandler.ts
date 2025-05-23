@@ -35,7 +35,7 @@ export function getGlobalRemoteInfo(
   remoteSnapshot: GlobalModuleInfo[string] | undefined;
 } {
   const hostGlobalSnapshot = getGlobalSnapshotInfoByModuleInfo({
-    name: origin.options.name,
+    name: origin.name,
     version: origin.options.version,
   });
 
@@ -97,6 +97,8 @@ export class SnapshotHandler {
       from: 'global' | 'manifest';
     }>('loadRemoteSnapshot'),
     afterLoadSnapshot: new AsyncWaterfallHook<{
+      id?: string;
+      host: FederationHost;
       options: Options;
       moduleInfo: Remote;
       remoteSnapshot: ModuleInfo;
@@ -111,32 +113,16 @@ export class SnapshotHandler {
     this.loaderHook = HostInstance.loaderHook;
   }
 
-  async loadSnapshot(moduleInfo: Remote): Promise<{
-    remoteSnapshot: GlobalModuleInfo[string] | undefined;
-    globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
-  }> {
-    const { options } = this.HostInstance;
-    const { hostGlobalSnapshot, remoteSnapshot, globalSnapshot } =
-      this.getGlobalRemoteInfo(moduleInfo);
-
-    const {
-      remoteSnapshot: globalRemoteSnapshot,
-      globalSnapshot: globalSnapshotRes,
-    } = await this.hooks.lifecycle.loadSnapshot.emit({
-      options,
-      moduleInfo,
-      hostGlobalSnapshot,
-      remoteSnapshot,
-      globalSnapshot,
-    });
-    return {
-      remoteSnapshot: globalRemoteSnapshot,
-      globalSnapshot: globalSnapshotRes,
-    };
-  }
-
   // eslint-disable-next-line max-lines-per-function
-  async loadRemoteSnapshotInfo(moduleInfo: Remote):
+  async loadRemoteSnapshotInfo({
+    moduleInfo,
+    id,
+    expose,
+  }: {
+    moduleInfo: Remote;
+    id?: string;
+    expose?: string;
+  }):
     | Promise<{
         remoteSnapshot: ModuleInfo;
         globalSnapshot: GlobalModuleInfo;
@@ -269,6 +255,8 @@ export class SnapshotHandler {
     }
 
     await this.hooks.lifecycle.afterLoadSnapshot.emit({
+      id,
+      host: this.HostInstance,
       options,
       moduleInfo,
       remoteSnapshot: mSnapshot,
