@@ -65,6 +65,8 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
     const remoteInfoQuery = getDecodeQuery(url, 'remoteInfo');
     remoteInfo = remoteInfoQuery ? JSON.parse(remoteInfoQuery) : null;
   } catch (e) {
+    //TODO: remove me
+    console.log('fetch data from server, error: ', e);
     console.error(e);
     return next();
   }
@@ -73,12 +75,19 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
     return next();
   }
   logger.log('fetch data from server, dataFetchId: ', dataFetchId);
+  //TODO: remove me
+  console.log(
+    'fetch data from server, moduleInfo: ',
+    globalThis.__FEDERATION__?.moduleInfo,
+  );
   try {
     const dataFetchMap = getDataFetchMap();
     if (!dataFetchMap) {
       initDataFetchMap();
     }
     const fetchDataPromise = dataFetchMap[dataFetchId]?.[1];
+    //TODO: remove me
+    console.log('fetch data from server, fetchDataPromise: ', fetchDataPromise);
     if (
       fetchDataPromise &&
       dataFetchMap[dataFetchId]?.[2] !== MF_DATA_FETCH_STATUS.ERROR
@@ -148,7 +157,10 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
     }
 
     const dataFetchItem = dataFetchMap[dataFetchId];
+    //TODO: remove me
+    console.log('fetch data from server, dataFetchItem: ', dataFetchItem);
     if (dataFetchItem) {
+      logger.log('fetch data from server, dataFetchItem: ', dataFetchItem);
       const callFetchDataPromise = fetchData(dataFetchId, {
         ...params,
         isDowngrade: true,
