@@ -15,7 +15,10 @@
         "development": {
           "outputPath": "apps/3001-shop"
         },
-        "production": {}
+        "production": {
+          "cache": false,
+          "outputPath": "apps/3001-shop"
+        }
       },
       "dependsOn": [
         {
@@ -70,14 +73,41 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :3001 || nx run 3001-shop:serve",
+            "command": "npx kill-port 3000 3001 3002",
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 10 && nx run 3001-shop:e2e",
+            "command": "NX_TUI=false nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=development & wait-on tcp:3000 tcp:3002 ",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "wait-on tcp:3000 tcp:3002 && nx run 3001-shop:e2e:development",
             "forwardAllArgs": true
           }
         ]
+      },
+      "configurations": {
+        "production": {
+          "parallel": true,
+          "commands": [
+            {
+              "command": "npx kill-port 3000 3001 3002",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "nx run-many --target=build --projects=3000-home,3002-checkout --configuration=production --parallel=9",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "nx run-many --target=serve --projects=3000-home,3002-checkout --configuration=production --parallel=9 & wait-on tcp:3000 tcp:3002",
+              "forwardAllArgs": false
+            },
+            {
+              "command": "echo 'done'",
+              "forwardAllArgs": true
+            }
+          ]
+        }
       }
     },
     "e2e": {
@@ -87,7 +117,11 @@
         "testingType": "e2e",
         "baseUrl": "http://localhost:3001"
       },
+      "defaultConfiguration": "development",
       "configurations": {
+        "development": {
+          "devServerTarget": "3001-shop:serve:development"
+        },
         "production": {
           "devServerTarget": "3001-shop:serve:production"
         }

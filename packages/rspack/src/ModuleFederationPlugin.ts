@@ -39,14 +39,37 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
   }
 
   private _patchBundlerConfig(compiler: Compiler): void {
-    const { name } = this._options;
+    const { name, experiments } = this._options;
+    const definePluginOptions: Record<string, string | boolean> = {};
     if (name) {
-      new compiler.webpack.DefinePlugin({
-        FEDERATION_BUILD_IDENTIFIER: JSON.stringify(
-          composeKeyWithSeparator(name, utils.getBuildVersion()),
-        ),
-      }).apply(compiler);
+      definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
+        composeKeyWithSeparator(name, utils.getBuildVersion()),
+      );
     }
+    // Add FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
+    const disableSnapshot = experiments?.optimization?.disableSnapshot ?? false;
+    definePluginOptions['FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN'] =
+      disableSnapshot;
+
+    // Determine ENV_TARGET: only if manually specified in experiments.optimization.target
+    if (
+      experiments?.optimization &&
+      typeof experiments.optimization === 'object' &&
+      experiments.optimization !== null &&
+      'target' in experiments.optimization
+    ) {
+      const manualTarget = experiments.optimization.target as
+        | 'web'
+        | 'node'
+        | undefined;
+      // Ensure the target is one of the expected values before setting
+      if (manualTarget === 'web' || manualTarget === 'node') {
+        definePluginOptions['ENV_TARGET'] = JSON.stringify(manualTarget);
+      }
+    }
+    // No inference for ENV_TARGET. If not manually set and valid, it's not defined.
+
+    new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
   }
 
   private _checkSingleton(compiler: Compiler): void {
@@ -114,8 +137,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     let disableDts = options.dts === false;
 
     if (!disableDts) {
+      const dtsPlugin = new DtsPlugin(options);
       // @ts-ignore
-      new DtsPlugin(options).apply(compiler);
+      dtsPlugin.apply(compiler);
+      dtsPlugin.addRuntimePlugins();
     }
     if (!disableManifest && options.exposes) {
       try {
