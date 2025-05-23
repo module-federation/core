@@ -32,7 +32,7 @@ export async function callDowngrade(
     return;
   }
   const mfDataFetch = dataFetchMap[id];
-  if (mfDataFetch[2] === MF_DATA_FETCH_STATUS.AWAIT) {
+  if (mfDataFetch?.[2] === MF_DATA_FETCH_STATUS.AWAIT) {
     mfDataFetch[2] = MF_DATA_FETCH_STATUS.LOADING;
     let promise, res, rej;
     if (mfDataFetch[1]) {
