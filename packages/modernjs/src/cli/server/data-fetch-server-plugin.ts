@@ -101,6 +101,7 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
       const wrappedPromise = wrapSetTimeout(targetPromise, 20000, dataFetchId);
       if (wrappedPromise) {
         const res = await wrappedPromise;
+        logger.log('fetch data from server, fetchDataPromise res: ', res);
         return ctx.json(res);
       }
       logger.error(
@@ -172,6 +173,7 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
       );
       if (wrappedPromise) {
         const res = await wrappedPromise;
+        logger.log('fetch data from server, dataFetchItem res: ', res);
         return ctx.json(res);
       }
     }
@@ -183,6 +185,7 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
     }
     const dataFetchFn = await loadDataFetchModule(hostInstance, remoteId);
     const data = await dataFetchFn({ ...params, isDowngrade: !remoteInfo });
+    logger.log('fetch data from server, loadDataFetchModule res: ', data);
     return ctx.json(data);
   } catch (e) {
     console.log('server plugin data fetch error: ', e);
