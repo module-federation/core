@@ -160,10 +160,10 @@ export async function fetchData(
     const mfDowngrade = getDowngradeTag();
     if (mfDowngrade) {
       if (typeof mfDowngrade === 'boolean') {
-        return callDowngrade(id, params);
+        return callDowngrade(id, { ...params, isDowngrade: true });
       }
       if (mfDowngrade.includes(id)) {
-        return callDowngrade(id, params);
+        return callDowngrade(id, { ...params, isDowngrade: true });
       }
     }
 
