@@ -12,6 +12,7 @@ type IProps = {
   id: string;
   injectScript?: boolean;
   injectLink?: boolean;
+  inlineCSS?: boolean;
 };
 
 type ReactKey = { key?: React.Key | null };
@@ -76,11 +77,12 @@ function getTargetModuleInfo(id: string) {
   };
 }
 
-export function collectSSRAssets(options: IProps) {
+export async function collectSSRAssets(options: IProps) {
   const {
     id,
     injectLink = true,
     injectScript = true,
+    inlineCSS = false,
   } = typeof options === 'string' ? { id: options } : options;
   const links: React.ReactNode[] = [];
   const scripts: React.ReactNode[] = [];
@@ -95,17 +97,26 @@ export function collectSSRAssets(options: IProps) {
   }
   const { module: targetModule, publicPath, remoteEntry } = moduleAndPublicPath;
   if (injectLink) {
-    [...targetModule.assets.css.sync, ...targetModule.assets.css.async].forEach(
-      (file, index) => {
-        links.push(
-          <link
-            key={`${file.split('.')[0]}_${index}`}
-            href={`${publicPath}${file}`}
-            rel="stylesheet"
-            type="text/css"
-          />,
-        );
-      },
+    await Promise.all(
+      [...targetModule.assets.css.sync, ...targetModule.assets.css.async].map(
+        async (file, index) => {
+          const href = `${publicPath}${file}`;
+          const key = `${file.split('.')[0]}_${index}`;
+          if (inlineCSS) {
+            const content = await fetch(href).then((res) => res.text());
+            links.push(<style key={key}>{content}</style>);
+            return;
+          }
+          links.push(
+            <link
+              key={key}
+              href={`${publicPath}${file}`}
+              rel="stylesheet"
+              type="text/css"
+            />,
+          );
+        },
+      ),
     );
   }
   if (injectScript) {
@@ -154,7 +165,7 @@ export function createRemoteSSRComponent<T, E extends keyof T>(info: {
       }
       const moduleId = m && m[Symbol.for('mf_module_id')];
 
-      const assets = collectSSRAssets({
+      const assets = await collectSSRAssets({
         id: moduleId,
       });
 
