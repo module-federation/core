@@ -6,3 +6,7 @@ This is the example application for Module Federation core.
 ## Usage
 
 Run the development server and navigate to the provided localhost URL.
+
+## Description
+
+This package demonstrates a specific use case of Module Federation within the ecosystem.
