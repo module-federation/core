@@ -9,7 +9,7 @@ import {
 import { MANIFEST_EXT } from './constant';
 
 interface IOptions {
-  remotes?: Record<string, string>;
+  remotes?: Record<string, string | Record<string, string>>;
   overrides?: Record<string, string>;
   version?: string;
 }
@@ -109,12 +109,24 @@ export function generateSnapshotFromManifest(
   // If remotes (deploy scenario) are specified, they need to be traversed again
   Object.keys(remotes).forEach(
     (key) =>
-      (remotesInfo[key] = {
-        // overrides will override dependencies
-        matchedVersion: overridesKeys.includes(key)
-          ? overrides[key]
-          : remotes[key],
-      }),
+      (remotesInfo[key] =
+        typeof remotes[key] === 'string'
+          ? {
+              // overrides will override dependencies
+              matchedVersion: overridesKeys.includes(key)
+                ? overrides[key]
+                : remotes[key],
+            }
+          : typeof remotes[key] === 'object'
+            ? {
+                ...remotes[key],
+                matchedVersion: overridesKeys.includes(key)
+                  ? overrides[key]
+                  : remotes[key]?.['version'] || remotes[key]?.['entry'],
+              }
+            : {
+                matchedVersion: '*',
+              }),
   );
 
   const {
