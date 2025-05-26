@@ -462,3 +462,11 @@ export default defineConfig({
   ],
 });
 ```
+
+### fetchServerQuery
+
+- Type: `Record<string, unknown>`
+- Required: No
+- Default: `undefined`
+
+If a downgrade occurs, an HTTP request will be sent to the server. This configuration can be used to add query parameters to that request.

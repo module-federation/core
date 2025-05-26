@@ -16,12 +16,25 @@ type dataFetchFunctionOptions = [
   data?: unknown,
   downgrade?: boolean,
 ];
-export const injectDataFetchFunctionPlugin = (): RuntimePluginFuture => ({
+export function setSSREnv({
+  fetchServerQuery,
+}: {
+  fetchServerQuery?: Record<string, unknown>;
+}) {
+  globalThis.FEDERATION_SSR = true;
+  globalThis.FEDERATION_SERVER_QUERY = fetchServerQuery;
+}
+
+export const injectDataFetchFunctionPlugin = ({
+  fetchServerQuery,
+}: {
+  fetchServerQuery?: Record<string, unknown>;
+}): RuntimePluginFuture => ({
   name: '@module-federation/inject-data-fetch-function-plugin',
 
   setup: (api) => {
     api.onBeforeRender(async () => {
-      globalThis.FEDERATION_SSR = true;
+      setSSREnv({ fetchServerQuery });
       if (typeof window === 'undefined') {
         return;
       }

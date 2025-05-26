@@ -78,6 +78,15 @@ export async function callDowngrade(
             encodeURIComponent(JSON.stringify(remoteInfo)),
           );
         }
+        const fetchServerQuery = globalThis.FEDERATION_SERVER_QUERY;
+        if (fetchServerQuery && typeof fetchServerQuery === 'object') {
+          Object.keys(fetchServerQuery).forEach((key) => {
+            currentUrl.searchParams.set(
+              key,
+              JSON.stringify(fetchServerQuery[key]),
+            );
+          });
+        }
         const fetchUrl = currentUrl.toString();
         const data = await fetch(fetchUrl).then((res) => res.json());
         mfDataFetch[2] = MF_DATA_FETCH_STATUS.LOADED;

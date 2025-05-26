@@ -16,6 +16,8 @@ export default defineConfig({
     appTools({
       bundler: 'rspack',
     }),
-    moduleFederationPlugin(),
+    moduleFederationPlugin({
+      fetchServerQuery: { extraQuery: true },
+    }),
   ],
 });

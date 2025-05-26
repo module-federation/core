@@ -462,3 +462,11 @@ export default defineConfig({
   ],
 });
 ```
+
+### fetchServerQuery
+
+- 类型：`Record<string, unknown>`
+- 是否必填：否
+- 默认值：`undefined`
+
+如果发生降级，那么会向服务端发送一个 http 请求，此时可以通过此配置来添加请求的 query。

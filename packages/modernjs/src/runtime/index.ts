@@ -17,3 +17,5 @@ export const kit = {
     return require('./wrapNoSSR').wrapNoSSR;
   },
 };
+
+export { setSSREnv } from '../ssr-runtime/injectDataFetchFunctionPlugin';
