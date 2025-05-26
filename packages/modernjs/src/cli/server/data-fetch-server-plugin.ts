@@ -167,7 +167,7 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
       logger.log('fetch data from server, dataFetchItem: ', dataFetchItem);
       const callFetchDataPromise = fetchData(dataFetchId, {
         ...params,
-        isDowngrade: true,
+        isDowngrade: !remoteInfo,
       });
       const wrappedPromise = wrapSetTimeout(
         callFetchDataPromise,
