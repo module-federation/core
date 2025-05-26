@@ -1,7 +1,8 @@
 import type { RuntimePluginFuture } from '@modern-js/runtime';
 import { SSRLiveReload } from './SSRLiveReload';
+import { flushDataFetch } from '../utils';
 
-export const mfSSRPlugin = (): RuntimePluginFuture => ({
+export const mfSSRDevPlugin = (): RuntimePluginFuture => ({
   name: '@module-federation/modern-js',
 
   setup: (api) => {
@@ -12,9 +13,11 @@ export const mfSSRPlugin = (): RuntimePluginFuture => ({
       globalThis.shouldUpdate = false;
       const nodeUtils = await import('@module-federation/node/utils');
       const shouldUpdate = await nodeUtils.revalidate();
+      console.log('shouldUpdate: ', shouldUpdate);
       if (shouldUpdate) {
         console.log('should RELOAD', shouldUpdate);
         await nodeUtils.flushChunks();
+        flushDataFetch();
         globalThis.shouldUpdate = true;
       }
     });
