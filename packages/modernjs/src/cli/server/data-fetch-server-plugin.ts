@@ -6,7 +6,7 @@ import {
   initDataFetchMap,
   loadDataFetchModule,
 } from '../../utils/dataFetch';
-import { SEPARATOR } from '@module-federation/sdk';
+import { SEPARATOR, MANIFEST_EXT } from '@module-federation/sdk';
 import type {
   MiddlewareHandler,
   ServerPlugin,
@@ -130,7 +130,10 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
               entryGlobalName: remoteInfo.globalName,
             },
           ]);
-        } else {
+        } else if (
+          !('entry' in remote) ||
+          !remote.entry.includes(MANIFEST_EXT)
+        ) {
           const { hostGlobalSnapshot, remoteSnapshot } =
             hostInstance.snapshotHandler.getGlobalRemoteInfo(remoteInfo);
           logger.debug(
