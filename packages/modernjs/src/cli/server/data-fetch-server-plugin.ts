@@ -65,9 +65,7 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
     const remoteInfoQuery = getDecodeQuery(url, 'remoteInfo');
     remoteInfo = remoteInfoQuery ? JSON.parse(remoteInfoQuery) : null;
   } catch (e) {
-    //TODO: remove me
-    console.log('fetch data from server, error: ', e);
-    console.error(e);
+    logger.error('fetch data from server, error: ', e);
     return next();
   }
 
@@ -75,8 +73,7 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
     return next();
   }
   logger.log('fetch data from server, dataFetchId: ', dataFetchId);
-  //TODO: remove me
-  console.log(
+  logger.debug(
     'fetch data from server, moduleInfo: ',
     globalThis.__FEDERATION__?.moduleInfo,
   );
@@ -86,16 +83,14 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
       initDataFetchMap();
     }
     const fetchDataPromise = dataFetchMap[dataFetchId]?.[1];
-    //TODO: remove me
-    console.log('fetch data from server, fetchDataPromise: ', fetchDataPromise);
+    logger.debug(
+      'fetch data from server, fetchDataPromise: ',
+      fetchDataPromise,
+    );
     if (
       fetchDataPromise &&
       dataFetchMap[dataFetchId]?.[2] !== MF_DATA_FETCH_STATUS.ERROR
     ) {
-      logger.log(
-        'fetch data from server, fetchDataPromise: ',
-        fetchDataPromise,
-      );
       const targetPromise = fetchDataPromise[0];
       // Ensure targetPromise is thenable
       const wrappedPromise = wrapSetTimeout(targetPromise, 20000, dataFetchId);
@@ -161,10 +156,8 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
     }
 
     const dataFetchItem = dataFetchMap[dataFetchId];
-    //TODO: remove me
-    console.log('fetch data from server, dataFetchItem: ', dataFetchItem);
+    logger.debug('fetch data from server, dataFetchItem: ', dataFetchItem);
     if (dataFetchItem) {
-      logger.log('fetch data from server, dataFetchItem: ', dataFetchItem);
       const callFetchDataPromise = fetchData(dataFetchId, {
         ...params,
         isDowngrade: !remoteInfo,
@@ -191,7 +184,7 @@ const middleware: MiddlewareHandler = async (ctx, next) => {
     logger.log('fetch data from server, loadDataFetchModule res: ', data);
     return ctx.json(data);
   } catch (e) {
-    console.log('server plugin data fetch error: ', e);
+    logger.error('server plugin data fetch error: ', e);
     ctx.status(500);
     return ctx.text(`failed to fetch ${remoteInfo.name} data, error:\n ${e}`);
   }

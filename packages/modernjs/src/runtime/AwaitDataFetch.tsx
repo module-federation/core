@@ -129,7 +129,6 @@ function ResolveAwait<T>({
       <>
         {typeof errorElement === 'function' ? (
           <>
-            {/* TODO: set _mfSSRDowngrade */}
             {globalThis.FEDERATION_SSR && (
               <script
                 suppressHydrationWarning
