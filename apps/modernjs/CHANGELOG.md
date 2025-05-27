@@ -1,5 +1,12 @@
 # @module-federation/modernjsapp
 
+## 0.1.96
+
+### Patch Changes
+
+- 0c68c2f: feat(modern-js-plugin): add server plugin to handle remote's SSR assets
+  - @module-federation/enhanced@0.14.1
+
 ## 0.1.95
 
 ### Patch Changes
