@@ -55,6 +55,10 @@
       "types": "./dist/types/cli/mfRuntimePlugins/inject-node-fetch.d.ts",
       "import": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.js",
       "require": "./dist/esm/cli/mfRuntimePlugins/inject-node-fetch.js"
+    },
+    "./server": {
+      "types": "./dist/types/server/index.d.ts",
+      "default": "./dist/cjs/server/index.js"
     }
   },
   "typesVersions": {
@@ -79,6 +83,9 @@
       ],
       "inject-node-fetch": [
         "./dist/types/cli/mfRuntimePlugins/inject-node-fetch.d.ts"
+      ],
+      "server": [
+        "./dist/types/server/index.d.ts"
       ]
     }
   },
@@ -87,9 +94,10 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@modern-js/node-bundle-require": "2.65.1",
+    "@modern-js/node-bundle-require": "2.67.6",
     "@module-federation/rsbuild-plugin": "workspace:*",
-    "@modern-js/utils": "2.65.1",
+    "fs-extra": "11.3.0",
+    "lru-cache": "11.1.0",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
     "@module-federation/sdk": "workspace:*",
@@ -100,11 +108,11 @@
   },
   "devDependencies": {
     "@rsbuild/core": "1.2.8",
-    "@modern-js/app-tools": "2.65.1",
-    "@modern-js/core": "2.65.1",
-    "@modern-js/module-tools": "2.65.1",
-    "@modern-js/runtime": "2.65.1",
-    "@modern-js/tsconfig": "2.65.1",
+    "@modern-js/app-tools": "2.67.6",
+    "@modern-js/server-runtime": "2.67.6",
+    "@modern-js/module-tools": "2.67.6",
+    "@modern-js/runtime": "2.67.6",
+    "@modern-js/tsconfig": "2.67.6",
     "@module-federation/manifest": "workspace:*"
   },
   "peerDependencies": {
