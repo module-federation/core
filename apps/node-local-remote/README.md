@@ -13,3 +13,7 @@
 ---
 
 *Optimized by Aiden*
+
+## Usage
+
+Run the development server and navigate to the provided localhost URL.
