@@ -1,5 +1,16 @@
 # @module-federation/modern-js
 
+## 0.14.2
+
+### Patch Changes
+
+- e6ac307: fix(modern-js-plugin): downgrade lru-cache
+  - @module-federation/enhanced@0.14.2
+  - @module-federation/sdk@0.14.2
+  - @module-federation/rsbuild-plugin@0.14.2
+  - @module-federation/cli@0.14.2
+  - @module-federation/node@2.7.5
+
 ## 0.14.1
 
 ### Patch Changes
