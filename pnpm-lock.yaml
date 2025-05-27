@@ -1883,7 +1883,7 @@ importers:
         version: link:../../packages/storybook-addon
       '@rsbuild/plugin-react':
         specifier: ^1.0.6
-        version: 1.0.6(@rsbuild/core@1.3.17)
+        version: 1.0.6(@rsbuild/core@1.3.20)
       '@rslib/core':
         specifier: 0.2.0
         version: 0.2.0(typescript@5.7.3)
@@ -1904,10 +1904,10 @@ importers:
         version: 8.4.2(prettier@3.3.3)
       storybook-addon-rslib:
         specifier: ^0.1.4
-        version: 0.1.4(@rsbuild/core@1.3.17)(@rslib/core@0.2.0)(storybook-builder-rsbuild@1.0.1)(typescript@5.7.3)
+        version: 0.1.4(@rsbuild/core@1.3.20)(@rslib/core@0.2.0)(storybook-builder-rsbuild@1.0.1)(typescript@5.7.3)
       storybook-react-rsbuild:
         specifier: ^0.1.5
-        version: 0.1.5(@rsbuild/core@1.3.17)(@rspack/core@1.3.9)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)(rollup@4.40.0)(storybook@8.4.2)(typescript@5.7.3)(webpack@5.98.0)
+        version: 0.1.5(@rsbuild/core@1.3.20)(@rspack/core@1.3.9)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)(rollup@4.40.0)(storybook@8.4.2)(typescript@5.7.3)(webpack@5.98.0)
 
   apps/runtime-demo/3005-runtime-host:
     dependencies:
@@ -2670,8 +2670,8 @@ importers:
         specifier: 11.3.0
         version: 11.3.0
       lru-cache:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 10.4.3
+        version: 10.4.3
       node-fetch:
         specifier: ~3.3.0
         version: 3.3.2
@@ -5561,7 +5561,7 @@ packages:
       '@babel/helper-module-imports': 7.25.9
       '@babel/helper-plugin-utils': 7.25.9
       '@babel/plugin-syntax-jsx': 7.25.9(@babel/core@7.26.10)
-      '@babel/types': 7.27.0
+      '@babel/types': 7.26.0
     transitivePeerDependencies:
       - supports-color
 
@@ -14836,7 +14836,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.1.3(rollup@4.40.0)
+      '@rollup/pluginutils': 5.1.2(rollup@4.40.0)
       '@types/resolve': 1.20.2
       deepmerge: 4.3.1
       is-module: 1.0.0
@@ -15575,12 +15575,12 @@ packages:
       '@rspack/plugin-react-refresh': 1.0.0(react-refresh@0.14.2)
       react-refresh: 0.14.2
 
-  /@rsbuild/plugin-react@1.0.6(@rsbuild/core@1.3.17):
+  /@rsbuild/plugin-react@1.0.6(@rsbuild/core@1.3.20):
     resolution: {integrity: sha512-k2VS7nvNm74DlVQROK+w+Ua1j60n3qSnVFva8zjmj6uakLCxxp85aRwfEHzaVP/YdDLffweypROuQPYvTZ57ew==}
     peerDependencies:
       '@rsbuild/core': 1.x
     dependencies:
-      '@rsbuild/core': 1.3.17
+      '@rsbuild/core': 1.3.20
       '@rspack/plugin-react-refresh': 1.0.0(react-refresh@0.14.2)
       react-refresh: 0.14.2
     dev: true
@@ -15721,7 +15721,7 @@ packages:
       toml: 3.0.0
     dev: true
 
-  /@rsbuild/plugin-type-check@1.2.1(@rsbuild/core@1.3.17)(@rspack/core@1.3.9)(typescript@5.7.3):
+  /@rsbuild/plugin-type-check@1.2.1(@rsbuild/core@1.3.20)(@rspack/core@1.3.9)(typescript@5.7.3):
     resolution: {integrity: sha512-PtbjeMqDQy8IiPDTuaj8ZmvR42b0AsRq6RUF6wxa8dDsOzD0Dl1GcvemVGCto+/Dh8frLUmnlWF+T8riBw5rtA==}
     peerDependencies:
       '@rsbuild/core': 1.x
@@ -15729,7 +15729,7 @@ packages:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.3.17
+      '@rsbuild/core': 1.3.20
       deepmerge: 4.3.1
       json5: 2.2.3
       reduce-configs: 1.1.0
@@ -15770,6 +15770,24 @@ packages:
       json5: 2.2.3
       reduce-configs: 1.1.0
       ts-checker-rspack-plugin: 1.1.3(@rspack/core@1.3.9)(typescript@5.5.2)
+    transitivePeerDependencies:
+      - '@rspack/core'
+      - typescript
+    dev: true
+
+  /@rsbuild/plugin-type-check@1.2.2(@rsbuild/core@1.3.20)(@rspack/core@1.3.9)(typescript@5.7.3):
+    resolution: {integrity: sha512-7hRPT9Vi5uXLkvjy9gGHttpCvK7afGXS7bukyf0XCYAWj6XMPJvUQpXBatVVdNdNfeYt0ffHo5GqiPz/eeCorQ==}
+    peerDependencies:
+      '@rsbuild/core': 1.x
+    peerDependenciesMeta:
+      '@rsbuild/core':
+        optional: true
+    dependencies:
+      '@rsbuild/core': 1.3.20
+      deepmerge: 4.3.1
+      json5: 2.2.3
+      reduce-configs: 1.1.0
+      ts-checker-rspack-plugin: 1.1.3(@rspack/core@1.3.9)(typescript@5.7.3)
     transitivePeerDependencies:
       - '@rspack/core'
       - typescript
@@ -31003,7 +31021,7 @@ packages:
       lodash: 4.17.21
       pretty-error: 4.0.0
       tapable: 2.2.1
-      webpack: 5.99.9(@swc/core@1.10.18)(esbuild@0.17.19)(webpack-cli@5.1.4)
+      webpack: 5.99.9(@swc/core@1.7.26)(esbuild@0.17.19)(webpack-cli@5.1.4)
     dev: true
 
   /htmlparser2@10.0.0:
@@ -33563,6 +33581,8 @@ packages:
     peerDependenciesMeta:
       webpack:
         optional: true
+      webpack-sources:
+        optional: true
     dependencies:
       webpack: 5.94.0(@swc/core@1.7.26)(esbuild@0.24.0)(webpack-cli@5.1.4)
       webpack-sources: 3.2.3
@@ -33574,6 +33594,8 @@ packages:
       webpack: '*'
     peerDependenciesMeta:
       webpack:
+        optional: true
+      webpack-sources:
         optional: true
     dependencies:
       webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
@@ -41387,7 +41409,7 @@ packages:
       typescript: 5.7.3
     dev: true
 
-  /rsbuild-plugin-html-minifier-terser@1.1.1(@rsbuild/core@1.3.17):
+  /rsbuild-plugin-html-minifier-terser@1.1.1(@rsbuild/core@1.3.20):
     resolution: {integrity: sha512-rbDLv+XmGeSQo9JWKSwBst3Qwx1opLqtQCnQ3t9Z0F0ZTxKOC1S/ypPv5tSn/S3GMHct5Yb76mMgh6p80hjOAQ==}
     peerDependencies:
       '@rsbuild/core': 1.x || ^1.0.1-beta.0
@@ -41395,7 +41417,7 @@ packages:
       '@rsbuild/core':
         optional: true
     dependencies:
-      '@rsbuild/core': 1.3.17
+      '@rsbuild/core': 1.3.20
       '@types/html-minifier-terser': 7.0.2
       html-minifier-terser: 7.2.0
     dev: true
@@ -43176,7 +43198,7 @@ packages:
     dependencies:
       graceful-fs: 4.2.11
 
-  /storybook-addon-rslib@0.1.4(@rsbuild/core@1.3.17)(@rslib/core@0.2.0)(storybook-builder-rsbuild@1.0.1)(typescript@5.7.3):
+  /storybook-addon-rslib@0.1.4(@rsbuild/core@1.3.20)(@rslib/core@0.2.0)(storybook-builder-rsbuild@1.0.1)(typescript@5.7.3):
     resolution: {integrity: sha512-JXF2OZb3NXE7iYztLxiOTMP1j2BGHSNhREu+5LCjsOXxXFXiJrh4T8OeVLKsg7FlBSfnTkALSra0vHHnerFlfA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
@@ -43188,13 +43210,13 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@rsbuild/core': 1.3.17
+      '@rsbuild/core': 1.3.20
       '@rslib/core': 0.2.0(typescript@5.7.3)
-      storybook-builder-rsbuild: 1.0.1(@rsbuild/core@1.3.17)(@rspack/core@1.3.9)(@types/react@18.3.11)(storybook@8.4.2)(typescript@5.7.3)
+      storybook-builder-rsbuild: 1.0.1(@rsbuild/core@1.3.20)(@rspack/core@1.3.9)(@types/react@18.3.11)(storybook@8.4.2)(typescript@5.7.3)
       typescript: 5.7.3
     dev: true
 
-  /storybook-builder-rsbuild@0.1.5(@rsbuild/core@1.3.17)(@rspack/core@1.3.9)(@types/react@18.3.11)(storybook@8.4.2)(typescript@5.7.3):
+  /storybook-builder-rsbuild@0.1.5(@rsbuild/core@1.3.20)(@rspack/core@1.3.9)(@types/react@18.3.11)(storybook@8.4.2)(typescript@5.7.3):
     resolution: {integrity: sha512-g8/pVX+2YixHpWt/Q8dQWtkuKpWKxm1i9h+ihTFPO5LQWc3HvlF6PAXccPvedicLizGR2xTaI/RcJkE+2bYXqA==}
     peerDependencies:
       '@rsbuild/core': ^1.0.1
@@ -43204,8 +43226,8 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@rsbuild/core': 1.3.17
-      '@rsbuild/plugin-type-check': 1.2.1(@rsbuild/core@1.3.17)(@rspack/core@1.3.9)(typescript@5.7.3)
+      '@rsbuild/core': 1.3.20
+      '@rsbuild/plugin-type-check': 1.2.1(@rsbuild/core@1.3.20)(@rspack/core@1.3.9)(typescript@5.7.3)
       '@storybook/addon-docs': 8.6.4(@types/react@18.3.11)(storybook@8.4.2)
       '@storybook/core-webpack': 8.6.4(storybook@8.4.2)
       browser-assert: 1.2.1
@@ -43217,7 +43239,7 @@ packages:
       magic-string: 0.30.17
       path-browserify: 1.0.1
       process: 0.11.10
-      rsbuild-plugin-html-minifier-terser: 1.1.1(@rsbuild/core@1.3.17)
+      rsbuild-plugin-html-minifier-terser: 1.1.1(@rsbuild/core@1.3.20)
       sirv: 2.0.4
       storybook: 8.4.2(prettier@3.3.3)
       ts-dedent: 2.2.0
@@ -43230,7 +43252,7 @@ packages:
       - '@types/react'
     dev: true
 
-  /storybook-builder-rsbuild@1.0.1(@rsbuild/core@1.3.17)(@rspack/core@1.3.9)(@types/react@18.3.11)(storybook@8.4.2)(typescript@5.7.3):
+  /storybook-builder-rsbuild@1.0.1(@rsbuild/core@1.3.20)(@rspack/core@1.3.9)(@types/react@18.3.11)(storybook@8.4.2)(typescript@5.7.3):
     resolution: {integrity: sha512-sfr0qg3r76A9qlQRXE3ekAiJQM8v31skfuC+qc3m1GPoUeerfiBAWUOFBMdpNqUimt0eGSM5HUiY/vs3VRd3LQ==}
     peerDependencies:
       '@rsbuild/core': ^1.0.1
@@ -43240,8 +43262,8 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@rsbuild/core': 1.3.17
-      '@rsbuild/plugin-type-check': 1.2.1(@rsbuild/core@1.3.17)(@rspack/core@1.3.9)(typescript@5.7.3)
+      '@rsbuild/core': 1.3.20
+      '@rsbuild/plugin-type-check': 1.2.2(@rsbuild/core@1.3.20)(@rspack/core@1.3.9)(typescript@5.7.3)
       '@storybook/addon-docs': 8.6.12(@types/react@18.3.11)(storybook@8.4.2)
       '@storybook/core-webpack': 8.6.12(storybook@8.4.2)
       browser-assert: 1.2.1
@@ -43254,7 +43276,7 @@ packages:
       magic-string: 0.30.17
       path-browserify: 1.0.1
       process: 0.11.10
-      rsbuild-plugin-html-minifier-terser: 1.1.1(@rsbuild/core@1.3.17)
+      rsbuild-plugin-html-minifier-terser: 1.1.1(@rsbuild/core@1.3.20)
       sirv: 2.0.4
       storybook: 8.4.2(prettier@3.3.3)
       ts-dedent: 2.2.0
@@ -43267,7 +43289,7 @@ packages:
       - '@types/react'
     dev: true
 
-  /storybook-react-rsbuild@0.1.5(@rsbuild/core@1.3.17)(@rspack/core@1.3.9)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)(rollup@4.40.0)(storybook@8.4.2)(typescript@5.7.3)(webpack@5.98.0):
+  /storybook-react-rsbuild@0.1.5(@rsbuild/core@1.3.20)(@rspack/core@1.3.9)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)(rollup@4.40.0)(storybook@8.4.2)(typescript@5.7.3)(webpack@5.98.0):
     resolution: {integrity: sha512-Cy7Ms5COLR1FTelGRxS5pE9LVlDSvaJeBsTH2MVi/29ZK8UEE0VH+Mnve2MboB93GbC3fhZFtIcNSF2dy9pjTw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
@@ -43281,7 +43303,7 @@ packages:
         optional: true
     dependencies:
       '@rollup/pluginutils': 5.1.3(rollup@4.40.0)
-      '@rsbuild/core': 1.3.17
+      '@rsbuild/core': 1.3.20
       '@storybook/react': 8.3.5(react-dom@18.3.1)(react@18.3.1)(storybook@8.4.2)(typescript@5.7.3)
       '@storybook/react-docgen-typescript-plugin': 1.0.1(typescript@5.7.3)(webpack@5.98.0)
       '@types/node': 18.16.9
@@ -43292,7 +43314,7 @@ packages:
       react-dom: 18.3.1(react@18.3.1)
       resolve: 1.22.8
       storybook: 8.4.2(prettier@3.3.3)
-      storybook-builder-rsbuild: 0.1.5(@rsbuild/core@1.3.17)(@rspack/core@1.3.9)(@types/react@18.3.11)(storybook@8.4.2)(typescript@5.7.3)
+      storybook-builder-rsbuild: 0.1.5(@rsbuild/core@1.3.20)(@rspack/core@1.3.9)(@types/react@18.3.11)(storybook@8.4.2)(typescript@5.7.3)
       tsconfig-paths: 4.2.0
       typescript: 5.7.3
     transitivePeerDependencies:
@@ -44958,6 +44980,27 @@ packages:
       minimatch: 9.0.5
       picocolors: 1.1.1
       typescript: 5.5.2
+    dev: true
+
+  /ts-checker-rspack-plugin@1.1.3(@rspack/core@1.3.9)(typescript@5.7.3):
+    resolution: {integrity: sha512-VpB+L+F330T484qGp5KqyoU00PRlUlz4kO1ifBpQ5CkKXEFXye8nmeXlZ5rvZAXjFAMRFiG+sI9OewO6Bd9UvA==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      '@rspack/core': ^1.0.0
+      typescript: '>=3.8.0'
+    peerDependenciesMeta:
+      '@rspack/core':
+        optional: true
+    dependencies:
+      '@babel/code-frame': 7.26.2
+      '@rspack/core': 1.3.9(@swc/helpers@0.5.13)
+      '@rspack/lite-tapable': 1.0.1
+      chokidar: 3.6.0
+      is-glob: 4.0.3
+      memfs: 4.17.0
+      minimatch: 9.0.5
+      picocolors: 1.1.1
+      typescript: 5.7.3
     dev: true
 
   /ts-dedent@2.2.0:
