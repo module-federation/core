@@ -1,0 +1,18 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+<ErrorCodeTitle code='RUNTIME-009'/>
+
+> 原错误信息：remoteEntryExports is undefined
+
+
+## 原因
+
+获取 remote entry 导出失败，可能有两个原因：
+
+1. entry 地址错误
+2. 网络不稳定，导致加载 entry 失败
+
+## 解决方法
+
+1. 检查 `remoteInfo` 中 `entry` 地址是否正确，
+2. 增加重试机制，参考 [Runtime 重试机制](zh/plugin/plugins/retry-plugin.html)。

@@ -9,6 +9,7 @@ import {
   RUNTIME_008,
   TYPE_001,
   BUILD_001,
+  RUNTIME_009,
 } from './error-codes';
 
 export const runtimeDescMap = {
@@ -20,6 +21,7 @@ export const runtimeDescMap = {
   [RUNTIME_006]: 'Invalid loadShareSync function call from runtime',
   [RUNTIME_007]: 'Failed to get remote snapshot.',
   [RUNTIME_008]: 'Failed to load script resources.',
+  [RUNTIME_009]: 'Failed to get remote entry exports.',
 };
 
 export const typeDescMap = {

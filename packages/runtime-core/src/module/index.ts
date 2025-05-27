@@ -3,6 +3,7 @@ import { safeToString, ModuleInfo } from '@module-federation/sdk';
 import {
   getShortErrorMsg,
   RUNTIME_002,
+  RUNTIME_009,
   runtimeDescMap,
 } from '@module-federation/error-codes';
 import { getRemoteEntry, getRemoteEntryUniqueKey } from '../utils/load';
@@ -57,7 +58,10 @@ class Module {
 
     assert(
       remoteEntryExports,
-      `remoteEntryExports is undefined \n ${safeToString(this.remoteInfo)}`,
+      getShortErrorMsg(RUNTIME_009, runtimeDescMap, {
+        remoteInfo: this.remoteInfo,
+        hostName: this.host.name,
+      }),
     );
 
     this.remoteEntryExports = remoteEntryExports as RemoteEntryExports;

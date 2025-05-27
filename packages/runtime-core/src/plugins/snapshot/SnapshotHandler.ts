@@ -260,8 +260,9 @@ export class SnapshotHandler {
       } else {
         error(
           getShortErrorMsg(RUNTIME_007, runtimeDescMap, {
-            hostName: moduleInfo.name,
-            hostVersion: moduleInfo.version,
+            hostName: this.HostInstance.options.name,
+            remoteName: moduleInfo.name,
+            remoteVersion: moduleInfo.version,
             globalSnapshot: JSON.stringify(globalSnapshotRes),
           }),
         );
