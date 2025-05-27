@@ -1,5 +1,16 @@
 # @module-federation/modern-js
 
+## 0.14.3
+
+### Patch Changes
+
+- fix: empty dist
+  - @module-federation/enhanced@0.14.3
+  - @module-federation/sdk@0.14.3
+  - @module-federation/rsbuild-plugin@0.14.3
+  - @module-federation/cli@0.14.3
+  - @module-federation/node@2.7.6
+
 ## 0.14.2
 
 ### Patch Changes

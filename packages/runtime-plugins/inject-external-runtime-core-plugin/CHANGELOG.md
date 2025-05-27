@@ -1,5 +1,11 @@
 # @module-federation/inject-external-runtime-core-plugin
 
+## 0.14.3
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.14.3
+
 ## 0.14.2
 
 ### Patch Changes
