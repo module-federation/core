@@ -1,5 +1,12 @@
 # remote5
 
+## 1.1.4
+
+### Patch Changes
+
+- @module-federation/bridge-react@0.14.2
+- @module-federation/rsbuild-plugin@0.14.2
+
 ## 1.1.3
 
 ### Patch Changes
