@@ -111,7 +111,7 @@ export function collectSSRAssets(options: IProps) {
   if (injectScript) {
     scripts.push(
       <script
-        async={true}
+        defer={true}
         key={remoteEntry.split('.')[0]}
         src={`${publicPath}${remoteEntry}`}
         crossOrigin="anonymous"
@@ -121,7 +121,7 @@ export function collectSSRAssets(options: IProps) {
       scripts.push(
         <script
           key={`${file.split('.')[0]}_${index}`}
-          async={true}
+          defer={true}
           src={`${publicPath}${file}`}
           crossOrigin="anonymous"
         />,
