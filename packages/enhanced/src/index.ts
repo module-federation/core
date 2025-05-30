@@ -27,6 +27,16 @@ export const container = {
   },
 };
 
+// Export modules under a modules object
+export const modules = {
+  get ConsumeSharedModule() {
+    return require('./lib/sharing/ConsumeSharedModule').default;
+  },
+  get ProvideSharedModule() {
+    return require('./lib/sharing/ProvideSharedModule').default;
+  },
+};
+
 export const createModuleFederationConfig = (
   options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ): moduleFederationPlugin.ModuleFederationPluginOptions => {
