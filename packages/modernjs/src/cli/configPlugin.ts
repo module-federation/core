@@ -385,7 +385,6 @@ export const moduleFederationConfigPlugin = (
         return;
       }
       const isWeb = isWebTarget(target);
-      // @ts-expect-error chain type is not correct
       addMyTypes2Ignored(chain, !isWeb ? ssrConfig : csrConfig);
 
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
@@ -396,7 +395,6 @@ export const moduleFederationConfigPlugin = (
       );
 
       patchBundlerConfig({
-        // @ts-expect-error chain type is not correct
         chain,
         isServer: !isWeb,
         modernjsConfig,

@@ -83,3 +83,35 @@ export default defineConfig({
 
 ### 注意
 如果需要使用 Module Federation 运行时能力，请安装 [@module-federation/enhanced](/zh/guide/basic/runtime.html)
+
+## 配置
+
+* 类型：
+
+```ts
+export declare const pluginModuleFederation: (moduleFederationOptions: ModuleFederationOptions, rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS) => RsbuildPlugin;
+
+type RSBUILD_PLUGIN_OPTIONS = {
+  ssr?: boolean;
+}
+```
+
+### moduleFederationOptions
+
+[Module Federation 配置项](../../configure/index)
+
+### rsbuildOptions
+
+Rsbuild 插件额外配置。
+
+#### ssr
+
+:::tip
+仅支持 Rslib
+:::
+
+* 类型：`boolean`
+* 默认值：`false`
+
+
+开启后可以生成 SSR 产物。

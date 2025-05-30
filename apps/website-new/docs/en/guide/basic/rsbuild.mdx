@@ -83,3 +83,35 @@ export default defineConfig({
 
 ### Note
 If you need to use the Module Federation runtime capabilities, please install [@module-federation/enhanced](/en/guide/basic/runtime.html)
+
+## Configuration
+
+* Type:
+
+```ts
+export declare const pluginModuleFederation: (moduleFederationOptions: ModuleFederationOptions, rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS) => RsbuildPlugin;
+
+type RSBUILD_PLUGIN_OPTIONS = {
+  ssr?: boolean;
+}
+```
+
+### moduleFederationOptions
+
+[Module Federation Configuration](../../configure/index)
+
+### rsbuildOptions
+
+Additional configuration for the Rsbuild plugin.
+
+#### ssr
+
+:::tip
+Only supports Rslib
+:::
+
+* Type: `boolean`
+* Default: `false`
+
+
+Enables the generation of SSR artifacts.

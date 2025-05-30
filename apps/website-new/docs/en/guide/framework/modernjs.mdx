@@ -120,7 +120,7 @@ const { createRemoteSSRComponent } = kit;
 
 const RemoteSSRComponent = createRemoteSSRComponent({
   // The remote declared in the build plug-in can also be loaded using this function: loader: () => import('remote/Image'),
-  loader: () => loadRemote('dynamic_remote/Image'),
+  loader: () => loadRemote('dynamic_remote'),
   loading: <div>loading...</div>,
   fallback: ({ error }) => {
     if (error instanceof Error && error.message.includes('not exist')) {
