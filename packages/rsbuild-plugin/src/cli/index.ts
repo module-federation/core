@@ -126,7 +126,6 @@ export const pluginModuleFederation = (
       shared[0].endsWith('/') ? shared[0].slice(0, -1) : shared[0],
     );
 
-    // dev config only works on format: 'mf'
     api.modifyRsbuildConfig((config) => {
       // skip storybook
       if (isStoryBook(config)) {
@@ -203,6 +202,7 @@ export const pluginModuleFederation = (
     let nodePlugin: ModuleFederationPlugin | undefined;
     let browserPlugin: ModuleFederationPlugin | undefined;
     let distOutputDir: string | undefined;
+
     api.onBeforeCreateCompiler(({ bundlerConfigs }) => {
       if (!bundlerConfigs) {
         throw new Error('Can not get bundlerConfigs!');
