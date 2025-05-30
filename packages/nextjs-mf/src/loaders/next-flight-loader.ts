@@ -73,8 +73,7 @@ export default function transformSource(
   const buildInfo = getModuleBuildInfo(module)
   buildInfo.rsc = getRSCModuleInformation(source, true)
   let prefix = ''
-  // @ts-ignore
-  if (process.env.BUILTIN_FLIGHT_CLIENT_ENTRY_PLUGIN) {
+  if (process.env['BUILTIN_FLIGHT_CLIENT_ENTRY_PLUGIN']) {
     const rscModuleInformationJson = JSON.stringify(buildInfo.rsc)
     prefix = `/* __rspack_internal_rsc_module_information_do_not_use__ ${rscModuleInformationJson} */\n`
     source = prefix + source
@@ -98,6 +97,10 @@ export default function transformSource(
       resourceKey,
       module.matchResource
     )
+  }
+
+  if (module.issuer?.type === 'consume-shared-module') {
+    resourceKey = (module as any).issuer.options.shareKey
   }
 
   // A client boundary.
@@ -153,19 +156,12 @@ ${JSON.stringify(ref)},
 
       return this.callback(null, esmSource, sourceMap)
     } else if (assumedSourceType === 'commonjs') {
-      let finalResourceKey = stringifiedResourceKey;
-      // debugger;
-        if (stringifiedResourceKey.includes('link') && module.issuer instanceof modules.ConsumeSharedModule) {
-          const consumeSharedModule = module.issuer as InstanceType<typeof modules.ConsumeSharedModule>;
-          const sharedLookupKey = utils.createLookupKeyForSharing(consumeSharedModule.libIdent());
-          finalResourceKey = JSON.stringify(sharedLookupKey);
-          // debugger;
-        }
-      let cjsSource =
+      const cjsSource =
         prefix +
         `\
 const { createProxy } = require("${MODULE_PROXY_PATH}")
-module.exports = createProxy(${finalResourceKey})
+
+module.exports = createProxy(${stringifiedResourceKey})
 `
       return this.callback(null, cjsSource, sourceMap)
     }
