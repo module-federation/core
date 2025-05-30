@@ -137,6 +137,30 @@ describe('RemoteModule', () => {
   });
 
   describe('build', () => {
+    let mockGetCompilationHooks: jest.SpyInstance;
+
+    beforeEach(() => {
+      const FederationModulesPlugin =
+        require('../../../src/lib/container/runtime/FederationModulesPlugin').default;
+      // Mock the SyncHook instances more accurately
+      const mockHook = () => ({
+        tap: jest.fn(),
+        call: jest.fn(), // Add the call method
+      });
+
+      mockGetCompilationHooks = jest
+        .spyOn(FederationModulesPlugin, 'getCompilationHooks')
+        .mockReturnValue({
+          addContainerEntryDependency: mockHook() as any,
+          addFederationRuntimeDependency: mockHook() as any,
+          addRemoteDependency: mockHook() as any,
+        });
+    });
+
+    afterEach(() => {
+      mockGetCompilationHooks.mockRestore();
+    });
+
     it('should set buildInfo and buildMeta', () => {
       const module = new RemoteModule(
         'remote-request',
@@ -161,7 +185,34 @@ describe('RemoteModule', () => {
         target: 'web',
       } as any; // Cast to any to avoid type errors
 
-      module.build(mockOptions, mockCompilation as any, {}, {}, callback);
+      const mockResolver = {
+        fileSystem: {},
+        options: {},
+        hooks: {
+          resolve: { tapAsync: jest.fn(), tapPromise: jest.fn() }, // Add common hooks
+        },
+        ensureHook: jest.fn(),
+        getHook: jest.fn(() => ({
+          tapAsync: jest.fn(),
+          tapPromise: jest.fn(),
+        })),
+        resolve: jest.fn(),
+        withOptions: jest.fn().mockReturnThis(), // For chaining
+      } as any;
+
+      const mockFs = {
+        readFile: jest.fn(),
+        readFileSync: jest.fn(),
+        // Add other fs methods if needed by the module during build
+      } as any;
+
+      module.build(
+        mockOptions,
+        mockCompilation as any,
+        mockResolver,
+        mockFs,
+        callback,
+      );
 
       expect(module.buildInfo).toBeDefined();
       expect(module.buildMeta).toBeDefined();

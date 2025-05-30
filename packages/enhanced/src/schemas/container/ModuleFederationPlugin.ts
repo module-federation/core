@@ -539,6 +539,11 @@ export default {
             },
           ],
         },
+        nodeModulesReconstructedLookup: {
+          description:
+            'Enable reconstructed lookup for node_modules paths for this share item',
+          type: 'boolean',
+        },
       },
     },
     SharedItem: {

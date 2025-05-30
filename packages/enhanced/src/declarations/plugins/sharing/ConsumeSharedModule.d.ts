@@ -74,4 +74,9 @@ export type ConsumeOptions = {
    * Only modules matching the criteria in this object will be included.
    */
   include?: ConsumeSharedModuleIncludeOptions;
+  /**
+   * Enable reconstructed lookup for node_modules paths for this share item
+   */
+  nodeModulesReconstructedLookup?: boolean;
 };
+const TYPES = new Set(['consume-shared']);
