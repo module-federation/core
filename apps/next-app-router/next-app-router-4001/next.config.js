@@ -64,8 +64,8 @@ const nextConfig = {
         filename: 'static/chunks/remoteEntry.js',
         exposes: {
           // Core UI Components
-          './rsc/Button': './rsc/button',
-          './Button': './classic/button',
+          './Button': './rsc/button',
+          './ssr/Button': './classic/button',
           // './Header': isServer ? './ui/header?rsc' : './ui/header?shared',
           // './Footer': './ui/footer',
           // './GlobalNav(rsc)': isServer ? './ui/global-nav?rsc' : './ui/global-nav',

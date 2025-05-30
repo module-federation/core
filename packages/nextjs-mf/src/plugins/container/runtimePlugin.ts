@@ -217,12 +217,14 @@ export default function (): FederationRuntimePlugin {
       return args;
     },
     resolveShare: function (args: any) {
-      console.log(
-        'Resolving share for package:',
-        args.pkgName,
-        args.version,
-        args.scope,
-      );
+      if (typeof window !== 'undefined') {
+        console.log(
+          'Resolving share for package:',
+          args.pkgName,
+          args.version,
+          args.scope,
+        );
+      }
       if (
         args.pkgName !== 'react' &&
         args.pkgName !== 'react-dom' &&

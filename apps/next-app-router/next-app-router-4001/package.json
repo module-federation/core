@@ -2,14 +2,19 @@
   "private": true,
   "name": "app-router-4001",
   "scripts": {
-    "build": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
-    "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4001",
+    "watch": "nx watch --projects=nextjs-mf --includeDependentProjects -- pnpm dev",
+    "build": "pnpm patch-flight-plugin && NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+    "dev": "pnpm patch-flight-plugin && rm -rf ./.next; NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4001",
     "lint": "next lint",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown .",
     "start": "next start",
-    "test": "pnpm prettier:check && pnpm lint"
+    "test": "pnpm prettier:check && pnpm lint",
+    "client:rsd": "rsdoctor analyze --profile .next/.rsdoctor/manifest.json",
+    "server:rsd": "rsdoctor analyze --profile .next/server/.rsdoctor/manifest.json",
+    "patch-flight-plugin": "cp node_modules/@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/flight-client-entry-plugin.js node_modules/next/dist/build/webpack/plugins/flight-client-entry-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/flight-manifest-plugin.js node_modules/next/dist/build/webpack/plugins/flight-manifest-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/loaders/next-flight-loader.js node_modules/next/dist/build/webpack/loaders/next-flight-loader/index.js",
+    "postinstall": "npm run patch-flight-plugin || true"
   },
   "git": {
     "pre-commit": "lint-staged"

@@ -8,7 +8,7 @@ import Button from '#/ui/button';
 
 export default function Page() {
   return (
-    <div className="space-  y-8">
+    <div className="space-y-8">
       <Button>Local RSC Button</Button>
       <RemoteRSCButton>Remote Button from RSC</RemoteRSCButton>
       <RemoteSSRButton>Remote Button from RSC</RemoteSSRButton>
