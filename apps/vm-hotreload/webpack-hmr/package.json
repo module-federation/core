@@ -1,0 +1,18 @@
+{
+  "name": "webpack-hmr-demo",
+  "version": "1.0.0",
+  "main": "dist/entrypoint1.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "start:entrypoint1": "nodemon --watch dist dist/entrypoint1.js",
+    "start:entrypoint2": "nodemon --watch dist dist/entrypoint2.js",
+    "demo": "concurrently \"npm:build\" \"nodemon --watch dist dist/index.js\""
+  },
+  "devDependencies": {
+    "webpack": "^5.90.0",
+    "webpack-cli": "^5.1.4",
+    "nodemon": "^3.0.3",
+    "concurrently": "^8.2.2"
+  }
+}
