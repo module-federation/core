@@ -28,12 +28,15 @@ type RSBUILD_PLUGIN_OPTIONS = {
   ssr?: boolean;
 };
 
-type ExposedOptionsType = {
-  nodePlugin?: ModuleFederationPlugin;
-  browserPlugin?: ModuleFederationPlugin;
-  distOutputDir?: string;
+type ExposedAPIType = {
+  options: {
+    nodePlugin?: ModuleFederationPlugin;
+    browserPlugin?: ModuleFederationPlugin;
+    distOutputDir?: string;
+  };
+  isSSRConfig: typeof isSSRConfig;
 };
-export type { ModuleFederationOptions, ExposedOptionsType };
+export type { ModuleFederationOptions, ExposedAPIType };
 
 const RSBUILD_PLUGIN_MODULE_FEDERATION_NAME =
   'rsbuild:module-federation-enhanced';
@@ -71,6 +74,9 @@ export function isMFFormat(bundlerConfig: Rspack.Configuration) {
   );
 }
 
+const isSSRConfig = (bundlerConfigName?: string) =>
+  Boolean(bundlerConfigName === SSR_ENV_NAME);
+
 export const pluginModuleFederation = (
   moduleFederationOptions: ModuleFederationOptions,
   rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS,
@@ -86,6 +92,7 @@ export const pluginModuleFederation = (
     }
     const isRslib = callerName === 'rslib';
     const isSSR = Boolean(rsbuildOptions?.ssr);
+
     if (isSSR && !isStoryBook(originalRsbuildConfig)) {
       if (!isRslib) {
         throw new Error(`'ssr' option is only supported in rslib.`);
@@ -204,14 +211,18 @@ export const pluginModuleFederation = (
       return config;
     });
 
-    const generateMergedStatsAndManifestOptions: ExposedOptionsType = {
-      nodePlugin: undefined,
-      browserPlugin: undefined,
-      distOutputDir: undefined,
+    const generateMergedStatsAndManifestOptions: ExposedAPIType = {
+      options: {
+        nodePlugin: undefined,
+        browserPlugin: undefined,
+        distOutputDir: undefined,
+      },
+      isSSRConfig,
     };
-    api.expose(RSBUILD_PLUGIN_MODULE_FEDERATION_NAME, {
-      value: generateMergedStatsAndManifestOptions,
-    });
+    api.expose(
+      RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
+      generateMergedStatsAndManifestOptions,
+    );
     api.onBeforeCreateCompiler(({ bundlerConfigs }) => {
       if (!bundlerConfigs) {
         throw new Error('Can not get bundlerConfigs!');
@@ -223,7 +234,6 @@ export const pluginModuleFederation = (
           bundlerConfig.output!.uniqueName = `${moduleFederationOptions.name}-storybook-host`;
         } else {
           // mf
-          const isSSRConfig = bundlerConfig.name === SSR_ENV_NAME;
           autoDeleteSplitChunkCacheGroups(
             moduleFederationOptions,
             bundlerConfig?.optimization?.splitChunks,
@@ -279,7 +289,10 @@ export const pluginModuleFederation = (
             }
           }
 
-          if (!bundlerConfig.output?.chunkLoadingGlobal && !isSSRConfig) {
+          if (
+            !bundlerConfig.output?.chunkLoadingGlobal &&
+            !isSSRConfig(bundlerConfig.name)
+          ) {
             bundlerConfig.output!.chunkLoading = 'jsonp';
             bundlerConfig.output!.chunkLoadingGlobal = `chunk_${moduleFederationOptions.name}`;
           }
@@ -292,22 +305,22 @@ export const pluginModuleFederation = (
           if (
             !bundlerConfig.plugins!.find((p) => p && p.name === PLUGIN_NAME)
           ) {
-            if (isSSRConfig) {
-              generateMergedStatsAndManifestOptions.nodePlugin =
+            if (isSSRConfig(bundlerConfig.name)) {
+              generateMergedStatsAndManifestOptions.options.nodePlugin =
                 new ModuleFederationPlugin(
                   createSSRMFConfig(moduleFederationOptions),
                 );
               bundlerConfig.plugins!.push(
-                generateMergedStatsAndManifestOptions.nodePlugin,
+                generateMergedStatsAndManifestOptions.options.nodePlugin,
               );
               return;
             }
-            generateMergedStatsAndManifestOptions.browserPlugin =
+            generateMergedStatsAndManifestOptions.options.browserPlugin =
               new ModuleFederationPlugin(moduleFederationOptions);
-            generateMergedStatsAndManifestOptions.distOutputDir =
+            generateMergedStatsAndManifestOptions.options.distOutputDir =
               bundlerConfig.output?.path || '';
             bundlerConfig.plugins!.push(
-              generateMergedStatsAndManifestOptions.browserPlugin,
+              generateMergedStatsAndManifestOptions.options.browserPlugin,
             );
           }
         }
@@ -316,7 +329,7 @@ export const pluginModuleFederation = (
 
     const generateMergedStatsAndManifest = () => {
       const { nodePlugin, browserPlugin, distOutputDir } =
-        generateMergedStatsAndManifestOptions;
+        generateMergedStatsAndManifestOptions.options;
       if (!nodePlugin || !browserPlugin || !distOutputDir) {
         return;
       }
