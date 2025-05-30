@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Router from 'next/router';
-console.log(Router);
+
 const RouterTestPage = () => {
   return (
     <div>
