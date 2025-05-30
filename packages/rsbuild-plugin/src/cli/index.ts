@@ -28,7 +28,12 @@ type RSBUILD_PLUGIN_OPTIONS = {
   ssr?: boolean;
 };
 
-export type { ModuleFederationOptions };
+type ExposedOptionsType = {
+  nodePlugin?: ModuleFederationPlugin;
+  browserPlugin?: ModuleFederationPlugin;
+  distOutputDir?: string;
+};
+export type { ModuleFederationOptions, ExposedOptionsType };
 
 const RSBUILD_PLUGIN_MODULE_FEDERATION_NAME =
   'rsbuild:module-federation-enhanced';
@@ -199,10 +204,14 @@ export const pluginModuleFederation = (
       return config;
     });
 
-    let nodePlugin: ModuleFederationPlugin | undefined;
-    let browserPlugin: ModuleFederationPlugin | undefined;
-    let distOutputDir: string | undefined;
-
+    const generateMergedStatsAndManifestOptions: ExposedOptionsType = {
+      nodePlugin: undefined,
+      browserPlugin: undefined,
+      distOutputDir: undefined,
+    };
+    api.expose(RSBUILD_PLUGIN_MODULE_FEDERATION_NAME, {
+      value: generateMergedStatsAndManifestOptions,
+    });
     api.onBeforeCreateCompiler(({ bundlerConfigs }) => {
       if (!bundlerConfigs) {
         throw new Error('Can not get bundlerConfigs!');
@@ -284,21 +293,30 @@ export const pluginModuleFederation = (
             !bundlerConfig.plugins!.find((p) => p && p.name === PLUGIN_NAME)
           ) {
             if (isSSRConfig) {
-              nodePlugin = new ModuleFederationPlugin(
-                createSSRMFConfig(moduleFederationOptions),
+              generateMergedStatsAndManifestOptions.nodePlugin =
+                new ModuleFederationPlugin(
+                  createSSRMFConfig(moduleFederationOptions),
+                );
+              bundlerConfig.plugins!.push(
+                generateMergedStatsAndManifestOptions.nodePlugin,
               );
-              bundlerConfig.plugins!.push(nodePlugin);
               return;
             }
-            browserPlugin = new ModuleFederationPlugin(moduleFederationOptions);
-            distOutputDir = bundlerConfig.output?.path || '';
-            bundlerConfig.plugins!.push(browserPlugin);
+            generateMergedStatsAndManifestOptions.browserPlugin =
+              new ModuleFederationPlugin(moduleFederationOptions);
+            generateMergedStatsAndManifestOptions.distOutputDir =
+              bundlerConfig.output?.path || '';
+            bundlerConfig.plugins!.push(
+              generateMergedStatsAndManifestOptions.browserPlugin,
+            );
           }
         }
       });
     });
 
     const generateMergedStatsAndManifest = () => {
+      const { nodePlugin, browserPlugin, distOutputDir } =
+        generateMergedStatsAndManifestOptions;
       if (!nodePlugin || !browserPlugin || !distOutputDir) {
         return;
       }
