@@ -5,9 +5,9 @@
   "license": "MIT",
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "start:entrypoint1": "nodemon --watch dist dist/entrypoint1.js",
-    "start:entrypoint2": "nodemon --watch dist dist/entrypoint2.js",
-    "demo": "concurrently \"npm:build\" \"nodemon --watch dist dist/index.js\""
+    "start:entrypoint1": "node dist/entrypoint1.js",
+    "start:entrypoint2": "node dist/entrypoint2.js",
+    "demo": "node dist/index.js"
   },
   "devDependencies": {
     "webpack": "^5.90.0",
