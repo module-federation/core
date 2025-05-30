@@ -75,7 +75,7 @@ export default function (): FederationRuntimePlugin {
       let gs = globalThis;
       try {
         // Catch webpack rewrites of globalThis.
-        if (gs === ___webpack_require__.g) {
+        if (gs === __webpack_require__.g) {
           gs = new Function('return globalThis')();
         }
       } catch (e) {
