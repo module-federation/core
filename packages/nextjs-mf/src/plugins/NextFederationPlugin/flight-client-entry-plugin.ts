@@ -1,20 +1,30 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
-import type { Compiler, Compilation, NormalModule, Dependency, EntryOptions , EntryPlugin} from 'webpack';
+import type {
+  Compiler,
+  Compilation,
+  NormalModule,
+  Dependency,
+  EntryOptions,
+  EntryPlugin,
+} from 'webpack';
 import type webpackType from 'webpack';
 const { webpack, sources } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
-import { parse, stringify } from 'querystring'
-import path from 'path'
+import { parse, stringify } from 'querystring';
+import path from 'path';
 import {
   getInvalidator,
   getEntries,
   EntryTypes,
   getEntryKey,
-} from 'next/dist/server/dev/on-demand-entry-handler'
-import { WEBPACK_LAYERS, WEBPACK_RESOURCE_QUERIES } from 'next/dist/lib/constants'
+} from 'next/dist/server/dev/on-demand-entry-handler';
+import {
+  WEBPACK_LAYERS,
+  WEBPACK_RESOURCE_QUERIES,
+} from 'next/dist/lib/constants';
 import {
   APP_CLIENT_INTERNALS,
   BARREL_OPTIMIZATION_PREFIX,
@@ -23,76 +33,75 @@ import {
   EDGE_RUNTIME_WEBPACK,
   SERVER_REFERENCE_MANIFEST,
   UNDERSCORE_NOT_FOUND_ROUTE_ENTRY,
-} from 'next/dist/shared/lib/constants'
+} from 'next/dist/shared/lib/constants';
 import {
   isClientComponentEntryModule,
   isCSSMod,
   regexCSS,
-} from 'next/dist/build/webpack/loaders/utils'
+} from 'next/dist/build/webpack/loaders/utils';
 import {
   traverseModules,
   forEachEntryModule,
   formatBarrelOptimizedResource,
   getModuleReferencesInOrder,
-} from 'next/dist/build/webpack/utils'
-import { normalizePathSep } from 'next/dist/shared/lib/page-path/normalize-path-sep'
-import { getProxiedPluginState } from 'next/dist/build/build-context'
-import { PAGE_TYPES } from 'next/dist/lib/page-types'
-import { getModuleBuildInfo } from 'next/dist/build/webpack/loaders/get-module-build-info'
-import { getAssumedSourceType } from 'next/dist/build/webpack/loaders/next-flight-loader'
-import { isAppRouteRoute } from 'next/dist/lib/is-app-route-route'
+} from 'next/dist/build/webpack/utils';
+import { normalizePathSep } from 'next/dist/shared/lib/page-path/normalize-path-sep';
+import { getProxiedPluginState } from 'next/dist/build/build-context';
+import { PAGE_TYPES } from 'next/dist/lib/page-types';
+import { getModuleBuildInfo } from 'next/dist/build/webpack/loaders/get-module-build-info';
+import { getAssumedSourceType } from 'next/dist/build/webpack/loaders/next-flight-loader';
+import { isAppRouteRoute } from 'next/dist/lib/is-app-route-route';
 import {
   DEFAULT_METADATA_ROUTE_EXTENSIONS,
   isMetadataRouteFile,
-} from 'next/dist/lib/metadata/is-metadata-route'
-import type { MetadataRouteLoaderOptions } from 'next/dist/build/webpack/loaders/next-metadata-route-loader'
-import type { FlightActionEntryLoaderActions } from 'next/dist/build/webpack/loaders/next-flight-action-entry-loader'
-import getWebpackBundler from 'next/dist/shared/lib/get-webpack-bundler'
+} from 'next/dist/lib/metadata/is-metadata-route';
+import type { MetadataRouteLoaderOptions } from 'next/dist/build/webpack/loaders/next-metadata-route-loader';
+import type { FlightActionEntryLoaderActions } from 'next/dist/build/webpack/loaders/next-flight-action-entry-loader';
+import getWebpackBundler from 'next/dist/shared/lib/get-webpack-bundler';
 
 // Define the types locally since the loader doesn't exist yet
 export type CssImports = {
-  [entryName: string]: string[]
-}
+  [entryName: string]: string[];
+};
 
 export type ClientComponentImports = {
-  [clientImportPath: string]: Set<string>
-}
-
+  [clientImportPath: string]: Set<string>;
+};
 
 interface Options {
-  dev: boolean
-  appDir: string
-  isEdgeServer: boolean
-  encryptionKey: string
-  originalPublicPath?: string
+  dev: boolean;
+  appDir: string;
+  isEdgeServer: boolean;
+  encryptionKey: string;
+  originalPublicPath?: string;
 }
 
-const PLUGIN_NAME = 'FlightClientEntryPlugin'
+const PLUGIN_NAME = 'FlightClientEntryPlugin';
 
 type Actions = {
   [actionId: string]: {
     workers: {
-      [name: string]: { moduleId: string | number; async: boolean }
-    }
+      [name: string]: { moduleId: string | number; async: boolean };
+    };
     // Record which layer the action is in (rsc or sc_action), in the specific entry.
     layer: {
-      [name: string]: string
-    }
-  }
-}
+      [name: string]: string;
+    };
+  };
+};
 
-type ActionIdNamePair = { id: string; exportedName: string }
+type ActionIdNamePair = { id: string; exportedName: string };
 
 export type ActionManifest = {
   // Assign a unique encryption key during production build.
-  encryptionKey: string
-  node: Actions
-  edge: Actions
-}
+  encryptionKey: string;
+  node: Actions;
+  edge: Actions;
+};
 
 export interface ModuleInfo {
-  moduleId: string | number
-  async: boolean
+  moduleId: string | number;
+  async: boolean;
 }
 
 const pluginState = getProxiedPluginState({
@@ -101,11 +110,11 @@ const pluginState = getProxiedPluginState({
   edgeServerActions: {} as ActionManifest['edge'],
 
   serverActionModules: {} as {
-    [workerName: string]: { server?: ModuleInfo; client?: ModuleInfo }
+    [workerName: string]: { server?: ModuleInfo; client?: ModuleInfo };
   },
 
   edgeServerActionModules: {} as {
-    [workerName: string]: { server?: ModuleInfo; client?: ModuleInfo }
+    [workerName: string]: { server?: ModuleInfo; client?: ModuleInfo };
   },
 
   ssrModules: {} as { [ssrModuleId: string]: ModuleInfo },
@@ -115,7 +124,7 @@ const pluginState = getProxiedPluginState({
   edgeRscModules: {} as { [rscModuleId: string]: ModuleInfo },
 
   injectedClientEntries: {} as Record<string, string>,
-})
+});
 
 function deduplicateCSSImportsForEntry(mergedCSSimports: CssImports) {
   // If multiple entry module connections are having the same CSS import,
@@ -134,136 +143,135 @@ function deduplicateCSSImportsForEntry(mergedCSSimports: CssImports) {
 
   // Sort the connections as described above.
   const sortedCSSImports = Object.entries(mergedCSSimports).sort((a, b) => {
-    const [aPath] = a
-    const [bPath] = b
+    const [aPath] = a;
+    const [bPath] = b;
 
-    const aDepth = aPath.split('/').length
-    const bDepth = bPath.split('/').length
+    const aDepth = aPath.split('/').length;
+    const bDepth = bPath.split('/').length;
 
     if (aDepth !== bDepth) {
-      return aDepth - bDepth
+      return aDepth - bDepth;
     }
 
-    const aName = path.parse(aPath).name
-    const bName = path.parse(bPath).name
+    const aName = path.parse(aPath).name;
+    const bName = path.parse(bPath).name;
 
-    const indexA = ['template', 'layout'].indexOf(aName)
-    const indexB = ['template', 'layout'].indexOf(bName)
+    const indexA = ['template', 'layout'].indexOf(aName);
+    const indexB = ['template', 'layout'].indexOf(bName);
 
-    if (indexA === -1) return 1
-    if (indexB === -1) return -1
-    return indexA - indexB
-  })
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
 
-  const dedupedCSSImports: CssImports = {}
-  const trackedCSSImports = new Set<string>()
+  const dedupedCSSImports: CssImports = {};
+  const trackedCSSImports = new Set<string>();
   for (const [entryName, cssImports] of sortedCSSImports) {
     for (const cssImport of cssImports) {
-      if (trackedCSSImports.has(cssImport)) continue
+      if (trackedCSSImports.has(cssImport)) continue;
 
       // Only track CSS imports that are in files that can inherit CSS.
-      const filename = path.parse(entryName).name
+      const filename = path.parse(entryName).name;
       if (['template', 'layout'].includes(filename)) {
-        trackedCSSImports.add(cssImport)
+        trackedCSSImports.add(cssImport);
       }
 
       if (!dedupedCSSImports[entryName]) {
-        dedupedCSSImports[entryName] = []
+        dedupedCSSImports[entryName] = [];
       }
-      dedupedCSSImports[entryName].push(cssImport)
+      dedupedCSSImports[entryName].push(cssImport);
     }
   }
 
-  return dedupedCSSImports
+  return dedupedCSSImports;
 }
 
 export class FlightClientEntryPlugin {
-  dev: boolean
-  appDir: string
-  encryptionKey: string
-  isEdgeServer: boolean
-  assetPrefix: string
-  webpackRuntime: string
-  originalPublicPath?: string
+  dev: boolean;
+  appDir: string;
+  encryptionKey: string;
+  isEdgeServer: boolean;
+  assetPrefix: string;
+  webpackRuntime: string;
+  originalPublicPath?: string;
 
   constructor(options: Options) {
-    this.dev = options.dev
-    this.appDir = options.appDir
-    this.isEdgeServer = options.isEdgeServer
-    this.assetPrefix = !this.dev && !this.isEdgeServer ? '../' : ''
-    this.encryptionKey = options.encryptionKey
+    this.dev = options.dev;
+    this.appDir = options.appDir;
+    this.isEdgeServer = options.isEdgeServer;
+    this.assetPrefix = !this.dev && !this.isEdgeServer ? '../' : '';
+    this.encryptionKey = options.encryptionKey;
     this.webpackRuntime = this.isEdgeServer
       ? EDGE_RUNTIME_WEBPACK
-      : DEFAULT_RUNTIME_WEBPACK
+      : DEFAULT_RUNTIME_WEBPACK;
   }
 
   apply(compiler: Compiler) {
     compiler.hooks.finishMake.tapPromise(PLUGIN_NAME, (compilation) =>
-      this.createClientEntries(compiler, compilation)
-    )
+      this.createClientEntries(compiler, compilation),
+    );
 
     compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation) => {
       compilation.hooks.addEntry.tap(PLUGIN_NAME, (entryDep, entryOptions) => {
-        if(entryDep.constructor.name === 'ProvideSharedDependency') return;
-        if(entryDep.constructor.name === 'ContainerEntryDependency') return;
-        if(entryDep.constructor.name === 'FederationRuntimeDependency') return;
-        if(entryOptions.name === 'app/page') {
+        if (entryDep.constructor.name === 'ProvideSharedDependency') return;
+        if (entryDep.constructor.name === 'ContainerEntryDependency') return;
+        if (entryDep.constructor.name === 'FederationRuntimeDependency') return;
+        if (entryOptions.name === 'app/page') {
           //@ts-ignore
-          const inslces = entryDep.includeDependencies
-          if(inslces) {
-
-            for(const dep of inslces) {
-              if(!dep.request.includes('zack')){
-               dep.request= dep.request.replace('!','&zack=true!')
-                dep.userRequest =dep.userRequest.replace('!','&zack=true!')
+          const inslces = entryDep.includeDependencies;
+          if (inslces) {
+            for (const dep of inslces) {
+              if (!dep.request.includes('zack')) {
+                dep.request = dep.request.replace('!', '&zack=true!');
+                dep.userRequest = dep.userRequest.replace('!', '&zack=true!');
               }
             }
           }
         }
-      })
-    })
+      });
+    });
 
     compiler.hooks.afterCompile.tap(PLUGIN_NAME, (compilation) => {
       const recordModule = (modId: string, mod: any) => {
         // Match Resource is undefined unless an import is using the inline match resource syntax
         // https://webpack.js.org/api/loaders/#inline-matchresource
-        const modPath = mod.matchResource || mod.resourceResolveData?.path
-        const modQuery = mod.resourceResolveData?.query || ''
+        const modPath = mod.matchResource || mod.resourceResolveData?.path;
+        const modQuery = mod.resourceResolveData?.query || '';
         // query is already part of mod.resource
         // so it's only necessary to add it for matchResource or mod.resourceResolveData
         let modResource = modPath
           ? modPath.startsWith(BARREL_OPTIMIZATION_PREFIX)
             ? formatBarrelOptimizedResource(mod.resource, modPath)
             : modPath + modQuery
-          : mod.resource
+          : mod.resource;
 
         // Handle consume-shared-module by using shareKey for predictable lookups
         if (mod.type === 'consume-shared-module') {
-          const shareKey = (mod as any).options?.shareKey || ''
-          modResource = shareKey
+          const shareKey = (mod as any).options?.shareKey || '';
+          modResource = shareKey;
         }
 
         if (typeof modId !== 'undefined' && modResource) {
           if (mod.layer === WEBPACK_LAYERS.reactServerComponents) {
             const key = path
               .relative(compiler.context, modResource)
-              .replace(/\/next\/dist\/esm\//, '/next/dist/')
+              .replace(/\/next\/dist\/esm\//, '/next/dist/');
 
             const moduleInfo: ModuleInfo = {
               moduleId: modId,
               async: compilation.moduleGraph.isAsync(mod),
-            }
+            };
 
             if (this.isEdgeServer) {
-              pluginState.edgeRscModules[key] = moduleInfo
+              pluginState.edgeRscModules[key] = moduleInfo;
             } else {
-              pluginState.rscModules[key] = moduleInfo
+              pluginState.rscModules[key] = moduleInfo;
             }
           }
         }
 
         if (mod.layer !== WEBPACK_LAYERS.serverSideRendering) {
-          return
+          return;
         }
 
         // Check mod resource to exclude the empty resource module like virtual module created by next-flight-client-entry-loader
@@ -271,93 +279,90 @@ export class FlightClientEntryPlugin {
           // Note that this isn't that reliable as webpack is still possible to assign
           // additional queries to make sure there's no conflict even using the `named`
           // module ID strategy.
-          let ssrNamedModuleId = path.relative(compiler.context, modResource)
+          let ssrNamedModuleId = path.relative(compiler.context, modResource);
 
           if (!ssrNamedModuleId.startsWith('.')) {
             // TODO use getModuleId instead
-            ssrNamedModuleId = `./${normalizePathSep(ssrNamedModuleId)}`
+            ssrNamedModuleId = `./${normalizePathSep(ssrNamedModuleId)}`;
           }
           if (mod.type === 'consume-shared-module') {
             // dont use ./ prefix on consume-shared
-            ssrNamedModuleId = modResource
+            ssrNamedModuleId = modResource;
           }
 
           const moduleInfo: ModuleInfo = {
             moduleId: modId,
             async: compilation.moduleGraph.isAsync(mod),
-          }
+          };
 
           if (this.isEdgeServer) {
             pluginState.edgeSsrModules[
               ssrNamedModuleId.replace(/\/next\/dist\/esm\//, '/next/dist/')
-              ] = moduleInfo
+            ] = moduleInfo;
           } else {
-            pluginState.ssrModules[ssrNamedModuleId] = moduleInfo
+            pluginState.ssrModules[ssrNamedModuleId] = moduleInfo;
           }
         }
-      }
+      };
 
       traverseModules(compilation, (mod, _chunk, _chunkGroup, modId) => {
-        if (modId) recordModule(modId, mod)
-      })
+        if (modId) recordModule(modId, mod);
+      });
 
       const state = pluginState;
-    })
+    });
 
     compiler.hooks.make.tap(PLUGIN_NAME, (compilation) => {
       compilation.hooks.processAssets.tapPromise(
         {
           name: PLUGIN_NAME,
-          stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
+          stage:
+            compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
         },
-        () => this.createActionAssets(compilation)
-      )
-    })
+        () => this.createActionAssets(compilation),
+      );
+    });
   }
 
-  async createClientEntries(
-    compiler: Compiler,
-    compilation: Compilation
-  ) {
+  async createClientEntries(compiler: Compiler, compilation: Compilation) {
     const addClientEntryAndSSRModulesList: Array<
       ReturnType<typeof this.injectClientEntryAndSSRModules>
-    > = []
+    > = [];
     const createdSSRDependenciesForEntry: Record<
       string,
       ReturnType<typeof this.injectClientEntryAndSSRModules>[3][]
-    > = {}
+    > = {};
 
     const addActionEntryList: Array<ReturnType<typeof this.injectActionEntry>> =
-      []
+      [];
     const actionMapsPerEntry: Record<
       string,
       Map<string, ActionIdNamePair[]>
-    > = {}
-    const createdActionIds = new Set<string>()
+    > = {};
+    const createdActionIds = new Set<string>();
 
     // For each SC server compilation entry, we need to create its corresponding
     // client component entry.
     forEachEntryModule(compilation, ({ name, entryModule }) => {
-      const internalClientComponentEntryImports: ClientComponentImports = {}
-      const actionEntryImports = new Map<string, ActionIdNamePair[]>()
-      const clientEntriesToInject = []
-      const mergedCSSimports: CssImports = {}
+      const internalClientComponentEntryImports: ClientComponentImports = {};
+      const actionEntryImports = new Map<string, ActionIdNamePair[]>();
+      const clientEntriesToInject = [];
+      const mergedCSSimports: CssImports = {};
 
       for (const connection of getModuleReferencesInOrder(
         entryModule,
-        compilation.moduleGraph
+        compilation.moduleGraph,
       )) {
         // Entry can be any user defined entry files such as layout, page, error, loading, etc.
-        let entryRequest = (
-          connection.dependency as unknown as NormalModule
-        ).request
+        let entryRequest = (connection.dependency as unknown as NormalModule)
+          .request;
 
         if (entryRequest.endsWith(WEBPACK_RESOURCE_QUERIES.metadataRoute)) {
           const { filePath, isDynamicRouteExtension } =
-            getMetadataRouteResource(entryRequest)
+            getMetadataRouteResource(entryRequest);
 
           if (isDynamicRouteExtension === '1') {
-            entryRequest = filePath
+            entryRequest = filePath;
           }
         }
 
@@ -366,20 +371,20 @@ export class FlightClientEntryPlugin {
             entryRequest,
             compilation,
             resolvedModule: connection.resolvedModule,
-          })
+          });
 
         actionImports.forEach(([dep, actions]) =>
-          actionEntryImports.set(dep, actions)
-        )
+          actionEntryImports.set(dep, actions),
+        );
 
-        const isAbsoluteRequest = path.isAbsolute(entryRequest)
+        const isAbsoluteRequest = path.isAbsolute(entryRequest);
 
         // Next.js internals are put into a separate entry.
         if (!isAbsoluteRequest) {
           Object.keys(clientComponentImports).forEach(
-            (value) => (internalClientComponentEntryImports[value] = new Set())
-          )
-          continue
+            (value) => (internalClientComponentEntryImports[value] = new Set()),
+          );
+          continue;
         }
 
         // TODO-APP: Enable these lines. This ensures no entrypoint is created for layout/page when there are no client components.
@@ -390,14 +395,14 @@ export class FlightClientEntryPlugin {
 
         const relativeRequest = isAbsoluteRequest
           ? path.relative(compilation.options.context!, entryRequest)
-          : entryRequest
+          : entryRequest;
 
         // Replace file suffix as `.js` will be added.
         // bundlePath will have app/ prefix but not src/.
         // e.g. src/app/foo/page.js -> app/foo/page
         let bundlePath = normalizePathSep(
-          relativeRequest.replace(/\.[^.\\/]+$/, '').replace(/^src[\\/]/, '')
-        )
+          relativeRequest.replace(/\.[^.\\/]+$/, '').replace(/^src[\\/]/, ''),
+        );
 
         // For metadata routes, the entry name can be used as the bundle path,
         // as it has been normalized already.
@@ -407,17 +412,17 @@ export class FlightClientEntryPlugin {
         // then `isMetadataEntryFile` will be `true`
         const appDirRelativeRequest = relativeRequest
           .replace(/^src[\\/]/, '')
-          .replace(/^app[\\/]/, '/')
+          .replace(/^app[\\/]/, '/');
         const isMetadataEntryFile = isMetadataRouteFile(
           appDirRelativeRequest,
           DEFAULT_METADATA_ROUTE_EXTENSIONS,
-          true
-        )
+          true,
+        );
         if (isMetadataEntryFile) {
-          bundlePath = name
+          bundlePath = name;
         }
 
-        Object.assign(mergedCSSimports, cssImports)
+        Object.assign(mergedCSSimports, cssImports);
         clientEntriesToInject.push({
           compiler,
           compilation,
@@ -425,7 +430,7 @@ export class FlightClientEntryPlugin {
           clientComponentImports,
           bundlePath,
           absolutePagePath: entryRequest,
-        })
+        });
 
         // The webpack implementation of writing the client reference manifest relies on all entrypoints writing a page.js even when there is no client components in the page.
         // It needs the file in order to write the reference manifest for the path in the `.next/server` folder.
@@ -441,7 +446,7 @@ export class FlightClientEntryPlugin {
             clientComponentImports: {},
             bundlePath: `app${UNDERSCORE_NOT_FOUND_ROUTE_ENTRY}`,
             absolutePagePath: entryRequest,
-          })
+          });
         }
 
         if (
@@ -455,13 +460,13 @@ export class FlightClientEntryPlugin {
             clientComponentImports,
             bundlePath: `app${UNDERSCORE_NOT_FOUND_ROUTE_ENTRY}`,
             absolutePagePath: entryRequest,
-          })
+          });
         }
       }
 
       // Make sure CSS imports are deduplicated before injecting the client entry
       // and SSR modules.
-      const dedupedCSSImports = deduplicateCSSImportsForEntry(mergedCSSimports)
+      const dedupedCSSImports = deduplicateCSSImportsForEntry(mergedCSSimports);
       for (const clientEntryToInject of clientEntriesToInject) {
         const injected = this.injectClientEntryAndSSRModules({
           ...clientEntryToInject,
@@ -470,21 +475,21 @@ export class FlightClientEntryPlugin {
             ...(
               dedupedCSSImports[clientEntryToInject.absolutePagePath] || []
             ).reduce<ClientComponentImports>((res, curr) => {
-              res[curr] = new Set()
-              return res
+              res[curr] = new Set();
+              return res;
             }, {}),
           },
-        })
+        });
 
         // Track all created SSR dependencies for each entry from the server layer.
         if (!createdSSRDependenciesForEntry[clientEntryToInject.entryName]) {
-          createdSSRDependenciesForEntry[clientEntryToInject.entryName] = []
+          createdSSRDependenciesForEntry[clientEntryToInject.entryName] = [];
         }
         createdSSRDependenciesForEntry[clientEntryToInject.entryName].push(
-          injected[3]
-        )
+          injected[3],
+        );
 
-        addClientEntryAndSSRModulesList.push(injected)
+        addClientEntryAndSSRModulesList.push(injected);
       }
 
       if (!isAppRouteRoute(name)) {
@@ -496,23 +501,23 @@ export class FlightClientEntryPlugin {
             entryName: name,
             clientImports: { ...internalClientComponentEntryImports },
             bundlePath: APP_CLIENT_INTERNALS,
-          })
-        )
+          }),
+        );
       }
 
       if (actionEntryImports.size > 0) {
         if (!actionMapsPerEntry[name]) {
-          actionMapsPerEntry[name] = new Map()
+          actionMapsPerEntry[name] = new Map();
         }
         actionMapsPerEntry[name] = new Map([
           ...actionMapsPerEntry[name],
           ...actionEntryImports,
-        ])
+        ]);
       }
-    })
+    });
 
     for (const [name, actionEntryImports] of Object.entries(
-      actionMapsPerEntry
+      actionMapsPerEntry,
     )) {
       addActionEntryList.push(
         this.injectActionEntry({
@@ -522,20 +527,20 @@ export class FlightClientEntryPlugin {
           entryName: name,
           bundlePath: name,
           createdActionIds,
-        })
-      )
+        }),
+      );
     }
 
     // Invalidate in development to trigger recompilation
-    const invalidator = getInvalidator(compiler.outputPath)
+    const invalidator = getInvalidator(compiler.outputPath);
     // Check if any of the entry injections need an invalidation
     if (
       invalidator &&
       addClientEntryAndSSRModulesList.some(
-        ([shouldInvalidate]) => shouldInvalidate === true
+        ([shouldInvalidate]) => shouldInvalidate === true,
       )
     ) {
-      invalidator.invalidate([COMPILER_NAMES.client])
+      invalidator.invalidate([COMPILER_NAMES.client]);
     }
 
     // Client compiler is invalidated before awaiting the compilation of the SSR
@@ -545,61 +550,61 @@ export class FlightClientEntryPlugin {
       addClientEntryAndSSRModulesList.flatMap((addClientEntryAndSSRModules) => [
         addClientEntryAndSSRModules[1],
         addClientEntryAndSSRModules[2],
-      ])
-    )
+      ]),
+    );
 
     // Wait for action entries to be added.
-    await Promise.all(addActionEntryList)
+    await Promise.all(addActionEntryList);
 
-    const addedClientActionEntryList: Promise<any>[] = []
+    const addedClientActionEntryList: Promise<any>[] = [];
     const actionMapsPerClientEntry: Record<
       string,
       Map<string, ActionIdNamePair[]>
-    > = {}
+    > = {};
 
     // We need to create extra action entries that are created from the
     // client layer.
     // Start from each entry's created SSR dependency from our previous step.
     for (const [name, ssrEntryDependencies] of Object.entries(
-      createdSSRDependenciesForEntry
+      createdSSRDependenciesForEntry,
     )) {
       // Collect from all entries, e.g. layout.js, page.js, loading.js, ...
       // add aggregate them.
       const actionEntryImports = this.collectClientActionsFromDependencies({
         compilation,
         dependencies: ssrEntryDependencies,
-      })
+      });
 
       if (actionEntryImports.size > 0) {
         if (!actionMapsPerClientEntry[name]) {
-          actionMapsPerClientEntry[name] = new Map()
+          actionMapsPerClientEntry[name] = new Map();
         }
         actionMapsPerClientEntry[name] = new Map([
           ...actionMapsPerClientEntry[name],
           ...actionEntryImports,
-        ])
+        ]);
       }
     }
 
     for (const [entryName, actionEntryImports] of Object.entries(
-      actionMapsPerClientEntry
+      actionMapsPerClientEntry,
     )) {
       // If an action method is already created in the server layer, we don't
       // need to create it again in the action layer.
       // This is to avoid duplicate action instances and make sure the module
       // state is shared.
-      let remainingClientImportedActions = false
-      const remainingActionEntryImports = new Map<string, ActionIdNamePair[]>()
+      let remainingClientImportedActions = false;
+      const remainingActionEntryImports = new Map<string, ActionIdNamePair[]>();
       for (const [dep, actions] of actionEntryImports) {
-        const remainingActionNames = []
+        const remainingActionNames = [];
         for (const action of actions) {
           if (!createdActionIds.has(entryName + '@' + action.id)) {
-            remainingActionNames.push(action)
+            remainingActionNames.push(action);
           }
         }
         if (remainingActionNames.length > 0) {
-          remainingActionEntryImports.set(dep, remainingActionNames)
-          remainingClientImportedActions = true
+          remainingActionEntryImports.set(dep, remainingActionNames);
+          remainingClientImportedActions = true;
         }
       }
 
@@ -613,65 +618,63 @@ export class FlightClientEntryPlugin {
             bundlePath: entryName,
             fromClient: true,
             createdActionIds,
-          })
-        )
+          }),
+        );
       }
     }
 
-    await Promise.all(addedClientActionEntryList)
+    await Promise.all(addedClientActionEntryList);
   }
 
   collectClientActionsFromDependencies({
-                                         compilation,
-                                         dependencies,
-                                       }: {
-    compilation: Compilation
-    dependencies: ReturnType<typeof EntryPlugin.createDependency>[]
+    compilation,
+    dependencies,
+  }: {
+    compilation: Compilation;
+    dependencies: ReturnType<typeof EntryPlugin.createDependency>[];
   }) {
     // action file path -> action names
-    const collectedActions = new Map<string, ActionIdNamePair[]>()
+    const collectedActions = new Map<string, ActionIdNamePair[]>();
 
     // Keep track of checked modules to avoid infinite loops with recursive imports.
-    const visitedModule = new Set<string>()
-    const visitedEntry = new Set<string>()
+    const visitedModule = new Set<string>();
+    const visitedEntry = new Set<string>();
 
     const collectActions = ({
-                              entryRequest,
-                              resolvedModule,
-                            }: {
-      entryRequest: string
-      resolvedModule: any
+      entryRequest,
+      resolvedModule,
+    }: {
+      entryRequest: string;
+      resolvedModule: any;
     }) => {
       const collectActionsInDep = (mod: NormalModule): void => {
-        if (!mod) return
+        if (!mod) return;
 
-        const modResource = getModuleResource(mod)
+        const modResource = getModuleResource(mod);
 
-        if (!modResource) return
+        if (!modResource) return;
 
-        if (visitedModule.has(modResource)) return
-        visitedModule.add(modResource)
+        if (visitedModule.has(modResource)) return;
+        visitedModule.add(modResource);
 
-        const actionIds = getModuleBuildInfo(mod).rsc?.actionIds
+        const actionIds = getModuleBuildInfo(mod).rsc?.actionIds;
         if (actionIds) {
           collectedActions.set(
             modResource,
             Object.entries(actionIds).map(([id, exportedName]) => ({
               id,
               exportedName,
-            }))
-          )
+            })),
+          );
         }
 
         // Collect used exported actions transversely.
         getModuleReferencesInOrder(mod, compilation.moduleGraph).forEach(
           (connection: any) => {
-            collectActionsInDep(
-              connection.resolvedModule as NormalModule
-            )
-          }
-        )
-      }
+            collectActionsInDep(connection.resolvedModule as NormalModule);
+          },
+        );
+      };
 
       // Don't traverse the module graph anymore once hitting the action layer.
       if (
@@ -679,65 +682,65 @@ export class FlightClientEntryPlugin {
         !entryRequest.includes('next-flight-action-entry-loader')
       ) {
         // Traverse the module graph to find all client components.
-        collectActionsInDep(resolvedModule)
+        collectActionsInDep(resolvedModule);
       }
-    }
+    };
 
     for (const entryDependency of dependencies) {
       const ssrEntryModule =
-        compilation.moduleGraph.getResolvedModule(entryDependency)!
+        compilation.moduleGraph.getResolvedModule(entryDependency)!;
       for (const connection of getModuleReferencesInOrder(
         ssrEntryModule,
-        compilation.moduleGraph
+        compilation.moduleGraph,
       )) {
-        const depModule = connection.dependency
-        const request = (depModule as unknown as NormalModule).request
+        const depModule = connection.dependency;
+        const request = (depModule as unknown as NormalModule).request;
 
         // It is possible that the same entry is added multiple times in the
         // connection graph. We can just skip these to speed up the process.
-        if (visitedEntry.has(request)) continue
-        visitedEntry.add(request)
+        if (visitedEntry.has(request)) continue;
+        visitedEntry.add(request);
 
         collectActions({
           entryRequest: request,
           resolvedModule: connection.resolvedModule,
-        })
+        });
       }
     }
 
-    return collectedActions
+    return collectedActions;
   }
 
   collectComponentInfoFromServerEntryDependency({
-                                                  entryRequest,
-                                                  compilation,
-                                                  resolvedModule,
-                                                }: {
-    entryRequest: string
-    compilation: Compilation
-    resolvedModule: any /* Dependency */
+    entryRequest,
+    compilation,
+    resolvedModule,
+  }: {
+    entryRequest: string;
+    compilation: Compilation;
+    resolvedModule: any /* Dependency */;
   }): {
-    cssImports: CssImports
-    clientComponentImports: ClientComponentImports
-    actionImports: [string, ActionIdNamePair[]][]
+    cssImports: CssImports;
+    clientComponentImports: ClientComponentImports;
+    actionImports: [string, ActionIdNamePair[]][];
   } {
     // Keep track of checked modules to avoid infinite loops with recursive imports.
-    const visitedOfClientComponentsTraverse = new Set()
+    const visitedOfClientComponentsTraverse = new Set();
 
     // Info to collect.
-    const clientComponentImports: ClientComponentImports = {}
-    const actionImports: [string, ActionIdNamePair[]][] = []
-    const CSSImports = new Set<string>()
+    const clientComponentImports: ClientComponentImports = {};
+    const actionImports: [string, ActionIdNamePair[]][] = [];
+    const CSSImports = new Set<string>();
 
     const filterClientComponents = (
       mod: NormalModule,
-      importedIdentifiers: string[]
+      importedIdentifiers: string[],
     ): void => {
-      if (!mod) return
+      if (!mod) return;
 
-      const modResource = getModuleResource(mod)
+      const modResource = getModuleResource(mod);
 
-      if (!modResource) return
+      if (!modResource) return;
       if (visitedOfClientComponentsTraverse.has(modResource)) {
         if (clientComponentImports[modResource]) {
           addClientImport(
@@ -745,14 +748,14 @@ export class FlightClientEntryPlugin {
             modResource,
             clientComponentImports,
             importedIdentifiers,
-            false
-          )
+            false,
+          );
         }
-        return
+        return;
       }
-      visitedOfClientComponentsTraverse.add(modResource)
+      visitedOfClientComponentsTraverse.add(modResource);
 
-      const actionIds = getModuleBuildInfo(mod).rsc?.actionIds
+      const actionIds = getModuleBuildInfo(mod).rsc?.actionIds;
       if (actionIds) {
         actionImports.push([
           modResource,
@@ -760,153 +763,157 @@ export class FlightClientEntryPlugin {
             id,
             exportedName,
           })),
-        ])
+        ]);
       }
 
       if (isCSSMod(mod)) {
         const sideEffectFree =
-          mod.factoryMeta && (mod.factoryMeta as any).sideEffectFree
+          mod.factoryMeta && (mod.factoryMeta as any).sideEffectFree;
 
         if (sideEffectFree) {
           const unused = !compilation.moduleGraph
             .getExportsInfo(mod)
-            .isModuleUsed(this.webpackRuntime)
+            .isModuleUsed(this.webpackRuntime);
 
-          if (unused) return
+          if (unused) return;
         }
 
-        CSSImports.add(modResource)
+        CSSImports.add(modResource);
       } else if (isClientComponentEntryModule(mod)) {
         if (!clientComponentImports[modResource]) {
-          clientComponentImports[modResource] = new Set()
+          clientComponentImports[modResource] = new Set();
         }
         addClientImport(
           mod,
           modResource,
           clientComponentImports,
           importedIdentifiers,
-          true
-        )
+          true,
+        );
 
-        return
+        return;
       } else if (mod.type === 'consume-shared-module') {
         // Handle consume-shared-module by getting the actual module and checking if it's a client component
-        const actualModule = compilation.moduleGraph.getModule(mod.blocks[0].dependencies[0]) as NormalModule
+        const actualModule = compilation.moduleGraph.getModule(
+          mod.blocks[0].dependencies[0],
+        ) as NormalModule;
 
         if (actualModule && isClientComponentEntryModule(actualModule)) {
-          if (modResource && !visitedOfClientComponentsTraverse.has(modResource)) {
-            visitedOfClientComponentsTraverse.add(modResource)
+          if (
+            modResource &&
+            !visitedOfClientComponentsTraverse.has(modResource)
+          ) {
+            visitedOfClientComponentsTraverse.add(modResource);
 
             if (!clientComponentImports[modResource]) {
-              clientComponentImports[modResource] = new Set()
+              clientComponentImports[modResource] = new Set();
             }
             addClientImport(
               actualModule,
               modResource,
               clientComponentImports,
               importedIdentifiers,
-              true
-            )
-            return
+              true,
+            );
+            return;
           }
         }
       }
 
       getModuleReferencesInOrder(mod, compilation.moduleGraph).forEach(
         (connection: any) => {
-          let dependencyIds: string[] = []
+          let dependencyIds: string[] = [];
 
           // `ids` are the identifiers that are imported from the dependency,
           // if it's present, it's an array of strings.
           if (connection.dependency?.ids) {
-            dependencyIds.push(...connection.dependency.ids)
+            dependencyIds.push(...connection.dependency.ids);
           } else {
-            dependencyIds = ['*']
+            dependencyIds = ['*'];
           }
 
-          filterClientComponents(connection.resolvedModule, dependencyIds)
-        }
-      )
-    }
+          filterClientComponents(connection.resolvedModule, dependencyIds);
+        },
+      );
+    };
 
     // Traverse the module graph to find all client components.
-    filterClientComponents(resolvedModule, [])
+    filterClientComponents(resolvedModule, []);
 
     return {
       clientComponentImports,
       cssImports: CSSImports.size
         ? {
-          [entryRequest]: Array.from(CSSImports),
-        }
+            [entryRequest]: Array.from(CSSImports),
+          }
         : {},
       actionImports,
-    }
+    };
   }
 
   injectClientEntryAndSSRModules({
-                                   compiler,
-                                   compilation,
-                                   entryName,
-                                   clientImports,
-                                   bundlePath,
-                                   absolutePagePath,
-                                 }: {
-    compiler: Compiler
-    compilation: Compilation
-    entryName: string
-    clientImports: ClientComponentImports
-    bundlePath: string
-    absolutePagePath?: string
+    compiler,
+    compilation,
+    entryName,
+    clientImports,
+    bundlePath,
+    absolutePagePath,
+  }: {
+    compiler: Compiler;
+    compilation: Compilation;
+    entryName: string;
+    clientImports: ClientComponentImports;
+    bundlePath: string;
+    absolutePagePath?: string;
   }): [
     shouldInvalidate: boolean,
     addSSREntryPromise: Promise<void>,
     addRSCEntryPromise: Promise<void>,
     ssrDep: ReturnType<typeof EntryPlugin.createDependency>,
   ] {
-    const bundler = getWebpackBundler()
-    let shouldInvalidate = false
+    const bundler = getWebpackBundler();
+    let shouldInvalidate = false;
 
     const modules = Object.keys(clientImports)
       .sort((a, b) => (regexCSS.test(b) ? 1 : a.localeCompare(b)))
       .map((clientImportPath) => ({
         request: clientImportPath,
         ids: [...clientImports[clientImportPath]],
-      }))
+      }));
 
     // For the client entry, we always use the CJS build of Next.js. If the
     // server is using the ESM build (when using the Edge runtime), we need to
     // replace them.
     const clientBrowserLoader = `next-flight-client-entry-loader?${stringify({
       modules: (this.isEdgeServer
-          ? modules.map(({ request, ids }) => ({
+        ? modules.map(({ request, ids }) => ({
             request: request.replace(
               /[\\/]next[\\/]dist[\\/]esm[\\/]/,
-              '/next/dist/'.replace(/\//g, path.sep)
+              '/next/dist/'.replace(/\//g, path.sep),
             ),
             ids,
           }))
-          : modules
+        : modules
       ).map((x) => JSON.stringify(x)),
       server: false,
-      zackWasHere: true
-    })}!`
-
+      zackWasHere: true,
+    })}!`;
 
     const clientServerLoader = `next-flight-client-entry-loader?${stringify({
       modules: modules.map((x) => JSON.stringify(x)),
       server: true,
-      zackWasHere: true
-    })}!`
+      zackWasHere: true,
+    })}!`;
 
     // Add for the client compilation
     // Inject the entry to the client compiler.
     if (this.dev) {
-      const entries = getEntries(compiler.outputPath)
+      const entries = getEntries(compiler.outputPath);
       const pageKey = getEntryKey(
         COMPILER_NAMES.client,
         PAGE_TYPES.APP,
-        bundlePath
-      )
+        bundlePath,
+      );
 
       if (!entries[pageKey]) {
         entries[pageKey] = {
@@ -917,35 +924,34 @@ export class FlightClientEntryPlugin {
           request: clientBrowserLoader,
           dispose: false,
           lastActiveTime: Date.now(),
-        }
-        shouldInvalidate = true
+        };
+        shouldInvalidate = true;
       } else {
-        const entryData = entries[pageKey]
+        const entryData = entries[pageKey];
         // New version of the client loader
         if (entryData.request !== clientBrowserLoader) {
-          entryData.request = clientBrowserLoader
-          shouldInvalidate = true
+          entryData.request = clientBrowserLoader;
+          shouldInvalidate = true;
         }
         if (entryData.type === EntryTypes.CHILD_ENTRY) {
-          entryData.parentEntries.add(entryName)
+          entryData.parentEntries.add(entryName);
         }
-        entryData.dispose = false
-        entryData.lastActiveTime = Date.now()
+        entryData.dispose = false;
+        entryData.lastActiveTime = Date.now();
       }
     } else {
-      pluginState.injectedClientEntries[bundlePath] = clientBrowserLoader
+      pluginState.injectedClientEntries[bundlePath] = clientBrowserLoader;
     }
 
-    const clientComponentSSREntryDep = compiler.webpack.EntryPlugin.createDependency(
-      clientServerLoader,
-      { name: bundlePath }
-    )
+    const clientComponentSSREntryDep =
+      compiler.webpack.EntryPlugin.createDependency(clientServerLoader, {
+        name: bundlePath,
+      });
 
-    const clientComponentRSCEntryDep = compiler.webpack.EntryPlugin.createDependency(
-      clientServerLoader,
-      { name: bundlePath }
-    )
-
+    const clientComponentRSCEntryDep =
+      compiler.webpack.EntryPlugin.createDependency(clientServerLoader, {
+        name: bundlePath,
+      });
 
     return [
       shouldInvalidate,
@@ -961,48 +967,48 @@ export class FlightClientEntryPlugin {
         layer: WEBPACK_LAYERS.reactServerComponents,
       }),
       clientComponentSSREntryDep,
-    ]
+    ];
   }
 
   injectActionEntry({
-                      compiler,
-                      compilation,
-                      actions,
-                      entryName,
-                      bundlePath,
-                      fromClient,
-                      createdActionIds,
-                    }: {
-    compiler: Compiler
-    compilation: Compilation
-    actions: Map<string, ActionIdNamePair[]>
-    entryName: string
-    bundlePath: string
-    createdActionIds: Set<string>
-    fromClient?: boolean
+    compiler,
+    compilation,
+    actions,
+    entryName,
+    bundlePath,
+    fromClient,
+    createdActionIds,
+  }: {
+    compiler: Compiler;
+    compilation: Compilation;
+    actions: Map<string, ActionIdNamePair[]>;
+    entryName: string;
+    bundlePath: string;
+    createdActionIds: Set<string>;
+    fromClient?: boolean;
   }) {
-    const bundler = getWebpackBundler()
-    const actionsArray = Array.from(actions.entries())
+    const bundler = getWebpackBundler();
+    const actionsArray = Array.from(actions.entries());
     for (const [, actionsFromModule] of actions) {
       for (const { id } of actionsFromModule) {
-        createdActionIds.add(entryName + '@' + id)
+        createdActionIds.add(entryName + '@' + id);
       }
     }
 
     if (actionsArray.length === 0) {
-      return Promise.resolve()
+      return Promise.resolve();
     }
 
     const actionLoader = `next-flight-action-entry-loader?${stringify({
       actions: JSON.stringify(
-        actionsArray satisfies FlightActionEntryLoaderActions
+        actionsArray satisfies FlightActionEntryLoaderActions,
       ),
       __client_imported__: fromClient,
-    })}!`
+    })}!`;
 
     const currentCompilerServerActions = this.isEdgeServer
       ? pluginState.edgeServerActions
-      : pluginState.serverActions
+      : pluginState.serverActions;
 
     for (const [, actionsFromModule] of actionsArray) {
       for (const { id } of actionsFromModule) {
@@ -1010,23 +1016,26 @@ export class FlightClientEntryPlugin {
           currentCompilerServerActions[id] = {
             workers: {},
             layer: {},
-          }
+          };
         }
         currentCompilerServerActions[id].workers[bundlePath] = {
           moduleId: '', // TODO: What's the meaning of this?
           async: false,
-        }
+        };
 
         currentCompilerServerActions[id].layer[bundlePath] = fromClient
           ? WEBPACK_LAYERS.actionBrowser
-          : WEBPACK_LAYERS.reactServerComponents
+          : WEBPACK_LAYERS.reactServerComponents;
       }
     }
 
     // Inject the entry to the server compiler
-    const actionEntryDep = compiler.webpack.EntryPlugin.createDependency(actionLoader, {
-      name: bundlePath,
-    })
+    const actionEntryDep = compiler.webpack.EntryPlugin.createDependency(
+      actionLoader,
+      {
+        name: bundlePath,
+      },
+    );
 
     return this.addEntry(
       compilation,
@@ -1038,34 +1047,36 @@ export class FlightClientEntryPlugin {
         layer: fromClient
           ? WEBPACK_LAYERS.actionBrowser
           : WEBPACK_LAYERS.reactServerComponents,
-      }
-    )
+      },
+    );
   }
 
   addEntry(
     compilation: Compilation,
     context: string,
     dependency: Dependency,
-    options: EntryOptions
+    options: EntryOptions,
   ): Promise<any> /* Promise<module> */ {
     return new Promise((resolve, reject) => {
       if ('rspack' in compilation.compiler) {
         compilation.addInclude(context, dependency, options, (err, module) => {
           if (err) {
-            return reject(err)
+            return reject(err);
           }
 
           compilation.moduleGraph
             .getExportsInfo(module!)
             .setUsedInUnknownWay(
-              this.isEdgeServer ? EDGE_RUNTIME_WEBPACK : DEFAULT_RUNTIME_WEBPACK
-            )
-          return resolve(module)
-        })
+              this.isEdgeServer
+                ? EDGE_RUNTIME_WEBPACK
+                : DEFAULT_RUNTIME_WEBPACK,
+            );
+          return resolve(module);
+        });
       } else {
-        const entry = compilation.entries.get(options.name!)!
-        entry.includeDependencies.push(dependency)
-        compilation.hooks.addEntry.call(entry as any, options)
+        const entry = compilation.entries.get(options.name!)!;
+        entry.includeDependencies.push(dependency);
+        compilation.hooks.addEntry.call(entry as any, options);
         // debugger;
         compilation.addModuleTree(
           {
@@ -1075,30 +1086,30 @@ export class FlightClientEntryPlugin {
           },
           (err: any, module: any) => {
             if (err) {
-              compilation.hooks.failedEntry.call(dependency, options, err)
-              return reject(err)
+              compilation.hooks.failedEntry.call(dependency, options, err);
+              return reject(err);
             }
 
-            compilation.hooks.succeedEntry.call(dependency, options, module)
+            compilation.hooks.succeedEntry.call(dependency, options, module);
 
             compilation.moduleGraph
               .getExportsInfo(module)
               .setUsedInUnknownWay(
                 this.isEdgeServer
                   ? EDGE_RUNTIME_WEBPACK
-                  : DEFAULT_RUNTIME_WEBPACK
-              )
+                  : DEFAULT_RUNTIME_WEBPACK,
+              );
 
-            return resolve(module)
-          }
-        )
+            return resolve(module);
+          },
+        );
       }
-    })
+    });
   }
 
   async createActionAssets(compilation: Compilation) {
-    const serverActions: ActionManifest['node'] = {}
-    const edgeServerActions: ActionManifest['edge'] = {}
+    const serverActions: ActionManifest['node'] = {};
+    const edgeServerActions: ActionManifest['edge'] = {};
 
     traverseModules(compilation, (mod, _chunk, chunkGroup, modId) => {
       // Go through all action entries and record the module ID for each entry.
@@ -1108,77 +1119,77 @@ export class FlightClientEntryPlugin {
         modId &&
         /next-flight-action-entry-loader/.test(mod.request)
       ) {
-        const fromClient = /&__client_imported__=true/.test(mod.request)
+        const fromClient = /&__client_imported__=true/.test(mod.request);
 
         const mapping = this.isEdgeServer
           ? pluginState.edgeServerActionModules
-          : pluginState.serverActionModules
+          : pluginState.serverActionModules;
 
         if (!mapping[chunkGroup.name]) {
-          mapping[chunkGroup.name] = {}
+          mapping[chunkGroup.name] = {};
         }
         mapping[chunkGroup.name][fromClient ? 'client' : 'server'] = {
           moduleId: modId,
           async: compilation.moduleGraph.isAsync(mod),
-        }
+        };
       }
-    })
+    });
 
     for (const id in pluginState.serverActions) {
-      const action = pluginState.serverActions[id]
+      const action = pluginState.serverActions[id];
       for (const name in action.workers) {
         const modId =
           pluginState.serverActionModules[name][
             action.layer[name] === WEBPACK_LAYERS.actionBrowser
               ? 'client'
               : 'server'
-            ]
-        action.workers[name] = modId!
+          ];
+        action.workers[name] = modId!;
       }
-      serverActions[id] = action
+      serverActions[id] = action;
     }
 
     for (const id in pluginState.edgeServerActions) {
-      const action = pluginState.edgeServerActions[id]
+      const action = pluginState.edgeServerActions[id];
       for (const name in action.workers) {
         const modId =
           pluginState.edgeServerActionModules[name][
             action.layer[name] === WEBPACK_LAYERS.actionBrowser
               ? 'client'
               : 'server'
-            ]
-        action.workers[name] = modId!
+          ];
+        action.workers[name] = modId!;
       }
-      edgeServerActions[id] = action
+      edgeServerActions[id] = action;
     }
 
     const serverManifest = {
       node: serverActions,
       edge: edgeServerActions,
       encryptionKey: this.encryptionKey,
-    }
+    };
     const edgeServerManifest = {
       ...serverManifest,
       encryptionKey: 'process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY',
-    }
+    };
 
-    const json = JSON.stringify(serverManifest, null, this.dev ? 2 : undefined)
+    const json = JSON.stringify(serverManifest, null, this.dev ? 2 : undefined);
     const edgeJson = JSON.stringify(
       edgeServerManifest,
       null,
-      this.dev ? 2 : undefined
-    )
+      this.dev ? 2 : undefined,
+    );
 
     compilation.emitAsset(
       `${this.assetPrefix}${SERVER_REFERENCE_MANIFEST}.js`,
       new sources.RawSource(
-        `self.__RSC_SERVER_MANIFEST=${JSON.stringify(edgeJson)}`
-      ) as unknown as webpackType.sources.RawSource
-    )
+        `self.__RSC_SERVER_MANIFEST=${JSON.stringify(edgeJson)}`,
+      ) as unknown as webpackType.sources.RawSource,
+    );
     compilation.emitAsset(
       `${this.assetPrefix}${SERVER_REFERENCE_MANIFEST}.json`,
-      new sources.RawSource(json) as unknown as webpackType.sources.RawSource
-    )
+      new sources.RawSource(json) as unknown as webpackType.sources.RawSource,
+    );
   }
 }
 
@@ -1187,58 +1198,58 @@ function addClientImport(
   modRequest: string,
   clientComponentImports: ClientComponentImports,
   importedIdentifiers: string[],
-  isFirstVisitModule: boolean
+  isFirstVisitModule: boolean,
 ) {
-  const clientEntryType = getModuleBuildInfo(mod).rsc?.clientEntryType
-  const isCjsModule = clientEntryType === 'cjs'
+  const clientEntryType = getModuleBuildInfo(mod).rsc?.clientEntryType;
+  const isCjsModule = clientEntryType === 'cjs';
   const assumedSourceType = getAssumedSourceType(
     mod,
-    isCjsModule ? 'commonjs' : 'auto'
-  )
+    isCjsModule ? 'commonjs' : 'auto',
+  );
 
-  const clientImportsSet = clientComponentImports[modRequest]
+  const clientImportsSet = clientComponentImports[modRequest];
 
   if (importedIdentifiers[0] === '*') {
     // If there's collected import path with named import identifiers,
     // or there's nothing in collected imports are empty.
     // we should include the whole module.
     if (!isFirstVisitModule && [...clientImportsSet][0] !== '*') {
-      clientComponentImports[modRequest] = new Set(['*'])
+      clientComponentImports[modRequest] = new Set(['*']);
     }
   } else {
-    const isAutoModuleSourceType = assumedSourceType === 'auto'
+    const isAutoModuleSourceType = assumedSourceType === 'auto';
     if (isAutoModuleSourceType) {
-      clientComponentImports[modRequest] = new Set(['*'])
+      clientComponentImports[modRequest] = new Set(['*']);
     } else {
       // If it's not analyzed as named ESM exports, e.g. if it's mixing `export *` with named exports,
       // We'll include all modules since it's not able to do tree-shaking.
       for (const name of importedIdentifiers) {
         // For cjs module default import, we include the whole module since
-        const isCjsDefaultImport = isCjsModule && name === 'default'
+        const isCjsDefaultImport = isCjsModule && name === 'default';
 
         // Always include __esModule along with cjs module default export,
         // to make sure it work with client module proxy from React.
         if (isCjsDefaultImport) {
-          clientComponentImports[modRequest].add('__esModule')
+          clientComponentImports[modRequest].add('__esModule');
         }
 
-        clientComponentImports[modRequest].add(name)
+        clientComponentImports[modRequest].add(name);
       }
     }
   }
 }
 
 function getModuleResource(mod: NormalModule): string {
-  const modPath: string = mod.resourceResolveData?.['path'] || ''
-  const modQuery = mod.resourceResolveData?.['query'] || ''
+  const modPath: string = mod.resourceResolveData?.['path'] || '';
+  const modQuery = mod.resourceResolveData?.['query'] || '';
   // We have to always use the resolved request here to make sure the
   // server and client are using the same module path (required by RSC), as
   // the server compiler and client compiler have different resolve configs.
-  let modResource: string = modPath + modQuery
+  let modResource: string = modPath + modQuery;
 
   // Context modules don't have a resource path, we use the identifier instead.
   if (mod.constructor.name === 'ContextModule') {
-    modResource = mod.identifier()
+    modResource = mod.identifier();
   }
 
   // For the barrel optimization, we need to use the match resource instead
@@ -1246,23 +1257,23 @@ function getModuleResource(mod: NormalModule): string {
   // but they're different modules and can't be deduped via `visitedModule`.
   // The first module is a virtual re-export module created by the loader.
   if (mod.matchResource?.startsWith(BARREL_OPTIMIZATION_PREFIX)) {
-    modResource = mod.matchResource + ':' + modResource
+    modResource = mod.matchResource + ':' + modResource;
   }
 
   if (mod.resource === `?${WEBPACK_RESOURCE_QUERIES.metadataRoute}`) {
-    return getMetadataRouteResource(mod.rawRequest).filePath
+    return getMetadataRouteResource(mod.rawRequest).filePath;
   }
 
   if (mod.type === 'consume-shared-module') {
-    return (mod as any).libIdent()
+    return (mod as any).libIdent();
   }
 
-  return modResource
+  return modResource;
 }
 
 function getMetadataRouteResource(request: string): MetadataRouteLoaderOptions {
   // e.g. next-metadata-route-loader?filePath=<some-url-encoded-path>&isDynamicRouteExtension=1!?__next_metadata_route__
-  const query = request.split('!')[0].split('next-metadata-route-loader?')[1]
+  const query = request.split('!')[0].split('next-metadata-route-loader?')[1];
 
-  return parse(query) as MetadataRouteLoaderOptions
+  return parse(query) as MetadataRouteLoaderOptions;
 }

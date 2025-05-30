@@ -122,7 +122,7 @@ export const getReactGroupServer = (
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
-      nodeModulesReconstructedLookup: false
+      nodeModulesReconstructedLookup: false,
     },
     {
       request: 'react',
@@ -134,7 +134,7 @@ export const getReactGroupServer = (
       shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
-      nodeModulesReconstructedLookup: false
+      nodeModulesReconstructedLookup: false,
     },
     // --- React (React Server Components) ---
     {
@@ -147,7 +147,7 @@ export const getReactGroupServer = (
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
-      nodeModulesReconstructedLookup: false
+      nodeModulesReconstructedLookup: false,
     },
     {
       request: 'react',
@@ -159,7 +159,7 @@ export const getReactGroupServer = (
       shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
-      nodeModulesReconstructedLookup: false
+      nodeModulesReconstructedLookup: false,
     },
     // --- React (Default Fallback) ---
     {
@@ -171,7 +171,7 @@ export const getReactGroupServer = (
       version: reactVersion,
       requiredVersion: `^${reactVersion}`,
       packageName: 'react',
-      nodeModulesReconstructedLookup: false
+      nodeModulesReconstructedLookup: false,
     },
 
     // --- React DOM (Server Side Rendering) ---
@@ -257,7 +257,8 @@ export const getReactGroupServer = (
       nodeModulesReconstructedLookup: false,
     },
     {
-      request: 'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime',
+      request:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime',
       shareKey: 'react/jsx-runtime',
       import:
         'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime',
@@ -286,7 +287,8 @@ export const getReactGroupServer = (
       nodeModulesReconstructedLookup: false,
     },
     {
-      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-runtime',
+      request:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-runtime',
       shareKey: 'react/jsx-runtime',
       import:
         'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-runtime',
@@ -328,7 +330,8 @@ export const getReactGroupServer = (
       nodeModulesReconstructedLookup: false,
     },
     {
-      request: 'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime',
+      request:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime',
       shareKey: 'react/jsx-dev-runtime',
       import:
         'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime',
@@ -357,7 +360,8 @@ export const getReactGroupServer = (
       nodeModulesReconstructedLookup: false,
     },
     {
-      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime',
+      request:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime',
       shareKey: 'react/jsx-dev-runtime',
       import:
         'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime',
@@ -399,7 +403,8 @@ export const getReactGroupServer = (
       nodeModulesReconstructedLookup: false,
     },
     {
-      request: 'next/dist/server/route-modules/app-page/vendored/ssr/react-compiler-runtime',
+      request:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-compiler-runtime',
       shareKey: 'react/compiler-runtime',
       import:
         'next/dist/server/route-modules/app-page/vendored/ssr/react-compiler-runtime',
@@ -428,7 +433,8 @@ export const getReactGroupServer = (
       nodeModulesReconstructedLookup: false,
     },
     {
-      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-compiler-runtime',
+      request:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-compiler-runtime',
       shareKey: 'react/compiler-runtime',
       import:
         'next/dist/server/route-modules/app-page/vendored/rsc/react-compiler-runtime',
@@ -470,7 +476,8 @@ export const getReactGroupServer = (
       nodeModulesReconstructedLookup: false,
     },
     {
-      request: 'next/dist/server/route-modules/app-page/vendored/ssr/react-server-dom-webpack-client-edge',
+      request:
+        'next/dist/server/route-modules/app-page/vendored/ssr/react-server-dom-webpack-client-edge',
       shareKey: 'react-server-dom-webpack/client.edge',
       import:
         'next/dist/server/route-modules/app-page/vendored/ssr/react-server-dom-webpack-client-edge',
@@ -512,7 +519,8 @@ export const getReactGroupServer = (
       nodeModulesReconstructedLookup: false,
     },
     {
-      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-edge',
+      request:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-edge',
       shareKey: 'react-server-dom-webpack/server.edge',
       import:
         'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-edge',
@@ -554,7 +562,8 @@ export const getReactGroupServer = (
       nodeModulesReconstructedLookup: false,
     },
     {
-      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-node',
+      request:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-node',
       shareKey: 'react-server-dom-webpack/server.node',
       import:
         'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-server-node',
@@ -596,7 +605,8 @@ export const getReactGroupServer = (
       nodeModulesReconstructedLookup: false,
     },
     {
-      request: 'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-static-edge',
+      request:
+        'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-static-edge',
       shareKey: 'react-server-dom-webpack/static.edge',
       import:
         'next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-webpack-static-edge',
@@ -622,7 +632,6 @@ export const getReactGroupServer = (
       nodeModulesReconstructedLookup: false,
     },
   ];
-
 
   // Convert the array to a Record using reduce, ensuring unique keys by including the index.
   return reactConfigs.reduce(
@@ -657,6 +666,114 @@ export const getNextGroupServer = (
   const nextVersion = require(nextPackageJsonPath).version;
 
   const nextConfigs: SharedConfig[] = [
+    // {
+    //   request:'next/dist/build/webpack/loaders/next-flight-loader/module-proxy',
+    //   shareKey:'next/dist/build/webpack/loaders/next-flight-loader/module-proxy',
+    //   import:'./module-proxy',
+    //   layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+    //   issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+    //   shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+    //   singleton: true,
+    //   requiredVersion: `^${nextVersion}`,
+    // },
+    {
+      request: 'next/link',
+      shareKey: 'next/link',
+      import: 'next/dist/client/app-dir/link',
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+      nodeModulesReconstructedLookup: true,
+    },
+    {
+      request: 'next/dist/client/app-dir/link',
+      shareKey: 'next/link',
+      import: 'next/dist/client/app-dir/link',
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+      nodeModulesReconstructedLookup: true,
+    },
+    {
+      request: 'next/dist/client/app-dir/link.js',
+      shareKey: 'next/link',
+      import: 'next/dist/client/app-dir/link',
+      layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+      nodeModulesReconstructedLookup: true,
+    },
+    // Next.js Link - serverSideRendering layer (explicit configurations)
+    {
+      request: 'next/link',
+      shareKey: 'next/link',
+      import: 'next/dist/client/app-dir/link',
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+      nodeModulesReconstructedLookup: true,
+    },
+    {
+      request: 'next/dist/client/app-dir/link',
+      shareKey: 'next/link',
+      import: 'next/dist/client/app-dir/link',
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+      nodeModulesReconstructedLookup: true,
+    },
+    {
+      request: 'next/dist/client/app-dir/link.js',
+      shareKey: 'next/link',
+      import: 'next/dist/client/app-dir/link',
+      layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+      nodeModulesReconstructedLookup: true,
+    },
+    // for internal next monorepo
+    // {
+    //   request: '/Users/bytedance/dev/next.js/packages/next/dist/client/app-dir/link.js',
+    //   shareKey: 'next/link',
+    //   import: 'next/dist/client/app-dir/link',
+    //   layer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+    //   issuerLayer: WEBPACK_LAYERS_NAMES.serverSideRendering,
+    //   shareScope: WEBPACK_LAYERS_NAMES.serverSideRendering,
+    //   singleton: true,
+    //   requiredVersion: `^${nextVersion}`,
+    //   version: nextVersion,
+    //   nodeModulesReconstructedLookup: true,
+    // },
+    // {
+    //   request: '/Users/bytedance/dev/next.js/packages/next/dist/client/app-dir/link.js',
+    //   shareKey: 'next/link',
+    //   import: 'next/dist/client/app-dir/link',
+    //   layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+    //   issuerLayer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+    //   shareScope: WEBPACK_LAYERS_NAMES.reactServerComponents,
+    //   singleton: true,
+    //   requiredVersion: `^${nextVersion}`,
+    //   version: nextVersion,
+    //   nodeModulesReconstructedLookup: true,
+    // },
     // --- Next.js Internal Contexts (React-specific) ---
     {
       request: 'next/dist/server/route-modules/app-page/vendored/contexts/',
@@ -709,6 +826,6 @@ export const getNextInternalsShareScopeServer = (
   const nextGroup = getNextGroupServer(compiler);
   return {
     ...reactGroup,
-    // ...nextGroup,
+    ...nextGroup,
   };
 };
