@@ -64,3 +64,33 @@ Uncaught TypeError: Cannot read properties on null (reading `useState`)
 * [Modern.js]: 设置 [devServer.headers](https://modernjs.dev/configure/app/tools/dev-server.html#headers) 值为指定的域名白名单而非 `*`
 
 * [Rsbuild]: 设置 [server.cors.origin](https://rsbuild.dev/config/server/cors#origin) 值为指定的域名白名单而非 `*`
+
+## A preload for 'http://resource-url' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.
+
+### 原因
+
+当生产者 url 为 manifest 时，加载此生产者模块会自动预加载相应的资源。如果出现上述警告，是因为默认预加载不会配置 credentials ，而实际的 load remote script 携带了对应的 credentials ，导致预加载失败。
+
+### 解决方案
+
+通过 [runtimePlugins](../../configure/runtimeplugins) 添加运行时插件，在 [createLink](../../plugin/dev/index#createlink) hook 中配置 `crossorigin` 属性，其值需要和实际 load script 保持一致。
+
+例如需要修改预加载 link 的 crossorigin 属性为 `anonymous`：
+
+```ts title="runtimePlugin.ts
+import { FederationRuntimePlugin } from '@module-federation/runtime/types';
+
+export default function MFLinkPlugin(): FederationRuntimePlugin {
+  return {
+    name: 'link-plugin',
+    createLink({ url }) {
+      const link = document.createElement('link');
+      link.setAttribute('href', url);
+      link.setAttribute('rel', 'preload');
+      link.setAttribute('as', 'script');
+      link.setAttribute('crossorigin', 'anonymous');
+      return link
+    }
+  };
+}
+```

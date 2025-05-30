@@ -1,5 +1,5 @@
 import path from 'path';
-import { fs } from '@modern-js/utils';
+import fs from 'fs-extra';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
