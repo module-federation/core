@@ -1,6 +1,5 @@
 import React from 'react';
 import Button from 'antd/lib/button';
-import mfSvg from '../assets/module-federation.svg';
 import stuff from './stuff.module.css';
 
 export default ({ text }: { text: string }): JSX.Element => (

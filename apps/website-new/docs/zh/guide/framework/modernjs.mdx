@@ -126,7 +126,7 @@ const { createRemoteSSRComponent } = kit;
 
 const RemoteSSRComponent = createRemoteSSRComponent({
   // 在构建插件声明过的 remote 也可以使用此函数加载：loader: () => import('remote/Image'),
-  loader: () => loadRemote('dynamic_remote/Image'),
+  loader: () => loadRemote('dynamic_remote'),
   loading: <div>loading...</div>,
   fallback: ({ error }) => {
     if (error instanceof Error && error.message.includes('not exist')) {
