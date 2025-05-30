@@ -60,7 +60,7 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
 
     while (retries++ < hostOptions.maxRetries) {
       try {
-        const url = fileToDownload;
+        const url = new URL(fileToDownload).href;
         const response = await axiosGet(url, {
           responseType: 'arraybuffer',
           timeout: hostOptions.timeout,
@@ -107,7 +107,7 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
         );
         if (retries >= hostOptions.maxRetries) {
           logger.error(
-            `Failed to download ${fileToDownload}, you can set FEDERATION_DEBUG=true to see detail message.`,
+            `Failed to download types archive from "${fileToDownload}". Set FEDERATION_DEBUG=true for details.`,
           );
           if (hostOptions.abortOnError !== false) {
             throw error;
