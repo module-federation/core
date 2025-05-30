@@ -1,5 +1,32 @@
 # @module-federation/dts-plugin
 
+## 0.14.3
+
+### Patch Changes
+
+- @module-federation/sdk@0.14.3
+- @module-federation/managers@0.14.3
+- @module-federation/third-party-dts-extractor@0.14.3
+- @module-federation/error-codes@0.14.3
+
+## 0.14.2
+
+### Patch Changes
+
+- @module-federation/sdk@0.14.2
+- @module-federation/managers@0.14.2
+- @module-federation/third-party-dts-extractor@0.14.2
+- @module-federation/error-codes@0.14.2
+
+## 0.14.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.14.1
+- @module-federation/managers@0.14.1
+- @module-federation/third-party-dts-extractor@0.14.1
+- @module-federation/error-codes@0.14.1
+
 ## 0.14.0
 
 ### Patch Changes
