@@ -38,7 +38,7 @@ function createCompositeKey(request: string, config: ConsumeOptions): string {
     return request;
   }
 }
-// TODO: look at passing dedicated request key instead of infer from object key
+
 export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   compilation: Compilation,
   configs: [string, T][],
