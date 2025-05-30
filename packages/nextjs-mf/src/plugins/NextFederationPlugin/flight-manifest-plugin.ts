@@ -244,7 +244,7 @@ export class ClientReferenceManifestPlugin {
           name: PLUGIN_NAME,
           // Have to be in the optimize stage to run after updating the CSS
           // asset hash via extract mini css plugin.
-          stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
+          stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_HASH,
         },
         () => this.createAsset(compilation, compiler.context)
       )
@@ -342,6 +342,13 @@ export class ClientReferenceManifestPlugin {
             ? mod.identifier().slice(mod.identifier().lastIndexOf('!') + 1)
             : mod.resource
 
+        // consume shared resource is undefined
+        if (mod.type === 'consume-shared-module') {
+          // instead of using resource as the lookup key, we use shareKey from federation to provide known lookup
+          const shareKey = (mod as any).options?.shareKey || ''
+          resource = shareKey
+        }
+
         if (!resource) {
           return
         }
@@ -373,9 +380,9 @@ export class ClientReferenceManifestPlugin {
         // also add the mapping for the ESM build (Edge runtime) to consume.
         const esmResource = /[\\/]next[\\/]dist[\\/]/.test(resource)
           ? resource.replace(
-            /[\\/]next[\\/]dist[\\/]/,
-            '/next/dist/esm/'.replace(/\//g, path.sep)
-          )
+              /[\\/]next[\\/]dist[\\/]/,
+              '/next/dist/esm/'.replace(/\//g, path.sep)
+            )
           : null
 
         // An extra query param is added to the resource key when it's optimized
@@ -390,11 +397,15 @@ export class ClientReferenceManifestPlugin {
           resource = formatBarrelOptimizedResource(resource, mod.matchResource)
         }
 
+        if (mod.type === 'consume-shared-module') {
+          ssrNamedModuleId = (mod as any).options.shareKey
+        }
+
         function addClientReference() {
           const isAsync = Boolean(
             compilation.moduleGraph.isAsync(mod) ||
-            pluginState.ssrModules[ssrNamedModuleId]?.async ||
-            pluginState.edgeSsrModules[ssrNamedModuleId]?.async
+              pluginState.ssrModules[ssrNamedModuleId]?.async ||
+              pluginState.edgeSsrModules[ssrNamedModuleId]?.async
           )
 
           const exportName = resource
@@ -414,10 +425,11 @@ export class ClientReferenceManifestPlugin {
         function addSSRIdMapping() {
           const exportName = resource
           const moduleInfo = pluginState.ssrModules[ssrNamedModuleId]
+          const mappingId = mod.type === 'consume-shared-module' ? modId : modId
 
           if (moduleInfo) {
-            moduleIdMapping[modId] = moduleIdMapping[modId] || {}
-            moduleIdMapping[modId]['*'] = {
+            moduleIdMapping[mappingId] = moduleIdMapping[mappingId] || {}
+            moduleIdMapping[mappingId]['*'] = {
               ...manifest.clientModules[exportName],
               // During SSR, we don't have external chunks to load on the server
               // side with our architecture of Webpack / Turbopack. We can keep
@@ -431,8 +443,8 @@ export class ClientReferenceManifestPlugin {
           const edgeModuleInfo = pluginState.edgeSsrModules[ssrNamedModuleId]
 
           if (edgeModuleInfo) {
-            edgeModuleIdMapping[modId] = edgeModuleIdMapping[modId] || {}
-            edgeModuleIdMapping[modId]['*'] = {
+            edgeModuleIdMapping[mappingId] = edgeModuleIdMapping[mappingId] || {}
+            edgeModuleIdMapping[mappingId]['*'] = {
               ...manifest.clientModules[exportName],
               // During SSR, we don't have external chunks to load on the server
               // side with our architecture of Webpack / Turbopack. We can keep
@@ -447,10 +459,10 @@ export class ClientReferenceManifestPlugin {
         function addRSCIdMapping() {
           const exportName = resource
           const moduleInfo = pluginState.rscModules[rscNamedModuleId]
-
+          const mappingId = mod.type === 'consume-shared-module' ? modId : modId
           if (moduleInfo) {
-            rscIdMapping[modId] = rscIdMapping[modId] || {}
-            rscIdMapping[modId]['*'] = {
+            rscIdMapping[mappingId] = rscIdMapping[mappingId] || {}
+            rscIdMapping[mappingId]['*'] = {
               ...manifest.clientModules[exportName],
               // During SSR, we don't have external chunks to load on the server
               // side with our architecture of Webpack / Turbopack. We can keep
@@ -464,8 +476,8 @@ export class ClientReferenceManifestPlugin {
           const edgeModuleInfo = pluginState.ssrModules[rscNamedModuleId]
 
           if (edgeModuleInfo) {
-            edgeRscIdMapping[modId] = edgeRscIdMapping[modId] || {}
-            edgeRscIdMapping[modId]['*'] = {
+            edgeRscIdMapping[mappingId] = edgeRscIdMapping[mappingId] || {}
+            edgeRscIdMapping[mappingId]['*'] = {
               ...manifest.clientModules[exportName],
               // During SSR, we don't have external chunks to load on the server
               // side with our architecture of Webpack / Turbopack. We can keep
@@ -605,23 +617,27 @@ export class ClientReferenceManifestPlugin {
         group += (group ? '/' : '') + segment
       }
 
-      // Check if we need to modify the prefix from 'auto' back to original
-      if (this.originalPublicPath && mergedManifest.moduleLoading?.prefix === 'auto') {
-        mergedManifest.moduleLoading.prefix = this.originalPublicPath
-        console.log(`Updated prefix from 'auto' to: ${this.originalPublicPath}`)
+      // Reset 'auto' prefix to default Next.js public path
+      if (mergedManifest.moduleLoading?.prefix === 'auto') {
+        mergedManifest.moduleLoading.prefix = '/_next/'
       }
+
       const json = JSON.stringify(mergedManifest)
 
       const pagePath = pageName.replace(/%5F/g, '_')
       const pageBundlePath = normalizePagePath(pagePath.slice('app'.length))
-      compilation.emitAsset(
-        'server/app' + pageBundlePath + '_' + CLIENT_REFERENCE_MANIFEST + '.js',
-        new sources.RawSource(
-          `globalThis.__RSC_MANIFEST=(globalThis.__RSC_MANIFEST||{});globalThis.__RSC_MANIFEST[${JSON.stringify(
-            pagePath.slice('app'.length)
-          )}]=${json}`
-        ) as unknown as webpackType.sources.RawSource
-      )
+      const assetName = 'server/app' + pageBundlePath + '_' + CLIENT_REFERENCE_MANIFEST + '.js'
+      const assetContent = new sources.RawSource(
+        `globalThis.__RSC_MANIFEST=(globalThis.__RSC_MANIFEST||{});globalThis.__RSC_MANIFEST[${JSON.stringify(
+          pagePath.slice('app'.length)
+        )}]=${json}`
+      ) as unknown as webpackType.sources.RawSource
+
+      if (compilation.getAsset(assetName)) {
+        compilation.updateAsset(assetName, assetContent)
+      } else {
+        compilation.emitAsset(assetName, assetContent)
+      }
     }
   }
 }

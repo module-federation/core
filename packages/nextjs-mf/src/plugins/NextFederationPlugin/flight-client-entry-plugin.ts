@@ -237,8 +237,10 @@ export class FlightClientEntryPlugin {
             : modPath + modQuery
           : mod.resource
 
-        if(mod.type === 'consume-shared-module') {
-          modResource = mod.libIdent()
+        // Handle consume-shared-module by using shareKey for predictable lookups
+        if (mod.type === 'consume-shared-module') {
+          const shareKey = (mod as any).options?.shareKey || ''
+          modResource = shareKey
         }
 
         if (typeof modId !== 'undefined' && modResource) {
@@ -271,9 +273,13 @@ export class FlightClientEntryPlugin {
           // module ID strategy.
           let ssrNamedModuleId = path.relative(compiler.context, modResource)
 
-          if (!ssrNamedModuleId.startsWith('.') && mod.type !== 'consume-shared-module') {
+          if (!ssrNamedModuleId.startsWith('.')) {
             // TODO use getModuleId instead
             ssrNamedModuleId = `./${normalizePathSep(ssrNamedModuleId)}`
+          }
+          if (mod.type === 'consume-shared-module') {
+            // dont use ./ prefix on consume-shared
+            ssrNamedModuleId = modResource
           }
 
           const moduleInfo: ModuleInfo = {
@@ -885,6 +891,7 @@ export class FlightClientEntryPlugin {
       zackWasHere: true
     })}!`
 
+
     const clientServerLoader = `next-flight-client-entry-loader?${stringify({
       modules: modules.map((x) => JSON.stringify(x)),
       server: true,
@@ -1234,12 +1241,6 @@ function getModuleResource(mod: NormalModule): string {
     modResource = mod.identifier()
   }
 
-  if (mod.constructor.name === 'ConsumeSharedModule') {
-    const libIdent = mod.libIdent({ context: mod.context || '' })
-    const identifier = mod.identifier()
-    modResource = libIdent || identifier
-  }
-
   // For the barrel optimization, we need to use the match resource instead
   // because there will be 2 modules for the same file (same resource path)
   // but they're different modules and can't be deduped via `visitedModule`.
@@ -1250,6 +1251,10 @@ function getModuleResource(mod: NormalModule): string {
 
   if (mod.resource === `?${WEBPACK_RESOURCE_QUERIES.metadataRoute}`) {
     return getMetadataRouteResource(mod.rawRequest).filePath
+  }
+
+  if (mod.type === 'consume-shared-module') {
+    return (mod as any).libIdent()
   }
 
   return modResource
