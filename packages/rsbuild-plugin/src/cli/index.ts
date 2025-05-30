@@ -298,11 +298,19 @@ export const pluginModuleFederation = (
       });
     });
 
-    api.onDevCompileDone(() => {
+    const generateMergedStatsAndManifest = () => {
       if (!nodePlugin || !browserPlugin || !distOutputDir) {
         return;
       }
       updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
+    };
+
+    api.onDevCompileDone(() => {
+      generateMergedStatsAndManifest();
+    });
+
+    api.onAfterBuild(() => {
+      generateMergedStatsAndManifest();
     });
   },
 });
