@@ -13,12 +13,6 @@ import type {
   NormalModule,
   Module,
 } from 'webpack';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { modules, utils } from '@module-federation/enhanced';
-
-const { javascript } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
 
 type SourceType = WebpackJavascript.JavascriptParser['sourceType'] | 'commonjs';
 

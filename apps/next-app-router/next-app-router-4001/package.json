@@ -14,7 +14,7 @@
     "client:rsd": "rsdoctor analyze --profile .next/.rsdoctor/manifest.json",
     "server:rsd": "rsdoctor analyze --profile .next/server/.rsdoctor/manifest.json",
     "patch-flight-plugin": "cp node_modules/@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/flight-client-entry-plugin.js node_modules/next/dist/build/webpack/plugins/flight-client-entry-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/flight-manifest-plugin.js node_modules/next/dist/build/webpack/plugins/flight-manifest-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/loaders/next-flight-loader.js node_modules/next/dist/build/webpack/loaders/next-flight-loader/index.js",
-    "postinstall": "npm run patch-flight-plugin"
+    "postinstall": "npm run patch-flight-plugin || true"
   },
   "git": {
     "pre-commit": "lint-staged"
