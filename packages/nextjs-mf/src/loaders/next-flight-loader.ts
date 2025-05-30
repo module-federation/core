@@ -1,18 +1,18 @@
-import { RSC_MOD_REF_PROXY_ALIAS } from 'next/dist/lib/constants'
+import { RSC_MOD_REF_PROXY_ALIAS } from 'next/dist/lib/constants';
 import {
   BARREL_OPTIMIZATION_PREFIX,
   RSC_MODULE_TYPES,
-} from 'next/dist/shared/lib/constants'
-import { warnOnce } from 'next/dist/shared/lib/utils/warn-once'
-import { getRSCModuleInformation } from 'next/dist/build/analysis/get-page-static-info'
-import { formatBarrelOptimizedResource } from 'next/dist/build/webpack/utils'
-import { getModuleBuildInfo } from 'next/dist/build/webpack/loaders/get-module-build-info'
+} from 'next/dist/shared/lib/constants';
+import { warnOnce } from 'next/dist/shared/lib/utils/warn-once';
+import { getRSCModuleInformation } from 'next/dist/build/analysis/get-page-static-info';
+import { formatBarrelOptimizedResource } from 'next/dist/build/webpack/utils';
+import { getModuleBuildInfo } from 'next/dist/build/webpack/loaders/get-module-build-info';
 import type {
   LoaderContext,
   javascript as WebpackJavascript,
   NormalModule,
-  Module
-} from 'webpack'
+  Module,
+} from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { modules, utils } from '@module-federation/enhanced';
 
@@ -20,20 +20,20 @@ const { javascript } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
-type SourceType = WebpackJavascript.JavascriptParser['sourceType'] | 'commonjs'
+type SourceType = WebpackJavascript.JavascriptParser['sourceType'] | 'commonjs';
 
-const noopHeadPath = require.resolve('next/dist/client/components/noop-head')
+const noopHeadPath = require.resolve('next/dist/client/components/noop-head');
 // For edge runtime it will be aliased to esm version by webpack
 const MODULE_PROXY_PATH =
-  'next/dist/build/webpack/loaders/next-flight-loader/module-proxy'
+  'next/dist/build/webpack/loaders/next-flight-loader/module-proxy';
 
 export function getAssumedSourceType(
   mod: Module,
-  sourceType: SourceType
+  sourceType: SourceType,
 ): SourceType {
-  const buildInfo = getModuleBuildInfo(mod)
-  const detectedClientEntryType = buildInfo?.rsc?.clientEntryType
-  const clientRefs = buildInfo?.rsc?.clientRefs || []
+  const buildInfo = getModuleBuildInfo(mod);
+  const detectedClientEntryType = buildInfo?.rsc?.clientEntryType;
+  const clientRefs = buildInfo?.rsc?.clientRefs || [];
   // It's tricky to detect the type of a client boundary, but we should always
   // use the `module` type when we can, to support `export *` and `export from`
   // syntax in other modules that import this client boundary.
@@ -44,39 +44,39 @@ export function getAssumedSourceType(
         // If there's zero export detected in the client boundary, and it's the
         // `auto` type, we can safely assume it's a CJS module because it doesn't
         // have ESM exports.
-        return 'commonjs'
+        return 'commonjs';
       } else if (!clientRefs.includes('*')) {
         // Otherwise, we assume it's an ESM module.
-        return 'module'
+        return 'module';
       }
     } else if (detectedClientEntryType === 'cjs') {
-      return 'commonjs'
+      return 'commonjs';
     }
   }
 
-  return sourceType
+  return sourceType;
 }
 
 export default function transformSource(
   this: LoaderContext<undefined>,
   source: string,
-  sourceMap: any
+  sourceMap: any,
 ) {
   // Avoid buffer to be consumed
   if (typeof source !== 'string') {
-    throw new Error('Expected source to have been transformed to a string.')
+    throw new Error('Expected source to have been transformed to a string.');
   }
-  const module = this._module!
+  const module = this._module!;
 
   // Assign the RSC meta information to buildInfo.
   // Exclude next internal files which are not marked as client files
-  const buildInfo = getModuleBuildInfo(module)
-  buildInfo.rsc = getRSCModuleInformation(source, true)
-  let prefix = ''
+  const buildInfo = getModuleBuildInfo(module);
+  buildInfo.rsc = getRSCModuleInformation(source, true);
+  let prefix = '';
   if (process.env['BUILTIN_FLIGHT_CLIENT_ENTRY_PLUGIN']) {
-    const rscModuleInformationJson = JSON.stringify(buildInfo.rsc)
-    prefix = `/* __rspack_internal_rsc_module_information_do_not_use__ ${rscModuleInformationJson} */\n`
-    source = prefix + source
+    const rscModuleInformationJson = JSON.stringify(buildInfo.rsc);
+    prefix = `/* __rspack_internal_rsc_module_information_do_not_use__ ${rscModuleInformationJson} */\n`;
+    source = prefix + source;
   }
 
   // Resource key is the unique identifier for the resource. When RSC renders
@@ -91,47 +91,47 @@ export default function transformSource(
   //
   // Because of that, we must add another query param to the resource key to
   // differentiate them.
-  let resourceKey: string = this.resourcePath
+  let resourceKey: string = this.resourcePath;
   if (module.matchResource?.startsWith(BARREL_OPTIMIZATION_PREFIX)) {
     resourceKey = formatBarrelOptimizedResource(
       resourceKey,
-      module.matchResource
-    )
+      module.matchResource,
+    );
   }
 
   if (module.issuer?.type === 'consume-shared-module') {
-    resourceKey = (module as any).issuer.options.shareKey
+    resourceKey = (module as any).issuer.options.shareKey;
   }
 
   // A client boundary.
   if (buildInfo.rsc?.type === RSC_MODULE_TYPES.client) {
     const assumedSourceType = getAssumedSourceType(
       module,
-      sourceTypeFromModule(module)
-    )
+      sourceTypeFromModule(module),
+    );
 
-    const clientRefs = buildInfo.rsc.clientRefs!
-    const stringifiedResourceKey = JSON.stringify(resourceKey)
+    const clientRefs = buildInfo.rsc.clientRefs!;
+    const stringifiedResourceKey = JSON.stringify(resourceKey);
 
     if (assumedSourceType === 'module') {
       if (clientRefs.length === 0) {
-        return this.callback(null, 'export {}')
+        return this.callback(null, 'export {}');
       }
 
       if (clientRefs.includes('*')) {
         this.callback(
           new Error(
-            `It's currently unsupported to use "export *" in a client boundary. Please use named exports instead.`
-          )
-        )
-        return
+            `It's currently unsupported to use "export *" in a client boundary. Please use named exports instead.`,
+          ),
+        );
+        return;
       }
 
       let esmSource =
         prefix +
         `\
 import { registerClientReference } from "react-server-dom-webpack/server.edge";
-`
+`;
       for (const ref of clientRefs) {
         if (ref === 'default') {
           esmSource += `export default registerClientReference(
@@ -141,7 +141,7 @@ It's not possible to invoke a client function from the server, it can only be \
 rendered as a Component or passed to props of a Client Component.`)}); },
 ${stringifiedResourceKey},
 "default",
-);\n`
+);\n`;
         } else {
           esmSource += `export const ${ref} = registerClientReference(
 function() { throw new Error(${JSON.stringify(`Attempted to call ${ref}() from \
@@ -150,11 +150,11 @@ function from the server, it can only be rendered as a Component or passed to \
 props of a Client Component.`)}); },
 ${stringifiedResourceKey},
 ${JSON.stringify(ref)},
-);`
+);`;
         }
       }
 
-      return this.callback(null, esmSource, sourceMap)
+      return this.callback(null, esmSource, sourceMap);
     } else if (assumedSourceType === 'commonjs') {
       const cjsSource =
         prefix +
@@ -162,36 +162,36 @@ ${JSON.stringify(ref)},
 const { createProxy } = require("${MODULE_PROXY_PATH}")
 
 module.exports = createProxy(${stringifiedResourceKey})
-`
-      return this.callback(null, cjsSource, sourceMap)
+`;
+      return this.callback(null, cjsSource, sourceMap);
     }
   }
 
   if (buildInfo.rsc?.type !== RSC_MODULE_TYPES.client) {
     if (noopHeadPath === this.resourcePath) {
       warnOnce(
-        `Warning: You're using \`next/head\` inside the \`app\` directory, please migrate to the Metadata API. See https://nextjs.org/docs/app/building-your-application/upgrading/app-router-migration#step-3-migrating-nexthead for more details.`
-      )
+        `Warning: You're using \`next/head\` inside the \`app\` directory, please migrate to the Metadata API. See https://nextjs.org/docs/app/building-your-application/upgrading/app-router-migration#step-3-migrating-nexthead for more details.`,
+      );
     }
   }
 
   const replacedSource = source.replace(
     RSC_MOD_REF_PROXY_ALIAS,
-    MODULE_PROXY_PATH
-  )
-  this.callback(null, replacedSource, sourceMap)
+    MODULE_PROXY_PATH,
+  );
+  this.callback(null, replacedSource, sourceMap);
 }
 
 function sourceTypeFromModule(module: NormalModule): SourceType {
-  const moduleType = module.type
+  const moduleType = module.type;
   switch (moduleType) {
     case 'javascript/auto':
-      return 'auto'
+      return 'auto';
     case 'javascript/dynamic':
-      return 'script'
+      return 'script';
     case 'javascript/esm':
-      return 'module'
+      return 'module';
     default:
-      throw new Error('Unexpected module type ' + moduleType)
+      throw new Error('Unexpected module type ' + moduleType);
   }
 }
