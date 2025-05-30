@@ -1,5 +1,15 @@
 # create-module-federation
 
+## 0.14.3
+
+## 0.14.2
+
+## 0.14.1
+
+### Patch Changes
+
+- 0c68c2f: feat(modern-js-plugin): add server plugin to handle remote's SSR assets
+
 ## 0.14.0
 
 ## 0.13.1
