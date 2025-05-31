@@ -14,7 +14,7 @@ This example demonstrates hot reloading using VM contexts with wrapper functions
 - ✅ Self-contained module hot reload logic
 - ✅ Clean separation of concerns
 - ✅ Proper Node.js global handling in VM
-- ✅ Automatic state management
+- ✅ Fresh state on VM recreation
 - ✅ Live getter-based exports
 
 ## Files
@@ -34,7 +34,7 @@ The demo will:
 1. Load both entrypoint modules in wrapper mode
 2. Run 3 iterations, automatically modifying the greet messages
 3. Show how modules hot reload themselves when files change
-4. Demonstrate state preservation and live updates
+4. Demonstrate fresh state on VM recreation and live updates
 
 ## Technical Details
 
@@ -102,3 +102,4 @@ const context = {
 - Development environments with complex module dependencies
 - Applications requiring fine-grained hot reload control
 - Testing VM context behavior and module isolation
+- Scenarios where fresh state on reload is acceptable

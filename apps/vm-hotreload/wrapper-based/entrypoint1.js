@@ -19,13 +19,7 @@ if (isInVM) {
     getCreatedAt: () => state.createdAt,
     greet: (name = 'World') =>
       `🔥 HOT RELOADED: Hey ${name}! Iteration ${state.counter}`,
-    reset: () => {
-      state.counter = 0;
-      return 'Counter reset';
-    },
   };
-  // For demo: allow VM to be destroyed
-  module.exports.__destroyVM = () => {};
 } else {
   // Not in VM: export live getters that delegate to a VM instance
   let vmInstance = null;

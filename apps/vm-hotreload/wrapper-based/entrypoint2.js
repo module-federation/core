@@ -18,13 +18,7 @@ if (isInVM) {
     getCounter: () => state.counter,
     getCreatedAt: () => state.createdAt,
     greet: (name = 'Universe') => `Welcome ${name} to ${state.name}!`,
-    reset: () => {
-      state.counter = 100;
-      return 'Counter reset to 100';
-    },
   };
-  // For demo: allow VM to be destroyed
-  module.exports.__destroyVM = () => {};
 } else {
   // Not in VM: export live getters that delegate to a VM instance
   let vmInstance = null;
