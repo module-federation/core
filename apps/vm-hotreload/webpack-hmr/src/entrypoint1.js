@@ -18,7 +18,7 @@ function getCreatedAt() {
   return state.createdAt;
 }
 function greet(name = 'World') {
-  return `✨ FINAL: Greetings ${name}! Count is ${state.counter}`;
+  return `🔥 HOT RELOADED: Hey ${name}! Iteration ${state.counter}`;
 }
 function reset() {
   state.counter = 0;

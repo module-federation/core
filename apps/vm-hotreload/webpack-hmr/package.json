@@ -7,6 +7,7 @@
     "build": "webpack --config webpack.config.js --watch",
     "start:entrypoint1": "node dist/entrypoint1.js",
     "start:entrypoint2": "node dist/entrypoint2.js",
+    "start": "node ./dist/index.js",
     "demo": "rm -rf ./dist && npx concurrently \"pnpm build\" \"wait-on dist/index.js && node dist/index.js\""
   },
   "devDependencies": {

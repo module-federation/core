@@ -21,48 +21,6 @@ const entrypoint2Path = path.resolve(__dirname, '../src/entrypoint2.js');
 const originalEntrypoint1 = fs.readFileSync(entrypoint1Path, 'utf8');
 const originalEntrypoint2 = fs.readFileSync(entrypoint2Path, 'utf8');
 
-function safeEditFile(filePath, newContent) {
-  const dir = path.dirname(filePath);
-  const base = path.basename(filePath);
-  const tmpPath = path.join(dir, '.' + base + '.tmp');
-
-  // Write to a temp file first
-  fs.writeFileSync(tmpPath, newContent);
-
-  // Rename temp file to target file (atomic replace)
-  fs.renameSync(tmpPath, filePath);
-
-  // Optionally, touch the file to update mtime
-  const now = new Date();
-  fs.utimesSync(filePath, now, now);
-}
-
-function modifyGreetMessageEntrypoint1(newMessage) {
-  const filePath = path.resolve(__dirname, '../src/entrypoint1.js');
-  console.log(`[MODIFY] Writing to: ${filePath}`);
-  let fileContent = fs.readFileSync(filePath, 'utf8');
-  const greetRegex = /greet: \(name = 'World'\) => `[^`]+`/;
-  fileContent = fileContent.replace(
-    greetRegex,
-    `greet: (name = 'World') => \`${newMessage}\``,
-  );
-  safeEditFile(filePath, fileContent);
-  console.log(`\n📝 Modified entrypoint1 greet message to: "${newMessage}"`);
-}
-
-function modifyGreetMessageEntrypoint2(newMessage) {
-  const filePath = path.resolve(__dirname, '../src/entrypoint2.js');
-  console.log(`[MODIFY] Writing to: ${filePath}`);
-  let fileContent = fs.readFileSync(filePath, 'utf8');
-  const greetRegex = /greet: \(name = 'Universe'\) => `[^`]+`/;
-  fileContent = fileContent.replace(
-    greetRegex,
-    `greet: (name = 'Universe') => \`${newMessage}\``,
-  );
-  safeEditFile(filePath, fileContent);
-  console.log(`\n📝 Modified entrypoint2 greet message to: "${newMessage}"`);
-}
-
 function simulateNaturalEditEntrypoint1() {
   const filePath = path.resolve(__dirname, '../src/entrypoint1.js');
   let fileContent = fs.readFileSync(filePath, 'utf8');
@@ -145,6 +103,7 @@ function runDemo() {
 }
 
 if (module.hot) {
+  module.hot.accept();
   console.log('index.js has module.hot');
   // Accept updates for dependencies and re-require them
   module.hot.accept(['./entrypoint1.js', './entrypoint2.js'], () => {

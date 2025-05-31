@@ -1,0 +1,11 @@
+{
+  "name": "webpack-hmr-manual",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "replay": "node replay-hmr.js",
+    "run-and-replay": "node run-and-replay.js"
+  },
+  "dependencies": {}
+}

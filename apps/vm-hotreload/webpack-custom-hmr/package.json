@@ -1,0 +1,17 @@
+{
+  "name": "webpack-hmr-demo",
+  "version": "1.0.0",
+  "main": "dist/entrypoint1.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "demo:programmatic": "rm -rf ./dist && pnpm run build && node ./replay-programmatic-hmr.js"
+  },
+  "devDependencies": {
+    "webpack": "^5.90.0",
+    "webpack-cli": "^5.1.4",
+    "nodemon": "^3.0.3",
+    "concurrently": "^8.2.2",
+    "wait-on": "^7.0.1"
+  }
+}
