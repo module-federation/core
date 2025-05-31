@@ -1,9 +1,8 @@
 console.log('index.js evaluated');
 
-// const { applyHotUpdateFromStrings } = require('./custom-hmr-helpers.js'); // Old
 const {
   applyHotUpdateFromStringsByPatching,
-} = require('./custom-hmr-helpers.js'); // Correct new export name
+} = require('./custom-hmr-helpers.js');
 
 let entrypoint1 = require('./entrypoint1.js');
 let entrypoint2 = require('./entrypoint2.js');

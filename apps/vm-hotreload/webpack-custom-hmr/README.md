@@ -1,19 +1,19 @@
 # Webpack Custom HMR Demo
 
-This example demonstrates a custom Webpack Hot Module Replacement (HMR) implementation with programmatic updates and manual cache management. It shows how to build a custom HMR system that can apply multiple updates programmatically without relying on file system changes.
+This example demonstrates a custom Webpack Hot Module Replacement (HMR) implementation with programmatic updates and automatic cache management. It shows how to build a custom HMR system that can apply multiple updates programmatically without relying on file system changes.
 
 ## How It Works
 
 - **Custom HMR Runtime**: Implements custom HMR logic using webpack's module system
 - **Programmatic Updates**: Applies multiple HMR updates in sequence without file changes
-- **Manual Cache Management**: Manually manages module cache and dependencies
+- **Automatic Cache Management**: Leverages Webpack's internal HMR mechanisms for automatic module updates and cache management.
 - **Custom Update Content**: Generates update content programmatically for demonstration
 
 ## Key Features
 
 - ✅ Custom HMR implementation
 - ✅ Programmatic update application
-- ✅ Manual module cache management
+- ✅ Integration with Webpack's HMR for cache and module management
 - ✅ Multiple update iterations
 - ✅ Custom update content generation
 - ✅ Comprehensive error handling
@@ -31,20 +31,16 @@ This example demonstrates a custom Webpack Hot Module Replacement (HMR) implemen
 npm install
 npm run build              # Build the project
 npm run demo:programmatic  # Run programmatic HMR demo
-npm run demo:file-based    # Run file-based HMR demo
 ```
 
 ## Demo Scenarios
 
 ### Programmatic Demo
 Runs 4 HMR updates in sequence:
-1. **Update 1**: Initial module loading
-2. **Update 2**: Update both entrypoint modules with new messages
-3. **Update 3**: Further updates to entrypoint modules
-4. **Update 4**: Final update to main index module
-
-### File-Based Demo
-Standard webpack HMR with file watching and automatic updates.
+1. **Update 1**: Updates both entrypoint modules with new messages and counter values
+2. **Update 2**: Further updates to entrypoint modules with "hot reloaded" messages
+3. **Update 3**: Updates entrypoint modules with "final update" messages
+4. **Update 4**: Final update to the main index module that completes the demo
 
 ## Technical Details
 
@@ -72,71 +68,84 @@ if (module.hot) {
 
 The demo programmatically applies updates:
 
-1. **Update Definition**: Each update defines new module content
-2. **Cache Management**: Manually clears and updates module cache
-3. **Dependency Resolution**: Handles module dependencies correctly
-4. **State Preservation**: Maintains application state across updates
+1. **Update Definition**: Each update defines new module content and HMR manifest.
+2. **HMR Trigger**: The `custom-hmr-helpers.js` script feeds this content to the Webpack HMR runtime.
+3. **Automatic Cache Management**: Webpack's HMR runtime automatically handles module cache invalidation and updates based on the provided content.
+4. **Dependency Resolution**: Webpack's HMR logic manages module dependencies during the update.
+5. **State Preservation**: Application state can be maintained across updates if modules are designed to preserve or restore it (e.g., using `module.hot.data` or by re-initializing with existing data).
 
 ### Update Content Generation
 
 Generates update content for different iterations:
 
 ```javascript
-const updates = {
-  1: {
-    'entrypoint1.js': {
-      content: `module.exports = { message: "Update 1", applied: true };`
-    },
-    'entrypoint2.js': {
-      content: `module.exports = { message: "Update 1", applied: true };`
-    }
+const customHMRChunks = [
+  {
+    manifestJsonString: JSON.stringify({ c: ['index'], r: [], m: [] }),
+    chunkJsString: `exports.id = 'index';
+exports.modules = {
+  "./src/entrypoint1.js": (module, exports, __webpack_require__) => {
+    console.log('🎉✨ HMR Update 1: Entrypoint 1 updated! 🚀🔥');
+    module.exports = {
+      getName: () => 'Entrypoint 1',
+      greet: (name = 'World') => \`Hello \${name} from Entrypoint 1!\`,
+      customUpdateApplied: true,
+      updateMessage: 'Hello'
+    };
+  }
+};
+// ... runtime code`
   },
   // ... more updates
-};
+];
 ```
 
 ### Custom HMR Helpers
 
 The `custom-hmr-helpers.js` provides:
 
-- **Module Cache Management**: Functions to clear and update module cache
-- **Dependency Tracking**: Track and update module dependencies
-- **Update Application**: Apply updates with proper error handling
-- **State Migration**: Preserve state between updates
+- **In-Memory Update Provision**: Functions to supply HMR manifest and chunk content directly to the Webpack HMR runtime.
+- **HMR Orchestration**: Logic to trigger and manage the HMR process using the provided in-memory updates.
+- **Integration with Webpack HMR**: Relies on Webpack's `module.hot.check()` and the underlying HMR runtime for applying changes.
+- **Error Handling**: Includes error handling for the custom update application process.
 
 ## HMR Update Flow
 
-1. **Update Trigger**: Programmatic or file-based trigger
-2. **Content Generation**: Generate new module content
-3. **Cache Invalidation**: Clear affected modules from cache
-4. **Module Replacement**: Replace modules with new content
-5. **Dependency Update**: Update dependent modules
-6. **Accept Handler**: Execute custom accept logic
-7. **State Preservation**: Maintain application state
-8. **Error Handling**: Handle any update failures
+1. **Update Trigger**: Programmatic trigger from `index.js`.
+2. **Content Preparation**: HMR manifest and chunk JavaScript strings are prepared.
+3. **Runtime Patching (Temporary)**: `custom-hmr-helpers.js` temporarily makes the Webpack HMR runtime aware of these in-memory strings.
+4. **HMR Check**: `module.hot.check(true)` is called.
+5. **Webpack HMR Process**:
+    - Webpack's HMR runtime reads the (in-memory) manifest.
+    - It loads the (in-memory) update chunks.
+    - It invalidates and updates modules in its cache.
+    - It re-runs affected modules or their accepted dependencies.
+6. **Accept Handler**: Custom `module.hot.accept` handlers in `index.js` or other modules are executed.
+7. **State Preservation**: Application state can be maintained depending on how modules and HMR handlers are structured.
+8. **Error Handling**: Failures in the HMR process are caught and logged.
+9. **Runtime Cleanup**: In-memory patches to the HMR runtime are cleared after the update attempt.
 
 ## Advanced Features
 
-### Manual Cache Management
+### Leveraging Webpack's Automatic HMR Cache Management
 
-```javascript
-// Clear module from cache
-delete require.cache[require.resolve('./module')];
+This demo leverages Webpack's own HMR capabilities for automatic cache management. When `module.hot.check(true)` is called and new module code is provided (via the patched runtime in `custom-hmr-helpers.js`), Webpack's HMR logic:
+- Automatically updates its internal module cache (`__webpack_require__.c` and `__webpack_require__.m`).
+- Disposes of old modules.
+- Executes new module code.
+- Handles the accept/decline logic.
 
-// Update module with new content
-const newModule = require('./module');
-```
+The updates are seamlessly integrated into Webpack's existing HMR lifecycle without manual cache manipulation.
 
 ### Custom Update Logic
 
+The custom HMR helpers provide in-memory update content to Webpack's HMR runtime:
+
 ```javascript
-function applyCustomUpdate(moduleId, newContent) {
-  // Custom logic for applying updates
-  const module = require.cache[moduleId];
-  if (module) {
-    // Update module exports
-    Object.assign(module.exports, newContent);
-  }
+// Example from custom-hmr-helpers.js
+function applyHotUpdateFromStringsByPatching(__webpack_require__, manifestJsonString, chunkJsString) {
+  // Patches Webpack's HMR runtime to use in-memory content
+  // Triggers module.hot.check(true) for automatic updates
 }
 ```
 
@@ -198,10 +207,10 @@ module.exports = {
 
 ### Common Issues
 
-- **Module Not Accepted**: Ensure proper `module.hot.accept()` calls
-- **Cache Issues**: Verify manual cache management logic
-- **Dependency Problems**: Check module dependency resolution
-- **State Loss**: Implement proper state preservation
+- **Module Not Accepted**: Ensure proper `module.hot.accept()` calls are in place for the modules being updated or their parents. If an update bubbles up to the top and isn't accepted, a full reload might be triggered by Webpack.
+- **Webpack HMR Errors**: Check the browser console or Node output for errors originating from Webpack's HMR runtime. These can indicate issues with the update content, manifest, or the HMR process itself.
+- **State Loss**: If state is not being preserved, ensure your HMR accept handlers correctly re-initialize or migrate state. For modules that self-accept or are re-required, they need to handle their own state. Webpack's HMR doesn't automatically preserve all state.
+- **Incorrect Update Content**: Ensure the JavaScript strings for HMR chunks and the manifest JSON are correctly formatted and represent valid updates.
 
 ### Debug Tips
 

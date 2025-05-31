@@ -747,80 +747,6 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
 }
 
 /**
- * Applies a hot update from in-memory strings using webpack's built-in HMR system.
- * @param {object} updatePayload - The HMR update data.
- * @param {string} updatePayload.hash - The hash for this update.
- * @param {string} updatePayload.manifestJsonString - The JSON string content of the HMR manifest.
- * @param {object} updatePayload.chunkJsStringsMap - A map of chunkId to the JS string content of the HMR chunk.
- * @returns {Promise<string[]>} A promise that resolves to an array of module IDs that were updated.
- */
-function applyHotUpdateFromStrings(updatePayload) {
-  console.log(
-    `🔥 [Custom HMR Helper] Applying update for hash: ${updatePayload.hash}`,
-  );
-
-  return new Promise((resolve, reject) => {
-    try {
-      // Check if module.hot is available
-      if (typeof module !== 'undefined' && module.hot) {
-        console.log(
-          "🚀 [Custom HMR Helper] Using webpack's built-in HMR system",
-        );
-        console.log(
-          '📊 [Custom HMR Helper] Current HMR status:',
-          module.hot.status(),
-        );
-
-        if (module.hot.status() === 'idle') {
-          module.hot
-            .check(true) // true means auto-apply
-            .then((updatedModules) => {
-              if (!updatedModules) {
-                console.log(
-                  'ℹ️ [Custom HMR Helper] No updates detected by webpack',
-                );
-                resolve([]);
-                return;
-              }
-              console.log(
-                '✅ [Custom HMR Helper] Update applied. Updated modules:',
-                updatedModules,
-              );
-              resolve(updatedModules || []);
-            })
-            .catch((error) => {
-              const status = module.hot.status();
-              if (['abort', 'fail'].indexOf(status) >= 0) {
-                console.error(
-                  '[Custom HMR Helper] Cannot apply update:',
-                  error,
-                );
-                console.error(
-                  '[Custom HMR Helper] You need to restart the application!',
-                );
-              } else {
-                console.error('[Custom HMR Helper] Update failed:', error);
-              }
-              reject(error);
-            });
-        } else {
-          console.warn(
-            `⚠️ [Custom HMR Helper] HMR not in idle state (${module.hot.status()}), cannot check for updates`,
-          );
-          resolve([]);
-        }
-      } else {
-        console.warn('⚠️ [Custom HMR Helper] module.hot not available');
-        reject(new Error('[HMR] Hot Module Replacement is disabled.'));
-      }
-    } catch (error) {
-      console.error('[Custom HMR Helper] Error processing update:', error);
-      reject(error);
-    }
-  });
-}
-
-/**
  * Applies a hot update from in-memory strings by patching webpack's runtime modules.
  * @param {object} moduleObj - The module object (usually 'module')
  * @param {object} webpackRequire - The __webpack_require__ function
@@ -927,7 +853,6 @@ function applyHotUpdateFromStringsByPatching(
 }
 
 module.exports = {
-  applyHotUpdateFromStrings,
   applyHotUpdateFromStringsByPatching,
   injectInMemoryHMRRuntime,
 };
