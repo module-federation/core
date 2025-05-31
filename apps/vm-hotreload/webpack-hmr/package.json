@@ -4,10 +4,10 @@
   "main": "dist/entrypoint1.js",
   "license": "MIT",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
+    "build": "webpack --config webpack.config.js --watch",
     "start:entrypoint1": "node dist/entrypoint1.js",
     "start:entrypoint2": "node dist/entrypoint2.js",
-    "demo": "node dist/index.js"
+    "demo": "rm -rf ./dist && npx concurrently \"pnpm build\" \"wait-on dist/index.js && node dist/index.js\""
   },
   "devDependencies": {
     "webpack": "^5.90.0",
