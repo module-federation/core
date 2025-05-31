@@ -741,11 +741,7 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
       /******/
     };
     /******/
-    /******/ __webpack_require__.clearInMemoryContent = function () {
-      /******/ inMemoryManifest = null;
-      /******/ inMemoryChunks = {};
-      /******/
-    };
+
     /******/
   })();
 }
@@ -892,12 +888,6 @@ function applyHotUpdateFromStringsByPatching(
         moduleObj.hot
           .check(true) // true means auto-apply
           .then((updatedModules) => {
-            // Clear in-memory content after successful update
-            if (webpackRequire.clearInMemoryContent) {
-              webpackRequire.clearInMemoryContent();
-              console.log('🧹 [Custom HMR Helper] Cleared in-memory content');
-            }
-
             if (!updatedModules) {
               console.log(
                 'ℹ️ [Custom HMR Helper] No updates detected by webpack',
@@ -912,11 +902,6 @@ function applyHotUpdateFromStringsByPatching(
             resolve(updatedModules || []);
           })
           .catch((error) => {
-            // Clear in-memory content on error
-            if (webpackRequire.clearInMemoryContent) {
-              webpackRequire.clearInMemoryContent();
-            }
-
             const status = moduleObj.hot.status();
             if (['abort', 'fail'].indexOf(status) >= 0) {
               console.error('[Custom HMR Helper] Cannot apply update:', error);
@@ -929,22 +914,12 @@ function applyHotUpdateFromStringsByPatching(
             reject(error);
           });
       } else {
-        // Clear in-memory content if not in idle state
-        if (webpackRequire.clearInMemoryContent) {
-          webpackRequire.clearInMemoryContent();
-        }
-
         console.warn(
           `⚠️ [Custom HMR Helper] HMR not in idle state (${moduleObj.hot.status()}), cannot check for updates`,
         );
         resolve([]);
       }
     } catch (error) {
-      // Clear in-memory content on error
-      if (webpackRequire && webpackRequire.clearInMemoryContent) {
-        webpackRequire.clearInMemoryContent();
-      }
-
       console.error('[Custom HMR Helper] Error processing update:', error);
       reject(error);
     }

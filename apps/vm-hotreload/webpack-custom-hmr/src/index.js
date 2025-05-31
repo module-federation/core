@@ -312,7 +312,15 @@ function triggerNextHMRUpdate() {
 
 if (module.hot) {
   console.log('index.js has module.hot');
-  module.hot.accept();
+  module.hot.accept(() => {
+    console.log('HOT RELOAD SELF');
+    console.log('\n♻️  HMR: Modules reloaded!');
+    if (typeof continueDemo === 'function') {
+      const fn = continueDemo;
+      continueDemo = null;
+      fn();
+    }
+  });
   module.hot.accept(['./entrypoint1.js', './entrypoint2.js'], () => {
     require('./entrypoint1.js');
     require('./entrypoint2.js');
