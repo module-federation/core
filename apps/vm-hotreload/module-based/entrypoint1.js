@@ -14,8 +14,4 @@ module.exports = {
   getCreatedAt: () => state.createdAt,
   greet: (name = 'World') =>
     `🔥 HOT RELOADED: Hey ${name}! Iteration ${state.counter}`,
-  reset: () => {
-    state.counter = 0;
-    return 'Counter reset';
-  },
 };

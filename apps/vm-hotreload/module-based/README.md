@@ -12,7 +12,7 @@ This example demonstrates hot reloading using Node.js module system overrides an
 ## Key Features
 
 - ✅ True hot reloading without restart
-- ✅ State preservation between reloads
+- ✅ Fresh state on each reload (VM recreation)
 - ✅ Automatic file watching
 - ✅ Clean VM isolation
 - ✅ Live getter-based exports
@@ -34,7 +34,7 @@ npm start
 The demo will:
 1. Load both entrypoint modules
 2. Run 3 iterations, automatically modifying the greet messages
-3. Show how modules are hot reloaded without losing state
+3. Show how modules are hot reloaded with fresh VM instances
 4. Display live updates as files change
 
 ## Technical Details
@@ -52,7 +52,7 @@ The `register-vm-loader.js` creates a custom module loader that:
 
 1. File change detected by `chokidar`
 2. VM instance destroyed via `destroyVM()`
-3. Next property access triggers VM recreation
+3. Next property access triggers VM recreation with fresh state
 4. New code executed in fresh VM context
 5. Live bindings automatically reflect new exports
 
@@ -67,5 +67,5 @@ The `register-vm-loader.js` creates a custom module loader that:
 
 - Development environments requiring fast iteration
 - Applications with expensive startup costs
-- Scenarios where preserving application state is critical
+- Scenarios where fresh state on reload is acceptable
 - Testing module isolation and hot reload mechanisms

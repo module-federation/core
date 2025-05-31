@@ -13,8 +13,4 @@ module.exports = {
   getCounter: () => state.counter,
   getCreatedAt: () => state.createdAt,
   greet: (name = 'Universe') => `Welcome ${name} to ${state.name}!`,
-  reset: () => {
-    state.counter = 100;
-    return 'Counter reset to 100';
-  },
 };

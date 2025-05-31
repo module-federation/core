@@ -39,9 +39,9 @@ Module._extensions['.js'] = function (module, filename) {
             const exports = module.exports;
             const __filename = '${filename.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}';
             const __dirname = '${path.dirname(filename).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}';
-            
+
             ${fileContent}
-            
+
             return module.exports;
           })
         `,
