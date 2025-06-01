@@ -251,6 +251,36 @@
       </div>
 
       <div class="section" style="margin: 0 30px 30px 30px">
+        <h2>🧪 Basic Debugger Testing</h2>
+        <div
+          style="
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+          "
+        >
+          <p style="margin-bottom: 15px; color: #6c757d">
+            Test the basic debugger functionality with a custom hot update
+            chunk.
+          </p>
+          <button
+            class="btn btn-success"
+            onclick="triggerBasicDebuggerTest()"
+            style="margin-right: 10px"
+          >
+            🚀 Trigger Basic Debugger Test
+          </button>
+          <button
+            class="btn"
+            onclick="triggerBasicDebuggerTestWithCustomMessage()"
+          >
+            ✏️ Trigger with Custom Message
+          </button>
+        </div>
+      </div>
+
+      <div class="section" style="margin: 0 30px 30px 30px">
         <h2>📝 Live Logs</h2>
         <div class="logs" id="logs">
           <div class="log-entry">
@@ -418,6 +448,75 @@
           }
         } catch (error) {
           addLog('Error triggering update: ' + error.message, 'error');
+        }
+      }
+
+      async function triggerBasicDebuggerTest() {
+        try {
+          const response = await fetch('/api/trigger-basic-debugger-test', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ description: 'Basic Debugger Test Update' }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            addLog(
+              'Successfully triggered basic debugger test update',
+              'connected',
+            );
+            loadData(); // Refresh data
+          } else {
+            addLog(
+              `Failed to trigger basic debugger test: ${result.error}`,
+              'error',
+            );
+          }
+        } catch (error) {
+          addLog(
+            'Error triggering basic debugger test: ' + error.message,
+            'error',
+          );
+        }
+      }
+
+      async function triggerBasicDebuggerTestWithCustomMessage() {
+        const customMessage = prompt(
+          'Enter a custom description for the basic debugger test:',
+        );
+        if (customMessage) {
+          try {
+            const response = await fetch('/api/trigger-basic-debugger-test', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ description: customMessage }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              addLog(
+                `Successfully triggered basic debugger test: ${customMessage}`,
+                'connected',
+              );
+              loadData(); // Refresh data
+            } else {
+              addLog(
+                `Failed to trigger basic debugger test: ${result.error}`,
+                'error',
+              );
+            }
+          } catch (error) {
+            addLog(
+              'Error triggering basic debugger test: ' + error.message,
+              'error',
+            );
+          }
         }
       }
 

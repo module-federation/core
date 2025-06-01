@@ -110,7 +110,6 @@ function applyHotUpdateFromStringsByPatching(
           '⚠️ [Custom HMR Helper] setInMemoryManifest not available',
         );
       }
-
       // Set the in-memory chunk content for each chunk
       if (webpackRequire.setInMemoryChunk) {
         for (const chunkId in chunkJsStringsMap) {

@@ -76,16 +76,18 @@ app.get('/api/updates', (req, res) => {
   const formattedUpdates = pendingUpdatesRaw.map((update) => {
     // Extract module path from content - this is a simplified example
     // A more robust solution would parse the JS content or have this info stored
-    const modulePathMatch = update.content.match(
-      /\*!\*\*\* (\.\/src\/[^\s]+) \*\*\*!/,
-    );
-    const modulePath = modulePathMatch ? modulePathMatch[1] : update.filename; // Fallback to filename
+    // const modulePathMatch = update.content.match(
+    //   /\*!\*\*\* (\.\/src\/[^\s]+) \*\*\*!/,
+    // );
+    // const modulePath = modulePathMatch ? modulePathMatch[1] : update.filename; // Fallback to filename
 
     return {
       manifest: {
         c: ['index'], // Assuming 'index' is the main chunk for all these updates
         r: [], // Removed chunks, empty for now
-        m: [modulePath], // Modules affected by this update
+        m: [
+          // modulePath
+        ], // Modules affected by this update
       },
       script: update.content,
       // Keep original update info for reference if needed by client
@@ -152,6 +154,50 @@ app.post('/api/trigger-update', (req, res) => {
   res.json({ success: true, update: triggeredUpdate });
 });
 
+// Trigger basic debugger test update
+app.post('/api/trigger-basic-debugger-test', (req, res) => {
+  const { description = 'Basic Debugger Test Update' } = req.body;
+
+  // Create a test update specifically for basic debugger
+  const testUpdate = {
+    id: ++lastUpdateId,
+    updateId: 'basic-debugger-test',
+    filename: 'basic-debugger-test.hot-update.js',
+    description: description,
+    content: `/** Basic Debugger Test Update */
+exports.id = 'main';
+exports.ids = ['something'];
+exports.modules = {};
+exports.runtime = /******/ function (__webpack_require__) {
+  /******/ /* webpack/runtime/getFullHash */
+  /******/ (() => {
+    /******/ __webpack_require__.h = () => 'basic-debugger-test';
+    /******/
+  })();
+  /******/
+};`,
+    triggered: true,
+    timestamp: Date.now(),
+  };
+
+  updateHistory.push(testUpdate);
+
+  // Notify connected WebSocket clients
+  const message = JSON.stringify({
+    type: 'update-triggered',
+    update: testUpdate,
+  });
+
+  connectedClients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+
+  console.log(`Basic debugger test update triggered: ${description}`);
+  res.json({ success: true, update: testUpdate });
+});
+
 // Get server status
 app.get('/api/status', (req, res) => {
   res.json({
@@ -176,6 +222,8 @@ app.get('/', (req, res) => {
       'GET /api/updates': 'Get pending updates for client',
       'GET /api/available-updates': 'Get all available updates',
       'POST /api/trigger-update': 'Trigger an update',
+      'POST /api/trigger-basic-debugger-test':
+        'Trigger basic debugger test update',
       'GET /api/status': 'Get server status',
       'GET /admin': 'Admin web interface',
     },

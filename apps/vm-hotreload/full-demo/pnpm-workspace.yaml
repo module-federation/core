@@ -1,3 +1,4 @@
 packages:
   - 'backend'
   - 'client'
+  - 'basic_debugging'
