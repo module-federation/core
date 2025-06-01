@@ -47,10 +47,23 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
           )(update, require, __dirname, filename);
           var updatedModules = update.modules;
           var runtime = update.runtime;
-          console.log(update);
+
           for (var moduleId in updatedModules) {
             if (__webpack_require__.o(updatedModules, moduleId)) {
-              currentUpdate[moduleId] = updatedModules[moduleId];
+              // Check if a new module exists in the update chunk
+              if (updatedModules[moduleId]) {
+                // Use the new module from the update chunk
+                currentUpdate[moduleId] = updatedModules[moduleId];
+              } else if (
+                __webpack_require__.m &&
+                __webpack_require__.m[moduleId]
+              ) {
+                // Only restore from .m if no new module exists in the update
+                currentUpdate[moduleId] = __webpack_require__.m[moduleId];
+              } else {
+                // This shouldn't happen, but handle gracefully
+                currentUpdate[moduleId] = false;
+              }
               if (updatedModulesList) updatedModulesList.push(moduleId);
             }
           }
@@ -184,12 +197,26 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
       for (var moduleId in currentUpdate) {
         if (__webpack_require__.o(currentUpdate, moduleId)) {
           var newModuleFactory = currentUpdate[moduleId];
+          console.log(
+            '[HMR DEBUG] Processing module:',
+            moduleId,
+            'factory exists:',
+            !!newModuleFactory,
+          );
+          console.log(
+            '[HMR DEBUG] New module factory exists:',
+            !!newModuleFactory,
+          );
+
           var result = newModuleFactory
             ? getAffectedModuleEffects(moduleId)
             : {
                 type: 'disposed',
                 moduleId: moduleId,
               };
+
+          console.log('[HMR DEBUG] Module effect result:', result);
+
           /** @type {Error|false} */
           var abortError = false;
           var doApply = false;
@@ -198,8 +225,19 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
           if (result.chain) {
             chainInfo = '\nUpdate propagation: ' + result.chain.join(' -> ');
           }
+          console.log(
+            '[HMR DEBUG] Handling result type:',
+            result.type,
+            'for module:',
+            moduleId,
+          );
+
           switch (result.type) {
             case 'self-declined':
+              console.log(
+                '[HMR DEBUG] Module self-declined, aborting:',
+                moduleId,
+              );
               if (options.onDeclined) options.onDeclined(result);
               if (!options.ignoreDeclined)
                 abortError = new Error(
@@ -209,6 +247,10 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
                 );
               break;
             case 'declined':
+              console.log(
+                '[HMR DEBUG] Module declined by parent, aborting:',
+                moduleId,
+              );
               if (options.onDeclined) options.onDeclined(result);
               if (!options.ignoreDeclined)
                 abortError = new Error(
@@ -220,6 +262,7 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
                 );
               break;
             case 'unaccepted':
+              console.log('[HMR DEBUG] Module unaccepted, aborting:', moduleId);
               if (options.onUnaccepted) options.onUnaccepted(result);
               if (!options.ignoreUnaccepted)
                 abortError = new Error(
@@ -230,10 +273,15 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
                 );
               break;
             case 'accepted':
+              console.log('[HMR DEBUG] Module accepted, will apply:', moduleId);
               if (options.onAccepted) options.onAccepted(result);
               doApply = true;
               break;
             case 'disposed':
+              console.log(
+                '[HMR DEBUG] Module disposed, will dispose:',
+                moduleId,
+              );
               if (options.onDisposed) options.onDisposed(result);
               doDispose = true;
               break;
@@ -246,7 +294,15 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
             };
           }
           if (doApply) {
-            appliedUpdate[moduleId] = newModuleFactory;
+            //if no new module factory, use the existing one
+            appliedUpdate[moduleId] =
+              newModuleFactory || __webpack_require__.m[moduleId];
+            console.log(
+              '[HMR DEBUG] Applying update for module using factory:',
+              __webpack_require__.c[moduleId],
+              appliedUpdate[moduleId],
+            );
+            // Propagate outdated modules and dependencies inf
             addAllToSet(outdatedModules, result.outdatedModules);
             for (moduleId in result.outdatedDependencies) {
               if (
@@ -282,6 +338,12 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
           // when called invalidate self-accepting is not possible
           !module.hot._selfInvalidated
         ) {
+          console.log(
+            '[HMR DEBUG] Adding self-accepted module:',
+            outdatedModuleId,
+            'callback type:',
+            typeof module.hot._selfAccepted,
+          );
           outdatedSelfAcceptedModules.push({
             module: outdatedModuleId,
             require: module.hot._requireSelf,
@@ -353,26 +415,63 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
           }
         },
         apply: function (reportError) {
+          console.log('[HMR DEBUG] Apply function called');
+          console.log('[HMR DEBUG] appliedUpdate:', Object.keys(appliedUpdate));
+          console.log(
+            '[HMR DEBUG] outdatedDependencies:',
+            Object.keys(outdatedDependencies),
+          );
+          console.log(
+            '[HMR DEBUG] outdatedSelfAcceptedModules:',
+            outdatedSelfAcceptedModules.map(function (m) {
+              return m.module;
+            }),
+          );
+
           // insert new code
           for (var updateModuleId in appliedUpdate) {
             if (__webpack_require__.o(appliedUpdate, updateModuleId)) {
+              console.log(
+                '[HMR DEBUG] Updating module factory for:',
+                updateModuleId,
+              );
               __webpack_require__.m[updateModuleId] =
                 appliedUpdate[updateModuleId];
             }
           }
 
           // run new runtime modules
+          console.log(
+            '[HMR DEBUG] Running',
+            currentUpdateRuntime.length,
+            'runtime modules',
+          );
           for (var i = 0; i < currentUpdateRuntime.length; i++) {
             currentUpdateRuntime[i](__webpack_require__);
           }
 
           // call accept handlers
+          console.log(
+            '[HMR DEBUG] Calling accept handlers for outdated dependencies',
+          );
           for (var outdatedModuleId in outdatedDependencies) {
             if (__webpack_require__.o(outdatedDependencies, outdatedModuleId)) {
               var module = __webpack_require__.c[outdatedModuleId];
+              console.log(
+                '[HMR DEBUG] Processing outdated module:',
+                outdatedModuleId,
+                'exists:',
+                !!module,
+              );
+
               if (module) {
                 moduleOutdatedDependencies =
                   outdatedDependencies[outdatedModuleId];
+                console.log(
+                  '[HMR DEBUG] Module outdated dependencies:',
+                  moduleOutdatedDependencies,
+                );
+
                 var callbacks = [];
                 var errorHandlers = [];
                 var dependenciesForCallbacks = [];
@@ -382,6 +481,13 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
                     module.hot._acceptedDependencies[dependency];
                   var errorHandler =
                     module.hot._acceptedErrorHandlers[dependency];
+                  console.log(
+                    '[HMR DEBUG] Checking dependency:',
+                    dependency,
+                    'has callback:',
+                    !!acceptCallback,
+                  );
+
                   if (acceptCallback) {
                     if (callbacks.indexOf(acceptCallback) !== -1) continue;
                     callbacks.push(acceptCallback);
@@ -389,8 +495,22 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
                     dependenciesForCallbacks.push(dependency);
                   }
                 }
+
+                console.log(
+                  '[HMR DEBUG] Found',
+                  callbacks.length,
+                  'accept callbacks for module:',
+                  outdatedModuleId,
+                );
+
                 for (var k = 0; k < callbacks.length; k++) {
                   try {
+                    console.log(
+                      '[HMR DEBUG] Calling accept callback',
+                      k,
+                      'for module:',
+                      outdatedModuleId,
+                    );
                     callbacks[k].call(null, moduleOutdatedDependencies);
                   } catch (err) {
                     if (typeof errorHandlers[k] === 'function') {
@@ -434,12 +554,26 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
           }
 
           // Load self accepted modules
+          console.log(
+            '[HMR DEBUG] Loading',
+            outdatedSelfAcceptedModules.length,
+            'self-accepted modules',
+          );
           for (var o = 0; o < outdatedSelfAcceptedModules.length; o++) {
             var item = outdatedSelfAcceptedModules[o];
             var moduleId = item.module;
+            console.log(
+              '[HMR DEBUG] Reloading self-accepted module:',
+              moduleId,
+            );
             try {
               item.require(moduleId);
             } catch (err) {
+              console.log(
+                '[HMR DEBUG] Error reloading self-accepted module:',
+                moduleId,
+                err,
+              );
               if (typeof item.errorHandler === 'function') {
                 try {
                   item.errorHandler(err, {
@@ -480,15 +614,27 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
       };
     }
     __webpack_require__.hmrI.readFileVm = function (moduleId, applyHandlers) {
+      console.log('[HMR DEBUG] hmrI.readFileVm called for module:', moduleId);
+
       if (!currentUpdate) {
+        console.log('[HMR DEBUG] Initializing currentUpdate');
         currentUpdate = {};
         currentUpdateRuntime = [];
         currentUpdateRemovedChunks = [];
         applyHandlers.push(applyHandler);
       }
+
       if (!__webpack_require__.o(currentUpdate, moduleId)) {
+        console.log('[HMR DEBUG] Adding module to currentUpdate:', moduleId);
         currentUpdate[moduleId] = __webpack_require__.m[moduleId];
+      } else {
+        console.log('[HMR DEBUG] Module already in currentUpdate:', moduleId);
       }
+
+      console.log(
+        '[HMR DEBUG] Current update modules:',
+        Object.keys(currentUpdate),
+      );
     };
     __webpack_require__.hmrC.readFileVm = function (
       chunkIds,
@@ -498,6 +644,12 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
       applyHandlers,
       updatedModulesList,
     ) {
+      console.log('[HMR DEBUG] hmrC.readFileVm called with:');
+      console.log('[HMR DEBUG] - chunkIds:', chunkIds);
+      console.log('[HMR DEBUG] - removedChunks:', removedChunks);
+      console.log('[HMR DEBUG] - removedModules:', removedModules);
+      console.log('[HMR DEBUG] - installedChunks:', installedChunks);
+
       applyHandlers.push(applyHandler);
       currentUpdateChunks = {};
       currentUpdateRemovedChunks = removedChunks;
@@ -505,17 +657,30 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
         obj[key] = false;
         return obj;
       }, {});
+
+      console.log(
+        '[HMR DEBUG] Initial currentUpdate from removedModules:',
+        currentUpdate,
+      );
+
       currentUpdateRuntime = [];
       chunkIds.forEach(function (chunkId) {
-        console.log('looping handler');
+        console.log('[HMR DEBUG] Processing chunkId:', chunkId);
+        console.log(
+          '[HMR DEBUG] Chunk in installedChunks:',
+          __webpack_require__.o(installedChunks, chunkId),
+        );
+        console.log('[HMR DEBUG] Chunk value:', installedChunks[chunkId]);
+
         if (
           __webpack_require__.o(installedChunks, chunkId) &&
           installedChunks[chunkId] !== undefined
         ) {
+          console.log('[HMR DEBUG] Loading update chunk:', chunkId);
           promises.push(loadUpdateChunk(chunkId, updatedModulesList));
           currentUpdateChunks[chunkId] = true;
-          console.log('load hot update chunk');
         } else {
+          console.log('[HMR DEBUG] Skipping chunk (not installed):', chunkId);
           currentUpdateChunks[chunkId] = false;
         }
       });

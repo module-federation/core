@@ -35,6 +35,30 @@ let demoCompleted = false;
 let initialTimestamp = timestampModule.getModuleLoadTime();
 let lastKnownTimestamp = initialTimestamp;
 
+// Use global scope to persist across HMR reloads
+if (typeof global !== 'undefined') {
+  global.didAcceptUpdate = global.didAcceptUpdate || false;
+} else if (typeof window !== 'undefined') {
+  window.didAcceptUpdate = window.didAcceptUpdate || false;
+}
+
+function getDidAcceptUpdate() {
+  if (typeof global !== 'undefined') {
+    return global.didAcceptUpdate;
+  } else if (typeof window !== 'undefined') {
+    return window.didAcceptUpdate;
+  }
+  return false;
+}
+
+function setDidAcceptUpdate(value) {
+  if (typeof global !== 'undefined') {
+    global.didAcceptUpdate = value;
+  } else if (typeof window !== 'undefined') {
+    window.didAcceptUpdate = value;
+  }
+}
+
 function testTimestampUpdate() {
   const currentTimestamp = timestampModule.getModuleLoadTime();
   const currentTimeString = timestampModule.getModuleLoadTimeString();
@@ -264,14 +288,7 @@ function triggerForceReload() {
     updatePayload.manifestJsonString,
     updatePayload.chunkJsStringsMap,
   )
-    .then((updatedModules) => {
-      console.log(
-        `✅ [Force Reload] Complete. Modules refreshed: ${updatedModules && updatedModules.length > 0 ? updatedModules.join(', ') : 'none'}`,
-      );
-      console.log(
-        '🔄 Modules have been re-installed from their original files',
-      );
-    })
+    .then((updatedModules) => {})
     .catch((err) => {
       console.error('[Force Reload] Error applying force reload:', err);
     });
@@ -337,19 +354,11 @@ function runDemo() {
       // Stop analytics processing to prevent continuous output
       analytics.stopAnalytics();
 
-      setTimeout(() => {
-        console.log('👋 Goodbye!');
-        process.exit(0);
-      }, 2000);
       return;
   }
 
   // Continue for steps 1-3, then let HMR handler continue to step 4
   if (iteration < 3) {
-    setTimeout(() => {
-      continueDemo = runDemo;
-      runDemo();
-    }, 2000);
   } else if (iteration === 3) {
     // Set up continuation for after force reload
     continueDemo = runDemo;
@@ -360,6 +369,7 @@ if (module.hot) {
   console.log('🔥 Force reload demo has module.hot support');
 
   module.hot.accept(() => {
+    setDidAcceptUpdate(true);
     console.log('\n♻️  HMR: Index module reloaded!');
     if (demoCompleted) {
       console.log('🛑 Demo already completed, not restarting.');
@@ -403,6 +413,7 @@ if (module.hot) {
       './components/dataVisualization.js',
     ],
     () => {
+      setDidAcceptUpdate(true);
       console.log('\n♻️  HMR: Application modules reloaded!');
       console.log('🔄 Re-requiring modules to get fresh instances...');
       // Re-require modules normally
@@ -428,12 +439,21 @@ if (module.hot) {
       console.log(
         '  • No new module content was provided - just empty HMR update',
       );
-      console.log('\n🛑 HMR Demo finished - exiting in 2 seconds...');
+      console.log('\n🛑 HMR Demo finished - checking HMR accept callback...');
 
+      // Check if HMR accept callback was executed
       setTimeout(() => {
+        if (getDidAcceptUpdate()) {
+          console.log(
+            '✅ HMR test completed successfully - accept callback was executed!',
+          );
+        } else {
+          console.log('❌ HMR test failed - accept callback was not executed');
+          throw new Error('HMR test failed');
+        }
         console.log('👋 Goodbye from HMR handler!');
         process.exit(0);
-      }, 2000);
+      }, 1000);
     },
   );
 }

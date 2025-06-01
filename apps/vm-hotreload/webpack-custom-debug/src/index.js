@@ -1,62 +1,67 @@
-// Simple HMR Test - Basic counter increment demo
-// This demonstrates how to trigger Webpack HMR with a simple counter
+// Basic Hello World for HMR Testing
 
 const {
   applyHotUpdateFromStringsByPatching,
 } = require('./custom-hmr-helpers.js');
 
-// Import utilities
-const timestampModule = require('./utils/timestamp');
-const dashboard = require('./dashboard.js');
-const analytics = require('./analytics.js');
+console.log('Hello World!');
 
-// Simple counter state
 let counter = 0;
-let initialTimestamp = timestampModule.getModuleLoadTime();
-let lastKnownTimestamp = initialTimestamp;
 
 function incrementCounter() {
   counter++;
+  console.log(`Counter: ${counter}`);
   return counter;
 }
 
 function getCounter() {
   return counter;
 }
+// Use global scope to persist across HMR reloads
+if (typeof global !== 'undefined') {
+  global.didAcceptUpdate = global.didAcceptUpdate || false;
+} else if (typeof window !== 'undefined') {
+  window.didAcceptUpdate = window.didAcceptUpdate || false;
+}
 
-function testTimestampUpdate() {
-  const currentTimestamp = timestampModule.getModuleLoadTime();
-
-  if (currentTimestamp === lastKnownTimestamp) {
-    throw new Error('HMR TIMESTAMP TEST FAILED: Timestamp has not updated!');
-  } else {
-    lastKnownTimestamp = currentTimestamp;
-    return true;
+function getDidAcceptUpdate() {
+  if (typeof global !== 'undefined') {
+    return global.didAcceptUpdate;
+  } else if (typeof window !== 'undefined') {
+    return window.didAcceptUpdate;
   }
-}
-function displayCurrentState() {
-  return {
-    counter: counter,
-    timestamp: timestampModule.getModuleLoadTime(),
-    dashboardCounter: dashboard.getCounter(),
-    analyticsCounter: analytics.getCounter(),
-  };
+  return false;
 }
 
-function modifyState() {
-  incrementCounter();
-  dashboard.incrementCounter();
-  analytics.incrementCounter();
+function setDidAcceptUpdate(value) {
+  if (typeof global !== 'undefined') {
+    global.didAcceptUpdate = value;
+  } else if (typeof window !== 'undefined') {
+    window.didAcceptUpdate = value;
+  }
 }
 
 function createForceReloadUpdate() {
+  console.log(
+    'currently installed chunks',
+    __webpack_require__.hmrS_readFileVm,
+  );
+  console.log('currently cached modules', Object.keys(__webpack_require__.c));
+
+  // This creates an "empty" HMR update that forces module re-installation
+  // without providing new content - modules will be reloaded from their original files
+  // Include timestamp module to test if static exports are re-evaluated
   const modulesToReload = Object.keys(__webpack_require__.c);
+  console.log(
+    '🕐 Modules to reload (including timestamp module):',
+    modulesToReload,
+  );
 
   return {
     manifestJsonString: JSON.stringify({
-      c: Object.keys(__webpack_require__.hmrS_readFileVm),
-      r: Object.keys(__webpack_require__.hmrS_readFileVm),
-      m: modulesToReload,
+      c: Object.keys(__webpack_require__.hmrS_readFileVm), // update all currently installed chunks
+      r: Object.keys(__webpack_require__.hmrS_readFileVm), // removed chunks
+      m: modulesToReload, // modules to be re-installed
     }),
     chunkJsString: `exports.id = 'main';
 exports.ids = null;
@@ -72,150 +77,61 @@ exports.runtime = /******/ function (__webpack_require__) {
   };
 }
 
-function triggerForceReload() {
-  const forceReloadUpdate = createForceReloadUpdate();
-  const updatePayload = {
-    hash: `force-reload-${Date.now()}`,
-    manifestJsonString: forceReloadUpdate.manifestJsonString,
-    chunkJsStringsMap: {
-      main: forceReloadUpdate.chunkJsString,
-      dashboard: '{}',
-      analytics: '{}',
-      components: '{}',
-    },
-  };
-
-  if (
-    typeof __webpack_require__ === 'undefined' ||
-    typeof module === 'undefined' ||
-    !module.hot
-  ) {
-    return;
-  }
-
-  applyHotUpdateFromStringsByPatching(
-    module,
-    __webpack_require__,
-    updatePayload.manifestJsonString,
-    updatePayload.chunkJsStringsMap,
-  )
-    .then((updatedModules) => {
-      // Force reload complete
-    })
-    .catch((err) => {
-      // Error applying force reload
-    });
-}
-
-let iteration = 0;
-let continueDemo = null;
-let demoCompleted = false;
-
+// Simple demo function
 function runDemo() {
-  if (demoCompleted) {
-    return;
+  console.log('Running demo...');
+  incrementCounter();
+
+  // Trigger hot update patching
+  console.log('Triggering applyHotUpdateFromStringsByPatching...');
+
+  // Only call if webpack require is available
+  if (typeof __webpack_require__ !== 'undefined') {
+    const { manifestJsonString, chunkJsString } = createForceReloadUpdate();
+    const chunkJsStringsMap = { main: chunkJsString };
+
+    applyHotUpdateFromStringsByPatching(
+      module,
+      __webpack_require__,
+      manifestJsonString,
+      chunkJsStringsMap,
+    ).then(() => {});
+  } else {
+    console.log('Webpack require not available, skipping hot update');
   }
 
-  iteration++;
-
-  switch (iteration) {
-    case 1:
-      // Step 1: Display initial state
-      break;
-
-    case 2:
-      // Step 2: Modify state
-      modifyState();
-      break;
-
-    case 3:
-      // Step 3: Trigger force reload
-      triggerForceReload();
-      return;
-
-    default:
-      // Test timestamp update after force reload
-      try {
-        testTimestampUpdate();
-      } catch (error) {
-        // Timestamp test failed
-      }
-
-      demoCompleted = true;
-      setTimeout(() => {
-        process.exit(0);
-      }, 2000);
-      return;
-  }
-
-  // Continue for steps 1-3
-  if (iteration < 3) {
-    setTimeout(() => {
-      continueDemo = runDemo;
-      runDemo();
-    }, 2000);
-  } else if (iteration === 3) {
-    continueDemo = runDemo;
-  }
+  console.log('Demo completed');
 }
-
+// HMR acceptance
 if (module.hot) {
+  console.log('🔥 Debug demo has module.hot support');
+
   module.hot.accept(() => {
-    console.log('ACCEPT HOT UPDATE SELF');
-    if (demoCompleted) {
-      return;
-    }
+    setDidAcceptUpdate(true);
+    console.log('\n♻️  HMR: Index module reloaded!');
 
-    // Test timestamp update after hot reload
+    // Small delay to ensure module is fully reloaded
     setTimeout(() => {
-      try {
-        testTimestampUpdate();
-      } catch (error) {
-        // Timestamp test failed
-      }
-
-      // Re-run demo after hot reload if continueDemo is set
-      if (typeof continueDemo === 'function') {
-        const fn = continueDemo;
-        continueDemo = null;
-        setTimeout(() => {
-          fn();
-          continueDemo = null;
-        }, 500);
-      }
+      console.log('✅ HMR Accept: Module successfully reloaded!');
     }, 100);
   });
-
-  module.hot.accept(
-    [
-      './dashboard.js',
-      './analytics.js',
-      './utils/logger.js',
-      './utils/dataManager.js',
-      './utils/metrics.js',
-      './components/userInterface.js',
-      './components/dataVisualization.js',
-    ],
-    () => {
-      // Re-require modules
-      require('./dashboard.js');
-      require('./analytics.js');
-
-      demoCompleted = true;
-      setTimeout(() => {
-        process.exit(0);
-      }, 2000);
-    },
-  );
 }
 
 // Start the demo
 runDemo();
-
+setTimeout(() => {
+  if (getDidAcceptUpdate()) {
+    console.log(
+      '✅ HMR test completed successfully - accept callback was executed!',
+    );
+  } else {
+    console.log('❌ HMR test failed - accept callback was not executed');
+    throw new Error('HMR test failed');
+  }
+}, 1000);
 // Export functions for testing
 module.exports = {
   incrementCounter,
   getCounter,
-  displayCurrentState,
-  testTimestampUpdate,
+  runDemo,
 };

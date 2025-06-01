@@ -73,6 +73,16 @@ function setupEventProcessing() {
     }
   });
 
+  // Don't start periodic processing automatically
+  // It will be started when runAnalyticsDemo is called
+}
+
+function startPeriodicProcessing() {
+  if (analyticsState.processingInterval) {
+    return; // Already started
+  }
+
+  logger.info('⚙️ Starting periodic event processing...');
   // Setup periodic batch processing
   const processingInterval = setInterval(() => {
     if (!analyticsState.isProcessing && !analyticsState.stopped) {
@@ -398,6 +408,7 @@ function runAnalyticsDemo() {
   switch (demoStep) {
     case 1:
       logger.info('📋 Step 1: Initial analytics render');
+      startPeriodicProcessing(); // Start the processing interval
       renderAnalytics();
       break;
 
@@ -456,5 +467,6 @@ module.exports = {
   generateAnalyticsReport,
   renderAnalytics,
   runAnalyticsDemo,
+  startPeriodicProcessing,
   stopAnalytics,
 };
