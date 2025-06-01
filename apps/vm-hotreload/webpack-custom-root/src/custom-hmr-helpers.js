@@ -208,12 +208,7 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
             !!newModuleFactory,
           );
 
-          var result = newModuleFactory
-            ? getAffectedModuleEffects(moduleId)
-            : {
-                type: 'disposed',
-                moduleId: moduleId,
-              };
+          var result = getAffectedModuleEffects(moduleId);
 
           console.log('[HMR DEBUG] Module effect result:', result);
 
@@ -347,7 +342,14 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
           outdatedSelfAcceptedModules.push({
             module: outdatedModuleId,
             require: module.hot._requireSelf,
-            errorHandler: module.hot._selfAccepted,
+            errorHandler:
+              typeof module.hot._selfAccepted === 'function'
+                ? null
+                : module.hot._selfAccepted,
+            callback:
+              typeof module.hot._selfAccepted === 'function'
+                ? module.hot._selfAccepted
+                : null,
           });
         }
       }
@@ -568,6 +570,30 @@ function injectInMemoryHMRRuntime(__webpack_require__) {
             );
             try {
               item.require(moduleId);
+              console.log(
+                '[HMR DEBUG] Successfully reloaded self-accepted module:',
+                moduleId,
+              );
+
+              // Then call the self-accept callback if it exists
+              if (item.callback && typeof item.callback === 'function') {
+                console.log(
+                  '[HMR DEBUG] Calling self-accept callback for module:',
+                  moduleId,
+                );
+                item.callback();
+                console.log(
+                  '[HMR DEBUG] Self-accept callback executed for module:',
+                  moduleId,
+                );
+              } else {
+                console.log(
+                  '[HMR DEBUG] No self-accept callback found for module:',
+                  moduleId,
+                  'callback type:',
+                  typeof item.callback,
+                );
+              }
             } catch (err) {
               console.log(
                 '[HMR DEBUG] Error reloading self-accepted module:',

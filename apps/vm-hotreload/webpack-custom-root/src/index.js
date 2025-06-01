@@ -312,11 +312,11 @@ function runDemo() {
 
     case 2:
       console.log('🔧 Step 2: Modify application state and show changes');
-      // modifyState();
+      modifyState();
       // displayCurrentState();
       // Run analytics demo as part of step 2
-      // console.log('📊 Running analytics demo...');
-      // analytics.runAnalyticsDemo();
+      console.log('📊 Running analytics demo...');
+      analytics.runAnalyticsDemo();
       break;
 
     case 3:
@@ -359,6 +359,11 @@ function runDemo() {
 
   // Continue for steps 1-3, then let HMR handler continue to step 4
   if (iteration < 3) {
+    setTimeout(() => {
+      if (!global.didAcceptUpdate) {
+        runDemo();
+      }
+    }, 3000);
   } else if (iteration === 3) {
     // Set up continuation for after force reload
     continueDemo = runDemo;

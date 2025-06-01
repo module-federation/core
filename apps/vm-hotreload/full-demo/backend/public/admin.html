@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HMR Management Platform - Admin</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+
+      .status-bar {
+        background: #f8f9fa;
+        padding: 20px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+      }
+
+      .status-item {
+        text-align: center;
+        margin: 10px;
+      }
+
+      .status-value {
+        font-size: 2em;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .status-label {
+        color: #6c757d;
+        font-size: 0.9em;
+      }
+
+      .main-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        padding: 30px;
+      }
+
+      .section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 25px;
+        border: 1px solid #dee2e6;
+      }
+
+      .section h2 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+      }
+
+      .update-item {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+      }
+
+      .update-item:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .update-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .update-id {
+        font-weight: bold;
+        color: #2c3e50;
+        font-size: 1.1em;
+      }
+
+      .update-description {
+        color: #6c757d;
+        margin-bottom: 15px;
+        line-height: 1.4;
+      }
+
+      .btn {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9em;
+        transition: all 0.3s ease;
+      }
+
+      .btn:hover {
+        background: linear-gradient(135deg, #2980b9 0%, #1f5f8b 100%);
+        transform: translateY(-1px);
+      }
+
+      .btn:disabled {
+        background: #95a5a6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+      }
+
+      .btn-success:hover {
+        background: linear-gradient(135deg, #229954 0%, #1e8449 100%);
+      }
+
+      .history-item {
+        background: white;
+        border-left: 4px solid #3498db;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 0 5px 5px 0;
+      }
+
+      .history-time {
+        font-size: 0.8em;
+        color: #6c757d;
+        margin-bottom: 5px;
+      }
+
+      .history-description {
+        color: #2c3e50;
+        font-weight: 500;
+      }
+
+      .logs {
+        background: #2c3e50;
+        color: #ecf0f1;
+        padding: 20px;
+        border-radius: 5px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+        max-height: 300px;
+        overflow-y: auto;
+        line-height: 1.4;
+      }
+
+      .log-entry {
+        margin-bottom: 5px;
+        padding: 2px 0;
+      }
+
+      .log-time {
+        color: #95a5a6;
+      }
+
+      .connected {
+        color: #27ae60;
+      }
+
+      .disconnected {
+        color: #e74c3c;
+      }
+
+      @media (max-width: 768px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+
+        .status-bar {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔥 HMR Management Platform</h1>
+        <p>Control and monitor Hot Module Replacement updates</p>
+      </div>
+
+      <div class="status-bar">
+        <div class="status-item">
+          <div class="status-value" id="connectedClients">0</div>
+          <div class="status-label">Connected Clients</div>
+        </div>
+        <div class="status-item">
+          <div class="status-value" id="availableUpdates">0</div>
+          <div class="status-label">Available Updates</div>
+        </div>
+        <div class="status-item">
+          <div class="status-value" id="totalUpdates">0</div>
+          <div class="status-label">Total Updates</div>
+        </div>
+        <div class="status-item">
+          <div class="status-value" id="uptime">0s</div>
+          <div class="status-label">Server Uptime</div>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="section">
+          <h2>📦 Available Updates</h2>
+          <div id="availableUpdatesList">
+            <p>Loading updates...</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>📊 Update History</h2>
+          <div id="updateHistory">
+            <p>No updates triggered yet.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" style="margin: 0 30px 30px 30px">
+        <h2>📝 Live Logs</h2>
+        <div class="logs" id="logs">
+          <div class="log-entry">
+            <span class="log-time">[${new Date().toLocaleTimeString()}]</span>
+            Admin interface loaded
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let ws;
+      let logs = [];
+
+      function connectWebSocket() {
+        ws = new WebSocket('ws://localhost:3001');
+
+        ws.onopen = function () {
+          addLog('WebSocket connected', 'connected');
+        };
+
+        ws.onmessage = function (event) {
+          const data = JSON.parse(event.data);
+          if (data.type === 'update-triggered') {
+            addLog(`Update triggered: ${data.update.updateId}`, 'info');
+            loadData(); // Refresh data
+          }
+        };
+
+        ws.onclose = function () {
+          addLog('WebSocket disconnected', 'disconnected');
+          // Attempt to reconnect after 3 seconds
+          setTimeout(connectWebSocket, 3000);
+        };
+
+        ws.onerror = function (error) {
+          addLog('WebSocket error: ' + error, 'error');
+        };
+      }
+
+      function addLog(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = {
+          time: timestamp,
+          message: message,
+          type: type,
+        };
+
+        logs.push(logEntry);
+        if (logs.length > 50) {
+          logs.shift(); // Keep only last 50 logs
+        }
+
+        updateLogsDisplay();
+      }
+
+      function updateLogsDisplay() {
+        const logsContainer = document.getElementById('logs');
+        logsContainer.innerHTML = logs
+          .map(
+            (log) =>
+              `<div class="log-entry">
+                    <span class="log-time">[${log.time}]</span>
+                    <span class="${log.type}">${log.message}</span>
+                </div>`,
+          )
+          .join('');
+
+        // Auto-scroll to bottom
+        logsContainer.scrollTop = logsContainer.scrollHeight;
+      }
+
+      async function loadData() {
+        try {
+          // Load server status
+          const statusResponse = await fetch('/api/status');
+          const status = await statusResponse.json();
+
+          document.getElementById('connectedClients').textContent =
+            status.connectedClients;
+          document.getElementById('availableUpdates').textContent =
+            status.availableUpdates;
+          document.getElementById('totalUpdates').textContent =
+            status.updateHistory;
+          document.getElementById('uptime').textContent =
+            Math.floor(status.uptime) + 's';
+
+          // Load available updates
+          const updatesResponse = await fetch('/api/available-updates');
+          const updatesData = await updatesResponse.json();
+
+          displayAvailableUpdates(updatesData.updates);
+          displayUpdateHistory(updatesData.history);
+        } catch (error) {
+          addLog('Error loading data: ' + error.message, 'error');
+        }
+      }
+
+      function displayAvailableUpdates(updates) {
+        const container = document.getElementById('availableUpdatesList');
+
+        if (updates.length === 0) {
+          container.innerHTML =
+            '<p>No updates available. Add some .hot-update.js files to the updates directory.</p>';
+          return;
+        }
+
+        container.innerHTML = updates
+          .map(
+            (update) => `
+                <div class="update-item">
+                    <div class="update-header">
+                        <div class="update-id">${update.id}</div>
+                        <button class="btn" onclick="triggerUpdate('${update.id}', '${update.description}')">
+                            🚀 Trigger Update
+                        </button>
+                    </div>
+                    <div class="update-description">${update.description}</div>
+                    <small style="color: #6c757d;">File: ${update.filename}</small>
+                </div>
+            `,
+          )
+          .join('');
+      }
+
+      function displayUpdateHistory(history) {
+        const container = document.getElementById('updateHistory');
+
+        if (history.length === 0) {
+          container.innerHTML = '<p>No updates triggered yet.</p>';
+          return;
+        }
+
+        container.innerHTML = history
+          .reverse()
+          .map(
+            (update) => `
+                <div class="history-item">
+                    <div class="history-time">${new Date(update.timestamp).toLocaleString()}</div>
+                    <div class="history-description">${update.description}</div>
+                    <small style="color: #6c757d;">ID: ${update.updateId}</small>
+                </div>
+            `,
+          )
+          .join('');
+      }
+
+      async function triggerUpdate(updateId, description) {
+        try {
+          const response = await fetch('/api/trigger-update', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ updateId, description }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            addLog(`Successfully triggered update: ${updateId}`, 'connected');
+            loadData(); // Refresh data
+          } else {
+            addLog(`Failed to trigger update: ${result.error}`, 'error');
+          }
+        } catch (error) {
+          addLog('Error triggering update: ' + error.message, 'error');
+        }
+      }
+
+      // Initialize
+      document.addEventListener('DOMContentLoaded', function () {
+        connectWebSocket();
+        loadData();
+
+        // Refresh data every 5 seconds
+        setInterval(loadData, 5000);
+      });
+    </script>
+  </body>
+</html>

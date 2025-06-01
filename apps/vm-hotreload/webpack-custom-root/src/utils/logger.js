@@ -16,7 +16,7 @@ class Logger {
     };
 
     this.logs.push(logEntry);
-    console.log(`[${timestamp}] [${this.prefix}] [${level}] ${message}`);
+    // console.log(`[${timestamp}] [${this.prefix}] [${level}] ${message}`);
   }
 
   info(message) {

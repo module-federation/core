@@ -1,0 +1,24 @@
+{
+  "name": "hmr-management-platform",
+  "version": "1.0.0",
+  "description": "Complete HMR management platform with backend API, client application, and web interface",
+  "main": "index.js",
+  "scripts": {
+    "start:backend": "pnpm --filter hmr-backend start",
+    "start:client": "pnpm --filter hmr-client-demo start",
+    "start:all": "pnpm --filter hmr-backend start & pnpm --filter hmr-client-demo start",
+    "demo": "pnpm run start:all",
+    "install:all": "pnpm install --recursive",
+    "dev:backend": "pnpm --filter hmr-backend dev",
+    "dev:client": "pnpm --filter hmr-client-demo dev",
+    "build:client": "pnpm --filter hmr-client-demo build"
+  },
+  "keywords": [
+    "hmr",
+    "hot-module-replacement",
+    "webpack",
+    "api",
+    "management"
+  ],
+  "license": "MIT"
+}
