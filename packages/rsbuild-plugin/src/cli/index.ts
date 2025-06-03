@@ -12,6 +12,7 @@ import {
   createSSRREnvConfig,
   setSSREnv,
   SSR_ENV_NAME,
+  SSR_DIR,
 } from './ssr';
 import { updateStatsAndManifest } from './manifest';
 
@@ -42,7 +43,7 @@ const RSBUILD_PLUGIN_MODULE_FEDERATION_NAME =
   'rsbuild:module-federation-enhanced';
 const RSBUILD_PLUGIN_NAME = '@module-federation/rsbuild-plugin';
 
-export { RSBUILD_PLUGIN_MODULE_FEDERATION_NAME, PLUGIN_NAME };
+export { RSBUILD_PLUGIN_MODULE_FEDERATION_NAME, PLUGIN_NAME, SSR_DIR };
 
 const LIB_FORMAT = ['umd', 'modern-module'];
 
