@@ -451,6 +451,12 @@ export const moduleFederationConfigPlugin = (
             'Access-Control-Allow-Headers': '*',
           }
         : undefined;
+      const defineConfig = {
+        REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
+      };
+      if (isDev) {
+        defineConfig['FEDERATION_IPV4'] = JSON.stringify(ipv4);
+      }
       return {
         tools: {
           devServer: {
@@ -464,10 +470,7 @@ export const moduleFederationConfigPlugin = (
               '@module-federation/modern-js/runtime',
             ),
           },
-          define: {
-            FEDERATION_IPV4: JSON.stringify(ipv4),
-            REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
-          },
+          define: defineConfig,
           enableAsyncEntry:
             bundlerType === 'rspack'
               ? (modernjsConfig.source?.enableAsyncEntry ?? true)
