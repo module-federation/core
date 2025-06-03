@@ -144,6 +144,7 @@ export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
   remoteIpStrategy?: 'ipv4' | 'inherit',
+  enableSSR?: boolean,
 ) => {
   replaceRemoteUrl(mfConfig, remoteIpStrategy);
   if (mfConfig.remoteType === undefined) {
@@ -161,7 +162,7 @@ export const patchMFConfig = (
     runtimePlugins,
   );
 
-  if (isDev) {
+  if (enableSSR && isDev) {
     injectRuntimePlugins(
       require.resolve('@module-federation/modern-js/resolve-entry-ipv4'),
       runtimePlugins,
@@ -393,6 +394,7 @@ export const moduleFederationConfigPlugin = (
         targetMFConfig,
         !isWeb,
         userConfig.remoteIpStrategy || 'ipv4',
+        enableSSR,
       );
 
       patchBundlerConfig({
@@ -454,7 +456,7 @@ export const moduleFederationConfigPlugin = (
       const defineConfig = {
         REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
       };
-      if (isDev) {
+      if (enableSSR && isDev) {
         defineConfig['FEDERATION_IPV4'] = JSON.stringify(ipv4);
       }
       return {
