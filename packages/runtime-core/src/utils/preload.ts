@@ -70,6 +70,7 @@ export function preloadAssets(
   assets: PreloadAssets,
   // It is used to distinguish preload from load remote parallel loading
   useLinkPreload = true,
+  root: HTMLElement = document.head,
 ): void {
   const { cssAssets, jsAssetsWithoutEntry, entryAssets } = assets;
 
@@ -99,6 +100,7 @@ export function preloadAssets(
       };
       cssAssets.forEach((cssUrl) => {
         const { link: cssEl, needAttach } = createLink({
+          root,
           url: cssUrl,
           cb: () => {
             // noop
@@ -116,7 +118,7 @@ export function preloadAssets(
           },
         });
 
-        needAttach && document.head.appendChild(cssEl);
+        needAttach && root.appendChild(cssEl);
       });
     } else {
       const defaultAttrs = {
@@ -125,6 +127,7 @@ export function preloadAssets(
       };
       cssAssets.forEach((cssUrl) => {
         const { link: cssEl, needAttach } = createLink({
+          root,
           url: cssUrl,
           cb: () => {
             // noop
@@ -143,7 +146,7 @@ export function preloadAssets(
           needDeleteLink: false,
         });
 
-        needAttach && document.head.appendChild(cssEl);
+        needAttach && root.appendChild(cssEl);
       });
     }
 
@@ -154,6 +157,7 @@ export function preloadAssets(
       };
       jsAssetsWithoutEntry.forEach((jsUrl) => {
         const { link: linkEl, needAttach } = createLink({
+          root: document.head,
           url: jsUrl,
           cb: () => {
             // noop
