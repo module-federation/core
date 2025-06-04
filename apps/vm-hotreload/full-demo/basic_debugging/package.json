@@ -4,8 +4,8 @@
   "description": "Basic HMR debugging tool that connects to backend API for hot updates",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --mode development",
-    "start": "npm run build && node dist/index.js",
+    "build": "echo 'must use start command only'",
+    "start": "npx webpack --mode development && node dist/index.js",
     "dev": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

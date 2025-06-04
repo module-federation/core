@@ -1,0 +1,63 @@
+
+
+> @module-federation/modern-js@0.14.3 build /Users/bytedance/dev/universe/packages/modernjs
+> modern-module build
+
+[1m[38;2;189;255;243m [39m[38;2;189;255;243m [39m[38;2;184;252;239mM[39m[38;2;179;249;235mo[39m[38;2;173;247;231md[39m[38;2;168;244;227me[39m[38;2;163;241;223mr[39m[38;2;158;238;219mn[39m[38;2;152;236;215m.[39m[38;2;147;233;211mj[39m[38;2;142;230;207ms[39m[38;2;142;230;207m [39m[38;2;137;227;203mM[39m[38;2;132;224;199mo[39m[38;2;126;222;194md[39m[38;2;121;219;190mu[39m[38;2;116;216;186ml[39m[38;2;111;213;182me[39m[38;2;111;213;182m [39m[38;2;105;211;178mv[39m[38;2;100;208;174m2[39m[38;2;95;205;170m.[39m[38;2;90;202;166m6[39m[38;2;84;200;162m7[39m[38;2;79;197;158m.[39m[38;2;74;194;154m6[39m[38;2;74;194;154m
+[39m[22m
+[1m[31merror  [39m[22m ModuleBuildError: 
+
+[31m[1mbundleless DTS failed:[22m[39m
+
+[96msrc/runtime/createRemoteSSRComponent.tsx[0m:[93m184[0m:[93m10[0m - [91merror[0m[90m TS2786: [0m'FallbackFunctionComponent' cannot be used as a JSX component.
+  Its type 'ComponentType<FallbackProps>' is not a valid JSX element type.
+    Type 'ComponentClass<FallbackProps, any>' is not assignable to type 'ElementType'.
+      Type 'ComponentClass<FallbackProps, any>' is not assignable to type 'new (props: any, deprecatedLegacyContext?: any) => Component<any, any, any>'.
+        Property 'refs' is missing in type 'Component<FallbackProps, any, any>' but required in type 'Component<any, any, any>'.
+
+[7m184[0m         <FallbackFunctionComponent
+[7m   [0m [91m         ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96m../../node_modules/.pnpm/@types+react@18.3.11/node_modules/@types/react/index.d.ts[0m:[93m1033[0m:[93m9[0m
+    [7m1033[0m         refs: {
+    [7m    [0m [96m        ~~~~[0m
+    'refs' is declared here.
+
+[96msrc/runtime/createRemoteSSRComponent.tsx[0m:[93m199[0m:[93m8[0m - [91merror[0m[90m TS2786: [0m'ErrorBoundary' cannot be used as a JSX component.
+  Its type 'typeof ErrorBoundary' is not a valid JSX element type.
+    Types of construct signatures are incompatible.
+      Type 'new (props: ErrorBoundaryProps) => ErrorBoundary' is not assignable to type 'new (props: any, deprecatedLegacyContext?: any) => Component<any, any, any>'.
+        Property 'refs' is missing in type 'ErrorBoundary' but required in type 'Component<any, any, any>'.
+
+[7m199[0m       <ErrorBoundary FallbackComponent={info.fallback}>
+[7m   [0m [91m       ~~~~~~~~~~~~~[0m
+
+  [96m../../node_modules/.pnpm/@types+react@18.3.11/node_modules/@types/react/index.d.ts[0m:[93m1033[0m:[93m9[0m
+    [7m1033[0m         refs: {
+    [7m    [0m [96m        ~~~~[0m
+    'refs' is declared here.
+
+[96msrc/ssr-runtime/SSRLiveReload.tsx[0m:[93m1[0m:[93m17[0m - [91merror[0m[90m TS2742: [0mThe inferred type of 'SSRLiveReload' cannot be named without a reference to '../../../../../next.js/node_modules/@types/react'. This is likely not portable. A type annotation is necessary.
+
+[7m1[0m export function SSRLiveReload() {
+[7m [0m [91m                ~~~~~~~~~~~~~[0m
+
+
+Found 3 errors in 2 files.
+
+Errors  Files
+     2  src/runtime/createRemoteSSRComponent.tsx[90m:184[0m
+     1  src/ssr-runtime/SSRLiveReload.tsx[90m:1[0m
+[90m    at makeError (/Users/bytedance/dev/next.js/node_modules/.pnpm/@modern-js+utils@2.67.6/node_modules/@modern-js/utils/dist/compiled/execa/index.js:1:8677)[39m
+[90m    at handlePromise (/Users/bytedance/dev/next.js/node_modules/.pnpm/@modern-js+utils@2.67.6/node_modules/@modern-js/utils/dist/compiled/execa/index.js:1:5315)[39m
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+[90m    at async runTscBin (/Users/bytedance/dev/next.js/node_modules/.pnpm/@modern-js+module-tools@2.67.6_typescript@5.8.2/node_modules/@modern-js/module-tools/dist/builder/dts/tsc.js:117:5)[39m
+[90m    at async runTsc (/Users/bytedance/dev/next.js/node_modules/.pnpm/@modern-js+module-tools@2.67.6_typescript@5.8.2/node_modules/@modern-js/module-tools/dist/builder/dts/tsc.js:126:3)[39m
+[90m    at async generatorDts (/Users/bytedance/dev/next.js/node_modules/.pnpm/@modern-js+module-tools@2.67.6_typescript@5.8.2/node_modules/@modern-js/module-tools/dist/builder/build.js:114:5)[39m
+[90m    at async /Users/bytedance/dev/next.js/node_modules/.pnpm/@modern-js+module-tools@2.67.6_typescript@5.8.2/node_modules/@modern-js/module-tools/dist/builder/build.js:64:7[39m
+[90m    at async /Users/bytedance/dev/next.js/node_modules/.pnpm/@modern-js+module-tools@2.67.6_typescript@5.8.2/node_modules/@modern-js/module-tools/compiled/p-map/index.js:1:2587[39m
+[90m    at Object.run (/Users/bytedance/dev/next.js/node_modules/.pnpm/@modern-js+module-tools@2.67.6_typescript@5.8.2/node_modules/@modern-js/module-tools/dist/builder/index.js:77:15)[39m
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+[90m    at async build (/Users/bytedance/dev/next.js/node_modules/.pnpm/@modern-js+module-tools@2.67.6_typescript@5.8.2/node_modules/@modern-js/module-tools/dist/build.js:56:3)[39m
+[90m    at async Command.<anonymous> (/Users/bytedance/dev/next.js/node_modules/.pnpm/@modern-js+module-tools@2.67.6_typescript@5.8.2/node_modules/@modern-js/module-tools/dist/command.js:53:5)[39m
+[41m[30m ELIFECYCLE [39m[49m [31mCommand failed with exit code 1.[39m

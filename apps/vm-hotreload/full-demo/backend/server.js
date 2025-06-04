@@ -30,7 +30,15 @@ wss.on('connection', (ws) => {
 // In-memory state
 let updateHistory = [];
 let availableUpdates = [];
-let lastUpdateId = 0;
+let clientUpdateTracking = new Map(); // Track which updates each client has received
+
+// Generate a unique webpack-style hash
+function generateWebpackHash() {
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
+}
 
 // Load available updates from updates directory
 function loadAvailableUpdates() {
@@ -67,21 +75,33 @@ function extractDescription(content) {
 // Get pending updates for client
 app.get('/api/updates', (req, res) => {
   const clientId = req.query.clientId || 'default';
-  const lastAppliedId = parseInt(req.query.lastAppliedId) || 0;
+  const currentHash = req.query.currentHash || '0';
 
-  const pendingUpdatesRaw = updateHistory.filter(
-    (update) => update.id > lastAppliedId && update.triggered,
-  );
+  // Get the list of updates this client has already received
+  if (!clientUpdateTracking.has(clientId)) {
+    clientUpdateTracking.set(clientId, new Set());
+  }
+  const clientReceivedUpdates = clientUpdateTracking.get(clientId);
 
-  const formattedUpdates = pendingUpdatesRaw.map((update) => {
-    // Extract module path from content - this is a simplified example
-    // A more robust solution would parse the JS content or have this info stored
-    // const modulePathMatch = update.content.match(
-    //   /\*!\*\*\* (\.\/src\/[^\s]+) \*\*\*!/,
-    // );
-    // const modulePath = modulePathMatch ? modulePathMatch[1] : update.filename; // Fallback to filename
+  // Find the latest triggered update that:
+  // 1. Has a different hash than client's current hash
+  // 2. Has not been sent to this client before
+  const latestUpdate = updateHistory
+    .filter((update) => {
+      return (
+        update.triggered &&
+        update.webpackHash !== currentHash &&
+        !clientReceivedUpdates.has(update.updateId)
+      );
+    })
+    .slice(-1)[0]; // Get the most recent one
 
-    return {
+  let formattedUpdate = null;
+  if (latestUpdate) {
+    // Mark this update as sent to this client
+    clientReceivedUpdates.add(latestUpdate.updateId);
+
+    formattedUpdate = {
       manifest: {
         c: ['index'], // Assuming 'index' is the main chunk for all these updates
         r: [], // Removed chunks, empty for now
@@ -89,22 +109,25 @@ app.get('/api/updates', (req, res) => {
           // modulePath
         ], // Modules affected by this update
       },
-      script: update.content,
+      script: latestUpdate.content,
       // Keep original update info for reference if needed by client
-      originalUpdateInfo: {
-        id: update.id,
-        updateId: update.updateId,
-        filename: update.filename,
-        description: update.description,
-        triggered: update.triggered,
-        timestamp: update.timestamp,
+      originalInfo: {
+        updateId: latestUpdate.updateId,
+        filename: latestUpdate.filename,
+        description: latestUpdate.description,
+        triggered: latestUpdate.triggered,
+        timestamp: latestUpdate.timestamp,
+        webpackHash: latestUpdate.webpackHash,
       },
     };
-  });
+
+    console.log(
+      `Sending update ${latestUpdate.updateId} to client ${clientId} with hash ${latestUpdate.webpackHash}`,
+    );
+  }
 
   res.json({
-    updates: formattedUpdates,
-    lastUpdateId: Math.max(...updateHistory.map((u) => u.id), 0),
+    update: formattedUpdate, // Single update object instead of array
     serverTime: Date.now(),
   });
 });
@@ -126,14 +149,17 @@ app.post('/api/trigger-update', (req, res) => {
     return res.status(404).json({ error: 'Update not found' });
   }
 
+  // Generate a unique webpack hash for this update
+  const webpackHash = generateWebpackHash();
+
   const triggeredUpdate = {
-    id: ++lastUpdateId,
     updateId: updateId,
     filename: update.filename,
     description: description || update.description,
     content: update.content,
     triggered: true,
     timestamp: Date.now(),
+    webpackHash: webpackHash,
   };
 
   updateHistory.push(triggeredUpdate);
@@ -159,19 +185,45 @@ app.post('/api/trigger-basic-debugger-test', (req, res) => {
   const { description = 'Basic Debugger Test Update' } = req.body;
 
   // Create a test update specifically for basic debugger
+  // Generate a unique hash for this update to prevent continuous reloads
+  const uniqueUpdateHash = `basic-debugger-test-${Date.now().toString(36)}`;
+
+  // Generate a unique webpack hash for this update
+  const webpackHash = generateWebpackHash();
+
   const testUpdate = {
-    id: ++lastUpdateId,
-    updateId: 'basic-debugger-test',
-    filename: 'basic-debugger-test.hot-update.js',
+    updateId: uniqueUpdateHash, // Use unique hash instead of fixed string
+    filename: `${uniqueUpdateHash}.hot-update.js`,
     description: description,
+    webpackHash: webpackHash,
     content: `/** Basic Debugger Test Update */
 exports.id = 'main';
-exports.ids = ['something'];
-exports.modules = {};
+exports.ids = null;
+exports.modules = {
+  './src/index.js': function(module, exports, __webpack_require__) {
+    console.log('🧪 Basic debugger test module loaded at:', new Date().toISOString());
+    console.log('🔄 This is a test hot update for the basic debugger');
+
+    // Test module that demonstrates HMR functionality
+    const testData = {
+      timestamp: Date.now(),
+      message: 'Hot update applied successfully!',
+      counter: Math.floor(Math.random() * 1000)
+    };
+
+    console.log('📊 Test data:', testData);
+if (module.hot) {
+  console.log('🔥 Debug demo has module.hot support');
+  // process.exit();
+  module.hot.accept();
+}
+    module.exports = testData;
+  }
+};
 exports.runtime = /******/ function (__webpack_require__) {
   /******/ /* webpack/runtime/getFullHash */
   /******/ (() => {
-    /******/ __webpack_require__.h = () => 'basic-debugger-test';
+    /******/ __webpack_require__.h = () => '${webpackHash}';
     /******/
   })();
   /******/
@@ -204,7 +256,7 @@ app.get('/api/status', (req, res) => {
     connectedClients: connectedClients.size,
     availableUpdates: availableUpdates.length,
     updateHistory: updateHistory.length,
-    lastUpdateId: lastUpdateId,
+    totalUpdates: updateHistory.length,
     uptime: process.uptime(),
   });
 });

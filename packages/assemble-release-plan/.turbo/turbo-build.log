@@ -1,0 +1,10 @@
+
+
+> @changesets/assemble-release-plan@6.0.4 build /Users/bytedance/dev/universe/packages/assemble-release-plan
+> preconstruct build
+
+🎁 [36minfo[39m building bundles!
+Browserslist: browsers data (caniuse-lite) is 18 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+🎁 [32msuccess[39m built bundles!

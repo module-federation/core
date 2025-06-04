@@ -3,7 +3,10 @@ const { createHMRRuntime } = require('./hmr-runtime');
 
 // Webpack runtime code for in-memory HMR - only executed when webpack is available
 function injectInMemoryHMRRuntime(__webpack_require__) {
-  if (typeof __webpack_require__ === 'undefined') {
+  if (
+    typeof __webpack_require__ === 'undefined' ||
+    __webpack_require__.setInMemoryManifest
+  ) {
     console.warn(
       '[Custom HMR Helper] __webpack_require__ not available, skipping runtime injection',
     );
@@ -76,9 +79,7 @@ function applyHotUpdateFromStringsByPatching(
   manifestJsonString,
   chunkJsStringsMap,
 ) {
-  console.log(
-    '🔥 [Custom HMR Helper] Applying update using patched runtime modules',
-  );
+  // Applying update using patched runtime modules
 
   return new Promise((resolve, reject) => {
     try {
@@ -95,29 +96,27 @@ function applyHotUpdateFromStringsByPatching(
 
       // Inject the in-memory HMR runtime if not already injected
       if (!webpackRequire.setInMemoryManifest) {
-        console.log('🔧 [Custom HMR Helper] Injecting in-memory HMR runtime');
+        // Injecting in-memory HMR runtime
         injectInMemoryHMRRuntime(webpackRequire);
       }
 
-      console.log('🚀 [Custom HMR Helper] Setting in-memory content for HMR');
+      // Setting in-memory content for HMR
 
       // Set the in-memory manifest content
       if (webpackRequire.setInMemoryManifest) {
         webpackRequire.setInMemoryManifest(manifestJsonString);
-        console.log('📄 [Custom HMR Helper] Set in-memory manifest');
+        // Set in-memory manifest
       } else {
-        console.warn(
-          '⚠️ [Custom HMR Helper] setInMemoryManifest not available',
-        );
+        // setInMemoryManifest not available
       }
       // Set the in-memory chunk content for each chunk
       if (webpackRequire.setInMemoryChunk) {
         for (const chunkId in chunkJsStringsMap) {
           webpackRequire.setInMemoryChunk(chunkId, chunkJsStringsMap[chunkId]);
-          console.log(`📦 [Custom HMR Helper] Set in-memory chunk: ${chunkId}`);
+          // Set in-memory chunk
         }
       } else {
-        console.warn('⚠️ [Custom HMR Helper] setInMemoryChunk not available');
+        // setInMemoryChunk not available
       }
 
       console.log(
@@ -136,10 +135,7 @@ function applyHotUpdateFromStringsByPatching(
               resolve([]);
               return;
             }
-            console.log(
-              '✅ [Custom HMR Helper] Update applied. Updated modules:',
-              updatedModules,
-            );
+            // Update applied
             resolve(updatedModules || []);
           })
           .catch((error) => {

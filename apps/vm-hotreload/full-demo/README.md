@@ -185,13 +185,25 @@ full-demo/
 
 ### Running the Demo
 
-#### Option 1: Run Everything (Recommended)
-```bash
-# From the full-demo directory
-   npm run demo
-```
+#### Option 1: All-in-One Startup (Recommended)
 
-#### Option 2: Run Components Separately
+1. **Start All Services**:
+   ```bash
+   ./start-all.sh
+   ```
+
+2. **Test the HMR System**:
+   ```bash
+   bash test_hmr.sh
+   ```
+
+3. **Stop All Services**:
+   ```bash
+   ./stop-all.sh
+   # Or press Ctrl+C in the start-all.sh terminal
+   ```
+
+#### Option 2: Manual Startup
 
 1. **Start the Backend API Server:**
    ```bash
@@ -210,7 +222,18 @@ full-demo/
    pnpm --filter hmr-client-demo start
    ```
 
-3. **Open the Admin Interface:**
+3. **Start the Client Demo** (optional):
+   ```bash
+   cd client
+   pnpm start
+   ```
+
+4. **Test the HMR System**:
+   ```bash
+   bash test_hmr.sh
+   ```
+
+5. **Open the Admin Interface:**
    Open your browser and navigate to: `http://localhost:3000/admin`
 
 ## 🎮 Using the Demo

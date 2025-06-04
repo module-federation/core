@@ -172,7 +172,7 @@ function createApplyHandler(__webpack_require__, installedChunks, state) {
       if (__webpack_require__.o(state.currentUpdate, moduleId)) {
         var newModuleFactory = state.currentUpdate[moduleId];
         /** @type {TODO} */
-        var result = newModuleFactory
+        var result = true
           ? getAffectedModuleEffects(moduleId)
           : {
               type: 'disposed',
@@ -231,7 +231,10 @@ function createApplyHandler(__webpack_require__, installedChunks, state) {
           };
         }
         if (doApply) {
-          appliedUpdate[moduleId] = newModuleFactory;
+          //if no new module factory, use the existing one
+          appliedUpdate[moduleId] =
+            newModuleFactory || __webpack_require__.m[moduleId];
+          // Propagate outdated modules and dependencies inf
           addAllToSet(outdatedModules, result.outdatedModules);
           for (moduleId in result.outdatedDependencies) {
             if (__webpack_require__.o(result.outdatedDependencies, moduleId)) {
@@ -250,7 +253,7 @@ function createApplyHandler(__webpack_require__, installedChunks, state) {
         }
       }
     }
-    currentUpdate = undefined;
+    state.currentUpdate = undefined;
 
     // Store self accepted outdated modules to require them later by the module system
     var outdatedSelfAcceptedModules = [];
@@ -277,10 +280,10 @@ function createApplyHandler(__webpack_require__, installedChunks, state) {
 
     return {
       dispose: function () {
-        currentUpdateRemovedChunks.forEach(function (chunkId) {
+        state.currentUpdateRemovedChunks.forEach(function (chunkId) {
           delete installedChunks[chunkId];
         });
-        currentUpdateRemovedChunks = undefined;
+        state.currentUpdateRemovedChunks = undefined;
 
         var idx;
         var queue = outdatedModules.slice();
@@ -345,8 +348,8 @@ function createApplyHandler(__webpack_require__, installedChunks, state) {
         }
 
         // run new runtime modules
-        for (var i = 0; i < currentUpdateRuntime.length; i++) {
-          currentUpdateRuntime[i](__webpack_require__);
+        for (var i = 0; i < state.currentUpdateRuntime.length; i++) {
+          state.currentUpdateRuntime[i](__webpack_require__);
         }
 
         // call accept handlers
@@ -520,10 +523,10 @@ function createHMRHandlers(
 ) {
   return {
     hmrI: function (moduleId, applyHandlers) {
-      console.log('[HMR DEBUG] hmrI.readFileVm called for module:', moduleId);
+      // hmrI.readFileVm called for module
 
       if (!state.currentUpdate) {
-        console.log('[HMR DEBUG] Initializing currentUpdate');
+        // Initializing currentUpdate
         state.currentUpdate = {};
         state.currentUpdateRuntime = [];
         state.currentUpdateRemovedChunks = [];
@@ -531,16 +534,13 @@ function createHMRHandlers(
       }
 
       if (!__webpack_require__.o(state.currentUpdate, moduleId)) {
-        console.log('[HMR DEBUG] Adding module to currentUpdate:', moduleId);
+        // Adding module to currentUpdate
         state.currentUpdate[moduleId] = __webpack_require__.m[moduleId];
       } else {
-        console.log('[HMR DEBUG] Module already in currentUpdate:', moduleId);
+        // Module already in currentUpdate
       }
 
-      console.log(
-        '[HMR DEBUG] Current update modules:',
-        Object.keys(state.currentUpdate),
-      );
+      // Current update modules
     },
     hmrC: function (
       chunkIds,
@@ -564,29 +564,21 @@ function createHMRHandlers(
         return obj;
       }, {});
 
-      console.log(
-        '[HMR DEBUG] Initial currentUpdate from removedModules:',
-        state.currentUpdate,
-      );
+      // Initial currentUpdate from removedModules
 
       state.currentUpdateRuntime = [];
       chunkIds.forEach(function (chunkId) {
-        console.log('[HMR DEBUG] Processing chunkId:', chunkId);
-        console.log(
-          '[HMR DEBUG] Chunk in installedChunks:',
-          __webpack_require__.o(installedChunks, chunkId),
-        );
-        console.log('[HMR DEBUG] Chunk value:', installedChunks[chunkId]);
+        // Processing chunkId
 
         if (
           __webpack_require__.o(installedChunks, chunkId) &&
           installedChunks[chunkId] !== undefined
         ) {
-          console.log('[HMR DEBUG] Loading update chunk:', chunkId);
+          // Loading update chunk
           promises.push(loadUpdateChunk(chunkId, updatedModulesList));
           state.currentUpdateChunks[chunkId] = true;
         } else {
-          console.log('[HMR DEBUG] Skipping chunk (not installed):', chunkId);
+          // Skipping chunk (not installed)
           state.currentUpdateChunks[chunkId] = false;
         }
       });

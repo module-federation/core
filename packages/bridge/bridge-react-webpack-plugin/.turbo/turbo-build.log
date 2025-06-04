@@ -1,0 +1,17 @@
+
+
+> @module-federation/bridge-react-webpack-plugin@0.14.3 build /Users/bytedance/dev/universe/packages/bridge/bridge-react-webpack-plugin
+> vite build
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+[36mvite v5.4.19 [32mbuilding for production...[36m[39m
+[2K[1Gtransforming (1) [2msrc/index.ts[22[2K[1Gtransforming (6) [2m../../../../next[2K[1G[2K[1G[32m✓[39m 91 modules transformed.
+[2K[1Grendering chunks (1)...[2K[1G[32m
+[36m[vite:dts][32m Start generate declaration files...[39m
+[2K[1Gcomputing gzip size (0)...[2K[1Gcomputing gzip size (1)...[2K[1G[2mdist/[22m[36mindex.cjs.js  [39m[1m[2m56.18 kB[22m[1m[22m[2m │ gzip: 12.46 kB[22m
+[32m[36m[vite:dts][32m Start rollup declaration files...[39m
+Analysis will use the bundled TypeScript version 5.8.2
+[32m[36m[vite:dts][32m Declaration files built in 6742ms.
+[39m
+[2K[1Grendering chunks (1)...[2K[1G[2K[1Gcomputing gzip size (1)...[2K[1G[2mdist/[22m[36mindex.es.js  [39m[1m[2m55.03 kB[22m[1m[22m[2m │ gzip: 12.03 kB[22m
+[32m✓ built in 7.11s[39m
