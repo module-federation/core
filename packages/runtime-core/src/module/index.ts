@@ -122,7 +122,8 @@ class Module {
       if (typeof remoteEntryExports?.init === 'undefined') {
         error(
           getShortErrorMsg(RUNTIME_002, runtimeDescMap, {
-            remoteName: name,
+            hostName: this.host.name,
+            remoteName: this.remoteInfo.name,
             remoteEntryUrl: this.remoteInfo.entry,
             remoteEntryKey: this.remoteInfo.entryGlobalName,
           }),

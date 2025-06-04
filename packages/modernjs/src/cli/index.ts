@@ -67,6 +67,13 @@ export const moduleFederationPlugin = (
           }
         }
       });
+
+      api._internalServerPlugins(({ plugins }) => {
+        plugins.push({
+          name: '@module-federation/modern-js/server',
+        });
+        return { plugins };
+      });
     },
     usePlugins: [
       moduleFederationConfigPlugin(internalModernPluginOptions),

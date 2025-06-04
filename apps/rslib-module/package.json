@@ -23,14 +23,14 @@
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@module-federation/storybook-addon": "workspace:*",
     "@rsbuild/plugin-react": "^1.0.6",
-    "@rslib/core": "0.2.0",
+    "@rslib/core": "^0.9.0",
     "@types/react": "^18.3.11",
     "http-server": "^14.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "storybook": "^8.3.6",
-    "storybook-react-rsbuild": "^0.1.5",
-    "storybook-addon-rslib": "^0.1.4"
+    "storybook-react-rsbuild": "^1.0.1",
+    "storybook-addon-rslib": "^1.0.1"
   },
   "peerDependencies": {
     "react": "*"

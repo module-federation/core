@@ -9,6 +9,7 @@ import {
   addDataFetchExposes,
 } from '@module-federation/rsbuild-plugin/utils';
 import logger from '../logger';
+import { isDev } from './utils';
 
 import type { InternalModernPluginOptions } from '../types';
 import type {
@@ -19,7 +20,6 @@ import type {
   CliPluginFuture,
   Bundler,
 } from '@modern-js/app-tools';
-import { isDev } from './utils';
 import type { BundlerChainConfig } from '../interfaces/bundler';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
@@ -147,6 +147,7 @@ export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
   remoteIpStrategy?: 'ipv4' | 'inherit',
+  enableSSR?: boolean,
 ) => {
   replaceRemoteUrl(mfConfig, remoteIpStrategy);
   addDataFetchExposes(mfConfig.exposes, isServer);
@@ -173,7 +174,7 @@ export const patchMFConfig = (
     runtimePlugins,
   );
 
-  if (isDev()) {
+  if (enableSSR && isDev()) {
     injectRuntimePlugins(
       require.resolve('@module-federation/modern-js/resolve-entry-ipv4'),
       runtimePlugins,
@@ -397,7 +398,6 @@ export const moduleFederationConfigPlugin = (
         return;
       }
       const isWeb = isWebTarget(target);
-      // @ts-expect-error chain type is not correct
       addMyTypes2Ignored(chain, !isWeb ? ssrConfig : csrConfig);
 
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
@@ -405,10 +405,10 @@ export const moduleFederationConfigPlugin = (
         targetMFConfig,
         !isWeb,
         userConfig.remoteIpStrategy || 'ipv4',
+        enableSSR,
       );
 
       patchBundlerConfig({
-        // @ts-expect-error chain type is not correct
         chain,
         isServer: !isWeb,
         modernjsConfig,
@@ -463,6 +463,12 @@ export const moduleFederationConfigPlugin = (
             'Access-Control-Allow-Headers': '*',
           }
         : undefined;
+      const defineConfig = {
+        REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
+      };
+      if (enableSSR && isDev()) {
+        defineConfig['FEDERATION_IPV4'] = JSON.stringify(ipv4);
+      }
       return {
         tools: {
           devServer: {
@@ -476,11 +482,7 @@ export const moduleFederationConfigPlugin = (
               '@module-federation/modern-js/runtime',
             ),
           },
-          define: {
-            FEDERATION_IPV4: JSON.stringify(ipv4),
-            REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
-            // FEDERATION_SSR: JSON.stringify(enableSSR),
-          },
+          define: defineConfig,
           enableAsyncEntry:
             bundlerType === 'rspack'
               ? (modernjsConfig.source?.enableAsyncEntry ?? true)
