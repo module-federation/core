@@ -126,7 +126,7 @@
     "@module-federation/node": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/cli": "workspace:*",
-    "@swc/helpers": "0.5.13",
+    "@swc/helpers": "^0.5.17",
     "node-fetch": "~3.3.0",
     "react-error-boundary": "4.1.2"
   },
