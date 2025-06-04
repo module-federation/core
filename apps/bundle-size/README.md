@@ -11,3 +11,7 @@ Run the development server and navigate to the provided localhost URL.
 
 - `pnpm start`: Start dev server
 - `pnpm build`: Build production bundle
+
+## Configuration
+
+Check `webpack.config.js` or `next.config.js` for federation settings.
