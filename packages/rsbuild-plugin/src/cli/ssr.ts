@@ -81,6 +81,7 @@ export function createSSRMFConfig(
 ) {
   const ssrMFConfig = {
     ...mfConfig,
+    exposes: { ...mfConfig.exposes },
     library: {
       ...mfConfig.library,
       name: mfConfig.name,

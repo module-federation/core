@@ -46,6 +46,7 @@
     "app:manifest:dev": "NX_TUI=false nx run-many --target=serve --configuration=development --parallel=100 -p modernjs,manifest-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider",
     "app:manifest:prod": "NX_TUI=false nx run-many --target=serve --configuration=production --parallel=100 -p modernjs,manifest-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider",
     "app:ts:dev": "nx run-many --target=serve -p react_ts_host,react_ts_nested_remote,react_ts_remote",
+    "app:component-data-fetch:dev": "NX_TUI=false nx run-many --target=serve --parallel=3 --configuration=development -p modernjs-ssr-data-fetch-provider,modernjs-ssr-data-fetch-provider-csr,modernjs-ssr-data-fetch-host",
     "app:modern:dev": "NX_TUI=false nx run-many --target=serve --parallel=10 --configuration=development -p modernjs-ssr-dynamic-nested-remote,modernjs-ssr-dynamic-remote,modernjs-ssr-dynamic-remote-new-version,modernjs-ssr-host,modernjs-ssr-nested-remote,modernjs-ssr-remote,modernjs-ssr-remote-new-version",
     "commitlint": "commitlint --edit",
     "prepare": "husky install",

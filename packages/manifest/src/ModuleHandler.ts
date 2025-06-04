@@ -3,6 +3,7 @@ import {
   StatsRemote,
   StatsRemoteVal,
   StatsShared,
+  composeKeyWithSeparator,
   moduleFederationPlugin,
 } from '@module-federation/sdk';
 import type { StatsModule } from 'webpack';
@@ -14,6 +15,9 @@ type ShareMap = { [sharedKey: string]: StatsShared };
 type ExposeMap = { [exposeImportValue: string]: StatsExpose };
 type RemotesConsumerMap = { [remoteKey: string]: StatsRemote };
 
+export const getExposeName = (exposeKey: string) => {
+  return exposeKey.replace('./', '');
+};
 export function getExposeItem({
   exposeKey,
   name,
@@ -23,11 +27,11 @@ export function getExposeItem({
   name: string;
   file: { import: string[] };
 }): StatsExpose {
-  const exposeModuleName = exposeKey.replace('./', '');
+  const exposeModuleName = getExposeName(exposeKey);
 
   return {
     path: exposeKey,
-    id: `${name}:${exposeModuleName}`,
+    id: composeKeyWithSeparator(name, exposeModuleName),
     name: exposeModuleName,
     // @ts-ignore to deduplicate
     requires: new Set(),

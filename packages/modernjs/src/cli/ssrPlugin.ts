@@ -3,9 +3,9 @@ import fs from 'fs-extra';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
+import logger from '../logger';
+import { isDev } from './utils';
 import { updateStatsAndManifest } from '@module-federation/rsbuild-plugin/manifest';
-import { isDev } from './constant';
-import logger from './logger';
 import { isWebTarget, skipByTarget } from './utils';
 
 import type {
@@ -108,16 +108,36 @@ export const moduleFederationSSRPlugin = (
     setEnv();
 
     api._internalRuntimePlugins(({ entrypoint, plugins }) => {
-      if (!isDev) {
+      const { fetchServerQuery } = pluginOptions;
+      plugins.push({
+        name: 'injectDataFetchFunction',
+        path: '@module-federation/modern-js/ssr-inject-data-fetch-function-plugin',
+        config: {
+          fetchServerQuery,
+        },
+      });
+      if (!isDev()) {
         return { entrypoint, plugins };
       }
       plugins.push({
-        name: 'mfSSR',
-        path: '@module-federation/modern-js/ssr-runtime',
+        name: 'mfSSRDev',
+        path: '@module-federation/modern-js/ssr-dev-plugin',
         config: {},
       });
       return { entrypoint, plugins };
     });
+
+    if (pluginOptions.ssrConfig.remotes) {
+      api._internalServerPlugins(({ plugins }) => {
+        plugins.push({
+          name: '@module-federation/modern-js/data-fetch-server-plugin',
+          options: {},
+        });
+
+        return { plugins };
+      });
+    }
+
     api.modifyBundlerChain((chain) => {
       const target = chain.get('target');
       if (skipByTarget(target)) {
@@ -146,7 +166,7 @@ export const moduleFederationSSRPlugin = (
 
       if (!isWeb) {
         chain.target('async-node');
-        if (isDev) {
+        if (isDev()) {
           chain
             .plugin('UniverseEntryChunkTrackerPlugin')
             .use(UniverseEntryChunkTrackerPlugin);
@@ -164,7 +184,7 @@ export const moduleFederationSSRPlugin = (
         }
       }
 
-      if (isDev && isWeb) {
+      if (isDev() && isWeb) {
         chain.externals({
           '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
         });
@@ -213,6 +233,7 @@ export const moduleFederationSSRPlugin = (
       updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
     });
     api.onDevCompileDone(() => {
+      // 热更后修改 manifest
       const { nodePlugin, browserPlugin, distOutputDir } = pluginOptions;
       updateStatsAndManifest(nodePlugin, browserPlugin, distOutputDir);
     });

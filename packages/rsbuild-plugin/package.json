@@ -23,6 +23,11 @@
       "import": "./dist/utils.esm.js",
       "require": "./dist/utils.cjs.js"
     },
+    "./constant": {
+      "types": "./dist/constant.cjs.d.ts",
+      "import": "./dist/constant.esm.js",
+      "require": "./dist/constant.cjs.js"
+    },
     "./manifest": {
       "types": "./dist/manifest.cjs.d.ts",
       "import": "./dist/manifest.esm.js",
@@ -38,6 +43,9 @@
       ],
       "utils": [
         "./dist/utils.cjs.d.ts"
+      ],
+      "constant": [
+        "./dist/constant.cjs.d.ts"
       ],
       "manifest": [
         "./dist/manifest.cjs.d.ts"
