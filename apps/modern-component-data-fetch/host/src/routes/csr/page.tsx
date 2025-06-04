@@ -4,7 +4,7 @@ const { createRemoteComponent, wrapNoSSR } = kit;
 
 const CsrWithFetchDataFromServerComponent = wrapNoSSR(createRemoteComponent)({
   loader: () => {
-    return import('provider-csr/Content');
+    return import('provider-csr');
   },
   loading: 'loading...',
   export: 'default',

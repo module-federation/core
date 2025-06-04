@@ -96,6 +96,11 @@ Module Federation usage can be broadly categorized into two parts: components (f
 Different actions are required depending on the role.
 
 #### Provider
+::: info Note
+Producers can use [Rslib](../basic/rsbuild#ssr) to generate SSR components.
+
+However, it should be noted that because the data in "Data Fetching" is injected by the consumer. Therefore, if "Data Fetching" is used in Rslib, the exported non-MF components cannot be isomorphic with MF components.
+:::
 
 Each exposed module can have a corresponding `.data` file with the same name. These files can export a loader function, which we call a Data Loader. This function executes before the corresponding `expose` component renders, providing data to the component. Here's an example:
 
@@ -143,6 +148,45 @@ const List = (props: {
 };
 
 export default List;
+```
+
+
+##### Producer Consuming Its Own Data
+
+If Modern.js is used to develop a producer, and this producer page is also accessed independently, then Modern.js's [Data Loader](https://modernjs.dev/zh/guides/basic-features/data/data-fetch.html) can be used to inject data.
+
+Its usage is basically the same as Module Federation, except for the function name. Therefore, you can easily consume Data Loader in the producer, as shown in the example below:
+
+* Create a `page.data.ts` file in the producer page and export a function named `loader`:
+
+```ts title="page.data.ts"
+import { fetchData } from '../components/List.data';
+import type { Data } from '../components/List.data';
+
+export const loader = fetchData
+
+export type {Data}
+```
+* Consume this data in the producer page :
+
+```tsx title="page.tsx"
+import { useLoaderData } from '@modern-js/runtime/router';
+import List from '../components/List';
+import './index.css';
+
+import type { Data } from './page.data';
+
+const Index = () => {
+  const data = useLoaderData() as Data;
+  console.log('page data', data);
+
+  return (
+  <div className="container-box">
+    <List mfData={data} />
+  </div>
+)};
+
+export default Index;
 ```
 
 #### Consumer

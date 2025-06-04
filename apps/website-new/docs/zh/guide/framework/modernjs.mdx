@@ -96,6 +96,11 @@ Module Federation 的使用大体分为两种部分：组件（函数）、应�
 根据角色的不同，需要做不同的行为。
 
 #### 生产者
+::: info 注意
+生产者可以使用 [Rslib](../basic/rsbuild#ssr) 来生成 SSR 组件。
+
+不过需要注意的是，因为「数据获取」中的数据由消费者注入。因此如果在 Rslib 中使用了「数据获取」，那么其导出的非 MF 组件无法与 MF 组件保持同构。
+:::
 
 每个 expose 模块都可以有一个同名的 `.data` 文件。这些文件可以导出一个 loader 函数，我们称为 Data Loader，它会在对应的 `expose` 组件渲染之前执行，为组件提供数据。如下面示例：
 
@@ -143,6 +148,46 @@ const List = (props: {
 };
 
 export default List;
+```
+
+##### 生产者消费自身数据
+
+如果使用了 Modern.js 来开发生产者，并且该生产者页面也会单独访问。那么可以利用 Modern.js 提供的 [Data Loader](https://modernjs.dev/zh/guides/basic-features/data/data-fetch.html) 来注入数据。
+
+其用法与 Module Federation 除了函数名称外，基本一致。因此你可以很方便的在生产者消费 Data Loader，示例如下：
+
+* 在生产者页面创建 `page.data.ts` 文件，导出名为 `loader` 的函数：
+
+```ts title="page.data.ts"
+import { fetchData } from '../components/List.data';
+import type { Data } from '../components/List.data';
+
+export const loader = fetchData
+
+export type {Data}
+```
+
+* 在生产者 `page` 页面消费此数据：
+
+```tsx title="page.tsx"
+import { useLoaderData } from '@modern-js/runtime/router';
+import List from '../components/List';
+import './index.css';
+
+import type { Data } from './page.data';
+
+const Index = () => {
+  const data = useLoaderData() as Data;
+  console.log('page data', data);
+
+  return (
+  <div className="container-box">
+    <List mfData={data} />
+  </div>
+)};
+
+export default Index;
+
 ```
 
 #### 消费者

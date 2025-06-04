@@ -4,7 +4,7 @@ export default createModuleFederationConfig({
   name: 'provider_csr',
   filename: 'remoteEntry.js',
   exposes: {
-    './Content': './src/components/Content.tsx',
+    '.': './src/index.tsx',
   },
   shared: {
     react: { singleton: true },

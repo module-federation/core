@@ -9,36 +9,38 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "dependsOn": [
-          {
-            "target": "build",
-            "dependencies": true
-          }
-        ],
         "commands": [
-          {
-            "command": "cd apps/modern-component-data-fetch/provider-csr; pnpm run build",
-            "forwardAllArgs": true
-          }
+          "npm run build --prefix apps/modern-component-data-fetch/provider-csr"
         ]
       }
     },
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "dependsOn": [
-          {
-            "target": "build",
-            "dependencies": true
-          }
-        ],
         "commands": [
-          {
-            "command": "cd apps/modern-component-data-fetch/provider-csr; pnpm run dev",
-            "forwardAllArgs": false
-          }
+          "npm run dev --prefix apps/modern-component-data-fetch/provider-csr"
         ]
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npm run dev --prefix apps/modern-component-data-fetch/provider-csr"
+        ]
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "e2e": {
       "executor": "@nx/cypress:cypress",

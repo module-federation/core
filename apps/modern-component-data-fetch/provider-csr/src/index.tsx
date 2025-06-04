@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from 'antd/lib/button';
-import type { Data } from './Content.data';
+import type { Data } from './index.data';
 
 const Content = (props: { mfData?: Data }): JSX.Element => {
   return (

@@ -20,7 +20,7 @@ const addDataFetchExpose = (
       ? `./${DATA_FETCH_IDENTIFIER}${suffix}`
       : `${key}.${DATA_FETCH_IDENTIFIER}${suffix}`;
 
-  if (exposes[dataFetchKey]) {
+  if (exposes[dataFetchKey] && exposes[dataFetchKey] !== filepath) {
     throw new Error(
       `data fetch key ${dataFetchKey} already exists, please modify this expose key, do not end with '${DATA_FETCH_IDENTIFIER}' or '${DATA_FETCH_CLIENT_SUFFIX}'`,
     );

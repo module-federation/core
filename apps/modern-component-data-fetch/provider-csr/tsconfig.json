@@ -1,15 +1,12 @@
 {
-  "extends": "@modern-js/tsconfig/base",
   "compilerOptions": {
-    "declaration": false,
-    "jsx": "preserve",
-    "baseUrl": "./",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@shared/*": ["./shared/*"],
       "*": ["./@mf-types/*"]
     }
   },
-  "include": ["src", "shared", "config", "modern.config.ts"],
-  "exclude": ["**/node_modules"]
+  "include": ["src/**/*", "src/stories"]
 }

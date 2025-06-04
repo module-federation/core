@@ -4,7 +4,11 @@ import {
   PLUGIN_NAME,
 } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion } from '@module-federation/sdk';
-import { isRegExp, autoDeleteSplitChunkCacheGroups } from '../utils/index';
+import {
+  isRegExp,
+  autoDeleteSplitChunkCacheGroups,
+  addDataFetchExposes,
+} from '../utils/index';
 import pkgJson from '../../package.json';
 import logger from '../logger';
 import {
@@ -238,6 +242,10 @@ export const pluginModuleFederation = (
           autoDeleteSplitChunkCacheGroups(
             moduleFederationOptions,
             bundlerConfig?.optimization?.splitChunks,
+          );
+          addDataFetchExposes(
+            moduleFederationOptions.exposes,
+            isSSRConfig(bundlerConfig.name),
           );
 
           delete bundlerConfig.optimization?.runtimeChunk;
