@@ -1,7 +1,12 @@
 import path from 'path';
 import { Stats, Manifest } from '@module-federation/sdk';
 import fs from 'fs-extra';
-import { BundlerPlugin } from '../types';
+import type { ModuleFederationPlugin as WebpackModuleFederationPlugin } from '@module-federation/enhanced';
+import type { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+
+type BundlerPlugin =
+  | WebpackModuleFederationPlugin
+  | RspackModuleFederationPlugin;
 
 function mergeStats(browserStats: Stats, nodeStats: Stats): Stats {
   const ssrRemoteEntry = nodeStats.metaData.remoteEntry;

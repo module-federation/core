@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
-import { updateStatsAndManifest } from './manifest';
+import { updateStatsAndManifest } from '@module-federation/rsbuild-plugin/manifest';
 import { isDev } from './constant';
 import logger from './logger';
 import { isWebTarget, skipByTarget } from './utils';
