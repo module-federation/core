@@ -112,6 +112,8 @@ describe('patchSSRRspackConfig', () => {
   });
 
   it('should add UniverseEntryChunkTrackerPlugin to plugins', () => {
+    const env = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
     const config = JSON.parse(JSON.stringify(baseConfig));
     const patchedConfig = patchSSRRspackConfig(config, baseMfConfig);
     expect(patchedConfig.plugins).toHaveLength(1);
@@ -119,6 +121,7 @@ describe('patchSSRRspackConfig', () => {
     expect(patchedConfig.plugins?.[0].constructor.name).toBe(
       'UniverseEntryChunkTrackerPlugin',
     );
+    process.env.NODE_ENV = env;
   });
 
   describe('chunkFilename modification', () => {

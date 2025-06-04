@@ -11,6 +11,10 @@ export function setSSREnv() {
   process.env['MF_SSR_PRJ'] = 'true';
 }
 
+const isDev = () => {
+  return process.env.NODE_ENV === 'development';
+};
+
 export function patchSSRRspackConfig(
   config: Rspack.Configuration,
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -28,7 +32,7 @@ export function patchSSRRspackConfig(
   const UniverseEntryChunkTrackerPlugin =
     require('@module-federation/node/universe-entry-chunk-tracker-plugin').default;
   config.plugins ||= [];
-  config.plugins.push(new UniverseEntryChunkTrackerPlugin());
+  isDev() && config.plugins.push(new UniverseEntryChunkTrackerPlugin());
 
   const uniqueName = mfConfig.name || config.output?.uniqueName;
   const chunkFileName = config.output.chunkFilename;
@@ -90,7 +94,7 @@ export function createSSRMFConfig(
   ssrMFConfig.runtimePlugins.push(
     require.resolve('@module-federation/node/runtimePlugin'),
   );
-  if (process.env.NODE_ENV === 'development') {
+  if (isDev()) {
     ssrMFConfig.runtimePlugins.push(
       require.resolve(
         '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
