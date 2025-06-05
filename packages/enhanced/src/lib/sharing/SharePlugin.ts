@@ -16,13 +16,29 @@ import type {
 import type { ConsumesConfig } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import type { ProvidesConfig } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { createSchemaValidation } from '../../utils';
+
+const validate = createSchemaValidation(
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('../../schemas/sharing/SharePlugin.check.js').validate,
+  () => require('../../schemas/sharing/SharePlugin').default,
+  {
+    name: 'Share Plugin',
+    baseDataPath: 'options',
+  },
+);
 
 class SharePlugin {
   private _shareScope: string | string[];
   private _consumes: Record<string, ConsumesConfig>[];
   private _provides: Record<string, ProvidesConfig>[];
+  private _experiments: NonNullable<SharePluginOptions['experiments']>;
 
   constructor(options: SharePluginOptions) {
+    validate(options);
+
+    this._experiments = options.experiments || {};
+
     const sharedOptions: [string, SharedConfig][] = parseOptions(
       options.shared,
       (item, key) => {
@@ -55,6 +71,8 @@ class SharePlugin {
           issuerLayer: options.issuerLayer,
           layer: options.layer,
           request: options.request || key,
+          exclude: options.exclude,
+          include: options.include,
         },
       }),
     );
@@ -71,6 +89,8 @@ class SharePlugin {
           singleton: options.singleton,
           layer: options.layer,
           request: options.request || options.import || key,
+          exclude: options.exclude,
+          include: options.include,
         },
       }));
 
@@ -90,10 +110,12 @@ class SharePlugin {
     new ConsumeSharedPlugin({
       shareScope: this._shareScope,
       consumes: this._consumes,
+      experiments: this._experiments,
     }).apply(compiler);
     new ProvideSharedPlugin({
       shareScope: this._shareScope,
       provides: this._provides,
+      experiments: this._experiments,
     }).apply(compiler);
   }
 }
