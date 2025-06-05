@@ -252,11 +252,13 @@ loader 函数可能会在服务端或浏览器端执行。在服务端执行的 
 在 SSR 应用中，loader 函数只会在服务端执行，即默认都是 Server Loader。在 SSR Module Federation 会直接在服务端调用对应的 loader 函数。在浏览器端切换路由时，Module Federation 会发送一个 http 请求到 SSR 服务，同样在服务端触发 loader 函数。
 
 :::note NOTE
+
 SSR 应用的 loader 函数只在服务端执行可以带来以下好处：
 
 简化使用方式：保证 SSR 应用获取数据的方式是同构的，开发者无需根据环境区分 loader 函数执行的代码。
 减少浏览器端 bundle 体积：将逻辑代码及其依赖，从浏览器端移动到了服务端。
 提高可维护性：将逻辑代码移动到服务端，减少了数据逻辑对前端 UI 的直接影响。此外，也避免了浏览器端 bundle 中误引入服务端依赖，或服务端 bundle 中误引入浏览器端依赖的问题。
+
 :::
 
 #### 在 SSR 应用中使用 Client Loader
@@ -282,7 +284,9 @@ export async function loader({ params }) {
 }
 ```
 :::warning WARNING
+
 要使用 Client Loader，必须有对应的 Server Loader，且 Server Loader 必须是 .data 文件约定，不能是 .loader 文件约定。
+
 :::
 
 ### FAQ

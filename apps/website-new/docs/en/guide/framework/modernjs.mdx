@@ -251,11 +251,13 @@ In CSR applications, the loader function executes in the browser, meaning they a
 In SSR applications, the loader function only executes on the server, meaning they are all Server Loaders by default. In SSR, Module Federation directly calls the corresponding loader function on the server. When switching routes in the browser, Module Federation sends an HTTP request to the SSR service, which also triggers the loader function on the server.
 
 :::note NOTE
+
 Having the loader function for SSR applications execute only on the server offers the following benefits:
 
 - Simplified usage: Ensures that data fetching in SSR applications is isomorphic, so developers don't need to differentiate loader function execution code based on the environment.
 - Reduced browser bundle size: Moves logic code and its dependencies from the browser to the server.
 - Improved maintainability: Moves logic code to the server, reducing the direct impact of data logic on the frontend UI. Additionally, it prevents accidental inclusion of server-side dependencies in the browser bundle or browser-side dependencies in the server bundle.
+
 :::
 
 #### Using Client Loader in SSR Applications
@@ -280,6 +282,7 @@ export async function loader({ params }) {
   }
 }
 ```
+
 :::warning WARNING
 To use a Client Loader, there must be a corresponding Server Loader, and the Server Loader must be defined using the `.data` file convention, not the `.loader` file convention.
 :::
