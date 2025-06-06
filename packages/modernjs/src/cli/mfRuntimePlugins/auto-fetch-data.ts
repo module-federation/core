@@ -63,18 +63,26 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
     }
 
     const dataFetchMap = getDataFetchMap();
-    const downgradeType = remoteSnapshot.modules.find(
-      (module) =>
-        module.moduleName === `${dataFetchName}${DATA_FETCH_CLIENT_SUFFIX}`,
-    )
+    const hasSSRAsset = Boolean(remoteSnapshot.ssrRemoteEntry);
+    const hasDataFetchClient = Boolean(
+      remoteSnapshot.modules.find(
+        (module) =>
+          module.moduleName === `${dataFetchName}${DATA_FETCH_CLIENT_SUFFIX}`,
+      ),
+    );
+    const downgradeType = hasDataFetchClient
       ? MF_DATA_FETCH_TYPE.FETCH_CLIENT
-      : MF_DATA_FETCH_TYPE.FETCH_SERVER;
+      : hasSSRAsset
+        ? MF_DATA_FETCH_TYPE.FETCH_SERVER
+        : MF_DATA_FETCH_TYPE.FETCH_CLIENT;
     let finalDataFetchId = dataFetchId;
 
     if (typeof window !== 'undefined') {
       finalDataFetchId =
         downgradeType === MF_DATA_FETCH_TYPE.FETCH_CLIENT
-          ? `${dataFetchId}${DATA_FETCH_CLIENT_SUFFIX}`
+          ? hasDataFetchClient
+            ? `${dataFetchId}${DATA_FETCH_CLIENT_SUFFIX}`
+            : dataFetchId
           : dataFetchId;
     }
 
