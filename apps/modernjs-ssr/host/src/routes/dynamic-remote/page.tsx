@@ -15,7 +15,7 @@ registerRemotes([
 ]);
 
 const RemoteSSRComponent = createRemoteSSRComponent({
-  loader: () => loadRemote('dynamic_remote/Image'),
+  loader: () => loadRemote('dynamic_remote'),
   loading: 'loading...',
   fallback: ({ error }) => {
     if (error instanceof Error && error.message.includes('not exist')) {
@@ -26,7 +26,7 @@ const RemoteSSRComponent = createRemoteSSRComponent({
 });
 
 const NewRemoteCom = React.lazy(() =>
-  loadRemote('dynamic_remote/Image').then((m) => {
+  loadRemote('dynamic_remote').then((m) => {
     console.log('加载');
     return m;
   }),

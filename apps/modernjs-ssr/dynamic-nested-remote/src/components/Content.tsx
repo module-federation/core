@@ -17,7 +17,7 @@ registerRemotes([
 ]);
 
 const RemoteSSRComponent = createRemoteSSRComponent({
-  loader: () => loadRemote('dynamic_remote/Image'),
+  loader: () => loadRemote('dynamic_remote'),
   loading: 'loading...',
   fallback: ({ error }) => {
     if (error instanceof Error && error.message.includes('not exist')) {

@@ -534,6 +534,42 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
 };
 ```
 
+
+### createLink
+
+`SyncHook`
+
+- **Type**
+
+```typescript
+function createLink(args: CreateLinkOptions): HTMLLinkElement  | void;
+
+type CreateScriptOptions = {
+  url: string;
+  attrs?: Record<string, any>;
+};
+```
+
+- Example
+
+```typescript
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeLinkAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'change-link-attribute',
+    createLink({ url }) {
+      link.setAttribute('href', url);
+      link.setAttribute('rel', 'preload');
+      link.setAttribute('as', 'script');
+      link.setAttribute('crossorigin', 'anonymous');
+      return link;
+    },
+  };
+};
+```
+
 ### fetch
 The `fetch` function allows customizing the request that fetches the manifest JSON. A successful `Response` must yield a valid JSON.
 

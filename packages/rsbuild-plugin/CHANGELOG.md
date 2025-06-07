@@ -1,5 +1,48 @@
 # @module-federation/rsbuild-plugin
 
+## 0.15.0
+
+### Patch Changes
+
+- f777710: feat(rsbuild-plugin): support generate MF SSR in Rslib
+- Updated dependencies [ad446af]
+  - @module-federation/enhanced@0.15.0
+  - @module-federation/node@2.7.7
+  - @module-federation/sdk@0.15.0
+
+## 0.14.3
+
+### Patch Changes
+
+- @module-federation/enhanced@0.14.3
+- @module-federation/sdk@0.14.3
+
+## 0.14.2
+
+### Patch Changes
+
+- @module-federation/enhanced@0.14.2
+- @module-federation/sdk@0.14.2
+
+## 0.14.1
+
+### Patch Changes
+
+- @module-federation/enhanced@0.14.1
+- @module-federation/sdk@0.14.1
+
+## 0.14.0
+
+### Patch Changes
+
+- 26f8a77: fix(rsbuild-plugin): detect server.cors option to check waring
+- d237ab9: fix(rsbuild-plugin): judge options from orignal userConfig
+- Updated dependencies [82b8cac]
+- Updated dependencies [82b8cac]
+- Updated dependencies [0eb6697]
+  - @module-federation/enhanced@0.14.0
+  - @module-federation/sdk@0.14.0
+
 ## 0.13.1
 
 ### Patch Changes

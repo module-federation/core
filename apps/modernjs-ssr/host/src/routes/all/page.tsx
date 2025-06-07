@@ -22,7 +22,7 @@ const DynamicNestedRemote = React.lazy(() =>
 );
 
 const DynamicRemote = React.lazy(() =>
-  loadRemote('dynamic_remote/Image').then((m) => {
+  loadRemote('dynamic_remote').then((m) => {
     return m;
   }),
 );

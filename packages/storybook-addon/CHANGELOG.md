@@ -1,5 +1,46 @@
 # @module-federation/storybook-addon
 
+## 4.0.20
+
+### Patch Changes
+
+- Updated dependencies [ad446af]
+  - @module-federation/enhanced@0.15.0
+  - @module-federation/sdk@0.15.0
+
+## 4.0.19
+
+### Patch Changes
+
+- @module-federation/enhanced@0.14.3
+- @module-federation/sdk@0.14.3
+
+## 4.0.18
+
+### Patch Changes
+
+- @module-federation/enhanced@0.14.2
+- @module-federation/sdk@0.14.2
+
+## 4.0.17
+
+### Patch Changes
+
+- @module-federation/enhanced@0.14.1
+- @module-federation/sdk@0.14.1
+
+## 4.0.16
+
+### Patch Changes
+
+- 04d3064: remove utilities package import
+- 2ca17f8: fix type error with nx update
+- Updated dependencies [82b8cac]
+- Updated dependencies [82b8cac]
+- Updated dependencies [0eb6697]
+  - @module-federation/enhanced@0.14.0
+  - @module-federation/sdk@0.14.0
+
 ## 4.0.15
 
 ### Patch Changes

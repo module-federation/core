@@ -532,6 +532,73 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
 };
 ```
 
+
+### createLink
+
+`SyncHook`
+
+- 类型
+
+```typescript
+function createLink(args: CreateLinkOptions): HTMLLinkElement  | void;
+
+type CreateScriptOptions = {
+  url: string;
+  attrs?: Record<string, any>;
+};
+```
+
+- 示例
+
+```typescript
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeLinkAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'change-link-attribute',
+    createLink({ url }) {
+      link.setAttribute('href', url);
+      link.setAttribute('rel', 'preload');
+      link.setAttribute('as', 'script');
+      link.setAttribute('crossorigin', 'anonymous');
+      return link;
+    },
+  };
+};
+```
+
+### fetch
+
+`fetch` 函数用于自定义获取 Manifest 的请求。
+
+`AsyncHook`
+
+- **类型**
+
+```typescript
+function fetch(manifestUrl: string, requestInit: RequestInit): Promise<Response> | void | false;
+```
+
+- 示例：获取 manifest 时增加 credentials：
+
+```typescript
+// fetch-manifest-with-credentials-plugin.ts
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function (): FederationRuntimePlugin {
+  return {
+    name: 'fetch-manifest-with-credentials-plugin',
+    fetch(manifestUrl, requestInit) {
+      return fetch(manifestUrl, {
+        ...requestInit,
+        credentials: 'include'
+      });
+    },
+  }
+};
+```
+
 ### loadEntry
 可以完全自定义remote, 可以扩展新的remote类型。
 下面两个简单的例子分别实现了加载json数据和模块代理

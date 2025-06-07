@@ -892,4 +892,47 @@ Looking at the `useIn` field, you can see that the `useIn` field contains the `w
 
 ### __INSTANCES__
 
-The currently loaded MF instance.
+The currently loaded MF instance. It stores a list of all loaded MF modules. Every list entry has the following structure:
+
+#### bridgeHook
+Contains metadata about the MF bridge which is used to enable cross-application use-cases (React, Vue) to load properly.
+
+#### hooks
+Contains metadata about the MF hooks which are used to tap into the MF lifecycle.
+
+#### loaderHook
+Contains metadata about the MF loaderHook.
+
+#### moduleCache
+Contains a Map storing all MF modules with their metadata available in the moduleCache.
+
+#### name
+The name of the MF module.
+
+#### options
+> Useful for debugging your modules.
+
+Vital data about the MF module, such as loaded plugins, connected remotes, shareStrategy and the shared dependency object.
+
+#### remoteHandler
+Contains metadata about the MF remoteHandler including the idToRemoteMap which stores all bindings to connected remote components exposed by the connected MF remotes.
+
+#### shareScopeMap
+Contains metadata about the MF shared scope including data about every connected shared dependency.
+
+#### sharedHandler
+Contains metadata about the MF sharedHandler.
+
+#### snapshotHandler
+> Useful to check the mf-manifest.json structure and status.
+
+Contains metadata about the MF snapshotHandler including the manifestCache object and the manifestLoading object.
+
+#### version
+The version of the Mf module.
+
+### __PRELOADED_MAP__
+The key-value-map of all preloaded modules (build-time). `key` represents the module name, and `value` represents the boolean value of the loaded status.
+
+### __MANIFEST_LOADING__
+Contains metadata about the manifestLoading object. This is the same as the `snapshotHandler.manifestLoading` in `__INSTANCES__`.

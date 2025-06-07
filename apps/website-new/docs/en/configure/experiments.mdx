@@ -1,6 +1,6 @@
 # Experiments
 
-The `experiments` configuration is used to enable experimental capabilities in the plugin.
+The `experiments` configuration enables advanced and experimental capabilities in the plugin.
 
 - Example
 
@@ -30,9 +30,9 @@ new ModuleFederationPlugin({
 
 ## asyncStartup
 
-- Type: `boolean`
-- Required: No
-- Default: `false`
+- **Type:** `boolean`
+- **Required:** No
+- **Default:** `false`
 
 When `asyncStartup` is enabled, all Module Federation entrypoints will initialize asynchronously by default. This means:
 
@@ -46,17 +46,17 @@ When using this mode, all entrypoints will initialize asynchronously. If you're 
 
 ## externalRuntime
 
-- Type: `boolean`
-- Required: No
-- Default: `false`
+- **Type:** `boolean`
+- **Required:** No
+- **Default:** `false`
 
 After setting `true`, the external MF runtime will be used and the runtime provided by the consumer will be used. (Please make sure your consumer has `provideExternalRuntime: true` set, otherwise it will not run properly!)
 
 ## provideExternalRuntime
 
-- Type: `boolean`
-- Required: No
-- Default: `false`
+- **Type:** `boolean`
+- **Required:** No
+- **Default:** `false`
 
 ::: warning note
 Make sure to only configure it on the topmost consumer! If multiple consumers inject runtime at the same time, the ones executed later will not overwrite the existing runtime.
@@ -70,9 +70,9 @@ This object contains flags related to build-time optimizations that can affect t
 
 ### disableSnapshot
 
-- Type: `boolean`
-- Required: No
-- Default: `false`
+- **Type:** `boolean`
+- **Required:** No
+- **Default:** `false`
 
 When set to `true`, this option defines the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` global constant as `true` during the build. In the `@module-federation/runtime-core`, this prevents the `snapshotPlugin()` and `generatePreloadAssetsPlugin()` from being included and initialized within the FederationHost.
 
@@ -83,11 +83,15 @@ When set to `true`, this option defines the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLU
     *   Features relying on the manifest, such as dynamic remote discovery, manifest-based version compatibility checks, advanced asset preloading (also handled by the removed `generatePreloadAssetsPlugin`), and potentially runtime debugging/introspection tools, will not function correctly or will be unavailable.
     *   Use this option only if you do not rely on these manifest-driven features and prioritize a minimal runtime footprint.
 
+:::warning
+**Caution:** Setting `disableSnapshot: true` will disable the mf-manifest protocol. This means you will lose TypeScript syncing support and hot module replacement (HMR) for federated modules. If you are only using `.js` remotes (not manifest-based remotes), you will not lose any functionality as the `js` remotes do not support these capabilities anyways.
+:::
+
 ### target
 
-- Type: `'web' | 'node'`
-- Required: No
-- Default: Inferred from Webpack's `target` option (usually `'web'`)
+- **Type:** `'web' | 'node'`
+- **Required:** No
+- **Default:** Inferred from Webpack's `target` option (usually `'web'`)
 
 This option defines the `ENV_TARGET` global constant during the build, specifying the intended execution environment.
 
@@ -100,3 +104,21 @@ This option defines the `ENV_TARGET` global constant during the build, specifyin
     *   Includes the necessary Node.js-specific functions from the SDK (`createScriptNode`, `loadScriptNode`) in the bundle, allowing the federated application to function correctly in Node.js.
 
 Explicitly setting this value is recommended to ensure the intended optimizations are applied, especially in universal or server-side rendering scenarios.
+
+### Impact of Optimization Flags on `remoteEntry.js` Size
+
+The following table demonstrates how different combinations of the `disableSnapshot`, `target: 'web'`, and `externalRuntime` optimization flags affect the size of the generated `remoteEntry.js` file. These measurements can help you choose the right trade-off between runtime features and bundle size for your use case.
+
+| Optimization Flags                          | remoteEntry.js | Gzip Size | Brotli Size |
+|---------------------------------------------|:--------------:|:---------:|:-----------:|
+| No optimization flags enabled               | 69K            | 21437 B   | 19024 B     |
+| `disableSnapshot: true`                     | 65K            | 20096 B   | 17860 B     |
+| `target: 'web'`                             | 60K            | 19314 B   | 17105 B     |
+| Both enabled                                | 56K            | 17998 B   | 15982 B     |
+| Both enabled + `externalRuntime: true`      | 14K            | 5381 B    | 4703 B      |
+| Both disabled + `externalRuntime: true`     | 22K            | 8222 B    | 7269 B      |
+
+**Notes:**
+- Enabling both `disableSnapshot` and `target: 'web'` provides the greatest reduction in bundle size, especially when combined with `externalRuntime: true`.
+- Using the external runtime (`externalRuntime: true`) can dramatically reduce the size of your remote entry, but requires that the consumer provides the runtime.
+- Smaller bundle sizes can lead to faster load times and improved performance, but may disable certain features (see above for details on what each flag does).
