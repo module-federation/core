@@ -1,5 +1,10 @@
 import { RemoteEntryType, StatsAssets } from './stats';
-
+export type dynamicRemoteConsumeMode =
+  | 'version'
+  | 'tag'
+  | 'entry'
+  | 'deploy_channel'
+  | '*';
 interface BasicModuleInfo {
   dev?: {
     version?: string;
@@ -10,7 +15,19 @@ interface BasicModuleInfo {
   remoteTypes: string;
   remoteTypesZip: string;
   remoteTypesAPI?: string;
-  remotesInfo: Record<string, { matchedVersion: string }>;
+  remotesInfo: Record<
+    string,
+    {
+      moduleSource?: 'dynamic-module';
+      name?: string;
+      matchedVersion: string;
+      alias?: string;
+      consumeMode?: dynamicRemoteConsumeMode;
+      route?: string;
+      exposesPathForLoadRemote?: string;
+      props?: string;
+    }
+  >;
   shared: Array<{
     sharedName: string;
     version?: string;
