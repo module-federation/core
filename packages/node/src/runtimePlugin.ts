@@ -152,7 +152,6 @@ export const fetchAndRun = (
     .then((data) => {
       const chunk = {};
       try {
-        debugger;
         eval(`(function(exports, require, __dirname, __filename) {${data}\n})`)(
           chunk,
           __non_webpack_require__,
@@ -173,12 +172,10 @@ export const resolveUrl = (
   chunkName: string,
 ): URL | null => {
   try {
-    debugger;
     return new URL(chunkName, __webpack_require__.p);
   } catch {
     const entryUrl =
       returnFromCache(remoteName) || returnFromGlobalInstances(remoteName);
-    debugger;
 
     if (!entryUrl) return null;
 
@@ -218,7 +215,6 @@ export const loadChunk = (
   }
 
   const url = resolveUrl(rootOutputDir, chunkId);
-  debugger;
   if (!url) return callback(null, { modules: {}, ids: [], runtime: null });
 
   // Using fetchAndRun directly with args
