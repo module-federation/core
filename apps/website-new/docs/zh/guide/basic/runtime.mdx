@@ -432,6 +432,32 @@ registerPlugins([runtimePlugin()]);
 
 如果你需要开发 Module Federation 插件，可以阅读 [Module Federation 插件系统](../../plugin/dev/index) 获取更多信息。
 
+## FederationHost
+
+`Federation Runtime` 除了暴露出 API 外，还提供了一个 `FederationHost` 类，你可以使用它来创建一个 `FederationHost` 实例。
+
+* 什么时候使用 `FederationHost` ？
+
+为了保证 `FederationHost` 实例的唯一性，我们在构建插件创建实例后，会将其存储到内存中，导出的 API 都是先从内存中获取 `FederationHost` 实例，然后再调用 `FederationHost` 实例的 API。这也是为什么 `loadRemote` 等 API 可以直接使用的原因。
+
+但是这种单例模式同时也限制无法创建多份实例，因此如果你需要**创建新的实例**，那么你可以使用 `FederationHost` 类来创建一个新的实例。
+
+```ts
+import { FederationHost } from '@module-federation/enhanced/runtime';
+
+const host = new FederationHost({
+  name: '@demo/host',
+  remotes: [
+    {
+      name: '@demo/sub1',
+      entry: 'http://localhost:8080/mf-manifest.json'
+    }
+  ]
+});
+
+host.loadRemote('@demo/sub1/util').then((m) => m.add(1, 2, 3));
+```
+
 ## FAQ
 
 ### 构建插件和 Runtime 差异
