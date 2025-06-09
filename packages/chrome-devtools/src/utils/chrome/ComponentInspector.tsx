@@ -58,10 +58,7 @@ export const wrapComponent = ({
         clearTimeout(leaveTimeout);
       }
       leaveTimeout = setTimeout(() => {
-        if (
-          localStorage.getItem('mf-inspector-show') !== 'all' &&
-          !isMouseOverInspectorInfo
-        ) {
+        if (!isMouseOverInspectorInfo) {
           setInspectorInfo(null);
         }
       }, 50); // Add a small delay to allow mouse to enter the info box
