@@ -6,15 +6,15 @@
 .inspector-info {
   position: fixed;
   z-index: 1000;
-  background: #1a1a1a;
+  background: #323232;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 12px;
   color: #fff;
-  pointer-events: none;
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-content: space-between;
 }
 
 .inspector-overlay {
@@ -22,17 +22,18 @@
   border-radius: 4px;
   pointer-events: none;
   z-index: 999;
+  /* 3b82f6 */
   background:
-    linear-gradient(90deg, #3b82f6 0%, #ec4899 50%, #3b82f6 100%) 0 0,
-    linear-gradient(90deg, #3b82f6 0%, #ec4899 50%, #3b82f6 100%) 0 100%,
-    linear-gradient(0deg, #3b82f6 0%, #ec4899 50%, #3b82f6 100%) 0 0,
-    linear-gradient(0deg, #3b82f6 0%, #ec4899 50%, #3b82f6 100%) 100% 0;
+    linear-gradient(90deg, #656565 0%, #cbcbcb 50%, #656565 100%) 0 0,
+    linear-gradient(90deg, #656565 0%, #cbcbcb 50%, #656565 100%) 0 100%,
+    linear-gradient(0deg, #656565 0%, #cbcbcb 50%, #656565 100%) 0 0,
+    linear-gradient(180deg, #656565 0%, #cbcbcb 50%, #656565 100%) 100% 0;
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
   background-size:
-    200% 3px,
-    200% 3px,
-    3px 200%,
-    3px 200%; /* 将边框从 2px 加粗到 3px */
+    200% 2px,
+    200% 2px,
+    2px 200%,
+    2px 200%;
   animation: borderRotate 4s linear infinite;
 }
 
@@ -53,34 +54,31 @@
   }
 }
 .mf-tag {
-  color: #646cff;
-  font-weight: 500;
-  position: relative;
-  padding-left: 16px;
+  color: #cbcbcb;
+  margin-left: 6px;
 }
 
-.mf-tag::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 12px;
-  height: 12px;
-  background-image: url('https://module-federation.io/svg.svg');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
+.mf-info {
+  display: flex;
+  align-items: center;
+}
+
+.mf-img {
+  width: 16px;
 }
 
 .divider {
-  color: #4a4a4a;
+  color: #cbcbcb;
 }
 
-.gradient-text {
-  background: linear-gradient(90deg, #60a5fa, #ec4899);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 500;
+.copy-btn {
+  width: 16px;
+  height: 16px;
+  background: #cbcbcb;
+  border: 1px solid #cbcbcb;
+  border-radius: 4px;
+}
+
+.copy-btn:hover {
+  background: #e5e5e5;
 }

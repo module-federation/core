@@ -44,6 +44,10 @@ export default defineConfig({
         './src/utils/chrome/post-message-listener.ts';
       config.entry['post-message-start'] =
         './src/utils/chrome/post-message-start.ts';
+
+      if (process.env.TEST_INSPECTOR) {
+        config.entry = './demos/inspector.tsx';
+      }
       return config;
     },
   },

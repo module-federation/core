@@ -12,6 +12,7 @@
     "storybook": "storybook dev -p 6006",
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern-app dev",
+    "dev:inspector": "TEST_INSPECTOR=true modern-app dev",
     "build": " INSPECTOR=true modern-app build && modern-app build && node postpack.js",
     "build:debug": "DEBUG=true modern-app build && node postpack.js",
     "build:lib": "rm -rf dist && modern-module build -c modern.lib.config.ts",
@@ -61,7 +62,8 @@
     "dagre": "^0.8.5",
     "react": "~18.3.1",
     "react-dom": "~18.3.1",
-    "reactflow": "11.11.4"
+    "reactflow": "11.11.4",
+    "react-toastify": "11.0.5"
   },
   "devDependencies": {
     "@modern-js-app/eslint-config": "2.59.0",
