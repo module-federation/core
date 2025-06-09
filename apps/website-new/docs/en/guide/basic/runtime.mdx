@@ -453,7 +453,7 @@ If you want to develop Module Federation plugin, you can read [Module Federation
 
 In addition to exposing APIs, Federation Runtime also provides the FederationHost class, which you can use to create a FederationHost instance.
 
-* When to use `FederationHos` ?
+* When to use `FederationHost` ?
 
 To ensure the uniqueness of the FederationHost instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the FederationHost instance from memory and then call the APIs of the FederationHost instance. This is also why APIs like loadRemote can be used directly.
 
