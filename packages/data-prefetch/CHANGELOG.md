@@ -1,5 +1,12 @@
 # @module-federation/data-prefetch
 
+## 0.15.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.15.0
+- @module-federation/sdk@0.15.0
+
 ## 0.14.3
 
 ### Patch Changes
