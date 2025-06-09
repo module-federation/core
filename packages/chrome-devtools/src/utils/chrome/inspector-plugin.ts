@@ -23,7 +23,13 @@ const inspectorPluginPlugin = (): FederationRuntimePlugin => {
         return;
       }
 
-      const { exposeModuleFactory, exposeModule, remote } = args;
+      const {
+        exposeModuleFactory,
+        exposeModule,
+        remote,
+        expose,
+        moduleInstance,
+      } = args;
       let react: typeof React;
       try {
         // eslint-disable-next-line prettier/prettier
@@ -81,8 +87,11 @@ const inspectorPluginPlugin = (): FederationRuntimePlugin => {
                 //@ts-ignore
                 CustomComponent: mod,
                 //@ts-ignore
-                componentName: mod.name,
+                componentName: expose.replace('./', ''),
                 mfName: remote.name,
+                versionOrEntry:
+                  moduleInstance.remoteInfo.version ||
+                  moduleInstance.remoteInfo.entry,
               });
           }
           // no handle element
@@ -97,8 +106,11 @@ const inspectorPluginPlugin = (): FederationRuntimePlugin => {
             //@ts-ignore
             CustomComponent: exposeModule,
             //@ts-ignore
-            componentName: exposeModule.name,
+            componentName: expose.replace('./', ''),
             mfName: remote.name,
+            versionOrEntry:
+              moduleInstance.remoteInfo.version ||
+              moduleInstance.remoteInfo.entry,
           });
         }
       }
