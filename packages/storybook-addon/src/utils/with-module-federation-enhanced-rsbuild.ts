@@ -76,6 +76,7 @@ export const withModuleFederation = (
             shareStrategy: options.shareStrategy,
           },
         ]);
+        chain.output.uniqueName(`${options.name}-storybook-host`);
       });
     },
   };

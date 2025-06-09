@@ -236,7 +236,7 @@ export const pluginModuleFederation = (
         if (!isMFFormat(bundlerConfig)) {
           return;
         } else if (isStoryBook(originalRsbuildConfig)) {
-          bundlerConfig.output!.uniqueName = `${moduleFederationOptions.name}-storybook-host`;
+          return;
         } else {
           // mf
           autoDeleteSplitChunkCacheGroups(
