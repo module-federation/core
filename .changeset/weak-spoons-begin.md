@@ -1,6 +1,5 @@
 ---
 '@module-federation/modern-js': patch
-'@module-federation/node': patch
 ---
 
-fix(modern-js-plugin): adjust downgrade type
+fix(modern-js-plugin): adjust fetch type
