@@ -4,6 +4,9 @@ import { moduleFederationPluginOverview } from './src/moduleFederationPluginOver
 import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
 import { pluginSass } from '@rsbuild/plugin-sass';
 import { pluginLlms } from '@rspress/plugin-llms';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import fs from 'fs';
+import mfConfig from './module-federation.config';
 
 const getNavbar = (lang: string) => {
   const cn = lang === 'zh';
@@ -87,9 +90,28 @@ export default defineConfig({
   ],
   builderConfig: {
     plugins: [moduleFederationPluginOverview, pluginSass()],
+    dev: {
+      assetPrefix: true,
+      writeToDisk: true,
+    },
     tools: {
       postcss: (config, { addPlugins }) => {
         addPlugins([require('tailwindcss/nesting'), require('tailwindcss')]);
+      },
+      rspack(config) {
+        debugger;
+        const asyncEntry = path.resolve(
+          __dirname,
+          'node_modules/.federation/bootstrap.js',
+        );
+        if (!fs.existsSync(asyncEntry)) {
+          // @ts-ignore
+          fs.writeFileSync(asyncEntry, `import ('${config.entry.index}')`);
+        }
+        // @ts-ignore
+        config.entry.index = [asyncEntry];
+
+        config.plugins.push(new ModuleFederationPlugin(mfConfig));
       },
     },
     resolve: {
