@@ -1,0 +1,15 @@
+
+
+> create-module-federation@0.14.3 build /Users/bytedance/dev/universe/packages/create-module-federation
+> rslib build
+
+[1m[38;2;189;255;243m [39m[38;2;189;255;243m [39m[38;2;179;249;235mR[39m[38;2;168;244;227ms[39m[38;2;158;238;219ml[39m[38;2;147;233;211mi[39m[38;2;137;227;203mb[39m[38;2;137;227;203m [39m[38;2;126;222;194mv[39m[38;2;116;216;186m0[39m[38;2;105;211;178m.[39m[38;2;95;205;170m3[39m[38;2;84;200;162m.[39m[38;2;74;194;154m2[39m[38;2;74;194;154m
+[39m[22m
+[1m[32mready  [39m[22m Built in [1m0.46[22m s[90m (esm)[39m
+
+[34m  File (esm)       Size       [39m
+  [2mdist/[22m[36mindex.js[39m    14.1 kB
+
+[1m[36minfo   [39m[22m [36mPublint found [1m2[22m suggestions:[39m
+[1m[36minfo   [39m[22m [1mpkg.repository.url[22m is [1mhttps://github.com/module-federation/core/[22m but could be a full git URL like "[1mgit+https://github.com/module-federation/core.git[22m".
+[1m[36minfo   [39m[22m [1mpkg.main[22m is an ESM file, but it is usually better to use [1mpkg.exports[22m instead. If you don't support NodeJS 12.6 and below, you can also remove [1mpkg.main[22m. (This will be a breaking change)
