@@ -1,6 +1,7 @@
 import { createModuleFederationConfig } from '@module-federation/enhanced';
 
 export default createModuleFederationConfig({
+  filename: 'remoteEntry.js',
   name: 'mf_doc',
   exposes: {
     './cli-zh': './docs/zh/guide/basic/cli.mdx',
@@ -9,7 +10,7 @@ export default createModuleFederationConfig({
   shared: {
     react: { singleton: true },
     'react-dom': { singleton: true },
-    '@mdx-js/react': { singleton: true },
+    '@mdx-js/react': { singleton: true, requiredVersion: false },
   },
   dts: false,
 });

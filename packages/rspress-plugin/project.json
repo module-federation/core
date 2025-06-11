@@ -1,0 +1,27 @@
+{
+  "name": "rspress-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/rspress-plugin/src",
+  "projectType": "library",
+  "tags": ["type:app"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run build --prefix packages/rspress-plugin"]
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run dev --prefix packages/rspress-plugin"]
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    }
+  }
+}

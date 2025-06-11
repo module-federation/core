@@ -4,21 +4,19 @@ import {
   PLUGIN_NAME,
 } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion } from '@module-federation/sdk';
+import pkgJson from '../../package.json';
+import logger from '../logger';
 import {
   isRegExp,
   autoDeleteSplitChunkCacheGroups,
   addDataFetchExposes,
-} from '../utils/index';
-import pkgJson from '../../package.json';
-import logger from '../logger';
-import {
   createSSRMFConfig,
   createSSRREnvConfig,
   setSSREnv,
   SSR_ENV_NAME,
   SSR_DIR,
-} from './ssr';
-import { updateStatsAndManifest } from './manifest';
+  updateStatsAndManifest,
+} from '../utils';
 
 import type {
   moduleFederationPlugin,
