@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/rspress-plugin/src",
   "projectType": "library",
-  "tags": ["type:app"],
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -22,6 +22,18 @@
           "dependencies": true
         }
       ]
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run webpack-bundler-runtime:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
     }
   }
 }
