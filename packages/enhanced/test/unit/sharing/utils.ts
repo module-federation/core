@@ -197,7 +197,20 @@ export const createMockCompilation = () => {
     },
     resolverFactory: {
       get: jest.fn().mockReturnValue({
-        resolve: jest.fn().mockResolvedValue({ path: '/resolved/path' }),
+        resolve: jest
+          .fn()
+          .mockImplementation(
+            (
+              resolveOptions,
+              resolveFrom,
+              resolveTo,
+              resolveContext,
+              callback,
+            ) => {
+              // Mock successful resolution with correct 5-parameter signature
+              callback(null, '/resolved/' + resolveTo);
+            },
+          ),
       }),
     },
     codeGenerationResults: {
@@ -363,10 +376,20 @@ export const createSharingTestEnvironment = () => {
   mockCompilation.context = compiler.context;
   mockCompilation.resolverFactory = {
     get: jest.fn().mockReturnValue({
-      resolve: jest.fn().mockImplementation((context, request, callback) => {
-        // Mock successful resolution
-        callback(null, '/resolved/' + request);
-      }),
+      resolve: jest
+        .fn()
+        .mockImplementation(
+          (
+            resolveOptions,
+            resolveFrom,
+            resolveTo,
+            resolveContext,
+            callback,
+          ) => {
+            // Mock successful resolution with correct 5-parameter signature
+            callback(null, '/resolved/' + resolveTo);
+          },
+        ),
     }),
   };
 

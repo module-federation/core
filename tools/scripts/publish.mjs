@@ -69,7 +69,9 @@ async function main() {
     json.version = version;
     writeFileSync(packageJsonPath, JSON.stringify(json, null, 2));
 
-    console.log(chalk.green(`Updated version from ${oldVersion} to ${version}`));
+    console.log(
+      chalk.green(`Updated version from ${oldVersion} to ${version}`),
+    );
   } catch (e) {
     console.error(
       chalk.bold.red(
@@ -82,9 +84,15 @@ async function main() {
 
   // Execute "npm publish" to publish
   try {
-    console.log(chalk.blue(`Publishing with command: npm publish --access public --tag ${tag}`));
+    console.log(
+      chalk.blue(
+        `Publishing with command: npm publish --access public --tag ${tag}`,
+      ),
+    );
     execSync(`npm publish --access public --tag ${tag}`, { stdio: 'inherit' });
-    console.log(chalk.green(`Successfully published ${name}@${version} with tag: ${tag}`));
+    console.log(
+      chalk.green(`Successfully published ${name}@${version} with tag: ${tag}`),
+    );
   } catch (error) {
     console.error(chalk.bold.red('Failed to publish package:'), error);
     process.exit(1);
