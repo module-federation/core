@@ -81,6 +81,7 @@ function replaceEntryWithBootstrapEntry(bundlerConfig: RspackConfig) {
 
 export function pluginModuleFederation(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  ModuleFederationPluginImplementation = ModuleFederationPlugin,
 ): RspressPlugin {
   let browserPlugin: ModuleFederationPlugin;
   let serverPlugin: ModuleFederationPlugin;
@@ -108,7 +109,7 @@ export function pluginModuleFederation(
       }
     },
     async afterBuild(config, isProd) {
-      if (serverPlugin && browserPlugin && outputDir) {
+      if (enableSSG) {
         updateStatsAndManifest(serverPlugin, browserPlugin, outputDir);
       }
     },
@@ -130,10 +131,14 @@ export function pluginModuleFederation(
               process.exit(1);
             }
             patchSSRRspackConfig(config, mfConfigForSSR);
-            serverPlugin = new ModuleFederationPlugin(mfConfigForSSR);
+            serverPlugin = new ModuleFederationPluginImplementation(
+              mfConfigForSSR,
+            );
             config.plugins.push(serverPlugin);
           } else {
-            browserPlugin = new ModuleFederationPlugin(mfConfigForBrowser);
+            browserPlugin = new ModuleFederationPluginImplementation(
+              mfConfigForBrowser,
+            );
             config.plugins.push(browserPlugin);
             outputDir = config.output?.path || '';
           }
