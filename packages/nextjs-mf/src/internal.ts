@@ -135,6 +135,12 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
     singleton: true,
     import: undefined,
   },
+  'next/compat/router': {
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+    shareKey: 'next/router',
+  },
   'next/image': {
     requiredVersion: undefined,
     singleton: true,
@@ -173,14 +179,10 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
   'react/jsx-dev-runtime': {
     singleton: true,
     requiredVersion: false,
-    import: require.resolve('react/jsx-dev-runtime', {
-      paths: [process.cwd()],
-    }),
   },
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
-    import: require.resolve('react/jsx-runtime', { paths: [process.cwd()] }),
   },
   'styled-jsx': {
     singleton: true,
@@ -218,16 +220,9 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: moduleFederationPlugin.SharedObject =
     if (key === 'react-dom/server') {
       return acc;
     }
-    let imp = undefined;
-    if (key.startsWith('react')) {
-      console.log(key);
-      imp = require.resolve(key, { paths: [process.cwd()] });
-    }
-    if (imp) {
-      console.log(imp, process.cwd());
-    }
-    // Set eager and import to undefined for all entries, except for the ones specified above
-    acc[key] = { ...value, import: imp };
+
+    // Set import to undefined for all entries
+    acc[key] = { ...value, import: undefined };
 
     return acc;
   }, {} as moduleFederationPlugin.SharedObject);
