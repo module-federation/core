@@ -1,5 +1,15 @@
 # @module-federation/rsbuild-plugin
 
+## 0.15.0
+
+### Patch Changes
+
+- f777710: feat(rsbuild-plugin): support generate MF SSR in Rslib
+- Updated dependencies [ad446af]
+  - @module-federation/enhanced@0.15.0
+  - @module-federation/node@2.7.7
+  - @module-federation/sdk@0.15.0
+
 ## 0.14.3
 
 ### Patch Changes
