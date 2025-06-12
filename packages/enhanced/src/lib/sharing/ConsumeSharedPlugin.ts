@@ -29,7 +29,6 @@ import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugi
 import ShareRuntimeModule from './ShareRuntimeModule';
 import type { SemVerRange } from 'webpack/lib/util/semver';
 import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
-import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFactory';
 import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
 import { createSchemaValidation } from '../../utils';
 
@@ -61,14 +60,23 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
 };
 const PLUGIN_NAME = 'ConsumeSharedPlugin';
 
-// Helper function to create composite key
-function createLookupKey(
-  request: string,
-  contextInfo: ModuleFactoryCreateDataContextInfo,
-): string {
-  return contextInfo.issuerLayer
-    ? `(${contextInfo.issuerLayer})${request}`
-    : request;
+// Helper function to try layered lookup first, then unlayered fallback
+function tryLookupWithFallback<T>(
+  map: Map<string, T>,
+  key: string,
+  issuerLayer?: string | null,
+): T | undefined {
+  // First try layered lookup if request has an issuer layer
+  if (issuerLayer) {
+    const layeredKey = `(${issuerLayer})${key}`;
+    const layeredResult = map.get(layeredKey);
+    if (layeredResult !== undefined) {
+      return layeredResult;
+    }
+  }
+
+  // Fallback to unlayered lookup
+  return map.get(key);
 }
 
 class ConsumeSharedPlugin {
@@ -322,27 +330,57 @@ class ConsumeSharedPlugin {
               ) {
                 return;
               }
-              const match = unresolvedConsumes.get(
-                createLookupKey(request, contextInfo),
+
+              // Check exact request matches (with layer fallback)
+              const match = tryLookupWithFallback(
+                unresolvedConsumes,
+                request,
+                contextInfo.issuerLayer,
               );
 
               if (match !== undefined) {
                 return createConsumeSharedModule(context, request, match);
               }
+
+              // Check prefix matches with layer fallback
+              // First try to find a prefix that matches both request and layer
+              if (contextInfo.issuerLayer) {
+                for (const [prefix, options] of prefixedConsumes) {
+                  if (
+                    request.startsWith(prefix) &&
+                    options.layer === contextInfo.issuerLayer
+                  ) {
+                    const remainder = request.slice(prefix.length);
+                    return createConsumeSharedModule(context, request, {
+                      ...options,
+                      import: options.import
+                        ? options.import + remainder
+                        : undefined,
+                      shareKey: options.shareKey + remainder,
+                      layer: options.layer,
+                    });
+                  }
+                }
+              }
+
+              // Fallback to unlayered prefix matches
               for (const [prefix, options] of prefixedConsumes) {
-                const lookup = options.request || prefix;
-                if (request.startsWith(lookup)) {
-                  const remainder = request.slice(lookup.length);
+                if (
+                  request.startsWith(prefix) &&
+                  (!options.layer || options.layer === 'undefined')
+                ) {
+                  const remainder = request.slice(prefix.length);
                   return createConsumeSharedModule(context, request, {
                     ...options,
                     import: options.import
                       ? options.import + remainder
                       : undefined,
                     shareKey: options.shareKey + remainder,
-                    layer: options.layer || contextInfo.issuerLayer,
+                    layer: options.layer,
                   });
                 }
               }
+
               return;
             });
           },

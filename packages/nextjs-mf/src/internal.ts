@@ -150,12 +150,17 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
     requiredVersion: false,
     import: false,
   },
-  'react/': {
+  // 'react/': {
+  //   singleton: true,
+  //   requiredVersion: false,
+  //   import: false,
+  // },
+  'react-dom/client': {
     singleton: true,
     requiredVersion: false,
     import: false,
   },
-  'react-dom/': {
+  'react-dom/server': {
     singleton: true,
     requiredVersion: false,
     import: false,
@@ -168,10 +173,14 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
   'react/jsx-dev-runtime': {
     singleton: true,
     requiredVersion: false,
+    import: require.resolve('react/jsx-dev-runtime', {
+      paths: [process.cwd()],
+    }),
   },
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
+    import: require.resolve('react/jsx-runtime', { paths: [process.cwd()] }),
   },
   'styled-jsx': {
     singleton: true,
@@ -206,9 +215,19 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
 export const DEFAULT_SHARE_SCOPE_BROWSER: moduleFederationPlugin.SharedObject =
   Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc, item) => {
     const [key, value] = item as [string, moduleFederationPlugin.SharedConfig];
-
+    if (key === 'react-dom/server') {
+      return acc;
+    }
+    let imp = undefined;
+    if (key.startsWith('react')) {
+      console.log(key);
+      imp = require.resolve(key, { paths: [process.cwd()] });
+    }
+    if (imp) {
+      console.log(imp, process.cwd());
+    }
     // Set eager and import to undefined for all entries, except for the ones specified above
-    acc[key] = { ...value, import: undefined };
+    acc[key] = { ...value, import: imp };
 
     return acc;
   }, {} as moduleFederationPlugin.SharedObject);

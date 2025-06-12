@@ -147,6 +147,13 @@ export class NextFederationPlugin {
       asyncFunction: true,
     };
 
+    // Configure optimization settings
+    if (!compiler.options.optimization) {
+      compiler.options.optimization = {};
+    }
+    compiler.options.optimization.minimize = false;
+    compiler.options.optimization.moduleIds = 'named';
+
     // Add layer rules for resource queries
     if (!compiler.options.module.rules) {
       compiler.options.module.rules = [];

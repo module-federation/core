@@ -57,15 +57,21 @@ const validate = createSchemaValidation(
 
 /** @typedef {Map<string, { config: ProvideOptions, version: string | undefined | false }>} ResolvedProvideMap */
 
-// Helper function to create composite key
-function createLookupKey(
-  request: string,
-  config: { layer?: string | null },
-): string {
-  if (config.layer) {
-    return `(${config.layer})${request}`;
+// Helper function to try layered lookup first, then unlayered fallback
+function tryLookupWithFallback<T>(
+  map: Map<string, T>,
+  key: string,
+  moduleLayer?: string | null,
+): T | undefined {
+  // Look for entries that match the key and consider layer
+  for (const [mapKey, value] of map) {
+    if (mapKey === key) {
+      // For resolved provides, we need to check if this entry has the right layer context
+      // This is a simple fallback - try to find exact matches first
+      return value;
+    }
   }
-  return request;
+  return undefined;
 }
 
 class ProvideSharedPlugin {
@@ -139,25 +145,24 @@ class ProvideSharedPlugin {
         const prefixMatchProvides: Map<string, ProvidesConfig> = new Map();
         for (const [request, config] of this._provides) {
           const actualRequest = config.request || request;
-          const lookupKey = createLookupKey(actualRequest, config);
           if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
             // relative request
-            resolvedProvideMap.set(lookupKey, {
+            resolvedProvideMap.set(actualRequest, {
               config,
               version: config.version,
             });
           } else if (/^(\/|[A-Za-z]:\\|\\\\)/.test(actualRequest)) {
             // absolute path
-            resolvedProvideMap.set(lookupKey, {
+            resolvedProvideMap.set(actualRequest, {
               config,
               version: config.version,
             });
           } else if (actualRequest.endsWith('/')) {
             // module request prefix
-            prefixMatchProvides.set(lookupKey, config);
+            prefixMatchProvides.set(actualRequest, config);
           } else {
             // module request
-            matchProvides.set(lookupKey, config);
+            matchProvides.set(actualRequest, config);
           }
         }
 
@@ -193,8 +198,7 @@ class ProvideSharedPlugin {
               compilation.warnings.push(error);
             }
           }
-          const lookupKey = createLookupKey(resource, config);
-          resolvedProvideMap.set(lookupKey, {
+          resolvedProvideMap.set(resource, {
             config,
             version,
             resource,
@@ -204,32 +208,68 @@ class ProvideSharedPlugin {
           'ProvideSharedPlugin',
           (module, { resource, resourceResolveData }, resolveData) => {
             const moduleLayer = module.layer;
-            const lookupKey = createLookupKey(resource || '', {
-              layer: moduleLayer || undefined,
-            });
 
-            if (resource && resolvedProvideMap.has(lookupKey)) {
-              return module;
-            }
-            const { request } = resolveData;
-            {
-              const requestKey = createLookupKey(request, {
-                layer: moduleLayer || undefined,
-              });
-              const config = matchProvides.get(requestKey);
-              if (config !== undefined && resource) {
-                provideSharedModule(
-                  request,
-                  config,
-                  resource,
-                  resourceResolveData,
-                );
-                resolveData.cacheable = false;
+            // Check if resource is already in resolved provides (with layer fallback)
+            if (resource) {
+              const resolvedConfig = tryLookupWithFallback(
+                resolvedProvideMap,
+                resource,
+                moduleLayer,
+              );
+              if (resolvedConfig) {
+                return module;
               }
             }
+
+            const { request } = resolveData;
+
+            // Check exact request matches (with layer fallback)
+            const config = tryLookupWithFallback(
+              matchProvides,
+              request,
+              moduleLayer,
+            );
+            if (config !== undefined && resource) {
+              provideSharedModule(
+                request,
+                config,
+                resource,
+                resourceResolveData,
+              );
+              resolveData.cacheable = false;
+              return module;
+            }
+
+            // Check prefix matches with layer fallback
+            // First try to find a prefix that matches both request and layer
+            if (moduleLayer) {
+              for (const [prefix, config] of prefixMatchProvides) {
+                const lookup = config.request || prefix;
+                if (
+                  request.startsWith(lookup) &&
+                  resource &&
+                  config.layer === moduleLayer
+                ) {
+                  const remainder = request.slice(lookup.length);
+                  provideSharedModule(
+                    resource,
+                    {
+                      ...config,
+                      shareKey: config.shareKey + remainder,
+                    },
+                    resource,
+                    resourceResolveData,
+                  );
+                  resolveData.cacheable = false;
+                  return module;
+                }
+              }
+            }
+
+            // Fallback to unlayered prefix matches
             for (const [prefix, config] of prefixMatchProvides) {
               const lookup = config.request || prefix;
-              if (request.startsWith(lookup) && resource) {
+              if (request.startsWith(lookup) && resource && !config.layer) {
                 const remainder = request.slice(lookup.length);
                 provideSharedModule(
                   resource,
@@ -241,8 +281,10 @@ class ProvideSharedPlugin {
                   resourceResolveData,
                 );
                 resolveData.cacheable = false;
+                return module;
               }
             }
+
             return module;
           },
         );

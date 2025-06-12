@@ -7,15 +7,17 @@
     "antd": "5.19.1",
     "lodash": "4.17.21",
     "next": "15.4.0",
-    "react": "19.1.0"
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "webpack": "5.99.9"
   },
   "devDependencies": {
     "@module-federation/nextjs-mf": "workspace:*",
-    "@module-federation/runtime": "workspace:*",
-    "@module-federation/utilities": "workspace:*"
+    "@module-federation/runtime": "latest"
   },
   "scripts": {
     "start": "next start",
+    "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev",
     "build": "pnpm exec next telemetry disable && NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
   }
 }
