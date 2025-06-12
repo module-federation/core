@@ -44,16 +44,34 @@ function replaceEntryWithBootstrapEntry(bundlerConfig: RspackConfig) {
     entryName: string,
   ) => {
     const entryPath = path.resolve(
-      __dirname,
+      process.cwd(),
       `node_modules/.federation/${entryName}-bootstrap.js`,
     );
     fs.ensureDirSync(path.dirname(entryPath));
 
     if (typeof entries === 'string') {
-      fs.writeFileSync(entryPath, `import ('${entries}')`);
+      fs.writeFileSync(
+        entryPath,
+        `const entry = import ('${entries}');
+      const render = entry.then(({render})=>(render));
+      const routes = entry.then(({routes})=>(routes));
+      export {
+          render,
+          routes
+        };`,
+      );
       return entryPath;
     } else {
-      fs.writeFileSync(entryPath, `import ('${entries.slice(-1)[0]}')`);
+      fs.writeFileSync(
+        entryPath,
+        `const entry = import ('${entries.slice(-1)[0]}');
+         const render = entry.then(({render})=>(render));
+      const routes = entry.then(({routes})=>(routes));
+      export {
+          render,
+          routes
+        };`,
+      );
       return entries.slice(0, -1).concat(entryPath);
     }
   };
