@@ -25,7 +25,7 @@
     "dist/"
   ],
   "dependencies": {
-    "@babel/runtime": "7.26.0",
+    "@babel/runtime": "7.27.6",
     "@modern-js/runtime": "2.67.6",
     "@module-federation/modern-js": "workspace:*",
     "antd": "4.24.15",
