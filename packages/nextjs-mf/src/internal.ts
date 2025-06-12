@@ -150,17 +150,12 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
     requiredVersion: false,
     import: false,
   },
-  // 'react/': {
-  //   singleton: true,
-  //   requiredVersion: false,
-  //   import: false,
-  // },
-  'react-dom/client': {
+  'react/': {
     singleton: true,
     requiredVersion: false,
     import: false,
   },
-  'react-dom/server': {
+  'react-dom/': {
     singleton: true,
     requiredVersion: false,
     import: false,
@@ -211,11 +206,8 @@ export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
 export const DEFAULT_SHARE_SCOPE_BROWSER: moduleFederationPlugin.SharedObject =
   Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc, item) => {
     const [key, value] = item as [string, moduleFederationPlugin.SharedConfig];
-    if (key === 'react-dom/server') {
-      return acc;
-    }
 
-    // Set import to undefined for all entries
+    // Set eager and import to undefined for all entries, except for the ones specified above
     acc[key] = { ...value, import: undefined };
 
     return acc;

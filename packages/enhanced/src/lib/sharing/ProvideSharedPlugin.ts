@@ -63,15 +63,17 @@ function tryLookupWithFallback<T>(
   key: string,
   moduleLayer?: string | null,
 ): T | undefined {
-  // Look for entries that match the key and consider layer
-  for (const [mapKey, value] of map) {
-    if (mapKey === key) {
-      // For resolved provides, we need to check if this entry has the right layer context
-      // This is a simple fallback - try to find exact matches first
-      return value;
+  // First try layered lookup if request has a module layer
+  if (moduleLayer) {
+    const layeredKey = `(${moduleLayer})${key}`;
+    const layeredResult = map.get(layeredKey);
+    if (layeredResult !== undefined) {
+      return layeredResult;
     }
   }
-  return undefined;
+
+  // Fallback to unlayered lookup
+  return map.get(key);
 }
 
 class ProvideSharedPlugin {

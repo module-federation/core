@@ -6,17 +6,16 @@
     "@ant-design/cssinjs": "^1.21.0",
     "antd": "5.19.1",
     "lodash": "4.17.21",
-    "next": "15.3.3",
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "next": "14.2.16",
+    "react": "18.3.1"
   },
   "devDependencies": {
     "@module-federation/nextjs-mf": "workspace:*",
     "@module-federation/runtime": "workspace:*",
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/utilities": "workspace:*"
   },
   "scripts": {
-    "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev",
     "start": "next start",
     "build": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
   }
