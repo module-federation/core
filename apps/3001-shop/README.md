@@ -12,3 +12,8 @@ Output will be located in the `dist` or `.next` folder.
 ```bash
 pnpm install
 ```
+
+## Scripts
+
+- `pnpm start`: Start dev server
+- `pnpm build`: Build production bundle
