@@ -112,8 +112,8 @@ export const createShareScope = (
   const isServer = compiler.name === 'server';
   const isEdgeServer = compiler.name === 'edge-server';
 
-  // Base shared configuration
-  const baseSharedConfig: moduleFederationPlugin.SharedObject = {
+  // Create shared configuration with conditional logic based on compiler context
+  return {
     // ...reactShares,
     // ...reactDomShares,
     // ...nextNavigationShares,
@@ -164,30 +164,32 @@ export const createShareScope = (
     react: {
       singleton: true,
       requiredVersion: false,
-      import: false,
+      import: isServer ? false : undefined,
     },
     'react/': {
       singleton: true,
       requiredVersion: false,
-      import: false,
+      import: isServer ? false : undefined,
     },
     'react-dom/': {
       singleton: true,
       requiredVersion: false,
-      import: false,
+      import: isServer ? false : undefined,
     },
     'react-dom': {
       singleton: true,
       requiredVersion: false,
-      import: false,
+      import: isServer ? false : undefined,
     },
     'react/jsx-dev-runtime': {
       singleton: true,
       requiredVersion: false,
+      import: isServer ? false : undefined,
     },
     'react/jsx-runtime': {
       singleton: true,
       requiredVersion: false,
+      import: isServer ? false : undefined,
     },
     'styled-jsx': {
       singleton: true,
@@ -197,7 +199,7 @@ export const createShareScope = (
     },
     'styled-jsx/style': {
       singleton: true,
-      import: false,
+      import: isServer ? false : undefined,
       version: require('styled-jsx/package.json').version,
       requiredVersion: '^' + require('styled-jsx/package.json').version,
     },
@@ -208,60 +210,6 @@ export const createShareScope = (
       requiredVersion: '^' + require('styled-jsx/package.json').version,
     },
   };
-
-  // Modify configuration based on compiler context
-  if (isClient) {
-    // For client builds, set eager and import to undefined for all entries
-    // For specific modules like 'react', 'react-dom', 'next/router', and 'next/link', set eager to true
-    return Object.entries(baseSharedConfig).reduce((acc, [key, value]) => {
-      // Ensure value is a SharedConfig object, not a string
-      if (typeof value === 'object' && value !== null) {
-        acc[key] = {
-          ...value,
-          import: undefined,
-          // Add client-specific configurations here if needed
-        };
-      } else {
-        acc[key] = value;
-      }
-      return acc;
-    }, {} as moduleFederationPlugin.SharedObject);
-  }
-
-  if (isServer) {
-    // Server-specific modifications
-    return Object.entries(baseSharedConfig).reduce((acc, [key, value]) => {
-      // Ensure value is a SharedConfig object, not a string
-      if (typeof value === 'object' && value !== null) {
-        acc[key] = {
-          ...value,
-          // Add server-specific configurations here if needed
-        };
-      } else {
-        acc[key] = value;
-      }
-      return acc;
-    }, {} as moduleFederationPlugin.SharedObject);
-  }
-
-  if (isEdgeServer) {
-    // Edge server-specific modifications
-    return Object.entries(baseSharedConfig).reduce((acc, [key, value]) => {
-      // Ensure value is a SharedConfig object, not a string
-      if (typeof value === 'object' && value !== null) {
-        acc[key] = {
-          ...value,
-          // Add edge server-specific configurations here if needed
-        };
-      } else {
-        acc[key] = value;
-      }
-      return acc;
-    }, {} as moduleFederationPlugin.SharedObject);
-  }
-
-  // Default configuration for other compiler names
-  return baseSharedConfig;
 };
 
 /**
