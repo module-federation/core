@@ -6,5 +6,6 @@ export default defineConfig({
   buildConfig: {
     input: ['src', '!src/index.tsx'],
     tsconfig: 'tsconfig.lib.json',
+    minify: false,
   },
 });

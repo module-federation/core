@@ -29,6 +29,18 @@
         }
       ]
     },
+    "dev:inspector": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run dev:inspector --prefix packages/chrome-devtools"]
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
     "test": {
       "executor": "nx:run-commands",
       "options": {

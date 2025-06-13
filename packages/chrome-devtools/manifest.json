@@ -17,6 +17,7 @@
         "static/js/post-message.js",
         "static/js/post-message-start.js",
         "static/js/fast-refresh.js",
+        "static/js/inspector-plugin.js",
         "static/js/snapshot-plugin.js"
       ],
       "matches": ["<all_urls>"]
@@ -35,7 +36,11 @@
     },
     {
       "matches": ["<all_urls>"],
-      "js": ["static/js/fast-refresh.js", "static/js/snapshot-plugin.js"],
+      "js": [
+        "static/js/fast-refresh.js",
+        "static/js/snapshot-plugin.js",
+        "static/js/inspector-plugin.js"
+      ],
       "world": "MAIN",
       "run_at": "document_start"
     }
