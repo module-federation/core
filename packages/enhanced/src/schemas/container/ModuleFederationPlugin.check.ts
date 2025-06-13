@@ -311,7 +311,7 @@ const t = {
                         items: { type: 'string' },
                       },
                       compileInChildProcess: { type: 'boolean' },
-                      compilerInstance: { enum: ['tsc', 'vue-tsc'] },
+                      compilerInstance: { type: 'string' },
                       generateAPITypes: { type: 'boolean' },
                       extractThirdParty: { type: 'boolean' },
                       extractRemoteTypes: { type: 'boolean' },
@@ -2158,50 +2158,50 @@ function D(
                             if (m) {
                               if (void 0 !== o.dts) {
                                 let e = o.dts;
-                                const r = u,
-                                  n = u;
-                                let s = !1;
-                                const a = u;
+                                const t = u,
+                                  r = u;
+                                let n = !1;
+                                const s = u;
                                 if ('boolean' != typeof e) {
                                   const e = { params: { type: 'boolean' } };
                                   null === y ? (y = [e]) : y.push(e), u++;
                                 }
-                                var b = a === u;
-                                if (((s = s || b), !s)) {
-                                  const r = u;
-                                  if (u === r)
+                                var b = s === u;
+                                if (((n = n || b), !n)) {
+                                  const t = u;
+                                  if (u === t)
                                     if (
                                       e &&
                                       'object' == typeof e &&
                                       !Array.isArray(e)
                                     ) {
                                       if (void 0 !== e.generateTypes) {
-                                        let r = e.generateTypes;
-                                        const n = u,
-                                          s = u;
-                                        let o = !1;
-                                        const a = u;
-                                        if ('boolean' != typeof r) {
+                                        let t = e.generateTypes;
+                                        const r = u,
+                                          n = u;
+                                        let s = !1;
+                                        const o = u;
+                                        if ('boolean' != typeof t) {
                                           const e = {
                                             params: { type: 'boolean' },
                                           };
                                           null === y ? (y = [e]) : y.push(e),
                                             u++;
                                         }
-                                        var v = a === u;
-                                        if (((o = o || v), !o)) {
+                                        var v = o === u;
+                                        if (((s = s || v), !s)) {
                                           const e = u;
                                           if (u === e)
                                             if (
-                                              r &&
-                                              'object' == typeof r &&
-                                              !Array.isArray(r)
+                                              t &&
+                                              'object' == typeof t &&
+                                              !Array.isArray(t)
                                             ) {
-                                              if (void 0 !== r.tsConfigPath) {
+                                              if (void 0 !== t.tsConfigPath) {
                                                 const e = u;
                                                 if (
                                                   'string' !=
-                                                  typeof r.tsConfigPath
+                                                  typeof t.tsConfigPath
                                                 ) {
                                                   const e = {
                                                     params: { type: 'string' },
@@ -2214,11 +2214,11 @@ function D(
                                                 var j = e === u;
                                               } else j = !0;
                                               if (j) {
-                                                if (void 0 !== r.typesFolder) {
+                                                if (void 0 !== t.typesFolder) {
                                                   const e = u;
                                                   if (
                                                     'string' !=
-                                                    typeof r.typesFolder
+                                                    typeof t.typesFolder
                                                   ) {
                                                     const e = {
                                                       params: {
@@ -2235,12 +2235,12 @@ function D(
                                                 if (j) {
                                                   if (
                                                     void 0 !==
-                                                    r.compiledTypesFolder
+                                                    t.compiledTypesFolder
                                                   ) {
                                                     const e = u;
                                                     if (
                                                       'string' !=
-                                                      typeof r.compiledTypesFolder
+                                                      typeof t.compiledTypesFolder
                                                     ) {
                                                       const e = {
                                                         params: {
@@ -2257,12 +2257,12 @@ function D(
                                                   if (j) {
                                                     if (
                                                       void 0 !==
-                                                      r.deleteTypesFolder
+                                                      t.deleteTypesFolder
                                                     ) {
                                                       const e = u;
                                                       if (
                                                         'boolean' !=
-                                                        typeof r.deleteTypesFolder
+                                                        typeof t.deleteTypesFolder
                                                       ) {
                                                         const e = {
                                                           params: {
@@ -2279,12 +2279,12 @@ function D(
                                                     if (j) {
                                                       if (
                                                         void 0 !==
-                                                        r.additionalFilesToCompile
+                                                        t.additionalFilesToCompile
                                                       ) {
                                                         let e =
-                                                          r.additionalFilesToCompile;
-                                                        const t = u;
-                                                        if (u === t)
+                                                          t.additionalFilesToCompile;
+                                                        const r = u;
+                                                        if (u === r)
                                                           if (
                                                             Array.isArray(e)
                                                           ) {
@@ -2323,17 +2323,17 @@ function D(
                                                               : y.push(e),
                                                               u++;
                                                           }
-                                                        j = t === u;
+                                                        j = r === u;
                                                       } else j = !0;
                                                       if (j) {
                                                         if (
                                                           void 0 !==
-                                                          r.compileInChildProcess
+                                                          t.compileInChildProcess
                                                         ) {
                                                           const e = u;
                                                           if (
                                                             'boolean' !=
-                                                            typeof r.compileInChildProcess
+                                                            typeof t.compileInChildProcess
                                                           ) {
                                                             const e = {
                                                               params: {
@@ -2350,27 +2350,16 @@ function D(
                                                         if (j) {
                                                           if (
                                                             void 0 !==
-                                                            r.compilerInstance
+                                                            t.compilerInstance
                                                           ) {
-                                                            let e =
-                                                              r.compilerInstance;
-                                                            const n = u;
+                                                            const e = u;
                                                             if (
-                                                              'tsc' !== e &&
-                                                              'vue-tsc' !== e
+                                                              'string' !=
+                                                              typeof t.compilerInstance
                                                             ) {
                                                               const e = {
                                                                 params: {
-                                                                  allowedValues:
-                                                                    t.properties
-                                                                      .dts
-                                                                      .anyOf[1]
-                                                                      .properties
-                                                                      .generateTypes
-                                                                      .anyOf[1]
-                                                                      .properties
-                                                                      .compilerInstance
-                                                                      .enum,
+                                                                  type: 'string',
                                                                 },
                                                               };
                                                               null === y
@@ -2378,17 +2367,17 @@ function D(
                                                                 : y.push(e),
                                                                 u++;
                                                             }
-                                                            j = n === u;
+                                                            j = e === u;
                                                           } else j = !0;
                                                           if (j) {
                                                             if (
                                                               void 0 !==
-                                                              r.generateAPITypes
+                                                              t.generateAPITypes
                                                             ) {
                                                               const e = u;
                                                               if (
                                                                 'boolean' !=
-                                                                typeof r.generateAPITypes
+                                                                typeof t.generateAPITypes
                                                               ) {
                                                                 const e = {
                                                                   params: {
@@ -2405,12 +2394,12 @@ function D(
                                                             if (j) {
                                                               if (
                                                                 void 0 !==
-                                                                r.extractThirdParty
+                                                                t.extractThirdParty
                                                               ) {
                                                                 const e = u;
                                                                 if (
                                                                   'boolean' !=
-                                                                  typeof r.extractThirdParty
+                                                                  typeof t.extractThirdParty
                                                                 ) {
                                                                   const e = {
                                                                     params: {
@@ -2427,12 +2416,12 @@ function D(
                                                               if (j) {
                                                                 if (
                                                                   void 0 !==
-                                                                  r.extractRemoteTypes
+                                                                  t.extractRemoteTypes
                                                                 ) {
                                                                   const e = u;
                                                                   if (
                                                                     'boolean' !=
-                                                                    typeof r.extractRemoteTypes
+                                                                    typeof t.extractRemoteTypes
                                                                   ) {
                                                                     const e = {
                                                                       params: {
@@ -2453,12 +2442,12 @@ function D(
                                                                 if (j)
                                                                   if (
                                                                     void 0 !==
-                                                                    r.abortOnError
+                                                                    t.abortOnError
                                                                   ) {
                                                                     const e = u;
                                                                     if (
                                                                       'boolean' !=
-                                                                      typeof r.abortOnError
+                                                                      typeof t.abortOnError
                                                                     ) {
                                                                       const e =
                                                                         {
@@ -2496,18 +2485,18 @@ function D(
                                                 : y.push(e),
                                                 u++;
                                             }
-                                          (v = e === u), (o = o || v);
+                                          (v = e === u), (s = s || v);
                                         }
-                                        if (o)
-                                          (u = s),
+                                        if (s)
+                                          (u = n),
                                             null !== y &&
-                                              (s ? (y.length = s) : (y = null));
+                                              (n ? (y.length = n) : (y = null));
                                         else {
                                           const e = { params: {} };
                                           null === y ? (y = [e]) : y.push(e),
                                             u++;
                                         }
-                                        var A = n === u;
+                                        var A = r === u;
                                       } else A = !0;
                                       if (A) {
                                         if (void 0 !== e.consumeTypes) {
@@ -2849,9 +2838,9 @@ function D(
                                       const e = { params: { type: 'object' } };
                                       null === y ? (y = [e]) : y.push(e), u++;
                                     }
-                                  (b = r === u), (s = s || b);
+                                  (b = t === u), (n = n || b);
                                 }
-                                if (!s) {
+                                if (!n) {
                                   const e = { params: {} };
                                   return (
                                     null === y ? (y = [e]) : y.push(e),
@@ -2860,10 +2849,10 @@ function D(
                                     !1
                                   );
                                 }
-                                (u = n),
+                                (u = r),
                                   null !== y &&
-                                    (n ? (y.length = n) : (y = null)),
-                                  (m = r === u);
+                                    (r ? (y.length = r) : (y = null)),
+                                  (m = t === u);
                               } else m = !0;
                               if (m) {
                                 if (void 0 !== o.experiments) {
