@@ -179,7 +179,7 @@ export class NextFederationPlugin {
       applyServerPlugins(compiler, this._options);
       handleServerExternals(compiler, {
         ...this._options,
-        shared: { ...retrieveDefaultShared(isServer), ...this._options.shared },
+        shared: { ...retrieveDefaultShared(compiler), ...this._options.shared },
       });
     } else {
       applyClientPlugins(compiler, this._options, this._extraOptions);
@@ -192,7 +192,7 @@ export class NextFederationPlugin {
   ): moduleFederationPlugin.ModuleFederationPluginOptions {
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
-      : retrieveDefaultShared(isServer);
+      : retrieveDefaultShared(compiler);
 
     return {
       ...this._options,

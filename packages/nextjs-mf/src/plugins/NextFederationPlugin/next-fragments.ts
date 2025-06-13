@@ -3,10 +3,7 @@ import type {
   moduleFederationPlugin,
   sharePlugin,
 } from '@module-federation/sdk';
-import {
-  DEFAULT_SHARE_SCOPE,
-  DEFAULT_SHARE_SCOPE_BROWSER,
-} from '../../internal';
+import { createShareScope } from '../../internal';
 import {
   hasLoader,
   injectRuleLoader,
@@ -14,20 +11,14 @@ import {
 } from '../../loaders/helpers';
 import path from 'path';
 /**
- * Set up default shared values based on the environment.
- * @param {boolean} isServer - Boolean indicating if the code is running on the server.
- * @returns {SharedObject} The default share scope based on the environment.
+ * Set up default shared values based on the compiler context.
+ * @param {Compiler} compiler - The webpack compiler instance.
+ * @returns {SharedObject} The default share scope based on the compiler context.
  */
 export const retrieveDefaultShared = (
-  isServer: boolean,
+  compiler: Compiler,
 ): moduleFederationPlugin.SharedObject => {
-  // If the code is running on the server, treat some Next.js internals as import false to make them external
-  // This is because they will be provided by the server environment and not by the remote container
-  if (isServer) {
-    return DEFAULT_SHARE_SCOPE;
-  }
-  // If the code is running on the client/browser, always bundle Next.js internals
-  return DEFAULT_SHARE_SCOPE_BROWSER;
+  return createShareScope(compiler);
 };
 export const applyPathFixes = (
   compiler: Compiler,

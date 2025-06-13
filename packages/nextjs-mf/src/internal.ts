@@ -2,6 +2,7 @@ import type {
   moduleFederationPlugin,
   sharePlugin,
 } from '@module-federation/sdk';
+import type { Compiler } from 'webpack';
 
 // Extend the SharedConfig type to include layer properties
 type ExtendedSharedConfig = sharePlugin.SharedConfig & {
@@ -100,118 +101,168 @@ const nextNavigationShares = createSharedConfig(
 );
 
 /**
- * @typedef SharedObject
- * @type {object}
- * @property {object} [key] - The key representing the shared object's package name.
- * @property {boolean} key.singleton - Whether the shared object should be a singleton.
- * @property {boolean} key.requiredVersion - Whether a specific version of the shared object is required.
- * @property {boolean} key.eager - Whether the shared object should be eagerly loaded.
- * @property {boolean} key.import - Whether the shared object should be imported or not.
- * @property {string} key.layer - The webpack layer this shared module belongs to.
- * @property {string|string[]} key.issuerLayer - The webpack layer that can import this shared module.
+ * Creates a share scope configuration based on the compiler context
+ * @param {Compiler} compiler - The webpack compiler instance
+ * @returns {moduleFederationPlugin.SharedObject} - The configured share scope
  */
-export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
-  // ...reactShares,
-  // ...reactDomShares,
-  // ...nextNavigationShares,
-  // ...jsxRuntimeShares,
-  'next/dynamic': {
-    requiredVersion: undefined,
-    singleton: true,
-    import: undefined,
-  },
-  'next/head': {
-    requiredVersion: undefined,
-    singleton: true,
-    import: undefined,
-  },
-  'next/link': {
-    requiredVersion: undefined,
-    singleton: true,
-    import: undefined,
-  },
-  'next/router': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-  },
-  'next/image': {
-    requiredVersion: undefined,
-    singleton: true,
-    import: undefined,
-  },
-  'next/script': {
-    requiredVersion: undefined,
-    singleton: true,
-    import: undefined,
-  },
-  react: {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react/': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react-dom/': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react-dom': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react/jsx-dev-runtime': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'react/jsx-runtime': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'styled-jsx': {
-    singleton: true,
-    import: undefined,
-    version: require('styled-jsx/package.json').version,
-    requiredVersion: '^' + require('styled-jsx/package.json').version,
-  },
-  'styled-jsx/style': {
-    singleton: true,
-    import: false,
-    version: require('styled-jsx/package.json').version,
-    requiredVersion: '^' + require('styled-jsx/package.json').version,
-  },
-  'styled-jsx/css': {
-    singleton: true,
-    import: undefined,
-    version: require('styled-jsx/package.json').version,
-    requiredVersion: '^' + require('styled-jsx/package.json').version,
-  },
+export const createShareScope = (
+  compiler: Compiler,
+): moduleFederationPlugin.SharedObject => {
+  const isClient = compiler.name === 'client';
+  const isServer = compiler.name === 'server';
+  const isEdgeServer = compiler.name === 'edge-server';
+
+  // Base shared configuration
+  const baseSharedConfig: moduleFederationPlugin.SharedObject = {
+    // ...reactShares,
+    // ...reactDomShares,
+    // ...nextNavigationShares,
+    // ...jsxRuntimeShares,
+    'next/dynamic': {
+      requiredVersion: undefined,
+      singleton: true,
+      import: undefined,
+    },
+    'next/head': {
+      requiredVersion: undefined,
+      singleton: true,
+      import: undefined,
+    },
+    'next/link': {
+      requiredVersion: undefined,
+      singleton: true,
+      import: undefined,
+    },
+    'next/router': {
+      requiredVersion: false,
+      singleton: true,
+      import: undefined,
+      ...(isClient && {
+        issuerLayer: 'app-pages-browser',
+        layer: 'app-pages-browser',
+      }),
+    },
+    'next/compat/router': {
+      requiredVersion: false,
+      singleton: true,
+      import: undefined,
+      ...(isClient && {
+        issuerLayer: 'app-pages-browser',
+        layer: 'app-pages-browser',
+      }),
+    },
+    'next/image': {
+      requiredVersion: undefined,
+      singleton: true,
+      import: undefined,
+    },
+    'next/script': {
+      requiredVersion: undefined,
+      singleton: true,
+      import: undefined,
+    },
+    react: {
+      singleton: true,
+      requiredVersion: false,
+      import: false,
+    },
+    'react/': {
+      singleton: true,
+      requiredVersion: false,
+      import: false,
+    },
+    'react-dom/': {
+      singleton: true,
+      requiredVersion: false,
+      import: false,
+    },
+    'react-dom': {
+      singleton: true,
+      requiredVersion: false,
+      import: false,
+    },
+    'react/jsx-dev-runtime': {
+      singleton: true,
+      requiredVersion: false,
+    },
+    'react/jsx-runtime': {
+      singleton: true,
+      requiredVersion: false,
+    },
+    'styled-jsx': {
+      singleton: true,
+      import: undefined,
+      version: require('styled-jsx/package.json').version,
+      requiredVersion: '^' + require('styled-jsx/package.json').version,
+    },
+    'styled-jsx/style': {
+      singleton: true,
+      import: false,
+      version: require('styled-jsx/package.json').version,
+      requiredVersion: '^' + require('styled-jsx/package.json').version,
+    },
+    'styled-jsx/css': {
+      singleton: true,
+      import: undefined,
+      version: require('styled-jsx/package.json').version,
+      requiredVersion: '^' + require('styled-jsx/package.json').version,
+    },
+  };
+
+  // Modify configuration based on compiler context
+  if (isClient) {
+    // For client builds, set eager and import to undefined for all entries
+    // For specific modules like 'react', 'react-dom', 'next/router', and 'next/link', set eager to true
+    return Object.entries(baseSharedConfig).reduce((acc, [key, value]) => {
+      // Ensure value is a SharedConfig object, not a string
+      if (typeof value === 'object' && value !== null) {
+        acc[key] = {
+          ...value,
+          import: undefined,
+          // Add client-specific configurations here if needed
+        };
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as moduleFederationPlugin.SharedObject);
+  }
+
+  if (isServer) {
+    // Server-specific modifications
+    return Object.entries(baseSharedConfig).reduce((acc, [key, value]) => {
+      // Ensure value is a SharedConfig object, not a string
+      if (typeof value === 'object' && value !== null) {
+        acc[key] = {
+          ...value,
+          // Add server-specific configurations here if needed
+        };
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as moduleFederationPlugin.SharedObject);
+  }
+
+  if (isEdgeServer) {
+    // Edge server-specific modifications
+    return Object.entries(baseSharedConfig).reduce((acc, [key, value]) => {
+      // Ensure value is a SharedConfig object, not a string
+      if (typeof value === 'object' && value !== null) {
+        acc[key] = {
+          ...value,
+          // Add edge server-specific configurations here if needed
+        };
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as moduleFederationPlugin.SharedObject);
+  }
+
+  // Default configuration for other compiler names
+  return baseSharedConfig;
 };
-
-/**
- * Defines a default share scope for the browser environment.
- * This function takes the DEFAULT_SHARE_SCOPE and sets eager to undefined and import to undefined for all entries.
- * For 'react', 'react-dom', 'next/router', and 'next/link', it sets eager to true.
- * The module hoisting system relocates these modules into the right runtime and out of the remote.
- *
- * @type {SharedObject}
- * @returns {SharedObject} - The modified share scope for the browser environment.
- */
-
-export const DEFAULT_SHARE_SCOPE_BROWSER: moduleFederationPlugin.SharedObject =
-  Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc, item) => {
-    const [key, value] = item as [string, moduleFederationPlugin.SharedConfig];
-
-    // Set eager and import to undefined for all entries, except for the ones specified above
-    acc[key] = { ...value, import: undefined };
-
-    return acc;
-  }, {} as moduleFederationPlugin.SharedObject);
 
 /**
  * Checks if the remote value is an internal or promise delegate module reference.
@@ -246,6 +297,7 @@ export const parseRemotes = (
     {} as Record<string, string>,
   );
 };
+
 /**
  * Checks if the remote value is an internal delegate module reference.
  * An internal delegate module reference starts with the string 'internal '.
@@ -256,6 +308,7 @@ export const parseRemotes = (
 const isInternalDelegate = (value: string): boolean => {
   return value.startsWith('internal ');
 };
+
 /**
  * Extracts the delegate modules from the provided remotes object.
  * This function iterates over the remotes object and checks if each remote value is an internal delegate module reference.
