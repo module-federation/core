@@ -524,6 +524,9 @@ importers:
       react:
         specifier: 18.3.1
         version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
@@ -531,9 +534,6 @@ importers:
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
-      '@module-federation/utilities':
-        specifier: workspace:*
-        version: link:../../packages/utilities
 
   apps/3001-shop:
     dependencies:
@@ -552,6 +552,9 @@ importers:
       react:
         specifier: 18.3.1
         version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
@@ -562,9 +565,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
-      '@module-federation/utilities':
-        specifier: workspace:*
-        version: link:../../packages/utilities
 
   apps/3002-checkout:
     dependencies:
@@ -583,6 +583,9 @@ importers:
       react:
         specifier: 18.3.1
         version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
@@ -593,9 +596,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
-      '@module-federation/utilities':
-        specifier: workspace:*
-        version: link:../../packages/utilities
 
   apps/bundle-size:
     dependencies:
