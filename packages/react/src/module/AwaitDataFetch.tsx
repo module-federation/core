@@ -1,14 +1,14 @@
 import React, { MutableRefObject, ReactNode, Suspense, useRef } from 'react';
-import logger from '../logger';
+import logger from './logger';
 import {
   DATA_FETCH_ERROR_PREFIX,
   LOAD_REMOTE_ERROR_PREFIX,
   ERROR_TYPE,
-  DOWNGRADE_KEY,
   DATA_FETCH_FUNCTION,
-} from '../constant';
-import { getDataFetchIdWithErrorMsgs, wrapDataFetchId } from '../utils';
-import type { DataFetchParams } from '../interfaces/global';
+} from './constant';
+
+import { getDataFetchIdWithErrorMsgs, wrapDataFetchId } from './utils';
+import type { DataFetchParams } from './types';
 
 function isPromise<T>(obj: any): obj is PromiseLike<T> {
   return (

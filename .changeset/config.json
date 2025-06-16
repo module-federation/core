@@ -27,7 +27,8 @@
       "@module-federation/inject-external-runtime-core-plugin",
       "@module-federation/runtime-core",
       "create-module-federation",
-      "@module-federation/cli"
+      "@module-federation/cli",
+      "@module-federation/react"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],

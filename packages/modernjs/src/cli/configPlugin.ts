@@ -170,7 +170,7 @@ export const patchMFConfig = (
   );
 
   injectRuntimePlugins(
-    require.resolve('@module-federation/modern-js/auto-fetch-data'),
+    require.resolve('@module-federation/react/data-fetch-runtime-plugin'),
     runtimePlugins,
   );
 

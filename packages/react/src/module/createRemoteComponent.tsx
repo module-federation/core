@@ -1,32 +1,32 @@
 import React, { ReactNode, useEffect, useState } from 'react';
-import logger from '../logger';
-import { getInstance } from '@module-federation/enhanced/runtime';
+import logger from './logger';
 import { AwaitDataFetch, transformError } from './AwaitDataFetch';
 import {
   fetchData,
   getDataFetchItem,
   getDataFetchMapKey,
-} from '../utils/dataFetch';
-import {
   getDataFetchInfo,
   getLoadedRemoteInfos,
   setDataFetchItemLoadedStatus,
   wrapDataFetchId,
-} from '../utils';
+} from './utils';
 import {
   DATA_FETCH_ERROR_PREFIX,
   DATA_FETCH_FUNCTION,
   FS_HREF,
   LOAD_REMOTE_ERROR_PREFIX,
   MF_DATA_FETCH_TYPE,
-} from '../constant';
-import type { ErrorInfo } from './AwaitDataFetch';
-import type { DataFetchParams, NoSSRRemoteInfo } from '../interfaces/global';
+} from './constant';
 
-type IProps = {
+import type { ErrorInfo } from './AwaitDataFetch';
+import type { DataFetchParams, NoSSRRemoteInfo } from './types';
+import type { FederationHost } from '@module-federation/runtime';
+
+export type IProps = {
   id: string;
   injectScript?: boolean;
   injectLink?: boolean;
+  runtime: typeof import('@module-federation/runtime');
 };
 
 export type CreateRemoteComponentOptions<T, E extends keyof T> = {
@@ -36,12 +36,12 @@ export type CreateRemoteComponentOptions<T, E extends keyof T> = {
   export?: E;
   dataFetchParams?: DataFetchParams;
   noSSR?: boolean;
+  runtime: typeof import('@module-federation/runtime');
 };
 
 type ReactKey = { key?: React.Key | null };
 
-function getTargetModuleInfo(id: string) {
-  const instance = getInstance();
+function getTargetModuleInfo(id: string, instance?: FederationHost) {
   if (!instance) {
     return;
   }
@@ -89,12 +89,12 @@ export function collectSSRAssets(options: IProps) {
   } = typeof options === 'string' ? { id: options } : options;
   const links: React.ReactNode[] = [];
   const scripts: React.ReactNode[] = [];
-  const instance = getInstance();
+  const instance = options.runtime.getInstance();
   if (!instance || (!injectLink && !injectScript)) {
     return [...scripts, ...links];
   }
 
-  const moduleAndPublicPath = getTargetModuleInfo(id);
+  const moduleAndPublicPath = getTargetModuleInfo(id, instance);
   if (!moduleAndPublicPath) {
     return [...scripts, ...links];
   }
@@ -192,6 +192,12 @@ function getServerNeedRemoteInfo(
 export function createRemoteComponent<T, E extends keyof T>(
   options: CreateRemoteComponentOptions<T, E>,
 ) {
+  const { runtime } = options;
+  if (!runtime?.getInstance) {
+    throw new Error(
+      'runtime is required if used in "@module-federation/bridge-react"!',
+    );
+  }
   type ComponentType = T[E] extends (...args: any) => any
     ? Parameters<T[E]>[0] extends undefined
       ? ReactKey
@@ -213,7 +219,7 @@ export function createRemoteComponent<T, E extends keyof T>(
   const getData = async (noSSR?: boolean) => {
     let loadedRemoteInfo: ReturnType<typeof getLoadedRemoteInfos>;
     let moduleId: string;
-    const instance = getInstance();
+    const instance = runtime.getInstance();
     try {
       const m = await callLoader();
       moduleId = m && m[Symbol.for('mf_module_id')];
@@ -265,7 +271,7 @@ export function createRemoteComponent<T, E extends keyof T>(
   const LazyComponent = React.lazy(async () => {
     const m = await callLoader();
     const moduleId = m && m[Symbol.for('mf_module_id')];
-    const instance = getInstance()!;
+    const instance = runtime.getInstance()!;
     const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, instance);
     loadedRemoteInfo?.snapshot;
     const dataFetchMapKey = loadedRemoteInfo
@@ -283,6 +289,7 @@ export function createRemoteComponent<T, E extends keyof T>(
 
     const assets = collectSSRAssets({
       id: moduleId,
+      runtime,
     });
 
     const Com = m[exportName] as React.FC<ComponentType>;

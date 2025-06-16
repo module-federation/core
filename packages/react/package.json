@@ -1,0 +1,85 @@
+{
+  "name": "@module-federation/react",
+  "version": "0.15.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/"
+  ],
+  "author": "hanric <hanric.zhang@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/core",
+    "directory": "packages/react"
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./data-fetch-runtime-plugin": {
+      "types": "./dist/types/module/data-fetch/runtime-plugin.d.ts",
+      "import": "./dist/esm/module/data-fetch/runtime-plugin.js",
+      "require": "./dist/cjs/module/data-fetch/runtime-plugin.js"
+    },
+    "./data-fetch-utils": {
+      "types": "./dist/types/module/utils.d.ts",
+      "import": "./dist/esm/module/utils.js",
+      "require": "./dist/cjs/module/utils.js"
+    },
+    "./data-fetch-server-middleware": {
+      "types": "./dist/types/module/data-fetch/data-fetch-server-middleware.d.ts",
+      "import": "./dist/esm/module/data-fetch/data-fetch-server-middleware.js",
+      "require": "./dist/cjs/module/data-fetch/data-fetch-server-middleware.js"
+    },
+    "./pure": {
+      "types": "./dist/types/module/index.d.ts",
+      "import": "./dist/esm/module/index.js",
+      "require": "./dist/cjs/module/index.js"
+    },
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types/index.d.ts"
+      ],
+      "data-fetch-runtime-plugin": [
+        "./dist/types/module/data-fetch/runtime-plugin.d.ts"
+      ],
+      "data-fetch-utils": [
+        "./dist/types/module/utils.d.ts"
+      ],
+      "data-fetch-server-middleware": [
+        "./dist/types/module/data-fetch/data-fetch-server-middleware.d.ts"
+      ],
+      "pure": [
+        "./dist/types/module/index.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "modern-module build"
+  },
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*",
+    "@swc/helpers": "^0.5.17"
+  },
+  "peerDependencies": {
+    "react": ">=17"
+  },
+  "devDependencies": {
+    "@types/react": "18.2.79",
+    "react": "18.3.1",
+    "typescript": "^5.2.2",
+    "@modern-js/module-tools": "2.67.6",
+    "@module-federation/runtime": "workspace:*",
+    "hono": "3.12.12"
+  }
+}

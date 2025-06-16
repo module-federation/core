@@ -1,0 +1,27 @@
+{
+  "name": "react",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/react/src",
+  "projectType": "library",
+  "tags": ["type:pkg"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/packages/modernjs/dist"],
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
+      "options": {
+        "parallel": false,
+        "commands": [
+          "pnpm i",
+          "cd packages/react; pnpm run build || (sleep 2 && pnpm run build)",
+          "cp packages/react/LICENSE packages/react/dist"
+        ]
+      }
+    }
+  }
+}

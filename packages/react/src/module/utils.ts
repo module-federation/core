@@ -1,24 +1,24 @@
 import { isBrowserEnv, composeKeyWithSeparator } from '@module-federation/sdk';
-import { isCSROnly } from '../utils';
-import logger from '../logger';
-import { callDowngrade, getDowngradeTag } from '../ssr-runtime/downgrade';
+import logger from './logger';
 import {
   DOWNGRADE_KEY,
   MF_DATA_FETCH_STATUS,
   WRAP_DATA_FETCH_ID_IDENTIFIER,
-} from '../constant';
-import {
-  DATA_FETCH_CLIENT_SUFFIX,
+  DATA_FETCH_QUERY,
+  MF_DATA_FETCH_TYPE,
   DATA_FETCH_IDENTIFIER,
-} from '@module-federation/rsbuild-plugin/constant';
+  DATA_FETCH_CLIENT_SUFFIX,
+} from './constant';
 
 import type { GlobalModuleInfo } from '@module-federation/sdk';
 import type {
   DataFetchParams,
   MF_DATA_FETCH_MAP,
   NoSSRRemoteInfo,
-} from '../interfaces/global';
-import type { FederationHost } from '@module-federation/enhanced/runtime';
+  MF_SSR_DOWNGRADE,
+  MF_DATA_FETCH_MAP_VALUE_PROMISE_SET,
+} from './types';
+import type { FederationHost } from '@module-federation/runtime';
 
 export const getDataFetchInfo = ({
   name,
@@ -218,4 +218,138 @@ export function isDataLoaderExpose(exposeKey: string) {
     exposeKey.endsWith(DATA_FETCH_IDENTIFIER) ||
     exposeKey.endsWith(DATA_FETCH_CLIENT_SUFFIX)
   );
+}
+
+export function getDowngradeTag() {
+  return globalThis[DOWNGRADE_KEY] as MF_SSR_DOWNGRADE;
+}
+
+export function callAllDowngrade() {
+  const dataFetchMap = getDataFetchMap();
+  if (!dataFetchMap) {
+    return;
+  }
+  Object.keys(dataFetchMap).forEach((key) => {
+    callDowngrade(key);
+  });
+}
+
+export async function callDowngrade(
+  id: string,
+  params?: DataFetchParams,
+  remoteInfo?: NoSSRRemoteInfo,
+) {
+  const dataFetchMap = getDataFetchMap();
+  if (!dataFetchMap) {
+    return;
+  }
+  const mfDataFetch = dataFetchMap[id];
+  if (mfDataFetch?.[2] === MF_DATA_FETCH_STATUS.AWAIT) {
+    mfDataFetch[2] = MF_DATA_FETCH_STATUS.LOADING;
+    let promise: MF_DATA_FETCH_MAP_VALUE_PROMISE_SET[0];
+    let res: MF_DATA_FETCH_MAP_VALUE_PROMISE_SET[1];
+    let rej: MF_DATA_FETCH_MAP_VALUE_PROMISE_SET[2];
+    if (mfDataFetch[1]) {
+      promise = mfDataFetch[1][0];
+      res = mfDataFetch[1][1];
+      rej = mfDataFetch[1][2];
+    } else {
+      promise = new Promise((resolve, reject) => {
+        res = resolve;
+        rej = reject;
+      });
+      mfDataFetch[1] = [promise, res, rej];
+    }
+    const dataFetchType = mfDataFetch[0][1];
+    if (dataFetchType === MF_DATA_FETCH_TYPE.FETCH_CLIENT) {
+      try {
+        mfDataFetch[0][0]().then((getDataFetchFn) => {
+          return getDataFetchFn({
+            ...params,
+            isDowngrade: true,
+          }).then((data) => {
+            mfDataFetch[2] = MF_DATA_FETCH_STATUS.LOADED;
+            res && res(data);
+          });
+        });
+      } catch (e) {
+        mfDataFetch[2] = MF_DATA_FETCH_STATUS.ERROR;
+        rej && rej(e);
+      }
+    } else if (dataFetchType === MF_DATA_FETCH_TYPE.FETCH_SERVER) {
+      try {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set(DATA_FETCH_QUERY, encodeURIComponent(id));
+        if (params) {
+          currentUrl.searchParams.set(
+            'params',
+            encodeURIComponent(JSON.stringify(params)),
+          );
+        }
+        if (remoteInfo) {
+          currentUrl.searchParams.set(
+            'remoteInfo',
+            encodeURIComponent(JSON.stringify(remoteInfo)),
+          );
+        }
+        const fetchServerQuery = globalThis.FEDERATION_SERVER_QUERY;
+        if (fetchServerQuery && typeof fetchServerQuery === 'object') {
+          Object.keys(fetchServerQuery).forEach((key) => {
+            currentUrl.searchParams.set(
+              key,
+              JSON.stringify(fetchServerQuery[key]),
+            );
+          });
+        }
+        const fetchUrl = currentUrl.toString();
+        const data = await fetch(fetchUrl).then((res) => res.json());
+        mfDataFetch[2] = MF_DATA_FETCH_STATUS.LOADED;
+        res && res(data);
+      } catch (e) {
+        mfDataFetch[2] = MF_DATA_FETCH_STATUS.ERROR;
+        rej && rej(e);
+      }
+    }
+
+    return promise;
+  }
+}
+
+export function isCSROnly() {
+  // @ts-ignore  modern.js will inject window._SSR_DATA if enable ssr
+  return window._SSR_DATA === undefined;
+}
+
+export function setSSREnv({
+  fetchServerQuery,
+}: {
+  fetchServerQuery?: Record<string, unknown>;
+}) {
+  globalThis.FEDERATION_SSR = true;
+  globalThis.FEDERATION_SERVER_QUERY = fetchServerQuery;
+}
+
+export function getLoadedRemoteInfos(
+  id: string,
+  instance: FederationHost | null,
+) {
+  if (!instance) {
+    return;
+  }
+  const { name, expose } = instance.remoteHandler.idToRemoteMap[id] || {};
+  if (!name) {
+    return;
+  }
+  const module = instance.moduleCache.get(name);
+  if (!module) {
+    return;
+  }
+  const { remoteSnapshot } = instance.snapshotHandler.getGlobalRemoteInfo(
+    module.remoteInfo,
+  );
+  return {
+    ...module.remoteInfo,
+    snapshot: remoteSnapshot,
+    expose,
+  };
 }
