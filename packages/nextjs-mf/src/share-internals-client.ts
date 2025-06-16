@@ -402,6 +402,54 @@ export const getReactGroupClient = (
     //   version: reactVersion,
     //   requiredVersion: `^${reactVersion}`,
     // },
+
+    // --- Unlayered React (defaults to pages directory) ---
+    {
+      request: 'react',
+      singleton: true,
+      shareKey: 'react',
+      packageName: 'react',
+      import: 'next/dist/compiled/react',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: undefined, // unlayered
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+      requiredVersion: `^${reactVersion}`,
+    },
+    {
+      request: 'react-dom',
+      singleton: true,
+      shareKey: 'react-dom',
+      packageName: 'react-dom',
+      import: 'next/dist/compiled/react-dom',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: undefined, // unlayered
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+      requiredVersion: `^${reactVersion}`,
+    },
+    {
+      request: 'react/jsx-runtime',
+      singleton: true,
+      shareKey: 'react/jsx-runtime',
+      import: 'next/dist/compiled/react/jsx-runtime',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: undefined, // unlayered
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+      requiredVersion: `^${reactVersion}`,
+    },
+    {
+      request: 'react/jsx-dev-runtime',
+      singleton: true,
+      shareKey: 'react/jsx-dev-runtime',
+      import: 'next/dist/compiled/react/jsx-dev-runtime',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: undefined, // unlayered
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      version: reactVersion,
+      requiredVersion: `^${reactVersion}`,
+    },
   ];
   // Convert the array to a Record using reduce
   return reactConfigs.reduce(

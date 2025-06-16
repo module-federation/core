@@ -561,6 +561,58 @@ export const getReactGroupServer = (
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
       nodeModulesReconstructedLookup: false,
     },
+
+    // --- Unlayered React (defaults to pages directory) ---
+    {
+      request: 'react',
+      singleton: true,
+      shareKey: 'react',
+      packageName: 'react',
+      import: 'next/dist/compiled/react',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      issuerLayer: undefined, // unlayered
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'react-dom',
+      singleton: true,
+      shareKey: 'react-dom',
+      packageName: 'react-dom',
+      import: 'next/dist/compiled/react-dom',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      issuerLayer: undefined, // unlayered
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'react/jsx-runtime',
+      singleton: true,
+      shareKey: 'react/jsx-runtime',
+      import: 'next/dist/compiled/react/jsx-runtime',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      issuerLayer: undefined, // unlayered
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      nodeModulesReconstructedLookup: false,
+    },
+    {
+      request: 'react/jsx-dev-runtime',
+      singleton: true,
+      shareKey: 'react/jsx-dev-runtime',
+      import: 'next/dist/compiled/react/jsx-dev-runtime',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      issuerLayer: undefined, // unlayered
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      version: reactVersion || undefined,
+      requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
+      nodeModulesReconstructedLookup: false,
+    },
   ];
 
   // Convert the array to a Record using reduce, ensuring unique keys by including the index.
