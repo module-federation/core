@@ -571,7 +571,7 @@ export const getReactGroupServer = (
       import: 'next/dist/compiled/react',
       layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
       issuerLayer: undefined, // unlayered
-      shareScope: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      shareScope: 'default',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
       nodeModulesReconstructedLookup: false,
@@ -584,7 +584,7 @@ export const getReactGroupServer = (
       import: 'next/dist/compiled/react-dom',
       layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
       issuerLayer: undefined, // unlayered
-      shareScope: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      shareScope: 'default',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
       nodeModulesReconstructedLookup: false,
@@ -596,7 +596,7 @@ export const getReactGroupServer = (
       import: 'next/dist/compiled/react/jsx-runtime',
       layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
       issuerLayer: undefined, // unlayered
-      shareScope: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      shareScope: 'default',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
       nodeModulesReconstructedLookup: false,
@@ -608,7 +608,7 @@ export const getReactGroupServer = (
       import: 'next/dist/compiled/react/jsx-dev-runtime',
       layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
       issuerLayer: undefined, // unlayered
-      shareScope: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      shareScope: 'default',
       version: reactVersion || undefined,
       requiredVersion: reactVersion ? `^${reactVersion}` : undefined,
       nodeModulesReconstructedLookup: false,
@@ -666,7 +666,7 @@ export const getNextGroupServer = (
       import: 'next/dist/client/router',
       layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirNode,
-      shareScope: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      shareScope: 'default',
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
@@ -678,7 +678,7 @@ export const getNextGroupServer = (
       import: 'next/dist/client/compat/router',
       layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
       issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirNode,
-      shareScope: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      shareScope: 'default',
       singleton: true,
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
