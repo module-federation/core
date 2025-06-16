@@ -12,76 +12,6 @@ import { getReactVersionSafely } from './internal-helpers';
 import path from 'path';
 
 /**
- * Gets the appropriate React alias based on the layer
- */
-const getReactAliasForLayer = (layer: WebpackLayerName): string => {
-  switch (layer) {
-    case WL.reactServerComponents:
-      return 'next/dist/server/route-modules/app-page/vendored/rsc/react';
-    case WL.serverSideRendering:
-      return 'next/dist/server/route-modules/app-page/vendored/ssr/react';
-    default:
-      console.warn(
-        `getReactAliasForLayer: Unexpected layer ${String(layer)}, defaulting to RSC vendored React.`,
-      );
-      return 'next/dist/server/route-modules/app-page/vendored/rsc/react';
-  }
-};
-
-/**
- * Gets the appropriate React DOM alias based on the layer
- */
-const getReactDomAliasForLayer = (layer: WebpackLayerName): string => {
-  switch (layer) {
-    case WL.reactServerComponents:
-      return 'next/dist/server/route-modules/app-page/vendored/rsc/react-dom';
-    case WL.serverSideRendering:
-      return 'next/dist/server/route-modules/app-page/vendored/ssr/react-dom';
-    default:
-      console.warn(
-        `getReactDomAliasForLayer: Unexpected layer ${String(layer)}, defaulting to RSC vendored React DOM.`,
-      );
-      return 'next/dist/server/route-modules/app-page/vendored/rsc/react-dom';
-  }
-};
-
-/**
- * Gets the appropriate React JSX Runtime alias based on the layer
- */
-const getReactJsxRuntimeAliasForLayer = (layer: WebpackLayerName): string => {
-  switch (layer) {
-    case WL.reactServerComponents:
-      return 'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-runtime';
-    case WL.serverSideRendering:
-      return 'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-runtime';
-    default:
-      console.warn(
-        `getReactJsxRuntimeAliasForLayer: Unexpected layer ${String(layer)}, defaulting to RSC vendored JSX runtime.`,
-      );
-      return 'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-runtime';
-  }
-};
-
-/**
- * Gets the appropriate React JSX Dev Runtime alias based on the layer
- */
-const getReactJsxDevRuntimeAliasForLayer = (
-  layer: WebpackLayerName,
-): string => {
-  switch (layer) {
-    case WL.reactServerComponents:
-      return 'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime';
-    case WL.serverSideRendering:
-      return 'next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime';
-    default:
-      console.warn(
-        `getReactJsxDevRuntimeAliasForLayer: Unexpected layer ${String(layer)}, defaulting to RSC vendored JSX dev runtime.`,
-      );
-      return 'next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime';
-  }
-};
-
-/**
  * Function defining the React related packages group for server side
  */
 export const getReactGroupServer = (
@@ -676,6 +606,34 @@ export const getNextGroupServer = (
     //   singleton: true,
     //   requiredVersion: `^${nextVersion}`,
     // },
+
+    // --- Next.js Router (Pages Directory) ---
+    {
+      request: 'next/router',
+      shareKey: 'next/router',
+      import: 'next/dist/client/router',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+      nodeModulesReconstructedLookup: true,
+    },
+    {
+      request: 'next/compat/router',
+      shareKey: 'next/compat/router',
+      import: 'next/dist/client/compat/router',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirNode,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+      nodeModulesReconstructedLookup: true,
+    },
+
+    // --- Next.js Link (App Directory) ---
     {
       request: 'next/link',
       shareKey: 'next/link',

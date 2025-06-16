@@ -423,6 +423,30 @@ const getNextGroup = (compiler: Compiler): Record<string, SharedConfig> => {
 
   // Define configurations as an array of objects
   const nextConfigs = [
+    // --- Next.js Router (Pages Directory) ---
+    {
+      request: 'next/router',
+      shareKey: 'next/router',
+      import: 'next/dist/client/router',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+    },
+    {
+      request: 'next/compat/router',
+      shareKey: 'next/compat/router',
+      import: 'next/dist/client/compat/router',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+    },
+
     // General configuration for modules under 'next/' for the appPagesBrowser layer
     {
       request: 'next/dist/shared/',
