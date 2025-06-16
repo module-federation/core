@@ -6,6 +6,7 @@ import {
   updateStatsAndManifest,
 } from '@module-federation/rsbuild-plugin/utils';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { pluginModuleFederation as rsbuildPluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import {
   getShortErrorMsg,
   BUILD_002,
@@ -120,18 +121,37 @@ export function pluginModuleFederation(
         enableSSG = true;
       }
 
-      if (!config.builderConfig?.dev?.assetPrefix) {
-        config.builderConfig ||= {};
-        config.builderConfig.dev ||= {};
-        config.builderConfig.dev.assetPrefix = true;
+      config.builderConfig ||= {};
+      config.builderConfig.dev ||= {};
+      console.log(
+        'config.builderConfig.dev.lazyCompilation ',
+        config.builderConfig.dev.lazyCompilation,
+      );
+      if (
+        isDev() &&
+        typeof config.builderConfig.dev.lazyCompilation === 'undefined'
+      ) {
+        logger.warn(
+          'lazyCompilation is not fully supported for module federation, set lazyCompilation to false',
+        );
+        config.builderConfig.dev.lazyCompilation = false;
       }
+      config.builderConfig.plugins ||= [];
+      config.builderConfig.plugins.push(
+        rsbuildPluginModuleFederation(mfConfig, {
+          ssr: enableSSG,
+          environment: 'node',
+          ssrDir: 'ssg',
+        }),
+      );
     },
-    async afterBuild(config, isProd) {
-      if (enableSSG) {
-        updateStatsAndManifest(serverPlugin, browserPlugin, outputDir);
-      }
-    },
+    // async afterBuild(config, isProd) {
+    //   if (enableSSG) {
+    //     updateStatsAndManifest(serverPlugin, browserPlugin, outputDir);
+    //   }
+    // },
     builderConfig: {
+      plugins: [],
       tools: {
         rspack(config) {
           replaceEntryWithBootstrapEntry(config);
@@ -148,17 +168,17 @@ export function pluginModuleFederation(
               );
               process.exit(1);
             }
-            patchSSRRspackConfig(config, mfConfigForSSR);
-            serverPlugin = new ModuleFederationPluginImplementation(
-              mfConfigForSSR,
-            );
-            config.plugins.push(serverPlugin);
+            // patchSSRRspackConfig(config, mfConfigForSSR);
+            // serverPlugin = new ModuleFederationPluginImplementation(
+            //   mfConfigForSSR,
+            // );
+            // config.plugins.push(serverPlugin);
           } else {
-            browserPlugin = new ModuleFederationPluginImplementation(
-              mfConfigForBrowser,
-            );
-            config.plugins.push(browserPlugin);
-            outputDir = config.output?.path || '';
+            // browserPlugin = new ModuleFederationPluginImplementation(
+            //   mfConfigForBrowser,
+            // );
+            // config.plugins.push(browserPlugin);
+            // outputDir = config.output?.path || '';
           }
         },
       },

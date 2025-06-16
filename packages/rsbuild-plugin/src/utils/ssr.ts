@@ -1,6 +1,9 @@
 import path from 'path';
 import { encodeName } from '@module-federation/sdk';
-import type { EnvironmentConfig, Rspack } from '@rsbuild/core';
+import logger from '../logger';
+import { GetPublicPathPlugin } from '@module-federation/enhanced/rspack';
+
+import type { EnvironmentConfig, RsbuildConfig, Rspack } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 export const SSR_DIR = 'ssr';
@@ -18,6 +21,7 @@ const isDev = () => {
 export function patchSSRRspackConfig(
   config: Rspack.Configuration,
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  ssrDir: string,
 ) {
   if (typeof config.output?.publicPath !== 'string') {
     throw new Error('publicPath must be string!');
@@ -26,7 +30,18 @@ export function patchSSRRspackConfig(
   if (publicPath === 'auto') {
     throw new Error('publicPath can not be "auto"!');
   }
-  config.output.publicPath = `${config.output.publicPath}${SSR_DIR}/`;
+
+  const publicPathWithSSRDir = `${publicPath}${ssrDir}/`;
+  config.plugins?.push({
+    // @ts-ignore
+    apply(compiler) {
+      GetPublicPathPlugin.addPublicPathEntry(
+        compiler,
+        `return "${publicPathWithSSRDir}"`,
+        mfConfig.name!,
+      );
+    },
+  });
   config.target = 'async-node';
   // @module-federation/node/universe-entry-chunk-tracker-plugin only export cjs
   const UniverseEntryChunkTrackerPlugin =
@@ -51,6 +66,8 @@ export function patchSSRRspackConfig(
 export function createSSRREnvConfig(
   envConfig: EnvironmentConfig,
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  ssrDir: string,
+  rsbuildConfig: RsbuildConfig,
 ) {
   const ssrEnvConfig: EnvironmentConfig = {
     ...envConfig,
@@ -59,7 +76,7 @@ export function createSSRREnvConfig(
         if (environment.name !== SSR_ENV_NAME) {
           return;
         }
-        patchSSRRspackConfig(config, mfConfig);
+        patchSSRRspackConfig(config, mfConfig, ssrDir);
       },
     },
   };
@@ -70,7 +87,12 @@ export function createSSRREnvConfig(
     target: 'node',
     distPath: {
       ...ssrEnvConfig.output?.distPath,
-      root: path.join(ssrEnvConfig.output?.distPath?.root || '', SSR_DIR),
+      root: path.join(
+        ssrEnvConfig.output?.distPath?.root ||
+          rsbuildConfig.output?.distPath?.root ||
+          '',
+        ssrDir,
+      ),
     },
   };
   return ssrEnvConfig;
@@ -79,6 +101,11 @@ export function createSSRREnvConfig(
 export function createSSRMFConfig(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
 ) {
+  if (mfConfig.getPublicPath) {
+    logger.error('getPublicPath is not support in ssr mode!');
+    process.exit(1);
+  }
+
   const ssrMFConfig = {
     ...mfConfig,
     exposes: { ...mfConfig.exposes },

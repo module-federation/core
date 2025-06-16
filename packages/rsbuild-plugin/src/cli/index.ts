@@ -29,6 +29,10 @@ type ModuleFederationOptions =
 
 type RSBUILD_PLUGIN_OPTIONS = {
   ssr?: boolean;
+  // ssr dir, default is ssr
+  ssrDir?: string;
+  // target copy environment name, default is mf
+  environment?: string;
 };
 
 type ExposedAPIType = {
@@ -82,10 +86,15 @@ const isSSRConfig = (bundlerConfigName?: string) =>
 
 export const pluginModuleFederation = (
   moduleFederationOptions: ModuleFederationOptions,
-  rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS,
+  rsbuildOptions: RSBUILD_PLUGIN_OPTIONS,
 ): RsbuildPlugin => ({
   name: RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
+    const {
+      ssr = undefined,
+      ssrDir = SSR_DIR,
+      environment = DEFAULT_MF_ENVIRONMENT_NAME,
+    } = rsbuildOptions || {};
     const { callerName } = api.context;
     const originalRsbuildConfig = api.getRsbuildConfig();
     if (!callerName) {
@@ -94,20 +103,19 @@ export const pluginModuleFederation = (
       );
     }
     const isRslib = callerName === 'rslib';
-    const isSSR = Boolean(rsbuildOptions?.ssr);
+    const isRspress = callerName === 'rspress';
+    const isSSR = Boolean(ssr);
 
     if (isSSR && !isStoryBook(originalRsbuildConfig)) {
-      if (!isRslib) {
+      if (!isRslib && !isRspress) {
         throw new Error(`'ssr' option is only supported in rslib.`);
       }
       const rsbuildConfig = api.getRsbuildConfig();
 
       if (
-        !rsbuildConfig.environments?.[DEFAULT_MF_ENVIRONMENT_NAME] ||
+        !rsbuildConfig.environments?.[environment] ||
         Object.keys(rsbuildConfig.environments).some(
-          (key) =>
-            key.startsWith(DEFAULT_MF_ENVIRONMENT_NAME) &&
-            key !== DEFAULT_MF_ENVIRONMENT_NAME,
+          (key) => key.startsWith(environment) && key !== environment,
         )
       ) {
         throw new Error(
@@ -168,7 +176,7 @@ export const pluginModuleFederation = (
             'View https://module-federation.io/guide/troubleshooting/other.html#cors-warn for more details.',
           ];
 
-          !isRslib && logger.warn(corsWarnMsgs.join('\n'));
+          !isRslib && !isRspress && logger.warn(corsWarnMsgs.join('\n'));
           config.server.headers['Access-Control-Allow-Origin'] = '*';
         }
 
@@ -197,8 +205,10 @@ export const pluginModuleFederation = (
           );
         }
         config.environments![SSR_ENV_NAME] = createSSRREnvConfig(
-          config.environments?.[DEFAULT_MF_ENVIRONMENT_NAME]!,
+          config.environments?.[environment]!,
           moduleFederationOptions,
+          ssrDir,
+          config,
         );
       }
     });
