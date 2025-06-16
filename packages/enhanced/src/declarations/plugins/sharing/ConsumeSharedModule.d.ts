@@ -50,4 +50,8 @@ export type ConsumeOptions = {
    * Issuer layer in which the module should be resolved
    */
   issuerLayer?: string | null;
+  /**
+   * Enable reconstruction of node_modules path for matching internal package imports.
+   */
+  nodeModulesReconstructedLookup?: boolean;
 };

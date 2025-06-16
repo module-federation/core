@@ -16,6 +16,7 @@ import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
   getDescriptionFile,
   getRequiredVersionFromDescriptionFile,
+  extractPathAfterNodeModules,
 } from './utils';
 import type {
   ResolveOptionsWithDependencyType,
@@ -107,6 +108,7 @@ class ConsumeSharedPlugin {
                 issuerLayer: undefined,
                 layer: undefined,
                 request: key,
+                nodeModulesReconstructedLookup: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -123,6 +125,7 @@ class ConsumeSharedPlugin {
                 issuerLayer: undefined,
                 layer: undefined,
                 request: key,
+                nodeModulesReconstructedLookup: undefined,
               };
         return result;
       },
@@ -147,6 +150,7 @@ class ConsumeSharedPlugin {
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
+          nodeModulesReconstructedLookup: !!item.nodeModulesReconstructedLookup,
         } as ConsumeOptions;
       },
     );
@@ -323,32 +327,52 @@ class ConsumeSharedPlugin {
           async (resolveData: ResolveData): Promise<Module | undefined> => {
             const { context, request, dependencies, contextInfo } = resolveData;
             // wait for resolving to be complete
-            return promise.then(() => {
-              if (
-                dependencies[0] instanceof ConsumeSharedFallbackDependency ||
-                dependencies[0] instanceof ProvideForSharedDependency
-              ) {
-                return;
-              }
+            return promise
+              .then(() => {
+                if (
+                  dependencies[0] instanceof ConsumeSharedFallbackDependency ||
+                  dependencies[0] instanceof ProvideForSharedDependency
+                ) {
+                  return;
+                }
 
-              // Check exact request matches (with layer fallback)
-              const match = tryLookupWithFallback(
-                unresolvedConsumes,
-                request,
-                contextInfo.issuerLayer,
-              );
+                // Check exact request matches (with layer fallback)
+                const match = tryLookupWithFallback(
+                  unresolvedConsumes,
+                  request,
+                  contextInfo.issuerLayer,
+                );
 
-              if (match !== undefined) {
-                return createConsumeSharedModule(context, request, match);
-              }
+                if (match !== undefined) {
+                  return createConsumeSharedModule(context, request, match);
+                }
 
-              // Check prefix matches with layer fallback
-              // First try to find a prefix that matches both request and layer
-              if (contextInfo.issuerLayer) {
+                // Check prefix matches with layer fallback
+                // First try to find a prefix that matches both request and layer
+                if (contextInfo.issuerLayer) {
+                  for (const [prefix, options] of prefixedConsumes) {
+                    if (
+                      request.startsWith(prefix) &&
+                      options.layer === contextInfo.issuerLayer
+                    ) {
+                      const remainder = request.slice(prefix.length);
+                      return createConsumeSharedModule(context, request, {
+                        ...options,
+                        import: options.import
+                          ? options.import + remainder
+                          : undefined,
+                        shareKey: options.shareKey + remainder,
+                        layer: options.layer,
+                      });
+                    }
+                  }
+                }
+
+                // Fallback to unlayered prefix matches
                 for (const [prefix, options] of prefixedConsumes) {
                   if (
                     request.startsWith(prefix) &&
-                    options.layer === contextInfo.issuerLayer
+                    (!options.layer || options.layer === 'undefined')
                   ) {
                     const remainder = request.slice(prefix.length);
                     return createConsumeSharedModule(context, request, {
@@ -361,28 +385,124 @@ class ConsumeSharedPlugin {
                     });
                   }
                 }
-              }
 
-              // Fallback to unlayered prefix matches
-              for (const [prefix, options] of prefixedConsumes) {
-                if (
-                  request.startsWith(prefix) &&
-                  (!options.layer || options.layer === 'undefined')
-                ) {
-                  const remainder = request.slice(prefix.length);
-                  return createConsumeSharedModule(context, request, {
-                    ...options,
-                    import: options.import
-                      ? options.import + remainder
-                      : undefined,
-                    shareKey: options.shareKey + remainder,
-                    layer: options.layer,
-                  });
+                return;
+              })
+              .then((result) => {
+                // If we found a result, return it
+                if (result) {
+                  return result;
                 }
-              }
 
-              return;
-            });
+                // --- Stage 2: Match using reconstructed node_modules path ---
+                // This is a fallback when normal request matching fails
+                return new Promise((resolve) => {
+                  const resolveContext = {
+                    fileDependencies: new LazySet<string>(),
+                    contextDependencies: new LazySet<string>(),
+                    missingDependencies: new LazySet<string>(),
+                  };
+
+                  resolver.resolve(
+                    {},
+                    context,
+                    request,
+                    resolveContext,
+                    (err, result) => {
+                      compilation.contextDependencies.addAll(
+                        resolveContext.contextDependencies,
+                      );
+                      compilation.fileDependencies.addAll(
+                        resolveContext.fileDependencies,
+                      );
+                      compilation.missingDependencies.addAll(
+                        resolveContext.missingDependencies,
+                      );
+
+                      if (err || !result) {
+                        return resolve(undefined);
+                      }
+
+                      const resource = result;
+                      const modulePathAfterNodeModules =
+                        extractPathAfterNodeModules(resource);
+
+                      if (!modulePathAfterNodeModules) {
+                        return resolve(undefined);
+                      }
+
+                      // 2a. Direct match with reconstructed path
+                      const configFromReconstructedDirect =
+                        tryLookupWithFallback(
+                          unresolvedConsumes,
+                          modulePathAfterNodeModules,
+                          contextInfo.issuerLayer,
+                        );
+
+                      if (
+                        configFromReconstructedDirect !== undefined &&
+                        configFromReconstructedDirect.nodeModulesReconstructedLookup
+                      ) {
+                        return resolve(
+                          createConsumeSharedModule(context, request, {
+                            ...configFromReconstructedDirect,
+                            shareKey: modulePathAfterNodeModules,
+                          }),
+                        );
+                      }
+
+                      // 2b. Prefix match with reconstructed path
+                      for (const [
+                        prefix,
+                        originalPrefixConfig,
+                      ] of prefixedConsumes) {
+                        if (
+                          !originalPrefixConfig.nodeModulesReconstructedLookup
+                        ) {
+                          continue;
+                        }
+
+                        // Layer matching logic for reconstructed path
+                        if (originalPrefixConfig.layer) {
+                          if (!contextInfo.issuerLayer) {
+                            continue; // Option is layered, request is not: skip
+                          }
+                          if (
+                            contextInfo.issuerLayer !==
+                            originalPrefixConfig.layer
+                          ) {
+                            continue; // Both are layered but do not match: skip
+                          }
+                        }
+                        // If issuerLayer exists but config.layer does not, allow (non-layered option matches layered request)
+
+                        if (modulePathAfterNodeModules.startsWith(prefix)) {
+                          const remainder = modulePathAfterNodeModules.slice(
+                            prefix.length,
+                          );
+                          const configForSpecificModule = {
+                            ...originalPrefixConfig,
+                            shareKey: originalPrefixConfig.shareKey + remainder,
+                            import: originalPrefixConfig.import
+                              ? originalPrefixConfig.import + remainder
+                              : undefined,
+                          };
+
+                          return resolve(
+                            createConsumeSharedModule(
+                              context,
+                              request,
+                              configForSpecificModule,
+                            ),
+                          );
+                        }
+                      }
+
+                      return resolve(undefined);
+                    },
+                  );
+                });
+              });
           },
         );
         normalModuleFactory.hooks.createModule.tapPromise(

@@ -474,3 +474,103 @@ export function normalizeConsumeShareOptions(consumeOptions: ConsumeOptions) {
     shareKey,
   };
 }
+
+/**
+ * Extracts the path after node_modules for path reconstruction
+ * @param {string} fullPath - The full path to extract from
+ * @returns {string | null} The path after node_modules or null if not found
+ */
+export function extractPathAfterNodeModules(fullPath: string): string | null {
+  const nodeModulesIndex = fullPath.lastIndexOf('node_modules/');
+  if (nodeModulesIndex === -1) {
+    return null;
+  }
+  return fullPath.slice(nodeModulesIndex + 'node_modules/'.length);
+}
+
+/**
+ * Creates a lookup key for sharing that includes layer information
+ * @param {string} request - The request string
+ * @param {string | undefined} layer - The layer information
+ * @returns {string} The lookup key
+ */
+export function createLookupKeyForSharing(
+  request: string,
+  layer?: string | undefined,
+): string {
+  if (layer) {
+    return `(${layer})${request}`;
+  }
+  return request;
+}
+
+/**
+ * Tests request filters to see if they match
+ * @param {string} request - The request to test
+ * @param {string | RegExp | undefined} includeFilter - The include filter
+ * @param {string | RegExp | undefined} excludeFilter - The exclude filter
+ * @returns {boolean} Whether the request passes the filters
+ */
+export function testRequestFilters(
+  request: string,
+  includeFilter?: string | RegExp | undefined,
+  excludeFilter?: string | RegExp | undefined,
+): boolean {
+  // Check exclude filter first
+  if (excludeFilter) {
+    if (excludeFilter instanceof RegExp) {
+      if (excludeFilter.test(request)) {
+        return false;
+      }
+    } else if (typeof excludeFilter === 'string') {
+      if (request === excludeFilter) {
+        return false;
+      }
+    }
+  }
+
+  // Check include filter
+  if (includeFilter) {
+    if (includeFilter instanceof RegExp) {
+      return includeFilter.test(request);
+    } else if (typeof includeFilter === 'string') {
+      return request === includeFilter;
+    }
+  }
+
+  // If no include filter specified but exclude filter passed, allow
+  return true;
+}
+
+/**
+ * Adds a warning for singleton usage with version filters
+ * @param {any} compilation - The webpack compilation
+ * @param {string} shareKey - The share key
+ * @param {string} filterType - The filter type ('include' or 'exclude')
+ * @param {string} filterProperty - The filter property ('version' or 'request')
+ * @param {string} filterValue - The filter value
+ * @param {string} moduleRequest - The module request
+ * @param {string | undefined} moduleResource - The module resource
+ */
+export function addSingletonFilterWarning(
+  compilation: any,
+  shareKey: string,
+  filterType: string,
+  filterProperty: string,
+  filterValue: string,
+  moduleRequest: string,
+  moduleResource?: string,
+): void {
+  const WebpackError = require(
+    normalizeWebpackPath('webpack/lib/WebpackError'),
+  ) as typeof import('webpack/lib/WebpackError');
+
+  const warning = new WebpackError(
+    `Shared module "${shareKey}" is configured as singleton but uses ${filterType}.${filterProperty} filter "${filterValue}". ` +
+      `This combination may lead to unexpected behavior when multiple versions exist. ` +
+      `Consider removing singleton: true or the ${filterType}.${filterProperty} filter. ` +
+      `Module: ${moduleRequest}${moduleResource ? ` (${moduleResource})` : ''}`,
+  );
+  warning.name = 'SingletonFilterWarning';
+  compilation.warnings.push(warning);
+}

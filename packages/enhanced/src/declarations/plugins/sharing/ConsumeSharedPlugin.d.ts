@@ -83,4 +83,8 @@ export interface ConsumesConfig {
    * The actual request to use for importing the module. If not specified, the property name/key will be used.
    */
   request?: string;
+  /**
+   * Enable reconstruction of node_modules path for matching internal package imports.
+   */
+  nodeModulesReconstructedLookup?: boolean;
 }

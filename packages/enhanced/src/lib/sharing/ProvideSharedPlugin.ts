@@ -23,6 +23,7 @@ import type {
 } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
+import { extractPathAfterNodeModules } from './utils';
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
@@ -101,6 +102,7 @@ class ProvideSharedPlugin {
           singleton: false,
           layer: undefined,
           request: item,
+          nodeModulesReconstructedLookup: false,
         };
         return result;
       },
@@ -116,6 +118,7 @@ class ProvideSharedPlugin {
           singleton: !!item.singleton,
           layer: item.layer,
           request,
+          nodeModulesReconstructedLookup: !!item.nodeModulesReconstructedLookup,
         };
       },
     );
@@ -284,6 +287,81 @@ class ProvideSharedPlugin {
                 );
                 resolveData.cacheable = false;
                 return module;
+              }
+            }
+
+            // --- Stage 2: Match using reconstructed node_modules path ---
+            if (resource) {
+              const modulePathAfterNodeModules =
+                extractPathAfterNodeModules(resource);
+
+              if (modulePathAfterNodeModules) {
+                // 2a. Direct match with reconstructed path
+                const configFromReconstructedDirect = tryLookupWithFallback(
+                  matchProvides,
+                  modulePathAfterNodeModules,
+                  moduleLayer,
+                );
+
+                if (
+                  configFromReconstructedDirect !== undefined &&
+                  configFromReconstructedDirect.nodeModulesReconstructedLookup
+                ) {
+                  provideSharedModule(
+                    modulePathAfterNodeModules,
+                    configFromReconstructedDirect,
+                    resource,
+                    resourceResolveData,
+                  );
+                  resolveData.cacheable = false;
+                  return module;
+                }
+
+                // 2b. Prefix match with reconstructed path
+                for (const [
+                  prefix,
+                  originalPrefixConfig,
+                ] of prefixMatchProvides) {
+                  if (!originalPrefixConfig.nodeModulesReconstructedLookup) {
+                    continue;
+                  }
+                  const configuredPrefix =
+                    originalPrefixConfig.request || prefix;
+
+                  // Layer matching logic for reconstructed path
+                  if (originalPrefixConfig.layer) {
+                    if (!moduleLayer) {
+                      continue; // Option is layered, request is not: skip
+                    }
+                    if (moduleLayer !== originalPrefixConfig.layer) {
+                      continue; // Both are layered but do not match: skip
+                    }
+                  }
+                  // If moduleLayer exists but config.layer does not, allow (non-layered option matches layered request)
+
+                  if (modulePathAfterNodeModules.startsWith(configuredPrefix)) {
+                    const remainder = modulePathAfterNodeModules.slice(
+                      configuredPrefix.length,
+                    );
+                    const finalShareKey =
+                      (originalPrefixConfig.shareKey || configuredPrefix) +
+                      remainder;
+                    const configForSpecificModule: ProvidesConfig = {
+                      ...originalPrefixConfig,
+                      shareKey: finalShareKey,
+                      request: modulePathAfterNodeModules,
+                    };
+
+                    provideSharedModule(
+                      modulePathAfterNodeModules,
+                      configForSpecificModule,
+                      resource,
+                      resourceResolveData,
+                    );
+                    resolveData.cacheable = false;
+                    return module;
+                  }
+                }
               }
             }
 
