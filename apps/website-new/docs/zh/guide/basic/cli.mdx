@@ -7,16 +7,6 @@ pageType: doc
 import React from 'react';
 import {getCustomMDXComponent} from 'rspress/theme';
 
-
-`
-{
-(props.cmdTools || ['@module-federation/enhanced', '@module-federation/modern-js']).map((cmdTool, index, arr) => <React.Fragment key={cmdTool}>
-{getCustomMDXComponent().code({children:cmdTool})}
-{index < arr.length - 1 ? ' 和 ' : ''}</React.Fragment>)
-}
-
-`
-
 `@module-federation/enhanced` 和 `@module-federation/modern-js` 提供了轻量的命令行工具。
 
 ## testtitle

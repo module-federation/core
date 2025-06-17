@@ -91,8 +91,8 @@ export default defineConfig({
   builderConfig: {
     plugins: [moduleFederationPluginOverview, pluginSass()],
     output: {
-      // assetPrefix: 'https://module-federation.io/',
-      assetPrefix: 'http://localhost:3000/',
+      assetPrefix: 'https://module-federation.io/',
+      // assetPrefix: 'http://localhost:3000/',
     },
     dev: {
       assetPrefix: true,
