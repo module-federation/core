@@ -5,6 +5,7 @@ import { GetPublicPathPlugin } from '@module-federation/enhanced/rspack';
 
 import type { EnvironmentConfig, RsbuildConfig, Rspack } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
+import { CALL_NAME_MAP } from '../constant';
 
 export const SSR_DIR = 'ssr';
 export const SSR_ENV_NAME = 'mf-ssr';
@@ -22,6 +23,7 @@ export function patchSSRRspackConfig(
   config: Rspack.Configuration,
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   ssrDir: string,
+  callerName?: string,
 ) {
   if (typeof config.output?.publicPath !== 'string') {
     throw new Error('publicPath must be string!');
@@ -32,16 +34,22 @@ export function patchSSRRspackConfig(
   }
 
   const publicPathWithSSRDir = `${publicPath}${ssrDir}/`;
-  config.plugins?.push({
-    // @ts-ignore
-    apply(compiler) {
-      GetPublicPathPlugin.addPublicPathEntry(
-        compiler,
-        `return "${publicPathWithSSRDir}"`,
-        mfConfig.name!,
-      );
-    },
-  });
+  config.output.publicPath = publicPathWithSSRDir;
+
+  if (callerName === CALL_NAME_MAP.RSPRESS) {
+    // set virtue entry, only need mf entry
+    config.entry = 'data:application/node;base64,';
+    // config.plugins?.push({
+    //   // @ts-ignore
+    //   apply(compiler) {
+    //     GetPublicPathPlugin.addPublicPathEntry(
+    //       compiler,
+    //       `return "${publicPathWithSSRDir}"`,
+    //       mfConfig.name!,
+    //     );
+    //   },
+    // });
+  }
   config.target = 'async-node';
   // @module-federation/node/universe-entry-chunk-tracker-plugin only export cjs
   const UniverseEntryChunkTrackerPlugin =
@@ -68,6 +76,7 @@ export function createSSRREnvConfig(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   ssrDir: string,
   rsbuildConfig: RsbuildConfig,
+  callerName?: string,
 ) {
   const ssrEnvConfig: EnvironmentConfig = {
     ...envConfig,
@@ -76,7 +85,7 @@ export function createSSRREnvConfig(
         if (environment.name !== SSR_ENV_NAME) {
           return;
         }
-        patchSSRRspackConfig(config, mfConfig, ssrDir);
+        patchSSRRspackConfig(config, mfConfig, ssrDir, callerName);
       },
     },
   };
@@ -101,11 +110,6 @@ export function createSSRREnvConfig(
 export function createSSRMFConfig(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
 ) {
-  if (mfConfig.getPublicPath) {
-    logger.error('getPublicPath is not support in ssr mode!');
-    process.exit(1);
-  }
-
   const ssrMFConfig = {
     ...mfConfig,
     exposes: { ...mfConfig.exposes },

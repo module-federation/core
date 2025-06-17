@@ -23,6 +23,7 @@ import type {
   sharePlugin,
 } from '@module-federation/sdk';
 import type { RsbuildConfig, RsbuildPlugin, Rspack } from '@rsbuild/core';
+import { CALL_NAME_MAP } from '../constant';
 
 type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -102,8 +103,8 @@ export const pluginModuleFederation = (
         '`callerName` is undefined. Please ensure the @rsbuild/core version is higher than 1.3.21 .',
       );
     }
-    const isRslib = callerName === 'rslib';
-    const isRspress = callerName === 'rspress';
+    const isRslib = callerName === CALL_NAME_MAP.RSLIB;
+    const isRspress = callerName === CALL_NAME_MAP.RSPRESS;
     const isSSR = Boolean(ssr);
 
     if (isSSR && !isStoryBook(originalRsbuildConfig)) {
@@ -209,6 +210,7 @@ export const pluginModuleFederation = (
           moduleFederationOptions,
           ssrDir,
           config,
+          callerName,
         );
       }
     });

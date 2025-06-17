@@ -123,10 +123,6 @@ export function pluginModuleFederation(
 
       config.builderConfig ||= {};
       config.builderConfig.dev ||= {};
-      console.log(
-        'config.builderConfig.dev.lazyCompilation ',
-        config.builderConfig.dev.lazyCompilation,
-      );
       if (
         isDev() &&
         typeof config.builderConfig.dev.lazyCompilation === 'undefined'
@@ -141,7 +137,7 @@ export function pluginModuleFederation(
         rsbuildPluginModuleFederation(mfConfig, {
           ssr: enableSSG,
           environment: 'node',
-          ssrDir: 'ssg',
+          ssrDir: 'mf-ssg',
         }),
       );
     },
