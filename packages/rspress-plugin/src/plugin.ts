@@ -18,6 +18,10 @@ import logger from './logger';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { RspressPlugin } from '@rspress/shared';
 
+type RspressPluginOptions = {
+  autoShared?: boolean;
+};
+
 type ExtractObjectType<T> = T extends (...args: any[]) => any ? never : T;
 type OmitArrayConfiguration<T> =
   T extends Array<any> ? (T extends (infer U)[] ? U : T) : ExtractObjectType<T>;
@@ -100,7 +104,25 @@ function replaceEntryWithBootstrapEntry(bundlerConfig: RspackConfig) {
 
 export function pluginModuleFederation(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  rspressOptions?: RspressPluginOptions,
 ): RspressPlugin {
+  const { autoShared = true } = rspressOptions || {};
+
+  if (autoShared) {
+    mfConfig.shared = {
+      ...mfConfig.shared,
+      react: {
+        singleton: true,
+        requiredVersion: false,
+      },
+      'react-dom': {
+        singleton: true,
+        requiredVersion: false,
+      },
+      '@mdx-js/react': { singleton: true, requiredVersion: false },
+    };
+  }
+
   let enableSSG = false;
 
   return {

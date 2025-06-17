@@ -7,10 +7,10 @@ export default createModuleFederationConfig({
     './cli-zh': './docs/zh/guide/basic/cli.mdx',
     './cli-en': './docs/en/guide/basic/cli.mdx',
   },
-  shared: {
-    react: { singleton: true, import: require.resolve('react') },
-    'react-dom': { singleton: true, import: require.resolve('react-dom') },
-    '@mdx-js/react': { singleton: true, requiredVersion: false },
-  },
+  // shared: {
+  //   react: { singleton: true, import: require.resolve('react') },
+  //   'react-dom': { singleton: true, import: require.resolve('react-dom') },
+  //   '@mdx-js/react': { singleton: true, requiredVersion: false },
+  // },
   dts: false,
 });

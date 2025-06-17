@@ -255,7 +255,7 @@ export const pluginModuleFederation = (
         throw new Error('Can not get bundlerConfigs!');
       }
       bundlerConfigs.forEach((bundlerConfig) => {
-        if (!isMFFormat(bundlerConfig)) {
+        if (!isMFFormat(bundlerConfig) && !isRspress) {
           return;
         } else if (isStoryBook(originalRsbuildConfig)) {
           bundlerConfig.output!.uniqueName = `${moduleFederationOptions.name}-storybook-host`;
@@ -322,7 +322,8 @@ export const pluginModuleFederation = (
 
           if (
             !bundlerConfig.output?.chunkLoadingGlobal &&
-            !isSSRConfig(bundlerConfig.name)
+            !isSSRConfig(bundlerConfig.name) &&
+            !isRspressSSGConfig(bundlerConfig.name)
           ) {
             bundlerConfig.output!.chunkLoading = 'jsonp';
             bundlerConfig.output!.chunkLoadingGlobal = `chunk_${moduleFederationOptions.name}`;
@@ -350,6 +351,8 @@ export const pluginModuleFederation = (
                 ...createSSRMFConfig(moduleFederationOptions),
                 // expose in mf-ssg env
                 exposes: {},
+                manifest: false,
+                library: undefined,
               };
               patchSSRRspackConfig(
                 bundlerConfig,
@@ -359,7 +362,10 @@ export const pluginModuleFederation = (
                 false,
                 false,
               );
-              delete bundlerConfig.output?.publicPath;
+              bundlerConfig.output ||= {};
+              bundlerConfig.output.publicPath = '/';
+              // MF depend on asyncChunks
+              bundlerConfig.output.asyncChunks = undefined;
               generateMergedStatsAndManifestOptions.options.rspressSSGPlugin =
                 new ModuleFederationPlugin(mfConfig);
               bundlerConfig.plugins!.push(
