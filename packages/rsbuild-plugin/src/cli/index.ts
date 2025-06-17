@@ -16,6 +16,7 @@ import {
   SSR_ENV_NAME,
   SSR_DIR,
   updateStatsAndManifest,
+  patchSSRRspackConfig,
 } from '../utils';
 
 import type {
@@ -23,7 +24,11 @@ import type {
   sharePlugin,
 } from '@module-federation/sdk';
 import type { RsbuildConfig, RsbuildPlugin, Rspack } from '@rsbuild/core';
-import { CALL_NAME_MAP } from '../constant';
+import {
+  CALL_NAME_MAP,
+  RSPRESS_BUNDLER_CONFIG_NAME,
+  RSPRESS_SSR_DIR,
+} from '../constant';
 
 type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -34,6 +39,7 @@ type RSBUILD_PLUGIN_OPTIONS = {
   ssrDir?: string;
   // target copy environment name, default is mf
   environment?: string;
+  PluginConstructor?: typeof ModuleFederationPlugin;
 };
 
 type ExposedAPIType = {
@@ -85,6 +91,10 @@ export function isMFFormat(bundlerConfig: Rspack.Configuration) {
 const isSSRConfig = (bundlerConfigName?: string) =>
   Boolean(bundlerConfigName === SSR_ENV_NAME);
 
+const isRspressSSGConfig = (bundlerConfigName?: string) => {
+  return bundlerConfigName === RSPRESS_BUNDLER_CONFIG_NAME;
+};
+
 export const pluginModuleFederation = (
   moduleFederationOptions: ModuleFederationOptions,
   rsbuildOptions: RSBUILD_PLUGIN_OPTIONS,
@@ -95,6 +105,7 @@ export const pluginModuleFederation = (
       ssr = undefined,
       ssrDir = SSR_DIR,
       environment = DEFAULT_MF_ENVIRONMENT_NAME,
+      PluginConstructor = ModuleFederationPlugin,
     } = rsbuildOptions || {};
     const { callerName } = api.context;
     const originalRsbuildConfig = api.getRsbuildConfig();
@@ -326,16 +337,33 @@ export const pluginModuleFederation = (
           ) {
             if (isSSRConfig(bundlerConfig.name)) {
               generateMergedStatsAndManifestOptions.options.nodePlugin =
-                new ModuleFederationPlugin(
+                new PluginConstructor(
                   createSSRMFConfig(moduleFederationOptions),
                 );
               bundlerConfig.plugins!.push(
                 generateMergedStatsAndManifestOptions.options.nodePlugin,
               );
               return;
+            } else if (isRspressSSGConfig(bundlerConfig.name)) {
+              const mfConfig = {
+                ...createSSRMFConfig(moduleFederationOptions),
+                // expose in mf-ssg env
+                exposes: {},
+              };
+              patchSSRRspackConfig(
+                bundlerConfig,
+                mfConfig,
+                RSPRESS_SSR_DIR,
+                callerName,
+                false,
+                false,
+              );
+              delete bundlerConfig.output?.publicPath;
+              bundlerConfig.plugins!.push(new PluginConstructor(mfConfig));
+              return;
             }
             generateMergedStatsAndManifestOptions.options.browserPlugin =
-              new ModuleFederationPlugin(moduleFederationOptions);
+              new PluginConstructor(moduleFederationOptions);
             generateMergedStatsAndManifestOptions.options.distOutputDir =
               bundlerConfig.output?.path || '';
             bundlerConfig.plugins!.push(

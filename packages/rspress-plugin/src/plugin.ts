@@ -100,24 +100,15 @@ function replaceEntryWithBootstrapEntry(bundlerConfig: RspackConfig) {
 
 export function pluginModuleFederation(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  ModuleFederationPluginImplementation = ModuleFederationPlugin,
+  PluginConstructor = ModuleFederationPlugin,
 ): RspressPlugin {
-  let browserPlugin: ModuleFederationPlugin;
-  let serverPlugin: ModuleFederationPlugin;
-  let outputDir = '';
-  const mfConfigForSSR = createSSRMFConfig(mfConfig);
-  const mfConfigForBrowser = mfConfig;
-
   let enableSSG = false;
 
   return {
     // 插件名称
     name: 'plugin-module-federation',
-    async beforeBuild(config, isProd) {
+    async beforeBuild(config) {
       if (!isDev() && config.ssg !== false) {
-        // FIXME: rspress will automatically delete ssr dir, but it's necessary for ssg build, set debug mode can avoid this dir delete.
-        // If rspress can provide stuff like deleteSSRDir, can remove this action, cause this action will log more unnecessary info, and have some error log like miss i8n.
-        process.env.DEBUG = process.env.DEBUG ?? 'rsbuild';
         enableSSG = true;
       }
 
@@ -138,14 +129,10 @@ export function pluginModuleFederation(
           ssr: enableSSG,
           environment: 'node',
           ssrDir: 'mf-ssg',
+          PluginConstructor,
         }),
       );
     },
-    // async afterBuild(config, isProd) {
-    //   if (enableSSG) {
-    //     updateStatsAndManifest(serverPlugin, browserPlugin, outputDir);
-    //   }
-    // },
     builderConfig: {
       plugins: [],
       tools: {
@@ -164,17 +151,6 @@ export function pluginModuleFederation(
               );
               process.exit(1);
             }
-            // patchSSRRspackConfig(config, mfConfigForSSR);
-            // serverPlugin = new ModuleFederationPluginImplementation(
-            //   mfConfigForSSR,
-            // );
-            // config.plugins.push(serverPlugin);
-          } else {
-            // browserPlugin = new ModuleFederationPluginImplementation(
-            //   mfConfigForBrowser,
-            // );
-            // config.plugins.push(browserPlugin);
-            // outputDir = config.output?.path || '';
           }
         },
       },

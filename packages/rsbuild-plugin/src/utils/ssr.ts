@@ -1,7 +1,5 @@
 import path from 'path';
 import { encodeName } from '@module-federation/sdk';
-import logger from '../logger';
-import { GetPublicPathPlugin } from '@module-federation/enhanced/rspack';
 
 import type { EnvironmentConfig, RsbuildConfig, Rspack } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
@@ -24,31 +22,26 @@ export function patchSSRRspackConfig(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   ssrDir: string,
   callerName?: string,
+  resetEntry = true,
+  modifyPublicPath = true,
 ) {
-  if (typeof config.output?.publicPath !== 'string') {
-    throw new Error('publicPath must be string!');
-  }
-  const publicPath = config.output.publicPath;
-  if (publicPath === 'auto') {
-    throw new Error('publicPath can not be "auto"!');
+  config.output ||= {};
+  if (modifyPublicPath) {
+    if (typeof config.output?.publicPath !== 'string') {
+      throw new Error('publicPath must be string!');
+    }
+    const publicPath = config.output.publicPath;
+    if (publicPath === 'auto') {
+      throw new Error('publicPath can not be "auto"!');
+    }
+
+    const publicPathWithSSRDir = `${publicPath}${ssrDir}/`;
+    config.output.publicPath = publicPathWithSSRDir;
   }
 
-  const publicPathWithSSRDir = `${publicPath}${ssrDir}/`;
-  config.output.publicPath = publicPathWithSSRDir;
-
-  if (callerName === CALL_NAME_MAP.RSPRESS) {
+  if (callerName === CALL_NAME_MAP.RSPRESS && resetEntry) {
     // set virtue entry, only need mf entry
     config.entry = 'data:application/node;base64,';
-    // config.plugins?.push({
-    //   // @ts-ignore
-    //   apply(compiler) {
-    //     GetPublicPathPlugin.addPublicPathEntry(
-    //       compiler,
-    //       `return "${publicPathWithSSRDir}"`,
-    //       mfConfig.name!,
-    //     );
-    //   },
-    // });
   }
   config.target = 'async-node';
   // @module-federation/node/universe-entry-chunk-tracker-plugin only export cjs
