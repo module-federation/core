@@ -38,7 +38,7 @@
     "build:website": "nx run website-new:build",
     "extract-i18n:website": "nx run website:extract-i18n",
     "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\"",
-    "app:next:dev": "nx run-many --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout",
+    "app:next:dev": "NX_TUI=false nx run-many --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout",
     "app:next:build": "nx run-many --target=build --parallel=2 --configuration=production -p 3000-home,3001-shop,3002-checkout",
     "app:next:prod": "nx run-many --target=serve --configuration=production -p 3000-home,3001-shop,3002-checkout",
     "app:node:dev": "nx run-many --target=serve --parallel=10 --configuration=development -p node-host,node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote",
@@ -66,7 +66,10 @@
       }
     },
     "overrides": {
-      "@changesets/assemble-release-plan": "workspace:*"
+      "@changesets/assemble-release-plan": "workspace:*",
+      "next": "15.3.3",
+      "react": "19.1.0",
+      "react-dom": "19.1.0"
     }
   },
   "dependencies": {
