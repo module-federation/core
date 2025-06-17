@@ -100,7 +100,6 @@ function replaceEntryWithBootstrapEntry(bundlerConfig: RspackConfig) {
 
 export function pluginModuleFederation(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  PluginConstructor = ModuleFederationPlugin,
 ): RspressPlugin {
   let enableSSG = false;
 
@@ -129,7 +128,6 @@ export function pluginModuleFederation(
           ssr: enableSSG,
           environment: 'node',
           ssrDir: 'mf-ssg',
-          PluginConstructor,
         }),
       );
     },

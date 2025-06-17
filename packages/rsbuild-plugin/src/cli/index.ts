@@ -39,13 +39,13 @@ type RSBUILD_PLUGIN_OPTIONS = {
   ssrDir?: string;
   // target copy environment name, default is mf
   environment?: string;
-  PluginConstructor?: typeof ModuleFederationPlugin;
 };
 
 type ExposedAPIType = {
   options: {
     nodePlugin?: ModuleFederationPlugin;
     browserPlugin?: ModuleFederationPlugin;
+    rspressSSGPlugin?: ModuleFederationPlugin;
     distOutputDir?: string;
   };
   isSSRConfig: typeof isSSRConfig;
@@ -105,7 +105,6 @@ export const pluginModuleFederation = (
       ssr = undefined,
       ssrDir = SSR_DIR,
       environment = DEFAULT_MF_ENVIRONMENT_NAME,
-      PluginConstructor = ModuleFederationPlugin,
     } = rsbuildOptions || {};
     const { callerName } = api.context;
     const originalRsbuildConfig = api.getRsbuildConfig();
@@ -337,7 +336,7 @@ export const pluginModuleFederation = (
           ) {
             if (isSSRConfig(bundlerConfig.name)) {
               generateMergedStatsAndManifestOptions.options.nodePlugin =
-                new PluginConstructor(
+                new ModuleFederationPlugin(
                   createSSRMFConfig(moduleFederationOptions),
                 );
               bundlerConfig.plugins!.push(
@@ -359,11 +358,16 @@ export const pluginModuleFederation = (
                 false,
               );
               delete bundlerConfig.output?.publicPath;
-              bundlerConfig.plugins!.push(new PluginConstructor(mfConfig));
+              generateMergedStatsAndManifestOptions.options.rspressSSGPlugin =
+                new ModuleFederationPlugin(mfConfig);
+              bundlerConfig.plugins!.push(
+                generateMergedStatsAndManifestOptions.options.rspressSSGPlugin,
+              );
               return;
             }
+
             generateMergedStatsAndManifestOptions.options.browserPlugin =
-              new PluginConstructor(moduleFederationOptions);
+              new ModuleFederationPlugin(moduleFederationOptions);
             generateMergedStatsAndManifestOptions.options.distOutputDir =
               bundlerConfig.output?.path || '';
             bundlerConfig.plugins!.push(
