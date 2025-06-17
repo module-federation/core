@@ -49,6 +49,7 @@ type ExposedAPIType = {
     distOutputDir?: string;
   };
   isSSRConfig: typeof isSSRConfig;
+  isRspressSSGConfig: typeof isRspressSSGConfig;
 };
 export type { ModuleFederationOptions, ExposedAPIType };
 
@@ -243,6 +244,7 @@ export const pluginModuleFederation = (
         distOutputDir: undefined,
       },
       isSSRConfig,
+      isRspressSSGConfig,
     };
     api.expose(
       RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
