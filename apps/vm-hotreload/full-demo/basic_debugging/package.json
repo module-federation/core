@@ -4,10 +4,16 @@
   "description": "Basic HMR debugging tool that connects to backend API for hot updates",
   "main": "index.js",
   "scripts": {
-    "build": "echo 'must use start command only'",
-    "start": "npx webpack --mode development && node dist/index.js",
+    "build": "npx webpack --mode development",
+    "start": "npm run build && node dist/index.js",
     "dev": "nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test --test-concurrency=1 test/*.test.js",
+    "test:unit": "node --test test/unit.test.js",
+    "test:integration": "node --test test/integration.test.js",
+    "test:e2e": "node --test test/e2e.test.js",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:watch": "node --test --watch --test-concurrency=1 test/*.test.js",
+    "test:sequential": "npm run test:unit && npm run test:integration && npm run test:e2e"
   },
   "dependencies": {
     "webpack": "^5.0.0",

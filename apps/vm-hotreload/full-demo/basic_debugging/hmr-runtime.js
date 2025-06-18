@@ -615,9 +615,9 @@ function createHMRRuntime(
   // Shared state object
   var state = {
     currentUpdateChunks: undefined,
-    currentUpdate: undefined,
-    currentUpdateRemovedChunks: undefined,
-    currentUpdateRuntime: undefined,
+    currentUpdate: {},
+    currentUpdateRemovedChunks: [],
+    currentUpdateRuntime: [],
   };
 
   var loadUpdateChunk = createLoadUpdateChunk(

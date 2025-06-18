@@ -1,102 +1,171 @@
-// Basic Hello World for HMR Testing
+// HMR Testing Module - Designed for Webpack Bundle Testing
 
 const {
   applyHotUpdateFromStringsByPatching,
 } = require('../custom-hmr-helpers.js');
 
-console.log('Hello World!');
+// Test state that persists across HMR reloads
+let moduleState = {
+  version: '1.0.0',
+  reloadCount: 0,
+  lastReload: null,
+  moduleId: Math.random().toString(36).substr(2, 9),
+  isUpdated: false,
+};
 
-let counter = 0;
-const BACKEND_URL = 'http://localhost:3000';
-// No need to track lastUpdateId - we'll use webpack hash directly
-
-function incrementCounter() {
-  counter++;
-  console.log(`Counter: ${counter}`);
-  return counter;
+// HMR Test Functions
+function getModuleState() {
+  return { ...moduleState };
 }
 
-function getCounter() {
-  return counter;
-}
-// Use global scope to persist across HMR reloads
-if (typeof global !== 'undefined') {
-  global.didAcceptUpdate = global.didAcceptUpdate || false;
-} else if (typeof window !== 'undefined') {
-  window.didAcceptUpdate = window.didAcceptUpdate || false;
+function updateModuleState(newState) {
+  moduleState = { ...moduleState, ...newState };
+  moduleState.lastReload = new Date().toISOString();
+  return moduleState;
 }
 
-function getDidAcceptUpdate() {
-  if (typeof global !== 'undefined') {
-    return global.didAcceptUpdate;
-  } else if (typeof window !== 'undefined') {
-    return window.didAcceptUpdate;
+function incrementReloadCount() {
+  moduleState.reloadCount++;
+  moduleState.lastReload = new Date().toISOString();
+  return moduleState.reloadCount;
+}
+
+function resetModuleState() {
+  const oldModuleId = moduleState.moduleId;
+  moduleState = {
+    version: '1.0.0',
+    reloadCount: 0,
+    lastReload: null,
+    moduleId: Math.random().toString(36).substr(2, 9),
+    isUpdated: false,
+  };
+  return { oldModuleId, newModuleId: moduleState.moduleId };
+}
+
+// Update Provider System
+let updateProvider = null;
+
+function setUpdateProvider(provider) {
+  updateProvider = provider;
+}
+
+function getUpdateProvider() {
+  return updateProvider;
+}
+
+// Provider factories
+function createDefaultUpdateProvider() {
+  return async function defaultUpdateProvider() {
+    return { update: null };
+  };
+}
+
+function createQueueUpdateProvider(updates = []) {
+  let index = 0;
+  return async function queueUpdateProvider() {
+    if (index < updates.length) {
+      const update = updates[index];
+      index++;
+      return { update };
+    }
+    return { update: null };
+  };
+}
+
+function createCallbackUpdateProvider(callback) {
+  return async function callbackUpdateProvider() {
+    try {
+      const currentHash =
+        typeof __webpack_require__ !== 'undefined'
+          ? __webpack_require__.h()
+          : '0';
+      const result = await callback(currentHash);
+      return result || { update: null };
+    } catch (error) {
+      return { update: null };
+    }
+  };
+}
+
+// Core HMR Testing Functions
+async function fetchUpdates() {
+  if (!updateProvider) {
+    console.log('Failed to fetch updates: No provider set');
+    return { update: null };
   }
-  return false;
-}
 
-function setDidAcceptUpdate(value) {
-  if (typeof global !== 'undefined') {
-    global.didAcceptUpdate = value;
-  } else if (typeof window !== 'undefined') {
-    window.didAcceptUpdate = value;
-  }
-}
-
-// Fetch updates from backend API
-async function fetchUpdatesFromBackend() {
   try {
-    const currentHash =
-      typeof __webpack_require__ !== 'undefined'
-        ? __webpack_require__.h()
-        : '0';
-    const response = await fetch(
-      `${BACKEND_URL}/api/updates?currentHash=${currentHash}`,
-    );
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const result = await updateProvider();
+    if (result && result.update) {
+      console.log('Applying update from provider');
     }
-    const data = await response.json();
-    // Only log if there is an actual update to avoid noise
-    if (data.update) {
-      console.log('📡 Fetched update from backend');
-    }
-    return data;
+    return result;
   } catch (error) {
-    console.error('❌ Failed to fetch updates from backend:', error);
-    return null;
+    console.log('Failed to fetch updates:', error.message);
+    return { update: null };
   }
 }
 
-// Apply updates received from backend
-async function applyBackendUpdates(updatesData) {
+async function applyUpdates(updatesData, force = false) {
   if (!updatesData || !updatesData.update) {
-    // Silently return when no update to reduce noise
-    return;
+    if (!force) {
+      return { success: false, reason: 'no_update_data' };
+    }
+
+    console.log('Force mode: creating minimal update for testing');
+    // Force mode: create minimal update for testing
+    updatesData = {
+      update: {
+        manifest: {
+          h:
+            typeof __webpack_require__ !== 'undefined'
+              ? __webpack_require__.h()
+              : 'force-hash',
+          c: [],
+          r: [],
+          m: [],
+        },
+        script: `
+          exports.modules = {};
+          exports.runtime = function(__webpack_require__) {
+            // Force runtime update for testing
+          };
+        `,
+        originalInfo: {
+          updateId: 'force-update-' + Date.now(),
+          webpackHash:
+            typeof __webpack_require__ !== 'undefined'
+              ? __webpack_require__.h()
+              : 'force-hash',
+        },
+      },
+    };
   }
 
   const update = updatesData.update;
-  console.log('🔄 Applying update from backend');
+  console.log('Applying update from provider');
 
   try {
-    // Store the original hash before applying update
-    const originalHash =
-      typeof __webpack_require__ !== 'undefined'
-        ? __webpack_require__.h()
-        : '0';
-
-    update.manifest.c = Object.keys(__webpack_require__.hmrS_readFileVm);
-    update.manifest.r = Object.keys(__webpack_require__.hmrS_readFileVm);
-    update.manifest.m = Object.keys(__webpack_require__.c);
+    // For testing: populate manifest with current webpack state
+    if (typeof __webpack_require__ !== 'undefined') {
+      update.manifest.c =
+        update.manifest.c.length === 0
+          ? Object.keys(__webpack_require__.hmrS_readFileVm || {})
+          : update.manifest.c;
+      update.manifest.r =
+        update.manifest.r.length === 0
+          ? Object.keys(__webpack_require__.hmrS_readFileVm || {})
+          : update.manifest.r;
+      update.manifest.m =
+        update.manifest.m.length === 0
+          ? Object.keys(__webpack_require__.c || {})
+          : update.manifest.m;
+    }
 
     const manifestJsonString = JSON.stringify(update.manifest);
     const chunkJsStringsMap = { index: update.script };
 
-    console.log('📦 Applying update:', {
-      manifest: update.manifest,
-      originalInfo: update.originalInfo,
-    });
-
+    // Apply the HMR update
     await applyHotUpdateFromStringsByPatching(
       module,
       __webpack_require__,
@@ -104,132 +173,141 @@ async function applyBackendUpdates(updatesData) {
       chunkJsStringsMap,
     );
 
-    // Ensure the webpack hash is properly updated from the update
-    if (update.originalInfo && update.originalInfo.webpackHash) {
-      // Force webpack to use the hash from the update
-      if (
-        typeof __webpack_require__ !== 'undefined' &&
-        typeof __webpack_require__.hmrF !== 'undefined'
-      ) {
-        // Override the hash function to return the new hash
-        const originalHmrF = __webpack_require__.hmrF;
-        __webpack_require__.hmrF = function () {
-          return update.originalInfo.webpackHash;
-        };
-        // Restore after a short delay
-        setTimeout(() => {
-          __webpack_require__.hmrF = originalHmrF;
-        }, 100);
-      }
-    }
+    // Update module state to reflect successful HMR
+    incrementReloadCount();
+    updateModuleState({
+      isUpdated: true,
+      lastUpdateId: update.originalInfo?.updateId,
+    });
 
-    console.log(
-      '✅ Successfully applied update:',
-      update.originalInfo?.updateId,
-    );
+    return {
+      success: true,
+      updateId: update.originalInfo?.updateId,
+      moduleState: getModuleState(),
+    };
   } catch (error) {
-    console.error('❌ Failed to apply update:', error);
+    return {
+      success: false,
+      reason: 'apply_failed',
+      error: error.message,
+    };
   }
-
-  // Hash will be automatically updated by webpack after hot update
-  const newHash =
-    typeof __webpack_require__ !== 'undefined' ? __webpack_require__.h() : '0';
-  console.log('📝 Webpack hash updated to:', newHash);
 }
 
-// Simple demo function
-async function runDemo() {
-  console.log('Running demo...');
-  incrementCounter();
+async function forceUpdate() {
+  try {
+    console.log('Force mode');
+    console.log('Applying forced update');
+    const result = await applyUpdates(null, true);
+    return result;
+  } catch (error) {
+    return {
+      success: false,
+      reason: 'force_failed',
+      error: error.message,
+    };
+  }
+}
 
-  // Fetch and apply updates from backend API
-  console.log('🔍 Checking for updates from backend API...');
-
-  // Only call if webpack require is available
-  if (typeof __webpack_require__ !== 'undefined') {
+// Update polling functionality
+async function startUpdatePolling(intervalMs = 1000, forceMode = false) {
+  const pollingFunction = async () => {
     try {
-      const updatesData = await fetchUpdatesFromBackend();
-      await applyBackendUpdates(updatesData);
-    } catch (error) {
-      console.error('❌ Error during backend update process:', error);
-    }
-  } else {
-    console.log('Webpack require not available, skipping hot update');
-  }
-
-  console.log('Demo completed');
-}
-
-// Track the last applied update to prevent reload loops
-let lastAppliedUpdateId = null;
-let appliedUpdatesCount = 0;
-
-// Function to continuously poll for updates
-async function startUpdatePolling(intervalMs = 5000) {
-  console.log(`🔄 Starting update polling every ${intervalMs}ms`);
-
-  const pollForUpdates = async () => {
-    if (typeof __webpack_require__ !== 'undefined') {
-      try {
-        const updatesData = await fetchUpdatesFromBackend();
-        if (updatesData && updatesData.update) {
-          const updateId = updatesData.update.originalInfo?.updateId;
-
-          // Only apply if this is a new update we haven't seen before
-          if (updateId && updateId !== lastAppliedUpdateId) {
-            await applyBackendUpdates(updatesData);
-            lastAppliedUpdateId = updateId;
-            appliedUpdatesCount++;
-            console.log(`📊 Applied ${appliedUpdatesCount} updates total`);
-          } else if (updateId === lastAppliedUpdateId) {
-            // Silently skip - we already have this update
-            // This prevents reload loops while allowing continuous polling
-          }
-        } else {
-          // No update available - continue polling silently
+      if (forceMode) {
+        await forceUpdate();
+      } else {
+        const updateData = await fetchUpdates();
+        if (updateData && updateData.update) {
+          await applyUpdates(updateData);
         }
-      } catch (error) {
-        console.error('❌ Error during polling update:', error);
       }
+    } catch (error) {
+      console.log('Polling error:', error.message);
     }
   };
 
-  // Initial poll
-  await pollForUpdates();
+  // Run initial check
+  await pollingFunction();
 
-  // Set up continuous interval polling
-  const pollingInterval = setInterval(pollForUpdates, intervalMs);
+  // Start interval
+  const interval = setInterval(pollingFunction, intervalMs);
 
-  // Return interval ID so it can be cleared if needed
-  return pollingInterval;
+  return interval;
 }
-// HMR acceptance
 
-// Start the demo
-(async () => {
-  await runDemo();
+// Test utilities
+function testModuleReinstall() {
+  const beforeState = getModuleState();
+  const newId = resetModuleState();
+  const afterState = getModuleState();
 
-  // Start polling for updates from backend
-  await startUpdatePolling(3000); // Poll every 3 seconds
+  return {
+    beforeState,
+    afterState,
+    moduleIdChanged: newId.oldModuleId !== newId.newModuleId,
+    stateReset: beforeState.reloadCount !== afterState.reloadCount,
+  };
+}
 
-  console.log('🎯 Basic debugging demo is running and polling for updates...');
-  console.log('💡 Use the backend admin interface to trigger test updates');
-})();
+function getHMRStatus() {
+  return {
+    hasWebpackRequire: typeof __webpack_require__ !== 'undefined',
+    hasModuleHot: typeof module !== 'undefined' && !!module.hot,
+    hotStatus:
+      typeof module !== 'undefined' && module.hot
+        ? module.hot.status()
+        : 'unavailable',
+    moduleState: getModuleState(),
+    webpackHash:
+      typeof __webpack_require__ !== 'undefined'
+        ? __webpack_require__.h()
+        : null,
+  };
+}
 
+// Initialize
+if (!updateProvider) {
+  setUpdateProvider(createDefaultUpdateProvider());
+}
+
+// HMR acceptance for testing
 if (module.hot) {
-  console.log('🔥 Debug demo has module.hot support');
-  // module.hot.invalidate()
   module.hot.accept(() => {
-    setDidAcceptUpdate(true);
-    console.log('\n♻️  HMR: Index module reloaded!');
-
-    process.exit();
+    // When HMR updates this module, increment reload count
+    incrementReloadCount();
+    updateModuleState({ isUpdated: true, hotReloaded: true });
   });
 }
 
-// Export functions for testing
+// Only run demo if executed directly (not imported)
+if (require.main === module) {
+  console.log('HMR Test Module Started');
+  console.log('Initial State:', getModuleState());
+  console.log('HMR Status:', getHMRStatus());
+}
+
+// Export all testing functions
 module.exports = {
-  incrementCounter,
-  getCounter,
-  runDemo,
+  // State management
+  getModuleState,
+  updateModuleState,
+  incrementReloadCount,
+  resetModuleState,
+
+  // Update providers
+  setUpdateProvider,
+  getUpdateProvider,
+  createDefaultUpdateProvider,
+  createQueueUpdateProvider,
+  createCallbackUpdateProvider,
+
+  // HMR operations
+  fetchUpdates,
+  applyUpdates,
+  forceUpdate,
+  startUpdatePolling,
+
+  // Test utilities
+  testModuleReinstall,
+  getHMRStatus,
 };
