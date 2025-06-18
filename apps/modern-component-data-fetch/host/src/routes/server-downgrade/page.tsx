@@ -1,8 +1,6 @@
-import { kit } from '@module-federation/modern-js/runtime';
+import { createLazyComponent } from '@module-federation/modern-js/react';
 
-const { createRemoteComponent } = kit;
-
-const ServerDowngrade = createRemoteComponent({
+const ServerDowngrade = createLazyComponent({
   loader: () => {
     return import('remote/ServerDowngrade');
   },

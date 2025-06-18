@@ -1,8 +1,9 @@
-import { kit } from '@module-federation/modern-js/runtime';
+import {
+  createLazyComponent,
+  wrapNoSSR,
+} from '@module-federation/modern-js/react';
 
-const { createRemoteComponent, wrapNoSSR } = kit;
-
-const CsrWithFetchDataFromServerComponent = wrapNoSSR(createRemoteComponent)({
+const CsrWithFetchDataFromServerComponent = wrapNoSSR(createLazyComponent)({
   loader: () => {
     return import('provider-csr');
   },

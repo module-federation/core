@@ -254,12 +254,10 @@ This is because the producer's style files cannot be injected into the correspon
 This issue can be solved by using the [createremotessrcomponent](../../../guide/framework/modernjs#createremotessrcomponent) provided by `@module-federation/modern-js`.
 
 ```tsx title='page.tsx'
-import { kit } from '@module-federation/modern-js/runtime'
+import { createLazyComponent } from '@module-federation/modern-js/react'
 import './index.css';
 
-const { createRemoteSSRComponent } = kit;
-
-const RemoteSSRComponent = createRemoteSSRComponent({
+const RemoteSSRComponent = createLazyComponent({
   loader: () => import('remote/Image'),
   loading: 'loading...',
   export: 'default',

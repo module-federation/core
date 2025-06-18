@@ -144,16 +144,15 @@ export const loader = async ({ request }: LoaderFunctionArgs): Promise<DataLoade
 消费 loader 数据，并动态加载对应的生产者：
 
 ```tsx
-import { kit, loadRemote, registerRemotes } from '@module-federation/modern-js/runtime';
+import { loadRemote, registerRemotes } from '@module-federation/modern-js/runtime';
+import { createLazyComponent } from '@module-federation/modern-js/react';
 // 使用 import type ，仅获取类型
 import type { DataLoaderRes } from './page.data';
 import { useLoaderData } from '@modern-js/runtime/router';
 
 import './index.css';
 
-const { createRemoteSSRComponent } = kit;
-
-const RemoteSSRComponent = createRemoteSSRComponent({
+const RemoteSSRComponent = createLazyComponent({
   loader: () => import('remote/Image'),
   loading: 'loading...',
   export: 'default',
@@ -173,7 +172,7 @@ const Index = () => {
 
   const DynamicRemoteSSRComponents = dataLoader.providerList.map(item => {
     const { id } = item;
-    const Com = createRemoteSSRComponent({
+    const Com = createLazyComponent({
       loader: () => loadRemote(id),
       loading: 'loading...',
       fallback: ({ error }) => {

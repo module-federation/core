@@ -2,7 +2,7 @@
 
 `@module-federation/bridge-react` provides bridge utility functions for React applications:
 - `createBridgeComponent`: Used for exporting application-level modules, suitable for producers to wrap modules exported as application types
-- `createRemoteComponent`: Used for loading application-level modules, suitable for consumers to load modules as application types
+- `createRemoteAppComponent`: Used for loading application-level modules, suitable for consumers to load modules as application types
 
 ### React Version Compatibility
 
@@ -118,11 +118,11 @@ export default defineConfig({
 });
 ```
 
-- Step 2: In the host application, we need to use `createRemoteComponent` to load the remote application.
+- Step 2: In the host application, we need to use `createRemoteAppComponent` to load the remote application.
 
 ```tsx
 // ./src/App.tsx
-import { createRemoteComponent } from '@module-federation/bridge-react';
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
 import { loadRemote } from '@module-federation/runtime';
 
 // Define FallbackError component
@@ -141,8 +141,8 @@ const FallbackErrorComp = ({ error }: { error: Error }) => {
 // Define FallbackLoading component
 const FallbackComp = <div data-test-id="loading">loading...</div>;
 
-// Use createRemoteComponent to create remote component
-const Remote1App = createRemoteComponent({
+// Use createRemoteAppComponent to create remote component
+const Remote1App = createRemoteAppComponent({
   // loader is used to load remote modules, e.g.: loadRemote('remote1/export-app'), import('remote1/export-app')
   loader: () => loadRemote('remote1/export-app'),
   // fallback is used for displaying components when remote module loading fails
@@ -177,10 +177,10 @@ const App = () => {
 
 :::info
 
-1. The remote module exported by `createRemoteComponent` will automatically use the react-bridge loading protocol to load the module,
+1. The remote module exported by `createRemoteAppComponent` will automatically use the react-bridge loading protocol to load the module,
 making cross-framework rendering of applications possible.
 
-2. Additionally, `createRemoteComponent` will automatically handle module loading, module destruction, error handling, loading, routing, and other logic,
+2. Additionally, `createRemoteAppComponent` will automatically handle module loading, module destruction, error handling, loading, routing, and other logic,
 allowing developers to focus solely on how to use the remote component.
 
 :::
@@ -210,8 +210,8 @@ function createBridgeComponent<T>(
 interface ProviderFnParams<T> {
   /** Root component to be remotely loaded */
   rootComponent: React.ComponentType<T>;
-  
-  /** 
+
+  /**
    * Custom render function for custom rendering logic
    * @param App - React element
    * @param id - DOM element or string ID
@@ -221,8 +221,8 @@ interface ProviderFnParams<T> {
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
-  
-  /** 
+
+  /**
    * Custom createRoot function for React 18 and above
    * @param container - DOM container
    * @param options - CreateRoot options
@@ -232,7 +232,7 @@ interface ProviderFnParams<T> {
     container: Element | DocumentFragment,
     options?: CreateRootOptions,
   ) => Root;
-  
+
   /**
    * Default options for createRoot in React 18 and 19
    * These options will be used when creating a root unless overridden by rootOptions in render params
@@ -246,9 +246,9 @@ interface ProviderFnParams<T> {
 }
 ```
 
-#### createRemoteComponent
+#### createRemoteAppComponent
 
-`createRemoteComponent` is used to load remote React components.
+`createRemoteAppComponent` is used to load remote React components.
 
 ```tsx
 /**
@@ -256,7 +256,7 @@ interface ProviderFnParams<T> {
  * @param options - Remote component configuration options
  * @returns Returns a React component that can receive props and render remote component
  */
-function createRemoteComponent<T, E extends keyof T = 'default'>(
+function createRemoteAppComponent<T, E extends keyof T = 'default'>(
   options: RemoteComponentParams<T, E>
 ): React.ForwardRefExoticComponent<
   React.PropsWithoutRef<RemoteComponentProps> & React.RefAttributes<HTMLDivElement>
@@ -269,19 +269,19 @@ interface RemoteComponentParams<
   T = Record<string, unknown>,
   E extends keyof T = keyof T
 > {
-  /** 
+  /**
    * Function to load remote module
    * Example: () => loadRemote('remote1/export-app') or () => import('remote1/export-app')
    */
   loader: () => Promise<T>;
-  
+
   /** Component displayed when loading remote module */
   loading: React.ReactNode;
-  
+
   /** Error component displayed when loading or rendering remote module fails */
   fallback: React.ComponentType<{ error: Error }>;
-  
-  /** 
+
+  /**
    * Specify module export name
    * Default is 'default'
    */
@@ -295,18 +295,18 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
   /** Properties passed to remote component */
   props?: T;
 
-  /** 
+  /**
    * Memory route configuration, used to control child application routing as memoryRouter
    * Will not directly display URL in browser address bar
    */
   memoryRoute?: { entryPath: string };
-  
+
   /** Base path name */
   basename?: string;
-  
+
   /** Style */
   style?: React.CSSProperties;
-  
+
   /** Class name */
   className?: string;
 }
@@ -323,7 +323,7 @@ export const provider = createBridgeComponent({
 });
 
 // host
-const Remote1App = createRemoteComponent({
+const Remote1App = createRemoteAppComponent({
   loader: () => loadRemote('remote1/export-app'),
   export: 'provider', // Specify to use provider export
   fallback: FallbackErrorComp,
@@ -385,15 +385,15 @@ export default createBridgeComponent({
 
 ```tsx
 // In the consumer application
-const RemoteApp = createRemoteComponent({
+const RemoteApp = createRemoteAppComponent({
   url: 'http://localhost:3001/remoteEntry.js',
   scope: 'remote',
   module: './App',
 });
 
 // Pass rootOptions when rendering
-<RemoteApp 
-  props={{ message: 'Hello' }} 
+<RemoteApp
+  props={{ message: 'Hello' }}
   rootOptions={{
     identifierPrefix: 'instance-',
     onRecoverableError: (error) => {

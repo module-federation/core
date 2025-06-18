@@ -191,14 +191,12 @@ export default Index;
 
 #### Consumer
 
-In the consumer, we need to use `createRemoteComponent` to load the remote component and fetch data.
+In the consumer, we need to use `createLazyComponent` to load the remote component and fetch data.
 
 ```tsx
-import { kit, ERROR_TYPE } from '@module-federation/modern-js/runtime';
+import { createLazyComponent, ERROR_TYPE } from '@module-federation/modern-js/react';
 
-const { createRemoteComponent } = kit;
-
-const List = createRemoteComponent({
+const List = createLazyComponent({
   loader: () => {
     return import('remote/List');
   },
@@ -236,7 +234,7 @@ By default, parameters are passed to the loader function. The type is `DataFetch
 
 - `isDowngrade` (boolean): Indicates whether the current execution context is in downgrade mode. For example, if Server-Side Rendering (SSR) fails and falls back to Client-Side Rendering (CSR), a request will be re-initiated to the server to call the loader function, and this value will be `true`.
 
-In addition to the default parameters, you can also pass the [dataFetchParams](#datafetchparams) field in `createRemoteComponent`. This field will be passed through to the loader function.
+In addition to the default parameters, you can also pass the [dataFetchParams](#datafetchparams) field in `createLazyComponent`. This field will be passed through to the loader function.
 
 #### Return Value
 
@@ -304,21 +302,21 @@ In addition to exporting [MF Runtime](../basic/runtime), `@module-federation/mod
 To prevent conflicts with Shared modules, you need to import them as follows:
 
 ```ts
-import { kit } from '@module-federation/modern-js/runtime';
-const { loadRemote ,createRemoteComponent, createRemoteSSRComponent, wrapNoSSR } = kit;
+import { loadRemote } from '@module-federation/modern-js/runtime';
+import { createLazyComponent, wrapNoSSR } from '@module-federation/modern-js/react';
 ```
 
-### createRemoteComponent
+### createLazyComponent
 
 import Collapse from '@components/Collapse'
 
 <Collapse>
 ```ts
-declare function createRemoteComponent(
-  props: CreateRemoteComponentOptions
+declare function createLazyComponent(
+  props: CreateLazyComponentOptions
 ): (props: ComponentType) => React.JSX.Element;
 
-type CreateRemoteComponentOptions<T, E extends keyof T> = {
+type CreateLazyComponentOptions<T, E extends keyof T> = {
   loader: () => Promise<T>;
   loading: React.ReactNode;
   fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
@@ -353,11 +351,9 @@ This function supports loading components and also provides the following capabi
 
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
-import { kit, ERROR_TYPE } from '@module-federation/modern-js/runtime';
+import { createLazyComponent, ERROR_TYPE } from '@module-federation/modern-js/react';
 
-const { createRemoteComponent } = kit;
-
-const RemoteComponent = createRemoteComponent({
+const LazyComponent = createLazyComponent({
   loader: () => import('remote/Image'),
   loading: <div>loading...</div>,
   fallback: ({error,errorType,dataFetchMapKey}) => {
@@ -374,7 +370,7 @@ const RemoteComponent = createRemoteComponent({
 
 const App: FC = () => {
   return <>
-    <RemoteComponent />
+    <LazyComponent />
   </>;
 };
 export default App;
@@ -420,19 +416,13 @@ If the remote component is a named export, you can use this parameter to specify
 
 If the remote component has a data fetching function, setting this will pass it to the data fetching function.
 
-### createRemoteSSRComponent
-
-:::danger Note
-This function will be deprecated. It is recommended to use [createRemoteComponent](#createremotecomponent).
-:::
-
 ### wrapNoSSR
 
 <Collapse>
 ```ts
 declare function wrapNoSSR<T, E extends keyof T>(
-  createComponentFn: typeof createRemoteComponent<T, E>,
-) : (options: CreateRemoteComponentOptions<T, E>) => (props: ComponentType) => React.JSX.Element
+  createLazyComponentFn: typeof createLazyComponent<T, E>,
+) : (options: CreateLazyComponentOptions<T, E>) => (props: ComponentType) => React.JSX.Element
 ```
 </Collapse>
 
@@ -441,11 +431,9 @@ Wraps a component so that it does not render in SSR scenarios.
 Usage example:
 
 ```tsx
-import { kit } from '@module-federation/modern-js/runtime';
+import { createLazyComponent, wrapNoSSR } from '@module-federation/modern-js/react';
 
-const { createRemoteComponent, wrapNoSSR } = kit;
-
-const RemoteComponent = wrapNoSSR(createRemoteComponent)({
+const LazyComponent = wrapNoSSR(createLazyComponent)({
   loader: () => {
     return import('remote/Content');
   },
@@ -465,7 +453,7 @@ const Index = (): JSX.Element => {
       <h1>
         The component will be render in csr.
       </h1>
-      <RemoteComponent />
+      <LazyComponent />
     </div>
   );
 };

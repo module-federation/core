@@ -3,11 +3,9 @@ import Button from 'antd/lib/button';
 import {
   registerRemotes,
   loadRemote,
-  kit,
 } from '@module-federation/modern-js/runtime';
+import { createLazyComponent } from '@module-federation/modern-js/react';
 import stuff from './stuff.module.css';
-
-const { createRemoteSSRComponent } = kit;
 
 registerRemotes([
   {
@@ -16,7 +14,7 @@ registerRemotes([
   },
 ]);
 
-const RemoteSSRComponent = createRemoteSSRComponent({
+const RemoteSSRComponent = createLazyComponent({
   loader: () => loadRemote('dynamic_remote'),
   loading: 'loading...',
   fallback: ({ error }) => {

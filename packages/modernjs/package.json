@@ -27,6 +27,10 @@
       "types": "./dist/types/runtime/index.d.ts",
       "default": "./dist/esm/runtime/index.js"
     },
+    "./react": {
+      "types": "./dist/types/react/index.d.ts",
+      "default": "./dist/esm/react/index.js"
+    },
     "./ssr-dev-plugin": {
       "types": "./dist/types/ssr-runtime/devPlugin.d.ts",
       "default": "./dist/esm/ssr-runtime/devPlugin.js"
@@ -77,6 +81,9 @@
       "runtime": [
         "./dist/types/runtime/index.d.ts"
       ],
+      "react": [
+        "./dist/types/react/index.d.ts"
+      ],
       "config-plugin": [
         "./dist/types/cli/configPlugin.d.ts"
       ],
@@ -111,7 +118,7 @@
     "@modern-js/utils": "2.67.5",
     "@modern-js/node-bundle-require": "2.67.6",
     "@module-federation/rsbuild-plugin": "workspace:*",
-    "@module-federation/react": "workspace:*",
+    "@module-federation/bridge-react": "workspace:*",
     "fs-extra": "11.3.0",
     "lru-cache": "10.4.3",
     "@module-federation/enhanced": "workspace:*",

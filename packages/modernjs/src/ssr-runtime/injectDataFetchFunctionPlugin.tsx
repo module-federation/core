@@ -1,6 +1,9 @@
-import { kit } from '@module-federation/react/pure';
+import {
+  callDataFetch,
+  injectDataFetch,
+} from '@module-federation/bridge-react/data-fetch-utils';
+import { setSSREnv } from '@module-federation/bridge-react/lazy-utils';
 
-const { callDataFetch, injectDataFetch, setSSREnv } = kit;
 import type { RuntimePluginFuture } from '@modern-js/runtime';
 
 export const injectDataFetchFunctionPlugin = ({

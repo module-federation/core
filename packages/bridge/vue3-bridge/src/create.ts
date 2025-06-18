@@ -5,7 +5,7 @@ import { LoggerInstance } from './utils.js';
 
 declare const __APP_VERSION__: string;
 
-export function createRemoteComponent(info: {
+export function createRemoteAppComponent(info: {
   loader: () => Promise<any>;
   export?: string;
   asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
@@ -29,17 +29,20 @@ export function createRemoteComponent(info: {
       }
 
       const exportName = info?.export || 'default';
-      LoggerInstance.debug(`createRemoteComponent LazyComponent create >>>`, {
-        basename,
-        info,
-      });
+      LoggerInstance.debug(
+        `createRemoteAppComponent LazyComponent create >>>`,
+        {
+          basename,
+          info,
+        },
+      );
 
       const module: any = await info.loader();
       const moduleName = module && module[Symbol.for('mf_module_id')];
       const exportFn = module[exportName];
 
       LoggerInstance.debug(
-        `createRemoteComponent LazyComponent loadRemote info >>>`,
+        `createRemoteAppComponent LazyComponent loadRemote info >>>`,
         { moduleName, module, exportName, basename, route },
       );
 
@@ -58,4 +61,19 @@ export function createRemoteComponent(info: {
       throw new Error('module not found');
     },
   });
+}
+
+/**
+ * @deprecated createRemoteAppComponent is deprecated, please use createRemoteAppComponent instead!
+ */
+export function createRemoteComponent(info: {
+  loader: () => Promise<any>;
+  export?: string;
+  asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
+  rootAttrs?: Record<string, unknown>;
+}) {
+  LoggerInstance.warn(
+    'createRemoteAppComponent is deprecated, please use createRemoteAppComponent instead!',
+  );
+  return createRemoteAppComponent(info);
 }

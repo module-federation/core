@@ -29,7 +29,7 @@ export type IProps = {
   runtime: typeof import('@module-federation/runtime');
 };
 
-export type CreateRemoteComponentOptions<T, E extends keyof T> = {
+export type CreateLazyComponentOptions<T, E extends keyof T> = {
   loader: () => Promise<T>;
   loading: React.ReactNode;
   fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
@@ -189,8 +189,8 @@ function getServerNeedRemoteInfo(
   return;
 }
 
-export function createRemoteComponent<T, E extends keyof T>(
-  options: CreateRemoteComponentOptions<T, E>,
+export function createLazyComponent<T, E extends keyof T>(
+  options: CreateLazyComponentOptions<T, E>,
 ) {
   const { runtime } = options;
   if (!runtime?.getInstance) {
@@ -387,16 +387,4 @@ export function createRemoteComponent<T, E extends keyof T>(
       return <LazyComponent {...args} mfData={data} />;
     }
   };
-}
-
-/**
- * @deprecated createRemoteSSRComponent is deprecated, please use createRemoteComponent instead!
- */
-export function createRemoteSSRComponent<T, E extends keyof T>(
-  options: CreateRemoteComponentOptions<T, E>,
-) {
-  logger.warn(
-    'createRemoteSSRComponent is deprecated, please use createRemoteComponent instead!',
-  );
-  return createRemoteComponent(options);
 }

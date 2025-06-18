@@ -1,4 +1,4 @@
-import dataFetchMiddleWare from '@module-federation/react/data-fetch-server-middleware';
+import dataFetchMiddleWare from '@module-federation/bridge-react/data-fetch-server-middleware';
 
 import type { ServerPlugin } from '@modern-js/server-runtime';
 

@@ -4,7 +4,7 @@ import './App.css';
 import Navigation from './navigation';
 import Home from './pages/Home';
 import { loadRemote } from '@module-federation/enhanced/runtime';
-import { createRemoteComponent } from '@module-federation/bridge-react';
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
 
 const FallbackErrorComp = (info: any) => {
   return <div>{info?.error?.message}</div>;
@@ -12,13 +12,13 @@ const FallbackErrorComp = (info: any) => {
 
 const FallbackComp = <div>loading</div>;
 
-const Remote1App = createRemoteComponent({
+const Remote1App = createRemoteAppComponent({
   loader: () => loadRemote('remote1/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
-const Remote2App = createRemoteComponent({
+const Remote2App = createRemoteAppComponent({
   // @ts-ignore
   loader: () => import('remote2/export-app'),
   export: 'provider',
@@ -26,7 +26,7 @@ const Remote2App = createRemoteComponent({
   loading: FallbackComp,
 });
 
-const Remote3App = createRemoteComponent({
+const Remote3App = createRemoteAppComponent({
   loader: () => loadRemote('remote3/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
