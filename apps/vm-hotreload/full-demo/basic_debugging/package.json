@@ -6,14 +6,17 @@
   "scripts": {
     "build": "npx webpack --mode development",
     "start": "npm run build && node dist/index.js",
+    "start:hmr-client": "npm run build && node dist/hmr-client-demo.js",
     "dev": "nodemon src/index.js",
+    "dev:hmr-client": "nodemon src/hmr-client-demo.js",
     "test": "node --test --test-concurrency=1 test/*.test.js",
     "test:unit": "node --test test/unit.test.js",
     "test:integration": "node --test test/integration.test.js",
     "test:e2e": "node --test test/e2e.test.js",
-    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:hmr-client": "node --test test/hmr-client.test.js",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:hmr-client",
     "test:watch": "node --test --watch --test-concurrency=1 test/*.test.js",
-    "test:sequential": "npm run test:unit && npm run test:integration && npm run test:e2e"
+    "test:sequential": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:hmr-client"
   },
   "dependencies": {
     "webpack": "^5.0.0",

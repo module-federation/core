@@ -6,6 +6,7 @@ module.exports = {
   target: 'async-node',
   entry: {
     index: path.resolve(__dirname, 'src/index.js'),
+    'hmr-client-demo': path.resolve(__dirname, 'src/hmr-client-demo.js'),
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
