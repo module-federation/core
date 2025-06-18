@@ -14,9 +14,10 @@
     "test:integration": "node --test test/integration.test.js",
     "test:e2e": "node --test test/e2e.test.js",
     "test:hmr-client": "node --test test/hmr-client.test.js",
-    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:hmr-client",
+    "test:hmr-client-e2e": "node --test test/hmr-client-e2e.test.js",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:hmr-client && npm run test:hmr-client-e2e",
     "test:watch": "node --test --watch --test-concurrency=1 test/*.test.js",
-    "test:sequential": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:hmr-client"
+    "test:sequential": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:hmr-client && npm run test:hmr-client-e2e"
   },
   "dependencies": {
     "webpack": "^5.0.0",
