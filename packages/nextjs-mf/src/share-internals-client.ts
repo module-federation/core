@@ -1,13 +1,9 @@
 import type {
   SharedConfig,
   SharedObject,
-} from '../../enhanced/src/declarations/plugins/sharing/SharePlugin';
+} from '@module-federation/enhanced/src/declarations/plugins/sharing/SharePlugin';
 import type { Compiler } from 'webpack';
-import {
-  WEBPACK_LAYERS as WL,
-  type WebpackLayerName,
-  WEBPACK_LAYERS_NAMES,
-} from './constants';
+import { WEBPACK_LAYERS_NAMES } from './constants';
 import { getReactVersionSafely } from './internal-helpers';
 
 /**
@@ -287,6 +283,110 @@ export const getPagesDirSharesClient = (
       import: 'next/dist/client/compat/router',
       layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       issuerLayer: undefined, // unlayered
+      shareScope: 'default',
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+    },
+
+    // --- Unlayered Next.js Head (defaults to pages directory) ---
+    {
+      request: 'next/head',
+      shareKey: 'next/head',
+      import: 'next/head',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: undefined, // unlayered
+      shareScope: 'default',
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+    },
+
+    // --- Unlayered Next.js Image (defaults to pages directory) ---
+    {
+      request: 'next/image',
+      shareKey: 'next/image',
+      import: 'next/image',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: undefined, // unlayered
+      shareScope: 'default',
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+    },
+
+    // --- Unlayered Next.js Script (defaults to pages directory) ---
+    {
+      request: 'next/script',
+      shareKey: 'next/script',
+      import: 'next/script',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: undefined, // unlayered
+      shareScope: 'default',
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+    },
+
+    // --- Unlayered Next.js Dynamic (defaults to pages directory) ---
+    {
+      request: 'next/dynamic',
+      shareKey: 'next/dynamic',
+      import: 'next/dynamic',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: undefined, // unlayered
+      shareScope: 'default',
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+    },
+
+    // --- Next.js Head (Pages Directory only) ---
+    {
+      request: 'next/head',
+      shareKey: 'next/head',
+      import: 'next/head',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: 'default',
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+    },
+
+    // --- Next.js Image (Pages Directory) ---
+    {
+      request: 'next/image',
+      shareKey: 'next/image',
+      import: 'next/image',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: 'default',
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+    },
+
+    // --- Next.js Script (Pages Directory) ---
+    {
+      request: 'next/script',
+      shareKey: 'next/script',
+      import: 'next/script',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      shareScope: 'default',
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+    },
+
+    // --- Next.js Dynamic (Pages Directory) ---
+    {
+      request: 'next/dynamic',
+      shareKey: 'next/dynamic',
+      import: 'next/dynamic',
+      layer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.pagesDirBrowser,
       shareScope: 'default',
       singleton: true,
       requiredVersion: `^${nextVersion}`,
@@ -575,6 +675,45 @@ export const getAppDirSharesClient = (
       requiredVersion: `^${nextVersion}`,
       version: nextVersion,
       nodeModulesReconstructedLookup: true,
+    },
+
+    // --- Next.js Image (App Directory) ---
+    {
+      request: 'next/image',
+      shareKey: 'next/image',
+      import: 'next/image',
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+    },
+
+    // --- Next.js Script (App Directory) ---
+    {
+      request: 'next/script',
+      shareKey: 'next/script',
+      import: 'next/script',
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
+    },
+
+    // --- Next.js Dynamic (App Directory) ---
+    {
+      request: 'next/dynamic',
+      shareKey: 'next/dynamic',
+      import: 'next/dynamic',
+      layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      issuerLayer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      shareScope: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      version: nextVersion,
     },
 
     // --- Next.js Link (App Directory) ---

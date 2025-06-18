@@ -13,7 +13,6 @@ import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
-import { getShareScope } from '../../internal';
 import { getNextInternalsShareScopeClient } from '../../share-internals-client';
 import { getNextInternalsShareScopeServer } from '../../share-internals-server';
 import { setOptions } from './set-options';
