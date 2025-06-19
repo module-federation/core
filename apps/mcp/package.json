@@ -1,0 +1,23 @@
+{
+  "name": "mcp-federation-demo",
+  "version": "0.0.1",
+  "private": true,
+  "description": "MCP servers with Module Federation demo",
+  "scripts": {
+    "build:all": "nx run-many --target=build --projects=mcp-host,mcp-remote1,mcp-remote2 --parallel=3",
+    "serve:all": "nx run-many --target=serve --projects=mcp-host,mcp-remote1,mcp-remote2 --parallel=3",
+    "dev": "nx run-many --target=serve --projects=mcp-host,mcp-remote1,mcp-remote2 --parallel=3 --configuration=development",
+    "start:host": "nx run mcp-host:serve",
+    "start:remote1": "nx run mcp-remote1:serve",
+    "start:remote2": "nx run mcp-remote2:serve",
+    "build:host": "nx run mcp-host:build",
+    "build:remote1": "nx run mcp-remote1:build",
+    "build:remote2": "nx run mcp-remote2:build",
+    "test:api": "node test-mcp-api.js",
+    "demo": "node run-demo.js"
+  },
+  "devDependencies": {
+    "axios": "^1.8.2",
+    "concurrently": "^8.2.2"
+  }
+}

@@ -1,10 +1,10 @@
-import * as vm from 'vm';
-import type { WebpackRequire } from './webpack-runtime-handlers';
 import { createHMRRuntime } from './hmr-runtime';
 import type { HMRWebpackRequire, ModuleHot, ModuleObject } from '../types/hmr';
 
 // Injects the necessary webpack runtime patches for in-memory HMR functionality
-function injectInMemoryHMRRuntime(__webpack_require__: HMRWebpackRequire): void {
+function injectInMemoryHMRRuntime(
+  __webpack_require__: HMRWebpackRequire,
+): void {
   if (
     typeof __webpack_require__ === 'undefined' ||
     __webpack_require__.setInMemoryManifest
@@ -57,11 +57,16 @@ function injectInMemoryHMRRuntime(__webpack_require__: HMRWebpackRequire): void 
     __webpack_require__.hmrM = hmrRuntime.hmrManifestLoader;
 
     // Helper functions to set in-memory content
-    __webpack_require__.setInMemoryManifest = function (manifestContent: string): void {
+    __webpack_require__.setInMemoryManifest = function (
+      manifestContent: string,
+    ): void {
       manifestRef.value = manifestContent;
     };
 
-    __webpack_require__.setInMemoryChunk = function (chunkId: string, chunkContent: string): void {
+    __webpack_require__.setInMemoryChunk = function (
+      chunkId: string,
+      chunkContent: string,
+    ): void {
       inMemoryChunks[chunkId] = chunkContent;
     };
   })();
@@ -170,6 +175,7 @@ export {
   applyInMemoryHotUpdate,
   // Keep the old name for backward compatibility
   applyInMemoryHotUpdate as applyHotUpdateFromStringsByPatching,
+  injectInMemoryHMRRuntime,
   type HMRWebpackRequire,
   type ModuleHot,
   type ModuleObject,

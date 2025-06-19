@@ -781,6 +781,15 @@ importers:
         specifier: 0.14.2
         version: 0.14.2
 
+  apps/mcp:
+    devDependencies:
+      axios:
+        specifier: ^1.8.2
+        version: 1.8.2
+      concurrently:
+        specifier: ^8.2.2
+        version: 8.2.2
+
   apps/modernjs:
     dependencies:
       '@babel/runtime':
@@ -25217,7 +25226,7 @@ packages:
       chalk: 4.1.2
       date-fns: 2.30.0
       lodash: 4.17.21
-      rxjs: 7.8.1
+      rxjs: 7.8.2
       shell-quote: 1.8.1
       spawn-command: 0.0.2
       supports-color: 8.1.1
@@ -31538,7 +31547,7 @@ packages:
       mute-stream: 0.0.8
       ora: 5.4.1
       run-async: 2.4.1
-      rxjs: 7.8.1
+      rxjs: 7.8.2
       string-width: 4.2.3
       strip-ansi: 6.0.1
       through: 2.3.8
@@ -31559,7 +31568,7 @@ packages:
       mute-stream: 0.0.8
       ora: 5.4.1
       run-async: 2.4.1
-      rxjs: 7.8.1
+      rxjs: 7.8.2
       string-width: 4.2.3
       strip-ansi: 6.0.1
       through: 2.3.8
@@ -33700,7 +33709,7 @@ packages:
       log-update: 4.0.0
       p-map: 4.0.0
       rfdc: 1.4.1
-      rxjs: 7.8.1
+      rxjs: 7.8.2
       through: 2.3.8
       wrap-ansi: 7.0.0
     dev: true

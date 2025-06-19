@@ -1,0 +1,78 @@
+{
+  "name": "mcp-host",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/mcp/host/src",
+  "projectType": "application",
+  "tags": ["mcp", "host"],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "apps/mcp/host/dist",
+        "main": "apps/mcp/host/src/main.ts",
+        "tsConfig": "apps/mcp/host/tsconfig.app.json",
+        "webpackConfig": "apps/mcp/host/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
+      "options": {
+        "buildTarget": [
+          "mcp-host:build",
+          "mcp-remote1:build",
+          "mcp-remote2:build"
+        ]
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "mcp-host:build:development"
+        },
+        "production": {
+          "buildTarget": "mcp-host:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/mcp/host/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/mcp/host/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  }
+}
