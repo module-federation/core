@@ -1,0 +1,119 @@
+{
+  "name": "hmr-basic-debugging",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/vm-hotreload/full-demo/basic_debugging",
+  "projectType": "application",
+  "tags": ["type:app", "scope:demo", "tech:hmr"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx webpack --mode development",
+        "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
+      }
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npm run build",
+          "node dist/index.js"
+        ],
+        "parallel": false,
+        "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
+      },
+      "dependsOn": ["build"]
+    },
+    "start:hmr-client": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npm run build",
+          "node dist/hmr-client-demo.js"
+        ],
+        "parallel": false,
+        "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
+      },
+      "dependsOn": ["build"]
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm test",
+        "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
+      },
+      "configurations": {
+        "unit": {
+          "command": "pnpm test:unit"
+        },
+        "integration": {
+          "command": "pnpm test:integration"
+        },
+        "e2e": {
+          "command": "pnpm test:e2e"
+        },
+        "hmr-client": {
+          "command": "pnpm test:hmr-client"
+        },
+        "hmr-client-e2e": {
+          "command": "pnpm test:hmr-client-e2e"
+        },
+        "all": {
+          "command": "pnpm test:all"
+        },
+        "sequential": {
+          "command": "pnpm test:sequential"
+        }
+      }
+    },
+    "test:unit": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm test:unit",
+        "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
+      }
+    },
+    "test:integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm test:integration",
+        "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm test:e2e",
+        "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
+      }
+    },
+    "test:hmr-client": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm test:hmr-client",
+        "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
+      }
+    },
+    "test:hmr-client-e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm test:hmr-client-e2e",
+        "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm dev",
+        "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
+      }
+    },
+    "dev:hmr-client": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm dev:hmr-client",
+        "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
+      }
+    }
+  }
+}
