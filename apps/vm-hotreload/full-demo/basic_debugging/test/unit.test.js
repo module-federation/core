@@ -25,7 +25,7 @@ const {
   forceUpdate,
   testModuleReinstall,
   getHMRStatus,
-} = require('../src/index.js');
+} = require('../examples/demo/index.js');
 
 describe('HMR Basic Debugging Unit Tests', () => {
   let originalWebpackRequire;
@@ -371,7 +371,7 @@ describe('HMR Basic Debugging Unit Tests', () => {
   });
 
   describe('Complex HMR Runtime Logic', () => {
-    const { createHMRRuntime, createApplyHandler } = require('../hmr-runtime.js');
+    const { createHMRRuntime, createApplyHandler } = require('@module-federation/node/utils/hmr-runtime');
 
     beforeEach(() => {
       // Set up complex mock for HMR runtime testing

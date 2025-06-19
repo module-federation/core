@@ -12,8 +12,8 @@ const path = require('path');
 // Import the HMR helpers
 const {
   applyHotUpdateFromStringsByPatching,
-} = require('../custom-hmr-helpers.js');
-const { createHMRRuntime } = require('../hmr-runtime.js');
+} = require('@module-federation/node/utils/custom-hmr-helpers');
+const { createHMRRuntime } = require('@module-federation/node/utils/hmr-runtime');
 
 // Import main module
 const {
@@ -24,7 +24,7 @@ const {
   applyUpdates,
   startUpdatePolling,
   forceUpdate,
-} = require('../src/index.js');
+} = require('../examples/demo/index.js');
 
 describe('HMR Integration Tests', () => {
   let mockWebpackRequire;
@@ -69,7 +69,7 @@ describe('HMR Integration Tests', () => {
             _acceptedDependencies: {},
             _acceptedErrorHandlers: {},
             _declinedDependencies: {},
-            _requireSelf: () => require('../src/index.js'),
+            _requireSelf: () => require('../examples/demo/index.js'),
             active: true,
           },
           parents: [],
@@ -78,7 +78,7 @@ describe('HMR Integration Tests', () => {
       },
       m: {
         './src/index.js': function (module, exports, require) {
-          module.exports = require('../src/index.js');
+          module.exports = require('../examples/demo/index.js');
         },
       },
       hmrD: {},

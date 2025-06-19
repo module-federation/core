@@ -236,29 +236,32 @@ describe('End-to-End Webpack HMR Tests', () => {
 
       // Create a test script that uses the built application with custom providers
       const testScript = `
-        const app = require('${builtIndexPath}');
+        async function testApp() {
+          // Webpack bundle exports a promise that resolves to the module exports
+          const app = await require('${builtIndexPath}');
 
-        console.log('Testing update providers...');
+          console.log('Testing update providers...');
 
-        // Test queue provider
-        const testUpdate = {
-          manifest: { h: 'test123', c: [], r: [], m: [] },
-          script: 'console.log("Test update applied");',
-          originalInfo: { updateId: 'test-001', webpackHash: 'test123' }
-        };
+          // Test queue provider
+          const testUpdate = {
+            manifest: { h: 'test123', c: [], r: [], m: [] },
+            script: 'console.log("Test update applied");',
+            originalInfo: { updateId: 'test-001', webpackHash: 'test123' }
+          };
 
-        const queueProvider = app.createQueueUpdateProvider([testUpdate]);
-        app.setUpdateProvider(queueProvider);
+          const queueProvider = app.createQueueUpdateProvider([testUpdate]);
+          app.setUpdateProvider(queueProvider);
 
-        app.fetchUpdates().then(result => {
+          const result = await app.fetchUpdates();
           console.log('Fetch result:', result.update ? 'SUCCESS' : 'FAILED');
 
           // Test force update
-          return app.forceUpdate();
-        }).then(() => {
+          await app.forceUpdate();
           console.log('Force update: SUCCESS');
           process.exit(0);
-        }).catch(error => {
+        }
+
+        testApp().catch(error => {
           console.error('Test failed:', error);
           process.exit(1);
         });
@@ -349,81 +352,75 @@ describe('End-to-End Webpack HMR Tests', () => {
 
       // Create a realistic HMR test that simulates an actual update
       const hmrTestScript = `
-        // Load the built application
-        const builtApp = require('${builtIndexPath}');
+        async function testHMRFlow() {
+          try {
+            // Webpack bundle exports a promise that resolves to the module exports
+            const builtApp = await require('${builtIndexPath}');
 
-        console.log('Starting HMR simulation test...');
+            console.log('Starting HMR simulation test...');
 
-        // Create a realistic update that would come from webpack
-        const realisticUpdate = {
-          manifest: {
-            h: 'hmr-test-hash-456',
-            c: ['index'],
-            r: [],
-            m: ['./src/index.js']
-          },
-          script: \`
-            exports.modules = {
-              './src/index.js': function(module, exports, __webpack_require__) {
-                console.log('🔥 HMR: Updated module loaded successfully!');
+            // Create a realistic update that would come from webpack
+            const realisticUpdate = {
+              manifest: {
+                h: 'hmr-test-hash-456',
+                c: ['index'],
+                r: [],
+                m: ['./src/index.js']
+              },
+              script: \`
+                exports.modules = {
+                  './src/index.js': function(module, exports, __webpack_require__) {
+                    console.log('🔥 HMR: Updated module loaded successfully!');
 
-                // Updated counter function
-                let counter = 100; // Start from 100 to show it's updated
+                    // Updated counter function
+                    let counter = 100; // Start from 100 to show it's updated
 
-                function incrementCounter() {
-                  counter++;
-                  console.log('Updated Counter: ' + counter);
-                  return counter;
-                }
+                    function incrementCounter() {
+                      counter++;
+                      console.log('Updated Counter: ' + counter);
+                      return counter;
+                    }
 
-                function getCounter() {
-                  return counter;
-                }
+                    function getCounter() {
+                      return counter;
+                    }
 
-                module.exports = {
-                  incrementCounter: incrementCounter,
-                  getCounter: getCounter,
-                  updated: true,
-                  version: '2.0.0'
+                    module.exports = {
+                      incrementCounter: incrementCounter,
+                      getCounter: getCounter,
+                      updated: true,
+                      version: '2.0.0'
+                    };
+                  }
                 };
+
+                exports.runtime = function(__webpack_require__) {
+                  console.log('🚀 HMR: Runtime update applied');
+                };
+              \`,
+              originalInfo: {
+                updateId: 'hmr-simulation-001',
+                webpackHash: 'hmr-test-hash-456'
               }
             };
 
-            exports.runtime = function(__webpack_require__) {
-              console.log('🚀 HMR: Runtime update applied');
-            };
-          \`,
-          originalInfo: {
-            updateId: 'hmr-simulation-001',
-            webpackHash: 'hmr-test-hash-456'
-          }
-        };
+            // Set up the update provider
+            const hmrProvider = builtApp.createQueueUpdateProvider([realisticUpdate]);
+            builtApp.setUpdateProvider(hmrProvider);
 
-        // Set up the update provider
-        const hmrProvider = builtApp.createQueueUpdateProvider([realisticUpdate]);
-        builtApp.setUpdateProvider(hmrProvider);
+            console.log('Provider configured, testing HMR flow...');
 
-        console.log('Provider configured, testing HMR flow...');
-
-        // Test the complete HMR flow
-        Promise.resolve()
-          .then(() => {
+            // Test the complete HMR flow
             console.log('1. Fetching update...');
-            return builtApp.fetchUpdates();
-          })
-          .then(updateData => {
+            const updateData = await builtApp.fetchUpdates();
             console.log('2. Update fetched:', updateData.update ? 'SUCCESS' : 'FAILED');
 
             console.log('3. Applying update...');
-            return builtApp.applyUpdates(updateData, false);
-          })
-          .then(() => {
+            await builtApp.applyUpdates(updateData, false);
             console.log('4. Update applied successfully');
 
             console.log('5. Testing force update...');
-            return builtApp.forceUpdate();
-          })
-          .then(() => {
+            await builtApp.forceUpdate();
             console.log('6. Force update completed');
 
             console.log('7. Testing module state functionality...');
@@ -435,12 +432,14 @@ describe('End-to-End Webpack HMR Tests', () => {
 
             console.log('✅ All HMR tests completed successfully!');
             process.exit(0);
-          })
-          .catch(error => {
+          } catch (error) {
             console.error('❌ HMR test failed:', error.message);
             console.error(error.stack);
             process.exit(1);
-          });
+          }
+        }
+
+        testHMRFlow();
       `;
 
       const hmrTestPath = path.join(distDir, 'test-real-hmr.js');
@@ -541,7 +540,7 @@ describe('End-to-End Webpack HMR Tests', () => {
       );
       assert.ok(
         configContent.includes("target: 'async-node'"),
-        'Should target Node.js',
+        'Should target async Node.js',
       );
     });
   });

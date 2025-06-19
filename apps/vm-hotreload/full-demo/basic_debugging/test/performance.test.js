@@ -2,7 +2,7 @@ const { describe, it, before, after, beforeEach, afterEach } = require('node:tes
 const assert = require('node:assert');
 
 // Import modules under test
-const { createHMRRuntime } = require('../hmr-runtime.js');
+const { createHMRRuntime } = require('@module-federation/node/utils/hmr-runtime');
 const {
   setUpdateProvider,
   createQueueUpdateProvider,
@@ -13,7 +13,7 @@ const {
   getModuleState,
   updateModuleState,
   incrementReloadCount,
-} = require('../src/index.js');
+} = require('../examples/demo/index.js');
 
 describe('HMR Performance and Load Tests', () => {
   let mockWebpackRequire;

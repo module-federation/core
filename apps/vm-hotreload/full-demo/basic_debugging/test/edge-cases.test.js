@@ -3,8 +3,8 @@ const assert = require('node:assert');
 const path = require('path');
 
 // Import the modules under test
-const { createHMRRuntime, createApplyHandler } = require('../hmr-runtime.js');
-const { applyHotUpdateFromStringsByPatching } = require('../custom-hmr-helpers.js');
+const { createHMRRuntime, createApplyHandler } = require('@module-federation/node/utils/hmr-runtime');
+const { applyHotUpdateFromStringsByPatching } = require('@module-federation/node/utils/custom-hmr-helpers');
 const {
   setUpdateProvider,
   createQueueUpdateProvider,
@@ -14,7 +14,7 @@ const {
   forceUpdate,
   getModuleState,
   resetModuleState,
-} = require('../src/index.js');
+} = require('../examples/demo/index.js');
 
 describe('HMR Edge Cases and Stress Tests', () => {
   let mockWebpackRequire;
@@ -597,7 +597,7 @@ describe('HMR Edge Cases and Stress Tests', () => {
         await new Promise(resolve => setTimeout(resolve, 1)); // Micro delay
         
         // Update state
-        const updated = require('../src/index.js').updateModuleState(newState);
+        const updated = require('../examples/demo/index.js').updateModuleState(newState);
         assert.ok(updated.testValue === `rapid-${i}`, 'State should update correctly');
       }
 
