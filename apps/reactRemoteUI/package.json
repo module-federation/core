@@ -1,7 +1,7 @@
 {
   "name": "react-remote-ui",
   "version": "1.0.0",
-  "private": true, "description": "Federation example for reactRemoteUI",
+  "private": true, "description": "Federation example for reactRemoteUI", "description": "Federation example for reactRemoteUI",
   "devDependencies": {
     "@module-federation/utilities": "workspace:*",
     "@module-federation/storybook-addon": "workspace:*",
