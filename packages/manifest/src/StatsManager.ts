@@ -129,7 +129,7 @@ class StatsManager {
           (this._options?.library?.type as RemoteEntryType | undefined) ||
           'global',
       },
-      types: getTypesMetaInfo(this._options, compiler.context, compilation),
+      types: getTypesMetaInfo(this._options, compiler.context),
       globalName: globalName,
       pluginVersion: this._pluginVersion,
     };

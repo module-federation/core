@@ -405,4 +405,4 @@ export const pluginModuleFederation = (
   },
 });
 
-export { createModuleFederationConfig } from '@module-federation/enhanced';
+export { createModuleFederationConfig } from '@module-federation/sdk';

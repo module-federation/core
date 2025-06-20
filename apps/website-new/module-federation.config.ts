@@ -1,16 +1,26 @@
-import { createModuleFederationConfig } from '@module-federation/enhanced';
+import { createModuleFederationConfig } from '@module-federation/rspress-plugin';
+
+const LANGUAGE = 'LANGUAGE';
+const LANGUAGES = ['zh', 'en'];
+
+const exposes = {
+  // basic
+  [`./rspack-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/rspack.mdx`,
+  [`./webpack-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/webpack.mdx`,
+  [`./cli-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/cli.mdx`,
+  [`./type-prompt-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/type-prompt.mdx`,
+
+  // debug
+  [`./mode-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/debug/mode.mdx`,
+};
 
 export default createModuleFederationConfig({
   filename: 'remoteEntry.js',
   name: 'mf_doc',
-  exposes: {
-    './cli-zh': './docs/zh/guide/basic/cli.mdx',
-    './cli-en': './docs/en/guide/basic/cli.mdx',
-  },
-  // shared: {
-  //   react: { singleton: true, import: require.resolve('react') },
-  //   'react-dom': { singleton: true, import: require.resolve('react-dom') },
-  //   '@mdx-js/react': { singleton: true, requiredVersion: false },
-  // },
-  dts: false,
+  exposes: Object.entries(exposes).reduce((acc, [key, value]) => {
+    LANGUAGES.forEach((lang) => {
+      acc[key.replace(LANGUAGE, lang)] = value.replace(LANGUAGE, lang);
+    });
+    return acc;
+  }, {}),
 });

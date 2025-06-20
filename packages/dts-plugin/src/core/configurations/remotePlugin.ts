@@ -120,6 +120,7 @@ const readTsConfig = (
     outputDir || configContent.options.outDir || 'dist',
   );
 
+  const excludeExtensions = ['.mdx', '.md'];
   const filesToCompile = [
     ...Object.values(mapComponentsToExpose),
     ...configContent.fileNames.filter(
@@ -128,7 +129,9 @@ const readTsConfig = (
         !filename.startsWith(outDirWithoutTypesFolder),
     ),
     ...additionalFilesToCompile,
-  ];
+  ].filter(
+    (filename) => !excludeExtensions.some((ext) => filename.endsWith(ext)),
+  );
 
   rawTsConfigJson.include = [];
   rawTsConfigJson.files = filesToCompile;

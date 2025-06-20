@@ -144,7 +144,8 @@ class DTSManager {
       const { remoteOptions, tsConfig, mapComponentsToExpose } =
         retrieveRemoteConfig(options.remote);
 
-      if (!Object.keys(mapComponentsToExpose).length) {
+      if (!tsConfig.files?.length) {
+        logger.info('No type files to compile, skip');
         return;
       }
 

@@ -79,7 +79,7 @@
 
 ## FAQ
 
-1. 项目循环编译，无法终止
+### 项目循环编译，无法终止
 
 A: 大概率是编译器监听了类型文件夹或者 `dist` 里的变动导致，将 `@mf-types` 添加至忽略文件即可。
 
@@ -90,3 +90,12 @@ config.watchOptions = {
   ignored: ['**/node_modules/**', '**/@mf-types/**'],
 };
 ```
+
+### 2. 没有生成类型文件，如何查看原因
+
+**解决方案**
+
+1. 在项目启动命令前加上 `FEDERATION_DEBUG=true` 环境变量
+2. 设置 [dts.displayErrorInTerminal](../../configure/dts#displayerrorinterminal) 为 `true`
+3. 启动项目，查看控制台输出
+4. （可选）若控制台没输出错误，查看 `.mf/typesGenerate.log` 日志文件

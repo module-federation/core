@@ -1,11 +1,5 @@
 import path from 'path';
 import fs from 'fs-extra';
-import {
-  createSSRMFConfig,
-  patchSSRRspackConfig,
-  updateStatsAndManifest,
-} from '@module-federation/rsbuild-plugin/utils';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { pluginModuleFederation as rsbuildPluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import {
   getShortErrorMsg,
@@ -16,10 +10,12 @@ import {
 import logger from './logger';
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import type { RspressPlugin } from '@rspress/shared';
+import type { RspressPlugin, Route, RouteMeta } from '@rspress/shared';
+import { rebuildSearchIndexByHtml } from './rebuildSearchIndexByHtml';
 
 type RspressPluginOptions = {
   autoShared?: boolean;
+  rebuildSearchIndex?: boolean;
 };
 
 type ExtractObjectType<T> = T extends (...args: any[]) => any ? never : T;
@@ -106,7 +102,7 @@ export function pluginModuleFederation(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   rspressOptions?: RspressPluginOptions,
 ): RspressPlugin {
-  const { autoShared = true } = rspressOptions || {};
+  const { autoShared = true, rebuildSearchIndex = true } = rspressOptions || {};
 
   if (autoShared) {
     mfConfig.shared = {
@@ -122,6 +118,8 @@ export function pluginModuleFederation(
   }
 
   let enableSSG = false;
+  let outputDir = '';
+  let routes: RouteMeta[] = [];
 
   return {
     // 插件名称
@@ -169,9 +167,48 @@ export function pluginModuleFederation(
               );
               process.exit(1);
             }
+
+            outputDir = config.output.path!;
           }
         },
       },
     },
+    routeGenerated(routeMetaArr) {
+      routes = routeMetaArr;
+    },
+    async afterBuild(config) {
+      if (!mfConfig.remotes || isDev() || !rebuildSearchIndex) {
+        return;
+      }
+      if (!enableSSG) {
+        logger.error('rebuildSearchIndex is only supported for ssg');
+        process.exit(1);
+      }
+      const searchConfig = config?.search || {};
+      const replaceRules = config?.replaceRules || [];
+      const domain =
+        searchConfig?.mode === 'remote' ? (searchConfig.domain ?? '') : '';
+
+      const versioned =
+        searchConfig &&
+        searchConfig.mode !== 'remote' &&
+        searchConfig.versioned;
+
+      const searchCodeBlocks =
+        'codeBlocks' in searchConfig ? Boolean(searchConfig.codeBlocks) : true;
+
+      await rebuildSearchIndexByHtml(routes, {
+        outputDir,
+        versioned,
+        replaceRules,
+        domain,
+        searchCodeBlocks,
+        defaultLang: config.lang || 'en',
+      });
+
+      logger.info('rebuildSearchIndex success!');
+    },
   };
 }
+
+export { createModuleFederationConfig } from '@module-federation/sdk';
