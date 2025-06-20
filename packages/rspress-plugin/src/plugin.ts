@@ -122,7 +122,6 @@ export function pluginModuleFederation(
   let routes: RouteMeta[] = [];
 
   return {
-    // 插件名称
     name: 'plugin-module-federation',
     async beforeBuild(config) {
       if (!isDev() && config.ssg !== false) {

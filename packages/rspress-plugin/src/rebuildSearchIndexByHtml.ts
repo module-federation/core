@@ -212,7 +212,7 @@ export async function rebuildSearchIndexByHtml(
       const indexLang = lang ? `.${lang}` : '';
       const searchFilePath = searchFilePaths.find((filePath) =>
         filePath
-          .replace(path.dirname(filePath), '')
+          .replace(`${path.dirname(filePath)}/`, '')
           .startsWith(`${SEARCH_INDEX_NAME}${indexVersion}${indexLang}`),
       );
       if (!searchFilePath) {
