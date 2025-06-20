@@ -371,16 +371,25 @@ describe('HMR Basic Debugging Unit Tests', () => {
   });
 
   describe('Complex HMR Runtime Logic', () => {
-    const { createHMRRuntime, createApplyHandler } = require('@module-federation/node/utils/hmr-runtime');
+    const {
+      createHMRRuntime,
+      createApplyHandler,
+    } = require('@module-federation/node/utils/hmr-runtime');
 
     beforeEach(() => {
       // Set up complex mock for HMR runtime testing
       global.__webpack_require__ = {
         ...mockWebpackRequire,
         m: {
-          './src/module-a.js': function() { return 'module-a'; },
-          './src/module-b.js': function() { return 'module-b'; },
-          './src/module-c.js': function() { return 'module-c'; }
+          './src/module-a.js': function () {
+            return 'module-a';
+          },
+          './src/module-b.js': function () {
+            return 'module-b';
+          },
+          './src/module-c.js': function () {
+            return 'module-c';
+          },
         },
         c: {
           './src/module-a.js': {
@@ -395,10 +404,10 @@ describe('HMR Basic Debugging Unit Tests', () => {
               _declinedDependencies: {},
               _disposeHandlers: [],
               active: true,
-              _requireSelf: () => require('./src/module-a.js')
+              _requireSelf: () => require('./src/module-a.js'),
             },
             parents: ['./src/module-c.js'],
-            children: ['./src/module-b.js']
+            children: ['./src/module-b.js'],
           },
           './src/module-b.js': {
             id: './src/module-b.js',
@@ -410,11 +419,15 @@ describe('HMR Basic Debugging Unit Tests', () => {
               _acceptedDependencies: {},
               _acceptedErrorHandlers: {},
               _declinedDependencies: {},
-              _disposeHandlers: [function(data) { data.disposed = true; }],
-              active: true
+              _disposeHandlers: [
+                function (data) {
+                  data.disposed = true;
+                },
+              ],
+              active: true,
             },
             parents: ['./src/module-a.js'],
-            children: []
+            children: [],
           },
           './src/module-c.js': {
             id: './src/module-c.js',
@@ -427,13 +440,13 @@ describe('HMR Basic Debugging Unit Tests', () => {
               _acceptedErrorHandlers: {},
               _declinedDependencies: { './src/module-a.js': true },
               _disposeHandlers: [],
-              active: true
+              active: true,
             },
             parents: [],
-            children: ['./src/module-a.js']
-          }
+            children: ['./src/module-a.js'],
+          },
         },
-        hmrD: {}
+        hmrD: {},
       };
     });
 
@@ -446,19 +459,23 @@ describe('HMR Basic Debugging Unit Tests', () => {
         global.__webpack_require__,
         installedChunks,
         inMemoryChunks,
-        manifestRef
+        manifestRef,
       );
 
       // Create a state object for testing
       const state = {
-        currentUpdate: { './src/module-a.js': function() { return 'updated-module-a'; } },
-        currentUpdateRuntime: []
+        currentUpdate: {
+          './src/module-a.js': function () {
+            return 'updated-module-a';
+          },
+        },
+        currentUpdateRuntime: [],
       };
 
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({ ignoreDeclined: false });
@@ -473,96 +490,132 @@ describe('HMR Basic Debugging Unit Tests', () => {
 
       // Test with module that has declined dependency
       const state = {
-        currentUpdate: { './src/module-a.js': function() { return 'updated-module-a'; } },
-        currentUpdateRuntime: []
+        currentUpdate: {
+          './src/module-a.js': function () {
+            return 'updated-module-a';
+          },
+        },
+        currentUpdateRuntime: [],
       };
 
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({ ignoreDeclined: false });
       // Should return error due to declined dependency
-      assert.ok(result.error || result.dispose, 'Should handle declined dependency');
+      assert.ok(
+        result.error || result.dispose,
+        'Should handle declined dependency',
+      );
     });
 
     it('should test module disposal and cleanup cycle', () => {
       const installedChunks = { index: 0 };
       const state = {
-        currentUpdate: { './src/module-b.js': function() { return 'updated-module-b'; } },
+        currentUpdate: {
+          './src/module-b.js': function () {
+            return 'updated-module-b';
+          },
+        },
         currentUpdateRuntime: [],
-        currentUpdateRemovedChunks: []
+        currentUpdateRemovedChunks: [],
       };
 
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({});
-      
+
       // Test dispose functionality
       if (result.dispose) {
         result.dispose();
-        
+
         // Verify disposal effects
         const moduleB = global.__webpack_require__.c['./src/module-b.js'];
         if (moduleB) {
-          assert.strictEqual(moduleB.hot.active, false, 'Module should be deactivated');
+          assert.strictEqual(
+            moduleB.hot.active,
+            false,
+            'Module should be deactivated',
+          );
         }
-        
+
         // Check if dispose handler data was set
-        assert.ok(global.__webpack_require__.hmrD, 'Should have dispose data storage');
+        assert.ok(
+          global.__webpack_require__.hmrD,
+          'Should have dispose data storage',
+        );
       }
     });
 
     it('should handle self-declined modules', () => {
       // Test with self-declined module
-      global.__webpack_require__.c['./src/module-c.js'].hot._selfDeclined = true;
-      
+      global.__webpack_require__.c['./src/module-c.js'].hot._selfDeclined =
+        true;
+
       const installedChunks = { index: 0 };
       const state = {
-        currentUpdate: { './src/module-c.js': function() { return 'updated-module-c'; } },
-        currentUpdateRuntime: []
+        currentUpdate: {
+          './src/module-c.js': function () {
+            return 'updated-module-c';
+          },
+        },
+        currentUpdateRuntime: [],
       };
 
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({ ignoreDeclined: false });
       assert.ok(result.error, 'Should return error for self-declined module');
-      assert.ok(result.error.message.includes('self decline'), 'Error should mention self decline');
+      assert.ok(
+        result.error.message.includes('self decline'),
+        'Error should mention self decline',
+      );
     });
 
     it('should handle unaccepted modules (main modules)', () => {
       // Set module as main (unaccepted)
       global.__webpack_require__.c['./src/module-a.js'].hot._main = true;
-      
+
       const installedChunks = { index: 0 };
       const state = {
-        currentUpdate: { './src/module-a.js': function() { return 'updated-module-a'; } },
+        currentUpdate: {
+          './src/module-a.js': function () {
+            return 'updated-module-a';
+          },
+        },
         currentUpdateRuntime: [],
-        currentUpdateRemovedChunks: []
+        currentUpdateRemovedChunks: [],
       };
 
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({ ignoreUnaccepted: false });
-      
+
       // The test should verify behavior regardless of specific implementation
-      assert.ok(result.error || result.dispose, 'Should handle unaccepted module appropriately');
+      assert.ok(
+        result.error || result.dispose,
+        'Should handle unaccepted module appropriately',
+      );
       if (result.error) {
-        assert.ok(result.error.message.includes('not accepted'), 'Error should mention not accepted');
+        assert.ok(
+          result.error.message.includes('not accepted'),
+          'Error should mention not accepted',
+        );
       }
     });
 
@@ -579,52 +632,66 @@ describe('HMR Basic Debugging Unit Tests', () => {
           _acceptedErrorHandlers: {},
           _declinedDependencies: {},
           _disposeHandlers: [],
-          active: true
+          active: true,
         },
         parents: ['./src/module-a.js'],
-        children: []
+        children: [],
       };
 
       // Add module-d as child of module-a
-      global.__webpack_require__.c['./src/module-a.js'].children.push('./src/module-d.js');
-      
+      global.__webpack_require__.c['./src/module-a.js'].children.push(
+        './src/module-d.js',
+      );
+
       const installedChunks = { index: 0 };
       const state = {
-        currentUpdate: { './src/module-d.js': function() { return 'updated-module-d'; } },
-        currentUpdateRuntime: []
+        currentUpdate: {
+          './src/module-d.js': function () {
+            return 'updated-module-d';
+          },
+        },
+        currentUpdateRuntime: [],
       };
 
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({});
       // Should propagate up the dependency chain
-      assert.ok(result.dispose || result.apply, 'Should handle dependency chain propagation');
+      assert.ok(
+        result.dispose || result.apply,
+        'Should handle dependency chain propagation',
+      );
     });
 
     it('should test self-accepted module reloading with error handling', () => {
       // Create a self-accepted module with error handler
-      global.__webpack_require__.c['./src/module-a.js'].hot._selfAccepted = function(err, context) {
-        console.log('Self-accept error handler called:', err, context);
-      };
-      
+      global.__webpack_require__.c['./src/module-a.js'].hot._selfAccepted =
+        function (err, context) {
+          console.log('Self-accept error handler called:', err, context);
+        };
+
       const installedChunks = { index: 0 };
       const state = {
-        currentUpdate: { './src/module-a.js': function() { throw new Error('Test error'); } },
-        currentUpdateRuntime: []
+        currentUpdate: {
+          './src/module-a.js': function () {
+            throw new Error('Test error');
+          },
+        },
+        currentUpdateRuntime: [],
       };
 
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({});
-      
+
       if (result.apply) {
         let errorCaught = false;
         try {
@@ -642,26 +709,39 @@ describe('HMR Basic Debugging Unit Tests', () => {
 
     it('should test accept callback error handling', () => {
       // Set up accept callback that throws error
-      global.__webpack_require__.c['./src/module-a.js'].hot._acceptedDependencies['./src/module-b.js'] = 
-        function() { throw new Error('Accept callback error'); };
-      
-      global.__webpack_require__.c['./src/module-a.js'].hot._acceptedErrorHandlers['./src/module-b.js'] = 
-        function(err, context) { console.log('Accept error handler:', err, context); };
-      
+      global.__webpack_require__.c[
+        './src/module-a.js'
+      ].hot._acceptedDependencies['./src/module-b.js'] = function () {
+        throw new Error('Accept callback error');
+      };
+
+      global.__webpack_require__.c[
+        './src/module-a.js'
+      ].hot._acceptedErrorHandlers['./src/module-b.js'] = function (
+        err,
+        context,
+      ) {
+        console.log('Accept error handler:', err, context);
+      };
+
       const installedChunks = { index: 0 };
       const state = {
-        currentUpdate: { './src/module-b.js': function() { return 'updated-module-b'; } },
-        currentUpdateRuntime: []
+        currentUpdate: {
+          './src/module-b.js': function () {
+            return 'updated-module-b';
+          },
+        },
+        currentUpdateRuntime: [],
       };
 
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({});
-      
+
       if (result.apply) {
         let errorReported = false;
         result.apply((err) => {

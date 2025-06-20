@@ -23,15 +23,15 @@ describe('Advanced HMR Runtime Tests', () => {
 
   beforeAll(() => {
     originalWebpackRequire = (global as any).__webpack_require__;
-    
+
     // Create test HMR update files in test dist directory for filesystem testing
     testDistDir = path.join(__dirname, 'test-dist');
-    
+
     // Ensure test dist directory exists
     if (!fs.existsSync(testDistDir)) {
       fs.mkdirSync(testDistDir, { recursive: true });
     }
-    
+
     // Create sample HMR update files
     const sampleUpdateContent = `
       exports.modules = {
@@ -43,20 +43,35 @@ describe('Advanced HMR Runtime Tests', () => {
         console.log('Test HMR runtime executed');
       };
     `;
-    
-    fs.writeFileSync(path.join(testDistDir, 'index.hot-update.js'), sampleUpdateContent);
-    fs.writeFileSync(path.join(testDistDir, 'vendor.hot-update.js'), sampleUpdateContent);
-    fs.writeFileSync(path.join(testDistDir, 'main.hot-update.js'), sampleUpdateContent);
-    fs.writeFileSync(path.join(testDistDir, 'test-chunk.hot-update.js'), sampleUpdateContent);
-    
+
+    fs.writeFileSync(
+      path.join(testDistDir, 'index.hot-update.js'),
+      sampleUpdateContent,
+    );
+    fs.writeFileSync(
+      path.join(testDistDir, 'vendor.hot-update.js'),
+      sampleUpdateContent,
+    );
+    fs.writeFileSync(
+      path.join(testDistDir, 'main.hot-update.js'),
+      sampleUpdateContent,
+    );
+    fs.writeFileSync(
+      path.join(testDistDir, 'test-chunk.hot-update.js'),
+      sampleUpdateContent,
+    );
+
     // Create test manifest file
     const testManifestContent = JSON.stringify({
       h: 'fs-test-hash',
       c: ['fs-chunk'],
       r: [],
-      m: ['fs-module']
+      m: ['fs-module'],
     });
-    fs.writeFileSync(path.join(testDistDir, 'test.hot-update.json'), testManifestContent);
+    fs.writeFileSync(
+      path.join(testDistDir, 'test.hot-update.json'),
+      testManifestContent,
+    );
   });
 
   afterAll(() => {
@@ -65,23 +80,23 @@ describe('Advanced HMR Runtime Tests', () => {
     } else {
       delete (global as any).__webpack_require__;
     }
-    
+
     // Clean up test HMR update files
     const testFiles = [
       'index.hot-update.js',
-      'vendor.hot-update.js', 
+      'vendor.hot-update.js',
       'main.hot-update.js',
       'test-chunk.hot-update.js',
-      'test.hot-update.json'
+      'test.hot-update.json',
     ];
-    
-    testFiles.forEach(file => {
+
+    testFiles.forEach((file) => {
       const filePath = path.join(testDistDir, file);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
     });
-    
+
     // Remove test directory
     if (fs.existsSync(testDistDir)) {
       fs.rmSync(testDistDir, { recursive: true, force: true });
@@ -94,23 +109,39 @@ describe('Advanced HMR Runtime Tests', () => {
       hmrS_readFileVm: { index: 0, vendor: 0 },
       c: {},
       m: {
-        './src/test-module.js': function(module: any, exports: any, require: any) {
+        './src/test-module.js': function (
+          module: any,
+          exports: any,
+          require: any,
+        ) {
           module.exports = { test: true };
-        }
+        },
       },
       hmrD: {},
-      hmrF: jest.fn(() => path.relative(path.join(__dirname, '..', 'utils'), path.join(testDistDir, 'test.hot-update.json'))),
+      hmrF: jest.fn(() =>
+        path.relative(
+          path.join(__dirname, '..', 'utils'),
+          path.join(testDistDir, 'test.hot-update.json'),
+        ),
+      ),
       hmrI: {},
       hmrC: {},
       hmrM: jest.fn(),
-      o: jest.fn((obj: any, key: string) => Object.prototype.hasOwnProperty.call(obj, key)),
+      o: jest.fn((obj: any, key: string) =>
+        Object.prototype.hasOwnProperty.call(obj, key),
+      ),
       f: {
         readFileVmHmr: jest.fn((chunkId: string, promises: Promise<any>[]) => {
           promises.push(Promise.resolve());
           return Promise.resolve();
-        })
+        }),
       },
-      hu: jest.fn((chunkId: string) => path.relative(path.join(__dirname, '..', 'utils'), path.join(testDistDir, `${chunkId}.hot-update.js`))),
+      hu: jest.fn((chunkId: string) =>
+        path.relative(
+          path.join(__dirname, '..', 'utils'),
+          path.join(testDistDir, `${chunkId}.hot-update.js`),
+        ),
+      ),
       setInMemoryManifest: jest.fn(),
       setInMemoryChunk: jest.fn(),
     } as any;
@@ -134,9 +165,9 @@ describe('Advanced HMR Runtime Tests', () => {
           exports.runtime = function(__webpack_require__) {
             console.log('Memory chunk runtime executed');
           };
-        `
+        `,
       };
-      
+
       // Initialize state as hmrC would do
       const state: HMRState = {
         currentUpdate: {}, // This needs to be initialized for loadUpdateChunk to work
@@ -145,7 +176,11 @@ describe('Advanced HMR Runtime Tests', () => {
         currentUpdateChunks: undefined,
       };
 
-      const loadUpdateChunk = createLoadUpdateChunk(mockWebpackRequire, inMemoryChunks, state);
+      const loadUpdateChunk = createLoadUpdateChunk(
+        mockWebpackRequire,
+        inMemoryChunks,
+        state,
+      );
 
       await loadUpdateChunk('memory-chunk');
 
@@ -155,7 +190,7 @@ describe('Advanced HMR Runtime Tests', () => {
 
     it('should load chunk from filesystem when not in memory', async () => {
       const inMemoryChunks: InMemoryChunks = {};
-      // Initialize state as hmrC would do  
+      // Initialize state as hmrC would do
       const state: HMRState = {
         currentUpdate: {}, // This needs to be initialized for loadUpdateChunk to work
         currentUpdateRuntime: [],
@@ -163,7 +198,11 @@ describe('Advanced HMR Runtime Tests', () => {
         currentUpdateChunks: undefined,
       };
 
-      const loadUpdateChunk = createLoadUpdateChunk(mockWebpackRequire, inMemoryChunks, state);
+      const loadUpdateChunk = createLoadUpdateChunk(
+        mockWebpackRequire,
+        inMemoryChunks,
+        state,
+      );
 
       await loadUpdateChunk('index');
 
@@ -182,9 +221,18 @@ describe('Advanced HMR Runtime Tests', () => {
       };
 
       // Mock hu to return a non-existent file
-      mockWebpackRequire.hu = jest.fn(() => path.relative(path.join(__dirname, '..', 'utils'), path.join(testDistDir, 'non-existent-file.js')));
+      mockWebpackRequire.hu = jest.fn(() =>
+        path.relative(
+          path.join(__dirname, '..', 'utils'),
+          path.join(testDistDir, 'non-existent-file.js'),
+        ),
+      );
 
-      const loadUpdateChunk = createLoadUpdateChunk(mockWebpackRequire, inMemoryChunks, state);
+      const loadUpdateChunk = createLoadUpdateChunk(
+        mockWebpackRequire,
+        inMemoryChunks,
+        state,
+      );
 
       await expect(loadUpdateChunk('non-existent')).rejects.toThrow();
     });
@@ -195,16 +243,24 @@ describe('Advanced HMR Runtime Tests', () => {
       const installedChunks: InstalledChunks = {};
       const state: HMRState = {
         currentUpdate: {
-          './src/test-module.js': function(module: any, exports: any, require: any) {
+          './src/test-module.js': function (
+            module: any,
+            exports: any,
+            require: any,
+          ) {
             module.exports = { updated: true };
-          }
+          },
         },
         currentUpdateRuntime: [],
         currentUpdateRemovedChunks: [],
         currentUpdateChunks: undefined,
       };
 
-      const applyHandler = createApplyHandler(mockWebpackRequire, installedChunks, state);
+      const applyHandler = createApplyHandler(
+        mockWebpackRequire,
+        installedChunks,
+        state,
+      );
       const options: ApplyOptions = {
         ignoreUnaccepted: false,
         ignoreDeclined: false,
@@ -226,7 +282,7 @@ describe('Advanced HMR Runtime Tests', () => {
       const installedChunks: InstalledChunks = {};
       const state: HMRState = {
         currentUpdate: {
-          './src/test-module.js': false as any // false indicates module removal
+          './src/test-module.js': false as any, // false indicates module removal
         },
         currentUpdateRuntime: [],
         currentUpdateRemovedChunks: ['test-chunk'],
@@ -259,10 +315,14 @@ describe('Advanced HMR Runtime Tests', () => {
           } as any,
           children: [],
           parents: [],
-        }
+        },
       };
 
-      const applyHandler = createApplyHandler(mockWebpackRequire, installedChunks, state);
+      const applyHandler = createApplyHandler(
+        mockWebpackRequire,
+        installedChunks,
+        state,
+      );
       const options: ApplyOptions = {
         ignoreUnaccepted: false,
         ignoreDeclined: false,
@@ -283,11 +343,14 @@ describe('Advanced HMR Runtime Tests', () => {
           h: 'test-hash',
           c: ['test-chunk'],
           r: [],
-          m: ['test-module']
-        })
+          m: ['test-module'],
+        }),
       };
 
-      const hmrManifestLoader = createHMRManifestLoader(mockWebpackRequire, manifestRef);
+      const hmrManifestLoader = createHMRManifestLoader(
+        mockWebpackRequire,
+        manifestRef,
+      );
       const manifest = await hmrManifestLoader();
 
       expect(manifest).toHaveProperty('h', 'test-hash');
@@ -298,7 +361,10 @@ describe('Advanced HMR Runtime Tests', () => {
     it('should load manifest from filesystem when not in memory', async () => {
       const manifestRef: ManifestRef = { value: null };
 
-      const hmrManifestLoader = createHMRManifestLoader(mockWebpackRequire, manifestRef);
+      const hmrManifestLoader = createHMRManifestLoader(
+        mockWebpackRequire,
+        manifestRef,
+      );
       const manifest = await hmrManifestLoader();
 
       expect(manifest).toHaveProperty('h', 'fs-test-hash');
@@ -306,11 +372,19 @@ describe('Advanced HMR Runtime Tests', () => {
 
     it('should handle missing manifest file gracefully', async () => {
       const manifestRef: ManifestRef = { value: null };
-      
-      // Mock hmrF to return a non-existent file
-      mockWebpackRequire.hmrF = jest.fn(() => path.relative(path.join(__dirname, '..', 'utils'), path.join(testDistDir, 'non-existent-manifest.json')));
 
-      const hmrManifestLoader = createHMRManifestLoader(mockWebpackRequire, manifestRef);
+      // Mock hmrF to return a non-existent file
+      mockWebpackRequire.hmrF = jest.fn(() =>
+        path.relative(
+          path.join(__dirname, '..', 'utils'),
+          path.join(testDistDir, 'non-existent-manifest.json'),
+        ),
+      );
+
+      const hmrManifestLoader = createHMRManifestLoader(
+        mockWebpackRequire,
+        manifestRef,
+      );
       const manifest = await hmrManifestLoader();
 
       expect(manifest).toBeUndefined();
@@ -318,10 +392,13 @@ describe('Advanced HMR Runtime Tests', () => {
 
     it('should handle invalid JSON gracefully', async () => {
       const manifestRef: ManifestRef = {
-        value: 'invalid json content'
+        value: 'invalid json content',
       };
 
-      const hmrManifestLoader = createHMRManifestLoader(mockWebpackRequire, manifestRef);
+      const hmrManifestLoader = createHMRManifestLoader(
+        mockWebpackRequire,
+        manifestRef,
+      );
 
       await expect(hmrManifestLoader()).rejects.toThrow();
     });
@@ -338,14 +415,22 @@ describe('Advanced HMR Runtime Tests', () => {
         currentUpdateChunks: undefined,
       };
 
-      const loadUpdateChunk = createLoadUpdateChunk(mockWebpackRequire, inMemoryChunks, state);
-      const applyHandler = createApplyHandler(mockWebpackRequire, installedChunks, state);
+      const loadUpdateChunk = createLoadUpdateChunk(
+        mockWebpackRequire,
+        inMemoryChunks,
+        state,
+      );
+      const applyHandler = createApplyHandler(
+        mockWebpackRequire,
+        installedChunks,
+        state,
+      );
       const hmrHandlers = createHMRHandlers(
         mockWebpackRequire,
         installedChunks,
         loadUpdateChunk,
         applyHandler,
-        state
+        state,
       );
 
       expect(hmrHandlers).toHaveProperty('hmrI');
@@ -364,14 +449,22 @@ describe('Advanced HMR Runtime Tests', () => {
         currentUpdateChunks: undefined,
       };
 
-      const loadUpdateChunk = createLoadUpdateChunk(mockWebpackRequire, inMemoryChunks, state);
-      const applyHandler = createApplyHandler(mockWebpackRequire, installedChunks, state);
+      const loadUpdateChunk = createLoadUpdateChunk(
+        mockWebpackRequire,
+        inMemoryChunks,
+        state,
+      );
+      const applyHandler = createApplyHandler(
+        mockWebpackRequire,
+        installedChunks,
+        state,
+      );
       const hmrHandlers = createHMRHandlers(
         mockWebpackRequire,
         installedChunks,
         loadUpdateChunk,
         applyHandler,
-        state
+        state,
       );
 
       const applyHandlers: any[] = [];
@@ -391,14 +484,22 @@ describe('Advanced HMR Runtime Tests', () => {
         currentUpdateChunks: undefined,
       };
 
-      const loadUpdateChunk = createLoadUpdateChunk(mockWebpackRequire, inMemoryChunks, state);
-      const applyHandler = createApplyHandler(mockWebpackRequire, installedChunks, state);
+      const loadUpdateChunk = createLoadUpdateChunk(
+        mockWebpackRequire,
+        inMemoryChunks,
+        state,
+      );
+      const applyHandler = createApplyHandler(
+        mockWebpackRequire,
+        installedChunks,
+        state,
+      );
       const hmrHandlers = createHMRHandlers(
         mockWebpackRequire,
         installedChunks,
         loadUpdateChunk,
         applyHandler,
-        state
+        state,
       );
 
       const chunkIds = ['test-chunk'];
@@ -408,7 +509,14 @@ describe('Advanced HMR Runtime Tests', () => {
       const applyHandlers: any[] = [];
       const updatedModulesList: string[] = [];
 
-      hmrHandlers.hmrC(chunkIds, removedChunks, removedModules, promises, applyHandlers, updatedModulesList);
+      hmrHandlers.hmrC(
+        chunkIds,
+        removedChunks,
+        removedModules,
+        promises,
+        applyHandlers,
+        updatedModulesList,
+      );
 
       expect(state.currentUpdateChunks).toBeDefined();
       expect(state.currentUpdateRemovedChunks).toEqual(removedChunks);
@@ -426,14 +534,14 @@ describe('Advanced HMR Runtime Tests', () => {
         mockWebpackRequire,
         installedChunks,
         inMemoryChunks,
-        manifestRef
+        manifestRef,
       );
 
       expect(hmrRuntime).toHaveProperty('loadUpdateChunk');
       expect(hmrRuntime).toHaveProperty('applyHandler');
       expect(hmrRuntime).toHaveProperty('hmrHandlers');
       expect(hmrRuntime).toHaveProperty('hmrManifestLoader');
-      
+
       expect(typeof hmrRuntime.loadUpdateChunk).toBe('function');
       expect(typeof hmrRuntime.applyHandler).toBe('function');
       expect(typeof hmrRuntime.hmrManifestLoader).toBe('function');
@@ -453,7 +561,7 @@ describe('Advanced HMR Runtime Tests', () => {
           exports.runtime = function(__webpack_require__) {
             console.log('Shared runtime executed');
           };
-        `
+        `,
       };
       const manifestRef: ManifestRef = { value: null };
 
@@ -461,14 +569,21 @@ describe('Advanced HMR Runtime Tests', () => {
         mockWebpackRequire,
         installedChunks,
         inMemoryChunks,
-        manifestRef
+        manifestRef,
       );
 
       // Test that state is shared between functions
       const applyHandlers: any[] = [];
       hmrRuntime.hmrHandlers.hmrI('./src/shared-module.js', applyHandlers);
       // Call hmrC which always adds an apply handler to test shared state
-      hmrRuntime.hmrHandlers.hmrC(['shared-test'], [], [], [], applyHandlers, []);
+      hmrRuntime.hmrHandlers.hmrC(
+        ['shared-test'],
+        [],
+        [],
+        [],
+        applyHandlers,
+        [],
+      );
 
       // The apply handler should be added by hmrC (hmrI doesn't add when currentUpdate already exists)
       expect(applyHandlers).toHaveLength(1);
@@ -488,22 +603,22 @@ describe('Advanced HMR Runtime Tests', () => {
           exports.runtime = function(__webpack_require__) {
             console.log('Integration test runtime executed');
           };
-        `
+        `,
       };
       const manifestRef: ManifestRef = {
         value: JSON.stringify({
           h: 'integration-hash',
           c: ['integration-test'],
           r: [],
-          m: ['./src/integration-module.js']
-        })
+          m: ['./src/integration-module.js'],
+        }),
       };
 
       const hmrRuntime = createHMRRuntime(
         mockWebpackRequire,
         installedChunks,
         inMemoryChunks,
-        manifestRef
+        manifestRef,
       );
 
       // 1. Load manifest
@@ -521,7 +636,7 @@ describe('Advanced HMR Runtime Tests', () => {
         [],
         promises,
         applyHandlers,
-        updatedModulesList
+        updatedModulesList,
       );
 
       // Wait for chunk loading to complete

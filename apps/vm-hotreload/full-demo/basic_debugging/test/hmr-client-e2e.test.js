@@ -61,10 +61,13 @@ describe('HMR Client Demo End-to-End Tests', () => {
         );
         console.log(
           '📚 HMR Client library detected:',
-          builtContent.includes('HMRClient') || builtContent.includes('createHMRClient'),
+          builtContent.includes('HMRClient') ||
+            builtContent.includes('createHMRClient'),
         );
       } else {
-        throw new Error('Built HMR Client Demo file does not exist after build');
+        throw new Error(
+          'Built HMR Client Demo file does not exist after build',
+        );
       }
     } catch (error) {
       console.error('❌ Build failed during setup:', error.message);
@@ -89,12 +92,18 @@ describe('HMR Client Demo End-to-End Tests', () => {
         buildSuccessful,
         'Build should have completed successfully in setup',
       );
-      assert.ok(fs.existsSync(hmrClientDemoPath), 'Built hmr-client-demo.js should exist');
+      assert.ok(
+        fs.existsSync(hmrClientDemoPath),
+        'Built hmr-client-demo.js should exist',
+      );
     });
 
     it('should create proper webpack bundle with HMR Client library', () => {
       assert.ok(buildSuccessful, 'Build should have completed successfully');
-      assert.ok(fs.existsSync(hmrClientDemoPath), 'hmr-client-demo.js should be built');
+      assert.ok(
+        fs.existsSync(hmrClientDemoPath),
+        'hmr-client-demo.js should be built',
+      );
 
       const builtContent = fs.readFileSync(hmrClientDemoPath, 'utf8');
 
@@ -116,7 +125,8 @@ describe('HMR Client Demo End-to-End Tests', () => {
 
       // Check for HMR Client library
       assert.ok(
-        builtContent.includes('HMRClient') || builtContent.includes('createHMRClient'),
+        builtContent.includes('HMRClient') ||
+          builtContent.includes('createHMRClient'),
         'Should contain HMR Client library',
       );
 
@@ -145,7 +155,7 @@ describe('HMR Client Demo End-to-End Tests', () => {
       const child = spawn('node', [hmrClientDemoPath], {
         cwd: projectRoot,
         stdio: ['pipe', 'pipe', 'pipe'],
-        env: { ...process.env, HMR_DEMO_AUTOSTART: 'true' }
+        env: { ...process.env, HMR_DEMO_AUTOSTART: 'true' },
       });
 
       let stdout = '';
@@ -188,7 +198,11 @@ describe('HMR Client Demo End-to-End Tests', () => {
             'Should show initial status',
           );
 
-          if (stderr && !stderr.includes('DeprecationWarning') && !stderr.includes('ENOENT')) {
+          if (
+            stderr &&
+            !stderr.includes('DeprecationWarning') &&
+            !stderr.includes('ENOENT')
+          ) {
             console.warn('HMR Client Demo stderr:', stderr);
           }
 
@@ -222,7 +236,7 @@ describe('HMR Client Demo End-to-End Tests', () => {
 
       try {
         // Test direct import of webpack bundle
-        const hmrDemo = await (require(hmrClientDemoPath));
+        const hmrDemo = await require(hmrClientDemoPath);
 
         // Verify basic structure
         assert.ok(hmrDemo, 'Should export demo object');
@@ -233,16 +247,44 @@ describe('HMR Client Demo End-to-End Tests', () => {
         const client = hmrDemo.hmrClient;
         const status = client.getStatus();
 
-        assert.strictEqual(typeof status, 'object', 'Should return status object');
-        assert.strictEqual(status.isAttached, true, 'Should show client as attached');
-        assert.strictEqual(status.hasWebpackRequire, true, 'Should have webpack runtime in built bundle');
-        assert.strictEqual(status.hasModuleHot, true, 'Should have module.hot support');
-        assert.strictEqual(typeof status.webpackHash, 'string', 'Should have webpack hash');
+        assert.strictEqual(
+          typeof status,
+          'object',
+          'Should return status object',
+        );
+        assert.strictEqual(
+          status.isAttached,
+          true,
+          'Should show client as attached',
+        );
+        assert.strictEqual(
+          status.hasWebpackRequire,
+          true,
+          'Should have webpack runtime in built bundle',
+        );
+        assert.strictEqual(
+          status.hasModuleHot,
+          true,
+          'Should have module.hot support',
+        );
+        assert.strictEqual(
+          typeof status.webpackHash,
+          'string',
+          'Should have webpack hash',
+        );
 
         // Test client methods
         const stats = client.getStats();
-        assert.strictEqual(typeof stats, 'object', 'Should return stats object');
-        assert.strictEqual(typeof stats.totalUpdates, 'number', 'Should track total updates');
+        assert.strictEqual(
+          typeof stats,
+          'object',
+          'Should return stats object',
+        );
+        assert.strictEqual(
+          typeof stats.totalUpdates,
+          'number',
+          'Should track total updates',
+        );
 
         const chunks = client.getCurrentChunks();
         assert.ok(Array.isArray(chunks), 'Should return chunks array');
@@ -255,27 +297,59 @@ describe('HMR Client Demo End-to-End Tests', () => {
         const demoAPI = hmrDemo.demoAPI;
 
         const greeting = demoAPI.greet('Tester');
-        assert.ok(greeting.includes('Hello, Tester'), 'Should generate greeting');
+        assert.ok(
+          greeting.includes('Hello, Tester'),
+          'Should generate greeting',
+        );
         assert.ok(greeting.includes('v1.0.0'), 'Should include version');
 
         const calcResult = demoAPI.calculate(10);
-        assert.strictEqual(typeof calcResult, 'object', 'Should return calculation object');
-        assert.strictEqual(calcResult.originalInput, 10, 'Should preserve original input');
-        assert.strictEqual(calcResult.processed, 30, 'Should process calculation correctly');
-        assert.strictEqual(calcResult.version, '1.0.0', 'Should include version');
+        assert.strictEqual(
+          typeof calcResult,
+          'object',
+          'Should return calculation object',
+        );
+        assert.strictEqual(
+          calcResult.originalInput,
+          10,
+          'Should preserve original input',
+        );
+        assert.strictEqual(
+          calcResult.processed,
+          30,
+          'Should process calculation correctly',
+        );
+        assert.strictEqual(
+          calcResult.version,
+          '1.0.0',
+          'Should include version',
+        );
 
         const testData = [{ id: 1, name: 'Test' }];
         const processed = demoAPI.processData(testData);
         assert.ok(Array.isArray(processed), 'Should return processed array');
-        assert.strictEqual(processed[0].processed, true, 'Should mark as processed');
+        assert.strictEqual(
+          processed[0].processed,
+          true,
+          'Should mark as processed',
+        );
         assert.strictEqual(processed[0].version, '1.0.0', 'Should add version');
 
         const demoStatus = demoAPI.getStatus();
-        assert.strictEqual(typeof demoStatus, 'object', 'Should return demo status');
-        assert.strictEqual(demoStatus.version, '1.0.0', 'Should have correct version');
+        assert.strictEqual(
+          typeof demoStatus,
+          'object',
+          'Should return demo status',
+        );
+        assert.strictEqual(
+          demoStatus.version,
+          '1.0.0',
+          'Should have correct version',
+        );
 
-        console.log('✅ HMR Client Demo library integration verified via direct testing');
-
+        console.log(
+          '✅ HMR Client Demo library integration verified via direct testing',
+        );
       } catch (error) {
         throw new Error(`Direct bundle test failed: ${error.message}`);
       }
@@ -288,40 +362,99 @@ describe('HMR Client Demo End-to-End Tests', () => {
 
       try {
         // Test direct import and HMR update functionality
-        const hmrDemo = await (require(hmrClientDemoPath));
+        const hmrDemo = await require(hmrClientDemoPath);
         const client = hmrDemo.hmrClient;
 
         assert.ok(client, 'Should have HMR client');
 
         // Test initial status
         const initialStatus = client.getStatus();
-        assert.strictEqual(initialStatus.isAttached, true, 'Should show client as attached');
-        assert.strictEqual(initialStatus.hasWebpackRequire, true, 'Should have webpack runtime in bundle');
-        assert.strictEqual(initialStatus.hasModuleHot, true, 'Should have module.hot support');
+        assert.strictEqual(
+          initialStatus.isAttached,
+          true,
+          'Should show client as attached',
+        );
+        assert.strictEqual(
+          initialStatus.hasWebpackRequire,
+          true,
+          'Should have webpack runtime in bundle',
+        );
+        assert.strictEqual(
+          initialStatus.hasModuleHot,
+          true,
+          'Should have module.hot support',
+        );
 
         // Test update checking functionality
         const checkResult = await client.checkForUpdates();
-        assert.strictEqual(typeof checkResult, 'object', 'Should return check result object');
-        assert.strictEqual(typeof checkResult.success, 'boolean', 'Should have success property');
-        assert.strictEqual(typeof checkResult.reason, 'string', 'Should have reason property');
+        assert.strictEqual(
+          typeof checkResult,
+          'object',
+          'Should return check result object',
+        );
+        assert.strictEqual(
+          typeof checkResult.success,
+          'boolean',
+          'Should have success property',
+        );
+        assert.strictEqual(
+          typeof checkResult.reason,
+          'string',
+          'Should have reason property',
+        );
 
         // Test force update functionality
         const forceResult = await client.forceUpdate();
-        assert.strictEqual(typeof forceResult, 'object', 'Should return force result object');
-        assert.strictEqual(typeof forceResult.success, 'boolean', 'Should have success property');
-        assert.ok(forceResult.updateId || forceResult.reason, 'Should have updateId or reason');
+        assert.strictEqual(
+          typeof forceResult,
+          'object',
+          'Should return force result object',
+        );
+        assert.strictEqual(
+          typeof forceResult.success,
+          'boolean',
+          'Should have success property',
+        );
+        assert.ok(
+          forceResult.updateId || forceResult.reason,
+          'Should have updateId or reason',
+        );
 
         // Test stats tracking after operations
         const finalStats = client.getStats();
-        assert.strictEqual(typeof finalStats.totalUpdates, 'number', 'Should track total updates');
-        assert.strictEqual(typeof finalStats.successfulUpdates, 'number', 'Should track successful updates');
-        assert.strictEqual(typeof finalStats.failedUpdates, 'number', 'Should track failed updates');
+        assert.strictEqual(
+          typeof finalStats.totalUpdates,
+          'number',
+          'Should track total updates',
+        );
+        assert.strictEqual(
+          typeof finalStats.successfulUpdates,
+          'number',
+          'Should track successful updates',
+        );
+        assert.strictEqual(
+          typeof finalStats.failedUpdates,
+          'number',
+          'Should track failed updates',
+        );
 
         // Test webpack integration status after operations
         const finalStatus = client.getStatus();
-        assert.strictEqual(finalStatus.isAttached, true, 'Should remain attached after operations');
-        assert.strictEqual(typeof finalStatus.webpackHash, 'string', 'Should have webpack hash');
-        assert.strictEqual(typeof finalStatus.isPolling, 'boolean', 'Should have polling status');
+        assert.strictEqual(
+          finalStatus.isAttached,
+          true,
+          'Should remain attached after operations',
+        );
+        assert.strictEqual(
+          typeof finalStatus.webpackHash,
+          'string',
+          'Should have webpack hash',
+        );
+        assert.strictEqual(
+          typeof finalStatus.isPolling,
+          'boolean',
+          'Should have polling status',
+        );
 
         // Test webpack-specific functionality
         const chunks = client.getCurrentChunks();
@@ -331,8 +464,9 @@ describe('HMR Client Demo End-to-End Tests', () => {
         assert.ok(Array.isArray(modules), 'Should return modules array');
         assert.ok(modules.length > 0, 'Should have modules loaded');
 
-        console.log('✅ HMR Client update functionality verified via direct testing');
-
+        console.log(
+          '✅ HMR Client update functionality verified via direct testing',
+        );
       } catch (error) {
         throw new Error(`HMR update test failed: ${error.message}`);
       }
@@ -347,19 +481,34 @@ describe('HMR Client Demo End-to-End Tests', () => {
 
       try {
         // Test complete workflow with direct function calls
-        const hmrDemo = await (require(hmrClientDemoPath));
+        const hmrDemo = await require(hmrClientDemoPath);
         const client = hmrDemo.hmrClient;
 
         assert.ok(client, 'Should have HMR client');
 
         // Test initial state verification
         const initialStatus = client.getStatus();
-        assert.strictEqual(initialStatus.isAttached, true, 'Should show initial client state as attached');
-        assert.strictEqual(initialStatus.hasWebpackRequire, true, 'Should show webpack runtime available');
-        assert.strictEqual(typeof initialStatus.hotStatus, 'string', 'Should have hot status');
+        assert.strictEqual(
+          initialStatus.isAttached,
+          true,
+          'Should show initial client state as attached',
+        );
+        assert.strictEqual(
+          initialStatus.hasWebpackRequire,
+          true,
+          'Should show webpack runtime available',
+        );
+        assert.strictEqual(
+          typeof initialStatus.hotStatus,
+          'string',
+          'Should have hot status',
+        );
 
         // Test demo functions are available and callable
-        assert.ok(typeof hmrDemo.runDemoTests === 'function', 'Should have runDemoTests function');
+        assert.ok(
+          typeof hmrDemo.runDemoTests === 'function',
+          'Should have runDemoTests function',
+        );
 
         // Execute demo tests (this tests the internal functionality)
         // Note: runDemoTests() may not return a value, but should execute without error
@@ -369,45 +518,95 @@ describe('HMR Client Demo End-to-End Tests', () => {
 
         // Test complete update workflow
         const forceResult = await client.forceUpdate();
-        assert.strictEqual(typeof forceResult.success, 'boolean', 'Should have force update result');
+        assert.strictEqual(
+          typeof forceResult.success,
+          'boolean',
+          'Should have force update result',
+        );
 
         const checkResult = await client.checkForUpdates();
-        assert.strictEqual(typeof checkResult.success, 'boolean', 'Should have check update result');
+        assert.strictEqual(
+          typeof checkResult.success,
+          'boolean',
+          'Should have check update result',
+        );
 
         // Verify final state after workflow
         const finalStats = client.getStats();
-        assert.strictEqual(typeof finalStats.totalUpdates, 'number', 'Should track final update count');
+        assert.strictEqual(
+          typeof finalStats.totalUpdates,
+          'number',
+          'Should track final update count',
+        );
 
         const finalStatus = client.getStatus();
-        assert.strictEqual(finalStatus.isAttached, true, 'Should maintain client attachment');
-        assert.strictEqual(finalStatus.hasWebpackRequire, true, 'Should maintain webpack integration');
+        assert.strictEqual(
+          finalStatus.isAttached,
+          true,
+          'Should maintain client attachment',
+        );
+        assert.strictEqual(
+          finalStatus.hasWebpackRequire,
+          true,
+          'Should maintain webpack integration',
+        );
 
         // Test business logic functions work throughout workflow
         const greeting = hmrDemo.demoAPI.greet('Developer');
-        assert.ok(greeting.includes('Hello, Developer'), 'Should maintain API functionality');
+        assert.ok(
+          greeting.includes('Hello, Developer'),
+          'Should maintain API functionality',
+        );
 
         const calculation = hmrDemo.demoAPI.calculate(5);
-        assert.strictEqual(calculation.originalInput, 5, 'Should maintain calculation functionality');
-        assert.strictEqual(calculation.processed, 20, 'Should process calculations correctly');
+        assert.strictEqual(
+          calculation.originalInput,
+          5,
+          'Should maintain calculation functionality',
+        );
+        assert.strictEqual(
+          calculation.processed,
+          20,
+          'Should process calculations correctly',
+        );
 
         // Test data processing throughout workflow
         const testData = [
           { id: 1, name: 'Test Item 1' },
-          { id: 2, name: 'Test Item 2' }
+          { id: 2, name: 'Test Item 2' },
         ];
         const processedData = hmrDemo.demoAPI.processData(testData);
-        assert.ok(Array.isArray(processedData), 'Should maintain data processing');
+        assert.ok(
+          Array.isArray(processedData),
+          'Should maintain data processing',
+        );
         assert.strictEqual(processedData.length, 2, 'Should process all items');
-        assert.strictEqual(processedData[0].processed, true, 'Should mark items as processed');
+        assert.strictEqual(
+          processedData[0].processed,
+          true,
+          'Should mark items as processed',
+        );
 
         // Test status retrieval throughout workflow
         const workflowStatus = hmrDemo.demoAPI.getStatus();
-        assert.strictEqual(typeof workflowStatus.version, 'string', 'Should maintain version info');
-        assert.ok(workflowStatus.hmrStatus, 'Should include HMR status in workflow');
-        assert.strictEqual(typeof workflowStatus.uptime, 'number', 'Should track uptime');
+        assert.strictEqual(
+          typeof workflowStatus.version,
+          'string',
+          'Should maintain version info',
+        );
+        assert.ok(
+          workflowStatus.hmrStatus,
+          'Should include HMR status in workflow',
+        );
+        assert.strictEqual(
+          typeof workflowStatus.uptime,
+          'number',
+          'Should track uptime',
+        );
 
-        console.log('✅ HMR Client complete workflow verified via direct testing');
-
+        console.log(
+          '✅ HMR Client complete workflow verified via direct testing',
+        );
       } catch (error) {
         throw new Error(`Complete workflow test failed: ${error.message}`);
       }
@@ -460,7 +659,11 @@ describe('HMR Client Demo End-to-End Tests', () => {
           assert.ok(buildCompleted, 'Webpack build should complete');
           assert.ok(demoStarted, 'HMR Client Demo should start');
 
-          if (stderr && !stderr.includes('DeprecationWarning') && !stderr.includes('ENOENT')) {
+          if (
+            stderr &&
+            !stderr.includes('DeprecationWarning') &&
+            !stderr.includes('ENOENT')
+          ) {
             console.warn('HMR Client Demo script stderr:', stderr);
           }
 

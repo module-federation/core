@@ -1,10 +1,22 @@
-const { describe, it, before, after, beforeEach, afterEach } = require('node:test');
+const {
+  describe,
+  it,
+  before,
+  after,
+  beforeEach,
+  afterEach,
+} = require('node:test');
 const assert = require('node:assert');
 const path = require('path');
 
 // Import the modules under test
-const { createHMRRuntime, createApplyHandler } = require('@module-federation/node/utils/hmr-runtime');
-const { applyHotUpdateFromStringsByPatching } = require('@module-federation/node/utils/custom-hmr-helpers');
+const {
+  createHMRRuntime,
+  createApplyHandler,
+} = require('@module-federation/node/utils/hmr-runtime');
+const {
+  applyHotUpdateFromStringsByPatching,
+} = require('@module-federation/node/utils/custom-hmr-helpers');
 const {
   setUpdateProvider,
   createQueueUpdateProvider,
@@ -113,7 +125,11 @@ describe('HMR Edge Cases and Stress Tests', () => {
     it('should handle circular dependencies without infinite loops', () => {
       const installedChunks = { index: 0 };
       const state = {
-        currentUpdate: { './src/module-a.js': function() { return 'updated-a'; } },
+        currentUpdate: {
+          './src/module-a.js': function () {
+            return 'updated-a';
+          },
+        },
         currentUpdateRuntime: [],
         currentUpdateRemovedChunks: [],
       };
@@ -121,19 +137,26 @@ describe('HMR Edge Cases and Stress Tests', () => {
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({});
       // Should complete without hanging
-      assert.ok(result.dispose || result.apply, 'Should handle circular dependencies');
+      assert.ok(
+        result.dispose || result.apply,
+        'Should handle circular dependencies',
+      );
     });
 
     it('should properly break circular dependency chains at self-accepted modules', () => {
       // Update module C which is self-accepted in the circular chain
       const installedChunks = { index: 0 };
       const state = {
-        currentUpdate: { './src/module-c.js': function() { return 'updated-c'; } },
+        currentUpdate: {
+          './src/module-c.js': function () {
+            return 'updated-c';
+          },
+        },
         currentUpdateRuntime: [],
         currentUpdateRemovedChunks: [],
       };
@@ -141,15 +164,18 @@ describe('HMR Edge Cases and Stress Tests', () => {
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({});
-      
+
       if (result.apply) {
         const outdatedModules = result.apply(() => {});
         // Should only include module C, not propagate through the entire circle
-        assert.ok(Array.isArray(outdatedModules), 'Should return array of outdated modules');
+        assert.ok(
+          Array.isArray(outdatedModules),
+          'Should return array of outdated modules',
+        );
       }
     });
 
@@ -190,12 +216,20 @@ describe('HMR Edge Cases and Stress Tests', () => {
       };
 
       // Update C -> D chain
-      global.__webpack_require__.c['./src/module-c.js'].children = ['./src/module-d.js'];
-      global.__webpack_require__.c['./src/module-a.js'].parents.push('./src/module-e.js');
+      global.__webpack_require__.c['./src/module-c.js'].children = [
+        './src/module-d.js',
+      ];
+      global.__webpack_require__.c['./src/module-a.js'].parents.push(
+        './src/module-e.js',
+      );
 
       const installedChunks = { index: 0 };
       const state = {
-        currentUpdate: { './src/module-d.js': function() { return 'updated-d'; } },
+        currentUpdate: {
+          './src/module-d.js': function () {
+            return 'updated-d';
+          },
+        },
         currentUpdateRuntime: [],
         currentUpdateRemovedChunks: [],
       };
@@ -203,12 +237,15 @@ describe('HMR Edge Cases and Stress Tests', () => {
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({});
       // Should handle deep circular chains without hanging
-      assert.ok(result.dispose || result.apply, 'Should handle deep circular dependencies');
+      assert.ok(
+        result.dispose || result.apply,
+        'Should handle deep circular dependencies',
+      );
     });
   });
 
@@ -240,7 +277,10 @@ describe('HMR Edge Cases and Stress Tests', () => {
       // All should complete without errors
       results.forEach((result, index) => {
         assert.ok(result.update, `Update ${index} should succeed`);
-        assert.ok(result.update.originalInfo.updateId.includes('concurrent'), 'Should be concurrent update');
+        assert.ok(
+          result.update.originalInfo.updateId.includes('concurrent'),
+          'Should be concurrent update',
+        );
       });
     });
 
@@ -278,7 +318,7 @@ describe('HMR Edge Cases and Stress Tests', () => {
       ];
 
       // Apply multiple updates in parallel
-      const applyPromises = testUpdates.map(update => applyUpdates(update));
+      const applyPromises = testUpdates.map((update) => applyUpdates(update));
       const applyResults = await Promise.all(applyPromises);
 
       // All should complete
@@ -307,7 +347,9 @@ describe('HMR Edge Cases and Stress Tests', () => {
       setUpdateProvider(regularProvider);
 
       // Start regular update and force update simultaneously
-      const regularUpdatePromise = fetchUpdates().then(result => applyUpdates(result));
+      const regularUpdatePromise = fetchUpdates().then((result) =>
+        applyUpdates(result),
+      );
       const forceUpdatePromise = forceUpdate();
 
       const [regularResult, forceResult] = await Promise.all([
@@ -335,11 +377,11 @@ describe('HMR Edge Cases and Stress Tests', () => {
             _acceptedErrorHandlers: {},
             _declinedDependencies: {},
             _disposeHandlers: [
-              function(data) {
+              function (data) {
                 data.cleanedUp = true;
                 data.timestamp = Date.now();
               },
-              function(data) {
+              function (data) {
                 data.secondCleanup = true;
               },
             ],
@@ -360,24 +402,35 @@ describe('HMR Edge Cases and Stress Tests', () => {
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({});
-      
+
       if (result.dispose) {
         result.dispose();
-        
+
         // Check that disposal data was properly set
-        const disposeData = global.__webpack_require__.hmrD['./src/memory-test.js'];
+        const disposeData =
+          global.__webpack_require__.hmrD['./src/memory-test.js'];
         assert.ok(disposeData, 'Should have dispose data');
-        assert.ok(disposeData.cleanedUp, 'Should have called first dispose handler');
-        assert.ok(disposeData.secondCleanup, 'Should have called second dispose handler');
-        
+        assert.ok(
+          disposeData.cleanedUp,
+          'Should have called first dispose handler',
+        );
+        assert.ok(
+          disposeData.secondCleanup,
+          'Should have called second dispose handler',
+        );
+
         // Check that module was deactivated
         const module = global.__webpack_require__.c['./src/memory-test.js'];
         if (module) {
-          assert.strictEqual(module.hot.active, false, 'Module should be deactivated');
+          assert.strictEqual(
+            module.hot.active,
+            false,
+            'Module should be deactivated',
+          );
         }
       }
     });
@@ -385,7 +438,7 @@ describe('HMR Edge Cases and Stress Tests', () => {
     it('should handle memory cleanup with large module graphs', () => {
       // Create a large module graph for stress testing
       const moduleCount = 50;
-      
+
       for (let i = 0; i < moduleCount; i++) {
         const moduleId = `./src/large-module-${i}.js`;
         global.__webpack_require__.c[moduleId] = {
@@ -398,18 +451,27 @@ describe('HMR Edge Cases and Stress Tests', () => {
             _acceptedDependencies: {},
             _acceptedErrorHandlers: {},
             _declinedDependencies: {},
-            _disposeHandlers: [function(data) { data.disposed = true; }],
+            _disposeHandlers: [
+              function (data) {
+                data.disposed = true;
+              },
+            ],
             active: true,
-            _requireSelf: i % 10 === 0 ? (() => ({ large: i })) : undefined,
+            _requireSelf: i % 10 === 0 ? () => ({ large: i }) : undefined,
           },
           parents: i > 0 ? [`./src/large-module-${i - 1}.js`] : [],
-          children: i < moduleCount - 1 ? [`./src/large-module-${i + 1}.js`] : [],
+          children:
+            i < moduleCount - 1 ? [`./src/large-module-${i + 1}.js`] : [],
         };
       }
 
       const installedChunks = { index: 0 };
       const state = {
-        currentUpdate: { './src/large-module-25.js': function() { return 'updated-25'; } },
+        currentUpdate: {
+          './src/large-module-25.js': function () {
+            return 'updated-25';
+          },
+        },
         currentUpdateRuntime: [],
         currentUpdateRemovedChunks: [],
       };
@@ -417,7 +479,7 @@ describe('HMR Edge Cases and Stress Tests', () => {
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const startTime = Date.now();
@@ -425,15 +487,21 @@ describe('HMR Edge Cases and Stress Tests', () => {
       const endTime = Date.now();
 
       // Should complete in reasonable time (< 1 second)
-      assert.ok(endTime - startTime < 1000, 'Should handle large graphs efficiently');
-      assert.ok(result.dispose || result.apply, 'Should handle large module graph');
+      assert.ok(
+        endTime - startTime < 1000,
+        'Should handle large graphs efficiently',
+      );
+      assert.ok(
+        result.dispose || result.apply,
+        'Should handle large module graph',
+      );
     });
 
     it('should prevent memory leaks in update provider state', async () => {
       // Test with many sequential updates to check for memory leaks
       const updateCount = 100;
       const updates = [];
-      
+
       for (let i = 0; i < updateCount; i++) {
         updates.push({
           manifest: { h: `leak-test-${i}`, c: [], r: [], m: [] },
@@ -449,7 +517,10 @@ describe('HMR Edge Cases and Stress Tests', () => {
       for (let i = 0; i < updateCount; i++) {
         const result = await fetchUpdates();
         if (result.update) {
-          assert.strictEqual(result.update.originalInfo.updateId, `leak-test-${i}`);
+          assert.strictEqual(
+            result.update.originalInfo.updateId,
+            `leak-test-${i}`,
+          );
         }
       }
 
@@ -471,12 +542,12 @@ describe('HMR Edge Cases and Stress Tests', () => {
             _selfDeclined: false,
             _main: false,
             _acceptedDependencies: {
-              './src/error-child.js': function() {
+              './src/error-child.js': function () {
                 throw new Error('Parent accept handler error');
               },
             },
             _acceptedErrorHandlers: {
-              './src/error-child.js': function(err, context) {
+              './src/error-child.js': function (err, context) {
                 console.log('Parent error handler:', err.message);
                 throw new Error('Error handler also failed');
               },
@@ -508,7 +579,11 @@ describe('HMR Edge Cases and Stress Tests', () => {
 
       const installedChunks = { index: 0 };
       const state = {
-        currentUpdate: { './src/error-child.js': function() { return 'updated-child'; } },
+        currentUpdate: {
+          './src/error-child.js': function () {
+            return 'updated-child';
+          },
+        },
         currentUpdateRuntime: [],
         currentUpdateRemovedChunks: [],
       };
@@ -516,7 +591,7 @@ describe('HMR Edge Cases and Stress Tests', () => {
       const applyHandler = createApplyHandler(
         global.__webpack_require__,
         installedChunks,
-        state
+        state,
       );
 
       const result = applyHandler({
@@ -548,7 +623,7 @@ describe('HMR Edge Cases and Stress Tests', () => {
         global.__webpack_require__,
         installedChunks,
         inMemoryChunks,
-        manifestRef
+        manifestRef,
       );
 
       // Should handle malformed content without crashing
@@ -571,7 +646,7 @@ describe('HMR Edge Cases and Stress Tests', () => {
         global.__webpack_require__,
         installedChunks,
         inMemoryChunks,
-        manifestRef
+        manifestRef,
       );
 
       try {
@@ -587,23 +662,31 @@ describe('HMR Edge Cases and Stress Tests', () => {
     it('should maintain state consistency during rapid updates', async () => {
       // Simulate rapid state changes
       const stateSnapshots = [];
-      
+
       for (let i = 0; i < 20; i++) {
         const state = getModuleState();
         stateSnapshots.push(JSON.parse(JSON.stringify(state)));
-        
+
         // Modify state
         const newState = { testValue: `rapid-${i}`, counter: i };
-        await new Promise(resolve => setTimeout(resolve, 1)); // Micro delay
-        
+        await new Promise((resolve) => setTimeout(resolve, 1)); // Micro delay
+
         // Update state
-        const updated = require('../examples/demo/index.js').updateModuleState(newState);
-        assert.ok(updated.testValue === `rapid-${i}`, 'State should update correctly');
+        const updated = require('../examples/demo/index.js').updateModuleState(
+          newState,
+        );
+        assert.ok(
+          updated.testValue === `rapid-${i}`,
+          'State should update correctly',
+        );
       }
 
       // Verify state integrity
       const finalState = getModuleState();
-      assert.ok(finalState.testValue === 'rapid-19', 'Final state should be consistent');
+      assert.ok(
+        finalState.testValue === 'rapid-19',
+        'Final state should be consistent',
+      );
       assert.ok(finalState.counter === 19, 'Counter should be correct');
     });
 
@@ -626,21 +709,30 @@ describe('HMR Edge Cases and Stress Tests', () => {
       }));
 
       setUpdateProvider(provider);
-      
+
       // Start update and reset state simultaneously
-      const updatePromise = fetchUpdates().then(result => applyUpdates(result));
-      const resetPromise = new Promise(resolve => {
+      const updatePromise = fetchUpdates().then((result) =>
+        applyUpdates(result),
+      );
+      const resetPromise = new Promise((resolve) => {
         setTimeout(() => {
           const resetResult = resetModuleState();
           resolve(resetResult);
         }, 10);
       });
 
-      const [updateResult, resetResult] = await Promise.all([updatePromise, resetPromise]);
+      const [updateResult, resetResult] = await Promise.all([
+        updatePromise,
+        resetPromise,
+      ]);
 
       assert.ok(updateResult, 'Update should complete');
       assert.ok(resetResult.newModuleId, 'Reset should complete');
-      assert.notStrictEqual(resetResult.oldModuleId, resetResult.newModuleId, 'Module ID should change');
+      assert.notStrictEqual(
+        resetResult.oldModuleId,
+        resetResult.newModuleId,
+        'Module ID should change',
+      );
     });
 
     it('should handle provider switching during active operations', async () => {

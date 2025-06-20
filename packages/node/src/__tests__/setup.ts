@@ -3,7 +3,8 @@
  */
 
 // Add experimental VM modules support
-process.env['NODE_OPTIONS'] = (process.env['NODE_OPTIONS'] || '') + ' --experimental-vm-modules';
+process.env['NODE_OPTIONS'] =
+  (process.env['NODE_OPTIONS'] || '') + ' --experimental-vm-modules';
 
 // Mock console methods to reduce noise in tests
 const originalConsoleWarn = console.warn;
@@ -21,7 +22,7 @@ afterEach(() => {
   // Restore console methods
   console.warn = originalConsoleWarn;
   console.error = originalConsoleError;
-  
+
   // Clean up global state
   delete (global as any).__webpack_require__;
   delete (global as any).module;

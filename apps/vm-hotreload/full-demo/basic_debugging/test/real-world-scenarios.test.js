@@ -1,9 +1,20 @@
-const { describe, it, before, after, beforeEach, afterEach } = require('node:test');
+const {
+  describe,
+  it,
+  before,
+  after,
+  beforeEach,
+  afterEach,
+} = require('node:test');
 const assert = require('node:assert');
 
 // Import modules under test
-const { applyHotUpdateFromStringsByPatching } = require('@module-federation/node/utils/custom-hmr-helpers');
-const { createHMRRuntime } = require('@module-federation/node/utils/hmr-runtime');
+const {
+  applyHotUpdateFromStringsByPatching,
+} = require('@module-federation/node/utils/custom-hmr-helpers');
+const {
+  createHMRRuntime,
+} = require('@module-federation/node/utils/hmr-runtime');
 const {
   setUpdateProvider,
   createQueueUpdateProvider,
@@ -132,16 +143,25 @@ describe('Real-World HMR Scenarios', () => {
         componentModule,
         mockWebpackRequire,
         manifestJson,
-        chunkMap
+        chunkMap,
       );
 
       // Verify component was updated
-      assert.ok(mockWebpackRequire.setInMemoryManifest, 'Should inject HMR runtime');
-      assert.ok(mockWebpackRequire.setInMemoryChunk, 'Should set chunk in memory');
+      assert.ok(
+        mockWebpackRequire.setInMemoryManifest,
+        'Should inject HMR runtime',
+      );
+      assert.ok(
+        mockWebpackRequire.setInMemoryChunk,
+        'Should set chunk in memory',
+      );
 
       // Check for HMR status log or successful execution
-      const hasHMRLog = logMessages.some(msg =>
-        msg.includes('Current HMR status') || msg.includes('Update failed') || msg.includes('Component hot reload')
+      const hasHMRLog = logMessages.some(
+        (msg) =>
+          msg.includes('Current HMR status') ||
+          msg.includes('Update failed') ||
+          msg.includes('Component hot reload'),
       );
       assert.ok(hasHMRLog, 'Should execute component hot reload');
     });
@@ -202,8 +222,11 @@ describe('Real-World HMR Scenarios', () => {
       const result = await applyUpdates(cssUpdate);
 
       // Check for successful update application or HMR status
-      const hasUpdateLog = logMessages.some(msg =>
-        msg.includes('Applying update') || msg.includes('Current HMR status') || msg.includes('CSS hot reload')
+      const hasUpdateLog = logMessages.some(
+        (msg) =>
+          msg.includes('Applying update') ||
+          msg.includes('Current HMR status') ||
+          msg.includes('CSS hot reload'),
       );
       assert.ok(result || hasUpdateLog, 'Should execute CSS hot reload');
     });
@@ -269,10 +292,16 @@ describe('Real-World HMR Scenarios', () => {
       const result = await applyUpdates(apiUpdate);
 
       // Check for successful update application or HMR status
-      const hasUpdateLog = logMessages.some(msg =>
-        msg.includes('Applying update') || msg.includes('Current HMR status') || msg.includes('API service hot reloaded')
+      const hasUpdateLog = logMessages.some(
+        (msg) =>
+          msg.includes('Applying update') ||
+          msg.includes('Current HMR status') ||
+          msg.includes('API service hot reloaded'),
       );
-      assert.ok(result || hasUpdateLog, 'Should execute API service hot reload');
+      assert.ok(
+        result || hasUpdateLog,
+        'Should execute API service hot reload',
+      );
     });
   });
 
@@ -368,13 +397,17 @@ describe('Real-World HMR Scenarios', () => {
         };
 
         await applyUpdates(update);
-        
+
         // Verify each iteration
-        const hasUpdateLog = logMessages.some(msg =>
-          msg.includes('Applying update from provider') ||
-          msg.includes('HMR')
+        const hasUpdateLog = logMessages.some(
+          (msg) =>
+            msg.includes('Applying update from provider') ||
+            msg.includes('HMR'),
         );
-        assert.ok(hasUpdateLog, `Should apply iteration ${i}: ${iteration.description}`);
+        assert.ok(
+          hasUpdateLog,
+          `Should apply iteration ${i}: ${iteration.description}`,
+        );
       }
     });
 
@@ -444,8 +477,11 @@ describe('Real-World HMR Scenarios', () => {
       const result = await applyUpdates(debugUpdate);
 
       // Check for successful update application or HMR status
-      const hasUpdateLog = logMessages.some(msg =>
-        msg.includes('Applying update') || msg.includes('Current HMR status') || msg.includes('Debug hot reload')
+      const hasUpdateLog = logMessages.some(
+        (msg) =>
+          msg.includes('Applying update') ||
+          msg.includes('Current HMR status') ||
+          msg.includes('Debug hot reload'),
       );
       assert.ok(result || hasUpdateLog, 'Should apply debug session updates');
     });
@@ -472,10 +508,18 @@ describe('Real-World HMR Scenarios', () => {
 
       // First attempts should fail
       let result1 = await fetchUpdates();
-      assert.deepStrictEqual(result1, { update: null }, 'First fetch should fail');
+      assert.deepStrictEqual(
+        result1,
+        { update: null },
+        'First fetch should fail',
+      );
 
       let result2 = await fetchUpdates();
-      assert.deepStrictEqual(result2, { update: null }, 'Second fetch should fail');
+      assert.deepStrictEqual(
+        result2,
+        { update: null },
+        'Second fetch should fail',
+      );
 
       // Third attempt should succeed
       let result3 = await fetchUpdates();
@@ -527,10 +571,10 @@ describe('Real-World HMR Scenarios', () => {
 
       // Apply failing update
       const result = await applyUpdates(failingUpdate);
-      
+
       // Should handle failure gracefully
       assert.ok(result, 'Should return result even on failure');
-      
+
       // Test recovery with force update
       const recoveryResult = await forceUpdate();
       assert.ok(recoveryResult, 'Should allow force update for recovery');
@@ -556,9 +600,10 @@ describe('Real-World HMR Scenarios', () => {
       // Create a very large update to test memory handling
       const largeModuleCount = 100;
       const largeModules = {};
-      
+
       for (let i = 0; i < largeModuleCount; i++) {
-        largeModules[`./src/large-${i}.js`] = `function(module, exports, require) {
+        largeModules[`./src/large-${i}.js`] =
+          `function(module, exports, require) {
           // Large module with substantial content
           const largeData = ${JSON.stringify(Array.from({ length: 1000 }, (_, j) => `data-${i}-${j}`))};
           module.exports = { id: ${i}, data: largeData };
@@ -573,7 +618,9 @@ describe('Real-World HMR Scenarios', () => {
             r: [],
             m: Object.keys(largeModules),
           },
-          script: `exports.modules = {${Object.entries(largeModules).map(([key, value]) => `'${key}': ${value}`).join(',')}};`,
+          script: `exports.modules = {${Object.entries(largeModules)
+            .map(([key, value]) => `'${key}': ${value}`)
+            .join(',')}};`,
           originalInfo: {
             updateId: 'large-update-001',
             webpackHash: 'large-hash',
@@ -587,7 +634,10 @@ describe('Real-World HMR Scenarios', () => {
       const duration = endTime - startTime;
 
       assert.ok(result, 'Should handle large update');
-      assert.ok(duration < 1000, `Should handle large update efficiently: ${duration.toFixed(2)}ms`);
+      assert.ok(
+        duration < 1000,
+        `Should handle large update efficiently: ${duration.toFixed(2)}ms`,
+      );
     });
   });
 
@@ -704,8 +754,11 @@ describe('Real-World HMR Scenarios', () => {
       const result = await applyUpdates(dependencyUpdate);
 
       // Check for successful update application or HMR status
-      const hasUpdateLog = logMessages.some(msg =>
-        msg.includes('Applying update') || msg.includes('Current HMR status') || msg.includes('Database hot reload')
+      const hasUpdateLog = logMessages.some(
+        (msg) =>
+          msg.includes('Applying update') ||
+          msg.includes('Current HMR status') ||
+          msg.includes('Database hot reload'),
       );
       assert.ok(result || hasUpdateLog, 'Should apply dependency updates');
     });

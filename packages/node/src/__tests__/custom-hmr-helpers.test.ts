@@ -65,7 +65,9 @@ describe('Custom HMR Helpers Integration Tests', () => {
       hmrI: {},
       hmrC: {},
       hmrM: jest.fn(),
-      o: jest.fn((obj: any, key: string) => Object.prototype.hasOwnProperty.call(obj, key)),
+      o: jest.fn((obj: any, key: string) =>
+        Object.prototype.hasOwnProperty.call(obj, key),
+      ),
       f: {},
       setInMemoryManifest: jest.fn(),
       setInMemoryChunk: jest.fn(),
@@ -135,12 +137,17 @@ describe('Custom HMR Helpers Integration Tests', () => {
         mockModule,
         mockWebpackRequire,
         manifestJsonString,
-        chunkJsStringsMap
+        chunkJsStringsMap,
       );
 
       expect(result).toEqual(['./src/index.js']);
-      expect(mockWebpackRequire.setInMemoryManifest).toHaveBeenCalledWith(manifestJsonString);
-      expect(mockWebpackRequire.setInMemoryChunk).toHaveBeenCalledWith('index', chunkJsStringsMap.index);
+      expect(mockWebpackRequire.setInMemoryManifest).toHaveBeenCalledWith(
+        manifestJsonString,
+      );
+      expect(mockWebpackRequire.setInMemoryChunk).toHaveBeenCalledWith(
+        'index',
+        chunkJsStringsMap.index,
+      );
       expect(mockModule.hot?.check).toHaveBeenCalledWith(true);
     });
 
@@ -155,21 +162,20 @@ describe('Custom HMR Helpers Integration Tests', () => {
       });
       const chunkJsStringsMap = { index: 'test content' };
 
-      await expect(applyInMemoryHotUpdate(
-        mockModule,
-        mockWebpackRequire,
-        manifestJsonString,
-        chunkJsStringsMap
-      )).rejects.toThrow('[HMR] Hot Module Replacement is disabled.');
+      await expect(
+        applyInMemoryHotUpdate(
+          mockModule,
+          mockWebpackRequire,
+          manifestJsonString,
+          chunkJsStringsMap,
+        ),
+      ).rejects.toThrow('[HMR] Hot Module Replacement is disabled.');
     });
 
     it('should handle missing webpack require gracefully', async () => {
-      await expect(applyInMemoryHotUpdate(
-        mockModule,
-        null,
-        '{}',
-        {}
-      )).rejects.toThrow('[HMR] __webpack_require__ is not available.');
+      await expect(
+        applyInMemoryHotUpdate(mockModule, null, '{}', {}),
+      ).rejects.toThrow('[HMR] __webpack_require__ is not available.');
     });
 
     it('should inject runtime when setInMemoryManifest is not available', async () => {
@@ -188,7 +194,7 @@ describe('Custom HMR Helpers Integration Tests', () => {
         mockModule,
         mockWebpackRequire,
         manifestJsonString,
-        chunkJsStringsMap
+        chunkJsStringsMap,
       );
 
       expect(result).toEqual(['./src/index.js']);
@@ -197,7 +203,9 @@ describe('Custom HMR Helpers Integration Tests', () => {
     });
 
     it('should handle HMR check failures', async () => {
-      mockModule.hot!.check = jest.fn().mockRejectedValue(new Error('HMR check failed'));
+      mockModule.hot!.check = jest
+        .fn()
+        .mockRejectedValue(new Error('HMR check failed'));
 
       const manifestJsonString = JSON.stringify({
         h: 'test-hash',
@@ -207,12 +215,14 @@ describe('Custom HMR Helpers Integration Tests', () => {
       });
       const chunkJsStringsMap = { index: 'test content' };
 
-      await expect(applyInMemoryHotUpdate(
-        mockModule,
-        mockWebpackRequire,
-        manifestJsonString,
-        chunkJsStringsMap
-      )).rejects.toThrow('HMR check failed');
+      await expect(
+        applyInMemoryHotUpdate(
+          mockModule,
+          mockWebpackRequire,
+          manifestJsonString,
+          chunkJsStringsMap,
+        ),
+      ).rejects.toThrow('HMR check failed');
     });
 
     it('should handle non-idle HMR status', async () => {
@@ -230,7 +240,7 @@ describe('Custom HMR Helpers Integration Tests', () => {
         mockModule,
         mockWebpackRequire,
         manifestJsonString,
-        chunkJsStringsMap
+        chunkJsStringsMap,
       );
 
       expect(result).toEqual([]);
@@ -252,7 +262,7 @@ describe('Custom HMR Helpers Integration Tests', () => {
         mockModule,
         mockWebpackRequire,
         manifestJsonString,
-        chunkJsStringsMap
+        chunkJsStringsMap,
       );
 
       expect(result).toEqual([]);
@@ -293,7 +303,7 @@ describe('Custom HMR Helpers Integration Tests', () => {
         mockWebpackRequire,
         installedChunks,
         inMemoryChunks,
-        manifestRef
+        manifestRef,
       );
 
       // Set up HMR handlers
@@ -303,9 +313,11 @@ describe('Custom HMR Helpers Integration Tests', () => {
       mockWebpackRequire.setInMemoryManifest = jest.fn((content: string) => {
         manifestRef.value = content;
       });
-      mockWebpackRequire.setInMemoryChunk = jest.fn((chunkId: string, content: string) => {
-        (inMemoryChunks as any)[chunkId] = content;
-      });
+      mockWebpackRequire.setInMemoryChunk = jest.fn(
+        (chunkId: string, content: string) => {
+          (inMemoryChunks as any)[chunkId] = content;
+        },
+      );
 
       const manifestJsonString = JSON.stringify({
         h: 'updated-hash',
@@ -331,12 +343,17 @@ describe('Custom HMR Helpers Integration Tests', () => {
         mockModule,
         mockWebpackRequire,
         manifestJsonString,
-        chunkJsStringsMap
+        chunkJsStringsMap,
       );
 
       expect(result).toEqual(['./src/index.js']);
-      expect(mockWebpackRequire.setInMemoryManifest).toHaveBeenCalledWith(manifestJsonString);
-      expect(mockWebpackRequire.setInMemoryChunk).toHaveBeenCalledWith('index', chunkJsStringsMap.index);
+      expect(mockWebpackRequire.setInMemoryManifest).toHaveBeenCalledWith(
+        manifestJsonString,
+      );
+      expect(mockWebpackRequire.setInMemoryChunk).toHaveBeenCalledWith(
+        'index',
+        chunkJsStringsMap.index,
+      );
     });
   });
 
@@ -349,7 +366,7 @@ describe('Custom HMR Helpers Integration Tests', () => {
         mockModule,
         mockWebpackRequire,
         manifestJsonString,
-        chunkJsStringsMap
+        chunkJsStringsMap,
       );
 
       expect(result).toEqual(['./src/index.js']); // Should still work with patched runtime
@@ -368,7 +385,7 @@ describe('Custom HMR Helpers Integration Tests', () => {
         mockModule,
         mockWebpackRequire,
         manifestJsonString,
-        chunkJsStringsMap
+        chunkJsStringsMap,
       );
 
       expect(result).toEqual(['./src/index.js']);
@@ -393,7 +410,7 @@ describe('Custom HMR Helpers Integration Tests', () => {
         mockModule,
         mockWebpackRequire,
         manifestJsonString,
-        chunkJsStringsMap
+        chunkJsStringsMap,
       );
 
       // First call checks status and finds it's idle, proceeds with check()
@@ -415,11 +432,11 @@ describe('Custom HMR Helpers Integration Tests', () => {
         mockModule,
         mockWebpackRequire,
         manifestJsonString,
-        chunkJsStringsMap
+        chunkJsStringsMap,
       );
 
-      const logMessage = logMessages.find(msg => 
-        msg.includes('[Custom HMR Helper] Current HMR status:')
+      const logMessage = logMessages.find((msg) =>
+        msg.includes('[Custom HMR Helper] Current HMR status:'),
       );
       expect(logMessage).toBeDefined();
     });
@@ -429,10 +446,12 @@ describe('Custom HMR Helpers Integration Tests', () => {
     it('should handle large chunk updates efficiently', async () => {
       const largeChunkContent = `
         exports.modules = {
-          ${Array.from({ length: 100 }, (_, i) => 
-            `'./src/module-${i}.js': function(module, exports, require) {
+          ${Array.from(
+            { length: 100 },
+            (_, i) =>
+              `'./src/module-${i}.js': function(module, exports, require) {
               module.exports = { id: ${i}, updated: true };
-            }`
+            }`,
           ).join(',\n')}
         };
         exports.runtime = function(__webpack_require__) {
@@ -456,7 +475,7 @@ describe('Custom HMR Helpers Integration Tests', () => {
         mockModule,
         mockWebpackRequire,
         manifestJsonString,
-        chunkJsStringsMap
+        chunkJsStringsMap,
       );
       const endTime = Date.now();
 
@@ -486,18 +505,18 @@ describe('Custom HMR Helpers Integration Tests', () => {
         },
       }));
 
-      const promises = updates.map(update =>
+      const promises = updates.map((update) =>
         applyInMemoryHotUpdate(
           mockModule,
           mockWebpackRequire,
           update.manifest,
-          update.chunks
-        )
+          update.chunks,
+        ),
       );
 
       const results = await Promise.all(promises);
 
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result).toEqual(['./src/index.js']);
       });
     });

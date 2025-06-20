@@ -13,7 +13,9 @@ const path = require('path');
 const {
   applyHotUpdateFromStringsByPatching,
 } = require('@module-federation/node/utils/custom-hmr-helpers');
-const { createHMRRuntime } = require('@module-federation/node/utils/hmr-runtime');
+const {
+  createHMRRuntime,
+} = require('@module-federation/node/utils/hmr-runtime');
 
 // Import main module
 const {

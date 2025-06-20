@@ -44,7 +44,10 @@ export interface HMRWebpackRequire {
   /** Federation support */
   federation?: {
     runtime: {
-      loadScriptNode: (url: string, options: { attrs: { globalName: string } }) => Promise<any>;
+      loadScriptNode: (
+        url: string,
+        options: { attrs: { globalName: string } },
+      ) => Promise<any>;
     };
     instance: any;
     chunkMatcher?: (chunkId: string) => boolean;
@@ -87,7 +90,9 @@ export interface ModuleHot {
   _selfDeclined?: boolean;
   _main?: boolean;
   _acceptedDependencies?: { [moduleId: string]: () => void };
-  _acceptedErrorHandlers?: { [moduleId: string]: (error: Error, context: any) => void };
+  _acceptedErrorHandlers?: {
+    [moduleId: string]: (error: Error, context: any) => void;
+  };
   _declinedDependencies?: { [moduleId: string]: boolean };
   _disposeHandlers?: ((data: any) => void)[];
   _requireSelf?: () => any;
@@ -224,7 +229,14 @@ export interface CheckResult {
   /** Whether the operation was successful */
   success: boolean;
   /** Reason for failure or success details */
-  reason: 'no_provider' | 'no_updates' | 'updates_available' | 'update_applied' | 'check_error' | 'apply_error' | 'force_error';
+  reason:
+    | 'no_provider'
+    | 'no_updates'
+    | 'updates_available'
+    | 'update_applied'
+    | 'check_error'
+    | 'apply_error'
+    | 'force_error';
   /** Human-readable message */
   message: string;
   /** The update data if applicable */
@@ -407,7 +419,10 @@ export interface OutdatedSelfAcceptedModule {
  */
 export interface HMRHandlers {
   /** Initialize handler */
-  hmrI: (moduleId: string, applyHandlers: ((options: ApplyOptions) => ApplyResult)[]) => void;
+  hmrI: (
+    moduleId: string,
+    applyHandlers: ((options: ApplyOptions) => ApplyResult)[],
+  ) => void;
   /** Chunk handler */
   hmrC: (
     chunkIds: string[],
@@ -415,7 +430,7 @@ export interface HMRHandlers {
     removedModules: string[],
     promises: Promise<any>[],
     applyHandlers: ((options: ApplyOptions) => ApplyResult)[],
-    updatedModulesList: string[]
+    updatedModulesList: string[],
   ) => void;
 }
 
@@ -424,7 +439,10 @@ export interface HMRHandlers {
  */
 export interface HMRRuntime {
   /** Load update chunk function */
-  loadUpdateChunk: (chunkId: string, updatedModulesList?: string[]) => Promise<void>;
+  loadUpdateChunk: (
+    chunkId: string,
+    updatedModulesList?: string[],
+  ) => Promise<void>;
   /** Apply handler function */
   applyHandler: (options: ApplyOptions) => ApplyResult;
   /** HMR handlers */
@@ -499,7 +517,9 @@ export interface HMRClientConstructor {
   /** Create a queue-based update provider */
   createQueueUpdateProvider(updates: HMRUpdateData[]): UpdateProvider;
   /** Create a callback-based update provider */
-  createCallbackUpdateProvider(callback: (currentHash?: string) => Promise<HMRUpdate>): UpdateProvider;
+  createCallbackUpdateProvider(
+    callback: (currentHash?: string) => Promise<HMRUpdate>,
+  ): UpdateProvider;
 }
 
 /**
@@ -546,9 +566,11 @@ export interface FederationHMRUpdateProviderOptions {
  * Type guard to check if we're in a webpack context
  */
 export function isWebpackContext(): boolean {
-  return typeof globalThis !== 'undefined' &&
-         '__webpack_require__' in globalThis &&
-         typeof (globalThis as any).__webpack_require__ === 'function';
+  return (
+    typeof globalThis !== 'undefined' &&
+    '__webpack_require__' in globalThis &&
+    typeof (globalThis as any).__webpack_require__ === 'function'
+  );
 }
 
 /**
@@ -565,17 +587,26 @@ export function getWebpackRequire(): HMRWebpackRequire | null {
  * Type guard to check if module has hot API
  */
 export function hasModuleHot(module: any): module is ModuleObject {
-  return module && typeof module === 'object' && module.hot && typeof module.hot === 'object';
+  return (
+    module &&
+    typeof module === 'object' &&
+    module.hot &&
+    typeof module.hot === 'object'
+  );
 }
 
 /**
  * Type guard to check if webpack require has HMR capabilities
  */
-export function hasHMRCapabilities(webpackRequire: any): webpackRequire is HMRWebpackRequire {
-  return webpackRequire &&
-         typeof webpackRequire === 'function' &&
-         webpackRequire.hmrI &&
-         webpackRequire.hmrC;
+export function hasHMRCapabilities(
+  webpackRequire: any,
+): webpackRequire is HMRWebpackRequire {
+  return (
+    webpackRequire &&
+    typeof webpackRequire === 'function' &&
+    webpackRequire.hmrI &&
+    webpackRequire.hmrC
+  );
 }
 
 // =============================================================================

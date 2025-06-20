@@ -545,7 +545,6 @@ describe('End-to-End Webpack HMR Tests', () => {
     });
   });
 
-
   describe('Package Integration', () => {
     it('should have correct package.json configuration', () => {
       const packagePath = path.join(projectRoot, 'package.json');

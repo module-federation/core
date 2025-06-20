@@ -1,11 +1,14 @@
 /**
  * HMR Client - Usage Examples
- * 
+ *
  * This file demonstrates various ways to use the HMR Client library
  * for controlling custom Hot Module Replacement operations.
  */
 
-const { HMRClient, createHMRClient } = require('@module-federation/node/utils/hmr-client');
+const {
+  HMRClient,
+  createHMRClient,
+} = require('@module-federation/node/utils/hmr-client');
 
 console.log('🚀 HMR Client Library Examples\n');
 
@@ -16,7 +19,7 @@ async function basicUsageExample() {
   // Create and attach HMR client
   const hmrClient = createHMRClient({
     logging: true,
-    autoAttach: true
+    autoAttach: true,
   });
 
   console.log('📊 Initial Status:', hmrClient.getStatus());
@@ -27,7 +30,7 @@ async function basicUsageExample() {
   console.log('Force update result:', forceResult);
 
   console.log('📊 Status after force update:', hmrClient.getStatus());
-  
+
   return hmrClient;
 }
 
@@ -45,7 +48,7 @@ async function updateProviderExample() {
         h: 'hash1',
         c: ['index'],
         r: ['index'],
-        m: ['./src/index.js']
+        m: ['./src/index.js'],
       },
       script: `
         exports.modules = {
@@ -57,15 +60,15 @@ async function updateProviderExample() {
       `,
       originalInfo: {
         updateId: 'queue-update-1',
-        webpackHash: 'hash1'
-      }
+        webpackHash: 'hash1',
+      },
     },
     {
       manifest: {
         h: 'hash2',
         c: ['index'],
         r: ['index'],
-        m: ['./src/index.js']
+        m: ['./src/index.js'],
       },
       script: `
         exports.modules = {
@@ -77,9 +80,9 @@ async function updateProviderExample() {
       `,
       originalInfo: {
         updateId: 'queue-update-2',
-        webpackHash: 'hash2'
-      }
-    }
+        webpackHash: 'hash2',
+      },
+    },
   ];
 
   const queueProvider = HMRClient.createQueueUpdateProvider(testUpdates);
@@ -87,11 +90,17 @@ async function updateProviderExample() {
 
   // Apply first update
   const result1 = await hmrClient.checkForUpdates();
-  console.log('Queue Update 1 Result:', result1.success ? '✅ Success' : '❌ Failed');
+  console.log(
+    'Queue Update 1 Result:',
+    result1.success ? '✅ Success' : '❌ Failed',
+  );
 
   // Apply second update
   const result2 = await hmrClient.checkForUpdates();
-  console.log('Queue Update 2 Result:', result2.success ? '✅ Success' : '❌ Failed');
+  console.log(
+    'Queue Update 2 Result:',
+    result2.success ? '✅ Success' : '❌ Failed',
+  );
 
   // Try third update (should be no updates available)
   const result3 = await hmrClient.checkForUpdates();
@@ -100,21 +109,24 @@ async function updateProviderExample() {
   // 2b. Callback-based Provider
   console.log('\n🔄 Testing Callback Provider...');
   let callbackCounter = 0;
-  const callbackProvider = HMRClient.createCallbackUpdateProvider(async (currentHash) => {
-    callbackCounter++;
-    console.log(`📞 Callback called ${callbackCounter} times with hash: ${currentHash}`);
-    
-    // Return update on every other call
-    if (callbackCounter % 2 === 1) {
-      return {
-        update: {
-          manifest: {
-            h: `callback-hash-${callbackCounter}`,
-            c: ['index'],
-            r: ['index'],
-            m: ['./src/index.js']
-          },
-          script: `
+  const callbackProvider = HMRClient.createCallbackUpdateProvider(
+    async (currentHash) => {
+      callbackCounter++;
+      console.log(
+        `📞 Callback called ${callbackCounter} times with hash: ${currentHash}`,
+      );
+
+      // Return update on every other call
+      if (callbackCounter % 2 === 1) {
+        return {
+          update: {
+            manifest: {
+              h: `callback-hash-${callbackCounter}`,
+              c: ['index'],
+              r: ['index'],
+              m: ['./src/index.js'],
+            },
+            script: `
             exports.modules = {
               './src/index.js': function(module, exports, require) {
                 console.log('📞 Callback Update ${callbackCounter} Applied!');
@@ -122,22 +134,26 @@ async function updateProviderExample() {
               }
             };
           `,
-          originalInfo: {
-            updateId: `callback-update-${callbackCounter}`,
-            webpackHash: `callback-hash-${callbackCounter}`
-          }
-        }
-      };
-    }
-    
-    return { update: null };
-  });
+            originalInfo: {
+              updateId: `callback-update-${callbackCounter}`,
+              webpackHash: `callback-hash-${callbackCounter}`,
+            },
+          },
+        };
+      }
+
+      return { update: null };
+    },
+  );
 
   hmrClient.setUpdateProvider(callbackProvider);
 
   for (let i = 1; i <= 3; i++) {
     const result = await hmrClient.checkForUpdates();
-    console.log(`Callback check ${i}:`, result.success ? '✅ Applied' : `ℹ️ ${result.reason}`);
+    console.log(
+      `Callback check ${i}:`,
+      result.success ? '✅ Applied' : `ℹ️ ${result.reason}`,
+    );
   }
 
   return hmrClient;
@@ -148,21 +164,24 @@ console.log('\n=== Example 3: HTTP Update Provider ===');
 
 function httpProviderExample() {
   console.log('🌐 HTTP Provider Example (mock)...');
-  
+
   // This would work with a real server endpoint
-  const httpProvider = HMRClient.createHttpUpdateProvider('http://localhost:3001/hmr/updates', {
-    headers: {
-      'Authorization': 'Bearer your-token-here'
+  const httpProvider = HMRClient.createHttpUpdateProvider(
+    'http://localhost:3001/hmr/updates',
+    {
+      headers: {
+        Authorization: 'Bearer your-token-here',
+      },
+      timeout: 5000,
     },
-    timeout: 5000
-  });
+  );
 
   const hmrClient = createHMRClient();
   hmrClient.setUpdateProvider(httpProvider);
 
   console.log('✅ HTTP provider configured');
   console.log('ℹ️ In real usage, this would fetch updates from your server');
-  
+
   return hmrClient;
 }
 
@@ -171,12 +190,12 @@ console.log('\n=== Example 4: Polling Updates ===');
 
 async function pollingExample() {
   const hmrClient = createHMRClient();
-  
+
   // Set up a simple provider that occasionally has updates
   let pollCount = 0;
   const pollingProvider = HMRClient.createCallbackUpdateProvider(async () => {
     pollCount++;
-    
+
     // Provide an update every 3rd poll
     if (pollCount % 3 === 0) {
       return {
@@ -185,7 +204,7 @@ async function pollingExample() {
             h: `poll-hash-${pollCount}`,
             c: ['index'],
             r: ['index'],
-            m: ['./src/index.js']
+            m: ['./src/index.js'],
           },
           script: `
             exports.modules = {
@@ -197,19 +216,19 @@ async function pollingExample() {
           `,
           originalInfo: {
             updateId: `poll-update-${pollCount}`,
-            webpackHash: `poll-hash-${pollCount}`
-          }
-        }
+            webpackHash: `poll-hash-${pollCount}`,
+          },
+        },
       };
     }
-    
+
     return { update: null };
   });
 
   hmrClient.setUpdateProvider(pollingProvider);
 
   console.log('⏰ Starting polling (every 2 seconds)...');
-  
+
   const pollingControl = hmrClient.startPolling({
     interval: 2000,
     onUpdate: (result) => {
@@ -217,7 +236,7 @@ async function pollingExample() {
     },
     onError: (result) => {
       console.log('❌ Poll Error:', result.reason);
-    }
+    },
   });
 
   // Stop polling after 10 seconds
@@ -236,7 +255,9 @@ function forceModeExample() {
   const hmrClient = createHMRClient();
 
   console.log('💪 Starting force mode polling (every 3 seconds)...');
-  console.log('ℹ️ This will continuously reinstall modules even when no updates are available');
+  console.log(
+    'ℹ️ This will continuously reinstall modules even when no updates are available',
+  );
 
   const forcePollingControl = hmrClient.startPolling({
     interval: 3000,
@@ -246,7 +267,7 @@ function forceModeExample() {
     },
     onError: (result) => {
       console.log('❌ Force Error:', result.reason);
-    }
+    },
   });
 
   // Stop force polling after 8 seconds
@@ -264,10 +285,10 @@ console.log('\n=== Example 6: Advanced Configuration ===');
 async function advancedExample() {
   // Create client with custom configuration
   const hmrClient = new HMRClient({
-    autoAttach: false,    // Manual attachment
+    autoAttach: false, // Manual attachment
     logging: true,
     pollingInterval: 5000,
-    maxRetries: 5
+    maxRetries: 5,
   });
 
   console.log('🔧 Manual attachment...');
@@ -280,13 +301,13 @@ async function advancedExample() {
     if (Math.random() > 0.5) {
       throw new Error('Simulated provider error');
     }
-    
+
     return {
       update: {
         manifest: { h: 'error-test', c: ['index'], r: ['index'], m: [] },
         script: 'exports.modules = {}; console.log("Error test update");',
-        originalInfo: { updateId: 'error-test', webpackHash: 'error-test' }
-      }
+        originalInfo: { updateId: 'error-test', webpackHash: 'error-test' },
+      },
     };
   });
 
@@ -296,7 +317,10 @@ async function advancedExample() {
   console.log('🧪 Testing error handling...');
   for (let i = 1; i <= 3; i++) {
     const result = await hmrClient.checkForUpdates();
-    console.log(`Error test ${i}:`, result.success ? '✅ Success' : `❌ ${result.reason}`);
+    console.log(
+      `Error test ${i}:`,
+      result.success ? '✅ Success' : `❌ ${result.reason}`,
+    );
   }
 
   // Show final statistics
@@ -323,7 +347,7 @@ async function customUpdateExample() {
         h: 'custom-' + Date.now(),
         c: ['index'],
         r: ['index'],
-        m: ['./src/custom-module.js']
+        m: ['./src/custom-module.js'],
       },
       script: `
         exports.modules = {
@@ -347,14 +371,17 @@ async function customUpdateExample() {
       `,
       originalInfo: {
         updateId: 'custom-update-' + Date.now(),
-        webpackHash: 'custom-' + Date.now()
-      }
-    }
+        webpackHash: 'custom-' + Date.now(),
+      },
+    },
   };
 
   console.log('🎨 Applying custom update...');
   const result = await hmrClient.applyUpdate(customUpdate);
-  console.log('Custom update result:', result.success ? '✅ Success' : '❌ Failed');
+  console.log(
+    'Custom update result:',
+    result.success ? '✅ Success' : '❌ Failed',
+  );
 
   if (result.success) {
     console.log('📊 Update Stats:', result.stats);
@@ -372,11 +399,11 @@ async function runAllExamples() {
     await basicUsageExample();
     await updateProviderExample();
     httpProviderExample();
-    
+
     // Note: Polling examples are time-based, uncomment to test
     // await pollingExample();
     // forceModeExample();
-    
+
     await advancedExample();
     await customUpdateExample();
 
@@ -388,7 +415,6 @@ async function runAllExamples() {
     console.log('   • Use forceUpdate() for testing or forced reloads');
     console.log('   • Use polling for automatic updates');
     console.log('   • Check getStatus() and getStats() for monitoring');
-
   } catch (error) {
     console.error('❌ Error running examples:', error);
   }
@@ -403,7 +429,7 @@ module.exports = {
   forceModeExample,
   advancedExample,
   customUpdateExample,
-  runAllExamples
+  runAllExamples,
 };
 
 // Run examples if this file is executed directly

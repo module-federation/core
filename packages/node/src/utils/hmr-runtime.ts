@@ -16,7 +16,7 @@ import type {
   ManifestRef,
   UpdateChunk,
   HMRHandlers,
-  HMRRuntime
+  HMRRuntime,
 } from '../types/hmr';
 
 /**
@@ -29,15 +29,18 @@ import type {
 function createLoadUpdateChunk(
   __webpack_require__: HMRWebpackRequire,
   inMemoryChunks: InMemoryChunks,
-  state: HMRState
+  state: HMRState,
 ): (chunkId: string, updatedModulesList?: string[]) => Promise<void> {
-  return function loadUpdateChunk(chunkId: string, updatedModulesList?: string[]): Promise<void> {
+  return function loadUpdateChunk(
+    chunkId: string,
+    updatedModulesList?: string[],
+  ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       // Initialize currentUpdate if not already done
       if (!state.currentUpdate) {
         state.currentUpdate = {};
       }
-      
+
       // Check if we have in-memory content for this chunk
       if (inMemoryChunks[chunkId]) {
         var content = inMemoryChunks[chunkId];
@@ -67,26 +70,30 @@ function createLoadUpdateChunk(
           __dirname,
           '' + __webpack_require__.hu!(chunkId),
         );
-        require('fs').readFile(filename, 'utf-8', function (err: any, content: string) {
-          if (err) return reject(err);
-          var update: UpdateChunk = {};
-          require('vm').runInThisContext(
-            '(function(exports, require, __dirname, __filename) {' +
-              content +
-              '\n})',
-            filename,
-          )(update, require, require('path').dirname(filename), filename);
-          var updatedModules = update.modules;
-          var runtime = update.runtime;
-          for (var moduleId in updatedModules) {
-            if (__webpack_require__.o(updatedModules, moduleId)) {
-              state.currentUpdate![moduleId] = updatedModules[moduleId];
-              if (updatedModulesList) updatedModulesList.push(moduleId);
+        require('fs').readFile(
+          filename,
+          'utf-8',
+          function (err: any, content: string) {
+            if (err) return reject(err);
+            var update: UpdateChunk = {};
+            require('vm').runInThisContext(
+              '(function(exports, require, __dirname, __filename) {' +
+                content +
+                '\n})',
+              filename,
+            )(update, require, require('path').dirname(filename), filename);
+            var updatedModules = update.modules;
+            var runtime = update.runtime;
+            for (var moduleId in updatedModules) {
+              if (__webpack_require__.o(updatedModules, moduleId)) {
+                state.currentUpdate![moduleId] = updatedModules[moduleId];
+                if (updatedModulesList) updatedModulesList.push(moduleId);
+              }
             }
-          }
-          if (runtime) state.currentUpdateRuntime.push(runtime);
-          resolve();
-        });
+            if (runtime) state.currentUpdateRuntime.push(runtime);
+            resolve();
+          },
+        );
       }
     });
   };
@@ -102,13 +109,16 @@ function createLoadUpdateChunk(
 function createApplyHandler(
   __webpack_require__: HMRWebpackRequire,
   installedChunks: InstalledChunks,
-  state: HMRState
+  state: HMRState,
 ): (options: ApplyOptions) => ApplyResult {
   return function applyHandler(options: ApplyOptions): ApplyResult {
-    if ((__webpack_require__ as any).f) delete (__webpack_require__ as any).f.readFileVmHmr;
+    if ((__webpack_require__ as any).f)
+      delete (__webpack_require__ as any).f.readFileVmHmr;
     state.currentUpdateChunks = undefined;
 
-    function getAffectedModuleEffects(updateModuleId: string): ModuleEffectResult {
+    function getAffectedModuleEffects(
+      updateModuleId: string,
+    ): ModuleEffectResult {
       const outdatedModules = [updateModuleId];
       const outdatedDependencies: { [moduleId: string]: string[] } = {};
 
@@ -121,7 +131,9 @@ function createApplyHandler(
         const queueItem = queue.pop()!;
         const moduleId = queueItem.id;
         const chain = queueItem.chain;
-        const module = (__webpack_require__ as any).c[moduleId] as HMRModule | undefined;
+        const module = (__webpack_require__ as any).c[moduleId] as
+          | HMRModule
+          | undefined;
         if (
           !module ||
           (module.hot._selfAccepted && !module.hot._selfInvalidated)
@@ -143,7 +155,9 @@ function createApplyHandler(
         }
         for (let i = 0; i < module.parents.length; i++) {
           const parentId = module.parents[i];
-          const parent = (__webpack_require__ as any).c[parentId] as HMRModule | undefined;
+          const parent = (__webpack_require__ as any).c[parentId] as
+            | HMRModule
+            | undefined;
           if (!parent) continue;
           if (parent.hot._declinedDependencies?.[moduleId]) {
             return {
@@ -190,7 +204,9 @@ function createApplyHandler(
     const outdatedModules: string[] = [];
     const appliedUpdate: { [moduleId: string]: any } = {};
 
-    const warnUnexpectedRequire = function warnUnexpectedRequire(module: any): void {
+    const warnUnexpectedRequire = function warnUnexpectedRequire(
+      module: any,
+    ): void {
       console.warn(
         '[HMR] unexpected require(' + module.id + ') to disposed module',
       );
@@ -265,7 +281,9 @@ function createApplyHandler(
           // Propagate outdated modules and dependencies
           addAllToSet(outdatedModules, result.outdatedModules || []);
           for (const outModuleId in result.outdatedDependencies) {
-            if (__webpack_require__.o(result.outdatedDependencies, outModuleId)) {
+            if (
+              __webpack_require__.o(result.outdatedDependencies, outModuleId)
+            ) {
               if (!outdatedDependencies[outModuleId])
                 outdatedDependencies[outModuleId] = [];
               addAllToSet(
@@ -287,7 +305,9 @@ function createApplyHandler(
     const outdatedSelfAcceptedModules: OutdatedSelfAcceptedModule[] = [];
     for (let j = 0; j < outdatedModules.length; j++) {
       const outdatedModuleId = outdatedModules[j];
-      const module = (__webpack_require__ as any).c[outdatedModuleId] as HMRModule | undefined;
+      const module = (__webpack_require__ as any).c[outdatedModuleId] as
+        | HMRModule
+        | undefined;
       if (
         module &&
         (module.hot._selfAccepted || module.hot._main) &&
@@ -299,7 +319,13 @@ function createApplyHandler(
         outdatedSelfAcceptedModules.push({
           module: outdatedModuleId,
           require: module.hot._requireSelf,
-          errorHandler: typeof module.hot._selfAccepted === 'function' ? module.hot._selfAccepted as ((error: Error, context: any) => void) : undefined,
+          errorHandler:
+            typeof module.hot._selfAccepted === 'function'
+              ? (module.hot._selfAccepted as (
+                  error: Error,
+                  context: any,
+                ) => void)
+              : undefined,
         });
       }
     }
@@ -317,7 +343,9 @@ function createApplyHandler(
         const queue = outdatedModules.slice();
         while (queue.length > 0) {
           const moduleId = queue.pop()!;
-          const module = (__webpack_require__ as any).c[moduleId] as HMRModule | undefined;
+          const module = (__webpack_require__ as any).c[moduleId] as
+            | HMRModule
+            | undefined;
           if (!module) continue;
 
           const data: any = {};
@@ -340,7 +368,9 @@ function createApplyHandler(
 
           // remove "parents" references from all children
           for (let j = 0; j < module.children.length; j++) {
-            const child = (__webpack_require__ as any).c[module.children[j]] as HMRModule | undefined;
+            const child = (__webpack_require__ as any).c[module.children[j]] as
+              | HMRModule
+              | undefined;
             if (!child) continue;
             idx = child.parents.indexOf(moduleId);
             if (idx >= 0) {
@@ -353,7 +383,9 @@ function createApplyHandler(
         let dependency: string;
         for (const outdatedModuleId in outdatedDependencies) {
           if (__webpack_require__.o(outdatedDependencies, outdatedModuleId)) {
-            const module = (__webpack_require__ as any).c[outdatedModuleId] as HMRModule | undefined;
+            const module = (__webpack_require__ as any).c[outdatedModuleId] as
+              | HMRModule
+              | undefined;
             if (module) {
               moduleOutdatedDependencies =
                 outdatedDependencies[outdatedModuleId];
@@ -383,12 +415,17 @@ function createApplyHandler(
         // call accept handlers
         for (const outdatedModuleId in outdatedDependencies) {
           if (__webpack_require__.o(outdatedDependencies, outdatedModuleId)) {
-            const module = (__webpack_require__ as any).c[outdatedModuleId] as HMRModule | undefined;
+            const module = (__webpack_require__ as any).c[outdatedModuleId] as
+              | HMRModule
+              | undefined;
             if (module) {
               moduleOutdatedDependencies =
                 outdatedDependencies[outdatedModuleId];
               const callbacks: ((...args: any[]) => void)[] = [];
-              const errorHandlers: ((error: Error, context: any) => void | undefined)[] = [];
+              const errorHandlers: ((
+                error: Error,
+                context: any,
+              ) => void | undefined)[] = [];
               const dependenciesForCallbacks: string[] = [];
               for (let j = 0; j < moduleOutdatedDependencies.length; j++) {
                 const dependency = moduleOutdatedDependencies[j];
@@ -503,7 +540,7 @@ function createApplyHandler(
  */
 function createHMRManifestLoader(
   __webpack_require__: HMRWebpackRequire,
-  manifestRef: ManifestRef
+  manifestRef: ManifestRef,
 ): () => Promise<HMRManifest | undefined> {
   return function (): Promise<HMRManifest | undefined> {
     return new Promise<HMRManifest | undefined>((resolve, reject) => {
@@ -548,12 +585,18 @@ function createHMRManifestLoader(
 function createHMRHandlers(
   __webpack_require__: HMRWebpackRequire,
   installedChunks: InstalledChunks,
-  loadUpdateChunk: (chunkId: string, updatedModulesList?: string[]) => Promise<void>,
+  loadUpdateChunk: (
+    chunkId: string,
+    updatedModulesList?: string[],
+  ) => Promise<void>,
   applyHandler: (options: ApplyOptions) => ApplyResult,
   state: HMRState,
 ): HMRHandlers {
   return {
-    hmrI: function (moduleId: string, applyHandlers: ((options: ApplyOptions) => ApplyResult)[]): void {
+    hmrI: function (
+      moduleId: string,
+      applyHandlers: ((options: ApplyOptions) => ApplyResult)[],
+    ): void {
       // hmrI.readFileVm called for module
 
       if (!state.currentUpdate) {
@@ -566,7 +609,9 @@ function createHMRHandlers(
 
       if (!__webpack_require__.o(state.currentUpdate, moduleId)) {
         // Adding module to currentUpdate
-        state.currentUpdate[moduleId] = (__webpack_require__ as any).m[moduleId];
+        state.currentUpdate[moduleId] = (__webpack_require__ as any).m[
+          moduleId
+        ];
       } else {
         // Module already in currentUpdate
       }
@@ -581,14 +626,16 @@ function createHMRHandlers(
       applyHandlers: ((options: ApplyOptions) => ApplyResult)[],
       updatedModulesList: string[],
     ): void {
-
       applyHandlers.push(applyHandler);
       state.currentUpdateChunks = {};
       state.currentUpdateRemovedChunks = removedChunks;
-      state.currentUpdate = removedModules.reduce((obj: { [key: string]: any }, key: string) => {
-        obj[key] = false;
-        return obj;
-      }, {});
+      state.currentUpdate = removedModules.reduce(
+        (obj: { [key: string]: any }, key: string) => {
+          obj[key] = false;
+          return obj;
+        },
+        {},
+      );
 
       // Initial currentUpdate from removedModules
 
@@ -609,7 +656,10 @@ function createHMRHandlers(
         }
       });
       if ((__webpack_require__ as any).f) {
-        (__webpack_require__ as any).f.readFileVmHmr = function (chunkId: string, promises: Promise<any>[]): void {
+        (__webpack_require__ as any).f.readFileVmHmr = function (
+          chunkId: string,
+          promises: Promise<any>[],
+        ): void {
           if (
             state.currentUpdateChunks &&
             __webpack_require__.o(state.currentUpdateChunks, chunkId) &&

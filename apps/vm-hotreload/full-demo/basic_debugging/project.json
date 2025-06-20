@@ -15,10 +15,7 @@
     "start": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "npm run build",
-          "node dist/index.js"
-        ],
+        "commands": ["npm run build", "node dist/index.js"],
         "parallel": false,
         "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
       },
@@ -27,10 +24,7 @@
     "start:hmr-client": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "npm run build",
-          "node dist/hmr-client-demo.js"
-        ],
+        "commands": ["npm run build", "node dist/hmr-client-demo.js"],
         "parallel": false,
         "cwd": "apps/vm-hotreload/full-demo/basic_debugging"
       },
