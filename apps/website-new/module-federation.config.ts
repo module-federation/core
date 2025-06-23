@@ -30,14 +30,14 @@ const exposes = {
   [`./configure-remotes-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/remotes.mdx`,
   [`./configure-exposes-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/exposes.mdx`,
   [`./configure-shared-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/shared.mdx`,
-  [`./configure-runtimePlugins-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/runtimePlugins.mdx`,
+  // [`./configure-runtimePlugins-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/runtimePlugins.mdx`,
   [`./configure-getpublicpath-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/getpublicpath.mdx`,
   [`./configure-implementation-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/implementation.mdx`,
   [`./configure-dts-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/dts.mdx`,
   [`./configure-dev-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/dev.mdx`,
   [`./configure-manifest-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/manifest.mdx`,
-  [`./configure-shareStrategy-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/shareStrategy.mdx`,
-  [`./configure-experiments-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/experiments.mdx`,
+  // [`./configure-shareStrategy-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/shareStrategy.mdx`,
+  // [`./configure-experiments-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/experiments.mdx`,
 
   // blog
   [`./error-load-remote-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/error-load-remote.mdx`,
