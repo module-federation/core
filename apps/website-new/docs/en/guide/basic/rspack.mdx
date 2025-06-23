@@ -33,7 +33,7 @@ import { PackageManagerTabs } from '@theme';
 
 Create the {props.configName || 'module-federation.config.ts'} file with the following content:
 
-import CreateConfig from '@components/common/rspack/CreateConfig';
+import CreateConfig from '@components/common/rspack/create-config';
 
 {props.createConfig || <CreateConfig />}
 
@@ -41,7 +41,7 @@ import CreateConfig from '@components/common/rspack/CreateConfig';
 
 In `Rspack`, you can add plugins through the `plugins` configuration item:
 
-import RegisterPlugin from '@components/common/rspack/RegisterPlugin';
+import RegisterPlugin from '@components/common/rspack/register-plugin';
 
 {props.registerPlugin || <RegisterPlugin />}
 

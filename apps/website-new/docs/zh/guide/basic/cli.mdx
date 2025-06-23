@@ -7,7 +7,7 @@
 ## 查看所有命令
 
 import React from 'react';
-import ViewAllCmdsMdx from '@components/common/cli/ViewAllCmds';
+import ViewAllCmdsMdx from '@components/common/cli/view-all-cmds';
 
 {/* rspress flattenMdxContent issue  */}
 {props.show || React.createElement(ViewAllCmdsMdx)}
@@ -29,7 +29,7 @@ import ViewAllCmdsMdx from '@components/common/cli/ViewAllCmds';
   命令用于拉取或生成 TypeScript 类型声明文件。
 </p>
 
-import CommandInfo from '@components/common/cli/CommandInfo';
+import CommandInfo from '@components/common/cli/cmd-info';
 
 {props.commandInfo || <CommandInfo />}
 

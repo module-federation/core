@@ -12,7 +12,7 @@
 
 你可以通过如下的命令安装插件：
 
-import InstallKit from '@components/common/InstallKit';
+import InstallKit from '@components/common/install-kit';
 
 <InstallKit
   pkgName={props.pkgName || '@module-federation/rspress-plugin'}
@@ -22,13 +22,13 @@ import InstallKit from '@components/common/InstallKit';
 
 创建 {props.configName || 'module-federation.config.ts'} 文件，内容如下：
 
-import CreateConfig from '@components/common/rspress/CreateConfig';
+import CreateConfig from '@components/common/rspress/create-config';
 
 {props.createConfig || <CreateConfig />}
 
 ### 注册插件
 
-import RegisterPlugin from '@components/common/rspress/RegisterPlugin';
+import RegisterPlugin from '@components/common/rspress/register-plugin';
 import React from 'react';
 
 {props.registerPlugin || React.createElement(RegisterPlugin)}
@@ -56,7 +56,7 @@ import Intro from 'mf-doc/intro-zh';
 
 * 类型：
 
-import ConfigType from '@components/common/rspress/ConfigType';
+import ConfigType from '@components/common/rspress/config-type';
 
 {props.configType || <ConfigType />}
 
