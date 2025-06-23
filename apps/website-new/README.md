@@ -14,3 +14,8 @@ Clear `.nx` cache if you encounter unexpected build issues.
 ## Build
 
 Output will be located in the `dist` or `.next` folder.
+
+## Scripts
+
+- `pnpm start`: Start dev server
+- `pnpm build`: Build production bundle
