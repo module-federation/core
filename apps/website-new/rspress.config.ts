@@ -102,10 +102,6 @@ export default defineConfig({
       postcss: (config, { addPlugins }) => {
         addPlugins([require('tailwindcss/nesting'), require('tailwindcss')]);
       },
-      rspack(config) {
-        config.optimization.moduleIds = 'named';
-        config.optimization.chunkIds = 'named';
-      },
     },
     resolve: {
       alias: {

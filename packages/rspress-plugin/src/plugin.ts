@@ -114,6 +114,10 @@ export function pluginModuleFederation(
         singleton: true,
       },
       '@mdx-js/react': { singleton: true, requiredVersion: false },
+      '@rspress/runtime': {
+        singleton: true,
+        requiredVersion: false,
+      },
     };
   }
 

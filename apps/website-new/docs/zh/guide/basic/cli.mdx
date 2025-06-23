@@ -1,70 +1,42 @@
----
-pageType: doc
----
-
 # 命令行工具
 
-`@module-federation/enhanced` 和 `@module-federation/modern-js` 提供了轻量的命令行工具。
-
-## testtitle
-cccasdawqeqxca asda
+<p>
+{props.name || 'Module Federation'} 提供了轻量的命令行工具：{(props.cmdTools || ['@module-federation/enhanced', '@module-federation/modern-js']).map((cmdTool,index,arr)=>(<><code>{cmdTool}</code>{index+1===arr.length ? '':' 和 '}</>))} 。
+</p>
 
 ## 查看所有命令
 
-如果你需要查看所有可用的 CLI 命令，请在项目目录中运行以下命令：
+import React from 'react';
+import ViewAllCmdsMdx from '@components/common/cli/ViewAllCmds';
 
-```bash
-npx mf -h
-```
-
-输出如下：
-
-```text
-Usage: mf <command> [options]
-
-Options:
-  -V, --version   output the version number
-  -h, --help      display help for command
-
-Commands:
-  dts [options]   generate or fetch the mf types
-  help [command]  display help for command
-```
+{/* rspress flattenMdxContent issue  */}
+{props.show || React.createElement(ViewAllCmdsMdx)}
 
 ## 公共选项
 
-Module Federation CLI 提供了一些公共选项，可以用于所有命令：
+{props.name || 'Module Federation'} CLI 提供了一些公共选项，可以用于所有命令：
 
 | 选项                       | 描述                                                                                                              |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `-c, --config <config>`    | 指定配置文件路径，可以为相对路径或绝对路径，默认值为 `module-federation.config.ts`      |
+| `-c, --config <config>`    | 指定配置文件路径，可以为相对路径或绝对路径，默认值为 {props.configName ? props.configName : 'module-federation.config.ts'}      |
 | `-m, --mode <mode>`        | 指定运行环境，可以选择 "dev" 或 "prod" ，默认值为 "dev" ，设置后会按照值自动往 `process.env.NODE_ENV` 环境变量注入  "development" 或 "production"   |
 | `-h, --help`               | 显示命令帮助                                                                                                      |
 
-## mf dts
+## {props.cmd || 'mf'} dts
 
-`mf dts` 命令用于拉取或生成 TypeScript 类型声明文件。
+<p>
+  <code>{props.cmd || 'mf'} dts</code>
+  命令用于拉取或生成 TypeScript 类型声明文件。
+</p>
 
-```bash
-Usage: mf dts [options]
+import CommandInfo from '@components/common/cli/CommandInfo';
 
-generate or fetch the mf types
-
-Options:
-  --root <root>         specify the project root directory
-  --output <output>     specify the generated dts output directory
-  --fetch <boolean>     fetch types from remote, default is true (default: true)
-  --generate <boolean>  generate types, default is true (default: true)
-  -c --config <config>  specify the configuration file, can be a relative or absolute path
-  -m --mode <mode>      Specify the runtime environment. You can choose "dev" or "prod". The default value is "dev". After setting, the process.env.NODE_ENV environment variable will be
-                        automatically injected with "development" or "production" according to the value. (default: "dev")
-  -h, --help            display help for command
-```
+{props.commandInfo || <CommandInfo />}
 
 :::info 注意
 
-`mf dts` 命令会自动根据 `module-federation.config.ts` 中的配置生成或拉取类型声明文件。 这意味着你必须提供一个有效的配置文件，否则命令将无法正常运行。
+<p><code>{props.cmd || 'mf'} dts</code> 命令会自动根据 <code>{props.configName || 'module-federation.config.ts'}</code> 中的配置生成或拉取类型声明文件。 这意味着你必须提供一个有效的配置文件，否则命令将无法正常运行。</p>
 
-如果你是只使用了 runtime API，那么你需要创建一份临时的 `module-federation.config.ts` 文件，配置 [dts.consumeTypes.remoteTypeUrls](../../configure/dts#remotetypeurls)，然后运行 `mf dts` 命令。
+<p>如果你是只使用了 runtime API，那么你需要创建一份临时的 <code>{props.configName || 'module-federation.config.ts'}</code> 文件，配置 [dts.consumeTypes.remoteTypeUrls](../../configure/dts#remotetypeurls)，然后运行 <code>{props.cmd || 'mf'} dts</code>  命令。</p>
 
 :::
