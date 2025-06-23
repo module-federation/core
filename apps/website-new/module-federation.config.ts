@@ -1,4 +1,5 @@
 import { createModuleFederationConfig } from '@module-federation/rspress-plugin';
+import * as path from 'path';
 
 const LANGUAGE = 'LANGUAGE';
 const LANGUAGES = ['zh', 'en'];
@@ -48,7 +49,10 @@ export default createModuleFederationConfig({
   name: 'mf_doc',
   exposes: Object.entries(exposes).reduce((acc, [key, value]) => {
     LANGUAGES.forEach((lang) => {
-      acc[key.replace(LANGUAGE, lang)] = value.replace(LANGUAGE, lang);
+      acc[key.replace(LANGUAGE, lang)] = path.join(
+        __dirname,
+        value.replace(LANGUAGE, lang),
+      );
     });
     return acc;
   }, {}),
