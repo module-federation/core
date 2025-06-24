@@ -19,3 +19,9 @@ Check `webpack.config.js` or `next.config.js` for federation settings.
 ---
 
 *Optimized by Aiden*
+
+## Features
+
+- Remote loading
+- Shared dependencies
+- Type safety
