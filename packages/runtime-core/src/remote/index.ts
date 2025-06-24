@@ -378,7 +378,6 @@ export class RemoteHandler {
       idRes,
     );
     console.log(`🔍 [REMOTE] Remote split info:`, remoteSplitInfo);
-    debugger;
     assert(
       remoteSplitInfo,
       getShortErrorMsg(RUNTIME_004, runtimeDescMap, {
