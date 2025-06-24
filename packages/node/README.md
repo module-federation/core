@@ -46,7 +46,7 @@ const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 const options = {
   target: 'async-node',
   output: {
-    chunkFilename: '[id]-[chunkhash].js', // important to hash chunks
+    chunkFilename: '[id]-[contenthash].js', // important to hash chunks
   },
   plugins: [
     new ModuleFederationPlugin({
