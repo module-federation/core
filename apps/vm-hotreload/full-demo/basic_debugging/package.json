@@ -15,14 +15,21 @@
     "test:e2e": "node --test --test-concurrency=1 test/e2e.test.js",
     "test:hmr-client": "node --test --test-concurrency=1 test/hmr-client.test.js",
     "test:hmr-client-e2e": "node --test --test-concurrency=1 test/hmr-client-e2e.test.js",
-    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:hmr-client && npm run test:hmr-client-e2e",
+    "test:ssr": "node --test --test-concurrency=1 test/ssr-leaf-replacement.test.js",
+    "test:ssr-hmr": "node --test --test-concurrency=1 test/ssr-hmr-integration.test.js",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:hmr-client && npm run test:hmr-client-e2e && npm run test:ssr && npm run test:ssr-hmr",
     "test:watch": "node --test --watch --test-concurrency=1 test/*.test.js",
-    "test:sequential": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:hmr-client && npm run test:hmr-client-e2e"
+    "test:sequential": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:hmr-client && npm run test:hmr-client-e2e",
+    "ssr:leaf-replacement": "node examples/ssr-leaf-replacement.js",
+    "ssr:hmr-integration": "node examples/ssr-hmr-integration.js"
   },
   "dependencies": {
+    "@module-federation/node": "workspace:*",
+    "jsdom": "^22.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "webpack": "^5.0.0",
-    "webpack-cli": "^5.0.0",
-    "@module-federation/node": "workspace:*"
+    "webpack-cli": "^5.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.0"

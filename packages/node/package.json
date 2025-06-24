@@ -24,6 +24,10 @@
       "import": "./dist/src/utils/hmr-runtime.js",
       "require": "./dist/src/utils/hmr-runtime.js"
     },
+    "./utils/hot-reload": {
+      "import": "./dist/src/utils/hot-reload.js",
+      "require": "./dist/src/utils/hot-reload.js"
+    },
     "./utils/custom-hmr-helpers": {
       "import": "./dist/src/utils/custom-hmr-helpers.js",
       "require": "./dist/src/utils/custom-hmr-helpers.js"

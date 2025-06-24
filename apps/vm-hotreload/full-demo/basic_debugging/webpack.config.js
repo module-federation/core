@@ -10,6 +10,14 @@ module.exports = {
       __dirname,
       'examples/demo/hmr-client-demo.js',
     ),
+    'federation-multi-entry': path.resolve(
+      __dirname,
+      'examples/federation-multi-entry.js',
+    ),
+    'federation-isolate-test': path.resolve(
+      __dirname,
+      'examples/federation-isolate-test.js',
+    ),
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

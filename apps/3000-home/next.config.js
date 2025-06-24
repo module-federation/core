@@ -1,5 +1,6 @@
 const { withNx } = require('@nx/next/plugins/with-nx');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
+const webpack = require('webpack');
 
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
@@ -58,6 +59,11 @@ const nextConfig = {
         },
       }),
     );
+    // Add Hot Module Replacement Plugin
+    if (isServer) {
+      config.plugins.push(new webpack.HotModuleReplacementPlugin());
+    }
+
     config.plugins.push({
       name: 'xxx',
       apply(compiler) {

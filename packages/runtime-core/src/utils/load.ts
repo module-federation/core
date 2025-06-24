@@ -182,23 +182,15 @@ async function loadEntryNode({
   loaderHook: FederationHost['loaderHook'];
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
-  console.log(`🖥️  [LOAD] loadEntryNode called for:`, {
-    name,
-    entry,
-    type,
-    globalName,
-  });
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
     globalName,
   );
 
   if (remoteEntryExports) {
-    console.log(`✓ [LOAD] Found existing remote entry exports for ${name}`);
     return remoteEntryExports;
   }
 
-  console.log(`🔽 [LOAD] Loading script node for entry: ${entry}`);
   return loadScriptNode(entry, {
     attrs: { name, globalName, type },
     loaderHook: {
@@ -216,13 +208,9 @@ async function loadEntryNode({
     },
   })
     .then(() => {
-      console.log(
-        `✓ [LOAD] Script loaded successfully for ${name}, handling remote entry...`,
-      );
       return handleRemoteEntryLoaded(name, globalName, entry);
     })
     .catch((e) => {
-      console.error(`❌ [LOAD] Failed to load script for ${name}:`, e);
       throw e;
     });
 }
@@ -242,21 +230,11 @@ export async function getRemoteEntry({
   remoteEntryExports?: RemoteEntryExports | undefined;
 }): Promise<RemoteEntryExports | false | void> {
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
-  console.log(`🚀 [LOAD] getRemoteEntry called for:`, {
-    name: remoteInfo.name,
-    entry: remoteInfo.entry,
-    type: remoteInfo.type,
-    uniqueKey,
-    hasExistingExports: !!remoteEntryExports,
-  });
   if (remoteEntryExports) {
     return remoteEntryExports;
   }
 
   if (!globalLoading[uniqueKey]) {
-    console.log(
-      `📥 [LOAD] Starting to load remote entry for uniqueKey: ${uniqueKey}`,
-    );
     const loadEntryHook = origin.remoteHandler.hooks.lifecycle.loadEntry;
     const loaderHook = origin.loaderHook;
 
@@ -275,24 +253,13 @@ export async function getRemoteEntry({
           typeof ENV_TARGET !== 'undefined'
             ? ENV_TARGET === 'web'
             : isBrowserEnv();
-        console.log(
-          `🌐 [LOAD] Environment check - isWebEnvironment: ${isWebEnvironment}, ENV_TARGET: ${typeof ENV_TARGET !== 'undefined' ? ENV_TARGET : 'undefined'}`,
-        );
-        console.log(`📡 [LOAD] About to load remote entry:`, {
-          name: remoteInfo.name,
-          entry: remoteInfo.entry,
-          type: remoteInfo.type,
-          isWebEnvironment,
-        });
+
         return isWebEnvironment
           ? loadEntryDom({ remoteInfo, remoteEntryExports, loaderHook })
           : loadEntryNode({ remoteInfo, loaderHook });
       });
   }
 
-  console.log(
-    `⏳ [LOAD] Returning existing loading promise for uniqueKey: ${uniqueKey}`,
-  );
   return globalLoading[uniqueKey];
 }
 
