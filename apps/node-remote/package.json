@@ -1,6 +1,6 @@
 {
   "name": "node-remote",
-  "private": true, "description": "Federation example for node-remote",
+  "private": true, "description": "Federation example for node-remote", "description": "Federation example for node-remote",
   "dependencies": {
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
