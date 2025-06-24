@@ -13,3 +13,9 @@
 ## Links
 
 - [Module Federation Docs](https://module-federation.io/)
+
+## Features
+
+- Remote loading
+- Shared dependencies
+- Type safety
