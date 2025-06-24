@@ -20,23 +20,23 @@ import {
 
 import type { ErrorInfo } from './AwaitDataFetch';
 import type { DataFetchParams, NoSSRRemoteInfo } from './types';
-import type { FederationHost } from '@module-federation/runtime';
+import type { FederationHost, getInstance } from '@module-federation/runtime';
 
 export type IProps = {
   id: string;
+  instance: ReturnType<typeof getInstance>;
   injectScript?: boolean;
   injectLink?: boolean;
-  runtime: typeof import('@module-federation/runtime');
 };
 
 export type CreateLazyComponentOptions<T, E extends keyof T> = {
   loader: () => Promise<T>;
+  instance: ReturnType<typeof getInstance>;
   loading: React.ReactNode;
   fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
   export?: E;
   dataFetchParams?: DataFetchParams;
   noSSR?: boolean;
-  runtime: typeof import('@module-federation/runtime');
 };
 
 type ReactKey = { key?: React.Key | null };
@@ -89,7 +89,7 @@ export function collectSSRAssets(options: IProps) {
   } = typeof options === 'string' ? { id: options } : options;
   const links: React.ReactNode[] = [];
   const scripts: React.ReactNode[] = [];
-  const instance = options.runtime.getInstance();
+  const instance = options.instance;
   if (!instance || (!injectLink && !injectScript)) {
     return [...scripts, ...links];
   }
@@ -192,10 +192,10 @@ function getServerNeedRemoteInfo(
 export function createLazyComponent<T, E extends keyof T>(
   options: CreateLazyComponentOptions<T, E>,
 ) {
-  const { runtime } = options;
-  if (!runtime?.getInstance) {
+  const { instance } = options;
+  if (!instance) {
     throw new Error(
-      'runtime is required if used in "@module-federation/bridge-react"!',
+      'instance is required if used in "@module-federation/bridge-react"!',
     );
   }
   type ComponentType = T[E] extends (...args: any) => any
@@ -219,7 +219,6 @@ export function createLazyComponent<T, E extends keyof T>(
   const getData = async (noSSR?: boolean) => {
     let loadedRemoteInfo: ReturnType<typeof getLoadedRemoteInfos>;
     let moduleId: string;
-    const instance = runtime.getInstance();
     try {
       const m = await callLoader();
       moduleId = m && m[Symbol.for('mf_module_id')];
@@ -271,7 +270,6 @@ export function createLazyComponent<T, E extends keyof T>(
   const LazyComponent = React.lazy(async () => {
     const m = await callLoader();
     const moduleId = m && m[Symbol.for('mf_module_id')];
-    const instance = runtime.getInstance()!;
     const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, instance);
     loadedRemoteInfo?.snapshot;
     const dataFetchMapKey = loadedRemoteInfo
@@ -289,7 +287,7 @@ export function createLazyComponent<T, E extends keyof T>(
 
     const assets = collectSSRAssets({
       id: moduleId,
-      runtime,
+      instance,
     });
 
     const Com = m[exportName] as React.FC<ComponentType>;

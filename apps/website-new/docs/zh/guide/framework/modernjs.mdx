@@ -195,9 +195,11 @@ export default Index;
 在消费者中，我们需要通过 `createLazyComponent` 来加载远程组件，并获取数据。
 
 ```tsx
+import { getInstance } from '@module-federation/modern-js/runtime';
 import { createLazyComponent, ERROR_TYPE } from '@module-federation/modern-js/react';
 
 const List = createLazyComponent({
+  instance: getInstance(),
   loader: () => {
     return import('remote/List');
   },
@@ -304,7 +306,7 @@ export async function loader({ params }) {
 为防止与 Shared 冲突，需要通过下列方式引用。
 
 ```ts
-import { loadRemote } from '@module-federation/modern-js/runtime';
+import { loadRemote, getInstance } from '@module-federation/modern-js/runtime';
 import { createLazyComponent, wrapNoSSR } from '@module-federation/modern-js/react';
 ```
 
@@ -319,6 +321,7 @@ declare function createLazyComponent(
 ): (props: ComponentType) => React.JSX.Element;
 
 type CreateLazyComponentOptions<T, E extends keyof T> = {
+  instance: ReturnType<typeof getInstance>;
   loader: () => Promise<T>;
   loading: React.ReactNode;
   fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
@@ -353,9 +356,11 @@ type ErrorInfo = {
 
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
+import { getInstance } from '@module-federation/modern-js/runtime';
 import { createLazyComponent, ERROR_TYPE } from '@module-federation/modern-js/react';
 
 const LazyComponent = createLazyComponent({
+  instance: getInstance(),
   loader: () => import('remote/Image'),
   loading: <div>loading...</div>,
   fallback: ({error,errorType,dataFetchMapKey}) => {
@@ -433,9 +438,11 @@ declare function wrapNoSSR<T, E extends keyof T>(
 使用示例：
 
 ```tsx
+import { getInstance } from '@module-federation/modern-js/runtime';
 import { createLazyComponent, wrapNoSSR } from '@module-federation/modern-js/runtime';
 
 const LazyComponent = wrapNoSSR(createLazyComponent)({
+  instance: getInstance(),
   loader: () => {
     return import('remote/Content');
   },

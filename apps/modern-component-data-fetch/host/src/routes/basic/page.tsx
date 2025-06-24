@@ -1,9 +1,11 @@
+import { getInstance } from '@module-federation/modern-js/runtime';
 import {
   createLazyComponent,
   ERROR_TYPE,
 } from '@module-federation/modern-js/react';
 
 const Basic = createLazyComponent({
+  instance: getInstance(),
   loader: () => {
     return import('remote/BasicComponent');
   },

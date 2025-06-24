@@ -194,9 +194,11 @@ export default Index;
 In the consumer, we need to use `createLazyComponent` to load the remote component and fetch data.
 
 ```tsx
+import { getInstance } from '@module-federation/modern-js/runtime';
 import { createLazyComponent, ERROR_TYPE } from '@module-federation/modern-js/react';
 
 const List = createLazyComponent({
+  instance: getInstance(),
   loader: () => {
     return import('remote/List');
   },
@@ -302,7 +304,7 @@ In addition to exporting [MF Runtime](../basic/runtime), `@module-federation/mod
 To prevent conflicts with Shared modules, you need to import them as follows:
 
 ```ts
-import { loadRemote } from '@module-federation/modern-js/runtime';
+import { loadRemote, getInstance } from '@module-federation/modern-js/runtime';
 import { createLazyComponent, wrapNoSSR } from '@module-federation/modern-js/react';
 ```
 
@@ -317,6 +319,7 @@ declare function createLazyComponent(
 ): (props: ComponentType) => React.JSX.Element;
 
 type CreateLazyComponentOptions<T, E extends keyof T> = {
+  instance: ReturnType<typeof getInstance>;
   loader: () => Promise<T>;
   loading: React.ReactNode;
   fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
@@ -351,9 +354,11 @@ This function supports loading components and also provides the following capabi
 
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
+import { getInstance } from '@module-federation/modern-js/runtime';
 import { createLazyComponent, ERROR_TYPE } from '@module-federation/modern-js/react';
 
 const LazyComponent = createLazyComponent({
+  instance: getInstance(),
   loader: () => import('remote/Image'),
   loading: <div>loading...</div>,
   fallback: ({error,errorType,dataFetchMapKey}) => {
@@ -431,9 +436,11 @@ Wraps a component so that it does not render in SSR scenarios.
 Usage example:
 
 ```tsx
+import { getInstance } from '@module-federation/modern-js/runtime';
 import { createLazyComponent, wrapNoSSR } from '@module-federation/modern-js/react';
 
 const LazyComponent = wrapNoSSR(createLazyComponent)({
+  instance: getInstance(),
   loader: () => {
     return import('remote/Content');
   },

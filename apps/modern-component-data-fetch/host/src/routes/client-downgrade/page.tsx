@@ -1,6 +1,8 @@
+import { getInstance } from '@module-federation/modern-js/runtime';
 import { createLazyComponent } from '@module-federation/modern-js/react';
 
 const ClientDowngrade = createLazyComponent({
+  instance: getInstance(),
   loader: () => {
     return import('remote/ClientDowngrade');
   },

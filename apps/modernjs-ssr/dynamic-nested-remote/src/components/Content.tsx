@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from 'antd/lib/button';
 import {
+  getInstance,
   registerRemotes,
   loadRemote,
 } from '@module-federation/modern-js/runtime';
@@ -15,6 +16,7 @@ registerRemotes([
 ]);
 
 const RemoteSSRComponent = createLazyComponent({
+  instance: getInstance(),
   loader: () => loadRemote('dynamic_remote'),
   loading: 'loading...',
   fallback: ({ error }) => {
