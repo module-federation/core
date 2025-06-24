@@ -34,3 +34,25 @@
 1. Start remote1: `npx nx serve mcp-remote1` (should run on port 3030)
 2. Start remote2: `npx nx serve mcp-remote2` (should run on port 3031)  
 3. Then start host: `node apps/mcp/host/dist/main.js`
+
+### Latest Fix:
+✅ **Changed remoteType from 'node-commonjs' to 'script'** - this ensures the webpack container generates script loader code instead of require() calls for remote modules, which works better with the patched script loader.
+
+**Verification**: After rebuild, the container/reference modules now use:
+- `__webpack_require__.l("http://localhost:3030/remoteEntry.js")` (script loading)
+- Instead of `require("mcp_remote1@http://localhost:3030/remoteEntry.js")` (node require)
+
+### Current Status:
+✅ **Remote1 (mcp_remote1) - Working!**
+- Successfully loaded filesystem and tools servers
+- 6 total tools registered: read_file, write_file, list_directory, run_command, process_info, environment_info
+- Script loading working correctly
+
+❌ **Remote2 (mcp_remote2) - Issues:**
+- `Cannot find module './constant.esm.js'` during script load
+- `remoteEntryExports is undefined` error
+- Need to check remote2 build and dependencies
+
+❌ **Other Issues:**
+- `publicPath` warning (fixed by adding `config.output.publicPath = 'auto'`)
+- Tools show "Not connected" error - need to initialize MCP transport

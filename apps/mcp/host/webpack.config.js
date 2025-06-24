@@ -12,6 +12,7 @@ module.exports = composePlugins(withNx(), async (config) => {
   config.output.chunkFilename = '[id]-[chunkhash].js';
   config.output.libraryTarget = 'commonjs2';
   config.output.chunkLoading = 'async-node';
+  config.output.publicPath = 'auto';
   config.optimization = {};
   delete config.externals;
   config.optimization.chunkIds = 'named';
@@ -33,7 +34,7 @@ module.exports = composePlugins(withNx(), async (config) => {
         require.resolve('@module-federation/node/runtimePlugin'),
       ],
       library: { type: 'commonjs-module', name: 'mcp_host' },
-      remoteType: 'node-commonjs',
+      remoteType: 'script',
       experiments: {
         asyncStartup: true,
       },
