@@ -1,26 +1,21 @@
-import { Server } from '@modelcontextprotocol/sdk/server/index';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
   Tool,
 } from '@modelcontextprotocol/sdk/types';
 
-export interface McpServerInfo {
-  name: string;
-  version: string;
-  server: Server;
-  tools: Tool[];
-}
-
 export class McpRegistry {
-  private servers: Map<string, McpServerInfo> = new Map();
+  constructor() {
+    this.servers = new Map();
+  }
 
-  async registerServer(name: string, server: Server): Promise<void> {
+  async registerServer(name, server) {
     try {
       // Get server info and tools
       const tools = await this.getServerTools(server);
 
-      const serverInfo: McpServerInfo = {
+      const serverInfo = {
         name,
         version: '1.0.0', // Default version
         server,
@@ -37,33 +32,41 @@ export class McpRegistry {
     }
   }
 
-  private async getServerTools(server: Server): Promise<Tool[]> {
+  async getServerTools(server) {
     try {
-      // Create a mock request to get tools
-      const request = {
-        method: 'tools/list' as const,
-        params: {},
-      };
+      // Instead of using server.request(), directly call the tools/list handler
+      // since the server may not be connected to a transport
 
-      // Call the server's request handler
-      const result = await server.request(request);
-      return result.tools || [];
+      // Access the server's internal request handlers
+      const requestHandlers = server._requestHandlers || server.requestHandlers;
+
+      if (requestHandlers && requestHandlers.has('tools/list')) {
+        const handler = requestHandlers.get('tools/list');
+        const result = await handler({
+          method: 'tools/list',
+          params: {},
+        });
+        return result.tools || [];
+      } else {
+        console.warn('No tools/list handler found on server');
+        return [];
+      }
     } catch (error) {
       console.warn(`Could not get tools from server:`, error);
       return [];
     }
   }
 
-  getServer(name: string): McpServerInfo | undefined {
+  getServer(name) {
     return this.servers.get(name);
   }
 
-  getAllServers(): McpServerInfo[] {
+  getAllServers() {
     return Array.from(this.servers.values());
   }
 
-  getAllTools(): Array<Tool & { serverName: string }> {
-    const allTools: Array<Tool & { serverName: string }> = [];
+  getAllTools() {
+    const allTools = [];
 
     for (const [serverName, serverInfo] of this.servers) {
       for (const tool of serverInfo.tools) {
@@ -77,14 +80,14 @@ export class McpRegistry {
     return allTools;
   }
 
-  async callTool(toolName: string, args: any): Promise<any> {
+  async callTool(toolName, args) {
     // Find which server has this tool
     for (const [serverName, serverInfo] of this.servers) {
       const tool = serverInfo.tools.find((t) => t.name === toolName);
       if (tool) {
         try {
           const request = {
-            method: 'tools/call' as const,
+            method: 'tools/call',
             params: {
               name: toolName,
               arguments: args,
@@ -105,11 +108,11 @@ export class McpRegistry {
     throw new Error(`Tool not found: ${toolName}`);
   }
 
-  getServerNames(): string[] {
+  getServerNames() {
     return Array.from(this.servers.keys());
   }
 
-  unregisterServer(name: string): boolean {
+  unregisterServer(name) {
     const removed = this.servers.delete(name);
     if (removed) {
       console.log(`✓ Unregistered MCP server: ${name}`);
@@ -117,7 +120,7 @@ export class McpRegistry {
     return removed;
   }
 
-  clear(): void {
+  clear() {
     this.servers.clear();
     console.log('✓ Cleared all registered MCP servers');
   }

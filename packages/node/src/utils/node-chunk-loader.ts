@@ -292,6 +292,8 @@ export const createFederationChunkHandler = (
   args: any,
 ): ((chunkId: string, promises: any[]) => void) => {
   return (chunkId: string, promises: any[]): void => {
+    console.log('HANDLER', chunkId);
+
     let installedChunkData = installedChunks[chunkId];
     if (installedChunkData !== 0) {
       if (installedChunkData) {
@@ -373,6 +375,7 @@ export const patchWebpackRequireForFederation = (
     }
 
     if (__webpack_require__.f.readFileVm) {
+      console.log('patching readfilevm', __filename);
       __webpack_require__.f.readFileVm = handle;
     }
   }
@@ -388,10 +391,8 @@ export const initializeFederationChunkLoading = (
 ): { installedChunks: { [key: string]: any } } => {
   // Create the chunk tracking object
   const installedChunks: { [key: string]: any } = {};
-
   // Set up webpack script loader
   configureFederationScriptLoader();
-
   // Create and set up the chunk handler
   const handle = createFederationChunkHandler(installedChunks, args);
 

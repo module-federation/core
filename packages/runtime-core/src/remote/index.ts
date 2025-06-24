@@ -200,6 +200,7 @@ export class RemoteHandler {
     options?: { loadFactory?: boolean; from: CallFrom },
   ): Promise<T | null> {
     const { host } = this;
+    console.log(`🔄 [REMOTE] Starting loadRemote for id: ${id}`);
     try {
       const { loadFactory = true } = options || {
         loadFactory: true,
@@ -211,10 +212,18 @@ export class RemoteHandler {
       // id: pkgName(@federation/app1) + expose(button) = @federation/app1/button
       // id: alias(app1) + expose(button) = app1/button
       // id: alias(app1/utils) + expose(loadash/sort) = app1/utils/loadash/sort
+      console.log(
+        `🔍 [REMOTE] Getting remote module and options for id: ${id}`,
+      );
       const { module, moduleOptions, remoteMatchInfo } =
         await this.getRemoteModuleAndOptions({
           id,
         });
+      console.log(`✓ [REMOTE] Got remote match info:`, {
+        remote: remoteMatchInfo.remote.name,
+        expose: remoteMatchInfo.expose,
+        entry: remoteMatchInfo.remoteInfo.entry,
+      });
       const {
         pkgNameOrAlias,
         remote,
@@ -223,12 +232,14 @@ export class RemoteHandler {
         remoteSnapshot,
       } = remoteMatchInfo;
 
+      console.log(`🎯 [REMOTE] Calling module.get for expose: ${expose}`);
       const moduleOrFactory = (await module.get(
         idRes,
         expose,
         options,
         remoteSnapshot,
       )) as T;
+      console.log(`✓ [REMOTE] Successfully got module for expose: ${expose}`);
 
       const moduleWrapper = await this.hooks.lifecycle.onLoad.emit({
         id: idRes,
@@ -249,6 +260,7 @@ export class RemoteHandler {
 
       return moduleOrFactory;
     } catch (error) {
+      console.error(`❌ [REMOTE] Error loading remote ${id}:`, error);
       const { from = 'runtime' } = options || { from: 'runtime' };
 
       const failOver = await this.hooks.lifecycle.errorLoadRemote.emit({
@@ -321,6 +333,7 @@ export class RemoteHandler {
   }> {
     const { host } = this;
     const { id } = options;
+    console.log(`🔧 [REMOTE] getRemoteModuleAndOptions for id: ${id}`);
     let loadRemoteArgs;
 
     try {
@@ -350,10 +363,22 @@ export class RemoteHandler {
 
     const { id: idRes } = loadRemoteArgs;
 
+    console.log(
+      `🔍 [REMOTE] Matching remote with name and expose for idRes: ${idRes}`,
+    );
+    console.log(
+      `🔍 [REMOTE] Available remotes:`,
+      host.options.remotes.map((r) => ({
+        name: r.name,
+        entry: 'entry' in r ? r.entry : 'no-entry',
+      })),
+    );
     const remoteSplitInfo = matchRemoteWithNameAndExpose(
       host.options.remotes,
       idRes,
     );
+    console.log(`🔍 [REMOTE] Remote split info:`, remoteSplitInfo);
+    debugger;
     assert(
       remoteSplitInfo,
       getShortErrorMsg(RUNTIME_004, runtimeDescMap, {

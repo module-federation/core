@@ -1,11 +1,38 @@
 import { McpRegistry } from './mcp-registry';
 import { FederationLoader } from './federation-loader';
-import { Server } from '@modelcontextprotocol/sdk/server/index';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types';
+// adding random async import so chunk loading stuff is added to bundler.
+console.log(import('./noop'));
+console.log('🚀 Main.js module loaded');
 
+// Check if Federation Host is available and what remotes are configured
+console.log('🔍 [DEBUG] Checking Federation Host configuration...');
+if (typeof globalThis !== 'undefined' && globalThis.__FEDERATION__) {
+  console.log(
+    '🔍 [DEBUG] Federation instances:',
+    globalThis.__FEDERATION__.__INSTANCES__?.length || 0,
+  );
+  if (
+    globalThis.__FEDERATION__.__INSTANCES__ &&
+    globalThis.__FEDERATION__.__INSTANCES__.length > 0
+  ) {
+    globalThis.__FEDERATION__.__INSTANCES__.forEach((instance, i) => {
+      console.log(`🔍 [DEBUG] Instance ${i}:`, {
+        name: instance.name,
+        remotes: instance.options.remotes?.length || 0,
+        remoteDetails:
+          instance.options.remotes?.map((r) => ({
+            name: r.name,
+            entry: r.entry,
+          })) || [],
+      });
+    });
+  }
+}
 async function createMcpHost() {
   console.log('🏠 Starting MCP Host with Module Federation');
 
@@ -138,7 +165,5 @@ async function runDemo() {
 // Export for Module Federation
 export { createMcpHost, McpRegistry, FederationLoader };
 
-// Run demo if this is the main module
-if (require.main === module) {
-  runDemo().catch(console.error);
-}
+// Always run demo when this module is loaded
+runDemo().catch(console.error);

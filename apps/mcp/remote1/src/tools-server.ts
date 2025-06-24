@@ -1,4 +1,4 @@
-import { Server } from '@modelcontextprotocol/sdk/server/index';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,

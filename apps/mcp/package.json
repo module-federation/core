@@ -7,17 +7,23 @@
     "build:all": "nx run-many --target=build --projects=mcp-host,mcp-remote1,mcp-remote2 --parallel=3",
     "serve:all": "nx run-many --target=serve --projects=mcp-host,mcp-remote1,mcp-remote2 --parallel=3",
     "dev": "nx run-many --target=serve --projects=mcp-host,mcp-remote1,mcp-remote2 --parallel=3 --configuration=development",
-    "start:host": "nx run mcp-host:serve",
+    "start:host": "NX_TUI=false nx run mcp-host:serve",
     "start:remote1": "nx run mcp-remote1:serve",
     "start:remote2": "nx run mcp-remote2:serve",
     "build:host": "nx run mcp-host:build",
     "build:remote1": "nx run mcp-remote1:build",
     "build:remote2": "nx run mcp-remote2:build",
     "test:api": "node test-mcp-api.js",
+    "test:e2e": "node e2e-test.js",
+    "test:all": "node test-runner.js",
+    "test": "node test-runner.js",
     "demo": "node run-demo.js"
   },
   "devDependencies": {
     "axios": "^1.8.2",
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.13.0"
   }
 }

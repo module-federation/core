@@ -55,11 +55,19 @@ export function normalizeRuntimeInitOptionsWithOutShared(
     const { external, shareScope } = remoteInfos;
     try {
       // only fit for remoteType: 'script'
-      const entry = external[0];
+      let entry = external[0];
+
+      // Handle 'script' prefix format: 'script remoteName@url'
+      if (entry.startsWith('script ')) {
+        entry = entry.substring(7); // Remove 'script ' prefix
+      }
+
+      // Skip entries with remaining whitespace (but allow script prefix)
       if (/\s/.test(entry)) {
         return;
       }
-      const [url, globalName] = extractUrlAndGlobal(external[0]);
+
+      const [url, globalName] = extractUrlAndGlobal(entry);
       remoteOptions.push({
         alias,
         name: globalName,

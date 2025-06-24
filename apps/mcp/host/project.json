@@ -8,13 +8,12 @@
     "build": {
       "executor": "@nx/webpack:webpack",
       "outputs": ["{options.outputPath}"],
-      "defaultConfiguration": "production",
+      "defaultConfiguration": "development",
       "options": {
         "target": "node",
-        "compiler": "tsc",
+        "compiler": "swc",
         "outputPath": "apps/mcp/host/dist",
-        "main": "apps/mcp/host/src/main.ts",
-        "tsConfig": "apps/mcp/host/tsconfig.app.json",
+        "main": "apps/mcp/host/src/main.js",
         "webpackConfig": "apps/mcp/host/webpack.config.js"
       },
       "configurations": {
@@ -57,14 +56,14 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/mcp/host/**/*.ts"]
+        "lintFilePatterns": ["apps/mcp/host/**/*.js"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/mcp/host/jest.config.ts",
+        "jestConfig": "apps/mcp/host/jest.config.js",
         "passWithNoTests": true
       },
       "configurations": {

@@ -1,12 +1,15 @@
 const { composePlugins, withNx } = require('@nx/webpack');
 const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 
+// Nx plugins for webpack.
 module.exports = composePlugins(withNx(), (config) => {
+  config.mode = 'development';
   config.target = 'async-node';
   config.devtool = false;
   config.cache = false;
-
   if (config.mode === 'development') {
+    config.devServer = config.devServer || {};
+    config.devServer.devMiddleware = config.devServer.devMiddleware || {};
     config.devServer.devMiddleware.writeToDisk = true;
   }
 

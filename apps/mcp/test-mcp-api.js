@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { Server } = require('@modelcontextprotocol/sdk/server/index');
+const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
 
 // ANSI color codes
 const colors = {
