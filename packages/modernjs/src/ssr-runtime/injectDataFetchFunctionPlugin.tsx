@@ -1,7 +1,4 @@
-import {
-  callDataFetch,
-  injectDataFetch,
-} from '@module-federation/bridge-react/data-fetch-utils';
+import { callDataFetch } from '@module-federation/bridge-react/data-fetch-utils';
 import { setSSREnv } from '@module-federation/bridge-react/lazy-utils';
 
 import type { RuntimePluginFuture } from '@modern-js/runtime';
@@ -16,7 +13,6 @@ export const injectDataFetchFunctionPlugin = ({
   setup: (api) => {
     api.onBeforeRender(async () => {
       setSSREnv({ fetchServerQuery });
-      injectDataFetch();
 
       await callDataFetch();
     });

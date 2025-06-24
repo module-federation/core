@@ -1,3 +1,4 @@
+import { injectDataFetch } from './inject-data-fetch';
 import {
   getDataFetchInfo,
   initDataFetchMap,
@@ -22,6 +23,7 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
   name: 'auto-fetch-data-plugin',
   beforeInit(args) {
     initDataFetchMap();
+    injectDataFetch();
     return args;
   },
   afterLoadSnapshot(args) {

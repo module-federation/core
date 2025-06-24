@@ -12,7 +12,6 @@ export {
   createLazyComponent,
   collectSSRAssets,
   wrapNoSSR,
-  injectDataFetch,
   callDataFetch,
   setSSREnv,
   autoFetchDataPlugin,

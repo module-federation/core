@@ -4,7 +4,6 @@ import {
   ERROR_TYPE,
   createLazyComponent as rawCreateLazyComponent,
   collectSSRAssets as rawCollectSsrAssets,
-  injectDataFetch,
 } from '@module-federation/bridge-react';
 
 import type {
@@ -43,7 +42,5 @@ export function wrapNoSSR<T, E extends keyof T>(
     return createLazyComponentFn({ ...options, noSSR: true });
   };
 }
-
-export { injectDataFetch };
 
 export type { DataFetchParams } from '@module-federation/bridge-react';
