@@ -156,6 +156,10 @@ async function runDemo() {
     }
 
     console.log('\n✅ MCP Host Demo Complete!');
+    console.log('🔚 Shutting down after demo...');
+    setTimeout(() => {
+      process.exit(0);
+    }, 1000);
   } catch (error) {
     console.error('❌ Demo failed:', error);
     process.exit(1);

@@ -86,15 +86,28 @@ export class McpRegistry {
       const tool = serverInfo.tools.find((t) => t.name === toolName);
       if (tool) {
         try {
-          const request = {
-            method: 'tools/call',
-            params: {
-              name: toolName,
-              arguments: args,
-            },
-          };
+          // Call the tool handler directly instead of using server.request()
+          // since these are local function calls, not network requests
+          const requestHandlers =
+            serverInfo.server._requestHandlers ||
+            serverInfo.server.requestHandlers;
 
-          return await serverInfo.server.request(request);
+          if (requestHandlers && requestHandlers.has('tools/call')) {
+            const handler = requestHandlers.get('tools/call');
+            const request = {
+              method: 'tools/call',
+              params: {
+                name: toolName,
+                arguments: args,
+              },
+            };
+
+            return await handler(request);
+          } else {
+            throw new Error(
+              `No tools/call handler found on server ${serverName}`,
+            );
+          }
         } catch (error) {
           console.error(
             `Error calling tool ${toolName} on server ${serverName}:`,
