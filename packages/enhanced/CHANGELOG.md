@@ -1,5 +1,25 @@
 # @module-federation/enhanced
 
+## 0.15.0
+
+### Patch Changes
+
+- ad446af: support `||` pipes in semver parsing
+- Updated dependencies [c343589]
+- Updated dependencies [f432619]
+- Updated dependencies [b5e1640]
+  - @module-federation/dts-plugin@0.15.0
+  - @module-federation/manifest@0.15.0
+  - @module-federation/cli@0.15.0
+  - @module-federation/rspack@0.15.0
+  - @module-federation/sdk@0.15.0
+  - @module-federation/runtime-tools@0.15.0
+  - @module-federation/managers@0.15.0
+  - @module-federation/bridge-react-webpack-plugin@0.15.0
+  - @module-federation/data-prefetch@0.15.0
+  - @module-federation/error-codes@0.15.0
+  - @module-federation/inject-external-runtime-core-plugin@0.15.0
+
 ## 0.14.3
 
 ### Patch Changes

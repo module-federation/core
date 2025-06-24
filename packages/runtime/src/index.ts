@@ -18,7 +18,9 @@ export {
   type FederationRuntimePlugin,
   type Federation,
 } from '@module-federation/runtime-core';
+
 export { FederationHost };
+
 let FederationInstance: FederationHost | null = null;
 export function init(options: UserOptions): FederationHost {
   // Retrieve the same instance with the same name

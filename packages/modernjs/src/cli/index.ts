@@ -22,6 +22,7 @@ export const moduleFederationPlugin = (
     originPluginOptions: userConfig,
     remoteIpStrategy: userConfig?.remoteIpStrategy,
     userConfig: userConfig || {},
+    fetchServerQuery: userConfig.fetchServerQuery ?? undefined,
   };
   return {
     name: '@modern-js/plugin-module-federation',
@@ -86,3 +87,5 @@ export const moduleFederationPlugin = (
 export default moduleFederationPlugin;
 
 export { createModuleFederationConfig } from '@module-federation/enhanced';
+
+export type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
