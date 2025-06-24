@@ -11,8 +11,21 @@ export { createLazyComponent, collectSSRAssets } from './createLazyComponent';
 
 export { wrapNoSSR } from './wrapNoSSR';
 
-export { injectDataFetch, callDataFetch } from './data-fetch';
+export {
+  injectDataFetch,
+  callDataFetch,
+  CacheSize,
+  CacheTime,
+  configureCache,
+  generateKey,
+  cache,
+  revalidateTag,
+  clearStore,
+  prefetch,
+} from './data-fetch';
 
 export { setSSREnv } from './utils';
 
 export { autoFetchDataPlugin };
+
+export type { CacheStatus, CacheStatsInfo } from './data-fetch';

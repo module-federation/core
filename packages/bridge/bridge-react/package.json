@@ -99,7 +99,8 @@
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "react-error-boundary": "^4.1.2"
+    "react-error-boundary": "^4.1.2",
+    "lru-cache": "^10.4.3"
   },
   "peerDependencies": {
     "react": ">=16.9.0",

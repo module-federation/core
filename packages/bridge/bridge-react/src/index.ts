@@ -15,6 +15,14 @@ export {
   callDataFetch,
   setSSREnv,
   autoFetchDataPlugin,
+  CacheSize,
+  CacheTime,
+  configureCache,
+  generateKey,
+  cache,
+  revalidateTag,
+  clearStore,
+  prefetch,
 } from './lazy';
 
 export type { CreateRootOptions, Root } from './provider/versions/legacy';
@@ -30,4 +38,6 @@ export type {
   NoSSRRemoteInfo,
   CollectSSRAssetsOptions,
   CreateLazyComponentOptions,
+  CacheStatus,
+  CacheStatsInfo,
 } from './lazy';

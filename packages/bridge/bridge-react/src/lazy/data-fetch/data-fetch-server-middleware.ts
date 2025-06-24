@@ -159,6 +159,7 @@ const dataFetchServerMiddleware: MiddlewareHandler = async (ctx, next) => {
       const callFetchDataPromise = fetchData(dataFetchId, {
         ...params,
         isDowngrade: !remoteInfo,
+        _id: dataFetchId,
       });
       const wrappedPromise = wrapSetTimeout(
         callFetchDataPromise,
@@ -178,7 +179,11 @@ const dataFetchServerMiddleware: MiddlewareHandler = async (ctx, next) => {
       throw new Error('host instance not found!');
     }
     const dataFetchFn = await loadDataFetchModule(hostInstance, remoteId);
-    const data = await dataFetchFn({ ...params, isDowngrade: !remoteInfo });
+    const data = await dataFetchFn({
+      ...params,
+      isDowngrade: !remoteInfo,
+      _id: dataFetchId,
+    });
     logger.log('fetch data from server, loadDataFetchModule res: ', data);
     return ctx.json(data);
   } catch (e) {

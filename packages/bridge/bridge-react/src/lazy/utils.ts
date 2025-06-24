@@ -17,8 +17,10 @@ import type {
   NoSSRRemoteInfo,
   MF_SSR_DOWNGRADE,
   MF_DATA_FETCH_MAP_VALUE_PROMISE_SET,
+  MF_DATA_FETCH_CACHE,
 } from './types';
 import type { FederationHost } from '@module-federation/runtime';
+import { clearStore } from './data-fetch/cache';
 
 export const getDataFetchInfo = ({
   name,
@@ -83,9 +85,14 @@ export function getDataFetchMap() {
   return globalThis.__MF_DATA_FETCH_MAP__ as MF_DATA_FETCH_MAP;
 }
 
+export function getDataFetchCache() {
+  return globalThis.__MF_DATA_FETCH_CACHE__ as MF_DATA_FETCH_CACHE;
+}
+
 export const flushDataFetch = () => {
   globalThis.__MF_DATA_FETCH_MAP__ = {};
   globalThis[DOWNGRADE_KEY] = undefined;
+  clearStore();
 };
 
 export function setDataFetchItemLoadedStatus(id: string) {
@@ -137,7 +144,10 @@ export async function fetchData(
     if (!fetchDataFn) {
       return;
     }
-    return fetchDataFn(params);
+    return fetchDataFn({
+      ...params,
+      _id: id,
+    });
   };
   if (isBrowserEnv()) {
     const dataFetchItem = getDataFetchItem(id);
@@ -158,13 +168,11 @@ export async function fetchData(
     }
 
     const mfDowngrade = getDowngradeTag();
-    if (mfDowngrade) {
-      if (typeof mfDowngrade === 'boolean') {
-        return callDowngrade(id, { ...params, isDowngrade: true });
-      }
-      if (mfDowngrade.includes(id)) {
-        return callDowngrade(id, { ...params, isDowngrade: true });
-      }
+    if (
+      mfDowngrade &&
+      (typeof mfDowngrade === 'boolean' || mfDowngrade.includes(id))
+    ) {
+      return callDowngrade(id, { ...params, isDowngrade: true });
     }
 
     let res;
@@ -263,10 +271,11 @@ export async function callDowngrade(
     const dataFetchType = mfDataFetch[0][1];
     if (dataFetchType === MF_DATA_FETCH_TYPE.FETCH_CLIENT) {
       try {
-        mfDataFetch[0][0]().then((getDataFetchFn) => {
+        mfDataFetch[0][0]().then(async (getDataFetchFn) => {
           return getDataFetchFn({
             ...params,
             isDowngrade: true,
+            _id: id,
           }).then((data) => {
             mfDataFetch[2] = MF_DATA_FETCH_STATUS.LOADED;
             res && res(data);

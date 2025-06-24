@@ -194,9 +194,7 @@ export function createLazyComponent<T, E extends keyof T>(
 ) {
   const { instance } = options;
   if (!instance) {
-    throw new Error(
-      'instance is required if used in "@module-federation/bridge-react"!',
-    );
+    throw new Error('instance is required for createLazyComponent!');
   }
   type ComponentType = T[E] extends (...args: any) => any
     ? Parameters<T[E]>[0] extends undefined
