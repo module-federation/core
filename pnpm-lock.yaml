@@ -899,6 +899,9 @@ importers:
 
   apps/modern-component-data-fetch/provider-csr:
     devDependencies:
+      '@module-federation/bridge-react':
+        specifier: workspace:*
+        version: link:../../../packages/bridge/bridge-react
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../../packages/enhanced

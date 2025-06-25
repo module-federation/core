@@ -1,6 +1,19 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from '@modern-js/runtime/router';
 import { Layout, Menu } from 'antd';
+import { getInstance } from '@module-federation/modern-js/runtime';
+import { prefetch } from '@module-federation/modern-js/react';
+
+console.log('layout');
+prefetch({
+  id: 'remote/BasicComponent',
+  instance: getInstance(),
+});
+
+prefetch({
+  id: 'provider-csr',
+  instance: getInstance(),
+});
 
 const { Header, Content } = Layout;
 

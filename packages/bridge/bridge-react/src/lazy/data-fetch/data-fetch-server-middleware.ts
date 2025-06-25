@@ -53,12 +53,12 @@ const getDecodeQuery = (url: URL, name: string) => {
 
 const dataFetchServerMiddleware: MiddlewareHandler = async (ctx, next) => {
   let url: URL;
-  let dataFetchId: string | null;
+  let dataFetchKey: string | null;
   let params: Record<string, unknown>;
   let remoteInfo: NoSSRRemoteInfo;
   try {
     url = new URL(ctx.req.url);
-    dataFetchId = getDecodeQuery(url, DATA_FETCH_QUERY);
+    dataFetchKey = getDecodeQuery(url, DATA_FETCH_QUERY);
     params = JSON.parse(getDecodeQuery(url, 'params') || '{}');
     const remoteInfoQuery = getDecodeQuery(url, 'remoteInfo');
     remoteInfo = remoteInfoQuery ? JSON.parse(remoteInfoQuery) : null;
@@ -67,10 +67,10 @@ const dataFetchServerMiddleware: MiddlewareHandler = async (ctx, next) => {
     return next();
   }
 
-  if (!dataFetchId) {
+  if (!dataFetchKey) {
     return next();
   }
-  logger.log('fetch data from server, dataFetchId: ', dataFetchId);
+  logger.log('fetch data from server, dataFetchKey: ', dataFetchKey);
   logger.debug(
     'fetch data from server, moduleInfo: ',
     globalThis.__FEDERATION__?.moduleInfo,
@@ -80,25 +80,25 @@ const dataFetchServerMiddleware: MiddlewareHandler = async (ctx, next) => {
     if (!dataFetchMap) {
       initDataFetchMap();
     }
-    const fetchDataPromise = dataFetchMap[dataFetchId]?.[1];
+    const fetchDataPromise = dataFetchMap[dataFetchKey]?.[1];
     logger.debug(
       'fetch data from server, fetchDataPromise: ',
       fetchDataPromise,
     );
     if (
       fetchDataPromise &&
-      dataFetchMap[dataFetchId]?.[2] !== MF_DATA_FETCH_STATUS.ERROR
+      dataFetchMap[dataFetchKey]?.[2] !== MF_DATA_FETCH_STATUS.ERROR
     ) {
       const targetPromise = fetchDataPromise[0];
       // Ensure targetPromise is thenable
-      const wrappedPromise = wrapSetTimeout(targetPromise, 20000, dataFetchId);
+      const wrappedPromise = wrapSetTimeout(targetPromise, 20000, dataFetchKey);
       if (wrappedPromise) {
         const res = await wrappedPromise;
         logger.log('fetch data from server, fetchDataPromise res: ', res);
         return ctx.json(res);
       }
       logger.error(
-        `Expected a Promise from fetchDataPromise[0] for dataFetchId ${dataFetchId}, but received:`,
+        `Expected a Promise from fetchDataPromise[0] for dataFetchKey ${dataFetchKey}, but received:`,
         targetPromise,
         'Will try call new dataFetch again...',
       );
@@ -153,18 +153,18 @@ const dataFetchServerMiddleware: MiddlewareHandler = async (ctx, next) => {
       }
     }
 
-    const dataFetchItem = dataFetchMap[dataFetchId];
+    const dataFetchItem = dataFetchMap[dataFetchKey];
     logger.debug('fetch data from server, dataFetchItem: ', dataFetchItem);
     if (dataFetchItem) {
-      const callFetchDataPromise = fetchData(dataFetchId, {
+      const callFetchDataPromise = fetchData(dataFetchKey, {
         ...params,
         isDowngrade: !remoteInfo,
-        _id: dataFetchId,
+        _id: dataFetchKey,
       });
       const wrappedPromise = wrapSetTimeout(
         callFetchDataPromise,
         20000,
-        dataFetchId,
+        dataFetchKey,
       );
       if (wrappedPromise) {
         const res = await wrappedPromise;
@@ -173,7 +173,7 @@ const dataFetchServerMiddleware: MiddlewareHandler = async (ctx, next) => {
       }
     }
 
-    const remoteId = dataFetchId.split(SEPARATOR)[0];
+    const remoteId = dataFetchKey.split(SEPARATOR)[0];
     const hostInstance = globalThis.__FEDERATION__.__INSTANCES__[0];
     if (!hostInstance) {
       throw new Error('host instance not found!');
@@ -182,7 +182,7 @@ const dataFetchServerMiddleware: MiddlewareHandler = async (ctx, next) => {
     const data = await dataFetchFn({
       ...params,
       isDowngrade: !remoteInfo,
-      _id: dataFetchId,
+      _id: dataFetchKey,
     });
     logger.log('fetch data from server, loadDataFetchModule res: ', data);
     return ctx.json(data);

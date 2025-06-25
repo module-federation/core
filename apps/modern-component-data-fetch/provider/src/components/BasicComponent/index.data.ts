@@ -5,6 +5,7 @@ export type Data = {
 };
 
 export const fetchData = cache(async (): Promise<Data> => {
+  console.log('provder-server called');
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({

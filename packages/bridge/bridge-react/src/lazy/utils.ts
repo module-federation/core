@@ -1,4 +1,8 @@
-import { isBrowserEnv, composeKeyWithSeparator } from '@module-federation/sdk';
+import {
+  isBrowserEnv,
+  composeKeyWithSeparator,
+  SEPARATOR,
+} from '@module-federation/sdk';
 import logger from './logger';
 import {
   DOWNGRADE_KEY,
@@ -45,17 +49,20 @@ export const getDataFetchInfo = ({
   const expose = id.replace(nameOrAlias, '');
   let dataFetchName = '';
   let dataFetchId = '';
+  let dataFetchKey = '';
   if (expose.startsWith('/')) {
     dataFetchName = `${expose.slice(1)}.${DATA_FETCH_IDENTIFIER}`;
     dataFetchId = `${id}.${DATA_FETCH_IDENTIFIER}`;
+    dataFetchKey = `${name}${expose}.${DATA_FETCH_IDENTIFIER}`;
   } else if (expose === '') {
     dataFetchName = DATA_FETCH_IDENTIFIER;
     dataFetchId = `${id}/${DATA_FETCH_IDENTIFIER}`;
+    dataFetchKey = `${name}/${DATA_FETCH_IDENTIFIER}`;
   } else {
     return;
   }
 
-  if (!dataFetchName || !dataFetchId) {
+  if (!dataFetchName || !dataFetchId || !dataFetchKey) {
     return;
   }
 
@@ -70,6 +77,7 @@ export const getDataFetchInfo = ({
   return {
     dataFetchName,
     dataFetchId,
+    dataFetchKey,
   };
 };
 
@@ -197,9 +205,9 @@ export function getDataFetchMapKey(
     return;
   }
 
-  const { dataFetchId } = dataFetchInfo;
+  const { dataFetchKey } = dataFetchInfo;
 
-  return composeKeyWithSeparator(dataFetchId, hostInfo.name, hostInfo.version);
+  return composeKeyWithSeparator(dataFetchKey, hostInfo.name, hostInfo.version);
 }
 
 export async function loadDataFetchModule(
@@ -327,6 +335,10 @@ export async function callDowngrade(
 export function isCSROnly() {
   // @ts-ignore  modern.js will inject window._SSR_DATA if enable ssr
   return window._SSR_DATA === undefined;
+}
+
+export function isServerEnv() {
+  return typeof window === 'undefined';
 }
 
 export function setSSREnv({
