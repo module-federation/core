@@ -8,6 +8,7 @@ import {
   getDataFetchMapKey,
   isDataLoaderExpose,
   loadDataFetchModule,
+  isServerEnv,
 } from '../utils';
 import logger from '../logger';
 import {
@@ -80,7 +81,7 @@ const autoFetchData: () => FederationRuntimePlugin = () => ({
         : MF_DATA_FETCH_TYPE.FETCH_CLIENT;
     let finalDataFetchId = dataFetchId;
 
-    if (typeof window !== 'undefined') {
+    if (!isServerEnv()) {
       finalDataFetchId =
         downgradeType === MF_DATA_FETCH_TYPE.FETCH_CLIENT
           ? hasDataFetchClient

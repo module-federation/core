@@ -3,11 +3,9 @@ import {
   getDataFetchInfo,
   getDataFetchMap,
   getDataFetchMapKey,
-  isServerEnv,
 } from '../utils';
 import helpers from '@module-federation/runtime/helpers';
 import { DataFetchParams } from '../types';
-import { MF_DATA_FETCH_TYPE } from '../constant';
 
 type PrefetchOptions = {
   id: string;
@@ -83,11 +81,8 @@ export async function prefetch(options: PrefetchOptions) {
     return;
   }
 
-  const [getDataFetchGetter, type, getDataFetchPromise] = dataFetchItem[0];
-
-  if (type === MF_DATA_FETCH_TYPE.FETCH_CLIENT && !isServerEnv()) {
-    return;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [getDataFetchGetter, _type, getDataFetchPromise] = dataFetchItem[0];
 
   let _getDataFetchPromise = getDataFetchPromise;
   if (!getDataFetchPromise) {

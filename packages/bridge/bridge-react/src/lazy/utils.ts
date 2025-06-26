@@ -1,8 +1,4 @@
-import {
-  isBrowserEnv,
-  composeKeyWithSeparator,
-  SEPARATOR,
-} from '@module-federation/sdk';
+import { isBrowserEnv, composeKeyWithSeparator } from '@module-federation/sdk';
 import logger from './logger';
 import {
   DOWNGRADE_KEY,
