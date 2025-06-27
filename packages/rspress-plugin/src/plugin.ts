@@ -106,7 +106,6 @@ export function pluginModuleFederation(
 
   if (autoShared) {
     mfConfig.shared = {
-      ...mfConfig.shared,
       react: {
         singleton: true,
       },
@@ -118,6 +117,7 @@ export function pluginModuleFederation(
         singleton: true,
         requiredVersion: false,
       },
+      ...mfConfig.shared,
     };
   }
 
