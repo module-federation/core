@@ -14,14 +14,9 @@ import {
   RemoteEntryType,
   encodeName,
   MFPrefetchCommon,
+  composeKeyWithSeparator,
 } from '@module-federation/sdk';
-import {
-  Compilation,
-  Compiler,
-  StatsCompilation,
-  StatsModule,
-  Chunk,
-} from 'webpack';
+import { Compilation, Compiler, StatsCompilation, StatsModule } from 'webpack';
 import {
   isDev,
   getAssetsByChunk,
@@ -42,7 +37,7 @@ import {
   utils,
 } from '@module-federation/managers';
 import { HOT_UPDATE_SUFFIX } from './constants';
-import { ModuleHandler, getExposeItem } from './ModuleHandler';
+import { ModuleHandler, getExposeItem, getExposeName } from './ModuleHandler';
 import { StatsInfo } from './types';
 
 class StatsManager {
@@ -425,7 +420,46 @@ class StatsManager {
           });
           return sum;
         }, new Set());
-        stats.exposes = Object.values(exposesMap).map((expose) => {
+        const { fileExposeKeyMap } = this._containerManager;
+
+        stats.exposes = [];
+        Object.entries(fileExposeKeyMap).forEach(
+          ([exposeFileWithoutExt, exposeKeySet]) => {
+            const expose = exposesMap[exposeFileWithoutExt] || {
+              assets: {
+                js: { sync: [], async: [] },
+                css: { sync: [], async: [] },
+              },
+            };
+            exposeKeySet.forEach((exposeKey) => {
+              const { js, css } = expose.assets;
+              const exposeModuleName = getExposeName(exposeKey);
+              stats.exposes.push({
+                ...expose,
+                path: exposeKey,
+                id: composeKeyWithSeparator(
+                  this._options.name!,
+                  exposeModuleName,
+                ),
+                name: exposeModuleName,
+                assets: {
+                  js: {
+                    sync: js.sync.filter((asset) => !sharedAssets.has(asset)),
+                    async: js.async.filter((asset) => !sharedAssets.has(asset)),
+                  },
+                  css: {
+                    sync: css.sync.filter((asset) => !sharedAssets.has(asset)),
+                    async: css.async.filter(
+                      (asset) => !sharedAssets.has(asset),
+                    ),
+                  },
+                },
+              });
+            });
+          },
+        );
+
+        Object.values(exposesMap).map((expose) => {
           const { js, css } = expose.assets;
           return {
             ...expose,

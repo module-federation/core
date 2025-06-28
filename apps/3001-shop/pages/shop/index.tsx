@@ -14,7 +14,8 @@ const Shop = (props) => {
       <div className="hero">
         <h1>Shop Page</h1>
         <h3 className="title">
-          This is a federated page owned by localhost:3001
+          This is a federated page owned by localhost:3001 (HYDRATION FIX TEST
+          345)
         </h3>
         <p className="description">
           This application manually exposes <code>page-map</code> and its

@@ -35,6 +35,16 @@ export const normalizeDtsOptions = (
   )(options.dts);
 };
 
+const excludeDts = (filepath: unknown) => {
+  if (typeof filepath !== 'string') {
+    return false;
+  }
+  const [_p, query] = filepath.split('?');
+  if (query && query.startsWith('exclude-mf-dts')) {
+    return true;
+  }
+  return false;
+};
 export class DtsPlugin implements WebpackPluginInstance {
   options: moduleFederationPlugin.ModuleFederationPluginOptions;
   clonedOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -52,8 +62,19 @@ export class DtsPlugin implements WebpackPluginInstance {
       const cleanedExposes: Record<string, any> = {};
       Object.entries(options.exposes).forEach(([key, value]) => {
         if (typeof value === 'string') {
-          cleanedExposes[key] = value.split('?')[0];
+          const [filepath, _query] = value.split('?');
+          if (excludeDts(value)) {
+            return;
+          }
+          cleanedExposes[key] = filepath;
         } else {
+          if (
+            typeof value === 'object' &&
+            Array.isArray(value.import) &&
+            value.import.some((v) => excludeDts(v))
+          ) {
+            return;
+          }
           cleanedExposes[key] = value;
         }
       });

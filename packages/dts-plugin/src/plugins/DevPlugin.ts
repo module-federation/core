@@ -117,9 +117,7 @@ export class DevPlugin implements WebpackPluginInstance {
     const {
       _options: { name, dev, dts },
     } = this;
-    new compiler.webpack.DefinePlugin({
-      FEDERATION_IPV4: JSON.stringify(getIPV4()),
-    }).apply(compiler);
+
     const normalizedDev =
       normalizeOptions<moduleFederationPlugin.PluginDevOptions>(
         true,
@@ -134,6 +132,10 @@ export class DevPlugin implements WebpackPluginInstance {
     if (!isDev() || normalizedDev === false) {
       return;
     }
+
+    new compiler.webpack.DefinePlugin({
+      FEDERATION_IPV4: JSON.stringify(getIPV4()),
+    }).apply(compiler);
 
     if (
       normalizedDev.disableHotTypesReload &&

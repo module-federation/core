@@ -52,7 +52,7 @@ export function HomeFeature({ features }: { features: Feature[] }) {
                   }
                 }}
               >
-                <div className="flex-center">
+                <div className="flex justify-center items-center">
                   <div className="w-12 h-12 text-3xl text-center">{icon}</div>
                 </div>
                 <h2 className="font-bold text-center">{title}</h2>

@@ -4,5 +4,6 @@ export function isRegExp(target: any) {
   return util.types.isRegExp(target);
 }
 
-export * from './constant';
-export * from './autoDeleteSplitChunkCacheGroups';
+export { DEFAULT_ASSET_PREFIX } from './constant';
+export { autoDeleteSplitChunkCacheGroups } from './autoDeleteSplitChunkCacheGroups';
+export { addDataFetchExposes } from './addDataFetchExposes';

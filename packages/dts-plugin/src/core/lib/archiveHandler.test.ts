@@ -298,7 +298,7 @@ describe('archiveHandler', () => {
       // Only verify the URL and responseType
       const axiosGetMock = vi.mocked(axios.get);
       const [[url, options]] = axiosGetMock.mock.calls;
-      expect(url).toBe(fileToDownload);
+      expect(url).toBe(new URL(fileToDownload).href);
       expect(options.responseType).toBe('arraybuffer');
     });
 

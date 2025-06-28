@@ -55,3 +55,7 @@ export const skipByTarget = (target: string[] | string) => {
   }
   return false;
 };
+
+export function isDev() {
+  return process.env.NODE_ENV === 'development';
+}

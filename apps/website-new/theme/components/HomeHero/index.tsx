@@ -50,17 +50,18 @@ export function HomeHero({ hero }: { hero: Hero }) {
                 <Button
                   className="pl-2 pr-2"
                   type="a"
-                  text={action.text}
                   href={normalizeHrefInRuntime(action.link)}
                   theme={action.theme}
-                />
+                >
+                  {action.text}
+                </Button>
               </div>
             ))}
           </div>
         </div>
 
         {hasImage ? (
-          <div className="modern-doc-home-hero-image m-auto flex-center md:none lg:flex order-1 md:order-2">
+          <div className="modern-doc-home-hero-image m-auto justify-center items-center md:none lg:flex order-1 md:order-2">
             <div className={styles.imgMask}></div>
             <img src="/svg.svg" alt={hero.image?.alt} />
           </div>

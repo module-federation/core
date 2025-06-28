@@ -320,7 +320,7 @@ export default defineConfig({
 
 ```tsx
 // src/runtime-plugin/fallback.ts
-import type { FederationRuntimePlugin, Manifest } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
 
 interface FallbackConfig {
   // 备用服务地址
@@ -341,7 +341,7 @@ const fallbackPlugin = (config: FallbackConfig = {}): FederationRuntimePlugin =>
       // 处理组件加载错误
       if (args.lifecycle === 'onLoad') {
         const React = await import('react');
-        
+
         // 创建一个带有错误提示的兜底组件
         const FallbackComponent = React.memo(() => {
           return React.createElement(
@@ -358,15 +358,15 @@ const fallbackPlugin = (config: FallbackConfig = {}): FederationRuntimePlugin =>
             errorMessage
           );
         });
-        
+
         FallbackComponent.displayName = 'ErrorFallbackComponent';
-        
+
         return () => ({
           __esModule: true,
           default: FallbackComponent
         });
       }
-      
+
       // 处理入口文件加载错误
       if (args.lifecycle === 'afterResolve') {
         try {
@@ -375,7 +375,7 @@ const fallbackPlugin = (config: FallbackConfig = {}): FederationRuntimePlugin =>
           if (!response.ok) {
             throw new Error(`Failed to fetch backup entry: ${response.statusText}`);
           }
-          const backupManifest = await response.json() as Manifest;
+          const backupManifest = await response.json();
           console.info('Successfully loaded backup manifest');
           return backupManifest;
         } catch (error) {
@@ -396,9 +396,9 @@ export default fallbackPlugin;
 - `App.tsx` 同步导入：`import Remote1App from 'remote1/app';`
 
 - 关于 `fallback.ts`:
-  
+
   - `errorLoadRemote` 钩子接收一个 `args` 参数，其中包含了错误的详细信息。通过 `args.lifecycle` 我们可以判断错误发生的阶段，从而采取相应的处理策略：
-  
+
   - **处理组件加载错误** (`args.lifecycle === 'onLoad'`)
      - 这类错误发生在除入口资源 `mf-manifest.json` 外的模块加载过程中
      - 我们可以返回一个带有样式的兜底组件：
@@ -426,7 +426,7 @@ export default fallbackPlugin;
         __esModule: true,
         default: FallbackComponent
       });
-    } 
+    }
     ```
 
   - **处理入口文件错误** (`args.lifecycle === 'afterResolve'`)
@@ -490,7 +490,7 @@ export default fallbackPlugin;
      ```
 
   - **简化版本**
-     
+
      如果不需要区分错误类型，也可以使用一个通用的错误处理方案：
 
   ```ts
@@ -550,7 +550,7 @@ React 的 ErrorBoundary 是处理组件级错误的最后一道防线，在远�
 为组件设置 ErrorBoundary 适用于动态导入远程模块场景，例如 懒加载场景。
 
 此外，在为组件自身设置 ErrorBoundary 后你可以不依赖 errorLoadRemote hook 来进行错误兜底，这是利用 React 自身的特性来为你的组件进行错误兜底。
- 
+
 
 
 - `App.tsx` 动态导入远程模块

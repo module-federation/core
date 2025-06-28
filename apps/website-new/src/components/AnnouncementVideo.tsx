@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { useI18n } from '../../theme/i18n';
 import Player from 'xgplayer';
 import 'xgplayer/dist/index.min.css';
@@ -31,12 +31,16 @@ export default function AnnouncementVideo(props: {
     };
   }
 
-  const [divWidth, setDivWidth] = useState(window.innerWidth);
+  const [divWidth, setDivWidth] = useState(0);
 
   // 更新宽度的函数
   const updateWidth = () => {
     setDivWidth(window.innerWidth);
   };
+
+  useLayoutEffect(() => {
+    updateWidth();
+  }, []);
 
   useEffect(() => {
     window.addEventListener('resize', updateWidth);

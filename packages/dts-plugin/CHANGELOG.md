@@ -1,5 +1,16 @@
 # @module-federation/dts-plugin
 
+## 0.15.0
+
+### Patch Changes
+
+- c343589: fix(dts-plugin): only inject ipv4 str in dev mode
+- b5e1640: chore(dts-plugin): check types archive url and optimize the error msg
+  - @module-federation/sdk@0.15.0
+  - @module-federation/managers@0.15.0
+  - @module-federation/third-party-dts-extractor@0.15.0
+  - @module-federation/error-codes@0.15.0
+
 ## 0.14.3
 
 ### Patch Changes

@@ -1,0 +1,89 @@
+{
+  "name": "mcp-remote2",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/mcp/remote2/src",
+  "projectType": "application",
+  "tags": ["mcp", "remote"],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "development",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "apps/mcp/remote2/dist",
+        "main": "apps/mcp/remote2/src/main.ts",
+        "tsConfig": "apps/mcp/remote2/tsconfig.app.json",
+        "webpackConfig": "apps/mcp/remote2/webpack.config.js"
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": false,
+          "vendorChunk": false
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "serve": {
+      "executor": "@nx/webpack:dev-server",
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "mcp-remote2:build",
+        "hmr": false,
+        "port": 3031
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "mcp-remote2:build:development"
+        },
+        "production": {
+          "buildTarget": "mcp-remote2:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/mcp/remote2/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/mcp/remote2/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  }
+}
