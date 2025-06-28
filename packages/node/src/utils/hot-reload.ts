@@ -168,21 +168,21 @@ export const performReload = async (
     //@ts-ignore
     if (__webpack_require__?.federation) {
       //@ts-ignore
-      if (__webpack_require__.federation.instance) {
+      if ((__webpack_require__ as any).federation?.instance) {
         // Preserve bundlerRuntime
         //@ts-ignore
-        const preservedBundlerRuntime =
-          __webpack_require__.federation.instance.bundlerRuntime;
+        const preservedBundlerRuntime = (__webpack_require__ as any).federation
+          .instance.bundlerRuntime;
 
         //@ts-ignore
-        __webpack_require__.federation.instance.moduleCache?.clear();
+        (__webpack_require__ as any).federation.instance.moduleCache?.clear();
         //@ts-ignore
-        __webpack_require__.federation.instance.remoteCache?.clear();
+        (__webpack_require__ as any).federation.instance.remoteCache?.clear();
 
         // Restore bundlerRuntime
         if (preservedBundlerRuntime) {
           //@ts-ignore
-          __webpack_require__.federation.instance.bundlerRuntime =
+          (__webpack_require__ as any).federation.instance.bundlerRuntime =
             preservedBundlerRuntime;
           console.log(
             '[Module Federation Hot Reload] Preserved webpack federation bundlerRuntime',

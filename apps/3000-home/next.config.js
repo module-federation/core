@@ -1,3 +1,8 @@
+// Load Native Server HMR early to initialize Next.js internals
+if (process.env.NODE_ENV === 'development') {
+  require('./lib/server-hmr');
+}
+
 const { withNx } = require('@nx/next/plugins/with-nx');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 const webpack = require('webpack');
@@ -59,10 +64,6 @@ const nextConfig = {
         },
       }),
     );
-    // Add Hot Module Replacement Plugin
-    if (isServer) {
-      config.plugins.push(new webpack.HotModuleReplacementPlugin());
-    }
 
     config.plugins.push({
       name: 'xxx',

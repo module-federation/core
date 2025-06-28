@@ -292,7 +292,7 @@ export const createFederationChunkHandler = (
   args: any,
 ): ((chunkId: string, promises: any[]) => void) => {
   return (chunkId: string, promises: any[]): void => {
-    console.log('HANDLER', chunkId);
+    // console.log('HANDLER', chunkId);
 
     let installedChunkData = installedChunks[chunkId];
     if (installedChunkData !== 0) {

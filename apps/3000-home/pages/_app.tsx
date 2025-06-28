@@ -9,6 +9,7 @@ import { StyleProvider } from '@ant-design/cssinjs';
 import Router, { useRouter } from 'next/router';
 const SharedNav = React.lazy(() => import('../components/SharedNav'));
 import HostAppMenu from '../components/menu';
+
 function MyApp(props) {
   const { Component, pageProps } = props;
   const { asPath } = useRouter();
@@ -107,8 +108,7 @@ function MyApp(props) {
   );
 }
 
-MyApp.getInitialProps = async (ctx) => {
-  return App.getInitialProps(ctx);
-};
+// Use getServerSideProps pattern for pages to get server render count
+// This will be picked up by individual pages that use getServerSideProps
 
 export default MyApp;
