@@ -2,14 +2,17 @@
   "name": "app-router-4000",
   "private": true,
   "scripts": {
-    "build": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
-    "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4000",
+    "build": "pnpm patch-next && NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+    "dev": "pnpm patch-next && NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4000",
     "lint": "next lint",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown .",
     "start": "next start",
-    "test": "pnpm prettier:check && pnpm lint"
+    "test": "pnpm prettier:check && pnpm lint",
+    "patch-next": "cp node_modules/@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/flight-client-entry-plugin.js node_modules/next/dist/build/webpack/plugins/flight-client-entry-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/flight-manifest-plugin.js node_modules/next/dist/build/webpack/plugins/flight-manifest-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/loaders/next-flight-loader.js node_modules/next/dist/build/webpack/loaders/next-flight-loader/index.js",
+    "postinstall": "npm run patch-next || true",
+    "kill-app": "npx kill-port 4000 4001 || true"
   },
   "git": {
     "pre-commit": "lint-staged"

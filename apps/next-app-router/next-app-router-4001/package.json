@@ -3,8 +3,8 @@
   "name": "app-router-4001",
   "scripts": {
     "watch": "nx watch --projects=nextjs-mf --includeDependentProjects -- pnpm dev",
-    "build": "pnpm patch-flight-plugin && NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
-    "dev": "pnpm patch-flight-plugin && rm -rf ./.next; NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4001",
+    "build": "pnpm patch-next && NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+    "dev": "pnpm patch-next && rm -rf ./.next; NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4001",
     "lint": "next lint",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write --ignore-unknown .",
@@ -13,8 +13,8 @@
     "test": "pnpm prettier:check && pnpm lint",
     "client:rsd": "rsdoctor analyze --profile .next/.rsdoctor/manifest.json",
     "server:rsd": "rsdoctor analyze --profile .next/server/.rsdoctor/manifest.json",
-    "patch-flight-plugin": "cp node_modules/@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/flight-client-entry-plugin.js node_modules/next/dist/build/webpack/plugins/flight-client-entry-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/flight-manifest-plugin.js node_modules/next/dist/build/webpack/plugins/flight-manifest-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/loaders/next-flight-loader.js node_modules/next/dist/build/webpack/loaders/next-flight-loader/index.js",
-    "postinstall": "npm run patch-flight-plugin || true"
+    "patch-next": "cp node_modules/@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/flight-client-entry-plugin.js node_modules/next/dist/build/webpack/plugins/flight-client-entry-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/flight-manifest-plugin.js node_modules/next/dist/build/webpack/plugins/flight-manifest-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/loaders/next-flight-loader.js node_modules/next/dist/build/webpack/loaders/next-flight-loader/index.js",
+    "postinstall": "npm run patch-next || true"
   },
   "git": {
     "pre-commit": "lint-staged"

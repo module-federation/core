@@ -18,15 +18,6 @@ const nextConfig = {
       remote_4001: `remote_4001@http://localhost:4001/_next/static/${
         isServer ? 'ssr' : 'chunks'
       }/remoteEntry.js`,
-      checkout: `checkout@http://localhost:4000/_next/static/${
-        isServer ? 'ssr' : 'chunks'
-      }/remoteEntry.js`,
-      home_app: `home_app@http://localhost:3000/_next/static/${
-        isServer ? 'ssr' : 'chunks'
-      }/remoteEntry.js`,
-      shop: `shop@http://localhost:4000/_next/static/${
-        isServer ? 'ssr' : 'chunks'
-      }/remoteEntry.js`,
     };
 
     config.plugins.push(
@@ -35,8 +26,6 @@ const nextConfig = {
         filename: 'static/chunks/remoteEntry.js',
         remotes: {
           remote_4001: remotes.remote_4001,
-          home_app: remotes.home_app,
-          // checkout: remotes.checkout,
         },
         shared: {
           // 'react': {

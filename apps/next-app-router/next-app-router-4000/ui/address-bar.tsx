@@ -2,7 +2,7 @@
 
 import React, { Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import Button from 'remote_4001/Button';
+// import Button from 'remote_4001/Button';
 
 function Params() {
   const searchParams = useSearchParams()!;
@@ -41,7 +41,10 @@ export function AddressBar() {
 
   return (
     <div className="flex items-center gap-x-2 p-3.5 lg:px-5 lg:py-3">
-      <Button>Remote Button</Button>
+      {/* <Button>Remote Button</Button> */}
+      <button className="rounded bg-gray-600 px-3 py-1 text-sm text-white">
+        Remote Button
+      </button>
       <div className="text-gray-600">
         <svg
           xmlns="http://www.w3.org/2000/svg"
