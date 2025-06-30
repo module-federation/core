@@ -41,11 +41,14 @@ export function snapshotPlugin(): FederationRuntimePlugin {
   return {
     name: 'snapshot-plugin',
     async afterResolve(args) {
-      const { remote, pkgNameOrAlias, expose, origin, remoteInfo } = args;
+      const { remote, pkgNameOrAlias, expose, origin, remoteInfo, id } = args;
 
       if (!isRemoteInfoWithEntry(remote) || !isPureRemoteEntry(remote)) {
         const { remoteSnapshot, globalSnapshot } =
-          await origin.snapshotHandler.loadRemoteSnapshotInfo(remote);
+          await origin.snapshotHandler.loadRemoteSnapshotInfo({
+            moduleInfo: remote,
+            id,
+          });
 
         assignRemoteInfo(remoteInfo, remoteSnapshot);
         // preloading assets

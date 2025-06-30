@@ -176,6 +176,7 @@ export const resolveUrl = (
   } catch {
     const entryUrl =
       returnFromCache(remoteName) || returnFromGlobalInstances(remoteName);
+
     if (!entryUrl) return null;
 
     const url = new URL(entryUrl);
