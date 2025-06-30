@@ -9,7 +9,7 @@ import type {
   EntryPlugin,
 } from 'webpack';
 import type webpackType from 'webpack';
-const { webpack, sources } = require(
+const { sources } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
