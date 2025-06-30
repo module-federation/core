@@ -510,29 +510,31 @@ describe('SharePlugin', () => {
       ProvideSharedPluginMock.mockClear();
     });
 
-    it('should pass experiments to both ConsumeSharedPlugin and ProvideSharedPlugin', () => {
-      const experiments = {
-        nodeModulesReconstructedLookup: true,
-      };
-
+    it('should handle nodeModulesReconstructedLookup per share item', () => {
       const plugin = new SharePlugin({
         shared: {
-          react: '^17.0.0',
+          react: {
+            version: '^17.0.0',
+            nodeModulesReconstructedLookup: true,
+          },
         },
-        experiments,
       });
 
       plugin.apply(mockCompiler);
 
-      // Check ConsumeSharedPlugin receives experiments
+      // Check ConsumeSharedPlugin receives consumes with nodeModulesReconstructedLookup
       expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
       const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
-      expect(consumeOptions.experiments).toBe(experiments);
+      expect(
+        consumeOptions.consumes[0]['react'].nodeModulesReconstructedLookup,
+      ).toBe(true);
 
-      // Check ProvideSharedPlugin receives experiments
+      // Check ProvideSharedPlugin receives provides with nodeModulesReconstructedLookup
       expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
       const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
-      expect(provideOptions.experiments).toBe(experiments);
+      expect(
+        provideOptions.provides[0]['react'].nodeModulesReconstructedLookup,
+      ).toBe(true);
     });
   });
 

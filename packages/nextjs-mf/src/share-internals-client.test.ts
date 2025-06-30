@@ -1,6 +1,7 @@
 import {
   getNextInternalsShareScopeClient,
-  getReactGroupClient,
+  getPagesDirSharesClient,
+  getAppDirSharesClient,
 } from './share-internals-client';
 import fs from 'fs';
 import os from 'os';
@@ -61,19 +62,36 @@ describe('getNextInternalsShareScopeClient', () => {
     expect(result).toEqual({});
   });
 
-  // Tests specifically for getReactGroupClient
-  describe('getReactGroupClient', () => {
+  // Tests specifically for getPagesDirSharesClient
+  describe('getPagesDirSharesClient', () => {
     it('returns the correct config for Next 15', () => {
       const context = setupNextVersion('15.0.0');
       const compiler = { context } as any;
-      const result = getReactGroupClient(compiler);
+      const result = getPagesDirSharesClient(compiler);
       expect(result).toMatchSnapshot();
     });
 
     it('returns the correct config for Next 14', () => {
       const context = setupNextVersion('14.0.0');
       const compiler = { context } as any;
-      const result = getReactGroupClient(compiler);
+      const result = getPagesDirSharesClient(compiler);
+      expect(result).toMatchSnapshot();
+    });
+  });
+
+  // Tests specifically for getAppDirSharesClient
+  describe('getAppDirSharesClient', () => {
+    it('returns the correct config for Next 15', () => {
+      const context = setupNextVersion('15.0.0');
+      const compiler = { context } as any;
+      const result = getAppDirSharesClient(compiler);
+      expect(result).toMatchSnapshot();
+    });
+
+    it('returns the correct config for Next 14', () => {
+      const context = setupNextVersion('14.0.0');
+      const compiler = { context } as any;
+      const result = getAppDirSharesClient(compiler);
       expect(result).toMatchSnapshot();
     });
   });
