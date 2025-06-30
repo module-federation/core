@@ -7,5 +7,5 @@
     "paths": {},
     "noImplicitAny": false
   },
-  "include": ["src", "types"]
+  "include": ["src", "types", "global.d.ts"]
 }

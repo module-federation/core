@@ -1,5 +1,7 @@
 # create-module-federation
 
+## 0.15.0
+
 ## 0.14.3
 
 ## 0.14.2

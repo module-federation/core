@@ -1,5 +1,24 @@
 # @module-federation/modern-js
 
+## 0.15.0
+
+### Minor Changes
+
+- f432619: feat(modern-js-plugin): support component-level data fetch
+
+### Patch Changes
+
+- c343589: fix(modern-js-plugin): only inject ipv4 str in dev mode
+- 2faa3a3: chore(modernjs-js-plugin): keep the version of swc/helpers consistent with rsbuild
+- Updated dependencies [ad446af]
+- Updated dependencies [f777710]
+  - @module-federation/enhanced@0.15.0
+  - @module-federation/rsbuild-plugin@0.15.0
+  - @module-federation/cli@0.15.0
+  - @module-federation/node@2.7.7
+  - @module-federation/runtime@0.15.0
+  - @module-federation/sdk@0.15.0
+
 ## 0.14.3
 
 ### Patch Changes

@@ -83,3 +83,60 @@ export default defineConfig({
 
 ### Note
 If you need to use the Module Federation runtime capabilities, please install [@module-federation/enhanced](/en/guide/basic/runtime.html)
+
+## Configuration
+
+* Type:
+
+```ts
+export declare const pluginModuleFederation: (moduleFederationOptions: ModuleFederationOptions, rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS) => RsbuildPlugin;
+
+type RSBUILD_PLUGIN_OPTIONS = {
+  ssr?: boolean;
+}
+```
+
+### moduleFederationOptions
+
+[Module Federation Configuration](../../configure/index)
+
+### rsbuildOptions
+
+Additional configuration for the Rsbuild plugin.
+
+
+#### ssr
+
+:::tip
+Only supports Rslib global plugins.
+:::
+
+* Type: `boolean`
+* Default: `false`
+
+
+Enables the generation of SSR artifacts.
+
+**Example:**
+
+First, create an Rslib project using `npm create module-federation@next`:
+
+```bash
+# Here, three parameters (template, role, name) are passed. You can also run npm create module-federation@latest directly and follow the prompts.
+npm create module-federation@next -- --template provider-rslib --role provider --name rslib_ssr_provider
+```
+
+Then, modify the `rslib.config.ts` configuration to add `ssr:true`:
+```diff title='rslib.config.ts'
+- plugins: [pluginReact(), pluginModuleFederation(moduleFederationConfig)],
++ plugins: [pluginReact(), pluginModuleFederation(moduleFederationConfig, { ssr: true })],
+```
+
+Install dependencies and start the project:
+```bash
+pnpm install
+pnpm run mf-dev
+```
+This will generate a `dist/mf/ssr` directory containing the SSR artifacts.
+
+Then, refer to the [Create a Modern.js Consumer](../../practice/frameworks/modern/index) section to create a consumer, reference the Rslib SSR provider, and then start project development.

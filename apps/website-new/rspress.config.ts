@@ -2,6 +2,8 @@ import * as path from 'path';
 import { defineConfig } from 'rspress/config';
 import { moduleFederationPluginOverview } from './src/moduleFederationPluginOverview';
 import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
+import { pluginSass } from '@rsbuild/plugin-sass';
+import { pluginLlms } from '@rspress/plugin-llms';
 
 const getNavbar = (lang: string) => {
   const cn = lang === 'zh';
@@ -81,15 +83,16 @@ export default defineConfig({
     pluginAnnotationWords({
       wordsMapPath: 'words-map.json',
     }),
+    pluginLlms(),
   ],
   builderConfig: {
-    plugins: [moduleFederationPluginOverview],
+    plugins: [moduleFederationPluginOverview, pluginSass()],
     tools: {
       postcss: (config, { addPlugins }) => {
         addPlugins([require('tailwindcss/nesting'), require('tailwindcss')]);
       },
     },
-    source: {
+    resolve: {
       alias: {
         '@site': path.resolve(__dirname),
         '@components': path.join(__dirname, 'src/components'),
