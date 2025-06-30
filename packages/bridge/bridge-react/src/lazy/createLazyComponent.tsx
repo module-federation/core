@@ -315,13 +315,13 @@ export function createLazyComponent<T, E extends keyof T>(
           exportName,
         )}`,
       );
+      // eslint-disable-next-line max-lines
     }
   });
 
   return (props: ComponentType) => {
-    // eslint-disable-next-line max-lines
     const { key, ...args } = props;
-    if (globalThis.FEDERATION_SSR && !options.noSSR) {
+    if (!options.noSSR) {
       return (
         <AwaitDataFetch
           resolve={getData(options.noSSR)}
