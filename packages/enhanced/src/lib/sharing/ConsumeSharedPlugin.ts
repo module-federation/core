@@ -106,6 +106,7 @@ class ConsumeSharedPlugin {
                 request: key,
                 include: undefined,
                 exclude: undefined,
+                nodeModulesReconstructedLookup: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -124,6 +125,7 @@ class ConsumeSharedPlugin {
                 request: key,
                 include: undefined,
                 exclude: undefined,
+                nodeModulesReconstructedLookup: undefined,
               };
         return result;
       },
@@ -150,6 +152,7 @@ class ConsumeSharedPlugin {
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
+          nodeModulesReconstructedLookup: item.nodeModulesReconstructedLookup,
         } as ConsumeOptions;
       },
     );
@@ -574,7 +577,10 @@ class ConsumeSharedPlugin {
                     ),
                   );
 
-                  if (moduleMatch !== undefined) {
+                  if (
+                    moduleMatch !== undefined &&
+                    moduleMatch.nodeModulesReconstructedLookup
+                  ) {
                     return boundCreateConsumeSharedModule(
                       compilation,
                       context,
@@ -670,6 +676,9 @@ class ConsumeSharedPlugin {
               // Also check prefixed consumes with modulePathAfterNodeModules
               if (modulePathAfterNodeModules) {
                 for (const [prefix, options] of prefixedConsumes) {
+                  if (!options.nodeModulesReconstructedLookup) {
+                    continue;
+                  }
                   const lookup = options.request || prefix;
                   if (modulePathAfterNodeModules.startsWith(lookup)) {
                     const remainder = modulePathAfterNodeModules.slice(

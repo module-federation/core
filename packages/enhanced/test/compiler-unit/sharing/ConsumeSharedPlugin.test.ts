@@ -1345,10 +1345,8 @@ describe('ConsumeSharedPlugin', () => {
             shareKey: 'shared/directory/',
             shareScope: 'default',
             singleton: false,
+            nodeModulesReconstructedLookup: true,
           },
-        },
-        experiments: {
-          nodeModulesReconstructedLookup: true,
         },
       }),
     ];
