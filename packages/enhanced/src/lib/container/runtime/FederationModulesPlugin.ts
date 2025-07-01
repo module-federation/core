@@ -7,6 +7,8 @@ const Compilation = require(
 import { SyncHook } from 'tapable';
 import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
+import RemoteToExternalDependency from '../RemoteToExternalDependency';
+import FallbackDependency from '../FallbackDependency';
 
 /** @type {WeakMap<import("webpack").Compilation, CompilationHooks>} */
 const compilationHooksMap = new WeakMap<CompilationType, CompilationHooks>();
@@ -18,7 +20,14 @@ const PLUGIN_NAME = 'FederationModulesPlugin';
 type CompilationHooks = {
   addContainerEntryDependency: SyncHook<[ContainerEntryDependency], void>;
   addFederationRuntimeDependency: SyncHook<[FederationRuntimeDependency], void>;
+<<<<<<< HEAD
   addRemoteDependency: SyncHook<[any], void>;
+=======
+  addRemoteDependency: SyncHook<
+    [RemoteToExternalDependency | FallbackDependency],
+    void
+  >;
+>>>>>>> a9ba0c7ec (feat(enhanced): update hook system for container dependency management)
 };
 
 class FederationModulesPlugin {
