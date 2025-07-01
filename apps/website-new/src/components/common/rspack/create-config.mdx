@@ -1,0 +1,21 @@
+```ts title='module-federation.config.ts'
+import { createModuleFederationConfig } from '@module-federation/enhanced/rspack';
+
+export default createModuleFederationConfig({
+  name: 'host',
+  remotes: {
+    provider: 'provider@http://localhost:2004/mf-manifest.json',
+  },
+  exposes: {
+    './Button': './src/components/Button.tsx',
+  },
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+});
+```

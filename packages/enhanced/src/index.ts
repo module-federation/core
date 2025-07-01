@@ -37,10 +37,6 @@ export const modules = {
   },
 };
 
-export const createModuleFederationConfig = (
-  options: moduleFederationPlugin.ModuleFederationPluginOptions,
-): moduleFederationPlugin.ModuleFederationPluginOptions => {
-  return options;
-};
+export { createModuleFederationConfig } from '@module-federation/sdk';
 
 export type { moduleFederationPlugin };

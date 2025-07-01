@@ -1,1 +1,8 @@
-["runtime", "rsbuild", "rspack", "webpack", "vite",  "type-prompt","cli"]
+[
+  {
+  "type": "dir",
+  "name": "runtime",
+  "label": "Runtime"
+  },
+"rsbuild", "rspack", "webpack", "rspress","vite","type-prompt","cli", "css-isolate"
+]
