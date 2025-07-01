@@ -38,7 +38,7 @@ describe('getNextInternalsShareScope', () => {
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
-    
+
     // Setup common compiler mock
     mockCompiler = {
       context: '/mock/project',
@@ -55,29 +55,33 @@ describe('getNextInternalsShareScope', () => {
   describe('Client/Server configuration delegation', () => {
     it('should delegate to client configuration module', () => {
       mockCompiler.options!.name = 'client';
-      
+
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
-      
+
       // Should use mocked client configuration
       expect(result).toHaveProperty('react-client-config');
-      expect((result['react-client-config'] as SharedConfig).shareKey).toBe('react');
+      expect((result['react-client-config'] as SharedConfig).shareKey).toBe(
+        'react',
+      );
     });
 
     it('should delegate to server configuration module', () => {
       mockCompiler.options!.name = 'server';
-      
+
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
-      
+
       // Should use mocked server configuration
       expect(result).toHaveProperty('react-server-config');
-      expect((result['react-server-config'] as SharedConfig).shareKey).toBe('react');
+      expect((result['react-server-config'] as SharedConfig).shareKey).toBe(
+        'react',
+      );
     });
 
     it('should default to server when compiler name is undefined', () => {
       delete mockCompiler.options!.name;
-      
+
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
-      
+
       // Should use server configuration as default
       expect(result).toHaveProperty('react-server-config');
     });
@@ -85,24 +89,32 @@ describe('getNextInternalsShareScope', () => {
 
   describe('Module delegation verification', () => {
     it('should call client configuration module correctly', () => {
-      const { getNextInternalsShareScopeClient } = require('./share-internals-client');
+      const {
+        getNextInternalsShareScopeClient,
+      } = require('./share-internals-client');
       mockCompiler.options!.name = 'client';
-      
+
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
-      
+
       // Should have called the client module
-      expect(getNextInternalsShareScopeClient).toHaveBeenCalledWith(mockCompiler);
+      expect(getNextInternalsShareScopeClient).toHaveBeenCalledWith(
+        mockCompiler,
+      );
       expect(result).toHaveProperty('react-client-config');
     });
 
     it('should call server configuration module correctly', () => {
       mockCompiler.options!.name = 'server';
-      const { getNextInternalsShareScopeServer } = require('./share-internals-server');
-      
+      const {
+        getNextInternalsShareScopeServer,
+      } = require('./share-internals-server');
+
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
-      
+
       // Should have called the server module
-      expect(getNextInternalsShareScopeServer).toHaveBeenCalledWith(mockCompiler);
+      expect(getNextInternalsShareScopeServer).toHaveBeenCalledWith(
+        mockCompiler,
+      );
       expect(result).toHaveProperty('react-server-config');
     });
   });
@@ -110,18 +122,19 @@ describe('getNextInternalsShareScope', () => {
   describe('Error handling', () => {
     it('should handle missing compiler context gracefully', () => {
       delete mockCompiler.context;
-      
+
       expect(() => {
         getNextInternalsShareScope(mockCompiler as Compiler);
-      }).toThrow('Compiler context is not available. Cannot resolve Next.js version.');
+      }).toThrow(
+        'Compiler context is not available. Cannot resolve Next.js version.',
+      );
     });
-
   });
 
   describe('Configuration structure validation', () => {
     it('should return a valid SharedObject', () => {
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
-      
+
       expect(typeof result).toBe('object');
       expect(result).not.toBeNull();
       expect(Object.keys(result).length).toBeGreaterThan(0);
@@ -129,8 +142,8 @@ describe('getNextInternalsShareScope', () => {
 
     it('should ensure all configurations have required properties', () => {
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
-      
-      Object.values(result).forEach(config => {
+
+      Object.values(result).forEach((config) => {
         if (typeof config === 'object') {
           const sharedConfig = config as SharedConfig;
           expect(sharedConfig).toHaveProperty('singleton');
@@ -145,12 +158,16 @@ describe('getNextInternalsShareScope', () => {
   describe('Integration with existing share configurations', () => {
     it('should delegate to client module for client builds', () => {
       mockCompiler.options!.name = 'client';
-      
-      const { getNextInternalsShareScopeClient } = require('./share-internals-client');
+
+      const {
+        getNextInternalsShareScopeClient,
+      } = require('./share-internals-client');
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
-      
+
       // Should have called the existing client configuration
-      expect(getNextInternalsShareScopeClient).toHaveBeenCalledWith(mockCompiler);
+      expect(getNextInternalsShareScopeClient).toHaveBeenCalledWith(
+        mockCompiler,
+      );
       expect(result).toEqual({
         'react-client-config': {
           request: 'react',
@@ -164,12 +181,16 @@ describe('getNextInternalsShareScope', () => {
 
     it('should delegate to server module for server builds', () => {
       mockCompiler.options!.name = 'server';
-      
-      const { getNextInternalsShareScopeServer } = require('./share-internals-server');
+
+      const {
+        getNextInternalsShareScopeServer,
+      } = require('./share-internals-server');
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
-      
+
       // Should have called the existing server configuration
-      expect(getNextInternalsShareScopeServer).toHaveBeenCalledWith(mockCompiler);
+      expect(getNextInternalsShareScopeServer).toHaveBeenCalledWith(
+        mockCompiler,
+      );
       expect(result).toEqual({
         'react-server-config': {
           request: 'react',
