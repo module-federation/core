@@ -10,22 +10,21 @@ This document provides a comprehensive, chronological breakdown of the Module Fe
 4. [Module Resolution & Interception](#module-resolution--interception)
 5. [Runtime Federation System](#runtime-federation-system)
 6. [Advanced Patterns & Use Cases](#advanced-patterns--use-cases)
-7. [Performance Optimization](#performance-optimization)
-8. [Troubleshooting & Debugging](#troubleshooting--debugging)
 
 ```mermaid
 flowchart TD
-    %% Enhanced Styling for Maximum Visual Impact
-    classDef startClass fill:#4caf50,stroke:#2e7d32,stroke-width:4px,color:#fff,font-weight:bold,font-size:16px
-    classDef pluginClass fill:#2196f3,stroke:#1565c0,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
-    classDef hookClass fill:#ff9800,stroke:#ef6c00,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
-    classDef dependencyClass fill:#e91e63,stroke:#ad1457,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
-    classDef moduleClass fill:#9c27b0,stroke:#6a1b9a,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
-    classDef runtimeClass fill:#607d8b,stroke:#37474f,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
-    classDef decisionClass fill:#795548,stroke:#3e2723,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
-    classDef codegenClass fill:#673ab7,stroke:#311b92,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
+    %% Enhanced Styling for Maximum Visual Impact and Modern Aesthetic
+    classDef startClass fill:#22c55e,stroke:#16a34a,stroke-width:4px,color:#fff,font-weight:bold,font-size:16px,border-radius:8px
+    classDef pluginClass fill:#3b82f6,stroke:#2563eb,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px,border-radius:8px
+    classDef hookClass fill:#f59e0b,stroke:#d97706,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px,border-radius:8px
+    classDef dependencyClass fill:#ec4899,stroke:#db2777,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px,border-radius:8px
+    classDef moduleClass fill:#a855f7,stroke:#9333ea,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px,border-radius:8px
+    classDef runtimeClass fill:#64748b,stroke:#475569,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px,border-radius:8px
+    classDef decisionClass fill:#78716c,stroke:#57534e,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px,border-radius:8px
+    classDef codegenClass fill:#7c3aed,stroke:#6d28d9,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px,border-radius:8px
+    classDef layerClass fill:#06b6d4,stroke:#0891b2,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px,border-radius:8px
 
-    A["🚀 webpack.config.js Entry Point<br/>📋 Federation Configuration<br/>```js<br/>new ModuleFederationPlugin({<br/>  name: 'host-app',<br/>  exposes: {<br/>    './Button': './src/Button.jsx',<br/>    './Header': './src/Header.jsx'<br/>  },<br/>  remotes: {<br/>    mf2: 'mf2@http://localhost:3001/entry.js',<br/>    shell: 'shell@http://cdn.example.com/shell.js'<br/>  },<br/>  shared: {<br/>    react: { singleton: true, version: '^18.0.0' },<br/>    lodash: { requiredVersion: '^4.17.0' }<br/>  }<br/>})<br/>```<br/>🎯 Triggers complete federation orchestration"]:::startClass
+    A["🚀 webpack.config.js Entry Point<br/>📋 Federation Configuration with Layer Support<br/>```js<br/>new ModuleFederationPlugin({<br/>  name: 'host-app',<br/>  exposes: {<br/>    './Button': './src/Button.jsx',<br/>    './Header': './src/Header.jsx'<br/>  },<br/>  remotes: {<br/>    mf2: 'mf2@http://localhost:3001/entry.js',<br/>    shell: 'shell@http://cdn.example.com/shell.js'<br/>  },<br/>  shared: {<br/>    react: { <br/>      singleton: true, <br/>      version: '^18.0.0',<br/>      issuerLayer: 'app-layer'<br/>    },<br/>    lodash: { <br/>      requiredVersion: '^4.17.0',<br/>      nodeModulesReconstructedLookup: true<br/>    }<br/>  }<br/>})<br/>```<br/>🎯 Triggers complete federation orchestration"]:::startClass
 
     subgraph "⚙️ Phase 1: Plugin Initialization & Hook Registration System"
         direction TB
@@ -41,11 +40,11 @@ flowchart TD
         end
         
         subgraph "🔌 Conditional Plugin Application (afterPlugins Hook)"
-            D["🤝 SharePlugin.apply(compiler)<br/>📊 Universal Sharing Orchestrator<br/>• ALWAYS applied when shared exists<br/>• Bidirectional sharing enablement<br/>• Configuration normalization<br/>• Provider & Consumer instantiation<br/>• Share scope coordination"]:::pluginClass
+            D["🤝 SharePlugin.apply(compiler)<br/>📊 Universal Sharing Orchestrator<br/>• ALWAYS applied when shared exists<br/>• Bidirectional sharing enablement<br/>• Configuration normalization<br/>• Provider & Consumer instantiation<br/>• Share scope coordination<br/>• Layer-aware module resolution"]:::pluginClass
             
-            E["📤 ProvideSharedPlugin.apply(compiler)<br/>🔧 Module Provider System<br/>• normalModuleFactory.module hook<br/>• Module wrapping & enhancement<br/>• Version registration & validation<br/>• Include/exclude pattern filtering<br/>• nodeModulesReconstructedLookup<br/>• Share scope population"]:::pluginClass
+            E["📤 ProvideSharedPlugin.apply(compiler)<br/>🔧 Module Provider System with Layer Support<br/>• normalModuleFactory.module hook<br/>• Module wrapping & enhancement<br/>• Version registration & validation<br/>• Include/exclude pattern filtering<br/>• Per-item nodeModulesReconstructedLookup<br/>• Layer-specific share scope population<br/>• issuerLayer filtering logic"]:::pluginClass
             
-            F["📥 ConsumeSharedPlugin.apply(compiler)<br/>🔧 Module Consumer System<br/>• normalModuleFactory.factorize hook<br/>• Module request interception<br/>• Version satisfaction algorithms<br/>• Fallback mechanism configuration<br/>• Singleton enforcement logic<br/>• Share scope resolution"]:::pluginClass
+            F["📥 ConsumeSharedPlugin.apply(compiler)<br/>🔧 Enhanced Module Consumer System<br/>• normalModuleFactory.factorize hook<br/>• Layer-aware module request interception<br/>• Version satisfaction algorithms<br/>• Fallback mechanism configuration<br/>• Singleton enforcement logic<br/>• issuerLayer matching & filtering<br/>• Composite key resolution"]:::pluginClass
             
             G["🏗️ ContainerPlugin.apply(compiler)<br/>📦 Container & Expose Manager<br/>• compiler.make hook registration<br/>• Container entry creation<br/>• Module map generation<br/>• Library type configuration<br/>• Chunk splitting optimization<br/>• Entry dependency management"]:::pluginClass
             
@@ -89,13 +88,13 @@ flowchart TD
             
             S["🔗 RemoteToExternalDependency<br/>📋 External Reference Link<br/>• Script injection preparation<br/>• Container initialization setup<br/>• Runtime loading configuration<br/>• External dependency tracking<br/>• Load order optimization<br/>• Error recovery mechanisms"]:::dependencyClass
             
-            T["📥 ConsumeSharedPlugin.factorize Logic<br/>🎯 Shared Module Interceptor<br/>• Pre-creation module interception<br/>• Version requirement validation<br/>• Share scope lookup & validation<br/>• Fallback configuration setup<br/>• Singleton enforcement logic<br/>• Layer compatibility checking"]:::pluginClass
+            T["📥 ConsumeSharedPlugin.factorize Logic<br/>🎯 Enhanced Shared Module Interceptor<br/>• Pre-creation module interception<br/>• Version requirement validation<br/>• Share scope lookup & validation<br/>• Fallback configuration setup<br/>• Singleton enforcement logic<br/>• issuerLayer compatibility checking<br/>• Composite key generation"]:::pluginClass
             
-            T1{"🔍 Shared Module Match Decision<br/>📋 Configuration Lookup Logic<br/>• Package name pattern matching<br/>• Share scope validation & lookup<br/>• Layer compatibility verification<br/>• Request pattern analysis<br/>• Configuration priority resolution<br/>• Include/exclude filtering"}:::decisionClass
+            T1{"🔍 Advanced Module Match Decision<br/>📋 Enhanced Configuration Lookup<br/>• Package name pattern matching<br/>• Share scope validation & lookup<br/>• issuerLayer compatibility verification<br/>• Request pattern analysis<br/>• Configuration priority resolution<br/>• Include/exclude filtering<br/>• nodeModulesReconstructedLookup handling<br/>• Layer fallback vs explicit matching"}:::decisionClass
             
-            T2["📥 ConsumeSharedModule Creation<br/>📦 Shared Consumer Implementation<br/>• Version satisfaction algorithms<br/>• Fallback handling & configuration<br/>• Singleton enforcement logic<br/>• Runtime resolution preparation<br/>• Share scope integration<br/>• Error handling & recovery"]:::moduleClass
+            T2["📥 ConsumeSharedModule Creation<br/>📦 Layer-Aware Consumer Implementation<br/>• Version satisfaction algorithms<br/>• Fallback handling & configuration<br/>• Singleton enforcement logic<br/>• Runtime resolution preparation<br/>• Share scope integration<br/>• Layer propagation to dependencies<br/>• Error handling & recovery"]:::moduleClass
             
-            X["🔄 ConsumeSharedFallbackDependency<br/>📋 Fallback Strategy Implementation<br/>• Local module fallback logic<br/>• Error recovery mechanisms<br/>• Version mismatch handling<br/>• Performance optimization<br/>• Dependency tracking<br/>• Runtime coordination"]:::dependencyClass
+            X["🔄 ConsumeSharedFallbackDependency<br/>📋 Enhanced Fallback Strategy<br/>• Local module fallback logic<br/>• Error recovery mechanisms<br/>• Version mismatch handling<br/>• Layer propagation support<br/>• Performance optimization<br/>• Dependency tracking<br/>• Runtime coordination"]:::dependencyClass
             
             U["⚙️ Normal Webpack Module<br/>📦 Standard Processing Path<br/>• File resolution via loaders<br/>• Standard module creation<br/>• AST parsing & analysis<br/>• Dependency extraction<br/>• Module optimization<br/>• Standard webpack flow"]:::moduleClass
             
@@ -572,15 +571,16 @@ normalModuleFactory.hooks.module.tap(PLUGIN_NAME, (module, { resource }, resolve
 
 ```mermaid
 flowchart TD
-    %% Styling
-    classDef startNode fill:#4caf50,stroke:#2e7d32,stroke-width:3px,color:#fff
-    classDef pluginNode fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#fff
-    classDef hookNode fill:#ff9800,stroke:#ef6c00,stroke-width:2px,color:#fff
-    classDef decisionNode fill:#9c27b0,stroke:#6a1b9a,stroke-width:2px,color:#fff
-    classDef moduleNode fill:#f44336,stroke:#c62828,stroke-width:2px,color:#fff
-    classDef endNode fill:#607d8b,stroke:#37474f,stroke-width:2px,color:#fff
-    classDef configNode fill:#8bc34a,stroke:#558b2f,stroke-width:2px,color:#fff
-    classDef errorNode fill:#ff5722,stroke:#d84315,stroke-width:3px,color:#fff
+    %% Modern Enhanced Styling with Layer Support
+    classDef startNode fill:#22c55e,stroke:#16a34a,stroke-width:3px,color:#fff,border-radius:8px
+    classDef pluginNode fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff,border-radius:8px
+    classDef hookNode fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff,border-radius:8px
+    classDef decisionNode fill:#a855f7,stroke:#9333ea,stroke-width:2px,color:#fff,border-radius:8px
+    classDef moduleNode fill:#ef4444,stroke:#dc2626,stroke-width:2px,color:#fff,border-radius:8px
+    classDef endNode fill:#64748b,stroke:#475569,stroke-width:2px,color:#fff,border-radius:8px
+    classDef configNode fill:#84cc16,stroke:#65a30d,stroke-width:2px,color:#fff,border-radius:8px
+    classDef errorNode fill:#f97316,stroke:#ea580c,stroke-width:3px,color:#fff,border-radius:8px
+    classDef layerNode fill:#06b6d4,stroke:#0891b2,stroke-width:2px,color:#fff,border-radius:8px
 
     %% Start
     START["🚀 Webpack Compilation Start<br/>📋 webpack.config.js loaded<br/>• ModuleFederationPlugin options parsed<br/>• Compiler instance created"]:::startNode
@@ -632,10 +632,10 @@ flowchart TD
 
     CREATE_REMOTE["🌐 Create RemoteModule<br/>📋 Remote Module Wrapper<br/>• Map to external reference<br/>• Set up dynamic loading<br/>• Configure error handling<br/>• Add RemoteToExternalDependency"]:::moduleNode
 
-    %% Shared Module Consumption
-    SHARED_CONSUME_CHECK{"📥 Shared Consumption Check<br/>📋 ConsumeSharedPlugin Logic<br/>• Match against consumes config<br/>• Check package name/shareKey<br/>• Validate share scope"}:::decisionNode
+    %% Enhanced Shared Module Consumption with Layer Support
+    SHARED_CONSUME_CHECK{"📥 Enhanced Shared Consumption Check<br/>📋 ConsumeSharedPlugin with Layer Logic<br/>• Match against consumes config<br/>• Check package name/shareKey<br/>• Validate share scope<br/>• issuerLayer compatibility check<br/>• Composite key resolution<br/>• nodeModulesReconstructedLookup"}:::decisionNode
 
-    CREATE_CONSUME_SHARED["📥 Create ConsumeSharedModule<br/>📋 Shared Consumer Implementation<br/>• Version requirement checking<br/>• Singleton enforcement<br/>• Fallback configuration<br/>• Add ConsumeSharedFallbackDependency"]:::moduleNode
+    CREATE_CONSUME_SHARED["📥 Create ConsumeSharedModule<br/>📋 Layer-Aware Consumer Implementation<br/>• Version requirement checking<br/>• Singleton enforcement<br/>• Fallback configuration<br/>• Layer propagation to dependencies<br/>• Add ConsumeSharedFallbackDependency with layer<br/>• issuerLayer filtering logic"]:::moduleNode
 
     %% Normal Module Creation
     NORMAL_MODULE["⚙️ Normal Module Creation<br/>📋 Standard Webpack Processing<br/>• File resolution<br/>• Loader application<br/>• AST parsing<br/>• Dependency extraction"]:::moduleNode
@@ -643,10 +643,10 @@ flowchart TD
     %% Module Hook (after creation)
     MODULE_HOOK["🎯 normalModuleFactory.hooks.module<br/>📋 Post-Creation Processing<br/>• Module wrapping opportunity<br/>• Plugin modification point<br/>• After module instantiation"]:::hookNode
 
-    %% Shared Module Provision
-    SHARED_PROVIDE_CHECK{"📤 Shared Provision Check<br/>📋 ProvideSharedPlugin Logic<br/>• Match against provides config<br/>• Check resource path<br/>• Validate share configuration"}:::decisionNode
+    %% Enhanced Shared Module Provision with Layer Support
+    SHARED_PROVIDE_CHECK{"📤 Enhanced Shared Provision Check<br/>📋 ProvideSharedPlugin with Layer Logic<br/>• Match against provides config<br/>• Check resource path<br/>• Validate share configuration<br/>• issuerLayer filtering<br/>• Per-item nodeModulesReconstructedLookup<br/>• Include/exclude pattern filtering"}:::decisionNode
 
-    WRAP_PROVIDE_SHARED["📤 Wrap with ProvideSharedModule<br/>📋 Shared Provider Implementation<br/>• Wrap existing module<br/>• Register in share scope<br/>• Version management<br/>• Add ProvideForSharedDependency"]:::moduleNode
+    WRAP_PROVIDE_SHARED["📤 Wrap with ProvideSharedModule<br/>📋 Layer-Aware Provider Implementation<br/>• Wrap existing module<br/>• Register in layer-specific share scope<br/>• Version management with layer context<br/>• Add ProvideForSharedDependency<br/>• Layer propagation support"]:::moduleNode
 
     %% Module Build Phase
     MODULE_BUILD["🏗️ Module Build Phase<br/>📋 Module Compilation<br/>• Source code processing<br/>• Dependency resolution<br/>• Code transformation<br/>• Chunk assignment"]:::moduleNode
@@ -664,14 +664,14 @@ flowchart TD
     %% Code Generation Phase
     CODE_GEN["🏭 Code Generation Phase<br/>📋 Source Code Output<br/>• Generate module source<br/>• Inject runtime code<br/>• Create chunks<br/>• Optimize bundles"]:::hookNode
 
-    %% Different Code Generation Paths
-    CONTAINER_CODE_GEN["📦 Container Code Generation<br/>📋 Container Entry Output<br/>```js<br/>var moduleMap = {<br/>  './Button': () => import('./src/Button'),<br/>  './Header': () => import('./src/Header')<br/>};<br/>var get = (module, getScope) => {...};<br/>var init = (shareScope, initScope) => {...};<br/>```"]:::moduleNode
+    %% Enhanced Code Generation Paths with Layer Support
+    CONTAINER_CODE_GEN["📦 Container Code Generation<br/>📋 Layer-Aware Container Entry Output<br/>```js<br/>var moduleMap = {<br/>  './Button': {<br/>    get: () => import('./src/Button'),<br/>    layer: 'ui-layer'<br/>  },<br/>  './Header': () => import('./src/Header')<br/>};<br/>var get = (module, getScope) => {...};<br/>var init = (shareScope, initScope) => {...};<br/>```"]:::moduleNode
 
-    REMOTE_CODE_GEN["🌐 Remote Code Generation<br/>📋 Remote Module Output<br/>```js<br/>const remote = await loadScript(url);<br/>await remote.init(__webpack_require__.S['default']);<br/>const factory = await remote.get('ComponentName');<br/>return factory();<br/>```"]:::moduleNode
+    REMOTE_CODE_GEN["🌐 Remote Code Generation<br/>📋 Remote Module Output with Error Handling<br/>```js<br/>const remote = await loadScript(url);<br/>await remote.init(__webpack_require__.S['default']);<n/>const factory = await remote.get('ComponentName');<br/>return factory();r/>```"]:::moduleNode
 
-    SHARED_PROVIDE_CODE_GEN["📤 Shared Provider Code Generation<br/>📋 Share Registration Output<br/>```js<br/>__webpack_require__.S['default']['react'] = {<br/>  '18.2.0': {<br/>    get: () => Promise.resolve(() => __webpack_require__(123)),<br/>    loaded: 1, scope: ['default']<br/>  }<br/>};<br/>```"]:::moduleNode
+    SHARED_PROVIDE_CODE_GEN["📤 Shared Provider Code Generation<br/>📋 Layer-Aware Share Registration<br/>```js<br/>__webpack_require__.S['default']['react'] = {<br/>  '18.2.0': {<br/>    get: () => Promise.resolve(() => __webpack_require__(123)),<br/>    loaded: 1, scope: ['default'],<br/>    layer: 'app-layer'<br/>  }<br/>};<br/>```"]:::moduleNode
 
-    SHARED_CONSUME_CODE_GEN["📥 Shared Consumer Code Generation<br/>📋 Dynamic Resolution Output<br/>```js<br/>const satisfy = (version, range) => semver.satisfies(version, range);<br/>const loadSingleton = async (scope, key) => {...};<br/>const loadVersionCheck = async () => {...};<br/>```"]:::moduleNode
+    SHARED_CONSUME_CODE_GEN["📥 Shared Consumer Code Generation<br/>📋 Enhanced Resolution with Layer Support<br/>```js<br/>const satisfy = (version, range) => semver.satisfies(version, range);<br/>const loadSingleton = async (scope, key, layer) => {...};<br/>const loadVersionCheck = async (issuerLayer) => {...};<br/>const createCompositeKey = (request, layer) => layer ? `(${layer})${request}` : request;<br/>```"]:::moduleNode
 
     %% Error Handling
     CONFIG_ERROR["❌ Configuration Error<br/>📋 Invalid Plugin Options<br/>• Missing required fields<br/>• Invalid URLs/paths<br/>• Conflicting settings"]:::errorNode
@@ -815,11 +815,11 @@ sequenceDiagram
     participant User as 👤 User Browser<br/>🌐 Web Client
     participant HostApp as 🏠 Host Application<br/>📍 localhost:3000<br/>🎯 Main Consumer App
     participant HostBundle as 📦 Host Bundle<br/>📄 main.js + remoteEntry.js<br/>⚡ Federation-enabled
-    participant FedRuntime as ⚡ Federation Runtime<br/>🔧 __webpack_require__.S<br/>🗃️ Share Scope Manager
-    participant ShareScope as 🗃️ Share Scope Registry<br/>📊 Global Module Hub<br/>🔄 Version Coordinator
+    participant FedRuntime as ⚡ Federation Runtime<br/>🔧 __webpack_require__.S<br/>🗃️ Layer-Aware Share Manager
+    participant ShareScope as 🗃️ Enhanced Share Scope Registry<br/>📊 Global Module Hub with Layers<br/>🔄 Version & Layer Coordinator
     participant RemoteScript as 📡 Remote Script Loader<br/>🌐 CDN/localhost:3001<br/>📜 Dynamic Script Injection
-    participant RemoteContainer as 🌐 Remote Container<br/>📦 Federated Module Provider<br/>🏗️ Module Factory
-    participant SharedModules as 🤝 Shared Module System<br/>📚 react, lodash, @company/ui<br/>🔄 Dependency Resolution
+    participant RemoteContainer as 🌐 Remote Container<br/>📦 Layer-Aware Module Provider<br/>🏗️ Enhanced Module Factory
+    participant SharedModules as 🤝 Enhanced Shared Module System<br/>📚 react, lodash, @company/ui<br/>🔄 Layer-Aware Dependency Resolution
     participant ErrorBoundary as ⚠️ Error Boundary<br/>🛡️ Fallback System<br/>🔄 Recovery Mechanisms
     
     Note over User,ErrorBoundary: 🚀 Phase 1: Application Bootstrap & Federation Infrastructure Initialization
@@ -837,11 +837,11 @@ sequenceDiagram
     Note over ShareScope: 📊 Share scope structure:<br/>__webpack_require__.S.default = {}<br/>🎯 Ready for module registration
     ShareScope-->>FedRuntime: ✅ Share scope infrastructure ready
     
-    FedRuntime->>+SharedModules: 📤 Register host's provided modules<br/>🔧 Populate initial share scope
-    Note over SharedModules: 📋 Host module registration:<br/>• react@18.2.0: { get: factory, loaded: 1, eager: true }<br/>• lodash@4.17.21: { get: factory, loaded: 0, lazy: true }<br/>• @company/design-system@3.1.0: { get: factory, loaded: 1 }
+    FedRuntime->>+SharedModules: 📤 Register host's provided modules<br/>🔧 Populate layer-aware share scope
+    Note over SharedModules: 📋 Enhanced host module registration:<br/>• react@18.2.0: { get: factory, loaded: 1, eager: true, issuerLayer: 'app-layer' }<br/>• lodash@4.17.21: { get: factory, loaded: 0, lazy: true, nodeModulesReconstructedLookup: true }<br/>• @company/design-system@3.1.0: { get: factory, loaded: 1, layer: 'ui-layer' }
     
-    SharedModules->>ShareScope: 📊 Modules registered in share scope<br/>🔄 Available for consumption
-    Note over ShareScope: 📊 Updated registry:<br/>default: {<br/>  react: { '18.2.0': {get, loaded: 1} },<br/>  lodash: { '4.17.21': {get, loaded: 0} }<br/>}
+    SharedModules->>ShareScope: 📊 Modules registered in layer-aware share scope<br/>🔄 Available for consumption with layer matching
+    Note over ShareScope: 📊 Enhanced registry with layer support:<br/>default: {<br/>  '(app-layer)react': { '18.2.0': {get, loaded: 1, issuerLayer: 'app-layer'} },<br/>  lodash: { '4.17.21': {get, loaded: 0, nodeModulesReconstructedLookup: true} },<br/>  '(ui-layer)@company/design-system': { '3.1.0': {get, loaded: 1, layer: 'ui-layer'} }<br/>}
     
     ShareScope-->>FedRuntime: ✅ Host modules successfully registered
     FedRuntime-->>HostBundle: ✅ Federation runtime fully initialized
@@ -871,11 +871,11 @@ sequenceDiagram
     RemoteContainer->>ShareScope: 🔍 Inspect current share scope state<br/>📊 Analyze available modules
     Note over ShareScope: 📊 Current share scope state:<br/>react@18.2.0 (from host, eager)<br/>lodash@4.17.21 (from host, lazy)<br/>@company/design-system@3.1.0 (from host)
     
-    RemoteContainer->>SharedModules: 📤 Register remote's provided modules<br/>🔄 Expand shared module ecosystem
-    Note over SharedModules: 📋 Remote module registration:<br/>• @company/ui@2.1.0: { get: factory, loaded: 0 }<br/>• moment@2.29.4: { get: factory, loaded: 1 }<br/>• @company/icons@1.5.0: { get: factory, loaded: 0 }
+    RemoteContainer->>SharedModules: 📤 Register remote's provided modules<br/>🔄 Expand layer-aware shared module ecosystem
+    Note over SharedModules: 📋 Enhanced remote module registration:<br/>• @company/ui@2.1.0: { get: factory, loaded: 0, issuerLayer: 'remote-layer' }<br/>• moment@2.29.4: { get: factory, loaded: 1, singleton: true }<br/>• @company/icons@1.5.0: { get: factory, loaded: 0, layer: 'icons-layer' }
     
-    SharedModules->>ShareScope: 🔄 Merge module registrations<br/>📊 Update global registry
-    Note over ShareScope: 📊 Merged share scope:<br/>react@18.2.0 (host)<br/>lodash@4.17.21 (host)<br/>@company/ui@2.1.0 (remote)<br/>moment@2.29.4 (remote)<br/>@company/icons@1.5.0 (remote)
+    SharedModules->>ShareScope: 🔄 Merge module registrations with layer awareness<br/>📊 Update global registry with layer support
+    Note over ShareScope: 📊 Enhanced merged share scope with layers:<br/>'(app-layer)react'@18.2.0 (host, issuerLayer: 'app-layer')<br/>lodash@4.17.21 (host, nodeModulesReconstructedLookup: true)<br/>'(remote-layer)@company/ui'@2.1.0 (remote, issuerLayer: 'remote-layer')<br/>moment@2.29.4 (remote, singleton: true)<br/>'(icons-layer)@company/icons'@1.5.0 (remote, layer: 'icons-layer')
     
     ShareScope-->>RemoteContainer: ✅ Share scope successfully merged<br/>🤝 Bidirectional sharing established
     RemoteContainer-->>FedRuntime: ✅ Remote container fully initialized<br/>📦 Ready for module requests
@@ -885,12 +885,12 @@ sequenceDiagram
     FedRuntime->>RemoteContainer: 📥 container.get('./Component')<br/>🎯 Request specific component
     Note over RemoteContainer: 🎯 Component factory lookup:<br/>• Find in module map<br/>• Prepare factory function<br/>• Analyze dependencies
     
-    RemoteContainer->>ShareScope: 🔍 Resolve component dependencies<br/>📊 Dependency analysis & version checking
-    Note over ShareScope: 🎯 Component dependency requirements:<br/>• react (^18.0.0) - REQUIRED<br/>• @company/ui (^2.0.0) - REQUIRED<br/>• moment (^2.29.0) - OPTIONAL<br/>• @company/icons (^1.0.0) - REQUIRED
+    RemoteContainer->>ShareScope: 🔍 Resolve component dependencies<br/>📊 Layer-aware dependency analysis & version checking
+    Note over ShareScope: 🎯 Enhanced component dependency requirements:<br/>• react (^18.0.0, issuerLayer: 'app-layer') - REQUIRED<br/>• @company/ui (^2.0.0, issuerLayer: 'remote-layer') - REQUIRED<br/>• moment (^2.29.0, singleton: true) - OPTIONAL<br/>• @company/icons (^1.0.0, layer: 'icons-layer') - REQUIRED
     
-    loop 🔄 For each dependency requirement
-        ShareScope->>ShareScope: ✅ Version satisfaction analysis<br/>📋 semver.satisfies(available, required)
-        Note over ShareScope: 🔍 Version checking process:<br/>• Parse semver ranges<br/>• Find compatible versions<br/>• Apply singleton constraints<br/>• Resolve conflicts
+    loop 🔄 For each dependency requirement with layer awareness
+        ShareScope->>ShareScope: ✅ Enhanced version & layer satisfaction analysis<br/>📋 semver.satisfies(available, required) + layer matching
+        Note over ShareScope: 🔍 Enhanced checking process:<br/>• Parse semver ranges<br/>• Check issuerLayer compatibility<br/>• Find compatible versions in correct layers<br/>• Apply singleton constraints<br/>• Resolve layer conflicts<br/>• Validate composite key matching
         
         alt ✅ Compatible version found in scope
             ShareScope->>SharedModules: 📦 Retrieve module factory<br/>🏭 Get cached or create new factory
@@ -1337,414 +1337,6 @@ class FederationEnvironmentManager {
 ```
 
 ---
-
-## Performance Optimization
-
-### 1. Chunk Splitting Strategies
-
-```typescript
-// Optimized webpack configuration for federation
-const federationOptimizedConfig = {
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-      cacheGroups: {
-        // Separate vendor chunks for better sharing
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all',
-          priority: 10,
-          enforce: true
-        },
-        
-        // Shared modules chunk
-        shared: {
-          test: (module: any) => {
-            return module.resource && 
-                   this.isSharedModule(module.resource);
-          },
-          name: 'shared',
-          chunks: 'all',
-          priority: 20,
-          enforce: true
-        },
-        
-        // Federation runtime
-        federation: {
-          test: /[\\/]@module-federation[\\/]/,
-          name: 'federation-runtime',
-          chunks: 'all',
-          priority: 30,
-          enforce: true
-        }
-      }
-    },
-    
-    // Minimize runtime overhead
-    runtimeChunk: {
-      name: 'runtime'
-    }
-  }
-};
-```
-
-### 2. Preloading and Prefetching
-
-```typescript
-class FederationPreloader {
-  private preloadedRemotes = new Set<string>();
-  
-  async preloadCriticalRemotes(remotes: string[]): Promise<void> {
-    const preloadPromises = remotes.map(remoteName => {
-      if (this.preloadedRemotes.has(remoteName)) {
-        return Promise.resolve();
-      }
-      
-      return this.preloadRemote(remoteName);
-    });
-    
-    await Promise.allSettled(preloadPromises);
-  }
-  
-  private async preloadRemote(remoteName: string): Promise<void> {
-    try {
-      // Preload the script
-      const remoteUrl = this.getRemoteUrl(remoteName);
-      await this.preloadScript(remoteUrl);
-      
-      // Mark as preloaded
-      this.preloadedRemotes.add(remoteName);
-    } catch (error) {
-      console.warn(`Failed to preload remote ${remoteName}:`, error);
-    }
-  }
-  
-  private preloadScript(url: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'script';
-      link.href = url;
-      link.onload = () => resolve();
-      link.onerror = () => reject(new Error(`Failed to preload ${url}`));
-      document.head.appendChild(link);
-    });
-  }
-  
-  setupIntelligentPrefetch(): void {
-    // Intersection observer for lazy loading
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const remoteName = entry.target.getAttribute('data-remote');
-          if (remoteName && !this.preloadedRemotes.has(remoteName)) {
-            this.preloadRemote(remoteName);
-          }
-        }
-      });
-    }, { threshold: 0.1 });
-    
-    // Observe elements that might trigger remote loading
-    document.querySelectorAll('[data-remote]').forEach(el => {
-      observer.observe(el);
-    });
-  }
-}
-```
-
-### 3. Bundle Analysis and Monitoring
-
-```typescript
-class FederationAnalyzer {
-  static analyzeBundle(stats: webpack.Stats): FederationAnalysis {
-    const chunks = Array.from(stats.compilation.chunks);
-    const federationChunks = chunks.filter(chunk => 
-      this.isFederationChunk(chunk)
-    );
-    
-    return {
-      totalSize: this.calculateTotalSize(federationChunks),
-      sharedModulesSize: this.calculateSharedSize(federationChunks),
-      remoteOverhead: this.calculateRemoteOverhead(federationChunks),
-      duplicateModules: this.findDuplicates(federationChunks),
-      optimizationSuggestions: this.generateSuggestions(federationChunks)
-    };
-  }
-  
-  static generateSuggestions(chunks: webpack.Chunk[]): OptimizationSuggestion[] {
-    const suggestions: OptimizationSuggestion[] = [];
-    
-    // Check for shared module opportunities
-    const duplicatedModules = this.findDuplicatedModules(chunks);
-    if (duplicatedModules.length > 0) {
-      suggestions.push({
-        type: 'sharing-opportunity',
-        impact: 'high',
-        message: `Consider sharing these duplicated modules: ${duplicatedModules.join(', ')}`,
-        estimatedSavings: this.calculatePotentialSavings(duplicatedModules)
-      });
-    }
-    
-    // Check for oversized chunks
-    const oversizedChunks = chunks.filter(chunk => chunk.size > 500 * 1024);
-    if (oversizedChunks.length > 0) {
-      suggestions.push({
-        type: 'code-splitting',
-        impact: 'medium',
-        message: `Large chunks detected, consider further code splitting`,
-        affectedChunks: oversizedChunks.map(c => c.name)
-      });
-    }
-    
-    return suggestions;
-  }
-}
-```
-
----
-
-## Troubleshooting & Debugging
-
-### 1. Common Issues and Solutions
-
-#### Version Conflicts
-```typescript
-class VersionConflictResolver {
-  static diagnoseVersionConflict(
-    moduleKey: string,
-    shareScope: ShareScope
-  ): ConflictDiagnosis {
-    const versions = shareScope[moduleKey];
-    if (!versions || Object.keys(versions).length <= 1) {
-      return { hasConflict: false };
-    }
-    
-    const versionList = Object.keys(versions);
-    const conflicts = versionList.map(version => ({
-      version,
-      providers: this.findProviders(moduleKey, version),
-      consumers: this.findConsumers(moduleKey, version)
-    }));
-    
-    return {
-      hasConflict: true,
-      moduleKey,
-      conflicts,
-      recommendation: this.generateResolutionStrategy(conflicts)
-    };
-  }
-  
-  static generateResolutionStrategy(
-    conflicts: VersionConflict[]
-  ): ResolutionStrategy {
-    // Strategy 1: Use highest compatible version
-    const sorted = conflicts.sort((a, b) => 
-      semver.rcompare(a.version, b.version)
-    );
-    
-    return {
-      strategy: 'highest-compatible',
-      recommendedVersion: sorted[0].version,
-      actions: [
-        'Update all consumers to use compatible version range',
-        'Consider using singleton: true if appropriate',
-        'Test thoroughly after version alignment'
-      ]
-    };
-  }
-}
-```
-
-#### Remote Loading Failures
-```typescript
-class RemoteFailureHandler {
-  private retryCount = new Map<string, number>();
-  private maxRetries = 3;
-  
-  async loadWithRetry(
-    remoteName: string,
-    moduleName: string,
-    fallback?: any
-  ): Promise<any> {
-    const key = `${remoteName}/${moduleName}`;
-    const attempts = this.retryCount.get(key) || 0;
-    
-    try {
-      const result = await this.loadRemoteModule(remoteName, moduleName);
-      this.retryCount.delete(key); // Reset on success
-      return result;
-    } catch (error) {
-      if (attempts < this.maxRetries) {
-        this.retryCount.set(key, attempts + 1);
-        
-        // Exponential backoff
-        const delay = Math.pow(2, attempts) * 1000;
-        await this.delay(delay);
-        
-        return this.loadWithRetry(remoteName, moduleName, fallback);
-      }
-      
-      // Max retries reached
-      if (fallback) {
-        console.warn(`Using fallback for ${key} after ${this.maxRetries} attempts`);
-        return fallback;
-      }
-      
-      throw new Error(`Failed to load ${key} after ${this.maxRetries} attempts: ${error.message}`);
-    }
-  }
-  
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-}
-```
-
-### 2. Debug Utilities
-
-```typescript
-class FederationDebugger {
-  static enableDebugMode(): void {
-    (window as any).__FEDERATION_DEBUG__ = true;
-    this.patchFederationRuntime();
-    this.createDebugPanel();
-  }
-  
-  static inspectShareScope(scopeName: string = 'default'): ShareScopeInfo {
-    const scope = window.__webpack_share_scopes__?.[scopeName];
-    
-    if (!scope) {
-      return { exists: false, scopeName };
-    }
-    
-    const modules = Object.keys(scope);
-    const versions = Object.entries(scope).reduce((acc, [key, versions]) => {
-      acc[key] = Object.keys(versions);
-      return acc;
-    }, {} as Record<string, string[]>);
-    
-    return {
-      exists: true,
-      scopeName,
-      modules,
-      versions,
-      moduleCount: modules.length,
-      conflicts: this.findVersionConflicts(scope)
-    };
-  }
-  
-  static generateDiagnosticReport(): DiagnosticReport {
-    const shareScopes = this.getAllShareScopes();
-    const remoteStatus = this.getRemoteStatus();
-    const performanceMetrics = this.getPerformanceMetrics();
-    
-    return {
-      timestamp: new Date().toISOString(),
-      shareScopes,
-      remoteStatus,
-      performanceMetrics,
-      issues: this.detectIssues(shareScopes, remoteStatus)
-    };
-  }
-  
-  private static detectIssues(
-    shareScopes: any,
-    remoteStatus: any
-  ): DiagnosticIssue[] {
-    const issues: DiagnosticIssue[] = [];
-    
-    // Check for version conflicts
-    Object.entries(shareScopes).forEach(([scopeName, scope]) => {
-      Object.entries(scope as ShareScope).forEach(([moduleKey, versions]) => {
-        if (Object.keys(versions).length > 1) {
-          issues.push({
-            type: 'version-conflict',
-            severity: 'warning',
-            message: `Multiple versions of ${moduleKey} in scope ${scopeName}`,
-            moduleKey,
-            scopeName,
-            versions: Object.keys(versions)
-          });
-        }
-      });
-    });
-    
-    // Check for failed remotes
-    Object.entries(remoteStatus).forEach(([remoteName, status]) => {
-      if ((status as any).failed) {
-        issues.push({
-          type: 'remote-failure',
-          severity: 'error',
-          message: `Remote ${remoteName} failed to load`,
-          remoteName,
-          error: (status as any).error
-        });
-      }
-    });
-    
-    return issues;
-  }
-}
-```
-
-### 3. Performance Monitoring
-
-```typescript
-class FederationPerformanceMonitor {
-  private metrics = new Map<string, PerformanceMetric[]>();
-  
-  measureRemoteLoad(remoteName: string): PerformanceMeasure {
-    const startTime = performance.now();
-    
-    return {
-      end: () => {
-        const endTime = performance.now();
-        const duration = endTime - startTime;
-        
-        this.recordMetric('remote-load', {
-          remoteName,
-          duration,
-          timestamp: startTime
-        });
-        
-        return duration;
-      }
-    };
-  }
-  
-  getPerformanceReport(): PerformanceReport {
-    const remoteLoadTimes = this.getMetrics('remote-load');
-    const moduleResolutionTimes = this.getMetrics('module-resolution');
-    
-    return {
-      averageRemoteLoadTime: this.calculateAverage(remoteLoadTimes, 'duration'),
-      slowestRemote: this.findSlowest(remoteLoadTimes),
-      totalFederationOverhead: this.calculateTotalOverhead(),
-      recommendations: this.generatePerformanceRecommendations()
-    };
-  }
-  
-  private generatePerformanceRecommendations(): string[] {
-    const recommendations: string[] = [];
-    const avgLoadTime = this.calculateAverage(this.getMetrics('remote-load'), 'duration');
-    
-    if (avgLoadTime > 2000) {
-      recommendations.push('Consider preloading critical remotes');
-      recommendations.push('Implement resource hints (preload, prefetch)');
-    }
-    
-    if (this.hasLargeSharedModules()) {
-      recommendations.push('Review shared module bundle sizes');
-      recommendations.push('Consider code splitting for large shared modules');
-    }
-    
-    return recommendations;
-  }
-}
-```
-
-This comprehensive guide now covers all aspects of Module Federation from basic configuration to advanced runtime patterns and debugging techniques.
 
 #### Why This Timing Matters:
 
