@@ -556,7 +556,7 @@ describe('SharePlugin', () => {
     });
   });
 
-  describe('experiments functionality', () => {
+  describe('nodeModulesReconstructedLookup functionality', () => {
     let mockCompiler;
 
     beforeEach(() => {
@@ -565,29 +565,33 @@ describe('SharePlugin', () => {
       ProvideSharedPluginMock.mockClear();
     });
 
-    it('should pass experiments to both ConsumeSharedPlugin and ProvideSharedPlugin', () => {
-      const experiments = {
-        nodeModulesReconstructedLookup: true,
-      };
-
+    it('should pass nodeModulesReconstructedLookup to both ConsumeSharedPlugin and ProvideSharedPlugin', () => {
       const plugin = new SharePlugin({
         shared: {
-          react: '^17.0.0',
+          react: {
+            requiredVersion: '^17.0.0',
+            nodeModulesReconstructedLookup: true,
+          },
         },
-        experiments,
       });
 
       plugin.apply(mockCompiler);
 
-      // Check ConsumeSharedPlugin receives experiments
+      // Check ConsumeSharedPlugin receives nodeModulesReconstructedLookup in config
       expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
       const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
-      expect(consumeOptions.experiments).toBe(experiments);
+      const reactConsume = consumeOptions.consumes.find(
+        (consume) => Object.keys(consume)[0] === 'react',
+      );
+      expect(reactConsume.react.nodeModulesReconstructedLookup).toBe(true);
 
-      // Check ProvideSharedPlugin receives experiments
+      // Check ProvideSharedPlugin receives nodeModulesReconstructedLookup in config
       expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
       const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
-      expect(provideOptions.experiments).toBe(experiments);
+      const reactProvide = provideOptions.provides.find(
+        (provide) => Object.keys(provide)[0] === 'react',
+      );
+      expect(reactProvide.react.nodeModulesReconstructedLookup).toBe(true);
     });
   });
 
