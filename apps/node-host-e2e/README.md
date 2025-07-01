@@ -12,3 +12,7 @@ Clear `.nx` cache if you encounter unexpected build issues.
 ```bash
 pnpm install
 ```
+
+## Usage
+
+Run the development server and navigate to the provided localhost URL.
