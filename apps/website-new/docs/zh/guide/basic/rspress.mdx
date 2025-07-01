@@ -77,6 +77,35 @@ Rspress 使用了 `react`、`react-dom`、`@mdx-js/react` 第三方依赖，并�
 
 你也可以设置 `autoShared: false` 来禁用此行为。
 
+默认 `shared` 配置如下：
+
+```json
+  react: {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react/': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  '@mdx-js/react': {
+    singleton: true,
+    requiredVersion: false
+  },
+  '@rspress/runtime': {
+    singleton: true,
+    requiredVersion: false
+  }
+```
+
 #### rebuildSearchIndex
 
 * 类型：`boolean`

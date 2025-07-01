@@ -113,9 +113,9 @@ export function createSSRMFConfig(
     },
     dts: false,
     dev: false,
+    runtimePlugins: [...(mfConfig.runtimePlugins || [])],
   };
 
-  ssrMFConfig.runtimePlugins ||= [];
   ssrMFConfig.runtimePlugins.push(
     require.resolve('@module-federation/node/runtimePlugin'),
   );

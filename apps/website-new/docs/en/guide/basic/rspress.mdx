@@ -77,6 +77,35 @@ Rspress uses `react`, `react-dom`, and `@mdx-js/react` as third-party dependenci
 
 You can also set `autoShared: false` to disable this behavior.
 
+Default `shared` configuration: as follows:
+
+```json
+  react: {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react/': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  '@mdx-js/react': {
+    singleton: true,
+    requiredVersion: false
+  },
+  '@rspress/runtime': {
+    singleton: true,
+    requiredVersion: false
+  }
+```
+
 #### rebuildSearchIndex
 
 * Type: `boolean`
