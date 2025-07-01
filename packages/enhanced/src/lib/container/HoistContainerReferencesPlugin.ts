@@ -1,7 +1,7 @@
 import type {
+  Chunk,
   Compiler,
   Compilation,
-  Chunk,
   WebpackPluginInstance,
   Module,
   Dependency,
@@ -20,9 +20,9 @@ const { AsyncDependenciesBlock, ExternalModule } = require(
 const PLUGIN_NAME = 'HoistContainerReferences';
 
 /**
- * This class is used to hoist container references in the code.
+ * This plugin hoists container-related modules into runtime chunks when using runtimeChunk: single configuration.
  */
-export class HoistContainerReferences implements WebpackPluginInstance {
+class HoistContainerReferences implements WebpackPluginInstance {
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
@@ -162,31 +162,17 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       for (const chunk of chunkGraph.getModuleChunks(module)) {
         if (!chunk.hasRuntime()) {
           chunkGraph.disconnectChunkAndModule(chunk, module);
-          if (
-            chunkGraph.getNumberOfChunkModules(chunk) === 0 &&
-            chunkGraph.getNumberOfEntryModules(chunk) === 0
-          ) {
-            chunkGraph.disconnectChunk(chunk);
-            compilation.chunks.delete(chunk);
-            if (chunk.name) {
-              compilation.namedChunks.delete(chunk.name);
-            }
-          }
         }
       }
     }
-    modules.clear();
   }
 
-  // Helper method to get runtime chunks from the compilation
+  // Method to get runtime chunks
   private getRuntimeChunks(compilation: Compilation): Set<Chunk> {
     const runtimeChunks = new Set<Chunk>();
-    const entries = compilation.entrypoints;
-
-    for (const entrypoint of entries.values()) {
-      const runtimeChunk = entrypoint.getRuntimeChunk();
-      if (runtimeChunk) {
-        runtimeChunks.add(runtimeChunk);
+    for (const chunk of compilation.chunks) {
+      if (chunk.hasRuntime()) {
+        runtimeChunks.add(chunk);
       }
     }
     return runtimeChunks;

@@ -3,6 +3,11 @@ import type {
   sharePlugin,
 } from '@module-federation/sdk';
 import type { Compiler } from 'webpack';
+import type {
+  SharedConfig,
+  SharedObject,
+} from '@module-federation/enhanced/src/declarations/plugins/sharing/SharePlugin';
+import { getReactVersionSafely } from './internal-helpers';
 
 export const WEBPACK_LAYERS_NAMES = {
   /**
@@ -227,4 +232,125 @@ const formatError = (error: Error): string => {
  */
 export const toDisplayErrors = (err: Error[]): string => {
   return err.map(formatError).join('\n');
+};
+
+/**
+ * Gets the Next.js version from compiler context
+ * @param {Compiler} compiler - The webpack compiler instance
+ * @returns {string} - The Next.js version
+ */
+const getNextVersion = (compiler: Compiler): string => {
+  if (!compiler.context) {
+    throw new Error(
+      'Compiler context is not available. Cannot resolve Next.js version.',
+    );
+  }
+
+  try {
+    const nextPackageJsonPath = require.resolve('next/package.json', {
+      paths: [compiler.context],
+    });
+    // Use global require if available (for testing), otherwise use normal require
+    const requireFn = (global as any).require || require;
+    return requireFn(nextPackageJsonPath).version;
+  } catch (error) {
+    throw new Error('Could not resolve Next.js version from compiler context.');
+  }
+};
+
+/**
+ * Checks if the Next.js version is 14 or higher
+ * @param {string} version - The Next.js version string
+ * @returns {boolean} - True if version is 14+, false otherwise
+ */
+const isNextJs14Plus = (version: string): boolean => {
+  const majorVersion = parseInt(version.split('.')[0], 10);
+  return majorVersion >= 14;
+};
+
+/**
+ * Version-aware function to get Next.js internals share scope
+ * Uses existing client/server configurations based on Next.js version detection
+ * @param {Compiler} compiler - The webpack compiler instance
+ * @returns {SharedObject} - The generated share scope based on version and compiler type
+ */
+export const getNextInternalsShareScope = (
+  compiler: Compiler,
+): SharedObject => {
+  const nextVersion = getNextVersion(compiler);
+  const isNext14Plus = isNextJs14Plus(nextVersion);
+  const isClient = compiler.options.name === 'client';
+
+  if (isNext14Plus) {
+    // For Next.js 14+, use the unified internal configuration
+    if (isClient) {
+      // Import and use the existing client configuration
+      const {
+        getNextInternalsShareScopeClient,
+      } = require('./share-internals-client');
+      return getNextInternalsShareScopeClient(compiler);
+    } else {
+      // Import and use the existing server configuration
+      const {
+        getNextInternalsShareScopeServer,
+      } = require('./share-internals-server');
+      return getNextInternalsShareScopeServer(compiler);
+    }
+  } else {
+    // For older Next.js versions, return basic configuration
+    return getBasicNextInternalsShareScope(compiler);
+  }
+};
+
+/**
+ * Basic share scope for older Next.js versions (pre-14)
+ * Provides minimal sharing configuration for compatibility
+ */
+const getBasicNextInternalsShareScope = (compiler: Compiler): SharedObject => {
+  if (!compiler.context) {
+    console.warn('Compiler context is not available. Cannot resolve versions.');
+    return {};
+  }
+
+  const nextVersion = getNextVersion(compiler);
+  const reactVersion = getReactVersionSafely(
+    'next/dist/compiled/react',
+    compiler.context,
+  );
+
+  const basicConfigs: SharedConfig[] = [
+    {
+      request: 'react',
+      singleton: true,
+      requiredVersion: `^${reactVersion}`,
+      shareKey: 'react',
+      shareScope: 'default',
+      version: reactVersion,
+    },
+    {
+      request: 'react-dom',
+      singleton: true,
+      requiredVersion: `^${reactVersion}`,
+      shareKey: 'react-dom',
+      shareScope: 'default',
+      version: reactVersion,
+    },
+    {
+      request: 'next/router',
+      singleton: true,
+      requiredVersion: `^${nextVersion}`,
+      shareKey: 'next/router',
+      shareScope: 'default',
+      version: nextVersion,
+    },
+  ];
+
+  return basicConfigs.reduce(
+    (acc, config, index) => {
+      const key = `${config.request}-${config.shareKey}-${index}-basic`;
+      acc[key] = config;
+      return acc;
+    },
+    {} as Record<string, SharedConfig>,
+  );
 };
