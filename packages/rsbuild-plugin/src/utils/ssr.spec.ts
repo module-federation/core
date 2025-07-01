@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest';
-import { resolve } from 'import-meta-resolve';
 import { createSSRMFConfig, patchSSRRspackConfig, SSR_DIR } from './ssr';
 import type { Rspack } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
@@ -16,7 +15,7 @@ describe('createSSRMFConfig', () => {
     expect(ssrMFConfig.dts).toBe(false);
     expect(ssrMFConfig.dev).toBe(false);
     expect(ssrMFConfig.runtimePlugins).toEqual([
-      resolve('@module-federation/node/runtimePlugin', import.meta.url),
+      require.resolve('@module-federation/node/runtimePlugin'),
     ]);
   });
 
@@ -38,12 +37,11 @@ describe('createSSRMFConfig', () => {
     process.env.NODE_ENV = 'development';
     const ssrMFConfig = createSSRMFConfig(baseMFConfig);
     expect(ssrMFConfig.runtimePlugins).toContain(
-      resolve('@module-federation/node/runtimePlugin', import.meta.url),
+      require.resolve('@module-federation/node/runtimePlugin'),
     );
     expect(ssrMFConfig.runtimePlugins).toContain(
-      resolve(
+      require.resolve(
         '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
-        import.meta.url,
       ),
     );
     process.env.NODE_ENV = originalNodeEnv; // Restore original NODE_ENV
@@ -54,7 +52,7 @@ describe('createSSRMFConfig', () => {
     process.env.NODE_ENV = 'production';
     const ssrMFConfig = createSSRMFConfig(baseMFConfig);
     expect(ssrMFConfig.runtimePlugins).toEqual([
-      resolve('@module-federation/node/runtimePlugin', import.meta.url),
+      require.resolve('@module-federation/node/runtimePlugin'),
     ]);
     process.env.NODE_ENV = originalNodeEnv; // Restore original NODE_ENV
   });
@@ -67,7 +65,7 @@ describe('createSSRMFConfig', () => {
       };
     const ssrMFConfig = createSSRMFConfig(mfConfigWithoutRuntimePlugins);
     expect(ssrMFConfig.runtimePlugins).toEqual([
-      resolve('@module-federation/node/runtimePlugin', import.meta.url),
+      require.resolve('@module-federation/node/runtimePlugin'),
     ]);
   });
 });

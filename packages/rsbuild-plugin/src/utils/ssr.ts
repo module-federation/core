@@ -1,5 +1,4 @@
 import path from 'path';
-import { resolve } from 'import-meta-resolve';
 import { createRequire } from 'node:module';
 import { encodeName } from '@module-federation/sdk';
 import { CALL_NAME_MAP } from '../constant';
@@ -8,6 +7,7 @@ import type { EnvironmentConfig, RsbuildConfig, Rspack } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 const require = createRequire(import.meta.url);
+const resolve = require.resolve;
 
 export const SSR_DIR = 'ssr';
 export const SSR_ENV_NAME = 'mf-ssr';
@@ -121,14 +121,13 @@ export function createSSRMFConfig(
   };
 
   ssrMFConfig.runtimePlugins.push(
-    resolve('@module-federation/node/runtimePlugin', import.meta.url),
+    resolve('@module-federation/node/runtimePlugin'),
   );
   if (isDev()) {
     ssrMFConfig.runtimePlugins.push(
       // @ts-ignore
       resolve(
         '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
-        import.meta.url,
       ),
     );
   }
