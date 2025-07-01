@@ -49,7 +49,7 @@ import Intro from 'mf-doc/intro-zh';
 假设你需要在文档片段中使用 `cmdTools` 变量，可以参考下方内容：
 
 ```mdx title='docs/zh/guide/intro.mdx'
-{(props.cmdTools || ['pkg-a', 'pkg-b']).map(cmdTool=>(<p><code>{cmdTool}</code></p>))}
+{(props.cmdTools || ['pkg-a', 'pkg-b']).map(cmdTool=>(<code>{cmdTool}</code>))}
 ```
 
 ## 配置

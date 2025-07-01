@@ -49,7 +49,7 @@ Document fragments support passing parameters, which are consumed as props.
 If you need to use the `cmdTools` variable in a document fragment, you can refer to the following:
 
 ```mdx title='docs/zh/guide/intro.mdx'
-{(props.cmdTools || ['pkg-a', 'pkg-b']).map(cmdTool=>(<p><code>{cmdTool}</code></p>))}
+{(props.cmdTools || ['pkg-a', 'pkg-b']).map(cmdTool=>(<code>{cmdTool}</code>))}
 ```
 
 ## Configuration
