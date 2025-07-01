@@ -51,7 +51,8 @@
     "fs-extra": "11.3.0",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
-    "@module-federation/node": "workspace:*"
+    "@module-federation/node": "workspace:*",
+    "import-meta-resolve": "4.1.0"
   },
   "devDependencies": {
     "@rsbuild/core": "^1.3.21"

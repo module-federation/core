@@ -1,4 +1,5 @@
 import path from 'path';
+import { resolve } from 'import-meta-resolve';
 import { createRequire } from 'node:module';
 import { encodeName } from '@module-federation/sdk';
 import { CALL_NAME_MAP } from '../constant';
@@ -120,14 +121,14 @@ export function createSSRMFConfig(
   };
 
   ssrMFConfig.runtimePlugins.push(
-    // @ts-ignore
-    import.meta.resolve('@module-federation/node/runtimePlugin'),
+    resolve('@module-federation/node/runtimePlugin', import.meta.url),
   );
   if (isDev()) {
     ssrMFConfig.runtimePlugins.push(
       // @ts-ignore
-      import.meta.resolve(
+      resolve(
         '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
+        import.meta.url,
       ),
     );
   }
