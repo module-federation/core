@@ -93,7 +93,7 @@ jobs:
         with:
           max_attempts: 2
           timeout_minutes: 10
-          command: npx nx affected -t test:experiments --parallel=1 --exclude='*,!tag:type:pkg' --skip-nx-cache
+          command: npx nx affected -t test:experiments --parallel=1 --exclude='*,!tag:type:pkg'
 
   e2e-modern:
     needs: checkout-install
