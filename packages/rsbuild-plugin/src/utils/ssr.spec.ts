@@ -138,7 +138,7 @@ describe('patchSSRRspackConfig', () => {
       };
       const patchedConfig = patchSSRRspackConfig(config, mfConfig, 'ssr');
       expect(patchedConfig.output?.chunkFilename).toBe(
-        'js/[name]myApp-[chunkhash].js',
+        'js/[name]myApp-[contenthash].js',
       );
     });
 
@@ -154,7 +154,7 @@ describe('patchSSRRspackConfig', () => {
       const mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions = {}; // No name in mfConfig
       const patchedConfig = patchSSRRspackConfig(config, mfConfig, 'ssr');
       expect(patchedConfig.output?.chunkFilename).toBe(
-        'js/[name]myOutputUniqueName-[chunkhash].js',
+        'js/[name]myOutputUniqueName-[contenthash].js',
       );
     });
 

@@ -15,6 +15,7 @@ import type { Compiler, WebpackPluginInstance } from 'webpack';
 export const DEFAULT_CONSUME_TYPES = {
   abortOnError: false,
   consumeAPITypes: true,
+  typesOnBuild: false,
 };
 
 export const normalizeConsumeTypesOptions = ({
@@ -99,11 +100,6 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
   apply(compiler: Compiler) {
     const { dtsOptions, pluginOptions, fetchRemoteTypeUrlsResolve } = this;
 
-    if (isPrd()) {
-      fetchRemoteTypeUrlsResolve(undefined);
-      return;
-    }
-
     const dtsManagerOptions = normalizeConsumeTypesOptions({
       context: compiler.context,
       dtsOptions,
@@ -111,6 +107,11 @@ export class ConsumeTypesPlugin implements WebpackPluginInstance {
     });
 
     if (!dtsManagerOptions) {
+      fetchRemoteTypeUrlsResolve(undefined);
+      return;
+    }
+
+    if (isPrd() && !dtsManagerOptions.host.typesOnBuild) {
       fetchRemoteTypeUrlsResolve(undefined);
       return;
     }

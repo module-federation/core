@@ -64,7 +64,7 @@ export function applyServerPlugins(
 ): void {
   const chunkFileName = compiler.options?.output?.chunkFilename;
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
-  const suffix = `-[chunkhash].js`;
+  const suffix = `-[contenthash].js`;
 
   // Modify chunk filename to include a unique suffix if not already present
   if (
