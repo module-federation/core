@@ -14,132 +14,162 @@ This document provides a comprehensive, chronological breakdown of the Module Fe
 8. [Troubleshooting & Debugging](#troubleshooting--debugging)
 
 ```mermaid
-graph TD
-    %% Styling
-    classDef configClass fill:#e1f5fe,stroke:#01579b,stroke-width:3px,color:#000
-    classDef pluginClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
-    classDef hookClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px,color:#000
-    classDef moduleClass fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
-    classDef runtimeClass fill:#ffebee,stroke:#b71c1c,stroke-width:2px,color:#000
-    classDef dependencyClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px,color:#000
-    classDef codegenClass fill:#fce4ec,stroke:#880e4f,stroke-width:2px,color:#000
+flowchart TD
+    %% Enhanced Styling for Maximum Visual Impact
+    classDef startClass fill:#4caf50,stroke:#2e7d32,stroke-width:4px,color:#fff,font-weight:bold,font-size:16px
+    classDef pluginClass fill:#2196f3,stroke:#1565c0,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
+    classDef hookClass fill:#ff9800,stroke:#ef6c00,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
+    classDef dependencyClass fill:#e91e63,stroke:#ad1457,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
+    classDef moduleClass fill:#9c27b0,stroke:#6a1b9a,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
+    classDef runtimeClass fill:#607d8b,stroke:#37474f,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
+    classDef decisionClass fill:#795548,stroke:#3e2723,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
+    classDef codegenClass fill:#673ab7,stroke:#311b92,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
 
-    subgraph "📋 User Configuration Layer"
-        A["📝 webpack.config.js<br/>🔧 ModuleFederationPlugin Options<br/>• name: 'my-app'<br/>• exposes: {...}<br/>• remotes: {...}<br/>• shared: {...}"]:::configClass
-    end
+    A["🚀 webpack.config.js Entry Point<br/>📋 Federation Configuration<br/>```js<br/>new ModuleFederationPlugin({<br/>  name: 'host-app',<br/>  exposes: {<br/>    './Button': './src/Button.jsx',<br/>    './Header': './src/Header.jsx'<br/>  },<br/>  remotes: {<br/>    mf2: 'mf2@http://localhost:3001/entry.js',<br/>    shell: 'shell@http://cdn.example.com/shell.js'<br/>  },<br/>  shared: {<br/>    react: { singleton: true, version: '^18.0.0' },<br/>    lodash: { requiredVersion: '^4.17.0' }<br/>  }<br/>})<br/>```<br/>🎯 Triggers complete federation orchestration"]:::startClass
 
-    subgraph "⚙️ Build-Time: Plugin Initialization & Hook Registration"
+    subgraph "⚙️ Phase 1: Plugin Initialization & Hook Registration System"
         direction TB
         
-        subgraph "🎯 Core Plugin Orchestration"
-            B["🎼 ModuleFederationPlugin<br/>📋 Master Orchestrator<br/>• Validates configuration<br/>• Applies sub-plugins conditionally"]:::pluginClass
+        subgraph "🎯 Core Plugin Orchestration Sequence (Synchronous)"
+            B["🎼 ModuleFederationPlugin.apply(compiler)<br/>📋 Master Federation Orchestrator<br/>• Schema validation & normalization<br/>• Core plugin instantiation<br/>• Hook registration coordination<br/>• Configuration preprocessing<br/>🔧 FIRST: RemoteEntryPlugin<br/>🔧 SECOND: FederationModulesPlugin<br/>🔧 THIRD: FederationRuntimePlugin<br/>🔧 FOURTH: afterPlugins hook setup"]:::pluginClass
             
-            B1["🏠 RemoteEntryPlugin<br/>🔧 Container Entry Setup"]:::pluginClass
-            B2["📦 FederationModulesPlugin<br/>🔧 Module Registry"]:::pluginClass
-            B3["⚡ FederationRuntimePlugin<br/>🔧 Runtime Injection"]:::pluginClass
+            B1["🏠 RemoteEntryPlugin.apply(compiler)<br/>🔧 Container Entry & Public Path Setup<br/>• Public path function configuration<br/>• Container entry point creation<br/>• Dynamic path resolution setup<br/>• Entry plugin coordination<br/>• Build identifier injection"]:::pluginClass
+            
+            B2["📦 FederationModulesPlugin.apply(compiler)<br/>🔧 Module Registry & Hook Infrastructure<br/>• Compilation hooks creation<br/>• addContainerEntryModule hook<br/>• addFederationRuntimeModule hook<br/>• Plugin communication channels<br/>• Module tracking system"]:::pluginClass
+            
+            B3["⚡ FederationRuntimePlugin.apply(compiler)<br/>🔧 Runtime Injection & Bootstrapping<br/>• Federation runtime embedding<br/>• Runtime alias configuration<br/>• Entry dependency injection<br/>• Runtime module setup<br/>• Bundle runtime coordination"]:::pluginClass
         end
         
-        subgraph "🔌 Conditional Plugin Application"
-            D["🤝 SharePlugin<br/>📊 Universal Sharing<br/>• ALWAYS applied<br/>• Enables bidirectional sharing"]:::pluginClass
-            E["📤 ProvideSharedPlugin<br/>🔧 Module Provider<br/>• Wraps modules for sharing<br/>• Version registration"]:::pluginClass
-            F["📥 ConsumeSharedPlugin<br/>🔧 Module Consumer<br/>• Intercepts module requests<br/>• Version satisfaction"]:::pluginClass
-            G["🏗️ ContainerPlugin<br/>📦 Expose Manager<br/>• Creates container entry<br/>• Module map generation"]:::pluginClass
-            H["🔗 ContainerReferencePlugin<br/>🌐 Remote Loader<br/>• External mapping<br/>• Script injection"]:::pluginClass
-        end
-    end
-
-    subgraph "🏗️ Build-Time: Dependency Graph Construction & Module Interception"
-        direction TB
-        
-        subgraph "📊 Webpack Hook Integration"
-            C["⚡ Compiler Hooks<br/>🔧 Webpack Integration Points<br/>• afterPlugins<br/>• make<br/>• normalModuleFactory"]:::hookClass
+        subgraph "🔌 Conditional Plugin Application (afterPlugins Hook)"
+            D["🤝 SharePlugin.apply(compiler)<br/>📊 Universal Sharing Orchestrator<br/>• ALWAYS applied when shared exists<br/>• Bidirectional sharing enablement<br/>• Configuration normalization<br/>• Provider & Consumer instantiation<br/>• Share scope coordination"]:::pluginClass
             
-            P["🎯 normalModuleFactory.hooks.factorize<br/>📋 BEFORE Module Creation<br/>Data: resolveData { context, request, dependencies }<br/>🔍 Module Request Interception Point"]:::hookClass
+            E["📤 ProvideSharedPlugin.apply(compiler)<br/>🔧 Module Provider System<br/>• normalModuleFactory.module hook<br/>• Module wrapping & enhancement<br/>• Version registration & validation<br/>• Include/exclude pattern filtering<br/>• nodeModulesReconstructedLookup<br/>• Share scope population"]:::pluginClass
             
-            V["🎯 normalModuleFactory.hooks.module<br/>📋 AFTER Module Creation<br/>Data: module, resourceResolveData, resolveData<br/>🔄 Module Wrapping Point"]:::hookClass
-        end
-        
-        subgraph "📦 Container System"
-            I["🏗️ ContainerEntryDependency<br/>📋 Container Entry Point<br/>• Entry chunk creation<br/>• Module map preparation"]:::dependencyClass
-            J["⚡ Webpack Dependency Graph<br/>📊 Integration Point<br/>• compilation.addEntry()<br/>• Chunk generation"]:::hookClass
-            K["🏭 ContainerEntryModuleFactory<br/>🔧 Container Module Creator"]:::moduleClass
-            L["📦 ContainerEntryModule<br/>🎯 Container Implementation<br/>• Module map generation<br/>• Init/get functions"]:::moduleClass
-            M["🔗 ContainerExposedDependency<br/>📋 Per-exposed module<br/>• Individual expose handling"]:::dependencyClass
-        end
-        
-        subgraph "🌐 Remote System"
-            N["🔧 ExternalsPlugin<br/>📋 Webpack Built-in<br/>• Remote mapping<br/>• External references"]:::pluginClass
-            O["🌍 External Module References<br/>📋 Webpack Treatment<br/>• Prevents bundling<br/>• Runtime resolution"]:::moduleClass
-        end
-        
-        subgraph "🔄 Module Resolution Flow"
-            Q["🔗 ContainerReferencePlugin<br/>🎯 Remote Request Handler<br/>• URL/variable resolution<br/>• Script loading"]:::pluginClass
-            R["🌐 RemoteModule<br/>📦 Remote Module Wrapper<br/>• Dynamic loading<br/>• Error handling"]:::moduleClass
-            S["🔗 RemoteToExternalDependency<br/>📋 External Reference<br/>• Script injection<br/>• Container initialization"]:::dependencyClass
+            F["📥 ConsumeSharedPlugin.apply(compiler)<br/>🔧 Module Consumer System<br/>• normalModuleFactory.factorize hook<br/>• Module request interception<br/>• Version satisfaction algorithms<br/>• Fallback mechanism configuration<br/>• Singleton enforcement logic<br/>• Share scope resolution"]:::pluginClass
             
-            T["📥 ConsumeSharedPlugin.factorize<br/>🎯 Shared Module Interceptor<br/>• Pre-creation interception<br/>• Version checking"]:::pluginClass
-            T1{"🔍 Shared Module Match?<br/>📋 Configuration Lookup<br/>• Package name matching<br/>• Share scope validation"}:::hookClass
-            T2["📥 ConsumeSharedModule<br/>📦 Shared Consumer<br/>• Version satisfaction<br/>• Fallback handling<br/>• Singleton enforcement"]:::moduleClass
-            X["🔄 ConsumeSharedFallbackDependency<br/>📋 Fallback Strategy<br/>• Local module fallback<br/>• Error recovery"]:::dependencyClass
+            G["🏗️ ContainerPlugin.apply(compiler)<br/>📦 Container & Expose Manager<br/>• compiler.make hook registration<br/>• Container entry creation<br/>• Module map generation<br/>• Library type configuration<br/>• Chunk splitting optimization<br/>• Entry dependency management"]:::pluginClass
             
-            U["⚙️ Normal Webpack Module<br/>📦 Standard Processing<br/>• File resolution<br/>• Module creation"]:::moduleClass
-            W["📤 ProvideSharedPlugin.module<br/>🎯 Shared Module Wrapper<br/>• Post-creation wrapping<br/>• Share registration"]:::pluginClass
-            W1{"📤 Should Provide Shared?<br/>📋 Configuration Check<br/>• Resource matching<br/>• Share scope validation"}:::hookClass
-            W2["📤 ProvideSharedModule<br/>🏭 Shared Provider Factory<br/>• Module wrapping<br/>• Version registration<br/>• Share scope population"]:::moduleClass
-            Y["📋 ProvideForSharedDependency<br/>🔗 Share Registration<br/>• Runtime registration<br/>• Version management"]:::dependencyClass
+            H["🔗 ContainerReferencePlugin.apply(compiler)<br/>🌐 Remote Module Loader<br/>• normalModuleFactory.factorize hook<br/>• ExternalsPlugin coordination<br/>• Remote pattern matching<br/>• Script injection preparation<br/>• External dependency creation<br/>• Runtime loading setup"]:::pluginClass
         end
     end
 
-    subgraph "⚡ Build-Time: Code Generation & Runtime Module Injection"
+    subgraph "🏗️ Phase 2: Dependency Graph Construction & Module Interception"
         direction TB
-        Z["⚡ compilation.hooks.additionalTreeRuntimeRequirements<br/>📋 Runtime Injection Point<br/>• Runtime module registration<br/>• Dependency analysis"]:::hookClass
         
-        subgraph "🔧 Runtime Module Generation"
-            AA["📥 ConsumeSharedRuntimeModule<br/>⚡ Consumer Runtime<br/>• Version satisfaction logic<br/>• Fallback mechanisms<br/>• Singleton management"]:::runtimeClass
-            BB["🤝 ShareRuntimeModule<br/>⚡ Share Scope Manager<br/>• Share scope initialization<br/>• Module registration<br/>• Version negotiation"]:::runtimeClass
-            CC["🌐 RemoteRuntimeModule<br/>⚡ Remote Loader<br/>• Script injection<br/>• Container initialization<br/>• Error handling"]:::runtimeClass
+        subgraph "📊 Webpack Hook Integration Timeline"
+            C["⚡ Compiler Hook Execution Sequence<br/>🔧 Webpack Integration Points<br/>• afterPlugins: Plugin registration complete<br/>• make: Entry creation & processing<br/>• thisCompilation: Factory setup<br/>• finishMake: Additional entry handling<br/>• compilation: Module processing"]:::hookClass
+            
+            P["🎯 normalModuleFactory.hooks.factorize<br/>📋 PRE-CREATION Interception (Critical Timing)<br/>Data: resolveData { context, request, dependencies, contextInfo }<br/>🔍 Module Request Interception Point<br/>⚡ ConsumeSharedPlugin intercepts HERE<br/>⚡ ContainerReferencePlugin intercepts HERE<br/>🎯 BEFORE any module instantiation"]:::hookClass
+            
+            V["🎯 normalModuleFactory.hooks.module<br/>📋 POST-CREATION Enhancement (Module Wrapping)<br/>Data: module, resourceResolveData, resolveData<br/>🔄 Module Enhancement & Wrapping Point<br/>⚡ ProvideSharedPlugin wraps HERE<br/>🎯 AFTER module has been created & resolved"]:::hookClass
         end
         
-        subgraph "📋 Code Generation Pipeline"
-            DD["🏭 Code Generation Phase<br/>📋 Module Compilation<br/>• Source code generation<br/>• Runtime code injection"]:::codegenClass
+        subgraph "📦 Container System Architecture"
+            I["🏗️ ContainerEntryDependency<br/>📋 Container Entry Point Creation<br/>• compilation.addEntry() integration<br/>• Entry chunk creation & optimization<br/>• Module map preparation & setup<br/>• Exposed module registration<br/>• Runtime integration coordination<br/>• Chunk splitting configuration"]:::dependencyClass
             
-            EE["📦 Container Entry Code<br/>🎯 Generated Output<br/>```js<br/>var moduleMap = { './Button': () => ... }<br/>var get = (module, getScope) => ...<br/>var init = (shareScope, initScope) => ...<br/>```"]:::codegenClass
+            J["⚡ Webpack Dependency Graph Integration<br/>📊 Core Webpack Integration Point<br/>• compilation.addEntry() for containers<br/>• compilation.addInclude() for runtime<br/>• Chunk generation & optimization<br/>• Dependency resolution & tracking<br/>• Module graph construction"]:::hookClass
             
-            FF["🌐 Remote Loading Code<br/>⚡ Dynamic Import<br/>```js<br/>const remote = await loadScript(url)<br/>await remote.init(shareScope)<br/>return remote.get(moduleName)<br/>```"]:::codegenClass
+            K["🏭 ContainerEntryModuleFactory<br/>🔧 Container Module Creator<br/>• Factory for container entry modules<br/>• Module instantiation coordination<br/>• Exposed module mapping<br/>• Runtime factory integration<br/>• Module lifecycle management"]:::moduleClass
             
-            GG["📤 Shared Provider Code<br/>🔧 Share Registration<br/>```js<br/>__webpack_require__.S['default']['react'] = {<br/>  '18.2.0': { get: () => ..., loaded: 1 }<br/>}<br/>```"]:::codegenClass
+            L["📦 ContainerEntryModule<br/>🎯 Container Implementation Core<br/>• Module map object generation<br/>• get() function implementation<br/>• init() function for sharing<br/>• Exposed module resolution<br/>• Runtime coordination logic<br/>• Error handling & fallbacks"]:::moduleClass
             
-            HH["📥 Shared Consumer Code<br/>🔄 Dynamic Resolution<br/>```js<br/>const satisfy = (version, range) => ...<br/>const loadSingleton = (scope, key) => ...<br/>const loadVersionCheck = () => ...<br/>```"]:::codegenClass
+            M["🔗 ContainerExposedDependency<br/>📋 Individual Expose Handler<br/>• Per-exposed module processing<br/>• Module path resolution & validation<br/>• Export mapping configuration<br/>• Dependency tracking & optimization<br/>• Runtime integration setup"]:::dependencyClass
+        end
+        
+        subgraph "🌐 Remote System Architecture"
+            N["🔧 ExternalsPlugin (Webpack Built-in)<br/>📋 External Reference System<br/>• Remote-to-external mapping<br/>• Bundle exclusion logic<br/>• Runtime resolution delegation<br/>• Script loading preparation<br/>• External dependency tracking<br/>• URL/variable configuration"]:::pluginClass
+            
+            O["🌍 External Module References<br/>📋 Webpack External Treatment<br/>• Bundle exclusion enforcement<br/>• Runtime resolution markers<br/>• Dynamic loading preparation<br/>• URL/variable mapping<br/>• External dependency optimization<br/>• Script injection coordination"]:::moduleClass
+        end
+        
+        subgraph "🔄 Module Resolution Flow & Decision Logic"
+            Q["🔗 ContainerReferencePlugin Decision Logic<br/>🎯 Remote Request Pattern Handler<br/>• Pattern matching: remoteA/moduleName<br/>• URL/variable resolution & validation<br/>• Script loading configuration<br/>• External dependency creation<br/>• Remote module instantiation<br/>• Error handling & fallbacks"]:::pluginClass
+            
+            R["🌐 RemoteModule Creation<br/>📦 Remote Module Wrapper Implementation<br/>• Dynamic loading setup & config<br/>• Error handling & recovery logic<br/>• Fallback mechanism implementation<br/>• Container initialization coordination<br/>• Runtime loading optimization<br/>• Script injection management"]:::moduleClass
+            
+            S["🔗 RemoteToExternalDependency<br/>📋 External Reference Link<br/>• Script injection preparation<br/>• Container initialization setup<br/>• Runtime loading configuration<br/>• External dependency tracking<br/>• Load order optimization<br/>• Error recovery mechanisms"]:::dependencyClass
+            
+            T["📥 ConsumeSharedPlugin.factorize Logic<br/>🎯 Shared Module Interceptor<br/>• Pre-creation module interception<br/>• Version requirement validation<br/>• Share scope lookup & validation<br/>• Fallback configuration setup<br/>• Singleton enforcement logic<br/>• Layer compatibility checking"]:::pluginClass
+            
+            T1{"🔍 Shared Module Match Decision<br/>📋 Configuration Lookup Logic<br/>• Package name pattern matching<br/>• Share scope validation & lookup<br/>• Layer compatibility verification<br/>• Request pattern analysis<br/>• Configuration priority resolution<br/>• Include/exclude filtering"}:::decisionClass
+            
+            T2["📥 ConsumeSharedModule Creation<br/>📦 Shared Consumer Implementation<br/>• Version satisfaction algorithms<br/>• Fallback handling & configuration<br/>• Singleton enforcement logic<br/>• Runtime resolution preparation<br/>• Share scope integration<br/>• Error handling & recovery"]:::moduleClass
+            
+            X["🔄 ConsumeSharedFallbackDependency<br/>📋 Fallback Strategy Implementation<br/>• Local module fallback logic<br/>• Error recovery mechanisms<br/>• Version mismatch handling<br/>• Performance optimization<br/>• Dependency tracking<br/>• Runtime coordination"]:::dependencyClass
+            
+            U["⚙️ Normal Webpack Module<br/>📦 Standard Processing Path<br/>• File resolution via loaders<br/>• Standard module creation<br/>• AST parsing & analysis<br/>• Dependency extraction<br/>• Module optimization<br/>• Standard webpack flow"]:::moduleClass
+            
+            W["📤 ProvideSharedPlugin.module Logic<br/>🎯 Shared Module Wrapper<br/>• Post-creation module wrapping<br/>• Share registration coordination<br/>• Version management & validation<br/>• Include/exclude pattern filtering<br/>• nodeModulesReconstructedLookup<br/>• Share scope population"]:::pluginClass
+            
+            W1{"📤 Should Provide Shared Decision<br/>📋 Configuration Check Logic<br/>• Resource path pattern matching<br/>• Share scope validation<br/>• Include/exclude filtering logic<br/>• nodeModulesReconstructedLookup<br/>• Version compatibility checking<br/>• Layer compatibility verification"}:::decisionClass
+            
+            W2["📤 ProvideSharedModule Wrapping<br/>🏭 Shared Provider Factory<br/>• Module wrapping & enhancement<br/>• Version registration in scope<br/>• Share scope population logic<br/>• Runtime factory creation<br/>• Module lifecycle management<br/>• Performance optimization"]:::moduleClass
+            
+            Y["📋 ProvideForSharedDependency<br/>🔗 Share Registration Link<br/>• Runtime registration setup<br/>• Version management coordination<br/>• Share scope integration<br/>• Dependency tracking<br/>• Module factory preparation<br/>• Runtime optimization"]:::dependencyClass
         end
     end
 
-    subgraph "🌐 Runtime: Browser Execution & Federation Bootstrap"
+    subgraph "⚡ Phase 3: Code Generation & Runtime Module Injection"
         direction TB
-        II["🚀 Consumer App Starts<br/>📋 Application Bootstrap<br/>• Bundle loading<br/>• Federation initialization"]:::runtimeClass
+        Z["⚡ compilation.hooks.additionalTreeRuntimeRequirements<br/>📋 Runtime Injection Trigger Point<br/>• Runtime module registration coordination<br/>• Dependency analysis completion<br/>• Runtime requirement calculation<br/>• Module injection orchestration<br/>• Performance optimization setup<br/>• Runtime code preparation"]:::hookClass
         
-        subgraph "📡 Remote Module Loading"
-            JJ["🎯 RemoteModule Logic<br/>⚡ Dynamic Import Trigger<br/>• import('host/Component')<br/>• URL resolution<br/>• Script injection"]:::runtimeClass
-            KK["📜 Script Loading<br/>🌐 Network Request<br/>• <script> tag injection<br/>• Container download<br/>• Parse & execute"]:::runtimeClass
-            LL["🏠 Host Container Ready<br/>📦 Global Registration<br/>• window.hostApp = container<br/>• get/init functions available"]:::runtimeClass
+        subgraph "🔧 Runtime Module Generation System"
+            AA["📥 ConsumeSharedRuntimeModule<br/>⚡ Consumer Runtime Logic Engine<br/>• Version satisfaction algorithms<br/>• Fallback mechanism implementation<br/>• Singleton management logic<br/>• Share scope resolution<br/>• Error handling & recovery<br/>• Performance optimization"]:::runtimeClass
+            
+            BB["🤝 ShareRuntimeModule<br/>⚡ Share Scope Manager<br/>• Share scope initialization<br/>• Module registration system<br/>• Version negotiation algorithms<br/>• Scope merging logic<br/>• Conflict resolution<br/>• Performance optimization"]:::runtimeClass
+            
+            CC["🌐 RemoteRuntimeModule<br/>⚡ Remote Loader System<br/>• Script injection logic<br/>• Container initialization<br/>• Error handling & recovery<br/>• Dynamic loading coordination<br/>• Performance optimization<br/>• Load order management"]:::runtimeClass
+        end
+        
+        subgraph "📜 Generated Code Examples & Runtime Output"
+            DD["🔧 Runtime Code Injection<br/>📋 Core Federation Runtime Setup<br/>```js<br/>// Federation Runtime Globals<br/>__webpack_require__.S = {}; // Share scopes<br/>__webpack_require__.I = {}; // Init sharing functions<br/>__webpack_require__.federation = {}; // Runtime core<br/>__webpack_require__.f.remotes = {}; // Remote loading<br/>__webpack_require__.e = {}; // Chunk loading<br/>```<br/>🎯 Foundation for all federation operations"]:::codegenClass
+            
+            EE["📦 Container Code Generation<br/>📋 Module Map & Export Logic<br/>```js<br/>// Container Module Map<br/>var moduleMap = {<br/>  './Button': () => import('./src/Button.jsx'),<br/>  './Header': () => import('./src/Header.jsx'),<br/>  './utils': () => import('./src/utils/index.js')<br/>};<br/>// Container Functions<br/>var get = (module, getScope) => {<br/>  return moduleMap[module]?.();<br/>};<br/>var init = (shareScope, initScope) => {<br/>  return __webpack_require__.I(shareScope, initScope);<br/>};<br/>```"]:::codegenClass
+            
+            FF["🌐 Remote Loading Code<br/>📋 Dynamic Import & Script Logic<br/>```js<br/>// Remote Module Loading<br/>__webpack_require__.e('webpack_container_remote_mf2')<br/>  .then(() => __webpack_require__('webpack/container/reference/mf2'))<br/>  .then(container => {<br/>    return container.init(__webpack_require__.S.default)<br/>      .then(() => container.get('./Component'))<br/>      .then(factory => factory());<br/>  })<br/>  .catch(err => /* fallback logic */);<br/>```"]:::codegenClass
+            
+            GG["📤 Provide Shared Code<br/>📋 Share Registration Logic<br/>```js<br/>// Share Scope Population<br/>__webpack_require__.S.default = {<br/>  'react': {<br/>    '18.2.0': {<br/>      get: () => import('react'),<br/>      loaded: 1, // eager<br/>      scope: ['default']<br/>    }<br/>  },<br/>  'lodash': {<br/>    '4.17.21': {<br/>      get: () => import('lodash'),<br/>      loaded: 0, // lazy<br/>      scope: ['default']<br/>    }<br/>  }<br/>};<br/>```"]:::codegenClass
+            
+            HH["📥 Consume Shared Code<br/>📋 Version Resolution Logic<br/>```js<br/>// Shared Module Resolution<br/>const getSharedModule = async (scope, key, version) => {<br/>  const satisfy = (version, range) => /* semver logic */;<br/>  const available = __webpack_require__.S[scope][key];<br/>  const compatible = Object.keys(available)<br/>    .find(v => satisfy(v, version));<br/>  if (compatible) {<br/>    const factory = await available[compatible].get();<br/>    return factory();<br/>  }<br/>  throw new Error(`No compatible version found`);<br/>};<br/>```"]:::codegenClass
+        end
+    end
+
+    subgraph "🌐 Phase 4: Runtime Execution & Federation Bootstrap"
+        direction TB
+        II["🚀 Consumer App Bootstrap<br/>📋 Application Initialization Sequence<br/>• Bundle loading & parsing<br/>• Federation runtime initialization<br/>• Share scope setup & population<br/>• Remote discovery & preparation<br/>• Module graph preparation<br/>• Performance optimization"]:::runtimeClass
+        
+        subgraph "📡 Remote Module Loading System"
+            JJ["🎯 RemoteModule Logic Execution<br/>⚡ Dynamic Import Trigger<br/>• import('host/Component') invocation<br/>• URL resolution & validation<br/>• Script injection preparation<br/>• Container loading initiation<br/>• Error handling setup<br/>• Performance monitoring"]:::runtimeClass
+            
+            KK["📜 Script Loading & Execution<br/>🌐 Network Request & Processing<br/>• <script> tag injection & management<br/>• Container download & parsing<br/>• Module execution & registration<br/>• Global container availability<br/>• Error handling & recovery<br/>• Performance optimization"]:::runtimeClass
+            
+            LL["🏠 Host Container Ready<br/>📦 Global Registration Complete<br/>• window.hostApp = container assignment<br/>• get/init functions availability<br/>• Module map accessibility<br/>• Share scope population<br/>• Runtime coordination setup<br/>• Error handling preparation"]:::runtimeClass
         end
         
         subgraph "🤝 Federation Runtime Handshake"
-            MM["⚡ Federation Handshake<br/>🔧 Initialization Process<br/>• Share scope merging<br/>• Version negotiation<br/>• Module registration"]:::runtimeClass
-            NN["📊 Share Scope<br/>🗃️ Global Module Registry<br/>```js<br/>__webpack_require__.S.default = {<br/>  'react': { '18.2.0': {...} },<br/>  'lodash': { '4.17.21': {...} }<br/>}<br/>```"]:::runtimeClass
-            OO["📤 Provider Registration<br/>🔧 Module Population<br/>• Version registration<br/>• Module factory storage<br/>• Scope validation"]:::runtimeClass
+            MM["⚡ Federation Handshake Process<br/>🔧 Initialization & Negotiation<br/>• Share scope merging & validation<br/>• Version negotiation & resolution<br/>• Module registration & coordination<br/>• Singleton validation & enforcement<br/>• Conflict resolution<br/>• Performance optimization"]:::runtimeClass
+            
+            NN["📊 Share Scope Registry<br/>🗃️ Global Module Coordination Hub<br/>```js<br/>__webpack_require__.S.default = {<br/>  'react': {<br/>    '18.2.0': {get: factory, loaded: 1, scope: ['default']},<br/>    '17.0.2': {get: factory, loaded: 0, scope: ['default']}<br/>  },<br/>  'lodash': {<br/>    '4.17.21': {get: factory, loaded: 0, scope: ['default']}<br/>  }<br/>}<br/>```<br/>🎯 Central coordination for all shared modules"]:::runtimeClass
+            
+            OO["📤 Provider Registration<br/>🔧 Module Population Process<br/>• Version registration & validation<br/>• Module factory storage & optimization<br/>• Scope validation & merging<br/>• Eager/lazy loading configuration<br/>• Singleton enforcement setup<br/>• Performance monitoring"]:::runtimeClass
         end
         
-        subgraph "🔄 Module Resolution & Execution"
-            PP["📥 Consumer Logic<br/>🎯 Dependency Resolution<br/>• Share scope lookup<br/>• Version satisfaction<br/>• Module retrieval"]:::runtimeClass
-            QQ{"✅ Version Compatible?<br/>📋 Satisfaction Check<br/>• semver.satisfies()<br/>• Singleton validation<br/>• Strict version mode"}:::hookClass
-            RR["✅ Use Host's Module<br/>📦 Shared Dependency<br/>• Factory execution<br/>• Module instantiation<br/>• Singleton enforcement"]:::runtimeClass
-            SS["⚠️ Use Fallback Module<br/>🔄 Local Resolution<br/>• Local bundle lookup<br/>• Fallback execution<br/>• Error handling"]:::runtimeClass
-            TT["🎯 Dependencies Resolved<br/>✅ Module Graph Complete<br/>• All deps satisfied<br/>• Ready for execution"]:::runtimeClass
-            UU["🎊 Execute Component<br/>⚡ Runtime Execution<br/>• Component instantiation<br/>• UI rendering<br/>• Event handling"]:::runtimeClass
+        subgraph "🔄 Module Resolution & Execution Flow"
+            PP["📥 Consumer Logic Execution<br/>🎯 Dependency Resolution Process<br/>• Share scope lookup & navigation<br/>• Version compatibility checking<br/>• Module factory retrieval<br/>• Singleton enforcement logic<br/>• Fallback decision making<br/>• Performance optimization"]:::runtimeClass
+            
+            QQ{"✅ Version Compatible Decision<br/>📋 Satisfaction Check Logic<br/>• semver.satisfies() validation<br/>• Singleton constraint verification<br/>• Strict version mode handling<br/>• Fallback decision logic<br/>• Performance consideration<br/>• Error handling preparation"}:::decisionClass
+            
+            RR["✅ Use Host's Module<br/>📦 Shared Dependency Success Path<br/>• Factory execution & optimization<br/>• Module instantiation & caching<br/>• Singleton enforcement & validation<br/>• Cache management & optimization<br/>• Performance monitoring<br/>• Error handling setup"]:::runtimeClass
+            
+            SS["⚠️ Use Fallback Module<br/>🔄 Local Resolution Path<br/>• Local bundle lookup & resolution<br/>• Fallback execution & optimization<br/>• Error handling & recovery<br/>• Performance impact mitigation<br/>• Dependency tracking<br/>• Alternative resolution"]:::runtimeClass
+            
+            TT["🎯 Dependencies Resolved<br/>✅ Module Graph Complete<br/>• All dependencies satisfied<br/>• Module tree ready & optimized<br/>• Execution preparation complete<br/>• Performance optimization applied<br/>• Error handling prepared<br/>• Runtime coordination ready"]:::runtimeClass
+            
+            UU["🎊 Execute Component<br/>⚡ Runtime Execution Success<br/>• Component instantiation & rendering<br/>• UI rendering & hydration<br/>• Event handling setup & optimization<br/>• User interaction readiness<br/>• Performance monitoring<br/>• Error boundary activation"]:::runtimeClass
         end
     end
 
-    %% Main Flow Connections
+    %% Enhanced Flow Connections with Logical Grouping
     A --> B
     B --> B1
     B --> B2
@@ -151,31 +181,32 @@ graph TD
     C --> G
     C --> H
     
-    %% Container Flow
+    %% Container System Flow
     G --> I
     I --> J
     J --> K
     K --> L
     L --> M
     
-    %% Remote Flow
+    %% Remote System Flow
     H --> N
     N --> O
     
-    %% Module Resolution Flow
+    %% Module Resolution Decision Flow
     C --> P
     P --> Q
     Q --> R
     R --> S
     P --> T
     T --> T1
-    T1 -->|Yes| T2
+    T1 -->|"✅ Match Found"| T2
+    T1 -->|"❌ No Match"| U
     T2 --> X
-    P --> U
     U --> V
     V --> W
     W --> W1
-    W1 -->|Yes| W2
+    W1 -->|"✅ Should Provide"| W2
+    W1 -->|"❌ Skip"| Z
     W2 --> Y
     
     %% Code Generation Flow
@@ -189,7 +220,7 @@ graph TD
     W2 --> GG
     T2 --> HH
     
-    %% Runtime Flow
+    %% Runtime Execution Flow
     DD --> II
     II --> JJ
     JJ --> KK
@@ -200,8 +231,8 @@ graph TD
     MM --> PP
     PP --> NN
     PP --> QQ
-    QQ -->|Yes| RR
-    QQ -->|No| SS
+    QQ -->|"✅ Compatible"| RR
+    QQ -->|"❌ Incompatible"| SS
     RR --> TT
     SS --> TT
     TT --> UU
@@ -781,130 +812,167 @@ declare global {
 
 ```mermaid
 sequenceDiagram
-    participant User as 👤 User Browser
-    participant HostApp as 🏠 Host Application<br/>(localhost:3000)
-    participant HostBundle as 📦 Host Bundle<br/>(main.js + remoteEntry.js)
-    participant FedRuntime as ⚡ Federation Runtime<br/>(__webpack_require__.S)
-    participant ShareScope as 🗃️ Share Scope<br/>(Global Registry)
-    participant RemoteScript as 📡 Remote Script<br/>(CDN/localhost:3001)
-    participant RemoteContainer as 🌐 Remote Container<br/>(Federated Module)
-    participant SharedModules as 🤝 Shared Modules<br/>(react, lodash, etc.)
+    participant User as 👤 User Browser<br/>🌐 Web Client
+    participant HostApp as 🏠 Host Application<br/>📍 localhost:3000<br/>🎯 Main Consumer App
+    participant HostBundle as 📦 Host Bundle<br/>📄 main.js + remoteEntry.js<br/>⚡ Federation-enabled
+    participant FedRuntime as ⚡ Federation Runtime<br/>🔧 __webpack_require__.S<br/>🗃️ Share Scope Manager
+    participant ShareScope as 🗃️ Share Scope Registry<br/>📊 Global Module Hub<br/>🔄 Version Coordinator
+    participant RemoteScript as 📡 Remote Script Loader<br/>🌐 CDN/localhost:3001<br/>📜 Dynamic Script Injection
+    participant RemoteContainer as 🌐 Remote Container<br/>📦 Federated Module Provider<br/>🏗️ Module Factory
+    participant SharedModules as 🤝 Shared Module System<br/>📚 react, lodash, @company/ui<br/>🔄 Dependency Resolution
+    participant ErrorBoundary as ⚠️ Error Boundary<br/>🛡️ Fallback System<br/>🔄 Recovery Mechanisms
     
-    Note over User,SharedModules: 🚀 Phase 1: Application Bootstrap & Federation Initialization
+    Note over User,ErrorBoundary: 🚀 Phase 1: Application Bootstrap & Federation Infrastructure Initialization
     
-    User->>HostApp: 🌐 Navigate to application
-    activate HostApp
+    User->>+HostApp: 🌐 Navigate to federated application<br/>📍 GET https://localhost:3000
+    Note over User,HostApp: 🎯 Initial page load triggers<br/>complete federation setup
     
-    HostApp->>HostBundle: 📥 Load main application bundle
-    activate HostBundle
+    HostApp->>+HostBundle: 📥 Load main application bundle<br/>⚡ Federation runtime included
+    Note over HostBundle: 📦 Bundle contains:<br/>• Main app code<br/>• Federation runtime<br/>• Share configurations<br/>• Remote entry points
     
-    HostBundle->>FedRuntime: ⚡ Initialize federation runtime
-    activate FedRuntime
+    HostBundle->>+FedRuntime: ⚡ Initialize federation runtime system<br/>🔧 Setup global federation infrastructure
+    Note over FedRuntime: 🏗️ Runtime initialization:<br/>• __webpack_require__.S = {}<br/>• __webpack_require__.I = {}<br/>• __webpack_require__.federation = {}
     
-    FedRuntime->>ShareScope: 🗃️ Create default share scope
-    activate ShareScope
-    Note over ShareScope: 📊 Initialize: __webpack_require__.S.default = {}
-    ShareScope-->>FedRuntime: ✅ Share scope ready
+    FedRuntime->>+ShareScope: 🗃️ Create default share scope registry<br/>📊 Initialize global module coordination
+    Note over ShareScope: 📊 Share scope structure:<br/>__webpack_require__.S.default = {}<br/>🎯 Ready for module registration
+    ShareScope-->>FedRuntime: ✅ Share scope infrastructure ready
     
-    FedRuntime->>SharedModules: 📤 Register host's provided modules
-    activate SharedModules
-    Note over SharedModules: 📋 Register:<br/>react@18.2.0: { get: fn, loaded: 1 }<br/>lodash@4.17.21: { get: fn, loaded: 0 }
-    SharedModules-->>ShareScope: 📊 Modules registered in scope
-    ShareScope-->>FedRuntime: ✅ Host modules registered
-    FedRuntime-->>HostBundle: ✅ Federation runtime ready
-    HostBundle-->>HostApp: ✅ Application initialized
+    FedRuntime->>+SharedModules: 📤 Register host's provided modules<br/>🔧 Populate initial share scope
+    Note over SharedModules: 📋 Host module registration:<br/>• react@18.2.0: { get: factory, loaded: 1, eager: true }<br/>• lodash@4.17.21: { get: factory, loaded: 0, lazy: true }<br/>• @company/design-system@3.1.0: { get: factory, loaded: 1 }
     
-    Note over User,SharedModules: 📡 Phase 2: Dynamic Remote Loading & Container Initialization
+    SharedModules->>ShareScope: 📊 Modules registered in share scope<br/>🔄 Available for consumption
+    Note over ShareScope: 📊 Updated registry:<br/>default: {<br/>  react: { '18.2.0': {get, loaded: 1} },<br/>  lodash: { '4.17.21': {get, loaded: 0} }<br/>}
     
-    User->>HostApp: 🖱️ Trigger remote component<br/>(e.g., click button, route change)
-    HostApp->>FedRuntime: 🎯 import('remote/Component')
+    ShareScope-->>FedRuntime: ✅ Host modules successfully registered
+    FedRuntime-->>HostBundle: ✅ Federation runtime fully initialized
+    HostBundle-->>HostApp: ✅ Application ready with federation support
+    HostApp-->>-User: 🎊 Initial application loaded & ready
     
-    FedRuntime->>RemoteScript: 📡 Load remote container script
-    Note over RemoteScript: 🌐 Inject: <script src="http://localhost:3001/remoteEntry.js">
-    activate RemoteScript
+    Note over User,ErrorBoundary: 📡 Phase 2: Dynamic Remote Loading & Container Initialization
     
-    RemoteScript->>RemoteContainer: 📦 Download & execute container
-    activate RemoteContainer
-    Note over RemoteContainer: 🏗️ Container available at window.remoteApp
-    RemoteScript-->>FedRuntime: ✅ Remote script loaded
+    User->>+HostApp: 🖱️ Trigger remote component interaction<br/>🎯 Click button, navigate route, lazy load
+    Note over User,HostApp: 🎯 User action triggers:<br/>import('remote/Component')<br/>Dynamic federation loading
+    
+    HostApp->>FedRuntime: 🎯 Dynamic import request<br/>📡 import('remote/Component')
+    Note over FedRuntime: 🔍 Remote resolution:<br/>• Parse remote identifier<br/>• Resolve container URL<br/>• Initiate script loading
+    
+    FedRuntime->>+RemoteScript: 📡 Load remote container script<br/>🌐 Dynamic script injection
+    Note over RemoteScript: 🌐 Script injection:<br/><script src="http://localhost:3001/remoteEntry.js"><br/>🔄 Async loading with error handling
+    
+    RemoteScript->>+RemoteContainer: 📦 Download, parse & execute container<br/>🏗️ Remote module factory creation
+    Note over RemoteContainer: 🏗️ Container initialization:<br/>• Parse module map<br/>• Setup get() function<br/>• Setup init() function<br/>• Register at window.remoteApp
+    
+    RemoteScript-->>FedRuntime: ✅ Remote script loaded successfully<br/>📦 Container available globally
     deactivate RemoteScript
     
-    FedRuntime->>RemoteContainer: 🤝 container.init(shareScope)
-    Note over RemoteContainer: 🔧 Initialize remote with host's share scope
+    FedRuntime->>RemoteContainer: 🤝 container.init(shareScope)<br/>🔧 Initialize remote with host's share scope
+    Note over RemoteContainer: 🔧 Initialization process:<br/>• Receive host's share scope<br/>• Merge configurations<br/>• Validate compatibility<br/>• Setup bidirectional sharing
     
-    RemoteContainer->>ShareScope: 🔍 Inspect current share scope
-    Note over ShareScope: 📊 Current state:<br/>react@18.2.0 (from host)<br/>lodash@4.17.21 (from host)
+    RemoteContainer->>ShareScope: 🔍 Inspect current share scope state<br/>📊 Analyze available modules
+    Note over ShareScope: 📊 Current share scope state:<br/>react@18.2.0 (from host, eager)<br/>lodash@4.17.21 (from host, lazy)<br/>@company/design-system@3.1.0 (from host)
     
-    RemoteContainer->>SharedModules: 📤 Register remote's provided modules
-    Note over SharedModules: 📋 Add remote modules:<br/>@company/ui@2.1.0: { get: fn, loaded: 0 }<br/>moment@2.29.4: { get: fn, loaded: 1 }
+    RemoteContainer->>SharedModules: 📤 Register remote's provided modules<br/>🔄 Expand shared module ecosystem
+    Note over SharedModules: 📋 Remote module registration:<br/>• @company/ui@2.1.0: { get: factory, loaded: 0 }<br/>• moment@2.29.4: { get: factory, loaded: 1 }<br/>• @company/icons@1.5.0: { get: factory, loaded: 0 }
     
-    SharedModules->>ShareScope: 🔄 Merge module registrations
-    Note over ShareScope: 📊 Updated scope:<br/>react@18.2.0 (host)<br/>lodash@4.17.21 (host)<br/>@company/ui@2.1.0 (remote)<br/>moment@2.29.4 (remote)
+    SharedModules->>ShareScope: 🔄 Merge module registrations<br/>📊 Update global registry
+    Note over ShareScope: 📊 Merged share scope:<br/>react@18.2.0 (host)<br/>lodash@4.17.21 (host)<br/>@company/ui@2.1.0 (remote)<br/>moment@2.29.4 (remote)<br/>@company/icons@1.5.0 (remote)
     
-    ShareScope-->>RemoteContainer: ✅ Share scope merged
-    RemoteContainer-->>FedRuntime: ✅ Remote container initialized
+    ShareScope-->>RemoteContainer: ✅ Share scope successfully merged<br/>🤝 Bidirectional sharing established
+    RemoteContainer-->>FedRuntime: ✅ Remote container fully initialized<br/>📦 Ready for module requests
     
-    Note over User,SharedModules: 🔄 Phase 3: Module Resolution & Dependency Satisfaction
+    Note over User,ErrorBoundary: 🔄 Phase 3: Module Resolution & Dependency Satisfaction
     
-    FedRuntime->>RemoteContainer: 📥 container.get('Component')
-    RemoteContainer->>ShareScope: 🔍 Resolve component dependencies
-    Note over ShareScope: 🎯 Component needs:<br/>- react (any version)<br/>- @company/ui (^2.0.0)<br/>- moment (^2.29.0)
+    FedRuntime->>RemoteContainer: 📥 container.get('./Component')<br/>🎯 Request specific component
+    Note over RemoteContainer: 🎯 Component factory lookup:<br/>• Find in module map<br/>• Prepare factory function<br/>• Analyze dependencies
     
-    loop 🔄 For each dependency
-        ShareScope->>ShareScope: ✅ Version satisfaction check
-        Note over ShareScope: 📋 semver.satisfies(available, required)
+    RemoteContainer->>ShareScope: 🔍 Resolve component dependencies<br/>📊 Dependency analysis & version checking
+    Note over ShareScope: 🎯 Component dependency requirements:<br/>• react (^18.0.0) - REQUIRED<br/>• @company/ui (^2.0.0) - REQUIRED<br/>• moment (^2.29.0) - OPTIONAL<br/>• @company/icons (^1.0.0) - REQUIRED
+    
+    loop 🔄 For each dependency requirement
+        ShareScope->>ShareScope: ✅ Version satisfaction analysis<br/>📋 semver.satisfies(available, required)
+        Note over ShareScope: 🔍 Version checking process:<br/>• Parse semver ranges<br/>• Find compatible versions<br/>• Apply singleton constraints<br/>• Resolve conflicts
         
-        alt ✅ Compatible version found
-            ShareScope->>SharedModules: 📦 Get module factory
-            SharedModules-->>ShareScope: 🏭 Return factory function
-        else ❌ No compatible version
-            ShareScope->>RemoteContainer: ⚠️ Use fallback or throw error
-            Note over RemoteContainer: 🔄 Fallback to local bundle<br/>or show error boundary
+        alt ✅ Compatible version found in scope
+            ShareScope->>SharedModules: 📦 Retrieve module factory<br/>🏭 Get cached or create new factory
+            Note over SharedModules: 🏭 Factory resolution:<br/>• Check if already loaded<br/>• Execute factory if needed<br/>• Apply singleton logic<br/>• Cache result
+            SharedModules-->>ShareScope: 🏭 Module factory ready<br/>✅ Dependency satisfied
+        else ❌ No compatible version available
+            ShareScope->>+ErrorBoundary: ⚠️ Version conflict detected<br/>🔄 Initiate fallback strategy
+            Note over ErrorBoundary: 🛡️ Fallback strategies:<br/>• Use local bundle version<br/>• Show degraded UI<br/>• Display error message<br/>• Retry with different version
+            ErrorBoundary->>RemoteContainer: 🔄 Apply fallback resolution<br/>⚠️ Graceful degradation
+            deactivate ErrorBoundary
         end
     end
     
-    ShareScope-->>RemoteContainer: ✅ All dependencies resolved
-    RemoteContainer->>SharedModules: 🏭 Execute module factories
+    ShareScope-->>RemoteContainer: ✅ All dependencies resolved<br/>📦 Module graph complete
     
-    Note over SharedModules: ⚡ Instantiate:<br/>• react hooks & context<br/>• @company/ui components<br/>• moment utilities
+    RemoteContainer->>SharedModules: 🏭 Execute resolved module factories<br/>⚡ Instantiate dependencies
+    Note over SharedModules: ⚡ Module instantiation process:<br/>• Execute react factory → React instance<br/>• Execute @company/ui factory → UI components<br/>• Execute moment factory → Date utilities<br/>• Execute @company/icons factory → Icon library
     
-    SharedModules-->>RemoteContainer: 📦 Module instances ready
-    RemoteContainer-->>FedRuntime: 🎯 Component factory function
-    FedRuntime-->>HostApp: 📦 Ready-to-render component
+    SharedModules-->>RemoteContainer: 📦 Module instances ready<br/>✅ All dependencies instantiated
     
-    Note over User,SharedModules: 🎊 Phase 4: Component Execution & UI Rendering
+    RemoteContainer-->>FedRuntime: 🎯 Component factory function<br/>📦 Ready-to-execute component
+    Note over FedRuntime: 📦 Component factory contains:<br/>• Resolved dependencies<br/>• Component implementation<br/>• Props interface<br/>• Error boundaries
     
-    HostApp->>HostApp: 🎨 Render federated component
-    Note over HostApp: ⚡ Component execution:<br/>• Props passed down<br/>• State management active<br/>• Event handlers bound<br/>• Lifecycle methods called
+    FedRuntime-->>HostApp: 📦 Federated component ready<br/>🎨 Ready for rendering
     
-    HostApp-->>User: 🎊 Federated UI rendered
+    Note over User,ErrorBoundary: 🎊 Phase 4: Component Execution & UI Rendering
     
-    Note over User,SharedModules: 🔄 Ongoing: Hot Module Replacement (Development)
+    HostApp->>HostApp: 🎨 Render federated component<br/>⚡ Execute with resolved dependencies
+    Note over HostApp: ⚡ Component execution process:<br/>• Props validation & passing<br/>• State management initialization<br/>• Event handlers binding<br/>• Lifecycle methods execution<br/>• Context providers setup<br/>• Error boundary activation
     
-    opt 🔥 HMR in Development
-        RemoteScript->>RemoteContainer: 🔄 Hot update received
-        RemoteContainer->>ShareScope: 🔄 Update module registration
-        ShareScope->>HostApp: ⚡ Trigger re-render
-        HostApp-->>User: 🔄 UI updated without page reload
+    HostApp-->>-User: 🎊 Federated UI successfully rendered<br/>✨ Seamless user experience
+    Note over User,HostApp: 🎊 User sees:<br/>• Integrated UI components<br/>• Shared design system<br/>• Consistent interactions<br/>• No loading indicators
+    
+    Note over User,ErrorBoundary: 🔄 Phase 5: Ongoing Operations & Optimizations
+    
+    opt 🔥 Hot Module Replacement (Development Mode)
+        Note over User,ErrorBoundary: 🔥 Development-time optimizations
+        RemoteScript->>RemoteContainer: 🔄 HMR update received<br/>📡 New module version available
+        Note over RemoteContainer: 🔄 HMR process:<br/>• Invalidate old modules<br/>• Load new versions<br/>• Preserve component state<br/>• Update registrations
+        RemoteContainer->>ShareScope: 🔄 Update module registrations<br/>📊 Refresh share scope
+        ShareScope->>HostApp: ⚡ Trigger component re-render<br/>🔄 Apply changes without page reload
+        HostApp-->>User: 🔄 UI updated instantly<br/>✨ Development experience enhanced
     end
     
-    Note over User,SharedModules: ⚠️ Error Handling & Fallback Scenarios
+    Note over User,ErrorBoundary: ⚠️ Phase 6: Error Handling & Recovery Scenarios
     
-    opt ❌ Remote Loading Failure
-        FedRuntime->>RemoteScript: 📡 Attempt remote load
-        RemoteScript-->>FedRuntime: ❌ Network error / 404 / timeout
-        FedRuntime->>HostApp: ⚠️ Fallback to error boundary
-        HostApp-->>User: 🚨 Error UI displayed
+    opt ❌ Remote Loading Failure Scenarios
+        Note over User,ErrorBoundary: ❌ Network/infrastructure failures
+        FedRuntime->>RemoteScript: 📡 Attempt remote container load
+        RemoteScript-->>FedRuntime: ❌ Network error / 404 / timeout<br/>🚨 Loading failed
+        Note over FedRuntime: ❌ Failure scenarios:<br/>• Network connectivity issues<br/>• Remote server down<br/>• Invalid container URL<br/>• CORS policy violations
+        FedRuntime->>+ErrorBoundary: ⚠️ Activate error boundary<br/>🛡️ Fallback to safe UI
+        ErrorBoundary->>HostApp: 🔄 Render fallback component<br/>⚠️ Graceful degradation
+        HostApp-->>User: 🚨 Error UI displayed<br/>💡 User informed of issue
+        deactivate ErrorBoundary
     end
     
-    opt ❌ Version Conflict
-        ShareScope->>ShareScope: ❌ Version incompatible
-        ShareScope->>RemoteContainer: ⚠️ Version conflict detected
-        alt 🔧 Singleton mode
-            RemoteContainer->>HostApp: ⚠️ Show version warning
-        else 🔄 Fallback mode
-            RemoteContainer->>SharedModules: 🔄 Use local fallback module
+    opt ❌ Version Conflict Resolution
+        Note over User,ErrorBoundary: ❌ Dependency version conflicts
+        ShareScope->>ShareScope: ❌ Version incompatibility detected<br/>🔍 Conflict analysis
+        Note over ShareScope: ❌ Conflict scenarios:<br/>• Singleton violations<br/>• Breaking version changes<br/>• Missing dependencies<br/>• Circular dependencies
+        ShareScope->>+ErrorBoundary: ⚠️ Version conflict detected<br/>🔄 Initiate resolution strategy
+        
+        alt 🔧 Singleton enforcement mode
+            ErrorBoundary->>HostApp: ⚠️ Display version warning<br/>💡 Inform about potential issues
+            Note over HostApp: ⚠️ Singleton warning:<br/>"Multiple versions of React detected.<br/>Using host version 18.2.0"
+        else 🔄 Fallback resolution mode
+            ErrorBoundary->>SharedModules: 🔄 Use local fallback module<br/>📦 Load from local bundle
+            Note over SharedModules: 🔄 Fallback strategies:<br/>• Use bundled version<br/>• Load compatible alternative<br/>• Show degraded functionality
+        else 🚨 Critical failure mode
+            ErrorBoundary->>HostApp: 🚨 Show error boundary UI<br/>⚠️ Component failed to load
+            Note over HostApp: 🚨 Error boundary displays:<br/>"Component temporarily unavailable.<br/>Please try again later."
         end
+        deactivate ErrorBoundary
+    end
+    
+    opt 🔄 Performance Monitoring & Optimization
+        Note over User,ErrorBoundary: 📊 Runtime performance tracking
+        ShareScope->>ShareScope: 📊 Monitor performance metrics<br/>⏱️ Track loading times
+        Note over ShareScope: 📊 Metrics collected:<br/>• Module resolution time<br/>• Script loading duration<br/>• Component render time<br/>• Memory usage<br/>• Cache hit rates
+        ShareScope->>HostApp: 📊 Performance insights<br/>💡 Optimization opportunities
+        Note over HostApp: 💡 Optimizations applied:<br/>• Preload critical remotes<br/>• Cache frequently used modules<br/>• Lazy load non-critical components<br/>• Bundle splitting optimization
     end
     
     deactivate SharedModules
@@ -912,7 +980,6 @@ sequenceDiagram
     deactivate ShareScope
     deactivate FedRuntime
     deactivate HostBundle
-    deactivate HostApp
 ```
 
 ### Version Satisfaction Logic
