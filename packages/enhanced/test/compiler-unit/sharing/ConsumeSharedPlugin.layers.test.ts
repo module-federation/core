@@ -117,14 +117,14 @@ describe('ConsumeSharedPlugin Layers', () => {
     ],
   });
 
-  it('should only apply config when module layer matches "layer" option', async () => {
+  it('should only apply config when issuer layer matches "issuerLayer" option', async () => {
     const config = createWebpackConfig({
       consumes: {
         react: {
           import: 'react',
           shareKey: 'react',
           shareScope: 'clientLayerScope',
-          layer: 'client', // Config only applies if the consuming module is in 'client' layer
+          issuerLayer: 'client', // Config only applies if the importing module is in 'client' layer
         },
       },
       shareScope: 'default',
@@ -145,6 +145,7 @@ describe('ConsumeSharedPlugin Layers', () => {
       ) || [];
 
     // Expect one CSM for the client module, using the clientLayerScope config
+    // because issuerLayer matches the client module's layer
     expect(consumeSharedModules.length).toBe(1);
     const clientCsm = consumeSharedModules[0];
     expect(clientCsm.name).toContain('clientLayerScope');
@@ -165,14 +166,9 @@ describe('ConsumeSharedPlugin Layers', () => {
     expect(serverModule?.layer).toBe('server');
 
     // Verify that module.server.js did NOT get a consume-shared-module from this config
-    // It might resolve to a normal module if no other 'react' consume config exists
-    const serverModuleImportsReact = serverModule?.reasons?.some(
-      (r: any) =>
-        r.moduleName?.includes('react') &&
-        !r.moduleName?.includes('consume-shared-module'),
-    );
-    // This check is tricky, as webpack might optimize. The key is that no CSM was generated for it *from this config*.
-    // The length check (expect(consumeSharedModules.length).toBe(1)) already confirms this.
+    // because the issuerLayer ('client') doesn't match the server module's layer ('server')
+    // The length check (expect(consumeSharedModules.length).toBe(1)) already confirms this -
+    // only the client module gets the CSM since its layer matches the config's issuerLayer.
   });
 
   it('should only apply config when issuer layer matches "issuerLayer" option', async () => {

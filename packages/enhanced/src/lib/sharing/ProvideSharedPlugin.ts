@@ -464,7 +464,40 @@ class ProvideSharedPlugin {
           details =
             'No description file (usually package.json) found. Add description file with name and version, or manually specify version in shared config.';
         } else if (!descriptionFileData.version) {
-          details = `No version in description file (usually package.json). Add version to description file ${resourceResolveData.descriptionFilePath}, or manually specify version in shared config.`;
+          // Try to get version from the parent package.json's dependencies
+          if (resourceResolveData.descriptionFilePath) {
+            try {
+              const fs = require('fs');
+              const path = require('path');
+              const parentPkgPath = path.resolve(
+                path.dirname(resourceResolveData.descriptionFilePath),
+                '..',
+                'package.json',
+              );
+              if (fs.existsSync(parentPkgPath)) {
+                const parentPkg = JSON.parse(
+                  fs.readFileSync(parentPkgPath, 'utf8'),
+                );
+                const deps = {
+                  ...parentPkg.dependencies,
+                  ...parentPkg.devDependencies,
+                  ...parentPkg.peerDependencies,
+                };
+                if (deps[key]) {
+                  version = deps[key];
+                  details = `Using version from parent package.json dependencies: ${version}`;
+                } else {
+                  details = `No version in description file (usually package.json). Add version to description file ${resourceResolveData.descriptionFilePath}, or manually specify version in shared config.`;
+                }
+              } else {
+                details = `No version in description file (usually package.json). Add version to description file ${resourceResolveData.descriptionFilePath}, or manually specify version in shared config.`;
+              }
+            } catch (e) {
+              details = `No version in description file (usually package.json). Add version to description file ${resourceResolveData.descriptionFilePath}, or manually specify version in shared config.`;
+            }
+          } else {
+            details = `No version in description file (usually package.json). Add version to description file ${resourceResolveData.descriptionFilePath}, or manually specify version in shared config.`;
+          }
         } else {
           version = descriptionFileData.version;
         }
