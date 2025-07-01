@@ -1,0 +1,175 @@
+# Style Isolation
+
+To achieve CSS style isolation, the following methods can be used. Here are the detailed usage instructions for each method:
+
+## 1. BEM (Block Element Modifier)
+
+BEM is a naming convention that achieves style isolation by adding prefixes and suffixes to class names. The structure of BEM is as follows:
+
+- **Block**: Represents an independent functional block, e.g., `.button`
+- **Element**: Represents a part of the block, e.g., `.button__text`
+- **Modifier**: Represents different states or versions of the block or element, e.g., `.button--primary`
+
+### Usage Example
+```html
+<div class="button">
+  <span class="button__text">Button</span>
+</div>
+```
+
+```css
+.button {
+  background-color: blue;
+  color: white;
+}
+
+.button__text {
+  font-size: 16px;
+}
+
+.button--primary {
+  background-color: green;
+}
+```
+
+## 2. CSS Modules
+
+CSS Modules achieve style isolation by treating each CSS file as a module, where each class name is transformed into a unique identifier during compilation.
+
+### Usage Example
+
+1. Create a CSS file named `styles.module.css`:
+
+```css
+/* styles.module.css */
+.button {
+  background-color: blue;
+  color: white;
+}
+```
+
+2. Import and use it in a React component:
+
+```javascript
+import React from 'react';
+import styles from './styles.module.css';
+
+function App() {
+  return <button className={styles.button}>Button</button>;
+}
+
+export default App;
+```
+
+## 3. CSS-in-JS
+
+CSS-in-JS writes styles directly in JavaScript files. Common libraries include [styled-components](https://styled-components.com/) and [emotion](https://github.com/emotion-js/emotion).
+
+### Usage Example
+
+1. Install styled-components:
+
+```bash
+npm install styled-components
+```
+
+2. Use it in a React component:
+
+```javascript
+import React from 'react';
+import styled from 'styled-components';
+
+const Button = styled.button`
+  background: blue;
+  color: white;
+`;
+
+function App() {
+  return <Button>Button</Button>;
+}
+
+export default App;
+```
+
+## 4. Shadow DOM
+
+Shadow DOM is part of the Web Components technology, creating an isolated DOM tree to achieve style isolation. React can use Shadow DOM via [react-shadow](https://www.npmjs.com/package/react-shadow).
+
+### Usage Example
+
+1. Create an HTML template:
+
+```html
+<template id="my-component">
+  <style>
+    .button {
+      background: blue;
+      color: white;
+    }
+  </style>
+  <button class="button">Button</button>
+</template>
+```
+
+2. Define a custom element and attach Shadow DOM:
+
+```javascript
+class MyComponent extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const template = document.getElementById('my-component').content;
+    shadow.appendChild(template.cloneNode(true));
+  }
+}
+
+customElements.define('my-component', MyComponent);
+```
+
+3. Use the custom element in HTML:
+
+```html
+<my-component></my-component>
+```
+
+## 5. Vue Scoped Styles
+
+In Vue, the `scoped` attribute can be used to achieve component-level style isolation.
+
+### Usage Example
+
+1. Define styles in a Vue component:
+
+```vue
+<template>
+  <button class="button">Button</button>
+</template>
+
+<style scoped>
+.button {
+  background: blue;
+  color: white;
+}
+</style>
+```
+
+Each method has its own applicable scenarios and limitations. Developers can choose the appropriate style isolation solution based on project requirements.
+
+## FAQ
+
+### Why doesn't Module Federation directly handle CSS style isolation?
+
+The main reasons for not directly incorporating CSS isolation into Module Federation are:
+
+* CSS isolation can conflict significantly with shared dependencies. Shared dependencies aim to reuse common dependencies as much as possible, which can lead to some shared dependencies escaping the sandbox, making isolation uncontrollable and potentially affected by load order.
+
+* Runtime handling of CSS isolation can have many edge cases and troubleshooting issues can be very difficult, leading to decreased business stability. Common issues include:
+  * Shadow DOM: This method can cause compatibility issues with various component libraries, and troubleshooting online issues can be long and complex, with no guarantee of resolution.
+  * Collecting and clearing CSS: Due to the isolation and shared reuse issues mentioned above, CSS might be unintentionally cleared.
+  * Upgrading the sandbox in the consumer: The impact on business is uncontrollable.
+
+> Suggested handling methods:
+
+* Process CSS at the module or sub-application producer level to ensure that the module or application runs as expected in any environment.
+* Use CSS modules, component library prefixes, and unified component library versions to solve the problem.
+* Directly export Shadow DOM components for use by other businesses.

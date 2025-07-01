@@ -1,7 +1,9 @@
 import path from 'path';
 import { encodeName } from '@module-federation/sdk';
-import type { EnvironmentConfig, Rspack } from '@rsbuild/core';
+
+import type { EnvironmentConfig, RsbuildConfig, Rspack } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
+import { CALL_NAME_MAP } from '../constant';
 
 export const SSR_DIR = 'ssr';
 export const SSR_ENV_NAME = 'mf-ssr';
@@ -18,15 +20,29 @@ const isDev = () => {
 export function patchSSRRspackConfig(
   config: Rspack.Configuration,
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  ssrDir: string,
+  callerName?: string,
+  resetEntry = true,
+  modifyPublicPath = true,
 ) {
-  if (typeof config.output?.publicPath !== 'string') {
-    throw new Error('publicPath must be string!');
+  config.output ||= {};
+  if (modifyPublicPath) {
+    if (typeof config.output?.publicPath !== 'string') {
+      throw new Error('publicPath must be string!');
+    }
+    const publicPath = config.output.publicPath;
+    if (publicPath === 'auto') {
+      throw new Error('publicPath can not be "auto"!');
+    }
+
+    const publicPathWithSSRDir = `${publicPath}${ssrDir}/`;
+    config.output.publicPath = publicPathWithSSRDir;
   }
-  const publicPath = config.output.publicPath;
-  if (publicPath === 'auto') {
-    throw new Error('publicPath can not be "auto"!');
+
+  if (callerName === CALL_NAME_MAP.RSPRESS && resetEntry) {
+    // set virtue entry, only need mf entry
+    config.entry = 'data:application/node;base64,';
   }
-  config.output.publicPath = `${config.output.publicPath}${SSR_DIR}/`;
   config.target = 'async-node';
   // @module-federation/node/universe-entry-chunk-tracker-plugin only export cjs
   const UniverseEntryChunkTrackerPlugin =
@@ -41,7 +57,7 @@ export function patchSSRRspackConfig(
     uniqueName &&
     !chunkFileName.includes(uniqueName)
   ) {
-    const suffix = `${encodeName(uniqueName)}-[chunkhash].js`;
+    const suffix = `${encodeName(uniqueName)}-[contenthash].js`;
     config.output.chunkFilename = chunkFileName.replace('.js', suffix);
   }
 
@@ -51,6 +67,9 @@ export function patchSSRRspackConfig(
 export function createSSRREnvConfig(
   envConfig: EnvironmentConfig,
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  ssrDir: string,
+  rsbuildConfig: RsbuildConfig,
+  callerName?: string,
 ) {
   const ssrEnvConfig: EnvironmentConfig = {
     ...envConfig,
@@ -59,7 +78,7 @@ export function createSSRREnvConfig(
         if (environment.name !== SSR_ENV_NAME) {
           return;
         }
-        patchSSRRspackConfig(config, mfConfig);
+        patchSSRRspackConfig(config, mfConfig, ssrDir, callerName);
       },
     },
   };
@@ -70,7 +89,12 @@ export function createSSRREnvConfig(
     target: 'node',
     distPath: {
       ...ssrEnvConfig.output?.distPath,
-      root: path.join(ssrEnvConfig.output?.distPath?.root || '', SSR_DIR),
+      root: path.join(
+        ssrEnvConfig.output?.distPath?.root ||
+          rsbuildConfig.output?.distPath?.root ||
+          '',
+        ssrDir,
+      ),
     },
   };
   return ssrEnvConfig;

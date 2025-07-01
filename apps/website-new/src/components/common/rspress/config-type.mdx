@@ -1,0 +1,11 @@
+```ts
+export declare const pluginModuleFederation: (
+  moduleFederationOptions: ModuleFederationOptions,
+  rspressOptions?: RspressPluginOptions,
+) => RspressPlugin;
+
+type RspressPluginOptions = {
+  autoShared?: boolean;
+  rebuildSearchIndex?: boolean;
+};
+```
