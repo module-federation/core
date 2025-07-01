@@ -519,33 +519,8 @@ class ConsumeSharedPlugin {
                 createLookupKeyForSharing(request, contextInfo.issuerLayer),
               );
 
-              // First check direct match
+              // First check direct match with original request
               if (match !== undefined) {
-                // Check for request filters with singleton here
-                if (match.exclude && match.exclude.request && match.singleton) {
-                  addSingletonFilterWarning(
-                    compilation,
-                    match.shareKey || request,
-                    'exclude',
-                    'request',
-                    match.exclude.request,
-                    request, // moduleRequest
-                    undefined, // moduleResource
-                  );
-                }
-
-                if (match.include && match.include.request && match.singleton) {
-                  addSingletonFilterWarning(
-                    compilation,
-                    match.shareKey || request,
-                    'include',
-                    'request',
-                    match.include.request,
-                    request, // moduleRequest
-                    undefined, // moduleResource
-                  );
-                }
-
                 // Use the bound function
                 return boundCreateConsumeSharedModule(
                   compilation,
@@ -621,39 +596,6 @@ class ConsumeSharedPlugin {
                     )
                   ) {
                     continue;
-                  }
-
-                  // Check for request filters with singleton for prefixed consumes
-                  if (
-                    options.exclude &&
-                    options.exclude.request &&
-                    options.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      options.shareKey || prefix,
-                      'exclude',
-                      'request',
-                      options.exclude.request,
-                      request, // moduleRequest
-                      undefined, // moduleResource
-                    );
-                  }
-
-                  if (
-                    options.include &&
-                    options.include.request &&
-                    options.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      options.shareKey || prefix,
-                      'include',
-                      'request',
-                      options.include.request,
-                      request, // moduleRequest
-                      undefined, // moduleResource
-                    );
                   }
 
                   // Use the bound function
