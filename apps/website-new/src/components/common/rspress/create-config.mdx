@@ -1,0 +1,12 @@
+```ts title='module-federation.config.ts'
+import { createModuleFederationConfig } from '@module-federation/rspress-plugin';
+
+export default createModuleFederationConfig({
+  filename: 'remoteEntry.js',
+  name: 'mf_doc',
+  exposes: {
+    './intro-en': './docs/en/guide/intro.mdx',
+    './intro-zh': './docs/zh/guide/intro.mdx',
+  },
+});
+```

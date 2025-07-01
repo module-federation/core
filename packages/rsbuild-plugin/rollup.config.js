@@ -14,8 +14,7 @@ module.exports = (rollupConfig, _projectOptions) => {
   rollupConfig.input = {
     index: 'packages/rsbuild-plugin/src/cli/index.ts',
     utils: 'packages/rsbuild-plugin/src/utils/index.ts',
-    constant: 'packages/rsbuild-plugin/src/utils/constant.ts',
-    manifest: 'packages/rsbuild-plugin/src/cli/manifest.ts',
+    constant: 'packages/rsbuild-plugin/src/constant.ts',
   };
   return rollupConfig;
 };

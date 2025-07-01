@@ -148,6 +148,11 @@ class DTSManager {
         return;
       }
 
+      if (!tsConfig.files?.length) {
+        logger.info('No type files to compile, skip');
+        return;
+      }
+
       if (tsConfig.compilerOptions.tsBuildInfoFile) {
         try {
           const tsBuildInfoFile = path.resolve(

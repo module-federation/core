@@ -9,6 +9,7 @@ import {
   RUNTIME_008,
   TYPE_001,
   BUILD_001,
+  BUILD_002,
 } from './error-codes';
 
 export const runtimeDescMap = {
@@ -29,6 +30,7 @@ export const typeDescMap = {
 
 export const buildDescMap = {
   [BUILD_001]: 'Failed to find expose module.',
+  [BUILD_002]: 'PublicPath is required in prod mode.',
 };
 
 export const errorDescMap = {

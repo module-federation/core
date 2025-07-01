@@ -33,19 +33,11 @@ export class RemoteEntryPlugin implements RspackPluginInstance {
     this._options = options;
   }
 
-  apply(compiler: Compiler): void {
-    const { name, getPublicPath } = this._options;
-    if (!getPublicPath || !name) {
-      return;
-    }
-    const containerManager = new ContainerManager();
-    containerManager.init(this._options);
-    if (!containerManager.enable) {
-      logger.warn(
-        "Detect you don't set exposes, 'getPublicPath' will not have effect.",
-      );
-      return;
-    }
+  static addPublicPathEntry(
+    compiler: Compiler,
+    getPublicPath: string,
+    name: string,
+  ) {
     let code;
     const sanitizedPublicPath = escapeUnsafeChars(getPublicPath);
 
@@ -64,5 +56,21 @@ export class RemoteEntryPlugin implements RspackPluginInstance {
         name: name,
       }).apply(compiler);
     });
+  }
+
+  apply(compiler: Compiler): void {
+    const { name, getPublicPath } = this._options;
+    if (!getPublicPath || !name) {
+      return;
+    }
+    const containerManager = new ContainerManager();
+    containerManager.init(this._options);
+    if (!containerManager.enable) {
+      logger.warn(
+        "Detect you don't set exposes, 'getPublicPath' will not have effect.",
+      );
+      return;
+    }
+    RemoteEntryPlugin.addPublicPathEntry(compiler, getPublicPath, name);
   }
 }

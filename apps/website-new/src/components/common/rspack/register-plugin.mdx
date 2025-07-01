@@ -1,0 +1,8 @@
+```ts title='rspack.config.ts'
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import mfConfig from './module-federation.config';
+
+export default defineConfig({
+  plugins: [new ModuleFederationPlugin(mfConfig)],
+});
+```

@@ -1,14 +1,14 @@
 # 类型提示
 
-就像 NPM Package 一样，`Module Federation` 产物同样会生成类型，并且享有类型热加载，尽管产物托管在远程 CDN 上。
+就像 NPM Package 一样，{props.name || 'Module Federation'} 产物同样会生成类型，并且享有类型热加载，尽管产物托管在远程 CDN 上。
 
-`@module-federation/enhanced` 默认开启类型提示功能，本文将介绍几种常见的使用场景以及具体配置。
+<p><code>{props.pkgName || '@module-federation/enhanced'}</code> 默认开启类型提示功能，本文将介绍几种常见的使用场景以及具体配置。</p>
 
 ## 使用场景
 
 ### 生成类型
 
-使用 `@module-federation/enhanced` 提供的构建插件进行构建，会自动生成类型文件。
+<p>使用<code>{props.pkgName || '@module-federation/enhanced'}</code> 提供的构建插件进行构建，会自动生成类型文件。</p>
 
 ### 加载类型
 
@@ -38,13 +38,13 @@
 
 ![hot-types-reload-static](@public/guide/type-prompt/hot-types-reload-static.gif)
 
-### Federation Runtime API 类型提示
+### Runtime API 类型提示
 
 :::info
 如果构建器为 `webpack` ，还需要再 [watchOptions.ignored](https://webpack.js.org/configuration/watch/#watchoptionsignored) 增加 `**/@mf-types/**`，以避免类型更新导致的循环编译问题
 :::
 
-需要在 `include` 字段增加 `./@mf-types/*` 以享有 `Federation Runtime` `loadRemote` 类型提示以及类型热重载
+需要在 `include` 字段增加 `./@mf-types/*` 以享有 `Runtime` `loadRemote` 类型提示以及类型热重载
 
 ```json title="tsconfig.json"
 {
@@ -56,21 +56,23 @@
 
 ### 第三方包类型抽取
 
-`Module Federation` 会自动抽取第三方包类型，确保 `exposes` 文件类型能正常访问。
+{props.name || 'Module Federation'} 会自动抽取第三方包类型，确保 `exposes` 文件类型能正常访问。
 
 ![third-party](@public/guide/type-prompt/third-party.jpg)
 
 ### 嵌套类型重导出
 
-`Module Federation` 支持嵌套 remotes ，并会自动抽取嵌套的 remotes 类型。
+{props.name || 'Module Federation'} 支持嵌套 remotes ，并会自动抽取嵌套的 remotes 类型。
 
 ![nested-remote](@public/guide/type-prompt/nested-remote.jpg)
 
 ### 动态类型提示
 
-`Module Federation` 支持加载动态类型，并且通用支持热更新。
+{props.name || 'Module Federation'} 支持加载动态类型，并且通用支持热更新。
 
 ![dynamic-remote-hot-types-reload](@public/guide/type-prompt/dynamic-remote-hot-types-reload-static.gif)
+
+{props.dynamic}
 
 ## 配置
 
@@ -79,7 +81,7 @@
 
 ## FAQ
 
-1. 项目循环编译，无法终止
+### 项目循环编译，无法终止
 
 A: 大概率是编译器监听了类型文件夹或者 `dist` 里的变动导致，将 `@mf-types` 添加至忽略文件即可。
 
@@ -90,3 +92,12 @@ config.watchOptions = {
   ignored: ['**/node_modules/**', '**/@mf-types/**'],
 };
 ```
+
+### 2. 没有生成类型文件，如何查看原因
+
+**解决方案**
+
+1. 在项目启动命令前加上 `FEDERATION_DEBUG=true` 环境变量
+2. 设置 [dts.displayErrorInTerminal](../../configure/dts#displayerrorinterminal) 为 `true`
+3. 启动项目，查看控制台输出
+4. （可选）若控制台没输出错误，查看 `.mf/typesGenerate.log` 日志文件
