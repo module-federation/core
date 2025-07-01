@@ -537,6 +537,215 @@ normalModuleFactory.hooks.module.tap(PLUGIN_NAME, (module, { resource }, resolve
 
 ---
 
+### Detailed Compile-Time Plugin Flow
+
+```mermaid
+flowchart TD
+    %% Styling
+    classDef startNode fill:#4caf50,stroke:#2e7d32,stroke-width:3px,color:#fff
+    classDef pluginNode fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#fff
+    classDef hookNode fill:#ff9800,stroke:#ef6c00,stroke-width:2px,color:#fff
+    classDef decisionNode fill:#9c27b0,stroke:#6a1b9a,stroke-width:2px,color:#fff
+    classDef moduleNode fill:#f44336,stroke:#c62828,stroke-width:2px,color:#fff
+    classDef endNode fill:#607d8b,stroke:#37474f,stroke-width:2px,color:#fff
+    classDef configNode fill:#8bc34a,stroke:#558b2f,stroke-width:2px,color:#fff
+    classDef errorNode fill:#ff5722,stroke:#d84315,stroke-width:3px,color:#fff
+
+    %% Start
+    START["🚀 Webpack Compilation Start<br/>📋 webpack.config.js loaded<br/>• ModuleFederationPlugin options parsed<br/>• Compiler instance created"]:::startNode
+
+    %% Plugin Registration Phase
+    APPLY["🔌 ModuleFederationPlugin.apply(compiler)<br/>📋 Master Plugin Orchestration<br/>• Validate configuration<br/>• Normalize options<br/>• Register sub-plugins"]:::pluginNode
+
+    %% Core Plugin Applications
+    CORE_PLUGINS["⚡ Core Plugin Registration<br/>📋 Always Applied Plugins<br/>• RemoteEntryPlugin<br/>• FederationModulesPlugin<br/>• FederationRuntimePlugin"]:::pluginNode
+
+    %% afterPlugins Hook
+    AFTER_PLUGINS["🎯 compiler.hooks.afterPlugins<br/>📋 Conditional Plugin Application<br/>• Check configuration options<br/>• Apply conditional plugins"]:::hookNode
+
+    %% Configuration Checks
+    CHECK_EXPOSES{"🔍 Has exposes config?<br/>📋 options.exposes defined?<br/>• Check for modules to expose<br/>• Validate expose paths"}:::decisionNode
+
+    CHECK_REMOTES{"🔍 Has remotes config?<br/>📋 options.remotes defined?<br/>• Check for remote containers<br/>• Validate remote URLs"}:::decisionNode
+
+    CHECK_SHARED{"🔍 Has shared config?<br/>📋 options.shared defined?<br/>• Check for shared modules<br/>• Parse sharing configuration"}:::decisionNode
+
+    %% Conditional Plugin Applications
+    CONTAINER_PLUGIN["🏗️ ContainerPlugin.apply(compiler)<br/>📋 Expose Module Management<br/>• Register make hook<br/>• Create container entry dependency<br/>• Set up module map generation"]:::pluginNode
+
+    CONTAINER_REF_PLUGIN["🔗 ContainerReferencePlugin.apply(compiler)<br/>📋 Remote Module Consumption<br/>• Apply ExternalsPlugin<br/>• Map remotes to externals<br/>• Configure remote loading"]:::pluginNode
+
+    SHARE_PLUGIN["🤝 SharePlugin.apply(compiler)<br/>📋 Universal Sharing Setup<br/>• ALWAYS applied regardless of config<br/>• Apply ProvideSharedPlugin<br/>• Apply ConsumeSharedPlugin"]:::pluginNode
+
+    %% Share Plugin Sub-Applications
+    PROVIDE_SHARED["📤 ProvideSharedPlugin.apply(compiler)<br/>📋 Module Provider Setup<br/>• Register normalModuleFactory hooks<br/>• Set up module wrapping logic<br/>• Configure share scope population"]:::pluginNode
+
+    CONSUME_SHARED["📥 ConsumeSharedPlugin.apply(compiler)<br/>📋 Module Consumer Setup<br/>• Register factorize hook<br/>• Set up version checking<br/>• Configure fallback handling"]:::pluginNode
+
+    %% Compilation Phase Start
+    COMPILATION_START["⚡ compiler.hooks.make.tapAsync<br/>📋 Compilation Phase Begins<br/>• Dependency graph construction<br/>• Entry point processing<br/>• Module resolution starts"]:::hookNode
+
+    %% Container Entry Creation (if exposes)
+    CONTAINER_ENTRY{"🏗️ Container Entry Creation<br/>📋 ContainerPlugin make hook<br/>• Create ContainerEntryDependency<br/>• Add to compilation.entries"}:::moduleNode
+
+    CONTAINER_MODULE["📦 ContainerEntryModule Creation<br/>📋 Container Implementation<br/>• Generate module map<br/>• Create get() function<br/>• Create init() function<br/>• Handle exposed modules"]:::moduleNode
+
+    %% Module Factorization Phase
+    MODULE_FACTORIZE["🎯 normalModuleFactory.hooks.factorize<br/>📋 Module Request Processing<br/>• For each import/require<br/>• Before module creation<br/>• Plugin interception point"]:::hookNode
+
+    %% Module Request Analysis
+    ANALYZE_REQUEST{"🔍 Analyze Module Request<br/>📋 Request Classification<br/>• Check if remote module<br/>• Check if shared module<br/>• Determine resolution strategy"}:::decisionNode
+
+    %% Remote Module Handling
+    REMOTE_CHECK{"🌐 Remote Module Check<br/>📋 ContainerReferencePlugin Logic<br/>• Does request match remote pattern?<br/>• remoteA/moduleName format?<br/>• External mapping exists?"}:::decisionNode
+
+    CREATE_REMOTE["🌐 Create RemoteModule<br/>📋 Remote Module Wrapper<br/>• Map to external reference<br/>• Set up dynamic loading<br/>• Configure error handling<br/>• Add RemoteToExternalDependency"]:::moduleNode
+
+    %% Shared Module Consumption
+    SHARED_CONSUME_CHECK{"📥 Shared Consumption Check<br/>📋 ConsumeSharedPlugin Logic<br/>• Match against consumes config<br/>• Check package name/shareKey<br/>• Validate share scope"}:::decisionNode
+
+    CREATE_CONSUME_SHARED["📥 Create ConsumeSharedModule<br/>📋 Shared Consumer Implementation<br/>• Version requirement checking<br/>• Singleton enforcement<br/>• Fallback configuration<br/>• Add ConsumeSharedFallbackDependency"]:::moduleNode
+
+    %% Normal Module Creation
+    NORMAL_MODULE["⚙️ Normal Module Creation<br/>📋 Standard Webpack Processing<br/>• File resolution<br/>• Loader application<br/>• AST parsing<br/>• Dependency extraction"]:::moduleNode
+
+    %% Module Hook (after creation)
+    MODULE_HOOK["🎯 normalModuleFactory.hooks.module<br/>📋 Post-Creation Processing<br/>• Module wrapping opportunity<br/>• Plugin modification point<br/>• After module instantiation"]:::hookNode
+
+    %% Shared Module Provision
+    SHARED_PROVIDE_CHECK{"📤 Shared Provision Check<br/>📋 ProvideSharedPlugin Logic<br/>• Match against provides config<br/>• Check resource path<br/>• Validate share configuration"}:::decisionNode
+
+    WRAP_PROVIDE_SHARED["📤 Wrap with ProvideSharedModule<br/>📋 Shared Provider Implementation<br/>• Wrap existing module<br/>• Register in share scope<br/>• Version management<br/>• Add ProvideForSharedDependency"]:::moduleNode
+
+    %% Module Build Phase
+    MODULE_BUILD["🏗️ Module Build Phase<br/>📋 Module Compilation<br/>• Source code processing<br/>• Dependency resolution<br/>• Code transformation<br/>• Chunk assignment"]:::moduleNode
+
+    %% Runtime Requirements Analysis
+    RUNTIME_REQUIREMENTS["⚡ compilation.hooks.additionalTreeRuntimeRequirements<br/>📋 Runtime Module Registration<br/>• Analyze module dependencies<br/>• Register required runtime modules<br/>• Set up runtime code injection"]:::hookNode
+
+    %% Runtime Module Creation
+    CONSUME_RUNTIME{"📥 ConsumeSharedRuntimeModule<br/>📋 Consumer Runtime Logic<br/>• Version satisfaction functions<br/>• Fallback mechanisms<br/>• Singleton management<br/>• loadSingleton, loadVersionCheck"}:::moduleNode
+
+    SHARE_RUNTIME{"🤝 ShareRuntimeModule<br/>📋 Share Scope Management<br/>• Share scope initialization<br/>• Module registration logic<br/>• Version negotiation<br/>• __webpack_require__.S setup"}:::moduleNode
+
+    REMOTE_RUNTIME{"🌐 RemoteRuntimeModule<br/>📋 Remote Loading Logic<br/>• Script injection functions<br/>• Container initialization<br/>• Error handling<br/>• Dynamic import support"}:::moduleNode
+
+    %% Code Generation Phase
+    CODE_GEN["🏭 Code Generation Phase<br/>📋 Source Code Output<br/>• Generate module source<br/>• Inject runtime code<br/>• Create chunks<br/>• Optimize bundles"]:::hookNode
+
+    %% Different Code Generation Paths
+    CONTAINER_CODE_GEN["📦 Container Code Generation<br/>📋 Container Entry Output<br/>```js<br/>var moduleMap = {<br/>  './Button': () => import('./src/Button'),<br/>  './Header': () => import('./src/Header')<br/>};<br/>var get = (module, getScope) => {...};<br/>var init = (shareScope, initScope) => {...};<br/>```"]:::moduleNode
+
+    REMOTE_CODE_GEN["🌐 Remote Code Generation<br/>📋 Remote Module Output<br/>```js<br/>const remote = await loadScript(url);<br/>await remote.init(__webpack_require__.S['default']);<br/>const factory = await remote.get('ComponentName');<br/>return factory();<br/>```"]:::moduleNode
+
+    SHARED_PROVIDE_CODE_GEN["📤 Shared Provider Code Generation<br/>📋 Share Registration Output<br/>```js<br/>__webpack_require__.S['default']['react'] = {<br/>  '18.2.0': {<br/>    get: () => Promise.resolve(() => __webpack_require__(123)),<br/>    loaded: 1, scope: ['default']<br/>  }<br/>};<br/>```"]:::moduleNode
+
+    SHARED_CONSUME_CODE_GEN["📥 Shared Consumer Code Generation<br/>📋 Dynamic Resolution Output<br/>```js<br/>const satisfy = (version, range) => semver.satisfies(version, range);<br/>const loadSingleton = async (scope, key) => {...};<br/>const loadVersionCheck = async () => {...};<br/>```"]:::moduleNode
+
+    %% Error Handling
+    CONFIG_ERROR["❌ Configuration Error<br/>📋 Invalid Plugin Options<br/>• Missing required fields<br/>• Invalid URLs/paths<br/>• Conflicting settings"]:::errorNode
+
+    RESOLUTION_ERROR["❌ Module Resolution Error<br/>📋 Failed Module Loading<br/>• Remote not accessible<br/>• Shared module not found<br/>• Version incompatibility"]:::errorNode
+
+    %% Compilation Complete
+    COMPILATION_COMPLETE["✅ Compilation Complete<br/>📋 Bundle Generation Finished<br/>• All modules processed<br/>• Chunks optimized<br/>• Assets generated<br/>• Federation ready"]:::endNode
+
+    %% Main Flow
+    START --> APPLY
+    APPLY --> CORE_PLUGINS
+    CORE_PLUGINS --> AFTER_PLUGINS
+
+    %% Configuration Branching
+    AFTER_PLUGINS --> CHECK_EXPOSES
+    AFTER_PLUGINS --> CHECK_REMOTES
+    AFTER_PLUGINS --> CHECK_SHARED
+
+    %% Conditional Plugin Applications
+    CHECK_EXPOSES -->|Yes| CONTAINER_PLUGIN
+    CHECK_EXPOSES -->|No| COMPILATION_START
+    CHECK_REMOTES -->|Yes| CONTAINER_REF_PLUGIN
+    CHECK_REMOTES -->|No| COMPILATION_START
+    CHECK_SHARED -->|Always| SHARE_PLUGIN
+
+    %% Share Plugin Sub-Applications
+    SHARE_PLUGIN --> PROVIDE_SHARED
+    SHARE_PLUGIN --> CONSUME_SHARED
+
+    %% Plugin Applications Flow to Compilation
+    CONTAINER_PLUGIN --> COMPILATION_START
+    CONTAINER_REF_PLUGIN --> COMPILATION_START
+    PROVIDE_SHARED --> COMPILATION_START
+    CONSUME_SHARED --> COMPILATION_START
+
+    %% Container Entry Creation
+    COMPILATION_START --> CONTAINER_ENTRY
+    CONTAINER_ENTRY --> CONTAINER_MODULE
+
+    %% Module Factorization Flow
+    COMPILATION_START --> MODULE_FACTORIZE
+    CONTAINER_MODULE --> MODULE_FACTORIZE
+
+    %% Module Request Analysis
+    MODULE_FACTORIZE --> ANALYZE_REQUEST
+
+    %% Remote Module Path
+    ANALYZE_REQUEST --> REMOTE_CHECK
+    REMOTE_CHECK -->|Yes| CREATE_REMOTE
+    REMOTE_CHECK -->|No| SHARED_CONSUME_CHECK
+
+    %% Shared Consumption Path
+    SHARED_CONSUME_CHECK -->|Yes| CREATE_CONSUME_SHARED
+    SHARED_CONSUME_CHECK -->|No| NORMAL_MODULE
+
+    %% Module Creation to Module Hook
+    CREATE_REMOTE --> MODULE_BUILD
+    CREATE_CONSUME_SHARED --> MODULE_BUILD
+    NORMAL_MODULE --> MODULE_HOOK
+
+    %% Shared Provision Path
+    MODULE_HOOK --> SHARED_PROVIDE_CHECK
+    SHARED_PROVIDE_CHECK -->|Yes| WRAP_PROVIDE_SHARED
+    SHARED_PROVIDE_CHECK -->|No| MODULE_BUILD
+
+    %% Module Build to Runtime Requirements
+    WRAP_PROVIDE_SHARED --> MODULE_BUILD
+    MODULE_BUILD --> RUNTIME_REQUIREMENTS
+
+    %% Runtime Module Registration
+    RUNTIME_REQUIREMENTS --> CONSUME_RUNTIME
+    RUNTIME_REQUIREMENTS --> SHARE_RUNTIME
+    RUNTIME_REQUIREMENTS --> REMOTE_RUNTIME
+
+    %% Code Generation Phase
+    CONSUME_RUNTIME --> CODE_GEN
+    SHARE_RUNTIME --> CODE_GEN
+    REMOTE_RUNTIME --> CODE_GEN
+
+    %% Different Code Generation Outputs
+    CODE_GEN --> CONTAINER_CODE_GEN
+    CODE_GEN --> REMOTE_CODE_GEN
+    CODE_GEN --> SHARED_PROVIDE_CODE_GEN
+    CODE_GEN --> SHARED_CONSUME_CODE_GEN
+
+    %% Final Compilation
+    CONTAINER_CODE_GEN --> COMPILATION_COMPLETE
+    REMOTE_CODE_GEN --> COMPILATION_COMPLETE
+    SHARED_PROVIDE_CODE_GEN --> COMPILATION_COMPLETE
+    SHARED_CONSUME_CODE_GEN --> COMPILATION_COMPLETE
+
+    %% Error Paths
+    APPLY -.-> CONFIG_ERROR
+    MODULE_FACTORIZE -.-> RESOLUTION_ERROR
+    CONFIG_ERROR -.-> COMPILATION_COMPLETE
+    RESOLUTION_ERROR -.-> COMPILATION_COMPLETE
+
+    %% Loops for Multiple Modules
+    MODULE_FACTORIZE -.->|For each module request| ANALYZE_REQUEST
+    ANALYZE_REQUEST -.->|Process next request| MODULE_FACTORIZE
+```
+
+---
+
 ## Runtime Federation System
 
 ### Share Scope Architecture
