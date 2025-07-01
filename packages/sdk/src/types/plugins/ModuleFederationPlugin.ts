@@ -156,6 +156,7 @@ export interface DtsHostOptions {
   runtimePkgs?: string[];
   remoteTypeUrls?: (() => Promise<RemoteTypeUrls>) | RemoteTypeUrls;
   timeout?: number;
+  typesOnBuild?: boolean;
 }
 
 export interface DtsRemoteOptions {
