@@ -8,9 +8,7 @@ module.exports = {
   plugins: [
     new SharePlugin({
       shared: {
-        shared: {
-          nodeModulesReconstructedLookup: true,
-        },
+        shared: {},
         'shared/directory/': {
           nodeModulesReconstructedLookup: true,
         },

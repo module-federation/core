@@ -29,6 +29,7 @@ import {
   testRequestFilters,
   createLookupKeyForSharing,
   extractPathAfterNodeModules,
+  getRequiredVersionFromDescriptionFile,
 } from './utils';
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
@@ -247,6 +248,38 @@ class ProvideSharedPlugin {
                   const finalShareKey =
                     (originalPrefixConfig.shareKey || configuredPrefix) +
                     remainder;
+
+                  // Validate singleton usage when using include.request
+                  if (
+                    originalPrefixConfig.include?.request &&
+                    originalPrefixConfig.singleton
+                  ) {
+                    addSingletonFilterWarning(
+                      compilation,
+                      finalShareKey,
+                      'include',
+                      'request',
+                      originalPrefixConfig.include.request,
+                      originalRequestString,
+                      resource,
+                    );
+                  }
+
+                  // Validate singleton usage when using exclude.request
+                  if (
+                    originalPrefixConfig.exclude?.request &&
+                    originalPrefixConfig.singleton
+                  ) {
+                    addSingletonFilterWarning(
+                      compilation,
+                      finalShareKey,
+                      'exclude',
+                      'request',
+                      originalPrefixConfig.exclude.request,
+                      originalRequestString,
+                      resource,
+                    );
+                  }
                   const configForSpecificModule: ProvidesConfig = {
                     ...originalPrefixConfig,
                     shareKey: finalShareKey,
@@ -350,6 +383,38 @@ class ProvideSharedPlugin {
                       const finalShareKey =
                         (originalPrefixConfig.shareKey || configuredPrefix) +
                         remainder;
+
+                      // Validate singleton usage when using include.request
+                      if (
+                        originalPrefixConfig.include?.request &&
+                        originalPrefixConfig.singleton
+                      ) {
+                        addSingletonFilterWarning(
+                          compilation,
+                          finalShareKey,
+                          'include',
+                          'request',
+                          originalPrefixConfig.include.request,
+                          modulePathAfterNodeModules,
+                          resource,
+                        );
+                      }
+
+                      // Validate singleton usage when using exclude.request
+                      if (
+                        originalPrefixConfig.exclude?.request &&
+                        originalPrefixConfig.singleton
+                      ) {
+                        addSingletonFilterWarning(
+                          compilation,
+                          finalShareKey,
+                          'exclude',
+                          'request',
+                          originalPrefixConfig.exclude.request,
+                          modulePathAfterNodeModules,
+                          resource,
+                        );
+                      }
                       const configForSpecificModule: ProvidesConfig = {
                         ...originalPrefixConfig,
                         shareKey: finalShareKey,
@@ -464,7 +529,39 @@ class ProvideSharedPlugin {
           details =
             'No description file (usually package.json) found. Add description file with name and version, or manually specify version in shared config.';
         } else if (!descriptionFileData.version) {
-          details = `No version in description file (usually package.json). Add version to description file ${resourceResolveData.descriptionFilePath}, or manually specify version in shared config.`;
+          // Try to get version from parent package.json dependencies
+          if (resourceResolveData.descriptionFilePath) {
+            try {
+              const fs = require('fs');
+              const path = require('path');
+              const parentPkgPath = path.resolve(
+                path.dirname(resourceResolveData.descriptionFilePath),
+                '..',
+                'package.json',
+              );
+              if (fs.existsSync(parentPkgPath)) {
+                const parentPkg = JSON.parse(
+                  fs.readFileSync(parentPkgPath, 'utf8'),
+                );
+                const parentVersion = getRequiredVersionFromDescriptionFile(
+                  parentPkg,
+                  key,
+                );
+                if (parentVersion) {
+                  version = parentVersion;
+                  details = `Using version from parent package.json dependencies: ${version}`;
+                } else {
+                  details = `No version in description file (usually package.json). Add version to description file ${resourceResolveData.descriptionFilePath}, or manually specify version in shared config.`;
+                }
+              } else {
+                details = `No version in description file (usually package.json). Add version to description file ${resourceResolveData.descriptionFilePath}, or manually specify version in shared config.`;
+              }
+            } catch (e) {
+              details = `No version in description file (usually package.json). Add version to description file ${resourceResolveData.descriptionFilePath}, or manually specify version in shared config.`;
+            }
+          } else {
+            details = `No version in description file (usually package.json). Add version to description file ${resourceResolveData.descriptionFilePath}, or manually specify version in shared config.`;
+          }
         } else {
           version = descriptionFileData.version;
         }

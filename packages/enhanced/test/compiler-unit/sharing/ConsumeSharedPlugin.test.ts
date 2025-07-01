@@ -740,7 +740,7 @@ describe('ConsumeSharedPlugin', () => {
         const stats = await compile(compiler);
         expect(stats.hasErrors()).toBe(false);
 
-        // Check for warnings about singleton with exclude.request
+        // Check for warnings about singleton with exclude.request (should not warn for request filters)
         const warnings = stats.compilation.warnings;
         const hasSingletonWarning = warnings.some(
           (warning) =>
@@ -749,7 +749,7 @@ describe('ConsumeSharedPlugin', () => {
             warning.message.includes('@scope/prefix/'),
         );
 
-        expect(hasSingletonWarning).toBe(true);
+        expect(hasSingletonWarning).toBe(false);
       });
 
       it('should warn when using singleton with request inclusion', async () => {
@@ -810,7 +810,7 @@ describe('ConsumeSharedPlugin', () => {
         const stats = await compile(compiler);
         expect(stats.hasErrors()).toBe(false);
 
-        // Check for warnings about singleton with include.request
+        // Check for warnings about singleton with include.request (should not warn for request filters)
         const warnings = stats.compilation.warnings;
         const hasSingletonWarning = warnings.some(
           (warning) =>
@@ -819,7 +819,7 @@ describe('ConsumeSharedPlugin', () => {
             warning.message.includes('@scope/prefix/'),
         );
 
-        expect(hasSingletonWarning).toBe(true);
+        expect(hasSingletonWarning).toBe(false);
       });
     });
   });
@@ -1345,10 +1345,8 @@ describe('ConsumeSharedPlugin', () => {
             shareKey: 'shared/directory/',
             shareScope: 'default',
             singleton: false,
+            nodeModulesReconstructedLookup: true,
           },
-        },
-        experiments: {
-          nodeModulesReconstructedLookup: true,
         },
       }),
     ];

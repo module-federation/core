@@ -496,6 +496,58 @@ class ConsumeSharedPlugin {
                 );
               }
 
+              // Then try relative path handling and node_modules paths
+              let reconstructed: string | null = null;
+              let modulePathAfterNodeModules: string | null = null;
+
+              if (
+                request &&
+                !path.isAbsolute(request) &&
+                RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request)
+              ) {
+                reconstructed = path.join(context, request);
+                modulePathAfterNodeModules =
+                  extractPathAfterNodeModules(reconstructed);
+
+                // Try to match with module path after node_modules
+                if (modulePathAfterNodeModules) {
+                  const moduleMatch = unresolvedConsumes.get(
+                    createLookupKeyForSharing(
+                      modulePathAfterNodeModules,
+                      contextInfo.issuerLayer,
+                    ),
+                  );
+
+                  if (
+                    moduleMatch !== undefined &&
+                    moduleMatch.nodeModulesReconstructedLookup
+                  ) {
+                    return boundCreateConsumeSharedModule(
+                      compilation,
+                      context,
+                      modulePathAfterNodeModules,
+                      moduleMatch,
+                    );
+                  }
+                }
+
+                // Try to match with the full reconstructed path
+                const reconstructedMatch = unresolvedConsumes.get(
+                  createLookupKeyForSharing(
+                    reconstructed,
+                    contextInfo.issuerLayer,
+                  ),
+                );
+
+                if (reconstructedMatch !== undefined) {
+                  return boundCreateConsumeSharedModule(
+                    compilation,
+                    context,
+                    reconstructed,
+                    reconstructedMatch,
+                  );
+                }
+              }
               // Check for prefixed consumes with original request
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
@@ -533,111 +585,57 @@ class ConsumeSharedPlugin {
                         : undefined,
                       shareKey: options.shareKey + remainder,
                       layer: options.layer,
-                      issuerLayer: options.issuerLayer,
-                      shareScope: options.shareScope,
                     },
                   );
                 }
               }
 
-              // Only proceed if this is a relative or absolute request
-              // ignore normal import requests like 'react' that are make inside context that is in node_modules
-              if (!RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request)) {
-                return;
-              }
-
-              // reconstruct node_modules path
-              const modulePathAfterNodeModules = extractPathAfterNodeModules(
-                path.join(context, request),
-              );
-
-              if (!modulePathAfterNodeModules) {
-                return;
-              }
-              // check if direct match with reconstructed path
-              const reconstructedMatch = unresolvedConsumes.get(
-                createLookupKeyForSharing(
-                  modulePathAfterNodeModules,
-                  contextInfo.issuerLayer,
-                ),
-              );
-
-              if (
-                reconstructedMatch !== undefined &&
-                reconstructedMatch.nodeModulesReconstructedLookup
-              ) {
-                // Check for request filters with singleton here
-                if (
-                  reconstructedMatch.exclude &&
-                  reconstructedMatch.exclude.version &&
-                  reconstructedMatch.singleton
-                ) {
-                  addSingletonFilterWarning(
-                    compilation,
-                    reconstructedMatch.shareKey || request,
-                    'exclude',
-                    'version',
-                    reconstructedMatch.exclude.version,
-                    request, // moduleRequest
-                    undefined, // moduleResource
-                  );
-                }
-
-                // Use the bound function
-                return boundCreateConsumeSharedModule(
-                  compilation,
-                  context,
-                  request,
-                  reconstructedMatch,
-                );
-              }
-
-              // Check for prefixed consumes with reconstruced path
-              for (const [prefix, options] of prefixedConsumes) {
-                if (!options.nodeModulesReconstructedLookup) {
-                  continue;
-                }
-                // Refined issuerLayer matching logic for reconstructed path
-                if (options.issuerLayer) {
-                  if (!contextInfo.issuerLayer) {
-                    continue; // Option is layered, request is not: skip
-                  }
-                  if (contextInfo.issuerLayer !== options.issuerLayer) {
-                    continue; // Both are layered but do not match: skip
-                  }
-                }
-                // If contextInfo.issuerLayer exists but options.issuerLayer does not, allow (non-layered option matches layered request)
-                const lookup = options.request || prefix;
-                if (modulePathAfterNodeModules.startsWith(lookup)) {
-                  const remainder = modulePathAfterNodeModules.slice(
-                    lookup.length,
-                  );
-                  if (
-                    !testRequestFilters(
-                      remainder,
-                      options.include?.request,
-                      options.exclude?.request,
-                    )
-                  ) {
+              // Also check prefixed consumes with modulePathAfterNodeModules
+              if (modulePathAfterNodeModules) {
+                for (const [prefix, options] of prefixedConsumes) {
+                  if (!options.nodeModulesReconstructedLookup) {
                     continue;
                   }
+                  // Refined issuerLayer matching logic for reconstructed path
+                  if (options.issuerLayer) {
+                    if (!contextInfo.issuerLayer) {
+                      continue; // Option is layered, request is not: skip
+                    }
+                    if (contextInfo.issuerLayer !== options.issuerLayer) {
+                      continue; // Both are layered but do not match: skip
+                    }
+                  }
+                  // If contextInfo.issuerLayer exists but options.issuerLayer does not, allow (non-layered option matches layered request)
+                  const lookup = options.request || prefix;
+                  if (modulePathAfterNodeModules.startsWith(lookup)) {
+                    const remainder = modulePathAfterNodeModules.slice(
+                      lookup.length,
+                    );
 
-                  // Use the bound function
-                  return boundCreateConsumeSharedModule(
-                    compilation,
-                    context,
-                    request,
-                    {
-                      ...options,
-                      import: options.import
-                        ? options.import + remainder
-                        : undefined,
-                      shareKey: options.shareKey + remainder,
-                      layer: options.layer,
-                      issuerLayer: options.issuerLayer,
-                      shareScope: options.shareScope || 'default',
-                    },
-                  );
+                    if (
+                      !testRequestFilters(
+                        remainder,
+                        options.include?.request,
+                        options.exclude?.request,
+                      )
+                    ) {
+                      continue;
+                    }
+
+                    return boundCreateConsumeSharedModule(
+                      compilation,
+                      context,
+                      modulePathAfterNodeModules,
+                      {
+                        ...options,
+                        import: options.import
+                          ? options.import + remainder
+                          : undefined,
+                        shareKey: options.shareKey + remainder,
+                        layer: options.layer,
+                      },
+                    );
+                  }
                 }
               }
 

@@ -501,7 +501,7 @@ describe('SharePlugin', () => {
     });
   });
 
-  describe('experiments functionality', () => {
+  describe('nodeModulesReconstructedLookup functionality', () => {
     let mockCompiler;
 
     beforeEach(() => {
@@ -510,11 +510,11 @@ describe('SharePlugin', () => {
       ProvideSharedPluginMock.mockClear();
     });
 
-    it('should handle nodeModulesReconstructedLookup per share item', () => {
+    it('should pass nodeModulesReconstructedLookup to both ConsumeSharedPlugin and ProvideSharedPlugin', () => {
       const plugin = new SharePlugin({
         shared: {
           react: {
-            version: '^17.0.0',
+            requiredVersion: '^17.0.0',
             nodeModulesReconstructedLookup: true,
           },
         },
@@ -522,19 +522,21 @@ describe('SharePlugin', () => {
 
       plugin.apply(mockCompiler);
 
-      // Check ConsumeSharedPlugin receives consumes with nodeModulesReconstructedLookup
+      // Check ConsumeSharedPlugin receives nodeModulesReconstructedLookup in config
       expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
       const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
-      expect(
-        consumeOptions.consumes[0]['react'].nodeModulesReconstructedLookup,
-      ).toBe(true);
+      const reactConsume = consumeOptions.consumes.find(
+        (consume) => Object.keys(consume)[0] === 'react',
+      );
+      expect(reactConsume.react.nodeModulesReconstructedLookup).toBe(true);
 
-      // Check ProvideSharedPlugin receives provides with nodeModulesReconstructedLookup
+      // Check ProvideSharedPlugin receives nodeModulesReconstructedLookup in config
       expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
       const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
-      expect(
-        provideOptions.provides[0]['react'].nodeModulesReconstructedLookup,
-      ).toBe(true);
+      const reactProvide = provideOptions.provides.find(
+        (provide) => Object.keys(provide)[0] === 'react',
+      );
+      expect(reactProvide.react.nodeModulesReconstructedLookup).toBe(true);
     });
   });
 
