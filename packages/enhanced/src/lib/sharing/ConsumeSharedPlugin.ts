@@ -4,6 +4,13 @@
 */
 
 'use strict';
+
+// Hoisted regex constants
+const DIRECT_FALLBACK_REGEX = /^(\.\.?(\/|$)|\/|[A-Za-z]:|\\\\)/;
+const ABSOLUTE_PATH_REGEX = /^(\/|[A-Za-z]:|\\\\)/;
+const RELATIVE_OR_ABSOLUTE_PATH_REGEX = /^(?:\.{1,2}[\\/]|\/|[A-Za-z]:|\\\\)/;
+const PACKAGE_NAME_REGEX = /^((?:@[^\\/]+[\\/])?[^\\/]+)/;
+
 import {
   getWebpackPath,
   normalizeWebpackPath,
@@ -71,14 +78,11 @@ const PLUGIN_NAME = 'ConsumeSharedPlugin';
 
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
-  private _experiments: NonNullable<ConsumeSharedPluginOptions['experiments']>;
 
   constructor(options: ConsumeSharedPluginOptions) {
     if (typeof options !== 'string') {
       validate(options);
     }
-
-    this._experiments = options.experiments || {};
 
     this._consumes = parseOptions(
       options.consumes,
@@ -165,7 +169,7 @@ class ConsumeSharedPlugin {
       compilation.warnings.push(error);
     };
     const directFallback =
-      config.import && /^(\.\.?(\/|$)|\/|[A-Za-z]:|\\\\)/.test(config.import);
+      config.import && DIRECT_FALLBACK_REGEX.test(config.import);
 
     const resolver: ResolverWithOptions = compilation.resolverFactory.get(
       'normal',
@@ -214,12 +218,12 @@ class ConsumeSharedPlugin {
         }
         let packageName = config.packageName;
         if (packageName === undefined) {
-          if (/^(\/|[A-Za-z]:|\\\\)/.test(request)) {
+          if (ABSOLUTE_PATH_REGEX.test(request)) {
             // For relative or absolute requests we don't automatically use a packageName.
             // If wished one can specify one with the packageName option.
             return resolve(undefined);
           }
-          const match = /^((?:@[^\\/]+[\\/])?[^\\/]+)/.exec(request);
+          const match = PACKAGE_NAME_REGEX.exec(request);
           if (!match) {
             requiredVersionWarning(
               'Unable to extract the package name from request.',
@@ -553,10 +557,9 @@ class ConsumeSharedPlugin {
               let modulePathAfterNodeModules: string | null = null;
 
               if (
-                this._experiments.nodeModulesReconstructedLookup &&
                 request &&
                 !path.isAbsolute(request) &&
-                /^(\.\.?(\/|$)|\/|[A-Za-z]:|\\\\)/.test(request)
+                RELATIVE_OR_ABSOLUTE_PATH_REGEX.test(request)
               ) {
                 reconstructed = path.join(context, request);
                 modulePathAfterNodeModules =

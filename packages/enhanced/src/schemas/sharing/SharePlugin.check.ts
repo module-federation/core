@@ -29,6 +29,7 @@ const r = {
       request: { type: 'string', minLength: 1 },
       layer: { type: 'string', minLength: 1 },
       issuerLayer: { type: 'string', minLength: 1 },
+      nodeModulesReconstructedLookup: { type: 'boolean' },
     },
   },
   e = {
@@ -528,7 +529,7 @@ function s(
                                   }
                                   u = e === f;
                                 } else u = !0;
-                                if (u)
+                                if (u) {
                                   if (void 0 !== n.issuerLayer) {
                                     let r = n.issuerLayer;
                                     const e = f;
@@ -547,6 +548,25 @@ function s(
                                     }
                                     u = e === f;
                                   } else u = !0;
+                                  if (u)
+                                    if (
+                                      void 0 !==
+                                      n.nodeModulesReconstructedLookup
+                                    ) {
+                                      const r = f;
+                                      if (
+                                        'boolean' !=
+                                        typeof n.nodeModulesReconstructedLookup
+                                      )
+                                        return (
+                                          (s.errors = [
+                                            { params: { type: 'boolean' } },
+                                          ]),
+                                          !1
+                                        );
+                                      u = r === f;
+                                    } else u = !0;
+                                }
                               }
                             }
                           }

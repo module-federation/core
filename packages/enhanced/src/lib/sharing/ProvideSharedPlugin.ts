@@ -68,15 +68,12 @@ const validate = createSchemaValidation(
 
 class ProvideSharedPlugin {
   private _provides: [string, ProvidesConfig][];
-  private _experiments: NonNullable<ProvideSharedPluginOptions['experiments']>;
 
   /**
    * @param {ProvideSharedPluginOptions} options options
    */
   constructor(options: ProvideSharedPluginOptions) {
     validate(options);
-
-    this._experiments = options.experiments || {};
 
     this._provides = parseOptions(
       options.provides,
@@ -96,6 +93,7 @@ class ProvideSharedPlugin {
           request: item,
           exclude: undefined,
           include: undefined,
+          nodeModulesReconstructedLookup: false,
         };
         return result;
       },
@@ -113,6 +111,7 @@ class ProvideSharedPlugin {
           request,
           exclude: item.exclude,
           include: item.include,
+          nodeModulesReconstructedLookup: !!item.nodeModulesReconstructedLookup,
         };
       },
     );
@@ -314,9 +313,8 @@ class ProvideSharedPlugin {
               }
             }
 
-            // Handle paths through node_modules as fallback
+            // Handle paths through node_modules if configured
             if (
-              this._experiments.nodeModulesReconstructedLookup &&
               resource &&
               resource.includes('node_modules') &&
               !resolvedProvideMap.has(lookupKey)
@@ -332,7 +330,10 @@ class ProvideSharedPlugin {
                 );
                 const moduleConfig = matchProvides.get(modulePathKey);
 
-                if (moduleConfig !== undefined) {
+                if (
+                  moduleConfig !== undefined &&
+                  moduleConfig.nodeModulesReconstructedLookup
+                ) {
                   this.provideSharedModule(
                     compilation,
                     resolvedProvideMap,
@@ -349,6 +350,10 @@ class ProvideSharedPlugin {
                   prefixKeyPM,
                   originalPrefixConfigPM,
                 ] of prefixMatchProvides) {
+                  if (!originalPrefixConfigPM.nodeModulesReconstructedLookup) {
+                    continue;
+                  }
+
                   const lookupPM =
                     originalPrefixConfigPM.request || prefixKeyPM;
                   if (modulePathAfterNodeModules.startsWith(lookupPM)) {

@@ -28,15 +28,11 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
 };
 
 function createCompositeKey(request: string, config: ConsumeOptions): string {
-  if (config.issuerLayer) {
-    return `(${config.issuerLayer})${request}`;
-    // layer unlikely to be used, issuerLayer is what factorize provides
-    // which is what we need to create a matching key for
-  } else if (config.layer) {
-    return `(${config.layer})${request}`;
-  } else {
-    return request;
+  const layer = config.issuerLayer;
+  if (layer) {
+    return `(${layer})${request}`;
   }
+  return request;
 }
 
 export async function resolveMatchedConfigs<T extends ConsumeOptions>(

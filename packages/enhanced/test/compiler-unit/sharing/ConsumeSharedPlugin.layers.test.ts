@@ -117,14 +117,14 @@ describe('ConsumeSharedPlugin Layers', () => {
     ],
   });
 
-  it('should only apply config when module layer matches "layer" option', async () => {
+  it('should only apply config when issuer layer matches "issuerLayer" option', async () => {
     const config = createWebpackConfig({
       consumes: {
         react: {
           import: 'react',
           shareKey: 'react',
           shareScope: 'clientLayerScope',
-          layer: 'client', // Config only applies if the consuming module is in 'client' layer
+          issuerLayer: 'client', // Config only applies if the issuing module is in 'client' layer
         },
       },
       shareScope: 'default',
