@@ -607,7 +607,6 @@ class ConsumeSharedPlugin {
                   if (!options.nodeModulesReconstructedLookup) {
                     continue;
                   }
-<<<<<<< HEAD
                   // Refined issuerLayer matching logic for reconstructed path
                   if (options.issuerLayer) {
                     if (!contextInfo.issuerLayer) {
@@ -618,8 +617,6 @@ class ConsumeSharedPlugin {
                     }
                   }
                   // If contextInfo.issuerLayer exists but options.issuerLayer does not, allow (non-layered option matches layered request)
-=======
->>>>>>> 49bb94e15 (feat(enhanced): add nodeModulesReconstructedLookup support)
                   const lookup = options.request || prefix;
                   if (modulePathAfterNodeModules.startsWith(lookup)) {
                     const remainder = modulePathAfterNodeModules.slice(
