@@ -56,10 +56,4 @@ export default createModuleFederationConfig({
     });
     return acc;
   }, {}),
-  shared: {
-    '@rspress/runtime': {
-      singleton: true,
-      requiredVersion: false,
-    },
-  },
 });
