@@ -28,10 +28,13 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
 };
 
 function createCompositeKey(request: string, config: ConsumeOptions): string {
-  // disabling layer as fallback so that we can use issuerLayer to match
-  // this way we can catch unlayered requests and default them to another layer
-  // example react -> layered react without (layer)react
-  const layer = config.issuerLayer; //|| config.layer;
+  // Only use issuerLayer for matching - no fallback to config.layer
+  // Users must explicitly configure both layer and issuerLayer if they want layered sharing
+  // issuerLayer: used for request matching to determine which layer's modules to use
+  // layer: can be different or undefined, determines the actual layer the module is placed in
+  // This allows issuerLayer to act as a filter while layer controls placement
+  // Example: issuerLayer="app" matches app layer requests, layer="shared" places module in shared layer
+  const layer = config.issuerLayer;
   if (layer) {
     return `(${layer})${request}`;
   }

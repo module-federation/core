@@ -587,7 +587,7 @@ class ConsumeSharedPlugin {
                 return boundCreateConsumeSharedModule(
                   compilation,
                   context,
-                  request,
+                  modulePathAfterNodeModules,
                   reconstructedMatch,
                 );
               }
@@ -626,7 +626,7 @@ class ConsumeSharedPlugin {
                   return boundCreateConsumeSharedModule(
                     compilation,
                     context,
-                    request,
+                    modulePathAfterNodeModules,
                     {
                       ...options,
                       import: options.import

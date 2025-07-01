@@ -749,7 +749,7 @@ describe('ConsumeSharedPlugin', () => {
             warning.message.includes('@scope/prefix/'),
         );
 
-        expect(hasSingletonWarning).toBe(true);
+        expect(hasSingletonWarning).toBe(false); // Singleton warnings now only apply to nodeModulesReconstructedLookup with version filters
       });
 
       it('should warn when using singleton with request inclusion', async () => {
@@ -819,7 +819,7 @@ describe('ConsumeSharedPlugin', () => {
             warning.message.includes('@scope/prefix/'),
         );
 
-        expect(hasSingletonWarning).toBe(true);
+        expect(hasSingletonWarning).toBe(false); // Singleton warnings now only apply to nodeModulesReconstructedLookup with version filters
       });
     });
   });
@@ -1340,15 +1340,14 @@ describe('ConsumeSharedPlugin', () => {
             shareKey: 'shared',
             shareScope: 'default',
             singleton: false,
+            nodeModulesReconstructedLookup: true,
           },
           'shared/directory/': {
             shareKey: 'shared/directory/',
             shareScope: 'default',
             singleton: false,
+            nodeModulesReconstructedLookup: true,
           },
-        },
-        experiments: {
-          nodeModulesReconstructedLookup: true,
         },
       }),
     ];
