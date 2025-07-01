@@ -776,6 +776,292 @@ flowchart TD
 
 ---
 
+## Plugin Calling and Hooks Flow System
+
+This section provides a detailed sequence diagram showing the precise timing and data flow of the Module Federation plugin system during build time, similar to the Federation Runtime Bootstrap Sequence but focused on plugin orchestration and hook execution.
+
+```mermaid
+sequenceDiagram
+    participant Config as 📋 webpack.config.js<br/>ModuleFederationPlugin
+    participant MFP as 🎼 ModuleFederationPlugin<br/>Master Orchestrator
+    participant Compiler as ⚙️ Webpack Compiler<br/>Hook System
+    participant REP as 🏠 RemoteEntryPlugin<br/>Container Setup
+    participant FMP as 📦 FederationModulesPlugin<br/>Hook Infrastructure
+    participant FRP as ⚡ FederationRuntimePlugin<br/>Runtime Injection
+    participant SP as 🤝 SharePlugin<br/>Sharing Orchestrator
+    participant PSP as 📤 ProvideSharedPlugin<br/>Provider System
+    participant CSP as 📥 ConsumeSharedPlugin<br/>Consumer System
+    participant CP as 🏗️ ContainerPlugin<br/>Container Manager
+    participant CRP as 🔗 ContainerReferencePlugin<br/>Remote Loader
+    participant NMF as 🏭 NormalModuleFactory<br/>Module Factory
+    participant Compilation as 📊 Compilation<br/>Build Process
+
+    Note over Config, Compilation: 🚀 Phase 1: Plugin Registration & Hook Setup (Synchronous)
+    
+    Config->>+MFP: new ModuleFederationPlugin(options)
+    MFP->>MFP: Schema validation & normalization
+    MFP->>MFP: Configuration preprocessing
+    
+    Config->>Compiler: webpack(config) - compiler instance created
+    Compiler->>+MFP: apply(compiler) - Plugin registration
+    
+    Note over MFP: 🎯 Core Plugin Orchestration Sequence
+    MFP->>+REP: new RemoteEntryPlugin().apply(compiler)
+    REP->>Compiler: Register compiler.hooks.make
+    REP->>Compiler: Register compiler.hooks.thisCompilation
+    REP->>Compiler: Setup public path configuration
+    REP->>-MFP: ✅ RemoteEntryPlugin initialized
+    
+    MFP->>+FMP: new FederationModulesPlugin().apply(compiler)
+    FMP->>Compiler: Register compiler.hooks.thisCompilation
+    FMP->>Compiler: Create addContainerEntryModule hook
+    FMP->>Compiler: Create addFederationRuntimeModule hook
+    FMP->>-MFP: ✅ FederationModulesPlugin initialized
+    
+    MFP->>+FRP: new FederationRuntimePlugin().apply(compiler)
+    FRP->>Compiler: Register compiler.hooks.thisCompilation
+    FRP->>Compiler: Setup federation runtime embedding
+    FRP->>Compiler: Configure runtime alias system
+    FRP->>-MFP: ✅ FederationRuntimePlugin initialized
+    
+    MFP->>Compiler: Register compiler.hooks.afterPlugins
+    MFP->>-Config: ✅ Core plugins registered
+    
+    Note over Compiler: 🔌 afterPlugins Hook - Conditional Plugin Application
+    Compiler->>Compiler: Fire afterPlugins hook
+    
+    alt 📊 Shared Configuration Present
+        Compiler->>+SP: new SharePlugin().apply(compiler)
+        SP->>SP: Normalize sharing configuration
+        SP->>+PSP: new ProvideSharedPlugin().apply(compiler)
+        PSP->>Compiler: Register compiler.hooks.thisCompilation
+        PSP->>-SP: ✅ ProvideSharedPlugin applied
+        SP->>+CSP: new ConsumeSharedPlugin().apply(compiler)
+        CSP->>Compiler: Register compiler.hooks.thisCompilation
+        CSP->>-SP: ✅ ConsumeSharedPlugin applied
+        SP->>-Compiler: ✅ SharePlugin complete
+    end
+    
+    alt 🏗️ Exposes Configuration Present
+        Compiler->>+CP: new ContainerPlugin().apply(compiler)
+        CP->>Compiler: Register compiler.hooks.make
+        CP->>Compiler: Register compiler.hooks.thisCompilation
+        CP->>-Compiler: ✅ ContainerPlugin applied
+    end
+    
+    alt 🔗 Remotes Configuration Present
+        Compiler->>+CRP: new ContainerReferencePlugin().apply(compiler)
+        CRP->>Compiler: Register compiler.hooks.thisCompilation
+        CRP->>-Compiler: ✅ ContainerReferencePlugin applied
+    end
+
+    Note over Compiler, Compilation: 🏗️ Phase 2: Build Process & Hook Execution (Asynchronous)
+    
+    Compiler->>Compiler: webpack build starts
+    Compiler->>+Compilation: Fire compiler.hooks.make
+    
+    Note over Compilation: 📊 thisCompilation Hook Execution
+    Compilation->>Compilation: Fire compiler.hooks.thisCompilation
+    
+    alt 🏠 RemoteEntryPlugin thisCompilation
+        Compilation->>REP: thisCompilation(compilation, params)
+        REP->>Compilation: Setup container entry creation
+        REP->>Compilation: Configure entry dependency handling
+    end
+    
+    alt 📦 FederationModulesPlugin thisCompilation
+        Compilation->>FMP: thisCompilation(compilation, params)
+        FMP->>Compilation: Register addContainerEntryModule hook
+        FMP->>Compilation: Register addFederationRuntimeModule hook
+        FMP->>NMF: Setup normalModuleFactory hooks
+    end
+    
+    alt ⚡ FederationRuntimePlugin thisCompilation
+        Compilation->>FRP: thisCompilation(compilation, params)
+        FRP->>Compilation: Setup runtime module injection
+        FRP->>Compilation: Configure federation bootstrap
+    end
+    
+    alt 📤 ProvideSharedPlugin thisCompilation
+        Compilation->>PSP: thisCompilation(compilation, params)
+        PSP->>NMF: Register normalModuleFactory.hooks.module
+        PSP->>Compilation: Setup dependency factories
+    end
+    
+    alt 📥 ConsumeSharedPlugin thisCompilation
+        Compilation->>CSP: thisCompilation(compilation, params)
+        CSP->>NMF: Register normalModuleFactory.hooks.factorize
+        CSP->>NMF: Register normalModuleFactory.hooks.createModule
+        CSP->>Compilation: Setup dependency factories
+        CSP->>CSP: Resolve matched configurations
+    end
+    
+    alt 🏗️ ContainerPlugin thisCompilation
+        Compilation->>CP: thisCompilation(compilation, params)
+        CP->>Compilation: Setup container entry handling
+        CP->>Compilation: Register dependency factories
+    end
+    
+    alt 🔗 ContainerReferencePlugin thisCompilation
+        Compilation->>CRP: thisCompilation(compilation, params)
+        CRP->>NMF: Register normalModuleFactory.hooks.factorize
+        CRP->>Compilation: Setup external dependency handling
+    end
+
+    Note over NMF, Compilation: 🎯 Phase 3: Module Resolution & Interception (Critical Timing)
+    
+    Compilation->>+NMF: Module resolution begins
+    
+    loop 🔄 For Each Module Request
+        Note over NMF: 🎯 PRE-CREATION Interception Point
+        NMF->>NMF: Fire normalModuleFactory.hooks.factorize
+        
+        alt 📥 ConsumeSharedPlugin Interception
+            NMF->>CSP: factorize(resolveData)
+            CSP->>CSP: Check request against consume patterns
+            CSP->>CSP: Apply issuerLayer filtering logic
+            CSP->>CSP: Handle nodeModulesReconstructedLookup
+            
+            alt 🎯 Request Matches Consume Pattern
+                CSP->>CSP: Create ConsumeSharedModule
+                CSP->>CSP: Setup fallback dependency if needed
+                CSP->>CSP: Apply version satisfaction logic
+                CSP->>NMF: Return ConsumeSharedModule
+            else ❌ No Match
+                CSP->>NMF: Return undefined (continue normal flow)
+            end
+        end
+        
+        alt 🔗 ContainerReferencePlugin Interception
+            NMF->>CRP: factorize(resolveData)
+            CRP->>CRP: Check request against remote patterns
+            
+            alt 🌐 Request Matches Remote Pattern
+                CRP->>CRP: Create RemoteModule
+                CRP->>CRP: Setup external dependency
+                CRP->>CRP: Configure script loading
+                CRP->>NMF: Return RemoteModule
+            else ❌ No Match
+                CRP->>NMF: Return undefined (continue normal flow)
+            end
+        end
+        
+        alt ⚙️ Normal Module Creation
+            NMF->>NMF: Create standard webpack module
+            NMF->>NMF: Fire normalModuleFactory.hooks.createModule
+            
+            alt 📥 ConsumeSharedPlugin createModule
+                NMF->>CSP: createModule(createData, resolveData)
+                CSP->>CSP: Check resolved resource against patterns
+                alt 🎯 Resource Matches
+                    CSP->>CSP: Create ConsumeSharedModule for resolved path
+                    CSP->>NMF: Return ConsumeSharedModule
+                else ❌ No Resource Match
+                    CSP->>NMF: Return original module (continue normal flow)
+                end
+            end
+        end
+        
+        Note over NMF: 🎯 POST-CREATION Enhancement Point
+        NMF->>NMF: Fire normalModuleFactory.hooks.module
+        
+        alt 📤 ProvideSharedPlugin Enhancement
+            NMF->>PSP: module(module, createData, resolveData)
+            PSP->>PSP: Check if module should be shared
+            PSP->>PSP: Apply include/exclude filtering
+            PSP->>PSP: Handle issuerLayer matching
+            
+            alt 🔄 Module Should Be Shared
+                PSP->>PSP: Wrap module with sharing logic
+                PSP->>PSP: Register in share scope
+                PSP->>PSP: Setup version management
+                PSP->>NMF: Return enhanced module
+            else ❌ Module Not Shared
+                PSP->>NMF: Return original module
+            end
+        end
+    end
+    
+    NMF->>-Compilation: ✅ Module resolution complete
+
+    Note over Compilation: 🎯 Phase 4: Runtime Requirements & Code Generation
+    
+    Compilation->>Compilation: Fire additionalTreeRuntimeRequirements
+    
+    alt 📥 ConsumeSharedPlugin Runtime Requirements
+        Compilation->>CSP: additionalTreeRuntimeRequirements(chunk, set)
+        CSP->>Compilation: Add RuntimeGlobals.shareScopeMap
+        CSP->>Compilation: Add RuntimeGlobals.initializeSharing
+        CSP->>Compilation: Add ConsumeSharedRuntimeModule
+        CSP->>Compilation: Add ShareRuntimeModule
+    end
+    
+    alt 📤 ProvideSharedPlugin Runtime Requirements
+        Compilation->>PSP: additionalTreeRuntimeRequirements(chunk, set)
+        PSP->>Compilation: Add sharing runtime globals
+        PSP->>Compilation: Add ProvideSharedRuntimeModule
+    end
+    
+    Compilation->>Compilation: Code generation phase
+    
+    loop 🔄 For Each Federation Module
+        alt 📥 ConsumeSharedModule Code Generation
+            Compilation->>CSP: codeGeneration(context)
+            CSP->>CSP: Generate share scope lookup code
+            CSP->>CSP: Generate version checking logic
+            CSP->>CSP: Generate fallback handling code
+            CSP->>CSP: Apply singleton enforcement
+            CSP->>Compilation: Return generated code & runtime requirements
+        end
+        
+        alt 🏗️ ContainerEntryModule Code Generation
+            Compilation->>CP: codeGeneration(context)
+            CP->>CP: Generate module map object
+            CP->>CP: Generate get() function implementation
+            CP->>CP: Generate init() function for sharing
+            CP->>Compilation: Return container implementation
+        end
+        
+        alt 🌐 RemoteModule Code Generation
+            Compilation->>CRP: codeGeneration(context)
+            CRP->>CRP: Generate dynamic loading code
+            CRP->>CRP: Generate error handling logic
+            CRP->>CRP: Generate script injection code
+            CRP->>Compilation: Return remote loading implementation
+        end
+    end
+    
+    Compilation->>-Compiler: ✅ Build complete with federation
+    
+    Note over Config, Compilation: 🎯 Key Hook Timing & Data Flow Summary:<br/>1. factorize: PRE-creation module interception<br/>2. createModule: Alternative creation path<br/>3. module: POST-creation enhancement<br/>4. additionalTreeRuntimeRequirements: Runtime setup<br/>5. codeGeneration: Final code output
+```
+
+### Key Hook Execution Details
+
+#### 1. Plugin Registration Phase (Synchronous)
+- **ModuleFederationPlugin** orchestrates all sub-plugin registration
+- **Core plugins** (RemoteEntry, FederationModules, FederationRuntime) are always applied
+- **Conditional plugins** are applied based on configuration in `afterPlugins` hook
+
+#### 2. Build Process Hook Execution (Asynchronous)
+- **thisCompilation** hook allows each plugin to register its module factory hooks
+- **Plugin order matters**: registration happens synchronously, execution happens asynchronously
+
+#### 3. Module Interception Strategy (Critical Timing)
+- **factorize hook**: PRE-creation interception (ConsumeSharedPlugin, ContainerReferencePlugin)
+- **createModule hook**: Alternative creation path (ConsumeSharedPlugin for resolved resources)
+- **module hook**: POST-creation enhancement (ProvideSharedPlugin wrapping)
+
+#### 4. Layer-Aware Processing
+- **issuerLayer matching**: ConsumeSharedPlugin filters requests based on issuer context
+- **Layer propagation**: Modules carry layer information through the dependency graph
+- **Composite key generation**: `createLookupKeyForSharing(request, issuerLayer)` enables precise matching
+
+#### 5. Runtime Requirements Integration
+- **additionalTreeRuntimeRequirements**: Each plugin adds its runtime globals
+- **Runtime modules**: ConsumeSharedRuntimeModule, ShareRuntimeModule handle runtime logic
+- **Code generation**: Each module type generates its specific implementation code
+
 ## Runtime Federation System
 
 ### Share Scope Architecture
