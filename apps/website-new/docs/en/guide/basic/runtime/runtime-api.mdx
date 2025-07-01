@@ -416,4 +416,34 @@ registerPlugins([
 ]);
 ```
 
+## FederationConstructor
 
+In addition to exposing APIs,  the Federation Runtime also provides a FederationConstructor class, which you can use to create Federation instance.
+
+* What is a `Federation` instance?
+
+A `Federation` instance is an instance of the `FederationConstructor` class, which contains all the functionality of the `Federation` runtime.
+
+> You can enter `__FEDERATION__.__INSTANCES__` in the console to view the created instances.
+
+* When to use `FederationConstructor`?
+
+To ensure the uniqueness of the FederationHost instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the FederationHost instance from memory and then call the APIs of the FederationHost instance. This is also why APIs like loadRemote can be used directly from the `module-federation/runtime` package and inherently understand what application container they are attached to.
+
+However, this singleton pattern also limits the ability to create multiple instances, as it assumes that there is only one instance per bundle. Therefore, if you need to create a new instance , you can use the FederationHost class to create a new one.
+
+```ts
+import { FederationConstructor } from '@vmok/kit/runtime';
+
+const host = new FederationConstructor({
+  name: '@demo/host',
+  remotes: [
+    {
+      name: '@demo/sub1',
+      entry: 'http://localhost:8080/vmok-manifest.json'
+    }
+  ]
+});
+
+host.loadRemote('@demo/sub1/util').then((m) => m.add(1, 2, 3));
+```
