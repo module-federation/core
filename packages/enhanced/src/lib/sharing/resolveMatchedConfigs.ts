@@ -28,7 +28,10 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
 };
 
 function createCompositeKey(request: string, config: ConsumeOptions): string {
-  const layer = config.issuerLayer;
+  // disabling layer as fallback so that we can use issuerLayer to match
+  // this way we can catch unlayered requests and default them to another layer
+  // example react -> layered react without (layer)react
+  const layer = config.issuerLayer; //|| config.layer;
   if (layer) {
     return `(${layer})${request}`;
   }

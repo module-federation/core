@@ -586,6 +586,16 @@ class ConsumeSharedPlugin {
               // Check for prefixed consumes with original request
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
+                // Refined issuerLayer matching logic
+                if (options.issuerLayer) {
+                  if (!contextInfo.issuerLayer) {
+                    continue; // Option is layered, request is not: skip
+                  }
+                  if (contextInfo.issuerLayer !== options.issuerLayer) {
+                    continue; // Both are layered but do not match: skip
+                  }
+                }
+                // If contextInfo.issuerLayer exists but options.issuerLayer does not, allow (non-layered option matches layered request)
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
                   if (
@@ -609,7 +619,7 @@ class ConsumeSharedPlugin {
                         ? options.import + remainder
                         : undefined,
                       shareKey: options.shareKey + remainder,
-                      layer: options.layer || contextInfo.issuerLayer,
+                      layer: options.layer,
                     },
                   );
                 }
@@ -621,6 +631,16 @@ class ConsumeSharedPlugin {
                   if (!options.nodeModulesReconstructedLookup) {
                     continue;
                   }
+                  // Refined issuerLayer matching logic for reconstructed path
+                  if (options.issuerLayer) {
+                    if (!contextInfo.issuerLayer) {
+                      continue; // Option is layered, request is not: skip
+                    }
+                    if (contextInfo.issuerLayer !== options.issuerLayer) {
+                      continue; // Both are layered but do not match: skip
+                    }
+                  }
+                  // If contextInfo.issuerLayer exists but options.issuerLayer does not, allow (non-layered option matches layered request)
                   const lookup = options.request || prefix;
                   if (modulePathAfterNodeModules.startsWith(lookup)) {
                     const remainder = modulePathAfterNodeModules.slice(
@@ -647,7 +667,7 @@ class ConsumeSharedPlugin {
                           ? options.import + remainder
                           : undefined,
                         shareKey: options.shareKey + remainder,
-                        layer: options.layer || contextInfo.issuerLayer,
+                        layer: options.layer,
                       },
                     );
                   }
@@ -681,7 +701,7 @@ class ConsumeSharedPlugin {
                           ? options.import + remainder
                           : undefined,
                         shareKey: options.shareKey + remainder,
-                        layer: options.layer || contextInfo.issuerLayer,
+                        layer: options.layer,
                       },
                     );
                   }

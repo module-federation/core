@@ -175,7 +175,10 @@ class ConsumeSharedModule extends Module {
     this.buildMeta = {};
     this.buildInfo = {};
     if (this.options.import) {
-      const dep = new ConsumeSharedFallbackDependency(this.options.import);
+      const dep = new ConsumeSharedFallbackDependency(
+        this.options.import,
+        this.options.layer,
+      );
       if (this.options.eager) {
         this.addDependency(dep);
       } else {
