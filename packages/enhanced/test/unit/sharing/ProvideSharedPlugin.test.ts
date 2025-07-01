@@ -968,23 +968,25 @@ describe('ProvideSharedPlugin', () => {
     });
 
     describe('nodeModulesReconstructedLookup functionality', () => {
-      it('should pass nodeModulesReconstructedLookup to experiments', () => {
+      it('should set nodeModulesReconstructedLookup on provided configs', () => {
         const plugin = new ProvideSharedPlugin({
           shareScope: shareScopes.string,
           provides: {
             'shared-lib': {
               version: '1.0.0',
               shareScope: shareScopes.string,
+              nodeModulesReconstructedLookup: true,
             },
-          },
-          experiments: {
-            nodeModulesReconstructedLookup: true, // Set the experiment flag
           },
         });
 
-        // Verify the experiment is correctly set
+        // Verify the config is correctly set
         // @ts-ignore accessing private property for testing
-        expect(plugin._experiments.nodeModulesReconstructedLookup).toBe(true);
+        const providesConfig = plugin._provides.find(
+          ([key]) => key === 'shared-lib',
+        );
+        expect(providesConfig).toBeDefined();
+        expect(providesConfig[1].nodeModulesReconstructedLookup).toBe(true);
       });
     });
 
