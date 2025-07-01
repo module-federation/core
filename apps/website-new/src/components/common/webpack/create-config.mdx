@@ -1,0 +1,19 @@
+```js title='module-federation.config.js'
+module.export = {
+  name: 'host',
+  remotes: {
+    provider: 'provider@http://localhost:2004/mf-manifest.json',
+  },
+  exposes: {
+    './Button': './src/components/Button.tsx',
+  },
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+};
+```

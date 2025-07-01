@@ -86,7 +86,7 @@ describe('patchSSRRspackConfig', () => {
   it('should throw error if publicPath is not a string', () => {
     const config = JSON.parse(JSON.stringify(baseConfig));
     config.output.publicPath = undefined;
-    expect(() => patchSSRRspackConfig(config, baseMfConfig)).toThrow(
+    expect(() => patchSSRRspackConfig(config, baseMfConfig, 'ssr')).toThrow(
       'publicPath must be string!',
     );
   });
@@ -94,20 +94,20 @@ describe('patchSSRRspackConfig', () => {
   it('should throw error if publicPath is "auto"', () => {
     const config = JSON.parse(JSON.stringify(baseConfig));
     config.output.publicPath = 'auto';
-    expect(() => patchSSRRspackConfig(config, baseMfConfig)).toThrow(
+    expect(() => patchSSRRspackConfig(config, baseMfConfig, 'ssr')).toThrow(
       'publicPath can not be "auto"!',
     );
   });
 
   it('should update publicPath correctly', () => {
     const config = JSON.parse(JSON.stringify(baseConfig));
-    const patchedConfig = patchSSRRspackConfig(config, baseMfConfig);
+    const patchedConfig = patchSSRRspackConfig(config, baseMfConfig, 'ssr');
     expect(patchedConfig.output?.publicPath).toBe(`/test/${SSR_DIR}/`);
   });
 
   it('should set target to async-node', () => {
     const config = JSON.parse(JSON.stringify(baseConfig));
-    const patchedConfig = patchSSRRspackConfig(config, baseMfConfig);
+    const patchedConfig = patchSSRRspackConfig(config, baseMfConfig, 'ssr');
     expect(patchedConfig.target).toBe('async-node');
   });
 
@@ -115,7 +115,7 @@ describe('patchSSRRspackConfig', () => {
     const env = process.env.NODE_ENV;
     process.env.NODE_ENV = 'development';
     const config = JSON.parse(JSON.stringify(baseConfig));
-    const patchedConfig = patchSSRRspackConfig(config, baseMfConfig);
+    const patchedConfig = patchSSRRspackConfig(config, baseMfConfig, 'ssr');
     expect(patchedConfig.plugins).toHaveLength(1);
     // @ts-expect-error default is a class
     expect(patchedConfig.plugins?.[0].constructor.name).toBe(
@@ -136,7 +136,7 @@ describe('patchSSRRspackConfig', () => {
       const mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions = {
         name: 'myApp',
       };
-      const patchedConfig = patchSSRRspackConfig(config, mfConfig);
+      const patchedConfig = patchSSRRspackConfig(config, mfConfig, 'ssr');
       expect(patchedConfig.output?.chunkFilename).toBe(
         'js/[name]myApp-[chunkhash].js',
       );
@@ -152,7 +152,7 @@ describe('patchSSRRspackConfig', () => {
         plugins: [],
       };
       const mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions = {}; // No name in mfConfig
-      const patchedConfig = patchSSRRspackConfig(config, mfConfig);
+      const patchedConfig = patchSSRRspackConfig(config, mfConfig, 'ssr');
       expect(patchedConfig.output?.chunkFilename).toBe(
         'js/[name]myOutputUniqueName-[chunkhash].js',
       );
@@ -169,7 +169,7 @@ describe('patchSSRRspackConfig', () => {
       const mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions = {
         name: 'myApp',
       };
-      const patchedConfig = patchSSRRspackConfig(config, mfConfig);
+      const patchedConfig = patchSSRRspackConfig(config, mfConfig, 'ssr');
       expect(typeof patchedConfig.output?.chunkFilename).toBe('function');
     });
 
@@ -182,7 +182,7 @@ describe('patchSSRRspackConfig', () => {
         plugins: [],
       };
       const mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions = {}; // No name
-      const patchedConfig = patchSSRRspackConfig(config, mfConfig);
+      const patchedConfig = patchSSRRspackConfig(config, mfConfig, 'ssr');
       expect(patchedConfig.output?.chunkFilename).toBe('js/[name].js');
     });
 
@@ -198,7 +198,7 @@ describe('patchSSRRspackConfig', () => {
       const mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions = {
         name: 'myApp',
       };
-      const patchedConfig = patchSSRRspackConfig(config, mfConfig);
+      const patchedConfig = patchSSRRspackConfig(config, mfConfig, 'ssr');
       expect(patchedConfig.output?.chunkFilename).toBe('js/myApp-[name].js');
     });
   });

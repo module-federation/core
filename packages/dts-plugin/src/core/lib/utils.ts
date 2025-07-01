@@ -42,7 +42,7 @@ export function retrieveTypesAssetsInfo(options: RemoteOptions) {
   try {
     const { tsConfig, remoteOptions, mapComponentsToExpose } =
       retrieveRemoteConfig(options);
-    if (!Object.keys(mapComponentsToExpose).length) {
+    if (!Object.keys(mapComponentsToExpose).length || !tsConfig.files.length) {
       return {
         zipPrefix,
         apiTypesPath,
@@ -51,6 +51,7 @@ export function retrieveTypesAssetsInfo(options: RemoteOptions) {
         apiFileName: '',
       };
     }
+
     const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
     zipTypesPath = retrieveTypesZipPath(mfTypesPath, remoteOptions);
     if (remoteOptions.generateAPITypes) {

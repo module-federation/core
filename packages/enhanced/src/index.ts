@@ -27,10 +27,6 @@ export const container = {
   },
 };
 
-export const createModuleFederationConfig = (
-  options: moduleFederationPlugin.ModuleFederationPluginOptions,
-): moduleFederationPlugin.ModuleFederationPluginOptions => {
-  return options;
-};
+export { createModuleFederationConfig } from '@module-federation/sdk';
 
 export type { moduleFederationPlugin };

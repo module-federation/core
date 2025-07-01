@@ -1,0 +1,15 @@
+```ts title='rspress.config.ts'
+import { defineConfig } from 'rspress/config';
+import { pluginModuleFederation } from '@module-federation/rspress-plugin';
+import mfConfig from './module-federation.config';
+
+export default defineConfig({
+  // ...
+  plugins: [pluginModuleFederation(mfConfig)],
+  builderConfig: {
+    output: {
+      assetPrefix: 'https://module-federation.io/',
+    },
+  },
+});
+```
