@@ -166,9 +166,11 @@ Restricts this shared configuration to only apply when the consuming module (the
 **Use Case:**
 Imagine you want a library `my-service` to be shared as a singleton when used by client-side components, but you want a fresh, non-shared instance (or a different version) if it's imported from a server-side utility that should not interfere with the client's singleton. If client components are in a `'client-ui'` layer, you can set `issuerLayer: 'client-ui'` for the singleton configuration of `my-service`.
 
-**How it Differs from `layer`:**
-- `layer`: Puts the shared module *itself* (the one being provided/consumed according to this config) into a layer. The config is only active for modules *within* that layer.
-- `issuerLayer`: Filters the applicability of the shared config based on the layer of the module *requesting* (importing) the shared dependency. The shared module itself doesn't necessarily need to be in a layer (or could be in a different one, or the same one).
+**Key Distinction between `layer` and `issuerLayer`:**
+- **`issuerLayer`**: Controls **who can request** the shared module (filtering mechanism). This determines whether a shared configuration applies based on the layer of the module *importing* the dependency. Used for request matching in `createCompositeKey()`.
+- **`layer`**: Controls **where the ConsumeSharedModule is placed** (module placement). This determines which layer the created ConsumeSharedModule belongs to, regardless of which layer requested it.
+
+**Important:** As of the latest implementation, only `issuerLayer` is used for request matching. The `layer` property no longer serves as a fallback for filtering - it is purely for controlling the placement layer of the shared module.
 
 **Example (from the test case):**
 ```ts
