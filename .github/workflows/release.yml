@@ -48,7 +48,7 @@ jobs:
       - name: Build and test Packages
         run: |
           git fetch origin main
-          npx nx run-many --targets=build --projects=tag:type:pkg
+          npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
           ls -l packages/*/dist packages/*/package.json
 
       - name: Release
