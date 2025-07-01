@@ -21,17 +21,59 @@ import FederationRuntimeDependency from '../../../src/lib/container/runtime/Fede
 
 describe('HoistContainerReferencesPlugin', () => {
   let tempDir: string;
+  let allTempDirs: string[] = [];
+
+  beforeAll(() => {
+    // Track all temp directories for final cleanup
+    allTempDirs = [];
+  });
 
   beforeEach(() => {
     // Create temp dir before each test
-    tempDir = fs.mkdtempSync(path.join(__dirname, 'hoist-test-'));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hoist-test-'));
+    allTempDirs.push(tempDir);
   });
 
-  afterEach(() => {
+  afterEach((done) => {
     // Clean up temp dir after each test
     if (tempDir && fs.existsSync(tempDir)) {
-      fs.rmSync(tempDir, { recursive: true, force: true });
+      // Add a small delay to allow file handles to be released
+      setTimeout(() => {
+        try {
+          fs.rmSync(tempDir, { recursive: true, force: true });
+          done();
+        } catch (error) {
+          console.warn(`Failed to clean up temp directory ${tempDir}:`, error);
+          // Try alternative cleanup method
+          try {
+            fs.rmdirSync(tempDir, { recursive: true });
+            done();
+          } catch (fallbackError) {
+            console.error(
+              `Fallback cleanup also failed for ${tempDir}:`,
+              fallbackError,
+            );
+            done();
+          }
+        }
+      }, 100); // 100ms delay to allow file handles to close
+    } else {
+      done();
     }
+  });
+
+  afterAll(() => {
+    // Final cleanup of any remaining temp directories
+    allTempDirs.forEach((dir) => {
+      if (fs.existsSync(dir)) {
+        try {
+          fs.rmSync(dir, { recursive: true, force: true });
+        } catch (error) {
+          console.warn(`Final cleanup failed for ${dir}:`, error);
+        }
+      }
+    });
+    allTempDirs = [];
   });
 
   it('should hoist container runtime modules into the single runtime chunk when using remotes', (done) => {
@@ -127,64 +169,54 @@ describe('HoistContainerReferencesPlugin', () => {
         expect(runtimeChunk).toBeDefined();
         if (!runtimeChunk) return done(new Error('Runtime chunk not found'));
 
-        // 2. Find the module originating from FederationRuntimeDependency
-        let federationRuntimeOriginModule: Module | null = null;
+        // 2. Find the module that was created from FederationRuntimeDependency
+        let federationRuntimeModule: Module | null = null;
         for (const module of compilation.modules) {
-          if (!module) continue;
-          // Use direct import for instanceof check
-          if (
-            module.dependencies?.some(
-              (dep) => dep instanceof FederationRuntimeDependency,
-            )
-          ) {
-            federationRuntimeOriginModule = module;
-            break;
-          }
-          if (
-            module.blocks?.some((block) =>
-              block.dependencies?.some(
-                (dep) => dep instanceof FederationRuntimeDependency,
-              ),
-            )
-          ) {
-            federationRuntimeOriginModule = module;
+          if (module.constructor.name === 'FederationRuntimeModule') {
+            federationRuntimeModule = module;
             break;
           }
         }
-        expect(federationRuntimeOriginModule).toBeDefined();
-        if (!federationRuntimeOriginModule)
+        expect(federationRuntimeModule).toBeDefined();
+        if (!federationRuntimeModule)
           return done(
             new Error(
               'Module originating FederationRuntimeDependency not found',
             ),
           );
 
-        // 3. Assert the Federation Runtime Origin Module is in the Runtime Chunk
-        const isRuntimeOriginInRuntime = chunkGraph.isModuleInChunk(
-          federationRuntimeOriginModule,
+        // 3. Assert the Federation Runtime Module is in the Runtime Chunk
+        const isRuntimeModuleInRuntime = chunkGraph.isModuleInChunk(
+          federationRuntimeModule,
           runtimeChunk,
         );
-        expect(isRuntimeOriginInRuntime).toBe(true);
+        expect(isRuntimeModuleInRuntime).toBe(true);
 
-        // 4. Assert the Federation Runtime Origin Module is NOT in the Main Chunk (if separate)
+        // 4. Assert the Federation Runtime Module is NOT in the Main Chunk (if separate)
         const mainChunk = Array.from(compilation.chunks).find(
           (c: Chunk) => c.name === 'main',
         );
         if (mainChunk && mainChunk !== runtimeChunk) {
-          const isRuntimeOriginInMain = chunkGraph.isModuleInChunk(
-            federationRuntimeOriginModule,
+          const isRuntimeModuleInMain = chunkGraph.isModuleInChunk(
+            federationRuntimeModule,
             mainChunk,
           );
-          expect(isRuntimeOriginInMain).toBe(false);
+          expect(isRuntimeModuleInMain).toBe(false);
         }
 
         // 5. Verify file output (Optional)
         const runtimeFilePath = path.join(outputPath, 'runtime.js');
         expect(fs.existsSync(runtimeFilePath)).toBe(true);
 
-        done();
+        // Close compiler to release file handles
+        compiler.close(() => {
+          done();
+        });
       } catch (e) {
-        done(e);
+        // Close compiler even on error
+        compiler.close(() => {
+          done(e);
+        });
       }
     });
   });
@@ -275,14 +307,10 @@ describe('HoistContainerReferencesPlugin', () => {
         expect(runtimeChunk).toBeDefined();
         if (!runtimeChunk) return done(new Error('Runtime chunk not found'));
 
-        // 2. Find the Container Entry Module via its Dependency
+        // 2. Find the Container Entry Module that was created from ContainerEntryDependency
         let containerEntryModule: Module | null = null;
         for (const module of compilation.modules) {
-          if (
-            module.dependencies.some(
-              (dep) => dep instanceof dependencies.ContainerEntryDependency,
-            )
-          ) {
+          if (module.constructor.name === 'ContainerEntryModule') {
             containerEntryModule = module;
             break;
           }
@@ -348,9 +376,15 @@ describe('HoistContainerReferencesPlugin', () => {
         expect(fs.existsSync(runtimeFilePath)).toBe(true);
         expect(fs.existsSync(containerFilePath)).toBe(true);
 
-        done();
+        // Close compiler to release file handles
+        compiler.close(() => {
+          done();
+        });
       } catch (e) {
-        done(e);
+        // Close compiler even on error
+        compiler.close(() => {
+          done(e);
+        });
       }
     });
   });
@@ -483,48 +517,50 @@ describe('HoistContainerReferencesPlugin', () => {
         // In remotes-only mode without filename, container.js might not exist or be empty
         // expect(fs.existsSync(containerFilePath)).toBe(true);
 
-        // 5. Find the federationRuntimeOriginModule
-        let federationRuntimeOriginModule: Module | null = null;
+        // 5. Find the federationRuntimeModule
+        let federationRuntimeModule: Module | null = null;
         for (const module of compilation.modules) {
-          if (
-            module.dependencies.some(
-              (dep) => dep instanceof FederationRuntimeDependency,
-            )
-          ) {
-            federationRuntimeOriginModule = module;
+          if (module.constructor.name === 'FederationRuntimeModule') {
+            federationRuntimeModule = module;
             break;
           }
         }
-        expect(federationRuntimeOriginModule).toBeDefined();
-        if (!federationRuntimeOriginModule)
+        expect(federationRuntimeModule).toBeDefined();
+        if (!federationRuntimeModule)
           return done(
             new Error(
-              'Module originating FederationRuntimeDependency not found',
+              'Module created from FederationRuntimeDependency not found',
             ),
           );
 
-        // 6. Assert the Federation Runtime Origin Module is in the Runtime Chunk
-        const isRuntimeOriginInRuntime = chunkGraph.isModuleInChunk(
-          federationRuntimeOriginModule,
+        // 6. Assert the Federation Runtime Module is in the Runtime Chunk
+        const isRuntimeModuleInRuntime = chunkGraph.isModuleInChunk(
+          federationRuntimeModule,
           runtimeChunk,
         );
-        expect(isRuntimeOriginInRuntime).toBe(true);
+        expect(isRuntimeModuleInRuntime).toBe(true);
 
-        // 7. Assert the Federation Runtime Origin Module is NOT in the Main Chunk (if separate)
+        // 7. Assert the Federation Runtime Module is NOT in the Main Chunk (if separate)
         if (mainChunk && mainChunk !== runtimeChunk) {
-          const isRuntimeOriginInMain = chunkGraph.isModuleInChunk(
-            federationRuntimeOriginModule,
+          const isRuntimeModuleInMain = chunkGraph.isModuleInChunk(
+            federationRuntimeModule,
             mainChunk,
           );
-          expect(isRuntimeOriginInMain).toBe(false);
+          expect(isRuntimeModuleInMain).toBe(false);
         }
 
         // 8. Verify file output using real fs paths (Optional, but still useful)
         expect(fs.existsSync(runtimeFilePath)).toBe(true);
 
-        done();
+        // Close compiler to release file handles
+        compiler.close(() => {
+          done();
+        });
       } catch (e) {
-        done(e);
+        // Close compiler even on error
+        compiler.close(() => {
+          done(e);
+        });
       }
     });
   });
