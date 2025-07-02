@@ -6,6 +6,22 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
+      "executor": "../../tools/rslib-plugin:build",
+      "outputs": ["{workspaceRoot}/packages/runtime-core/dist"],
+      "options": {
+        "configFile": "rslib.config.ts",
+        "outputPath": "packages/runtime-core/dist",
+        "mode": "production",
+        "verbose": true
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "build:rollup": {
       "executor": "@nx/rollup:rollup",
       "outputs": ["{workspaceRoot}/packages/runtime-core/dist"],
       "options": {
@@ -77,6 +93,20 @@
             "forwardAllArgs": false
           }
         ]
+      }
+    },
+    "test:rslib": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rslib build --mode development",
+        "cwd": "packages/runtime-core"
+      }
+    },
+    "test:watch": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rslib build --mode development --watch",
+        "cwd": "packages/runtime-core"
       }
     }
   }
