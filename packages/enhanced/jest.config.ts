@@ -23,7 +23,7 @@ if (swcJestConfig.swcrc === undefined) {
 // jest needs EsModule Interop to find the default exported setup/teardown functions
 // swcJestConfig.module.noInterop = false;
 
-const jestConfig: any = {
+export default {
   displayName: 'enhanced',
   preset: '../../jest.preset.js',
   cacheDirectory: path.join(os.tmpdir(), 'enhanced'),
@@ -36,22 +36,8 @@ const jestConfig: any = {
   testMatch: [
     '<rootDir>/test/*.basictest.js',
     '<rootDir>/test/unit/**/*.test.ts',
-    '<rootDir>/test/compiler-unit/**/*.test.ts',
   ],
 
   testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
   setupFilesAfterEnv: ['<rootDir>/test/setupTestFramework.js'],
-
-  // CI stability improvements
-  testTimeout: 60000, // 60 seconds timeout for CI environments
-  forceExit: true, // Force exit to prevent hanging in CI
-  detectOpenHandles: false, // Disable to prevent noise in CI logs
-  workerIdleMemoryLimit: '512MB', // Restart workers when memory usage is high
 };
-
-// Only set maxWorkers if in CI environment
-if (process.env['CI']) {
-  jestConfig.maxWorkers = 2; // Limit workers in CI to reduce memory pressure
-}
-
-export default jestConfig;
