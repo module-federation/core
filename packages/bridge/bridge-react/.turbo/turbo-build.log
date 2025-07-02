@@ -1,0 +1,62 @@
+
+
+> @module-federation/bridge-react@0.14.3 build /Users/bytedance/dev/universe/packages/bridge/bridge-react
+> vite build
+
+[36mvite v5.4.19 [32mbuilding for production...[36m[39m
+[2K[1Gtransforming (1) [2msrc/v19.ts[22m[2K[1G../../../../next.js/node_modules/.pnpm/react-error-boundary@4.1.2_react@19.2.0-canary-197d6a04-20250424/node_modules/react-error-boundary/dist/react-error-boundary.esm.js (1:0): Module level directives cause errors when bundled, "use client" in "../../../../next.js/node_modules/.pnpm/react-error-boundary@4.1.2_react@19.2.0-canary-197d6a04-20250424/node_modules/react-error-boundary/dist/react-error-boundary.esm.js" was ignored.
+[2K[1G../../sdk/dist/index.esm.js (680:83): Use of eval in "../../sdk/dist/index.esm.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+[2K[1G[32m✓[39m 19 modules transformed.
+[2K[1GEntry module "src/provider/plugin.ts" is using named and default exports together. Consumers of your bundle will have to use `chunk.default` to access the default export, which may not be what you want. Use `output.exports: "named"` to disable this warning.
+[2K[1Grendering chunks (1)...[2K[1Grendering chunks (2)...[2K[1Grendering chunks (3)...[2K[1Grendering chunks (4)...[2K[1Grendering chunks (5)...[2K[1Grendering chunks (6)...[2K[1Grendering chunks (7)...[2K[1Grendering chunks (8)...[2K[1Grendering chunks (9)...[2K[1G[32m
+[36m[vite:dts][32m Start generate declaration files...[39m
+[96msrc/provider/versions/legacy.ts[0m:[93m72[0m:[93m16[0m - [91merror[0m[90m TS2339: [0mProperty 'unmountComponentAtNode' does not exist on type 'typeof import("/Users/bytedance/dev/next.js/node_modules/.pnpm/@types+react-dom@19.1.2_@types+react@19.1.1/node_modules/@types/react-dom/index")'.
+
+[7m72[0m       ReactDOM.unmountComponentAtNode(container as Element);
+[7m  [0m [91m               ~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/remote/component.tsx[0m:[93m14[0m:[93m37[0m - [91merror[0m[90m TS2345: [0mArgument of type '(props: RemoteAppParams & RemoteComponentProps<Record<string, unknown>>, ref: ForwardedRef<unknown>) => Element' is not assignable to parameter of type 'ForwardRefRenderFunction<unknown, Omit<RemoteAppParams & RemoteComponentProps<Record<string, unknown>>, "ref">>'.
+  Types of parameters 'props' and 'props' are incompatible.
+    Type 'Omit<RemoteAppParams & RemoteComponentProps<Record<string, unknown>>, "ref">' is not assignable to type 'RemoteAppParams & RemoteComponentProps<Record<string, unknown>>'.
+      Type 'Omit<RemoteAppParams & RemoteComponentProps<Record<string, unknown>>, "ref">' is missing the following properties from type 'RemoteAppParams': moduleName, providerInfo, exportName, fallback
+
+[7m14[0m const RemoteAppWrapper = forwardRef(function (
+[7m  [0m [91m                                    ~~~~~~~~[0m
+[96msrc/remote/create.tsx[0m:[93m11[0m:[93m33[0m - [91merror[0m[90m TS6133: [0m'E' is declared but its value is never read.
+
+[7m11[0m type LazyRemoteComponentInfo<T, E extends keyof T> = RemoteComponentParams<T>;
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~[0m
+[96msrc/remote/create.tsx[0m:[93m43[0m:[93m15[0m - [91merror[0m[90m TS2322: [0mType '{ moduleName: any; providerInfo: any; exportName: string | keyof T; fallback: ComponentType<{ error: Error; }>; ref: ForwardedRef<HTMLDivElement>; }' is not assignable to type 'IntrinsicAttributes & Omit<RefAttributes<unknown>, "basename">'.
+  Property 'moduleName' does not exist on type 'IntrinsicAttributes & Omit<RefAttributes<unknown>, "basename">'.
+
+[7m43[0m               moduleName={moduleName}
+[7m  [0m [91m              ~~~~~~~~~~[0m
+
+[2K[1Gcomputing gzip size (0)...[2K[1Gcomputing gzip size (1)...[2K[1Gcomputing gzip size (2)...[2K[1Gcomputing gzip size (3)...[2K[1Gcomputing gzip size (4)...[2K[1Gcomputing gzip size (5)...[2K[1Gcomputing gzip size (6)...[2K[1Gcomputing gzip size (7)...[2K[1Gcomputing gzip size (8)...[2K[1Gcomputing gzip size (9)...[2K[1G[2mdist/[22m[36mplugin.cjs.js             [39m[1m[2m 0.43 kB[22m[1m[22m[2m │ gzip: 0.27 kB[22m
+[2mdist/[22m[36mv18.cjs.js                [39m[1m[2m 0.54 kB[22m[1m[22m[2m │ gzip: 0.29 kB[22m
+[2mdist/[22m[36mv19.cjs.js                [39m[1m[2m 0.54 kB[22m[1m[22m[2m │ gzip: 0.29 kB[22m
+[2mdist/[22m[36mrouter-v5.cjs.js          [39m[1m[2m 1.90 kB[22m[1m[22m[2m │ gzip: 0.72 kB[22m
+[2mdist/[22m[36mrouter.cjs.js             [39m[1m[2m 3.13 kB[22m[1m[22m[2m │ gzip: 0.90 kB[22m
+[2mdist/[22m[36mrouter-v6.cjs.js          [39m[1m[2m 3.28 kB[22m[1m[22m[2m │ gzip: 0.96 kB[22m
+[2mdist/[22m[36mbridge-base-C1n4ztAl.cjs  [39m[1m[2m 7.07 kB[22m[1m[22m[2m │ gzip: 1.97 kB[22m
+[2mdist/[22m[36mindex-BisLFgHe.cjs        [39m[1m[2m 7.81 kB[22m[1m[22m[2m │ gzip: 2.41 kB[22m
+[2mdist/[22m[36mindex.cjs.js              [39m[1m[2m10.05 kB[22m[1m[22m[2m │ gzip: 2.64 kB[22m
+[32m[36m[vite:dts][32m Start rollup declaration files...[39m
+Analysis will use the bundled TypeScript version 5.8.2
+Analysis will use the bundled TypeScript version 5.8.2
+Analysis will use the bundled TypeScript version 5.8.2
+Analysis will use the bundled TypeScript version 5.8.2
+Analysis will use the bundled TypeScript version 5.8.2
+Analysis will use the bundled TypeScript version 5.8.2
+Analysis will use the bundled TypeScript version 5.8.2
+[32m[36m[vite:dts][32m Declaration files built in 22841ms.
+[39m
+[2K[1Grendering chunks (1)...[2K[1Grendering chunks (2)...[2K[1Grendering chunks (3)...[2K[1Grendering chunks (4)...[2K[1Grendering chunks (5)...[2K[1Grendering chunks (6)...[2K[1Grendering chunks (7)...[2K[1Grendering chunks (8)...[2K[1Grendering chunks (9)...[2K[1G[2K[1Gcomputing gzip size (1)...[2K[1Gcomputing gzip size (2)...[2K[1Gcomputing gzip size (3)...[2K[1Gcomputing gzip size (4)...[2K[1Gcomputing gzip size (5)...[2K[1Gcomputing gzip size (6)...[2K[1Gcomputing gzip size (7)...[2K[1Gcomputing gzip size (8)...[2K[1Gcomputing gzip size (9)...[2K[1G[2mdist/[22m[36mplugin.es.js             [39m[1m[2m0.29 kB[22m[1m[22m[2m │ gzip: 0.18 kB[22m
+[2mdist/[22m[36mv18.es.js                [39m[1m[2m0.44 kB[22m[1m[22m[2m │ gzip: 0.22 kB[22m
+[2mdist/[22m[36mv19.es.js                [39m[1m[2m0.44 kB[22m[1m[22m[2m │ gzip: 0.22 kB[22m
+[2mdist/[22m[36mrouter-v5.es.js          [39m[1m[2m1.10 kB[22m[1m[22m[2m │ gzip: 0.44 kB[22m
+[2mdist/[22m[36mrouter.es.js             [39m[1m[2m2.35 kB[22m[1m[22m[2m │ gzip: 0.63 kB[22m
+[2mdist/[22m[36mrouter-v6.es.js          [39m[1m[2m2.44 kB[22m[1m[22m[2m │ gzip: 0.67 kB[22m
+[2mdist/[22m[36mbridge-base-BQKWoswk.js  [39m[1m[2m6.53 kB[22m[1m[22m[2m │ gzip: 1.77 kB[22m
+[2mdist/[22m[36mindex-DjPznVSC.js        [39m[1m[2m7.74 kB[22m[1m[22m[2m │ gzip: 2.41 kB[22m
+[2mdist/[22m[36mindex.es.js              [39m[1m[2m9.44 kB[22m[1m[22m[2m │ gzip: 2.45 kB[22m
+[32m✓ built in 23.23s[39m
