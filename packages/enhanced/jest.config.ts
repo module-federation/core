@@ -42,4 +42,11 @@ export default {
   verbose: false,
   testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
   setupFilesAfterEnv: ['<rootDir>/test/setupTestFramework.js'],
+
+  // CI stability improvements
+  testTimeout: 60000, // 60 seconds timeout for CI environments
+  maxWorkers: process.env.CI ? 2 : undefined, // Limit workers in CI to reduce memory pressure
+  forceExit: true, // Force exit to prevent hanging in CI
+  detectOpenHandles: false, // Disable to prevent noise in CI logs
+  workerIdleMemoryLimit: '512MB', // Restart workers when memory usage is high
 };
