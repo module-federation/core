@@ -5,7 +5,7 @@
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs.cjs",
   "module": "./dist/index.esm.js",
-  "types": "./dist/index.cjs.d.ts",
+  "types": "./src/index.ts",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -17,26 +17,27 @@
   },
   "files": [
     "dist/",
+    "src/",
     "README.md"
   ],
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.esm.d.ts",
+        "types": "./src/index.ts",
         "default": "./dist/index.esm.js"
       },
       "require": {
-        "types": "./dist/index.cjs.d.ts",
+        "types": "./src/index.ts",
         "default": "./dist/index.cjs.cjs"
       }
     },
     "./types": {
       "import": {
-        "types": "./dist/types.esm.d.ts",
+        "types": "./src/types.ts",
         "default": "./dist/types.esm.js"
       },
       "require": {
-        "types": "./dist/types.cjs.d.ts",
+        "types": "./src/types.ts",
         "default": "./dist/types.cjs.cjs"
       }
     }
@@ -44,10 +45,10 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.cjs.d.ts"
+        "./src/index.ts"
       ],
       "types": [
-        "./dist/types.cjs.d.ts"
+        "./src/types.ts"
       ]
     }
   },

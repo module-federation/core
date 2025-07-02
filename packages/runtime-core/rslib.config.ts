@@ -30,6 +30,7 @@ export default defineConfig({
   lib: [
     {
       format: 'esm',
+      dts: true,
       output: {
         filename: {
           js: '[name].esm.js',
@@ -39,6 +40,7 @@ export default defineConfig({
     },
     {
       format: 'cjs',
+      dts: true,
       output: {
         filename: {
           js: '[name].cjs.cjs',
