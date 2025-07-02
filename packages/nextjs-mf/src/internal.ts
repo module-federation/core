@@ -1,17 +1,8 @@
-import type {
-  moduleFederationPlugin,
-  sharePlugin,
-} from '@module-federation/sdk';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
+import type { Compiler } from 'webpack';
+import type { SharedObject } from '@module-federation/enhanced/src/declarations/plugins/sharing/SharePlugin';
 
-// Extend the SharedConfig type to include layer properties
-type ExtendedSharedConfig = sharePlugin.SharedConfig & {
-  layer?: string;
-  issuerLayer?: string | string[];
-  request?: string;
-  shareKey?: string;
-};
-
-const WEBPACK_LAYERS_NAMES = {
+export const WEBPACK_LAYERS_NAMES = {
   /**
    * The layer for the shared code between the client and server bundles.
    */
@@ -50,71 +41,7 @@ const WEBPACK_LAYERS_NAMES = {
    */
   appPagesBrowser: 'app-pages-browser',
 } as const;
-
-const createSharedConfig = (
-  name: string,
-  layers: (string | undefined)[],
-  options: { request?: string; import?: false | undefined } = {},
-) => {
-  return layers.reduce(
-    (acc, layer) => {
-      const key = layer ? `${name}-${layer}` : name;
-      acc[key] = {
-        singleton: true,
-        requiredVersion: false,
-        import: layer ? undefined : (options.import ?? false),
-        shareKey: options.request ?? name,
-        request: options.request ?? name,
-        layer,
-        issuerLayer: layer,
-      };
-      return acc;
-    },
-    {} as Record<string, ExtendedSharedConfig>,
-  );
-};
-
-const defaultLayers = [
-  WEBPACK_LAYERS_NAMES.reactServerComponents,
-  WEBPACK_LAYERS_NAMES.serverSideRendering,
-  undefined,
-];
-
-const navigationLayers = [
-  WEBPACK_LAYERS_NAMES.reactServerComponents,
-  WEBPACK_LAYERS_NAMES.serverSideRendering,
-];
-
-const reactShares = createSharedConfig('react', defaultLayers);
-const reactDomShares = createSharedConfig('react', defaultLayers, {
-  request: 'react-dom',
-});
-const jsxRuntimeShares = createSharedConfig('react/', navigationLayers, {
-  request: 'react/',
-  import: undefined,
-});
-const nextNavigationShares = createSharedConfig(
-  'next-navigation',
-  navigationLayers,
-  { request: 'next/navigation' },
-);
-
-/**
- * @typedef SharedObject
- * @type {object}
- * @property {object} [key] - The key representing the shared object's package name.
- * @property {boolean} key.singleton - Whether the shared object should be a singleton.
- * @property {boolean} key.requiredVersion - Whether a specific version of the shared object is required.
- * @property {boolean} key.eager - Whether the shared object should be eagerly loaded.
- * @property {boolean} key.import - Whether the shared object should be imported or not.
- * @property {string} key.layer - The webpack layer this shared module belongs to.
- * @property {string|string[]} key.issuerLayer - The webpack layer that can import this shared module.
- */
 export const DEFAULT_SHARE_SCOPE: moduleFederationPlugin.SharedObject = {
-  // ...reactShares,
-  // ...reactDomShares,
-  // ...nextNavigationShares,
-  // ...jsxRuntimeShares,
   'next/dynamic': {
     requiredVersion: undefined,
     singleton: true,
@@ -214,87 +141,78 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: moduleFederationPlugin.SharedObject =
   }, {} as moduleFederationPlugin.SharedObject);
 
 /**
- * Checks if the remote value is an internal or promise delegate module reference.
- *
- * @param {string} value - The remote value to check.
- * @returns {boolean} - True if the value is an internal or promise delegate module reference, false otherwise.
+ * Gets the Next.js version from compiler context
+ * @param {Compiler} compiler - The webpack compiler instance
+ * @returns {string} - The Next.js version
  */
-const isInternalOrPromise = (value: string): boolean =>
-  ['internal ', 'promise '].some((prefix) => value.startsWith(prefix));
-
-/**
- * Parses the remotes object and checks if they are using a custom promise template or not.
- * If it's a custom promise template, the remote syntax is parsed to get the module name and version number.
- * If the remote value is using the standard remote syntax, a delegated module is created.
- *
- * @param {Record<string, any>} remotes - The remotes object to be parsed.
- * @returns {Record<string, string>} - The parsed remotes object with either the original value,
- * the value for internal or promise delegate module reference, or the created delegated module.
- */
-export const parseRemotes = (
-  remotes: Record<string, any>,
-): Record<string, string> => {
-  return Object.entries(remotes).reduce(
-    (acc, [key, value]) => {
-      if (isInternalOrPromise(value)) {
-        // If the value is an internal or promise delegate module reference, keep the original value
-        return { ...acc, [key]: value };
-      }
-
-      return { ...acc, [key]: value };
-    },
-    {} as Record<string, string>,
-  );
-};
-/**
- * Checks if the remote value is an internal delegate module reference.
- * An internal delegate module reference starts with the string 'internal '.
- *
- * @param {string} value - The remote value to check.
- * @returns {boolean} - Returns true if the value is an internal delegate module reference, otherwise returns false.
- */
-const isInternalDelegate = (value: string): boolean => {
-  return value.startsWith('internal ');
-};
-/**
- * Extracts the delegate modules from the provided remotes object.
- * This function iterates over the remotes object and checks if each remote value is an internal delegate module reference.
- * If it is, the function adds it to the returned object.
- *
- * @param {Record<string, any>} remotes - The remotes object containing delegate module references.
- * @returns {Record<string, string>} - An object containing only the delegate modules from the remotes object.
- */
-export const getDelegates = (
-  remotes: Record<string, any>,
-): Record<string, string> =>
-  Object.entries(remotes).reduce(
-    (acc, [key, value]) =>
-      isInternalDelegate(value) ? { ...acc, [key]: value } : acc,
-    {},
-  );
-
-/**
- * Takes an error object and formats it into a displayable string.
- * If the error object contains a stack trace, it is appended to the error message.
- *
- * @param {Error} error - The error object to be formatted.
- * @returns {string} - The formatted error message string. If a stack trace is present in the error object, it is appended to the error message.
- */
-const formatError = (error: Error): string => {
-  let { message } = error;
-  if (error.stack) {
-    message += `\n${error.stack}`;
+export const getNextVersion = (compiler: Compiler): string => {
+  if (!compiler.context) {
+    throw new Error(
+      'Compiler context is not available. Cannot resolve Next.js version.',
+    );
   }
-  return message;
+
+  try {
+    const nextPackageJsonPath = require.resolve('next/package.json', {
+      paths: [compiler.context],
+    });
+    // Use global require if available (for testing), otherwise use normal require
+    const requireFn = (global as any).require || require;
+    return requireFn(nextPackageJsonPath).version;
+  } catch (error) {
+    throw new Error('Could not resolve Next.js version from compiler context.');
+  }
 };
 
 /**
- * Transforms an array of Error objects into a single string. Each error message is formatted using the 'formatError' function.
- * The resulting error messages are then joined together, separated by newline characters.
- *
- * @param {Error[]} err - An array of Error objects that need to be formatted and combined.
- * @returns {string} - A single string containing all the formatted error messages, separated by newline characters.
+ * Checks if the Next.js version is 15 or higher
+ * @param {string} version - The Next.js version string
+ * @returns {boolean} - True if version is 15+, false otherwise
  */
-export const toDisplayErrors = (err: Error[]): string => {
-  return err.map(formatError).join('\n');
+export const isNextJs15Plus = (version: string): boolean => {
+  const majorVersion = parseInt(version.split('.')[0], 10);
+  return majorVersion >= 15;
+};
+
+/**
+ * Version-aware function to get Next.js internals share scope
+ * For Next.js 14 and lower, returns DEFAULT_SHARE_SCOPE_BROWSER for client or DEFAULT_SHARE_SCOPE for server
+ * For Next.js 15+, uses specialized client/server configurations
+ * @param {Compiler} compiler - The webpack compiler instance
+ * @returns {SharedObject} - The generated share scope based on version and compiler type
+ */
+export const getNextInternalsShareScope = (
+  compiler: Compiler,
+): SharedObject => {
+  const nextVersion = getNextVersion(compiler);
+  const isNext15Plus = isNextJs15Plus(nextVersion);
+  const isClient = compiler.options.name === 'client';
+
+  if (isNext15Plus) {
+    // For Next.js 15+, use the specialized internal configurations
+    if (isClient) {
+      const {
+        getNextInternalsShareScopeClient,
+      } = require('./share-internals-client');
+      return getNextInternalsShareScopeClient(compiler);
+    } else {
+      const {
+        getNextInternalsShareScopeServer,
+      } = require('./share-internals-server');
+      return getNextInternalsShareScopeServer(compiler);
+    }
+  } else {
+    // For Next.js 14 and lower, use the main branch compatible approach
+    return isClient ? DEFAULT_SHARE_SCOPE_BROWSER : DEFAULT_SHARE_SCOPE;
+  }
+};
+
+/**
+ * Legacy function for backwards compatibility
+ * @deprecated Use getNextInternalsShareScope instead
+ */
+export const getShareScope = (
+  compiler: Compiler,
+): moduleFederationPlugin.SharedObject => {
+  return getNextInternalsShareScope(compiler);
 };
