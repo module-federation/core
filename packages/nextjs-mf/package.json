@@ -54,10 +54,7 @@
     "@types/react-dom": "^18.3.1"
   },
   "peerDependencies": {
-    "webpack": "^5.40.0",
-    "next": "^12 || ^13 || ^14 || ^15",
-    "react": "^17 || ^18 || ^19",
-    "react-dom": "^17 || ^18 || ^19",
+    "next": "^15 || ^14 || ^13 || ^12",
     "styled-jsx": "*"
   },
   "peerDependenciesMeta": {
@@ -65,6 +62,9 @@
       "optional": true
     },
     "styled-jsx": {
+      "optional": true
+    },
+    "next": {
       "optional": true
     }
   }
