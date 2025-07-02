@@ -12,43 +12,25 @@ export default defineConfig({
   },
   output: {
     target: 'node',
-    format: ['esm', 'cjs'],
     distPath: {
       root: './dist',
-    },
-    filename: {
-      js: {
-        esm: '[name].esm.js',
-        cjs: '[name].cjs.cjs',
-      },
-      dts: {
-        esm: '[name].esm.d.ts',
-        cjs: '[name].cjs.d.ts',
-      },
     },
   },
   lib: [
     {
       format: 'esm',
       dts: true,
-      output: {
-        filename: {
-          js: '[name].esm.js',
-          dts: '[name].esm.d.ts',
-        },
-      },
     },
     {
       format: 'cjs',
       dts: true,
-      output: {
-        filename: {
-          js: '[name].cjs.cjs',
-          dts: '[name].cjs.d.ts',
-        },
-      },
     },
   ],
+  tools: {
+    bundlerChain: (config, { CHAIN_ID }) => {
+      config.output.path('./dist');
+    },
+  },
   shims: true,
   bundle: false,
   external: ['@module-federation/sdk', '@module-federation/error-codes'],
