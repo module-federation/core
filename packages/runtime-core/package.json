@@ -3,9 +3,9 @@
   "version": "0.14.0",
   "type": "module",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "main": "./dist/index.cjs.cjs",
-  "module": "./dist/index.esm.js",
-  "types": "./src/index.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -20,35 +20,38 @@
     "src/",
     "README.md"
   ],
+  "scripts": {
+    "postbuild": "npx tsc --declaration --declarationDir ./dist --emitDeclarationOnly --project tsconfig.lib.json && find dist -name 'index.d.ts' -path '*/src/index.d.ts' -exec cp {} dist/index.d.ts \\; && find dist -name 'types.d.ts' -path '*/src/types.d.ts' -exec cp {} dist/types.d.ts \\;"
+  },
   "exports": {
     ".": {
       "import": {
-        "types": "./src/index.ts",
-        "default": "./dist/index.esm.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       },
       "require": {
-        "types": "./src/index.ts",
-        "default": "./dist/index.cjs.cjs"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
       }
     },
     "./types": {
       "import": {
-        "types": "./src/types.ts",
-        "default": "./dist/types.esm.js"
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
       },
       "require": {
-        "types": "./src/types.ts",
-        "default": "./dist/types.cjs.cjs"
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.cjs"
       }
     }
   },
   "typesVersions": {
     "*": {
       ".": [
-        "./src/index.ts"
+        "./dist/index.d.ts"
       ],
       "types": [
-        "./src/types.ts"
+        "./dist/types.d.ts"
       ]
     }
   },

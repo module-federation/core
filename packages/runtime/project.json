@@ -29,6 +29,10 @@
         {
           "target": "build",
           "dependencies": true
+        },
+        {
+          "target": "post-build",
+          "projects": ["runtime-core"]
         }
       ]
     },

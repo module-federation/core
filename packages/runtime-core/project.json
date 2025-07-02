@@ -6,13 +6,15 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "../../tools/rslib-plugin:build",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/runtime-core/dist"],
       "options": {
-        "configFile": "rslib.config.ts",
-        "outputPath": "packages/runtime-core/dist",
-        "mode": "production",
-        "verbose": true
+        "commands": [
+          "cd packages/runtime-core && npx rslib build",
+          "cd packages/runtime-core && npx tsc --declaration --declarationDir ./dist --emitDeclarationOnly --project tsconfig.lib.json",
+          "cd packages/runtime-core && find dist -name 'index.d.ts' -path '*/src/index.d.ts' -exec cp {} dist/index.d.ts \\;",
+          "cd packages/runtime-core && find dist -name 'types.d.ts' -path '*/src/types.d.ts' -exec cp {} dist/types.d.ts \\;"
+        ]
       },
       "dependsOn": [
         {
@@ -20,6 +22,16 @@
           "dependencies": true
         }
       ]
+    },
+    "post-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "cd packages/runtime-core && npx tsc --declaration --declarationDir ./dist --emitDeclarationOnly --project tsconfig.lib.json",
+          "cd packages/runtime-core && find dist -name 'index.d.ts' -path '*/src/index.d.ts' -exec cp {} dist/index.d.ts \\;",
+          "cd packages/runtime-core && find dist -name 'types.d.ts' -path '*/src/types.d.ts' -exec cp {} dist/types.d.ts \\;"
+        ]
+      }
     },
     "build:rollup": {
       "executor": "@nx/rollup:rollup",
