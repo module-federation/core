@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createSSRMFConfig, patchSSRRspackConfig, SSR_DIR } from './ssr'; // Assuming SSR_DIR is exported or mockable
+import { createSSRMFConfig, patchSSRRspackConfig, SSR_DIR } from './ssr';
 import type { Rspack } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 

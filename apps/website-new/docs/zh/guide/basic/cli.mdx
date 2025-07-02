@@ -1,8 +1,6 @@
 # 命令行工具
 
-<p>
 {props.name || 'Module Federation'} 提供了轻量的命令行工具：{(props.cmdTools || ['@module-federation/enhanced', '@module-federation/modern-js']).map((cmdTool,index,arr)=>(<><code>{cmdTool}</code>{index+1===arr.length ? '':' 和 '}</>))} 。
-</p>
 
 ## 查看所有命令
 
@@ -24,10 +22,8 @@ import ViewAllCmdsMdx from '@components/common/cli/view-all-cmds';
 
 ## {props.cmd || 'mf'} dts
 
-<p>
   <code>{props.cmd || 'mf'} dts</code>
   命令用于拉取或生成 TypeScript 类型声明文件。
-</p>
 
 import CommandInfo from '@components/common/cli/cmd-info';
 
@@ -35,8 +31,8 @@ import CommandInfo from '@components/common/cli/cmd-info';
 
 :::info 注意
 
-<p><code>{props.cmd || 'mf'} dts</code> 命令会自动根据 <code>{props.configName || 'module-federation.config.ts'}</code> 中的配置生成或拉取类型声明文件。 这意味着你必须提供一个有效的配置文件，否则命令将无法正常运行。</p>
+<code>{props.cmd || 'mf'} dts</code> 命令会自动根据 <code>{props.configName || 'module-federation.config.ts'}</code> 中的配置生成或拉取类型声明文件。 这意味着你必须提供一个有效的配置文件，否则命令将无法正常运行。
 
-<p>如果你是只使用了 runtime API，那么你需要创建一份临时的 <code>{props.configName || 'module-federation.config.ts'}</code> 文件，配置 [dts.consumeTypes.remoteTypeUrls](../../configure/dts#remotetypeurls)，然后运行 <code>{props.cmd || 'mf'} dts</code>  命令。</p>
+如果你是只使用了 runtime API，那么你需要创建一份临时的 <code>{props.configName || 'module-federation.config.ts'}</code> 文件，配置 [dts.consumeTypes.remoteTypeUrls](../../configure/dts#remotetypeurls)，然后运行 <code>{props.cmd || 'mf'} dts</code>  命令。
 
 :::

@@ -108,9 +108,19 @@ export function pluginModuleFederation(
     mfConfig.shared = {
       react: {
         singleton: true,
+        requiredVersion: false,
       },
       'react-dom': {
         singleton: true,
+        requiredVersion: false,
+      },
+      'react/': {
+        singleton: true,
+        requiredVersion: false,
+      },
+      'react-dom/': {
+        singleton: true,
+        requiredVersion: false,
       },
       '@mdx-js/react': { singleton: true, requiredVersion: false },
       '@rspress/runtime': {

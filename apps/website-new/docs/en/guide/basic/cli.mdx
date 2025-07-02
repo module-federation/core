@@ -1,8 +1,6 @@
 # Command Line Tool
 
-<p>
 {props.name || 'Module Federation'} provides lightweight command-line tools: {(props.cmdTools || ['@module-federation/enhanced', '@module-federation/modern-js']).map((cmdTool,index,arr)=>(<><code>{cmdTool}</code>{index+1===arr.length ? '':' and '}</>))} .
-</p>
 
 ## View All Commands
 
@@ -24,9 +22,7 @@ import ViewAllCmdsMdx from '@components/common/cli/view-all-cmds-en';
 
 ## {props.cmd || 'mf'} dts
 
-<p>
   The <code>{props.cmd || 'mf'} dts</code> command is used to pull or generate TypeScript type declaration files.
-</p>
 
 import CommandInfo from '@components/common/cli/cmd-info';
 
@@ -34,7 +30,7 @@ import CommandInfo from '@components/common/cli/cmd-info';
 
 :::info 注意
 
-<p>The <code>{props.cmd || 'mf'} dts</code> command will automatically generate or pull type declaration files based on the configuration in <code>{props.configName || 'module-federation.config.ts'}</code>. This means you must provide a valid configuration file, otherwise the command will not run correctly.</p>
+The <code>{props.cmd || 'mf'} dts</code> command will automatically generate or pull type declaration files based on the configuration in <code>{props.configName || 'module-federation.config.ts'}</code>. This means you must provide a valid configuration file, otherwise the command will not run correctly.
 
 If you are only using the runtime API, you need to create a temporary <code>{props.configName || 'module-federation.config.ts'}</code> file, configure [dts.consumeTypes.remoteTypeUrls](../../configure/dts#remotetypeurls), and then run the `mf dts` command.
 
