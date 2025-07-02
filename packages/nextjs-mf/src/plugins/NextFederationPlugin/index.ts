@@ -13,7 +13,11 @@ import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
-import { retrieveDefaultShared, applyPathFixes } from './next-fragments';
+import {
+  getNextInternalsShareScope,
+  getNextVersion,
+  isNextJs15Plus,
+} from '../../internal';
 import { setOptions } from './set-options';
 import {
   validateCompilerOptions,
@@ -28,8 +32,10 @@ import {
 import { applyClientPlugins } from './apply-client-plugins';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
+import { applyPathFixes } from './next-fragments';
 
 import path from 'path';
+import { WEBPACK_LAYERS_NAMES } from '../../constants';
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
@@ -37,6 +43,9 @@ export class NextFederationPlugin {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
   public name: string;
+  // Store the original public path for use by other plugins
+  public static originalPublicPath = '';
+
   /**
    * Constructs the NextFederationPlugin with the provided options.
    *
@@ -54,44 +63,130 @@ export class NextFederationPlugin {
    * @param compiler The webpack compiler object.
    */
   apply(compiler: Compiler) {
+    // Check Next.js version and conditionally apply flight loader override
+    const nextVersion = getNextVersion(compiler);
+    const isNext15Plus = isNextJs15Plus(nextVersion);
+
+    if (isNext15Plus) {
+      // Override next-flight-loader with local loader for Next.js 15+
+      compiler.options.resolveLoader = compiler.options.resolveLoader || {};
+      compiler.options.resolveLoader.alias =
+        compiler.options.resolveLoader.alias || {};
+      // @ts-ignore
+      compiler.options.resolveLoader.alias['next-flight-loader'] =
+        require.resolve('../../patches/next-flight-loader');
+    }
+
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] ||
       getWebpackPath(compiler, { framework: 'nextjs' });
     if (!this.validateOptions(compiler)) return;
+
     const isServer = this.isServerCompiler(compiler);
+
+    // Capture the original public path before any modifications
+    const publicPath = compiler.options.output.publicPath;
+    NextFederationPlugin.originalPublicPath =
+      typeof publicPath === 'string' ? publicPath : '';
+
     new CopyFederationPlugin(isServer).apply(compiler);
     const normalFederationPluginOptions = this.getNormalFederationPluginOptions(
       compiler,
       isServer,
     );
+
     this._options = normalFederationPluginOptions;
     this.applyConditionalPlugins(compiler, isServer);
 
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
 
-    const noop = this.getNoopPath();
+    const noopAppDirClient = this.getNoopAppDirClientPath();
+    const noopAppDirServer = this.getNoopAppDirServerPath();
 
     if (!this._extraOptions.skipSharingNextInternals) {
-      compiler.hooks.make.tapAsync(
-        'NextFederationPlugin',
-        (compilation, callback) => {
-          const dep = compiler.webpack.EntryPlugin.createDependency(
-            noop,
-            'noop',
-          );
-          compilation.addEntry(
-            compiler.context,
-            dep,
-            { name: 'noop' },
-            (err, module) => {
-              if (err) {
-                return callback(err);
-              }
-              callback();
-            },
-          );
-        },
-      );
+      // Adds 'noop' entry (unlayered)
+      // compiler.hooks.make.tapAsync(
+      //   'NextFederationPlugin',
+      //   (compilation, callback) => {
+      //     const dep = compiler.webpack.EntryPlugin.createDependency(
+      //       noop,
+      //       'noop',
+      //     );
+      //     compilation.addEntry(
+      //       compiler.context,
+      //       dep,
+      //       { name: 'noop' },
+      //       (err) => {
+      //         if (err) {
+      //           return callback(err);
+      //         }
+      //         callback();
+      //       },
+      //     );
+      //   },
+      // );
+      // Add entry for app directory client components
+      // compiler.hooks.make.tapAsync(
+      //   'NextFederationPlugin',
+      //   (compilation, callback) => {
+      //     if (compiler.name === 'client') {
+      //       const dep = compiler.webpack.EntryPlugin.createDependency(
+      //         noopAppDirClient,
+      //         {
+      //           name: 'noop-appdir-client',
+      //           layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      //         },
+      //       );
+      //       compilation.addEntry(
+      //         compiler.context,
+      //         dep,
+      //         {
+      //           name: 'noop-appdir-client',
+      //           layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      //         },
+      //         (err) => {
+      //           if (err) {
+      //             return callback(err);
+      //           }
+      //           callback();
+      //         },
+      //       );
+      //     } else {
+      //       callback();
+      //     }
+      //   },
+      // );
+      // Add entry for app directory server components
+      // compiler.hooks.make.tapAsync(
+      //   'NextFederationPlugin',
+      //   (compilation, callback) => {
+      //     if (compiler.name === 'server') {
+      //       const dep = compiler.webpack.EntryPlugin.createDependency(
+      //         noopAppDirServer,
+      //         {
+      //           name: 'noop-appdir-server',
+      //           layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      //         },
+      //       );
+      //       compilation.addEntry(
+      //         compiler.context,
+      //         dep,
+      //         {
+      //           name: 'noop-appdir-server',
+      //           layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      //         },
+      //         (err) => {
+      //           if (err) {
+      //             return callback(err);
+      //           }
+      //           callback();
+      //         },
+      //       );
+      //     } else {
+      //       callback();
+      //     }
+      //   },
+      // );
     }
 
     if (!compiler.options.ignoreWarnings) {
@@ -99,6 +194,33 @@ export class NextFederationPlugin {
         //@ts-ignore
         (message) => /your target environment does not appear/.test(message),
       ];
+    }
+
+    // Add a module rule for /rsc/ directory to use nextRscMapLoader
+    compiler.options.module = compiler.options.module || {};
+    compiler.options.module.rules = compiler.options.module.rules || [];
+    if (compiler.options.name === 'client') {
+      // Find or create a top-level oneOf rule
+      let oneOfRule = compiler.options.module.rules.find(
+        (rule) =>
+          rule &&
+          typeof rule === 'object' &&
+          'oneOf' in rule &&
+          Array.isArray((rule as any).oneOf),
+      ) as { oneOf: any[] } | undefined;
+      if (!oneOfRule) {
+        oneOfRule = { oneOf: [] };
+        compiler.options.module.rules.unshift(oneOfRule);
+      }
+      oneOfRule.oneOf.unshift({
+        test: /[\\/]rsc[\\/].*\.(js|jsx|ts|tsx)$/,
+        layer: WEBPACK_LAYERS_NAMES.appPagesBrowser,
+      });
+    } else if (compiler.options.name === 'server') {
+      compiler.options.module.rules.unshift({
+        test: /[\\/]rsc[\\/].*\.(js|jsx|ts|tsx)$/,
+        layer: WEBPACK_LAYERS_NAMES.reactServerComponents,
+      });
     }
   }
 
@@ -108,14 +230,14 @@ export class NextFederationPlugin {
         p?.constructor?.name === 'BuildManifestPlugin',
     );
 
-    if (manifestPlugin) {
-      //@ts-ignore
-      if (manifestPlugin?.appDirEnabled) {
-        throw new Error(
-          'App Directory is not supported by nextjs-mf. Use only pages directory, do not open git issues about this',
-        );
-      }
-    }
+    // if (manifestPlugin) {
+    //   //@ts-ignore
+    //   if (manifestPlugin?.appDirEnabled) {
+    //     throw new Error(
+    //       'App Directory is not supported by nextjs-mf. Use only pages directory, do not open git issues about this',
+    //     );
+    //   }
+    // }
 
     const compilerValid = validateCompilerOptions(compiler);
     const pluginValid = validatePluginOptions(this._options);
@@ -158,7 +280,10 @@ export class NextFederationPlugin {
       applyServerPlugins(compiler, this._options);
       handleServerExternals(compiler, {
         ...this._options,
-        shared: { ...retrieveDefaultShared(isServer), ...this._options.shared },
+        shared: {
+          ...getNextInternalsShareScope(compiler),
+          ...this._options.shared,
+        },
       });
     } else {
       applyClientPlugins(compiler, this._options, this._extraOptions);
@@ -171,7 +296,7 @@ export class NextFederationPlugin {
   ): moduleFederationPlugin.ModuleFederationPluginOptions {
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
-      : retrieveDefaultShared(isServer);
+      : getNextInternalsShareScope(compiler);
 
     return {
       ...this._options,
@@ -194,6 +319,10 @@ export class NextFederationPlugin {
       remotes: {
         ...this._options.remotes,
       },
+      shareScope: Object.values({
+        ...WEBPACK_LAYERS_NAMES,
+        default: 'default',
+      }),
       shared: {
         ...defaultShared,
         ...this._options.shared,
@@ -210,8 +339,16 @@ export class NextFederationPlugin {
     };
   }
 
-  private getNoopPath(): string {
-    return require.resolve('../../federation-noop.cjs');
+  // private getNoopPath(): string {
+  //   return require.resolve('../../federation-noop.cjs');
+  // }
+
+  private getNoopAppDirClientPath(): string {
+    return require.resolve('../../federation-noop-appdir-client.cjs');
+  }
+
+  private getNoopAppDirServerPath(): string {
+    return require.resolve('../../federation-noop-appdir-server.cjs');
   }
 }
 
