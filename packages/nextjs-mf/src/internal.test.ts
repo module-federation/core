@@ -1,4 +1,5 @@
-import { getNextInternalsShareScope, WEBPACK_LAYERS_NAMES } from './internal';
+import * as internalModule from './internal';
+import { WEBPACK_LAYERS_NAMES } from './constants';
 import type { Compiler, WebpackOptionsNormalized } from 'webpack';
 import type { SharedConfig } from '@module-federation/enhanced/src/declarations/plugins/sharing/SharePlugin';
 
@@ -7,27 +8,98 @@ jest.mock('./internal-helpers', () => ({
   getReactVersionSafely: jest.fn(() => '18.2.0'),
 }));
 
-// Mock the client and server share scope modules
+// Mock Next.js version detection
+const mockNextVersion = jest.fn(() => '14.2.16');
+const getNextVersionSpy = jest
+  .spyOn(internalModule, 'getNextVersion')
+  .mockImplementation(() => mockNextVersion());
+
+const {
+  getNextInternalsShareScope,
+  DEFAULT_SHARE_SCOPE,
+  DEFAULT_SHARE_SCOPE_BROWSER,
+} = internalModule;
+
+// Mock the client and server share scope modules with realistic data
 jest.mock('./share-internals-client', () => ({
   getNextInternalsShareScopeClient: jest.fn(() => ({
-    'react-client-config': {
+    react: {
       request: 'react',
       singleton: true,
       shareKey: 'react',
+      packageName: 'react',
+      import: 'next/dist/compiled/react',
+      layer: 'pages-dir-browser',
+      issuerLayer: 'pages-dir-browser',
       shareScope: 'default',
       version: '18.2.0',
+      requiredVersion: '^18.2.0',
+    },
+    'react-dom': {
+      request: 'react-dom',
+      singleton: true,
+      shareKey: 'react-dom',
+      packageName: 'react-dom',
+      import: 'next/dist/compiled/react-dom',
+      layer: 'pages-dir-browser',
+      issuerLayer: 'pages-dir-browser',
+      shareScope: 'default',
+      version: '18.2.0',
+      requiredVersion: '^18.2.0',
+    },
+    'next/router': {
+      request: 'next/router',
+      shareKey: 'next/router',
+      import: 'next/dist/client/router',
+      layer: 'pages-dir-browser',
+      issuerLayer: 'pages-dir-browser',
+      shareScope: 'default',
+      singleton: true,
+      requiredVersion: '^15.0.0',
+      version: '15.0.0',
     },
   })),
 }));
 
 jest.mock('./share-internals-server', () => ({
   getNextInternalsShareScopeServer: jest.fn(() => ({
-    'react-server-config': {
+    react: {
       request: 'react',
       singleton: true,
       shareKey: 'react',
+      packageName: 'react',
+      import: 'next/dist/compiled/react',
+      layer: 'pages-dir-node',
+      issuerLayer: undefined,
       shareScope: 'default',
       version: '18.2.0',
+      requiredVersion: '^18.2.0',
+      nodeModulesReconstructedLookup: false,
+    },
+    'react-dom': {
+      request: 'react-dom',
+      singleton: true,
+      shareKey: 'react-dom',
+      packageName: 'react-dom',
+      import: 'next/dist/compiled/react-dom',
+      layer: 'pages-dir-node',
+      issuerLayer: undefined,
+      shareScope: 'default',
+      version: '18.2.0',
+      requiredVersion: '^18.2.0',
+      nodeModulesReconstructedLookup: false,
+    },
+    'next/router': {
+      request: 'next/router',
+      shareKey: 'next/router',
+      import: 'next/dist/client/router',
+      layer: 'pages-dir-node',
+      issuerLayer: undefined,
+      shareScope: 'default',
+      singleton: true,
+      requiredVersion: '^15.0.0',
+      version: '15.0.0',
+      nodeModulesReconstructedLookup: true,
     },
   })),
 }));
@@ -36,8 +108,21 @@ describe('getNextInternalsShareScope', () => {
   let mockCompiler: Partial<Compiler>;
 
   beforeEach(() => {
-    // Reset mocks
+    // Reset all mocks
     jest.clearAllMocks();
+
+    // Reset Next.js version to default
+    mockNextVersion.mockReturnValue('14.2.16');
+
+    // Reset the client and server module mocks explicitly
+    const {
+      getNextInternalsShareScopeClient,
+    } = require('./share-internals-client');
+    const {
+      getNextInternalsShareScopeServer,
+    } = require('./share-internals-server');
+    getNextInternalsShareScopeClient.mockClear();
+    getNextInternalsShareScopeServer.mockClear();
 
     // Setup common compiler mock
     mockCompiler = {
@@ -52,29 +137,33 @@ describe('getNextInternalsShareScope', () => {
     jest.restoreAllMocks();
   });
 
-  describe('Client/Server configuration delegation', () => {
-    it('should delegate to client configuration module', () => {
+  describe('Next.js 14 and lower (legacy behavior)', () => {
+    beforeEach(() => {
+      mockNextVersion.mockReturnValue('14.2.16');
+    });
+
+    it('should return DEFAULT_SHARE_SCOPE_BROWSER for client compiler', () => {
       mockCompiler.options!.name = 'client';
 
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
 
-      // Should use mocked client configuration
-      expect(result).toHaveProperty('react-client-config');
-      expect((result['react-client-config'] as SharedConfig).shareKey).toBe(
-        'react',
-      );
+      expect(result).toEqual(DEFAULT_SHARE_SCOPE_BROWSER);
+      expect(result).toHaveProperty('react');
+      expect(result).toHaveProperty('react-dom');
+      expect(result).toHaveProperty('next/router');
+      expect((result['react'] as SharedConfig).singleton).toBe(true);
     });
 
-    it('should delegate to server configuration module', () => {
+    it('should return DEFAULT_SHARE_SCOPE for server compiler', () => {
       mockCompiler.options!.name = 'server';
 
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
 
-      // Should use mocked server configuration
-      expect(result).toHaveProperty('react-server-config');
-      expect((result['react-server-config'] as SharedConfig).shareKey).toBe(
-        'react',
-      );
+      expect(result).toEqual(DEFAULT_SHARE_SCOPE);
+      expect(result).toHaveProperty('react');
+      expect(result).toHaveProperty('react-dom');
+      expect(result).toHaveProperty('next/router');
+      expect((result['react'] as SharedConfig).singleton).toBe(true);
     });
 
     it('should default to server when compiler name is undefined', () => {
@@ -82,28 +171,48 @@ describe('getNextInternalsShareScope', () => {
 
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
 
-      // Should use server configuration as default
-      expect(result).toHaveProperty('react-server-config');
+      expect(result).toEqual(DEFAULT_SHARE_SCOPE);
     });
-  });
 
-  describe('Module delegation verification', () => {
-    it('should call client configuration module correctly', () => {
+    it('should not call client/server modules for Next.js 14', () => {
       const {
         getNextInternalsShareScopeClient,
       } = require('./share-internals-client');
+      const {
+        getNextInternalsShareScopeServer,
+      } = require('./share-internals-server');
+
+      getNextInternalsShareScope(mockCompiler as Compiler);
+
+      expect(getNextInternalsShareScopeClient).not.toHaveBeenCalled();
+      expect(getNextInternalsShareScopeServer).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Next.js 15+ (new behavior)', () => {
+    beforeEach(() => {
+      mockNextVersion.mockReturnValue('15.0.0');
+    });
+
+    it('should delegate to client configuration module for Next.js 15+', () => {
       mockCompiler.options!.name = 'client';
+      const {
+        getNextInternalsShareScopeClient,
+      } = require('./share-internals-client');
 
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
 
-      // Should have called the client module
       expect(getNextInternalsShareScopeClient).toHaveBeenCalledWith(
         mockCompiler,
       );
-      expect(result).toHaveProperty('react-client-config');
+      expect(result).toHaveProperty('react');
+      expect(result).toHaveProperty('react-dom');
+      expect(result).toHaveProperty('next/router');
+      expect((result['react'] as SharedConfig).shareKey).toBe('react');
+      expect((result['react'] as SharedConfig).shareScope).toBe('default');
     });
 
-    it('should call server configuration module correctly', () => {
+    it('should delegate to server configuration module for Next.js 15+', () => {
       mockCompiler.options!.name = 'server';
       const {
         getNextInternalsShareScopeServer,
@@ -111,11 +220,60 @@ describe('getNextInternalsShareScope', () => {
 
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
 
-      // Should have called the server module
       expect(getNextInternalsShareScopeServer).toHaveBeenCalledWith(
         mockCompiler,
       );
-      expect(result).toHaveProperty('react-server-config');
+      expect(result).toHaveProperty('react');
+      expect(result).toHaveProperty('react-dom');
+      expect(result).toHaveProperty('next/router');
+      expect((result['react'] as SharedConfig).shareKey).toBe('react');
+      expect((result['react'] as SharedConfig).shareScope).toBe('default');
+    });
+
+    it('should default to server module when compiler name is undefined for Next.js 15+', () => {
+      delete mockCompiler.options!.name;
+      const {
+        getNextInternalsShareScopeServer,
+      } = require('./share-internals-server');
+
+      const result = getNextInternalsShareScope(mockCompiler as Compiler);
+
+      expect(getNextInternalsShareScopeServer).toHaveBeenCalledWith(
+        mockCompiler,
+      );
+    });
+  });
+
+  describe('Version detection', () => {
+    it('should correctly detect Next.js 13 as legacy', () => {
+      mockNextVersion.mockReturnValue('13.5.4');
+      mockCompiler.options!.name = 'client';
+
+      const result = getNextInternalsShareScope(mockCompiler as Compiler);
+
+      expect(result).toEqual(DEFAULT_SHARE_SCOPE_BROWSER);
+    });
+
+    it('should correctly detect Next.js 15 as new', () => {
+      mockNextVersion.mockReturnValue('15.1.0');
+      const {
+        getNextInternalsShareScopeClient,
+      } = require('./share-internals-client');
+
+      getNextInternalsShareScope(mockCompiler as Compiler);
+
+      expect(getNextInternalsShareScopeClient).toHaveBeenCalled();
+    });
+
+    it('should correctly detect Next.js 16 as new', () => {
+      mockNextVersion.mockReturnValue('16.0.0');
+      const {
+        getNextInternalsShareScopeClient,
+      } = require('./share-internals-client');
+
+      getNextInternalsShareScope(mockCompiler as Compiler);
+
+      expect(getNextInternalsShareScopeClient).toHaveBeenCalled();
     });
   });
 
@@ -129,10 +287,26 @@ describe('getNextInternalsShareScope', () => {
         'Compiler context is not available. Cannot resolve Next.js version.',
       );
     });
+
+    it('should handle Next.js resolution errors gracefully', () => {
+      getNextVersionSpy.mockImplementationOnce(() => {
+        throw new Error(
+          'Could not resolve Next.js version from compiler context.',
+        );
+      });
+
+      expect(() => {
+        getNextInternalsShareScope(mockCompiler as Compiler);
+      }).toThrow('Could not resolve Next.js version from compiler context.');
+
+      // Reset to normal behavior
+      getNextVersionSpy.mockImplementation(() => mockNextVersion());
+    });
   });
 
   describe('Configuration structure validation', () => {
-    it('should return a valid SharedObject', () => {
+    it('should return a valid SharedObject for Next.js 14', () => {
+      mockNextVersion.mockReturnValue('14.2.16');
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
 
       expect(typeof result).toBe('object');
@@ -140,66 +314,44 @@ describe('getNextInternalsShareScope', () => {
       expect(Object.keys(result).length).toBeGreaterThan(0);
     });
 
-    it('should ensure all configurations have required properties', () => {
+    it('should return a valid SharedObject for Next.js 15', () => {
+      mockNextVersion.mockReturnValue('15.0.0');
+      const result = getNextInternalsShareScope(mockCompiler as Compiler);
+
+      expect(typeof result).toBe('object');
+      expect(result).not.toBeNull();
+      expect(Object.keys(result).length).toBeGreaterThan(0);
+    });
+
+    it('should ensure all configurations have required properties for Next.js 14', () => {
+      mockNextVersion.mockReturnValue('14.2.16');
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
 
       Object.values(result).forEach((config) => {
-        if (typeof config === 'object') {
+        if (typeof config === 'object' && config !== null) {
           const sharedConfig = config as SharedConfig;
           expect(sharedConfig).toHaveProperty('singleton');
-          expect(sharedConfig).toHaveProperty('shareKey');
-          expect(sharedConfig).toHaveProperty('shareScope');
           expect(sharedConfig.singleton).toBe(true);
         }
       });
     });
-  });
 
-  describe('Integration with existing share configurations', () => {
-    it('should delegate to client module for client builds', () => {
-      mockCompiler.options!.name = 'client';
-
-      const {
-        getNextInternalsShareScopeClient,
-      } = require('./share-internals-client');
+    it('should ensure all configurations have required properties for Next.js 15', () => {
+      mockNextVersion.mockReturnValue('15.0.0');
       const result = getNextInternalsShareScope(mockCompiler as Compiler);
 
-      // Should have called the existing client configuration
-      expect(getNextInternalsShareScopeClient).toHaveBeenCalledWith(
-        mockCompiler,
-      );
-      expect(result).toEqual({
-        'react-client-config': {
-          request: 'react',
-          singleton: true,
-          shareKey: 'react',
-          shareScope: 'default',
-          version: '18.2.0',
-        },
-      });
-    });
+      // For Next.js 15+, the mocked client module returns specific configurations
+      // Check that the expected properties exist on the mocked return values
+      expect(result).toHaveProperty('react');
+      expect(result).toHaveProperty('react-dom');
+      expect(result).toHaveProperty('next/router');
 
-    it('should delegate to server module for server builds', () => {
-      mockCompiler.options!.name = 'server';
-
-      const {
-        getNextInternalsShareScopeServer,
-      } = require('./share-internals-server');
-      const result = getNextInternalsShareScope(mockCompiler as Compiler);
-
-      // Should have called the existing server configuration
-      expect(getNextInternalsShareScopeServer).toHaveBeenCalledWith(
-        mockCompiler,
-      );
-      expect(result).toEqual({
-        'react-server-config': {
-          request: 'react',
-          singleton: true,
-          shareKey: 'react',
-          shareScope: 'default',
-          version: '18.2.0',
-        },
-      });
+      const reactConfig = result['react'] as SharedConfig;
+      expect(reactConfig).toHaveProperty('singleton');
+      expect(reactConfig).toHaveProperty('shareKey');
+      expect(reactConfig).toHaveProperty('shareScope');
+      expect(reactConfig.singleton).toBe(true);
+      expect(reactConfig.shareScope).toBe('default');
     });
   });
 
@@ -214,6 +366,24 @@ describe('getNextInternalsShareScope', () => {
       expect(typeof WEBPACK_LAYERS_NAMES).toBe('object');
       expect(WEBPACK_LAYERS_NAMES.appPagesBrowser).toBe('app-pages-browser');
       expect(WEBPACK_LAYERS_NAMES.reactServerComponents).toBe('rsc');
+      expect(WEBPACK_LAYERS_NAMES.pagesDirBrowser).toBe('pages-dir-browser');
+      expect(WEBPACK_LAYERS_NAMES.pagesDirNode).toBe('pages-dir-node');
+    });
+
+    it('should export DEFAULT_SHARE_SCOPE constant', () => {
+      expect(DEFAULT_SHARE_SCOPE).toBeDefined();
+      expect(typeof DEFAULT_SHARE_SCOPE).toBe('object');
+      expect(DEFAULT_SHARE_SCOPE).toHaveProperty('react');
+      expect(DEFAULT_SHARE_SCOPE).toHaveProperty('react-dom');
+      expect(DEFAULT_SHARE_SCOPE).toHaveProperty('next/router');
+    });
+
+    it('should export DEFAULT_SHARE_SCOPE_BROWSER constant', () => {
+      expect(DEFAULT_SHARE_SCOPE_BROWSER).toBeDefined();
+      expect(typeof DEFAULT_SHARE_SCOPE_BROWSER).toBe('object');
+      expect(DEFAULT_SHARE_SCOPE_BROWSER).toHaveProperty('react');
+      expect(DEFAULT_SHARE_SCOPE_BROWSER).toHaveProperty('react-dom');
+      expect(DEFAULT_SHARE_SCOPE_BROWSER).toHaveProperty('next/router');
     });
   });
 });
