@@ -57,7 +57,7 @@
     "commitgen:main": "./commit-gen.js --path ./packages",
     "changeset:status": "changeset status",
     "generate:schema": "nx run enhanced:generate:schema && nx format:write",
-    "e2e:next:dev": "pnpm nx run-many --targets=build --projects=tag:type:pkg && NX_TUI=false npx nx run-many --target=sync-mf && NX_TUI=false pnpm nx run-many --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout & sleep 3 && pnpm wait-on tcp:3000 tcp:3001 tcp:3002 && NX_TUI=false pnpm nx e2e 3000-home; pnpm kill-port 3000,3001,3002"
+    "e2e:next:dev": "NX_TUI=false pnpm nx run-many --targets=build --projects=tag:type:pkg && NX_TUI=false npx nx run-many --target=sync-mf && NX_TUI=false pnpm nx run-many --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout & sleep 3 && pnpm wait-on tcp:3000 tcp:3001 tcp:3002 && NX_TUI=false pnpm nx e2e 3000-home; pnpm kill-port 3000,3001,3002"
   },
   "pnpm": {
     "packageExtensions": {
@@ -85,8 +85,8 @@
     "lodash.get": "4.4.2",
     "openai": "^4.72.0",
     "rambda": "7.5.0",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-router-dom": "6.26.2",
     "regenerator-runtime": "0.14.1",
     "sharp": "^0.33.4",
@@ -160,8 +160,8 @@
     "@types/node": "18.16.9",
     "@types/node-fetch": "2.6.11",
     "@types/pidusage": "2.0.5",
-    "@types/react": "18.3.11",
-    "@types/react-dom": "18.3.0",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
     "@types/webpack-sources": "3.2.3",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
