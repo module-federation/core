@@ -1,5 +1,5 @@
 /* eslint-disable */
-module.exports = {
+const jestConfig = {
   displayName: 'nextjs-mf',
   preset: '../../jest.preset.js',
   globals: {},
@@ -17,7 +17,13 @@ module.exports = {
 
   // CI stability improvements
   testTimeout: 30000, // 30 seconds timeout for CI environments
-  maxWorkers: process.env.CI ? 2 : undefined, // Limit workers in CI to reduce memory pressure
   forceExit: true, // Force exit to prevent hanging in CI
   detectOpenHandles: false, // Disable to prevent noise in CI logs
 };
+
+// Only set maxWorkers if in CI environment
+if (process.env['CI']) {
+  jestConfig.maxWorkers = 2; // Limit workers in CI to reduce memory pressure
+}
+
+module.exports = jestConfig;
