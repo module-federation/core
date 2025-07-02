@@ -87,7 +87,7 @@ export function HomeFooter() {
           </div>
         ))}
       </div>
-      <div className="flex flex-center">
+      <div className="flex justify-center items-center">
         <h2 className="font-normal text-sm text-gray-600 dark:text-light-600 py-4">
           © {new Date().getFullYear()} Module Federation core team. All Rights
           Reserved.

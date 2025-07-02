@@ -281,3 +281,5 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     return this._statsPlugin?.resourceInfo;
   }
 }
+
+export const GetPublicPathPlugin = RemoteEntryPlugin;

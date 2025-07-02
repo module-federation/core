@@ -1,5 +1,19 @@
 # @module-federation/sdk
 
+## 0.16.0
+
+### Minor Changes
+
+- 1485fcf: added flag to fetch types from remote when building in production.
+
+## 0.15.0
+
+## 0.14.3
+
+## 0.14.2
+
+## 0.14.1
+
 ## 0.14.0
 
 ### Minor Changes

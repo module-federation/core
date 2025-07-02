@@ -287,7 +287,9 @@ export class RemoteHandler {
         const { remote } = ops;
         const remoteInfo = getRemoteInfo(remote);
         const { globalSnapshot, remoteSnapshot } =
-          await host.snapshotHandler.loadRemoteSnapshotInfo(remote);
+          await host.snapshotHandler.loadRemoteSnapshotInfo({
+            moduleInfo: remote,
+          });
 
         const assets = await this.hooks.lifecycle.generatePreloadAssets.emit({
           origin: host,

@@ -1,5 +1,74 @@
 # @module-federation/modern-js
 
+## 0.16.0
+
+### Patch Changes
+
+- 98136ca: fix(modern-js-plugin): use contenthash instead of chunkhash
+- de350f3: fix(modern-js-plugin): adjust fetch type
+- Updated dependencies [1485fcf]
+- Updated dependencies [98136ca]
+- Updated dependencies [98136ca]
+  - @module-federation/sdk@0.16.0
+  - @module-federation/node@2.7.8
+  - @module-federation/rsbuild-plugin@0.16.0
+  - @module-federation/cli@0.16.0
+  - @module-federation/enhanced@0.16.0
+  - @module-federation/runtime@0.16.0
+
+## 0.15.0
+
+### Minor Changes
+
+- f432619: feat(modern-js-plugin): support component-level data fetch
+
+### Patch Changes
+
+- c343589: fix(modern-js-plugin): only inject ipv4 str in dev mode
+- 2faa3a3: chore(modernjs-js-plugin): keep the version of swc/helpers consistent with rsbuild
+- Updated dependencies [ad446af]
+- Updated dependencies [f777710]
+  - @module-federation/enhanced@0.15.0
+  - @module-federation/rsbuild-plugin@0.15.0
+  - @module-federation/cli@0.15.0
+  - @module-federation/node@2.7.7
+  - @module-federation/runtime@0.15.0
+  - @module-federation/sdk@0.15.0
+
+## 0.14.3
+
+### Patch Changes
+
+- fix: empty dist
+  - @module-federation/enhanced@0.14.3
+  - @module-federation/sdk@0.14.3
+  - @module-federation/rsbuild-plugin@0.14.3
+  - @module-federation/cli@0.14.3
+  - @module-federation/node@2.7.6
+
+## 0.14.2
+
+### Patch Changes
+
+- e6ac307: fix(modern-js-plugin): downgrade lru-cache
+  - @module-federation/enhanced@0.14.2
+  - @module-federation/sdk@0.14.2
+  - @module-federation/rsbuild-plugin@0.14.2
+  - @module-federation/cli@0.14.2
+  - @module-federation/node@2.7.5
+
+## 0.14.1
+
+### Patch Changes
+
+- 0c68c2f: feat(modern-js-plugin): add server plugin to handle remote's SSR assets
+- Updated dependencies [0c68c2f]
+  - @module-federation/cli@0.14.1
+  - @module-federation/enhanced@0.14.1
+  - @module-federation/node@2.7.4
+  - @module-federation/rsbuild-plugin@0.14.1
+  - @module-federation/sdk@0.14.1
+
 ## 0.14.0
 
 ### Patch Changes
