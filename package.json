@@ -56,7 +56,8 @@
     "commitgen:staged": "./commit-gen.js --path ./packages --staged",
     "commitgen:main": "./commit-gen.js --path ./packages",
     "changeset:status": "changeset status",
-    "generate:schema": "nx run enhanced:generate:schema && nx format:write"
+    "generate:schema": "nx run enhanced:generate:schema && nx format:write",
+    "e2e:next:dev": "pnpm nx run-many --targets=build --projects=tag:type:pkg && NX_TUI=false npx nx run-many --target=sync-mf && NX_TUI=false pnpm nx run-many --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout & sleep 3 && pnpm wait-on tcp:3000 tcp:3001 tcp:3002 && NX_TUI=false pnpm nx e2e 3000-home; pnpm kill-port 3000,3001,3002"
   },
   "pnpm": {
     "packageExtensions": {

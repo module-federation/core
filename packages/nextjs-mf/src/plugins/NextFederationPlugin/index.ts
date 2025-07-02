@@ -13,8 +13,11 @@ import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
-import { getNextInternalsShareScopeClient } from '../../share-internals-client';
-import { getNextInternalsShareScopeServer } from '../../share-internals-server';
+import {
+  getNextInternalsShareScope,
+  getNextVersion,
+  isNextJs15Plus,
+} from '../../internal';
 import { setOptions } from './set-options';
 import {
   validateCompilerOptions,
@@ -60,17 +63,25 @@ export class NextFederationPlugin {
    * @param compiler The webpack compiler object.
    */
   apply(compiler: Compiler) {
-    // Override next-flight-loader with local loader
-    compiler.options.resolveLoader = compiler.options.resolveLoader || {};
-    compiler.options.resolveLoader.alias =
-      compiler.options.resolveLoader.alias || {};
-    // @ts-ignore
-    compiler.options.resolveLoader.alias['next-flight-loader'] =
-      require.resolve('../../loaders/next-flight-loader');
+    // Check Next.js version and conditionally apply flight loader override
+    const nextVersion = getNextVersion(compiler);
+    const isNext15Plus = isNextJs15Plus(nextVersion);
+
+    if (isNext15Plus) {
+      // Override next-flight-loader with local loader for Next.js 15+
+      compiler.options.resolveLoader = compiler.options.resolveLoader || {};
+      compiler.options.resolveLoader.alias =
+        compiler.options.resolveLoader.alias || {};
+      // @ts-ignore
+      compiler.options.resolveLoader.alias['next-flight-loader'] =
+        require.resolve('../../patches/next-flight-loader');
+    }
+
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] ||
       getWebpackPath(compiler, { framework: 'nextjs' });
     if (!this.validateOptions(compiler)) return;
+
     const isServer = this.isServerCompiler(compiler);
 
     // Capture the original public path before any modifications
@@ -270,7 +281,7 @@ export class NextFederationPlugin {
       handleServerExternals(compiler, {
         ...this._options,
         shared: {
-          ...getNextInternalsShareScopeServer(compiler),
+          ...getNextInternalsShareScope(compiler),
           ...this._options.shared,
         },
       });
@@ -285,9 +296,7 @@ export class NextFederationPlugin {
   ): moduleFederationPlugin.ModuleFederationPluginOptions {
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
-      : compiler.options.name === 'client'
-        ? getNextInternalsShareScopeClient(compiler)
-        : getNextInternalsShareScopeServer(compiler);
+      : getNextInternalsShareScope(compiler);
 
     return {
       ...this._options,

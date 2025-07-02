@@ -10,7 +10,7 @@
     "prettier:check": "prettier --check --ignore-unknown .",
     "start": "next start",
     "test": "pnpm prettier:check && pnpm lint",
-    "patch-next": "cp node_modules/@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/flight-client-entry-plugin.js node_modules/next/dist/build/webpack/plugins/flight-client-entry-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/flight-manifest-plugin.js node_modules/next/dist/build/webpack/plugins/flight-manifest-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/loaders/next-flight-loader.js node_modules/next/dist/build/webpack/loaders/next-flight-loader/index.js",
+    "patch-next": "cp node_modules/@module-federation/nextjs-mf/dist/src/patches/flight-client-entry-plugin.js node_modules/next/dist/build/webpack/plugins/flight-client-entry-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/patches/flight-manifest-plugin.js node_modules/next/dist/build/webpack/plugins/flight-manifest-plugin.js && cp node_modules/@module-federation/nextjs-mf/dist/src/patches/next-flight-loader.js node_modules/next/dist/build/webpack/loaders/next-flight-loader/index.js",
     "postinstall": "npm run patch-next || true",
     "kill-app": "npx kill-port 4000 4001 || true"
   },
