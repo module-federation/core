@@ -118,16 +118,8 @@
   },
   "useInferencePlugins": false,
   "defaultBase": "main",
-  "nxCloudAccessToken": "N2Q2NDVhZjktMzQyZC00Zjc4LWI3ZDItNGY5NGQwY2ZjNzE0fHJlYWQtd3JpdGU=",
-  "tasksRunnerOptions": {
-    "default": {
-      "options": {
-        "useDaemonProcess": false
-      }
-    }
-  },
+  "nxCloudAccessToken": "NTVlZTRhOWItMGRjYy00YmJjLTllNzAtNDFkNzRhNzdjZDkwfHJlYWQtd3JpdGU=",
   "cli": {
     "tui": false
-  },
-  "plugins": []
+  }
 }
