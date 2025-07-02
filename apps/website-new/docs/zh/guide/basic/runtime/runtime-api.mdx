@@ -416,26 +416,26 @@ registerPlugins([
 ]);
 ```
 
-## FederationConstructor
+## ModuleFederation
 
-`Federation Runtime` 除了暴露出 API 外，还提供了 `FederationConstructor` 类，你可以使用它来创建一个 `Federation` 实例。
+`Runtime` 除了暴露出 API 外，还提供了 `ModuleFederation` 类，你可以使用它来创建一个 `ModuleFederation` 实例。
 
-* 什么是 `Federation` 实例 ？
+* 什么是 `ModuleFederation` 实例 ？
 
-`Federation` 实例是 `FederationConstructor` 类的实例，它包含了 `Federation` 运行时的所有功能。
+`ModuleFederation` 实例是 `ModuleFederation` 类的实例，它包含了 `ModuleFederation` 运行时的所有功能。
 
 > 你可以在控制台输入 `__FEDERATION__.__INSTANCES__` 来查看已经创建好的实例。
 
-* 什么时候使用 `FederationConstructor` ？
+* 什么时候使用 `ModuleFederation` class？
 
-为了保证 `FederationConstructor` 实例的唯一性，我们在构建插件创建实例后，会将其存储到内存中，导出的 API 都是先从内存中获取 `FederationConstructor` 实例，然后再调用 `FederationConstructor` 实例的 API。这也是为什么 `loadRemote` 等 API 可以直接使用的原因。
+为了保证 `ModuleFederation` 实例的唯一性，我们在构建插件创建实例后，会将其存储到内存中，导出的 API 都是先从内存中获取 `ModuleFederation` 实例，然后再调用 `ModuleFederation` 实例的 API。这也是为什么 `loadRemote` 等 API 可以直接使用的原因。
 
-但是这种单例模式同时也限制无法创建多份实例，因此如果你需要**创建新的 FederationConstructor 实例**，那么你可以使用 `FederationConstructor` 类来创建一个新的实例。
+但是这种单例模式同时也限制无法创建多份实例，因此如果你需要**创建新的 ModuleFederation 实例**，那么你可以使用 `ModuleFederation` 类来创建一个新的实例。
 
 ```ts
-import { FederationConstructor } from '@module-federation/enhanced/runtime';
+import { ModuleFederation } from '@module-federation/enhanced/runtime';
 
-const host = new FederationConstructor({
+const mf = new ModuleFederation({
   name: 'host',
   remotes: [
     {

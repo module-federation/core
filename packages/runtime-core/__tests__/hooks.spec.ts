@@ -1,5 +1,5 @@
 import { assert, describe, test, it } from 'vitest';
-import { FederationHost } from '../src/core';
+import { ModuleFederation } from '../src/core';
 import { FederationRuntimePlugin } from '../src/type/plugin';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
 import { addGlobalSnapshot } from '../src/global';
@@ -59,7 +59,7 @@ describe('hooks', () => {
       ],
       plugins: [testPlugin()],
     };
-    const GM = new FederationHost(options);
+    const GM = new ModuleFederation(options);
     assert(beforeInitArgs, "beforeInitArgs can't be undefined");
     expect(beforeInitArgs).toMatchObject({
       options: {
@@ -149,7 +149,7 @@ describe('hooks', () => {
       },
     });
 
-    const INSTANCE = new FederationHost({
+    const INSTANCE = new ModuleFederation({
       name: '@loader-hooks/globalinfo',
       remotes: [
         {
@@ -242,7 +242,7 @@ describe('hooks', () => {
         }
       },
     });
-    const INSTANCE = new FederationHost({
+    const INSTANCE = new ModuleFederation({
       name: '@loader-hooks/fetch',
       remotes: [
         {
@@ -320,7 +320,7 @@ describe('hooks', () => {
       } as any;
     };
 
-    const INSTANCE = new FederationHost({
+    const INSTANCE = new ModuleFederation({
       name: '@loader-hooks/fetch',
       remotes: [
         {

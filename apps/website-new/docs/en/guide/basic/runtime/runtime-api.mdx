@@ -416,26 +416,26 @@ registerPlugins([
 ]);
 ```
 
-## FederationConstructor
+## ModuleFederation
 
-In addition to exposing APIs,  the Federation Runtime also provides a FederationConstructor class, which you can use to create Federation instance.
+In addition to exposing APIs,  the Runtime also provides the ModuleFederation class, which you can use to create ModuleFederation instance.
 
-* What is a `Federation` instance?
+* What is a `ModuleFederation` instance?
 
-A `Federation` instance is an instance of the `FederationConstructor` class, which contains all the functionality of the `Federation` runtime.
+A `ModuleFederation` instance is an instance of the `ModuleFederation` class, which contains all the functionality of the `ModuleFederation` runtime.
 
 > You can enter `__FEDERATION__.__INSTANCES__` in the console to view the created instances.
 
-* When to use `FederationConstructor`?
+* When to use `ModuleFederation` class?
 
-To ensure the uniqueness of the FederationHost instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the FederationHost instance from memory and then call the APIs of the FederationHost instance. This is also why APIs like loadRemote can be used directly from the `module-federation/runtime` package and inherently understand what application container they are attached to.
+To ensure the uniqueness of the ModuleFederation instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the ModuleFederation instance from memory and then call the APIs of the ModuleFederation instance. This is also why APIs like loadRemote can be used directly from the `module-federation/runtime` package and inherently understand what application container they are attached to.
 
-However, this singleton pattern also limits the ability to create multiple instances, as it assumes that there is only one instance per bundle. Therefore, if you need to create a new instance , you can use the FederationHost class to create a new one.
+However, this singleton pattern also limits the ability to create multiple instances, as it assumes that there is only one instance per bundle. Therefore, if you need to create a new instance , you can use the ModuleFederation class to create a new one.
 
 ```ts
-import { FederationConstructor } from '@vmok/kit/runtime';
+import { ModuleFederation } from '@module-federation/enhanced/runtime';
 
-const host = new FederationConstructor({
+const mf = new ModuleFederation({
   name: '@demo/host',
   remotes: [
     {
@@ -445,5 +445,5 @@ const host = new FederationConstructor({
   ]
 });
 
-host.loadRemote('@demo/sub1/util').then((m) => m.add(1, 2, 3));
+mf.loadRemote('@demo/sub1/util').then((m) => m.add(1, 2, 3));
 ```

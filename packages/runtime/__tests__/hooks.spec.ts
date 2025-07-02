@@ -1,6 +1,6 @@
 import { assert, describe, test, it } from 'vitest';
 import {
-  FederationHost,
+  ModuleFederation,
   addGlobalSnapshot,
 } from '@module-federation/runtime-core';
 import { FederationRuntimePlugin } from '@module-federation/runtime-core/types';
@@ -61,7 +61,7 @@ describe('hooks', () => {
       ],
       plugins: [testPlugin()],
     };
-    const GM = new FederationHost(options);
+    const GM = new ModuleFederation(options);
     assert(beforeInitArgs, "beforeInitArgs can't be undefined");
     expect(beforeInitArgs).toMatchObject({
       options: {
@@ -151,7 +151,7 @@ describe('hooks', () => {
       },
     });
 
-    const INSTANCE = new FederationHost({
+    const INSTANCE = new ModuleFederation({
       name: '@loader-hooks/globalinfo',
       remotes: [
         {
@@ -244,7 +244,7 @@ describe('hooks', () => {
         }
       },
     });
-    const INSTANCE = new FederationHost({
+    const INSTANCE = new ModuleFederation({
       name: '@loader-hooks/fetch',
       remotes: [
         {
@@ -322,7 +322,7 @@ describe('hooks', () => {
       } as any;
     };
 
-    const INSTANCE = new FederationHost({
+    const INSTANCE = new ModuleFederation({
       name: '@loader-hooks/fetch',
       remotes: [
         {

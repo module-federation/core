@@ -1,10 +1,10 @@
 import type {
   FederationRuntimePlugin,
-  FederationHost,
+  ModuleFederation,
 } from '@module-federation/runtime';
 
 export type FederationRuntimeType = {
-  instance: FederationHost | null;
+  instance: ModuleFederation | null;
 };
 
 export const federationRuntime: FederationRuntimeType = { instance: null };

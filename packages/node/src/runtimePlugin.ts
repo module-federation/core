@@ -1,6 +1,6 @@
 import type {
   FederationRuntimePlugin,
-  FederationHost,
+  ModuleFederation,
 } from '@module-federation/runtime';
 type WebpackRequire = {
   (id: string): any;
@@ -22,7 +22,7 @@ type WebpackRequire = {
         options: { attrs: { globalName: string } },
       ) => Promise<any>;
     };
-    instance: FederationHost;
+    instance: ModuleFederation;
     chunkMatcher?: (chunkId: string) => boolean;
     rootOutputDir?: string;
     initOptions: {

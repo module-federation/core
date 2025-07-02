@@ -13,12 +13,12 @@ function beforeInit(args: BeforeInitOptions): BeforeInitOptions
 
 type BeforeInitOptions ={
     userOptions: UserOptions;
-    options: FederationRuntimeOptions;
-    origin: FederationHost;
+    options: ModuleFederationRuntimeOptions;
+    origin: ModuleFederation;
     shareInfo: ShareInfos;
 }
 
-interface FederationRuntimeOptions {
+interface ModuleFederationRuntimeOptions {
   id?: string;
   name: string;
   version?: string;
@@ -41,8 +41,8 @@ interface FederationRuntimeOptions {
 function init(args: InitOptions): void
 
 type InitOptions ={
-  options: FederationRuntimeOptions;
-  origin: FederationHost;
+  options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
 }
 ```
 
@@ -59,8 +59,8 @@ async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestO
 
 type BeforeRequestOptions ={
   id: string;
-  options: FederationRuntimeOptions;
-  origin: FederationHost;
+  options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
 }
 ```
 
@@ -80,8 +80,8 @@ type AfterResolveOptions ={
   pkgNameOrAlias: string;
   expose: string;
   remote: Remote;
-  options: FederationRuntimeOptions;
-  origin: FederationHost;
+  options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
 }
@@ -106,7 +106,7 @@ type OnLoadOptions ={
   pkgNameOrAlias: string;
   remote: Remote;
   options: ModuleOptions;
-  origin: FederationHost;
+  origin: ModuleFederation;
   exposeModule: any;
   exposeModuleFactory: any;
   moduleInstance: Module;
@@ -114,7 +114,7 @@ type OnLoadOptions ={
 
 type ModuleOptions = {
     remoteInfo: RemoteInfo;
-    host: FederationHost;
+    host: ModuleFederation;
 }
 
 interface RemoteInfo {
@@ -162,7 +162,7 @@ type ErrorLoadRemoteOptions ={
   id: string;
   error: unknown;
   from: 'build' | 'runtime';
-  origin: FederationHost;
+  origin: ModuleFederation;
 }
 ```
 * example
@@ -216,7 +216,7 @@ type BeforeLoadShareOptions ={
   pkgName: string;
   shareInfo?: Shared;
   shared: Options['shared'];
-  origin: FederationHost;
+  origin: ModuleFederation;
 }
 ```
 
@@ -308,7 +308,7 @@ async function beforePreloadRemote(args: BeforePreloadRemoteOptions): BeforePrel
 type BeforePreloadRemoteOptions ={
   preloadOps: Array<PreloadRemoteArgs>;
   options: Options;
-  origin: FederationHost;
+  origin: ModuleFederation;
 }
 ```
 
@@ -324,7 +324,7 @@ type BeforePreloadRemoteOptions ={
 async function generatePreloadAssets(args: GeneratePreloadAssetsOptions): Promise<PreloadAssets>
 
 type GeneratePreloadAssetsOptions ={
-  origin: FederationHost;
+  origin: ModuleFederation;
   preloadOptions: PreloadOptions[number];
   remote: Remote;
   remoteInfo: RemoteInfo;
