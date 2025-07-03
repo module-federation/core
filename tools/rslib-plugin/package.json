@@ -14,12 +14,12 @@
   },
   "dependencies": {
     "@nx/devkit": "^21.0.0",
-    "@rslib/core": "^0.7.1"
+    "@rslib/core": "^0.10.4"
   },
   "devDependencies": {
     "@types/node": "^20.0.0"
   },
   "peerDependencies": {
-    "@rslib/core": ">=0.5.0"
+    "@rslib/core": ">=0.10.0"
   }
 }

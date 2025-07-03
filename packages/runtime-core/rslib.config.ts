@@ -8,7 +8,18 @@ export default defineConfig({
     entry: {
       index: './src/index.ts',
       types: './src/types.ts',
+      helpers: './src/helpers.ts',
+      core: './src/core.ts',
+      global: './src/global.ts',
     },
+    define: {
+      __VERSION__: JSON.stringify(pkg.version),
+      FEDERATION_DEBUG: JSON.stringify(FEDERATION_DEBUG),
+      FEDERATION_ALLOW_NEW_FUNCTION: JSON.stringify(
+        process.env.FEDERATION_ALLOW_NEW_FUNCTION || false,
+      ),
+    },
+    tsconfigPath: './tsconfig.lib.json',
   },
   output: {
     target: 'node',
@@ -16,40 +27,19 @@ export default defineConfig({
     distPath: {
       root: './dist',
     },
-    filename: {
-      js: {
-        esm: '[name].esm.js',
-        cjs: '[name].cjs.cjs',
-      },
-      dts: {
-        esm: '[name].esm.d.ts',
-        cjs: '[name].cjs.d.ts',
-      },
-    },
   },
   lib: [
     {
       format: 'esm',
-      dts: true,
-      output: {
-        filename: {
-          js: '[name].esm.js',
-          dts: '[name].esm.d.ts',
-        },
+      dts: {
+        bundle: false,
+        distPath: './dist',
       },
     },
     {
       format: 'cjs',
-      dts: true,
-      output: {
-        filename: {
-          js: '[name].cjs.cjs',
-          dts: '[name].cjs.d.ts',
-        },
-      },
     },
   ],
-  shims: true,
   bundle: false,
   external: ['@module-federation/sdk', '@module-federation/error-codes'],
 });
