@@ -57,8 +57,9 @@
     "commitgen:main": "./commit-gen.js --path ./packages",
     "changeset:status": "changeset status",
     "generate:schema": "nx run enhanced:generate:schema && nx format:write",
-    "e2e:next:dev": "pnpm build && NX_TUI=false npx nx run-many --target=sync-mf && NX_TUI=false pnpm nx run-many --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout & sleep 3 && pnpm wait-on tcp:3000 tcp:3001 tcp:3002 && (NX_TUI=false pnpm nx e2e 3000-home && NX_TUI=false pnpm nx e2e 3001-shop && NX_TUI=false pnpm nx e2e 3002-checkout; pnpm kill-port 3000 3001 3002)",
-    "e2e:next:dev:parallel": "pnpm build && NX_TUI=false npx nx run-many --target=sync-mf && NX_TUI=false pnpm nx run-many --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout & sleep 3 && pnpm wait-on tcp:3000 tcp:3001 tcp:3002 && (NX_TUI=false pnpm nx run-many --target=e2e --projects=3000-home,3001-shop,3002-checkout --parallel=3; pnpm kill-port 3000 3001 3002)"
+    "e2e:next:home": "pnpm build && NX_TUI=false npx nx run-many --target=sync-mf && pnpm run app:next:dev & sleep 3 && pnpm wait-on tcp:3000 && NX_TUI=false pnpm nx e2e 3000-home && pnpm kill-port 3000 3001 3002",
+    "e2e:next:shop": "pnpm build && NX_TUI=false npx nx run-many --target=sync-mf && pnpm run app:next:dev & sleep 3 && pnpm wait-on tcp:3001 && NX_TUI=false pnpm nx e2e 3001-shop && pnpm kill-port 3000 3001 3002",
+    "e2e:next:checkout": "pnpm build && NX_TUI=false npx nx run-many --target=sync-mf && pnpm run app:next:dev & sleep 3 && pnpm wait-on tcp:3002 && NX_TUI=false pnpm nx e2e 3002-checkout && pnpm kill-port 3000 3001 3002"
   },
   "pnpm": {
     "packageExtensions": {
