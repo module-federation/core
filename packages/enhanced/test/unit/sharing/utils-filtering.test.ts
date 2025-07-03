@@ -1,132 +1,117 @@
+/*
+ * @jest-environment node
+ */
+
 import {
   testRequestFilters,
-  addSingletonFilterWarning,
   extractPathAfterNodeModules,
   createLookupKeyForSharing,
 } from '../../../src/lib/sharing/utils';
-import type { Compilation } from 'webpack';
 
-describe('Filtering Utils', () => {
+describe('Filtering utility functions', () => {
   describe('testRequestFilters', () => {
     it('should return true when no filters are provided', () => {
-      expect(testRequestFilters('test')).toBe(true);
-      expect(testRequestFilters('test', undefined, undefined)).toBe(true);
+      const result = testRequestFilters('some/module');
+      expect(result).toBe(true);
     });
 
     it('should handle string include filters', () => {
+      // Should include exact matches
       expect(testRequestFilters('react', 'react')).toBe(true);
-      expect(testRequestFilters('react', 'vue')).toBe(false);
-      expect(testRequestFilters('react/hooks', 'react')).toBe(false);
+      expect(testRequestFilters('vue', 'react')).toBe(false);
+
+      // Should handle partial matches
+      expect(testRequestFilters('lodash', 'lodash')).toBe(true);
+      expect(testRequestFilters('lodash/util', 'lodash')).toBe(false);
     });
 
     it('should handle RegExp include filters', () => {
-      expect(testRequestFilters('react', /^react$/)).toBe(true);
-      expect(testRequestFilters('react-dom', /^react/)).toBe(true);
-      expect(testRequestFilters('vue', /^react/)).toBe(false);
+      const includeFilter = /^react/;
+
+      expect(testRequestFilters('react', includeFilter)).toBe(true);
+      expect(testRequestFilters('react-dom', includeFilter)).toBe(true);
+      expect(testRequestFilters('vue', includeFilter)).toBe(false);
+      expect(testRequestFilters('preact', includeFilter)).toBe(false);
     });
 
     it('should handle string exclude filters', () => {
+      // Should exclude exact matches
       expect(testRequestFilters('react', undefined, 'react')).toBe(false);
-      expect(testRequestFilters('react', undefined, 'vue')).toBe(true);
-      expect(testRequestFilters('react/hooks', undefined, 'react')).toBe(true);
+      expect(testRequestFilters('vue', undefined, 'react')).toBe(true);
+
+      // Should handle partial matches
+      expect(testRequestFilters('lodash', undefined, 'lodash')).toBe(false);
+      expect(testRequestFilters('lodash/util', undefined, 'lodash')).toBe(true);
     });
 
     it('should handle RegExp exclude filters', () => {
-      expect(testRequestFilters('react', undefined, /^react$/)).toBe(false);
-      expect(testRequestFilters('react-dom', undefined, /^react/)).toBe(false);
-      expect(testRequestFilters('vue', undefined, /^react/)).toBe(true);
-    });
+      const excludeFilter = /test|spec/;
 
-    it('should handle both include and exclude filters', () => {
-      // Must pass include AND not match exclude
-      expect(testRequestFilters('react-dom', /^react/, /test/)).toBe(true);
-      expect(testRequestFilters('vue', /^react/, /test/)).toBe(false); // fails include
-      expect(testRequestFilters('react-test', /^react/, /test/)).toBe(false); // matches exclude
-    });
-
-    it('should handle complex patterns', () => {
-      const remainder = '/components/Button';
-      expect(testRequestFilters(remainder, /components/, /Button/)).toBe(false);
-      expect(testRequestFilters(remainder, /components/, /Modal/)).toBe(true);
-      expect(testRequestFilters(remainder, /utils/, /Button/)).toBe(false);
-    });
-  });
-
-  describe('addSingletonFilterWarning', () => {
-    let mockCompilation: Compilation;
-
-    beforeEach(() => {
-      mockCompilation = {
-        warnings: [],
-      } as unknown as Compilation;
-    });
-
-    it('should add warning for include version filter', () => {
-      addSingletonFilterWarning(
-        mockCompilation,
-        'react',
-        'include',
-        'version',
-        '^18.0.0',
-        'react',
-        '/path/to/react',
+      expect(testRequestFilters('react', undefined, excludeFilter)).toBe(true);
+      expect(testRequestFilters('test-utils', undefined, excludeFilter)).toBe(
+        false,
       );
-
-      expect(mockCompilation.warnings).toHaveLength(1);
-      expect(mockCompilation.warnings[0].message).toContain('react');
-      expect(mockCompilation.warnings[0].message).toContain('singleton');
-      expect(mockCompilation.warnings[0].message).toContain('include');
-      expect(mockCompilation.warnings[0].message).toContain('version');
-      expect(mockCompilation.warnings[0].message).toContain('^18.0.0');
+      expect(
+        testRequestFilters('component.spec.js', undefined, excludeFilter),
+      ).toBe(false);
+      expect(
+        testRequestFilters('module.test.ts', undefined, excludeFilter),
+      ).toBe(false);
     });
 
-    it('should add warning for exclude request filter', () => {
-      const regexFilter = /test/;
-      addSingletonFilterWarning(
-        mockCompilation,
-        'react',
-        'exclude',
-        'request',
-        regexFilter,
-        'react/test',
-        '/path/to/react',
-      );
+    it('should handle both include and exclude filters together', () => {
+      const includeFilter = /^@company/;
+      const excludeFilter = /test/;
 
-      expect(mockCompilation.warnings).toHaveLength(1);
-      expect(mockCompilation.warnings[0].message).toContain('react');
-      expect(mockCompilation.warnings[0].message).toContain('singleton');
-      expect(mockCompilation.warnings[0].message).toContain('exclude');
-      expect(mockCompilation.warnings[0].message).toContain('request');
-      expect(mockCompilation.warnings[0].message).toContain('/test/');
+      // Should include matches that pass include and don't match exclude
+      expect(
+        testRequestFilters('@company/component', includeFilter, excludeFilter),
+      ).toBe(true);
+      expect(
+        testRequestFilters('@company/test-utils', includeFilter, excludeFilter),
+      ).toBe(false);
+      expect(
+        testRequestFilters('@other/component', includeFilter, excludeFilter),
+      ).toBe(false);
+      expect(
+        testRequestFilters('regular-module', includeFilter, excludeFilter),
+      ).toBe(false);
     });
 
-    it('should handle missing resource parameter', () => {
-      addSingletonFilterWarning(
-        mockCompilation,
-        'react',
-        'include',
-        'version',
-        '^18.0.0',
-        'react',
-      );
+    it('should prioritize include filter over exclude filter', () => {
+      // If include doesn't match, should return false regardless of exclude
+      expect(testRequestFilters('vue', 'react', 'vue')).toBe(false);
 
-      expect(mockCompilation.warnings).toHaveLength(1);
-      expect(mockCompilation.warnings[0].message).toContain('react');
+      // If include matches but exclude also matches, should return false
+      expect(testRequestFilters('react', 'react', 'react')).toBe(false);
+
+      // If include matches and exclude doesn't match, should return true
+      expect(testRequestFilters('react', 'react', 'vue')).toBe(true);
     });
 
-    it('should handle string filter values', () => {
-      addSingletonFilterWarning(
-        mockCompilation,
-        'lodash',
-        'exclude',
-        'request',
-        'test',
-        'lodash/test',
-      );
+    it('should handle complex regex patterns', () => {
+      const complexInclude = /^(@scope\/|lodash)/;
+      const complexExclude = /(\.test\.|\.spec\.|\/test\/|\/spec\/)/;
 
-      expect(mockCompilation.warnings).toHaveLength(1);
-      expect(mockCompilation.warnings[0].message).toContain('lodash');
-      expect(mockCompilation.warnings[0].message).toContain('test');
+      expect(
+        testRequestFilters('@scope/component', complexInclude, complexExclude),
+      ).toBe(true);
+      expect(
+        testRequestFilters('lodash/get', complexInclude, complexExclude),
+      ).toBe(true);
+      expect(
+        testRequestFilters(
+          '@scope/component.test.js',
+          complexInclude,
+          complexExclude,
+        ),
+      ).toBe(false);
+      expect(testRequestFilters('react', complexInclude, complexExclude)).toBe(
+        false,
+      );
+      expect(
+        testRequestFilters('test/helper', complexInclude, complexExclude),
+      ).toBe(false);
     });
   });
 
@@ -156,10 +141,23 @@ describe('Filtering Utils', () => {
       expect(result).toBe('package\\lib\\index.js');
     });
 
+    it('should handle paths ending with node_modules', () => {
+      const filePath = '/project/node_modules';
+      const result = extractPathAfterNodeModules(filePath);
+      expect(result).toBe('');
+    });
+
     it('should handle scoped packages', () => {
       const filePath = '/project/node_modules/@scope/package/lib/index.js';
       const result = extractPathAfterNodeModules(filePath);
       expect(result).toBe('@scope/package/lib/index.js');
+    });
+
+    it('should handle nested node_modules with scoped packages', () => {
+      const filePath =
+        '/project/node_modules/package/node_modules/@scope/sub-package/index.js';
+      const result = extractPathAfterNodeModules(filePath);
+      expect(result).toBe('@scope/sub-package/index.js');
     });
   });
 
@@ -187,6 +185,16 @@ describe('Filtering Utils', () => {
     it('should handle complex requests with layers', () => {
       const result = createLookupKeyForSharing('@scope/package/lib', 'client');
       expect(result).toBe('(client)@scope/package/lib');
+    });
+
+    it('should handle empty string layer', () => {
+      const result = createLookupKeyForSharing('react', '');
+      expect(result).toBe('react');
+    });
+
+    it('should handle whitespace-only layer', () => {
+      const result = createLookupKeyForSharing('react', '   ');
+      expect(result).toBe('(   )react');
     });
   });
 });

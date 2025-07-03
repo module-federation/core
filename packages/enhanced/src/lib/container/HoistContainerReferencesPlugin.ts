@@ -87,31 +87,17 @@ class HoistContainerReferences implements WebpackPluginInstance {
     const { chunkGraph, moduleGraph } = compilation;
     const allModulesToHoist = new Set<Module>();
 
-<<<<<<< HEAD
     // Process container entry dependencies (needed for nextjs-mf exposed modules)
     for (const dep of containerEntryDependencies) {
       const containerEntryModule = moduleGraph.getModule(dep);
       if (!containerEntryModule) continue;
-=======
-    // Skip container entry dependencies hoisting for exposes case
-    // Container entries should remain in their own chunks when using exposes
-    // Only their runtime dependencies should be hoisted, which is handled by federationRuntimeDependencies
-    // Federation Runtime Dependencies: use 'initial' (not 'all')
-    for (const dep of federationRuntimeDependencies) {
-      const runtimeModule = moduleGraph.getModule(dep);
-      if (!runtimeModule) continue;
->>>>>>> a9ba0c7ec (feat(enhanced): update hook system for container dependency management)
       const referencedModules = getAllReferencedModules(
         compilation,
-        runtimeModule,
+        containerEntryModule,
         'initial',
       );
       referencedModules.forEach((m: Module) => allModulesToHoist.add(m));
-<<<<<<< HEAD
       const moduleRuntimes = chunkGraph.getModuleRuntimes(containerEntryModule);
-=======
-      const moduleRuntimes = chunkGraph.getModuleRuntimes(runtimeModule);
->>>>>>> a9ba0c7ec (feat(enhanced): update hook system for container dependency management)
       const runtimes = new Set<string>();
       for (const runtimeSpec of moduleRuntimes) {
         compilation.compiler.webpack.util.runtime.forEachRuntime(
@@ -133,7 +119,6 @@ class HoistContainerReferences implements WebpackPluginInstance {
         }
       }
     }
-<<<<<<< HEAD
 
     // Federation Runtime Dependencies: use 'initial' (not 'all')
     for (const dep of federationRuntimeDependencies) {
@@ -167,10 +152,6 @@ class HoistContainerReferences implements WebpackPluginInstance {
         }
       }
     }
-
-    // Process remote dependencies
-=======
->>>>>>> a9ba0c7ec (feat(enhanced): update hook system for container dependency management)
     for (const remoteDep of remoteDependencies) {
       const remoteModule = moduleGraph.getModule(remoteDep);
       if (!remoteModule) continue;
