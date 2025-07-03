@@ -36,7 +36,7 @@ const mf = createInstance({
   ]
 });
 
-mf.loadRemote('@demo/sub1/util').then((m) => m.add(1, 2, 3));
+mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
 ```
 
 ## init <Badge type='danger'>废弃</Badge>
@@ -45,7 +45,7 @@ mf.loadRemote('@demo/sub1/util').then((m) => m.add(1, 2, 3));
 
 此 API 将被废弃。如果需要获取已创建的实例，可以使用 [getInstance](#getinstance) 获取已创建的实例。
 
-如果需要创建新的实例，请使用 [createInstance](#createinstance) class。
+如果需要创建新的实例，请使用 [createInstance](#createinstance)。
 
 :::
 
@@ -152,7 +152,7 @@ const mfInstance = getInstance();
 mfInstance.loadRemote('remote/util');
 ```
 
-如果没有使用构建插件，调用 `getInstance` 会抛出异常，此时你需要使用 [ModuleFederation](#modulefederation) class 来创建一个新的实例。
+如果没有使用构建插件，调用 `getInstance` 会抛出异常，此时你需要使用 [createInstance](#createinstance) 来创建一个新的实例。
 
 ## registerRemotes
 
@@ -196,7 +196,7 @@ interface RemoteWithVersion {
 ```ts
 import { registerRemotes } from '@module-federation/enhanced/runtime';
 
-// 增加新的 remote @demo/sub2
+// 增加新的 remote sub2
 registerRemotes([
   {
       name: 'sub2',
@@ -204,7 +204,7 @@ registerRemotes([
   }
 ]);
 
-// 覆盖之前的 remote @demo/sub1
+// 覆盖之前的 remote sub1
 registerRemotes([
   {
       name: 'sub1',
@@ -228,7 +228,7 @@ const mf = createInstance({
   ]
 });
 
-// 增加新的 remote @demo/sub2
+// 增加新的 remote sub2
 mf.registerRemotes([
   {
       name: 'sub2',
@@ -236,7 +236,7 @@ mf.registerRemotes([
   }
 ]);
 
-// 覆盖之前的 remote @demo/sub1
+// 覆盖之前的 remote sub1
 mf.registerRemotes([
   {
       name: 'sub1',
@@ -487,9 +487,9 @@ registerRemotes([
   },
 ]);
 
-// 预加载 @demo/sub1 模块
+// 预加载 sub1 模块
 // 过滤资源名称中携带 ignore 的资源信息
-// 只预加载子依赖的 @demo/sub1-button 模块
+// 只预加载子依赖的 sub1-button 模块
 preloadRemote([
     {
         nameOrAlias: 'sub1',
@@ -501,9 +501,9 @@ preloadRemote([
 ]);
 
 
-// 预加载 @demo/sub2 模块
-// 预加载 @demo/sub2 下的所有 expose
-// 预加载 @demo/sub2 的同步资源和异步资源
+// 预加载 sub2 模块
+// 预加载 sub2 下的所有 expose
+// 预加载 sub2 的同步资源和异步资源
 preloadRemote([
     {
         nameOrAlias: 'sub2',
@@ -511,7 +511,7 @@ preloadRemote([
     },
 ]);
 
-// 预加载 @demo/sub3 模块的 add expose
+// 预加载 sub3 模块的 add expose
 preloadRemote([
     {
         nameOrAlias: 'sub3',

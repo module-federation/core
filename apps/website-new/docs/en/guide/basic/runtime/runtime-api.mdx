@@ -3,13 +3,9 @@
 import { Badge } from '@theme';
 import Collapse from '@components/Collapse'
 
-If the build plugin is used, an MF instance will be automatically created and stored in memory when the project starts. You can directly call methods of the MF instance via the <Badge>API</Badge>.
+If the build plugin is used, an MF instance will be automatically created and stored in memory when the project starts. You can directly call methods of the MF instance via the .
 
 If the build plugin is not used, you need to manually create an MF instance before calling the corresponding API.
-
-## ModuleFederation <Badge type='info'>Class</Badge>
-
-In addition to exposing APIs,  the Runtime also provides the ModuleFederation class, which you can use to create ModuleFederation instance.
 
 * What is a `ModuleFederation` instance?
 
@@ -17,35 +13,39 @@ A `ModuleFederation` instance is an instance of the `ModuleFederation` class, wh
 
 > You can enter `__FEDERATION__.__INSTANCES__` in the console to view the created instances.
 
-* When to use `ModuleFederation` class?
+## createInstance
+
+In addition to exposing APIs,  the Runtime also provides the `createInstance`, which you can use to create ModuleFederation instance.
+
+* When to use `createInstance`?
 
 To ensure the uniqueness of the ModuleFederation instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the ModuleFederation instance from memory and then call the APIs of the ModuleFederation instance. This is also why APIs like loadRemote can be used directly from the `@module-federation/enhanced/runtime` package and inherently understand what application container they are attached to.
 
-However, this singleton pattern also limits the ability to create multiple instances, as it assumes that there is only one instance per bundle. Therefore, if you need to create a new instance , you can use the ModuleFederation class to create a new one.
+However, this singleton pattern also limits the ability to create multiple instances, as it assumes that there is only one instance per bundle. Therefore, if you need to create a new instance , you can use the [createInstance](#createinstance) to create a new one.
 
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
 
 const mf = createInstance({
-  name: '@demo/host',
+  name: 'host',
   remotes: [
     {
-      name: '@demo/sub1',
-      entry: 'http://localhost:8080/vmok-manifest.json'
+      name: 'sub1',
+      entry: 'http://localhost:8080/mf-manifest.json'
     }
   ]
 });
 
-mf.loadRemote('@demo/sub1/util').then((m) => m.add(1, 2, 3));
+mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
 ```
 
-## init <Badge>API</Badge> <Badge type='danger'>Deprecated</Badge>
+## init <Badge type='danger'>Deprecated</Badge>
 
 :::warning Warning
 
 This API will be deprecated. If you need to get an existing instance, you can use [getInstance](#getinstance) to retrieve the created instance.
 
-If you need to create a new instance, please use the [ModuleFederation](#modulefederation) class.
+If you need to create a new instance, please use the [createInstance](#createinstance).
 
 :::
 
@@ -138,7 +138,7 @@ init({
 ```
 </Collapse>
 
-## getInstance <Badge>API</Badge>
+## getInstance
 
 - Type: `getInstance(): ModuleFederation`
 - Retrieves the `ModuleFederation` instance created by the build plugin
@@ -152,9 +152,9 @@ const mfInstance = getInstance();
 mfInstance.loadRemote('remote/util');
 ```
 
-If the build plugin is not used, calling `getInstance` will throw an exception. In this case, you need to use the [ModuleFederation](#modulefederation) class to create a new instance.
+If the build plugin is not used, calling `getInstance` will throw an exception. In this case, you need to use the [createInstance](#createinstance) to create a new instance.
 
-## registerRemotes <Badge>API</Badge>
+## registerRemotes
 
 <Collapse>
 
@@ -196,7 +196,7 @@ If use build plugin:
 ```ts
 import { registerRemotes } from '@module-federation/enhanced/runtime';
 
-// Add a new remote @demo/sub2
+// Add a new remote sub2
 registerRemotes([
   {
       name: 'sub2',
@@ -204,7 +204,7 @@ registerRemotes([
   }
 ]);
 
-// Overwrite the previous remote @demo/sub1
+// Overwrite the previous remote sub1
 registerRemotes([
   {
       name: 'sub1',
@@ -212,6 +212,7 @@ registerRemotes([
   }
 ],{ force:true });
 ```
+
 If not use build plugin:
 
 
@@ -228,7 +229,7 @@ const mf = createInstance({
   ]
 });
 
-// Add a new remote @demo/sub2
+// Add a new remote sub2
 mf.registerRemotes([
   {
       name: 'sub2',
@@ -236,7 +237,7 @@ mf.registerRemotes([
   }
 ]);
 
-// Overwrite the previous remote @demo/sub1
+// Overwrite the previous remote sub1
 mf.registerRemotes([
   {
       name: 'sub1',
@@ -245,7 +246,7 @@ mf.registerRemotes([
 ],{ force:true });
 ```
 
-## registerPlugins <Badge>API</Badge>
+## registerPlugins
 
 - type
 
@@ -289,7 +290,7 @@ registerPlugins([
 ]);
 ```
 
-## registerShared <Badge>API</Badge>
+## registerShared
 
 <Collapse>
 
@@ -353,7 +354,7 @@ registerShared({
 });
 ```
 
-## loadRemote <Badge>API</Badge>
+## loadRemote
 
 - Type: `loadRemote(id: string)`
 - Loads a remote module.
@@ -369,7 +370,7 @@ loadRemote("remote/util").then((m)=> m.add(1,2,3));
 loadRemote("app1/util").then((m)=> m.add(1,2,3));
 ```
 
-## loadShare <Badge>API</Badge>
+## loadShare
 
 - Type: `loadShare(pkgName: string, extraOptions?: { customShareInfo?: Partial<Shared>;resolver?: (sharedOptions: ShareInfos[string]) => Shared;})`
 - Gets a `share` dependency. When there is a `share` dependency in the global environment that meets the requirements of the current `host`, the existing dependency that meets the `share` conditions will be reused first. Otherwise, its own dependency will be loaded and stored in the global cache.
@@ -426,7 +427,7 @@ loadShare('react', {
 });
 ```
 
-## preloadRemote <Badge>API</Badge>
+## preloadRemote
 
 <Collapse>
 
@@ -486,9 +487,9 @@ registerRemotes([
   },
 ]);
 
-// Preload the @demo/sub1 module
+// Preload the sub1 module
 // Filter resource information that contains 'ignore' in the resource name
-// Only preload the sub-dependency @demo/sub1-button module
+// Only preload the sub-dependency sub1-button module
 preloadRemote([
     {
         nameOrAlias: 'sub1',
@@ -500,9 +501,9 @@ preloadRemote([
 ]);
 
 
-// Preload the @demo/sub2 module
-// Preload all exposes under @demo/sub2
-// Preload the synchronous and asynchronous resources of @demo/sub2
+// Preload the sub2 module
+// Preload all exposes under sub2
+// Preload the synchronous and asynchronous resources of sub2
 preloadRemote([
     {
         nameOrAlias: 'sub2',
@@ -510,7 +511,7 @@ preloadRemote([
     },
 ]);
 
-// Preload the add expose of the @demo/sub3 module
+// Preload the add expose of the sub3 module
 preloadRemote([
     {
         nameOrAlias: 'sub3',
