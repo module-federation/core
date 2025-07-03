@@ -52,14 +52,14 @@
     "@types/btoa": "^1.2.5"
   },
   "peerDependencies": {
-    "webpack": "^5.40.0",
-    "next": "^12 || ^13 || ^14 || ^15",
-    "react": "^17 || ^18 || ^19",
-    "react-dom": "^17 || ^18 || ^19",
+    "next": "^15 || ^14 || ^13 || ^12",
     "styled-jsx": "*"
   },
   "peerDependenciesMeta": {
     "styled-jsx": {
+      "optional": true
+    },
+    "next": {
       "optional": true
     }
   }

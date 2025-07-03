@@ -45,20 +45,25 @@ jobs:
       - name: Run condition check script
         id: check-ci
         run: node tools/scripts/ci-is-affected.mjs --appName=3000-home
-      - name: E2E Test for Next.js Dev - Home
+      - name: Start Development Servers
         if: steps.check-ci.outcome == 'success'
         run: |
           killall node
-          npx nx run 3000-home:test:e2e
+          pnpm nx daemon
+          NX_TUI=false pnpm nx run-many --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout & sleep 3 && pnpm wait-on tcp:3001 tcp:3002 tcp:3000
 
-      - name: E2E Test for Next.js Dev - Shop
+      - name: E2E Test Home App
         if: steps.check-ci.outcome == 'success'
-        run: |
-          killall node
-          npx nx run 3001-shop:test:e2e
+        run: NX_TUI=false pnpm nx e2e 3000-home
 
-      - name: E2E Test for Next.js Dev - Checkout
+      - name: E2E Test Shop App
         if: steps.check-ci.outcome == 'success'
-        run: |
-          killall node
-          npx nx run 3002-checkout:test:e2e
+        run: NX_TUI=false pnpm nx e2e 3001-shop
+
+      - name: E2E Test Checkout App
+        if: steps.check-ci.outcome == 'success'
+        run: NX_TUI=false pnpm nx e2e 3002-checkout
+
+      - name: Cleanup Development Servers
+        if: always()
+        run: pnpm kill-port 3000,3001,3002

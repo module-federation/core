@@ -317,4 +317,544 @@ describe('SharePlugin', () => {
       expect(lodashProvide.lodash.shareScope).toEqual(shareScopes.array);
     });
   });
+
+  describe('exclude functionality', () => {
+    let mockCompiler;
+
+    beforeEach(() => {
+      mockCompiler = createMockCompiler();
+      ConsumeSharedPluginMock.mockClear();
+      ProvideSharedPluginMock.mockClear();
+    });
+
+    it('should handle version-based exclusion in consumes', () => {
+      const plugin = new SharePlugin({
+        shareScope: shareScopes.string,
+        shared: {
+          react: {
+            requiredVersion: '^17.0.0',
+            exclude: {
+              version: '^16.0.0',
+            },
+          },
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ConsumeSharedPlugin options
+      expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
+      const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
+      const reactConsume = consumeOptions.consumes.find(
+        (consume) => Object.keys(consume)[0] === 'react',
+      );
+      expect(reactConsume.react.exclude).toEqual({ version: '^16.0.0' });
+    });
+
+    it('should handle request-based exclusion in consumes', () => {
+      const plugin = new SharePlugin({
+        shareScope: shareScopes.string,
+        shared: {
+          '@scope/prefix/': {
+            requiredVersion: '^1.0.0',
+            exclude: {
+              request: /excluded-path$/,
+            },
+          },
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ConsumeSharedPlugin options
+      expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
+      const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
+      const prefixConsume = consumeOptions.consumes.find(
+        (consume) => Object.keys(consume)[0] === '@scope/prefix/',
+      );
+      expect(prefixConsume['@scope/prefix/'].exclude.request).toBeInstanceOf(
+        RegExp,
+      );
+      expect(prefixConsume['@scope/prefix/'].exclude.request.source).toBe(
+        'excluded-path$',
+      );
+    });
+
+    it('should handle version-based exclusion in provides', () => {
+      const plugin = new SharePlugin({
+        shareScope: shareScopes.string,
+        shared: {
+          react: {
+            version: '17.0.2',
+            exclude: {
+              version: '^16.0.0',
+            },
+          },
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ProvideSharedPlugin options
+      expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
+      const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
+      const reactProvide = provideOptions.provides.find(
+        (provide) => Object.keys(provide)[0] === 'react',
+      );
+      expect(reactProvide.react.exclude).toEqual({ version: '^16.0.0' });
+    });
+
+    it('should handle request-based exclusion in provides', () => {
+      const plugin = new SharePlugin({
+        shareScope: shareScopes.string,
+        shared: {
+          '@scope/prefix/': {
+            version: '1.0.0',
+            exclude: {
+              request: /excluded-path$/,
+            },
+          },
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ProvideSharedPlugin options
+      expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
+      const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
+      const prefixProvide = provideOptions.provides.find(
+        (provide) => Object.keys(provide)[0] === '@scope/prefix/',
+      );
+      expect(prefixProvide['@scope/prefix/'].exclude.request).toBeInstanceOf(
+        RegExp,
+      );
+      expect(prefixProvide['@scope/prefix/'].exclude.request.source).toBe(
+        'excluded-path$',
+      );
+    });
+
+    it('should handle both version and request exclusion together', () => {
+      const plugin = new SharePlugin({
+        shareScope: shareScopes.string,
+        shared: {
+          '@scope/prefix/': {
+            version: '1.0.0',
+            exclude: {
+              version: '^0.9.0',
+              request: /excluded-path$/,
+            },
+          },
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check both plugins receive the complete exclude configuration
+      const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
+      const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
+
+      const prefixConsume = consumeOptions.consumes.find(
+        (consume) => Object.keys(consume)[0] === '@scope/prefix/',
+      );
+      const prefixProvide = provideOptions.provides.find(
+        (provide) => Object.keys(provide)[0] === '@scope/prefix/',
+      );
+
+      // Both should have version and request exclusion
+      expect(prefixConsume['@scope/prefix/'].exclude).toEqual({
+        version: '^0.9.0',
+        request: expect.any(RegExp),
+      });
+      expect(prefixProvide['@scope/prefix/'].exclude).toEqual({
+        version: '^0.9.0',
+        request: expect.any(RegExp),
+      });
+    });
+
+    it('should not create provides entry when import is false, but should keep exclude in consumes', () => {
+      const plugin = new SharePlugin({
+        shareScope: shareScopes.string,
+        shared: {
+          react: {
+            import: false,
+            requiredVersion: '^17.0.0',
+            exclude: {
+              version: '^16.0.0',
+            },
+          },
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ProvideSharedPlugin has no entries
+      expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
+      const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
+      expect(provideOptions.provides).toHaveLength(0);
+
+      // Check ConsumeSharedPlugin still has the exclude config
+      const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
+      const reactConsume = consumeOptions.consumes.find(
+        (consume) => Object.keys(consume)[0] === 'react',
+      );
+      expect(reactConsume.react.exclude).toEqual({ version: '^16.0.0' });
+    });
+  });
+
+  describe('nodeModulesReconstructedLookup functionality', () => {
+    let mockCompiler;
+
+    beforeEach(() => {
+      mockCompiler = createMockCompiler();
+      ConsumeSharedPluginMock.mockClear();
+      ProvideSharedPluginMock.mockClear();
+    });
+
+    it('should pass nodeModulesReconstructedLookup to both ConsumeSharedPlugin and ProvideSharedPlugin', () => {
+      const plugin = new SharePlugin({
+        shared: {
+          react: {
+            requiredVersion: '^17.0.0',
+            nodeModulesReconstructedLookup: true,
+          },
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ConsumeSharedPlugin receives nodeModulesReconstructedLookup in config
+      expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
+      const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
+      const reactConsume = consumeOptions.consumes.find(
+        (consume) => Object.keys(consume)[0] === 'react',
+      );
+      expect(reactConsume.react.nodeModulesReconstructedLookup).toBe(true);
+
+      // Check ProvideSharedPlugin receives nodeModulesReconstructedLookup in config
+      expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
+      const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
+      const reactProvide = provideOptions.provides.find(
+        (provide) => Object.keys(provide)[0] === 'react',
+      );
+      expect(reactProvide.react.nodeModulesReconstructedLookup).toBe(true);
+    });
+  });
+
+  describe('include functionality', () => {
+    let mockCompiler;
+
+    beforeEach(() => {
+      mockCompiler = createMockCompiler();
+      ConsumeSharedPluginMock.mockClear();
+      ProvideSharedPluginMock.mockClear();
+    });
+
+    it('should handle version-based inclusion in consumes', () => {
+      const plugin = new SharePlugin({
+        shareScope: shareScopes.string,
+        shared: {
+          react: {
+            requiredVersion: '^17.0.0',
+            include: {
+              version: '^17.0.0',
+            },
+          },
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ConsumeSharedPlugin options
+      expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
+      const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
+      const reactConsume = consumeOptions.consumes.find(
+        (consume) => Object.keys(consume)[0] === 'react',
+      );
+      expect(reactConsume.react.include).toEqual({ version: '^17.0.0' });
+    });
+
+    it('should handle request-based inclusion in consumes', () => {
+      const plugin = new SharePlugin({
+        shareScope: shareScopes.string,
+        shared: {
+          '@scope/prefix/': {
+            requiredVersion: '^1.0.0',
+            include: {
+              request: /included-path$/,
+            },
+          },
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ConsumeSharedPlugin options
+      expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
+      const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
+      const prefixConsume = consumeOptions.consumes.find(
+        (consume) => Object.keys(consume)[0] === '@scope/prefix/',
+      );
+      expect(prefixConsume['@scope/prefix/'].include.request).toBeInstanceOf(
+        RegExp,
+      );
+      expect(prefixConsume['@scope/prefix/'].include.request.source).toBe(
+        'included-path$',
+      );
+    });
+
+    it('should handle version-based inclusion in provides', () => {
+      const plugin = new SharePlugin({
+        shareScope: shareScopes.string,
+        shared: {
+          react: {
+            version: '17.0.2',
+            include: {
+              version: '^17.0.0',
+              fallbackVersion: '16.14.0',
+            },
+          },
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ProvideSharedPlugin options
+      expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
+      const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
+      const reactProvide = provideOptions.provides.find(
+        (provide) => Object.keys(provide)[0] === 'react',
+      );
+      expect(reactProvide.react.include).toEqual({
+        version: '^17.0.0',
+        fallbackVersion: '16.14.0',
+      });
+    });
+  });
+
+  describe('default shareScope', () => {
+    let mockCompiler;
+
+    beforeEach(() => {
+      mockCompiler = createMockCompiler();
+      ConsumeSharedPluginMock.mockClear();
+      ProvideSharedPluginMock.mockClear();
+    });
+
+    it('should use "default" as shareScope when none is provided', () => {
+      const plugin = new SharePlugin({
+        shared: {
+          react: '^17.0.0',
+        },
+        // No shareScope provided
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ConsumeSharedPlugin receives default shareScope
+      expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
+      const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
+      expect(consumeOptions.shareScope).toBe('default');
+
+      // Check ProvideSharedPlugin receives default shareScope
+      expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
+      const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
+      expect(provideOptions.shareScope).toBe('default');
+    });
+  });
+
+  describe('schema validation', () => {
+    beforeEach(() => {
+      // Save original console.error to restore later
+      jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    });
+
+    afterEach(() => {
+      // Restore console.error
+      jest.restoreAllMocks();
+    });
+
+    it('should throw on invalid options', () => {
+      expect(() => {
+        // @ts-ignore - testing invalid types
+        new SharePlugin({
+          shared: 'not-an-object',
+        });
+      }).toThrow();
+
+      expect(() => {
+        // @ts-ignore - testing invalid types
+        new SharePlugin({
+          shareScope: 123,
+          shared: { react: '^17.0.0' },
+        });
+      }).toThrow();
+    });
+  });
+
+  describe('environment variable setting', () => {
+    let mockCompiler;
+    let originalEnv;
+
+    beforeEach(() => {
+      mockCompiler = createMockCompiler();
+      ConsumeSharedPluginMock.mockClear();
+      ProvideSharedPluginMock.mockClear();
+
+      // Save original environment variable
+      originalEnv = process.env['FEDERATION_WEBPACK_PATH'];
+      // Clear environment variable for testing
+      delete process.env['FEDERATION_WEBPACK_PATH'];
+    });
+
+    afterEach(() => {
+      // Restore environment variable
+      if (originalEnv) {
+        process.env['FEDERATION_WEBPACK_PATH'] = originalEnv;
+      } else {
+        delete process.env['FEDERATION_WEBPACK_PATH'];
+      }
+    });
+
+    it('should set FEDERATION_WEBPACK_PATH environment variable', () => {
+      const plugin = new SharePlugin({
+        shared: {
+          react: '^17.0.0',
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Should set environment variable
+      expect(process.env['FEDERATION_WEBPACK_PATH']).toBe(
+        'mocked-webpack-path',
+      );
+
+      // Should call getWebpackPath
+      expect(getWebpackPath).toHaveBeenCalledWith(mockCompiler);
+    });
+
+    it('should not override existing FEDERATION_WEBPACK_PATH environment variable', () => {
+      // Set environment variable
+      process.env['FEDERATION_WEBPACK_PATH'] = 'existing-path';
+
+      const plugin = new SharePlugin({
+        shared: {
+          react: '^17.0.0',
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Should not change environment variable
+      expect(process.env['FEDERATION_WEBPACK_PATH']).toBe('existing-path');
+    });
+  });
+
+  describe('property transformation', () => {
+    let mockCompiler;
+
+    beforeEach(() => {
+      mockCompiler = createMockCompiler();
+      ConsumeSharedPluginMock.mockClear();
+      ProvideSharedPluginMock.mockClear();
+    });
+
+    it('should transform all properties from SharedConfig to ConsumesConfig', () => {
+      const sharedConfig = {
+        import: './path/to/module',
+        shareKey: 'customKey',
+        shareScope: 'customScope',
+        requiredVersion: '^1.0.0',
+        strictVersion: true,
+        singleton: true,
+        packageName: 'my-package',
+        eager: true,
+        version: '1.0.0',
+        issuerLayer: 'issuerLayer',
+        layer: 'layer',
+        request: 'custom-request',
+        exclude: { version: '^0.9.0' },
+        include: { version: '^1.0.0' },
+      };
+
+      const plugin = new SharePlugin({
+        shared: {
+          react: sharedConfig,
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ConsumeSharedPlugin properties
+      expect(ConsumeSharedPluginMock).toHaveBeenCalledTimes(1);
+      const consumeOptions = ConsumeSharedPluginMock.mock.calls[0][0];
+      const reactConsume = consumeOptions.consumes.find(
+        (consume) => Object.keys(consume)[0] === 'react',
+      );
+
+      // All expected properties should be passed through
+      expect(reactConsume.react).toMatchObject({
+        import: sharedConfig.import,
+        shareKey: sharedConfig.shareKey,
+        shareScope: sharedConfig.shareScope,
+        requiredVersion: sharedConfig.requiredVersion,
+        strictVersion: sharedConfig.strictVersion,
+        singleton: sharedConfig.singleton,
+        packageName: sharedConfig.packageName,
+        eager: sharedConfig.eager,
+        issuerLayer: sharedConfig.issuerLayer,
+        layer: sharedConfig.layer,
+        request: sharedConfig.request,
+        exclude: sharedConfig.exclude,
+        include: sharedConfig.include,
+      });
+    });
+
+    it('should transform all properties from SharedConfig to ProvidesConfig', () => {
+      const sharedConfig = {
+        import: './path/to/module',
+        shareKey: 'customKey',
+        shareScope: 'customScope',
+        version: '1.0.0',
+        eager: true,
+        requiredVersion: '^1.0.0',
+        strictVersion: true,
+        singleton: true,
+        layer: 'layer',
+        request: 'custom-request',
+        exclude: { version: '^0.9.0' },
+        include: { version: '^1.0.0' },
+      };
+
+      const plugin = new SharePlugin({
+        shared: {
+          react: sharedConfig,
+        },
+      });
+
+      plugin.apply(mockCompiler);
+
+      // Check ProvideSharedPlugin properties
+      expect(ProvideSharedPluginMock).toHaveBeenCalledTimes(1);
+      const provideOptions = ProvideSharedPluginMock.mock.calls[0][0];
+      const reactProvide = provideOptions.provides.find(
+        (provide) => Object.keys(provide)[0] === './path/to/module',
+      );
+
+      // All expected properties should be passed through
+      expect(reactProvide['./path/to/module']).toMatchObject({
+        shareKey: sharedConfig.shareKey,
+        shareScope: sharedConfig.shareScope,
+        version: sharedConfig.version,
+        eager: sharedConfig.eager,
+        requiredVersion: sharedConfig.requiredVersion,
+        strictVersion: sharedConfig.strictVersion,
+        singleton: sharedConfig.singleton,
+        layer: sharedConfig.layer,
+        request: sharedConfig.request,
+        exclude: sharedConfig.exclude,
+        include: sharedConfig.include,
+      });
+    });
+  });
 });
