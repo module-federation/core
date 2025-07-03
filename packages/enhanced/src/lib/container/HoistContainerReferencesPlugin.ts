@@ -1,7 +1,7 @@
 import type {
+  Chunk,
   Compiler,
   Compilation,
-  Chunk,
   WebpackPluginInstance,
   Module,
   Dependency,
@@ -10,6 +10,8 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
+import RemoteToExternalDependency from './RemoteToExternalDependency';
+import FallbackDependency from './FallbackDependency';
 
 const { AsyncDependenciesBlock, ExternalModule } = require(
   normalizeWebpackPath('webpack'),
@@ -18,9 +20,9 @@ const { AsyncDependenciesBlock, ExternalModule } = require(
 const PLUGIN_NAME = 'HoistContainerReferences';
 
 /**
- * This class is used to hoist container references in the code.
+ * This plugin hoists container-related modules into runtime chunks when using runtimeChunk: single configuration.
  */
-export class HoistContainerReferences implements WebpackPluginInstance {
+class HoistContainerReferences implements WebpackPluginInstance {
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
@@ -28,6 +30,9 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         const logger = compilation.getLogger(PLUGIN_NAME);
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const containerEntryDependencies = new Set<Dependency>();
+        const federationRuntimeDependencies = new Set<Dependency>();
+        const remoteDependencies = new Set<Dependency>();
+
         hooks.addContainerEntryDependency.tap(
           'HoistContainerReferences',
           (dep: ContainerEntryDependency) => {
@@ -37,7 +42,13 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         hooks.addFederationRuntimeDependency.tap(
           'HoistContainerReferences',
           (dep: FederationRuntimeDependency) => {
-            containerEntryDependencies.add(dep);
+            federationRuntimeDependencies.add(dep);
+          },
+        );
+        hooks.addRemoteDependency.tap(
+          'HoistContainerReferences',
+          (dep: RemoteToExternalDependency | FallbackDependency) => {
+            remoteDependencies.add(dep);
           },
         );
 
@@ -53,9 +64,9 @@ export class HoistContainerReferences implements WebpackPluginInstance {
             this.hoistModulesInChunks(
               compilation,
               runtimeChunks,
-              chunks,
               logger,
               containerEntryDependencies,
+              federationRuntimeDependencies,
             );
           },
         );
@@ -67,9 +78,9 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   private hoistModulesInChunks(
     compilation: Compilation,
     runtimeChunks: Set<Chunk>,
-    chunks: Iterable<Chunk>,
     logger: ReturnType<Compilation['getLogger']>,
     containerEntryDependencies: Set<Dependency>,
+    federationRuntimeDependencies: Set<Dependency>,
   ): void {
     const { chunkGraph, moduleGraph } = compilation;
     // when runtimeChunk: single is set - ContainerPlugin will create a "partial" chunk we can use to
