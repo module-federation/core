@@ -428,7 +428,7 @@ A `ModuleFederation` instance is an instance of the `ModuleFederation` class, wh
 
 * When to use `ModuleFederation` class?
 
-To ensure the uniqueness of the ModuleFederation instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the ModuleFederation instance from memory and then call the APIs of the ModuleFederation instance. This is also why APIs like loadRemote can be used directly from the `module-federation/runtime` package and inherently understand what application container they are attached to.
+To ensure the uniqueness of the ModuleFederation instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the ModuleFederation instance from memory and then call the APIs of the ModuleFederation instance. This is also why APIs like loadRemote can be used directly from the `@module-federation/enhanced/runtime` package and inherently understand what application container they are attached to.
 
 However, this singleton pattern also limits the ability to create multiple instances, as it assumes that there is only one instance per bundle. Therefore, if you need to create a new instance , you can use the ModuleFederation class to create a new one.
 

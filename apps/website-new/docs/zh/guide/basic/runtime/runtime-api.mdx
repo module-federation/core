@@ -445,5 +445,5 @@ const mf = new ModuleFederation({
   ]
 });
 
-host.loadRemote('@demo/sub1/util').then((m) => m.add(1, 2, 3));
+mf.loadRemote('@demo/sub1/util').then((m) => m.add(1, 2, 3));
 ```
