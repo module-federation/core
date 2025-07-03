@@ -8,6 +8,8 @@
 
 ## 快速开始
 
+{props.demo}
+
 ### 安装
 
 你可以通过如下的命令安装插件：
@@ -49,7 +51,7 @@ import Intro from 'mf-doc/intro-zh';
 假设你需要在文档片段中使用 `cmdTools` 变量，可以参考下方内容：
 
 ```mdx title='docs/zh/guide/intro.mdx'
-{(props.cmdTools || ['pkg-a', 'pkg-b']).map(cmdTool=>(<p><code>{cmdTool}</code></p>))}
+{(props.cmdTools || ['pkg-a', 'pkg-b']).map(cmdTool=>(<code>{cmdTool}</code>))}
 ```
 
 ## 配置
@@ -76,6 +78,35 @@ Rspress 插件额外配置。
 Rspress 使用了 `react`、`react-dom`、`@mdx-js/react` 第三方依赖，并且上述三个依赖需要保证单利，因此在构建时会自动注入 `shared` 配置。
 
 你也可以设置 `autoShared: false` 来禁用此行为。
+
+默认 `shared` 配置如下：
+
+```json
+  react: {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react/': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  '@mdx-js/react': {
+    singleton: true,
+    requiredVersion: false
+  },
+  '@rspress/runtime': {
+    singleton: true,
+    requiredVersion: false
+  }
+```
 
 #### rebuildSearchIndex
 

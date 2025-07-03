@@ -1,5 +1,15 @@
 # @module-federation/node
 
+## 2.7.8
+
+### Patch Changes
+
+- 98136ca: fix(node): use contenthash instead of chunkhash
+- Updated dependencies [1485fcf]
+  - @module-federation/sdk@0.16.0
+  - @module-federation/enhanced@0.16.0
+  - @module-federation/runtime@0.16.0
+
 ## 2.7.7
 
 ### Patch Changes

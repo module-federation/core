@@ -87,9 +87,39 @@ class HoistContainerReferences implements WebpackPluginInstance {
     const { chunkGraph, moduleGraph } = compilation;
     const allModulesToHoist = new Set<Module>();
 
-    // Skip container entry dependencies hoisting for exposes case
-    // Container entries should remain in their own chunks when using exposes
-    // Only their runtime dependencies should be hoisted, which is handled by federationRuntimeDependencies
+    // Process container entry dependencies (needed for nextjs-mf exposed modules)
+    for (const dep of containerEntryDependencies) {
+      const containerEntryModule = moduleGraph.getModule(dep);
+      if (!containerEntryModule) continue;
+      const referencedModules = getAllReferencedModules(
+        compilation,
+        containerEntryModule,
+        'initial',
+      );
+      referencedModules.forEach((m: Module) => allModulesToHoist.add(m));
+      const moduleRuntimes = chunkGraph.getModuleRuntimes(containerEntryModule);
+      const runtimes = new Set<string>();
+      for (const runtimeSpec of moduleRuntimes) {
+        compilation.compiler.webpack.util.runtime.forEachRuntime(
+          runtimeSpec,
+          (runtimeKey) => {
+            if (runtimeKey) {
+              runtimes.add(runtimeKey);
+            }
+          },
+        );
+      }
+      for (const runtime of runtimes) {
+        const runtimeChunk = compilation.namedChunks.get(runtime);
+        if (!runtimeChunk) continue;
+        for (const module of referencedModules) {
+          if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
+            chunkGraph.connectChunkAndModule(runtimeChunk, module);
+          }
+        }
+      }
+    }
+
     // Federation Runtime Dependencies: use 'initial' (not 'all')
     for (const dep of federationRuntimeDependencies) {
       const runtimeModule = moduleGraph.getModule(dep);

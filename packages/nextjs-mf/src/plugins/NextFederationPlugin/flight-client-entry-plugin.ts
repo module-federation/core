@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 import type {

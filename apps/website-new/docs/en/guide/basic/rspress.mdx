@@ -8,6 +8,8 @@ Helps users build and consume {props.name || 'Module Federation'} products in **
 
 ## Quick Start
 
+{props.demo}
+
 ### Installation
 
 You can install the plugin with the following command:
@@ -49,7 +51,7 @@ Document fragments support passing parameters, which are consumed as props.
 If you need to use the `cmdTools` variable in a document fragment, you can refer to the following:
 
 ```mdx title='docs/zh/guide/intro.mdx'
-{(props.cmdTools || ['pkg-a', 'pkg-b']).map(cmdTool=>(<p><code>{cmdTool}</code></p>))}
+{(props.cmdTools || ['pkg-a', 'pkg-b']).map(cmdTool=>(<code>{cmdTool}</code>))}
 ```
 
 ## Configuration
@@ -76,6 +78,35 @@ Additional configuration for the Rspress plugin.
 Rspress uses `react`, `react-dom`, and `@mdx-js/react` as third-party dependencies. These three dependencies need to be singletons, so the `shared` configuration is automatically injected during the build.
 
 You can also set `autoShared: false` to disable this behavior.
+
+Default `shared` configuration: as follows:
+
+```json
+  react: {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react/': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  '@mdx-js/react': {
+    singleton: true,
+    requiredVersion: false
+  },
+  '@rspress/runtime': {
+    singleton: true,
+    requiredVersion: false
+  }
+```
 
 #### rebuildSearchIndex
 
