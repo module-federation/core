@@ -1,10 +1,59 @@
 # Runtime API
 
-## init
+import { Badge } from '@theme';
+import Collapse from '@components/Collapse'
+
+If the build plugin is used, an MF instance will be automatically created and stored in memory when the project starts. You can directly call methods of the MF instance via the <Badge>API</Badge>.
+
+If the build plugin is not used, you need to manually create an MF instance before calling the corresponding API.
+
+## ModuleFederation <Badge type='info'>Class</Badge>
+
+In addition to exposing APIs,  the Runtime also provides the ModuleFederation class, which you can use to create ModuleFederation instance.
+
+* What is a `ModuleFederation` instance?
+
+A `ModuleFederation` instance is an instance of the `ModuleFederation` class, which contains all the functionality of the `ModuleFederation` runtime.
+
+> You can enter `__FEDERATION__.__INSTANCES__` in the console to view the created instances.
+
+* When to use `ModuleFederation` class?
+
+To ensure the uniqueness of the ModuleFederation instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the ModuleFederation instance from memory and then call the APIs of the ModuleFederation instance. This is also why APIs like loadRemote can be used directly from the `@module-federation/enhanced/runtime` package and inherently understand what application container they are attached to.
+
+However, this singleton pattern also limits the ability to create multiple instances, as it assumes that there is only one instance per bundle. Therefore, if you need to create a new instance , you can use the ModuleFederation class to create a new one.
+
+```ts
+import { ModuleFederation } from '@module-federation/enhanced/runtime';
+
+const mf = new ModuleFederation({
+  name: '@demo/host',
+  remotes: [
+    {
+      name: '@demo/sub1',
+      entry: 'http://localhost:8080/vmok-manifest.json'
+    }
+  ]
+});
+
+mf.loadRemote('@demo/sub1/util').then((m) => m.add(1, 2, 3));
+```
+
+## init <Badge>API</Badge> <Badge type='danger'>Deprecated</Badge>
+
+:::warning Warning
+
+This API will be deprecated. If you need to get an existing instance, you can use [getInstance](#getinstance) to retrieve the created instance.
+
+If you need to create a new instance, please use the [ModuleFederation](#modulefederation) class.
+
+:::
 
 - Type: `init(options: InitOptions): void`
 - Used for dynamically registering `Vmok` modules at runtime.
 - InitOptions:
+
+<Collapse>
 
 ```ts
 type InitOptions {
@@ -67,9 +116,11 @@ type Share = {
 };
 ```
 
-- Example
+</Collapse>
 
-```js
+<Collapse title="Example">
+
+```ts
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
 init({
@@ -85,28 +136,231 @@ init({
     ],
 });
 ```
+</Collapse>
 
-## loadRemote
+## getInstance <Badge>API</Badge>
+
+- Type: `getInstance(): ModuleFederation`
+- Retrieves the `ModuleFederation` instance created by the build plugin
+
+When the build plugin is used, you can call `getInstance` to retrieve the `ModuleFederation` instance created by the build plugin.
+
+```ts
+import { getInstance } from '@module-federation/enhanced/runtime';
+
+const mfInstance = getInstance();
+mfInstance.loadRemote('remote/util');
+```
+
+If the build plugin is not used, calling `getInstance` will throw an exception. In this case, you need to use the [ModuleFederation](#modulefederation) class to create a new instance.
+
+## registerRemotes <Badge>API</Badge>
+
+<Collapse>
+
+```typescript
+function registerRemotes(remotes: Remote[], options?: { force?: boolean }) {}
+
+type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
+
+interface RemoteInfoCommon {
+  alias?: string;
+  shareScope?: string;
+  type?: RemoteEntryType;
+  entryGlobalName?: string;
+}
+
+interface RemoteWithEntry {
+    name: string;
+    entry: string;
+}
+
+interface RemoteWithVersion {
+    name: string;
+    version: string;
+}
+```
+
+</Collapse>
+
+- Details
+
+**info**: Please set `force:true` with caution!
+
+If `force: true` is set, it will overwrite the registered (and loaded) modules, and automatically delete the cache of the loaded modules (if they have been loaded), and output a warning in the console to inform that this operation is risky.
+
+* Example
+
+If use build plugin:
+
+```ts
+import { registerRemotes } from '@module-federation/enhanced/runtime';
+
+// Add a new remote @demo/sub2
+registerRemotes([
+  {
+      name: 'sub2',
+      entry: 'http://localhost:2002/mf-manifest.json',
+  }
+]);
+
+// Overwrite the previous remote @demo/sub1
+registerRemotes([
+  {
+      name: 'sub1',
+      entry: 'http://localhost:2003/mf-manifest.json',
+  }
+],{ force:true });
+```
+If not use build plugin:
+
+
+```ts
+import { ModuleFederation, registerRemotes } from '@module-federation/enhanced/runtime';
+
+const mf = new ModuleFederation({
+  name: 'mf_host',
+  remotes: [
+    {
+      name: 'sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    }
+  ]
+});
+
+// Add a new remote @demo/sub2
+mf.registerRemotes([
+  {
+      name: 'sub2',
+      entry: 'http://localhost:2002/mf-manifest.json',
+  }
+]);
+
+// Overwrite the previous remote @demo/sub1
+mf.registerRemotes([
+  {
+      name: 'sub1',
+      entry: 'http://localhost:2003/mf-manifest.json',
+  }
+],{ force:true });
+```
+
+## registerPlugins <Badge>API</Badge>
+
+- type
+
+```typescript
+function registerPlugins(plugins: ModuleFederationRuntimePlugin[]) {}
+```
+
+* Example
+
+```ts
+import { registerPlugins } from '@module-federation/enhanced/runtime';
+import runtimePlugin from './custom-runtime-plugin';
+
+// Add a new runtime plugin
+registerPlugins([runtimePlugin()]);
+
+registerPlugins([
+  {
+    name: 'custom-plugin-runtime',
+    beforeInit(args) {
+      const { userOptions, origin } = args;
+      if (origin.options.name && origin.options.name !== userOptions.name) {
+        userOptions.name = origin.options.name;
+      }
+      console.log('[build time inject] beforeInit: ', args);
+      return args;
+    },
+    beforeLoadShare(args) {
+      console.log('[build time inject] beforeLoadShare: ', args);
+      return args;
+    },
+    createLink({ url }) {
+      const link = document.createElement('link');
+      link.setAttribute('href', url);
+      link.setAttribute('rel', 'preload');
+      link.setAttribute('as', 'script');
+      link.setAttribute('crossorigin', 'anonymous');
+      return link;
+    },
+  }
+]);
+```
+
+## registerShared <Badge>API</Badge>
+
+<Collapse>
+
+```typescript
+function registerShared(shared: Shared) {}
+
+type Shared = {
+  [pkgName: string]: ShareArgs | ShareArgs[];
+}
+type ShareArgs = (SharedBaseArgs & {
+    get: SharedGetter;
+}) | (SharedBaseArgs & {
+    lib: () => Module;
+}) | SharedBaseArgs;
+type SharedBaseArgs = {
+    version?: string;
+    shareConfig?: SharedConfig;
+    scope?: string | Array<string>;
+    deps?: Array<string>;
+    strategy?: 'version-first' | 'loaded-first';
+    loaded?: boolean;
+};
+interface SharedConfig {
+    singleton?: boolean;
+    requiredVersion: false | string;
+    eager?: boolean;
+    strictVersion?: boolean;
+    layer?: string | null;
+}
+type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
+```
+
+</Collapse>
+
+* Example
+
+```ts
+import { registerShared } from '@module-federation/enhanced/runtime';
+import React from 'react';
+import ReactDom from 'react-dom';
+
+registerShared({
+  react: {
+        version: "18.0.0",
+        scope: "default",
+        lib: ()=> React,
+        shareConfig: {
+            singleton: true,
+            requiredVersion: "^18.0.0"
+        }
+    },
+    "react-dom": {
+        version: "18.0.0",
+        scope: "default",
+        lib: ()=> ReactDom,
+        shareConfig: {
+            singleton: true,
+            requiredVersion: "^18.0.0"
+        }
+    }
+});
+```
+
+## loadRemote <Badge>API</Badge>
 
 - Type: `loadRemote(id: string)`
 - Loads a remote module.
 - Example
 
-```javascript
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
-
-init({
-    name: "mf_host",
-    remotes: [
-        {
-          name: "remote",
-          // Remote module alias. After configuring an alias, the module can be loaded through the alias. Please note: the prefixes of alias and name cannot be the same.
-          alias: "app1",
-          // Specify the remote module address ending with `mf-manifest.json`, which is generated by the mf plugin.
-          entry: "http://localhost:2001/vmok-manifest.json"
-        }
-    ]
-});
+```ts
+import { loadRemote } from '@module-federation/enhanced/runtime';
 
 // remoteName + expose
 loadRemote("remote/util").then((m)=> m.add(1,2,3));
@@ -115,82 +369,51 @@ loadRemote("remote/util").then((m)=> m.add(1,2,3));
 loadRemote("app1/util").then((m)=> m.add(1,2,3));
 ```
 
-## loadShare
+## loadShare <Badge>API</Badge>
 
 - Type: `loadShare(pkgName: string, extraOptions?: { customShareInfo?: Partial<Shared>;resolver?: (sharedOptions: ShareInfos[string]) => Shared;})`
 - Gets a `share` dependency. When there is a `share` dependency in the global environment that meets the requirements of the current `host`, the existing dependency that meets the `share` conditions will be reused first. Otherwise, its own dependency will be loaded and stored in the global cache.
 - This `API` is **generally not called directly by the user, but is used by the build plugin to transform its own dependencies**.
 
-- Example
+<Collapse title='Example'>
 
-```js
-import { init, loadRemote, loadShare } from '@module-federation/enhanced/runtime';
+```ts
+import { registerShared, loadShare } from '@module-federation/enhanced/runtime';
 import React from 'react';
 import ReactDom from 'react-dom';
 
-init({
-    name: "mf_host",
-    remotes: [],
-    shared: {
-        react: {
-            version: "17.0.0",
-            scope: "default",
-            lib: ()=> React,
-            shareConfig: {
-                singleton: true,
-                requiredVersion: "^17.0.0"
-            }
-        },
-        "react-dom": {
-            version: "17.0.0",
-            scope: "default",
-            lib: ()=> ReactDom,
-            shareConfig: {
-                singleton: true,
-                requiredVersion: "^17.0.0"
-            }
-        }
-    }
+registerShared({
+  react: {
+      version: "17.0.0",
+      scope: "default",
+      lib: ()=> React,
+      shareConfig: {
+          singleton: true,
+          requiredVersion: "^17.0.0"
+      }
+  },
+  "react-dom": {
+      version: "17.0.0",
+      scope: "default",
+      lib: ()=> ReactDom,
+      shareConfig: {
+          singleton: true,
+          requiredVersion: "^17.0.0"
+      }
+  }
 });
-
 
 loadShare("react").then((reactFactory)=>{
     console.log(reactFactory())
 });
 ```
 
+</Collapse>
+
 If multiple versions of shared are set, the loaded shared with the highest version will be returned by default. This behavior can be changed by setting `extraOptions.resolver`:
 
-```js
-import { init, loadRemote, loadShare } from '@module-federation/enhanced/runtime';
-
-init({
-  name: 'mf_host',
-  remotes: [],
-  shared: {
-    react: [
-      {
-        version: '17.0.0',
-        scope: 'default',
-        get: async ()=>() => ({ version: '17.0.0' }),
-        shareConfig: {
-          singleton: true,
-          requiredVersion: '^17.0.0',
-        },
-      },
-      {
-        version: '18.0.0',
-        scope: 'default',
-        // pass lib means the shared has loaded
-        lib: () => ({ version: '18.0.0' }),
-        shareConfig: {
-          singleton: true,
-          requiredVersion: '^18.0.0',
-        },
-      },
-    ],
-  },
-});
+```ts
+// ...
 
 loadShare('react', {
    resolver: (sharedOptions) => {
@@ -203,9 +426,9 @@ loadShare('react', {
 });
 ```
 
-## preloadRemote
+## preloadRemote <Badge>API</Badge>
 
-- type
+<Collapse>
 
 ```typescript
 async function preloadRemote(preloadOptions: Array<PreloadRemoteArgs>){}
@@ -232,6 +455,8 @@ type PreloadRemoteArgs = {
 };
 ```
 
+</Collapse>
+
 - Details
 
 Through `preloadRemote`, you can start preloading module resources at an earlier stage to avoid waterfall requests. What can `preloadRemote` preload:
@@ -244,24 +469,22 @@ Through `preloadRemote`, you can start preloading module resources at an earlier
 - Example
 
 ```ts
-import { init, preloadRemote } from '@module-federation/enhanced/runtime';
-init({
-    name: 'mf_host',
-    remotes: [
-        {
-            name: 'sub1',
-            entry: "http://localhost:2001/mf-manifest.json"
-        },
-        {
-            name: 'sub2',
-            entry: "http://localhost:2002/mf-manifest.json"
-        },
-        {
-            name: 'sub3',
-            entry: "http://localhost:2003/mf-manifest.json"
-        },
-    ],
-});
+import { registerRemotes, preloadRemote } from '@module-federation/enhanced/runtime';
+
+registerRemotes([
+  {
+      name: 'sub1',
+      entry: "http://localhost:2001/mf-manifest.json"
+  },
+  {
+      name: 'sub2',
+      entry: "http://localhost:2002/mf-manifest.json"
+  },
+  {
+      name: 'sub3',
+      entry: "http://localhost:2003/mf-manifest.json"
+  },
+]);
 
 // Preload the @demo/sub1 module
 // Filter resource information that contains 'ignore' in the resource name
@@ -295,155 +518,4 @@ preloadRemote([
         exposes: ['add'],
     },
 ]);
-```
-
-## registerRemotes
-
-- type
-
-```typescript
-function registerRemotes(remotes: Remote[], options?: { force?: boolean }) {}
-
-type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
-
-interface RemoteInfoCommon {
-  alias?: string;
-  shareScope?: string;
-  type?: RemoteEntryType;
-  entryGlobalName?: string;
-}
-
-interface RemoteWithEntry {
-    name: string;
-    entry: string;
-}
-
-interface RemoteWithVersion {
-    name: string;
-    version: string;
-}
-```
-
-- Details
-
-**info**: Please set `force:true` with caution!
-
-If `force: true` is set, it will overwrite the registered (and loaded) modules, and automatically delete the cache of the loaded modules (if they have been loaded), and output a warning in the console to inform that this operation is risky.
-
-* Example
-
-```ts
-import { init, registerRemotes } from '@module-federation/enhanced/runtime';
-
-init({
-  name: 'mf_host',
-  remotes: [
-    {
-      name: 'sub1',
-      entry: 'http://localhost:2001/mf-manifest.json',
-    }
-  ],
-});
-
-// Add a new remote @demo/sub2
-registerRemotes([
-  {
-      name: 'sub2',
-      entry: 'http://localhost:2002/mf-manifest.json',
-  }
-]);
-
-// Overwrite the previous remote @demo/sub1
-registerRemotes([
-  {
-      name: 'sub1',
-      entry: 'http://localhost:2003/mf-manifest.json',
-  }
-],{ force:true });
-```
-
-## registerPlugins
-
-- type
-
-```typescript
-function registerPlugins(plugins: FederationRuntimePlugin[]) {}
-```
-
-* Example
-
-```ts
-import { init, registerPlugins } from '@module-federation/enhanced/runtime';
-import runtimePlugin from './custom-runtime-plugin';
-
-init({
-  name: 'mf_host',
-  remotes: [
-    {
-      name: 'sub1',
-      entry: 'http://localhost:2001/mf-manifest.json',
-    }
-  ],
-});
-
-// Add a new runtime plugin
-registerPlugins([runtimePlugin()]);
-
-registerPlugins([
-  {
-    name: 'custom-plugin-runtime',
-    beforeInit(args) {
-      const { userOptions, origin } = args;
-      if (origin.options.name && origin.options.name !== userOptions.name) {
-        userOptions.name = origin.options.name;
-      }
-      console.log('[build time inject] beforeInit: ', args);
-      return args;
-    },
-    beforeLoadShare(args) {
-      console.log('[build time inject] beforeLoadShare: ', args);
-      return args;
-    },
-    createLink({ url }) {
-      const link = document.createElement('link');
-      link.setAttribute('href', url);
-      link.setAttribute('rel', 'preload');
-      link.setAttribute('as', 'script');
-      link.setAttribute('crossorigin', 'anonymous');
-      return link;
-    },
-  }
-]);
-```
-
-## ModuleFederation
-
-In addition to exposing APIs,  the Runtime also provides the ModuleFederation class, which you can use to create ModuleFederation instance.
-
-* What is a `ModuleFederation` instance?
-
-A `ModuleFederation` instance is an instance of the `ModuleFederation` class, which contains all the functionality of the `ModuleFederation` runtime.
-
-> You can enter `__FEDERATION__.__INSTANCES__` in the console to view the created instances.
-
-* When to use `ModuleFederation` class?
-
-To ensure the uniqueness of the ModuleFederation instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the ModuleFederation instance from memory and then call the APIs of the ModuleFederation instance. This is also why APIs like loadRemote can be used directly from the `@module-federation/enhanced/runtime` package and inherently understand what application container they are attached to.
-
-However, this singleton pattern also limits the ability to create multiple instances, as it assumes that there is only one instance per bundle. Therefore, if you need to create a new instance , you can use the ModuleFederation class to create a new one.
-
-```ts
-import { ModuleFederation } from '@module-federation/enhanced/runtime';
-
-const mf = new ModuleFederation({
-  name: '@demo/host',
-  remotes: [
-    {
-      name: '@demo/sub1',
-      entry: 'http://localhost:8080/vmok-manifest.json'
-    }
-  ]
-});
-
-mf.loadRemote('@demo/sub1/util').then((m) => m.add(1, 2, 3));
 ```

@@ -15,7 +15,7 @@ export {
   getRemoteEntry,
   getRemoteInfo,
   registerGlobalPlugins,
-  type FederationRuntimePlugin,
+  type ModuleFederationRuntimePlugin,
   type Federation,
 } from '@module-federation/runtime-core';
 
@@ -98,6 +98,14 @@ export function registerPlugins(
 
 export function getInstance() {
   return FederationInstance;
+}
+
+export function registerShared(
+  ...args: Parameters<ModuleFederation['registerShared']>
+): ReturnType<ModuleFederation['registerShared']> {
+  assert(FederationInstance, 'Please call init first');
+  // eslint-disable-next-line prefer-spread
+  return FederationInstance.registerShared.apply(FederationInstance, args);
 }
 
 // Inject for debug

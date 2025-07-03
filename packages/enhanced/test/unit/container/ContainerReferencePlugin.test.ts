@@ -49,14 +49,17 @@ jest.mock('../../../src/lib/container/RemoteModule', () => MockRemoteModule, {
   virtual: true,
 });
 
-// Mock FederationRuntimePlugin
+// Mock ModuleFederationRuntimePlugin
 const mockApply = jest.fn();
 const mockFederationRuntimePlugin = jest.fn().mockImplementation(() => ({
   apply: mockApply,
 }));
-jest.mock('../../../src/lib/container/runtime/FederationRuntimePlugin', () => {
-  return mockFederationRuntimePlugin;
-});
+jest.mock(
+  '../../../src/lib/container/runtime/ModuleFederationRuntimePlugin',
+  () => {
+    return mockFederationRuntimePlugin;
+  },
+);
 
 // Mock FallbackModuleFactory
 jest.mock(
@@ -301,7 +304,7 @@ describe('ContainerReferencePlugin', () => {
       expect(mockCompilation.dependencyFactories.size).toBeGreaterThan(0);
     });
 
-    it('should apply FederationRuntimePlugin', () => {
+    it('should apply ModuleFederationRuntimePlugin', () => {
       const options = {
         remotes: {
           'remote-app': 'remote-app@http://localhost:3001/remoteEntry.js',
@@ -316,7 +319,7 @@ describe('ContainerReferencePlugin', () => {
       const plugin = new ContainerReferencePlugin(options);
       plugin.apply(mockCompiler);
 
-      // Verify FederationRuntimePlugin was created and applied
+      // Verify ModuleFederationRuntimePlugin was created and applied
       expect(mockFederationRuntimePlugin).toHaveBeenCalled();
       expect(mockApply).toHaveBeenCalledWith(mockCompiler);
     });

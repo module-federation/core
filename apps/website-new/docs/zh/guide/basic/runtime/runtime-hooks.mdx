@@ -24,7 +24,7 @@ interface ModuleFederationRuntimeOptions {
   version?: string;
   remotes: Array<Remote>;
   shared: ShareInfos;
-  plugins: Array<FederationRuntimePlugin>;
+  plugins: Array<ModuleFederationRuntimePlugin>;
   inBrowser: boolean;
 }
 ```
@@ -168,11 +168,11 @@ type ErrorLoadRemoteOptions ={
 * example
 
 ```ts
-import { init, loadRemote } from '@module-federation/enhanced/runtime'
+import { ModuleFederation } from '@module-federation/enhanced/runtime'
 
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
-const fallbackPlugin: () => FederationRuntimePlugin =
+const fallbackPlugin: () => ModuleFederationRuntimePlugin =
   function () {
     return {
       name: 'fallback-plugin',
@@ -184,7 +184,7 @@ const fallbackPlugin: () => FederationRuntimePlugin =
   };
 
 
-init({
+const mf = new ModuleFederation({
     name: 'mf_host',
     remotes: [
         {
@@ -196,7 +196,7 @@ init({
     plugins: [fallbackPlugin()]
 });
 
-loadRemote('app1/un-existed-module').then(mod=>{
+mf.loadRemote('app1/un-existed-module').then(mod=>{
   expect(mod).toEqual('fallback');
 })
 ```
@@ -244,11 +244,11 @@ type ResolveShareOptions ={
 * example
 
 ```ts
-import { init, loadRemote } from '@module-federation/enhanced/runtime'
+import { ModuleFederation, loadRemote } from '@module-federation/enhanced/runtime'
 
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
-const customSharedPlugin: () => FederationRuntimePlugin =
+const customSharedPlugin: () => ModuleFederationRuntimePlugin =
   function () {
     return {
       name: 'custom-shared-plugin',
@@ -271,7 +271,7 @@ const customSharedPlugin: () => FederationRuntimePlugin =
   };
 
 
-init({
+const mf = new ModuleFederation({
     name: 'mf_host',
     shared: {
       react: {
@@ -289,7 +289,7 @@ init({
 
 window.React = ()=> 'Desired Shared';
 
-loadShare("react").then((reactFactory)=>{
+mf.loadShare("react").then((reactFactory)=>{
   expect(reactFactory()).toEqual(window.React());
 });
 ```
@@ -360,10 +360,9 @@ type CreateScriptOptions ={
 * example
 
 ```ts
-import { init } from '@module-federation/enhanced/runtime'
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
-const changeScriptAttributePlugin: () => FederationRuntimePlugin =
+const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
   function () {
     return {
       name: 'change-script-attribute',

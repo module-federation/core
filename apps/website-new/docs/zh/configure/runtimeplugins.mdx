@@ -13,9 +13,9 @@
 创建运行时插件文件： `custom-runtime-plugin.ts`
 
 ```ts title="custom-runtime-plugin.ts"
-import { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
-export default function (): FederationRuntimePlugin {
+export default function (): ModuleFederationRuntimePlugin {
   return {
     name: 'custom-plugin-build',
     beforeInit(args) {

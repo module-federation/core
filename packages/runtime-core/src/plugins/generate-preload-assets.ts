@@ -8,7 +8,7 @@ import {
 } from '@module-federation/sdk';
 import {
   EntryAssets,
-  FederationRuntimePlugin,
+  ModuleFederationRuntimePlugin,
   PreloadAssets,
   PreloadConfig,
   PreloadOptions,
@@ -310,7 +310,7 @@ export function generatePreloadAssets(
   };
 }
 
-export const generatePreloadAssetsPlugin: () => FederationRuntimePlugin =
+export const generatePreloadAssetsPlugin: () => ModuleFederationRuntimePlugin =
   function () {
     return {
       name: 'generate-preload-assets-plugin',

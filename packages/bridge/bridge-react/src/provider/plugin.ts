@@ -1,5 +1,5 @@
 import type {
-  FederationRuntimePlugin,
+  ModuleFederationRuntimePlugin,
   ModuleFederation,
 } from '@module-federation/runtime';
 
@@ -9,7 +9,7 @@ export type FederationRuntimeType = {
 
 export const federationRuntime: FederationRuntimeType = { instance: null };
 
-function BridgeReactPlugin(): FederationRuntimePlugin {
+function BridgeReactPlugin(): ModuleFederationRuntimePlugin {
   return {
     name: 'bridge-react-plugin',
     beforeInit(args) {

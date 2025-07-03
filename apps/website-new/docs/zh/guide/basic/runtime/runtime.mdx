@@ -58,21 +58,49 @@ import { PackageManagerTabs } from '@theme';
 
 ## 模块注册
 
-```ts
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
+如果使用了构建插件，那么可以直接使用 `registerRemotes` 注册模块。
 
-init({
-    // 消费者模块名称，必填。如同时注册了 ModuleFederationPlugin 插件，则 `name` 应与插件中配置的 `name`[/configure/name.html] 保持一致，
-    name: 'mf_host',
-    // 远程模块注册信息，包含模块名称、别名、版本等信息。
-    remotes: [
-        {
-            name: "remote1",
-            alias: "remotes-1",
-            entry: "http://localhost:3001/mf-manifest.json"
-        }
-    ],
+```ts
+import { registerRemotes } from '@module-federation/enhanced/runtime';
+
+registerRemotes([
+  {
+      name: 'remote1',
+      alias: 'remote-1',
+      entry: 'http://localhost:3001/mf-manifest.json',
+  }
+]);
+
+```
+
+如果没有使用构建插件，并且没有创建实例，那么可以创建新的实例，并注册模块。
+
+```ts
+import { ModuleFederation } from '@module-federation/enhanced/runtime';
+
+const mf = new ModuleFederation({
+  name: 'mf_host',
+  remotes: [
+    {
+      name: 'remote1',
+      alias: 'remote-1',
+      entry: 'http://localhost:3001/mf-manifest.json',
+    }
+  ]
 });
+
+```
+
+如果没有使用构建插件，但已经创建了实例，那么可以调用 `instance.registerRemotes` 进行模块注册。
+
+```ts
+mf.registerRemotes([
+  {
+    name: 'remote2',
+    alias: 'remote-2',
+    entry: 'http://localhost:3002/mf-manifest.json',
+  }
+]);
 ```
 
 ## 模块加载

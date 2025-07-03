@@ -80,7 +80,7 @@ jest.mock(
 );
 
 jest.mock(
-  '../../../src/lib/container/runtime/FederationRuntimePlugin',
+  '../../../src/lib/container/runtime/ModuleFederationRuntimePlugin',
   () => {
     return jest.fn().mockImplementation(() => ({
       apply: jest.fn(),
@@ -290,7 +290,7 @@ describe('ContainerPlugin', () => {
       expect(true).toBe(true);
     });
 
-    it('should register FederationRuntimePlugin', () => {
+    it('should register ModuleFederationRuntimePlugin', () => {
       const options = {
         name: 'test-container',
         exposes: {
@@ -301,10 +301,10 @@ describe('ContainerPlugin', () => {
       const plugin = new ContainerPlugin(options);
       plugin.apply(mockCompiler);
 
-      const FederationRuntimePlugin = require('../../../src/lib/container/runtime/FederationRuntimePlugin');
-      expect(FederationRuntimePlugin).toHaveBeenCalled();
+      const ModuleFederationRuntimePlugin = require('../../../src/lib/container/runtime/ModuleFederationRuntimePlugin');
+      expect(ModuleFederationRuntimePlugin).toHaveBeenCalled();
       expect(
-        FederationRuntimePlugin.mock.results[0].value.apply,
+        ModuleFederationRuntimePlugin.mock.results[0].value.apply,
       ).toHaveBeenCalledWith(mockCompiler);
     });
 

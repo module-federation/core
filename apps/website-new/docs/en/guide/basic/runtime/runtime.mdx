@@ -59,21 +59,49 @@ import { PackageManagerTabs } from '@theme';
 
 ## Module Registration
 
+If use build plugin, you can directly register modules using `registerRemotes`.
+
 ```ts
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
-init({
-    // The name of the consumer module, required. If the ModuleFederationPlugin plugin is also registered, the `name` should be consistent with the `name`[/configure/name.html] configured in the plugin,
-    name: 'mf_host',
-    // Remote module registration information, including module name, alias, version, etc.
-    remotes: [
-        {
-            name: "remote1",
-            alias: "remotes-1",
-            entry: "http://localhost:3001/mf-manifest.json"
-        }
-    ],
+registerRemotes([
+  {
+      name: 'remote1',
+      alias: 'remote-1',
+      entry: 'http://localhost:3001/mf-manifest.json',
+  }
+]);
+
+```
+
+If the build plugin is not used and no instance has been created, you can create a new instance and register the modules.
+
+```ts
+import { ModuleFederation } from '@module-federation/enhanced/runtime';
+
+const mf = new ModuleFederation({
+  name: 'mf_host',
+  remotes: [
+    {
+      name: 'remote1',
+      alias: 'remote-1',
+      entry: 'http://localhost:3001/mf-manifest.json',
+    }
+  ]
 });
+
+```
+
+If the build plugin is not used but an instance has already been created, you can call `instance.registerRemotes` to register modules.
+
+```ts
+mf.registerRemotes([
+  {
+    name: 'remote2',
+    alias: 'remote-2',
+    entry: 'http://localhost:3002/mf-manifest.json',
+  }
+]);
 ```
 
 ## Module Loading

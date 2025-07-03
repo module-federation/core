@@ -25,7 +25,7 @@ import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import ConsumeSharedModule from './ConsumeSharedModule';
 import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
-import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
+import ModuleFederationRuntimePlugin from '../container/runtime/ModuleFederationRuntimePlugin';
 import ShareRuntimeModule from './ShareRuntimeModule';
 import type { SemVerRange } from 'webpack/lib/util/semver';
 import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
@@ -145,7 +145,7 @@ class ConsumeSharedPlugin {
   }
 
   apply(compiler: Compiler): void {
-    new FederationRuntimePlugin().apply(compiler);
+    new ModuleFederationRuntimePlugin().apply(compiler);
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 

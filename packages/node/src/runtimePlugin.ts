@@ -1,5 +1,5 @@
 import type {
-  FederationRuntimePlugin,
+  ModuleFederationRuntimePlugin,
   ModuleFederation,
 } from '@module-federation/runtime';
 type WebpackRequire = {
@@ -360,7 +360,7 @@ export const setupWebpackRequirePatching = (
   }
 };
 
-export default function (): FederationRuntimePlugin {
+export default function (): ModuleFederationRuntimePlugin {
   return {
     name: 'node-federation-plugin',
     beforeInit(args) {

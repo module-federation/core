@@ -3,7 +3,7 @@ import {
   ModuleFederation,
   addGlobalSnapshot,
 } from '@module-federation/runtime-core';
-import { FederationRuntimePlugin } from '@module-federation/runtime-core/types';
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime-core/types';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
 
 // eslint-disable-next-line max-lines-per-function
@@ -22,7 +22,7 @@ describe('hooks', () => {
       initArgs: any,
       beforeLoadRemoteArgs,
       loadRemoteArgs;
-    const testPlugin: () => FederationRuntimePlugin = () => ({
+    const testPlugin: () => ModuleFederationRuntimePlugin = () => ({
       name: 'testPlugin',
       beforeInit(args) {
         beforeInitArgs = args;
@@ -236,7 +236,7 @@ describe('hooks', () => {
       statusText: 'OK',
       headers: { 'Content-Type': 'application/json' },
     });
-    const fetchPlugin: () => FederationRuntimePlugin = () => ({
+    const fetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
       name: 'fetch-plugin',
       fetch(url, options) {
         if (url === 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json') {
@@ -294,7 +294,7 @@ describe('hooks', () => {
       headers: { 'Content-Type': 'application/json' },
     });
 
-    const fetchPlugin: () => FederationRuntimePlugin = function () {
+    const fetchPlugin: () => ModuleFederationRuntimePlugin = function () {
       return {
         name: 'fetch-plugin',
         fetch(url, options) {
@@ -306,7 +306,7 @@ describe('hooks', () => {
         },
       };
     };
-    const loadEntryPlugin = function (): FederationRuntimePlugin {
+    const loadEntryPlugin = function (): ModuleFederationRuntimePlugin {
       return {
         name: 'load-entry-plugin',
         loadEntry({ remoteInfo }) {

@@ -447,7 +447,7 @@ export const createSharingTestEnvironment = () => {
  * Mock classes for federation runtime plugins
  */
 export const createMockFederationRuntime = () => {
-  // Mock FederationRuntimePlugin
+  // Mock ModuleFederationRuntimePlugin
   const MockFederationRuntimePlugin = jest.fn().mockImplementation(() => ({
     apply: jest.fn(),
   }));

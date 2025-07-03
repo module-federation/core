@@ -12,10 +12,10 @@ import {
   isDebugMode,
 } from '@module-federation/sdk';
 import { warn } from './utils/logger';
-import { FederationRuntimePlugin } from './type/plugin';
+import { ModuleFederationRuntimePlugin } from './type/plugin';
 
 export interface Federation {
-  __GLOBAL_PLUGIN__: Array<FederationRuntimePlugin>;
+  __GLOBAL_PLUGIN__: Array<ModuleFederationRuntimePlugin>;
   __DEBUG_CONSTRUCTOR_VERSION__?: string;
   moduleInfo: GlobalModuleInfo;
   __DEBUG_CONSTRUCTOR__?: typeof ModuleFederation;
@@ -269,7 +269,7 @@ export const getRemoteEntryExports = (
 // If a plugin is not registered, it is added to the global plugins.
 // If a plugin is already registered, a warning message is logged.
 export const registerGlobalPlugins = (
-  plugins: Array<FederationRuntimePlugin>,
+  plugins: Array<ModuleFederationRuntimePlugin>,
 ): void => {
   const { __GLOBAL_PLUGIN__ } = nativeGlobal.__FEDERATION__;
 
@@ -282,7 +282,7 @@ export const registerGlobalPlugins = (
   });
 };
 
-export const getGlobalHostPlugins = (): Array<FederationRuntimePlugin> =>
+export const getGlobalHostPlugins = (): Array<ModuleFederationRuntimePlugin> =>
   nativeGlobal.__FEDERATION__.__GLOBAL_PLUGIN__;
 
 export const getPreloaded = (id: string) =>

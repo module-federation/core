@@ -39,12 +39,15 @@ jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
   getWebpackPath: jest.fn(() => 'mocked-webpack-path'),
 }));
 
-// Mock FederationRuntimePlugin
-jest.mock('../../../src/lib/container/runtime/FederationRuntimePlugin', () => {
-  return jest.fn().mockImplementation(() => ({
-    apply: jest.fn(),
-  }));
-});
+// Mock ModuleFederationRuntimePlugin
+jest.mock(
+  '../../../src/lib/container/runtime/ModuleFederationRuntimePlugin',
+  () => {
+    return jest.fn().mockImplementation(() => ({
+      apply: jest.fn(),
+    }));
+  },
+);
 
 // Mock ConsumeSharedModule
 jest.mock('../../../src/lib/sharing/ConsumeSharedModule', () => {

@@ -15,9 +15,9 @@ import { MF_DATA_FETCH_TYPE, MF_DATA_FETCH_STATUS } from '../../constant';
 import { DATA_FETCH_CLIENT_SUFFIX } from '@module-federation/rsbuild-plugin/constant';
 
 import type { MF_DATA_FETCH_MAP_VALUE } from '../../interfaces/global';
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
-const autoFetchData: () => FederationRuntimePlugin = () => ({
+const autoFetchData: () => ModuleFederationRuntimePlugin = () => ({
   name: 'auto-fetch-data-plugin',
   beforeInit(args) {
     initDataFetchMap();

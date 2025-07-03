@@ -343,4 +343,11 @@ export class ModuleFederation {
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
     return this.remoteHandler.registerRemotes(remotes, options);
   }
+
+  registerShared(shared: UserOptions['shared']) {
+    this.sharedHandler.registerShared(this.options, {
+      ...this.options,
+      shared,
+    });
+  }
 }

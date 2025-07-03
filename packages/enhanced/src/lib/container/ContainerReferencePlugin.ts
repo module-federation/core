@@ -14,7 +14,7 @@ import RemoteRuntimeModule from './RemoteRuntimeModule';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import { parseOptions } from './options';
 import { containerReferencePlugin } from '@module-federation/sdk';
-import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import ModuleFederationRuntimePlugin from './runtime/ModuleFederationRuntimePlugin';
 import schema from '../../schemas/container/ContainerReferencePlugin';
 import checkOptions from '../../schemas/container/ContainerReferencePlugin.check';
 
@@ -70,7 +70,7 @@ class ContainerReferencePlugin {
    */
   apply(compiler: Compiler): void {
     const { _remotes: remotes, _remoteType: remoteType } = this;
-    new FederationRuntimePlugin().apply(compiler);
+    new ModuleFederationRuntimePlugin().apply(compiler);
     /** @type {Record<string, string>} */
     const remoteExternals: Record<string, string> = {};
 

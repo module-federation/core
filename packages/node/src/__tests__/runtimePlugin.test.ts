@@ -13,7 +13,7 @@ import runtimePlugin, {
   setupWebpackRequirePatching,
 } from '../runtimePlugin';
 import type {
-  FederationRuntimePlugin,
+  ModuleFederationRuntimePlugin,
   ModuleFederation,
   Federation,
 } from '@module-federation/runtime';
@@ -125,7 +125,7 @@ const mockModule = {
 } as any;
 
 describe('runtimePlugin', () => {
-  let plugin: FederationRuntimePlugin;
+  let plugin: ModuleFederationRuntimePlugin;
 
   beforeEach(() => {
     jest.clearAllMocks();
