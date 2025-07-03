@@ -35,6 +35,13 @@ export interface ConsumesObject {
    */
   [k: string]: ConsumesConfig | ConsumesItem;
 }
+
+export interface IncludeExcludeOptions {
+  request?: string | RegExp;
+  version?: string;
+  fallbackVersion?: string;
+}
+
 /**
  * Advanced configuration for modules that should be consumed from share scope.
  */
@@ -83,4 +90,7 @@ export interface ConsumesConfig {
    * The actual request to use for importing the module. If not specified, the property name/key will be used.
    */
   request?: string;
+  exclude?: IncludeExcludeOptions;
+  include?: IncludeExcludeOptions;
+  nodeModulesReconstructedLookup?: boolean;
 }
