@@ -13,11 +13,15 @@ const { dependencies } = require(
 ) as typeof import('webpack');
 
 class ConsumeSharedFallbackDependency extends dependencies.ModuleDependency {
+  layer?: string | null;
+
   /**
    * @param {string} request the request
+   * @param {string | null} layer the layer for the fallback module
    */
-  constructor(request: string) {
+  constructor(request: string, layer?: string | null) {
     super(request);
+    this.layer = layer;
   }
 
   override get type(): string {
