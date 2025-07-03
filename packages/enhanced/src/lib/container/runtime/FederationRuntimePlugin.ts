@@ -56,7 +56,7 @@ const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 const onceForCompiler = new WeakSet<Compiler>();
 const onceForCompilerEntryMap = new WeakMap<Compiler, string>();
 
-class ModuleFederationRuntimePlugin {
+class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
   bundlerRuntimePath: string;
@@ -163,7 +163,7 @@ class ModuleFederationRuntimePlugin {
     if (!this.options?.virtualRuntimeEntry) {
       const containerName = this.options.name;
       const hash = createHash(
-        `${containerName} ${ModuleFederationRuntimePlugin.getTemplate(
+        `${containerName} ${FederationRuntimePlugin.getTemplate(
           compiler,
           this.options,
           this.bundlerRuntimePath,
@@ -173,7 +173,7 @@ class ModuleFederationRuntimePlugin {
       entryFilePath = path.join(TEMP_DIR, `entry.${hash}.js`);
     } else {
       entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
-        ModuleFederationRuntimePlugin.getTemplate(
+        FederationRuntimePlugin.getTemplate(
           compiler,
           this.options,
           this.bundlerRuntimePath,
@@ -202,7 +202,7 @@ class ModuleFederationRuntimePlugin {
       mkdirpSync(fs, TEMP_DIR);
       fs.writeFileSync(
         filePath,
-        ModuleFederationRuntimePlugin.getTemplate(
+        FederationRuntimePlugin.getTemplate(
           compiler,
           this.options,
           this.bundlerRuntimePath,
@@ -429,4 +429,4 @@ class ModuleFederationRuntimePlugin {
   }
 }
 
-export default ModuleFederationRuntimePlugin;
+export default FederationRuntimePlugin;

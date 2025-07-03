@@ -18,7 +18,7 @@ import type { Compiler, WebpackPluginInstance } from 'webpack';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
-import ModuleFederationRuntimePlugin from './runtime/ModuleFederationRuntimePlugin';
+import FederationRuntimePlugin from './runtime/FederationModulesPlugin';
 import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
 import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
@@ -147,7 +147,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       new PrefetchPlugin(options).apply(compiler);
     }
 
-    new ModuleFederationRuntimePlugin(options).apply(compiler);
+    new FederationRuntimePlugin(options).apply(compiler);
 
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =

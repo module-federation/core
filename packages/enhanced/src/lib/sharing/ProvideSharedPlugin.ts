@@ -21,7 +21,7 @@ import type {
   ProvideSharedPluginOptions,
   ProvidesConfig,
 } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
-import ModuleFederationRuntimePlugin from '../container/runtime/ModuleFederationRuntimePlugin';
+import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
 const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
@@ -124,7 +124,7 @@ class ProvideSharedPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
-    new ModuleFederationRuntimePlugin().apply(compiler);
+    new FederationRuntimePlugin().apply(compiler);
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 

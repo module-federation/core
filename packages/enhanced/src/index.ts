@@ -9,7 +9,7 @@ export { default as ContainerPlugin } from './wrapper/ContainerPlugin';
 export { default as ConsumeSharedPlugin } from './wrapper/ConsumeSharedPlugin';
 export { default as ProvideSharedPlugin } from './wrapper/ProvideSharedPlugin';
 export { default as FederationModulesPlugin } from './wrapper/FederationModulesPlugin';
-export { default as ModuleFederationRuntimePlugin } from './wrapper/ModuleFederationRuntimePlugin';
+export { default as FederationRuntimePlugin } from './wrapper/FederationRuntimePlugin';
 export { default as AsyncBoundaryPlugin } from './wrapper/AsyncBoundaryPlugin';
 export { default as HoistContainerReferencesPlugin } from './wrapper/HoistContainerReferencesPlugin';
 

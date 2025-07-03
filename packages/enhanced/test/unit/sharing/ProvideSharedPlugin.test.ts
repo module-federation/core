@@ -26,14 +26,11 @@ jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
   getWebpackPath: jest.fn(() => 'mocked-webpack-path'),
 }));
 
-jest.mock(
-  '../../../src/lib/container/runtime/ModuleFederationRuntimePlugin',
-  () => {
-    return jest.fn().mockImplementation(() => ({
-      apply: jest.fn(),
-    }));
-  },
-);
+jest.mock('../../../src/lib/container/runtime/FederationRuntimePlugin', () => {
+  return jest.fn().mockImplementation(() => ({
+    apply: jest.fn(),
+  }));
+});
 
 // Mock ProvideSharedDependency
 class MockProvideSharedDependency {

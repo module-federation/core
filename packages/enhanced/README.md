@@ -10,7 +10,7 @@ The following items are exported:
 - SharePlugin
 - ConsumeSharedPlugin
 - ProvideSharedPlugin
-- ModuleFederationRuntimePlugin
+- FederationRuntimePlugin
 - AsyncBoundaryPlugin
 - HoistContainerReferencesPlugin
 

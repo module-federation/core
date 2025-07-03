@@ -3,11 +3,9 @@ import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
-const PLUGIN_NAME = 'ModuleFederationRuntimePlugin';
+const PLUGIN_NAME = 'FederationRuntimePlugin';
 
-export default class ModuleFederationRuntimePlugin
-  implements WebpackPluginInstance
-{
+export default class FederationRuntimePlugin implements WebpackPluginInstance {
   private _options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   name: string;
   entryFilePath: string;
@@ -22,8 +20,8 @@ export default class ModuleFederationRuntimePlugin
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
     const CoreFederationRuntimePlugin =
-      require('../lib/container/runtime/ModuleFederationRuntimePlugin')
-        .default as typeof import('../lib/container/runtime/ModuleFederationRuntimePlugin').default;
+      require('../lib/container/runtime/FederationRuntimePlugin')
+        .default as typeof import('../lib/container/runtime/FederationRuntimePlugin').default;
     const pluginInstance = new CoreFederationRuntimePlugin(this._options);
     pluginInstance.apply(compiler);
 

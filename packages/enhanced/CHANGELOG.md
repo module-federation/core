@@ -764,7 +764,7 @@
 
 - 6b02145: Added a check to skip processing when virtualRuntimeEntry is present.
 
-  - Added an early return in `ModuleFederationRuntimePlugin` to skip processing if `options.virtualRuntimeEntry` is defined.
+  - Added an early return in `FederationRuntimePlugin` to skip processing if `options.virtualRuntimeEntry` is defined.
 
 - 22a3b83: fix(data-prefetch): apply DataPrefetchPlugin on demand
 - Updated dependencies [22a3b83]
@@ -784,7 +784,7 @@
 
 - 70a1708: Added a check to skip processing when virtualRuntimeEntry is present.
 
-  - Added an early return in `ModuleFederationRuntimePlugin` to skip processing if `options.virtualRuntimeEntry` is defined.
+  - Added an early return in `FederationRuntimePlugin` to skip processing if `options.virtualRuntimeEntry` is defined.
   - @module-federation/rspack@0.6.9
   - @module-federation/sdk@0.6.9
   - @module-federation/runtime-tools@0.6.9

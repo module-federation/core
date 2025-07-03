@@ -15,7 +15,7 @@ import type {
   WebpackPluginFunction,
 } from 'webpack';
 import type { containerPlugin } from '@module-federation/sdk';
-import ModuleFederationRuntimePlugin from './runtime/ModuleFederationRuntimePlugin';
+import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
 import schema from '../../schemas/container/ContainerPlugin';
@@ -172,7 +172,7 @@ class ContainerPlugin {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
 
-    const federationRuntimePluginInstance = new ModuleFederationRuntimePlugin();
+    const federationRuntimePluginInstance = new FederationRuntimePlugin();
     federationRuntimePluginInstance.apply(compiler);
 
     const { name, exposes, shareScope, filename, library, runtime } =
