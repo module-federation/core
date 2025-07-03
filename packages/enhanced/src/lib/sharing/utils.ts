@@ -10,6 +10,11 @@ import type { InputFileSystem } from 'webpack/lib/util/fs';
 const { join, dirname, readJson } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
+import type { Compilation, WebpackError as WebpackErrorType } from 'webpack';
+
+const WebpackError = require(
+  normalizeWebpackPath('webpack/lib/WebpackError'),
+) as typeof import('webpack/lib/WebpackError');
 
 // Extreme shorthand only for github. eg: foo/bar
 const RE_URL_GITHUB_EXTREME_SHORT = /^[^/@:.\s][^/@:\s]*\/[^@:\s]*[^/@:\s]#\S+/;
@@ -473,4 +478,75 @@ export function normalizeConsumeShareOptions(consumeOptions: ConsumeOptions) {
     shareScope,
     shareKey,
   };
+}
+
+export function addSingletonFilterWarning(
+  compilation: Compilation,
+  shareKey: string, // The shareKey or a relevant identifier for the shared module
+  filterType: 'include' | 'exclude',
+  filterProperty: 'request' | 'version',
+  filterValue: string | RegExp,
+  moduleRequest: string, // original request that led to this shared module
+  moduleResource?: string, // resolved path of the module
+): void {
+  if (typeof compilation.warnings.push !== 'function') {
+    return;
+  }
+  const filterValueStr =
+    filterValue instanceof RegExp ? filterValue.toString() : `"${filterValue}"`;
+  const warningMessage = `"singleton: true" is used together with "${filterType}.${filterProperty}: ${filterValueStr}". This might lead to multiple instances of the shared module "${shareKey}" in the shared scope.`;
+  const warning = new WebpackError(warningMessage) as WebpackErrorType;
+
+  if (moduleResource) {
+    warning.file = `shared module ${moduleRequest} -> ${moduleResource}`;
+  } else {
+    warning.file = `shared module ${moduleRequest}`; // Fallback if resource is not available
+  }
+  compilation.warnings.push(warning);
+}
+
+export function testRequestFilters(
+  remainder: string,
+  includeRequest?: string | RegExp,
+  excludeRequest?: string | RegExp,
+): boolean {
+  if (
+    includeRequest &&
+    !(includeRequest instanceof RegExp
+      ? includeRequest.test(remainder)
+      : remainder === includeRequest)
+  ) {
+    return false; // Skip if include doesn't match
+  }
+
+  if (
+    excludeRequest &&
+    (excludeRequest instanceof RegExp
+      ? excludeRequest.test(remainder)
+      : remainder === excludeRequest)
+  ) {
+    return false; // Skip if exclude matches
+  }
+
+  return true; // Process if no filters skip it
+}
+
+export function createLookupKeyForSharing(
+  request: string,
+  layer?: string | null,
+): string {
+  if (layer) {
+    return `(${layer})${request}`;
+  }
+  return request;
+}
+
+export function extractPathAfterNodeModules(filePath: string): string | null {
+  // Fast check for 'node_modules' substring
+  if (~filePath.indexOf('node_modules')) {
+    const nodeModulesIndex = filePath.lastIndexOf('node_modules');
+    const result = filePath.substring(nodeModulesIndex + 13); // 13 = 'node_modules/'.length
+    return result;
+  }
+  return null;
 }

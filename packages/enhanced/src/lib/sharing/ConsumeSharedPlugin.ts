@@ -16,6 +16,9 @@ import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
   getDescriptionFile,
   getRequiredVersionFromDescriptionFile,
+  testRequestFilters,
+  createLookupKeyForSharing,
+  extractPathAfterNodeModules,
 } from './utils';
 import type {
   ResolveOptionsWithDependencyType,
@@ -66,9 +69,7 @@ function createLookupKey(
   request: string,
   contextInfo: ModuleFactoryCreateDataContextInfo,
 ): string {
-  return contextInfo.issuerLayer
-    ? `(${contextInfo.issuerLayer})${request}`
-    : request;
+  return createLookupKeyForSharing(request, contextInfo.issuerLayer);
 }
 
 class ConsumeSharedPlugin {
@@ -99,6 +100,9 @@ class ConsumeSharedPlugin {
                 issuerLayer: undefined,
                 layer: undefined,
                 request: key,
+                include: undefined,
+                exclude: undefined,
+                nodeModulesReconstructedLookup: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -115,6 +119,9 @@ class ConsumeSharedPlugin {
                 issuerLayer: undefined,
                 layer: undefined,
                 request: key,
+                include: undefined,
+                exclude: undefined,
+                nodeModulesReconstructedLookup: undefined,
               };
         return result;
       },
@@ -139,6 +146,9 @@ class ConsumeSharedPlugin {
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
+          include: item.include,
+          exclude: item.exclude,
+          nodeModulesReconstructedLookup: item.nodeModulesReconstructedLookup,
         } as ConsumeOptions;
       },
     );
@@ -327,12 +337,38 @@ class ConsumeSharedPlugin {
               );
 
               if (match !== undefined) {
+                // Apply filtering logic for unresolved consumes
+                if (match.include?.request || match.exclude?.request) {
+                  if (
+                    !testRequestFilters(
+                      request,
+                      match.include?.request,
+                      match.exclude?.request,
+                    )
+                  ) {
+                    return;
+                  }
+                }
                 return createConsumeSharedModule(context, request, match);
               }
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
                 if (request.startsWith(lookup)) {
                   const remainder = request.slice(lookup.length);
+
+                  // Apply filtering logic for prefixed consumes
+                  if (options.include?.request || options.exclude?.request) {
+                    if (
+                      !testRequestFilters(
+                        remainder,
+                        options.include?.request,
+                        options.exclude?.request,
+                      )
+                    ) {
+                      continue;
+                    }
+                  }
+
                   return createConsumeSharedModule(context, request, {
                     ...options,
                     import: options.import
