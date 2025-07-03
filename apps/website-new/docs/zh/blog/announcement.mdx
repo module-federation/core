@@ -36,9 +36,9 @@ Module Federation 作为 Webpack 5 推出的重磅功能，自发布以来已经
 Module Federation 的新版本带来了显著的变化。在这个版本中，原本嵌入在 Webpack 中的 Module Federation Runtime 能力被提取出来，形成了一个独立的 SDK。这个变化意味着，现在我们可以不依赖于任何构建工具，就能够动态地注册和加载远程模块，以及注册共享模块。此外，模块的预加载和运行时插件的使用也得到了增强，从而为模块的加载过程提供了更为强大的控制能力。
 
 ```ts
-import { ModuleFederation } from '@module-federation/enhanced/runtime';
+import { createInstance } from '@module-federation/enhanced/runtime';
 
-const mf = new ModuleFederation({
+const mf = createInstance({
   name: '@demo/app-main',
   remotes: [
     {

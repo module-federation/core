@@ -1,11 +1,11 @@
 # 动态远程模块
 
 ```js
-import { loadRemote, ModuleFederation } from '@module-federation/runtime';
+import { loadRemote, createInstance } from '@module-federation/runtime';
 // if i have remotes in my federation plugin, i can pass the name of the remote
 loadRemote('home/exposedModule')
 // if i want to load a custom remote not known at build time.
-const mf = new ModuleFederation({
+const mf = createInstance({
   name: 'hostname',
   remotes: [
     {

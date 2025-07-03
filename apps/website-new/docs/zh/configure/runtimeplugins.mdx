@@ -37,7 +37,7 @@ export default function (): ModuleFederationRuntimePlugin {
 const path = require('path');
 module.exports = {
   plugins: [
-    new ModuleFederation({
+    new ModuleFederationPlugin({
       name: 'host',
       remotes: {
         'manifest-provider':

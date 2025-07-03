@@ -57,11 +57,11 @@ Module Federation 官方提供重试插件 [@module-federation/retry-plugin](htt
 ```diff
 
 import React from 'react';
-import { ModuleFederation, loadRemote } from '@module-federation/enhanced/runtime';
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 + import { RetryPlugin } from '@module-federation/retry-plugin';
 
 // 模块注册
-const mf = new ModuleFederation({
+const mf = createInstance({
     name: 'host',
     remotes: [
         {
@@ -176,11 +176,11 @@ export default retryPlugin;
 
 ```tsx
 import React from 'react';
-import { ModuleFederation, loadRemote } from '@module-federation/enhanced/runtime';
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 
 // 模块注册
-const mf = new ModuleFederation({
+const mf = createInstance({
     name: 'host',
     remotes: [
         {
@@ -219,7 +219,7 @@ loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=
 
 ```diff
 import React from 'react';
-import { ModuleFederation, loadRemote } from '@module-federation/enhanced/runtime';
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 
 + const fallbackPlugin: () => ModuleFederationRuntimePlugin = function () {
@@ -232,7 +232,7 @@ import { RetryPlugin } from '@module-federation/retry-plugin';
 + };
 
 // 模块注册
-const mf = new ModuleFederation({
+const mf = createInstance({
     name: 'host',
     remotes: [
         {

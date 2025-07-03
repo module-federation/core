@@ -63,10 +63,10 @@ export default retryPlugin;
 ### 方式二：运行时注册
 
 ```ts
-import { ModuleFederation, loadRemote } from '@module-federation/enhanced/runtime';
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 
-const mf = new ModuleFederation({
+const mf = createInstance({
   name: 'federation_consumer',
   remotes: [],
   plugins: [
@@ -173,10 +173,10 @@ type ScriptWithRetryOptions = {
 
 
 ```ts
-import { ModuleFederation, loadRemote } from '@module-federation/enhanced/runtime';
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 
-const mf = new ModuleFederation({
+const mf = createInstance({
   name: 'federation_consumer',
   remotes: [],
   plugins: [

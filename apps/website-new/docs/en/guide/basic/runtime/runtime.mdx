@@ -77,9 +77,9 @@ registerRemotes([
 If the build plugin is not used and no instance has been created, you can create a new instance and register the modules.
 
 ```ts
-import { ModuleFederation } from '@module-federation/enhanced/runtime';
+import { createInstance } from '@module-federation/enhanced/runtime';
 
-const mf = new ModuleFederation({
+const mf = createInstance({
   name: 'mf_host',
   remotes: [
     {

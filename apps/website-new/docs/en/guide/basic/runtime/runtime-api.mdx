@@ -24,9 +24,9 @@ To ensure the uniqueness of the ModuleFederation instance, after the build plugi
 However, this singleton pattern also limits the ability to create multiple instances, as it assumes that there is only one instance per bundle. Therefore, if you need to create a new instance , you can use the ModuleFederation class to create a new one.
 
 ```ts
-import { ModuleFederation } from '@module-federation/enhanced/runtime';
+import { createInstance } from '@module-federation/enhanced/runtime';
 
-const mf = new ModuleFederation({
+const mf = createInstance({
   name: '@demo/host',
   remotes: [
     {
@@ -216,9 +216,9 @@ If not use build plugin:
 
 
 ```ts
-import { ModuleFederation, registerRemotes } from '@module-federation/enhanced/runtime';
+import { createInstance, registerRemotes } from '@module-federation/enhanced/runtime';
 
-const mf = new ModuleFederation({
+const mf = createInstance({
   name: 'mf_host',
   remotes: [
     {

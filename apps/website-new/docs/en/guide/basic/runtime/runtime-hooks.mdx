@@ -166,7 +166,7 @@ type ErrorLoadRemoteOptions ={
 * example
 
 ```ts
-import { ModuleFederation, loadRemote } from '@module-federation/enhanced/runtime'
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
 
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -182,7 +182,7 @@ const fallbackPlugin: () => ModuleFederationRuntimePlugin =
   };
 
 
-const mf = new ModuleFederation({
+const mf = createInstance({
     name: 'mf_host',
     remotes: [
         {
@@ -269,7 +269,7 @@ const customSharedPlugin: () => ModuleFederationRuntimePlugin =
   };
 
 
-const mf = new ModuleFederation({
+const mf = createInstance({
     name: 'mf_host',
     shared: {
       react: {

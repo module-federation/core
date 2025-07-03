@@ -36,7 +36,7 @@ Then, apply this plugin in your build configuration:
 const path = require('path');
 module.exports = {
   plugins: [
-    new ModuleFederation({
+    new ModuleFederationPlugin({
       name: 'host',
       remotes: {
         'manifest-provider':

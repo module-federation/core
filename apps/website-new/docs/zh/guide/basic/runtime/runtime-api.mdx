@@ -3,13 +3,9 @@
 import { Badge } from '@theme';
 import Collapse from '@components/Collapse'
 
-若使用构建插件，项目启动时将自动创建 MF 实例并存储于内存中。此时可直接通过 <Badge>API</Badge> 调用 MF 实例的方法。
+若使用构建插件，项目启动时将自动创建 `ModuleFederation` 实例并存储于内存中。此时可直接调用 API，API 会自动从内存中获取构建运行时创建的 `ModuleFederation` 实例。
 
-若未使用构建插件，则需手动创建 MF 实例，之后调用相应 API。
-
-## ModuleFederation <Badge type='info'>Class</Badge>
-
-`Runtime` 除了暴露出 API 外，还提供了 `ModuleFederation` 类，你可以使用它来创建一个 `ModuleFederation` 实例。
+若未使用构建插件，则需手动创建 `ModuleFederation` 实例，之后调用相应 API。
 
 * 什么是 `ModuleFederation` 实例 ？
 
@@ -17,16 +13,20 @@ import Collapse from '@components/Collapse'
 
 > 你可以在控制台输入 `__FEDERATION__.__INSTANCES__` 来查看已经创建好的实例。
 
-* 什么时候使用 `ModuleFederation` class？
+## createInstance
+
+`Runtime` 除了暴露出 API 外，还提供了 `ModuleFederation` 类，你可以使用它来创建一个 `ModuleFederation` 实例。
+
+* 什么时候使用 `createInstance` ？
 
 为了保证 `ModuleFederation` 实例的唯一性，我们在构建插件创建实例后，会将其存储到内存中，导出的 API 都是先从内存中获取 `ModuleFederation` 实例，然后再调用 `ModuleFederation` 实例的 API。这也是为什么 `loadRemote` 等 API 可以直接使用的原因。
 
-但是这种单例模式同时也限制无法创建多份实例，因此如果你需要**创建新的 ModuleFederation 实例**，那么你可以使用 `ModuleFederation` 类来创建一个新的实例。
+但是这种单例模式同时也限制无法创建多份实例，因此如果你需要**创建新的 ModuleFederation 实例**，那么你可以使用 `createInstance` 来创建一个新的实例。
 
 ```ts
-import { ModuleFederation } from '@module-federation/enhanced/runtime';
+import { createInstance } from '@module-federation/enhanced/runtime';
 
-const mf = new ModuleFederation({
+const mf = createInstance({
   name: 'host',
   remotes: [
     {
@@ -39,13 +39,13 @@ const mf = new ModuleFederation({
 mf.loadRemote('@demo/sub1/util').then((m) => m.add(1, 2, 3));
 ```
 
-## init <Badge>API</Badge> <Badge type='danger'>废弃</Badge>
+## init <Badge type='danger'>废弃</Badge>
 
 :::warning Warning
 
 此 API 将被废弃。如果需要获取已创建的实例，可以使用 [getInstance](#getinstance) 获取已创建的实例。
 
-如果需要创建新的实例，请使用 [ModuleFederation](#modulefederation) class。
+如果需要创建新的实例，请使用 [createInstance](#createinstance) class。
 
 :::
 
@@ -138,7 +138,7 @@ init({
 ```
 </Collapse>
 
-## getInstance <Badge>API</Badge>
+## getInstance
 
 - Type: `getInstance(): ModuleFederation`
 - 获取构建插件创建的 `ModuleFederation` 实例
@@ -154,7 +154,7 @@ mfInstance.loadRemote('remote/util');
 
 如果没有使用构建插件，调用 `getInstance` 会抛出异常，此时你需要使用 [ModuleFederation](#modulefederation) class 来创建一个新的实例。
 
-## registerRemotes <Badge>API</Badge>
+## registerRemotes
 
 <Collapse>
 
@@ -216,9 +216,9 @@ registerRemotes([
 没使用构建插件
 
 ```ts
-import { ModuleFederation, registerRemotes } from '@module-federation/enhanced/runtime';
+import { createInstance, registerRemotes } from '@module-federation/enhanced/runtime';
 
-const mf = new ModuleFederation({
+const mf = createInstance({
   name: 'mf_host',
   remotes: [
     {
@@ -245,7 +245,7 @@ mf.registerRemotes([
 ],{ force:true });
 ```
 
-## registerPlugins <Badge>API</Badge>
+## registerPlugins
 
 - type
 
@@ -289,7 +289,7 @@ registerPlugins([
 ]);
 ```
 
-## registerShared <Badge>API</Badge>
+## registerShared
 
 <Collapse>
 
@@ -353,7 +353,7 @@ registerShared({
 });
 ```
 
-## loadRemote <Badge>API</Badge>
+## loadRemote
 
 - Type: `loadRemote(id: string)`
 - 加载远程模块
@@ -369,7 +369,7 @@ loadRemote("remote/util").then((m)=> m.add(1,2,3));
 loadRemote("app1/util").then((m)=> m.add(1,2,3));
 ```
 
-## loadShare <Badge>API</Badge>
+## loadShare
 
 - Type: `loadShare(pkgName: string, extraOptions?: { customShareInfo?: Partial<Shared>;resolver?: (sharedOptions: ShareInfos[string]) => Shared;})`
 - 获取 `share` 依赖，当全局环境有符合当前 `host` 的 `share` 依赖时，将优先复用当前已存在且满足 `share` 条件的依赖，否则将加载自身的依赖并存入全局缓存
@@ -427,7 +427,7 @@ loadShare('react', {
 });
 ```
 
-## preloadRemote <Badge>API</Badge>
+## preloadRemote
 
 <Collapse>
 

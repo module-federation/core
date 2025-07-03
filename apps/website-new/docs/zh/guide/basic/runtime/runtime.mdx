@@ -76,9 +76,9 @@ registerRemotes([
 如果没有使用构建插件，并且没有创建实例，那么可以创建新的实例，并注册模块。
 
 ```ts
-import { ModuleFederation } from '@module-federation/enhanced/runtime';
+import { createInstance } from '@module-federation/enhanced/runtime';
 
-const mf = new ModuleFederation({
+const mf = createInstance({
   name: 'mf_host',
   remotes: [
     {

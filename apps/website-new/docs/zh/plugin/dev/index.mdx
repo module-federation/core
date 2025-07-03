@@ -57,7 +57,7 @@ export default runtimePlugin;
 const path = require('path');
 module.exports = {
   plugins: [
-    new ModuleFederation({
+    new ModuleFederationPlugin({
       // ...
       runtimePlugins: [path.resolve(__dirname, './custom-runtime-plugin.ts')],
     }),
