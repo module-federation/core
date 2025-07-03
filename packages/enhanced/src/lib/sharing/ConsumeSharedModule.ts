@@ -52,6 +52,8 @@ const makeSerializable = require(
  * @property {boolean} eager include the fallback module in a sync way
  * @property {string | null=} layer Share a specific layer of the module, if the module supports layers
  * @property {string | null=} issuerLayer Issuer layer in which the module should be resolved
+ * @property {{ version?: string; fallbackVersion?: string }} exclude Options for excluding certain versions
+ * @property {{ version?: string; fallbackVersion?: string }} include Options for including only certain versions
  */
 
 const TYPES = new Set(['consume-shared']);
@@ -173,7 +175,10 @@ class ConsumeSharedModule extends Module {
     this.buildMeta = {};
     this.buildInfo = {};
     if (this.options.import) {
-      const dep = new ConsumeSharedFallbackDependency(this.options.import);
+      const dep = new ConsumeSharedFallbackDependency(
+        this.options.import,
+        this.options.layer,
+      );
       if (this.options.eager) {
         this.addDependency(dep);
       } else {
