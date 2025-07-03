@@ -25,7 +25,7 @@
     },
     "e2e": {
       "inputs": ["default", "^production"],
-      "cache": true
+      "cache": false
     },
     "@nx/webpack:webpack": {
       "inputs": [
@@ -106,5 +106,8 @@
   },
   "useInferencePlugins": false,
   "defaultBase": "main",
-  "nxCloudAccessToken": "NTVlZTRhOWItMGRjYy00YmJjLTllNzAtNDFkNzRhNzdjZDkwfHJlYWQtd3JpdGU="
+  "nxCloudAccessToken": "NTVlZTRhOWItMGRjYy00YmJjLTllNzAtNDFkNzRhNzdjZDkwfHJlYWQtd3JpdGU=",
+  "tui": {
+    "enabled": false
+  }
 }
