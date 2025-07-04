@@ -18,7 +18,7 @@ import type {
   MF_DATA_FETCH_MAP,
   NoSSRRemoteInfo,
 } from '../interfaces/global';
-import type { FederationHost } from '@module-federation/enhanced/runtime';
+import type { ModuleFederation } from '@module-federation/enhanced/runtime';
 
 export const getDataFetchInfo = ({
   name,
@@ -195,7 +195,7 @@ export function getDataFetchMapKey(
 }
 
 export async function loadDataFetchModule(
-  instance: FederationHost,
+  instance: ModuleFederation,
   id: string,
 ) {
   return instance.loadRemote(id).then((m) => {

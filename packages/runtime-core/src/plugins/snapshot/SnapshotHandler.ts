@@ -23,12 +23,12 @@ import {
   getInfoWithoutType,
 } from '../../global';
 import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
-import { FederationHost } from '../../core';
+import { ModuleFederation } from '../../core';
 import { assert } from '../../utils/logger';
 
 export function getGlobalRemoteInfo(
   moduleInfo: Remote,
-  origin: FederationHost,
+  origin: ModuleFederation,
 ): {
   hostGlobalSnapshot: ModuleInfo | undefined;
   globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
@@ -69,7 +69,7 @@ export function getGlobalRemoteInfo(
 
 export class SnapshotHandler {
   loadingHostSnapshot: Promise<GlobalModuleInfo | void> | null = null;
-  HostInstance: FederationHost;
+  HostInstance: ModuleFederation;
   manifestCache: Map<string, Manifest> = new Map();
   hooks = new PluginSystem({
     beforeLoadRemoteSnapshot: new AsyncHook<
@@ -98,17 +98,17 @@ export class SnapshotHandler {
     }>('loadRemoteSnapshot'),
     afterLoadSnapshot: new AsyncWaterfallHook<{
       id?: string;
-      host: FederationHost;
+      host: ModuleFederation;
       options: Options;
       moduleInfo: Remote;
       remoteSnapshot: ModuleInfo;
     }>('afterLoadSnapshot'),
   });
-  loaderHook: FederationHost['loaderHook'];
+  loaderHook: ModuleFederation['loaderHook'];
   manifestLoading: Record<string, Promise<ModuleInfo>> =
     Global.__FEDERATION__.__MANIFEST_LOADING__;
 
-  constructor(HostInstance: FederationHost) {
+  constructor(HostInstance: ModuleFederation) {
     this.HostInstance = HostInstance;
     this.loaderHook = HostInstance.loaderHook;
   }

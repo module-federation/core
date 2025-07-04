@@ -1,4 +1,4 @@
-import type { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 import { ModuleInfo, getResourceUrl } from '@module-federation/sdk';
 
 import { getSignalFromManifest } from './common/runtime-utils';
@@ -18,7 +18,7 @@ interface Loading {
 const loadingArray: Array<Loading> = [];
 let sharedFlag = SHARED_STRATEGY;
 // eslint-disable-next-line max-lines-per-function
-export const prefetchPlugin = (): FederationRuntimePlugin => ({
+export const prefetchPlugin = (): ModuleFederationRuntimePlugin => ({
   name: 'data-prefetch-runtime-plugin',
   initContainer(options) {
     const { remoteSnapshot, remoteInfo, id, origin } = options;

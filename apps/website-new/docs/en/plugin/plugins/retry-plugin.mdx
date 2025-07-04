@@ -84,7 +84,7 @@ the resources that need to be retried are divided into two types: fetch type and
 ## Type
 
 ```ts
-const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin;
+const RetryPlugin: (params: RetryPluginParams) => ModuleFederationRuntimePlugin;
 
 type RetryPluginParams = {
   fetch?: FetchWithRetryOptions; // fetch retry options

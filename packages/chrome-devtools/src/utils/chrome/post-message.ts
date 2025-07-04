@@ -1,9 +1,9 @@
 import helpers from '@module-federation/runtime/helpers';
-import type { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 
 import { definePropertyGlobalVal } from '../sdk';
 
-const getModuleInfo = (): FederationRuntimePlugin => {
+const getModuleInfo = (): ModuleFederationRuntimePlugin => {
   return {
     name: 'mf-devtool-getModuleInfo-plugin',
     loadRemoteSnapshot({ options, moduleInfo, remoteSnapshot, ...res }) {

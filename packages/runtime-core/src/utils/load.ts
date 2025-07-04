@@ -5,7 +5,7 @@ import {
   isBrowserEnv,
 } from '@module-federation/sdk';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
-import { FederationHost } from '../core';
+import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
 import { assert } from './logger';
@@ -109,7 +109,7 @@ async function loadEntryScript({
   name: string;
   globalName: string;
   entry: string;
-  loaderHook: FederationHost['loaderHook'];
+  loaderHook: ModuleFederation['loaderHook'];
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -160,7 +160,7 @@ async function loadEntryDom({
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
-  loaderHook: FederationHost['loaderHook'];
+  loaderHook: ModuleFederation['loaderHook'];
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   switch (type) {
@@ -179,7 +179,7 @@ async function loadEntryNode({
   loaderHook,
 }: {
   remoteInfo: RemoteInfo;
-  loaderHook: FederationHost['loaderHook'];
+  loaderHook: ModuleFederation['loaderHook'];
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
@@ -225,7 +225,7 @@ export async function getRemoteEntry({
   remoteEntryExports,
   remoteInfo,
 }: {
-  origin: FederationHost;
+  origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | undefined;
 }): Promise<RemoteEntryExports | false | void> {

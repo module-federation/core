@@ -1,4 +1,4 @@
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 import {
   createLifecycleBasedPlugin,
   createSimplePlugin,
@@ -15,7 +15,7 @@ interface FallbackConfig {
 
 const fallbackPlugin = (
   config: FallbackConfig = {},
-): FederationRuntimePlugin => {
+): ModuleFederationRuntimePlugin => {
   const {
     backupEntryUrl = 'http://localhost:2002/mf-manifest.json',
     errorMessage = 'Module loading failed, please try again later',

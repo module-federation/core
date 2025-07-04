@@ -1,5 +1,5 @@
 import { assert, describe, it } from 'vitest';
-import { FederationHost } from '../src';
+import { ModuleFederation } from '../src';
 import {
   getGlobalSnapshot,
   resetFederationGlobalInfo,
@@ -15,7 +15,7 @@ describe('snapshot', () => {
       'http://localhost:1111/resources/snapshot/remote1/federation-manifest.json';
     const Remote2Entry =
       'http://localhost:1111/resources/snapshot/remote2/federation-manifest.json';
-    const FM1 = new FederationHost({
+    const FM1 = new ModuleFederation({
       name: '@snapshot/host',
       version: '0.0.3',
       remotes: [

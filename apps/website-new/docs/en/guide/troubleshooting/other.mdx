@@ -104,9 +104,9 @@ Add a runtime plugin via [runtimePlugins](../../configure/runtimeplugins) and co
 For example, to modify the crossorigin attribute of the preloaded link to `anonymous`:
 
 ```ts title="runtimePlugin.ts
-import { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 
-export default function MFLinkPlugin(): FederationRuntimePlugin {
+export default function MFLinkPlugin(): ModuleFederationRuntimePlugin {
   return {
     name: 'link-plugin',
     createLink({ url }) {

@@ -1,4 +1,4 @@
-import { FederationHost } from '../core';
+import { ModuleFederation } from '../core';
 import { UserOptions } from '../type';
 import { Module } from '../module';
 import { getGlobalHostPlugins } from '../global';
@@ -6,10 +6,10 @@ import { getGlobalHostPlugins } from '../global';
 export function registerPlugins(
   plugins: UserOptions['plugins'],
   hookInstances: Array<
-    | FederationHost['hooks']
-    | FederationHost['snapshotHandler']['hooks']
-    | FederationHost['sharedHandler']['hooks']
-    | FederationHost['remoteHandler']['hooks']
+    | ModuleFederation['hooks']
+    | ModuleFederation['snapshotHandler']['hooks']
+    | ModuleFederation['sharedHandler']['hooks']
+    | ModuleFederation['remoteHandler']['hooks']
     | Module['host']['loaderHook']
     | Module['host']['bridgeHook']
   >,

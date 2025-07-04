@@ -15,10 +15,10 @@ type NonUndefined<T = Shared> = ExcludeUndefined<T>;
 
 type InitOptions = Parameters<typeof runtime.init>[0];
 
-type ModuleCache = runtime.FederationHost['moduleCache'];
+type ModuleCache = runtime.ModuleFederation['moduleCache'];
 type InferModule<T> = T extends Map<string, infer U> ? U : never;
 type InferredModule = InferModule<ModuleCache>;
-export type ShareScopeMap = runtime.FederationHost['shareScopeMap'];
+export type ShareScopeMap = runtime.ModuleFederation['shareScopeMap'];
 
 type InitToken = Record<string, Record<string, any>>;
 
@@ -128,7 +128,7 @@ export interface InitContainerEntryOptions {
 
 export interface Federation {
   runtime?: typeof runtime;
-  instance?: runtime.FederationHost;
+  instance?: runtime.ModuleFederation;
   initOptions?: InitOptions;
   installInitialConsumes?: (options: InstallInitialConsumesOptions) => any;
   bundlerRuntime?: {

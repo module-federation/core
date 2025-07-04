@@ -1,5 +1,5 @@
 import {
-  FederationHost,
+  ModuleFederation,
   getRemoteEntry,
   getRemoteInfo,
 } from '@module-federation/runtime';
@@ -26,7 +26,7 @@ type PrefetchExports = Record<string, any>;
 export interface DataPrefetchOptions {
   name: string;
   remote?: Remote;
-  origin?: FederationHost;
+  origin?: ModuleFederation;
   remoteSnapshot?: ModuleInfo;
 }
 

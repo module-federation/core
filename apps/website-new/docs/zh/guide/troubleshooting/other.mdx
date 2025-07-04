@@ -78,9 +78,9 @@ Uncaught TypeError: Cannot read properties on null (reading `useState`)
 例如需要修改预加载 link 的 crossorigin 属性为 `anonymous`：
 
 ```ts title="runtimePlugin.ts
-import { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 
-export default function MFLinkPlugin(): FederationRuntimePlugin {
+export default function MFLinkPlugin(): ModuleFederationRuntimePlugin {
   return {
     name: 'link-plugin',
     createLink({ url }) {

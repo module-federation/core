@@ -1,8 +1,8 @@
-import type { FederationHost } from '@module-federation/enhanced/runtime';
+import type { ModuleFederation } from '@module-federation/enhanced/runtime';
 
 export function getLoadedRemoteInfos(
   id: string,
-  instance: FederationHost | null,
+  instance: ModuleFederation | null,
 ) {
   if (!instance) {
     return;

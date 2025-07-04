@@ -10,7 +10,7 @@
 module.exports = {
   // ...other configurations
   plugins: [
-    new ModuleFederation({
+    new ModuleFederationPlugin({
       // ...other Module Federation options
       implementation: require.resolve('@module-federation/runtime-tools'),
     }),
