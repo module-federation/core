@@ -28,17 +28,16 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
 };
 
 function createCompositeKey(request: string, config: ConsumeOptions): string {
-  if (config.issuerLayer) {
-    return `(${config.issuerLayer})${request}`;
-    // layer unlikely to be used, issuerLayer is what factorize provides
-    // which is what we need to create a matching key for
-  } else if (config.layer) {
-    return `(${config.layer})${request}`;
-  } else {
-    return request;
+  // disabling layer as fallback so that we can use issuerLayer to match
+  // this way we can catch unlayered requests and default them to another layer
+  // example react -> layered react without (layer)react
+  const layer = config.issuerLayer; //|| config.layer;
+  if (layer) {
+    return `(${layer})${request}`;
   }
+  return request;
 }
-// TODO: look at passing dedicated request key instead of infer from object key
+
 export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   compilation: Compilation,
   configs: [string, T][],
