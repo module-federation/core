@@ -18,7 +18,7 @@ import type { Compiler, WebpackPluginInstance } from 'webpack';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
-import FederationRuntimePlugin from './runtime/FederationModulesPlugin';
+import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
 import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
