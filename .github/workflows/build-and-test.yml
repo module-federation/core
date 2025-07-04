@@ -56,7 +56,7 @@ jobs:
         run: nproc
 
       - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
 
       - name: Run Build for All
         run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache

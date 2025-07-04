@@ -18,7 +18,8 @@ import {
   Global,
 } from './global';
 import { getRegisteredShare, getGlobalShareScope } from './utils/share';
-
+import { getRemoteInfo, matchRemoteWithNameAndExpose } from './utils';
+import { preloadAssets } from './utils/preload';
 interface IShareUtils {
   getRegisteredShare: typeof getRegisteredShare;
   getGlobalShareScope: typeof getGlobalShareScope;
@@ -71,6 +72,11 @@ const GlobalUtils: IGlobalUtils = {
 export default {
   global: GlobalUtils,
   share: ShareUtils,
+  utils: {
+    matchRemoteWithNameAndExpose,
+    preloadAssets,
+    getRemoteInfo,
+  },
 };
 
 export type { IGlobalUtils, IShareUtils };

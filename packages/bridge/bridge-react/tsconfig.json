@@ -9,7 +9,7 @@
     "declarationDir": "./dist/types",
     "rootDir": "./src",
     "module": "commonjs",
-    "target": "es5",
+    "target": "es2015",
 
     /* Linting */
     "noUnusedLocals": true,

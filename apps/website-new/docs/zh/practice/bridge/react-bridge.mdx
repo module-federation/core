@@ -2,7 +2,7 @@
 
 `@module-federation/bridge-react` 提供了用于 React 应用的 bridge 工具函数：
 - `createBridgeComponent`：用于导出应用级别模块，适用于生产者包装其作为应用类型导出的模块
-- `createRemoteComponent`：用于加载应用级别模块，适用于消费者加载作为应用类型加载的模块
+- `createRemoteAppComponent`：用于加载应用级别模块，适用于消费者加载作为应用类型加载的模块
 
 ## React 版本兼容性
 
@@ -130,11 +130,11 @@ export default defineConfig({
 
 **步骤 2**: 加载远程应用
 
-在消费者项目中，我们需要使用 `createRemoteComponent` 来加载应用类型模块：
+在消费者项目中，我们需要使用 `createRemoteAppComponent` 来加载应用类型模块：
 
 ```tsx
 // ./src/App.tsx
-import { createRemoteComponent } from '@module-federation/bridge-react';
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
 import { loadRemote } from '@module-federation/runtime';
 
 // 定义错误回退组件
@@ -153,8 +153,8 @@ const FallbackErrorComp = ({ error }) => {
 // 定义加载中组件
 const FallbackComp = <div data-test-id="loading">加载中...</div>;
 
-// 使用 createRemoteComponent 创建远程组件
-const Remote1App = createRemoteComponent({
+// 使用 createRemoteAppComponent 创建远程组件
+const Remote1App = createRemoteAppComponent({
   // loader 用于加载远程模块，例如：loadRemote('remote1/export-app')，import('remote1/export-app')
   loader: () => loadRemote('remote1/export-app'),
   // fallback 用于在远程模块加载失败时显示的组件
@@ -191,8 +191,8 @@ const App = () => {
 
 **关于远程组件加载**
 
-1. 通过 `createRemoteComponent` 导出的远程模块将自动使用 react-bridge 加载协议加载模块，使得应用的跨框架渲染成为可能。
-2. 此外，`createRemoteComponent` 将自动处理模块加载、模块销毁、错误处理、加载中、路由等逻辑，让开发者只需要关注如何使用远程组件。
+1. 通过 `createRemoteAppComponent` 导出的远程模块将自动使用 react-bridge 加载协议加载模块，使得应用的跨框架渲染成为可能。
+2. 此外，`createRemoteAppComponent` 将自动处理模块加载、模块销毁、错误处理、加载中、路由等逻辑，让开发者只需要关注如何使用远程组件。
 
 :::
 
@@ -221,8 +221,8 @@ function createBridgeComponent<T>(
 interface ProviderFnParams<T> {
   /** 要远程加载的根组件 */
   rootComponent: React.ComponentType<T>;
-  
-  /** 
+
+  /**
    * 自定义渲染函数，用于自定义渲染逻辑
    * @param App - React 元素
    * @param id - DOM 元素或字符串 ID
@@ -232,8 +232,8 @@ interface ProviderFnParams<T> {
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
-  
-  /** 
+
+  /**
    * 自定义 createRoot 函数，用于 React 18 及以上版本
    * @param container - DOM 容器
    * @param options - CreateRoot 选项
@@ -243,7 +243,7 @@ interface ProviderFnParams<T> {
     container: Element | DocumentFragment,
     options?: CreateRootOptions,
   ) => Root;
-  
+
   /**
    * React 18 和 19 的 createRoot 默认选项
    * 这些选项将在创建根节点时使用，除非在渲染参数中被 rootOptions 覆盖
@@ -257,9 +257,9 @@ interface ProviderFnParams<T> {
 }
 ```
 
-### createRemoteComponent
+### createRemoteAppComponent
 
-`createRemoteComponent` 用于加载远程 React 组件。
+`createRemoteAppComponent` 用于加载远程 React 组件。
 
 ```tsx
 /**
@@ -267,7 +267,7 @@ interface ProviderFnParams<T> {
  * @param options - 远程组件配置选项
  * @returns 返回一个可以接收 props 并渲染远程组件的 React 组件
  */
-function createRemoteComponent<T, E extends keyof T = 'default'>(
+function createRemoteAppComponent<T, E extends keyof T = 'default'>(
   options: RemoteComponentParams<T, E>
 ): React.ForwardRefExoticComponent<
   React.PropsWithoutRef<RemoteComponentProps> & React.RefAttributes<HTMLDivElement>
@@ -280,19 +280,19 @@ interface RemoteComponentParams<
   T = Record<string, unknown>,
   E extends keyof T = keyof T
 > {
-  /** 
+  /**
    * 加载远程模块的函数
    * 例如：() => loadRemote('remote1/export-app') 或 () => import('remote1/export-app')
    */
   loader: () => Promise<T>;
-  
+
   /** 加载远程模块时显示的组件 */
   loading: React.ReactNode;
-  
+
   /** 加载或渲染远程模块失败时显示的错误组件 */
   fallback: React.ComponentType<{ error: Error }>;
-  
-  /** 
+
+  /**
    * 指定模块导出名称
    * 默认为 'default'
    */
@@ -306,18 +306,18 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
   /** 传递给远程组件的属性 */
   props?: T;
 
-  /** 
+  /**
    * 内存路由配置，用于将子应用路由作为 memoryRouter 控制
    * 不会直接在浏览器地址栏中显示 URL
    */
   memoryRoute?: { entryPath: string };
-  
+
   /** 基础路径名 */
   basename?: string;
-  
+
   /** 样式 */
   style?: React.CSSProperties;
-  
+
   /** 类名 */
   className?: string;
 }
@@ -334,7 +334,7 @@ export const provider = createBridgeComponent({
 });
 
 // 宿主应用
-const Remote1App = createRemoteComponent({
+const Remote1App = createRemoteAppComponent({
   loader: () => loadRemote('remote1/export-app'),
   export: 'provider', // 指定使用 provider 导出
   fallback: FallbackErrorComp,
@@ -396,15 +396,15 @@ export default createBridgeComponent({
 
 ```tsx
 // 在消费者应用中
-const RemoteApp = createRemoteComponent({
+const RemoteApp = createRemoteAppComponent({
   url: 'http://localhost:3001/remoteEntry.js',
   scope: 'remote',
   module: './App',
 });
 
 // 在渲染时传递 rootOptions
-<RemoteApp 
-  props={{ message: 'Hello' }} 
+<RemoteApp
+  props={{ message: 'Hello' }}
   rootOptions={{
     identifierPrefix: 'instance-',
     onRecoverableError: (error) => {

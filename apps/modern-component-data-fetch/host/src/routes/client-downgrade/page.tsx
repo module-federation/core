@@ -1,8 +1,8 @@
-import { kit } from '@module-federation/modern-js/runtime';
+import { getInstance } from '@module-federation/modern-js/runtime';
+import { createLazyComponent } from '@module-federation/modern-js/react';
 
-const { createRemoteComponent } = kit;
-
-const ClientDowngrade = createRemoteComponent({
+const ClientDowngrade = createLazyComponent({
+  instance: getInstance(),
   loader: () => {
     return import('remote/ClientDowngrade');
   },

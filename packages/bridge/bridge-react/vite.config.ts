@@ -26,6 +26,19 @@ export default defineConfig({
         'router-v6': path.resolve(__dirname, 'src/router/v6.tsx'),
         v18: path.resolve(__dirname, 'src/v18.ts'),
         v19: path.resolve(__dirname, 'src/v19.ts'),
+        'data-fetch-runtime-plugin': path.resolve(
+          __dirname,
+          'src/lazy/data-fetch/runtime-plugin.ts',
+        ),
+        'data-fetch-server-middleware': path.resolve(
+          __dirname,
+          'src/lazy/data-fetch/data-fetch-server-middleware.ts',
+        ),
+        'lazy-utils': path.resolve(__dirname, 'src/lazy/utils.ts'),
+        'data-fetch-utils': path.resolve(
+          __dirname,
+          'src/lazy/data-fetch/index.ts',
+        ),
       },
       formats: ['cjs', 'es'],
       fileName: (format, entryName) => `${entryName}.${format}.js`,
