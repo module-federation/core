@@ -11,6 +11,8 @@
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
     "dist/**",
-    "node_modules/**"
+    "node_modules/**",
+    "../runtime-core/src/**",
+    "../runtime-core/global.d.ts"
   ]
 }

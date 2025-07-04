@@ -38,16 +38,8 @@ export const nativeGlobal: typeof global = (() => {
 
 export const Global = nativeGlobal;
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __FEDERATION__: Federation,
-    __VMOK__: Federation,
-    // eslint-disable-next-line no-var
-    __GLOBAL_LOADING_REMOTE_ENTRY__: Record<
-      string,
-      undefined | Promise<RemoteEntryExports | void>
-    >;
-}
+// Move global declarations to a separate ambient declaration file
+// to avoid conflicts with generated .d.ts files
 
 function definePropertyGlobalVal(
   target: typeof CurrentGlobal,
