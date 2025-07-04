@@ -165,6 +165,21 @@ init({
 ```
 </Collapse>
 
+### 如何迁移
+
+**使用了构建插件**
+
+1. 移除 `init` API 的调用
+2. 使用 [registerShared](#registershared) 代替 `init` 中的 `shared` 配置
+3. 使用 [registerRemotes](#registerremotes) 代替 `init` 中的 `remotes` 配置
+4. 使用 [registerPlugins](#registerplugins) 代替 `init` 中的 `plugins` 配置
+5. 使用 [getInstance](#getinstance) 获取构建插件创建的 `ModuleFederation` 实例
+
+
+**没有使用构建插件**
+
+如果没有使用构建插件，你可以使用 [createInstance](#createinstance)替换 `init` ，其参数完全一致。
+
 ## getInstance
 
 - Type: `getInstance(): ModuleFederation`

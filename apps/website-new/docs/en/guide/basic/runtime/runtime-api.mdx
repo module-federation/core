@@ -165,6 +165,21 @@ init({
 ```
 </Collapse>
 
+### How to Migrate
+
+**Using Build Plugin**
+
+1. Remove calls to the `init` API
+2. Use [registerShared](#registershared) instead of the `shared` configuration in `init`
+3. Use [registerRemotes](#registerremotes) instead of the `remotes` configuration in `init`
+4. Use [registerPlugins](#registerplugins) instead of the `plugins` configuration in `init`
+5. Use [getInstance](#getinstance) to obtain the `ModuleFederation` instance created by the build plugin
+
+
+**Not Using Build Plugin**
+
+If you are not using the build plugin, you can replace `init` with [createInstance](#createinstance), which has exactly the same parameters.
+
 ## getInstance
 
 - Type: `getInstance(): ModuleFederation`
