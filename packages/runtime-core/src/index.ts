@@ -12,7 +12,14 @@ export {
   getGlobalSnapshot,
   getInfoWithoutType,
 } from './global';
-export type { UserOptions, FederationRuntimePlugin } from './type';
+export type {
+  UserOptions,
+  FederationRuntimePlugin,
+  Shared,
+  Remote,
+  RemoteEntryInitOptions,
+  SharedConfig,
+} from './type';
 export { assert } from './utils/logger';
 export { registerGlobalPlugins } from './global';
 export {

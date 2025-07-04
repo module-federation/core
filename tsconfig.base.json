@@ -16,9 +16,7 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {
-      "rslib": ["tools/rslib/src/index.ts"]
-    }
+    "paths": {}
   },
   "exclude": [
     "node_modules/**",

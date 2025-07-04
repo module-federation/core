@@ -1,7 +1,6 @@
 packages:
   - '!**/dist/**'
   - 'packages/*'
-  - 'tools/rslib'
   - 'packages/bridge/*'
   - 'packages/enhance'
   - 'apps/runtime-demo/*'
@@ -14,3 +13,4 @@ packages:
   - 'webpack'
   - 'assemble-release-plan'
   - 'packages/runtime-plugins/*'
+  - 'tools/*'
