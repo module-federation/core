@@ -10,7 +10,7 @@
     "types": ["node"],
     "rootDir": "./src"
   },
-  "include": ["src/**/*.ts", "src/env.d.ts", "src/global-types.d.ts"],
+  "include": ["src/**/*.ts", "src/env.d.ts"],
   "exclude": [
     "jest.config.ts",
     "src/**/*.spec.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime-core",
-  "version": "0.14.0",
+  "version": "0.16.0",
   "type": "module",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs",
@@ -17,7 +17,6 @@
   },
   "files": [
     "dist/",
-    "src/",
     "README.md"
   ],
   "scripts": {
@@ -86,7 +85,10 @@
     }
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
-    "@module-federation/error-codes": "workspace:*"
+    "@module-federation/error-codes": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@rslib/core": "^0.10.4"
   }
 }
