@@ -6,10 +6,13 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
+      "executor": "../../tools/rslib-plugin:build",
       "outputs": ["{workspaceRoot}/packages/runtime-core/dist"],
       "options": {
-        "commands": ["npm run build --prefix packages/runtime-core"]
+        "configFile": "rslib.config.ts",
+        "outputPath": "packages/runtime-core/dist",
+        "mode": "production",
+        "verbose": true
       },
       "dependsOn": [
         {

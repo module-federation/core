@@ -1,7 +1,5 @@
 import { defineConfig } from '@rslib/core';
-import { readFileSync } from 'fs';
-
-const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
+import pkg from './package.json';
 const FEDERATION_DEBUG = process.env.FEDERATION_DEBUG || '';
 
 export default defineConfig({
