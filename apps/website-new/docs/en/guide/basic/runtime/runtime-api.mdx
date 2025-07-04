@@ -5,7 +5,30 @@ import Collapse from '@components/Collapse'
 
 If the build plugin is used, an MF instance will be automatically created and stored in memory when the project starts. You can directly call methods of the MF instance via the .
 
+```ts
+import { loadRemote } from '@module-federation/enhanced/runtime';
+
+loadRemote('remote1');
+```
+
 If the build plugin is not used, you need to manually create an MF instance before calling the corresponding API.
+
+```ts
+import { createInstance } from '@module-federation/enhanced/runtime';
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'remote1',
+      entry: 'http://localhost:2001/vmok-manifest.json'
+    }
+  ]
+});
+
+
+mf.loadRemote('remote1');
+```
 
 * What is a `ModuleFederation` instance?
 
@@ -15,13 +38,17 @@ A `ModuleFederation` instance is an instance of the `ModuleFederation` class, wh
 
 ## createInstance
 
-In addition to exposing APIs,  the Runtime also provides the `createInstance`, which you can use to create ModuleFederation instance.
+Used to create ModuleFederation instance.
 
 * When to use `createInstance`?
 
 To ensure the uniqueness of the ModuleFederation instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the ModuleFederation instance from memory and then call the APIs of the ModuleFederation instance. This is also why APIs like loadRemote can be used directly from the `@module-federation/enhanced/runtime` package and inherently understand what application container they are attached to.
 
-However, this singleton pattern also limits the ability to create multiple instances, as it assumes that there is only one instance per bundle. Therefore, if you need to create a new instance , you can use the [createInstance](#createinstance) to create a new one.
+This singleton pattern works for most scenarios, but in the following cases, you need to use `createInstance`:
+
+- No build plugin is used  (Only use runtime)
+- Multiple ModuleFederation instances need to be created with different configurations for each instance
+- You want to use ModuleFederation's partitioning feature to encapsulate corresponding APIs for use in other projects
 
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';

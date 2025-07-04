@@ -5,7 +5,30 @@ import Collapse from '@components/Collapse'
 
 若使用构建插件，项目启动时将自动创建 `ModuleFederation` 实例并存储于内存中。此时可直接调用 API，API 会自动从内存中获取构建运行时创建的 `ModuleFederation` 实例。
 
+```ts
+import { loadRemote } from '@module-federation/enhanced/runtime';
+
+loadRemote('remote1');
+```
+
 若未使用构建插件，则需手动创建 `ModuleFederation` 实例，之后调用相应 API。
+
+```ts
+import { createInstance } from '@module-federation/enhanced/runtime';
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'remote1',
+      entry: 'http://localhost:2001/vmok-manifest.json'
+    }
+  ]
+});
+
+
+mf.loadRemote('remote1');
+```
 
 * 什么是 `ModuleFederation` 实例 ？
 
@@ -15,13 +38,17 @@ import Collapse from '@components/Collapse'
 
 ## createInstance
 
-`Runtime` 除了暴露出 API 外，还提供了 `ModuleFederation` 类，你可以使用它来创建一个 `ModuleFederation` 实例。
+用于创建 ModuleFederation 实例。
 
 * 什么时候使用 `createInstance` ？
 
 为了保证 `ModuleFederation` 实例的唯一性，我们在构建插件创建实例后，会将其存储到内存中，导出的 API 都是先从内存中获取 `ModuleFederation` 实例，然后再调用 `ModuleFederation` 实例的 API。这也是为什么 `loadRemote` 等 API 可以直接使用的原因。
 
-但是这种单例模式同时也限制无法创建多份实例，因此如果你需要**创建新的 ModuleFederation 实例**，那么你可以使用 `createInstance` 来创建一个新的实例。
+这种单例模式适用于大多数场景，但如果在以下场景，你需要使用 `createInstance`：
+
+- 没有使用构建插件（纯运行时场景）
+- 需要创建多个 ModuleFederation 实例，每个实例的配置不同
+- 希望使用 ModuleFederation 分治特性，封装相应的 API 提供给其他项目使用
 
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
