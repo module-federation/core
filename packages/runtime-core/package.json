@@ -20,6 +20,9 @@
     "src/",
     "README.md"
   ],
+  "scripts": {
+    "build": "rslib build"
+  },
   "exports": {
     ".": {
       "import": {
@@ -39,6 +42,36 @@
       "require": {
         "types": "./dist/types.d.ts",
         "default": "./dist/types.cjs"
+      }
+    },
+    "./helpers": {
+      "import": {
+        "types": "./dist/helpers.d.ts",
+        "default": "./dist/helpers.js"
+      },
+      "require": {
+        "types": "./dist/helpers.d.ts",
+        "default": "./dist/helpers.cjs"
+      }
+    },
+    "./core": {
+      "import": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.js"
+      },
+      "require": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.cjs"
+      }
+    },
+    "./global": {
+      "import": {
+        "types": "./dist/global.d.ts",
+        "default": "./dist/global.js"
+      },
+      "require": {
+        "types": "./dist/global.d.ts",
+        "default": "./dist/global.cjs"
       }
     }
   },
