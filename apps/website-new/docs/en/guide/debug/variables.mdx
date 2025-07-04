@@ -479,7 +479,7 @@ moduleInfo: {
 
 In the above example, `moduleInfo` contains information about 5 modules, among which `manifest_host` does not have a version number after it, indicating that it is a consumer module.
 
-The remotesInfo field in `manifest_host` records the information of all producer modules it depends on, and the corresponding `matchedVersion` field records the version or `url` it matches.
+The `remotesInfo` field in `manifest_host` records the information of all producer modules it depends on, and the corresponding `matchedVersion` field records the version or `url` it matches.
 
 The corresponding producer module information can be obtained through the key + `matchedVersion` in the consumer `remotesInfo` field, such as `webpack_provider:http://localhost:3009/mf-manifest.json`.
 
