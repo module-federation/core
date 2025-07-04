@@ -16,7 +16,7 @@ export function getGlobalFederationInstance(
 ): FederationHost | undefined {
   const buildId = getBuilderId();
   return CurrentGlobal.__FEDERATION__.__INSTANCES__.find((GMInstance) => {
-    if (buildId && GMInstance.options.id === getBuilderId()) {
+    if (buildId && GMInstance.options.id === buildId) {
       return true;
     }
 
