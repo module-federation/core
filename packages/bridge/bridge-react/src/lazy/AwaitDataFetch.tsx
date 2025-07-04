@@ -1,4 +1,10 @@
-import React, { MutableRefObject, ReactNode, Suspense, useRef } from 'react';
+import React, {
+  MutableRefObject,
+  ReactNode,
+  Suspense,
+  useRef,
+  useState,
+} from 'react';
 import logger from './logger';
 import {
   DATA_FETCH_ERROR_PREFIX,
@@ -63,6 +69,7 @@ export const transformError = (err: string | Error): ErrorInfo => {
 export interface AwaitProps<T> {
   resolve: T | Promise<T>;
   loading?: ReactNode;
+  delayLoading?: number;
   errorElement?: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
   children: (data: T) => ReactNode;
   params?: DataFetchParams;
@@ -82,6 +89,7 @@ export function AwaitDataFetch<T>({
   errorElement = DefaultErrorElement,
   children,
   params,
+  delayLoading,
 }: AwaitProps<T>) {
   const dataRef = useRef<T>();
   const data = dataRef.current || resolve;
@@ -92,7 +100,8 @@ export function AwaitDataFetch<T>({
       params={params}
       loading={loading}
       errorElement={errorElement}
-      // @ts-ignore
+      delayLoading={delayLoading}
+      // @ts-expect-error
       resolve={getData}
     >
       {children}
@@ -100,14 +109,43 @@ export function AwaitDataFetch<T>({
   );
 }
 
+export const DelayedLoading = ({
+  delayLoading,
+  children,
+}: {
+  delayLoading?: number;
+  children: ReactNode;
+}) => {
+  const [show, setShow] = useState(false);
+  const timerSet = useRef(false);
+
+  if (!delayLoading) {
+    return children;
+  }
+
+  if (typeof window !== 'undefined' && !show && !timerSet.current) {
+    timerSet.current = true;
+    setTimeout(() => {
+      setShow(true);
+    }, delayLoading);
+  }
+
+  return show ? children : null;
+};
+
 function AwaitSuspense<T>({
   resolve,
   children,
   loading = DefaultLoading,
   errorElement = DefaultErrorElement,
+  delayLoading,
 }: AwaitErrorHandlerProps<T>) {
   return (
-    <Suspense fallback={loading}>
+    <Suspense
+      fallback={
+        <DelayedLoading delayLoading={delayLoading}>{loading}</DelayedLoading>
+      }
+    >
       <ResolveAwait resolve={resolve} errorElement={errorElement}>
         {children}
       </ResolveAwait>
@@ -132,6 +170,7 @@ function ResolveAwait<T>({
             {globalThis.FEDERATION_SSR && (
               <script
                 suppressHydrationWarning
+                // eslint-disable-next-line react/no-danger
                 dangerouslySetInnerHTML={{
                   __html: String.raw`
                   globalThis['${DATA_FETCH_FUNCTION}'] = globalThis['${DATA_FETCH_FUNCTION}']  || []

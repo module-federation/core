@@ -1,6 +1,10 @@
 import React, { ReactNode, useState, useEffect } from 'react';
 import logger from './logger';
-import { AwaitDataFetch, transformError } from './AwaitDataFetch';
+import {
+  AwaitDataFetch,
+  DelayedLoading,
+  transformError,
+} from './AwaitDataFetch';
 import {
   fetchData,
   getDataFetchItem,
@@ -9,6 +13,7 @@ import {
   getLoadedRemoteInfos,
   setDataFetchItemLoadedStatus,
   wrapDataFetchId,
+  isServerEnv,
 } from './utils';
 import {
   DATA_FETCH_ERROR_PREFIX,
@@ -33,6 +38,7 @@ export type CreateLazyComponentOptions<T, E extends keyof T> = {
   loader: () => Promise<T>;
   instance: ReturnType<typeof getInstance>;
   loading: React.ReactNode;
+  delayLoading?: number;
   fallback: ReactNode | ((errorInfo: ErrorInfo) => ReactNode);
   export?: E;
   dataFetchParams?: DataFetchParams;
@@ -313,13 +319,13 @@ export function createLazyComponent<T, E extends keyof T>(
           </>
         ),
       };
+      // eslint-disable-next-line max-lines
     } else {
       throw Error(
         `Make sure that ${moduleId} has the correct export when export is ${String(
           exportName,
         )}`,
       );
-      // eslint-disable-next-line max-lines
     }
   });
 
@@ -334,6 +340,7 @@ export function createLazyComponent<T, E extends keyof T>(
         <AwaitDataFetch
           resolve={getData(options.noSSR)}
           loading={options.loading}
+          delayLoading={options.delayLoading}
           errorElement={options.fallback}
         >
           {/* @ts-expect-error ignore */}
@@ -374,7 +381,11 @@ export function createLazyComponent<T, E extends keyof T>(
       }, []);
 
       if (loading) {
-        return <>{options.loading}</>;
+        return (
+          <DelayedLoading delayLoading={options.delayLoading}>
+            {options.loading}
+          </DelayedLoading>
+        );
       }
 
       if (error) {
