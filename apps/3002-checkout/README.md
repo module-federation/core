@@ -19,3 +19,7 @@ Output will be located in the `dist` or `.next` folder.
 - Remote loading
 - Shared dependencies
 - Type safety
+
+## Configuration
+
+Check `webpack.config.js` or `next.config.js` for federation settings.
