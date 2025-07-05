@@ -254,8 +254,10 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                       field={`${item.field}.key`}
                       rules={[
                         {
-                          validator: (value, cb) =>
-                            validateKey(value, cb, index),
+                          validator: ((
+                            value: any,
+                            cb: (error?: ReactNode) => void,
+                          ) => validateKey(value, cb, index)) as any,
                         },
                       ]}
                     >
@@ -280,8 +282,10 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
                       field={`${item.field}.value`}
                       rules={[
                         {
-                          validator: (value, cb) =>
-                            validateValue(value, cb, index),
+                          validator: ((
+                            value: any,
+                            cb: (error?: ReactNode) => void,
+                          ) => validateValue(value, cb, index)) as any,
                         },
                       ]}
                     >
