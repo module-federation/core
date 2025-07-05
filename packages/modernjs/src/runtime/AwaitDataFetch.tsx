@@ -83,7 +83,7 @@ export function AwaitDataFetch<T>({
   children,
   params,
 }: AwaitProps<T>) {
-  const dataRef = useRef<T>();
+  const dataRef = useRef<T | undefined>(undefined);
   const data = dataRef.current || resolve;
   const getData = isPromise(data) ? fetchData(data, dataRef) : () => data;
 

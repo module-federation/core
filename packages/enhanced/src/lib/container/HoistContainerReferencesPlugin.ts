@@ -129,7 +129,7 @@ class HoistContainerReferences implements WebpackPluginInstance {
         runtimeModule,
         'initial',
       );
-      referencedModules.forEach((m: Module) => allModulesToHoist.add(m));
+      referencedModules.forEach((m) => allModulesToHoist.add(m));
       const moduleRuntimes = chunkGraph.getModuleRuntimes(runtimeModule);
       const runtimes = new Set<string>();
       for (const runtimeSpec of moduleRuntimes) {
@@ -160,7 +160,7 @@ class HoistContainerReferences implements WebpackPluginInstance {
         remoteModule,
         'initial',
       );
-      referencedRemoteModules.forEach((m: Module) => allModulesToHoist.add(m));
+      referencedRemoteModules.forEach((m) => allModulesToHoist.add(m));
       const remoteModuleRuntimes = chunkGraph.getModuleRuntimes(remoteModule);
       const remoteRuntimes = new Set<string>();
       for (const runtimeSpec of remoteModuleRuntimes) {

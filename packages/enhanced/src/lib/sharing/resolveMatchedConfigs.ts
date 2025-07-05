@@ -99,5 +99,6 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   compilation.contextDependencies.addAll(resolveContext.contextDependencies);
   compilation.fileDependencies.addAll(resolveContext.fileDependencies);
   compilation.missingDependencies.addAll(resolveContext.missingDependencies);
+
   return { resolved, unresolved, prefixed };
 }
