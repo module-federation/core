@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2021",
+    "lib": ["es2022.error"],
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "skipLibCheck": true,
