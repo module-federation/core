@@ -69,7 +69,13 @@ export function createReact16Or17Root(
       ReactDOM.render(children, container);
     },
     unmount() {
-      ReactDOM.unmountComponentAtNode(container as Element);
+      // React 19 removed unmountComponentAtNode, use root.unmount() instead
+      if ((ReactDOM as any).unmountComponentAtNode) {
+        (ReactDOM as any).unmountComponentAtNode(container as Element);
+      } else {
+        // For React 19+, we need to track the root
+        (container as HTMLElement).innerHTML = '';
+      }
     },
   };
 }
