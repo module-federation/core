@@ -5,6 +5,7 @@ import {
   useSelectedLayoutSegment,
   useSelectedLayoutSegments,
 } from 'next/navigation';
+import * as React from 'react';
 
 export function LayoutHooks() {
   const selectedLayoutSegment = useSelectedLayoutSegment();
