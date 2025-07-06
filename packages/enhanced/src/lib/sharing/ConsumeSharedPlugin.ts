@@ -343,23 +343,6 @@ class ConsumeSharedPlugin {
                   );
                 }
 
-                // Validate singleton usage with include.request
-                if (
-                  config.include &&
-                  config.include.request &&
-                  config.singleton
-                ) {
-                  addSingletonFilterWarning(
-                    compilation,
-                    config.shareKey || request,
-                    'include',
-                    'request',
-                    config.include.request,
-                    request, // moduleRequest
-                    importResolved, // moduleResource (might be undefined)
-                  );
-                }
-
                 return resolveFilter(consumedModule);
               }
 
@@ -441,23 +424,6 @@ class ConsumeSharedPlugin {
                   'exclude',
                   'version',
                   config.exclude.version,
-                  request, // moduleRequest
-                  importResolved, // moduleResource (might be undefined)
-                );
-              }
-
-              // Validate singleton usage with exclude.request
-              if (
-                config.exclude &&
-                config.exclude.request &&
-                config.singleton
-              ) {
-                addSingletonFilterWarning(
-                  compilation,
-                  config.shareKey || request,
-                  'exclude',
-                  'request',
-                  config.exclude.request,
                   request, // moduleRequest
                   importResolved, // moduleResource (might be undefined)
                 );
@@ -582,7 +548,6 @@ class ConsumeSharedPlugin {
                   );
                 }
               }
-
               // Check for prefixed consumes with original request
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
@@ -661,40 +626,6 @@ class ConsumeSharedPlugin {
                       compilation,
                       context,
                       modulePathAfterNodeModules,
-                      {
-                        ...options,
-                        import: options.import
-                          ? options.import + remainder
-                          : undefined,
-                        shareKey: options.shareKey + remainder,
-                        layer: options.layer,
-                      },
-                    );
-                  }
-                }
-              }
-
-              // Finally check prefixed consumes with reconstructed path
-              if (reconstructed) {
-                for (const [prefix, options] of prefixedConsumes) {
-                  const lookup = options.request || prefix;
-                  if (reconstructed.startsWith(lookup)) {
-                    const remainder = reconstructed.slice(lookup.length);
-
-                    if (
-                      !testRequestFilters(
-                        remainder,
-                        options.include?.request,
-                        options.exclude?.request,
-                      )
-                    ) {
-                      continue;
-                    }
-
-                    return boundCreateConsumeSharedModule(
-                      compilation,
-                      context,
-                      reconstructed,
                       {
                         ...options,
                         import: options.import
