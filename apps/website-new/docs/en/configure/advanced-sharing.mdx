@@ -26,6 +26,7 @@ interface SharedConfig {
   issuerLayer?: string;          // Restrict config to apply only when the consuming module (issuer) is in this layer.
   include?: IncludeExcludeOptions; // Rules to include specific modules/versions
   exclude?: IncludeExcludeOptions; // Rules to exclude specific modules/versions
+  nodeModulesReconstructedLookup?: boolean; // Enable enhanced matching for relative imports for this shared item
 }
 
 interface IncludeExcludeOptions {
@@ -82,6 +83,24 @@ new ModuleFederationPlugin({
   //...
 });
 ```
+
+## How Share Matching Works
+
+:::note
+Module Federation matches shared modules in a specific order. This applies to both providing and consuming shared modules, and is essential for advanced sharing scenarios.
+:::
+
+**Matching order:**
+
+1. **Direct match:** Exact match for the requested module name (e.g., `'react'`).
+2. **Prefix match:** If no direct match, check for prefix-based shares (e.g., `'next/'` for `'next/router'`).
+3. **Reconstructed path match:** If enabled, try matching the path after `node_modules` (for relative/absolute imports inside node_modules), first direct, then prefix.
+4. **No match:** Falls back to normal module resolution.
+
+- Matching stops at the first match found.
+- `include`/`exclude`, `layer`, and `issuerLayer` filters apply at each step.
+
+See `ProvideSharedPlugin.ts` and `ConsumeSharedPlugin.ts` for implementation details.
 
 ## Layers
 
@@ -348,53 +367,9 @@ In this Next.js-style example:
 
 ## nodeModulesReconstructedLookup
 
-This section covers the nodeModulesReconstructedLookup experiment, which helps with sharing modules that use relative imports internally.
+`nodeModulesReconstructedLookup` is now a per-shared-item option in the `shared` configuration. It enables enhanced matching for relative imports inside node_modules for the specific shared item where it is set.
 
-Module Federation offers an experimental feature `nodeModulesReconstructedLookup` to solve a common issue with sharing modules that use relative imports internally.
-
-### The Problem
-
-When you share a module like `'shared'` and its subpaths like `'shared/directory/'`, Module Federation matches the **import request** against these patterns. However, if your module uses **relative imports** internally, Module Federation can't match them properly:
-
-```js
-// shared/index.js
-export * from './package.json';
-export { default as thing } from './directory/thing'; // This relative import won't match 'shared/directory/'
-```
-
-The problem occurs because:
-1. You configure Module Federation to share `'shared'` and `'shared/directory/'`
-2. When code imports `'shared'`, it works fine
-3. But inside `shared/index.js`, there's a relative import `import './directory/thing'`
-4. Module Federation doesn't recognize this as matching `'shared/directory/'` because the import request is `'./directory/thing'` (relative)
-
-### The Solution
-
-The `nodeModulesReconstructedLookup` experiment solves this by:
-1. Detecting relative imports inside shared modules
-2. Reconstructing the full path (e.g., `'node_modules/shared/directory/thing'`)
-3. Extracting the module name after node_modules (e.g., `'shared/directory/thing'`)
-4. Matching it against your shared configuration
-
-### Example Project Structure
-
-```
-your-project/
-├── node_modules/
-│   ├── shared/
-│   │   ├── directory/
-│   │   │   └── thing.js  // Exports a component or functionality
-│   │   ├── index.js      // imports './directory/thing' with relative path
-│   │   └── package.json  // version: 1.0.0
-│   └── my-module/
-│       ├── index.js      // Might also import from shared
-│       └── package.json  // version: 2.0.0
-├── src/
-│   └── index.js          // imports 'shared'
-└── webpack.config.js
-```
-
-### Configuration Example
+**How to use:**
 
 ```js
 // webpack.config.js
@@ -405,21 +380,23 @@ module.exports = {
   plugins: [
     new ModuleFederationPlugin({
       name: 'host',
-      experiments: {
-        nodeModulesReconstructedLookup: true // Enable the feature
-      },
       shared: {
-        'shared': {}, // Share the root module
-        'shared/directory/': {} // Share all modules under this path
+        'shared': { nodeModulesReconstructedLookup: true }, // Share the root module with enhanced lookup
+        'shared/directory/': { nodeModulesReconstructedLookup: true } // Share all modules under this path with enhanced lookup
       }
     })
   ]
 };
 ```
 
-### Code Example
+**When to use:**
+1. Your shared modules use relative imports internally (e.g., `./directory/thing`)
+2. You're sharing a package that has internal subdirectory imports
+3. Module Federation isn't correctly sharing submodules because the request doesn't match the shared configuration
 
-This is the key difference - you don't directly import the deep path, but it gets shared automatically when used internally:
+This option is only effective for the specific shared item where it is set.
+
+**Example Project Structure and Code**
 
 ```js
 // shared/index.js (inside node_modules)
@@ -431,15 +408,6 @@ import { version } from 'shared'; // You only import the root module
 console.log(version); // "1.0.0"
 console.log(thing); // The correctly shared submodule
 ```
-
-Without this experiment, the relative import in `shared/index.js` wouldn't be properly shared, potentially leading to duplicate instances of the same module.
-
-### When to Use This Feature
-
-This feature is particularly useful in scenarios where:
-1. Your shared modules use relative imports internally (e.g., `./directory/thing`)
-2. You're sharing a package that has internal subdirectory imports
-3. Module Federation isn't correctly sharing submodules because the request doesn't match the shared configuration
 
 ## Advanced Filtering Examples (`include`/`exclude`)
 
