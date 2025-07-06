@@ -1,11 +1,13 @@
 import { demos } from '#/lib/demos';
 import Link from 'next/link';
+import React from 'react';
+import Random from '#/ui/random';
 
 export default function Page() {
   return (
-    <div className="space-  y-8">
+    <div className="space-y-8">
       <h1 className="text-xl font-medium text-gray-300">Examples</h1>
-
+      <Random />
       <div className="space-y-10 text-white">
         {demos.map((section) => {
           return (
