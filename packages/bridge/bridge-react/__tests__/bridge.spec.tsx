@@ -1,6 +1,6 @@
 import React from 'react';
 import { assert, describe, it } from 'vitest';
-import { createBridgeComponent, createRemoteComponent } from '../src/v19';
+import { createBridgeComponent, createRemoteComponent } from '../src';
 import {
   act,
   fireEvent,
@@ -66,12 +66,8 @@ describe('bridge', () => {
     );
     expect(getHtml(container)).toMatch('loading');
 
-    await waitFor(
-      () => {
-        expect(getHtml(container)).toMatch('life cycle render');
-      },
-      { timeout: 1000 },
-    );
+    await sleep(200);
+    expect(getHtml(container)).toMatch('life cycle render');
     expect(getHtml(container)).toMatch('hello world');
   });
 
@@ -101,12 +97,8 @@ describe('bridge', () => {
     );
     expect(getHtml(container)).toMatch('loading');
 
-    await waitFor(
-      () => {
-        expect(getHtml(container)).toMatch('life cycle render');
-      },
-      { timeout: 1000 },
-    );
+    await sleep(200);
+    expect(getHtml(container)).toMatch('life cycle render');
     expect(getHtml(container)).toMatch('hello world');
     expect(ref.current).not.toBeNull();
   });
@@ -139,11 +131,7 @@ describe('bridge', () => {
     const { container } = render(<RemoteComponent />);
     expect(getHtml(container)).toMatch('loading');
 
-    await waitFor(
-      () => {
-        expect(renderMock).toHaveBeenCalledTimes(1);
-      },
-      { timeout: 1000 },
-    );
+    await sleep(200);
+    expect(renderMock).toHaveBeenCalledTimes(1);
   });
 });
