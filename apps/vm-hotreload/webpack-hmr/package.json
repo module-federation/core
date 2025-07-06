@@ -1,0 +1,19 @@
+{
+  "name": "webpack-hmr-demo",
+  "version": "1.0.0",
+  "main": "dist/entrypoint1.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack --config webpack.config.js --watch",
+    "start:entrypoint1": "node dist/entrypoint1.js",
+    "start:entrypoint2": "node dist/entrypoint2.js",
+    "start": "node ./dist/index.js",
+    "demo": "rm -rf ./dist && npx concurrently \"pnpm build\" \"wait-on dist/index.js && node dist/index.js\""
+  },
+  "devDependencies": {
+    "webpack": "^5.90.0",
+    "webpack-cli": "^5.1.4",
+    "nodemon": "^3.0.3",
+    "concurrently": "^8.2.2"
+  }
+}
