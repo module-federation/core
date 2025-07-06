@@ -45,6 +45,11 @@
     }
   }
 
+  & .headerSlot {
+    display: flex;
+    align-items: center;
+  }
+
   & .badge {
     display: flex;
     transform: scale(1.6);

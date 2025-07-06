@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { getModuleInfo } from '../index';
 
 export interface FormItemStatus {
@@ -14,4 +15,5 @@ export interface RootComponentProps {
   getVersion?: (moduleName: string) => Promise<Array<string>>;
   handleProxyAddress?: (address: string) => string;
   customValueValidate?: (schema: string) => boolean;
+  headerSlot?: ReactNode;
 }
