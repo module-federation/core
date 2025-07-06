@@ -18,8 +18,12 @@
     "directory": "packages/utilities"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "react": "18.3.1",
     "@types/react": "^18.3.11"
+=======
+    "react": "19.0.0"
+>>>>>>> 4eec06a46 (fix: update packages to React 19 individually instead of global overrides)
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*"
