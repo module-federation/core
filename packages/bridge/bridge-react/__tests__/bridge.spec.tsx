@@ -4,6 +4,7 @@ import { createBridgeComponent } from '../src/v19';
 import { createRemoteComponent } from '../src';
 import {
   act,
+  cleanup,
   fireEvent,
   render,
   screen,
@@ -17,8 +18,11 @@ describe('bridge', () => {
     containerInfo = createContainer();
   });
 
-  afterEach(() => {
-    containerInfo?.clean();
+  afterEach(async () => {
+    cleanup();
+    await act(async () => {
+      containerInfo?.clean();
+    });
   });
 
   it('createBridgeComponent life cycle', async () => {
@@ -29,17 +33,21 @@ describe('bridge', () => {
       rootComponent: Component,
     })();
 
-    lifeCycle.render({
-      dom: containerInfo?.container,
+    await act(async () => {
+      lifeCycle.render({
+        dom: containerInfo?.container,
+      });
+      await sleep(200);
     });
 
-    await sleep(200);
     expect(document.querySelector('#container')!.innerHTML).toContain(
       '<div>life cycle render</div>',
     );
 
-    lifeCycle.destroy({
-      dom: containerInfo?.container,
+    await act(async () => {
+      lifeCycle.destroy({
+        dom: containerInfo?.container,
+      });
     });
 
     expect(document.querySelector('#container')!.innerHTML).toContain('');

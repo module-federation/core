@@ -18,5 +18,6 @@ export default defineConfig({
     ],
     globals: true,
     testTimeout: 10000,
+    setupFiles: [path.resolve(__dirname, '__tests__/setup.ts')],
   },
 });
