@@ -1,6 +1,6 @@
 import React from 'react';
 import { assert, describe, it } from 'vitest';
-import { createBridgeComponent, createRemoteComponent } from '../src';
+import { createBridgeComponent, createRemoteComponent } from '../src/v19';
 import {
   act,
   fireEvent,
