@@ -71,9 +71,7 @@
       }
     },
     "overrides": {
-      "@changesets/assemble-release-plan": "workspace:*",
-      "react": "19.0.0",
-      "react-dom": "19.0.0"
+      "@changesets/assemble-release-plan": "workspace:*"
     }
   },
   "dependencies": {
