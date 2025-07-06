@@ -1,6 +1,11 @@
-import { getNextInternalsShareScope, WEBPACK_LAYERS_NAMES } from './internal';
+import {
+  getNextInternalsShareScope,
+  WEBPACK_LAYERS_NAMES,
+  getNextVersion,
+} from './internal';
 import type { Compiler, WebpackOptionsNormalized } from 'webpack';
 import type { SharedConfig } from '@module-federation/enhanced/src/declarations/plugins/sharing/SharePlugin';
+import * as internalModule from './internal';
 
 // Mock internal-helpers
 jest.mock('./internal-helpers', () => ({
@@ -38,6 +43,9 @@ describe('getNextInternalsShareScope', () => {
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
+
+    // Mock getNextVersion to return Next.js 15+ for delegation tests
+    jest.spyOn(internalModule, 'getNextVersion').mockReturnValue('15.0.0');
 
     // Setup common compiler mock
     mockCompiler = {
@@ -121,6 +129,8 @@ describe('getNextInternalsShareScope', () => {
 
   describe('Error handling', () => {
     it('should handle missing compiler context gracefully', () => {
+      // Restore the original getNextVersion for this test
+      jest.restoreAllMocks();
       delete mockCompiler.context;
 
       expect(() => {
@@ -128,6 +138,9 @@ describe('getNextInternalsShareScope', () => {
       }).toThrow(
         'Compiler context is not available. Cannot resolve Next.js version.',
       );
+
+      // Re-mock for other tests
+      jest.spyOn(internalModule, 'getNextVersion').mockReturnValue('15.0.0');
     });
   });
 
