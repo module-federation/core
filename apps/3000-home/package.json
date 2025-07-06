@@ -6,11 +6,12 @@
     "@ant-design/cssinjs": "^1.21.0",
     "antd": "5.19.1",
     "lodash": "4.17.21",
-    "next": "14.2.16",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "next": "15.3.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "@module-federation/nextjs-mf": "workspace:*",
 <<<<<<< HEAD
     "@module-federation/runtime": "workspace:*",
@@ -20,6 +21,11 @@
 =======
     "@module-federation/runtime": "workspace:*"
 >>>>>>> e644b8fe8 (chore: update cmd syntax exit)
+=======
+    "@module-federation/nextjs-mf": "0.0.0-next-20250701105507",
+    "@module-federation/runtime": "workspace:*",
+    "webpack": "^5.98.0"
+>>>>>>> 2a2337ae2 (feat: merge increment C - core package dependencies)
   },
   "scripts": {
     "start": "next start",
