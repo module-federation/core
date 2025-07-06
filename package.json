@@ -71,10 +71,7 @@
       }
     },
     "overrides": {
-      "@changesets/assemble-release-plan": "workspace:*",
-      "next": "15.3.3",
-      "react": "19.1.0",
-      "react-dom": "19.1.0"
+      "@changesets/assemble-release-plan": "workspace:*"
     }
   },
   "dependencies": {
@@ -91,8 +88,8 @@
     "lodash.get": "4.4.2",
     "openai": "^4.72.0",
     "rambda": "7.5.0",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-router-dom": "6.26.2",
     "regenerator-runtime": "0.14.1",
     "sharp": "^0.33.4",
@@ -123,7 +120,6 @@
     "@nx/jest": "21.0.3",
     "@nx/js": "21.0.3",
     "@nx/module-federation": "21.0.3",
-    "@nx/next": "21.0.3",
     "@nx/node": "21.0.3",
     "@nx/react": "21.0.3",
     "@nx/rollup": "21.0.3",
@@ -145,7 +141,6 @@
     "@storybook/addon-essentials": "8.6.12",
     "@storybook/core-common": "8.6.12",
     "@storybook/core-server": "8.6.12",
-    "@storybook/nextjs": "8.6.12",
     "@storybook/node-logger": "8.1.11",
     "@storybook/react": "8.6.12",
     "@svgr/webpack": "8.1.0",
@@ -168,8 +163,8 @@
     "@types/node": "18.16.9",
     "@types/node-fetch": "2.6.11",
     "@types/pidusage": "2.0.5",
-    "@types/react": "18.3.11",
-    "@types/react-dom": "18.3.0",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
     "@types/webpack-sources": "3.2.3",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
