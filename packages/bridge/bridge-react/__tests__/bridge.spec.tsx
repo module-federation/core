@@ -67,7 +67,9 @@ describe('bridge', () => {
     );
     expect(getHtml(container)).toMatch('loading');
 
-    await sleep(200);
+    await act(async () => {
+      await sleep(200);
+    });
     expect(getHtml(container)).toMatch('life cycle render');
     expect(getHtml(container)).toMatch('hello world');
   });
@@ -98,7 +100,9 @@ describe('bridge', () => {
     );
     expect(getHtml(container)).toMatch('loading');
 
-    await sleep(200);
+    await act(async () => {
+      await sleep(200);
+    });
     expect(getHtml(container)).toMatch('life cycle render');
     expect(getHtml(container)).toMatch('hello world');
     expect(ref.current).not.toBeNull();
@@ -132,7 +136,9 @@ describe('bridge', () => {
     const { container } = render(<RemoteComponent />);
     expect(getHtml(container)).toMatch('loading');
 
-    await sleep(200);
+    await act(async () => {
+      await sleep(200);
+    });
     expect(renderMock).toHaveBeenCalledTimes(1);
   });
 });

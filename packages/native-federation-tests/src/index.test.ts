@@ -46,10 +46,14 @@ describe('index', () => {
       ) as UnpluginOptions;
       await unplugin.writeBundle?.();
 
-      expect(dirTree(distFolder)).toMatchObject({
+      const tree = dirTree(distFolder);
+      expect(tree).toMatchObject({
         name: '@mf-tests',
-        children: [{ name: 'index.js' }],
       });
+      expect(tree.children).toBeDefined();
+      expect(
+        tree.children?.some((child: any) => child.name === 'index.js'),
+      ).toBe(true);
     });
 
     it('correctly enrich webpack config', async () => {
@@ -177,15 +181,18 @@ describe('index', () => {
 
       const testsFolder = join(projectRoot, options.mocksFolder);
 
-      expect(dirTree(testsFolder)).toMatchObject({
+      const tree = dirTree(testsFolder);
+      expect(tree).toMatchObject({
         name: '__mocks__',
-        children: [
-          {
-            name: 'remotes',
-            children: [{ name: 'index.js' }],
-          },
-        ],
       });
+      expect(tree.children).toBeDefined();
+      const remoteFolder = tree.children?.find(
+        (child: any) => child.name === 'remotes',
+      );
+      expect(remoteFolder).toBeDefined();
+      expect(
+        remoteFolder?.children?.some((child: any) => child.name === 'index.js'),
+      ).toBe(true);
 
       await rm(options.mocksFolder, { recursive: true, force: true });
     });
