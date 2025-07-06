@@ -55,11 +55,12 @@ jobs:
       - name: Print Number of CPU Cores
         run: nproc
 
-      - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=1
-
       - name: Run Build for All
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 3
+          timeout_minutes: 15
+          command: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Check Package Publishing Compatibility
         run: |
