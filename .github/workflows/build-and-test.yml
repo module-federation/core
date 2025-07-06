@@ -59,7 +59,11 @@ jobs:
         run: nproc
 
       - name: Run Build for All
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 3
+          timeout_minutes: 15
+          command: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Check Package Publishing Compatibility
         run: |
