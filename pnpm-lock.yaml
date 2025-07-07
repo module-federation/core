@@ -229,7 +229,7 @@ importers:
         version: 0.5.9(tailwindcss@3.4.13)
       '@testing-library/react':
         specifier: 16.1.0
-        version: 16.1.0(@testing-library/dom@10.4.0)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)
+        version: 16.1.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)
       '@types/adm-zip':
         specifier: 0.5.5
         version: 0.5.5
@@ -267,8 +267,11 @@ importers:
         specifier: 2.0.5
         version: 2.0.5
       '@types/react':
-        specifier: ^18.3.11
+        specifier: 18.3.11
         version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       '@types/webpack-sources':
         specifier: 3.2.3
         version: 3.2.3
@@ -420,8 +423,11 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(@nx/devkit@21.0.3)(@nx/eslint@21.0.3)(@nx/js@21.0.3)(@nx/vite@21.0.3)
       react:
-        specifier: ^18.3.1
+        specifier: 18.3.1
         version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -670,6 +676,12 @@ importers:
       antd:
         specifier: 4.24.14
         version: 4.24.14(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/core':
         specifier: workspace:*
@@ -692,6 +704,12 @@ importers:
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
       react-router-dom:
         specifier: ^6.23.1
         version: 6.24.1(react-dom@18.3.1)(react@18.3.1)
@@ -720,6 +738,12 @@ importers:
       lodash:
         specifier: 4.17.21
         version: 4.17.21
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/enhanced':
         specifier: workspace:*
@@ -742,6 +766,12 @@ importers:
       lodash:
         specifier: 4.17.21
         version: 4.17.21
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/enhanced':
         specifier: workspace:*
@@ -761,6 +791,12 @@ importers:
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/enhanced':
         specifier: workspace:*
@@ -2035,6 +2071,12 @@ importers:
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/core':
         specifier: workspace:*
@@ -2063,6 +2105,12 @@ importers:
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/core':
         specifier: workspace:*
@@ -2085,6 +2133,12 @@ importers:
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/core':
         specifier: workspace:*
@@ -2108,10 +2162,10 @@ importers:
         specifier: workspace:*
         version: link:../../../packages/enhanced
       react:
-        specifier: ^18.3.1
+        specifier: 18.3.1
         version: 18.3.1
       react-dom:
-        specifier: ^18.3.1
+        specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
     devDependencies:
       '@rsbuild/core':
@@ -9684,7 +9738,7 @@ packages:
       react: '>=16'
     dependencies:
       '@types/mdx': 2.0.13
-      '@types/react': 19.1.8
+      '@types/react': 18.3.11
       react: 19.1.0
     dev: false
 
@@ -20920,7 +20974,7 @@ packages:
       react-dom: 19.0.0(react@19.0.0)
     dev: true
 
-  /@testing-library/react@16.1.0(@testing-library/dom@10.4.0)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1):
+  /@testing-library/react@16.1.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-Q2ToPvg0KsVL0ohND9A3zLJWcOXXcO8IDu3fj11KhNt0UlCWyFyvnCIBkd12tidB2lkiVRG8VFqdhcqhqnAQtg==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -20938,6 +20992,7 @@ packages:
       '@babel/runtime': 7.26.0
       '@testing-library/dom': 10.4.0
       '@types/react': 18.3.11
+      '@types/react-dom': 18.3.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     dev: true
@@ -21480,7 +21535,7 @@ packages:
   /@types/hoist-non-react-statics@3.3.5:
     resolution: {integrity: sha512-SbcrWzkKBw2cdwRTwQAswfpB9g9LJWfjtUeW/jvNwbhC8cpmmNYVePa+ncbUe0rGTQ7G3Ff6mYUN2VMfLVr+Sg==}
     dependencies:
-      '@types/react': 19.1.8
+      '@types/react': 18.3.11
       hoist-non-react-statics: 3.3.2
 
   /@types/html-minifier-terser@6.1.0:
@@ -21582,7 +21637,7 @@ packages:
   /@types/loadable__component@5.13.9:
     resolution: {integrity: sha512-QWOtIkwZqHNdQj3nixQ8oyihQiTMKZLk/DNuvNxMSbTfxf47w+kqcbnxlUeBgAxdOtW0Dh48dTAIp83iJKtnrQ==}
     dependencies:
-      '@types/react': 19.1.8
+      '@types/react': 18.3.11
 
   /@types/lodash-es@4.17.12:
     resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
@@ -21771,7 +21826,7 @@ packages:
   /@types/react-helmet@6.1.11:
     resolution: {integrity: sha512-0QcdGLddTERotCXo3VFlUSWO3ztraw8nZ6e3zJSgG7apwV5xt+pJUS8ewPBqT4NYB1optGLprNQzFleIY84u/g==}
     dependencies:
-      '@types/react': 19.1.8
+      '@types/react': 18.3.11
 
   /@types/react-router-dom@5.3.3:
     resolution: {integrity: sha512-kpqnYK4wcdm5UaWI3fLcELopqLrHgLqNsdpHauzlQktfkHL3npOSwtj1Uz9oKBAzs7lFtVkV8j83voAz2D8fhw==}
@@ -21784,7 +21839,7 @@ packages:
     resolution: {integrity: sha512-jGjmu/ZqS7FjSH6owMcD5qpq19+1RS9DeVRqfl1FeBMxTDQAGwlMWOcs52NDoXaNKyG3d1cYQFMs9rCrb88o9Q==}
     dependencies:
       '@types/history': 4.7.11
-      '@types/react': 19.1.8
+      '@types/react': 18.3.11
 
   /@types/react@18.2.79:
     resolution: {integrity: sha512-RwGAGXPl9kSXwdNTafkOEuFrTBD5SA2B3iEB96xi8+xu5ddUa/cpvyVCSNn+asgLCTHkb5ZxN8gbuibYJi4s1w==}
@@ -21878,7 +21933,7 @@ packages:
     resolution: {integrity: sha512-mmiVvwpYklFIv9E8qfxuPyIt/OuyIrn6gMOAMOFUO3WJfSrSE+sGUoa4PiZj77Ut7bKZpaa6o1fBKS/4TOEvnA==}
     dependencies:
       '@types/hoist-non-react-statics': 3.3.5
-      '@types/react': 19.1.8
+      '@types/react': 18.3.11
       csstype: 3.1.3
 
   /@types/stylis@4.2.0:
@@ -47253,7 +47308,7 @@ packages:
   /types-react-dom@19.0.0-rc.1:
     resolution: {integrity: sha512-VSLZJl8VXCD0fAWp7DUTFUDCcZ8DVXOQmjhJMD03odgeFmu14ZQJHCXeETm3BEAhJqfgJaFkLnGkQv88sRx0fQ==}
     dependencies:
-      '@types/react': 19.1.8
+      '@types/react': 18.3.11
     dev: true
 
   /types-react@19.0.0-rc.1:

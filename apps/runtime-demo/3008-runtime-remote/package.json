@@ -9,8 +9,8 @@
   },
   "dependencies": {
     "@module-federation/enhanced": "workspace:*",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
     "@rsbuild/core": "^1.3.21",
