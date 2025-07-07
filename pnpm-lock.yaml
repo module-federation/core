@@ -52,15 +52,6 @@ importers:
       rambda:
         specifier: 7.5.0
         version: 7.5.0
-      react:
-        specifier: 18.3.1
-        version: 18.3.1
-      react-dom:
-        specifier: 18.3.1
-        version: 18.3.1(react@18.3.1)
-      react-router-dom:
-        specifier: 6.26.2
-        version: 6.26.2(react-dom@18.3.1)(react@18.3.1)
       regenerator-runtime:
         specifier: 0.14.1
         version: 0.14.1
@@ -241,7 +232,7 @@ importers:
         version: 0.5.9(tailwindcss@3.4.13)
       '@testing-library/react':
         specifier: 16.1.0
-        version: 16.1.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)
+        version: 16.1.0(@testing-library/dom@10.4.0)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)
       '@types/adm-zip':
         specifier: 0.5.5
         version: 0.5.5
@@ -278,12 +269,6 @@ importers:
       '@types/pidusage':
         specifier: 2.0.5
         version: 2.0.5
-      '@types/react':
-        specifier: 18.3.11
-        version: 18.3.11
-      '@types/react-dom':
-        specifier: 18.3.0
-        version: 18.3.0
       '@types/webpack-sources':
         specifier: 3.2.3
         version: 3.2.3
@@ -534,6 +519,12 @@ importers:
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../../packages/utilities
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
 
   apps/3001-shop:
     dependencies:
@@ -565,6 +556,12 @@ importers:
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../../packages/utilities
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
 
   apps/3002-checkout:
     dependencies:
@@ -596,6 +593,12 @@ importers:
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../../packages/utilities
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
 
   apps/bundle-size:
     dependencies:
@@ -652,6 +655,12 @@ importers:
       '@types/node':
         specifier: ^18.7.13
         version: 18.16.9
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       concurrently:
         specifier: ^8.2.2
         version: 8.2.2
@@ -764,6 +773,15 @@ importers:
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+      react-router-dom:
+        specifier: 6.26.2
+        version: 6.26.2(react-dom@18.3.1)(react@18.3.1)
     devDependencies:
       '@module-federation/enhanced':
         specifier: workspace:*
@@ -777,6 +795,12 @@ importers:
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.5.15
         version: 0.5.15(react-refresh@0.14.2)(webpack@5.98.0)
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -1594,6 +1618,16 @@ importers:
         version: link:../../packages/node
 
   apps/react-ts-host:
+    dependencies:
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+      react-router-dom:
+        specifier: 6.26.2
+        version: 6.26.2(react-dom@18.3.1)(react@18.3.1)
     devDependencies:
       '@module-federation/core':
         specifier: workspace:*
@@ -1607,15 +1641,34 @@ importers:
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.5.15
         version: 0.5.15(react-refresh@0.14.2)(webpack@5.98.0)
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
 
   apps/react-ts-nested-remote:
+    dependencies:
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../packages/enhanced
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       file-loader:
         specifier: 6.2.0
         version: 6.2.0(webpack@5.98.0)
@@ -1624,10 +1677,23 @@ importers:
         version: 0.14.2
 
   apps/react-ts-remote:
+    dependencies:
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../packages/enhanced
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       file-loader:
         specifier: 6.2.0
         version: 6.2.0(webpack@5.98.0)
@@ -1636,6 +1702,13 @@ importers:
         version: 0.14.2
 
   apps/reactRemoteUI:
+    dependencies:
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/storybook-addon':
         specifier: workspace:*
@@ -1643,8 +1716,24 @@ importers:
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../../packages/utilities
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
 
   apps/reactStorybook:
+    dependencies:
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+      react-router-dom:
+        specifier: 6.26.2
+        version: 6.26.2(react-dom@18.3.1)(react@18.3.1)
     devDependencies:
       '@module-federation/storybook-addon':
         specifier: workspace:*
@@ -1652,6 +1741,12 @@ importers:
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../../packages/utilities
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
 
   apps/router-demo/router-host-2000:
     dependencies:
@@ -2279,6 +2374,9 @@ importers:
       '@types/node':
         specifier: ~16.11.7
         version: 16.11.68
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
       '@vitejs/plugin-vue':
         specifier: ^5.0.4
         version: 5.1.4(vite@5.4.18)(vue@3.5.13)
@@ -2685,12 +2783,24 @@ importers:
       '@types/btoa':
         specifier: ^1.2.5
         version: 1.2.5
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
       enhanced-resolve:
         specifier: ^5.0.0
         version: 5.17.1
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
       terser:
         specifier: ^5.37.0
         version: 5.37.0
@@ -2854,6 +2964,12 @@ importers:
       '@rsbuild/core':
         specifier: 1.3.21
         version: 1.3.21
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
 
   packages/native-federation-tests:
     dependencies:
@@ -2940,9 +3056,21 @@ importers:
         specifier: ^5.40.0
         version: 5.93.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
     devDependencies:
-      '@types/btoa':
-        specifier: ^1.2.5
-        version: 1.2.5
+      '@module-federation/runtime-tools':
+        specifier: workspace:*
+        version: link:../runtime-tools
+      '@module-federation/utilities':
+        specifier: workspace:*
+        version: link:../utilities
+      '@types/node':
+        specifier: ^16.18.0
+        version: 16.18.126
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
 
   packages/node:
     dependencies:
@@ -9538,7 +9666,7 @@ packages:
       react: '>=16'
     dependencies:
       '@types/mdx': 2.0.13
-      '@types/react': 19.1.8
+      '@types/react': 18.3.11
       react: 19.1.0
     dev: false
 
@@ -20065,7 +20193,7 @@ packages:
       react-dom: 18.3.1(react@18.3.1)
     dev: true
 
-  /@testing-library/react@16.1.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1):
+  /@testing-library/react@16.1.0(@testing-library/dom@10.4.0)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-Q2ToPvg0KsVL0ohND9A3zLJWcOXXcO8IDu3fj11KhNt0UlCWyFyvnCIBkd12tidB2lkiVRG8VFqdhcqhqnAQtg==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -20083,7 +20211,6 @@ packages:
       '@babel/runtime': 7.26.0
       '@testing-library/dom': 10.4.0
       '@types/react': 18.3.11
-      '@types/react-dom': 18.3.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     dev: true
@@ -20809,6 +20936,10 @@ packages:
 
   /@types/node@16.11.68:
     resolution: {integrity: sha512-JkRpuVz3xCNCWaeQ5EHLR/6woMbHZz/jZ7Kmc63AkU+1HxnoUugzSWMck7dsR4DvNYX8jp9wTi9K7WvnxOIQZQ==}
+    dev: true
+
+  /@types/node@16.18.126:
+    resolution: {integrity: sha512-OTcgaiwfGFBKacvfwuHzzn1KLxH/er8mluiy8/uM3sGXHaRe73RrSIj01jow9t4kJEW633Ov+cOexXeiApTyAw==}
     dev: true
 
   /@types/node@17.0.45:
