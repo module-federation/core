@@ -3337,6 +3337,9 @@ importers:
         specifier: ^5.40.0
         version: 5.93.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
     devDependencies:
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
       react:
         specifier: 18.3.1
         version: 18.3.1
