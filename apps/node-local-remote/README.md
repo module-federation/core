@@ -35,3 +35,7 @@ Check `webpack.config.js` or `next.config.js` for federation settings.
 - Remote loading
 - Shared dependencies
 - Type safety
+
+## Description
+
+This package demonstrates a specific use case of Module Federation within the ecosystem.
