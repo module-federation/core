@@ -18,7 +18,7 @@
     "directory": "packages/utilities"
   },
   "devDependencies": {
-    "react": "18.3.1"
+    "react": "19.0.0"
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*"
