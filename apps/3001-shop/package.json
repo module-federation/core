@@ -11,7 +11,7 @@
     "react-dom": "19.0.0"
   },
   "devDependencies": {
-    "@module-federation/nextjs-mf": "0.0.0-next-20250701105507",
+    "@module-federation/nextjs-mf": "workspace:*",
     "@module-federation/runtime": "workspace:*",
 <<<<<<< HEAD
 <<<<<<< HEAD
