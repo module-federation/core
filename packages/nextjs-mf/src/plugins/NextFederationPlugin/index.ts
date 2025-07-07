@@ -74,7 +74,7 @@ export class NextFederationPlugin {
         compiler.options.resolveLoader.alias || {};
       // @ts-ignore
       compiler.options.resolveLoader.alias['next-flight-loader'] =
-        require.resolve('../../patches/next-flight-loader');
+        require.resolve('../../loaders/next-flight-loader');
     }
 
     process.env['FEDERATION_WEBPACK_PATH'] =
