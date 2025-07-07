@@ -111,6 +111,7 @@ import { Steps, Tab, Tabs } from '@theme';
   ```tsx
   // 如果使用了构建插件，那么可以直接使用 `loadRemote` 加载模块。
   import { loadRemote } from '@module-federation/enhanced/runtime';
+  import React from 'react';
 
   export default () => {
     const MyButton = React.lazy(() =>
@@ -133,6 +134,7 @@ import { Steps, Tab, Tabs } from '@theme';
   ```ts
   // 如果没有使用构建插件，那么可以创建新的实例，并注册模块
   import { createInstance } from '@module-federation/enhanced/runtime';
+  import React from 'react';
 
   const mf = createInstance({
     name: 'mf_host',

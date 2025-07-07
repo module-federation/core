@@ -115,6 +115,7 @@ import { Steps, Tab, Tabs } from '@theme';
   ```tsx
   // If use build plugin, you can use `loadRemote` directly.
   import { loadRemote } from '@module-federation/enhanced/runtime';
+  import React from 'react';
 
   export default () => {
     const MyButton = React.lazy(() =>
@@ -137,6 +138,7 @@ import { Steps, Tab, Tabs } from '@theme';
   ```ts
   // If not use build plugin, you can create new instance and load remote.
   import { createInstance } from '@module-federation/enhanced/runtime';
+  import React from 'react';
 
   const mf = createInstance({
     name: 'mf_host',
