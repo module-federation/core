@@ -1,40 +1,10 @@
 # Runtime API
 
-import { Badge } from '@theme';
+import { Steps, Tab, Tabs, Badge, Aside } from '@theme';
 import Collapse from '@components/Collapse'
+import Runtime from '@components/zh/runtime';
 
-若使用构建插件，项目启动时将自动创建 `ModuleFederation` 实例并存储于内存中。此时可直接调用 API，API 会自动从内存中获取构建运行时创建的 `ModuleFederation` 实例。
-
-```ts
-import { loadRemote } from '@module-federation/enhanced/runtime';
-
-loadRemote('remote1');
-```
-
-若未使用构建插件，则需手动创建 `ModuleFederation` 实例，之后调用相应 API。
-
-```ts
-import { createInstance } from '@module-federation/enhanced/runtime';
-
-const mf = createInstance({
-  name: 'host',
-  remotes: [
-    {
-      name: 'remote1',
-      entry: 'http://localhost:2001/vmok-manifest.json'
-    }
-  ]
-});
-
-
-mf.loadRemote('remote1');
-```
-
-* 什么是 `ModuleFederation` 实例 ？
-
-`ModuleFederation` 实例是 `ModuleFederation` 类的实例，它包含了 `ModuleFederation` 运行时的所有功能。
-
-> 你可以在控制台输入 `__FEDERATION__.__INSTANCES__` 来查看已经创建好的实例。
+<Runtime />
 
 ## createInstance
 
@@ -167,7 +137,7 @@ init({
 
 ### 如何迁移
 
-**使用了构建插件**
+#### Build Plugin（使用构建插件）
 
 1. 移除 `init` API 的调用
 2. 使用 [registerShared](#registershared) 代替 `init` 中的 `shared` 配置
@@ -175,8 +145,86 @@ init({
 4. 使用 [registerPlugins](#registerplugins) 代替 `init` 中的 `plugins` 配置
 5. 使用 [getInstance](#getinstance) 获取构建插件创建的 `ModuleFederation` 实例
 
+```diff
+- import { init } from '@module-federation/enhanced/runtime';
++ import { registerShared, registerRemotes, registerPlugins, getInstance } from '@module-federation/enhanced/runtime';
+import React from 'react';
+import mfRuntimePlugin from 'mf-runtime-plugin';
 
-**没有使用构建插件**
+- const instance = init({
++ const instance = getInstance();
+- name: 'mf_host',
+- remotes: [
+-   {
+-     name: 'remote',
+-     entry: 'http://localhost:2001/mf-manifest.json',
+-   }
+- ],
++ registerRemotes([
++   {
++     name: 'remote',
++     entry: 'http://localhost:2001/mf-manifest.json',
++   }
++ ]);
+- shared: {
+-   react: {
+-         version: "18.0.0",
+-         scope: "default",
+-         lib: ()=> React,
+-         shareConfig: {
+-             singleton: true,
+-             requiredVersion: "^18.0.0"
+-     }
+-   },
+- },
++ registerShared({
++   react: {
++     version: "18.0.0",
++     scope: "default",
++     lib: ()=> React,
++     shareConfig: {
++       singleton: true,
++       requiredVersion: "^18.0.0"
++     }
++   }
++ });
+- plugins: [mfRuntimePlugin()]
++ registerPlugins([mfRuntimePlugin()]);
+-});
+
+```
+
+#### Pure Runtime（未使用构建插件）
+
+
+```diff
+- import { init } from '@module-federation/enhanced/runtime';
++ import { createInstance } from '@module-federation/enhanced/runtime';
+
+-const instance = init({
++ const instance = createInstance({
+name: 'mf_host',
+remotes: [
+  {
+    name: 'remote',
+    entry: 'http://localhost:2001/mf-manifest.json',
+  }
+],
+shared: {
+  react: {
+        version: "18.0.0",
+        scope: "default",
+        lib: ()=> React,
+        shareConfig: {
+            singleton: true,
+            requiredVersion: "^18.0.0"
+    }
+  },
+},
+plugins: [mfRuntimePlugin()]
+});
+```
+
 
 如果没有使用构建插件，你可以使用 [createInstance](#createinstance)替换 `init` ，其参数完全一致。
 
@@ -231,61 +279,60 @@ interface RemoteWithVersion {
 
 如果设置 `force: true`, 这会覆盖已经注册（且加载的模块， 并且自动删除已经加载过的模块缓存（如果已经加载过），同时在控制台输出警告，告知这操作存在风险性。
 
-* Example
+<Tabs>
+  <Tab label="Build Plugin（使用构建插件）">
+  ```tsx
+    import { registerRemotes } from '@module-federation/enhanced/runtime';
 
-使用了构建插件
+    // 增加新的 remote sub2
+    registerRemotes([
+      {
+          name: 'sub2',
+          entry: 'http://localhost:2002/mf-manifest.json',
+      }
+    ]);
 
-```ts
-import { registerRemotes } from '@module-federation/enhanced/runtime';
+    // 覆盖之前的 remote sub1
+    registerRemotes([
+      {
+          name: 'sub1',
+          entry: 'http://localhost:2003/mf-manifest.json',
+      }
+    ],{ force:true });
+  ```
+  </Tab>
+  <Tab label="Pure Runtime（未使用构建插件）">
+  ```ts
+    import { createInstance } from '@module-federation/enhanced/runtime';
 
-// 增加新的 remote sub2
-registerRemotes([
-  {
-      name: 'sub2',
-      entry: 'http://localhost:2002/mf-manifest.json',
-  }
-]);
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'sub1',
+          entry: 'http://localhost:2001/mf-manifest.json',
+        }
+      ]
+    });
 
-// 覆盖之前的 remote sub1
-registerRemotes([
-  {
-      name: 'sub1',
-      entry: 'http://localhost:2003/mf-manifest.json',
-  }
-],{ force:true });
-```
+    // 增加新的 remote sub2
+    mf.registerRemotes([
+      {
+          name: 'sub2',
+          entry: 'http://localhost:2002/mf-manifest.json',
+      }
+    ]);
 
-没使用构建插件
-
-```ts
-import { createInstance, registerRemotes } from '@module-federation/enhanced/runtime';
-
-const mf = createInstance({
-  name: 'mf_host',
-  remotes: [
-    {
-      name: 'sub1',
-      entry: 'http://localhost:2001/mf-manifest.json',
-    }
-  ]
-});
-
-// 增加新的 remote sub2
-mf.registerRemotes([
-  {
-      name: 'sub2',
-      entry: 'http://localhost:2002/mf-manifest.json',
-  }
-]);
-
-// 覆盖之前的 remote sub1
-mf.registerRemotes([
-  {
-      name: 'sub1',
-      entry: 'http://localhost:2003/mf-manifest.json',
-  }
-],{ force:true });
-```
+    // 覆盖之前的 remote sub1
+    mf.registerRemotes([
+      {
+          name: 'sub1',
+          entry: 'http://localhost:2003/mf-manifest.json',
+      }
+    ],{ force:true });
+  ```
+  </Tab>
+</Tabs>
 
 ## registerPlugins
 
@@ -295,41 +342,88 @@ mf.registerRemotes([
 function registerPlugins(plugins: ModuleFederationRuntimePlugin[]) {}
 ```
 
-* Example
+<Tabs>
+  <Tab label="Build Plugin（使用构建插件）">
+  ```tsx
+    import { registerPlugins } from '@module-federation/enhanced/runtime';
+    import runtimePlugin from './custom-runtime-plugin';
 
-```ts
-import { registerPlugins } from '@module-federation/enhanced/runtime';
-import runtimePlugin from './custom-runtime-plugin';
+    // 增加新的运行时插件
+    registerPlugins([runtimePlugin()]);
 
-// 增加新的运行时插件
-registerPlugins([runtimePlugin()]);
-
-registerPlugins([
-  {
-    name: 'custom-plugin-runtime',
-    beforeInit(args) {
-      const { userOptions, origin } = args;
-      if (origin.options.name && origin.options.name !== userOptions.name) {
-        userOptions.name = origin.options.name;
+    registerPlugins([
+      {
+        name: 'custom-plugin-runtime',
+        beforeInit(args) {
+          const { userOptions, origin } = args;
+          if (origin.options.name && origin.options.name !== userOptions.name) {
+            userOptions.name = origin.options.name;
+          }
+          console.log('[build time inject] beforeInit: ', args);
+          return args;
+        },
+        beforeLoadShare(args) {
+          console.log('[build time inject] beforeLoadShare: ', args);
+          return args;
+        },
+        createLink({ url }) {
+          const link = document.createElement('link');
+          link.setAttribute('href', url);
+          link.setAttribute('rel', 'preload');
+          link.setAttribute('as', 'script');
+          link.setAttribute('crossorigin', 'anonymous');
+          return link;
+        },
       }
-      console.log('[build time inject] beforeInit: ', args);
-      return args;
-    },
-    beforeLoadShare(args) {
-      console.log('[build time inject] beforeLoadShare: ', args);
-      return args;
-    },
-    createLink({ url }) {
-      const link = document.createElement('link');
-      link.setAttribute('href', url);
-      link.setAttribute('rel', 'preload');
-      link.setAttribute('as', 'script');
-      link.setAttribute('crossorigin', 'anonymous');
-      return link;
-    },
-  }
-]);
-```
+    ]);
+  ```
+  </Tab>
+  <Tab label="Pure Runtime（未使用构建插件）">
+  ```ts
+    import { createInstance } from '@module-federation/enhanced/runtime';
+    import runtimePlugin from './custom-runtime-plugin';
+
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'sub1',
+          entry: 'http://localhost:2001/mf-manifest.json',
+        }
+      ]
+    });
+
+    // 增加新的运行时插件
+    mf.registerPlugins([runtimePlugin()]);
+
+    mf.registerPlugins([
+      {
+        name: 'custom-plugin-runtime',
+        beforeInit(args) {
+          const { userOptions, origin } = args;
+          if (origin.options.name && origin.options.name !== userOptions.name) {
+            userOptions.name = origin.options.name;
+          }
+          console.log('[build time inject] beforeInit: ', args);
+          return args;
+        },
+        beforeLoadShare(args) {
+          console.log('[build time inject] beforeLoadShare: ', args);
+          return args;
+        },
+        createLink({ url }) {
+          const link = document.createElement('link');
+          link.setAttribute('href', url);
+          link.setAttribute('rel', 'preload');
+          link.setAttribute('as', 'script');
+          link.setAttribute('crossorigin', 'anonymous');
+          return link;
+        },
+      }
+    ]);
+  ```
+  </Tab>
+</Tabs>
 
 ## registerShared
 
@@ -366,50 +460,74 @@ type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
 
 </Collapse>
 
-* Example
+<Tabs>
+  <Tab label="Build Plugin（使用构建插件）">
+  ```tsx
+    import { registerShared } from '@module-federation/enhanced/runtime';
+    import React from 'react';
+    import ReactDom from 'react-dom';
 
-```ts
-import { registerShared } from '@module-federation/enhanced/runtime';
-import React from 'react';
-import ReactDom from 'react-dom';
-
-registerShared({
-  react: {
-        version: "18.0.0",
-        scope: "default",
-        lib: ()=> React,
-        shareConfig: {
-            singleton: true,
-            requiredVersion: "^18.0.0"
+    registerShared({
+      react: {
+            version: "18.0.0",
+            scope: "default",
+            lib: ()=> React,
+            shareConfig: {
+                singleton: true,
+                requiredVersion: "^18.0.0"
+            }
+        },
+        "react-dom": {
+            version: "18.0.0",
+            scope: "default",
+            lib: ()=> ReactDom,
+            shareConfig: {
+                singleton: true,
+                requiredVersion: "^18.0.0"
+            }
         }
-    },
-    "react-dom": {
-        version: "18.0.0",
-        scope: "default",
-        lib: ()=> ReactDom,
-        shareConfig: {
-            singleton: true,
-            requiredVersion: "^18.0.0"
+    });
+  ```
+  </Tab>
+  <Tab label="Pure Runtime（未使用构建插件）">
+  ```ts
+    import { createInstance } from '@module-federation/enhanced/runtime';
+    import React from 'react';
+    import ReactDom from 'react-dom';
+
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'sub1',
+          entry: 'http://localhost:2001/mf-manifest.json',
         }
-    }
-});
-```
+      ]
+    });
 
-## loadRemote
-
-- Type: `loadRemote(id: string)`
-- 加载远程模块
-- 示例
-
-```ts
-import { getInstance, loadRemote } from '@module-federation/enhanced/runtime';
-
-// remoteName + expose
-loadRemote("remote/util").then((m)=> m.add(1,2,3));
-
-// alias + expose
-loadRemote("app1/util").then((m)=> m.add(1,2,3));
-```
+    registerShared({
+      react: {
+            version: "18.0.0",
+            scope: "default",
+            lib: ()=> React,
+            shareConfig: {
+                singleton: true,
+                requiredVersion: "^18.0.0"
+            }
+        },
+        "react-dom": {
+            version: "18.0.0",
+            scope: "default",
+            lib: ()=> ReactDom,
+            shareConfig: {
+                singleton: true,
+                requiredVersion: "^18.0.0"
+            }
+        }
+    });
+  ```
+  </Tab>
+</Tabs>
 
 ## loadShare
 
@@ -417,41 +535,85 @@ loadRemote("app1/util").then((m)=> m.add(1,2,3));
 - 获取 `share` 依赖，当全局环境有符合当前 `host` 的 `share` 依赖时，将优先复用当前已存在且满足 `share` 条件的依赖，否则将加载自身的依赖并存入全局缓存
 - 该 `API` **一般不由用户直接调用，用于构建插件转换自身依赖时使用**
 
-<Collapse title='示例'>
+<Tabs>
+  <Tab label="Build Plugin（使用构建插件）">
+  ```tsx
+    import { registerShared, loadShare } from '@module-federation/enhanced/runtime';
+    import React from 'react';
+    import ReactDom from 'react-dom';
 
-```ts
-import { registerShared, loadShare } from '@module-federation/enhanced/runtime';
-import React from 'react';
-import ReactDom from 'react-dom';
-
-registerShared({
-  react: {
-      version: "17.0.0",
-      scope: "default",
-      lib: ()=> React,
-      shareConfig: {
-          singleton: true,
-          requiredVersion: "^17.0.0"
+    registerShared({
+      react: {
+          version: "17.0.0",
+          scope: "default",
+          lib: ()=> React,
+          shareConfig: {
+              singleton: true,
+              requiredVersion: "^17.0.0"
+          }
+      },
+      "react-dom": {
+          version: "17.0.0",
+          scope: "default",
+          lib: ()=> ReactDom,
+          shareConfig: {
+              singleton: true,
+              requiredVersion: "^17.0.0"
+          }
       }
-  },
-  "react-dom": {
-      version: "17.0.0",
-      scope: "default",
-      lib: ()=> ReactDom,
-      shareConfig: {
-          singleton: true,
-          requiredVersion: "^17.0.0"
+    });
+
+
+    loadShare("react").then((reactFactory)=>{
+        console.log(reactFactory())
+    });
+  ```
+  </Tab>
+  <Tab label="Pure Runtime（未使用构建插件）">
+  ```ts
+    import { createInstance } from '@module-federation/enhanced/runtime';
+    import React from 'react';
+    import ReactDom from 'react-dom';
+
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote',
+          entry: 'http://localhost:2001/mf-manifest.json',
+          alias: 'app1'
+        }
+      ]
+    });
+
+    mf.registerShared({
+      react: {
+          version: "17.0.0",
+          scope: "default",
+          lib: ()=> React,
+          shareConfig: {
+              singleton: true,
+              requiredVersion: "^17.0.0"
+          }
+      },
+      "react-dom": {
+          version: "17.0.0",
+          scope: "default",
+          lib: ()=> ReactDom,
+          shareConfig: {
+              singleton: true,
+              requiredVersion: "^17.0.0"
+          }
       }
-  }
-});
+    });
 
 
-loadShare("react").then((reactFactory)=>{
-    console.log(reactFactory())
-});
-```
-
-</Collapse>
+    mf.loadShare("react").then((reactFactory)=>{
+        console.log(reactFactory())
+    });
+  ```
+  </Tab>
+</Tabs>
 
 如果设置了多个版本 shared，默认会返回已加载且最高版本的 shared 。可以通过设置 `extraOptions.resolver` 来改变这个行为：
 
@@ -468,6 +630,47 @@ loadShare('react', {
   console.log(reactFactory()); // { version: '17.0.0)' }
 });
 ```
+
+## loadRemote
+
+- Type: `loadRemote(id: string)`
+- 加载远程模块
+
+<Tabs>
+  <Tab label="Build Plugin（使用构建插件）">
+  ```tsx
+    import { loadRemote } from '@module-federation/enhanced/runtime';
+
+    // remoteName + expose
+    loadRemote("remote/util").then((m)=> m.add(1,2,3));
+
+    // alias + expose
+    loadRemote("app1/util").then((m)=> m.add(1,2,3));
+  ```
+  </Tab>
+  <Tab label="Pure Runtime（未使用构建插件）">
+  ```ts
+    import { createInstance } from '@module-federation/enhanced/runtime';
+
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote',
+          entry: 'http://localhost:2001/mf-manifest.json',
+          alias: 'app1'
+        }
+      ]
+    });
+
+    // remoteName + expose
+    mf.loadRemote("remote/util").then((m)=> m.add(1,2,3));
+
+    // alias + expose
+    mf.loadRemote("app1/util").then((m)=> m.add(1,2,3));
+  ```
+  </Tab>
+</Tabs>
 
 ## preloadRemote
 
@@ -509,56 +712,117 @@ type PreloadRemoteArgs = {
 * `remote` 的同步资源还是异步资源
 * `remote` 依赖的 `remote` 资源
 
-- Example
+<Tabs>
+  <Tab label="Build Plugin（使用构建插件）">
+  ```tsx
+    import { registerRemotes, preloadRemote } from '@module-federation/enhanced/runtime';
 
-```ts
-import { registerRemotes, preloadRemote } from '@module-federation/enhanced/runtime';
+    registerRemotes([
+      {
+          name: 'sub1',
+          entry: "http://localhost:2001/mf-manifest.json"
+      },
+      {
+          name: 'sub2',
+          entry: "http://localhost:2002/mf-manifest.json"
+      },
+      {
+          name: 'sub3',
+          entry: "http://localhost:2003/mf-manifest.json"
+      },
+    ]);
 
-registerRemotes([
-  {
-      name: 'sub1',
-      entry: "http://localhost:2001/mf-manifest.json"
-  },
-  {
-      name: 'sub2',
-      entry: "http://localhost:2002/mf-manifest.json"
-  },
-  {
-      name: 'sub3',
-      entry: "http://localhost:2003/mf-manifest.json"
-  },
-]);
-
-// 预加载 sub1 模块
-// 过滤资源名称中携带 ignore 的资源信息
-// 只预加载子依赖的 sub1-button 模块
-preloadRemote([
-    {
-        nameOrAlias: 'sub1',
-        filter(assetUrl) {
-            return assetUrl.indexOf('ignore') === -1;
+    // 预加载 sub1 模块
+    // 过滤资源名称中携带 ignore 的资源信息
+    // 只预加载子依赖的 sub1-button 模块
+    preloadRemote([
+        {
+            nameOrAlias: 'sub1',
+            filter(assetUrl) {
+                return assetUrl.indexOf('ignore') === -1;
+            },
+            depsRemote: [{ nameOrAlias: 'sub1-button' }],
         },
-        depsRemote: [{ nameOrAlias: 'sub1-button' }],
-    },
-]);
+    ]);
 
 
-// 预加载 sub2 模块
-// 预加载 sub2 下的所有 expose
-// 预加载 sub2 的同步资源和异步资源
-preloadRemote([
-    {
-        nameOrAlias: 'sub2',
-        resourceCategory: 'all',
-    },
-]);
+    // 预加载 sub2 模块
+    // 预加载 sub2 下的所有 expose
+    // 预加载 sub2 的同步资源和异步资源
+    preloadRemote([
+        {
+            nameOrAlias: 'sub2',
+            resourceCategory: 'all',
+        },
+    ]);
 
-// 预加载 sub3 模块的 add expose
-preloadRemote([
-    {
-        nameOrAlias: 'sub3',
-        resourceCategory: 'all',
-        exposes: ['add'],
-    },
-]);
-```
+    // 预加载 sub3 模块的 add expose
+    preloadRemote([
+        {
+            nameOrAlias: 'sub3',
+            resourceCategory: 'all',
+            exposes: ['add'],
+        },
+    ]);
+  ```
+  </Tab>
+  <Tab label="Pure Runtime（未使用构建插件）">
+  ```ts
+    import { createInstance } from '@module-federation/enhanced/runtime';
+
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: []
+    });
+
+    mf.registerRemotes([
+      {
+          name: 'sub1',
+          entry: "http://localhost:2001/mf-manifest.json"
+      },
+      {
+          name: 'sub2',
+          entry: "http://localhost:2002/mf-manifest.json"
+      },
+      {
+          name: 'sub3',
+          entry: "http://localhost:2003/mf-manifest.json"
+      },
+    ]);
+
+    // 预加载 sub1 模块
+    // 过滤资源名称中携带 ignore 的资源信息
+    // 只预加载子依赖的 sub1-button 模块
+    mf.preloadRemote([
+        {
+            nameOrAlias: 'sub1',
+            filter(assetUrl) {
+                return assetUrl.indexOf('ignore') === -1;
+            },
+            depsRemote: [{ nameOrAlias: 'sub1-button' }],
+        },
+    ]);
+
+
+    // 预加载 sub2 模块
+    // 预加载 sub2 下的所有 expose
+    // 预加载 sub2 的同步资源和异步资源
+    mf.preloadRemote([
+        {
+            nameOrAlias: 'sub2',
+            resourceCategory: 'all',
+        },
+    ]);
+
+    // 预加载 sub3 模块的 add expose
+    mf.preloadRemote([
+        {
+            nameOrAlias: 'sub3',
+            resourceCategory: 'all',
+            exposes: ['add'],
+        },
+    ]);
+  ```
+  </Tab>
+</Tabs>
+

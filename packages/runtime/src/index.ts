@@ -6,6 +6,11 @@ import {
   assert,
   setGlobalFederationConstructor,
 } from '@module-federation/runtime-core';
+import {
+  runtimeDescMap,
+  getShortErrorMsg,
+  RUNTIME_009,
+} from '@module-federation/error-codes';
 import { getGlobalFederationInstance } from './utils';
 
 export {
@@ -52,7 +57,7 @@ export function init(options: UserOptions): ModuleFederation {
 export function loadRemote<T>(
   ...args: Parameters<ModuleFederation['loadRemote']>
 ): Promise<T | null> {
-  assert(FederationInstance, 'Please call init first');
+  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   const loadRemote: typeof FederationInstance.loadRemote<T> =
     FederationInstance.loadRemote;
   // eslint-disable-next-line prefer-spread
@@ -62,7 +67,7 @@ export function loadRemote<T>(
 export function loadShare<T>(
   ...args: Parameters<ModuleFederation['loadShare']>
 ): Promise<false | (() => T | undefined)> {
-  assert(FederationInstance, 'Please call init first');
+  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   // eslint-disable-next-line prefer-spread
   const loadShare: typeof FederationInstance.loadShare<T> =
     FederationInstance.loadShare;
@@ -72,7 +77,7 @@ export function loadShare<T>(
 export function loadShareSync<T>(
   ...args: Parameters<ModuleFederation['loadShareSync']>
 ): () => T | never {
-  assert(FederationInstance, 'Please call init first');
+  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   const loadShareSync: typeof FederationInstance.loadShareSync<T> =
     FederationInstance.loadShareSync;
   // eslint-disable-next-line prefer-spread
@@ -82,7 +87,7 @@ export function loadShareSync<T>(
 export function preloadRemote(
   ...args: Parameters<ModuleFederation['preloadRemote']>
 ): ReturnType<ModuleFederation['preloadRemote']> {
-  assert(FederationInstance, 'Please call init first');
+  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   // eslint-disable-next-line prefer-spread
   return FederationInstance.preloadRemote.apply(FederationInstance, args);
 }
@@ -90,7 +95,7 @@ export function preloadRemote(
 export function registerRemotes(
   ...args: Parameters<ModuleFederation['registerRemotes']>
 ): ReturnType<ModuleFederation['registerRemotes']> {
-  assert(FederationInstance, 'Please call init first');
+  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   // eslint-disable-next-line prefer-spread
   return FederationInstance.registerRemotes.apply(FederationInstance, args);
 }
@@ -98,7 +103,7 @@ export function registerRemotes(
 export function registerPlugins(
   ...args: Parameters<ModuleFederation['registerPlugins']>
 ): ReturnType<ModuleFederation['registerRemotes']> {
-  assert(FederationInstance, 'Please call init first');
+  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   // eslint-disable-next-line prefer-spread
   return FederationInstance.registerPlugins.apply(FederationInstance, args);
 }
@@ -110,7 +115,7 @@ export function getInstance() {
 export function registerShared(
   ...args: Parameters<ModuleFederation['registerShared']>
 ): ReturnType<ModuleFederation['registerShared']> {
-  assert(FederationInstance, 'Please call init first');
+  assert(FederationInstance, getShortErrorMsg(RUNTIME_009, runtimeDescMap));
   // eslint-disable-next-line prefer-spread
   return FederationInstance.registerShared.apply(FederationInstance, args);
 }

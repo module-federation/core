@@ -9,7 +9,6 @@
 
 :::
 
-
 目前 `Module Federation` 提供了两种注册模块和加载模块的方式：
 
 - 一种是在构建插件中声明(一般是在 `module-federation.config.ts` 文件中声明)
@@ -31,6 +30,10 @@
 |`shared` 依赖只能供外部使用，无法使用外部 `shared` 依赖|`shared` 依赖按照特定规则双向共享|
 |可以通过 `runtime` 的 `plugin` 机制影响加载流程|目前不支持提供 `plugin` 影响加载流程|
 |不支持远程类型提示|支持远程类型提示|
+
+import Runtime from '@components/zh/runtime';
+
+<Runtime />
 
 ## 安装
 
@@ -55,129 +58,267 @@ import { PackageManagerTabs } from '@theme';
 
 :::
 
-
 ## 模块注册
 
-如果使用了构建插件，那么可以直接使用 `registerRemotes` 注册模块。
+import { Steps, Tab, Tabs } from '@theme';
 
-```ts
-import { registerRemotes } from '@module-federation/enhanced/runtime';
+<Tabs>
+  <Tab label="Build Plugin（使用构建插件）">
+  ```tsx
+  // 如果使用了构建插件，那么可以直接使用 `registerRemotes` 注册模块。
+  import { registerRemotes } from '@module-federation/enhanced/runtime';
 
-registerRemotes([
-  {
-      name: 'remote1',
-      alias: 'remote-1',
-      entry: 'http://localhost:3001/mf-manifest.json',
-  }
-]);
-
-```
-
-如果没有使用构建插件，并且没有创建实例，那么可以创建新的实例，并注册模块。
-
-```ts
-import { createInstance } from '@module-federation/enhanced/runtime';
-
-const mf = createInstance({
-  name: 'mf_host',
-  remotes: [
+  registerRemotes([
     {
-      name: 'remote1',
-      alias: 'remote-1',
-      entry: 'http://localhost:3001/mf-manifest.json',
+        name: 'remote1',
+        alias: 'remote-1',
+        entry: 'http://localhost:3001/mf-manifest.json',
     }
-  ]
-});
+  ]);
+  ```
+  </Tab>
+  <Tab label="Pure Runtime（未使用构建插件）">
+  ```ts
+  // 如果没有使用构建插件，那么可以创建新的实例，并注册模块
+  import { createInstance } from '@module-federation/enhanced/runtime';
 
-```
+  const mf = createInstance({
+    name: 'mf_host',
+    remotes: [
+      {
+        name: 'remote1',
+        alias: 'remote-1',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      }
+    ]
+  });
 
-如果没有使用构建插件，但已经创建了实例，那么可以调用 `instance.registerRemotes` 进行模块注册。
-
-```ts
-mf.registerRemotes([
-  {
-    name: 'remote2',
-    alias: 'remote-2',
-    entry: 'http://localhost:3002/mf-manifest.json',
-  }
-]);
-```
+  mf.registerRemotes([
+    {
+        name: 'remote1',
+        alias: 'remote-1',
+        entry: 'http://localhost:3001/mf-manifest.json',
+    }
+  ]);
+  ```
+  </Tab>
+</Tabs>
 
 ## 模块加载
 
-```tsx
-import { loadRemote } from '@module-federation/enhanced/runtime';
+<Tabs>
+  <Tab label="Build Plugin（使用构建插件）">
+  ```tsx
+  // 如果使用了构建插件，那么可以直接使用 `loadRemote` 加载模块。
+  import { loadRemote } from '@module-federation/enhanced/runtime';
 
-export default () => {
-  const MyButton = React.lazy(() =>
-    loadRemote('remote1').then(({ MyButton }) => {
-      return {
-        default: MyButton
-      };
-    }),
-  );
+  export default () => {
+    const MyButton = React.lazy(() =>
+      loadRemote('remote1').then(({ MyButton }) => {
+        return {
+          default: MyButton
+        };
+      }),
+    );
 
-  return (
-    <React.Suspense fallback="Loading Button">
-      <MyButton />
-    </React.Suspense>
-  );
-}
-```
+    return (
+      <React.Suspense fallback="Loading Button">
+        <MyButton />
+      </React.Suspense>
+    );
+  }
+  ```
+  </Tab>
+  <Tab label="Pure Runtime（未使用构建插件）">
+  ```ts
+  // 如果没有使用构建插件，那么可以创建新的实例，并注册模块
+  import { createInstance } from '@module-federation/enhanced/runtime';
+
+  const mf = createInstance({
+    name: 'mf_host',
+    remotes: [
+      {
+        name: 'remote1',
+        alias: 'remote-1',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      }
+    ]
+  });
+
+  export default () => {
+    const MyButton = React.lazy(() =>
+      mf.loadRemote('remote1').then(({ MyButton }) => {
+        return {
+          default: MyButton
+        };
+      }),
+    );
+
+    return (
+      <React.Suspense fallback="Loading Button">
+        <MyButton />
+      </React.Suspense>
+    );
+  }
+  ```
+  </Tab>
+</Tabs>
 
 ### 加载匿名模块
 
-```tsx
-import React from 'react';
-import { loadRemote } from '@module-federation/enhanced/runtime';
+ <Tabs>
+    <Tab label="Build Plugin（使用构建插件）">
+    ```tsx
+    // 如果使用了构建插件，那么可以直接使用 `loadRemote` 加载模块。
+    import React from 'react';
+    import { loadRemote } from '@module-federation/enhanced/runtime';
 
-const RemoteButton = React.lazy(() => loadRemote('provider/button'));
-// 也可通过模块别名加载：
-// const RemoteButton = React.lazy(() => loadRemote('remotes-1/button'));
+    const RemoteButton = React.lazy(() => loadRemote('provider/button'));
+    // 也可通过模块别名加载：
+    // const RemoteButton = React.lazy(() => loadRemote('remotes-1/button'));
 
-export default () => {
-  return (
-    <React.Suspense fallback="Loading Button">
-      <RemoteButton />
-    </React.Suspense>
-  );
-}
-```
+    export default () => {
+      return (
+        <React.Suspense fallback="Loading Button">
+          <RemoteButton />
+        </React.Suspense>
+      );
+    }
+    ```
+    </Tab>
+    <Tab label="Pure Runtime（未使用构建插件）">
+    ```tsx
+    // 如果没有使用构建插件，那么可以创建新的实例，并注册模块
+    import { createInstance } from '@module-federation/enhanced/runtime';
+    import React from 'react';
+
+    // 创建实例
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote1',
+          alias: 'remote-1',
+          entry: 'http://localhost:3001/mf-manifest.json',
+        }
+      ]
+    });
+
+    // 使用 实例 loadRemote API 加载模块
+    const RemoteButton = React.lazy(() => mf.loadRemote('provider/button'));
+    // 也可通过模块别名加载：
+    // const RemoteButton = React.lazy(() => mf.loadRemote('remotes-1/button'));
+
+    export default () => {
+      return (
+        <React.Suspense fallback="Loading Button">
+          <RemoteButton />
+        </React.Suspense>
+      );
+    }
+    ```
+    </Tab>
+ </Tabs>
+
 
 ### 加载具名模块
 
-```tsx
-import React from 'react';
-import { loadRemote } from '@module-federation/enhanced/runtime';
+ <Tabs>
+    <Tab label="Build Plugin（使用构建插件）">
+    ```tsx
+    // 如果使用了构建插件，那么可以直接使用 `loadRemote` 加载模块。
+    import React from 'react';
+    import { loadRemote } from '@module-federation/enhanced/runtime';
 
-export default () => {
-  const RemoteButton = React.lazy(() =>
-    loadRemote('remote1/button').then(({ RemoteButton }) => {
-      return {
-        default: RemoteButton
-      };
-    }),
-  );
-  return (
-    <React.Suspense fallback="Loading Button">
-      <RemoteButton />
-    </React.Suspense>
-  );
-}
-```
+    export default () => {
+      const RemoteButton = React.lazy(() =>
+        loadRemote('remote1/button').then(({ RemoteButton }) => {
+          return {
+            default: RemoteButton
+          };
+        }),
+      );
+      return (
+        <React.Suspense fallback="Loading Button">
+          <RemoteButton />
+        </React.Suspense>
+      );
+    }
+    ```
+    </Tab>
+    <Tab label="Pure Runtime（未使用构建插件）">
+    ```tsx
+    // 如果没有使用构建插件，那么可以创建新的实例，并注册模块
+    import { createInstance } from '@module-federation/enhanced/runtime';
+    import React from 'react';
+
+    // 创建实例
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote1',
+          alias: 'remote-1',
+          entry: 'http://localhost:3001/mf-manifest.json',
+        }
+      ]
+    });
+
+    export default () => {
+      const RemoteButton = React.lazy(() =>
+        // 使用 实例 loadRemote API 加载模块
+        mf.loadRemote('remote1/button').then(({ RemoteButton }) => {
+          return {
+            default: RemoteButton
+          };
+        }),
+      );
+      return (
+        <React.Suspense fallback="Loading Button">
+          <RemoteButton />
+        </React.Suspense>
+      );
+    }
+    ```
+    </Tab>
+ </Tabs>
 
 ### 加载工具函数
 
-```ts
-import { loadRemote } from '@module-federation/enhanced/runtime';
+ <Tabs>
+    <Tab label="Build Plugin（使用构建插件）">
+    ```tsx
+    // 如果使用了构建插件，那么可以直接使用 `loadRemote` 加载模块。
+    import React from 'react';
+    import { loadRemote } from '@module-federation/enhanced/runtime';
 
-// 加载 app2 expose 的 util
-loadRemote<{add: (...args: Array<number>)=> number }>("@demo/app2/util").then((md)=>{
-    md.add(1,2);
-});
+    // 加载 remote1 expose 的 util
+    loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
+        md.add(1,2);
+    });
+    ```
+    </Tab>
+    <Tab label="Pure Runtime（未使用构建插件）">
+    ```tsx
+    // 如果没有使用构建插件，那么可以创建新的实例，并注册模块
+    import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
+    import React from 'react';
 
-// 通过别名加载：
-// loadRemote<{add: (...args: Array<number>)=> number }>("app3/util").then((md)=>{
-//     md.add(1,2);
-// });
-```
+    // 创建实例
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote1',
+          alias: 'remote-1',
+          entry: 'http://localhost:3001/mf-manifest.json',
+        }
+      ]
+    });
+
+    mf.loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
+        md.add(1,2);
+    });
+    ```
+    </Tab>
+ </Tabs>
