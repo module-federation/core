@@ -2172,6 +2172,15 @@ importers:
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+      react-router-dom:
+        specifier: 6.26.2
+        version: 6.26.2(react-dom@18.3.1)(react@18.3.1)
     devDependencies:
       '@module-federation/core':
         specifier: workspace:*
@@ -2191,6 +2200,12 @@ importers:
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.5.15
         version: 0.5.15(react-refresh@0.14.2)(webpack@5.98.0)
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -2200,6 +2215,12 @@ importers:
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/core':
         specifier: workspace:*
@@ -2213,6 +2234,12 @@ importers:
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.5.15
         version: 0.5.15(react-refresh@0.14.2)(webpack@5.98.0)
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -2222,6 +2249,12 @@ importers:
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/core':
         specifier: workspace:*
@@ -2235,6 +2268,12 @@ importers:
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.5.15
         version: 0.5.15(react-refresh@0.14.2)(webpack@5.98.0)
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
