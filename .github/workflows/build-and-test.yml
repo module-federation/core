@@ -58,7 +58,7 @@ jobs:
       - name: Run Build for All
         uses: nick-fields/retry@v3
         with:
-          max_attempts: 3
+          max_attempts: 2
           timeout_minutes: 15
           command: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
