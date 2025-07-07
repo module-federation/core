@@ -193,7 +193,7 @@ importers:
         version: 11.0.3(semantic-release@24.2.3)
       '@storybook/addon-essentials':
         specifier: 8.6.12
-        version: 8.6.12(@types/react@18.2.79)(storybook@8.3.5)
+        version: 8.6.12(@types/react@18.3.11)(storybook@8.3.5)
       '@storybook/core-common':
         specifier: 8.6.12
         version: 8.6.12(storybook@8.3.5)
@@ -229,7 +229,7 @@ importers:
         version: 0.5.9(tailwindcss@3.4.13)
       '@testing-library/react':
         specifier: 16.1.0
-        version: 16.1.0(@testing-library/dom@10.4.0)(@types/react@18.2.79)(react-dom@18.3.1)(react@18.3.1)
+        version: 16.1.0(@testing-library/dom@10.4.0)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1)
       '@types/adm-zip':
         specifier: 0.5.5
         version: 0.5.5
@@ -266,6 +266,9 @@ importers:
       '@types/pidusage':
         specifier: 2.0.5
         version: 2.0.5
+      '@types/react':
+        specifier: ^18.3.11
+        version: 18.3.11
       '@types/webpack-sources':
         specifier: 3.2.3
         version: 3.2.3
@@ -416,6 +419,9 @@ importers:
       qwik-nx:
         specifier: ^3.1.1
         version: 3.1.1(@nx/devkit@21.0.3)(@nx/eslint@21.0.3)(@nx/js@21.0.3)(@nx/vite@21.0.3)
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -3175,6 +3181,13 @@ importers:
       resolve:
         specifier: 1.22.8
         version: 1.22.8
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.11
+        version: 18.3.11
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
 
   packages/typescript:
     dependencies:
@@ -9677,17 +9690,6 @@ packages:
 
   /@mdx-js/react@3.0.1(@types/react@18.2.79)(react@18.3.1):
     resolution: {integrity: sha512-9ZrPIU4MGf6et1m1ov3zKf+q9+deetI51zprKB1D/z3NOb+rUxxtEl3mCjW5wTGh6VhRdwPueh1oRzi6ezkA8A==}
-    peerDependencies:
-      '@types/react': '>=16'
-      react: '>=16'
-    dependencies:
-      '@types/mdx': 2.0.13
-      '@types/react': 18.2.79
-      react: 18.3.1
-    dev: true
-
-  /@mdx-js/react@3.1.0(@types/react@18.2.79)(react@18.3.1):
-    resolution: {integrity: sha512-QjHtSaoameoalGnKDT3FoIl4+9RwyTmo9ZJGBdLOks/YOiWHoRDI3PUwEzOE7kEmGcV3AFcp9K6dYu9rEuKLAQ==}
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16'
@@ -16625,7 +16627,6 @@ packages:
     cpu: [arm]
     os: [android]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-android-arm64@4.24.0:
@@ -16640,7 +16641,6 @@ packages:
     cpu: [arm64]
     os: [android]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-darwin-arm64@4.24.0:
@@ -16655,7 +16655,6 @@ packages:
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-darwin-x64@4.24.0:
@@ -16670,7 +16669,6 @@ packages:
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-freebsd-arm64@4.40.0:
@@ -16678,7 +16676,6 @@ packages:
     cpu: [arm64]
     os: [freebsd]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-freebsd-x64@4.40.0:
@@ -16686,7 +16683,6 @@ packages:
     cpu: [x64]
     os: [freebsd]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-linux-arm-gnueabihf@4.24.0:
@@ -16701,7 +16697,6 @@ packages:
     cpu: [arm]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-linux-arm-musleabihf@4.24.0:
@@ -16716,7 +16711,6 @@ packages:
     cpu: [arm]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-linux-arm64-gnu@4.24.0:
@@ -16731,7 +16725,6 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-linux-arm64-musl@4.24.0:
@@ -16746,7 +16739,6 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-linux-loongarch64-gnu@4.40.0:
@@ -16754,7 +16746,6 @@ packages:
     cpu: [loong64]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-linux-powerpc64le-gnu@4.24.0:
@@ -16769,7 +16760,6 @@ packages:
     cpu: [ppc64]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-linux-riscv64-gnu@4.24.0:
@@ -16784,7 +16774,6 @@ packages:
     cpu: [riscv64]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-linux-riscv64-musl@4.40.0:
@@ -16792,7 +16781,6 @@ packages:
     cpu: [riscv64]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-linux-s390x-gnu@4.24.0:
@@ -16807,7 +16795,6 @@ packages:
     cpu: [s390x]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-linux-x64-gnu@4.24.0:
@@ -16822,7 +16809,6 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-linux-x64-musl@4.24.0:
@@ -16837,7 +16823,6 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-win32-arm64-msvc@4.24.0:
@@ -16852,7 +16837,6 @@ packages:
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-win32-ia32-msvc@4.24.0:
@@ -16867,7 +16851,6 @@ packages:
     cpu: [ia32]
     os: [win32]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rollup/rollup-win32-x64-msvc@4.24.0:
@@ -16882,7 +16865,6 @@ packages:
     cpu: [x64]
     os: [win32]
     requiresBuild: true
-    dev: true
     optional: true
 
   /@rsbuild/babel-preset@0.7.10(@rsbuild/core@0.7.10)(@swc/helpers@0.5.13):
@@ -19159,12 +19141,12 @@ packages:
       - webpack-sources
     dev: true
 
-  /@storybook/addon-docs@8.6.12(@types/react@18.2.79)(storybook@8.3.5):
+  /@storybook/addon-docs@8.6.12(@types/react@18.3.11)(storybook@8.3.5):
     resolution: {integrity: sha512-kEezQjAf/p3SpDzLABgg4fbT48B6dkT2LiZCKTRmCrJVtuReaAr4R9MMM6Jsph6XjbIj/SvOWf3CMeOPXOs9sg==}
     peerDependencies:
       storybook: ^8.6.12
     dependencies:
-      '@mdx-js/react': 3.1.0(@types/react@18.2.79)(react@18.3.1)
+      '@mdx-js/react': 3.1.0(@types/react@18.3.11)(react@18.3.1)
       '@storybook/blocks': 8.6.12(react-dom@18.3.1)(react@18.3.1)(storybook@8.3.5)
       '@storybook/csf-plugin': 8.6.12(storybook@8.3.5)
       '@storybook/react-dom-shim': 8.6.12(react-dom@18.3.1)(react@18.3.1)(storybook@8.3.5)
@@ -19230,7 +19212,7 @@ packages:
       - webpack-sources
     dev: true
 
-  /@storybook/addon-essentials@8.6.12(@types/react@18.2.79)(storybook@8.3.5):
+  /@storybook/addon-essentials@8.6.12(@types/react@18.3.11)(storybook@8.3.5):
     resolution: {integrity: sha512-Y/7e8KFlttaNfv7q2zoHMPdX6hPXHdsuQMAjYl5NG9HOAJREu4XBy4KZpbcozRe4ApZ78rYsN/MO1EuA+bNMIA==}
     peerDependencies:
       storybook: ^8.6.12
@@ -19238,7 +19220,7 @@ packages:
       '@storybook/addon-actions': 8.6.12(storybook@8.3.5)
       '@storybook/addon-backgrounds': 8.6.12(storybook@8.3.5)
       '@storybook/addon-controls': 8.6.12(storybook@8.3.5)
-      '@storybook/addon-docs': 8.6.12(@types/react@18.2.79)(storybook@8.3.5)
+      '@storybook/addon-docs': 8.6.12(@types/react@18.3.11)(storybook@8.3.5)
       '@storybook/addon-highlight': 8.6.12(storybook@8.3.5)
       '@storybook/addon-measure': 8.6.12(storybook@8.3.5)
       '@storybook/addon-outline': 8.6.12(storybook@8.3.5)
@@ -20938,7 +20920,7 @@ packages:
       react-dom: 18.3.1(react@18.3.1)
     dev: true
 
-  /@testing-library/react@16.1.0(@testing-library/dom@10.4.0)(@types/react@18.2.79)(react-dom@18.3.1)(react@18.3.1):
+  /@testing-library/react@16.1.0(@testing-library/dom@10.4.0)(@types/react@18.3.11)(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-Q2ToPvg0KsVL0ohND9A3zLJWcOXXcO8IDu3fj11KhNt0UlCWyFyvnCIBkd12tidB2lkiVRG8VFqdhcqhqnAQtg==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -20955,7 +20937,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.26.0
       '@testing-library/dom': 10.4.0
-      '@types/react': 18.2.79
+      '@types/react': 18.3.11
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     dev: true
@@ -38315,10 +38297,6 @@ packages:
       sonic-boom: 4.2.0
       thread-stream: 3.1.0
 
-  /pirates@4.0.6:
-    resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}
-    engines: {node: '>= 6'}
-
   /pirates@4.0.7:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
     engines: {node: '>= 6'}
@@ -43260,7 +43238,6 @@ packages:
       '@rollup/rollup-win32-ia32-msvc': 4.40.0
       '@rollup/rollup-win32-x64-msvc': 4.40.0
       fsevents: 2.3.3
-    dev: true
 
   /rrweb-cssom@0.7.1:
     resolution: {integrity: sha512-TrEMa7JGdVm0UThDJSx7ddw5nVm3UJS9o9CCIZ72B1vSyEZoziDqBYP3XIoi/12lKrJR8rE3jeFHMok2F/Mnsg==}
@@ -45609,12 +45586,12 @@ packages:
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
     dependencies:
-      '@jridgewell/gen-mapping': 0.3.5
+      '@jridgewell/gen-mapping': 0.3.8
       commander: 4.1.1
       glob: 10.4.5
       lines-and-columns: 1.2.4
       mz: 2.7.0
-      pirates: 4.0.6
+      pirates: 4.0.7
       ts-interface-checker: 0.1.13
 
   /super-regex@1.0.0:
@@ -46370,14 +46347,6 @@ packages:
     resolution: {integrity: sha512-KQQR9yN7R5+OSwaK0XQoj22pwHoTlgYqmUscPYoknOoWCWfj/5/ABTMRi69FrKU5ffPVh5QcFikpWJI/P1ocHA==}
     dev: false
 
-  /tinyglobby@0.2.10:
-    resolution: {integrity: sha512-Zc+8eJlFMvgatPZTl6A9L/yht8QqdmUNtURHaKZLmKBE12hNPSrqNkUp2cs3M/UKmNVVAMFQYSjYIVHDjW5zew==}
-    engines: {node: '>=12.0.0'}
-    dependencies:
-      fdir: 6.4.4(picomatch@4.0.2)
-      picomatch: 4.0.2
-    dev: false
-
   /tinyglobby@0.2.13:
     resolution: {integrity: sha512-mEwzpUgrLySlveBwEVDMKk5B57bhLPYovRfPAXD5gA/98Opn0rCDj3GtLwFvCvH5RK9uPCExUROW5NjDwvqkxw==}
     engines: {node: '>=12.0.0'}
@@ -47080,11 +47049,11 @@ packages:
       postcss: 8.4.38
       postcss-load-config: 6.0.1(jiti@2.4.2)(postcss@8.4.38)
       resolve-from: 5.0.0
-      rollup: 4.24.0
+      rollup: 4.40.0
       source-map: 0.8.0-beta.0
       sucrase: 3.35.0
       tinyexec: 0.3.2
-      tinyglobby: 0.2.10
+      tinyglobby: 0.2.14
       tree-kill: 1.2.2
       typescript: 5.7.3
     transitivePeerDependencies:

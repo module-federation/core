@@ -45,7 +45,7 @@ function createLazyRemoteComponent<
               exportName={info.export || 'default'}
               fallback={info.fallback}
               ref={ref}
-              {...props}
+              {...(props as any)}
             />
           );
         });

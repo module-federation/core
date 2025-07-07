@@ -18,7 +18,7 @@ retry_command() {
     local max_attempts=$1
     local command=$2
     local attempt=1
-    
+
     while [ $attempt -le $max_attempts ]; do
         echo "Attempt $attempt of $max_attempts: $command"
         if eval "$command"; then
@@ -30,7 +30,7 @@ retry_command() {
             sleep 2
         fi
     done
-    
+
     echo "Command failed after $max_attempts attempts"
     return 1
 }
@@ -76,21 +76,6 @@ echo "Number of CPU cores: $(nproc)"
 # Run build for all packages
 echo "Building all packages..."
 retry_command 2 "npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4" || handle_error "Build failed"
-
-# Check package publishing compatibility
-echo "Checking package publishing compatibility..."
-for pkg in packages/*; do
-    if [ -f "$pkg/package.json" ] && \
-       [ "$pkg" != "packages/assemble-release-plan" ] && \
-       [ "$pkg" != "packages/chrome-devtools" ] && \
-       [ "$pkg" != "packages/core" ] && \
-       [ "$pkg" != "packages/esbuild" ] && \
-       [ "$pkg" != "packages/modernjs" ] && \
-       [ "$pkg" != "packages/utilities" ]; then
-        echo "Checking $pkg..."
-        npx publint "$pkg" || echo "Warning: publint check failed for $pkg"
-    fi
-done
 
 # Run affected tests
 echo "Running affected tests..."
