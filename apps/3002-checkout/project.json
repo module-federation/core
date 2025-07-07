@@ -83,9 +83,13 @@
         "testingType": "e2e",
         "baseUrl": "http://localhost:3002"
       },
+      "defaultConfiguration": "development",
       "configurations": {
+        "development": {
+          "devServerTarget": "3002-checkout:serve:development"
+        },
         "production": {
-          "baseUrl": "http://localhost:3002"
+          "devServerTarget": "3002-checkout:serve:production"
         }
       }
     }
