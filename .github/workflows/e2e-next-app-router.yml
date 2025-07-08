@@ -44,16 +44,14 @@ jobs:
 
       - name: Run condition check script
         id: check-ci
-        run: node tools/scripts/ci-is-affected.mjs --appName=next-app-router-4000
+        run: node tools/scripts/ci-is-affected.mjs --appName=next-app-router-4000,next-app-router-4001
 
-      - name: E2E Test for Next.js App Router 4000
+      - name: E2E Test for Next.js App Router
         if: steps.check-ci.outcome == 'success'
         run: |
-          killall node || true
-          npx nx run next-app-router-4000:test:e2e
-
-      - name: E2E Test for Next.js App Router 4001
-        if: steps.check-ci.outcome == 'success'
-        run: |
-          killall node || true
-          npx nx run next-app-router-4001:test:e2e
+          npx kill-port --port 4000,4001 || true
+          pnpm run app:next-router:dev &
+          echo "Waiting for servers to start..."
+          sleep 25
+          npx nx run-many --target=test:e2e --projects=next-app-router-4000,next-app-router-4001 --parallel=1
+          lsof -ti tcp:4000,4001 | xargs kill || true
