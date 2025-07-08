@@ -12,4 +12,5 @@ export {
 
 export type { CacheStatus, CacheStatsInfo } from './cache';
 
+export type { PrefetchOptions } from './prefetch';
 export { prefetch } from './prefetch';

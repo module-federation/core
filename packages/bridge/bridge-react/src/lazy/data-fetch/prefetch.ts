@@ -7,7 +7,7 @@ import {
 import helpers from '@module-federation/runtime/helpers';
 import { DataFetchParams } from '../types';
 
-type PrefetchOptions = {
+export type PrefetchOptions = {
   id: string;
   instance: ReturnType<typeof getInstance>;
   dataFetchParams?: DataFetchParams;

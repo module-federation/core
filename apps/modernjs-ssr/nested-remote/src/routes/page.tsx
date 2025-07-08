@@ -1,11 +1,12 @@
 import { getInstance } from '@module-federation/modern-js/runtime';
-import { createLazyComponent } from '@module-federation/modern-js/react';
+import { lazyLoadComponentPlugin } from '@module-federation/modern-js/react';
 
 import Content from '../components/Content';
 import './index.css';
 
-const RemoteSSRComponent = createLazyComponent({
-  instance: getInstance(),
+getInstance()!.registerPlugins([lazyLoadComponentPlugin()]);
+
+const RemoteSSRComponent = getInstance()!.createLazyComponent({
   loader: () => import('remote/Button'),
   loading: 'loading...',
   export: 'Button',

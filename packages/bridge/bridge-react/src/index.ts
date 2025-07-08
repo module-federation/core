@@ -11,7 +11,7 @@ export {
   ERROR_TYPE,
   createLazyComponent,
   collectSSRAssets,
-  wrapNoSSR,
+  // wrapNoSSR,
   callDataFetch,
   setSSREnv,
   autoFetchDataPlugin,
@@ -24,6 +24,8 @@ export {
   clearStore,
   prefetch,
 } from './lazy';
+
+export { lazyLoadComponentPlugin } from './plugins/lazy-load-component-plugin';
 
 export type { CreateRootOptions, Root } from './provider/versions/legacy';
 export type {

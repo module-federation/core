@@ -9,7 +9,7 @@ export type {
 
 export { createLazyComponent, collectSSRAssets } from './createLazyComponent';
 
-export { wrapNoSSR } from './wrapNoSSR';
+// export { wrapNoSSR } from './wrapNoSSR';
 
 export {
   injectDataFetch,
@@ -28,4 +28,8 @@ export { setSSREnv } from './utils';
 
 export { autoFetchDataPlugin };
 
-export type { CacheStatus, CacheStatsInfo } from './data-fetch';
+export type {
+  CacheStatus,
+  CacheStatsInfo,
+  PrefetchOptions,
+} from './data-fetch';

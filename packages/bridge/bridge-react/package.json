@@ -50,11 +50,6 @@
       "import": "./dist/router-v6.es.js",
       "require": "./dist/router-v6.cjs.js"
     },
-    "./data-fetch-runtime-plugin": {
-      "types": "./dist/data-fetch-runtime-plugin.d.ts",
-      "import": "./dist/data-fetch-runtime-plugin.es.js",
-      "require": "./dist/data-fetch-runtime-plugin.cjs.js"
-    },
     "./lazy-utils": {
       "types": "./dist/lazy-utils.d.ts",
       "import": "./dist/lazy-utils.es.js",
@@ -70,6 +65,11 @@
       "import": "./dist/data-fetch-server-middleware.es.js",
       "require": "./dist/data-fetch-server-middleware.cjs.js"
     },
+    "./lazy-load-component-plugin": {
+      "types": "./dist/lazy-load-component-plugin.d.ts",
+      "import": "./dist/lazy-load-component-plugin.es.js",
+      "require": "./dist/lazy-load-component-plugin.cjs.js"
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -77,8 +77,8 @@
       ".": [
         "./dist/types/index.d.ts"
       ],
-      "data-fetch-runtime-plugin": [
-        "./dist/lazy-utils.d.ts"
+      "lazy-load-component-plugin": [
+        "./dist/lazy-load-component-plugin.d.ts"
       ],
       "lazy-utils": [
         "./dist/lazy-utils.d.ts"

@@ -4,7 +4,6 @@ import {
   loadRemote,
   registerRemotes,
 } from '@module-federation/modern-js/runtime';
-import { createLazyComponent } from '@module-federation/modern-js/react';
 
 registerRemotes([
   {
@@ -13,8 +12,7 @@ registerRemotes([
   },
 ]);
 
-const RemoteSSRComponent = createLazyComponent({
-  instance: getInstance(),
+const RemoteSSRComponent = getInstance()!.createLazyComponent({
   loader: () => loadRemote('dynamic_remote'),
   loading: 'loading...',
   fallback: ({ error }) => {

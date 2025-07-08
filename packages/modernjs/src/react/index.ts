@@ -1,8 +1,5 @@
 export {
   ERROR_TYPE,
-  createLazyComponent,
-  collectSSRAssets,
-  wrapNoSSR,
   CacheSize,
   CacheTime,
   configureCache,
@@ -10,7 +7,7 @@ export {
   cache,
   revalidateTag,
   clearStore,
-  prefetch,
+  lazyLoadComponentPlugin,
 } from '@module-federation/bridge-react';
 
 export type {
