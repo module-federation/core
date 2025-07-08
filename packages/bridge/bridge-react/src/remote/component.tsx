@@ -11,12 +11,9 @@ import { LoggerInstance, pathJoin, getRootDomDefaultClassName } from '../utils';
 import { federationRuntime } from '../provider/plugin';
 import { RemoteComponentProps, RemoteAppParams } from '../types';
 
-const RemoteAppWrapper = forwardRef<
-  HTMLDivElement,
-  RemoteAppParams & RemoteComponentProps
->(function RemoteAppWrapperFn(
+const RemoteAppWrapper = forwardRef(function (
   props: RemoteAppParams & RemoteComponentProps,
-  ref: React.ForwardedRef<HTMLDivElement>,
+  ref,
 ) {
   const {
     moduleName,
