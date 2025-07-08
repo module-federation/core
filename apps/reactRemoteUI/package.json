@@ -9,6 +9,7 @@
   "devDependencies": {
     "@module-federation/utilities": "workspace:*",
     "@module-federation/storybook-addon": "workspace:*",
+    "@nx/react": "21.0.3",
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0"
   }
