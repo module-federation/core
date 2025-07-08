@@ -1,0 +1,59 @@
+name: E2E Test for Next.js App Router
+
+on:
+  workflow_call:
+
+jobs:
+  e2e-next-app-router:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: |
+          corepack prepare pnpm@8.11.0 --activate
+          corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> $GITHUB_ENV
+
+      - name: Set local webpack
+        run: echo "NEXT_PRIVATE_LOCAL_WEBPACK=true" >> $GITHUB_ENV
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Run Build for All
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
+      - name: Run condition check script
+        id: check-ci
+        run: node tools/scripts/ci-is-affected.mjs --appName=next-app-router-4000
+
+      - name: E2E Test for Next.js App Router 4000
+        if: steps.check-ci.outcome == 'success'
+        run: |
+          killall node || true
+          npx nx run next-app-router-4000:e2e
+
+      - name: E2E Test for Next.js App Router 4001
+        if: steps.check-ci.outcome == 'success'
+        run: |
+          killall node || true
+          npx nx run next-app-router-4001:e2e
