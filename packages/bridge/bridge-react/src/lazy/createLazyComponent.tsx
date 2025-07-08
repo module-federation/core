@@ -308,7 +308,7 @@ export function createLazyComponent<T, E extends keyof T>(
       injectScript,
     });
 
-    const Com = m[exportName] as React.FC<ComponentType>;
+    const Com = m[exportName as string] as React.FC<ComponentType>;
     if (exportName in m && typeof Com === 'function') {
       return {
         default: (props: Omit<ComponentType, 'key'> & { mfData?: unknown }) => (
