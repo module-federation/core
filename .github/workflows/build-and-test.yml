@@ -130,3 +130,8 @@ jobs:
     needs: checkout-install
     uses: ./.github/workflows/e2e-router.yml
     secrets: inherit
+
+  e2e-next-app-router:
+    needs: checkout-install
+    uses: ./.github/workflows/e2e-next-app-router.yml
+    secrets: inherit
