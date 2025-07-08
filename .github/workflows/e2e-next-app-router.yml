@@ -50,10 +50,10 @@ jobs:
         if: steps.check-ci.outcome == 'success'
         run: |
           killall node || true
-          npx nx run next-app-router-4000:e2e
+          npx nx run next-app-router-4000:test:e2e
 
       - name: E2E Test for Next.js App Router 4001
         if: steps.check-ci.outcome == 'success'
         run: |
           killall node || true
-          npx nx run next-app-router-4001:e2e
+          npx nx run next-app-router-4001:test:e2e
