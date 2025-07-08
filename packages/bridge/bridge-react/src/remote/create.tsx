@@ -46,7 +46,7 @@ function createLazyRemoteComponent<
               fallback={info.fallback}
               loading={info.loading}
               ref={ref}
-              {...(props as any)}
+              {...props}
             />
           );
         });
