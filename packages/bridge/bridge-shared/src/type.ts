@@ -3,7 +3,7 @@ export interface ProviderParams {
   basename?: string;
   memoryRoute?: { entryPath: string };
   hashRoute?: boolean;
-  style?: React.CSSProperties;
+  style?: Record<string, any>;
   className?: string;
 }
 

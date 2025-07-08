@@ -1,20 +1,22 @@
-import clsx from 'clsx';
+// Simple local Button component to replace Module Federation imports
+// since Module Federation (nextjs-mf) doesn't support App Router
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+}
 
 export default function Button({
-  kind = 'default',
-  ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  kind?: 'default' | 'error';
-}) {
+  children,
+  onClick,
+  className = '',
+}: ButtonProps) {
   return (
     <button
-      className={clsx('rounded-lg px-3 py-1 text-sm font-medium', {
-        'bg-gray-700 text-gray-100 hover:bg-gray-500 hover:text-white':
-          kind === 'default',
-        'bg-vercel-pink text-red-50 hover:bg-pink-600 hover:text-white':
-          kind === 'error',
-      })}
-      {...props}
-    />
+      onClick={onClick}
+      className={`rounded bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 ${className}`}
+    >
+      {children}
+    </button>
   );
 }

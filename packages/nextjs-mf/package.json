@@ -49,7 +49,14 @@
     "@module-federation/webpack-bundler-runtime": "workspace:*"
   },
   "devDependencies": {
-    "@types/btoa": "^1.2.5"
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/runtime-tools": "workspace:*",
+    "@module-federation/webpack-bundler-runtime": "workspace:*",
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/utilities": "workspace:*",
+    "@types/node": "^16.18.0",
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.0"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",

@@ -85,8 +85,12 @@
   "devDependencies": {
     "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@types/btoa": "^1.2.5",
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.0",
     "ajv": "^8.17.1",
     "enhanced-resolve": "^5.0.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "terser": "^5.37.0"
   },
   "dependencies": {
