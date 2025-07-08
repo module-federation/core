@@ -262,7 +262,6 @@ export function getFileName(
 export function getTypesMetaInfo(
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
   context: string,
-  compilation: Compilation,
 ): MetaDataTypes {
   const defaultRemoteOptions = {
     generateAPITypes: true,

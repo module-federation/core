@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rsbuild-plugin",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "Module Federation plugin for Rsbuild",
   "homepage": "https://module-federation.io",
   "bugs": {
@@ -15,27 +15,22 @@
   "exports": {
     ".": {
       "types": "./dist/index.cjs.d.ts",
-      "import": "./dist/index.esm.js",
+      "import": "./dist/index.esm.mjs",
       "require": "./dist/index.cjs.js"
     },
     "./utils": {
       "types": "./dist/utils.cjs.d.ts",
-      "import": "./dist/utils.esm.js",
+      "import": "./dist/utils.esm.mjs",
       "require": "./dist/utils.cjs.js"
     },
     "./constant": {
       "types": "./dist/constant.cjs.d.ts",
-      "import": "./dist/constant.esm.js",
+      "import": "./dist/constant.esm.mjs",
       "require": "./dist/constant.cjs.js"
-    },
-    "./manifest": {
-      "types": "./dist/manifest.cjs.d.ts",
-      "import": "./dist/manifest.esm.js",
-      "require": "./dist/manifest.cjs.js"
     }
   },
   "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "module": "./dist/index.esm.mjs",
   "typesVersions": {
     "*": {
       ".": [
@@ -46,9 +41,6 @@
       ],
       "constant": [
         "./dist/constant.cjs.d.ts"
-      ],
-      "manifest": [
-        "./dist/manifest.cjs.d.ts"
       ]
     }
   },

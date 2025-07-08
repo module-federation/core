@@ -355,7 +355,7 @@ export function patchBundlerConfig(options: {
       uniqueName &&
       !chunkFileName.includes(uniqueName)
     ) {
-      const suffix = `${encodeName(uniqueName)}-[chunkhash].js`;
+      const suffix = `${encodeName(uniqueName)}-[contenthash].js`;
       chain.output.chunkFilename(chunkFileName.replace('.js', suffix));
     }
   }

@@ -1,0 +1,176 @@
+# 样式隔离
+
+要实现CSS样式隔离，可以采用以下几种方法。下面是每种方法的详细使用方式：
+
+## 1. BEM（Block Element Modifier）
+
+BEM是一种命名规范，通过给类名添加前缀和后缀来实现样式隔离。BEM的结构如下：
+
+- **Block**：代表独立的功能块，例如`.button`
+- **Element**：代表块的组成部分，例如`.button__text`
+- **Modifier**：代表块或元素的不同状态或版本，例如`.button--primary`
+
+### 使用示例
+```html
+<div class="button">
+  <span class="button__text">按钮</span>
+</div>
+```
+
+```css
+.button {
+  background-color: blue;
+  color: white;
+}
+
+.button__text {
+  font-size: 16px;
+}
+
+.button--primary {
+  background-color: green;
+}
+```
+
+## 2. CSS Modules
+
+CSS Modules通过将每个CSS文件作为一个模块来实现样式隔离，每个类名在编译时会被转换成唯一的标识符。[Rsbuild 中使用 css module](https://rsbuild.dev/zh/guide/basic/css-modules)
+
+### 使用示例
+
+1. 创建CSS文件并命名为`styles.module.css`：
+
+```css
+/* styles.module.css */
+.button {
+  background-color: blue;
+  color: white;
+}
+```
+
+2. 在React组件中引入并使用：
+
+```javascript
+import React from 'react';
+import styles from './styles.module.css';
+
+function App() {
+  return <button className={styles.button}>按钮</button>;
+}
+
+export default App;
+```
+
+## 3. CSS-in-JS
+
+CSS-in-JS将样式直接写在JavaScript文件中，常用的库有 [styled-components](https://styled-components.com/) 、[emotion](https://github.com/emotion-js/emotion) 等。[Rsbuild 中使用 css-in-js](https://rsbuild.dev/zh/guide/basic/css-usage#css-in-js)
+
+### 使用示例
+
+1. 安装styled-components：
+
+```bash
+npm install styled-components
+```
+
+2. 在React组件中使用：
+
+```javascript
+import React from 'react';
+import styled from 'styled-components';
+
+const Button = styled.button`
+  background: blue;
+  color: white;
+`;
+
+function App() {
+  return <Button>按钮</Button>;
+}
+
+export default App;
+```
+
+## 4. Shadow DOM
+
+Shadow DOM是 Web 组件技术的一部分，通过创建独立的DOM树来实现样式隔离。React 可以通过 [react-shadow](https://www.npmjs.com/package/react-shadow) 使用 ShadowDOM。
+
+### 使用示例
+
+1. 创建一个HTML模板：
+
+```html
+<template id="my-component">
+  <style>
+    .button {
+      background: blue;
+      color: white;
+    }
+  </style>
+  <button class="button">按钮</button>
+</template>
+```
+
+2. 定义自定义元素并附加Shadow DOM：
+
+```javascript
+class MyComponent extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const template = document.getElementById('my-component').content;
+    shadow.appendChild(template.cloneNode(true));
+  }
+}
+
+customElements.define('my-component', MyComponent);
+```
+
+3. 在HTML中使用自定义元素：
+
+```html
+<my-component></my-component>
+```
+
+## 5. Vue Scoped Styles
+
+在Vue中，可以使用`scoped`属性来实现组件级别的样式隔离。
+
+### 使用示例
+
+1. 在Vue组件中定义样式：
+
+```vue
+<template>
+  <button class="button">按钮</button>
+</template>
+
+<style scoped>
+.button {
+  background: blue;
+  color: white;
+}
+</style>
+```
+
+每种方法都有其适用场景和限制，开发者可以根据项目需求选择合适的样式隔离方案。
+
+
+## FAQ
+
+### 为什么 Module Federation 不直接处理 css 样式隔离？
+
+之所以目前未选择直接将 CSS 隔离放到 Module Federation 中主要有以下几个原因：
+
+* CSS 隔离，这个能力和 shared 会有极大的冲突，比较典型的是因为 shared 会尽可能的复用公共依赖，这会导致部分共享依赖会逃逸沙箱，从而导致隔离不可控，可能会受到加载时序的影响
+
+* 运行时处理 CSS 隔离会有比较多的边界问题，并且遇到了问题排查非常困难，从而导致对业务稳定性下降，比较典型的有下面几种：
+  * shadowDOM ，通过这种方式后可能会遇到各类组件库不兼容的情况，如果业务遇到线上问题时可能排查链路和周期都比较长，最终问题不一定能解决
+  * 收集 CSS 进行清除，因为上面的隔离和共享复用问题，可能会意外的 CSS 被清除
+  * 在消费者进行 sandbox 升级的时候，业务影响面不可控
+
+> 建议处理方式：
+
+* 在模块或者子应用的生产者就将 CSS 进行处理，这样可以保证模块或者应用在任意环境运行执行结果都不会不符合预期
+* 通过 CSS module、组件库前缀、统一组件库版本，来解决该问题
+* 直接导出 shadowDOM 的组件给到其他业务使用

@@ -1,0 +1,10 @@
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: `npm add ${props.pkgName || '@module-federation/enhanced'}`,
+    yarn: `yarn add ${props.pkgName || '@module-federation/enhanced'}`,
+    pnpm: `pnpm add ${props.pkgName || '@module-federation/enhanced'}`,
+    bun: `bun add ${props.pkgName || '@module-federation/enhanced'}`,
+  }}
+/>
