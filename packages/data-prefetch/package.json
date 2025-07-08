@@ -86,6 +86,7 @@
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "fs-extra": "9.1.0"
+    "fs-extra": "9.1.0",
+    "react-router-dom": "6.26.2"
   }
 }

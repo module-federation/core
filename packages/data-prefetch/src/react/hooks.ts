@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { defer } from 'react-router';
+import type { defer } from 'react-router-dom';
 
 import logger from '../logger';
 import { MFDataPrefetch, type prefetchOptions } from '../prefetch';

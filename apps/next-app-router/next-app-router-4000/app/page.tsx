@@ -1,7 +1,14 @@
 import { demos } from '#/lib/demos';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
-const Button = dynamic(() => import('remote_4001/Button'), { ssr: true });
+
+// Simple local Button component since Module Federation isn't supported with App Router
+function Button({ children }: { children: React.ReactNode }) {
+  return (
+    <button className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+      {children}
+    </button>
+  );
+}
 
 export default function Page() {
   return (
