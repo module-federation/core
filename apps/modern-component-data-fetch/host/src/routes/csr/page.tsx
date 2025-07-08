@@ -1,8 +1,9 @@
 import { getInstance } from '@module-federation/modern-js/runtime';
-import { NoSSR } from '@modern-js/runtime/ssr';
 
 const CsrWithFetchDataFromServerComponent = getInstance()!.createLazyComponent({
+  noSSR: true,
   loader: () => {
+    console.log('calling');
     return import('provider-csr');
   },
   loading: 'loading...',
@@ -22,9 +23,7 @@ const Index = (): JSX.Element => {
       <h1>
         The component will be render in csr but <i>fetch data from server</i>
       </h1>
-      <NoSSR>
-        <CsrWithFetchDataFromServerComponent />
-      </NoSSR>
+      <CsrWithFetchDataFromServerComponent />
     </div>
   );
 };
