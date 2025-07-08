@@ -48,4 +48,4 @@ jobs:
 
       - name: E2E Test for Next.js App Router
         if: steps.check-ci.outcome == 'success'
-        run: npx kill-port --port 4000,4001 && pnpm run app:next-router:dev & echo "done" && sleep 25 && npx nx run-many --target=e2e --projects=next-app-router-4000,next-app-router-4001 --parallel=1 && lsof -ti tcp:4000,4001 | xargs kill
+        run: npx kill-port --port 4000,4001 || true && pnpm run app:next-router:dev & echo "done" && sleep 25 && npx nx run-many --target=e2e --projects=next-app-router-4000,next-app-router-4001 --parallel=1 && lsof -ti tcp:4000,4001 | xargs kill || true
