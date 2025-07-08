@@ -12,6 +12,10 @@
     "url": "https://github.com/module-federation/core/",
     "directory": "packages/runtime-tools"
   },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "publishConfig": {
     "access": "public"
   },
