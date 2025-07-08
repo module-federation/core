@@ -3,7 +3,7 @@ import {
   init,
   registerGlobalPlugins,
 } from '@module-federation/enhanced/runtime';
-import * as ReactDOM from 'react-dom';
+import * as ReactDOM from 'react-dom/client';
 import App from './App';
 
 init({
@@ -17,9 +17,11 @@ init({
   ],
 });
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement,
+);
+root.render(
   <StrictMode>
     <App />
   </StrictMode>,
-  document.getElementById('root') as HTMLElement,
 );
