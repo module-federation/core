@@ -10,7 +10,7 @@ import {
 } from '../lazy';
 import type { CreateLazyComponentOptions, PrefetchOptions } from '../lazy';
 
-declare module '@module-federation/runtime' {
+declare module '@module-federation/runtime-core' {
   interface FederationHost {
     createLazyComponent<T, E extends keyof T>(
       options: Omit<CreateLazyComponentOptions<T, E>, 'instance'>,
@@ -47,16 +47,6 @@ export function lazyLoadComponentPlugin(): FederationRuntimePlugin {
           instance,
           ...options,
         });
-      };
-
-      instance.wrapNoSSR = (fn) => {
-        return (options) => {
-          return fn({
-            instance,
-            noSSR: true,
-            ...options,
-          });
-        };
       };
 
       instance.collectSSRAssets = (options) => {

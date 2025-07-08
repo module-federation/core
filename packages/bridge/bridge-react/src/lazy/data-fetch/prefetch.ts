@@ -4,6 +4,7 @@ import {
   getDataFetchMap,
   getDataFetchMapKey,
 } from '../utils';
+import logger from '../logger';
 import helpers from '@module-federation/runtime/helpers';
 import { DataFetchParams } from '../types';
 
@@ -17,17 +18,20 @@ export type PrefetchOptions = {
 export async function prefetch(options: PrefetchOptions) {
   const { instance, id, dataFetchParams, preloadComponentResource } = options;
   if (!id) {
-    throw new Error('id is required for prefetch!');
+    logger.error('id is required for prefetch!');
+    return;
   }
   if (!instance) {
-    throw new Error('instance is required for prefetch!');
+    logger.error('instance is required for prefetch!');
+    return;
   }
   const matchedRemoteInfo = helpers.utils.matchRemoteWithNameAndExpose(
     instance.options.remotes,
     id,
   );
   if (!matchedRemoteInfo) {
-    throw new Error(`Can not found '${id}' in instance.options.remotes!`);
+    logger.error(`Can not found '${id}' in instance.options.remotes!`);
+    return;
   }
   const { remote, expose } = matchedRemoteInfo;
   const { remoteSnapshot, globalSnapshot } =
