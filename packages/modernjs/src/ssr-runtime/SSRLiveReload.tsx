@@ -1,4 +1,4 @@
-export function SSRLiveReload() {
+export function SSRLiveReload(): JSX.Element | null {
   if (process.env.NODE_ENV !== 'development') {
     return null;
   }
