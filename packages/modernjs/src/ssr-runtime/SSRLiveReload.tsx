@@ -1,4 +1,6 @@
-export function SSRLiveReload() {
+import React from 'react';
+
+export function SSRLiveReload(): React.ReactElement | null {
   if (process.env.NODE_ENV !== 'development') {
     return null;
   }

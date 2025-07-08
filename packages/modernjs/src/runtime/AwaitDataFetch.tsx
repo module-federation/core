@@ -83,7 +83,7 @@ export function AwaitDataFetch<T>({
   children,
   params,
 }: AwaitProps<T>) {
-  const dataRef = useRef<T>();
+  const dataRef = useRef<T | undefined>(undefined);
   const data = dataRef.current || resolve;
   const getData = isPromise(data) ? fetchData(data, dataRef) : () => data;
 
@@ -153,7 +153,10 @@ function ResolveAwait<T>({
 }
 
 // return string when promise is rejected
-const fetchData = <T,>(promise: Promise<T>, ref: MutableRefObject<T>) => {
+const fetchData = <T,>(
+  promise: Promise<T>,
+  ref: MutableRefObject<T | undefined>,
+) => {
   let data: T | string;
   let status: 'pending' | 'success' = 'pending';
   const suspender = promise
