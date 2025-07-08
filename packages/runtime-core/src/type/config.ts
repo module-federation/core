@@ -4,7 +4,7 @@ import type {
   Module,
   RemoteEntryType,
 } from '@module-federation/sdk';
-import { FederationRuntimePlugin } from './plugin';
+import { ModuleFederationRuntimePlugin } from './plugin';
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<T>;
 export type PartialOptional<T, K extends keyof T> = Omit<T, K> & {
@@ -111,7 +111,7 @@ export interface Options {
   version?: string;
   remotes: Array<Remote>;
   shared: ShareInfos;
-  plugins: Array<FederationRuntimePlugin>;
+  plugins: Array<ModuleFederationRuntimePlugin>;
   inBrowser: boolean;
   shareStrategy?: ShareStrategy;
 }

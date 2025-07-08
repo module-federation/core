@@ -1,4 +1,4 @@
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 import { LOCALHOST } from '../../constant';
 
 declare const FEDERATION_IPV4: string | undefined;
@@ -26,7 +26,7 @@ function replaceLocalhost(url: string): string {
   return url.replace(LOCALHOST, ipv4);
 }
 
-const resolveEntryIpv4Plugin: () => FederationRuntimePlugin = () => ({
+const resolveEntryIpv4Plugin: () => ModuleFederationRuntimePlugin = () => ({
   name: 'resolve-entry-ipv4',
 
   beforeRegisterRemote(args) {

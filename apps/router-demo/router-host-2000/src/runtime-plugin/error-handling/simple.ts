@@ -12,7 +12,7 @@
  * Use this when you don't need different handling strategies for different error types.
  */
 
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 interface SimpleConfig {
   errorMessage?: string;
@@ -20,7 +20,7 @@ interface SimpleConfig {
 
 export const createSimplePlugin = (
   config: SimpleConfig = {},
-): FederationRuntimePlugin => {
+): ModuleFederationRuntimePlugin => {
   const { errorMessage = 'Module loading failed, please try again later' } =
     config;
 

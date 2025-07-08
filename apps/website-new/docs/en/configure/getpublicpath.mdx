@@ -20,7 +20,7 @@ If you're using module federation webpack plugin and want to set a dynamic publi
 ```ts title="rspack.config.ts"
 module.exports = {
   plugins: [
-    new ModuleFederation({
+    new ModuleFederationPlugin({
       name: 'provider',
       exposes: {
         './Button': './src/components/Button.tsx',

@@ -15,10 +15,10 @@ import './App.css';
 import BridgeReactPlugin from '@module-federation/bridge-react/plugin';
 import { ErrorBoundary } from 'react-error-boundary';
 import Remote1AppNew from 'remote1/app';
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 import { Spin } from 'antd';
 
-const fallbackPlugin: () => FederationRuntimePlugin = function () {
+const fallbackPlugin: () => ModuleFederationRuntimePlugin = function () {
   return {
     name: 'fallback-plugin',
     errorLoadRemote(args) {

@@ -1,0 +1,31 @@
+若使用构建插件，项目启动时将自动创建 `ModuleFederation` 实例并存储于内存中。此时可直接调用 API，API 会自动从内存中获取构建运行时创建的 `ModuleFederation` 实例。
+
+```ts
+import { loadRemote } from '@module-federation/enhanced/runtime';
+
+loadRemote('remote1');
+```
+
+若未使用构建插件，则需手动创建 `ModuleFederation` 实例，之后调用相应 API。
+
+```ts
+import { createInstance } from '@module-federation/enhanced/runtime';
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'remote1',
+      entry: 'http://localhost:2001/vmok-manifest.json',
+    },
+  ],
+});
+
+mf.loadRemote('remote1');
+```
+
+- 什么是 `ModuleFederation` 实例 ？
+
+`ModuleFederation` 实例是 `ModuleFederation` 类的实例，它包含了 `ModuleFederation` 运行时的所有功能。
+
+> 你可以在控制台输入 `__FEDERATION__.__INSTANCES__` 来查看已经创建好的实例。

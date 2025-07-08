@@ -1,7 +1,7 @@
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 import nodeFetch from 'node-fetch';
 
-const injectNodeFetchPlugin: () => FederationRuntimePlugin = () => ({
+const injectNodeFetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
   name: 'inject-node-fetch-plugin',
   beforeInit(args) {
     if (!globalThis.fetch) {

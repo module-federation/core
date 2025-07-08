@@ -1,9 +1,9 @@
 import { assert, describe, it, expect } from 'vitest';
-import { FederationHost } from '../src/index';
+import { ModuleFederation } from '../src/index';
 
-describe('FederationHost', () => {
+describe('ModuleFederation', () => {
   it('registers new remotes and loads them correctly', async () => {
-    const FM = new FederationHost({
+    const FM = new ModuleFederation({
       name: '@federation/instance',
       version: '1.0.1',
       remotes: [
@@ -37,7 +37,7 @@ describe('FederationHost', () => {
     expect(res).toBe('hello app2');
   });
   it('does not merge loaded remote by default', async () => {
-    const FM = new FederationHost({
+    const FM = new ModuleFederation({
       name: '@federation/instance',
       version: '1.0.1',
       remotes: [
@@ -65,7 +65,7 @@ describe('FederationHost', () => {
     expect(app1Res).toBe('hello app1 entry1');
   });
   it('merges loaded remote by setting "force: true"', async () => {
-    const FM = new FederationHost({
+    const FM = new ModuleFederation({
       name: '@federation/instance',
       version: '1.0.1',
       remotes: [

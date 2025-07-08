@@ -11,7 +11,7 @@ import {
   shareInfoWithoutLibAndGetProvider,
 } from './share';
 // import { assert } from '../src/utils/logger';
-import { FederationHost } from '@module-federation/runtime-core';
+import { ModuleFederation } from '@module-federation/runtime-core';
 import {
   UserOptions,
   ShareScopeMap,
@@ -108,8 +108,8 @@ describe('shared', () => {
       },
     };
 
-    const FederationInstance = new FederationHost(gmConfig1);
-    const FederationInstance2 = new FederationHost(gmConfig2);
+    const FederationInstance = new ModuleFederation(gmConfig1);
+    const FederationInstance2 = new ModuleFederation(gmConfig2);
 
     const reactInstance = await FederationInstance.loadShare<{
       version: string;
@@ -156,7 +156,7 @@ describe('shared', () => {
       },
     };
 
-    const FederationInstance = new FederationHost(gmConfig1);
+    const FederationInstance = new ModuleFederation(gmConfig1);
 
     const [reactInstance1, reactInstance2] = await Promise.all([
       FederationInstance.loadShare<{
@@ -214,7 +214,7 @@ describe('shared', () => {
       },
     };
 
-    const GM1 = new FederationHost(gmConfig1);
+    const GM1 = new ModuleFederation(gmConfig1);
     GM1.initOptions({
       name: '@federation/runtime-deps',
       remotes: [],
@@ -226,7 +226,7 @@ describe('shared', () => {
       },
     });
     await GM1.loadShare<{ from: string; version: string }>('runtime-react');
-    const FederationInstance2 = new FederationHost(gmConfig2);
+    const FederationInstance2 = new ModuleFederation(gmConfig2);
     const shared = await FederationInstance2.loadShare<{
       from: string;
       version: string;
@@ -238,7 +238,7 @@ describe('shared', () => {
   });
 
   // it('share deps', async () => {
-  //   const GM1 = new FederationHost({
+  //   const GM1 = new ModuleFederation({
   //     name: '@federation/load-deps',
   //     remotes: [],
   //     shared: {
@@ -334,12 +334,12 @@ describe('single shared', () => {
       },
     };
 
-    const FM1 = new FederationHost(vmConfig1);
+    const FM1 = new ModuleFederation(vmConfig1);
     await FM1.loadShare<{ from: string; version: string }>('runtime-react');
-    const FM3 = new FederationHost(vmConfig3);
+    const FM3 = new ModuleFederation(vmConfig3);
     await FM3.loadShare<{ from: string; version: string }>('runtime-react');
 
-    const FM2 = new FederationHost(vmConfig2);
+    const FM2 = new ModuleFederation(vmConfig2);
     const shared = await FM2.loadShare<{ from: string; version: string }>(
       'runtime-react',
     );
@@ -394,8 +394,8 @@ describe('eager shared', () => {
       },
     };
 
-    const FM = new FederationHost(federationConfig1);
-    const FM2 = new FederationHost(federationConfig2);
+    const FM = new ModuleFederation(federationConfig1);
+    const FM2 = new ModuleFederation(federationConfig2);
 
     const reactInstanceFactory = FM.loadShareSync<{
       version: string;
@@ -454,8 +454,8 @@ describe('eager shared', () => {
       },
     };
 
-    const FM = new FederationHost(federationConfig1);
-    const FM2 = new FederationHost(federationConfig2);
+    const FM = new ModuleFederation(federationConfig1);
+    const FM2 = new ModuleFederation(federationConfig2);
 
     const reactInstance2 = FM2.loadShareSync<{
       version: string;
@@ -485,7 +485,7 @@ describe('eager shared', () => {
         },
       },
     };
-    const FM = new FederationHost(federationConfig1);
+    const FM = new ModuleFederation(federationConfig1);
 
     expect(function () {
       FM.loadShareSync<{
@@ -530,8 +530,8 @@ describe('strictVersion shared', () => {
       },
     };
 
-    const FM1 = new FederationHost(federationConfig1);
-    const FM2 = new FederationHost(federationConfig2);
+    const FM1 = new ModuleFederation(federationConfig1);
+    const FM2 = new ModuleFederation(federationConfig2);
 
     await FM1.loadShare<{ from: string; version: string }>('runtime-react');
     FM2.initShareScopeMap('default', FM1.shareScopeMap['default']);
@@ -577,8 +577,8 @@ describe('strictVersion shared', () => {
       },
     };
 
-    const FM1 = new FederationHost(federationConfig1);
-    const FM2 = new FederationHost(federationConfig2);
+    const FM1 = new ModuleFederation(federationConfig1);
+    const FM2 = new ModuleFederation(federationConfig2);
 
     await FM1.loadShare<{ from: string; version: string }>('runtime-react');
     FM2.initShareScopeMap('default', FM1.shareScopeMap['default']);
@@ -660,7 +660,7 @@ describe('with shareScope shared', () => {
       },
     };
 
-    const FM1 = new FederationHost(federationConfig1);
+    const FM1 = new ModuleFederation(federationConfig1);
     // initShareScopeMap will be called while container.init execute
     FM1.initShareScopeMap('default', existedShareScopeMap['default']);
 
@@ -740,7 +740,7 @@ describe('with shareScope shared', () => {
       },
     };
 
-    const FM1 = new FederationHost(federationConfig1);
+    const FM1 = new ModuleFederation(federationConfig1);
     // initShareScopeMap will be called while container.init execute
     FM1.initShareScopeMap('old', existedShareScopeMap['old']);
 
@@ -771,7 +771,7 @@ describe('load share with customize consume info', () => {
       },
     };
 
-    const FM1 = new FederationHost(federationConfig1);
+    const FM1 = new ModuleFederation(federationConfig1);
     const shared = await FM1.loadShare<{ from: string }>('runtime-react');
     assert(shared, "shared can't be null");
     const sharedRes = shared();
@@ -793,7 +793,7 @@ describe('load share with customize consume info', () => {
 
 describe('load share with different strategy', () => {
   it('register all shared to shareScopeMap while strategy is "version-first"', async () => {
-    setGlobalFederationConstructor(FederationHost, true);
+    setGlobalFederationConstructor(ModuleFederation, true);
 
     const federationConfig1: UserOptions = {
       name: '@shared-test/app1',
@@ -817,7 +817,7 @@ describe('load share with different strategy', () => {
       },
     };
 
-    const FM1 = new FederationHost(federationConfig1);
+    const FM1 = new ModuleFederation(federationConfig1);
     const shared = await FM1.loadShare<{ from: string }>('runtime-react');
 
     // should register remote shared to share scope map
@@ -835,7 +835,7 @@ describe('load share with different strategy', () => {
   });
 
   it('register only self shared to shareScopeMap while strategy is "loaded-first"', async () => {
-    setGlobalFederationConstructor(FederationHost, true);
+    setGlobalFederationConstructor(ModuleFederation, true);
 
     const federationConfig1: UserOptions = {
       name: '@shared-test/app1',
@@ -859,7 +859,7 @@ describe('load share with different strategy', () => {
       },
     };
 
-    const FM1 = new FederationHost(federationConfig1);
+    const FM1 = new ModuleFederation(federationConfig1);
     const shared = await FM1.loadShare<{ from: string }>('runtime-react');
 
     // should not register remote shared to share scope map
@@ -903,7 +903,7 @@ describe('load share while shared has multiple versions', () => {
       },
     };
 
-    const FM1 = new FederationHost(federationConfig1);
+    const FM1 = new ModuleFederation(federationConfig1);
     const shared = await FM1.loadShare<{ version: string }>('runtime-react');
     assert(shared, "shared can't be null");
     const sharedRes = shared();
@@ -936,7 +936,7 @@ describe('load share while shared has multiple versions', () => {
       },
     };
 
-    const FM1 = new FederationHost(federationConfig1);
+    const FM1 = new ModuleFederation(federationConfig1);
     const shared = await FM1.loadShare<{ version: string }>('runtime-react', {
       resolver: (sharedOptions) => {
         return (

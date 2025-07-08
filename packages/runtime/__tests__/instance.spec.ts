@@ -1,9 +1,9 @@
 import { assert, describe, test, it } from 'vitest';
-import { FederationHost } from '../src/index';
+import { ModuleFederation } from '../src/index';
 
-describe('FederationHost', () => {
+describe('ModuleFederation', () => {
   it('should initialize with provided arguments', () => {
-    const GM = new FederationHost({
+    const GM = new ModuleFederation({
       name: '@federation/instance',
       version: '1.0.1',
       remotes: [],

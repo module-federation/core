@@ -33,7 +33,7 @@ interface ExposesConfig {
 ```jsx
 module.exports = {
   plugins: [
-    new ModuleFederation({
+    new ModuleFederationPlugin({
       name: 'provider',
       exposes: {
         // 注意： 不支持 "./"，为 . 导出是表示为 default 默认导出

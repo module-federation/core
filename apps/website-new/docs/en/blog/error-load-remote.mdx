@@ -172,7 +172,7 @@ import React from 'react';
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 
-+ const fallbackPlugin: () => FederationRuntimePlugin = function () {
++ const fallbackPlugin: () => ModuleFederationRuntimePlugin = function () {
 +  return {
 +    name: 'fallback-plugin',
 +    errorLoadRemote(args) {
@@ -263,7 +263,7 @@ export default defineConfig({
 
 ```tsx
 // src/runtime-plugin/fallback.ts
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
 interface FallbackConfig {
   // Backup service address
@@ -272,7 +272,7 @@ interface FallbackConfig {
   errorMessage?: string;
 }
 
-const fallbackPlugin = (config: FallbackConfig = {}): FederationRuntimePlugin => {
+const fallbackPlugin = (config: FallbackConfig = {}): ModuleFederationRuntimePlugin => {
   const {
     backupEntryUrl = 'http://localhost:2002/mf-manifest.json',
     errorMessage = 'Module loading failed, please try again later'
@@ -435,9 +435,9 @@ return () => ({
      If you don't need to distinguish between error types, you can use a generic error handling solution:
 
   ```ts
-  import type { FederationRuntimePlugin } from '@module-federation/runtime';
+  import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
-  const fallbackPlugin = (errorMessage = 'Module loading failed, please try again later'): FederationRuntimePlugin => {
+  const fallbackPlugin = (errorMessage = 'Module loading failed, please try again later'): ModuleFederationRuntimePlugin => {
     return {
       name: 'fallback-plugin',
       async errorLoadRemote() {

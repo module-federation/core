@@ -13,8 +13,8 @@ import runtimePlugin, {
   setupWebpackRequirePatching,
 } from '../runtimePlugin';
 import type {
-  FederationRuntimePlugin,
-  FederationHost,
+  ModuleFederationRuntimePlugin,
+  ModuleFederation,
   Federation,
 } from '@module-federation/runtime';
 import * as runtimePluginModule from '../runtimePlugin';
@@ -94,7 +94,7 @@ const mockModule = {
   },
   inited: false,
   lib: {},
-  host: {} as FederationHost,
+  host: {} as ModuleFederation,
   getEntry: () => 'http://localhost:3001/remoteEntry.js',
   init: () => Promise.resolve({}),
   get: () => Promise.resolve({}),
@@ -125,7 +125,7 @@ const mockModule = {
 } as any;
 
 describe('runtimePlugin', () => {
-  let plugin: FederationRuntimePlugin;
+  let plugin: ModuleFederationRuntimePlugin;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -829,7 +829,7 @@ describe('runtimePlugin', () => {
               },
             },
           },
-        } as unknown as FederationHost,
+        } as unknown as ModuleFederation,
       } as any;
 
       if (plugin.beforeInit) {
@@ -854,7 +854,7 @@ describe('runtimePlugin', () => {
               },
             },
           },
-        } as unknown as FederationHost,
+        } as unknown as ModuleFederation,
       } as any;
 
       if (plugin.beforeInit) {
@@ -903,7 +903,7 @@ describe('runtimePlugin', () => {
               },
             },
           },
-        } as unknown as FederationHost,
+        } as unknown as ModuleFederation,
       } as any;
 
       if (plugin.beforeInit) {
@@ -986,7 +986,7 @@ describe('runtimePlugin', () => {
               },
             },
           },
-        } as unknown as FederationHost,
+        } as unknown as ModuleFederation,
       } as any;
 
       if (plugin.beforeInit) {
@@ -1041,7 +1041,7 @@ describe('runtimePlugin', () => {
               },
             },
           },
-        } as unknown as FederationHost,
+        } as unknown as ModuleFederation,
       } as any;
 
       if (plugin.beforeInit) {
@@ -1087,7 +1087,7 @@ describe('runtimePlugin', () => {
               },
             },
           },
-        } as unknown as FederationHost,
+        } as unknown as ModuleFederation,
       } as any;
 
       if (plugin.beforeInit) {
@@ -1145,7 +1145,7 @@ describe('runtimePlugin', () => {
               },
             },
           },
-        } as unknown as FederationHost,
+        } as unknown as ModuleFederation,
       } as any;
 
       if (plugin.beforeInit) {

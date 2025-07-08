@@ -13,18 +13,18 @@ function beforeInit(args: BeforeInitOptions): BeforeInitOptions
 
 type BeforeInitOptions ={
     userOptions: UserOptions;
-    options: FederationRuntimeOptions;
-    origin: FederationHost;
+    options: ModuleFederationRuntimeOptions;
+    origin: ModuleFederation;
     shareInfo: ShareInfos;
 }
 
-interface FederationRuntimeOptions {
+interface ModuleFederationRuntimeOptions {
   id?: string;
   name: string;
   version?: string;
   remotes: Array<Remote>;
   shared: ShareInfos;
-  plugins: Array<FederationRuntimePlugin>;
+  plugins: Array<ModuleFederationRuntimePlugin>;
   inBrowser: boolean;
 }
 ```
@@ -41,8 +41,8 @@ Called after the MF instance is initialized.
 function init(args: InitOptions): void
 
 type InitOptions ={
-  options: FederationRuntimeOptions;
-  origin: FederationHost;
+  options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
 }
 ```
 
@@ -59,8 +59,8 @@ async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestO
 
 type BeforeRequestOptions ={
   id: string;
-  options: FederationRuntimeOptions;
-  origin: FederationHost;
+  options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
 }
 ```
 
@@ -80,8 +80,8 @@ type AfterResolveOptions ={
   pkgNameOrAlias: string;
   expose: string;
   remote: Remote;
-  options: FederationRuntimeOptions;
-  origin: FederationHost;
+  options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
 }
@@ -104,7 +104,7 @@ type OnLoadOptions ={
   pkgNameOrAlias: string;
   remote: Remote;
   options: ModuleOptions;
-  origin: FederationHost;
+  origin: ModuleFederation;
   exposeModule: any;
   exposeModuleFactory: any;
   moduleInstance: Module;
@@ -112,7 +112,7 @@ type OnLoadOptions ={
 
 type ModuleOptions = {
     remoteInfo: RemoteInfo;
-    host: FederationHost;
+    host: ModuleFederation;
 }
 
 interface RemoteInfo {
@@ -160,17 +160,17 @@ type ErrorLoadRemoteOptions ={
   id: string;
   error: unknown;
   from: 'build' | 'runtime';
-  origin: FederationHost;
+  origin: ModuleFederation;
 }
 ```
 * example
 
 ```ts
-import { init, loadRemote } from '@module-federation/enhanced/runtime'
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
 
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
-const fallbackPlugin: () => FederationRuntimePlugin =
+const fallbackPlugin: () => ModuleFederationRuntimePlugin =
   function () {
     return {
       name: 'fallback-plugin',
@@ -182,7 +182,7 @@ const fallbackPlugin: () => FederationRuntimePlugin =
   };
 
 
-init({
+const mf = createInstance({
     name: 'mf_host',
     remotes: [
         {
@@ -194,7 +194,7 @@ init({
     plugins: [fallbackPlugin()]
 });
 
-loadRemote('app1/un-existed-module').then(mod=>{
+mf.loadRemote('app1/un-existed-module').then(mod=>{
   expect(mod).toEqual('fallback');
 })
 ```
@@ -214,7 +214,7 @@ type BeforeLoadShareOptions ={
   pkgName: string;
   shareInfo?: Shared;
   shared: Options['shared'];
-  origin: FederationHost;
+  origin: ModuleFederation;
 }
 ```
 
@@ -242,11 +242,11 @@ type ResolveShareOptions ={
 * example
 
 ```ts
-import { init, loadRemote } from '@module-federation/enhanced/runtime'
+import { ModuleFederation, loadRemote } from '@module-federation/enhanced/runtime'
 
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
-const customSharedPlugin: () => FederationRuntimePlugin =
+const customSharedPlugin: () => ModuleFederationRuntimePlugin =
   function () {
     return {
       name: 'custom-shared-plugin',
@@ -269,7 +269,7 @@ const customSharedPlugin: () => FederationRuntimePlugin =
   };
 
 
-init({
+const mf = createInstance({
     name: 'mf_host',
     shared: {
       react: {
@@ -287,7 +287,7 @@ init({
 
 window.React = ()=> 'Desired Shared';
 
-loadShare("react").then((reactFactory)=>{
+mf.loadShare("react").then((reactFactory)=>{
   expect(reactFactory()).toEqual(window.React());
 });
 ```
@@ -306,7 +306,7 @@ async function beforePreloadRemote(args: BeforePreloadRemoteOptions): BeforePrel
 type BeforePreloadRemoteOptions ={
   preloadOps: Array<PreloadRemoteArgs>;
   options: Options;
-  origin: FederationHost;
+  origin: ModuleFederation;
 }
 ```
 
@@ -322,7 +322,7 @@ Used to control the generation of resources that need to be preloaded.
 async function generatePreloadAssets(args: GeneratePreloadAssetsOptions): Promise<PreloadAssets>
 
 type GeneratePreloadAssetsOptions ={
-  origin: FederationHost;
+  origin: ModuleFederation;
   preloadOptions: PreloadOptions[number];
   remote: Remote;
   remoteInfo: RemoteInfo;
@@ -358,10 +358,9 @@ type CreateScriptOptions ={
 * example
 
 ```ts
-import { init } from '@module-federation/enhanced/runtime'
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
-const changeScriptAttributePlugin: () => FederationRuntimePlugin =
+const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
   function () {
     return {
       name: 'change-script-attribute',
