@@ -42,7 +42,6 @@
     "@module-federation/runtime": "workspace:*"
   },
   "devDependencies": {
-    "@types/react": "^18.3.11",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
     "typescript": "^5.2.2",
