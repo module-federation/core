@@ -11,3 +11,7 @@ This is the example application for Module Federation core.
 
 - `pnpm start`: Start dev server
 - `pnpm build`: Build production bundle
+
+## Description
+
+This package demonstrates a specific use case of Module Federation within the ecosystem.
