@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "rootDir": "./",
+    "baseUrl": "src",
+    "rootDir": "src",
     "outDir": "dist",
     "sourceMap": false,
     "module": "es2022",
@@ -16,12 +16,8 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "removeComments": true,
-    "declaration": true,
-    "paths": {
-      "@/*": ["./*"],
-      "@src/*": ["./src/*"]
-    }
+    "declaration": true
   },
-  "include": ["src", "../../global.d.ts", "__tests__/**/*"],
+  "include": ["src"],
   "exclude": ["node_modules/**/*", "../node_modules"]
 }
