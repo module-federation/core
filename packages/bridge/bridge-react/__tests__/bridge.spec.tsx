@@ -1,10 +1,8 @@
 import React from 'react';
 import { assert, describe, it } from 'vitest';
-import { createBridgeComponent } from '../src/v19';
-import { createRemoteComponent } from '../src';
+import { createBridgeComponent, createRemoteComponent } from '../src';
 import {
   act,
-  cleanup,
   fireEvent,
   render,
   screen,
@@ -18,11 +16,8 @@ describe('bridge', () => {
     containerInfo = createContainer();
   });
 
-  afterEach(async () => {
-    cleanup();
-    await act(async () => {
-      containerInfo?.clean();
-    });
+  afterEach(() => {
+    containerInfo?.clean();
   });
 
   it('createBridgeComponent life cycle', async () => {
@@ -33,21 +28,17 @@ describe('bridge', () => {
       rootComponent: Component,
     })();
 
-    await act(async () => {
-      lifeCycle.render({
-        dom: containerInfo?.container,
-      });
-      await sleep(200);
+    lifeCycle.render({
+      dom: containerInfo?.container,
     });
 
+    await sleep(200);
     expect(document.querySelector('#container')!.innerHTML).toContain(
       '<div>life cycle render</div>',
     );
 
-    await act(async () => {
-      lifeCycle.destroy({
-        dom: containerInfo?.container,
-      });
+    lifeCycle.destroy({
+      dom: containerInfo?.container,
     });
 
     expect(document.querySelector('#container')!.innerHTML).toContain('');
@@ -75,9 +66,7 @@ describe('bridge', () => {
     );
     expect(getHtml(container)).toMatch('loading');
 
-    await act(async () => {
-      await sleep(200);
-    });
+    await sleep(200);
     expect(getHtml(container)).toMatch('life cycle render');
     expect(getHtml(container)).toMatch('hello world');
   });
@@ -108,9 +97,7 @@ describe('bridge', () => {
     );
     expect(getHtml(container)).toMatch('loading');
 
-    await act(async () => {
-      await sleep(200);
-    });
+    await sleep(200);
     expect(getHtml(container)).toMatch('life cycle render');
     expect(getHtml(container)).toMatch('hello world');
     expect(ref.current).not.toBeNull();
@@ -144,9 +131,7 @@ describe('bridge', () => {
     const { container } = render(<RemoteComponent />);
     expect(getHtml(container)).toMatch('loading');
 
-    await act(async () => {
-      await sleep(200);
-    });
+    await sleep(200);
     expect(renderMock).toHaveBeenCalledTimes(1);
   });
 });
