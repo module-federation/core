@@ -1,4 +1,4 @@
-import { createModuleFederationConfig } from '@module-federation/modern-js';
+import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
 
 export default createModuleFederationConfig({
   name: 'provider_csr',
