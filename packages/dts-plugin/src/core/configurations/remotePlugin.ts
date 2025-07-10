@@ -56,12 +56,13 @@ function getEffectiveRootDir(
 const getDependentFiles = (
   rootFiles: string[],
   configContent: typescript.ParsedCommandLine,
+  rootDir: string,
 ): string[] => {
   const program = typescript.createProgram(rootFiles, configContent.options);
   const sourceFiles = program.getSourceFiles();
   const dependentFiles = sourceFiles
     .map((file) => file.fileName)
-    .filter((file) => !file.endsWith('.d.ts'));
+    .filter((file) => !file.endsWith('.d.ts') && file.startsWith(rootDir));
   return dependentFiles.length ? dependentFiles : rootFiles;
 };
 
@@ -141,7 +142,7 @@ const readTsConfig = (
   );
 
   const filesToCompile = [
-    ...getDependentFiles(rootFiles, configContent),
+    ...getDependentFiles(rootFiles, configContent, rootDir),
     ...configContent.fileNames.filter(
       (filename) =>
         filename.endsWith('.d.ts') &&
