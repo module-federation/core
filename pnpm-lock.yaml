@@ -523,8 +523,8 @@ importers:
         version: 19.0.0(react@19.0.0)
     devDependencies:
       '@module-federation/nextjs-mf':
-        specifier: 0.0.0-next-20250701105507
-        version: 0.0.0-next-20250701105507(@rspack/core@1.3.9)(next@15.3.3)(react-dom@19.0.0)(react@19.0.0)(typescript@5.7.3)(vue-tsc@2.2.10)(webpack@5.98.0)
+        specifier: workspace:*
+        version: link:../../packages/nextjs-mf
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
@@ -11428,14 +11428,6 @@ packages:
       lodash: 4.17.21
       rslog: 1.2.3
 
-  /@module-federation/bridge-react-webpack-plugin@0.0.0-next-20250701105507:
-    resolution: {integrity: sha512-s03Kx5i6smiqPt4seHWaiO27zy8IZopU39WIB1jVi3Berp29SG08Ww/25/3UvrCMHPdpA5IItihtWRRT/CkR5g==}
-    dependencies:
-      '@module-federation/sdk': 0.0.0-next-20250701105507
-      '@types/semver': 7.5.8
-      semver: 7.6.3
-    dev: true
-
   /@module-federation/bridge-react-webpack-plugin@0.13.1:
     resolution: {integrity: sha512-3RgGd8KcRw5vibnxWa1NUWwfb0tKwn8OvHeQ4GFKzMvDLm+QpCgQd9LeTEBP38wZgGXVtIJR3y5FPnufWswFKw==}
     dependencies:
@@ -11458,25 +11450,6 @@ packages:
       '@module-federation/sdk': 0.9.1
       '@types/semver': 7.5.8
       semver: 7.6.3
-    dev: true
-
-  /@module-federation/cli@0.0.0-next-20250701105507(typescript@5.7.3)(vue-tsc@2.2.10):
-    resolution: {integrity: sha512-MMTsoQ3RwyBBrObhrLovK3YiPY975Zpnre1GNOXYnWu52NlZSFBsudCF0HdqfebAqp74PlcREkmtq70KTo8sKg==}
-    engines: {node: '>=16.0.0'}
-    hasBin: true
-    dependencies:
-      '@modern-js/node-bundle-require': 2.67.6
-      '@module-federation/dts-plugin': 0.0.0-next-20250701105507(typescript@5.7.3)(vue-tsc@2.2.10)
-      '@module-federation/sdk': 0.0.0-next-20250701105507
-      chalk: 3.0.0
-      commander: 11.1.0
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - vue-tsc
     dev: true
 
   /@module-federation/cli@0.13.1(typescript@5.4.5)(vue-tsc@2.2.10):
@@ -11515,19 +11488,6 @@ packages:
       - typescript
       - utf-8-validate
       - vue-tsc
-    dev: true
-
-  /@module-federation/data-prefetch@0.0.0-next-20250701105507(react-dom@19.0.0)(react@19.0.0):
-    resolution: {integrity: sha512-1QKJA6fenv+P0Fm3MBvoYtsjcAR5O1YG7iJH/8ya4rRTq1FjdZcP1ScvNoFDbuMcx4BnIT0k7e5hRFGrAS470Q==}
-    peerDependencies:
-      react: '>=16.9.0'
-      react-dom: '>=16.9.0'
-    dependencies:
-      '@module-federation/runtime': 0.0.0-next-20250701105507
-      '@module-federation/sdk': 0.0.0-next-20250701105507
-      fs-extra: 9.1.0
-      react: 19.0.0
-      react-dom: 19.0.0(react@19.0.0)
     dev: true
 
   /@module-federation/data-prefetch@0.13.1(react-dom@18.3.1)(react@18.3.1):
@@ -11593,40 +11553,6 @@ packages:
       fs-extra: 9.1.0
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
-    dev: true
-
-  /@module-federation/dts-plugin@0.0.0-next-20250701105507(typescript@5.7.3)(vue-tsc@2.2.10):
-    resolution: {integrity: sha512-V/qcqiL1lBsWWmRMoN90FBACx6CUKQ2je2GDX6YzQNH9ZrHdDMG9Z9Q1w7lSSVbpbXtMNgwNMxSRs6BKlz8+lg==}
-    peerDependencies:
-      typescript: ^4.9.0 || ^5.0.0
-      vue-tsc: '>=1.0.24'
-    peerDependenciesMeta:
-      vue-tsc:
-        optional: true
-    dependencies:
-      '@module-federation/error-codes': 0.0.0-next-20250701105507
-      '@module-federation/managers': 0.0.0-next-20250701105507
-      '@module-federation/sdk': 0.0.0-next-20250701105507
-      '@module-federation/third-party-dts-extractor': 0.0.0-next-20250701105507
-      adm-zip: 0.5.16
-      ansi-colors: 4.1.3
-      axios: 1.8.2
-      chalk: 3.0.0
-      fs-extra: 9.1.0
-      isomorphic-ws: 5.0.0(ws@8.18.0)
-      koa: 2.16.1
-      lodash.clonedeepwith: 4.5.0
-      log4js: 6.9.1
-      node-schedule: 2.1.1
-      rambda: 9.4.2
-      typescript: 5.7.3
-      vue-tsc: 2.2.10(typescript@5.7.3)
-      ws: 8.18.0
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - supports-color
-      - utf-8-validate
     dev: true
 
   /@module-federation/dts-plugin@0.13.1(typescript@5.4.5)(vue-tsc@2.2.10):
@@ -11794,48 +11720,6 @@ packages:
     transitivePeerDependencies:
       - bufferutil
       - debug
-      - supports-color
-      - utf-8-validate
-    dev: true
-
-  /@module-federation/enhanced@0.0.0-next-20250701105507(@rspack/core@1.3.9)(react-dom@19.0.0)(react@19.0.0)(typescript@5.7.3)(vue-tsc@2.2.10)(webpack@5.98.0):
-    resolution: {integrity: sha512-K88m80Y2fv9q7UwqXEQbu3n6buZxI0FfKMi6lMTX57Q1jD8s9XOAuoAswJnF6hunlmlG0v1dxxnDcuTFMzdQ+A==}
-    hasBin: true
-    peerDependencies:
-      typescript: ^4.9.0 || ^5.0.0
-      vue-tsc: '>=1.0.24'
-      webpack: ^5.0.0
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-      vue-tsc:
-        optional: true
-      webpack:
-        optional: true
-    dependencies:
-      '@module-federation/bridge-react-webpack-plugin': 0.0.0-next-20250701105507
-      '@module-federation/cli': 0.0.0-next-20250701105507(typescript@5.7.3)(vue-tsc@2.2.10)
-      '@module-federation/data-prefetch': 0.0.0-next-20250701105507(react-dom@19.0.0)(react@19.0.0)
-      '@module-federation/dts-plugin': 0.0.0-next-20250701105507(typescript@5.7.3)(vue-tsc@2.2.10)
-      '@module-federation/error-codes': 0.0.0-next-20250701105507
-      '@module-federation/inject-external-runtime-core-plugin': 0.0.0-next-20250701105507(@module-federation/runtime-tools@0.0.0-next-20250701105507)
-      '@module-federation/managers': 0.0.0-next-20250701105507
-      '@module-federation/manifest': 0.0.0-next-20250701105507(typescript@5.7.3)(vue-tsc@2.2.10)
-      '@module-federation/rspack': 0.0.0-next-20250701105507(@rspack/core@1.3.9)(typescript@5.7.3)(vue-tsc@2.2.10)
-      '@module-federation/runtime-tools': 0.0.0-next-20250701105507
-      '@module-federation/sdk': 0.0.0-next-20250701105507
-      btoa: 1.2.1
-      schema-utils: 4.3.2
-      typescript: 5.7.3
-      upath: 2.0.1
-      vue-tsc: 2.2.10(typescript@5.7.3)
-      webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
-    transitivePeerDependencies:
-      - '@rspack/core'
-      - bufferutil
-      - debug
-      - react
-      - react-dom
       - supports-color
       - utf-8-validate
     dev: true
@@ -12074,10 +11958,6 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@module-federation/error-codes@0.0.0-next-20250701105507:
-    resolution: {integrity: sha512-xgY3uxe1jRc8FlS67iKoDU6njmYu4WXSEqWgaAGLIvRbJCwJ7UVbs3dBD7NwmNUlwtK3kl3FyK0Z3/t05MrZvA==}
-    dev: true
-
   /@module-federation/error-codes@0.13.1:
     resolution: {integrity: sha512-azgGDBnFRfqlivHOl96ZjlFUFlukESz2Rnnz/pINiSqoBBNjUE0fcAZP4X6jgrVITuEg90YkruZa7pW9I3m7Uw==}
 
@@ -12090,14 +11970,6 @@ packages:
 
   /@module-federation/error-codes@0.9.1:
     resolution: {integrity: sha512-q8spCvlwUzW42iX1irnlBTcwcZftRNHyGdlaoFO1z/fW4iphnBIfijzkigWQzOMhdPgzqN/up7XN+g5hjBGBtw==}
-    dev: true
-
-  /@module-federation/inject-external-runtime-core-plugin@0.0.0-next-20250701105507(@module-federation/runtime-tools@0.0.0-next-20250701105507):
-    resolution: {integrity: sha512-wKJw4oo8SHZQ2083fWJNzwiAm9r7LGhjytZzsEhoEYy7JUkowHL7cWwbE56vdq0GdNHsG4VdCjgO44GzqRhmfA==}
-    peerDependencies:
-      '@module-federation/runtime-tools': 0.0.0-next-20250701105507
-    dependencies:
-      '@module-federation/runtime-tools': 0.0.0-next-20250701105507
     dev: true
 
   /@module-federation/inject-external-runtime-core-plugin@0.13.1(@module-federation/runtime-tools@0.13.1):
@@ -12114,14 +11986,6 @@ packages:
       '@module-federation/runtime-tools': 0.9.1
     dependencies:
       '@module-federation/runtime-tools': 0.9.1
-    dev: true
-
-  /@module-federation/managers@0.0.0-next-20250701105507:
-    resolution: {integrity: sha512-18XN9N8vJ27TUd3n0LM/DFt3NaAm4d7650r0k0CXVouBNzSKPPDcd05/OLXDApIfZ5ry+FY+Ur/QdrFyUIB2Ag==}
-    dependencies:
-      '@module-federation/sdk': 0.0.0-next-20250701105507
-      find-pkg: 2.0.0
-      fs-extra: 9.1.0
     dev: true
 
   /@module-federation/managers@0.13.1:
@@ -12146,23 +12010,6 @@ packages:
       '@module-federation/sdk': 0.9.1
       find-pkg: 2.0.0
       fs-extra: 9.1.0
-    dev: true
-
-  /@module-federation/manifest@0.0.0-next-20250701105507(typescript@5.7.3)(vue-tsc@2.2.10):
-    resolution: {integrity: sha512-QSx3L9XNVt+aJUQrJKt09jhsTF04N+6+voharc5os46ZNij916XSWeJjeyvcsKOocQidzun/Vya9cp3UirOtfw==}
-    dependencies:
-      '@module-federation/dts-plugin': 0.0.0-next-20250701105507(typescript@5.7.3)(vue-tsc@2.2.10)
-      '@module-federation/managers': 0.0.0-next-20250701105507
-      '@module-federation/sdk': 0.0.0-next-20250701105507
-      chalk: 3.0.0
-      find-pkg: 2.0.0
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - vue-tsc
     dev: true
 
   /@module-federation/manifest@0.13.1(typescript@5.4.5)(vue-tsc@2.2.10):
@@ -12250,69 +12097,6 @@ packages:
       - vue-tsc
     dev: true
 
-  /@module-federation/nextjs-mf@0.0.0-next-20250701105507(@rspack/core@1.3.9)(next@15.3.3)(react-dom@19.0.0)(react@19.0.0)(typescript@5.7.3)(vue-tsc@2.2.10)(webpack@5.98.0):
-    resolution: {integrity: sha512-o/tZQxf2d5D8aND0vDH/lyaZo1zGea4S4mNROQFbeckgviERTrWRI5lyGOTJFlszQzm6AKylEHk5t3j++SPh7A==}
-    requiresBuild: true
-    peerDependencies:
-      next: ^15 || ^14 || ^13 || ^12
-      styled-jsx: '*'
-    peerDependenciesMeta:
-      next:
-        optional: true
-      styled-jsx:
-        optional: true
-    dependencies:
-      '@module-federation/enhanced': 0.0.0-next-20250701105507(@rspack/core@1.3.9)(react-dom@19.0.0)(react@19.0.0)(typescript@5.7.3)(vue-tsc@2.2.10)(webpack@5.98.0)
-      '@module-federation/node': 0.0.0-next-20250701105507(@rspack/core@1.3.9)(react-dom@19.0.0)(react@19.0.0)(typescript@5.7.3)(vue-tsc@2.2.10)(webpack@5.98.0)
-      '@module-federation/runtime': 0.0.0-next-20250701105507
-      '@module-federation/sdk': 0.0.0-next-20250701105507
-      '@module-federation/webpack-bundler-runtime': 0.0.0-next-20250701105507
-      fast-glob: 3.3.2
-      next: 15.3.3(@babel/core@7.25.2)(react-dom@19.0.0)(react@19.0.0)
-    transitivePeerDependencies:
-      - '@rspack/core'
-      - bufferutil
-      - debug
-      - react
-      - react-dom
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - vue-tsc
-      - webpack
-    dev: true
-
-  /@module-federation/node@0.0.0-next-20250701105507(@rspack/core@1.3.9)(react-dom@19.0.0)(react@19.0.0)(typescript@5.7.3)(vue-tsc@2.2.10)(webpack@5.98.0):
-    resolution: {integrity: sha512-sccEb/RGz3ioPeYXyYl8UlDHGUe8Hy8BSbuU+yWF0p2nmlRXoRYrmJSB5bDX5w17RETCpWI3wSerQVY3aI3D7Q==}
-    peerDependencies:
-      react: ^16||^17||^18||^19
-      react-dom: ^16||^17||^18||^19
-      webpack: ^5.40.0
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-dom:
-        optional: true
-    dependencies:
-      '@module-federation/enhanced': 0.0.0-next-20250701105507(@rspack/core@1.3.9)(react-dom@19.0.0)(react@19.0.0)(typescript@5.7.3)(vue-tsc@2.2.10)(webpack@5.98.0)
-      '@module-federation/runtime': 0.0.0-next-20250701105507
-      '@module-federation/sdk': 0.0.0-next-20250701105507
-      btoa: 1.2.1
-      encoding: 0.1.13
-      node-fetch: 2.7.0(encoding@0.1.13)
-      react: 19.0.0
-      react-dom: 19.0.0(react@19.0.0)
-      webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)
-    transitivePeerDependencies:
-      - '@rspack/core'
-      - bufferutil
-      - debug
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - vue-tsc
-    dev: true
-
   /@module-federation/node@2.7.2(@rspack/core@1.3.9)(next@15.3.3)(react-dom@19.0.0)(react@19.0.0)(typescript@5.4.5)(vue-tsc@2.2.10)(webpack@5.98.0):
     resolution: {integrity: sha512-NRVF56J0iyWRfCbpW6+HYis2sj8BBNVp8H5jHkIM/NgZt1Ck9Nyd5BVcL/Jys8ku44v8tdDQdnlzl/BjGHp9Yg==}
     peerDependencies:
@@ -12380,36 +12164,6 @@ packages:
       - typescript
       - utf-8-validate
       - vue-tsc
-    dev: true
-
-  /@module-federation/rspack@0.0.0-next-20250701105507(@rspack/core@1.3.9)(typescript@5.7.3)(vue-tsc@2.2.10):
-    resolution: {integrity: sha512-ss1rcPuY/rWoUJm15wrp5KNbiIllBaaVdeP6qF6NNt47l2vXKv65aNTDefagmdUybomthWfsrUa+RNV9wkd76A==}
-    peerDependencies:
-      '@rspack/core': '>=0.7'
-      typescript: ^4.9.0 || ^5.0.0
-      vue-tsc: '>=1.0.24'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-      vue-tsc:
-        optional: true
-    dependencies:
-      '@module-federation/bridge-react-webpack-plugin': 0.0.0-next-20250701105507
-      '@module-federation/dts-plugin': 0.0.0-next-20250701105507(typescript@5.7.3)(vue-tsc@2.2.10)
-      '@module-federation/inject-external-runtime-core-plugin': 0.0.0-next-20250701105507(@module-federation/runtime-tools@0.0.0-next-20250701105507)
-      '@module-federation/managers': 0.0.0-next-20250701105507
-      '@module-federation/manifest': 0.0.0-next-20250701105507(typescript@5.7.3)(vue-tsc@2.2.10)
-      '@module-federation/runtime-tools': 0.0.0-next-20250701105507
-      '@module-federation/sdk': 0.0.0-next-20250701105507
-      '@rspack/core': 1.3.9(@swc/helpers@0.5.13)
-      btoa: 1.2.1
-      typescript: 5.7.3
-      vue-tsc: 2.2.10(typescript@5.7.3)
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - supports-color
-      - utf-8-validate
     dev: true
 
   /@module-federation/rspack@0.13.1(@rspack/core@1.3.9)(typescript@5.4.5)(vue-tsc@2.2.10):
@@ -12556,13 +12310,6 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@module-federation/runtime-core@0.0.0-next-20250701105507:
-    resolution: {integrity: sha512-Lw7mLdmsl3QAJ2Eo7qSXtqR846icxncLVqgkb856rnhlDUNE7GbKs9Jq2xnqu6RgE1TTyrUG99s9I+G1pad0lw==}
-    dependencies:
-      '@module-federation/error-codes': 0.0.0-next-20250701105507
-      '@module-federation/sdk': 0.0.0-next-20250701105507
-    dev: true
-
   /@module-federation/runtime-core@0.13.1:
     resolution: {integrity: sha512-TfyKfkSAentKeuvSsAItk8s5tqQSMfIRTPN2e1aoaq/kFhE+7blps719csyWSX5Lg5Es7WXKMsXHy40UgtBtuw==}
     dependencies:
@@ -12587,13 +12334,6 @@ packages:
     dependencies:
       '@module-federation/error-codes': 0.9.1
       '@module-federation/sdk': 0.9.1
-    dev: true
-
-  /@module-federation/runtime-tools@0.0.0-next-20250701105507:
-    resolution: {integrity: sha512-5jl/Rjd+BSiYA3p7B8VTgiVbvrnHlM41E0n7mxbRUwWkC7fyvjcvM7JaDqsC2D0guL0Ab/anyYSwrrwmk1YV8A==}
-    dependencies:
-      '@module-federation/runtime': 0.0.0-next-20250701105507
-      '@module-federation/webpack-bundler-runtime': 0.0.0-next-20250701105507
     dev: true
 
   /@module-federation/runtime-tools@0.1.6:
@@ -12641,14 +12381,6 @@ packages:
     dependencies:
       '@module-federation/runtime': 0.9.1
       '@module-federation/webpack-bundler-runtime': 0.9.1
-    dev: true
-
-  /@module-federation/runtime@0.0.0-next-20250701105507:
-    resolution: {integrity: sha512-YkjP6TRWIJpSbN7tbwHsPLrCVj86XzjrInQso5o3ds4ONk1P9lIEDMQcPxAYqsilngTR5TwkCV19lQuQ/uWNAQ==}
-    dependencies:
-      '@module-federation/error-codes': 0.0.0-next-20250701105507
-      '@module-federation/runtime-core': 0.0.0-next-20250701105507
-      '@module-federation/sdk': 0.0.0-next-20250701105507
     dev: true
 
   /@module-federation/runtime@0.1.6:
@@ -12699,10 +12431,6 @@ packages:
       '@module-federation/sdk': 0.9.1
     dev: true
 
-  /@module-federation/sdk@0.0.0-next-20250701105507:
-    resolution: {integrity: sha512-ekcIgMbXdwapaGwYsTZwUvroWgxDsnzW8pTBlIfa7XDET+LJlJSZjm8FGi4G1iuj0ekWQlVQWYGJ2KUlhluJrA==}
-    dev: true
-
   /@module-federation/sdk@0.1.6:
     resolution: {integrity: sha512-qifXpyYLM7abUeEOIfv0oTkguZgRZuwh89YOAYIZJlkP6QbRG7DJMQvtM8X2yHXm9PTk0IYNnOJH0vNQCo6auQ==}
     dev: true
@@ -12733,14 +12461,6 @@ packages:
     resolution: {integrity: sha512-YQonPTImgnCqZjE/A+3N2g3J5ypR6kx1tbBzc9toUANKr/dw/S63qlh/zHKzWQzxjjNNVMdXRtTMp07g3kgEWg==}
     dev: true
 
-  /@module-federation/third-party-dts-extractor@0.0.0-next-20250701105507:
-    resolution: {integrity: sha512-+HcvEls6gJ3WYrq8vLQTKpCSt2z5tdX8hsr+UcTxCOjpjux2dx/SOOowp+gMTAmGIVy8P5+66hBrhYY+D9hong==}
-    dependencies:
-      find-pkg: 2.0.0
-      fs-extra: 9.1.0
-      resolve: 1.22.8
-    dev: true
-
   /@module-federation/third-party-dts-extractor@0.13.1:
     resolution: {integrity: sha512-0kWSupoC0aTxFjJZE5TVPNsoZ9kBsZhkvRxFnUW2vDYLgtvgs2dIrDlNlIXYiS/MaQCNHGyvdNepbchKQiwFaw==}
     dependencies:
@@ -12763,13 +12483,6 @@ packages:
       find-pkg: 2.0.0
       fs-extra: 9.1.0
       resolve: 1.22.8
-    dev: true
-
-  /@module-federation/webpack-bundler-runtime@0.0.0-next-20250701105507:
-    resolution: {integrity: sha512-VbLHx3Fgbj6cu2szK5whgC+MHhZqKpjAwRHEhO14Vn0dBBcTVFtB6RNcaxD5mqyzmEZ7DBImCmP3IKya+OV/hA==}
-    dependencies:
-      '@module-federation/runtime': 0.0.0-next-20250701105507
-      '@module-federation/sdk': 0.0.0-next-20250701105507
     dev: true
 
   /@module-federation/webpack-bundler-runtime@0.1.6:
@@ -36840,6 +36553,7 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
+    dev: false
 
   /next@15.3.3(@babel/core@7.26.10)(react-dom@19.0.0)(react@19.0.0):
     resolution: {integrity: sha512-JqNj29hHNmCLtNvd090SyRbXJiivQ+58XjCcrC50Crb5g5u2zi7Y2YivbsEfzk6AtVI80akdOQbaMZwWB1Hthw==}
@@ -45491,6 +45205,7 @@ packages:
       '@babel/core': 7.25.2
       client-only: 0.0.1
       react: 19.0.0
+    dev: false
 
   /styled-jsx@5.1.6(@babel/core@7.26.10)(react@19.0.0):
     resolution: {integrity: sha512-qSVyDTeMotdvQYoHWLNGwRFJHC+i+ZvdBRYosOFgC+Wg1vx4frN2/RG/NA7SYqqvKNLf39P2LSRA2pu6n0XYZA==}
