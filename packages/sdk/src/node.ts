@@ -7,11 +7,21 @@ function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
     throw new Error('import specifier is required');
   }
+
+  // Debug logging
+  console.log(`[importNodeModule] Attempting to import: ${name}`);
+
   const importModule = new Function('name', `return import(name)`);
   return importModule(name)
-    .then((res: any) => res as T)
+    .then((res: any) => {
+      console.log(`[importNodeModule] Successfully imported: ${name}`);
+      return res as T;
+    })
     .catch((error: any) => {
-      console.error(`Error importing module ${name}:`, error);
+      console.error(
+        `[importNodeModule] Error importing module ${name}:`,
+        error,
+      );
       throw error;
     });
 }
