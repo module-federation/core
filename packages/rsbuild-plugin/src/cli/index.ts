@@ -98,7 +98,7 @@ const isRspressSSGConfig = (bundlerConfigName?: string) => {
 
 export const pluginModuleFederation = (
   moduleFederationOptions: ModuleFederationOptions,
-  rsbuildOptions: RSBUILD_PLUGIN_OPTIONS,
+  rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS,
 ): RsbuildPlugin => ({
   name: RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
