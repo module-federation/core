@@ -64,23 +64,6 @@
         "lintFilePatterns": ["apps/3002-checkout/**/*.{ts,tsx,js,jsx}"]
       }
     },
-    "e2e": {
-      "executor": "@nx/cypress:cypress",
-      "options": {
-        "cypressConfig": "apps/3002-checkout/cypress.config.ts",
-        "testingType": "e2e",
-        "baseUrl": "http://localhost:3002"
-      },
-      "defaultConfiguration": "development",
-      "configurations": {
-        "development": {
-          "devServerTarget": "3002-checkout:serve:development"
-        },
-        "production": {
-          "devServerTarget": "3002-checkout:serve:production"
-        }
-      }
-    },
     "test:e2e": {
       "executor": "nx:run-commands",
       "options": {
@@ -117,6 +100,23 @@
               "forwardAllArgs": true
             }
           ]
+        }
+      }
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/3002-checkout/cypress.config.ts",
+        "testingType": "e2e",
+        "baseUrl": "http://localhost:3002"
+      },
+      "defaultConfiguration": "development",
+      "configurations": {
+        "development": {
+          "devServerTarget": "3002-checkout:serve:development"
+        },
+        "production": {
+          "devServerTarget": "3002-checkout:serve:production"
         }
       }
     }

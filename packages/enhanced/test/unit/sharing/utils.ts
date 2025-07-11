@@ -113,23 +113,29 @@ export const createMockConsumeSharedDependencies = () => {
  * Create a mock ConsumeSharedModule with the necessary properties and methods
  */
 export const createMockConsumeSharedModule = () => {
-  const mockConsumeSharedModule = jest.fn().mockImplementation((options) => {
-    return {
-      shareScope: options.shareScope,
-      name: options.name || 'default-name',
-      request: options.request || 'default-request',
-      eager: options.eager || false,
-      strictVersion: options.strictVersion || false,
-      singleton: options.singleton || false,
-      requiredVersion: options.requiredVersion || '1.0.0',
-      getVersion: jest.fn().mockReturnValue(options.requiredVersion || '1.0.0'),
-      options,
-      // Add necessary methods expected by the plugin
-      build: jest.fn().mockImplementation((context, _c, _r, _f, callback) => {
-        callback && callback();
-      }),
-    };
-  });
+  const mockConsumeSharedModule = jest
+    .fn()
+    .mockImplementation((context, options) => {
+      return {
+        shareScope: options?.shareScope,
+        name: options?.name || 'default-name',
+        request: options?.request || 'default-request',
+        eager: options?.eager || false,
+        strictVersion: options?.strictVersion || false,
+        singleton: options?.singleton || false,
+        requiredVersion: options?.requiredVersion || '1.0.0',
+        getVersion: jest
+          .fn()
+          .mockReturnValue(options?.requiredVersion || '1.0.0'),
+        options,
+        // Add necessary methods expected by the plugin
+        build: jest
+          .fn()
+          .mockImplementation((_buildContext, _c, _r, _f, callback) => {
+            callback && callback();
+          }),
+      };
+    });
 
   return mockConsumeSharedModule;
 };
@@ -200,6 +206,17 @@ export const createMockCompilation = () => {
         resolve: jest.fn().mockResolvedValue({ path: '/resolved/path' }),
       }),
     },
+    // Add getLogger mock
+    getLogger: jest.fn().mockImplementation((name) => ({
+      debug: jest.fn(), // console.debug, // Use console for visible output during tests
+      log: jest.fn(), // console.log,
+      warn: jest.fn(), // console.warn,
+      error: jest.fn(), // console.error,
+      info: jest.fn(), // console.info,
+      group: jest.fn(), // console.group,
+      groupEnd: jest.fn(), // console.groupEnd,
+      // Add other methods if needed by the code under test
+    })),
     codeGenerationResults: {
       getSource: jest.fn().mockReturnValue({ source: () => 'mockSource' }),
       getData: jest.fn(),
@@ -361,13 +378,17 @@ export const createSharingTestEnvironment = () => {
   mockCompilation.compiler = compiler;
   mockCompilation.options = compiler.options;
   mockCompilation.context = compiler.context;
-  mockCompilation.resolverFactory = {
-    get: jest.fn().mockReturnValue({
-      resolve: jest.fn().mockImplementation((context, request, callback) => {
-        // Mock successful resolution
+  // Add a mock resolver to mockCompilation
+  const mockResolver = {
+    resolve: jest
+      .fn()
+      .mockImplementation((ctx, context, request, resolveContext, callback) => {
+        // Default mock resolution
         callback(null, '/resolved/' + request);
       }),
-    }),
+  };
+  mockCompilation.resolverFactory = {
+    get: jest.fn().mockReturnValue(mockResolver),
   };
 
   // Set up additionalTreeRuntimeRequirements hook with callback storage
@@ -378,17 +399,28 @@ export const createSharingTestEnvironment = () => {
     }),
   };
 
-  // Create a normal module factory with all required hooks
+  // --- Capture factorize hook ---
+  let factorizeCallback: any = null;
   const normalModuleFactory = {
     hooks: {
       factorize: {
-        tapPromise: jest.fn(),
+        tapPromise: jest.fn().mockImplementation((name, callback) => {
+          factorizeCallback = callback; // Store the factorize callback
+        }),
+        promise: jest.fn().mockImplementation(async (data) => {
+          if (!factorizeCallback) return undefined;
+          return factorizeCallback(data);
+        }),
       },
       createModule: {
         tapPromise: jest.fn(),
       },
     },
+    factorize: jest.fn().mockImplementation(async (data) => {
+      return normalModuleFactory.hooks.factorize.promise(data);
+    }),
   };
+  // -----------------------------
 
   // Set up the compilation hook callback to invoke with our mocks
   compiler.hooks.compilation.tap.mockImplementation((name, callback) => {
@@ -416,15 +448,10 @@ export const createSharingTestEnvironment = () => {
 
   // Function to simulate runtime requirements callback
   const simulateRuntimeRequirements = (chunk = { id: 'test-chunk' }) => {
-    // Create runtime requirements Set
     const runtimeRequirements = new Set();
 
     if (runtimeRequirementsCallback) {
-      // Call the callback with chunk and requirements
       runtimeRequirementsCallback(chunk, runtimeRequirements);
-
-      // Add the share scopes requirement if not already added
-      // This is needed for testing because ConsumeSharedPlugin checks for this constant
       if (!runtimeRequirements.has('__webpack_share_scopes__')) {
         runtimeRequirements.add('__webpack_share_scopes__');
       }
@@ -433,6 +460,20 @@ export const createSharingTestEnvironment = () => {
     return runtimeRequirements;
   };
 
+  // --- Add function to retrieve factorize hook callback ---
+  const getFactorizeHook = () => {
+    if (!factorizeCallback) {
+      throw new Error(
+        'Factorize hook callback was not captured during simulation.',
+      );
+    }
+    // Return a function that invokes the captured callback and returns its promise
+    return async (data: any) => {
+      return factorizeCallback(data);
+    };
+  };
+  // -------------------------------------------------------
+
   return {
     compiler,
     mockCompilation,
@@ -440,6 +481,8 @@ export const createSharingTestEnvironment = () => {
     runtimeRequirementsCallback,
     simulateCompilation,
     simulateRuntimeRequirements,
+    mockResolver, // Expose the mock resolver
+    getFactorizeHook, // Expose the function to get the hook
   };
 };
 

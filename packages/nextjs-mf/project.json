@@ -45,6 +45,12 @@
             "command": "mv packages/nextjs-mf/dist/src/federation-noop.js packages/nextjs-mf/dist/src/federation-noop.cjs"
           },
           {
+            "command": "mv packages/nextjs-mf/dist/src/federation-noop-appdir-client.js packages/nextjs-mf/dist/src/federation-noop-appdir-client.cjs"
+          },
+          {
+            "command": "mv packages/nextjs-mf/dist/src/federation-noop-appdir-server.js packages/nextjs-mf/dist/src/federation-noop-appdir-server.cjs"
+          },
+          {
             "command": "mv packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.js packages/nextjs-mf/dist/src/plugins/container/runtimePlugin.cjs"
           }
         ]

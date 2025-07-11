@@ -68,6 +68,7 @@ const addCustomKeywords = (ajv) => {
       );
     },
   });
+
   return ajv;
 };
 

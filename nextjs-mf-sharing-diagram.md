@@ -2,453 +2,390 @@
 
 ## Overview
 
-This document details the sharing mechanism in the Next.js Module Federation plugin, showing how it handles sharing between client and server environments across Next.js versions 14 and 15.
+This document details the sharing mechanism in the Next.js Module Federation plugin, showing the sophisticated layer-based sharing system that differentiates between Next.js versions and environments. A major architectural shift occurs between Next.js 14 and 15, where version 15+ introduces granular layer-based sharing with specific share scopes.
 
-## Architecture Flow Diagram
+## Version Detection and Routing Flow
 
 ```mermaid
 flowchart TB
-    subgraph "Next.js MF Plugin Core"
-        Plugin[NextFederationPlugin]
-        Internal[internal.ts]
-        Fragments[next-fragments.ts]
+    subgraph "Entry Point (internal.ts)"
+        Start[getNextInternalsShareScope]
+        GetVersion[getNextVersion]
+        CheckVersion{isNextJs15Plus?}
+        CheckEnv{isClient?}
     end
 
-    subgraph "Sharing Configuration"
-        DSS[DEFAULT_SHARE_SCOPE]
-        DSSB[DEFAULT_SHARE_SCOPE_BROWSER]
-        RDS[retrieveDefaultShared]
+    subgraph "Next.js 14 and Below"
+        Legacy14[DEFAULT_SHARE_SCOPE]
+        Legacy14Browser[DEFAULT_SHARE_SCOPE_BROWSER]
     end
 
-    subgraph "Environment Detection"
-        IsServer{isServer?}
-        ServerBuild[Server Build]
-        ClientBuild[Client Build]
+    subgraph "Next.js 15+ Client"
+        ClientHandler[share-internals-client.ts]
+        GetPagesClient[getPagesDirSharesClient]
+        GetAppClient[getAppDirSharesClient]
+        ClientResult[Layer-based Client Shares]
     end
 
-    subgraph "Layer System (Next.js 15)"
+    subgraph "Next.js 15+ Server"
+        ServerHandler[share-internals-server.ts]
+        GetPagesServer[getPagesDirSharesServer]
+        GetAppServer[getAppDirSharesServer]
+        ServerResult[Layer-based Server Shares]
+    end
+
+    Start --> GetVersion
+    GetVersion --> CheckVersion
+
+    CheckVersion -->|Next.js < 15| CheckEnv
+    CheckEnv -->|Server| Legacy14
+    CheckEnv -->|Client| Legacy14Browser
+
+    CheckVersion -->|Next.js >= 15| CheckEnv
+    CheckEnv -->|Client| ClientHandler
+    CheckEnv -->|Server| ServerHandler
+
+    ClientHandler --> GetPagesClient
+    ClientHandler --> GetAppClient
+    GetPagesClient --> ClientResult
+    GetAppClient --> ClientResult
+
+    ServerHandler --> GetPagesServer
+    ServerHandler --> GetAppServer
+    GetPagesServer --> ServerResult
+    GetAppServer --> ServerResult
+```
+
+## Layer Architecture in Next.js 15+
+
+```mermaid
+graph TB
+    subgraph "Webpack Layer Names"
+        Shared[shared - 'shared']
         RSC[React Server Components - 'rsc']
         SSR[Server Side Rendering - 'ssr']
-        Client[Client/Browser - undefined layer]
         ActionBrowser[Action Browser - 'action-browser']
         API[API Routes - 'api']
         Middleware[Middleware - 'middleware']
         Instrument[Instrumentation - 'instrument']
         EdgeAsset[Edge Assets - 'edge-asset']
-        AppPages[App Pages Browser - 'app-pages-browser']
+        AppPagesBrowser[App Pages Browser - 'app-pages-browser']
+        PagesDirBrowser[Pages Dir Browser - 'pages-dir-browser']
+        PagesDirNode[Pages Dir Node - 'pages-dir-node']
     end
 
-    subgraph "Shared Modules"
-        React[React Modules]
+    subgraph "Share Scopes"
+        DefaultScope[default - Pages Directory]
+        AppScope[app-pages-browser - App Client]
+        RSCScope[reactServerComponents - RSC Layer]
+        SSRScope[serverSideRendering - SSR Layer]
+    end
+
+    subgraph "Module Categories"
+        ReactModules[React Modules]
         NextModules[Next.js Modules]
-        StyledJSX[styled-jsx]
+        VendoredReact[Vendored React]
     end
 
-    subgraph "Server Sharing"
-        ServerShared[Server Shared Config]
-        ServerPlugins[applyServerPlugins]
-        ServerExternals[handleServerExternals]
-    end
+    PagesDirBrowser --> DefaultScope
+    PagesDirNode --> DefaultScope
+    AppPagesBrowser --> AppScope
+    RSC --> RSCScope
+    SSR --> SSRScope
 
-    subgraph "Client Sharing"
-        ClientShared[Client Shared Config]
-        ClientPlugins[applyClientPlugins]
-        ChunkCorrelation[ChunkCorrelationPlugin]
-        InvertedContainer[InvertedContainerPlugin]
-    end
-
-    Plugin --> IsServer
-    IsServer -->|Yes| ServerBuild
-    IsServer -->|No| ClientBuild
-
-    ServerBuild --> RDS
-    ClientBuild --> RDS
-
-    RDS -->|Server| DSS
-    RDS -->|Client| DSSB
-
-    Internal --> DSS
-    Internal --> DSSB
-    Fragments --> RDS
-
-    DSS --> ServerShared
-    DSSB --> ClientShared
-
-    ServerShared --> ServerPlugins
-    ServerPlugins --> ServerExternals
-
-    ClientShared --> ClientPlugins
-    ClientPlugins --> ChunkCorrelation
-    ClientPlugins --> InvertedContainer
-
-    React --> DSS
-    React --> DSSB
-    NextModules --> DSS
-    NextModules --> DSSB
-    StyledJSX --> DSS
-    StyledJSX --> DSSB
-
-    RSC -.->|Layer-based sharing| React
-    SSR -.->|Layer-based sharing| React
-    Client -.->|Layer-based sharing| React
+    ReactModules --> VendoredReact
+    VendoredReact --> RSC
+    VendoredReact --> SSR
+    VendoredReact --> AppPagesBrowser
+    VendoredReact --> PagesDirBrowser
 ```
 
-## Sharing Configuration Details
+## Next.js 15+ Client Sharing Architecture
 
 ```mermaid
-graph LR
-    subgraph "Shared Module Configuration"
-        subgraph "Core React Modules"
-            R1[react - singleton: true, requiredVersion: false, import: false]
-            R2[react/ - singleton: true, requiredVersion: false, import: false]
-            R3[react-dom - singleton: true, requiredVersion: false, import: false]
-            R4[react-dom/ - singleton: true, requiredVersion: false, import: false]
-            R5[react/jsx-runtime - singleton: true, requiredVersion: false]
-            R6[react/jsx-dev-runtime - singleton: true, requiredVersion: false]
-        end
+flowchart LR
+    subgraph "Client Entry"
+        ClientCompiler[Client Compiler]
+        ShareClient[getNextInternalsShareScopeClient]
+    end
 
-        subgraph "Next.js Modules"
-            N1[next/dynamic - singleton: true, import: undefined]
-            N2[next/head - singleton: true, import: undefined]
-            N3[next/link - singleton: true, import: undefined]
-            N4[next/router - singleton: true, requiredVersion: false]
-            N5[next/image - singleton: true, import: undefined]
-            N6[next/script - singleton: true, import: undefined]
+    subgraph "Pages Directory Client Shares"
+        subgraph "Pages React Modules"
+            PagesReact[react<br/>Import: next/dist/compiled/react<br/>Layer: pagesDirBrowser<br/>ShareScope: default]
+            PagesReactDom[react-dom<br/>Import: next/dist/compiled/react-dom<br/>Layer: pagesDirBrowser<br/>ShareScope: default]
+            PagesJSX[react/jsx-runtime<br/>Import: next/dist/compiled/react/jsx-runtime<br/>Layer: pagesDirBrowser<br/>ShareScope: default]
         end
-
-        subgraph "Styled JSX"
-            S1[styled-jsx - singleton: true, versioned]
-            S2[styled-jsx/style - singleton: true, import: false, versioned]
-            S3[styled-jsx/css - singleton: true, versioned]
+        subgraph "Pages Next Modules"
+            PagesRouter[next/router<br/>Import: next/dist/client/router<br/>Layer: pagesDirBrowser<br/>ShareScope: default]
+            PagesHead[next/head<br/>Layer: pagesDirBrowser<br/>ShareScope: default]
+            PagesImage[next/image<br/>Layer: pagesDirBrowser<br/>ShareScope: default]
         end
     end
+
+    subgraph "App Directory Client Shares"
+        subgraph "App React Modules"
+            AppReact[react<br/>Import: next/dist/compiled/react<br/>Layer: appPagesBrowser<br/>ShareScope: app-pages-browser]
+            AppReactDom[react-dom<br/>Import: next/dist/compiled/react-dom<br/>Layer: appPagesBrowser<br/>ShareScope: app-pages-browser]
+            AppServerDom[react-server-dom-webpack/client<br/>Layer: appPagesBrowser<br/>ShareScope: app-pages-browser]
+        end
+        subgraph "App Next Modules"
+            AppLink[next/link<br/>Import: next/dist/client/app-dir/link<br/>Layer: appPagesBrowser<br/>ShareScope: app-pages-browser]
+            AppImage[next/image<br/>Layer: appPagesBrowser<br/>ShareScope: app-pages-browser]
+            AppDynamic[next/dynamic<br/>Layer: appPagesBrowser<br/>ShareScope: app-pages-browser]
+        end
+    end
+
+    ClientCompiler --> ShareClient
+    ShareClient --> PagesReact
+    ShareClient --> PagesReactDom
+    ShareClient --> PagesJSX
+    ShareClient --> PagesRouter
+    ShareClient --> PagesHead
+    ShareClient --> PagesImage
+    ShareClient --> AppReact
+    ShareClient --> AppReactDom
+    ShareClient --> AppServerDom
+    ShareClient --> AppLink
+    ShareClient --> AppImage
+    ShareClient --> AppDynamic
 ```
 
-## Environment-Specific Sharing Flow
+## Next.js 15+ Server Sharing Architecture
+
+```mermaid
+flowchart TB
+    subgraph "Server Entry"
+        ServerCompiler[Server Compiler]
+        ShareServer[getNextInternalsShareScopeServer]
+    end
+
+    subgraph "Pages Directory Server Shares"
+        subgraph "Pages Server React"
+            SPagesReact[react<br/>Import: next/dist/compiled/react<br/>Layer: pagesDirNode<br/>ShareScope: default]
+            SPagesReactDom[react-dom<br/>Import: next/dist/compiled/react-dom<br/>Layer: pagesDirNode<br/>ShareScope: default]
+        end
+        subgraph "Pages Server Next"
+            SPagesRouter[next/router<br/>Import: next/dist/client/router<br/>Layer: pagesDirNode<br/>ShareScope: default]
+            SPagesModules[next/head, next/image, next/script<br/>Layer: pagesDirNode<br/>ShareScope: default]
+        end
+    end
+
+    subgraph "App Directory Server Shares"
+        subgraph "RSC Layer Shares"
+            RSCReact[react<br/>Import: .../vendored/rsc/react<br/>Layer: rsc<br/>ShareScope: reactServerComponents]
+            RSCReactDom[react-dom<br/>Import: .../vendored/rsc/react-dom<br/>Layer: rsc<br/>ShareScope: reactServerComponents]
+            RSCServerDom[react-server-dom-webpack/server.*<br/>Layer: rsc<br/>ShareScope: reactServerComponents]
+        end
+        subgraph "SSR Layer Shares"
+            SSRReact[react<br/>Import: .../vendored/ssr/react<br/>Layer: ssr<br/>ShareScope: serverSideRendering]
+            SSRReactDom[react-dom<br/>Import: .../vendored/ssr/react-dom<br/>Layer: ssr<br/>ShareScope: serverSideRendering]
+            SSRClientEdge[react-server-dom-webpack/client.edge<br/>Layer: ssr<br/>ShareScope: serverSideRendering]
+        end
+    end
+
+    ServerCompiler --> ShareServer
+    ShareServer --> SPagesReact
+    ShareServer --> SPagesReactDom
+    ShareServer --> SPagesRouter
+    ShareServer --> SPagesModules
+    ShareServer --> RSCReact
+    ShareServer --> RSCReactDom
+    ShareServer --> RSCServerDom
+    ShareServer --> SSRReact
+    ShareServer --> SSRReactDom
+    ShareServer --> SSRClientEdge
+```
+
+## Share Configuration Structure (Next.js 15+)
+
+```mermaid
+classDiagram
+    class SharedConfig {
+        +string request
+        +string shareKey
+        +string import
+        +string layer
+        +string|string[] issuerLayer
+        +string shareScope
+        +boolean singleton
+        +string version
+        +string requiredVersion
+        +string packageName
+        +boolean nodeModulesReconstructedLookup
+    }
+
+    class PagesDirShare {
+        +layer: "pagesDirBrowser" | "pagesDirNode"
+        +shareScope: "default"
+        +issuerLayer: undefined | layer
+    }
+
+    class AppDirClientShare {
+        +layer: "appPagesBrowser"
+        +shareScope: "app-pages-browser"
+        +issuerLayer: "appPagesBrowser"
+    }
+
+    class AppDirServerShare {
+        +layer: "rsc" | "ssr"
+        +shareScope: "reactServerComponents" | "serverSideRendering"
+        +issuerLayer: layer
+    }
+
+    SharedConfig <|-- PagesDirShare
+    SharedConfig <|-- AppDirClientShare
+    SharedConfig <|-- AppDirServerShare
+```
+
+## Detailed Sharing Comparison: Next.js 14 vs 15
+
+### Client-Side Sharing
+
+| Module | Next.js 14 Client | Next.js 15 Pages Dir Client | Next.js 15 App Dir Client |
+|--------|-------------------|------------------------------|---------------------------|
+| react | `import: undefined`<br/>shareScope: default | `import: next/dist/compiled/react`<br/>layer: pagesDirBrowser<br/>shareScope: default | `import: next/dist/compiled/react`<br/>layer: appPagesBrowser<br/>shareScope: app-pages-browser |
+| react-dom | `import: undefined`<br/>shareScope: default | `import: next/dist/compiled/react-dom`<br/>layer: pagesDirBrowser<br/>shareScope: default | `import: next/dist/compiled/react-dom`<br/>layer: appPagesBrowser<br/>shareScope: app-pages-browser |
+| next/router | `import: undefined`<br/>shareScope: default | `import: next/dist/client/router`<br/>layer: pagesDirBrowser<br/>shareScope: default | N/A (uses next/navigation) |
+| next/link | `import: undefined`<br/>shareScope: default | Standard next/link<br/>layer: pagesDirBrowser<br/>shareScope: default | `import: next/dist/client/app-dir/link`<br/>layer: appPagesBrowser<br/>shareScope: app-pages-browser |
+| react-server-dom-webpack/client | Not supported | Not used | `import: next/dist/compiled/...`<br/>layer: appPagesBrowser<br/>shareScope: app-pages-browser |
+
+### Server-Side Sharing
+
+| Module | Next.js 14 Server | Next.js 15 Pages Dir Server | Next.js 15 App Dir RSC | Next.js 15 App Dir SSR |
+|--------|-------------------|------------------------------|------------------------|------------------------|
+| react | `import: false` (external)<br/>shareScope: default | `import: next/dist/compiled/react`<br/>layer: pagesDirNode<br/>shareScope: default | `import: .../vendored/rsc/react`<br/>layer: rsc<br/>shareScope: reactServerComponents | `import: .../vendored/ssr/react`<br/>layer: ssr<br/>shareScope: serverSideRendering |
+| react-dom | `import: false` (external)<br/>shareScope: default | `import: next/dist/compiled/react-dom`<br/>layer: pagesDirNode<br/>shareScope: default | `import: .../vendored/rsc/react-dom`<br/>layer: rsc<br/>shareScope: reactServerComponents | `import: .../vendored/ssr/react-dom`<br/>layer: ssr<br/>shareScope: serverSideRendering |
+| Server DOM packages | Not supported | Not used | Various server.* imports<br/>layer: rsc<br/>shareScope: reactServerComponents | client.edge imports<br/>layer: ssr<br/>shareScope: serverSideRendering |
+
+## Module Resolution Flow (Next.js 15+)
 
 ```mermaid
 sequenceDiagram
-    participant Plugin as NextFederationPlugin
-    participant Compiler as Webpack Compiler
-    participant RDS as retrieveDefaultShared
-    participant Server as Server Environment
-    participant Client as Client Environment
+    participant Import as Module Import
+    participant Webpack as Webpack Resolver
+    participant Layer as Layer Matcher
+    participant Scope as Share Scope
+    participant Module as Resolved Module
 
-    Plugin->>Compiler: Check environment (isServer)
+    Import->>Webpack: Request module (e.g., 'react')
+    Webpack->>Layer: Check issuerLayer
     
-    alt Server Build
-        Compiler->>Plugin: isServer = true
-        Plugin->>RDS: retrieveDefaultShared(true)
-        RDS->>Plugin: Return DEFAULT_SHARE_SCOPE
-        Plugin->>Server: Apply server-specific configuration
-        Server->>Server: Set import: false for Next internals
-        Server->>Server: Configure externals handling
-        Server->>Server: Add node runtime plugin
-    else Client Build
-        Compiler->>Plugin: isServer = false
-        Plugin->>RDS: retrieveDefaultShared(false)
-        RDS->>Plugin: Return DEFAULT_SHARE_SCOPE_BROWSER
-        Plugin->>Client: Apply client-specific configuration
-        Client->>Client: Set import: undefined for all modules
-        Client->>Client: Apply ChunkCorrelationPlugin
-        Client->>Client: Apply InvertedContainerPlugin
+    alt issuerLayer === 'appPagesBrowser'
+        Layer->>Scope: Use app-pages-browser scope
+        Scope->>Module: Return app-specific React
+    else issuerLayer === 'pagesDirBrowser'
+        Layer->>Scope: Use default scope
+        Scope->>Module: Return pages-specific React
+    else issuerLayer === 'rsc'
+        Layer->>Scope: Use reactServerComponents scope
+        Scope->>Module: Return RSC vendored React
+    else issuerLayer === 'ssr'
+        Layer->>Scope: Use serverSideRendering scope
+        Scope->>Module: Return SSR vendored React
+    else issuerLayer === undefined
+        Layer->>Scope: Check default fallbacks
+        Scope->>Module: Return unlayered module
     end
+
+    Module->>Import: Resolved module with correct version
 ```
 
-## Layer-Based Sharing (Next.js 15)
+## Key Configuration Examples (Next.js 15+)
 
-### Layer Definitions Table
-
-| Layer Name | Key | Description | Usage |
-|------------|-----|-------------|-------|
-| Shared | `shared` | Shared code between client and server bundles | Common utilities |
-| React Server Components | `rsc` | Server-only runtime for RSC | App Router RSC pages |
-| Server Side Rendering | `ssr` | SSR layer for app directory | Server-rendered pages |
-| Action Browser | `action-browser` | Browser client bundle for actions | Server actions client |
-| API | `api` | API routes layer | API endpoints |
-| Middleware | `middleware` | Middleware code layer | Edge middleware |
-| Instrumentation | `instrument` | Instrumentation hooks | Monitoring/telemetry |
-| Edge Asset | `edge-asset` | Assets on the edge | Edge-optimized assets |
-| App Pages Browser | `app-pages-browser` | Browser client bundle for App | Client-side app pages |
-
-### Module Sharing by Environment
-
-| Module | Server (DEFAULT_SHARE_SCOPE) | Client (DEFAULT_SHARE_SCOPE_BROWSER) | Notes |
-|--------|------------------------------|--------------------------------------|-------|
-| react | `import: false` | `import: undefined` | External on server |
-| react-dom | `import: false` | `import: undefined` | External on server |
-| next/router | `import: undefined` | `import: undefined` | Bundled in both |
-| next/link | `import: undefined` | `import: undefined` | Bundled in both |
-| next/dynamic | `import: undefined` | `import: undefined` | Bundled in both |
-| styled-jsx | `import: undefined` | `import: undefined` | Versioned sharing |
-
-### Layer-Based Sharing Configuration (Currently Commented Out)
-
+### Client-Side App Directory React Configuration
 ```javascript
-// Example of layer-based sharing for React
-const reactShares = {
-  'react-rsc': {
-    singleton: true,
-    requiredVersion: false,
-    import: undefined,
-    layer: 'rsc',
-    issuerLayer: 'rsc'
-  },
-  'react-ssr': {
-    singleton: true,
-    requiredVersion: false,
-    import: undefined,
-    layer: 'ssr',
-    issuerLayer: 'ssr'
-  },
-  'react': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-    layer: undefined,
-    issuerLayer: undefined
-  }
+{
+  request: 'react',
+  singleton: true,
+  shareKey: 'react',
+  packageName: 'react',
+  import: 'next/dist/compiled/react',
+  layer: 'app-pages-browser',
+  issuerLayer: 'app-pages-browser',
+  shareScope: 'app-pages-browser',
+  version: '18.2.0',
+  requiredVersion: '^18.2.0'
 }
 ```
 
-## Key Differences Between Next.js 14 and 15
-
-| Aspect | Next.js 14 | Next.js 15 | Notes |
-|--------|------------|------------|-------|
-| Sharing Mechanism | Traditional sharing | Layer-aware sharing (prepared) | Same core implementation |
-| External Handling | Standard externals | Dynamic externals detection | Improved in 8.7.1 |
-| Layer Support | Basic layers | Full layer system | RSC, SSR, etc. |
-| Runtime Plugins | Standard plugins | Same + Universe tracking | Enhanced tracking |
-
-## Plugin Application Flow
-
-```mermaid
-stateDiagram-v2
-    [*] --> Initialize: NextFederationPlugin
-    Initialize --> ValidateOptions
-    ValidateOptions --> DetectEnvironment
-    
-    DetectEnvironment --> ServerConfig: isServer = true
-    DetectEnvironment --> ClientConfig: isServer = false
-    
-    ServerConfig --> RetrieveServerShared
-    RetrieveServerShared --> ApplyServerPlugins
-    ApplyServerPlugins --> ConfigureExternals
-    ConfigureExternals --> AddNodeRuntime
-    AddNodeRuntime --> ApplyModuleFederation
-    
-    ClientConfig --> RetrieveClientShared
-    RetrieveClientShared --> ApplyClientPlugins
-    ApplyClientPlugins --> SetLibraryWindow
-    SetLibraryWindow --> AddChunkCorrelation
-    AddChunkCorrelation --> AddInvertedContainer
-    AddInvertedContainer --> ApplyModuleFederation
-    
-    ApplyModuleFederation --> ConfigureLayers
-    ConfigureLayers --> [*]
+### Server-Side RSC React Configuration
+```javascript
+{
+  request: 'react',
+  singleton: true,
+  shareKey: 'react',
+  import: 'next/dist/server/route-modules/app-page/vendored/rsc/react',
+  layer: 'rsc',
+  issuerLayer: 'rsc',
+  shareScope: 'reactServerComponents',
+  version: '18.2.0',
+  requiredVersion: '^18.2.0'
+}
 ```
 
-## Runtime Plugin Sharing Resolution
-
-```mermaid
-flowchart TD
-    Start[resolveShare Called] --> CheckPkg{Is React/Next pkg?}
-    CheckPkg -->|No| Return[Return unchanged]
-    CheckPkg -->|Yes| GetHost[Get Federation Host]
-    GetHost --> CheckHost{Host exists?}
-    CheckHost -->|No| Return
-    CheckHost -->|Yes| CheckShared{Has shared config?}
-    CheckShared -->|No| Return
-    CheckShared -->|Yes| SetResolver[Set custom resolver]
-    SetResolver --> UpdateScope[Update share scope map]
-    UpdateScope --> End[Return modified args]
-```
-
-## Summary
-
-The Next.js Module Federation plugin uses a sophisticated sharing mechanism that:
-
-1. **Maintains consistency** across Next.js versions 14 and 15
-2. **Differentiates** between server and client environments
-3. **Prepares** for layer-based sharing in Next.js 15 (currently commented out)
-4. **Handles** React and Next.js internals specially to ensure proper module resolution
-5. **Uses** runtime plugins to dynamically resolve shared modules
-
-The main distinction is not between Next.js versions but between server and client builds, with server builds treating React/Next internals as external modules (`import: false`) while client builds bundle them (`import: undefined`).
-
-## Detailed Correlation: Next.js 14 vs 15 Sharing Internals
+## Share Scope Isolation
 
 ```mermaid
 graph TB
-    subgraph "Next.js 14 & 15 Common Core"
-        subgraph "internal.ts (Shared by both versions)"
-            DS14[DEFAULT_SHARE_SCOPE]
-            DSB14[DEFAULT_SHARE_SCOPE_BROWSER]
-            subgraph "Commented Layer Config"
-                CLS[createSharedConfig]
-                RSH[reactShares - Layer-based]
-                RDSH[reactDomShares - Layer-based]
-                NSH[nextNavigationShares - Layer-based]
-            end
-        end
-        
-        subgraph "next-fragments.ts"
-            RDS14[retrieveDefaultShared function]
-        end
+    subgraph "Share Scope: default"
+        DefReact[react - Pages Dir]
+        DefRouter[next/router]
+        DefHead[next/head]
     end
 
-    subgraph "Next.js 14 Implementation"
-        N14S[Server Build]
-        N14C[Client Build]
-        N14T[Traditional Sharing]
+    subgraph "Share Scope: app-pages-browser"
+        AppReact[react - App Dir Client]
+        AppLink[next/link - App variant]
+        AppServerDom[react-server-dom-webpack/client]
     end
 
-    subgraph "Next.js 15 Implementation"
-        N15S[Server Build]
-        N15C[Client Build]
-        N15T[Traditional Sharing Active]
-        N15L[Layer Sharing Ready]
+    subgraph "Share Scope: reactServerComponents"
+        RSCReact[react - RSC vendored]
+        RSCServerEdge[react-server-dom-webpack/server.edge]
+        RSCServerNode[react-server-dom-webpack/server.node]
     end
 
-    DS14 --> N14S
-    DSB14 --> N14C
-    DS14 --> N15S
-    DSB14 --> N15C
+    subgraph "Share Scope: serverSideRendering"
+        SSRReact[react - SSR vendored]
+        SSRClientEdge[react-server-dom-webpack/client.edge]
+        SSRCompilerRuntime[react/compiler-runtime]
+    end
 
-    RDS14 --> N14T
-    RDS14 --> N15T
+    Note1[Isolated scopes prevent version conflicts]
+    Note2[Each scope maintains its own module instances]
 
-    CLS -.->|Prepared but unused| N15L
+    Note1 -.-> DefReact
+    Note1 -.-> AppReact
+    Note1 -.-> RSCReact
+    Note1 -.-> SSRReact
 
-    N14S --> |Uses| DS14
-    N14C --> |Uses| DSB14
-    N15S --> |Uses| DS14
-    N15C --> |Uses| DSB14
-
-    style N15L fill:#f9f,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5
+    style Note1 fill:#ffffcc
+    style Note2 fill:#ffffcc
 ```
 
-## Sharing Configuration Transformation
+## Summary of Architectural Changes
 
-### Server Environment (Both Next.js 14 & 15)
+### Next.js 14 and Below
+- Uses simple `DEFAULT_SHARE_SCOPE` and `DEFAULT_SHARE_SCOPE_BROWSER`
+- Server treats React/Next as external (`import: false`)
+- Client bundles everything (`import: undefined`)
+- Single share scope ("default") for all modules
+- No layer-based isolation
 
-```mermaid
-graph LR
-    subgraph "Input: DEFAULT_SHARE_SCOPE"
-        I1[react: import: false]
-        I2[react-dom: import: false]
-        I3[next/router: import: undefined]
-        I4[styled-jsx: import: undefined]
-    end
-
-    subgraph "Server Processing"
-        SP1[handleServerExternals]
-        SP2[Check if module in shared]
-        SP3[Keep as external if Next/React]
-        SP4[Bundle if in shared config]
-    end
-
-    subgraph "Output: Server Bundle"
-        O1[react: External - from Next.js]
-        O2[react-dom: External - from Next.js]
-        O3[next/router: Bundled]
-        O4[styled-jsx: Bundled with version]
-    end
-
-    I1 --> SP1 --> O1
-    I2 --> SP1 --> O2
-    I3 --> SP2 --> O3
-    I4 --> SP4 --> O4
-```
-
-### Client Environment (Both Next.js 14 & 15)
-
-```mermaid
-graph LR
-    subgraph "Input: DEFAULT_SHARE_SCOPE_BROWSER"
-        CI1[react: import: undefined]
-        CI2[react-dom: import: undefined]
-        CI3[next/router: import: undefined]
-        CI4[styled-jsx: import: undefined]
-    end
-
-    subgraph "Client Processing"
-        CP1[applyClientPlugins]
-        CP2[All modules bundled]
-        CP3[ChunkCorrelationPlugin]
-        CP4[InvertedContainerPlugin]
-    end
-
-    subgraph "Output: Client Bundle"
-        CO1[react: Bundled + Shared]
-        CO2[react-dom: Bundled + Shared]
-        CO3[next/router: Bundled + Shared]
-        CO4[styled-jsx: Bundled + Shared]
-    end
-
-    CI1 --> CP1 --> CO1
-    CI2 --> CP1 --> CO2
-    CI3 --> CP2 --> CO3
-    CI4 --> CP2 --> CO4
-
-    CP1 --> CP3
-    CP1 --> CP4
-```
-
-## Future Layer-Based Sharing (Next.js 15 Ready)
-
-```mermaid
-graph TD
-    subgraph "Layer-Based Module Resolution"
-        subgraph "React Module Variants"
-            R_RSC[react-rsc<br/>Layer: rsc]
-            R_SSR[react-ssr<br/>Layer: ssr]
-            R_Client[react<br/>Layer: undefined]
-        end
-
-        subgraph "Import Context"
-            RSC_Page[RSC Page Import]
-            SSR_Page[SSR Page Import]
-            Client_Comp[Client Component Import]
-        end
-
-        subgraph "Resolution"
-            Resolver{Layer Matcher}
-            RSC_Bundle[Use react-rsc variant]
-            SSR_Bundle[Use react-ssr variant]
-            Client_Bundle[Use standard react]
-        end
-    end
-
-    RSC_Page --> Resolver
-    SSR_Page --> Resolver
-    Client_Comp --> Resolver
-
-    Resolver -->|issuerLayer: rsc| RSC_Bundle
-    Resolver -->|issuerLayer: ssr| SSR_Bundle
-    Resolver -->|issuerLayer: undefined| Client_Bundle
-
-    R_RSC -.-> RSC_Bundle
-    R_SSR -.-> SSR_Bundle
-    R_Client -.-> Client_Bundle
-```
-
-## Complete Sharing Matrix
-
-| Module | Next.js 14 Server | Next.js 14 Client | Next.js 15 Server | Next.js 15 Client | Layer Support (15) |
-|--------|-------------------|-------------------|-------------------|-------------------|--------------------|
-| react | External (`import: false`) | Bundled (`import: undefined`) | External (`import: false`) | Bundled (`import: undefined`) | RSC, SSR, Client layers ready |
-| react-dom | External (`import: false`) | Bundled (`import: undefined`) | External (`import: false`) | Bundled (`import: undefined`) | RSC, SSR, Client layers ready |
-| react/jsx-runtime | External | Bundled | External | Bundled | Navigation layers ready |
-| next/router | Bundled | Bundled | Bundled | Bundled | No layer config |
-| next/link | Bundled | Bundled | Bundled | Bundled | No layer config |
-| next/navigation | N/A | N/A | Bundled | Bundled | RSC, SSR layers ready |
-| styled-jsx | Bundled + Versioned | Bundled + Versioned | Bundled + Versioned | Bundled + Versioned | No layer config |
+### Next.js 15+
+- Sophisticated layer-based sharing with multiple share scopes
+- Different vendored React versions for different layers (RSC, SSR, client)
+- Complete module isolation between Pages and App directories
+- Layer-specific share scopes prevent version conflicts
+- Granular control over module resolution based on issuerLayer
+- Support for React Server Components and advanced App Router features
 
 ## Key Insights
 
-1. **Version Consistency**: The core sharing mechanism remains identical between Next.js 14 and 15
-2. **Layer Preparation**: Next.js 15 has layer-based sharing infrastructure ready but currently disabled
-3. **Environment Priority**: The primary differentiation is server vs client, not version-based
-4. **External Strategy**: Server builds treat React/Next core as external to leverage Next.js's built-in versions
-5. **Future-Ready**: The commented layer-based sharing in `internal.ts` shows preparation for more granular control in Next.js 15+
+1. **Version Detection**: The system dynamically detects Next.js version and routes to appropriate sharing configuration
+2. **Layer Isolation**: Next.js 15+ uses webpack layers to completely isolate different rendering contexts
+3. **Vendored Dependencies**: App directory uses vendored React builds specific to each layer (RSC/SSR)
+4. **Share Scope Separation**: Different share scopes prevent module conflicts between Pages and App directories
+5. **Backward Compatibility**: Next.js 14 and below continue using the simpler sharing approach
+6. **Granular Control**: Each module can specify exactly which layer can import it via `issuerLayer`
+7. **Multiple React Instances**: The system can maintain different React versions/builds for different contexts simultaneously

@@ -6,13 +6,14 @@
     "@ant-design/cssinjs": "^1.21.0",
     "antd": "5.19.1",
     "lodash": "4.17.21",
-    "next": "14.2.16",
-    "react": "18.3.1"
+    "next": "15.3.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
-    "@module-federation/nextjs-mf": "workspace:*",
+    "@module-federation/nextjs-mf": "0.0.0-next-20250701105507",
     "@module-federation/runtime": "workspace:*",
-    "@module-federation/utilities": "workspace:*"
+    "webpack": "^5.98.0"
   },
   "scripts": {
     "start": "next start",
