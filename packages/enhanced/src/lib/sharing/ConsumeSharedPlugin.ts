@@ -492,9 +492,13 @@ class ConsumeSharedPlugin {
               }
               const { context, request, contextInfo } = resolveData;
 
-              const match = unresolvedConsumes.get(
-                createLookupKeyForSharing(request, contextInfo.issuerLayer),
-              );
+              const match =
+                unresolvedConsumes.get(
+                  createLookupKeyForSharing(request, contextInfo.issuerLayer),
+                ) ||
+                unresolvedConsumes.get(
+                  createLookupKeyForSharing(request, undefined),
+                );
 
               // First check direct match with original request
               if (match !== undefined) {
@@ -522,12 +526,19 @@ class ConsumeSharedPlugin {
 
                 // Try to match with module path after node_modules
                 if (modulePathAfterNodeModules) {
-                  const moduleMatch = unresolvedConsumes.get(
-                    createLookupKeyForSharing(
-                      modulePathAfterNodeModules,
-                      contextInfo.issuerLayer,
-                    ),
-                  );
+                  const moduleMatch =
+                    unresolvedConsumes.get(
+                      createLookupKeyForSharing(
+                        modulePathAfterNodeModules,
+                        contextInfo.issuerLayer,
+                      ),
+                    ) ||
+                    unresolvedConsumes.get(
+                      createLookupKeyForSharing(
+                        modulePathAfterNodeModules,
+                        undefined,
+                      ),
+                    );
 
                   if (
                     moduleMatch !== undefined &&
@@ -543,12 +554,16 @@ class ConsumeSharedPlugin {
                 }
 
                 // Try to match with the full reconstructed path
-                const reconstructedMatch = unresolvedConsumes.get(
-                  createLookupKeyForSharing(
-                    reconstructed,
-                    contextInfo.issuerLayer,
-                  ),
-                );
+                const reconstructedMatch =
+                  unresolvedConsumes.get(
+                    createLookupKeyForSharing(
+                      reconstructed,
+                      contextInfo.issuerLayer,
+                    ),
+                  ) ||
+                  unresolvedConsumes.get(
+                    createLookupKeyForSharing(reconstructed, undefined),
+                  );
 
                 if (reconstructedMatch !== undefined) {
                   return boundCreateConsumeSharedModule(
