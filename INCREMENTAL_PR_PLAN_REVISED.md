@@ -1,4 +1,4 @@
-# Revised Incremental PR Plan for packages/enhanced Changes
+f# Revised Incremental PR Plan for packages/enhanced Changes
 
 ## Overview
 Based on a detailed diff analysis, this document provides a more accurate breakdown of changes into focused, incremental PRs. Each PR represents a distinct feature, fix, or refactor that can be merged independently.
@@ -21,7 +21,7 @@ Based on a detailed diff analysis, this document provides a more accurate breakd
 
 ### PR 2: Hook Renaming and Cleanup
 **Size**: Small (~6 files)
-**Risk**: Medium (potential breaking change)
+**Risk**: Low (internal refactoring only - all usages updated)
 **Type**: Refactor
 **Feature**: Rename container hooks for clarity and consistency
 
@@ -31,17 +31,22 @@ Based on a detailed diff analysis, this document provides a more accurate breakd
 - `src/lib/container/runtime/FederationModulesPlugin.ts`
 - `src/lib/container/runtime/EmbedFederationRuntimePlugin.ts`
 - `src/lib/container/RemoteModule.ts` (use new hook)
+- Any other files that reference these hooks
 
 **Changes**:
 - `addContainerEntryModule` → `addContainerEntryDependency`
 - `addFederationRuntimeModule` → `addFederationRuntimeDependency`
 - Add new `addRemoteDependency` hook
 
-**Implementation with backward compatibility**:
+**Implementation**:
 ```javascript
+// Direct rename - all usages updated in same PR
 compiler.hooks.addContainerEntryDependency = new SyncHook([...]);
-compiler.hooks.addContainerEntryModule = compiler.hooks.addContainerEntryDependency; // deprecated
+compiler.hooks.addFederationRuntimeDependency = new SyncHook([...]);
+compiler.hooks.addRemoteDependency = new SyncHook([...]);
 ```
+
+**Note**: This is NOT a breaking change because all hook usages within the codebase are updated in the same PR.
 
 ---
 
