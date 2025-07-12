@@ -5,15 +5,33 @@ Based on a detailed diff analysis, this document provides a more accurate breakd
 
 ## Updated PR Sequence
 
-### PR 1: Runtime Safety Fixes
+### PR 1: Runtime Safety Fixes ✅ COMPLETED
+**Status**: Merged/In Review - [PR #3900](https://github.com/module-federation/core/pull/3900)
 **Size**: Tiny (~2 files)
 **Risk**: Low
 **Type**: Fix
 **Feature**: Add defensive checks to prevent runtime errors
 
-**Files to include**:
-- `src/lib/container/runtime/EmbedFederationRuntimeModule.ts` (add `typeof oldStartup === 'function'` check)
-- `src/lib/startup/StartupHelpers.ts` (add `typeof __webpack_require__.x === "function"` check)
+**Files included**:
+- `src/lib/container/runtime/EmbedFederationRuntimeModule.ts` (added `typeof oldStartup === 'function'` check with warning log)
+- `src/lib/startup/StartupHelpers.ts` (added `typeof __webpack_require__.x === "function"` check with warning log)
+
+**Implementation**:
+```javascript
+// EmbedFederationRuntimeModule.ts
+if (typeof oldStartup === 'function') {
+  return oldStartup();
+} else {
+  console.warn('[Module Federation] oldStartup is not a function, skipping startup execution');
+}
+
+// StartupHelpers.ts
+if (typeof __webpack_require__.x === "function") {
+  __webpack_require__.x();
+} else {
+  console.warn("[Module Federation] __webpack_require__.x is not a function, skipping startup extension");
+}
+```
 
 **Why first**: These are independent safety fixes that improve stability without any dependencies.
 
