@@ -58,6 +58,20 @@ jest.mock('../../../src/lib/container/runtime/FederationRuntimePlugin', () => {
   return mockFederationRuntimePlugin;
 });
 
+// Mock FederationModulesPlugin
+jest.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => {
+  return {
+    __esModule: true,
+    default: {
+      getCompilationHooks: jest.fn(() => ({
+        addContainerEntryDependency: { tap: jest.fn() },
+        addFederationRuntimeDependency: { tap: jest.fn() },
+        addRemoteDependency: { tap: jest.fn() },
+      })),
+    },
+  };
+});
+
 // Mock FallbackModuleFactory
 jest.mock(
   '../../../src/lib/container/FallbackModuleFactory',
