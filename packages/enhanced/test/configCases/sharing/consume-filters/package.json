@@ -1,0 +1,11 @@
+{
+  "name": "consume-filters-test",
+  "version": "1.0.0",
+  "dependencies": {
+    "version-include": "^1.0.0",
+    "version-exclude": "^1.0.0",
+    "version-include-fail": "^1.0.0",
+    "version-exclude-fail": "^2.0.0",
+    "singleton-filter": "^1.0.0"
+  }
+}
