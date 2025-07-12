@@ -71,7 +71,11 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
           `  hasRun = true;`,
           `  ${initRuntimeModuleGetter};`,
           `}`,
-          `return oldStartup();`,
+          `if (typeof oldStartup === 'function') {`,
+          `  return oldStartup();`,
+          `} else {`,
+          `  console.warn('[Module Federation] oldStartup is not a function, skipping startup execution');`,
+          `}`,
         ],
       )};`,
     ]);

@@ -49,7 +49,11 @@ export const generateEntryStartup = (
     '',
     '\n',
     'var promises = [];',
-    '__webpack_require__.x();',
+    'if (typeof __webpack_require__.x === "function") {',
+    '  __webpack_require__.x();',
+    '} else {',
+    '  console.warn("[Module Federation] __webpack_require__.x is not a function, skipping startup extension");',
+    '}',
   ];
 
   const treeRuntimeRequirements = chunkGraph.getTreeRuntimeRequirements(chunk);
