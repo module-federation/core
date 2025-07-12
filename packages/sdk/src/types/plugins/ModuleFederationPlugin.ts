@@ -256,6 +256,10 @@ export interface ModuleFederationPluginOptions {
     provideExternalRuntime?: boolean;
     asyncStartup?: boolean;
     /**
+     * Enable reconstructed lookup for node_modules paths
+     */
+    nodeModulesReconstructedLookup?: boolean;
+    /**
      * Options related to build optimizations.
      */
     optimization?: {

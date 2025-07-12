@@ -1,3 +1,17 @@
+import type { SemVerRange } from 'webpack/lib/util/semver';
+
+export interface ConsumeSharedModuleExcludeOptions {
+  request?: string | RegExp;
+  version?: string;
+  fallbackVersion?: string;
+}
+
+export interface ConsumeSharedModuleIncludeOptions {
+  request?: string | RegExp;
+  version?: string;
+  fallbackVersion?: string;
+}
+
 export type ConsumeOptions = {
   /**
    * fallback request
@@ -50,4 +64,19 @@ export type ConsumeOptions = {
    * Issuer layer in which the module should be resolved
    */
   issuerLayer?: string | null;
+  /**
+   * Filter object for consuming shared modules.
+   * Modules matching the criteria in this object will be excluded.
+   */
+  exclude?: ConsumeSharedModuleExcludeOptions;
+  /**
+   * Filter object for consuming shared modules.
+   * Only modules matching the criteria in this object will be included.
+   */
+  include?: ConsumeSharedModuleIncludeOptions;
+  /**
+   * Enable reconstructed lookup for node_modules paths for this share item
+   */
+  nodeModulesReconstructedLookup?: boolean;
 };
+const TYPES = new Set(['consume-shared']);

@@ -100,6 +100,18 @@
               "type": "string"
             }
           ]
+        },
+        "exclude": {
+          "description": "Filter for the shared module.",
+          "$ref": "#/definitions/Exclude"
+        },
+        "include": {
+          "description": "Options for including only certain versions or requests of the provided module. Cannot be used with 'exclude'.",
+          "$ref": "#/definitions/IncludeExcludeOptions"
+        },
+        "nodeModulesReconstructedLookup": {
+          "description": "Enable reconstructed lookup for node_modules paths for this share item",
+          "type": "boolean"
         }
       }
     },
@@ -122,6 +134,59 @@
           }
         ]
       }
+    },
+    "Exclude": {
+      "description": "Advanced filtering options.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "description": "Regular expression pattern to filter module requests",
+          "instanceof": "RegExp"
+        },
+        "version": {
+          "description": "Specific version string or range to filter by (exclude matches).",
+          "type": "string"
+        },
+        "fallbackVersion": {
+          "description": "Optional specific version string to check against the exclude.version range instead of reading package.json.",
+          "type": "string"
+        }
+      }
+    },
+    "ProvidesList": {
+      "type": "array",
+      "description": "A list of module requests to be provided to the shared scope.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "IncludeExcludeOptions": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Request string to match exactly."
+            },
+            {
+              "instanceof": "RegExp",
+              "description": "Regular expression to match the request path."
+            }
+          ]
+        },
+        "version": {
+          "type": "string",
+          "description": "Semantic versioning range to match against the module's version."
+        },
+        "fallbackVersion": {
+          "type": "string",
+          "description": "Optional specific version string to check against the version range instead of reading package.json."
+        }
+      },
+      "additionalProperties": false,
+      "anyOf": [{ "required": ["request"] }, { "required": ["version"] }]
     }
   },
   "title": "ProvideSharedPluginOptions",
@@ -146,6 +211,17 @@
           }
         }
       ]
+    },
+    "experiments": {
+      "description": "Experimental features configuration",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nodeModulesReconstructedLookup": {
+          "description": "Enable reconstructed lookup for node_modules paths",
+          "type": "boolean"
+        }
+      }
     }
   },
   "required": ["provides"]

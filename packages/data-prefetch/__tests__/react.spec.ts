@@ -1,5 +1,5 @@
 import { FederationHost, init } from '@module-federation/runtime';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import * as ModuleFederationSDK from '@module-federation/sdk';
 import { usePrefetch } from '../src/react';
 import { MFDataPrefetch } from '../src/prefetch';
