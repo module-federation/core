@@ -27,11 +27,13 @@ This toolkit provides two APIs:
 
 > Used to create React application-type module exports. If your application is React-based and you want it to be loaded as an application-type module by another MF application, you should use this to create standard-compliant exports for your application.
 
+- createRemoteAppComponent
+
+> Used to load application-type modules in a React application. The loaded module must be wrapped by `createBridgeComponent`. `createRemoteAppComponent` will automatically create a rendering context in your application to ensure the module works properly.
+
 - createRemoteComponent
 
-> Used to load application-type modules in a React application. The loaded module must be wrapped by `createBridgeComponent`. `createRemoteComponent` will automatically create a rendering context in your application to ensure the module works properly.
-
-For usage of `@module-federation/bridge-react`, see [Host demo](https://github.com/module-federation/core/tree/main/apps/router-demo/router-host-2000) and [Remote demo](https://github.com/module-federation/core/tree/main/apps/router-demo/router-remote2-2002).
+> It will be deprecated, please use `createRemoteAppComponent` instead.
 
 ### @module-federation/bridge-vue3
 
@@ -43,9 +45,9 @@ This toolkit provides two APIs:
 
 > Used to create Vue application-type module exports. If your application is Vue v3-based and you want it to be loaded as an application-type module by another MF application, you should use this to create standard-compliant exports for your application.
 
-- createRemoteComponent
+- createRemoteAppComponent
 
-> Used to load application-type modules in a Vue application. The loaded module must be wrapped by `createBridgeComponent`. `createRemoteComponent` will automatically create a rendering context in your application to ensure the module works properly.
+> Used to load application-type modules in a Vue application. The loaded module must be wrapped by `createBridgeComponent`. `createRemoteAppComponent` will automatically create a rendering context in your application to ensure the module works properly.
 
 ## FAQ
 

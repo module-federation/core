@@ -1,11 +1,9 @@
 import React, { useState, Suspense } from 'react';
 import {
+  getInstance,
   loadRemote,
   registerRemotes,
-  kit,
 } from '@module-federation/modern-js/runtime';
-
-const { createRemoteSSRComponent } = kit;
 
 registerRemotes([
   {
@@ -14,7 +12,7 @@ registerRemotes([
   },
 ]);
 
-const RemoteSSRComponent = createRemoteSSRComponent({
+const RemoteSSRComponent = getInstance()!.createLazyComponent({
   loader: () => loadRemote('dynamic_remote'),
   loading: 'loading...',
   fallback: ({ error }) => {

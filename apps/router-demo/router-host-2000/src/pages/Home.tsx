@@ -3,7 +3,7 @@ import { Space, Table, Tag } from 'antd';
 import type { TableProps } from 'antd';
 import type React from 'react';
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
-import { createRemoteComponent } from '@module-federation/bridge-react';
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
 
 interface DataType {
   key: string;
@@ -86,7 +86,7 @@ const data: DataType[] = [
   },
 ];
 
-const Remote1Button = createRemoteComponent<any, any>({
+const Remote1Button = createRemoteAppComponent<any, any>({
   loader: () => loadRemote('remote1/export-button'),
   // @ts-ignore
   fallback: null,

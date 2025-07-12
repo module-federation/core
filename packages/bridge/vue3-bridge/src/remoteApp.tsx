@@ -43,7 +43,7 @@ export default defineComponent({
         hashRoute: props.hashRoute,
       };
       LoggerInstance.debug(
-        `createRemoteComponent LazyComponent render >>>`,
+        `createRemoteAppComponent LazyComponent render >>>`,
         renderProps,
       );
 
@@ -67,7 +67,7 @@ export default defineComponent({
         // dispatchPopstateEnv
         if (pathname.value !== '' && pathname.value !== newPath) {
           LoggerInstance.debug(
-            `createRemoteComponent dispatchPopstateEnv >>>`,
+            `createRemoteAppComponent dispatchPopstateEnv >>>`,
             {
               ...props,
               pathname: route.path,
@@ -84,9 +84,12 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
-      LoggerInstance.debug(`createRemoteComponent LazyComponent destroy >>>`, {
-        ...props,
-      });
+      LoggerInstance.debug(
+        `createRemoteAppComponent LazyComponent destroy >>>`,
+        {
+          ...props,
+        },
+      );
       watchStopHandle();
 
       hostInstance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({

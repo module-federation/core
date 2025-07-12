@@ -8,7 +8,7 @@ import Detail from '@/pages/Detail.vue';
 import { loadRemote, init } from '@module-federation/enhanced/runtime';
 import * as bridge from '@module-federation/bridge-vue3';
 
-const Remote2 = bridge.createRemoteComponent({
+const Remote2 = bridge.createRemoteAppComponent({
   loader: () => loadRemote('remote1/export-app'),
 });
 

@@ -44,4 +44,5 @@ export type FederationRuntimePlugin = CoreLifeCyclePartial &
   ModuleBridgeLifeCycleCyclePartial & {
     name: string;
     version?: string;
+    apply?: (instance: FederationHost) => void;
   };

@@ -1,20 +1,20 @@
 import { FederationHost } from '../core';
 import { UserOptions } from '../type';
-import { Module } from '../module';
 import { getGlobalHostPlugins } from '../global';
 
 export function registerPlugins(
   plugins: UserOptions['plugins'],
-  hookInstances: Array<
-    | FederationHost['hooks']
-    | FederationHost['snapshotHandler']['hooks']
-    | FederationHost['sharedHandler']['hooks']
-    | FederationHost['remoteHandler']['hooks']
-    | Module['host']['loaderHook']
-    | Module['host']['bridgeHook']
-  >,
+  instance: FederationHost,
 ) {
   const globalPlugins = getGlobalHostPlugins();
+  const hookInstances = [
+    instance.hooks,
+    instance.remoteHandler.hooks,
+    instance.sharedHandler.hooks,
+    instance.snapshotHandler.hooks,
+    instance.loaderHook,
+    instance.bridgeHook,
+  ];
   // Incorporate global plugins
   if (globalPlugins.length > 0) {
     globalPlugins.forEach((plugin) => {
@@ -27,7 +27,7 @@ export function registerPlugins(
   if (plugins && plugins.length > 0) {
     plugins.forEach((plugin) => {
       hookInstances.forEach((hookInstance) => {
-        hookInstance.applyPlugin(plugin);
+        hookInstance.applyPlugin(plugin, instance);
       });
     });
   }

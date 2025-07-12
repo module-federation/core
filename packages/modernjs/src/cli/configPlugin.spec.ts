@@ -34,7 +34,6 @@ describe('patchMFConfig', async () => {
       remoteType: 'script',
       runtimePlugins: [
         require.resolve('@module-federation/modern-js/shared-strategy'),
-        require.resolve('@module-federation/modern-js/auto-fetch-data'),
         require.resolve('@module-federation/node/runtimePlugin'),
         require.resolve('@module-federation/modern-js/inject-node-fetch'),
       ],
@@ -65,7 +64,9 @@ describe('patchMFConfig', async () => {
       remoteType: 'script',
       runtimePlugins: [
         require.resolve('@module-federation/modern-js/shared-strategy'),
-        require.resolve('@module-federation/modern-js/auto-fetch-data'),
+        require.resolve(
+          '@module-federation/bridge-react/lazy-load-component-plugin',
+        ),
       ],
       shared: {
         react: {

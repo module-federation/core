@@ -169,11 +169,6 @@ export const patchMFConfig = (
     runtimePlugins,
   );
 
-  injectRuntimePlugins(
-    require.resolve('@module-federation/modern-js/auto-fetch-data'),
-    runtimePlugins,
-  );
-
   if (enableSSR && isDev()) {
     injectRuntimePlugins(
       require.resolve('@module-federation/modern-js/resolve-entry-ipv4'),
@@ -391,6 +386,15 @@ export const moduleFederationConfigPlugin = (
     const enableSSR = Boolean(
       userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr),
     );
+
+    // api._internalRuntimePlugins(({ entrypoint, plugins }) => {
+    //   plugins.push({
+    //     name: 'mf',
+    //     path: '@module-federation/modern-js/runtime-plugin',
+    //     config: {},
+    //   });
+    //   return { entrypoint, plugins };
+    // });
 
     api.modifyBundlerChain((chain) => {
       const target = chain.get('target');

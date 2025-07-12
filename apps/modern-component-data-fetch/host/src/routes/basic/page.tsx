@@ -1,8 +1,7 @@
-import { kit, ERROR_TYPE } from '@module-federation/modern-js/runtime';
+import { getInstance } from '@module-federation/modern-js/runtime';
+import { ERROR_TYPE } from '@module-federation/modern-js/react';
 
-const { createRemoteComponent } = kit;
-
-const Basic = createRemoteComponent({
+const Basic = getInstance()!.createLazyComponent({
   loader: () => {
     return import('remote/BasicComponent');
   },
