@@ -22,5 +22,5 @@
   "peerDependencies": {
     "@rslib/core": ">=0.10.0"
   },
-  "types": "./tools/rslib-plugin/src/index.d.ts"
+  "types": "./src/index.d.ts"
 }

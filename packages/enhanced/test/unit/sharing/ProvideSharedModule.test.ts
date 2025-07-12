@@ -354,7 +354,12 @@ describe('ProvideSharedModule', () => {
       // or might be implemented differently in the real module
       // Just verify the hash.update method was called
       if (typeof module.updateHash === 'function') {
-        const context = { moduleGraph: {} };
+        const context = {
+          chunkGraph: {
+            getModuleGraphHash: jest.fn().mockReturnValue('mock-hash'),
+          },
+          runtime: undefined,
+        };
         module.updateHash(hash as any, context as any);
         expect(hash.update).toHaveBeenCalled();
       } else {
@@ -395,10 +400,9 @@ describe('ProvideSharedModule', () => {
       };
 
       // Just verify the serialize method can be called without error
+      expect(typeof module.serialize).toBe('function');
       expect(() => {
-        if (typeof module.serialize === 'function') {
-          module.serialize(context);
-        }
+        module.serialize(context);
       }).not.toThrow();
     });
 
@@ -432,10 +436,9 @@ describe('ProvideSharedModule', () => {
       };
 
       // Just verify the serialize method can be called without error
+      expect(typeof module.serialize).toBe('function');
       expect(() => {
-        if (typeof module.serialize === 'function') {
-          module.serialize(context);
-        }
+        module.serialize(context);
       }).not.toThrow();
     });
 
@@ -470,10 +473,9 @@ describe('ProvideSharedModule', () => {
       };
 
       // Just verify the serialize method can be called without error
+      expect(typeof module.serialize).toBe('function');
       expect(() => {
-        if (typeof module.serialize === 'function') {
-          module.serialize(context);
-        }
+        module.serialize(context);
       }).not.toThrow();
     });
   });

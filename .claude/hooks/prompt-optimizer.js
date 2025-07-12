@@ -209,7 +209,9 @@ async function main() {
         }
 
         // Skip optimization for very short or simple prompts that don't need enhancement
+        const wordCount = prompt.trim().split(/\s+/).length;
         if (
+          wordCount <= 4 ||
           prompt.length < 10 ||
           /^(hi|hello|hey|thanks|thank you)$/i.test(prompt.trim())
         ) {
