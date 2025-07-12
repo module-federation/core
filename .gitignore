@@ -90,3 +90,4 @@ ssg
 
 # Native binary files
 *.node
+worktrees/
