@@ -12,7 +12,7 @@ class InvertedContainerPlugin {
       (compilation: Compilation) => {
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const containers = new Set();
-        hooks.addContainerEntryModule.tap(
+        hooks.addContainerEntryDependency.tap(
           'EmbeddedContainerPlugin',
           (dependency) => {
             if (dependency instanceof dependencies.ContainerEntryDependency) {

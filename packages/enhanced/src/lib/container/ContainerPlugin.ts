@@ -218,7 +218,7 @@ class ContainerPlugin {
             },
             (error: WebpackError | null | undefined) => {
               if (error) return reject(error);
-              hooks.addContainerEntryModule.call(dep);
+              hooks.addContainerEntryDependency.call(dep);
               resolve(undefined);
             },
           );
@@ -233,7 +233,7 @@ class ContainerPlugin {
               if (err) {
                 return reject(err);
               }
-              hooks.addFederationRuntimeModule.call(
+              hooks.addFederationRuntimeDependency.call(
                 federationRuntimeDependency,
               );
               resolve(undefined);
@@ -291,7 +291,7 @@ class ContainerPlugin {
           { name: undefined },
           (error: WebpackError | null | undefined) => {
             if (error) return callback(error);
-            hooks.addContainerEntryModule.call(dep);
+            hooks.addContainerEntryDependency.call(dep);
             callback();
           },
         );
