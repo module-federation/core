@@ -7,41 +7,37 @@ module.exports = {
     new ProvideSharedPlugin({
       provides: {
         // Version filtering tests
-        'version-include': {
+        './version-include': {
+          shareKey: 'version-include',
           version: '1.2.0',
           include: {
             version: '^1.0.0',
           },
         },
-        'version-exclude': {
+        './version-exclude': {
+          shareKey: 'version-exclude',
           version: '1.2.0',
           exclude: {
             version: '^2.0.0',
           },
         },
-        'version-include-fail': {
+        './version-include-fail': {
+          shareKey: 'version-include-fail',
           version: '1.2.0',
           include: {
             version: '^2.0.0',
           },
         },
-        'version-exclude-fail': {
+        './version-exclude-fail': {
+          shareKey: 'version-exclude-fail',
           version: '2.0.0',
           exclude: {
             version: '^2.0.0',
           },
         },
-        // Request filtering tests
-        'request-filter/': {
-          include: {
-            request: /components/,
-          },
-          exclude: {
-            request: /Button/,
-          },
-        },
         // Singleton with filters
-        'singleton-filter': {
+        './singleton-filter': {
+          shareKey: 'singleton-filter',
           version: '1.0.0',
           singleton: true,
           include: {

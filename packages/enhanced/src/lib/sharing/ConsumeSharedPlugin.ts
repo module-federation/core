@@ -103,6 +103,8 @@ class ConsumeSharedPlugin {
                 issuerLayer: undefined,
                 layer: undefined,
                 request: key,
+                include: undefined,
+                exclude: undefined,
               }
             : // key is a request/key
               // item is a version
@@ -119,6 +121,8 @@ class ConsumeSharedPlugin {
                 issuerLayer: undefined,
                 layer: undefined,
                 request: key,
+                include: undefined,
+                exclude: undefined,
               };
         return result;
       },
@@ -143,6 +147,8 @@ class ConsumeSharedPlugin {
           issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
           layer: item.layer ? item.layer : undefined,
           request,
+          include: item.include,
+          exclude: item.exclude,
         } as ConsumeOptions;
       },
     );
