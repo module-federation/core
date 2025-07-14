@@ -2,6 +2,11 @@
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
+// Import the actual Compilation class for instanceof checks
+const Compilation = require(
+  normalizeWebpackPath('webpack/lib/Compilation'),
+) as typeof import('webpack/lib/Compilation');
+
 /**
  * Create a mock compilation with all the necessary objects for testing Module Federation components
  */
@@ -33,7 +38,11 @@ export const createMockCompilation = () => {
     }),
   };
 
-  const mockCompilation = {
+  // Create a mock compilation that extends the actual Compilation class
+  const mockCompilation = Object.create(Compilation.prototype);
+
+  // Add all the necessary properties and methods
+  Object.assign(mockCompilation, {
     runtimeTemplate: mockRuntimeTemplate,
     moduleGraph: mockModuleGraph,
     chunkGraph: mockChunkGraph,
@@ -64,7 +73,7 @@ export const createMockCompilation = () => {
     },
     addInclude: jest.fn(),
     moduleMemento: { restore: jest.fn() },
-  };
+  });
 
   return {
     mockCompilation,
