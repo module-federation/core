@@ -87,4 +87,22 @@ export interface SharedConfig {
    * The actual request to use for importing the module. Defaults to the property name.
    */
   request?: string;
+  /**
+   * Filter for the shared module.
+   */
+  exclude?: IncludeExcludeOptions;
+  /**
+   * Filter for the shared module.
+   */
+  include?: IncludeExcludeOptions;
+  /**
+   * Node modules reconstructed lookup.
+   */
+  nodeModulesReconstructedLookup?: boolean;
+}
+
+export interface IncludeExcludeOptions {
+  request?: string | RegExp;
+  version?: string;
+  fallbackVersion?: string;
 }
