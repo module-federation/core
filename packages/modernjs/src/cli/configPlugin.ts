@@ -387,15 +387,6 @@ export const moduleFederationConfigPlugin = (
       userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr),
     );
 
-    // api._internalRuntimePlugins(({ entrypoint, plugins }) => {
-    //   plugins.push({
-    //     name: 'mf',
-    //     path: '@module-federation/modern-js/runtime-plugin',
-    //     config: {},
-    //   });
-    //   return { entrypoint, plugins };
-    // });
-
     api.modifyBundlerChain((chain) => {
       const target = chain.get('target');
       if (skipByTarget(target)) {

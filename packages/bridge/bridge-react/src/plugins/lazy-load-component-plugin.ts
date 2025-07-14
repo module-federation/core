@@ -18,11 +18,6 @@ declare module '@module-federation/runtime-core' {
     prefetch(
       options: Omit<PrefetchOptions, 'instance'>,
     ): ReturnType<typeof prefetch>;
-    // wrapNoSSR<T, E extends keyof T>(
-    //   createLazyComponentFn: typeof createLazyComponent<T, E>,
-    // ): (
-    //   options: Omit<CreateLazyComponentOptions<T, E>, 'instance' | 'noSSR'>,
-    // ) => ReturnType<typeof createLazyComponent<T, E>>;
     collectSSRAssets(
       options: Omit<Parameters<typeof collectSSRAssets>[0], 'instance'>,
     ): ReturnType<typeof collectSSRAssets>;

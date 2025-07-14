@@ -27,10 +27,6 @@
       "types": "./dist/types/runtime/index.d.ts",
       "default": "./dist/esm/runtime/index.js"
     },
-    "./runtime-plugin": {
-      "types": "./dist/types/runtime/plugin.d.ts",
-      "default": "./dist/esm/runtime/plugin.js"
-    },
     "./react": {
       "types": "./dist/types/react/index.d.ts",
       "default": "./dist/esm/react/index.js"
@@ -84,9 +80,6 @@
       ],
       "runtime": [
         "./dist/types/runtime/index.d.ts"
-      ],
-      "runtime-plugin": [
-        "./dist/types/runtime/plugin.d.ts"
       ],
       "react": [
         "./dist/types/react/index.d.ts"

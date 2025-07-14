@@ -64,9 +64,6 @@ describe('patchMFConfig', async () => {
       remoteType: 'script',
       runtimePlugins: [
         require.resolve('@module-federation/modern-js/shared-strategy'),
-        require.resolve(
-          '@module-federation/bridge-react/lazy-load-component-plugin',
-        ),
       ],
       shared: {
         react: {
