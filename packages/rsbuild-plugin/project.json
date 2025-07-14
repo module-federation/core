@@ -9,8 +9,8 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "packages/rsbuild-plugin/dist",
-        "main": "packages/rsbuild-plugin/cli/src/index.ts",
-        "tsConfig": "packages/rsbuild-plugin/tsconfig.json",
+        "main": "packages/rsbuild-plugin/src/cli/index.ts",
+        "tsConfig": "packages/rsbuild-plugin/tsconfig.lib.json",
         "assets": [],
         "project": "packages/rsbuild-plugin/package.json",
         "rollupConfig": "packages/rsbuild-plugin/rollup.config.js",
