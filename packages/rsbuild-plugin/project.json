@@ -9,7 +9,7 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "packages/rsbuild-plugin/dist",
-        "main": "packages/rsbuild-plugin/cli/src/index.ts",
+        "main": "packages/rsbuild-plugin/src/cli/index.ts",
         "tsConfig": "packages/rsbuild-plugin/tsconfig.json",
         "assets": [],
         "project": "packages/rsbuild-plugin/package.json",
@@ -17,7 +17,13 @@
         "compiler": "swc",
         "format": ["cjs", "esm"],
         "generatePackageJson": false
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
