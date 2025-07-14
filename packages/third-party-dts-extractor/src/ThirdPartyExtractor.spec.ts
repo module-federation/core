@@ -27,13 +27,6 @@ describe('ThirdPartyExtractor', () => {
 
   it('should correctly infer pkg types dir without types field in package.json', () => {
     const typedReactDir = thirdPartyExtractor.inferPkgDir('react');
-
-    if (!typedReactDir) {
-      // If react types are not found, skip the test
-      console.warn('React types not found, skipping test');
-      return;
-    }
-
     const pkgJson = fs.readJSONSync(`${typedReactDir}/package.json`);
 
     expect(pkgJson.name).toBe('@types/react');
@@ -52,28 +45,21 @@ describe('ThirdPartyExtractor', () => {
     export { defineConfig }
     `);
 
-    // Check which packages were actually collected
-    const collectedPkgs = Object.keys(thirdPartyExtractor.pkgs);
-
-    // Ensure tsup is collected
-    expect(collectedPkgs).toContain('tsup');
-
-    // React types might not be collected if not available
-    if (collectedPkgs.includes('@types/react')) {
-      expect(collectedPkgs.length).toEqual(2);
-    } else {
-      expect(collectedPkgs.length).toEqual(1);
-    }
+    const targetPkg = ['tsup', '@types/react'];
+    expect(Object.keys(thirdPartyExtractor.pkgs).length).toEqual(
+      targetPkg.length,
+    );
+    expect(
+      Object.keys(thirdPartyExtractor.pkgs).every((pkg) =>
+        targetPkg.includes(pkg),
+      ),
+    ).toEqual(true);
   });
 
   it('copyDts to dest dir', async () => {
     await thirdPartyExtractor.copyDts();
     expect(fs.existsSync(join(destDir, 'tsup'))).toEqual(true);
-
-    // React types might not be present
-    if (Object.keys(thirdPartyExtractor.pkgs).includes('@types/react')) {
-      expect(fs.existsSync(join(destDir, '@types/react'))).toEqual(true);
-    }
+    expect(fs.existsSync(join(destDir, '@types/react'))).toEqual(true);
   });
 
   it('exclude pkg', async () => {
