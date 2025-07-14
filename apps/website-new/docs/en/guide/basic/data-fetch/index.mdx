@@ -1,0 +1,239 @@
+# Data Fetching
+
+:::tip
+Data Loader supports both SSR and CSR scenarios!
+
+* [Demo](https://github.com/module-federation/core/tree/main/apps/modern-component-data-fetch)
+
+:::
+
+## Introduction
+
+In SSR scenarios, `useEffect` does not execute. This behavior means that under normal circumstances, it's impossible to fetch data before rendering a component.
+
+To support this functionality, mainstream frameworks typically pre-fetch data using the `data loader` provided by React Router and inject it into the route component. The route component then retrieves the data using [useLoaderData](https://reactrouter.com/api/hooks/useLoaderData#useloaderdata) for rendering.
+
+This approach heavily relies on routing functionality and cannot be used directly with Module Federation.
+
+To solve this problem, Module Federation provides **component-level** data fetching capabilities, allowing developers to fetch data and render components in SSR scenarios.
+
+:::tip What is component-level?
+The use of Module Federation can be broadly divided into two parts: components (functions) and applications. The difference between them is whether they include *routing* functionality.
+:::
+
+## How to Use
+
+Different actions are required depending on the role.
+
+### Producer
+::: info Note
+Producers can use [Rslib](../../basic/rsbuild#ssr) and [Modern.js](../../framework/modernjs) to generate components.
+
+However, it's important to note that because the data in "Data Fetching" is injected by the consumer, if a component uses "Data Fetching", its exported non-MF components cannot be isomorphic with the MF components.
+:::
+
+Each exposed module can have a corresponding `.data` file with the same name. These files can export a loader function, which we call a Data Loader. It executes before the corresponding `expose` component renders, providing data to the component. Here is an example:
+
+```bash
+.
+└── src
+    ├── List.tsx
+    └── List.data.ts
+```
+
+Here, `List.data.ts` needs to export a function named `fetchData`, which will be executed before the `List` component renders and injects its data. Here is an example:
+
+```ts title="List.data.ts"
+import type { DataFetchParams } from '@module-federation/bridge-react';
+export type Data = {
+  data: string;
+};
+
+export const fetchData = async (params: DataFetchParams): Promise<Data> => {
+  console.log('params: ', params);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        data: `data: ${new Date()}`,
+      });
+    }, 1000);
+  });
+};
+```
+
+The data from the loader function is injected into the producer's props with the key `mfData`. Therefore, the producer needs to modify the code to consume this data, as shown below:
+
+```tsx title="List.tsx"
+import React from 'react';
+import type { Data } from './index.data';
+
+const List = (props: {
+  mfData?: Data;
+}): JSX.Element => {
+  return (
+    <div>
+     {props.mfData?.data && props.mfData?.data.map((item,index)=><p key={index}>{item}</p>)}
+    </div>
+  );
+};
+
+export default List;
+```
+
+##### Producer Consuming Its Own Data
+
+If you use Modern.js to develop a producer, and that producer's page is also accessed directly, you can use the [Data Loader](https://modernjs.dev/guides/basic-features/data/data-fetch.html) provided by Modern.js to inject data.
+
+Its usage is almost identical to Module Federation's, except for the function name. This makes it easy to consume the Data Loader in the producer. Here's an example:
+
+*   Create a `page.data.ts` file in the producer's page directory and export a function named `loader`:
+
+```ts title="page.data.ts"
+import { fetchData } from '../components/List.data';
+import type { Data } from '../components/List.data';
+
+export const loader = fetchData
+
+export type {Data}
+```
+
+*   Consume this data on the producer's `page`:
+
+```tsx title="page.tsx"
+import { useLoaderData } from '@modern-js/runtime/router';
+import List from '../components/List';
+import './index.css';
+
+import type { Data } from './page.data';
+
+const Index = () => {
+  const data = useLoaderData() as Data;
+  console.log('page data', data);
+
+  return (
+  <div className="container-box">
+    <List mfData={data} />
+  </div>
+)};
+
+export default Index;
+
+```
+
+### Consumer
+::: info Note
+In SSR scenarios, this can only be used with [Modern.js](../../framework/modernjs).
+:::
+
+In the consumer, we need to use the [createLazyComponent](../../../practice/bridge/react-bridge#createlazycomponent) API to load the remote component and fetch its data.
+
+```tsx
+import { getInstance } from '@module-federation/enhanced/runtime';
+import { createLazyComponent, ERROR_TYPE, lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
+const List = instance.createLazyComponent({
+  loader: () => {
+    return import('remote/List');
+  },
+  loading: 'loading...',
+  export: 'default',
+  fallback: ({error,errorType,dataFetchMapKey}) => {
+    console.error(error)
+    if(errorType === ERROR_TYPE.LOAD_REMOTE){
+      return <div>load remote failed</div>
+    }
+    if(errorType === ERROR_TYPE.DATA_FETCH){
+      return <div>data fetch failed, the dataFetchMapKey key is: {dataFetchMapKey}</div>
+    }
+    return <div>error type is unknown</div>;
+  },
+});
+
+const Index = (): JSX.Element => {
+  return (
+    <div>
+      <h1>Basic usage with data fetch</h1>
+      <List />
+    </div>
+  );
+};
+
+export default Index;
+```
+
+### Loader Function
+
+#### Parameters
+
+By default, parameters are passed to the loader function. The type is [dataFetchParams](../../../practice/bridge/react-bridge#datafetchparams), which includes the following field:
+
+- `isDowngrade` (boolean): Indicates whether the current execution context is in a fallback mode. For example, if Server-Side Rendering (SSR) fails, a new request is sent from the client-side (CSR) to the server to call the loader function. In this case, the value is `true`.
+
+In addition to the default parameters, you can also pass the `dataFetchParams` field in `createLazyComponent`, which will be passed through to the loader function.
+
+#### Return Value
+
+The return value of the loader function can only be a **serializable data object**.
+
+### Using Data Loader in Different Environments
+
+The loader function can be executed on the server or in the browser. A loader function executed on the server is called a Server Loader, and one executed in the browser is called a Client Loader.
+
+In CSR applications, the loader function is executed in the browser, so they are all Client Loaders by default.
+
+In SSR applications, the loader function is only executed on the server, so they are all Server Loaders by default. In SSR, Module Federation directly calls the corresponding loader function on the server. When switching routes in the browser, Module Federation sends an HTTP request to the SSR service, which also triggers the loader function on the server.
+
+:::note NOTE
+
+Executing the loader function only on the server in SSR applications offers the following benefits:
+
+-   **Simplified Usage**: It ensures that the data fetching method in SSR applications is isomorphic, so developers don't need to differentiate code execution based on the environment.
+-   **Reduced Browser Bundle Size**: Logic code and its dependencies are moved from the browser to the server.
+-   **Improved Maintainability**: Moving logic code to the server reduces the direct impact of data logic on the front-end UI. It also prevents accidentally including server-side dependencies in the browser bundle or vice versa.
+
+:::
+
+#### Using Client Loader in SSR Applications
+
+By default, in SSR applications, the loader function is only executed on the server. However, in some scenarios, developers may want requests from the browser to go directly to the data source without passing through the SSR service. For example:
+
+1.  To reduce network consumption in the browser by directly requesting the data source.
+2.  The application has a data cache in the browser and does not want to request data from the SSR service.
+
+Module Federation supports adding an additional `.data.client` file in SSR applications, which also exports a named loader. In this case, if the Data Loader on the server fails and falls back, or when switching routes in the browser, the application will execute this loader function in the browser like a CSR application, instead of sending another data request to the SSR service.
+
+```ts title="List.data.client.ts"
+import cache from 'my-cache';
+
+export async function loader({ params }) {
+  if (cache.has(params.id)) {
+    return cache.get(params.id);
+  }
+  const res = await fetch('URL_ADDRESS?id={params.id}');
+  return {
+    message: res.message,
+  }
+}
+```
+:::warning WARNING
+
+To use a Client Loader, there must be a corresponding Server Loader, and the Server Loader must be defined in a `.data` file, not a `.loader` file.
+
+:::
+
+## FAQ
+
+### Application-Level Data Fetching?
+
+For application-level modules, we prefer to use RSC (React Server Components) to make the functionality more complete. This feature is currently under exploration, so please stay tuned.
+
+### Is Nested Producer Supported?
+
+No, it is not supported.
+
+### Are there other plugins for producers besides the Rslib plugin and the Modern.js plugin?
+
+Currently, only the Rslib and Modern.js plugins can create a Data Loader.

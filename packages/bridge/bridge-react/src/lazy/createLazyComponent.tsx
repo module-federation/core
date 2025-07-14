@@ -43,7 +43,8 @@ export type CreateLazyComponentOptions<T, E extends keyof T> = {
   export?: E;
   dataFetchParams?: DataFetchParams;
   noSSR?: boolean;
-  cacheData?: boolean;
+  injectScript?: boolean;
+  injectLink?: boolean;
 };
 
 type ReactKey = { key?: React.Key | null };
@@ -208,11 +209,10 @@ function getServerNeedRemoteInfo(
 export function createLazyComponent<T, E extends keyof T>(
   options: CreateLazyComponentOptions<T, E>,
 ) {
-  const { instance, cacheData } = options;
+  const { instance, injectScript, injectLink } = options;
   if (!instance) {
     throw new Error('instance is required for createLazyComponent!');
   }
-  let dataCache: unknown = null;
 
   type ComponentType = T[E] extends (...args: any) => any
     ? Parameters<T[E]>[0] extends undefined
@@ -275,7 +275,6 @@ export function createLazyComponent<T, E extends keyof T>(
       );
       setDataFetchItemLoadedStatus(dataFetchMapKey);
       logger.debug('get data res: \n', data);
-      dataCache = data;
       return data;
     } catch (err) {
       const errMsg = `${DATA_FETCH_ERROR_PREFIX}${wrapDataFetchId(dataFetchMapKey)}${err}`;
@@ -305,6 +304,8 @@ export function createLazyComponent<T, E extends keyof T>(
     const assets = collectSSRAssets({
       id: moduleId,
       instance,
+      injectLink,
+      injectScript,
     });
 
     const Com = m[exportName] as React.FC<ComponentType>;
@@ -340,10 +341,6 @@ export function createLazyComponent<T, E extends keyof T>(
 
   return (props: ComponentType) => {
     const { key, ...args } = props;
-    if (cacheData && dataCache) {
-      // @ts-expect-error ignore
-      return <LazyComponent {...args} mfData={dataCache} />;
-    }
 
     if (!options.noSSR) {
       return (

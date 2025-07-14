@@ -37,11 +37,6 @@ interface CacheOptions {
   maxAge?: number;
   revalidate?: number;
   getKey?: <Args extends any[]>(...args: Args) => string;
-  customKey?: <Args extends any[]>(options: {
-    params: Args;
-    fn: (...args: Args) => any;
-    generatedKey: string;
-  }) => string | symbol;
   onCache?: (info: CacheStatsInfo) => boolean;
 }
 

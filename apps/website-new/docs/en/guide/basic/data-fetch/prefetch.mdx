@@ -1,0 +1,74 @@
+# Prefetch
+
+The `prefetch` function is used to pre-fetch resources and **data** for remote modules, thereby improving application performance and user experience. By pre-loading required content before a user accesses a feature, waiting times can be significantly reduced.
+
+> This API requires the [`lazyLoadComponentPlugin` to be registered](../../../practice/bridge/react-bridge#register-lazyloadcomponentplugin) before it can be used.
+
+## When to Use
+
+`prefetch` is an ideal choice when you want to pre-load associated JavaScript, CSS, or data for a component without immediately rendering it. For example, you can trigger `prefetch` when a user hovers over a link or button, so that when the user actually clicks, the component can be rendered faster.
+
+## API
+
+```typescript
+interface FederationHost {
+  prefetch(options: {
+    id: string;
+    dataFetchParams?: Record<string, any>;
+    preloadComponentResource?: boolean;
+  }): void;
+}
+```
+
+### Parameters
+
+- `id` (required): `string`
+  The unique identifier for the remote module, in the format `'<remoteName>/<exposedModule>'`. For example, `'shop/Button'`.
+
+- `preloadComponentResource` (optional): `boolean`
+  Whether to preload the component's resources, including JavaScript chunks and associated CSS files. Defaults to `false`.
+
+- `dataFetchParams` (optional): `object`
+  If the remote component has a data fetch function, this object will be passed to it.
+
+
+## Usage Examples
+
+Suppose we have a remote application `shop` that exposes a `Button` component, and this component is associated with a data fetch function.
+
+### Scenario 1: Prefetching Data Only
+
+When a user hovers over a link that will navigate to the shop page, we can prefetch the data needed for that page.
+
+```ts
+import { getInstance } from '@module-federation/runtime';
+
+const instance = getInstance();
+
+const handleMouseEnter = () => {
+  instance.prefetch({
+    id: 'shop/Button',
+    dataFetchParams: { productId: '12345' },
+  });
+};
+```
+
+### Scenario 2: Prefetching Data and Preloading Component Resources
+
+For further optimization, we can download the component's JS and CSS files at the same time as prefetching the data.
+
+```ts
+import { getInstance } from '@module-federation/runtime';
+
+const instance = getInstance();
+
+const handleMouseEnter = () => {
+  instance.prefetch({
+    id: 'shop/Button',
+    dataFetchParams: { productId: '12345' },
+    preloadComponentResource: true,
+  });
+};
+```
+
+By using `prefetch` flexibly, you can finely control the timing of resource loading based on your application's specific scenarios and user behavior, thereby optimizing application performance.

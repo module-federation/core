@@ -4,5 +4,10 @@
   "name": "runtime",
   "label": "Runtime"
   },
-"rsbuild", "rspack", "webpack", "rspress","vite","type-prompt","cli", "css-isolate"
+"rsbuild", "rspack", "webpack", "rspress","vite","type-prompt","cli", "css-isolate",
+  {
+  "type": "dir",
+  "name": "data-fetch",
+  "label": "Data Solution"
+  }
 ]
