@@ -2,7 +2,10 @@
 
 `prefetch` 函数用于预取远程模块的资源和**数据**，从而提升应用的性能和用户体验。通过在用户访问某个功能之前提前加载所需内容，可以显著减少等待时间。
 
-> 该 API 需要先[注册 lazyLoadComponentPlugin 插件](../../../practice/bridge/react-bridge#注册-lazyloadcomponentplugin)，才可以使用。
+import React from 'react';
+import PrefetchTip from '@components/zh/data-fetch/prefetch-tip';
+
+{props.prefetchTip || React.createElement(PrefetchTip)}
 
 ## 何时使用
 
@@ -36,39 +39,8 @@ interface FederationHost {
 
 假设我们有一个远程应用 `shop`，它暴露了一个组件 `Button`，并且该组件关联了一个数据获取函数。
 
-### 场景 1: 仅预取数据
+import PrefetchDemo from '@components/zh/data-fetch/prefetch-demo';
 
-当用户鼠标悬停在一个将要导航到购物页面的链接上时，我们可以预取该页面所需的数据。
-
-```ts
-import { getInstance } from '@module-federation/runtime';
-
-const instance = getInstance();
-
-const handleMouseEnter = () => {
-  instance.prefetch({
-    id: 'shop/Button',
-    dataFetchParams: { productId: '12345' },
-  });
-};
-```
-
-### 场景 2: 预取数据并预加载组件资源
-
-为了进一步优化，我们可以在预取数据的同时，也把组件的 JS 和 CSS 文件下载下来。
-
-```ts
-import { getInstance } from '@module-federation/runtime';
-
-const instance = getInstance();
-
-const handleMouseEnter = () => {
-  instance.prefetch({
-    id: 'shop/Button',
-    dataFetchParams: { productId: '12345' },
-    preloadComponentResource: true,
-  });
-};
-```
+{props.prefetchDemo || React.createElement(PrefetchDemo)}
 
 通过灵活使用 `prefetch`，您可以根据应用的具体场景和用户行为，精细地控制资源的加载时机，从而优化应用性能。

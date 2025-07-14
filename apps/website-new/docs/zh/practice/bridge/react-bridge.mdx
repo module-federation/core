@@ -408,7 +408,7 @@ type ErrorInfo = {
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
 import { getInstance } from '@module-federation/enhanced/runtime';
-import { ,createLazyComponent, ERROR_TYPE } from '@module-federation/bridge-react';
+import { createLazyComponent, ERROR_TYPE } from '@module-federation/bridge-react';
 
 const instance = getInstance();
 const LazyComponent = instance.createLazyComponent({
