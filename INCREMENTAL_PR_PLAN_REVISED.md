@@ -12,7 +12,7 @@ Based on a detailed diff analysis, this document provides a more accurate breakd
 **Feature**: Add defensive checks to prevent runtime errors
 
 **Files to include**:
-- `src/lib/container/runtime/EmbedFederationRuntimeModule.ts` (add `typeof oldStartup === 'function'` check)
+- `src/lib/container/runtime/EmbedFederationRuntimeModule.ts` (add `typeof prevStartup === 'function'` check)
 - `src/lib/startup/StartupHelpers.ts` (add `typeof __webpack_require__.x === "function"` check)
 
 **Why first**: These are independent safety fixes that improve stability without any dependencies.
