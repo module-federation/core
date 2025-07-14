@@ -249,22 +249,6 @@ class ProvideSharedPlugin {
                     (originalPrefixConfig.shareKey || configuredPrefix) +
                     remainder;
 
-                  // Validate singleton usage when using include.request
-                  if (
-                    originalPrefixConfig.include?.request &&
-                    originalPrefixConfig.singleton
-                  ) {
-                    addSingletonFilterWarning(
-                      compilation,
-                      finalShareKey,
-                      'include',
-                      'request',
-                      originalPrefixConfig.include.request,
-                      originalRequestString,
-                      resource,
-                    );
-                  }
-
                   // Validate singleton usage when using exclude.request
                   if (
                     originalPrefixConfig.exclude?.request &&
