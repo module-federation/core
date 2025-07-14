@@ -3,13 +3,7 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "declaration": true,
-    "types": ["node"],
-    "baseUrl": ".",
-    "paths": {
-      "@module-federation/sdk": ["../sdk/src/index.ts"],
-      "@module-federation/enhanced": ["../enhanced/src/index.ts"],
-      "@module-federation/node": ["../node/src/index.ts"]
-    }
+    "types": ["node"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
