@@ -191,6 +191,16 @@ class ProvideSharedPlugin {
               });
               const config = matchProvides.get(requestKey);
               if (config !== undefined && resource) {
+                // Apply request filters if defined
+                if (
+                  !testRequestFilters(
+                    request,
+                    config.include?.request,
+                    config.exclude?.request,
+                  )
+                ) {
+                  return module;
+                }
                 this.provideSharedModule(
                   compilation,
                   resolvedProvideMap,
