@@ -45,6 +45,7 @@ interface FormProps {
   validateForm: any;
   enableHMR: string;
   onHMRChange: (on: boolean) => void;
+  headerSlot?: ReactNode;
 }
 const FormComponent = (props: FormProps & RootComponentProps) => {
   const {
@@ -222,13 +223,16 @@ const FormComponent = (props: FormProps & RootComponentProps) => {
             <div className={styles.status}>
               <Badge color={condition.color} className={styles.badge} />
               <span className={styles.message}>{condition.message}</span>
-              <Switch
-                checked={enableHMR === 'enable'}
-                checkedText={'Enable HMR'}
-                uncheckedText={'Disable HMR'}
-                onChange={hmrChange}
-                className={styles.switch}
-              />
+              <span className={styles.headerSlot}>
+                {props.headerSlot}
+                <Switch
+                  checked={enableHMR === 'enable'}
+                  checkedText={'Enable HMR'}
+                  uncheckedText={'Disable HMR'}
+                  onChange={hmrChange}
+                  className={styles.switch}
+                />
+              </span>
             </div>
           </div>
 
