@@ -254,7 +254,7 @@ export function generatePreloadAssets(
     remoteSnapshot,
   );
 
-  if (remoteSnapshot.shared) {
+  if (remoteSnapshot.shared && remoteSnapshot.shared.length > 0) {
     const collectSharedAssets = (
       shareInfo: Shared,
       snapshotShared: ModuleInfo['shared'][0],
