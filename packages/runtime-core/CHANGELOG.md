@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.17.0
+
+### Patch Changes
+
+- 3f736b6: chore: rename FederationHost to ModuleFederation
+  - @module-federation/sdk@0.17.0
+  - @module-federation/error-codes@0.17.0
+
 ## 0.16.0
 
 ### Patch Changes
