@@ -1,0 +1,46 @@
+# Prefetch
+
+`prefetch` 函数用于预取远程模块的资源和**数据**，从而提升应用的性能和用户体验。通过在用户访问某个功能之前提前加载所需内容，可以显著减少等待时间。
+
+import React from 'react';
+import PrefetchTip from '@components/zh/data-fetch/prefetch-tip';
+
+{props.prefetchTip || React.createElement(PrefetchTip)}
+
+## 何时使用
+
+当你希望在不立即渲染组件的情况下，提前加载其关联的 JavaScript、CSS 或数据时，`prefetch` 是一个理想的选择。例如，当用户鼠标悬停在某个链接或按钮上时，可以触发 `prefetch`，以便在用户真正点击时，组件能够更快地呈现。
+
+## API
+
+```typescript
+interface FederationHost {
+  prefetch(options: {
+    id: string;
+    dataFetchParams?: Record<string, any>;
+    preloadComponentResource?: boolean;
+  }): void;
+}
+```
+
+### 参数
+
+- `id` (必填): `string`
+  远程模块的唯一标识符，格式为 `'<remoteName>/<exposedModule>'`。例如, `'shop/Button'`。
+
+- `preloadComponentResource` (可选): `boolean`
+  是否预加载组件的资源，包括 JavaScript chunk 和关联的 CSS 文件。默认为 `false`。
+
+- `dataFetchParams` (可选): `object`
+  如果远程组件存在数据获取函数，设置后会传递给数据获取函数。
+
+
+## 使用示例
+
+假设我们有一个远程应用 `shop`，它暴露了一个组件 `Button`，并且该组件关联了一个数据获取函数。
+
+import PrefetchDemo from '@components/zh/data-fetch/prefetch-demo';
+
+{props.prefetchDemo || React.createElement(PrefetchDemo)}
+
+通过灵活使用 `prefetch`，您可以根据应用的具体场景和用户行为，精细地控制资源的加载时机，从而优化应用性能。
