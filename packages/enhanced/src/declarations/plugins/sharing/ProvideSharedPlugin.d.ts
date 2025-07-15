@@ -91,4 +91,8 @@ export interface ProvidesConfig {
    * Node modules reconstructed lookup.
    */
   nodeModulesReconstructedLookup?: any;
+  /**
+   * Original prefix for prefix matches (internal use).
+   */
+  _originalPrefix?: string;
 }

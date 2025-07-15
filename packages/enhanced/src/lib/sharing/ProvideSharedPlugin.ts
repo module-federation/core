@@ -28,6 +28,7 @@ import {
   addSingletonFilterWarning,
   testRequestFilters,
   createLookupKeyForSharing,
+  extractPathAfterNodeModules,
   getRequiredVersionFromDescriptionFile,
 } from './utils';
 const WebpackError = require(
@@ -92,6 +93,7 @@ class ProvideSharedPlugin {
           request: item,
           exclude: undefined,
           include: undefined,
+          nodeModulesReconstructedLookup: false,
         };
         return result;
       },
@@ -109,6 +111,7 @@ class ProvideSharedPlugin {
           request,
           exclude: item.exclude,
           include: item.include,
+          nodeModulesReconstructedLookup: !!item.nodeModulesReconstructedLookup,
         };
       },
     );
@@ -281,11 +284,12 @@ class ProvideSharedPlugin {
                     ...originalPrefixConfig,
                     shareKey: finalShareKey,
                     request: originalRequestString,
+                    _originalPrefix: configuredPrefix, // Store the original prefix for filtering
                     include: originalPrefixConfig.include
-                      ? { ...originalPrefixConfig.include, request: undefined }
+                      ? { ...originalPrefixConfig.include }
                       : undefined,
                     exclude: originalPrefixConfig.exclude
-                      ? { ...originalPrefixConfig.exclude, request: undefined }
+                      ? { ...originalPrefixConfig.exclude }
                       : undefined,
                   };
 
@@ -299,6 +303,148 @@ class ProvideSharedPlugin {
                   );
                   resolveData.cacheable = false;
                   break;
+                }
+              }
+            }
+
+            // --- Stage 2: Match using reconstructed node_modules path ---
+            if (resource && !resolvedProvideMap.has(lookupKeyForResource)) {
+              const modulePathAfterNodeModules =
+                extractPathAfterNodeModules(resource);
+
+              if (modulePathAfterNodeModules) {
+                // 2a. Direct match with reconstructed path
+                const reconstructedLookupKey = createLookupKeyForSharing(
+                  modulePathAfterNodeModules,
+                  moduleLayer || undefined,
+                );
+                const configFromReconstructedDirect = matchProvides.get(
+                  reconstructedLookupKey,
+                );
+
+                if (
+                  configFromReconstructedDirect !== undefined &&
+                  configFromReconstructedDirect.nodeModulesReconstructedLookup &&
+                  !resolvedProvideMap.has(lookupKeyForResource)
+                ) {
+                  this.provideSharedModule(
+                    compilation,
+                    resolvedProvideMap,
+                    modulePathAfterNodeModules,
+                    configFromReconstructedDirect,
+                    resource,
+                    resourceResolveData,
+                  );
+                  resolveData.cacheable = false;
+                }
+
+                // 2b. Prefix match with reconstructed path
+                if (resource && !resolvedProvideMap.has(lookupKeyForResource)) {
+                  for (const [
+                    prefixLookupKey,
+                    originalPrefixConfig,
+                  ] of prefixMatchProvides) {
+                    if (!originalPrefixConfig.nodeModulesReconstructedLookup) {
+                      continue;
+                    }
+                    const configuredPrefix =
+                      originalPrefixConfig.request ||
+                      prefixLookupKey.split('?')[0];
+
+                    // Refined layer matching logic for reconstructed path
+                    if (originalPrefixConfig.layer) {
+                      if (!moduleLayer) {
+                        continue; // Option is layered, request is not: skip
+                      }
+                      if (moduleLayer !== originalPrefixConfig.layer) {
+                        continue; // Both are layered but do not match: skip
+                      }
+                    }
+                    // If moduleLayer exists but config.layer does not, allow (non-layered option matches layered request)
+
+                    if (
+                      modulePathAfterNodeModules.startsWith(configuredPrefix)
+                    ) {
+                      if (resolvedProvideMap.has(lookupKeyForResource))
+                        continue;
+
+                      const remainder = modulePathAfterNodeModules.slice(
+                        configuredPrefix.length,
+                      );
+                      if (
+                        !testRequestFilters(
+                          remainder,
+                          originalPrefixConfig.include?.request,
+                          originalPrefixConfig.exclude?.request,
+                        )
+                      ) {
+                        continue;
+                      }
+
+                      const finalShareKey =
+                        (originalPrefixConfig.shareKey || configuredPrefix) +
+                        remainder;
+
+                      // Validate singleton usage when using include.request
+                      if (
+                        originalPrefixConfig.include?.request &&
+                        originalPrefixConfig.singleton
+                      ) {
+                        addSingletonFilterWarning(
+                          compilation,
+                          finalShareKey,
+                          'include',
+                          'request',
+                          originalPrefixConfig.include.request,
+                          modulePathAfterNodeModules,
+                          resource,
+                        );
+                      }
+
+                      // Validate singleton usage when using exclude.request
+                      if (
+                        originalPrefixConfig.exclude?.request &&
+                        originalPrefixConfig.singleton
+                      ) {
+                        addSingletonFilterWarning(
+                          compilation,
+                          finalShareKey,
+                          'exclude',
+                          'request',
+                          originalPrefixConfig.exclude.request,
+                          modulePathAfterNodeModules,
+                          resource,
+                        );
+                      }
+                      const configForSpecificModule: ProvidesConfig = {
+                        ...originalPrefixConfig,
+                        shareKey: finalShareKey,
+                        request: modulePathAfterNodeModules,
+                        _originalPrefix: configuredPrefix, // Store the original prefix for filtering
+                        include: originalPrefixConfig.include
+                          ? {
+                              ...originalPrefixConfig.include,
+                            }
+                          : undefined,
+                        exclude: originalPrefixConfig.exclude
+                          ? {
+                              ...originalPrefixConfig.exclude,
+                            }
+                          : undefined,
+                      };
+
+                      this.provideSharedModule(
+                        compilation,
+                        resolvedProvideMap,
+                        modulePathAfterNodeModules,
+                        configForSpecificModule,
+                        resource,
+                        resourceResolveData,
+                      );
+                      resolveData.cacheable = false;
+                      break;
+                    }
+                  }
                 }
               }
             }
@@ -336,10 +482,25 @@ class ProvideSharedPlugin {
               let requestIncludeFailed = false;
               if (config.include.request) {
                 const includeRequestValue = config.include.request;
+                // For prefix matches, we need to check the remainder after the prefix
+                let testString = actualResource;
+
+                // If this is a prefix match (indicated by _originalPrefix being present)
+                // then we should test against the remainder
+                if (
+                  config._originalPrefix &&
+                  actualResource.startsWith(config._originalPrefix)
+                ) {
+                  const remainder = actualResource.slice(
+                    config._originalPrefix.length,
+                  );
+                  testString = remainder;
+                }
+
                 const requestActuallyMatches =
                   includeRequestValue instanceof RegExp
-                    ? includeRequestValue.test(actualResource)
-                    : actualResource === includeRequestValue;
+                    ? includeRequestValue.test(testString)
+                    : testString === includeRequestValue;
                 if (!requestActuallyMatches) {
                   requestIncludeFailed = true;
                 }
@@ -373,10 +534,25 @@ class ProvideSharedPlugin {
               let requestExcludeMatches = false;
               if (config.exclude.request) {
                 const excludeRequestValue = config.exclude.request;
+                // For prefix matches, we need to check the remainder after the prefix
+                let testString = actualResource;
+
+                // If this is a prefix match (indicated by _originalPrefix being present)
+                // then we should test against the remainder
+                if (
+                  config._originalPrefix &&
+                  actualResource.startsWith(config._originalPrefix)
+                ) {
+                  const remainder = actualResource.slice(
+                    config._originalPrefix.length,
+                  );
+                  testString = remainder;
+                }
+
                 const requestActuallyMatchesExclude =
                   excludeRequestValue instanceof RegExp
-                    ? excludeRequestValue.test(actualResource)
-                    : actualResource === excludeRequestValue;
+                    ? excludeRequestValue.test(testString)
+                    : testString === excludeRequestValue;
                 if (requestActuallyMatchesExclude) {
                   requestExcludeMatches = true;
                 }
