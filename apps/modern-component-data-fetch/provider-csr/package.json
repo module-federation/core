@@ -8,6 +8,7 @@
     "build:watch": "rslib build --watch"
   },
   "devDependencies": {
+    "@module-federation/bridge-react": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@module-federation/storybook-addon": "workspace:*",
