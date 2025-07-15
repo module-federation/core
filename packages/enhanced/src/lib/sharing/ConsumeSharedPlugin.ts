@@ -412,6 +412,16 @@ class ConsumeSharedPlugin {
               );
 
               if (match !== undefined) {
+                // Apply request filters if defined
+                if (
+                  !testRequestFilters(
+                    request,
+                    match.include?.request,
+                    match.exclude?.request,
+                  )
+                ) {
+                  return;
+                }
                 return createConsumeSharedModule(context, request, match);
               }
               for (const [prefix, options] of prefixedConsumes) {
@@ -482,6 +492,20 @@ class ConsumeSharedPlugin {
             if (resource) {
               const options = resolvedConsumes.get(resource);
               if (options !== undefined) {
+                // Extract request from resource path for filtering
+                const request =
+                  extractPathAfterNodeModules(resource) || resource;
+
+                // Apply request filters if defined
+                if (
+                  !testRequestFilters(
+                    request,
+                    options.include?.request,
+                    options.exclude?.request,
+                  )
+                ) {
+                  return Promise.resolve();
+                }
                 return createConsumeSharedModule(context, resource, options);
               }
             }
