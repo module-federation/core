@@ -21,14 +21,14 @@ module.exports = {
             version: '^2.0.0',
           },
         },
-        './version-include-fail': {
+        './version-include-fail.js': {
           shareKey: 'version-include-fail',
           version: '1.2.0',
           include: {
             version: '^2.0.0',
           },
         },
-        './version-exclude-fail': {
+        './version-exclude-fail.js': {
           shareKey: 'version-exclude-fail',
           version: '2.0.0',
           exclude: {

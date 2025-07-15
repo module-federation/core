@@ -145,7 +145,7 @@ class ProvideSharedPlugin {
             actualRequest,
             config.layer,
           );
-          if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
+          if (/^(\/|[A-Za-z]:\\|\\\\|\.\.(\/|$))/.test(actualRequest)) {
             resolvedProvideMap.set(lookupKey, {
               config,
               version: config.version,
@@ -478,17 +478,11 @@ class ProvideSharedPlugin {
       const shouldSkipRequest = config.include.request && requestIncludeFailed;
 
       if (shouldSkipVersion || shouldSkipRequest) {
-        console.log(
-          `[DEBUG] Skipping module ${key} due to include filter failure`,
-          {
-            shouldSkipVersion,
-            shouldSkipRequest,
-            versionIncludeFailed,
-            requestIncludeFailed,
-            version,
-            includeVersion: config.include.version,
-          },
+        const error = new WebpackError(
+          `Shared module "${key}" (${resource}) version "${version}" does not satisfy include filter: ${config.include.version}`,
         );
+        error.file = `shared module ${key} -> ${resource}`;
+        compilation.warnings.push(error);
         return;
       }
 
@@ -549,15 +543,11 @@ class ProvideSharedPlugin {
 
       // Skip if any specified exclude condition matched
       if (versionExcludeMatches || requestExcludeMatches) {
-        console.log(
-          `[DEBUG] Skipping module ${key} due to exclude filter match`,
-          {
-            versionExcludeMatches,
-            requestExcludeMatches,
-            version,
-            excludeVersion: config.exclude.version,
-          },
+        const error = new WebpackError(
+          `Shared module "${key}" (${resource}) version "${version}" matches exclude filter: ${config.exclude.version}`,
         );
+        error.file = `shared module ${key} -> ${resource}`;
+        compilation.warnings.push(error);
         return;
       }
 
@@ -576,13 +566,6 @@ class ProvideSharedPlugin {
     }
 
     const lookupKey = createLookupKeyForSharing(resource, config.layer);
-    console.log(`[DEBUG] Adding module ${key} to resolvedProvideMap`, {
-      lookupKey,
-      version,
-      resource,
-      includeVersion: config.include?.version,
-      excludeVersion: config.exclude?.version,
-    });
     resolvedProvideMap.set(lookupKey, {
       config,
       version,
