@@ -11,6 +11,10 @@ module.exports = (rollupConfig, _projectOptions) => {
       ],
     }),
   );
+
+  // Set external dependencies explicitly like other packages
+  rollupConfig.external = [/@module-federation/, '@rsbuild/core'];
+
   rollupConfig.input = {
     index: 'packages/rsbuild-plugin/src/cli/index.ts',
     utils: 'packages/rsbuild-plugin/src/utils/index.ts',
