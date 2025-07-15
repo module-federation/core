@@ -1,0 +1,10 @@
+{
+  "name": "mcp-remote1",
+  "version": "0.0.1",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/node": "workspace:*"
+  },
+  "type": "commonjs"
+}
