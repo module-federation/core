@@ -26,7 +26,7 @@
     "@module-federation/dts-plugin": "workspace:*",
     "commander": "11.1.0",
     "chalk": "3.0.0",
-    "@modern-js/node-bundle-require": "2.68.0"
+    "@modern-js/node-bundle-require": "2.68.2"
   },
   "devDependencies": {
     "@types/node": "~16.11.7"
