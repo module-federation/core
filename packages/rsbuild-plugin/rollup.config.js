@@ -23,27 +23,6 @@ module.exports = (rollupConfig, _projectOptions) => {
     }`;
   });
 
-  // Mark workspace dependencies as external to avoid bundling them
-  const workspaceDependencies = [
-    '@module-federation/sdk',
-    '@module-federation/enhanced',
-    '@module-federation/node',
-  ];
-
-  if (Array.isArray(rollupConfig.external)) {
-    rollupConfig.external.push(...workspaceDependencies);
-  } else if (typeof rollupConfig.external === 'function') {
-    const originalExternal = rollupConfig.external;
-    rollupConfig.external = (id, parentId, isResolved) => {
-      if (workspaceDependencies.includes(id)) {
-        return true;
-      }
-      return originalExternal(id, parentId, isResolved);
-    };
-  } else {
-    rollupConfig.external = workspaceDependencies;
-  }
-
   // rollupConfig
   return rollupConfig;
 };
