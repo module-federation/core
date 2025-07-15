@@ -44,4 +44,5 @@ export type ModuleFederationRuntimePlugin = CoreLifeCyclePartial &
   ModuleBridgeLifeCycleCyclePartial & {
     name: string;
     version?: string;
+    apply?: (instance: ModuleFederation) => void;
   };

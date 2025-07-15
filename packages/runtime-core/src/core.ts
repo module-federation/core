@@ -323,14 +323,7 @@ export class ModuleFederation {
   }
 
   registerPlugins(plugins: UserOptions['plugins']) {
-    const pluginRes = registerPlugins(plugins, [
-      this.hooks,
-      this.remoteHandler.hooks,
-      this.sharedHandler.hooks,
-      this.snapshotHandler.hooks,
-      this.loaderHook,
-      this.bridgeHook,
-    ]);
+    const pluginRes = registerPlugins(plugins, this);
     // Merge plugin
     this.options.plugins = this.options.plugins.reduce((res, plugin) => {
       if (!plugin) return res;

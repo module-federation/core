@@ -7,7 +7,7 @@ import React, {
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
-import { createRemoteComponent } from '@module-federation/bridge-react';
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
@@ -67,13 +67,13 @@ const FallbackErrorComp = (info: any) => {
 
 const FallbackComp = <div data-test-id="loading">loading...</div>;
 
-const Remote1App = createRemoteComponent({
+const Remote1App = createRemoteAppComponent({
   loader: () => loadRemote('remote1/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
-const Remote5App = createRemoteComponent({
+const Remote5App = createRemoteAppComponent({
   loader: () => loadRemote('remote5/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
@@ -136,26 +136,26 @@ const Remote1AppWithErrorBoundary = React.forwardRef<any, any>((props, ref) => (
   </ErrorBoundary>
 ));
 
-const Remote2App = createRemoteComponent({
+const Remote2App = createRemoteAppComponent({
   loader: () => import('remote2/export-app'),
   export: 'provider',
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
-const Remote3App = createRemoteComponent({
+const Remote3App = createRemoteAppComponent({
   loader: () => loadRemote('remote3/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 });
 
-const RemoteRenderErrorApp = createRemoteComponent({
+const RemoteRenderErrorApp = createRemoteAppComponent({
   loader: () => loadRemote('remote-render-error/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
 }) as ForwardRefExoticComponent<unknown>;
 
-const RemoteResourceErrorApp = createRemoteComponent({
+const RemoteResourceErrorApp = createRemoteAppComponent({
   loader: () => loadRemote('remote-resource-error/export-app'),
   fallback: FallbackErrorComp,
   loading: FallbackComp,
