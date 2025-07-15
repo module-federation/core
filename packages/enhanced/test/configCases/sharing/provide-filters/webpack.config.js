@@ -7,14 +7,14 @@ module.exports = {
     new ProvideSharedPlugin({
       provides: {
         // Version filtering tests
-        './version-include': {
+        './version-include.js': {
           shareKey: 'version-include',
           version: '1.2.0',
           include: {
             version: '^1.0.0',
           },
         },
-        './version-exclude': {
+        './version-exclude.js': {
           shareKey: 'version-exclude',
           version: '1.2.0',
           exclude: {
@@ -36,7 +36,7 @@ module.exports = {
           },
         },
         // Singleton with filters
-        './singleton-filter': {
+        './singleton-filter.js': {
           shareKey: 'singleton-filter',
           version: '1.0.0',
           singleton: true,
