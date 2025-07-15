@@ -21,7 +21,7 @@ Based on a detailed diff analysis, this document provides a more accurate breakd
 
 ### PR 2: Hook Renaming and Cleanup
 **Size**: Small (~6 files)
-**Risk**: Medium (potential breaking change)
+**Risk**: Low (internal refactoring only - all usages updated)
 **Type**: Refactor
 **Feature**: Rename container hooks for clarity and consistency
 
@@ -31,18 +31,22 @@ Based on a detailed diff analysis, this document provides a more accurate breakd
 - `src/lib/container/runtime/FederationModulesPlugin.ts`
 - `src/lib/container/runtime/EmbedFederationRuntimePlugin.ts`
 - `src/lib/container/RemoteModule.ts` (use new hook)
+- Any other files that reference these hooks
 
 **Changes**:
 - `addContainerEntryModule` → `addContainerEntryDependency`
 - `addFederationRuntimeModule` → `addFederationRuntimeDependency`
 - Add new `addRemoteDependency` hook
 
-**Implementation with backward compatibility**:
+**Implementation**:
 ```javascript
+// Direct rename - all usages updated in same PR
 compiler.hooks.addContainerEntryDependency = new SyncHook([...]);
-compiler.hooks.addContainerEntryModule = compiler.hooks.addContainerEntryDependency; // deprecated
+compiler.hooks.addFederationRuntimeDependency = new SyncHook([...]);
+compiler.hooks.addRemoteDependency = new SyncHook([...]);
 ```
 
+**Note**: This is NOT a breaking change because all hook usages within the codebase are updated in the same PR.
 ---
 
 ### PR 3: Enhanced HoistContainerReferencesPlugin
@@ -282,4 +286,8 @@ All Feature PRs ─────────────────────�
 2. **Reduced Risk**: Smaller, focused changes are easier to review and test
 3. **Flexibility**: Some PRs can be developed in parallel
 4. **Progressive Enhancement**: Each filtering feature builds on the previous
+<<<<<<< HEAD
 5. **Early Wins**: Runtime fixes and hook renaming can be merged quickly
+=======
+5. **Early Wins**: Runtime fixes and hook renaming can be merged quickly
+>>>>>>> origin/refactor/hook-renaming-cleanup-v2
