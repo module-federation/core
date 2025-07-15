@@ -157,5 +157,260 @@ describe('Fallback Version Filtering', () => {
       expect(versionToCheck).toBe('16.8.0');
       expect(shouldExclude).toBe(true); // Should be excluded
     });
+
+    it('should simulate ProvideSharedPlugin filtering logic', () => {
+      // Simulate the actual filtering logic used in ProvideSharedPlugin
+      const testCases = [
+        {
+          name: 'include filter passes with fallbackVersion',
+          actualVersion: '1.2.0',
+          config: {
+            include: {
+              version: '^2.0.0',
+              fallbackVersion: '2.1.0',
+            },
+          },
+          expected: true, // Should provide because fallbackVersion satisfies include
+        },
+        {
+          name: 'include filter fails even with fallbackVersion',
+          actualVersion: '1.2.0',
+          config: {
+            include: {
+              version: '^2.0.0',
+              fallbackVersion: '1.5.0',
+            },
+          },
+          expected: false, // Should not provide because fallbackVersion doesn't satisfy include
+        },
+        {
+          name: 'exclude filter triggers with fallbackVersion',
+          actualVersion: '2.0.0',
+          config: {
+            exclude: {
+              version: '^1.0.0',
+              fallbackVersion: '1.5.0',
+            },
+          },
+          expected: false, // Should not provide because fallbackVersion matches exclude
+        },
+        {
+          name: 'exclude filter does not trigger with fallbackVersion',
+          actualVersion: '2.0.0',
+          config: {
+            exclude: {
+              version: '^1.0.0',
+              fallbackVersion: '3.0.0',
+            },
+          },
+          expected: true, // Should provide because fallbackVersion doesn't match exclude
+        },
+      ];
+
+      testCases.forEach((testCase) => {
+        // Simulate ProvideSharedPlugin include filtering logic
+        let shouldProvide = true;
+
+        if (testCase.config.include) {
+          let versionIncludeFailed = false;
+          if (typeof testCase.config.include.version === 'string') {
+            if (
+              typeof testCase.actualVersion === 'string' &&
+              testCase.actualVersion
+            ) {
+              if (
+                !satisfy(
+                  testCase.actualVersion,
+                  testCase.config.include.version,
+                )
+              ) {
+                versionIncludeFailed = true;
+              }
+            } else {
+              versionIncludeFailed = true;
+            }
+          }
+
+          // Check fallback version for include
+          if (
+            versionIncludeFailed &&
+            testCase.config.include &&
+            typeof testCase.config.include.fallbackVersion === 'string' &&
+            testCase.config.include.fallbackVersion
+          ) {
+            if (
+              satisfy(
+                testCase.config.include.fallbackVersion,
+                testCase.config.include.version,
+              )
+            ) {
+              versionIncludeFailed = false; // fallbackVersion satisfies, so include
+            }
+          }
+
+          if (versionIncludeFailed) {
+            shouldProvide = false;
+          }
+        }
+
+        if (testCase.config.exclude && shouldProvide) {
+          let versionExcludeMatches = false;
+          if (
+            typeof testCase.config.exclude.version === 'string' &&
+            typeof testCase.actualVersion === 'string' &&
+            testCase.actualVersion
+          ) {
+            if (
+              satisfy(testCase.actualVersion, testCase.config.exclude.version)
+            ) {
+              versionExcludeMatches = true;
+            }
+          }
+
+          // Check fallback version for exclude
+          if (
+            !versionExcludeMatches &&
+            testCase.config.exclude &&
+            typeof testCase.config.exclude.fallbackVersion === 'string' &&
+            testCase.config.exclude.fallbackVersion
+          ) {
+            if (
+              satisfy(
+                testCase.config.exclude.fallbackVersion,
+                testCase.config.exclude.version,
+              )
+            ) {
+              versionExcludeMatches = true; // fallbackVersion satisfies, so exclude
+            }
+          }
+
+          if (versionExcludeMatches) {
+            shouldProvide = false;
+          }
+        }
+
+        expect(shouldProvide).toBe(testCase.expected);
+      });
+    });
+  });
+
+  describe('Complex Scenarios', () => {
+    it('should handle multiple filter combinations with fallbackVersion', () => {
+      const scenarios = [
+        {
+          description: 'Both include and exclude with fallbackVersion',
+          actualVersion: '2.5.0',
+          include: { version: '^3.0.0', fallbackVersion: '3.1.0' },
+          exclude: { version: '^2.0.0', fallbackVersion: '1.0.0' },
+          expectedResult: true, // Include fallback satisfies, exclude fallback doesn't
+        },
+        {
+          description:
+            'Include passes but exclude also matches with fallbackVersion',
+          actualVersion: '1.0.0',
+          include: { version: '^2.0.0', fallbackVersion: '2.1.0' },
+          exclude: { version: '^2.0.0', fallbackVersion: '2.2.0' },
+          expectedResult: false, // Both match, but exclude takes precedence
+        },
+      ];
+
+      scenarios.forEach((scenario) => {
+        // Test the logic for each scenario
+        let shouldInclude = true;
+
+        // Include check
+        if (scenario.include) {
+          let includeFailsWithActual = !satisfy(
+            scenario.actualVersion,
+            scenario.include.version,
+          );
+          if (includeFailsWithActual && scenario.include.fallbackVersion) {
+            includeFailsWithActual = !satisfy(
+              scenario.include.fallbackVersion,
+              scenario.include.version,
+            );
+          }
+          if (includeFailsWithActual) {
+            shouldInclude = false;
+          }
+        }
+
+        // Exclude check
+        if (scenario.exclude && shouldInclude) {
+          let excludeMatchesActual = satisfy(
+            scenario.actualVersion,
+            scenario.exclude.version,
+          );
+          if (!excludeMatchesActual && scenario.exclude.fallbackVersion) {
+            excludeMatchesActual = satisfy(
+              scenario.exclude.fallbackVersion,
+              scenario.exclude.version,
+            );
+          }
+          if (excludeMatchesActual) {
+            shouldInclude = false;
+          }
+        }
+
+        expect(shouldInclude).toBe(scenario.expectedResult);
+      });
+    });
+
+    it('should handle edge cases with empty and invalid versions', () => {
+      const edgeCases = [
+        {
+          description: 'Empty actualVersion with valid fallbackVersion',
+          actualVersion: '',
+          include: { version: '^1.0.0', fallbackVersion: '1.2.0' },
+          expectedResult: true,
+        },
+        {
+          description: 'Invalid actualVersion with valid fallbackVersion',
+          actualVersion: 'not-a-version',
+          include: { version: '^1.0.0', fallbackVersion: '1.2.0' },
+          expectedResult: true,
+        },
+        {
+          description: 'Valid actualVersion with invalid fallbackVersion',
+          actualVersion: '1.2.0',
+          include: { version: '^2.0.0', fallbackVersion: 'invalid' },
+          expectedResult: false, // Actual doesn't satisfy, fallback is invalid
+        },
+      ];
+
+      edgeCases.forEach((edgeCase) => {
+        let shouldInclude = true;
+
+        if (edgeCase.include) {
+          let includeFailsWithActual = false;
+
+          // Check if actual version satisfies
+          if (
+            !edgeCase.actualVersion ||
+            !satisfy(edgeCase.actualVersion, edgeCase.include.version)
+          ) {
+            includeFailsWithActual = true;
+          }
+
+          // If actual version fails, try fallback
+          if (includeFailsWithActual && edgeCase.include.fallbackVersion) {
+            if (
+              satisfy(
+                edgeCase.include.fallbackVersion,
+                edgeCase.include.version,
+              )
+            ) {
+              includeFailsWithActual = false;
+            }
+          }
+
+          if (includeFailsWithActual) {
+            shouldInclude = false;
+          }
+        }
+
+        expect(shouldInclude).toBe(edgeCase.expectedResult);
+      });
+    });
   });
 });
