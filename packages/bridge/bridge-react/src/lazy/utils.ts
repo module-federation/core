@@ -19,7 +19,7 @@ import type {
   MF_DATA_FETCH_MAP_VALUE_PROMISE_SET,
   MF_DATA_FETCH_CACHE,
 } from './types';
-import type { FederationHost } from '@module-federation/runtime';
+import type { ModuleFederation } from '@module-federation/runtime';
 import { clearStore } from './data-fetch/cache';
 
 export const getDataFetchInfo = ({
@@ -207,7 +207,7 @@ export function getDataFetchMapKey(
 }
 
 export async function loadDataFetchModule(
-  instance: FederationHost,
+  instance: ModuleFederation,
   id: string,
 ) {
   return instance.loadRemote(id).then((m) => {
@@ -348,7 +348,7 @@ export function setSSREnv({
 
 export function getLoadedRemoteInfos(
   id: string,
-  instance: FederationHost | null,
+  instance: ModuleFederation | null,
 ) {
   if (!instance) {
     return;

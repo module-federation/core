@@ -1,4 +1,4 @@
-import type { FederationHost } from '../../core';
+import type { ModuleFederation } from '../../core';
 import { assert, isPlainObject } from '../../utils';
 
 export type Plugin<T extends Record<string, any>> = {
@@ -6,7 +6,7 @@ export type Plugin<T extends Record<string, any>> = {
 } & {
   name: string;
   version?: string;
-  apply?: (instance: FederationHost) => void;
+  apply?: (instance: ModuleFederation) => void;
 };
 
 export class PluginSystem<T extends Record<string, any>> {
@@ -19,7 +19,7 @@ export class PluginSystem<T extends Record<string, any>> {
     this.lifecycleKeys = Object.keys(lifecycle);
   }
 
-  applyPlugin(plugin: Plugin<T>, instance: FederationHost): void {
+  applyPlugin(plugin: Plugin<T>, instance: ModuleFederation): void {
     assert(isPlainObject(plugin), 'Plugin configuration is invalid.');
     // The plugin's name is mandatory and must be unique
     const pluginName = plugin.name;

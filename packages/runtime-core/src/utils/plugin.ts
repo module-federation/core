@@ -1,10 +1,10 @@
-import { FederationHost } from '../core';
+import { ModuleFederation } from '../core';
 import { UserOptions } from '../type';
 import { getGlobalHostPlugins } from '../global';
 
 export function registerPlugins(
   plugins: UserOptions['plugins'],
-  instance: FederationHost,
+  instance: ModuleFederation,
 ) {
   const globalPlugins = getGlobalHostPlugins();
   const hookInstances = [

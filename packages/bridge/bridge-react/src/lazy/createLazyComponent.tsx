@@ -1,4 +1,4 @@
-import type { FederationHost, getInstance } from '@module-federation/runtime';
+import type { ModuleFederation, getInstance } from '@module-federation/runtime';
 import type { BasicProviderModuleInfo } from '@module-federation/sdk';
 import React, { ReactNode, useState, useEffect } from 'react';
 import type { ErrorInfo } from './AwaitDataFetch';
@@ -51,7 +51,7 @@ type ReactKey = { key?: React.Key | null };
 
 function getTargetModuleInfo(
   id: string,
-  instance?: FederationHost,
+  instance?: ModuleFederation,
 ):
   | {
       module: BasicProviderModuleInfo['modules'][0];

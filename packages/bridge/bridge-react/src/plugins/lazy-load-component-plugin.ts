@@ -1,5 +1,5 @@
 import type {
-  FederationHost,
+  ModuleFederation,
   FederationRuntimePlugin,
 } from '@module-federation/runtime';
 import {
@@ -11,7 +11,7 @@ import {
 import type { CreateLazyComponentOptions, PrefetchOptions } from '../lazy';
 
 declare module '@module-federation/runtime-core' {
-  interface FederationHost {
+  interface ModuleFederation {
     createLazyComponent<T, E extends keyof T>(
       options: Omit<CreateLazyComponentOptions<T, E>, 'instance'>,
     ): ReturnType<typeof createLazyComponent<T, E>>;
@@ -27,7 +27,7 @@ declare module '@module-federation/runtime-core' {
 export function lazyLoadComponentPlugin(): FederationRuntimePlugin {
   return {
     name: 'lazy-load-component-plugin',
-    apply(instance: FederationHost) {
+    apply(instance: ModuleFederation) {
       instance.registerPlugins([autoFetchDataPlugin()]);
 
       instance.createLazyComponent = (options) => {

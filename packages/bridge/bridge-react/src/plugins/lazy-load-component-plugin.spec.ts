@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { lazyLoadComponentPlugin } from './lazy-load-component-plugin';
-import type { FederationHost } from '@module-federation/runtime';
+import type { ModuleFederation } from '@module-federation/runtime';
 
 describe('lazyLoadComponentPlugin', () => {
   it('should register lazy load component methods on the instance', () => {
     const instance = {
       registerPlugins: vi.fn(),
-    } as unknown as FederationHost;
+    } as unknown as ModuleFederation;
 
     const plugin = lazyLoadComponentPlugin();
     if (plugin.apply) {

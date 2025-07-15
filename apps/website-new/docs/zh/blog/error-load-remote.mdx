@@ -57,11 +57,11 @@ Module Federation 官方提供重试插件 [@module-federation/retry-plugin](htt
 ```diff
 
 import React from 'react';
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 + import { RetryPlugin } from '@module-federation/retry-plugin';
 
 // 模块注册
-init({
+const mf = createInstance({
     name: 'host',
     remotes: [
         {
@@ -79,7 +79,7 @@ init({
 });
 
 // 模块加载
-const Remote1Button = React.lazy(() => loadRemote('remote1/button'));
+const Remote1Button = React.lazy(() => mf.loadRemote('remote1/button'));
 
 export default () => {
   return (
@@ -90,7 +90,7 @@ export default () => {
 }
 
 // 方法/函数加载
-loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
+mf.loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
     md.add(1,2,3);
 });
 
@@ -171,15 +171,16 @@ export default retryPlugin;
 
 
 #### 纯运行时 + 动态 import
+
 纯运行时注册时，远程模块在注册后实际加载前才会请求资源。
 
 ```tsx
 import React from 'react';
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 
 // 模块注册
-init({
+const mf = createInstance({
     name: 'host',
     remotes: [
         {
@@ -218,10 +219,10 @@ loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=
 
 ```diff
 import React from 'react';
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
 
-+ const fallbackPlugin: () => FederationRuntimePlugin = function () {
++ const fallbackPlugin: () => ModuleFederationRuntimePlugin = function () {
 +  return {
 +    name: 'fallback-plugin',
 +    errorLoadRemote(args) {
@@ -231,7 +232,7 @@ import { RetryPlugin } from '@module-federation/retry-plugin';
 + };
 
 // 模块注册
-init({
+const mf = createInstance({
     name: 'host',
     remotes: [
         {
@@ -250,7 +251,7 @@ init({
 });
 
 // 模块加载
-const Remote1Button = React.lazy(() => loadRemote('remote1/button'));
+const Remote1Button = React.lazy(() => mf.loadRemote('remote1/button'));
 
 export default () => {
   return (
@@ -261,7 +262,7 @@ export default () => {
 }
 
 // 方法/函数加载
-loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
+mf.loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
     md.add(1,2,3);
 });
 
@@ -320,7 +321,7 @@ export default defineConfig({
 
 ```tsx
 // src/runtime-plugin/fallback.ts
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
 interface FallbackConfig {
   // 备用服务地址
@@ -329,7 +330,7 @@ interface FallbackConfig {
   errorMessage?: string;
 }
 
-const fallbackPlugin = (config: FallbackConfig = {}): FederationRuntimePlugin => {
+const fallbackPlugin = (config: FallbackConfig = {}): ModuleFederationRuntimePlugin => {
   const {
     backupEntryUrl = 'http://localhost:2002/mf-manifest.json',
     errorMessage = '模块加载失败，请稍后重试'
@@ -494,9 +495,9 @@ export default fallbackPlugin;
      如果不需要区分错误类型，也可以使用一个通用的错误处理方案：
 
   ```ts
-  import type { FederationRuntimePlugin } from '@module-federation/runtime';
+  import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
-  const fallbackPlugin = (errorMessage = '模块加载失败，请稍后重试'): FederationRuntimePlugin => {
+  const fallbackPlugin = (errorMessage = '模块加载失败，请稍后重试'): ModuleFederationRuntimePlugin => {
     return {
       name: 'fallback-plugin',
       async errorLoadRemote() {

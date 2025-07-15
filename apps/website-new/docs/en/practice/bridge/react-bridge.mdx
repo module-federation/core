@@ -191,20 +191,20 @@ allowing developers to focus solely on how to use the remote component.
 
 Register the `lazyLoadComponentPlugin` at runtime to make the `createLazyComponent` and `prefetch` APIs available.
 
+import { Steps, Tab, Tabs } from '@theme';
+
+<Tabs>
+  <Tab label="Build Plugin(Use build plugin)">
+
 ```ts
-import { init } from '@module-federation/runtime';
+import { getInstance } from '@module-federation/runtime';
 import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
 
-const instance = init({
-  name: 'host',
-  remotes,
-  plugins: [lazyLoadComponentPlugin()]
-});
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()])
 
-```
-After registration, you can use the `createLazyComponent` and `prefetch` APIs.
+// After registration, you can use the `createLazyComponent` and `prefetch` APIs.
 
-```ts
 instance.prefetch({
   id: 'dynamic_remote'
 });
@@ -221,6 +221,39 @@ const LazyComponent = instance.createLazyComponent({
 });
 
 ```
+  </Tab>
+  <Tab label="Pure Runtime(Not use build plugin)">
+
+```ts
+import { createInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+const instance = createInstance({
+  name: 'host',
+  remotes,
+  plugins: [lazyLoadComponentPlugin()]
+});
+
+// After registration, you can use the `createLazyComponent` and `prefetch` APIs.
+
+instance.prefetch({
+  id: 'dynamic_remote'
+});
+
+const LazyComponent = instance.createLazyComponent({
+  loader: () => loadRemote('dynamic_remote'),
+  loading: 'loading...',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+
+```
+  </Tab>
+</Tabs>
 
 ## API Reference
 
