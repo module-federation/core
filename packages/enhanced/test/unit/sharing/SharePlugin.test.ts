@@ -44,6 +44,31 @@ const SharePlugin = require('../../../src/lib/sharing/SharePlugin').default;
 
 describe('SharePlugin', () => {
   describe('constructor', () => {
+    it('should throw error for empty shared configuration', () => {
+      expect(() => {
+        new SharePlugin({
+          shared: {},
+        });
+      }).toThrow(
+        'SharePlugin requires at least one shared module configuration',
+      );
+    });
+
+    it('should throw error for conflicting include/exclude filters', () => {
+      expect(() => {
+        new SharePlugin({
+          shared: {
+            react: {
+              include: { version: '^17.0.0' },
+              exclude: { version: '^16.0.0' },
+            },
+          },
+        });
+      }).toThrow(
+        'Cannot specify both include and exclude filters for shared module "react"',
+      );
+    });
+
     it('should initialize with string shareScope', () => {
       const plugin = new SharePlugin({
         shareScope: shareScopes.string,
@@ -192,6 +217,72 @@ describe('SharePlugin', () => {
       const reactConsume = consumes.find((consume) => 'react' in consume);
       expect(reactConsume).toBeDefined();
       expect(reactConsume.react.import).toBe(false);
+    });
+  });
+
+  describe('helper methods', () => {
+    let plugin: any;
+
+    beforeEach(() => {
+      plugin = new SharePlugin({
+        shareScope: 'test-scope',
+        shared: {
+          react: '^17.0.0',
+          lodash: {
+            import: false,
+            requiredVersion: '^4.17.0',
+          },
+          utils: {
+            version: '1.0.0',
+          },
+        },
+      });
+    });
+
+    it('should return original options via getOptions()', () => {
+      const options = plugin.getOptions();
+      expect(options).toBeDefined();
+      expect(options.shareScope).toBe('test-scope');
+      expect(options.shared.react).toBe('^17.0.0');
+    });
+
+    it('should return share scope via getShareScope()', () => {
+      const shareScope = plugin.getShareScope();
+      expect(shareScope).toBe('test-scope');
+    });
+
+    it('should return consumes via getConsumes()', () => {
+      const consumes = plugin.getConsumes();
+      expect(consumes).toBeInstanceOf(Array);
+      expect(consumes.length).toBe(3);
+    });
+
+    it('should return provides via getProvides()', () => {
+      const provides = plugin.getProvides();
+      expect(provides).toBeInstanceOf(Array);
+      expect(provides.length).toBe(2); // lodash excluded due to import: false
+    });
+
+    it('should return shared info via getSharedInfo()', () => {
+      const info = plugin.getSharedInfo();
+      expect(info).toEqual({
+        totalShared: 3,
+        consumeOnly: 1,
+        provideAndConsume: 2,
+        shareScopes: ['test-scope'],
+      });
+    });
+
+    it('should handle array shareScope in getSharedInfo()', () => {
+      const arrayPlugin = new SharePlugin({
+        shareScope: ['scope1', 'scope2'],
+        shared: {
+          react: '^17.0.0',
+        },
+      });
+
+      const info = arrayPlugin.getSharedInfo();
+      expect(info.shareScopes).toEqual(['scope1', 'scope2']);
     });
   });
 
