@@ -14,7 +14,6 @@
     "@module-federation/nextjs-mf": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/utilities": "workspace:*",
-    "@nx/next": "21.0.3",
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0"
   },
