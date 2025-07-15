@@ -200,20 +200,19 @@ const App = () => {
 ### 注册 lazyLoadComponentPlugin
 在运行时注册 `lazyLoadComponentPlugin` 插件，用于注册 `createLazyComponent`、`prefetch` API。
 
+import { Steps, Tab, Tabs } from '@theme';
+
+<Tabs>
+  <Tab label="Build Plugin（使用构建插件）">
 ```ts
-import { init } from '@module-federation/runtime';
+import { getInstance } from '@module-federation/runtime';
 import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
 
-const instance = init({
-  name: 'host',
-  remotes,
-  plugins: [lazyLoadComponentPlugin()]
-});
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()]);
 
-```
-注册后，即可使用 `createLazyComponent`、`prefetch` API。
+// 注册后，即可使用 `createLazyComponent`、`prefetch` API。
 
-```ts
 instance.prefetch({
   id: 'dynamic_remote'
 });
@@ -230,6 +229,40 @@ const LazyComponent = instance.createLazyComponent({
 });
 
 ```
+</Tab>
+<Tab label="Pure Runtime（未使用构建插件）">
+
+```ts
+import { createInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+
+const instance = createInstance({
+  name: 'host',
+  remotes,
+  plugins: [lazyLoadComponentPlugin()]
+});
+
+// 注册后，即可使用 `createLazyComponent`、`prefetch` API。
+
+instance.prefetch({
+  id: 'dynamic_remote'
+});
+
+const LazyComponent = instance.createLazyComponent({
+  loader: () => loadRemote('dynamic_remote'),
+  loading: 'loading...',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+
+```
+</Tab>
+</Tabs>
+
 
 ## API 参考
 
