@@ -120,6 +120,10 @@
                   "instanceof": "RegExp"
                 }
               ]
+            },
+            "fallbackVersion": {
+              "description": "Fallback version requirement to check if the primary version filter doesn't match.",
+              "type": "string"
             }
           }
         },
@@ -142,6 +146,10 @@
                   "instanceof": "RegExp"
                 }
               ]
+            },
+            "fallbackVersion": {
+              "description": "Fallback version requirement to check if the primary version filter doesn't match.",
+              "type": "string"
             }
           }
         }

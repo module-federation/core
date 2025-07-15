@@ -84,6 +84,10 @@ export interface ProvidesConfig {
      * Request pattern that must match for the module to be provided.
      */
     request?: string | RegExp;
+    /**
+     * Fallback version requirement to check if the primary version filter doesn't match.
+     */
+    fallbackVersion?: string;
   };
   /**
    * Exclude filters for providing shared modules.
@@ -97,5 +101,9 @@ export interface ProvidesConfig {
      * Request pattern that if matched will exclude the module from being provided.
      */
     request?: string | RegExp;
+    /**
+     * Fallback version requirement to check if the primary version filter doesn't match.
+     */
+    fallbackVersion?: string;
   };
 }

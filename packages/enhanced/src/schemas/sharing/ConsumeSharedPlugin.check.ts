@@ -34,6 +34,7 @@ const r = {
         properties: {
           version: { type: 'string' },
           request: { anyOf: [{ type: 'string' }, { instanceof: 'RegExp' }] },
+          fallbackVersion: { type: 'string' },
         },
       },
       exclude: {
@@ -42,6 +43,7 @@ const r = {
         properties: {
           version: { type: 'string' },
           request: { anyOf: [{ type: 'string' }, { instanceof: 'RegExp' }] },
+          fallbackVersion: { type: 'string' },
         },
       },
     },
@@ -308,7 +310,11 @@ function t(
                                   {
                                     const e = p;
                                     for (const e in r)
-                                      if ('version' !== e && 'request' !== e)
+                                      if (
+                                        'version' !== e &&
+                                        'request' !== e &&
+                                        'fallbackVersion' !== e
+                                      )
                                         return (
                                           (t.errors = [
                                             {
@@ -329,7 +335,7 @@ function t(
                                           );
                                         var g = e === p;
                                       } else g = !0;
-                                      if (g)
+                                      if (g) {
                                         if (void 0 !== r.request) {
                                           let e = r.request;
                                           const s = p,
@@ -371,6 +377,24 @@ function t(
                                               (n ? (l.length = n) : (l = null)),
                                             (g = s === p);
                                         } else g = !0;
+                                        if (g)
+                                          if (void 0 !== r.fallbackVersion) {
+                                            const e = p;
+                                            if (
+                                              'string' !=
+                                              typeof r.fallbackVersion
+                                            )
+                                              return (
+                                                (t.errors = [
+                                                  {
+                                                    params: { type: 'string' },
+                                                  },
+                                                ]),
+                                                !1
+                                              );
+                                            g = e === p;
+                                          } else g = !0;
+                                      }
                                     }
                                   }
                                 }
@@ -395,7 +419,11 @@ function t(
                                     {
                                       const e = p;
                                       for (const e in r)
-                                        if ('version' !== e && 'request' !== e)
+                                        if (
+                                          'version' !== e &&
+                                          'request' !== e &&
+                                          'fallbackVersion' !== e
+                                        )
                                           return (
                                             (t.errors = [
                                               {
@@ -418,7 +446,7 @@ function t(
                                             );
                                           var h = e === p;
                                         } else h = !0;
-                                        if (h)
+                                        if (h) {
                                           if (void 0 !== r.request) {
                                             let e = r.request;
                                             const s = p,
@@ -464,6 +492,26 @@ function t(
                                                   : (l = null)),
                                               (h = s === p);
                                           } else h = !0;
+                                          if (h)
+                                            if (void 0 !== r.fallbackVersion) {
+                                              const e = p;
+                                              if (
+                                                'string' !=
+                                                typeof r.fallbackVersion
+                                              )
+                                                return (
+                                                  (t.errors = [
+                                                    {
+                                                      params: {
+                                                        type: 'string',
+                                                      },
+                                                    },
+                                                  ]),
+                                                  !1
+                                                );
+                                              h = e === p;
+                                            } else h = !0;
+                                        }
                                       }
                                     }
                                   }

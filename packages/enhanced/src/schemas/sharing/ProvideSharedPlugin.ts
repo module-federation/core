@@ -140,6 +140,11 @@ export default {
                 },
               ],
             },
+            fallbackVersion: {
+              description:
+                "Fallback version requirement to check if the primary version filter doesn't match.",
+              type: 'string',
+            },
           },
         },
         exclude: {
@@ -163,6 +168,11 @@ export default {
                   instanceof: 'RegExp',
                 },
               ],
+            },
+            fallbackVersion: {
+              description:
+                "Fallback version requirement to check if the primary version filter doesn't match.",
+              type: 'string',
             },
           },
         },

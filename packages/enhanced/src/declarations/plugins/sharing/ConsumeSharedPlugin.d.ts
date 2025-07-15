@@ -91,5 +91,4 @@ export interface ConsumesConfig {
   request?: string;
   exclude?: IncludeExcludeOptions;
   include?: IncludeExcludeOptions;
-  nodeModulesReconstructedLookup?: boolean;
 }

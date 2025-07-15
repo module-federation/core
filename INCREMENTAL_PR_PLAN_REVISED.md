@@ -3,6 +3,8 @@ f# Revised Incremental PR Plan for packages/enhanced Changes
 ## Overview
 Based on a detailed diff analysis, this document provides a more accurate breakdown of changes into focused, incremental PRs. Each PR represents a distinct feature, fix, or refactor that can be merged independently.
 
+**IMPORTANT**: All PRs should be compared against the `share-filter` branch as the base branch for measuring changes and creating pull requests.
+
 ## Updated PR Sequence
 
 ### PR 1: Runtime Safety Fixes
@@ -129,6 +131,8 @@ shared: {
 ---
 
 ### PR 6: Fallback Version Support
+**Branch from**: `pr5-request-pattern-filtering`
+**Compare against**: `share-filter` branch
 **Size**: Small (~6 files)
 **Risk**: Low
 **Type**: Feature
@@ -141,7 +145,7 @@ shared: {
 - Unit tests for fallback version
 - Integration tests
 
-**Depends on**: PR 4
+**Depends on**: PR 4 and PR 5
 
 **API**:
 ```javascript
