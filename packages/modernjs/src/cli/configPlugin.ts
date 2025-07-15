@@ -475,13 +475,15 @@ export const moduleFederationConfigPlugin = (
             headers: corsHeaders,
           },
         },
-        source: {
+        resolve: {
           alias: {
             // TODO: deprecated
             '@modern-js/runtime/mf': require.resolve(
               '@module-federation/modern-js/runtime',
             ),
           },
+        },
+        source: {
           define: defineConfig,
           enableAsyncEntry:
             bundlerType === 'rspack'
