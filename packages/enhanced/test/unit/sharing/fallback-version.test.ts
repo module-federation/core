@@ -302,7 +302,7 @@ describe('Fallback Version Filtering', () => {
           actualVersion: '2.5.0',
           include: { version: '^3.0.0', fallbackVersion: '3.1.0' },
           exclude: { version: '^2.0.0', fallbackVersion: '1.0.0' },
-          expectedResult: true, // Include fallback satisfies, exclude fallback doesn't
+          expectedResult: false, // actualVersion matches exclude version, so excluded
         },
         {
           description:
