@@ -1,4 +1,5 @@
 const copy = require('rollup-plugin-copy');
+const path = require('path');
 
 module.exports = (rollupConfig, _projectOptions) => {
   rollupConfig.plugins.push(
@@ -16,9 +17,18 @@ module.exports = (rollupConfig, _projectOptions) => {
   rollupConfig.external = [/@module-federation/, '@rsbuild/core'];
 
   rollupConfig.input = {
-    index: 'packages/rsbuild-plugin/src/cli/index.ts',
-    utils: 'packages/rsbuild-plugin/src/utils/index.ts',
-    constant: 'packages/rsbuild-plugin/src/constant.ts',
+    index: path.resolve(
+      process.cwd(),
+      './packages/rsbuild-plugin/src/cli/index.ts',
+    ),
+    utils: path.resolve(
+      process.cwd(),
+      './packages/rsbuild-plugin/src/utils/index.ts',
+    ),
+    constant: path.resolve(
+      process.cwd(),
+      './packages/rsbuild-plugin/src/constant.ts',
+    ),
   };
 
   rollupConfig.output.forEach((output) => {
