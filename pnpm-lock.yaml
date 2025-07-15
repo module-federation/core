@@ -694,6 +694,12 @@ importers:
       antd:
         specifier: 4.24.14
         version: 4.24.14(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/core':
         specifier: workspace:*
@@ -707,6 +713,12 @@ importers:
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.5.15
         version: 0.5.15(react-refresh@0.14.2)(webpack@5.98.0)
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -716,6 +728,12 @@ importers:
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
       react-router-dom:
         specifier: ^6.23.1
         version: 6.24.1(react-dom@18.3.1)(react@18.3.1)
@@ -732,6 +750,12 @@ importers:
       '@rspack/plugin-react-refresh':
         specifier: ^0.7.5
         version: 0.7.5(react-refresh@0.14.2)
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -744,6 +768,12 @@ importers:
       lodash:
         specifier: 4.17.21
         version: 4.17.21
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/enhanced':
         specifier: workspace:*
@@ -754,6 +784,12 @@ importers:
       '@rspack/plugin-react-refresh':
         specifier: ^0.7.5
         version: 0.7.5(react-refresh@0.14.2)
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -766,6 +802,12 @@ importers:
       lodash:
         specifier: 4.17.21
         version: 4.17.21
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/enhanced':
         specifier: workspace:*
@@ -776,6 +818,12 @@ importers:
       '@rspack/plugin-react-refresh':
         specifier: ^0.7.5
         version: 0.7.5(react-refresh@0.14.2)
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -785,6 +833,12 @@ importers:
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.3.1)(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@module-federation/enhanced':
         specifier: workspace:*
@@ -798,6 +852,12 @@ importers:
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.5.15
         version: 0.5.15(react-refresh@0.14.2)(webpack@5.98.0)
+      '@types/react':
+        specifier: 18.3.11
+        version: 18.3.11
+      '@types/react-dom':
+        specifier: 18.3.0
+        version: 18.3.0
       react-refresh:
         specifier: 0.14.2
         version: 0.14.2
@@ -22143,7 +22203,7 @@ packages:
       '@babel/core': 7.25.2
       '@babel/plugin-transform-typescript': 7.25.2(@babel/core@7.25.2)
       '@vue/babel-plugin-jsx': 1.2.5(@babel/core@7.25.2)
-      vite: 5.4.18(@types/node@16.11.68)(less@4.3.0)(stylus@0.64.0)
+      vite: 5.4.18(@types/node@18.16.9)(less@4.3.0)(stylus@0.64.0)
       vue: 3.5.13(typescript@5.5.2)
     transitivePeerDependencies:
       - supports-color
@@ -22167,7 +22227,7 @@ packages:
       vite: ^5.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 5.4.18(@types/node@16.11.68)(less@4.3.0)(stylus@0.64.0)
+      vite: 5.4.18(@types/node@18.16.9)(less@4.3.0)(stylus@0.64.0)
       vue: 3.5.13(typescript@5.5.2)
     dev: true
 
@@ -45066,7 +45126,7 @@ packages:
       '@swc/core': 1.10.18(@swc/helpers@0.5.17)
       esbuild: 0.18.20
       jest-worker: 27.5.1
-      schema-utils: 4.3.2
+      schema-utils: 4.3.0
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.99.9(@swc/core@1.10.18)(esbuild@0.18.20)(webpack-cli@5.1.4)
@@ -45092,7 +45152,7 @@ packages:
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       esbuild: 0.17.19
       jest-worker: 27.5.1
-      schema-utils: 4.3.2
+      schema-utils: 4.3.0
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.99.9(@swc/core@1.7.26)(esbuild@0.17.19)(webpack-cli@5.1.4)
@@ -45118,7 +45178,7 @@ packages:
       '@swc/core': 1.7.26(@swc/helpers@0.5.13)
       esbuild: 0.25.0
       jest-worker: 27.5.1
-      schema-utils: 4.3.2
+      schema-utils: 4.3.0
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.98.0(@swc/core@1.7.26)(esbuild@0.25.0)(webpack-cli@5.1.4)

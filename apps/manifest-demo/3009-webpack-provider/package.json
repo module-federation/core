@@ -7,9 +7,13 @@
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/typescript": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
-    "react-refresh": "0.14.2"
+    "react-refresh": "0.14.2",
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.0"
   },
   "dependencies": {
-    "antd": "4.24.14"
+    "antd": "4.24.14",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   }
 }
