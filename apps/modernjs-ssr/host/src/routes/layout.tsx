@@ -1,9 +1,11 @@
 import React from 'react';
 import { Outlet, useNavigate } from '@modern-js/runtime/router';
 import { Layout, Menu } from 'antd';
-
+import { lazyLoadComponentPlugin } from '@module-federation/modern-js/react';
+import { getInstance } from '@module-federation/modern-js/runtime';
 const { Header, Content } = Layout;
 
+getInstance()!.registerPlugins([lazyLoadComponentPlugin()]);
 const App: React.FC = () => {
   const navi = useNavigate();
 

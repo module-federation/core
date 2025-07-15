@@ -7,6 +7,7 @@ import {
   RUNTIME_006,
   RUNTIME_007,
   RUNTIME_008,
+  RUNTIME_009,
   TYPE_001,
   BUILD_001,
   BUILD_002,
@@ -21,6 +22,7 @@ export const runtimeDescMap = {
   [RUNTIME_006]: 'Invalid loadShareSync function call from runtime',
   [RUNTIME_007]: 'Failed to get remote snapshot.',
   [RUNTIME_008]: 'Failed to load script resources.',
+  [RUNTIME_009]: 'Please call createInstance first.',
 };
 
 export const typeDescMap = {

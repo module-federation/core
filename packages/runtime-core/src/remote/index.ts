@@ -27,7 +27,7 @@ import {
   RemoteEntryExports,
   CallFrom,
 } from '../type';
-import { FederationHost } from '../core';
+import { ModuleFederation } from '../core';
 import {
   PluginSystem,
   AsyncHook,
@@ -54,28 +54,28 @@ export interface LoadRemoteMatch {
   expose: string;
   remote: Remote;
   options: Options;
-  origin: FederationHost;
+  origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
 }
 
 export class RemoteHandler {
-  host: FederationHost;
+  host: ModuleFederation;
   idToRemoteMap: Record<string, { name: string; expose: string }>;
 
   hooks = new PluginSystem({
     beforeRegisterRemote: new SyncWaterfallHook<{
       remote: Remote;
-      origin: FederationHost;
+      origin: ModuleFederation;
     }>('beforeRegisterRemote'),
     registerRemote: new SyncWaterfallHook<{
       remote: Remote;
-      origin: FederationHost;
+      origin: ModuleFederation;
     }>('registerRemote'),
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
-      origin: FederationHost;
+      origin: ModuleFederation;
     }>('beforeRequest'),
     onLoad: new AsyncHook<
       [
@@ -85,7 +85,7 @@ export class RemoteHandler {
           pkgNameOrAlias: string;
           remote: Remote;
           options: ModuleOptions;
-          origin: FederationHost;
+          origin: ModuleFederation;
           exposeModule: any;
           exposeModuleFactory: any;
           moduleInstance: Module;
@@ -101,7 +101,7 @@ export class RemoteHandler {
           remote: Remote;
           remoteSnapshot: ModuleInfo;
           preloadConfig: PreloadRemoteArgs;
-          origin: FederationHost;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -118,7 +118,7 @@ export class RemoteHandler {
             | 'beforeLoadShare'
             | 'afterResolve'
             | 'onLoad';
-          origin: FederationHost;
+          origin: ModuleFederation;
         },
       ],
       void | unknown
@@ -128,14 +128,14 @@ export class RemoteHandler {
         {
           preloadOps: Array<PreloadRemoteArgs>;
           options: Options;
-          origin: FederationHost;
+          origin: ModuleFederation;
         },
       ]
     >('beforePreloadRemote'),
     generatePreloadAssets: new AsyncHook<
       [
         {
-          origin: FederationHost;
+          origin: ModuleFederation;
           preloadOptions: PreloadOptions[number];
           remote: Remote;
           remoteInfo: RemoteInfo;
@@ -149,12 +149,12 @@ export class RemoteHandler {
     afterPreloadRemote: new AsyncHook<{
       preloadOps: Array<PreloadRemoteArgs>;
       options: Options;
-      origin: FederationHost;
+      origin: ModuleFederation;
     }>(),
     loadEntry: new AsyncHook<
       [
         {
-          loaderHook: FederationHost['loaderHook'];
+          loaderHook: ModuleFederation['loaderHook'];
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports;
         },
@@ -163,7 +163,7 @@ export class RemoteHandler {
     >(),
   });
 
-  constructor(host: FederationHost) {
+  constructor(host: ModuleFederation) {
     this.host = host;
     this.idToRemoteMap = {};
   }
@@ -342,7 +342,7 @@ export class RemoteHandler {
       })) as {
         id: string;
         options: Options;
-        origin: FederationHost;
+        origin: ModuleFederation;
       };
 
       if (!loadRemoteArgs) {

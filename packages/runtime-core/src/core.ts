@@ -44,20 +44,20 @@ const USE_SNAPSHOT =
     ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
     : true; // Default to true (use snapshot) when not explicitly defined
 
-export class FederationHost {
+export class ModuleFederation {
   options: Options;
   hooks = new PluginSystem({
     beforeInit: new SyncWaterfallHook<{
       userOptions: UserOptions;
       options: Options;
-      origin: FederationHost;
+      origin: ModuleFederation;
       shareInfo: ShareInfos;
     }>('beforeInit'),
     init: new SyncHook<
       [
         {
           options: Options;
-          origin: FederationHost;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -68,7 +68,7 @@ export class FederationHost {
       initScope: InitScope;
       remoteEntryInitOptions: RemoteEntryInitOptions;
       remoteInfo: RemoteInfo;
-      origin: FederationHost;
+      origin: ModuleFederation;
     }>('beforeInitContainer'),
     // maybe will change, temporarily for internal use only
     initContainer: new AsyncWaterfallHook<{
@@ -77,7 +77,7 @@ export class FederationHost {
       remoteEntryInitOptions: RemoteEntryInitOptions;
       remoteInfo: RemoteInfo;
       remoteEntryExports: RemoteEntryExports;
-      origin: FederationHost;
+      origin: ModuleFederation;
       id: string;
       remoteSnapshot?: ModuleInfo;
     }>('initContainer'),
@@ -126,7 +126,7 @@ export class FederationHost {
       [
         {
           getRemoteEntry: typeof getRemoteEntry;
-          origin: FederationHost;
+          origin: ModuleFederation;
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports | undefined;
           globalLoading: Record<
@@ -323,14 +323,7 @@ export class FederationHost {
   }
 
   registerPlugins(plugins: UserOptions['plugins']) {
-    const pluginRes = registerPlugins(plugins, [
-      this.hooks,
-      this.remoteHandler.hooks,
-      this.sharedHandler.hooks,
-      this.snapshotHandler.hooks,
-      this.loaderHook,
-      this.bridgeHook,
-    ]);
+    const pluginRes = registerPlugins(plugins, this);
     // Merge plugin
     this.options.plugins = this.options.plugins.reduce((res, plugin) => {
       if (!plugin) return res;
@@ -342,5 +335,12 @@ export class FederationHost {
   }
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
     return this.remoteHandler.registerRemotes(remotes, options);
+  }
+
+  registerShared(shared: UserOptions['shared']) {
+    this.sharedHandler.registerShared(this.options, {
+      ...this.options,
+      shared,
+    });
   }
 }
