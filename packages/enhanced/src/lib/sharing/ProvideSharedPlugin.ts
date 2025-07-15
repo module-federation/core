@@ -443,6 +443,23 @@ class ProvideSharedPlugin {
         }
       }
 
+      // Check fallback version for include
+      if (
+        versionIncludeFailed &&
+        config.include &&
+        typeof config.include.fallbackVersion === 'string' &&
+        config.include.fallbackVersion
+      ) {
+        if (
+          satisfy(
+            config.include.fallbackVersion,
+            config.include.version as string,
+          )
+        ) {
+          versionIncludeFailed = false; // fallbackVersion satisfies, so include
+        }
+      }
+
       let requestIncludeFailed = false;
       if (config.include.request) {
         const includeRequestValue = config.include.request;
@@ -487,6 +504,23 @@ class ProvideSharedPlugin {
       ) {
         if (satisfy(version, config.exclude.version)) {
           versionExcludeMatches = true;
+        }
+      }
+
+      // Check fallback version for exclude
+      if (
+        !versionExcludeMatches &&
+        config.exclude &&
+        typeof config.exclude.fallbackVersion === 'string' &&
+        config.exclude.fallbackVersion
+      ) {
+        if (
+          satisfy(
+            config.exclude.fallbackVersion,
+            config.exclude.version as string,
+          )
+        ) {
+          versionExcludeMatches = true; // fallbackVersion satisfies, so exclude
         }
       }
 

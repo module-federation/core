@@ -71,8 +71,8 @@ describe('Fallback Version Filtering', () => {
       const fallbackVersion = 'invalid-version';
       const includeVersion = '^1.0.0';
 
-      // This should throw or return false depending on satisfy implementation
-      expect(() => satisfy(fallbackVersion, includeVersion)).toThrow();
+      // Invalid version should return false
+      expect(satisfy(fallbackVersion, includeVersion)).toBe(false);
     });
   });
 
