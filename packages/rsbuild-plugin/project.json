@@ -9,7 +9,7 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "packages/rsbuild-plugin/dist",
-        "main": "packages/rsbuild-plugin/cli/src/index.ts",
+        "main": "packages/rsbuild-plugin/src/cli/index.ts",
         "tsConfig": "packages/rsbuild-plugin/tsconfig.lib.json",
         "assets": [],
         "external": ["@module-federation/*"],
