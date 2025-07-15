@@ -6,7 +6,7 @@ import {
   runtimeDescMap,
 } from '@module-federation/error-codes';
 import { getRemoteEntry, getRemoteEntryUniqueKey } from '../utils/load';
-import { FederationHost } from '../core';
+import { ModuleFederation } from '../core';
 import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
 import { globalLoading } from '../global';
 
@@ -17,14 +17,14 @@ class Module {
   inited = false;
   remoteEntryExports?: RemoteEntryExports;
   lib: RemoteEntryExports | undefined = undefined;
-  host: FederationHost;
+  host: ModuleFederation;
 
   constructor({
     remoteInfo,
     host,
   }: {
     remoteInfo: RemoteInfo;
-    host: FederationHost;
+    host: ModuleFederation;
   }) {
     this.remoteInfo = remoteInfo;
     this.host = host;

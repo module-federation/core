@@ -9,7 +9,7 @@
  * 2. Entry File Loading (afterResolve): Attempts to load from a backup service
  */
 
-import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 interface LifecycleBasedConfig {
   backupEntryUrl?: string;
@@ -18,7 +18,7 @@ interface LifecycleBasedConfig {
 
 export const createLifecycleBasedPlugin = (
   config: LifecycleBasedConfig = {},
-): FederationRuntimePlugin => {
+): ModuleFederationRuntimePlugin => {
   const {
     backupEntryUrl = 'http://localhost:2002/mf-manifest.json',
     errorMessage = 'Module loading failed, please try again later',
