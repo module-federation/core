@@ -5,6 +5,7 @@ import type {
 type WebpackRequire = {
   (id: string): any;
   u: (chunkId: string) => string;
+  g: any;
   p: string;
   m: { [key: string]: any };
   o: (obj: any, prop: string) => boolean;
