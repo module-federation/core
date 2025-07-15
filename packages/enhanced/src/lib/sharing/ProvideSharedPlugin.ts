@@ -478,6 +478,17 @@ class ProvideSharedPlugin {
       const shouldSkipRequest = config.include.request && requestIncludeFailed;
 
       if (shouldSkipVersion || shouldSkipRequest) {
+        console.log(
+          `[DEBUG] Skipping module ${key} due to include filter failure`,
+          {
+            shouldSkipVersion,
+            shouldSkipRequest,
+            versionIncludeFailed,
+            requestIncludeFailed,
+            version,
+            includeVersion: config.include.version,
+          },
+        );
         return;
       }
 
@@ -538,6 +549,15 @@ class ProvideSharedPlugin {
 
       // Skip if any specified exclude condition matched
       if (versionExcludeMatches || requestExcludeMatches) {
+        console.log(
+          `[DEBUG] Skipping module ${key} due to exclude filter match`,
+          {
+            versionExcludeMatches,
+            requestExcludeMatches,
+            version,
+            excludeVersion: config.exclude.version,
+          },
+        );
         return;
       }
 
@@ -556,6 +576,13 @@ class ProvideSharedPlugin {
     }
 
     const lookupKey = createLookupKeyForSharing(resource, config.layer);
+    console.log(`[DEBUG] Adding module ${key} to resolvedProvideMap`, {
+      lookupKey,
+      version,
+      resource,
+      includeVersion: config.include?.version,
+      excludeVersion: config.exclude?.version,
+    });
     resolvedProvideMap.set(lookupKey, {
       config,
       version,
