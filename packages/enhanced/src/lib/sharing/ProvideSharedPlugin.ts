@@ -145,7 +145,7 @@ class ProvideSharedPlugin {
             actualRequest,
             config.layer,
           );
-          if (/^(\/|[A-Za-z]:\\|\\\\|\.\.(\/|$))/.test(actualRequest)) {
+          if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
             resolvedProvideMap.set(lookupKey, {
               config,
               version: config.version,
@@ -314,9 +314,86 @@ class ProvideSharedPlugin {
         const resolvedProvideMap = compilationData.get(compilation);
         if (!resolvedProvideMap) return;
 
+        // Filter out modules that don't pass include/exclude conditions
+        const filteredEntries = Array.from(resolvedProvideMap).filter(
+          ([resourceKey, { config, version, resource }]) => {
+            // Apply the same filtering logic as in provideSharedModule
+            const actualResource = resource || resourceKey;
+
+            // Check include conditions
+            if (config.include) {
+              let versionIncludeFailed = false;
+              if (typeof config.include.version === 'string') {
+                if (typeof version === 'string' && version) {
+                  if (!satisfy(version, config.include.version)) {
+                    versionIncludeFailed = true;
+                  }
+                } else {
+                  versionIncludeFailed = true;
+                }
+              }
+
+              let requestIncludeFailed = false;
+              if (config.include.request) {
+                const includeRequestValue = config.include.request;
+                const requestActuallyMatches =
+                  includeRequestValue instanceof RegExp
+                    ? includeRequestValue.test(actualResource)
+                    : actualResource === includeRequestValue;
+                if (!requestActuallyMatches) {
+                  requestIncludeFailed = true;
+                }
+              }
+
+              // Skip if any specified include condition failed
+              const shouldSkipVersion =
+                typeof config.include.version === 'string' &&
+                versionIncludeFailed;
+              const shouldSkipRequest =
+                config.include.request && requestIncludeFailed;
+
+              if (shouldSkipVersion || shouldSkipRequest) {
+                return false;
+              }
+            }
+
+            // Check exclude conditions
+            if (config.exclude) {
+              let versionExcludeMatches = false;
+              if (
+                typeof config.exclude.version === 'string' &&
+                typeof version === 'string' &&
+                version
+              ) {
+                if (satisfy(version, config.exclude.version)) {
+                  versionExcludeMatches = true;
+                }
+              }
+
+              let requestExcludeMatches = false;
+              if (config.exclude.request) {
+                const excludeRequestValue = config.exclude.request;
+                const requestActuallyMatchesExclude =
+                  excludeRequestValue instanceof RegExp
+                    ? excludeRequestValue.test(actualResource)
+                    : actualResource === excludeRequestValue;
+                if (requestActuallyMatchesExclude) {
+                  requestExcludeMatches = true;
+                }
+              }
+
+              // Skip if any specified exclude condition matched
+              if (versionExcludeMatches || requestExcludeMatches) {
+                return false;
+              }
+            }
+
+            return true;
+          },
+        );
+
         await Promise.all(
-          Array.from(
-            resolvedProvideMap,
+          filteredEntries.map(
             ([resourceKey, { config, version, resource }]) => {
               return new Promise<void>((resolve, reject) => {
                 compilation.addInclude(
@@ -443,23 +520,6 @@ class ProvideSharedPlugin {
         }
       }
 
-      // Check fallback version for include
-      if (
-        versionIncludeFailed &&
-        config.include &&
-        typeof config.include.fallbackVersion === 'string' &&
-        config.include.fallbackVersion
-      ) {
-        if (
-          satisfy(
-            config.include.fallbackVersion,
-            config.include.version as string,
-          )
-        ) {
-          versionIncludeFailed = false; // fallbackVersion satisfies, so include
-        }
-      }
-
       let requestIncludeFailed = false;
       if (config.include.request) {
         const includeRequestValue = config.include.request;
@@ -478,11 +538,6 @@ class ProvideSharedPlugin {
       const shouldSkipRequest = config.include.request && requestIncludeFailed;
 
       if (shouldSkipVersion || shouldSkipRequest) {
-        const error = new WebpackError(
-          `Shared module "${key}" (${resource}) version "${version}" does not satisfy include filter: ${config.include.version}`,
-        );
-        error.file = `shared module ${key} -> ${resource}`;
-        compilation.warnings.push(error);
         return;
       }
 
@@ -512,23 +567,6 @@ class ProvideSharedPlugin {
         }
       }
 
-      // Check fallback version for exclude
-      if (
-        !versionExcludeMatches &&
-        config.exclude &&
-        typeof config.exclude.fallbackVersion === 'string' &&
-        config.exclude.fallbackVersion
-      ) {
-        if (
-          satisfy(
-            config.exclude.fallbackVersion,
-            config.exclude.version as string,
-          )
-        ) {
-          versionExcludeMatches = true; // fallbackVersion satisfies, so exclude
-        }
-      }
-
       let requestExcludeMatches = false;
       if (config.exclude.request) {
         const excludeRequestValue = config.exclude.request;
@@ -543,11 +581,6 @@ class ProvideSharedPlugin {
 
       // Skip if any specified exclude condition matched
       if (versionExcludeMatches || requestExcludeMatches) {
-        const error = new WebpackError(
-          `Shared module "${key}" (${resource}) version "${version}" matches exclude filter: ${config.exclude.version}`,
-        );
-        error.file = `shared module ${key} -> ${resource}`;
-        compilation.warnings.push(error);
         return;
       }
 
