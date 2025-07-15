@@ -137,7 +137,7 @@ export function pluginModuleFederation(
 
   return {
     name: 'plugin-module-federation',
-    async beforeBuild(config) {
+    async config(config) {
       if (!isDev() && config.ssg !== false) {
         enableSSG = true;
       }
@@ -161,6 +161,7 @@ export function pluginModuleFederation(
           ssrDir: 'mf-ssg',
         }),
       );
+      return config;
     },
     builderConfig: {
       plugins: [],

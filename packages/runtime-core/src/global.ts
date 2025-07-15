@@ -1,4 +1,4 @@
-import { FederationHost } from './core';
+import { ModuleFederation } from './core';
 import {
   RemoteEntryExports,
   GlobalShareScopeMap,
@@ -12,14 +12,14 @@ import {
   isDebugMode,
 } from '@module-federation/sdk';
 import { warn } from './utils/logger';
-import { FederationRuntimePlugin } from './type/plugin';
+import { ModuleFederationRuntimePlugin } from './type/plugin';
 
 export interface Federation {
-  __GLOBAL_PLUGIN__: Array<FederationRuntimePlugin>;
+  __GLOBAL_PLUGIN__: Array<ModuleFederationRuntimePlugin>;
   __DEBUG_CONSTRUCTOR_VERSION__?: string;
   moduleInfo: GlobalModuleInfo;
-  __DEBUG_CONSTRUCTOR__?: typeof FederationHost;
-  __INSTANCES__: Array<FederationHost>;
+  __DEBUG_CONSTRUCTOR__?: typeof ModuleFederation;
+  __INSTANCES__: Array<ModuleFederation>;
   __SHARE__: GlobalShareScopeMap;
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
   __PRELOADED_MAP__: Map<string, boolean>;
@@ -119,19 +119,19 @@ export function resetFederationGlobalInfo(): void {
 }
 
 export function setGlobalFederationInstance(
-  FederationInstance: FederationHost,
+  FederationInstance: ModuleFederation,
 ): void {
   CurrentGlobal.__FEDERATION__.__INSTANCES__.push(FederationInstance);
 }
 
 export function getGlobalFederationConstructor():
-  | typeof FederationHost
+  | typeof ModuleFederation
   | undefined {
   return CurrentGlobal.__FEDERATION__.__DEBUG_CONSTRUCTOR__;
 }
 
 export function setGlobalFederationConstructor(
-  FederationConstructor: typeof FederationHost | undefined,
+  FederationConstructor: typeof ModuleFederation | undefined,
   isDebug = isDebugMode(),
 ): void {
   if (isDebug) {
@@ -269,7 +269,7 @@ export const getRemoteEntryExports = (
 // If a plugin is not registered, it is added to the global plugins.
 // If a plugin is already registered, a warning message is logged.
 export const registerGlobalPlugins = (
-  plugins: Array<FederationRuntimePlugin>,
+  plugins: Array<ModuleFederationRuntimePlugin>,
 ): void => {
   const { __GLOBAL_PLUGIN__ } = nativeGlobal.__FEDERATION__;
 
@@ -282,7 +282,7 @@ export const registerGlobalPlugins = (
   });
 };
 
-export const getGlobalHostPlugins = (): Array<FederationRuntimePlugin> =>
+export const getGlobalHostPlugins = (): Array<ModuleFederationRuntimePlugin> =>
   nativeGlobal.__FEDERATION__.__GLOBAL_PLUGIN__;
 
 export const getPreloaded = (id: string) =>

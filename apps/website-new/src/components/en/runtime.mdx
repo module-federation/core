@@ -1,0 +1,31 @@
+If the build plugin is used, an MF instance will be automatically created and stored in memory when the project starts. You can directly call methods of the MF instance via the .
+
+```ts
+import { loadRemote } from '@module-federation/enhanced/runtime';
+
+loadRemote('remote1');
+```
+
+If the build plugin is not used, you need to manually create an MF instance before calling the corresponding API.
+
+```ts
+import { createInstance } from '@module-federation/enhanced/runtime';
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'remote1',
+      entry: 'http://localhost:2001/vmok-manifest.json',
+    },
+  ],
+});
+
+mf.loadRemote('remote1');
+```
+
+- What is a `ModuleFederation` instance?
+
+A `ModuleFederation` instance is an instance of the `ModuleFederation` class, which contains all the functionality of the `ModuleFederation` runtime.
+
+> You can enter `__FEDERATION__.__INSTANCES__` in the console to view the created instances.

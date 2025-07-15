@@ -33,6 +33,10 @@ The two modes are not conflicting and can be used together. You can flexibly cho
 |The loading process can be affected through the `runtime`'s `plugin` mechanism|Currently does not support providing `plugin` to affect the loading process|
 |Does not support remote type hints|Supports remote type hints|
 
+import Runtime from '@components/en/runtime';
+
+<Runtime />
+
 ## Installation
 
 import { PackageManagerTabs } from '@theme';
@@ -59,98 +63,267 @@ import { PackageManagerTabs } from '@theme';
 
 ## Module Registration
 
-```ts
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import { Steps, Tab, Tabs } from '@theme';
 
-init({
-    // The name of the consumer module, required. If the ModuleFederationPlugin plugin is also registered, the `name` should be consistent with the `name`[/configure/name.html] configured in the plugin,
+<Tabs>
+  <Tab label="Build Plugin(Use build plugin)">
+  ```tsx
+  // If use build plugin, you can use `registerRemotes` directly.
+  import { registerRemotes } from '@module-federation/enhanced/runtime';
+
+  registerRemotes([
+    {
+        name: 'remote1',
+        alias: 'remote-1',
+        entry: 'http://localhost:3001/mf-manifest.json',
+    }
+  ]);
+  ```
+  </Tab>
+  <Tab label="Pure Runtime(Not use build plugin)">
+  ```ts
+  // If not use build plugin, you can create new instance and register remote.
+  import { createInstance } from '@module-federation/enhanced/runtime';
+
+  const mf = createInstance({
     name: 'mf_host',
-    // Remote module registration information, including module name, alias, version, etc.
     remotes: [
-        {
-            name: "remote1",
-            alias: "remotes-1",
-            entry: "http://localhost:3001/mf-manifest.json"
-        }
-    ],
-});
-```
+      {
+        name: 'remote1',
+        alias: 'remote-1',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      }
+    ]
+  });
+
+  mf.registerRemotes([
+    {
+        name: 'remote1',
+        alias: 'remote-1',
+        entry: 'http://localhost:3001/mf-manifest.json',
+    }
+  ]);
+  ```
+  </Tab>
+</Tabs>
 
 ## Module Loading
 
-```tsx
-import { loadRemote } from '@module-federation/enhanced/runtime';
 
-export default () => {
-  const MyButton = React.lazy(() =>
-    loadRemote('remote1').then(({ MyButton }) => {
-      return {
-        default: MyButton
-      };
-    }),
-  );
+<Tabs>
+  <Tab label="Build Plugin(Use build plugin)">
+  ```tsx
+  // If use build plugin, you can use `loadRemote` directly.
+  import { loadRemote } from '@module-federation/enhanced/runtime';
+  import React from 'react';
 
-  return (
-    <React.Suspense fallback="Loading Button">
-      <MyButton />
-    </React.Suspense>
-  );
-}
-```
+  export default () => {
+    const MyButton = React.lazy(() =>
+      loadRemote('remote1').then(({ MyButton }) => {
+        return {
+          default: MyButton
+        };
+      }),
+    );
+
+    return (
+      <React.Suspense fallback="Loading Button">
+        <MyButton />
+      </React.Suspense>
+    );
+  }
+  ```
+  </Tab>
+  <Tab label="Pure Runtime(Not use build plugin)">
+  ```ts
+  // If not use build plugin, you can create new instance and load remote.
+  import { createInstance } from '@module-federation/enhanced/runtime';
+  import React from 'react';
+
+  const mf = createInstance({
+    name: 'mf_host',
+    remotes: [
+      {
+        name: 'remote1',
+        alias: 'remote-1',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      }
+    ]
+  });
+
+  export default () => {
+    const MyButton = React.lazy(() =>
+      mf.loadRemote('remote1').then(({ MyButton }) => {
+        return {
+          default: MyButton
+        };
+      }),
+    );
+
+    return (
+      <React.Suspense fallback="Loading Button">
+        <MyButton />
+      </React.Suspense>
+    );
+  }
+  ```
+  </Tab>
+</Tabs>
 
 ### Loading Anonymous Modules
 
-```tsx
-import React from 'react';
-import { loadRemote } from '@module-federation/enhanced/runtime';
+<Tabs>
+    <Tab label="Build Plugin(Use build plugin)">
+    ```tsx
+    // If use build plugin, you can use `loadRemote` directly.
+    import React from 'react';
+    import { loadRemote } from '@module-federation/enhanced/runtime';
 
-const RemoteButton = React.lazy(() => loadRemote('provider/button'));
-// Can also be loaded by module alias:
-// const RemoteButton = React.lazy(() => loadRemote('remotes-1/button'));
+    const RemoteButton = React.lazy(() => loadRemote('provider/button'));
+    // 也可通过模块别名加载：
+    // const RemoteButton = React.lazy(() => loadRemote('remotes-1/button'));
 
-export default () => {
-  return (
-    <React.Suspense fallback="Loading Button">
-      <RemoteButton />
-    </React.Suspense>
-  );
-}
-```
+    export default () => {
+      return (
+        <React.Suspense fallback="Loading Button">
+          <RemoteButton />
+        </React.Suspense>
+      );
+    }
+    ```
+    </Tab>
+    <Tab label="Pure Runtime(Not use build plugin)">
+    ```tsx
+    // If not use build plugin, you can create new instance and load remote.
+    import { createInstance } from '@module-federation/enhanced/runtime';
+    import React from 'react';
+
+    // 创建实例
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote1',
+          alias: 'remote-1',
+          entry: 'http://localhost:3001/mf-manifest.json',
+        }
+      ]
+    });
+
+    // Use instance api load remote.
+    const RemoteButton = React.lazy(() => mf.loadRemote('provider/button'));
+    // Also support use alias to load
+    // const RemoteButton = React.lazy(() => mf.loadRemote('remotes-1/button'));
+
+    export default () => {
+      return (
+        <React.Suspense fallback="Loading Button">
+          <RemoteButton />
+        </React.Suspense>
+      );
+    }
+    ```
+    </Tab>
+ </Tabs>
 
 ### Loading Named Modules
 
-```tsx
-import React from 'react';
-import { loadRemote } from '@module-federation/enhanced/runtime';
+ <Tabs>
+    <Tab label="Build Plugin(Use build plugin)">
+    ```tsx
+    // If use build plugin, you can use `loadRemote` directly.
+    import React from 'react';
+    import { loadRemote } from '@module-federation/enhanced/runtime';
 
-export default () => {
-  const RemoteButton = React.lazy(() =>
-    loadRemote('remote1/button').then(({ RemoteButton }) => {
-      return {
-        default: RemoteButton
-      };
-    }),
-  );
-  return (
-    <React.Suspense fallback="Loading Button">
-      <RemoteButton />
-    </React.Suspense>
-  );
-}
-```
+    export default () => {
+      const RemoteButton = React.lazy(() =>
+        loadRemote('remote1/button').then(({ RemoteButton }) => {
+          return {
+            default: RemoteButton
+          };
+        }),
+      );
+      return (
+        <React.Suspense fallback="Loading Button">
+          <RemoteButton />
+        </React.Suspense>
+      );
+    }
+    ```
+    </Tab>
+    <Tab label="Pure Runtime(Not use build plugin)">
+    ```tsx
+    // If not use build plugin, you can create new instance and load remote.
+    import { createInstance } from '@module-federation/enhanced/runtime';
+    import React from 'react';
+
+    // 创建实例
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote1',
+          alias: 'remote-1',
+          entry: 'http://localhost:3001/mf-manifest.json',
+        }
+      ]
+    });
+
+    export default () => {
+      const RemoteButton = React.lazy(() =>
+        // Use instance api load remote.
+        mf.loadRemote('remote1/button').then(({ RemoteButton }) => {
+          return {
+            default: RemoteButton
+          };
+        }),
+      );
+      return (
+        <React.Suspense fallback="Loading Button">
+          <RemoteButton />
+        </React.Suspense>
+      );
+    }
+    ```
+    </Tab>
+ </Tabs>
 
 ### Loading Utility Functions
 
-```ts
-import { loadRemote } from '@module-federation/enhanced/runtime';
+<Tabs>
+    <Tab label="Build Plugin(Use build plugin)">
+    ```tsx
+    // If use build plugin, you can use `loadRemote` directly.
+    import React from 'react';
+    import { loadRemote } from '@module-federation/enhanced/runtime';
 
-// Load the util exposed by app2
-loadRemote<{add: (...args: Array<number>)=> number }>("@demo/app2/util").then((md)=>{
-    md.add(1,2);
-});
+    // 加载 remote1 expose 的 util
+    loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
+        md.add(1,2);
+    });
+    ```
+    </Tab>
+    <Tab label="Pure Runtime(Not use build plugin)">
+    ```tsx
+    // If not use build plugin, you can create new instance and load remote.
+    import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
+    import React from 'react';
 
-// Load by alias:
-// loadRemote<{add: (...args: Array<number>)=> number }>("app3/util").then((md)=>{
-//     md.add(1,2);
-// });
-```
+    // create instance
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote1',
+          alias: 'remote-1',
+          entry: 'http://localhost:3001/mf-manifest.json',
+        }
+      ]
+    });
+
+    mf.loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
+        md.add(1,2);
+    });
+    ```
+    </Tab>
+ </Tabs>
