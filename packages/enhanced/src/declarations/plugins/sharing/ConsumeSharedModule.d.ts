@@ -62,6 +62,10 @@ export type ConsumeOptions = {
      * Request pattern that must match for the shared module to be included
      */
     request?: string | RegExp;
+    /**
+     * Fallback version to use when package.json cannot be read
+     */
+    fallbackVersion?: string;
   };
   /**
    * Exclude filters for consuming shared modules
@@ -75,5 +79,9 @@ export type ConsumeOptions = {
      * Request pattern that if matched will exclude the shared module
      */
     request?: string | RegExp;
+    /**
+     * Fallback version to use when package.json cannot be read
+     */
+    fallbackVersion?: string;
   };
 };
