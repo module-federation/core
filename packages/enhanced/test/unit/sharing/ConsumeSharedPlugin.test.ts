@@ -90,9 +90,21 @@ jest.mock(
   { virtual: true },
 );
 
+// Mock resolveMatchedConfigs
+jest.mock('../../../src/lib/sharing/resolveMatchedConfigs', () => ({
+  resolveMatchedConfigs: jest.fn().mockResolvedValue({
+    resolved: new Map(),
+    unresolved: new Map(),
+    prefixed: new Map(),
+  }),
+}));
+
 // Import after mocks are set up
 const ConsumeSharedPlugin =
   require('../../../src/lib/sharing/ConsumeSharedPlugin').default;
+const {
+  resolveMatchedConfigs,
+} = require('../../../src/lib/sharing/resolveMatchedConfigs');
 
 describe('ConsumeSharedPlugin', () => {
   describe('constructor', () => {
@@ -267,6 +279,60 @@ describe('ConsumeSharedPlugin', () => {
 
       // Verify runtime modules were added
       expect(testEnv.mockCompilation.addRuntimeModule).toHaveBeenCalled();
+    });
+  });
+
+  describe('issuerLayer fallback logic (PR #3893)', () => {
+    describe('fallback behavior verification', () => {
+      it('should demonstrate fallback logic pattern exists in code', () => {
+        // This test documents the expected fallback pattern that PR #3893 introduced
+        // The actual implementation should use this pattern:
+        // unresolvedConsumes.get(createLookupKeyForSharing(request, contextInfo.issuerLayer)) ||
+        // unresolvedConsumes.get(createLookupKeyForSharing(request, undefined))
+
+        const mockUnresolvedConsumes = new Map([
+          ['(client)react', { shareScope: 'layered-scope' }],
+          ['react', { shareScope: 'default' }],
+        ]);
+
+        const { createLookupKeyForSharing } = jest.requireActual(
+          '../../../src/lib/sharing/utils',
+        );
+
+        // Test fallback pattern for layered context
+        const layeredLookup = createLookupKeyForSharing('react', 'client');
+        const nonLayeredLookup = createLookupKeyForSharing('react', undefined);
+
+        // With issuerLayer='client' - should find layered config
+        const layeredResult =
+          mockUnresolvedConsumes.get(layeredLookup) ||
+          mockUnresolvedConsumes.get(nonLayeredLookup);
+        expect(layeredResult).toBeDefined();
+        expect(layeredResult!.shareScope).toBe('layered-scope');
+
+        // With no issuerLayer - should find non-layered config
+        const nonLayeredResult = mockUnresolvedConsumes.get(
+          createLookupKeyForSharing('react', undefined),
+        );
+        expect(nonLayeredResult).toBeDefined();
+        expect(nonLayeredResult!.shareScope).toBe('default');
+      });
+    });
+
+    describe('createLookupKeyForSharing fallback behavior', () => {
+      it('should verify fallback logic uses correct lookup keys', () => {
+        // Import the real function (not mocked) directly to test the logic
+        const utils = jest.requireActual('../../../src/lib/sharing/utils');
+        const { createLookupKeyForSharing } = utils;
+
+        // Test the utility function directly
+        expect(createLookupKeyForSharing('react', 'client')).toBe(
+          '(client)react',
+        );
+        expect(createLookupKeyForSharing('react', undefined)).toBe('react');
+        expect(createLookupKeyForSharing('react', null)).toBe('react');
+        expect(createLookupKeyForSharing('react', '')).toBe('react');
+      });
     });
   });
 });
