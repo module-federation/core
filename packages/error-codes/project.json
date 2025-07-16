@@ -18,7 +18,8 @@
         "project": "packages/error-codes/package.json",
         "compiler": "swc",
         "format": ["cjs", "esm"],
-        "generatePackageJson": false
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
       },
       "dependsOn": [
         {
