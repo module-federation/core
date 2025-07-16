@@ -118,9 +118,7 @@ export const loadFromFs = (
           `(function(exports, require, __dirname, __filename) {${content}\n})`,
           {
             filename,
-            importModuleDynamically:
-              //@ts-ignore
-              vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
+            importModuleDynamically: importNodeModule,
           },
         );
         script.runInThisContext()(
