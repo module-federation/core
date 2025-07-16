@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rsbuild-plugin",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Module Federation plugin for Rsbuild",
   "homepage": "https://module-federation.io",
   "bugs": {
@@ -31,6 +31,7 @@
   },
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.mjs",
+  "types": "./dist/index.cjs.d.ts",
   "typesVersions": {
     "*": {
       ".": [

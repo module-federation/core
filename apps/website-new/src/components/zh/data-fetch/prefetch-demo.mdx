@@ -1,0 +1,34 @@
+### 场景 1: 仅预取数据
+
+当用户鼠标悬停在一个将要导航到购物页面的链接上时，我们可以预取该页面所需的数据。
+
+```ts
+import { getInstance } from '@module-federation/runtime';
+
+const instance = getInstance();
+
+const handleMouseEnter = () => {
+  instance.prefetch({
+    id: 'shop/Button',
+    dataFetchParams: { productId: '12345' },
+  });
+};
+```
+
+### 场景 2: 预取数据并预加载组件资源
+
+为了进一步优化，我们可以在预取数据的同时，也把组件的 JS 和 CSS 文件下载下来。
+
+```ts
+import { getInstance } from '@module-federation/runtime';
+
+const instance = getInstance();
+
+const handleMouseEnter = () => {
+  instance.prefetch({
+    id: 'shop/Button',
+    dataFetchParams: { productId: '12345' },
+    preloadComponentResource: true,
+  });
+};
+```
