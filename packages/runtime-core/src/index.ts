@@ -1,5 +1,5 @@
 import helpers, { type IGlobalUtils, type IShareUtils } from './helpers';
-export { FederationHost } from './core';
+export { ModuleFederation } from './core';
 export {
   type Federation,
   CurrentGlobal,
@@ -12,7 +12,7 @@ export {
   getGlobalSnapshot,
   getInfoWithoutType,
 } from './global';
-export type { UserOptions, FederationRuntimePlugin } from './type';
+export type { UserOptions, ModuleFederationRuntimePlugin } from './type';
 export { assert } from './utils/logger';
 export { registerGlobalPlugins } from './global';
 export {

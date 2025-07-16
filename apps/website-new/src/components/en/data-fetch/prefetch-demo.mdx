@@ -1,0 +1,34 @@
+### Scenario 1: Prefetching Data Only
+
+When a user hovers over a link that will navigate to the shop page, we can prefetch the data needed for that page.
+
+```ts
+import { getInstance } from '@module-federation/runtime';
+
+const instance = getInstance();
+
+const handleMouseEnter = () => {
+  instance.prefetch({
+    id: 'shop/Button',
+    dataFetchParams: { productId: '12345' },
+  });
+};
+```
+
+### Scenario 2: Prefetching Data and Preloading Component Resources
+
+For further optimization, we can download the component's JS and CSS files at the same time as prefetching the data.
+
+```ts
+import { getInstance } from '@module-federation/runtime';
+
+const instance = getInstance();
+
+const handleMouseEnter = () => {
+  instance.prefetch({
+    id: 'shop/Button',
+    dataFetchParams: { productId: '12345' },
+    preloadComponentResource: true,
+  });
+};
+```

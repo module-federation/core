@@ -3,17 +3,31 @@ import { CreateScriptHookNode, FetchHook } from './types';
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
 declare const ENV_TARGET: 'web' | 'node';
 
+const sdkImportCache = new Map<string, Promise<any>>();
+
 function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
     throw new Error('import specifier is required');
   }
+
+  // Check cache to prevent infinite recursion
+  if (sdkImportCache.has(name)) {
+    return sdkImportCache.get(name)!;
+  }
+
   const importModule = new Function('name', `return import(name)`);
-  return importModule(name)
+  const promise = importModule(name)
     .then((res: any) => res as T)
     .catch((error: any) => {
       console.error(`Error importing module ${name}:`, error);
+      // Remove from cache on error so it can be retried
+      sdkImportCache.delete(name);
       throw error;
     });
+
+  // Cache the promise to prevent recursive calls
+  sdkImportCache.set(name, promise);
+  return promise;
 }
 
 const loadNodeFetch = async (): Promise<typeof fetch> => {
@@ -225,6 +239,8 @@ export const loadScriptNode =
         );
       };
 
+const esmModuleCache = new Map<string, any>();
+
 async function loadModule(
   url: string,
   options: {
@@ -232,6 +248,11 @@ async function loadModule(
     fetch: any;
   },
 ) {
+  // Check cache to prevent infinite recursion in ESM loading
+  if (esmModuleCache.has(url)) {
+    return esmModuleCache.get(url)!;
+  }
+
   const { fetch, vm } = options;
   const response = await fetch(url);
   const code = await response.text();
@@ -243,6 +264,9 @@ async function loadModule(
       return loadModule(resolvedUrl, options);
     },
   });
+
+  // Cache the module before linking to prevent cycles
+  esmModuleCache.set(url, module);
 
   await module.link(async (specifier: string) => {
     const resolvedUrl = new URL(specifier, url).href;

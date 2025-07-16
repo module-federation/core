@@ -169,11 +169,6 @@ export const patchMFConfig = (
     runtimePlugins,
   );
 
-  injectRuntimePlugins(
-    require.resolve('@module-federation/modern-js/auto-fetch-data'),
-    runtimePlugins,
-  );
-
   if (enableSSR && isDev()) {
     injectRuntimePlugins(
       require.resolve('@module-federation/modern-js/resolve-entry-ipv4'),
@@ -475,13 +470,15 @@ export const moduleFederationConfigPlugin = (
             headers: corsHeaders,
           },
         },
-        source: {
+        resolve: {
           alias: {
             // TODO: deprecated
             '@modern-js/runtime/mf': require.resolve(
               '@module-federation/modern-js/runtime',
             ),
           },
+        },
+        source: {
           define: defineConfig,
           enableAsyncEntry:
             bundlerType === 'rspack'

@@ -17,7 +17,7 @@ import {
   InitTokens,
   CallFrom,
 } from '../type';
-import { FederationHost } from '../core';
+import { ModuleFederation } from '../core';
 import {
   PluginSystem,
   AsyncHook,
@@ -35,7 +35,7 @@ import { DEFAULT_SCOPE } from '../constant';
 import { LoadRemoteMatch } from '../remote';
 
 export class SharedHandler {
-  host: FederationHost;
+  host: ModuleFederation;
   shareScopeMap: ShareScopeMap;
   hooks = new PluginSystem({
     afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
@@ -43,10 +43,10 @@ export class SharedHandler {
       pkgName: string;
       shareInfo?: Shared;
       shared: Options['shared'];
-      origin: FederationHost;
+      origin: ModuleFederation;
     }>('beforeLoadShare'),
     // not used yet
-    loadShare: new AsyncHook<[FederationHost, string, ShareInfos]>(),
+    loadShare: new AsyncHook<[ModuleFederation, string, ShareInfos]>(),
     resolveShare: new SyncWaterfallHook<{
       shareScopeMap: ShareScopeMap;
       scope: string;
@@ -59,13 +59,13 @@ export class SharedHandler {
     initContainerShareScopeMap: new SyncWaterfallHook<{
       shareScope: ShareScopeMap[string];
       options: Options;
-      origin: FederationHost;
+      origin: ModuleFederation;
       scopeName: string;
       hostShareScopeMap?: ShareScopeMap;
     }>('initContainerShareScopeMap'),
   });
   initTokens: InitTokens;
-  constructor(host: FederationHost) {
+  constructor(host: ModuleFederation) {
     this.host = host;
     this.shareScopeMap = {};
     this.initTokens = {};
