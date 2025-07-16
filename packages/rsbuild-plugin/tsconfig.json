@@ -1,5 +1,4 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./",
@@ -20,10 +19,7 @@
     "declaration": true,
     "paths": {
       "@/*": ["./*"],
-      "@src/*": ["./src/*"],
-      "@module-federation/sdk": ["../sdk/src/index.ts"],
-      "@module-federation/enhanced": ["../enhanced/src/index.ts"],
-      "@module-federation/node": ["../node/src/index.ts"]
+      "@src/*": ["./src/*"]
     }
   },
   "include": ["src", "../../global.d.ts", "__tests__/**/*"],

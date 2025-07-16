@@ -12,12 +12,6 @@ export default defineConfig({
   },
   resolve: {
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
-    alias: {
-      react: require.resolve('react'),
-      'react-dom': require.resolve('react-dom'),
-      'react/jsx-dev-runtime': require.resolve('react/jsx-dev-runtime'),
-      'react/jsx-runtime': require.resolve('react/jsx-runtime'),
-    },
   },
   plugins: [react(), nxViteTsPaths()],
   test: {
