@@ -1,9 +1,11 @@
-import { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 import { fetchWithRetry } from './fetch-retry';
 import type { RetryPluginParams } from './types';
 import { scriptCommonRetry } from './util';
 
-const RetryPlugin: (params: RetryPluginParams) => FederationRuntimePlugin = ({
+const RetryPlugin: (
+  params: RetryPluginParams,
+) => ModuleFederationRuntimePlugin = ({
   fetch: fetchOption,
   script: scriptOption,
 }) => ({

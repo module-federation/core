@@ -72,6 +72,7 @@ function isStoryBook(rsbuildConfig: RsbuildConfig) {
   ) {
     return true;
   }
+  return false;
 }
 
 export function isMFFormat(bundlerConfig: Rspack.Configuration) {

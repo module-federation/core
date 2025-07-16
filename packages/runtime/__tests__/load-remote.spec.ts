@@ -1,6 +1,6 @@
 import 'whatwg-fetch';
 import { assert, describe, it } from 'vitest';
-import { FederationHost, init } from '../src/index';
+import { ModuleFederation, init } from '../src/index';
 import { mockRemoteSnapshot } from './mock/utils';
 import { matchRemoteWithNameAndExpose } from '@module-federation/runtime-core';
 import {
@@ -109,7 +109,7 @@ describe('matchRemote', () => {
 // eslint-disable-next-line max-lines-per-function
 describe('loadRemote', () => {
   it('api functionality', () => {
-    const FederationInstance = new FederationHost({
+    const FederationInstance = new ModuleFederation({
       name: '@federation-test/loadRemote-api',
       remotes: [],
     });
@@ -149,7 +149,7 @@ describe('loadRemote', () => {
       },
     });
 
-    const FederationInstance = new FederationHost({
+    const FederationInstance = new ModuleFederation({
       name: '@federation-test/globalinfo',
       remotes: [
         {
@@ -195,7 +195,7 @@ describe('loadRemote', () => {
       },
     });
 
-    const FM = new FederationHost({
+    const FM = new ModuleFederation({
       name: 'xxxxx',
       remotes: [
         {
@@ -251,7 +251,7 @@ describe('loadRemote', () => {
       },
     });
 
-    const FederationInstance = new FederationHost({
+    const FederationInstance = new ModuleFederation({
       name: '@federation-test/compatible',
       remotes: [
         {
@@ -268,7 +268,7 @@ describe('loadRemote', () => {
     reset();
   });
   it('handles remote entry URL with query', async () => {
-    const FederationInstance = new FederationHost({
+    const FederationInstance = new ModuleFederation({
       name: '@federation-test/compatible',
       remotes: [
         {
@@ -333,11 +333,11 @@ describe('loadRemote', () => {
         },
       ],
     };
-    const FM = new FederationHost({
+    const FM = new ModuleFederation({
       name: '@module-federation/load-remote-different-instance',
       ...vmOptions,
     });
-    const FM2 = new FederationHost({
+    const FM2 = new ModuleFederation({
       name: '@module-federation/load-remote-different-instance2',
       ...vmOptions,
     });
@@ -355,7 +355,7 @@ describe('loadRemote', () => {
 
 describe('loadRemote with manifest.json', () => {
   it('handles duplicate request to manifest.json', async () => {
-    const FM = new FederationHost({
+    const FM = new ModuleFederation({
       name: '@demo/host',
       remotes: [
         {
@@ -366,7 +366,7 @@ describe('loadRemote with manifest.json', () => {
       ],
     });
 
-    const FM2 = new FederationHost({
+    const FM2 = new ModuleFederation({
       name: '@demo/host2',
       remotes: [
         {
@@ -393,7 +393,7 @@ describe('loadRemote with manifest.json', () => {
     ).toBe(1);
   });
   it('handles circular dependencies', async () => {
-    setGlobalFederationConstructor(FederationHost, true);
+    setGlobalFederationConstructor(ModuleFederation, true);
     const FM = init({
       name: '@circulate-deps/app1',
       remotes: [
@@ -416,7 +416,7 @@ describe('loadRemote with manifest.json', () => {
     setGlobalFederationConstructor(undefined, true);
   });
   it('handles manifest.json with query', async () => {
-    const FM = new FederationHost({
+    const FM = new ModuleFederation({
       name: '@demo/host',
       remotes: [
         {
@@ -463,7 +463,7 @@ describe('lazy loadRemote and add remote into snapshot', () => {
         remoteEntry: 'federation-remote-entry.js',
       },
     });
-    const federationInstance = new FederationHost({
+    const federationInstance = new ModuleFederation({
       name: '@demo/app1',
       remotes: [
         {
@@ -505,7 +505,7 @@ describe('lazy loadRemote and add remote into snapshot', () => {
       },
     });
 
-    const federationInstance = new FederationHost({
+    const federationInstance = new ModuleFederation({
       name: '@demo/app1',
       remotes: [
         {
@@ -583,7 +583,7 @@ describe('loadRemote', () => {
       },
     });
 
-    const FederationInstance = new FederationHost({
+    const FederationInstance = new ModuleFederation({
       name: '@federation-test/globalinfo',
       remotes: [
         {

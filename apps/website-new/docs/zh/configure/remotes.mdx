@@ -31,7 +31,7 @@ interface PluginRemoteOptions {
 ```js
 module.exports = {
   plugins: [
-    new ModuleFederation({
+    new ModuleFederationPlugin({
       name: 'host',
       // 下面的 remotes 中定义了两个 remote，分别是名称为：manifest_provider 在 3011 端口启动的项目、js_entry_provider 在 3012 端口启动的项目
       remotes: {
