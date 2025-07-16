@@ -1,6 +1,6 @@
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import type { ModuleFederationPlugin as WebpackModuleFederationPlugin } from '@module-federation/enhanced';
-import type { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 
 export interface PluginOptions {
   config?: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -26,6 +26,4 @@ export interface InternalModernPluginOptions {
   fetchServerQuery?: Record<string, unknown>;
 }
 
-export type BundlerPlugin =
-  | WebpackModuleFederationPlugin
-  | RspackModuleFederationPlugin;
+export type BundlerPlugin = any;
