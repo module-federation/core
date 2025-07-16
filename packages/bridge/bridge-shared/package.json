@@ -13,8 +13,21 @@
   },
   "type": "commonjs",
   "main": "./dist/index.umd.js",
-  "module": "./dist/index.es.mjs",
+  "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.es.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.umd.js"
+      },
+      "default": "./dist/index.umd.js"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

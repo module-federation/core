@@ -35,7 +35,8 @@
       "require": {
         "types": "./dist/index.cjs.d.ts",
         "default": "./dist/index.cjs.cjs"
-      }
+      },
+      "default": "./dist/index.cjs.cjs"
     },
     "./normalize-webpack-path": {
       "import": {
