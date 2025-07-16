@@ -9,7 +9,7 @@ describe('router-remote5-2005/', () => {
 });
 
 describe('router-remote5-2005 in host', () => {
-  beforeEach(() => cy.visit('/'));
+  beforeEach(() => cy.visit('http://127.0.0.1:2000/'));
 
   describe('Remote5 render and destroy', () => {
     it('jump to remote5 home page', () => {
