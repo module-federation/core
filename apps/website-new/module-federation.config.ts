@@ -12,6 +12,10 @@ const exposes = {
   [`./cli-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/cli.mdx`,
   [`./type-prompt-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/type-prompt.mdx`,
   [`./css-isolate-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/css-isolate.mdx`,
+
+  [`./data-fetch-index-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/data-fetch/index.mdx`,
+  [`./data-fetch-cache-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/data-fetch/cache.mdx`,
+  [`./data-fetch-prefetch-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/data-fetch/prefetch.mdx`,
   // runtime
   // [`./runtime-overview-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/runtime/runtime.mdx`,
   // [`./runtime-api-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/basic/runtime/runtime-api.mdx`,

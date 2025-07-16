@@ -1,9 +1,9 @@
-import { kit } from '@module-federation/modern-js/runtime';
+import { getInstance } from '@module-federation/modern-js/runtime';
 
-const { createRemoteComponent, wrapNoSSR } = kit;
-
-const CsrWithFetchDataFromServerComponent = wrapNoSSR(createRemoteComponent)({
+const CsrWithFetchDataFromServerComponent = getInstance()!.createLazyComponent({
+  noSSR: true,
   loader: () => {
+    console.log('calling');
     return import('provider-csr');
   },
   loading: 'loading...',

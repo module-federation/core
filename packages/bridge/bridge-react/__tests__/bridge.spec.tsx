@@ -1,6 +1,6 @@
 import React from 'react';
 import { assert, describe, it } from 'vitest';
-import { createBridgeComponent, createRemoteComponent } from '../src';
+import { createBridgeComponent, createRemoteAppComponent } from '../src';
 import {
   act,
   fireEvent,
@@ -44,14 +44,14 @@ describe('bridge', () => {
     expect(document.querySelector('#container')!.innerHTML).toContain('');
   });
 
-  it('createRemoteComponent', async () => {
+  it('createRemoteAppComponent', async () => {
     function Component({ props }: { props?: Record<string, any> }) {
       return <div>life cycle render {props?.msg}</div>;
     }
     const BridgeComponent = createBridgeComponent({
       rootComponent: Component,
     });
-    const RemoteComponent = createRemoteComponent({
+    const RemoteComponent = createRemoteAppComponent({
       loader: async () => {
         return {
           default: BridgeComponent,
@@ -71,7 +71,7 @@ describe('bridge', () => {
     expect(getHtml(container)).toMatch('hello world');
   });
 
-  it('createRemoteComponent and obtain ref property', async () => {
+  it('createRemoteAppComponent and obtain ref property', async () => {
     const ref = {
       current: null,
     };
@@ -82,7 +82,7 @@ describe('bridge', () => {
     const BridgeComponent = createBridgeComponent({
       rootComponent: Component,
     });
-    const RemoteComponent = createRemoteComponent({
+    const RemoteComponent = createRemoteAppComponent({
       loader: async () => {
         return {
           default: BridgeComponent,
@@ -103,7 +103,7 @@ describe('bridge', () => {
     expect(ref.current).not.toBeNull();
   });
 
-  it('createRemoteComponent with custom createRoot prop', async () => {
+  it('createRemoteAppComponent with custom createRoot prop', async () => {
     const renderMock = vi.fn();
 
     function Component({ props }: { props?: Record<string, any> }) {
@@ -118,7 +118,7 @@ describe('bridge', () => {
         };
       },
     });
-    const RemoteComponent = createRemoteComponent({
+    const RemoteComponent = createRemoteAppComponent({
       loader: async () => {
         return {
           default: BridgeComponent,

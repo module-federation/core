@@ -90,7 +90,7 @@ export function mockStaticServer({
   });
 }
 
-import { FederationRuntimePlugin } from '../../src/type';
+import { ModuleFederationRuntimePlugin } from '../../src/type';
 import { ProviderModuleInfo } from '@module-federation/sdk';
 
 export const mockRemoteSnapshot: (
@@ -98,7 +98,7 @@ export const mockRemoteSnapshot: (
   remoteSnapshots: {
     [name: string]: ProviderModuleInfo;
   },
-) => FederationRuntimePlugin = function (uniqueId, remoteSnapshots) {
+) => ModuleFederationRuntimePlugin = function (uniqueId, remoteSnapshots) {
   return {
     name: `mock-snapshot-${uniqueId}`,
     loadSnapshot({ moduleInfo, ...info }) {

@@ -1,6 +1,6 @@
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
-const recordDynamicRemoteEntryHashPlugin: () => FederationRuntimePlugin =
+const recordDynamicRemoteEntryHashPlugin: () => ModuleFederationRuntimePlugin =
   () => ({
     name: 'record-dynamic-remote-entry-hash-plugin',
     beforeInit(args) {
