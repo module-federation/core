@@ -393,7 +393,7 @@ class DTSManager {
     const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(options);
 
     const downloadPromises = Object.entries(mapRemotesToDownload).map(
-      async (item) => {
+      async (item: [string, RemoteInfo]) => {
         const remoteInfo = item[1];
         if (!this.remoteAliasMap[remoteInfo.alias]) {
           const requiredRemoteInfo = await this.requestRemoteManifest(
@@ -534,7 +534,7 @@ class DTSManager {
         );
         if (!loadedRemoteInfo) {
           const remoteInfo = Object.values(mapRemotesToDownload).find(
-            (item) => {
+            (item: RemoteInfo) => {
               return item.name === remoteName;
             },
           );
@@ -544,14 +544,15 @@ class DTSManager {
             'info',
           );
           if (remoteInfo) {
-            if (!this.remoteAliasMap[remoteInfo.alias]) {
+            const typedRemoteInfo = remoteInfo as RemoteInfo;
+            if (!this.remoteAliasMap[typedRemoteInfo.alias]) {
               const requiredRemoteInfo = await this.requestRemoteManifest(
-                remoteInfo,
+                typedRemoteInfo,
                 hostOptions,
               );
-              this.remoteAliasMap[remoteInfo.alias] = requiredRemoteInfo;
+              this.remoteAliasMap[typedRemoteInfo.alias] = requiredRemoteInfo;
             }
-            await consumeTypes(this.remoteAliasMap[remoteInfo.alias]);
+            await consumeTypes(this.remoteAliasMap[typedRemoteInfo.alias]);
           } else if (updatedRemoteInfo) {
             const consumeDynamicRemoteTypes = async () => {
               await consumeTypes(
