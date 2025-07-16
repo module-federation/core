@@ -17,7 +17,6 @@
         "rollupConfig": "packages/rsbuild-plugin/rollup.config.js",
         "compiler": "swc",
         "format": ["cjs", "esm"],
-        "generatePackageJson": false,
         "useLegacyTypescriptPlugin": false
       }
     },

@@ -23,7 +23,6 @@
         "compiler": "swc",
         "rollupConfig": "packages/runtime/rollup.config.cjs",
         "format": ["cjs", "esm"],
-        "generatePackageJson": false,
         "useLegacyTypescriptPlugin": false
       },
       "dependsOn": [

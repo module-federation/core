@@ -20,7 +20,6 @@
         "additionalEntryPoints": [
           "packages/webpack-bundler-runtime/src/constant.ts"
         ],
-        "generatePackageJson": false,
         "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.cjs",
         "useLegacyTypescriptPlugin": false
       },
