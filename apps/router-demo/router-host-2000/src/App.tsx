@@ -7,7 +7,7 @@ import React, {
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import { RetryPlugin } from '@module-federation/retry-plugin';
-import { createRemoteAppComponent } from '@module-federation/bridge-react';
+import { createRemoteAppComponent } from '@module-federation/bridge-react/v18';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
