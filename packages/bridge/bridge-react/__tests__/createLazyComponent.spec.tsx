@@ -1,21 +1,22 @@
+// Mocking dependencies
+jest.mock('@module-federation/runtime', () => ({
+  getInstance: jest.fn(),
+}));
+jest.mock('../src/lazy/utils', () => ({
+  getLoadedRemoteInfos: jest.fn(),
+  getDataFetchMapKey: jest.fn(),
+  fetchData: jest.fn(),
+}));
+
 import React, { Suspense } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import {
   createLazyComponent,
   collectSSRAssets,
 } from '../src/lazy/createLazyComponent';
 import * as runtime from '@module-federation/runtime';
 import * as utils from '../src/lazy/utils';
-
-// Mocking dependencies
-vi.mock('@module-federation/runtime');
-vi.mock('../src/lazy/utils');
-
-const mockGetInstance = runtime.getInstance as vi.Mock;
-const mockGetLoadedRemoteInfos = utils.getLoadedRemoteInfos as vi.Mock;
-const mockGetDataFetchMapKey = utils.getDataFetchMapKey as vi.Mock;
-const mockFetchData = utils.fetchData as vi.Mock;
 
 const MockComponent = () => <div>Mock Component</div>;
 const LoadingComponent = () => <div>Loading...</div>;
@@ -25,14 +26,14 @@ describe('createLazyComponent', () => {
   let mockInstance: any;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockInstance = {
       name: 'host-app',
       options: { version: '1.0.0' },
-      getModuleInfo: vi.fn(),
+      getModuleInfo: jest.fn(),
     };
-    mockGetInstance.mockReturnValue(mockInstance);
-    mockGetLoadedRemoteInfos.mockReturnValue({
+    (runtime.getInstance as any).mockReturnValue(mockInstance);
+    (utils.getLoadedRemoteInfos as any).mockReturnValue({
       name: 'remoteApp',
       alias: 'remote',
       expose: './Component',
@@ -52,11 +53,11 @@ describe('createLazyComponent', () => {
       },
       entryGlobalName: 'remoteApp',
     });
-    mockGetDataFetchMapKey.mockReturnValue('data-fetch-key');
+    (utils.getDataFetchMapKey as any).mockReturnValue('data-fetch-key');
   });
 
   it('should render loading component then the actual component', async () => {
-    const loader = vi.fn().mockResolvedValue({
+    const loader = jest.fn().mockResolvedValue({
       default: MockComponent,
       [Symbol.for('mf_module_id')]: 'remoteApp/Component',
     });
@@ -82,9 +83,9 @@ describe('createLazyComponent', () => {
   });
 
   it('should render fallback component on data fetch error', async () => {
-    mockFetchData.mockRejectedValue(new Error('Data fetch failed'));
+    (utils.fetchData as any).mockRejectedValue(new Error('Data fetch failed'));
     const LazyComponentWithDataFetch = createLazyComponent({
-      loader: vi.fn().mockResolvedValue({
+      loader: jest.fn().mockResolvedValue({
         default: MockComponent,
         [Symbol.for('mf_module_id')]: 'remoteApp/Component',
       }),
@@ -101,14 +102,14 @@ describe('createLazyComponent', () => {
   });
 
   it('should fetch data and pass it to the component', async () => {
-    const loader = vi.fn().mockResolvedValue({
+    const loader = jest.fn().mockResolvedValue({
       default: (props: { mfData: any }) => (
         <div>Data: {JSON.stringify(props.mfData)}</div>
       ),
       [Symbol.for('mf_module_id')]: 'remoteApp/Component',
     });
     const mockData = { message: 'Hello' };
-    mockFetchData.mockResolvedValue(mockData);
+    (utils.fetchData as any).mockResolvedValue(mockData);
 
     const LazyComponent = createLazyComponent({
       loader,
@@ -131,12 +132,12 @@ describe('collectSSRAssets', () => {
   let mockInstance: any;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockInstance = {
       name: 'host-app',
       options: { version: '1.0.0' },
     };
-    mockGetInstance.mockReturnValue(mockInstance);
+    (runtime.getInstance as any).mockReturnValue(mockInstance);
   });
 
   it('should return an empty array if instance is not available', () => {
@@ -148,7 +149,7 @@ describe('collectSSRAssets', () => {
   });
 
   it('should return an empty array if module info is not found', () => {
-    mockGetLoadedRemoteInfos.mockReturnValue(undefined);
+    (utils.getLoadedRemoteInfos as any).mockReturnValue(undefined);
     const assets = collectSSRAssets({
       id: 'test/expose',
       instance: mockInstance,
@@ -157,7 +158,7 @@ describe('collectSSRAssets', () => {
   });
 
   it('should collect CSS and JS assets for SSR', () => {
-    mockGetLoadedRemoteInfos.mockReturnValue({
+    (utils.getLoadedRemoteInfos as any).mockReturnValue({
       name: 'remoteApp',
       expose: './Component',
       snapshot: {

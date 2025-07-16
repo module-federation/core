@@ -1,5 +1,12 @@
 import React from 'react';
-import { assert, describe, it } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  jest,
+} from '@jest/globals';
 import { createBridgeComponent, createRemoteAppComponent } from '../src';
 import {
   act,
@@ -28,11 +35,12 @@ describe('bridge', () => {
       rootComponent: Component,
     })();
 
-    lifeCycle.render({
-      dom: containerInfo?.container,
+    await act(async () => {
+      lifeCycle.render({
+        dom: containerInfo?.container,
+      });
+      await sleep(200);
     });
-
-    await sleep(200);
     expect(document.querySelector('#container')!.innerHTML).toContain(
       '<div>life cycle render</div>',
     );
@@ -66,7 +74,9 @@ describe('bridge', () => {
     );
     expect(getHtml(container)).toMatch('loading');
 
-    await sleep(200);
+    await act(async () => {
+      await sleep(200);
+    });
     expect(getHtml(container)).toMatch('life cycle render');
     expect(getHtml(container)).toMatch('hello world');
   });
@@ -97,14 +107,16 @@ describe('bridge', () => {
     );
     expect(getHtml(container)).toMatch('loading');
 
-    await sleep(200);
+    await act(async () => {
+      await sleep(200);
+    });
     expect(getHtml(container)).toMatch('life cycle render');
     expect(getHtml(container)).toMatch('hello world');
     expect(ref.current).not.toBeNull();
   });
 
   it('createRemoteAppComponent with custom createRoot prop', async () => {
-    const renderMock = vi.fn();
+    const renderMock = jest.fn();
 
     function Component({ props }: { props?: Record<string, any> }) {
       return <div>life cycle render {props?.msg}</div>;
@@ -114,7 +126,7 @@ describe('bridge', () => {
       createRoot: () => {
         return {
           render: renderMock,
-          unmount: vi.fn(),
+          unmount: jest.fn(),
         };
       },
     });
@@ -131,7 +143,9 @@ describe('bridge', () => {
     const { container } = render(<RemoteComponent />);
     expect(getHtml(container)).toMatch('loading');
 
-    await sleep(200);
+    await act(async () => {
+      await sleep(200);
+    });
     expect(renderMock).toHaveBeenCalledTimes(1);
   });
 });

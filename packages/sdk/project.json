@@ -16,7 +16,7 @@
         "project": "packages/sdk/package.json",
         "additionalEntryPoints": ["packages/sdk/src/normalize-webpack-path.ts"],
         "rollupConfig": "packages/sdk/rollup.config.cjs",
-        "compiler": "swc",
+        "compiler": "tsc",
         "generatePackageJson": false,
         "format": ["cjs", "esm"],
         "useLegacyTypescriptPlugin": false
