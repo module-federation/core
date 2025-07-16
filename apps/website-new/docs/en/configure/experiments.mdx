@@ -101,7 +101,7 @@ This object contains flags related to build-time optimizations that can affect t
 - **Required:** No
 - **Default:** `false`
 
-When set to `true`, this option defines the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` global constant as `true` during the build. In the `@module-federation/runtime-core`, this prevents the `snapshotPlugin()` and `generatePreloadAssetsPlugin()` from being included and initialized within the FederationHost.
+When set to `true`, this option defines the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` global constant as `true` during the build. In the `@module-federation/runtime-core`, this prevents the `snapshotPlugin()` and `generatePreloadAssetsPlugin()` from being included and initialized within the Module Federation instance.
 
 **Impact:**
 *   **Benefit:** Can reduce the overall bundle size of the Module Federation runtime by excluding the code for these two plugins.

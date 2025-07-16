@@ -55,6 +55,9 @@ jobs:
       - name: Print Number of CPU Cores
         run: nproc
 
+      - name: Warm Nx Cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+
       - name: Run Build for All
         uses: nick-fields/retry@v3
         with:
