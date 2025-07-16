@@ -22,7 +22,7 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.esm.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.esm.js"
       },
       "require": {
@@ -32,7 +32,7 @@
     },
     "./helpers": {
       "import": {
-        "types": "./dist/helpers.esm.d.ts",
+        "types": "./dist/helpers.d.ts",
         "default": "./dist/helpers.esm.js"
       },
       "require": {
@@ -42,7 +42,7 @@
     },
     "./types": {
       "import": {
-        "types": "./dist/types.esm.d.ts",
+        "types": "./dist/types.d.ts",
         "default": "./dist/types.esm.js"
       },
       "require": {
@@ -52,7 +52,7 @@
     },
     "./core": {
       "import": {
-        "types": "./dist/core.esm.d.ts",
+        "types": "./dist/core.d.ts",
         "default": "./dist/core.esm.js"
       },
       "require": {

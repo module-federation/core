@@ -22,7 +22,7 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.esm.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.esm.js"
       },
       "require": {
@@ -32,7 +32,7 @@
     },
     "./runtime": {
       "import": {
-        "types": "./dist/runtime.esm.d.ts",
+        "types": "./dist/runtime.d.ts",
         "default": "./dist/runtime.esm.js"
       },
       "require": {
@@ -42,7 +42,7 @@
     },
     "./runtime-core": {
       "import": {
-        "types": "./dist/runtime-core.esm.d.ts",
+        "types": "./dist/runtime-core.d.ts",
         "default": "./dist/runtime-core.esm.js"
       },
       "require": {
@@ -52,7 +52,7 @@
     },
     "./webpack-bundler-runtime": {
       "import": {
-        "types": "./dist/webpack-bundler-runtime.esm.d.ts",
+        "types": "./dist/webpack-bundler-runtime.d.ts",
         "default": "./dist/webpack-bundler-runtime.esm.js"
       },
       "require": {

@@ -22,7 +22,7 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.esm.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.esm.js"
       },
       "require": {
@@ -32,7 +32,7 @@
     },
     "./types": {
       "import": {
-        "types": "./dist/types.esm.d.ts",
+        "types": "./dist/types.d.ts",
         "default": "./dist/types.esm.js"
       },
       "require": {
