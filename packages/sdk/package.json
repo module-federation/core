@@ -25,7 +25,7 @@
   "sideEffects": false,
   "main": "./dist/index.cjs.cjs",
   "module": "./dist/index.esm.js",
-  "types": "./dist/index.cjs.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
@@ -33,7 +33,7 @@
         "default": "./dist/index.esm.js"
       },
       "require": {
-        "types": "./dist/index.cjs.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs.cjs"
       }
     },
@@ -43,7 +43,7 @@
         "default": "./dist/normalize-webpack-path.esm.js"
       },
       "require": {
-        "types": "./dist/normalize-webpack-path.cjs.d.ts",
+        "types": "./dist/normalize-webpack-path.d.ts",
         "default": "./dist/normalize-webpack-path.cjs.cjs"
       }
     }

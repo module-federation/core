@@ -24,7 +24,7 @@
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "main": "./dist/index.cjs.cjs",
   "module": "./dist/index.esm.js",
-  "types": "./dist/index.cjs.d.ts",
+  "types": "./dist/index.d.ts",
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*"
@@ -36,7 +36,7 @@
         "default": "./dist/index.esm.js"
       },
       "require": {
-        "types": "./dist/index.cjs.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs.cjs"
       }
     },
@@ -46,7 +46,7 @@
         "default": "./dist/constant.esm.js"
       },
       "require": {
-        "types": "./dist/constant.cjs.d.ts",
+        "types": "./dist/constant.d.ts",
         "default": "./dist/constant.cjs.cjs"
       }
     },
@@ -55,10 +55,10 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.cjs.d.ts"
+        "./dist/index.d.ts"
       ],
       "constant": [
-        "./dist/constant.cjs.d.ts"
+        "./dist/constant.d.ts"
       ]
     }
   },
