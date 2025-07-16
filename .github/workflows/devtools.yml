@@ -53,10 +53,10 @@ jobs:
         run: npx cypress install
 
       - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=1 --skip-nx-cache
 
       - name: Run Affected Build
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=1 --skip-nx-cache
 
       - name: Configuration xvfb
         shell: bash
