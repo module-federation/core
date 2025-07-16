@@ -55,9 +55,6 @@ jobs:
       - name: Print Number of CPU Cores
         run: nproc
 
-      - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
-
       - name: Run Build for All
         run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
 
@@ -74,6 +71,9 @@ jobs:
               npx publint "$pkg"
             fi
           done
+
+      - name: Warm Nx Cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Run Affected Test
         uses: nick-fields/retry@v3
