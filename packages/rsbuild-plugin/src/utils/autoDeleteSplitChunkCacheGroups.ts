@@ -1,5 +1,5 @@
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import type { Rspack, SplitChunks } from '@rsbuild/core';
+import type { Rspack } from '@rsbuild/core';
 
 // lib-polyfill.js: include core-js，@babel/runtime，@swc/helpers，tslib.
 // lib-react.js: include react，react-dom.

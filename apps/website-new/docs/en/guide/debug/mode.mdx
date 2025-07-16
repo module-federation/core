@@ -1,6 +1,6 @@
 # Enable debug mode
 
-To facilitate troubleshooting, Module Federation provides a debug mode. You can add the FEDERATION_DEBUG=true environment variable when executing a build or execute `localStorage.setItem('FEDERATION_DEBUG','true')` in the browser to enable the debug mode of Module Federation.
+To facilitate troubleshooting, {props.name || 'Module Federation'} provides a debug mode. You can add the FEDERATION_DEBUG=true environment variable when executing a build or execute `localStorage.setItem('FEDERATION_DEBUG','true')` in the browser to enable the debug mode of Module Federation.
 
 Build and add environment variables:
 
@@ -22,4 +22,4 @@ localStorage.setItem('FEDERATION_DEBUG','true')
 
 After enabling debug mode, you can see the following information in the console:
 
-In debug mode, you will see some logs starting with `[ Module Federation ]` output in the terminal.
+In debug mode, you will see some logs starting with [ <code>{props.name || 'Module Federation'}</code> ] output in the terminal.

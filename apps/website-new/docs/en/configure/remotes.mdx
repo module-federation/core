@@ -31,7 +31,7 @@ interface PluginRemoteOptions {
 ```js
 module.exports = {
   plugins: [
-    new ModuleFederation({
+    new ModuleFederationPlugin({
       name: 'host',
       // The `remotes` below defines two remotes, named `manifest-provider` for the project started on port 3011 and `js-entry-provider` for the project started on port 3012
       remotes: {

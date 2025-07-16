@@ -111,34 +111,23 @@ new ModuleFederationPlugin({
 
 ### 如何使用共享依赖
 
-根据使用场景，`Module Federation` 支持两种形式配置共享依赖，分别是 数组、对象。前者适用于大部分场景，后者适用于复杂的定制需求。
+根据使用场景，{props.name || 'Module Federation'} 支持两种形式配置共享依赖，分别是 数组、对象。前者适用于大部分场景，后者适用于复杂的定制需求。
 
 **数组格式（通用场景）**
 
-仅需在 `Module Federation` 构建配置中的 `shared` 配置添加对应的依赖即可，例如：
+仅需在 {props.name || 'Module Federation'} 构建配置中的 `shared` 配置添加对应的依赖即可，例如：
 
-```ts
-new ModuleFederationPlugin({
-  name: '@demo/button',
-  shared: ['react', 'react-dom'],
-  //...
-});
-```
+import ArrayShared from '@components/common/configure/array-shared';
+import React from 'react';
+
+{props.arrayShared || React.createElement(ArrayShared)}
+
 
 **对象格式（定制化配置）**
 
-在 `Module Federation Plugin` 中的 `shared` 配置添加需要共享的依赖， `key` 为依赖名称，`value` 为提供的配置。
+在 {props.name || 'Module Federation'} 中的 `shared` 配置添加需要共享的依赖， `key` 为依赖名称，`value` 为提供的配置。
 
-```ts
-new ModuleFederationPlugin({
-  name: '@demo/button',
-  shared: {
-    react: {
-      singleton: true,
-      requiredVersion: '~18.2.0',
-      fixedDependencies: true
-    }
-  },
-  //...
-});
-```
+import ObjectShared from '@components/common/configure/object-shared'
+
+{props.objectShared || React.createElement(ObjectShared)}
+

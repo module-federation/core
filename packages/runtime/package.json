@@ -1,11 +1,11 @@
 {
   "name": "@module-federation/runtime",
-  "version": "0.14.3",
+  "version": "0.17.0",
   "type": "module",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs.cjs",
   "module": "./dist/index.esm.js",
-  "types": "./dist/index.cjs.d.ts",
+  "types": "./dist/index.d.ts",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -22,41 +22,41 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.esm.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.esm.js"
       },
       "require": {
-        "types": "./dist/index.cjs.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs.cjs"
       }
     },
     "./helpers": {
       "import": {
-        "types": "./dist/helpers.esm.d.ts",
+        "types": "./dist/helpers.d.ts",
         "default": "./dist/helpers.esm.js"
       },
       "require": {
-        "types": "./dist/helpers.cjs.d.ts",
+        "types": "./dist/helpers.d.ts",
         "default": "./dist/helpers.cjs.cjs"
       }
     },
     "./types": {
       "import": {
-        "types": "./dist/types.esm.d.ts",
+        "types": "./dist/types.d.ts",
         "default": "./dist/types.esm.js"
       },
       "require": {
-        "types": "./dist/types.cjs.d.ts",
+        "types": "./dist/types.d.ts",
         "default": "./dist/types.cjs.cjs"
       }
     },
     "./core": {
       "import": {
-        "types": "./dist/core.esm.d.ts",
+        "types": "./dist/core.d.ts",
         "default": "./dist/core.esm.js"
       },
       "require": {
-        "types": "./dist/core.cjs.d.ts",
+        "types": "./dist/core.d.ts",
         "default": "./dist/core.cjs.cjs"
       }
     },
@@ -65,16 +65,16 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.cjs.d.ts"
+        "./dist/index.d.ts"
       ],
       "helpers": [
-        "./dist/helpers.cjs.d.ts"
+        "./dist/helpers.d.ts"
       ],
       "types": [
-        "./dist/types.cjs.d.ts"
+        "./dist/types.d.ts"
       ],
       "core": [
-        "./dist/core.cjs.d.ts"
+        "./dist/core.d.ts"
       ]
     }
   },

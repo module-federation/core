@@ -2,6 +2,8 @@
 
 :::warning
 This feature is not currently supported by Rspack producer projects
+
+It is recommended to use [bridge-react - prefetch](../../guide/basic/data-fetch/prefetch), which supports Rspack/Webpack, as well as SSR/CSR.
 :::
 
 ## What is Data Prefetch
@@ -210,7 +212,7 @@ return (
 
 ### loadRemote
 #### Function
-If the user manually calls [loadRemote](/zh/guide/basic/runtime.html#loadremote) in the hosts project API, then it will be considered that the hosts not only wants to load the producer's static resources, but also wants to send the interface request in advance, which can make the project render faster. This is especially effective in the scenario where **the first screen has a pre-request** or **you want the second screen to be directly displayed**. It is suitable for the scenario where the second screen module is loaded in advance on the current page.
+If the user manually calls [loadRemote](/zh/guide/basic/runtime/runtime-api.html#loadremote) in the hosts project API, then it will be considered that the hosts not only wants to load the producer's static resources, but also wants to send the interface request in advance, which can make the project render faster. This is especially effective in the scenario where **the first screen has a pre-request** or **you want the second screen to be directly displayed**. It is suitable for the scenario where the second screen module is loaded in advance on the current page.
 #### How to use
 ``` ts
 import { loadRemote } from '@module-federation/enhanced/runtime';

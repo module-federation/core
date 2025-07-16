@@ -19,6 +19,7 @@ const defaultOptions = {
   runtimePkgs: [],
   remoteTypeUrls: {},
   timeout: 60000,
+  typesOnBuild: false,
 } satisfies Partial<HostOptions>;
 
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {
@@ -139,7 +140,7 @@ const resolveRemotes = (hostOptions: Required<HostOptions>) => {
 
     accumulator[key] = res;
     return accumulator;
-  }, remoteInfos);
+  }, remoteInfos) as Record<string, RemoteInfo>;
 };
 
 export const retrieveHostConfig = (options: HostOptions) => {

@@ -11,6 +11,7 @@ export interface PluginOptions {
       }
     | boolean;
   remoteIpStrategy?: 'ipv4' | 'inherit';
+  fetchServerQuery?: Record<string, unknown>;
 }
 
 export interface InternalModernPluginOptions {
@@ -22,8 +23,7 @@ export interface InternalModernPluginOptions {
   nodePlugin?: BundlerPlugin;
   remoteIpStrategy?: 'ipv4' | 'inherit';
   userConfig?: PluginOptions;
+  fetchServerQuery?: Record<string, unknown>;
 }
 
-export type BundlerPlugin =
-  | WebpackModuleFederationPlugin
-  | RspackModuleFederationPlugin;
+export type BundlerPlugin = any;

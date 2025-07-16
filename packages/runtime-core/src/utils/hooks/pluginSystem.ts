@@ -1,3 +1,4 @@
+import type { ModuleFederation } from '../../core';
 import { assert, isPlainObject } from '../../utils';
 
 export type Plugin<T extends Record<string, any>> = {
@@ -5,6 +6,7 @@ export type Plugin<T extends Record<string, any>> = {
 } & {
   name: string;
   version?: string;
+  apply?: (instance: ModuleFederation) => void;
 };
 
 export class PluginSystem<T extends Record<string, any>> {
@@ -17,7 +19,7 @@ export class PluginSystem<T extends Record<string, any>> {
     this.lifecycleKeys = Object.keys(lifecycle);
   }
 
-  applyPlugin(plugin: Plugin<T>): void {
+  applyPlugin(plugin: Plugin<T>, instance: ModuleFederation): void {
     assert(isPlainObject(plugin), 'Plugin configuration is invalid.');
     // The plugin's name is mandatory and must be unique
     const pluginName = plugin.name;
@@ -25,6 +27,7 @@ export class PluginSystem<T extends Record<string, any>> {
 
     if (!this.registerPlugins[pluginName]) {
       this.registerPlugins[pluginName] = plugin;
+      plugin.apply?.(instance);
 
       Object.keys(this.lifecycle).forEach((key) => {
         const pluginLife = plugin[key as string];
@@ -44,30 +47,6 @@ export class PluginSystem<T extends Record<string, any>> {
       if (key !== 'name') {
         this.lifecycle[key].remove(plugin[key as string]);
       }
-    });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  inherit<T extends PluginSystem<any>>({
-    lifecycle,
-    registerPlugins,
-  }: T): void {
-    Object.keys(lifecycle).forEach((hookName) => {
-      assert(
-        !this.lifecycle[hookName],
-        `The hook "${
-          hookName as string
-        }" has a conflict and cannot be inherited.`,
-      );
-      (this.lifecycle as any)[hookName] = lifecycle[hookName];
-    });
-
-    Object.keys(registerPlugins).forEach((pluginName) => {
-      assert(
-        !this.registerPlugins[pluginName],
-        `The plugin "${pluginName}" has a conflict and cannot be inherited.`,
-      );
-      this.applyPlugin(registerPlugins[pluginName]);
     });
   }
 }

@@ -1,5 +1,67 @@
 # @module-federation/modern-js
 
+## 0.17.0
+
+### Minor Changes
+
+- e874c64: refactor(modern-js-plugin): deprecate createRemoteComponent and createRemoteSSRComponent
+
+### Patch Changes
+
+- e874c64: refactor(modern-js-plugin): add subpath react to export createLazyCompoent and wrapNoSSR apis
+- f9985a8: chore(modern-js-plugin): update source.alias to resolve.alias
+- 3f736b6: chore: rename FederationHost to ModuleFederation
+- e0ceca6: bump modern.js to fix esbuild vulnerability
+- Updated dependencies [e874c64]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [e874c64]
+- Updated dependencies [3f736b6]
+- Updated dependencies [e0ceca6]
+  - @module-federation/bridge-react@0.17.0
+  - @module-federation/runtime@0.17.0
+  - @module-federation/node@2.7.9
+  - @module-federation/cli@0.17.0
+  - @module-federation/enhanced@0.17.0
+  - @module-federation/rsbuild-plugin@0.17.0
+  - @module-federation/sdk@0.17.0
+
+## 0.16.0
+
+### Patch Changes
+
+- 98136ca: fix(modern-js-plugin): use contenthash instead of chunkhash
+- de350f3: fix(modern-js-plugin): adjust fetch type
+- Updated dependencies [1485fcf]
+- Updated dependencies [98136ca]
+- Updated dependencies [98136ca]
+  - @module-federation/sdk@0.16.0
+  - @module-federation/node@2.7.8
+  - @module-federation/rsbuild-plugin@0.16.0
+  - @module-federation/cli@0.16.0
+  - @module-federation/enhanced@0.16.0
+  - @module-federation/runtime@0.16.0
+
+## 0.15.0
+
+### Minor Changes
+
+- f432619: feat(modern-js-plugin): support component-level data fetch
+
+### Patch Changes
+
+- c343589: fix(modern-js-plugin): only inject ipv4 str in dev mode
+- 2faa3a3: chore(modernjs-js-plugin): keep the version of swc/helpers consistent with rsbuild
+- Updated dependencies [ad446af]
+- Updated dependencies [f777710]
+  - @module-federation/enhanced@0.15.0
+  - @module-federation/rsbuild-plugin@0.15.0
+  - @module-federation/cli@0.15.0
+  - @module-federation/node@2.7.7
+  - @module-federation/runtime@0.15.0
+  - @module-federation/sdk@0.15.0
+
 ## 0.14.3
 
 ### Patch Changes

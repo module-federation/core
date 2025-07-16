@@ -1,9 +1,13 @@
-import { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 
-export default function (): FederationRuntimePlugin {
+export default function (): ModuleFederationRuntimePlugin {
   return {
     name: 'custom-plugin-build',
     beforeInit(args) {
+      const { userOptions, origin } = args;
+      if (origin.options.name && origin.options.name !== userOptions.name) {
+        userOptions.name = origin.options.name;
+      }
       console.log('[build time inject] beforeInit: ', args);
       return args;
     },

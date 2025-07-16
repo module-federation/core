@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/sdk",
-  "version": "0.14.3",
+  "version": "0.17.0",
   "type": "module",
   "license": "MIT",
   "description": "A sdk for support module federation",
@@ -25,25 +25,25 @@
   "sideEffects": false,
   "main": "./dist/index.cjs.cjs",
   "module": "./dist/index.esm.js",
-  "types": "./dist/index.cjs.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.esm.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.esm.js"
       },
       "require": {
-        "types": "./dist/index.cjs.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs.cjs"
       }
     },
     "./normalize-webpack-path": {
       "import": {
-        "types": "./dist/normalize-webpack-path.esm.d.ts",
+        "types": "./dist/normalize-webpack-path.d.ts",
         "default": "./dist/normalize-webpack-path.esm.js"
       },
       "require": {
-        "types": "./dist/normalize-webpack-path.cjs.d.ts",
+        "types": "./dist/normalize-webpack-path.d.ts",
         "default": "./dist/normalize-webpack-path.cjs.cjs"
       }
     }
@@ -51,10 +51,10 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.cjs.d.ts"
+        "./dist/index.d.ts"
       ],
       "normalize-webpack-path": [
-        "./dist/normalize-webpack-path.cjs.d.ts"
+        "./dist/normalize-webpack-path.d.ts"
       ]
     }
   }
