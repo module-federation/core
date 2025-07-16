@@ -1,0 +1,14 @@
+{
+  "name": "webpack-hmr-demo",
+  "version": "1.0.0",
+  "main": "dist/main.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "demo": "rm -rf ./dist && npm run build && node dist/main.js"
+  },
+  "devDependencies": {
+    "webpack": "^5.90.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
