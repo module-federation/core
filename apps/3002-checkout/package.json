@@ -14,7 +14,6 @@
     "@module-federation/nextjs-mf": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "@module-federation/utilities": "workspace:*",
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0",
     "webpack": "5.98.0"
