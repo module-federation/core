@@ -11,6 +11,7 @@ import runtimePlugin, {
   setupScriptLoader,
   setupChunkHandler,
   setupWebpackRequirePatching,
+  nodeRuntimeImportCache,
 } from '../runtimePlugin';
 import type {
   ModuleFederationRuntimePlugin,
@@ -139,6 +140,8 @@ describe('runtimePlugin', () => {
     beforeEach(() => {
       originalFunction = global.Function;
       console.error = jest.fn();
+      // Clear the import cache to ensure fresh tests
+      nodeRuntimeImportCache.clear();
     });
 
     afterEach(() => {
