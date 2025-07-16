@@ -24,9 +24,10 @@
   },
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.mjs",
-  "types": "./dist/index.cjs.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.mjs",
       "require": "./dist/index.cjs.js"
     }
@@ -34,7 +35,7 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.cjs.d.ts"
+        "./dist/index.d.ts"
       ]
     }
   }

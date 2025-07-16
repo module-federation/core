@@ -39,7 +39,7 @@
     },
     "./normalize-webpack-path": {
       "import": {
-        "types": "./dist/normalize-webpack-path.esm.d.ts",
+        "types": "./dist/normalize-webpack-path.d.ts",
         "default": "./dist/normalize-webpack-path.esm.js"
       },
       "require": {
@@ -51,10 +51,10 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.cjs.d.ts"
+        "./dist/index.d.ts"
       ],
       "normalize-webpack-path": [
-        "./dist/normalize-webpack-path.cjs.d.ts"
+        "./dist/normalize-webpack-path.d.ts"
       ]
     }
   }
