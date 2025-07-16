@@ -7,7 +7,7 @@
   "scripts": {
     "build:remote": "node build/build-mfe1.js",
     "build:host": "node build/build-shell.js",
-    "build": "rm -rf ./node_modules/.cache && npm run build:remote && npm run build:host",
+    "build": "npm run build:remote && npm run build:host",
     "watch": "concurrently \"npm run build:remote -- --watch\" \"npm run build:host -- --watch\"",
     "start:remote": "live-server dist/mfe1 --port=3001 --cors",
     "start:host": "live-server dist/shell --port=3000",
