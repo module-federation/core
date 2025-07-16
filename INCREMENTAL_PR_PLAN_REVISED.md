@@ -1,4 +1,4 @@
-f# Revised Incremental PR Plan for packages/enhanced Changes
+# Revised Incremental PR Plan for packages/enhanced Changes
 
 ## Overview
 Based on a detailed diff analysis, this document provides a more accurate breakdown of changes into focused, incremental PRs. Each PR represents a distinct feature, fix, or refactor that can be merged independently.
@@ -14,7 +14,7 @@ Based on a detailed diff analysis, this document provides a more accurate breakd
 **Feature**: Add defensive checks to prevent runtime errors
 
 **Files to include**:
-- `src/lib/container/runtime/EmbedFederationRuntimeModule.ts` (add `typeof oldStartup === 'function'` check)
+- `src/lib/container/runtime/EmbedFederationRuntimeModule.ts` (add `typeof prevStartup === 'function'` check)
 - `src/lib/startup/StartupHelpers.ts` (add `typeof __webpack_require__.x === "function"` check)
 
 **Why first**: These are independent safety fixes that improve stability without any dependencies.
@@ -49,7 +49,6 @@ compiler.hooks.addRemoteDependency = new SyncHook([...]);
 ```
 
 **Note**: This is NOT a breaking change because all hook usages within the codebase are updated in the same PR.
-
 ---
 
 ### PR 3: Enhanced HoistContainerReferencesPlugin
@@ -291,4 +290,8 @@ All Feature PRs ─────────────────────�
 2. **Reduced Risk**: Smaller, focused changes are easier to review and test
 3. **Flexibility**: Some PRs can be developed in parallel
 4. **Progressive Enhancement**: Each filtering feature builds on the previous
+<<<<<<< HEAD
 5. **Early Wins**: Runtime fixes and hook renaming can be merged quickly
+=======
+5. **Early Wins**: Runtime fixes and hook renaming can be merged quickly
+>>>>>>> origin/refactor/hook-renaming-cleanup-v2

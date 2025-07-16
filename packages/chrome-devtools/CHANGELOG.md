@@ -1,5 +1,12 @@
 # @module-federation/devtools
 
+## 0.17.0
+
+### Patch Changes
+
+- e0ceca6: bump modern.js to fix esbuild vulnerability
+  - @module-federation/sdk@0.17.0
+
 ## 0.16.0
 
 ### Patch Changes

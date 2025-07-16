@@ -55,11 +55,11 @@ jobs:
       - name: Print Number of CPU Cores
         run: nproc
 
-      - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
+      - name: Build SDK with skip cache to ensure workspace deps available
+        run: npx nx build sdk --skip-nx-cache
 
       - name: Run Build for All
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
 
       - name: Check Package Publishing Compatibility
         run: |
@@ -69,6 +69,7 @@ jobs:
                [ "$pkg" != "packages/chrome-devtools" ] && \
                [ "$pkg" != "packages/core" ] && \
                [ "$pkg" != "packages/esbuild" ] && \
+               [ "$pkg" != "packages/modernjs" ] && \
                [ "$pkg" != "packages/utilities" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"

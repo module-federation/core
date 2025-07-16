@@ -1,8 +1,11 @@
+import { cache } from '@module-federation/modern-js/react';
+
 export type Data = {
   data: string;
 };
 
-export const fetchData = async (): Promise<Data> => {
+export const fetchData = cache(async (): Promise<Data> => {
+  console.log('provder-server called');
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
@@ -10,4 +13,4 @@ export const fetchData = async (): Promise<Data> => {
       });
     }, 1000);
   });
-};
+});
