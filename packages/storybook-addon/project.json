@@ -4,7 +4,7 @@
   "sourceRoot": "packages/storybook-addon/src",
   "projectType": "library",
   "tags": ["type:pkg"],
-  "implicitDependencies": ["utils"],
+  "implicitDependencies": [],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
