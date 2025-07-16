@@ -3,7 +3,30 @@
  * This file provides support for React 16 and 17 versions, using the traditional ReactDOM.render API
  */
 export { createBridgeComponent } from './provider/versions/legacy';
-export { createRemoteComponent } from './remote/create';
+export {
+  createRemoteComponent,
+  createRemoteAppComponent,
+} from './remote/create';
+export {
+  ERROR_TYPE,
+  createLazyComponent,
+  collectSSRAssets,
+  // wrapNoSSR,
+  callDataFetch,
+  setSSREnv,
+  autoFetchDataPlugin,
+  CacheSize,
+  CacheTime,
+  configureCache,
+  generateKey,
+  cache,
+  revalidateTag,
+  clearStore,
+  prefetch,
+} from './lazy';
+
+export { lazyLoadComponentPlugin } from './plugins/lazy-load-component-plugin';
+
 export type { CreateRootOptions, Root } from './provider/versions/legacy';
 export type {
   ProviderParams,
@@ -12,3 +35,11 @@ export type {
   DestroyParams,
   RenderParams,
 } from './types';
+export type {
+  DataFetchParams,
+  NoSSRRemoteInfo,
+  CollectSSRAssetsOptions,
+  CreateLazyComponentOptions,
+  CacheStatus,
+  CacheStatsInfo,
+} from './lazy';

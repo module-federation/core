@@ -10,8 +10,9 @@
       "options": {
         "outputPath": "packages/rsbuild-plugin/dist",
         "main": "packages/rsbuild-plugin/src/cli/index.ts",
-        "tsConfig": "packages/rsbuild-plugin/tsconfig.json",
+        "tsConfig": "packages/rsbuild-plugin/tsconfig.lib.json",
         "assets": [],
+        "external": ["@module-federation/*"],
         "project": "packages/rsbuild-plugin/package.json",
         "rollupConfig": "packages/rsbuild-plugin/rollup.config.js",
         "compiler": "swc",

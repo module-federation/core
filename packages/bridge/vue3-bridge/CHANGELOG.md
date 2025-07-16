@@ -1,5 +1,21 @@
 # @module-federation/bridge-vue3
 
+## 0.17.0
+
+### Minor Changes
+
+- e874c64: refactor(vue3-bridge): rename createRemoteComponent as createRemoteAppComponent
+
+### Patch Changes
+
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+  - @module-federation/runtime@0.17.0
+  - @module-federation/sdk@0.17.0
+  - @module-federation/bridge-shared@0.17.0
+
 ## 0.16.0
 
 ### Patch Changes
