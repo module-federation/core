@@ -35,6 +35,7 @@ describe('RemoteModule', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.resetModules();
 
     const { mockCompilation: compilation } = createMockCompilation();
     mockCompilation = compilation;
