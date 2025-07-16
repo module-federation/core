@@ -34,15 +34,15 @@ jest.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => {
     call: jest.fn(),
   });
 
-  return {
-    default: {
-      getCompilationHooks: jest.fn(() => ({
-        addContainerEntryDependency: mockHook(),
-        addFederationRuntimeDependency: mockHook(),
-        addRemoteDependency: mockHook(),
-      })),
-    },
+  const mockFederationModulesPlugin = {
+    getCompilationHooks: jest.fn(() => ({
+      addContainerEntryDependency: mockHook(),
+      addFederationRuntimeDependency: mockHook(),
+      addRemoteDependency: mockHook(),
+    })),
   };
+
+  return mockFederationModulesPlugin;
 });
 
 describe('RemoteModule', () => {
