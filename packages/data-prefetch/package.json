@@ -2,13 +2,13 @@
   "name": "@module-federation/data-prefetch",
   "description": "Module Federation Data Prefetch",
   "version": "0.17.0",
-  "type": "module",
+  "type": "commonjs",
   "author": "nieyan <nyqykk@foxmail.com>",
   "homepage": "https://github.com/module-federation/core",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/data-prefetch"
   },
   "scripts": {
@@ -24,29 +24,54 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.cjs.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.cjs.d.ts",
+        "default": "./dist/index.cjs.cjs"
+      }
     },
     "./react": {
-      "types": "./dist/react.cjs.d.ts",
-      "import": "./dist/react.esm.js",
-      "require": "./dist/react.cjs.cjs"
+      "import": {
+        "types": "./dist/react.d.ts",
+        "default": "./dist/react.esm.js"
+      },
+      "require": {
+        "types": "./dist/react.cjs.d.ts",
+        "default": "./dist/react.cjs.cjs"
+      }
     },
     "./cli": {
-      "types": "./dist/cli.cjs.d.ts",
-      "import": "./dist/cli.esm.js",
-      "require": "./dist/cli.cjs.cjs"
+      "import": {
+        "types": "./dist/cli.d.ts",
+        "default": "./dist/cli.esm.js"
+      },
+      "require": {
+        "types": "./dist/cli.cjs.d.ts",
+        "default": "./dist/cli.cjs.cjs"
+      }
     },
     "./babel-plugin": {
-      "types": "./dist/babel.cjs.d.ts",
-      "import": "./dist/babel.esm.js",
-      "require": "./dist/babel.cjs.cjs"
+      "import": {
+        "types": "./dist/babel.d.ts",
+        "default": "./dist/babel.esm.js"
+      },
+      "require": {
+        "types": "./dist/babel.cjs.d.ts",
+        "default": "./dist/babel.cjs.cjs"
+      }
     },
     "./universal": {
-      "types": "./dist/universal.cjs.d.ts",
-      "import": "./dist/universal.esm.js",
-      "require": "./dist/universal.cjs.cjs"
+      "import": {
+        "types": "./dist/universal.d.ts",
+        "default": "./dist/universal.esm.js"
+      },
+      "require": {
+        "types": "./dist/universal.cjs.d.ts",
+        "default": "./dist/universal.cjs.cjs"
+      }
     }
   },
   "typesVersions": {

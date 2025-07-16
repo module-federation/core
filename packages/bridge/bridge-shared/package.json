@@ -8,12 +8,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/bridge-shared"
   },
-  "type": "module",
+  "type": "commonjs",
   "main": "./dist/index.umd.js",
-  "module": "./dist/index.es.js",
+  "module": "./dist/index.es.mjs",
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite",

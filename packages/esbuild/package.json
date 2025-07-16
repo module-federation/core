@@ -1,9 +1,10 @@
 {
   "name": "@module-federation/esbuild",
   "version": "0.0.73",
+  "type": "commonjs",
   "author": "Zack Jackson (@ScriptedAlchemy)",
   "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "module": "./dist/index.esm.mjs",
   "types": "./dist/index.cjs.d.ts",
   "license": "MIT",
   "repository": {
@@ -20,24 +21,44 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.cjs.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "import": {
+        "types": "./dist/index.esm.d.mts",
+        "default": "./dist/index.esm.mjs"
+      },
+      "require": {
+        "types": "./dist/index.cjs.d.ts",
+        "default": "./dist/index.cjs.js"
+      }
     },
     "./plugin": {
-      "types": "./dist/esbuild.cjs.d.ts",
-      "import": "./dist/plugin.esm.js",
-      "require": "./dist/plugin.cjs.js"
+      "import": {
+        "types": "./dist/plugin.esm.d.mts",
+        "default": "./dist/plugin.esm.mjs"
+      },
+      "require": {
+        "types": "./dist/plugin.cjs.d.ts",
+        "default": "./dist/plugin.cjs.js"
+      }
     },
     "./build": {
-      "types": "./dist/build.cjs.d.ts",
-      "import": "./dist/build.esm.js",
-      "require": "./dist/build.cjs.js"
+      "import": {
+        "types": "./dist/build.esm.d.mts",
+        "default": "./dist/build.esm.mjs"
+      },
+      "require": {
+        "types": "./dist/build.cjs.d.ts",
+        "default": "./dist/build.cjs.js"
+      }
     },
     "./types": {
-      "types": "./dist/types.cjs.d.ts",
-      "import": "./dist/types.esm.js",
-      "require": "./dist/types.cjs.js"
+      "import": {
+        "types": "./dist/types.esm.d.mts",
+        "default": "./dist/types.esm.mjs"
+      },
+      "require": {
+        "types": "./dist/types.cjs.d.ts",
+        "default": "./dist/types.cjs.js"
+      }
     },
     "./*": "./*"
   },

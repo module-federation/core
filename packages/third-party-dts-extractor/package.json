@@ -1,13 +1,14 @@
 {
   "name": "@module-federation/third-party-dts-extractor",
   "version": "0.17.0",
+  "type": "commonjs",
   "files": [
     "dist/",
     "README.md"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/third-party-dts-extractor"
   },
   "publishConfig": {

@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/sdk",
   "version": "0.17.0",
-  "type": "module",
+  "type": "commonjs",
   "license": "MIT",
   "description": "A sdk for support module federation",
   "keywords": [
@@ -15,7 +15,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/sdk"
   },
   "publishConfig": {
@@ -29,7 +29,7 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.esm.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.esm.js"
       },
       "require": {
@@ -39,7 +39,7 @@
     },
     "./normalize-webpack-path": {
       "import": {
-        "types": "./dist/normalize-webpack-path.esm.d.ts",
+        "types": "./dist/normalize-webpack-path.d.ts",
         "default": "./dist/normalize-webpack-path.esm.js"
       },
       "require": {
