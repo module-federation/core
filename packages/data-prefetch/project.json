@@ -17,7 +17,7 @@
         "rollupConfig": "packages/data-prefetch/rollup.config.cjs",
         "compiler": "swc",
         "format": ["cjs", "esm"],
-        "generatePackageJson": false
+        "useLegacyTypescriptPlugin": false
       }
     },
     "test": {

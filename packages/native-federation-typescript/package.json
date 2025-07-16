@@ -1,6 +1,7 @@
 {
   "name": "@module-federation/native-federation-typescript",
   "version": "0.6.0",
+  "type": "commonjs",
   "description": "Bundler agnostic unplugin to share federated types",
   "keywords": [
     "module federation",

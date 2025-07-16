@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/runtime-core",
   "version": "0.17.0",
-  "type": "module",
+  "type": "commonjs",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs.cjs",
   "module": "./dist/index.esm.js",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/module-federation/core/",
+    "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/runtime-core"
   },
   "files": [
@@ -22,7 +22,7 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.esm.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.esm.js"
       },
       "require": {
@@ -32,7 +32,7 @@
     },
     "./types": {
       "import": {
-        "types": "./dist/types.esm.d.ts",
+        "types": "./dist/types.d.ts",
         "default": "./dist/types.esm.js"
       },
       "require": {

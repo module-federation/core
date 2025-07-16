@@ -16,7 +16,7 @@
         "rollupConfig": "packages/cli/rollup.config.js",
         "compiler": "swc",
         "format": ["cjs"],
-        "generatePackageJson": false
+        "useLegacyTypescriptPlugin": false
       }
     },
     "lint": {

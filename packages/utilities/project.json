@@ -31,7 +31,7 @@
         "external": ["@module-federation/*"],
         "compiler": "swc",
         "format": ["cjs", "esm"],
-        "generatePackageJson": false
+        "useLegacyTypescriptPlugin": false
       }
     },
     "lint": {
