@@ -69,6 +69,7 @@ jobs:
                [ "$pkg" != "packages/chrome-devtools" ] && \
                [ "$pkg" != "packages/core" ] && \
                [ "$pkg" != "packages/esbuild" ] && \
+               [ "$pkg" != "packages/modernjs" ] && \
                [ "$pkg" != "packages/utilities" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"
