@@ -12,7 +12,7 @@
 ```ts title="rspack.config.ts"
 module.exports = {
   plugins: [
-    new ModuleFederation({
+    new ModuleFederationPlugin({
       name: 'provider',
       exposes: {
         './Button': './src/components/Button.tsx',

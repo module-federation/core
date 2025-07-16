@@ -1,5 +1,5 @@
 import type {
-  FederationRuntimePlugin,
+  ModuleFederationRuntimePlugin,
   Shared,
 } from '@module-federation/runtime/types';
 import { loadScript } from '@module-federation/sdk';
@@ -8,7 +8,7 @@ import { isObject, getUnpkgUrl } from '../index';
 import { definePropertyGlobalVal } from '../sdk';
 import { __FEDERATION_DEVTOOLS__ } from '../../template';
 
-const fastRefreshPlugin = (): FederationRuntimePlugin => {
+const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
   return {
     name: 'mf-fast-refresh-plugin',
     beforeInit({ userOptions, ...args }) {

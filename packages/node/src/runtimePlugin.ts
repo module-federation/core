@@ -1,6 +1,6 @@
 import type {
-  FederationRuntimePlugin,
-  FederationHost,
+  ModuleFederationRuntimePlugin,
+  ModuleFederation,
 } from '@module-federation/runtime';
 type WebpackRequire = {
   (id: string): any;
@@ -22,7 +22,7 @@ type WebpackRequire = {
         options: { attrs: { globalName: string } },
       ) => Promise<any>;
     };
-    instance: FederationHost;
+    instance: ModuleFederation;
     chunkMatcher?: (chunkId: string) => boolean;
     rootOutputDir?: string;
     initOptions: {
@@ -39,17 +39,31 @@ type WebpackRequire = {
 declare const __webpack_require__: WebpackRequire;
 declare const __non_webpack_require__: (id: string) => any;
 
+export const nodeRuntimeImportCache = new Map<string, Promise<any>>();
+
 export function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
     throw new Error('import specifier is required');
   }
+
+  // Check cache to prevent infinite recursion
+  if (nodeRuntimeImportCache.has(name)) {
+    return nodeRuntimeImportCache.get(name)!;
+  }
+
   const importModule = new Function('name', `return import(name)`);
-  return importModule(name)
+  const promise = importModule(name)
     .then((res: any) => res.default as T)
     .catch((error: any) => {
       console.error(`Error importing module ${name}:`, error);
+      // Remove from cache on error so it can be retried
+      nodeRuntimeImportCache.delete(name);
       throw error;
     });
+
+  // Cache the promise to prevent recursive calls
+  nodeRuntimeImportCache.set(name, promise);
+  return promise;
 }
 
 // Hoisted utility function to resolve file paths for chunks
@@ -360,7 +374,7 @@ export const setupWebpackRequirePatching = (
   }
 };
 
-export default function (): FederationRuntimePlugin {
+export default function (): ModuleFederationRuntimePlugin {
   return {
     name: 'node-federation-plugin',
     beforeInit(args) {
