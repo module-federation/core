@@ -12,15 +12,17 @@
       }
     },
     "test": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "parallel": false,
-        "commands": [
-          {
-            "command": "vitest run -c packages/bridge/bridge-react/vitest.config.ts",
-            "forwardAllArgs": false
-          }
-        ]
+        "jestConfig": "packages/bridge/bridge-react/jest.config.cjs",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
       }
     }
   }

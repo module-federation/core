@@ -1,26 +1,41 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+
+// Mock dependencies
+jest.mock('../src/lazy/logger', () => ({
+  default: {
+    error: jest.fn(),
+  },
+}));
+jest.mock('../src/lazy/utils', () => ({
+  getDataFetchMap: jest.fn(),
+}));
+jest.mock('@module-federation/runtime/helpers', () => ({
+  default: {
+    utils: {
+      matchRemoteWithNameAndExpose: jest.fn(),
+      getRemoteInfo: jest.fn(),
+    },
+  },
+}));
+
 import { prefetch } from '../src/lazy/data-fetch/prefetch';
 import * as utils from '../src/lazy/utils';
 import logger from '../src/lazy/logger';
 import helpers from '@module-federation/runtime/helpers';
 
-// Mock dependencies
-vi.mock('../src/lazy/logger');
-vi.mock('../src/lazy/utils');
-vi.mock('@module-federation/runtime/helpers', () => ({
-  default: {
-    utils: {
-      matchRemoteWithNameAndExpose: vi.fn(),
-      getRemoteInfo: vi.fn(),
-    },
-  },
-}));
-
 describe('prefetch', () => {
   let mockInstance: any;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+
+    // Set up logger mock
+    (logger.error as jest.Mock) = jest.fn();
+
+    // Set up helpers mock
+    (helpers.utils.matchRemoteWithNameAndExpose as jest.Mock) = jest.fn();
+    (helpers.utils.getRemoteInfo as jest.Mock) = jest.fn();
+
     mockInstance = {
       name: 'host',
       options: {
@@ -34,13 +49,13 @@ describe('prefetch', () => {
         ],
       },
       snapshotHandler: {
-        loadRemoteSnapshotInfo: vi.fn(),
+        loadRemoteSnapshotInfo: jest.fn(),
       },
       remoteHandler: {
         hooks: {
           lifecycle: {
             generatePreloadAssets: {
-              emit: vi.fn(),
+              emit: jest.fn(),
             },
           },
         },
@@ -63,7 +78,7 @@ describe('prefetch', () => {
   });
 
   it('should log an error if remote is not found', async () => {
-    (helpers.utils.matchRemoteWithNameAndExpose as vi.Mock).mockReturnValue(
+    (helpers.utils.matchRemoteWithNameAndExpose as jest.Mock).mockReturnValue(
       undefined,
     );
     await prefetch({ id: 'nonexistent/component', instance: mockInstance });
@@ -77,33 +92,31 @@ describe('prefetch', () => {
       remote: { name: 'remote1', alias: 'remote1_alias' },
       expose: './component1',
     };
-    (helpers.utils.matchRemoteWithNameAndExpose as vi.Mock).mockReturnValue(
-      mockRemoteInfo,
-    );
+    helpers.utils.matchRemoteWithNameAndExpose.mockReturnValue(mockRemoteInfo);
     (
-      mockInstance.snapshotHandler.loadRemoteSnapshotInfo as vi.Mock
+      mockInstance.snapshotHandler.loadRemoteSnapshotInfo as jest.Mock
     ).mockResolvedValue({
       remoteSnapshot: {},
       globalSnapshot: {},
     });
-    (helpers.utils.getRemoteInfo as vi.Mock).mockReturnValue({});
+    helpers.utils.getRemoteInfo.mockReturnValue({});
 
-    const mockDataFetchFn = vi
+    const mockDataFetchFn = jest
       .fn()
       .mockResolvedValue({ data: 'prefetched data' });
-    const mockGetDataFetchGetter = vi.fn().mockResolvedValue(mockDataFetchFn);
+    const mockGetDataFetchGetter = jest.fn().mockResolvedValue(mockDataFetchFn);
     const mockDataFetchMap = {
       'remote1_alias@remote1/component1': [
         [mockGetDataFetchGetter, 'GET', undefined],
       ],
     };
-    (utils.getDataFetchMap as vi.Mock).mockReturnValue(mockDataFetchMap);
-    (utils.getDataFetchInfo as vi.Mock).mockReturnValue({
+    jest.mocked(utils.getDataFetchMap).mockReturnValue(mockDataFetchMap);
+    (utils.getDataFetchInfo as jest.Mock).mockReturnValue({
       name: 'remote1',
       alias: 'remote1_alias',
       id: 'remote1/component1',
     });
-    (utils.getDataFetchMapKey as vi.Mock).mockReturnValue(
+    (utils.getDataFetchMapKey as jest.Mock).mockReturnValue(
       'remote1_alias@remote1/component1',
     );
 
@@ -132,16 +145,14 @@ describe('prefetch', () => {
       remote: { name: 'remote1', alias: 'remote1_alias' },
       expose: './component1',
     };
-    (helpers.utils.matchRemoteWithNameAndExpose as vi.Mock).mockReturnValue(
-      mockRemoteInfo,
-    );
+    helpers.utils.matchRemoteWithNameAndExpose.mockReturnValue(mockRemoteInfo);
     (
-      mockInstance.snapshotHandler.loadRemoteSnapshotInfo as vi.Mock
+      mockInstance.snapshotHandler.loadRemoteSnapshotInfo as jest.Mock
     ).mockResolvedValue({
       remoteSnapshot: {},
       globalSnapshot: {},
     });
-    (utils.getDataFetchMap as vi.Mock).mockReturnValue(undefined);
+    jest.mocked(utils.getDataFetchMap).mockReturnValue(undefined);
 
     await prefetch({
       id: 'remote1/component1',
