@@ -16,7 +16,8 @@
         "rollupConfig": "packages/rsbuild-plugin/rollup.config.js",
         "compiler": "tsc",
         "format": ["cjs", "esm"],
-        "generatePackageJson": false
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
       }
     },
     "lint": {
