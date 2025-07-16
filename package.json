@@ -134,11 +134,7 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^11.0.1",
     "@semantic-release/npm": "^11.0.0",
-    "@storybook/core-common": "8.6.12",
-    "@storybook/core-server": "8.6.12",
     "@storybook/nextjs": "9.0.9",
-    "@storybook/node-logger": "8.1.11",
-    "@storybook/react": "9.0.9",
     "@svgr/webpack": "8.1.0",
     "@swc-node/register": "1.10.10",
     "@swc/cli": "0.6.0",
@@ -234,7 +230,9 @@
     "webpack-cli": "^5.1.4",
     "webpack-virtual-modules": "0.6.2",
     "whatwg-fetch": "^3.6.20",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "eslint-plugin-storybook": "9.0.9",
+    "@storybook/addon-docs": "9.0.17"
   },
   "config": {
     "commitizen": {

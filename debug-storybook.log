@@ -1,0 +1,91 @@
+[18:11:22.430] [DEBUG] Extracting storybook data...
+[18:11:22.430] [DEBUG] Getting Storybook info...
+[18:11:22.432] [DEBUG] Loading main config...
+[18:11:22.480] [DEBUG] Getting stories paths...
+[18:11:22.491] [DEBUG] Getting package manager...
+[18:11:22.920] [DEBUG] Getting Storybook version...
+[18:11:22.921] [INFO] 🔎 checking possible migrations..
+[18:11:22.922] [DEBUG] Running eslintPlugin migration checks
+[18:11:22.925] [DEBUG] End of eslintPlugin migration checks
+[18:11:22.925] [DEBUG] Running addon-mdx-gfm-remove migration checks
+[18:11:22.926] [DEBUG] End of addon-mdx-gfm-remove migration checks
+[18:11:22.926] [DEBUG] Running addon-storysource-code-panel migration checks
+[18:11:22.926] [DEBUG] End of addon-storysource-code-panel migration checks
+[18:11:22.926] [DEBUG] Running initial-globals migration checks
+[18:11:22.926] [DEBUG] End of initial-globals migration checks
+[18:11:22.926] [DEBUG] Running addon-a11y-addon-test migration checks
+[18:11:22.926] [DEBUG] End of addon-a11y-addon-test migration checks
+[18:11:22.926] [DEBUG] Running consolidated-imports migration checks
+[18:11:22.926] [DEBUG] End of consolidated-imports migration checks
+[18:11:22.926] [DEBUG] Running addon-experimental-test migration checks
+[18:11:22.926] [DEBUG] Getting installed version for @storybook/experimental-addon-test...
+[18:11:23.432] [DEBUG] End of addon-experimental-test migration checks
+[18:11:23.432] [DEBUG] Running rnstorybook-config migration checks
+[18:11:23.433] [DEBUG] End of rnstorybook-config migration checks
+[18:11:23.433] [DEBUG] Running remove-addon-interactions migration checks
+[18:11:23.433] [DEBUG] End of remove-addon-interactions migration checks
+[18:11:23.433] [DEBUG] Running renderer-to-framework migration checks
+[18:11:23.434] [DEBUG] End of renderer-to-framework migration checks
+[18:11:23.434] [DEBUG] Running remove-essential-addons migration checks
+[18:11:23.434] [DEBUG] End of remove-essential-addons migration checks
+[18:11:23.434] [DEBUG] Running addon-a11y-parameters migration checks
+[18:11:23.434] [DEBUG] End of addon-a11y-parameters migration checks
+[18:11:23.434] [DEBUG] Running remove-docs-autodocs migration checks
+[18:11:23.447] [DEBUG] End of remove-docs-autodocs migration checks
+[18:11:23.447] [DEBUG] Running wrap-require migration checks
+[18:11:23.450] [DEBUG] End of wrap-require migration checks
+[18:11:23.450] [INFO] 🔎 found a 'wrap-require' migration:
+[18:11:23.450] [INFO] automigrate-task-wrap-require-task-start: Automigration detected: wrap-require
+[18:11:23.450] [INFO] We have detected that you're using Storybook in a monorepo or PnP project. Some fields in your main config must be updated.
+[18:11:23.470] [INFO] automigrate-task-wrap-require-task: ╭──────────────────────────────────────────────────────────────────────────────╮
+│
+│
+│   We have detected that you're using Storybook in a monorepo or PnP
+│
+│   project. Some fields in your main config must be updated.
+│
+│
+│
+╰──────────────────────────────────────────────────────────────────────────────╯
+[18:11:23.478] [INFO] ✅ ran wrap-require migration
+[18:11:23.478] [INFO] automigrate-task-wrap-require-task-success: Ran wrap-require migration
+[18:11:23.478] [INFO] 
+[18:11:23.478] [INFO] Successful migrations:
+
+wrap-require
+
+─────────────────────────────────────────────────
+
+If you'd like to run the migrations again, you can do so by running 'npx storybook automigrate'
+
+The automigrations try to migrate common patterns in your project, but might not contain everything needed to migrate to the latest version of Storybook.
+
+Please check the changelog and migration guide for manual migrations and more information: https://storybook.js.org/docs/migration-guide
+And reach out on Discord if you need help: https://discord.gg/storybook
+[18:11:23.480] [INFO] 
+[18:11:23.480] [INFO] Installing dependencies...
+[18:11:23.480] [INFO] install-dependencies-task-start: Installing dependencies...
+[18:11:23.480] [INFO] Checking the health of your Storybook..
+[18:11:23.481] [DEBUG] Getting Storybook info...
+[18:11:23.481] [DEBUG] Loading main config...
+[18:11:23.486] [ERROR] undefined: 1 problem found
+[18:11:23.487] [INFO] ❌ Unable to determine Storybook version so the command will not proceed.
+🤔 Are you running storybook doctor from your project directory? Please specify your Storybook config directory with the --config-dir flag.
+[18:11:23.505] [INFO] install-dependencies-task: ╭ Configuration Error
+─────────────────────────────────────────────────────────╮
+│
+│
+│   ❌ Unable to determine Storybook version so the command will not
+│
+│   proceed.
+│
+│   🤔 Are you running storybook doctor from your project directory?
+Please    │
+│   specify your Storybook config directory with the --config-dir
+flag.        │
+│
+│
+╰──────────────────────────────────────────────────────────────────────────────╯
+[18:11:23.505] [INFO] Storybook doctor is complete!
+[18:11:23.505] [INFO] You can always recheck the health of your project(s) by running:
+npx storybook doctor
