@@ -18,3 +18,8 @@ This package demonstrates a specific use case of Module Federation within the ec
 ## Build
 
 Output will be located in the `dist` or `.next` folder.
+
+## Scripts
+
+- `pnpm start`: Start dev server
+- `pnpm build`: Build production bundle
