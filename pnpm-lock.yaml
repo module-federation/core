@@ -519,9 +519,6 @@ importers:
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
-      '@module-federation/utilities':
-        specifier: workspace:*
-        version: link:../../packages/utilities
       '@types/react':
         specifier: 18.3.11
         version: 18.3.11
@@ -562,9 +559,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
-      '@module-federation/utilities':
-        specifier: workspace:*
-        version: link:../../packages/utilities
       '@types/react':
         specifier: 18.3.11
         version: 18.3.11
@@ -605,9 +599,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
-      '@module-federation/utilities':
-        specifier: workspace:*
-        version: link:../../packages/utilities
       '@types/react':
         specifier: 18.3.11
         version: 18.3.11
