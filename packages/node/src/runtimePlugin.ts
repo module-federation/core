@@ -41,6 +41,9 @@ declare const __non_webpack_require__: (id: string) => any;
 
 const nodeRuntimeImportCache = new Map<string, Promise<any>>();
 
+// Export cache for testing
+export { nodeRuntimeImportCache };
+
 export function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
     throw new Error('import specifier is required');
