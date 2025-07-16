@@ -3,7 +3,7 @@ import path from 'path';
 import { TEMP_DIR } from '@module-federation/sdk';
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import { DATA_FETCH_CLIENT_SUFFIX, DATA_FETCH_IDENTIFIER } from './constant';
+import { DATA_FETCH_CLIENT_SUFFIX, DATA_FETCH_IDENTIFIER } from '../constant';
 
 const addDataFetchExpose = (
   exposes: moduleFederationPlugin.ExposesObject,

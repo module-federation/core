@@ -1,5 +1,25 @@
 # @module-federation/webpack-bundler-runtime
 
+## 0.17.0
+
+### Patch Changes
+
+- 3f736b6: chore: rename FederationHost to ModuleFederation
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+- Updated dependencies [3f736b6]
+  - @module-federation/runtime@0.17.0
+  - @module-federation/sdk@0.17.0
+
+## 0.16.0
+
+### Patch Changes
+
+- Updated dependencies [1485fcf]
+  - @module-federation/sdk@0.16.0
+  - @module-federation/runtime@0.16.0
+
 ## 0.15.0
 
 ### Patch Changes

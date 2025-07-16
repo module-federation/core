@@ -255,7 +255,9 @@ class FederationRuntimePlugin {
             if (err) {
               return callback(err);
             }
-            hooks.addFederationRuntimeModule.call(federationRuntimeDependency);
+            hooks.addFederationRuntimeDependency.call(
+              federationRuntimeDependency,
+            );
             callback();
           },
         );

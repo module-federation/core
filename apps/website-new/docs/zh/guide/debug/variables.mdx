@@ -479,7 +479,7 @@ moduleInfo: {
 
 在上述示例中，`moduleInfo` 包含了 5 个模块的信息，其中 `manifest_host` 后面没带有版本号，说明它是一个消费者模块。
 
-`manifest_host` 中的 remotesInfo 字段记录了它依赖的所有生产者模块的信息，对应的 `matchedVersion` 字段记录了它匹配到的版本或者 `url` 。
+`manifest_host` 中的 `remotesInfo` 字段记录了它依赖的所有生产者模块的信息，对应的 `matchedVersion` 字段记录了它匹配到的版本或者 `url` 。
 
 可以通过消费者 `remotesInfo` 字段中的 key + `matchedVersion` 来获取对应的生产者模块信息，比如 `webpack_provider:http://localhost:3009/mf-manifest.json` 。
 

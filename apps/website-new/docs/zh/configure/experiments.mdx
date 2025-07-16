@@ -30,7 +30,7 @@ new ModuleFederationPlugin({
 - Required: No
 - Default: `false`
 
-启用 `asyncStartup` 后，所有 Module Federation 入口将默认以异步方式初始化。这意味着：
+启用 `asyncStartup` 后，所有 {props.name || 'Module Federation'}  入口将默认以异步方式初始化。这意味着：
 
 - 无需在应用顶部手动添加 `import()` 语句（例如 `import('./bootstrap')`）
 - 所有入口都会自动处理异步初始化

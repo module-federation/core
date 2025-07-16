@@ -1,5 +1,26 @@
 # @module-federation/bridge-react
 
+## 0.17.0
+
+### Minor Changes
+
+- e874c64: refactor(bridge-react): rename createRemoteComponent as createRemoteAppComponent
+
+### Patch Changes
+
+- e874c64: feat(bridge-react): export createLazyCompoent api
+- 3f736b6: chore: rename FederationHost to ModuleFederation
+  - @module-federation/sdk@0.17.0
+  - @module-federation/bridge-shared@0.17.0
+
+## 0.16.0
+
+### Patch Changes
+
+- Updated dependencies [1485fcf]
+  - @module-federation/sdk@0.16.0
+  - @module-federation/bridge-shared@0.16.0
+
 ## 0.15.0
 
 ### Patch Changes

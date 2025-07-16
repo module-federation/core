@@ -11,16 +11,10 @@ export default function (): FederationRuntimePlugin {
     name: 'node-federation-plugin',
     beforeInit(args) {
       try {
-        // Initialize federation chunk loading
-        initializeFederationChunkLoading(args);
-
-        // Initialize HMR runtime patching for hot module replacement
+        initializeFederationChunkLoading();
         initializeHMRRuntimePatchingFromArgs(args);
-
-        return args;
       } catch (error) {
-        console.error('Failed to initialize node-federation-plugin:', error);
-        return args;
+        console.error('[Node Federation Plugin] Failed to initialize:', error);
       }
     },
   };

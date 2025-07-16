@@ -1,5 +1,13 @@
 # create-module-federation
 
+## 0.17.0
+
+### Patch Changes
+
+- e0ceca6: bump modern.js to fix esbuild vulnerability
+
+## 0.16.0
+
 ## 0.15.0
 
 ## 0.14.3

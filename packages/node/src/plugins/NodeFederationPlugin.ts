@@ -87,7 +87,7 @@ class NodeFederationPlugin {
       uniqueName &&
       !chunkFileName.includes(uniqueName)
     ) {
-      const suffix = `-[chunkhash].js`;
+      const suffix = `-[contenthash].js`;
       compiler.options.output.chunkFilename = chunkFileName.replace(
         '.js',
         suffix,

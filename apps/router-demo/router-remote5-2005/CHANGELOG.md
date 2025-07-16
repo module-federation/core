@@ -1,5 +1,23 @@
 # remote5
 
+## 1.1.8
+
+### Patch Changes
+
+- Updated dependencies [e874c64]
+- Updated dependencies [e874c64]
+- Updated dependencies [3f736b6]
+  - @module-federation/bridge-react@0.17.0
+  - @module-federation/rsbuild-plugin@0.17.0
+
+## 1.1.7
+
+### Patch Changes
+
+- Updated dependencies [98136ca]
+  - @module-federation/rsbuild-plugin@0.16.0
+  - @module-federation/bridge-react@0.16.0
+
 ## 1.1.6
 
 ### Patch Changes

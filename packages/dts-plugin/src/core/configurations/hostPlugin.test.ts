@@ -43,6 +43,7 @@ describe('hostPlugin', () => {
           runtimePkgs: [],
           remoteTypeUrls: {},
           timeout: 60000,
+          typesOnBuild: false,
         });
 
         expect(mapRemotesToDownload).toStrictEqual({
@@ -70,6 +71,7 @@ describe('hostPlugin', () => {
           runtimePkgs: [],
           remoteTypeUrls: {},
           timeout: 60000,
+          typesOnBuild: false,
         };
 
         const { hostOptions, mapRemotesToDownload } =

@@ -28,13 +28,13 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         const logger = compilation.getLogger(PLUGIN_NAME);
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const containerEntryDependencies = new Set<Dependency>();
-        hooks.addContainerEntryModule.tap(
+        hooks.addContainerEntryDependency.tap(
           'HoistContainerReferences',
           (dep: ContainerEntryDependency) => {
             containerEntryDependencies.add(dep);
           },
         );
-        hooks.addFederationRuntimeModule.tap(
+        hooks.addFederationRuntimeDependency.tap(
           'HoistContainerReferences',
           (dep: FederationRuntimeDependency) => {
             containerEntryDependencies.add(dep);

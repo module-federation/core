@@ -1,5 +1,30 @@
 # @module-federation/runtime
 
+## 0.17.0
+
+### Minor Changes
+
+- 3f736b6: feat(runtime): add createInstance api and deprecate init
+
+### Patch Changes
+
+- 3f736b6: chore(runtime): add RUNTIME-009 error code
+- 3f736b6: refactor(runtime): rename FederationRuntimePlugin to ModuleFederationRuntimePlugin
+- 3f736b6: chore: rename FederationHost to ModuleFederation
+- Updated dependencies [3f736b6]
+  - @module-federation/runtime-core@0.17.0
+  - @module-federation/sdk@0.17.0
+  - @module-federation/error-codes@0.17.0
+
+## 0.16.0
+
+### Patch Changes
+
+- Updated dependencies [1485fcf]
+  - @module-federation/sdk@0.16.0
+  - @module-federation/runtime-core@0.16.0
+  - @module-federation/error-codes@0.16.0
+
 ## 0.15.0
 
 ### Patch Changes
@@ -415,19 +440,19 @@
 - 9e32644: Added comprehensive integration tests for the API synchronization and enhanced the embedded module proxy implementation.
 
   - Added detailed integration tests for API consistency between embedded and index modules.
-    - Tests include export comparison and method consistency for `FederationHost` and `Module` classes.
+    - Tests include export comparison and method consistency for `ModuleFederation` and `Module` classes.
   - Introduced and updated the `embedded.ts` file to dynamically access the runtime modules at runtime.
     - Included detailed implementations for accessing and wrapping existing runtime functions.
-  - Exposed the previously private `formatOptions` method in the `FederationHost` class publicly.
+  - Exposed the previously private `formatOptions` method in the `ModuleFederation` class publicly.
   - Enhanced error handling for uninstantiated or unregistered runtime access.
 
 - 9e32644: - Refactor `embedded.ts` to use a proxy pattern for better runtime compatibility:
-  - Implement FederationHost and Module classes that delegate to the actual runtime implementation
+  - Implement ModuleFederation and Module classes that delegate to the actual runtime implementation
   - Expose all public methods and properties from the original classes
   - Use a lazy initialization approach to ensure proper runtime loading
   - Add comprehensive test suite for API synchronization between embedded.ts and index.ts
     - Introduce new test file `sync.spec.ts` with extensive tests for API compatibility
-    - Ensure FederationHost and Module classes have the same methods in both files
+    - Ensure ModuleFederation and Module classes have the same methods in both files
     - Test various scenarios including remote loading, manifest handling, and circular dependencies
     - Modify `core.ts` to make `formatOptions` method public
 - Updated dependencies [9e32644]

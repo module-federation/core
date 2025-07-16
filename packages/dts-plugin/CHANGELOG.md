@@ -1,5 +1,29 @@
 # @module-federation/dts-plugin
 
+## 0.17.0
+
+### Patch Changes
+
+- 1d691ef: fix(dts-plugin): add expose file imported files to tsconfig files
+  - @module-federation/sdk@0.17.0
+  - @module-federation/managers@0.17.0
+  - @module-federation/third-party-dts-extractor@0.17.0
+  - @module-federation/error-codes@0.17.0
+
+## 0.16.0
+
+### Minor Changes
+
+- 1485fcf: added flag to fetch types from remote when building in production.
+
+### Patch Changes
+
+- Updated dependencies [1485fcf]
+  - @module-federation/sdk@0.16.0
+  - @module-federation/managers@0.16.0
+  - @module-federation/third-party-dts-extractor@0.16.0
+  - @module-federation/error-codes@0.16.0
+
 ## 0.15.0
 
 ### Patch Changes
