@@ -18,11 +18,6 @@ import {
 import * as runtime from '@module-federation/runtime';
 import * as utils from '../src/lazy/utils';
 
-const mockGetInstance = runtime.getInstance as jest.Mock;
-const mockGetLoadedRemoteInfos = utils.getLoadedRemoteInfos as jest.Mock;
-const mockGetDataFetchMapKey = utils.getDataFetchMapKey as jest.Mock;
-const mockFetchData = utils.fetchData as jest.Mock;
-
 const MockComponent = () => <div>Mock Component</div>;
 const LoadingComponent = () => <div>Loading...</div>;
 const ErrorComponent = () => <div>Error!</div>;
@@ -37,8 +32,8 @@ describe('createLazyComponent', () => {
       options: { version: '1.0.0' },
       getModuleInfo: jest.fn(),
     };
-    mockGetInstance.mockReturnValue(mockInstance);
-    mockGetLoadedRemoteInfos.mockReturnValue({
+    (runtime.getInstance as any).mockReturnValue(mockInstance);
+    (utils.getLoadedRemoteInfos as any).mockReturnValue({
       name: 'remoteApp',
       alias: 'remote',
       expose: './Component',
@@ -58,7 +53,7 @@ describe('createLazyComponent', () => {
       },
       entryGlobalName: 'remoteApp',
     });
-    mockGetDataFetchMapKey.mockReturnValue('data-fetch-key');
+    (utils.getDataFetchMapKey as any).mockReturnValue('data-fetch-key');
   });
 
   it('should render loading component then the actual component', async () => {
@@ -88,7 +83,7 @@ describe('createLazyComponent', () => {
   });
 
   it('should render fallback component on data fetch error', async () => {
-    mockFetchData.mockRejectedValue(new Error('Data fetch failed'));
+    (utils.fetchData as any).mockRejectedValue(new Error('Data fetch failed'));
     const LazyComponentWithDataFetch = createLazyComponent({
       loader: jest.fn().mockResolvedValue({
         default: MockComponent,
@@ -114,7 +109,7 @@ describe('createLazyComponent', () => {
       [Symbol.for('mf_module_id')]: 'remoteApp/Component',
     });
     const mockData = { message: 'Hello' };
-    mockFetchData.mockResolvedValue(mockData);
+    (utils.fetchData as any).mockResolvedValue(mockData);
 
     const LazyComponent = createLazyComponent({
       loader,
@@ -142,7 +137,7 @@ describe('collectSSRAssets', () => {
       name: 'host-app',
       options: { version: '1.0.0' },
     };
-    mockGetInstance.mockReturnValue(mockInstance);
+    (runtime.getInstance as any).mockReturnValue(mockInstance);
   });
 
   it('should return an empty array if instance is not available', () => {
@@ -154,7 +149,7 @@ describe('collectSSRAssets', () => {
   });
 
   it('should return an empty array if module info is not found', () => {
-    mockGetLoadedRemoteInfos.mockReturnValue(undefined);
+    (utils.getLoadedRemoteInfos as any).mockReturnValue(undefined);
     const assets = collectSSRAssets({
       id: 'test/expose',
       instance: mockInstance,
@@ -163,7 +158,7 @@ describe('collectSSRAssets', () => {
   });
 
   it('should collect CSS and JS assets for SSR', () => {
-    mockGetLoadedRemoteInfos.mockReturnValue({
+    (utils.getLoadedRemoteInfos as any).mockReturnValue({
       name: 'remoteApp',
       expose: './Component',
       snapshot: {

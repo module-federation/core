@@ -8,6 +8,7 @@ jest.mock('../src/lazy/logger', () => ({
 }));
 jest.mock('../src/lazy/utils', () => ({
   getDataFetchMap: jest.fn(),
+  getDataFetchInfo: jest.fn(),
 }));
 jest.mock('@module-federation/runtime/helpers', () => ({
   default: {
@@ -110,8 +111,8 @@ describe('prefetch', () => {
         [mockGetDataFetchGetter, 'GET', undefined],
       ],
     };
-    jest.mocked(utils.getDataFetchMap).mockReturnValue(mockDataFetchMap);
-    (utils.getDataFetchInfo as jest.Mock).mockReturnValue({
+    (utils.getDataFetchMap as any).mockReturnValue(mockDataFetchMap);
+    (utils.getDataFetchInfo as any).mockReturnValue({
       name: 'remote1',
       alias: 'remote1_alias',
       id: 'remote1/component1',
@@ -152,7 +153,7 @@ describe('prefetch', () => {
       remoteSnapshot: {},
       globalSnapshot: {},
     });
-    jest.mocked(utils.getDataFetchMap).mockReturnValue(undefined);
+    (utils.getDataFetchMap as any).mockReturnValue(undefined);
 
     await prefetch({
       id: 'remote1/component1',
