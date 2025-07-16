@@ -14,17 +14,17 @@
   "license": "MIT",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/index.cjs.d.ts",
       "import": "./dist/index.esm.mjs",
       "require": "./dist/index.cjs.js"
     },
     "./utils": {
-      "types": "./dist/utils.d.ts",
+      "types": "./dist/utils.cjs.d.ts",
       "import": "./dist/utils.esm.mjs",
       "require": "./dist/utils.cjs.js"
     },
     "./constant": {
-      "types": "./dist/constant.d.ts",
+      "types": "./dist/constant.cjs.d.ts",
       "import": "./dist/constant.esm.mjs",
       "require": "./dist/constant.cjs.js"
     }
@@ -34,13 +34,13 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.d.ts"
+        "./dist/index.cjs.d.ts"
       ],
       "utils": [
-        "./dist/utils.d.ts"
+        "./dist/utils.cjs.d.ts"
       ],
       "constant": [
-        "./dist/constant.d.ts"
+        "./dist/constant.cjs.d.ts"
       ]
     }
   },
