@@ -544,6 +544,8 @@ class DTSManager {
             'info',
           );
           if (remoteInfo) {
+            // TypeScript doesn't infer the type correctly from Object.values().find()
+            // even though resolveRemotes returns Record<string, RemoteInfo>
             const typedRemoteInfo = remoteInfo as RemoteInfo;
             if (!this.remoteAliasMap[typedRemoteInfo.alias]) {
               const requiredRemoteInfo = await this.requestRemoteManifest(
