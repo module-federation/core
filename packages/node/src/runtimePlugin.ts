@@ -120,15 +120,7 @@ export const loadFromFs = (
             filename,
             importModuleDynamically:
               //@ts-ignore
-              vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ??
-              ((specifier: string) => {
-                // Use direct dynamic import to avoid recursion
-                const dynamicImport = new Function(
-                  'specifier',
-                  'return import(specifier)',
-                );
-                return dynamicImport(specifier);
-              }),
+              vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
           },
         );
         script.runInThisContext()(
