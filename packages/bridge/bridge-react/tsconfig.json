@@ -22,7 +22,7 @@
     "strict": true,
     "moduleResolution": "node",
     "lib": ["esnext", "dom"],
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
