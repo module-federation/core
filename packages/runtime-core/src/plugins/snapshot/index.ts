@@ -3,7 +3,7 @@ import {
   getResourceUrl,
   isBrowserEnv,
 } from '@module-federation/sdk';
-import { FederationRuntimePlugin } from '../../type/plugin';
+import { ModuleFederationRuntimePlugin } from '../../type/plugin';
 import {
   error,
   isPureRemoteEntry,
@@ -37,7 +37,7 @@ export function assignRemoteInfo(
   remoteInfo.buildVersion = remoteSnapshot.buildVersion;
 }
 
-export function snapshotPlugin(): FederationRuntimePlugin {
+export function snapshotPlugin(): ModuleFederationRuntimePlugin {
   return {
     name: 'snapshot-plugin',
     async afterResolve(args) {

@@ -4,5 +4,10 @@
   "name": "runtime",
   "label": "运行时"
   },
-  "rsbuild", "rspack", "webpack", "rspress","vite","type-prompt","cli","css-isolate"
+  "rsbuild", "rspack", "webpack", "rspress","vite","type-prompt","cli","css-isolate",
+   {
+    "type": "dir",
+    "name": "data-fetch",
+    "label": "数据管理"
+  }
 ]
