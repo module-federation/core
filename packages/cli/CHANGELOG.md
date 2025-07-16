@@ -1,5 +1,14 @@
 # @module-federation/cli
 
+## 0.17.0
+
+### Patch Changes
+
+- e0ceca6: bump modern.js to fix esbuild vulnerability
+- Updated dependencies [1d691ef]
+  - @module-federation/dts-plugin@0.17.0
+  - @module-federation/sdk@0.17.0
+
 ## 0.16.0
 
 ### Patch Changes

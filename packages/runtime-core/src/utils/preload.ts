@@ -10,7 +10,7 @@ import {
 } from '../type';
 import { matchRemote } from './manifest';
 import { assert } from './logger';
-import { FederationHost } from '../core';
+import { ModuleFederation } from '../core';
 import { getRemoteEntry } from './load';
 
 export function defaultPreloadArgs(
@@ -66,7 +66,7 @@ export function normalizePreloadExposes(exposes?: string[]): string[] {
 
 export function preloadAssets(
   remoteInfo: RemoteInfo,
-  host: FederationHost,
+  host: ModuleFederation,
   assets: PreloadAssets,
   // It is used to distinguish preload from load remote parallel loading
   useLinkPreload = true,

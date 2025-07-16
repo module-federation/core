@@ -1,4 +1,4 @@
-import type { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 import { createWebsocket } from '../server/createWebsocket';
 import {
   AddDynamicRemoteAction,
@@ -9,7 +9,7 @@ import { getIpFromEntry } from '../dev-worker/utils';
 declare const FEDERATION_IPV4: string | undefined;
 const PLUGIN_NAME = 'dynamic-remote-type-hints-plugin';
 
-function dynamicRemoteTypeHintsPlugin(): FederationRuntimePlugin {
+function dynamicRemoteTypeHintsPlugin(): ModuleFederationRuntimePlugin {
   let ws = createWebsocket();
   let isConnected = false;
   ws.onopen = () => {
