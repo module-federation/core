@@ -177,7 +177,15 @@ describe('index', () => {
 
       const testsFolder = join(projectRoot, options.mocksFolder);
 
-      expect(dirTree(testsFolder)).toMatchObject({
+      const tree = dirTree(testsFolder);
+      // Filter out platform-specific fsevents files
+      if (tree?.children?.[0]?.children) {
+        tree.children[0].children = tree.children[0].children.filter(
+          (child: any) => !child.name.includes('fsevents'),
+        );
+      }
+
+      expect(tree).toMatchObject({
         name: '__mocks__',
         children: [
           {

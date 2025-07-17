@@ -1,6 +1,5 @@
 import React, { Suspense } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   createLazyComponent,
   collectSSRAssets,
@@ -9,13 +8,13 @@ import * as runtime from '@module-federation/runtime';
 import * as utils from '../src/lazy/utils';
 
 // Mocking dependencies
-vi.mock('@module-federation/runtime');
-vi.mock('../src/lazy/utils');
+jest.mock('@module-federation/runtime');
+jest.mock('../src/lazy/utils');
 
-const mockGetInstance = runtime.getInstance as vi.Mock;
-const mockGetLoadedRemoteInfos = utils.getLoadedRemoteInfos as vi.Mock;
-const mockGetDataFetchMapKey = utils.getDataFetchMapKey as vi.Mock;
-const mockFetchData = utils.fetchData as vi.Mock;
+const mockGetInstance = runtime.getInstance as jest.Mock;
+const mockGetLoadedRemoteInfos = utils.getLoadedRemoteInfos as jest.Mock;
+const mockGetDataFetchMapKey = utils.getDataFetchMapKey as jest.Mock;
+const mockFetchData = utils.fetchData as jest.Mock;
 
 const MockComponent = () => <div>Mock Component</div>;
 const LoadingComponent = () => <div>Loading...</div>;
@@ -25,11 +24,11 @@ describe('createLazyComponent', () => {
   let mockInstance: any;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockInstance = {
       name: 'host-app',
       options: { version: '1.0.0' },
-      getModuleInfo: vi.fn(),
+      getModuleInfo: jest.fn(),
     };
     mockGetInstance.mockReturnValue(mockInstance);
     mockGetLoadedRemoteInfos.mockReturnValue({
@@ -56,7 +55,7 @@ describe('createLazyComponent', () => {
   });
 
   it('should render loading component then the actual component', async () => {
-    const loader = vi.fn().mockResolvedValue({
+    const loader = jest.fn().mockResolvedValue({
       default: MockComponent,
       [Symbol.for('mf_module_id')]: 'remoteApp/Component',
     });
@@ -84,7 +83,7 @@ describe('createLazyComponent', () => {
   it('should render fallback component on data fetch error', async () => {
     mockFetchData.mockRejectedValue(new Error('Data fetch failed'));
     const LazyComponentWithDataFetch = createLazyComponent({
-      loader: vi.fn().mockResolvedValue({
+      loader: jest.fn().mockResolvedValue({
         default: MockComponent,
         [Symbol.for('mf_module_id')]: 'remoteApp/Component',
       }),
@@ -101,7 +100,7 @@ describe('createLazyComponent', () => {
   });
 
   it('should fetch data and pass it to the component', async () => {
-    const loader = vi.fn().mockResolvedValue({
+    const loader = jest.fn().mockResolvedValue({
       default: (props: { mfData: any }) => (
         <div>Data: {JSON.stringify(props.mfData)}</div>
       ),
@@ -131,7 +130,7 @@ describe('collectSSRAssets', () => {
   let mockInstance: any;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockInstance = {
       name: 'host-app',
       options: { version: '1.0.0' },

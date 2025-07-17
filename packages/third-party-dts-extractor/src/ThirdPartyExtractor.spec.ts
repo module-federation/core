@@ -5,10 +5,11 @@ import { ThirdPartyExtractor } from './ThirdPartyExtractor';
 
 describe('ThirdPartyExtractor', () => {
   const projectRoot = join(__dirname, '..', '..', '..');
+  const packageRoot = join(__dirname, '..'); // Local package directory
   const destDir = join(projectRoot, 'dist', 'third-party-extractor');
   const thirdPartyExtractor = new ThirdPartyExtractor({
     destDir,
-    context: projectRoot,
+    context: packageRoot, // Use local package context instead of root
     exclude: ['ignore-pkg', /ignore-pkg2-/, /ignore-pkg3/.toString()],
   });
 
