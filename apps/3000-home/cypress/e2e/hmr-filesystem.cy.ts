@@ -1,9 +1,10 @@
 import { getH1 } from '../support/app.po';
 
 describe('HMR Filesystem Changes E2E', () => {
-  const SHOP_COMPONENT_PATH = '../../apps/3001-shop/components/exposedTitle.tsx';
+  const SHOP_COMPONENT_PATH =
+    '../../apps/3001-shop/components/exposedTitle.tsx';
   const TEST_MARKER = 'CYPRESS HMR TEST';
-  
+
   let originalContent: string;
 
   before(() => {
@@ -36,7 +37,7 @@ describe('HMR Filesystem Changes E2E', () => {
     cy.visit('/shop');
     cy.wait(2000); // Wait for federation to load
     getH1().contains('Shop Page');
-    
+
     // Verify original content is present
     cy.get('body').should('contain', 'And it works like a charm v2');
     cy.get('body').should('not.contain', TEST_MARKER);
@@ -46,9 +47,9 @@ describe('HMR Filesystem Changes E2E', () => {
     cy.readFile(SHOP_COMPONENT_PATH).then((content) => {
       const modifiedContent = content.replace(
         /And it works like a charm v2/g,
-        `${TEST_MARKER} - Modified at ${Date.now()}`
+        `${TEST_MARKER} - Modified at ${Date.now()}`,
       );
-      
+
       cy.writeFile(SHOP_COMPONENT_PATH, modifiedContent);
       cy.log('File modified, waiting for HMR detection...');
     });
@@ -59,11 +60,11 @@ describe('HMR Filesystem Changes E2E', () => {
     // Step 5: Navigate to trigger server-side revalidation
     cy.visit('/');
     cy.wait(1000);
-    
+
     // Step 6: Navigate back to shop to see if changes were detected
     cy.visit('/shop');
     cy.wait(2000);
-    
+
     // Step 7: Verify the changes are reflected
     cy.get('body').should('contain', TEST_MARKER, { timeout: 10000 });
     cy.log('✅ HMR changes detected and applied!');
@@ -72,7 +73,7 @@ describe('HMR Filesystem Changes E2E', () => {
     cy.visit('/checkout');
     cy.wait(1000);
     getH1().contains('checkout page');
-    
+
     cy.visit('/shop');
     cy.wait(1000);
     cy.get('body').should('contain', TEST_MARKER);
@@ -85,9 +86,9 @@ describe('HMR Filesystem Changes E2E', () => {
       const testMessage = `${TEST_MARKER} Multi-Visit Test ${Date.now()}`;
       const modifiedContent = content.replace(
         /And it works like a charm v2/g,
-        testMessage
+        testMessage,
       );
-      
+
       cy.writeFile(SHOP_COMPONENT_PATH, modifiedContent);
     });
 
@@ -96,12 +97,12 @@ describe('HMR Filesystem Changes E2E', () => {
 
     // Visit multiple pages to trigger different revalidation scenarios
     const pages = ['/', '/shop', '/checkout', '/shop'];
-    
+
     pages.forEach((page, index) => {
       cy.log(`Visiting page ${index + 1}: ${page}`);
       cy.visit(page);
       cy.wait(1500);
-      
+
       if (page === '/shop') {
         cy.get('body').should('contain', TEST_MARKER, { timeout: 10000 });
       }
@@ -114,27 +115,28 @@ describe('HMR Filesystem Changes E2E', () => {
     // Rapid file modifications
     for (let i = 1; i <= 3; i++) {
       cy.log(`Making file change ${i}/3...`);
-      
+
       cy.readFile(SHOP_COMPONENT_PATH).then((content) => {
         const testMessage = `${TEST_MARKER} Rapid Change ${i} - ${Date.now()}`;
-        const modifiedContent = content.replace(
-          /And it works like a charm v2/g,
-          testMessage
-        ).replace(
-          new RegExp(`${TEST_MARKER} Rapid Change \\d+ - \\d+`, 'g'),
-          testMessage
-        );
-        
+        const modifiedContent = content
+          .replace(/And it works like a charm v2/g, testMessage)
+          .replace(
+            new RegExp(`${TEST_MARKER} Rapid Change \\d+ - \\d+`, 'g'),
+            testMessage,
+          );
+
         cy.writeFile(SHOP_COMPONENT_PATH, modifiedContent);
       });
-      
+
       cy.wait(1000);
-      
+
       // Visit shop to trigger revalidation
       cy.visit('/shop');
       cy.wait(1500);
-      
-      cy.get('body').should('contain', `${TEST_MARKER} Rapid Change ${i}`, { timeout: 10000 });
+
+      cy.get('body').should('contain', `${TEST_MARKER} Rapid Change ${i}`, {
+        timeout: 10000,
+      });
     }
 
     cy.log('✅ Rapid file changes handled correctly!');
@@ -151,9 +153,9 @@ describe('HMR Filesystem Changes E2E', () => {
       const testMessage = `${TEST_MARKER} Console Test ${Date.now()}`;
       const modifiedContent = content.replace(
         /And it works like a charm v2/g,
-        testMessage
+        testMessage,
       );
-      
+
       cy.writeFile(SHOP_COMPONENT_PATH, modifiedContent);
     });
 
@@ -165,10 +167,10 @@ describe('HMR Filesystem Changes E2E', () => {
 
     // Check that revalidation console logs were called
     cy.get('@consoleLog').should('have.been.called');
-    
+
     // Verify content changed
     cy.get('body').should('contain', TEST_MARKER, { timeout: 10000 });
-    
+
     cy.log('✅ HMR console logging verification complete!');
   });
 
@@ -187,9 +189,9 @@ describe('HMR Filesystem Changes E2E', () => {
       const testMessage = `${TEST_MARKER} SSR Test ${Date.now()}`;
       const modifiedContent = content.replace(
         /And it works like a charm v2/g,
-        testMessage
+        testMessage,
       );
-      
+
       cy.writeFile(SHOP_COMPONENT_PATH, modifiedContent);
     });
 
@@ -206,7 +208,7 @@ describe('HMR Filesystem Changes E2E', () => {
     cy.visit('/shop');
     cy.wait(1000);
     cy.get('body').should('contain', TEST_MARKER, { timeout: 10000 });
-    
+
     cy.log('✅ Server-side HMR detection working!');
   });
 });

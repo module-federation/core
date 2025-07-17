@@ -18,9 +18,9 @@ const fakeDocumentUpdates = [
   {
     manifest: {
       h: 'fake-doc-v1.0.0',
-      c: ['pages/_document'],        // chunk name for document (Next.js format)
-      r: [],                         // removed chunks
-      m: ['./pages/_document.js']    // correct module ID
+      c: ['pages/_document'], // chunk name for document (Next.js format)
+      r: [], // removed chunks
+      m: ['./pages/_document.js'], // correct module ID
     },
     script: `
       // FAKE UPDATE CHUNK for _document.js replacement (Next.js webpack format)
@@ -156,15 +156,15 @@ const fakeDocumentUpdates = [
     `,
     originalInfo: {
       updateId: 'fake-document-update-v1.0.0',
-      webpackHash: 'fake-doc-v1.0.0'
-    }
+      webpackHash: 'fake-doc-v1.0.0',
+    },
   },
   {
     manifest: {
       h: 'fake-doc-v2.0.0',
       c: ['_document'],
       r: [],
-      m: ['./_document']
+      m: ['./_document'],
     },
     script: `
       // FAKE UPDATE CHUNK v2.0.0 for _document.js replacement
@@ -258,14 +258,16 @@ const fakeDocumentUpdates = [
     `,
     originalInfo: {
       updateId: 'super-fake-document-update-v2.0.0',
-      webpackHash: 'fake-doc-v2.0.0'
-    }
-  }
+      webpackHash: 'fake-doc-v2.0.0',
+    },
+  },
 ];
 
 // Method 1: Using Queue Provider (like example-usage.js)
 async function sendFakeDocumentUpdateViaQueue() {
-  console.log('\n🔄 Method 1: Sending fake document updates via Queue Provider');
+  console.log(
+    '\n🔄 Method 1: Sending fake document updates via Queue Provider',
+  );
 
   const queueProvider = createQueueUpdateProvider(fakeDocumentUpdates);
   setUpdateProvider(queueProvider);
@@ -275,28 +277,42 @@ async function sendFakeDocumentUpdateViaQueue() {
   // Apply first fake update
   console.log('\n📤 Applying first fake document update...');
   const result1 = await applyUpdates(await queueProvider());
-  console.log('Result 1:', result1.success ? '✅ Success' : '❌ Failed', result1);
+  console.log(
+    'Result 1:',
+    result1.success ? '✅ Success' : '❌ Failed',
+    result1,
+  );
 
   // Apply second fake update
   console.log('\n📤 Applying second fake document update...');
   const result2 = await applyUpdates(await queueProvider());
-  console.log('Result 2:', result2.success ? '✅ Success' : '❌ Failed', result2);
+  console.log(
+    'Result 2:',
+    result2.success ? '✅ Success' : '❌ Failed',
+    result2,
+  );
 
   return { result1, result2 };
 }
 
 // Method 2: Using Callback Provider for Dynamic Fake Updates
 async function sendFakeDocumentUpdateViaCallback() {
-  console.log('\n🔄 Method 2: Sending fake document updates via Callback Provider');
+  console.log(
+    '\n🔄 Method 2: Sending fake document updates via Callback Provider',
+  );
 
   let callCount = 0;
   const callbackProvider = createCallbackUpdateProvider(async (currentHash) => {
     callCount++;
-    console.log(`📞 Callback called ${callCount} times with hash: ${currentHash}`);
+    console.log(
+      `📞 Callback called ${callCount} times with hash: ${currentHash}`,
+    );
 
     if (callCount <= fakeDocumentUpdates.length) {
       const update = fakeDocumentUpdates[callCount - 1];
-      console.log(`🎯 Returning fake document update ${callCount}: ${update.originalInfo.updateId}`);
+      console.log(
+        `🎯 Returning fake document update ${callCount}: ${update.originalInfo.updateId}`,
+      );
       return { update };
     }
 
@@ -313,7 +329,11 @@ async function sendFakeDocumentUpdateViaCallback() {
     const updateData = await callbackProvider();
     if (updateData && updateData.update) {
       const result = await applyUpdates(updateData);
-      console.log(`Result ${i}:`, result.success ? '✅ Success' : '❌ Failed', result);
+      console.log(
+        `Result ${i}:`,
+        result.success ? '✅ Success' : '❌ Failed',
+        result,
+      );
       results.push(result);
     }
   }
@@ -323,7 +343,9 @@ async function sendFakeDocumentUpdateViaCallback() {
 
 // Method 3: Using HMR Client Force Update
 async function sendFakeDocumentUpdateViaHMRClient() {
-  console.log('\n🔄 Method 3: Sending fake document updates via HMR Client Force Mode');
+  console.log(
+    '\n🔄 Method 3: Sending fake document updates via HMR Client Force Mode',
+  );
 
   const hmrClient = new HMRClient({ logging: true, autoAttach: true });
 
@@ -337,7 +359,7 @@ async function sendFakeDocumentUpdateViaHMRClient() {
   console.log('\n💥 Force applying first fake document update...');
   const result1 = await hmrClient.forceUpdate({
     createMinimalUpdate: false,
-    updateData: { update: fakeDocumentUpdates[0] }
+    updateData: { update: fakeDocumentUpdates[0] },
   });
   console.log('Force Result 1:', result1);
 
@@ -345,7 +367,7 @@ async function sendFakeDocumentUpdateViaHMRClient() {
   console.log('\n💥 Force applying second fake document update...');
   const result2 = await hmrClient.forceUpdate({
     createMinimalUpdate: false,
-    updateData: { update: fakeDocumentUpdates[1] }
+    updateData: { update: fakeDocumentUpdates[1] },
   });
   console.log('Force Result 2:', result2);
 
@@ -363,10 +385,16 @@ async function sendFakeDocumentUpdateDirect() {
 
   for (let i = 0; i < fakeDocumentUpdates.length; i++) {
     const update = fakeDocumentUpdates[i];
-    console.log(`\n📤 Directly applying fake document update ${i + 1}: ${update.originalInfo.updateId}`);
+    console.log(
+      `\n📤 Directly applying fake document update ${i + 1}: ${update.originalInfo.updateId}`,
+    );
 
     const result = await applyUpdates({ update }, true); // Force mode
-    console.log(`Direct Result ${i + 1}:`, result.success ? '✅ Success' : '❌ Failed', result);
+    console.log(
+      `Direct Result ${i + 1}:`,
+      result.success ? '✅ Success' : '❌ Failed',
+      result,
+    );
     results.push(result);
   }
 
@@ -377,8 +405,12 @@ async function sendFakeDocumentUpdateDirect() {
 async function runFakeDocumentUpdateDemo() {
   try {
     console.log('🎬 Starting Fake Document Update Demo...\n');
-    console.log('📋 This demo creates fake HMR update chunks for _document.js replacement');
-    console.log('📋 Following the same payload structure as example-usage.js\n');
+    console.log(
+      '📋 This demo creates fake HMR update chunks for _document.js replacement',
+    );
+    console.log(
+      '📋 Following the same payload structure as example-usage.js\n',
+    );
 
     // Run all methods
     const queueResults = await sendFakeDocumentUpdateViaQueue();
@@ -388,22 +420,36 @@ async function runFakeDocumentUpdateDemo() {
 
     console.log('\n🎉 Fake Document Update Demo completed!');
     console.log('\n📊 Summary:');
-    console.log('   ✅ Queue Provider:', queueResults.result1.success && queueResults.result2.success);
-    console.log('   ✅ Callback Provider:', callbackResults.every(r => r.success));
-    console.log('   ✅ HMR Client Force:', hmrClientResults.result1.success && hmrClientResults.result2.success);
-    console.log('   ✅ Direct Application:', directResults.every(r => r.success));
+    console.log(
+      '   ✅ Queue Provider:',
+      queueResults.result1.success && queueResults.result2.success,
+    );
+    console.log(
+      '   ✅ Callback Provider:',
+      callbackResults.every((r) => r.success),
+    );
+    console.log(
+      '   ✅ HMR Client Force:',
+      hmrClientResults.result1.success && hmrClientResults.result2.success,
+    );
+    console.log(
+      '   ✅ Direct Application:',
+      directResults.every((r) => r.success),
+    );
 
     return {
       queueResults,
       callbackResults,
       hmrClientResults,
       directResults,
-      allSuccess: queueResults.result1.success && queueResults.result2.success &&
-                  callbackResults.every(r => r.success) &&
-                  hmrClientResults.result1.success && hmrClientResults.result2.success &&
-                  directResults.every(r => r.success)
+      allSuccess:
+        queueResults.result1.success &&
+        queueResults.result2.success &&
+        callbackResults.every((r) => r.success) &&
+        hmrClientResults.result1.success &&
+        hmrClientResults.result2.success &&
+        directResults.every((r) => r.success),
     };
-
   } catch (error) {
     console.error('❌ Fake Document Update Demo failed:', error);
     return { error };
@@ -417,15 +463,18 @@ module.exports = {
   sendFakeDocumentUpdateViaCallback,
   sendFakeDocumentUpdateViaHMRClient,
   sendFakeDocumentUpdateDirect,
-  runFakeDocumentUpdateDemo
+  runFakeDocumentUpdateDemo,
 };
 
 // Run demo if this file is executed directly
 if (require.main === module) {
   runFakeDocumentUpdateDemo()
-    .then(results => {
+    .then((results) => {
       console.log('\n✅ Demo completed successfully!');
-      console.log('Results:', results.allSuccess ? 'ALL METHODS SUCCESSFUL' : 'SOME METHODS FAILED');
+      console.log(
+        'Results:',
+        results.allSuccess ? 'ALL METHODS SUCCESSFUL' : 'SOME METHODS FAILED',
+      );
     })
     .catch(console.error);
 }
