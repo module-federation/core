@@ -2,7 +2,7 @@
 "@module-federation/enhanced": patch
 ---
 
-feat: enhance HoistContainerReferencesPlugin for better module hoisting
+enhance HoistContainerReferencesPlugin for better module hoisting
 
 - Separate handling for container, federation, and remote dependencies
 - Improved support for `runtimeChunk: 'single'` configuration
