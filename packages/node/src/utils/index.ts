@@ -8,3 +8,11 @@ export {
   createFetcher,
   getFetchModule,
 } from './hot-reload';
+
+/**
+ * Check if revalidation should occur
+ */
+export async function revalidate(): Promise<boolean> {
+  // Simple implementation that checks if module graph is dirty
+  return globalThis.moduleGraphDirty || false;
+}
