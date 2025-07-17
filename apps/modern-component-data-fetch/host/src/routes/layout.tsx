@@ -1,6 +1,18 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from '@modern-js/runtime/router';
 import { Layout, Menu } from 'antd';
+import { getInstance } from '@module-federation/modern-js/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/modern-js/react';
+
+getInstance()!.registerPlugins([lazyLoadComponentPlugin()]);
+console.log('layout');
+getInstance()!.prefetch({
+  id: 'remote/BasicComponent',
+});
+
+getInstance()!.prefetch({
+  id: 'provider-csr',
+});
 
 const { Header, Content } = Layout;
 
