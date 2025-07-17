@@ -1,4 +1,4 @@
-import type { FederationHost } from '@module-federation/runtime';
+import type { Federation } from '@module-federation/runtime';
 
 /**
  * Extended webpack require function with federation capabilities
@@ -23,7 +23,7 @@ export type WebpackRequire = {
         options: { attrs: { globalName: string } },
       ) => Promise<any>;
     };
-    instance: FederationHost;
+    instance: Federation;
     chunkMatcher?: (chunkId: string) => boolean;
     rootOutputDir?: string;
     initOptions: {
@@ -268,12 +268,7 @@ export const configureFederationScriptLoader = (): void => {
     __webpack_require__.federation.runtime
       .loadScriptNode(url, { attrs: { globalName: key } })
       .then((res) => {
-        const enhancedRemote =
-          __webpack_require__.federation.instance.initRawContainer(
-            key,
-            url,
-            res,
-          );
+        const enhancedRemote = res;
         new Function('return globalThis')()[key] = enhancedRemote;
         done(enhancedRemote);
       })

@@ -505,6 +505,12 @@ export interface HMRClient {
   getStatus(): HMRStatus;
   /** Get update statistics */
   getStats(): HMRStats;
+  /** Set HMR port */
+  setPort(port: number): void;
+  /** Check if client is connected */
+  isConnected(): boolean;
+  /** Connect the client */
+  connect(): void;
 }
 
 /**

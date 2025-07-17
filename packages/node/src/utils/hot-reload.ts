@@ -16,7 +16,7 @@ globalThis.moduleGraphDirty = false;
 /**
  * Initialize or get the global HMR client instance for Module Federation hot reload
  */
-function getOrCreateHMRClient(): HMRClient {
+export function getOrCreateHMRClient(): HMRClient {
   if (!globalThis.mfHMRClient) {
     globalThis.mfHMRClient = createHMRClient();
   }
@@ -47,4 +47,30 @@ export function initializeHMRRuntimePatchingFromArgs(args: any): void {
   if (!hmrClient.isConnected()) {
     hmrClient.connect();
   }
+}
+
+/**
+ * Create a fetcher for remote entry hash tracking
+ */
+export function createFetcher(
+  entry: string,
+  fetchModule: any,
+  name: string,
+  callback: (hash: string) => void,
+): Promise<void> {
+  return Promise.resolve().then(() => {
+    // Extract hash from entry URL or use current timestamp as fallback
+    const hashMatch = entry.match(/hash[=:]([a-f0-9]+)/i);
+    const hash = hashMatch ? hashMatch[1] : Date.now().toString();
+    callback(hash);
+  });
+}
+
+/**
+ * Get fetch module helper
+ */
+export function getFetchModule(): any {
+  return {
+    fetch: globalThis.fetch || (() => Promise.resolve({ text: () => '' })),
+  };
 }

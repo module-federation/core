@@ -1,4 +1,4 @@
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 import { initializeFederationChunkLoading } from './utils/node-chunk-loader';
 import { initializeHMRRuntimePatchingFromArgs } from './utils/hmr-runtime-patch';
 
@@ -6,16 +6,17 @@ import { initializeHMRRuntimePatchingFromArgs } from './utils/hmr-runtime-patch'
  * Creates a Node.js Federation runtime plugin that patches webpack chunk loading and HMR runtime
  * @returns FederationRuntimePlugin instance
  */
-export default function (): FederationRuntimePlugin {
+export default function (): ModuleFederationRuntimePlugin {
   return {
     name: 'node-federation-plugin',
     beforeInit(args) {
       try {
-        initializeFederationChunkLoading();
+        initializeFederationChunkLoading(args);
         initializeHMRRuntimePatchingFromArgs(args);
       } catch (error) {
         console.error('[Node Federation Plugin] Failed to initialize:', error);
       }
+      return args;
     },
   };
 }

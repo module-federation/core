@@ -509,6 +509,30 @@ class HMRClient {
       };
     `;
   }
+
+  /**
+   * Set HMR port (placeholder implementation)
+   */
+  setPort(port: number): void {
+    // Store port for future use
+    console.log(`[HMR Client] Port set to ${port}`);
+  }
+
+  /**
+   * Check if client is connected (placeholder implementation)
+   */
+  isConnected(): boolean {
+    return this.isAttached;
+  }
+
+  /**
+   * Connect the client (placeholder implementation)
+   */
+  connect(): void {
+    if (!this.isAttached) {
+      this.attach();
+    }
+  }
 }
 
 // Convenience function to create a new HMR client instance
