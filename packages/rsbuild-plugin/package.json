@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rsbuild-plugin",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Module Federation plugin for Rsbuild",
   "homepage": "https://module-federation.io",
   "bugs": {
@@ -14,17 +14,17 @@
   "license": "MIT",
   "exports": {
     ".": {
-      "types": "./dist/index.cjs.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.mjs",
       "require": "./dist/index.cjs.js"
     },
     "./utils": {
-      "types": "./dist/utils.cjs.d.ts",
+      "types": "./dist/utils.d.ts",
       "import": "./dist/utils.esm.mjs",
       "require": "./dist/utils.cjs.js"
     },
     "./constant": {
-      "types": "./dist/constant.cjs.d.ts",
+      "types": "./dist/constant.d.ts",
       "import": "./dist/constant.esm.mjs",
       "require": "./dist/constant.cjs.js"
     }
@@ -34,13 +34,13 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.cjs.d.ts"
+        "./dist/index.d.ts"
       ],
       "utils": [
-        "./dist/utils.cjs.d.ts"
+        "./dist/utils.d.ts"
       ],
       "constant": [
-        "./dist/constant.cjs.d.ts"
+        "./dist/constant.d.ts"
       ]
     }
   },
