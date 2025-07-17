@@ -17,7 +17,9 @@ interface StreamingTargetOptions extends ModuleFederationPluginOptions {
 /**
  * Interface for StreamingTargetContext
  */
-interface StreamingTargetContext {}
+interface StreamingTargetContext {
+  [key: string]: unknown;
+}
 
 /**
  * Class representing a StreamingTargetPlugin

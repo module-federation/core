@@ -12,6 +12,7 @@
     "**/*.test.ts",
     "**/*.spec.js",
     "**/*.test.js",
+    "src/__tests__/**",
     "dist/**"
   ]
 }

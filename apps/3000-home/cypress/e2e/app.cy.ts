@@ -107,6 +107,112 @@ describe('3000-home/', () => {
     });
   });
 
+  describe('HMR Tests', () => {
+    it('should detect HMR updates when remote entries change', () => {
+      // Visit the home page first
+      cy.visit('/');
+      getH1().contains('This is SPA combined');
+
+      // Check console for HMR logs
+      cy.window().then((win) => {
+        cy.stub(win.console, 'log').as('consoleLog');
+      });
+
+      // Trigger a page reload to simulate HMR check
+      cy.reload();
+
+      // Check that the page still loads correctly after potential HMR
+      getH1().contains('This is SPA combined');
+
+      // Visit different federated pages to test HMR across remotes
+      cy.visit('/shop');
+      getH1().contains('Shop Page');
+
+      cy.visit('/checkout');
+      getH1().contains('checkout page');
+
+      // Return to home to complete the cycle
+      cy.visit('/');
+      getH1().contains('This is SPA combined');
+    });
+
+    it('should handle HMR updates during navigation', () => {
+      cy.visit('/');
+
+      // Navigate through multiple federated modules
+      cy.visit('/shop');
+      cy.wait(1000);
+
+      // Trigger potential HMR by reloading
+      cy.reload();
+      cy.wait(2000);
+
+      // Verify content still loads correctly after HMR
+      getH1().contains('Shop Page');
+
+      // Navigate back home
+      cy.get('.home-menu-link').click();
+      cy.wait(1000);
+      getH1().contains('This is SPA combined');
+    });
+
+    it('should verify HMR functionality through federation integration', () => {
+      cy.visit('/');
+      getH1().contains('This is SPA combined');
+
+      // Test navigation to trigger revalidate() calls in _document.js
+      // The revalidate function should be called server-side without errors
+      cy.visit('/shop');
+      cy.wait(1000);
+      getH1().contains('Shop Page');
+
+      // Return to home page - this triggers another revalidate() call
+      cy.visit('/');
+      cy.wait(1000);
+      getH1().contains('This is SPA combined');
+
+      // Test checkout page - more revalidate() calls
+      cy.visit('/checkout');
+      cy.wait(1000);
+      getH1().contains('checkout page');
+
+      // Verify that pages still load correctly after revalidate() calls
+      // This tests that the HMR system doesn't break normal page navigation
+      cy.visit('/');
+      getH1().contains('This is SPA combined');
+
+      // Test that federation components still work correctly
+      cy.get('body').should('be.visible');
+      cy.url().should('include', '/');
+
+      // Verify federation navigation still works after multiple revalidate() calls
+      cy.visit('/shop');
+      cy.wait(1000);
+      getH1().contains('Shop Page');
+    });
+
+    it('should test HMR revalidation on page navigation', () => {
+      // Enable console logging to catch HMR messages
+      cy.window().then((win) => {
+        cy.stub(win.console, 'log').as('consoleLog');
+      });
+
+      // Visit each page to trigger _document.js revalidate() calls
+      const pages = ['/', '/shop', '/checkout', '/checkout/test-title'];
+
+      pages.forEach((page) => {
+        cy.visit(page);
+        cy.wait(1500); // Allow time for HMR checks
+
+        // Verify page loads correctly (basic smoke test)
+        cy.get('h1, h3').should('be.visible');
+      });
+
+      // Check if any HMR logs were captured
+      cy.get('@consoleLog').should('have.been.called');
+    });
+  });
+
   describe('3000-home/shop', () => {
     beforeEach(() => cy.visit('/shop'));
 

@@ -11,13 +11,62 @@ const WebpackSvgRemote = lazy(() =>
 );
 const WebpackPngRemote = lazy(() => import('shop/WebpackPng'));
 
-const Home = () => {
+// Server-side render counter (resets on each server restart/HMR)
+let serverRenderCount = 0;
+
+const Home = ({ renderCount, renderTime }) => {
   return (
     <>
       <Head>
         <title>Home</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      <div
+        style={{
+          padding: '15px',
+          marginBottom: '20px',
+          backgroundColor: '#f0f8ff',
+          border: '2px solid #1890ff',
+          borderRadius: '8px',
+          fontFamily: 'monospace',
+          textAlign: 'center',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: '#1890ff',
+            marginBottom: '12px',
+          }}
+        >
+          🔥 Server Render Counter
+        </div>
+        <div
+          style={{
+            fontSize: '36px',
+            fontWeight: 'bold',
+            color: '#52c41a',
+            marginBottom: '8px',
+          }}
+          data-testid="render-counter"
+        >
+          {renderCount || 0}
+        </div>
+        <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+          Route: <span style={{ color: '#fa8c16', fontWeight: 'bold' }}>/</span>
+        </div>
+        {renderTime && (
+          <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+            Last render: {new Date(renderTime).toLocaleTimeString()}
+          </div>
+        )}
+        <div style={{ fontSize: '12px', color: '#999', fontStyle: 'italic' }}>
+          💡 After HMR (?hotReloadAll=true), count should reset to 1 on next
+          page reload
+        </div>
+      </div>
 
       <h1 style={{ fontSize: '2em' }}>
         This is SPA combined from 3 different nextjs applications.
@@ -157,5 +206,21 @@ const Home = () => {
     </>
   );
 };
+
+export async function getServerSideProps() {
+  // Increment server render count
+  serverRenderCount++;
+  console.log(
+    '[HMR Home] Server getServerSideProps called, count:',
+    serverRenderCount,
+  );
+
+  return {
+    props: {
+      renderCount: serverRenderCount,
+      renderTime: new Date().toISOString(),
+    },
+  };
+}
 
 export default Home;

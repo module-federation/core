@@ -1,0 +1,24 @@
+{
+  "pages/_app.tsx -> ../components/SharedNav": {
+    "id": "pages/_app.tsx -> ../components/SharedNav",
+    "files": [
+      "static/chunks/components_SharedNav_tsx.js"
+    ]
+  },
+  "pages/_app.tsx -> checkout/menu": {
+    "id": "pages/_app.tsx -> checkout/menu",
+    "files": []
+  },
+  "pages/_app.tsx -> shop/menu": {
+    "id": "pages/_app.tsx -> shop/menu",
+    "files": []
+  },
+  "pages/index.tsx -> shop/WebpackPng": {
+    "id": "pages/index.tsx -> shop/WebpackPng",
+    "files": []
+  },
+  "pages/index.tsx -> shop/WebpackSvg": {
+    "id": "pages/index.tsx -> shop/WebpackSvg",
+    "files": []
+  }
+}

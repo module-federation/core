@@ -4,12 +4,30 @@
   "description": "Basic HMR debugging tool that connects to backend API for hot updates",
   "main": "index.js",
   "scripts": {
-    "build": "echo 'must use start command only'",
-    "start": "npx webpack --mode development && node dist/index.js",
+    "build": "npx webpack --mode development",
+    "start": "npm run build && node dist/index.js",
+    "start:hmr-client": "npm run build && node dist/hmr-client-demo.js",
     "dev": "nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:hmr-client": "nodemon src/hmr-client-demo.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js",
+    "test:unit": "node --test --test-concurrency=1 test/unit.test.js",
+    "test:integration": "node --test --test-concurrency=1 test/integration.test.js",
+    "test:e2e": "node --test --test-concurrency=1 test/e2e.test.js",
+    "test:hmr-client": "node --test --test-concurrency=1 test/hmr-client.test.js",
+    "test:hmr-client-e2e": "node --test --test-concurrency=1 test/hmr-client-e2e.test.js",
+    "test:ssr": "node --test --test-concurrency=1 test/ssr-leaf-replacement.test.js",
+    "test:ssr-hmr": "node --test --test-concurrency=1 test/ssr-hmr-integration.test.js",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:hmr-client && npm run test:hmr-client-e2e && npm run test:ssr && npm run test:ssr-hmr",
+    "test:watch": "node --test --watch --test-concurrency=1 test/*.test.js",
+    "test:sequential": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:hmr-client && npm run test:hmr-client-e2e",
+    "ssr:leaf-replacement": "node examples/ssr-leaf-replacement.js",
+    "ssr:hmr-integration": "node examples/ssr-hmr-integration.js"
   },
   "dependencies": {
+    "@module-federation/node": "workspace:*",
+    "jsdom": "^22.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "webpack": "^5.0.0",
     "webpack-cli": "^5.0.0"
   },

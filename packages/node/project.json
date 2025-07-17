@@ -33,7 +33,10 @@
       "outputs": ["{workspaceRoot}/coverage/packages/node"],
       "options": {
         "jestConfig": "packages/node/jest.config.js",
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "runInBand": true,
+        "detectOpenHandles": true,
+        "forceExit": true
       }
     },
     "pre-release": {

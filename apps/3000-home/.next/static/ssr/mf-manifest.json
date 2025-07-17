@@ -1,0 +1,929 @@
+{
+  "id": "home_app",
+  "name": "home_app",
+  "metaData": {
+    "name": "home_app",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "1.0.0",
+      "buildName": "@module-federation/3000-home"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "commonjs-module"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "home_app",
+    "pluginVersion": "0.15.0",
+    "prefetchInterface": false,
+    "publicPath": "/_next/"
+  },
+  "shared": [
+    {
+      "id": "home_app:@ant-design/colors",
+      "name": "@ant-design/colors",
+      "version": "7.1.0",
+      "requiredVersion": "^7.1.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/@ant-design+colors@7.1.0-1d1102a1d57c51f0.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:@ant-design/cssinjs",
+      "name": "@ant-design/cssinjs",
+      "version": "1.21.1",
+      "requiredVersion": "^1.21.1",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/@ant-design+cssinjs@1.21.1_react-dom@18.3.1_react@18.3.1-ffdad335bdcfd342.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:@ant-design/icons-svg/es/asn/BarsOutlined",
+      "name": "@ant-design/icons-svg/es/asn/BarsOutlined",
+      "version": "4.4.2",
+      "requiredVersion": "^4.4.2",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/@ant-design+icons-svg@4.4.2-c359bd17f6a8945c.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:@ant-design/icons-svg/es/asn/EllipsisOutlined",
+      "name": "@ant-design/icons-svg/es/asn/EllipsisOutlined",
+      "version": "4.4.2",
+      "requiredVersion": "^4.4.2",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/@ant-design+icons-svg@4.4.2-c359bd17f6a8945c.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:@ant-design/icons-svg/es/asn/LeftOutlined",
+      "name": "@ant-design/icons-svg/es/asn/LeftOutlined",
+      "version": "4.4.2",
+      "requiredVersion": "^4.4.2",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/@ant-design+icons-svg@4.4.2-c359bd17f6a8945c.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:@ant-design/icons-svg/es/asn/RightOutlined",
+      "name": "@ant-design/icons-svg/es/asn/RightOutlined",
+      "version": "4.4.2",
+      "requiredVersion": "^4.4.2",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/@ant-design+icons-svg@4.4.2-c359bd17f6a8945c.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:@ant-design/icons/es/components/Context",
+      "name": "@ant-design/icons/es/components/Context",
+      "version": "5.5.1",
+      "requiredVersion": "^5.5.1",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/@ant-design+icons@5.5.1_react-dom@18.3.1_react@18.3.1-8dce77e2b43b86b3.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:@ant-design/icons/es/icons/BarsOutlined",
+      "name": "@ant-design/icons/es/icons/BarsOutlined",
+      "version": "5.5.1",
+      "requiredVersion": "^5.5.1",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/@ant-design+icons@5.5.1_react-dom@18.3.1_react@18.3.1-8dce77e2b43b86b3.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:@ant-design/icons/es/icons/EllipsisOutlined",
+      "name": "@ant-design/icons/es/icons/EllipsisOutlined",
+      "version": "5.5.1",
+      "requiredVersion": "^5.5.1",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/@ant-design+icons@5.5.1_react-dom@18.3.1_react@18.3.1-8dce77e2b43b86b3.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:@ant-design/icons/es/icons/LeftOutlined",
+      "name": "@ant-design/icons/es/icons/LeftOutlined",
+      "version": "5.5.1",
+      "requiredVersion": "^5.5.1",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/@ant-design+icons@5.5.1_react-dom@18.3.1_react@18.3.1-8dce77e2b43b86b3.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:@ant-design/icons/es/icons/RightOutlined",
+      "name": "@ant-design/icons/es/icons/RightOutlined",
+      "version": "5.5.1",
+      "requiredVersion": "^5.5.1",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/@ant-design+icons@5.5.1_react-dom@18.3.1_react@18.3.1-8dce77e2b43b86b3.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:next/dynamic",
+      "name": "next/dynamic",
+      "version": "14.2.16",
+      "singleton": true,
+      "requiredVersion": "^14.2.16",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/next@14.2.16_@babel+core@7.25.2_react-dom@18.3.1_react@18.3.1.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:next/head",
+      "name": "next/head",
+      "version": "14.2.16",
+      "singleton": true,
+      "requiredVersion": "^14.2.16",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/next@14.2.16_@babel+core@7.25.2_react-dom@18.3.1_react@18.3.1.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:next/image",
+      "name": "next/image",
+      "version": "14.2.16",
+      "singleton": true,
+      "requiredVersion": "^14.2.16",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/next@14.2.16_@babel+core@7.25.2_react-dom@18.3.1_react@18.3.1.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:next/link",
+      "name": "next/link",
+      "version": "14.2.16",
+      "singleton": true,
+      "requiredVersion": "^14.2.16",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/next@14.2.16_@babel+core@7.25.2_react-dom@18.3.1_react@18.3.1.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:next/router",
+      "name": "next/router",
+      "version": "14.2.16",
+      "singleton": true,
+      "requiredVersion": "^14.2.16",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/next@14.2.16_@babel+core@7.25.2_react-dom@18.3.1_react@18.3.1.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:next/script",
+      "name": "next/script",
+      "version": "14.2.16",
+      "singleton": true,
+      "requiredVersion": "^14.2.16",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/next@14.2.16_@babel+core@7.25.2_react-dom@18.3.1_react@18.3.1.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:react/jsx-dev-runtime",
+      "name": "react/jsx-dev-runtime",
+      "version": "18.3.1",
+      "singleton": true,
+      "requiredVersion": "^18.3.1",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/react@18.3.1-3a2c27cf94fe1ab4.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:react/jsx-runtime",
+      "name": "react/jsx-runtime",
+      "version": "18.3.1",
+      "singleton": true,
+      "requiredVersion": "^18.3.1",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/react@18.3.1-3a2c27cf94fe1ab4.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "home_app:styled-jsx",
+      "name": "styled-jsx",
+      "version": "5.1.6",
+      "singleton": true,
+      "requiredVersion": "^5.1.6",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "vendor-chunks/styled-jsx@5.1.1_@babel+core@7.25.2_react@18.3.1-4171d1d1dfa2db11.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    }
+  ],
+  "remotes": [
+    {
+      "federationContainerName": "checkout",
+      "moduleName": "CheckoutTitle",
+      "alias": "checkout",
+      "entry": "http://localhost:3002/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "checkout",
+      "moduleName": "ButtonOldAnt",
+      "alias": "checkout",
+      "entry": "http://localhost:3002/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "checkout",
+      "moduleName": "pages/checkout/[...slug]",
+      "alias": "checkout",
+      "entry": "http://localhost:3002/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "checkout",
+      "moduleName": "pages/checkout/[pid]",
+      "alias": "checkout",
+      "entry": "http://localhost:3002/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "checkout",
+      "moduleName": "pages/checkout/exposed-pages",
+      "alias": "checkout",
+      "entry": "http://localhost:3002/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "checkout",
+      "moduleName": "pages/checkout/index",
+      "alias": "checkout",
+      "entry": "http://localhost:3002/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "checkout",
+      "moduleName": "pages/checkout/test-check-button",
+      "alias": "checkout",
+      "entry": "http://localhost:3002/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "checkout",
+      "moduleName": "pages/checkout/test-title",
+      "alias": "checkout",
+      "entry": "http://localhost:3002/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "shop",
+      "moduleName": "useCustomRemoteHook",
+      "alias": "shop",
+      "entry": "http://localhost:3001/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "shop",
+      "moduleName": "pages/shop/exposed-pages",
+      "alias": "shop",
+      "entry": "http://localhost:3001/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "shop",
+      "moduleName": "pages/shop/index",
+      "alias": "shop",
+      "entry": "http://localhost:3001/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "shop",
+      "moduleName": "pages/shop/test-webpack-png",
+      "alias": "shop",
+      "entry": "http://localhost:3001/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "shop",
+      "moduleName": "pages/shop/test-webpack-svg",
+      "alias": "shop",
+      "entry": "http://localhost:3001/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "shop",
+      "moduleName": "pages/shop/products/[...slug]",
+      "alias": "shop",
+      "entry": "http://localhost:3001/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "shop",
+      "moduleName": "menu",
+      "alias": "shop",
+      "entry": "http://localhost:3001/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "checkout",
+      "moduleName": "menu",
+      "alias": "checkout",
+      "entry": "http://localhost:3002/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "shop",
+      "moduleName": "WebpackSvg",
+      "alias": "shop",
+      "entry": "http://localhost:3001/_next/static/ssr/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "shop",
+      "moduleName": "WebpackPng",
+      "alias": "shop",
+      "entry": "http://localhost:3001/_next/static/ssr/remoteEntry.js"
+    }
+  ],
+  "exposes": [
+    {
+      "id": "home_app:SharedNav",
+      "name": "SharedNav",
+      "assets": {
+        "js": {
+          "sync": [
+            "vendor-chunks/rc-util@5.43.0_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/@babel+runtime@7.26.0.js",
+            "vendor-chunks/classnames@2.5.1.js",
+            "vendor-chunks/@ctrl+tinycolor@3.6.1.js",
+            "vendor-chunks/antd@5.19.1_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-menu@9.14.1_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-field-form@2.2.1_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/@rc-component+trigger@2.2.3_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/@rc-component+async-validator@5.0.4.js",
+            "vendor-chunks/rc-motion@2.9.3_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/resize-observer-polyfill@1.5.1.js",
+            "vendor-chunks/rc-overflow@1.3.2_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-resize-observer@1.4.0_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/@rc-component+portal@1.1.2_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-tooltip@6.2.1_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/react-is@18.3.1.js",
+            "vendor-chunks/@babel+runtime@7.25.6.js",
+            "vendor-chunks/rc-picker@4.6.15_dayjs@1.11.13_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-pagination@4.2.0_react-dom@18.3.1_react@18.3.1.js",
+            "__federation_expose_SharedNav-e3d08bc05698c81d.js"
+          ],
+          "async": [
+            "vendor-chunks/@swc+helpers@0.5.5.js",
+            "vendor-chunks/@babel+runtime@7.25.7-7b3c8972b9979ba3.js",
+            "vendor-chunks/stylis@4.3.4-e9575ef80156216b.js",
+            "vendor-chunks/@emotion+hash@0.8.0-4224d96b572460fd.js",
+            "vendor-chunks/@emotion+unitless@0.7.5-6c824da849cc84e7.js"
+          ]
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./SharedNav"
+    },
+    {
+      "id": "home_app:menu",
+      "name": "menu",
+      "assets": {
+        "js": {
+          "sync": [
+            "vendor-chunks/rc-util@5.43.0_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/@babel+runtime@7.26.0.js",
+            "vendor-chunks/classnames@2.5.1.js",
+            "vendor-chunks/@ctrl+tinycolor@3.6.1.js",
+            "vendor-chunks/antd@5.19.1_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-menu@9.14.1_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-field-form@2.2.1_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/@rc-component+trigger@2.2.3_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/@rc-component+async-validator@5.0.4.js",
+            "vendor-chunks/rc-motion@2.9.3_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/resize-observer-polyfill@1.5.1.js",
+            "vendor-chunks/rc-overflow@1.3.2_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-resize-observer@1.4.0_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/@rc-component+portal@1.1.2_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-tooltip@6.2.1_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/react-is@18.3.1.js",
+            "vendor-chunks/@babel+runtime@7.25.6.js",
+            "vendor-chunks/rc-picker@4.6.15_dayjs@1.11.13_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-pagination@4.2.0_react-dom@18.3.1_react@18.3.1.js",
+            "__federation_expose_menu-b23d8ca9e16f708b.js"
+          ],
+          "async": [
+            "vendor-chunks/@swc+helpers@0.5.5.js",
+            "vendor-chunks/@babel+runtime@7.25.7-7b3c8972b9979ba3.js",
+            "vendor-chunks/stylis@4.3.4-e9575ef80156216b.js",
+            "vendor-chunks/@emotion+hash@0.8.0-4224d96b572460fd.js",
+            "vendor-chunks/@emotion+unitless@0.7.5-6c824da849cc84e7.js"
+          ]
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./menu"
+    },
+    {
+      "id": "home_app:pages-map",
+      "name": "pages-map",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages_map-357ae3c1607aacdd.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages-map"
+    },
+    {
+      "id": "home_app:pages-map-v2",
+      "name": "pages-map-v2",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages_map_v2-41c88806f2472dec.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages-map-v2"
+    },
+    {
+      "id": "home_app:pages/index",
+      "name": "pages/index",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__index-18b7ea3c20e73472.js"
+          ],
+          "async": [
+            "vendor-chunks/@swc+helpers@0.5.5.js"
+          ]
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/index"
+    },
+    {
+      "id": "home_app:pages/checkout/[...slug]",
+      "name": "pages/checkout/[...slug]",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__checkout__[...slug]-0f48279a2ddef1d9.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/checkout/[...slug]"
+    },
+    {
+      "id": "home_app:pages/checkout/[pid]",
+      "name": "pages/checkout/[pid]",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__checkout__[pid]-d5d79e32863a59a9.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/checkout/[pid]"
+    },
+    {
+      "id": "home_app:pages/checkout/exposed-pages",
+      "name": "pages/checkout/exposed-pages",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__checkout__exposed_pages-8e6ad58e10f420f1.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/checkout/exposed-pages"
+    },
+    {
+      "id": "home_app:pages/checkout/index",
+      "name": "pages/checkout/index",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__checkout__index-39de0f2b091ff151.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/checkout/index"
+    },
+    {
+      "id": "home_app:pages/checkout/test-check-button",
+      "name": "pages/checkout/test-check-button",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__checkout__test_check_button-2a485bf7d4542e77.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/checkout/test-check-button"
+    },
+    {
+      "id": "home_app:pages/checkout/test-title",
+      "name": "pages/checkout/test-title",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__checkout__test_title-d4701a45f1a375a2.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/checkout/test-title"
+    },
+    {
+      "id": "home_app:pages/home/exposed-pages",
+      "name": "pages/home/exposed-pages",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__home__exposed_pages-d9f81c35223227e8.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/home/exposed-pages"
+    },
+    {
+      "id": "home_app:pages/home/test-broken-remotes",
+      "name": "pages/home/test-broken-remotes",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__home__test_broken_remotes-868ca6aed72fa62d.js"
+          ],
+          "async": [
+            "vendor-chunks/@swc+helpers@0.5.5.js"
+          ]
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/home/test-broken-remotes"
+    },
+    {
+      "id": "home_app:pages/home/test-remote-hook",
+      "name": "pages/home/test-remote-hook",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__home__test_remote_hook-75c96574d36aa1b3.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/home/test-remote-hook"
+    },
+    {
+      "id": "home_app:pages/home/test-shared-nav",
+      "name": "pages/home/test-shared-nav",
+      "assets": {
+        "js": {
+          "sync": [
+            "vendor-chunks/rc-util@5.43.0_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/@babel+runtime@7.26.0.js",
+            "vendor-chunks/classnames@2.5.1.js",
+            "vendor-chunks/@ctrl+tinycolor@3.6.1.js",
+            "vendor-chunks/antd@5.19.1_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-menu@9.14.1_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-field-form@2.2.1_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/@rc-component+trigger@2.2.3_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/@rc-component+async-validator@5.0.4.js",
+            "vendor-chunks/rc-motion@2.9.3_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/resize-observer-polyfill@1.5.1.js",
+            "vendor-chunks/rc-overflow@1.3.2_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-resize-observer@1.4.0_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/@rc-component+portal@1.1.2_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-tooltip@6.2.1_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/react-is@18.3.1.js",
+            "vendor-chunks/@babel+runtime@7.25.6.js",
+            "vendor-chunks/rc-picker@4.6.15_dayjs@1.11.13_react-dom@18.3.1_react@18.3.1.js",
+            "vendor-chunks/rc-pagination@4.2.0_react-dom@18.3.1_react@18.3.1.js",
+            "__federation_expose_pages__home__test_shared_nav-0ee7abc787eef22a.js"
+          ],
+          "async": [
+            "vendor-chunks/@swc+helpers@0.5.5.js",
+            "vendor-chunks/@babel+runtime@7.25.7-7b3c8972b9979ba3.js",
+            "vendor-chunks/stylis@4.3.4-e9575ef80156216b.js",
+            "vendor-chunks/@emotion+hash@0.8.0-4224d96b572460fd.js",
+            "vendor-chunks/@emotion+unitless@0.7.5-6c824da849cc84e7.js"
+          ]
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/home/test-shared-nav"
+    },
+    {
+      "id": "home_app:pages/shop/exposed-pages",
+      "name": "pages/shop/exposed-pages",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__shop__exposed_pages-6aef04f926f60b42.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/shop/exposed-pages"
+    },
+    {
+      "id": "home_app:pages/shop/index",
+      "name": "pages/shop/index",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__shop__index-7bcac62ac50d5cf3.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/shop/index"
+    },
+    {
+      "id": "home_app:pages/shop/test-webpack-png",
+      "name": "pages/shop/test-webpack-png",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__shop__test_webpack_png-d4cec1ef6d878c09.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/shop/test-webpack-png"
+    },
+    {
+      "id": "home_app:pages/shop/test-webpack-svg",
+      "name": "pages/shop/test-webpack-svg",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__shop__test_webpack_svg-d41ec0f3e5f2c188.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/shop/test-webpack-svg"
+    },
+    {
+      "id": "home_app:pages/shop/products/[...slug]",
+      "name": "pages/shop/products/[...slug]",
+      "assets": {
+        "js": {
+          "sync": [
+            "__federation_expose_pages__shop__products__[...slug]-5a3c3473993fd6fb.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./pages/shop/products/[...slug]"
+    }
+  ]
+}
