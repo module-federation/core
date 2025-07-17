@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { pluginModuleFederation } from './index';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
