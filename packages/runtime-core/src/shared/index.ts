@@ -29,6 +29,7 @@ import {
   getRegisteredShare,
   getTargetSharedOptions,
   getGlobalShareScope,
+  addUseIn,
 } from '../utils/share';
 import { assert, addUniqueItem } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';

@@ -316,3 +316,13 @@ export function getTargetSharedOptions(options: {
     extraOptions?.customShareInfo,
   );
 }
+
+export function addUseIn(shared: Shared): void {
+  if (!shared || !shared.from) {
+    return;
+  }
+
+  if (!shared.useIn.includes(shared.from)) {
+    shared.useIn.push(shared.from);
+  }
+}
