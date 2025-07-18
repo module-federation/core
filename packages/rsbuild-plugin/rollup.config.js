@@ -12,9 +12,6 @@ module.exports = (rollupConfig, _projectOptions) => {
     }),
   );
 
-  // Let nx handle external dependencies via project.json configuration
-  // Don't override rollupConfig.external to allow proper workspace dependency resolution
-
   rollupConfig.input = {
     index: 'packages/rsbuild-plugin/src/cli/index.ts',
     utils: 'packages/rsbuild-plugin/src/utils/index.ts',

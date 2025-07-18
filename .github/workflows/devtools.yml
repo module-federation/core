@@ -52,9 +52,6 @@ jobs:
       - name: Install Cypress
         run: npx cypress install
 
-      - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=1
-
       - name: Run Affected Build
         run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=1 --skip-nx-cache
 
