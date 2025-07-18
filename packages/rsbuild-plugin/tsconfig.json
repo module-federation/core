@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./",
@@ -23,5 +24,13 @@
     }
   },
   "include": ["src", "../../global.d.ts", "__tests__/**/*"],
-  "exclude": ["node_modules/**/*", "../node_modules"]
+  "exclude": ["node_modules/**/*", "../node_modules"],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }
