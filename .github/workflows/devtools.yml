@@ -31,11 +31,26 @@ jobs:
           node-version: '18'
           cache: 'pnpm'
 
+      - name: Cache Browsers
+        uses: actions/cache@v3
+        id: browsers-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-browsers-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Set Playwright cache status
+        run: echo "PLAYWRIGHT_CACHE_HIT=${{ steps.browsers-cache.outputs.cache-hit }}" >> $GITHUB_ENV
+
       - name: Set Nx SHA
         uses: nrwl/nx-set-shas@v3
 
       - name: Install Dependencies
         run: pnpm install
+
+      - name: Install Cypress
+        run: npx cypress install
 
       - name: Run Affected Build
         run: npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
